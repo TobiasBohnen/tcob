@@ -331,8 +331,10 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
                 pointcloud.set(idx, v);
             }
         }
-    } else if (ev.Code == Scancode::P) {
+    } else if (ev.Code == Scancode::O) {
         sound.play();
+    } else if (ev.Code == Scancode::P) {
+        sound.stop();
     } else if (ev.Code == Scancode::T) {
         for (u32 i = 0; i < 5; i++) {
             tileMap.modify_layer(1, { 0, i }, 2);

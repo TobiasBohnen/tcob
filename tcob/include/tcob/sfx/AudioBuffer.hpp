@@ -15,6 +15,7 @@ public:
     auto load(const std::string& filename) -> bool;
 
     void play();
+    void stop();
 
 private:
     u32 _source { 0 };
