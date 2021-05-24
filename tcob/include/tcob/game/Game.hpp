@@ -66,10 +66,11 @@ public:
     void push_scene(std::shared_ptr<Scene> scene);
     void pop_current_scene();
 
-    auto fps() -> FPSCounter&; //TODO: expand to stats class
+    auto audio() const -> AudioSystem&;
+    auto fps() -> FPSCounter&;
+    auto input() const -> Input&;
     auto resource_library() const -> ResourceLibrary&;
     auto window() const -> gl::Window&;
-    auto input() const -> Input&;
 
 private:
     void setup_window();
@@ -85,6 +86,7 @@ private:
     std::unique_ptr<Input> _input;
     std::unique_ptr<ResourceLibrary> _resources {};
     std::unique_ptr<gl::Window> _window {};
+    std::unique_ptr<AudioSystem> _audio {};
 
     std::stack<std::shared_ptr<Scene>> _scenes {};
     std::queue<std::function<void()>> _commandQueue {};

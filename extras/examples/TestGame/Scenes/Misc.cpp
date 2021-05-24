@@ -183,6 +183,8 @@ void MiscScene::on_start()
     webp = *resMgr.get<WebpAnimation>("res", "test");
     webp.size({ 0.5f, 0.5f });
     webp.position({ 0.75f, 0.25f });
+
+    sound.load("res/audio/test.mp3");
 }
 
 void MiscScene::draw(RenderTarget& target)
@@ -330,7 +332,7 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
             }
         }
     } else if (ev.Code == Scancode::P) {
-        _rvc.stop_and_clear();
+        sound.play();
     } else if (ev.Code == Scancode::T) {
         for (u32 i = 0; i < 5; i++) {
             tileMap.modify_layer(1, { 0, i }, 2);

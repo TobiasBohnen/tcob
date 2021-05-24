@@ -16,7 +16,7 @@ void ControllerEx::on_start()
     auto font { resMgr.get<Font>("res", "DejaVuSans32") };
 
     _text.font(font);
-    _text.material(resMgr.get<Material>("res", "mat-text"));
+    _text.material(resMgr.get<Material>("res", "mat-text0"));
     _text.text("1: High freq \n"
                "2: Low freq \n"
                "3: both \n");
@@ -26,7 +26,7 @@ void ControllerEx::on_start()
     _text.update(0);
 
     _controllerDesc.font(font);
-    _controllerDesc.material(resMgr.get<Material>("res", "mat-text"));
+    _controllerDesc.material(resMgr.get<Material>("res", "mat-text1"));
     _controllerDesc.outline_thickness(0.5f);
     _controllerDesc.outline_color(Colors::Black);
     _controllerDesc.bounds({ { 0.55f, 0.1f }, { 1.25f, 0.75f } });

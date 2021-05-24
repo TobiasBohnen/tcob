@@ -76,6 +76,8 @@ class LuaTable;
 template <typename T>
 struct LuaConverter;
 
+class AudioSystem;
+
 namespace gl {
     class RenderTarget;
     class Renderer;

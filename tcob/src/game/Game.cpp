@@ -12,6 +12,7 @@
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/gl/GLCapabilities.hpp>
 #include <tcob/gfx/gl/GLWindow.hpp>
+#include <tcob/sfx/AudioSystem.hpp>
 
 using hrc = std::chrono::high_resolution_clock;
 
@@ -24,6 +25,8 @@ Game::Game(i32 argc, char* argv[], const std::string& name, bool createwindow)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
     FileSystem::init(argv[0], name);
+
+    _audio = std::make_unique<AudioSystem>();
 
     _input = std::make_unique<Input>();
 
@@ -54,6 +57,7 @@ Game::~Game()
     _input = nullptr;
     _resources = nullptr;
     _window = nullptr;
+    _audio = nullptr;
 
     _config.save();
     Log("exiting");
@@ -92,6 +96,21 @@ void Game::pop_scene()
     }
 }
 
+auto Game::audio() const -> AudioSystem&
+{
+    return *_audio;
+}
+
+auto Game::fps() -> FPSCounter&
+{
+    return _fps;
+}
+
+auto Game::input() const -> Input&
+{
+    return *_input;
+}
+
 auto Game::resource_library() const -> ResourceLibrary&
 {
     return *_resources;
@@ -100,16 +119,6 @@ auto Game::resource_library() const -> ResourceLibrary&
 auto Game::window() const -> gl::Window&
 {
     return *_window;
-}
-
-auto Game::input() const -> Input&
-{
-    return *_input;
-}
-
-auto Game::fps() -> FPSCounter&
-{
-    return _fps;
 }
 
 void Game::loop()

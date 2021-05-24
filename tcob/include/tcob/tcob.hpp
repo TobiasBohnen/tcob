@@ -67,3 +67,5 @@
 #include <tcob/gfx/Transformable.hpp>
 
 #include <tcob/script/LuaScript.hpp>
+
+#include <tcob/sfx/AudioBuffer.hpp>

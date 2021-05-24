@@ -37,4 +37,5 @@ private:
     NinePatch ninepatch;
 
     WebpAnimation webp;
+    AudioBuffer sound;
 };
