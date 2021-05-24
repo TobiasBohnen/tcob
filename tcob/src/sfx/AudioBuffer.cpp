@@ -68,42 +68,43 @@ AudioBuffer::~AudioBuffer()
 
 auto AudioBuffer::load(const std::string& filename) -> bool
 {
-    InputFileStream stream { filename };
+    if (FileSystem::is_file(filename)) {
+        InputFileStream stream { filename };
+        std::string ext { FileSystem::extension(filename) };
 
-    std::string ext { FileSystem::extension(filename) };
+        if (ext == ".wav") {
+            drwav wav;
+            if (drwav_init(&wav, &read, &seek_wav, &stream, nullptr)) {
+            } else {
+                return false;
+            }
+        } else if (ext == ".flac") {
+            stream.seek(0, std::ios_base::beg);
+            drflac* flac { drflac_open(&read, &seek_flac, &stream, nullptr) };
+            if (flac) {
+                drflac_close(flac);
+            } else {
+                return false;
+            }
+        } else if (ext == ".mp3") {
+            u64 frameCount { 0 };
+            drmp3_config config {};
+            auto audioData { drmp3_open_and_read_pcm_frames_s16(&read, &seek_mp3, &stream, &config, &frameCount, nullptr) };
 
-    if (ext == ".wav") {
-        drwav wav;
-        if (drwav_init(&wav, &read, &seek_wav, &stream, nullptr)) {
+            alBufferData(_buffer,
+                config.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                audioData,
+                static_cast<i32>(frameCount * 2),
+                config.sampleRate);
+
+            drmp3_free(audioData, nullptr);
         } else {
             return false;
         }
-    } else if (ext == ".flac") {
-        stream.seek(0, std::ios_base::beg);
-        drflac* flac { drflac_open(&read, &seek_flac, &stream, nullptr) };
-        if (flac) {
-            drflac_close(flac);
-        } else {
-            return false;
-        }
-    } else if (ext == ".mp3") {
-        u64 frameCount { 0 };
-        drmp3_config config {};
-        auto audioData { drmp3_open_and_read_pcm_frames_s16(&read, &seek_mp3, &stream, &config, &frameCount, nullptr) };
 
-        alBufferData(_buffer,
-            config.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-            audioData,
-            static_cast<i32>(frameCount * 2),
-            config.sampleRate);
-
-        drmp3_free(audioData, nullptr);
-
-    } else {
-        return false;
+        return true;
     }
-
-    return true;
+    return false;
 }
 
 void AudioBuffer::play()

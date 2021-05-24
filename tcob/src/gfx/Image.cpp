@@ -60,12 +60,16 @@ auto Image::Load(const std::string& filename) -> Image
 {
     if (FileSystem::is_file(filename)) {
         InputFileStreamU stream { filename };
+        std::string ext { FileSystem::extension(filename) };
+
         auto buffer { stream.read_all() };
 
-        WebpDecoder webp { buffer };
-        if (webp.is_valid()) { //try webp
-            return webp.decode();
-        } else { //try png
+        if (ext == ".webp") {
+            WebpDecoder webp { buffer };
+            if (webp.is_valid()) { //try webp
+                return webp.decode();
+            }
+        } else if (ext == ".png") { //try png
             PngDecoder png { buffer };
             if (png.is_valid()) {
                 return png.decode();
