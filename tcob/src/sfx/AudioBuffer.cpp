@@ -73,8 +73,18 @@ auto AudioBuffer::load(const std::string& filename) -> bool
         std::string ext { FileSystem::extension(filename) };
 
         if (ext == ".wav") {
-            drwav wav;
-            if (drwav_init(&wav, &read, &seek_wav, &stream, nullptr)) {
+            u64 frameCount { 0 };
+            u32 channels { 0 }, sampleRate { 0 };
+            auto audioData { drwav_open_and_read_pcm_frames_s16(&read, &seek_wav, &stream, &channels, &sampleRate, &frameCount, nullptr) };
+            if (audioData) {
+                alBufferData(
+                    _buffer,
+                    channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                    audioData,
+                    static_cast<i32>(frameCount * 2),
+                    sampleRate);
+
+                drwav_free(audioData, nullptr);
                 return true;
             }
         } else if (ext == ".flac") {
