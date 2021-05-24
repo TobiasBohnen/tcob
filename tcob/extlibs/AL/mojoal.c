@@ -5,7 +5,7 @@
  *
  *  This file written by Ryan C. Gordon.
  */
-
+// clang-format off
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
@@ -633,6 +633,7 @@ static ALCenum null_device_error = ALC_NO_ERROR;
 
 static void set_alc_error(ALCdevice *device, const ALCenum error)
 {
+    //TODO: add logging
     ALCenum *perr = device ? &device->error : &null_device_error;
     /* can't set a new error when the previous hasn't been cleared yet. */
     if (*perr == ALC_NO_ERROR) {
@@ -4588,4 +4589,4 @@ static void _alGetBufferiv(const ALuint name, const ALenum param, ALint *values)
 ENTRYPOINTVOID(alGetBufferiv,(ALuint name, ALenum param, ALint *values),(name,param,values))
 
 /* end of mojoal.c ... */
-
+// clang-format on
