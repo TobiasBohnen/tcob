@@ -116,8 +116,6 @@ auto AudioBuffer::load(const std::string& filename) -> bool
                 drmp3_free(audioData, nullptr);
                 return true;
             }
-        } else {
-            return false;
         }
     }
     return false;
