@@ -6,7 +6,6 @@
 #include <tcob/sfx/AudioBuffer.hpp>
 
 #include <AL/al.h>
-#include <SDL.h>
 #define DR_FLAC_NO_STDIO
 #include <dr_libs/dr_flac.h>
 #define DR_MP3_NO_STDIO
@@ -88,10 +87,18 @@ auto AudioBuffer::load(const std::string& filename) -> bool
                 return true;
             }
         } else if (ext == ".flac") {
-            stream.seek(0, std::ios_base::beg);
-            drflac* flac { drflac_open(&read, &seek_flac, &stream, nullptr) };
-            if (flac) {
-                drflac_close(flac);
+            u64 frameCount { 0 };
+            u32 channels { 0 }, sampleRate { 0 };
+            auto audioData { drflac_open_and_read_pcm_frames_s16(&read, &seek_flac, &stream, &channels, &sampleRate, &frameCount, nullptr) };
+            if (audioData) {
+                alBufferData(
+                    _buffer,
+                    channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                    audioData,
+                    static_cast<i32>(frameCount * 2),
+                    sampleRate);
+
+                drflac_free(audioData, nullptr);
                 return true;
             }
         } else if (ext == ".mp3") {

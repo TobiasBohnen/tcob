@@ -184,7 +184,7 @@ void MiscScene::on_start()
     webp.size({ 0.5f, 0.5f });
     webp.position({ 0.75f, 0.25f });
 
-    sound.load("res/audio/test.wav");
+    sound.load("res/audio/test.flac");
 }
 
 void MiscScene::draw(RenderTarget& target)
