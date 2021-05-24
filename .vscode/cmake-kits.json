@@ -1,0 +1,28 @@
+[
+    {
+        "name": "vcpkg",
+        "visualStudio": "838a4085",
+        "visualStudioArchitecture": "x64",
+        "toolchainFile": "C:/dev/cpp/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "cmakeSettings": {
+            "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+        },
+        "preferredGenerator": {
+            "name": "Ninja"
+        }
+    },
+    {
+        "name": "vcpkg clang",
+        "compilers": {
+            "C": "C:/Program Files/LLVM/bin/clang.exe",
+            "CXX": "C:/Program Files/LLVM/bin/clang++.exe"
+        },
+        "toolchainFile": "C:/dev/cpp/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "cmakeSettings": {
+            "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+        },
+        "preferredGenerator": {
+            "name": "Ninja"
+        }
+    }
+]

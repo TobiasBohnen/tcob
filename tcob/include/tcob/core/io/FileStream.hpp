@@ -1,0 +1,156 @@
+// Copyright (c) 2021 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include <tcob/tcob_config.hpp>
+
+#include <tcob/core/io/FileSystem.hpp>
+
+struct PHYSFS_File;
+
+namespace tcob {
+namespace io::detail {
+    class FileStreamBase {
+    public:
+        explicit FileStreamBase(PHYSFS_File* handle)
+            : _handle { handle }
+        {
+            if (!_handle) {
+                throw std::runtime_error("failed to aquire file handle");
+            }
+        }
+
+        virtual ~FileStreamBase()
+        {
+            close();
+        }
+
+        FileStreamBase(const FileStreamBase&) = delete;
+        auto operator=(const FileStreamBase& other) -> FileStreamBase& = delete;
+
+        void close() const;
+
+        auto flush() const -> bool;
+
+        auto eof() const -> bool;
+
+        auto tell() const -> std::streamsize;
+
+        auto length() const -> std::streamsize;
+
+        auto seek(std::streamoff off, std::ios_base::seekdir way) const -> std::streampos;
+
+    protected:
+        static auto OpenRead(const std::string& path) -> PHYSFS_File*;
+        static auto OpenWrite(const std::string& path) -> PHYSFS_File*;
+        static auto OpenAppend(const std::string& path) -> PHYSFS_File*;
+
+        void buffer(u64 size);
+
+        auto read(void* s, std::streamsize n, isize size) const -> std::streamsize;
+        auto write(const void* s, std::streamsize n, isize size) const -> std::streamsize;
+
+    private:
+        PHYSFS_File* _handle { nullptr };
+    };
+
+    template <typename T>
+    class InputFileStream final : public FileStreamBase {
+        using FileStreamBase::read;
+
+    public:
+        explicit InputFileStream(const std::string& path)
+            : FileStreamBase { OpenRead(path) }
+        {
+            buffer(4096);
+        }
+
+        auto read(T* s, std::streamsize n) const -> std::streamsize
+        {
+            return read(s, n, sizeof(T));
+        }
+
+        auto read() const -> T
+        {
+            T s;
+            read(&s, 1, sizeof(T));
+            return s;
+        }
+
+        auto read_all() const -> std::vector<T>
+        {
+            std::vector<T> retValue;
+            retValue.reserve(length());
+
+            do {
+                std::array<T, 1024> buffer;
+                std::streamsize readbytes { read(buffer.data(), sizeof(buffer)) };
+                retValue.insert(retValue.end(), buffer.begin(), buffer.begin() + readbytes);
+            } while (!eof());
+
+            return retValue;
+        }
+    };
+
+    template <typename T>
+    class OutputFileStream final : public FileStreamBase {
+        using FileStreamBase::write;
+
+    public:
+        explicit OutputFileStream(const std::string& path)
+            : FileStreamBase { OpenWrite(path) }
+        {
+        }
+
+        auto write(const T s) const -> std::streamsize
+        {
+            return write(&s, 1, sizeof(T));
+        }
+
+        auto write(const std::string& s) const -> std::streamsize
+        {
+            return write(s.c_str(), s.size(), 1);
+        }
+
+        auto write(const T* s, std::streamsize n) const -> std::streamsize
+        {
+            return write(s, n, sizeof(T));
+        }
+    };
+
+    template <typename T>
+    class AppendFileStream final : public FileStreamBase {
+        using FileStreamBase::write;
+
+    public:
+        explicit AppendFileStream(const std::string& path)
+            : FileStreamBase { OpenAppend(path) }
+        {
+        }
+
+        auto write(const T s) const -> std::streamsize
+        {
+            return write(&s, 1, sizeof(T));
+        }
+
+        auto write(const std::string& s) const -> std::streamsize
+        {
+            return write(s.c_str(), s.size(), 1);
+        }
+
+        auto write(const T* s, std::streamsize n) const -> std::streamsize
+        {
+            return write(s, n, sizeof(T));
+        }
+    };
+}
+
+using InputFileStream = io::detail::InputFileStream<byte>;
+using OutputFileStream = io::detail::OutputFileStream<byte>;
+using AppendFileStream = io::detail::AppendFileStream<byte>;
+using InputFileStreamU = io::detail::InputFileStream<ubyte>;
+using OutputFileStreamU = io::detail::OutputFileStream<ubyte>;
+using AppendFileStreamU = io::detail::AppendFileStream<ubyte>;
+}

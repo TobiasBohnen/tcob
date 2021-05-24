@@ -1,0 +1,233 @@
+// Copyright (c) 2021 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include <tcob/gfx/Font.hpp>
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include <stb/stb_truetype.h>
+
+#include <tcob/core/data/Color.hpp>
+#include <tcob/core/io/FileStream.hpp>
+
+namespace tcob {
+
+// based on: https://github.com/brofield/simpleini/blob/master/ConvertUTF.c
+auto convert_UTF8_to_UTF32(const std::string& text) -> std::u32string
+{
+    static const std::array<ubyte, 256> trailingBytesForUTF8 {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5
+    };
+
+    static const std::array<u32, 6> offsetsFromUTF8 { 0x00000000UL, 0x00003080UL, 0x000E2080UL,
+        0x03C82080UL, 0xFA082080UL, 0x82082080UL };
+
+    std::u32string retValue {};
+    for (u32 i { 0 }; i < text.size();) {
+        ubyte source { static_cast<ubyte>(text[i]) };
+        u32 ch { 0 };
+
+        auto extraBytesToRead { trailingBytesForUTF8[source] };
+        if (i + extraBytesToRead >= text.size()) {
+            return {};
+        }
+
+        for (u32 j { extraBytesToRead }; j > 0; j--) {
+            ch += static_cast<ubyte>(text[i++]);
+            ch <<= 6;
+        }
+        ch += static_cast<ubyte>(text[i++]);
+        ch -= offsetsFromUTF8[extraBytesToRead];
+
+        if (ch <= 0x0010FFFF) {
+            retValue.append(1, static_cast<char32_t>(ch));
+        } else {
+            return {};
+        }
+    }
+
+    return retValue;
+}
+
+constexpr i32 FONT_TEXTURE_SIZE { 1024 };
+constexpr u32 GLYPH_PADDING { 5 };
+
+Font::Font()
+    : _fontInfo { new stbtt_fontinfo }
+{
+}
+
+Font::~Font()
+{
+    if (_fontInfo) {
+        delete _fontInfo;
+        _fontInfo = nullptr;
+    }
+}
+
+const std::string FONT_WARMUP { "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>" };
+
+auto Font::load(const std::string& filename, u32 fontSize) -> bool
+{
+    if (!FileSystem::exists(filename)) {
+        //TODO: log error
+        return false;
+    }
+
+    InputFileStreamU fs { filename };
+    _fontData = fs.read_all();
+
+    if (!stbtt_InitFont(_fontInfo, _fontData.data(), stbtt_GetFontOffsetForIndex(_fontData.data(), 0)))
+        return false;
+
+    _fontScale = stbtt_ScaleForPixelHeight(_fontInfo, static_cast<f32>(fontSize));
+    _fontSize = fontSize;
+
+    _glyphs.clear();
+    _glyphIndices.clear();
+
+    create_texture();
+    std::array<u8, 9> c {};
+    c.fill(0xff);
+    _fontTexture->update(PointU::Zero, { 3, 3 }, &c, 3, 1);
+    _fontTextureCursor = { 4, 0 };
+
+    stbtt_GetFontVMetrics(_fontInfo, &_ascent, &_descent, &_lineGap);
+
+    shape_text(FONT_WARMUP);
+
+    return true;
+}
+
+auto Font::info() const -> FontInfo
+{
+    return {
+        .Ascender = ascender(),
+        .Descender = descender(),
+        .Height = height()
+    };
+}
+
+void Font::create_texture()
+{
+    if (!_fontTexture) {
+        _fontTexture = std::make_shared<gl::Texture2D>();
+        _texRes = { std::make_shared<Resource<gl::TextureBase>>(_fontTexture) };
+    }
+
+    _fontTexture->create({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
+    _fontTexture->filtering(gl::TextureFiltering::Linear);
+}
+
+auto Font::texture() const -> ResourcePtr<gl::TextureBase>
+{
+    return _texRes;
+}
+
+void Font::kerning(bool kerning)
+{
+    if (_kerning != kerning) {
+        _kerning = kerning;
+    }
+}
+
+auto Font::shape_text(const std::string& text) -> std::vector<Glyph>
+{
+    auto utf32text { convert_UTF8_to_UTF32(text) };
+
+    isize len { utf32text.size() };
+    std::vector<Glyph> retValue;
+    retValue.reserve(len);
+    for (u32 i { 0 }; i < len; ++i) {
+        const u32 gi { glyph_index(utf32text[i]) };
+        if (!cache_glyph(gi)) {
+            return {};
+        }
+
+        auto glyph { _glyphs[gi] }; //copy glyph
+        if (_kerning && i < len - 1) {
+            glyph.Advance += stbtt_GetGlyphKernAdvance(_fontInfo, gi, utf32text[i + 1]) * _fontScale;
+        }
+        retValue.push_back(glyph);
+    }
+
+    return retValue;
+}
+
+auto Font::ascender() const -> f32
+{
+    return _ascent * _fontScale;
+}
+
+auto Font::descender() const -> f32
+{
+    return _descent * _fontScale;
+}
+
+auto Font::height() const -> f32
+{
+    return (_ascent - _descent + _lineGap) * _fontScale;
+}
+
+auto Font::cache_glyph(u32 gi) -> bool
+{
+    if (!_glyphs.contains(gi)) {
+        const u8 onEdgeValue { 0x7F };
+        const f32 pixelDistScale { 0x3F };
+        i32 glWidth { 0 }, glHeight { 0 }, xoff { 0 }, yoff { 0 };
+        auto* bitmap { stbtt_GetGlyphSDF(_fontInfo, _fontScale, gi, GLYPH_PADDING, onEdgeValue, pixelDistScale, &glWidth, &glHeight, &xoff, &yoff) };
+
+        // check font texture space
+        if (_fontTextureCursor.X + glWidth >= FONT_TEXTURE_SIZE) { //new line
+            _fontTextureCursor.X = 0;
+            _fontTextureCursor.Y += static_cast<u32>(height()) + GLYPH_PADDING;
+        }
+
+        if (_fontTextureCursor.Y + glHeight >= FONT_TEXTURE_SIZE) { //new level
+            // TODO: resize texture
+            _fontTextureCursor = PointU::Zero;
+        }
+
+        // write to texture
+        auto [x, y] { _fontTextureCursor };
+        _fontTexture->update({ x, y }, { static_cast<u32>(glWidth), static_cast<u32>(glHeight) }, bitmap, glWidth, 1);
+
+        stbtt_FreeSDF(bitmap, nullptr);
+
+        i32 advanceWidth {}, lsb {};
+        stbtt_GetGlyphHMetrics(_fontInfo, gi, &advanceWidth, &lsb);
+
+        // create glyph
+        Glyph glyph {
+            .Bearing = { static_cast<f32>(xoff), static_cast<f32>(yoff) },
+            .Size = { static_cast<f32>(glWidth), static_cast<f32>(glHeight) },
+            .Offset = lsb * _fontScale,
+            .Advance = advanceWidth * _fontScale,
+            .UVRect = { static_cast<f32>(x) / FONT_TEXTURE_SIZE, static_cast<f32>(y) / FONT_TEXTURE_SIZE,
+                static_cast<f32>(glWidth) / FONT_TEXTURE_SIZE, static_cast<f32>(glHeight) / FONT_TEXTURE_SIZE }
+        };
+        _glyphs[gi] = glyph;
+
+        // advance cursor
+        _fontTextureCursor.X += glWidth;
+    }
+    return true;
+}
+
+auto Font::glyph_index(u32 codepoint) -> u32
+{
+    if (!_glyphIndices.contains(codepoint)) {
+        _glyphIndices[codepoint] = static_cast<u32>(stbtt_FindGlyphIndex(_fontInfo, codepoint));
+    }
+
+    return _glyphIndices[codepoint];
+}
+}

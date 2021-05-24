@@ -1,0 +1,47 @@
+buildType:
+  default: debug
+  choices:
+    debug:
+      short: Debug
+      long: Emit debug information
+      buildType: Debug
+    release:
+      short: Release
+      long: Optimize generated code
+      buildType: Release
+    releaseWithDebug:
+      short: RelWithDebInfo
+      long: Optimize generated code and emit debug
+      buildType: RelWithDebInfo
+
+building:
+    default: all
+    choices:
+      testing:
+        short: tests
+        long: build tests only
+        settings:
+          BUILD_TESTS: on
+          BUILD_EXAMPLES: off
+          BUILD_TOOLS: off
+      examples:
+        short: examples
+        long: build examples only
+        settings:
+          BUILD_TESTS: off
+          BUILD_EXAMPLES: on
+          BUILD_TOOLS: off
+      tools:
+        short: tools
+        long: build tools only
+        settings:
+          BUILD_TESTS: off
+          BUILD_EXAMPLES: off
+          BUILD_TOOLS: on
+      all:
+        short: all
+        long: build all
+        settings:
+          BUILD_TESTS: on
+          BUILD_EXAMPLES: on
+          BUILD_TOOLS: on

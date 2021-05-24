@@ -1,0 +1,10 @@
+.vs
+build
+x64
+*.nvuser
+*.user
+*.bat
+*.exe
+*.aps
+*.lock
+doxy

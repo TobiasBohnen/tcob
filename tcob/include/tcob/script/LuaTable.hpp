@@ -1,0 +1,224 @@
+// Copyright (c) 2021 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include <tcob/tcob_config.hpp>
+
+#include <cassert>
+#include <sstream>
+
+#include <tcob/core/io/FileStream.hpp>
+#include <tcob/script/LuaRef.hpp>
+#include <tcob/script/LuaState.hpp>
+
+namespace tcob {
+class LuaTable : public LuaRef {
+    template <typename... Keys>
+    struct Proxy final {
+        Proxy(const LuaTable* scr, std::tuple<Keys...> keys)
+            : _table { scr }
+            , _keys { keys }
+        {
+        }
+
+        template <typename T>
+        operator T() const
+        {
+            return std::apply(
+                [this](auto&&... args) {
+                    return _table->get<T>(args...).Value;
+                },
+                _keys);
+        }
+
+        template <typename T>
+        void operator=(T&& other)
+        {
+            std::apply(
+                [this, &other](auto&&... args) {
+                    return _table->set(args..., std::forward<T>(other));
+                },
+                _keys);
+        }
+
+        template <typename Key>
+        auto operator[](Key key) const -> Proxy<Keys..., Key>
+        {
+            return Proxy<Keys..., Key>(_table, std::tuple_cat(_keys, std::make_tuple(key)));
+        }
+
+        const LuaTable* _table;
+        std::tuple<Keys...> _keys;
+    };
+
+public:
+    LuaTable() = default;
+
+    LuaTable(lua_State* l, i32 idx)
+    {
+        ref(l, idx);
+    }
+
+    template <typename Key>
+    auto operator[](Key key) const -> Proxy<Key>
+    {
+        return Proxy<Key> { this, std::make_tuple(key) };
+    }
+
+    template <typename... Keys>
+    void set(Keys&&... keys) const
+    {
+        const LuaState ls { lua_state() };
+        set(ls, keys...);
+        ls.restore_top();
+    }
+
+    template <typename T, typename... Keys>
+    auto get(Keys&&... keys) const -> LuaResult<T>
+    {
+        const LuaState ls { lua_state() };
+        const LuaResult<T> retValue { get<T>(ls, keys...) };
+        ls.restore_top();
+        return retValue;
+    }
+
+    template <typename T, typename... Keys>
+    auto is(Keys&&... keys) const -> bool
+    {
+        const LuaState ls { lua_state() };
+        const bool retValue { is<T>(ls, keys...) };
+        ls.restore_top();
+        return retValue;
+    }
+
+    template <typename... Keys>
+    auto has(Keys&&... keys) const -> bool
+    {
+        const LuaState ls { lua_state() };
+        const bool retValue { has(ls, keys...) };
+        ls.restore_top();
+        return retValue;
+    }
+
+    auto raw_length() const -> isize;
+
+    auto create_table(const std::string& name) const -> LuaTable;
+
+    void dump(OutputFileStream& stream) const;
+
+    template <typename T>
+    auto keys() const -> std::vector<T>
+    {
+        const LuaState ls { lua_state() };
+
+        std::vector<T> retValue {};
+        push_self();
+        ls.push(nullptr);
+        while (ls.next(-2)) {
+            ls.push_value(-2);
+
+            T var {};
+            if (LuaConverter<T>::IsType(ls, -1) && ls.try_get(-1, var)) {
+                retValue.push_back(var);
+            }
+
+            ls.pop(2);
+        }
+
+        ls.restore_top();
+        return retValue;
+    }
+
+private:
+    void dump(std::stringstream& stream, i32 indent) const;
+
+    template <typename Key, typename... Keys>
+    void set(const LuaState& state, Key&& key, Keys&&... keys) const
+    {
+        push_self();
+        state.push(key);
+
+        if constexpr (sizeof...(Keys) > 1) {
+            state.get_table(-2);
+            LuaTable lt;
+
+            if (!state.is_table(-1)) { // set new nested table
+                state.new_table();
+                lt.ref(state.lua(), -1);
+                set(state, key, lt);
+            } else {
+                lt.ref(state.lua(), -1);
+            }
+
+            lt.set(state, keys...);
+        } else {
+            state.push(keys...);
+            state.set_table(-3);
+        }
+    }
+
+    template <typename T, typename Key, typename... Keys>
+    auto get(const LuaState& state, Key&& key, Keys&&... keys) const -> LuaResult<T>
+    {
+        push_self();
+        state.push(key);
+        state.get_table(-2);
+
+        if constexpr (sizeof...(Keys) > 0) {
+            if (!state.is_table(-1)) {
+                return { T(), LuaResultState::NonTableIndex };
+            }
+            LuaTable lt { state.lua(), -1 };
+            return lt.get<T>(state, keys...);
+        } else {
+            T retValue {};
+            LuaResultState result;
+
+            if (state.is_nil(-1)) {
+                result = LuaResultState::Undefined;
+            } else {
+                result = state.try_get(-1, retValue) ? LuaResultState::Ok : LuaResultState::TypeMismatch;
+            }
+            return { retValue, result };
+        }
+    }
+
+    template <typename T, typename Key, typename... Keys>
+    auto is(const LuaState& state, Key&& key, Keys&&... keys) const -> bool
+    {
+        push_self();
+        state.push(key);
+        state.get_table(-2);
+
+        if constexpr (sizeof...(Keys) > 0) {
+            if (!state.is_table(-1)) {
+                return false;
+            }
+            LuaTable lt { state.lua(), -1 };
+            return lt.is<T>(state, keys...);
+        } else {
+            return !state.is_nil(-1) && LuaConverter<T>::IsType(state, -1);
+        }
+    }
+
+    template <typename Key, typename... Keys>
+    auto has(const LuaState& state, Key&& key, Keys&&... keys) const -> bool
+    {
+        push_self();
+        state.push(key);
+        state.get_table(-2);
+
+        if constexpr (sizeof...(Keys) > 0) {
+            if (!state.is_table(-1)) {
+                return false;
+            }
+            LuaTable lt { state.lua(), -1 };
+            return lt.has(state, keys...);
+        } else {
+            return !state.is_nil(-1);
+        }
+    }
+};
+}

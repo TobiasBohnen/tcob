@@ -1,0 +1,299 @@
+// Copyright (c) 2021 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include <tcob/script/LuaState.hpp>
+
+#include <lua.hpp>
+
+namespace tcob {
+LuaState::LuaState(lua_State* l)
+    : _luaState { l }
+{
+    assert(l);
+    save_top();
+}
+
+auto LuaState::is_bool(i32 idx) const -> bool
+{
+    return lua_isboolean(_luaState, idx);
+}
+
+auto LuaState::is_function(i32 idx) const -> bool
+{
+    return lua_isfunction(_luaState, idx);
+}
+
+auto LuaState::is_integer(i32 idx) const -> bool
+{
+    return lua_isinteger(_luaState, idx);
+}
+
+auto LuaState::is_number(i32 idx) const -> bool
+{
+    return lua_isnumber(_luaState, idx);
+}
+
+auto LuaState::is_string(i32 idx) const -> bool
+{
+    return lua_isstring(_luaState, idx);
+}
+
+auto LuaState::is_table(i32 idx) const -> bool
+{
+    return lua_istable(_luaState, idx);
+}
+
+auto LuaState::is_thread(i32 idx) const -> bool
+{
+    return lua_isthread(_luaState, idx);
+}
+
+auto LuaState::is_nil(i32 idx) const -> bool
+{
+    return lua_isnil(_luaState, idx);
+}
+
+auto LuaState::is_userdata(i32 idx) const -> bool
+{
+    return lua_isuserdata(_luaState, idx);
+}
+
+auto LuaState::to_bool(i32 idx) const -> bool
+{
+    return lua_toboolean(_luaState, idx);
+}
+
+auto LuaState::to_integer(i32 idx) const -> i64
+{
+    return lua_tointeger(_luaState, idx);
+}
+
+auto LuaState::to_number(i32 idx) const -> f64
+{
+    return lua_tonumber(_luaState, idx);
+}
+
+auto LuaState::to_string(i32 idx) const -> const char*
+{
+    return lua_tostring(_luaState, idx);
+}
+
+auto LuaState::to_userdata(i32 idx) const -> void*
+{
+    return lua_touserdata(_luaState, idx);
+}
+
+auto LuaState::get_type(i32 idx) const -> LuaType
+{
+    switch (lua_type(_luaState, idx)) {
+    case LUA_TNONE:
+        return LuaType::None;
+    case LUA_TNIL:
+        return LuaType::Nil;
+    case LUA_TBOOLEAN:
+        return LuaType::Boolean;
+    case LUA_TLIGHTUSERDATA:
+        return LuaType::LightUserdata;
+    case LUA_TNUMBER:
+        return LuaType::Number;
+    case LUA_TSTRING:
+        return LuaType::String;
+    case LUA_TTABLE:
+        return LuaType::Table;
+    case LUA_TFUNCTION:
+        return LuaType::Function;
+    case LUA_TUSERDATA:
+        return LuaType::Userdata;
+    case LUA_TTHREAD:
+        return LuaType::Thread;
+    default:
+        return LuaType::None;
+    }
+}
+
+auto LuaState::get_top() const -> i32
+{
+    return lua_gettop(_luaState);
+}
+
+void LuaState::save_top() const
+{
+    _oldTop = get_top();
+}
+
+void LuaState::restore_top() const
+{
+    const i32 n { get_top() - _oldTop };
+    if (n > 0)
+        lua_pop(_luaState, n);
+}
+
+void LuaState::check_stack(i32 size) const
+{
+    lua_checkstack(_luaState, size);
+}
+
+auto LuaState::resume(i32 argCount, i32* resultCount) const -> LuaThreadState
+{
+    i32 err { lua_resume(_luaState, nullptr, argCount, resultCount) };
+    switch (err) {
+    case LUA_OK:
+        return LuaThreadState::Ok;
+    case LUA_YIELD:
+        return LuaThreadState::Yielded;
+    case LUA_ERRRUN:
+        return LuaThreadState::RuntimeError;
+    case LUA_ERRSYNTAX:
+        return LuaThreadState::SyntaxError;
+    case LUA_ERRMEM:
+        return LuaThreadState::MemError;
+    case LUA_ERRERR:
+        return LuaThreadState::ErrorError;
+    }
+
+    return LuaThreadState::ErrorError;
+}
+
+auto LuaState::next(i32 idx) const -> bool
+{
+    return lua_next(_luaState, idx) != 0;
+}
+
+void LuaState::push_bool(bool val) const
+{
+    lua_pushboolean(_luaState, val);
+}
+
+void LuaState::push_cfunction(i32 (*lua_CFunction)(lua_State*)) const
+{
+    lua_pushcfunction(_luaState, lua_CFunction);
+}
+
+void LuaState::push_cclosure(i32 (*lua_CFunction)(lua_State*), i32 n) const
+{
+    lua_pushcclosure(_luaState, lua_CFunction, n);
+}
+
+void LuaState::push_integer(i64 val) const
+{
+    lua_pushinteger(_luaState, val);
+}
+
+void LuaState::push_lightuserdata(void* p) const
+{
+    lua_pushlightuserdata(_luaState, p);
+}
+
+void LuaState::push_nil() const
+{
+    lua_pushnil(_luaState);
+}
+
+void LuaState::push_number(f64 val) const
+{
+    lua_pushnumber(_luaState, val);
+}
+
+void LuaState::push_string(const char* val) const
+{
+    lua_pushstring(_luaState, val);
+}
+
+void LuaState::push_value(i32 idx) const
+{
+    lua_pushvalue(_luaState, idx);
+}
+
+void LuaState::pop(i32 count) const
+{
+    lua_pop(_luaState, count);
+}
+
+void LuaState::remove(i32 count) const
+{
+    lua_remove(_luaState, count);
+}
+
+void LuaState::get_table(i32 idx) const
+{
+    lua_gettable(_luaState, idx);
+}
+
+void LuaState::get_metatable(const char* tableName) const
+{
+    luaL_getmetatable(_luaState, tableName);
+}
+
+void LuaState::set_table(i32 idx) const
+{
+    lua_settable(_luaState, idx);
+}
+
+void LuaState::set_metatable(i32 idx) const
+{
+    lua_setmetatable(_luaState, idx);
+}
+
+void LuaState::new_table() const
+{
+    lua_newtable(_luaState);
+}
+void LuaState::create_table(i32 narr, i32 nrec) const
+{
+    lua_createtable(_luaState, narr, nrec);
+}
+auto LuaState::new_metatable(const char* tableName) const -> i32
+{
+    return luaL_newmetatable(_luaState, tableName);
+}
+auto LuaState::new_userdata(i32 size) const -> void*
+{
+    return lua_newuserdata(_luaState, size);
+}
+
+void LuaState::set_registry_field(const char* name) const
+{
+    lua_setfield(_luaState, LUA_REGISTRYINDEX, name);
+}
+
+void LuaState::insert(i32 idx) const
+{
+    lua_insert(_luaState, idx);
+}
+
+auto LuaState::rawlen(i32 idx) const -> u64
+{
+    return lua_rawlen(_luaState, idx);
+}
+
+void LuaState::rawgeti(i32 idx, i64 n) const
+{
+    lua_rawgeti(_luaState, idx, n);
+}
+
+void LuaState::rawget(i32 idx) const
+{
+    lua_rawget(_luaState, idx);
+}
+
+void LuaState::rawseti(i32 idx, i64 n) const
+{
+    lua_rawseti(_luaState, idx, n);
+}
+
+void LuaState::rawset(i32 idx) const
+{
+    lua_rawset(_luaState, idx);
+}
+
+auto LuaState::UpvalueIndex(i32 n) -> i32
+{
+    return lua_upvalueindex(n);
+}
+auto LuaState::lua() const -> lua_State*
+{
+    return _luaState;
+}
+}
