@@ -23,12 +23,44 @@ Buffer::~Buffer()
     }
 }
 
-void Buffer::buffer_data(i32 channels, const void* data, i32 size, i32 freq)
+void Buffer::buffer_data(i32 channels, const void* data, i32 size, i32 freq) const
 {
     assert(ID);
     alBufferData(ID,
         channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
         data, size, freq);
+}
+
+auto Buffer::frequency() const -> i32
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetBufferi(ID, AL_FREQUENCY, &retValue);
+    return retValue;
+}
+
+auto Buffer::size() const -> i32
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetBufferi(ID, AL_SIZE, &retValue);
+    return retValue;
+}
+
+auto Buffer::bits() const -> i32
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetBufferi(ID, AL_BITS, &retValue);
+    return retValue;
+}
+
+auto Buffer::channels() const -> i32
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetBufferi(ID, AL_CHANNELS, &retValue);
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////

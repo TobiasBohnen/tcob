@@ -83,9 +83,11 @@ auto Sound::load(const std::string& filename) -> bool
 
 void Sound::play()
 {
-    stop();
-    _source->buffer(_buffer->ID);
-    _source->play();
+    if (_buffer->size() > 0) {
+        stop();
+        _source->buffer(_buffer->ID);
+        _source->play();
+    }
 }
 
 void Sound::stop()

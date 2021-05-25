@@ -13,7 +13,12 @@ public:
     Buffer();
     ~Buffer();
 
-    void buffer_data(i32 channels, const void* data, i32 size, i32 freq);
+    void buffer_data(i32 channels, const void* data, i32 size, i32 freq) const;
+
+    auto frequency() const -> i32;
+    auto size() const -> i32;
+    auto bits() const -> i32;
+    auto channels() const -> i32;
 
     u32 ID { 0 };
 };
