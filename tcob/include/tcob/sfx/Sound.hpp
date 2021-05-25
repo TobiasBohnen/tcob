@@ -9,13 +9,13 @@
 #include <tcob/sfx/ALObjects.hpp>
 
 namespace tcob {
-class AudioBuffer final {
+class Sound final {
 public:
-    AudioBuffer();
-    ~AudioBuffer();
+    Sound();
+    ~Sound();
 
-    AudioBuffer(const AudioBuffer& other);
-    auto operator=(const AudioBuffer& other) -> AudioBuffer& ;
+    Sound(const Sound& other);
+    auto operator=(const Sound& other) -> Sound&;
 
     auto load(const std::string& filename) -> bool;
 

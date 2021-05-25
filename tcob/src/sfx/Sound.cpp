@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <tcob/sfx/AudioBuffer.hpp>
+#include <tcob/sfx/Sound.hpp>
 
 #include <AL/al.h>
 #define DR_FLAC_NO_STDIO
@@ -44,25 +44,25 @@ auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> u32
     return static_cast<u32>(stream->seek(offset, dir));
 }
 
-AudioBuffer::AudioBuffer()
+Sound::Sound()
 {
     _source = std::make_unique<al::Source>();
     _buffer = std::make_shared<al::Buffer>();
 }
 
-AudioBuffer::~AudioBuffer()
+Sound::~Sound()
 {
     _source->buffer(0);
     _buffer = nullptr;
     _source = nullptr;
 }
 
-AudioBuffer::AudioBuffer(const AudioBuffer& other)
+Sound::Sound(const Sound& other)
 {
     *this = other;
 }
 
-auto AudioBuffer::operator=(const AudioBuffer& other) -> AudioBuffer&
+auto Sound::operator=(const Sound& other) -> Sound&
 {
     _source = std::make_unique<al::Source>();
     //TODO: copy source settings
@@ -70,7 +70,7 @@ auto AudioBuffer::operator=(const AudioBuffer& other) -> AudioBuffer&
     return *this;
 }
 
-auto AudioBuffer::load(const std::string& filename) -> bool
+auto Sound::load(const std::string& filename) -> bool
 {
     if (FileSystem::is_file(filename)) {
         InputFileStream stream { filename };
@@ -108,14 +108,14 @@ auto AudioBuffer::load(const std::string& filename) -> bool
     return false;
 }
 
-void AudioBuffer::play()
+void Sound::play()
 {
     stop();
     _source->buffer(_buffer->ID);
     _source->play();
 }
 
-void AudioBuffer::stop()
+void Sound::stop()
 {
     _source->stop();
 }
