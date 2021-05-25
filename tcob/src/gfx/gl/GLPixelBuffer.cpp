@@ -10,10 +10,6 @@
 #include <glad/gl.h>
 
 namespace tcob::gl {
-PixelPackBuffer::PixelPackBuffer(isize size)
-{
-    create(size);
-}
 
 void PixelPackBuffer::create(isize size)
 {

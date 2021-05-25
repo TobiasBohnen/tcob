@@ -67,6 +67,7 @@ set(LIB_SRCFILES
         src/script/LuaScript.cpp
         src/script/LuaState.cpp
         src/script/LuaTable.cpp
+        src/sfx/ALObjects.cpp
         src/sfx/AudioBuffer.cpp
         src/sfx/AudioSystem.cpp
         src/gfx/gl/nanovg/GLNVGcontext.cpp

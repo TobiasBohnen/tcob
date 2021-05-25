@@ -12,7 +12,6 @@ namespace tcob::gl {
 class PixelPackBuffer final : public Object {
 public:
     PixelPackBuffer() = default;
-    explicit PixelPackBuffer(isize size);
     ~PixelPackBuffer() override;
 
     void create(isize size);
