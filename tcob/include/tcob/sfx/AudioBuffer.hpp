@@ -14,6 +14,9 @@ public:
     AudioBuffer();
     ~AudioBuffer();
 
+    AudioBuffer(const AudioBuffer& other);
+    auto operator=(const AudioBuffer& other) -> AudioBuffer& ;
+
     auto load(const std::string& filename) -> bool;
 
     void play();

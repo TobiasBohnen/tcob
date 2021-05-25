@@ -57,6 +57,19 @@ AudioBuffer::~AudioBuffer()
     _source = nullptr;
 }
 
+AudioBuffer::AudioBuffer(const AudioBuffer& other)
+{
+    *this = other;
+}
+
+auto AudioBuffer::operator=(const AudioBuffer& other) -> AudioBuffer&
+{
+    _source = std::make_unique<al::Source>();
+    //TODO: copy source settings
+    _buffer = other._buffer;
+    return *this;
+}
+
 auto AudioBuffer::load(const std::string& filename) -> bool
 {
     if (FileSystem::is_file(filename)) {
