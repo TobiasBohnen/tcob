@@ -5,7 +5,6 @@
 
 #include <tcob/sfx/Sound.hpp>
 
-#include <AL/al.h>
 #define DR_FLAC_NO_STDIO
 #include <dr_libs/dr_flac.h>
 #define DR_MP3_NO_STDIO
