@@ -105,4 +105,87 @@ void Source::buffer(u32 bufferID)
     alSourcei(ID, AL_BUFFER, bufferID);
 }
 
+auto Source::pitch() const -> f32
+{
+    assert(ID);
+    f32 retValue { 0 };
+    alGetSourcef(ID, AL_PITCH, &retValue);
+    return retValue;
+}
+
+void Source::pitch(f32 value) const
+{
+    assert(ID);
+    alSourcef(ID, AL_PITCH, value);
+}
+
+auto Source::gain() const -> f32
+{
+    assert(ID);
+    f32 retValue { 0 };
+    alGetSourcef(ID, AL_GAIN, &retValue);
+    return retValue;
+}
+
+void Source::gain(f32 value) const
+{
+    assert(ID);
+    alSourcef(ID, AL_GAIN, value);
+}
+
+auto Source::position() const -> std::array<f32, 3>
+{
+    assert(ID);
+    std::array<f32, 3> retValue {};
+    alGetSource3f(ID, AL_POSITION, &retValue[0], &retValue[1], &retValue[2]);
+    return retValue;
+}
+
+void Source::position(const std::array<f32, 3>& value) const
+{
+    assert(ID);
+    alSource3f(ID, AL_POSITION, value[0], value[1], value[2]);
+}
+
+auto Source::direction() const -> std::array<f32, 3>
+{
+    assert(ID);
+    std::array<f32, 3> retValue {};
+    alGetSource3f(ID, AL_DIRECTION, &retValue[0], &retValue[1], &retValue[2]);
+    return retValue;
+}
+
+void Source::direction(const std::array<f32, 3>& value) const
+{
+    assert(ID);
+    alSource3f(ID, AL_DIRECTION, value[0], value[1], value[2]);
+}
+
+auto Source::rolloff_factor() const -> f32
+{
+    assert(ID);
+    f32 retValue { 0 };
+    alGetSourcef(ID, AL_ROLLOFF_FACTOR, &retValue);
+    return retValue;
+}
+
+void Source::rolloff_factor(f32 value) const
+{
+    assert(ID);
+    alSourcef(ID, AL_ROLLOFF_FACTOR, value);
+}
+
+auto Source::source_relatvie() const -> bool
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetSourcei(ID, AL_SOURCE_RELATIVE, &retValue);
+    return retValue;
+}
+
+void Source::source_relatvie(bool value) const
+{
+    assert(ID);
+    alSourcei(ID, AL_SOURCE_RELATIVE, value);
+}
 }

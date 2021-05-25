@@ -633,7 +633,7 @@ static ALCenum null_device_error = ALC_NO_ERROR;
 
 static void set_alc_error(ALCdevice *device, const ALCenum error)
 {
-    //TODO: add logging
+    SDL_assert(SDL_FALSE);
     ALCenum *perr = device ? &device->error : &null_device_error;
     /* can't set a new error when the previous hasn't been cleared yet. */
     if (*perr == ALC_NO_ERROR) {
@@ -2493,8 +2493,8 @@ ENTRYPOINTVOID(alcCaptureSamples,(ALCdevice *device, ALCvoid *buffer, ALCsizei s
 static ALenum null_context_error = AL_NO_ERROR;
 
 static void set_al_error(ALCcontext *ctx, const ALenum error)
-{
-    //TODO: add logging
+{    
+    SDL_assert(SDL_FALSE);
     ALenum *perr = ctx ? &ctx->error : &null_context_error;
     /* can't set a new error when the previous hasn't been cleared yet. */
     if (*perr == AL_NO_ERROR) {

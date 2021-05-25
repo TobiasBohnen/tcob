@@ -38,7 +38,13 @@ Sound::Sound(const Sound& other)
 auto Sound::operator=(const Sound& other) -> Sound&
 {
     _source = std::make_unique<al::Source>();
-    //TODO: copy source settings
+    _source->pitch(other._source->pitch());
+    _source->gain(other._source->gain());
+    _source->position(other._source->position());
+    _source->direction(other._source->direction());
+    _source->rolloff_factor(other._source->rolloff_factor());
+    _source->source_relatvie(other._source->source_relatvie());
+
     _buffer = other._buffer;
     return *this;
 }
