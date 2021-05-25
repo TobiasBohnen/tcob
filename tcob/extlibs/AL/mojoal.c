@@ -2494,6 +2494,7 @@ static ALenum null_context_error = AL_NO_ERROR;
 
 static void set_al_error(ALCcontext *ctx, const ALenum error)
 {
+    //TODO: add logging
     ALenum *perr = ctx ? &ctx->error : &null_context_error;
     /* can't set a new error when the previous hasn't been cleared yet. */
     if (*perr == AL_NO_ERROR) {

@@ -61,6 +61,7 @@ AudioBuffer::AudioBuffer()
 
 AudioBuffer::~AudioBuffer()
 {
+    alSourcei(_source, AL_BUFFER, 0);
     alDeleteBuffers(1, &_buffer);
     alDeleteSources(1, &_source);
 }
