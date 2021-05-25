@@ -94,4 +94,16 @@ void Sound::stop()
 {
     _source->stop();
 }
+
+auto Sound::duration() const -> f32
+{
+    i32 size { _buffer->size() };
+    i32 channels { _buffer->channels() };
+    i32 bits { _buffer->bits() };
+
+    f32 lengthInSamples = { size * 8.0f / (channels * bits) };
+    i32 frequency { _buffer->frequency() };
+
+    return lengthInSamples / frequency * 1000;
+}
 }

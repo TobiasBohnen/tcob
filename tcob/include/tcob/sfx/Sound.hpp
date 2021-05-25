@@ -22,6 +22,8 @@ public:
     void play();
     void stop();
 
+    auto duration() const -> f32;
+
 private:
     std::shared_ptr<al::Buffer> _buffer;
     std::unique_ptr<al::Source> _source;
