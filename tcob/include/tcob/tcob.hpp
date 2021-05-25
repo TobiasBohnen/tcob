@@ -68,4 +68,5 @@
 
 #include <tcob/script/LuaScript.hpp>
 
+#include <tcob/sfx/Music.hpp>
 #include <tcob/sfx/Sound.hpp>

@@ -4,31 +4,19 @@
 // https://opensource.org/licenses/MIT
 #include <tcob/core/io/FileStream.hpp>
 
+#define DR_FLAC_NO_STDIO
+#include <dr_libs/dr_flac.h>
+#define DR_MP3_NO_STDIO
+#include <dr_libs/dr_mp3.h>
+#define DR_WAV_NO_STDIO
+#include <dr_libs/dr_wav.h>
+
 namespace tcob::detail {
-auto read(void* userdata, void* buffer, isize bytesToRead) -> isize
-{
-    InputFileStream* stream { reinterpret_cast<InputFileStream*>(userdata) };
-    return stream->read(reinterpret_cast<byte*>(buffer), bytesToRead);
-}
+auto read(void* userdata, void* buffer, isize bytesToRead) -> isize;
 
-auto seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> u32
-{
-    InputFileStream* stream { reinterpret_cast<InputFileStream*>(userdata) };
-    auto dir { origin == drwav_seek_origin_current ? std::ios_base::cur : std::ios_base::beg };
-    return static_cast<u32>(stream->seek(offset, dir));
-}
+auto seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> u32;
 
-auto seek_flac(void* userdata, i32 offset, drflac_seek_origin origin) -> u32
-{
-    InputFileStream* stream { reinterpret_cast<InputFileStream*>(userdata) };
-    auto dir { origin == drflac_seek_origin_current ? std::ios_base::cur : std::ios_base::beg };
-    return static_cast<u32>(stream->seek(offset, dir));
-}
+auto seek_flac(void* userdata, i32 offset, drflac_seek_origin origin) -> u32;
 
-auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> u32
-{
-    InputFileStream* stream { reinterpret_cast<InputFileStream*>(userdata) };
-    auto dir { origin == drmp3_seek_origin_current ? std::ios_base::cur : std::ios_base::beg };
-    return static_cast<u32>(stream->seek(offset, dir));
-}
+auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> u32;
 }
