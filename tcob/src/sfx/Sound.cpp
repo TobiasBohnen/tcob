@@ -25,6 +25,7 @@ Sound::Sound()
 
 Sound::~Sound()
 {
+    stop();
     _source->buffer(0);
     _buffer = nullptr;
     _source = nullptr;
