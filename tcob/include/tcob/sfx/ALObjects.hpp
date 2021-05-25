@@ -7,10 +7,30 @@
 #include <tcob/tcob_config.hpp>
 
 namespace tcob::al {
+
 class Buffer final {
+public:
+    Buffer();
+    ~Buffer();
+
+    void buffer_data(i32 channels, const void* data, i32 size, i32 freq);
+
+    u32 ID { 0 };
 };
 
+////////////////////////////////////////////////////////////
+
 class Source final {
+public:
+    Source();
+    ~Source();
+
+    void play();
+    void stop();
+
+    void buffer(u32 bufferID);
+
+    u32 ID { 0 };
 };
 
 }

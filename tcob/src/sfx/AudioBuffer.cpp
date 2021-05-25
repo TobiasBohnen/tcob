@@ -46,24 +46,15 @@ auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> u32
 
 AudioBuffer::AudioBuffer()
 {
-    alGenSources(1, &_source);
-    alSourcef(_source, AL_PITCH, 1);
-    alSourcef(_source, AL_GAIN, 1);
-
-    alSource3f(_source, AL_POSITION, 0.0f, 0.0f, 0.0f);
-    alSource3f(_source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-    alSource3f(_source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSourcef(_source, AL_ROLLOFF_FACTOR, 0.0f);
-    alSourcei(_source, AL_SOURCE_RELATIVE, false);
-
-    alGenBuffers(1, &_buffer);
+    _source = std::make_unique<al::Source>();
+    _buffer = std::make_shared<al::Buffer>();
 }
 
 AudioBuffer::~AudioBuffer()
 {
-    alSourcei(_source, AL_BUFFER, 0);
-    alDeleteBuffers(1, &_buffer);
-    alDeleteSources(1, &_source);
+    _source->buffer(0);
+    _buffer = nullptr;
+    _source = nullptr;
 }
 
 auto AudioBuffer::load(const std::string& filename) -> bool
@@ -77,13 +68,7 @@ auto AudioBuffer::load(const std::string& filename) -> bool
             u32 channels { 0 }, sampleRate { 0 };
             auto audioData { drwav_open_and_read_pcm_frames_s16(&read, &seek_wav, &stream, &channels, &sampleRate, &frameCount, nullptr) };
             if (audioData) {
-                alBufferData(
-                    _buffer,
-                    channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-                    audioData,
-                    static_cast<i32>(frameCount * 2),
-                    sampleRate);
-
+                _buffer->buffer_data(channels, audioData, static_cast<i32>(frameCount * 2), sampleRate);
                 drwav_free(audioData, nullptr);
                 return true;
             }
@@ -92,13 +77,7 @@ auto AudioBuffer::load(const std::string& filename) -> bool
             u32 channels { 0 }, sampleRate { 0 };
             auto audioData { drflac_open_and_read_pcm_frames_s16(&read, &seek_flac, &stream, &channels, &sampleRate, &frameCount, nullptr) };
             if (audioData) {
-                alBufferData(
-                    _buffer,
-                    channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-                    audioData,
-                    static_cast<i32>(frameCount * 2),
-                    sampleRate);
-
+                _buffer->buffer_data(channels, audioData, static_cast<i32>(frameCount * 2), sampleRate);
                 drflac_free(audioData, nullptr);
                 return true;
             }
@@ -107,13 +86,7 @@ auto AudioBuffer::load(const std::string& filename) -> bool
             drmp3_config config {};
             auto audioData { drmp3_open_and_read_pcm_frames_s16(&read, &seek_mp3, &stream, &config, &frameCount, nullptr) };
             if (audioData) {
-                alBufferData(
-                    _buffer,
-                    config.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-                    audioData,
-                    static_cast<i32>(frameCount * 2),
-                    config.sampleRate);
-
+                _buffer->buffer_data(config.channels, audioData, static_cast<i32>(frameCount * 2), config.sampleRate);
                 drmp3_free(audioData, nullptr);
                 return true;
             }
@@ -125,13 +98,12 @@ auto AudioBuffer::load(const std::string& filename) -> bool
 void AudioBuffer::play()
 {
     stop();
-    alSourcei(_source, AL_BUFFER, _buffer);
-    alSourcePlay(_source);
+    _source->buffer(_buffer->ID);
+    _source->play();
 }
 
 void AudioBuffer::stop()
 {
-    alSourceStop(_source);
+    _source->stop();
 }
-
 }

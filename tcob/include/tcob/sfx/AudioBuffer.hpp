@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <tcob/sfx/ALObjects.hpp>
+
 namespace tcob {
 class AudioBuffer final {
 public:
@@ -18,7 +20,7 @@ public:
     void stop();
 
 private:
-    u32 _source { 0 };
-    u32 _buffer { 0 };
+    std::shared_ptr<al::Buffer> _buffer;
+    std::unique_ptr<al::Source> _source;
 };
 }
