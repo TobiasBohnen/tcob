@@ -39,6 +39,9 @@ public:
 
     auto load(const std::string& filename, u32 fontSize) -> bool;
 
+    auto material() const -> ResourcePtr<Material>;
+    void material(ResourcePtr<Material> material);
+
     auto info() const -> FontInfo;
 
     void kerning(bool kerning);
@@ -48,6 +51,7 @@ public:
     auto texture() const -> ResourcePtr<gl::TextureBase>;
 
     static inline ResourcePtr<Font> Default;
+    static inline ResourcePtr<gl::ShaderProgram> DefaultShader;
 
 private:
     auto ascender() const -> f32;
@@ -74,6 +78,7 @@ private:
 
     std::shared_ptr<gl::Texture2D> _fontTexture;
     ResourcePtr<gl::TextureBase> _texRes;
+    ResourcePtr<Material> _material;
 
     bool _kerning { true };
 };

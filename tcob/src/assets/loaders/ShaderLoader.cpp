@@ -5,7 +5,7 @@
 
 #include "ShaderLoader.hpp"
 
-#include <tcob/gfx/drawables/Text.hpp>
+#include <tcob/gfx/Font.hpp>
 #include <tcob/gfx/gl/GLWindow.hpp>
 #include <tcob/script/LuaScript.hpp>
 
@@ -70,8 +70,8 @@ void ShaderLoader::on_preparing()
 
             def->Res->create(vertSource.c_str(), fragSource.c_str());
 
-            if (def->defaultFor.contains("Text")) {
-                Text::DefaultShader = def->Res;
+            if (def->defaultFor.contains("Font")) {
+                Font::DefaultShader = def->Res;
             }
             if (def->defaultFor.contains("UI")) {
                 // ui::UILayer::DefaultShader = shader->Obj;

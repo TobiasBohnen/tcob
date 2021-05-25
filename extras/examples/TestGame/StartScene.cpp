@@ -27,7 +27,6 @@ void StartScene::on_start()
 
     auto font { resMgr.get<Font>("res", "defaultFont") };
     _text.font(font);
-    _text.material(resMgr.get<Material>("res", "mat-text"));
     _text.text("1: Automation \n"
                "2: Canvas \n"
                "3: Text \n"

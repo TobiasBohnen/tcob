@@ -25,9 +25,6 @@ public:
     auto text() const -> std::string;
     void text(const std::string& text);
 
-    auto material() const -> ResourcePtr<Material>;
-    void material(ResourcePtr<Material> material);
-
     auto color() const -> Color; //move to Material
     void color(const Color& color); //move to Material
 
@@ -39,8 +36,6 @@ public:
     auto horizontal_alignment() const -> TextAlignment;
     void horizontal_alignment(TextAlignment align);
 
-    static inline ResourcePtr<gl::ShaderProgram> DefaultShader;
-
     void update(f64 deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
@@ -51,7 +46,6 @@ private:
     void setup_ubo();
 
     ResourcePtr<Font> _font;
-    ResourcePtr<Material> _material;
 
     std::string _text;
     Color _color { Colors::White };

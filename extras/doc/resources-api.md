@@ -31,6 +31,7 @@
   - size = [int]
   - kerning = [bool]
   - is_default
+  - material [material::name]
 
 ## **material**
 
@@ -70,7 +71,7 @@
 - shader [name]
   - fragment [file]
   - vertex [file]
-  - default_for { 'UI', 'Window', 'Text' }
+  - default_for { 'UI', 'Window', 'Font' }
 
 ## **texture**
 

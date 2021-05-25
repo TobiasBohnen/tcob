@@ -138,7 +138,6 @@ void MiscScene::on_start()
 
     font = resMgr.get<Font>("res", "defaultFont");
     text.font(font);
-    text.material(resMgr.get<Material>("res", "mat-text"));
     text.text("{Alpha:1.0}Lorem ipsum dolor sit amet\n, {Color:Red}consetetur sadipscing elitr, sed diam{Alpha:0.5} nonumy eirmod "
               "{Color:Blue}tempor invidunt ut labore et dolore {Color:Gray}magna aliquyam erat, {Alpha:1.0}sed diam voluptua. "
               "At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,  {Alpha:0.5}no sea takimata "

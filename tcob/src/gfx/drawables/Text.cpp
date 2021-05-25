@@ -14,8 +14,6 @@ void Text::font(ResourcePtr<Font> font)
 {
     _font = std::move(font);
     _needsReshape = true;
-    if (_font && _material)
-        _material->Texture = _font->texture();
 }
 
 auto Text::text() const -> std::string
@@ -27,21 +25,6 @@ void Text::text(const std::string& text)
 {
     _text = text;
     _needsReshape = true;
-}
-
-auto Text::material() const -> ResourcePtr<Material>
-{
-    return _material;
-}
-
-void Text::material(ResourcePtr<Material> material)
-{
-    _material = std::move(material);
-    _needsReshape = true;
-    _renderer.material(_material.object());
-
-    if (_font && _material)
-        _material->Texture = _font->texture();
 }
 
 auto Text::color() const -> Color
@@ -97,9 +80,7 @@ void Text::update([[maybe_unused]] f64 deltaTime)
     if (!_font && Font::Default) {
         font(Font::Default);
     }
-    if (_material && !_material->Shader) {
-        _material->Shader = DefaultShader;
-    }
+
     if (_font) {
         if (_needsReshape) {
             reshape();
@@ -116,7 +97,7 @@ void Text::update([[maybe_unused]] f64 deltaTime)
 
 void Text::draw(gl::RenderTarget& target)
 {
-    if (!is_visible() || !_font || !_material)
+    if (!is_visible() || !_font)
         return;
 
     if (_needsFormat)
@@ -128,6 +109,7 @@ void Text::draw(gl::RenderTarget& target)
     _renderer.unmap(size);
 
     _uniformBuffer.bind_base(1);
+    _renderer.material(_font->material().object());
     _renderer.render_to_target(target);
 }
 

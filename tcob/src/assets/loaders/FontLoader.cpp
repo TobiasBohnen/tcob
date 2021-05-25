@@ -44,6 +44,10 @@ void FontLoader::register_wrapper(LuaScript& script)
         def->isDefault = true;
         return def;
     });
+    wrapper.function("material", [](FontDef* def, const std::string& val) {
+        def->info.material = val;
+        return def;
+    });
 }
 
 void FontLoader::do_unload(ResourcePtr<Font> res, bool)
@@ -58,14 +62,17 @@ auto FontLoader::do_reload(ResourcePtr<Font> res) -> bool
     }
 
     auto& info { _reloadInfo[res.get()->name()] };
+    res->material(group().get<Material>(info.material));
     return res->load(group().mount_point() + info.source, info.size);
 }
 
 void FontLoader::on_preparing()
 {
     for (auto& def : _cache) {
+        def->Res->material(group().get<Material>(def->info.material));
         def->Res->load(group().mount_point() + def->info.source, def->info.size);
         def->Res->kerning(def->kerning);
+
         if (def->isDefault) {
             Font::Default = def->Res;
         }

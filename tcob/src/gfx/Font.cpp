@@ -63,6 +63,8 @@ constexpr u32 GLYPH_PADDING { 5 };
 Font::Font()
     : _fontInfo { new stbtt_fontinfo }
 {
+    _fontTexture = std::make_shared<gl::Texture2D>();
+    _texRes = { std::make_shared<Resource<gl::TextureBase>>(_fontTexture) };
 }
 
 Font::~Font()
@@ -107,6 +109,22 @@ auto Font::load(const std::string& filename, u32 fontSize) -> bool
     return true;
 }
 
+auto Font::material() const -> ResourcePtr<Material>
+{
+    return _material;
+}
+
+void Font::material(ResourcePtr<Material> material)
+{
+    _material = std::move(material);
+    if (_material) {
+        _material->Texture = _texRes;
+        if (!_material->Shader) {
+            _material->Shader = DefaultShader;
+        }
+    }
+}
+
 auto Font::info() const -> FontInfo
 {
     return {
@@ -118,11 +136,6 @@ auto Font::info() const -> FontInfo
 
 void Font::create_texture()
 {
-    if (!_fontTexture) {
-        _fontTexture = std::make_shared<gl::Texture2D>();
-        _texRes = { std::make_shared<Resource<gl::TextureBase>>(_fontTexture) };
-    }
-
     _fontTexture->create({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
     _fontTexture->filtering(gl::TextureFiltering::Linear);
 }

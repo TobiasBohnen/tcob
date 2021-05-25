@@ -27,6 +27,7 @@ private:
     struct ReloadInfo {
         std::string source;
         u32 size;
+        std::string material;
     };
 
     struct FontDef {
