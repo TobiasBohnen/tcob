@@ -32,7 +32,8 @@ target_sources(tcob_extlibs INTERFACE
 
 target_compile_definitions(tcob_extlibs 
     INTERFACE SPNG_USE_MINIZ 
-    INTERFACE SPNG_STATIC)
+    INTERFACE SPNG_STATIC
+    INTERFACE AL_LIBTYPE_STATIC)
 
 target_include_directories(tcob_extlibs 
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} 

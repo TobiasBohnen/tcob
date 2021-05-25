@@ -145,7 +145,8 @@
         "sdl_log.h": "c",
         "sdl_timer.h": "c",
         "close_code.h": "c",
-        "dr_flac.h": "c"
+        "dr_flac.h": "c",
+        "al.h": "c"
     },
     "Lua.diagnostics.disable": [
         "undefined-global"
