@@ -58,7 +58,7 @@ auto Input::controller_at(u32 index) -> GameController
     return { nullptr };
 }
 
-auto Input::contoller_count() -> u32
+auto Input::controller_count() -> u32
 {
     return static_cast<u32>(_controllers.size());
 }

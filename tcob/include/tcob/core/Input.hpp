@@ -769,7 +769,7 @@ public:
     ~Input();
 
     auto controller_at(u32 index) -> GameController;
-    auto contoller_count() -> u32;
+    auto controller_count() -> u32;
 
     void process_events(SDL_Event* ev);
 

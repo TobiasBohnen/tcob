@@ -25,13 +25,13 @@ public:
     auto text() const -> std::string;
     void text(const std::string& text);
 
-    auto color() const -> Color; //move to Material
-    void color(const Color& color); //move to Material
+    auto color() const -> Color;
+    void color(const Color& color);
 
-    auto outline_thickness() const -> f32; //move to Material
-    void outline_thickness(f32 outline); //move to Material
-    auto outline_color() const -> Color; //move to Material
-    void outline_color(const Color& color); //move to Material
+    auto outline_thickness() const -> f32;
+    void outline_thickness(f32 outline);
+    auto outline_color() const -> Color;
+    void outline_color(const Color& color);
 
     auto horizontal_alignment() const -> TextAlignment;
     void horizontal_alignment(TextAlignment align);

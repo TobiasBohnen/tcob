@@ -12,6 +12,10 @@ ControllerEx::~ControllerEx()
 
 void ControllerEx::on_start()
 {
+    if (game().input().controller_count() == 0) {
+        game().pop_current_scene();
+        return;
+    }
     auto& resMgr { game().resource_library() };
     auto font { resMgr.get<Font>("res", "DejaVuSans32") };
 
@@ -30,7 +34,7 @@ void ControllerEx::on_start()
     _controllerDesc.bounds({ { 0.55f, 0.1f }, { 1.25f, 0.75f } });
     _controllerDesc.pivot({ 0.55f, 0.1f }, false);
     std::stringstream stream;
-    stream << "Controller count: " << game().input().contoller_count() << "\n";
+    stream << "Controller count: " << game().input().controller_count() << "\n";
     stream << "Name of controller 0:" << game().input().controller_at(0).name();
     _controllerDesc.text(stream.str());
     _controllerDesc.update(0);

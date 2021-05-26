@@ -26,10 +26,10 @@ public:
     auto material() const -> ResourcePtr<Material>;
     void material(ResourcePtr<Material> material, const std::string& texRegion = "default");
     void texture_region(const std::string& texRegion);
-    void texture_scroll(const PointF& scroll); //move to Material
+    void texture_scroll(const PointF& scroll);
 
-    void color(const Color& color); //move to Material
-    void transparency(f32 trans); //move to Material
+    void color(const Color& color);
+    void transparency(f32 trans);
 
     auto id() const -> u64;
 
