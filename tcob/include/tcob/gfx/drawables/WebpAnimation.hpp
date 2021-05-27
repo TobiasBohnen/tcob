@@ -39,8 +39,8 @@ namespace detail {
         SizeU _size { SizeU::Zero };
         i32 _currentTimeStamp { 0 };
 
-        WebPAnimDecoder* _dec;
-        WebPData* _data;
+        WebPAnimDecoder* _dec { nullptr };
+        WebPData* _data { nullptr };
     };
 }
 

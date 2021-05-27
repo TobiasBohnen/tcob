@@ -154,8 +154,8 @@ void WebpAnimation::draw(gl::RenderTarget& target)
 namespace tcob::detail {
 
 WebpAnimDecoder::WebpAnimDecoder(const std::string& file)
+    : _data { new WebPData }
 {
-    _data = new WebPData;
     WebPDataInit(_data);
     InputFileStreamU stream { file };
     auto buffer { stream.read_all() };
