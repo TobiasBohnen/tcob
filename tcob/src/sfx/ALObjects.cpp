@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include <AL/al.h>
+#include <thread>
 
 namespace tcob::al {
 Buffer::Buffer()
@@ -23,7 +24,7 @@ Buffer::~Buffer()
     }
 }
 
-void Buffer::buffer_data(i32 channels, const void* data, i32 frameCount, i32 freq) const
+void Buffer::buffer_data(i32 channels, const void* data, u64 frameCount, i32 freq) const
 {
     i32 framesize { static_cast<i32>(frameCount * channels * sizeof(i16)) }; //assumes short frames
     assert(ID);
@@ -93,10 +94,11 @@ void Source::play()
     assert(ID);
     alSourcePlay(ID);
 }
-
+using namespace std::chrono_literals;
 void Source::stop()
 {
     assert(ID);
+
     alSourceStop(ID);
 }
 

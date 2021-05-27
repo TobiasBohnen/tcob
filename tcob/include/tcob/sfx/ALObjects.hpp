@@ -13,7 +13,7 @@ public:
     Buffer();
     ~Buffer();
 
-    void buffer_data(i32 channels, const void* data, i32 frameCount, i32 freq) const;
+    void buffer_data(i32 channels, const void* data, u64 frameCount, i32 freq) const;
 
     auto frequency() const -> i32;
 
