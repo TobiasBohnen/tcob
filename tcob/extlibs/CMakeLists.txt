@@ -26,6 +26,8 @@ target_sources(tcob_extlibs INTERFACE
 
     dr_libs/dr_libs.c
     
+    stb/stb_vorbis.c
+    
     ${LUA_SRC_FILES}
     ${PHYSFS_SRC_FILES}
 )

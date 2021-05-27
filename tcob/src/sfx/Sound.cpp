@@ -11,6 +11,9 @@
 #include <dr_libs/dr_mp3.h>
 #define DR_WAV_NO_STDIO
 #include <dr_libs/dr_wav.h>
+#define STB_VORBIS_NO_STDIO
+#define STB_VORBIS_HEADER_ONLY
+#include <stb/stb_vorbis.c>
 
 #include "AudioIO.hpp"
 #include <tcob/core/io/FileStream.hpp>
@@ -81,6 +84,17 @@ auto Sound::load(const std::string& filename) -> bool
             if (audioData) {
                 _buffer->buffer_data(config.channels, audioData, frameCount, config.sampleRate);
                 drmp3_free(audioData, nullptr);
+                return true;
+            }
+        } else if (ext == ".ogg") {
+            auto buffer { stream.read_all() };
+            i32 channels { 0 }, sampleRate { 0 };
+            i16* output;
+            auto sampleCount { stb_vorbis_decode_memory(reinterpret_cast<u8*>(buffer.data()), static_cast<i32>(buffer.size()), &channels, &sampleRate, &output) };
+
+            if (sampleCount > 0) {
+                _buffer->buffer_data(channels, output, sampleCount, sampleRate);
+                free(output);
                 return true;
             }
         }
