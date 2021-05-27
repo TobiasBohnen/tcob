@@ -69,7 +69,8 @@ auto FontLoader::do_reload(ResourcePtr<Font> res) -> bool
 void FontLoader::on_preparing()
 {
     for (auto& def : _cache) {
-        def->Res->material(group().get<Material>(def->info.material));
+        if (!def->info.material.empty())
+            def->Res->material(group().get<Material>(def->info.material));
         def->Res->load(group().mount_point() + def->info.source, def->info.size);
         def->Res->kerning(def->kerning);
 

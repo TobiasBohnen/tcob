@@ -147,7 +147,8 @@
         "close_code.h": "c",
         "dr_flac.h": "c",
         "al.h": "c",
-        "format": "cpp"
+        "format": "cpp",
+        "forward_list": "cpp"
     },
     "Lua.diagnostics.disable": [
         "undefined-global"

@@ -42,13 +42,13 @@ public:
     auto material() const -> ResourcePtr<Material>;
     void material(ResourcePtr<Material> material);
 
+    auto texture() const -> ResourcePtr<gl::TextureBase>;
+
     auto info() const -> FontInfo;
 
     void kerning(bool kerning);
 
     auto shape_text(const std::string& text) -> std::vector<Glyph>;
-
-    auto texture() const -> ResourcePtr<gl::TextureBase>;
 
     static inline ResourcePtr<Font> Default;
     static inline ResourcePtr<gl::ShaderProgram> DefaultShader;
@@ -77,8 +77,8 @@ private:
     PointU _fontTextureCursor { PointU::Zero };
 
     std::shared_ptr<gl::Texture2D> _fontTexture;
-    ResourcePtr<gl::TextureBase> _texRes;
-    ResourcePtr<Material> _material;
+    std::shared_ptr<Material> _material;
+    ResourcePtr<Material> _matRes;
 
     bool _kerning { true };
 };
