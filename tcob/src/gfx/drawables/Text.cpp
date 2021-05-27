@@ -129,7 +129,7 @@ void Text::format(const SizeU& newTargetSize)
 
         Color color { _color };
         u8 alpha { color.A };
-        const f32 x { position().X }, y { position().Y };
+        const auto [x, y] { position() };
         for (const auto& token : formatResult.Tokens) {
             if (token.Command.Type != TextFormatter::CommandType::None) {
                 switch (token.Command.Type) {
