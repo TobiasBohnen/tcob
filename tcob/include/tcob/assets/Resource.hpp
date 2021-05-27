@@ -185,7 +185,12 @@ public:
 
     auto object() const -> T*
     {
-        return _object.lock().get();
+        return object_ptr().get();
+    }
+
+    auto object_ptr() const -> std::shared_ptr<T>
+    {
+        return _object.lock();
     }
 
     auto state() const -> ResourceState

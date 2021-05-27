@@ -124,11 +124,12 @@ auto Font::material() const -> ResourcePtr<Material>
 
 void Font::material(ResourcePtr<Material> material)
 {
-    if (material) {
-        material->Texture = std::make_shared<Resource<gl::TextureBase>>(_fontTexture);
-    }
-
     _matRes = std::move(material);
+
+    if (_matRes) {
+        _matRes->Texture = std::make_shared<Resource<gl::TextureBase>>(_fontTexture);
+        _material = _matRes.get()->object_ptr();
+    }
 }
 
 auto Font::texture() const -> ResourcePtr<gl::TextureBase>

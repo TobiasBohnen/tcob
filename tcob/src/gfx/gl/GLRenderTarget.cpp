@@ -41,9 +41,11 @@ auto RenderTarget::material() const -> ResourcePtr<Material>
 
 void RenderTarget::material(ResourcePtr<Material> material)
 {
-    _matRes = material;
+    _matRes = std::move(material);
+
     if (_matRes) {
         _matRes->Texture = { std::make_shared<Resource<TextureBase>>(_texture) };
+        _material = _matRes.get()->object_ptr();
     }
 }
 
