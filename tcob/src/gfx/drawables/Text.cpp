@@ -10,6 +10,11 @@
 
 namespace tcob {
 
+auto Text::font() -> ResourcePtr<Font>
+{
+    return _font;
+}
+
 void Text::font(ResourcePtr<Font> font)
 {
     _font = std::move(font);
