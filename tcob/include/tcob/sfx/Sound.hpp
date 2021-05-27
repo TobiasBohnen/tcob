@@ -23,6 +23,7 @@ public:
     void stop();
 
     auto duration() const -> f32;
+    auto playback_position() const -> f32;
 
 private:
     std::shared_ptr<al::Buffer> _buffer;

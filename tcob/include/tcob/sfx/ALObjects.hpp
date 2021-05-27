@@ -13,7 +13,7 @@ public:
     Buffer();
     ~Buffer();
 
-    void buffer_data(i32 channels, const void* data, i32 size, i32 freq) const;
+    void buffer_data(i32 channels, const void* data, i32 frameCount, i32 freq) const;
 
     auto frequency() const -> i32;
 
@@ -55,6 +55,9 @@ public:
 
     auto source_relatvie() const -> bool;
     void source_relatvie(bool value) const;
+
+    auto sec_offset() const -> f32;
+    void sec_offset(f32 value) const;
 
     u32 ID { 0 };
 };

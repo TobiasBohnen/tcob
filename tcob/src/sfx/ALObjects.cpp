@@ -23,12 +23,13 @@ Buffer::~Buffer()
     }
 }
 
-void Buffer::buffer_data(i32 channels, const void* data, i32 size, i32 freq) const
+void Buffer::buffer_data(i32 channels, const void* data, i32 frameCount, i32 freq) const
 {
+    i32 framesize { static_cast<i32>(frameCount * channels * sizeof(i16)) }; //assumes short frames
     assert(ID);
     alBufferData(ID,
         channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-        data, size, freq);
+        data, framesize, freq);
 }
 
 auto Buffer::frequency() const -> i32
@@ -187,5 +188,19 @@ void Source::source_relatvie(bool value) const
 {
     assert(ID);
     alSourcei(ID, AL_SOURCE_RELATIVE, value);
+}
+
+auto Source::sec_offset() const -> f32
+{
+    assert(ID);
+    f32 retValue { 0 };
+    alGetSourcef(ID, AL_SEC_OFFSET, &retValue);
+    return retValue;
+}
+
+void Source::sec_offset(f32 value) const
+{
+    assert(ID);
+    alSourcef(ID, AL_SEC_OFFSET, value);
 }
 }

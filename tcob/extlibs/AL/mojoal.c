@@ -3947,6 +3947,7 @@ static int source_get_offset(ALsource *src, ALenum param)
     int offset = 0;
     int framesize = sizeof(float);
     int freq = 1;
+ 
     if (src->type == AL_STREAMING) {
         /* streaming: the offset counts from the first processed buffer in the queue. */
         BufferQueueItem *item = src->buffer_queue.head;
@@ -3957,6 +3958,9 @@ static int source_get_offset(ALsource *src, ALenum param)
             offset = (proc_buf * item->buffer->len + src->offset);
         }
     } else {
+        if (!src->buffer) {
+            return 0;
+        }
         framesize = (int)(src->buffer->channels * sizeof(float));
         freq = (int)src->buffer->frequency;
         offset = src->offset;

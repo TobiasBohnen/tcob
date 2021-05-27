@@ -61,7 +61,7 @@ auto Sound::load(const std::string& filename) -> bool
             u32 channels { 0 }, sampleRate { 0 };
             auto audioData { drwav_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_wav, &stream, &channels, &sampleRate, &frameCount, nullptr) };
             if (audioData) {
-                _buffer->buffer_data(channels, audioData, static_cast<i32>(frameCount * 2), sampleRate);
+                _buffer->buffer_data(channels, audioData, frameCount, sampleRate);
                 drwav_free(audioData, nullptr);
                 return true;
             }
@@ -70,7 +70,7 @@ auto Sound::load(const std::string& filename) -> bool
             u32 channels { 0 }, sampleRate { 0 };
             auto audioData { drflac_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_flac, &stream, &channels, &sampleRate, &frameCount, nullptr) };
             if (audioData) {
-                _buffer->buffer_data(channels, audioData, static_cast<i32>(frameCount * 2), sampleRate);
+                _buffer->buffer_data(channels, audioData, frameCount, sampleRate);
                 drflac_free(audioData, nullptr);
                 return true;
             }
@@ -79,7 +79,7 @@ auto Sound::load(const std::string& filename) -> bool
             drmp3_config config {};
             auto audioData { drmp3_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_mp3, &stream, &config, &frameCount, nullptr) };
             if (audioData) {
-                _buffer->buffer_data(config.channels, audioData, static_cast<i32>(frameCount * 2), config.sampleRate);
+                _buffer->buffer_data(config.channels, audioData, frameCount, config.sampleRate);
                 drmp3_free(audioData, nullptr);
                 return true;
             }
@@ -112,5 +112,13 @@ auto Sound::duration() const -> f32
     i32 frequency { _buffer->frequency() };
 
     return lengthInSamples / frequency * 1000;
+}
+
+auto Sound::playback_position() const -> f32
+{
+    if (_buffer->size() > 0) {
+        return _source->sec_offset();
+    }
+    return 0;
 }
 }

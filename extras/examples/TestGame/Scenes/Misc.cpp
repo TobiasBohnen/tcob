@@ -215,7 +215,7 @@ void MiscScene::fixed_update(f64 deltaTime)
     stream << "avg FPS:" << game().fps().average();
     stream << " best FPS:" << game().fps().best();
     stream << " worst FPS:" << game().fps().worst();
-    stream << "|" << partSystem1.particle_count();
+    stream << "|" << sound.playback_position();
 
     game().window().title("TestGame " + stream.str());
 }
