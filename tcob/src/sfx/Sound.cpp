@@ -59,44 +59,31 @@ auto Sound::load(const std::string& filename) -> bool
         InputFileStream stream { filename };
         std::string ext { FileSystem::extension(filename) };
 
+        i16* audioData { nullptr };
+        u64 frameCount { 0 };
+        u32 channels { 0 }, sampleRate { 0 };
+
         if (ext == ".wav") {
-            u64 frameCount { 0 };
-            u32 channels { 0 }, sampleRate { 0 };
-            auto audioData { drwav_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_wav, &stream, &channels, &sampleRate, &frameCount, nullptr) };
-            if (audioData) {
-                _buffer->buffer_data(channels, audioData, frameCount, sampleRate);
-                drwav_free(audioData, nullptr);
-                return true;
-            }
+            audioData = drwav_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_wav, &stream, &channels, &sampleRate, &frameCount, nullptr);
         } else if (ext == ".flac") {
-            u64 frameCount { 0 };
-            u32 channels { 0 }, sampleRate { 0 };
-            auto audioData { drflac_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_flac, &stream, &channels, &sampleRate, &frameCount, nullptr) };
-            if (audioData) {
-                _buffer->buffer_data(channels, audioData, frameCount, sampleRate);
-                drflac_free(audioData, nullptr);
-                return true;
-            }
+            audioData = drflac_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_flac, &stream, &channels, &sampleRate, &frameCount, nullptr);
         } else if (ext == ".mp3") {
-            u64 frameCount { 0 };
             drmp3_config config {};
-            auto audioData { drmp3_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_mp3, &stream, &config, &frameCount, nullptr) };
-            if (audioData) {
-                _buffer->buffer_data(config.channels, audioData, frameCount, config.sampleRate);
-                drmp3_free(audioData, nullptr);
-                return true;
-            }
+            audioData = drmp3_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_mp3, &stream, &config, &frameCount, nullptr);
+            channels = config.channels;
+            sampleRate = config.sampleRate;
         } else if (ext == ".ogg") {
             auto buffer { stream.read_all() };
-            i32 channels { 0 }, sampleRate { 0 };
-            i16* output;
-            auto sampleCount { stb_vorbis_decode_memory(reinterpret_cast<u8*>(buffer.data()), static_cast<i32>(buffer.size()), &channels, &sampleRate, &output) };
+            i32 c, sr;
+            frameCount = stb_vorbis_decode_memory(reinterpret_cast<u8*>(buffer.data()), static_cast<i32>(buffer.size()), &c, &sr, &audioData);
+            channels = static_cast<u32>(c);
+            sampleRate = static_cast<u32>(sr);
+        }
 
-            if (sampleCount > 0) {
-                _buffer->buffer_data(channels, output, sampleCount, sampleRate);
-                free(output);
-                return true;
-            }
+        if (audioData) {
+            _buffer->buffer_data(channels, audioData, frameCount, sampleRate);
+            free(audioData);
+            return true;
         }
     }
     return false;
