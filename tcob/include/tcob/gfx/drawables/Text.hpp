@@ -18,7 +18,7 @@
 
 namespace tcob {
 
-class Text final : public Transformable, public Drawable {
+class Text final : public RectTransformable, public Drawable {
 public:
     auto font() -> ResourcePtr<Font>;
     void font(ResourcePtr<Font> font);

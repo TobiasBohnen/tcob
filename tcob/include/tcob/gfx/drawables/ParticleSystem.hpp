@@ -18,7 +18,7 @@
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob {
-class Particle final : public Transformable {
+class Particle final : public RectTransformable {
 public:
     Particle();
 

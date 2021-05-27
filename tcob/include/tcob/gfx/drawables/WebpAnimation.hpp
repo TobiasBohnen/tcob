@@ -44,7 +44,7 @@ namespace detail {
     };
 }
 
-class WebpAnimation final : public Transformable, public Drawable {
+class WebpAnimation final : public RectTransformable, public Drawable {
 public:
     WebpAnimation();
     ~WebpAnimation();

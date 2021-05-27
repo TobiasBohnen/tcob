@@ -6,50 +6,6 @@
 #include <tcob/gfx/Transformable.hpp>
 
 namespace tcob {
-auto Transformable::size() const -> SizeF
-{
-    return _rect.size();
-}
-
-void Transformable::size(const SizeF& size)
-{
-    if (_rect.size() != size) {
-
-        _rect.size(size);
-        _isDirty = true;
-    }
-}
-
-auto Transformable::position() const -> PointF
-{
-    return _rect.position();
-}
-
-void Transformable::position(const PointF& position)
-{
-    if (_rect.position() != position) {
-        _rect.position(position);
-        _isDirty = true;
-    }
-}
-
-void Transformable::move_by(const PointF& offset)
-{
-    position(_rect.position() + offset);
-}
-
-auto Transformable::bounds() const -> const RectF&
-{
-    return _rect;
-}
-
-void Transformable::bounds(const RectF& rect)
-{
-    if (_rect != rect) {
-        _rect = rect;
-        _isDirty = true;
-    }
-}
 
 auto Transformable::translation() const -> const PointF&
 {
@@ -130,20 +86,6 @@ void Transformable::skew_by(const PointF& factor)
     skew(_skew + factor);
 }
 
-auto Transformable::pivot() const -> PointF
-{
-    return _pivot.value_or(_rect.center());
-}
-
-void Transformable::pivot(const PointF& pivot, bool local)
-{
-    if (local)
-        _pivot = _rect.top_left() + pivot;
-    else
-        _pivot = pivot;
-    _isDirty = true;
-}
-
 auto Transformable::transform() -> const Transform&
 {
     update_transform();
@@ -153,6 +95,11 @@ auto Transformable::transform() -> const Transform&
 auto Transformable::is_transform_dirty() const -> bool
 {
     return _isDirty;
+}
+
+void Transformable::transform_dirty(bool dirty)
+{
+    _isDirty = dirty;
 }
 
 void Transformable::update_transform()
@@ -180,8 +127,74 @@ void Transformable::reset_transform()
     _scale = { SizeF::One };
     _translation = { PointF::Zero };
     _skew = { PointF::Zero };
-    _rect = { RectF::Zero };
     _isDirty = { true };
+}
+
+////////////////////////////////////////////////////////////
+
+auto RectTransformable::size() const -> SizeF
+{
+    return _rect.size();
+}
+
+void RectTransformable::size(const SizeF& size)
+{
+    if (_rect.size() != size) {
+
+        _rect.size(size);
+        transform_dirty(true);
+    }
+}
+
+auto RectTransformable::position() const -> PointF
+{
+    return _rect.position();
+}
+
+void RectTransformable::position(const PointF& position)
+{
+    if (_rect.position() != position) {
+        _rect.position(position);
+        transform_dirty(true);
+    }
+}
+
+void RectTransformable::move_by(const PointF& offset)
+{
+    position(_rect.position() + offset);
+}
+
+auto RectTransformable::bounds() const -> const RectF&
+{
+    return _rect;
+}
+
+void RectTransformable::bounds(const RectF& rect)
+{
+    if (_rect != rect) {
+        _rect = rect;
+        transform_dirty(true);
+    }
+}
+
+auto RectTransformable::pivot() const -> PointF
+{
+    return _pivot.value_or(_rect.center());
+}
+
+void RectTransformable::pivot(const PointF& pivot, bool local)
+{
+    if (local)
+        _pivot = _rect.top_left() + pivot;
+    else
+        _pivot = pivot;
+    transform_dirty(true);
+}
+
+void RectTransformable::reset_transform()
+{
+    Transformable::reset_transform();
+    _rect = { RectF::Zero };
 }
 
 }

@@ -23,18 +23,6 @@ public:
     Transformable() = default;
     virtual ~Transformable() = default;
 
-    //!@brief Gets the size of an object.
-    auto size() const -> SizeF;
-    //!@brief Sets the size of an object
-    void size(const SizeF& size);
-
-    //!@brief Gets the position of an object.
-    auto position() const -> PointF;
-    //!@brief Sets the position of an object.
-    void position(const PointF& position);
-    //!@brief Moves the object by a given offset.
-    void move_by(const PointF& offset);
-
     //!@brief Gets the translation of an object.
     auto translation() const -> const PointF&;
     //!@brief Sets the translation of an object.
@@ -68,18 +56,15 @@ public:
     void bounds(const RectF& rect);
 
     //!@brief
-    auto pivot() const -> PointF;
-    //!@brief
-    //!@param pivot
-    //!@param local
-    void pivot(const PointF& pivot, bool local = true);
+    virtual auto pivot() const -> PointF = 0;
 
     //!@brief Resets the current transformation to an identity matrix.
-    void reset_transform();
+    virtual void reset_transform();
 
 protected:
     auto transform() -> const Transform&;
     auto is_transform_dirty() const -> bool;
+    void transform_dirty(bool dirty);
     void update_transform();
 
 private:
@@ -88,9 +73,40 @@ private:
     SizeF _scale { SizeF::One };
     PointF _translation { PointF::Zero };
     PointF _skew { PointF::Zero };
+    bool _isDirty { false };
+};
+
+//!@brief base class for rectangular transformable objects
+class RectTransformable : public Transformable {
+public:
+    //!@brief Gets the size of an object.
+    auto size() const -> SizeF;
+    //!@brief Sets the size of an object
+    void size(const SizeF& size);
+
+    //!@brief Gets the position of an object.
+    auto position() const -> PointF;
+    //!@brief Sets the position of an object.
+    void position(const PointF& position);
+    //!@brief Moves the object by a given offset.
+    void move_by(const PointF& offset);
+
+    //!@brief
+    auto bounds() const -> const RectF&;
+    void bounds(const RectF& rect);
+
+    //!@brief
+    auto pivot() const -> PointF override;
+    //!@brief
+    //!@param pivot
+    //!@param local
+    void pivot(const PointF& pivot, bool local = true);
+
+    void reset_transform() override;
+
+private:
     RectF _rect { RectF::Zero };
     std::optional<PointF> _pivot {};
-    bool _isDirty { false };
 };
 
 //! @}

@@ -15,7 +15,7 @@
 #include <tcob/gfx/gl/GLRenderer.hpp>
 
 namespace tcob {
-class Sprite final : public Transformable {
+class Sprite final : public RectTransformable {
 public:
     Sprite();
 

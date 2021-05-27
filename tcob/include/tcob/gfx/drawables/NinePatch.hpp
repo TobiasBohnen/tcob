@@ -13,7 +13,7 @@
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob {
-class NinePatch final : public Transformable, public Drawable {
+class NinePatch final : public RectTransformable, public Drawable {
 public:
     auto material() const -> ResourcePtr<Material>;
     void material(ResourcePtr<Material> material, const std::string& texRegion = "default");
