@@ -249,12 +249,13 @@ void Source::queue_buffers(const u32* buffers, i32 bufferCount)
 auto Source::unqueue_buffers(i32 bufferCount) -> std::vector<u32>
 {
     assert(ID);
-    std::vector<u32> retValue {};
-    u32 buffers { 0 };
-    alSourceUnqueueBuffers(ID, bufferCount, &buffers);
-    for (isize i { 0 }; i < bufferCount; ++i) {
-        retValue.push_back(buffers++);
-    }
+
+    u32* buffers { new u32[bufferCount] };
+
+    alSourceUnqueueBuffers(ID, bufferCount, buffers);
+
+    std::vector<u32> retValue { buffers, buffers + bufferCount };
+    delete[] buffers;
 
     return retValue;
 }

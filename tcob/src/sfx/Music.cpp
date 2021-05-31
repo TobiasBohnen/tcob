@@ -104,6 +104,7 @@ void Music::stop()
         _source->stop();
         if (_thread.joinable())
             _thread.join();
+        _source->unqueue_buffers(_source->buffers_queued());
     }
 }
 
