@@ -9,7 +9,7 @@
 
 #include <tcob/core/io/Logger.hpp>
 
-namespace tcob::io::detail {
+namespace tcob::detail::io {
 inline void check(const std::string& msg, i32 c)
 {
     if (c == 0) {

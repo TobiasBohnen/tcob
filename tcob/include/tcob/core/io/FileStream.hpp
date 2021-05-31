@@ -11,7 +11,7 @@
 struct PHYSFS_File;
 
 namespace tcob {
-namespace io::detail {
+namespace detail::io {
     class FileStream {
     public:
         explicit FileStream(PHYSFS_File* handle)
@@ -147,10 +147,10 @@ namespace io::detail {
     };
 }
 
-using InputFileStream = io::detail::InputFileStream<byte>;
-using OutputFileStream = io::detail::OutputFileStream<byte>;
-using AppendFileStream = io::detail::AppendFileStream<byte>;
-using InputFileStreamU = io::detail::InputFileStream<ubyte>;
-using OutputFileStreamU = io::detail::OutputFileStream<ubyte>;
-using AppendFileStreamU = io::detail::AppendFileStream<ubyte>;
+using InputFileStream = detail::io::InputFileStream<byte>;
+using OutputFileStream = detail::io::OutputFileStream<byte>;
+using AppendFileStream = detail::io::AppendFileStream<byte>;
+using InputFileStreamU = detail::io::InputFileStream<ubyte>;
+using OutputFileStreamU = detail::io::OutputFileStream<ubyte>;
+using AppendFileStreamU = detail::io::AppendFileStream<ubyte>;
 }
