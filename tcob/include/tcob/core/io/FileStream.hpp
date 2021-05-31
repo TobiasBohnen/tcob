@@ -12,9 +12,9 @@ struct PHYSFS_File;
 
 namespace tcob {
 namespace io::detail {
-    class FileStreamBase {
+    class FileStream {
     public:
-        explicit FileStreamBase(PHYSFS_File* handle)
+        explicit FileStream(PHYSFS_File* handle)
             : _handle { handle }
         {
             if (!_handle) {
@@ -22,13 +22,13 @@ namespace io::detail {
             }
         }
 
-        virtual ~FileStreamBase()
+        virtual ~FileStream()
         {
             close();
         }
 
-        FileStreamBase(const FileStreamBase&) = delete;
-        auto operator=(const FileStreamBase& other) -> FileStreamBase& = delete;
+        FileStream(const FileStream&) = delete;
+        auto operator=(const FileStream& other) -> FileStream& = delete;
 
         void close() const;
 
@@ -57,12 +57,12 @@ namespace io::detail {
     };
 
     template <typename T>
-    class InputFileStream final : public FileStreamBase {
-        using FileStreamBase::read;
+    class InputFileStream final : public FileStream {
+        using FileStream::read;
 
     public:
         explicit InputFileStream(const std::string& path)
-            : FileStreamBase { OpenRead(path) }
+            : FileStream { OpenRead(path) }
         {
             buffer(4096);
         }
@@ -95,12 +95,12 @@ namespace io::detail {
     };
 
     template <typename T>
-    class OutputFileStream final : public FileStreamBase {
-        using FileStreamBase::write;
+    class OutputFileStream final : public FileStream {
+        using FileStream::write;
 
     public:
         explicit OutputFileStream(const std::string& path)
-            : FileStreamBase { OpenWrite(path) }
+            : FileStream { OpenWrite(path) }
         {
         }
 
@@ -121,12 +121,12 @@ namespace io::detail {
     };
 
     template <typename T>
-    class AppendFileStream final : public FileStreamBase {
-        using FileStreamBase::write;
+    class AppendFileStream final : public FileStream {
+        using FileStream::write;
 
     public:
         explicit AppendFileStream(const std::string& path)
-            : FileStreamBase { OpenAppend(path) }
+            : FileStream { OpenAppend(path) }
         {
         }
 

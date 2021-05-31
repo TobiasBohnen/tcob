@@ -66,7 +66,7 @@ Font::Font()
     , _material { std::make_shared<Material>() }
     , _matRes { std::make_shared<Resource<Material>>(_material) }
 {
-    _material->Texture = std::make_shared<Resource<gl::TextureBase>>(_fontTexture);
+    _material->Texture = std::make_shared<Resource<gl::Texture>>(_fontTexture);
 }
 
 Font::~Font()
@@ -127,12 +127,12 @@ void Font::material(ResourcePtr<Material> material)
     _matRes = std::move(material);
 
     if (_matRes) {
-        _matRes->Texture = std::make_shared<Resource<gl::TextureBase>>(_fontTexture);
+        _matRes->Texture = std::make_shared<Resource<gl::Texture>>(_fontTexture);
         _material = _matRes.get()->object_ptr();
     }
 }
 
-auto Font::texture() const -> ResourcePtr<gl::TextureBase>
+auto Font::texture() const -> ResourcePtr<gl::Texture>
 {
     return _matRes->Texture;
 }

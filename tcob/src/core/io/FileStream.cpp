@@ -17,32 +17,32 @@ inline void check(const std::string& msg, i32 c)
     }
 }
 
-void FileStreamBase::close() const
+void FileStream::close() const
 {
     check("close", PHYSFS_close(_handle));
 }
 
-auto FileStreamBase::flush() const -> bool
+auto FileStream::flush() const -> bool
 {
     return PHYSFS_flush(_handle) != 0;
 }
 
-auto FileStreamBase::eof() const -> bool
+auto FileStream::eof() const -> bool
 {
     return PHYSFS_eof(_handle) != 0;
 }
 
-auto FileStreamBase::tell() const -> std::streamsize
+auto FileStream::tell() const -> std::streamsize
 {
     return static_cast<std::streamsize>(PHYSFS_tell(_handle));
 }
 
-auto FileStreamBase::length() const -> std::streamsize
+auto FileStream::length() const -> std::streamsize
 {
     return static_cast<std::streamsize>(PHYSFS_fileLength(_handle));
 }
 
-auto FileStreamBase::seek(std::streamoff off, std::ios_base::seekdir way) const -> std::streampos
+auto FileStream::seek(std::streamoff off, std::ios_base::seekdir way) const -> std::streampos
 {
     PHYSFS_sint64 pos { off };
     if (way == std::ios_base::cur) {
@@ -58,32 +58,32 @@ auto FileStreamBase::seek(std::streamoff off, std::ios_base::seekdir way) const 
     return static_cast<std::streampos>(pos);
 }
 
-auto FileStreamBase::OpenRead(const std::string& path) -> PHYSFS_File*
+auto FileStream::OpenRead(const std::string& path) -> PHYSFS_File*
 {
     return PHYSFS_openRead(path.c_str());
 }
 
-auto FileStreamBase::OpenWrite(const std::string& path) -> PHYSFS_File*
+auto FileStream::OpenWrite(const std::string& path) -> PHYSFS_File*
 {
     return PHYSFS_openWrite(path.c_str());
 }
 
-auto FileStreamBase::OpenAppend(const std::string& path) -> PHYSFS_File*
+auto FileStream::OpenAppend(const std::string& path) -> PHYSFS_File*
 {
     return PHYSFS_openAppend(path.c_str());
 }
 
-void FileStreamBase::buffer(u64 size)
+void FileStream::buffer(u64 size)
 {
     check("setBuffer", PHYSFS_setBuffer(_handle, size));
 }
 
-auto FileStreamBase::read(void* s, std::streamsize n, isize size) const -> std::streamsize
+auto FileStream::read(void* s, std::streamsize n, isize size) const -> std::streamsize
 {
     return static_cast<std::streamsize>(PHYSFS_readBytes(_handle, s, n * size));
 }
 
-auto FileStreamBase::write(const void* s, std::streamsize n, isize size) const -> std::streamsize
+auto FileStream::write(const void* s, std::streamsize n, isize size) const -> std::streamsize
 {
     return static_cast<std::streamsize>(PHYSFS_writeBytes(_handle, s, n * size));
 }

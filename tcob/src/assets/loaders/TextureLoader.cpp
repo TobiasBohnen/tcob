@@ -28,7 +28,7 @@ static const std::unordered_map<std::string, tcob::gl::TextureFiltering> filteri
 };
 
 TextureLoader::TextureLoader(ResourceGroup& group)
-    : ResourceLoader<gl::TextureBase> { group }
+    : ResourceLoader<gl::Texture> { group }
 {
 }
 

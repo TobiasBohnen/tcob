@@ -13,7 +13,7 @@
 namespace tcob {
 struct Material final {
     ResourcePtr<gl::ShaderProgram> Shader;
-    ResourcePtr<gl::TextureBase> Texture;
+    ResourcePtr<gl::Texture> Texture;
     gl::BlendFunc SourceColorBlendFunc { gl::BlendFunc::SrcAlpha };
     gl::BlendFunc DestinationColorBlendFunc { gl::BlendFunc::OneMinusSrcAlpha };
     gl::BlendFunc SourceAlphaBlendFunc { gl::BlendFunc::SrcAlpha };

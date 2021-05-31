@@ -56,12 +56,12 @@ constexpr auto enumToGL(tcob::gl::TextureWrap wrap) -> GLenum
 
 ////////////////////////////////////////////////////////////
 
-TextureBase::~TextureBase()
+Texture::~Texture()
 {
     destroy();
 }
 
-void TextureBase::filtering(TextureFiltering filter) const
+void Texture::filtering(TextureFiltering filter) const
 {
     assert(ID);
     const GLenum filtering = enumToGL(filter);
@@ -70,44 +70,44 @@ void TextureBase::filtering(TextureFiltering filter) const
     glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, filtering);
 }
 
-void TextureBase::wrapping(TextureWrap wrap) const
+void Texture::wrapping(TextureWrap wrap) const
 {
     wrapping(wrap, wrap);
 }
 
-void TextureBase::wrapping(TextureWrap wrapS, TextureWrap wrapT) const
+void Texture::wrapping(TextureWrap wrapS, TextureWrap wrapT) const
 {
     glTextureParameteri(ID, GL_TEXTURE_WRAP_S, enumToGL(wrapS));
     glTextureParameteri(ID, GL_TEXTURE_WRAP_T, enumToGL(wrapT));
 }
 
-auto TextureBase::size() const -> SizeU
+auto Texture::size() const -> SizeU
 {
     return _size;
 }
 
-void TextureBase::size(const SizeU& size)
+void Texture::size(const SizeU& size)
 {
     _size = size;
 }
 
-auto TextureBase::regions() -> std::unordered_map<std::string, TextureRegion>&
+auto Texture::regions() -> std::unordered_map<std::string, TextureRegion>&
 {
     return _regions;
 }
 
-void TextureBase::do_destroy()
+void Texture::do_destroy()
 {
     glDeleteTextures(1, &ID);
 }
 
-void TextureBase::bind_texture_unit(u32 tu) const
+void Texture::bind_texture_unit(u32 tu) const
 {
     assert(ID);
     glBindTextureUnit(tu, ID);
 }
 
-auto TextureBase::copy_to_image() const -> Image
+auto Texture::copy_to_image() const -> Image
 {
     std::vector<ubyte> buffer;
     buffer.reserve(_size.Width * _size.Height * 4);

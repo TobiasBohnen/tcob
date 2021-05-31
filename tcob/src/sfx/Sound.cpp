@@ -21,9 +21,9 @@
 namespace tcob {
 
 Sound::Sound()
+    : _source { std::make_unique<al::Source>() }
+    , _buffer { std::make_shared<al::Buffer>() }
 {
-    _source = std::make_unique<al::Source>();
-    _buffer = std::make_shared<al::Buffer>();
 }
 
 Sound::~Sound()

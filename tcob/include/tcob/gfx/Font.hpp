@@ -42,7 +42,7 @@ public:
     auto material() const -> ResourcePtr<Material>;
     void material(ResourcePtr<Material> material);
 
-    auto texture() const -> ResourcePtr<gl::TextureBase>;
+    auto texture() const -> ResourcePtr<gl::Texture>;
 
     auto info() const -> FontInfo;
 

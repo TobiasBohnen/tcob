@@ -12,7 +12,7 @@
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob::detail {
-class TextureLoader : public ResourceLoader<gl::TextureBase> {
+class TextureLoader : public ResourceLoader<gl::Texture> {
 public:
     explicit TextureLoader(ResourceGroup& group);
 
@@ -26,7 +26,7 @@ private:
     auto async_load() -> bool;
 
     struct TextureDef {
-        ResourcePtr<gl::TextureBase> Res;
+        ResourcePtr<gl::Texture> Res;
         std::string name;
         std::unordered_map<std::string, RectF> regions;
         std::string textureFile;
@@ -39,7 +39,7 @@ private:
     std::vector<std::unique_ptr<TextureDef>> _textureCache;
 
     struct TextureArrayDef {
-        ResourcePtr<gl::TextureBase> Res;
+        ResourcePtr<gl::Texture> Res;
         std::string name;
         gl::TextureFiltering filtering { gl::TextureFiltering::NearestNeighbor };
         gl::TextureWrap wrapping { gl::TextureWrap::Repeat };

@@ -10,4 +10,32 @@
 
 namespace tcob {
 
+Music::Music()
+    : _source { std::make_unique<al::Source>() }
+//  , _buffer { std::make_shared<al::Buffer>() }
+{
+}
+
+Music::~Music()
+{
+    stop();
+    //_source->buffer(0);
+    //_buffer = nullptr;
+    _source = nullptr;
+}
+
+auto Music::open(const std::string& filename) -> bool
+{
+
+    return true;
+}
+
+void Music::play()
+{
+}
+
+void Music::stop()
+{
+}
+
 }

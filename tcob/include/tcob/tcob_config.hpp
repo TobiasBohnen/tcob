@@ -83,7 +83,7 @@ namespace gl {
     class Renderer;
     class Object;
     class ShaderProgram;
-    class TextureBase;
+    class Texture;
     class Texture1D;
     class Texture2D;
     class Texture2DArray;

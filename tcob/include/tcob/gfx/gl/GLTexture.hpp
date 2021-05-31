@@ -39,10 +39,10 @@ enum class TextureWrap : u8 {
     MirrorClampToEdge
 };
 
-class TextureBase : public Object {
+class Texture : public Object {
 public:
-    TextureBase() = default;
-    ~TextureBase() override;
+    Texture() = default;
+    ~Texture() override;
 
     void bind_texture_unit(u32 tu = 0) const;
 
@@ -68,7 +68,7 @@ private:
     SizeU _size { SizeU::Zero };
 };
 
-class Texture1D : public TextureBase {
+class Texture1D : public Texture {
 public:
     void create(u32 texsize);
 
@@ -77,7 +77,7 @@ public:
     auto format() -> TextureFormat override;
 };
 
-class Texture2D : public TextureBase {
+class Texture2D : public Texture {
 public:
     void create(const SizeU& texsize, TextureFormat format = TextureFormat::RGBA8);
 
@@ -89,7 +89,7 @@ private:
     i32 _format { 0 };
 };
 
-class Texture2DArray : public TextureBase {
+class Texture2DArray : public Texture {
 public:
     void create(const SizeU& texsize, u32 depth, TextureFormat format = TextureFormat::RGBA8);
 

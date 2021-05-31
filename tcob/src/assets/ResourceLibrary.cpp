@@ -99,7 +99,7 @@ ResourceGroup::ResourceGroup(std::string name)
 {
     _luaScript.open_libraries();
     register_loader<gl::ShaderProgram>(std::make_unique<detail::ShaderLoader>(*this));
-    register_loader<gl::TextureBase>(std::make_unique<detail::TextureLoader>(*this));
+    register_loader<gl::Texture>(std::make_unique<detail::TextureLoader>(*this));
     register_loader<Material>(std::make_unique<detail::MaterialLoader>(*this));
     register_loader<Cursor>(std::make_unique<detail::CursorLoader>(*this));
     register_loader<ParticleSystem>(std::make_unique<detail::ParticleSystemLoader>(*this));

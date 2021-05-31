@@ -102,7 +102,7 @@ void WebpAnimation::material(ResourcePtr<Material> material)
 {
     _material = std::move(material);
     if (_texture && _material) {
-        _material->Texture = { std::make_shared<Resource<gl::TextureBase>>(_texture) };
+        _material->Texture = { std::make_shared<Resource<gl::Texture>>(_texture) };
         _renderer.material(_material.object());
     }
 }

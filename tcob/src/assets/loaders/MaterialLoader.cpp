@@ -88,7 +88,7 @@ void MaterialLoader::on_preparing()
 {
     for (const auto& def : _cache) {
         def->Res->Shader = group().get<gl::ShaderProgram>(def->shader);
-        def->Res->Texture = group().get<gl::TextureBase>(def->texture);
+        def->Res->Texture = group().get<gl::Texture>(def->texture);
 
         set_resource_loaded(def->Res);
     }

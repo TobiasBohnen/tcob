@@ -44,7 +44,7 @@ void RenderTarget::material(ResourcePtr<Material> material)
     _matRes = std::move(material);
 
     if (_matRes) {
-        _matRes->Texture = { std::make_shared<Resource<TextureBase>>(_texture) };
+        _matRes->Texture = { std::make_shared<Resource<Texture>>(_texture) };
         _material = _matRes.get()->object_ptr();
     }
 }
@@ -191,7 +191,7 @@ void RenderTarget::create_framebuffer()
 {
     _frameBuffer.create();
     _texture = std::make_shared<Texture2D>();
-    _material->Texture = { std::make_shared<Resource<TextureBase>>(_texture) };
+    _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
 }
 
 void RenderTarget::resize_framebuffer(const SizeU& size)
