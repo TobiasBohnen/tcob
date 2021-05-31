@@ -13,6 +13,11 @@ enum class AudioState {
     Paused,
     Playing
 };
+
+struct AudioInfo {
+    i32 Channels { 0 };
+    i32 Frequency { 0 };
+};
 }
 
 namespace tcob::al {

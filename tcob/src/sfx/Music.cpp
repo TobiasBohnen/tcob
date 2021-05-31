@@ -7,6 +7,7 @@
 
 #include <AL/al.h>
 
+#include "AudioCodecs.hpp"
 #include <tcob/core/io/FileStream.hpp>
 
 namespace tcob {
@@ -18,8 +19,23 @@ detail::AudioDecoder::AudioDecoder(const std::string& filename)
 
 auto detail::AudioDecoder::buffer_data(u32 buffer) -> bool
 {
+    std::vector<i16> data {};
+    data.reserve(MUSIC_BUFFER_SIZE);
+    i32 frameCount { 0 };
+    bool ok { read_data(data.data(), frameCount) };
 
-    return true;
+    auto audioInfo { info() };
+    i32 framesize { static_cast<i32>(frameCount * audioInfo.Channels * sizeof(i16)) }; //assumes short frames
+    alBufferData(buffer,
+        audioInfo.Channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+        data.data(), framesize, audioInfo.Frequency);
+
+    return ok;
+}
+
+auto detail::AudioDecoder::stream() const -> InputFileStream*
+{
+    return _stream.get();
 }
 
 ////////////////////////////////////////////////////////////
@@ -45,7 +61,7 @@ auto Music::open(const std::string& filename) -> bool
         std::string ext { FileSystem::extension(filename) };
 
         if (ext == ".wav") {
-
+            _decoder = std::make_unique<detail::WavDecoder>(filename);
         } else if (ext == ".flac") {
 
         } else if (ext == ".mp3") {

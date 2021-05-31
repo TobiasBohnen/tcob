@@ -17,11 +17,18 @@ constexpr u32 MUSIC_BUFFER_SIZE { 4096 };
 constexpr u32 MUSIC_BUFFER_COUNT { 4 };
 
 namespace detail {
+
     class AudioDecoder {
     public:
         explicit AudioDecoder(const std::string& filename);
+        virtual ~AudioDecoder() = default;
 
         auto buffer_data(u32 buffer) -> bool;
+
+    protected:
+        virtual auto info() const -> AudioInfo = 0;
+        virtual auto read_data(i16* data, i32& frameCount) -> bool = 0;
+        auto stream() const -> InputFileStream*;
 
     private:
         std::unique_ptr<InputFileStream> _stream;
