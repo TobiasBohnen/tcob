@@ -6,6 +6,15 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+namespace tcob {
+enum class AudioState {
+    Initial,
+    Stopped,
+    Paused,
+    Playing
+};
+}
+
 namespace tcob::al {
 
 class Buffer final {
@@ -58,6 +67,14 @@ public:
 
     auto sec_offset() const -> f32;
     void sec_offset(f32 value) const;
+
+    auto buffers_queued() const -> i32;
+    auto buffers_processed() const -> i32;
+
+    auto state() const -> AudioState;
+
+    void queue_buffers(const u32* buffers, i32 bufferCount);
+    auto unqueue_buffers(i32 bufferCount) -> std::vector<u32>;
 
     u32 ID { 0 };
 };

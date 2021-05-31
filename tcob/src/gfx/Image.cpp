@@ -25,7 +25,7 @@ Image::Image(u32 width, u32 height, u32 channels, const u8* data)
 auto Image::save(const std::string& filename, bool flip) const -> bool
 {
     if (_info.Channels == 4) {
-        WebpEncoder { *this }.encode(filename, flip);
+        detail::WebpEncoder { *this }.encode(filename, flip);
         return true;
     }
     return false;
@@ -65,12 +65,12 @@ auto Image::Load(const std::string& filename) -> Image
         auto buffer { stream.read_all() };
 
         if (ext == ".webp") {
-            WebpDecoder webp { buffer };
+            detail::WebpDecoder webp { buffer };
             if (webp.is_valid()) { //try webp
                 return webp.decode();
             }
         } else if (ext == ".png") { //try png
-            PngDecoder png { buffer };
+            detail::PngDecoder png { buffer };
             if (png.is_valid()) {
                 return png.decode();
             }
@@ -97,9 +97,9 @@ auto Image::Info(const std::string& filename) -> ImageInfo
         InputFileStreamU stream { filename };
         auto buffer { stream.read_all() };
 
-        if (WebpDecoder { buffer }.info(retValue)) {
+        if (detail::WebpDecoder { buffer }.info(retValue)) {
             return retValue;
-        } else if (PngDecoder { buffer }.info(retValue)) {
+        } else if (detail::PngDecoder { buffer }.info(retValue)) {
             return retValue;
         }
 

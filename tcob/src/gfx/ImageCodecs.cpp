@@ -7,7 +7,7 @@
 
 #include <tcob/core/io/FileStream.hpp>
 
-namespace tcob {
+namespace tcob::detail {
 
 PngDecoder::PngDecoder(const std::vector<u8>& filedata)
     : _buffer { filedata }

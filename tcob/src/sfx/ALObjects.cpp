@@ -94,11 +94,10 @@ void Source::play()
     assert(ID);
     alSourcePlay(ID);
 }
-using namespace std::chrono_literals;
+
 void Source::stop()
 {
     assert(ID);
-
     alSourceStop(ID);
 }
 
@@ -205,4 +204,59 @@ void Source::sec_offset(f32 value) const
     assert(ID);
     alSourcef(ID, AL_SEC_OFFSET, value);
 }
+
+auto Source::buffers_queued() const -> i32
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetSourcei(ID, AL_BUFFERS_QUEUED, &retValue);
+    return retValue;
+}
+
+auto Source::buffers_processed() const -> i32
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetSourcei(ID, AL_BUFFERS_PROCESSED, &retValue);
+    return retValue;
+}
+
+auto Source::state() const -> AudioState
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetSourcei(ID, AL_SOURCE_STATE, &retValue);
+    switch (retValue) {
+    case AL_INITIAL:
+        return AudioState::Initial;
+    case AL_PLAYING:
+        return AudioState::Playing;
+    case AL_STOPPED:
+        return AudioState::Stopped;
+    case AL_PAUSED:
+        return AudioState::Paused;
+    default:
+        return AudioState::Initial;
+    }
+}
+
+void Source::queue_buffers(const u32* buffers, i32 bufferCount)
+{
+    assert(ID);
+    alSourceQueueBuffers(ID, bufferCount, buffers);
+}
+
+auto Source::unqueue_buffers(i32 bufferCount) -> std::vector<u32>
+{
+    assert(ID);
+    std::vector<u32> retValue {};
+    u32 buffers { 0 };
+    alSourceUnqueueBuffers(ID, bufferCount, &buffers);
+    for (isize i { 0 }; i < bufferCount; ++i) {
+        retValue.push_back(buffers++);
+    }
+
+    return retValue;
+}
+
 }

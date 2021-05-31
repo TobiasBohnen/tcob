@@ -13,13 +13,20 @@
 #include <tcob/sfx/ALObjects.hpp>
 
 namespace tcob {
-namespace detail {
-    class AudioDecoder {
-    };
-}
-
 constexpr u32 MUSIC_BUFFER_SIZE { 4096 };
 constexpr u32 MUSIC_BUFFER_COUNT { 4 };
+
+namespace detail {
+    class AudioDecoder {
+    public:
+        explicit AudioDecoder(const std::string& filename);
+
+        auto buffer_data(u32 buffer) -> bool;
+
+    private:
+        std::unique_ptr<InputFileStream> _stream;
+    };
+}
 
 class Music final {
 public:
@@ -32,12 +39,16 @@ public:
     void stop();
 
 private:
+    void update_stream();
+    void queue_buffers(const std::vector<u32>& buffers);
+
     std::array<al::Buffer, MUSIC_BUFFER_COUNT> _buffers;
     std::unique_ptr<al::Source> _source;
 
+    std::unique_ptr<detail::AudioDecoder> _decoder;
     std::string _file {};
-    std::unique_ptr<InputFileStream> _stream;
-    std::thread _streamThread;
-    std::mutex _mutex;
+
+    std::thread _thread;
+    std::recursive_mutex _mutex {};
 };
 }

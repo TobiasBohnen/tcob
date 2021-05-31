@@ -12,7 +12,7 @@
 
 #include <tcob/gfx/Image.hpp>
 
-namespace tcob {
+namespace tcob::detail {
 class PngDecoder final {
 public:
     PngDecoder(const std::vector<u8>& filedata);

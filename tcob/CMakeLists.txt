@@ -68,10 +68,11 @@ set(LIB_SRCFILES
         src/script/LuaState.cpp
         src/script/LuaTable.cpp
         src/sfx/ALObjects.cpp
-        src/sfx/Sound.cpp
-        src/sfx/Music.cpp
+        src/sfx/AudioCodecs.cpp
         src/sfx/AudioIO.cpp
         src/sfx/AudioSystem.cpp
+        src/sfx/Music.cpp
+        src/sfx/Sound.cpp
         src/gfx/gl/nanovg/GLNVGcontext.cpp
 )
 
