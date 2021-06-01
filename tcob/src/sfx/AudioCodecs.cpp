@@ -8,6 +8,48 @@
 #include "AudioIO.hpp"
 #include <tcob/core/io/FileStream.hpp>
 
+extern "C" {
+int filehack_fgetc(filehack* f)
+{
+    auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
+    if (istream->eof()) {
+        return EOF;
+    } else {
+        tcob::ubyte retValue { 0 };
+        istream->read(reinterpret_cast<tcob::byte*>(&retValue), 1);
+        return retValue;
+    }
+}
+
+int filehack_fread(void* dst, int s, int c, filehack* f)
+{
+    auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
+    return static_cast<int>(istream->read(reinterpret_cast<tcob::byte*>(dst), s * c)) / s;
+}
+
+int filehack_fseek(filehack* f, int idx, int base)
+{
+    auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
+    static_cast<int>(istream->seek(idx, base));
+    return 0;
+}
+
+int filehack_ftell(filehack* f)
+{
+    auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
+    return static_cast<int>(istream->tell());
+}
+
+int filehack_fclose(filehack* f)
+{
+    auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
+    istream->close();
+    return 0;
+}
+}
+
+////////////////////////////////////////////////////////////
+
 namespace tcob::detail {
 
 WavDecoder::WavDecoder(const std::string& filename)
@@ -29,17 +71,17 @@ auto WavDecoder::info() const -> AudioInfo
     return _info;
 }
 
-auto WavDecoder::seek(f32 pos) -> bool
+auto WavDecoder::seek(f32 duration) -> bool
 {
-    f32 offset { pos / 1000 * _info.Frequency / _info.Channels };
+    f32 offset { duration / 1000 * _info.Frequency / _info.Channels };
     return drwav_seek_to_pcm_frame(&_wav, static_cast<u64>(offset));
 }
 
-auto WavDecoder::read_data(i16* data, i32& frameCount) -> bool
+auto WavDecoder::read_data(i16* data, i32& sampleCount) -> bool
 {
     u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    frameCount = static_cast<i32>(drwav_read_pcm_frames_s16(&_wav, wantRead, data)); //assumes short frames
-    return frameCount > 0;
+    sampleCount = static_cast<i32>(drwav_read_pcm_frames_s16(&_wav, wantRead, data)); //assumes short frames
+    return sampleCount > 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -64,17 +106,17 @@ auto FlacDecoder::info() const -> AudioInfo
     return _info;
 }
 
-auto FlacDecoder::seek(f32 pos) -> bool
+auto FlacDecoder::seek(f32 duration) -> bool
 {
-    f32 offset { pos / 1000 * _info.Frequency / _info.Channels };
+    f32 offset { duration / 1000 * _info.Frequency / _info.Channels };
     return drflac_seek_to_pcm_frame(_flac, static_cast<u64>(offset));
 }
 
-auto FlacDecoder::read_data(i16* data, i32& frameCount) -> bool
+auto FlacDecoder::read_data(i16* data, i32& sampleCount) -> bool
 {
     u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    frameCount = static_cast<i32>(drflac_read_pcm_frames_s16(_flac, wantRead, data)); //assumes short frames
-    return frameCount > 0;
+    sampleCount = static_cast<i32>(drflac_read_pcm_frames_s16(_flac, wantRead, data)); //assumes short frames
+    return sampleCount > 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -98,17 +140,59 @@ auto Mp3Decoder::info() const -> AudioInfo
     return _info;
 }
 
-auto Mp3Decoder::seek(f32 pos) -> bool
+auto Mp3Decoder::seek(f32 duration) -> bool
 {
-    f32 offset { pos / 1000 * _info.Frequency / _info.Channels };
+    f32 offset { duration / 1000 * _info.Frequency / _info.Channels };
     return drmp3_seek_to_pcm_frame(&_mp3, static_cast<u64>(offset));
 }
 
-auto Mp3Decoder::read_data(i16* data, i32& frameCount) -> bool
+auto Mp3Decoder::read_data(i16* data, i32& sampleCount) -> bool
 {
     u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    frameCount = static_cast<i32>(drmp3_read_pcm_frames_s16(&_mp3, wantRead, data)); //assumes short frames
-    return frameCount > 0;
+    sampleCount = static_cast<i32>(drmp3_read_pcm_frames_s16(&_mp3, wantRead, data)); //assumes short frames
+    return sampleCount > 0;
 }
 
+////////////////////////////////////////////////////////////
+
+VorbisDecoder::VorbisDecoder(const std::string& filename)
+    : AudioDecoder { filename }
+{
+    std::vector<byte> buffer {};
+    auto istream { stream() };
+
+    i32 error { 0 };
+    _vorbis = stb_vorbis_open_file(reinterpret_cast<filehack*>(istream), true, &error, nullptr);
+
+    auto info { stb_vorbis_get_info(_vorbis) };
+    _info.Channels = info.channels;
+    _info.Frequency = info.sample_rate;
+}
+
+VorbisDecoder::~VorbisDecoder()
+{
+    stb_vorbis_close(_vorbis);
+}
+
+auto VorbisDecoder::info() const -> AudioInfo
+{
+    return _info;
+}
+
+auto VorbisDecoder::seek(f32 duration) -> bool
+{
+    if (duration == 0) {
+        stb_vorbis_seek_start(_vorbis);
+        return true;
+    } else
+        //FIXME: implement seeking
+        // f32 offset { pos / 1000 * _info.Frequency / _info.Channels };
+        return false;
+}
+
+auto VorbisDecoder::read_data(i16* data, i32& sampleCount) -> bool
+{
+    sampleCount = static_cast<i32>(stb_vorbis_get_samples_short_interleaved(_vorbis, _info.Channels, data, MUSIC_BUFFER_SIZE / sizeof(i16))); //assumes short frames
+    return sampleCount > 0;
+}
 }

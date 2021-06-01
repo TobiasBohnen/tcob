@@ -82,6 +82,20 @@
 extern "C" {
 #endif
 
+//based on SoLoud_file_hack:
+typedef void* filehack;
+extern int filehack_fgetc(filehack* f);
+extern int filehack_fread(void* dst, int s, int c, filehack* f);
+extern int filehack_fseek(filehack* f, int idx, int base);
+extern int filehack_ftell(filehack* f);
+extern int filehack_fclose(filehack* f);
+#define FILE filehack
+#define fgetc filehack_fgetc
+#define fread filehack_fread
+#define fseek filehack_fseek
+#define ftell filehack_ftell
+#define fclose filehack_fclose
+
 ///////////   THREAD SAFETY
 
 // Individual stb_vorbis* handles are not thread-safe; you cannot decode from
@@ -5277,17 +5291,7 @@ stb_vorbis* stb_vorbis_open_file(FILE* file, int close_on_free, int* error, cons
 
 stb_vorbis* stb_vorbis_open_filename(const char* filename, int* error, const stb_vorbis_alloc* alloc)
 {
-    FILE* f;
-#if defined(_WIN32) && defined(__STDC_WANT_SECURE_LIB__)
-    if (0 != fopen_s(&f, filename, "rb"))
-        f = NULL;
-#else
-    f = fopen(filename, "rb");
-#endif
-    if (f)
-        return stb_vorbis_open_file(f, TRUE, error, alloc);
-    if (error)
-        *error = VORBIS_file_open_failure;
+
     return NULL;
 }
 #endif // STB_VORBIS_NO_STDIO
@@ -5798,3 +5802,12 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------
 */
+
+#undef FILE
+#undef fgetc
+#undef fread
+#undef fseek
+#undef ftell
+#undef fclose
+#undef fopen
+#undef fopen_s

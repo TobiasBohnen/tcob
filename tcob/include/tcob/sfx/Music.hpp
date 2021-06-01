@@ -14,7 +14,7 @@
 #include <tcob/sfx/ALObjects.hpp>
 
 namespace tcob {
-constexpr u32 MUSIC_BUFFER_SIZE { 8192 };
+constexpr u32 MUSIC_BUFFER_SIZE { 4096 };
 constexpr u32 MUSIC_BUFFER_COUNT { 4 };
 
 namespace detail {
@@ -32,7 +32,7 @@ namespace detail {
 
     protected:
         auto stream() const -> InputFileStream*;
-        virtual auto read_data(i16* data, i32& frameCount) -> bool = 0;
+        virtual auto read_data(i16* data, i32& sampleCount) -> bool = 0;
 
     private:
         std::unique_ptr<InputFileStream> _stream;

@@ -12,8 +12,8 @@
 #include <dr_libs/dr_mp3.h>
 #define DR_WAV_NO_STDIO
 #include <dr_libs/dr_wav.h>
-#define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_HEADER_ONLY
+#define STB_VORBIS_NO_PUSHDATA_API
 #include <stb/stb_vorbis.c>
 
 #include <tcob/sfx/Music.hpp>
@@ -26,10 +26,10 @@ public:
 
     auto info() const -> AudioInfo override;
 
-    auto seek(f32 pos) -> bool override;
+    auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& frameCount) -> bool override;
+    auto read_data(i16* data, i32& sampleCount) -> bool override;
 
 private:
     AudioInfo _info;
@@ -45,14 +45,14 @@ public:
 
     auto info() const -> AudioInfo override;
 
-    auto seek(f32 pos) -> bool override;
+    auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& frameCount) -> bool override;
+    auto read_data(i16* data, i32& sampleCount) -> bool override;
 
 private:
     AudioInfo _info;
-    drflac* _flac;
+    drflac* _flac { nullptr };
 };
 
 ////////////////////////////////////////////////////////////
@@ -64,13 +64,33 @@ public:
 
     auto info() const -> AudioInfo override;
 
-    auto seek(f32 pos) -> bool override;
+    auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& frameCount) -> bool override;
+    auto read_data(i16* data, i32& sampleCount) -> bool override;
 
 private:
     AudioInfo _info;
     drmp3 _mp3;
+};
+
+////////////////////////////////////////////////////////////
+
+class VorbisDecoder final : public AudioDecoder {
+public:
+    VorbisDecoder(const std::string& filename);
+    ~VorbisDecoder();
+
+    auto info() const -> AudioInfo override;
+
+    auto seek(f32 duration) -> bool override;
+
+protected:
+    auto read_data(i16* data, i32& sampleCount) -> bool override;
+
+private:
+    AudioInfo _info;
+    stb_vorbis* _vorbis { nullptr };
+    i32 _headerBytes { 0 };
 };
 }
