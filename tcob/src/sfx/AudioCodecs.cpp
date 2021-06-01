@@ -32,7 +32,7 @@ auto WavDecoder::info() const -> AudioInfo
 auto WavDecoder::seek(f32 pos) -> bool
 {
     f32 offset { pos / 1000 * _info.Frequency / _info.Channels };
-    return drwav_seek_to_pcm_frame(&_wav, offset);
+    return drwav_seek_to_pcm_frame(&_wav, static_cast<u64>(offset));
 }
 
 auto WavDecoder::read_data(i16* data, i32& frameCount) -> bool

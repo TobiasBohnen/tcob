@@ -60,6 +60,6 @@ private:
     std::string _file {};
 
     std::thread _thread;
-    std::atomic<bool> _requestStop { false };
+    std::atomic_bool _requestStop { false };
 };
 }
