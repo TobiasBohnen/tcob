@@ -14,7 +14,7 @@
 #include <tcob/sfx/ALObjects.hpp>
 
 namespace tcob {
-constexpr u32 MUSIC_BUFFER_SIZE { 2048 };
+constexpr u32 MUSIC_BUFFER_SIZE { 8192 };
 constexpr u32 MUSIC_BUFFER_COUNT { 4 };
 
 namespace detail {

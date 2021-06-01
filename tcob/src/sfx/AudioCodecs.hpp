@@ -35,4 +35,42 @@ private:
     AudioInfo _info;
     drwav _wav;
 };
+
+////////////////////////////////////////////////////////////
+
+class FlacDecoder final : public AudioDecoder {
+public:
+    FlacDecoder(const std::string& filename);
+    ~FlacDecoder();
+
+    auto info() const -> AudioInfo override;
+
+    auto seek(f32 pos) -> bool override;
+
+protected:
+    auto read_data(i16* data, i32& frameCount) -> bool override;
+
+private:
+    AudioInfo _info;
+    drflac* _flac;
+};
+
+////////////////////////////////////////////////////////////
+
+class Mp3Decoder final : public AudioDecoder {
+public:
+    Mp3Decoder(const std::string& filename);
+    ~Mp3Decoder();
+
+    auto info() const -> AudioInfo override;
+
+    auto seek(f32 pos) -> bool override;
+
+protected:
+    auto read_data(i16* data, i32& frameCount) -> bool override;
+
+private:
+    AudioInfo _info;
+    drmp3 _mp3;
+};
 }

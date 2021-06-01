@@ -63,9 +63,9 @@ auto Music::open(const std::string& filename) -> bool
         if (ext == ".wav") {
             _decoder = std::make_unique<detail::WavDecoder>(filename);
         } else if (ext == ".flac") {
-
+            _decoder = std::make_unique<detail::FlacDecoder>(filename);
         } else if (ext == ".mp3") {
-
+            _decoder = std::make_unique<detail::Mp3Decoder>(filename);
         } else if (ext == ".ogg") {
         }
 
