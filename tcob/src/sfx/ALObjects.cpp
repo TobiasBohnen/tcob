@@ -250,14 +250,8 @@ auto Source::unqueue_buffers(i32 bufferCount) -> std::vector<u32>
 {
     if (bufferCount > 0) {
         assert(ID);
-
-        u32* buffers { new u32[bufferCount] };
-
-        alSourceUnqueueBuffers(ID, bufferCount, buffers);
-
-        std::vector<u32> retValue { buffers, buffers + bufferCount };
-        delete[] buffers;
-
+        std::vector<u32> retValue(bufferCount);
+        alSourceUnqueueBuffers(ID, bufferCount, retValue.data());
         return retValue;
     }
 

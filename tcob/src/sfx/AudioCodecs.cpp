@@ -38,9 +38,8 @@ auto WavDecoder::seek(f32 pos) -> bool
 auto WavDecoder::read_data(i16* data, i32& frameCount) -> bool
 {
     u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    u64 haveRead { drwav_read_pcm_frames_s16(&_wav, wantRead, data) }; //assumes short frames
-    frameCount = static_cast<i32>(haveRead);
-    return wantRead == haveRead;
+    frameCount = static_cast<i32>(drwav_read_pcm_frames_s16(&_wav, wantRead, data)); //assumes short frames
+    return frameCount > 0;
 }
 
 }
