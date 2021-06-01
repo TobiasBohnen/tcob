@@ -27,6 +27,9 @@ public:
     Buffer();
     ~Buffer();
 
+    Buffer(const Buffer& other) = delete;
+    auto operator=(const Buffer& other) -> Buffer& = delete;
+
     void buffer_data(i32 channels, const void* data, u64 frameCount, i32 freq) const;
 
     auto frequency() const -> i32;
@@ -46,6 +49,9 @@ class Source final {
 public:
     Source();
     ~Source();
+
+    Source(const Source& other) = delete;
+    auto operator=(const Source& other) -> Source& = delete;
 
     void play();
     void stop();
