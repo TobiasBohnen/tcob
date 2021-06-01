@@ -6,6 +6,7 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -25,10 +26,13 @@ namespace detail {
 
         auto buffer_data(u32 buffer) -> bool;
 
-    protected:
         virtual auto info() const -> AudioInfo = 0;
-        virtual auto read_data(i16* data, i32& frameCount) -> bool = 0;
+
+        virtual void seek(u32 pos) = 0;
+
+    protected:
         auto stream() const -> InputFileStream*;
+        virtual auto read_data(i16* data, i32& frameCount) -> bool = 0;
 
     private:
         std::unique_ptr<InputFileStream> _stream;
@@ -49,7 +53,7 @@ private:
     void update_stream();
     void queue_buffers(const std::vector<u32>& buffers);
 
-    std::array<al::Buffer, MUSIC_BUFFER_COUNT> _buffers;
+    std::array<std::unique_ptr<al::Buffer>, MUSIC_BUFFER_COUNT> _buffers;
     std::unique_ptr<al::Source> _source;
 
     std::unique_ptr<detail::AudioDecoder> _decoder;
@@ -57,5 +61,6 @@ private:
 
     std::thread _thread;
     std::recursive_mutex _mutex {};
+    std::atomic<bool> _requestStop { false };
 };
 }

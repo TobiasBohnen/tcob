@@ -81,17 +81,8 @@ void Music::play()
     }
 
     const std::lock_guard lock { _mutex };
-
     if (_source->state() != AudioState::Playing) {
-        stop();
-
-        std::vector<u32> buffers {};
-        for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
-            buffers.push_back(_buffers[i].ID);
-        }
-
-        queue_buffers(buffers);
-        _source->play();
+        _requestStop = false;
         _thread = std::thread { &Music::update_stream, this };
     }
 }
@@ -99,25 +90,26 @@ void Music::play()
 void Music::stop()
 {
     const std::lock_guard lock { _mutex };
-
     if (_source->state() != AudioState::Stopped) {
-        _source->stop();
+        _requestStop = true;
         if (_thread.joinable())
             _thread.join();
-        _source->unqueue_buffers(_source->buffers_queued());
     }
 }
 
 using namespace std::chrono_literals;
 void Music::update_stream()
 {
-    while (_source->state() != AudioState::Stopped) {
+    std::vector<u32> buffers {};
+    for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
+        _buffers[i] = std::make_unique<al::Buffer>();
+        buffers.push_back(_buffers[i]->ID);
+    }
+    queue_buffers(buffers);
+    _source->play();
 
-        bool paused { false };
-        {
-            const std::lock_guard lock { _mutex };
-            paused = _source->state() == AudioState::Paused;
-        }
+    for (;;) {
+        bool paused { _source->state() == AudioState::Paused };
 
         if (!paused) {
             i32 processed { _source->buffers_processed() };
@@ -125,13 +117,21 @@ void Music::update_stream()
                 queue_buffers(_source->unqueue_buffers(processed));
             }
         }
+
+        if (_requestStop) {
+            _source->stop();
+            _source->unqueue_buffers(_source->buffers_queued());
+            _source->buffer(0);
+            _requestStop = false;
+            break;
+        }
+
         std::this_thread::sleep_for(1ms);
     }
 }
 
 void Music::queue_buffers(const std::vector<u32>& buffers)
 {
-    const std::lock_guard lock { _mutex };
     for (u32 buffer : buffers) {
         if (_decoder->buffer_data(buffer)) {
             alSourceQueueBuffers(_source->ID, 1, &buffer);

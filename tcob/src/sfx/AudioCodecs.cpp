@@ -29,6 +29,10 @@ auto WavDecoder::info() const -> AudioInfo
     return _info;
 }
 
+void WavDecoder::seek(u32 pos)
+{
+}
+
 auto WavDecoder::read_data(i16* data, i32& frameCount) -> bool
 {
     u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };

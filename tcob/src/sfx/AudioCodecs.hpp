@@ -24,8 +24,11 @@ public:
     WavDecoder(const std::string& filename);
     ~WavDecoder();
 
-protected:
     auto info() const -> AudioInfo override;
+
+    void seek(u32 pos) override;
+
+protected:
     auto read_data(i16* data, i32& frameCount) -> bool override;
 
 private:
