@@ -82,6 +82,7 @@ void Music::play()
 
     const std::lock_guard lock { _mutex };
     if (_source->state() != AudioState::Playing) {
+        _decoder->seek(0);
         _requestStop = false;
         _thread = std::thread { &Music::update_stream, this };
     }

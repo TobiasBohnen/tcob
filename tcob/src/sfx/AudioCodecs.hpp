@@ -26,7 +26,7 @@ public:
 
     auto info() const -> AudioInfo override;
 
-    void seek(u32 pos) override;
+    auto seek(f32 pos) -> bool override;
 
 protected:
     auto read_data(i16* data, i32& frameCount) -> bool override;

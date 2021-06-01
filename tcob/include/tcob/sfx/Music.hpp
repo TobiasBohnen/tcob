@@ -28,7 +28,7 @@ namespace detail {
 
         virtual auto info() const -> AudioInfo = 0;
 
-        virtual void seek(u32 pos) = 0;
+        virtual auto seek(f32 pos) -> bool = 0;
 
     protected:
         auto stream() const -> InputFileStream*;
