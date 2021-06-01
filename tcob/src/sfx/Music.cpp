@@ -54,7 +54,7 @@ Music::~Music()
 auto Music::open(const std::string& filename) -> bool
 {
     if (FileSystem::is_file(filename)) {
-        const std::lock_guard lock { _mutex };
+        stop();
 
         _file = filename;
         _decoder = nullptr;
@@ -80,7 +80,6 @@ void Music::play()
         return;
     }
 
-    const std::lock_guard lock { _mutex };
     if (_source->state() != AudioState::Playing) {
         _decoder->seek(0);
         _requestStop = false;
@@ -90,7 +89,6 @@ void Music::play()
 
 void Music::stop()
 {
-    const std::lock_guard lock { _mutex };
     if (_source->state() != AudioState::Stopped) {
         _requestStop = true;
         if (_thread.joinable())
@@ -110,9 +108,7 @@ void Music::update_stream()
     _source->play();
 
     for (;;) {
-        bool paused { _source->state() == AudioState::Paused };
-
-        if (!paused) {
+        if (_source->state() != AudioState::Paused) {
             i32 processed { _source->buffers_processed() };
             if (processed > 0) {
                 queue_buffers(_source->unqueue_buffers(processed));

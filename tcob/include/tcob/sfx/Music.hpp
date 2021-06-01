@@ -60,7 +60,6 @@ private:
     std::string _file {};
 
     std::thread _thread;
-    std::recursive_mutex _mutex {};
     std::atomic<bool> _requestStop { false };
 };
 }
