@@ -47,7 +47,10 @@ Music::Music()
 
 Music::~Music()
 {
-    stop();
+    _requestStop = true;
+    if (_thread.joinable())
+        _thread.join();
+
     _source = nullptr;
 }
 
@@ -82,6 +85,9 @@ void Music::play()
 
     if (_source->state() != AudioState::Playing) {
         _decoder->seek(0);
+        _requestStop = true;
+        if (_thread.joinable())
+            _thread.join();
         _requestStop = false;
         _thread = std::thread { &Music::update_stream, this };
     }
@@ -108,11 +114,12 @@ void Music::update_stream()
     _source->play();
 
     for (;;) {
-        if (_source->state() != AudioState::Paused) {
-            i32 processed { _source->buffers_processed() };
-            if (processed > 0) {
-                queue_buffers(_source->unqueue_buffers(processed));
-            }
+        if (!_source) {
+            break;
+        }
+
+        if (_source->state() == AudioState::Stopped) {
+            _requestStop = true;
         }
 
         if (_requestStop) {
@@ -121,6 +128,13 @@ void Music::update_stream()
             _source->buffer(0);
             _requestStop = false;
             break;
+        }
+
+        if (_source->state() != AudioState::Paused) {
+            i32 processed { _source->buffers_processed() };
+            if (processed > 0) {
+                queue_buffers(_source->unqueue_buffers(processed));
+            }
         }
 
         std::this_thread::sleep_for(1ms);
@@ -137,5 +151,4 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
         }
     }
 }
-
 }
