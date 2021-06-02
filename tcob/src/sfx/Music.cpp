@@ -79,31 +79,16 @@ void Music::start(bool looped)
         return;
     }
 
-    if (source()->state() != AudioState::Playing) {
+    if (state() != AudioState::Playing) {
         stop_stream();
         source()->looping(looped);
         _thread = std::thread { &Music::update_stream, this };
     }
 }
 
-void Music::restart()
-{
-    stop();
-    start(source()->looping());
-}
-
-void Music::toggle_pause()
-{
-    if (source()->state() == AudioState::Paused) {
-        source()->play();
-    } else if (source()->state() == AudioState::Playing) {
-        source()->pause();
-    }
-}
-
 void Music::stop()
 {
-    if (source()->state() != AudioState::Stopped) {
+    if (state() != AudioState::Stopped) {
         stop_stream();
     }
 }
@@ -111,28 +96,26 @@ void Music::stop()
 using namespace std::chrono_literals;
 void Music::update_stream()
 {
+    auto s { source() };
+
     fill_buffers();
-    source()->play();
+    s->play();
 
     for (;;) {
-        if (!source()) {
-            break;
-        }
-
-        if (source()->state() == AudioState::Stopped) {
+        if (state() == AudioState::Stopped) {
             _requestStop = true;
         }
 
         if (_requestStop) {
-            source()->stop();
-            source()->unqueue_buffers(source()->buffers_queued());
-            source()->buffer(0);
+            s->stop();
+            s->unqueue_buffers(s->buffers_queued());
+            s->buffer(0);
             _requestStop = false;
             break;
         }
 
-        if (source()->state() == AudioState::Playing) {
-            queue_buffers(source()->unqueue_buffers(source()->buffers_processed()));
+        if (state() == AudioState::Playing) {
+            queue_buffers(s->unqueue_buffers(s->buffers_processed()));
         }
 
         std::this_thread::sleep_for(1ms);
@@ -149,13 +132,15 @@ void Music::stop_stream()
 
 void Music::queue_buffers(const std::vector<u32>& buffers)
 {
+    auto s { source() };
+
     for (u32 buffer : buffers) {
         if (_decoder->buffer_data(buffer)) {
-            source()->queue_buffers(&buffer, 1);
+            s->queue_buffers(&buffer, 1);
         } else {
-            if (source()->looping()) {
-                while (source()->buffers_queued() > 0) { }
-                source()->unqueue_buffers(source()->buffers_processed());
+            if (s->looping()) {
+                while (s->buffers_queued() > 0) { }
+                s->unqueue_buffers(s->buffers_processed());
                 fill_buffers();
             }
             return;

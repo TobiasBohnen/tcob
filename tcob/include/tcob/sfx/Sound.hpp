@@ -18,8 +18,6 @@ public:
     auto load(const std::string& filename) -> bool;
 
     void start(bool looped = false) override;
-    void restart() override;
-    void toggle_pause() override;
     void stop() override;
 
     auto duration() const -> f32;

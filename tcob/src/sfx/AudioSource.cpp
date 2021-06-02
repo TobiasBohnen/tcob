@@ -16,6 +16,21 @@ AudioSource::~AudioSource()
 {
 }
 
+void AudioSource::restart()
+{
+    stop();
+    start(_source->looping());
+}
+
+void AudioSource::toggle_pause()
+{
+    if (_source->state() == AudioState::Paused) {
+        _source->play();
+    } else if (_source->state() == AudioState::Playing) {
+        _source->pause();
+    }
+}
+
 auto AudioSource::volume() const -> f32
 {
     return _source->gain();
@@ -24,6 +39,11 @@ auto AudioSource::volume() const -> f32
 void AudioSource::volume(f32 vol) const
 {
     _source->gain(vol);
+}
+
+auto AudioSource::state() const -> AudioState
+{
+    return _source->state();
 }
 
 auto AudioSource::source() const -> al::Source*

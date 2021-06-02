@@ -15,12 +15,14 @@ public:
     virtual ~AudioSource();
 
     virtual void start(bool looped = false) = 0;
-    virtual void restart() = 0;
-    virtual void toggle_pause() = 0;
+    void restart();
+    void toggle_pause();
     virtual void stop() = 0;
 
     auto volume() const -> f32;
     void volume(f32 vol) const;
+
+    auto state() const -> AudioState;
 
 protected:
     auto source() const -> al::Source*;

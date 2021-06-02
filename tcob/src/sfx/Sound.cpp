@@ -69,34 +69,21 @@ auto Sound::load(const std::string& filename) -> bool
 
 void Sound::start(bool looped)
 {
-    if (source()->state() != AudioState::Playing) {
+
+    if (state() != AudioState::Playing) {
         if (_buffer->size() > 0) {
             stop();
-            source()->buffer(_buffer->ID);
-            source()->looping(looped);
-            source()->play();
+            auto s { source() };
+            s->buffer(_buffer->ID);
+            s->looping(looped);
+            s->play();
         }
-    }
-}
-
-void Sound::restart()
-{
-    stop();
-    start(source()->looping());
-}
-
-void Sound::toggle_pause()
-{
-    if (source()->state() == AudioState::Paused) {
-        source()->play();
-    } else if (source()->state() == AudioState::Playing) {
-        source()->pause();
     }
 }
 
 void Sound::stop()
 {
-    if (source()->state() != AudioState::Stopped) {
+    if (state() != AudioState::Stopped) {
         source()->stop();
     }
 }
