@@ -82,7 +82,6 @@ void Music::start(bool looped)
     }
 
     if (_source->state() != AudioState::Playing) {
-        _decoder->seek(0);
         stop_stream();
         _source->looping(looped);
         _thread = std::thread { &Music::update_stream, this };
@@ -114,12 +113,7 @@ void Music::stop()
 using namespace std::chrono_literals;
 void Music::update_stream()
 {
-    std::vector<u32> buffers {};
-    for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
-        _buffers[i] = std::make_unique<al::Buffer>();
-        buffers.push_back(_buffers[i]->ID);
-    }
-    queue_buffers(buffers);
+    fill_buffers();
     _source->play();
 
     for (;;) {
@@ -164,15 +158,21 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
             if (_source->looping()) {
                 while (_source->buffers_queued() > 0) { }
                 _source->unqueue_buffers(_source->buffers_processed());
-                std::vector<u32> buffers2 {};
-                for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
-                    buffers2.push_back(_buffers[i]->ID);
-                }
-                _decoder->seek(0);
-                queue_buffers(buffers2);
+                fill_buffers();
             }
             return;
         }
     }
+}
+
+void Music::fill_buffers()
+{
+    _decoder->seek(0);
+    std::vector<u32> buffers {};
+    for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
+        _buffers[i] = std::make_unique<al::Buffer>();
+        buffers.push_back(_buffers[i]->ID);
+    }
+    queue_buffers(buffers);
 }
 }
