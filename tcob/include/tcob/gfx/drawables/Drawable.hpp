@@ -6,18 +6,17 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <tcob/core/Updatable.hpp>
 #include <tcob/gfx/gl/GLRenderTarget.hpp>
 
 namespace tcob {
-class Drawable {
+class Drawable : public Updatable {
 public:
     virtual ~Drawable() = default;
 
     auto is_visible() const -> bool;
     void show();
     void hide();
-
-    virtual void update(f64 deltaTime) = 0;
 
     virtual void draw(gl::RenderTarget& target) = 0;
 

@@ -12,6 +12,7 @@
 #include <queue>
 
 #include <tcob/core/Random.hpp>
+#include <tcob/core/Updatable.hpp>
 #include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Point.hpp>
 
@@ -41,7 +42,7 @@ concept Interpolatable = requires(T& t, f32 elapsedRatio)
 
 ////////////////////////////////////////////////////////////
 
-class AutomationBase {
+class AutomationBase : public Updatable {
 public:
     explicit AutomationBase(f64 duration);
     virtual ~AutomationBase() = default;
@@ -57,7 +58,7 @@ public:
 
     auto progress() const -> f32;
 
-    void update(f64 deltaTime);
+    void update(f64 deltaTime) override;
 
 private:
     virtual void update_values() = 0;
@@ -126,7 +127,7 @@ auto make_shared_automation(f64 duration, Rs&&... args) -> std::shared_ptr<Autom
 
 ////////////////////////////////////////////////////////////
 
-class AutomationQueue final {
+class AutomationQueue final : public Updatable {
 
 public:
     template <typename... Ts>
@@ -140,7 +141,7 @@ public:
 
     auto is_empty() -> bool;
 
-    void update(f64 deltaTime);
+    void update(f64 deltaTime) override;
 
 private:
     std::queue<std::shared_ptr<AutomationBase>> _queue;

@@ -18,11 +18,11 @@
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob {
-class Particle final : public RectTransformable {
+class Particle final : public RectTransformable, public Updatable {
 public:
     Particle();
 
-    void update(f64 deltaTime);
+    void update(f64 deltaTime) override;
 
     auto direction() -> f32;
     void direction(f32 dir);

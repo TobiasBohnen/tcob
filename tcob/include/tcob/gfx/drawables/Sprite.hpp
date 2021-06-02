@@ -15,7 +15,7 @@
 #include <tcob/gfx/gl/GLRenderer.hpp>
 
 namespace tcob {
-class Sprite final : public RectTransformable {
+class Sprite final : public RectTransformable, public Updatable {
 public:
     Sprite();
 
@@ -35,7 +35,7 @@ public:
 
     auto aabb() const -> RectF;
 
-    void update(f64 deltaTime);
+    void update(f64 deltaTime) override;
 
 private:
     friend class SpriteBatch;

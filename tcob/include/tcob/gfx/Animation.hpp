@@ -34,11 +34,11 @@ public:
 struct FrameAnimationFunction final {
     using type = std::string;
 
+    f64 Duration;
+
     FrameAnimationFunction(f64 duration, FrameAnimation ani);
 
     auto value(f32 elapsed) const -> std::string;
-
-    f64 Duration;
 
 private:
     FrameAnimation _animation;
