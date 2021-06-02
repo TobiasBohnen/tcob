@@ -183,7 +183,7 @@ void MiscScene::on_start()
     webp.size({ 0.5f, 0.5f });
     webp.position({ 0.75f, 0.25f });
 
-    sound.open("res/audio/door.ogg");
+    sound.open("res/audio/test.ogg");
 }
 
 void MiscScene::draw(RenderTarget& target)

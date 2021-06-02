@@ -184,10 +184,10 @@ auto VorbisDecoder::seek(f32 duration) -> bool
     if (duration == 0) {
         stb_vorbis_seek_start(_vorbis);
         return true;
-    } else
-        //FIXME: implement seeking
-        // f32 offset { pos / 1000 * _info.Frequency / _info.Channels };
-        return false;
+    } else {
+        f32 offset { duration / 1000 * _info.Frequency / _info.Channels };
+        return stb_vorbis_seek_frame(_vorbis, offset);
+    }
 }
 
 auto VorbisDecoder::read_data(i16* data, i32& sampleCount) -> bool
