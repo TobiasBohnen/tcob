@@ -21,37 +21,14 @@
 namespace tcob {
 
 Sound::Sound()
-    : _source { std::make_unique<al::Source>() }
-    , _buffer { std::make_shared<al::Buffer>() }
+    : _buffer { std::make_shared<al::Buffer>() }
 {
 }
 
 Sound::~Sound()
 {
     stop();
-    _source->buffer(0);
-    _buffer = nullptr;
-    _source = nullptr;
-}
-
-Sound::Sound(const Sound& other)
-{
-    *this = other;
-}
-
-auto Sound::operator=(const Sound& other) -> Sound&
-{
-    _source = std::make_unique<al::Source>();
-    _source->pitch(other._source->pitch());
-    _source->gain(other._source->gain());
-    _source->position(other._source->position());
-    _source->direction(other._source->direction());
-    _source->rolloff_factor(other._source->rolloff_factor());
-    _source->source_relatvie(other._source->source_relatvie());
-    _source->looping(other._source->looping());
-
-    _buffer = other._buffer;
-    return *this;
+    source()->buffer(0);
 }
 
 auto Sound::load(const std::string& filename) -> bool
@@ -92,12 +69,12 @@ auto Sound::load(const std::string& filename) -> bool
 
 void Sound::start(bool looped)
 {
-    if (_source->state() != AudioState::Playing) {
+    if (source()->state() != AudioState::Playing) {
         if (_buffer->size() > 0) {
             stop();
-            _source->buffer(_buffer->ID);
-            _source->looping(looped);
-            _source->play();
+            source()->buffer(_buffer->ID);
+            source()->looping(looped);
+            source()->play();
         }
     }
 }
@@ -105,33 +82,23 @@ void Sound::start(bool looped)
 void Sound::restart()
 {
     stop();
-    start(_source->looping());
+    start(source()->looping());
 }
 
 void Sound::toggle_pause()
 {
-    if (_source->state() == AudioState::Paused) {
-        _source->play();
-    } else if (_source->state() == AudioState::Playing) {
-        _source->pause();
+    if (source()->state() == AudioState::Paused) {
+        source()->play();
+    } else if (source()->state() == AudioState::Playing) {
+        source()->pause();
     }
 }
 
 void Sound::stop()
 {
-    if (_source->state() != AudioState::Stopped) {
-        _source->stop();
+    if (source()->state() != AudioState::Stopped) {
+        source()->stop();
     }
-}
-
-auto Sound::volume() const -> f32
-{
-    return _source->gain();
-}
-
-void Sound::volume(f32 vol) const
-{
-    _source->gain(vol);
 }
 
 auto Sound::duration() const -> f32
@@ -149,7 +116,7 @@ auto Sound::duration() const -> f32
 auto Sound::playback_position() const -> f32
 {
     if (_buffer->size() > 0) {
-        return _source->sec_offset();
+        return source()->sec_offset();
     }
     return 0;
 }

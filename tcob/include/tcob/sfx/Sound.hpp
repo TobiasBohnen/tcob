@@ -7,31 +7,25 @@
 #include <tcob/tcob_config.hpp>
 
 #include <tcob/sfx/ALObjects.hpp>
+#include <tcob/sfx/AudioSource.hpp>
 
 namespace tcob {
-class Sound final {
+class Sound final : public AudioSource {
 public:
     Sound();
     ~Sound();
 
-    Sound(const Sound& other);
-    auto operator=(const Sound& other) -> Sound&;
-
     auto load(const std::string& filename) -> bool;
 
-    void start(bool looped = false);
-    void restart();
-    void toggle_pause();
-    void stop();
-
-    auto volume() const -> f32;
-    void volume(f32 vol) const;
+    void start(bool looped = false) override;
+    void restart() override;
+    void toggle_pause() override;
+    void stop() override;
 
     auto duration() const -> f32;
     auto playback_position() const -> f32;
 
 private:
     std::shared_ptr<al::Buffer> _buffer;
-    std::unique_ptr<al::Source> _source;
 };
 }

@@ -12,6 +12,7 @@
 
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/sfx/ALObjects.hpp>
+#include <tcob/sfx/AudioSource.hpp>
 
 namespace tcob {
 constexpr u32 MUSIC_BUFFER_SIZE { 4096 };
@@ -39,20 +40,17 @@ namespace detail {
     };
 }
 
-class Music final {
+class Music final : public AudioSource {
 public:
     Music();
     ~Music();
 
     auto open(const std::string& filename) -> bool;
 
-    void start(bool looped = false);
-    void restart();
-    void toggle_pause();
-    void stop();
-
-    auto volume() const -> f32;
-    void volume(f32 vol) const;
+    void start(bool looped = false) override;
+    void restart() override;
+    void toggle_pause() override;
+    void stop() override;
 
 private:
     void update_stream();
@@ -61,7 +59,6 @@ private:
     void fill_buffers();
 
     std::array<std::unique_ptr<al::Buffer>, MUSIC_BUFFER_COUNT> _buffers;
-    std::unique_ptr<al::Source> _source;
 
     std::unique_ptr<detail::AudioDecoder> _decoder;
     std::string _file {};

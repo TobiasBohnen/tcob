@@ -70,6 +70,7 @@ set(LIB_SRCFILES
         src/sfx/ALObjects.cpp
         src/sfx/AudioCodecs.cpp
         src/sfx/AudioIO.cpp
+        src/sfx/AudioSource.cpp
         src/sfx/AudioSystem.cpp
         src/sfx/Music.cpp
         src/sfx/Sound.cpp

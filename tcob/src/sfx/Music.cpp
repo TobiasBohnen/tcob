@@ -41,14 +41,12 @@ auto detail::AudioDecoder::stream() const -> InputFileStream*
 ////////////////////////////////////////////////////////////
 
 Music::Music()
-    : _source { std::make_unique<al::Source>() }
 {
 }
 
 Music::~Music()
 {
     stop_stream();
-    _source = nullptr;
 }
 
 auto Music::open(const std::string& filename) -> bool
@@ -81,9 +79,9 @@ void Music::start(bool looped)
         return;
     }
 
-    if (_source->state() != AudioState::Playing) {
+    if (source()->state() != AudioState::Playing) {
         stop_stream();
-        _source->looping(looped);
+        source()->looping(looped);
         _thread = std::thread { &Music::update_stream, this };
     }
 }
@@ -91,60 +89,50 @@ void Music::start(bool looped)
 void Music::restart()
 {
     stop();
-    start(_source->looping());
+    start(source()->looping());
 }
 
 void Music::toggle_pause()
 {
-    if (_source->state() == AudioState::Paused) {
-        _source->play();
-    } else if (_source->state() == AudioState::Playing) {
-        _source->pause();
+    if (source()->state() == AudioState::Paused) {
+        source()->play();
+    } else if (source()->state() == AudioState::Playing) {
+        source()->pause();
     }
 }
 
 void Music::stop()
 {
-    if (_source->state() != AudioState::Stopped) {
+    if (source()->state() != AudioState::Stopped) {
         stop_stream();
     }
-}
-
-auto Music::volume() const -> f32
-{
-    return _source->gain();
-}
-
-void Music::volume(f32 vol) const
-{
-    _source->gain(vol);
 }
 
 using namespace std::chrono_literals;
 void Music::update_stream()
 {
     fill_buffers();
-    _source->play();
+    source()->play();
 
     for (;;) {
-        if (!_source) {
+        if (!source()) {
             break;
         }
 
-        if (_source->state() == AudioState::Stopped) {
+        if (source()->state() == AudioState::Stopped) {
             _requestStop = true;
         }
 
         if (_requestStop) {
-            _source->stop();
-            _source->unqueue_buffers(_source->buffers_queued());
-            _source->buffer(0);
+            source()->stop();
+            source()->unqueue_buffers(source()->buffers_queued());
+            source()->buffer(0);
             _requestStop = false;
             break;
         }
 
-        if (_source->state() == AudioState::Playing) {
-            queue_buffers(_source->unqueue_buffers(_source->buffers_processed()));
+        if (source()->state() == AudioState::Playing) {
+            queue_buffers(source()->unqueue_buffers(source()->buffers_processed()));
         }
 
         std::this_thread::sleep_for(1ms);
@@ -163,11 +151,11 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
 {
     for (u32 buffer : buffers) {
         if (_decoder->buffer_data(buffer)) {
-            _source->queue_buffers(&buffer, 1);
+            source()->queue_buffers(&buffer, 1);
         } else {
-            if (_source->looping()) {
-                while (_source->buffers_queued() > 0) { }
-                _source->unqueue_buffers(_source->buffers_processed());
+            if (source()->looping()) {
+                while (source()->buffers_queued() > 0) { }
+                source()->unqueue_buffers(source()->buffers_processed());
                 fill_buffers();
             }
             return;
