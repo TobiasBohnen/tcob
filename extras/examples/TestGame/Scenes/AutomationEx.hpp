@@ -1,3 +1,5 @@
+#pragma once
+
 #include <tcob/tcob.hpp>
 using namespace tcob;
 using namespace tcob::gl;
