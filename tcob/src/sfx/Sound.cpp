@@ -69,7 +69,6 @@ auto Sound::load(const std::string& filename) -> bool
 
 void Sound::start(bool looped)
 {
-
     if (state() != AudioState::Playing) {
         if (_buffer->size() > 0) {
             stop();
