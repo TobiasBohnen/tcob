@@ -101,6 +101,12 @@ void Source::stop()
     alSourceStop(ID);
 }
 
+void Source::pause()
+{
+    assert(ID);
+    alSourcePause(ID);
+}
+
 void Source::buffer(u32 bufferID)
 {
     assert(ID);
@@ -219,6 +225,20 @@ auto Source::buffers_processed() const -> i32
     i32 retValue { 0 };
     alGetSourcei(ID, AL_BUFFERS_PROCESSED, &retValue);
     return retValue;
+}
+
+auto Source::looping() const -> bool
+{
+    assert(ID);
+    i32 retValue { 0 };
+    alGetSourcei(ID, AL_LOOPING, &retValue);
+    return retValue;
+}
+
+void Source::looping(bool value) const
+{
+    assert(ID);
+    alSourcei(ID, AL_LOOPING, value);
 }
 
 auto Source::state() const -> AudioState

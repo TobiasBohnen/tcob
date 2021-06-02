@@ -46,7 +46,9 @@ public:
 
     auto open(const std::string& filename) -> bool;
 
-    void play();
+    void start();
+    void restart();
+    void toggle_pause();
     void stop();
 
 private:

@@ -48,6 +48,7 @@ auto Sound::operator=(const Sound& other) -> Sound&
     _source->direction(other._source->direction());
     _source->rolloff_factor(other._source->rolloff_factor());
     _source->source_relatvie(other._source->source_relatvie());
+    _source->looping(other._source->looping());
 
     _buffer = other._buffer;
     return *this;
@@ -89,18 +90,38 @@ auto Sound::load(const std::string& filename) -> bool
     return false;
 }
 
-void Sound::play()
+void Sound::start(bool looped)
 {
-    if (_buffer->size() > 0) {
-        stop();
-        _source->buffer(_buffer->ID);
+    if (_source->state() != AudioState::Playing) {
+        if (_buffer->size() > 0) {
+            stop();
+            _source->buffer(_buffer->ID);
+            _source->looping(looped);
+            _source->play();
+        }
+    }
+}
+
+void Sound::restart()
+{
+    stop();
+    start(_source->looping());
+}
+
+void Sound::toggle_pause()
+{
+    if (_source->state() == AudioState::Paused) {
         _source->play();
+    } else if (_source->state() == AudioState::Playing) {
+        _source->pause();
     }
 }
 
 void Sound::stop()
 {
-    _source->stop();
+    if (_source->state() != AudioState::Stopped) {
+        _source->stop();
+    }
 }
 
 auto Sound::duration() const -> f32

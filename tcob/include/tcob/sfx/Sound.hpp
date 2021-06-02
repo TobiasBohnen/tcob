@@ -19,7 +19,9 @@ public:
 
     auto load(const std::string& filename) -> bool;
 
-    void play();
+    void start(bool looped = false);
+    void restart();
+    void toggle_pause();
     void stop();
 
     auto duration() const -> f32;

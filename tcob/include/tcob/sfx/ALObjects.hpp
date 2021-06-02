@@ -55,6 +55,7 @@ public:
 
     void play();
     void stop();
+    void pause();
 
     void buffer(u32 bufferID);
 
@@ -78,6 +79,9 @@ public:
 
     auto sec_offset() const -> f32;
     void sec_offset(f32 value) const;
+
+    auto looping() const -> bool;
+    void looping(bool value) const;
 
     auto buffers_queued() const -> i32;
     auto buffers_processed() const -> i32;

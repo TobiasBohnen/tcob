@@ -75,7 +75,7 @@ auto Music::open(const std::string& filename) -> bool
     return false;
 }
 
-void Music::play()
+void Music::start()
 {
     if (!_decoder) {
         return;
@@ -85,6 +85,21 @@ void Music::play()
         _decoder->seek(0);
         stop_stream();
         _thread = std::thread { &Music::update_stream, this };
+    }
+}
+
+void Music::restart()
+{
+    stop();
+    start();
+}
+
+void Music::toggle_pause()
+{
+    if (_source->state() == AudioState::Paused) {
+        _source->play();
+    } else if (_source->state() == AudioState::Playing) {
+        _source->pause();
     }
 }
 

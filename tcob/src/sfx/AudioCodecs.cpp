@@ -186,7 +186,7 @@ auto VorbisDecoder::seek(f32 duration) -> bool
         return true;
     } else {
         f32 offset { duration / 1000 * _info.Frequency / _info.Channels };
-        return stb_vorbis_seek_frame(_vorbis, offset);
+        return stb_vorbis_seek_frame(_vorbis, static_cast<i32>(offset));
     }
 }
 
