@@ -1127,9 +1127,6 @@ static int initStaticArchivers(void)
     SZIP_global_init();
     REGISTER_STATIC_ARCHIVER(7Z);
 #endif
-#if PHYSFS_SUPPORTS_WAD
-    REGISTER_STATIC_ARCHIVER(WAD);
-#endif
 
 #undef REGISTER_STATIC_ARCHIVER
 

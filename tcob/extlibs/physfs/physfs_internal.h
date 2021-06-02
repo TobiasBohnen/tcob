@@ -86,14 +86,6 @@ extern "C" {
 extern const PHYSFS_Archiver __PHYSFS_Archiver_DIR;
 extern const PHYSFS_Archiver __PHYSFS_Archiver_ZIP;
 extern const PHYSFS_Archiver __PHYSFS_Archiver_7Z;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_GRP;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_QPAK;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_HOG;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_MVL;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_WAD;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_SLB;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_ISO9660;
-extern const PHYSFS_Archiver __PHYSFS_Archiver_VDF;
 
 /* a real C99-compliant snprintf() is in Visual Studio 2015,
    but just use this everywhere for binary compatibility. */
