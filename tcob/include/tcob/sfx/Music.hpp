@@ -51,6 +51,9 @@ public:
     void toggle_pause();
     void stop();
 
+    auto volume() const -> f32;
+    void volume(f32 vol) const;
+
 private:
     void update_stream();
     void stop_stream();

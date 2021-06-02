@@ -138,6 +138,7 @@ auto Source::gain() const -> f32
 void Source::gain(f32 value) const
 {
     assert(ID);
+    value = std::clamp(value, 0.0f, 1.0f);
     alSourcef(ID, AL_GAIN, value);
 }
 

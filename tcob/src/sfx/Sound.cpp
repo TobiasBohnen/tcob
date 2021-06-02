@@ -124,6 +124,16 @@ void Sound::stop()
     }
 }
 
+auto Sound::volume() const -> f32
+{
+    return _source->gain();
+}
+
+void Sound::volume(f32 vol) const
+{
+    _source->gain(vol);
+}
+
 auto Sound::duration() const -> f32
 {
     i32 size { _buffer->size() };

@@ -110,6 +110,16 @@ void Music::stop()
     }
 }
 
+auto Music::volume() const -> f32
+{
+    return _source->gain();
+}
+
+void Music::volume(f32 vol) const
+{
+    _source->gain(vol);
+}
+
 using namespace std::chrono_literals;
 void Music::update_stream()
 {

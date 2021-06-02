@@ -24,6 +24,9 @@ public:
     void toggle_pause();
     void stop();
 
+    auto volume() const -> f32;
+    void volume(f32 vol) const;
+
     auto duration() const -> f32;
     auto playback_position() const -> f32;
 
