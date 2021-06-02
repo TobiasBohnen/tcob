@@ -75,7 +75,7 @@ auto Music::open(const std::string& filename) -> bool
     return false;
 }
 
-void Music::start()
+void Music::start(bool looped)
 {
     if (!_decoder) {
         return;
@@ -84,6 +84,7 @@ void Music::start()
     if (_source->state() != AudioState::Playing) {
         _decoder->seek(0);
         stop_stream();
+        _source->looping(looped);
         _thread = std::thread { &Music::update_stream, this };
     }
 }
@@ -91,7 +92,7 @@ void Music::start()
 void Music::restart()
 {
     stop();
-    start();
+    start(_source->looping());
 }
 
 void Music::toggle_pause()
@@ -138,11 +139,8 @@ void Music::update_stream()
             break;
         }
 
-        if (_source->state() != AudioState::Paused) {
-            i32 processed { _source->buffers_processed() };
-            if (processed > 0) {
-                queue_buffers(_source->unqueue_buffers(processed));
-            }
+        if (_source->state() == AudioState::Playing) {
+            queue_buffers(_source->unqueue_buffers(_source->buffers_processed()));
         }
 
         std::this_thread::sleep_for(1ms);
@@ -161,8 +159,18 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
 {
     for (u32 buffer : buffers) {
         if (_decoder->buffer_data(buffer)) {
-            alSourceQueueBuffers(_source->ID, 1, &buffer);
+            _source->queue_buffers(&buffer, 1);
         } else {
+            if (_source->looping()) {
+                while (_source->buffers_queued() > 0) { }
+                _source->unqueue_buffers(_source->buffers_processed());
+                std::vector<u32> buffers2 {};
+                for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
+                    buffers2.push_back(_buffers[i]->ID);
+                }
+                _decoder->seek(0);
+                queue_buffers(buffers2);
+            }
             return;
         }
     }

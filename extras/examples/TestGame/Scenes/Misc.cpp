@@ -184,7 +184,7 @@ void MiscScene::on_start()
     webp.position({ 0.75f, 0.25f });
 
     sound0.load("res/audio/door.ogg");
-    music0.open("res/audio/test.ogg");
+    music0.open("res/audio/test.flac");
 }
 
 void MiscScene::draw(RenderTarget& target)
@@ -332,9 +332,9 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
             }
         }
     } else if (ev.Code == Scancode::O) {
-        sound0.start();
+        music0.start(true);
     } else if (ev.Code == Scancode::P) {
-        music0.start();
+        music0.stop();
     } else if (ev.Code == Scancode::T) {
         for (u32 i = 0; i < 5; i++) {
             tileMap.modify_layer(1, { 0, i }, 2);

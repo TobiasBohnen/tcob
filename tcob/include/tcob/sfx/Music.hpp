@@ -46,7 +46,7 @@ public:
 
     auto open(const std::string& filename) -> bool;
 
-    void start();
+    void start(bool looped = false);
     void restart();
     void toggle_pause();
     void stop();
