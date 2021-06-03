@@ -13,35 +13,6 @@
 
 namespace tcob {
 
-detail::AudioDecoder::AudioDecoder(const std::string& filename)
-    : _stream { std::make_unique<InputFileStream>(filename) }
-{
-}
-
-auto detail::AudioDecoder::buffer_data(u32 buffer) -> bool
-{
-    std::vector<i16> data;
-    data.reserve(MUSIC_BUFFER_SIZE);
-
-    i32 sampleCount { 0 };
-    bool ok { read_data(data.data(), sampleCount) };
-    if (ok) {
-        auto audioInfo { info() };
-        i32 size { static_cast<i32>(sampleCount * audioInfo.Channels * sizeof(i16)) };
-        alBufferData(buffer,
-            audioInfo.Channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-            data.data(), size, audioInfo.Frequency);
-    }
-    return ok;
-}
-
-auto detail::AudioDecoder::stream() const -> InputFileStream*
-{
-    return _stream.get();
-}
-
-////////////////////////////////////////////////////////////
-
 Music::Music()
 {
 }

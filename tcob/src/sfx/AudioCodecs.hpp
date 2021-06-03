@@ -19,6 +19,27 @@
 #include <tcob/sfx/Music.hpp>
 
 namespace tcob::detail {
+class AudioDecoder {
+public:
+    explicit AudioDecoder(const std::string& filename);
+    virtual ~AudioDecoder() = default;
+
+    auto buffer_data(u32 buffer) -> bool;
+
+    virtual auto info() const -> AudioInfo = 0;
+
+    virtual auto seek(f32 pos) -> bool = 0;
+
+protected:
+    auto stream() const -> InputFileStream*;
+    virtual auto read_data(i16* data, isize size) -> i32 = 0;
+
+private:
+    std::unique_ptr<InputFileStream> _stream;
+};
+
+////////////////////////////////////////////////////////////
+
 class WavDecoder final : public AudioDecoder {
 public:
     WavDecoder(const std::string& filename);
@@ -29,7 +50,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& sampleCount) -> bool override;
+    auto read_data(i16* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
@@ -48,7 +69,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& sampleCount) -> bool override;
+    auto read_data(i16* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
@@ -67,7 +88,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& sampleCount) -> bool override;
+    auto read_data(i16* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
@@ -86,7 +107,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, i32& sampleCount) -> bool override;
+    auto read_data(i16* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
