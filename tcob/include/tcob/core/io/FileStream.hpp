@@ -24,13 +24,14 @@ namespace detail::io {
 
         virtual ~FileStream()
         {
-            close();
+            if (!_closed)
+                close();
         }
 
         FileStream(const FileStream&) = delete;
         auto operator=(const FileStream& other) -> FileStream& = delete;
 
-        void close() const;
+        auto close() -> bool;
 
         auto flush() const -> bool;
 
@@ -53,6 +54,7 @@ namespace detail::io {
         auto write(const void* s, std::streamsize n, isize size) const -> std::streamsize;
 
     private:
+        bool _closed { false };
         PHYSFS_File* _handle { nullptr };
     };
 

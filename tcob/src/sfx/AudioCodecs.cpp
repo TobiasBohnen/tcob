@@ -42,10 +42,8 @@ int filehack_ftell(filehack* f)
     return static_cast<int>(istream->tell());
 }
 
-int filehack_fclose(filehack* f)
+int filehack_fclose(filehack*)
 {
-    auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
-    istream->close();
     return 0;
 }
 }
@@ -190,7 +188,7 @@ VorbisDecoder::VorbisDecoder(const std::string& filename)
     auto istream { stream() };
 
     i32 error { 0 };
-    _vorbis = stb_vorbis_open_file(reinterpret_cast<filehack*>(istream), true, &error, nullptr);
+    _vorbis = stb_vorbis_open_file(reinterpret_cast<filehack*>(istream), false, &error, nullptr);
 
     auto info { stb_vorbis_get_info(_vorbis) };
     _info.Channels = info.channels;

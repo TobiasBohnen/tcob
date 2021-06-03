@@ -19,14 +19,15 @@ inline auto check(const std::string& msg, i32 c) -> bool
     return c != 0;
 }
 
-void FileStream::close() const
+auto FileStream::close() -> bool
 {
-    check("close", PHYSFS_close(_handle));
+    _closed = true;
+    return check("close", PHYSFS_close(_handle));
 }
 
 auto FileStream::flush() const -> bool
 {
-    return PHYSFS_flush(_handle) != 0;
+    return check("flush", PHYSFS_flush(_handle));
 }
 
 auto FileStream::eof() const -> bool
