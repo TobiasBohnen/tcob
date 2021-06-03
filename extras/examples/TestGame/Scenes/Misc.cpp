@@ -332,9 +332,9 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
             }
         }
     } else if (ev.Code == Scancode::O) {
-        music0.start();
+        music0.start(true);
     } else if (ev.Code == Scancode::P) {
-        sound0.start();
+        music0.restart();
     } else if (ev.Code == Scancode::T) {
         for (u32 i = 0; i < 5; i++) {
             tileMap.modify_layer(1, { 0, i }, 2);

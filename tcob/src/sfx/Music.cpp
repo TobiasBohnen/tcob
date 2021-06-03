@@ -108,7 +108,6 @@ void Music::update_stream()
 
         if (_requestStop) {
             s->stop();
-            s->unqueue_buffers(s->buffers_queued());
             s->buffer(0);
             _requestStop = false;
             break;
@@ -139,7 +138,8 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
             s->queue_buffers(&buffer, 1);
         } else {
             if (s->looping()) {
-                while (s->buffers_queued() > 0) { }
+                while (s->buffers_queued() > 0) {
+                }
                 s->unqueue_buffers(s->buffers_processed());
                 fill_buffers();
             }
