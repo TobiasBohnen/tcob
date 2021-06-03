@@ -34,14 +34,14 @@ void FileSystem::done()
     PHYSFS_deinit();
 }
 
-void FileSystem::mount(const std::string& loc, const std::string& mp)
+auto FileSystem::mount(const std::string& loc, const std::string& mp) -> bool
 {
-    check("mount", PHYSFS_mount(loc.c_str(), mp.c_str(), true));
+    return check("mount", PHYSFS_mount(loc.c_str(), mp.c_str(), true));
 }
 
-void FileSystem::unmount(const std::string& loc)
+auto FileSystem::unmount(const std::string& loc) -> bool
 {
-    check("ummount", PHYSFS_unmount(loc.c_str()));
+    return check("ummount", PHYSFS_unmount(loc.c_str()));
 }
 
 auto FileSystem::filesize(const std::string& path) -> i64
@@ -140,19 +140,19 @@ auto FileSystem::exists(const std::string& path) -> bool
     return PHYSFS_exists(path.c_str());
 }
 
-void FileSystem::delete_file(const std::string& path)
+auto FileSystem::delete_file(const std::string& path) -> bool
 {
     if (!is_file(path)) {
-        return;
+        return false;
     }
 
-    check("delete", PHYSFS_delete(path.c_str()));
+    return check("delete", PHYSFS_delete(path.c_str()));
 }
 
-void FileSystem::delete_folder(const std::string& path)
+auto FileSystem::delete_folder(const std::string& path) -> bool
 {
     if (!is_folder(path)) {
-        return;
+        return false;
     }
 
     const char* folder { path.c_str() };
@@ -167,28 +167,29 @@ void FileSystem::delete_folder(const std::string& path)
     }
 
     PHYSFS_freeList(items);
-    check("delete", PHYSFS_delete(folder));
+    return check("delete", PHYSFS_delete(folder));
 }
 
-void FileSystem::create_file(const std::string& path)
+auto FileSystem::create_file(const std::string& path) -> bool
 {
     delete_file(path);
 
     const isize idx { path.find_last_of('/') };
     if (idx != std::string::npos && idx > 0) {
-        std::string folder { path.substr(0, idx) };
+        const std::string folder { path.substr(0, idx) };
         if (!exists(folder)) {
-            create_folder(folder);
+            if (!create_folder(folder)) {
+                return false;
+            }
         }
     }
 
-    PHYSFS_File* handle { PHYSFS_openWrite(path.c_str()) };
-    PHYSFS_close(handle);
+    return PHYSFS_close(PHYSFS_openWrite(path.c_str())) != 0;
 }
 
-void FileSystem::create_folder(const std::string& path)
+auto FileSystem::create_folder(const std::string& path) -> bool
 {
-    check("create folder", PHYSFS_mkdir(path.c_str()));
+    return check("create folder", PHYSFS_mkdir(path.c_str()));
 }
 
 struct CallbackData {

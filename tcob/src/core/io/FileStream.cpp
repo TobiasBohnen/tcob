@@ -10,11 +10,13 @@
 #include <tcob/core/io/Logger.hpp>
 
 namespace tcob::detail::io {
-inline void check(const std::string& msg, i32 c)
+inline auto check(const std::string& msg, i32 c) -> bool
 {
     if (c == 0) {
         Log(msg + ": " + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
     }
+
+    return c != 0;
 }
 
 void FileStream::close() const
@@ -53,10 +55,7 @@ auto FileStream::seek(std::streamoff off, std::ios_base::seekdir way) const -> b
         pos = end + off;
     }
 
-    i32 err { PHYSFS_seek(_handle, static_cast<PHYSFS_uint64>(pos)) };
-    check("seek", err);
-
-    return err != 0;
+    return check("seek", PHYSFS_seek(_handle, static_cast<PHYSFS_uint64>(pos)));
 }
 
 auto FileStream::OpenRead(const std::string& path) -> PHYSFS_File*

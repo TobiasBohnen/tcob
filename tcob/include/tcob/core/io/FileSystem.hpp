@@ -25,14 +25,14 @@ struct Stat {
 void init(const char* argv0, const std::string& name);
 void done();
 
-void mount(const std::string& loc, const std::string& mp);
-void unmount(const std::string& loc);
+auto mount(const std::string& loc, const std::string& mp) -> bool;
+auto unmount(const std::string& loc) -> bool;
 
-void create_file(const std::string& path);
-void create_folder(const std::string& path);
+auto create_file(const std::string& path) -> bool;
+auto create_folder(const std::string& path) -> bool;
 
-void delete_file(const std::string& path);
-void delete_folder(const std::string& path);
+auto delete_file(const std::string& path) -> bool;
+auto delete_folder(const std::string& path) -> bool;
 
 auto is_file(const std::string& path) -> bool;
 auto is_folder(const std::string& path) -> bool;
