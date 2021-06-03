@@ -5,7 +5,9 @@
   - [**cursor**](#cursor)
   - [**font**](#font)
   - [**material**](#material)
+  - [**music**](#music)
   - [**particle_system**](#particle_system)
+  - [**sound**](#sound)
   - [**shader**](#shader)
   - [**texture**](#texture)
   - [**webp-animation**](#webp-animation)
@@ -42,6 +44,11 @@
   - separate_blend_func
   - blend_equation
 
+## **music**
+
+- music [name]
+  - source [file]
+
 ## **particle_system**
 
 - particle_system [name]
@@ -65,6 +72,11 @@
   - spin [float, float]
   - lifetime [float, float]
   - transparency [float, float]
+
+## **sound**
+
+- sound [name]
+  - source [file]
 
 ## **shader**
 
