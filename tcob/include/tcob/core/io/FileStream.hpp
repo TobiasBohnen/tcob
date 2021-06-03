@@ -63,10 +63,10 @@ namespace detail::io {
         using FileStream::read;
 
     public:
-        explicit InputFileStream(const std::string& path)
+        explicit InputFileStream(const std::string& path, u64 bufferSize = 4096)
             : FileStream { OpenRead(path) }
         {
-            buffer(4096);
+            buffer(bufferSize);
         }
 
         auto read(T* s, std::streamsize n) const -> std::streamsize
