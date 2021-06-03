@@ -184,7 +184,7 @@ void MiscScene::on_start()
     webp.position({ 0.75f, 0.25f });
 
     sound0.load("res/audio/door.ogg");
-    music0.open("res/audio/test.ogg");
+    music0.open("res/audio/test-mono.mp3");
 }
 
 void MiscScene::draw(RenderTarget& target)
@@ -216,7 +216,8 @@ void MiscScene::fixed_update(f64 deltaTime)
     stream << "avg FPS:" << game().fps().average();
     stream << " best FPS:" << game().fps().best();
     stream << " worst FPS:" << game().fps().worst();
-    //stream << "|" << sound.playback_position();
+    stream << "|" << sound0.duration();
+    stream << "|" << music0.duration();
 
     game().window().title("TestGame " + stream.str());
 }

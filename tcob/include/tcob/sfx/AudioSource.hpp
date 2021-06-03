@@ -24,6 +24,9 @@ public:
 
     auto state() const -> AudioState;
 
+    virtual auto duration() const -> f32 = 0;
+    virtual auto playback_position() const -> f32 = 0;
+
 protected:
     auto source() const -> al::Source*;
 

@@ -20,8 +20,8 @@ public:
     void start(bool looped = false) override;
     void stop() override;
 
-    auto duration() const -> f32;
-    auto playback_position() const -> f32;
+    auto duration() const -> f32 override;
+    auto playback_position() const -> f32 override;
 
 private:
     std::shared_ptr<al::Buffer> _buffer;

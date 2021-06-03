@@ -93,6 +93,16 @@ void Music::stop()
     }
 }
 
+auto Music::duration() const -> f32
+{
+    return (static_cast<f32>(_decoder->info().SampleCount) / _decoder->info().Frequency) * 1000.f;
+}
+
+auto Music::playback_position() const -> f32
+{
+    return 0;
+}
+
 using namespace std::chrono_literals;
 void Music::update_stream()
 {

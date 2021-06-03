@@ -17,6 +17,7 @@ enum class AudioState {
 struct AudioInfo {
     i32 Channels { 0 };
     i32 Frequency { 0 };
+    u64 SampleCount { 0 };
 };
 }
 

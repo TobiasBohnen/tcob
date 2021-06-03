@@ -58,6 +58,7 @@ WavDecoder::WavDecoder(const std::string& filename)
     if (drwav_init(&_wav, &read, &seek_wav, stream(), nullptr)) {
         _info.Channels = _wav.channels;
         _info.Frequency = _wav.sampleRate;
+        _info.SampleCount = _wav.totalPCMFrameCount;
     }
 }
 
@@ -93,6 +94,7 @@ FlacDecoder::FlacDecoder(const std::string& filename)
     if (_flac) {
         _info.Channels = _flac->channels;
         _info.Frequency = _flac->sampleRate;
+        _info.SampleCount = _flac->totalPCMFrameCount;
     }
 }
 
@@ -127,6 +129,7 @@ Mp3Decoder::Mp3Decoder(const std::string& filename)
     if (drmp3_init(&_mp3, &read, &seek_mp3, stream(), nullptr)) {
         _info.Channels = _mp3.channels;
         _info.Frequency = _mp3.sampleRate;
+        _info.SampleCount = drmp3_get_pcm_frame_count(&_mp3);
     }
 }
 
@@ -167,6 +170,7 @@ VorbisDecoder::VorbisDecoder(const std::string& filename)
     auto info { stb_vorbis_get_info(_vorbis) };
     _info.Channels = info.channels;
     _info.Frequency = info.sample_rate;
+    _info.SampleCount = stb_vorbis_stream_length_in_samples(_vorbis);
 }
 
 VorbisDecoder::~VorbisDecoder()

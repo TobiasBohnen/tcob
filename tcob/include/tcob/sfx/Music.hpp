@@ -50,6 +50,9 @@ public:
     void start(bool looped = false) override;
     void stop() override;
 
+    auto duration() const -> f32 override;
+    auto playback_position() const -> f32 override;
+
 private:
     void update_stream();
     void stop_stream();
