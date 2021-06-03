@@ -6,6 +6,7 @@
 #include <tcob/assets/ResourceLibrary.hpp>
 
 #include "loaders/AnimationLoader.hpp"
+#include "loaders/AudioLoader.hpp"
 #include "loaders/CursorLoader.hpp"
 #include "loaders/FontLoader.hpp"
 #include "loaders/MaterialLoader.hpp"
@@ -106,6 +107,8 @@ ResourceGroup::ResourceGroup(std::string name)
     register_loader<Font>(std::make_unique<detail::FontLoader>(*this));
     register_loader<FrameAnimation>(std::make_unique<detail::AnimationLoader>(*this));
     register_loader<WebpAnimation>(std::make_unique<detail::WebpAnimationLoader>(*this));
+    register_loader<Music>(std::make_unique<detail::MusicLoader>(*this));
+    register_loader<Sound>(std::make_unique<detail::SoundLoader>(*this));
 }
 
 auto ResourceGroup::mount_point() const -> std::string

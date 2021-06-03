@@ -39,6 +39,6 @@ private:
     NinePatch ninepatch;
 
     WebpAnimation webp;
-    Sound sound0;
-    Music music0;
+    ResourcePtr<Sound> sound0;
+    ResourcePtr<Music> music0;
 };

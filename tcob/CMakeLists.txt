@@ -7,6 +7,7 @@ set(LIB_SRCFILES
         src/assets/ResourceLibrary.cpp
         src/assets/Resource.cpp
         src/assets/loaders/AnimationLoader.cpp
+        src/assets/loaders/AudioLoader.cpp
         src/assets/loaders/CursorLoader.cpp
         src/assets/loaders/FontLoader.cpp
         src/assets/loaders/MaterialLoader.cpp
