@@ -15,7 +15,6 @@
 #define STB_VORBIS_HEADER_ONLY
 #include <stb/stb_vorbis.c>
 
-#include "AudioIO.hpp"
 #include <tcob/core/io/FileStream.hpp>
 
 namespace tcob {
@@ -35,25 +34,25 @@ auto Sound::load(const std::string& filename) -> bool
 {
     if (FileSystem::is_file(filename)) {
         InputFileStream stream { filename };
+        auto buffer { stream.read_all() };
         std::string ext { FileSystem::extension(filename) };
 
-        i16* audioData { nullptr };
+        f32* audioData { nullptr };
         u64 frameCount { 0 };
         u32 channels { 0 }, sampleRate { 0 };
 
         if (ext == ".wav") {
-            audioData = drwav_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_wav, &stream, &channels, &sampleRate, &frameCount, nullptr);
+            audioData = drwav_open_memory_and_read_pcm_frames_f32(buffer.data(), buffer.size(), &channels, &sampleRate, &frameCount, nullptr);
         } else if (ext == ".flac") {
-            audioData = drflac_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_flac, &stream, &channels, &sampleRate, &frameCount, nullptr);
+            audioData = drflac_open_memory_and_read_pcm_frames_f32(buffer.data(), buffer.size(), &channels, &sampleRate, &frameCount, nullptr);
         } else if (ext == ".mp3") {
             drmp3_config config {};
-            audioData = drmp3_open_and_read_pcm_frames_s16(&detail::read, &detail::seek_mp3, &stream, &config, &frameCount, nullptr);
+            audioData = drmp3_open_memory_and_read_pcm_frames_f32(buffer.data(), buffer.size(), &config, &frameCount, nullptr);
             channels = config.channels;
             sampleRate = config.sampleRate;
         } else if (ext == ".ogg") {
-            auto buffer { stream.read_all() };
             i32 c, sr;
-            frameCount = stb_vorbis_decode_memory(reinterpret_cast<u8*>(buffer.data()), static_cast<i32>(buffer.size()), &c, &sr, &audioData);
+            frameCount = stb_vorbis_decode_memory_float(reinterpret_cast<u8*>(buffer.data()), static_cast<i32>(buffer.size()), &c, &sr, &audioData);
             channels = static_cast<u32>(c);
             sampleRate = static_cast<u32>(sr);
         }
