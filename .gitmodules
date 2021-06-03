@@ -1,0 +1,3 @@
+[submodule "tcob/extlibs"]
+	path = tcob/extlibs
+	url = https://github.com/TobiasBohnen/tcob_extlibs.git
