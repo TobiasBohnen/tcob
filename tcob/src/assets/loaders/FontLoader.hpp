@@ -27,12 +27,12 @@ private:
     struct ReloadInfo {
         std::string source;
         u32 size;
-        std::string material;
     };
 
     struct FontDef {
         ResourcePtr<Font> Res;
         ReloadInfo info;
+        std::string material;
         bool kerning { false };
         bool isDefault { false };
     };

@@ -25,12 +25,12 @@ protected:
 private:
     struct ReloadInfo {
         std::string source;
-        std::string material;
     };
 
     struct WebpAnimationDef {
         ResourcePtr<WebpAnimation> Res;
         ReloadInfo info;
+        std::string material;
     };
 
     std::function<WebpAnimationDef*(const std::string&)> _funcNew;

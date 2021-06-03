@@ -35,7 +35,7 @@ void WebpAnimationLoader::register_wrapper(LuaScript& script)
         return def;
     });
     wrapper.function("material", [](WebpAnimationDef* def, const std::string& val) {
-        def->info.material = val;
+        def->material = val;
         return def;
     });
 }
@@ -55,14 +55,14 @@ auto WebpAnimationLoader::do_reload(ResourcePtr<WebpAnimation> res) -> bool
     }
 
     auto& info { _reloadInfo[res.get()->name()] };
-    res->material(group().get<Material>(info.material));
     return res->load(group().mount_point() + info.source);
 }
 
 void WebpAnimationLoader::on_preparing()
 {
     for (auto& def : _cache) {
-        def->Res->material(group().get<Material>(def->info.material));
+        if (!def->material.empty())
+            def->Res->material(group().get<Material>(def->material));
         def->Res->load(group().mount_point() + def->info.source);
 
         _reloadInfo[def->Res.get()->name()] = def->info;
