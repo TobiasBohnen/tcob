@@ -42,7 +42,7 @@ auto FileStream::length() const -> std::streamsize
     return static_cast<std::streamsize>(PHYSFS_fileLength(_handle));
 }
 
-auto FileStream::seek(std::streamoff off, std::ios_base::seekdir way) const -> std::streampos
+auto FileStream::seek(std::streamoff off, std::ios_base::seekdir way) const -> bool
 {
     PHYSFS_sint64 pos { off };
     if (way == std::ios_base::cur) {
@@ -53,9 +53,10 @@ auto FileStream::seek(std::streamoff off, std::ios_base::seekdir way) const -> s
         pos = end + off;
     }
 
-    check("seek", PHYSFS_seek(_handle, static_cast<PHYSFS_uint64>(pos)));
+    i32 err { PHYSFS_seek(_handle, static_cast<PHYSFS_uint64>(pos)) };
+    check("seek", err);
 
-    return static_cast<std::streampos>(pos);
+    return err != 0;
 }
 
 auto FileStream::OpenRead(const std::string& path) -> PHYSFS_File*

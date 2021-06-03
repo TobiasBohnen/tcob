@@ -40,7 +40,7 @@ namespace detail::io {
 
         auto length() const -> std::streamsize;
 
-        auto seek(std::streamoff off, std::ios_base::seekdir way) const -> std::streampos;
+        auto seek(std::streamoff off, std::ios_base::seekdir way) const -> bool;
 
     protected:
         static auto OpenRead(const std::string& path) -> PHYSFS_File*;
