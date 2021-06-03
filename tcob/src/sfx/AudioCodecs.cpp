@@ -80,8 +80,8 @@ auto WavDecoder::seek(f32 duration) -> bool
 
 auto WavDecoder::read_data(i16* data, i32& sampleCount) -> bool
 {
-    u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    sampleCount = static_cast<i32>(drwav_read_pcm_frames_s16(&_wav, wantRead, data)); //assumes short frames
+    u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels };
+    sampleCount = static_cast<i32>(drwav_read_pcm_frames_s16(&_wav, wantRead, data));
     return sampleCount > 0;
 }
 
@@ -116,8 +116,8 @@ auto FlacDecoder::seek(f32 duration) -> bool
 
 auto FlacDecoder::read_data(i16* data, i32& sampleCount) -> bool
 {
-    u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    sampleCount = static_cast<i32>(drflac_read_pcm_frames_s16(_flac, wantRead, data)); //assumes short frames
+    u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels };
+    sampleCount = static_cast<i32>(drflac_read_pcm_frames_s16(_flac, wantRead, data));
     return sampleCount > 0;
 }
 
@@ -151,8 +151,8 @@ auto Mp3Decoder::seek(f32 duration) -> bool
 
 auto Mp3Decoder::read_data(i16* data, i32& sampleCount) -> bool
 {
-    u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels / sizeof(i16) };
-    sampleCount = static_cast<i32>(drmp3_read_pcm_frames_s16(&_mp3, wantRead, data)); //assumes short frames
+    u64 wantRead { MUSIC_BUFFER_SIZE / _info.Channels };
+    sampleCount = static_cast<i32>(drmp3_read_pcm_frames_s16(&_mp3, wantRead, data));
     return sampleCount > 0;
 }
 
@@ -196,7 +196,7 @@ auto VorbisDecoder::seek(f32 duration) -> bool
 
 auto VorbisDecoder::read_data(i16* data, i32& sampleCount) -> bool
 {
-    sampleCount = static_cast<i32>(stb_vorbis_get_samples_short_interleaved(_vorbis, _info.Channels, data, MUSIC_BUFFER_SIZE / sizeof(i16))); //assumes short frames
+    sampleCount = static_cast<i32>(stb_vorbis_get_samples_short_interleaved(_vorbis, _info.Channels, data, MUSIC_BUFFER_SIZE));
     return sampleCount > 0;
 }
 }

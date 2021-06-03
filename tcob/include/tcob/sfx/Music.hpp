@@ -66,5 +66,7 @@ private:
 
     std::thread _thread;
     std::atomic_bool _requestStop { false };
+
+    i32 _samplesPlayed { 0 };
 };
 }

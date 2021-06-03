@@ -6,6 +6,7 @@
 #include <tcob/sfx/Music.hpp>
 
 #include <AL/al.h>
+#include <cassert>
 
 #include "AudioCodecs.hpp"
 #include <tcob/core/io/FileStream.hpp>
@@ -21,11 +22,12 @@ auto detail::AudioDecoder::buffer_data(u32 buffer) -> bool
 {
     std::vector<i16> data;
     data.reserve(MUSIC_BUFFER_SIZE);
+
     i32 sampleCount { 0 };
     bool ok { read_data(data.data(), sampleCount) };
     if (ok) {
         auto audioInfo { info() };
-        i32 size { static_cast<i32>(sampleCount * audioInfo.Channels * sizeof(i16)) }; //assumes short frames
+        i32 size { static_cast<i32>(sampleCount * audioInfo.Channels * sizeof(i16)) };
         alBufferData(buffer,
             audioInfo.Channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
             data.data(), size, audioInfo.Frequency);
@@ -100,7 +102,7 @@ auto Music::duration() const -> f32
 
 auto Music::playback_position() const -> f32
 {
-    return 0;
+    return (static_cast<f32>(_samplesPlayed) / _decoder->info().Frequency / _decoder->info().Channels) * 1000.f;
 }
 
 using namespace std::chrono_literals;
@@ -124,7 +126,18 @@ void Music::update_stream()
         }
 
         if (state() == AudioState::Playing) {
-            queue_buffers(s->unqueue_buffers(s->buffers_processed()));
+            auto processed { s->buffers_processed() };
+            auto buffers { s->unqueue_buffers(processed) };
+            assert(processed == buffers.size());
+            if (processed > 0) {
+                for (auto buffer : buffers) {
+                    i32 size;
+                    alGetBufferi(buffer, AL_SIZE, &size);
+                    _samplesPlayed += (size / sizeof(f32)); //buffer is float32
+                }
+
+                queue_buffers(buffers);
+            }
         }
 
         std::this_thread::sleep_for(1ms);
@@ -160,6 +173,7 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
 
 void Music::fill_buffers()
 {
+    _samplesPlayed = 0;
     _decoder->seek(0);
     std::vector<u32> buffers {};
     for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
