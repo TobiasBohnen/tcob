@@ -24,7 +24,7 @@ public:
     explicit AudioDecoder(const std::string& filename);
     virtual ~AudioDecoder() = default;
 
-    auto buffer_data(u32 buffer) -> bool;
+    auto buffer_data(std::shared_ptr<al::Buffer> buffer) -> bool;
 
     virtual auto info() const -> AudioInfo = 0;
 
@@ -32,7 +32,7 @@ public:
 
 protected:
     auto stream() const -> InputFileStream*;
-    virtual auto read_data(i16* data, isize size) -> i32 = 0;
+    virtual auto read_data(f32* data, isize size) -> i32 = 0;
 
 private:
     std::unique_ptr<InputFileStream> _stream;
@@ -50,7 +50,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, isize size) -> i32 override;
+    auto read_data(f32* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
@@ -69,7 +69,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, isize size) -> i32 override;
+    auto read_data(f32* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
@@ -88,7 +88,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, isize size) -> i32 override;
+    auto read_data(f32* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;
@@ -107,7 +107,7 @@ public:
     auto seek(f32 duration) -> bool override;
 
 protected:
-    auto read_data(i16* data, isize size) -> i32 override;
+    auto read_data(f32* data, isize size) -> i32 override;
 
 private:
     AudioInfo _info;

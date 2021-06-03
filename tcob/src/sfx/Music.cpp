@@ -134,16 +134,22 @@ void Music::queue_buffers(const std::vector<u32>& buffers)
     auto s { source() };
 
     for (u32 buffer : buffers) {
-        if (_decoder->buffer_data(buffer)) {
-            s->queue_buffers(&buffer, 1);
-        } else {
-            if (s->looping()) {
-                while (s->buffers_queued() > 0) {
+        for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
+            if (buffer == _buffers[i]->ID) {
+                if (_decoder->buffer_data(_buffers[i])) {
+                    s->queue_buffers(&buffer, 1);
+                } else {
+                    if (s->looping()) {
+                        while (s->buffers_queued() > 0) {
+                        }
+                        s->unqueue_buffers(s->buffers_processed());
+                        fill_buffers();
+                    }
+                    return;
                 }
-                s->unqueue_buffers(s->buffers_processed());
-                fill_buffers();
+
+                break;
             }
-            return;
         }
     }
 }
@@ -154,7 +160,7 @@ void Music::fill_buffers()
     _decoder->seek(0);
     std::vector<u32> buffers {};
     for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
-        _buffers[i] = std::make_unique<al::Buffer>();
+        _buffers[i] = std::make_shared<al::Buffer>();
         buffers.push_back(_buffers[i]->ID);
     }
     queue_buffers(buffers);

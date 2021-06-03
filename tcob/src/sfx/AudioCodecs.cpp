@@ -59,18 +59,15 @@ detail::AudioDecoder::AudioDecoder(const std::string& filename)
 {
 }
 
-auto detail::AudioDecoder::buffer_data(u32 buffer) -> bool
+auto detail::AudioDecoder::buffer_data(std::shared_ptr<al::Buffer> buffer) -> bool
 {
-    std::vector<i16> data;
+    std::vector<f32> data;
     data.reserve(MUSIC_BUFFER_SIZE);
 
     i32 sampleCount { read_data(data.data(), MUSIC_BUFFER_SIZE) };
     if (sampleCount > 0) {
         auto audioInfo { info() };
-        i32 size { static_cast<i32>(sampleCount * audioInfo.Channels * sizeof(i16)) };
-        alBufferData(buffer,
-            audioInfo.Channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-            data.data(), size, audioInfo.Frequency);
+        buffer->buffer_data(data.data(), sampleCount, audioInfo.Channels, audioInfo.Frequency);
         return true;
     }
     return false;
@@ -109,10 +106,10 @@ auto WavDecoder::seek(f32 duration) -> bool
     return drwav_seek_to_pcm_frame(&_wav, static_cast<u64>(offset));
 }
 
-auto WavDecoder::read_data(i16* data, isize size) -> i32
+auto WavDecoder::read_data(f32* data, isize size) -> i32
 {
     u64 wantRead { size / _info.Channels };
-    return static_cast<i32>(drwav_read_pcm_frames_s16(&_wav, wantRead, data));
+    return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, data));
 }
 
 ////////////////////////////////////////////////////////////
@@ -144,10 +141,10 @@ auto FlacDecoder::seek(f32 duration) -> bool
     return drflac_seek_to_pcm_frame(_flac, static_cast<u64>(offset));
 }
 
-auto FlacDecoder::read_data(i16* data, isize size) -> i32
+auto FlacDecoder::read_data(f32* data, isize size) -> i32
 {
     u64 wantRead { size / _info.Channels };
-    return static_cast<i32>(drflac_read_pcm_frames_s16(_flac, wantRead, data));
+    return static_cast<i32>(drflac_read_pcm_frames_f32(_flac, wantRead, data));
 }
 
 ////////////////////////////////////////////////////////////
@@ -178,10 +175,10 @@ auto Mp3Decoder::seek(f32 duration) -> bool
     return drmp3_seek_to_pcm_frame(&_mp3, static_cast<u64>(offset));
 }
 
-auto Mp3Decoder::read_data(i16* data, isize size) -> i32
+auto Mp3Decoder::read_data(f32* data, isize size) -> i32
 {
     u64 wantRead { size / _info.Channels };
-    return static_cast<i32>(drmp3_read_pcm_frames_s16(&_mp3, wantRead, data));
+    return static_cast<i32>(drmp3_read_pcm_frames_f32(&_mp3, wantRead, data));
 }
 
 ////////////////////////////////////////////////////////////
@@ -222,8 +219,8 @@ auto VorbisDecoder::seek(f32 duration) -> bool
     }
 }
 
-auto VorbisDecoder::read_data(i16* data, isize size) -> i32
+auto VorbisDecoder::read_data(f32* data, isize size) -> i32
 {
-    return static_cast<i32>(stb_vorbis_get_samples_short_interleaved(_vorbis, _info.Channels, data, static_cast<i32>(size)));
+    return static_cast<i32>(stb_vorbis_get_samples_float_interleaved(_vorbis, _info.Channels, data, static_cast<i32>(size)));
 }
 }

@@ -59,7 +59,7 @@ auto Sound::load(const std::string& filename) -> bool
         }
 
         if (audioData) {
-            _buffer->buffer_data(channels, audioData, frameCount, sampleRate);
+            _buffer->buffer_data(audioData, frameCount, channels, sampleRate);
             free(audioData);
             return true;
         }

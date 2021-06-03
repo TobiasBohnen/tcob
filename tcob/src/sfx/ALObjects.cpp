@@ -24,12 +24,21 @@ Buffer::~Buffer()
     }
 }
 
-void Buffer::buffer_data(i32 channels, const void* data, u64 frameCount, i32 freq) const
+void Buffer::buffer_data(const i16* data, u64 frameCount, i32 channels, i32 freq) const
 {
-    i32 framesize { static_cast<i32>(frameCount * channels * sizeof(i16)) }; //assumes short frames
+    i32 framesize { static_cast<i32>(frameCount * channels * sizeof(i16)) };
     assert(ID);
     alBufferData(ID,
         channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+        data, framesize, freq);
+}
+
+void Buffer::buffer_data(const f32* data, u64 frameCount, i32 channels, i32 freq) const
+{
+    i32 framesize { static_cast<i32>(frameCount * channels * sizeof(f32)) };
+    assert(ID);
+    alBufferData(ID,
+        channels == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
         data, framesize, freq);
 }
 

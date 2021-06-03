@@ -6,6 +6,9 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#define AL_FORMAT_MONO_FLOAT32 0x10010
+#define AL_FORMAT_STEREO_FLOAT32 0x10011
+
 namespace tcob {
 enum class AudioState {
     Initial,
@@ -31,7 +34,8 @@ public:
     Buffer(const Buffer& other) = delete;
     auto operator=(const Buffer& other) -> Buffer& = delete;
 
-    void buffer_data(i32 channels, const void* data, u64 frameCount, i32 freq) const;
+    void buffer_data(const i16* data, u64 frameCount, i32 channels, i32 freq) const;
+    void buffer_data(const f32* data, u64 frameCount, i32 channels, i32 freq) const;
 
     auto frequency() const -> i32;
 
