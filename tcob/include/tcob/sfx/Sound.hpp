@@ -24,6 +24,8 @@ public:
     auto playback_position() const -> f32 override;
 
 private:
+    void stop_source();
+
     std::shared_ptr<al::Buffer> _buffer;
 };
 }

@@ -26,13 +26,14 @@ Sound::Sound()
 
 Sound::~Sound()
 {
-    stop();
-    source()->buffer(0);
+    stop_source();
 }
 
 auto Sound::load(const std::string& filename) -> bool
 {
     if (FileSystem::is_file(filename)) {
+        stop_source();
+
         InputFileStream stream { filename };
         auto buffer { stream.read_all() };
         std::string ext { FileSystem::extension(filename) };
@@ -82,7 +83,7 @@ void Sound::start(bool looped)
 void Sound::stop()
 {
     if (state() != AudioState::Stopped) {
-        source()->stop();
+        stop_source();
     }
 }
 
@@ -104,5 +105,12 @@ auto Sound::playback_position() const -> f32
         return source()->sec_offset();
     }
     return 0;
+}
+
+void Sound::stop_source()
+{
+    auto s { source() };
+    s->stop();
+    s->buffer(0);
 }
 }
