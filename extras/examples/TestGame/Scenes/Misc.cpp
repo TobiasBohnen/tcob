@@ -19,7 +19,7 @@ i32 numPoints = 100;
 
 void MiscScene::on_start()
 {
-    auto& resMgr = game().resource_library();
+    auto& resMgr = game().resources();
 
     Random rand;
     /*
@@ -213,9 +213,9 @@ void MiscScene::fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
-    stream << "avg FPS:" << game().fps().average();
-    stream << " best FPS:" << game().fps().best();
-    stream << " worst FPS:" << game().fps().worst();
+    stream << "avg FPS:" << game().stats().average_fps();
+    stream << " best FPS:" << game().stats().best_fps();
+    stream << " worst FPS:" << game().stats().worst_fps();
     stream << "|" << music0->duration();
     stream << "|" << music0->playback_position();
 
@@ -260,9 +260,9 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
     if (ev.Code == Scancode::D1) {
         partSystem1.restart();
     } else if (ev.Code == Scancode::D2) {
-        game().fps().reset();
+        game().stats().reset();
     } else if (ev.Code == Scancode::D3) {
-        auto& resMgr = game().resource_library();
+        auto& resMgr = game().resources();
         auto map { resMgr.resource_state("res") };
         std::cout << "created: " << map[ResourceState::Created] << std::endl;
         std::cout << "loaded: " << map[ResourceState::Loaded] << std::endl;

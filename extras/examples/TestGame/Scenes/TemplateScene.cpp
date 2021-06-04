@@ -28,9 +28,9 @@ void TemplateScene::fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
-    stream << "avg FPS:" << game().fps().average();
-    stream << " best FPS:" << game().fps().best();
-    stream << " worst FPS:" << game().fps().worst();
+    stream << "avg FPS:" << game().stats().average_fps();
+    stream << " best FPS:" << game().stats().best_fps();
+    stream << " worst FPS:" << game().stats().worst_fps();
 
     game().window().title("TestGame " + stream.str());
 }

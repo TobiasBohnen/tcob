@@ -18,7 +18,7 @@ StartScene::~StartScene()
 
 void StartScene::on_start()
 {
-    auto& resMgr { game().resource_library() };
+    auto& resMgr { game().resources() };
     resMgr.load_all_groups();
     game().window().load_icon("res/testing.webp");
     auto cursor = resMgr.get<Cursor>("res", "default");
@@ -54,9 +54,9 @@ void StartScene::fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
-    stream << "avg FPS:" << game().fps().average();
-    stream << " best FPS:" << game().fps().best();
-    stream << " worst FPS:" << game().fps().worst();
+    stream << "avg FPS:" << game().stats().average_fps();
+    stream << " best FPS:" << game().stats().best_fps();
+    stream << " worst FPS:" << game().stats().worst_fps();
 
     game().window().title("TestGame " + stream.str());
 }
@@ -86,7 +86,7 @@ void StartScene::on_key_down(const KeyboardEvent& ev)
         break;
     }
 
-    game().fps().reset();
+    game().stats().reset();
 }
 
 void StartScene::on_mouse_motion(const MouseMotionEvent& ev)

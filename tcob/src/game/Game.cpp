@@ -102,7 +102,7 @@ auto Game::audio() const -> AudioSystem&
     return *_audio;
 }
 
-auto Game::fps() -> FPSCounter&
+auto Game::stats() -> FPSCounter&
 {
     return _fps;
 }
@@ -112,7 +112,7 @@ auto Game::input() const -> Input&
     return *_input;
 }
 
-auto Game::resource_library() const -> ResourceLibrary&
+auto Game::resources() const -> ResourceLibrary&
 {
     return *_resources;
 }
@@ -279,17 +279,17 @@ void FPSCounter::reset()
     _framecount = 0;
 }
 
-auto FPSCounter::average() const -> f32
+auto FPSCounter::average_fps() const -> f32
 {
     return _averageFrames;
 }
 
-auto FPSCounter::best() const -> f32
+auto FPSCounter::best_fps() const -> f32
 {
     return _bestFrames;
 }
 
-auto FPSCounter::worst() const -> f32
+auto FPSCounter::worst_fps() const -> f32
 {
     return _worstFrames;
 }

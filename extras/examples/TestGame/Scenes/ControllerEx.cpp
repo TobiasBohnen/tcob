@@ -16,7 +16,7 @@ void ControllerEx::on_start()
         game().pop_current_scene();
         return;
     }
-    auto& resMgr { game().resource_library() };
+    auto& resMgr { game().resources() };
     auto font { resMgr.get<Font>("res", "DejaVuSans32") };
 
     _text.font(font);
@@ -55,9 +55,9 @@ void ControllerEx::fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
-    stream << "avg FPS:" << game().fps().average();
-    stream << " best FPS:" << game().fps().best();
-    stream << " worst FPS:" << game().fps().worst();
+    stream << "avg FPS:" << game().stats().average_fps();
+    stream << " best FPS:" << game().stats().best_fps();
+    stream << " worst FPS:" << game().stats().worst_fps();
     stream << " input mode:" << static_cast<i32>(game().input().mode());
 
     game().window().title("TestGame " + stream.str());

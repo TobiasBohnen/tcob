@@ -21,7 +21,7 @@ auto ScriptApi::create_script() -> std::unique_ptr<LuaScript>
     retValue->open_libraries();
 
     //.Canvas
-    detail::create_canvas_wrapper(retValue.get(), _game.resource_library());
+    detail::create_canvas_wrapper(retValue.get(), _game.resources());
     auto ns { retValue->global_table().create_table(_namespace) };
     ns["Canvas"] = &_canvas;
 

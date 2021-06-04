@@ -24,9 +24,9 @@ public:
     void run();
     void reset();
 
-    auto average() const -> f32;
-    auto best() const -> f32;
-    auto worst() const -> f32;
+    auto average_fps() const -> f32;
+    auto best_fps() const -> f32;
+    auto worst_fps() const -> f32;
 
 private:
     std::array<u32, FRAME_VALUES> _frametimes {};
@@ -67,9 +67,9 @@ public:
     void pop_current_scene();
 
     auto audio() const -> AudioSystem&;
-    auto fps() -> FPSCounter&;
+    auto stats() -> FPSCounter&;
     auto input() const -> Input&;
-    auto resource_library() const -> ResourceLibrary&;
+    auto resources() const -> ResourceLibrary&;
     auto window() const -> gl::Window&;
 
 private:
