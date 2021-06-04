@@ -805,6 +805,7 @@ public:
     auto controller_count() -> u32;
 
     auto mode() -> InputMode;
+
     void process_events(SDL_Event* ev);
 
 private:
