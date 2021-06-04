@@ -58,6 +58,7 @@ void ControllerEx::fixed_update(f64 deltaTime)
     stream << "avg FPS:" << game().fps().average();
     stream << " best FPS:" << game().fps().best();
     stream << " worst FPS:" << game().fps().worst();
+    stream << " input mode:" << static_cast<i32>(game().input().mode());
 
     game().window().title("TestGame " + stream.str());
 }

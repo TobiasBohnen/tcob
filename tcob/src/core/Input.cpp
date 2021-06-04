@@ -29,6 +29,40 @@ auto GameController::rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, u32
     return SDL_GameControllerRumble(_controller, lowFrequencyRumble, highFrequencyRumble, duration) == 0;
 }
 
+auto GameController::is_button_pressed(GameControllerButton button) const -> bool
+{
+    assert(_controller);
+    return SDL_GameControllerGetButton(_controller, static_cast<SDL_GameControllerButton>(button)) == 1; //TODO: add switch here
+}
+
+auto GameController::has_button(GameControllerButton button) const -> bool
+{
+    assert(_controller);
+    return SDL_GameControllerHasButton(_controller, static_cast<SDL_GameControllerButton>(button)); //TODO: add switch here
+}
+
+auto GameController::ButtonName(GameControllerButton button) -> std::string
+{
+    return SDL_GameControllerGetStringForButton(static_cast<SDL_GameControllerButton>(button)); //TODO: add switch here
+}
+
+auto GameController::axis_value(GameControllerAxis axis) const -> i16
+{
+    assert(_controller);
+    return SDL_GameControllerGetAxis(_controller, static_cast<SDL_GameControllerAxis>(axis)); //TODO: add switch here
+}
+
+auto GameController::has_axis(GameControllerAxis axis) const -> bool
+{
+    assert(_controller);
+    return SDL_GameControllerHasAxis(_controller, static_cast<SDL_GameControllerAxis>(axis)); //TODO: add switch here
+}
+
+auto GameController::AxisName(GameControllerAxis axis) -> std::string
+{
+    return SDL_GameControllerGetStringForAxis(static_cast<SDL_GameControllerAxis>(axis)); //TODO: add switch here
+}
+
 auto GameController::is_valid() const -> bool
 {
     return _controller;
@@ -63,8 +97,15 @@ auto Input::controller_count() -> u32
     return static_cast<u32>(_controllers.size());
 }
 
+auto Input::mode() -> InputMode
+{
+    return _mode;
+}
+
 void Input::process_events(SDL_Event* ev)
 {
+    InputMode newMode { _mode };
+
     switch (ev->type) {
     case SDL_KEYDOWN: {
         KeyboardEvent event {
@@ -75,6 +116,7 @@ void Input::process_events(SDL_Event* ev)
             .Mod = static_cast<KeyMod>(ev->key.keysym.mod) //TODO: add switch here
         };
         KeyDown(event);
+        newMode = InputMode::KeyboardMouse;
     } break;
     case SDL_KEYUP: {
         KeyboardEvent event {
@@ -85,6 +127,7 @@ void Input::process_events(SDL_Event* ev)
             .Mod = static_cast<KeyMod>(ev->key.keysym.mod) //TODO: add switch here
         };
         KeyUp(event);
+        newMode = InputMode::KeyboardMouse;
     } break;
     case SDL_TEXTINPUT: {
         TextInputEvent event {
@@ -106,6 +149,7 @@ void Input::process_events(SDL_Event* ev)
             .RelativeMotion = { ev->motion.xrel, ev->motion.yrel }
         };
         MouseMotion(event);
+        newMode = InputMode::KeyboardMouse;
     } break;
     case SDL_MOUSEBUTTONDOWN: {
         MouseButtonEvent event {
@@ -115,6 +159,7 @@ void Input::process_events(SDL_Event* ev)
             .Position = { ev->button.x, ev->button.y }
         };
         MouseButtonDown(event);
+        newMode = InputMode::KeyboardMouse;
     } break;
     case SDL_MOUSEBUTTONUP: {
         MouseButtonEvent event {
@@ -124,6 +169,7 @@ void Input::process_events(SDL_Event* ev)
             .Position = { ev->button.x, ev->button.y }
         };
         MouseButtonUp(event);
+        newMode = InputMode::KeyboardMouse;
     } break;
     case SDL_MOUSEWHEEL: {
         MouseWheelEvent event {
@@ -131,6 +177,7 @@ void Input::process_events(SDL_Event* ev)
             .Flipped = ev->wheel.direction == SDL_MOUSEWHEEL_FLIPPED
         };
         MouseWheel(event);
+        newMode = InputMode::KeyboardMouse;
     } break;
     case SDL_JOYAXISMOTION: {
         JoyAxisEvent event {
@@ -139,6 +186,7 @@ void Input::process_events(SDL_Event* ev)
             .Value = ev->jaxis.value
         };
         JoyAxisMotion(event);
+        newMode = InputMode::Joystick;
     } break;
     case SDL_JOYHATMOTION: {
         JoyHatEvent event {
@@ -147,6 +195,7 @@ void Input::process_events(SDL_Event* ev)
             .Value = ev->jhat.value
         };
         JoyHatMotion(event);
+        newMode = InputMode::Joystick;
     } break;
     case SDL_JOYBUTTONDOWN: {
         JoyButtonEvent event {
@@ -155,6 +204,7 @@ void Input::process_events(SDL_Event* ev)
             .Pressed = ev->jbutton.state == SDL_PRESSED
         };
         JoyButtonDown(event);
+        newMode = InputMode::Joystick;
     } break;
     case SDL_JOYBUTTONUP: {
         JoyButtonEvent event {
@@ -163,6 +213,7 @@ void Input::process_events(SDL_Event* ev)
             .Pressed = ev->jbutton.state == SDL_PRESSED
         };
         JoyButtonUp(event);
+        newMode = InputMode::Joystick;
     } break;
     case SDL_CONTROLLERAXISMOTION: {
         ControllerAxisEvent event {
@@ -171,6 +222,7 @@ void Input::process_events(SDL_Event* ev)
             .Value = ev->caxis.value
         };
         ControllerAxisMotion(event);
+        newMode = InputMode::Controller;
     } break;
     case SDL_CONTROLLERBUTTONDOWN: {
         ControllerButtonEvent event {
@@ -179,6 +231,7 @@ void Input::process_events(SDL_Event* ev)
             .Pressed = ev->cbutton.state == SDL_PRESSED
         };
         ControllerButtonDown(event);
+        newMode = InputMode::Controller;
     } break;
     case SDL_CONTROLLERBUTTONUP: {
         ControllerButtonEvent event {
@@ -187,6 +240,7 @@ void Input::process_events(SDL_Event* ev)
             .Pressed = ev->cbutton.state == SDL_PRESSED
         };
         ControllerButtonUp(event);
+        newMode = InputMode::Controller;
     } break;
     case SDL_JOYDEVICEADDED: {
         i32 id { ev->jdevice.which };
@@ -201,6 +255,11 @@ void Input::process_events(SDL_Event* ev)
             _controllers.erase(id);
         }
     } break;
+    }
+
+    if (_mode != newMode) {
+        _mode = newMode;
+        InputModeChanged(_mode);
     }
 }
 

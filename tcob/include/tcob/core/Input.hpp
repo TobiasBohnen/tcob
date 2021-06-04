@@ -642,6 +642,7 @@ struct MouseMotionEvent {
 };
 
 ////////////////////////////////////////////////////////////
+
 enum class MouseButton {
     None = 0,
     Left = 1,
@@ -720,6 +721,7 @@ struct ControllerAxisEvent {
 };
 
 ////////////////////////////////////////////////////////////
+
 enum class GameControllerButton {
     Invalid = -1,
     A,
@@ -755,6 +757,14 @@ public:
 
     auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, u32 duration) const -> bool;
 
+    auto is_button_pressed(GameControllerButton button) const -> bool;
+    auto has_button(GameControllerButton button) const -> bool;
+    static auto ButtonName(GameControllerButton button) -> std::string;
+
+    auto axis_value(GameControllerAxis axis) const -> i16;
+    auto has_axis(GameControllerAxis axis) const -> bool;
+    static auto AxisName(GameControllerAxis axis) -> std::string;
+
     auto is_valid() const -> bool;
 
 private:
@@ -763,15 +773,16 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+enum class InputMode {
+    KeyboardMouse,
+    Joystick,
+    Controller
+};
+
 class Input final {
 public:
     Input();
     ~Input();
-
-    auto controller_at(u32 index) -> GameController;
-    auto controller_count() -> u32;
-
-    void process_events(SDL_Event* ev);
 
     sigslot::signal<KeyboardEvent&> KeyDown;
     sigslot::signal<KeyboardEvent&> KeyUp;
@@ -788,8 +799,16 @@ public:
     sigslot::signal<ControllerAxisEvent&> ControllerAxisMotion;
     sigslot::signal<ControllerButtonEvent&> ControllerButtonDown;
     sigslot::signal<ControllerButtonEvent&> ControllerButtonUp;
+    sigslot::signal<InputMode> InputModeChanged;
+
+    auto controller_at(u32 index) -> GameController;
+    auto controller_count() -> u32;
+
+    auto mode() -> InputMode;
+    void process_events(SDL_Event* ev);
 
 private:
     std::unordered_map<i32, SDL_GameController*> _controllers;
+    InputMode _mode { InputMode::KeyboardMouse };
 };
 }
