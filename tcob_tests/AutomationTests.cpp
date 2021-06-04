@@ -40,12 +40,12 @@ TEST_CASE("Core.Automation.Queue")
     auto output1 { [&output](f32 val) { output.push_back(val); } };
     {
         auto contr { make_shared_automation<LinearFunction<f32>>(1000, 50.f, 10.f) };
-        contr->add_output(output1);
+        contr->ValueChanged.connect(output1);
         queue.push(contr);
     }
     {
         auto contr { make_shared_automation<LinearFunction<f32>>(1000, 50.f, 150.f) };
-        contr->add_output(output1);
+        contr->ValueChanged.connect(output1);
         queue.push(contr);
     }
 
@@ -62,7 +62,7 @@ TEST_CASE("Core.Automation.RandomFunction")
     Random rand { 12345 };
     Automation<RandomFunction<f32>> contr { { 100, 10.f, 50.f, rand } };
 
-    contr.add_output([&out](f32 newVal) { out = newVal; });
+    contr.ValueChanged.connect([&out](f32 newVal) { out = newVal; });
     contr.start(true);
     REQUIRE(out == rand(10.f, 50.f));
     contr.update(1);
@@ -98,7 +98,7 @@ TEST_CASE("Core.Automation.LinearFunction")
 
         Automation<LinearFunction<f32>> contr { { 100, 10.f, 50.f } };
 
-        contr.add_output([&out](f32 newVal) { out = newVal; });
+        contr.ValueChanged.connect([&out](f32 newVal) { out = newVal; });
         contr.start(true);
 
         contr.update(90);
@@ -115,7 +115,7 @@ TEST_CASE("Core.Automation.LinearFunction")
 
         Automation<LinearFunction<u32>> contr { { 100, 10, 50 } };
 
-        contr.add_output([&out](u32 newVal) { out = newVal; });
+        contr.ValueChanged.connect([&out](u32 newVal) { out = newVal; });
         contr.start(true);
 
         contr.update(90);
@@ -132,7 +132,7 @@ TEST_CASE("Core.Automation.LinearFunction")
 
         Automation<LinearFunction<u32>> contr { { 100, 0, 50 } };
 
-        contr.add_output([&out](u32 newVal) { out = newVal; });
+        contr.ValueChanged.connect([&out](u32 newVal) { out = newVal; });
         contr.start(false);
 
         contr.update(10);
@@ -177,7 +177,7 @@ TEST_CASE("Core.Automation.LinearFunction")
         Foo foo;
         auto f3 { std::bind(&Foo::set_bar, &foo, std::placeholders::_1) };
 
-        contr.add_output(f3);
+        contr.ValueChanged.connect(f3);
         contr.start();
 
         contr.update(250);
@@ -206,9 +206,9 @@ TEST_CASE("Core.Automation.LinearFunction")
         contr.add_output(&out2);
         contr.add_output(&out3);
 
-        contr.add_output([&fval1](f32 newVal) { fval1 = newVal; });
-        contr.add_output([&fval2](f32 newVal) { fval2 = newVal; });
-        contr.add_output([&fval3](f32 newVal) { fval3 = newVal; });
+        contr.ValueChanged.connect([&fval1](f32 newVal) { fval1 = newVal; });
+        contr.ValueChanged.connect([&fval2](f32 newVal) { fval2 = newVal; });
+        contr.ValueChanged.connect([&fval3](f32 newVal) { fval3 = newVal; });
 
         contr.start();
         contr.update(500);
@@ -349,7 +349,7 @@ TEST_CASE("Core.Automation.SineWaveFunction")
             SineWaveFunction<f32> { 360, 0.f, 1.f, 1.f, 0 }
         };
         std::vector<f32> output;
-        contr.add_output([&output](f32 val) { output.push_back(val); });
+        contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
         contr.start();
         for (i32 i = 0; i < 4; i++) {
@@ -398,7 +398,7 @@ TEST_CASE("Core.Automation.SquareWaveFunction")
             SquareWaveFunction<f32> { 50, 0.f, 1.f, 1.f, 0 }
         };
         std::vector<f32> output;
-        contr.add_output([&output](f32 val) { output.push_back(val); });
+        contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
         contr.start();
         for (i32 i = 0; i < 5; i++) {
@@ -460,7 +460,7 @@ TEST_CASE("Core.Automation.TriangeWaveFunction")
             TriangeWaveFunction<f32> { 50, 0.f, 2.f, 1.f, 0 }
         };
         std::vector<f32> output;
-        contr.add_output([&output](f32 val) { output.push_back(val); });
+        contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
         contr.start();
         for (i32 i = 0; i < 5; i++) {
@@ -522,7 +522,7 @@ TEST_CASE("Core.Automation.SawtoothWaveFunction")
             SawtoothWaveFunction<f32> { 50, 0.f, 2.f, 1.f, 0 }
         };
         std::vector<f32> output;
-        contr.add_output([&output](f32 val) { output.push_back(val); });
+        contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
         contr.start();
         for (i32 i = 0; i < 5; i++) {
@@ -676,7 +676,7 @@ TEST_CASE("Core.Automation.Interval")
 
         Automation<LinearFunction<f32>> contr { { 1000, 10.f, 70.f } };
 
-        contr.add_output([&output](f32 val) { output.push_back(val); });
+        contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
         contr.interval(100);
 
         contr.start();
@@ -702,7 +702,7 @@ TEST_CASE("Core.Automation.Interval")
 
         Automation<LinearFunction<f32>> contr { { 1000, 10.f, 70.f } };
 
-        contr.add_output([&output](f32 val) { output.push_back(val); });
+        contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
         contr.interval(500);
 
         contr.start();

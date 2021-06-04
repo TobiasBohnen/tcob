@@ -6,15 +6,13 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
-#include <chrono>
-#include <functional>
-#include <memory>
 #include <queue>
 
 #include <tcob/core/Random.hpp>
 #include <tcob/core/Updatable.hpp>
 #include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Point.hpp>
+#include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob {
 
@@ -85,14 +83,11 @@ public:
     {
     }
 
-    void add_output(std::function<void(func_type)>&& func)
-    {
-        _outputFuncs.push_back(func);
-    }
+    sigslot::signal<func_type> ValueChanged;
 
-    void add_output(func_type* dest)
+    auto add_output(func_type* dest)
     {
-        add_output([dest](const func_type& val) { *dest = val; });
+        return ValueChanged.connect([dest](const func_type& val) { *dest = val; });
     }
 
     auto value() const -> func_type
@@ -103,13 +98,9 @@ public:
 private:
     void update_values() override
     {
-        const func_type val { value() };
-        for (auto& func : _outputFuncs) {
-            func(std::forward<const func_type>(val));
-        }
+        ValueChanged(value());
     }
 
-    std::vector<std::function<void(const func_type)>> _outputFuncs;
     Func _function;
 };
 

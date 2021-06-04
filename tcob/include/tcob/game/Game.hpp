@@ -6,13 +6,13 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
-#include <chrono>
 #include <functional>
 #include <queue>
 #include <stack>
 
 #include <tcob/core/Input.hpp>
 #include <tcob/game/Config.hpp>
+#include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob {
 class FPSCounter {

@@ -6,6 +6,7 @@
 #include <tcob/game/Game.hpp>
 
 #include <SDL2/SDL.h>
+#include <chrono>
 
 #include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/game/Scene.hpp>

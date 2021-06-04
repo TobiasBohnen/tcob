@@ -33,8 +33,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(0).position(point); } };
         auto auto0 { make_shared_automation<LinearFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }) };
         auto auto1 { make_shared_automation<LinearFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position()) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -47,8 +47,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(1).position(point); } };
         auto auto0 { make_shared_automation<SmoothstepFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }) };
         auto auto1 { make_shared_automation<SmoothstepFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position()) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -61,8 +61,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(2).position(point); } };
         auto auto0 { make_shared_automation<SmootherstepFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }) };
         auto auto1 { make_shared_automation<SmootherstepFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position()) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -75,8 +75,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(3).position(point); } };
         auto auto0 { make_shared_automation<PowerFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }, 2.f) };
         auto auto1 { make_shared_automation<PowerFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position(), 2.f) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -89,8 +89,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(4).position(point); } };
         auto auto0 { make_shared_automation<PowerFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }, 0.75f) };
         auto auto1 { make_shared_automation<PowerFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position(), 0.75f) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -103,8 +103,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(5).position(point); } };
         auto auto0 { make_shared_automation<InversePowerFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }, 2.f) };
         auto auto1 { make_shared_automation<InversePowerFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position(), 2.f) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -117,8 +117,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(6).position(point); } };
         auto auto0 { make_shared_automation<CubicBezierFunction>(duration, circle.position(), PointF { endX / 4, circle.position().Y + 0.25f }, PointF { endX / 4 * 3, circle.position().Y - 0.25f }, PointF { endX, circle.position().Y }) };
         auto auto1 { make_shared_automation<CubicBezierFunction>(duration, PointF { endX, circle.position().Y }, PointF { endX / 4 * 3, circle.position().Y - 0.25f }, PointF { endX / 4, circle.position().Y + 0.25f }, circle.position()) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
@@ -131,8 +131,8 @@ void AutomationEx::on_start()
         auto lamb { [this](const PointF& point) { _layer1.at(7).position(point); } };
         auto auto0 { make_shared_automation<SquareWaveFunction<PointF>>(duration, circle.position(), PointF { endX, circle.position().Y }, 1.f, 0.f) };
         auto auto1 { make_shared_automation<SquareWaveFunction<PointF>>(duration, PointF { endX, circle.position().Y }, circle.position(), 1.f, 0.f) };
-        auto0->add_output(lamb);
-        auto1->add_output(lamb);
+        auto0->ValueChanged.connect(lamb);
+        auto1->ValueChanged.connect(lamb);
         queue.push(auto0, auto1);
         _autos.insert(_autos.end(), { auto0, auto1 });
     }
