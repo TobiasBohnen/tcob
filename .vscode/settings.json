@@ -148,7 +148,8 @@
         "dr_flac.h": "c",
         "al.h": "c",
         "format": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "stb_truetype.h": "c"
     },
     "Lua.diagnostics.disable": [
         "undefined-global"

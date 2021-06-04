@@ -5,7 +5,6 @@
 
 #include <tcob/gfx/Font.hpp>
 
-#define STB_TRUETYPE_IMPLEMENTATION
 #include <stb/stb_truetype.h>
 
 #include <tcob/core/data/Color.hpp>
