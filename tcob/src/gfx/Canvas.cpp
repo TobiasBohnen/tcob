@@ -1263,7 +1263,7 @@ auto Canvas::add_font(ResourcePtr<Font> font) -> isize
 
 void Canvas::font_face_ID(isize id)
 {
-    if (id < 0 || id >= _fonts.size())
+    if (id >= _fonts.size())
         return;
 
     NVGstate& s = state();
