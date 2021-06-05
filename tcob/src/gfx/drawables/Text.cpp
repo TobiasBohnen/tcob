@@ -5,6 +5,8 @@
 
 #include <tcob/gfx/drawables/Text.hpp>
 
+#include <cstring>
+
 #include <tcob/gfx/Quad.hpp>
 #include <tcob/gfx/gl/GLShaderProgram.hpp>
 
