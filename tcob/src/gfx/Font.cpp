@@ -57,7 +57,7 @@ auto convert_UTF8_to_UTF32(const std::string& text) -> std::u32string
 }
 
 constexpr i32 FONT_TEXTURE_SIZE { 1024 };
-constexpr u32 GLYPH_PADDING { 5 };
+constexpr u32 GLYPH_PADDING { 4 };
 
 Font::Font()
     : _fontInfo { new stbtt_fontinfo }
@@ -236,7 +236,7 @@ auto Font::cache_glyph(u32 gi) -> bool
         _glyphs[gi] = glyph;
 
         // advance cursor
-        _fontTextureCursor.X += glWidth;
+        _fontTextureCursor.X += glWidth + GLYPH_PADDING;
     }
     return true;
 }

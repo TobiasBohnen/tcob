@@ -347,6 +347,8 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
     } else if (ev.Code == Scancode::M) {
         game().window().create_screenshot().save_async("screen1async.webp");
     } else if (ev.Code == Scancode::BACKSPACE) {
+        music0->stop();
+        sound0->stop();
         game().pop_current_scene();
     }
 }

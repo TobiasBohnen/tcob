@@ -133,6 +133,7 @@ auto Source::pitch() const -> f32
 void Source::pitch(f32 value) const
 {
     assert(ID);
+    value = std::clamp(value, 0.5f, 2.0f);
     alSourcef(ID, AL_PITCH, value);
 }
 
