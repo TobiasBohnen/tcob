@@ -39,7 +39,7 @@ auto Sound::load(const std::string& filename) -> bool
         std::string ext { FileSystem::extension(filename) };
 
         f32* audioData { nullptr };
-        u64 frameCount { 0 };
+        long long unsigned int frameCount { 0 };
         u32 channels { 0 }, sampleRate { 0 };
 
         if (ext == ".wav") {
