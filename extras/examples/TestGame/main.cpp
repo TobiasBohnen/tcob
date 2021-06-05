@@ -1,6 +1,6 @@
 #include "StartScene.hpp"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <tcob/tcob.hpp>
 
 int main(int argc, char* argv[])
