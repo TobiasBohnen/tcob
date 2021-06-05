@@ -32,7 +32,7 @@ int filehack_fread(void* dst, int s, int c, filehack* f)
 int filehack_fseek(filehack* f, int idx, int base)
 {
     auto istream { reinterpret_cast<tcob::InputFileStream*>(f) };
-    static_cast<int>(istream->seek(idx, base));
+    static_cast<int>(istream->seek(idx, static_cast<std::ios_base::seekdir>(base)));
     return 0;
 }
 
