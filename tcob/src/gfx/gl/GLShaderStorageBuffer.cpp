@@ -12,22 +12,10 @@
 #include <tcob/core/io/Logger.hpp>
 
 namespace tcob::gl {
-void ShaderStorageBuffer::create_or_resize(isize size, BufferUsage usage)
+ShaderStorageBuffer::ShaderStorageBuffer(isize size, BufferUsage usage)
 {
-    if (!ID) {
-        glCreateBuffers(1, &ID);
-    }
-
-    assert(ID);
-    const GLenum bufferUsage { enumToGL(usage) };
-
-    if (size > _bufferSize) {
-        _bufferSize = std::max(size, _bufferSize * 2);
-        glNamedBufferData(ID, _bufferSize, nullptr, bufferUsage);
-        Log(
-            "Resizing shader storage buffer " + std::to_string(ID) + " to "
-            + std::to_string(_bufferSize) + " bytes.");
-    }
+    glCreateBuffers(1, &ID);
+    resize(size, usage);
 }
 
 ShaderStorageBuffer::~ShaderStorageBuffer()
@@ -50,5 +38,19 @@ void ShaderStorageBuffer::update(const void* data, isize size, isize offset) con
 {
     assert(ID);
     glNamedBufferSubData(ID, offset, size, data);
+}
+
+void ShaderStorageBuffer::resize(isize size, BufferUsage usage)
+{
+    assert(ID);
+    const GLenum bufferUsage { enumToGL(usage) };
+
+    if (size > _bufferSize) {
+        _bufferSize = std::max(size, _bufferSize * 2);
+        glNamedBufferData(ID, _bufferSize, nullptr, bufferUsage);
+        Log(
+            "Resizing shader storage buffer " + std::to_string(ID) + " to "
+            + std::to_string(_bufferSize) + " bytes.");
+    }
 }
 }

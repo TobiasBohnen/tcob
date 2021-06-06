@@ -12,12 +12,12 @@
 namespace tcob::gl {
 class ShaderStorageBuffer : public Object {
 public:
-    ShaderStorageBuffer() = default;
+    ShaderStorageBuffer(isize size, BufferUsage usage);
     ~ShaderStorageBuffer() override;
 
-    void create_or_resize(isize size, BufferUsage usage);
-
     void update(const void* data, isize size, isize offset) const;
+
+    void resize(isize size, BufferUsage usage);
 
     void bind_base(u32 index) const;
 

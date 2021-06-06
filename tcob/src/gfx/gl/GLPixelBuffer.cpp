@@ -11,9 +11,8 @@
 
 namespace tcob::gl {
 
-void PixelPackBuffer::create(isize size)
+PixelPackBuffer::PixelPackBuffer(isize size)
 {
-    assert(!ID);
     glCreateBuffers(1, &ID);
     glNamedBufferData(ID, size, nullptr, GL_STREAM_READ);
 }
