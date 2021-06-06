@@ -12,6 +12,11 @@
 #include <tcob/core/io/Logger.hpp>
 
 namespace tcob::gl {
+ShaderProgram::ShaderProgram()
+{
+    ID = glCreateProgram();
+}
+
 ShaderProgram::~ShaderProgram()
 {
     destroy();
@@ -19,11 +24,12 @@ ShaderProgram::~ShaderProgram()
 
 auto ShaderProgram::create(const char* vertexShaderSource, const char* fragmentShaderSource) -> bool
 {
-    if (ID) {
+    GLint success {};
+    glGetProgramiv(ID, GL_LINK_STATUS, &success);
+    if (success) { // already linked -> destroy and recreate
         do_destroy();
+        ID = glCreateProgram();
     }
-
-    ID = glCreateProgram();
 
     // Build compile VERTEX_SHADER
     const GLuint vertexShader { glCreateShader(GL_VERTEX_SHADER) };
@@ -31,7 +37,6 @@ auto ShaderProgram::create(const char* vertexShaderSource, const char* fragmentS
     glCompileShader(vertexShader);
 
     // Check for compile errors VERTEX_SHADER
-    GLint success {};
     std::array<GLchar, 512> infoLog {};
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {

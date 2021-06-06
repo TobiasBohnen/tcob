@@ -16,7 +16,7 @@
 namespace tcob::gl {
 class ShaderProgram : public Object {
 public:
-    ShaderProgram() = default;
+    ShaderProgram();
     ~ShaderProgram() override;
 
     auto create(const char* vertexShaderSource, const char* fragmentShaderSource) -> bool;
@@ -66,6 +66,6 @@ private:
 
     auto uniform_location(const std::string& name) const -> i32;
 
-    mutable std::unordered_map<std::string, i32> _uniformLocations;
+    mutable std::unordered_map<std::string, i32> _uniformLocations {};
 };
 }
