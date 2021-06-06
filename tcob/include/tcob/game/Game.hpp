@@ -61,9 +61,10 @@ public:
     sigslot::signal<gl::RenderTarget&> Draw;
     sigslot::signal<> Quit;
 
-    template <typename T>
     void start();
 
+    template <typename T>
+    void push_scene();
     void push_scene(std::shared_ptr<Scene> scene);
     void pop_current_scene();
 
@@ -95,10 +96,9 @@ private:
 };
 
 template <typename T>
-void Game::start()
+inline void Game::push_scene()
 {
-    push_scene(std::make_unique<T>(*this));
-    loop();
+    push_scene(std::make_shared<T>(*this));
 }
 
 }

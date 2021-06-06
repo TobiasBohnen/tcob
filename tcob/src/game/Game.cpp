@@ -60,6 +60,11 @@ Game::~Game()
     SDL_Quit();
 }
 
+void Game::start()
+{
+    loop();
+}
+
 void Game::push_scene(std::shared_ptr<Scene> scene)
 {
     auto command { [this, scene]() {

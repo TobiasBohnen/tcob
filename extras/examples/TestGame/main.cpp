@@ -6,6 +6,7 @@
 int main(int argc, char* argv[])
 {
     tcob::Game game { argv[0], "TestGame" };
-    game.start<StartScene>();
+    game.push_scene<StartScene>();
+    game.start();
     return 0;
 }
