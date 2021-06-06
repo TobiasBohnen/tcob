@@ -751,8 +751,6 @@ struct ControllerButtonEvent {
 
 class GameController final {
 public:
-    GameController(SDL_GameController* controller);
-
     auto name() const -> std::string;
 
     auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, u32 duration) const -> bool;
@@ -768,6 +766,9 @@ public:
     auto is_valid() const -> bool;
 
 private:
+    friend class Input;
+    GameController(SDL_GameController* controller);
+
     SDL_GameController* _controller;
 };
 

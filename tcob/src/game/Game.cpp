@@ -218,7 +218,7 @@ void Game::create_context(bool createWindow)
 
     _context = std::make_unique<gl::Context>(PointU { SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED }, size, aa);
     if (createWindow) {
-        _window = std::make_unique<gl::Window>(_context->window_handle());
+        _window = std::unique_ptr<gl::Window> { new gl::Window { _context->window_handle() } };
 
         _window->settings({
 

@@ -89,8 +89,6 @@ namespace gl {
     class Texture2DArray;
     class UniformBuffer;
     class Window;
-
-    class BatchQuadRenderer;
 }
 
 }

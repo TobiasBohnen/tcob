@@ -36,7 +36,6 @@ struct WindowSettings {
 
 class Window final : public RenderTarget {
 public:
-    explicit Window(SDL_Window* window);
     ~Window() override;
 
     sigslot::signal<WindowEvent&> WindowShown;
@@ -80,6 +79,8 @@ protected:
     void on_resize(const SizeU& newsize);
 
 private:
+    friend class Game;
+    explicit Window(SDL_Window* window);
     SDL_Window* _window { nullptr };
 
     ResourcePtr<Cursor> _cursor;
