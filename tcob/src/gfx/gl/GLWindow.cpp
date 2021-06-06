@@ -50,7 +50,8 @@ Window::Window(const PointU& loc, const SizeU& size, u32 aa)
     q.color(Colors::White);
     q.position({ 0, 0, 1.f, 1.f });
     q.texcoords({ { 0, 0, 1, -1 }, 0 });
-    _renderer.set_geometry(&q, 1);
+    _renderer = std::make_unique<StaticQuadRenderer>();
+    _renderer->set_geometry(&q, 1);
 }
 
 Window::~Window()
@@ -210,8 +211,8 @@ void Window::swap()
         const SizeI s { size() };
         glViewport(0, 0, s.Width, s.Height);
 
-        _renderer.material(mat.object());
-        _renderer.render_to_target(_defaultTarget);
+        _renderer->material(mat.object());
+        _renderer->render_to_target(_defaultTarget);
 
         if (_cursor) {
             _cursor->draw(_defaultTarget);

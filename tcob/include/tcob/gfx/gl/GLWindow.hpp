@@ -84,7 +84,7 @@ private:
     std::unique_ptr<gl::Context> _context;
 
     ResourcePtr<Cursor> _cursor;
-    StaticQuadRenderer _renderer;
+    std::unique_ptr<StaticQuadRenderer> _renderer;
     DefaultRenderTarget _defaultTarget;
     WindowSettings _settings;
 };

@@ -12,13 +12,13 @@
 namespace tcob::gl {
 class VertexArray final : public Object {
 public:
-    VertexArray() = default;
+    VertexArray();
     ~VertexArray() override;
 
     VertexArray(VertexArray&& other) noexcept = default;
     auto operator=(VertexArray&& other) noexcept -> VertexArray& = default;
 
-    void create_or_resize(isize vertCount, isize indCount, BufferUsage usage);
+    void resize(isize vertCount, isize indCount, BufferUsage usage);
 
     void update(const Vertex* verts, isize vertCount, isize vertOffset) const;
     void update(const Quad* quad, isize quadCount, isize vertOffset) const;

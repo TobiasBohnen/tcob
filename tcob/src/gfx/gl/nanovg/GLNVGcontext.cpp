@@ -315,7 +315,7 @@ void GLNVGcontext::flush()
         glBufferData(GL_UNIFORM_BUFFER, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW);
 
         // Upload vertex data
-        _vertexArray.create_or_resize(_nverts, 0, tcob::gl::BufferUsage::StreamDraw);
+        _vertexArray.resize(_nverts, 0, tcob::gl::BufferUsage::StreamDraw);
         _vertexArray.update(_verts.data(), _nverts, 0);
 
         // Set view and texture just once per frame.

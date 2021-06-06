@@ -13,6 +13,18 @@
 #include <tcob/gfx/Quad.hpp>
 
 namespace tcob::gl {
+VertexArray::VertexArray()
+{
+    glCreateVertexArrays(1, &ID);
+    setup_attributes();
+
+    glCreateBuffers(1, &_vbo);
+    glCreateBuffers(1, &_ebo);
+
+    glVertexArrayVertexBuffer(ID, 0, _vbo, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(ID, _ebo);
+}
+
 VertexArray::~VertexArray()
 {
     destroy();
@@ -57,19 +69,8 @@ void VertexArray::do_destroy()
     _ebo = 0;
 }
 
-void VertexArray::create_or_resize(isize vertCount, isize indCount, BufferUsage usage)
+void VertexArray::resize(isize vertCount, isize indCount, BufferUsage usage)
 {
-    if (!ID) {
-        glCreateVertexArrays(1, &ID);
-        setup_attributes();
-
-        glCreateBuffers(1, &_vbo);
-        glCreateBuffers(1, &_ebo);
-
-        glVertexArrayVertexBuffer(ID, 0, _vbo, 0, sizeof(Vertex));
-        glVertexArrayElementBuffer(ID, _ebo);
-    }
-
     assert(ID);
     const GLenum bufferUsage { enumToGL(usage) };
 

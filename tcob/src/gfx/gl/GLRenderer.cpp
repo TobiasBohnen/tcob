@@ -68,7 +68,7 @@ void Renderer::bind_material(Material* mat)
 
 void StaticQuadRenderer::prepare(isize quadCount)
 {
-    _vertexArray.create_or_resize(static_cast<isize>(quadCount) * 4, static_cast<isize>(quadCount) * 6, gl::BufferUsage::StaticDraw);
+    _vertexArray.resize(static_cast<isize>(quadCount) * 4, static_cast<isize>(quadCount) * 6, gl::BufferUsage::StaticDraw);
 }
 
 void StaticQuadRenderer::set_geometry(const Quad* quads, isize count)
@@ -127,7 +127,7 @@ void DynamicQuadRenderer::prepare(isize quadCount)
         isize vertCount { quadCount * 4 };
         isize indCount { quadCount * 6 };
 
-        _vertexArray.create_or_resize(vertCount, indCount, gl::BufferUsage::DynamicDraw);
+        _vertexArray.resize(vertCount, indCount, gl::BufferUsage::DynamicDraw);
 
         //copy indices
         std::vector<u32> inds;
@@ -200,7 +200,7 @@ void BatchQuadRenderer::prepare(isize quadCount)
     isize vertCount { quadCount * 4 };
     isize indCount { quadCount * 6 };
 
-    _vertexArray.create_or_resize(vertCount, indCount, gl::BufferUsage::StreamDraw);
+    _vertexArray.resize(vertCount, indCount, gl::BufferUsage::StreamDraw);
 
     _indices.reserve(indCount);
     _vertices.reserve(vertCount);
@@ -269,7 +269,7 @@ void BatchQuadRenderer::draw()
 
 void StaticPointRenderer::prepare(isize vertCount)
 {
-    _vertexArray.create_or_resize(static_cast<isize>(vertCount), 0, gl::BufferUsage::StaticDraw);
+    _vertexArray.resize(static_cast<isize>(vertCount), 0, gl::BufferUsage::StaticDraw);
 }
 
 void StaticPointRenderer::set_geometry(const Vertex* vertices, isize count)
@@ -313,7 +313,7 @@ void StaticPointRenderer::draw()
 
 void StreamPointRenderer::prepare(isize vertCount)
 {
-    _vertexArray.create_or_resize(static_cast<isize>(vertCount), 0, gl::BufferUsage::StreamDraw);
+    _vertexArray.resize(static_cast<isize>(vertCount), 0, gl::BufferUsage::StreamDraw);
 }
 
 void StreamPointRenderer::set_geometry(const Vertex* vertices, isize count)
