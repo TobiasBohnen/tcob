@@ -119,18 +119,17 @@ auto Texture::copy_to_image() const -> Image
 
 ////////////////////////////////////////////////////////////
 
-void Texture2D::create(const SizeU& texsize, TextureFormat format)
+Texture2D::Texture2D()
 {
-    if (ID) {
-        do_destroy();
-    }
-
-    const auto [iform, form] = enumToGL(format);
-    _format = form;
-
     glCreateTextures(GL_TEXTURE_2D, 1, &ID);
     wrapping(TextureWrap::Repeat, TextureWrap::Repeat);
     filtering(TextureFiltering::NearestNeighbor);
+}
+
+void Texture2D::create(const SizeU& texsize, TextureFormat format)
+{
+    const auto [iform, form] = enumToGL(format);
+    _format = form;
 
     glTextureStorage2D(ID, 1, iform, texsize.Width, texsize.Height);
     size(texsize);
@@ -161,20 +160,19 @@ auto Texture2D::format() -> TextureFormat
 
 ////////////////////////////////////////////////////////////
 
+Texture2DArray::Texture2DArray()
+{
+    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &ID);
+    wrapping(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+    filtering(TextureFiltering::NearestNeighbor);
+}
+
 void Texture2DArray::create(const SizeU& texsize, u32 depth, TextureFormat format)
 {
-    if (ID) {
-        do_destroy();
-    }
-
     _depth = depth;
 
     const auto [iform, form] = enumToGL(format);
     _format = form;
-
-    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &ID);
-    wrapping(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-    filtering(TextureFiltering::NearestNeighbor);
 
     glTextureStorage3D(ID, 1, iform, texsize.Width, texsize.Height, depth);
     size(texsize);
@@ -220,16 +218,15 @@ auto Texture2DArray::depth() const -> u32
 
 ////////////////////////////////////////////////////////////
 
-void Texture1D::create(u32 texsize)
+Texture1D::Texture1D()
 {
-    if (ID) {
-        do_destroy();
-    }
-
     glCreateTextures(GL_TEXTURE_1D, 1, &ID);
     wrapping(TextureWrap::Repeat, TextureWrap::Repeat);
     filtering(TextureFiltering::Linear);
+}
 
+void Texture1D::create(u32 texsize)
+{
     glTextureStorage1D(ID, 1, GL_RGBA8, texsize);
     size({ texsize, 1 });
 }

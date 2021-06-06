@@ -41,7 +41,6 @@ enum class TextureWrap : u8 {
 
 class Texture : public Object {
 public:
-    Texture() = default;
     ~Texture() override;
 
     void bind_texture_unit(u32 tu = 0) const;
@@ -59,17 +58,21 @@ public:
     auto regions() -> std::unordered_map<std::string, TextureRegion>&;
 
 protected:
+    Texture() = default;
+
     void size(const SizeU& size);
 
     void do_destroy() override;
 
 private:
-    std::unordered_map<std::string, TextureRegion> _regions;
+    std::unordered_map<std::string, TextureRegion> _regions {};
     SizeU _size { SizeU::Zero };
 };
 
 class Texture1D : public Texture {
 public:
+    Texture1D();
+
     void create(u32 texsize);
 
     void update(i32 offsetX, i32 width, const void* data) const;
@@ -79,6 +82,8 @@ public:
 
 class Texture2D : public Texture {
 public:
+    Texture2D();
+
     void create(const SizeU& texsize, TextureFormat format = TextureFormat::RGBA8);
 
     void update(const PointU& origin, const SizeU& size, const void* data, i32 rowLength = 0, i32 alignment = 4) const;
@@ -91,6 +96,8 @@ private:
 
 class Texture2DArray : public Texture {
 public:
+    Texture2DArray();
+
     void create(const SizeU& texsize, u32 depth, TextureFormat format = TextureFormat::RGBA8);
 
     void update(const PointU& origin, const SizeU& size, const void* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;

@@ -32,8 +32,6 @@ RenderTarget::RenderTarget()
     : _material { std::make_shared<Material>() }
     , _matRes { std::make_shared<Resource<Material>>(_material) }
 {
-    _texture = std::make_shared<Texture2D>();
-    _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
 }
 
 auto RenderTarget::material() const -> ResourcePtr<Material>
@@ -191,8 +189,11 @@ void RenderTarget::clear(const Color& c) const
 
 void RenderTarget::setup_framebuffer(const SizeU& size)
 {
-    if (!_frameBuffer)
+    if (!_frameBuffer) {
         _frameBuffer = std::make_unique<Framebuffer>();
+        _texture = std::make_shared<Texture2D>();
+        _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
+    }
 
     // TODO: test this (maybe change texture to mutable)
     _texture->create(size);
