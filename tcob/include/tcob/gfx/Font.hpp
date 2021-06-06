@@ -61,7 +61,7 @@ private:
     void create_texture();
 
     auto cache_glyph(u32 codepoint) -> bool;
-    auto glyph_index(u32 codepoint) -> u32;
+    auto codepoint_to_glyphindex(u32 codepoint) -> u32;
 
     stbtt_fontinfo* _fontInfo;
     std::vector<ubyte> _fontData;

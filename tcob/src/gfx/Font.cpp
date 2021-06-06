@@ -166,7 +166,7 @@ auto Font::shape_text(const std::string& text) -> std::vector<Glyph>
     std::vector<Glyph> retValue;
     retValue.reserve(len);
     for (u32 i { 0 }; i < len; ++i) {
-        const u32 gi { glyph_index(utf32text[i]) };
+        const u32 gi { codepoint_to_glyphindex(utf32text[i]) };
         if (!cache_glyph(gi)) {
             return {};
         }
@@ -241,7 +241,7 @@ auto Font::cache_glyph(u32 gi) -> bool
     return true;
 }
 
-auto Font::glyph_index(u32 codepoint) -> u32
+auto Font::codepoint_to_glyphindex(u32 codepoint) -> u32
 {
     if (!_glyphIndices.contains(codepoint)) {
         _glyphIndices[codepoint] = static_cast<u32>(stbtt_FindGlyphIndex(_fontInfo, codepoint));
