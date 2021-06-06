@@ -14,49 +14,20 @@
 
 namespace tcob::gl {
 
-Window::Window(const PointU& loc, const SizeU& size, u32 aa)
+Window::Window(SDL_Window* window)
+    : _window { window }
 {
-    // Set attributes
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, aa);
-
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-
-    i32 flags { SDL_WINDOW_OPENGL };
-    flags |= SDL_WINDOW_RESIZABLE;
-
-    // Create window
-    _window = SDL_CreateWindow("", loc.X, loc.Y, size.Width, size.Height, flags);
-    if (!_window) {
-        Log("Error: Window creation failed!");
-        throw std::runtime_error("Window creation failed");
-    }
-
-    // Create OpenGL context
-    _context = std::make_unique<gl::Context>(_window);
-    on_resize(size);
+    on_resize(size());
 
     Quad q {};
     q.color(Colors::White);
     q.position({ 0, 0, 1.f, 1.f });
     q.texcoords({ { 0, 0, 1, -1 }, 0 });
-    _renderer = std::make_unique<StaticQuadRenderer>();
-    _renderer->set_geometry(&q, 1);
+    _renderer.set_geometry(&q, 1);
 }
 
 Window::~Window()
 {
-    _context = nullptr;
     SDL_DestroyWindow(_window);
 }
 
@@ -211,8 +182,8 @@ void Window::swap()
         const SizeI s { size() };
         glViewport(0, 0, s.Width, s.Height);
 
-        _renderer->material(mat.object());
-        _renderer->render_to_target(_defaultTarget);
+        _renderer.material(mat.object());
+        _renderer.render_to_target(_defaultTarget);
 
         if (_cursor) {
             _cursor->draw(_defaultTarget);

@@ -5,15 +5,21 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <tcob/core/data/Point.hpp>
+#include <tcob/core/data/Size.hpp>
+
 struct SDL_Window;
 
 namespace tcob::gl {
 class Context final {
 public:
-    Context(SDL_Window* window);
+    Context(const PointU& loc, const SizeU& size, u32 aa = 0);
     ~Context();
+
+    auto window_handle() const -> SDL_Window*;
 
 private:
     void* _context { nullptr };
+    SDL_Window* _window { nullptr };
 };
 }

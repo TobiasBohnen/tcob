@@ -27,6 +27,10 @@ Game::Game(i32 argc, char* argv[], const std::string& name, bool createwindow)
     SDL_Init(SDL_INIT_EVERYTHING);
     FileSystem::init(argv[0], name);
 
+    for (i32 i { 1 }; i < argc; ++i) {
+        //TODO: handle cmdline args
+    }
+
     _audio = std::make_unique<AudioSystem>();
 
     _input = std::make_unique<Input>();
@@ -37,20 +41,11 @@ Game::Game(i32 argc, char* argv[], const std::string& name, bool createwindow)
     _config.load();
 
     if (createwindow) {
-        Log("creating window");
-        setup_window();
+        create_context();
         gl::Capabilities::init();
     }
 
     _resources = std::make_unique<ResourceLibrary>();
-
-    for (i32 i { 1 }; i < argc; ++i) {
-        const char* cmd { argv[i] };
-
-        if (strcmp(cmd, "--config") == 0) {
-            //TODO: handle cmdline args
-        }
-    }
 }
 
 Game::~Game()
@@ -59,6 +54,7 @@ Game::~Game()
     _resources = nullptr;
     _window = nullptr;
     _audio = nullptr;
+    _context = nullptr;
 
     _config.save();
     Log("exiting");
@@ -216,15 +212,15 @@ void Game::process_events()
     }
 }
 
-void Game::setup_window()
+void Game::create_context()
 {
     const bool fullscreen { _config["Video"]["FullScreen"] };
     const SizeU size { _config["Video"]["Resolution"] };
     const u32 aa { _config["Video"]["AntiAliasing"] };
     const bool vsync { _config["Video"]["VSync"] };
 
-    if (!_window)
-        _window = std::make_unique<gl::Window>(PointU { SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED }, size, aa);
+    _context = std::make_unique<gl::Context>(PointU { SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED }, size, aa);
+    _window = std::make_unique<gl::Window>(_context->window_handle());
 
     _window->settings({
 

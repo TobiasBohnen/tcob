@@ -36,7 +36,7 @@ struct WindowSettings {
 
 class Window final : public RenderTarget {
 public:
-    Window(const PointU& loc, const SizeU& size, u32 aa = 0);
+    explicit Window(SDL_Window* window);
     ~Window() override;
 
     sigslot::signal<WindowEvent&> WindowShown;
@@ -81,10 +81,9 @@ protected:
 
 private:
     SDL_Window* _window { nullptr };
-    std::unique_ptr<gl::Context> _context;
 
     ResourcePtr<Cursor> _cursor;
-    std::unique_ptr<StaticQuadRenderer> _renderer;
+    StaticQuadRenderer _renderer;
     DefaultRenderTarget _defaultTarget;
     WindowSettings _settings;
 };
