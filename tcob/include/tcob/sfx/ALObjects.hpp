@@ -55,8 +55,8 @@ public:
     Source();
     ~Source();
 
-    Source(const Source& other) = delete;
-    auto operator=(const Source& other) -> Source& = delete;
+    Source(const Source& other);
+    auto operator=(const Source& other) -> Source&;
 
     void play();
     void stop();

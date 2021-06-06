@@ -78,7 +78,6 @@ auto Buffer::channels() const -> i32
 
 Source::Source()
 {
-    assert(!ID);
     alGenSources(1, &ID);
     alSourcef(ID, AL_PITCH, 1);
     alSourcef(ID, AL_GAIN, 1);
@@ -96,6 +95,26 @@ Source::~Source()
         alDeleteSources(1, &ID);
         ID = 0;
     }
+}
+
+Source::Source(const Source& other)
+{
+    *this = other;
+}
+
+auto Source::operator=(const Source& other) -> Source&
+{
+    alGenSources(1, &ID);
+
+    pitch(other.pitch());
+    gain(other.gain());
+    position(other.position());
+    direction(other.direction());
+    rolloff_factor(other.rolloff_factor());
+    source_relatvie(other.source_relatvie());
+    looping(other.looping());
+
+    return *this;
 }
 
 void Source::play()

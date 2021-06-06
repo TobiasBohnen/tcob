@@ -183,7 +183,7 @@ void MiscScene::on_start()
     webp.size({ 0.5f, 0.5f });
     webp.position({ 0.75f, 0.25f });
 
-    sound0 = resMgr.get<Sound>("res", "test");
+    sound0 = *resMgr.get<Sound>("res", "test");
     music0 = resMgr.get<Music>("res", "test");
 }
 
@@ -335,7 +335,7 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
     } else if (ev.Code == Scancode::O) {
         music0->start(true);
     } else if (ev.Code == Scancode::P) {
-        sound0->start();
+        sound0.start();
     } else if (ev.Code == Scancode::T) {
         for (u32 i = 0; i < 5; i++) {
             tileMap.modify_layer(1, { 0, i }, 2);
@@ -351,7 +351,6 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
         game().window().create_screenshot().save_async("screen1async.webp");
     } else if (ev.Code == Scancode::BACKSPACE) {
         music0->stop();
-        sound0->stop();
         game().pop_current_scene();
     }
 }

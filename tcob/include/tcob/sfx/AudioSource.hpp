@@ -14,6 +14,9 @@ public:
     AudioSource();
     virtual ~AudioSource();
 
+    AudioSource(const AudioSource& other);
+    auto operator=(const AudioSource& other) -> AudioSource&;
+
     virtual void start(bool looped = false) = 0;
     virtual void stop() = 0;
     void restart();

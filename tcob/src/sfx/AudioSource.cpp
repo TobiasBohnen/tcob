@@ -16,6 +16,17 @@ AudioSource::~AudioSource()
 {
 }
 
+AudioSource::AudioSource(const AudioSource& other)
+{
+    *this = other;
+}
+
+auto AudioSource::operator=(const AudioSource& other) -> AudioSource&
+{
+    _source = std::make_unique<al::Source>(*other._source.get());
+    return *this;
+}
+
 void AudioSource::restart()
 {
     stop();
