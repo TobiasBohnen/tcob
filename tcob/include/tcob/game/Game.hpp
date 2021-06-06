@@ -43,7 +43,7 @@ private:
 
 class Game {
 public:
-    Game(i32 argc, char* argv[], const std::string& name, bool createwindow = true);
+    Game(const std::string& path, const std::string& name, bool createWindow = true);
     virtual ~Game();
 
     Game(const Game&) = delete;
@@ -74,7 +74,7 @@ public:
     auto window() const -> gl::Window&;
 
 private:
-    void create_context();
+    void create_context(bool createWindow);
     void loop();
     void on_quit();
     void process_events();

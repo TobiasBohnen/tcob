@@ -5,6 +5,6 @@
 
 int main(int argc, char** argv)
 {
-    tcob::Game game { argc, argv, "tcob_tests", false };
+    tcob::Game game { argv[0], "tcob_tests", false };
     return Catch::Session().run(argc, argv);
 }
