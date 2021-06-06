@@ -65,19 +65,19 @@ void StartScene::on_key_down(const KeyboardEvent& ev)
 {
     switch (ev.Code) {
     case Scancode::D1:
-        game().push_scene(std::make_shared<AutomationEx>(game()));
+        game().push_scene<AutomationEx>();
         break;
     case Scancode::D2:
-        game().push_scene(std::make_shared<CanvasEx>(game()));
+        game().push_scene<CanvasEx>();
         break;
     case Scancode::D3:
-        game().push_scene(std::make_shared<TextEx>(game()));
+        game().push_scene<TextEx>();
         break;
     case Scancode::D4:
-        game().push_scene(std::make_shared<ControllerEx>(game()));
+        game().push_scene<ControllerEx>();
         break;
     case Scancode::Z:
-        game().push_scene(std::make_shared<MiscScene>(game()));
+        game().push_scene<MiscScene>();
         break;
     case Scancode::BACKSPACE:
         game().pop_current_scene();
