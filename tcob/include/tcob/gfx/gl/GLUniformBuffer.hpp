@@ -11,11 +11,8 @@
 namespace tcob::gl {
 class UniformBuffer : public Object {
 public:
-    UniformBuffer() = default;
     explicit UniformBuffer(isize size);
     ~UniformBuffer() override;
-
-    void create(isize size);
 
     void update(const void* data, isize size, isize offset) const;
 

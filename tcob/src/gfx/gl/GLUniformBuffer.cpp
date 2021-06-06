@@ -12,12 +12,6 @@
 namespace tcob::gl {
 UniformBuffer::UniformBuffer(isize size)
 {
-    create(size);
-}
-
-void UniformBuffer::create(isize size)
-{
-    assert(!ID);
     glCreateBuffers(1, &ID);
     glNamedBufferStorage(ID, size, nullptr, GL_DYNAMIC_STORAGE_BIT);
 }
