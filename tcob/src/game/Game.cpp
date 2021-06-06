@@ -27,28 +27,31 @@ Game::Game(const std::string& path, const std::string& name, bool createWindow)
     SDL_Init(SDL_INIT_EVERYTHING);
     FileSystem::init(path.c_str(), name);
 
+    Log("starting");
+    _config.load();
+
     _audio = std::make_unique<AudioSystem>();
 
     _input = std::make_unique<Input>();
-
-    Quit.connect(&Game::on_quit, this);
-
-    Log("starting");
-    _config.load();
 
     create_context(createWindow);
     gl::Capabilities::init();
 
     _resources = std::make_unique<ResourceLibrary>();
+
+    Quit.connect(&Game::on_quit, this);
 }
 
 Game::~Game()
 {
-    _input = nullptr;
     _resources = nullptr;
+
     _window = nullptr;
-    _audio = nullptr;
     _context = nullptr;
+
+    _input = nullptr;
+
+    _audio = nullptr;
 
     _config.save();
     Log("exiting");
