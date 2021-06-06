@@ -21,7 +21,7 @@ namespace tcob {
 constexpr f32 FIXED_TIME_STEPS { 1000.f / 50.f };
 constexpr u8 MAX_FRAME_SKIP = 10;
 
-Game::Game(const std::string& path, const std::string& name, bool createWindow)
+Game::Game(const std::string& path, const std::string& name)
     : _name { name }
 {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -34,7 +34,7 @@ Game::Game(const std::string& path, const std::string& name, bool createWindow)
 
     _input = std::make_unique<Input>();
 
-    create_context(createWindow);
+    create_context();
     gl::Capabilities::init();
 
     _resources = std::make_unique<ResourceLibrary>();
@@ -214,7 +214,7 @@ void Game::process_events()
     }
 }
 
-void Game::create_context(bool createWindow)
+void Game::create_context()
 {
     const bool fullscreen { _config["Video"]["FullScreen"] };
     const SizeU size { _config["Video"]["Resolution"] };
@@ -222,15 +222,13 @@ void Game::create_context(bool createWindow)
     const bool vsync { _config["Video"]["VSync"] };
 
     _context = std::make_unique<gl::Context>(PointU { SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED }, size, aa);
-    if (createWindow) {
-        _window = std::unique_ptr<gl::Window> { new gl::Window { _context->window_handle() } };
 
-        _window->settings({
+    _window = std::unique_ptr<gl::Window> { new gl::Window { _context->window_handle() } };
 
-            .Fullscreen = fullscreen,
-            .VSync = vsync,
-            .Title = _name });
-    }
+    _window->settings(gl::WindowSettings {
+        .Fullscreen = fullscreen,
+        .VSync = vsync,
+        .Title = _name });
 }
 
 ////////////////////////////////////////////////////////////
