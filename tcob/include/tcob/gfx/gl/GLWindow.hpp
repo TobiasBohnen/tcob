@@ -79,7 +79,7 @@ protected:
     void on_resize(const SizeU& newsize);
 
 private:
-    friend class Game;
+    friend class tcob::Game;
     explicit Window(SDL_Window* window);
     SDL_Window* _window { nullptr };
 
