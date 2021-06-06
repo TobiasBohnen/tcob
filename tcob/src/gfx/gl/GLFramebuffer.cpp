@@ -13,9 +13,8 @@
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob::gl {
-void Framebuffer::create()
+Framebuffer::Framebuffer()
 {
-    assert(!ID);
     glCreateFramebuffers(1, &ID);
     glCreateRenderbuffers(1, &_rbo);
 }

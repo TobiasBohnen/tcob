@@ -12,10 +12,8 @@
 namespace tcob::gl {
 class Framebuffer final : public Object {
 public:
-    Framebuffer() = default;
+    Framebuffer();
     ~Framebuffer() override;
-
-    void create();
 
     void bind() const;
     static void BindDefault();

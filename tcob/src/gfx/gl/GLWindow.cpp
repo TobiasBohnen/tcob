@@ -44,7 +44,6 @@ Window::Window(const PointU& loc, const SizeU& size, u32 aa)
 
     // Create OpenGL context
     _context = std::make_unique<gl::Context>(_window);
-    create_framebuffer();
     on_resize(size);
 
     Quad q {};
@@ -196,7 +195,7 @@ void Window::on_resize(const SizeU& newsize)
 {
     const f32 aspectRatio { static_cast<f32>(newsize.Width) / newsize.Height };
     camera().aspect_ratio(aspectRatio);
-    resize_framebuffer(newsize);
+    setup_framebuffer(newsize);
     _defaultTarget.size(newsize);
 }
 

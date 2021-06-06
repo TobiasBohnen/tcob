@@ -32,6 +32,8 @@ RenderTarget::RenderTarget()
     : _material { std::make_shared<Material>() }
     , _matRes { std::make_shared<Resource<Material>>(_material) }
 {
+    _texture = std::make_shared<Texture2D>();
+    _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
 }
 
 auto RenderTarget::material() const -> ResourcePtr<Material>
@@ -100,7 +102,7 @@ auto RenderTarget::convert_screen_to_world(const RectI& rect) -> RectF
 
 void RenderTarget::setup_render(bool debug)
 {
-    _frameBuffer.bind();
+    _frameBuffer->bind();
     const SizeI s { size() };
     glViewport(0, 0, s.Width, s.Height);
 
@@ -142,7 +144,7 @@ void RenderTarget::disable_scissor() const
 
 auto RenderTarget::read_pixel(const PointI& pos) const -> Color
 {
-    _frameBuffer.bind();
+    _frameBuffer->bind();
     std::array<u8, 4> data {};
     glReadPixels(pos.X, size().Height - pos.Y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
     Framebuffer::BindDefault();
@@ -151,7 +153,7 @@ auto RenderTarget::read_pixel(const PointI& pos) const -> Color
 
 auto RenderTarget::create_screenshot() -> Image
 {
-    _frameBuffer.bind();
+    _frameBuffer->bind();
 
     auto [width, height] = size();
     std::vector<u8> pixels;
@@ -184,20 +186,16 @@ void RenderTarget::setup_ubo(bool debug)
 
 void RenderTarget::clear(const Color& c) const
 {
-    _frameBuffer.clear(c);
+    _frameBuffer->clear(c);
 }
 
-void RenderTarget::create_framebuffer()
+void RenderTarget::setup_framebuffer(const SizeU& size)
 {
-    _frameBuffer.create();
-    _texture = std::make_shared<Texture2D>();
-    _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
-}
+    if (!_frameBuffer)
+        _frameBuffer = std::make_unique<Framebuffer>();
 
-void RenderTarget::resize_framebuffer(const SizeU& size)
-{
     // TODO: test this (maybe change texture to mutable)
     _texture->create(size);
-    _frameBuffer.attach_texture(_texture.get());
+    _frameBuffer->attach_texture(_texture.get());
 }
 }

@@ -10,8 +10,7 @@
 namespace tcob::gl {
 void RenderTexture::create(const SizeU& size)
 {
-    create_framebuffer();
-    resize_framebuffer(size);
+    setup_framebuffer(size);
     texture()->regions()["default"] = TextureRegion { { 0, 0, 1, -1 } };
 }
 

@@ -48,13 +48,12 @@ public:
 protected:
     auto texture() const -> Texture2D*;
 
-    void create_framebuffer();
-    void resize_framebuffer(const SizeU& size);
+    void setup_framebuffer(const SizeU& size);
 
     void setup_ubo(bool debug);
 
 private:
-    Framebuffer _frameBuffer;
+    std::unique_ptr<Framebuffer> _frameBuffer;
 
     std::shared_ptr<Texture2D> _texture;
     std::shared_ptr<Material> _material;
