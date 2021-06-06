@@ -40,5 +40,5 @@ private:
 
     WebpAnimation webp;
     Sound sound0;
-    ResourcePtr<Music> music0;
+    Music music0;
 };

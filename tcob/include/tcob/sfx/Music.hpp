@@ -27,6 +27,9 @@ public:
     Music();
     ~Music();
 
+    Music(const Music& other);
+    auto operator=(const Music& other) -> Music&;
+
     auto open(const std::string& filename) -> bool;
 
     void start(bool looped = false) override;

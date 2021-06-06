@@ -22,6 +22,18 @@ Music::~Music()
     stop_stream();
 }
 
+Music::Music(const Music& other)
+{
+    *this = other;
+}
+
+auto Music::operator=(const Music& other) -> Music&
+{
+    AudioSource::operator=(other);
+    open(other._file);
+    return *this;
+}
+
 auto Music::open(const std::string& filename) -> bool
 {
     if (FileSystem::is_file(filename)) {

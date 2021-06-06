@@ -184,7 +184,7 @@ void MiscScene::on_start()
     webp.position({ 0.75f, 0.25f });
 
     sound0 = *resMgr.get<Sound>("res", "test");
-    music0 = resMgr.get<Music>("res", "test");
+    music0 = *resMgr.get<Music>("res", "test");
 }
 
 void MiscScene::draw(RenderTarget& target)
@@ -216,8 +216,8 @@ void MiscScene::fixed_update(f64 deltaTime)
     stream << "avg FPS:" << game().stats().average_fps();
     stream << " best FPS:" << game().stats().best_fps();
     stream << " worst FPS:" << game().stats().worst_fps();
-    stream << "|" << music0->duration();
-    stream << "|" << music0->playback_position();
+    stream << "|" << music0.duration();
+    stream << "|" << music0.playback_position();
 
     game().window().title("TestGame " + stream.str());
 }
@@ -333,7 +333,7 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
             }
         }
     } else if (ev.Code == Scancode::O) {
-        music0->start(true);
+        music0.start(true);
     } else if (ev.Code == Scancode::P) {
         sound0.start();
     } else if (ev.Code == Scancode::T) {
@@ -350,7 +350,6 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
     } else if (ev.Code == Scancode::M) {
         game().window().create_screenshot().save_async("screen1async.webp");
     } else if (ev.Code == Scancode::BACKSPACE) {
-        music0->stop();
         game().pop_current_scene();
     }
 }

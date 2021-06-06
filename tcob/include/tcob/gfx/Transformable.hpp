@@ -68,7 +68,7 @@ protected:
     void update_transform();
 
 private:
-    Transform _transform;
+    Transform _transform {};
     f32 _rotation { 0 };
     SizeF _scale { SizeF::One };
     PointF _translation { PointF::Zero };
