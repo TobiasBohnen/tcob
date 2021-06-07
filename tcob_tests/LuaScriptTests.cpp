@@ -43,7 +43,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
     }
     {
         auto res = run_script(
-            "tableX = { left = 2.7, x = 10, t = { a = 20, y = 30.2, m = {z = 1, f = 3 } }, y = true, z ='ok' }");
+            "tableX = { left = 2.7, x = 10, t = { a = 20, y = 30.2, m = { z = 1, f = 3 } }, y = true, z = 'ok' }");
         REQUIRE(res.State == LuaResultState::Ok);
         LuaTable tab = global["tableX"];
 
