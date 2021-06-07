@@ -147,7 +147,7 @@ public:
         const auto lambda { [func](T* instance, P&&... args) {
             return (instance->*func)(std::forward<P>(args)...);
         } };
-        _funcs[name] = detail::to_LuaClosurePtr(std::function<R(T*, P...)>(lambda));
+        _funcs[name] = make_unique_luaclosure(std::function<R(T*, P...)>(lambda));
     }
 
     template <typename R, typename... P>
@@ -156,14 +156,14 @@ public:
         const auto lambda { [func](T* instance, P&&... args) {
             return (instance->*func)(std::forward<P>(args)...);
         } };
-        _funcs[name] = detail::to_LuaClosurePtr(std::function<R(T*, P...)>(lambda));
+        _funcs[name] = make_unique_luaclosure(std::function<R(T*, P...)>(lambda));
     }
 
     // define non-member function
     template <typename Func>
     void function(const std::string& name, Func func)
     {
-        _funcs[name] = detail::to_LuaClosurePtr(std::function(func));
+        _funcs[name] = make_unique_luaclosure(std::function(func));
     }
 
     // define overloaded function
@@ -219,7 +219,7 @@ public:
     template <typename Func>
     void getter(const std::string& name, Func func)
     {
-        _getters[name] = detail::to_LuaClosurePtr(std::function(func));
+        _getters[name] = make_unique_luaclosure(std::function(func));
     }
 
     template <typename R>
@@ -246,7 +246,7 @@ public:
     template <typename Func>
     void setter(const std::string& name, Func func)
     {
-        _setters[name] = detail::to_LuaClosurePtr(std::function(func));
+        _setters[name] = make_unique_luaclosure(std::function(func));
     }
 
     template <typename... Func>
@@ -265,12 +265,12 @@ public:
         }
         // create 'new' function
         if (!_globalTable->has(_name, "new")) {
-            auto ptr { detail::to_LuaClosurePtr(
+            auto ptr { make_unique_luaclosure(
                 std::function<void(void)>(
                     [this]() {
                         this->overload_resolution("new");
                     })) };
-            (*_globalTable)[_name]["new"] = ptr;
+            (*_globalTable)[_name]["new"] = ptr.get();
             _metamethods.push_back(std::move(ptr));
         }
 
@@ -279,7 +279,7 @@ public:
             return LuaOwnedPtr<T>(new T(std::forward<P>(args)...));
         } };
 
-        auto constr { detail::to_LuaClosurePtr(std::function<LuaOwnedPtr<T>(P...)>(lambda)) };
+        auto constr { make_unique_luaclosure(std::function<LuaOwnedPtr<T>(P...)>(lambda)) };
         _constructors.push_back(std::move(constr));
     }
 
@@ -290,69 +290,69 @@ public:
         std::string name = metamethodsMap[method];
         if (!_overloads.contains(name)) {
             auto lambda { [this, name]() { this->overload_resolution(name); } };
-            auto ptr { detail::to_LuaClosurePtr(std::function(lambda)) };
+            auto ptr { make_unique_luaclosure(std::function(lambda)) };
             set_metamethod(name, typeid(T).name(), ptr);
             set_metamethod(name, (std::string(typeid(T).name()) + "_gc").c_str(), ptr);
             _metamethods.push_back(std::move(ptr));
         }
 
-        auto ptr { detail::to_LuaClosurePtr(std::function(func)) };
+        auto ptr { make_unique_luaclosure(std::function(func)) };
         _overloads[name].push_back(std::move(ptr));
     }
 
 private:
-    void set_metamethod(const std::string& name, const char* tableName, detail::LuaClosurePtr& ptr)
+    void set_metamethod(const std::string& name, const char* tableName, LuaClosureUniquePtr& ptr)
     {
         _state.get_metatable(tableName);
 
         i32 top { _state.get_top() };
         _state.push(name);
-        _state.push(ptr);
+        _state.push(ptr.get());
         _state.set_table(top);
 
         _state.pop(1);
     }
 
     template <typename R, typename... P, typename... Func>
-    void overload(std::unordered_map<std::string, detail::LuaClosurePtr>& target, const std::string& name, R (T::*func)(P...), Func... funcs)
+    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name, R (T::*func)(P...), Func... funcs)
     {
         // wrap member functions
         const auto lambda { [func](T* instance, auto&&... args) {
             return (instance->*func)(std::forward<decltype(args)>(args)...);
         } };
 
-        _overloads[name].push_back(detail::to_LuaClosurePtr(std::function<R(T*, P...)>(lambda)));
+        _overloads[name].push_back(make_unique_luaclosure(std::function<R(T*, P...)>(lambda)));
         overload(target, name, funcs...);
     }
 
     template <typename R, typename... P, typename... Func>
-    void overload(std::unordered_map<std::string, detail::LuaClosurePtr>& target, const std::string& name, R (T::*func)(P...) const, Func... funcs)
+    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name, R (T::*func)(P...) const, Func... funcs)
     {
         // wrap member functions
         const auto lambda { [func](T* instance, auto&&... args) {
             return (instance->*func)(std::forward<decltype(args)>(args)...);
         } };
 
-        _overloads[name].push_back(detail::to_LuaClosurePtr(std::function<R(T*, P...)>(lambda)));
+        _overloads[name].push_back(make_unique_luaclosure(std::function<R(T*, P...)>(lambda)));
         overload(target, name, funcs...);
     }
 
     template <typename Func, typename... Funcs>
-    void overload(std::unordered_map<std::string, detail::LuaClosurePtr>& target, const std::string& name, Func func, Funcs... funcs)
+    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name, Func func, Funcs... funcs)
     {
-        _overloads[name].push_back(detail::to_LuaClosurePtr(std::function(func)));
+        _overloads[name].push_back(make_unique_luaclosure(std::function(func)));
         overload(target, name, funcs...);
     }
 
-    void overload(std::unordered_map<std::string, detail::LuaClosurePtr>& target, const std::string& name)
+    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name)
     {
         auto lambda { [this, name]() { this->overload_resolution(name); } };
-        target[name] = detail::to_LuaClosurePtr(std::function<void(void)>(lambda));
+        target[name] = make_unique_luaclosure(std::function<void(void)>(lambda));
     }
 
     void overload_resolution(const std::string& name)
     {
-        std::vector<detail::LuaClosurePtr>* funcs;
+        std::vector<LuaClosureUniquePtr>* funcs;
         if (name == "new") {
             funcs = &_constructors;
         } else {
@@ -483,8 +483,8 @@ private:
     void push_metamethod(const std::string& methodname, std::function<R(P...)>&& func, i32 idx)
     {
         _state.push(methodname);
-        auto ptr { detail::to_LuaClosurePtr(std::forward<std::function<R(P...)>>(func)) };
-        _state.push(ptr);
+        auto ptr { make_unique_luaclosure(std::forward<std::function<R(P...)>>(func)) };
+        _state.push(ptr.get());
         _state.set_table(idx);
         _metamethods.push_back(std::move(ptr));
     }
@@ -515,7 +515,7 @@ private:
                         _state.push((*b)[arg]);
                     } else {
                         if (_funcs.contains(arg)) {
-                            _state.push(_funcs[arg]);
+                            _state.push(_funcs[arg].get());
                         } else if (_getters.contains(arg)) {
                             (*_getters[arg])(_state.lua());
                         } else {
@@ -574,12 +574,12 @@ private:
         // TODO: log
     }
 
-    std::unordered_map<std::string, detail::LuaClosurePtr> _funcs;
-    std::unordered_map<std::string, detail::LuaClosurePtr> _getters;
-    std::unordered_map<std::string, detail::LuaClosurePtr> _setters;
-    std::unordered_map<std::string, std::vector<detail::LuaClosurePtr>> _overloads;
-    std::vector<detail::LuaClosurePtr> _constructors;
-    std::vector<detail::LuaClosurePtr> _metamethods;
+    std::unordered_map<std::string, LuaClosureUniquePtr> _funcs;
+    std::unordered_map<std::string, LuaClosureUniquePtr> _getters;
+    std::unordered_map<std::string, LuaClosureUniquePtr> _setters;
+    std::unordered_map<std::string, std::vector<LuaClosureUniquePtr>> _overloads;
+    std::vector<LuaClosureUniquePtr> _constructors;
+    std::vector<LuaClosureUniquePtr> _metamethods;
 
     std::string _name;
     LuaTable* _globalTable;

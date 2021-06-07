@@ -1,3 +1,4 @@
+#include "LuaScriptTestsClass.hpp"
 #include "LuaScriptTestsHelper.hpp"
 #include "tests.hpp"
 
@@ -1523,5 +1524,33 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.DataStructs")
         REQUIRE(c == Colors::Salmon);
         c = global["w"];
         REQUIRE(c == Colors::Wheat);
+    }
+}
+
+TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.RawPointers")
+{
+    {
+        TestScriptClass t;
+        global["obj"] = &t;
+
+        std::function func = [](TestScriptClass* x) {
+            x->set_value(101);
+        };
+
+        global["func"] = func;
+
+        auto res = run_script("func(obj)");
+        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(t.get_value() == 101);
+    }
+    {
+        REQUIRE(TestScriptClass::ObjCount == 0);
+        LuaOwnedPtr<TestScriptClass> t { new TestScriptClass };
+        REQUIRE(TestScriptClass::ObjCount == 1);
+        global["obj"] = t;
+        auto res = run_script("obj = nil");
+        REQUIRE(res.State == LuaResultState::Ok);
+        perform_GC();
+        REQUIRE(TestScriptClass::ObjCount == 0);
     }
 }

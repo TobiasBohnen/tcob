@@ -60,16 +60,16 @@ struct LuaConverter<std::function<R(P...)>> {
 };
 
 template <>
-struct LuaConverter<detail::LuaClosurePtr> {
+struct LuaConverter<detail::LuaClosureBase*> {
     static constexpr i32 StackSlots { 1 };
 
-    static void ToLua(const LuaState& ls, detail::LuaClosurePtr& value)
+    static void ToLua(const LuaState& ls, detail::LuaClosureBase* value)
     {
-        ls.push_lightuserdata(reinterpret_cast<void*>(value.get()));
+        ls.push_lightuserdata(reinterpret_cast<void*>(value));
         ls.push_cclosure(
             [](lua_State* l) -> i32 {                
-            auto* p { reinterpret_cast<detail::LuaClosureBase*>(LuaState { l }.to_userdata(LuaState::UpvalueIndex(1))) };
-            return (*p)(l); },
+                auto* p { reinterpret_cast<detail::LuaClosureBase*>(LuaState { l }.to_userdata(LuaState::UpvalueIndex(1))) };
+                return (*p)(l); },
             1);
     }
 };

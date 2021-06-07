@@ -20,8 +20,6 @@ public:
     virtual auto compare_args_to_stack(lua_State* l, i32 args) -> bool = 0;
 };
 
-using LuaClosurePtr = std::unique_ptr<LuaClosureBase>;
-
 template <typename R, typename... P>
 class LuaClosure;
 template <typename R, typename... P>
@@ -110,9 +108,20 @@ private:
     func _fn;
 };
 
+}
+namespace tcob {
+using LuaClosureUniquePtr = std::unique_ptr<detail::LuaClosureBase>;
+using LuaClosureSharedPtr = std::shared_ptr<detail::LuaClosureBase>;
+
 template <typename R, typename... P>
-auto to_LuaClosurePtr(std::function<R(P...)>&& fn) -> LuaClosurePtr
+auto make_unique_luaclosure(std::function<R(P...)>&& fn) -> LuaClosureUniquePtr
 {
-    return std::make_unique<LuaClosure<R(P...)>>(fn);
+    return std::make_unique<detail::LuaClosure<R(P...)>>(fn);
+}
+
+template <typename R, typename... P>
+auto make_shared_luaclosure(std::function<R(P...)>&& fn) -> LuaClosureSharedPtr
+{
+    return std::make_shared<detail::LuaClosure<R(P...)>>(fn);
 }
 }

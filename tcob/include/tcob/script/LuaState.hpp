@@ -177,6 +177,12 @@ private:
     }
 
     template <ConvertableToLua T>
+    void to_lua(T&& value) const
+    {
+        LuaConverter<T>::ToLua(*this, value);
+    }
+
+    template <ConvertableToLua T>
     void to_lua(T& value) const
     {
         LuaConverter<T>::ToLua(*this, value);

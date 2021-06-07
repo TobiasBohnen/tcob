@@ -459,30 +459,27 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
     perform_GC();
     REQUIRE(TestScriptClass::ObjCount == 0);
 }
-TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.NotWrapped")
+
+TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
 {
+    LuaClosureSharedPtr l;
+
+    auto lambda2 = [&l](TestScriptClass* instance1, i32 x) mutable {
+        instance1->set_value(x * 10);
+        auto lambda = [instance1](i32 y) {
+            return instance1->get_value() + y;
+        };
+        l = make_shared_luaclosure(std::function(lambda));
+
+        return l.get();
+    };
+
+    auto& wrapper = create_wrapper<TestScriptClass>("TSCB");
+    wrapper.function("foo", lambda2);
     {
         TestScriptClass t;
-        global["obj"] = &t;
-
-        std::function func = [](TestScriptClass* x) {
-            x->set_value(101);
-        };
-
-        global["func"] = func;
-
-        auto res = run_script("func(obj)");
-        REQUIRE(res.State == LuaResultState::Ok);
-        REQUIRE(t.get_value() == 101);
-    }
-    {
-        REQUIRE(TestScriptClass::ObjCount == 0);
-        LuaOwnedPtr<TestScriptClass> t { new TestScriptClass };
-        REQUIRE(TestScriptClass::ObjCount == 1);
-        global["obj"] = t;
-        auto res = run_script("obj = nil");
-        REQUIRE(res.State == LuaResultState::Ok);
-        perform_GC();
-        REQUIRE(TestScriptClass::ObjCount == 0);
+        global["wrap"] = &t;
+        auto ret = run_script<i32>("return wrap:foo(4)(2)");
+        REQUIRE(ret.Value == 42);
     }
 }
