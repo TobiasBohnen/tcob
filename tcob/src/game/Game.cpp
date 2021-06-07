@@ -27,7 +27,7 @@ Game::Game(const std::string& path, const std::string& name)
     SDL_Init(SDL_INIT_EVERYTHING);
     FileSystem::init(path.c_str(), name);
 
-    Log("starting");
+    Log("starting", LogLevel::Info);
     if (!_config.load()) {
         on_config_defaults();
     }
@@ -56,7 +56,7 @@ Game::~Game()
     _audio = nullptr;
 
     _config.save();
-    Log("exiting");
+    Log("exiting", LogLevel::Info);
 
     FileSystem::done();
     SDL_Quit();

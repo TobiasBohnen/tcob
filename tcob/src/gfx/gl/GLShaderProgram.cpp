@@ -41,7 +41,7 @@ auto ShaderProgram::create(const char* vertexShaderSource, const char* fragmentS
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), nullptr, infoLog.data());
-        Log("Error: vertex shader compilation error: " + std::string(infoLog.data()));
+        Log("vertex shader compilation error: " + std::string(infoLog.data()), LogLevel::Error);
         return false;
     }
 
@@ -54,7 +54,7 @@ auto ShaderProgram::create(const char* vertexShaderSource, const char* fragmentS
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), nullptr, infoLog.data());
-        Log("Error: fragment shader compilation error: " + std::string(infoLog.data()));
+        Log("fragment shader compilation error: " + std::string(infoLog.data()), LogLevel::Error);
         return false;
     }
 
@@ -67,7 +67,7 @@ auto ShaderProgram::create(const char* vertexShaderSource, const char* fragmentS
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, sizeof(infoLog), nullptr, infoLog.data());
-        Log("Error: linking error: " + std::string(infoLog.data()));
+        Log("linking error: " + std::string(infoLog.data()), LogLevel::Error);
         return false;
     }
 

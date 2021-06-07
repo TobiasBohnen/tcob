@@ -82,7 +82,8 @@ void VertexArray::resize(isize vertCount, isize indCount, BufferUsage usage)
         glNamedBufferData(_vbo, _vboSize, nullptr, bufferUsage);
         glNamedBufferData(_ebo, _eboSize, nullptr, bufferUsage);
         Log("Resizing vertex array " + std::to_string(ID) + " to "
-            + std::to_string(_vboSize / sizeof(Vertex)) + " vertices and " + std::to_string(_eboSize / sizeof(GLuint)) + " indices.");
+                + std::to_string(_vboSize / sizeof(Vertex)) + " vertices and " + std::to_string(_eboSize / sizeof(GLuint)) + " indices.",
+            LogLevel::Debug);
     }
 }
 

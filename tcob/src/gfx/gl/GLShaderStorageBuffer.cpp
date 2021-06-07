@@ -50,7 +50,8 @@ void ShaderStorageBuffer::resize(isize size, BufferUsage usage)
         glNamedBufferData(ID, _bufferSize, nullptr, bufferUsage);
         Log(
             "Resizing shader storage buffer " + std::to_string(ID) + " to "
-            + std::to_string(_bufferSize) + " bytes.");
+                + std::to_string(_bufferSize) + " bytes.",
+            LogLevel::Debug);
     }
 }
 }

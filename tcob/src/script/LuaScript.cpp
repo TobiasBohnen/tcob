@@ -69,7 +69,7 @@ auto LuaScript::do_call(i32 nargs, i32 nret) const -> LuaResultState
     _state.push_cfunction(
         [](lua_State* l) -> i32 {
         const i32 n { lua_gettop(l)};
-        Log("Lua says: " + std::string(lua_tostring(l, n)));
+        Log("Lua says: " + std::string(lua_tostring(l, n)), LogLevel::Error);
         return 0; });
     _state.insert(hpos);
     err = lua_pcall(_state.lua(), nargs, nret, hpos);
@@ -94,7 +94,7 @@ auto LuaScript::call_buffer(const byte* script, isize length, const std::string&
         return do_call(0, LUA_MULTRET);
     } else {
         const i32 n { _state.get_top() };
-        Log("Lua says: " + std::string(_state.to_string(n)));
+        Log("Lua says: " + std::string(_state.to_string(n)), LogLevel::Error);
 
         switch (err) {
         case LUA_ERRSYNTAX:

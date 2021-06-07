@@ -149,7 +149,8 @@
         "al.h": "c",
         "format": "cpp",
         "forward_list": "cpp",
-        "stb_truetype.h": "c"
+        "stb_truetype.h": "c",
+        "source_location": "cpp"
     },
     "Lua.diagnostics.disable": [
         "undefined-global"

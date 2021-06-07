@@ -22,13 +22,13 @@ auto Config::operator=(const LuaRef& other) -> Config&
 
 auto Config::load() -> bool
 {
-    Log("loading config");
+    Log("loading config", LogLevel::Info);
     std::string file;
     if (FileSystem::exists(CONFIG_FILE)) {
         file = CONFIG_FILE;
     } else {
         // load default
-        Log("Warning: Config file not found! Loading defaults.");
+        Log("Config file not found! Loading defaults.", LogLevel::Warning);
         file = DEFAULT_CONFIG_FILE;
     }
 
@@ -44,7 +44,7 @@ auto Config::load() -> bool
 
 void Config::save() const
 {
-    Log("saving config");
+    Log("saving config", LogLevel::Info);
 
     OutputFileStream s { CONFIG_FILE };
     s.write("Config = ");

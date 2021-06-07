@@ -32,7 +32,7 @@ namespace detail {
 
         ls.push_cfunction([](lua_State* l) -> i32 {
                 const i32 n { lua_gettop(l)};
-                Log("Lua says: " + std::string(lua_tostring(l, n)));
+                Log("Lua says: " + std::string(lua_tostring(l, n)), LogLevel::Error);
                 return 0; });
         ls.insert(hpos);
         err = lua_pcall(ls.lua(), nargs, LUA_MULTRET, hpos);

@@ -15,7 +15,7 @@ namespace tcob::gl {
 void debugCallback([[maybe_unused]] GLenum source, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id, GLenum severity, GLsizei, const GLchar* message, const void*)
 {
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-        Log(message);
+        Log(message, LogLevel::Error);
 }
 
 Context::Context(const PointU& loc, const SizeU& size, u32 aa)
@@ -40,10 +40,10 @@ Context::Context(const PointU& loc, const SizeU& size, u32 aa)
     flags |= SDL_WINDOW_RESIZABLE;
 
     // Create window
-    Log("creating window");
+    Log("creating window", LogLevel::Info);
     _window = SDL_CreateWindow("", loc.X, loc.Y, size.Width, size.Height, flags);
     if (!_window) {
-        Log("Error: Window creation failed!");
+        Log("Window creation failed!", LogLevel::Error);
         throw std::runtime_error("Window creation failed");
     }
 
@@ -57,16 +57,16 @@ Context::Context(const PointU& loc, const SizeU& size, u32 aa)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-    Log("want OpenGL version: " + std::to_string(glMajor) + "." + std::to_string(glMinor));
+    Log("want OpenGL version: " + std::to_string(glMajor) + "." + std::to_string(glMinor), LogLevel::Info);
 
     _context = SDL_GL_CreateContext(_window);
     if (!_context) {
-        Log("Error: OpenGL context creation failed!");
+        Log("OpenGL context creation failed!", LogLevel::Error);
         throw std::runtime_error("OpenGL context creation failed");
     }
 
     if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)) {
-        Log("Error: OpenGL loading failed!");
+        Log("OpenGL loading failed!", LogLevel::Error);
         throw std::runtime_error("OpenGL loading failed");
     }
 
@@ -74,7 +74,7 @@ Context::Context(const PointU& loc, const SizeU& size, u32 aa)
     glGetIntegerv(GL_MAJOR_VERSION, &checkMajor);
     glGetIntegerv(GL_MINOR_VERSION, &checkMinor);
 
-    Log("have OpenGL version: " + std::to_string(checkMajor) + "." + std::to_string(checkMinor));
+    Log("have OpenGL version: " + std::to_string(checkMajor) + "." + std::to_string(checkMinor), LogLevel::Info);
 
 #if defined(_DEBUG)
     // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

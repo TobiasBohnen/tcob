@@ -13,7 +13,7 @@ namespace tcob::detail::io {
 inline auto check(const std::string& msg, i32 c) -> bool
 {
     if (c == 0) {
-        Log(msg + ": " + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        Log(msg + ": " + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()), LogLevel::Error);
     }
 
     return c != 0;

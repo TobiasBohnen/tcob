@@ -6,19 +6,18 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
-#include <cstring>
+#include <source_location>
 
 #include <tcob/core/io/FileStream.hpp>
 
-#ifdef _WIN32
-constexpr auto PATH_SEP { '\\' };
-#else
-constexpr auto PATH_SEP { '/' };
-#endif
-
-#define __FILENAME__ (std::strrchr(__FILE__, PATH_SEP) ? std::strrchr(__FILE__, PATH_SEP) + 1 : __FILE__)
-
 namespace tcob {
+enum class LogLevel {
+    Debug,
+    Info,
+    Warning,
+    Error
+};
+
 class Logger final {
 public:
     static auto Instance() -> Logger&
@@ -27,7 +26,7 @@ public:
         return instance;
     }
 
-    void log(const std::string& message) const;
+    void log(const std::string& message, LogLevel level, std::source_location location) const;
     void done();
 
 private:
@@ -37,5 +36,5 @@ private:
     std::unique_ptr<OutputFileStream> _logStream;
 };
 
-#define Log(X) Logger::Instance().log("[" + std::string(__FILENAME__) + "(" + std::to_string(__LINE__) + ")]: " + (X) + "\n");
+#define Log(X, Y) Logger::Instance().log((X), (Y), std::source_location::current());
 }
