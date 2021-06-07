@@ -39,7 +39,8 @@ void Logger::log(const std::string& message, LogLevel level, std::source_locatio
     }
 
     _logStream->write(message);
-    _logStream->write(" @[" + FileSystem::stem(location.file_name()) + "(" + std::to_string(location.line()) + ")]");
+    if (level != LogLevel::Info)
+        _logStream->write(" @[" + FileSystem::stem(location.file_name()) + "(" + std::to_string(location.line()) + ")]");
     _logStream->write("\n");
     _logStream->flush();
 }
