@@ -21,14 +21,13 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
             "tableX = { 2.7, 5, 6, a = 69, 7, 8, x = 10, t = { a = 20, 30.2 } }");
         REQUIRE(res.State == LuaResultState::Ok);
         LuaTable tab = global["tableX"];
-        {
-            OutputFileStream fs { "test2.lua" };
-            fs.write("tab = ");
-            tab.dump(fs);
-            fs.write("\nreturn tab");
-        }
 
-        LuaTable tab2 = run_file<LuaTable>("test2.lua");
+        stringstream fs;
+        fs << "tab = ";
+        tab.dump(fs);
+        fs << "\nreturn tab";
+
+        LuaTable tab2 = run_script<LuaTable>(fs.str());
 
         REQUIRE((f32)tab2[1] == 2.7f);
         REQUIRE((f32)tab[1] == (f32)tab2[1]);
@@ -47,14 +46,13 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
             "tableX = { left = 2.7, x = 10, t = { a = 20, y = 30.2, m = {z = 1, f = 3 } }, y = true, z ='ok' }");
         REQUIRE(res.State == LuaResultState::Ok);
         LuaTable tab = global["tableX"];
-        {
-            OutputFileStream fs { "test1.lua" };
-            fs.write("tab = ");
-            tab.dump(fs);
-            fs.write("\nreturn tab");
-        }
 
-        LuaTable tab2 = run_file<LuaTable>("test1.lua");
+        stringstream fs;
+        fs << "tab = ";
+        tab.dump(fs);
+        fs << "\nreturn tab";
+
+        LuaTable tab2 = run_script<LuaTable>(fs.str());
 
         REQUIRE((f32)tab2["left"] == 2.7f);
         REQUIRE((f32)tab["left"] == (f32)tab2["left"]);

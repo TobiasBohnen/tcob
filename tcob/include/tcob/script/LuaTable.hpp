@@ -107,6 +107,7 @@ public:
     auto create_table(const std::string& name) const -> LuaTable;
 
     void dump(OutputFileStream& stream) const;
+    void dump(std::stringstream& stream) const;
 
     template <typename T>
     auto keys() const -> std::vector<T>
@@ -132,7 +133,7 @@ public:
     }
 
 private:
-    void dump(std::stringstream& stream, i32 indent) const;
+    void dump_it(std::stringstream& stream, i32 indent) const;
 
     template <typename Key, typename... Keys>
     void set(const LuaState& state, Key&& key, Keys&&... keys) const

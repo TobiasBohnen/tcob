@@ -35,22 +35,26 @@ auto LuaTable::create_table(const std::string& name) const -> LuaTable
     return lt;
 }
 
-void LuaTable::dump(OutputFileStream& stream) const
+void LuaTable::dump(std::stringstream& stream) const
 {
     lua_state().save_top();
 
     push_self();
 
-    std::stringstream sstream;
-    dump(sstream, 0);
-    sstream << std::endl;
-
-    stream.write(sstream.str());
+    dump_it(stream, 0);
+    stream << std::endl;
 
     lua_state().restore_top();
 }
 
-void LuaTable::dump(std::stringstream& stream, i32 indent) const
+void LuaTable::dump(OutputFileStream& stream) const
+{
+    std::stringstream sstream;
+    dump(sstream);
+    stream.write(sstream.str());
+}
+
+void LuaTable::dump_it(std::stringstream& stream, i32 indent) const
 {
     const LuaState ls { lua_state() };
 
@@ -111,7 +115,7 @@ void LuaTable::dump(std::stringstream& stream, i32 indent) const
             break;
         case LuaType::Table:
             ls.push_value(-1);
-            dump(stream, indent + 2);
+            dump_it(stream, indent + 2);
             break;
         default:
             break;
