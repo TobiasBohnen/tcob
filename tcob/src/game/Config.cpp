@@ -20,7 +20,7 @@ auto Config::operator=(const LuaRef& other) -> Config&
     return *this;
 }
 
-void Config::load()
+auto Config::load() -> bool
 {
     Log("loading config");
     std::string file;
@@ -28,16 +28,17 @@ void Config::load()
         file = CONFIG_FILE;
     } else {
         // load default
-        Log("Config file not found! Loading default.");
+        Log("Warning: Config file not found! Loading defaults.");
         file = DEFAULT_CONFIG_FILE;
     }
 
-    const auto result { _state.run_file<LuaTable>(file) };
+    const auto result { _script.run_file<LuaTable>(file) };
     if (result.State == LuaResultState::Ok) {
         *this = result.Value;
+        return true;
     } else {
-        Log("Error loading config file. Aborting.");
-        std::terminate();
+        *this = _script.global_table().create_table("Config");
+        return false;
     }
 }
 
@@ -46,8 +47,8 @@ void Config::save() const
     Log("saving config");
 
     OutputFileStream s { CONFIG_FILE };
-    s.write("local config = ");
+    s.write("Config = ");
     dump(s);
-    s.write("\nreturn config ");
+    s.write("\nreturn Config ");
 }
 }

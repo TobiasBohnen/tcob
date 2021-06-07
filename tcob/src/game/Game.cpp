@@ -28,7 +28,9 @@ Game::Game(const std::string& path, const std::string& name)
     FileSystem::init(path.c_str(), name);
 
     Log("starting");
-    _config.load();
+    if (!_config.load()) {
+        on_config_defaults();
+    }
 
     _audio = std::make_unique<AudioSystem>();
 
@@ -100,9 +102,9 @@ auto Game::audio() const -> AudioSystem&
     return *_audio;
 }
 
-auto Game::stats() -> FPSCounter&
+auto Game::config() -> Config&
 {
-    return _fps;
+    return _config;
 }
 
 auto Game::input() const -> Input&
@@ -115,9 +117,22 @@ auto Game::resources() const -> ResourceLibrary&
     return *_resources;
 }
 
+auto Game::stats() -> FPSCounter&
+{
+    return _fps;
+}
+
 auto Game::window() const -> gl::Window&
 {
     return *_window;
+}
+
+void Game::on_config_defaults()
+{
+    //set defaults
+    _config["Video"]["Fullscreen"] = false;
+    _config["Video"]["Resolution"] = SizeU { 800, 600 };
+    _config["Video"]["VSync"] = false;
 }
 
 void Game::loop()
@@ -218,10 +233,9 @@ void Game::create_context()
 {
     const bool fullscreen { _config["Video"]["FullScreen"] };
     const SizeU size { _config["Video"]["Resolution"] };
-    const u32 aa { _config["Video"]["AntiAliasing"] };
     const bool vsync { _config["Video"]["VSync"] };
 
-    _context = std::make_unique<gl::Context>(PointU { SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED }, size, aa);
+    _context = std::make_unique<gl::Context>(PointU { SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED }, size);
 
     _window = std::unique_ptr<gl::Window> { new gl::Window { _context->window_handle() } };
 

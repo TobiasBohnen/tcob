@@ -69,15 +69,19 @@ public:
     void pop_current_scene();
 
     auto audio() const -> AudioSystem&;
-    auto stats() -> FPSCounter&;
+    auto config() -> Config&;
     auto input() const -> Input&;
     auto resources() const -> ResourceLibrary&;
+    auto stats() -> FPSCounter&;
     auto window() const -> gl::Window&;
+
+protected:
+    virtual void on_config_defaults();
+    virtual void on_quit();
 
 private:
     void create_context();
     void loop();
-    void on_quit();
     void process_events();
     void pop_scene();
 

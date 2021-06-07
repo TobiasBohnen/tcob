@@ -17,9 +17,9 @@ public:
     auto operator=(const LuaRef& other) -> Config&;
 
     void save() const;
-    void load();
+    auto load() -> bool;
 
 private:
-    LuaScript _state;
+    LuaScript _script;
 };
 }
