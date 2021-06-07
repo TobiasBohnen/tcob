@@ -462,24 +462,53 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
 
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
 {
-    LuaClosureSharedPtr l;
-
-    auto lambda2 = [&l](TestScriptClass* instance1, i32 x) mutable {
-        instance1->set_value(x * 10);
-        auto lambda = [instance1](i32 y) {
-            return instance1->get_value() + y;
-        };
-        l = make_shared_luaclosure(std::function(lambda));
-
-        return l.get();
-    };
-
-    auto& wrapper = create_wrapper<TestScriptClass>("TSCB");
-    wrapper.function("foo", lambda2);
     {
-        TestScriptClass t;
-        global["wrap"] = &t;
-        auto ret = run_script<i32>("return wrap:foo(4)(2)");
-        REQUIRE(ret.Value == 42);
+        LuaClosureSharedPtr l;
+
+        auto foo = [&l](TestScriptClass* instance1, i32 x) mutable {
+            instance1->set_value(x * 10);
+            auto lambda = [instance1](i32 y) {
+                return instance1->get_value() + y;
+            };
+
+            l = make_shared_luaclosure(std::function(lambda));
+            return l.get();
+        };
+
+        auto& wrapper = create_wrapper<TestScriptClass>("TSCB");
+        wrapper.function("foo", foo);
+        {
+            TestScriptClass t;
+            global["wrap"] = &t;
+            auto ret = run_script<i32>("return wrap:foo(4)(2)");
+            REQUIRE(ret.State == LuaResultState::Ok);
+            REQUIRE(ret.Value == 42);
+        }
+    }
+    {
+        std::string text {};
+
+        LuaClosureSharedPtr l;
+        auto text_adder = [&l, &text](std::string& y) {
+            text += y;
+            return l.get();
+        };
+
+        l = make_shared_luaclosure(std::function(text_adder));
+
+        auto text_setter = [&l, &text](std::string& x) mutable {
+            text = x;
+            return l.get();
+        };
+
+        auto& wrapper = create_wrapper<TestScriptClass>("TSCB");
+        wrapper.function("foo", text_setter);
+        {
+            TestScriptClass t;
+            global["wrap"] = &t;
+            auto ret = run_script("wrap.foo 'hello' ' ' 'world' '!'");
+            REQUIRE(ret.State == LuaResultState::Ok);
+            REQUIRE(text == "hello world!");
+        }
     }
 }
