@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <list>
+#include <mutex>
 #include <optional>
 
 #include <tcob/assets/Resource.hpp>
@@ -168,5 +169,7 @@ private:
     std::vector<Particle> _particles;
     u32 _aliveParticleCount { 0 };
     std::vector<ParticleEmitter> _emitters;
+
+    std::mutex _mutex;
 };
 }

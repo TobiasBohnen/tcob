@@ -60,6 +60,8 @@ void ParticleSystem::stop()
 
 void ParticleSystem::update(MilliSeconds delta)
 {
+    std::lock_guard lock { _mutex };
+
     if (!_started) {
         return;
     }
@@ -149,6 +151,8 @@ void ParticleSystem::add_affector(const std::function<void(Particle&)>& func)
 
 void ParticleSystem::draw(gl::RenderTarget& target)
 {
+    std::lock_guard lock { _mutex };
+
     if (_started && _aliveParticleCount > 0 && _material) {
         isize count { 0 };
         Quad* quad { _renderer.map(_aliveParticleCount) };

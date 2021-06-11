@@ -185,6 +185,14 @@ void MiscScene::on_start()
 
     sound0 = *resMgr.get<Sound>("res", "test");
     music0 = *resMgr.get<Music>("res", "test");
+
+    auto lambda {
+        [&](MilliSeconds deltaTime) {
+            partSystem1.update(deltaTime);
+        }
+    };
+    _timer.Tick.connect(lambda);
+    _timer.start(MilliSeconds { 1 });
 }
 
 void MiscScene::on_draw(RenderTarget& target)
@@ -203,7 +211,7 @@ void MiscScene::on_update(MilliSeconds deltaTime)
     tileMap.update(deltaTime);
     layer1.update(deltaTime);
     _rvc.update(deltaTime);
-    partSystem1.update(deltaTime);
+
     pointcloud.update(deltaTime);
     ninepatch.update(deltaTime);
     webp.update(deltaTime);

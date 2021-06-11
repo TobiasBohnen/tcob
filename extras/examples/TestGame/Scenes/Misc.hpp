@@ -41,4 +41,5 @@ private:
     WebpAnimation webp;
     Sound sound0;
     Music music0;
+    Timer _timer;
 };
