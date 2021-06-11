@@ -36,8 +36,6 @@ class Font {
 public:
     Font();
     ~Font();
-    Font(const Font&) = delete;
-    auto operator=(const Font& other) -> Font& = delete;
 
     virtual auto load(const std::string& filename, u32 fontSize) -> bool = 0;
 
@@ -72,12 +70,12 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class SdfFont final : public Font {
+class TrueTypeFont final : public Font {
 public:
-    SdfFont();
-    ~SdfFont();
-    SdfFont(const SdfFont&) = delete;
-    auto operator=(const SdfFont& other) -> SdfFont& = delete;
+    explicit TrueTypeFont(bool sdfmode);
+    ~TrueTypeFont();
+    TrueTypeFont(const TrueTypeFont&) = delete;
+    auto operator=(const TrueTypeFont& other) -> TrueTypeFont& = delete;
 
     auto load(const std::string& filename, u32 fontSize) -> bool override;
 
@@ -100,6 +98,8 @@ private:
     i32 _ascent { 0 };
     i32 _descent { 0 };
     i32 _lineGap { 0 };
+
+    bool _sdfMode { false };
 
     std::unordered_map<u32, Glyph> _glyphs;
     std::unordered_map<u32, u32> _glyphIndices;

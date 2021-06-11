@@ -125,13 +125,14 @@ void Font::kerning(bool kerning)
 
 ////////////////////////////////////////////////////////////
 
-SdfFont::SdfFont()
-    : _fontInfo { new stbtt_fontinfo }
-    , Font {}
+TrueTypeFont::TrueTypeFont(bool sdfmode)
+    : Font {}
+    , _fontInfo { new stbtt_fontinfo }
+    , _sdfMode(sdfmode)
 {
 }
 
-SdfFont::~SdfFont()
+TrueTypeFont::~TrueTypeFont()
 {
     if (_fontInfo) {
         delete _fontInfo;
@@ -139,7 +140,7 @@ SdfFont::~SdfFont()
     }
 }
 
-auto SdfFont::load(const std::string& filename, u32 fontSize) -> bool
+auto TrueTypeFont::load(const std::string& filename, u32 fontSize) -> bool
 {
     if (!FileSystem::exists(filename)) {
         //TODO: log error
@@ -171,7 +172,7 @@ auto SdfFont::load(const std::string& filename, u32 fontSize) -> bool
     return true;
 }
 
-auto SdfFont::shape_text(const std::string& text) -> std::vector<Glyph>
+auto TrueTypeFont::shape_text(const std::string& text) -> std::vector<Glyph>
 {
     auto utf32text { convert_UTF8_to_UTF32(text) };
 
@@ -194,28 +195,34 @@ auto SdfFont::shape_text(const std::string& text) -> std::vector<Glyph>
     return retValue;
 }
 
-auto SdfFont::ascender() const -> f32
+auto TrueTypeFont::ascender() const -> f32
 {
     return _ascent * _fontScale;
 }
 
-auto SdfFont::descender() const -> f32
+auto TrueTypeFont::descender() const -> f32
 {
     return _descent * _fontScale;
 }
 
-auto SdfFont::height() const -> f32
+auto TrueTypeFont::height() const -> f32
 {
     return (_ascent - _descent + _lineGap) * _fontScale;
 }
 
-auto SdfFont::cache_glyph(u32 gi) -> bool
+auto TrueTypeFont::cache_glyph(u32 gi) -> bool
 {
     if (!_glyphs.contains(gi)) {
-        const u8 onEdgeValue { 0x7F };
-        const f32 pixelDistScale { 0x3F };
+
         i32 glWidth { 0 }, glHeight { 0 }, xoff { 0 }, yoff { 0 };
-        auto* bitmap { stbtt_GetGlyphSDF(_fontInfo, _fontScale, gi, GLYPH_PADDING, onEdgeValue, pixelDistScale, &glWidth, &glHeight, &xoff, &yoff) };
+        ubyte* bitmap;
+        if (_sdfMode) {
+            const u8 onEdgeValue { 0x7F };
+            const f32 pixelDistScale { 0x3F };
+            bitmap = stbtt_GetGlyphSDF(_fontInfo, _fontScale, gi, GLYPH_PADDING, onEdgeValue, pixelDistScale, &glWidth, &glHeight, &xoff, &yoff);
+        } else {
+            bitmap = stbtt_GetGlyphBitmap(_fontInfo, _fontScale, _fontScale, gi, &glWidth, &glHeight, &xoff, &yoff);
+        }
 
         // check font texture space
         if (_fontTextureCursor.X + glWidth >= FONT_TEXTURE_SIZE) { //new line
@@ -232,7 +239,10 @@ auto SdfFont::cache_glyph(u32 gi) -> bool
         auto [x, y] { _fontTextureCursor };
         texture()->update({ x, y }, { static_cast<u32>(glWidth), static_cast<u32>(glHeight) }, bitmap, glWidth, 1);
 
-        stbtt_FreeSDF(bitmap, nullptr);
+        if (_sdfMode)
+            stbtt_FreeSDF(bitmap, nullptr);
+        else
+            stbtt_FreeBitmap(bitmap, nullptr);
 
         i32 advanceWidth {}, lsb {};
         stbtt_GetGlyphHMetrics(_fontInfo, gi, &advanceWidth, &lsb);
@@ -254,7 +264,7 @@ auto SdfFont::cache_glyph(u32 gi) -> bool
     return true;
 }
 
-auto SdfFont::codepoint_to_glyphindex(u32 codepoint) -> u32
+auto TrueTypeFont::codepoint_to_glyphindex(u32 codepoint) -> u32
 {
     if (!_glyphIndices.contains(codepoint)) {
         _glyphIndices[codepoint] = static_cast<u32>(stbtt_FindGlyphIndex(_fontInfo, codepoint));

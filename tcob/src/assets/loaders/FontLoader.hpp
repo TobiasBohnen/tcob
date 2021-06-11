@@ -37,7 +37,8 @@ private:
         bool isDefault { false };
     };
 
-    std::function<FontDef*(const std::string&)> _funcNew;
+    std::function<FontDef*(const std::string&)> _funcNewSDF;
+    std::function<FontDef*(const std::string&)> _funcNewTTF;
     std::vector<std::unique_ptr<FontDef>> _cache;
 
     std::unordered_map<std::string, ReloadInfo> _reloadInfo;

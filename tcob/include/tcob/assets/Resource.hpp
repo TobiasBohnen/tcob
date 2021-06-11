@@ -113,11 +113,11 @@ protected:
     virtual void do_unload(ResourcePtr<T>, bool) {};
     virtual auto do_reload(ResourcePtr<T>) -> bool { return false; }
 
-    template <typename R = T>
-    auto get_or_create_resource(const std::string& resname) -> ResourcePtr<T>
+    template <typename R = T, typename... Args>
+    auto get_or_create_resource(const std::string& resname, Args&&... args) -> ResourcePtr<T>
     {
         if (!_resources.contains(resname)) {
-            auto obj { std::make_shared<R>() };
+            auto obj { std::make_shared<R>(args...) };
             _objects[resname] = obj;
             _resources[resname] = { std::make_shared<Resource<T>>(obj, resname, this) };
         }

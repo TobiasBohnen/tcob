@@ -15,9 +15,9 @@ FontLoader::FontLoader(ResourceGroup& group)
 
 void FontLoader::register_wrapper(LuaScript& script)
 {
-    // texture
-    _funcNew = [this](const std::string& s) {
-        auto font { get_or_create_resource<SdfFont>(s) };
+    // font
+    _funcNewTTF = [this](const std::string& s) {
+        auto font { get_or_create_resource<TrueTypeFont>(s, false) };
         auto def { std::make_unique<FontDef>() };
         def->Res = font;
 
@@ -25,7 +25,18 @@ void FontLoader::register_wrapper(LuaScript& script)
         _cache.push_back(std::move(def));
         return retValue;
     };
-    script.global_table()["sdf_font"] = _funcNew;
+    script.global_table()["font"] = _funcNewTTF;
+
+    _funcNewSDF = [this](const std::string& s) {
+        auto font { get_or_create_resource<TrueTypeFont>(s, true) };
+        auto def { std::make_unique<FontDef>() };
+        def->Res = font;
+
+        auto retValue { def.get() };
+        _cache.push_back(std::move(def));
+        return retValue;
+    };
+    script.global_table()["sdf_font"] = _funcNewSDF;
 
     auto& wrapper { script.create_wrapper<FontDef>("FontDef") };
     wrapper.function("source", [](FontDef* def, const std::string& val) {

@@ -28,6 +28,13 @@
   
 ## **fonts**
 
+- font [name]
+  - source = [file]
+  - size = [int]
+  - kerning = [bool]
+  - is_default
+  - material [material::name]
+
 - sdf_font [name]
   - source = [file]
   - size = [int]
