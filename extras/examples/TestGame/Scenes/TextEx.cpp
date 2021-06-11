@@ -29,7 +29,7 @@ void TextEx::on_start()
     _text3.bounds({ { 0.05f, 0.31f }, { 0.55f, 0.5f } });
 }
 
-void TextEx::draw(RenderTarget& target)
+void TextEx::on_draw(RenderTarget& target)
 {
     target.clear(Colors::Gray);
 
@@ -39,7 +39,7 @@ void TextEx::draw(RenderTarget& target)
     _text3.draw(target);
 }
 
-void TextEx::update(f64 deltaTime)
+void TextEx::on_update(f64 deltaTime)
 {
     _text0.update(deltaTime);
     _text1.update(deltaTime);
@@ -47,7 +47,7 @@ void TextEx::update(f64 deltaTime)
     _text3.update(deltaTime);
 }
 
-void TextEx::fixed_update(f64 deltaTime)
+void TextEx::on_fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

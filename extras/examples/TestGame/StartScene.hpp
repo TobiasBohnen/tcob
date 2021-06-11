@@ -7,12 +7,13 @@ public:
     StartScene(Game& game);
     ~StartScene();
 
-    virtual void draw(RenderTarget& target) override;
-    void update(f64 deltaTime) override;
-    void fixed_update(f64 deltaTime) override;
-
 protected:
     void on_start() override;
+
+    void on_draw(RenderTarget& target) override;
+
+    void on_update(f64 deltaTime) override;
+    void on_fixed_update(f64 deltaTime) override;
 
     void on_key_down(const KeyboardEvent& ev) override;
     void on_mouse_motion(const MouseMotionEvent& ev) override;

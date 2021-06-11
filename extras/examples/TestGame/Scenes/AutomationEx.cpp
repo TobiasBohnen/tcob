@@ -142,12 +142,12 @@ void AutomationEx::on_start()
     }
 }
 
-void AutomationEx::draw(RenderTarget& target)
+void AutomationEx::on_draw(RenderTarget& target)
 {
     _layer1.draw(target);
 }
 
-void AutomationEx::update(f64 deltaTime)
+void AutomationEx::on_update(f64 deltaTime)
 {
     for (auto& queue : _queues) {
         queue.update(deltaTime);
@@ -155,7 +155,7 @@ void AutomationEx::update(f64 deltaTime)
     _layer1.update(deltaTime);
 }
 
-void AutomationEx::fixed_update(f64 deltaTime)
+void AutomationEx::on_fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

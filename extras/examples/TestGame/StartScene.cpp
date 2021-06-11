@@ -41,16 +41,16 @@ void StartScene::on_start()
     _text.update(0);
 }
 
-void StartScene::draw(RenderTarget& target)
+void StartScene::on_draw(RenderTarget& target)
 {
     _text.draw(target);
 }
 
-void StartScene::update(f64 deltaTime)
+void StartScene::on_update(f64 deltaTime)
 {
 }
 
-void StartScene::fixed_update(f64 deltaTime)
+void StartScene::on_fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

@@ -23,15 +23,16 @@ public:
     void wake_up();
     void sleep();
 
-    void draw(gl::RenderTarget& target) override = 0;
-
 protected:
-    virtual void fixed_update(f64 deltaTime) = 0;
+    virtual void on_update(f64 deltaTime) = 0;
+    virtual void on_fixed_update(f64 deltaTime) = 0;
 
     virtual void on_start();
     virtual void on_finish();
     virtual void on_wake_up();
     virtual void on_sleep();
+
+    virtual void on_draw(gl::RenderTarget& target) = 0;
 
     virtual void on_key_down(const KeyboardEvent& ev);
     virtual void on_key_up(const KeyboardEvent& ev);
@@ -46,6 +47,9 @@ protected:
     auto game() const -> Game&;
 
 private:
+    void update(f64 deltaTime) override final;
+    void draw(gl::RenderTarget& target) override final;
+
     void attach_events();
     void detach_events();
 

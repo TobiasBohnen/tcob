@@ -42,11 +42,21 @@ auto Scene::game() const -> Game&
     return _game;
 }
 
+void Scene::update(f64 deltaTime)
+{
+    on_update(deltaTime);
+}
+
+void Scene::draw(gl::RenderTarget& target)
+{
+    on_draw(target);
+}
+
 void Scene::attach_events()
 {
     _connMan.connect(_game.Draw, &Scene::draw, this);
     _connMan.connect(_game.Update, &Scene::update, this);
-    _connMan.connect(_game.FixedUpdate, &Scene::fixed_update, this);
+    _connMan.connect(_game.FixedUpdate, &Scene::on_fixed_update, this);
 
     auto& input { _game.input() };
     _connMan.connect(input.KeyUp, &Scene::on_key_up, this);

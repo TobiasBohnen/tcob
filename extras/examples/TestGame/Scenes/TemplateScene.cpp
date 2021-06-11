@@ -14,17 +14,17 @@ void TemplateScene::on_start()
 {
 }
 
-void TemplateScene::draw(RenderTarget& target)
+void TemplateScene::on_draw(RenderTarget& target)
 {
     layer1.draw(target);
 }
 
-void TemplateScene::update(f64 deltaTime)
+void TemplateScene::on_update(f64 deltaTime)
 {
     layer1.update(deltaTime);
 }
 
-void TemplateScene::fixed_update(f64 deltaTime)
+void TemplateScene::on_fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

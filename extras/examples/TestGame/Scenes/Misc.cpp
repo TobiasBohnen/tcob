@@ -187,7 +187,7 @@ void MiscScene::on_start()
     music0 = *resMgr.get<Music>("res", "test");
 }
 
-void MiscScene::draw(RenderTarget& target)
+void MiscScene::on_draw(RenderTarget& target)
 {
     tileMap.draw(target);
     layer1.draw(target);
@@ -197,7 +197,7 @@ void MiscScene::draw(RenderTarget& target)
     webp.draw(target);
 }
 
-void MiscScene::update(f64 deltaTime)
+void MiscScene::on_update(f64 deltaTime)
 {
     text.update(deltaTime);
     tileMap.update(deltaTime);
@@ -209,7 +209,7 @@ void MiscScene::update(f64 deltaTime)
     webp.update(deltaTime);
 }
 
-void MiscScene::fixed_update(f64 deltaTime)
+void MiscScene::on_fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
@@ -356,10 +356,4 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
 
 void MiscScene::on_mouse_motion(const MouseMotionEvent& ev)
 {
-}
-
-void MiscScene::on_controller_axis_motion(const ControllerAxisEvent& ev)
-{
-    if (ev.Axis == GameControllerAxis::LeftX)
-        std::cout << static_cast<i32>(ev.Axis) << ":" << ev.Value << std::endl;
 }

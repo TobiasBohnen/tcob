@@ -9,12 +9,13 @@ public:
     CanvasEx(Game& game);
     ~CanvasEx();
 
-    void fixed_update(f64 deltaTime) override;
-    void update(double deltaTime) override;
-    void draw(RenderTarget& target) override;
-
 protected:
     void on_start() override;
+
+    void on_draw(RenderTarget& target) override;
+
+    void on_update(f64 deltaTime) override;
+    void on_fixed_update(f64 deltaTime) override;
 
     void on_key_down(const KeyboardEvent& ev) override;
     void on_mouse_motion(const MouseMotionEvent& ev) override;

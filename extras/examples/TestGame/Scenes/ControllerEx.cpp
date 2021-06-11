@@ -41,17 +41,17 @@ void ControllerEx::on_start()
     _controllerDesc.scale({ 0.75f, 0.75f });
 }
 
-void ControllerEx::draw(RenderTarget& target)
+void ControllerEx::on_draw(RenderTarget& target)
 {
     _text.draw(target);
     _controllerDesc.draw(target);
 }
 
-void ControllerEx::update(f64 deltaTime)
+void ControllerEx::on_update(f64 deltaTime)
 {
 }
 
-void ControllerEx::fixed_update(f64 deltaTime)
+void ControllerEx::on_fixed_update(f64 deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
