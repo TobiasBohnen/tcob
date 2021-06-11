@@ -35,7 +35,7 @@ public:
 
     auto aabb() const -> RectF;
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
 private:
     friend class SpriteBatch;
@@ -88,7 +88,7 @@ public:
 
     auto sprite_count() const -> isize;
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 

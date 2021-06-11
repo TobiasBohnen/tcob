@@ -26,7 +26,7 @@ public:
     void define_mode(const std::string& name, const std::string& tex, const PointI& hotspot = PointI::Zero);
     void active_mode(const std::string& name);
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 

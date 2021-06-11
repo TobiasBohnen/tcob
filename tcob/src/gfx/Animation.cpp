@@ -8,9 +8,11 @@
 #include <algorithm>
 
 namespace tcob {
-auto FrameAnimation::get_frame(f64 time) const -> std::string
+using namespace std::chrono_literals;
+
+auto FrameAnimation::get_frame(MilliSeconds time) const -> std::string
 {
-    if (Duration <= 0 || time < 0 || Frames.empty()) {
+    if (Duration <= 0ms || time < 0ms || Frames.empty()) {
         return "";
     }
 
@@ -71,7 +73,7 @@ auto FrameAnimation::get_frame(f64 time) const -> std::string
 
 ////////////////////////////////////////////////////////////
 
-FrameAnimationFunction::FrameAnimationFunction(f64 duration, FrameAnimation ani)
+FrameAnimationFunction::FrameAnimationFunction(MilliSeconds duration, FrameAnimation ani)
     : Duration { duration }
     , _animation { std::move(ani) }
 {

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <numbers>
@@ -49,6 +50,8 @@ using mat3 = std::array<f32, 3 * 3>;
 
 constexpr auto TAU { std::numbers::pi * 2 };
 constexpr auto TAU_F { std::numbers::pi_v<f32> * 2 };
+
+using MilliSeconds = std::chrono::duration<double, std::milli>;
 
 //forward decl
 struct Color;

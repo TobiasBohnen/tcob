@@ -57,7 +57,7 @@ auto PointCloud::point_size() const -> f32
     return _pointSize;
 }
 
-void PointCloud::update([[maybe_unused]] f64 deltaTime)
+void PointCloud::update([[maybe_unused]] MilliSeconds deltaTime)
 {
     if (!is_visible() || _points.empty() || !_material) {
         return;

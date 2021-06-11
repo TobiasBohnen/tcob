@@ -43,7 +43,7 @@ void NinePatch::define_center(const PointF& posTopLeft, const PointF& posBottomR
     _isDirty = true;
 }
 
-void NinePatch::update(f64)
+void NinePatch::update([[maybe_unused]] MilliSeconds deltaTime)
 {
     if ((_isDirty || is_transform_dirty()) && _material->Texture) {
 

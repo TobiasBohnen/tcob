@@ -21,7 +21,7 @@ public:
     void texture_region(const std::string& texRegion);
     void define_center(const PointF& posTopLeft, const PointF& posBottomRight, const PointF& uvTopLeft, const PointF& uvBottomRight);
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 

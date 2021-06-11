@@ -6,7 +6,6 @@
 #include <tcob/game/Game.hpp>
 
 #include <SDL2/SDL.h>
-#include <chrono>
 
 #include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/game/Scene.hpp>
@@ -18,7 +17,7 @@
 using hrc = std::chrono::high_resolution_clock;
 
 namespace tcob {
-constexpr f32 FIXED_TIME_STEPS { 1000.f / 50.f };
+constexpr MilliSeconds FIXED_TIME_STEPS { 1000.f / 50.f };
 constexpr u8 MAX_FRAME_SKIP = 10;
 
 Game::Game(const std::string& path, const std::string& name)
@@ -137,10 +136,10 @@ void Game::on_config_defaults()
 
 void Game::loop()
 {
-    std::chrono::duration<f64, std::milli> now { hrc::now().time_since_epoch() };
-    std::chrono::duration<f64, std::milli> nextTick { now };
-    std::chrono::duration<f64, std::milli> last { now };
-    const std::chrono::duration<f64, std::milli> fixedTimeSteps { FIXED_TIME_STEPS };
+    MilliSeconds now { hrc::now().time_since_epoch() };
+    MilliSeconds nextTick { now };
+    MilliSeconds last { now };
+    const MilliSeconds fixedTimeSteps { FIXED_TIME_STEPS };
 
     PreMainLoop();
 
@@ -165,7 +164,7 @@ void Game::loop()
 
         // update
         now = hrc::now().time_since_epoch();
-        const f64 delta { (now - last).count() };
+        const MilliSeconds delta { now - last };
         last = now;
 
         PreUpdate(delta);

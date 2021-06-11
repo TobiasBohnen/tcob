@@ -39,7 +39,7 @@ void TextEx::on_draw(RenderTarget& target)
     _text3.draw(target);
 }
 
-void TextEx::on_update(f64 deltaTime)
+void TextEx::on_update(MilliSeconds deltaTime)
 {
     _text0.update(deltaTime);
     _text1.update(deltaTime);
@@ -47,7 +47,7 @@ void TextEx::on_update(f64 deltaTime)
     _text3.update(deltaTime);
 }
 
-void TextEx::on_fixed_update(f64 deltaTime)
+void TextEx::on_fixed_update(MilliSeconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

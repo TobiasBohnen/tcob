@@ -11,7 +11,7 @@ AutomationEx::~AutomationEx()
 {
 }
 
-f32 duration { 2000 };
+MilliSeconds duration { 2000 };
 
 void AutomationEx::on_start()
 {
@@ -147,7 +147,7 @@ void AutomationEx::on_draw(RenderTarget& target)
     _layer1.draw(target);
 }
 
-void AutomationEx::on_update(f64 deltaTime)
+void AutomationEx::on_update(MilliSeconds deltaTime)
 {
     for (auto& queue : _queues) {
         queue.update(deltaTime);
@@ -155,7 +155,7 @@ void AutomationEx::on_update(f64 deltaTime)
     _layer1.update(deltaTime);
 }
 
-void AutomationEx::on_fixed_update(f64 deltaTime)
+void AutomationEx::on_fixed_update(MilliSeconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
@@ -196,7 +196,7 @@ void AutomationEx::on_key_down(const KeyboardEvent& ev)
         break;
     case Scancode::D6:
         for (auto& auto0 : _autos) {
-            auto0->interval(0);
+            auto0->interval(MilliSeconds { 0 });
         }
         break;
     case Scancode::BACKSPACE:

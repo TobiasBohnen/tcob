@@ -42,7 +42,7 @@ auto Scene::game() const -> Game&
     return _game;
 }
 
-void Scene::update(f64 deltaTime)
+void Scene::update(MilliSeconds deltaTime)
 {
     on_update(deltaTime);
 }

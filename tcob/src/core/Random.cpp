@@ -6,7 +6,6 @@
 #include <tcob/core/Random.hpp>
 
 #include <algorithm>
-#include <chrono>
 
 namespace tcob {
 Random::Random()

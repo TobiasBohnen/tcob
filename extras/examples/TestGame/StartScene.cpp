@@ -38,7 +38,7 @@ void StartScene::on_start()
     _text.color(Colors::White);
     _text.outline_thickness(0.5f);
     _text.outline_color(Colors::Black);
-    _text.update(0);
+    _text.update(MilliSeconds { 0 });
 }
 
 void StartScene::on_draw(RenderTarget& target)
@@ -46,11 +46,11 @@ void StartScene::on_draw(RenderTarget& target)
     _text.draw(target);
 }
 
-void StartScene::on_update(f64 deltaTime)
+void StartScene::on_update(MilliSeconds deltaTime)
 {
 }
 
-void StartScene::on_fixed_update(f64 deltaTime)
+void StartScene::on_fixed_update(MilliSeconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

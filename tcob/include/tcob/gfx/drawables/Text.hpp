@@ -37,7 +37,7 @@ public:
     auto horizontal_alignment() const -> TextAlignment;
     void horizontal_alignment(TextAlignment align);
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 

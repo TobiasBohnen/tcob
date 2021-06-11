@@ -44,7 +44,7 @@ void AnimationLoader::register_wrapper(LuaScript& script)
         return def;
     });
     wrapper.function("duration", [](AnimationDef* def, f64 val) {
-        def->Res->Duration = val;
+        def->Res->Duration = MilliSeconds { val };
         return def;
     });
     wrapper.function("playback_mode", [](AnimationDef* def, const std::string& val) {

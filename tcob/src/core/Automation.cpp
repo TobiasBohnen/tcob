@@ -6,14 +6,16 @@
 #include <tcob/core/Automation.hpp>
 
 namespace tcob {
-AutomationBase::AutomationBase(f64 duration)
+using namespace std::chrono_literals;
+
+AutomationBase::AutomationBase(MilliSeconds duration)
     : _duration { duration }
 {
 }
 
 void AutomationBase::start(bool looped)
 {
-    if (_isRunning || _duration <= 0) {
+    if (_isRunning || _duration <= 0ms) {
         //TODO: log error
         return;
     }
@@ -21,10 +23,10 @@ void AutomationBase::start(bool looped)
     _looped = looped;
 
     _isRunning = true;
-    _elapsedTime = 0;
-    _currentInterval = 0;
+    _elapsedTime = 0ms;
+    _currentInterval = 0ms;
 
-    update(0);
+    update(0ms);
 }
 
 void AutomationBase::restart()
@@ -41,8 +43,8 @@ void AutomationBase::toggle_pause()
 void AutomationBase::stop()
 {
     _isRunning = false;
-    _elapsedTime = 0;
-    _currentInterval = 0;
+    _elapsedTime = 0ms;
+    _currentInterval = 0ms;
 }
 
 auto AutomationBase::is_running() const -> bool
@@ -55,22 +57,22 @@ auto AutomationBase::progress() const -> f32
     return static_cast<f32>(_elapsedTime / _duration);
 }
 
-void AutomationBase::update(f64 deltaTime)
+void AutomationBase::update(MilliSeconds deltaTime)
 {
     if (_isRunning) {
         _elapsedTime += deltaTime;
 
-        if (_interval > 0) {
+        if (_interval > 0ms) {
             _currentInterval += deltaTime;
             if (_currentInterval >= _interval) {
-                _currentInterval = 0;
+                _currentInterval = 0ms;
             }
         }
 
-        if (_interval == 0 || _currentInterval == 0) {
+        if (_interval == 0ms || _currentInterval == 0ms) {
             if (_elapsedTime >= _duration) {
                 if (_looped) {
-                    _elapsedTime = std::fmod(_elapsedTime, _duration);
+                    _elapsedTime = MilliSeconds { std::fmod(_elapsedTime.count(), _duration.count()) };
                 } else {
                     _elapsedTime = _duration;
                     _isRunning = false;
@@ -82,7 +84,7 @@ void AutomationBase::update(f64 deltaTime)
     }
 }
 
-void AutomationBase::interval(f64 interval)
+void AutomationBase::interval(MilliSeconds interval)
 {
     _interval = std::min(interval, _duration);
 }
@@ -112,7 +114,7 @@ auto AutomationQueue::is_empty() -> bool
     return _queue.empty();
 }
 
-void AutomationQueue::update(f64 deltaTime)
+void AutomationQueue::update(MilliSeconds deltaTime)
 {
     if (!_isRunning || _queue.empty()) {
         return;

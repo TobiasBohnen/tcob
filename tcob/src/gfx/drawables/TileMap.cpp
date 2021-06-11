@@ -106,7 +106,7 @@ void TileMap::position(const PointF& pos)
     _isDirty = true;
 }
 
-void TileMap::update(f64)
+void TileMap::update([[maybe_unused]] MilliSeconds deltaTime)
 {
     if (_tileMap.empty() || !_material) {
         return;

@@ -6,8 +6,6 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
-#include <chrono>
-
 namespace tcob {
 class Stopwatch final {
 public:

@@ -64,7 +64,7 @@ public:
     auto material() const -> ResourcePtr<Material>;
     void material(ResourcePtr<Material> material);
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 
@@ -75,7 +75,7 @@ private:
     std::shared_ptr<gl::Texture2D> _texture;
 
     SizeU _frameSize { SizeU::Zero };
-    f64 _elapsedTime { 0 };
+    MilliSeconds _elapsedTime { 0 };
 
     bool _isRunning { false };
     bool _looped { false };

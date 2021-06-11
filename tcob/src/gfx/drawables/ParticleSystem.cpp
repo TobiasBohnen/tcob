@@ -11,6 +11,7 @@
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob {
+using namespace std::chrono_literals;
 
 ParticleSystem::ParticleSystem(const ParticleSystem& other)
 {
@@ -57,7 +58,7 @@ void ParticleSystem::stop()
     _aliveParticleCount = 0;
 }
 
-void ParticleSystem::update(f64 delta)
+void ParticleSystem::update(MilliSeconds delta)
 {
     if (!_started) {
         return;
@@ -182,7 +183,7 @@ ParticleEmitter::ParticleEmitter()
 
 auto ParticleEmitter::is_alive() const -> bool
 {
-    return _remainLife > 0 || _loop;
+    return _remainLife > 0ms || _loop;
 }
 
 void ParticleEmitter::reset()
@@ -207,7 +208,7 @@ void ParticleEmitter::spawnrate(f32 rate)
     _spawnRate = rate;
 }
 
-void ParticleEmitter::lifetime(f64 life)
+void ParticleEmitter::lifetime(MilliSeconds life)
 {
     _startLife = life;
 }
@@ -256,12 +257,12 @@ void ParticleEmitter::particle_speed(f32 min, std::optional<f32> max)
     _parSpeed = std::pair<f32, f32> { min, max.value() };
 }
 
-void ParticleEmitter::particle_lifetime(f32 min, std::optional<f32> max)
+void ParticleEmitter::particle_lifetime(MilliSeconds min, std::optional<MilliSeconds> max)
 {
     if (!max.has_value()) {
         max = min;
     }
-    _parLife = std::pair<f32, f32> { min, max.value() };
+    _parLife = std::pair<f32, f32> { static_cast<f32>(min.count()), static_cast<f32>(max.value().count()) };
 }
 
 void ParticleEmitter::particle_transparency(f32 min, std::optional<f32> max)
@@ -280,11 +281,11 @@ void ParticleEmitter::particle_acceleration(f32 min, std::optional<f32> max)
     _parAcceleration = std::pair<f32, f32> { min, max.value() };
 }
 
-void ParticleEmitter::emit_particles(ParticleSystem& system, f64 time)
+void ParticleEmitter::emit_particles(ParticleSystem& system, MilliSeconds time)
 {
     _remainLife -= time;
 
-    const f64 particleAmount { _spawnRate * (time / 1000) + _emissionDiff };
+    const f64 particleAmount { _spawnRate * (time.count() / 1000) + _emissionDiff };
     const u32 particleCount { static_cast<u32>(particleAmount) };
     _emissionDiff = particleAmount - particleCount;
 
@@ -308,7 +309,7 @@ void ParticleEmitter::emit_particles(ParticleSystem& system, f64 time)
         particle.size(_parSize);
 
         // set life
-        particle.lifetime(_randomGen(_parLife.first, _parLife.second));
+        particle.lifetime(MilliSeconds { _randomGen(_parLife.first, _parLife.second) });
 
         // calculate random postion
         const f32 x { _randomGen(_areaXDist.first, _areaXDist.second) - _parSize.Width / 2 };
@@ -334,24 +335,26 @@ Particle::Particle()
 
 auto Particle::is_alive() const -> bool
 {
-    return _remainingLife >= 0.0;
+    return _remainingLife > 0ms;
 }
 
-void Particle::update(f64 delta)
+void Particle::update(MilliSeconds delta)
 {
     // age
     _remainingLife -= delta;
 
+    const f64 s { delta.count() / 1000 };
+
     // move
     PointF offset;
-    _speed += (_acc * delta / 1000);
-    const f64 var { _speed * delta / 1000 };
+    _speed += _acc * s;
+    const f64 var { _speed * s };
     offset.X = static_cast<f32>(_direction.X * var);
     offset.Y = static_cast<f32>(_direction.Y * var);
     move_by(offset);
 
     // spin
-    rotate_by(static_cast<f32>(_spin * delta / 1000));
+    rotate_by(static_cast<f32>(_spin * s));
     update_transform();
 }
 
@@ -400,7 +403,7 @@ auto Particle::spin() -> f32
     return _spin;
 }
 
-void Particle::lifetime(f64 life)
+void Particle::lifetime(MilliSeconds life)
 {
     _startingLife = life;
     _remainingLife = life;

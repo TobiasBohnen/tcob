@@ -21,7 +21,7 @@ concept AutomationFunction = requires(T& t, f32 elapsedRatio)
 {
     typename T::type;
 
-    std::same_as<decltype(t.Duration), f64>;
+    std::same_as<decltype(t.Duration), MilliSeconds>;
 
     {
         t.value(elapsedRatio)
@@ -42,7 +42,7 @@ concept Interpolatable = requires(T& t, f32 elapsedRatio)
 
 class AutomationBase : public Updatable {
 public:
-    explicit AutomationBase(f64 duration);
+    explicit AutomationBase(MilliSeconds duration);
     virtual ~AutomationBase() = default;
 
     void start(bool looped = false);
@@ -50,24 +50,25 @@ public:
     void toggle_pause();
     void stop();
 
-    void interval(f64 interval);
+    void interval(MilliSeconds interval);
 
     auto is_running() const -> bool;
 
     auto progress() const -> f32;
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
 private:
     virtual void update_values() = 0;
 
-    f64 _duration { 0 };
-    f64 _elapsedTime { 0 };
     bool _isRunning { false };
     bool _looped { false };
 
-    f64 _interval { 0 };
-    f64 _currentInterval { 0 };
+    MilliSeconds _duration { 0 };
+    MilliSeconds _elapsedTime { 0 };
+
+    MilliSeconds _interval { 0 };
+    MilliSeconds _currentInterval { 0 };
 };
 
 ////////////////////////////////////////////////////////////
@@ -107,11 +108,23 @@ private:
 template <typename Func, typename... Rs>
 auto make_unique_automation(f64 duration, Rs&&... args) -> std::unique_ptr<Automation<Func>>
 {
+    return std::unique_ptr<Automation<Func>>(new Automation<Func> { Func { MilliSeconds { duration }, std::forward<Rs>(args)... } });
+}
+
+template <typename Func, typename... Rs>
+auto make_unique_automation(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<Automation<Func>>
+{
     return std::unique_ptr<Automation<Func>>(new Automation<Func> { Func { duration, std::forward<Rs>(args)... } });
 }
 
 template <typename Func, typename... Rs>
 auto make_shared_automation(f64 duration, Rs&&... args) -> std::shared_ptr<Automation<Func>>
+{
+    return std::shared_ptr<Automation<Func>>(new Automation<Func> { Func { MilliSeconds { duration }, std::forward<Rs>(args)... } });
+}
+
+template <typename Func, typename... Rs>
+auto make_shared_automation(MilliSeconds duration, Rs&&... args) -> std::shared_ptr<Automation<Func>>
 {
     return std::shared_ptr<Automation<Func>>(new Automation<Func> { Func { duration, std::forward<Rs>(args)... } });
 }
@@ -132,7 +145,7 @@ public:
 
     auto is_empty() -> bool;
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
 private:
     std::queue<std::shared_ptr<AutomationBase>> _queue;
@@ -147,7 +160,7 @@ class LinearFunctionChain final {
 public:
     using type = T;
 
-    LinearFunctionChain(f64 duration, std::vector<T>&& elements)
+    LinearFunctionChain(MilliSeconds duration, std::vector<T>&& elements)
         : Duration { duration }
         , _elements { std::move(elements) }
     {
@@ -176,7 +189,7 @@ public:
         }
     }
 
-    f64 Duration;
+    MilliSeconds Duration;
 
 private:
     std::vector<T> _elements;
@@ -188,7 +201,7 @@ template <typename T>
 struct PowerFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T StartValue;
     T EndValue;
     f32 Exponent;
@@ -213,7 +226,7 @@ template <typename T>
 struct InversePowerFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T StartValue;
     T EndValue;
     f32 Exponent;
@@ -238,7 +251,7 @@ template <typename T>
 struct LinearFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T StartValue;
     T EndValue;
 
@@ -262,7 +275,7 @@ template <typename T>
 struct SmoothstepFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T Edge0;
     T Edge1;
 
@@ -287,7 +300,7 @@ template <typename T>
 struct SmootherstepFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T Edge0;
     T Edge1;
 
@@ -312,7 +325,7 @@ template <typename T>
 struct SineWaveFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T MinValue;
     T MaxValue;
     f32 Frequency;
@@ -341,7 +354,7 @@ template <typename T>
 struct TriangeWaveFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T MinValue;
     T MaxValue;
     f32 Frequency;
@@ -370,7 +383,7 @@ template <typename T>
 struct SquareWaveFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T MinValue;
     T MaxValue;
     f32 Frequency;
@@ -400,7 +413,7 @@ template <typename T>
 struct SawtoothWaveFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T MinValue;
     T MaxValue;
     f32 Frequency;
@@ -428,7 +441,7 @@ private:
 struct CubicBezierFunction final {
     using type = PointF;
 
-    f64 Duration;
+    MilliSeconds Duration;
     PointF Start;
     PointF ControlPoint0;
     PointF ControlPoint1;
@@ -458,7 +471,7 @@ template <typename T>
 struct RandomFunction final {
     using type = T;
 
-    f64 Duration;
+    MilliSeconds Duration;
     T MinValue;
     T MaxValue;
     mutable Random RNG;

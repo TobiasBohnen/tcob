@@ -35,7 +35,7 @@ public:
     auto position() const -> PointF;
     void position(const PointF& position);
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 

@@ -5,8 +5,6 @@
 
 #include "TextureLoader.hpp"
 
-#include <chrono>
-
 #include <tcob/core/io/FileSystem.hpp>
 #include <tcob/gfx/gl/GLCapabilities.hpp>
 #include <tcob/script/LuaScript.hpp>

@@ -45,7 +45,7 @@ void Cursor::active_mode(const std::string& name)
     _renderer.material(_material.object(), static_cast<f32>(_size));
 }
 
-void Cursor::update([[maybe_unused]] f64 deltaTime)
+void Cursor::update([[maybe_unused]] MilliSeconds deltaTime)
 {
 }
 

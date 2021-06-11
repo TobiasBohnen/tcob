@@ -55,7 +55,7 @@ auto SpriteBatch::sprite_count() const -> isize
     return _children.size();
 }
 
-void SpriteBatch::update(f64 deltaTime)
+void SpriteBatch::update(MilliSeconds deltaTime)
 {
     for (auto& child : _children) {
         child.update(deltaTime);
@@ -138,7 +138,7 @@ void Sprite::update_aabb()
     _aabb.size({ lr.second - lr.first, tb.second - tb.first });
 }
 
-void Sprite::update(f64 delta)
+void Sprite::update(MilliSeconds delta)
 {
     if (is_transform_dirty()) {
         _quad.position(bounds(), transform());
@@ -146,7 +146,7 @@ void Sprite::update(f64 delta)
     }
 
     if (_textureScroll != PointF::Zero) {
-        _quad.scroll_texcoords(_textureScroll * (static_cast<f32>(delta) / 1000));
+        _quad.scroll_texcoords(_textureScroll * (static_cast<f32>(delta.count()) / 1000));
     }
 }
 

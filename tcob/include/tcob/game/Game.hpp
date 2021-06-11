@@ -54,10 +54,10 @@ public:
 
     sigslot::signal<> PreMainLoop;
     sigslot::signal<> PostMainLoop;
-    sigslot::signal<f64> FixedUpdate;
-    sigslot::signal<f64> PreUpdate;
-    sigslot::signal<f64> Update;
-    sigslot::signal<f64> PostUpdate;
+    sigslot::signal<MilliSeconds> FixedUpdate;
+    sigslot::signal<MilliSeconds> PreUpdate;
+    sigslot::signal<MilliSeconds> Update;
+    sigslot::signal<MilliSeconds> PostUpdate;
     sigslot::signal<gl::RenderTarget&> Draw;
     sigslot::signal<> Quit;
 

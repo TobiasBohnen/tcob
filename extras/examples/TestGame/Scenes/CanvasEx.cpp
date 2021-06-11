@@ -18,7 +18,7 @@ CanvasEx::~CanvasEx()
 {
 }
 
-void CanvasEx::on_fixed_update(f64 deltaTime)
+void CanvasEx::on_fixed_update(MilliSeconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
@@ -49,7 +49,7 @@ void CanvasEx::on_start()
     prepare_canvas();
 }
 
-void CanvasEx::on_update(double deltaTime)
+void CanvasEx::on_update(MilliSeconds deltaTime)
 {
     paint_to_canvas();
     _layer1->update(deltaTime);

@@ -22,7 +22,7 @@ class Particle final : public RectTransformable, public Updatable {
 public:
     Particle();
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     auto direction() -> f32;
     void direction(f32 dir);
@@ -36,7 +36,7 @@ public:
     auto spin() -> f32;
     void spin(f32 spin);
 
-    void lifetime(f64 life);
+    void lifetime(MilliSeconds life);
     auto life_ratio() const -> f32;
     auto is_alive() const -> bool;
 
@@ -60,8 +60,8 @@ private:
     f64 _speed { 0 };
     f32 _spin { 0 };
     f32 _acc { 0 };
-    f64 _startingLife { 0 };
-    f64 _remainingLife { 0 };
+    MilliSeconds _startingLife { 0 };
+    MilliSeconds _remainingLife { 0 };
 
     Color _color;
     ResourcePtr<Material> _material;
@@ -82,19 +82,19 @@ public:
 
     void spawnarea(const RectF& area);
     void spawnrate(f32 rate);
-    void lifetime(f64 life);
+    void lifetime(MilliSeconds life);
     void loop(bool loop);
 
     void particle_acceleration(f32 min, std::optional<f32> max = std::nullopt);
     void particle_direction(f32 min, std::optional<f32> max = std::nullopt);
-    void particle_lifetime(f32 min, std::optional<f32> max = std::nullopt);
+    void particle_lifetime(MilliSeconds min, std::optional<MilliSeconds> max = std::nullopt);
     void particle_scale(f32 min, std::optional<f32> max = std::nullopt);
     void particle_size(SizeF size);
     void particle_speed(f32 min, std::optional<f32> max = std::nullopt);
     void particle_spin(f32 min, std::optional<f32> max = std::nullopt);
     void particle_transparency(f32 min, std::optional<f32> max = std::nullopt);
 
-    void emit_particles(ParticleSystem& system, f64 time);
+    void emit_particles(ParticleSystem& system, MilliSeconds time);
 
 private:
     Random _randomGen;
@@ -106,8 +106,8 @@ private:
     std::pair<f32, f32> _areaYDist;
 
     f32 _spawnRate { 1 };
-    f64 _startLife { 1000 };
-    f64 _remainLife { 1000 };
+    MilliSeconds _startLife { 1000 };
+    MilliSeconds _remainLife { 1000 };
     bool _loop { false };
 
     SizeF _parSize { SizeF::Zero };
@@ -150,12 +150,12 @@ public:
 
     auto particle_count() const -> u32;
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 
 private:
-    friend void ParticleEmitter::emit_particles(ParticleSystem& system, f64 time);
+    friend void ParticleEmitter::emit_particles(ParticleSystem& system, MilliSeconds time);
     auto activate_particle() -> Particle&;
     void deactivate_particle(isize index);
 

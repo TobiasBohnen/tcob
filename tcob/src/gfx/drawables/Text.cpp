@@ -82,7 +82,7 @@ void Text::horizontal_alignment(TextAlignment align)
     }
 }
 
-void Text::update([[maybe_unused]] f64 deltaTime)
+void Text::update([[maybe_unused]] MilliSeconds deltaTime)
 {
     if (!_font && Font::Default) {
         font(Font::Default);

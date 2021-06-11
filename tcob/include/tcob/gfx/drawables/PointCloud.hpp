@@ -32,7 +32,7 @@ public:
     auto point_size() const -> f32;
     void point_size(f32 size);
 
-    void update(f64 deltaTime) override;
+    void update(MilliSeconds deltaTime) override;
 
     void draw(gl::RenderTarget& target) override;
 

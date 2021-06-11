@@ -26,7 +26,7 @@ void ControllerEx::on_start()
     _text.bounds({ { 0.05f, 0.1f }, { 0.75f, 1.75f } });
     _text.outline_thickness(0.5f);
     _text.outline_color(Colors::Black);
-    _text.update(0);
+    _text.update(MilliSeconds { 0 });
 
     _controllerDesc.font(font);
     _controllerDesc.outline_thickness(0.5f);
@@ -37,7 +37,7 @@ void ControllerEx::on_start()
     stream << "Controller count: " << game().input().controller_count() << "\n";
     stream << "Name of controller 0:" << game().input().controller_at(0).name();
     _controllerDesc.text(stream.str());
-    _controllerDesc.update(0);
+    _controllerDesc.update(MilliSeconds { 0 });
     _controllerDesc.scale({ 0.75f, 0.75f });
 }
 
@@ -47,11 +47,11 @@ void ControllerEx::on_draw(RenderTarget& target)
     _controllerDesc.draw(target);
 }
 
-void ControllerEx::on_update(f64 deltaTime)
+void ControllerEx::on_update(MilliSeconds deltaTime)
 {
 }
 
-void ControllerEx::on_fixed_update(f64 deltaTime)
+void ControllerEx::on_fixed_update(MilliSeconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

@@ -11,6 +11,6 @@ class Updatable {
 public:
     virtual ~Updatable() = default;
 
-    virtual void update(f64 deltaTime) = 0;
+    virtual void update(MilliSeconds deltaTime) = 0;
 };
 }

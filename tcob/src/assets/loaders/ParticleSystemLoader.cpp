@@ -108,7 +108,7 @@ void ParticleSystemLoader::on_preparing()
             auto& emitter { def->Res->create_emitter() };
             auto* emitterDef { _emitterCache[emitterName].get() };
             emitter.spawnarea(emitterDef->spawnarea);
-            emitter.lifetime(emitterDef->lifetime);
+            emitter.lifetime(MilliSeconds { emitterDef->lifetime });
             emitter.loop(emitterDef->loop);
             emitter.spawnrate(emitterDef->spawnrate);
             emitter.texture_region(emitterDef->texture);
@@ -119,7 +119,7 @@ void ParticleSystemLoader::on_preparing()
             emitter.particle_acceleration(templateDef->acceleration.first, templateDef->acceleration.second);
             emitter.particle_scale(templateDef->scale.first, templateDef->scale.second);
             emitter.particle_spin(templateDef->spin.first, templateDef->spin.second);
-            emitter.particle_lifetime(templateDef->lifetime.first, templateDef->lifetime.second);
+            emitter.particle_lifetime(MilliSeconds { templateDef->lifetime.first }, MilliSeconds { templateDef->lifetime.second });
             emitter.particle_transparency(templateDef->transparency.first, templateDef->transparency.second);
             emitter.particle_size(templateDef->size);
         }

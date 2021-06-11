@@ -22,10 +22,10 @@ enum class AnimationPlaybackMode {
 
 struct FrameAnimation final {
 public:
-    auto get_frame(f64 time) const -> std::string;
+    auto get_frame(MilliSeconds time) const -> std::string;
 
     std::vector<std::string> Frames {};
-    f64 Duration { 0 };
+    MilliSeconds Duration { 0 };
     AnimationPlaybackMode Mode { AnimationPlaybackMode::Normal };
 };
 
@@ -34,9 +34,9 @@ public:
 struct FrameAnimationFunction final {
     using type = std::string;
 
-    f64 Duration;
+    MilliSeconds Duration;
 
-    FrameAnimationFunction(f64 duration, FrameAnimation ani);
+    FrameAnimationFunction(MilliSeconds duration, FrameAnimation ani);
 
     auto value(f32 elapsed) const -> std::string;
 

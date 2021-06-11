@@ -11,6 +11,7 @@
 #include <tcob/gfx/gl/GLCapabilities.hpp>
 
 namespace tcob {
+using namespace std::chrono_literals;
 
 WebpAnimation::WebpAnimation()
 {
@@ -65,7 +66,7 @@ void WebpAnimation::start(bool looped)
 
     _looped = looped;
 
-    _elapsedTime = 0;
+    _elapsedTime = 0ms;
     _isRunning = true;
 }
 
@@ -84,7 +85,7 @@ void WebpAnimation::stop()
 {
     if (_decoder)
         _decoder->reset();
-    _elapsedTime = 0;
+    _elapsedTime = 0ms;
     _isRunning = false;
 }
 
@@ -107,7 +108,7 @@ void WebpAnimation::material(ResourcePtr<Material> material)
     }
 }
 
-void WebpAnimation::update(f64 deltaTime)
+void WebpAnimation::update(MilliSeconds deltaTime)
 {
     if (is_transform_dirty()) {
         _quad.position(bounds(), transform());
@@ -120,7 +121,7 @@ void WebpAnimation::update(f64 deltaTime)
     _elapsedTime += deltaTime;
 
     u8* buffer;
-    auto result { _decoder->get_frame(static_cast<i32>(_elapsedTime), &buffer) };
+    auto result { _decoder->get_frame(static_cast<i32>(_elapsedTime.count()), &buffer) };
 
     switch (result) {
     case detail::DecodeResult::NewFrame:
@@ -128,7 +129,7 @@ void WebpAnimation::update(f64 deltaTime)
         break;
     case detail::DecodeResult::NoMoreFrames:
         if (_looped) {
-            _elapsedTime = 0;
+            _elapsedTime = 0ms;
             _decoder->reset();
         } else {
             _isRunning = false;
@@ -141,7 +142,7 @@ void WebpAnimation::update(f64 deltaTime)
 
 void WebpAnimation::draw(gl::RenderTarget& target)
 {
-    if (!is_visible() || _elapsedTime == 0 || !_material)
+    if (!is_visible() || _elapsedTime == 0ms || !_material)
         return;
 
     _renderer.render_to_target(target);

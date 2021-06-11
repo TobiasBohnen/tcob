@@ -197,7 +197,7 @@ void MiscScene::on_draw(RenderTarget& target)
     webp.draw(target);
 }
 
-void MiscScene::on_update(f64 deltaTime)
+void MiscScene::on_update(MilliSeconds deltaTime)
 {
     text.update(deltaTime);
     tileMap.update(deltaTime);
@@ -209,7 +209,7 @@ void MiscScene::on_update(f64 deltaTime)
     webp.update(deltaTime);
 }
 
-void MiscScene::on_fixed_update(f64 deltaTime)
+void MiscScene::on_fixed_update(MilliSeconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);

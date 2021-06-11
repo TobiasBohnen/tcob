@@ -24,8 +24,8 @@ public:
     void sleep();
 
 protected:
-    virtual void on_update(f64 deltaTime) = 0;
-    virtual void on_fixed_update(f64 deltaTime) = 0;
+    virtual void on_update(MilliSeconds deltaTime) = 0;
+    virtual void on_fixed_update(MilliSeconds deltaTime) = 0;
 
     virtual void on_start();
     virtual void on_finish();
@@ -47,7 +47,7 @@ protected:
     auto game() const -> Game&;
 
 private:
-    void update(f64 deltaTime) override final;
+    void update(MilliSeconds deltaTime) override final;
     void draw(gl::RenderTarget& target) override final;
 
     void attach_events();
