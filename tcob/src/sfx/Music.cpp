@@ -12,6 +12,7 @@
 #include <tcob/core/io/FileStream.hpp>
 
 namespace tcob {
+using namespace std::chrono_literals;
 
 Music::Music()
 {
@@ -78,20 +79,20 @@ void Music::stop()
     }
 }
 
-auto Music::duration() const -> f32
+auto Music::duration() const -> MilliSeconds
 {
     if (!_decoder)
-        return 0;
+        return 0ms;
 
-    return (static_cast<f32>(_decoder->info().SampleCount) / _decoder->info().Frequency) * 1000.f;
+    return MilliSeconds { (static_cast<f32>(_decoder->info().SampleCount) / _decoder->info().Frequency) * 1000.f };
 }
 
-auto Music::playback_position() const -> f32
+auto Music::playback_position() const -> MilliSeconds
 {
     if (!_decoder)
-        return 0;
+        return 0ms;
 
-    return (static_cast<f32>(_samplesPlayed) / _decoder->info().Frequency / _decoder->info().Channels) * 1000.f;
+    return MilliSeconds { (static_cast<f32>(_samplesPlayed) / _decoder->info().Frequency / _decoder->info().Channels) * 1000.f };
 }
 
 using namespace std::chrono_literals;

@@ -18,6 +18,7 @@
 #include <tcob/core/io/FileStream.hpp>
 
 namespace tcob {
+using namespace std::chrono_literals;
 
 Sound::Sound()
     : _buffer { std::make_shared<al::Buffer>() }
@@ -87,7 +88,7 @@ void Sound::stop()
     }
 }
 
-auto Sound::duration() const -> f32
+auto Sound::duration() const -> MilliSeconds
 {
     i32 size { _buffer->size() };
     i32 channels { _buffer->channels() };
@@ -96,15 +97,15 @@ auto Sound::duration() const -> f32
     f32 lengthInSamples = { size * 8.0f / (channels * bits) };
     i32 frequency { _buffer->frequency() };
 
-    return lengthInSamples / frequency * 1000;
+    return MilliSeconds { lengthInSamples / frequency * 1000 };
 }
 
-auto Sound::playback_position() const -> f32
+auto Sound::playback_position() const -> MilliSeconds
 {
     if (_buffer->size() > 0) {
-        return source()->sec_offset();
+        return MilliSeconds { source()->sec_offset() };
     }
-    return 0;
+    return 0ms;
 }
 
 void Sound::stop_source()
