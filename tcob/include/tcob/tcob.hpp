@@ -24,6 +24,7 @@
 #include <tcob/core/Input.hpp>
 #include <tcob/core/Random.hpp>
 #include <tcob/core/Stopwatch.hpp>
+#include <tcob/core/Timer.hpp>
 
 #include <tcob/game/Config.hpp>
 #include <tcob/game/Game.hpp>

@@ -19,6 +19,7 @@ set(LIB_SRCFILES
         src/core/Input.cpp
         src/core/Random.cpp
         src/core/Stopwatch.cpp
+        src/core/Timer.cpp
         src/core/data/Color.cpp
         src/core/data/Transform.cpp
         src/core/io/FileStream.cpp

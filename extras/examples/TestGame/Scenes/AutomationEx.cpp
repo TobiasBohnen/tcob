@@ -140,6 +140,16 @@ void AutomationEx::on_start()
     for (auto& queue : _queues) {
         queue.start(true);
     }
+
+    auto lambda {
+        [&](MilliSeconds deltaTime) {
+            for (auto& queue : _queues) {
+                queue.update(deltaTime);
+            }
+        }
+    };
+    _timer.Tick.connect(lambda);
+    _timer.start(MilliSeconds { 1 });
 }
 
 void AutomationEx::on_draw(RenderTarget& target)
@@ -149,9 +159,6 @@ void AutomationEx::on_draw(RenderTarget& target)
 
 void AutomationEx::on_update(MilliSeconds deltaTime)
 {
-    for (auto& queue : _queues) {
-        queue.update(deltaTime);
-    }
     _layer1.update(deltaTime);
 }
 

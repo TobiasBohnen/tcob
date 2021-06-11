@@ -24,4 +24,5 @@ private:
     SpriteBatch _layer1;
     std::vector<AutomationQueue> _queues;
     std::vector<std::shared_ptr<AutomationBase>> _autos;
+    Timer _timer;
 };
