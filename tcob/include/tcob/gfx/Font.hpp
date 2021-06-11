@@ -30,36 +30,65 @@ struct FontInfo final {
     f32 Height { 0 };
 };
 
-class Font final {
+////////////////////////////////////////////////////////////
+
+class Font {
 public:
     Font();
     ~Font();
     Font(const Font&) = delete;
     auto operator=(const Font& other) -> Font& = delete;
 
-    auto load(const std::string& filename, u32 fontSize) -> bool;
+    virtual auto load(const std::string& filename, u32 fontSize) -> bool = 0;
 
     auto material() const -> ResourcePtr<Material>;
     void material(ResourcePtr<Material> material);
-
-    auto texture() const -> ResourcePtr<gl::Texture>;
+    auto texture() const -> gl::Texture2D*;
 
     auto info() const -> FontInfo;
 
+    auto kerning() const -> bool;
     void kerning(bool kerning);
 
-    auto shape_text(const std::string& text) -> std::vector<Glyph>;
+    virtual auto shape_text(const std::string& text) -> std::vector<Glyph> = 0;
 
     static inline ResourcePtr<Font> Default;
     static inline ResourcePtr<gl::ShaderProgram> DefaultShader;
 
-private:
-    auto ascender() const -> f32;
-    auto descender() const -> f32;
-    auto height() const -> f32;
+protected:
+    virtual auto ascender() const -> f32 = 0;
+    virtual auto descender() const -> f32 = 0;
+    virtual auto height() const -> f32 = 0;
 
     void create_texture();
 
+private:
+    std::shared_ptr<gl::Texture2D> _fontTexture;
+    std::shared_ptr<Material> _material;
+    ResourcePtr<Material> _matRes;
+
+    bool _kerning { true };
+};
+
+////////////////////////////////////////////////////////////
+
+class SdfFont final : public Font {
+public:
+    SdfFont();
+    ~SdfFont();
+    SdfFont(const SdfFont&) = delete;
+    auto operator=(const SdfFont& other) -> SdfFont& = delete;
+
+    auto load(const std::string& filename, u32 fontSize) -> bool override;
+
+    auto shape_text(const std::string& text) -> std::vector<Glyph> override;
+
+protected:
+    auto ascender() const -> f32 override;
+    auto descender() const -> f32 override;
+    auto height() const -> f32 override;
+
+private:
     auto cache_glyph(u32 codepoint) -> bool;
     auto codepoint_to_glyphindex(u32 codepoint) -> u32;
 
@@ -75,11 +104,5 @@ private:
     std::unordered_map<u32, Glyph> _glyphs;
     std::unordered_map<u32, u32> _glyphIndices;
     PointU _fontTextureCursor { PointU::Zero };
-
-    std::shared_ptr<gl::Texture2D> _fontTexture;
-    std::shared_ptr<Material> _material;
-    ResourcePtr<Material> _matRes;
-
-    bool _kerning { true };
 };
 }

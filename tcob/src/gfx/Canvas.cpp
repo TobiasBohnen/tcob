@@ -1941,7 +1941,7 @@ void Canvas::render_text(Vertex* verts, i32 nverts)
     CanvasPaint& paint { s.fill };
 
     // Render triangles.
-    paint.image = dynamic_cast<gl::Texture2D*>(_fonts[s.fontId]->texture().object());
+    paint.image = _fonts[s.fontId]->texture();
 
     // Apply global alpha
     paint.gradient.multiply_alpha(s.alpha);

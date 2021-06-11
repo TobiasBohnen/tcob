@@ -58,57 +58,17 @@ auto convert_UTF8_to_UTF32(const std::string& text) -> std::u32string
 
 constexpr i32 FONT_TEXTURE_SIZE { 1024 };
 constexpr u32 GLYPH_PADDING { 4 };
+const std::string FONT_WARMUP { "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>" };
 
 Font::Font()
-    : _fontInfo { new stbtt_fontinfo }
-    , _fontTexture { std::make_shared<gl::Texture2D>() }
+    : _fontTexture { std::make_shared<gl::Texture2D>() }
     , _material { std::make_shared<Material>() }
     , _matRes { std::make_shared<Resource<Material>>(_material) }
 {
     _material->Texture = std::make_shared<Resource<gl::Texture>>(_fontTexture);
 }
 
-Font::~Font()
-{
-    if (_fontInfo) {
-        delete _fontInfo;
-        _fontInfo = nullptr;
-    }
-}
-
-const std::string FONT_WARMUP { "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>" };
-
-auto Font::load(const std::string& filename, u32 fontSize) -> bool
-{
-    if (!FileSystem::exists(filename)) {
-        //TODO: log error
-        return false;
-    }
-
-    InputFileStreamU fs { filename };
-    _fontData = fs.read_all();
-
-    if (!stbtt_InitFont(_fontInfo, _fontData.data(), stbtt_GetFontOffsetForIndex(_fontData.data(), 0)))
-        return false;
-
-    _fontScale = stbtt_ScaleForPixelHeight(_fontInfo, static_cast<f32>(fontSize));
-    _fontSize = fontSize;
-
-    _glyphs.clear();
-    _glyphIndices.clear();
-
-    create_texture();
-    std::array<u8, 9> c {};
-    c.fill(0xff);
-    _fontTexture->update(PointU::Zero, { 3, 3 }, &c, 3, 1);
-    _fontTextureCursor = { 4, 0 };
-
-    stbtt_GetFontVMetrics(_fontInfo, &_ascent, &_descent, &_lineGap);
-
-    shape_text(FONT_WARMUP);
-
-    return true;
-}
+Font::~Font() = default;
 
 auto Font::material() const -> ResourcePtr<Material>
 {
@@ -131,9 +91,9 @@ void Font::material(ResourcePtr<Material> material)
     }
 }
 
-auto Font::texture() const -> ResourcePtr<gl::Texture>
+auto Font::texture() const -> gl::Texture2D*
 {
-    return _matRes->Texture;
+    return _fontTexture.get();
 }
 
 auto Font::info() const -> FontInfo
@@ -143,6 +103,11 @@ auto Font::info() const -> FontInfo
         .Descender = descender(),
         .Height = height()
     };
+}
+
+auto Font::kerning() const -> bool
+{
+    return _kerning;
 }
 
 void Font::create_texture()
@@ -158,7 +123,55 @@ void Font::kerning(bool kerning)
     }
 }
 
-auto Font::shape_text(const std::string& text) -> std::vector<Glyph>
+////////////////////////////////////////////////////////////
+
+SdfFont::SdfFont()
+    : _fontInfo { new stbtt_fontinfo }
+    , Font {}
+{
+}
+
+SdfFont::~SdfFont()
+{
+    if (_fontInfo) {
+        delete _fontInfo;
+        _fontInfo = nullptr;
+    }
+}
+
+auto SdfFont::load(const std::string& filename, u32 fontSize) -> bool
+{
+    if (!FileSystem::exists(filename)) {
+        //TODO: log error
+        return false;
+    }
+
+    InputFileStreamU fs { filename };
+    _fontData = fs.read_all();
+
+    if (!stbtt_InitFont(_fontInfo, _fontData.data(), stbtt_GetFontOffsetForIndex(_fontData.data(), 0)))
+        return false;
+
+    _fontScale = stbtt_ScaleForPixelHeight(_fontInfo, static_cast<f32>(fontSize));
+    _fontSize = fontSize;
+
+    _glyphs.clear();
+    _glyphIndices.clear();
+
+    create_texture();
+    std::array<u8, 9> c {};
+    c.fill(0xff);
+    texture()->update(PointU::Zero, { 3, 3 }, &c, 3, 1);
+    _fontTextureCursor = { 4, 0 };
+
+    stbtt_GetFontVMetrics(_fontInfo, &_ascent, &_descent, &_lineGap);
+
+    shape_text(FONT_WARMUP);
+
+    return true;
+}
+
+auto SdfFont::shape_text(const std::string& text) -> std::vector<Glyph>
 {
     auto utf32text { convert_UTF8_to_UTF32(text) };
 
@@ -172,7 +185,7 @@ auto Font::shape_text(const std::string& text) -> std::vector<Glyph>
         }
 
         auto glyph { _glyphs[gi] }; //copy glyph
-        if (_kerning && i < len - 1) {
+        if (kerning() && i < len - 1) {
             glyph.Advance += stbtt_GetGlyphKernAdvance(_fontInfo, gi, utf32text[i + 1]) * _fontScale;
         }
         retValue.push_back(glyph);
@@ -181,22 +194,22 @@ auto Font::shape_text(const std::string& text) -> std::vector<Glyph>
     return retValue;
 }
 
-auto Font::ascender() const -> f32
+auto SdfFont::ascender() const -> f32
 {
     return _ascent * _fontScale;
 }
 
-auto Font::descender() const -> f32
+auto SdfFont::descender() const -> f32
 {
     return _descent * _fontScale;
 }
 
-auto Font::height() const -> f32
+auto SdfFont::height() const -> f32
 {
     return (_ascent - _descent + _lineGap) * _fontScale;
 }
 
-auto Font::cache_glyph(u32 gi) -> bool
+auto SdfFont::cache_glyph(u32 gi) -> bool
 {
     if (!_glyphs.contains(gi)) {
         const u8 onEdgeValue { 0x7F };
@@ -217,7 +230,7 @@ auto Font::cache_glyph(u32 gi) -> bool
 
         // write to texture
         auto [x, y] { _fontTextureCursor };
-        _fontTexture->update({ x, y }, { static_cast<u32>(glWidth), static_cast<u32>(glHeight) }, bitmap, glWidth, 1);
+        texture()->update({ x, y }, { static_cast<u32>(glWidth), static_cast<u32>(glHeight) }, bitmap, glWidth, 1);
 
         stbtt_FreeSDF(bitmap, nullptr);
 
@@ -241,7 +254,7 @@ auto Font::cache_glyph(u32 gi) -> bool
     return true;
 }
 
-auto Font::codepoint_to_glyphindex(u32 codepoint) -> u32
+auto SdfFont::codepoint_to_glyphindex(u32 codepoint) -> u32
 {
     if (!_glyphIndices.contains(codepoint)) {
         _glyphIndices[codepoint] = static_cast<u32>(stbtt_FindGlyphIndex(_fontInfo, codepoint));

@@ -3,13 +3,13 @@
 - [**Resources API**](#resources-api)
   - [**animation**](#animation)
   - [**cursor**](#cursor)
-  - [**font**](#font)
+  - [**fonts**](#fonts)
   - [**material**](#material)
   - [**music**](#music)
   - [**particle_system**](#particle_system)
   - [**sound**](#sound)
   - [**shader**](#shader)
-  - [**texture**](#texture)
+  - [**textures**](#textures)
   - [**webp-animation**](#webp-animation)
   
 ## **animation**
@@ -26,9 +26,9 @@
   - modes
     - { [name] = { texture = [file], hotspot = [PointI] } }
   
-## **font**
+## **fonts**
 
-- font [name]
+- sdf_font [name]
   - source = [file]
   - size = [int]
   - kerning = [bool]
@@ -85,7 +85,7 @@
   - vertex [file]
   - default_for { 'UI', 'Window', 'Font' }
 
-## **texture**
+## **textures**
 
 - texture [name]
   - source [file]
