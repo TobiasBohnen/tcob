@@ -753,7 +753,7 @@ class GameController final {
 public:
     auto name() const -> std::string;
 
-    auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, u32 duration) const -> bool;
+    auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, MilliSeconds duration) const -> bool;
 
     auto is_button_pressed(GameControllerButton button) const -> bool;
     auto has_button(GameControllerButton button) const -> bool;

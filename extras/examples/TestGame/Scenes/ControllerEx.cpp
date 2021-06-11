@@ -1,6 +1,9 @@
 ﻿#include "ControllerEx.hpp"
 #include "../StartScene.hpp"
 #include <iomanip>
+
+using namespace std::chrono_literals;
+
 ControllerEx::ControllerEx(Game& game)
     : Scene(game)
 {
@@ -67,13 +70,13 @@ void ControllerEx::on_key_down(const KeyboardEvent& ev)
 {
     switch (ev.Code) {
     case Scancode::D1:
-        game().input().controller_at(0).rumble(0, 0xFFFF, 1000);
+        game().input().controller_at(0).rumble(0, 0xFFFF, 1s);
         break;
     case Scancode::D2:
-        game().input().controller_at(0).rumble(0xFFFF, 0, 1000);
+        game().input().controller_at(0).rumble(0xFFFF, 0, 1s);
         break;
     case Scancode::D3:
-        game().input().controller_at(0).rumble(0xFFFF, 0xFFFF, 1000);
+        game().input().controller_at(0).rumble(0xFFFF, 0xFFFF, 1s);
         break;
     case Scancode::BACKSPACE:
         game().pop_current_scene();

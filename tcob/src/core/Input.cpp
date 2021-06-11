@@ -23,10 +23,10 @@ auto GameController::name() const -> std::string
     return SDL_JoystickName(SDL_GameControllerGetJoystick(_controller));
 }
 
-auto GameController::rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, u32 duration) const -> bool
+auto GameController::rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, MilliSeconds duration) const -> bool
 {
     assert(_controller);
-    return SDL_GameControllerRumble(_controller, lowFrequencyRumble, highFrequencyRumble, duration) == 0;
+    return SDL_GameControllerRumble(_controller, lowFrequencyRumble, highFrequencyRumble, static_cast<u32>(duration.count())) == 0;
 }
 
 auto GameController::is_button_pressed(GameControllerButton button) const -> bool
