@@ -12,7 +12,6 @@ LuaState::LuaState(lua_State* l)
     : _luaState { l }
 {
     assert(l);
-    save_top();
 }
 
 auto LuaState::is_bool(i32 idx) const -> bool

@@ -71,6 +71,7 @@ public:
     void set(Keys&&... keys) const
     {
         const LuaState ls { lua_state() };
+        ls.save_top();
         set(ls, keys...);
         ls.restore_top();
     }
@@ -79,6 +80,7 @@ public:
     auto get(Keys&&... keys) const -> LuaResult<T>
     {
         const LuaState ls { lua_state() };
+        ls.save_top();
         const LuaResult<T> retValue { get<T>(ls, keys...) };
         ls.restore_top();
         return retValue;
@@ -88,6 +90,7 @@ public:
     auto is(Keys&&... keys) const -> bool
     {
         const LuaState ls { lua_state() };
+        ls.save_top();
         const bool retValue { is<T>(ls, keys...) };
         ls.restore_top();
         return retValue;
@@ -97,6 +100,7 @@ public:
     auto has(Keys&&... keys) const -> bool
     {
         const LuaState ls { lua_state() };
+        ls.save_top();
         const bool retValue { has(ls, keys...) };
         ls.restore_top();
         return retValue;
@@ -113,6 +117,7 @@ public:
     auto keys() const -> std::vector<T>
     {
         const LuaState ls { lua_state() };
+        ls.save_top();
 
         std::vector<T> retValue {};
         push_self();

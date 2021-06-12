@@ -40,6 +40,7 @@ public:
     auto call(P&&... params) const -> LuaResult<R>
     {
         const LuaState ls { lua_state() };
+        ls.save_top();
 
         push_self();
 
@@ -96,6 +97,7 @@ public:
     {
         lua_State* t { thread() };
         const LuaState ls { t };
+        ls.save_top();
 
         //push parameters to lua
         const i32 oldTop { ls.get_top() };
