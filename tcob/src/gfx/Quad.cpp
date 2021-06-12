@@ -22,7 +22,7 @@ void Quad::color(const Color& color)
 void Quad::texcoords(const TextureRegion& region)
 {
     const RectF rect { region.UVRect };
-    const auto level { static_cast<f32>(region.Level) };
+    const f32 level { static_cast<f32>(region.Level) };
 
     TopRight.TexCoords = { rect.right(), rect.Top, level };
     BottomRight.TexCoords = { rect.right(), rect.bottom(), level };
@@ -38,7 +38,7 @@ void Quad::scroll_texcoords(const PointF& offset)
     const f32 bottom { BottomRight.TexCoords[1] + offset.Y };
 
     const RectF rect { left, top, right - left, bottom - top };
-    const auto level { TopRight.TexCoords[2] };
+    const f32 level { TopRight.TexCoords[2] };
 
     TopRight.TexCoords = { rect.right(), rect.Top, level };
     BottomRight.TexCoords = { rect.right(), rect.bottom(), level };
