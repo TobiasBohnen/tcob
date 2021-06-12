@@ -162,8 +162,8 @@ void ParticleSystem::draw(gl::RenderTarget& target)
                 quad->position(particle.bounds(), particle.transform());
                 quad->color(particle._color);
                 quad->texcoords(particle._region);
-                quad++;
-                count++;
+                ++quad;
+                ++count;
             }
         }
         _renderer.unmap(count);
