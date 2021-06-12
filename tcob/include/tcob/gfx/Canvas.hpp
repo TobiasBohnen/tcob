@@ -188,21 +188,13 @@ struct CanvasPaint {
 };
 
 namespace detail {
-
-    struct NVGcompositeOperationState {
-        gl::BlendFunc srcRGB { 0 };
-        gl::BlendFunc dstRGB { 0 };
-        gl::BlendFunc srcAlpha { 0 };
-        gl::BlendFunc dstAlpha { 0 };
-    };
-
     struct NVGscissor {
         Transform xform;
         vec2 extent;
     };
 
     struct NVGstate {
-        NVGcompositeOperationState compositeOperation;
+        gl::BlendFuncs compositeOperation;
         bool shapeAntiAlias { false };
         CanvasPaint fill;
         CanvasPaint stroke;

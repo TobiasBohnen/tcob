@@ -83,11 +83,11 @@ public:
     void set_viewport(SizeF size);
     void cancel();
     void flush();
-    void render_fill(const CanvasPaint& paint, NVGcompositeOperationState compositeOperation, const NVGscissor& scissor, f32 fringe,
+    void render_fill(const CanvasPaint& paint, const gl::BlendFuncs& compositeOperation, const NVGscissor& scissor, f32 fringe,
         const vec4& bounds, const std::vector<NVGpath>& paths);
-    void render_stroke(const CanvasPaint& paint, NVGcompositeOperationState compositeOperation, const NVGscissor& scissor, f32 fringe,
+    void render_stroke(const CanvasPaint& paint, const gl::BlendFuncs& compositeOperation, const NVGscissor& scissor, f32 fringe,
         f32 strokeWidth, const std::vector<NVGpath>& paths);
-    void render_triangles(const CanvasPaint& paint, NVGcompositeOperationState compositeOperation, const NVGscissor& scissor,
+    void render_triangles(const CanvasPaint& paint, const gl::BlendFuncs& compositeOperation, const NVGscissor& scissor,
         const Vertex* verts, i32 nverts);
 
 private:
@@ -102,7 +102,7 @@ private:
     void convex_fill(const GLNVGcall& call);
     void stroke(const GLNVGcall& call);
     void triangles(const GLNVGcall& call);
-    auto get_blend_composite_operation(const NVGcompositeOperationState& op) -> GLNVGblend;
+    auto get_blend_composite_operation(const gl::BlendFuncs& op) -> GLNVGblend;
     auto get_max_vertcount(const std::vector<NVGpath>& paths) -> isize;
     auto alloc_verts(isize n) -> isize;
     auto alloc_frag_uniforms(isize n) -> isize;

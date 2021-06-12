@@ -34,6 +34,21 @@ enum class BlendFunc : u8 {
 
 auto enumToGL(tcob::gl::BlendFunc blendfunc) -> u32;
 
+struct BlendFuncs {
+    gl::BlendFunc SourceColorBlendFunc { gl::BlendFunc::SrcAlpha };
+    gl::BlendFunc DestinationColorBlendFunc { gl::BlendFunc::OneMinusSrcAlpha };
+    gl::BlendFunc SourceAlphaBlendFunc { gl::BlendFunc::SrcAlpha };
+    gl::BlendFunc DestinationAlphaBlendFunc { gl::BlendFunc::OneMinusSrcAlpha };
+};
+
+inline auto operator==(const BlendFuncs& left, const BlendFuncs& right) -> bool
+{
+    return (left.SourceColorBlendFunc == right.SourceColorBlendFunc)
+        && (left.DestinationColorBlendFunc == right.DestinationColorBlendFunc)
+        && (left.SourceAlphaBlendFunc == right.SourceAlphaBlendFunc)
+        && (left.DestinationAlphaBlendFunc == right.DestinationAlphaBlendFunc);
+}
+
 enum class BlendEquation : u8 {
     Add,
     Subtract,

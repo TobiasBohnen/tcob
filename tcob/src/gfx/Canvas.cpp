@@ -46,7 +46,7 @@ static auto nvg__normalize(f32& x, f32& y) -> f32
     return d;
 }
 
-static constexpr auto nvg__compositeOperationState(CompositeOperation op) -> NVGcompositeOperationState
+static constexpr auto nvg__compositeOperationState(CompositeOperation op) -> gl::BlendFuncs
 {
     gl::BlendFunc sfactor, dfactor;
 
@@ -102,10 +102,10 @@ static constexpr auto nvg__compositeOperationState(CompositeOperation op) -> NVG
     }
 
     return {
-        .srcRGB = sfactor,
-        .dstRGB = dfactor,
-        .srcAlpha = sfactor,
-        .dstAlpha = dfactor
+        .SourceColorBlendFunc = sfactor,
+        .DestinationColorBlendFunc = dfactor,
+        .SourceAlphaBlendFunc = sfactor,
+        .DestinationAlphaBlendFunc = dfactor
     };
 }
 
@@ -1151,11 +1151,12 @@ void Canvas::global_composite_blendfunc(gl::BlendFunc sfactor, gl::BlendFunc dfa
 
 void Canvas::global_composite_blendfunc_separate(gl::BlendFunc srcRGB, gl::BlendFunc dstRGB, gl::BlendFunc srcAlpha, gl::BlendFunc dstAlpha)
 {
-    NVGcompositeOperationState op;
-    op.srcRGB = srcRGB;
-    op.dstRGB = dstRGB;
-    op.srcAlpha = srcAlpha;
-    op.dstAlpha = dstAlpha;
+    gl::BlendFuncs op {
+        .SourceColorBlendFunc = srcRGB,
+        .DestinationColorBlendFunc = dstRGB,
+        .SourceAlphaBlendFunc = srcAlpha,
+        .DestinationAlphaBlendFunc = dstAlpha
+    };
 
     NVGstate& s { state() };
     s.compositeOperation = op;
@@ -1947,11 +1948,11 @@ void Canvas::render_text(Vertex* verts, i32 nverts)
     paint.gradient.multiply_alpha(s.alpha);
     paint.text_outline_color.A = static_cast<u8>(paint.text_outline_color.A * s.alpha);
 
-    static NVGcompositeOperationState comp {
-        .srcRGB = gl::BlendFunc::SrcAlpha,
-        .dstRGB = gl::BlendFunc::OneMinusSrcAlpha,
-        .srcAlpha = gl::BlendFunc::SrcAlpha,
-        .dstAlpha = gl::BlendFunc::OneMinusSrcAlpha
+    static gl::BlendFuncs comp {
+        .SourceColorBlendFunc = gl::BlendFunc::SrcAlpha,
+        .DestinationColorBlendFunc = gl::BlendFunc::OneMinusSrcAlpha,
+        .SourceAlphaBlendFunc = gl::BlendFunc::SrcAlpha,
+        .DestinationAlphaBlendFunc = gl::BlendFunc::OneMinusSrcAlpha
     };
 
     _glc->render_triangles(paint, comp, s.scissor, verts, nverts);

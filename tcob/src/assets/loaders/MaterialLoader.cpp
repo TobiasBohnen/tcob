@@ -65,17 +65,17 @@ void MaterialLoader::register_wrapper(LuaScript& script)
         return def;
     });
     wrapper.function("blend_func", [](MaterialDef* def, const std::string& s, const std::string& d) {
-        def->Res->SourceAlphaBlendFunc = blendfunc.at(s);
-        def->Res->SourceColorBlendFunc = blendfunc.at(s);
-        def->Res->DestinationAlphaBlendFunc = blendfunc.at(d);
-        def->Res->DestinationColorBlendFunc = blendfunc.at(d);
+        def->Res->BlendFuncs.SourceAlphaBlendFunc = blendfunc.at(s);
+        def->Res->BlendFuncs.SourceColorBlendFunc = blendfunc.at(s);
+        def->Res->BlendFuncs.DestinationAlphaBlendFunc = blendfunc.at(d);
+        def->Res->BlendFuncs.DestinationColorBlendFunc = blendfunc.at(d);
         return def;
     });
     wrapper.function("separate_blend_func", [](MaterialDef* def, const std::string& cs, const std::string& cd, const std::string& as, const std::string& ad) {
-        def->Res->SourceAlphaBlendFunc = blendfunc.at(as);
-        def->Res->SourceColorBlendFunc = blendfunc.at(cs);
-        def->Res->DestinationAlphaBlendFunc = blendfunc.at(ad);
-        def->Res->DestinationColorBlendFunc = blendfunc.at(cd);
+        def->Res->BlendFuncs.SourceAlphaBlendFunc = blendfunc.at(as);
+        def->Res->BlendFuncs.SourceColorBlendFunc = blendfunc.at(cs);
+        def->Res->BlendFuncs.DestinationAlphaBlendFunc = blendfunc.at(ad);
+        def->Res->BlendFuncs.DestinationColorBlendFunc = blendfunc.at(cd);
         return def;
     });
     wrapper.function("blend_equation", [](MaterialDef* def, const std::string& s) {

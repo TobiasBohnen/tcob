@@ -270,13 +270,14 @@ void GLNVGcontext::cancel()
     _calls.clear();
 }
 
-auto GLNVGcontext::get_blend_composite_operation(const NVGcompositeOperationState& op) -> GLNVGblend
+auto GLNVGcontext::get_blend_composite_operation(const gl::BlendFuncs& op) -> GLNVGblend
 {
-    GLNVGblend blend;
-    blend.srcRGB = gl::enumToGL(op.srcRGB);
-    blend.dstRGB = gl::enumToGL(op.dstRGB);
-    blend.srcAlpha = gl::enumToGL(op.srcAlpha);
-    blend.dstAlpha = gl::enumToGL(op.dstAlpha);
+    GLNVGblend blend {
+        .srcRGB = gl::enumToGL(op.SourceColorBlendFunc),
+        .dstRGB = gl::enumToGL(op.DestinationColorBlendFunc),
+        .srcAlpha = gl::enumToGL(op.SourceAlphaBlendFunc),
+        .dstAlpha = gl::enumToGL(op.DestinationAlphaBlendFunc),
+    };
     if (blend.srcRGB == GL_INVALID_ENUM || blend.dstRGB == GL_INVALID_ENUM || blend.srcAlpha == GL_INVALID_ENUM || blend.dstAlpha == GL_INVALID_ENUM) {
         blend.srcRGB = GL_ONE;
         blend.dstRGB = GL_ONE_MINUS_SRC_ALPHA;
@@ -389,7 +390,7 @@ auto GLNVGcontext::get_frag_uniformptr(isize i) -> GLNVGfragUniforms*
     return reinterpret_cast<GLNVGfragUniforms*>(&data[i]);
 }
 
-void GLNVGcontext::render_fill(const CanvasPaint& paint, NVGcompositeOperationState compositeOperation, const NVGscissor& scissor, f32 fringe,
+void GLNVGcontext::render_fill(const CanvasPaint& paint, const gl::BlendFuncs& compositeOperation, const NVGscissor& scissor, f32 fringe,
     const vec4& bounds, const std::vector<NVGpath>& paths)
 {
     GLNVGcall& call { _calls.emplace_back() };
@@ -461,7 +462,7 @@ void GLNVGcontext::render_fill(const CanvasPaint& paint, NVGcompositeOperationSt
     }
 }
 
-void GLNVGcontext::render_stroke(const CanvasPaint& paint, NVGcompositeOperationState compositeOperation, const NVGscissor& scissor, f32 fringe,
+void GLNVGcontext::render_stroke(const CanvasPaint& paint, const gl::BlendFuncs& compositeOperation, const NVGscissor& scissor, f32 fringe,
     f32 strokeWidth, const std::vector<NVGpath>& paths)
 {
     GLNVGcall& call { _calls.emplace_back() };
@@ -496,7 +497,7 @@ void GLNVGcontext::render_stroke(const CanvasPaint& paint, NVGcompositeOperation
     convert_paint(get_frag_uniformptr(call.uniformOffset + _fragSize), paint, scissor, strokeWidth, fringe, 1.0f - 0.5f / 255.0f);
 }
 
-void GLNVGcontext::render_triangles(const CanvasPaint& paint, NVGcompositeOperationState compositeOperation, const NVGscissor& scissor,
+void GLNVGcontext::render_triangles(const CanvasPaint& paint, const gl::BlendFuncs& compositeOperation, const NVGscissor& scissor,
     const Vertex* verts, i32 nverts)
 {
     GLNVGcall& call { _calls.emplace_back() };
