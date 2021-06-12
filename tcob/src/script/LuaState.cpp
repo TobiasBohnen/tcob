@@ -8,6 +8,22 @@
 #include <lua.hpp>
 
 namespace tcob {
+
+LuaStackGuard::LuaStackGuard(lua_State* l)
+    : _luaState { l }
+    , _oldTop { lua_gettop(l) }
+{
+}
+
+LuaStackGuard::~LuaStackGuard()
+{
+    const i32 n { lua_gettop(_luaState) - _oldTop };
+    if (n > 0)
+        lua_pop(_luaState, n);
+}
+
+////////////////////////////////////////////////////////////
+
 LuaState::LuaState(lua_State* l)
     : _luaState { l }
 {
@@ -117,18 +133,6 @@ auto LuaState::get_top() const -> i32
     return lua_gettop(_luaState);
 }
 
-void LuaState::save_top() const
-{
-    _oldTop = get_top();
-}
-
-void LuaState::restore_top() const
-{
-    const i32 n { get_top() - _oldTop };
-    if (n > 0)
-        lua_pop(_luaState, n);
-}
-
 void LuaState::check_stack(i32 size) const
 {
     lua_checkstack(_luaState, size);
@@ -136,7 +140,7 @@ void LuaState::check_stack(i32 size) const
 
 auto LuaState::resume(i32 argCount, i32* resultCount) const -> LuaThreadState
 {
-    i32 err { lua_resume(_luaState, nullptr, argCount, resultCount) };
+    const i32 err { lua_resume(_luaState, nullptr, argCount, resultCount) };
     switch (err) {
     case LUA_OK:
         return LuaThreadState::Ok;
@@ -291,8 +295,15 @@ auto LuaState::UpvalueIndex(i32 n) -> i32
 {
     return lua_upvalueindex(n);
 }
+
 auto LuaState::lua() const -> lua_State*
 {
     return _luaState;
 }
+
+auto LuaState::create_stack_guard() const -> LuaStackGuard
+{
+    return LuaStackGuard { _luaState };
+}
+
 }

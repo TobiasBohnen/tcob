@@ -80,6 +80,16 @@ struct [[nodiscard]] LuaResult<void> {
     LuaResultState State;
 };
 
+class LuaStackGuard final {
+public:
+    explicit LuaStackGuard(lua_State* l);
+    ~LuaStackGuard();
+
+private:
+    lua_State* _luaState;
+    mutable i32 _oldTop { 0 };
+};
+
 class LuaState final {
 public:
     explicit LuaState(lua_State* l);
@@ -123,8 +133,8 @@ public:
     auto get_type(i32 idx) const -> LuaType;
 
     auto get_top() const -> i32;
-    void save_top() const;
-    void restore_top() const;
+
+    auto create_stack_guard() const -> LuaStackGuard;
 
     void check_stack(i32 size) const;
     auto resume(i32 argCount, i32* resultCount) const -> LuaThreadState;
@@ -194,6 +204,5 @@ private:
     }
 
     lua_State* _luaState;
-    mutable i32 _oldTop { 0 };
 };
 }

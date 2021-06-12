@@ -13,13 +13,10 @@ namespace tcob {
 auto LuaTable::raw_length() const -> isize
 {
     const LuaState ls { lua_state() };
+    const auto guard { ls.create_stack_guard() };
 
-    ls.save_top();
     push_self();
-    auto retValue { ls.rawlen(-1) };
-    ls.restore_top();
-
-    return retValue;
+    return ls.rawlen(-1);
 }
 
 auto LuaTable::create_table(const std::string& name) const -> LuaTable
@@ -37,14 +34,12 @@ auto LuaTable::create_table(const std::string& name) const -> LuaTable
 
 void LuaTable::dump(std::stringstream& stream) const
 {
-    lua_state().save_top();
+    const auto guard { lua_state().create_stack_guard() };
 
     push_self();
 
     dump_it(stream, 0);
     stream << std::endl;
-
-    lua_state().restore_top();
 }
 
 void LuaTable::dump(OutputFileStream& stream) const

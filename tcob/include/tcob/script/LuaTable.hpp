@@ -71,18 +71,16 @@ public:
     void set(Keys&&... keys) const
     {
         const LuaState ls { lua_state() };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
         set(ls, keys...);
-        ls.restore_top();
     }
 
     template <typename T, typename... Keys>
     auto get(Keys&&... keys) const -> LuaResult<T>
     {
         const LuaState ls { lua_state() };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
         const LuaResult<T> retValue { get<T>(ls, keys...) };
-        ls.restore_top();
         return retValue;
     }
 
@@ -90,9 +88,8 @@ public:
     auto is(Keys&&... keys) const -> bool
     {
         const LuaState ls { lua_state() };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
         const bool retValue { is<T>(ls, keys...) };
-        ls.restore_top();
         return retValue;
     }
 
@@ -100,9 +97,8 @@ public:
     auto has(Keys&&... keys) const -> bool
     {
         const LuaState ls { lua_state() };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
         const bool retValue { has(ls, keys...) };
-        ls.restore_top();
         return retValue;
     }
 
@@ -117,7 +113,7 @@ public:
     auto keys() const -> std::vector<T>
     {
         const LuaState ls { lua_state() };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
 
         std::vector<T> retValue {};
         push_self();
@@ -133,7 +129,6 @@ public:
             ls.pop(2);
         }
 
-        ls.restore_top();
         return retValue;
     }
 

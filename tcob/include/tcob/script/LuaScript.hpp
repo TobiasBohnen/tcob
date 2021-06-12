@@ -51,31 +51,26 @@ public:
     template <typename R = void>
     auto run_file(const std::string& file, i32 idx = 1) const -> LuaResult<R>
     {
-        std::string s { FileSystem::read_as_string(file) };
-        return run_script<R>(s, idx, file);
+        return run_script<R>(FileSystem::read_as_string(file), idx, file);
     }
 
     template <typename R = void>
     auto run_script(const std::string& script, i32 idx = 1, const std::string& name = "Script") const -> LuaResult<R>
     {
-        _state.save_top();
-        LuaResultState result { call_buffer(script.data(), script.size(), name.c_str()) };
+        const auto guard { _state.create_stack_guard() };
+        const auto result { call_buffer(script.data(), script.size(), name.c_str()) };
         if (result == LuaResultState::Ok) {
             if constexpr (std::is_void_v<R>) {
-                _state.restore_top();
                 return { result };
             } else {
                 R retValue {};
-                const bool ok { _state.try_get(std::forward<int>(idx), retValue) };
-                _state.restore_top();
-                if (ok) {
+                if (_state.try_get(std::forward<int>(idx), retValue)) {
                     return { retValue, result };
                 } else {
                     return { R(), LuaResultState::TypeMismatch };
                 }
             }
         } else {
-            _state.restore_top();
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
@@ -103,14 +98,13 @@ public:
     template <typename R = void>
     auto load_binary(const std::string& file, i32 idx = 1) const -> LuaFunction<R>
     {
-        _state.save_top();
+        const auto guard { _state.create_stack_guard() };
 
         LuaFunction<R> retVal {};
         if (load_binarybuffer(file)) {
             _state.try_get<LuaFunction<R>>(-1, retVal);
         }
 
-        _state.restore_top();
         return retVal;
     }
 

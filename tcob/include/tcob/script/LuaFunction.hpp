@@ -40,7 +40,7 @@ public:
     auto call(P&&... params) const -> LuaResult<R>
     {
         const LuaState ls { lua_state() };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
 
         push_self();
 
@@ -50,23 +50,19 @@ public:
         const i32 paramsCount { ls.get_top() - oldTop };
 
         //call lua function
-        const LuaResultState result { do_call(paramsCount) };
+        const auto result { do_call(paramsCount) };
         if (result == LuaResultState::Ok) {
             if constexpr (std::is_void_v<R>) {
-                ls.restore_top();
                 return { LuaResultState::Ok };
             } else {
                 R retValue {};
-                bool ok { ls.try_get(1, retValue) };
-                ls.restore_top();
-                if (ok) {
+                if (ls.try_get(1, retValue)) {
                     return { retValue, LuaResultState::Ok };
                 } else {
                     return { R(), LuaResultState::TypeMismatch };
                 }
             }
         } else {
-            ls.restore_top();
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
@@ -97,7 +93,7 @@ public:
     {
         lua_State* t { thread() };
         const LuaState ls { t };
-        ls.save_top();
+        const auto guard { ls.create_stack_guard() };
 
         //push parameters to lua
         const i32 oldTop { ls.get_top() };
@@ -106,18 +102,14 @@ public:
 
         //call lua function
         i32 nresults { 0 };
-        LuaThreadState err { ls.resume(paramsCount, &nresults) };
+        const auto err { ls.resume(paramsCount, &nresults) };
 
         if (err == LuaThreadState::Ok || err == LuaThreadState::Yielded) {
             if constexpr (std::is_void_v<R>) {
-                ls.restore_top();
                 return { LuaResultState::Ok };
             } else {
                 R retValue {};
-                bool ok { ls.try_get(1, retValue) };
-                ls.restore_top();
-
-                if (ok) {
+                if (ls.try_get(1, retValue)) {
                     return { retValue, err == LuaThreadState::Ok ? LuaResultState::Ok : LuaResultState::Yielded };
                 } else {
                     return { R(), LuaResultState::TypeMismatch };
@@ -138,7 +130,6 @@ public:
                 break;
             }
 
-            ls.restore_top();
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
