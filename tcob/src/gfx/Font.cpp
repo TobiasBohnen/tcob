@@ -174,11 +174,11 @@ auto TrueTypeFont::load(const std::string& filename, u32 fontSize) -> bool
 
 auto TrueTypeFont::shape_text(const std::string& text) -> std::vector<Glyph>
 {
-    auto utf32text { convert_UTF8_to_UTF32(text) };
-
-    isize len { utf32text.size() };
+    const auto utf32text { convert_UTF8_to_UTF32(text) };
+    const isize len { utf32text.size() };
     std::vector<Glyph> retValue;
     retValue.reserve(len);
+
     for (u32 i { 0 }; i < len; ++i) {
         const u32 gi { codepoint_to_glyphindex(utf32text[i]) };
         if (!cache_glyph(gi)) {
