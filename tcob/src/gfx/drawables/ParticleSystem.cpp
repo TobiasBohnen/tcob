@@ -293,7 +293,7 @@ void ParticleEmitter::emit_particles(ParticleSystem& system, MilliSeconds time)
     const u32 particleCount { static_cast<u32>(particleAmount) };
     _emissionDiff = particleAmount - particleCount;
 
-    for (u32 i = 0; i < particleCount; ++i) {
+    for (u32 i { 0 }; i < particleCount; ++i) {
         auto& particle { system.activate_particle() };
         particle.Stage = 0;
 

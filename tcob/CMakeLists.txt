@@ -91,5 +91,8 @@ target_compile_options(tcob PRIVATE
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
 )
 
+set_target_properties(tcob PROPERTIES 
+    INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 add_library(tcob-static STATIC)
 target_link_libraries(tcob-static PRIVATE tcob)

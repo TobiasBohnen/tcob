@@ -17,4 +17,6 @@ target_link_libraries(TestGame PRIVATE tcob PUBLIC SDL2::SDL2main)
 
 target_include_directories(TestGame PRIVATE ../../../tcob/include)
 
-set_target_properties(TestGame PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+set_target_properties(TestGame PROPERTIES 
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+    INTERPROCEDURAL_OPTIMIZATION TRUE)
