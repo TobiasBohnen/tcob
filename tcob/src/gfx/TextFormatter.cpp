@@ -10,6 +10,24 @@
 namespace tcob {
 std::locale loc = std::locale("en_US.UTF8");
 
+void handle_commands(TextFormatter::ShaperToken& token)
+{
+    std::string hay { token.Text };
+    for (auto& c : hay)
+        c = std::toupper(c, std::locale("en_US.utf8"));
+    if (hay.rfind("COLOR:", 0) == 0) {
+        token.Command = {
+            .Type = TextFormatter::CommandType::Color,
+            .Value = Colors::FromString(token.Text.substr(6))
+        };
+    } else if (hay.rfind("ALPHA:", 0) == 0) {
+        token.Command = {
+            .Type = TextFormatter::CommandType::Alpha,
+            .Value = static_cast<u8>(255 * std::clamp(std::strtof(token.Text.substr(6).c_str(), nullptr), 0.f, 1.f))
+        };
+    }
+}
+
 void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& text, ResourcePtr<Font>& font)
 {
     ShaperToken currentToken {};
@@ -76,20 +94,7 @@ void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& t
                     token.Width += glyph.Advance;
                 }
             } else if (token.Type == ShaperTokenType::Command) {
-                std::string hay { token.Text };
-                for (auto& c : hay)
-                    c = std::toupper(c, std::locale("en_US.utf8"));
-                if (hay.rfind("COLOR:", 0) == 0) {
-                    token.Command = {
-                        .Type = CommandType::Color,
-                        .Value = Colors::FromString(token.Text.substr(6))
-                    };
-                } else if (hay.rfind("ALPHA:", 0) == 0) {
-                    token.Command = {
-                        .Type = CommandType::Alpha,
-                        .Value = static_cast<u8>(255 * std::clamp(std::strtof(token.Text.substr(6).c_str(), nullptr), 0.f, 1.f))
-                    };
-                }
+                handle_commands(token);
             }
         }
 }
