@@ -167,9 +167,10 @@ void Text::format(const SizeU& newTargetSize)
 
 void Text::reshape()
 {
-    _tokens.clear();
     if (_font && !_text.empty()) {
-        TextFormatter::shape(_tokens, _text, _font);
+        _tokens = TextFormatter::shape(_text, _font);
+    } else {
+        _tokens.clear();
     }
 
     _needsFormat = true;

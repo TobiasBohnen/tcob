@@ -28,8 +28,10 @@ void handle_commands(TextFormatter::ShaperToken& token)
     }
 }
 
-void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& text, ResourcePtr<Font>& font)
+auto TextFormatter::shape(const std::string& text, ResourcePtr<Font>& font) -> std::vector<ShaperToken>
 {
+    std::vector<ShaperToken> retValue {};
+
     ShaperToken currentToken {};
     for (auto& ch : text) {
         if (currentToken.Type == ShaperTokenType::Command) {
@@ -40,7 +42,7 @@ void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& t
             }
 
             if (ch == '}') { // finish command
-                tokens.push_back(currentToken);
+                retValue.push_back(currentToken);
                 currentToken = {};
             } else if (!std::isspace(ch, loc)) { // ignore spaces
                 currentToken.Text += ch;
@@ -48,13 +50,13 @@ void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& t
         } else if (std::isspace(ch, loc)) { // handle whitespace
             if (ch == '\n') { // handle newline
                 if (currentToken.Type != ShaperTokenType::None)
-                    tokens.push_back(currentToken);
+                    retValue.push_back(currentToken);
 
-                tokens.push_back({ .Type = ShaperTokenType::Newline });
+                retValue.push_back({ .Type = ShaperTokenType::Newline });
                 currentToken = {};
             } else if (currentToken.Type != ShaperTokenType::Whitespace) { // start new whitespace token
                 if (currentToken.Type != ShaperTokenType::None)
-                    tokens.push_back(currentToken);
+                    retValue.push_back(currentToken);
 
                 currentToken = { .Type = ShaperTokenType::Whitespace };
                 currentToken.Text += ch;
@@ -67,13 +69,13 @@ void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& t
             }
             if (ch == '{') { // start new command token
                 if (currentToken.Type != ShaperTokenType::None)
-                    tokens.push_back(currentToken);
+                    retValue.push_back(currentToken);
 
                 currentToken = { .Type = ShaperTokenType::Command };
             } else { // handle text
                 if (currentToken.Type != ShaperTokenType::Text) { // start new text token
                     if (currentToken.Type != ShaperTokenType::None)
-                        tokens.push_back(currentToken);
+                        retValue.push_back(currentToken);
 
                     currentToken = { .Type = ShaperTokenType::Text };
                     currentToken.Text += ch;
@@ -84,10 +86,10 @@ void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& t
         }
     }
     if (currentToken.Type != ShaperTokenType::None)
-        tokens.push_back(currentToken);
+        retValue.push_back(currentToken);
 
     if (font)
-        for (auto& token : tokens) {
+        for (auto& token : retValue) {
             if (token.Type == ShaperTokenType::Text || token.Type == ShaperTokenType::Whitespace) {
                 token.Glyphs = font->shape_text(token.Text);
                 for (const auto& glyph : token.Glyphs) {
@@ -97,6 +99,8 @@ void TextFormatter::shape(std::vector<ShaperToken>& tokens, const std::string& t
                 handle_commands(token);
             }
         }
+
+    return retValue;
 }
 
 auto TextFormatter::format(const std::vector<ShaperToken>& tokens, const FontInfo& font, TextAlignment align, const SizeF& sizeInPixels) -> Result
@@ -215,8 +219,6 @@ auto TextFormatter::format(const std::vector<ShaperToken>& tokens, const FontInf
 
 auto TextFormatter::format(const std::string& text, ResourcePtr<Font>& font, TextAlignment align, const SizeF& size) -> Result
 {
-    std::vector<ShaperToken> tokens;
-    shape(tokens, text, font);
-    return format(tokens, font->info(), align, size);
+    return format(shape(text, font), font->info(), align, size);
 }
 }

@@ -4,29 +4,25 @@ TEST_CASE("GFX.Text.Tokenizer")
 {
     auto font { ResourcePtr<Font> { nullptr } };
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "   ", font);
+        auto tokens { TextFormatter::shape("   ", font) };
         REQUIRE(tokens.size() == 1);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Whitespace);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "   a", font);
+        auto tokens { TextFormatter::shape("   a", font) };
         REQUIRE(tokens.size() == 2);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Whitespace);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Text);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, " a ", font);
+        auto tokens { TextFormatter::shape(" a ", font) };
         REQUIRE(tokens.size() == 3);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Whitespace);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[2].Type == TextFormatter::ShaperTokenType::Whitespace);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "a b c", font);
+        auto tokens { TextFormatter::shape("a b c", font) };
         REQUIRE(tokens.size() == 5);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Whitespace);
@@ -35,28 +31,24 @@ TEST_CASE("GFX.Text.Tokenizer")
         REQUIRE(tokens[4].Type == TextFormatter::ShaperTokenType::Text);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "abc", font);
+        auto tokens { TextFormatter::shape("abc", font) };
         REQUIRE(tokens.size() == 1);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Text);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "öäößह", font);
+        auto tokens { TextFormatter::shape("öäößह", font) };
         REQUIRE(tokens.size() == 1);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Text);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "abc def", font);
+        auto tokens { TextFormatter::shape("abc def", font) };
         REQUIRE(tokens.size() == 3);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Whitespace);
         REQUIRE(tokens[2].Type == TextFormatter::ShaperTokenType::Text);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "a\n b   \nc\n ", font);
+        auto tokens { TextFormatter::shape("a\n b   \nc\n ", font) };
         REQUIRE(tokens.size() == 9);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Newline);
@@ -69,8 +61,7 @@ TEST_CASE("GFX.Text.Tokenizer")
         REQUIRE(tokens[8].Type == TextFormatter::ShaperTokenType::Whitespace);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "abc def {color=red}", font);
+        auto tokens { TextFormatter::shape("abc def {color=red}", font) };
         REQUIRE(tokens.size() == 5);
         REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Whitespace);
@@ -79,8 +70,7 @@ TEST_CASE("GFX.Text.Tokenizer")
         REQUIRE(tokens[4].Type == TextFormatter::ShaperTokenType::Command);
     }
     {
-        std::vector<TextFormatter::ShaperToken> tokens;
-        TextFormatter::shape(tokens, "a{  {", font);
+        auto tokens { TextFormatter::shape("a{  {", font) };
         REQUIRE(tokens.size() == 2);
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[1].Text == "{");

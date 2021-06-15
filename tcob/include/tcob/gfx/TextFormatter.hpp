@@ -66,7 +66,7 @@ namespace TextFormatter {
         isize GlyphCount { 0 };
     };
 
-    void shape(std::vector<ShaperToken>& tokens, const std::string& text, ResourcePtr<Font>& font);
+    auto shape(const std::string& text, ResourcePtr<Font>& font) -> std::vector<ShaperToken>;
 
     auto format(const std::vector<ShaperToken>& tokens, const FontInfo& font, TextAlignment align, const SizeF& size) -> Result;
     auto format(const std::string& text, ResourcePtr<Font>& font, TextAlignment align, const SizeF& size) -> Result;
