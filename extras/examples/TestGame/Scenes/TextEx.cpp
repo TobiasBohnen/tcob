@@ -31,6 +31,13 @@ void TextEx::on_start()
     auto& text3 { _texts.emplace_back(std::make_unique<Text>()) };
     text3->text("{ALPHA:1}t{ALPHA:0.9}r{ALPHA:0.8}a{ALPHA:0.7}n{ALPHA:0.6}s{ALPHA:0.5}p{ALPHA:0.4}a{ALPHA:0.3}r{ALPHA:0.2}e{ALPHA:0.1}n{ALPHA:1}t text");
     text3->bounds({ { 0.05f, 0.31f }, { 0.55f, 0.5f } });
+
+    auto& text4 { _texts.emplace_back(std::make_unique<Text>()) };
+    text4->text("effect 1 \n"
+                "{EFFECT:1}"
+                "blablabla"
+                "{EFFECT:0}");
+    text4->bounds({ { 0.75f, 0.01f }, { 0.55f, 0.5f } });
 }
 
 void TextEx::on_draw(RenderTarget& target)

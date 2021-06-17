@@ -35,7 +35,8 @@ namespace TextFormatter {
     enum class CommandType {
         None,
         Color,
-        Alpha
+        Alpha,
+        Effect
     };
 
     struct CommandDefinition {

@@ -25,6 +25,11 @@ void handle_commands(TextFormatter::ShaperToken& token)
             .Type = TextFormatter::CommandType::Alpha,
             .Value = static_cast<u8>(255 * std::clamp(std::strtof(token.Text.substr(6).c_str(), nullptr), 0.f, 1.f))
         };
+    } else if (hay.rfind("EFFECT:", 0) == 0) {
+        token.Command = {
+            .Type = TextFormatter::CommandType::Effect,
+            .Value = static_cast<u8>(std::strtoul(token.Text.substr(7).c_str(), nullptr, 10))
+        };
     }
 }
 
@@ -88,17 +93,16 @@ auto TextFormatter::shape(const std::string& text, ResourcePtr<Font>& font) -> s
     if (currentToken.Type != ShaperTokenType::None)
         retValue.push_back(currentToken);
 
-    if (font)
-        for (auto& token : retValue) {
-            if (token.Type == ShaperTokenType::Text || token.Type == ShaperTokenType::Whitespace) {
-                token.Glyphs = font->shape_text(token.Text);
-                for (const auto& glyph : token.Glyphs) {
-                    token.Width += glyph.Advance;
-                }
-            } else if (token.Type == ShaperTokenType::Command) {
-                handle_commands(token);
+    for (auto& token : retValue) {
+        if (font && (token.Type == ShaperTokenType::Text || token.Type == ShaperTokenType::Whitespace)) {
+            token.Glyphs = font->shape_text(token.Text);
+            for (const auto& glyph : token.Glyphs) {
+                token.Width += glyph.Advance;
             }
+        } else if (token.Type == ShaperTokenType::Command) {
+            handle_commands(token);
         }
+    }
 
     return retValue;
 }

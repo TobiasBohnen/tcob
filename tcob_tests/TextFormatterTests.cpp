@@ -75,4 +75,14 @@ TEST_CASE("GFX.Text.Tokenizer")
         REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Text);
         REQUIRE(tokens[1].Text == "{");
     }
+    {
+        auto tokens { TextFormatter::shape("{effect:1}{effect:25}{effect:42}", font) };
+        REQUIRE(tokens.size() == 3);
+        REQUIRE(tokens[0].Type == TextFormatter::ShaperTokenType::Command);
+        REQUIRE((std::get<u8>(tokens[0].Command.Value)) == 1);
+        REQUIRE(tokens[1].Type == TextFormatter::ShaperTokenType::Command);
+        REQUIRE(std::get<u8>(tokens[1].Command.Value) == 25);
+        REQUIRE(tokens[2].Type == TextFormatter::ShaperTokenType::Command);
+        REQUIRE(std::get<u8>(tokens[2].Command.Value) == 42);
+    }
 }

@@ -17,6 +17,10 @@
 #include <tcob/gfx/gl/GLUniformBuffer.hpp>
 
 namespace tcob {
+struct TextEffect {
+};
+
+////////////////////////////////////////////////////////////
 
 class Text final : public RectTransformable, public Drawable {
 public:
