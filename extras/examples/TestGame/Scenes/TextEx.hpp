@@ -21,8 +21,5 @@ protected:
     void on_mouse_motion(const MouseMotionEvent& ev) override;
 
 private:
-    Text _text0;
-    Text _text1;
-    Text _text2;
-    Text _text3;
+    std::vector<std::unique_ptr<Text>> _texts;
 };
