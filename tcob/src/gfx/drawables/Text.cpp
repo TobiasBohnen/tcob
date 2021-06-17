@@ -107,13 +107,14 @@ void Text::draw(gl::RenderTarget& target)
     if (!is_visible() || !_font)
         return;
 
-    if (_needsFormat)
+    if (_needsFormat) {
         format(target.size());
 
-    const isize size { _quads.size() };
-    Quad* quad { _renderer.map(size) };
-    std::memcpy(quad, _quads.data(), size * sizeof(Quad));
-    _renderer.unmap(size);
+        const isize size { _quads.size() };
+        Quad* quad { _renderer.map(size) };
+        std::memcpy(quad, _quads.data(), size * sizeof(Quad));
+        _renderer.unmap(size);
+    }
 
     _uniformBuffer.bind_base(1);
     _renderer.material(_font->material().object());
