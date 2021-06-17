@@ -1579,7 +1579,7 @@ void Canvas::flatten_paths()
             ++i;
             break;
         case NVG_WINDING:
-            set_path_winding(static_cast<Winding>(int(_commands[i + 1])));
+            set_path_winding(static_cast<Winding>(_commands[i + 1]));
             i += 2;
             break;
         default:
