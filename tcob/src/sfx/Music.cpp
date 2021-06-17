@@ -142,7 +142,7 @@ void Music::stop_stream()
     _requestStop = false;
 }
 
-void Music::queue_buffers(const std::vector<u32>& buffers)
+void Music::queue_buffers(std::span<u32> buffers)
 {
     auto s { source() };
 

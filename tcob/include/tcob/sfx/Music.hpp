@@ -41,7 +41,7 @@ public:
 private:
     void update_stream();
     void stop_stream();
-    void queue_buffers(const std::vector<u32>& buffers);
+    void queue_buffers(std::span<u32> buffers);
     void fill_buffers();
 
     std::array<std::shared_ptr<al::Buffer>, MUSIC_BUFFER_COUNT> _buffers;

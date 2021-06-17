@@ -69,7 +69,7 @@ namespace TextFormatter {
 
     auto shape(const std::string& text, ResourcePtr<Font>& font) -> std::vector<ShaperToken>;
 
-    auto format(const std::vector<ShaperToken>& tokens, const FontInfo& font, TextAlignment align, const SizeF& size) -> Result;
+    auto format(std::span<ShaperToken> tokens, const FontInfo& font, TextAlignment align, const SizeF& size) -> Result;
     auto format(const std::string& text, ResourcePtr<Font>& font, TextAlignment align, const SizeF& size) -> Result;
 }
 }

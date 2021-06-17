@@ -239,16 +239,16 @@ void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library)
     canvasWrap.function("reset_scissor", &Canvas::reset_scissor);
 
     // Gradients
-    canvasWrap.function("create_linear_gradient", [](Canvas* canvas, const PointF& s, const PointF& e, const std::vector<ColorStop>& colors) {
-        auto paint { canvas->create_linear_gradient(s, e, colors) };
+    canvasWrap.function("create_linear_gradient", [](Canvas* canvas, const PointF& s, const PointF& e, std::vector<ColorStop>& colors) {
+        auto paint { canvas->create_linear_gradient(s, e, ColorGradient<256> { colors }) };
         return LuaOwnedPtr { new CanvasPaint { paint } };
     });
-    canvasWrap.function("create_box_gradient", [](Canvas* canvas, const RectF& rect, f32 r, f32 f, const std::vector<ColorStop>& colors) {
-        auto paint { canvas->create_box_gradient(rect, r, f, colors) };
+    canvasWrap.function("create_box_gradient", [](Canvas* canvas, const RectF& rect, f32 r, f32 f, std::vector<ColorStop>& colors) {
+        auto paint { canvas->create_box_gradient(rect, r, f, ColorGradient<256> { colors }) };
         return LuaOwnedPtr { new CanvasPaint { paint } };
     });
-    canvasWrap.function("create_radial_gradient", [](Canvas* canvas, const PointF& c, f32 inr, f32 outr, const std::vector<ColorStop>& colors) {
-        auto paint { canvas->create_radial_gradient(c, inr, outr, colors) };
+    canvasWrap.function("create_radial_gradient", [](Canvas* canvas, const PointF& c, f32 inr, f32 outr, std::vector<ColorStop>& colors) {
+        auto paint { canvas->create_radial_gradient(c, inr, outr, ColorGradient<256> { colors }) };
         return LuaOwnedPtr { new CanvasPaint { paint } };
     });
 

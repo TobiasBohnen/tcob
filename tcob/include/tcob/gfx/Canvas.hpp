@@ -105,7 +105,7 @@ public:
         calculate();
     }
 
-    ColorGradient(const std::vector<ColorStop>& colorStops, bool preMulAlpha = true)
+    explicit ColorGradient(std::span<ColorStop> colorStops, bool preMulAlpha = true)
         : _premulAlpha { preMulAlpha }
     {
         static_assert(Size > 0);

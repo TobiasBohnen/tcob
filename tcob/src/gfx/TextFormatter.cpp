@@ -107,7 +107,7 @@ auto TextFormatter::shape(const std::string& text, ResourcePtr<Font>& font) -> s
     return retValue;
 }
 
-auto TextFormatter::format(const std::vector<ShaperToken>& tokens, const FontInfo& font, TextAlignment align, const SizeF& sizeInPixels) -> Result
+auto TextFormatter::format(std::span<ShaperToken> tokens, const FontInfo& font, TextAlignment align, const SizeF& sizeInPixels) -> Result
 {
     // fit words in lines
     struct Line {
@@ -223,6 +223,7 @@ auto TextFormatter::format(const std::vector<ShaperToken>& tokens, const FontInf
 
 auto TextFormatter::format(const std::string& text, ResourcePtr<Font>& font, TextAlignment align, const SizeF& size) -> Result
 {
-    return format(shape(text, font), font->info(), align, size);
+    auto tokens { shape(text, font) };
+    return format(tokens, font->info(), align, size);
 }
 }
