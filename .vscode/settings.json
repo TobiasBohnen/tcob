@@ -36,7 +36,6 @@
     "files.associations": {
         "algorithm": "cpp",
         "any": "cpp",
-        "array": "cpp",
         "atomic": "cpp",
         "bitset": "cpp",
         "cctype": "cpp",
@@ -116,6 +115,7 @@
         "*.frag": "glsl",
         "*.vert": "glsl",
         "codecvt": "cpp",
+        "array": "cpp",
         "sdl_hints.h": "c",
         "*.rh": "cpp",
         "queue": "cpp",
@@ -150,7 +150,8 @@
         "format": "cpp",
         "forward_list": "cpp",
         "stb_truetype.h": "c",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "span": "cpp"
     },
     "Lua.diagnostics.disable": [
         "undefined-global"

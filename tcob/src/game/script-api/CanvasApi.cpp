@@ -209,8 +209,14 @@ void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library)
     canvasWrap.function("stroke_ellipse", &Canvas::stroke_ellipse);
     canvasWrap.function("fill_arc", &Canvas::fill_arc);
     canvasWrap.function("stroke_arc", &Canvas::stroke_arc);
-    canvasWrap.function("fill_lines", &Canvas::fill_lines);
-    canvasWrap.function("stroke_lines", &Canvas::stroke_lines);
+    canvasWrap.function("fill_lines",
+        [](Canvas* canvas, std::vector<PointF>& points) {
+            canvas->fill_lines(points);
+        });
+    canvasWrap.function("stroke_lines",
+        [](Canvas* canvas, std::vector<PointF>& points) {
+            canvas->stroke_lines(points);
+        });
 
     // Render styles
     canvasWrap.function("fill_style", &Canvas::fill_color,

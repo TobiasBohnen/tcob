@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <numbers>
+#include <span>
 #include <string>
 #include <vector>
 

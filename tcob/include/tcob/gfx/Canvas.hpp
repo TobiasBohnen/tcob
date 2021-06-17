@@ -342,8 +342,8 @@ public:
     void fill_arc(const PointF& center, f32 r, f32 a0, f32 a1, Winding wind);
     void stroke_arc(const PointF& center, f32 r, f32 a0, f32 a1, Winding wind);
 
-    void fill_lines(const std::vector<PointF>& points);
-    void stroke_lines(const std::vector<PointF>& points);
+    void fill_lines(std::span<PointF> points);
+    void stroke_lines(std::span<PointF> points);
 
     void draw_image(i32 handle, const RectF& rect);
     void draw_image_clipped(i32 handle, const RectF& srect, const RectF& rect);

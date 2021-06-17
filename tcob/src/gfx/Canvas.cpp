@@ -581,7 +581,7 @@ void Canvas::line_to(const PointF& pos)
     append_commands({ NVG_LINETO, pos.X, pos.Y });
 }
 
-void Canvas::fill_lines(const std::vector<PointF>& points)
+void Canvas::fill_lines(std::span<PointF> points)
 {
     begin_path();
 
@@ -593,7 +593,7 @@ void Canvas::fill_lines(const std::vector<PointF>& points)
     fill();
 }
 
-void Canvas::stroke_lines(const std::vector<PointF>& points)
+void Canvas::stroke_lines(std::span<PointF> points)
 {
     begin_path();
 
