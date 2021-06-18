@@ -107,27 +107,31 @@ auto Font::info() const -> FontInfo
     };
 }
 
-auto Font::kerning() const -> bool
-{
-    return _kerning;
-}
-
 void Font::create_texture()
 {
     _fontTexture->create({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
     _fontTexture->filtering(gl::TextureFiltering::Linear);
 }
 
+auto Font::kerning() const -> bool
+{
+    return _kerning;
+}
+
 void Font::kerning(bool kerning)
 {
     if (_kerning != kerning) {
         _kerning = kerning;
+        Changed();
     }
 }
 
 void Font::line_gap_override(f32 val)
 {
-    _lineGapOverride = val;
+    if (_lineGapOverride != val) {
+        _lineGapOverride = val;
+        Changed();
+    }
 }
 
 ////////////////////////////////////////////////////////////

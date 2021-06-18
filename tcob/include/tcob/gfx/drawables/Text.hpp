@@ -15,6 +15,7 @@
 #include <tcob/gfx/gl/GLRenderTarget.hpp>
 #include <tcob/gfx/gl/GLRenderer.hpp>
 #include <tcob/gfx/gl/GLUniformBuffer.hpp>
+#include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob {
 struct TextEffect {
@@ -69,5 +70,7 @@ private:
 
     gl::DynamicQuadRenderer _renderer {};
     SizeU _oldTargetSize { SizeU::Zero };
+
+    sigslot::scoped_connection _connection;
 };
 }

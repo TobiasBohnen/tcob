@@ -12,6 +12,7 @@
 #include <tcob/core/data/Rect.hpp>
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/gl/GLTexture.hpp>
+#include <tcob/thirdparty/sigslot/signal.hpp>
 
 struct stbtt_fontinfo;
 
@@ -38,6 +39,8 @@ public:
     Font();
     ~Font();
 
+    sigslot::signal<> Changed;
+
     virtual auto load(const std::string& filename, u32 fontSize) -> bool = 0;
 
     auto material() const -> ResourcePtr<Material>;
@@ -49,9 +52,9 @@ public:
     auto kerning() const -> bool;
     void kerning(bool kerning);
 
-    virtual auto shape_text(const std::string& text) -> std::vector<Glyph> = 0;
-
     void line_gap_override(f32 val);
+
+    virtual auto shape_text(const std::string& text) -> std::vector<Glyph> = 0;
 
     static inline ResourcePtr<Font> Default;
     static inline ResourcePtr<gl::ShaderProgram> DefaultShader;

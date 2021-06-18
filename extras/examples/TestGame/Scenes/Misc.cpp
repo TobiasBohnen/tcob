@@ -353,8 +353,7 @@ void MiscScene::on_key_down(const KeyboardEvent& ev)
             tileMap.modify_tile_set(i, "pebble_brown3");
         }
     } else if (ev.Code == Scancode::R) {
-        auto& resMgr = game().resources();
-        resMgr.get<gl::ShaderProgram>("res", "default2darray").get()->reload();
+        font->line_gap_override(50);
     } else if (ev.Code == Scancode::M) {
         game().window().create_screenshot().save_async("screen1async.webp");
     } else if (ev.Code == Scancode::BACKSPACE) {

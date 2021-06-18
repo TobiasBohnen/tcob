@@ -21,6 +21,9 @@ void Text::font(ResourcePtr<Font> font)
 {
     _font = std::move(font);
     _needsReshape = true;
+
+    if (_font)
+        _connection = _font->Changed.connect([=]() { _needsReshape = true; });
 }
 
 auto Text::text() const -> std::string
@@ -126,7 +129,7 @@ void Text::format(const SizeU& newTargetSize)
     if (!_tokens.empty() || _oldTargetSize != newTargetSize) {
         const f32 ty { static_cast<f32>(newTargetSize.Height) };
 
-        auto formatResult { TextFormatter::format(_tokens, _font->info(), _horiAlignment, { size().Width * ty, size().Height * ty }) };
+        const auto formatResult { TextFormatter::format(_tokens, _font->info(), _horiAlignment, { size().Width * ty, size().Height * ty }) };
 
         _quads.clear();
 
