@@ -172,7 +172,7 @@ auto TextFormatter::format(std::span<ShaperToken> tokens, const FontInfo& font, 
     }
 
     // format lines
-    f32 x { 0 }, y { 0 };
+    f32 x { 0 }, y { font.Ascender };
     Result retValue {};
     for (auto& line : lines) {
         switch (align) {
@@ -200,7 +200,7 @@ auto TextFormatter::format(std::span<ShaperToken> tokens, const FontInfo& font, 
             } else {
                 for (const auto& glyph : token.Glyphs) {
                     form.Quads.push_back(QuadDefinition {
-                        .Rect = { { x + glyph.Offset, y + glyph.Bearing.Y + font.Ascender }, glyph.Size },
+                        .Rect = { { x + glyph.Offset, y + glyph.Bearing.Y }, glyph.Size },
                         .TexRegion = { glyph.UVRect, 0 } });
 
                     retValue.GlyphCount++;
