@@ -145,7 +145,7 @@ void MiscScene::on_start()
               "eirmod tempor invidunt ut labore et dolore magna aliquyam erat, {Color:Yellow}sed diam voluptua. At vero eos et accusam "
               "et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
     //text.text("ö±\nad to");
-    text.size({ 0.75f, 1.75f });
+    text.size({ 1.25f, 1.75f });
     text.position({ 0.25f, 0.1f });
     text.horizontal_alignment(TextAlignment::Left);
     text.color(Colors::White);
@@ -154,7 +154,7 @@ void MiscScene::on_start()
 
     auto& sprite0 = layer1.create_sprite();
     sprite0.material(resMgr.get<Material>("res", "spriteMat1"), "default");
-    sprite0.size({ 0.75f, 0.75f });
+    sprite0.size({ 1.25f, 1.75f });
     sprite0.position({ 0.25f, 0.1f });
     //sprite0.transparency(0.5f);
     scrollID = sprite0.id();

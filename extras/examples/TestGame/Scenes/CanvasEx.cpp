@@ -161,7 +161,7 @@ void CanvasEx::paint_to_canvas()
             "c:text_outline_thickness(0.5) "
             "c:fill_style(Colors.White) "
 
-            "c:draw_textbox({ 250, 20 }, { 100, 100 }, 'okaydokey') "
+            "c:draw_textbox({ 250, 20 }, { 100, 600 }, 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.') "
 
             "c:fill_style(Colors.Teal) "
             "c:fill_arc({ 350, 300 }, 50, 15, 270, 'CCW') "
