@@ -29,18 +29,20 @@
 ## **fonts**
 
 - font [name]
-  - source = [file]
-  - size = [int]
-  - kerning = [bool]
-  - is_default
+  - source [file]
+  - size [int]
+  - kerning [bool]
+  - is_default [bool]
   - material [material::name]
+  - line_gap [float]
 
 - sdf_font [name]
-  - source = [file]
-  - size = [int]
-  - kerning = [bool]
-  - is_default
+  - source [file]
+  - size [int]
+  - kerning [bool]
+  - is_default [bool]
   - material [material::name]
+  - line_gap [float]
 
 ## **material**
 
@@ -60,7 +62,7 @@
 
 - particle_system [name]
   - material [material::name]
-  - emitters { [name] }
+  - emitters { [particle_emitter::name] }
 
 - particle_emitter [name]
   - spawnarea [RectF]
@@ -68,7 +70,7 @@
   - loop [bool]
   - spawnrate [float]
   - texture [texture::name]
-  - template [name]
+  - template [particle_template::name]
   
 - particle_template [name]
   - direction [float, float]
@@ -98,7 +100,6 @@
   - source [file]
   - regions
     - { [name] = { height, width, left, top }  }
-  - auto_regions { tilesize, padding }
   - filtering
   - wrapping
 

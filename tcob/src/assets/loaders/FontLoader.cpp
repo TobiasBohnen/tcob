@@ -59,6 +59,10 @@ void FontLoader::register_wrapper(LuaScript& script)
         def->material = val;
         return def;
     });
+    wrapper.function("line_gap", [](FontDef* def, f32 val) {
+        def->linegap = val;
+        return def;
+    });
 }
 
 void FontLoader::do_unload(ResourcePtr<Font> res, bool)
@@ -83,6 +87,9 @@ void FontLoader::on_preparing()
             def->Res->material(group().get<Material>(def->material));
         def->Res->load(group().mount_point() + def->info.source, def->info.size);
         def->Res->kerning(def->kerning);
+        if (def->linegap.has_value()) {
+            def->Res->line_gap_override(def->linegap.value());
+        }
 
         if (def->isDefault) {
             Font::Default = def->Res;

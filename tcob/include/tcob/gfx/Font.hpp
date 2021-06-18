@@ -27,6 +27,7 @@ struct Glyph {
 struct FontInfo final {
     f32 Ascender { 0 };
     f32 Descender { 0 };
+    f32 Linegap { 0 };
     f32 Height { 0 };
 };
 
@@ -50,13 +51,15 @@ public:
 
     virtual auto shape_text(const std::string& text) -> std::vector<Glyph> = 0;
 
+    void line_gap_override(f32 val);
+
     static inline ResourcePtr<Font> Default;
     static inline ResourcePtr<gl::ShaderProgram> DefaultShader;
 
 protected:
     virtual auto ascender() const -> f32 = 0;
     virtual auto descender() const -> f32 = 0;
-    virtual auto height() const -> f32 = 0;
+    virtual auto linegap() const -> f32 = 0;
 
     void create_texture();
 
@@ -64,6 +67,8 @@ private:
     std::shared_ptr<gl::Texture2D> _fontTexture;
     std::shared_ptr<Material> _material;
     ResourcePtr<Material> _matRes;
+
+    std::optional<f32> _lineGapOverride;
 
     bool _kerning { true };
 };
@@ -84,7 +89,7 @@ public:
 protected:
     auto ascender() const -> f32 override;
     auto descender() const -> f32 override;
-    auto height() const -> f32 override;
+    auto linegap() const -> f32 override;
 
 private:
     auto cache_glyph(u32 codepoint) -> bool;

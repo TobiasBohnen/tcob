@@ -35,6 +35,7 @@ private:
         std::string material;
         bool kerning { false };
         bool isDefault { false };
+        std::optional<f32> linegap;
     };
 
     std::function<FontDef*(const std::string&)> _funcNewSDF;

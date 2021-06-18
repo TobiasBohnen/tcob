@@ -98,10 +98,12 @@ auto Font::texture() const -> gl::Texture2D*
 
 auto Font::info() const -> FontInfo
 {
+    f32 lg { _lineGapOverride.has_value() ? _lineGapOverride.value() : linegap() };
     return {
         .Ascender = ascender(),
         .Descender = descender(),
-        .Height = height()
+        .Linegap = lg,
+        .Height = ascender() - descender() + lg
     };
 }
 
@@ -121,6 +123,11 @@ void Font::kerning(bool kerning)
     if (_kerning != kerning) {
         _kerning = kerning;
     }
+}
+
+void Font::line_gap_override(f32 val)
+{
+    _lineGapOverride = val;
 }
 
 ////////////////////////////////////////////////////////////
@@ -205,9 +212,9 @@ auto TrueTypeFont::descender() const -> f32
     return _descent * _fontScale;
 }
 
-auto TrueTypeFont::height() const -> f32
+auto TrueTypeFont::linegap() const -> f32
 {
-    return (_ascent - _descent + _lineGap) * _fontScale;
+    return _lineGap * _fontScale;
 }
 
 auto TrueTypeFont::cache_glyph(u32 gi) -> bool
@@ -227,7 +234,7 @@ auto TrueTypeFont::cache_glyph(u32 gi) -> bool
         // check font texture space
         if (_fontTextureCursor.X + glWidth >= FONT_TEXTURE_SIZE) { //new line
             _fontTextureCursor.X = 0;
-            _fontTextureCursor.Y += static_cast<u32>(height()) + GLYPH_PADDING;
+            _fontTextureCursor.Y += static_cast<u32>(info().Height) + GLYPH_PADDING;
         }
 
         if (_fontTextureCursor.Y + glHeight >= FONT_TEXTURE_SIZE) { //new level
