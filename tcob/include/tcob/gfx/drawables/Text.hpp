@@ -26,7 +26,7 @@ public:
     void add_quad(isize idx, Quad q);
 
 private:
-    std::map<isize, Quad> _quads;
+    std::map<isize, Quad> _quads {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -63,15 +63,15 @@ private:
 
     ResourcePtr<Font> _font;
 
-    std::string _text;
+    std::string _text {};
     Color _color { Colors::White };
     TextAlignment _horiAlignment { TextAlignment::Left };
 
     bool _needsReshape { true };
     bool _needsFormat { true };
 
-    std::vector<Quad> _quads;
-    std::vector<TextFormatter::ShaperToken> _tokens;
+    std::vector<Quad> _quads {};
+    std::vector<TextFormatter::ShaperToken> _tokens {};
 
     gl::UniformBuffer _uniformBuffer { sizeof(f32) + sizeof(vec4) };
     f32 _outlineThickness { 0 };
@@ -80,7 +80,7 @@ private:
     gl::DynamicQuadRenderer _renderer {};
     SizeU _oldTargetSize { SizeU::Zero };
 
-    std::unordered_map<u8, std::shared_ptr<TextEffect>> _textEffects;
+    std::unordered_map<u8, std::shared_ptr<TextEffect>> _textEffects {};
 
     sigslot::scoped_connection _connection;
 };
