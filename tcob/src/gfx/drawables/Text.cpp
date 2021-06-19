@@ -12,6 +12,13 @@
 
 namespace tcob {
 
+void TextEffect::add_quad(isize idx, Quad q)
+{
+    _quads[idx] = q;
+}
+
+////////////////////////////////////////////////////////////
+
 auto Text::font() -> ResourcePtr<Font>
 {
     return _font;
@@ -124,6 +131,16 @@ void Text::draw(gl::RenderTarget& target)
     _renderer.render_to_target(target);
 }
 
+void Text::register_event(u8 id, std::shared_ptr<TextEffect> effect)
+{
+    if (id == 0) {
+        //TODO: log error
+        return;
+    }
+
+    _textEffects[id] = effect;
+}
+
 void Text::format(const SizeU& newTargetSize)
 {
     if (!_tokens.empty() || _oldTargetSize != newTargetSize) {
@@ -135,6 +152,8 @@ void Text::format(const SizeU& newTargetSize)
 
         Color color { _color };
         u8 alpha { color.A };
+        std::shared_ptr<TextEffect> currentEffect;
+
         const auto [x, y] { position() };
         for (const auto& token : formatResult.Tokens) {
             if (token.Command.Type != TextFormatter::CommandType::None) {
@@ -145,6 +164,13 @@ void Text::format(const SizeU& newTargetSize)
                 case TextFormatter::CommandType::Color:
                     color = std::get<Color>(token.Command.Value);
                     break;
+                case TextFormatter::CommandType::Effect: {
+                    u8 idx { std::get<u8>(token.Command.Value) };
+                    if (idx != 0)
+                        currentEffect = _textEffects[idx];
+                    else
+                        currentEffect = nullptr;
+                } break;
                 default:
                     break;
                 }
@@ -157,8 +183,14 @@ void Text::format(const SizeU& newTargetSize)
                 q.color(color);
 
                 q.texcoords(token.Quads[i].TexRegion);
+
                 auto& posRect { token.Quads[i].Rect };
-                q.position({ x + posRect.Left / ty, y + posRect.Top / ty, posRect.Width / ty, posRect.Height / ty }, transform());
+                RectF quadRect { x + posRect.Left / ty, y + posRect.Top / ty, posRect.Width / ty, posRect.Height / ty };
+                q.position(quadRect, transform());
+
+                if (currentEffect) {
+                    currentEffect->add_quad(_quads.size() - 1, q);
+                }
             }
         }
 
@@ -188,7 +220,5 @@ void Text::setup_ubo()
     const f32 outline = (1 - _outlineThickness) * 0.5f;
     _uniformBuffer.update(&outline, sizeof(outline), sizeof(outlineColor));
 }
-
-////////////////////////////////////////////////////////////
 
 }

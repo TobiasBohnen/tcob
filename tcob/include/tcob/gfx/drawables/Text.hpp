@@ -6,6 +6,7 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <map>
 #include <vector>
 
 #include <tcob/assets/Resource.hpp>
@@ -20,7 +21,12 @@
 #include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob {
-struct TextEffect {
+class TextEffect {
+public:
+    void add_quad(isize idx, Quad q);
+
+private:
+    std::map<isize, Quad> _quads;
 };
 
 ////////////////////////////////////////////////////////////
@@ -48,6 +54,8 @@ public:
 
     void draw(gl::RenderTarget& target) override;
 
+    void register_event(u8 id, std::shared_ptr<TextEffect> effect);
+
 private:
     void reshape();
     void format(const SizeU& newTargetSize);
@@ -71,6 +79,8 @@ private:
 
     gl::DynamicQuadRenderer _renderer {};
     SizeU _oldTargetSize { SizeU::Zero };
+
+    std::unordered_map<u8, std::shared_ptr<TextEffect>> _textEffects;
 
     sigslot::scoped_connection _connection;
 };
