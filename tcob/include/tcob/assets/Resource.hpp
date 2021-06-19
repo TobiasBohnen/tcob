@@ -7,7 +7,6 @@
 #include <tcob/tcob_config.hpp>
 
 #include <cassert>
-#include <memory>
 #include <unordered_map>
 
 namespace tcob {
