@@ -7,12 +7,8 @@
 
 #include <array>
 #include <chrono>
-#include <iostream>
-#include <memory>
 #include <numbers>
-#include <span>
 #include <string>
-#include <vector>
 
 namespace tcob {
 using i64 = int64_t;

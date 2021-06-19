@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <span>
 #include <thread>
 
 #include <tcob/core/io/FileStream.hpp>

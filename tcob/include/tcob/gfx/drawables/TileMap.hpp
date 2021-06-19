@@ -7,6 +7,7 @@
 #include <tcob/tcob_config.hpp>
 
 #include <unordered_map>
+#include <vector>
 
 #include <tcob/assets/Resource.hpp>
 #include <tcob/core/data/Point.hpp>

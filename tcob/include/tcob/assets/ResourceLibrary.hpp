@@ -9,6 +9,7 @@
 #include <functional>
 #include <typeindex>
 #include <unordered_map>
+#include <vector>
 
 #include <tcob/assets/Resource.hpp>
 #include <tcob/script/LuaScript.hpp>

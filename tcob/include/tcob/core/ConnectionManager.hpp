@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <vector>
+
 #include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob::detail {

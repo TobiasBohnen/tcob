@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <vector>
+
 namespace tcob::gl {
 class ObjectRegistry final {
 public:

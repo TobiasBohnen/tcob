@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <vector>
 
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/script/LuaRef.hpp>

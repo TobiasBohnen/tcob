@@ -7,6 +7,7 @@
 #include <tcob/tcob_config.hpp>
 
 #include <queue>
+#include <vector>
 
 #include <tcob/core/Random.hpp>
 #include <tcob/core/Updatable.hpp>

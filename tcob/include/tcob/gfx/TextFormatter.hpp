@@ -5,7 +5,9 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <span>
 #include <variant>
+#include <vector>
 
 #include <tcob/assets/Resource.hpp>
 #include <tcob/gfx/Font.hpp>

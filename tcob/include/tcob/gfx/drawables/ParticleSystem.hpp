@@ -10,6 +10,7 @@
 #include <list>
 #include <mutex>
 #include <optional>
+#include <vector>
 
 #include <tcob/assets/Resource.hpp>
 #include <tcob/core/Random.hpp>

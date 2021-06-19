@@ -5,6 +5,8 @@
 
 #include "AnimationLoader.hpp"
 
+#include <vector>
+
 #include <tcob/script/LuaScript.hpp>
 
 namespace tcob::detail {

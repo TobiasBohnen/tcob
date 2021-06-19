@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <vector>
+
 #include <tcob/assets/Resource.hpp>
 #include <tcob/core/data/Color.hpp>
 #include <tcob/gfx/Material.hpp>

@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <vector>
+
 #define AL_FORMAT_MONO_FLOAT32 0x10010
 #define AL_FORMAT_STEREO_FLOAT32 0x10011
 

@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <vector>
+
 #include <tcob/core/Automation.hpp>
 
 namespace tcob {

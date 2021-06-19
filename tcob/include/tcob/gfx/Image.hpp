@@ -7,6 +7,7 @@
 #include <tcob/tcob_config.hpp>
 
 #include <future>
+#include <vector>
 
 #include <tcob/core/data/Size.hpp>
 

@@ -6,6 +6,8 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <vector>
+
 #include <tcob/assets/Resource.hpp>
 #include <tcob/gfx/Font.hpp>
 #include <tcob/gfx/Material.hpp>
@@ -46,9 +48,8 @@ public:
 
     void draw(gl::RenderTarget& target) override;
 
-    void reshape();
-
 private:
+    void reshape();
     void format(const SizeU& newTargetSize);
     void setup_ubo();
 

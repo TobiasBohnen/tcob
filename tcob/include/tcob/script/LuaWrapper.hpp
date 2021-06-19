@@ -7,6 +7,7 @@
 #include <tcob/tcob_config.hpp>
 
 #include <functional>
+#include <vector>
 
 #include <tcob/core/Helper.hpp>
 #include <tcob/script/LuaClosure.hpp>
