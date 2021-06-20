@@ -38,7 +38,6 @@ void StartScene::on_start()
     _text.color(Colors::White);
     _text.outline_thickness(0.5f);
     _text.outline_color(Colors::Black);
-    _text.update(MilliSeconds { 0 });
 }
 
 void StartScene::on_draw(RenderTarget& target)
@@ -48,6 +47,7 @@ void StartScene::on_draw(RenderTarget& target)
 
 void StartScene::on_update(MilliSeconds deltaTime)
 {
+    _text.update(deltaTime);
 }
 
 void StartScene::on_fixed_update(MilliSeconds deltaTime)

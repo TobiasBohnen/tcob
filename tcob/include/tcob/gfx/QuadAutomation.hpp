@@ -125,7 +125,7 @@ public:
     auto value(f32 progress, isize index, isize length, const Quad& ori) -> Quad;
 
 private:
-    bool _flip { true };
+    bool _flip { false };
 };
 
 }

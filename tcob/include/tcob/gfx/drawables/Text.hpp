@@ -50,7 +50,7 @@ public:
 
 private:
     void reshape();
-    void format(const SizeU& newTargetSize);
+    void format();
     void setup_ubo();
 
     ResourcePtr<Font> _font;
@@ -70,7 +70,7 @@ private:
     Color _outlineColor { Colors::Black };
 
     gl::DynamicQuadRenderer _renderer {};
-    SizeU _oldTargetSize { SizeU::Zero };
+    SizeU _targetSize { SizeU::Zero };
 
     std::unordered_map<u8, std::shared_ptr<QuadAutomationBase>> _textEffects {};
 

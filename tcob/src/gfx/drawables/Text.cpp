@@ -87,28 +87,24 @@ void Text::horizontal_alignment(TextAlignment align)
 
 void Text::update(MilliSeconds deltaTime)
 {
-    if (!_font && Font::Default) {
+    if (!_font && Font::Default)
         font(Font::Default);
-    }
 
     if (_font) {
-        if (_needsReshape) {
+        if (_needsReshape)
             reshape();
-        }
-
-        if (is_transform_dirty()) {
+        if (is_transform_dirty())
             _needsFormat = true;
-        }
     } else {
         _needsReshape = false;
         _needsFormat = false;
     }
 
-    if (!_needsFormat) {
-        for (auto& [_, effect] : _textEffects) {
-            effect->update(deltaTime);
-        }
-    }
+    if (_needsFormat)
+        format();
+
+    for (auto& [_, effect] : _textEffects)
+        effect->update(deltaTime);
 }
 
 void Text::draw(gl::RenderTarget& target)
@@ -116,17 +112,21 @@ void Text::draw(gl::RenderTarget& target)
     if (!is_visible() || !_font)
         return;
 
-    if (_needsFormat)
-        format(target.size());
+    auto newTargetSize { target.size() };
+    if (_targetSize != newTargetSize)
+        _needsFormat = true;
+    _targetSize = target.size();
 
     const isize size { _quads.size() };
-    Quad* quad { _renderer.map(size) };
-    std::memcpy(quad, _quads.data(), size * sizeof(Quad));
-    _renderer.unmap(size);
+    if (size > 0) {
+        Quad* quad { _renderer.map(size) };
+        std::memcpy(quad, _quads.data(), size * sizeof(Quad));
+        _renderer.unmap(size);
 
-    _uniformBuffer.bind_base(1);
-    _renderer.material(_font->material().object());
-    _renderer.render_to_target(target);
+        _uniformBuffer.bind_base(1);
+        _renderer.material(_font->material().object());
+        _renderer.render_to_target(target);
+    }
 }
 
 void Text::register_event(u8 id, std::shared_ptr<QuadAutomationBase> effect)
@@ -145,10 +145,10 @@ void Text::register_event(u8 id, std::shared_ptr<QuadAutomationBase> effect)
     _needsFormat = true;
 }
 
-void Text::format(const SizeU& newTargetSize)
+void Text::format()
 {
-    if (!_tokens.empty() || _oldTargetSize != newTargetSize) {
-        const f32 ty { static_cast<f32>(newTargetSize.Height) };
+    if (!_tokens.empty() && _targetSize != SizeU::Zero) {
+        const f32 ty { static_cast<f32>(_targetSize.Height) };
 
         const auto formatResult { TextFormatter::format(_tokens, _font->info(), _horiAlignment, { size().Width * ty, size().Height * ty }) };
 
@@ -198,7 +198,6 @@ void Text::format(const SizeU& newTargetSize)
             }
         }
 
-        _oldTargetSize = newTargetSize;
         _needsFormat = false;
 
         setup_ubo();
