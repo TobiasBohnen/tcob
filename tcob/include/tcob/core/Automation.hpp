@@ -6,6 +6,7 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <concepts>
 #include <queue>
 #include <vector>
 
@@ -13,6 +14,7 @@
 #include <tcob/core/Updatable.hpp>
 #include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Point.hpp>
+#include <tcob/gfx/Quad.hpp>
 #include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob {
@@ -80,7 +82,7 @@ class Automation final : public AutomationBase {
 
 public:
     Automation(Func&& ptr)
-        : AutomationBase(ptr.Duration)
+        : AutomationBase { ptr.Duration }
         , _function { std::move(ptr) }
     {
     }
@@ -482,7 +484,4 @@ struct RandomFunction final {
         return RNG(MinValue, MaxValue);
     }
 };
-
-////////////////////////////////////////////////////////////
-
 }

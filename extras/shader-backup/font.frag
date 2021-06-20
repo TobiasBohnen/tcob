@@ -24,6 +24,9 @@ void main() {
 
    if (outline_thickness < 0.5)
    {
+      vec4 oc = outline_color;
+      oc.a = fs_in.Color.a;
+      
       float outlineFactor = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
       color = mix(outline_color, fs_in.Color, outlineFactor);
       float alpha = smoothstep(max(0, outline_thickness - smoothing), outline_thickness + smoothing, distance);

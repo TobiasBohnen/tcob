@@ -12,13 +12,6 @@
 
 namespace tcob {
 
-void TextEffect::add_quad(isize idx, Quad q)
-{
-    _quads[idx] = q;
-}
-
-////////////////////////////////////////////////////////////
-
 auto Text::font() -> ResourcePtr<Font>
 {
     return _font;
@@ -30,7 +23,7 @@ void Text::font(ResourcePtr<Font> font)
     _needsReshape = true;
 
     if (_font)
-        _connection = _font->Changed.connect([=]() { _needsReshape = true; });
+        _fontConnection = _font->Changed.connect([=]() { _needsReshape = true; });
 }
 
 auto Text::text() const -> std::string
@@ -92,7 +85,7 @@ void Text::horizontal_alignment(TextAlignment align)
     }
 }
 
-void Text::update([[maybe_unused]] MilliSeconds deltaTime)
+void Text::update(MilliSeconds deltaTime)
 {
     if (!_font && Font::Default) {
         font(Font::Default);
@@ -110,6 +103,12 @@ void Text::update([[maybe_unused]] MilliSeconds deltaTime)
         _needsReshape = false;
         _needsFormat = false;
     }
+
+    if (!_needsFormat) {
+        for (auto& [_, effect] : _textEffects) {
+            effect->update(deltaTime);
+        }
+    }
 }
 
 void Text::draw(gl::RenderTarget& target)
@@ -117,28 +116,33 @@ void Text::draw(gl::RenderTarget& target)
     if (!is_visible() || !_font)
         return;
 
-    if (_needsFormat) {
+    if (_needsFormat)
         format(target.size());
 
-        const isize size { _quads.size() };
-        Quad* quad { _renderer.map(size) };
-        std::memcpy(quad, _quads.data(), size * sizeof(Quad));
-        _renderer.unmap(size);
-    }
+    const isize size { _quads.size() };
+    Quad* quad { _renderer.map(size) };
+    std::memcpy(quad, _quads.data(), size * sizeof(Quad));
+    _renderer.unmap(size);
 
     _uniformBuffer.bind_base(1);
     _renderer.material(_font->material().object());
     _renderer.render_to_target(target);
 }
 
-void Text::register_event(u8 id, std::shared_ptr<TextEffect> effect)
+void Text::register_event(u8 id, std::shared_ptr<QuadAutomationBase> effect)
 {
     if (id == 0) {
         //TODO: log error
         return;
     }
 
+    _effectConnections.push_back(effect->ValueChanged.connect(
+        [=](isize idx, const Quad& q) {
+            _quads[idx] = q;
+        }));
+
     _textEffects[id] = effect;
+    _needsFormat = true;
 }
 
 void Text::format(const SizeU& newTargetSize)
@@ -152,7 +156,7 @@ void Text::format(const SizeU& newTargetSize)
 
         Color color { _color };
         u8 alpha { color.A };
-        std::shared_ptr<TextEffect> currentEffect;
+        std::shared_ptr<QuadAutomationBase> currentEffect;
 
         const auto [x, y] { position() };
         for (const auto& token : formatResult.Tokens) {
@@ -166,7 +170,7 @@ void Text::format(const SizeU& newTargetSize)
                     break;
                 case TextFormatter::CommandType::Effect: {
                     u8 idx { std::get<u8>(token.Command.Value) };
-                    if (idx != 0)
+                    if (idx != 0 && _textEffects.contains(idx))
                         currentEffect = _textEffects[idx];
                     else
                         currentEffect = nullptr;

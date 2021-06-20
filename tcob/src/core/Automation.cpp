@@ -59,28 +59,29 @@ auto AutomationBase::progress() const -> f32
 
 void AutomationBase::update(MilliSeconds deltaTime)
 {
-    if (_isRunning) {
-        _elapsedTime += deltaTime;
+    if (!_isRunning)
+        return;
 
-        if (_interval > 0ms) {
-            _currentInterval += deltaTime;
-            if (_currentInterval >= _interval) {
-                _currentInterval = 0ms;
+    _elapsedTime += deltaTime;
+
+    if (_interval > 0ms) {
+        _currentInterval += deltaTime;
+        if (_currentInterval >= _interval) {
+            _currentInterval = 0ms;
+        }
+    }
+
+    if (_interval == 0ms || _currentInterval == 0ms) {
+        if (_elapsedTime >= _duration) {
+            if (_looped) {
+                _elapsedTime = MilliSeconds { std::fmod(_elapsedTime.count(), _duration.count()) };
+            } else {
+                _elapsedTime = _duration;
+                _isRunning = false;
             }
         }
 
-        if (_interval == 0ms || _currentInterval == 0ms) {
-            if (_elapsedTime >= _duration) {
-                if (_looped) {
-                    _elapsedTime = MilliSeconds { std::fmod(_elapsedTime.count(), _duration.count()) };
-                } else {
-                    _elapsedTime = _duration;
-                    _isRunning = false;
-                }
-            }
-
-            update_values();
-        }
+        update_values();
     }
 }
 
@@ -135,4 +136,5 @@ void AutomationQueue::update(MilliSeconds deltaTime)
         }
     }
 }
+
 }

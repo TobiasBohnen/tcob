@@ -1,6 +1,8 @@
 ﻿#include "TextEx.hpp"
 #include "../StartScene.hpp"
 #include <iomanip>
+using namespace std::chrono_literals;
+
 TextEx::TextEx(Game& game)
     : Scene(game)
 {
@@ -33,11 +35,34 @@ void TextEx::on_start()
     text3->bounds({ { 0.05f, 0.31f }, { 0.55f, 0.5f } });
 
     auto& text4 { _texts.emplace_back(std::make_unique<Text>()) };
-    text4->text("effect 1 \n"
+    text4->text("{COLOR:Blue}effect 1: \n"
                 "{EFFECT:1}"
-                "blablabla"
+                "FadeIn\n"
+                "{EFFECT:0}"
+                "{COLOR:Red}effect 2:  \n"
+                "{EFFECT:2}"
+                "FadeOut\n"
+                "{EFFECT:0}"
+                "{COLOR:Green}effect 3:  \n"
+                "{EFFECT:3}"
+                "Blink\n"
                 "{EFFECT:0}");
-    text4->bounds({ { 0.75f, 0.01f }, { 0.55f, 0.5f } });
+    text4->bounds({ { 0.75f, 0.01f }, { 0.55f, 2.5f } });
+    text4->outline_thickness(1.f);
+    text4->outline_color(Colors::Black);
+
+    auto tfx0 { make_shared_quadautomation<FadeIn>(3s) };
+    tfx0->start(true);
+    text4->register_event(1, tfx0);
+
+    auto tfx1 { make_shared_quadautomation<FadeOut>(3s) };
+    tfx1->start(true);
+    text4->register_event(2, tfx1);
+
+    auto tfx2 { make_shared_quadautomation<Blink>(3s, Colors::Red, Colors::DarkGoldenRod) };
+    tfx2->start(true);
+    tfx2->interval(0.5s);
+    text4->register_event(3, tfx2);
 }
 
 void TextEx::on_draw(RenderTarget& target)

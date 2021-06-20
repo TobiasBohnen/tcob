@@ -12,6 +12,7 @@
 #include <tcob/assets/Resource.hpp>
 #include <tcob/gfx/Font.hpp>
 #include <tcob/gfx/Material.hpp>
+#include <tcob/gfx/QuadAutomation.hpp>
 #include <tcob/gfx/TextFormatter.hpp>
 #include <tcob/gfx/Transformable.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>
@@ -21,15 +22,6 @@
 #include <tcob/thirdparty/sigslot/signal.hpp>
 
 namespace tcob {
-class TextEffect {
-public:
-    void add_quad(isize idx, Quad q);
-
-private:
-    std::map<isize, Quad> _quads {};
-};
-
-////////////////////////////////////////////////////////////
 
 class Text final : public RectTransformable, public Drawable {
 public:
@@ -54,7 +46,7 @@ public:
 
     void draw(gl::RenderTarget& target) override;
 
-    void register_event(u8 id, std::shared_ptr<TextEffect> effect);
+    void register_event(u8 id, std::shared_ptr<QuadAutomationBase> effect);
 
 private:
     void reshape();
@@ -80,8 +72,9 @@ private:
     gl::DynamicQuadRenderer _renderer {};
     SizeU _oldTargetSize { SizeU::Zero };
 
-    std::unordered_map<u8, std::shared_ptr<TextEffect>> _textEffects {};
+    std::unordered_map<u8, std::shared_ptr<QuadAutomationBase>> _textEffects {};
 
-    sigslot::scoped_connection _connection;
+    sigslot::scoped_connection _fontConnection;
+    std::vector<sigslot::scoped_connection> _effectConnections;
 };
 }
