@@ -51,15 +51,15 @@ void TextEx::on_start()
     text4->outline_thickness(1.f);
     text4->outline_color(Colors::Black);
 
-    auto tfx0 { make_shared_quadautomation<FadeIn>(3s) };
+    auto tfx0 { make_shared_quadautomation<FadeInEffect>(3s) };
     tfx0->start(true);
     text4->register_event(1, tfx0);
 
-    auto tfx1 { make_shared_quadautomation<FadeOut>(3s) };
+    auto tfx1 { make_shared_quadautomation<FadeOutEffect>(3s) };
     tfx1->start(true);
     text4->register_event(2, tfx1);
 
-    auto tfx2 { make_shared_quadautomation<Blink>(3s, Colors::Red, Colors::DarkGoldenRod) };
+    auto tfx2 { make_shared_quadautomation<BlinkEffect>(3s, Colors::Red, Colors::DarkGoldenRod) };
     tfx2->start(true);
     tfx2->interval(0.5s);
     text4->register_event(3, tfx2);

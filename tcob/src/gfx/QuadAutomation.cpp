@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-auto FadeIn::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
+auto FadeInEffect::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
 {
     Quad retValue { ori };
 
@@ -40,7 +40,7 @@ auto FadeIn::value(f32 progress, isize index, isize length, const Quad& ori) -> 
 
 ////////////////////////////////////////////////////////////
 
-auto FadeOut::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
+auto FadeOutEffect::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
 {
     Quad retValue { ori };
 
@@ -68,14 +68,14 @@ auto FadeOut::value(f32 progress, isize index, isize length, const Quad& ori) ->
 
 ////////////////////////////////////////////////////////////
 
-Blink::Blink(MilliSeconds duration, Color color0, Color color1)
+BlinkEffect::BlinkEffect(MilliSeconds duration, Color color0, Color color1)
     : Duration { duration }
     , Color0 { color0 }
     , Color1 { color1 }
 {
 }
 
-auto Blink::value([[maybe_unused]] f32 progress, isize index, isize length, const Quad& ori) -> Quad
+auto BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length, const Quad& ori) -> Quad
 {
     Quad retValue { ori };
 

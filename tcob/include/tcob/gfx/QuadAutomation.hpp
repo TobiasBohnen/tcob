@@ -97,7 +97,7 @@ auto make_shared_quadautomation(MilliSeconds duration, Rs&&... args) -> std::sha
 
 ////////////////////////////////////////////////////////////
 
-struct FadeIn final {
+struct FadeInEffect final {
     MilliSeconds Duration;
 
     auto value(f32 progress, isize index, isize length, const Quad& ori) -> Quad;
@@ -105,7 +105,7 @@ struct FadeIn final {
 
 ////////////////////////////////////////////////////////////
 
-struct FadeOut final {
+struct FadeOutEffect final {
     MilliSeconds Duration;
 
     auto value(f32 progress, isize index, isize length, const Quad& ori) -> Quad;
@@ -113,9 +113,9 @@ struct FadeOut final {
 
 ////////////////////////////////////////////////////////////
 
-struct Blink final {
+struct BlinkEffect final {
 public:
-    Blink(MilliSeconds duration, Color color0, Color color1);
+    BlinkEffect(MilliSeconds duration, Color color0, Color color1);
 
     MilliSeconds Duration;
 
