@@ -105,8 +105,8 @@ struct LuaConverter<LuaOwnedPtr<T>> {
 
     static void ToLua(const LuaState& ls, const LuaOwnedPtr<T>& value)
     {
-        T** ud = static_cast<T**>(ls.new_userdata(sizeof(T*)));
-        *ud = value.Obj;
+        T** obj { static_cast<T**>(ls.new_userdata(sizeof(T*))) };
+        *obj = value.Obj;
 
         std::string metatable { std::string(typeid(T).name()) + "_gc" };
         if (ls.new_metatable(metatable.c_str()) == 0) {
@@ -949,8 +949,8 @@ struct LuaConverter<T> {
 
     static void ToLua(const LuaState& ls, const T& value)
     {
-        T* ud { static_cast<T*>(ls.new_userdata(sizeof(T*))) };
-        *ud = value;
+        T* obj { static_cast<T*>(ls.new_userdata(sizeof(T*))) };
+        *obj = value;
 
         const char* metatable { typeid(std::remove_pointer_t<T>).name() };
         ls.new_metatable(metatable);
