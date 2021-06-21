@@ -7,6 +7,7 @@
 
 #include <AL/al.h>
 #include <cassert>
+#include <thread>
 
 #include "AudioCodecs.hpp"
 #include <tcob/core/io/FileStream.hpp>

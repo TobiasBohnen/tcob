@@ -14,9 +14,9 @@
 #include <tcob/gfx/gl/GLWindow.hpp>
 #include <tcob/sfx/AudioSystem.hpp>
 
+namespace tcob {
 using hrc = std::chrono::high_resolution_clock;
 
-namespace tcob {
 constexpr MilliSeconds FIXED_TIME_STEPS { 1000.f / 50.f };
 constexpr u8 MAX_FRAME_SKIP = 10;
 
