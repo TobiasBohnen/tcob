@@ -195,7 +195,6 @@ void RenderTarget::setup_framebuffer(const SizeU& size)
         _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
     }
 
-    // TODO: test this (maybe change texture to mutable)
     _texture->create(size);
     _frameBuffer->attach_texture(_texture.get());
 }
