@@ -13,12 +13,12 @@ TEST_CASE("Core.Automation.Vector")
     f32 output2;
 
     {
-        auto contr { make_unique_automation<LinearFunction<f32>>(1000., 50.f, 10.f) };
+        auto contr { make_unique_automation<LinearFunction<f32>>(MilliSeconds { 1000. }, 50.f, 10.f) };
         contr->add_output(&output1);
         controllers.push_back(std::move(contr));
     }
     {
-        auto contr { make_unique_automation<LinearFunction<f32>>(1000., 50.f, 150.f) };
+        auto contr { make_unique_automation<LinearFunction<f32>>(MilliSeconds { 1000. }, 50.f, 150.f) };
         contr->add_output(&output2);
         controllers.push_back(std::move(contr));
     }
@@ -39,12 +39,12 @@ TEST_CASE("Core.Automation.Queue")
     std::vector<f32> output;
     auto output1 { [&output](f32 val) { output.push_back(val); } };
     {
-        auto contr { make_shared_automation<LinearFunction<f32>>(1000, 50.f, 10.f) };
+        auto contr { make_shared_automation<LinearFunction<f32>>(MilliSeconds { 1000. }, 50.f, 10.f) };
         contr->ValueChanged.connect(output1);
         queue.push(contr);
     }
     {
-        auto contr { make_shared_automation<LinearFunction<f32>>(1000, 50.f, 150.f) };
+        auto contr { make_shared_automation<LinearFunction<f32>>(MilliSeconds { 1000. }, 50.f, 150.f) };
         contr->ValueChanged.connect(output1);
         queue.push(contr);
     }

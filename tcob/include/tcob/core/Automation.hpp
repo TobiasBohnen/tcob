@@ -109,21 +109,9 @@ private:
 };
 
 template <typename Func, typename... Rs>
-auto make_unique_automation(f64 duration, Rs&&... args) -> std::unique_ptr<Automation<Func>>
-{
-    return std::unique_ptr<Automation<Func>>(new Automation<Func> { Func { MilliSeconds { duration }, std::forward<Rs>(args)... } });
-}
-
-template <typename Func, typename... Rs>
 auto make_unique_automation(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<Automation<Func>>
 {
     return std::unique_ptr<Automation<Func>>(new Automation<Func> { Func { duration, std::forward<Rs>(args)... } });
-}
-
-template <typename Func, typename... Rs>
-auto make_shared_automation(f64 duration, Rs&&... args) -> std::shared_ptr<Automation<Func>>
-{
-    return std::shared_ptr<Automation<Func>>(new Automation<Func> { Func { MilliSeconds { duration }, std::forward<Rs>(args)... } });
 }
 
 template <typename Func, typename... Rs>

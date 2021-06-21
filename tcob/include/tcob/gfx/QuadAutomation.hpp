@@ -72,21 +72,9 @@ private:
 };
 
 template <typename Func, typename... Rs>
-auto make_unique_quadautomation(f64 duration, Rs&&... args) -> std::unique_ptr<QuadAutomation<Func>>
-{
-    return std::unique_ptr<QuadAutomation<Func>>(new QuadAutomation<Func> { Func { MilliSeconds { duration }, std::forward<Rs>(args)... } });
-}
-
-template <typename Func, typename... Rs>
 auto make_unique_quadautomation(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<QuadAutomation<Func>>
 {
     return std::unique_ptr<QuadAutomation<Func>>(new QuadAutomation<Func> { Func { duration, std::forward<Rs>(args)... } });
-}
-
-template <typename Func, typename... Rs>
-auto make_shared_quadautomation(f64 duration, Rs&&... args) -> std::shared_ptr<QuadAutomation<Func>>
-{
-    return std::shared_ptr<QuadAutomation<Func>>(new QuadAutomation<Func> { Func { MilliSeconds { duration }, std::forward<Rs>(args)... } });
 }
 
 template <typename Func, typename... Rs>
