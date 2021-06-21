@@ -35,21 +35,15 @@ void TextEx::on_start()
     text3->bounds({ { 0.05f, 0.31f }, { 0.55f, 0.5f } });
 
     auto& text4 { _texts.emplace_back(std::make_unique<Text>()) };
-    text4->text("{COLOR:Blue}effect 1: \n"
-                "{EFFECT:1}"
-                "FadeIn\n"
-                "{EFFECT:0}"
-                "{COLOR:Red}effect 2:  \n"
-                "{EFFECT:2}"
-                "FadeOut\n"
-                "{EFFECT:0}"
-                "{COLOR:Green}effect 3:  \n"
-                "{EFFECT:3}"
-                "Blink\n"
-                "{EFFECT:0}");
-    text4->bounds({ { 0.75f, 0.01f }, { 0.55f, 2.5f } });
-    text4->outline_thickness(1.f);
-    text4->outline_color(Colors::Black);
+    text4->font(resMgr.get<Font>("res", "DejaVuSans24"));
+    text4->text(
+        "{EFFECT:1}"
+        "FadeIn\n"
+        "{EFFECT:2}"
+        "FadeOut\n"
+        "{EFFECT:3}"
+        "Blink\n");
+    text4->bounds({ { 0.70f, 0.01f }, { 0.55f, 2.5f } });
 
     auto tfx0 { make_shared_quadautomation<FadeInEffect>(3s) };
     tfx0->start(true);
@@ -59,7 +53,7 @@ void TextEx::on_start()
     tfx1->start(true);
     text4->register_event(2, tfx1);
 
-    auto tfx2 { make_shared_quadautomation<BlinkEffect>(3s, Colors::Red, Colors::DarkGoldenRod) };
+    auto tfx2 { make_shared_quadautomation<BlinkEffect>(3s, Colors::Orange, Colors::Teal) };
     tfx2->start(true);
     tfx2->interval(0.5s);
     text4->register_event(3, tfx2);
@@ -67,7 +61,7 @@ void TextEx::on_start()
 
 void TextEx::on_draw(RenderTarget& target)
 {
-    target.clear(Colors::Gray);
+    target.clear(Color { 0x2a2a2aff });
 
     for (auto& text : _texts) {
         text->draw(target);
