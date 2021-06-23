@@ -15,6 +15,12 @@
 namespace tcob {
 
 template <typename T>
+concept HasInterval = requires(T& t)
+{
+    std::same_as<decltype(t.Interval), MilliSeconds>;
+};
+
+template <typename T>
 concept QuadAutomationFunction = requires(T& t, const Quad& q)
 {
     std::same_as<decltype(t.Duration), MilliSeconds>;
@@ -56,6 +62,9 @@ public:
         : QuadAutomationBase { ptr.Duration }
         , _function { std::move(ptr) }
     {
+        if constexpr (HasInterval<Func>) {
+            interval(ptr.Interval);
+        }
     }
 
 protected:
@@ -93,6 +102,14 @@ struct FadeInEffect final {
 
 ////////////////////////////////////////////////////////////
 
+struct SmoothFadeInEffect final {
+    MilliSeconds Duration;
+
+    auto value(f32 progress, isize index, isize length, const Quad& ori) -> Quad;
+};
+
+////////////////////////////////////////////////////////////
+
 struct FadeOutEffect final {
     MilliSeconds Duration;
 
@@ -103,10 +120,10 @@ struct FadeOutEffect final {
 
 struct BlinkEffect final {
 public:
-    BlinkEffect(MilliSeconds duration, Color color0, Color color1);
+    BlinkEffect(MilliSeconds duration, MilliSeconds interval, Color color0, Color color1);
 
     MilliSeconds Duration;
-
+    MilliSeconds Interval;
     Color Color0;
     Color Color1;
 

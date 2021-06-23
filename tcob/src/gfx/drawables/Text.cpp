@@ -129,7 +129,7 @@ void Text::draw(gl::RenderTarget& target)
     }
 }
 
-void Text::register_event(u8 id, std::shared_ptr<QuadAutomationBase> effect)
+void Text::register_effect(u8 id, std::shared_ptr<QuadAutomationBase> effect)
 {
     if (id == 0) {
         //TODO: log error
@@ -143,6 +143,22 @@ void Text::register_event(u8 id, std::shared_ptr<QuadAutomationBase> effect)
 
     _textEffects[id] = effect;
     _needsFormat = true;
+}
+
+void Text::start_all_effects(bool looped)
+{
+    for (auto& [_, effect] : _textEffects) {
+        effect->start(looped);
+    }
+}
+
+auto Text::get_effect(u8 id) -> std::shared_ptr<QuadAutomationBase>
+{
+    if (_textEffects.contains(id)) {
+        return _textEffects[id];
+    }
+
+    return nullptr;
 }
 
 void Text::format()
