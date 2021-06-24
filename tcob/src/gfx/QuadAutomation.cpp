@@ -17,40 +17,12 @@ auto FadeInEffect::value(f32 progress, isize index, isize length, const Quad& or
     Quad retValue { ori };
 
     isize fadeidx { static_cast<isize>(progress * length) };
-    if (fadeidx > index) {
+    if (index < fadeidx) {
         retValue.TopRight.Color[3] = 255;
         retValue.BottomRight.Color[3] = 255;
         retValue.TopLeft.Color[3] = 255;
         retValue.BottomLeft.Color[3] = 255;
-    } else if (fadeidx < index) {
-        retValue.TopRight.Color[3] = 0;
-        retValue.BottomRight.Color[3] = 0;
-        retValue.TopLeft.Color[3] = 0;
-        retValue.BottomLeft.Color[3] = 0;
-    } else {
-        f32 val { progress * length - fadeidx };
-        retValue.TopRight.Color[3] = static_cast<u8>(val * 255);
-        retValue.BottomRight.Color[3] = static_cast<u8>(val * 255);
-        retValue.TopLeft.Color[3] = static_cast<u8>(val * 255);
-        retValue.BottomLeft.Color[3] = static_cast<u8>(val * 255);
-    }
-
-    return retValue;
-}
-
-////////////////////////////////////////////////////////////
-
-auto SmoothFadeInEffect::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
-{
-    Quad retValue { ori };
-
-    isize fadeidx { static_cast<isize>(progress * length) };
-    if (fadeidx > index) {
-        retValue.TopRight.Color[3] = 255;
-        retValue.BottomRight.Color[3] = 255;
-        retValue.TopLeft.Color[3] = 255;
-        retValue.BottomLeft.Color[3] = 255;
-    } else if (fadeidx < index) {
+    } else if (index > fadeidx) {
         retValue.TopRight.Color[3] = 0;
         retValue.BottomRight.Color[3] = 0;
         retValue.TopLeft.Color[3] = 0;

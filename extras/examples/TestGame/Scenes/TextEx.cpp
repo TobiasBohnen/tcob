@@ -40,17 +40,14 @@ void TextEx::on_start()
         "{EFFECT:1}"
         "FadeIn\n"
         "{EFFECT:2}"
-        "SmoothFadeIn\n"
-        "{EFFECT:3}"
         "FadeOut\n"
-        "{EFFECT:4}"
+        "{EFFECT:3}"
         "Blink\n");
     text4->bounds({ { 0.70f, 0.01f }, { 0.55f, 2.5f } });
 
     text4->register_effect(1, make_shared_quadautomation<FadeInEffect>(3s));
-    text4->register_effect(2, make_shared_quadautomation<SmoothFadeInEffect>(3s));
-    text4->register_effect(3, make_shared_quadautomation<FadeOutEffect>(3s));
-    text4->register_effect(4, make_shared_quadautomation<BlinkEffect>(3s, 0.5s, Colors::Orange, Colors::Teal));
+    text4->register_effect(2, make_shared_quadautomation<FadeOutEffect>(3s));
+    text4->register_effect(3, make_shared_quadautomation<BlinkEffect>(3s, 0.5s, Colors::Orange, Colors::Teal));
 
     text4->start_all_effects(true);
 }

@@ -102,14 +102,6 @@ struct FadeInEffect final {
 
 ////////////////////////////////////////////////////////////
 
-struct SmoothFadeInEffect final {
-    MilliSeconds Duration;
-
-    auto value(f32 progress, isize index, isize length, const Quad& ori) -> Quad;
-};
-
-////////////////////////////////////////////////////////////
-
 struct FadeOutEffect final {
     MilliSeconds Duration;
 
