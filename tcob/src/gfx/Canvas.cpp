@@ -1280,7 +1280,7 @@ void Canvas::draw_textbox(const PointF& pos, const SizeF& size, const std::strin
 
     const f32 scale { nvg__getFontScale(s) * _devicePxRatio };
     const f32 invscale { 1.0f / scale };
-    auto verts { alloc_temp_verts(static_cast<i32>(formatResult.GlyphCount) * 6) };
+    auto verts { alloc_temp_verts(static_cast<i32>(formatResult.QuadCount) * 6) };
     i32 nverts { 0 };
     for (const auto& token : formatResult.Tokens) {
         for (isize i { 0 }; i < token.Quads.size(); ++i) {

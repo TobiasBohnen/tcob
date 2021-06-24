@@ -203,7 +203,7 @@ auto TextFormatter::format(std::span<ShaperToken> tokens, const FontInfo& font, 
                         .Rect = { { x + glyph.Offset, y + glyph.Bearing.Y }, glyph.Size },
                         .TexRegion = { glyph.UVRect, 0 } });
 
-                    retValue.GlyphCount++;
+                    retValue.QuadCount++;
 
                     x += glyph.Advance;
                 }

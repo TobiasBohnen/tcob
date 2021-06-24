@@ -66,7 +66,7 @@ namespace TextFormatter {
 
     struct Result {
         std::vector<FormatterToken> Tokens {};
-        isize GlyphCount { 0 };
+        isize QuadCount { 0 };
     };
 
     auto shape(const std::string& text, ResourcePtr<Font>& font) -> std::vector<ShaperToken>;

@@ -12,9 +12,9 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-auto FadeInEffect::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
+auto FadeInEffect::value(f32 progress, isize index, isize length, const Quad& quad) -> Quad
 {
-    Quad retValue { ori };
+    Quad retValue { quad };
 
     isize fadeidx { static_cast<isize>(progress * length) };
     if (index < fadeidx) {
@@ -40,9 +40,9 @@ auto FadeInEffect::value(f32 progress, isize index, isize length, const Quad& or
 
 ////////////////////////////////////////////////////////////
 
-auto FadeOutEffect::value(f32 progress, isize index, isize length, const Quad& ori) -> Quad
+auto FadeOutEffect::value(f32 progress, isize index, isize length, const Quad& quad) -> Quad
 {
-    Quad retValue { ori };
+    Quad retValue { quad };
 
     isize fadeidx { static_cast<isize>(progress * length) };
     if (fadeidx < index) {
@@ -76,9 +76,9 @@ BlinkEffect::BlinkEffect(MilliSeconds duration, MilliSeconds interval, Color col
 {
 }
 
-auto BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length, const Quad& ori) -> Quad
+auto BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length, const Quad& quad) -> Quad
 {
-    Quad retValue { ori };
+    Quad retValue { quad };
 
     retValue.color(_flip ? Color0 : Color1);
 

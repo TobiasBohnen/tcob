@@ -169,6 +169,7 @@ void Text::format()
         const auto formatResult { TextFormatter::format(_tokens, _font->info(), _horiAlignment, { size().Width * ty, size().Height * ty }) };
 
         _quads.clear();
+        _quads.reserve(formatResult.QuadCount);
 
         Color color { _color };
         u8 alpha { color.A };
