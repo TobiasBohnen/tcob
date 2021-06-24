@@ -136,11 +136,6 @@ void Text::register_effect(u8 id, std::shared_ptr<QuadAutomationBase> effect)
         return;
     }
 
-    _effectConnections.push_back(effect->ValueChanged.connect(
-        [=](isize idx, const Quad& q) {
-            _quads[idx] = q;
-        }));
-
     _textEffects[id] = effect;
     _needsFormat = true;
 }

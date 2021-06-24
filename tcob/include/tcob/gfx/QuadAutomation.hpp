@@ -7,6 +7,7 @@
 #include <tcob/tcob_config.hpp>
 
 #include <concepts>
+#include <functional>
 #include <map>
 
 #include <tcob/core/Automation.hpp>
@@ -21,13 +22,13 @@ concept HasInterval = requires(T& t)
 };
 
 template <typename T>
-concept QuadAutomationFunction = requires(T& t, const Quad& q)
+concept QuadAutomationFunction = requires(T& t, Quad& q)
 {
     std::same_as<decltype(t.Duration), MilliSeconds>;
 
     {
         t.value(0.0f, 0, 0, q)
-        } -> std::same_as<Quad>;
+    };
 };
 
 ////////////////////////////////////////////////////////////
@@ -38,21 +39,19 @@ public:
     {
     }
 
-    sigslot::signal<isize, Quad> ValueChanged;
-
-    void add_quad(isize idx, Quad q)
+    void add_quad(isize idx, Quad& q)
     {
-        _quads[idx] = q;
+        _quads.emplace(idx, q);
     }
 
 protected:
-    auto quads() -> const std::map<isize, Quad>&
+    auto quads() -> const std::map<isize, std::reference_wrapper<Quad>>&
     {
         return _quads;
     }
 
 private:
-    std::map<isize, Quad> _quads {};
+    std::map<isize, std::reference_wrapper<Quad>> _quads {};
 };
 
 template <QuadAutomationFunction Func>
@@ -72,7 +71,7 @@ protected:
     {
         isize i { 0 };
         for (auto& [k, v] : quads()) {
-            ValueChanged(k, _function.value(progress(), i++, quads().size(), v));
+            _function.value(progress(), i++, quads().size(), v);
         }
     }
 
@@ -97,7 +96,7 @@ auto make_shared_quadautomation(MilliSeconds duration, Rs&&... args) -> std::sha
 struct FadeInEffect final {
     MilliSeconds Duration;
 
-    auto value(f32 progress, isize index, isize length, const Quad& quad) -> Quad;
+    void value(f32 progress, isize index, isize length, Quad& quad);
 };
 
 ////////////////////////////////////////////////////////////
@@ -105,7 +104,7 @@ struct FadeInEffect final {
 struct FadeOutEffect final {
     MilliSeconds Duration;
 
-    auto value(f32 progress, isize index, isize length, const Quad& quad) -> Quad;
+    void value(f32 progress, isize index, isize length, Quad& quad);
 };
 
 ////////////////////////////////////////////////////////////
@@ -119,7 +118,7 @@ public:
     Color Color0;
     Color Color1;
 
-    auto value(f32 progress, isize index, isize length, const Quad& quad) -> Quad;
+    void value(f32 progress, isize index, isize length, Quad& quad);
 
 private:
     bool _flip { false };
