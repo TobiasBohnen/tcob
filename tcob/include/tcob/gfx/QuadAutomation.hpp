@@ -101,6 +101,14 @@ auto make_shared_quadautomation(MilliSeconds duration, Rs&&... args) -> std::sha
 
 ////////////////////////////////////////////////////////////
 
+struct TypingEffect final {
+    MilliSeconds Duration;
+
+    void value(f32 progress, isize index, isize length, Quad& quad) const;
+};
+
+////////////////////////////////////////////////////////////
+
 struct FadeInEffect final {
     MilliSeconds Duration;
 

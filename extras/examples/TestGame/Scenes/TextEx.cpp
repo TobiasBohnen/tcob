@@ -38,16 +38,18 @@ void TextEx::on_start()
     text4->font(resMgr.get<Font>("res", "DejaVuSans24"));
     text4->text(
         "{EFFECT:1}"
-        "FadeIn\n"
+        "Typing\n"
         "{EFFECT:2}"
-        "FadeOut\n"
+        "FadeIn\n"
         "{EFFECT:3}"
+        "FadeOut\n"
+        "{EFFECT:4}"
         "Blink\n");
     text4->bounds({ { 0.70f, 0.01f }, { 0.55f, 2.5f } });
-
-    text4->register_effect(1, make_unique_quadautomation<FadeInEffect>(3s));
-    text4->register_effect(2, make_unique_quadautomation<FadeOutEffect>(3s));
-    text4->register_effect(3, make_unique_quadautomation<BlinkEffect>(3s, 0.5s, Colors::Orange, Colors::Teal));
+    text4->register_effect(1, make_unique_quadautomation<TypingEffect>(3s));
+    text4->register_effect(2, make_unique_quadautomation<FadeInEffect>(3s));
+    text4->register_effect(3, make_unique_quadautomation<FadeOutEffect>(3s));
+    text4->register_effect(4, make_unique_quadautomation<BlinkEffect>(3s, 0.5s, Colors::Orange, Colors::Teal));
 
     text4->start_all_effects(true);
 }

@@ -12,6 +12,24 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
+void TypingEffect::value(f32 progress, isize index, isize length, Quad& quad) const
+{
+    isize fadeidx { static_cast<isize>(progress * length) };
+    if (index <= fadeidx) {
+        quad.TopRight.Color[3] = 255;
+        quad.BottomRight.Color[3] = 255;
+        quad.TopLeft.Color[3] = 255;
+        quad.BottomLeft.Color[3] = 255;
+    } else if (index > fadeidx) {
+        quad.TopRight.Color[3] = 0;
+        quad.BottomRight.Color[3] = 0;
+        quad.TopLeft.Color[3] = 0;
+        quad.BottomLeft.Color[3] = 0;
+    }
+}
+
+////////////////////////////////////////////////////////////
+
 void FadeInEffect::value(f32 progress, isize index, isize length, Quad& quad) const
 {
     isize fadeidx { static_cast<isize>(progress * length) };
