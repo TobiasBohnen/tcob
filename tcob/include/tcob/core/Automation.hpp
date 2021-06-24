@@ -134,7 +134,7 @@ public:
     void start(bool looped = false);
     void stop_and_clear();
 
-    auto is_empty() -> bool;
+    auto is_empty() const -> bool;
 
     void update(MilliSeconds deltaTime) override;
 

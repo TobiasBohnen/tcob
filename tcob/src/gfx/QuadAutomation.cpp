@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-void FadeInEffect::value(f32 progress, isize index, isize length, Quad& quad)
+void FadeInEffect::value(f32 progress, isize index, isize length, Quad& quad) const
 {
     isize fadeidx { static_cast<isize>(progress * length) };
     if (index < fadeidx) {
@@ -36,7 +36,7 @@ void FadeInEffect::value(f32 progress, isize index, isize length, Quad& quad)
 
 ////////////////////////////////////////////////////////////
 
-void FadeOutEffect::value(f32 progress, isize index, isize length, Quad& quad)
+void FadeOutEffect::value(f32 progress, isize index, isize length, Quad& quad) const
 {
     isize fadeidx { static_cast<isize>(progress * length) };
     if (fadeidx < index) {

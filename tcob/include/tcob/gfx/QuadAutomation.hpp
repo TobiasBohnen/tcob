@@ -50,7 +50,7 @@ public:
     }
 
 protected:
-    auto quads() -> const std::vector<std::reference_wrapper<Quad>>&
+    auto quads() const -> const std::vector<std::reference_wrapper<Quad>>&
     {
         return _quads;
     }
@@ -104,7 +104,7 @@ auto make_shared_quadautomation(MilliSeconds duration, Rs&&... args) -> std::sha
 struct FadeInEffect final {
     MilliSeconds Duration;
 
-    void value(f32 progress, isize index, isize length, Quad& quad);
+    void value(f32 progress, isize index, isize length, Quad& quad) const;
 };
 
 ////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ struct FadeInEffect final {
 struct FadeOutEffect final {
     MilliSeconds Duration;
 
-    void value(f32 progress, isize index, isize length, Quad& quad);
+    void value(f32 progress, isize index, isize length, Quad& quad) const;
 };
 
 ////////////////////////////////////////////////////////////

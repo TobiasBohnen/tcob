@@ -110,7 +110,7 @@ void AutomationQueue::stop_and_clear()
     _isRunning = false;
 }
 
-auto AutomationQueue::is_empty() -> bool
+auto AutomationQueue::is_empty() const -> bool
 {
     return _queue.empty();
 }
