@@ -129,14 +129,14 @@ void Text::draw(gl::RenderTarget& target)
     }
 }
 
-void Text::register_effect(u8 id, std::shared_ptr<QuadAutomationBase> effect)
+void Text::register_effect(u8 id, std::unique_ptr<QuadAutomationBase> effect)
 {
     if (id == 0) {
         //TODO: log error
         return;
     }
 
-    _textEffects[id] = effect;
+    _textEffects[id] = std::move(effect);
     _needsFormat = true;
 }
 
@@ -147,10 +147,17 @@ void Text::start_all_effects(bool looped)
     }
 }
 
-auto Text::get_effect(u8 id) -> std::shared_ptr<QuadAutomationBase>
+void Text::stop_all_effects()
+{
+    for (auto& [_, effect] : _textEffects) {
+        effect->stop();
+    }
+}
+
+auto Text::get_effect(u8 id) const -> QuadAutomationBase*
 {
     if (_textEffects.contains(id)) {
-        return _textEffects[id];
+        return _textEffects.at(id).get();
     }
 
     return nullptr;
@@ -165,10 +172,13 @@ void Text::format()
 
         _quads.clear();
         _quads.reserve(formatResult.QuadCount);
+        for (auto& [_, effect] : _textEffects) {
+            effect->clear_quads();
+        }
 
         Color color { _color };
         u8 alpha { color.A };
-        std::shared_ptr<QuadAutomationBase> currentEffect;
+        QuadAutomationBase* currentEffect { nullptr };
 
         const auto [x, y] { position() };
         for (const auto& token : formatResult.Tokens) {
@@ -183,7 +193,7 @@ void Text::format()
                 case TextFormatter::CommandType::Effect: {
                     u8 idx { std::get<u8>(token.Command.Value) };
                     if (idx != 0 && _textEffects.contains(idx))
-                        currentEffect = _textEffects[idx];
+                        currentEffect = _textEffects[idx].get();
                     else
                         currentEffect = nullptr;
                 } break;

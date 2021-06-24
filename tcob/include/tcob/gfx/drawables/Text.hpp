@@ -46,9 +46,10 @@ public:
 
     void draw(gl::RenderTarget& target) override;
 
-    void register_effect(u8 id, std::shared_ptr<QuadAutomationBase> effect);
+    void register_effect(u8 id, std::unique_ptr<QuadAutomationBase> effect);
     void start_all_effects(bool looped = false);
-    auto get_effect(u8 id) -> std::shared_ptr<QuadAutomationBase>;
+    void stop_all_effects();
+    auto get_effect(u8 id) const -> QuadAutomationBase*;
 
 private:
     void reshape();

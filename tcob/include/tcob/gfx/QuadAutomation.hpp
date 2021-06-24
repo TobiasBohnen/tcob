@@ -44,6 +44,11 @@ public:
         _quads.emplace_back(q);
     }
 
+    void clear_quads()
+    {
+        _quads.clear();
+    }
+
 protected:
     auto quads() -> const std::vector<std::reference_wrapper<Quad>>&
     {
