@@ -12,67 +12,67 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-void TypingEffect::value(f32 progress, isize index, isize length, Quad& quad) const
+void TypingEffect::value(f32 progress, isize index, isize length, Quad& dest, [[maybe_unused]] const Quad& src) const
 {
     isize fadeidx { static_cast<isize>(progress * length) };
     if (index <= fadeidx) {
-        quad.TopRight.Color[3] = 255;
-        quad.BottomRight.Color[3] = 255;
-        quad.TopLeft.Color[3] = 255;
-        quad.BottomLeft.Color[3] = 255;
+        dest.TopRight.Color[3] = 255;
+        dest.BottomRight.Color[3] = 255;
+        dest.TopLeft.Color[3] = 255;
+        dest.BottomLeft.Color[3] = 255;
     } else if (index > fadeidx) {
-        quad.TopRight.Color[3] = 0;
-        quad.BottomRight.Color[3] = 0;
-        quad.TopLeft.Color[3] = 0;
-        quad.BottomLeft.Color[3] = 0;
+        dest.TopRight.Color[3] = 0;
+        dest.BottomRight.Color[3] = 0;
+        dest.TopLeft.Color[3] = 0;
+        dest.BottomLeft.Color[3] = 0;
     }
 }
 
 ////////////////////////////////////////////////////////////
 
-void FadeInEffect::value(f32 progress, isize index, isize length, Quad& quad) const
+void FadeInEffect::value(f32 progress, isize index, isize length, Quad& dest, [[maybe_unused]] const Quad& src) const
 {
     isize fadeidx { static_cast<isize>(progress * length) };
     if (index < fadeidx) {
-        quad.TopRight.Color[3] = 255;
-        quad.BottomRight.Color[3] = 255;
-        quad.TopLeft.Color[3] = 255;
-        quad.BottomLeft.Color[3] = 255;
+        dest.TopRight.Color[3] = 255;
+        dest.BottomRight.Color[3] = 255;
+        dest.TopLeft.Color[3] = 255;
+        dest.BottomLeft.Color[3] = 255;
     } else if (index > fadeidx) {
-        quad.TopRight.Color[3] = 0;
-        quad.BottomRight.Color[3] = 0;
-        quad.TopLeft.Color[3] = 0;
-        quad.BottomLeft.Color[3] = 0;
+        dest.TopRight.Color[3] = 0;
+        dest.BottomRight.Color[3] = 0;
+        dest.TopLeft.Color[3] = 0;
+        dest.BottomLeft.Color[3] = 0;
     } else {
         f32 val { progress * length - fadeidx };
-        quad.TopRight.Color[3] = static_cast<u8>(val * 255);
-        quad.BottomRight.Color[3] = static_cast<u8>(val * 255);
-        quad.TopLeft.Color[3] = static_cast<u8>(val * 255);
-        quad.BottomLeft.Color[3] = static_cast<u8>(val * 255);
+        dest.TopRight.Color[3] = static_cast<u8>(val * 255);
+        dest.BottomRight.Color[3] = static_cast<u8>(val * 255);
+        dest.TopLeft.Color[3] = static_cast<u8>(val * 255);
+        dest.BottomLeft.Color[3] = static_cast<u8>(val * 255);
     }
 }
 
 ////////////////////////////////////////////////////////////
 
-void FadeOutEffect::value(f32 progress, isize index, isize length, Quad& quad) const
+void FadeOutEffect::value(f32 progress, isize index, isize length, Quad& dest, [[maybe_unused]] const Quad& src) const
 {
     isize fadeidx { static_cast<isize>(progress * length) };
     if (fadeidx < index) {
-        quad.TopRight.Color[3] = 255;
-        quad.BottomRight.Color[3] = 255;
-        quad.TopLeft.Color[3] = 255;
-        quad.BottomLeft.Color[3] = 255;
+        dest.TopRight.Color[3] = 255;
+        dest.BottomRight.Color[3] = 255;
+        dest.TopLeft.Color[3] = 255;
+        dest.BottomLeft.Color[3] = 255;
     } else if (fadeidx > index) {
-        quad.TopRight.Color[3] = 0;
-        quad.BottomRight.Color[3] = 0;
-        quad.TopLeft.Color[3] = 0;
-        quad.BottomLeft.Color[3] = 0;
+        dest.TopRight.Color[3] = 0;
+        dest.BottomRight.Color[3] = 0;
+        dest.TopLeft.Color[3] = 0;
+        dest.BottomLeft.Color[3] = 0;
     } else {
         f32 val { 1 - (progress * length - fadeidx) };
-        quad.TopRight.Color[3] = static_cast<u8>(val * 255);
-        quad.BottomRight.Color[3] = static_cast<u8>(val * 255);
-        quad.TopLeft.Color[3] = static_cast<u8>(val * 255);
-        quad.BottomLeft.Color[3] = static_cast<u8>(val * 255);
+        dest.TopRight.Color[3] = static_cast<u8>(val * 255);
+        dest.BottomRight.Color[3] = static_cast<u8>(val * 255);
+        dest.TopLeft.Color[3] = static_cast<u8>(val * 255);
+        dest.BottomLeft.Color[3] = static_cast<u8>(val * 255);
     }
 }
 
@@ -86,12 +86,43 @@ BlinkEffect::BlinkEffect(MilliSeconds duration, MilliSeconds interval, Color col
 {
 }
 
-void BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length, Quad& quad)
+void BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length, Quad& dest, [[maybe_unused]] const Quad& src)
 {
-    quad.color(_flip ? Color0 : Color1);
+    dest.color(_flip ? Color0 : Color1);
 
     if (index == length - 1)
         _flip = !_flip;
+}
+
+////////////////////////////////////////////////////////////
+
+void ShakeEffect::value([[maybe_unused]] f32 progress, [[maybe_unused]] isize index, [[maybe_unused]] isize length, Quad& dest, const Quad& src)
+{
+    f32 r { RNG(-Amount, Amount) };
+    switch (RNG(0, 1)) {
+    case 0:
+        dest.TopRight.Position[0] = src.TopRight.Position[0] + r;
+        dest.TopRight.Position[1] = src.TopRight.Position[1] + r;
+        dest.BottomRight.Position[0] = src.BottomRight.Position[0] + r;
+        dest.BottomRight.Position[1] = src.BottomRight.Position[1] + r;
+        dest.TopLeft.Position[0] = src.TopLeft.Position[0] + r;
+        dest.TopLeft.Position[1] = src.TopLeft.Position[1] + r;
+        dest.BottomLeft.Position[0] = src.BottomLeft.Position[0] + r;
+        dest.BottomLeft.Position[1] = src.BottomLeft.Position[1] + r;
+        break;
+    case 1:
+        dest.TopRight.Position[0] = src.TopRight.Position[0] + r;
+        dest.TopRight.Position[1] = src.TopRight.Position[1] - r;
+        dest.BottomRight.Position[0] = src.BottomRight.Position[0] + r;
+        dest.BottomRight.Position[1] = src.BottomRight.Position[1] - r;
+        dest.TopLeft.Position[0] = src.TopLeft.Position[0] + r;
+        dest.TopLeft.Position[1] = src.TopLeft.Position[1] - r;
+        dest.BottomLeft.Position[0] = src.BottomLeft.Position[0] + r;
+        dest.BottomLeft.Position[1] = src.BottomLeft.Position[1] - r;
+        break;
+    default:
+        break;
+    }
 }
 
 ////////////////////////////////////////////////////////////

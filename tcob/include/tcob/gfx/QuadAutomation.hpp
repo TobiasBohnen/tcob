@@ -27,7 +27,7 @@ concept QuadAutomationFunction = requires(T& t, Quad& q)
     std::same_as<decltype(t.Duration), MilliSeconds>;
 
     {
-        t.value(0.0f, 0, 0, q)
+        t.value(0.0f, 0, 0, q, q)
     };
 };
 
@@ -42,21 +42,29 @@ public:
     void add_quad(Quad& q)
     {
         _quads.emplace_back(q);
+        _oriQuads.push_back(q);
     }
 
     void clear_quads()
     {
         _quads.clear();
+        _oriQuads.clear();
     }
 
 protected:
-    auto quads() const -> const std::vector<std::reference_wrapper<Quad>>&
+    auto ref_quads() const -> const std::vector<std::reference_wrapper<Quad>>&
     {
         return _quads;
     }
 
+    auto ori_quads() const -> const std::vector<Quad>&
+    {
+        return _oriQuads;
+    }
+
 private:
     std::vector<std::reference_wrapper<Quad>> _quads {};
+    std::vector<Quad> _oriQuads {};
 };
 
 template <QuadAutomationFunction Func>
@@ -76,10 +84,12 @@ protected:
     {
         isize i { 0 };
         const f32 e { progress() };
-        const auto& quadVec { quads() };
+        const auto& refQuads { ref_quads() };
+        const auto& oriQuads { ori_quads() };
 
-        for (auto& q : quadVec) {
-            _function.value(e, i++, quadVec.size(), q);
+        for (auto& q : refQuads) {
+            _function.value(e, i, refQuads.size(), q, oriQuads[i]);
+            ++i;
         }
     }
 
@@ -104,7 +114,7 @@ auto make_shared_quadautomation(MilliSeconds duration, Rs&&... args) -> std::sha
 struct TypingEffect final {
     MilliSeconds Duration;
 
-    void value(f32 progress, isize index, isize length, Quad& quad) const;
+    void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src) const;
 };
 
 ////////////////////////////////////////////////////////////
@@ -112,7 +122,7 @@ struct TypingEffect final {
 struct FadeInEffect final {
     MilliSeconds Duration;
 
-    void value(f32 progress, isize index, isize length, Quad& quad) const;
+    void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src) const;
 };
 
 ////////////////////////////////////////////////////////////
@@ -120,7 +130,7 @@ struct FadeInEffect final {
 struct FadeOutEffect final {
     MilliSeconds Duration;
 
-    void value(f32 progress, isize index, isize length, Quad& quad) const;
+    void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src) const;
 };
 
 ////////////////////////////////////////////////////////////
@@ -134,10 +144,22 @@ public:
     Color Color0;
     Color Color1;
 
-    void value(f32 progress, isize index, isize length, Quad& quad);
+    void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
 
 private:
     bool _flip { false };
+};
+
+////////////////////////////////////////////////////////////
+
+struct ShakeEffect final {
+public:
+    MilliSeconds Duration;
+    MilliSeconds Interval;
+    f32 Amount;
+    Random RNG;
+
+    void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
 };
 
 }
