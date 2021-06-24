@@ -91,6 +91,10 @@ public:
     map<string, int> _testMap;
     int _importantValue = 0;
 };
+
+class TestScriptClassSub : public TestScriptClass {
+};
+
 inline bool operator==(const TestScriptClass& left, const TestScriptClass& right)
 {
     return (left._importantValue == right._importantValue);

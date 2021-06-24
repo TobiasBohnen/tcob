@@ -268,9 +268,10 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         map = *t.get_map();
         REQUIRE(map["x"] == 300);
     }
-    SECTION("pointer member function")
+    SECTION("subclass")
     {
-        TestScriptClass t1;
+        wrapper.register_type<TestScriptClassSub>();
+        TestScriptClassSub t1;
         global["wrap1"] = &t1;
         TestScriptClass t2;
         t2.set_value(123);

@@ -301,6 +301,13 @@ public:
         _overloads[name].push_back(std::move(ptr));
     }
 
+    template <std::derived_from<T> S>
+    void register_type()
+    {
+        create_metatable(typeid(S).name(), false);
+        create_metatable((std::string(typeid(S).name()) + "_gc").c_str(), true);
+    }
+
 private:
     void set_metamethod(const std::string& name, const char* tableName, LuaClosureUniquePtr& ptr)
     {
