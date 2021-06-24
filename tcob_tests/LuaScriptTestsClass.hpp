@@ -44,6 +44,11 @@ public:
         return &_testMap;
     }
 
+    void ptr(TestScriptClass* c)
+    {
+        _importantValue = c->_importantValue;
+    }
+
     int foo(const std::string& test, int x, bool b)
     {
         return (int)test.length() * x;

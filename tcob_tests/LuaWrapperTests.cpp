@@ -116,6 +116,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
     wrapper.getter("ro_age", &TestScriptClass::get_value);
     wrapper.setter("wo_age", &TestScriptClass::set_value);
     wrapper.getter("map", &TestScriptClass::get_map);
+    wrapper.function("ptr", &TestScriptClass::ptr);
 
     auto f1 = overload<i32, f32>(&TestScriptClass::overload);
     auto f2 = overload<f32, i32>(&TestScriptClass::overload);
@@ -128,10 +129,12 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
     wrapper.constructor<>();
     wrapper.constructor<i32>();
     wrapper.constructor<i32, f32>();
+    SECTION("early wrap")
     {
         i32 x = run_script<i32>("return earlywrap:foo('test', 2, true)");
         REQUIRE(x == 2 * 4);
     }
+    SECTION("index acces")
     {
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -142,6 +145,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         REQUIRE(res.State == LuaResultState::Ok);
         REQUIRE(t1.get_value() == 400);
     }
+    SECTION("pointer parameter")
     {
         global["test"]["WrapperObj"] = testFuncWrapperObj;
         TestScriptClass t1;
@@ -150,6 +154,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         i32 i = run_script<i32>("return test.WrapperObj(wrap)");
         REQUIRE(i == 100);
     }
+    SECTION("constructor")
     {
         TestScriptClass* t = run_script<TestScriptClass*>("return TSC.new(20)");
         REQUIRE(t->get_value() == 20);
@@ -158,12 +163,14 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         t = run_script<TestScriptClass*>("return TSC.new()");
         REQUIRE(t->get_value() == 0);
     }
+    SECTION("pointer from lua")
     {
         TestScriptClass t;
         global["wrap"] = &t;
         TestScriptClass* tp = global["wrap"];
         REQUIRE(tp == &t);
     }
+    SECTION("properties")
     {
         TestScriptClass t;
         global["wrap"] = &t;
@@ -175,6 +182,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         REQUIRE(res.State == LuaResultState::Ok);
         REQUIRE(t.get_value() == 21);
     }
+    SECTION("overloads")
     {
         TestScriptClass t;
         global["wrap"] = &t;
@@ -196,6 +204,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         x = run_script<f32>("return wrap:overload()");
         REQUIRE(x == 40);
     }
+    SECTION("functions and properties")
     {
         TestScriptClass t;
         global["wrap"] = &t;
@@ -209,6 +218,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         REQUIRE(t.get_value() == 25);
         REQUIRE(run_script<i32>("return wrap:me()") == 40);
     }
+    SECTION("more properties")
     {
         TestScriptClass t;
         global["wrap"] = &t;
@@ -223,6 +233,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         i32 x = func(&t);
         REQUIRE(x == 350);
     }
+    SECTION("even more properties")
     {
         TestScriptClass t1;
         global["wrap"] = &t1;
@@ -244,6 +255,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         x = run_script<i32>("return wrap:add(20)");
         REQUIRE(x == 120);
     }
+    SECTION("wrapped member")
     {
         create_wrapper<map<string, i32>>("map");
         TestScriptClass t;
@@ -255,6 +267,19 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         REQUIRE(res.State == LuaResultState::Ok);
         map = *t.get_map();
         REQUIRE(map["x"] == 300);
+    }
+    SECTION("pointer member function")
+    {
+        TestScriptClass t1;
+        global["wrap1"] = &t1;
+        TestScriptClass t2;
+        t2.set_value(123);
+        global["wrap2"] = &t2;
+
+        REQUIRE(t1.get_value() != t2.get_value());
+        auto result = run_script("wrap1:ptr(wrap2)");
+        REQUIRE(result.State == LuaResultState::Ok);
+        REQUIRE(t1.get_value() == t2.get_value());
     }
 }
 
@@ -317,8 +342,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         [](TestScriptClass* instance1, i32 x) {
             return x * instance1->get_value();
         });
+    SECTION("Call")
     {
-        //Call
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -327,8 +352,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         i32 b = run_script<i32>("return wrap1(100)");
         REQUIRE(b == age1 * 100);
     }
+    SECTION("Length")
     {
-        //Length
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -337,8 +362,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         i32 b = run_script<i32>("return #wrap1");
         REQUIRE(b == age1);
     }
+    SECTION("ToString")
     {
-        //ToString
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -347,8 +372,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         string b = run_script<string>("return tostring(wrap1)");
         REQUIRE(b == to_string(t1.get_value()));
     }
+    SECTION("Concat")
     {
-        //Concat
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -357,8 +382,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         i32 b = run_script<i32>("return wrap1 .. 10");
         REQUIRE(b == 400010);
     }
+    SECTION("LessOrEqualThan")
     {
-        //LessOrEqualThan
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -378,8 +403,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         b = run_script<bool>("return wrap1 >= age2");
         REQUIRE_FALSE(b);
     }
+    SECTION("LessThan")
     {
-        //LessThan
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -400,8 +425,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         b = run_script<bool>("return wrap1 > age2");
         REQUIRE(b);
     }
+    SECTION("autogenerated equal")
     {
-        //autogenerated equal
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -424,8 +449,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         b = run_script<bool>("return wrap1 ~= wrap2");
         REQUIRE(b);
     }
+    SECTION("Add,Subtract,Divide,Multiply")
     {
-        //Add,Subtract,Divide,Multiply
         i32 age1 = 4000;
         TestScriptClass t1;
         global["wrap1"] = &t1;
@@ -446,8 +471,8 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         b = run_script<TestScriptClass*>("return wrap1 * age2");
         REQUIRE(b->get_value() == age1 * age2);
     }
+    SECTION("UnaryMinus")
     {
-        //UnaryMinus
         TestScriptClass t1;
         global["wrap1"] = &t1;
         t1.set_value(100);
@@ -455,9 +480,11 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
         i32 b = run_script<i32>("return -wrap1");
         REQUIRE(b == -100);
     }
-
-    perform_GC();
-    REQUIRE(TestScriptClass::ObjCount == 0);
+    SECTION("GC")
+    {
+        perform_GC();
+        REQUIRE(TestScriptClass::ObjCount == 0);
+    }
 }
 
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
