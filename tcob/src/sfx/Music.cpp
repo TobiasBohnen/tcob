@@ -150,7 +150,7 @@ void Music::queue_buffers(std::span<u32> buffers)
     for (u32 buffer : buffers) {
         for (u32 i { 0 }; i < MUSIC_BUFFER_COUNT; ++i) {
             if (buffer == _buffers[i]->ID) {
-                if (_decoder->buffer_data(_buffers[i])) {
+                if (_decoder->buffer_data(_buffers[i].get())) {
                     s->queue_buffers(&buffer, 1);
                 } else {
                     if (s->looping()) {

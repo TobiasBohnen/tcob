@@ -57,7 +57,7 @@ detail::AudioDecoder::AudioDecoder(const std::string& filename)
 {
 }
 
-auto detail::AudioDecoder::buffer_data(std::shared_ptr<al::Buffer> buffer) -> bool
+auto detail::AudioDecoder::buffer_data(al::Buffer* buffer) -> bool
 {
     std::vector<f32> data;
     data.reserve(MUSIC_BUFFER_SIZE);

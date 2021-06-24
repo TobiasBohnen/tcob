@@ -24,7 +24,7 @@ public:
     explicit AudioDecoder(const std::string& filename);
     virtual ~AudioDecoder() = default;
 
-    auto buffer_data(std::shared_ptr<al::Buffer> buffer) -> bool;
+    auto buffer_data(al::Buffer* buffer) -> bool;
 
     virtual auto info() const -> AudioInfo = 0;
 
