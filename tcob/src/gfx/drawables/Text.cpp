@@ -205,7 +205,7 @@ void Text::format()
                 q.position(quadRect, transform());
 
                 if (currentEffect) {
-                    currentEffect->add_quad(_quads.size() - 1, q);
+                    currentEffect->add_quad(q);
                 }
             }
         }

@@ -8,7 +8,7 @@
 
 #include <concepts>
 #include <functional>
-#include <map>
+#include <vector>
 
 #include <tcob/core/Automation.hpp>
 #include <tcob/gfx/Quad.hpp>
@@ -39,19 +39,19 @@ public:
     {
     }
 
-    void add_quad(isize idx, Quad& q)
+    void add_quad(Quad& q)
     {
-        _quads.emplace(idx, q);
+        _quads.emplace_back(q);
     }
 
 protected:
-    auto quads() -> const std::map<isize, std::reference_wrapper<Quad>>&
+    auto quads() -> const std::vector<std::reference_wrapper<Quad>>&
     {
         return _quads;
     }
 
 private:
-    std::map<isize, std::reference_wrapper<Quad>> _quads {};
+    std::vector<std::reference_wrapper<Quad>> _quads {};
 };
 
 template <QuadAutomationFunction Func>
@@ -70,8 +70,11 @@ protected:
     void update_values() override
     {
         isize i { 0 };
-        for (auto& [k, v] : quads()) {
-            _function.value(progress(), i++, quads().size(), v);
+        const f32 e { progress() };
+        const auto& quadVec { quads() };
+
+        for (auto& q : quadVec) {
+            _function.value(e, i++, quadVec.size(), q);
         }
     }
 
