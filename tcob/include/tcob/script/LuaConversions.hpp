@@ -105,11 +105,14 @@ struct LuaConverter<LuaOwnedPtr<T>> {
 
     static void ToLua(const LuaState& ls, const LuaOwnedPtr<T>& value)
     {
-        T** obj { static_cast<T**>(ls.new_userdata(sizeof(T*))) };
+        T** obj { static_cast<T**>(ls.new_userdata(sizeof(T*), 1)) };
         *obj = value.Obj;
 
-        std::string metatable { std::string(typeid(T).name()) + "_gc" };
-        if (ls.new_metatable(metatable.c_str()) == 0) {
+        const char* metatable { typeid(T).name() };
+        ls.push_string(metatable);
+        assert(ls.set_uservalue(-2, 1) != 0);
+
+        if (ls.new_metatable((std::string(metatable) + "_gc").c_str()) == 0) {
             // GC table exists
             ls.set_metatable(-2);
         } else {
@@ -404,9 +407,9 @@ struct LuaConverter<std::set<T>> {
     {
         bool retValue { ls.is_table(idx) };
         if (retValue) {
-            const auto len { ls.rawlen(idx) };
+            const auto len { ls.raw_len(idx) };
             for (isize i { 1 }; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 T val {};
                 retValue = LuaConverter<T>::FromLua(ls, -1, val);
                 ls.pop(1);
@@ -433,7 +436,7 @@ struct LuaConverter<std::set<T>> {
         i32 i { 0 };
         for (auto& val : value) {
             LuaConverter<T>::ToLua(ls, val);
-            ls.rawseti(-2, ++i);
+            ls.raw_set(-2, ++i);
         }
     }
 
@@ -442,10 +445,10 @@ private:
     {
         bool retValue { ls.is_table(idx) };
         if (retValue) {
-            const auto len { ls.rawlen(idx) };
+            const auto len { ls.raw_len(idx) };
 
             for (isize i { 1 }; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 retValue = LuaConverter<T>::IsType(ls, -1);
                 ls.pop(1);
                 if (!retValue) {
@@ -470,9 +473,9 @@ struct LuaConverter<std::unordered_set<T>> {
     {
         bool retValue { ls.is_table(idx) };
         if (retValue) {
-            const auto len { ls.rawlen(idx) };
+            const auto len { ls.raw_len(idx) };
             for (isize i { 1 }; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 T val {};
                 retValue = LuaConverter<T>::FromLua(ls, -1, val);
                 ls.pop(1);
@@ -499,7 +502,7 @@ struct LuaConverter<std::unordered_set<T>> {
         i32 i { 0 };
         for (auto& val : value) {
             LuaConverter<T>::ToLua(ls, val);
-            ls.rawseti(-2, ++i);
+            ls.raw_set(-2, ++i);
         }
     }
 
@@ -508,10 +511,10 @@ private:
     {
         bool retValue { ls.is_table(idx) };
         if (retValue) {
-            const auto len { ls.rawlen(idx) };
+            const auto len { ls.raw_len(idx) };
 
             for (isize i { 1 }; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 retValue = LuaConverter<T>::IsType(ls, -1);
                 ls.pop(1);
                 if (!retValue) {
@@ -577,7 +580,7 @@ struct LuaConverter<std::array<T, Size>> {
             isize len = Size;
 
             for (isize i = 1; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 retValue &= LuaConverter<T>::FromLua(ls, -1, value[i - 1]);
                 ls.pop(1);
             }
@@ -593,7 +596,7 @@ struct LuaConverter<std::array<T, Size>> {
 
         for (isize i { 0 }; i < Size; ++i) {
             LuaConverter<T>::ToLua(ls, value[i]);
-            ls.rawseti(-2, i + 1);
+            ls.raw_set(-2, i + 1);
         }
     }
 };
@@ -611,11 +614,11 @@ struct LuaConverter<std::vector<T>> {
     {
         bool retValue { ls.is_table(idx) };
         if (retValue) {
-            const auto len { ls.rawlen(idx) };
+            const auto len { ls.raw_len(idx) };
             value.resize(len);
 
             for (isize i { 1 }; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 T val {};
                 retValue = LuaConverter<T>::FromLua(ls, -1, val);
                 ls.pop(1);
@@ -637,7 +640,7 @@ struct LuaConverter<std::vector<T>> {
 
         for (isize i { 0 }; i < value.size(); ++i) {
             LuaConverter<T>::ToLua(ls, value[i]);
-            ls.rawseti(-2, i + 1);
+            ls.raw_set(-2, i + 1);
         }
     }
 
@@ -646,10 +649,10 @@ private:
     {
         bool retValue { ls.is_table(idx) };
         if (retValue) {
-            const auto len { ls.rawlen(idx) };
+            const auto len { ls.raw_len(idx) };
 
             for (isize i { 1 }; i <= len; ++i) {
-                ls.rawgeti(idx, i);
+                ls.raw_get(idx, i);
                 retValue = LuaConverter<T>::IsType(ls, -1);
                 ls.pop(1);
                 if (!retValue) {
@@ -935,8 +938,18 @@ struct LuaConverter<T> {
     static auto FromLua(const LuaState& ls, i32&& idx, T& value) -> bool
     {
         if (ls.is_userdata(idx)) {
-            value = *static_cast<T*>(ls.to_userdata(idx++));
-            return true;
+            std::string expectedtype { typeid(std::remove_pointer_t<T>).name() };
+            assert(ls.get_uservalue(idx, 1) != 0);
+            std::string userdatatype { ls.to_string(-1) };
+            ls.pop(1);
+            if (expectedtype == userdatatype || expectedtype + "_gc" == userdatatype) {
+                value = *static_cast<T*>(ls.to_userdata(idx++));
+                return true;
+            } else {
+                value = nullptr;
+                return false;
+            }
+
         } else if constexpr (std::is_same_v<T, const char*>) {
             if (ls.is_string(idx)) {
                 value = ls.to_string(idx++);
@@ -949,10 +962,13 @@ struct LuaConverter<T> {
 
     static void ToLua(const LuaState& ls, const T& value)
     {
-        T* obj { static_cast<T*>(ls.new_userdata(sizeof(T*))) };
+        T* obj { static_cast<T*>(ls.new_userdata(sizeof(T*), 1)) };
         *obj = value;
 
         const char* metatable { typeid(std::remove_pointer_t<T>).name() };
+        ls.push_string(metatable);
+        assert(ls.set_uservalue(-2, 1) != 0);
+
         ls.new_metatable(metatable);
         ls.set_metatable(-2);
     }

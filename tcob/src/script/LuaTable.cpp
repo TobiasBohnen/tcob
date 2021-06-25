@@ -16,7 +16,7 @@ auto LuaTable::raw_length() const -> isize
     const auto guard { ls.create_stack_guard() };
 
     push_self();
-    return ls.rawlen(-1);
+    return ls.raw_len(-1);
 }
 
 auto LuaTable::create_table(const std::string& name) const -> LuaTable
@@ -78,7 +78,7 @@ void LuaTable::dump_it(std::stringstream& stream, i32 indent) const
         else if (std::holds_alternative<i64>(key))
             ls.push_integer(std::get<i64>(key));
 
-        ls.rawget(-2); // get value
+        ls.raw_get(-2); // get value
 
         LuaType type { ls.get_type(-1) };
         switch (type) {

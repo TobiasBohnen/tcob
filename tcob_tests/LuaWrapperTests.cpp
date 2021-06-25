@@ -268,20 +268,6 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         map = *t.get_map();
         REQUIRE(map["x"] == 300);
     }
-    SECTION("subclass")
-    {
-        wrapper.register_type<TestScriptClassSub>();
-        TestScriptClassSub t1;
-        global["wrap1"] = &t1;
-        TestScriptClass t2;
-        t2.set_value(123);
-        global["wrap2"] = &t2;
-
-        REQUIRE(t1.get_value() != t2.get_value());
-        auto result = run_script("wrap1:ptr(wrap2)");
-        REQUIRE(result.State == LuaResultState::Ok);
-        REQUIRE(t1.get_value() == t2.get_value());
-    }
 }
 
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")

@@ -160,17 +160,17 @@ public:
 
     auto new_userdata(i32 size) const -> void*;
     auto new_userdata(i32 size, i32 nuvalue) const -> void*;
-    auto seti_uservalue(i32 index, i32 n) const -> i32;
-    auto geti_uservalue(i32 index, i32 n) const -> i32;
+    auto set_uservalue(i32 index, i32 n) const -> i32;
+    auto get_uservalue(i32 index, i32 n) const -> i32;
 
     void set_registry_field(const char* name) const;
     void insert(i32 idx) const;
 
-    auto rawlen(i32 idx) const -> u64;
-    void rawgeti(i32 idx, i64 n) const;
-    void rawget(i32 idx) const;
-    void rawseti(i32 idx, i64 n) const;
-    void rawset(i32 idx) const;
+    auto raw_len(i32 idx) const -> u64;
+    void raw_get(i32 idx, i64 n) const;
+    void raw_get(i32 idx) const;
+    void raw_set(i32 idx, i64 n) const;
+    void raw_set(i32 idx) const;
 
     static auto UpvalueIndex(i32 n) -> i32;
 

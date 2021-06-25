@@ -270,36 +270,36 @@ void LuaState::insert(i32 idx) const
     lua_insert(_luaState, idx);
 }
 
-auto LuaState::rawlen(i32 idx) const -> u64
+auto LuaState::raw_len(i32 idx) const -> u64
 {
     return lua_rawlen(_luaState, idx);
 }
 
-void LuaState::rawgeti(i32 idx, i64 n) const
+void LuaState::raw_get(i32 idx, i64 n) const
 {
     lua_rawgeti(_luaState, idx, n);
 }
 
-void LuaState::rawget(i32 idx) const
+void LuaState::raw_get(i32 idx) const
 {
     lua_rawget(_luaState, idx);
 }
 
-void LuaState::rawseti(i32 idx, i64 n) const
+void LuaState::raw_set(i32 idx, i64 n) const
 {
     lua_rawseti(_luaState, idx, n);
 }
 
-void LuaState::rawset(i32 idx) const
+void LuaState::raw_set(i32 idx) const
 {
     lua_rawset(_luaState, idx);
 }
 
-auto LuaState::geti_uservalue(i32 index, i32 n) const -> i32
+auto LuaState::get_uservalue(i32 index, i32 n) const -> i32
 {
     return lua_getiuservalue(_luaState, index, n);
 }
-auto LuaState::seti_uservalue(i32 index, i32 n) const -> i32
+auto LuaState::set_uservalue(i32 index, i32 n) const -> i32
 {
     return lua_setiuservalue(_luaState, index, n);
 }
