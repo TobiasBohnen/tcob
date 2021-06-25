@@ -253,7 +253,7 @@ auto LuaState::new_metatable(const char* tableName) const -> i32
 }
 auto LuaState::new_userdata(i32 size) const -> void*
 {
-    return lua_newuserdata(_luaState, size);
+    return lua_newuserdatauv(_luaState, size, 0);
 }
 
 void LuaState::set_registry_field(const char* name) const
