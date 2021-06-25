@@ -157,7 +157,12 @@ public:
     void create_table(i32 narr, i32 nrec) const;
     void new_table() const;
     auto new_metatable(const char* tableName) const -> i32;
+
     auto new_userdata(i32 size) const -> void*;
+    auto new_userdata(i32 size, i32 nuvalue) const -> void*;
+    auto seti_uservalue(i32 index, i32 n) const -> i32;
+    auto geti_uservalue(i32 index, i32 n) const -> i32;
+
     void set_registry_field(const char* name) const;
     void insert(i32 idx) const;
 

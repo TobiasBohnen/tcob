@@ -255,6 +255,10 @@ auto LuaState::new_userdata(i32 size) const -> void*
 {
     return lua_newuserdatauv(_luaState, size, 0);
 }
+auto LuaState::new_userdata(i32 size, i32 nuvalue) const -> void*
+{
+    return lua_newuserdatauv(_luaState, size, nuvalue);
+}
 
 void LuaState::set_registry_field(const char* name) const
 {
@@ -289,6 +293,15 @@ void LuaState::rawseti(i32 idx, i64 n) const
 void LuaState::rawset(i32 idx) const
 {
     lua_rawset(_luaState, idx);
+}
+
+auto LuaState::geti_uservalue(i32 index, i32 n) const -> i32
+{
+    return lua_getiuservalue(_luaState, index, n);
+}
+auto LuaState::seti_uservalue(i32 index, i32 n) const -> i32
+{
+    return lua_setiuservalue(_luaState, index, n);
 }
 
 auto LuaState::UpvalueIndex(i32 n) -> i32
