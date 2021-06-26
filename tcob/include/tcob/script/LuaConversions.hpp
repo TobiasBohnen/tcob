@@ -108,11 +108,10 @@ struct LuaConverter<LuaOwnedPtr<T>> {
         T** obj { static_cast<T**>(ls.new_userdata(sizeof(T*), 1)) };
         *obj = value.Obj;
 
-        const char* metatable { typeid(T).name() };
-        ls.push_string(metatable);
+        ls.push_string(TypeName.c_str());
         assert(ls.set_uservalue(-2, 1) != 0);
 
-        if (ls.new_metatable((std::string(metatable) + "_gc").c_str()) == 0) {
+        if (ls.new_metatable((TypeName + "_gc").c_str()) == 0) {
             // GC table exists
             ls.set_metatable(-2);
         } else {
@@ -136,6 +135,8 @@ struct LuaConverter<LuaOwnedPtr<T>> {
 
         return 0;
     }
+
+    static inline std::string TypeName { typeid(T).name() };
 };
 
 template <typename T>
@@ -938,11 +939,10 @@ struct LuaConverter<T> {
     static auto FromLua(const LuaState& ls, i32&& idx, T& value) -> bool
     {
         if (ls.is_userdata(idx)) {
-            std::string expectedtype { typeid(std::remove_pointer_t<T>).name() };
             assert(ls.get_uservalue(idx, 1) != 0);
             std::string userdatatype { ls.to_string(-1) };
             ls.pop(1);
-            if (expectedtype == userdatatype || expectedtype + "_gc" == userdatatype) {
+            if (TypeName == userdatatype || TypeName + "_gc" == userdatatype) {
                 value = *static_cast<T*>(ls.to_userdata(idx++));
                 return true;
             } else {
@@ -965,13 +965,14 @@ struct LuaConverter<T> {
         T* obj { static_cast<T*>(ls.new_userdata(sizeof(T*), 1)) };
         *obj = value;
 
-        const char* metatable { typeid(std::remove_pointer_t<T>).name() };
-        ls.push_string(metatable);
+        ls.push_string(TypeName.c_str());
         assert(ls.set_uservalue(-2, 1) != 0);
 
-        ls.new_metatable(metatable);
+        ls.new_metatable(TypeName.c_str());
         ls.set_metatable(-2);
     }
+
+    static inline std::string TypeName { typeid(std::remove_pointer_t<T>).name() };
 };
 
 template <>
