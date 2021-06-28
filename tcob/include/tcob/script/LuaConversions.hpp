@@ -211,9 +211,7 @@ struct LuaConverter<std::variant<P...>> {
         case LuaType::Table: {
             // TODO: more types
             if constexpr ((detail::is_specialization<P, std::vector>() || ...)) {
-                std::vector<std::string> vec;
-                from_lua(ls, std::forward<i32>(idx), vec);
-                value = vec;
+                get_vector<P...>(ls, idx, value);
             }
         } break;
         default:
@@ -227,7 +225,7 @@ struct LuaConverter<std::variant<P...>> {
     static void ToLua(const LuaState& ls, const std::variant<P...>& value)
     {
         std::visit(
-            [ls](auto&& item) {
+            [&ls](auto&& item) {
                 to_lua(ls, item);
             },
             value);
@@ -250,6 +248,20 @@ private:
     static void to_lua(const LuaState& ls, const R& value)
     {
         LuaConverter<R>::ToLua(ls, value);
+    }
+
+    template <typename T, typename... Ts>
+    static void get_vector(const LuaState& ls, i32 idx, std::variant<P...>& value)
+    {
+        if constexpr (sizeof...(Ts) > 0) {
+            if constexpr (detail::is_specialization<T, std::vector>()) {
+                T vec;
+                from_lua(ls, std::forward<i32>(idx), vec);
+                value = vec;
+            } else {
+                get_vector<Ts...>(ls, idx, value);
+            }
+        }
     }
 
     template <typename T, typename... Ts>
