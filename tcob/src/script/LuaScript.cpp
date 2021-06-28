@@ -28,14 +28,14 @@ LuaScript::LuaScript()
     _state.pop(1);
 
     lua_pushglobaltable(ls);
-    _globalTable = new LuaTable { _state, -1 };
+    _globalTable = std::make_unique<LuaTable>(_state, -1);
     _state.pop(1);
 }
 
 LuaScript::~LuaScript()
 {
     _wrappers.clear();
-    delete _globalTable;
+    _globalTable = nullptr;
     lua_close(_state.lua());
 }
 

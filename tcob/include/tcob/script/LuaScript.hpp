@@ -67,14 +67,14 @@ public:
                 if (_state.try_get(std::forward<int>(idx), retValue)) {
                     return { retValue, result };
                 } else {
-                    return {  R {}, LuaResultState::TypeMismatch };
+                    return { R {}, LuaResultState::TypeMismatch };
                 }
             }
         } else {
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
-                return {  R {}, result };
+                return { R {}, result };
             }
         }
     }
@@ -121,7 +121,7 @@ public:
             _wrappers[name] = nullptr;
         }
 
-        auto wrap { std::make_shared<LuaWrapper<T>>(_state, _globalTable, name) };
+        auto wrap { std::make_shared<LuaWrapper<T>>(_state, _globalTable.get(), name) };
         _wrappers[name] = wrap;
         return *wrap;
     }
@@ -131,7 +131,7 @@ public:
 private:
     auto do_call(i32 nargs, i32 nret) const -> LuaResultState;
     auto call_buffer(const byte* script, isize length, const std::string& name) const -> LuaResultState;
-    auto load_binarybuffer(const std::string& filee) const -> bool;
+    auto load_binarybuffer(const std::string& file) const -> bool;
 
     template <typename... Args>
     void load_library(LuaLibrary lib, Args&&... args)
@@ -145,7 +145,7 @@ private:
 
     LuaState _state;
 
-    LuaTable* _globalTable;
+    std::unique_ptr<LuaTable> _globalTable;
 
     std::unordered_map<std::string, std::shared_ptr<detail::LuaWrapperBase>> _wrappers;
     std::function<std::function<LuaTable(const std::string&)>&(const std::string&)> _searcher;
