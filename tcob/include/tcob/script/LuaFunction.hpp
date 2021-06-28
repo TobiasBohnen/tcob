@@ -135,7 +135,7 @@ public:
     template <typename... T>
     void push(T&&... t) const
     {
-        LuaState { thread() }.push(t...);
+        thread().push(t...);
     }
 
     auto close() const -> LuaCoroutineState;
