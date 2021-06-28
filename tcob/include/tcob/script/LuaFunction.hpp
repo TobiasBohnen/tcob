@@ -38,7 +38,7 @@ public:
     template <typename... P>
     auto call(P&&... params) const -> LuaResult<R>
     {
-        const auto& ls { lua_state() };
+        const auto& ls { state() };
         const auto guard { ls.create_stack_guard() };
 
         push_self();
@@ -90,25 +90,24 @@ public:
     template <typename R, typename... P>
     auto resume(P&&... params) const -> LuaResult<R>
     {
-        lua_State* t { thread() };
-        const LuaState ls { t };
-        const auto guard { ls.create_stack_guard() };
+        const LuaState t { thread() };
+        const auto guard { t.create_stack_guard() };
 
         //push parameters to lua
-        const i32 oldTop { ls.get_top() };
-        ls.push(params...);
-        const i32 paramsCount { ls.get_top() - oldTop };
+        const i32 oldTop { t.get_top() };
+        t.push(params...);
+        const i32 paramsCount { t.get_top() - oldTop };
 
         //call lua function
         i32 nresults { 0 };
-        const auto err { ls.resume(paramsCount, &nresults) };
+        const auto err { t.resume(paramsCount, &nresults) };
 
         if (err == LuaThreadState::Ok || err == LuaThreadState::Yielded) {
             if constexpr (std::is_void_v<R>) {
                 return { LuaResultState::Ok };
             } else {
                 R retValue {};
-                if (ls.try_get(1, retValue)) {
+                if (t.try_get(1, retValue)) {
                     return { retValue, err == LuaThreadState::Ok ? LuaResultState::Ok : LuaResultState::Yielded };
                 } else {
                     return { R(), LuaResultState::TypeMismatch };
@@ -145,9 +144,9 @@ public:
 
     auto close() const -> LuaCoroutineState;
 
-    auto state() const -> LuaCoroutineState;
+    auto current_state() const -> LuaCoroutineState;
 
 private:
-    auto thread() const -> lua_State*;
+    auto thread() const -> LuaState;
 };
 }

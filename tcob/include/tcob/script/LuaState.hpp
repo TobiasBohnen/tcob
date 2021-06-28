@@ -15,6 +15,7 @@
 #include <tcob/core/Helper.hpp>
 
 struct lua_State;
+typedef int (*lua_CFunction)(lua_State* L);
 
 namespace tcob {
 template <typename T>
@@ -131,13 +132,14 @@ public:
     auto to_integer(i32 idx) const -> i64;
     auto to_number(i32 idx) const -> f64;
     auto to_string(i32 idx) const -> const char*;
+    auto to_thread(i32 idx) const -> LuaState;
     auto to_userdata(i32 idx) const -> void*;
     auto get_type(i32 idx) const -> LuaType;
 
     auto get_top() const -> i32;
 
     void check_stack(i32 size) const;
-    auto resume(i32 argCount, i32* resultCount) const -> LuaThreadState;
+
     auto next(i32 idx) const -> bool;
     void push_bool(bool val) const;
     void push_cfunction(i32 (*lua_CFunction)(lua_State*)) const;
@@ -174,6 +176,11 @@ public:
 
     auto ref(i32 idx) const -> i32;
     void unref(i32 t, i32 ref) const;
+
+    auto status() const -> i32;
+
+    auto resume(i32 argCount, i32* resultCount) const -> LuaThreadState;
+    auto reset_thread() const -> i32;
 
     static auto UpvalueIndex(i32 n) -> i32;
 

@@ -18,7 +18,7 @@ namespace detail {
 
     void LuaFunctionBase::dump(OutputFileStream& stream) const
     {
-        const auto& ls { lua_state() };
+        const auto& ls { state() };
         push_self();
         lua_dump(ls.lua(), &writer, &stream, true);
         ls.pop(1);
@@ -26,7 +26,7 @@ namespace detail {
 
     auto LuaFunctionBase::do_call(i32 nargs) const -> LuaResultState
     {
-        const auto& ls { lua_state() };
+        const auto& ls { state() };
         const i32 hpos { ls.get_top() - nargs };
         i32 err { 0 };
 
@@ -55,8 +55,7 @@ namespace detail {
 
 auto LuaCoroutine::close() const -> LuaCoroutineState
 {
-    lua_State* t = thread();
-    i32 err = lua_resetthread(t);
+    i32 err = thread().reset_thread();
     if (err == LUA_OK) {
         return LuaCoroutineState::Ok;
     }
@@ -64,12 +63,9 @@ auto LuaCoroutine::close() const -> LuaCoroutineState
     return LuaCoroutineState::Error;
 }
 
-auto LuaCoroutine::state() const -> LuaCoroutineState
+auto LuaCoroutine::current_state() const -> LuaCoroutineState
 {
-    lua_State* t = thread();
-
-    const i32 err = lua_status(t);
-
+    const i32 err = thread().status();
     if (err == LUA_OK)
         return LuaCoroutineState::Ok;
     else if (err == LUA_YIELD)
@@ -77,11 +73,11 @@ auto LuaCoroutine::state() const -> LuaCoroutineState
     return LuaCoroutineState::Error;
 }
 
-auto LuaCoroutine::thread() const -> lua_State*
+auto LuaCoroutine::thread() const -> LuaState
 {
-    const auto& ls { lua_state() };
+    const auto& ls { state() };
     push_self();
-    lua_State* thread = lua_tothread(ls.lua(), -1);
+    const auto thread { ls.to_thread(-1) };
     ls.pop(1);
     return thread;
 }

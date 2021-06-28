@@ -30,7 +30,7 @@ public:
     auto is_valid() const -> bool;
 
 protected:
-    auto lua_state() const -> const LuaState&;
+    auto state() const -> const LuaState&;
 
 private:
     LuaState _luaState { nullptr };

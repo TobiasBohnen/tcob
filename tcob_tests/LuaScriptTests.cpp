@@ -143,13 +143,13 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "     end) ");
         LuaCoroutine co = global["co"];
 
-        REQUIRE(co.state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
         auto result = co.resume<i32>();
-        REQUIRE(co.state() == LuaCoroutineState::Suspended);
+        REQUIRE(co.current_state() == LuaCoroutineState::Suspended);
         result = co.resume<i32>();
-        REQUIRE(co.state() == LuaCoroutineState::Suspended);
+        REQUIRE(co.current_state() == LuaCoroutineState::Suspended);
         result = co.resume<i32>();
-        REQUIRE(co.state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
     }
     {
         auto res = run_script("co = coroutine.create(function () "
@@ -205,7 +205,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
 
         auto coresult = co.close();
         REQUIRE(coresult == LuaCoroutineState::Ok);
-        REQUIRE(co.state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
 
         result = co.resume<i32>();
         REQUIRE(result.State == LuaResultState::RuntimeError);
@@ -222,7 +222,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(result.State == LuaResultState::Yielded);
         REQUIRE(result.Value == 100);
         static_cast<void>(co.resume<void>());
-        REQUIRE(co.state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
 
         co.push(l);
         auto result2 = co.resume<f32>(15);

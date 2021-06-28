@@ -78,7 +78,7 @@ void LuaRef::push_self() const
         _luaState.raw_get(LUA_REGISTRYINDEX, _ref);
 }
 
-auto LuaRef::lua_state() const -> const LuaState&
+auto LuaRef::state() const -> const LuaState&
 {
     return _luaState;
 }

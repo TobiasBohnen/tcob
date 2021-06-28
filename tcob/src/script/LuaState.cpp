@@ -99,6 +99,11 @@ auto LuaState::to_userdata(i32 idx) const -> void*
     return lua_touserdata(_luaState, idx);
 }
 
+auto LuaState::to_thread(i32 idx) const -> LuaState
+{
+    return LuaState { lua_tothread(_luaState, idx) };
+}
+
 auto LuaState::get_type(i32 idx) const -> LuaType
 {
     switch (lua_type(_luaState, idx)) {
@@ -327,4 +332,15 @@ void LuaState::unref(i32 t, i32 ref) const
 {
     luaL_unref(_luaState, t, ref);
 }
+
+auto LuaState::status() const -> i32
+{
+    return lua_status(_luaState);
+}
+
+auto LuaState::reset_thread() const -> i32
+{
+    return lua_resetthread(_luaState);
+}
+
 }
