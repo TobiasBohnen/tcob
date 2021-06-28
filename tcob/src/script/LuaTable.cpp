@@ -17,7 +17,7 @@ LuaTable::LuaTable(const LuaState& ls, i32 idx)
 
 auto LuaTable::raw_length() const -> isize
 {
-    const LuaState ls { lua_state() };
+    const auto& ls { lua_state() };
     const auto guard { ls.create_stack_guard() };
 
     push_self();
@@ -26,7 +26,7 @@ auto LuaTable::raw_length() const -> isize
 
 auto LuaTable::create_table(const std::string& name) const -> LuaTable
 {
-    const LuaState ls { lua_state() };
+    const auto& ls { lua_state() };
 
     ls.new_table();
     LuaTable lt { ls, -1 };
@@ -56,7 +56,7 @@ void LuaTable::dump(OutputFileStream& stream) const
 
 void LuaTable::dump_it(std::stringstream& stream, i32 indent) const
 {
-    const LuaState ls { lua_state() };
+    const auto& ls { lua_state() };
 
     std::string ind1(indent, ' ');
     std::string ind2(indent + 2, ' ');

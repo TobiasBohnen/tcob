@@ -6,7 +6,6 @@
 #include <tcob/script/LuaRef.hpp>
 
 #include <cassert>
-
 #include <lua.hpp>
 
 #include <tcob/script/LuaState.hpp>

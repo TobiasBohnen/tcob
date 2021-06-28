@@ -38,7 +38,7 @@ public:
     template <typename... P>
     auto call(P&&... params) const -> LuaResult<R>
     {
-        const LuaState ls { lua_state() };
+        const auto& ls { lua_state() };
         const auto guard { ls.create_stack_guard() };
 
         push_self();

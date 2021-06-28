@@ -18,7 +18,7 @@ namespace detail {
 
     void LuaFunctionBase::dump(OutputFileStream& stream) const
     {
-        auto ls { lua_state() };
+        const auto& ls { lua_state() };
         push_self();
         lua_dump(ls.lua(), &writer, &stream, true);
         ls.pop(1);
@@ -26,7 +26,7 @@ namespace detail {
 
     auto LuaFunctionBase::do_call(i32 nargs) const -> LuaResultState
     {
-        auto ls { lua_state() };
+        const auto& ls { lua_state() };
         const i32 hpos { ls.get_top() - nargs };
         i32 err { 0 };
 
@@ -79,7 +79,7 @@ auto LuaCoroutine::state() const -> LuaCoroutineState
 
 auto LuaCoroutine::thread() const -> lua_State*
 {
-    auto ls { lua_state() };
+    const auto& ls { lua_state() };
     push_self();
     lua_State* thread = lua_tothread(ls.lua(), -1);
     ls.pop(1);
