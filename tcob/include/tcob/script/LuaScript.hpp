@@ -67,14 +67,14 @@ public:
                 if (_state.try_get(std::forward<int>(idx), retValue)) {
                     return { retValue, result };
                 } else {
-                    return { R(), LuaResultState::TypeMismatch };
+                    return {  R {}, LuaResultState::TypeMismatch };
                 }
             }
         } else {
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
-                return { R(), result };
+                return {  R {}, result };
             }
         }
     }

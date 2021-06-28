@@ -58,14 +58,14 @@ public:
                 if (ls.try_get(1, retValue)) {
                     return { retValue, LuaResultState::Ok };
                 } else {
-                    return { R(), LuaResultState::TypeMismatch };
+                    return { R {}, LuaResultState::TypeMismatch };
                 }
             }
         } else {
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
-                return { R(), result };
+                return { R {}, result };
             }
         }
     }
@@ -110,7 +110,7 @@ public:
                 if (t.try_get(1, retValue)) {
                     return { retValue, err == LuaThreadState::Ok ? LuaResultState::Ok : LuaResultState::Yielded };
                 } else {
-                    return { R(), LuaResultState::TypeMismatch };
+                    return { R {}, LuaResultState::TypeMismatch };
                 }
             }
         } else {
@@ -131,7 +131,7 @@ public:
             if constexpr (std::is_void_v<R>) {
                 return { result };
             } else {
-                return { R(), result };
+                return { R {}, result };
             }
         }
     }

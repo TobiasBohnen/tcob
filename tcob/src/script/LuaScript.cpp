@@ -7,8 +7,6 @@
 
 #include <lua.hpp>
 
-#include <tcob/core/io/Logger.hpp>
-
 namespace tcob {
 static const std::unordered_map<LuaLibrary, std::pair<const char*, lua_CFunction>> Libraries = {
     { LuaLibrary::Table, { LUA_TABLIBNAME, luaopen_table } },
@@ -63,28 +61,7 @@ void LuaScript::restart_GC() const
 
 auto LuaScript::do_call(i32 nargs, i32 nret) const -> LuaResultState
 {
-    const i32 hpos { _state.get_top() - nargs };
-    i32 err { 0 };
-
-    _state.push_cfunction(
-        [](lua_State* l) -> i32 {
-        const i32 n { lua_gettop(l)};
-        Log("Lua says: " + std::string(lua_tostring(l, n)), LogLevel::Error);
-        return 0; });
-    _state.insert(hpos);
-    err = lua_pcall(_state.lua(), nargs, nret, hpos);
-    _state.remove(hpos);
-
-    switch (err) {
-    case LUA_ERRRUN:
-        return LuaResultState::RuntimeError;
-    case LUA_ERRMEM:
-        return LuaResultState::MemAllocError;
-    case LUA_OK:
-        return LuaResultState::Ok;
-    default:
-        return LuaResultState::RuntimeError;
-    }
+    return _state.do_call(nargs, nret);
 }
 
 auto LuaScript::call_buffer(const byte* script, isize length, const std::string& name) const -> LuaResultState

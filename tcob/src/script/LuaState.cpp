@@ -7,6 +7,8 @@
 
 #include <lua.hpp>
 
+#include <tcob/core/io/Logger.hpp>
+
 namespace tcob {
 
 LuaStackGuard::LuaStackGuard(lua_State* l)
@@ -341,6 +343,31 @@ auto LuaState::status() const -> i32
 auto LuaState::reset_thread() const -> i32
 {
     return lua_resetthread(_luaState);
+}
+
+auto LuaState::do_call(i32 nargs, i32 nret) const -> LuaResultState
+{
+    const i32 hpos { get_top() - nargs };
+
+    push_cfunction(
+        [](lua_State* l) -> i32 {
+                const i32 n { lua_gettop(l)};
+                Log("Lua says: " + std::string(lua_tostring(l, n)), LogLevel::Error);
+                return 0; });
+    insert(hpos);
+    const i32 err { lua_pcall(lua(), nargs, nret, hpos) };
+    remove(hpos);
+
+    switch (err) {
+    case LUA_ERRRUN:
+        return LuaResultState::RuntimeError;
+    case LUA_ERRMEM:
+        return LuaResultState::MemAllocError;
+    case LUA_OK:
+        return LuaResultState::Ok;
+    default:
+        return LuaResultState::RuntimeError;
+    }
 }
 
 }

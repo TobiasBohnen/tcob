@@ -186,6 +186,8 @@ public:
 
     auto lua() const -> lua_State*;
 
+    auto do_call(i32 nargs, i32 nret) const -> LuaResultState;
+
 private:
     //////get//////
     template <ConvertableFromLua T>

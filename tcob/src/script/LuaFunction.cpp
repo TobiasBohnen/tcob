@@ -26,28 +26,7 @@ namespace detail {
 
     auto LuaFunctionBase::do_call(i32 nargs) const -> LuaResultState
     {
-        const auto& ls { state() };
-        const i32 hpos { ls.get_top() - nargs };
-        i32 err { 0 };
-
-        ls.push_cfunction([](lua_State* l) -> i32 {
-                const i32 n { lua_gettop(l)};
-                Log("Lua says: " + std::string(lua_tostring(l, n)), LogLevel::Error);
-                return 0; });
-        ls.insert(hpos);
-        err = lua_pcall(ls.lua(), nargs, LUA_MULTRET, hpos);
-        ls.remove(hpos);
-
-        switch (err) {
-        case LUA_ERRRUN:
-            return LuaResultState::RuntimeError;
-        case LUA_ERRMEM:
-            return LuaResultState::MemAllocError;
-        case LUA_OK:
-            return LuaResultState::Ok;
-        default:
-            return LuaResultState::RuntimeError;
-        }
+        return state().do_call(nargs, LUA_MULTRET);
     }
 }
 
@@ -55,8 +34,7 @@ namespace detail {
 
 auto LuaCoroutine::close() const -> LuaCoroutineState
 {
-    i32 err = thread().reset_thread();
-    if (err == LUA_OK) {
+    if (thread().reset_thread() == LUA_OK) {
         return LuaCoroutineState::Ok;
     }
 
@@ -65,7 +43,7 @@ auto LuaCoroutine::close() const -> LuaCoroutineState
 
 auto LuaCoroutine::current_state() const -> LuaCoroutineState
 {
-    const i32 err = thread().status();
+    const i32 err { thread().status() };
     if (err == LUA_OK)
         return LuaCoroutineState::Ok;
     else if (err == LUA_YIELD)
