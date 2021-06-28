@@ -57,14 +57,14 @@ struct LuaConverter<foo> {
 
     static auto IsType(const LuaState& ls, i32 idx) -> bool
     {
-        LuaTable lt { ls.lua(), idx };
+        LuaTable lt { ls, idx };
         return lt.has("x") && lt.has("y") && lt.has("z");
     }
 
     static auto FromLua(const LuaState& ls, i32&& idx, foo& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx++ };
+            LuaTable lt { ls, idx++ };
 
             value.x = lt["x"];
             value.y = lt["y"];
@@ -76,7 +76,7 @@ struct LuaConverter<foo> {
     static void ToLua(const LuaState& ls, const foo& value)
     {
         ls.new_table();
-        LuaTable lt { ls.lua(), -1 };
+        LuaTable lt { ls, -1 };
 
         lt["x"] = value.x;
         lt["y"] = value.y;

@@ -30,7 +30,7 @@ LuaScript::LuaScript()
     _state.pop(1);
 
     lua_pushglobaltable(ls);
-    _globalTable = new LuaTable { ls, -1 };
+    _globalTable = new LuaTable { _state, -1 };
     _state.pop(1);
 }
 

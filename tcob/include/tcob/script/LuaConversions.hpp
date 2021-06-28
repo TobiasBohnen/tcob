@@ -1023,7 +1023,7 @@ struct LuaConverter<Color> {
     static auto IsType(const LuaState& ls, i32 idx) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx };
+            LuaTable lt { ls, idx };
             return (lt.has("r") && lt.has("g") && lt.has("b"));
         }
         return false;
@@ -1032,7 +1032,7 @@ struct LuaConverter<Color> {
     static auto FromLua(const LuaState& ls, i32&& idx, Color& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx++ };
+            LuaTable lt { ls, idx++ };
 
             if (lt.has("r") && lt.has("g") && lt.has("b")) {
                 value.R = lt["r"];
@@ -1048,7 +1048,7 @@ struct LuaConverter<Color> {
     static void ToLua(const LuaState& ls, const Color& value)
     {
         ls.new_table();
-        LuaTable lt { ls.lua(), -1 };
+        LuaTable lt { ls, -1 };
 
         lt["r"] = value.R;
         lt["g"] = value.G;
@@ -1064,7 +1064,7 @@ struct LuaConverter<Point<T>> {
     static auto IsType(const LuaState& ls, i32 idx) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx };
+            LuaTable lt { ls, idx };
             return (lt.has("x") && lt.has("y")) || lt.raw_length() == 2;
         }
         return false;
@@ -1073,7 +1073,7 @@ struct LuaConverter<Point<T>> {
     static auto FromLua(const LuaState& ls, i32&& idx, Point<T>& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx++ };
+            LuaTable lt { ls, idx++ };
             if (lt.has("x") && lt.has("y")) {
                 value.X = lt["x"];
                 value.Y = lt["y"];
@@ -1091,7 +1091,7 @@ struct LuaConverter<Point<T>> {
     static void ToLua(const LuaState& ls, const Point<T>& value)
     {
         ls.new_table();
-        LuaTable lt { ls.lua(), -1 };
+        LuaTable lt { ls, -1 };
 
         lt["x"] = value.X;
         lt["y"] = value.Y;
@@ -1105,7 +1105,7 @@ struct LuaConverter<Size<T>> {
     static auto IsType(const LuaState& ls, i32 idx) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx };
+            LuaTable lt { ls, idx };
             return (lt.has("width") && lt.has("height")) || lt.raw_length() == 2;
         }
         return false;
@@ -1114,7 +1114,7 @@ struct LuaConverter<Size<T>> {
     static auto FromLua(const LuaState& ls, i32&& idx, Size<T>& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx++ };
+            LuaTable lt { ls, idx++ };
             if (lt.has("width") && lt.has("height")) {
                 value.Width = lt["width"];
                 value.Height = lt["height"];
@@ -1132,7 +1132,7 @@ struct LuaConverter<Size<T>> {
     static void ToLua(const LuaState& ls, const Size<T>& value)
     {
         ls.new_table();
-        LuaTable lt { ls.lua(), -1 };
+        LuaTable lt { ls, -1 };
 
         lt["width"] = value.Width;
         lt["height"] = value.Height;
@@ -1146,7 +1146,7 @@ struct LuaConverter<Rect<T>> {
     static auto IsType(const LuaState& ls, i32 idx) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx };
+            LuaTable lt { ls, idx };
             return (lt.has("left") && lt.has("top") && lt.has("width") && lt.has("height")) || lt.raw_length() == 4;
         }
         return false;
@@ -1155,7 +1155,7 @@ struct LuaConverter<Rect<T>> {
     static auto FromLua(const LuaState& ls, i32&& idx, Rect<T>& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx++ };
+            LuaTable lt { ls, idx++ };
             if (lt.has("left") && lt.has("top") && lt.has("width") && lt.has("height")) {
                 value.Left = lt["left"];
                 value.Top = lt["top"];
@@ -1177,7 +1177,7 @@ struct LuaConverter<Rect<T>> {
     static void ToLua(const LuaState& ls, const Rect<T>& value)
     {
         ls.new_table();
-        LuaTable lt { ls.lua(), -1 };
+        LuaTable lt { ls, -1 };
 
         lt["left"] = value.Left;
         lt["top"] = value.Top;

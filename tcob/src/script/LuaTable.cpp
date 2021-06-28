@@ -10,6 +10,13 @@
 #include <tcob/script/LuaConversions.hpp>
 
 namespace tcob {
+LuaTable::LuaTable() = default;
+
+LuaTable::LuaTable(const LuaState& ls, i32 idx)
+{
+    ref(ls.lua(), idx);
+}
+
 auto LuaTable::raw_length() const -> isize
 {
     const LuaState ls { lua_state() };
@@ -24,7 +31,7 @@ auto LuaTable::create_table(const std::string& name) const -> LuaTable
     const LuaState ls { lua_state() };
 
     ls.new_table();
-    LuaTable lt { ls.lua(), -1 };
+    LuaTable lt { ls, -1 };
     ls.pop(1);
 
     set(name, lt);

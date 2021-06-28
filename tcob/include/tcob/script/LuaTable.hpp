@@ -55,12 +55,8 @@ class LuaTable : public LuaRef {
     };
 
 public:
-    LuaTable() = default;
-
-    LuaTable(lua_State* l, i32 idx)
-    {
-        ref(l, idx);
-    }
+    LuaTable();
+    LuaTable(const LuaState& ls, i32 idx);
 
     template <typename Key>
     auto operator[](Key key) const -> Proxy<Key>
@@ -172,7 +168,7 @@ private:
             if (!state.is_table(-1)) {
                 return { T(), LuaResultState::NonTableIndex };
             }
-            LuaTable lt { state.lua(), -1 };
+            LuaTable lt { state, -1 };
             return lt.get<T>(state, keys...);
         } else {
             T retValue {};
@@ -198,7 +194,7 @@ private:
             if (!state.is_table(-1)) {
                 return false;
             }
-            LuaTable lt { state.lua(), -1 };
+            LuaTable lt { state, -1 };
             return lt.is<T>(state, keys...);
         } else {
             return !state.is_nil(-1) && LuaConverter<T>::IsType(state, -1);
@@ -216,7 +212,7 @@ private:
             if (!state.is_table(-1)) {
                 return false;
             }
-            LuaTable lt { state.lua(), -1 };
+            LuaTable lt { state, -1 };
             return lt.has(state, keys...);
         } else {
             return !state.is_nil(-1);

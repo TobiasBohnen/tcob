@@ -15,7 +15,7 @@ struct LuaConverter<ColorStop> {
     static auto IsType(const LuaState& ls, i32 idx) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx };
+            LuaTable lt { ls, idx };
             return lt.raw_length() == 2 && lt.is<f32>(1) && lt.is<Color>(2);
         }
         return false;
@@ -24,7 +24,7 @@ struct LuaConverter<ColorStop> {
     static auto FromLua(const LuaState& ls, i32&& idx, ColorStop& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls.lua(), idx++ };
+            LuaTable lt { ls, idx++ };
             value.Position = lt[1];
             value.Value = lt[2];
         }
