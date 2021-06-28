@@ -138,7 +138,7 @@ public:
 
     auto get_top() const -> i32;
 
-    void check_stack(i32 size) const;
+    auto check_stack(i32 size) const -> bool;
 
     auto next(i32 idx) const -> bool;
     void push_bool(bool val) const;
@@ -152,7 +152,7 @@ public:
     void push_value(i32 idx) const;
     void pop(i32 count) const;
     void remove(i32 count) const;
-    void get_table(i32 idx) const;
+    auto get_table(i32 idx) const -> LuaType;
     void get_metatable(const char* tableName) const;
     void set_table(i32 idx) const;
     void set_metatable(i32 idx) const;

@@ -144,9 +144,9 @@ auto LuaState::get_top() const -> i32
     return lua_gettop(_luaState);
 }
 
-void LuaState::check_stack(i32 size) const
+auto LuaState::check_stack(i32 size) const -> bool
 {
-    lua_checkstack(_luaState, size);
+    return lua_checkstack(_luaState, size);
 }
 
 auto LuaState::resume(i32 argCount, i32* resultCount) const -> LuaThreadState
@@ -230,9 +230,9 @@ void LuaState::remove(i32 count) const
     lua_remove(_luaState, count);
 }
 
-void LuaState::get_table(i32 idx) const
+auto LuaState::get_table(i32 idx) const -> LuaType
 {
-    lua_gettable(_luaState, idx);
+    return convert_type(lua_gettable(_luaState, idx));
 }
 
 void LuaState::get_metatable(const char* tableName) const
