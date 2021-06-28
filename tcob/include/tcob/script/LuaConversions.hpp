@@ -942,7 +942,7 @@ struct LuaConverter<T> {
             assert(ls.get_uservalue(idx, 1) != 0);
             std::string userdatatype { ls.to_string(-1) };
             ls.pop(1);
-            if (TypeName == userdatatype || TypeName + "_gc" == userdatatype) {
+            if (TypeName == userdatatype) {
                 value = *static_cast<T*>(ls.to_userdata(idx++));
                 return true;
             } else {
