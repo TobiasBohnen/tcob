@@ -256,11 +256,14 @@ private:
         if constexpr (sizeof...(Ts) > 0) {
             if constexpr (detail::is_specialization<T, std::vector>()) {
                 T vec;
-                from_lua(ls, std::forward<i32>(idx), vec);
-                value = vec;
-            } else {
-                get_vector<Ts...>(ls, idx, value);
+                i32 i { idx };
+                if (from_lua(ls, std::forward<i32>(i), vec)) {
+                    value = vec;
+                    return;
+                }
             }
+
+            get_vector<Ts...>(ls, idx, value);
         }
     }
 

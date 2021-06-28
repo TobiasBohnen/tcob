@@ -508,6 +508,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
             const auto&& var = run_script<variant<int, vector<bool>, bool>>("return {true,false,true,false,true}").Value;
             REQUIRE(get<vector<bool>>(var) == vector<bool> { true, false, true, false, true });
         }
+        {
+            const auto&& var = run_script<variant<vector<int>, vector<string>, int>>("return {'ok','ko'}").Value;
+            REQUIRE(get<vector<string>>(var) == vector<string> { "ok", "ko" });
+        }
+        {
+            const auto&& var = run_script<variant<vector<int>, vector<string>, int>>("return {1,2,3}").Value;
+            REQUIRE(get<vector<int>>(var) == vector<int> { 1, 2, 3 });
+        }
     }
 }
 
