@@ -36,8 +36,7 @@ struct LuaConverter<R(P...)> {
         ls.push_lightuserdata(reinterpret_cast<void*>(value));
         ls.push_cclosure(
             [](lua_State* l) -> i32 {
-                auto p { reinterpret_cast<R(*)(P...)>(LuaState { l }.to_userdata(LuaState::UpvalueIndex(1))) };
-                std::function<R(P...)> func { p };
+                std::function<R(P...)> func { reinterpret_cast<R(*)(P...)>(LuaState { l }.to_userdata(LuaState::UpvalueIndex(1))) };
                 detail::LuaClosure<R(P...)> cl { func };
                 return cl.invoke(l); },
             1);
@@ -53,8 +52,7 @@ struct LuaConverter<std::function<R(P...)>> {
         ls.push_lightuserdata(reinterpret_cast<void*>(&value));
         ls.push_cclosure(
             [](lua_State* l) -> i32 {
-                auto* p { reinterpret_cast<std::function<R(P...)>*>(LuaState { l }.to_userdata(LuaState::UpvalueIndex(1)))};
-                detail::LuaClosure<R(P...)> cl { *p };
+                detail::LuaClosure<R(P...)> cl { *reinterpret_cast<std::function<R(P...)>*>(LuaState { l }.to_userdata(LuaState::UpvalueIndex(1))) };
                 return cl.invoke(l); },
             1);
     }
@@ -86,8 +84,7 @@ struct LuaConverter<std::optional<T>> {
 
     static auto FromLua(const LuaState& ls, i32&& idx, std::optional<T>& value) -> bool
     {
-        i32 top { ls.get_top() };
-        if (idx > top || !LuaConverter<T>::IsType(ls, idx)) {
+        if (idx > ls.get_top() || !LuaConverter<T>::IsType(ls, idx)) {
             value = std::nullopt;
             return false;
         } else {
@@ -748,8 +745,7 @@ struct LuaConverter<LuaTable> {
     static auto FromLua(const LuaState& ls, i32&& idx, LuaTable& value) -> bool
     {
         if (ls.is_table(idx)) {
-            value.ref(ls, idx);
-            idx++;
+            value.ref(ls, idx++);
             return true;
         }
 
