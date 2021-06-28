@@ -177,16 +177,20 @@ struct LuaConverter<std::variant<P...>> {
             if (ls.is_integer(idx)) {
                 if constexpr (contains<i32, P...>()) {
                     value = static_cast<i32>(ls.to_integer(idx++));
-                } else if constexpr (contains<i16, P...>()) {
-                    value = static_cast<i16>(ls.to_integer(idx++));
                 } else if constexpr (contains<i64, P...>()) {
                     value = static_cast<i64>(ls.to_integer(idx++));
+                } else if constexpr (contains<i16, P...>()) {
+                    value = static_cast<i16>(ls.to_integer(idx++));
+                } else if constexpr (contains<i8, P...>()) {
+                    value = static_cast<i8>(ls.to_integer(idx++));
                 } else if constexpr (contains<u32, P...>()) {
                     value = static_cast<u32>(ls.to_integer(idx++));
-                } else if constexpr (contains<u16, P...>()) {
-                    value = static_cast<u16>(ls.to_integer(idx++));
                 } else if constexpr (contains<u64, P...>()) {
                     value = static_cast<u64>(ls.to_integer(idx++));
+                } else if constexpr (contains<u16, P...>()) {
+                    value = static_cast<u16>(ls.to_integer(idx++));
+                } else if constexpr (contains<u8, P...>()) {
+                    value = static_cast<u8>(ls.to_integer(idx++));
                 }
             } else if constexpr (contains<f32, P...>()) {
                 value = static_cast<f32>(ls.to_number(idx++));
