@@ -210,8 +210,29 @@ struct LuaConverter<std::variant<P...>> {
             break;
         case LuaType::Table: {
             // TODO: more types
+            if constexpr (contains<Color, P...>()) {
+                Color c;
+                if (from_lua(ls, idx, c)) {
+                    value = c;
+                    break;
+                }
+            }
+
             if constexpr ((detail::is_specialization<P, std::vector>() || ...)) {
-                get_vector<P...>(ls, idx, value);
+                if (get_specialization<std::vector, P...>(ls, idx, value))
+                    break;
+            }
+            if constexpr ((detail::is_specialization<P, Point>() || ...)) {
+                if (get_specialization<Point, P...>(ls, idx, value))
+                    break;
+            }
+            if constexpr ((detail::is_specialization<P, Size>() || ...)) {
+                if (get_specialization<Size, P...>(ls, idx, value))
+                    break;
+            }
+            if constexpr ((detail::is_specialization<P, Rect>() || ...)) {
+                if (get_specialization<Rect, P...>(ls, idx, value))
+                    break;
             }
         } break;
         default:
@@ -239,7 +260,7 @@ private:
     }
 
     template <typename R>
-    static auto from_lua(const LuaState& ls, i32&& idx, R& value) -> bool
+    static auto from_lua(const LuaState& ls, i32 idx, R& value) -> bool
     {
         return LuaConverter<R>::FromLua(ls, std::forward<i32>(idx), value);
     }
@@ -250,20 +271,21 @@ private:
         LuaConverter<R>::ToLua(ls, value);
     }
 
-    template <typename T, typename... Ts>
-    static void get_vector(const LuaState& ls, i32 idx, std::variant<P...>& value)
+    template <template <typename...> typename C, typename T, typename... Ts>
+    static auto get_specialization(const LuaState& ls, i32 idx, std::variant<P...>& value) -> bool
     {
         if constexpr (sizeof...(Ts) > 0) {
-            if constexpr (detail::is_specialization<T, std::vector>()) {
+            if constexpr (detail::is_specialization<T, C>()) {
                 T vec;
-                i32 i { idx };
-                if (from_lua(ls, std::forward<i32>(i), vec)) {
+                if (from_lua(ls, idx, vec)) {
                     value = vec;
-                    return;
+                    return true;
                 }
             }
 
-            get_vector<Ts...>(ls, idx, value);
+            return get_specialization<C, Ts...>(ls, idx, value);
+        } else {
+            return false;
         }
     }
 

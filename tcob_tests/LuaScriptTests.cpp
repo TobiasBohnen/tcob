@@ -516,6 +516,22 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
             const auto&& var = run_script<variant<vector<int>, vector<string>, int>>("return {1,2,3}").Value;
             REQUIRE(get<vector<int>>(var) == vector<int> { 1, 2, 3 });
         }
+        {
+            const auto&& var = run_script<variant<vector<bool>, PointF, int>>("return {1,2}").Value;
+            REQUIRE(get<PointF>(var) == PointF { 1, 2 });
+        }
+        {
+            const auto&& var = run_script<variant<vector<bool>, SizeF, int>>("return {1,2}").Value;
+            REQUIRE(get<SizeF>(var) == SizeF { 1, 2 });
+        }
+        {
+            const auto&& var = run_script<variant<vector<bool>, RectF, int>>("return {1,2,3,4}").Value;
+            REQUIRE(get<RectF>(var) == RectF { 1, 2, 3, 4 });
+        }
+        {
+            const auto&& var = run_script<variant<vector<bool>, Color, int>>("return {r=1,g=2,b=4}").Value;
+            REQUIRE(get<Color>(var) == Color { 1, 2, 4, 255 });
+        }
     }
 }
 
