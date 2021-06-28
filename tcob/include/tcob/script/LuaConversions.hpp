@@ -208,14 +208,14 @@ struct LuaConverter<std::variant<P...>> {
                 value = static_cast<bool>(ls.to_bool(idx++));
             }
             break;
-        case LuaType::Table:
+        case LuaType::Table: {
             // TODO: more types
-            if constexpr (contains<std::vector<std::string>, P...>()) {
+            if constexpr ((detail::is_specialization<P, std::vector>() || ...)) {
                 std::vector<std::string> vec;
                 from_lua(ls, std::forward<i32>(idx), vec);
                 value = vec;
             }
-            break;
+        } break;
         default:
             idx++;
             return false;

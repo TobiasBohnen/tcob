@@ -60,8 +60,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
         REQUIRE((bool)tab2["y"] == true);
         REQUIRE((bool)tab["y"] == (bool)tab2["y"]);
 
-        REQUIRE(tab2.get<std::string>("z").Value == "ok");
-        REQUIRE(tab.get<std::string>("z").Value == tab2.get<std::string>("z").Value);
+        REQUIRE(tab2.get<string>("z").Value == "ok");
+        REQUIRE(tab.get<string>("z").Value == tab2.get<string>("z").Value);
 
         REQUIRE((i32)tab2["t"]["a"] == 20);
         REQUIRE((i32)tab["t"]["a"] == (i32)tab2["t"]["a"]);
@@ -211,7 +211,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(result.State == LuaResultState::RuntimeError);
     }
     {
-        auto l = std::function([](i32 i) { return (f32)i * 2.5f; });
+        auto l = function([](i32 i) { return (f32)i * 2.5f; });
 
         auto res = run_script("co = coroutine.create(function () "
                               "         coroutine.yield(100) "
@@ -238,7 +238,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Enums")
         False,
         FileNotFound
     };
-    std::function testFuncEnum = [](testEnum numnum) {
+    function testFuncEnum = [](testEnum numnum) {
         return numnum;
     };
 
@@ -300,7 +300,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Results")
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.UserDefinedConversion")
 {
-    std::function Foo = [](const foo& f) {
+    function Foo = [](const foo& f) {
         return f.x + f.y + f.z;
     };
     global["test"]["Foo"] = Foo;
@@ -334,14 +334,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.UserDefinedConversion")
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Optional")
 {
-    std::function Optional = [](i32 i, optional<string> str) -> isize {
+    function Optional = [](i32 i, optional<string> str) -> isize {
         if (str.has_value()) {
             return str.value().length();
         }
 
         return i;
     };
-    std::function Optional2 = [](i32 i, optional<string> str, f32 f) -> f32 {
+    function Optional2 = [](i32 i, optional<string> str, f32 f) -> f32 {
         if (str.has_value()) {
             return str.value().length() * f;
         }
@@ -355,7 +355,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Optional")
     {
         i32 i = run_script<i32>(
             "return test.Optional(100)");
-        REQUIRE(i == Optional(100, std::nullopt));
+        REQUIRE(i == Optional(100, nullopt));
     }
     {
         i32 i = run_script<i32>(
@@ -365,7 +365,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Optional")
     {
         f32 f = run_script<f32>(
             "return test.Optional2(100, 2.5)");
-        REQUIRE(f == Optional2(100, std::nullopt, 2.5f));
+        REQUIRE(f == Optional2(100, nullopt, 2.5f));
     }
     {
         f32 f = run_script<f32>(
@@ -450,7 +450,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Map")
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
 {
-    std::function Variant = [](variant<f32, string, bool> var) {
+    function Variant = [](variant<f32, string, bool> var) {
         if (auto* idx = get_if<f32>(&var))
             return "f32";
         else if (auto* idx = get_if<string>(&var))
@@ -462,6 +462,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
     };
     global["test"]["Variant"] = Variant;
 
+    SECTION("cpp parameter")
     {
         string str = run_script<string>(
             "return test.Variant('hi')");
@@ -473,6 +474,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
             "return test.Variant(true)");
         REQUIRE(str == Variant(true));
     }
+    SECTION("lua parameter")
     {
         auto res = run_script(
             "function foo(x) "
@@ -484,15 +486,20 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
         i32 a = func(var);
         REQUIRE(a == 1000);
     }
+    SECTION("return value")
     {
-        const auto&& var = run_script<variant<string, i16, bool>>(
-            "return 100")
-                               .Value;
-        REQUIRE(get<i16>(var) == 100);
-    }
-    {
-        const auto&& var = run_script<variant<string, u64, bool>>("return 100").Value;
-        REQUIRE(get<u64>(var) == 100);
+        {
+            const auto&& var = run_script<variant<string, i16, bool>>("return 100").Value;
+            REQUIRE(get<i16>(var) == 100);
+        }
+        {
+            const auto&& var = run_script<variant<string, u64, bool>>("return 100").Value;
+            REQUIRE(get<u64>(var) == 100);
+        }
+        {
+            const auto&& var = run_script<variant<vector<string>, int, bool>>("return {'ok','ko'}").Value;
+            REQUIRE(get<vector<string>>(var) == vector<string> { "ok", "ko" });
+        }
     }
 }
 
@@ -805,12 +812,12 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.IsHas")
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
 {
-    std::function testFuncPrim = [](i32 i, f32 f, double d, bool b) {
+    function testFuncPrim = [](i32 i, f32 f, double d, bool b) {
         return to_string(i) + to_string(f) + to_string(d) + string(b ? "true" : "false");
     };
 
     i32 voidTest = 0;
-    std::function testFuncVoid = [&voidTest]() {
+    function testFuncVoid = [&voidTest]() {
         voidTest++;
     };
 
@@ -859,7 +866,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
         REQUIRE(x == testfuncpair({ 4, 6.5f }));
     }
     {
-        auto l = std::function([](i32 i) { return (f32)i * 2.5f; });
+        auto l = function([](i32 i) { return (f32)i * 2.5f; });
         global["testFunc"] = l;
         f32 x = run_script<f32>(
             "return testFunc(2)");
@@ -867,7 +874,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
     }
     {
         f32 x;
-        auto l = std::function([&x](i32 i) { x = i * 2.5f; });
+        auto l = function([&x](i32 i) { x = i * 2.5f; });
         global["testFunc"] = l;
         auto res = run_script("testFunc(2)");
         REQUIRE(res.State == LuaResultState::Ok);
@@ -1199,33 +1206,33 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
 {
-    std::function testFuncVector = []() {
+    function testFuncVector = []() {
         return vector<string> { "1", "2", "3", "4", "5" };
     };
 
-    std::function testFuncArray = []() {
+    function testFuncArray = []() {
         return array<string, 5> { "1", "2", "3", "4", "5" };
     };
 
-    std::function testFuncPairPara = [](pair<string, i32> pair) {
+    function testFuncPairPara = [](pair<string, i32> pair) {
         return pair.second;
     };
 
-    std::function testFuncTuple = [](double d) {
+    function testFuncTuple = [](double d) {
         return tuple(d * 5, to_string(d));
     };
 
-    std::function testFuncTuplePara = [](tuple<double, string> d) {
+    function testFuncTuplePara = [](tuple<double, string> d) {
         return get<double>(d);
     };
 
-    std::function testFuncMap = []() {
+    function testFuncMap = []() {
         return map<string, i32> {
             { "abc", 123 },
             { "def", 234 }
         };
     };
-    std::function testFuncUMap = []() {
+    function testFuncUMap = []() {
         return unordered_map<string, i32> {
             { "abc", 123 }, { "def", 234 }
         };
@@ -1387,28 +1394,28 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.DataStructs")
 {
-    std::function testFuncColor = [](Color c) {
+    function testFuncColor = [](Color c) {
         return Color { static_cast<u8>(c.R * 2),
             static_cast<u8>(c.G * 2),
             static_cast<u8>(c.B * 2),
             static_cast<u8>(c.A * 2) };
     };
-    std::function testFuncPointF = [](PointF p) {
+    function testFuncPointF = [](PointF p) {
         return PointF { p.X * 2, p.Y * 2 };
     };
-    std::function testFuncPointI = [](PointI p) {
+    function testFuncPointI = [](PointI p) {
         return PointI { p.X * 2, p.Y * 2 };
     };
-    std::function testFuncSizeI = [](SizeI s) {
+    function testFuncSizeI = [](SizeI s) {
         return SizeI { s.Width * 5, s.Height * 8 };
     };
-    std::function testFuncRectF = [](RectF r) {
+    function testFuncRectF = [](RectF r) {
         return RectF { r.Left * 2, r.Top * 2, r.Width * 2, r.Height * 2 };
     };
-    std::function testFuncRectI = [](RectI r) {
+    function testFuncRectI = [](RectI r) {
         return RectI { r.Left * 2, r.Top * 2, r.Width * 2, r.Height * 2 };
     };
-    std::function testFuncMix = [](i32 i, RectF r, Color c, string s, bool b, PointI p) {
+    function testFuncMix = [](i32 i, RectF r, Color c, string s, bool b, PointI p) {
         f32 ret = i + r.Left + c.A + s.length() + (b ? 1 : 100) + p.X;
         return ret;
     };
@@ -1531,7 +1538,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.RawPointers")
         TestScriptClass t;
         global["obj"] = &t;
 
-        std::function func = [](TestScriptClass* x) {
+        function func = [](TestScriptClass* x) {
             x->set_value(101);
         };
 
