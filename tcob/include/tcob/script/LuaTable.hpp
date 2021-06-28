@@ -12,7 +12,6 @@
 
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/script/LuaRef.hpp>
-#include <tcob/script/LuaState.hpp>
 
 namespace tcob {
 class LuaTable : public LuaRef {
@@ -144,10 +143,10 @@ private:
 
             if (!state.is_table(-1)) { // set new nested table
                 state.new_table();
-                lt.ref(state.lua(), -1);
+                lt.ref(state, -1);
                 set(state, key, lt);
             } else {
-                lt.ref(state.lua(), -1);
+                lt.ref(state, -1);
             }
 
             lt.set(state, keys...);

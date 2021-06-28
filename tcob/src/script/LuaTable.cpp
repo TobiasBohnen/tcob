@@ -5,8 +5,6 @@
 
 #include <tcob/script/LuaTable.hpp>
 
-#include <lua.hpp>
-
 #include <tcob/script/LuaConversions.hpp>
 
 namespace tcob {
@@ -14,7 +12,7 @@ LuaTable::LuaTable() = default;
 
 LuaTable::LuaTable(const LuaState& ls, i32 idx)
 {
-    ref(ls.lua(), idx);
+    ref(ls, idx);
 }
 
 auto LuaTable::raw_length() const -> isize

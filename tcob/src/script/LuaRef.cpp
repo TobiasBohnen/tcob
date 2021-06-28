@@ -20,11 +20,11 @@ LuaRef::LuaRef()
 LuaRef::LuaRef(const LuaRef& other)
     : _ref { LUA_NOREF }
 {
-    if (other._luaState) {
+    if (other._luaState.lua()) {
         other.push_self();
         ref(other._luaState, -1);
         if (_ref != LUA_NOREF)
-            lua_pop(_luaState, 1); // pop extra copy
+            _luaState.pop(1); // pop extra copy
     }
 }
 
@@ -34,7 +34,7 @@ auto LuaRef::operator=(const LuaRef& other) -> LuaRef&
 }
 
 LuaRef::LuaRef(LuaRef&& other) noexcept
-    : _luaState { std::exchange(other._luaState, nullptr) }
+    : _luaState { std::exchange(other._luaState, LuaState { nullptr }) }
     , _ref { std::exchange(other._ref, LUA_NOREF) }
     , _ownsRef { std::exchange(other._ownsRef, false) }
 {
@@ -53,10 +53,12 @@ LuaRef::~LuaRef()
     unref();
 }
 
-void LuaRef::ref(lua_State* l, i32 idx)
+void LuaRef::ref(const LuaState& ls, i32 idx)
 {
     unref();
-    _luaState = l;
+    _luaState = ls;
+
+    auto* l { _luaState.lua() };
     if (l) {
         lua_pushvalue(l, idx); // push copy of ref to top
         _ref = luaL_ref(l, LUA_REGISTRYINDEX);
@@ -65,27 +67,27 @@ void LuaRef::ref(lua_State* l, i32 idx)
 
 void LuaRef::unref()
 {
-    if (_luaState && _ownsRef && _ref != LUA_NOREF) {
-        luaL_unref(_luaState, LUA_REGISTRYINDEX, _ref);
+    auto* l { _luaState.lua() };
+    if (l && _ownsRef && _ref != LUA_NOREF) {
+        luaL_unref(l, LUA_REGISTRYINDEX, _ref);
         _ref = LUA_NOREF;
-        _luaState = nullptr;
+        _luaState = LuaState { nullptr };
     }
 }
 
 void LuaRef::push_self() const
 {
-    if (_luaState)
-        lua_rawgeti(_luaState, LUA_REGISTRYINDEX, _ref);
+    if (is_valid())
+        _luaState.raw_get(LUA_REGISTRYINDEX, _ref);
 }
 
-auto LuaRef::lua_state() const -> LuaState
+auto LuaRef::lua_state() const -> const LuaState&
 {
-    assert(_luaState);
-    return LuaState { _luaState };
+    return _luaState;
 }
 
 auto LuaRef::is_valid() const -> bool
 {
-    return _ref != LUA_NOREF && _luaState != nullptr;
+    return _ref != LUA_NOREF && _luaState.lua() != nullptr;
 }
 }

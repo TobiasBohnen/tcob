@@ -27,7 +27,6 @@ LuaStackGuard::~LuaStackGuard()
 LuaState::LuaState(lua_State* l)
     : _luaState { l }
 {
-    assert(l);
 }
 
 auto LuaState::is_bool(i32 idx) const -> bool

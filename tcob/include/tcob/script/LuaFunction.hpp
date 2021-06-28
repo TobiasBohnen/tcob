@@ -10,7 +10,6 @@
 
 #include <tcob/core/io/Logger.hpp>
 #include <tcob/script/LuaRef.hpp>
-#include <tcob/script/LuaState.hpp>
 
 namespace tcob::detail {
 class LuaFunctionBase : public LuaRef {

@@ -748,7 +748,7 @@ struct LuaConverter<LuaTable> {
     static auto FromLua(const LuaState& ls, i32&& idx, LuaTable& value) -> bool
     {
         if (ls.is_table(idx)) {
-            value.ref(ls.lua(), idx);
+            value.ref(ls, idx);
             idx++;
             return true;
         }
@@ -766,7 +766,7 @@ struct LuaConverter<LuaTable> {
     {
         if (!value.is_valid()) {
             ls.new_table();
-            value.ref(ls.lua(), -1);
+            value.ref(ls, -1);
             ls.pop(1);
         }
 
@@ -848,7 +848,7 @@ struct LuaConverter<LuaCoroutine> {
     static auto FromLua(const LuaState& ls, i32&& idx, LuaCoroutine& value) -> bool
     {
         if (ls.is_thread(idx)) {
-            value.ref(ls.lua(), idx);
+            value.ref(ls, idx);
             idx++;
             return true;
         }
@@ -875,7 +875,7 @@ struct LuaConverter<LuaFunction<T>> {
     static auto FromLua(const LuaState& ls, i32&& idx, LuaFunction<T>& value) -> bool
     {
         if (ls.is_function(idx)) {
-            value.ref(ls.lua(), idx);
+            value.ref(ls, idx);
             idx++;
             return true;
         }

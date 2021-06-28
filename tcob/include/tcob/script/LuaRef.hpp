@@ -8,7 +8,8 @@
 
 #include <functional>
 
-struct lua_State;
+#include <tcob/script/LuaState.hpp>
+
 namespace tcob {
 class LuaRef {
 public:
@@ -21,7 +22,7 @@ public:
     LuaRef(LuaRef&& other) noexcept;
     auto operator=(LuaRef&& other) noexcept -> LuaRef&;
 
-    void ref(lua_State* l, i32 idx);
+    void ref(const LuaState& state, i32 idx);
     void unref();
 
     void push_self() const;
@@ -29,10 +30,10 @@ public:
     auto is_valid() const -> bool;
 
 protected:
-    auto lua_state() const -> LuaState;
+    auto lua_state() const -> const LuaState&;
 
 private:
-    lua_State* _luaState { nullptr };
+    LuaState _luaState { nullptr };
     i32 _ref;
     bool _ownsRef { true };
 };
