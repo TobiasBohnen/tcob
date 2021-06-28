@@ -49,20 +49,18 @@ public:
         const i32 paramsCount { ls.get_top() - oldTop };
 
         //call lua function
-        const auto result { do_call(paramsCount) };
+        auto result { do_call(paramsCount) };
         if constexpr (std::is_void_v<R>) {
             return { result };
         } else {
+            R retValue {};
             if (result == LuaResultState::Ok) {
-                R retValue {};
-                if (ls.try_get(1, retValue)) {
-                    return { retValue, LuaResultState::Ok };
-                } else {
-                    return { R {}, LuaResultState::TypeMismatch };
+                if (!ls.try_get(1, retValue)) {
+                    result = LuaResultState::TypeMismatch;
                 }
-            } else {
-                return { R {}, result };
             }
+
+            return { retValue, result };
         }
     }
 

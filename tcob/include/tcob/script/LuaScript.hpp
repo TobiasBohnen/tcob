@@ -58,20 +58,18 @@ public:
     auto run_script(const std::string& script, i32 idx = 1, const std::string& name = "Script") const -> LuaResult<R>
     {
         const auto guard { _state.create_stack_guard() };
-        const auto result { call_buffer(script.data(), script.size(), name.c_str()) };
+        auto result { call_buffer(script.data(), script.size(), name.c_str()) };
         if constexpr (std::is_void_v<R>) {
             return { result };
         } else {
+            R retValue {};
             if (result == LuaResultState::Ok) {
-                R retValue {};
-                if (_state.try_get(std::forward<int>(idx), retValue)) {
-                    return { retValue, result };
-                } else {
-                    return { R {}, LuaResultState::TypeMismatch };
+                if (!_state.try_get(std::forward<int>(idx), retValue)) {
+                    result = LuaResultState::TypeMismatch;
                 }
-            } else {
-                return { R {}, result };
             }
+
+            return { retValue, result };
         }
     }
 
