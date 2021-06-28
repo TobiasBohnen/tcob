@@ -273,10 +273,10 @@ void GLNVGcontext::cancel()
 auto GLNVGcontext::get_blend_composite_operation(const gl::BlendFuncs& op) -> GLNVGblend
 {
     GLNVGblend blend {
-        .srcRGB = gl::enumToGL(op.SourceColorBlendFunc),
-        .dstRGB = gl::enumToGL(op.DestinationColorBlendFunc),
-        .srcAlpha = gl::enumToGL(op.SourceAlphaBlendFunc),
-        .dstAlpha = gl::enumToGL(op.DestinationAlphaBlendFunc),
+        .srcRGB = gl::convert_enum(op.SourceColorBlendFunc),
+        .dstRGB = gl::convert_enum(op.DestinationColorBlendFunc),
+        .srcAlpha = gl::convert_enum(op.SourceAlphaBlendFunc),
+        .dstAlpha = gl::convert_enum(op.DestinationAlphaBlendFunc),
     };
     if (blend.srcRGB == GL_INVALID_ENUM || blend.dstRGB == GL_INVALID_ENUM || blend.srcAlpha == GL_INVALID_ENUM || blend.dstAlpha == GL_INVALID_ENUM) {
         blend.srcRGB = GL_ONE;

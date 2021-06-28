@@ -43,7 +43,7 @@ void ShaderStorageBuffer::update(const void* data, isize size, isize offset) con
 void ShaderStorageBuffer::resize(isize size, BufferUsage usage)
 {
     assert(ID);
-    const GLenum bufferUsage { enumToGL(usage) };
+    const GLenum bufferUsage { convert_enum(usage) };
 
     if (size > _bufferSize) {
         _bufferSize = std::max(size, _bufferSize * 2);

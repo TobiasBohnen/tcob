@@ -169,8 +169,8 @@ public:
     void insert(i32 idx) const;
 
     auto raw_len(i32 idx) const -> u64;
-    void raw_get(i32 idx, i64 n) const;
-    void raw_get(i32 idx) const;
+    auto raw_get(i32 idx, i64 n) const -> LuaType;
+    auto raw_get(i32 idx) const -> LuaType;
     void raw_set(i32 idx, i64 n) const;
     void raw_set(i32 idx) const;
 

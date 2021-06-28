@@ -60,9 +60,9 @@ void Renderer::bind_material(Material* mat)
     // set blend mode
     glEnable(GL_BLEND);
     glBlendFuncSeparate(
-        enumToGL(mat->BlendFuncs.SourceColorBlendFunc), enumToGL(mat->BlendFuncs.DestinationColorBlendFunc),
-        enumToGL(mat->BlendFuncs.SourceAlphaBlendFunc), enumToGL(mat->BlendFuncs.DestinationAlphaBlendFunc));
-    glBlendEquation(enumToGL(mat->BlendEquation));
+        convert_enum(mat->BlendFuncs.SourceColorBlendFunc), convert_enum(mat->BlendFuncs.DestinationColorBlendFunc),
+        convert_enum(mat->BlendFuncs.SourceAlphaBlendFunc), convert_enum(mat->BlendFuncs.DestinationAlphaBlendFunc));
+    glBlendEquation(convert_enum(mat->BlendEquation));
 }
 
 ////////////////////////////////////////////////////////////

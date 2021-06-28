@@ -7,7 +7,7 @@
 
 #include <glad/gl.h>
 
-auto tcob::gl::enumToGL(tcob::gl::BufferUsage usage) -> u32
+auto tcob::gl::convert_enum(tcob::gl::BufferUsage usage) -> u32
 {
     switch (usage) {
     case tcob::gl::BufferUsage::DynamicDraw:
@@ -21,7 +21,7 @@ auto tcob::gl::enumToGL(tcob::gl::BufferUsage usage) -> u32
     }
 }
 
-auto tcob::gl::enumToGL(tcob::gl::BlendFunc blendfunc) -> u32
+auto tcob::gl::convert_enum(tcob::gl::BlendFunc blendfunc) -> u32
 {
     switch (blendfunc) {
     case tcob::gl::BlendFunc::Zero:
@@ -57,7 +57,7 @@ auto tcob::gl::enumToGL(tcob::gl::BlendFunc blendfunc) -> u32
     }
 }
 
-auto tcob::gl::enumToGL(tcob::gl::BlendEquation equ) -> u32
+auto tcob::gl::convert_enum(tcob::gl::BlendEquation equ) -> u32
 {
     switch (equ) {
     case tcob::gl::BlendEquation::Add:

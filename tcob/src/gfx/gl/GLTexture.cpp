@@ -10,7 +10,7 @@
 #include <glad/gl.h>
 
 namespace tcob::gl {
-constexpr auto enumToGL(tcob::gl::TextureFormat format) -> std::pair<GLenum, GLenum>
+constexpr auto convert_enum(tcob::gl::TextureFormat format) -> std::pair<GLenum, GLenum>
 {
     switch (format) {
     case tcob::gl::TextureFormat::R8:
@@ -24,7 +24,7 @@ constexpr auto enumToGL(tcob::gl::TextureFormat format) -> std::pair<GLenum, GLe
     }
 }
 
-constexpr auto enumToGL(tcob::gl::TextureFiltering filtering) -> GLenum
+constexpr auto convert_enum(tcob::gl::TextureFiltering filtering) -> GLenum
 {
     switch (filtering) {
     case tcob::gl::TextureFiltering::Linear:
@@ -36,7 +36,7 @@ constexpr auto enumToGL(tcob::gl::TextureFiltering filtering) -> GLenum
     }
 }
 
-constexpr auto enumToGL(tcob::gl::TextureWrap wrap) -> GLenum
+constexpr auto convert_enum(tcob::gl::TextureWrap wrap) -> GLenum
 {
     switch (wrap) {
     case tcob::gl::TextureWrap::ClampToEdge:
@@ -64,7 +64,7 @@ Texture::~Texture()
 void Texture::filtering(TextureFiltering filter) const
 {
     assert(ID);
-    const GLenum filtering = enumToGL(filter);
+    const GLenum filtering = convert_enum(filter);
 
     glTextureParameteri(ID, GL_TEXTURE_MIN_FILTER, filtering);
     glTextureParameteri(ID, GL_TEXTURE_MAG_FILTER, filtering);
@@ -77,8 +77,8 @@ void Texture::wrapping(TextureWrap wrap) const
 
 void Texture::wrapping(TextureWrap wrapS, TextureWrap wrapT) const
 {
-    glTextureParameteri(ID, GL_TEXTURE_WRAP_S, enumToGL(wrapS));
-    glTextureParameteri(ID, GL_TEXTURE_WRAP_T, enumToGL(wrapT));
+    glTextureParameteri(ID, GL_TEXTURE_WRAP_S, convert_enum(wrapS));
+    glTextureParameteri(ID, GL_TEXTURE_WRAP_T, convert_enum(wrapT));
 }
 
 auto Texture::size() const -> SizeU
@@ -133,7 +133,7 @@ void Texture2D::create(const SizeU& texsize, TextureFormat format)
     wrapping(TextureWrap::Repeat, TextureWrap::Repeat);
     filtering(TextureFiltering::NearestNeighbor);
 
-    const auto [iform, form] = enumToGL(format);
+    const auto [iform, form] = convert_enum(format);
     _format = form;
 
     glTextureStorage2D(ID, 1, iform, texsize.Width, texsize.Height);
@@ -181,7 +181,7 @@ void Texture2DArray::create(const SizeU& texsize, u32 depth, TextureFormat forma
 
     _depth = depth;
 
-    const auto [iform, form] = enumToGL(format);
+    const auto [iform, form] = convert_enum(format);
     _format = form;
 
     glTextureStorage3D(ID, 1, iform, texsize.Width, texsize.Height, depth);

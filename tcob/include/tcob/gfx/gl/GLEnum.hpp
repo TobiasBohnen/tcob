@@ -13,7 +13,7 @@ enum class BufferUsage : u8 {
     StreamDraw
 };
 
-auto enumToGL(tcob::gl::BufferUsage usage) -> u32;
+auto convert_enum(tcob::gl::BufferUsage usage) -> u32;
 
 enum class BlendFunc : u8 {
     Zero,
@@ -32,7 +32,7 @@ enum class BlendFunc : u8 {
     OneMinusConstantAlpha
 };
 
-auto enumToGL(tcob::gl::BlendFunc blendfunc) -> u32;
+auto convert_enum(tcob::gl::BlendFunc blendfunc) -> u32;
 
 struct BlendFuncs {
     gl::BlendFunc SourceColorBlendFunc { gl::BlendFunc::SrcAlpha };
@@ -57,5 +57,5 @@ enum class BlendEquation : u8 {
     Max
 };
 
-auto enumToGL(tcob::gl::BlendEquation equ) -> u32;
+auto convert_enum(tcob::gl::BlendEquation equ) -> u32;
 }

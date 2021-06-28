@@ -26,6 +26,34 @@ LuaStackGuard::~LuaStackGuard()
 
 ////////////////////////////////////////////////////////////
 
+auto convert_type(i32 i) -> LuaType
+{
+    switch (i) {
+    case LUA_TNONE:
+        return LuaType::None;
+    case LUA_TNIL:
+        return LuaType::Nil;
+    case LUA_TBOOLEAN:
+        return LuaType::Boolean;
+    case LUA_TLIGHTUSERDATA:
+        return LuaType::LightUserdata;
+    case LUA_TNUMBER:
+        return LuaType::Number;
+    case LUA_TSTRING:
+        return LuaType::String;
+    case LUA_TTABLE:
+        return LuaType::Table;
+    case LUA_TFUNCTION:
+        return LuaType::Function;
+    case LUA_TUSERDATA:
+        return LuaType::Userdata;
+    case LUA_TTHREAD:
+        return LuaType::Thread;
+    default:
+        return LuaType::None;
+    }
+}
+
 LuaState::LuaState(lua_State* l)
     : _luaState { l }
 {
@@ -108,30 +136,7 @@ auto LuaState::to_thread(i32 idx) const -> LuaState
 
 auto LuaState::get_type(i32 idx) const -> LuaType
 {
-    switch (lua_type(_luaState, idx)) {
-    case LUA_TNONE:
-        return LuaType::None;
-    case LUA_TNIL:
-        return LuaType::Nil;
-    case LUA_TBOOLEAN:
-        return LuaType::Boolean;
-    case LUA_TLIGHTUSERDATA:
-        return LuaType::LightUserdata;
-    case LUA_TNUMBER:
-        return LuaType::Number;
-    case LUA_TSTRING:
-        return LuaType::String;
-    case LUA_TTABLE:
-        return LuaType::Table;
-    case LUA_TFUNCTION:
-        return LuaType::Function;
-    case LUA_TUSERDATA:
-        return LuaType::Userdata;
-    case LUA_TTHREAD:
-        return LuaType::Thread;
-    default:
-        return LuaType::None;
-    }
+    return convert_type(lua_type(_luaState, idx));
 }
 
 auto LuaState::get_top() const -> i32
@@ -249,18 +254,22 @@ void LuaState::new_table() const
 {
     lua_newtable(_luaState);
 }
+
 void LuaState::create_table(i32 narr, i32 nrec) const
 {
     lua_createtable(_luaState, narr, nrec);
 }
+
 auto LuaState::new_metatable(const char* tableName) const -> i32
 {
     return luaL_newmetatable(_luaState, tableName);
 }
+
 auto LuaState::new_userdata(i32 size) const -> void*
 {
     return lua_newuserdatauv(_luaState, size, 0);
 }
+
 auto LuaState::new_userdata(i32 size, i32 nuvalue) const -> void*
 {
     return lua_newuserdatauv(_luaState, size, nuvalue);
@@ -281,14 +290,14 @@ auto LuaState::raw_len(i32 idx) const -> u64
     return lua_rawlen(_luaState, idx);
 }
 
-void LuaState::raw_get(i32 idx, i64 n) const
+auto LuaState::raw_get(i32 idx, i64 n) const -> LuaType
 {
-    lua_rawgeti(_luaState, idx, n);
+    return convert_type(lua_rawgeti(_luaState, idx, n));
 }
 
-void LuaState::raw_get(i32 idx) const
+auto LuaState::raw_get(i32 idx) const -> LuaType
 {
-    lua_rawget(_luaState, idx);
+    return convert_type(lua_rawget(_luaState, idx));
 }
 
 void LuaState::raw_set(i32 idx, i64 n) const
@@ -305,6 +314,7 @@ auto LuaState::get_uservalue(i32 index, i32 n) const -> i32
 {
     return lua_getiuservalue(_luaState, index, n);
 }
+
 auto LuaState::set_uservalue(i32 index, i32 n) const -> i32
 {
     return lua_setiuservalue(_luaState, index, n);

@@ -72,7 +72,7 @@ void VertexArray::do_destroy()
 void VertexArray::resize(isize vertCount, isize indCount, BufferUsage usage)
 {
     assert(ID);
-    const GLenum bufferUsage { enumToGL(usage) };
+    const GLenum bufferUsage { convert_enum(usage) };
 
     const isize newVboSize { vertCount * sizeof(Vertex) };
     const isize newEboSize { indCount * sizeof(GLuint) };
