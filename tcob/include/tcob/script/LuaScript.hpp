@@ -59,20 +59,16 @@ public:
     {
         const auto guard { _state.create_stack_guard() };
         const auto result { call_buffer(script.data(), script.size(), name.c_str()) };
-        if (result == LuaResultState::Ok) {
-            if constexpr (std::is_void_v<R>) {
-                return { result };
-            } else {
+        if constexpr (std::is_void_v<R>) {
+            return { result };
+        } else {
+            if (result == LuaResultState::Ok) {
                 R retValue {};
                 if (_state.try_get(std::forward<int>(idx), retValue)) {
                     return { retValue, result };
                 } else {
                     return { R {}, LuaResultState::TypeMismatch };
                 }
-            }
-        } else {
-            if constexpr (std::is_void_v<R>) {
-                return { result };
             } else {
                 return { R {}, result };
             }

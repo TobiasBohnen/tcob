@@ -50,20 +50,16 @@ public:
 
         //call lua function
         const auto result { do_call(paramsCount) };
-        if (result == LuaResultState::Ok) {
-            if constexpr (std::is_void_v<R>) {
-                return { LuaResultState::Ok };
-            } else {
+        if constexpr (std::is_void_v<R>) {
+            return { result };
+        } else {
+            if (result == LuaResultState::Ok) {
                 R retValue {};
                 if (ls.try_get(1, retValue)) {
                     return { retValue, LuaResultState::Ok };
                 } else {
                     return { R {}, LuaResultState::TypeMismatch };
                 }
-            }
-        } else {
-            if constexpr (std::is_void_v<R>) {
-                return { result };
             } else {
                 return { R {}, result };
             }

@@ -58,24 +58,24 @@ public:
     auto invoke(lua_State* l) -> i32
     {
         std::tuple<std::remove_cvref_t<P>...> params;
-        LuaState stack { l };
+        LuaState ls { l };
 
-        std::apply([&stack](auto&... item) {
-            //FIXME!: check parameters
+        std::apply([&ls](auto&... item) {
+            //FIXME: check parameters
             i32 idx { 1 };
-            (stack.try_get(std::forward<i32>(idx), item), ...);
+            (ls.try_get(std::forward<i32>(idx), item), ...);
             static_cast<void>(idx);
         },
             params);
 
-        const i32 oldTop { stack.get_top() };
+        const i32 oldTop { ls.get_top() };
         if constexpr (std::is_void_v<R>) {
             std::apply(_fn, params);
         } else {
             const R result { std::apply(_fn, params) };
-            stack.push(result);
+            ls.push(result);
         }
-        return stack.get_top() - oldTop;
+        return ls.get_top() - oldTop;
     }
 
 private:
