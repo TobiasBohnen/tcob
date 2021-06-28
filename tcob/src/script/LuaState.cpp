@@ -318,4 +318,13 @@ auto LuaState::create_stack_guard() const -> LuaStackGuard
     return LuaStackGuard { _luaState };
 }
 
+auto LuaState::ref(i32 idx) const -> i32
+{
+    return luaL_ref(_luaState, idx);
+}
+
+void LuaState::unref(i32 t, i32 ref) const
+{
+    luaL_unref(_luaState, t, ref);
+}
 }

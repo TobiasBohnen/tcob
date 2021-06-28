@@ -172,6 +172,9 @@ public:
     void raw_set(i32 idx, i64 n) const;
     void raw_set(i32 idx) const;
 
+    auto ref(i32 idx) const -> i32;
+    void unref(i32 t, i32 ref) const;
+
     static auto UpvalueIndex(i32 n) -> i32;
 
     auto lua() const -> lua_State*;

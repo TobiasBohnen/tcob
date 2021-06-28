@@ -58,18 +58,16 @@ void LuaRef::ref(const LuaState& ls, i32 idx)
     unref();
     _luaState = ls;
 
-    auto* l { _luaState.lua() };
-    if (l) {
-        lua_pushvalue(l, idx); // push copy of ref to top
-        _ref = luaL_ref(l, LUA_REGISTRYINDEX);
+    if (_luaState.lua()) {
+        _luaState.push_value(idx); // push copy of ref to top
+        _ref = _luaState.ref(LUA_REGISTRYINDEX);
     }
 }
 
 void LuaRef::unref()
 {
-    auto* l { _luaState.lua() };
-    if (l && _ownsRef && _ref != LUA_NOREF) {
-        luaL_unref(l, LUA_REGISTRYINDEX, _ref);
+    if (is_valid() && _ownsRef) {
+        _luaState.unref(LUA_REGISTRYINDEX, _ref);
         _ref = LUA_NOREF;
         _luaState = LuaState { nullptr };
     }
