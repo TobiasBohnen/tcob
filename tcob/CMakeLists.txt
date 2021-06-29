@@ -85,11 +85,16 @@ target_sources(tcob PRIVATE ${LIB_SRCFILES})
 target_include_directories(tcob PRIVATE ./include PRIVATE ./extlibs)
 
 target_link_libraries(tcob PRIVATE tcob_extlibs 
-        $<$<CXX_COMPILER_ID:MSVC>:opengl32>)
+        $<$<CXX_COMPILER_ID:MSVC>:opengl32>
+)
 
 target_compile_options(tcob PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic>
+)
+
+target_precompile_headers(tcob PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:pch.hpp>
 )
 
 add_library(tcob-static STATIC)
