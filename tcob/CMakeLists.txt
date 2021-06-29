@@ -94,7 +94,7 @@ target_compile_options(tcob PRIVATE
 )
 
 target_precompile_headers(tcob PRIVATE
-        $<$<COMPILE_LANGUAGE:CXX>:pch.hpp>
+        $<$<COMPILE_LANGUAGE:CXX>:tcob/pch.hpp>
 )
 
 add_library(tcob-static STATIC)
