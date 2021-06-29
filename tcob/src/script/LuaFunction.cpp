@@ -34,21 +34,19 @@ namespace detail {
 
 auto LuaCoroutine::close() const -> LuaCoroutineState
 {
-    if (thread().reset_thread() == LUA_OK) {
-        return LuaCoroutineState::Ok;
-    }
-
-    return LuaCoroutineState::Error;
+    return thread().reset_thread() == LUA_OK ? LuaCoroutineState::Ok : LuaCoroutineState::Error;
 }
 
 auto LuaCoroutine::current_state() const -> LuaCoroutineState
 {
-    const i32 err { thread().status() };
-    if (err == LUA_OK)
-        return LuaCoroutineState::Ok;
-    else if (err == LUA_YIELD)
-        return LuaCoroutineState::Suspended;
-    return LuaCoroutineState::Error;
+    switch(thread().status()) {
+        case LUA_OK:
+            return LuaCoroutineState::Ok;
+        case LUA_YIELD:
+            return LuaCoroutineState::Suspended;
+        default:
+            return LuaCoroutineState::Error;
+    }
 }
 
 auto LuaCoroutine::thread() const -> LuaState
