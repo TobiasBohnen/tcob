@@ -39,13 +39,13 @@ auto LuaCoroutine::close() const -> LuaCoroutineState
 
 auto LuaCoroutine::current_state() const -> LuaCoroutineState
 {
-    switch(thread().status()) {
-        case LUA_OK:
-            return LuaCoroutineState::Ok;
-        case LUA_YIELD:
-            return LuaCoroutineState::Suspended;
-        default:
-            return LuaCoroutineState::Error;
+    switch (thread().status()) {
+    case LUA_OK:
+        return LuaCoroutineState::Ok;
+    case LUA_YIELD:
+        return LuaCoroutineState::Suspended;
+    default:
+        return LuaCoroutineState::Error;
     }
 }
 

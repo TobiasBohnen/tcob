@@ -95,7 +95,6 @@ public:
         //call lua function
         i32 nresults { 0 };
         const auto err { t.resume(paramsCount, &nresults) };
-
         if (err == LuaThreadState::Ok || err == LuaThreadState::Yielded) {
             if constexpr (std::is_void_v<R>) {
                 return { LuaResultState::Ok };
