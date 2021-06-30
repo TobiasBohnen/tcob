@@ -24,6 +24,10 @@ ShaderProgram::~ShaderProgram()
 
 auto ShaderProgram::create(const char* vertexShaderSource, const char* fragmentShaderSource) -> bool
 {
+    if (!vertexShaderSource || !vertexShaderSource[0] || !fragmentShaderSource || !fragmentShaderSource[0]) {
+        return false;
+    }
+
     GLint success {};
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (success) { // already linked -> destroy and recreate
