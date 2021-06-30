@@ -106,7 +106,8 @@ struct LuaConverter<LuaOwnedPtr<T>> {
         *obj = value.Obj;
 
         ls.push_string(TypeName.c_str());
-        assert(ls.set_uservalue(-2, 1) != 0);
+        i32 err { ls.set_uservalue(-2, 1) };
+        assert(err != 0);
 
         if (ls.new_metatable((TypeName + "_gc").c_str()) == 0) {
             // GC table exists
@@ -976,7 +977,8 @@ struct LuaConverter<T> {
     static auto FromLua(const LuaState& ls, i32&& idx, T& value) -> bool
     {
         if (ls.is_userdata(idx)) {
-            assert(ls.get_uservalue(idx, 1) != 0);
+            i32 err { ls.get_uservalue(idx, 1) };
+            assert(err != 0);
             std::string userdatatype { ls.to_string(-1) };
             ls.pop(1);
             if (TypeName == userdatatype) {
@@ -1003,7 +1005,8 @@ struct LuaConverter<T> {
         *obj = value;
 
         ls.push_string(TypeName.c_str());
-        assert(ls.set_uservalue(-2, 1) != 0);
+        i32 err { ls.set_uservalue(-2, 1) };
+        assert(err != 0);
 
         ls.new_metatable(TypeName.c_str());
         ls.set_metatable(-2);
