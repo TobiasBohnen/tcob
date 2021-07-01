@@ -61,6 +61,13 @@ Texture::~Texture()
     destroy();
 }
 
+void Texture::create(i32 type)
+{
+    glCreateTextures(type, 1, &ID);
+    wrapping(TextureWrap::Repeat, TextureWrap::Repeat);
+    filtering(TextureFiltering::NearestNeighbor);
+}
+
 void Texture::filtering(TextureFiltering filter) const
 {
     assert(ID);
@@ -123,15 +130,13 @@ Texture2D::Texture2D()
 {
 }
 
-void Texture2D::create(const SizeU& texsize, TextureFormat format)
+void Texture2D::create_or_resize(const SizeU& texsize, TextureFormat format)
 {
     if (ID) {
         destroy();
     }
 
-    glCreateTextures(GL_TEXTURE_2D, 1, &ID);
-    wrapping(TextureWrap::Repeat, TextureWrap::Repeat);
-    filtering(TextureFiltering::NearestNeighbor);
+    create(GL_TEXTURE_2D);
 
     const auto [iform, form] = convert_enum(format);
     _format = form;
@@ -169,15 +174,13 @@ Texture2DArray::Texture2DArray()
 {
 }
 
-void Texture2DArray::create(const SizeU& texsize, u32 depth, TextureFormat format)
+void Texture2DArray::create_or_resize(const SizeU& texsize, u32 depth, TextureFormat format)
 {
     if (ID) {
         destroy();
     }
 
-    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &ID);
-    wrapping(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-    filtering(TextureFiltering::NearestNeighbor);
+    create(GL_TEXTURE_2D_ARRAY);
 
     _depth = depth;
 
@@ -232,15 +235,13 @@ Texture1D::Texture1D()
 {
 }
 
-void Texture1D::create(u32 texsize)
+void Texture1D::create_or_resize(u32 texsize)
 {
     if (ID) {
         destroy();
     }
 
-    glCreateTextures(GL_TEXTURE_1D, 1, &ID);
-    wrapping(TextureWrap::Repeat, TextureWrap::Repeat);
-    filtering(TextureFiltering::Linear);
+    create(GL_TEXTURE_1D);
 
     glTextureStorage1D(ID, 1, GL_RGBA8, texsize);
     size({ texsize, 1 });

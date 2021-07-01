@@ -195,7 +195,7 @@ void RenderTarget::setup_framebuffer(const SizeU& size)
         _material->Texture = { std::make_shared<Resource<Texture>>(_texture) };
     }
 
-    _texture->create(size);
+    _texture->create_or_resize(size);
     _frameBuffer->attach_texture(_texture.get());
 }
 }

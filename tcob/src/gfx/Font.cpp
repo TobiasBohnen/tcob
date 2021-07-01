@@ -109,7 +109,7 @@ auto Font::info() const -> FontInfo
 
 void Font::create_texture()
 {
-    _fontTexture->create({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
+    _fontTexture->create_or_resize({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
     _fontTexture->filtering(gl::TextureFiltering::Linear);
 }
 

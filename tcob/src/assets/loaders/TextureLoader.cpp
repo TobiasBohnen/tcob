@@ -140,7 +140,7 @@ void TextureLoader::on_preparing()
         for (auto& def : _textureCache) {
 
             auto tex2d { dynamic_cast<gl::Texture2D*>(def->Res.object()) };
-            tex2d->create(Image::Info(def->textureFile).SizeInPixels);
+            tex2d->create_or_resize(Image::Info(def->textureFile).SizeInPixels);
             tex2d->wrapping(def->wrapping);
             tex2d->filtering(def->filtering);
 
@@ -166,7 +166,7 @@ void TextureLoader::on_preparing()
                 continue;
             }
 
-            tex2darray->create(Image::Info(def->textureFiles[0]).SizeInPixels, static_cast<u32>(def->textureFiles.size()));
+            tex2darray->create_or_resize(Image::Info(def->textureFiles[0]).SizeInPixels, static_cast<u32>(def->textureFiles.size()));
             tex2darray->wrapping(def->wrapping);
             tex2darray->filtering(def->filtering);
 

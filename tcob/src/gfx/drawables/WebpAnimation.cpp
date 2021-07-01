@@ -38,7 +38,7 @@ auto WebpAnimation::operator=(const WebpAnimation& other) -> WebpAnimation&
     _decoder = other._decoder;
     _decoder->reset();
     _frameSize = other._frameSize;
-    _texture->create(_frameSize);
+    _texture->create_or_resize(_frameSize);
     material(other._material);
     return *this;
 }
@@ -52,7 +52,7 @@ auto WebpAnimation::load(const std::string& file) -> bool
 
     _decoder = std::make_unique<detail::WebpAnimDecoder>(file);
     _frameSize = { _decoder->size() };
-    _texture->create(_frameSize);
+    _texture->create_or_resize(_frameSize);
 
     return true;
 }

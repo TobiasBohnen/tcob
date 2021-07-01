@@ -1128,7 +1128,7 @@ auto Canvas::add_image(const std::string& imageName) -> i32
     auto imgSize { image.info().SizeInPixels };
     if (imgSize != SizeU::Zero) {
         auto tex { std::make_unique<gl::Texture2D>() };
-        tex->create(imgSize, gl::TextureFormat::RGBA8);
+        tex->create_or_resize(imgSize, gl::TextureFormat::RGBA8);
         tex->update(PointU::Zero, imgSize, image.buffer());
         _images.push_back(std::move(tex));
         return static_cast<i32>(_images.size() - 1);

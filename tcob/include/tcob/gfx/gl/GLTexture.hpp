@@ -60,6 +60,8 @@ public:
 protected:
     Texture() = default;
 
+    void create(i32 type);
+
     void size(const SizeU& size);
 
     void do_destroy() override;
@@ -73,7 +75,7 @@ class Texture1D : public Texture {
 public:
     Texture1D();
 
-    void create(u32 texsize);
+    void create_or_resize(u32 texsize);
 
     void update(i32 offsetX, i32 width, const void* data) const;
 
@@ -84,7 +86,7 @@ class Texture2D : public Texture {
 public:
     Texture2D();
 
-    void create(const SizeU& texsize, TextureFormat format = TextureFormat::RGBA8);
+    void create_or_resize(const SizeU& texsize, TextureFormat format = TextureFormat::RGBA8);
 
     void update(const PointU& origin, const SizeU& size, const void* data, i32 rowLength = 0, i32 alignment = 4) const;
 
@@ -98,7 +100,7 @@ class Texture2DArray : public Texture {
 public:
     Texture2DArray();
 
-    void create(const SizeU& texsize, u32 depth, TextureFormat format = TextureFormat::RGBA8);
+    void create_or_resize(const SizeU& texsize, u32 depth, TextureFormat format = TextureFormat::RGBA8);
 
     void update(const PointU& origin, const SizeU& size, const void* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;
 
