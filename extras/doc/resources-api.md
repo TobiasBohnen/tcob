@@ -1,32 +1,32 @@
 # **Resources API**
 
 - [**Resources API**](#resources-api)
-  - [**animation**](#animation)
-  - [**cursor**](#cursor)
-  - [**fonts**](#fonts)
-  - [**material**](#material)
-  - [**music**](#music)
-  - [**particle_system**](#particle_system)
-  - [**sound**](#sound)
-  - [**shader**](#shader)
-  - [**textures**](#textures)
-  - [**webp-animation**](#webp-animation)
+  - [**tcob::FrameAnimation**](#tcobframeanimation)
+  - [**tcob::Cursor**](#tcobcursor)
+  - [**tcob::Font**](#tcobfont)
+  - [**tcob::Material**](#tcobmaterial)
+  - [**tcob::Music**](#tcobmusic)
+  - [**tcob::ParticleSystem**](#tcobparticlesystem)
+  - [**tcob::Sound**](#tcobsound)
+  - [**tcob::gl::ShaderProgram**](#tcobglshaderprogram)
+  - [**tcob::gl::Texture**](#tcobgltexture)
+  - [**tcob::WebpAnimation**](#tcobwebpanimation)
   
-## **animation**
+## **tcob::FrameAnimation**
 
 - animation [name]
   - frames { [texture::regions::name] }
   - duration [int]
   - playback_mode [AnimationPlaybackMode]
 
-## **cursor**
+## **tcob::Cursor**
 
 - cursor [name]
   - material [material::name]
   - modes
     - { [name] = { texture = [file], hotspot = [PointI] } }
   
-## **fonts**
+## **tcob::Font**
 
 - font [name]
   - source [file]
@@ -44,7 +44,7 @@
   - material [material::name]
   - line_gap [float]
 
-## **material**
+## **tcob::Material**
 
 - material [name]
   - texture [texture::name]
@@ -53,12 +53,12 @@
   - separate_blend_func
   - blend_equation
 
-## **music**
+## **tcob::Music**
 
 - music [name]
   - source [file]
 
-## **particle_system**
+## **tcob::ParticleSystem**
 
 - particle_system [name]
   - material [material::name]
@@ -82,19 +82,19 @@
   - lifetime [float, float]
   - transparency [float, float]
 
-## **sound**
+## **tcob::Sound**
 
 - sound [name]
   - source [file]
 
-## **shader**
+## **tcob::gl::ShaderProgram**
 
 - shader [name]
   - fragment [file]
   - vertex [file]
   - default_for { 'UI', 'Window', 'Font' }
 
-## **textures**
+## **tcob::gl::Texture**
 
 - texture [name]
   - source [file]
@@ -108,7 +108,7 @@
   - filtering
   - wrapping
 
-## **webp-animation**
+## **tcob::WebpAnimation**
 
 - webp-animation [name]
   - source [file]
