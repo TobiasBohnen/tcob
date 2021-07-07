@@ -22,7 +22,7 @@ concept HasInterval = requires(T& t)
 };
 
 template <typename T>
-concept QuadAutomationFunction = requires(T& t, Quad& q)
+concept QuadEffectFunction = requires(T& t, Quad& q)
 {
     std::same_as<decltype(t.Duration), MilliSeconds>;
 
@@ -32,9 +32,9 @@ concept QuadAutomationFunction = requires(T& t, Quad& q)
 };
 
 ////////////////////////////////////////////////////////////
-class QuadAutomationBase : public AutomationBase {
+class QuadEffectBase : public AutomationBase {
 public:
-    QuadAutomationBase(MilliSeconds duration)
+    QuadEffectBase(MilliSeconds duration)
         : AutomationBase { duration }
     {
     }
@@ -67,11 +67,11 @@ private:
     std::vector<Quad> _oriQuads {};
 };
 
-template <QuadAutomationFunction Func>
-class QuadAutomation : public QuadAutomationBase {
+template <QuadEffectFunction Func>
+class QuadEffect : public QuadEffectBase {
 public:
-    QuadAutomation(Func&& ptr)
-        : QuadAutomationBase { ptr.Duration }
+    QuadEffect(Func&& ptr)
+        : QuadEffectBase { ptr.Duration }
         , _function { std::move(ptr) }
     {
         if constexpr (HasInterval<Func>) {
@@ -98,15 +98,15 @@ private:
 };
 
 template <typename Func, typename... Rs>
-auto make_unique_quadautomation(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<QuadAutomation<Func>>
+auto make_unique_quadeffect(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<QuadEffect<Func>>
 {
-    return std::unique_ptr<QuadAutomation<Func>>(new QuadAutomation<Func> { Func { duration, std::forward<Rs>(args)... } });
+    return std::unique_ptr<QuadEffect<Func>>(new QuadEffect<Func> { Func { duration, std::forward<Rs>(args)... } });
 }
 
 template <typename Func, typename... Rs>
-auto make_shared_quadautomation(MilliSeconds duration, Rs&&... args) -> std::shared_ptr<QuadAutomation<Func>>
+auto make_shared_quadeffect(MilliSeconds duration, Rs&&... args) -> std::shared_ptr<QuadEffect<Func>>
 {
-    return std::shared_ptr<QuadAutomation<Func>>(new QuadAutomation<Func> { Func { duration, std::forward<Rs>(args)... } });
+    return std::shared_ptr<QuadEffect<Func>>(new QuadEffect<Func> { Func { duration, std::forward<Rs>(args)... } });
 }
 
 ////////////////////////////////////////////////////////////
@@ -153,11 +153,20 @@ private:
 ////////////////////////////////////////////////////////////
 
 struct ShakeEffect final {
-public:
     MilliSeconds Duration;
     MilliSeconds Interval;
-    f32 Amount;
+    f32 Intensity;
     Random RNG;
+
+    void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
+};
+
+////////////////////////////////////////////////////////////
+
+struct WaveEffect final {
+    MilliSeconds Duration;
+    f32 Height;
+    f32 Intensity;
 
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
 };

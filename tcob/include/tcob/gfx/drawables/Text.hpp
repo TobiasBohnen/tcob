@@ -12,7 +12,7 @@
 #include <tcob/assets/Resource.hpp>
 #include <tcob/gfx/Font.hpp>
 #include <tcob/gfx/Material.hpp>
-#include <tcob/gfx/QuadAutomation.hpp>
+#include <tcob/gfx/QuadEffect.hpp>
 #include <tcob/gfx/TextFormatter.hpp>
 #include <tcob/gfx/Transformable.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>
@@ -46,10 +46,10 @@ public:
 
     void draw(gl::RenderTarget& target) override;
 
-    void register_effect(u8 id, std::unique_ptr<QuadAutomationBase> effect);
+    void register_effect(u8 id, std::unique_ptr<QuadEffectBase> effect);
     void start_all_effects(bool looped = false);
     void stop_all_effects();
-    auto get_effect(u8 id) const -> QuadAutomationBase*;
+    auto get_effect(u8 id) const -> QuadEffectBase*;
 
 private:
     void reshape();
@@ -75,7 +75,7 @@ private:
     gl::DynamicQuadRenderer _renderer {};
     SizeU _targetSize { SizeU::Zero };
 
-    std::unordered_map<u8, std::shared_ptr<QuadAutomationBase>> _textEffects {};
+    std::unordered_map<u8, std::shared_ptr<QuadEffectBase>> _textEffects {};
 
     sigslot::scoped_connection _fontConnection;
     std::vector<sigslot::scoped_connection> _effectConnections;

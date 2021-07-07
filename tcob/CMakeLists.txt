@@ -37,7 +37,7 @@ set(LIB_SRCFILES
         src/gfx/Image.cpp
         src/gfx/ImageCodecs.cpp
         src/gfx/Quad.cpp
-        src/gfx/QuadAutomation.cpp
+        src/gfx/QuadEffect.cpp
         src/gfx/TextFormatter.cpp
         src/gfx/Transformable.cpp
         src/gfx/drawables/Cursor.cpp

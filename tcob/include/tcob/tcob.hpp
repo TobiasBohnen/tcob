@@ -65,7 +65,7 @@
 #include <tcob/gfx/Image.hpp>
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/Quad.hpp>
-#include <tcob/gfx/QuadAutomation.hpp>
+#include <tcob/gfx/QuadEffect.hpp>
 #include <tcob/gfx/Transformable.hpp>
 
 #include <tcob/script/LuaScript.hpp>

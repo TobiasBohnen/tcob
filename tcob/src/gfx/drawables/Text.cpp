@@ -129,7 +129,7 @@ void Text::draw(gl::RenderTarget& target)
     }
 }
 
-void Text::register_effect(u8 id, std::unique_ptr<QuadAutomationBase> effect)
+void Text::register_effect(u8 id, std::unique_ptr<QuadEffectBase> effect)
 {
     if (id == 0) {
         //TODO: log error
@@ -154,7 +154,7 @@ void Text::stop_all_effects()
     }
 }
 
-auto Text::get_effect(u8 id) const -> QuadAutomationBase*
+auto Text::get_effect(u8 id) const -> QuadEffectBase*
 {
     if (_textEffects.contains(id)) {
         return _textEffects.at(id).get();
@@ -178,7 +178,7 @@ void Text::format()
 
         Color color { _color };
         u8 alpha { color.A };
-        QuadAutomationBase* currentEffect { nullptr };
+        QuadEffectBase* currentEffect { nullptr };
 
         const auto [x, y] { position() };
         for (const auto& token : formatResult.Tokens) {

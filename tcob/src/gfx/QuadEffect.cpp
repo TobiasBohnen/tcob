@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <tcob/gfx/QuadAutomation.hpp>
+#include <tcob/gfx/QuadEffect.hpp>
 
 #include <iostream>
 
@@ -98,7 +98,7 @@ void BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length
 
 void ShakeEffect::value([[maybe_unused]] f32 progress, [[maybe_unused]] isize index, [[maybe_unused]] isize length, Quad& dest, const Quad& src)
 {
-    f32 r { RNG(-Amount, Amount) };
+    f32 r { RNG(-Intensity, Intensity) };
     switch (RNG(0, 1)) {
     case 0:
         dest.TopRight.Position[0] = src.TopRight.Position[0] + r;
@@ -126,4 +126,18 @@ void ShakeEffect::value([[maybe_unused]] f32 progress, [[maybe_unused]] isize in
 }
 
 ////////////////////////////////////////////////////////////
+
+void WaveEffect::value(f32 progress, isize index, isize length, Quad& dest, const Quad& src)
+{
+    const f64 phase { static_cast<f64>(index) / length };
+    const f64 factor { (std::sin((TAU * progress) + (0.75 * TAU) + phase * Intensity) + 1) / 2 };
+
+    const f64 val { factor * Height };
+
+    dest.TopRight.Position[1] = static_cast<f32>(src.TopRight.Position[1] + val);
+    dest.BottomRight.Position[1] = static_cast<f32>(src.BottomRight.Position[1] + val);
+    dest.TopLeft.Position[1] = static_cast<f32>(src.TopLeft.Position[1] + val);
+    dest.BottomLeft.Position[1] = static_cast<f32>(src.BottomLeft.Position[1] + val);
+}
+
 }
