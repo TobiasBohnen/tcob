@@ -34,6 +34,9 @@ public:
     auto color() const -> Color;
     void color(const Color& color);
 
+    auto background_color() const -> Color;
+    void background_color(const Color& color);
+
     auto outline_thickness() const -> f32;
     void outline_thickness(f32 outline);
     auto outline_color() const -> Color;
@@ -64,6 +67,9 @@ private:
 
     bool _needsReshape { true };
     bool _needsFormat { true };
+
+    Color _backgroundColor { 0, 0, 0, 0 };
+    Quad _backgroundQuad {};
 
     std::vector<Quad> _quads {};
     std::vector<TextFormatter::ShaperToken> _tokens {};

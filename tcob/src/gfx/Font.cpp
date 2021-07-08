@@ -107,12 +107,6 @@ auto Font::info() const -> FontInfo
     };
 }
 
-void Font::create_texture()
-{
-    _fontTexture->create_or_resize({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
-    _fontTexture->filtering(gl::TextureFiltering::Linear);
-}
-
 auto Font::kerning() const -> bool
 {
     return _kerning;
@@ -171,16 +165,24 @@ auto TrueTypeFont::load(const std::string& filename, u32 fontSize) -> bool
     _glyphIndices.clear();
 
     create_texture();
-    std::array<u8, 9> c {};
-    c.fill(0xff);
-    texture()->update(PointU::Zero, { 3, 3 }, &c, 3, 1);
-    _fontTextureCursor = { 4, 0 };
 
     stbtt_GetFontVMetrics(_fontInfo, &_ascent, &_descent, &_lineGap);
 
     shape_text(FONT_WARMUP);
 
     return true;
+}
+
+void TrueTypeFont::create_texture()
+{
+    auto tex { texture() };
+    tex->create_or_resize({ FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE }, tcob::gl::TextureFormat::R8);
+    tex->filtering(gl::TextureFiltering::Linear);
+
+    std::array<u8, 9> c {};
+    c.fill(0xff);
+    tex->update(PointU::Zero, { 3, 3 }, &c, 3, 1);
+    _fontTextureCursor = { 4, 0 };
 }
 
 auto TrueTypeFont::shape_text(const std::string& text) -> std::vector<Glyph>

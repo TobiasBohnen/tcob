@@ -65,8 +65,6 @@ protected:
     virtual auto descender() const -> f32 = 0;
     virtual auto linegap() const -> f32 = 0;
 
-    void create_texture();
-
 private:
     std::shared_ptr<gl::Texture2D> _fontTexture;
     std::shared_ptr<Material> _material;
@@ -96,6 +94,7 @@ protected:
     auto linegap() const -> f32 override;
 
 private:
+    void create_texture();
     auto cache_glyph(u32 codepoint) -> bool;
     auto codepoint_to_glyphindex(u32 codepoint) -> u32;
 

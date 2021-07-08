@@ -50,6 +50,18 @@ void Text::color(const Color& color)
     }
 }
 
+auto Text::background_color() const -> Color
+{
+    return _backgroundColor;
+}
+
+void Text::background_color(const Color& color)
+{
+    _backgroundColor = color;
+    _backgroundQuad.color(color);
+    _backgroundQuad.texcoords({ { 1 / 1024.f, 1 / 1024.f, 1 / 1024.f, 1 / 1024.f }, 0 }); //FIXME: hack
+}
+
 auto Text::outline_thickness() const -> f32
 {
     return _outlineThickness;
@@ -91,10 +103,13 @@ void Text::update(MilliSeconds deltaTime)
         font(Font::Default);
 
     if (_font) {
-        if (_needsReshape)
+        if (_needsReshape) {
             reshape();
-        if (is_transform_dirty())
+        }
+        if (is_transform_dirty()) {
             _needsFormat = true;
+            _backgroundQuad.position(bounds(), transform());
+        }
     } else {
         _needsReshape = false;
         _needsFormat = false;
@@ -117,10 +132,11 @@ void Text::draw(gl::RenderTarget& target)
         _needsFormat = true;
     _targetSize = target.size();
 
-    const isize size { _quads.size() };
-    if (size > 0) {
+    if (_quads.size() > 0) {
+        const isize size { _quads.size() + 1 };
         Quad* quad { _renderer.map(size) };
-        std::memcpy(quad, _quads.data(), size * sizeof(Quad));
+        std::memcpy(quad, &_backgroundQuad, sizeof(Quad));
+        std::memcpy(++quad, _quads.data(), size * sizeof(Quad));
         _renderer.unmap(size);
 
         _uniformBuffer.bind_base(1);

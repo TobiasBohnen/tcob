@@ -18,7 +18,8 @@ void TextEx::on_start()
 
     auto& text0 { _texts.emplace_back(std::make_unique<Text>()) };
     text0->text("normal text");
-    text0->bounds({ { 0.05f, 0.01f }, { 0.5f, 0.5f } });
+    text0->bounds({ { 0.05f, 0.01f }, { 0.40f, 0.075f } });
+    text0->background_color(Colors::BlueViolet);
 
     auto& text1 { _texts.emplace_back(std::make_unique<Text>()) };
     text1->text("outlined text");
@@ -56,7 +57,6 @@ void TextEx::on_start()
     text4->register_effect(4, make_unique_quadeffect<BlinkEffect>(3s, 0.5s, Colors::Orange, Colors::Teal));
     text4->register_effect(5, make_unique_quadeffect<ShakeEffect>(3s, 0.05s, 0.005f, Random { 12345 }));
     text4->register_effect(6, make_unique_quadeffect<WaveEffect>(3s, 0.05f, 4.f));
-
     text4->start_all_effects(true);
 }
 
