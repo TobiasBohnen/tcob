@@ -25,7 +25,7 @@ void TextEx::on_start()
     text1->text("outlined text");
     text1->bounds({ { 0.05f, 0.11f }, { 0.5f, 0.5f } });
     text1->outline_thickness(1.f);
-    text1->outline_color(Colors::Black);
+    text1->outline_color(Colors::Red);
 
     auto& text2 { _texts.emplace_back(std::make_unique<Text>()) };
     text2->text("{COLOR:Red}c{COLOR:Blue}o{COLOR:Yellow}l{COLOR:LightBlue}o{COLOR:Cyan}r{COLOR:Orange}e{COLOR:Blue}d {COLOR:RebeccaPurple}text");

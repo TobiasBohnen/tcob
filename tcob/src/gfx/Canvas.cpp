@@ -1275,7 +1275,7 @@ void Canvas::draw_textbox(const PointF& pos, const SizeF& size, const std::strin
 {
     auto [x, y] { pos };
     NVGstate& s { state() };
-    auto font { _fonts[s.fontId] };
+    auto* font { _fonts[s.fontId].object() };
     auto formatResult { TextFormatter::format(text, font, s.textAlign, size) };
 
     const f32 scale { nvg__getFontScale(s) * _devicePxRatio };

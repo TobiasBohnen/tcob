@@ -245,7 +245,7 @@ void Text::format()
 void Text::reshape()
 {
     if (_font && !_text.empty()) {
-        _tokens = TextFormatter::shape(_text, _font);
+        _tokens = TextFormatter::shape(_text, _font.object());
     } else {
         _tokens.clear();
     }

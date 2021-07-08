@@ -69,9 +69,9 @@ namespace TextFormatter {
         isize QuadCount { 0 };
     };
 
-    auto shape(const std::string& text, ResourcePtr<Font>& font) -> std::vector<ShaperToken>;
+    auto shape(const std::string& text, Font* font) -> std::vector<ShaperToken>;
 
     auto format(std::span<ShaperToken> tokens, const FontInfo& font, TextAlignment align, const SizeF& size) -> Result;
-    auto format(const std::string& text, ResourcePtr<Font>& font, TextAlignment align, const SizeF& size) -> Result;
+    auto format(const std::string& text, Font* font, TextAlignment align, const SizeF& size) -> Result;
 }
 }

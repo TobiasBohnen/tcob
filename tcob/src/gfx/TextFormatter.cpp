@@ -33,7 +33,7 @@ void handle_commands(TextFormatter::ShaperToken& token)
     }
 }
 
-auto TextFormatter::shape(const std::string& text, ResourcePtr<Font>& font) -> std::vector<ShaperToken>
+auto TextFormatter::shape(const std::string& text, Font* font) -> std::vector<ShaperToken>
 {
     std::vector<ShaperToken> retValue {};
 
@@ -221,7 +221,7 @@ auto TextFormatter::format(std::span<ShaperToken> tokens, const FontInfo& font, 
     return retValue;
 }
 
-auto TextFormatter::format(const std::string& text, ResourcePtr<Font>& font, TextAlignment align, const SizeF& size) -> Result
+auto TextFormatter::format(const std::string& text, Font* font, TextAlignment align, const SizeF& size) -> Result
 {
     auto tokens { shape(text, font) };
     return format(tokens, font->info(), align, size);
