@@ -130,7 +130,7 @@ void ShakeEffect::value([[maybe_unused]] f32 progress, [[maybe_unused]] isize in
 void WaveEffect::value(f32 progress, isize index, isize length, Quad& dest, const Quad& src)
 {
     const f64 phase { static_cast<f64>(index) / length };
-    const f64 factor { (std::sin((TAU * progress) + (0.75 * TAU) + phase * Intensity) + 1) / 2 };
+    const f64 factor { (std::sin((TAU * progress) + (0.75 * TAU) + phase * Amplitude) + 1) / 2 };
 
     const f64 val { factor * Height };
 

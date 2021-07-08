@@ -166,7 +166,7 @@ struct ShakeEffect final {
 struct WaveEffect final {
     MilliSeconds Duration;
     f32 Height;
-    f32 Intensity;
+    f32 Amplitude;
 
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
 };
