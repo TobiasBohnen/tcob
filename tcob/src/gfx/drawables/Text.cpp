@@ -145,7 +145,7 @@ void Text::draw(gl::RenderTarget& target)
     }
 }
 
-void Text::register_effect(u8 id, std::unique_ptr<QuadEffectBase> effect)
+void Text::register_effect(u8 id, std::shared_ptr<QuadEffectBase> effect)
 {
     if (id == 0) {
         //TODO: log error
@@ -170,10 +170,10 @@ void Text::stop_all_effects()
     }
 }
 
-auto Text::get_effect(u8 id) const -> QuadEffectBase*
+auto Text::get_effect(u8 id) const -> std::shared_ptr<QuadEffectBase>
 {
     if (_textEffects.contains(id)) {
-        return _textEffects.at(id).get();
+        return _textEffects.at(id);
     }
 
     return nullptr;

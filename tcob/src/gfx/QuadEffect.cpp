@@ -78,18 +78,12 @@ void FadeOutEffect::value(f32 progress, isize index, isize length, Quad& dest, [
 
 ////////////////////////////////////////////////////////////
 
-BlinkEffect::BlinkEffect(Color color0, Color color1)
-    : Color0 { color0 }
-    , Color1 { color1 }
+void BlinkEffect::value([[maybe_unused]] f32 progress, [[maybe_unused]] isize index, [[maybe_unused]] isize length, Quad& dest, [[maybe_unused]] const Quad& src)
 {
-}
+    const f64 x { std::round(Frequency * progress) / 2 };
+    bool flip { 2 * (x - std::floor(x)) == 0. };
 
-void BlinkEffect::value([[maybe_unused]] f32 progress, isize index, isize length, Quad& dest, [[maybe_unused]] const Quad& src)
-{
-    dest.color(_flip ? Color0 : Color1);
-
-    if (index == length - 1)
-        _flip = !_flip;
+    dest.color(flip ? Color0 : Color1);
 }
 
 ////////////////////////////////////////////////////////////

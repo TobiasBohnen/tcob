@@ -87,19 +87,15 @@ private:
 };
 
 template <typename... Funcs>
-auto make_unique_quadeffects(MilliSeconds duration, MilliSeconds interval, Funcs&&... args) -> std::unique_ptr<QuadEffects<Funcs...>>
+auto make_unique_quadeffects(MilliSeconds duration, Funcs&&... args) -> std::unique_ptr<QuadEffects<Funcs...>>
 {
-    auto retValue { std::unique_ptr<QuadEffects<Funcs...>>(new QuadEffects<Funcs...> { duration, std::forward<Funcs>(args)... }) };
-    retValue->interval(interval);
-    return retValue;
+    return std::unique_ptr<QuadEffects<Funcs...>>(new QuadEffects<Funcs...> { duration, std::forward<Funcs>(args)... });
 }
 
 template <typename... Funcs>
-auto make_shared_quadeffects(MilliSeconds duration, MilliSeconds interval, Funcs&&... args) -> std::shared_ptr<QuadEffects<Funcs...>>
+auto make_shared_quadeffects(MilliSeconds duration, Funcs&&... args) -> std::shared_ptr<QuadEffects<Funcs...>>
 {
-    auto retValue { std::shared_ptr<QuadEffects<Funcs...>>(new QuadEffects<Funcs...> { duration, std::forward<Funcs>(args)... }) };
-    retValue->interval(interval);
-    return retValue;
+    return std::shared_ptr<QuadEffects<Funcs...>>(new QuadEffects<Funcs...> { duration, std::forward<Funcs>(args)... });
 }
 
 ////////////////////////////////////////////////////////////
@@ -123,16 +119,12 @@ struct FadeOutEffect final {
 ////////////////////////////////////////////////////////////
 
 struct BlinkEffect final {
-public:
-    BlinkEffect(Color color0, Color color1);
 
     Color Color0;
     Color Color1;
+    f32 Frequency;
 
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
-
-private:
-    bool _flip { false };
 };
 
 ////////////////////////////////////////////////////////////
@@ -140,6 +132,7 @@ private:
 struct ShakeEffect final {
 
     f32 Intensity;
+    f32 Frequency;
     Random RNG;
 
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src);
