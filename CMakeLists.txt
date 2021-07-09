@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.19.0)
 project(tcob VERSION 0.0.1)
 
-option(BUILD_EXAMPLES "Build examples" ON)
-option(BUILD_TESTS "Build tests" ON)
-option(BUILD_TOOLS "Build tools" ON)
+option(TCOB_BUILD_EXAMPLES "Build examples" ON)
+option(TCOB_BUILD_TESTS "Build tests" ON)
+option(TCOB_BUILD_TOOLS "Build tools" ON)
 
 set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -25,18 +25,18 @@ endif()
 
 add_subdirectory(tcob)
 
-if (BUILD_TESTS)
+if (TCOB_BUILD_TESTS)
   add_subdirectory(tcob_tests)
 endif()
 
-if (BUILD_EXAMPLES)
+if (TCOB_BUILD_EXAMPLES)
   add_subdirectory(extras/examples)
 endif()
 
-if (BUILD_TOOLS)
+if (TCOB_BUILD_TOOLS)
   add_subdirectory(extras/tools)
 endif()
 
-MESSAGE(STATUS "Build examples: " ${BUILD_EXAMPLES})
-MESSAGE(STATUS "Build tests: " ${BUILD_TESTS})
-MESSAGE(STATUS "Build tools: " ${BUILD_TOOLS})
+MESSAGE(STATUS "Build examples: " ${TCOB_BUILD_EXAMPLES})
+MESSAGE(STATUS "Build tests: " ${TCOB_BUILD_TESTS})
+MESSAGE(STATUS "Build tools: " ${TCOB_BUILD_TOOLS})

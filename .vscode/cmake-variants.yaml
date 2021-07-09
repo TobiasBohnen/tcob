@@ -21,27 +21,27 @@ building:
         short: tests
         long: build tests only
         settings:
-          BUILD_TESTS: on
-          BUILD_EXAMPLES: off
-          BUILD_TOOLS: off
+          TCOB_BUILD_TESTS: on
+          TCOB_BUILD_EXAMPLES: off
+          TCOB_BUILD_TOOLS: off
       examples:
         short: examples
         long: build examples only
         settings:
-          BUILD_TESTS: off
-          BUILD_EXAMPLES: on
-          BUILD_TOOLS: off
+          TCOB_BUILD_TESTS: off
+          TCOB_BUILD_EXAMPLES: on
+          TCOB_BUILD_TOOLS: off
       tools:
         short: tools
         long: build tools only
         settings:
-          BUILD_TESTS: off
-          BUILD_EXAMPLES: off
-          BUILD_TOOLS: on
+          TCOB_BUILD_TESTS: off
+          TCOB_BUILD_EXAMPLES: off
+          TCOB_BUILD_TOOLS: on
       all:
         short: all
         long: build all
         settings:
-          BUILD_TESTS: on
-          BUILD_EXAMPLES: on
-          BUILD_TOOLS: on
+          TCOB_BUILD_TESTS: on
+          TCOB_BUILD_EXAMPLES: on
+          TCOB_BUILD_TOOLS: on
