@@ -78,9 +78,8 @@ void FadeOutEffect::value(f32 progress, isize index, isize length, Quad& dest, [
 
 ////////////////////////////////////////////////////////////
 
-BlinkEffect::BlinkEffect(MilliSeconds duration, MilliSeconds interval, Color color0, Color color1)
-    : Duration { duration }
-    , Interval { interval }
+BlinkEffect::BlinkEffect(MilliSeconds interval, Color color0, Color color1)
+    : Interval { interval }
     , Color0 { color0 }
     , Color1 { color1 }
 {

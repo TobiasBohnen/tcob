@@ -73,9 +73,8 @@ auto FrameAnimation::get_frame(MilliSeconds time) const -> std::string
 
 ////////////////////////////////////////////////////////////
 
-FrameAnimationFunction::FrameAnimationFunction(MilliSeconds duration, FrameAnimation ani)
-    : Duration { duration }
-    , _animation { std::move(ani) }
+FrameAnimationFunction::FrameAnimationFunction(FrameAnimation ani)
+    : _animation { std::move(ani) }
 {
 }
 

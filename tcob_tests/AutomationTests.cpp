@@ -60,7 +60,7 @@ TEST_CASE("Core.Automation.RandomFunction")
 {
     f32 out;
     Random rand { 12345 };
-    Automation<RandomFunction<f32>> contr { { MilliSeconds { 100 }, 10.f, 50.f, rand } };
+    Automation<RandomFunction<f32>> contr { MilliSeconds { 100 }, { 10.f, 50.f, rand } };
 
     contr.ValueChanged.connect([&out](f32 newVal) { out = newVal; });
     contr.start(true);
@@ -82,7 +82,7 @@ TEST_CASE("Core.Automation.LinearFunction")
         f32 out2;
         f32 out3;
 
-        Automation<LinearFunction<f32>> contr { { MilliSeconds { 1000 }, 10.f, 70.f } };
+        Automation<LinearFunction<f32>> contr { MilliSeconds { 1000 }, { 10.f, 70.f } };
 
         contr.add_output(&out1);
         contr.add_output(&out2);
@@ -96,7 +96,7 @@ TEST_CASE("Core.Automation.LinearFunction")
     {
         f32 out;
 
-        Automation<LinearFunction<f32>> contr { { MilliSeconds { 100 }, 10.f, 50.f } };
+        Automation<LinearFunction<f32>> contr { MilliSeconds { 100 }, { 10.f, 50.f } };
 
         contr.ValueChanged.connect([&out](f32 newVal) { out = newVal; });
         contr.start(true);
@@ -113,7 +113,7 @@ TEST_CASE("Core.Automation.LinearFunction")
     {
         u32 out;
 
-        Automation<LinearFunction<u32>> contr { { MilliSeconds { 100 }, 10, 50 } };
+        Automation<LinearFunction<u32>> contr { MilliSeconds { 100 }, { 10, 50 } };
 
         contr.ValueChanged.connect([&out](u32 newVal) { out = newVal; });
         contr.start(true);
@@ -130,7 +130,7 @@ TEST_CASE("Core.Automation.LinearFunction")
     {
         u32 out;
 
-        Automation<LinearFunction<u32>> contr { { MilliSeconds { 100 }, 0, 50 } };
+        Automation<LinearFunction<u32>> contr { MilliSeconds { 100 }, { 0, 50 } };
 
         contr.ValueChanged.connect([&out](u32 newVal) { out = newVal; });
         contr.start(false);
@@ -147,9 +147,7 @@ TEST_CASE("Core.Automation.LinearFunction")
     {
         auto out = std::make_shared<f32>();
 
-        Automation contr {
-            LinearFunction<f32> { MilliSeconds { 1000 }, 10.f, 50.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, LinearFunction<f32> { 10.f, 50.f } };
 
         contr.add_output(out.get());
         contr.start();
@@ -165,7 +163,7 @@ TEST_CASE("Core.Automation.LinearFunction")
     }
     {
 
-        Automation<LinearFunction<f32>> contr { { MilliSeconds { 1000 }, 10.f, 50.f } };
+        Automation<LinearFunction<f32>> contr { MilliSeconds { 1000 }, { 10.f, 50.f } };
 
         struct Foo {
             void set_bar(f32 newBar)
@@ -198,9 +196,7 @@ TEST_CASE("Core.Automation.LinearFunction")
         f32 fval2;
         f32 fval3;
 
-        Automation contr {
-            LinearFunction<f32> { MilliSeconds { 1000 }, 10.f, 50.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, LinearFunction<f32> { 10.f, 50.f } };
 
         contr.add_output(&out1);
         contr.add_output(&out2);
@@ -224,9 +220,7 @@ TEST_CASE("Core.Automation.LinearFunction")
         Color c2 { 0xFF, 0, 0xFF, 0 };
         Color out;
 
-        Automation contr {
-            LinearFunction<Color> { MilliSeconds { 1000 }, c1, c2 }
-        };
+        Automation contr { MilliSeconds { 1000 }, LinearFunction<Color> { c1, c2 } };
 
         contr.add_output(&out);
         contr.start();
@@ -258,9 +252,7 @@ TEST_CASE("Core.Automation.PowerFunctionFunction")
     {
         f32 out;
 
-        Automation contr {
-            PowerFunction<f32> { MilliSeconds { 1000 }, 10.f, 50.f, 2.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, PowerFunction<f32> { 10.f, 50.f, 2.f } };
 
         contr.add_output(&out);
         contr.start();
@@ -278,9 +270,7 @@ TEST_CASE("Core.Automation.PowerFunctionFunction")
         Color c2 { 0xFF, 0, 0xFF, 0 };
         Color out;
 
-        Automation contr {
-            PowerFunction<Color> { MilliSeconds { 1000 }, c1, c2, 2.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, PowerFunction<Color> { c1, c2, 2.f } };
 
         contr.add_output(&out);
         contr.start();
@@ -312,9 +302,7 @@ TEST_CASE("Core.Automation.SineWaveFunction")
     {
         auto out1 = 15.;
 
-        Automation contr {
-            SineWaveFunction<f64> { MilliSeconds { 1000 }, 10., 50., 1.f, 0.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, SineWaveFunction<f64> { 10., 50., 1.f, 0.f } };
 
         contr.add_output(&out1);
 
@@ -329,9 +317,7 @@ TEST_CASE("Core.Automation.SineWaveFunction")
         Color c2 { 0xFF, 0, 0xFF, 0 };
         Color out;
 
-        Automation contr {
-            SineWaveFunction<Color> { MilliSeconds { 1000 }, c1, c2, 1.f, 0.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, SineWaveFunction<Color> { c1, c2, 1.f, 0.f } };
 
         contr.add_output(&out);
 
@@ -345,9 +331,7 @@ TEST_CASE("Core.Automation.SineWaveFunction")
         REQUIRE(out.A == 0x7F);
     }
     {
-        Automation contr {
-            SineWaveFunction<f32> { MilliSeconds { 360 }, 0.f, 1.f, 1.f, 0 }
-        };
+        Automation contr { MilliSeconds { 360 }, SineWaveFunction<f32> { 0.f, 1.f, 1.f, 0 } };
         std::vector<f32> output;
         contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
@@ -364,9 +348,7 @@ TEST_CASE("Core.Automation.SquareWaveFunction")
     {
         auto out1 = 15.;
 
-        Automation contr {
-            SquareWaveFunction<f64> { MilliSeconds { 1000 }, 10., 50., 1.f, 0.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, SquareWaveFunction<f64> { 10., 50., 1.f, 0.f } };
 
         contr.add_output(&out1);
 
@@ -381,9 +363,7 @@ TEST_CASE("Core.Automation.SquareWaveFunction")
         Color c2 { 0xFF, 0, 0xFF, 0 };
         Color out;
 
-        Automation contr {
-            SquareWaveFunction<Color> { MilliSeconds { 1000 }, c1, c2, 1.f, 0 }
-        };
+        Automation contr { MilliSeconds { 1000 }, SquareWaveFunction<Color> { c1, c2, 1.f, 0 } };
 
         contr.add_output(&out);
 
@@ -394,9 +374,7 @@ TEST_CASE("Core.Automation.SquareWaveFunction")
         REQUIRE(out == c2);
     }
     {
-        Automation contr {
-            SquareWaveFunction<f32> { MilliSeconds { 50 }, 0.f, 1.f, 1.f, 0 }
-        };
+        Automation contr { MilliSeconds { 50 }, SquareWaveFunction<f32> { 0.f, 1.f, 1.f, 0 } };
         std::vector<f32> output;
         contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
@@ -413,9 +391,7 @@ TEST_CASE("Core.Automation.TriangeWaveFunction")
     {
         auto out1 = 15.;
 
-        Automation contr {
-            TriangeWaveFunction<f64> { MilliSeconds { 1000 }, 10., 50., 2.f, 1.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, TriangeWaveFunction<f64> { 10., 50., 2.f, 1.f } };
 
         contr.add_output(&out1);
 
@@ -432,9 +408,7 @@ TEST_CASE("Core.Automation.TriangeWaveFunction")
         Color c2 { 0xFF, 0, 0xFF, 0 };
         Color out;
 
-        Automation contr {
-            TriangeWaveFunction<Color> { MilliSeconds { 1000 }, c1, c2, 1.f, 1.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, TriangeWaveFunction<Color> { c1, c2, 1.f, 1.f } };
 
         contr.add_output(&out);
 
@@ -456,9 +430,7 @@ TEST_CASE("Core.Automation.TriangeWaveFunction")
         REQUIRE(out.A == 0x3F);
     }
     {
-        Automation contr {
-            TriangeWaveFunction<f32> { MilliSeconds { 50 }, 0.f, 2.f, 1.f, 0 }
-        };
+        Automation contr { MilliSeconds { 50 }, TriangeWaveFunction<f32> { 0.f, 2.f, 1.f, 0 } };
         std::vector<f32> output;
         contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
@@ -475,9 +447,7 @@ TEST_CASE("Core.Automation.SawtoothWaveFunction")
     {
         auto out1 = 15.;
 
-        Automation contr {
-            SawtoothWaveFunction<f64> { MilliSeconds { 1000 }, 10., 50., 5.f, 0.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, SawtoothWaveFunction<f64> { 10., 50., 5.f, 0.f } };
 
         contr.add_output(&out1);
 
@@ -494,9 +464,7 @@ TEST_CASE("Core.Automation.SawtoothWaveFunction")
         Color c2 { 0xFF, 0, 0xFF, 0 };
         Color out;
 
-        Automation contr {
-            SawtoothWaveFunction<Color> { MilliSeconds { 1000 }, c1, c2, 5.f, 0.f }
-        };
+        Automation contr { MilliSeconds { 1000 }, SawtoothWaveFunction<Color> { c1, c2, 5.f, 0.f } };
 
         contr.add_output(&out);
 
@@ -518,9 +486,7 @@ TEST_CASE("Core.Automation.SawtoothWaveFunction")
         REQUIRE(out.A == 0xDF);
     }
     {
-        Automation contr {
-            SawtoothWaveFunction<f32> { MilliSeconds { 50 }, 0.f, 2.f, 1.f, 0 }
-        };
+        Automation contr { MilliSeconds { 50 }, SawtoothWaveFunction<f32> { 0.f, 2.f, 1.f, 0 } };
         std::vector<f32> output;
         contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
 
@@ -537,9 +503,9 @@ TEST_CASE("Core.Automation.LinearChainFunction")
     {
         f32 out;
 
-        auto wi { LinearFunctionChain<f32>(MilliSeconds { 1000 }, { 0, 10, 5, 25, 10 }) };
+        auto wi { LinearFunctionChain<f32>({ 0, 10, 5, 25, 10 }) };
 
-        Automation contr { std::move(wi) };
+        Automation contr { MilliSeconds { 1000 }, std::move(wi) };
         contr.add_output(&out);
 
         contr.start();
@@ -564,9 +530,9 @@ TEST_CASE("Core.Automation.LinearChainFunction")
     {
         PointF out1;
 
-        auto wi { LinearFunctionChain<PointF>(MilliSeconds { 1000 }, { { 0.f, 0.f }, { 10.f, 20.f }, { 20.f, 10.f }, { 40.f, 0.f }, { 40.f, 80.f } }) };
+        auto wi { LinearFunctionChain<PointF>({ { 0.f, 0.f }, { 10.f, 20.f }, { 20.f, 10.f }, { 40.f, 0.f }, { 40.f, 80.f } }) };
 
-        Automation<LinearFunctionChain<PointF>> contr { std::move(wi) };
+        Automation<LinearFunctionChain<PointF>> contr { MilliSeconds { 1000 }, std::move(wi) };
         contr.add_output(&out1);
 
         contr.start();
@@ -600,10 +566,10 @@ TEST_CASE("Core.Automation.LinearChainFunction")
     {
         PointF out1;
 
-        auto wi { LinearFunctionChain<PointF>(MilliSeconds { 1000 },
+        auto wi { LinearFunctionChain<PointF>(
             std::vector<PointF> { { 0.f, 0.f }, { 10.f, 20.f }, { 20.f, 10.f }, { 40.f, 0.f }, { 40.f, 80.f } }) };
 
-        Automation contr { std::move(wi) };
+        Automation contr { MilliSeconds { 1000 }, std::move(wi) };
         contr.add_output(&out1);
 
         contr.start();
@@ -645,7 +611,7 @@ TEST_CASE("Core.Automation.Animation")
         ani.Frames = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
         ani.Duration = MilliSeconds { 160 };
         ani.Mode = AnimationPlaybackMode::Normal;
-        Automation<FrameAnimationFunction> contr { FrameAnimationFunction(MilliSeconds { 160 }, ani) };
+        Automation<FrameAnimationFunction> contr { MilliSeconds { 160 }, FrameAnimationFunction(ani) };
         contr.add_output(&out);
 
         contr.start();
@@ -674,7 +640,7 @@ TEST_CASE("Core.Automation.Interval")
     {
         std::vector<f32> output;
 
-        Automation<LinearFunction<f32>> contr { { MilliSeconds { 1000 }, 10.f, 70.f } };
+        Automation<LinearFunction<f32>> contr { MilliSeconds { 1000 }, { 10.f, 70.f } };
 
         contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
         contr.interval(100ms);
@@ -700,7 +666,7 @@ TEST_CASE("Core.Automation.Interval")
     {
         std::vector<f32> output;
 
-        Automation<LinearFunction<f32>> contr { { MilliSeconds { 1000 }, 10.f, 70.f } };
+        Automation<LinearFunction<f32>> contr { MilliSeconds { 1000 }, { 10.f, 70.f } };
 
         contr.ValueChanged.connect([&output](f32 val) { output.push_back(val); });
         contr.interval(500ms);

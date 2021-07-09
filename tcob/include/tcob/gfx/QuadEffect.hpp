@@ -24,8 +24,6 @@ concept HasInterval = requires(T& t)
 template <typename T>
 concept QuadEffectFunction = requires(T& t, Quad& q)
 {
-    std::same_as<decltype(t.Duration), MilliSeconds>;
-
     {
         t.value(0.0f, 0, 0, q, q)
     };
@@ -70,8 +68,8 @@ private:
 template <QuadEffectFunction Func>
 class QuadEffect : public QuadEffectBase {
 public:
-    QuadEffect(Func&& ptr)
-        : QuadEffectBase { ptr.Duration }
+    QuadEffect(MilliSeconds duration, Func&& ptr)
+        : QuadEffectBase { duration }
         , _function { std::move(ptr) }
     {
         if constexpr (HasInterval<Func>) {
@@ -100,36 +98,30 @@ private:
 template <typename Func, typename... Rs>
 auto make_unique_quadeffect(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<QuadEffect<Func>>
 {
-    return std::unique_ptr<QuadEffect<Func>>(new QuadEffect<Func> { Func { duration, std::forward<Rs>(args)... } });
+    return std::unique_ptr<QuadEffect<Func>>(new QuadEffect<Func> { duration, Func { std::forward<Rs>(args)... } });
 }
 
 template <typename Func, typename... Rs>
 auto make_shared_quadeffect(MilliSeconds duration, Rs&&... args) -> std::shared_ptr<QuadEffect<Func>>
 {
-    return std::shared_ptr<QuadEffect<Func>>(new QuadEffect<Func> { Func { duration, std::forward<Rs>(args)... } });
+    return std::shared_ptr<QuadEffect<Func>>(new QuadEffect<Func> { duration, Func { std::forward<Rs>(args)... } });
 }
 
 ////////////////////////////////////////////////////////////
 
 struct TypingEffect final {
-    MilliSeconds Duration;
-
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src) const;
 };
 
 ////////////////////////////////////////////////////////////
 
 struct FadeInEffect final {
-    MilliSeconds Duration;
-
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src) const;
 };
 
 ////////////////////////////////////////////////////////////
 
 struct FadeOutEffect final {
-    MilliSeconds Duration;
-
     void value(f32 progress, isize index, isize length, Quad& dest, const Quad& src) const;
 };
 
@@ -137,9 +129,8 @@ struct FadeOutEffect final {
 
 struct BlinkEffect final {
 public:
-    BlinkEffect(MilliSeconds duration, MilliSeconds interval, Color color0, Color color1);
+    BlinkEffect(MilliSeconds interval, Color color0, Color color1);
 
-    MilliSeconds Duration;
     MilliSeconds Interval;
     Color Color0;
     Color Color1;
@@ -153,7 +144,6 @@ private:
 ////////////////////////////////////////////////////////////
 
 struct ShakeEffect final {
-    MilliSeconds Duration;
     MilliSeconds Interval;
     f32 Intensity;
     Random RNG;
@@ -164,7 +154,6 @@ struct ShakeEffect final {
 ////////////////////////////////////////////////////////////
 
 struct WaveEffect final {
-    MilliSeconds Duration;
     f32 Height;
     f32 Amplitude;
 

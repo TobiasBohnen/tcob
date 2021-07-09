@@ -36,9 +36,7 @@ public:
 struct FrameAnimationFunction final {
     using type = std::string;
 
-    MilliSeconds Duration;
-
-    FrameAnimationFunction(MilliSeconds duration, FrameAnimation ani);
+    FrameAnimationFunction(FrameAnimation ani);
 
     auto value(f32 elapsed) const -> std::string;
 
