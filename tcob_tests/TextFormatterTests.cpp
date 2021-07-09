@@ -2,7 +2,7 @@
 
 TEST_CASE("GFX.Text.Tokenizer")
 {
-    auto font { ResourcePtr<Font> { nullptr }.object() };
+    Font* font { nullptr };
     {
         auto tokens { TextFormatter::shape("   ", font) };
         REQUIRE(tokens.size() == 1);
