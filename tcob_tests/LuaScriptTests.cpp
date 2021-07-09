@@ -2,7 +2,7 @@
 #include "LuaScriptTestsHelper.hpp"
 #include "tests.hpp"
 
-class LuaScriptTests : public LuaScript {
+class LuaScriptTests : public Script {
 public:
     LuaScriptTests()
     {
@@ -11,7 +11,7 @@ public:
         register_searcher(&openrequire);
     }
 
-    LuaTable global;
+    Table global;
 };
 
 TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
@@ -19,15 +19,15 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
     {
         auto res = run_script(
             "tableX = { 2.7, 5, 6, a = 69, 7, 8, x = 10, t = { a = 20, 30.2 } }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
 
         stringstream fs;
         fs << "tab = ";
         tab.dump(fs);
         fs << "\nreturn tab";
 
-        LuaTable tab2 = run_script<LuaTable>(fs.str());
+        Table tab2 = run_script<Table>(fs.str());
 
         REQUIRE((f32)tab2[1] == 2.7f);
         REQUIRE((f32)tab[1] == (f32)tab2[1]);
@@ -44,15 +44,15 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.TableDumper")
     {
         auto res = run_script(
             "tableX = { left = 2.7, x = 10, t = { a = 20, y = 30.2, m = { z = 1, f = 3 } }, y = true, z = 'ok' }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
 
         stringstream fs;
         fs << "tab = ";
         tab.dump(fs);
         fs << "\nreturn tab";
 
-        LuaTable tab2 = run_script<LuaTable>(fs.str());
+        Table tab2 = run_script<Table>(fs.str());
 
         REQUIRE((f32)tab2["left"] == 2.7f);
         REQUIRE((f32)tab["left"] == (f32)tab2["left"]);
@@ -79,9 +79,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i) "
                               "       end "
                               "     end) ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        REQUIRE(global.is<LuaCoroutine>("co"));
-        LuaCoroutine co = global["co"];
+        REQUIRE(res.State == ResultState::Ok);
+        REQUIRE(global.is<Coroutine>("co"));
+        Coroutine co = global["co"];
         REQUIRE(co.resume<i32>().Value == 1);
         REQUIRE(co.resume<i32>().Value == 2);
         REQUIRE(co.resume<i32>().Value == 3);
@@ -92,7 +92,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i*x) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
         REQUIRE(co.resume<i32>(2).Value == 2);
         REQUIRE(co.resume<i32>().Value == 4);
         REQUIRE(co.resume<i32>().Value == 6);
@@ -104,16 +104,16 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "       end "
                               "       return 1000 "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 1);
         result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 2);
         result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Ok);
+        REQUIRE(result.State == ResultState::Ok);
         REQUIRE(result.Value == 1000);
     }
     {
@@ -122,18 +122,18 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 1);
         result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 2);
         auto endresult = co.resume<void>();
-        REQUIRE(endresult.State == LuaResultState::Ok);
+        REQUIRE(endresult.State == ResultState::Ok);
         auto endresult2 = co.resume<void>();
-        REQUIRE(endresult2.State == LuaResultState::RuntimeError);
+        REQUIRE(endresult2.State == ResultState::RuntimeError);
     }
     {
         auto res = run_script("co = coroutine.create(function () "
@@ -141,15 +141,15 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
-        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == CoroutineState::Ok);
         auto result = co.resume<i32>();
-        REQUIRE(co.current_state() == LuaCoroutineState::Suspended);
+        REQUIRE(co.current_state() == CoroutineState::Suspended);
         result = co.resume<i32>();
-        REQUIRE(co.current_state() == LuaCoroutineState::Suspended);
+        REQUIRE(co.current_state() == CoroutineState::Suspended);
         result = co.resume<i32>();
-        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == CoroutineState::Ok);
     }
     {
         auto res = run_script("co = coroutine.create(function () "
@@ -157,16 +157,16 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 1);
         result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 2);
         result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::TypeMismatch);
+        REQUIRE(result.State == ResultState::TypeMismatch);
     }
     {
         auto res = run_script("co = coroutine.create(function () "
@@ -174,10 +174,10 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i,i+0.5) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<pair<i32, f32>>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == make_pair(1, 1.5f));
     }
     {
@@ -186,10 +186,10 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<pair<i32, f32>>();
-        REQUIRE(result.State == LuaResultState::TypeMismatch);
+        REQUIRE(result.State == ResultState::TypeMismatch);
     }
     {
         auto res = run_script("co = coroutine.create(function () "
@@ -197,18 +197,18 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
                               "         coroutine.yield(i) "
                               "       end "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 1);
 
         auto coresult = co.close();
-        REQUIRE(coresult == LuaCoroutineState::Ok);
-        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
+        REQUIRE(coresult == CoroutineState::Ok);
+        REQUIRE(co.current_state() == CoroutineState::Ok);
 
         result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::RuntimeError);
+        REQUIRE(result.State == ResultState::RuntimeError);
     }
     {
         auto l = function([](i32 i) { return (f32)i * 2.5f; });
@@ -216,17 +216,17 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Coroutines")
         auto res = run_script("co = coroutine.create(function () "
                               "         coroutine.yield(100) "
                               "     end) ");
-        LuaCoroutine co = global["co"];
+        Coroutine co = global["co"];
 
         auto result = co.resume<i32>();
-        REQUIRE(result.State == LuaResultState::Yielded);
+        REQUIRE(result.State == ResultState::Yielded);
         REQUIRE(result.Value == 100);
         static_cast<void>(co.resume<void>());
-        REQUIRE(co.current_state() == LuaCoroutineState::Ok);
+        REQUIRE(co.current_state() == CoroutineState::Ok);
 
         co.push(l);
         auto result2 = co.resume<f32>(15);
-        REQUIRE(result2.State == LuaResultState::Ok);
+        REQUIRE(result2.State == ResultState::Ok);
         REQUIRE(result2.Value == l(15));
     }
 }
@@ -244,7 +244,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Enums")
 
     global["test"]["Enum"] = testFuncEnum;
     {
-        LuaFunction<testEnum> func = global["test"]["Enum"];
+        Function<testEnum> func = global["test"]["Enum"];
         testEnum num = func.call(testEnum::FileNotFound);
         REQUIRE(num == testEnum::FileNotFound);
     }
@@ -275,25 +275,25 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Results")
 {
     {
         auto x = run_script("function return 1 edn");
-        REQUIRE(x.State == LuaResultState::SyntaxError);
+        REQUIRE(x.State == ResultState::SyntaxError);
     }
     {
         auto res = run_script("x = 'ok'");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         auto f = global.get<f32>("x");
-        REQUIRE(f.State == LuaResultState::TypeMismatch);
+        REQUIRE(f.State == ResultState::TypeMismatch);
         f = global.get<f32>("testX");
-        REQUIRE(f.State == LuaResultState::Undefined);
+        REQUIRE(f.State == ResultState::Undefined);
         auto s = global.get<string>("x");
-        REQUIRE(s.State == LuaResultState::Ok);
+        REQUIRE(s.State == ResultState::Ok);
         REQUIRE(s.Value == "ok");
     }
     {
         auto res = run_script(
             "tableX = {1,2,3,'a'}");
         auto tab = global.get<vector<i32>>("tableX");
-        REQUIRE(res.State == LuaResultState::Ok);
-        REQUIRE(tab.State == LuaResultState::TypeMismatch);
+        REQUIRE(res.State == ResultState::Ok);
+        REQUIRE(tab.State == ResultState::TypeMismatch);
         REQUIRE(tab.Value == vector<i32>({ 1, 2, 3 }));
     }
 }
@@ -315,7 +315,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.UserDefinedConversion")
     }
     {
         auto res = run_script("foo = {x=3,y=2,z=1}");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(global.is<foo>("foo"));
         res = run_script("foo = {x=3,n=2,z=1}");
         REQUIRE_FALSE(global.is<foo>("foo"));
@@ -325,8 +325,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.UserDefinedConversion")
             "function bar(p) "
             "return p.x * p.y * p.z "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<i32> func = global["bar"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<i32> func = global["bar"];
         i32 a = func.call(foo { 1, 2, 3 });
         REQUIRE(a == 6);
     }
@@ -480,9 +480,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
             "function foo(x) "
             "return x * 10 "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         variant<string, i32, bool> var = 100;
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 a = func(var);
         REQUIRE(a == 1000);
     }
@@ -535,28 +535,28 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Variant")
     }
 }
 
-TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
+TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Table")
 {
     {
         auto res = run_script(
             "tableX = { }");
         global["tableX"]["a"]["b"]["c"]["d"] = 100;
         i32 x = global["tableX"]["a"]["b"]["c"]["d"];
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(x == 100);
     }
     {
         auto res = run_script(
             "tableX = {left=2.7, top={x=10,y=2} }");
         i32 x = global.get<i32>("tableX", "top", "x");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(x == 10);
     }
     {
         auto res = run_script(
             "tableX = {1,{x=1,y=2} }");
         i32 y = global.get<i32>("tableX", 2, "y");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(y == 2);
     }
     {
@@ -564,14 +564,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
             "tableX = {1,{x=1,y=2} }");
         global.set("tableX", 2, "y", 200);
         i32 y = global.get<i32>("tableX", 2, "y");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(y == 200);
     }
     {
         auto res = run_script(
             "tableX = {1,{x=1,y=2} }");
         i32 y = global["tableX"][2]["y"];
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(y == 2);
     }
     {
@@ -579,11 +579,11 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
             "tableX = {1,{x=1,y=2} }");
         global["tableX"][2]["y"] = 200;
         i32 y = global.get<i32>("tableX", 2, "y");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(y == 200);
     }
     {
-        LuaTable tab = run_script<LuaTable>("return {4,5,2,1} ");
+        Table tab = run_script<Table>("return {4,5,2,1} ");
         i32 x = tab[1];
         REQUIRE(x == 4);
         x = tab[2];
@@ -595,26 +595,26 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     }
     {
         auto res = run_script("tab = {4,5,2,1} ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         {
-            LuaTable tab1 = global["tab"];
+            Table tab1 = global["tab"];
             tab1[1] = 100;
             REQUIRE((i32)tab1[1] == 100);
         }
         {
-            LuaTable tab1 = global["tab"];
+            Table tab1 = global["tab"];
             tab1[1] = 100;
             REQUIRE((i32)tab1[1] == 100);
         }
     }
     {
-        LuaTable tab = run_script<LuaTable>(
+        Table tab = run_script<Table>(
             "return {left=2.7, top=3.1, width=2.3, height=55.2} ");
         f32 f = tab["top"];
         REQUIRE(f == 3.1f);
     }
     {
-        LuaTable tab = run_script<LuaTable>(
+        Table tab = run_script<Table>(
             "return {left=2.7, top=3.1, width=2.3, height=55.2} ");
         REQUIRE(tab.has("left"));
         REQUIRE(tab.has("top"));
@@ -622,14 +622,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
         REQUIRE(tab.has("height"));
     }
     {
-        LuaTable tab = run_script<LuaTable>(
+        Table tab = run_script<Table>(
             "return {a = 2.4, b = true, c = 'hello'} ");
         REQUIRE(tab.is<f32>("a"));
         REQUIRE(tab.is<bool>("b"));
         REQUIRE(tab.is<string>("c"));
     }
     {
-        LuaTable tab = run_script<LuaTable>(
+        Table tab = run_script<Table>(
             "return {a = 2.4, b = true, c = 'hello', 42} ");
         vector<string> vect { "a", "b", "c" };
         vector<string> keys = tab.keys<string>();
@@ -637,7 +637,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
         REQUIRE(keys == vect);
     }
     {
-        LuaTable tab = run_script<LuaTable>(
+        Table tab = run_script<Table>(
             "return { 'a', 3, 55, a = 22 }");
         vector<i32> vect { 1, 2, 3 };
         vector<i32> keys = tab.keys<i32>();
@@ -645,7 +645,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
         REQUIRE(keys == vect);
     }
     {
-        LuaTable tab = run_script<LuaTable>(
+        Table tab = run_script<Table>(
             "return {a = 2.4, 3, c = 'hello'} ");
         vector<variant<i32, string>> vect { 1, "a", "c" };
         auto keys = tab.keys<variant<i32, string>>();
@@ -655,8 +655,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "rectF = {left=2.7, top=3.1, width=2.3, height=55.2} ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["rectF"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["rectF"];
         f32 f = tab["left"];
         REQUIRE(f == 2.7f);
     }
@@ -666,10 +666,10 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
             "function tabletest(x) "
             "return x.top "
             "end");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["rectF"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["rectF"];
         tab["top"] = 100.5f;
-        LuaFunction<f32> func = global["tabletest"];
+        Function<f32> func = global["tabletest"];
         f32 x = func(tab);
         REQUIRE(x == 100.5f);
         REQUIRE((f32)tab["top"] == 100.5f);
@@ -677,32 +677,32 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = {left=2.7, top={x=10,y=2} }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable top = global["tableX"]["top"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table top = global["tableX"]["top"];
         i32 x = top["x"];
         REQUIRE(x == 10);
     }
     {
         auto res = run_script(
             "tableX = {left=2.7, top={x=10,y=2} }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
         PointI top = tab["top"];
         REQUIRE(top.X == 10);
     }
     {
         auto res = run_script(
             "tableX = {left=2.7, top={x=10,y=2} }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
         i32 top = tab["top"]["x"];
         REQUIRE(top == 10);
     }
     {
         auto res = run_script(
             "tableX = {left=2.7, top={x=10,y=2} }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
         tab["top"]["x"] = 400;
         i32 top = global["tableX"]["top"]["x"];
         REQUIRE(top == 400);
@@ -710,8 +710,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = { a={ b={ c={ d=2 } } } }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
         tab["a"]["b"]["c"]["d"] = 42;
         i32 top = global["tableX"]["a"]["b"]["c"]["d"];
         REQUIRE(top == 42);
@@ -719,8 +719,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = { a={ b={ c={ d=2 } } } }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
         REQUIRE((i32)tab["a"]["b"]["c"]["d"] == 2);
         res = run_script(
             "tableX.a.b.c.d = 4");
@@ -729,8 +729,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = { a={ b={ c={ d=2 } } } }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"]["a"]["b"]["c"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"]["a"]["b"]["c"];
         REQUIRE((i32)tab["d"] == 2);
         res = run_script(
             "tableX.a.b.c.d = 4");
@@ -741,8 +741,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = { a={ b={ bb = 'ok', c={ d=2 } } } }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab = global["tableX"];
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab = global["tableX"];
         global["tableX"]["a"]["b"]["c"]["d"] = 100;
         REQUIRE((i32)global["tableX"]["a"]["b"]["c"]["d"] == 100);
         REQUIRE((i32)tab["a"]["b"]["c"]["d"] == 100);
@@ -752,9 +752,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = {  }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab { global["tableX"] };
-        LuaTable subt { tab.create_table("sub") };
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab { global["tableX"] };
+        Table subt { tab.create_table("sub") };
         subt["x"] = 42;
 
         REQUIRE((i32)global["tableX"]["sub"]["x"] == 42);
@@ -762,9 +762,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaTable")
     {
         auto res = run_script(
             "tableX = {  }");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaTable tab { global["tableX"] };
-        LuaTable subt;
+        REQUIRE(res.State == ResultState::Ok);
+        Table tab { global["tableX"] };
+        Table subt;
         tab["sub"] = subt;
         subt["x"] = 42;
 
@@ -778,7 +778,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Require")
     auto res = run_script(
         "a = require 'res/testfile' "
         "b = a.foo() ");
-    REQUIRE(res.State == LuaResultState::Ok);
+    REQUIRE(res.State == ResultState::Ok);
     i32 x = global["b"];
     REQUIRE(x == 300);
 }
@@ -799,22 +799,22 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.IsHas")
             "i = { 1, 2 } "
             "j = { \"a\", \"b\" } ");
 
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
 
         REQUIRE(global.is<i32>("a"));
         REQUIRE(global.is<bool>("b"));
         REQUIRE(global.is<f32>("c"));
         REQUIRE(global.is<string>("d"));
-        REQUIRE(global.is<LuaTable>("e"));
-        REQUIRE(global.is<LuaFunction<void>>("f"));
+        REQUIRE(global.is<Table>("e"));
+        REQUIRE(global.is<Function<void>>("f"));
         REQUIRE((global.is<map<string, i32>>("g")));
         REQUIRE((global.is<map<i32, i32>>("h")));
         REQUIRE((global.is<vector<i32>>("h")));
 
         REQUIRE_FALSE(global.is<bool>("a"));
         REQUIRE_FALSE(global.is<string>("a"));
-        REQUIRE_FALSE(global.is<LuaTable>("a"));
-        REQUIRE_FALSE(global.is<LuaFunction<void>>("a"));
+        REQUIRE_FALSE(global.is<Table>("a"));
+        REQUIRE_FALSE(global.is<Function<void>>("a"));
         REQUIRE_FALSE((global.is<vector<string>>("h")));
         REQUIRE_FALSE((global.is<map<i32, i32>>("g")));
 
@@ -822,14 +822,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.IsHas")
         REQUIRE_FALSE(global.is<i32>("c"));
 
         REQUIRE_FALSE(global.is<bool>("d"));
-        REQUIRE_FALSE(global.is<LuaTable>("d"));
-        REQUIRE_FALSE(global.is<LuaFunction<void>>("d"));
+        REQUIRE_FALSE(global.is<Table>("d"));
+        REQUIRE_FALSE(global.is<Function<void>>("d"));
     }
     //has tests///////////////////////////////////////////////
     {
         auto res = run_script(
             "x = { y = 100, z = { m = 75, n = 5 } }");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(global.has("x"));
         REQUIRE(global.has("x", "y"));
         REQUIRE(global.has("x", "z"));
@@ -842,7 +842,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.IsHas")
     }
 }
 
-TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
+TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Closures")
 {
     function testFuncPrim = [](i32 i, f32 f, double d, bool b) {
         return to_string(i) + to_string(f) + to_string(d) + string(b ? "true" : "false");
@@ -859,18 +859,18 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
     {
         auto res = run_script(
             "str = test.Prim(20, 4.4, 5.22, true)");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         string str = global["str"];
         REQUIRE(str == testFuncPrim(20, 4.4f, 5.22, true));
     }
     {
         auto res = run_script(
             "test.Void()");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(voidTest == 1);
         res = run_script(
             "test.Void()");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(voidTest == 2);
     }
     {
@@ -909,27 +909,27 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
         auto l = function([&x](i32 i) { x = i * 2.5f; });
         global["testFunc"] = l;
         auto res = run_script("testFunc(2)");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(x == 5.0f);
     }
 }
 
-TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
+TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Functions")
 {
     {
         auto res = run_script(
             "function testPoint(p) "
             "return p.x * p.y "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<i32> func = global["testPoint"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<i32> func = global["testPoint"];
         i32 a = func.call(PointI { 2, 4 });
         REQUIRE(a == 2 * 4);
         a = func(PointI { 2, 4 });
         REQUIRE(a == 2 * 4);
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function(x) return x*x end ");
         i32 a = func(200);
         REQUIRE(a == 200 * 200);
@@ -938,8 +938,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
         auto res = run_script(
             "table = { } "
             "table.func = function() return 50, \"Hello\" end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<pair<i32, string>> func = global["table"]["func"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<pair<i32, string>> func = global["table"]["func"];
         const auto& [a, b] = func.call().Value;
 
         REQUIRE(a == 50);
@@ -949,8 +949,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
         auto res = run_script(
             "table = { } "
             "table.func = function() return \"Hello\", 100, true end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<tuple<string, i32, bool>> func = global["table"]["func"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<tuple<string, i32, bool>> func = global["table"]["func"];
         const auto& [a, b, c] = func.call().Value;
 
         REQUIRE(a == "Hello");
@@ -958,43 +958,43 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
         REQUIRE(c == true);
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function() return 100 end ");
         REQUIRE(func() == 100);
         REQUIRE(100 == func());
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function() return 100 end ");
         REQUIRE_FALSE(func() == 10);
         REQUIRE_FALSE(10 == func());
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function() return 5 end ");
         REQUIRE(func() * 20 == 100);
         REQUIRE(20 * func() == 100);
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function() return 500 end ");
         REQUIRE(func() / 5 == 100);
         REQUIRE(50000 / func() == 100);
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function() return 95 end ");
         REQUIRE(func() + 5 == 100);
         REQUIRE(5 + func() == 100);
     }
     {
-        LuaFunction<i32> func = run_script<LuaFunction<i32>>(
+        Function<i32> func = run_script<Function<i32>>(
             "return function() return 105 end ");
         REQUIRE(func() - 5 == 100);
         REQUIRE(205 - func() == 100);
     }
     {
-        LuaFunction<vector<i32>> func = run_script<LuaFunction<vector<i32>>>(
+        Function<vector<i32>> func = run_script<Function<vector<i32>>>(
             "return function() return {5, 4, 3, 2, 1} end ");
         vector<i32> a = func();
         REQUIRE(a[0] == 5);
@@ -1004,7 +1004,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
         REQUIRE(a[4] == 1);
     }
     {
-        LuaFunction<map<string, i32>> func = run_script<LuaFunction<map<string, i32>>>(
+        Function<map<string, i32>> func = run_script<Function<map<string, i32>>>(
             "return function() return {x=5, y=4, b=3, r=2, aa=1} end ");
         map<string, i32> a = func();
         REQUIRE(a["x"] == 5);
@@ -1018,8 +1018,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             "function testPoint(p) "
             "return p.x * p.y "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<i32> func = global["testPoint"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<i32> func = global["testPoint"];
         i32 a = func(PointI { 2, 4 });
         REQUIRE(a == 2 * 4);
     }
@@ -1028,8 +1028,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             "function testPoint(p) "
             "return p.x * p.y "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<i32> func = global["testPoint"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<i32> func = global["testPoint"];
         PointI p = PointI { 2, 4 };
         i32 a = func(p);
         REQUIRE(a == 2 * 4);
@@ -1044,8 +1044,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             "function testVoid(p) "
             "x = p.x * p.y "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<void> func = global["testVoid"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<void> func = global["testVoid"];
         func(PointI { 2, 4 });
         i32 x = global["x"];
         REQUIRE(x == 2 * 4);
@@ -1055,8 +1055,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             "function testMulti(f,p,r,b) "
             "return f * p.x * r.top "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<f32> func = global["testMulti"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<f32> func = global["testMulti"];
         f32 x = func(10.4f, PointI { 2, 4 }, RectF { 0, 20, 4, 5 }, true);
         REQUIRE(x == 10.4f * 2 * 20);
     }
@@ -1065,9 +1065,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             "function testTable(x,y) "
             "return { a = x, b = y } "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<LuaTable> func = global["testTable"];
-        LuaTable tab = func(10, 20);
+        REQUIRE(res.State == ResultState::Ok);
+        Function<Table> func = global["testTable"];
+        Table tab = func(10, 20);
         REQUIRE((i32)tab["a"] == 10);
         REQUIRE((i32)tab["b"] == 20);
     }
@@ -1076,8 +1076,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             "function testTable(x,y) "
             "return x*y "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<i32> func = global["testTable"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<i32> func = global["testTable"];
         REQUIRE(func(10, 20) == 10 * 20);
         REQUIRE(func(20, 40) == 20 * 40);
         {
@@ -1085,12 +1085,12 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.LuaFunctions")
             func.dump(fs);
         }
 
-        LuaFunction<i32> func2 = load_binary<i32>("test.luac");
+        Function<i32> func2 = load_binary<i32>("test.luac");
         REQUIRE(func2(10, 20) == 10 * 20);
         REQUIRE(func2(20, 40) == 20 * 40);
     }
     {
-        LuaFunction<string> func = global["string"]["upper"];
+        Function<string> func = global["string"]["upper"];
         string upper = func("hello");
         REQUIRE(upper == "HELLO");
     }
@@ -1102,7 +1102,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
         string x;
         auto res = run_script(
             "x = 'ok'");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         x = global.get<string>("x");
         REQUIRE(x == "ok");
         string y = global["x"];
@@ -1111,7 +1111,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         const char* x;
         auto res = run_script("x = 'ok'");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         x = global.get<const char*>("x");
         REQUIRE(strcmp(x, "ok") == 0);
     }
@@ -1124,7 +1124,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         auto res = run_script(
             "x = 1337");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         i32 x = global["x"];
         REQUIRE(x == 1337);
         global["x"] = 2000;
@@ -1136,7 +1136,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         auto res = run_script(
             "x = 1337");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(global.has("x"));
         global["x"] = nullptr;
         REQUIRE_FALSE(global.has("x"));
@@ -1144,7 +1144,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         auto res = run_script(
             "x = { y = { z = 30 } }");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         i32 x = global["x"]["y"]["z"];
         REQUIRE(x == 30);
         global["x"]["y"]["z"] = 2000;
@@ -1154,7 +1154,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         auto res = run_script(
             "x = { y = {  } }");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE_FALSE(global.has("x", "y", "z"));
         global["x"]["y"]["z"] = 2000;
         REQUIRE(global.has("x", "y", "z"));
@@ -1171,7 +1171,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         auto res = run_script(
             "x = { y = {  } }");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE_FALSE(global.has("x", "y", "z"));
         global.set("x", "y", "z", 2000);
         REQUIRE(global.has("x", "y", "z"));
@@ -1195,13 +1195,13 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         REQUIRE_FALSE(global.has("testVar4"));
         auto f = global.get<f32>("testVar4");
-        REQUIRE(f.State == LuaResultState::Undefined);
+        REQUIRE(f.State == ResultState::Undefined);
         REQUIRE(f.Value == 0);
     }
     {
         auto res = run_script(
             "x = { y = 100, z = { m = 75, n = 5 } }");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         i32 m = global["x"]["z"]["m"];
         REQUIRE(m == 75);
     }
@@ -1212,8 +1212,8 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
             "function foo() "
             "return testVar * 10 "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
-        LuaFunction<i32> func = global["foo"];
+        REQUIRE(res.State == ResultState::Ok);
+        Function<i32> func = global["foo"];
         i32 a = func();
         REQUIRE(a == 400 * 10);
         global["testVar"] = 2000;
@@ -1223,14 +1223,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.GetSet")
     {
         auto res = run_script(
             "rectF = {left=2.7, top=3.1, width=2.3, height=55.2} ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         map<string, f32> rect = global["rectF"];
         REQUIRE(rect["left"] == 2.7f);
     }
     {
         auto res = run_script(
             "x = 30 ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         u8 x = global["x"];
         REQUIRE(x == 30);
     }
@@ -1286,14 +1286,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
     }
     {
         tuple<f64, string> tup = { 4.0, "ok" };
-        LuaFunction<f64> func = global["test"]["TuplePara"];
+        Function<f64> func = global["test"]["TuplePara"];
         f64 a = func(tup);
         REQUIRE(a == 4.0);
     }
     {
         auto res = run_script(
             "a, b = test.Tuple(5.22)");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         double a = global["a"];
         string b = global["b"];
         REQUIRE(a == 5.22 * 5);
@@ -1302,7 +1302,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
     {
         auto res = run_script(
             "x = test.Map()");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         map<string, i32> x = global["x"];
         REQUIRE(x["abc"] == 123);
         REQUIRE(x["def"] == 234);
@@ -1310,7 +1310,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
     {
         auto res = run_script(
             "x = test.UMap()");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         unordered_map<string, i32> x = global["x"];
         REQUIRE(x["abc"] == 123);
         REQUIRE(x["def"] == 234);
@@ -1318,7 +1318,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
     {
         auto res = run_script(
             "x = test.Vector()");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         vector<string> vec = global["x"];
         REQUIRE(vec[0] == "1");
         REQUIRE(vec[4] == "5");
@@ -1326,7 +1326,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
     {
         auto res = run_script(
             "x = test.Array()");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         array<string, 5> vec = global["x"];
         REQUIRE(vec[0] == "1");
         REQUIRE(vec[4] == "5");
@@ -1336,9 +1336,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
             "function foo(x) "
             "return x[2] * x[4] "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         vector vec { 1, 2, 3, 4, 5 };
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 a = func(vec);
         REQUIRE(a == 2 * 4);
 
@@ -1351,9 +1351,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
             "function foo(x, y, z) "
             "if z then return x * y else return 10 end "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         auto tup = make_tuple(4, 2, true);
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 a = func(tup);
         REQUIRE(a == 4 * 2);
     }
@@ -1362,9 +1362,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
             "function foo(x, y, z) "
             "if z then return x * y else return 10 end "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         auto tup = make_tuple(make_tuple(4, 2), true);
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 a = func(tup);
         REQUIRE(a == 4 * 2);
     }
@@ -1373,9 +1373,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
             "function foo(x, y) "
             "return x * y "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         auto tup = make_pair(4, 2.4f);
-        LuaFunction<f32> func = global["foo"];
+        Function<f32> func = global["foo"];
         f32 a = func(tup);
         REQUIRE(a == 4 * 2.4f);
     }
@@ -1384,9 +1384,9 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
             "function foo(x) "
             "return x.test "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         map<string, i32> map = { { "test", 123 } };
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 a = func(map);
         REQUIRE(a == 123);
 
@@ -1406,7 +1406,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.Collection")
         REQUIRE(x.second == 10);
     }
     {
-        LuaFunction<i32> func = global["test"]["PairPara"];
+        Function<i32> func = global["test"]["PairPara"];
         i32 a = func(pair { "ok"s, 4 });
         REQUIRE(a == 4);
     }
@@ -1467,7 +1467,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.DataStructs")
             "color = { r= 1, g = 2, b = 3, a = 1} "
             "pointI = { x = 20, y = 400 } "
             "pointF = { x = 4.5, y = 3.23 } ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         Color c = global["color"];
         REQUIRE(c == Color(1, 2, 3, 1));
         PointI p1 = global["pointI"];
@@ -1503,7 +1503,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.DataStructs")
             "rectFS = {2.7, 3.1, 2.3, 55.2} "
             "pointIS = { 20, 400 } "
             "pointFS = { 4.5, 3.23 } ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
 
         Color c = global["color"];
         REQUIRE(global.is<Color>("color"));
@@ -1539,14 +1539,14 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.DataStructs")
             "color = { r = 1, g = 2, b = 3, a = 1} "
             "pointI = { x = 20, y = 400 } "
             "x = test.Mix(100, rectF, color, 'Hello', false, pointI)");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         f32 x = global["x"];
 
         REQUIRE(x == testFuncMix(100, RectF(2.7f, 3.1f, 2.3f, 55.2f), Color(1, 2, 3, 1), "Hello", false, PointI(20, 400)));
     }
     {
         auto res = run_script("Colors = require 'colors'");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         res = run_script(
             "ab = Colors.AliceBlue "
             "b = Colors.Blue "
@@ -1577,7 +1577,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.RawPointers")
         global["func"] = func;
 
         auto res = run_script("func(obj)");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         REQUIRE(t.get_value() == 101);
     }
     {
@@ -1586,7 +1586,7 @@ TEST_CASE_METHOD(LuaScriptTests, "Script.Lua.RawPointers")
         REQUIRE(TestScriptClass::ObjCount == 1);
         global["obj"] = t;
         auto res = run_script("obj = nil");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == ResultState::Ok);
         perform_GC();
         REQUIRE(TestScriptClass::ObjCount == 0);
     }

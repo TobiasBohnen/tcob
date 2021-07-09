@@ -47,7 +47,7 @@ public:
 
 private:
     std::string _name;
-    LuaScript _luaScript;
+    lua::Script _LuaScript;
     std::unordered_map<std::type_index, std::unique_ptr<ResourceLoaderBase>> _loaders;
 
     std::vector<std::string> _groupScriptFiles;
@@ -76,7 +76,7 @@ auto ResourceGroup::has(const std::string& resname) const -> bool
 template <typename T>
 void ResourceGroup::register_loader(std::unique_ptr<ResourceLoader<T>> loader)
 {
-    loader->register_wrapper(_luaScript);
+    loader->register_wrapper(_LuaScript);
     _loaders[typeid(T)] = std::move(loader);
 }
 

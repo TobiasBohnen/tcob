@@ -2,7 +2,7 @@
 #include "LuaScriptTestsHelper.hpp"
 #include "tests.hpp"
 
-class LuaWrapperTests : public LuaScript {
+class LuaWrapperTests : public lua::Script {
 public:
     LuaWrapperTests()
     {
@@ -11,7 +11,7 @@ public:
         register_searcher(&openrequire);
     }
 
-    LuaTable global;
+    lua::Table global;
 };
 
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.MapWrapper")
@@ -86,7 +86,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.VectorWrapper")
         i32 x = run_script<i32>("return #wrap");
         REQUIRE(x == vec.size());
         auto res = run_script("wrap[#wrap + 1] = 6");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         REQUIRE(6 == vec[6]);
     }
     {
@@ -142,7 +142,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         i32 i = run_script<i32>("return wrap1[1]");
         REQUIRE(i == 100);
         auto res = run_script("wrap1[1] = 400");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         REQUIRE(t1.get_value() == 400);
     }
     SECTION("pointer parameter")
@@ -179,7 +179,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         REQUIRE(age == 42);
 
         auto res = run_script("wrap.wo_age = 21");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         REQUIRE(t.get_value() == 21);
     }
     SECTION("overloads")
@@ -227,9 +227,9 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
             "function foo(x) "
             "return x.age "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
 
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 x = func(&t);
         REQUIRE(x == 350);
     }
@@ -264,7 +264,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
         map["x"] = 100;
         auto res = run_script(
             "wrap.map.x = 300 ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         map = *t.get_map();
         REQUIRE(map["x"] == 300);
     }
@@ -274,7 +274,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
 {
     TestScriptClass t;
     global["earlywrap"] = &t;
-    using namespace tcob::lua_wrapper;
+    namespace wrap = tcob::lua::wrapper;
 
     auto f1 = overload<i32, f32>(&TestScriptClass::overload);
     auto f2 = overload<f32, i32>(&TestScriptClass::overload);
@@ -285,19 +285,19 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
 
     auto& wrapper = create_wrapper<TestScriptClass>("TSC");
     wrapper
-        | Function { "foo", &TestScriptClass::foo }
-        | Function { "add", &TestScriptClass::add_value }
-        | Function { "bar", &TestScriptClass::bar }
-        | Function { "me", []() -> i32 { return 40; } }
-        | Function { "ptr", &TestScriptClass::ptr }
-        | Getter { "map", &TestScriptClass::get_map }
-        | Getter { "ro_age", &TestScriptClass::get_value }
-        | Setter { "wo_age", &TestScriptClass::set_value }
-        | Property { "age", &TestScriptClass::get_value, &TestScriptClass::set_value }
-        | Overload { "overload", std::make_tuple(f1, f2, f3, f4, f5, f6) }
-        | Constructor<> {}
-        | Constructor<i32> {}
-        | Constructor<i32, f32> {};
+        | wrap::Function { "foo", &TestScriptClass::foo }
+        | wrap::Function { "add", &TestScriptClass::add_value }
+        | wrap::Function { "bar", &TestScriptClass::bar }
+        | wrap::Function { "me", []() -> i32 { return 40; } }
+        | wrap::Function { "ptr", &TestScriptClass::ptr }
+        | wrap::Getter { "map", &TestScriptClass::get_map }
+        | wrap::Getter { "ro_age", &TestScriptClass::get_value }
+        | wrap::Setter { "wo_age", &TestScriptClass::set_value }
+        | wrap::Property { "age", &TestScriptClass::get_value, &TestScriptClass::set_value }
+        | wrap::Overload { "overload", std::make_tuple(f1, f2, f3, f4, f5, f6) }
+        | wrap::Constructor<> {}
+        | wrap::Constructor<i32> {}
+        | wrap::Constructor<i32, f32> {};
 
     SECTION("early wrap")
     {
@@ -312,7 +312,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
         i32 i = run_script<i32>("return wrap1[1]");
         REQUIRE(i == 100);
         auto res = run_script("wrap1[1] = 400");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         REQUIRE(t1.get_value() == 400);
     }
     SECTION("pointer parameter")
@@ -349,7 +349,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
         REQUIRE(age == 42);
 
         auto res = run_script("wrap.wo_age = 21");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         REQUIRE(t.get_value() == 21);
     }
     SECTION("overloads")
@@ -397,9 +397,9 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
             "function foo(x) "
             "return x.age "
             "end ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
 
-        LuaFunction<i32> func = global["foo"];
+        Function<i32> func = global["foo"];
         i32 x = func(&t);
         REQUIRE(x == 350);
     }
@@ -434,7 +434,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
         map["x"] = 100;
         auto res = run_script(
             "wrap.map.x = 300 ");
-        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(res.State == lua::ResultState::Ok);
         map = *t.get_map();
         REQUIRE(map["x"] == 300);
     }
@@ -443,59 +443,59 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
 {
     auto& wrapper = create_wrapper<TestScriptClass>("TSCB");
-    wrapper.metamethod(LuaMetamethod::Add,
+    wrapper.metamethod(Metamethod::Add,
         [](TestScriptClass* instance1, i32 x) {
             i32 age = instance1->get_value() + x;
             return LuaOwnedPtr(new TestScriptClass(age));
         });
-    wrapper.metamethod(LuaMetamethod::Subtract,
+    wrapper.metamethod(Metamethod::Subtract,
         [](TestScriptClass* instance1, i32 x) {
             i32 age = instance1->get_value() - x;
             return LuaOwnedPtr(new TestScriptClass(age));
         });
-    wrapper.metamethod(LuaMetamethod::Divide,
+    wrapper.metamethod(Metamethod::Divide,
         [](TestScriptClass* instance1, i32 x) {
             i32 age = instance1->get_value() / x;
             return LuaOwnedPtr(new TestScriptClass(age));
         });
-    wrapper.metamethod(LuaMetamethod::Multiply,
+    wrapper.metamethod(Metamethod::Multiply,
         [](TestScriptClass* instance1, i32 x) {
             i32 age = instance1->get_value() * x;
             return LuaOwnedPtr(new TestScriptClass(age));
         });
-    wrapper.metamethod(LuaMetamethod::LessThan,
+    wrapper.metamethod(Metamethod::LessThan,
         [](TestScriptClass* instance1, i32 x) {
             return instance1->get_value() < x;
         });
-    wrapper.metamethod(LuaMetamethod::LessThan,
+    wrapper.metamethod(Metamethod::LessThan,
         [](i32 x, TestScriptClass* instance1) {
             return instance1->get_value() > x;
         });
-    wrapper.metamethod(LuaMetamethod::LessOrEqualThan,
+    wrapper.metamethod(Metamethod::LessOrEqualThan,
         [](TestScriptClass* instance1, i32 x) {
             return instance1->get_value() <= x;
         });
-    wrapper.metamethod(LuaMetamethod::LessOrEqualThan,
+    wrapper.metamethod(Metamethod::LessOrEqualThan,
         [](i32 x, TestScriptClass* instance1) {
             return instance1->get_value() >= x;
         });
-    wrapper.metamethod(LuaMetamethod::UnaryMinus,
+    wrapper.metamethod(Metamethod::UnaryMinus,
         [](TestScriptClass* instance1) {
             return -instance1->get_value();
         });
-    wrapper.metamethod(LuaMetamethod::Length,
+    wrapper.metamethod(Metamethod::Length,
         [](TestScriptClass* instance1) {
             return instance1->get_value();
         });
-    wrapper.metamethod(LuaMetamethod::ToString,
+    wrapper.metamethod(Metamethod::ToString,
         [](TestScriptClass* instance1) {
             return std::to_string(instance1->get_value());
         });
-    wrapper.metamethod(LuaMetamethod::Concat,
+    wrapper.metamethod(Metamethod::Concat,
         [](TestScriptClass* instance1, i32 x) {
             return std::stoi(std::to_string(instance1->get_value()) + std::to_string(x));
         });
-    wrapper.metamethod(LuaMetamethod::Call,
+    wrapper.metamethod(Metamethod::Call,
         [](TestScriptClass* instance1, i32 x) {
             return x * instance1->get_value();
         });
@@ -647,7 +647,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
 {
     {
-        LuaClosureSharedPtr l;
+        ClosureSharedPtr l;
 
         auto foo = [&l](TestScriptClass* instance1, i32 x) mutable {
             instance1->set_value(x * 10);
@@ -655,7 +655,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
                 return instance1->get_value() + y;
             };
 
-            l = make_shared_luaclosure(std::function(lambda));
+            l = make_shared_closure(std::function(lambda));
             return l.get();
         };
 
@@ -665,20 +665,20 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
             TestScriptClass t;
             global["wrap"] = &t;
             auto ret = run_script<i32>("return wrap:foo(4)(2)");
-            REQUIRE(ret.State == LuaResultState::Ok);
+            REQUIRE(ret.State == lua::ResultState::Ok);
             REQUIRE(ret.Value == 42);
         }
     }
     {
         std::string text {};
 
-        LuaClosureSharedPtr l;
+        ClosureSharedPtr l;
         auto text_adder = [&l, &text](std::string& y) {
             text += y;
             return l.get();
         };
 
-        l = make_shared_luaclosure(std::function(text_adder));
+        l = make_shared_closure(std::function(text_adder));
 
         auto text_setter = [&l, &text](std::string& x) mutable {
             text = x;
@@ -691,7 +691,7 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.FunctionReturn")
             TestScriptClass t;
             global["wrap"] = &t;
             auto ret = run_script("wrap.foo 'hello' ' ' 'world' '!'");
-            REQUIRE(ret.State == LuaResultState::Ok);
+            REQUIRE(ret.State == lua::ResultState::Ok);
             REQUIRE(text == "hello world!");
         }
     }

@@ -13,7 +13,7 @@ FontLoader::FontLoader(ResourceGroup& group)
 {
 }
 
-void FontLoader::register_wrapper(LuaScript& script)
+void FontLoader::register_wrapper(lua::Script& script)
 {
     // font
     _funcNewTTF = [this](const std::string& s) {

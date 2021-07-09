@@ -11,19 +11,19 @@
 #include <tcob/core/io/Logger.hpp>
 #include <tcob/script/LuaRef.hpp>
 
-namespace tcob::detail {
-class LuaFunctionBase : public LuaRef {
+namespace tcob::lua::detail {
+class FunctionBase : public Ref {
 public:
     void dump(OutputFileStream& stream) const;
 
 protected:
-    auto do_call(i32 nargs) const -> LuaResultState;
+    auto do_call(i32 nargs) const -> ResultState;
 };
 }
 
-namespace tcob {
+namespace tcob::lua {
 template <typename R>
-class LuaFunction final : public detail::LuaFunctionBase {
+class Function final : public detail::FunctionBase {
 public:
     template <typename... P>
     auto operator()(P&&... params) -> R
@@ -36,7 +36,7 @@ public:
     }
 
     template <typename... P>
-    auto call(P&&... params) const -> LuaResult<R>
+    auto call(P&&... params) const -> Result<R>
     {
         const auto& ls { state() };
         const auto guard { ls.create_stack_guard() };
@@ -54,9 +54,9 @@ public:
             return { result };
         } else {
             R retValue {};
-            if (result == LuaResultState::Ok) {
+            if (result == ResultState::Ok) {
                 if (!ls.try_get(1, retValue)) {
-                    result = LuaResultState::TypeMismatch;
+                    result = ResultState::TypeMismatch;
                 }
             }
 
@@ -65,7 +65,7 @@ public:
     }
 
     template <typename... P>
-    auto call_async(P&&... params) const -> std::future<LuaResult<R>>
+    auto call_async(P&&... params) const -> std::future<Result<R>>
     {
         return std::async(std::launch::async, [this, params...] {
             return call<R>(params...);
@@ -73,18 +73,18 @@ public:
     }
 };
 
-enum class LuaCoroutineState {
+enum class CoroutineState {
     Ok,
     Suspended,
     Error
 };
 
-class LuaCoroutine final : public LuaRef {
+class Coroutine final : public Ref {
 public:
     template <typename R, typename... P>
-    auto resume(P&&... params) const -> LuaResult<R>
+    auto resume(P&&... params) const -> Result<R>
     {
-        const LuaState t { thread() };
+        const State t { thread() };
         const auto guard { t.create_stack_guard() };
 
         //push parameters to lua
@@ -95,29 +95,29 @@ public:
         //call lua function
         i32 nresults { 0 };
         const auto err { t.resume(paramsCount, &nresults) };
-        if (err == LuaThreadState::Ok || err == LuaThreadState::Yielded) {
+        if (err == ThreadState::Ok || err == ThreadState::Yielded) {
             if constexpr (std::is_void_v<R>) {
-                return { LuaResultState::Ok };
+                return { ResultState::Ok };
             } else {
                 R retValue {};
                 if (t.try_get(1, retValue)) {
-                    return { retValue, err == LuaThreadState::Ok ? LuaResultState::Ok : LuaResultState::Yielded };
+                    return { retValue, err == ThreadState::Ok ? ResultState::Ok : ResultState::Yielded };
                 } else {
-                    return { R {}, LuaResultState::TypeMismatch };
+                    return { R {}, ResultState::TypeMismatch };
                 }
             }
         } else {
-            LuaResultState result;
+            ResultState result;
 
             switch (err) {
-            case LuaThreadState::RuntimeError:
-                result = LuaResultState::RuntimeError;
+            case ThreadState::RuntimeError:
+                result = ResultState::RuntimeError;
                 break;
-            case LuaThreadState::MemError:
-                result = LuaResultState::MemAllocError;
+            case ThreadState::MemError:
+                result = ResultState::MemAllocError;
                 break;
             default:
-                result = LuaResultState::RuntimeError;
+                result = ResultState::RuntimeError;
                 break;
             }
 
@@ -135,11 +135,11 @@ public:
         thread().push(t...);
     }
 
-    auto close() const -> LuaCoroutineState;
+    auto close() const -> CoroutineState;
 
-    auto current_state() const -> LuaCoroutineState;
+    auto current_state() const -> CoroutineState;
 
 private:
-    auto thread() const -> LuaState;
+    auto thread() const -> State;
 };
 }

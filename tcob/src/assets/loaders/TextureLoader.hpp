@@ -16,7 +16,7 @@ class TextureLoader : public ResourceLoader<gl::Texture> {
 public:
     explicit TextureLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void on_preparing() override;

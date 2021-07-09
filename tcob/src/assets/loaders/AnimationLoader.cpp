@@ -25,7 +25,7 @@ AnimationLoader::AnimationLoader(ResourceGroup& group)
 {
 }
 
-void AnimationLoader::register_wrapper(LuaScript& script)
+void AnimationLoader::register_wrapper(lua::Script& script)
 {
     // animation
     _funcNew = [this](const std::string& s) {

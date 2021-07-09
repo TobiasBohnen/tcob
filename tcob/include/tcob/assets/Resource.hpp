@@ -99,7 +99,7 @@ public:
         return do_reload(_resources[resname]);
     }
 
-    virtual void register_wrapper(LuaScript& script) = 0;
+    virtual void register_wrapper(lua::Script& script) = 0;
 
     void resource_state(std::unordered_map<ResourceState, u32>& out) const override
     {

@@ -25,7 +25,7 @@ private:
     void paint_to_canvas();
 
     tcob::gl::RenderTexture _rtt;
-    std::unique_ptr<LuaScript> _script;
+    std::unique_ptr<lua::Script> _script;
 
     std::shared_ptr<SpriteBatch> _layer1;
     ScriptApi _api;

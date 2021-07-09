@@ -41,7 +41,7 @@ MaterialLoader::MaterialLoader(ResourceGroup& group)
 {
 }
 
-void MaterialLoader::register_wrapper(LuaScript& script)
+void MaterialLoader::register_wrapper(lua::Script& script)
 {
     // material
     _funcNew = [this](const std::string& s) {

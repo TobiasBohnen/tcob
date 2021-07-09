@@ -8,163 +8,167 @@
 #include <tcob/script/LuaConversions.hpp>
 
 namespace tcob {
-template <>
-struct LuaConverter<ColorStop> {
-    static constexpr i32 StackSlots { 1 };
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        if (ls.is_table(idx)) {
-            LuaTable lt { ls, idx };
-            return lt.raw_length() == 2 && lt.is<f32>(1) && lt.is<Color>(2);
-        }
-        return false;
-    }
+namespace lua {
+    template <>
+    struct Converter<ColorStop> {
+        static constexpr i32 StackSlots { 1 };
 
-    static auto FromLua(const LuaState& ls, i32&& idx, ColorStop& value) -> bool
-    {
-        if (ls.is_table(idx)) {
-            LuaTable lt { ls, idx++ };
-            value.Position = lt[1];
-            value.Value = lt[2];
-        }
-        return true;
-    }
-};
-
-template <typename T>
-struct EnumConverter {
-    static std::unordered_map<std::string, T> Map;
-
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        return ls.is_string(idx) && Map.contains(ls.to_string(idx));
-    }
-
-    static auto FromLua(const LuaState& ls, i32&& idx, T& value) -> bool
-    {
-        if (ls.is_string(idx)) {
-            std::string val { ls.to_string(idx++) };
-
-            if (Map.contains(val)) {
-                value = Map[val];
-                return true;
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            if (ls.is_table(idx)) {
+                lua::Table lt { ls, idx };
+                return lt.raw_length() == 2 && lt.is<f32>(1) && lt.is<Color>(2);
             }
+            return false;
         }
 
-        idx++;
-        return false;
-    }
-};
+        static auto FromLua(const lua::State& ls, i32&& idx, ColorStop& value) -> bool
+        {
+            if (ls.is_table(idx)) {
+                lua::Table lt { ls, idx++ };
+                value.Position = lt[1];
+                value.Value = lt[2];
+            }
+            return true;
+        }
+    };
 
-template <>
-struct LuaConverter<Winding> {
-    static constexpr i32 StackSlots { 1 };
+    template <typename T>
+    struct EnumConverter {
+        static std::unordered_map<std::string, T> Map;
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        return EnumConverter<Winding>::IsType(ls, idx);
-    }
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            return ls.is_string(idx) && Map.contains(ls.to_string(idx));
+        }
 
-    static auto FromLua(const LuaState& ls, i32&& idx, Winding& value) -> bool
-    {
-        return EnumConverter<Winding>::FromLua(ls, std::forward<i32>(idx), value);
-    }
-};
-template <>
-std::unordered_map<std::string, Winding> EnumConverter<Winding>::Map {
-    { "CW", Winding::CW },
-    { "CCW", Winding::CCW },
-};
+        static auto FromLua(const lua::State& ls, i32&& idx, T& value) -> bool
+        {
+            if (ls.is_string(idx)) {
+                std::string val { ls.to_string(idx++) };
 
-template <>
-struct LuaConverter<Solidity> {
-    static constexpr i32 StackSlots { 1 };
+                if (Map.contains(val)) {
+                    value = Map[val];
+                    return true;
+                }
+            }
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        return EnumConverter<Solidity>::IsType(ls, idx);
-    }
+            idx++;
+            return false;
+        }
+    };
 
-    static auto FromLua(const LuaState& ls, i32&& idx, Solidity& value) -> bool
-    {
-        return EnumConverter<Solidity>::FromLua(ls, std::forward<i32>(idx), value);
-    }
-};
-template <>
-std::unordered_map<std::string, Solidity> EnumConverter<Solidity>::Map {
-    { "Solid", Solidity::Solid },
-    { "Hole", Solidity::Hole },
-};
+    template <>
+    struct Converter<Winding> {
+        static constexpr i32 StackSlots { 1 };
 
-template <>
-struct LuaConverter<LineCap> {
-    static constexpr i32 StackSlots { 1 };
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            return EnumConverter<Winding>::IsType(ls, idx);
+        }
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        return EnumConverter<LineCap>::IsType(ls, idx);
-    }
+        static auto FromLua(const lua::State& ls, i32&& idx, Winding& value) -> bool
+        {
+            return EnumConverter<Winding>::FromLua(ls, std::forward<i32>(idx), value);
+        }
+    };
+    template <>
+    std::unordered_map<std::string, Winding> EnumConverter<Winding>::Map {
+        { "CW", Winding::CW },
+        { "CCW", Winding::CCW },
+    };
 
-    static auto FromLua(const LuaState& ls, i32&& idx, LineCap& value) -> bool
-    {
-        return EnumConverter<LineCap>::FromLua(ls, std::forward<i32>(idx), value);
-    }
-};
-template <>
-std::unordered_map<std::string, LineCap> EnumConverter<LineCap>::Map {
-    { "Butt", LineCap::Butt },
-    { "Round", LineCap::Round },
-    { "Square", LineCap::Square },
-};
+    template <>
+    struct Converter<Solidity> {
+        static constexpr i32 StackSlots { 1 };
 
-template <>
-struct LuaConverter<LineJoin> {
-    static constexpr i32 StackSlots { 1 };
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            return EnumConverter<Solidity>::IsType(ls, idx);
+        }
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        return EnumConverter<LineJoin>::IsType(ls, idx);
-    }
+        static auto FromLua(const lua::State& ls, i32&& idx, Solidity& value) -> bool
+        {
+            return EnumConverter<Solidity>::FromLua(ls, std::forward<i32>(idx), value);
+        }
+    };
+    template <>
+    std::unordered_map<std::string, Solidity> EnumConverter<Solidity>::Map {
+        { "Solid", Solidity::Solid },
+        { "Hole", Solidity::Hole },
+    };
 
-    static auto FromLua(const LuaState& ls, i32&& idx, LineJoin& value) -> bool
-    {
-        return EnumConverter<LineJoin>::FromLua(ls, std::forward<i32>(idx), value);
-    }
-};
-template <>
-std::unordered_map<std::string, LineJoin> EnumConverter<LineJoin>::Map {
-    { "Round", LineJoin::Round },
-    { "Bevel", LineJoin::Bevel },
-    { "Miter", LineJoin::Miter },
-};
+    template <>
+    struct Converter<LineCap> {
+        static constexpr i32 StackSlots { 1 };
 
-template <>
-struct LuaConverter<TextAlignment> {
-    static constexpr i32 StackSlots { 1 };
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            return EnumConverter<LineCap>::IsType(ls, idx);
+        }
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
-    {
-        return EnumConverter<TextAlignment>::IsType(ls, idx);
-    }
+        static auto FromLua(const lua::State& ls, i32&& idx, LineCap& value) -> bool
+        {
+            return EnumConverter<LineCap>::FromLua(ls, std::forward<i32>(idx), value);
+        }
+    };
+    template <>
+    std::unordered_map<std::string, LineCap> EnumConverter<LineCap>::Map {
+        { "Butt", LineCap::Butt },
+        { "Round", LineCap::Round },
+        { "Square", LineCap::Square },
+    };
 
-    static auto FromLua(const LuaState& ls, i32&& idx, TextAlignment& value) -> bool
-    {
-        return EnumConverter<TextAlignment>::FromLua(ls, std::forward<i32>(idx), value);
-    }
-};
-template <>
-std::unordered_map<std::string, TextAlignment> EnumConverter<TextAlignment>::Map {
-    { "Left", TextAlignment::Left },
-    { "Center", TextAlignment::Centered },
-    { "Right", TextAlignment::Right },
-};
+    template <>
+    struct Converter<LineJoin> {
+        static constexpr i32 StackSlots { 1 };
+
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            return EnumConverter<LineJoin>::IsType(ls, idx);
+        }
+
+        static auto FromLua(const lua::State& ls, i32&& idx, LineJoin& value) -> bool
+        {
+            return EnumConverter<LineJoin>::FromLua(ls, std::forward<i32>(idx), value);
+        }
+    };
+    template <>
+    std::unordered_map<std::string, LineJoin> EnumConverter<LineJoin>::Map {
+        { "Round", LineJoin::Round },
+        { "Bevel", LineJoin::Bevel },
+        { "Miter", LineJoin::Miter },
+    };
+
+    template <>
+    struct Converter<TextAlignment> {
+        static constexpr i32 StackSlots { 1 };
+
+        static auto IsType(const lua::State& ls, i32 idx) -> bool
+        {
+            return EnumConverter<TextAlignment>::IsType(ls, idx);
+        }
+
+        static auto FromLua(const lua::State& ls, i32&& idx, TextAlignment& value) -> bool
+        {
+            return EnumConverter<TextAlignment>::FromLua(ls, std::forward<i32>(idx), value);
+        }
+    };
+    template <>
+    std::unordered_map<std::string, TextAlignment> EnumConverter<TextAlignment>::Map {
+        { "Left", TextAlignment::Left },
+        { "Center", TextAlignment::Centered },
+        { "Right", TextAlignment::Right },
+    };
+
+}
 
 }
 
 namespace tcob::detail {
 
-void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library)
+void create_canvas_wrapper(lua::Script* script, const ResourceLibrary& library)
 {
     // ---Canvas wrapper
     auto& canvasWrap { script->create_wrapper<Canvas>("Canvas") };
@@ -241,15 +245,15 @@ void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library)
     // Gradients
     canvasWrap.function("create_linear_gradient", [](Canvas* canvas, const PointF& s, const PointF& e, std::vector<ColorStop>& colors) {
         auto paint { canvas->create_linear_gradient(s, e, ColorGradient<256> { colors }) };
-        return LuaOwnedPtr { new CanvasPaint { paint } };
+        return lua::LuaOwnedPtr { new CanvasPaint { paint } };
     });
     canvasWrap.function("create_box_gradient", [](Canvas* canvas, const RectF& rect, f32 r, f32 f, std::vector<ColorStop>& colors) {
         auto paint { canvas->create_box_gradient(rect, r, f, ColorGradient<256> { colors }) };
-        return LuaOwnedPtr { new CanvasPaint { paint } };
+        return lua::LuaOwnedPtr { new CanvasPaint { paint } };
     });
     canvasWrap.function("create_radial_gradient", [](Canvas* canvas, const PointF& c, f32 inr, f32 outr, std::vector<ColorStop>& colors) {
         auto paint { canvas->create_radial_gradient(c, inr, outr, ColorGradient<256> { colors }) };
-        return LuaOwnedPtr { new CanvasPaint { paint } };
+        return lua::LuaOwnedPtr { new CanvasPaint { paint } };
     });
 
     // Image
@@ -257,7 +261,7 @@ void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library)
     canvasWrap.function("draw_image", &Canvas::draw_image, &Canvas::draw_image_clipped);
     canvasWrap.function("create_image_pattern", [](Canvas* canvas, const PointF& c, const SizeF& e, f32 angle, i32 image, f32 alpha) {
         auto paint { canvas->create_image_pattern(c, e, angle, image, alpha) };
-        return LuaOwnedPtr { new CanvasPaint { paint } };
+        return lua::LuaOwnedPtr { new CanvasPaint { paint } };
     });
 
     // Font
@@ -274,7 +278,7 @@ void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library)
     canvasWrap.function("window_size", &Canvas::window_size);
 }
 
-void fill_colors_table(const LuaTable& tab)
+void fill_colors_table(const lua::Table& tab)
 {
     tab["AliceBlue"] = Colors::AliceBlue;
     tab["AntiqueWhite"] = Colors::AntiqueWhite;

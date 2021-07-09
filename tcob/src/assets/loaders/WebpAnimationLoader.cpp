@@ -14,7 +14,7 @@ WebpAnimationLoader::WebpAnimationLoader(ResourceGroup& group)
 {
 }
 
-void WebpAnimationLoader::register_wrapper(LuaScript& script)
+void WebpAnimationLoader::register_wrapper(lua::Script& script)
 {
     // animation
     _funcNew = [this](const std::string& s) {

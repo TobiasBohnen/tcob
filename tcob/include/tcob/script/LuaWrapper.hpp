@@ -14,7 +14,7 @@
 #include <tcob/script/LuaState.hpp>
 #include <tcob/script/LuaTable.hpp>
 
-namespace tcob {
+namespace tcob::lua {
 template <typename T>
 struct LuaOwnedPtr {
     explicit LuaOwnedPtr(T* obj)
@@ -24,7 +24,7 @@ struct LuaOwnedPtr {
     T* Obj { nullptr };
 };
 
-enum class LuaMetamethod : char {
+enum class Metamethod : char {
     Length,
     ToString,
     UnaryMinus,
@@ -48,7 +48,7 @@ enum class LuaMetamethod : char {
 };
 
 namespace detail {
-    class LuaWrapperBase {
+    class WrapperBase {
     };
 
     template <class... Ts>
@@ -124,9 +124,9 @@ namespace detail {
 }
 
 template <typename T>
-class LuaWrapper final : public detail::LuaWrapperBase {
+class Wrapper final : public detail::WrapperBase {
 public:
-    LuaWrapper(const LuaState& state, LuaTable* globaltable, const std::string& name)
+    Wrapper(const State& state, Table* globaltable, const std::string& name)
         : _name { name }
         , _globalTable { globaltable }
         , _state { state }
@@ -135,7 +135,7 @@ public:
         create_metatable((std::string(typeid(T).name()) + "_gc").c_str(), true);
     }
 
-    ~LuaWrapper()
+    ~Wrapper()
     {
         remove_metatable(typeid(T).name());
         remove_metatable((std::string(typeid(T).name()) + "_gc").c_str());
@@ -148,7 +148,7 @@ public:
         const auto lambda { [func](T* instance, P&&... args) {
             return (instance->*func)(std::forward<P>(args)...);
         } };
-        _funcs[name] = make_unique_luaclosure(std::function<R(T*, P...)>(lambda));
+        _funcs[name] = make_unique_closure(std::function<R(T*, P...)>(lambda));
     }
 
     template <typename R, typename... P>
@@ -157,14 +157,14 @@ public:
         const auto lambda { [func](T* instance, P&&... args) {
             return (instance->*func)(std::forward<P>(args)...);
         } };
-        _funcs[name] = make_unique_luaclosure(std::function<R(T*, P...)>(lambda));
+        _funcs[name] = make_unique_closure(std::function<R(T*, P...)>(lambda));
     }
 
     // define non-member function
     template <typename Func>
     void function(const std::string& name, Func func)
     {
-        _funcs[name] = make_unique_luaclosure(std::function(func));
+        _funcs[name] = make_unique_closure(std::function(func));
     }
 
     // define overloaded function
@@ -220,7 +220,7 @@ public:
     template <typename Func>
     void getter(const std::string& name, Func func)
     {
-        _getters[name] = make_unique_luaclosure(std::function(func));
+        _getters[name] = make_unique_closure(std::function(func));
     }
 
     template <typename R>
@@ -247,7 +247,7 @@ public:
     template <typename Func>
     void setter(const std::string& name, Func func)
     {
-        _setters[name] = make_unique_luaclosure(std::function(func));
+        _setters[name] = make_unique_closure(std::function(func));
     }
 
     template <typename... Func>
@@ -266,7 +266,7 @@ public:
         }
         // create 'new' function
         if (!_globalTable->has(_name, "new")) {
-            auto ptr { make_unique_luaclosure(
+            auto ptr { make_unique_closure(
                 std::function<void(void)>(
                     [this]() {
                         this->overload_resolution("new");
@@ -280,29 +280,29 @@ public:
             return LuaOwnedPtr<T>(new T(std::forward<P>(args)...));
         } };
 
-        auto constr { make_unique_luaclosure(std::function<LuaOwnedPtr<T>(P...)>(lambda)) };
+        auto constr { make_unique_closure(std::function<LuaOwnedPtr<T>(P...)>(lambda)) };
         _constructors.push_back(std::move(constr));
     }
 
     // define metamethod
     template <typename Func>
-    void metamethod(LuaMetamethod method, Func func)
+    void metamethod(Metamethod method, Func func)
     {
         std::string name = metamethodsMap[method];
         if (!_overloads.contains(name)) {
             auto lambda { [this, name]() { this->overload_resolution(name); } };
-            auto ptr { make_unique_luaclosure(std::function(lambda)) };
+            auto ptr { make_unique_closure(std::function(lambda)) };
             set_metamethod(name, typeid(T).name(), ptr);
             set_metamethod(name, (std::string(typeid(T).name()) + "_gc").c_str(), ptr);
             _metamethods.push_back(std::move(ptr));
         }
 
-        auto ptr { make_unique_luaclosure(std::function(func)) };
+        auto ptr { make_unique_closure(std::function(func)) };
         _overloads[name].push_back(std::move(ptr));
     }
 
 private:
-    void set_metamethod(const std::string& name, const char* tableName, LuaClosureUniquePtr& ptr)
+    void set_metamethod(const std::string& name, const char* tableName, ClosureUniquePtr& ptr)
     {
         _state.get_metatable(tableName);
 
@@ -315,45 +315,45 @@ private:
     }
 
     template <typename R, typename... P, typename... Func>
-    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name, R (T::*func)(P...), Func... funcs)
+    void overload(std::unordered_map<std::string, ClosureUniquePtr>& target, const std::string& name, R (T::*func)(P...), Func... funcs)
     {
         // wrap member functions
         const auto lambda { [func](T* instance, auto&&... args) {
             return (instance->*func)(std::forward<decltype(args)>(args)...);
         } };
 
-        _overloads[name].push_back(make_unique_luaclosure(std::function<R(T*, P...)>(lambda)));
+        _overloads[name].push_back(make_unique_closure(std::function<R(T*, P...)>(lambda)));
         overload(target, name, funcs...);
     }
 
     template <typename R, typename... P, typename... Func>
-    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name, R (T::*func)(P...) const, Func... funcs)
+    void overload(std::unordered_map<std::string, ClosureUniquePtr>& target, const std::string& name, R (T::*func)(P...) const, Func... funcs)
     {
         // wrap member functions
         const auto lambda { [func](T* instance, auto&&... args) {
             return (instance->*func)(std::forward<decltype(args)>(args)...);
         } };
 
-        _overloads[name].push_back(make_unique_luaclosure(std::function<R(T*, P...)>(lambda)));
+        _overloads[name].push_back(make_unique_closure(std::function<R(T*, P...)>(lambda)));
         overload(target, name, funcs...);
     }
 
     template <typename Func, typename... Funcs>
-    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name, Func func, Funcs... funcs)
+    void overload(std::unordered_map<std::string, ClosureUniquePtr>& target, const std::string& name, Func func, Funcs... funcs)
     {
-        _overloads[name].push_back(make_unique_luaclosure(std::function(func)));
+        _overloads[name].push_back(make_unique_closure(std::function(func)));
         overload(target, name, funcs...);
     }
 
-    void overload(std::unordered_map<std::string, LuaClosureUniquePtr>& target, const std::string& name)
+    void overload(std::unordered_map<std::string, ClosureUniquePtr>& target, const std::string& name)
     {
         auto lambda { [this, name]() { this->overload_resolution(name); } };
-        target[name] = make_unique_luaclosure(std::function<void(void)>(lambda));
+        target[name] = make_unique_closure(std::function<void(void)>(lambda));
     }
 
     void overload_resolution(const std::string& name)
     {
-        std::vector<LuaClosureUniquePtr>* funcs;
+        std::vector<ClosureUniquePtr>* funcs;
         if (name == "new") {
             funcs = &_constructors;
         } else {
@@ -466,7 +466,7 @@ private:
         if (gc) {
             if constexpr (std::is_destructible_v<T>) {
                 _state.push("__gc");
-                _state.push_cfunction(&LuaWrapper::gc);
+                _state.push_cfunction(&Wrapper::gc);
                 _state.set_table(tableIdx);
             }
         }
@@ -484,7 +484,7 @@ private:
     void push_metamethod(const std::string& methodname, std::function<R(P...)>&& func, i32 idx)
     {
         _state.push(methodname);
-        auto ptr { make_unique_luaclosure(std::forward<std::function<R(P...)>>(func)) };
+        auto ptr { make_unique_closure(std::forward<std::function<R(P...)>>(func)) };
         _state.push(ptr.get());
         _state.set_table(idx);
         _metamethods.push_back(std::move(ptr));
@@ -507,7 +507,7 @@ private:
                         _state.push((*b)[arg - 1]);
                     } else {
                         // TODO: log
-                        _state.push(&LuaWrapper::noop);
+                        _state.push(&Wrapper::noop);
                     }
                 },
                 // string index
@@ -521,7 +521,7 @@ private:
                             (*_getters[arg])(_state.lua());
                         } else {
                             // TODO: log
-                            _state.push(&LuaWrapper::noop);
+                            _state.push(&Wrapper::noop);
                         }
                     }
                 },
@@ -562,7 +562,7 @@ private:
 
     static auto gc(lua_State* l) -> i32
     {
-        T** obj { static_cast<T**>(LuaState { l }.to_userdata(-1)) };
+        T** obj { static_cast<T**>(State { l }.to_userdata(-1)) };
 
         if (obj && *obj)
             delete (*obj);
@@ -575,16 +575,16 @@ private:
         // TODO: log
     }
 
-    std::unordered_map<std::string, LuaClosureUniquePtr> _funcs;
-    std::unordered_map<std::string, LuaClosureUniquePtr> _getters;
-    std::unordered_map<std::string, LuaClosureUniquePtr> _setters;
-    std::unordered_map<std::string, std::vector<LuaClosureUniquePtr>> _overloads;
-    std::vector<LuaClosureUniquePtr> _constructors;
-    std::vector<LuaClosureUniquePtr> _metamethods;
+    std::unordered_map<std::string, ClosureUniquePtr> _funcs;
+    std::unordered_map<std::string, ClosureUniquePtr> _getters;
+    std::unordered_map<std::string, ClosureUniquePtr> _setters;
+    std::unordered_map<std::string, std::vector<ClosureUniquePtr>> _overloads;
+    std::vector<ClosureUniquePtr> _constructors;
+    std::vector<ClosureUniquePtr> _metamethods;
 
     std::string _name;
-    LuaTable* _globalTable;
-    LuaState _state;
+    Table* _globalTable;
+    State _state;
 
     static constexpr bool is_vector { tcob::detail::is_specialization<T, std::vector>() };
     static constexpr bool is_string_indexable { detail::StringIndexable<T> };
@@ -599,31 +599,31 @@ private:
     static constexpr bool has_multiplies { detail::Multipliable<T> };
     static constexpr bool has_divides { detail::Dividable<T> };
 
-    inline static std::unordered_map<LuaMetamethod, std::string> metamethodsMap = {
-        { LuaMetamethod::Length, "__len" },
-        { LuaMetamethod::ToString, "__tostring" },
-        { LuaMetamethod::UnaryMinus, "__unm" },
-        { LuaMetamethod::Concat, "__concat" },
-        { LuaMetamethod::Add, "__add" },
-        { LuaMetamethod::Subtract, "__sub" },
-        { LuaMetamethod::Multiply, "__mul" },
-        { LuaMetamethod::Divide, "__div" },
-        { LuaMetamethod::LessThan, "__lt" },
-        { LuaMetamethod::LessOrEqualThan, "__le" },
-        { LuaMetamethod::Call, "__call" },
-        { LuaMetamethod::FloorDivide, "__idiv" },
-        { LuaMetamethod::Modulo, "__mod" },
-        { LuaMetamethod::Involution, "__pow" },
-        { LuaMetamethod::BitwiseAnd, "__band" },
-        { LuaMetamethod::BitwiseOr, "__bor" },
-        { LuaMetamethod::BitwiseXor, "__bxor" },
-        { LuaMetamethod::BitwiseNot, "__bnot" },
-        { LuaMetamethod::LeftShift, "__shl" },
-        { LuaMetamethod::RightShift, "__shr" }
+    inline static std::unordered_map<Metamethod, std::string> metamethodsMap = {
+        { Metamethod::Length, "__len" },
+        { Metamethod::ToString, "__tostring" },
+        { Metamethod::UnaryMinus, "__unm" },
+        { Metamethod::Concat, "__concat" },
+        { Metamethod::Add, "__add" },
+        { Metamethod::Subtract, "__sub" },
+        { Metamethod::Multiply, "__mul" },
+        { Metamethod::Divide, "__div" },
+        { Metamethod::LessThan, "__lt" },
+        { Metamethod::LessOrEqualThan, "__le" },
+        { Metamethod::Call, "__call" },
+        { Metamethod::FloorDivide, "__idiv" },
+        { Metamethod::Modulo, "__mod" },
+        { Metamethod::Involution, "__pow" },
+        { Metamethod::BitwiseAnd, "__band" },
+        { Metamethod::BitwiseOr, "__bor" },
+        { Metamethod::BitwiseXor, "__bxor" },
+        { Metamethod::BitwiseNot, "__bnot" },
+        { Metamethod::LeftShift, "__shl" },
+        { Metamethod::RightShift, "__shr" }
     };
 };
 
-namespace lua_wrapper {
+namespace wrapper {
     template <typename Func>
     struct Function {
         std::string Name;
@@ -661,35 +661,35 @@ namespace lua_wrapper {
 }
 
 template <typename T, typename Func>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Function<Func>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Function<Func>& func) -> Wrapper<T>&
 {
     wrap.function(func.Name, func.WrappedFunction);
     return wrap;
 }
 
 template <typename T, typename Func>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Getter<Func>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Getter<Func>& func) -> Wrapper<T>&
 {
     wrap.getter(func.Name, func.Getter);
     return wrap;
 }
 
 template <typename T, typename Func>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Setter<Func>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Setter<Func>& func) -> Wrapper<T>&
 {
     wrap.setter(func.Name, func.Setter);
     return wrap;
 }
 
 template <typename T, typename Get, typename Set>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Property<Get, Set>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Property<Get, Set>& func) -> Wrapper<T>&
 {
     wrap.property(func.Name, func.Getter, func.Setter);
     return wrap;
 }
 
 template <typename T, typename... Funcs>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Overload<Funcs...>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Overload<Funcs...>& func) -> Wrapper<T>&
 {
     std::apply(
         [&wrap, &func](auto&&... args) {
@@ -700,7 +700,7 @@ inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Overload<Funcs...>
 }
 
 template <typename T, typename... Funcs>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Setters<Funcs...>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Setters<Funcs...>& func) -> Wrapper<T>&
 {
     std::apply(
         [&wrap, &func](auto&&... args) {
@@ -711,7 +711,7 @@ inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Setters<Funcs...>&
 }
 
 template <typename T, typename... Types>
-inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Constructor<Types...>& func) -> LuaWrapper<T>&
+inline auto operator|(Wrapper<T>& wrap, const wrapper::Constructor<Types...>& func) -> Wrapper<T>&
 {
     wrap.constructor<Types...>();
     return wrap;

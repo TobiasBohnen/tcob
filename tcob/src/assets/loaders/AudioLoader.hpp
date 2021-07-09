@@ -17,7 +17,7 @@ class MusicLoader : public ResourceLoader<Music> {
 public:
     explicit MusicLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void do_unload(ResourcePtr<Music> res, bool greedy) override;
@@ -47,7 +47,7 @@ class SoundLoader : public ResourceLoader<Sound> {
 public:
     explicit SoundLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void do_unload(ResourcePtr<Sound> res, bool greedy) override;

@@ -16,7 +16,7 @@ class MaterialLoader : public ResourceLoader<Material> {
 public:
     explicit MaterialLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void on_preparing() override;

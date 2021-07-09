@@ -6,4 +6,5 @@
 using namespace std;
 using namespace tcob;
 using namespace tcob::gl;
+using namespace tcob::lua;
 using namespace std::chrono_literals;

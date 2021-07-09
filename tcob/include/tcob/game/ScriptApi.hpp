@@ -15,7 +15,7 @@ class ScriptApi {
 public:
     ScriptApi(Game& game, const std::string& ns);
 
-    virtual auto create_script() -> std::unique_ptr<LuaScript>;
+    virtual auto create_script() -> std::unique_ptr<lua::Script>;
 
 private:
     Game& _game;

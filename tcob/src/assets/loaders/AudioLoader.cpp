@@ -13,7 +13,7 @@ MusicLoader::MusicLoader(ResourceGroup& group)
 {
 }
 
-void MusicLoader::register_wrapper(LuaScript& script)
+void MusicLoader::register_wrapper(lua::Script& script)
 {
     // texture
     _funcNew = [this](const std::string& s) {
@@ -69,7 +69,7 @@ SoundLoader::SoundLoader(ResourceGroup& group)
 {
 }
 
-void SoundLoader::register_wrapper(LuaScript& script)
+void SoundLoader::register_wrapper(lua::Script& script)
 {
     // texture
     _funcNew = [this](const std::string& s) {

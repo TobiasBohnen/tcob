@@ -14,7 +14,7 @@ class ShaderLoader : public ResourceLoader<gl::ShaderProgram> {
 public:
     explicit ShaderLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void do_unload(ResourcePtr<gl::ShaderProgram> res, bool greedy) override;

@@ -30,7 +30,7 @@ TextureLoader::TextureLoader(ResourceGroup& group)
 {
 }
 
-void TextureLoader::register_wrapper(LuaScript& script)
+void TextureLoader::register_wrapper(lua::Script& script)
 {
     // texture
     _funcNewTexture = [this](const std::string& s) {

@@ -14,7 +14,7 @@ class WebpAnimationLoader : public ResourceLoader<WebpAnimation> {
 public:
     explicit WebpAnimationLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void do_unload(ResourcePtr<WebpAnimation> res, bool greedy) override;

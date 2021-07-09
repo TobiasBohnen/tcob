@@ -14,7 +14,7 @@ class AnimationLoader : public ResourceLoader<FrameAnimation> {
 public:
     explicit AnimationLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void on_preparing() override;

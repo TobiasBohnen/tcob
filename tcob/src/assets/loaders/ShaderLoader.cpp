@@ -15,7 +15,7 @@ ShaderLoader::ShaderLoader(ResourceGroup& group)
 {
 }
 
-void ShaderLoader::register_wrapper(LuaScript& script)
+void ShaderLoader::register_wrapper(lua::Script& script)
 {
     // shader
     _funcNew = [this](const std::string& s) {

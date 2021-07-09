@@ -10,16 +10,16 @@
 #include <tcob/script/LuaTable.hpp>
 
 namespace tcob {
-class Config final : public LuaTable {
+class Config final : public lua::Table {
 public:
     Config() = default;
     ~Config() override;
-    auto operator=(const LuaRef& other) -> Config&;
+    auto operator=(const lua::Ref& other) -> Config&;
 
     void save() const;
     auto load() -> bool;
 
 private:
-    LuaScript _script;
+    lua::Script _script;
 };
 }

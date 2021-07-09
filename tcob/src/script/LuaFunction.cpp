@@ -7,7 +7,7 @@
 
 #include <lua.hpp>
 
-namespace tcob {
+namespace tcob::lua {
 namespace detail {
     static auto writer(lua_State*, const void* p, isize sz, void* ud) -> i32
     {
@@ -16,7 +16,7 @@ namespace detail {
         return 0;
     }
 
-    void LuaFunctionBase::dump(OutputFileStream& stream) const
+    void FunctionBase::dump(OutputFileStream& stream) const
     {
         const auto& ls { state() };
         push_self();
@@ -24,7 +24,7 @@ namespace detail {
         ls.pop(1);
     }
 
-    auto LuaFunctionBase::do_call(i32 nargs) const -> LuaResultState
+    auto FunctionBase::do_call(i32 nargs) const -> ResultState
     {
         return state().do_call(nargs, LUA_MULTRET);
     }
@@ -32,24 +32,24 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-auto LuaCoroutine::close() const -> LuaCoroutineState
+auto Coroutine::close() const -> CoroutineState
 {
-    return thread().reset_thread() == LUA_OK ? LuaCoroutineState::Ok : LuaCoroutineState::Error;
+    return thread().reset_thread() == LUA_OK ? CoroutineState::Ok : CoroutineState::Error;
 }
 
-auto LuaCoroutine::current_state() const -> LuaCoroutineState
+auto Coroutine::current_state() const -> CoroutineState
 {
     switch (thread().status()) {
     case LUA_OK:
-        return LuaCoroutineState::Ok;
+        return CoroutineState::Ok;
     case LUA_YIELD:
-        return LuaCoroutineState::Suspended;
+        return CoroutineState::Suspended;
     default:
-        return LuaCoroutineState::Error;
+        return CoroutineState::Error;
     }
 }
 
-auto LuaCoroutine::thread() const -> LuaState
+auto Coroutine::thread() const -> State
 {
     const auto& ls { state() };
     push_self();

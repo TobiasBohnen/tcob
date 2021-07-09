@@ -15,8 +15,8 @@
 #include <tcob/script/LuaTable.hpp>
 #include <tcob/script/LuaWrapper.hpp>
 
-namespace tcob {
-enum class LuaLibrary : char {
+namespace tcob::lua {
+enum class Library : char {
     Table,
     String,
     Math,
@@ -28,34 +28,34 @@ enum class LuaLibrary : char {
     Package
 };
 
-class LuaScript {
+class Script {
 public:
-    LuaScript();
-    virtual ~LuaScript();
+    Script();
+    virtual ~Script();
 
-    LuaScript(const LuaScript&) = delete;
-    auto operator=(const LuaScript& other) -> LuaScript& = delete;
+    Script(const Script&) = delete;
+    auto operator=(const Script& other) -> Script& = delete;
 
     template <typename... Args>
     void open_libraries(Args&&... args)
     {
         if constexpr (sizeof...(args) == 0) {
-            load_library(LuaLibrary::Table, LuaLibrary::String,
-                LuaLibrary::Math, LuaLibrary::Coroutine,
-                LuaLibrary::IO, LuaLibrary::Utf8, LuaLibrary::Package);
+            load_library(Library::Table, Library::String,
+                Library::Math, Library::Coroutine,
+                Library::IO, Library::Utf8, Library::Package);
         } else {
             load_library(args...);
         }
     }
 
     template <typename R = void>
-    auto run_file(const std::string& file, i32 idx = 1) const -> LuaResult<R>
+    auto run_file(const std::string& file, i32 idx = 1) const -> Result<R>
     {
         return run_script<R>(FileSystem::read_as_string(file), idx, file);
     }
 
     template <typename R = void>
-    auto run_script(const std::string& script, i32 idx = 1, const std::string& name = "Script") const -> LuaResult<R>
+    auto run_script(const std::string& script, i32 idx = 1, const std::string& name = "Script") const -> Result<R>
     {
         const auto guard { _state.create_stack_guard() };
         auto result { call_buffer(script.data(), script.size(), name.c_str()) };
@@ -63,9 +63,9 @@ public:
             return { result };
         } else {
             R retValue {};
-            if (result == LuaResultState::Ok) {
+            if (result == ResultState::Ok) {
                 if (!_state.try_get(std::forward<int>(idx), retValue)) {
-                    result = LuaResultState::TypeMismatch;
+                    result = ResultState::TypeMismatch;
                 }
             }
 
@@ -74,7 +74,7 @@ public:
     }
 
     template <typename R = void>
-    auto run_file_async(const std::string& file, i32 idx = 1) const -> std::future<LuaResult<R>>
+    auto run_file_async(const std::string& file, i32 idx = 1) const -> std::future<Result<R>>
     {
         return std::async(std::launch::async, [this, &file, idx] {
             return run_file<R>(file, idx);
@@ -82,7 +82,7 @@ public:
     }
 
     template <typename R = void>
-    auto run_script_async(const std::string& script, i32 idx = 1, const std::string& name = "Script") const -> std::future<LuaResult<R>>
+    auto run_script_async(const std::string& script, i32 idx = 1, const std::string& name = "Script") const -> std::future<Result<R>>
     {
         return std::async(std::launch::async, [this, script, idx, name] {
             return run_script<R>(script, idx, name);
@@ -90,59 +90,59 @@ public:
     }
 
     template <typename R = void>
-    auto load_binary(const std::string& file, i32 idx = 1) const -> LuaFunction<R>
+    auto load_binary(const std::string& file, i32 idx = 1) const -> Function<R>
     {
         const auto guard { _state.create_stack_guard() };
 
-        LuaFunction<R> retVal {};
+        Function<R> retVal {};
         if (load_binarybuffer(file)) {
-            _state.try_get<LuaFunction<R>>(-1, retVal);
+            _state.try_get<Function<R>>(-1, retVal);
         }
 
         return retVal;
     }
 
-    auto global_table() const -> const LuaTable&;
+    auto global_table() const -> const Table&;
 
     void perform_GC() const;
     void stop_GC() const;
     void restart_GC() const;
 
     template <typename T>
-    auto create_wrapper(const std::string& name) -> LuaWrapper<T>&
+    auto create_wrapper(const std::string& name) -> Wrapper<T>&
     {
         if (_wrappers.contains(name)) {
             _wrappers[name] = nullptr;
         }
 
-        auto wrap { std::make_shared<LuaWrapper<T>>(_state, _globalTable.get(), name) };
+        auto wrap { std::make_shared<Wrapper<T>>(_state, _globalTable.get(), name) };
         _wrappers[name] = wrap;
         return *wrap;
     }
 
-    void register_searcher(const std::function<LuaTable(LuaScript&, const std::string&)>& func);
+    void register_searcher(const std::function<Table(Script&, const std::string&)>& func);
 
 private:
-    auto do_call(i32 nargs, i32 nret) const -> LuaResultState;
-    auto call_buffer(const byte* script, isize length, const std::string& name) const -> LuaResultState;
+    auto do_call(i32 nargs, i32 nret) const -> ResultState;
+    auto call_buffer(const byte* script, isize length, const std::string& name) const -> ResultState;
     auto load_binarybuffer(const std::string& file) const -> bool;
 
     template <typename... Args>
-    void load_library(LuaLibrary lib, Args&&... args)
+    void load_library(Library lib, Args&&... args)
     {
         load_library(lib);
 
         if constexpr (sizeof...(args) > 0)
             load_library(args...);
     }
-    void load_library(LuaLibrary lib);
+    void load_library(Library lib);
 
-    LuaState _state;
+    State _state;
 
-    std::unique_ptr<LuaTable> _globalTable;
+    std::unique_ptr<Table> _globalTable;
 
-    std::unordered_map<std::string, std::shared_ptr<detail::LuaWrapperBase>> _wrappers;
-    std::function<std::function<LuaTable(const std::string&)>&(const std::string&)> _searcher;
-    std::function<LuaTable(const std::string&)> _loader;
+    std::unordered_map<std::string, std::shared_ptr<detail::WrapperBase>> _wrappers;
+    std::function<std::function<Table(const std::string&)>&(const std::string&)> _searcher;
+    std::function<Table(const std::string&)> _loader;
 };
 } /* namespace tcob */

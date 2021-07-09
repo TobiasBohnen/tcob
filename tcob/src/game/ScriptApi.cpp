@@ -15,9 +15,9 @@ ScriptApi::ScriptApi(Game& game, const std::string& ns)
 {
 }
 
-auto ScriptApi::create_script() -> std::unique_ptr<LuaScript>
+auto ScriptApi::create_script() -> std::unique_ptr<lua::Script>
 {
-    auto retValue { std::make_unique<LuaScript>() };
+    auto retValue { std::make_unique<lua::Script>() };
     retValue->open_libraries();
 
     //.Canvas

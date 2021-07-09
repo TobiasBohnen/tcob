@@ -1,37 +1,37 @@
 #pragma once
 #include "tests.hpp"
-inline std::ostream& operator<<(std::ostream& os, LuaResultState bar)
+inline std::ostream& operator<<(std::ostream& os, ResultState bar)
 {
     switch (bar) {
-    case tcob::LuaResultState::Ok:
+    case tcob::lua::ResultState::Ok:
         return os << "Ok";
-    case tcob::LuaResultState::Yielded:
+    case tcob::lua::ResultState::Yielded:
         return os << "Yielded";
-    case tcob::LuaResultState::Undefined:
+    case tcob::lua::ResultState::Undefined:
         return os << "Undefined";
-    case tcob::LuaResultState::TypeMismatch:
+    case tcob::lua::ResultState::TypeMismatch:
         return os << "TypeMismatch";
-    case tcob::LuaResultState::NonTableIndex:
+    case tcob::lua::ResultState::NonTableIndex:
         return os << "NonTableIndex";
-    case tcob::LuaResultState::RuntimeError:
+    case tcob::lua::ResultState::RuntimeError:
         return os << "RuntimeError";
-    case tcob::LuaResultState::MemAllocError:
+    case tcob::lua::ResultState::MemAllocError:
         return os << "MemAllocError";
-    case tcob::LuaResultState::SyntaxError:
+    case tcob::lua::ResultState::SyntaxError:
         return os << "SyntaxError";
     default:
         return os;
     }
 }
 
-inline std::ostream& operator<<(std::ostream& os, LuaCoroutineState bar)
+inline std::ostream& operator<<(std::ostream& os, CoroutineState bar)
 {
     switch (bar) {
-    case tcob::LuaCoroutineState::Ok:
+    case tcob::lua::CoroutineState::Ok:
         return os << "Ok";
-    case tcob::LuaCoroutineState::Suspended:
+    case tcob::lua::CoroutineState::Suspended:
         return os << "Suspended";
-    case tcob::LuaCoroutineState::Error:
+    case tcob::lua::CoroutineState::Error:
         return os << "Error";
     default:
         return os;
@@ -52,19 +52,19 @@ struct foo {
 
 namespace tcob {
 template <>
-struct LuaConverter<foo> {
+struct Converter<foo> {
     static constexpr i32 StackSlots { 1 };
 
-    static auto IsType(const LuaState& ls, i32 idx) -> bool
+    static auto IsType(const State& ls, i32 idx) -> bool
     {
-        LuaTable lt { ls, idx };
+        Table lt { ls, idx };
         return lt.has("x") && lt.has("y") && lt.has("z");
     }
 
-    static auto FromLua(const LuaState& ls, i32&& idx, foo& value) -> bool
+    static auto FromLua(const State& ls, i32&& idx, foo& value) -> bool
     {
         if (ls.is_table(idx)) {
-            LuaTable lt { ls, idx++ };
+            Table lt { ls, idx++ };
 
             value.x = lt["x"];
             value.y = lt["y"];
@@ -73,10 +73,10 @@ struct LuaConverter<foo> {
         return true;
     }
 
-    static void ToLua(const LuaState& ls, const foo& value)
+    static void ToLua(const State& ls, const foo& value)
     {
         ls.new_table();
-        LuaTable lt { ls, -1 };
+        Table lt { ls, -1 };
 
         lt["x"] = value.x;
         lt["y"] = value.y;
@@ -98,13 +98,13 @@ static float testfuncpair(const std::pair<i32, f32>& p)
 {
     return p.first * p.second;
 }
-static float testfuncfloat2(LuaResult<float> f, LuaResult<float> x, int i)
+static float testfuncfloat2(Result<float> f, Result<float> x, int i)
 {
     return f.Value * x.Value * i;
 }
 
-static LuaTable openrequire(LuaScript& state, const string& name)
+static Table openrequire(Script& state, const string& name)
 {
     string libname = name + ".lua";
-    return state.run_file<LuaTable>(libname, -1).Value;
+    return state.run_file<Table>(libname, -1).Value;
 }

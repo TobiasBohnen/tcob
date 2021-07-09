@@ -7,20 +7,20 @@
 
 #include <lua.hpp>
 
-namespace tcob {
-static const std::unordered_map<LuaLibrary, std::pair<const char*, lua_CFunction>> Libraries = {
-    { LuaLibrary::Table, { LUA_TABLIBNAME, luaopen_table } },
-    { LuaLibrary::String, { LUA_STRLIBNAME, luaopen_string } },
-    { LuaLibrary::Math, { LUA_MATHLIBNAME, luaopen_math } },
-    { LuaLibrary::Coroutine, { LUA_COLIBNAME, luaopen_coroutine } },
-    { LuaLibrary::IO, { LUA_IOLIBNAME, luaopen_io } },
-    { LuaLibrary::OS, { LUA_OSLIBNAME, luaopen_os } },
-    { LuaLibrary::Utf8, { LUA_UTF8LIBNAME, luaopen_utf8 } },
-    { LuaLibrary::Debug, { LUA_DBLIBNAME, luaopen_debug } },
-    { LuaLibrary::Package, { LUA_LOADLIBNAME, luaopen_package } }
+namespace tcob::lua {
+static const std::unordered_map<Library, std::pair<const char*, lua_CFunction>> Libraries = {
+    { Library::Table, { LUA_TABLIBNAME, luaopen_table } },
+    { Library::String, { LUA_STRLIBNAME, luaopen_string } },
+    { Library::Math, { LUA_MATHLIBNAME, luaopen_math } },
+    { Library::Coroutine, { LUA_COLIBNAME, luaopen_coroutine } },
+    { Library::IO, { LUA_IOLIBNAME, luaopen_io } },
+    { Library::OS, { LUA_OSLIBNAME, luaopen_os } },
+    { Library::Utf8, { LUA_UTF8LIBNAME, luaopen_utf8 } },
+    { Library::Debug, { LUA_DBLIBNAME, luaopen_debug } },
+    { Library::Package, { LUA_LOADLIBNAME, luaopen_package } }
 };
 
-LuaScript::LuaScript()
+Script::Script()
     : _state { luaL_newstate() }
 {
     lua_State* ls { _state.lua() };
@@ -28,43 +28,43 @@ LuaScript::LuaScript()
     _state.pop(1);
 
     lua_pushglobaltable(ls);
-    _globalTable = std::make_unique<LuaTable>(_state, -1);
+    _globalTable = std::make_unique<Table>(_state, -1);
     _state.pop(1);
 }
 
-LuaScript::~LuaScript()
+Script::~Script()
 {
     _wrappers.clear();
     _globalTable = nullptr;
     lua_close(_state.lua());
 }
 
-auto LuaScript::global_table() const -> const LuaTable&
+auto Script::global_table() const -> const Table&
 {
     return *_globalTable;
 }
 
-void LuaScript::perform_GC() const
+void Script::perform_GC() const
 {
     lua_gc(_state.lua(), LUA_GCCOLLECT, 0);
 }
 
-void LuaScript::stop_GC() const
+void Script::stop_GC() const
 {
     lua_gc(_state.lua(), LUA_GCSTOP, 0);
 }
 
-void LuaScript::restart_GC() const
+void Script::restart_GC() const
 {
     lua_gc(_state.lua(), LUA_GCRESTART, 0);
 }
 
-auto LuaScript::do_call(i32 nargs, i32 nret) const -> LuaResultState
+auto Script::do_call(i32 nargs, i32 nret) const -> ResultState
 {
     return _state.do_call(nargs, nret);
 }
 
-auto LuaScript::call_buffer(const byte* script, isize length, const std::string& name) const -> LuaResultState
+auto Script::call_buffer(const byte* script, isize length, const std::string& name) const -> ResultState
 {
     const i32 err { luaL_loadbuffer(_state.lua(), script, length, name.c_str()) };
     if (err == LUA_OK) {
@@ -75,39 +75,39 @@ auto LuaScript::call_buffer(const byte* script, isize length, const std::string&
 
         switch (err) {
         case LUA_ERRSYNTAX:
-            return LuaResultState::SyntaxError;
+            return ResultState::SyntaxError;
         case LUA_ERRMEM:
-            return LuaResultState::MemAllocError;
+            return ResultState::MemAllocError;
         default:
-            return LuaResultState::RuntimeError;
+            return ResultState::RuntimeError;
         }
     }
 }
 
-auto LuaScript::load_binarybuffer(const std::string& file) const -> bool
+auto Script::load_binarybuffer(const std::string& file) const -> bool
 {
     std::string s { FileSystem::read_as_string(file) };
     return luaL_loadbufferx(_state.lua(), s.c_str(), s.length(), file.c_str(), "b") == LUA_OK;
 }
 
-void LuaScript::load_library(LuaLibrary lib)
+void Script::load_library(Library lib)
 {
     const auto& [name, func] = Libraries.at(lib);
     luaL_requiref(_state.lua(), name, func, 1);
     _state.pop(1);
 }
 
-void LuaScript::register_searcher(const std::function<LuaTable(LuaScript&, const std::string&)>& func)
+void Script::register_searcher(const std::function<Table(Script&, const std::string&)>& func)
 {
-    _loader = [this, func](const std::string& name) -> LuaTable {
+    _loader = [this, func](const std::string& name) -> Table {
         return func(*this, name);
     };
-    auto searcher { [this](const std::string&) -> std::function<LuaTable(const std::string&)>& {
+    auto searcher { [this](const std::string&) -> std::function<Table(const std::string&)>& {
         return _loader;
     } };
-    _searcher = std::function<std::function<LuaTable(const std::string&)>&(const std::string&)>(searcher);
+    _searcher = std::function<std::function<Table(const std::string&)>&(const std::string&)>(searcher);
 
-    LuaTable searchers { global_table()["package"]["searchers"] };
+    Table searchers { global_table()["package"]["searchers"] };
     searchers[5] = _searcher;
 }
 }

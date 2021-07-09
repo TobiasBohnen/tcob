@@ -10,13 +10,13 @@
 
 #include <tcob/script/LuaState.hpp>
 
-namespace tcob {
-LuaRef::LuaRef()
+namespace tcob::lua {
+Ref::Ref()
     : _ref { LUA_NOREF }
 {
 }
 
-LuaRef::LuaRef(const LuaRef& other)
+Ref::Ref(const Ref& other)
     : _ref { LUA_NOREF }
 {
     if (other._luaState.lua()) {
@@ -27,19 +27,19 @@ LuaRef::LuaRef(const LuaRef& other)
     }
 }
 
-auto LuaRef::operator=(const LuaRef& other) -> LuaRef&
+auto Ref::operator=(const Ref& other) -> Ref&
 {
-    return *this = LuaRef(other);
+    return *this = Ref(other);
 }
 
-LuaRef::LuaRef(LuaRef&& other) noexcept
-    : _luaState { std::exchange(other._luaState, LuaState { nullptr }) }
+Ref::Ref(Ref&& other) noexcept
+    : _luaState { std::exchange(other._luaState, State { nullptr }) }
     , _ref { std::exchange(other._ref, LUA_NOREF) }
     , _ownsRef { std::exchange(other._ownsRef, false) }
 {
 }
 
-auto LuaRef::operator=(LuaRef&& other) noexcept -> LuaRef&
+auto Ref::operator=(Ref&& other) noexcept -> Ref&
 {
     std::swap(_luaState, other._luaState);
     std::swap(_ref, other._ref);
@@ -47,12 +47,12 @@ auto LuaRef::operator=(LuaRef&& other) noexcept -> LuaRef&
     return *this;
 }
 
-LuaRef::~LuaRef()
+Ref::~Ref()
 {
     unref();
 }
 
-void LuaRef::ref(const LuaState& ls, i32 idx)
+void Ref::ref(const State& ls, i32 idx)
 {
     unref();
     _luaState = ls;
@@ -63,27 +63,27 @@ void LuaRef::ref(const LuaState& ls, i32 idx)
     }
 }
 
-void LuaRef::unref()
+void Ref::unref()
 {
     if (is_valid() && _ownsRef) {
         _luaState.unref(LUA_REGISTRYINDEX, _ref);
         _ref = LUA_NOREF;
-        _luaState = LuaState { nullptr };
+        _luaState = State { nullptr };
     }
 }
 
-void LuaRef::push_self() const
+void Ref::push_self() const
 {
     if (is_valid())
         _luaState.raw_get(LUA_REGISTRYINDEX, _ref);
 }
 
-auto LuaRef::state() const -> const LuaState&
+auto Ref::state() const -> const State&
 {
     return _luaState;
 }
 
-auto LuaRef::is_valid() const -> bool
+auto Ref::is_valid() const -> bool
 {
     return _ref != LUA_NOREF && _luaState.lua() != nullptr;
 }

@@ -14,9 +14,9 @@ Config::~Config()
     unref();
 }
 
-auto Config::operator=(const LuaRef& other) -> Config&
+auto Config::operator=(const lua::Ref& other) -> Config&
 {
-    LuaRef::operator=(other);
+    lua::Ref::operator=(other);
     return *this;
 }
 
@@ -32,8 +32,8 @@ auto Config::load() -> bool
         file = DEFAULT_CONFIG_FILE;
     }
 
-    const auto result { _script.run_file<LuaTable>(file) };
-    if (result.State == LuaResultState::Ok) {
+    const auto result { _script.run_file<lua::Table>(file) };
+    if (result.State == lua::ResultState::Ok) {
         *this = result.Value;
         return true;
     } else {

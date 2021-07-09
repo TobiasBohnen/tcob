@@ -7,15 +7,15 @@
 
 #include <tcob/script/LuaConversions.hpp>
 
-namespace tcob {
-LuaTable::LuaTable() = default;
+namespace tcob::lua {
+Table::Table() = default;
 
-LuaTable::LuaTable(const LuaState& ls, i32 idx)
+Table::Table(const State& ls, i32 idx)
 {
     ref(ls, idx);
 }
 
-auto LuaTable::raw_length() const -> isize
+auto Table::raw_length() const -> isize
 {
     const auto& ls { state() };
     const auto guard { ls.create_stack_guard() };
@@ -24,12 +24,12 @@ auto LuaTable::raw_length() const -> isize
     return ls.raw_len(-1);
 }
 
-auto LuaTable::create_table(const std::string& name) const -> LuaTable
+auto Table::create_table(const std::string& name) const -> Table
 {
     const auto& ls { state() };
 
     ls.new_table();
-    LuaTable lt { ls, -1 };
+    Table lt { ls, -1 };
     ls.pop(1);
 
     set(name, lt);
@@ -37,7 +37,7 @@ auto LuaTable::create_table(const std::string& name) const -> LuaTable
     return lt;
 }
 
-void LuaTable::dump(std::stringstream& stream) const
+void Table::dump(std::stringstream& stream) const
 {
     const auto guard { state().create_stack_guard() };
 
@@ -47,14 +47,14 @@ void LuaTable::dump(std::stringstream& stream) const
     stream << std::endl;
 }
 
-void LuaTable::dump(OutputFileStream& stream) const
+void Table::dump(OutputFileStream& stream) const
 {
     std::stringstream sstream;
     dump(sstream);
     stream.write(sstream.str());
 }
 
-void LuaTable::dump_it(std::stringstream& stream, i32 indent) const
+void Table::dump_it(std::stringstream& stream, i32 indent) const
 {
     const auto& ls { state() };
 
@@ -85,13 +85,13 @@ void LuaTable::dump_it(std::stringstream& stream, i32 indent) const
 
         ls.raw_get(-2); // get value
 
-        LuaType type { ls.get_type(-1) };
+        Type type { ls.get_type(-1) };
         switch (type) {
-        case LuaType::Nil:
-        case LuaType::LightUserdata:
-        case LuaType::Function:
-        case LuaType::Userdata:
-        case LuaType::Thread:
+        case Type::Nil:
+        case Type::LightUserdata:
+        case Type::Function:
+        case Type::Userdata:
+        case Type::Thread:
             ls.pop(1);
             continue;
         default:
@@ -104,16 +104,16 @@ void LuaTable::dump_it(std::stringstream& stream, i32 indent) const
 
         std::string val;
         switch (type) {
-        case LuaType::Boolean:
+        case Type::Boolean:
             val = ls.to_bool(-1) ? "true" : "false";
             break;
-        case LuaType::Number:
+        case Type::Number:
             val = ls.to_string(-1);
             break;
-        case LuaType::String:
+        case Type::String:
             val = "\"" + std::string(ls.to_string(-1)) + "\"";
             break;
-        case LuaType::Table:
+        case Type::Table:
             ls.push_value(-1);
             dump_it(stream, indent + 2);
             break;

@@ -15,7 +15,7 @@ class FontLoader : public ResourceLoader<Font> {
 public:
     explicit FontLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void do_unload(ResourcePtr<Font> res, bool greedy) override;

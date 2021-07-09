@@ -20,10 +20,10 @@ const std::string& BOOTSTRAP_FILE { "bootstrap.lua" };
 
 ResourceLibrary::ResourceLibrary()
 {
-    LuaScript script;
+    lua::Script script;
     if (FileSystem::exists(BOOTSTRAP_FILE)) {
         auto result { script.run_file<std::unordered_map<std::string, std::vector<std::string>>>(BOOTSTRAP_FILE) };
-        if (result.State == LuaResultState::Ok) {
+        if (result.State == lua::ResultState::Ok) {
             for (auto& [group, folders] : result.Value) {
                 for (auto& folder : folders) {
                     mount(group, folder);
@@ -98,7 +98,7 @@ auto ResourceLibrary::resource_state(const std::string& group) const -> std::uno
 ResourceGroup::ResourceGroup(std::string name)
     : _name { std::move(name) }
 {
-    _luaScript.open_libraries();
+    _LuaScript.open_libraries();
     register_loader<gl::ShaderProgram>(std::make_unique<detail::ShaderLoader>(*this));
     register_loader<gl::Texture>(std::make_unique<detail::TextureLoader>(*this));
     register_loader<Material>(std::make_unique<detail::MaterialLoader>(*this));
@@ -127,8 +127,8 @@ void ResourceGroup::load()
 
     Loading();
     for (const auto& file : _groupScriptFiles) {
-        auto result { _luaScript.run_file(file).State };
-        if (result != LuaResultState::Ok) {
+        auto result { _LuaScript.run_file(file).State };
+        if (result != lua::ResultState::Ok) {
             //TODO: check error
         }
     }

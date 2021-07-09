@@ -71,11 +71,13 @@ template <typename T>
 class ResourceLoader;
 class ResourceLibrary;
 
-class LuaScript;
-class LuaState;
-class LuaTable;
-template <typename T>
-struct LuaConverter;
+namespace lua {
+    class Script;
+    class State;
+    class Table;
+    template <typename T>
+    struct Converter;
+}
 
 class AudioSystem;
 

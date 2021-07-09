@@ -10,19 +10,19 @@
 
 #include <tcob/script/LuaState.hpp>
 
-namespace tcob {
-class LuaRef {
+namespace tcob::lua {
+class Ref {
 public:
-    LuaRef();
-    virtual ~LuaRef();
+    Ref();
+    virtual ~Ref();
 
-    LuaRef(const LuaRef& other);
-    auto operator=(const LuaRef& other) -> LuaRef&;
+    Ref(const Ref& other);
+    auto operator=(const Ref& other) -> Ref&;
 
-    LuaRef(LuaRef&& other) noexcept;
-    auto operator=(LuaRef&& other) noexcept -> LuaRef&;
+    Ref(Ref&& other) noexcept;
+    auto operator=(Ref&& other) noexcept -> Ref&;
 
-    void ref(const LuaState& state, i32 idx);
+    void ref(const State& state, i32 idx);
     void unref();
 
     void push_self() const;
@@ -30,10 +30,10 @@ public:
     auto is_valid() const -> bool;
 
 protected:
-    auto state() const -> const LuaState&;
+    auto state() const -> const State&;
 
 private:
-    LuaState _luaState { nullptr };
+    State _luaState { nullptr };
     i32 _ref;
     bool _ownsRef { true };
 };

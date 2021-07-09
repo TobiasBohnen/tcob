@@ -10,7 +10,7 @@
 
 namespace tcob::detail {
 
-void create_canvas_wrapper(LuaScript* script, const ResourceLibrary& library);
-void fill_colors_table(const LuaTable& targetTable);
+void create_canvas_wrapper(lua::Script* script, const ResourceLibrary& library);
+void fill_colors_table(const lua::Table& targetTable);
 
 }

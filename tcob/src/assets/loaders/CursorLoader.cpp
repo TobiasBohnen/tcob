@@ -14,7 +14,7 @@ CursorLoader::CursorLoader(ResourceGroup& group)
 {
 }
 
-void CursorLoader::register_wrapper(LuaScript& script)
+void CursorLoader::register_wrapper(lua::Script& script)
 {
     // cursor
     _funcNew = [this](const std::string& s) {
@@ -34,7 +34,7 @@ void CursorLoader::register_wrapper(LuaScript& script)
         def->material = material;
         return def;
     });
-    wrapper.function("modes", [](CursorDef* def, const LuaTable& table) {
+    wrapper.function("modes", [](CursorDef* def, const lua::Table& table) {
         for (auto& key : table.keys<std::string>()) {
             def->Res->define_mode(key, table[key]["texture"], table[key]["hotspot"]);
         }

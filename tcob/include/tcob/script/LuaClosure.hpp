@@ -10,31 +10,31 @@
 
 #include <tcob/script/LuaState.hpp>
 
-namespace tcob::detail {
-class LuaClosureBase {
+namespace tcob::lua::detail {
+class ClosureBase {
 public:
-    LuaClosureBase() = default;
-    virtual ~LuaClosureBase() = default;
+    ClosureBase() = default;
+    virtual ~ClosureBase() = default;
 
     virtual auto operator()(lua_State* l) -> i32 = 0;
     virtual auto compare_args_to_stack(lua_State* l, i32 args) -> bool = 0;
 };
 
 template <typename R, typename... P>
-class LuaClosure;
+class Closure;
 template <typename R, typename... P>
-class LuaClosure<R(P...)> : public LuaClosureBase {
+class Closure<R(P...)> : public ClosureBase {
     using func = std::function<R(P...)>;
 
 public:
-    explicit LuaClosure(func& fn)
+    explicit Closure(func& fn)
         : _fn { fn }
     {
         if constexpr (sizeof...(P) > 0)
             _numArgs = count_args<P...>();
     }
 
-    virtual ~LuaClosure()
+    virtual ~Closure()
     {
         _fn = nullptr;
     }
@@ -47,7 +47,7 @@ public:
     auto compare_args_to_stack(lua_State* l, i32 args) -> bool override
     {
         if constexpr (sizeof...(P) == 0) {
-            return args == 0 || (args == 1 && LuaState { l }.is_userdata(args));
+            return args == 0 || (args == 1 && State { l }.is_userdata(args));
         } else if (args == _numArgs) {
             return compare_types<P...>(l, 1);
         } else {
@@ -58,7 +58,7 @@ public:
     auto invoke(lua_State* l) -> i32
     {
         std::tuple<std::remove_cvref_t<P>...> params;
-        LuaState ls { l };
+        State ls { l };
 
         std::apply([&ls](auto&... item) {
             //FIXME: check parameters
@@ -82,11 +82,11 @@ private:
     template <typename T, typename... Args>
     auto compare_types(lua_State* l, i32 startIndex) const -> bool
     {
-        bool result { LuaConverter<std::remove_cvref_t<T>>::IsType(LuaState { l }, startIndex) };
+        bool result { Converter<std::remove_cvref_t<T>>::IsType(State { l }, startIndex) };
 
         if constexpr (sizeof...(Args) > 0) {
             using Type = std::remove_cvref_t<T>;
-            startIndex += LuaConverter<Type>::StackSlots;
+            startIndex += Converter<Type>::StackSlots;
             result = result && compare_types<Args...>(l, startIndex);
         }
         return result;
@@ -98,9 +98,9 @@ private:
         using Type = std::remove_cvref_t<T>;
 
         if constexpr (sizeof...(Args) > 0) {
-            return LuaConverter<Type>::StackSlots + count_args<Args...>();
+            return Converter<Type>::StackSlots + count_args<Args...>();
         } else {
-            return LuaConverter<Type>::StackSlots;
+            return Converter<Type>::StackSlots;
         }
     }
 
@@ -109,19 +109,19 @@ private:
 };
 
 }
-namespace tcob {
-using LuaClosureUniquePtr = std::unique_ptr<detail::LuaClosureBase>;
-using LuaClosureSharedPtr = std::shared_ptr<detail::LuaClosureBase>;
+namespace tcob::lua {
+using ClosureUniquePtr = std::unique_ptr<detail::ClosureBase>;
+using ClosureSharedPtr = std::shared_ptr<detail::ClosureBase>;
 
 template <typename R, typename... P>
-auto make_unique_luaclosure(std::function<R(P...)>&& fn) -> LuaClosureUniquePtr
+auto make_unique_closure(std::function<R(P...)>&& fn) -> ClosureUniquePtr
 {
-    return std::make_unique<detail::LuaClosure<R(P...)>>(fn);
+    return std::make_unique<detail::Closure<R(P...)>>(fn);
 }
 
 template <typename R, typename... P>
-auto make_shared_luaclosure(std::function<R(P...)>&& fn) -> LuaClosureSharedPtr
+auto make_shared_closure(std::function<R(P...)>&& fn) -> ClosureSharedPtr
 {
-    return std::make_shared<detail::LuaClosure<R(P...)>>(fn);
+    return std::make_shared<detail::Closure<R(P...)>>(fn);
 }
 }

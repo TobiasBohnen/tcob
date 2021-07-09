@@ -14,7 +14,7 @@ ParticleSystemLoader::ParticleSystemLoader(ResourceGroup& group)
 {
 }
 
-void ParticleSystemLoader::register_wrapper(LuaScript& script)
+void ParticleSystemLoader::register_wrapper(lua::Script& script)
 {
     // template
     _funcNewTemplate = [this](const std::string& s) {

@@ -16,7 +16,7 @@ class ParticleSystemLoader : public ResourceLoader<ParticleSystem> {
 public:
     explicit ParticleSystemLoader(ResourceGroup& group);
 
-    void register_wrapper(LuaScript& script) override;
+    void register_wrapper(lua::Script& script) override;
 
 protected:
     void on_preparing() override;
@@ -50,7 +50,7 @@ private:
     };
 
     template <typename Func>
-    void define_template_function(LuaWrapper<TemplateDef>& wrapper, const std::string& name, Func func)
+    void define_template_function(lua::Wrapper<TemplateDef>& wrapper, const std::string& name, Func func)
     {
         wrapper.function(name, [func](TemplateDef* def, f32 min, std::optional<f32> max) {
             if (!max.has_value()) {

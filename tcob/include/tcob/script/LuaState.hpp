@@ -17,20 +17,20 @@
 struct lua_State;
 typedef int (*lua_CFunction)(lua_State* L);
 
-namespace tcob {
+namespace tcob::lua {
 template <typename T>
-concept ConvertableToLua = requires(T& t, const LuaState& state)
+concept ConvertableToLua = requires(T& t, const State& state)
 {
-    { tcob::LuaConverter<T>::ToLua(state, t) };
+    { tcob::lua::Converter<T>::ToLua(state, t) };
 };
 
 template <typename T>
-concept ConvertableFromLua = requires(T& t, const LuaState& state)
+concept ConvertableFromLua = requires(T& t, const State& state)
 {
-    { tcob::LuaConverter<T>::FromLua(state, 1, t) };
+    { tcob::lua::Converter<T>::FromLua(state, 1, t) };
 };
 
-enum class LuaResultState {
+enum class ResultState {
     Ok,
     Yielded,
     Undefined,
@@ -41,7 +41,7 @@ enum class LuaResultState {
     SyntaxError
 };
 
-enum class LuaType {
+enum class Type {
     None,
     Nil,
     Boolean,
@@ -54,7 +54,7 @@ enum class LuaType {
     Thread
 };
 
-enum class LuaThreadState {
+enum class ThreadState {
     Ok,
     Yielded,
     RuntimeError,
@@ -64,38 +64,38 @@ enum class LuaThreadState {
 };
 
 template <typename T>
-struct [[nodiscard]] LuaResult {
+struct [[nodiscard]] Result {
     T Value;
-    LuaResultState State { LuaResultState::Ok };
+    ResultState State { ResultState::Ok };
 
     operator T() const
     {
         if constexpr (!tcob::detail::is_specialization<T, std::optional>())
-            assert(State == LuaResultState::Ok);
+            assert(State == ResultState::Ok);
         return Value;
     }
 };
 
 template <>
-struct [[nodiscard]] LuaResult<void> {
-    LuaResultState State;
+struct [[nodiscard]] Result<void> {
+    ResultState State;
 };
 
-class LuaStackGuard final {
+class StackGuard final {
 public:
-    explicit LuaStackGuard(lua_State* l);
-    ~LuaStackGuard();
+    explicit StackGuard(lua_State* l);
+    ~StackGuard();
 
 private:
     lua_State* _luaState;
     mutable i32 _oldTop { 0 };
 };
 
-class LuaState final {
+class State final {
 public:
-    explicit LuaState(lua_State* l);
+    explicit State(lua_State* l);
 
-    auto create_stack_guard() const -> LuaStackGuard;
+    auto create_stack_guard() const -> StackGuard;
 
     template <typename... T>
     void push(T&&... t) const
@@ -132,9 +132,9 @@ public:
     auto to_integer(i32 idx) const -> i64;
     auto to_number(i32 idx) const -> f64;
     auto to_string(i32 idx) const -> const char*;
-    auto to_thread(i32 idx) const -> LuaState;
+    auto to_thread(i32 idx) const -> State;
     auto to_userdata(i32 idx) const -> void*;
-    auto get_type(i32 idx) const -> LuaType;
+    auto get_type(i32 idx) const -> Type;
 
     auto get_top() const -> i32;
 
@@ -152,7 +152,7 @@ public:
     void push_value(i32 idx) const;
     void pop(i32 count) const;
     void remove(i32 count) const;
-    auto get_table(i32 idx) const -> LuaType;
+    auto get_table(i32 idx) const -> Type;
     void get_metatable(const char* tableName) const;
     void set_table(i32 idx) const;
     void set_metatable(i32 idx) const;
@@ -169,8 +169,8 @@ public:
     void insert(i32 idx) const;
 
     auto raw_len(i32 idx) const -> u64;
-    auto raw_get(i32 idx, i64 n) const -> LuaType;
-    auto raw_get(i32 idx) const -> LuaType;
+    auto raw_get(i32 idx, i64 n) const -> Type;
+    auto raw_get(i32 idx) const -> Type;
     void raw_set(i32 idx, i64 n) const;
     void raw_set(i32 idx) const;
 
@@ -179,40 +179,40 @@ public:
 
     auto status() const -> i32;
 
-    auto resume(i32 argCount, i32* resultCount) const -> LuaThreadState;
+    auto resume(i32 argCount, i32* resultCount) const -> ThreadState;
     auto reset_thread() const -> i32;
 
     static auto UpvalueIndex(i32 n) -> i32;
 
     auto lua() const -> lua_State*;
 
-    auto do_call(i32 nargs, i32 nret) const -> LuaResultState;
+    auto do_call(i32 nargs, i32 nret) const -> ResultState;
 
 private:
     //////get//////
     template <ConvertableFromLua T>
     auto from_lua(i32&& idx, T& value) const -> bool
     {
-        return LuaConverter<T>::FromLua(*this, std::forward<i32>(idx), value);
+        return Converter<T>::FromLua(*this, std::forward<i32>(idx), value);
     }
 
     //////push//////
     template <ConvertableToLua T>
     void to_lua(const T& value) const
     {
-        LuaConverter<T>::ToLua(*this, value);
+        Converter<T>::ToLua(*this, value);
     }
 
     template <ConvertableToLua T>
     void to_lua(T&& value) const
     {
-        LuaConverter<T>::ToLua(*this, value);
+        Converter<T>::ToLua(*this, value);
     }
 
     template <ConvertableToLua T>
     void to_lua(T& value) const
     {
-        LuaConverter<T>::ToLua(*this, value);
+        Converter<T>::ToLua(*this, value);
     }
 
     void to_lua(const char* value) const
