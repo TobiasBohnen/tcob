@@ -270,6 +270,176 @@ TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper")
     }
 }
 
+TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Wrapper2")
+{
+    TestScriptClass t;
+    global["earlywrap"] = &t;
+    using namespace tcob::lua_wrapper;
+
+    auto f1 = overload<i32, f32>(&TestScriptClass::overload);
+    auto f2 = overload<f32, i32>(&TestScriptClass::overload);
+    auto f3 = overload<const vector<f32>&>(&TestScriptClass::overload);
+    auto f4 = overload<i32, const pair<f32, string>&, f32>(&TestScriptClass::overload);
+    auto f5 = overload<const tuple<f32, i32, string>&>(&TestScriptClass::overload);
+    auto f6 = []() -> f32 { return 40.0f; };
+
+    auto& wrapper = create_wrapper<TestScriptClass>("TSC");
+    wrapper
+        | Function { "foo", &TestScriptClass::foo }
+        | Function { "add", &TestScriptClass::add_value }
+        | Function { "bar", &TestScriptClass::bar }
+        | Function { "me", []() -> i32 { return 40; } }
+        | Function { "ptr", &TestScriptClass::ptr }
+        | Getter { "map", &TestScriptClass::get_map }
+        | Getter { "ro_age", &TestScriptClass::get_value }
+        | Setter { "wo_age", &TestScriptClass::set_value }
+        | Property { "age", &TestScriptClass::get_value, &TestScriptClass::set_value }
+        | Overload { "overload", std::make_tuple(f1, f2, f3, f4, f5, f6) }
+        | Constructor<> {}
+        | Constructor<i32> {}
+        | Constructor<i32, f32> {};
+
+    SECTION("early wrap")
+    {
+        i32 x = run_script<i32>("return earlywrap:foo('test', 2, true)");
+        REQUIRE(x == 2 * 4);
+    }
+    SECTION("index acces")
+    {
+        TestScriptClass t1;
+        global["wrap1"] = &t1;
+        t1.set_value(100);
+        i32 i = run_script<i32>("return wrap1[1]");
+        REQUIRE(i == 100);
+        auto res = run_script("wrap1[1] = 400");
+        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(t1.get_value() == 400);
+    }
+    SECTION("pointer parameter")
+    {
+        global["test"]["WrapperObj"] = testFuncWrapperObj;
+        TestScriptClass t1;
+        global["wrap"] = &t1;
+        t1.set_value(100);
+        i32 i = run_script<i32>("return test.WrapperObj(wrap)");
+        REQUIRE(i == 100);
+    }
+    SECTION("constructor")
+    {
+        TestScriptClass* t = run_script<TestScriptClass*>("return TSC.new(20)");
+        REQUIRE(t->get_value() == 20);
+        t = run_script<TestScriptClass*>("return TSC.new(20, 3.5)");
+        REQUIRE(t->get_value() == 20 * (i32)3.5f);
+        t = run_script<TestScriptClass*>("return TSC.new()");
+        REQUIRE(t->get_value() == 0);
+    }
+    SECTION("pointer from lua")
+    {
+        TestScriptClass t;
+        global["wrap"] = &t;
+        TestScriptClass* tp = global["wrap"];
+        REQUIRE(tp == &t);
+    }
+    SECTION("properties")
+    {
+        TestScriptClass t;
+        global["wrap"] = &t;
+        t.set_value(42);
+        i32 age = run_script<i32>("return wrap.ro_age");
+        REQUIRE(age == 42);
+
+        auto res = run_script("wrap.wo_age = 21");
+        REQUIRE(res.State == LuaResultState::Ok);
+        REQUIRE(t.get_value() == 21);
+    }
+    SECTION("overloads")
+    {
+        TestScriptClass t;
+        global["wrap"] = &t;
+        f32 x = run_script<f32>("return wrap:overload({0.2,0.4})");
+        REQUIRE(x == t.overload(vector<f32> { 0.2f, 0.4f }));
+
+        x = run_script<f32>("return wrap:overload(4, 2.0)");
+        REQUIRE(x == t.overload(4, 2.0f));
+
+        x = run_script<f32>("return wrap:overload(2.0, 12)");
+        REQUIRE(x == t.overload(2.0f, 12));
+
+        x = run_script<f32>("return wrap:overload(15, 2.0, 'huhu', 99.9)");
+        REQUIRE(x == t.overload(15, { 2.0f, "huhu" }, 99.9f));
+
+        x = run_script<f32>("return wrap:overload(2.0, 15, 'huhu')");
+        REQUIRE(x == t.overload({ 2.0f, 15, "huhu" }));
+
+        x = run_script<f32>("return wrap:overload()");
+        REQUIRE(x == 40);
+    }
+    SECTION("functions and properties")
+    {
+        TestScriptClass t;
+        global["wrap"] = &t;
+        i32 x = run_script<i32>("return wrap:foo('test', 4, true)");
+        auto res = run_script("wrap:bar(true, 'test', 4)");
+        REQUIRE(x == 4 * 4);
+        res = run_script("wrap.age = 25");
+        res = run_script("age = wrap.age");
+        i32 age = global["age"];
+        REQUIRE(age == 25);
+        REQUIRE(t.get_value() == 25);
+        REQUIRE(run_script<i32>("return wrap:me()") == 40);
+    }
+    SECTION("more properties")
+    {
+        TestScriptClass t;
+        global["wrap"] = &t;
+        t.set_value(350);
+        auto res = run_script(
+            "function foo(x) "
+            "return x.age "
+            "end ");
+        REQUIRE(res.State == LuaResultState::Ok);
+
+        LuaFunction<i32> func = global["foo"];
+        i32 x = func(&t);
+        REQUIRE(x == 350);
+    }
+    SECTION("even more properties")
+    {
+        TestScriptClass t1;
+        global["wrap"] = &t1;
+
+        t1.set_value(100);
+        i32 x = run_script<i32>("return wrap.age");
+        REQUIRE(x == 100);
+        x = run_script<i32>("return wrap:add(20)");
+        REQUIRE(x == 120);
+
+        TestScriptClass t2;
+        t2.set_value(250);
+
+        global["wrap"] = &t2;
+        x = run_script<i32>("return wrap.age");
+        REQUIRE(x == 250);
+
+        global["wrap"] = &t1;
+        x = run_script<i32>("return wrap:add(20)");
+        REQUIRE(x == 120);
+    }
+    SECTION("wrapped member")
+    {
+        create_wrapper<map<string, i32>>("map");
+        TestScriptClass t;
+        global["wrap"] = &t;
+        map<string, i32>& map = *t.get_map();
+        map["x"] = 100;
+        auto res = run_script(
+            "wrap.map.x = 300 ");
+        REQUIRE(res.State == LuaResultState::Ok);
+        map = *t.get_map();
+        REQUIRE(map["x"] == 300);
+    }
+}
+
 TEST_CASE_METHOD(LuaWrapperTests, "Script.Wrapper.Metamethods")
 {
     auto& wrapper = create_wrapper<TestScriptClass>("TSCB");

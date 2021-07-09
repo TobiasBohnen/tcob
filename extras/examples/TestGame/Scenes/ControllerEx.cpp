@@ -20,18 +20,14 @@ void ControllerEx::on_start()
         return;
     }
     auto& resMgr { game().resources() };
-    auto font { resMgr.get<Font>("res", "DejaVuSans32") };
 
-    _text.font(font);
     _text.text("1: High freq \n"
                "2: Low freq \n"
                "3: both \n");
     _text.bounds({ { 0.05f, 0.1f }, { 0.75f, 1.75f } });
     _text.outline_thickness(0.5f);
     _text.outline_color(Colors::Black);
-    _text.update(MilliSeconds { 0 });
 
-    _controllerDesc.font(font);
     _controllerDesc.outline_thickness(0.5f);
     _controllerDesc.outline_color(Colors::Black);
     _controllerDesc.bounds({ { 0.55f, 0.1f }, { 1.25f, 0.75f } });
@@ -40,7 +36,7 @@ void ControllerEx::on_start()
     stream << "Controller count: " << game().input().controller_count() << "\n";
     stream << "Name of controller 0:" << game().input().controller_at(0).name();
     _controllerDesc.text(stream.str());
-    _controllerDesc.update(MilliSeconds { 0 });
+
     _controllerDesc.scale({ 0.75f, 0.75f });
 }
 
@@ -52,6 +48,8 @@ void ControllerEx::on_draw(RenderTarget& target)
 
 void ControllerEx::on_update(MilliSeconds deltaTime)
 {
+    _text.update(deltaTime);
+    _controllerDesc.update(deltaTime);
 }
 
 void ControllerEx::on_fixed_update(MilliSeconds deltaTime)

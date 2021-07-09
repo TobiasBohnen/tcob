@@ -622,4 +622,98 @@ private:
         { LuaMetamethod::RightShift, "__shr" }
     };
 };
+
+namespace lua_wrapper {
+    template <typename Func>
+    struct Function {
+        std::string Name;
+        Func WrappedFunction;
+    };
+    template <typename Func>
+    struct Getter {
+        std::string Name;
+        Func Getter;
+    };
+    template <typename Func>
+    struct Setter {
+        std::string Name;
+        Func Setter;
+    };
+    template <typename Get, typename Set>
+    struct Property {
+        std::string Name;
+        Get Getter;
+        Set Setter;
+    };
+    template <typename... Funcs>
+    struct Overload {
+        std::string Name;
+        std::tuple<Funcs...> Funcs;
+    };
+    template <typename... Funcs>
+    struct Setters {
+        std::string Name;
+        std::tuple<Funcs...> Funcs;
+    };
+    template <typename... Types>
+    struct Constructor {
+    };
+}
+
+template <typename T, typename Func>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Function<Func>& func) -> LuaWrapper<T>&
+{
+    wrap.function(func.Name, func.WrappedFunction);
+    return wrap;
+}
+
+template <typename T, typename Func>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Getter<Func>& func) -> LuaWrapper<T>&
+{
+    wrap.getter(func.Name, func.Getter);
+    return wrap;
+}
+
+template <typename T, typename Func>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Setter<Func>& func) -> LuaWrapper<T>&
+{
+    wrap.setter(func.Name, func.Setter);
+    return wrap;
+}
+
+template <typename T, typename Get, typename Set>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Property<Get, Set>& func) -> LuaWrapper<T>&
+{
+    wrap.property(func.Name, func.Getter, func.Setter);
+    return wrap;
+}
+
+template <typename T, typename... Funcs>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Overload<Funcs...>& func) -> LuaWrapper<T>&
+{
+    std::apply(
+        [&wrap, &func](auto&&... args) {
+            wrap.function(func.Name, args...);
+        },
+        func.Funcs);
+    return wrap;
+}
+
+template <typename T, typename... Funcs>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Setters<Funcs...>& func) -> LuaWrapper<T>&
+{
+    std::apply(
+        [&wrap, &func](auto&&... args) {
+            wrap.setters(func.Name, args...);
+        },
+        func.Funcs);
+    return wrap;
+}
+
+template <typename T, typename... Types>
+inline auto operator|(LuaWrapper<T>& wrap, const lua_wrapper::Constructor<Types...>& func) -> LuaWrapper<T>&
+{
+    wrap.constructor<Types...>();
+    return wrap;
+}
 }
