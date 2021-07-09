@@ -16,12 +16,6 @@
 namespace tcob {
 
 template <typename T>
-concept HasInterval = requires(T& t)
-{
-    std::same_as<decltype(t.Interval), MilliSeconds>;
-};
-
-template <typename T>
 concept QuadEffectFunction = requires(T& t, Quad& q)
 {
     {
@@ -65,16 +59,13 @@ private:
     std::vector<Quad> _oriQuads {};
 };
 
-template <QuadEffectFunction Func>
-class QuadEffect : public QuadEffectBase {
+template <QuadEffectFunction... Funcs>
+class QuadEffects : public QuadEffectBase {
 public:
-    QuadEffect(MilliSeconds duration, Func&& ptr)
+    QuadEffects(MilliSeconds duration, Funcs&&... ptr)
         : QuadEffectBase { duration }
-        , _function { std::move(ptr) }
+        , _functions { std::make_tuple(ptr...) }
     {
-        if constexpr (HasInterval<Func>) {
-            interval(ptr.Interval);
-        }
     }
 
 protected:
@@ -85,26 +76,30 @@ protected:
         const auto& refQuads { ref_quads() };
         const auto& oriQuads { ori_quads() };
 
-        for (auto& q : refQuads) {
-            _function.value(e, i, refQuads.size(), q, oriQuads[i]);
-            ++i;
+        for (isize i { 0 }; i < refQuads.size(); ++i) {
+            std::apply([=](auto&&... func) { (func.value(e, i, refQuads.size(), refQuads[i], oriQuads[i]), ...); },
+                _functions);
         }
     }
 
 private:
-    Func _function;
+    std::tuple<Funcs...> _functions;
 };
 
-template <typename Func, typename... Rs>
-auto make_unique_quadeffect(MilliSeconds duration, Rs&&... args) -> std::unique_ptr<QuadEffect<Func>>
+template <typename... Funcs>
+auto make_unique_quadeffects(MilliSeconds duration, MilliSeconds interval, Funcs&&... args) -> std::unique_ptr<QuadEffects<Funcs...>>
 {
-    return std::unique_ptr<QuadEffect<Func>>(new QuadEffect<Func> { duration, Func { std::forward<Rs>(args)... } });
+    auto retValue { std::unique_ptr<QuadEffects<Funcs...>>(new QuadEffects<Funcs...> { duration, std::forward<Funcs>(args)... }) };
+    retValue->interval(interval);
+    return retValue;
 }
 
-template <typename Func, typename... Rs>
-auto make_shared_quadeffect(MilliSeconds duration, Rs&&... args) -> std::shared_ptr<QuadEffect<Func>>
+template <typename... Funcs>
+auto make_shared_quadeffects(MilliSeconds duration, MilliSeconds interval, Funcs&&... args) -> std::shared_ptr<QuadEffects<Funcs...>>
 {
-    return std::shared_ptr<QuadEffect<Func>>(new QuadEffect<Func> { duration, Func { std::forward<Rs>(args)... } });
+    auto retValue { std::shared_ptr<QuadEffects<Funcs...>>(new QuadEffects<Funcs...> { duration, std::forward<Funcs>(args)... }) };
+    retValue->interval(interval);
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
@@ -129,9 +124,8 @@ struct FadeOutEffect final {
 
 struct BlinkEffect final {
 public:
-    BlinkEffect(MilliSeconds interval, Color color0, Color color1);
+    BlinkEffect(Color color0, Color color1);
 
-    MilliSeconds Interval;
     Color Color0;
     Color Color1;
 
@@ -144,7 +138,7 @@ private:
 ////////////////////////////////////////////////////////////
 
 struct ShakeEffect final {
-    MilliSeconds Interval;
+
     f32 Intensity;
     Random RNG;
 
@@ -154,6 +148,7 @@ struct ShakeEffect final {
 ////////////////////////////////////////////////////////////
 
 struct WaveEffect final {
+
     f32 Height;
     f32 Amplitude;
 

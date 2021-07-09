@@ -49,14 +49,18 @@ void TextEx::on_start()
         "{EFFECT:5}"
         "Shake\n"
         "{EFFECT:6}"
+        "TypingShake\n"
+        "{EFFECT:7}"
         "WaveWave\n");
     text4->bounds({ { 0.70f, 0.01f }, { 0.55f, 2.5f } });
-    text4->register_effect(1, make_unique_quadeffect<TypingEffect>(3s));
-    text4->register_effect(2, make_unique_quadeffect<FadeInEffect>(3s));
-    text4->register_effect(3, make_unique_quadeffect<FadeOutEffect>(3s));
-    text4->register_effect(4, make_unique_quadeffect<BlinkEffect>(3s, 0.5s, Colors::Orange, Colors::Teal));
-    text4->register_effect(5, make_unique_quadeffect<ShakeEffect>(3s, 0.05s, 0.005f, Random { 12345 }));
-    text4->register_effect(6, make_unique_quadeffect<WaveEffect>(3s, 0.05f, 4.f));
+    text4->register_effect(1, make_unique_quadeffects<TypingEffect>(3s, 0s, {}));
+    text4->register_effect(2, make_unique_quadeffects<FadeInEffect>(3s, 0s, {}));
+    text4->register_effect(3, make_unique_quadeffects<FadeOutEffect>(3s, 0s, {}));
+    text4->register_effect(4, make_unique_quadeffects<BlinkEffect>(3s, 0.5s, { Colors::Orange, Colors::Teal }));
+    text4->register_effect(5, make_unique_quadeffects<ShakeEffect>(3s, 0.05s, { 0.005f, Random { 12345 } }));
+    text4->register_effect(6, make_unique_quadeffects<TypingEffect, ShakeEffect>(3s, 0.05s, {}, { 0.005f, Random { 12345 } }));
+    text4->register_effect(7, make_unique_quadeffects<WaveEffect>(3s, 0s, { 0.05f, 4.f }));
+
     text4->start_all_effects(true);
 }
 
