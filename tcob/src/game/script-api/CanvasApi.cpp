@@ -4,7 +4,6 @@
 // https://opensource.org/licenses/MIT
 #include "CanvasApi.hpp"
 
-#include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/script/LuaConversions.hpp>
 
 namespace tcob {

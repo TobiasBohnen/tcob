@@ -14,6 +14,7 @@ namespace tcob {
 template <typename T>
 class ResourcePtr;
 
+class ResourceGroup;
 ////////////////////////////////////////////////////////////
 
 enum class ResourceState {

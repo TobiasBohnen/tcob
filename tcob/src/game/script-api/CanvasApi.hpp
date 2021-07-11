@@ -5,6 +5,7 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/script/LuaScript.hpp>
 

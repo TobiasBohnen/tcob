@@ -10,6 +10,7 @@
 #include <queue>
 #include <stack>
 
+#include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/core/Input.hpp>
 #include <tcob/game/Config.hpp>
 #include <tcob/game/Scene.hpp>

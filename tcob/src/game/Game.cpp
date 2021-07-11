@@ -7,7 +7,6 @@
 
 #include <SDL2/SDL.h>
 
-#include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/gl/GLCapabilities.hpp>
 

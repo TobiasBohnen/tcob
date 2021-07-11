@@ -54,13 +54,6 @@ using MilliSeconds = std::chrono::duration<double, std::milli>;
 //forward decl
 class Game;
 
-class ResourceGroup;
-template <typename T>
-class Resource;
-template <typename T>
-class ResourceLoader;
-class ResourceLibrary;
-
 namespace lua {
     template <typename T>
     struct Converter;
