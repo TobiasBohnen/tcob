@@ -18,6 +18,8 @@ struct lua_State;
 typedef int (*lua_CFunction)(lua_State* L);
 
 namespace tcob::lua {
+class State;
+
 template <typename T>
 concept ConvertableToLua = requires(T& t, const State& state)
 {

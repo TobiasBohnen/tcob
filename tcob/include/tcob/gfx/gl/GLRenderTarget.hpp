@@ -7,6 +7,7 @@
 #include <tcob/tcob_config.hpp>
 
 #include <tcob/assets/Resource.hpp>
+#include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Size.hpp>
 #include <tcob/gfx/Camera.hpp>
 #include <tcob/gfx/Material.hpp>

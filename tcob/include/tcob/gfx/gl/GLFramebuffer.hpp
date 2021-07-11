@@ -6,6 +6,7 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Size.hpp>
 #include <tcob/gfx/gl/GLObject.hpp>
 

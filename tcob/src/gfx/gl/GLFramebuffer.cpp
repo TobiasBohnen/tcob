@@ -6,10 +6,8 @@
 #include <tcob/gfx/gl/GLFramebuffer.hpp>
 
 #include <cassert>
-
 #include <glad/gl.h>
 
-#include <tcob/core/data/Color.hpp>
 #include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob::gl {

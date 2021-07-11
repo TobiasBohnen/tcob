@@ -7,7 +7,6 @@
 
 #include <glad/gl.h>
 
-#include <tcob/core/data/Color.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>
 #include <tcob/gfx/gl/GLTexture.hpp>
 #include <tcob/gfx/gl/GLUniformBuffer.hpp>

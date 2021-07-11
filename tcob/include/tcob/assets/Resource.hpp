@@ -44,6 +44,9 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
+namespace lua {
+    class Script;
+}
 
 template <typename T>
 class ResourceLoader : public ResourceLoaderBase {

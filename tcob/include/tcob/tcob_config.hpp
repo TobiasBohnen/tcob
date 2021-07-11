@@ -52,8 +52,6 @@ constexpr auto TAU_F { std::numbers::pi_v<f32> * 2 };
 using MilliSeconds = std::chrono::duration<double, std::milli>;
 
 //forward decl
-struct Color;
-
 class Drawable;
 class Game;
 class Image;
@@ -72,9 +70,6 @@ class ResourceLoader;
 class ResourceLibrary;
 
 namespace lua {
-    class Script;
-    class State;
-    class Table;
     template <typename T>
     struct Converter;
 }
