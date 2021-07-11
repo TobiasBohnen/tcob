@@ -10,7 +10,6 @@
 #include <tcob/assets/ResourceLibrary.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/gl/GLCapabilities.hpp>
-#include <tcob/gfx/gl/GLWindow.hpp>
 
 namespace tcob {
 using hrc = std::chrono::high_resolution_clock;

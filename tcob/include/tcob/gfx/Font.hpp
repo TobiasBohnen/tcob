@@ -12,6 +12,7 @@
 #include <tcob/assets/Resource.hpp>
 #include <tcob/core/data/Rect.hpp>
 #include <tcob/gfx/Material.hpp>
+#include <tcob/gfx/gl/GLShaderProgram.hpp>
 #include <tcob/gfx/gl/GLTexture.hpp>
 #include <tcob/thirdparty/sigslot/signal.hpp>
 

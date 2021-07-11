@@ -8,8 +8,6 @@
 #include <cassert>
 #include <glad/gl.h>
 
-#include <tcob/gfx/gl/GLTexture.hpp>
-
 namespace tcob::gl {
 Framebuffer::Framebuffer()
 {

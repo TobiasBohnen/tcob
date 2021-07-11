@@ -10,7 +10,6 @@
 #include <glad/gl.h>
 
 #include <tcob/gfx/Quad.hpp>
-#include <tcob/gfx/gl/GLRenderTarget.hpp>
 #include <tcob/gfx/gl/GLShaderProgram.hpp>
 #include <tcob/gfx/gl/GLTexture.hpp>
 

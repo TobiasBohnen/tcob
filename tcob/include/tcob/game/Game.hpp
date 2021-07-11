@@ -14,6 +14,7 @@
 #include <tcob/game/Config.hpp>
 #include <tcob/game/Scene.hpp>
 #include <tcob/gfx/gl/GLContext.hpp>
+#include <tcob/gfx/gl/GLWindow.hpp>
 #include <tcob/sfx/AudioSystem.hpp>
 #include <tcob/thirdparty/sigslot/signal.hpp>
 

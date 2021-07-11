@@ -13,6 +13,7 @@
 #include <tcob/gfx/Image.hpp>
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/gl/GLFramebuffer.hpp>
+#include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob::gl {
 class RenderTarget {

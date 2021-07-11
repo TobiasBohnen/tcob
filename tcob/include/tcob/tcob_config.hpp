@@ -66,17 +66,4 @@ namespace lua {
     struct Converter;
 }
 
-namespace gl {
-    class RenderTarget;
-    class Renderer;
-    class Object;
-    class ShaderProgram;
-    class Texture;
-    class Texture1D;
-    class Texture2D;
-    class Texture2DArray;
-    class UniformBuffer;
-    class Window;
-}
-
 }

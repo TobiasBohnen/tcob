@@ -9,6 +9,7 @@
 #include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Size.hpp>
 #include <tcob/gfx/gl/GLObject.hpp>
+#include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob::gl {
 class Framebuffer final : public Object {

@@ -11,6 +11,7 @@
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/Quad.hpp>
 #include <tcob/gfx/gl/GLEnum.hpp>
+#include <tcob/gfx/gl/GLRenderTarget.hpp>
 #include <tcob/gfx/gl/GLVertexArray.hpp>
 
 namespace tcob::gl {

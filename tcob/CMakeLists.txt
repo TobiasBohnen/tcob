@@ -54,7 +54,6 @@ set(LIB_SRCFILES
         src/gfx/gl/GLEnum.cpp
         src/gfx/gl/GLFramebuffer.cpp
         src/gfx/gl/GLObject.cpp
-        src/gfx/gl/GLObjectRegistry.cpp
         src/gfx/gl/GLPixelBuffer.cpp
         src/gfx/gl/GLRenderTarget.cpp
         src/gfx/gl/GLRenderTexture.cpp

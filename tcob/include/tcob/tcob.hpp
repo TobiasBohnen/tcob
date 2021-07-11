@@ -46,7 +46,6 @@
 #include <tcob/gfx/gl/GLEnum.hpp>
 #include <tcob/gfx/gl/GLFramebuffer.hpp>
 #include <tcob/gfx/gl/GLObject.hpp>
-#include <tcob/gfx/gl/GLObjectRegistry.hpp>
 #include <tcob/gfx/gl/GLPixelBuffer.hpp>
 #include <tcob/gfx/gl/GLRenderTarget.hpp>
 #include <tcob/gfx/gl/GLRenderTexture.hpp>

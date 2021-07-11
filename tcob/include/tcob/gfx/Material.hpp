@@ -9,6 +9,8 @@
 #include <tcob/assets/Resource.hpp>
 #include <tcob/core/data/Rect.hpp>
 #include <tcob/gfx/gl/GLEnum.hpp>
+#include <tcob/gfx/gl/GLShaderProgram.hpp>
+#include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob {
 
