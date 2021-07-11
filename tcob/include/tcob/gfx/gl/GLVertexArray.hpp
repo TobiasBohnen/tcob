@@ -6,6 +6,7 @@
 #pragma once
 #include <tcob/tcob_config.hpp>
 
+#include <tcob/gfx/Quad.hpp>
 #include <tcob/gfx/gl/GLEnum.hpp>
 #include <tcob/gfx/gl/GLObject.hpp>
 

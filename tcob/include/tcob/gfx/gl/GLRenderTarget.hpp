@@ -10,6 +10,7 @@
 #include <tcob/core/data/Color.hpp>
 #include <tcob/core/data/Size.hpp>
 #include <tcob/gfx/Camera.hpp>
+#include <tcob/gfx/Image.hpp>
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/gl/GLFramebuffer.hpp>
 

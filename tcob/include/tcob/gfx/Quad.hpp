@@ -10,6 +10,7 @@
 #include <tcob/core/data/Point.hpp>
 #include <tcob/core/data/Rect.hpp>
 #include <tcob/core/data/Transform.hpp>
+#include <tcob/gfx/gl/GLTexture.hpp>
 
 namespace tcob {
 #pragma pack(push, 1)

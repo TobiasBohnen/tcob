@@ -5,8 +5,6 @@
 
 #include <tcob/gfx/Quad.hpp>
 
-#include <tcob/gfx/gl/GLTexture.hpp>
-
 namespace tcob {
 static_assert(sizeof(Quad) == sizeof(Vertex) * 4);
 

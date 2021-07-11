@@ -10,7 +10,6 @@
 #include <glad/gl.h>
 
 #include <tcob/core/io/Logger.hpp>
-#include <tcob/gfx/Quad.hpp>
 
 namespace tcob::gl {
 VertexArray::VertexArray()

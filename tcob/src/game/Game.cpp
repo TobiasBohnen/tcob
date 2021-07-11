@@ -8,11 +8,9 @@
 #include <SDL2/SDL.h>
 
 #include <tcob/assets/ResourceLibrary.hpp>
-#include <tcob/game/Scene.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/gl/GLCapabilities.hpp>
 #include <tcob/gfx/gl/GLWindow.hpp>
-#include <tcob/sfx/AudioSystem.hpp>
 
 namespace tcob {
 using hrc = std::chrono::high_resolution_clock;
