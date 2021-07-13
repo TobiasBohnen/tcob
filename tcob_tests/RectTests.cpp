@@ -171,6 +171,15 @@ TEST_CASE("Core.Data.Rect")
             REQUIRE_FALSE(r.contains({ 1, 17 }));
             REQUIRE_FALSE(r.contains({ 15, 5 }));
         }
+        {
+            i32 x { 2 };
+            i32 y { 4 };
+            i32 w { 12 };
+            i32 h { 45 };
+            RectI r { x, y, w, h };
+            REQUIRE(r.contains({ 3, 5, 1, 1 }));
+            REQUIRE_FALSE(r.contains({ 3, 5, 20, 20 }));
+        }
     }
 
     SECTION("Intersects")

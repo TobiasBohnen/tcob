@@ -58,6 +58,11 @@ struct Rect final {
         return (point.X >= minMaxX.first) && ((point.X) < minMaxX.second) && (point.Y >= minMaxY.first) && ((point.Y) < minMaxY.second);
     }
 
+    inline auto contains(const Rect<T>& rect) const -> bool
+    {
+        return contains(rect.top_left()) && contains(rect.bottom_right());
+    }
+
     inline auto intersects(const Rect<T>& rectangle) const -> bool
     {
         const std::pair<T, T> r1MinMaxX { std::minmax(Left, static_cast<T>(Left + Width)) };
