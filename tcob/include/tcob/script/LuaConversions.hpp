@@ -212,26 +212,28 @@ struct Converter<std::variant<P...>> {
                 Color c;
                 if (from_lua(ls, idx, c)) {
                     value = c;
-                    break;
+                    return true;
                 }
             }
 
             if constexpr ((tcob::detail::is_specialization<P, std::vector>() || ...)) {
                 if (get_specialization<std::vector, P...>(ls, idx, value))
-                    break;
+                    return true;
             }
             if constexpr ((tcob::detail::is_specialization<P, Point>() || ...)) {
                 if (get_specialization<Point, P...>(ls, idx, value))
-                    break;
+                    return true;
             }
             if constexpr ((tcob::detail::is_specialization<P, Size>() || ...)) {
                 if (get_specialization<Size, P...>(ls, idx, value))
-                    break;
+                    return true;
             }
             if constexpr ((tcob::detail::is_specialization<P, Rect>() || ...)) {
                 if (get_specialization<Rect, P...>(ls, idx, value))
-                    break;
+                    return true;
             }
+
+            return false;
         } break;
         default:
             idx++;
