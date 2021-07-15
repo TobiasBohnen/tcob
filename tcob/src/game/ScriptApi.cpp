@@ -7,7 +7,7 @@
 
 #include "script-api/CanvasApi.hpp"
 
-namespace tcob {
+namespace tcob::lua {
 
 ScriptApi::ScriptApi(Game& game, const std::string& ns)
     : _game { game }
@@ -21,12 +21,12 @@ auto ScriptApi::create_script() -> std::unique_ptr<lua::Script>
     retValue->open_libraries();
 
     //.Canvas
-    detail::create_canvas_wrapper(retValue.get(), _game.resources());
+    tcob::detail::create_canvas_wrapper(retValue.get(), _game.resources());
     auto ns { retValue->global_table().create_table(_namespace) };
     ns["Canvas"] = &_canvas;
 
     //.Colors
-    detail::fill_colors_table(ns.create_table("Colors"));
+    tcob::detail::fill_colors_table(ns.create_table("Colors"));
 
     return retValue;
 }

@@ -28,5 +28,5 @@ private:
     std::unique_ptr<lua::Script> _script;
 
     std::shared_ptr<SpriteBatch> _layer1;
-    ScriptApi _api;
+    tcob::lua::ScriptApi _api;
 };

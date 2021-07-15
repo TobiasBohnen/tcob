@@ -10,7 +10,7 @@
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/script/LuaScript.hpp>
 
-namespace tcob {
+namespace tcob::lua {
 class ScriptApi {
 public:
     ScriptApi(Game& game, const std::string& ns);
