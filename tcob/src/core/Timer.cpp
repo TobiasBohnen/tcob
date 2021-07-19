@@ -40,4 +40,4 @@ auto Timer::is_running() const -> bool
     return _id;
 }
 
-} // namespace tcob
+}

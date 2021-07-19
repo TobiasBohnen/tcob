@@ -67,6 +67,8 @@
 #include <tcob/gfx/QuadEffect.hpp>
 #include <tcob/gfx/Transformable.hpp>
 
+#include <tcob/physics/B2DWorld.hpp>
+
 #include <tcob/script/LuaScript.hpp>
 
 #include <tcob/sfx/Music.hpp>

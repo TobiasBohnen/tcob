@@ -75,4 +75,4 @@ auto Transform::inverse() const -> Transform
     }
 }
 
-} // namespace sf
+}

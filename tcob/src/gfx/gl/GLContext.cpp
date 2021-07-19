@@ -93,4 +93,4 @@ Context::~Context()
     SDL_GL_DeleteContext(_context);
 }
 
-} // namespace gl
+}

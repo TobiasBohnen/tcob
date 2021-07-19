@@ -64,6 +64,7 @@ set(LIB_SRCFILES
         src/gfx/gl/GLUniformBuffer.cpp
         src/gfx/gl/GLVertexArray.cpp
         src/gfx/gl/GLWindow.cpp
+        src/physics/B2DWorld.cpp
         src/script/LuaFunction.cpp
         src/script/LuaRef.cpp
         src/script/LuaScript.cpp

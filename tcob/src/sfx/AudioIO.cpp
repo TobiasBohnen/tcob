@@ -29,4 +29,4 @@ auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_boo
     return stream->seek(offset, dir);
 }
 
-} // namespace detail
+}
