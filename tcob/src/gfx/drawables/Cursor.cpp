@@ -5,7 +5,7 @@
 
 #include <tcob/gfx/drawables/Cursor.hpp>
 
-#include <SDL2/SDL_mouse.h>
+#include <SDL_mouse.h>
 #include <tcob/gfx/gl/GLTexture.hpp>
 #include <tcob/gfx/gl/GLWindow.hpp>
 

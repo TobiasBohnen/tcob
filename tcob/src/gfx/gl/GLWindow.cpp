@@ -5,7 +5,7 @@
 
 #include <tcob/gfx/gl/GLWindow.hpp>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <glad/gl.h>
 
 #include <tcob/core/io/Logger.hpp>

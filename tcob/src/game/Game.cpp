@@ -5,7 +5,7 @@
 
 #include <tcob/game/Game.hpp>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/gl/GLCapabilities.hpp>

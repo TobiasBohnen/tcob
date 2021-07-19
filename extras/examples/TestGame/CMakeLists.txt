@@ -1,7 +1,5 @@
 add_executable(TestGame)
 
-find_package(SDL2 CONFIG REQUIRED)
-
 target_sources(TestGame PRIVATE 
     main.cpp 
     StartScene.cpp
@@ -13,7 +11,7 @@ target_sources(TestGame PRIVATE
     Scenes/Misc.cpp 
 )
 
-target_link_libraries(TestGame PRIVATE tcob PUBLIC SDL2::SDL2main)
+target_link_libraries(TestGame PRIVATE tcob PUBLIC SDL2main)
 
 if(MSVC)
     target_link_options(TestGame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/icon.res)

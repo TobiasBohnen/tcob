@@ -7,8 +7,8 @@
 
 #include <cassert>
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_gamecontroller.h>
+#include <SDL_events.h>
+#include <SDL_gamecontroller.h>
 
 namespace tcob {
 

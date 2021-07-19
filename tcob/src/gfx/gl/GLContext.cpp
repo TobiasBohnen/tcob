@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 #include <tcob/gfx/gl/GLContext.hpp>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <glad/gl.h>
 
 #include <tcob/core/io/Logger.hpp>

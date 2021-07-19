@@ -15,11 +15,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
 
+
+
 if(MSVC)
-  add_definitions(/MP)
-  add_definitions(/utf-8)
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions(/arch:AVX2)
+  add_compile_options(/utf-8)
+  add_compile_options(/arch:AVX2)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
   #set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-*, modernize-*, performance-*, cppcore*, -cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-reinterpret-cast;--extra-arg=/EHsc")
 endif()
 
