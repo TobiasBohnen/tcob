@@ -1,0 +1,160 @@
+// Copyright (c) 2023 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#include "tcob/core/Logger.hpp"
+
+#include <iostream>
+
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/io/FileSystem.hpp"
+
+namespace tcob {
+
+logger::~logger() = default;
+
+void logger::FormatDebug(string const& message, std::format_args const& args)
+{
+    Debug(std::vformat(message, args));
+}
+
+void logger::Debug([[maybe_unused]] string const& message)
+{
+#if defined(TCOB_DEBUG)
+    Log(message, level::Debug);
+#endif
+}
+
+void logger::FormatInfo(string const& message, std::format_args const& args)
+{
+    Info(std::vformat(message, args));
+}
+
+void logger::Info(string const& message)
+{
+    Log(message, level::Info);
+}
+
+void logger::FormatWarning(string const& message, std::format_args const& args)
+{
+    Warning(std::vformat(message, args));
+}
+
+void logger::Warning(string const& message)
+{
+    Log(message, level::Warning);
+}
+
+void logger::FormatError(error_msg const& msg, std::format_args const& args)
+{
+    Error({std::vformat(msg.Message, args), msg.SourceLocation});
+}
+
+void logger::Error(error_msg const& msg)
+{
+    string const source {" @[" + io::get_stem(msg.SourceLocation.file_name()) + "(" + std::to_string(msg.SourceLocation.line()) + ")]"};
+    Log(msg.Message + source, level::Error);
+}
+
+void logger::Log(string const& message, level level)
+{
+    locate_service<logger>().log(message, level);
+}
+
+auto logger::format_message(string const& message, level level) const -> string
+{
+    string prefix;
+
+    switch (level) {
+    case level::Debug:
+        prefix = "[debug] ";
+        break;
+    case level::Info:
+        prefix = "[info]  ";
+        break;
+    case level::Warning:
+        prefix = "[warn]  ";
+        break;
+    case level::Error:
+        prefix = "[error] ";
+        break;
+    case level::Off:
+        break;
+    }
+
+    auto const time {std::chrono::current_zone()->to_local(std::chrono::system_clock::now())};
+    return std::vformat("{} ({:%F - %T}) {}\n", std::make_format_args(prefix, time, message));
+}
+
+////////////////////////////////////////////////////////////
+
+logger::error_msg::error_msg(char const* msg, std::source_location loc)
+    : Message {msg}
+    , SourceLocation {loc}
+{
+}
+
+logger::error_msg::error_msg(string msg, std::source_location loc)
+    : Message {std::move(msg)}
+    , SourceLocation {loc}
+{
+}
+
+////////////////////////////////////////////////////////////
+
+file_logger::file_logger(path const& logfile)
+    : _logStream {std::make_unique<io::ofstream>(logfile, 0)}
+{
+}
+
+void file_logger::log(string const& message, level level) const
+{
+    if (level < MinLevel) {
+        return;
+    }
+
+    *_logStream << format_message(message, level);
+}
+
+////////////////////////////////////////////////////////////
+
+null_logger::null_logger() = default;
+
+void null_logger::log(string const&, level) const
+{
+}
+
+////////////////////////////////////////////////////////////
+
+stdout_logger::stdout_logger() = default;
+
+void stdout_logger::log(string const& message, level level) const
+{
+    if (level < MinLevel) {
+        return;
+    }
+    std::cout << "\033[";
+
+    switch (level) {
+    case logger::level::Debug:
+        std::cout << "36";
+        break;
+    case logger::level::Info:
+        std::cout << "32";
+        break;
+    case logger::level::Warning:
+        std::cout << "33";
+        break;
+    case logger::level::Error:
+        std::cout << "31";
+        break;
+    case logger::level::Off: break;
+    }
+
+    std::cout << "m"
+              << format_message(message, level)
+              << "\033[0m";
+}
+
+}

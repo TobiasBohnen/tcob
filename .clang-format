@@ -1,0 +1,30 @@
+---
+BasedOnStyle: webkit
+IndentWidth: 4
+
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: AcrossComments
+AlignConsecutiveDeclarations: AcrossComments
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
+AllowShortBlocksOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortCaseLabelsOnASingleLine: True
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: True
+BinPackArguments: True
+BinPackParameters: True
+BreakConstructorInitializers: BeforeComma
+AllowAllArgumentsOnNextLine: True
+BreakBeforeBinaryOperators: NonAssignment
+AlignArrayOfStructures: None
+Cpp11BracedListStyle: True
+SpaceBeforeCpp11BracedList: True
+IndentPPDirectives: BeforeHash
+BreakBeforeConceptDeclarations: Allowed
+IndentRequiresClause: True
+RequiresClausePosition: OwnLine
+QualifierAlignment: Right
+ReferenceAlignment: Left
+

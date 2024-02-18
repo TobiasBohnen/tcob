@@ -1,0 +1,119 @@
+// Copyright (c) 2023 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+
+// IWYU pragma: always_keep
+// NOLINTBEGIN
+
+#if !defined(NDEBUG) || defined(_DEBUG)
+    #define TCOB_DEBUG
+#endif
+#define NOMINMAX
+
+#include <array>
+#include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <numbers>
+#include <string>
+#include <string_view>
+
+namespace tcob {
+using i64 = int64_t;
+using i32 = int32_t;
+using i16 = int16_t;
+using i8  = int8_t;
+using u64 = uint64_t;
+using u32 = uint32_t;
+using u16 = uint16_t;
+using u8  = uint8_t;
+
+using byte  = char;
+using ubyte = unsigned char;
+using sbyte = signed char;
+
+using f32 = float;
+using f64 = double;
+
+using usize = std::size_t;
+using isize = std::ptrdiff_t;
+
+using ivec2 = std::array<i32, 2>;
+using ivec3 = std::array<i32, 3>;
+using ivec4 = std::array<i32, 4>;
+using uvec2 = std::array<u32, 2>;
+using uvec3 = std::array<u32, 3>;
+using uvec4 = std::array<u32, 4>;
+using vec2  = std::array<f32, 2>;
+using vec3  = std::array<f32, 3>;
+using vec4  = std::array<f32, 4>;
+
+using mat3 = std::array<f32, 3 * 3>;
+using mat4 = std::array<f32, 4 * 4>;
+
+f64 constexpr TAU {std::numbers::pi * 2};
+f32 constexpr TAU_F {std::numbers::pi_v<f32> * 2};
+
+using clock        = std::chrono::high_resolution_clock;
+using milliseconds = std::chrono::duration<f64, std::milli>;
+using seconds      = std::chrono::duration<f64>;
+using minutes      = std::chrono::duration<f64, std::ratio<60>>;
+
+using string      = std::string;
+using string_view = std::string_view;
+
+using utf8_string      = std::string;      // TODO: create real utf-8 string type
+using utf8_string_view = std::string_view; // TODO: create real utf-8 string_view type
+
+using path = utf8_string;
+
+#cmakedefine TCOB_ENABLE_RENDERER_OPENGL45
+#cmakedefine TCOB_ENABLE_RENDERER_OPENGLES30
+#cmakedefine TCOB_ENABLE_RENDERER_NULL
+
+#cmakedefine TCOB_ENABLE_TTF_FREETYPE
+#cmakedefine TCOB_ENABLE_TTF_STBTT
+#cmakedefine TCOB_ENABLE_TTF_LIBSCHRIFT
+
+#cmakedefine TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT
+#cmakedefine TCOB_ENABLE_ADDON_PHYSICS_BOX2D
+#cmakedefine TCOB_ENABLE_ADDON_PHYSICS_CHIPMUNK2D
+#cmakedefine TCOB_ENABLE_ADDON_SCRIPTING_LUA
+#cmakedefine TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL
+#cmakedefine TCOB_ENABLE_ADDON_DATA_SQLITE
+#cmakedefine TCOB_ENABLE_ADDON_GFX_LITEHTML
+
+#cmakedefine TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS
+#cmakedefine TCOB_ENABLE_FILETYPES_AUDIO_VORBIS
+#cmakedefine TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP
+#cmakedefine TCOB_ENABLE_FILETYPES_AUDIO_OPUS
+#cmakedefine TCOB_ENABLE_FILETYPES_GFX_QOI
+#cmakedefine TCOB_ENABLE_FILETYPES_GFX_WEBP
+#cmakedefine TCOB_ENABLE_FILETYPES_GFX_THEORA
+
+#cmakedefine TCOB_BUILD_SHARED
+
+#if defined(TCOB_BUILD_SHARED)
+    #if defined(_MSC_VER)
+        #pragma warning(disable : 4251)
+        #if defined(TCOB_EXPORTS)
+            #define TCOB_API __declspec(dllexport)
+        #else
+            #define TCOB_API __declspec(dllimport)
+        #endif
+    #else
+        #define TCOB_API
+    #endif
+#else
+    #define TCOB_API
+#endif
+
+static_assert(sizeof(f32) == 4);
+static_assert(sizeof(f64) == 8);
+
+// NOLINTEND
+
+}

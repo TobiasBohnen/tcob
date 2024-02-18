@@ -1,0 +1,77 @@
+name: CMake CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{matrix.config.os}}
+    name:    ${{matrix.variant}} (${{matrix.config.name}}/${{matrix.build_type}}/${{matrix.config.os}})
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ['default', 'shared', 'minimal']
+        build_type: ['Release', 'Debug']
+        config:
+          - name: 'MSVC'
+            os:   'windows-latest'
+            cc:   'cl'
+            cxx:  'cl'
+          - name: 'GCC-13'
+            os:   'ubuntu-22.04'
+            cc:   'gcc-13'
+            cxx:  'g++-13'
+            install_commands: 'sudo apt-get update; sudo apt-get install -y gcc-13 g++-13'
+          - name: 'Clang-17'
+            os:   'ubuntu-22.04'
+            cc:   'clang-17'
+            cxx:  'clang++-17'
+            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 17; sudo apt install -y libstdc++-13-dev'
+        include:
+          - variant:    'minimal'
+            definition: '-DTCOB_MINIMAL=ON'
+          - variant:    'default'
+            definition: ''
+          - variant:    'shared'
+            definition: '-DTCOB_BUILD_SHARED=ON'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name:  Install SDL2 deps
+      run:   sudo apt-get update; sudo apt-get install -y libsdl2-dev
+      shell: bash
+      if:    matrix.config.os == 'ubuntu-22.04'
+
+    - name:  Install compiler
+      run:   ${{matrix.config.install_commands}}
+      shell: bash
+      if:    matrix.config.os == 'ubuntu-22.04'
+
+    - name:  Configure CMake
+      run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON ${{matrix.definition}}
+      shell: bash
+      env:
+         CC:       ${{matrix.config.cc}}
+         CXX:      ${{matrix.config.cxx}}
+         CFLAGS:   ${{matrix.config.cflags}}
+         CXXFLAGS: ${{matrix.config.cxxflags}}
+
+    - name:  Build
+      run:   cmake --build ./build --config ${{matrix.build_type}} -j 8
+      shell: bash
+      env:
+         CC:       ${{matrix.config.cc}}
+         CXX:      ${{matrix.config.cxx}}
+         CFLAGS:   ${{matrix.config.cflags}}
+         CXXFLAGS: ${{matrix.config.cxxflags}}
+         
+    - name: Test
+      run:  ctest -C ${{matrix.build_type}} -j 8
+      working-directory: ./build
+      env:
+         CTEST_OUTPUT_ON_FAILURE: 1

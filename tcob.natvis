@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="tcob::point&lt;*&gt;">
+        <DisplayString>{{X={X};Y={Y}}}</DisplayString>
+    </Type>
+    <Type Name="tcob::rect&lt;*&gt;">
+        <DisplayString>{{X={X};Y={Y};W={Width};H={Height}}}</DisplayString>
+    </Type>
+    <Type Name="tcob::size&lt;*&gt;">
+        <DisplayString>{{W={Width};H={Height}}}</DisplayString>
+    </Type>
+    <Type Name="tcob::color">
+        <DisplayString>{{R={(int)R},G={(int)G},B={(int)B},A={(int)A}}}</DisplayString>
+    </Type>
+    <Type Name="tcob::degree&lt;*&gt;">
+        <DisplayString>{Value} deg</DisplayString>
+    </Type>
+    <Type Name="tcob::radian&lt;*&gt;">
+        <DisplayString>{Value} rad</DisplayString>
+    </Type>
+</AutoVisualizer>
