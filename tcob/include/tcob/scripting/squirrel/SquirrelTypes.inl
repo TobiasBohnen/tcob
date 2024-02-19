@@ -18,6 +18,12 @@ inline auto table::operator[](Key key) -> proxy<table, Key>
     return proxy<table, Key> {*this, std::tuple {key}};
 }
 
+template <typename Key>
+inline auto table::operator[](Key key) const -> proxy<table const, Key>
+{
+    return proxy<table const, Key> {*this, std::tuple {key}};
+}
+
 template <ConvertibleFrom T>
 inline auto table::get(auto&&... keys) const -> result<T>
 {
@@ -288,6 +294,12 @@ inline auto instance::operator[](Key key) -> proxy<instance, Key>
     return proxy<instance, Key> {*this, std::tuple {key}};
 }
 
+template <typename Key>
+inline auto instance::operator[](Key key) const -> proxy<instance const, Key>
+{
+    return proxy<instance const, Key> {*this, std::tuple {key}};
+}
+
 inline void instance::set(auto&& key, auto&& value) const
 {
     auto const view {get_view()};
@@ -305,6 +317,12 @@ template <typename Key>
 inline auto class_t::operator[](Key key) -> proxy<class_t, Key>
 {
     return proxy<class_t, Key> {*this, std::tuple {key}};
+}
+
+template <typename Key>
+inline auto class_t::operator[](Key key) const -> proxy<class_t const, Key>
+{
+    return proxy<class_t const, Key> {*this, std::tuple {key}};
 }
 
 inline void class_t::set(auto&& key, auto&& value) const

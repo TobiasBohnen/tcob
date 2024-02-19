@@ -18,6 +18,12 @@ inline auto table::operator[](Key key) -> proxy<table, Key>
     return proxy<table, Key> {*this, std::tuple {key}};
 }
 
+template <typename Key>
+inline auto table::operator[](Key key) const -> proxy<table const, Key>
+{
+    return proxy<table const, Key> {*this, std::tuple {key}};
+}
+
 template <ConvertibleFrom T>
 inline auto table::get(auto&&... keys) const -> result<T>
 {

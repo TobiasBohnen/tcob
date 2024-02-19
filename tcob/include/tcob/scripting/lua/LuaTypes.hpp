@@ -54,6 +54,8 @@ public:
 
     template <typename Key>
     auto operator[](Key key) -> proxy<table, Key>;
+    template <typename Key>
+    auto operator[](Key key) const -> proxy<table const, Key>;
 
     auto get_metatable() const -> table;
     auto get_raw_length() const -> u64;

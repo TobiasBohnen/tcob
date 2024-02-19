@@ -54,6 +54,9 @@ public:
     template <typename Key>
     auto operator[](Key key) -> proxy<table, Key>;
 
+    template <typename Key>
+    auto operator[](Key key) const -> proxy<table const, Key>;
+
     template <ConvertibleFrom T>
     auto get(auto&&... keys) const -> result<T>;
 
@@ -140,6 +143,9 @@ public:
     template <typename Key>
     auto operator[](Key key) -> proxy<instance, Key>;
 
+    template <typename Key>
+    auto operator[](Key key) const -> proxy<instance const, Key>;
+
     void set(auto&& key, auto&& value) const;
 
     auto static IsType(vm_view view, SQInteger idx) -> bool;
@@ -154,6 +160,9 @@ public:
 
     template <typename Key>
     auto operator[](Key key) -> proxy<class_t, Key>;
+
+    template <typename Key>
+    auto operator[](Key key) const -> proxy<class_t const, Key>;
 
     void set(auto&& key, auto&& value) const;
 
