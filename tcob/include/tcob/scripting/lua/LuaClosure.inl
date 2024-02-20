@@ -162,7 +162,7 @@ auto make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr
 }
 
 template <typename... Funcs>
-auto make_shared_overload(Funcs&&... fns) -> native_closure_unique_ptr
+auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr
 {
     return std::make_shared<detail::native_overload<std::remove_cvref_t<Funcs>...>>(std::make_tuple(std::forward<Funcs>(fns)...));
 }
