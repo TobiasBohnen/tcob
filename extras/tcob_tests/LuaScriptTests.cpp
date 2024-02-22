@@ -916,6 +916,45 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Hook")
         REQUIRE(!res);
         REQUIRE(linecount == 3);
     }
+    SUBCASE("locals in hook")
+    {
+        i32         x {0};
+        i32         y {0};
+        std::string z;
+
+        auto func = [&](debug const& debug) {
+            if (debug.Source == "TEST" && debug.Event == debug_event::Return) {
+                auto const view {get_view()};
+                auto const guard {view.create_stack_guard()};
+
+                for (i32 i {1};; ++i) {
+                    auto val {debug.get_local(i)};
+                    if (val.empty() || val[0] == '(') { break; }
+
+                    if (val == "x") {
+                        view.pull_convert_idx(-1, x);
+                    } else if (val == "y") {
+                        view.pull_convert_idx(-1, y);
+                    } else if (val == "z") {
+                        view.pull_convert_idx(-1, z);
+                    }
+                }
+            }
+        };
+
+        set_hook(func);
+        auto res = run(
+            "local x = 100 "
+            "local y = 400 "
+            "local z = 'ok' "
+            "print(x,y,z) ",
+            "TEST");
+
+        REQUIRE(res);
+        REQUIRE(x == 100);
+        REQUIRE(y == 400);
+        REQUIRE(z == "ok");
+    }
 }
 
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.IsHas")

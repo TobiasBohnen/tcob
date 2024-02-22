@@ -16,6 +16,32 @@
 
 namespace tcob::scripting::lua {
 
+debug::debug(state_view* view, lua_Debug* ar)
+    : Event {static_cast<debug_event>(ar->event)}
+    , Name {ar->name != nullptr ? ar->name : ""}
+    , NameWhat {ar->namewhat != nullptr ? ar->namewhat : ""}
+    , What {ar->what != nullptr ? ar->what : ""}
+    , Source {ar->source != nullptr ? ar->source : ""}
+    , CurrentLine {ar->currentline}
+    , LineDefined {ar->linedefined}
+    , LastLineDefined {ar->lastlinedefined}
+    , UpvalueCount {ar->nups}
+    , ParameterCount {ar->nparams}
+    , IsVarArg {ar->isvararg != 0}
+    , IsTailCall {ar->istailcall != 0}
+    , FirstTransfer {ar->ftransfer}
+    , TransferredValueCount {ar->ntransfer}
+    , ShortSource {ar->short_src}
+    , _view {view}
+    , _ar {ar}
+{
+}
+
+auto debug::get_local(i32 n) const -> string
+{
+    return _view->get_local(_ar, n);
+}
+
 ////////////////////////////////////////////////////////////
 
 stack_guard::stack_guard(lua_State* l)
@@ -53,113 +79,119 @@ static flat_map<i32, type> const typeMap {
 ////////////////////////////////////////////////////////////
 
 state_view::state_view(lua_State* l)
-    : _view {l}
+    : _state {l}
 {
 }
 
 auto state_view::is_bool(i32 idx) const -> bool
 {
-    return lua_isboolean(_view, idx);
+    return lua_isboolean(_state, idx);
 }
 
 auto state_view::is_function(i32 idx) const -> bool
 {
-    return lua_isfunction(_view, idx);
+    return lua_isfunction(_state, idx);
 }
 
 auto state_view::is_integer(i32 idx) const -> bool
 {
-    return lua_isinteger(_view, idx) != 0;
+    return lua_isinteger(_state, idx) != 0;
 }
 
 auto state_view::is_number(i32 idx) const -> bool
 {
-    return lua_isnumber(_view, idx) != 0;
+    return lua_isnumber(_state, idx) != 0;
 }
 
 auto state_view::is_string(i32 idx) const -> bool
 {
-    return lua_isstring(_view, idx) != 0;
+    return lua_isstring(_state, idx) != 0;
 }
 
 auto state_view::is_table(i32 idx) const -> bool
 {
-    return lua_istable(_view, idx);
+    return lua_istable(_state, idx);
 }
 
 auto state_view::is_thread(i32 idx) const -> bool
 {
-    return lua_isthread(_view, idx);
+    return lua_isthread(_state, idx);
 }
 
 auto state_view::is_nil(i32 idx) const -> bool
 {
-    return lua_isnil(_view, idx);
+    return lua_isnil(_state, idx);
 }
 
 auto state_view::is_none(i32 idx) const -> bool
 {
-    return lua_isnone(_view, idx);
+    return lua_isnone(_state, idx);
 }
 
 auto state_view::is_none_or_nil(i32 idx) const -> bool
 {
-    return lua_isnoneornil(_view, idx);
+    return lua_isnoneornil(_state, idx);
 }
 
 auto state_view::is_userdata(i32 idx) const -> bool
 {
-    return lua_isuserdata(_view, idx) != 0;
+    return lua_isuserdata(_state, idx) != 0;
 }
 
 auto state_view::to_bool(i32 idx) const -> bool
 {
-    return lua_toboolean(_view, idx) != 0;
+    return lua_toboolean(_state, idx) != 0;
 }
 
 auto state_view::to_integer(i32 idx) const -> i64
 {
-    return lua_tointeger(_view, idx);
+    return lua_tointeger(_state, idx);
 }
 
 auto state_view::to_number(i32 idx) const -> f64
 {
-    return lua_tonumber(_view, idx);
+    return lua_tonumber(_state, idx);
 }
 
 auto state_view::to_string(i32 idx) const -> char const*
 {
-    return lua_tostring(_view, idx);
+    return lua_tostring(_state, idx);
 }
 
 auto state_view::to_userdata(i32 idx) const -> void*
 {
-    return lua_touserdata(_view, idx);
+    return lua_touserdata(_state, idx);
 }
 
 auto state_view::to_thread(i32 idx) const -> state_view
 {
-    return state_view {lua_tothread(_view, idx)};
+    return state_view {lua_tothread(_state, idx)};
 }
 
 auto state_view::get_type(i32 idx) const -> type
 {
-    return typeMap.at(lua_type(_view, idx));
+    return typeMap.at(lua_type(_state, idx));
 }
 
 auto state_view::get_top() const -> i32
 {
-    return lua_gettop(_view);
+    return lua_gettop(_state);
+}
+
+auto state_view::get_local(lua_Debug* ar, i32 n) const -> string
+{
+    auto const* r {lua_getlocal(_state, ar, n)};
+    return r == nullptr ? "" : r;
 }
 
 auto state_view::check_stack(i32 size) const -> bool
 {
-    return lua_checkstack(_view, size) != 0;
+    return lua_checkstack(_state, size) != 0;
 }
 
 auto state_view::resume(i32 argCount, i32* resultCount) const -> coroutine_status
 {
-    i32 const err {lua_resume(_view, nullptr, argCount, resultCount)};
+    i32 const err {lua_resume(_state, nullptr, argCount, resultCount)};
     switch (err) {
     case LUA_OK:
         return coroutine_status::Dead;
@@ -180,162 +212,162 @@ auto state_view::resume(i32 argCount, i32* resultCount) const -> coroutine_statu
 
 auto state_view::next(i32 idx) const -> bool
 {
-    return lua_next(_view, idx) != 0;
+    return lua_next(_state, idx) != 0;
 }
 
 void state_view::push_bool(bool val) const
 {
-    lua_pushboolean(_view, static_cast<i32>(val));
+    lua_pushboolean(_state, static_cast<i32>(val));
 }
 
 void state_view::push_cfunction(i32 (*lua_CFunction)(lua_State*)) const
 {
-    lua_pushcfunction(_view, lua_CFunction);
+    lua_pushcfunction(_state, lua_CFunction);
 }
 
 void state_view::push_cclosure(i32 (*lua_CFunction)(lua_State*), i32 n) const
 {
-    lua_pushcclosure(_view, lua_CFunction, n);
+    lua_pushcclosure(_state, lua_CFunction, n);
 }
 
 void state_view::push_integer(i64 val) const
 {
-    lua_pushinteger(_view, val);
+    lua_pushinteger(_state, val);
 }
 
 void state_view::push_lightuserdata(void* p) const
 {
-    lua_pushlightuserdata(_view, p);
+    lua_pushlightuserdata(_state, p);
 }
 
 void state_view::push_nil() const
 {
-    lua_pushnil(_view);
+    lua_pushnil(_state);
 }
 
 void state_view::push_number(f64 val) const
 {
-    lua_pushnumber(_view, val);
+    lua_pushnumber(_state, val);
 }
 
 void state_view::push_string(string const& val) const
 {
-    lua_pushstring(_view, val.c_str());
+    lua_pushstring(_state, val.c_str());
 }
 
 void state_view::push_lstring(string_view val) const
 {
-    lua_pushlstring(_view, val.data(), val.size());
+    lua_pushlstring(_state, val.data(), val.size());
 }
 
 void state_view::push_value(i32 idx) const
 {
-    lua_pushvalue(_view, idx);
+    lua_pushvalue(_state, idx);
 }
 
 void state_view::pop(i32 count) const
 {
-    lua_pop(_view, count);
+    lua_pop(_state, count);
 }
 
 void state_view::remove(i32 idx) const
 {
-    lua_remove(_view, idx);
+    lua_remove(_state, idx);
 }
 
 auto state_view::get_table(i32 idx) const -> type
 {
-    return typeMap.at(lua_gettable(_view, idx));
+    return typeMap.at(lua_gettable(_state, idx));
 }
 
 auto state_view::get_metatable(i32 objindex) const -> i32
 {
-    return lua_getmetatable(_view, objindex);
+    return lua_getmetatable(_state, objindex);
 }
 
 void state_view::get_metatable(string const& tableName) const
 {
-    luaL_getmetatable(_view, tableName.c_str());
+    luaL_getmetatable(_state, tableName.c_str());
 }
 
 void state_view::set_table(i32 idx) const
 {
-    lua_settable(_view, idx);
+    lua_settable(_state, idx);
 }
 
 void state_view::set_metatable(i32 idx) const
 {
-    lua_setmetatable(_view, idx);
+    lua_setmetatable(_state, idx);
 }
 
 void state_view::new_table() const
 {
-    lua_newtable(_view);
+    lua_newtable(_state);
 }
 
 void state_view::create_table(i32 narr, i32 nrec) const
 {
-    lua_createtable(_view, narr, nrec);
+    lua_createtable(_state, narr, nrec);
 }
 
 auto state_view::new_metatable(string const& tableName) const -> i32
 {
-    return luaL_newmetatable(_view, tableName.c_str());
+    return luaL_newmetatable(_state, tableName.c_str());
 }
 
 auto state_view::new_userdata(usize size) const -> void*
 {
-    return lua_newuserdatauv(_view, size, 0);
+    return lua_newuserdatauv(_state, size, 0);
 }
 
 auto state_view::new_userdata(usize size, i32 nuvalue) const -> void*
 {
-    return lua_newuserdatauv(_view, size, nuvalue);
+    return lua_newuserdatauv(_state, size, nuvalue);
 }
 
 void state_view::set_registry_field(string const& name) const
 {
-    lua_setfield(_view, LUA_REGISTRYINDEX, name.c_str());
+    lua_setfield(_state, LUA_REGISTRYINDEX, name.c_str());
 }
 
 void state_view::insert(i32 idx) const
 {
-    lua_insert(_view, idx);
+    lua_insert(_state, idx);
 }
 
 auto state_view::raw_len(i32 idx) const -> u64
 {
-    return lua_rawlen(_view, idx);
+    return lua_rawlen(_state, idx);
 }
 
 auto state_view::raw_get(i32 idx, i64 n) const -> type
 {
-    return typeMap.at(lua_rawgeti(_view, idx, n));
+    return typeMap.at(lua_rawgeti(_state, idx, n));
 }
 
 auto state_view::raw_get(i32 idx) const -> type
 {
-    return typeMap.at(lua_rawget(_view, idx));
+    return typeMap.at(lua_rawget(_state, idx));
 }
 
 void state_view::raw_set(i32 idx, i64 n) const
 {
-    lua_rawseti(_view, idx, n);
+    lua_rawseti(_state, idx, n);
 }
 
 void state_view::raw_set(i32 idx) const
 {
-    lua_rawset(_view, idx);
+    lua_rawset(_state, idx);
 }
 
 auto state_view::get_uservalue(i32 index, i32 n) const -> i32
 {
-    return lua_getiuservalue(_view, index, n);
+    return lua_getiuservalue(_state, index, n);
 }
 
 auto state_view::set_uservalue(i32 index, i32 n) const -> i32
 {
-    return lua_setiuservalue(_view, index, n);
+    return lua_setiuservalue(_state, index, n);
 }
 
 auto state_view::GetUpvalueIndex(i32 n) -> i32
@@ -345,42 +377,42 @@ auto state_view::GetUpvalueIndex(i32 n) -> i32
 
 auto state_view::create_stack_guard() const -> stack_guard
 {
-    return stack_guard {_view};
+    return stack_guard {_state};
 }
 
 auto state_view::ref(i32 idx) const -> i32
 {
-    return luaL_ref(_view, idx);
+    return luaL_ref(_state, idx);
 }
 
 void state_view::unref(i32 t, i32 ref) const
 {
-    luaL_unref(_view, t, ref);
+    luaL_unref(_state, t, ref);
 }
 
 auto state_view::is_yieldable() const -> bool
 {
-    return lua_isyieldable(_view) != 0;
+    return lua_isyieldable(_state) != 0;
 }
 
 auto state_view::status() const -> i32
 {
-    return lua_status(_view);
+    return lua_status(_state);
 }
 
 auto state_view::close_thread() const -> i32
 {
-    return lua_closethread(_view, nullptr);
+    return lua_closethread(_state, nullptr);
 }
 
 auto state_view::close_thread(state_view from) const -> i32
 {
-    return lua_closethread(_view, from._view);
+    return lua_closethread(_state, from._state);
 }
 
 void state_view::error(string const& message) const
 {
-    luaL_error(_view, message.c_str());
+    luaL_error(_state, message.c_str());
 }
 
 auto static error_handler(lua_State* l) -> i32
@@ -398,7 +430,7 @@ auto state_view::pcall(i32 nargs, i32 nret) const -> error_code
 
     push_cfunction(&error_handler);
     insert(hpos);
-    i32 const err {lua_pcall(_view, nargs, nret, hpos)};
+    i32 const err {lua_pcall(_state, nargs, nret, hpos)};
     remove(hpos);
 
     switch (err) {
@@ -413,63 +445,63 @@ auto state_view::pcall(i32 nargs, i32 nret) const -> error_code
 
 void state_view::requiref(string const& modname, lua_CFunction openf, bool glb) const
 {
-    luaL_requiref(_view, modname.c_str(), openf, static_cast<i32>(glb));
+    luaL_requiref(_state, modname.c_str(), openf, static_cast<i32>(glb));
 }
 
 auto state_view::load_buffer(string_view script, string const& name) const -> i32
 {
-    return luaL_loadbuffer(_view, script.data(), script.size(), name.c_str());
+    return luaL_loadbuffer(_state, script.data(), script.size(), name.c_str());
 }
 
 auto state_view::load_buffer(string_view script, string const& name, string const& mode) const -> i32
 {
-    return luaL_loadbufferx(_view, script.data(), script.size(), name.c_str(), mode.c_str());
+    return luaL_loadbufferx(_state, script.data(), script.size(), name.c_str(), mode.c_str());
 }
 
 void state_view::set_warnf(lua_WarnFunction f, void* ud) const
 {
-    lua_setwarnf(_view, f, ud);
+    lua_setwarnf(_state, f, ud);
 }
 
 void state_view::set_hook(lua_Hook func, i32 mask, i32 count) const
 {
-    lua_sethook(_view, func, mask, count);
+    lua_sethook(_state, func, mask, count);
 }
 
 auto state_view::gc(i32 what, i32 a, i32 b, i32 c) const -> i32
 {
-    return lua_gc(_view, what, a, b, c);
+    return lua_gc(_state, what, a, b, c);
 }
 
 auto state_view::dump(lua_Writer writer, void* data, i32 strip) const -> i32
 {
-    return lua_dump(_view, writer, data, strip);
+    return lua_dump(_state, writer, data, strip);
 }
 
 auto state_view::get_upvalue(i32 funcindex, i32 n) const -> char const*
 {
-    return lua_getupvalue(_view, funcindex, n);
+    return lua_getupvalue(_state, funcindex, n);
 }
 
 auto state_view::set_upvalue(i32 funcindex, i32 n) const -> char const*
 {
-    return lua_setupvalue(_view, funcindex, n);
+    return lua_setupvalue(_state, funcindex, n);
 }
 
 void state_view::push_globaltable() const
 {
-    lua_pushglobaltable(_view);
+    lua_pushglobaltable(_state);
 }
 
 auto state_view::traceback(i32 level) const -> string
 {
-    luaL_traceback(_view, _view, nullptr, level);
+    luaL_traceback(_state, _state, nullptr, level);
     return to_string(-1);
 }
 
 auto state_view::raw_equal(i32 idx1, i32 idx2) const -> bool
 {
-    return lua_rawequal(_view, idx1, idx2) == 1;
+    return lua_rawequal(_state, idx1, idx2) == 1;
 }
 
 auto state_view::NewState() -> lua_State*
@@ -479,14 +511,14 @@ auto state_view::NewState() -> lua_State*
 
 void state_view::close() const
 {
-    if (_view != nullptr) {
-        lua_close(_view);
+    if (_state != nullptr) {
+        lua_close(_state);
     }
 }
 
 auto state_view::is_valid() const -> bool
 {
-    return _view != nullptr;
+    return _state != nullptr;
 }
 
 ////////////////////////////////////////////////////////////

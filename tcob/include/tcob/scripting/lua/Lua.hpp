@@ -96,7 +96,12 @@ enum class debug_event : u32 {
     TailCall = 4
 };
 
-struct debug {
+class state_view;
+
+class TCOB_API debug {
+public:
+    debug(state_view* view, lua_Debug* ar);
+
     debug_event Event {};
     string      Name;                      /* (n) */
     string      NameWhat;                  /* (n) */
@@ -112,6 +117,12 @@ struct debug {
     u16         FirstTransfer {0};         /* (r) index of first value transferred */
     u16         TransferredValueCount {0}; /* (r) number of transferred values */
     string      ShortSource;               /* (S) */
+
+    auto get_local(i32 n) const -> string;
+
+private:
+    state_view* _view;
+    lua_Debug*  _ar;
 };
 
 ////////////////////////////////////////////////////////////
@@ -167,6 +178,8 @@ public:
     auto get_type(i32 idx) const -> type;
 
     auto get_top() const -> i32;
+
+    auto get_local(lua_Debug* ar, i32 n) const -> string;
 
     auto check_stack(i32 size) const -> bool;
 
@@ -264,7 +277,7 @@ private:
     template <ConvertibleTo T>
     void convert_to(T& value) const;
 
-    lua_State* _view;
+    lua_State* _state;
 };
 
 }

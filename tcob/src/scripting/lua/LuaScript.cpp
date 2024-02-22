@@ -14,7 +14,6 @@
     #include "tcob/core/FlatMap.hpp"
     #include "tcob/core/Logger.hpp"
 
-
 namespace tcob::scripting::lua {
 
 static flat_map<library, std::pair<char const*, lua_CFunction>> const Libraries {
@@ -129,23 +128,7 @@ void static hook(lua_State* l, lua_Debug* ar)
     if (lt.has("hook")) {
         auto* hook {reinterpret_cast<std::function<void(debug const&)>*>(lt["hook"].as<void*>())};
         lua_getinfo(l, "nSlur", ar);
-        debug dbg {
-            .Event                 = static_cast<debug_event>(ar->event),
-            .Name                  = ar->name != nullptr ? ar->name : "",
-            .NameWhat              = ar->namewhat != nullptr ? ar->namewhat : "",
-            .What                  = ar->what != nullptr ? ar->what : "",
-            .Source                = ar->source != nullptr ? ar->source : "",
-            .CurrentLine           = ar->currentline,
-            .LineDefined           = ar->linedefined,
-            .LastLineDefined       = ar->lastlinedefined,
-            .UpvalueCount          = ar->nups,
-            .ParameterCount        = ar->nparams,
-            .IsVarArg              = ar->isvararg != 0,
-            .IsTailCall            = ar->istailcall != 0,
-            .FirstTransfer         = ar->ftransfer,
-            .TransferredValueCount = ar->ntransfer,
-            .ShortSource           = ar->short_src};
-
+        debug dbg {&ls, ar};
         (*hook)(dbg);
     }
 }
