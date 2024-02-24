@@ -136,8 +136,8 @@ void script::load_library(library lib)
 
 auto tcob::literals::operator""_squirrel(char const* str, usize) -> std::unique_ptr<tcob::scripting::squirrel::script>
 {
-    auto                        retValue {std::make_unique<tcob::scripting::squirrel::script>()};
-    [[maybe_unused]] auto const res {retValue->run(string {str})};
+    auto retValue {std::make_unique<tcob::scripting::squirrel::script>()};
+    (void)retValue->run(string {str});
     return retValue;
 }
 

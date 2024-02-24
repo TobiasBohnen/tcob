@@ -212,8 +212,8 @@ auto gc::get_count() const -> i32
 
 auto tcob::literals::operator""_lua(char const* str, usize) -> std::unique_ptr<tcob::scripting::lua::script>
 {
-    auto                        retValue {std::make_unique<tcob::scripting::lua::script>()};
-    [[maybe_unused]] auto const res {retValue->run(string {str})};
+    auto retValue {std::make_unique<tcob::scripting::lua::script>()};
+    (void)retValue->run(string {str});
     return retValue;
 }
 

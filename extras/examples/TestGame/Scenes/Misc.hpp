@@ -44,9 +44,10 @@ protected:
 private:
     void draw_dice(auto&& dice)
     {
+        auto               rolls {dice.roll_n(100000)};
         std::map<i32, i32> hist;
         for (int n = 0; n < 100000; ++n) {
-            ++hist[dice.roll()];
+            ++hist[rolls[n]];
         }
         for (auto p : hist) {
             std::cout << std::setfill('0') << std::setw(2) << p.first << ' ' << std::string(p.second / 250, '*') << '\n';

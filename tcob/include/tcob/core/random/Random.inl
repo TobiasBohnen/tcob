@@ -145,11 +145,8 @@ inline auto dice<N, RandomGenerator>::roll() -> i32
 template <i32 N, typename RandomGenerator>
 inline auto dice<N, RandomGenerator>::roll_n(usize n) -> std::vector<i32>
 {
-    std::vector<i32> retValue {};
-    retValue.reserve(n);
-    for (usize i {0}; i < n; ++i) {
-        retValue.push_back(roll());
-    }
+    std::vector<i32> retValue(n);
+    std::generate_n(retValue.begin(), n, [&]() { return roll(); });
     return retValue;
 }
 

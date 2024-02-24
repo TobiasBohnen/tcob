@@ -39,17 +39,14 @@ void progress_bar::on_paint(widget_painter& painter)
         // bar
         i32 const numBlocks {10};
 
-        [[maybe_unused]] auto _ {
-            painter.draw_bar(
-                style->Bar,
-                rect,
-                {.Orientation = get_orientation(),
-                 .Inverted    = false,
-                 .Alignment   = element::bar::alignment::CenterOrMiddle,
-                 .BlockCount  = numBlocks,
-                 .Fraction    = _tween.get_value()})
-
-        };
+        (void)painter.draw_bar(
+            style->Bar,
+            rect,
+            {.Orientation = get_orientation(),
+             .Inverted    = false,
+             .Alignment   = element::bar::alignment::CenterOrMiddle,
+             .BlockCount  = numBlocks,
+             .Fraction    = _tween.get_value()});
     }
 }
 

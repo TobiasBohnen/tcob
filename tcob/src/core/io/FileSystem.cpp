@@ -133,33 +133,30 @@ auto zip(path const& srcFileOrFolder, path const& dstFile, bool relative, i32 le
     zip.m_pWrite     = &mz_write;
     zip.m_pIO_opaque = &stream;
 
-    if (mz_zip_writer_init(&zip, 0)) {
-        if (is_folder(srcFileOrFolder)) {
-            auto files {enumerate(srcFileOrFolder)};
-            for (auto const& file : files) {
-                ifstream istream {file};
-                string   name {relative ? file.substr(srcFileOrFolder.size()) : file};
-                if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, istream.size_in_bytes(), nullptr, nullptr, 0, level, nullptr, 0, nullptr, 0)) {
-                    return false;
-                }
-            }
-        } else if (is_file(srcFileOrFolder)) {
-            ifstream istream {srcFileOrFolder};
-            string   name {relative ? std::filesystem::path {srcFileOrFolder}.filename().string() : srcFileOrFolder};
+    if (!mz_zip_writer_init(&zip, 0)) { return false; }
+
+    if (is_folder(srcFileOrFolder)) {
+        auto files {enumerate(srcFileOrFolder)};
+        for (auto const& file : files) {
+            ifstream istream {file};
+            string   name {relative ? file.substr(srcFileOrFolder.size()) : file};
             if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, istream.size_in_bytes(), nullptr, nullptr, 0, level, nullptr, 0, nullptr, 0)) {
                 return false;
             }
-        } else {
+        }
+    } else if (is_file(srcFileOrFolder)) {
+        ifstream istream {srcFileOrFolder};
+        string   name {relative ? std::filesystem::path {srcFileOrFolder}.filename().string() : srcFileOrFolder};
+        if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, istream.size_in_bytes(), nullptr, nullptr, 0, level, nullptr, 0, nullptr, 0)) {
             return false;
         }
-
-        if (!mz_zip_writer_finalize_archive(&zip)) {
-            return false;
-        }
-        return mz_zip_writer_end(&zip);
+    } else {
+        return false;
     }
 
-    return false;
+    if (!mz_zip_writer_finalize_archive(&zip)) { return false; }
+
+    return mz_zip_writer_end(&zip);
 }
 
 auto unzip(path const& srcFile, path const& dstFolder) -> bool
@@ -171,21 +168,19 @@ auto unzip(path const& srcFile, path const& dstFolder) -> bool
     zip.m_pRead      = &mz_read;
     zip.m_pIO_opaque = &stream;
 
-    if (mz_zip_reader_init(&zip, stream.size_in_bytes(), 0)) {
-        mz_uint const n {mz_zip_reader_get_num_files(&zip)};
-        for (mz_uint i {0}; i < n; ++i) {
-            std::array<char, 260> buf {};
-            mz_zip_reader_get_filename(&zip, i, buf.data(), static_cast<mz_uint>(buf.size()));
-            string const file {dstFolder.empty() ? string {buf.data()} : dstFolder + "/" + string {buf.data()}};
-            create_file(file);
-            ofstream ostream {file};
-            mz_zip_reader_extract_to_callback(&zip, i, &mz_write, &ostream, 0);
-        }
+    if (!mz_zip_reader_init(&zip, stream.size_in_bytes(), 0)) { return false; }
 
-        return mz_zip_reader_end(&zip);
+    mz_uint const n {mz_zip_reader_get_num_files(&zip)};
+    for (mz_uint i {0}; i < n; ++i) {
+        std::array<char, 260> buf {};
+        mz_zip_reader_get_filename(&zip, i, buf.data(), static_cast<mz_uint>(buf.size()));
+        string const file {dstFolder.empty() ? string {buf.data()} : dstFolder + "/" + string {buf.data()}};
+        create_file(file);
+        ofstream ostream {file};
+        mz_zip_reader_extract_to_callback(&zip, i, &mz_write, &ostream, 0);
     }
 
-    return false;
+    return mz_zip_reader_end(&zip);
 }
 
 auto mount(path const& folderOrArchive, string const& mp) -> bool
@@ -200,9 +195,7 @@ auto unmount(path const& folderOrArchive) -> bool
 
 auto get_file_size(path const& file) -> i64
 {
-    if (!is_file(file)) {
-        return -1;
-    }
+    if (!is_file(file)) { return -1; }
 
     return get_stat(file).FileSize;
 }
@@ -245,27 +238,21 @@ auto get_parent_folder(path const& file) -> string
 
 auto is_file(path const& file) -> bool
 {
-    if (!io::exists(file)) {
-        return false;
-    }
+    if (!io::exists(file)) { return false; }
 
     return get_stat(file).Type == file_type::File;
 }
 
 auto is_folder(path const& folder) -> bool
 {
-    if (!io::exists(folder)) {
-        return false;
-    }
+    if (!io::exists(folder)) { return false; }
 
     return get_stat(folder).Type == file_type::Folder;
 }
 
 auto is_folder_empty(path const& folder) -> bool
 {
-    if (!is_folder(folder)) {
-        return false;
-    }
+    if (!is_folder(folder)) { return false; }
 
     bool retValue {true};
     PHYSFS_enumerate(folder.c_str(), &emptyEnumCallback, &retValue);
@@ -356,9 +343,7 @@ auto create_folder(path const& folder) -> bool
 
 auto enumerate(path const& folder, string const& pattern, bool recursive) -> std::unordered_set<string>
 {
-    if (!is_folder(folder)) {
-        return {};
-    }
+    if (!is_folder(folder)) { return {}; }
 
     callback_data cd;
     cd.Pattern = pattern;

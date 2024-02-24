@@ -11,14 +11,12 @@ namespace tcob {
 template <typename EvArgs>
 inline void signal<EvArgs>::operator()(EvArgs& args) const
 {
-    if (_slots.empty()) { return; }
-
     for (auto it {_slots.begin()}; it != _slots.end();) {
         if (it->second) {
-            it->second(args);
             if constexpr (requires { args.Handled; }) {
                 if (args.Handled) { break; }
             }
+            it->second(args);
             ++it;
         } else {
             it = _slots.erase(it);
@@ -73,8 +71,6 @@ inline auto signal<EvArgs>::get_slot_count() const -> isize
 
 inline void signal<void>::operator()() const
 {
-    if (_slots.empty()) { return; }
-
     for (auto it {_slots.begin()}; it != _slots.end();) {
         if (it->second) {
             it->second();
