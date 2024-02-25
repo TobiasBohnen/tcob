@@ -110,6 +110,7 @@ auto static convert_enum(SDL_GameControllerButton button) -> controller::button
         return controller::button::Paddle4;
     case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_TOUCHPAD:
         return controller::button::Touchpad;
+    case SDL_CONTROLLER_BUTTON_MAX: break;
     }
 
     return controller::button::Invalid;

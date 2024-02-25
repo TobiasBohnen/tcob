@@ -122,6 +122,7 @@ auto static IsIgnored(yaml_tokenizer::token const& token) -> bool
     case token_type::DoubleQuote:
     case token_type::SingleQuote:
     case token_type::EoF:
+    case token_type::Indent:
         return false;
     }
 

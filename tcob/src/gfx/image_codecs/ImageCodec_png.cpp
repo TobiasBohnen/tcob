@@ -66,6 +66,7 @@ png::tRNS_chunk::tRNS_chunk(std::span<u8 const> data, color_type colorType, std:
             }
         }
         break;
+    default: break;
     }
 }
 

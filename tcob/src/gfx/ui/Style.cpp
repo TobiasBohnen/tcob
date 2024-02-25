@@ -102,6 +102,7 @@ namespace element {
             case alignment::CenterOrMiddle:
                 retValue.Y += (rect.Height - retValue.Height) / 2.0f;
                 break;
+            default: break;
             }
             break;
         case orientation::Vertical:
@@ -114,6 +115,7 @@ namespace element {
             case alignment::CenterOrMiddle:
                 retValue.X += (rect.Width - retValue.Width) / 2.0f;
                 break;
+            default: break;
             }
             break;
         }

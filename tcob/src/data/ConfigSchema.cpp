@@ -151,6 +151,7 @@ auto schema::FromObject(object const& obj) -> std::shared_ptr<schema>
                         }
                         prop = val;
                     } break;
+                    case type::Null: break;
                     }
 
                     props[k] = prop;
@@ -299,10 +300,9 @@ auto schema::validate_property(object const& obj, array_property const& prop) co
                     case type::String:
                         test = val.is<string>(i);
                         break;
+                    case type::Null: break;
                     }
-                    if (!test) {
-                        retValue.Constraint = "ItemType";
-                    }
+                    if (!test) { retValue.Constraint = "ItemType"; }
                 }
             }
         }

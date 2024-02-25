@@ -329,6 +329,7 @@ void bsbd_writer::write_entry(ostream& stream, entry const& ent, utf8_string con
         case bsbd::marker_type::Int64:
             stream.write(val);
             break;
+        default: break;
         }
     } else if (ent.is<f64>()) {
         f64 const  val {ent.as<f64>()};
@@ -341,6 +342,7 @@ void bsbd_writer::write_entry(ostream& stream, entry const& ent, utf8_string con
         case bsbd::marker_type::Float64:
             stream.write(val);
             break;
+        default: break;
         }
     } else if (ent.is<utf8_string>()) {
         write_entry_header(stream, bsbd::marker_type::String, name);
