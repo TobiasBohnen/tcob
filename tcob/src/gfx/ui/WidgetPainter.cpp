@@ -509,20 +509,19 @@ auto widget_painter::format_text(element::text const& style, rect_f const& rect,
 
     auto const rectSize {rect.get_size()};
     if (resize && style.AutoSize != element::text::auto_size_mode::Never) {
-
-        auto const size {_canvas.measure_text(rectSize.Height, text)};
+        auto const textSize {_canvas.measure_text(rectSize.Height, text)};
 
         if ((style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyShrink)
-            && (size.Width > rectSize.Width || size.Height > rectSize.Height)) { // shrink
+            && (textSize.Width > rectSize.Width || textSize.Height > rectSize.Height)) { // shrink
             _canvas.restore();
-            f32 const scale {std::max(size.Width / rectSize.Width, size.Height / rectSize.Height)};
+            f32 const scale {std::max(textSize.Width / std::ceil(rectSize.Width), textSize.Height / std::ceil(rectSize.Height))};
             return format_text(style, rect, text, static_cast<u32>(fontSize / scale), false);
         }
 
         if ((style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyGrow)
-            && (size.Width < rectSize.Width || size.Height < rectSize.Height)) { // grow
+            && (textSize.Width < rectSize.Width || textSize.Height < rectSize.Height)) { // grow
             _canvas.restore();
-            f32 const scale {std::min(rectSize.Width / size.Width, rectSize.Height / size.Height)};
+            f32 const scale {std::min(std::floor(rectSize.Width) / textSize.Width, std::floor(rectSize.Height) / textSize.Height)};
             return format_text(style, rect, text, static_cast<u32>(fontSize * scale), false);
         }
     }
@@ -548,14 +547,10 @@ auto widget_painter::transform_text(element::text::transform xform, utf8_string_
         }
     } break;
     case element::text::transform::Lowercase:
-        for (auto& c : retValue) {
-            c = static_cast<char>(std::tolower(c));
-        }
+        for (auto& c : retValue) { c = static_cast<char>(std::tolower(c)); }
         break;
     case element::text::transform::Uppercase:
-        for (auto& c : retValue) {
-            c = static_cast<char>(std::toupper(c));
-        }
+        for (auto& c : retValue) { c = static_cast<char>(std::toupper(c)); }
         break;
     default:
         break;

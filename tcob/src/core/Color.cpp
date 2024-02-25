@@ -157,6 +157,8 @@ static flat_map<string, color> const colorMap {
 
 auto color::FromString(string_view name) -> color
 {
+    if (name.empty()) { return colors::Transparent; }
+
     string const test {helper::to_lower(name)};
     if (colorMap.contains(test)) {
         return colorMap.at(test);

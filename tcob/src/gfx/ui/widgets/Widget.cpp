@@ -106,7 +106,7 @@ auto widget::is_enabled() const -> bool
 
 void widget::paint(widget_painter& painter)
 {
-    if (!is_visible()) {
+    if (!is_visible() || Bounds->Width <= 0 || Bounds->Height <= 0) {
         return;
     }
 

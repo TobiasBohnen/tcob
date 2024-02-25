@@ -101,6 +101,7 @@ void form::force_redraw(string const& reason)
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
     }
     _updateWidgets = true;
+    _layout.mark_dirty(); // FIXME: only if top-level controls change
 }
 
 void form::focus_nav_target(string const& widget, direction dir)
