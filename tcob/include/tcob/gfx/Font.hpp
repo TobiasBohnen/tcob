@@ -134,6 +134,7 @@ private:
 class TCOB_API truetype_font_engine : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<truetype_font_engine>> {
+        string                    Engine;
         static inline char const* service_name {"gfx::truetype_font_engine::factory"};
     };
 
@@ -151,8 +152,6 @@ public:
 
     auto virtual get_kerning(u32 cp0, u32 cp1) -> f32 = 0;
     auto virtual get_glyph(u32 cp) -> glyph_bitmap    = 0;
-
-    static string Engine;
 };
 
 ////////////////////////////////////////////////////////////

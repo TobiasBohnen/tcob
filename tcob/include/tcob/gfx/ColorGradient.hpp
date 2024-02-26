@@ -39,8 +39,6 @@ public:
     auto get_color_array(f32 multAlpha) const -> std::array<vec4, Size>;
     auto get_colors() const -> std::array<color, Size>;
 
-    static color_gradient const White;
-
     friend auto operator==(color_gradient const& left, color_gradient const& right) -> bool;
 
 private:

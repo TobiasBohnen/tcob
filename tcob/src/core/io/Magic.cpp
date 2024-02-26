@@ -10,12 +10,17 @@
 
 namespace tcob::io::magic {
 
-constexpr u8                  BUFFER_LENGTH {128};
-static std::vector<signature> SIGNATURES {};
+constexpr u8 BUFFER_LENGTH {128};
+
+auto static GetSignatures() -> std::vector<signature>&
+{
+    static std::vector<signature> signatures {};
+    return signatures;
+}
 
 void add_signature(signature const& sig)
 {
-    SIGNATURES.push_back(sig);
+    GetSignatures().push_back(sig);
 }
 
 auto get_signature(istream& stream) -> std::optional<signature>
@@ -26,7 +31,7 @@ auto get_signature(istream& stream) -> std::optional<signature>
     auto const endBuffer {stream.read_n<ubyte>(BUFFER_LENGTH)};
     stream.seek(sOffset, seek_dir::Begin);
 
-    for (auto const& sig : SIGNATURES) {
+    for (auto const& sig : GetSignatures()) {
         bool found {true};
         for (auto const& part : sig.Parts) {
             std::span<ubyte const> slice;
@@ -51,7 +56,7 @@ auto get_signature(istream& stream) -> std::optional<signature>
 
 auto get_group(path const& ext) -> path
 {
-    for (auto const& sig : SIGNATURES) {
+    for (auto const& sig : GetSignatures()) {
         if (sig.Extension == ext) {
             return sig.Group;
         }

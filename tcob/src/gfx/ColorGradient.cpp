@@ -16,8 +16,6 @@ color_stop::color_stop(f32 pos, color c)
 
 ////////////////////////////////////////////////////////////
 
-color_gradient const color_gradient::White = {};
-
 color_gradient::color_gradient()
     : color_gradient {colors::White, colors::White}
 {

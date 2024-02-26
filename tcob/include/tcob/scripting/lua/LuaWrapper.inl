@@ -8,35 +8,39 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include "tcob/core/FlatMap.hpp"
-
 namespace tcob::scripting::lua {
 
 namespace detail {
 
     ////////////////////////////////////////////////////////////
-    static inline flat_map<metamethod, string> const metamethodmap = {
-        {metamethod::Length, "__len"},
-        {metamethod::ToString, "__tostring"},
-        {metamethod::UnaryMinus, "__unm"},
-        {metamethod::Concat, "__concat"},
-        {metamethod::Add, "__add"},
-        {metamethod::Subtract, "__sub"},
-        {metamethod::Multiply, "__mul"},
-        {metamethod::Divide, "__div"},
-        {metamethod::LessThan, "__lt"},
-        {metamethod::LessOrEqualThan, "__le"},
-        {metamethod::Call, "__call"},
-        {metamethod::FloorDivide, "__idiv"},
-        {metamethod::Modulo, "__mod"},
-        {metamethod::PowerOf, "__pow"},
-        {metamethod::BitwiseAnd, "__band"},
-        {metamethod::BitwiseOr, "__bor"},
-        {metamethod::BitwiseXor, "__bxor"},
-        {metamethod::BitwiseNot, "__bnot"},
-        {metamethod::LeftShift, "__shl"},
-        {metamethod::RightShift, "__shr"},
-        {metamethod::Close, "__close"}};
+    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> std::string
+    {
+        switch (m) {
+        case metamethod::Length: return "__len";
+        case metamethod::ToString: return "__tostring";
+        case metamethod::UnaryMinus: return "__unm";
+        case metamethod::Add: return "__add";
+        case metamethod::Subtract: return "__sub";
+        case metamethod::Divide: return "__div";
+        case metamethod::Multiply: return "__mul";
+        case metamethod::Concat: return "__concat";
+        case metamethod::LessThan: return "__lt";
+        case metamethod::LessOrEqualThan: return "__le";
+        case metamethod::Call: return "__call";
+        case metamethod::FloorDivide: return "__idiv";
+        case metamethod::Modulo: return "__mod";
+        case metamethod::PowerOf: return "__pow";
+        case metamethod::BitwiseAnd: return "__band";
+        case metamethod::BitwiseOr: return "__bor";
+        case metamethod::BitwiseXor: return "__bxor";
+        case metamethod::BitwiseNot: return "__bnot";
+        case metamethod::LeftShift: return "__shl";
+        case metamethod::RightShift: return "__shr";
+        case metamethod::Close: return "__close";
+        }
+
+        return "";
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -94,7 +98,7 @@ inline void wrapper<T>::impl_register_type()
 template <typename T>
 inline void wrapper<T>::wrap_metamethod(metamethod method, auto&& func)
 {
-    string const& name {detail::metamethodmap.at(method)};
+    string const& name {detail::get_metamethod_name(method)};
     auto          ptr {scripting::wrapper<wrapper<T>>::make_unique_closure(std::function {func})};
     set_metatable_field(name, typeid(T).name(), ptr.get());
     set_metatable_field(name, (string(typeid(T).name()) + "_gc"), ptr.get());

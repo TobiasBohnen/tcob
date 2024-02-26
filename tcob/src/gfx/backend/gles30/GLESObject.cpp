@@ -28,29 +28,38 @@ void gl_object_registry::unregister_object(gl_object const* res) noexcept
 
 ////////////////////////////////////////////////////////////
 
-gl_object_registry gl_object::Registry = gl_object_registry();
+auto static GetRegistry() -> gl_object_registry&
+{
+    static gl_object_registry registry;
+    return registry;
+}
 
 gl_object::gl_object()
 {
-    Registry.register_object(this);
+    GetRegistry().register_object(this);
 }
 
 gl_object::gl_object(gl_object&& other) noexcept
     : ID {std::exchange(other.ID, 0)}
 {
-    Registry.unregister_object(&other);
+    GetRegistry().unregister_object(&other);
 }
 
 auto gl_object::operator=(gl_object&& other) noexcept -> gl_object&
 {
     std::swap(ID, other.ID);
-    Registry.unregister_object(&other);
+    GetRegistry().unregister_object(&other);
     return *this;
+}
+
+void gl_object::DestroyAll()
+{
+    GetRegistry().destroy_all_objects();
 }
 
 void gl_object::destroy()
 {
-    Registry.unregister_object(this);
+    GetRegistry().unregister_object(this);
 
     if (ID) {
         do_destroy();

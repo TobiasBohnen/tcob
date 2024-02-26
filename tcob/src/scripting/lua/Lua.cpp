@@ -64,17 +64,23 @@ auto stack_guard::get_top() const -> i32
 }
 
 ////////////////////////////////////////////////////////////
-static flat_map<i32, type> const typeMap {
-    {LUA_TNONE, type::None},
-    {LUA_TNIL, type::Nil},
-    {LUA_TBOOLEAN, type::Boolean},
-    {LUA_TLIGHTUSERDATA, type::LightUserdata},
-    {LUA_TNUMBER, type::Number},
-    {LUA_TSTRING, type::String},
-    {LUA_TTABLE, type::Table},
-    {LUA_TFUNCTION, type::Function},
-    {LUA_TUSERDATA, type::Userdata},
-    {LUA_TTHREAD, type::Thread}};
+
+auto static GetType(i32 i) -> type
+{
+    static flat_map<i32, type> const typeMap {
+        {LUA_TNONE, type::None},
+        {LUA_TNIL, type::Nil},
+        {LUA_TBOOLEAN, type::Boolean},
+        {LUA_TLIGHTUSERDATA, type::LightUserdata},
+        {LUA_TNUMBER, type::Number},
+        {LUA_TSTRING, type::String},
+        {LUA_TTABLE, type::Table},
+        {LUA_TFUNCTION, type::Function},
+        {LUA_TUSERDATA, type::Userdata},
+        {LUA_TTHREAD, type::Thread}};
+
+    return typeMap.at(i);
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -170,7 +176,7 @@ auto state_view::to_thread(i32 idx) const -> state_view
 
 auto state_view::get_type(i32 idx) const -> type
 {
-    return typeMap.at(lua_type(_state, idx));
+    return GetType(lua_type(_state, idx));
 }
 
 auto state_view::get_top() const -> i32
@@ -277,7 +283,7 @@ void state_view::remove(i32 idx) const
 
 auto state_view::get_table(i32 idx) const -> type
 {
-    return typeMap.at(lua_gettable(_state, idx));
+    return GetType(lua_gettable(_state, idx));
 }
 
 auto state_view::get_metatable(i32 objindex) const -> i32
@@ -342,12 +348,12 @@ auto state_view::raw_len(i32 idx) const -> u64
 
 auto state_view::raw_get(i32 idx, i64 n) const -> type
 {
-    return typeMap.at(lua_rawgeti(_state, idx, n));
+    return GetType(lua_rawgeti(_state, idx, n));
 }
 
 auto state_view::raw_get(i32 idx) const -> type
 {
-    return typeMap.at(lua_rawget(_state, idx));
+    return GetType(lua_rawget(_state, idx));
 }
 
 void state_view::raw_set(i32 idx, i64 n) const
@@ -522,7 +528,6 @@ auto state_view::is_valid() const -> bool
 }
 
 ////////////////////////////////////////////////////////////
-
 }
 
 #endif

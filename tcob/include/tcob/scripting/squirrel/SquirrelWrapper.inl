@@ -8,24 +8,27 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
-    #include "tcob/core/FlatMap.hpp"
-
 namespace tcob::scripting::squirrel {
 
 namespace detail {
     ////////////////////////////////////////////////////////////
-    static inline flat_map<metamethod, string> const metamethodmap = {
-        {metamethod::Add, "_add"},
-        {metamethod::Subtract, "_sub"},
-        {metamethod::Multiply, "_mul"},
-        {metamethod::Divide, "_div"},
-        {metamethod::Modulo, "_mod"},
-        {metamethod::UnaryMinus, "_unm"},
-        {metamethod::TypeOf, "_typeof"},
-        {metamethod::Compare, "_cmp"},
-        {metamethod::Call, "_call"},
-        {metamethod::Cloned, "_cloned"},
-        {metamethod::ToString, "_tostring"}};
+    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> std::string
+    {
+        switch (m) {
+        case metamethod::Add: return "_add";
+        case metamethod::Subtract: return "_sub";
+        case metamethod::Multiply: return "_mul";
+        case metamethod::Divide: return "_div";
+        case metamethod::Modulo: return "_mod";
+        case metamethod::UnaryMinus: return "_unm";
+        case metamethod::TypeOf: return "_typeof";
+        case metamethod::Compare: return "_cmp";
+        case metamethod::Call: return "_call";
+        case metamethod::Cloned: return "_cloned";
+        case metamethod::ToString: return "_tostring";
+        }
+        return "";
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -33,7 +36,7 @@ namespace detail {
 template <typename T>
 inline void wrapper<T>::wrap_metamethod(metamethod method, auto&& func)
 {
-    string const& name {detail::metamethodmap.at(method)};
+    string const& name {detail::get_metamethod_name(method)};
     push_metamethod(name, std::function {func});
 }
 

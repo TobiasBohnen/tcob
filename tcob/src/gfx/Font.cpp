@@ -179,11 +179,17 @@ constexpr i32 FONT_TEXTURE_SIZE {512};
 constexpr f32 FONT_TEXTURE_SIZE_F {static_cast<f32>(FONT_TEXTURE_SIZE)};
 constexpr u32 FONT_TEXTURE_LAYERS {3};
 
-constexpr i32 GLYPH_PADDING {4};
-string const  FONT_WARMUP {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>"};
+constexpr i32      GLYPH_PADDING {4};
+static char const* FONT_WARMUP {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>"};
+
+auto static CreateEngine() -> std::unique_ptr<tcob::gfx::truetype_font_engine>
+{
+    auto& factory {locate_service<truetype_font_engine::factory>()};
+    return factory.create(factory.Engine);
+}
 
 truetype_font::truetype_font()
-    : _engine {locate_service<truetype_font_engine::factory>().create(truetype_font_engine::Engine)}
+    : _engine {CreateEngine()}
 {
 }
 
@@ -479,8 +485,4 @@ void font_family::FindSources(font_family& fam, path const& source)
 
     fam._fontData.reserve(fam._fontSources.size());
 }
-
-////////////////////////////////////////////////////////////
-
-string truetype_font_engine::Engine {"FREETYPE"};
 }

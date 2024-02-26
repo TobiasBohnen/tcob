@@ -19,7 +19,7 @@ function(tcob_add_obj_library module sources headers)
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra
         -Wno-float-equal -Wno-double-promotion -Wno-implicit-int-float-conversion -Wno-sign-conversion -Wno-switch-enum
         -Wno-unsafe-buffer-usage -Wno-ctad-maybe-unsupported -Wno-c++20-compat -Wno-c++98-compat -Wno-c++98-compat-pedantic
-        -Wno-exit-time-destructors -Wno-global-constructors>
+        -Wno-exit-time-destructors>
         $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic
         -Wno-missing-field-initializers>
     )

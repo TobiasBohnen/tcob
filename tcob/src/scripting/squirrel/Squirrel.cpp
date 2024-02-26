@@ -43,26 +43,6 @@ auto stack_guard::get_top() const -> SQInteger
 
 ////////////////////////////////////////////////////////////
 
-static flat_map<SQObjectType, type> const typeMap {
-    {SQObjectType::OT_NULL, type::Null},
-    {SQObjectType::OT_INTEGER, type::Integer},
-    {SQObjectType::OT_FLOAT, type::Float},
-    {SQObjectType::OT_BOOL, type::Boolean},
-    {SQObjectType::OT_STRING, type::String},
-    {SQObjectType::OT_TABLE, type::Table},
-    {SQObjectType::OT_ARRAY, type::Array},
-    {SQObjectType::OT_USERDATA, type::Userdata},
-    {SQObjectType::OT_CLOSURE, type::Closure},
-    {SQObjectType::OT_NATIVECLOSURE, type::NativeClosure},
-    {SQObjectType::OT_GENERATOR, type::Generator},
-    {SQObjectType::OT_USERPOINTER, type::UserPointer},
-    {SQObjectType::OT_THREAD, type::Thread},
-    {SQObjectType::OT_CLASS, type::Class},
-    {SQObjectType::OT_INSTANCE, type::Instance},
-    {SQObjectType::OT_WEAKREF, type::WeakReference}};
-
-////////////////////////////////////////////////////////////
-
 vm_view::vm_view(HSQUIRRELVM vm)
     : _vm {vm}
 {
@@ -273,6 +253,24 @@ auto vm_view::get(SQInteger idx) const -> bool
 
 auto vm_view::get_type(SQInteger idx) const -> type
 {
+    static flat_map<SQObjectType, type> const typeMap {
+        {SQObjectType::OT_NULL, type::Null},
+        {SQObjectType::OT_INTEGER, type::Integer},
+        {SQObjectType::OT_FLOAT, type::Float},
+        {SQObjectType::OT_BOOL, type::Boolean},
+        {SQObjectType::OT_STRING, type::String},
+        {SQObjectType::OT_TABLE, type::Table},
+        {SQObjectType::OT_ARRAY, type::Array},
+        {SQObjectType::OT_USERDATA, type::Userdata},
+        {SQObjectType::OT_CLOSURE, type::Closure},
+        {SQObjectType::OT_NATIVECLOSURE, type::NativeClosure},
+        {SQObjectType::OT_GENERATOR, type::Generator},
+        {SQObjectType::OT_USERPOINTER, type::UserPointer},
+        {SQObjectType::OT_THREAD, type::Thread},
+        {SQObjectType::OT_CLASS, type::Class},
+        {SQObjectType::OT_INSTANCE, type::Instance},
+        {SQObjectType::OT_WEAKREF, type::WeakReference}};
+
     return typeMap.at(sq_gettype(_vm, idx));
 }
 

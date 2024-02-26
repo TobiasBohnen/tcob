@@ -36,16 +36,10 @@ public:
 
     u32 ID {0};
 
-    void static DestroyAll()
-    {
-        Registry.destroy_all_objects();
-    }
+    void static DestroyAll();
 
 protected:
     void destroy();
     void virtual do_destroy() = 0;
-
-private:
-    static gl_object_registry Registry;
 };
 }

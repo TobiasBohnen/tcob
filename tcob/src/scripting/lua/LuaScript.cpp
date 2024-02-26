@@ -16,17 +16,6 @@
 
 namespace tcob::scripting::lua {
 
-static flat_map<library, std::pair<char const*, lua_CFunction>> const Libraries {
-    {library::Table, {LUA_TABLIBNAME, luaopen_table}},
-    {library::String, {LUA_STRLIBNAME, luaopen_string}},
-    {library::Math, {LUA_MATHLIBNAME, luaopen_math}},
-    {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},
-    {library::IO, {LUA_IOLIBNAME, luaopen_io}},
-    {library::OS, {LUA_OSLIBNAME, luaopen_os}},
-    {library::Utf8, {LUA_UTF8LIBNAME, luaopen_utf8}},
-    {library::Debug, {LUA_DBLIBNAME, luaopen_debug}},
-    {library::Package, {LUA_LOADLIBNAME, luaopen_package}}};
-
 void static warn(void* ud, char const* msg, int toCont)
 {
     auto* scr {static_cast<script*>(ud)};
@@ -88,7 +77,18 @@ auto script::load_binary_buffer(string_view script, string const& name) const ->
 
 void script::load_library(library lib)
 {
-    auto const& [name, func] = Libraries.at(lib);
+    static flat_map<library, std::pair<char const*, lua_CFunction>> const libraries {
+        {library::Table, {LUA_TABLIBNAME, luaopen_table}},
+        {library::String, {LUA_STRLIBNAME, luaopen_string}},
+        {library::Math, {LUA_MATHLIBNAME, luaopen_math}},
+        {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},
+        {library::IO, {LUA_IOLIBNAME, luaopen_io}},
+        {library::OS, {LUA_OSLIBNAME, luaopen_os}},
+        {library::Utf8, {LUA_UTF8LIBNAME, luaopen_utf8}},
+        {library::Debug, {LUA_DBLIBNAME, luaopen_debug}},
+        {library::Package, {LUA_LOADLIBNAME, luaopen_package}}};
+
+    auto const& [name, func] = libraries.at(lib);
     _view.requiref(name, func, true);
     _view.pop(1);
 

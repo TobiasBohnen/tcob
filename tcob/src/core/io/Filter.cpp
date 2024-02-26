@@ -81,8 +81,6 @@ auto zlib_filter::from(std::span<ubyte const> bytes) const -> std::optional<std:
 ////////////////////////////////////////////////////////////
 // based on:https://stackoverflow.com/a/13935718/13220389
 
-static string const base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
 static inline auto is_base64(byte c) -> bool
 {
     return (isalnum(static_cast<ubyte>(c)) || (c == '+') || (c == '/'));
@@ -90,6 +88,8 @@ static inline auto is_base64(byte c) -> bool
 
 auto base64_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
 {
+    static string const base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
     ubyte const*         buf {bytes.data()};
     isize                bufLen {std::ssize(bytes)};
     i32                  i {0};
@@ -138,6 +138,8 @@ auto base64_filter::to(std::span<ubyte const> bytes) const -> std::optional<std:
 
 auto base64_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
 {
+    static string const base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
     isize                bufLen {std::ssize(bytes)};
     i32                  i {0};
     i32                  in {0};

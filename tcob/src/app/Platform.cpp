@@ -117,7 +117,7 @@ platform::platform(game* game, game::init const& ginit)
         auto config {std::make_shared<data::config_file>(ginit.ConfigFile)};
         register_service<data::config_file>(config);
         config->merge(_game->get_config_defaults(), false); // merge config with default
-        gfx::truetype_font_engine::Engine = (*config)[Cfg::Video::Name][Cfg::Video::font_engine].as<string>();
+        locate_service<gfx::truetype_font_engine::factory>().Engine = (*config)[Cfg::Video::Name][Cfg::Video::font_engine].as<string>();
 
         // init render system
         InitRenderSystem((*config)[Cfg::Video::Name][Cfg::Video::render_system].as<string>());

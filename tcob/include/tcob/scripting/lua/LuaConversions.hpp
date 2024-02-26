@@ -818,6 +818,8 @@ struct converter<T> {
 
     auto static From(state_view view, i32& idx, T& value) -> bool
     {
+        static string TypeName {typeid(std::remove_pointer_t<T>).name()};
+
         if (view.is_userdata(idx)) {
             // try uservalue
             [[maybe_unused]] i32 const err {view.get_uservalue(idx, 1)};
@@ -857,6 +859,8 @@ struct converter<T> {
 
     void static To(state_view view, T const& value)
     {
+        static string TypeName {typeid(std::remove_pointer_t<T>).name()};
+
         T* obj {static_cast<T*>(view.new_userdata(sizeof(T*), 1))};
         *obj = value;
 
@@ -867,8 +871,6 @@ struct converter<T> {
         view.new_metatable(TypeName);
         view.set_metatable(-2);
     }
-
-    static inline string TypeName {typeid(std::remove_pointer_t<T>).name()};
 };
 
 ////tcob//////////////////////////////////////////////////////////////
@@ -878,6 +880,8 @@ template <typename T>
 struct converter<scripting::script_owned_ptr<T>> {
     void static To(state_view view, scripting::script_owned_ptr<T> const& value)
     {
+        static string TypeName {typeid(T).name()};
+
         T** obj {static_cast<T**>(view.new_userdata(sizeof(T*), 1))};
         *obj = value.Pointer;
 
@@ -909,8 +913,6 @@ struct converter<scripting::script_owned_ptr<T>> {
 
         return 0;
     }
-
-    static inline string TypeName {typeid(T).name()};
 };
 
 template <typename T>

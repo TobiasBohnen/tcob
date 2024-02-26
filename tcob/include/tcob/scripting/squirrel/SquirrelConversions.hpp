@@ -766,6 +766,8 @@ struct converter<T> {
 
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
     {
+        static string TypeName {typeid(std::remove_pointer_t<T>).name()};
+
         if (view.is_userdata(idx)) {
             void* typetag {nullptr};
             void* val {nullptr};
@@ -806,6 +808,8 @@ struct converter<T> {
 
     void static To(vm_view view, T const& value)
     {
+        static string TypeName {typeid(std::remove_pointer_t<T>).name()};
+
         T* obj {static_cast<T*>(view.new_userdata(sizeof(T*)))};
         *obj = value;
         view.set_typetag(-1, TypeName.data());
@@ -821,8 +825,6 @@ struct converter<T> {
         view.set_delegate(-3);
         view.pop(1);
     }
-
-    static inline string TypeName {typeid(std::remove_pointer_t<T>).name()};
 };
 
 ////tcob//////////////////////////////////////////////////////////////
