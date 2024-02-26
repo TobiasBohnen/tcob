@@ -12,8 +12,6 @@ void gl_object_registry::destroy_all_objects()
     while (!_objects.empty()) {
         _objects[0]->destroy();
     }
-
-    _objects.clear();
 }
 
 void gl_object_registry::register_object(gl_object* res)

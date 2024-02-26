@@ -818,7 +818,7 @@ struct converter<T> {
 
     auto static From(state_view view, i32& idx, T& value) -> bool
     {
-        static string TypeName {typeid(std::remove_pointer_t<T>).name()};
+        static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
         if (view.is_userdata(idx)) {
             // try uservalue
@@ -859,7 +859,7 @@ struct converter<T> {
 
     void static To(state_view view, T const& value)
     {
-        static string TypeName {typeid(std::remove_pointer_t<T>).name()};
+        static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
         T* obj {static_cast<T*>(view.new_userdata(sizeof(T*), 1))};
         *obj = value;

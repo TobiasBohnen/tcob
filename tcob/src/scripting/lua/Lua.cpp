@@ -11,7 +11,6 @@
     #include <lua.h>
     #include <lualib.h>
 
-    #include "tcob/core/FlatMap.hpp"
     #include "tcob/core/Logger.hpp"
 
 namespace tcob::scripting::lua {
@@ -67,19 +66,20 @@ auto stack_guard::get_top() const -> i32
 
 auto static GetType(i32 i) -> type
 {
-    static flat_map<i32, type> const typeMap {
-        {LUA_TNONE, type::None},
-        {LUA_TNIL, type::Nil},
-        {LUA_TBOOLEAN, type::Boolean},
-        {LUA_TLIGHTUSERDATA, type::LightUserdata},
-        {LUA_TNUMBER, type::Number},
-        {LUA_TSTRING, type::String},
-        {LUA_TTABLE, type::Table},
-        {LUA_TFUNCTION, type::Function},
-        {LUA_TUSERDATA, type::Userdata},
-        {LUA_TTHREAD, type::Thread}};
+    switch (i) {
+    case LUA_TNONE: return type::None;
+    case LUA_TNIL: return type::Nil;
+    case LUA_TBOOLEAN: return type::Boolean;
+    case LUA_TLIGHTUSERDATA: return type::LightUserdata;
+    case LUA_TNUMBER: return type::Number;
+    case LUA_TSTRING: return type::String;
+    case LUA_TTABLE: return type::Table;
+    case LUA_TFUNCTION: return type::Function;
+    case LUA_TUSERDATA: return type::Userdata;
+    case LUA_TTHREAD: return type::Thread;
+    }
 
-    return typeMap.at(i);
+    return type::None;
 }
 
 ////////////////////////////////////////////////////////////
