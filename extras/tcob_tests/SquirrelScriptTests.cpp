@@ -438,10 +438,10 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")
     {
         auto res = run(R"(
             function geny() {
-                for(local i=1;i<10;i+=1) { yield i; } 
-                return null; 
+                for(local i=1;i<10;i+=1) { yield i; }
+                return null;
             }
-                
+
             co <- geny();
         )");
         REQUIRE(res);
@@ -455,10 +455,10 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")
     {
         auto res = run(R"(
             function geny(x) {
-                for(local i=1;i<10;i+=1) { yield i*x; } 
-                return null; 
+                for(local i=1;i<10;i+=1) { yield i*x; }
+                return null;
             }
-                
+
             co <- geny(2);
         )");
         REQUIRE(res);
@@ -471,10 +471,10 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")
     {
         auto res = run(R"(
             function geny() {
-                for(local i=1;i<=2;i+=1) { yield i; } 
-                return null; 
+                for(local i=1;i<=2;i+=1) { yield i; }
+                return null;
             }
-                
+
             co <- geny();
         )");
         REQUIRE(res);
@@ -1218,6 +1218,35 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.STLTypes")
 
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
 {
+    SUBCASE("table as parameter")
+    {
+        {
+            i32           x {0};
+            std::function func {[&](table& tab0) {
+                REQUIRE(tab0.has("x"));
+                x = tab0["x"];
+            }};
+
+            global["func"] = &func;
+            auto res       = run("local tab = { x = 42 }; func(tab);");
+            REQUIRE(res);
+            REQUIRE(x == 42);
+        }
+        {
+            i32           x {0};
+            std::function func {[&](stack_base& root, table& tab) {
+                REQUIRE(root.has("y"));
+                x += root["y"].as<i32>();
+                REQUIRE(tab.has("x"));
+                x += tab["x"].as<i32>();
+            }};
+
+            global["func"] = &func;
+            auto res       = run("y <- 100; local tab = { x = 42 }; func(tab);");
+            REQUIRE(res);
+            REQUIRE(x == 142);
+        }
+    }
     SUBCASE("basic operations")
     {
         {
@@ -1414,6 +1443,11 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
             table tab2 {global["tableY"]};
             REQUIRE(tab0 != tab2);
         }
+        {
+            table tab = *run<table>("local tableX = { a = 12 , b = { c = 100 }}; return tableX;");
+            REQUIRE(tab.is<table>("b"));
+            REQUIRE((i32)tab["b"]["c"] == 100);
+        }
     }
     SUBCASE("metamethods")
     {
@@ -1602,7 +1636,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Threads")
         REQUIRE(wres.value() == "2");
     }
     {
-        auto res = run(R"(                                     
+        auto res = run(R"(
                 function coroutine_test(x)
                 {
                     ::suspend(x+"1");
@@ -1688,8 +1722,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.VariadicFunctions")
             function testArg(...) {
                 local retValue = 0;
                 foreach(i, v in vargv) {retValue += v;}
-                return retValue; 
-            } 
+                return retValue;
+            }
         )");
 
         REQUIRE(res);

@@ -25,6 +25,8 @@
     #include "tcob/scripting/squirrel/SquirrelClosure.hpp"
     #include "tcob/scripting/squirrel/SquirrelTypes.hpp"
 
+    #include "tcob/core/ext/magic_enum_reduced.hpp"
+
 namespace tcob::scripting::squirrel {
 
 ////functions/////////////////////////////////////////////////////////
@@ -527,6 +529,8 @@ struct ref_converter {
 
 template <>
 struct converter<table> : public ref_converter<table> { };
+template <>
+struct converter<stack_base> : public ref_converter<stack_base> { };
 
 template <>
 struct converter<class_t> : public ref_converter<class_t> { };
@@ -680,7 +684,7 @@ template <Enum T>
 struct converter<T> {
     auto static IsType(vm_view view, SQInteger idx) -> bool
     {
-        return view.is_integer(idx);
+        return view.is_integer(idx) || view.is_string(idx);
     }
 
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
@@ -690,13 +694,18 @@ struct converter<T> {
             return true;
         }
 
+        if (view.is_string(idx)) {
+            value = tcob::detail::magic_enum_reduced::string_to_enum<T>(view.get_string(idx++));
+            return true;
+        }
+
         idx++;
         return false;
     }
 
     void static To(vm_view view, T const& value)
     {
-        view.push_integer(static_cast<SQInteger>(value));
+        view.push_string(tcob::detail::magic_enum_reduced::enum_to_string(value));
     }
 };
 

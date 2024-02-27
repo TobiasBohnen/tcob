@@ -39,7 +39,7 @@ protected:
     auto get_view() const -> vm_view;
 
 private:
-    std::shared_ptr<HSQOBJECT> _ref;
+    std::unique_ptr<HSQOBJECT> _ref;
 
     vm_view _view {nullptr};
 };
@@ -86,6 +86,11 @@ private:
     auto is(vm_view view, auto&& key, auto&&... keys) const -> bool;
 
     auto has(vm_view view, auto&& key, auto&&... keys) const -> bool;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API stack_base : public table {
 };
 
 ////////////////////////////////////////////////////////////

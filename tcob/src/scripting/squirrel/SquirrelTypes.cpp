@@ -11,13 +11,12 @@
 
     #include <cassert>
 
-    #include "tcob/core/io/FileStream.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
 
 namespace tcob::scripting::squirrel {
 
 ref::ref()
-    : _ref {std::make_shared<HSQOBJECT>()}
+    : _ref {std::make_unique<HSQOBJECT>()}
 {
 }
 
@@ -78,7 +77,7 @@ void ref::release()
 {
     if (is_valid()) {
         _view.release(_ref.get());
-        _ref  = nullptr;
+        _ref  = std::make_unique<HSQOBJECT>();
         _view = vm_view {nullptr};
     }
 }

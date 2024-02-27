@@ -30,11 +30,10 @@ namespace detail {
                 SQInteger idx {2};
                 if constexpr (sizeof...(Args) > 0) {
                     using first_type = typename std::remove_cvref_t<tcob::detail::first_element_t<Args...>>;
-                    if constexpr (Pointer<first_type> || std::is_same_v<table, first_type>) {
+                    if constexpr (Pointer<first_type> || std::is_same_v<stack_base, first_type>) {
                         idx = 1;
                     }
                 }
-
                 (view.pull_convert(idx, item), ...);
             },
             params);
