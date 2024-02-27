@@ -131,6 +131,19 @@ namespace render_backend {
 
 ////////////////////////////////////////////////////////////
 
+class canvas;
+
+class TCOB_API canvas_guard final : public non_copyable {
+public:
+    explicit canvas_guard(canvas* c);
+    ~canvas_guard();
+
+private:
+    canvas* _canvas;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API canvas final : public non_copyable {
 public:
     canvas();
@@ -151,6 +164,7 @@ public:
     void save();
     void restore();
     void reset();
+    auto create_guard() -> canvas_guard;
 
     // Render styles
     void set_fill_style(color c);

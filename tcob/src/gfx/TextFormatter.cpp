@@ -171,7 +171,7 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_d
             // reset currentLine
             currentLine.Tokens.clear();
             currentLine.WhiteSpaceCount = 0;
-            currentLine.RemainingWidth  = lineWidth;
+            currentLine.RemainingWidth  = lineWidth < 0 ? std::numeric_limits<f32>::max() : lineWidth;
 
             // add word to new line
             if (currentToken.Type == token_type::Text) {

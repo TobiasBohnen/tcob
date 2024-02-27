@@ -71,7 +71,7 @@ void widget_painter::draw_background_and_border(background_style const& style, r
 
 void widget_painter::draw_bordered_rect(rect_f const& rect, ui_paint const& back, element::border const& borderStyle)
 {
-    _canvas.save();
+    auto const guard {_canvas.create_guard()};
 
     if (auto const* np {std::get_if<nine_patch>(&back)}) {
         draw_nine_patch(*np, rect, borderStyle);
@@ -85,13 +85,11 @@ void widget_painter::draw_bordered_rect(rect_f const& rect, ui_paint const& back
         f32 const borderSize {borderStyle.Size.calc(rect.Width)};
         draw_border(rect, borderStyle, borderSize, borderRadius);
     }
-
-    _canvas.restore();
 }
 
 void widget_painter::draw_bordered_circle(rect_f const& rect, ui_paint const& back, element::border const& borderStyle)
 {
-    _canvas.save();
+    auto const guard {_canvas.create_guard()};
 
     if (auto const* np {std::get_if<nine_patch>(&back)}) {
         draw_nine_patch(*np, rect, borderStyle);
@@ -105,8 +103,6 @@ void widget_painter::draw_bordered_circle(rect_f const& rect, ui_paint const& ba
         f32 const borderSize {borderStyle.Size.calc(rect.Width)};
         draw_border({rect.X + (rect.Width / 2 - r), rect.Y + (rect.Height / 2 - r), r * 2, r * 2}, borderStyle, borderSize, r);
     }
-
-    _canvas.restore();
 }
 
 void widget_painter::draw_nine_patch(nine_patch const& np, rect_f const& rect, element::border const& borderStyle)
@@ -152,7 +148,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
 
 void widget_painter::draw_text(element::text const& style, rect_f const& refRect, text_formatter::result const& text)
 {
-    _canvas.save();
+    auto const guard {_canvas.create_guard()};
 
     _canvas.set_font(text.Font);
     _canvas.set_text_halign(style.Alignment.Horizontal);
@@ -259,13 +255,11 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
             drawDeco();
         }
     }
-
-    _canvas.restore();
 }
 
 void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect)
 {
-    _canvas.save();
+    auto const guard {_canvas.create_guard()};
 
     f32 width {style.Size.calc(std::min(refRect.Height, refRect.Width))};
     if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
@@ -313,8 +307,6 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
             break;
         }
     }
-
-    _canvas.restore();
 }
 
 auto widget_painter::draw_bar(element::bar const& style, rect_f const& refRect, element::bar::context const& barCtx) -> rect_f
@@ -404,7 +396,7 @@ auto widget_painter::draw_scrollbar(element::scrollbar const& style, element::th
 
 void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& refRect)
 {
-    _canvas.save();
+    auto const guard {_canvas.create_guard()};
 
     {
         rect_f const navRect {decStyle.calc(refRect)};
@@ -452,8 +444,6 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
             break;
         }
     }
-
-    _canvas.restore();
 }
 
 void widget_painter::draw_item(element::item const& style, rect_f const& rect, utf8_string const& text)
@@ -500,7 +490,8 @@ auto widget_painter::format_text(element::text const& style, rect_f const& rect,
 
 auto widget_painter::format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> text_formatter::result
 {
-    _canvas.save();
+    auto const guard {_canvas.create_guard()};
+
     auto* const font {style.Font->get_font(style.Style, fontSize).get_obj()};
 
     _canvas.set_font(font);
@@ -513,22 +504,18 @@ auto widget_painter::format_text(element::text const& style, rect_f const& rect,
 
         if ((style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyShrink)
             && (textSize.Width > rectSize.Width || textSize.Height > rectSize.Height)) { // shrink
-            _canvas.restore();
             f32 const scale {std::max(textSize.Width / std::ceil(rectSize.Width), textSize.Height / std::ceil(rectSize.Height))};
-            return format_text(style, rect, text, static_cast<u32>(fontSize / scale), false);
+            return format_text(style, rect, text, static_cast<u32>(fontSize / scale) - 1, false);
         }
 
         if ((style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyGrow)
             && (textSize.Width < rectSize.Width || textSize.Height < rectSize.Height)) { // grow
-            _canvas.restore();
             f32 const scale {std::min(std::floor(rectSize.Width) / textSize.Width, std::floor(rectSize.Height) / textSize.Height)};
-            return format_text(style, rect, text, static_cast<u32>(fontSize * scale), false);
+            return format_text(style, rect, text, static_cast<u32>(fontSize * scale) - 1, false);
         }
     }
 
-    auto const retValue {_canvas.format_text(rectSize, text)};
-    _canvas.restore();
-    return retValue;
+    return _canvas.format_text(rectSize, text);
 }
 
 auto widget_painter::transform_text(element::text::transform xform, utf8_string_view text) const -> utf8_string
