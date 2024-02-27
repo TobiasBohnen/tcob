@@ -182,7 +182,7 @@ public:
 namespace detail {
     ////////////////////////////////////////////////////////////
 
-    class function_base : public ref {
+    class TCOB_API function_base : public ref {
     protected:
         auto call_protected(SQInteger nargs, bool retValue) const -> error_code;
     };
