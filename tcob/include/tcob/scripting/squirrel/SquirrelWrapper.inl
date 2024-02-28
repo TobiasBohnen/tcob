@@ -73,7 +73,7 @@ inline void wrapper<T>::impl_wrap_func(string const& name, wrap_target target, n
 
 template <typename T>
 template <typename S>
-inline void wrapper<T>::impl_register_type()
+inline void wrapper<T>::impl_register_base()
 {
     static_assert(std::is_base_of_v<S, T>);
 

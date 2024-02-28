@@ -112,6 +112,9 @@ public:
     void wrap_setter(string const& name);
     void wrap_setter(string const& name, auto&& set);
 
+    template <typename S>
+    void register_base();
+
 protected:
     template <typename R, typename... P>
     auto make_unique_closure(std::function<R(P...)>&& fn);

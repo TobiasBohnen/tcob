@@ -826,20 +826,26 @@ struct converter<T> {
             assert(err != 0);
             string const userDataType {view.to_string(-1)};
             view.pop(1);
+
+            void* ptr {nullptr};
+
             if (userDataType == TypeName) {
-                value = *static_cast<T*>(view.to_userdata(idx++)); // Lua userdata is T**, so dereference it here
-                return true;
+                ptr = view.to_userdata(idx++);
+            } else {
+                // try metatable
+                view.get_metatable(userDataType);
+                table tab {view, -1};
+                view.pop(1);
+                if (tab.is_valid()) {
+                    if (std::unordered_set<string> types; tab.try_get(types, "__types") && types.contains(TypeName)) {
+                        ptr = view.to_userdata(idx++);
+                    }
+                }
             }
 
-            // try metatable
-            view.get_metatable(userDataType);
-            table tab {view, -1};
-            view.pop(1);
-            if (tab.is_valid()) {
-                if (std::unordered_set<string> types; tab.try_get(types, "__types") && types.contains(userDataType)) {
-                    value = *static_cast<T*>(view.to_userdata(idx++)); // Lua userdata is T**, so dereference it here
-                    return true;
-                }
+            if (ptr) {
+                value = *static_cast<T*>(ptr); // Lua userdata is T**, so dereference it here
+                return true;
             }
 
             value = nullptr;

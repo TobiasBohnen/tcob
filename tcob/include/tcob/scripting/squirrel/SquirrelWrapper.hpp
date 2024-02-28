@@ -89,7 +89,7 @@ private:
     void impl_wrap_func(string const& name, wrap_target target, native_closure_unique_ptr func);
 
     template <typename S>
-    void impl_register_type();
+    void impl_register_base();
 
     void create_metatable(string const& name);
     void remove_metatable(string const& name);

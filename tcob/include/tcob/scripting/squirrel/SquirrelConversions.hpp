@@ -795,7 +795,7 @@ struct converter<T> {
                 table retTable {view, -1};
                 view.pop(1);
                 if (retTable.has(userDataType)) {
-                    if (std::unordered_set<string> types; retTable[userDataType].try_get(types, "__types") && types.contains(userDataType)) {
+                    if (std::unordered_set<string> types; retTable[userDataType].try_get(types, "__types") && types.contains(TypeName)) {
                         value = *static_cast<T*>(val);
                         return true;
                     }

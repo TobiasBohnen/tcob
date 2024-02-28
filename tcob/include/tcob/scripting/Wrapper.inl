@@ -103,7 +103,7 @@ template <typename WrapperImpl>
 template <typename R, typename S, typename... Args>
 inline auto wrapper<WrapperImpl>::wrap_method_helper(R (S::*func)(Args...))
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<R(S*, Args...)> {func});
 }
 
@@ -111,7 +111,7 @@ template <typename WrapperImpl>
 template <typename R, typename S, typename... Args>
 inline auto wrapper<WrapperImpl>::wrap_method_helper(R (S::*func)(Args...) const)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<R(S*, Args...)> {func});
 }
 
@@ -133,7 +133,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper(R const (S::*prop)() const)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
@@ -141,7 +141,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper(R (S::*prop)() const)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
@@ -149,7 +149,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper(R const (S::*prop)())
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
@@ -157,7 +157,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper(R (S::*prop)())
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
@@ -165,7 +165,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper(void (S::*prop)(R const))
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     return make_unique_closure(std::function<void(S*, R)> {prop});
 }
 
@@ -173,7 +173,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper_field_getter(R S::*field)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     auto lambda {[field](S* instance) -> R { return (instance->*field); }};
     return make_unique_closure(std::function<R(S*)> {lambda});
 }
@@ -182,7 +182,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper_field_setter(R S::*field)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     auto lambda {[field](S* instance, R value) -> void { (instance->*field) = value; }};
     return make_unique_closure(std::function<void(S*, R)> {lambda});
 }
@@ -191,7 +191,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper_field_getter(prop<R> S::*prop)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     auto lambda {[prop](S* instance) -> R { return (instance->*prop)(); }};
     return make_unique_closure(std::function<R(S*)> {lambda});
 }
@@ -200,7 +200,7 @@ template <typename WrapperImpl>
 template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper_field_setter(prop<R> S::*prop)
 {
-    get_impl()->template impl_register_type<S>();
+    register_base<S>();
     auto lambda {[prop](S* instance, R value) -> void { (instance->*prop) = value; }};
     return make_unique_closure(std::function<void(S*, R)> {lambda});
 }
@@ -302,4 +302,12 @@ inline void wrapper<WrapperImpl>::wrap_setter(string const& name, auto&& set)
     auto setter {wrap_property_helper(set)};
     get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
 }
+
+template <typename WrapperImpl>
+template <typename S>
+inline void wrapper<WrapperImpl>::register_base()
+{
+    get_impl()->template impl_register_base<S>();
+}
+
 }
