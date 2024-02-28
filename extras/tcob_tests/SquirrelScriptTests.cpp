@@ -431,6 +431,39 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
         a = func(1, 2, nullptr);
         REQUIRE(a == 3);
     }
+
+    SUBCASE("parameter_pack")
+    {
+        {
+            auto res = run(
+                "function foo(a, b, c) { "
+                "  return a+b+c "
+                "} ");
+            REQUIRE(res);
+            function<i32> func = global["foo"];
+
+            parameter_pack<i32> pack;
+            pack.Items = {1, 2, 3};
+            i32 a      = func(pack);
+            REQUIRE(a == 6);
+        }
+        {
+            auto res = run(
+                "function foo(a, b, c) { "
+                "  return b ? a+c : a*c "
+                "} ");
+            REQUIRE(res);
+            function<i32> func = global["foo"];
+
+            parameter_pack<std::variant<i32, bool>> pack;
+            pack.Items = {2, true, 3};
+            i32 a      = func(pack);
+            REQUIRE(a == 5);
+            pack.Items = {2, false, 4};
+            a          = func(pack);
+            REQUIRE(a == 8);
+        }
+    }
 }
 
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")

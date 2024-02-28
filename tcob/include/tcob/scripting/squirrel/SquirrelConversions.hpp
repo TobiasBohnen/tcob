@@ -281,6 +281,17 @@ private:
     }
 };
 
+template <typename T>
+struct converter<parameter_pack<T>> {
+
+    void static To(vm_view view, parameter_pack<T> const& value)
+    {
+        for (auto const& item : value.Items) {
+            converter<T>::To(view, item);
+        }
+    }
+};
+
 template <typename T, usize Size>
 struct converter<std::array<T, Size>> {
     auto static IsType(vm_view view, SQInteger idx) -> bool

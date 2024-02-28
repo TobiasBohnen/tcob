@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <vector>
+
 #include "tcob/core/Result.hpp"
 
 namespace tcob::scripting {
@@ -21,6 +23,13 @@ enum class error_code : u8 {
 
 template <typename T>
 using result = tcob::result<T, error_code>;
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+struct parameter_pack final {
+    std::vector<T> Items;
+};
 
 ////////////////////////////////////////////////////////////
 
