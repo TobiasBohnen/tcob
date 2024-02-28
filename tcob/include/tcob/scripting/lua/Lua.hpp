@@ -61,6 +61,13 @@ concept ConvertibleFrom =
 
 ////////////////////////////////////////////////////////////
 
+template <typename T>
+struct parameter_pack final {
+    std::vector<T> Items;
+};
+
+////////////////////////////////////////////////////////////
+
 enum class type : u8 {
     None,
     Nil,

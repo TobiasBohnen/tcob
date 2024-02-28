@@ -370,6 +370,17 @@ struct converter<std::pair<K, V>> {
     }
 };
 
+template <typename T>
+struct converter<parameter_pack<T>> {
+
+    void static To(state_view view, parameter_pack<T> const& value)
+    {
+        for (auto const& item : value.Items) {
+            converter<T>::To(view, item);
+        }
+    }
+};
+
 template <typename T, usize Size>
 struct converter<std::array<T, Size>> {
     auto static IsType(state_view view, i32 idx) -> bool
