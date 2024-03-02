@@ -156,6 +156,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Closures")
 
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
 {
+    SUBCASE("basic")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -170,6 +171,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(co.resume<i32>().value() == 2);
         REQUIRE(co.resume<i32>().value() == 3);
     }
+    SUBCASE("with parameter")
     {
         auto res = run(
             "co = coroutine.create(function (x) "
@@ -184,6 +186,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(co.resume<i32>().value() == 4);
         REQUIRE(co.resume<i32>().value() == 6);
     }
+    SUBCASE("check dead")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -209,6 +212,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(result.has_value());
         REQUIRE(result.value() == 1000);
     }
+    SUBCASE("error on resume dead")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -235,25 +239,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(endresult2.has_error());
         REQUIRE(endresult2.error() == error_code::Error);
     }
-    {
-        auto res = run(
-            "co = coroutine.create(function () "
-            "       for i=1,2 do "
-            "         coroutine.yield(i) "
-            "       end "
-            "     end) ");
-        REQUIRE(res);
-
-        coroutine co = global["co"];
-
-        REQUIRE(co.get_status() == coroutine_status::Ok);
-        auto result = co.resume<i32>();
-        REQUIRE(co.get_status() == coroutine_status::Suspended);
-        result = co.resume<i32>();
-        REQUIRE(co.get_status() == coroutine_status::Suspended);
-        result = co.resume<i32>();
-        REQUIRE(co.get_status() == coroutine_status::Dead);
-    }
+    SUBCASE("status")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -275,7 +261,9 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(result.value() == 2);
         result = co.resume<i32>();
         REQUIRE_FALSE(result.has_value());
+        REQUIRE(co.get_status() == coroutine_status::Dead);
     }
+    SUBCASE("return multiple values")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -292,6 +280,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(result.has_value());
         REQUIRE(result.value() == std::make_pair(1, 1.5f));
     }
+    SUBCASE("mismatched return")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -306,6 +295,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         auto result = co.resume<std::pair<i32, f32>>();
         REQUIRE(result.error() == error_code::TypeMismatch);
     }
+    SUBCASE("close")
     {
         auto res = run(
             "co = coroutine.create(function () "
@@ -328,6 +318,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         result = co.resume<i32>();
         REQUIRE_FALSE(result.has_value());
     }
+    SUBCASE("push closure to coroutine")
     {
         auto l = std::function([](i32 i) { return (f32)i * 2.5f; });
 
@@ -351,6 +342,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Coroutines")
         REQUIRE(result2.has_value());
         REQUIRE(result2.value() == l(15));
     }
+    SUBCASE("create from function")
     {
         auto res = run(
             "function co_create() "
@@ -441,40 +433,65 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Enums")
 
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Functions")
 {
-    SUBCASE("misc")
+    SUBCASE("cpp -> lua -> cpp")
+    {
+        auto res = run(
+            "function foo0(a) return cppFunc0(a) end "
+            "function foo1(b) return 3 * b end ");
+        REQUIRE(res);
+        function<i32> foo0 = global["foo0"];
+        function<i32> foo1 = global["foo1"];
+
+        auto cppFunc0      = std::function([&](i32 i) { return foo1(20 * i); });
+        global["cppFunc0"] = &cppFunc0;
+
+        i32 result = foo0(10);
+        REQUIRE(result == 600);
+    }
+    SUBCASE("lua -> cpp -> lua")
+    {
+        REQUIRE(run("function foo1(b) return 3 * b end "));
+        function<i32> foo1     = global["foo1"];
+        auto          cppFunc0 = std::function([&](i32 i) { return foo1(20 * i); });
+        global["cppFunc0"]     = &cppFunc0;
+        auto res               = run<i32>("return cppFunc0(10)");
+        REQUIRE(res);
+        REQUIRE(res.value() == 600);
+    }
+    SUBCASE("point_f parameter")
+    {
+        auto res = run("function testPoint(p) return p.x * p.y end");
+        REQUIRE(res);
+        function<i32> func = global["testPoint"];
+        i32           a    = *func.call(point_i {2, 4});
+        REQUIRE(a == 2 * 4);
+        a = func(point_i {2, 4});
+        REQUIRE(a == 2 * 4);
+    }
+    SUBCASE("i32 parameter")
+    {
+        function<i32> func = *run<function<i32>>("return function(x) return x*x end ");
+        i32           a    = func(200);
+        REQUIRE(a == 200 * 200);
+    }
+    SUBCASE("multiple return values as pair")
+    {
+        auto res = run(
+            "table = { } "
+            "table.func = function() return 50, 'Hello' end ");
+        REQUIRE(res);
+        function<std::pair<i32, std::string>> func = global["table"]["func"];
+        auto const [a, b]                          = func.call().value();
+
+        REQUIRE(a == 50);
+        REQUIRE(b == "Hello");
+    }
+    SUBCASE("multiple return values as tuple")
     {
         {
             auto res = run(
-                "function testPoint(p) "
-                "   return p.x * p.y "
-                "end ");
-            REQUIRE(res);
-            function<i32> func = global["testPoint"];
-            i32           a    = *func.call(point_i {2, 4});
-            REQUIRE(a == 2 * 4);
-            a = func(point_i {2, 4});
-            REQUIRE(a == 2 * 4);
-        }
-        {
-            function<i32> func = *run<function<i32>>("return function(x) return x*x end ");
-            i32           a    = func(200);
-            REQUIRE(a == 200 * 200);
-        }
-        {
-            auto res = run(
                 "table = { } "
-                "table.func = function() return 50, \"Hello\" end ");
-            REQUIRE(res);
-            function<std::pair<i32, std::string>> func = global["table"]["func"];
-            auto const [a, b]                          = func.call().value();
-
-            REQUIRE(a == 50);
-            REQUIRE(b == "Hello");
-        }
-        {
-            auto res = run(
-                "table = { } "
-                "table.func = function() return \"Hello\", 100, true end ");
+                "table.func = function() return 'Hello', 100, true end ");
             REQUIRE(res);
             function<std::tuple<std::string, i32, bool>> func = global["table"]["func"];
             auto const [a, b, c]                              = func.call().value();
@@ -495,117 +512,6 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Functions")
             REQUIRE(b["a"] == 200);
             REQUIRE(b["b"] == 300);
             REQUIRE(c == false);
-        }
-        {
-            auto func = run<function<i32>>("return function() return 100 end ").value();
-            REQUIRE(func() == 100);
-            REQUIRE(100 == func());
-        }
-        {
-            function<i32> func = *run<function<i32>>("return function() return 100 end ");
-            REQUIRE_FALSE(func() == 10);
-            REQUIRE_FALSE(10 == func());
-        }
-        {
-            function<i32> func = *run<function<i32>>("return function() return 5 end ");
-            REQUIRE(func() * 20 == 100);
-            REQUIRE(20 * func() == 100);
-        }
-        {
-            function<i32> func = *run<function<i32>>("return function() return 500 end ");
-            REQUIRE(func() / 5 == 100);
-            REQUIRE(50000 / func() == 100);
-        }
-        {
-            function<i32> func = *run<function<i32>>("return function() return 95 end ");
-            REQUIRE(func() + 5 == 100);
-            REQUIRE(5 + func() == 100);
-        }
-        {
-            function<i32> func = *run<function<i32>>("return function() return 105 end ");
-            REQUIRE(func() - 5 == 100);
-            REQUIRE(205 - func() == 100);
-        }
-        {
-            auto func = run<function<std::vector<i32>>>("return function() return {5, 4, 3, 2, 1} end ").value();
-            auto a    = func();
-            REQUIRE(a[0] == 5);
-            REQUIRE(a[1] == 4);
-            REQUIRE(a[2] == 3);
-            REQUIRE(a[3] == 2);
-            REQUIRE(a[4] == 1);
-        }
-        {
-            auto func = run<function<std::map<std::string, i32>>>("return function() return {x=5, y=4, b=3, r=2, aa=1} end ").value();
-            auto a    = func();
-            REQUIRE(a["x"] == 5);
-            REQUIRE(a["y"] == 4);
-            REQUIRE(a["b"] == 3);
-            REQUIRE(a["r"] == 2);
-            REQUIRE(a["aa"] == 1);
-        }
-        {
-            auto res = run(
-                "function testPoint(p) "
-                "   return p.x * p.y "
-                "end ");
-            REQUIRE(res);
-            function<i32> func = global["testPoint"];
-            i32           a    = func(point_i {2, 4});
-            REQUIRE(a == 2 * 4);
-        }
-        {
-            auto res = run(
-                "function testPoint(p) "
-                "   return p.x * p.y "
-                "end ");
-            REQUIRE(res);
-            function<i32> func = global["testPoint"];
-            point_i       p    = point_i {2, 4};
-            i32           a    = func(p);
-            REQUIRE(a == 2 * 4);
-            a = func(point_i {6, 4});
-            REQUIRE(a == 6 * 4);
-            a = func(point_i {15, 7});
-            REQUIRE(a == 15 * 7);
-        }
-        {
-            auto res = run(
-                "x = 0 "
-                "function testVoid(p) "
-                "   x = p.x * p.y "
-                "end ");
-            REQUIRE(res);
-            function<void> func = global["testVoid"];
-            func(point_i {2, 4});
-            i32 x = global["x"];
-            REQUIRE(x == 2 * 4);
-        }
-        {
-            auto res = run(
-                "function testMulti(f,p,r,b) "
-                "   return f * p.x * r.y "
-                "end ");
-            REQUIRE(res);
-            function<f32> func = global["testMulti"];
-            f32           x    = func(10.4f, point_i {2, 4}, rect_f {0, 20, 4, 5}, true);
-            REQUIRE(x == 10.4f * 2 * 20);
-        }
-        {
-            auto res = run(
-                "function testTable(x,y) "
-                "   return { a = x, b = y } "
-                "end ");
-            REQUIRE(res);
-            function<table> func = global["testTable"];
-            table           tab  = func(10, 20);
-            REQUIRE((i32)tab["a"] == 10);
-            REQUIRE((i32)tab["b"] == 20);
-        }
-        {
-            function<std::string> func  = global["string"]["upper"];
-            std::string           upper = func("hello");
-            REQUIRE(upper == "HELLO");
         }
     }
     SUBCASE("load_binary from file")
@@ -697,6 +603,96 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Functions")
             pack.Items = {2, false, 4};
             a          = func(pack);
             REQUIRE(a == 8);
+        }
+    }
+    SUBCASE("call string library function")
+    {
+        function<std::string> func  = global["string"]["upper"];
+        std::string           upper = func("hello");
+        REQUIRE(upper == "HELLO");
+    }
+    SUBCASE("misc")
+    {
+        {
+            auto func = run<function<i32>>("return function() return 100 end ").value();
+            REQUIRE(func() == 100);
+            REQUIRE(100 == func());
+        }
+        {
+            function<i32> func = *run<function<i32>>("return function() return 100 end ");
+            REQUIRE_FALSE(func() == 10);
+            REQUIRE_FALSE(10 == func());
+        }
+        {
+            function<i32> func = *run<function<i32>>("return function() return 5 end ");
+            REQUIRE(func() * 20 == 100);
+            REQUIRE(20 * func() == 100);
+        }
+        {
+            function<i32> func = *run<function<i32>>("return function() return 500 end ");
+            REQUIRE(func() / 5 == 100);
+            REQUIRE(50000 / func() == 100);
+        }
+        {
+            function<i32> func = *run<function<i32>>("return function() return 95 end ");
+            REQUIRE(func() + 5 == 100);
+            REQUIRE(5 + func() == 100);
+        }
+        {
+            function<i32> func = *run<function<i32>>("return function() return 105 end ");
+            REQUIRE(func() - 5 == 100);
+            REQUIRE(205 - func() == 100);
+        }
+        {
+            auto func = run<function<std::vector<i32>>>("return function() return {5, 4, 3, 2, 1} end ").value();
+            auto a    = func();
+            REQUIRE(a[0] == 5);
+            REQUIRE(a[1] == 4);
+            REQUIRE(a[2] == 3);
+            REQUIRE(a[3] == 2);
+            REQUIRE(a[4] == 1);
+        }
+        {
+            auto func = run<function<std::map<std::string, i32>>>("return function() return {x=5, y=4, b=3, r=2, aa=1} end ").value();
+            auto a    = func();
+            REQUIRE(a["x"] == 5);
+            REQUIRE(a["y"] == 4);
+            REQUIRE(a["b"] == 3);
+            REQUIRE(a["r"] == 2);
+            REQUIRE(a["aa"] == 1);
+        }
+        {
+            auto res = run(
+                "x = 0 "
+                "function testVoid(p) "
+                "   x = p.x * p.y "
+                "end ");
+            REQUIRE(res);
+            function<void> func = global["testVoid"];
+            func(point_i {2, 4});
+            i32 x = global["x"];
+            REQUIRE(x == 2 * 4);
+        }
+        {
+            auto res = run(
+                "function testMulti(f,p,r,b) "
+                "   return f * p.x * r.y "
+                "end ");
+            REQUIRE(res);
+            function<f32> func = global["testMulti"];
+            f32           x    = func(10.4f, point_i {2, 4}, rect_f {0, 20, 4, 5}, true);
+            REQUIRE(x == 10.4f * 2 * 20);
+        }
+        {
+            auto res = run(
+                "function testTable(x,y) "
+                "   return { a = x, b = y } "
+                "end ");
+            REQUIRE(res);
+            function<table> func = global["testTable"];
+            table           tab  = func(10, 20);
+            REQUIRE((i32)tab["a"] == 10);
+            REQUIRE((i32)tab["b"] == 20);
         }
     }
 }
@@ -1156,7 +1152,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Optional")
         REQUIRE(f == 10.25f);
     }
     {
-        auto f = run<std::optional<f32>>("return \"ok\"");
+        auto f = run<std::optional<f32>>("return 'ok'");
         REQUIRE(f.has_value());
         REQUIRE_FALSE(f.value().has_value());
     }
@@ -1832,18 +1828,13 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
     }
     SUBCASE("metatable")
     {
-        auto tab = run<table>(
-                       "table = {  } "
-                       "meta  = { }"
-                       "setmetatable(table, meta) "
-                       "return table ")
-                       .value();
-
-        auto metatab = tab.get_metatable();
-        REQUIRE(metatab.is_valid());
-
+        auto tab          = table::CreateNew(get_view());
+        global["table"]   = tab;
+        auto metatab      = table::CreateNew(get_view());
         metatab["__name"] = "hello world";
-        auto res          = run<std::string>("return tostring(table)");
+        tab.set_metatable(metatab);
+
+        auto res = run<std::string>("return tostring(table)");
         REQUIRE(res.has_value());
         REQUIRE(res.value().starts_with("hello world"));
     }

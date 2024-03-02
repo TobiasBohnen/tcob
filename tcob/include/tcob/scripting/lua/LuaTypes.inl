@@ -207,7 +207,8 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
     } else {
         R retValue {};
         if (result == error_code::Ok) {
-            if (!view.pull_convert_idx(1, retValue)) {
+            auto const top {view.get_top() - get_stacksize<R>() + 1};
+            if (!view.pull_convert_idx(top, retValue)) {
                 result = error_code::TypeMismatch;
             }
         }

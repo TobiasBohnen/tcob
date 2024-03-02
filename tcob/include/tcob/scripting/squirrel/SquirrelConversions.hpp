@@ -171,7 +171,7 @@ struct converter<T> {
 
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        if (view.is_table(idx)) {
+        if (view.is_table(idx) || view.is_array(idx)) {
             bool retValue {true};
 
             view.push(idx);                     // stack: -1 => table
@@ -206,7 +206,7 @@ struct converter<T> {
 private:
     auto static check_map(vm_view view, SQInteger idx) -> bool
     {
-        bool retValue {view.is_table(idx)};
+        bool retValue {view.is_table(idx) || view.is_array(idx)};
         if (retValue) {
             view.push(idx);                     // stack: -1 => table
             view.push_null();                   // stack: -1 => nil; -2 => table
@@ -544,7 +544,7 @@ template <>
 struct converter<stack_base> : public ref_converter<stack_base> { };
 
 template <>
-struct converter<class_t> : public ref_converter<class_t> { };
+struct converter<clazz> : public ref_converter<clazz> { };
 
 template <>
 struct converter<instance> : public ref_converter<instance> { };

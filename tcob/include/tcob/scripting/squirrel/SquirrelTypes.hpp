@@ -57,6 +57,9 @@ public:
     template <typename Key>
     auto operator[](Key key) const -> proxy<table const, Key>;
 
+    auto get_delegate() const -> table;
+    void set_delegate(table const& mt) const;
+
     template <ConvertibleFrom T>
     auto get(auto&&... keys) const -> result<T>;
 
@@ -74,6 +77,8 @@ public:
     auto get_keys() const -> std::vector<T>;
 
     auto static PushNew(vm_view view) -> table;
+    auto static CreateNew(vm_view view) -> table;
+
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
@@ -117,6 +122,8 @@ public:
     void add(T const& addValue);
 
     auto static PushNew(vm_view view) -> array;
+    auto static CreateNew(vm_view view) -> array;
+
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 };
 
@@ -158,22 +165,24 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API class_t : public detail::type_ref {
+class TCOB_API clazz : public detail::type_ref {
 public:
-    class_t();
-    class_t(vm_view view, SQInteger idx);
+    clazz();
+    clazz(vm_view view, SQInteger idx);
 
     template <typename Key>
-    auto operator[](Key key) -> proxy<class_t, Key>;
+    auto operator[](Key key) -> proxy<clazz, Key>;
 
     template <typename Key>
-    auto operator[](Key key) const -> proxy<class_t const, Key>;
+    auto operator[](Key key) const -> proxy<clazz const, Key>;
 
     void set(auto&& key, auto&& value) const;
 
     auto create_instance() const -> instance;
 
-    auto static PushNew(vm_view view) -> class_t;
+    auto static PushNew(vm_view view) -> clazz;
+    auto static CreateNew(vm_view view) -> clazz;
+
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 };
 

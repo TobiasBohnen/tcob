@@ -115,10 +115,41 @@ table::table(vm_view view, SQInteger idx)
     acquire(view, idx);
 }
 
+auto table::get_delegate() const -> table
+{
+    auto const view {get_view()};
+    auto const guard {view.create_stack_guard()};
+
+    table retValue {};
+
+    push_self();
+    if (view.get_delegate(-1) != 0) {
+        retValue.acquire(view, -1);
+    }
+
+    return retValue;
+}
+
+void table::set_delegate(table const& mt) const
+{
+    auto const view {get_view()};
+    auto const guard {view.create_stack_guard()};
+
+    push_self();
+    mt.push_self();
+    view.set_delegate(-2);
+}
+
 auto table::PushNew(vm_view view) -> table
 {
     view.new_table();
     return table {view, -1};
+}
+
+auto table::CreateNew(vm_view view) -> table
+{
+    auto guard {view.create_stack_guard()};
+    return PushNew(view);
 }
 
 auto table::IsType(vm_view view, SQInteger idx) -> bool
@@ -167,6 +198,12 @@ auto array::PushNew(vm_view view) -> array
     return array {view, -1};
 }
 
+auto array::CreateNew(vm_view view) -> array
+{
+    auto guard {view.create_stack_guard()};
+    return PushNew(view);
+}
+
 auto array::IsType(vm_view view, SQInteger idx) -> bool
 {
     return view.is_array(idx);
@@ -200,14 +237,14 @@ auto thread::get_thread() const -> vm_view
 
 ////////////////////////////////////////////////////////////
 
-class_t::class_t() = default;
+clazz::clazz() = default;
 
-class_t::class_t(vm_view view, SQInteger idx)
+clazz::clazz(vm_view view, SQInteger idx)
 {
     acquire(view, idx);
 }
 
-auto class_t::create_instance() const -> instance
+auto clazz::create_instance() const -> instance
 {
     auto view {get_view()};
     auto guard {view.create_stack_guard()};
@@ -217,13 +254,19 @@ auto class_t::create_instance() const -> instance
     return instance {view, -1};
 }
 
-auto class_t::PushNew(vm_view view) -> class_t
+auto clazz::PushNew(vm_view view) -> clazz
 {
     view.new_class(false);
-    return class_t {view, -1};
+    return clazz {view, -1};
 }
 
-auto class_t::IsType(vm_view view, SQInteger idx) -> bool
+auto clazz::CreateNew(vm_view view) -> clazz
+{
+    auto guard {view.create_stack_guard()};
+    return PushNew(view);
+}
+
+auto clazz::IsType(vm_view view, SQInteger idx) -> bool
 {
     return view.is_class(idx);
 }
@@ -250,7 +293,6 @@ auto instance::IsType(vm_view view, SQInteger idx) -> bool
 }
 
 ////////////////////////////////////////////////////////////
-
 }
 
 #endif

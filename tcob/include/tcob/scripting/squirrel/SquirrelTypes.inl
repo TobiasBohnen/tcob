@@ -314,18 +314,18 @@ inline void instance::set(auto&& key, auto&& value) const
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename Key>
-inline auto class_t::operator[](Key key) -> proxy<class_t, Key>
+inline auto clazz::operator[](Key key) -> proxy<clazz, Key>
 {
-    return proxy<class_t, Key> {*this, std::tuple {key}};
+    return proxy<clazz, Key> {*this, std::tuple {key}};
 }
 
 template <typename Key>
-inline auto class_t::operator[](Key key) const -> proxy<class_t const, Key>
+inline auto clazz::operator[](Key key) const -> proxy<clazz const, Key>
 {
-    return proxy<class_t const, Key> {*this, std::tuple {key}};
+    return proxy<clazz const, Key> {*this, std::tuple {key}};
 }
 
-inline void class_t::set(auto&& key, auto&& value) const
+inline void clazz::set(auto&& key, auto&& value) const
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};

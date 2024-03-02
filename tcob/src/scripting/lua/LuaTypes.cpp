@@ -135,6 +135,16 @@ auto table::get_metatable() const -> table
     return retValue;
 }
 
+void table::set_metatable(table const& mt) const
+{
+    auto const view {get_view()};
+    auto const guard {view.create_stack_guard()};
+
+    push_self();
+    mt.push_self();
+    view.set_metatable(-2);
+}
+
 auto table::PushNew(state_view view) -> table
 {
     view.new_table();

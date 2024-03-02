@@ -126,7 +126,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
 {
     SUBCASE("fields")
     {
-        class_t c {class_t::PushNew(get_view())};
+        clazz c {clazz::CreateNew(get_view())};
         c["value"]    = 100;
         global["foo"] = c;
 
@@ -152,7 +152,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
             return x * y;
         };
 
-        class_t c {class_t::PushNew(get_view())};
+        clazz c {clazz::CreateNew(get_view())};
         c["func"]     = &func;
         global["foo"] = c;
 
@@ -162,7 +162,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
     }
     SUBCASE("create instance")
     {
-        class_t c {class_t::PushNew(get_view())};
+        clazz c {clazz::CreateNew(get_view())};
         c["value"]     = 100;
         global["inst"] = c.create_instance();
 
@@ -286,6 +286,24 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Enums")
 
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
 {
+    SUBCASE("cpp -> sq -> cpp")
+    {
+        auto res = run(
+            "function foo0(a) { return cppFunc0(a) }  "
+            "function foo1(b) { return 3 * b }        ");
+        REQUIRE(res);
+        function<i32> foo0 = global["foo0"];
+        function<i32> foo1 = global["foo1"];
+
+        auto cppFunc0      = std::function([&](i32 i) {
+            return foo1(20 * i);
+        });
+        global["cppFunc0"] = &cppFunc0;
+
+        i32 result = foo0(10);
+        REQUIRE(result == 600);
+    }
+    SUBCASE("sq -> cpp -> sq")
     {
         auto res = run("function testPoint(p) { return p.x * p.y }");
         REQUIRE(res);
@@ -294,121 +312,6 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
         REQUIRE(a == 2 * 4);
         a = func(point_i {2, 4});
         REQUIRE(a == 2 * 4);
-    }
-    {
-        function<i32> func = *run<function<i32>>("return @(x) x*x ");
-        i32           a    = func(200);
-        REQUIRE(a == 200 * 200);
-    }
-    {
-        auto func = run<function<i32>>("return function() {return 100} ").value();
-        REQUIRE(func() == 100);
-        REQUIRE(100 == func());
-    }
-    {
-        function<i32> func = *run<function<i32>>("return @() 100 ");
-        REQUIRE_FALSE(func() == 10);
-        REQUIRE_FALSE(10 == func());
-    }
-    {
-        function<i32> func = *run<function<i32>>("return @() 5 ");
-        REQUIRE(func() * 20 == 100);
-        REQUIRE(20 * func() == 100);
-    }
-    {
-        function<i32> func = *run<function<i32>>("return @() 500 ");
-        REQUIRE(func() / 5 == 100);
-        REQUIRE(50000 / func() == 100);
-    }
-    {
-        function<i32> func = *run<function<i32>>("return @() 95 ");
-        REQUIRE(func() + 5 == 100);
-        REQUIRE(5 + func() == 100);
-    }
-    {
-        function<i32> func = *run<function<i32>>("return @() 105 ");
-        REQUIRE(func() - 5 == 100);
-        REQUIRE(205 - func() == 100);
-    }
-    {
-
-        auto func = run<function<std::vector<i32>>>("return @() [5, 4, 3, 2, 1] ").value();
-        auto a    = func();
-        REQUIRE(a[0] == 5);
-        REQUIRE(a[1] == 4);
-        REQUIRE(a[2] == 3);
-        REQUIRE(a[3] == 2);
-        REQUIRE(a[4] == 1);
-    }
-    {
-        auto func = run<function<std::map<std::string, i32>>>("return @() {x=5, y=4, b=3, r=2, aa=1} ").value();
-        auto a    = func();
-        REQUIRE(a["x"] == 5);
-        REQUIRE(a["y"] == 4);
-        REQUIRE(a["b"] == 3);
-        REQUIRE(a["r"] == 2);
-        REQUIRE(a["aa"] == 1);
-    }
-    {
-        auto res = run("function testPoint(p) { return p.x * p.y } ");
-        REQUIRE(res);
-        function<i32> func = global["testPoint"];
-        i32           a    = func(point_i {2, 4});
-        REQUIRE(a == 2 * 4);
-    }
-    {
-        auto res = run("function testPoint(p) { return p.x * p.y } ");
-        REQUIRE(res);
-        function<i32> func = global["testPoint"];
-        point_i       p    = point_i {2, 4};
-        i32           a    = func(p);
-        REQUIRE(a == 2 * 4);
-        a = func(point_i {6, 4});
-        REQUIRE(a == 6 * 4);
-        a = func(point_i {15, 7});
-        REQUIRE(a == 15 * 7);
-    }
-    {
-        auto res = run(
-            "x <- 0;"
-            "function testVoid(p)  {x = p.x * p.y } ");
-        REQUIRE(res);
-        function<void> func = global["testVoid"];
-        func(point_i {2, 4});
-        i32 x = global["x"];
-        REQUIRE(x == 2 * 4);
-    }
-    {
-        auto res = run("function testMulti(f,p,r,b)  { return f * p.x * r.y } ");
-        REQUIRE(res);
-        function<f32> func = global["testMulti"];
-        f32           x    = func(10.4f, point_i {2, 4}, rect_f {0, 20, 4, 5}, true);
-        REQUIRE(x == 10.4f * 2 * 20);
-    }
-    {
-        auto res = run("function testTable(x,y) { return { a = x, b = y } } ");
-        REQUIRE(res);
-        function<table> func = global["testTable"];
-        table           tab  = func(10, 20);
-        REQUIRE((i32)tab["a"] == 10);
-        REQUIRE((i32)tab["b"] == 20);
-    }
-    {
-        /*
-        auto res = run("function testTable(x,y) { return x*y } ");
-        REQUIRE(res);
-        function<i32> func = global["testTable"];
-        REQUIRE(func(10, 20) == 10 * 20);
-        REQUIRE(func(20, 40) == 20 * 40);
-        {
-            ofstream fs{"test.luac"};
-            func.dump(fs);
-        }
-
-        function<i32> func2 = load_binary<i32>("test.luac");
-        REQUIRE(func2(10, 20) == 10 * 20);
-        REQUIRE(func2(20, 40) == 20 * 40);
-        */
     }
     SUBCASE("nullptr as parameter")
     {
@@ -431,7 +334,6 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
         a = func(1, 2, nullptr);
         REQUIRE(a == 3);
     }
-
     SUBCASE("parameter_pack")
     {
         {
@@ -462,6 +364,100 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
             pack.Items = {2, false, 4};
             a          = func(pack);
             REQUIRE(a == 8);
+        }
+    }
+    SUBCASE("misc")
+    {
+        {
+            function<i32> func = *run<function<i32>>("return @(x) x*x ");
+            i32           a    = func(200);
+            REQUIRE(a == 200 * 200);
+        }
+        {
+            auto func = run<function<i32>>("return function() {return 100} ").value();
+            REQUIRE(func() == 100);
+            REQUIRE(100 == func());
+        }
+        {
+            function<i32> func = *run<function<i32>>("return @() 100 ");
+            REQUIRE_FALSE(func() == 10);
+            REQUIRE_FALSE(10 == func());
+        }
+        {
+            function<i32> func = *run<function<i32>>("return @() 5 ");
+            REQUIRE(func() * 20 == 100);
+            REQUIRE(20 * func() == 100);
+        }
+        {
+            function<i32> func = *run<function<i32>>("return @() 500 ");
+            REQUIRE(func() / 5 == 100);
+            REQUIRE(50000 / func() == 100);
+        }
+        {
+            function<i32> func = *run<function<i32>>("return @() 95 ");
+            REQUIRE(func() + 5 == 100);
+            REQUIRE(5 + func() == 100);
+        }
+        {
+            function<i32> func = *run<function<i32>>("return @() 105 ");
+            REQUIRE(func() - 5 == 100);
+            REQUIRE(205 - func() == 100);
+        }
+        {
+
+            auto func = run<function<std::vector<i32>>>("return @() [5, 4, 3, 2, 1] ").value();
+            auto a    = func();
+            REQUIRE(a[0] == 5);
+            REQUIRE(a[1] == 4);
+            REQUIRE(a[2] == 3);
+            REQUIRE(a[3] == 2);
+            REQUIRE(a[4] == 1);
+        }
+        {
+            auto func = run<function<std::map<std::string, i32>>>("return @() {x=5, y=4, b=3, r=2, aa=1} ").value();
+            auto a    = func();
+            REQUIRE(a["x"] == 5);
+            REQUIRE(a["y"] == 4);
+            REQUIRE(a["b"] == 3);
+            REQUIRE(a["r"] == 2);
+            REQUIRE(a["aa"] == 1);
+        }
+        {
+            auto res = run("function testPoint(p) { return p.x * p.y } ");
+            REQUIRE(res);
+            function<i32> func = global["testPoint"];
+            point_i       p    = point_i {2, 4};
+            i32           a    = func(p);
+            REQUIRE(a == 2 * 4);
+            a = func(point_i {6, 4});
+            REQUIRE(a == 6 * 4);
+            a = func(point_i {15, 7});
+            REQUIRE(a == 15 * 7);
+        }
+        {
+            auto res = run(
+                "x <- 0;"
+                "function testVoid(p)  {x = p.x * p.y } ");
+            REQUIRE(res);
+            function<void> func = global["testVoid"];
+            func(point_i {2, 4});
+            i32 x = global["x"];
+            REQUIRE(x == 2 * 4);
+        }
+        {
+            auto res = run("function testMulti(f,p,r,b)  { return f * p.x * r.y } ");
+            REQUIRE(res);
+            function<f32> func = global["testMulti"];
+            f32           x    = func(10.4f, point_i {2, 4}, rect_f {0, 20, 4, 5}, true);
+            REQUIRE(x == 10.4f * 2 * 20);
+        }
+        {
+            auto res = run("function testTable(x,y) { return { a = x, b = y } } ");
+            REQUIRE(res);
+            function<table> func = global["testTable"];
+            table           tab  = func(10, 20);
+            REQUIRE((i32)tab["a"] == 10);
+            REQUIRE((i32)tab["b"] == 20);
         }
     }
 }
@@ -744,64 +740,64 @@ TEST_CASE("Script.Squirrel.Literals")
 
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Map")
 {
-    // to Squirrel
+    SUBCASE("to")
     {
-        std::map<std::string, rect_f> m = {{"a", {0, 1, 2, 3}}, {"b", {4, 3, 2, 1}}};
-        global["map"]                   = m;
-        rect_f x                        = *run<rect_f>("return map.a");
-        REQUIRE(x == m["a"]);
-        rect_f y = *run<rect_f>("return map.b");
-        REQUIRE(y == m["b"]);
+        {
+            std::map<std::string, rect_f> m = {{"a", {0, 1, 2, 3}}, {"b", {4, 3, 2, 1}}};
+            global["map"]                   = m;
+            rect_f x                        = *run<rect_f>("return map.a");
+            REQUIRE(x == m["a"]);
+            rect_f y = *run<rect_f>("return map.b");
+            REQUIRE(y == m["b"]);
+        }
+        {
+            std::map<i32, rect_f> m = {{1, {0, 1, 2, 3}}, {2, {4, 3, 2, 1}}};
+            global["map"]           = m;
+            rect_f x                = *run<rect_f>("return map[1]");
+            REQUIRE(x == m[1]);
+            rect_f y = *run<rect_f>("return map[2]");
+            REQUIRE(y == m[2]);
+        }
+        {
+            std::unordered_map<std::string, rect_f> m = {{"a", {0, 1, 2, 3}}, {"b", {4, 3, 2, 1}}};
+            global["map"]                             = m;
+            rect_f x                                  = *run<rect_f>("return map.a");
+            REQUIRE(x == m["a"]);
+            rect_f y = *run<rect_f>("return map.b");
+            REQUIRE(y == m["b"]);
+        }
+        {
+            std::unordered_map<i32, rect_f> m = {{1, {0, 1, 2, 3}}, {2, {4, 3, 2, 1}}};
+            global["map"]                     = m;
+            rect_f x                          = *run<rect_f>("return map[1]");
+            REQUIRE(x == m[1]);
+            rect_f y = *run<rect_f>("return map[2]");
+            REQUIRE(y == m[2]);
+        }
     }
+    SUBCASE("from")
     {
-        std::map<i32, rect_f> m = {{1, {0, 1, 2, 3}}, {2, {4, 3, 2, 1}}};
-        global["map"]           = m;
-        rect_f x                = *run<rect_f>("return map[1]");
-        REQUIRE(x == m[1]);
-        rect_f y = *run<rect_f>("return map[2]");
-        REQUIRE(y == m[2]);
+        {
+            std::map<std::string, rect_f> m = *run<std::map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
+            REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
+            REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
+        }
+        {
+            std::map<i32, rect_f> m = *run<std::map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
+            REQUIRE(m[0] == (rect_f {0, 1, 2, 3}));
+            REQUIRE(m[1] == (rect_f {4, 3, 2, 1}));
+        }
+        {
+            std::unordered_map<std::string, rect_f> m = *run<std::unordered_map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
+            REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
+            REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
+        }
+        {
+            std::unordered_map<i32, rect_f> m = *run<std::unordered_map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
+            REQUIRE(m[0] == (rect_f {0, 1, 2, 3}));
+            REQUIRE(m[1] == (rect_f {4, 3, 2, 1}));
+        }
     }
-    {
-        std::unordered_map<std::string, rect_f> m = {{"a", {0, 1, 2, 3}}, {"b", {4, 3, 2, 1}}};
-        global["map"]                             = m;
-        rect_f x                                  = *run<rect_f>("return map.a");
-        REQUIRE(x == m["a"]);
-        rect_f y = *run<rect_f>("return map.b");
-        REQUIRE(y == m["b"]);
-    }
-    {
-        std::unordered_map<i32, rect_f> m = {{1, {0, 1, 2, 3}}, {2, {4, 3, 2, 1}}};
-        global["map"]                     = m;
-        rect_f x                          = *run<rect_f>("return map[1]");
-        REQUIRE(x == m[1]);
-        rect_f y = *run<rect_f>("return map[2]");
-        REQUIRE(y == m[2]);
-    }
-    // from Squirrel
-    {
-        std::map<std::string, rect_f> m = *run<std::map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
-        REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
-        REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
-    }
-    /*
-    {
-        std::map<i32, rect_f> m = *run<std::map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
-        REQUIRE(m[1] == (rect_f{0, 1, 2, 3}));
-        REQUIRE(m[2] == (rect_f{4, 3, 2, 1}));
-    }
-    */
-    {
-        std::unordered_map<std::string, rect_f> m = *run<std::unordered_map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
-        REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
-        REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
-    }
-    /*
-    {
-        std::unordered_map<i32, rect_f> m = *run<std::unordered_map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
-        REQUIRE(m[1] == (rect_f{0, 1, 2, 3}));
-        REQUIRE(m[2] == (rect_f{4, 3, 2, 1}));
-    }
-    */
 }
 
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Optional")
@@ -861,19 +857,11 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Overloads")
 {
     SUBCASE("Lambdas")
     {
-        auto overload = make_unique_overload(
-            []() {
-                return 2.5f;
-            },
-            [](f32 i) {
-                return i * 2.5f;
-            },
-            [](f32 i0, f32 i1) {
-                return i0 * i1 * 2.5f;
-            },
-            [](std::array<f32, 5> arr) {
-                return std::accumulate(arr.begin(), arr.end(), 1.f, std::multiplies {}) * 2.5f;
-            });
+        auto const overload = make_unique_overload(
+            []() { return 2.5f; },
+            [](f32 i) { return i * 2.5f; },
+            [](f32 i0, f32 i1) { return i0 * i1 * 2.5f; },
+            [](std::array<f32, 5> arr) { return std::accumulate(arr.begin(), arr.end(), 1.f, std::multiplies {}) * 2.5f; });
         global["overload"] = overload.get();
 
         auto res = run<f32>("return overload([1, 2, 3, 4, 5])");
@@ -1482,20 +1470,16 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
             REQUIRE((i32)tab["b"]["c"] == 100);
         }
     }
-    SUBCASE("metamethods")
+    SUBCASE("delegate")
     {
-        std::function func = [](table const&) {
+        auto tab              = table::CreateNew(get_view());
+        global["tab"]         = tab;
+        auto          metatab = table::CreateNew(get_view());
+        std::function func    = [](table const&) {
             return "hello world";
         };
-
-        auto meta = run<table>(
-                        "tab  <- { }; "
-                        "meta <- { }; "
-                        "tab.setdelegate(meta); "
-                        "return meta ")
-                        .value();
-
-        meta["_tostring"] = &func;
+        metatab["_tostring"] = &func;
+        tab.set_delegate(metatab);
 
         auto res = run<std::string>("return tab.tostring()");
         REQUIRE(res.has_value());
