@@ -1808,7 +1808,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("tableX = {  }");
             REQUIRE(res);
-            table tab {global["tableX"]};
+            table tab = global["tableX"];
             table subt {};
             REQUIRE_FALSE(subt.is_valid());
             tab["sub"] = subt;
@@ -1820,7 +1820,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("tableX = {  }");
             REQUIRE(res);
-            table tab {global["tableX"]};
+            table tab       = global["tableX"];
             tab["sub"]      = table {};
             tab["sub"]["x"] = 42;
 
@@ -1829,7 +1829,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("tableX = {  }");
             REQUIRE(res);
-            table tab {global["tableX"]};
+            table tab = global["tableX"];
             table subt;
             tab["sub"] = subt;
             subt["x"]  = 42;
@@ -1838,9 +1838,9 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         }
         {
             table tab0 = *run<table>("tableX = {  } tableY = { } return tableX");
-            table tab1 {global["tableX"]};
+            table tab1 = global["tableX"];
             REQUIRE(tab0 == tab1);
-            table tab2 {global["tableY"]};
+            table tab2 = global["tableY"];
             REQUIRE(tab0 != tab2);
         }
     }

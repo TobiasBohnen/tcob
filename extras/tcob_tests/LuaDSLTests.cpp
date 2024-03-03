@@ -31,7 +31,7 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Form")
                     ui.button    'button1'   { label = 'click me',     bounds = rect(0, 0, 1, 1) },
                     ui.button    'button2'   { label = 'click me too', bounds = rect(0, 1, 3, 1) },
                     ui.check_box 'checkbox1' { checked = true,         bounds = rect(2, 2, 1, 1) }
-                }               
+                }
             },
             ui.panel 'panel2' {
                 bounds = rect(0, 300, 100, 200),
@@ -43,9 +43,9 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Form")
                             ui.button    'button4'   { label = 'click me' },
                             ui.button    'button5'   { label = 'click me too' },
                             ui.check_box 'checkbox2' { checked = true }
-                        } 
+                        }
                     }
-                }           
+                }
             },
             ui.tab_container 'tabs1' {
                 bounds = rect(250, 150, 100, 200),
@@ -53,12 +53,12 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Form")
                     ui.panel  'panel4' {
                         layout = ui.grid_layout {
                             ui.check_box 'checkbox3' { checked = true, bounds = rect(2, 2, 1, 1) }
-                        } 
+                        }
                     },
                     ui.panel  'panel5' {
                         layout = ui.grid_layout {
                             ui.check_box 'checkbox4' { checked = true, bounds = rect(2, 2, 1, 1) }
-                        } 
+                        }
                     }
                 }
             }
@@ -116,12 +116,12 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Form")
     auto res = run(script);
     REQUIRE(res);
 
-    table formContent {global["form1"]};
-    table panel1 {formContent[1]};
+    table formContent = global["form1"];
+    table panel1      = formContent[1];
     REQUIRE(panel1["type"].as<string>() == "panel");
     REQUIRE(panel1["name"].as<string>() == "panel1");
     REQUIRE(panel1["bounds"].as<rect_f>() == rect_f {0, 0, 200, 200});
-    table layout1 {panel1["layout"]};
+    table layout1 = panel1["layout"];
     REQUIRE(layout1["type"].as<string>() == "grid_layout");
     REQUIRE(layout1["widgets"][1]["type"].as<string>() == "button");
     REQUIRE(layout1["widgets"][1]["name"].as<string>() == "button1");
@@ -140,7 +140,7 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Style")
             ui.style.button 'button' {
                 background = 'chartreuse',
                 border = { type = 'solid' },
-            }, 
+            },
             ui.style.button 'button:hover' {
                 background = 'darkkhaki'
             }
@@ -184,13 +184,13 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Style")
     auto res = run(script);
     REQUIRE(res);
 
-    table stylesCntent {global["styles"]};
-    table buttonStyle {stylesCntent[1]};
+    table stylesCntent = global["styles"];
+    table buttonStyle  = stylesCntent[1];
     REQUIRE(buttonStyle["class"].as<string>() == "button");
     REQUIRE(buttonStyle["type"].as<string>() == "button");
     REQUIRE(buttonStyle["background"].as<string>() == "chartreuse");
     REQUIRE(buttonStyle["border"]["type"].as<string>() == "solid");
-    table buttonHoverStyle {stylesCntent[2]};
+    table buttonHoverStyle = stylesCntent[2];
     REQUIRE(buttonHoverStyle["class"].as<string>() == "button:hover");
     REQUIRE(buttonHoverStyle["type"].as<string>() == "button");
     REQUIRE(buttonHoverStyle["background"].as<string>() == "darkkhaki");
