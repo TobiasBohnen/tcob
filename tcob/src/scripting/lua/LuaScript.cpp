@@ -108,7 +108,7 @@ void script::register_searcher()
         return;
     }
 
-    table searchers {_globalTable["package"]["searchers"]};
+    table searchers {_globalTable["package"]["searchers"].as<table>()};
 
     _loader = [&](string const& name) -> table {
         require_event ev {.Name = name};
