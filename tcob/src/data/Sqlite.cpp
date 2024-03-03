@@ -8,6 +8,7 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <cassert>
+    #include <format>
 
     #include <sqlite3/sqlite3.h>
 
@@ -60,7 +61,7 @@ auto statement_view::column_int64(i32 col) const -> i64
     return sqlite3_column_int64(_stmt, col);
 }
 
-auto statement_view::column_text(i32 col) const -> string
+auto statement_view::column_text(i32 col) const -> utf8_string
 {
     assert(_stmt);
     return reinterpret_cast<char const*>(sqlite3_column_text(_stmt, col));
@@ -85,7 +86,7 @@ void statement_view::finalize() const
     }
 }
 
-auto statement_view::get_column_name(i32 col) const -> string
+auto statement_view::get_column_name(i32 col) const -> utf8_string
 {
     assert(_stmt);
     return sqlite3_column_name(_stmt, col);
@@ -128,7 +129,7 @@ auto statement_view::bind(i32 idx, i64 value) const -> bool
     return sqlite3_bind_int64(_stmt, idx, value) == SQLITE_OK;
 }
 
-auto statement_view::bind(i32 idx, string_view value) const -> bool
+auto statement_view::bind(i32 idx, utf8_string_view value) const -> bool
 {
     assert(_stmt);
     return sqlite3_bind_text(_stmt, idx, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT) == SQLITE_OK; // NOLINT
@@ -181,7 +182,7 @@ auto database_view::close() -> bool
     return true;
 }
 
-auto database_view::prepare(string_view sql) const -> statement_view
+auto database_view::prepare(utf8_string_view sql) const -> statement_view
 {
     assert(_db);
     logger::Debug("SQLite: prepare: {}", sql);
@@ -190,7 +191,7 @@ auto database_view::prepare(string_view sql) const -> statement_view
     return statement_view {stmt};
 }
 
-auto database_view::exec(string const& sql) const -> bool
+auto database_view::exec(utf8_string const& sql) const -> bool
 {
     assert(_db);
     logger::Debug("SQLite: exec: {}", sql);
@@ -198,7 +199,7 @@ auto database_view::exec(string const& sql) const -> bool
     return sqlite3_exec(_db, sql.c_str(), nullptr, nullptr, &err) == SQLITE_OK;
 }
 
-auto database_view::get_error_message() const -> string
+auto database_view::get_error_message() const -> utf8_string
 {
     assert(_db);
     return sqlite3_errmsg(_db);
@@ -220,6 +221,11 @@ void database_view::update_hook(void (*callback)(void*, int, char const*, char c
 {
     assert(_db);
     sqlite3_update_hook(_db, callback, userdata);
+}
+
+auto quote_string(utf8_string_view str) -> utf8_string
+{
+    return std::format("\"{}\"", str);
 }
 
 }

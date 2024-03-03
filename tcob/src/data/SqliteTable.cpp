@@ -9,21 +9,21 @@
 
 namespace tcob::data::sqlite {
 
-table::table(database_view db, string name)
+table::table(database_view db, utf8_string name)
     : _db {db}
     , _name {std::move(name)}
 {
 }
 
-auto table::get_name() const -> string const&
+auto table::get_name() const -> utf8_string const&
 {
     return _name;
 }
 
-auto table::get_column_names() const -> std::set<string>
+auto table::get_column_names() const -> std::set<utf8_string>
 {
     // SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name
-    std::set<string> retValue;
+    std::set<utf8_string> retValue;
 
     statement select {_db};
     if (select.prepare("SELECT * FROM " + _name + ";")) {
@@ -59,7 +59,7 @@ auto table::delete_from() const -> delete_statement
 
 ////////////////////////////////////////////////////////////
 
-view::view(database_view db, string name)
+view::view(database_view db, utf8_string name)
     : _db {db}
     , _name {std::move(name)}
 {

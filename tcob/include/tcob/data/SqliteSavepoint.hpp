@@ -16,7 +16,7 @@ namespace tcob::data::sqlite {
 
 class TCOB_API savepoint : public non_copyable {
 public:
-    savepoint(database_view db, string name);
+    savepoint(database_view db, utf8_string name);
     ~savepoint();
 
     void release();
@@ -24,7 +24,7 @@ public:
 
 private:
     database_view _db;
-    string        _name;
+    utf8_string   _name;
     bool          _released {false};
 };
 

@@ -3,95 +3,90 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <utility>
-
 #include "tcob/data/SqliteColumn.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
+
+    #include <format>
+    #include <utility>
+
 namespace tcob::data::sqlite {
 
-auto no_constraint::str() const -> string
+auto no_constraint::str() const -> utf8_string
 {
     return "";
 }
 
-auto unique::str() const -> string
+auto unique::str() const -> utf8_string
 {
     return "UNIQUE";
 }
 
-auto primary_key::str() const -> string
+auto primary_key::str() const -> utf8_string
 {
     return "PRIMARY KEY";
 }
 
-check::check(string check)
+check::check(utf8_string check)
     : Check {std::move(check)}
 {
 }
 
-auto check::str() const -> string
+auto check::str() const -> utf8_string
 {
     return "CHECK(" + Check + ")";
 }
 
 ////////////////////////////////////////////////////////////
 
-avg::avg(string column)
+avg::avg(utf8_string column)
     : Column {std::move(column)}
 {
 }
 
-auto avg::str() const -> string
+auto avg::str() const -> utf8_string
 {
-    return "AVG(\"" + Column + "\")";
+    return std::format("AVG({})", quote_string(utf8_string {Column}));
 }
 
-count::count(string column)
+count::count(utf8_string column)
     : Column {std::move(column)}
 {
 }
 
-auto count::str() const -> string
+auto count::str() const -> utf8_string
 {
-    return "COUNT(\"" + Column + "\")";
+    return std::format("COUNT({})", quote_string(utf8_string {Column}));
 }
 
-max::max(string column)
+max::max(utf8_string column)
     : Column {std::move(column)}
 {
 }
 
-auto max::str() const -> string
+auto max::str() const -> utf8_string
 {
-    return "MAX(\"" + Column + "\")";
+    return std::format("MAX({})", quote_string(utf8_string {Column}));
 }
 
-min::min(string column)
+min::min(utf8_string column)
     : Column {std::move(column)}
 {
 }
 
-auto min::str() const -> string
+auto min::str() const -> utf8_string
 {
-    return "MIN(\"" + Column + "\")";
+    return std::format("MIN({})", quote_string(utf8_string {Column}));
 }
 
-sum::sum(string column)
+sum::sum(utf8_string column)
     : Column {std::move(column)}
 {
 }
 
-auto sum::str() const -> string
+auto sum::str() const -> utf8_string
 {
-    return "SUM(\"" + Column + "\")";
-}
-
-////////////////////////////////////////////////////////////
-
-auto literals::operator""_col(char const* str, usize) -> detail::column_builder
-{
-    return detail::column_builder {str};
+    return std::format("SUM({})", quote_string(utf8_string {Column}));
 }
 
 }

@@ -1,7 +1,6 @@
 #include "tests.hpp"
 
 using namespace tcob::data::sqlite;
-using namespace tcob::data::sqlite::literals;
 
 struct foo {
     i32         ID;
@@ -22,11 +21,11 @@ TEST_CASE("Data.Sqlite.Select")
 
     database db {database::OpenMemory()};
     auto     dbTable {db.create_table(tableName,
-                                      "ID"_col(type::Integer, true, primary_key {}),
-                                      "Name"_col(type::Text, true),
-                                      "Age"_col(),
-                                      "Height"_col(),
-                                      "Alive"_col())};
+                                      column {"ID", type::Integer, true, primary_key {}},
+                                      column {"Name", type::Text, true},
+                                      column {"Age"},
+                                      column {"Height"},
+                                      column {"Alive"})};
     REQUIRE(dbTable);
     std::vector<std::tuple<i32, std::string, i32, f32, bool>> vec;
     for (i32 i {1}; i <= 100; ++i) {
@@ -104,15 +103,15 @@ TEST_CASE("Data.Sqlite.Aggregate")
     REQUIRE(dbTable);
 
     std::vector<std::tuple<std::string, int>> vec {};
-    vec.push_back(std::tuple {"A", 100});
-    vec.push_back(std::tuple {"A", 110});
-    vec.push_back(std::tuple {"A", 120});
-    vec.push_back(std::tuple {"A", 130});
-    vec.push_back(std::tuple {"B", 200});
-    vec.push_back(std::tuple {"B", 210});
-    vec.push_back(std::tuple {"B", 220});
-    vec.push_back(std::tuple {"B", 230});
-    vec.push_back(std::tuple {"B", 240});
+    vec.emplace_back("A", 100);
+    vec.emplace_back("A", 110);
+    vec.emplace_back("A", 120);
+    vec.emplace_back("A", 130);
+    vec.emplace_back("B", 200);
+    vec.emplace_back("B", 210);
+    vec.emplace_back("B", 220);
+    vec.emplace_back("B", 230);
+    vec.emplace_back("B", 240);
 
     REQUIRE(dbTable->insert_into("Name", "Age")(vec));
 

@@ -42,14 +42,14 @@ struct converter<char[N]> { // NOLINT
 };
 
 template <>
-struct converter<string> {
-    auto static From(statement_view stmt, i32 col, string& value) -> bool
+struct converter<utf8_string> {
+    auto static From(statement_view stmt, i32 col, utf8_string& value) -> bool
     {
         value = stmt.column_text(col);
         return true;
     }
 
-    auto static To(statement_view stmt, i32& idx, string const& value) -> bool
+    auto static To(statement_view stmt, i32& idx, utf8_string const& value) -> bool
     {
         return stmt.bind(idx++, value);
     }

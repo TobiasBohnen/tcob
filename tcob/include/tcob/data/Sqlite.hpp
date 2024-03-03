@@ -63,6 +63,10 @@ enum class step_status : u8 {
 
 ////////////////////////////////////////////////////////////
 
+TCOB_API auto quote_string(utf8_string_view str) -> utf8_string;
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API statement_view final {
 public:
     explicit statement_view(sqlite3_stmt* stmt);
@@ -76,20 +80,20 @@ public:
     auto column_double(i32 col) const -> f64;
     auto column_int(i32 col) const -> i32;
     auto column_int64(i32 col) const -> i64;
-    auto column_text(i32 col) const -> string;
+    auto column_text(i32 col) const -> utf8_string;
     auto column_blob(i32 col) const -> void const*;
 
     auto bind(i32 idx, f64 value) const -> bool;
     auto bind(i32 idx, i32 value) const -> bool;
     auto bind(i32 idx, i64 value) const -> bool;
-    auto bind(i32 idx, string_view value) const -> bool;
+    auto bind(i32 idx, utf8_string_view value) const -> bool;
     auto bind(i32 idx, char const* value) const -> bool;
     auto bind(i32 idx, void const* value, i64 size) const -> bool;
     auto bind_null(i32 idx) -> bool;
 
     void finalize() const;
 
-    auto get_column_name(i32 col) const -> string;
+    auto get_column_name(i32 col) const -> utf8_string;
     auto get_column_type(i32 col) const -> type;
 
 private:
@@ -104,15 +108,15 @@ public:
 
     explicit operator bool() const;
 
-    auto get_error_message() const -> string;
+    auto get_error_message() const -> utf8_string;
 
     auto open(path const& file) -> bool;
 
     auto close() -> bool;
 
-    auto prepare(string_view sql) const -> statement_view;
+    auto prepare(utf8_string_view sql) const -> statement_view;
 
-    auto exec(string const& sql) const -> bool;
+    auto exec(utf8_string const& sql) const -> bool;
 
     void commit_hook(i32 (*callback)(void*), void* userdata) const;
     void rollback_hook(void (*callback)(void*), void* userdata) const;

@@ -31,7 +31,7 @@ inline auto statement::bind_parameter(i32& idx, T&& value) const -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>
-inline select_statement<Values...>::select_statement(database_view db, bool distinct, string const& table, string const& columns)
+inline select_statement<Values...>::select_statement(database_view db, bool distinct, utf8_string const& table, utf8_string const& columns)
     : statement {db}
     , _distinct {distinct}
 {
@@ -42,14 +42,14 @@ inline select_statement<Values...>::select_statement(database_view db, bool dist
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::where(string const& expr) -> select_statement<Values...>&
+inline auto select_statement<Values...>::where(utf8_string const& expr) -> select_statement<Values...>&
 {
     _values.Where = std::format(" WHERE {}", expr);
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::order_by(string const& term) -> select_statement<Values...>&
+inline auto select_statement<Values...>::order_by(utf8_string const& term) -> select_statement<Values...>&
 {
     _values.OrderBy = std::format(" ORDER BY {}", term);
     return *this;
@@ -67,35 +67,35 @@ inline auto select_statement<Values...>::limit(i32 value, std::optional<i32> off
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::group_by(string const& column) -> select_statement<Values...>&
+inline auto select_statement<Values...>::group_by(utf8_string const& column) -> select_statement<Values...>&
 {
     _values.GroupBy = std::format(" GROUP BY \"{}\" ", column);
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::left_join(string const& table, string const& on) -> select_statement<Values...>&
+inline auto select_statement<Values...>::left_join(utf8_string const& table, utf8_string const& on) -> select_statement<Values...>&
 {
     _values.Join = std::format(" LEFT JOIN {} ON {}", table, on);
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::inner_join(string const& table, string const& on) -> select_statement<Values...>&
+inline auto select_statement<Values...>::inner_join(utf8_string const& table, utf8_string const& on) -> select_statement<Values...>&
 {
     _values.Join = std::format(" INNER JOIN {} ON {}", table, on);
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::cross_join(string const& table) -> select_statement<Values...>&
+inline auto select_statement<Values...>::cross_join(utf8_string const& table) -> select_statement<Values...>&
 {
     _values.Join = std::format(" CROSS JOIN {}", table);
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::get_query() const -> string
+inline auto select_statement<Values...>::get_query() const -> utf8_string
 {
     return std::format(
         "SELECT {} {} FROM {} {} {} {} {} {} {};",

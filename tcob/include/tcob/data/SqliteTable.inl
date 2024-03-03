@@ -13,22 +13,22 @@
 namespace tcob::data::sqlite {
 
 namespace detail {
-    auto get_column_string(auto&& column) -> string
+    auto get_column_string(auto&& column) -> utf8_string
     {
         if constexpr (Aggregate<decltype(column)>) {
             return column.str();
         } else {
-            return "\"" + string {column} + "\"";
+            return quote_string(utf8_string {column});
         }
     }
 
     template <typename... Values>
-    auto create_select(database_view db, string const& name, bool distinct, auto&&... columns) -> select_statement<Values...>
+    auto create_select(database_view db, utf8_string const& name, bool distinct, auto&&... columns) -> select_statement<Values...>
     {
         if constexpr (sizeof...(columns) == 0) {
             return select_statement<Values...> {db, distinct, name, "*"};
         } else {
-            std::vector<string> columnStrings;
+            std::vector<utf8_string> columnStrings;
             ((columnStrings.push_back(get_column_string(columns))), ...);
             return select_statement<Values...> {db, distinct, name, helper::join(columnStrings, ", ")};
         }
@@ -51,8 +51,8 @@ inline auto table::insert_into(auto&&... columns) const -> insert_statement
 {
     assert(check_columns(columns...));
 
-    std::vector<string> columnStrings;
-    ((columnStrings.push_back("\"" + string {columns} + "\"")), ...);
+    std::vector<utf8_string> columnStrings;
+    ((columnStrings.push_back(quote_string(utf8_string {columns}))), ...);
     return insert_statement {_db, _name, helper::join(columnStrings, ", ")};
 }
 
@@ -61,8 +61,8 @@ inline auto table::update(auto&&... columns) const -> update_statement
     assert(check_columns(columns...));
 
     // SET column1 = value1, column2 = value2...., columnN = valueN
-    std::vector<string> setStrings;
-    ((setStrings.push_back("\"" + string {columns} + "\" = ?")), ...);
+    std::vector<utf8_string> setStrings;
+    ((setStrings.push_back(quote_string(utf8_string {columns}) + " = ?")), ...);
     return update_statement {_db, _name, helper::join(setStrings, ", ")};
 }
 

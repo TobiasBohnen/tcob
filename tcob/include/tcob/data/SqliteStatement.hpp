@@ -23,13 +23,13 @@ public:
     auto operator=(statement&& other) noexcept -> statement&;
     ~statement();
 
-    auto prepare(string const& sql) -> bool;
+    auto prepare(utf8_string const& sql) -> bool;
     auto step() const -> step_status;
 
     auto get_column_count() const -> i32;
     template <typename T>
     auto get_column_value(i32 col) const -> T;
-    auto get_column_name(i32 col) const -> string;
+    auto get_column_name(i32 col) const -> utf8_string;
 
     template <typename T>
     auto bind_parameter(i32& idx, T&& value) const -> bool;
@@ -49,34 +49,34 @@ private:
 template <typename... Values>
 class select_statement : public statement {
 public:
-    select_statement(database_view db, bool distinct, string const& table, string const& columns);
+    select_statement(database_view db, bool distinct, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] ();
 
     template <typename T>
     operator std::vector<T>();
 
-    auto where(string const& expr) -> select_statement&;
-    auto order_by(string const& term) -> select_statement&;
+    auto where(utf8_string const& expr) -> select_statement&;
+    auto order_by(utf8_string const& term) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
-    auto group_by(string const& column) -> select_statement&;
+    auto group_by(utf8_string const& column) -> select_statement&;
 
-    auto left_join(string const& table, string const& on) -> select_statement&;
-    auto inner_join(string const& table, string const& on) -> select_statement&;
-    auto cross_join(string const& table) -> select_statement&;
+    auto left_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
+    auto inner_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
+    auto cross_join(utf8_string const& table) -> select_statement&;
 
-    auto get_query() const -> string;
+    auto get_query() const -> utf8_string;
 
 private:
     struct values {
-        string Columns;
-        string Table;
-        string Where;
-        string OrderBy;
-        string Limit;
-        string Offset;
-        string GroupBy;
-        string Join;
+        utf8_string Columns;
+        utf8_string Table;
+        utf8_string Where;
+        utf8_string OrderBy;
+        utf8_string Limit;
+        utf8_string Offset;
+        utf8_string GroupBy;
+        utf8_string Join;
     };
 
     values _values;
@@ -87,48 +87,48 @@ private:
 
 class TCOB_API update_statement : public statement {
 public:
-    update_statement(database_view db, string const& table, string const& columns);
+    update_statement(database_view db, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
-    auto where(string const& expr) -> update_statement&;
+    auto where(utf8_string const& expr) -> update_statement&;
 
 private:
-    auto get_query() const -> string;
+    auto get_query() const -> utf8_string;
 
-    string _where;
-    string _sql;
+    utf8_string _where;
+    utf8_string _sql;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API insert_statement : public statement {
 public:
-    insert_statement(database_view db, string const& table, string const& columns);
+    insert_statement(database_view db, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
 
 private:
-    auto get_query(usize valueSize, usize valueCount) const -> string;
+    auto get_query(usize valueSize, usize valueCount) const -> utf8_string;
 
-    string _sql;
+    utf8_string _sql;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API delete_statement : public statement {
 public:
-    delete_statement(database_view db, string const& table);
+    delete_statement(database_view db, utf8_string const& table);
 
     auto operator() [[nodiscard]] () -> bool;
 
-    auto where(string const& expr) -> delete_statement&;
+    auto where(utf8_string const& expr) -> delete_statement&;
 
 private:
-    auto get_query() const -> string;
+    auto get_query() const -> utf8_string;
 
-    string _where;
-    string _sql;
+    utf8_string _where;
+    utf8_string _sql;
 };
 
 }

@@ -19,10 +19,10 @@ namespace tcob::data::sqlite {
 
 class TCOB_API table final {
 public:
-    table(database_view db, string name);
+    table(database_view db, utf8_string name);
 
-    auto get_name() const -> string const&;
-    auto get_column_names() const -> std::set<string>;
+    auto get_name() const -> utf8_string const&;
+    auto get_column_names() const -> std::set<utf8_string>;
     auto get_row_count() const -> i32;
 
     template <typename... Values>
@@ -37,14 +37,14 @@ private:
     auto check_columns(auto&&... columns) const -> bool;
 
     database_view _db;
-    string        _name;
+    utf8_string   _name;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API view final {
 public:
-    view(database_view db, string name);
+    view(database_view db, utf8_string name);
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
@@ -53,7 +53,7 @@ public:
 
 private:
     database_view _db;
-    string        _name;
+    utf8_string   _name;
 };
 
 }

@@ -38,7 +38,7 @@ auto statement::operator=(statement&& other) noexcept -> statement&
     return *this;
 }
 
-auto statement::prepare(string const& sql) -> bool
+auto statement::prepare(utf8_string const& sql) -> bool
 {
     _stmt.finalize();
     _stmt = _db.prepare(sql);
@@ -57,7 +57,7 @@ auto statement::step() const -> step_status
     return retValue;
 }
 
-auto statement::get_column_name(i32 col) const -> string
+auto statement::get_column_name(i32 col) const -> utf8_string
 {
     return _stmt.get_column_name(col);
 }
@@ -79,7 +79,7 @@ auto statement::is_valid() const -> bool
 
 ////////////////////////////////////////////////////////////
 
-update_statement::update_statement(database_view db, string const& table, string const& columns)
+update_statement::update_statement(database_view db, utf8_string const& table, utf8_string const& columns)
     : statement {db}
 {
     // UPDATE table_name
@@ -90,20 +90,20 @@ update_statement::update_statement(database_view db, string const& table, string
     _sql = std::format("UPDATE {} SET {}", table, columns);
 }
 
-auto update_statement::where(string const& expr) -> update_statement&
+auto update_statement::where(utf8_string const& expr) -> update_statement&
 {
     _where = expr;
     return *this;
 }
 
-auto update_statement::get_query() const -> string
+auto update_statement::get_query() const -> utf8_string
 {
     return std::format("{} WHERE {};", _sql, _where);
 }
 
 ////////////////////////////////////////////////////////////
 
-insert_statement::insert_statement(database_view db, string const& table, string const& columns)
+insert_statement::insert_statement(database_view db, utf8_string const& table, utf8_string const& columns)
     : statement {db}
 {
     // INSERT INTO TABLE_NAME [(column1, column2, column3,...columnN)]
@@ -113,18 +113,18 @@ insert_statement::insert_statement(database_view db, string const& table, string
     _sql = std::format("INSERT INTO {} ({})", table, columns);
 }
 
-auto insert_statement::get_query(usize valueSize, usize valueCount) const -> string
+auto insert_statement::get_query(usize valueSize, usize valueCount) const -> utf8_string
 {
     // values
-    auto const paramLine {"(" + helper::join(std::vector<string>(valueSize, "?"), ", ") + ")"};
-    auto const paramLines {std::vector<string>(valueCount, paramLine)};
+    auto const paramLine {"(" + helper::join(std::vector<utf8_string>(valueSize, "?"), ", ") + ")"};
+    auto const paramLines {std::vector<utf8_string>(valueCount, paramLine)};
     return std::format("{} VALUES {};",
                        _sql, helper::join(paramLines, ", "));
 }
 
 ////////////////////////////////////////////////////////////
 
-delete_statement::delete_statement(database_view db, string const& table)
+delete_statement::delete_statement(database_view db, utf8_string const& table)
     : statement {db}
 {
     // DELETE FROM table_name
@@ -132,13 +132,13 @@ delete_statement::delete_statement(database_view db, string const& table)
     _sql = std::format("DELETE FROM {}", table);
 }
 
-auto delete_statement::where(string const& expr) -> delete_statement&
+auto delete_statement::where(utf8_string const& expr) -> delete_statement&
 {
     _where = expr;
     return *this;
 }
 
-auto delete_statement::get_query() const -> string
+auto delete_statement::get_query() const -> utf8_string
 {
     return std::format("{} WHERE {};", _sql, _where);
 }

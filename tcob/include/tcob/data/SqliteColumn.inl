@@ -8,6 +8,8 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <format>
+
 namespace tcob::data::sqlite {
 
 template <typename T>
@@ -17,59 +19,39 @@ inline default_value<T>::default_value(T defaultValue)
 }
 
 template <typename T>
-inline auto default_value<T>::str() const -> string
+inline auto default_value<T>::str() const -> utf8_string
 {
-    return " DEFAULT " + std::to_string(DefaultValue);
+    return std::format(" DEFAULT {}", DefaultValue);
 }
 
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline auto column<T>::str() const -> string
+inline auto column<T>::str() const -> utf8_string
 {
-    string ss;
-
-    // name
-    ss = "\"" + Name + "\"";
-
+    utf8_string type;
     // type
     switch (Type) {
     case type::Text:
-        ss += " TEXT";
+        type = "TEXT";
         break;
     case type::Numeric:
-        ss += " NUMERIC";
+        type = "NUMERIC";
         break;
     case type::Integer:
-        ss += " INTEGER";
+        type = "INTEGER";
         break;
     case type::Real:
-        ss += " REAL";
+        type = "REAL";
         break;
     case type::Blob:
-        ss += " BLOB";
+        type = "BLOB";
         break;
     case type::Null:
         break;
     }
 
-    // not null
-    if (NotNull) { ss += " NOT NULL"; }
-
-    // constraint
-    ss += " " + Constraint.str();
-
-    return ss;
-}
-
-////////////////////////////////////////////////////////////
-
-namespace detail {
-    template <typename T>
-    inline auto column_builder::operator()(type t, bool notNull, T constraint) const -> column<T>
-    {
-        return {Name, t, notNull, constraint};
-    }
+    return std::format("{} {} {} {}", quote_string(Name), type, NotNull ? "NOT NULL" : "", Constraint.str());
 }
 
 ////////////////////////////////////////////////////////////

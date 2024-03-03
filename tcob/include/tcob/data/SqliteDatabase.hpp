@@ -45,23 +45,23 @@ public:
 
     void set_journal_mode(journal_mode mode) const;
 
-    auto get_table_names() const -> std::set<string>;
-    auto get_view_names() const -> std::set<string>;
+    auto get_table_names() const -> std::set<utf8_string>;
+    auto get_view_names() const -> std::set<utf8_string>;
 
-    auto create_table(string const& tableName, auto&&... columns) const -> std::optional<table>;
+    auto create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>;
     template <typename... Values>
-    auto create_view(string const& viewName, select_statement<Values...>& stmt, bool temp = true) -> std::optional<view>;
-    auto create_savepoint(string const& name) const -> savepoint;
+    auto create_view(utf8_string const& viewName, select_statement<Values...>& stmt, bool temp = true) -> std::optional<view>;
+    auto create_savepoint(utf8_string const& name) const -> savepoint;
     auto create_statement() const -> statement;
 
-    auto table_exists(string const& tableName) const -> bool;
-    auto view_exists(string const& viewName) const -> bool;
+    auto table_exists(utf8_string const& tableName) const -> bool;
+    auto view_exists(utf8_string const& viewName) const -> bool;
 
-    auto get_table(string const& tableName) const -> std::optional<table>;
-    auto get_view(string const& viewName) const -> std::optional<view>;
+    auto get_table(utf8_string const& tableName) const -> std::optional<table>;
+    auto get_view(utf8_string const& viewName) const -> std::optional<view>;
 
-    auto drop_table(string const& tableName) const -> bool;
-    auto drop_view(string const& viewName) const -> bool;
+    auto drop_table(utf8_string const& tableName) const -> bool;
+    auto drop_view(utf8_string const& viewName) const -> bool;
 
     auto vacuum_into(path const& file) const -> bool;
 
@@ -71,8 +71,8 @@ public:
     void set_rollback_hook(std::function<void(database*)>&& func);
     void call_rollback_hook();
 
-    void set_update_hook(std::function<void(database*, update_mode, string, string, i64)>&& func);
-    void call_update_hook(update_mode mode, string const& dbName, string const& table, i64 rowId);
+    void set_update_hook(std::function<void(database*, update_mode, utf8_string, utf8_string, i64)>&& func);
+    void call_update_hook(update_mode mode, utf8_string const& dbName, utf8_string const& table, i64 rowId);
 
     auto static Open(path const& file) -> std::optional<database>; // TODO: change to result
     auto static OpenMemory() -> database;
@@ -82,9 +82,9 @@ private:
 
     database_view _db {nullptr};
 
-    std::function<i32(database*)>                                    _commitHookFunc;
-    std::function<void(database*)>                                   _rbHookFunc;
-    std::function<void(database*, update_mode, string, string, i64)> _updateHookFunc;
+    std::function<i32(database*)>                                              _commitHookFunc;
+    std::function<void(database*)>                                             _rbHookFunc;
+    std::function<void(database*, update_mode, utf8_string, utf8_string, i64)> _updateHookFunc;
 };
 
 }

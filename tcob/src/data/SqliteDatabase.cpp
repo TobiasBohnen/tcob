@@ -13,7 +13,7 @@
 
 namespace tcob::data::sqlite {
 
-auto static create_master_query(string const& name, string const& type) -> string
+auto static create_master_query(utf8_string const& name, utf8_string const& type) -> utf8_string
 {
     return std::format(
         "SELECT name FROM sqlite_master WHERE name = '{0}' and type = '{1}' "
@@ -90,7 +90,7 @@ void database::set_journal_mode(journal_mode mode) const
     }
 }
 
-auto database::get_table_names() const -> std::set<string>
+auto database::get_table_names() const -> std::set<utf8_string>
 {
     // SELECT name FROM sqlite_master WHERE type='table' ORDER BY name
     statement select {_db};
@@ -101,10 +101,10 @@ auto database::get_table_names() const -> std::set<string>
         "SELECT name FROM sqlite_temp_master "
         "WHERE type='table';");
 
-    return select.get_column_value<std::set<string>>(0);
+    return select.get_column_value<std::set<utf8_string>>(0);
 }
 
-auto database::get_view_names() const -> std::set<string>
+auto database::get_view_names() const -> std::set<utf8_string>
 {
     // SELECT name FROM sqlite_master WHERE type='view' ORDER BY name
     statement select {_db};
@@ -115,10 +115,10 @@ auto database::get_view_names() const -> std::set<string>
         "SELECT name FROM sqlite_temp_master "
         "WHERE type='view';");
 
-    return select.get_column_value<std::set<string>>(0);
+    return select.get_column_value<std::set<utf8_string>>(0);
 }
 
-auto database::table_exists(string const& tableName) const -> bool
+auto database::table_exists(utf8_string const& tableName) const -> bool
 {
     //  SELECT name FROM sqlite_master WHERE name='tableName' and type='table';
     statement select {_db};
@@ -126,7 +126,7 @@ auto database::table_exists(string const& tableName) const -> bool
     return select.step() == step_status::Row;
 }
 
-auto database::view_exists(string const& viewName) const -> bool
+auto database::view_exists(utf8_string const& viewName) const -> bool
 {
     //  SELECT name FROM sqlite_master WHERE name='viewName' and type='view';
     statement select {_db};
@@ -134,7 +134,7 @@ auto database::view_exists(string const& viewName) const -> bool
     return select.step() == step_status::Row;
 }
 
-auto database::create_savepoint(string const& name) const -> savepoint
+auto database::create_savepoint(utf8_string const& name) const -> savepoint
 {
     return {_db, name};
 }
@@ -144,27 +144,27 @@ auto database::create_statement() const -> statement
     return statement {_db};
 }
 
-auto database::get_table(string const& tableName) const -> std::optional<table>
+auto database::get_table(utf8_string const& tableName) const -> std::optional<table>
 {
     return table_exists(tableName)
         ? std::optional {table {_db, tableName}}
         : std::nullopt;
 }
 
-auto database::get_view(string const& viewName) const -> std::optional<view>
+auto database::get_view(utf8_string const& viewName) const -> std::optional<view>
 {
     return view_exists(viewName)
         ? std::optional {view {_db, viewName}}
         : std::nullopt;
 }
 
-auto database::drop_table(string const& tableName) const -> bool
+auto database::drop_table(utf8_string const& tableName) const -> bool
 {
     // DROP TABLE [IF EXISTS] [schema_name.]table_name;
     return _db.exec("DROP TABLE IF EXISTS " + tableName + ";");
 }
 
-auto database::drop_view(string const& viewName) const -> bool
+auto database::drop_view(utf8_string const& viewName) const -> bool
 {
     // DROP VIEW  [IF EXISTS] [schema_name.]table_name;
     return _db.exec("DROP VIEW IF EXISTS " + viewName + ";");
@@ -192,13 +192,13 @@ void database::call_rollback_hook()
     _rbHookFunc(this);
 }
 
-void database::set_update_hook(std::function<void(database*, update_mode, string, string, i64)>&& func)
+void database::set_update_hook(std::function<void(database*, update_mode, utf8_string, utf8_string, i64)>&& func)
 {
     _updateHookFunc = std::move(func);
     _db.update_hook(&update, this);
 }
 
-void database::call_update_hook(update_mode mode, string const& dbName, string const& table, i64 rowId)
+void database::call_update_hook(update_mode mode, utf8_string const& dbName, utf8_string const& table, i64 rowId)
 {
     _updateHookFunc(this, mode, dbName, table, rowId);
 }

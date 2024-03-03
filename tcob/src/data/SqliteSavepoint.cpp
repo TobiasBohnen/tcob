@@ -9,7 +9,7 @@
 
 namespace tcob::data::sqlite {
 
-savepoint::savepoint(database_view db, string name)
+savepoint::savepoint(database_view db, utf8_string name)
     : _db {db}
     , _name {std::move(name)}
 {

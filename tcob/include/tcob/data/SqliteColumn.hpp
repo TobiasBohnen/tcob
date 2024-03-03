@@ -18,56 +18,56 @@ concept Aggregate =
     requires(T t) {
         {
             t.str()
-        } -> std::same_as<string>;
+        } -> std::same_as<utf8_string>;
     };
 
 class TCOB_API avg {
 public:
-    avg(string column);
+    avg(utf8_string column);
 
-    string Column;
+    utf8_string Column;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 static_assert(Aggregate<avg>);
 
 class TCOB_API count {
 public:
-    count(string column);
+    count(utf8_string column);
 
-    string Column;
+    utf8_string Column;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 static_assert(Aggregate<count>);
 
 class TCOB_API max {
 public:
-    max(string column);
+    max(utf8_string column);
 
-    string Column;
+    utf8_string Column;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 static_assert(Aggregate<max>);
 
 class TCOB_API min {
 public:
-    min(string column);
+    min(utf8_string column);
 
-    string Column;
+    utf8_string Column;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 static_assert(Aggregate<min>);
 
 class TCOB_API sum {
 public:
-    sum(string column);
+    sum(utf8_string column);
 
-    string Column;
+    utf8_string Column;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 static_assert(Aggregate<sum>);
 
@@ -75,7 +75,7 @@ static_assert(Aggregate<sum>);
 
 class TCOB_API no_constraint {
 public:
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 
 template <typename T>
@@ -85,53 +85,39 @@ public:
 
     T DefaultValue;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 
 class TCOB_API unique {
 public:
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 
 class TCOB_API primary_key {
 public:
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 
 class TCOB_API check {
 public:
-    check(string check);
+    check(utf8_string check);
 
-    string Check;
+    utf8_string Check;
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
 
 ////////////////////////////////////////////////////////////
 
 template <typename T = no_constraint>
 struct column {
-    string Name;
-    type   Type {type::Integer};
-    bool   NotNull {false};
-    T      Constraint {};
+    utf8_string Name;
+    type        Type {type::Integer};
+    bool        NotNull {false};
+    T           Constraint {};
 
-    auto str() const -> string;
+    auto str() const -> utf8_string;
 };
-
-namespace detail {
-    struct column_builder {
-        string Name;
-
-        template <typename T = no_constraint>
-        auto operator()(type t = type::Integer, bool notNull = false, T constraint = no_constraint {}) const -> column<T>;
-    };
-
-}
-
-namespace literals {
-    auto operator""_col(char const* str, usize) -> detail::column_builder;
-}
 
 ////////////////////////////////////////////////////////////
 
