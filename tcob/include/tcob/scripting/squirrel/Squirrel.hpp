@@ -178,7 +178,7 @@ public:
     auto get_type(SQInteger idx) const -> type;
     auto get_size(SQInteger idx) const -> SQInteger;
     auto get_top() const -> SQInteger;
-    auto get_functioninfo(SQInteger level) const -> function_info;
+    auto get_function_info(SQInteger level) const -> function_info;
 
     auto next(SQInteger idx) const -> bool;
 
@@ -229,6 +229,8 @@ public:
     void reset_object(HSQOBJECT* po) const;
 
     void throw_error(string const& message) const;
+    void reset_error() const;
+    auto has_error() const -> bool;
 
     auto call(SQInteger params, bool retVal, bool raiseError) const -> error_code;
 

@@ -105,6 +105,23 @@ struct converter<std::optional<T>> {
 
         return true;
     }
+
+    void static To(vm_view view, std::optional<T> const& value)
+    {
+        if (value) {
+            converter<T>::To(view, *value);
+        } else {
+            view.push_null();
+        }
+    }
+};
+
+template <>
+struct converter<std::nullopt_t> {
+    void static To(vm_view view, std::nullopt_t const&)
+    {
+        view.push_null();
+    }
 };
 
 template <typename... P>

@@ -279,18 +279,19 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
 
     SUBCASE("unhandled setter")
     {
-        auto res = run("function foo(p){ p.unhandled_newindex=400 }");
+        auto res = run("function unhandled(p){ p.unhandled_newindex=400 }");
         REQUIRE(!res.has_error());
-        squirrel::function<void> f = get_root_table()["foo"];
-        bar                      test {};
-        //   REQUIRE(f.call(&test).has_error()); //TODO: should be an error
+        squirrel::function<void> f = global["unhandled"];
+
+        bar test {};
+        REQUIRE(f.call(&test).has_error());
         REQUIRE_FALSE(test.z == 400);
     }
     SUBCASE("handled setter")
     {
         auto res = run("function foo(p){ p.z=400 }");
         REQUIRE(!res.has_error());
-        squirrel::function<void> f = get_root_table()["foo"];
+        squirrel::function<void> f = global["foo"];
 
         wrap->UnknownSet.connect([](auto&& ev) {
             if (ev.Name == "z") {
@@ -305,18 +306,19 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     }
     SUBCASE("unhandled function")
     {
-        auto res = run("function foo(p) { return p.unhandled_index() }");
+        auto res = run("function unhandled(p) { return p.unhandled_index() }");
         REQUIRE(!res.has_error());
-        squirrel::function<int> f = get_root_table()["foo"];
-        bar                     test {};
-        auto                    funcres = f.call(&test);
+        squirrel::function<int> f = global["unhandled"];
+
+        bar  test {};
+        auto funcres = f.call(&test);
         REQUIRE(funcres.has_error());
     }
     SUBCASE("handled function")
     {
         auto res = run("function foo(p) { return p.y() }");
         REQUIRE(!res.has_error());
-        squirrel::function<int> f = get_root_table()["foo"];
+        squirrel::function<int> f = global["foo"];
 
         auto yfunc = squirrel::make_shared_closure(std::function([](bar* fx) { return fx->y(); }));
         wrap->UnknownGet.connect([yfunc](auto&& ev) {
@@ -333,10 +335,11 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     }
     SUBCASE("unhandled getter")
     {
-        auto res = run("function foo(p) { return p.unhandled_index }");
+        auto res = run("function unhandled(p) { return p.unhandled_index }");
         REQUIRE(!res.has_error());
-        squirrel::function<int> f = get_root_table()["foo"];
-        bar                     test {};
+        squirrel::function<int> f = global["unhandled"];
+
+        bar test {};
         test.x       = 420;
         auto funcres = f.call(&test);
         REQUIRE(funcres.has_error());
@@ -345,7 +348,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     {
         auto res = run("function foo(p) { return p.x }");
         REQUIRE(!res.has_error());
-        squirrel::function<int> f = get_root_table()["foo"];
+        squirrel::function<int> f = global["foo"];
 
         wrap->UnknownGet.connect([](auto&& ev) {
             if (ev.Name == "x") {

@@ -49,11 +49,12 @@ auto static error(HSQUIRRELVM v) -> SQInteger
     SQChar const* sErr {nullptr};
     if (sq_gettop(v) >= 1) {
         if (SQ_SUCCEEDED(sq_getstring(v, 2, &sErr))) {
-            SQStackInfos si;
-            sq_stackinfos(v, 1, &si);
-            if (si.source && si.funcname) {
-                logger::Error("Squirrel: \"{}\" @([{}] func: {} line: {})",
-                              sErr, si.source, si.funcname, si.line);
+            SQStackInfos si {};
+            if (SQ_SUCCEEDED(sq_stackinfos(v, 1, &si)) || SQ_SUCCEEDED(sq_stackinfos(v, 0, &si))) {
+                if (si.source && si.funcname) {
+                    logger::Error("Squirrel: \"{}\" @([{}] func: {} line: {})",
+                                  sErr, si.source, si.funcname, si.line);
+                }
             } else {
                 logger::Error("Squirrel: \"{}\"", sErr);
             }

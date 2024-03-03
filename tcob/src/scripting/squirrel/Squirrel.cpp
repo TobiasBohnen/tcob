@@ -28,7 +28,7 @@ stack_guard::stack_guard(HSQUIRRELVM vm)
 
 stack_guard::~stack_guard()
 {
-    SQInteger const n {sq_gettop(_vm) - _oldTop};
+    auto const n {sq_gettop(_vm) - _oldTop};
     if (n > 0) {
         sq_pop(_vm, n);
     }
@@ -287,7 +287,7 @@ auto vm_view::get_top() const -> SQInteger
     return sq_gettop(_vm);
 }
 
-auto vm_view::get_functioninfo(SQInteger level) const -> function_info
+auto vm_view::get_function_info(SQInteger level) const -> function_info
 {
     SQFunctionInfo fi;
     if (sq_getfunctioninfo(_vm, level, &fi) == SQ_OK) {
@@ -495,6 +495,19 @@ void vm_view::throw_error(string const& message) const
     sq_throwerror(_vm, message.c_str());
 }
 
+void vm_view::reset_error() const
+{
+    sq_reseterror(_vm);
+}
+
+auto vm_view::has_error() const -> bool
+{
+    sq_getlasterror(_vm);
+    bool const retvalue {!is_null(-1)};
+    pop(1);
+    return retvalue;
+}
+
 auto vm_view::call(SQInteger params, bool retVal, bool raiseError) const -> error_code
 {
     return sq_call(_vm, params, retVal, raiseError) == SQ_OK ? error_code::Ok : error_code::Error;
@@ -573,7 +586,7 @@ auto vm_view::is_valid() const -> bool
 auto vm_view::get_stack_types() const -> std::vector<type>
 {
     std::vector<type> retValue {};
-    SQInteger const   top {get_top()};
+    auto const        top {get_top()};
 
     for (SQInteger i {1}; i <= top; ++i) {
         retValue.push_back(get_type(i));

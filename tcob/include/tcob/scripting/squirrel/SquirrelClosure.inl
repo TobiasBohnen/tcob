@@ -24,6 +24,8 @@ namespace detail {
     template <typename R, typename... Args>
     inline auto native_closure<R(Args...)>::operator()(vm_view view) -> SQInteger
     {
+        view.reset_error();
+
         std::tuple<std::remove_cvref_t<Args>...> params;
         std::apply(
             [view](auto&... item) {
@@ -44,6 +46,8 @@ namespace detail {
         } else {
             view.push_convert(std::apply(_fn, params));
         }
+
+        if (view.has_error()) { return -1; }
         return std::max(SQInteger {0}, view.get_top() - oldTop);
     }
 
@@ -76,6 +80,8 @@ namespace detail {
     template <typename... Funcs>
     inline auto native_overload<Funcs...>::operator()(vm_view view) -> SQInteger
     {
+        view.reset_error();
+
         SQInteger const oldTop {view.get_top()};
         SQInteger const unusedStackObjects {_isStatic ? 2 : 1};
 
@@ -85,7 +91,8 @@ namespace detail {
             },
             _fns);
 
-        return view.get_top() - oldTop;
+        if (view.has_error()) { return -1; }
+        return std::max(SQInteger {0}, view.get_top() - oldTop);
     }
 
     template <typename... Funcs>

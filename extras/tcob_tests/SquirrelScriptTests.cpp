@@ -243,6 +243,207 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Closures")
     }
 }
 
+TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
+{
+    std::function testFuncVector = []() {
+        return std::vector<std::string> {"1", "2", "3", "4", "5"};
+    };
+
+    std::function testFuncArray = []() {
+        return std::array<std::string, 5> {"1", "2", "3", "4", "5"};
+    };
+
+    std::function testFuncPairPara = [](std::pair<std::string, i32> const& pair) {
+        return pair.second;
+    };
+    /*
+        std::function testFuncTuple = [](double d) {
+            return std::tuple(d * 5, std::to_string(d));
+        };
+    */
+    std::function testFuncMap = []() {
+        return std::map<std::string, i32> {
+            {"abc", 123},
+            {"def", 234}};
+    };
+    std::function testFuncUMap = []() {
+        return std::unordered_map<std::string, i32> {
+            {"abc", 123}, {"def", 234}};
+    };
+
+    // global["test"]["Tuple"]    = testFuncTuple;
+    global["test"]["Map"]      = &testFuncMap;
+    global["test"]["UMap"]     = &testFuncUMap;
+    global["test"]["Vector"]   = &testFuncVector;
+    global["test"]["Array"]    = &testFuncArray;
+    global["test"]["PairPara"] = &testFuncPairPara;
+
+    /*
+        SUBCASE("tuple return from cpp")
+        {
+            auto res = run("a <- test.Tuple(5.22)");
+            REQUIRE(res);
+            double      a = global["a"];
+            std::string b = global["b"];
+            REQUIRE(a == 5.22 * 5);
+            REQUIRE(b == std::to_string(5.22));
+        }
+        */
+    SUBCASE("map return from cpp")
+    {
+        auto res = run("x <- test.Map()");
+        REQUIRE(res);
+        std::map<std::string, i32> x = global["x"];
+        REQUIRE(x["abc"] == 123);
+        REQUIRE(x["def"] == 234);
+    }
+    SUBCASE("unordered_map return from cpp")
+    {
+        auto res = run("x <- test.UMap()");
+        REQUIRE(res);
+        std::unordered_map<std::string, i32> x = global["x"];
+        REQUIRE(x["abc"] == 123);
+        REQUIRE(x["def"] == 234);
+    }
+    SUBCASE("vector return from cpp")
+    {
+        auto res = run("x <- test.Vector();");
+        REQUIRE(res);
+        std::vector<std::string> vec = global["x"];
+        REQUIRE(vec[0] == "1");
+        REQUIRE(vec[4] == "5");
+    }
+    SUBCASE("array return from cpp")
+    {
+        auto res = run("x <- test.Array()");
+        REQUIRE(res);
+        std::array<std::string, 5> vec = global["x"];
+        REQUIRE(vec[0] == "1");
+        REQUIRE(vec[4] == "5");
+    }
+    SUBCASE("vector parameter")
+    {
+        auto res = run("function foo(x) {return x[1] * x[3]} ");
+        REQUIRE(res);
+        std::vector   vec {1, 2, 3, 4, 5};
+        function<i32> func = global["foo"];
+        i32           a    = func(vec);
+        REQUIRE(a == 2 * 4);
+
+        std::array arr {1, 2, 3, 4, 5};
+        a = func(arr);
+        REQUIRE(a == 2 * 4);
+    }
+    /*
+    SUBCASE("tuple parameter")
+    {
+        auto res = run(
+            "function foo(x) "
+            "   if (x[2])  return x[0] * x[1]; else return 10; "
+            "end ");
+        REQUIRE(res);
+        auto          tup  = std::make_tuple(4, 2, true);
+        function<i32> func = global["foo"];
+        i32           a    = func(tup);
+        REQUIRE(a == 4 * 2);
+    }*/
+    SUBCASE("pair parameter")
+    {
+        auto res = run("function foo(x) {return x[0] * x[1]} ");
+        REQUIRE(res);
+        auto          tup  = std::make_pair(4, 2.4f);
+        function<f32> func = global["foo"];
+        f32           a    = func(tup);
+        REQUIRE(a == 4 * 2.4f);
+    }
+    SUBCASE("map parameter")
+    {
+        auto res = run("function foo(x) {return x.test} ");
+        REQUIRE(res);
+        std::map<std::string, i32> map  = {{"test", 123}};
+        function<i32>              func = global["foo"];
+        i32                        a    = func(map);
+        REQUIRE(a == 123);
+
+        std::unordered_map<std::string, i32> umap = {{"test", 245}};
+        a                                         = func(umap);
+        REQUIRE(a == 245);
+    }
+    SUBCASE("get/set vector")
+    {
+        std::vector<std::string> vec = {"test", "123"};
+        global["foo"]                = vec;
+        std::string a                = *run<std::string>("return foo[0] ");
+        REQUIRE(a == "test");
+        std::string b = *run<std::string>("return foo[1] ");
+        REQUIRE(b == "123");
+    }
+    SUBCASE("get/set deque")
+    {
+        std::deque<std::string> deck = {"test", "123"};
+        global["foo"]                = deck;
+        std::string a                = *run<std::string>("return foo[0] ");
+        REQUIRE(a == "test");
+        std::string b = *run<std::string>("return foo[1] ");
+        REQUIRE(b == "123");
+    }
+    SUBCASE("get/set span")
+    {
+        std::vector<std::string> vec {"test", "123"};
+        std::span<std::string>   s {vec.data(), vec.size()};
+        global["foo"] = s;
+        std::string a = *run<std::string>("return foo[0] ");
+        REQUIRE(a == vec[0]);
+        std::string b = *run<std::string>("return foo[1] ");
+        REQUIRE(b == vec[1]);
+    }
+    SUBCASE("get map")
+    {
+        auto res = run("rectF <- {x=2.7, y=3.1, width=2.3, height=55.2} ");
+        REQUIRE(res);
+        std::map<std::string, f32> rectF = global["rectF"];
+        REQUIRE(rectF["x"] == 2.7f);
+    }
+    SUBCASE("get/set map")
+    {
+        std::map<std::string, i32> map = {{"test", 123}};
+        global["foo"]                  = map;
+        i32 a                          = *run<i32>("return foo.test ");
+        REQUIRE(a == 123);
+    }
+    SUBCASE("get multiple return values as pair")
+    {
+        std::pair<std::string, i32> x = *run<std::pair<std::string, i32>>("return [\"ok\", 10]");
+        REQUIRE(x.first == "ok");
+        REQUIRE(x.second == 10);
+    }
+    SUBCASE("pair parameter")
+    {
+        function<i32> func = global["test"]["PairPara"];
+        i32           a    = func(std::pair {"ok"s, 4});
+        REQUIRE(a == 4);
+    }
+    SUBCASE("get/set set")
+    {
+        std::set<std::string> set1 {"test", "test2"};
+        global["foo"]              = set1;
+        std::set<std::string> set2 = *run<std::set<std::string>>("return foo ");
+        REQUIRE(set1 == set2);
+    }
+    SUBCASE("set return")
+    {
+        std::set<i32> set = *run<std::set<i32>>("return [1, 2, 3, 1, 2, 3, 4, 2] ");
+        REQUIRE(set == std::set<i32> {1, 2, 3, 4});
+    }
+    SUBCASE("get/set unordered_set")
+    {
+        std::unordered_set<std::string> set1 {"test", "test2"};
+        global["foo"]                        = set1;
+        std::unordered_set<std::string> set2 = *run<std::unordered_set<std::string>>("return foo ");
+        REQUIRE(set1 == set2);
+    }
+}
+
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Enums")
 {
     enum class testEnum {
@@ -333,6 +534,24 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
         REQUIRE(a == 2);
         a = func(1, 2, nullptr);
         REQUIRE(a == 3);
+    }
+    SUBCASE("optional parameter")
+    {
+        {
+            auto f = *run<function<bool>>("return function(i) { return i == null }");
+            REQUIRE(f(std::nullopt) == true);
+            std::optional<i32> opt;
+            REQUIRE(f(opt) == true);
+            opt = 10;
+            REQUIRE(f(opt) == false);
+        }
+        {
+            auto               f = *run<function<i32>>("return function(a,b,c) { return b == null ? a + c : a + b + c }");
+            std::optional<i32> opt;
+            REQUIRE(f(1, opt, 5) == 6);
+            opt = 10;
+            REQUIRE(f(1, opt, 5) == 16);
+        }
     }
     SUBCASE("parameter_pack")
     {
@@ -928,7 +1147,6 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Results")
         auto tab = global.get<std::vector<i32>>("arrayX");
         REQUIRE(tab.error() == error_code::TypeMismatch);
     }
-
     {
         auto res = run<i32>("return \"ok\"");
         REQUIRE(res.error() == error_code::TypeMismatch);
@@ -1025,215 +1243,16 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.RunAsync")
         )-";
 
         io::delete_file("asynctest.nut");
-        io::ofstream stream {"asynctest.nut"};
-        stream.write(script);
-        stream.flush();
+        {
+            io::ofstream stream {"asynctest.nut"};
+            stream.write(script);
+        }
+
         auto ftr = run_file_async<i64>("asynctest.nut");
         ftr.wait();
         auto res = ftr.get();
         REQUIRE(res);
         REQUIRE(res.value() == 55);
-    }
-}
-
-TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.STLTypes")
-{
-    std::function testFuncVector = []() {
-        return std::vector<std::string> {"1", "2", "3", "4", "5"};
-    };
-
-    std::function testFuncArray = []() {
-        return std::array<std::string, 5> {"1", "2", "3", "4", "5"};
-    };
-
-    std::function testFuncPairPara = [](std::pair<std::string, i32> const& pair) {
-        return pair.second;
-    };
-    /*
-        std::function testFuncTuple = [](double d) {
-            return std::tuple(d * 5, std::to_string(d));
-        };
-    */
-    std::function testFuncMap = []() {
-        return std::map<std::string, i32> {
-            {"abc", 123},
-            {"def", 234}};
-    };
-    std::function testFuncUMap = []() {
-        return std::unordered_map<std::string, i32> {
-            {"abc", 123}, {"def", 234}};
-    };
-
-    // global["test"]["Tuple"]    = testFuncTuple;
-    global["test"]["Map"]      = &testFuncMap;
-    global["test"]["UMap"]     = &testFuncUMap;
-    global["test"]["Vector"]   = &testFuncVector;
-    global["test"]["Array"]    = &testFuncArray;
-    global["test"]["PairPara"] = &testFuncPairPara;
-
-    /*
-        SUBCASE("tuple return from cpp")
-        {
-            auto res = run("a <- test.Tuple(5.22)");
-            REQUIRE(res);
-            double      a = global["a"];
-            std::string b = global["b"];
-            REQUIRE(a == 5.22 * 5);
-            REQUIRE(b == std::to_string(5.22));
-        }
-        */
-    SUBCASE("map return from cpp")
-    {
-        auto res = run("x <- test.Map()");
-        REQUIRE(res);
-        std::map<std::string, i32> x = global["x"];
-        REQUIRE(x["abc"] == 123);
-        REQUIRE(x["def"] == 234);
-    }
-    SUBCASE("unordered_map return from cpp")
-    {
-        auto res = run("x <- test.UMap()");
-        REQUIRE(res);
-        std::unordered_map<std::string, i32> x = global["x"];
-        REQUIRE(x["abc"] == 123);
-        REQUIRE(x["def"] == 234);
-    }
-    SUBCASE("vector return from cpp")
-    {
-        auto res = run("x <- test.Vector();");
-        REQUIRE(res);
-        std::vector<std::string> vec = global["x"];
-        REQUIRE(vec[0] == "1");
-        REQUIRE(vec[4] == "5");
-    }
-    SUBCASE("array return from cpp")
-    {
-        auto res = run("x <- test.Array()");
-        REQUIRE(res);
-        std::array<std::string, 5> vec = global["x"];
-        REQUIRE(vec[0] == "1");
-        REQUIRE(vec[4] == "5");
-    }
-    SUBCASE("vector parameter")
-    {
-        auto res = run("function foo(x) {return x[1] * x[3]} ");
-        REQUIRE(res);
-        std::vector   vec {1, 2, 3, 4, 5};
-        function<i32> func = global["foo"];
-        i32           a    = func(vec);
-        REQUIRE(a == 2 * 4);
-
-        std::array arr {1, 2, 3, 4, 5};
-        a = func(arr);
-        REQUIRE(a == 2 * 4);
-    }
-    /*
-    SUBCASE("tuple parameter")
-    {
-        auto res = run(
-            "function foo(x) "
-            "   if (x[2])  return x[0] * x[1]; else return 10; "
-            "end ");
-        REQUIRE(res);
-        auto          tup  = std::make_tuple(4, 2, true);
-        function<i32> func = global["foo"];
-        i32           a    = func(tup);
-        REQUIRE(a == 4 * 2);
-    }*/
-    SUBCASE("pair parameter")
-    {
-        auto res = run("function foo(x) {return x[0] * x[1]} ");
-        REQUIRE(res);
-        auto          tup  = std::make_pair(4, 2.4f);
-        function<f32> func = global["foo"];
-        f32           a    = func(tup);
-        REQUIRE(a == 4 * 2.4f);
-    }
-    SUBCASE("map parameter")
-    {
-        auto res = run("function foo(x) {return x.test} ");
-        REQUIRE(res);
-        std::map<std::string, i32> map  = {{"test", 123}};
-        function<i32>              func = global["foo"];
-        i32                        a    = func(map);
-        REQUIRE(a == 123);
-
-        std::unordered_map<std::string, i32> umap = {{"test", 245}};
-        a                                         = func(umap);
-        REQUIRE(a == 245);
-    }
-    SUBCASE("get/set vector")
-    {
-        std::vector<std::string> vec = {"test", "123"};
-        global["foo"]                = vec;
-        std::string a                = *run<std::string>("return foo[0] ");
-        REQUIRE(a == "test");
-        std::string b = *run<std::string>("return foo[1] ");
-        REQUIRE(b == "123");
-    }
-    SUBCASE("get/set deque")
-    {
-        std::deque<std::string> deck = {"test", "123"};
-        global["foo"]                = deck;
-        std::string a                = *run<std::string>("return foo[0] ");
-        REQUIRE(a == "test");
-        std::string b = *run<std::string>("return foo[1] ");
-        REQUIRE(b == "123");
-    }
-    SUBCASE("get/set span")
-    {
-        std::vector<std::string> vec {"test", "123"};
-        std::span<std::string>   s {vec.data(), vec.size()};
-        global["foo"] = s;
-        std::string a = *run<std::string>("return foo[0] ");
-        REQUIRE(a == vec[0]);
-        std::string b = *run<std::string>("return foo[1] ");
-        REQUIRE(b == vec[1]);
-    }
-    SUBCASE("get map")
-    {
-        auto res = run("rectF <- {x=2.7, y=3.1, width=2.3, height=55.2} ");
-        REQUIRE(res);
-        std::map<std::string, f32> rectF = global["rectF"];
-        REQUIRE(rectF["x"] == 2.7f);
-    }
-    SUBCASE("get/set map")
-    {
-        std::map<std::string, i32> map = {{"test", 123}};
-        global["foo"]                  = map;
-        i32 a                          = *run<i32>("return foo.test ");
-        REQUIRE(a == 123);
-    }
-    SUBCASE("get multiple return values as pair")
-    {
-        std::pair<std::string, i32> x = *run<std::pair<std::string, i32>>("return [\"ok\", 10]");
-        REQUIRE(x.first == "ok");
-        REQUIRE(x.second == 10);
-    }
-    SUBCASE("pair parameter")
-    {
-        function<i32> func = global["test"]["PairPara"];
-        i32           a    = func(std::pair {"ok"s, 4});
-        REQUIRE(a == 4);
-    }
-    SUBCASE("get/set set")
-    {
-        std::set<std::string> set1 {"test", "test2"};
-        global["foo"]              = set1;
-        std::set<std::string> set2 = *run<std::set<std::string>>("return foo ");
-        REQUIRE(set1 == set2);
-    }
-    SUBCASE("set return")
-    {
-        std::set<i32> set = *run<std::set<i32>>("return [1, 2, 3, 1, 2, 3, 4, 2] ");
-        REQUIRE(set == std::set<i32> {1, 2, 3, 4});
-    }
-    SUBCASE("get/set unordered_set")
-    {
-        std::unordered_set<std::string> set1 {"test", "test2"};
-        global["foo"]                        = set1;
-        std::unordered_set<std::string> set2 = *run<std::unordered_set<std::string>>("return foo ");
-        REQUIRE(set1 == set2);
     }
 }
 
