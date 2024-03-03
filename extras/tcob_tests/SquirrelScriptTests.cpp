@@ -36,14 +36,14 @@ template <>
 struct converter<foo> {
     auto static IsType(vm_view ls, SQInteger idx) -> bool
     {
-        table lt {ls, idx};
+        table lt {table::Acquire(ls, idx)};
         return lt.has("x") && lt.has("y") && lt.has("z");
     }
 
     auto static From(vm_view ls, SQInteger& idx, foo& value) -> bool
     {
         if (ls.is_table(idx)) {
-            table lt {ls, idx++};
+            table lt {table::Acquire(ls, idx++)};
 
             value.x = lt["x"];
             value.y = lt["y"];
@@ -55,7 +55,7 @@ struct converter<foo> {
     void static To(vm_view ls, foo const& value)
     {
         ls.new_table();
-        table lt {ls, -1};
+        table lt {table::Acquire(ls, -1)};
 
         lt["x"] = value.x;
         lt["y"] = value.y;
@@ -126,7 +126,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
 {
     SUBCASE("fields")
     {
-        clazz c {clazz::CreateNew(get_view())};
+        clazz c {get_view()};
         c["value"]    = 100;
         global["foo"] = c;
 
@@ -152,7 +152,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
             return x * y;
         };
 
-        clazz c {clazz::CreateNew(get_view())};
+        clazz c {get_view()};
         c["func"]     = &func;
         global["foo"] = c;
 
@@ -162,7 +162,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
     }
     SUBCASE("create instance")
     {
-        clazz c {clazz::CreateNew(get_view())};
+        clazz c {get_view()};
         c["value"]     = 100;
         global["inst"] = c.create_instance();
 
@@ -1491,9 +1491,9 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
     }
     SUBCASE("delegate")
     {
-        auto tab              = table::CreateNew(get_view());
+        auto tab              = create_table();
         global["tab"]         = tab;
-        auto          metatab = table::CreateNew(get_view());
+        auto          metatab = create_table();
         std::function func    = [](table const&) {
             return "hello world";
         };

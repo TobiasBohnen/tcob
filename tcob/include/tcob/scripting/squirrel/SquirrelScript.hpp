@@ -38,6 +38,10 @@ public:
     auto get_root_table() -> table&;
     auto get_view() const -> vm_view;
 
+    auto create_array() const -> array;
+    auto create_table() const -> table;
+    auto create_class() const -> clazz;
+
     template <typename... Args>
     void open_libraries(Args... args);
 

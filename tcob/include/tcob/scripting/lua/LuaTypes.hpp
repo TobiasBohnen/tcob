@@ -50,7 +50,7 @@ private:
 class TCOB_API table : public ref {
 public:
     table();
-    table(state_view view, i32 idx);
+    explicit table(state_view view);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<table, Key>;
@@ -81,9 +81,11 @@ public:
     void dump(ostream& stream) const;
 
     auto static PushNew(state_view view) -> table;
-    auto static CreateNew(state_view view) -> table;
+    auto static Acquire(state_view view, i32 idx) -> table;
 
 private:
+    table(state_view view, i32 idx);
+
     void write_to_stream(ostream& stream, usize indent) const;
 
     template <typename T>

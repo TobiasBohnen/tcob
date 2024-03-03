@@ -110,6 +110,13 @@ auto operator==(ref const& left, ref const& right) -> bool
 
 table::table() = default;
 
+table::table(vm_view view)
+{
+    auto guard {view.create_stack_guard()};
+    view.new_table();
+    acquire(view, -1);
+}
+
 table::table(vm_view view, SQInteger idx)
 {
     acquire(view, idx);
@@ -146,10 +153,9 @@ auto table::PushNew(vm_view view) -> table
     return table {view, -1};
 }
 
-auto table::CreateNew(vm_view view) -> table
+auto table::Acquire(vm_view view, SQInteger idx) -> table
 {
-    auto guard {view.create_stack_guard()};
-    return PushNew(view);
+    return table {view, idx};
 }
 
 auto table::IsType(vm_view view, SQInteger idx) -> bool
@@ -167,6 +173,13 @@ auto detail::function_base::call_protected(SQInteger nargs, bool retValue) const
 ////////////////////////////////////////////////////////////
 
 array::array() = default;
+
+array::array(vm_view view)
+{
+    auto guard {view.create_stack_guard()};
+    view.new_array(0);
+    acquire(view, -1);
+}
 
 array::array(vm_view view, SQInteger idx)
 {
@@ -198,10 +211,9 @@ auto array::PushNew(vm_view view) -> array
     return array {view, -1};
 }
 
-auto array::CreateNew(vm_view view) -> array
+auto array::Acquire(vm_view view, SQInteger idx) -> array
 {
-    auto guard {view.create_stack_guard()};
-    return PushNew(view);
+    return array {view, idx};
 }
 
 auto array::IsType(vm_view view, SQInteger idx) -> bool
@@ -239,6 +251,13 @@ auto thread::get_thread() const -> vm_view
 
 clazz::clazz() = default;
 
+clazz::clazz(vm_view view)
+{
+    auto guard {view.create_stack_guard()};
+    view.new_class(false);
+    acquire(view, -1);
+}
+
 clazz::clazz(vm_view view, SQInteger idx)
 {
     acquire(view, idx);
@@ -260,10 +279,9 @@ auto clazz::PushNew(vm_view view) -> clazz
     return clazz {view, -1};
 }
 
-auto clazz::CreateNew(vm_view view) -> clazz
+auto clazz::Acquire(vm_view view, SQInteger idx) -> clazz
 {
-    auto guard {view.create_stack_guard()};
-    return PushNew(view);
+    return clazz {view, idx};
 }
 
 auto clazz::IsType(vm_view view, SQInteger idx) -> bool

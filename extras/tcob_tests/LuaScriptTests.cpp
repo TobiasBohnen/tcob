@@ -37,14 +37,14 @@ template <>
 struct converter<foo> {
     auto static IsType(state_view ls, i32 idx) -> bool
     {
-        table lt {ls, idx};
+        table lt {table::Acquire(ls, idx)};
         return lt.has("x") && lt.has("y") && lt.has("z");
     }
 
     auto static From(state_view ls, i32& idx, foo& value) -> bool
     {
         if (ls.is_table(idx)) {
-            table lt {ls, idx++};
+            table lt {table::Acquire(ls, idx++)};
 
             value.x = lt["x"];
             value.y = lt["y"];
@@ -56,7 +56,7 @@ struct converter<foo> {
     void static To(state_view ls, foo const& value)
     {
         ls.new_table();
-        table lt {ls, -1};
+        table lt {table::Acquire(ls, -1)};
 
         lt["x"] = value.x;
         lt["y"] = value.y;
@@ -143,7 +143,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Closures")
     {
         i32  x {102};
         auto l             = std::function([&](i32 i) {
-            table lt {table::CreateNew(get_view())};
+            table lt {get_view()};
             lt["value"] = x * i;
             return lt;
         });
@@ -1846,9 +1846,9 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
     }
     SUBCASE("metatable")
     {
-        auto tab          = table::CreateNew(get_view());
+        auto tab          = table {get_view()};
         global["table"]   = tab;
-        auto metatab      = table::CreateNew(get_view());
+        auto metatab      = table {get_view()};
         metatab["__name"] = "hello world";
         tab.set_metatable(metatab);
 

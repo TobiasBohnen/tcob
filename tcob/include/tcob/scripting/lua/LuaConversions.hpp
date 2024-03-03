@@ -862,7 +862,7 @@ struct converter<T> {
             } else {
                 // try metatable
                 view.get_metatable(userDataType);
-                table tab {view, -1};
+                table tab {table::Acquire(view, -1)};
                 view.pop(1);
                 if (tab.is_valid()) {
                     if (std::unordered_set<string> types; tab.try_get(types, "__types") && types.contains(TypeName)) {
@@ -984,7 +984,7 @@ struct converter<T> {
     auto static IsType(state_view view, i32 idx) -> bool
     {
         if (view.is_table(idx)) {
-            table tab {view, idx};
+            table tab {table::Acquire(view, idx)};
             T     t {};
             return T::Deserialize(t, tab);
         }
@@ -994,7 +994,7 @@ struct converter<T> {
 
     auto static From(state_view view, i32& idx, T& value) -> bool
     {
-        table tab {view, idx++};
+        table tab {table::Acquire(view, idx++)};
         return T::Deserialize(value, tab);
     }
 

@@ -820,7 +820,7 @@ struct converter<T> {
 
                 // try metatable
                 view.push_registrytable();
-                table retTable {view, -1};
+                table retTable {table::Acquire(view, -1)};
                 view.pop(1);
                 if (retTable.has(userDataType)) {
                     if (std::unordered_set<string> types; retTable[userDataType].try_get(types, "__types") && types.contains(TypeName)) {
@@ -852,7 +852,7 @@ struct converter<T> {
         view.set_typetag(-1, TypeName.data());
 
         view.push_registrytable();
-        table retTable {view, -1};
+        table retTable {table::Acquire(view, -1)};
         if (retTable.has(TypeName)) {
             retTable.get<table>(TypeName)->push_self();
         } else {
@@ -919,7 +919,7 @@ struct converter<T> {
     auto static IsType(vm_view view, SQInteger idx) -> bool
     {
         if (view.is_table(idx)) {
-            table tab {view, idx};
+            table tab {table::Acquire(view, idx)};
             T     t {};
             return T::Deserialize(t, tab);
         }
@@ -929,7 +929,7 @@ struct converter<T> {
 
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        table tab {view, idx++};
+        table tab {table::Acquire(view, idx++)};
         return T::Deserialize(value, tab);
     }
 

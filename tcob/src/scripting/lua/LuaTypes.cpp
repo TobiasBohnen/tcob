@@ -106,6 +106,13 @@ auto operator==(ref const& left, ref const& right) -> bool
 
 table::table() = default;
 
+table::table(state_view view)
+{
+    auto guard {view.create_stack_guard()};
+    view.new_table();
+    acquire(view, -1);
+}
+
 table::table(state_view view, i32 idx)
 {
     acquire(view, idx);
@@ -151,10 +158,9 @@ auto table::PushNew(state_view view) -> table
     return table {view, -1};
 }
 
-auto table::CreateNew(state_view view) -> table
+auto table::Acquire(state_view view, i32 idx) -> table
 {
-    auto guard {view.create_stack_guard()};
-    return PushNew(view);
+    return table {view, idx};
 }
 
 void table::dump(ostream& stream) const

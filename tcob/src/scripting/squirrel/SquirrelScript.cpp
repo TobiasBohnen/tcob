@@ -97,6 +97,21 @@ auto script::get_view() const -> vm_view
     return _vm;
 }
 
+auto script::create_array() const -> array
+{
+    return array {get_view()};
+}
+
+auto script::create_table() const -> table
+{
+    return table {get_view()};
+}
+
+auto script::create_class() const -> clazz
+{
+    return clazz {get_view()};
+}
+
 auto script::call_buffer(string_view script, string const& name, bool retValue) const -> error_code
 {
     if (_vm.compile_buffer(script, name) == error_code::Ok) {

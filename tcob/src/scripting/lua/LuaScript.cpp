@@ -57,6 +57,11 @@ auto script::get_GC() const -> gc
     return gc {_view};
 }
 
+auto script::create_table() const -> table
+{
+    return table {get_view()};
+}
+
 auto script::call_buffer(string_view script, string const& name) const -> error_code
 {
     i32 const err {_view.load_buffer(script, name)};
@@ -124,7 +129,7 @@ void static hook(lua_State* l, lua_Debug* ar)
     auto const guard {ls.create_stack_guard()};
 
     ls.get_metatable("tcob");
-    table lt {ls, -1};
+    table lt {table::Acquire(ls, -1)};
     if (lt.has("hook")) {
         auto* hook {reinterpret_cast<std::function<void(debug const&)>*>(lt["hook"].as<void*>())};
         lua_getinfo(l, "nSlur", ar);

@@ -49,7 +49,7 @@ private:
 class TCOB_API table : public ref {
 public:
     table();
-    table(vm_view view, SQInteger idx);
+    explicit table(vm_view view);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<table, Key>;
@@ -77,11 +77,12 @@ public:
     auto get_keys() const -> std::vector<T>;
 
     auto static PushNew(vm_view view) -> table;
-    auto static CreateNew(vm_view view) -> table;
-
+    auto static Acquire(vm_view view, SQInteger idx) -> table;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
+    table(vm_view view, SQInteger idx);
+
     template <typename T>
     auto get(vm_view view, auto&& key, auto&&... keys) const -> result<T>;
 
@@ -103,7 +104,7 @@ class TCOB_API stack_base : public table {
 class TCOB_API array : public ref {
 public:
     array();
-    array(vm_view view, SQInteger idx);
+    explicit array(vm_view view);
 
     auto operator[](SQInteger index) -> proxy<array, SQInteger>;
     auto operator[](SQInteger index) const -> proxy<array const, SQInteger>;
@@ -122,9 +123,11 @@ public:
     void add(T const& addValue);
 
     auto static PushNew(vm_view view) -> array;
-    auto static CreateNew(vm_view view) -> array;
-
+    auto static Acquire(vm_view view, SQInteger idx) -> array;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
+
+private:
+    array(vm_view view, SQInteger idx);
 };
 
 ////////////////////////////////////////////////////////////
@@ -168,7 +171,7 @@ public:
 class TCOB_API clazz : public detail::type_ref {
 public:
     clazz();
-    clazz(vm_view view, SQInteger idx);
+    explicit clazz(vm_view view);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<clazz, Key>;
@@ -181,9 +184,11 @@ public:
     auto create_instance() const -> instance;
 
     auto static PushNew(vm_view view) -> clazz;
-    auto static CreateNew(vm_view view) -> clazz;
-
+    auto static Acquire(vm_view view, SQInteger idx) -> clazz;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
+
+private:
+    clazz(vm_view view, SQInteger idx);
 };
 
 ////////////////////////////////////////////////////////////

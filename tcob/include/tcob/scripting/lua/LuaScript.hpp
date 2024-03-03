@@ -79,6 +79,8 @@ public:
     auto get_view() const -> state_view;
     auto get_GC() const -> gc;
 
+    auto create_table() const -> table;
+
     template <typename... Args>
     void open_libraries(Args... args);
 

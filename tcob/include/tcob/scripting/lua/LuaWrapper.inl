@@ -81,7 +81,7 @@ inline void wrapper<T>::impl_register_base()
 {
     static_assert(std::is_base_of_v<S, T>);
     _view.get_metatable(typeid(T).name());
-    table tab {_view, -1};
+    table tab {table::Acquire(_view, -1)};
 
     std::unordered_set<string> types;
     tab.try_get(types, "__types");
