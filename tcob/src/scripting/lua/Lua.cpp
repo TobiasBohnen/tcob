@@ -41,6 +41,11 @@ auto debug::get_local(i32 n) const -> string
     return _view->get_local(_ar, n);
 }
 
+auto debug::set_local(i32 n) const -> string
+{
+    return _view->set_local(_ar, n);
+}
+
 ////////////////////////////////////////////////////////////
 
 stack_guard::stack_guard(lua_State* l)
@@ -187,6 +192,12 @@ auto state_view::get_top() const -> i32
 auto state_view::get_local(lua_Debug* ar, i32 n) const -> string
 {
     auto const* r {lua_getlocal(_state, ar, n)};
+    return r == nullptr ? "" : r;
+}
+
+auto state_view::set_local(lua_Debug* ar, i32 n) const -> string
+{
+    auto const* r {lua_setlocal(_state, ar, n)};
     return r == nullptr ? "" : r;
 }
 

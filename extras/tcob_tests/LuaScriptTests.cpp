@@ -2061,7 +2061,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.TypeCoercion")
         REQUIRE(res);
         REQUIRE(global.is<i32>("a"));
         REQUIRE_FALSE(global.is<std::string>("a"));
-        std::string val = global["a"].as<std::string>();
+        auto val = global["a"].as<std::string>();
         REQUIRE(val == "100");
     }
     SUBCASE("string from number")
@@ -2070,7 +2070,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.TypeCoercion")
         REQUIRE(res);
         REQUIRE(global.is<f32>("a"));
         REQUIRE_FALSE(global.is<std::string>("a"));
-        std::string val = global["a"].as<std::string>();
+        auto val = global["a"].as<std::string>();
         REQUIRE(val == "100.5");
     }
     SUBCASE("number from string")

@@ -119,6 +119,7 @@ public:
     string      ShortSource;               /* (S) */
 
     auto get_local(i32 n) const -> string;
+    auto set_local(i32 n) const -> string;
 
 private:
     state_view* _view;
@@ -180,6 +181,7 @@ public:
     auto get_top() const -> i32;
 
     auto get_local(lua_Debug* ar, i32 n) const -> string;
+    auto set_local(lua_Debug* ar, i32 n) const -> string;
 
     auto check_stack(i32 size) const -> bool;
 
