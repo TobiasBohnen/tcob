@@ -35,12 +35,10 @@ inline auto table::get(auto&&... keys) const -> result<T>
 template <ConvertibleFrom T>
 inline auto table::try_get(T& value, auto&& key) const -> bool
 {
-    if (is<T>(key)) {
-        auto const res {get<T>(key)};
-        if (res.has_value()) {
-            value = res.value();
-            return true;
-        }
+    auto const res {get<T>(key)};
+    if (res.has_value()) {
+        value = res.value();
+        return true;
     }
 
     return false;
@@ -251,12 +249,10 @@ namespace detail {
     template <ConvertibleFrom T>
     inline auto type_ref::try_get(T& value, auto&& key) const -> bool
     {
-        if (is<T>(key)) {
-            auto const res {get<T>(key)};
-            if (res.has_value()) {
-                value = res.value();
-                return true;
-            }
+        auto const res {get<T>(key)};
+        if (res.has_value()) {
+            value = res.value();
+            return true;
         }
 
         return false;

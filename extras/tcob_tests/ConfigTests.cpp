@@ -336,13 +336,14 @@ TEST_CASE("Data.Ini.Array")
             array  = ["a",1.2,3,true,[1,2,3],{a=1,b=2,c=3}]
         )"_ini;
 
-        REQUIRE(t["array"].as<array>().get_type(0) == type::String);
-        REQUIRE(t["array"].as<array>().get_type(1) == type::Float);
-        REQUIRE(t["array"].as<array>().get_type(2) == type::Integer);
-        REQUIRE(t["array"].as<array>().get_type(3) == type::Bool);
-        REQUIRE(t["array"].as<array>().get_type(4) == type::Array);
-        REQUIRE(t["array"].as<array>().get_type(5) == type::Object);
-        REQUIRE(t["array"].as<array>().get_type(6) == type::Null);
+        auto arr = t["array"].as<array>();
+        REQUIRE(arr.get_type(0) == type::String);
+        REQUIRE(arr.get_type(1) == type::Float);
+        REQUIRE(arr.get_type(2) == type::Integer);
+        REQUIRE(arr.get_type(3) == type::Bool);
+        REQUIRE(arr.get_type(4) == type::Array);
+        REQUIRE(arr.get_type(5) == type::Object);
+        REQUIRE(arr.get_type(6) == type::Null);
     }
 }
 

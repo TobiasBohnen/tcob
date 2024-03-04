@@ -2033,7 +2033,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.TcobTypes")
         auto res = run(
             "rectF = {x=2.7, y=3.1, width='hello', height=true} "
             "color = { r = 'red', g = 'green', b = 'blue', a = 'aqua' } "
-            "pointI = { x = '1', y = '400' } ");
+            "pointI = { x = 1.5, y = 400.5 } ");
         REQUIRE(res);
 
         auto rectF = global.get<rect_f>("rectF");
@@ -2042,7 +2042,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.TcobTypes")
         auto col = global.get<color>("color");
         REQUIRE(col.error() == error_code::TypeMismatch);
 
-        auto pointI = global.get<point_f>("pointI");
+        auto pointI = global.get<point_i>("pointI");
         REQUIRE(pointI.error() == error_code::TypeMismatch);
     }
     SUBCASE("api: color_stop")
