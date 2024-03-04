@@ -35,7 +35,7 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.MapWrapper")
         global["wrap"]                 = &map;
         auto res                       = run("b = wrap.b");
         REQUIRE(res);
-        REQUIRE((i32)global["b"] == map["b"]);
+        REQUIRE(global["b"].as<i32>() == map["b"]);
     }
 
     create_wrapper<std::unordered_map<std::string, i32>>("unmap");
@@ -183,8 +183,8 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.TypeWrapper")
     SUBCASE("pointer from lua")
     {
         TestScriptClass t;
-        global["wrap"]      = &t;
-        TestScriptClass* tp = global["wrap"];
+        global["wrap"] = &t;
+        auto* tp       = global["wrap"].as<TestScriptClass*>();
         REQUIRE(tp == &t);
     }
     SUBCASE("properties")
@@ -234,8 +234,8 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.TypeWrapper")
             auto res = run("function foo(x) return x.value end ");
             REQUIRE(!res.has_error());
 
-            lua::function<i32> func = global["foo"];
-            i32                x    = func(&t);
+            auto func = global["foo"].as<lua::function<i32>>();
+            i32  x    = func(&t);
             REQUIRE(x == 350);
         }
         {
@@ -678,8 +678,8 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.UnknownHandler")
     {
         auto res = run("function foo(p) p.unhandled_newindex=400 end");
         REQUIRE(!res.has_error());
-        lua::function<void> f = get_global_table()["foo"];
-        foo                 test {};
+        auto f = global["foo"].as<lua::function<void>>();
+        foo  test {};
         REQUIRE(f.call(&test).has_error());
         REQUIRE_FALSE(test.z == 400);
     }
@@ -687,7 +687,7 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.UnknownHandler")
     {
         auto res = run("function foo(p) p.z=400 end");
         REQUIRE(!res.has_error());
-        lua::function<void> f = get_global_table()["foo"];
+        auto f = global["foo"].as<lua::function<void>>();
 
         wrap->UnknownSet.connect([](auto&& ev) {
             if (ev.Name == "z") {
@@ -705,14 +705,14 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.UnknownHandler")
         auto res = run("function foo(p) return p.unhandled_index end");
         REQUIRE(!res.has_error());
         foo        test {};
-        auto const funcres = get_global_table()["foo"].as<lua::function<int>>().call(&test);
+        auto const funcres = global["foo"].as<lua::function<int>>().call(&test);
         REQUIRE(funcres.has_error());
     }
     SUBCASE("handled getter (index)")
     {
         auto res = run("function foo(p) return p.x end");
         REQUIRE(!res.has_error());
-        lua::function<int> f = get_global_table()["foo"];
+        auto f = global["foo"].as<lua::function<int>>();
 
         wrap->UnknownGet.connect([](auto&& ev) {
             if (ev.Name == "x") {
@@ -732,14 +732,14 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.UnknownHandler")
         auto res = run("function foo(p) p.unhandled_index() end");
         REQUIRE(!res.has_error());
         foo        test {};
-        auto const funcres = get_global_table()["foo"].as<lua::function<int>>().call(&test);
+        auto const funcres = global["foo"].as<lua::function<int>>().call(&test);
         REQUIRE(funcres.has_error());
     }
     SUBCASE("handled function (index)")
     {
         auto res = run("function foo(p) return p.y() end");
         REQUIRE(!res.has_error());
-        lua::function<int> f = get_global_table()["foo"];
+        auto f = global["foo"].as<lua::function<int>>();
 
         auto yfunc = lua::make_shared_closure(std::function([](foo* fx) { return fx->y(); }));
         wrap->UnknownGet.connect([yfunc](auto&& ev) {

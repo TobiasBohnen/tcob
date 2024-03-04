@@ -20,25 +20,25 @@ auto ini_raster_font_loader::load(gfx::raster_font& font, path const& file, stri
         return std::nullopt;
     }
 
-    size_i const fontTextureSize {config["info"]["texture_size"]};
+    size_i const fontTextureSize {config["info"]["texture_size"].as<size_i>()};
 
     // glyphs
     for (auto& [_, s] : config["glyphs"].as<object>()) {
         auto       g {s.get<object>().value()};
-        gfx::glyph glyph {.Size      = g["size"],
-                          .Offset    = g["offset"],
-                          .AdvanceX  = g["advance_x"],
-                          .TexRegion = g["tex_region"]};
+        gfx::glyph glyph {.Size      = g["size"].as<size_i>(),
+                          .Offset    = g["offset"].as<point_f>(),
+                          .AdvanceX  = g["advance_x"].as<f32>(),
+                          .TexRegion = g["tex_region"].as<gfx::texture_region>()};
         glyph.TexRegion.UVRect.X /= fontTextureSize.Width;
         glyph.TexRegion.UVRect.Width /= fontTextureSize.Width;
         glyph.TexRegion.UVRect.Y /= fontTextureSize.Height;
         glyph.TexRegion.UVRect.Height /= fontTextureSize.Height;
-        font.add_glyph(g["id"], glyph);
+        font.add_glyph(g["id"].as<u32>(), glyph);
     }
 
     for (auto& [_, s] : config["kerning_pairs"].as<object>()) {
         auto k {s.get<object>().value()};
-        font.add_kerning_pair(k["first"], k["second"], k["amount"]);
+        font.add_kerning_pair(k["first"].as<u32>(), k["second"].as<u32>(), k["amount"].as<i16>());
     }
 
     for (auto& [_, s] : config["pages"].as<object>()) {
@@ -49,9 +49,9 @@ auto ini_raster_font_loader::load(gfx::raster_font& font, path const& file, stri
         }
     }
 
-    return gfx::font::info {.Ascender   = config["info"]["ascender"],
-                            .Descender  = config["info"]["ascender"],
-                            .LineHeight = config["info"]["line_height"]};
+    return gfx::font::info {.Ascender   = config["info"]["ascender"].as<f32>(),
+                            .Descender  = config["info"]["ascender"].as<f32>(),
+                            .LineHeight = config["info"]["line_height"].as<f32>()};
 }
 
 ////////////////////////////////////////////////////////////

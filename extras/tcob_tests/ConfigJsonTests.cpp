@@ -133,7 +133,7 @@ TEST_CASE("Data.Json.Literals")
         auto object = R"( { "x": 100 } )"_json;
 
         REQUIRE(object.has("x"));
-        REQUIRE((i32)object["x"] == 100);
+        REQUIRE(object["x"].as<i32>() == 100);
     }
 }
 
@@ -228,16 +228,16 @@ TEST_CASE("Data.Json.TcobTypes")
     obj.parse(json, EXT);
 
     REQUIRE(obj.is<point_i>("point"));
-    REQUIRE((point_i)obj["point"] == point_i {100, 350});
+    REQUIRE(obj["point"].as<point_i>() == point_i {100, 350});
 
     REQUIRE(obj.is<color>("color"));
-    REQUIRE((color)obj["color"] == color {15, 30, 12, 0});
+    REQUIRE(obj["color"].as<color>() == color {15, 30, 12, 0});
 
     REQUIRE(obj.is<size_i>("size"));
-    REQUIRE((size_i)obj["size"] == size_i {300, 450});
+    REQUIRE(obj["size"].as<size_i>() == size_i {300, 450});
 
     REQUIRE(obj.is<rect_f>("rect"));
-    REQUIRE((rect_f)obj["rect"] == rect_f {4.5f, 2.5f, 30.1f, 45.01f});
+    REQUIRE(obj["rect"].as<rect_f>() == rect_f {4.5f, 2.5f, 30.1f, 45.01f});
 }
 
 TEST_CASE("Data.Json.TestSuite")

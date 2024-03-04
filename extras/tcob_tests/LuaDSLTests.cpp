@@ -116,12 +116,12 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Form")
     auto res = run(script);
     REQUIRE(res);
 
-    table formContent = global["form1"];
-    table panel1      = formContent[1];
+    auto formContent = global["form1"].as<table>();
+    auto panel1      = formContent[1].as<table>();
     REQUIRE(panel1["type"].as<string>() == "panel");
     REQUIRE(panel1["name"].as<string>() == "panel1");
     REQUIRE(panel1["bounds"].as<rect_f>() == rect_f {0, 0, 200, 200});
-    table layout1 = panel1["layout"];
+    auto layout1 = panel1["layout"].as<table>();
     REQUIRE(layout1["type"].as<string>() == "grid_layout");
     REQUIRE(layout1["widgets"][1]["type"].as<string>() == "button");
     REQUIRE(layout1["widgets"][1]["name"].as<string>() == "button1");
@@ -184,13 +184,13 @@ TEST_CASE_FIXTURE(LuaDSLTests, "Script.LuaDSL.Style")
     auto res = run(script);
     REQUIRE(res);
 
-    table stylesCntent = global["styles"];
-    table buttonStyle  = stylesCntent[1];
+    auto stylesCntent = global["styles"].as<table>();
+    auto buttonStyle  = stylesCntent[1].as<table>();
     REQUIRE(buttonStyle["class"].as<string>() == "button");
     REQUIRE(buttonStyle["type"].as<string>() == "button");
     REQUIRE(buttonStyle["background"].as<string>() == "chartreuse");
     REQUIRE(buttonStyle["border"]["type"].as<string>() == "solid");
-    table buttonHoverStyle = stylesCntent[2];
+    auto buttonHoverStyle = stylesCntent[2].as<table>();
     REQUIRE(buttonHoverStyle["class"].as<string>() == "button:hover");
     REQUIRE(buttonHoverStyle["type"].as<string>() == "button");
     REQUIRE(buttonHoverStyle["background"].as<string>() == "darkkhaki");

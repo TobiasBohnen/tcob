@@ -233,14 +233,14 @@ TEST_CASE("Data.Ini.Array")
         object t;
         REQUIRE(t.parse(iniString, EXT));
         REQUIRE(t["section1"]["valueArray"].is<array>());
-        array arr {t["section1"]["valueArray"]};
+        array arr {t["section1"]["valueArray"].as<array>()};
         REQUIRE(arr.get_size() == 3);
         REQUIRE(arr[0].is<i64>());
         REQUIRE(arr[1].is<std::string>());
         REQUIRE(arr[2].is<bool>());
-        REQUIRE((f64)arr[0] == 1);
+        REQUIRE(arr[0].as<f64>() == 1);
         REQUIRE(arr[1].as<std::string>() == "a");
-        REQUIRE((bool)arr[2] == true);
+        REQUIRE(arr[2].as<bool>() == true);
     }
 
     SUBCASE("modify array")
@@ -249,20 +249,20 @@ TEST_CASE("Data.Ini.Array")
         REQUIRE(t.parse(iniString, EXT));
         REQUIRE(t["section1"]["valueArray"].is<array>());
 
-        array arr {t["section1"]["valueArray"]};
+        array arr {t["section1"]["valueArray"].as<array>()};
         REQUIRE(arr.get_size() == 3);
 
-        array arr1 {t["section1"]["valueArray"]};
+        array arr1 {t["section1"]["valueArray"].as<array>()};
         arr[0] = 100;
-        REQUIRE((f64)arr1[0] == 100);
+        REQUIRE(arr1[0].as<f64>() == 100);
         arr[1] = false;
-        REQUIRE((bool)arr1[1] == false);
+        REQUIRE(arr1[1].as<bool>() == false);
         arr[2] = "testString";
         REQUIRE(arr1[2].as<std::string>() == "testString");
 
-        array arr2 {t["section1"]["valueArray"]};
-        REQUIRE((f64)arr2[0] == 100);
-        REQUIRE((bool)arr2[1] == false);
+        array arr2 {t["section1"]["valueArray"].as<array>()};
+        REQUIRE(arr2[0].as<f64>() == 100);
+        REQUIRE(arr2[1].as<bool>() == false);
         REQUIRE(arr2[2].as<std::string>() == "testString");
     }
 
@@ -271,7 +271,7 @@ TEST_CASE("Data.Ini.Array")
         array a;
         a[100] = 1;
         REQUIRE(a.get_size() == 101);
-        REQUIRE((i32)a[100] == 1);
+        REQUIRE(a[100].as<i32>() == 1);
     }
 
     SUBCASE("from vector")
@@ -281,7 +281,7 @@ TEST_CASE("Data.Ini.Array")
             array            testArray {std::span<i32 const> {vec}};
             REQUIRE(testArray.get_size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
-                REQUIRE((i32)testArray[static_cast<isize>(i)] == vec[i]);
+                REQUIRE(testArray[static_cast<isize>(i)].as<i32>() == vec[i]);
             }
         }
         {
@@ -289,7 +289,7 @@ TEST_CASE("Data.Ini.Array")
             array            testArray {std::span<f64 const> {vec}};
             REQUIRE(testArray.get_size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
-                REQUIRE((f64)testArray[static_cast<isize>(i)] == vec[i]);
+                REQUIRE(testArray[static_cast<isize>(i)].as<f64>() == vec[i]);
             }
         }
     }
@@ -301,7 +301,7 @@ TEST_CASE("Data.Ini.Array")
             array            testArray {1, 2, 3, 4, 5, 6};
             REQUIRE(testArray.get_size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
-                REQUIRE((i32)testArray[static_cast<isize>(i)] == vec[i]);
+                REQUIRE(testArray[static_cast<isize>(i)].as<i32>() == vec[i]);
             }
         }
         {
@@ -309,7 +309,7 @@ TEST_CASE("Data.Ini.Array")
             array            testArray {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
             REQUIRE(testArray.get_size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
-                REQUIRE((f64)testArray[static_cast<isize>(i)] == vec[i]);
+                REQUIRE(testArray[static_cast<isize>(i)].as<f64>() == vec[i]);
             }
         }
     }
@@ -388,16 +388,16 @@ TEST_CASE("Data.Ini.Multiline")
     REQUIRE(t.parse(iniString, EXT));
 
     REQUIRE(t["section1"]["multiLineArray"].is<array>());
-    REQUIRE((i32)t["section1"]["multiLineArray"][0] == 1);
-    REQUIRE((i32)t["section1"]["multiLineArray"][1] == 3);
-    REQUIRE((i32)t["section1"]["multiLineArray"][2] == 5);
-    REQUIRE((i32)t["section1"]["multiLineArray"][3] == 7);
+    REQUIRE(t["section1"]["multiLineArray"][0].as<i32>() == 1);
+    REQUIRE(t["section1"]["multiLineArray"][1].as<i32>() == 3);
+    REQUIRE(t["section1"]["multiLineArray"][2].as<i32>() == 5);
+    REQUIRE(t["section1"]["multiLineArray"][3].as<i32>() == 7);
 
     REQUIRE(t["section1"]["multiLineSection"].is<object>());
-    REQUIRE((i32)t["section1"]["multiLineSection"]["a"] == 1);
-    REQUIRE((i32)t["section1"]["multiLineSection"]["b"] == 3);
-    REQUIRE((i32)t["section1"]["multiLineSection"]["c"] == 5);
-    REQUIRE((i32)t["section1"]["multiLineSection"]["d"] == 7);
+    REQUIRE(t["section1"]["multiLineSection"]["a"].as<i32>() == 1);
+    REQUIRE(t["section1"]["multiLineSection"]["b"].as<i32>() == 3);
+    REQUIRE(t["section1"]["multiLineSection"]["c"].as<i32>() == 5);
+    REQUIRE(t["section1"]["multiLineSection"]["d"].as<i32>() == 7);
 
     REQUIRE(t["section1"]["multiLineString"].is<std::string>());
     REQUIRE(t["section1"]["multiLineString"].as<std::string>() == "abc\ndef\nghi");
@@ -437,40 +437,40 @@ TEST_CASE("Data.Ini.Sections")
         REQUIRE(t.parse(iniString, EXT));
 
         REQUIRE(t["section1"]["id153"].is<object>());
-        object id153 {t["section1"]["id153"]};
-        REQUIRE((size_u)id153["size"] == size_u {16, 23});
-        REQUIRE((point_f)id153["offset"] == point_f {1, 0});
-        REQUIRE((f32)id153["advance_x"] == 18.f);
-        REQUIRE((rect_f)id153["tex_region"] == rect_f {0, 0.09375f, 0.0625f, 0.0898438f});
-        REQUIRE((i32)id153["tex_region"]["level"] == 0);
+        object id153 {t["section1"]["id153"].as<object>()};
+        REQUIRE(id153["size"].as<size_u>() == size_u {16, 23});
+        REQUIRE(id153["offset"].as<point_f>() == point_f {1, 0});
+        REQUIRE(id153["advance_x"].as<f32>() == 18.f);
+        REQUIRE(id153["tex_region"].as<rect_f>() == rect_f {0, 0.09375f, 0.0625f, 0.0898438f});
+        REQUIRE(id153["tex_region"]["level"].as<i32>() == 0);
 
         REQUIRE(t["section1"]["dotSection"].is<object>());
-        REQUIRE((i32)t["section1"]["dotSection"]["a"] == 100);
-        REQUIRE((i32)t["section1"]["dotSection"]["b"] == 42);
-        REQUIRE((i32)t["section1"]["dotSection"]["c"]["a"] == 420);
-        REQUIRE((i32)t["section1"]["dotSection"]["c"]["d"] == 69);
-        REQUIRE((i32)t["section1"]["dotSection"]["d"][0] == 1);
-        REQUIRE((i32)t["section1"]["dotSection"]["d"][1] == 2);
-        REQUIRE((i32)t["section1"]["dotSection"]["d"][2] == 3);
-        REQUIRE((i32)t["section1"]["dotSection"]["e"]["a"] == 1);
-        REQUIRE((i32)t["section1"]["dotSection"]["e"]["b"] == 2);
-        REQUIRE((i32)t["section1"]["dotSection"]["e"]["c"] == 3);
-        REQUIRE((i32)t["section1"]["dotSection"]["x"]["a"]["x"] == 100);
-        REQUIRE((i32)t["section1"]["dotSection"]["x"]["a"]["y"] == 300);
+        REQUIRE(t["section1"]["dotSection"]["a"].as<i32>() == 100);
+        REQUIRE(t["section1"]["dotSection"]["b"].as<i32>() == 42);
+        REQUIRE(t["section1"]["dotSection"]["c"]["a"].as<i32>() == 420);
+        REQUIRE(t["section1"]["dotSection"]["c"]["d"].as<i32>() == 69);
+        REQUIRE(t["section1"]["dotSection"]["d"][0].as<i32>() == 1);
+        REQUIRE(t["section1"]["dotSection"]["d"][1].as<i32>() == 2);
+        REQUIRE(t["section1"]["dotSection"]["d"][2].as<i32>() == 3);
+        REQUIRE(t["section1"]["dotSection"]["e"]["a"].as<i32>() == 1);
+        REQUIRE(t["section1"]["dotSection"]["e"]["b"].as<i32>() == 2);
+        REQUIRE(t["section1"]["dotSection"]["e"]["c"].as<i32>() == 3);
+        REQUIRE(t["section1"]["dotSection"]["x"]["a"]["x"].as<i32>() == 100);
+        REQUIRE(t["section1"]["dotSection"]["x"]["a"]["y"].as<i32>() == 300);
 
-        REQUIRE((i32)t["section1"]["subsection"]["a"] == 100);
-        REQUIRE((i32)t["section1"]["subsection"]["b"] == 500);
-        REQUIRE((i32)t["section1"]["subsection"]["subsection"]["x"] == 300);
-        REQUIRE((i32)t["section1"]["subsection"]["subsection"]["y"] == 600);
+        REQUIRE(t["section1"]["subsection"]["a"].as<i32>() == 100);
+        REQUIRE(t["section1"]["subsection"]["b"].as<i32>() == 500);
+        REQUIRE(t["section1"]["subsection"]["subsection"]["x"].as<i32>() == 300);
+        REQUIRE(t["section1"]["subsection"]["subsection"]["y"].as<i32>() == 600);
 
         REQUIRE(t["section1"]["valueSection"].is<object>());
-        object sec0 {t["section1"]["valueSection"]};
+        object sec0 {t["section1"]["valueSection"].as<object>()};
         REQUIRE(sec0["a"].is<i64>());
         REQUIRE(sec0["b"].is<std::string>());
         REQUIRE(sec0["xyz"].is<bool>());
-        REQUIRE((f64)sec0["a"] == 1);
+        REQUIRE(sec0["a"].as<f64>() == 1);
         REQUIRE(sec0["b"].as<std::string>() == "a");
-        REQUIRE((bool)sec0["xyz"] == true);
+        REQUIRE(sec0["xyz"].as<bool>() == true);
     }
 
     SUBCASE("inline section")
@@ -483,7 +483,7 @@ TEST_CASE("Data.Ini.Sections")
             object t;
             REQUIRE(t.parse(iniString, EXT));
             REQUIRE(t["section1"]["a"].is<object>());
-            REQUIRE((i32)t["section1"]["a"]["b"] == 100);
+            REQUIRE(t["section1"]["a"]["b"].as<i32>() == 100);
         }
         {
             std::string const iniString =
@@ -495,7 +495,7 @@ TEST_CASE("Data.Ini.Sections")
             object t;
             REQUIRE(t.parse(iniString, EXT));
             REQUIRE(t["section1"]["c"].is<object>());
-            REQUIRE((i32)t["section1"]["c"]["a"] == 100);
+            REQUIRE(t["section1"]["c"]["a"].as<i32>() == 100);
         }
     }
 
@@ -543,19 +543,19 @@ TEST_CASE("Data.Ini.Sections")
         t["section1"]["valueSection"] = object {};
         REQUIRE(t["section1"]["valueSection"].is<object>());
 
-        object obj {t["section1"]["valueSection"]};
+        object obj {t["section1"]["valueSection"].as<object>()};
 
-        object obj1 {t["section1"]["valueSection"]};
+        object obj1 {t["section1"]["valueSection"].as<object>()};
         obj["a"] = 100;
-        REQUIRE((f64)obj1["a"] == 100);
+        REQUIRE(obj1["a"].as<f64>() == 100);
         obj["b"] = false;
-        REQUIRE((bool)obj1["b"] == false);
+        REQUIRE(obj1["b"].as<bool>() == false);
         obj["xyz"] = "testString";
         REQUIRE(obj1["xyz"].as<std::string>() == "testString");
 
-        object obj2 {t["section1"]["valueSection"]};
-        REQUIRE((f64)obj2["a"] == 100);
-        REQUIRE((bool)obj2["b"] == false);
+        object obj2 {t["section1"]["valueSection"].as<object>()};
+        REQUIRE(obj2["a"].as<f64>() == 100);
+        REQUIRE(obj2["b"].as<bool>() == false);
         REQUIRE(obj2["xyz"].as<std::string>() == "testString");
     }
 
@@ -570,10 +570,10 @@ TEST_CASE("Data.Ini.Sections")
         t.set("section1", obj);
 
         REQUIRE(t.has("section1"));
-        object sec2 {t["section1"]};
-        REQUIRE((f64)sec2["a"] == 100);
+        object sec2 {t["section1"].as<object>()};
+        REQUIRE(sec2["a"].as<f64>() == 100);
         REQUIRE(sec2["xyz"].as<std::string>() == "testString");
-        REQUIRE((bool)sec2["b"] == false);
+        REQUIRE(sec2["b"].as<bool>() == false);
 
         t.set("section1", nullptr);
         REQUIRE_FALSE(t.has("section1"));
@@ -594,11 +594,11 @@ TEST_CASE("Data.Ini.Sections")
 
             s0.merge(s1, true);
 
-            REQUIRE((int)s0["section1"]["a"] == 150);
-            REQUIRE((int)s0["section1"]["b"] == 200);
-            REQUIRE((int)s0["section1"]["c"] == 400);
-            REQUIRE((int)s0["section2"]["a"] == 300);
-            REQUIRE((int)s0["section3"]["a"] == 500);
+            REQUIRE(s0["section1"]["a"].as<i32>() == 150);
+            REQUIRE(s0["section1"]["b"].as<i32>() == 200);
+            REQUIRE(s0["section1"]["c"].as<i32>() == 400);
+            REQUIRE(s0["section2"]["a"].as<i32>() == 300);
+            REQUIRE(s0["section3"]["a"].as<i32>() == 500);
         }
 
         {
@@ -614,11 +614,11 @@ TEST_CASE("Data.Ini.Sections")
 
             s0.merge(s1, false);
 
-            REQUIRE((int)s0["section1"]["a"] == 100);
-            REQUIRE((int)s0["section1"]["b"] == 200);
-            REQUIRE((int)s0["section1"]["c"] == 400);
-            REQUIRE((int)s0["section2"]["a"] == 300);
-            REQUIRE((int)s0["section3"]["a"] == 500);
+            REQUIRE(s0["section1"]["a"].as<i32>() == 100);
+            REQUIRE(s0["section1"]["b"].as<i32>() == 200);
+            REQUIRE(s0["section1"]["c"].as<i32>() == 400);
+            REQUIRE(s0["section2"]["a"].as<i32>() == 300);
+            REQUIRE(s0["section3"]["a"].as<i32>() == 500);
         }
         {
             std::string const section0Str =
@@ -750,16 +750,16 @@ TEST_CASE("Data.Ini.TcobTypes")
     obj.parse(iniString, EXT);
 
     REQUIRE(obj.is<point_i>("point"));
-    REQUIRE((point_i)obj["point"] == point_i {100, 350});
+    REQUIRE(obj["point"].as<point_i>() == point_i {100, 350});
 
     REQUIRE(obj.is<color>("color"));
-    REQUIRE((color)obj["color"] == color {15, 30, 12, 0});
+    REQUIRE(obj["color"].as<color>() == color {15, 30, 12, 0});
 
     REQUIRE(obj.is<size_i>("size"));
-    REQUIRE((size_i)obj["size"] == size_i {300, 450});
+    REQUIRE(obj["size"].as<size_i>() == size_i {300, 450});
 
     REQUIRE(obj.is<rect_f>("rect"));
-    REQUIRE((rect_f)obj["rect"] == rect_f {4.5f, 2.5f, 30.1f, 45.01f});
+    REQUIRE(obj["rect"].as<rect_f>() == rect_f {4.5f, 2.5f, 30.1f, 45.01f});
 }
 
 TEST_CASE("Data.Ini.STLTypes")

@@ -26,9 +26,9 @@ auto static testfuncfloat2(tcob::scripting::result<f32> f, tcob::scripting::resu
 }
 
 struct foo {
-    int x = 0;
-    int y = 0;
-    int z = 0;
+    i32 x = 0;
+    i32 y = 0;
+    i32 z = 0;
 };
 
 namespace tcob::scripting::squirrel {
@@ -45,9 +45,9 @@ struct converter<foo> {
         if (ls.is_table(idx)) {
             table lt {table::Acquire(ls, idx++)};
 
-            value.x = lt["x"];
-            value.y = lt["y"];
-            value.z = lt["z"];
+            value.x = lt["x"].as<i32>();
+            value.y = lt["y"].as<i32>();
+            value.z = lt["z"].as<i32>();
         }
         return true;
     }
@@ -80,43 +80,43 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Array")
     {
         array arr = *run<array>("return [4,5,2,1] ");
         REQUIRE(arr.get_size() == 4);
-        i32 x = arr[0];
+        i32 x = arr[0].as<i32>();
         REQUIRE(x == 4);
-        x = arr[1];
+        x = arr[1].as<i32>();
         REQUIRE(x == 5);
-        x = arr[2];
+        x = arr[2].as<i32>();
         REQUIRE(x == 2);
-        x = arr[3];
+        x = arr[3].as<i32>();
         REQUIRE(x == 1);
     }
     {
         auto res = run("arr <- [4,5,2,1] ");
         REQUIRE(res);
         {
-            array arr1 = global["arr"];
+            array arr1 = global["arr"].as<array>();
             arr1[1]    = 100;
-            REQUIRE((i32)arr1[1] == 100);
+            REQUIRE(arr1[1].as<i32>() == 100);
         }
         {
-            array arr1 = global["arr"];
+            array arr1 = global["arr"].as<array>();
             arr1[1]    = 100;
-            REQUIRE((i32)arr1[1] == 100);
+            REQUIRE(arr1[1].as<i32>() == 100);
         }
     }
     {
         auto res = run("arr1 <- [4,5,2,1]; ");
         REQUIRE(res);
-        array arr1 = global["arr1"];
+        array arr1 = global["arr1"].as<array>();
         arr1[3]    = 999;
-        array arr2 = global["arr1"];
-        REQUIRE((i32)arr2[3] == 999);
+        array arr2 = global["arr1"].as<array>();
+        REQUIRE(arr2[3].as<i32>() == 999);
     }
     {
         auto res = run("arr1 <- [4,5,2,1]; arr2 <- [1,2,3,4] ");
         REQUIRE(res);
-        array arr1a = global["arr1"];
-        array arr1b = global["arr1"];
-        array arr2  = global["arr2"];
+        array arr1a = global["arr1"].as<array>();
+        array arr1b = global["arr1"].as<array>();
+        array arr2  = global["arr2"].as<array>();
         REQUIRE(arr1a == arr1b);
         REQUIRE(arr1a != arr2);
     }
@@ -134,8 +134,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.ClassesAndInstances")
         REQUIRE(res);
         REQUIRE(res.value() == 100);
 
-        instance i = global["inst"];
-        REQUIRE((i32)i["value"] == 100);
+        instance i = global["inst"].as<instance>();
+        REQUIRE(i["value"].as<i32>() == 100);
         i["value"] = 420;
 
         res = run<i32>("return inst.value");
@@ -189,7 +189,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Closures")
     {
         auto res = run("str <- test.Prim(20, 4.4, 5.22, true)");
         REQUIRE(res);
-        std::string str = global["str"];
+        auto str = global["str"].as<std::string>();
         REQUIRE(str == testFuncPrim(20, 4.4f, 5.22, true));
     }
     {
@@ -293,7 +293,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("x <- test.Map()");
         REQUIRE(res);
-        std::map<std::string, i32> x = global["x"];
+        auto x = global["x"].as<std::map<std::string, i32>>();
         REQUIRE(x["abc"] == 123);
         REQUIRE(x["def"] == 234);
     }
@@ -301,7 +301,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("x <- test.UMap()");
         REQUIRE(res);
-        std::unordered_map<std::string, i32> x = global["x"];
+        auto x = global["x"].as<std::unordered_map<std::string, i32>>();
         REQUIRE(x["abc"] == 123);
         REQUIRE(x["def"] == 234);
     }
@@ -309,7 +309,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("x <- test.Vector();");
         REQUIRE(res);
-        std::vector<std::string> vec = global["x"];
+        auto vec = global["x"].as<std::vector<std::string>>();
         REQUIRE(vec[0] == "1");
         REQUIRE(vec[4] == "5");
     }
@@ -317,7 +317,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("x <- test.Array()");
         REQUIRE(res);
-        std::array<std::string, 5> vec = global["x"];
+        auto vec = global["x"].as<std::array<std::string, 5>>();
         REQUIRE(vec[0] == "1");
         REQUIRE(vec[4] == "5");
     }
@@ -325,9 +325,9 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("function foo(x) {return x[1] * x[3]} ");
         REQUIRE(res);
-        std::vector   vec {1, 2, 3, 4, 5};
-        function<i32> func = global["foo"];
-        i32           a    = func(vec);
+        std::vector vec {1, 2, 3, 4, 5};
+        auto        func = global["foo"].as<function<i32>>();
+        i32         a    = func(vec);
         REQUIRE(a == 2 * 4);
 
         std::array arr {1, 2, 3, 4, 5};
@@ -351,18 +351,18 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("function foo(x) {return x[0] * x[1]} ");
         REQUIRE(res);
-        auto          tup  = std::make_pair(4, 2.4f);
-        function<f32> func = global["foo"];
-        f32           a    = func(tup);
+        auto tup  = std::make_pair(4, 2.4f);
+        auto func = global["foo"].as<function<f32>>();
+        f32  a    = func(tup);
         REQUIRE(a == 4 * 2.4f);
     }
     SUBCASE("map parameter")
     {
         auto res = run("function foo(x) {return x.test} ");
         REQUIRE(res);
-        std::map<std::string, i32> map  = {{"test", 123}};
-        function<i32>              func = global["foo"];
-        i32                        a    = func(map);
+        auto map  = std::map<std::string, i32> {{"test", 123}};
+        auto func = global["foo"].as<function<i32>>();
+        i32  a    = func(map);
         REQUIRE(a == 123);
 
         std::unordered_map<std::string, i32> umap = {{"test", 245}};
@@ -401,7 +401,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     {
         auto res = run("rectF <- {x=2.7, y=3.1, width=2.3, height=55.2} ");
         REQUIRE(res);
-        std::map<std::string, f32> rectF = global["rectF"];
+        auto rectF = global["rectF"].as<std::map<std::string, f32>>();
         REQUIRE(rectF["x"] == 2.7f);
     }
     SUBCASE("get/set map")
@@ -419,8 +419,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Container")
     }
     SUBCASE("pair parameter")
     {
-        function<i32> func = global["test"]["PairPara"];
-        i32           a    = func(std::pair {"ok"s, 4});
+        auto func = global["test"]["PairPara"].as<function<i32>>();
+        i32  a    = func(std::pair {"ok"s, 4});
         REQUIRE(a == 4);
     }
     SUBCASE("get/set set")
@@ -457,8 +457,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Enums")
 
     global["test"]["Enum"] = &testFuncEnum;
     {
-        function<testEnum> func = global["test"]["Enum"];
-        testEnum           num  = *func.call(testEnum::FileNotFound);
+        auto     func = global["test"]["Enum"].as<function<testEnum>>();
+        testEnum num  = *func.call(testEnum::FileNotFound);
         REQUIRE(num == testEnum::FileNotFound);
     }
     {
@@ -493,8 +493,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
             "function foo0(a) { return cppFunc0(a) }  "
             "function foo1(b) { return 3 * b }        ");
         REQUIRE(res);
-        function<i32> foo0 = global["foo0"];
-        function<i32> foo1 = global["foo1"];
+        auto foo0 = global["foo0"].as<function<i32>>();
+        auto foo1 = global["foo1"].as<function<i32>>();
 
         auto cppFunc0      = std::function([&](i32 i) {
             return foo1(20 * i);
@@ -508,8 +508,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
     {
         auto res = run("function testPoint(p) { return p.x * p.y }");
         REQUIRE(res);
-        function<i32> func = global["testPoint"];
-        i32           a    = *func.call(point_i {2, 4});
+        auto func = global["testPoint"].as<function<i32>>();
+        i32  a    = *func.call(point_i {2, 4});
         REQUIRE(a == 2 * 4);
         a = func(point_i {2, 4});
         REQUIRE(a == 2 * 4);
@@ -524,7 +524,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
             "  return 0 "
             "} ");
         REQUIRE(res);
-        function<i32> func = global["foo"];
+        auto func = global["foo"].as<function<i32>>();
 
         i32 a = func(1, 2, 3);
         REQUIRE(a == 0);
@@ -561,7 +561,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
                 "  return a+b+c "
                 "} ");
             REQUIRE(res);
-            function<i32> func = global["foo"];
+            auto func = global["foo"].as<function<i32>>();
 
             parameter_pack<i32> pack;
             pack.Items = {1, 2, 3};
@@ -574,7 +574,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
                 "  return b ? a+c : a*c "
                 "} ");
             REQUIRE(res);
-            function<i32> func = global["foo"];
+            auto func = global["foo"].as<function<i32>>();
 
             parameter_pack<std::variant<i32, bool>> pack;
             pack.Items = {2, true, 3};
@@ -644,9 +644,9 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
         {
             auto res = run("function testPoint(p) { return p.x * p.y } ");
             REQUIRE(res);
-            function<i32> func = global["testPoint"];
-            point_i       p    = point_i {2, 4};
-            i32           a    = func(p);
+            auto    func = global["testPoint"].as<function<i32>>();
+            point_i p    = point_i {2, 4};
+            i32     a    = func(p);
             REQUIRE(a == 2 * 4);
             a = func(point_i {6, 4});
             REQUIRE(a == 6 * 4);
@@ -658,25 +658,25 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Functions")
                 "x <- 0;"
                 "function testVoid(p)  {x = p.x * p.y } ");
             REQUIRE(res);
-            function<void> func = global["testVoid"];
+            auto func = global["testVoid"].as<function<void>>();
             func(point_i {2, 4});
-            i32 x = global["x"];
+            i32 x = global["x"].as<i32>();
             REQUIRE(x == 2 * 4);
         }
         {
             auto res = run("function testMulti(f,p,r,b)  { return f * p.x * r.y } ");
             REQUIRE(res);
-            function<f32> func = global["testMulti"];
-            f32           x    = func(10.4f, point_i {2, 4}, rect_f {0, 20, 4, 5}, true);
+            auto func = global["testMulti"].as<function<f32>>();
+            f32  x    = func(10.4f, point_i {2, 4}, rect_f {0, 20, 4, 5}, true);
             REQUIRE(x == 10.4f * 2 * 20);
         }
         {
             auto res = run("function testTable(x,y) { return { a = x, b = y } } ");
             REQUIRE(res);
-            function<table> func = global["testTable"];
-            table           tab  = func(10, 20);
-            REQUIRE((i32)tab["a"] == 10);
-            REQUIRE((i32)tab["b"] == 20);
+            auto  func = global["testTable"].as<function<table>>();
+            table tab  = func(10, 20);
+            REQUIRE(tab["a"].as<i32>() == 10);
+            REQUIRE(tab["b"].as<i32>() == 20);
         }
     }
 }
@@ -695,7 +695,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")
         REQUIRE(res);
 
         REQUIRE(global.is<generator>("co"));
-        generator co = global["co"];
+        auto co = global["co"].as<generator>();
         REQUIRE(co.resume<i32>().value() == 1);
         REQUIRE(co.resume<i32>().value() == 2);
         REQUIRE(co.resume<i32>().value() == 3);
@@ -711,7 +711,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")
         )");
         REQUIRE(res);
 
-        generator co = global["co"];
+        auto co = global["co"].as<generator>();
         REQUIRE(co.resume<i32>().value() == 2);
         REQUIRE(co.resume<i32>().value() == 4);
         REQUIRE(co.resume<i32>().value() == 6);
@@ -727,7 +727,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Generators")
         )");
         REQUIRE(res);
 
-        generator co = global["co"];
+        auto co = global["co"].as<generator>();
 
         using return_type = std::optional<i32>;
 
@@ -751,16 +751,16 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         std::string x = *global.get<std::string>("x");
         REQUIRE(x == "ok");
 
-        global["x"]   = "ko";
-        std::string y = global["x"];
+        global["x"] = "ko";
+        auto y      = global["x"].as<std::string>();
         REQUIRE(y == "ko");
     }
     SUBCASE("get/set std::string_view")
     {
         using namespace std::literals;
         auto constexpr x {"ABCDEF"sv};
-        global["x"]        = x.substr(2, 2);
-        std::string_view y = global["x"];
+        global["x"] = x.substr(2, 2);
+        auto y      = global["x"].as<std::string_view>();
         REQUIRE(y == "CD");
     }
     SUBCASE("get const char*")
@@ -774,17 +774,17 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
     {
         char const* x {"ok"};
         global["x"]   = x;
-        char const* y = global["x"];
+        char const* y = global["x"].as<char const*>();
         REQUIRE(strcmp(x, y) == 0);
     }
     SUBCASE("get/set i32")
     {
         auto res = run("x <- 1337");
         REQUIRE(res);
-        i32 x = global["x"];
+        i32 x = global["x"].as<i32>();
         REQUIRE(x == 1337);
         global["x"] = 2000;
-        x           = global["x"];
+        x           = global["x"].as<i32>();
         REQUIRE(x == 2000);
         x = *run<i32>("return x");
         REQUIRE(x == 2000);
@@ -801,17 +801,17 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
     {
         auto res = run("x <- 30 ");
         REQUIRE(res);
-        u8 x = global["x"];
+        u8 x = global["x"].as<u8>();
         REQUIRE(x == 30);
     }
     SUBCASE("get/set nested i32")
     {
         auto res = run("x <- { y = { z = 30 } }");
         REQUIRE(res);
-        i32 x = global["x"]["y"]["z"];
+        i32 x = global["x"]["y"]["z"].as<i32>();
         REQUIRE(x == 30);
         global["x"]["y"]["z"] = 2000;
-        x                     = global["x"]["y"]["z"];
+        x                     = global["x"]["y"]["z"].as<i32>();
         REQUIRE(x == 2000);
     }
     SUBCASE("create nested entries w/ subscript")
@@ -821,7 +821,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         REQUIRE_FALSE(global.has("x", "y", "z"));
         global["x"]["y"]["z"] = 2000;
         REQUIRE(global.has("x", "y", "z"));
-        i32 x = global["x"]["y"]["z"];
+        i32 x = global["x"]["y"]["z"].as<i32>();
         REQUIRE(x == 2000);
     }
     SUBCASE("create nested entries w/ set")
@@ -831,7 +831,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         REQUIRE_FALSE(global.has("x", "y", "z"));
         global.set("x", "y", "z", 2000);
         REQUIRE(global.has("x", "y", "z"));
-        i32 x = global["x"]["y"]["z"];
+        i32 x = global["x"]["y"]["z"].as<i32>();
         REQUIRE(x == 2000);
     }
     SUBCASE("create global var w/ subscript")
@@ -839,7 +839,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         REQUIRE_FALSE(global.has("testVar1"));
         global["testVar1"] = 2000;
         REQUIRE(global.has("testVar1"));
-        i32 x = global["testVar1"];
+        i32 x = global["testVar1"].as<i32>();
         REQUIRE(x == 2000);
     }
     SUBCASE("create global var w/ set")
@@ -847,7 +847,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         REQUIRE_FALSE(global.has("testVar2"));
         global.set("testVar2", 2000);
         REQUIRE(global.has("testVar2"));
-        i32 x = global["testVar2"];
+        i32 x = global["testVar2"].as<i32>();
         REQUIRE(x == 2000);
     }
     SUBCASE("try access undefined global")
@@ -864,7 +864,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
     {
         auto res = run("x <- { y = 100, z = { m = 75, n = 5 } }");
         REQUIRE(res);
-        i32 m = global["x"]["z"]["m"];
+        i32 m = global["x"]["z"]["m"].as<i32>();
         REQUIRE(m == 75);
     }
     SUBCASE("access created global from function")
@@ -873,8 +873,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         global["testVar"] = 400;
         auto res          = run("function foo() {return testVar * 10 }");
         REQUIRE(res);
-        function<i32> func = global["foo"];
-        i32           a    = func();
+        auto func = global["foo"].as<function<i32>>();
+        i32  a    = func();
         REQUIRE(a == 400 * 10);
         global["testVar"] = 2000;
         a                 = func();
@@ -886,7 +886,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
         REQUIRE(res);
         REQUIRE_FALSE(global.has("x", "y", "z"));
         global["x"]["y"]["z"] = 2000;
-        i32 x                 = global["x"]["y"]["z"];
+        i32 x                 = global["x"]["y"]["z"].as<i32>();
         REQUIRE(x == 2000);
     }
 }
@@ -952,7 +952,7 @@ TEST_CASE("Script.Squirrel.Literals")
     using namespace tcob::literals;
     {
         auto script = "x <- 100"_squirrel;
-        i32  x      = script->get_root_table()["x"];
+        i32  x      = script->get_root_table()["x"].as<i32>();
         REQUIRE(x == 100);
     }
 }
@@ -1264,7 +1264,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
             i32           x {0};
             std::function func {[&](table& tab0) {
                 REQUIRE(tab0.has("x"));
-                x = tab0["x"];
+                x = tab0["x"].as<i32>();
             }};
 
             global["func"] = &func;
@@ -1292,7 +1292,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
         {
             auto res                             = run("tableX <- { }");
             global["tableX"]["a"]["b"]["c"]["d"] = 100;
-            i32 x                                = global["tableX"]["a"]["b"]["c"]["d"];
+            i32 x                                = global["tableX"]["a"]["b"]["c"]["d"].as<i32>();
             REQUIRE(res);
             REQUIRE(x == 100);
         }
@@ -1314,7 +1314,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
         }
         {
             table tab = *run<table>("return {left=2.7, top=3.1, width=2.3, height=55.2} ");
-            f32   f   = tab["top"];
+            f32   f   = tab["top"].as<f32>();
             REQUIRE(f == 3.1f);
         }
         {
@@ -1362,8 +1362,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
         {
             auto res = run("rectF <- {x=2.7, y=3.1, width=2.3, height=55.2} ");
             REQUIRE(res);
-            table tab = global["rectF"];
-            f32   f   = tab["x"];
+            auto tab = global["rectF"].as<table>();
+            f32  f   = tab["x"].as<f32>();
             REQUIRE(f == 2.7f);
         }
         {
@@ -1371,122 +1371,120 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
                 "rectF <- {x=2.7, y=3.1, width=2.3, height=55.2} "
                 "function tabletest(x) { return x.y}");
             REQUIRE(res);
-            table tab          = global["rectF"];
-            tab["y"]           = 100.5f;
-            function<f32> func = global["tabletest"];
-            f32           x    = func(tab);
+            table tab = global["rectF"].as<table>();
+            tab["y"]  = 100.5f;
+            auto func = global["tabletest"].as<function<f32>>();
+            f32  x    = func(tab);
             REQUIRE(x == 100.5f);
-            REQUIRE((f32)tab["y"] == 100.5f);
+            REQUIRE(tab["y"].as<f32>() == 100.5f);
         }
         {
             auto res = run("tableX <- {left=2.7, top={x=10,y=2} }");
             REQUIRE(res);
-            table top = global["tableX"]["top"];
-            i32   x   = top["x"];
+            auto top = global["tableX"]["top"].as<table>();
+            i32  x   = top["x"].as<i32>();
             REQUIRE(x == 10);
         }
         {
             auto res = run("tableX <- {left=2.7, top={x=10,y=2} }");
             REQUIRE(res);
-            table   tab = global["tableX"];
-            point_i top = tab["top"];
+            auto tab = global["tableX"].as<table>();
+            auto top = tab["top"].as<point_i>();
             REQUIRE(top.X == 10);
         }
         {
             auto res = run("tableX <- {left=2.7, top={x=10,y=2} }");
             REQUIRE(res);
-            table tab = global["tableX"];
-            i32   top = tab["top"]["x"];
+            auto tab = global["tableX"].as<table>();
+            i32  top = tab["top"]["x"].as<i32>();
             REQUIRE(top == 10);
         }
         {
             auto res = run("tableX <- {left=2.7, top={x=10,y=2} }");
             REQUIRE(res);
-            table tab       = global["tableX"];
+            auto tab        = global["tableX"].as<table>();
             tab["top"]["x"] = 400;
-            i32 top         = global["tableX"]["top"]["x"];
+            i32 top         = global["tableX"]["top"]["x"].as<i32>();
             REQUIRE(top == 400);
         }
         {
             auto res = run("tableX <- { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab               = global["tableX"];
+            table tab               = global["tableX"].as<table>();
             tab["a"]["b"]["c"]["d"] = 42;
-            i32 top                 = global["tableX"]["a"]["b"]["c"]["d"];
+            i32 top                 = global["tableX"]["a"]["b"]["c"]["d"].as<i32>();
             REQUIRE(top == 42);
         }
         {
             auto res = run("tableX <- { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab = global["tableX"];
-            REQUIRE((i32)tab["a"]["b"]["c"]["d"] == 2);
-            res = run(
-                "tableX.a.b.c.d = 4");
-            REQUIRE((i32)tab["a"]["b"]["c"]["d"] == 4);
+            table tab = global["tableX"].as<table>();
+            REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 2);
+            res = run("tableX.a.b.c.d = 4");
+            REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 4);
         }
         {
             auto res = run("tableX <- { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab = global["tableX"]["a"]["b"]["c"];
-            REQUIRE((i32)tab["d"] == 2);
-            res = run(
-                "tableX.a.b.c.d = 4");
-            REQUIRE((i32)tab["d"] == 4);
-            tab = global["tableX"];
+            auto tab = global["tableX"]["a"]["b"]["c"].as<table>();
+            REQUIRE(tab["d"].as<i32>() == 2);
+            res = run("tableX.a.b.c.d = 4");
+            REQUIRE(tab["d"].as<i32>() == 4);
+            tab = global["tableX"].as<table>();
             REQUIRE(tab["a"]["b"]["c"]["d"].get<i32>().value() == 4);
         }
         {
             auto res = run("tableX <- { a={ b={ bb = \"ok\", c={ d=2 } } } }");
             REQUIRE(res);
-            table tab                            = global["tableX"];
+            auto tab                             = global["tableX"].as<table>();
             global["tableX"]["a"]["b"]["c"]["d"] = 100;
-            REQUIRE((i32)global["tableX"]["a"]["b"]["c"]["d"] == 100);
-            REQUIRE((i32)tab["a"]["b"]["c"]["d"] == 100);
-            std::string x = tab["a"]["b"]["bb"];
+            REQUIRE(global["tableX"]["a"]["b"]["c"]["d"].as<i32>() == 100);
+            REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 100);
+            auto x = tab["a"]["b"]["bb"].as<std::string>();
             REQUIRE(x == "ok");
         }
         {
             auto res = run("tableX <- {  }");
             REQUIRE(res);
-            table tab = global["tableX"];
+            auto  tab = global["tableX"].as<table>();
             table subt {};
             REQUIRE_FALSE(subt.is_valid());
             tab["sub"] = subt;
             REQUIRE(subt.is_valid());
             subt["x"] = 42;
 
-            REQUIRE((i32)global["tableX"]["sub"]["x"] == 42);
+            REQUIRE(global["tableX"]["sub"]["x"].as<i32>() == 42);
         }
         {
             auto res = run("tableX <- {  }");
             REQUIRE(res);
-            table tab       = global["tableX"];
+            auto tab        = global["tableX"].as<table>();
             tab["sub"]      = table {};
             tab["sub"]["x"] = 42;
 
-            REQUIRE((i32)global["tableX"]["sub"]["x"] == 42);
+            REQUIRE(global["tableX"]["sub"]["x"].as<i32>() == 42);
         }
         {
             auto res = run("tableX <- {  }");
             REQUIRE(res);
-            table tab = global["tableX"];
+            auto  tab = global["tableX"].as<table>();
             table subt;
             tab["sub"] = subt;
             subt["x"]  = 42;
 
-            REQUIRE((i32)global["tableX"]["sub"]["x"] == 42);
+            REQUIRE(global["tableX"]["sub"]["x"].as<i32>() == 42);
         }
         {
             table tab0 = *run<table>("tableX <- {  }; tableY <- {  }; return tableX;");
-            table tab1 = global["tableX"];
+            auto  tab1 = global["tableX"].as<table>();
             REQUIRE(tab0 == tab1);
-            table tab2 = global["tableY"];
+            auto tab2 = global["tableY"].as<table>();
             REQUIRE(tab0 != tab2);
         }
         {
             table tab = *run<table>("local tableX = { a = 12 , b = { c = 100 }}; return tableX;");
             REQUIRE(tab.is<table>("b"));
-            REQUIRE((i32)tab["b"]["c"] == 100);
+            REQUIRE(tab["b"]["c"].as<i32>() == 100);
         }
     }
     SUBCASE("delegate")
@@ -1577,35 +1575,35 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.TcobTypes")
             "degree <- 160;");
         REQUIRE(res);
 
-        color c = global["color"];
+        auto c = global["color"].as<color>();
         REQUIRE(global.is<color>("color"));
         REQUIRE(c == color(1 * 2, 2 * 2, 3 * 2, 1 * 2));
 
-        point_i p1 = global["pointI"];
+        auto p1 = global["pointI"].as<point_i>();
         REQUIRE(global.is<point_i>("pointI"));
         REQUIRE(global.is<point_i>("pointIS"));
         REQUIRE(p1 == point_i(20 * 2, 400 * 2));
 
-        point_f p2 = global["pointF"];
+        auto p2 = global["pointF"].as<point_f>();
         REQUIRE(global.is<point_f>("pointF"));
         REQUIRE(global.is<point_f>("pointFS"));
         REQUIRE(p2 == point_f(4.5f * 2, 3.23f * 2));
 
-        size_i s1 = global["sizeI"];
+        auto s1 = global["sizeI"].as<size_i>();
         REQUIRE(global.is<size_i>("sizeI"));
         REQUIRE(s1 == size_i(20 * 5, 400 * 8));
 
-        rect_i r1 = global["rectI"];
+        auto r1 = global["rectI"].as<rect_i>();
         REQUIRE(global.is<rect_i>("rectI"));
         REQUIRE(global.is<rect_i>("rectIS"));
         REQUIRE(r1 == rect_i(3 * 2, 6 * 2, 10 * 2, 20 * 2));
 
-        rect_f r2 = global["rectF"];
+        auto r2 = global["rectF"].as<rect_f>();
         REQUIRE(global.is<rect_f>("rectF"));
         REQUIRE(global.is<rect_f>("rectFS"));
         REQUIRE(r2 == rect_f(2.7f * 2, 3.1f * 2, 2.3f * 2, 55.2f * 2));
 
-        degree_f deg = global["degree"];
+        auto deg = global["degree"].as<degree_f>();
         REQUIRE(global.is<degree_f>("degree"));
         REQUIRE(deg == 160);
     }
@@ -1617,7 +1615,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.TcobTypes")
             "pointI <- { x = 20, y = 400 } "
             "x <- test.Mix(100, rectF, color, \"Hello\", false, pointI)");
         REQUIRE(res);
-        f32 x = global["x"];
+        f32 x = global["x"].as<f32>();
 
         REQUIRE(x == testFuncMix(100, rect_f(2.7f, 3.1f, 2.3f, 55.2f), color(1, 2, 3, 1), "Hello", false, point_i(20, 400)));
     }
@@ -1661,7 +1659,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Threads")
 
         REQUIRE(res);
         REQUIRE(global.is<thread>("coro"));
-        thread t = global["coro"];
+        auto t = global["coro"].as<thread>();
         REQUIRE(t.get_status() == vm_view::status::Idle);
         auto cres = t.call<std::string>();
         REQUIRE(t.get_status() == vm_view::status::Suspended);
@@ -1684,7 +1682,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Threads")
 
         REQUIRE(res);
         REQUIRE(global.is<thread>("coro"));
-        thread t = global["coro"];
+        auto t = global["coro"].as<thread>();
         REQUIRE(t.get_status() == vm_view::status::Idle);
         auto cres = t.call<std::string>("a");
         REQUIRE(t.get_status() == vm_view::status::Suspended);
@@ -1704,7 +1702,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.TypeCoercion")
         REQUIRE(res);
         REQUIRE(global.is<i32>("a"));
         REQUIRE_FALSE(global.is<std::string>("a"));
-        std::string val = global["a"];
+        std::string val = global["a"].as<std::string>();
         REQUIRE(val == "100");
     }
     SUBCASE("string from number")
@@ -1713,7 +1711,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.TypeCoercion")
         REQUIRE(res);
         REQUIRE(global.is<f32>("a"));
         REQUIRE_FALSE(global.is<std::string>("a"));
-        std::string val = global["a"];
+        std::string val = global["a"].as<std::string>();
         REQUIRE(val == "100.500000");
     }
 }
@@ -1743,8 +1741,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.UserDefinedConversion")
     {
         auto res = run("function bar(p) {return p.x * p.y * p.z} ");
         REQUIRE(res);
-        function<i32> func = global["bar"];
-        i32           a    = *func.call(foo {1, 2, 3});
+        auto func = global["bar"].as<function<i32>>();
+        i32  a    = *func.call(foo {1, 2, 3});
         REQUIRE(a == 6);
     }
 }
@@ -1763,8 +1761,8 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.VariadicFunctions")
         )");
 
         REQUIRE(res);
-        function<i32> func = global["testArg"];
-        i32           a    = func(1, 2, 3, 4, 5, 6);
+        auto func = global["testArg"].as<function<i32>>();
+        i32  a    = func(1, 2, 3, 4, 5, 6);
         REQUIRE(a == (1 + 2 + 3 + 4 + 5 + 6));
     }
 }

@@ -192,7 +192,7 @@ void game::setup_rendersystem()
 
     size_i const resolution {video[Cfg::Video::use_desktop_resolution].as<bool>()
                                  ? locate_service<platform>().get_display_size(0)
-                                 : video[Cfg::Video::resolution]};
+                                 : video[Cfg::Video::resolution].as<size_i>()};
 
     auto& renderSystem {locate_service<gfx::render_system>()};
 

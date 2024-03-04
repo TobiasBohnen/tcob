@@ -16,13 +16,6 @@ inline proxy<Object, Keys...>::proxy(Object& object, std::tuple<Keys...> keys)
 }
 
 template <typename Object, typename... Keys>
-template <typename T>
-inline proxy<Object, Keys...>::operator T() const
-{
-    return as<T>();
-}
-
-template <typename Object, typename... Keys>
 inline auto proxy<Object, Keys...>::operator=(auto&& other) -> proxy&
 {
     std::apply([&](auto&&... args) { return _object.set(args..., std::move(other)); }, _keys);

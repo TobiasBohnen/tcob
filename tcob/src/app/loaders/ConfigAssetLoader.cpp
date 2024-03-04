@@ -431,7 +431,7 @@ void cfg_cursor_loader::declare()
             if (object modesSection; assetSection.try_get(modesSection, API::Cursor::modes)) {
                 for (auto const& [mk, mv] : modesSection) {
                     if (object modeSection; mv.try_get(modeSection)) {
-                        asset->assetPtr->add_mode(mk, modeSection["hotspot"]);
+                        asset->assetPtr->add_mode(mk, modeSection["hotspot"].as<point_i>());
                     }
                 }
             }
@@ -475,7 +475,7 @@ auto cfg_font_loader::reload_asset(asset<font>& asset) -> bool
     if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
         auto  info {_object[API::TrueTypeFont::Name][name]};
         auto* ttf {dynamic_cast<truetype_font*>(asset.get())};
-        if (ttf->load(mp + info[API::TrueTypeFont::source].as<path>(), info[API::TrueTypeFont::size]) != load_status::Ok) {
+        if (ttf->load(mp + info[API::TrueTypeFont::source].as<path>(), info[API::TrueTypeFont::size].as<u32>()) != load_status::Ok) {
             logger::Error("truetype_font asset: Error reloading file: {}", info[API::TrueTypeFont::source].as<path>());
             return false;
         }

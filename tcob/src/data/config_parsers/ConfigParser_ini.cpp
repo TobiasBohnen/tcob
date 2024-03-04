@@ -93,12 +93,12 @@ auto ini_reader::read_section(utf8_string_view line) -> bool
                 if (first) {
                     auto secRes {_section[utf8_string {token}]};
                     if (!secRes.is<object>()) { secRes = object {}; }
-                    _parentSection = secRes;
+                    _parentSection = secRes.as<object>();
                     first          = false;
                 } else {
                     auto secRes {_parentSection[utf8_string {token}]};
                     if (!secRes.is<object>()) { secRes = object {}; }
-                    _parentSection = secRes;
+                    _parentSection = secRes.as<object>();
                 }
 
                 return true;
