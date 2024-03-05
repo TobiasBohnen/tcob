@@ -23,7 +23,7 @@ inline void script::open_libraries(Args... args)
 template <typename R>
 inline auto script::impl_run(string_view script, string const& name) const -> result<R>
 {
-    auto const guard {_vm.create_stack_guard()};
+    auto const guard {_view.create_stack_guard()};
 
     auto result {call_buffer(script, name, !std::is_void_v<R>)};
     if constexpr (std::is_void_v<R>) {
@@ -31,7 +31,7 @@ inline auto script::impl_run(string_view script, string const& name) const -> re
     } else {
         R retValue {};
         if (result == error_code::Ok) {
-            if (!_vm.pull_convert_idx(_vm.get_top(), retValue)) {
+            if (!_view.pull_convert_idx(_view.get_top(), retValue)) {
                 result = error_code::TypeMismatch;
             }
         }
@@ -43,7 +43,7 @@ inline auto script::impl_run(string_view script, string const& name) const -> re
 template <typename T>
 inline auto script::impl_create_wrapper(string const& name) -> std::shared_ptr<wrapper<T>>
 {
-    return std::make_shared<wrapper<T>>(_vm, &_rootTable, name);
+    return std::make_shared<wrapper<T>>(_view, &_rootTable, name);
 }
 
 template <typename... Args>

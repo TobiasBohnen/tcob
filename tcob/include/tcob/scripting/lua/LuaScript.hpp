@@ -58,6 +58,8 @@ class TCOB_API script : public scripting::script<script> {
     friend class scripting::script<script>;
 
 public:
+    using HookFunc = std::function<void(debug const&)>;
+
     struct require_event {
         string               Name;
         std::optional<table> Table;
@@ -89,7 +91,7 @@ public:
     template <typename R = void>
     auto load_binary(istream& in, string const& name = "") const -> function<R>;
 
-    void set_hook(std::function<void(debug const&)>&& func);
+    void set_hook(HookFunc&& func);
     void remove_hook();
 
     void raise_error(string const& message);
@@ -112,7 +114,7 @@ private:
     state_view _view;
     table      _globalTable;
 
-    std::function<void(debug const&)>                                  _hookFunc;
+    HookFunc                                                           _hookFunc;
     std::function<std::function<table(string const&)>*(string const&)> _searcher;
     std::function<table(string const&)>                                _loader;
 };

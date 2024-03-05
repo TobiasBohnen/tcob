@@ -891,6 +891,53 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.GetSet")
     }
 }
 
+TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Hook")
+{
+    SUBCASE("locals in hook")
+    {
+        i32         x {0};
+        i32         y {0};
+        std::string z;
+
+        auto func = [&](debug_event type, string const& sourcename, i64, string const& funcname) {
+            if (sourcename == "TEST" && funcname == "foo" && type == debug_event::Return) {
+                auto const view {get_view()};
+                auto const guard {view.create_stack_guard()};
+
+                for (u32 i {0};; ++i) {
+                    auto val {view.get_local(0, i)};
+                    if (val.empty()) { break; }
+
+                    if (val == "x") {
+                        view.pull_convert_idx(-1, x);
+                    } else if (val == "y") {
+                        view.pull_convert_idx(-1, y);
+                    } else if (val == "z") {
+                        view.pull_convert_idx(-1, z);
+                    }
+                }
+            }
+        };
+
+        set_hook(func);
+        auto res = run(R"-(
+            function foo() {
+                local x = 100
+                local y = 400
+                local z = "ok"
+                return 45
+            }
+            foo()
+        )-",
+                       "TEST");
+
+        REQUIRE(res);
+        REQUIRE(x == 100);
+        REQUIRE(y == 400);
+        REQUIRE(z == "ok");
+    }
+}
+
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.IsHas")
 {
     SUBCASE("is")

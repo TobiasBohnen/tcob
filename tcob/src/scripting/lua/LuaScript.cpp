@@ -59,7 +59,7 @@ auto script::get_GC() const -> gc
 
 auto script::create_table() const -> table
 {
-    return table {get_view()};
+    return table {_view};
 }
 
 auto script::call_buffer(string_view script, string const& name) const -> error_code
@@ -125,43 +125,21 @@ void script::register_searcher()
 
 void static hook(lua_State* l, lua_Debug* ar)
 {
-    state_view ls {l};
-    auto const guard {ls.create_stack_guard()};
-
-    ls.get_metatable("tcob");
-    table lt {table::Acquire(ls, -1)};
-    if (lt.has("hook")) {
-        auto* hook {reinterpret_cast<std::function<void(debug const&)>*>(lt["hook"].as<void*>())};
-        lua_getinfo(l, "nSlur", ar);
-        debug dbg {&ls, ar};
-        (*hook)(dbg);
-    }
+    state_view view {l};
+    auto*      hook {*reinterpret_cast<script::HookFunc**>(view.get_extra_space())};
+    view.get_info("Slutnr", ar);
+    (*hook)({&view, ar});
 }
 
-void script::set_hook(std::function<void(debug const&)>&& func)
+void script::set_hook(HookFunc&& func)
 {
-    auto const guard {_view.create_stack_guard()};
-
-    _view.new_metatable("tcob");
-    i32 const tableIdx {_view.get_top()};
-    _view.push_convert("hook");
-    _hookFunc = std::move(func);
-    _view.push_convert(reinterpret_cast<void*>(&_hookFunc));
-    _view.set_table(tableIdx);
-
+    _hookFunc                                                      = std::move(func);
+    *reinterpret_cast<script::HookFunc**>(_view.get_extra_space()) = &_hookFunc;
     _view.set_hook(&hook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT, 1);
 }
 
 void script::remove_hook()
 {
-    auto const guard {_view.create_stack_guard()};
-
-    _view.new_metatable("tcob");
-    i32 const tableIdx {_view.get_top()};
-    _view.push_convert("hook");
-    _view.push_convert(nullptr);
-    _view.set_table(tableIdx);
-
     _view.set_hook(nullptr, 0, 0);
 }
 

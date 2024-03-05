@@ -289,15 +289,35 @@ auto vm_view::get_top() const -> SQInteger
 
 auto vm_view::get_function_info(SQInteger level) const -> function_info
 {
-    SQFunctionInfo fi;
+    SQFunctionInfo fi {};
     if (sq_getfunctioninfo(_vm, level, &fi) == SQ_OK) {
-        return {.FuncID = fi.funcid,
-                .Line   = fi.line,
-                .Name   = fi.name,
-                .Source = fi.source};
+        return {
+            .FuncID = fi.funcid,
+            .Name   = fi.name,
+            .Source = fi.source,
+            .Line   = fi.line};
     }
 
     return {};
+}
+
+auto vm_view::stack_infos(SQInteger level) const -> stack_info
+{
+    SQStackInfos si {.funcname = nullptr, .source = nullptr};
+    if (sq_stackinfos(_vm, level, &si) == SQ_OK) {
+        return {
+            .FuncName = si.funcname ? si.funcname : "",
+            .Source   = si.source ? si.source : "",
+            .Line     = si.line};
+    }
+
+    return {};
+}
+
+auto vm_view::get_local(SQUnsignedInteger level, SQUnsignedInteger nseq) const -> string
+{
+    char const* retValue {sq_getlocal(_vm, level, nseq)};
+    return retValue ? retValue : "";
 }
 
 auto vm_view::next(SQInteger idx) const -> bool
@@ -513,8 +533,17 @@ auto vm_view::call(SQInteger params, bool retVal, bool raiseError) const -> erro
     return sq_call(_vm, params, retVal, raiseError) == SQ_OK ? error_code::Ok : error_code::Error;
 }
 
+void vm_view::enable_debug_info(bool enable) const
+{
+    sq_enabledebuginfo(_vm, enable);
+}
+
 auto vm_view::compile_buffer(string_view script, string const& name) const -> error_code
 {
+    #if defined(TCOB_DEBUG)
+    enable_debug_info(true);
+    #endif
+
     return sq_compilebuffer(_vm, script.data(), std::ssize(script), name.c_str(), true) == SQ_OK ? error_code::Ok : error_code::Error;
 }
 
@@ -536,6 +565,21 @@ void vm_view::set_errorhandler() const
 void vm_view::set_releasehook(SQInteger idx, SQRELEASEHOOK hook) const
 {
     sq_setreleasehook(_vm, idx, hook);
+}
+
+void vm_view::set_native_debughook(SQDEBUGHOOK hook) const
+{
+    sq_setnativedebughook(_vm, hook);
+}
+
+auto vm_view::get_foreign_ptr() const -> void*
+{
+    return sq_getforeignptr(_vm);
+}
+
+void vm_view::set_foreign_ptr(void* ptr) const
+{
+    sq_setforeignptr(_vm, ptr);
 }
 
 auto vm_view::cmp() const -> SQInteger

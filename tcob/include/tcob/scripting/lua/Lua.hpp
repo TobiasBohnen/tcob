@@ -180,6 +180,7 @@ public:
 
     auto get_top() const -> i32;
 
+    auto get_info(string const& what, lua_Debug* ar) const -> bool;
     auto get_local(lua_Debug* ar, i32 n) const -> string;
     auto set_local(lua_Debug* ar, i32 n) const -> string;
 
@@ -258,6 +259,8 @@ public:
 
     auto get_upvalue(i32 funcindex, i32 n) const -> char const*;
     auto set_upvalue(i32 funcindex, i32 n) const -> char const*;
+
+    auto get_extra_space() const -> void*; // used for hook
 
     auto static GetUpvalueIndex(i32 n) -> i32;
 

@@ -68,23 +68,23 @@ auto static error(HSQUIRRELVM v) -> SQInteger
 }
 
 script::script()
-    : _vm {vm_view::NewVM()}
+    : _view {vm_view::NewVM()}
 {
-    _vm.set_print_func(&print, &print);
-    _vm.set_compiler_errorhandler(&comp_error);
-    _vm.new_closure(&error, 0);
-    _vm.set_errorhandler();
+    _view.set_print_func(&print, &print);
+    _view.set_compiler_errorhandler(&comp_error);
+    _view.new_closure(&error, 0);
+    _view.set_errorhandler();
 
-    _vm.push_roottable();
-    _rootTable.acquire(_vm, -1);
-    _vm.pop(1);
+    _view.push_roottable();
+    _rootTable.acquire(_view, -1);
+    _view.pop(1);
 }
 
 script::~script()
 {
     _rootTable.release();
     clear_wrappers();
-    _vm.close();
+    _view.close();
 }
 
 auto script::get_root_table() -> table&
@@ -94,29 +94,54 @@ auto script::get_root_table() -> table&
 
 auto script::get_view() const -> vm_view
 {
-    return _vm;
+    return _view;
 }
 
 auto script::create_array() const -> array
 {
-    return array {get_view()};
+    return array {_view};
 }
 
 auto script::create_table() const -> table
 {
-    return table {get_view()};
+    return table {_view};
 }
 
 auto script::create_class() const -> clazz
 {
-    return clazz {get_view()};
+    return clazz {_view};
+}
+
+void script::enable_debug_info() const
+{
+    _view.enable_debug_info(true);
+}
+
+void static hook(HSQUIRRELVM v, SQInteger type, SQChar const* sourcename, SQInteger line, SQChar const* funcname)
+{
+    vm_view view {v};
+
+    script::HookFunc* hook {reinterpret_cast<script::HookFunc*>(view.get_foreign_ptr())};
+    (*hook)(static_cast<debug_event>(type), sourcename ? sourcename : "", line, funcname ? funcname : "");
+}
+
+void script::set_hook(HookFunc&& func)
+{
+    _hookFunc = std::move(func);
+    _view.set_foreign_ptr(&_hookFunc);
+    _view.set_native_debughook(&hook);
+}
+
+void script::remove_hook()
+{
+    _view.set_native_debughook(nullptr);
 }
 
 auto script::call_buffer(string_view script, string const& name, bool retValue) const -> error_code
 {
-    if (_vm.compile_buffer(script, name) == error_code::Ok) {
-        _vm.push_roottable();
-        if (_vm.call(1, retValue, true) == error_code::Ok) {
+    if (_view.compile_buffer(script, name) == error_code::Ok) {
+        _view.push_roottable();
+        if (_view.call(1, retValue, true) == error_code::Ok) {
             return error_code::Ok;
         }
     }
@@ -129,22 +154,22 @@ void script::load_library(library lib)
     _rootTable.push_self();
     switch (lib) {
     case library::IO:
-        _vm.register_iolib();
+        _view.register_iolib();
         break;
     case library::Blob:
-        _vm.register_bloblib();
+        _view.register_bloblib();
         break;
     case library::Math:
-        _vm.register_mathlib();
+        _view.register_mathlib();
         break;
     case library::System:
-        _vm.register_systemlib();
+        _view.register_systemlib();
         break;
     case library::String:
-        _vm.register_stringlib();
+        _view.register_stringlib();
         break;
     }
-    _vm.poptop();
+    _view.poptop();
 }
 }
 

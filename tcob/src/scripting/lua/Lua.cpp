@@ -189,6 +189,11 @@ auto state_view::get_top() const -> i32
     return lua_gettop(_state);
 }
 
+auto state_view::get_info(string const& what, lua_Debug* ar) const -> bool
+{
+    return lua_getinfo(_state, what.c_str(), ar) != 0;
+}
+
 auto state_view::get_local(lua_Debug* ar, i32 n) const -> string
 {
     auto const* r {lua_getlocal(_state, ar, n)};
@@ -503,6 +508,11 @@ auto state_view::get_upvalue(i32 funcindex, i32 n) const -> char const*
 auto state_view::set_upvalue(i32 funcindex, i32 n) const -> char const*
 {
     return lua_setupvalue(_state, funcindex, n);
+}
+
+auto state_view::get_extra_space() const -> void*
+{
+    return lua_getextraspace(_state);
 }
 
 void state_view::push_globaltable() const

@@ -30,11 +30,13 @@ struct SQVM;
 using HSQUIRRELVM = SQVM*;
 struct tagSQObject;
 using HSQOBJECT = tagSQObject;
+using SQChar    = char;
 
 using SQFUNCTION      = SQInteger (*)(HSQUIRRELVM);
 using SQCOMPILERERROR = void (*)(HSQUIRRELVM, char const* /*desc*/, char const* /*source*/, SQInteger /*line*/, SQInteger /*column*/);
 using SQPRINTFUNCTION = void (*)(HSQUIRRELVM, char const*, ...);
 using SQRELEASEHOOK   = SQInteger (*)(void*, SQInteger);
+using SQDEBUGHOOK     = void (*)(HSQUIRRELVM /*v*/, SQInteger /*type*/, SQChar const* /*sourcename*/, SQInteger /*line*/, SQChar const* /*funcname*/);
 
 namespace tcob::scripting::squirrel {
 ////////////////////////////////////////////////////////////
@@ -102,9 +104,25 @@ enum class generator_status : u8 {
 
 struct function_info {
     void*     FuncID {nullptr};
-    SQInteger Line {0};
     string    Name;
     string    Source;
+    SQInteger Line {0};
+};
+
+////////////////////////////////////////////////////////////
+
+struct stack_info {
+    string    FuncName;
+    string    Source;
+    SQInteger Line {0};
+};
+
+////////////////////////////////////////////////////////////
+
+enum class debug_event : char {
+    Call   = 'c',
+    Return = 'r',
+    Line   = 'l'
 };
 
 ////////////////////////////////////////////////////////////
@@ -178,7 +196,10 @@ public:
     auto get_type(SQInteger idx) const -> type;
     auto get_size(SQInteger idx) const -> SQInteger;
     auto get_top() const -> SQInteger;
+
     auto get_function_info(SQInteger level) const -> function_info;
+    auto stack_infos(SQInteger level) const -> stack_info;
+    auto get_local(SQUnsignedInteger level, SQUnsignedInteger nseq) const -> string;
 
     auto next(SQInteger idx) const -> bool;
 
@@ -234,12 +255,18 @@ public:
 
     auto call(SQInteger params, bool retVal, bool raiseError) const -> error_code;
 
+    void enable_debug_info(bool enable) const;
+
     auto compile_buffer(string_view script, string const& name) const -> error_code;
 
     void set_print_func(SQPRINTFUNCTION printfunc, SQPRINTFUNCTION errfunc) const;
     void set_compiler_errorhandler(SQCOMPILERERROR func) const;
     void set_errorhandler() const;
     void set_releasehook(SQInteger idx, SQRELEASEHOOK hook) const;
+    void set_native_debughook(SQDEBUGHOOK hook) const;
+
+    auto get_foreign_ptr() const -> void*; // used for hook
+    void set_foreign_ptr(void* ptr) const; // used for hook
 
     auto cmp() const -> SQInteger;
 

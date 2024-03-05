@@ -30,6 +30,8 @@ class TCOB_API script : public scripting::script<script> {
     friend class scripting::script<script>;
 
 public:
+    using HookFunc = std::function<void(debug_event /*type*/, string const& /*sourcename*/, SQInteger /*line*/, string const& /*funcname*/)>;
+
     script();
     script(script&& other) noexcept                    = delete;
     auto operator=(script&& other) noexcept -> script& = delete;
@@ -44,6 +46,10 @@ public:
 
     template <typename... Args>
     void open_libraries(Args... args);
+    void enable_debug_info() const;
+
+    void set_hook(HookFunc&& func);
+    void remove_hook();
 
 private:
     template <typename R = void>
@@ -57,8 +63,10 @@ private:
     void load_library(library lib, Args... args);
     void load_library(library lib);
 
-    vm_view _vm;
+    vm_view _view;
     table   _rootTable;
+
+    HookFunc _hookFunc;
 };
 
 }
