@@ -193,8 +193,8 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Container")
     {
         auto res = run("a, b = test.Tuple(5.22)");
         REQUIRE(res);
-        f64         a = global["a"].as<f64>();
-        std::string b = global["b"].as<std::string>();
+        f64  a = global["a"].as<f64>();
+        auto b = global["b"].as<std::string>();
         REQUIRE(a == 5.22 * 5);
         REQUIRE(b == std::to_string(5.22));
     }
@@ -342,7 +342,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Container")
     }
     SUBCASE("get multiple return values as pair")
     {
-        std::pair<std::string, i32> x = *run<std::pair<std::string, i32>>("return 'ok', 10");
+        auto x = *run<std::pair<std::string, i32>>("return 'ok', 10");
         REQUIRE(x.first == "ok");
         REQUIRE(x.second == 10);
     }
@@ -1486,7 +1486,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.RawPointers")
     SUBCASE("LuaOwnedPtr")
     {
         REQUIRE(TestScriptClass::ObjCount == 0);
-        script_owned_ptr<TestScriptClass> t {new TestScriptClass};
+        owned_ptr<TestScriptClass> t {new TestScriptClass};
         REQUIRE(TestScriptClass::ObjCount == 1);
         global["obj"] = t;
         auto res      = run("obj = nil");
@@ -1654,22 +1654,22 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
             auto res = run("tab = {4,5,2,1} ");
             REQUIRE(res);
             {
-                table tab1 = global["tab"].as<table>();
-                tab1[1]    = 100;
+                table tab1 {global["tab"]};
+                tab1[1] = 100;
                 REQUIRE(tab1[1].as<i32>() == 100);
             }
             {
-                table tab1 = global["tab"].as<table>();
-                tab1[1]    = 100;
+                table tab1 {global["tab"]};
+                tab1[1] = 100;
                 REQUIRE(tab1[1].as<i32>() == 100);
             }
         }
         {
             auto res = run("tab1 = {4,5,2,1} tab2 = {1,2,3,4} ");
             REQUIRE(res);
-            table tab1a = global["tab1"].as<table>();
-            table tab1b = global["tab1"].as<table>();
-            table tab2  = global["tab2"].as<table>();
+            auto tab1a = global["tab1"].as<table>();
+            auto tab1b = global["tab1"].as<table>();
+            auto tab2  = global["tab2"].as<table>();
             REQUIRE(tab1a == tab1b);
             REQUIRE(tab1a != tab2);
         }
@@ -1720,8 +1720,8 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("rectF = {x=2.7, y=3.1, width=2.3, height=55.2} ");
             REQUIRE(res);
-            table tab = global["rectF"].as<table>();
-            f32   f   = tab["x"].as<f32>();
+            auto tab = global["rectF"].as<table>();
+            f32  f   = tab["x"].as<f32>();
             REQUIRE(f == 2.7f);
         }
         {
@@ -1731,7 +1731,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
                 "   return x.y "
                 "end");
             REQUIRE(res);
-            table tab = global["rectF"].as<table>();
+            auto tab  = global["rectF"].as<table>();
             tab["y"]  = 100.5f;
             auto func = global["tabletest"].as<function<f32>>();
             f32  x    = func(tab);
@@ -1762,7 +1762,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("tableX = {left=2.7, top={x=10,y=2} }");
             REQUIRE(res);
-            table tab       = global["tableX"].as<table>();
+            auto tab        = global["tableX"].as<table>();
             tab["top"]["x"] = 400;
             i32 top         = global["tableX"]["top"]["x"].as<i32>();
             REQUIRE(top == 400);
@@ -1770,7 +1770,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("tableX = { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab               = global["tableX"].as<table>();
+            auto tab                = global["tableX"].as<table>();
             tab["a"]["b"]["c"]["d"] = 42;
             i32 top                 = global["tableX"]["a"]["b"]["c"]["d"].as<i32>();
             REQUIRE(top == 42);
@@ -1778,7 +1778,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         {
             auto res = run("tableX = { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab = global["tableX"].as<table>();
+            auto tab = global["tableX"].as<table>();
             REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 2);
             res = run("tableX.a.b.c.d = 4");
             REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 4);
@@ -1862,7 +1862,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.TableDumper")
         auto res = run(
             "tableX = { 2.7, 5, 6, a = 69, 7, 8, x = 10, t = { a = 20, 30.2 } }");
         REQUIRE(res);
-        table tab = global["tableX"].as<table>();
+        auto tab = global["tableX"].as<table>();
 
         io::iomstream fs;
         fs << "return ";
@@ -1886,7 +1886,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.TableDumper")
         auto res = run(
             "tableX = { left = 2.7, x = 10, t = { a = 20, y = 30.2, m = { z = 1, f = 3 } }, y = true, z = 'ok' }");
         REQUIRE(res);
-        table tab = global["tableX"].as<table>();
+        auto tab = global["tableX"].as<table>();
 
         io::iomstream fs;
         fs << "tab = ";

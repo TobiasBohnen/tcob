@@ -13,15 +13,6 @@ namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-struct script_owned_ptr {
-    explicit script_owned_ptr(T* obj);
-
-    T* Pointer {nullptr};
-};
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
 struct getter {
     T Method;
 };

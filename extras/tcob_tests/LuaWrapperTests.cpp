@@ -403,13 +403,13 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.Metamethods")
 {
     auto wrapper = create_wrapper<TestScriptClass>("TSCB");
     wrapper->wrap_metamethod(
-        lua::metamethod::Add, [](TestScriptClass* instance1, i32 x) { return scripting::script_owned_ptr(new TestScriptClass(instance1->get_value() + x)); });
+        lua::metamethod::Add, [](TestScriptClass* instance1, i32 x) { return scripting::owned_ptr(new TestScriptClass(instance1->get_value() + x)); });
     wrapper->wrap_metamethod(
-        lua::metamethod::Subtract, [](TestScriptClass* instance1, i32 x) { return scripting::script_owned_ptr(new TestScriptClass(instance1->get_value() - x)); });
+        lua::metamethod::Subtract, [](TestScriptClass* instance1, i32 x) { return scripting::owned_ptr(new TestScriptClass(instance1->get_value() - x)); });
     wrapper->wrap_metamethod(
-        lua::metamethod::Divide, [](TestScriptClass* instance1, i32 x) { return scripting::script_owned_ptr(new TestScriptClass(instance1->get_value() / x)); });
+        lua::metamethod::Divide, [](TestScriptClass* instance1, i32 x) { return scripting::owned_ptr(new TestScriptClass(instance1->get_value() / x)); });
     wrapper->wrap_metamethod(
-        lua::metamethod::Multiply, [](TestScriptClass* instance1, i32 x) { return scripting::script_owned_ptr(new TestScriptClass(instance1->get_value() * x)); });
+        lua::metamethod::Multiply, [](TestScriptClass* instance1, i32 x) { return scripting::owned_ptr(new TestScriptClass(instance1->get_value() * x)); });
     wrapper->wrap_metamethod(
         lua::metamethod::LessThan,
         [](std::variant<TestScriptClass*, i32> left, std::variant<TestScriptClass*, i32> right) {
@@ -595,7 +595,7 @@ TEST_CASE_FIXTURE(LuaWrapperTests, "Script.LuaWrapper.Metamethods")
         REQUIRE(get_GC().is_running());
 
         auto* t1        = new TestScriptClass; // NOLINT
-        global["wrap1"] = scripting::script_owned_ptr {t1};
+        global["wrap1"] = scripting::owned_ptr {t1};
         REQUIRE(TestScriptClass::ObjCount == 1);
 
         global["wrap1"] = nullptr;

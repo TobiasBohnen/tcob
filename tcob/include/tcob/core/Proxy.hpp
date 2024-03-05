@@ -17,7 +17,7 @@ public:
     proxy(Object& object, std::tuple<Keys...> keys);
 
     template <typename T>
-    operator T() const;
+    explicit operator T() const;
 
     auto operator=(auto&& other) -> proxy&;
 

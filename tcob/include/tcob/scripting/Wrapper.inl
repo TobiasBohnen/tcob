@@ -11,7 +11,7 @@ namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline script_owned_ptr<T>::script_owned_ptr(T* obj)
+inline owned_ptr<T>::owned_ptr(T* obj)
     : Pointer {obj}
 {
 }

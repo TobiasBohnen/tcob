@@ -101,7 +101,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.Type")
     SUBCASE("release")
     {
         auto* t1        = new TestScriptClass; // NOLINT
-        global["wrap1"] = script_owned_ptr {t1};
+        global["wrap1"] = owned_ptr {t1};
         REQUIRE(TestScriptClass::ObjCount == 1);
 
         global["wrap1"] = nullptr;
