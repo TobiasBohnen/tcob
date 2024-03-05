@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Concepts.hpp"
+
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
@@ -13,6 +15,9 @@ template <typename Object, typename... Keys>
 class [[nodiscard]] proxy final {
 public:
     proxy(Object& object, std::tuple<Keys...> keys);
+
+    template <typename T>
+    operator T() const;
 
     auto operator=(auto&& other) -> proxy&;
 
