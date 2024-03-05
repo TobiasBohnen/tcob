@@ -91,7 +91,7 @@ public:
     template <typename R = void>
     auto load_binary(istream& in, string const& name = "") const -> function<R>;
 
-    void set_hook(HookFunc&& func);
+    void set_hook(HookFunc&& func, debug_mask mask = {});
     void remove_hook();
 
     void raise_error(string const& message);

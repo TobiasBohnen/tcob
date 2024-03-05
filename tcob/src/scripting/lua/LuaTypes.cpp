@@ -283,9 +283,7 @@ namespace detail {
 
         for (i32 i {1};; ++i) {
             auto const* upname {view.get_upvalue(-1, i)};
-            if (upname == nullptr) {
-                break;
-            }
+            if (upname == nullptr) { break; }
 
             view.pop(1);
 
@@ -304,9 +302,7 @@ namespace detail {
 
         for (i32 i {1};; ++i) {
             auto const* upname {view.get_upvalue(-1, i)};
-            if (upname == nullptr) {
-                break;
-            }
+            if (upname == nullptr) { break; }
 
             view.pop(1);
 
@@ -324,16 +320,13 @@ namespace detail {
 
 auto coroutine::close() -> coroutine_status
 {
-    _status = (get_thread().close_thread() == LUA_OK) ? coroutine_status::Dead : coroutine_status::ErrorError;
+    _status = (get_thread().close_thread() == LUA_OK) ? coroutine_status::Dead : coroutine_status::Error;
     return _status;
 }
 
 auto coroutine::get_status() const -> coroutine_status
 {
-    if (!is_valid()) {
-        return coroutine_status::ErrorError;
-    }
-    return _status;
+    return is_valid() ? _status : coroutine_status::Error;
 }
 
 auto coroutine::get_thread() const -> state_view

@@ -83,7 +83,7 @@ enum class coroutine_status : u8 {
     RuntimeError,
     SyntaxError,
     MemError,
-    ErrorError
+    Error
 };
 
 ////////////////////////////////////////////////////////////
@@ -95,6 +95,15 @@ enum class debug_event : u32 {
     Count    = 3,
     TailCall = 4
 };
+
+struct debug_mask {
+    bool Call {true};
+    bool Return {true};
+    bool Line {true};
+    bool Count {true};
+};
+
+////////////////////////////////////////////////////////////
 
 class state_view;
 

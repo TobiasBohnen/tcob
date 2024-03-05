@@ -64,8 +64,7 @@ auto script::create_table() const -> table
 
 auto script::call_buffer(string_view script, string const& name) const -> error_code
 {
-    i32 const err {_view.load_buffer(script, name)};
-    if (err == LUA_OK) {
+    if (_view.load_buffer(script, name) == LUA_OK) {
         return _view.pcall(0, LUA_MULTRET);
     }
 
@@ -131,11 +130,18 @@ void static hook(lua_State* l, lua_Debug* ar)
     (*hook)({&view, ar});
 }
 
-void script::set_hook(HookFunc&& func)
+void script::set_hook(HookFunc&& func, debug_mask mask)
 {
-    _hookFunc                                                      = std::move(func);
+    _hookFunc = std::move(func);
+
+    i32 dmask {0};
+    if (mask.Call) { dmask |= LUA_MASKCALL; }
+    if (mask.Return) { dmask |= LUA_MASKRET; }
+    if (mask.Line) { dmask |= LUA_MASKLINE; }
+    if (mask.Count) { dmask |= LUA_MASKCOUNT; }
+
     *reinterpret_cast<script::HookFunc**>(_view.get_extra_space()) = &_hookFunc;
-    _view.set_hook(&hook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT, 1);
+    _view.set_hook(&hook, dmask, 1);
 }
 
 void script::remove_hook()

@@ -226,10 +226,10 @@ auto state_view::resume(i32 argCount, i32* resultCount) const -> coroutine_statu
     case LUA_ERRMEM:
         return coroutine_status::MemError;
     case LUA_ERRERR:
-        return coroutine_status::ErrorError;
+        return coroutine_status::Error;
     }
 
-    return coroutine_status::ErrorError;
+    return coroutine_status::Error;
 }
 
 auto state_view::next(i32 idx) const -> bool
