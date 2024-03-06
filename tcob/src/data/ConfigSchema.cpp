@@ -186,7 +186,7 @@ auto schema::FromObject(object const& obj) -> std::shared_ptr<schema>
 
 auto schema::validate_property(object const& obj, string_property const& prop) const -> std::optional<failure>
 {
-    failure retValue {.Name = prop.Name};
+    failure retValue {.Group = "", .Name = prop.Name, .Constraint = ""};
 
     if (!obj.has(prop.Name)) {
         retValue.Constraint = "Name";
@@ -208,7 +208,7 @@ auto schema::validate_property(object const& obj, string_property const& prop) c
 
 auto schema::validate_property(object const& obj, float_property const& prop) const -> std::optional<failure>
 {
-    failure retValue {.Name = prop.Name};
+    failure retValue {.Group = "", .Name = prop.Name, .Constraint = ""};
 
     if (!obj.has(prop.Name)) {
         retValue.Constraint = "Name";
@@ -230,7 +230,7 @@ auto schema::validate_property(object const& obj, float_property const& prop) co
 
 auto schema::validate_property(object const& obj, int_property const& prop) const -> std::optional<failure>
 {
-    failure retValue {.Name = prop.Name};
+    failure retValue {.Group = "", .Name = prop.Name, .Constraint = ""};
 
     if (!obj.has(prop.Name)) {
         retValue.Constraint = "Name";
@@ -252,7 +252,7 @@ auto schema::validate_property(object const& obj, int_property const& prop) cons
 
 auto schema::validate_property(object const& obj, bool_property const& prop) const -> std::optional<failure>
 {
-    failure retValue {.Name = prop.Name};
+    failure retValue {.Group = "", .Name = prop.Name, .Constraint = ""};
 
     if (!obj.has(prop.Name)) {
         retValue.Constraint = "Name";
@@ -265,7 +265,7 @@ auto schema::validate_property(object const& obj, bool_property const& prop) con
 
 auto schema::validate_property(object const& obj, array_property const& prop) const -> std::optional<failure>
 {
-    failure retValue {.Name = prop.Name};
+    failure retValue {.Group = "", .Name = prop.Name, .Constraint = ""};
 
     if (!obj.has(prop.Name)) {
         retValue.Constraint = "Name";
@@ -313,7 +313,7 @@ auto schema::validate_property(object const& obj, array_property const& prop) co
 
 auto schema::validate_property(object const& obj, object_property const& prop) const -> std::optional<failure>
 {
-    failure retValue {.Name = prop.Name};
+    failure retValue {.Group = "", .Name = prop.Name, .Constraint = ""};
 
     if (!obj.has(prop.Name)) {
         retValue.Constraint = "Name";

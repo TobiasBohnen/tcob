@@ -17,7 +17,7 @@ function(tcob_add_obj_library module sources headers)
     target_compile_options(${module} PRIVATE
         $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<BOOL:TCOB_USE_DEFAULT_MSVC_OPTIONS>>: /W4>
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra
-        -Wno-float-equal -Wno-double-promotion -Wno-implicit-int-float-conversion -Wno-sign-conversion -Wno-switch-enum
+        -Wno-float-equal -Wno-double-promotion -Wno-implicit-int-float-conversion -Wno-sign-conversion -Wno-switch-enum -Wno-switch-default
         -Wno-unsafe-buffer-usage -Wno-ctad-maybe-unsupported -Wno-c++20-compat -Wno-c++98-compat -Wno-c++98-compat-pedantic
         -Wno-exit-time-destructors>
         $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic

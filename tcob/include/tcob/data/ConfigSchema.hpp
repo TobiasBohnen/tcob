@@ -31,18 +31,18 @@ public:
     };
 
     struct string_property {
-        string               Name;
+        string               Name {};
         std::optional<usize> MinLength {};
         std::optional<usize> MaxLength {};
         string               Pattern {};
     };
     struct float_property {
-        string             Name;
+        string             Name {};
         std::optional<f64> MinValue {};
         std::optional<f64> MaxValue {};
     };
     struct int_property {
-        string             Name;
+        string             Name {};
         std::optional<i64> MinValue {};
         std::optional<i64> MaxValue {};
     };
@@ -50,13 +50,13 @@ public:
         string Name;
     };
     struct array_property {
-        string               Name;
+        string               Name {};
         std::optional<isize> MinSize {};
         std::optional<isize> MaxSize {};
         std::optional<type>  ItemType {};
     };
     struct object_property {
-        string                  Name;
+        string                  Name {};
         std::shared_ptr<schema> Schema {};
     };
     using property = std::variant<string_property, float_property, int_property, bool_property, array_property, object_property>;

@@ -110,7 +110,7 @@ void script::register_searcher()
     table searchers {_globalTable["package"]["searchers"].as<table>()};
 
     _loader = [&](string const& name) -> table {
-        require_event ev {.Name = name};
+        require_event ev {.Name = name, .Table = std::nullopt};
         Require(ev);
         return ev.Table.has_value() ? *ev.Table : run_file<table>(name + ".lua").value();
     };

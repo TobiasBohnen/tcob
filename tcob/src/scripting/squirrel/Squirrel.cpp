@@ -303,7 +303,7 @@ auto vm_view::get_function_info(SQInteger level) const -> function_info
 
 auto vm_view::stack_infos(SQInteger level) const -> stack_info
 {
-    SQStackInfos si {.funcname = nullptr, .source = nullptr};
+    SQStackInfos si {.funcname = nullptr, .source = nullptr, .line = 0};
     if (sq_stackinfos(_vm, level, &si) == SQ_OK) {
         return {
             .FuncName = si.funcname ? si.funcname : "",
