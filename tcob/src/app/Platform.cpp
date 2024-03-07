@@ -117,7 +117,6 @@ platform::platform(game* game, game::init const& ginit)
         auto config {std::make_shared<data::config_file>(ginit.ConfigFile)};
         register_service<data::config_file>(config);
         config->merge(_game->get_config_defaults(), false); // merge config with default
-        locate_service<gfx::truetype_font_engine::factory>().Engine = (*config)[Cfg::Video::Name][Cfg::Video::font_engine].as<string>();
 
         // init render system
         InitRenderSystem((*config)[Cfg::Video::Name][Cfg::Video::render_system].as<string>());
@@ -138,10 +137,8 @@ platform::~platform()
     //  SDL
     SDL_Quit();
 
-#if defined(TCOB_ENABLE_TTF_FREETYPE)
     //  FreeType
     gfx::detail::ft_ttf_font_engine::Done();
-#endif
 }
 
 void platform::remove_services() const
@@ -166,7 +163,6 @@ void platform::remove_services() const
     remove_service<gfx::animated_image_encoder::factory>();
     remove_service<audio::decoder::factory>();
     remove_service<audio::encoder::factory>();
-    remove_service<gfx::truetype_font_engine::factory>();
     remove_service<gfx::raster_font::loader::factory>();
     remove_service<gfx::render_system::factory>();
 }
@@ -435,17 +431,7 @@ void platform::InitAudioCodecs()
 void platform::InitFontEngines()
 {
     /// init ttf engines
-    auto ttfFactory {register_service<gfx::truetype_font_engine::factory>()};
-#if defined(TCOB_ENABLE_TTF_FREETYPE)
     gfx::detail::ft_ttf_font_engine::Init();
-    ttfFactory->add({"FREETYPE"}, std::make_unique<gfx::detail::ft_ttf_font_engine>);
-#endif
-#if defined(TCOB_ENABLE_TTF_STBTT)
-    ttfFactory->add({"STBTT"}, std::make_unique<gfx::detail::stb_ttf_font_engine>);
-#endif
-#if defined(TCOB_ENABLE_TTF_LIBSCHRIFT)
-    ttfFactory->add({"LIBSCHRIFT"}, std::make_unique<gfx::detail::libschrift_ttf_font_engine>);
-#endif
 
     /// init raster font loader
     auto rasFactory {register_service<gfx::raster_font::loader::factory>()};

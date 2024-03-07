@@ -15,7 +15,6 @@ char const* const use_desktop_resolution {"use_desktop_resolution"};
 char const* const resolution {"resolution"};
 char const* const vsync {"vsync"};
 char const* const render_system {"render_system"};
-char const* const font_engine {"font_engine"};
 }
 
 namespace tcob::data {

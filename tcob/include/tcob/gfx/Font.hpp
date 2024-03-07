@@ -133,11 +133,6 @@ private:
 
 class TCOB_API truetype_font_engine : public non_copyable {
 public:
-    struct factory : public type_factory<std::unique_ptr<truetype_font_engine>> {
-        string                    Engine;
-        static inline char const* service_name {"gfx::truetype_font_engine::factory"};
-    };
-
     struct glyph_bitmap {
         glyph              Glyph {};
         std::vector<ubyte> Bitmap {};
@@ -145,8 +140,6 @@ public:
 
     truetype_font_engine()          = default;
     virtual ~truetype_font_engine() = default;
-
-    auto virtual get_name() -> string = 0;
 
     auto virtual load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info> = 0;
 

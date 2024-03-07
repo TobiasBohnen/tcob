@@ -8,13 +8,13 @@
 #include <optional>
 #include <utility>
 
-#include <stb/stb_truetype.h>
-
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+
+#include "FontEngines.hpp"
 
 using namespace std::chrono_literals;
 
@@ -182,14 +182,8 @@ constexpr u32 FONT_TEXTURE_LAYERS {3};
 constexpr i32      GLYPH_PADDING {4};
 static char const* FONT_WARMUP {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>"};
 
-auto static CreateEngine() -> std::unique_ptr<tcob::gfx::truetype_font_engine>
-{
-    auto& factory {locate_service<truetype_font_engine::factory>()};
-    return factory.create(factory.Engine);
-}
-
 truetype_font::truetype_font()
-    : _engine {CreateEngine()}
+    : _engine {std::make_unique<detail::ft_ttf_font_engine>()}
 {
 }
 

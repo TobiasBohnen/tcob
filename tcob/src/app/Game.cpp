@@ -219,7 +219,6 @@ auto game::get_config_defaults() const -> data::config::object
     video[Cfg::Video::resolution]             = size_i {1600, 900};
     video[Cfg::Video::vsync]                  = false;
     video[Cfg::Video::render_system]          = "OPENGL45";
-    video[Cfg::Video::font_engine]            = "FREETYPE";
 
     data::config::object defaults {};
     defaults[Cfg::Video::Name] = video;

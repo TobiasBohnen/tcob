@@ -2351,9 +2351,6 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = TCOB_ENABLE_RENDERER_OPENGL45 \
                         TCOB_ENABLE_RENDERER_OPENGLES30 \
                         TCOB_ENABLE_RENDERER_NULL \
-                        TCOB_ENABLE_TTF_FREETYPE \
-                        TCOB_ENABLE_TTF_STBTT \
-                        TCOB_ENABLE_TTF_LIBSCHRIFT \
                         TCOB_ENABLE_ADDON_PHYSICS_BOX2D \
                         TCOB_ENABLE_ADDON_PHYSICS_CHIPMUNK2D \
                         TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT \
