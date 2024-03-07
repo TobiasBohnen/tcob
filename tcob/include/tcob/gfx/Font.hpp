@@ -19,6 +19,8 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Texture.hpp"
 
+using FT_Face = struct FT_FaceRec_*;
+
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
@@ -136,15 +138,29 @@ public:
     struct glyph_bitmap {
         glyph              Glyph {};
         std::vector<ubyte> Bitmap {};
+        size_i             BitmapSize {};
     };
 
-    truetype_font_engine()          = default;
-    virtual ~truetype_font_engine() = default;
+    truetype_font_engine() = default;
+    ~truetype_font_engine();
 
-    auto virtual load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info> = 0;
+    auto load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info>;
+    auto get_kerning(u32 cp0, u32 cp1) -> f32;
 
-    auto virtual get_kerning(u32 cp0, u32 cp1) -> f32 = 0;
-    auto virtual get_glyph(u32 cp) -> glyph_bitmap    = 0;
+    auto render_glyph(u32 cp) -> glyph_bitmap;
+    auto load_glyph(u32 cp) -> glyph;
+
+    auto static Init() -> bool;
+    void static Done();
+
+private:
+    auto codepoint_to_glyphindex(u32 cp) -> u32;
+
+    FT_Face _face {nullptr};
+
+    u32                          _fontSize {0};
+    std::unordered_map<u32, u32> _glyphIndices {};
+    font::info                   _info {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -174,7 +190,7 @@ private:
     bool                           _textureNeedsSetup {false};
     std::vector<ubyte>             _fontData {};
 
-    std::unique_ptr<truetype_font_engine> _engine;
+    truetype_font_engine _engine;
 };
 
 ////////////////////////////////////////////////////////////

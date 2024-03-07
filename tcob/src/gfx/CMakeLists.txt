@@ -5,7 +5,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorGradient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/FontEngines.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bmp.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bsi.cpp

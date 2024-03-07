@@ -12,7 +12,6 @@
 
 #include "../audio/audio_codecs/AudioCodecs.hpp"
 #include "../data/config_parsers/ConfigParsers.hpp"
-#include "../gfx/FontEngines.hpp"
 #include "../gfx/image_codecs/ImageCodecs.hpp"
 
 #include "loaders/ConfigAssetLoader.hpp"
@@ -27,6 +26,7 @@
 #include "tcob/core/io/Magic.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/data/ConfigTypes.hpp"
+#include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)
@@ -138,7 +138,7 @@ platform::~platform()
     SDL_Quit();
 
     //  FreeType
-    gfx::detail::ft_ttf_font_engine::Done();
+    gfx::truetype_font_engine::Done();
 }
 
 void platform::remove_services() const
@@ -431,7 +431,7 @@ void platform::InitAudioCodecs()
 void platform::InitFontEngines()
 {
     /// init ttf engines
-    gfx::detail::ft_ttf_font_engine::Init();
+    gfx::truetype_font_engine::Init();
 
     /// init raster font loader
     auto rasFactory {register_service<gfx::raster_font::loader::factory>()};

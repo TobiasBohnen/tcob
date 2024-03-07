@@ -14,7 +14,8 @@
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
-#include "FontEngines.hpp"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 using namespace std::chrono_literals;
 
@@ -174,6 +175,107 @@ void raster_font::add_kerning_pair(u32 first, u32 second, i16 amount)
 }
 
 ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+static FT_Library library {nullptr};
+
+truetype_font_engine::~truetype_font_engine()
+{
+    if (_face) {
+        FT_Done_Face(_face);
+    }
+}
+
+auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info>
+{
+    assert(library);
+
+    _fontSize = fontsize;
+    _glyphIndices.clear();
+
+    if (!FT_New_Memory_Face(library, data.data(), static_cast<FT_Long>(data.size()), 0, &_face)) {
+        FT_Set_Pixel_Sizes(_face, fontsize, fontsize);
+        FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
+
+        _info = {.Ascender   = _face->size->metrics.ascender / 64.0f,
+                 .Descender  = _face->size->metrics.descender / 64.0f,
+                 .LineHeight = _face->size->metrics.height / 64.0f};
+
+        return _info;
+    }
+
+    return std::nullopt;
+}
+
+auto truetype_font_engine::get_kerning(u32 cp0, u32 cp1) -> f32
+{
+    assert(_face);
+    assert(library);
+    if (!FT_HAS_KERNING(_face)) {
+        return 0;
+    }
+
+    FT_Vector kerning;
+    FT_Get_Kerning(_face, codepoint_to_glyphindex(cp0), codepoint_to_glyphindex(cp1), FT_KERNING_DEFAULT, &kerning);
+    return kerning.x / 64.0f;
+}
+
+auto truetype_font_engine::render_glyph(u32 cp) -> glyph_bitmap
+{
+    assert(_face);
+    assert(library);
+    glyph_bitmap retValue {};
+
+    retValue.Glyph = load_glyph(cp);
+    FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
+    retValue.BitmapSize.Width  = _face->glyph->bitmap.width;
+    retValue.BitmapSize.Height = _face->glyph->bitmap.rows;
+
+    retValue.Bitmap = std::vector<ubyte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (retValue.BitmapSize.Width * retValue.BitmapSize.Height)};
+
+    return retValue;
+}
+
+auto truetype_font_engine::load_glyph(u32 cp) -> glyph
+{
+    assert(_face);
+    assert(library);
+    glyph retValue {};
+
+    FT_Load_Glyph(_face, codepoint_to_glyphindex(cp), 0);
+
+    retValue.Size.Width  = _face->glyph->metrics.width / 64;
+    retValue.Size.Height = _face->glyph->metrics.height / 64;
+    retValue.Offset.X    = _face->glyph->metrics.horiBearingX / 64.0f;
+    retValue.Offset.Y    = -_face->glyph->metrics.horiBearingY / 64.0f + _info.Ascender;
+    retValue.AdvanceX    = _face->glyph->metrics.horiAdvance / 64.0f;
+
+    return retValue;
+}
+
+auto truetype_font_engine::codepoint_to_glyphindex(u32 cp) -> u32
+{
+    assert(_face);
+    assert(library);
+    auto it {_glyphIndices.find(cp)};
+    if (it == _glyphIndices.end()) {
+        return _glyphIndices[cp] = FT_Get_Char_Index(_face, cp);
+    }
+
+    return it->second;
+}
+
+auto truetype_font_engine::Init() -> bool
+{
+    return !FT_Init_FreeType(&library);
+}
+
+void truetype_font_engine::Done()
+{
+    FT_Done_FreeType(library);
+}
+
+////////////////////////////////////////////////////////////
 
 constexpr i32 FONT_TEXTURE_SIZE {512};
 constexpr f32 FONT_TEXTURE_SIZE_F {static_cast<f32>(FONT_TEXTURE_SIZE)};
@@ -182,10 +284,7 @@ constexpr u32 FONT_TEXTURE_LAYERS {3};
 constexpr i32      GLYPH_PADDING {4};
 static char const* FONT_WARMUP {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>"};
 
-truetype_font::truetype_font()
-    : _engine {std::make_unique<detail::ft_ttf_font_engine>()}
-{
-}
+truetype_font::truetype_font() = default;
 
 auto truetype_font::load(path const& file, u32 size) noexcept -> load_status
 {
@@ -202,7 +301,7 @@ auto truetype_font::load(istream& stream, u32 size) noexcept -> load_status
 
 auto truetype_font::load(std::span<ubyte const> fontData, u32 size) noexcept -> load_status
 {
-    if (auto info {_engine->load_data(fontData, size)}) {
+    if (auto info {_engine.load_data(fontData, size)}) {
         _info = *info;
         _glyphs.clear();
         _textureNeedsSetup = true;
@@ -247,13 +346,13 @@ auto truetype_font::shape_text(utf8_string_view text, bool kerning, bool readOnl
 
             auto& glyph {retValue.emplace_back(_glyphs[cp0])};
             if (kerning && i < len - 1) {
-                glyph.AdvanceX += _engine->get_kerning(cp0, utf32text[i + 1]);
+                glyph.AdvanceX += _engine.get_kerning(cp0, utf32text[i + 1]);
             }
         } else {
             if (_glyphs.contains(cp0)) {
                 retValue.push_back(_glyphs[cp0]);
             } else {
-                retValue.push_back(_engine->get_glyph(cp0).Glyph);
+                retValue.push_back(_engine.load_glyph(cp0));
             }
         }
     }
@@ -269,19 +368,19 @@ auto truetype_font::get_info() const -> font::info const&
 auto truetype_font::cache_glyph(u32 cp) -> bool
 {
     if (!_glyphs.contains(cp)) {
-        auto        gb {_engine->get_glyph(cp)};
-        auto const& glyphSize {gb.Glyph.Size};
-        if (glyphSize.Width < 0 || glyphSize.Height < 0) {
+        auto       gb {_engine.render_glyph(cp)};
+        auto const bitmapSize {gb.BitmapSize};
+        if (bitmapSize.Width < 0 || bitmapSize.Height < 0) {
             return false;
         }
 
         // check font texture space
-        if (_fontTextureCursor.X + glyphSize.Width >= FONT_TEXTURE_SIZE) { // new line
+        if (_fontTextureCursor.X + bitmapSize.Width >= FONT_TEXTURE_SIZE) { // new line
             _fontTextureCursor.X = 0;
             _fontTextureCursor.Y += static_cast<i32>(get_info().LineHeight) + GLYPH_PADDING;
         }
 
-        if (_fontTextureCursor.Y + glyphSize.Height >= FONT_TEXTURE_SIZE) { // new level
+        if (_fontTextureCursor.Y + bitmapSize.Height >= FONT_TEXTURE_SIZE) { // new level
             _fontTextureLayer++;
             if (_fontTextureLayer >= FONT_TEXTURE_LAYERS) {
                 logger::Error("TrueTypeFont: font texture layer {} exceeds maximum.", _fontTextureLayer);
@@ -290,17 +389,17 @@ auto truetype_font::cache_glyph(u32 cp) -> bool
         }
 
         // write to texture
-        get_texture()->update_data(_fontTextureCursor, glyphSize, gb.Bitmap.data(), _fontTextureLayer, glyphSize.Width, 1);
+        get_texture()->update_data(_fontTextureCursor, bitmapSize, gb.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
 
         // create glyph
         gb.Glyph.TexRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
-                                         glyphSize.Width / FONT_TEXTURE_SIZE_F, glyphSize.Height / FONT_TEXTURE_SIZE_F},
+                                         bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
                               .Level  = _fontTextureLayer};
 
         _glyphs[cp] = gb.Glyph;
 
         // advance cursor
-        _fontTextureCursor.X += glyphSize.Width + GLYPH_PADDING;
+        _fontTextureCursor.X += bitmapSize.Width + GLYPH_PADDING;
     }
     return true;
 }
