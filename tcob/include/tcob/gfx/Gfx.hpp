@@ -22,7 +22,7 @@ enum class blend_func : u8 {
     Zero,
     One,
     SrcColor,
-    OneMinusScrColor,
+    OneMinusSrcColor,
     DstColor,
     OneMinusDstColor,
     SrcAlpha,

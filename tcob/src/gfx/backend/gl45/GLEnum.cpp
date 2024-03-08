@@ -32,7 +32,7 @@ auto convert_enum(blend_func blendfunc) -> u32
         return GL_ONE;
     case blend_func::SrcColor:
         return GL_SRC_COLOR;
-    case blend_func::OneMinusScrColor:
+    case blend_func::OneMinusSrcColor:
         return GL_ONE_MINUS_SRC_COLOR;
     case blend_func::DstColor:
         return GL_DST_COLOR;
