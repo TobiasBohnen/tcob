@@ -277,7 +277,7 @@ void truetype_font_engine::Done()
 
 ////////////////////////////////////////////////////////////
 
-constexpr i32 FONT_TEXTURE_SIZE {512};
+constexpr i32 FONT_TEXTURE_SIZE {2048};
 constexpr f32 FONT_TEXTURE_SIZE_F {static_cast<f32>(FONT_TEXTURE_SIZE)};
 constexpr u32 FONT_TEXTURE_LAYERS {3};
 
@@ -328,7 +328,7 @@ auto truetype_font::shape_text(utf8_string_view text, bool kerning, bool readOnl
 {
     if (_textureNeedsSetup && !readOnlyCache) {
         setup_texture();
-        shape_text(FONT_WARMUP, false, true);
+        shape_text(FONT_WARMUP, false, false);
     }
 
     auto const         utf32text {convert_UTF8_to_UTF32(text)};
