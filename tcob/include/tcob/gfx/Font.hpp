@@ -209,6 +209,8 @@ public:
 
     auto get_font_count() const -> isize;
 
+    auto get_images() const -> std::vector<image>;
+
     void static FindSources(font_family& fam, path const& source);
 
     static inline char const* asset_name {"font_family"};

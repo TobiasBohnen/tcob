@@ -194,7 +194,7 @@ auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) 
     _glyphIndices.clear();
 
     if (!FT_New_Memory_Face(library, data.data(), static_cast<FT_Long>(data.size()), 0, &_face)) {
-        FT_Set_Pixel_Sizes(_face, fontsize, fontsize);
+        FT_Set_Pixel_Sizes(_face, _fontSize, _fontSize);
         FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
 
         _info = {.Ascender   = _face->size->metrics.ascender / 64.0f,
@@ -228,10 +228,20 @@ auto truetype_font_engine::render_glyph(u32 cp) -> glyph_bitmap
 
     retValue.Glyph = load_glyph(cp);
     FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
+
+    /*
+        FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_SDF); // render twice to force bsdf
+        std::vector<byte> bitmap {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
+        retValue.Bitmap.reserve(bitmap.size());
+        for (ubyte pixel : bitmap) {
+            retValue.Bitmap.push_back(pixel < 128 ? static_cast<ubyte>(256 - (128 - pixel) * 2) : 255);
+        }
+    */
+
+    retValue.Bitmap = std::vector<ubyte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
+
     retValue.BitmapSize.Width  = _face->glyph->bitmap.width;
     retValue.BitmapSize.Height = _face->glyph->bitmap.rows;
-
-    retValue.Bitmap = std::vector<ubyte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (retValue.BitmapSize.Width * retValue.BitmapSize.Height)};
 
     return retValue;
 }
@@ -281,8 +291,7 @@ constexpr i32 FONT_TEXTURE_SIZE {2048};
 constexpr f32 FONT_TEXTURE_SIZE_F {static_cast<f32>(FONT_TEXTURE_SIZE)};
 constexpr u32 FONT_TEXTURE_LAYERS {3};
 
-constexpr i32      GLYPH_PADDING {4};
-static char const* FONT_WARMUP {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;:'!\"%&()=?<>"};
+constexpr i32 GLYPH_PADDING {4};
 
 truetype_font::truetype_font() = default;
 
@@ -328,7 +337,6 @@ auto truetype_font::shape_text(utf8_string_view text, bool kerning, bool readOnl
 {
     if (_textureNeedsSetup && !readOnlyCache) {
         setup_texture();
-        shape_text(FONT_WARMUP, false, false);
     }
 
     auto const         utf32text {convert_UTF8_to_UTF32(text)};
@@ -533,6 +541,21 @@ auto font_family::get_font_count() const -> isize
     for (auto const& a : _fontAssets) {
         retValue += std::ssize(a.second);
     }
+    return retValue;
+}
+
+auto font_family::get_images() const -> std::vector<image>
+{
+    std::vector<image> retValue;
+    for (auto const& f : _fontAssets) {
+        for (auto const& fa : f.second) {
+            fa.second->shape_text("a", false, false);
+            for (u32 level {0}; level < FONT_TEXTURE_LAYERS; ++level) {
+                retValue.push_back(fa.second->get_texture()->copy_to_image(level));
+            }
+        }
+    }
+
     return retValue;
 }
 
