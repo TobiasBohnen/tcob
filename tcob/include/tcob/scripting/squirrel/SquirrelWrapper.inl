@@ -140,17 +140,24 @@ inline void wrapper<T>::create_metatable(string const& name)
                     }});
 
     // cmp metamethod
-    if constexpr (LessEqualComparable<T> && Equatable<T>) {
-        push_metamethod("_cmp",
-                        std::function {[](T* instance1, T* instance2) {
-                            if (*instance1 == *instance2) {
-                                return 0;
-                            }
-                            if (*instance1 < *instance2) {
-                                return -1;
-                            }
-                            return 1;
-                        }});
+    if constexpr (Equatable<T>) {
+        if constexpr (LessEqualComparable<T>) {
+            push_metamethod("_cmp",
+                            std::function {[](T* instance1, T* instance2) {
+                                if (*instance1 == *instance2) {
+                                    return 0;
+                                }
+                                if (*instance1 < *instance2) {
+                                    return -1;
+                                }
+                                return 1;
+                            }});
+        } else {
+            push_metamethod("_cmp",
+                            std::function {[](T* instance1, T* instance2) {
+                                return *instance1 == *instance2 ? 0 : 1;
+                            }});
+        }
     }
 
     // unm metamethod

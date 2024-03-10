@@ -149,7 +149,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.DefaultMetametho
         REQUIRE_FALSE(*run<bool>("return wrap1 < wrap2"));
         REQUIRE(*run<bool>("return wrap1 > wrap2"));
     }
-    SUBCASE("Equal")
+    SUBCASE("Compare")
     {
         op_test_class t1 {4000};
         global["wrap1"] = &t1;
@@ -189,6 +189,30 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.DefaultMetametho
         op_test_class* b = *run<op_test_class*>("wrap3 <- -wrap1; return wrap3");
         REQUIRE(b->value == -4000);
     }
+}
+
+TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.Equals")
+{
+    struct op_test_class2 {
+        int  value {0};
+        auto operator==(op_test_class2 const& other) const -> bool // NOLINT
+        {
+            return value == other.value;
+        }
+    };
+
+    auto wrapper = create_wrapper<op_test_class2>("ops");
+
+    op_test_class2 t1 {4000};
+    global["wrap1"] = &t1;
+    op_test_class2 t2 {4000};
+    global["wrap2"] = &t2;
+
+    REQUIRE(*run<bool>("return (wrap1 <=> wrap2) == 0"));
+    REQUIRE_FALSE(*run<bool>("return (wrap1 <=> wrap2) != 0"));
+    t1.value = 8000;
+    REQUIRE_FALSE(*run<bool>("return (wrap1 <=> wrap2) == 0"));
+    REQUIRE(*run<bool>("return (wrap1 <=> wrap2) != 0"));
 }
 
 TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.Metamethods")

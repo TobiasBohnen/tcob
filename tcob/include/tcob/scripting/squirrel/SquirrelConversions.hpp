@@ -20,7 +20,6 @@
 
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
-    #include "tcob/scripting/Wrapper.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
     #include "tcob/scripting/squirrel/SquirrelClosure.hpp"
     #include "tcob/scripting/squirrel/SquirrelTypes.hpp"
