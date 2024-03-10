@@ -81,8 +81,8 @@ void text::format()
 
     // format text
     auto const size {Bounds->get_size()};
-    auto const lines {text_formatter::wrap(_shaperTokens, size.Width)};
-    auto const formatResult {text_formatter::format(lines, *_font, Style->Alignment, size.Height)};
+    auto const lines {text_formatter::wrap(_shaperTokens, size.Width, 1.0f)};
+    auto const formatResult {text_formatter::format(lines, *_font, Style->Alignment, size.Height, 1.0f)};
     _quads.reserve(formatResult.QuadCount);
 
     color c {Style->Color};

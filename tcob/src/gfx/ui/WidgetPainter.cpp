@@ -499,23 +499,24 @@ auto widget_painter::format_text(element::text const& style, rect_f const& rect,
     _canvas.set_text_valign(style.Alignment.Vertical);
 
     auto const rectSize {rect.get_size()};
+
+    f32 scale {1.0f};
+
     if (resize && style.AutoSize != element::text::auto_size_mode::Never) {
-        auto const textSize {_canvas.measure_text(rectSize.Height, text)};
+        auto const textSize {_canvas.measure_text(-1, text)};
 
-        if ((style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyShrink)
-            && (textSize.Width > rectSize.Width || textSize.Height > rectSize.Height)) { // shrink
-            f32 const scale {std::max(textSize.Width / std::ceil(rectSize.Width), textSize.Height / std::ceil(rectSize.Height))};
-            return format_text(style, rect, text, static_cast<u32>(fontSize / scale) - 1, false);
-        }
+        bool const shouldShrink {(style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyShrink)
+                                 && (textSize.Width > rectSize.Width || textSize.Height > rectSize.Height)};
 
-        if ((style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyGrow)
-            && (textSize.Width < rectSize.Width || textSize.Height < rectSize.Height)) { // grow
-            f32 const scale {std::min(std::floor(rectSize.Width) / textSize.Width, std::floor(rectSize.Height) / textSize.Height)};
-            return format_text(style, rect, text, static_cast<u32>(fontSize * scale) - 1, false);
+        bool const shouldGrow {(style.AutoSize == element::text::auto_size_mode::Always || style.AutoSize == element::text::auto_size_mode::OnlyGrow)
+                               && (textSize.Width < rectSize.Width && textSize.Height < rectSize.Height)};
+
+        if (shouldShrink || shouldGrow) {
+            scale = std::min(std::floor(rectSize.Width) / textSize.Width, std::floor(rectSize.Height) / textSize.Height);
         }
     }
 
-    return _canvas.format_text(rectSize, text);
+    return _canvas.format_text(rectSize, text, scale);
 }
 
 auto widget_painter::transform_text(element::text::transform xform, utf8_string_view text) const -> utf8_string

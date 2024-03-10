@@ -29,7 +29,7 @@ void UIEx::on_start()
     get_window().Cursor       = defaultCursor;
     defaultCursor->ActiveMode = "default";
 
-    _form0         = create_form_tabcontainer(&get_window());
+    _form0         = create_form0(&get_window());
     _form0->Styles = create_color_styles();
     // _form0->Bounds = rect_f {{300, 450}, size_f {get_window().Size() * 2}};
     //_form0->Scale  = {0.5f, 0.5f};

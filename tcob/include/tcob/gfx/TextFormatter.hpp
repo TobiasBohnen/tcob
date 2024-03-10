@@ -78,9 +78,9 @@ public:
 ////////////////////////////////////////////////////////////
 
 TCOB_API auto shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) -> std::vector<token>;
-TCOB_API auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_definition>;
-TCOB_API auto format(std::vector<line_definition> const& lines, font& font, alignments align, f32 height) -> result;
+TCOB_API auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>;
+TCOB_API auto format(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result;
 
-TCOB_API auto format_text(utf8_string_view text, font& font, alignments align, size_f size, bool kerning) -> result;
-TCOB_API auto measure_text(utf8_string_view text, font& font, f32 height, bool kerning) -> size_f;
+TCOB_API auto format_text(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result;
+TCOB_API auto measure_text(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f;
 }

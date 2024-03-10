@@ -216,7 +216,7 @@ auto container::text_width(char const* text, litehtml::uint_ptr hFont) -> i32
 {
     auto* f {_fonts[hFont - 1]};
     return f
-        ? static_cast<i32>(text_formatter::format_text(text, *f, {horizontal_alignment::Left, vertical_alignment::Top}, {-1.0f, -1.0f}, true).UsedSize.Width)
+        ? static_cast<i32>(text_formatter::measure_text(text, *f, -1, true).Width)
         : -1;
 }
 

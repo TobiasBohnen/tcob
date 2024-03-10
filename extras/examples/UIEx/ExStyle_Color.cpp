@@ -635,7 +635,7 @@ auto create_color_styles() -> style_collection
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Bold};
         style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
-        style->Item.Text.AutoSize  = element::text::auto_size_mode::OnlyShrink;
+        style->Item.Text.AutoSize  = element::text::auto_size_mode::Always;
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
         style->Item.Border.Size    = 5_px;
@@ -656,7 +656,7 @@ auto create_color_styles() -> style_collection
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Normal};
         style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
-        style->Item.Text.AutoSize  = element::text::auto_size_mode::OnlyShrink;
+        style->Item.Text.AutoSize  = element::text::auto_size_mode::Always;
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Color     = normal.Text;
         style->Item.Text.Alignment = {horizontal_alignment::Left, vertical_alignment::Middle};

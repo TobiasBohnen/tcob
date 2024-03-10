@@ -1496,11 +1496,11 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
     render_text(s.Font, {verts, nverts});
 }
 
-auto canvas::format_text(size_f const& size, utf8_string_view text) -> text_formatter::result
+auto canvas::format_text(size_f const& size, utf8_string_view text, f32 scale) -> text_formatter::result
 {
     state& s {get_state()};
     if (!s.Font) { return {}; }
-    return text_formatter::format_text(text, *s.Font, s.TextAlign, size, true);
+    return text_formatter::format_text(text, *s.Font, s.TextAlign, size, scale, true);
 }
 
 auto canvas::measure_text(f32 height, utf8_string_view text) -> size_f

@@ -51,9 +51,7 @@ auto static Tokenize(utf8_string_view text) -> std::vector<token>
 {
     std::vector<token> retValue {};
 
-    if (text.empty()) {
-        return retValue;
-    }
+    if (text.empty()) { return retValue; }
 
     token currentToken {};
     for (char const ch : text) {
@@ -143,7 +141,7 @@ auto shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) 
     return retValue;
 }
 
-auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_definition>
+auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>
 {
     std::vector<line_definition> retValue {};
     line_definition              currentLine {};
@@ -157,11 +155,11 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_d
         }
 
         f32 testWidth {currentLine.RemainingWidth};
-        if (currentToken.Width > testWidth || currentToken.Type == token_type::Newline) {
+        if (currentToken.Width * scale > testWidth || currentToken.Type == token_type::Newline) {
             if (!currentLine.Tokens.empty()) {
                 if (currentLine.Tokens.back()->Type == token_type::Whitespace) { // remove whitespace if last word of line
                     currentLine.WhiteSpaceCount--;
-                    currentLine.RemainingWidth += currentLine.Tokens.back()->Width;
+                    currentLine.RemainingWidth += currentLine.Tokens.back()->Width * scale;
                     currentLine.Tokens.pop_back();
                 }
 
@@ -176,7 +174,7 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_d
             // add word to new line
             if (currentToken.Type == token_type::Text) {
                 currentLine.Tokens.push_back(&currentToken);
-                currentLine.RemainingWidth -= currentToken.Width;
+                currentLine.RemainingWidth -= currentToken.Width * scale;
             }
         } else {
             // add word to line
@@ -186,9 +184,9 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_d
 
             if (currentToken.Type == token_type::Whitespace) {
                 currentLine.WhiteSpaceCount++;
-                currentLine.RemainingWidth -= currentToken.Width;
+                currentLine.RemainingWidth -= currentToken.Width * scale;
             } else {
-                currentLine.RemainingWidth -= currentToken.Width;
+                currentLine.RemainingWidth -= currentToken.Width * scale;
             }
         }
     }
@@ -199,8 +197,10 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth) -> std::vector<line_d
     return retValue;
 }
 
-auto format(std::vector<line_definition> const& lines, font& font, alignments align, f32 height) -> result
+auto format(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
 {
+    availableHeight = availableHeight < 0 ? std::numeric_limits<f32>::max() : availableHeight;
+
     auto const& fontInfo {font.get_info()};
 
     f32    x {0}, y {0};
@@ -226,24 +226,24 @@ auto format(std::vector<line_definition> const& lines, font& font, alignments al
 
             for (auto const& glyph : shapeToken->Glyphs) {
                 auto&     quadDef {formatToken.Quads.emplace_back()};
-                f32 const offsetX {x + glyph.Offset.X};
-                f32 const offsetY {y + glyph.Offset.Y};
+                f32 const offsetX {x + glyph.Offset.X * scale};
+                f32 const offsetY {y + glyph.Offset.Y * scale};
                 if (shapeToken->Type == token_type::Whitespace) {
-                    quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.AdvanceX, 0.f}};
+                    quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.AdvanceX * scale, 0.f}};
                 } else {
-                    quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.Size}};
+                    quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.Size} * scale};
                 }
                 quadDef.TexRegion = glyph.TexRegion;
 
                 retValue.QuadCount++;
-                x += glyph.AdvanceX;
+                x += glyph.AdvanceX * scale;
             }
         }
 
-        y += fontInfo.LineHeight;
+        y += fontInfo.LineHeight * scale;
         retValue.UsedSize.Width = std::max(x, retValue.UsedSize.Width);
 
-        if (y + fontInfo.LineHeight > height) {
+        if (y + fontInfo.LineHeight * scale > availableHeight) {
             break;
         }
     }
@@ -253,9 +253,9 @@ auto format(std::vector<line_definition> const& lines, font& font, alignments al
     if (align.Vertical != vertical_alignment::Top) {
         f32 offset {0.0f};
         if (align.Vertical == vertical_alignment::Middle) {
-            offset = (height - y) / 2;
+            offset = (availableHeight - y) / 2;
         } else if (align.Vertical == vertical_alignment::Bottom) {
-            offset = (height - y);
+            offset = (availableHeight - y);
         }
 
         for (auto& token : retValue.Tokens) {
@@ -268,18 +268,18 @@ auto format(std::vector<line_definition> const& lines, font& font, alignments al
     return retValue;
 }
 
-auto format_text(utf8_string_view text, font& font, alignments align, size_f size, bool kerning) -> result
+auto format_text(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result
 {
     auto shaperTokens {shape(text, font, kerning, false)};
-    auto lines {wrap(shaperTokens, size.Width)};
-    return format(lines, font, align, size.Height);
+    auto lines {wrap(shaperTokens, availableSize.Width, scale)};
+    return format(lines, font, align, availableSize.Height, scale);
 }
 
-auto measure_text(utf8_string_view text, font& font, f32 height, bool kerning) -> size_f
+auto measure_text(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f
 {
     auto shaperTokens {shape(text, font, kerning, true)};
-    auto lines {wrap(shaperTokens, -1)};
-    return format(lines, font, {}, height).UsedSize;
+    auto lines {wrap(shaperTokens, -1, 1.0f)};
+    return format(lines, font, {}, availableHeight, 1.0f).UsedSize;
 }
 
 ////////////////////////////////////////////////////////////
