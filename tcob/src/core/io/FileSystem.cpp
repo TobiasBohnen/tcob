@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <miniz/miniz.h>
+#undef crc32
 #include <physfs.h>
 
 #include "tcob/core/Logger.hpp"
@@ -22,7 +23,7 @@ file_hasher::file_hasher(path file)
 {
 }
 
-auto file_hasher::calc_crc32() const -> u32
+auto file_hasher::crc32() const -> u32
 {
     if (!is_file(_path)) {
         return 0;

@@ -15,7 +15,7 @@ class TCOB_API file_hasher final {
 public:
     explicit file_hasher(path file);
 
-    auto calc_crc32 [[nodiscard]] () const -> u32;
+    auto crc32 [[nodiscard]] () const -> u32;
 
 private:
     path _path;
