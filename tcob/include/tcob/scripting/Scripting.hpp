@@ -35,7 +35,10 @@ struct parameter_pack final {
 
 template <typename T>
 struct owned_ptr {
-    explicit owned_ptr(T* obj);
+    explicit owned_ptr(T* obj)
+        : Pointer {obj}
+    {
+    }
 
     T* Pointer {nullptr};
 };

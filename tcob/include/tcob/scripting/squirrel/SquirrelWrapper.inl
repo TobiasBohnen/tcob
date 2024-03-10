@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+
 #include "SquirrelWrapper.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)

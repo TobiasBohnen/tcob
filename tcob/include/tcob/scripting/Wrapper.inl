@@ -10,14 +10,6 @@ namespace tcob::scripting {
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline owned_ptr<T>::owned_ptr(T* obj)
-    : Pointer {obj}
-{
-}
-
-////////////////////////////////////////////////////////////
-
 template <typename WrapperImpl>
 inline wrapper<WrapperImpl>::proxy::proxy(wrapper& parent, string name)
     : _parent {parent}
