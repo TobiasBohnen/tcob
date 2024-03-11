@@ -22,7 +22,6 @@
 
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
-    #include "tcob/scripting/Wrapper.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
     #include "tcob/scripting/lua/LuaClosure.hpp"
     #include "tcob/scripting/lua/LuaTypes.hpp"
