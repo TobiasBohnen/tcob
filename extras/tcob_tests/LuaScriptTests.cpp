@@ -657,6 +657,48 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Enums")
     }
 }
 
+TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Environment")
+{
+    SUBCASE("change global vars")
+    {
+        auto res0 = run("x = 100");
+        REQUIRE(res0);
+        auto res1 = run<i32>("return x");
+        REQUIRE(res1);
+        REQUIRE(res1.value() == 100);
+
+        table newEnv {get_view()};
+        newEnv["x"] = 200;
+        set_environment(newEnv);
+
+        res1 = run<i32>("return x");
+        REQUIRE(res1);
+        REQUIRE(res1.value() == 200);
+
+        newEnv["x"] = 600;
+        res1        = run<i32>("return x");
+        REQUIRE(res1);
+        REQUIRE(res1.value() == 600);
+    }
+    SUBCASE("whitelist funcs")
+    {
+        auto res0 = run<f32>("return tonumber('5')");
+        REQUIRE(res0);
+        REQUIRE(res0.value() == 5.0f);
+
+        table newEnv {get_view()};
+        set_environment(newEnv);
+
+        res0 = run<f32>("return tonumber('5')", "error");
+        REQUIRE_FALSE(res0);
+
+        newEnv["tonumber"] = global["tonumber"].as<function<f32>>();
+        res0               = run<f32>("return tonumber('5')");
+        REQUIRE(res0);
+        REQUIRE(res0.value() == 5.0f);
+    }
+}
+
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Functions")
 {
     SUBCASE("cpp -> lua -> cpp")
@@ -2131,7 +2173,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Upvalue")
 
         REQUIRE(func() == 100 * 70 * 42);
 
-        REQUIRE(func.set_upvalue("_ENV", newEnv));
+        REQUIRE(func.set_environment(newEnv));
         REQUIRE(func() == 11 * 22 * 33);
     }
 

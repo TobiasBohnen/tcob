@@ -252,6 +252,11 @@ void table::write_to_stream(ostream& stream, usize indent) const
 ////////////////////////////////////////////////////////////
 
 namespace detail {
+    function_base::function_base(state_view view, i32 idx)
+    {
+        acquire(view, idx);
+    }
+
     auto static writer(lua_State*, void const* p, usize sz, void* ud) -> i32
     {
         auto* stream {static_cast<ostream*>(ud)};
@@ -314,6 +319,12 @@ namespace detail {
 
         return false;
     }
+
+    auto function_base::set_environment(table const& env) -> bool
+    {
+        return set_upvalue("_ENV", env);
+    }
+
 }
 
 ////////////////////////////////////////////////////////////

@@ -223,6 +223,12 @@ inline auto function<R>::call_async(auto&&... params) const -> std::future<resul
     });
 }
 
+template <typename R>
+inline auto function<R>::Acquire(state_view view, i32 idx) -> function<R>
+{
+    return function {view, idx};
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename R>

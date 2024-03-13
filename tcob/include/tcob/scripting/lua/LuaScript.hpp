@@ -78,6 +78,8 @@ public:
     signal<warning_event const> Warning;
 
     auto get_global_table() -> table&;
+    void set_environment(table const& env);
+
     auto get_view() const -> state_view;
     auto get_GC() const -> gc;
 
@@ -111,8 +113,9 @@ private:
 
     void register_searcher();
 
-    state_view _view;
-    table      _globalTable;
+    state_view           _view;
+    table                _globalTable;
+    std::optional<table> _environment;
 
     HookFunc                                                           _hookFunc;
     std::function<std::function<table(string const&)>*(string const&)> _searcher;

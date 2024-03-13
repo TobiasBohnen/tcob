@@ -32,11 +32,14 @@ script::script()
     _globalTable.acquire(_view, -1);
     _view.pop(1);
 
+    _environment = _globalTable; // NOLINT
+
     _view.set_warnf(&warn, this);
 }
 
 script::~script()
 {
+    if (_environment) { _environment->release(); }
     _globalTable.release();
     clear_wrappers();
     _view.close();
@@ -45,6 +48,11 @@ script::~script()
 auto script::get_global_table() -> table&
 {
     return _globalTable;
+}
+
+void script::set_environment(table const& env)
+{
+    _environment = env;
 }
 
 auto script::get_view() const -> state_view
@@ -65,6 +73,10 @@ auto script::create_table() const -> table
 auto script::call_buffer(string_view script, string const& name) const -> error_code
 {
     if (_view.load_buffer(script, name) == LUA_OK) {
+        if (_environment) {
+            function<void> func {function<void>::Acquire(_view, -1)};
+            func.set_environment(*_environment);
+        }
         return _view.pcall(0, LUA_MULTRET);
     }
 

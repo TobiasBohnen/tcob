@@ -106,12 +106,18 @@ namespace detail {
 
     class TCOB_API function_base : public ref {
     public:
+        function_base() = default;
+
         void dump(ostream& stream) const;
 
         auto get_upvalues() const -> std::unordered_set<string>;
         auto set_upvalue(string const& name, ref const& value) -> bool;
 
+        auto set_environment(table const& env) -> bool;
+
     protected:
+        function_base(state_view view, i32 idx);
+
         auto call_protected(i32 nargs) const -> error_code;
     };
 }
@@ -121,6 +127,8 @@ namespace detail {
 template <typename R>
 class function final : public detail::function_base {
 public:
+    function() = default;
+
     using return_type = R;
 
     auto operator()(auto&&... params) const -> return_type;
@@ -128,6 +136,11 @@ public:
     auto call(auto&&... params) const -> result<return_type>;
 
     auto call_async(auto&&... params) const -> std::future<result<return_type>>;
+
+    auto static Acquire(state_view view, i32 idx) -> function<R>;
+
+protected:
+    using detail::function_base::function_base;
 };
 
 ////////////////////////////////////////////////////////////
