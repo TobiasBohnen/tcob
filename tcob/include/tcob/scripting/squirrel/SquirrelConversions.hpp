@@ -519,6 +519,20 @@ struct converter<std::filesystem::path> {
 ////squirrel//////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
+template <>
+struct converter<ref> {
+    auto static IsType(vm_view, SQInteger) -> bool
+    {
+        return true;
+    }
+
+    auto static From(vm_view view, SQInteger& idx, ref& value) -> bool
+    {
+        value.acquire(view, idx++);
+        return value.is_valid();
+    }
+};
+
 template <typename T>
 struct ref_converter {
     auto static IsType(vm_view view, SQInteger idx) -> bool
@@ -910,6 +924,16 @@ struct converter<result<T>> {
     void static To(vm_view view, result<T> const& value)
     {
         converter<T>::To(view, value.value());
+    }
+};
+
+template <typename... Keys>
+struct converter<proxy<table, Keys...>> {
+    void static To(vm_view, proxy<table, Keys...> const& value)
+    {
+        if (ref val; value.try_get(val)) {
+            val.push_self();
+        }
     }
 };
 

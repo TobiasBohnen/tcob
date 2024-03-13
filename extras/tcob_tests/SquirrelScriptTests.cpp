@@ -1044,22 +1044,22 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Map")
     SUBCASE("from")
     {
         {
-            std::map<std::string, rect_f> m = *run<std::map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
+            auto m = *run<std::map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
             REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
             REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
         }
         {
-            std::map<i32, rect_f> m = *run<std::map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
+            auto m = *run<std::map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
             REQUIRE(m[0] == (rect_f {0, 1, 2, 3}));
             REQUIRE(m[1] == (rect_f {4, 3, 2, 1}));
         }
         {
-            std::unordered_map<std::string, rect_f> m = *run<std::unordered_map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
+            auto m = *run<std::unordered_map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
             REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
             REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
         }
         {
-            std::unordered_map<i32, rect_f> m = *run<std::unordered_map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
+            auto m = *run<std::unordered_map<i32, rect_f>>("return [{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}]");
             REQUIRE(m[0] == (rect_f {0, 1, 2, 3}));
             REQUIRE(m[1] == (rect_f {4, 3, 2, 1}));
         }
@@ -1103,7 +1103,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Optional")
         REQUIRE(f == Optional2(100, "hurray", 2.5f));
     }
     {
-        std::optional<f32> f = *run<std::optional<f32>>("return 10.25");
+        auto f = *run<std::optional<f32>>("return 10.25");
         REQUIRE(f.has_value());
         REQUIRE(f == 10.25f);
     }
@@ -1418,7 +1418,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
                 "rectF <- {x=2.7, y=3.1, width=2.3, height=55.2} "
                 "function tabletest(x) { return x.y}");
             REQUIRE(res);
-            table tab = global["rectF"].as<table>();
+            auto tab  = global["rectF"].as<table>();
             tab["y"]  = 100.5f;
             auto func = global["tabletest"].as<function<f32>>();
             f32  x    = func(tab);
@@ -1457,7 +1457,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
         {
             auto res = run("tableX <- { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab               = global["tableX"].as<table>();
+            auto tab                = global["tableX"].as<table>();
             tab["a"]["b"]["c"]["d"] = 42;
             i32 top                 = global["tableX"]["a"]["b"]["c"]["d"].as<i32>();
             REQUIRE(top == 42);
@@ -1465,7 +1465,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
         {
             auto res = run("tableX <- { a={ b={ c={ d=2 } } } }");
             REQUIRE(res);
-            table tab = global["tableX"].as<table>();
+            auto tab = global["tableX"].as<table>();
             REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 2);
             res = run("tableX.a.b.c.d = 4");
             REQUIRE(tab["a"]["b"]["c"]["d"].as<i32>() == 4);
@@ -1548,6 +1548,49 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
         auto res = run<std::string>("return tab.tostring()");
         REQUIRE(res.has_value());
         REQUIRE(res.value().starts_with("hello world"));
+    }
+    SUBCASE("proxy")
+    {
+        SUBCASE("int")
+        {
+            auto tab = table {get_view()};
+            tab["x"] = 100;
+            tab["y"] = tab["x"];
+            REQUIRE(tab["x"].as<i32>() == 100);
+            REQUIRE(tab["y"].as<i32>() == 100);
+        }
+        SUBCASE("bool")
+        {
+            auto tab = table {get_view()};
+            tab["x"] = true;
+            tab["y"] = tab["x"];
+            REQUIRE(tab["x"].as<bool>() == true);
+            REQUIRE(tab["y"].as<bool>() == true);
+        }
+        SUBCASE("string")
+        {
+            auto tab = table {get_view()};
+            tab["x"] = "ok";
+            tab["y"] = tab["x"];
+            REQUIRE(tab["x"].as<string>() == "ok");
+            REQUIRE(tab["y"].as<string>() == "ok");
+        }
+        SUBCASE("table")
+        {
+            auto tab  = table {get_view()};
+            auto tab2 = table {get_view()};
+            tab2["a"] = 100;
+            tab["x"]  = tab2;
+            tab["y"]  = tab["x"];
+            REQUIRE(tab["x"]["a"].as<i32>() == 100);
+            REQUIRE(tab["y"]["a"].as<i32>() == 100);
+        }
+        SUBCASE("undefined")
+        {
+            auto tab = table {get_view()};
+            tab["y"] = tab["x"];
+            REQUIRE_FALSE(tab.has("y"));
+        }
     }
 }
 
@@ -1749,7 +1792,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.TypeCoercion")
         REQUIRE(res);
         REQUIRE(global.is<i32>("a"));
         REQUIRE_FALSE(global.is<std::string>("a"));
-        std::string val = global["a"].as<std::string>();
+        auto val = global["a"].as<std::string>();
         REQUIRE(val == "100");
     }
     SUBCASE("string from number")
@@ -1758,7 +1801,7 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.TypeCoercion")
         REQUIRE(res);
         REQUIRE(global.is<f32>("a"));
         REQUIRE_FALSE(global.is<std::string>("a"));
-        std::string val = global["a"].as<std::string>();
+        auto val = global["a"].as<std::string>();
         REQUIRE(val == "100.500000");
     }
 }

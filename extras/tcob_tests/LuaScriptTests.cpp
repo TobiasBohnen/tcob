@@ -374,8 +374,8 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Container")
     SUBCASE("get/set unordered_set")
     {
         std::unordered_set<std::string> set1 {"test", "test2"};
-        global["foo"]                        = set1;
-        std::unordered_set<std::string> set2 = *run<std::unordered_set<std::string>>("return foo ");
+        global["foo"] = set1;
+        auto set2     = *run<std::unordered_set<std::string>>("return foo ");
         REQUIRE(set1 == set2);
     }
 }
@@ -659,7 +659,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Enums")
 
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Environment")
 {
-    SUBCASE("change global vars")
+    SUBCASE("change vars")
     {
         auto res0 = run("x = 100");
         REQUIRE(res0);
@@ -682,7 +682,9 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Environment")
     }
     SUBCASE("whitelist funcs")
     {
-        auto res0 = run<f32>("return tonumber('5')");
+        auto res0 = run<f32>(
+            "print('ok') "
+            "return tonumber('5')");
         REQUIRE(res0);
         REQUIRE(res0.value() == 5.0f);
 
@@ -692,10 +694,13 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Environment")
         res0 = run<f32>("return tonumber('5')", "error");
         REQUIRE_FALSE(res0);
 
-        newEnv["tonumber"] = global["tonumber"].as<function<f32>>();
+        newEnv["tonumber"] = global["tonumber"];
         res0               = run<f32>("return tonumber('5')");
         REQUIRE(res0);
         REQUIRE(res0.value() == 5.0f);
+
+        res0 = run<f32>("print('ok')", "error");
+        REQUIRE_FALSE(res0);
     }
 }
 
@@ -1375,22 +1380,22 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Map")
     }
     // from Lua
     {
-        std::map<std::string, rect_f> m = *run<std::map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
+        auto m = *run<std::map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
         REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
         REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
     }
     {
-        std::map<i32, rect_f> m = *run<std::map<i32, rect_f>>("return {{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}}");
+        auto m = *run<std::map<i32, rect_f>>("return {{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}}");
         REQUIRE(m[1] == (rect_f {0, 1, 2, 3}));
         REQUIRE(m[2] == (rect_f {4, 3, 2, 1}));
     }
     {
-        std::unordered_map<std::string, rect_f> m = *run<std::unordered_map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
+        auto m = *run<std::unordered_map<std::string, rect_f>>("return {a={x=0,y=1,width=2,height=3},b={x=4,y=3,width=2,height=1}}");
         REQUIRE(m["a"] == (rect_f {0, 1, 2, 3}));
         REQUIRE(m["b"] == (rect_f {4, 3, 2, 1}));
     }
     {
-        std::unordered_map<i32, rect_f> m = *run<std::unordered_map<i32, rect_f>>("return {{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}}");
+        auto m = *run<std::unordered_map<i32, rect_f>>("return {{x=0,y=1,width=2,height=3},{x=4,y=3,width=2,height=1}}");
         REQUIRE(m[1] == (rect_f {0, 1, 2, 3}));
         REQUIRE(m[2] == (rect_f {4, 3, 2, 1}));
     }
@@ -1895,6 +1900,49 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
         auto res = run<std::string>("return tostring(table)");
         REQUIRE(res.has_value());
         REQUIRE(res.value().starts_with("hello world"));
+    }
+    SUBCASE("proxy")
+    {
+        SUBCASE("int")
+        {
+            auto tab = table {get_view()};
+            tab["x"] = 100;
+            tab["y"] = tab["x"];
+            REQUIRE(tab["x"].as<i32>() == 100);
+            REQUIRE(tab["y"].as<i32>() == 100);
+        }
+        SUBCASE("bool")
+        {
+            auto tab = table {get_view()};
+            tab["x"] = true;
+            tab["y"] = tab["x"];
+            REQUIRE(tab["x"].as<bool>() == true);
+            REQUIRE(tab["y"].as<bool>() == true);
+        }
+        SUBCASE("string")
+        {
+            auto tab = table {get_view()};
+            tab["x"] = "ok";
+            tab["y"] = tab["x"];
+            REQUIRE(tab["x"].as<string>() == "ok");
+            REQUIRE(tab["y"].as<string>() == "ok");
+        }
+        SUBCASE("table")
+        {
+            auto tab  = table {get_view()};
+            auto tab2 = table {get_view()};
+            tab2["a"] = 100;
+            tab["x"]  = tab2;
+            tab["y"]  = tab["x"];
+            REQUIRE(tab["x"]["a"].as<i32>() == 100);
+            REQUIRE(tab["y"]["a"].as<i32>() == 100);
+        }
+        SUBCASE("undefined")
+        {
+            auto tab = table {get_view()};
+            tab["y"] = tab["x"];
+            REQUIRE_FALSE(tab.has("y"));
+        }
     }
 }
 

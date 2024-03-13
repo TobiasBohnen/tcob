@@ -134,7 +134,9 @@ inline void table::set(state_view view, auto&& key, auto&&... keysOrValue) const
         lt.set(view, keysOrValue...);
     } else {
         view.push_convert(keysOrValue...);
-        view.set_table(-3);
+        if (view.is_table(-3)) {
+            view.set_table(-3);
+        } // TODO: else error
     }
 }
 

@@ -126,7 +126,9 @@ inline void table::set(vm_view view, auto&& key, auto&&... keysOrValue) const
         lt.set(view, keysOrValue...);
     } else {
         view.push_convert(keysOrValue...);
-        view.new_slot(-3, false);
+        if (view.is_table(-3)) {
+            view.new_slot(-3, false);
+        } // TODO: else error
     }
 }
 

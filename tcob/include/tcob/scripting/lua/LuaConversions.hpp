@@ -550,6 +550,20 @@ struct converter<std::filesystem::path> {
 //////////////////////////////////////////////////////////////////////
 
 template <>
+struct converter<ref> {
+    auto static IsType(state_view, i32) -> bool
+    {
+        return true;
+    }
+
+    auto static From(state_view view, i32& idx, ref& value) -> bool
+    {
+        value.acquire(view, idx++);
+        return value.is_valid();
+    }
+};
+
+template <>
 struct converter<table> {
     auto static IsType(state_view view, i32 idx) -> bool
     {
@@ -975,6 +989,16 @@ struct converter<result<T>> {
     void static To(state_view view, result<T> const& value)
     {
         converter<T>::To(view, value.value());
+    }
+};
+
+template <typename... Keys>
+struct converter<proxy<table, Keys...>> {
+    void static To(state_view, proxy<table, Keys...> const& value)
+    {
+        if (ref val; value.try_get(val)) {
+            val.push_self();
+        }
     }
 };
 
