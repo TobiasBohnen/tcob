@@ -1232,7 +1232,7 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Hook")
             "return 1000",
             "TEST");
 
-        REQUIRE(!res);
+        REQUIRE_FALSE(res);
         REQUIRE(linecount == 3);
     }
     SUBCASE("locals in hook")

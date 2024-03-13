@@ -180,7 +180,7 @@ TEST_CASE("IO.FileSystem.Enumerate")
         std::string const file {folder + "/test.file1"};
         REQUIRE(io::is_folder_empty(folder));
         io::create_file(file);
-        REQUIRE(!io::is_folder_empty(folder));
+        REQUIRE_FALSE(io::is_folder_empty(folder));
 
         auto files {io::enumerate(folder, file)};
         REQUIRE(files.size() == 1);
@@ -205,7 +205,7 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file1);
         io::create_file(file2);
         io::create_file(file3);
-        REQUIRE(!io::is_folder_empty(folder));
+        REQUIRE_FALSE(io::is_folder_empty(folder));
 
         auto files {io::enumerate(folder, "*.file*")};
 
@@ -236,7 +236,7 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file1);
         io::create_file(file2);
         io::create_file(file3);
-        REQUIRE(!io::is_folder_empty(folder));
+        REQUIRE_FALSE(io::is_folder_empty(folder));
 
         auto files {io::enumerate("/", "*.phile*")};
 

@@ -8,7 +8,7 @@ TEST_CASE("Core.Assets.IsValid")
     auto ast = asset_ptr<i32>(std::make_shared<asset<i32>>("", ptr, nullptr));
     REQUIRE(ast);
     ptr = nullptr;
-    REQUIRE(!ast);
+    REQUIRE_FALSE(ast);
 }
 
 struct Base {

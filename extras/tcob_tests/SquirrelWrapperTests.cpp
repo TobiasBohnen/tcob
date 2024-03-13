@@ -294,9 +294,9 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.Metamethods")
 TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandler")
 {
     struct bar {
-        int  x {0};
+        int  x {12};
         auto y() -> int { return 400; }
-        int  z {0};
+        int  z {23};
     };
 
     auto wrap = create_wrapper<bar>("bar");
@@ -304,7 +304,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     SUBCASE("unhandled setter")
     {
         auto res = run("function unhandled(p){ p.unhandled_newindex=400 }");
-        REQUIRE(!res.has_error());
+        REQUIRE_FALSE(res.has_error());
         auto f = global["unhandled"].as<squirrel::function<void>>();
 
         bar test {};
@@ -314,7 +314,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     SUBCASE("handled setter")
     {
         auto res = run("function foo(p){ p.z=400 }");
-        REQUIRE(!res.has_error());
+        REQUIRE_FALSE(res.has_error());
         auto f = global["foo"].as<squirrel::function<void>>();
 
         wrap->UnknownSet.connect([](auto&& ev) {
@@ -331,7 +331,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     SUBCASE("unhandled function")
     {
         auto res = run("function unhandled(p) { return p.unhandled_index() }");
-        REQUIRE(!res.has_error());
+        REQUIRE_FALSE(res.has_error());
         auto f = global["unhandled"].as<squirrel::function<int>>();
 
         bar  test {};
@@ -341,7 +341,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     SUBCASE("handled function")
     {
         auto res = run("function foo(p) { return p.y() }");
-        REQUIRE(!res.has_error());
+        REQUIRE_FALSE(res.has_error());
         auto f = global["foo"].as<squirrel::function<int>>();
 
         auto yfunc = squirrel::make_shared_closure(std::function([](bar* fx) { return fx->y(); }));
@@ -360,7 +360,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     SUBCASE("unhandled getter")
     {
         auto res = run("function unhandled(p) { return p.unhandled_index }");
-        REQUIRE(!res.has_error());
+        REQUIRE_FALSE(res.has_error());
         auto f = global["unhandled"].as<squirrel::function<int>>();
 
         bar test {};
@@ -371,7 +371,7 @@ TEST_CASE_FIXTURE(SquirrelWrapperTests, "Script.SquirrelWrapper.UnknownGetHandle
     SUBCASE("handled getter")
     {
         auto res = run("function foo(p) { return p.x }");
-        REQUIRE(!res.has_error());
+        REQUIRE_FALSE(res.has_error());
         auto f = global["foo"].as<squirrel::function<int>>();
 
         wrap->UnknownGet.connect([](auto&& ev) {
