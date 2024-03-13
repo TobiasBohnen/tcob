@@ -528,6 +528,18 @@ auto vm_view::has_error() const -> bool
     return retvalue;
 }
 
+auto vm_view::get_error() const -> string
+{
+    sq_getlasterror(_vm);
+    if (is_string(-1)) {
+        auto const* retValue {get_string(-1)};
+        pop(1);
+        return retValue;
+    }
+    pop(1);
+    return "";
+}
+
 auto vm_view::call(SQInteger params, bool retVal, bool raiseError) const -> error_code
 {
     return sq_call(_vm, params, retVal, raiseError) == SQ_OK ? error_code::Ok : error_code::Error;

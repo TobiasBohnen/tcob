@@ -158,9 +158,7 @@ inline auto table::has(vm_view view, auto&& key, auto&&... keys) const -> bool
 
     if (view.get(-2)) {
         if constexpr (sizeof...(keys) > 0) {
-            if (!view.is_table(-1)) {
-                return false;
-            }
+            if (!view.is_table(-1)) { return false; }
             table lt {};
             lt.acquire(view, -1);
             retValue = lt.has(view, keys...);

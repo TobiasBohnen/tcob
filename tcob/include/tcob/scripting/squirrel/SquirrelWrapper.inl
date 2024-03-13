@@ -108,36 +108,82 @@ inline wrapper<T>::~wrapper()
 template <typename T>
 inline void wrapper<T>::create_metatable(string const& name)
 {
+    auto const guard {_view.create_stack_guard()};
+
     _view.push_registrytable();
     _view.push_string(name);
     _view.new_table();
     _metaTable.acquire(_view, -1);
     _view.new_slot(-3, false);
+
     _view.pop(1);
 
-    push_metamethod("_get", std::function {[&](T* b, string const& idx) {
-                        if (_getters.contains(idx)) {
-                            (*_getters[idx])(_view);
-                        } else {
-                            unknown_get_event ev {b, idx, _view};
-                            UnknownGet(ev);
-                            if (!ev.Handled) {
-                                _view.throw_error("unknown get: " + idx);
-                            }
-                        }
-                    }});
-    push_metamethod("_set", std::function {[&](T* b, string const& idx) {
-                        if (_setters.contains(idx)) {
-                            _view.remove(2); // remove string index
-                            (*_setters[idx])(_view);
-                        } else {
-                            unknown_set_event ev {b, idx, _view};
-                            UnknownSet(ev);
-                            if (!ev.Handled) {
-                                _view.throw_error("unknown set: " + idx);
-                            }
-                        }
-                    }});
+    _metaTable.push_self();
+    _view.push_string("_get");
+    _view.push_userpointer(reinterpret_cast<void*>(this));
+    _view.new_closure(
+        [](HSQUIRRELVM l) -> SQInteger {
+            vm_view s {l};
+            void*   ptr {nullptr};
+            s.get_userpointer(-1, &ptr);
+            wrapper<T>* wrap {reinterpret_cast<wrapper<T>*>(ptr)};
+
+            T* b {nullptr};
+            wrap->_view.pull_convert_idx(-3, b);
+            string idx;
+            wrap->_view.pull_convert_idx(-2, idx);
+
+            SQInteger const oldTop {wrap->_view.get_top()};
+
+            if (wrap->_getters.contains(idx)) {
+                (*wrap->_getters[idx])(wrap->_view);
+            } else {
+                unknown_get_event ev {b, idx, wrap->_view};
+                wrap->UnknownGet(ev);
+                if (!ev.Handled) {
+                    wrap->_view.throw_error("unknown get: " + idx);
+                    return -1;
+                }
+            }
+
+            return std::max(SQInteger {0}, wrap->_view.get_top() - oldTop);
+        },
+        1);
+    _view.new_slot(-3, false);
+
+    _view.push_string("_set");
+    _view.push_userpointer(reinterpret_cast<void*>(this));
+    _view.new_closure(
+        [](HSQUIRRELVM l) -> SQInteger {
+            vm_view s {l};
+            void*   ptr {nullptr};
+            s.get_userpointer(-1, &ptr);
+            wrapper<T>* wrap {reinterpret_cast<wrapper<T>*>(ptr)};
+
+            T* b {nullptr};
+            wrap->_view.pull_convert_idx(-4, b);
+            string idx;
+            wrap->_view.pull_convert_idx(-3, idx);
+
+            SQInteger const oldTop {wrap->_view.get_top()};
+
+            if (wrap->_setters.contains(idx)) {
+                wrap->_view.remove(2); // remove string index
+                (*wrap->_setters[idx])(wrap->_view);
+            } else {
+                unknown_set_event ev {b, idx, wrap->_view};
+                wrap->UnknownSet(ev);
+                if (!ev.Handled) {
+                    wrap->_view.throw_error("unknown set: " + idx);
+                    return -1;
+                }
+            }
+
+            return std::max(SQInteger {0}, wrap->_view.get_top() - oldTop);
+        },
+        1);
+    _view.new_slot(-3, false);
+    _view.pop(1);
 
     // cmp metamethod
     if constexpr (Equatable<T>) {

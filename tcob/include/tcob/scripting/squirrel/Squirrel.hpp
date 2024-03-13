@@ -252,6 +252,7 @@ public:
     void throw_error(string const& message) const;
     void reset_error() const;
     auto has_error() const -> bool;
+    auto get_error() const -> string;
 
     auto call(SQInteger params, bool retVal, bool raiseError) const -> error_code;
 
