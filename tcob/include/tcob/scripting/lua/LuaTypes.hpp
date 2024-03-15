@@ -127,9 +127,9 @@ namespace detail {
 template <typename R>
 class function final : public detail::function_base {
 public:
-    function() = default;
-
     using return_type = R;
+
+    function() = default;
 
     auto operator()(auto&&... params) const -> return_type;
 

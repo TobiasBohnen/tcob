@@ -153,7 +153,6 @@ namespace detail {
 class TCOB_API instance : public detail::type_ref {
 public:
     instance();
-    instance(vm_view view, SQInteger idx);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<instance, Key>;
@@ -163,7 +162,11 @@ public:
 
     void set(auto&& key, auto&& value) const;
 
+    auto static Acquire(vm_view view, SQInteger idx) -> instance;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
+
+private:
+    instance(vm_view view, SQInteger idx);
 };
 
 ////////////////////////////////////////////////////////////
@@ -197,7 +200,12 @@ namespace detail {
     ////////////////////////////////////////////////////////////
 
     class TCOB_API function_base : public ref {
+    public:
+        function_base() = default;
+
     protected:
+        function_base(vm_view view, SQInteger idx);
+
         auto call_protected(SQInteger nargs, bool retValue) const -> error_code;
     };
 }
@@ -209,12 +217,18 @@ class function final : public detail::function_base {
 public:
     using return_type = R;
 
+    function() = default;
+
     auto operator()(auto&&... params) const -> return_type;
 
     auto call(auto&&... params) const -> result<return_type>;
     auto call_async(auto&&... params) const -> std::future<result<return_type>>;
 
+    auto static Acquire(vm_view view, SQInteger idx) -> function<return_type>;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
+
+protected:
+    using detail::function_base::function_base;
 };
 
 ////////////////////////////////////////////////////////////
@@ -249,6 +263,7 @@ public:
 private:
     auto get_thread() const -> vm_view;
 };
+
 
 }
 

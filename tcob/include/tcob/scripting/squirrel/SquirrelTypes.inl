@@ -383,6 +383,12 @@ inline auto function<R>::call_async(auto&&... params) const -> std::future<resul
 }
 
 template <typename R>
+inline auto function<R>::Acquire(vm_view view, SQInteger idx) -> function<return_type>
+{
+    return function {view, idx};
+}
+
+template <typename R>
 inline auto function<R>::IsType(vm_view view, SQInteger idx) -> bool
 {
     return view.is_closure(idx) || view.is_nativeclosure(idx);

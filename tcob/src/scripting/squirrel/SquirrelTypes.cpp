@@ -165,6 +165,11 @@ auto table::IsType(vm_view view, SQInteger idx) -> bool
 
 ////////////////////////////////////////////////////////////
 
+detail::function_base::function_base(vm_view view, SQInteger idx)
+{
+    acquire(view, idx);
+}
+
 auto detail::function_base::call_protected(SQInteger nargs, bool retValue) const -> error_code
 {
     return get_view().call(nargs, retValue, true);
@@ -270,7 +275,7 @@ auto clazz::create_instance() const -> instance
 
     push_self();
     view.create_instance(-1);
-    return instance {view, -1};
+    return instance::Acquire(view, -1);
 }
 
 auto clazz::PushNew(vm_view view) -> clazz
@@ -303,6 +308,11 @@ instance::instance() = default;
 instance::instance(vm_view view, SQInteger idx)
 {
     acquire(view, idx);
+}
+
+auto instance::Acquire(vm_view view, SQInteger idx) -> instance
+{
+    return instance {view, idx};
 }
 
 auto instance::IsType(vm_view view, SQInteger idx) -> bool
