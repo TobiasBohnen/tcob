@@ -702,6 +702,20 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Environment")
         res0 = run<f32>("print('ok')", "error");
         REQUIRE_FALSE(res0);
     }
+    SUBCASE("get from _ENV")
+    {
+        table newEnv {get_view()};
+        set_environment(newEnv);
+
+        auto res0 = run("function foo() return tonumber('5') end", "error");
+        REQUIRE(res0);
+
+        auto func0 = newEnv["foo"].as<function<f32>>();
+        REQUIRE_FALSE(func0.call());
+
+        newEnv["tonumber"] = global["tonumber"];
+        REQUIRE(func0() == 5.f);
+    }
 }
 
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Functions")
