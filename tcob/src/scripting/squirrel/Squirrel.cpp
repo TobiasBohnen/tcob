@@ -455,6 +455,21 @@ auto vm_view::get_delegate(SQInteger idx) const -> bool
     return sq_getdelegate(_vm, idx) == SQ_OK;
 }
 
+auto vm_view::set_closure_root(SQInteger idx) const -> bool
+{
+    return sq_setclosureroot(_vm, idx) == SQ_OK;
+}
+
+auto vm_view::get_closure_root(SQInteger idx) const -> bool
+{
+    return sq_getclosureroot(_vm, idx) == SQ_OK;
+}
+
+auto vm_view::bind_env(SQInteger idx) const -> bool
+{
+    return sq_bindenv(_vm, idx) == SQ_OK;
+}
+
 auto vm_view::raw_get(SQInteger idx) const -> bool
 {
     return sq_rawget(_vm, idx) == SQTrue;

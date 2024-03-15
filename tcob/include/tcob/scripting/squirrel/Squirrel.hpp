@@ -235,6 +235,10 @@ public:
     auto set_delegate(SQInteger idx) const -> bool;
     auto get_delegate(SQInteger idx) const -> bool;
 
+    auto set_closure_root(SQInteger idx) const -> bool;
+    auto get_closure_root(SQInteger idx) const -> bool;
+    auto bind_env(SQInteger idx) const -> bool;
+
     auto raw_get(SQInteger idx) const -> bool;
     auto raw_set(SQInteger idx) const -> bool;
 
