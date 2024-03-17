@@ -49,27 +49,28 @@ public:
 
     ~window() override;
 
-    signal<event const> WindowShown;
-    signal<event const> WindowHidden;
-    signal<event const> WindowExposed;
-    signal<event const> WindowMoved;
-    signal<event const> WindowResized;
-    signal<event const> WindowSizeChanged;
-    signal<event const> WindowMinimized;
-    signal<event const> WindowMaximized;
-    signal<event const> WindowRestored;
-    signal<event const> WindowEnter;
-    signal<event const> WindowLeave;
-    signal<event const> WindowFocusGained;
-    signal<event const> WindowFocusLost;
-    signal<event const> WindowClose;
-    signal<event const> WindowTakeFocus;
-    signal<event const> WindowHitTest;
+    signal<event const> Shown;
+    signal<event const> Hidden;
+    signal<event const> Exposed;
+    signal<event const> Moved;
+    signal<event const> Resized;
+    signal<event const> SizeChanged;
+    signal<event const> Minimized;
+    signal<event const> Maximized;
+    signal<event const> Restored;
+    signal<event const> Enter;
+    signal<event const> Leave;
+    signal<event const> FocusGained;
+    signal<event const> FocusLost;
+    signal<event const> Close;
+    signal<event const> TakeFocus;
+    signal<event const> HitTest;
 
-    prop_fn<bool>                   FullScreen;
-    prop_fn<string>                 Title;
-    prop_fn<bool>                   VSync;
-    prop<assets::asset_ptr<cursor>> Cursor;
+    prop_fn<bool>                      FullScreen;
+    prop_fn<string>                    Title;
+    prop_fn<bool>                      VSync;
+    prop<assets::asset_ptr<cursor>>    Cursor;
+    prop_fn<assets::asset_ptr<shader>> Shader;
 
     void load_icon(path const& file);
 

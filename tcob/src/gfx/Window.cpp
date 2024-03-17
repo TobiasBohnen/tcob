@@ -7,6 +7,8 @@
 
 #include <SDL.h>
 
+#include <utility>
+
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
 
@@ -20,6 +22,8 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::manu
               [&](auto const& value) { set_title(value); }}}
     , VSync {{[&]() { return _impl->get_vsync(); },
               [&](auto const& value) { _impl->set_vsync(value); }}}
+    , Shader {{[&]() { return _material->Shader; },
+               [&](auto const& value) { _material->Shader = value; }}}
     , _texture {texture}
     , _impl {std::move(window)}
     , _window {_impl->get_handle()}
@@ -98,56 +102,56 @@ void window::process_events(SDL_Event* sdlEv)
 
     switch (sdlEv->window.event) {
     case SDL_WINDOWEVENT_SHOWN:
-        WindowShown(ev);
+        Shown(ev);
         break;
     case SDL_WINDOWEVENT_HIDDEN:
-        WindowHidden(ev);
+        Hidden(ev);
         break;
     case SDL_WINDOWEVENT_EXPOSED:
-        WindowExposed(ev);
+        Exposed(ev);
         break;
     case SDL_WINDOWEVENT_MOVED:
-        WindowMoved(ev);
+        Moved(ev);
         break;
     case SDL_WINDOWEVENT_RESIZED:
-        WindowResized(ev);
+        Resized(ev);
         break;
     case SDL_WINDOWEVENT_SIZE_CHANGED: {
         size_i const newSize {ev.Data1, ev.Data2};
         if (newSize != get_size()) {
             set_size(newSize);
-            WindowSizeChanged(ev);
+            SizeChanged(ev);
         }
     } break;
     case SDL_WINDOWEVENT_MINIMIZED:
-        WindowMinimized(ev);
+        Minimized(ev);
         break;
     case SDL_WINDOWEVENT_MAXIMIZED:
-        WindowMaximized(ev);
+        Maximized(ev);
         break;
     case SDL_WINDOWEVENT_RESTORED:
-        WindowRestored(ev);
+        Restored(ev);
         break;
     case SDL_WINDOWEVENT_ENTER:
-        WindowEnter(ev);
+        Enter(ev);
         break;
     case SDL_WINDOWEVENT_LEAVE:
-        WindowLeave(ev);
+        Leave(ev);
         break;
     case SDL_WINDOWEVENT_FOCUS_GAINED:
-        WindowFocusGained(ev);
+        FocusGained(ev);
         break;
     case SDL_WINDOWEVENT_FOCUS_LOST:
-        WindowFocusLost(ev);
+        FocusLost(ev);
         break;
     case SDL_WINDOWEVENT_CLOSE:
-        WindowClose(ev);
+        Close(ev);
         break;
     case SDL_WINDOWEVENT_TAKE_FOCUS:
-        WindowTakeFocus(ev);
+        TakeFocus(ev);
         break;
     case SDL_WINDOWEVENT_HIT_TEST:
-        WindowHitTest(ev);
+        HitTest(ev);
         break;
     }
 }
