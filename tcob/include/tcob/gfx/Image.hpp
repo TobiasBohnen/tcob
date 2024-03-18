@@ -14,6 +14,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TypeFactory.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -49,6 +50,7 @@ public:
 
     auto get_data() const -> std::span<u8 const>;
     auto get_data() -> std::span<u8>;
+    auto get_data(rect_i const& bounds) const -> std::vector<u8>;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (istream& in, string const& ext) noexcept -> load_status;

@@ -67,6 +67,11 @@ auto texture::get_region(string const& name) const -> texture_region const&
     return _regions.at(name);
 }
 
+auto texture::get_regions() const -> std::unordered_map<string, texture_region> const&
+{
+    return _regions;
+}
+
 auto texture::has_region(string const& name) const -> bool
 {
     return _regions.contains(name);

@@ -40,6 +40,26 @@ auto image::get_data() -> std::span<u8>
     return _buffer;
 }
 
+auto image::get_data(rect_i const& bounds) const -> std::vector<u8>
+{
+    i32 const bpp {_info.bytes_per_pixel()};
+    i32 const srcStride {_info.stride()};
+    i32 const dstStride {bounds.Width * bpp};
+
+    std::vector<u8> retValue;
+    retValue.resize(bounds.Height * dstStride);
+
+    // TODO: bounds check
+
+    for (i32 y {bounds.Y}; y < bounds.bottom(); ++y) {
+        u8 const* src {&_buffer[y * srcStride + bounds.X * bpp]};
+        i32 const dst {(y - bounds.Y) * dstStride};
+        std::copy(src, src + dstStride, retValue.begin() + dst);
+    }
+
+    return retValue;
+}
+
 auto image::get_info() const -> info const&
 {
     return _info;
