@@ -63,13 +63,15 @@ void cycle_button::on_paint(widget_painter& painter)
     }
 }
 
-void cycle_button::on_mouse_down(input::mouse::button_event& /* ev */)
+void cycle_button::on_mouse_down(input::mouse::button_event& ev)
 {
     if (SelectedItemIndex == get_item_count() - 1) {
         SelectedItemIndex = 0;
     } else {
         SelectedItemIndex = SelectedItemIndex + 1;
     }
+
+    ev.Handled = true;
 }
 
 void cycle_button::on_update(milliseconds /*deltaTime*/)

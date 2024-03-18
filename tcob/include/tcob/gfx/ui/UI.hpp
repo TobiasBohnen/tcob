@@ -265,30 +265,30 @@ struct widget_event {
 };
 
 struct keyboard_event {
-    widget*                Sender {nullptr};
-    input::keyboard::event Event;
+    widget*                 Sender {nullptr};
+    input::keyboard::event& Event;
 };
 
 struct mouse_button_event {
-    widget*                    Sender {nullptr};
-    point_i                    RelativePosition {point_i::Zero};
-    input::mouse::button_event Event;
+    widget*                     Sender {nullptr};
+    point_i                     RelativePosition {point_i::Zero};
+    input::mouse::button_event& Event;
 };
 
 struct mouse_motion_event {
-    widget*                    Sender {nullptr};
-    point_i                    RelativePosition {point_i::Zero};
-    input::mouse::motion_event Event;
+    widget*                     Sender {nullptr};
+    point_i                     RelativePosition {point_i::Zero};
+    input::mouse::motion_event& Event;
 };
 
 struct mouse_wheel_event {
-    widget*                   Sender {nullptr};
-    input::mouse::wheel_event Event;
+    widget*                    Sender {nullptr};
+    input::mouse::wheel_event& Event;
 };
 
 struct controller_button_event {
-    widget*                         Sender {nullptr};
-    input::controller::button_event Event;
+    widget*                          Sender {nullptr};
+    input::controller::button_event& Event;
 };
 
 struct tooltip_event {

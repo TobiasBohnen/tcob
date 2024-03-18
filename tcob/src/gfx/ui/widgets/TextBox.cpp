@@ -95,10 +95,11 @@ void text_box::on_key_down(input::keyboard::event& ev)
     ev.Handled = true;
 }
 
-void text_box::on_key_up(input::keyboard::event& /* ev */)
+void text_box::on_key_up(input::keyboard::event& ev)
 {
     if (_caretTween) {
         _caretTween->resume();
+        ev.Handled = true;
     }
 }
 

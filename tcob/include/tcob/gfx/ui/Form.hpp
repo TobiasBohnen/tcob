@@ -61,7 +61,7 @@ public:
 
     void force_redraw(string const& reason);
 
-    void focus_nav_target(string const& widget, direction dir);
+    auto focus_nav_target(string const& widget, direction dir) -> bool;
 
     auto get_update_mode() const -> update_mode override;
 

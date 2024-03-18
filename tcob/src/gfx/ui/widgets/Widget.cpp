@@ -259,20 +259,20 @@ void widget::do_key_down(input::keyboard::event& ev)
         auto const& controls {_form->Controls};
         if (!input::system::IsKeyDown(controls->ActivateKey)) {
             if (ev.KeyCode == controls->NavLeftKey) {
-                _form->focus_nav_target(_name, direction::Left);
+                ev.Handled = _form->focus_nav_target(_name, direction::Left);
             } else if (ev.KeyCode == controls->NavRightKey) {
-                _form->focus_nav_target(_name, direction::Right);
+                ev.Handled = _form->focus_nav_target(_name, direction::Right);
             } else if (ev.KeyCode == controls->NavDownKey) {
-                _form->focus_nav_target(_name, direction::Down);
+                ev.Handled = _form->focus_nav_target(_name, direction::Down);
             } else if (ev.KeyCode == controls->NavUpKey) {
-                _form->focus_nav_target(_name, direction::Up);
+                ev.Handled = _form->focus_nav_target(_name, direction::Up);
             }
         } else if (ev.KeyCode == controls->ActivateKey) {
             activate();
+            ev.Handled = true;
         }
     }
 
-    ev.Handled = true;
     KeyDown({this, ev});
 }
 
@@ -283,9 +283,9 @@ void widget::do_key_up(input::keyboard::event& ev)
     if (ev.KeyCode == _form->Controls->ActivateKey) {
         deactivate();
         do_click();
+        ev.Handled = true;
     }
 
-    ev.Handled = true;
     KeyUp({this, ev});
 }
 
@@ -337,7 +337,6 @@ void widget::do_mouse_hover(input::mouse::motion_event& ev)
 {
     on_mouse_hover(ev);
 
-    ev.Handled = true;
     MouseHover({.Sender           = this,
                 .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
                 .Event            = ev});
@@ -347,7 +346,6 @@ void widget::do_mouse_drag(input::mouse::motion_event& ev)
 {
     on_mouse_drag(ev);
 
-    ev.Handled = true;
     MouseDrag({.Sender           = this,
                .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
                .Event            = ev});
@@ -359,9 +357,9 @@ void widget::do_mouse_down(input::mouse::button_event& ev)
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         activate();
+        ev.Handled = true;
     }
 
-    ev.Handled = true;
     MouseDown({.Sender           = this,
                .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
                .Event            = ev});
@@ -373,9 +371,9 @@ void widget::do_mouse_up(input::mouse::button_event& ev)
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         deactivate();
+        ev.Handled = true;
     }
 
-    ev.Handled = true;
     MouseUp({.Sender           = this,
              .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
              .Event            = ev});
@@ -385,7 +383,6 @@ void widget::do_mouse_wheel(input::mouse::wheel_event& ev)
 {
     on_mouse_wheel(ev);
 
-    ev.Handled = true;
     MouseWheel({this, ev});
 }
 
@@ -424,10 +421,10 @@ void widget::do_controller_button_up(input::controller::button_event& ev)
         if (ev.Button == _form->Controls->ActivateButton) {
             deactivate();
             do_click();
+            ev.Handled = true;
         }
     }
 
-    ev.Handled = true;
     ControllerButtonUp({this, ev});
 }
 

@@ -424,6 +424,8 @@ void terminal::on_mouse_hover(input::mouse::motion_event& ev)
             HoveredCell = {x, y};
         }
     }
+
+    ev.Handled = true;
 }
 
 void terminal::on_mouse_down(input::mouse::button_event& ev)
@@ -435,6 +437,7 @@ void terminal::on_mouse_down(input::mouse::button_event& ev)
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         if (HoveredCell->X >= 0 && HoveredCell->Y >= 0) {
             move(HoveredCell);
+            ev.Handled = true;
         }
     }
 }

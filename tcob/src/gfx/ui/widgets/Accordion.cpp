@@ -99,6 +99,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event& ev)
         for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
             if (_sectionRects[i].contains(mp)) {
                 HoveredSectionIndex = i;
+                ev.Handled          = true;
                 break;
             }
         }
@@ -115,6 +116,8 @@ void accordion::on_mouse_down(input::mouse::button_event& ev)
         if (HoveredSectionIndex != -1) {
             ActiveSectionIndex = HoveredSectionIndex();
         }
+
+        ev.Handled = true;
     }
 }
 

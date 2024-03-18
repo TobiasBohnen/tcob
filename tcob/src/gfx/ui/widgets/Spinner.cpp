@@ -67,6 +67,8 @@ void spinner::on_paint(widget_painter& painter)
 
 void spinner::on_mouse_hover(input::mouse::motion_event& ev)
 {
+    ev.Handled = true;
+
     if (auto const style {get_style<spinner::style>()}) {
         rect_f const rect {get_global_content_bounds()};
         auto         normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};

@@ -104,10 +104,10 @@ void form::force_redraw(string const& reason)
     _layout.mark_dirty(); // FIXME: only if top-level controls change
 }
 
-void form::focus_nav_target(string const& widget, direction dir)
+auto form::focus_nav_target(string const& widget, direction dir) -> bool
 {
     if (!NavMap->contains(widget)) {
-        return;
+        return false;
     }
 
     string navTarget;
@@ -130,8 +130,11 @@ void form::focus_nav_target(string const& widget, direction dir)
     if (!navTarget.empty()) {
         if (auto target {find_widget_by_name(navTarget)}) {
             focus_widget(target.get());
+            return true;
         }
     }
+
+    return false;
 }
 
 auto form::get_update_mode() const -> update_mode

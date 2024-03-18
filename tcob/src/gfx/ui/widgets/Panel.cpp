@@ -165,10 +165,12 @@ void panel::on_mouse_hover(input::mouse::motion_event& ev)
 
     if (_vScrollbar.inject_mouse_hover(ev.Position)) {
         force_redraw(get_name() + ": vertical scrollbar hover");
+        ev.Handled = true;
     }
 
     if (_hScrollbar.inject_mouse_hover(ev.Position)) {
         force_redraw(get_name() + ": horizontal scrollbar hover");
+        ev.Handled = true;
     }
 }
 
@@ -178,10 +180,12 @@ void panel::on_mouse_drag(input::mouse::motion_event& ev)
 
     if (_vScrollbar.inject_mouse_drag(ev.Position)) {
         force_redraw(get_name() + ": vertical scrollbar dragged");
+        ev.Handled = true;
     }
 
     if (_hScrollbar.inject_mouse_drag(ev.Position)) {
         force_redraw(get_name() + ": horizontal scrollbar dragged");
+        ev.Handled = true;
     }
 }
 
@@ -193,6 +197,7 @@ void panel::on_mouse_down(input::mouse::button_event& ev)
         _vScrollbar.inject_mouse_down(ev.Position);
         _hScrollbar.inject_mouse_down(ev.Position);
         force_redraw(get_name() + ": mouse down");
+        ev.Handled = true;
     }
 }
 
@@ -204,6 +209,7 @@ void panel::on_mouse_up(input::mouse::button_event& ev)
         _vScrollbar.inject_mouse_up(ev.Position);
         _hScrollbar.inject_mouse_up(ev.Position);
         force_redraw(get_name() + ": mouse up");
+        ev.Handled = true;
     }
 }
 
@@ -234,6 +240,8 @@ void panel::on_mouse_wheel(input::mouse::wheel_event& ev)
         } else if (orien == orientation::Horizontal) {
             _hScrollbar.set_value(_hScrollbar.get_value() + diff, delay);
         }
+
+        ev.Handled = true;
     }
 }
 

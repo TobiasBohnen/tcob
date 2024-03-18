@@ -130,6 +130,7 @@ void list_box::on_key_down(input::keyboard::event& ev)
             if (!_items[idx].empty() && std::tolower(_items[idx][0]) == kc) {
                 SelectedItemIndex = idx;
                 scroll_to_selected();
+                ev.Handled = true;
                 break;
             }
         } while (idx != SelectedItemIndex);
@@ -158,6 +159,7 @@ void list_box::on_mouse_hover(input::mouse::motion_event& ev)
                 rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
                 if (itemRect.contains(ev.Position)) {
                     HoveredItemIndex = i;
+                    ev.Handled       = true;
                     return;
                 }
             }
@@ -173,6 +175,7 @@ void list_box::on_mouse_down(input::mouse::button_event& ev)
         if (HoveredItemIndex != -1) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
+                ev.Handled        = true;
             } // else SelectedItemClicked event?
         }
     }

@@ -91,6 +91,7 @@ void slider::on_key_down(input::keyboard::event& ev)
         } else if (ev.KeyCode == controls->NavUpKey) {
             handle_dir_input(direction::Up);
         }
+        ev.Handled = true;
     }
 }
 
@@ -108,12 +109,14 @@ void slider::on_mouse_hover(input::mouse::motion_event& ev)
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
         force_redraw(get_name() + ": thumb hover change");
+        ev.Handled = true;
     }
 }
 
 void slider::on_mouse_drag(input::mouse::motion_event& ev)
 {
     calculate_value(global_to_local(ev.Position));
+    ev.Handled = true;
 }
 
 void slider::on_mouse_up(input::mouse::button_event& ev)
@@ -122,6 +125,7 @@ void slider::on_mouse_up(input::mouse::button_event& ev)
     if (_overThumb && !hit_test(point_f {ev.Position})) {
         _overThumb = false;
         force_redraw(get_name() + ": thumb hit");
+        ev.Handled = true;
     }
 }
 
@@ -136,6 +140,7 @@ void slider::on_mouse_down(input::mouse::button_event& ev)
             _dragOffset = point_i {global_to_parent_local(ev.Position) - _paintResult.Thumb.get_center()};
             _isDragging = true;
         }
+        ev.Handled = true;
     }
 }
 
@@ -150,6 +155,8 @@ void slider::on_mouse_wheel(input::mouse::wheel_event& ev)
     } else if (ev.Scroll.X < 0) {
         Value -= Step();
     }
+
+    ev.Handled = true;
 }
 
 void slider::on_controller_button_down(input::controller::button_event& ev)
