@@ -10,6 +10,11 @@
 namespace tcob {
 stats::stats() = default;
 
+auto stats::get_time() const -> f32
+{
+    return _time;
+}
+
 auto stats::get_average_FPS() const -> f32
 {
     return _averageFrames;
@@ -27,7 +32,11 @@ auto stats::get_worst_FPS() const -> f32
 
 void stats::update(milliseconds delta)
 {
-    _frameTimes[_frameCount % FRAME_VALUES] = static_cast<f32>(delta.count());
+    f32 const count {static_cast<f32>(delta.count())};
+
+    _time += count;
+
+    _frameTimes[_frameCount % FRAME_VALUES] = count;
     ++_frameCount;
 
     if (_frameCount >= FRAME_VALUES) {

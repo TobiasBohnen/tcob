@@ -23,6 +23,7 @@ struct render_properties {
     mat4    ViewMatrix {};
     rect_i  Viewport {rect_i::Zero};
     point_i MousePosition {point_i::Zero};
+    f32     Time {0.0f};
     bool    Debug {false};
 
     bool UseDefaultFramebuffer {false};

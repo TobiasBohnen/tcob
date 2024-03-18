@@ -11,6 +11,7 @@ uniform Globals
 	mat4 camera;
 	uvec2 view_size;
 	ivec2 mouse_pos;
+	float time;
 	bool debug; 
 };
 

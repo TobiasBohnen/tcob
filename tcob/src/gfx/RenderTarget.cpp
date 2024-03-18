@@ -6,6 +6,7 @@
 #include "tcob/gfx/RenderTarget.hpp"
 
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Stats.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
@@ -31,11 +32,14 @@ void render_target::clear(color c) const
 
 void render_target::prepare_render(bool debug)
 {
+    auto const& stat {locate_service<stats>()};
+
     auto& cam {*Camera};
     _impl->prepare_render(
         {.ViewMatrix            = cam.get_matrix(),
          .Viewport              = rect_i {cam.get_viewport()},
          .MousePosition         = input::system::GetMousePosition(),
+         .Time                  = stat.get_time(),
          .Debug                 = debug,
          .UseDefaultFramebuffer = false});
 }
@@ -102,6 +106,8 @@ void default_render_target::set_size(size_i newsize)
 
 void default_render_target::prepare_render(bool)
 {
+    auto const& stat {locate_service<stats>()};
+
     constexpr mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
                            0.0f, 1.0f, 0.0f, 0.0f,
                            0.0f, 0.0f, 1.0f, 0.0f,
@@ -111,6 +117,7 @@ void default_render_target::prepare_render(bool)
         .ViewMatrix            = Matrix,
         .Viewport              = {point_i::Zero, get_size()},
         .MousePosition         = input::system::GetMousePosition(),
+        .Time                  = stat.get_time(),
         .Debug                 = false,
         .UseDefaultFramebuffer = true,
     });
