@@ -158,7 +158,7 @@ void group::mount(path const& folderOrArchive) const
 
 void group::load()
 {
-    auto files {io::enumerate(get_mount_point(), "*.assets.*")};
+    auto files {io::enumerate(get_mount_point(), {"*.assets.*"})};
 
     // load script files
     for (auto const& file : files) {

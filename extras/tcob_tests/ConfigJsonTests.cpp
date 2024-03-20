@@ -242,7 +242,7 @@ TEST_CASE("Data.Json.TcobTypes")
 
 TEST_CASE("Data.Json.TestSuite")
 {
-    auto const files(io::enumerate("testfiles/json/", "*" + EXT, false));
+    auto const files(io::enumerate("testfiles/json/", {"*" + EXT}, false));
     REQUIRE(files.size() == 237);
     for (auto const& file : files) {
         object     obj;

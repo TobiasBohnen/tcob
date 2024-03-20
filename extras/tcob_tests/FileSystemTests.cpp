@@ -182,7 +182,7 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file);
         REQUIRE_FALSE(io::is_folder_empty(folder));
 
-        auto files {io::enumerate(folder, file)};
+        auto files {io::enumerate(folder, {file})};
         REQUIRE(files.size() == 1);
         REQUIRE(files.contains(file));
     }
@@ -207,7 +207,7 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file3);
         REQUIRE_FALSE(io::is_folder_empty(folder));
 
-        auto files {io::enumerate(folder, "*.file*")};
+        auto files {io::enumerate(folder, {"*.file*"})};
 
         REQUIRE(files.size() == 3);
         REQUIRE(files.contains(file1));
@@ -238,7 +238,38 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file3);
         REQUIRE_FALSE(io::is_folder_empty(folder));
 
-        auto files {io::enumerate("/", "*.phile*")};
+        auto files {io::enumerate("/", {"*.phile*"})};
+
+        REQUIRE(files.size() == 3);
+        REQUIRE(files.contains(file1));
+        REQUIRE(files.contains(file2));
+        REQUIRE(files.contains(file3));
+        REQUIRE(io::exists(file1));
+        REQUIRE(io::exists(file2));
+        REQUIRE(io::exists(file3));
+    }
+
+    SUBCASE("pattern 3")
+    {
+        std::string const folder {"testfolder4/sub"};
+
+        io::delete_folder(folder);
+        REQUIRE_FALSE(io::exists(folder));
+
+        io::create_folder(folder);
+        REQUIRE(io::exists(folder));
+
+        std::string const file1 {folder + "/test.xile1"};
+        std::string const file2 {folder + "/test.xile2"};
+        std::string const file3 {folder + "/test.xile3"};
+
+        REQUIRE(io::is_folder_empty(folder));
+        io::create_file(file1);
+        io::create_file(file2);
+        io::create_file(file3);
+        REQUIRE_FALSE(io::is_folder_empty(folder));
+
+        auto files {io::enumerate("/", {"test.xile*", false})};
 
         REQUIRE(files.size() == 3);
         REQUIRE(files.contains(file1));

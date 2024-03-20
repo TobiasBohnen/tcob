@@ -830,11 +830,11 @@ void cfg_texture_loader::declare()
                             if (io::is_file(f)) {
                                 files.push_back(f);
                             } else if (io::is_folder(f)) {
-                                auto const moreFiles {io::enumerate(f, "*.*", false)};
+                                auto const moreFiles {io::enumerate(f, {"*.*"}, false)};
                                 files.insert(files.end(), moreFiles.begin(), moreFiles.end());
                             }
                         } else { // pattern
-                            if (auto const moreFiles {io::enumerate(io::get_parent_folder(f), f, false)}; !moreFiles.empty()) {
+                            if (auto const moreFiles {io::enumerate(io::get_parent_folder(f), {f, true}, false)}; !moreFiles.empty()) {
                                 files.insert(files.end(), moreFiles.begin(), moreFiles.end());
                             } else {
                                 logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->get_name(), f);

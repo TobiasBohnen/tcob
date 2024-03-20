@@ -39,6 +39,11 @@ struct stat {
     bool      ReadOnly {false};
 };
 
+struct pattern {
+    string String {"*.*"};
+    bool   MatchWholePath {true};
+};
+
 ////////////////////////////////////////////////////////////
 namespace detail {
     TCOB_API void simple_init(char const* argv0);
@@ -63,7 +68,7 @@ TCOB_API auto exists(path const& fileOrFolder) -> bool;
 
 TCOB_API auto is_folder_empty(path const& folder) -> bool;
 
-TCOB_API auto enumerate(path const& folder, string const& pattern = "*.*", bool recursive = true) -> std::unordered_set<string>;
+TCOB_API auto enumerate(path const& folder, pattern const& pattern = {}, bool recursive = true) -> std::unordered_set<string>;
 
 TCOB_API auto read_as_string(path const& file) -> string;
 

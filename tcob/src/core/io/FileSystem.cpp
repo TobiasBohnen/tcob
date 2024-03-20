@@ -46,24 +46,26 @@ extern "C" {
 struct callback_data {
     std::unordered_set<string> Files;
     std::unordered_set<string> Folders;
-    string                     Pattern;
+    pattern                    Pattern;
 };
 
 auto static EnumerateCallback(void* data, char const* origdir, char const* fname) -> PHYSFS_EnumerateCallbackResult
 {
-    auto*  cd {static_cast<callback_data*>(data)};
+    if (!origdir || !fname) { return PHYSFS_ENUM_ERROR; }
+
+    auto* cd {static_cast<callback_data*>(data)};
+
     string folder {origdir};
-    if (!folder.ends_with("/")) {
-        folder += "/";
-    }
-    string const entry {folder == "/" ? string(fname) : folder + string(fname)};
+    string file {fname};
+    if (!folder.ends_with("/")) { folder += "/"; }
+    string const entry {folder == "/" ? file : folder + file};
 
     switch (get_stat(entry).Type) {
-    case file_type::File:
-        if (cd->Pattern == "*.*" || helper::wildcard_match(entry, cd->Pattern)) {
+    case file_type::File: {
+        if (cd->Pattern.String == "*.*" || helper::wildcard_match(cd->Pattern.MatchWholePath ? entry : file, cd->Pattern.String)) {
             cd->Files.insert(entry);
         }
-        break;
+    } break;
     case file_type::Folder:
         cd->Folders.insert(entry);
         break;
@@ -342,7 +344,7 @@ auto create_folder(path const& folder) -> bool
     return check("create folder", PHYSFS_mkdir(folder.c_str()));
 }
 
-auto enumerate(path const& folder, string const& pattern, bool recursive) -> std::unordered_set<string>
+auto enumerate(path const& folder, pattern const& pattern, bool recursive) -> std::unordered_set<string>
 {
     if (!is_folder(folder)) { return {}; }
 
