@@ -10,7 +10,6 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 
 namespace tcob::gfx::ui {
-
 panel::panel(init const& wi)
     : widget_container {wi}
     , _layout {std::make_shared<fixed_layout>(this)}
@@ -217,31 +216,33 @@ void panel::on_mouse_wheel(input::mouse::wheel_event& ev)
 {
     widget_container::on_mouse_wheel(ev);
 
-    if (auto const style {get_style<panel::style>()}) {
-        orientation  orien {};
-        bool         invert {false};
-        milliseconds delay {};
+    if (_hScrollbar.Visible || _vScrollbar.Visible) {
+        if (auto const style {get_style<panel::style>()}) {
+            orientation  orien {};
+            bool         invert {false};
+            milliseconds delay {};
 
-        if (ev.Scroll.Y != 0) {
-            orien  = orientation::Vertical;
-            invert = ev.Scroll.Y > 0;
-            delay  = style->VScrollBar.Bar.Delay;
-        } else if (ev.Scroll.X != 0) {
-            orien  = orientation::Horizontal;
-            invert = ev.Scroll.X < 0;
-            delay  = style->HScrollBar.Bar.Delay;
+            if (ev.Scroll.Y != 0) {
+                orien  = orientation::Vertical;
+                invert = ev.Scroll.Y > 0;
+                delay  = style->VScrollBar.Bar.Delay;
+            } else if (ev.Scroll.X != 0) {
+                orien  = orientation::Horizontal;
+                invert = ev.Scroll.X < 0;
+                delay  = style->HScrollBar.Bar.Delay;
+            }
+
+            f32 const min {get_scroll_min_value(orien)};
+            f32 const max {get_scroll_max_value(orien)};
+            f32 const diff {(max - min) / (invert ? -5 : 5)};
+            if (orien == orientation::Vertical) {
+                _vScrollbar.set_value(_vScrollbar.get_value() + diff, delay);
+            } else if (orien == orientation::Horizontal) {
+                _hScrollbar.set_value(_hScrollbar.get_value() + diff, delay);
+            }
+
+            ev.Handled = true;
         }
-
-        f32 const min {get_scroll_min_value(orien)};
-        f32 const max {get_scroll_max_value(orien)};
-        f32 const diff {(max - min) / (invert ? -5 : 5)};
-        if (orien == orientation::Vertical) {
-            _vScrollbar.set_value(_vScrollbar.get_value() + diff, delay);
-        } else if (orien == orientation::Horizontal) {
-            _hScrollbar.set_value(_hScrollbar.get_value() + diff, delay);
-        }
-
-        ev.Handled = true;
     }
 }
 

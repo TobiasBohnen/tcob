@@ -396,7 +396,9 @@ void form::on_mouse_wheel(input::mouse::wheel_event& mev)
 
     hide_tooltip();
 
-    if (_focusWidget) {
+    if (_topWidget) {
+        _injector.on_mouse_wheel(_topWidget, ev);
+    } else if (_focusWidget) {
         _injector.on_mouse_wheel(_focusWidget, ev);
     }
 
