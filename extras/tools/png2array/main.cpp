@@ -63,7 +63,7 @@ auto main(int argc, char* argv[]) -> int
         return 1;
     }
 
-    auto const files {io::enumerate(arg, "*.png")};
+    auto const files {io::enumerate(arg, {"*.png"})};
 
     std::cout << "#include <array>\n";
     std::cout << "#include <cstdint>\n\n";

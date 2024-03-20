@@ -309,7 +309,7 @@ system::system()
 
 system::~system()
 {
-    for (auto [_, gc] : _controllers) {
+    for (auto const& [_, gc] : _controllers) {
         SDL_GameControllerClose(gc->_controller);
     }
 
