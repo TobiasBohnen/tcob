@@ -1033,7 +1033,9 @@ auto cfg_texture_loader::check_async_load() -> command_status
         }
 
         if (assetLoadingDone) {
-            set_asset_status(def->assetPtr, status::Loaded);
+            if (def->assetPtr.get()->get_status() != status::Error) {
+                set_asset_status(def->assetPtr, status::Loaded);
+            }
         } else {
             loadingDone = false;
         }
