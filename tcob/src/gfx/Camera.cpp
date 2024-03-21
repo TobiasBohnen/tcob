@@ -90,6 +90,11 @@ void camera::look_at(point_f pos)
     set_position(pos - offset);
 }
 
+auto camera::get_look_at() -> point_f
+{
+    return _position + get_transformed_viewport().get_local_center() * point_f {_zoom.Width, _zoom.Height};
+}
+
 auto camera::convert_world_to_screen(rect_f const& rect) -> rect_i
 {
     update_transform();

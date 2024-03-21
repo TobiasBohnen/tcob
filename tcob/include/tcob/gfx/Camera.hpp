@@ -32,13 +32,15 @@ public:
 
     auto get_zoom() const -> size_f;
     void set_zoom(size_f zoom);
-    void zoom_by(size_f factor);
 
     auto get_position() const -> point_f;
     void set_position(point_f pos);
+    // TODO: meh ^^^^^^
+
     void move_by(point_f offset);
     void look_at(point_f position);
-    // TODO: meh ^^^^^^
+    auto get_look_at() -> point_f;
+    void zoom_by(size_f factor);
 
     auto convert_world_to_screen(rect_f const& rect) -> rect_i;
     auto convert_world_to_screen(point_f point) -> point_i;
