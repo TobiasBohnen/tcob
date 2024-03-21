@@ -53,7 +53,7 @@ auto vscroll_widget::get_scroll_style(orientation orien) const -> element::scrol
 void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
-    _vScrollbar.set_value(0, milliseconds {0});
+    set_scrollbar_value(0);
 }
 
 void vscroll_widget::on_paint(widget_painter& painter)
@@ -134,7 +134,7 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event& ev)
 
         f32 const diff {get_list_height() / get_list_item_count() * (invert ? -5 : 5)};
         if (orien == orientation::Vertical) {
-            _vScrollbar.set_value(_vScrollbar.get_value() + diff, delay);
+            _vScrollbar.set_target_value(_vScrollbar.get_target_value() + diff, delay);
         }
         ev.Handled = true;
     }
@@ -160,12 +160,12 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
 
 auto vscroll_widget::get_scrollbar_value() const -> f32
 {
-    return _vScrollbar.get_value();
+    return _vScrollbar.get_current_value();
 }
 
 void vscroll_widget::set_scrollbar_value(f32 value)
 {
-    _vScrollbar.set_value(value, milliseconds {0});
+    _vScrollbar.set_target_value(value, milliseconds {0});
 }
 
 } // namespace ui

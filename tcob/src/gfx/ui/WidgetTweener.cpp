@@ -14,6 +14,8 @@ widget_tweener::widget_tweener(widget& parent)
 
 void widget_tweener::start(f32 toValue, milliseconds delay)
 {
+    _toval = toValue;
+
     if (delay.count() == 0) {
         _val = toValue;
         _parent.force_redraw(_parent.get_name() + ": Tween start");
@@ -35,9 +37,14 @@ void widget_tweener::update(milliseconds deltaTime)
     }
 }
 
-auto widget_tweener::get_value() const -> f32
+auto widget_tweener::get_current_value() const -> f32
 {
     return _val;
+}
+
+auto widget_tweener::get_target_value() const -> f32
+{
+    return _toval;
 }
 
 void widget_tweener::reset(f32 value)

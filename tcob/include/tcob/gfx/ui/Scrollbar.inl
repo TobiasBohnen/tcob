@@ -30,7 +30,7 @@ inline void scrollbar<Parent>::paint(widget_painter& painter, element::scrollbar
         i32 const numBlocks {10};
         f32 const min {get_min_value()};
         f32 const max {get_max_value()};
-        f32 const frac {(get_value() - min) / ((max - min))};
+        f32 const frac {(get_current_value() - min) / ((max - min))};
 
         element::bar::context const barCtx {
             .Orientation = _orien,
@@ -127,13 +127,19 @@ inline auto scrollbar<Parent>::requires_scroll(rect_f const& rect) const -> bool
 }
 
 template <typename Parent>
-inline auto scrollbar<Parent>::get_value() const -> f32
+inline auto scrollbar<Parent>::get_current_value() const -> f32
 {
-    return _tween.get_value();
+    return _tween.get_current_value();
 }
 
 template <typename Parent>
-inline void scrollbar<Parent>::set_value(f32 val, milliseconds delay)
+inline auto scrollbar<Parent>::get_target_value() const -> f32
+{
+    return _tween.get_target_value();
+}
+
+template <typename Parent>
+inline void scrollbar<Parent>::set_target_value(f32 val, milliseconds delay)
 {
     if (!Visible) {
         _tween.reset(val);
@@ -141,7 +147,7 @@ inline void scrollbar<Parent>::set_value(f32 val, milliseconds delay)
     }
 
     f32 const newVal {std::clamp(val, get_min_value(), get_max_value())};
-    if (!_overThumb) {
+    if (!_isDragging) {
         _tween.start(newVal, delay);
     } else {
         _tween.reset(newVal);
@@ -183,7 +189,7 @@ inline void scrollbar<Parent>::calculate_value(point_f mp)
 
         f32 const min {get_min_value()};
         f32 const max {get_max_value()};
-        set_value(min + (max - min) * frac, delay);
+        set_target_value(min + (max - min) * frac, delay);
 
         _overThumb = true;
     }

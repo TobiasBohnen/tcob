@@ -62,13 +62,16 @@ void slider::on_paint(widget_painter& painter)
              .Inverted    = false,
              .Alignment   = pos,
              .BlockCount  = numBlocks,
-             .Fraction    = _tween.get_value()});
+             .Fraction    = _tween.get_current_value()});
 
         // thumb
         auto const thumbFlags {!_overThumb              ? flags {}
                                    : get_flags().Active ? flags {.Active = true}
                                                         : flags {.Hover = true}};
-        _paintResult.Thumb = painter.draw_thumb(get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb, rect, {.Orientation = orien, .Inverted = false, .Fraction = _tween.get_value()});
+        _paintResult.Thumb = painter.draw_thumb(
+            get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb,
+            rect,
+            {.Orientation = orien, .Inverted = false, .Fraction = _tween.get_current_value()});
 
         if (orien == orientation::Vertical) {
             _paintResult.Thumb.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.Width);

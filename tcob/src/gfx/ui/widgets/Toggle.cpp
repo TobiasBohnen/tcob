@@ -32,7 +32,7 @@ void toggle::on_paint(widget_painter& painter)
         f32 const tickWidth {rect.Width / 2};
 
         rect.Width = tickWidth;
-        rect.X += tickWidth * _tween.get_value();
+        rect.X += tickWidth * _tween.get_current_value();
         painter.draw_tick(style->Tick, rect);
     }
 }
@@ -46,9 +46,9 @@ void toggle::on_enabled_changed()
 {
     if (auto const style {get_style<toggle::style>()}) {
         if (Enabled) {
-            _tween.start(1.0f, style->Delay * (1.0f - _tween.get_value()));
+            _tween.start(1.0f, style->Delay * (1.0f - _tween.get_current_value()));
         } else {
-            _tween.start(0.0f, style->Delay * _tween.get_value());
+            _tween.start(0.0f, style->Delay * _tween.get_current_value());
         }
     } else {
         _tween.reset(Enabled ? 1.0f : 0.0f);
@@ -70,7 +70,7 @@ auto toggle::get_properties() const -> widget_attributes
 auto toggle::get_flags() -> flags
 {
     auto retValue {widget::get_flags()};
-    retValue.Checked = _tween.get_value() >= 0.5f;
+    retValue.Checked = _tween.get_current_value() >= 0.5f;
     return retValue;
 }
 

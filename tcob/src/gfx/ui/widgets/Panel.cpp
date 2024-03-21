@@ -80,8 +80,8 @@ void panel::on_styles_changed()
 {
     widget_container::on_styles_changed();
     _layout->mark_dirty();
-    _vScrollbar.set_value(0, milliseconds {0});
-    _hScrollbar.set_value(0, milliseconds {0});
+    _vScrollbar.set_target_value(0, milliseconds {0});
+    _hScrollbar.set_target_value(0, milliseconds {0});
 }
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
@@ -236,9 +236,9 @@ void panel::on_mouse_wheel(input::mouse::wheel_event& ev)
             f32 const max {get_scroll_max_value(orien)};
             f32 const diff {(max - min) / (invert ? -5 : 5)};
             if (orien == orientation::Vertical) {
-                _vScrollbar.set_value(_vScrollbar.get_value() + diff, delay);
+                _vScrollbar.set_target_value(_vScrollbar.get_target_value() + diff, delay);
             } else if (orien == orientation::Horizontal) {
-                _hScrollbar.set_value(_hScrollbar.get_value() + diff, delay);
+                _hScrollbar.set_target_value(_hScrollbar.get_target_value() + diff, delay);
             }
 
             ev.Handled = true;
@@ -264,13 +264,13 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
 
 auto panel::get_scroll_offset() const -> point_f
 {
-    return {_hScrollbar.get_value(), _vScrollbar.get_value()};
+    return {_hScrollbar.get_current_value(), _vScrollbar.get_current_value()};
 }
 
 void panel::set_scroll_offset(point_f off)
 {
-    _hScrollbar.set_value(off.X, milliseconds {0});
-    _vScrollbar.set_value(off.Y, milliseconds {0});
+    _hScrollbar.set_target_value(off.X, milliseconds {0});
+    _vScrollbar.set_target_value(off.Y, milliseconds {0});
     force_redraw(get_name() + ": set_scroll_offset");
 }
 

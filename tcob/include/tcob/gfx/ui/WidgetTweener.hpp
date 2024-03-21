@@ -20,13 +20,15 @@ public:
 
     void update(milliseconds deltaTime);
 
-    auto get_value() const -> f32;
+    auto get_current_value() const -> f32;
+    auto get_target_value() const -> f32;
     void reset(f32 val);
 
 private:
     widget&                                      _parent;
     std::unique_ptr<tweening::linear_tween<f32>> _tween;
     f32                                          _val {0.0f};
+    f32                                          _toval {0.0f};
 };
 
 }
