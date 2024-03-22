@@ -51,26 +51,23 @@ namespace detail {
     ////////////////////////////////////////////////////////////
 
     template <typename Arg>
-    inline auto compare_types_impl(vm_view view, SQInteger& startIndex) -> bool
+    inline auto compare_types_impl(vm_view view, SQInteger startIndex) -> bool
     {
         using converter_type = std::remove_cvref_t<Arg>;
-        bool const result {converter<converter_type>::IsType(view, startIndex)};
-        startIndex++;
-        return result;
+        return converter<converter_type>::IsType(view, startIndex);
     }
 
     template <typename R, typename... Args>
     inline auto compare_types(vm_view view, SQInteger startIndex, std::function<R(Args...)> const&) -> bool
     {
-        return ((compare_types_impl<Args>(view, startIndex)) && ...);
+        return ((compare_types_impl<Args>(view, startIndex++)) && ...);
     }
 
     ////////////////////////////////////////////////////////////
 
     template <typename... Funcs>
-    inline native_overload<Funcs...>::native_overload(bool isStatic, std::tuple<Funcs...> fns)
+    inline native_overload<Funcs...>::native_overload(std::tuple<Funcs...> fns)
         : _fns {std::move(fns)}
-        , _isStatic {isStatic}
     {
     }
 
@@ -78,11 +75,9 @@ namespace detail {
     inline auto native_overload<Funcs...>::operator()(vm_view view) -> SQInteger
     {
         SQInteger const oldTop {view.get_top()};
-        SQInteger const unusedStackObjects {_isStatic ? 2 : 1};
-
         std::apply(
             [&](auto&&... item) {
-                ((check(view, oldTop - unusedStackObjects, item)) || ...);
+                return ((check(view, item)) || ...);
             },
             _fns);
 
@@ -91,22 +86,32 @@ namespace detail {
 
     template <typename... Funcs>
     template <typename R, typename T, typename... Args>
-    inline auto native_overload<Funcs...>::check(vm_view view, SQInteger numArgs, R (T::*func)(Args...)) -> bool
+    inline auto native_overload<Funcs...>::check(vm_view view, R (T::*func)(Args...)) -> bool
     {
-        return check_func(view, numArgs, std::function<R(T*, Args...)> {func});
+        return check_func(view, std::function<R(T*, Args...)> {func});
     }
 
     template <typename... Funcs>
-    inline auto native_overload<Funcs...>::check(vm_view view, SQInteger numArgs, auto&& func) -> bool
+    inline auto native_overload<Funcs...>::check(vm_view view, auto&& func) -> bool
     {
-        return check_func(view, numArgs, std::function {func});
+        return check_func(view, std::function {func});
     }
 
     template <typename... Funcs>
     template <typename R, typename... Args>
-    inline auto native_overload<Funcs...>::check_func(vm_view view, SQInteger numArgs, std::function<R(Args...)> const& func) -> bool
+    inline auto native_overload<Funcs...>::check_func(vm_view view, std::function<R(Args...)> const& func) -> bool
     {
-        SQInteger const startIndex {_isStatic ? 2 : 1};
+        SQInteger startIndex {2};
+        if constexpr (sizeof...(Args) > 0) {
+            using first_type = typename std::remove_cvref_t<tcob::detail::first_element_t<Args...>>;
+            if constexpr (Pointer<first_type>) {
+                startIndex = view.is_userdata(1) ? 1 : 2;
+            } else if constexpr (std::is_same_v<stack_base, first_type>) {
+                startIndex = 1;
+            }
+        }
+
+        SQInteger const numArgs {view.get_top() - startIndex};
         if (numArgs == sizeof...(Args) && compare_types(view, startIndex, func)) {
             call_func(view, startIndex, func);
             return true;
@@ -150,13 +155,13 @@ auto make_shared_closure(std::function<R(P...)>&& fn) -> native_closure_shared_p
 template <typename... Funcs>
 auto make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr
 {
-    return std::make_unique<detail::native_overload<std::remove_cvref_t<Funcs>...>>(true, std::make_tuple(std::forward<Funcs>(fns)...));
+    return std::make_unique<detail::native_overload<std::remove_cvref_t<Funcs>...>>(std::make_tuple(std::forward<Funcs>(fns)...));
 }
 
 template <typename... Funcs>
 auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr
 {
-    return std::make_shared<detail::native_overload<std::remove_cvref_t<Funcs>...>>(true, std::make_tuple(std::forward<Funcs>(fns)...));
+    return std::make_shared<detail::native_overload<std::remove_cvref_t<Funcs>...>>(std::make_tuple(std::forward<Funcs>(fns)...));
 }
 
 }

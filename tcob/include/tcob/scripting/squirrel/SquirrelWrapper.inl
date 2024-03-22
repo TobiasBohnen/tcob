@@ -52,7 +52,7 @@ template <typename T>
 template <typename... Funcs>
 inline auto wrapper<T>::impl_make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr
 {
-    return std::make_unique<detail::native_overload<std::remove_cvref_t<Funcs>...>>(false, std::make_tuple(std::forward<Funcs>(fns)...));
+    return std::make_unique<detail::native_overload<std::remove_cvref_t<Funcs>...>>(std::make_tuple(std::forward<Funcs>(fns)...));
 }
 
 template <typename T>

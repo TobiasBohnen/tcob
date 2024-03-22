@@ -44,22 +44,21 @@ namespace detail {
     template <typename... Funcs>
     class native_overload : public native_closure_base {
     public:
-        explicit native_overload(bool isStatic, std::tuple<Funcs...> fns);
+        explicit native_overload(std::tuple<Funcs...> fns);
 
         auto operator()(vm_view view) -> SQInteger override;
 
     private:
         template <typename R, typename T, typename... Args>
-        auto check(vm_view view, SQInteger numArgs, R (T::*func)(Args...)) -> bool;
-        auto check(vm_view view, SQInteger numArgs, auto&& func) -> bool;
+        auto check(vm_view view, R (T::*func)(Args...)) -> bool;
+        auto check(vm_view view, auto&& func) -> bool;
         template <typename R, typename... Args>
-        auto check_func(vm_view view, SQInteger numArgs, std::function<R(Args...)> const& func) -> bool;
+        auto check_func(vm_view view, std::function<R(Args...)> const& func) -> bool;
 
         template <typename R, typename... Args>
         auto call_func(vm_view view, SQInteger startIndex, std::function<R(Args...)> const& func) -> void;
 
         std::tuple<Funcs...> _fns;
-        bool                 _isStatic;
     };
 
 }
