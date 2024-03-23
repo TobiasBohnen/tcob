@@ -283,7 +283,12 @@ void form::focus_widget(widget* newFocus)
 void form::find_top_widget(input::mouse::motion_event& ev)
 {
     auto* newTop {find_widget_at(point_f {ev.Position}).get()};
-    if (newTop && newTop->is_inert()) { return; }
+    if (newTop && newTop->is_inert()) {
+        _injector.on_mouse_leave(_topWidget);
+        _topWidget = nullptr;
+        return;
+    }
+
     if (newTop != _topWidget) {
         hide_tooltip();
         _injector.on_mouse_leave(_topWidget);
