@@ -49,7 +49,8 @@ auto widget_tweener::get_target_value() const -> f32
 
 void widget_tweener::reset(f32 value)
 {
-    _val = value;
+    _val   = value;
+    _toval = value;
     if (_tween) {
         _tween->stop();
     }
