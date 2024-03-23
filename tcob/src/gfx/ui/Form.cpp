@@ -267,10 +267,30 @@ void form::focus_widget(widget* newFocus)
         _injector.on_focus_lost(_focusWidget);
 
         _focusWidget = newFocus;
+
         if (_focusWidget) {
+            if (_focusWidget->is_inert()) {
+                _focusWidget = nullptr;
+                return;
+            }
+
             _currentTabIndex = _focusWidget->TabStop->Index;
             _injector.on_focus_gained(_focusWidget);
         }
+    }
+}
+
+void form::find_top_widget(input::mouse::motion_event& ev)
+{
+    auto* newTop {find_widget_at(point_f {ev.Position}).get()};
+    if (newTop && newTop->is_inert()) { return; }
+    if (newTop != _topWidget) {
+        hide_tooltip();
+        _injector.on_mouse_leave(_topWidget);
+        _topWidget = newTop;
+        _injector.on_mouse_enter(_topWidget);
+    } else if (_topWidget) {
+        _injector.on_mouse_hover(_topWidget, ev);
     }
 }
 
@@ -322,15 +342,7 @@ void form::on_mouse_motion(input::mouse::motion_event& mev)
     if (_isLButtonDown) {
         _injector.on_mouse_drag(_focusWidget, ev);
     } else {
-        auto* newTop {find_widget_at(point_f {ev.Position}).get()};
-        if (newTop != _topWidget) {
-            hide_tooltip();
-            _injector.on_mouse_leave(_topWidget);
-            _topWidget = newTop;
-            _injector.on_mouse_enter(_topWidget);
-        } else if (_topWidget) {
-            _injector.on_mouse_hover(_topWidget, ev);
-        }
+        find_top_widget(ev);
     }
 
     mev.Handled = ev.Handled;

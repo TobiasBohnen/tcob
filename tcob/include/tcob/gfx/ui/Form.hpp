@@ -94,6 +94,8 @@ protected:
     void on_visiblity_changed() override;
 
 private:
+    void find_top_widget(input::mouse::motion_event& ev);
+
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
 

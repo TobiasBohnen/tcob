@@ -213,7 +213,7 @@ void widget::update_style()
 
 auto widget::can_tab_stop() const -> bool
 {
-    return TabStop->Enabled && is_enabled() && is_visible() && _inputEnabled;
+    return TabStop->Enabled && is_enabled() && is_visible() && !_inert;
 }
 
 auto widget::find_child_at(point_f /* pos */) -> std::shared_ptr<widget>
@@ -489,9 +489,14 @@ auto widget::get_orientation() const -> orientation
     return Bounds->Width >= Bounds->Height ? orientation::Horizontal : orientation::Vertical;
 }
 
-void widget::set_input_enabled(bool enable)
+auto widget::is_inert() const -> bool
 {
-    _inputEnabled = enable;
+    return _inert;
+}
+
+void widget::set_inert(bool inert)
+{
+    _inert = inert;
 }
 
 void widget::activate()

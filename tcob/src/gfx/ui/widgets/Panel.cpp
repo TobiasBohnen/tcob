@@ -288,7 +288,7 @@ glass::glass(init const& wi)
     : panel {wi}
 {
     Class("glass");
-    set_input_enabled(false);
+    set_inert(true);
 }
 
 void glass::on_paint(widget_painter& painter)

@@ -143,7 +143,8 @@ protected:
 
     auto get_orientation() const -> orientation;
 
-    void set_input_enabled(bool enable);
+    auto is_inert() const -> bool;
+    void set_inert(bool inert);
 
 private:
     void do_key_down(input::keyboard::event& ev);
@@ -173,7 +174,7 @@ private:
 
     bool                        _visible {true};
     bool                        _enabled {true};
-    bool                        _inputEnabled {true};
+    bool                        _inert {false};
     flags                       _flags {};
     f32                         _alpha {1.0f};
     form*                       _form {nullptr};
