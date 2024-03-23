@@ -143,6 +143,8 @@ protected:
 
     auto get_orientation() const -> orientation;
 
+    void set_input_enabled(bool enable);
+
 private:
     void do_key_down(input::keyboard::event& ev);
     void do_key_up(input::keyboard::event& ev);
@@ -171,23 +173,13 @@ private:
 
     bool                        _visible {true};
     bool                        _enabled {true};
+    bool                        _inputEnabled {true};
     flags                       _flags {};
     f32                         _alpha {1.0f};
     form*                       _form {nullptr};
     widget*                     _parent {nullptr};
     std::shared_ptr<style_base> _style;
     string                      _name;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API scissor_guard final {
-public:
-    scissor_guard(widget_painter& painter, widget* w);
-    ~scissor_guard();
-
-private:
-    widget_painter& _painter;
 };
 
 ////////////////////////////////////////////////////////////

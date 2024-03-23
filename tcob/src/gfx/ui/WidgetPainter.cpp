@@ -6,6 +6,8 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 
 #include "tcob/core/Common.hpp"
+#include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 
@@ -584,6 +586,26 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
             },
         },
         p);
+}
+
+////////////////////////////////////////////////////////////
+
+scissor_guard::scissor_guard(widget_painter& painter, widget* w)
+    : _painter {painter}
+{
+    rect_f bounds {w->get_global_content_bounds()};
+
+    if (auto const* form {w->get_form()}) {
+        point_f const off {form->Bounds->get_position()};
+        bounds.X -= off.X;
+        bounds.Y -= off.Y;
+    }
+    painter.push_scissor(bounds);
+}
+
+scissor_guard::~scissor_guard()
+{
+    _painter.pop_scissor();
 }
 
 } // namespace ui

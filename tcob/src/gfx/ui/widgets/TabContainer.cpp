@@ -100,7 +100,7 @@ void tab_container::on_paint(widget_painter& painter)
             offset_tab_content(rect, *style);
 
             auto          xform {transform::Identity};
-            point_f const translate {rect.get_position() + get_paint_translation()};
+            point_f const translate {rect.get_position() + get_paint_offset()};
             xform.translate(translate);
 
             auto& tab {_tabs[ActiveTabIndex]};

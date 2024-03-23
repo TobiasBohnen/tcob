@@ -63,6 +63,17 @@ private:
     scrollbar<panel>        _vScrollbar;
     scrollbar<panel>        _hScrollbar;
 };
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API glass : public panel {
+public:
+    explicit glass(init const& wi);
+
+protected:
+    void on_paint(widget_painter& painter) override;
+};
+
 }
 
 #include "Panel.inl"

@@ -30,7 +30,7 @@ protected:
 
     void on_styles_changed() override;
 
-    auto get_paint_translation() const -> point_f;
+    auto get_paint_offset() const -> point_f;
 };
 
 ////////////////////////////////////////////////////////////

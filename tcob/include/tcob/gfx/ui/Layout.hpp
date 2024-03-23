@@ -41,7 +41,7 @@ protected:
     void virtual do_layout(size_f size) = 0;
 
 private:
-    auto create_widgetinfo(string const& name) const -> widget::init;
+    auto create_init(string const& name) const -> widget::init;
 
     parent                               _parent;
     std::vector<std::shared_ptr<widget>> _widgets {};

@@ -376,12 +376,15 @@ void terminal::on_key_down(input::keyboard::event& ev)
             }
         }
     }
+
+    ev.Handled = true;
 }
 
-void terminal::on_key_up(input::keyboard::event& /* ev */)
+void terminal::on_key_up(input::keyboard::event& ev)
 {
     if (_cursorTween) {
         _cursorTween->resume();
+        ev.Handled = true;
     }
 }
 
@@ -407,9 +410,7 @@ void terminal::on_mouse_leave()
 
 void terminal::on_mouse_hover(input::mouse::motion_event& ev)
 {
-    if (!_useMouse) {
-        return;
-    }
+    if (!_useMouse) { return; }
 
     if (auto const style {get_style<terminal::style>()}) {
         rect_f const rect {get_global_content_bounds()};
@@ -422,17 +423,15 @@ void terminal::on_mouse_hover(input::mouse::motion_event& ev)
             i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.X) / fontWidth) + 0.5f))};
             i32 const y {static_cast<i32>((ev.Position.Y - rect.Y) / fontHeight)};
             HoveredCell = {x, y};
+
+            ev.Handled = true;
         }
     }
-
-    ev.Handled = true;
 }
 
 void terminal::on_mouse_down(input::mouse::button_event& ev)
 {
-    if (!_useMouse) {
-        return;
-    }
+    if (!_useMouse) { return; }
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         if (HoveredCell->X >= 0 && HoveredCell->Y >= 0) {
@@ -444,9 +443,7 @@ void terminal::on_mouse_down(input::mouse::button_event& ev)
 
 void terminal::on_focus_gained()
 {
-    if (!_showCursor) {
-        return;
-    }
+    if (!_showCursor) { return; }
     using namespace tcob::tweening;
 
     if (auto const style {get_style<terminal::style>()}) {
@@ -461,9 +458,7 @@ void terminal::on_focus_gained()
 
 void terminal::on_focus_lost()
 {
-    if (!_showCursor) {
-        return;
-    }
+    if (!_showCursor) { return; }
 
     _cursorTween   = nullptr;
     _cursorVisible = false;

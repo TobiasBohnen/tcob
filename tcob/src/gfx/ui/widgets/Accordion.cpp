@@ -70,7 +70,7 @@ void accordion::on_paint(widget_painter& painter)
             update_section_bounds(rect);
 
             auto          xform {transform::Identity};
-            point_f const translate {rect.get_position() + get_paint_translation()};
+            point_f const translate {rect.get_position() + get_paint_offset()};
             xform.translate(translate);
 
             auto& tab {_sections[ActiveSectionIndex]};

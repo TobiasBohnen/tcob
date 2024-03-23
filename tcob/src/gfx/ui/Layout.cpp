@@ -49,7 +49,7 @@ auto layout::get_widgets() -> std::vector<std::shared_ptr<widget>>&
     return _widgets;
 }
 
-auto layout::create_widgetinfo(string const& name) const -> widget::init
+auto layout::create_init(string const& name) const -> widget::init
 {
     widget::init retValue {};
     retValue.Name = name;
@@ -110,35 +110,35 @@ void dock_layout::do_layout(size_f size)
         case dock_style::Left:
             cbounds.Width = width;
 
-            layoutRect.X += cbounds.Width;
-            layoutRect.Width -= cbounds.Width;
+            layoutRect.X += width;
+            layoutRect.Width -= width;
             break;
         case dock_style::Right:
-            cbounds.X += width;
+            cbounds.X     = cbounds.Width - width;
             cbounds.Width = width;
 
-            layoutRect.Width -= cbounds.Width;
+            layoutRect.Width -= width;
             break;
         case dock_style::Top:
             cbounds.Height = height;
 
-            layoutRect.Y += cbounds.Height;
-            layoutRect.Height -= cbounds.Height;
+            layoutRect.Y += height;
+            layoutRect.Height -= height;
             break;
         case dock_style::Bottom:
-            cbounds.Y += height;
+            cbounds.Y      = cbounds.Height - height;
             cbounds.Height = height;
 
-            layoutRect.Height -= cbounds.Height;
+            layoutRect.Height -= height;
             break;
         case dock_style::Fill:
             cbounds.Width  = width;
             cbounds.Height = height;
 
-            layoutRect.X += cbounds.Width;
-            layoutRect.Width -= cbounds.Width;
-            layoutRect.Y += cbounds.Height;
-            layoutRect.Height -= cbounds.Height;
+            layoutRect.X += width;
+            layoutRect.Width -= width;
+            layoutRect.Y += height;
+            layoutRect.Height -= height;
             break;
         }
 

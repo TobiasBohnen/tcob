@@ -217,55 +217,77 @@ auto create_form_displays(window* wnd) -> std::shared_ptr<form>
     panel0->Flex = {100_pct, 100_pct};
     auto panel0Layout {panel0->get_layout<fixed_layout>()};
     (*panel0->TabStop).Enabled = false;
+    {
+        size_i const termSize {80, 24};
+        auto         terminal0 {panel0Layout->create_widget<terminal>({5, 5, termSize.Width * 14.f, termSize.Height * 28.f}, "Term1")};
+        terminal0->Size = termSize;
+        terminal0->clear();
 
-    size_i const termSize {80, 24};
-    auto         terminal0 {panel0Layout->create_widget<terminal>({5, 5, termSize.Width * 14.f, termSize.Height * 28.f}, "Term1")};
-    terminal0->Size = termSize;
-    terminal0->clear();
+        terminal0->add_str("\033[106;34mC\033[105;33mo\033[104;32ml\033[103;31mo\033[102;31mr\033[0m Te\033[31;40mst ");
+        terminal0->color_set(color::FromString("#008f11"), colors::White);
+        terminal0->add_str("\nThis is line 2");
+        terminal0->add_str({79, 23}, "x");
+        terminal0->move({20, 10});
+        terminal0->add_str("st\033[4CTe");
+        terminal0->move({40, 10});
+        terminal0->add_str("st\033[4CTe");
 
-    terminal0->add_str("\033[106;34mC\033[105;33mo\033[104;32ml\033[103;31mo\033[102;31mr\033[0m Te\033[31;40mst ");
-    terminal0->color_set(color::FromString("#008f11"), colors::White);
-    terminal0->add_str("\nThis is line 2");
-    terminal0->add_str({79, 23}, "x");
-    terminal0->move({20, 10});
-    terminal0->add_str("st\033[4CTe");
-    terminal0->move({40, 10});
-    terminal0->add_str("st\033[4CTe");
+        terminal0->curs_set(true);
+        terminal0->mouse_set(true);
+        terminal0->echo(true);
 
-    terminal0->curs_set(true);
-    terminal0->mouse_set(true);
-    terminal0->echo(true);
+        auto button0 {panel0Layout->create_widget<button>({1150, 450, 200, 100}, "Button0")};
+        button0->Label = "Button0";
+        auto button1 {panel0Layout->create_widget<button>({1150, 650, 200, 100}, "Button1")};
+        button1->Label = "Button1";
 
-    auto dotMatrix {panel0Layout->create_widget<dot_matrix_display>({1150, 60, 240, 120}, "DM1")};
-    dotMatrix->Size = {40, 20};
-    rng              rand;
-    std::vector<u16> dots;
-    dots.reserve(dotMatrix->Size->Width * dotMatrix->Size->Height);
-    for (i32 i {0}; i < dots.capacity(); ++i) {
-        dots.push_back(rand(0, 2));
+        button0->Click.connect([terminal0](auto const&) {
+            terminal0->rectangle({terminal0->get_xy(), {10, 5}});
+        });
+        button1->Click.connect([terminal0](auto const&) {
+            {
+                io::ifstream str {"term.dump"};
+                auto         _ = terminal0->restore(str);
+            }
+            terminal0->flash();
+        });
     }
-    dotMatrix->Dots = dots;
+    {
+        auto canvas {panel0Layout->create_widget<canvas_widget>({5, 700, 200, 200}, "Canvas1")};
+        canvas->set_fill_style(colors::Blue);
+        canvas->begin_path();
+        canvas->rect({0, 0, 100, 100});
+        canvas->fill();
 
-    auto lcdDisplay0 {panel0Layout->create_widget<seven_segment_display>({1150, 200, 350, 70}, "LCD0")};
-    lcdDisplay0->Text = "0123456789 -=\"',";
-    auto lcdDisplay1 {panel0Layout->create_widget<seven_segment_display>({1150, 270, 350, 70}, "LCD1")};
-    lcdDisplay1->Text = "ABCDEFGHIJLOPSUZ";
+        canvas->set_fill_style(colors::Red);
+        canvas->begin_path();
+        canvas->rect({50, 50, 100, 100});
+        canvas->fill();
 
-    auto button0 {panel0Layout->create_widget<button>({1150, 450, 200, 100}, "Button0")};
-    button0->Label = "Button0";
-    auto button1 {panel0Layout->create_widget<button>({1150, 650, 200, 100}, "Button1")};
-    button1->Label = "Button1";
+        canvas->set_fill_style(colors::Green);
+        canvas->begin_path();
+        canvas->rect({150, 150, 100, 100});
+        canvas->fill();
+    }
 
-    button0->Click.connect([terminal0](auto const&) {
-        terminal0->rectangle({terminal0->get_xy(), {10, 5}});
-    });
-    button1->Click.connect([terminal0](auto const&) {
-        {
-            io::ifstream str {"term.dump"};
-            auto         _ = terminal0->restore(str);
+    {
+        auto dotMatrix {panel0Layout->create_widget<dot_matrix_display>({1150, 60, 240, 120}, "DM1")};
+        dotMatrix->Size = {40, 20};
+        rng              rand;
+        std::vector<u16> dots;
+        dots.reserve(dotMatrix->Size->Width * dotMatrix->Size->Height);
+        for (i32 i {0}; i < dots.capacity(); ++i) {
+            dots.push_back(rand(0, 2));
         }
-        terminal0->flash();
-    });
+        dotMatrix->Dots = dots;
+    }
+
+    {
+        auto lcdDisplay0 {panel0Layout->create_widget<seven_segment_display>({1150, 200, 350, 70}, "LCD0")};
+        lcdDisplay0->Text = "0123456789 -=\"',";
+        auto lcdDisplay1 {panel0Layout->create_widget<seven_segment_display>({1150, 270, 350, 70}, "LCD1")};
+        lcdDisplay1->Text = "ABCDEFGHIJLOPSUZ";
+    }
 
     // styles
     return retValue;

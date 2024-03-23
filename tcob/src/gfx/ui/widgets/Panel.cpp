@@ -139,7 +139,7 @@ void panel::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         auto          xform {transform::Identity};
-        point_f const translate {rect.get_position() + get_paint_translation()};
+        point_f const translate {rect.get_position() + get_paint_offset()};
         xform.translate(translate);
 
         for (auto const& w : get_widgets()) {
@@ -162,14 +162,16 @@ void panel::on_mouse_hover(input::mouse::motion_event& ev)
 {
     widget_container::on_mouse_hover(ev);
 
-    if (_vScrollbar.inject_mouse_hover(ev.Position)) {
-        force_redraw(get_name() + ": vertical scrollbar hover");
-        ev.Handled = true;
-    }
+    if (_vScrollbar.Visible || _hScrollbar.Visible) {
+        if (_vScrollbar.inject_mouse_hover(ev.Position)) {
+            force_redraw(get_name() + ": vertical scrollbar hover");
+            ev.Handled = true;
+        }
 
-    if (_hScrollbar.inject_mouse_hover(ev.Position)) {
-        force_redraw(get_name() + ": horizontal scrollbar hover");
-        ev.Handled = true;
+        if (_hScrollbar.inject_mouse_hover(ev.Position)) {
+            force_redraw(get_name() + ": horizontal scrollbar hover");
+            ev.Handled = true;
+        }
     }
 }
 
@@ -177,14 +179,16 @@ void panel::on_mouse_drag(input::mouse::motion_event& ev)
 {
     widget_container::on_mouse_drag(ev);
 
-    if (_vScrollbar.inject_mouse_drag(ev.Position)) {
-        force_redraw(get_name() + ": vertical scrollbar dragged");
-        ev.Handled = true;
-    }
+    if (_vScrollbar.Visible || _hScrollbar.Visible) {
+        if (_vScrollbar.inject_mouse_drag(ev.Position)) {
+            force_redraw(get_name() + ": vertical scrollbar dragged");
+            ev.Handled = true;
+        }
 
-    if (_hScrollbar.inject_mouse_drag(ev.Position)) {
-        force_redraw(get_name() + ": horizontal scrollbar dragged");
-        ev.Handled = true;
+        if (_hScrollbar.inject_mouse_drag(ev.Position)) {
+            force_redraw(get_name() + ": horizontal scrollbar dragged");
+            ev.Handled = true;
+        }
     }
 }
 
@@ -192,11 +196,13 @@ void panel::on_mouse_down(input::mouse::button_event& ev)
 {
     widget_container::on_mouse_down(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
-        _vScrollbar.inject_mouse_down(ev.Position);
-        _hScrollbar.inject_mouse_down(ev.Position);
-        force_redraw(get_name() + ": mouse down");
-        ev.Handled = true;
+    if (_vScrollbar.Visible || _hScrollbar.Visible) {
+        if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+            _vScrollbar.inject_mouse_down(ev.Position);
+            _hScrollbar.inject_mouse_down(ev.Position);
+            force_redraw(get_name() + ": mouse down");
+            ev.Handled = true;
+        }
     }
 }
 
@@ -204,11 +210,13 @@ void panel::on_mouse_up(input::mouse::button_event& ev)
 {
     widget_container::on_mouse_up(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
-        _vScrollbar.inject_mouse_up(ev.Position);
-        _hScrollbar.inject_mouse_up(ev.Position);
-        force_redraw(get_name() + ": mouse up");
-        ev.Handled = true;
+    if (_vScrollbar.Visible || _hScrollbar.Visible) {
+        if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+            _vScrollbar.inject_mouse_up(ev.Position);
+            _hScrollbar.inject_mouse_up(ev.Position);
+            force_redraw(get_name() + ": mouse up");
+            ev.Handled = true;
+        }
     }
 }
 
@@ -216,7 +224,7 @@ void panel::on_mouse_wheel(input::mouse::wheel_event& ev)
 {
     widget_container::on_mouse_wheel(ev);
 
-    if (_hScrollbar.Visible || _vScrollbar.Visible) {
+    if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (auto const style {get_style<panel::style>()}) {
             orientation  orien {};
             bool         invert {false};
@@ -272,6 +280,33 @@ void panel::set_scroll_offset(point_f off)
     _hScrollbar.set_target_value(off.X, milliseconds {0});
     _vScrollbar.set_target_value(off.Y, milliseconds {0});
     force_redraw(get_name() + ": set_scroll_offset");
+}
+
+////////////////////////////////////////////////////////////
+
+glass::glass(init const& wi)
+    : panel {wi}
+{
+    Class("glass");
+    set_input_enabled(false);
+}
+
+void glass::on_paint(widget_painter& painter)
+{
+    rect_f rect {Bounds()};
+
+    // content
+    scissor_guard const guard {painter, this};
+
+    auto          xform {transform::Identity};
+    point_f const translate {rect.get_position() + get_paint_offset()};
+    xform.translate(translate);
+
+    for (auto const& w : get_widgets()) {
+        painter.begin(Alpha, xform);
+        w->paint(painter);
+        painter.end();
+    }
 }
 
 } // namespace ui

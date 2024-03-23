@@ -58,4 +58,15 @@ private:
     std::stack<rect_f> _scissorStack;
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API scissor_guard final {
+public:
+    scissor_guard(widget_painter& painter, widget* w);
+    ~scissor_guard();
+
+private:
+    widget_painter& _painter;
+};
+
 }

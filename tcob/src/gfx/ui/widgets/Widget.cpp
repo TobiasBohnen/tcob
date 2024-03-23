@@ -213,7 +213,7 @@ void widget::update_style()
 
 auto widget::can_tab_stop() const -> bool
 {
-    return TabStop->Enabled && is_enabled() && is_visible();
+    return TabStop->Enabled && is_enabled() && is_visible() && _inputEnabled;
 }
 
 auto widget::find_child_at(point_f /* pos */) -> std::shared_ptr<widget>
@@ -489,6 +489,11 @@ auto widget::get_orientation() const -> orientation
     return Bounds->Width >= Bounds->Height ? orientation::Horizontal : orientation::Vertical;
 }
 
+void widget::set_input_enabled(bool enable)
+{
+    _inputEnabled = enable;
+}
+
 void widget::activate()
 {
     if (!_flags.Active) {
@@ -517,26 +522,6 @@ void widget::on_styles_changed()
 auto widget::get_styles() const -> style_collection const&
 {
     return _form->Styles();
-}
-
-////////////////////////////////////////////////////////////
-
-scissor_guard::scissor_guard(widget_painter& painter, widget* w)
-    : _painter {painter}
-{
-    rect_f bounds {w->get_global_content_bounds()};
-
-    if (auto const* form {w->get_form()}) {
-        point_f const off {form->Bounds->get_position()};
-        bounds.X -= off.X;
-        bounds.Y -= off.Y;
-    }
-    painter.push_scissor(bounds);
-}
-
-scissor_guard::~scissor_guard()
-{
-    _painter.pop_scissor();
 }
 
 }
