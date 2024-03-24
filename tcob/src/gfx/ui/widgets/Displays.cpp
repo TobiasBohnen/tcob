@@ -268,6 +268,16 @@ void canvas_widget::set_stroke_width(f32 size)
     _commands.emplace_back([=](canvas& canvas) { canvas.set_stroke_width(size); });
 }
 
+void canvas_widget::set_line_cap(line_cap cap)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_line_cap(cap); });
+}
+
+void canvas_widget::set_line_join(line_join join)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_line_join(join); });
+}
+
 void canvas_widget::begin_path()
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.begin_path(); });

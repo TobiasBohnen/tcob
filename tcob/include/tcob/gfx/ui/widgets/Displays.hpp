@@ -85,6 +85,8 @@ public:
     void set_stroke_style(color c);
     void set_stroke_style(canvas_paint const& paint);
     void set_stroke_width(f32 size);
+    void set_line_cap(line_cap cap);
+    void set_line_join(line_join join);
 
     void begin_path();
     void close_path();
