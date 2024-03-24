@@ -63,8 +63,9 @@ public:
 
     auto constexpr find_edge(degree_f angle) const -> point<T>;
 
-    auto constexpr as_intersection(rect const& other) const -> rect;
-    auto constexpr as_shrunk(size<T> const& size) const -> rect;
+    auto constexpr as_intersected(rect const& other) const -> rect;
+    auto constexpr as_merged(rect const& other) const -> rect;
+    auto constexpr as_padded(size<T> const& size) const -> rect;
 
     auto static constexpr Lerp(rect const& left, rect const& right, f64 step) -> rect;
 

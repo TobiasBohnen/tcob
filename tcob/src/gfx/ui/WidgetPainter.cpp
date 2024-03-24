@@ -38,7 +38,7 @@ void widget_painter::push_scissor(rect_f const& globalScissor)
     if (_scissorStack.empty()) {
         _scissorStack.push(globalScissor);
     } else {
-        _scissorStack.push(globalScissor.as_intersection(_scissorStack.top()));
+        _scissorStack.push(globalScissor.as_intersected(_scissorStack.top()));
     }
 
     _canvas.set_scissor(_scissorStack.top(), false);

@@ -109,7 +109,7 @@ auto constexpr rect<T>::find_edge(degree_f angle) const -> point<T>
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_intersection(rect const& other) const -> rect
+auto constexpr rect<T>::as_intersected(rect const& other) const -> rect
 {
     T const x1 {std::max(X, other.X)};
     T const y1 {std::max(Y, other.Y)};
@@ -127,12 +127,23 @@ auto constexpr rect<T>::as_intersection(rect const& other) const -> rect
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_shrunk(size<T> const& size) const -> rect
+auto constexpr rect<T>::as_merged(rect const& other) const -> rect
 {
-    T const x = X + static_cast<T>(size.Width / 2);
-    T const y = Y + static_cast<T>(size.Height / 2);
-    T const w = Width - static_cast<T>(size.Width);
-    T const h = Height - static_cast<T>(size.Height);
+    T const x1 {std::min(X, other.X)};
+    T const y1 {std::min(Y, other.Y)};
+    T const x2 {std::max(right(), other.right())};
+    T const y2 {std::max(bottom(), other.bottom())};
+
+    return {x1, y1, x2 - x1, y2 - y1};
+}
+
+template <Arithmetic T>
+auto constexpr rect<T>::as_padded(size<T> const& size) const -> rect
+{
+    T const x {X + static_cast<T>(size.Width / 2)};
+    T const y {Y + static_cast<T>(size.Height / 2)};
+    T const w {Width - static_cast<T>(size.Width)};
+    T const h {Height - static_cast<T>(size.Height)};
 
     return {x, y, w, h};
 }
