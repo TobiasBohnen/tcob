@@ -553,9 +553,9 @@ void canvas::reset()
     s.TextAlign = {};
 }
 
-auto canvas::create_guard() -> canvas_guard
+auto canvas::create_guard() -> state_guard
 {
-    return canvas_guard {this};
+    return state_guard {this};
 }
 
 ////////////////////////////////////////////////////////////
@@ -2219,13 +2219,13 @@ void canvas::render_text(font* font, std::span<vertex const> verts)
     _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
 }
 
-canvas_guard::canvas_guard(canvas* c)
+canvas::state_guard::state_guard(canvas* c)
     : _canvas {c}
 {
     c->save();
 }
 
-canvas_guard::~canvas_guard()
+canvas::state_guard::state_guard::~state_guard()
 {
     _canvas->restore();
 }

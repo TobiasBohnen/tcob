@@ -206,6 +206,9 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file2);
         io::create_file(file3);
         REQUIRE_FALSE(io::is_folder_empty(folder));
+        REQUIRE(io::exists(file1));
+        REQUIRE(io::exists(file2));
+        REQUIRE(io::exists(file3));
 
         auto files {io::enumerate(folder, {"*.file*"})};
 
@@ -213,9 +216,6 @@ TEST_CASE("IO.FileSystem.Enumerate")
         REQUIRE(files.contains(file1));
         REQUIRE(files.contains(file2));
         REQUIRE(files.contains(file3));
-        REQUIRE(io::exists(file1));
-        REQUIRE(io::exists(file2));
-        REQUIRE(io::exists(file3));
     }
 
     SUBCASE("pattern 2")
@@ -237,6 +237,9 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file2);
         io::create_file(file3);
         REQUIRE_FALSE(io::is_folder_empty(folder));
+        REQUIRE(io::exists(file1));
+        REQUIRE(io::exists(file2));
+        REQUIRE(io::exists(file3));
 
         auto files {io::enumerate("/", {"*.phile*"})};
 
@@ -244,9 +247,6 @@ TEST_CASE("IO.FileSystem.Enumerate")
         REQUIRE(files.contains(file1));
         REQUIRE(files.contains(file2));
         REQUIRE(files.contains(file3));
-        REQUIRE(io::exists(file1));
-        REQUIRE(io::exists(file2));
-        REQUIRE(io::exists(file3));
     }
 
     SUBCASE("pattern 3")
@@ -268,6 +268,9 @@ TEST_CASE("IO.FileSystem.Enumerate")
         io::create_file(file2);
         io::create_file(file3);
         REQUIRE_FALSE(io::is_folder_empty(folder));
+        REQUIRE(io::exists(file1));
+        REQUIRE(io::exists(file2));
+        REQUIRE(io::exists(file3));
 
         auto files {io::enumerate("/", {"test.xile*", false})};
 
@@ -275,8 +278,5 @@ TEST_CASE("IO.FileSystem.Enumerate")
         REQUIRE(files.contains(file1));
         REQUIRE(files.contains(file2));
         REQUIRE(files.contains(file3));
-        REQUIRE(io::exists(file1));
-        REQUIRE(io::exists(file2));
-        REQUIRE(io::exists(file3));
     }
 }
