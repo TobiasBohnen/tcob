@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-// based on NanoVG
+// based on NanoVG/NanoSVG
 // original license:
 // Copyright (c) 2013 Mikko Mononen memon@inside.org
 //
@@ -200,6 +200,8 @@ public:
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);
 
+    auto path_2d(string_view path) -> bool;
+
     // Paints
     auto create_linear_gradient [[nodiscard]] (point_f s, point_f e, color_gradient const& gradient) -> canvas_paint;
     auto create_box_gradient [[nodiscard]] (rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> canvas_paint;
@@ -323,6 +325,7 @@ private:
     void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit);
     void render_text(font* font, std::span<vertex const> verts);
+    void path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel);
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
     std::vector<f32>                             _commands {};

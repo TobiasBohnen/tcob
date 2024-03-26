@@ -5,8 +5,8 @@
 
 #include "tcob/gfx/Canvas.hpp"
 
+#include <charconv>
 #include <cmath>
-#include <utility>
 #include <vector>
 
 #include "tcob/core/ServiceLocator.hpp"
@@ -854,6 +854,255 @@ void canvas::triangle(point_f a, point_f b, point_f c)
     line_to(b);
     line_to(c);
     line_to(a);
+}
+
+auto canvas::path_2d(string_view path) -> bool
+{
+    usize      idx {0};
+    auto const getValues {[&](usize size) -> std::optional<std::vector<f32>> {
+        std::vector<f32> retValue;
+        retValue.resize(size);
+        for (usize i {0}; i < size; ++i) {
+            char c {path[++idx]};
+            while (c == ' ' || c == ',') { c = path[++idx]; } // skip
+
+            string val;
+            for (; idx < path.size(); ++idx) {
+                c = path[idx];
+                if (!std::isdigit(c) && c != '-' && c != '+' && c != '.') {
+                    break;
+                }
+                val += c;
+            }
+            auto [end, err] = std::from_chars(val.data(), val.data() + val.size(), retValue[i]);
+            if (err != std::errc() || end != (val.data() + val.size())) { return std::nullopt; }
+        }
+        idx--;
+        return retValue;
+    }};
+    auto static const getPoint {[](std::optional<std::vector<f32>> const& values) -> point_f {
+        return {(*values)[0], (*values)[1]};
+    }};
+
+    point_f lastPoint;
+    point_f lastQuadControlPoint;
+    point_f lastCubicControlPoint;
+    begin_path();
+
+    for (; idx < path.size(); ++idx) {
+        bool const isAbs {std::isupper(path[idx]) != 0};
+        char const command {static_cast<char>(std::toupper(path[idx]))};
+        if (command == ' ') { continue; }
+
+        switch (command) {
+        case 'M': {
+            auto const p {getValues(2)};
+            if (!p) { return false; }
+            lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
+            move_to(lastPoint);
+
+            usize oldIdx {idx};
+            while (auto const lp {getValues(2)}) {
+                lastPoint = isAbs ? getPoint(lp) : getPoint(lp) + lastPoint;
+                line_to(lastPoint);
+                oldIdx = idx;
+            }
+            idx = oldIdx;
+        } break;
+        case 'L': {
+            auto const p {getValues(2)};
+            if (!p) { return false; }
+            lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
+            line_to(lastPoint);
+        } break;
+        case 'H': {
+            auto const p {getValues(1)};
+            if (!p) { return false; }
+            lastPoint = isAbs ? point_f {(*p)[0], lastPoint.Y} : point_f {(*p)[0] + lastPoint.X, lastPoint.Y};
+            line_to(lastPoint);
+        } break;
+        case 'V': {
+            auto const p {getValues(1)};
+            if (!p) { return false; }
+            lastPoint = isAbs ? point_f {lastPoint.X, (*p)[0]} : point_f {lastPoint.X, (*p)[0] + lastPoint.Y};
+            line_to(lastPoint);
+        } break;
+        case 'Q': {
+            auto const cpv {getValues(2)};
+            auto const endv {getValues(2)};
+            if (!cpv || !endv) { return false; }
+            point_f const cp {isAbs ? getPoint(cpv) : getPoint(cpv) + lastPoint};
+            point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            quad_bezier_to(cp, end);
+            lastQuadControlPoint = cp;
+            lastPoint            = end;
+        } break;
+        case 'T': {
+            auto const endv {getValues(2)};
+            if (!endv) { return false; }
+            point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            point_f const cp {2 * lastPoint.X - lastQuadControlPoint.X, 2 * lastPoint.Y - lastQuadControlPoint.Y};
+            quad_bezier_to(cp, end);
+            lastQuadControlPoint = cp;
+            lastPoint            = end;
+        } break;
+        case 'C': {
+            auto const cp0v {getValues(2)};
+            auto const cp1v {getValues(2)};
+            auto const endv {getValues(2)};
+            if (!cp0v || !cp1v || !endv) { return false; }
+            auto const cp0 {isAbs ? getPoint(cp0v) : getPoint(cp0v) + lastPoint};
+            auto const cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
+            auto const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            cubic_bezier_to(cp0, cp1, end);
+            lastCubicControlPoint = cp1;
+            lastPoint             = end;
+        } break;
+        case 'S': {
+            auto const cp1v {getValues(2)};
+            auto const endv {getValues(2)};
+            if (!cp1v || !endv) { return false; }
+            point_f const cp0 {2 * lastPoint.X - lastCubicControlPoint.X, 2 * lastPoint.Y - lastCubicControlPoint.Y};
+            auto const    cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
+            auto const    end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            cubic_bezier_to(cp0, cp1, end);
+            lastCubicControlPoint = cp1;
+            lastPoint             = end;
+        } break;
+        case 'A': {
+            auto const valv {getValues(7)};
+            if (!valv) { return false; }
+            auto const& val {*valv};
+            f32 const   x {val[5]};
+            f32 const   y {val[6]};
+            path_arc_to(lastPoint.X, lastPoint.Y, val, !isAbs);
+            lastPoint = isAbs ? point_f {x, y} : point_f {x, y} + lastPoint;
+        } break;
+        case 'Z':
+            close_path();
+            break;
+        default:
+            break;
+        }
+    }
+    return true;
+}
+
+void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
+{
+    auto static nsvg_xformPoint {[](f32* dx, f32* dy, f32 x, f32 y, std::array<f32, 6> const& t) {
+        *dx = x * t[0] + y * t[2] + t[4];
+        *dy = x * t[1] + y * t[3] + t[5];
+    }};
+    auto static nsvg_xformVec {[](f32* dx, f32* dy, f32 x, f32 y, std::array<f32, 6> const& t) {
+        *dx = x * t[0] + y * t[2];
+        *dy = x * t[1] + y * t[3];
+    }};
+    auto static nsvg_sqr {[](f32 x) -> f32 { return x * x; }};
+    auto static nsvg_vecang {[](f32 ux, f32 uy, f32 vx, f32 vy) -> f32 {
+        f32 const r {(ux * vx + uy * vy) / (std::sqrt(ux * ux + uy * uy) * std::sqrt(vx * vx + vy * vy))};
+        return ((ux * vy < uy * vx) ? -1.0f : 1.0f) * std::acos(std::clamp(r, -1.0f, 1.0f));
+    }};
+
+    // based on https://github.com/memononen/nanosvg
+
+    f32       rx {std::fabs(args[0])};                // y radius
+    f32       ry {std::fabs(args[1])};                // x radius
+    f32 const rotx {args[2] / 360.0f * TAU_F};        // x rotation angle
+    i32 const fa {std::fabs(args[3]) > 1e-6 ? 1 : 0}; // Large arc
+    i32 const fs {std::fabs(args[4]) > 1e-6 ? 1 : 0}; // Sweep direction
+
+    f32 x2 {0}, y2 {0};
+    if (rel) {                                        // end point
+        x2 = x1 + args[5];
+        y2 = y1 + args[6];
+    } else {
+        x2 = args[5];
+        y2 = args[6];
+    }
+
+    f32 dx {x1 - x2};
+    f32 dy {y1 - y2};
+    f32 d {std::sqrt(dx * dx + dy * dy)};
+    if (d < 1e-6f || rx < 1e-6f || ry < 1e-6f) {
+        line_to({x2, y2});
+        return;
+    }
+
+    f32 const sinrx {std::sin(rotx)};
+    f32 const cosrx {std::cos(rotx)};
+
+    // Convert to center point parameterization.
+    // http://www.w3.org/TR/SVG11/implnote.html#ArcImplementationNotes
+    // 1) Compute x1', y1'
+    f32 const x1p {cosrx * dx / 2.0f + sinrx * dy / 2.0f};
+    f32 const y1p {-sinrx * dx / 2.0f + cosrx * dy / 2.0f};
+    d = nsvg_sqr(x1p) / nsvg_sqr(rx) + nsvg_sqr(y1p) / nsvg_sqr(ry);
+    if (d > 1) {
+        d = std::sqrt(d);
+        rx *= d;
+        ry *= d;
+    }
+    // 2) Compute cx', cy'
+    f32       s {0.0f};
+    f32       sa {nsvg_sqr(rx) * nsvg_sqr(ry) - nsvg_sqr(rx) * nsvg_sqr(y1p) - nsvg_sqr(ry) * nsvg_sqr(x1p)};
+    f32 const sb {nsvg_sqr(rx) * nsvg_sqr(y1p) + nsvg_sqr(ry) * nsvg_sqr(x1p)};
+    if (sa < 0.0f) { sa = 0.0f; }
+    if (sb > 0.0f) { s = std::sqrt(sa / sb); }
+    if (fa == fs) { s = -s; }
+    f32 const cxp {s * rx * y1p / ry};
+    f32 const cyp {s * -ry * x1p / rx};
+
+    // 3) Compute cx,cy from cx',cy'
+    f32 const cx {(x1 + x2) / 2.0f + cosrx * cxp - sinrx * cyp};
+    f32 const cy {(y1 + y2) / 2.0f + sinrx * cxp + cosrx * cyp};
+
+    // 4) Calculate theta1, and delta theta.
+    f32 const ux {(x1p - cxp) / rx};
+    f32 const uy {(y1p - cyp) / ry};
+    f32 const vx {(-x1p - cxp) / rx};
+    f32 const vy {(-y1p - cyp) / ry};
+    f32 const a1 {nsvg_vecang(1.0f, 0.0f, ux, uy)}; // Initial angle
+    f32       da {nsvg_vecang(ux, uy, vx, vy)};     // Delta angle
+
+    if (fs == 0 && da > 0) {
+        da -= TAU_F;
+    } else if (fs == 1 && da < 0) {
+        da += TAU_F;
+    }
+
+    // Approximate the arc using cubic spline segments.
+    std::array<f32, 6> const t {cosrx, sinrx, -sinrx, cosrx, cx, cy};
+
+    // Split arc into max 90 degree segments.
+    // The loop assumes an iteration per end point (including start and end), this +1.
+    i32 const ndivs {static_cast<i32>(std::fabs(da) / (TAU_F / 4) + 1.0f)};
+    f32       hda {(da / static_cast<f32>(ndivs)) / 2.0f};
+    // Fix for ticket #179: division by 0: avoid cotangens around 0 (infinite)
+    if ((hda < 1e-3f) && (hda > -1e-3f)) {
+        hda *= 0.5f;
+    } else {
+        hda = (1.0f - std::cos(hda)) / std::sin(hda);
+    }
+    f32 kappa {std::fabs(4.0f / 3.0f * hda)};
+    if (da < 0.0f) { kappa = -kappa; }
+
+    f32 x {0}, y {0};
+    f32 tanx {0}, tany {0};
+    f32 px {0}, py {0};
+    f32 ptanx {0}, ptany {0};
+    for (i32 i {0}; i <= ndivs; ++i) {
+        f32 const a {a1 + da * (static_cast<f32>(i) / static_cast<f32>(ndivs))};
+        dx = std::cos(a);
+        dy = std::sin(a);
+        nsvg_xformPoint(&x, &y, dx * rx, dy * ry, t);                      // position
+        nsvg_xformVec(&tanx, &tany, -dy * rx * kappa, dx * ry * kappa, t); // tangent
+        if (i > 0) { cubic_bezier_to({px + ptanx, py + ptany}, {x - tanx, y - tany}, {x, y}); }
+        px    = x;
+        py    = y;
+        ptanx = tanx;
+        ptany = tany;
+    }
 }
 
 ////////////////////////////////////////////////////////////

@@ -86,47 +86,58 @@ void CanvasEx::prepare_canvas()
     RadialGradient1 = _canvas.create_radial_gradient(rect_f {550, 480, 100, 100}.get_center(), 0, 125, {0.5f, 1.f}, colorGradient);
     auto sprite1 {_layer1.create_sprite()};
     sprite1->Material = _material;
-    sprite1->Bounds   = {{0.f, 0.f}, {800.f, 600.f}};
+    sprite1->Bounds   = {{0.f, 0.f}, {1000.f, 800.f}};
 }
 
 void CanvasEx::paint_to_canvas()
 {
-    _canvas.begin_frame({800, 600}, 1);
+    _canvas.begin_frame({1000, 800}, 1);
 
-    _canvas.set_fill_style(colors::Green);
-    _canvas.begin_path();
-    _canvas.star({400, 300}, 50, 50 / 2, 5);
-    _canvas.fill();
-
-    _canvas.set_fill_style(colors::Red);
-    _canvas.begin_path();
-    _canvas.rect({400 - 25, 300 - 25, 50, 50});
-    _canvas.fill();
+    _canvas.set_stroke_width(10);
+    _canvas.set_stroke_style(colors::Blue);
+    _canvas.path_2d("m 108,229 -6,-2.5 -5,3.5 0.4,-6.5 -5.0,-4 6.0,-1.5 2.2,-6 3.5,5.5 6.5,0.3 -4.0,5 z");
+    _canvas.stroke();
+    _canvas.set_stroke_style(colors::Red);
+    _canvas.path_2d("m 200,100 a 99,99 0 0 0 0,150");
+    _canvas.stroke();
+    _canvas.set_stroke_style(colors::YellowGreen);
+    _canvas.path_2d("m 200,100 a 99,99 0 0 1 0,150");
+    _canvas.stroke();
     /*
-        _canvas.set_fill_style(colors::Gainsboro);
-        _canvas.fill_rect({0, 0, 800, 600});
+       _canvas.set_fill_style(colors::Green);
+       _canvas.begin_path();
+       _canvas.star({400, 300}, 50, 50 / 2, 5);
+       _canvas.fill();
 
-        _canvas.set_stroke_width(5);
-        _canvas.set_stroke_style(colors::Green);
-        _canvas.stroke_wavy_line({10, 300}, {300, 150}, 10, 0.2f);
+       _canvas.set_fill_style(colors::Red);
+       _canvas.begin_path();
+       _canvas.rect({400 - 25, 300 - 25, 50, 50});
+       _canvas.fill();
 
-        _canvas.set_stroke_style(colors::Red);
-        _canvas.stroke_line({10, 300}, {300, 150});
+           _canvas.set_fill_style(colors::Gainsboro);
+           _canvas.fill_rect({0, 0, 800, 600});
 
-        _canvas.set_stroke_width(1);
-        _canvas.set_stroke_style(colors::Green);
-        _canvas.stroke_wavy_line({300, 50}, {900, 150}, 10, 0.5f);
+           _canvas.set_stroke_width(5);
+           _canvas.set_stroke_style(colors::Green);
+           _canvas.stroke_wavy_line({10, 300}, {300, 150}, 10, 0.2f);
 
-        _canvas.set_stroke_style(colors::Red);
-        _canvas.stroke_line({300, 50}, {900, 150});
+           _canvas.set_stroke_style(colors::Red);
+           _canvas.stroke_line({10, 300}, {300, 150});
 
-        _canvas.set_stroke_width(5);
-        _canvas.set_stroke_style(colors::Green);
-        _canvas.stroke_wavy_line({300, 10}, {10, 10}, 10, 0.2f);
+           _canvas.set_stroke_width(1);
+           _canvas.set_stroke_style(colors::Green);
+           _canvas.stroke_wavy_line({300, 50}, {900, 150}, 10, 0.5f);
 
-        _canvas.set_stroke_style(colors::Red);
-        _canvas.stroke_line({10, 10}, {300, 10});
-    */
+           _canvas.set_stroke_style(colors::Red);
+           _canvas.stroke_line({300, 50}, {900, 150});
+
+           _canvas.set_stroke_width(5);
+           _canvas.set_stroke_style(colors::Green);
+           _canvas.stroke_wavy_line({300, 10}, {10, 10}, 10, 0.2f);
+
+           _canvas.set_stroke_style(colors::Red);
+           _canvas.stroke_line({10, 10}, {300, 10});
+       */
     /*
     rect_f uvlt {rect_f::FromLTRB(20 / 60.f, 20 / 60.f, 40 / 60.f, 40 / 60.f)};
     _canvas.draw_nine_patch(NP1, "default", {10, 290, 300, 200}, {50, 50}, {50, 50}, uvlt);
