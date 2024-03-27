@@ -69,6 +69,7 @@ TCOB_API auto exists(path const& fileOrFolder) -> bool;
 TCOB_API auto is_folder_empty(path const& folder) -> bool;
 
 TCOB_API auto enumerate(path const& folder, pattern const& pattern = {}, bool recursive = true) -> std::unordered_set<string>;
+TCOB_API auto get_sub_folders(path const& folder) -> std::unordered_set<string>;
 
 TCOB_API auto read_as_string(path const& file) -> string;
 

@@ -361,4 +361,14 @@ auto enumerate(path const& folder, pattern const& pattern, bool recursive) -> st
     return cd.Files;
 }
 
+auto get_sub_folders(path const& folder) -> std::unordered_set<string>
+{
+    if (!is_folder(folder)) { return {}; }
+
+    callback_data cd;
+    PHYSFS_enumerate(folder.c_str(), &EnumerateCallback, &cd);
+
+    return cd.Folders;
+}
+
 }
