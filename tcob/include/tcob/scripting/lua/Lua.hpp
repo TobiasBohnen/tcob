@@ -205,6 +205,7 @@ public:
     void push_nil() const;
     void push_number(f64 val) const;
     void push_string(string const& val) const;
+    void push_string(char const* val) const;
     void push_lstring(string_view val) const;
     void push_value(i32 idx) const;
     void push_globaltable() const;
@@ -219,8 +220,10 @@ public:
 
     auto get_metatable(i32 objindex) const -> i32;
     void get_metatable(string const& tableName) const;
+    void get_metatable(char const* tableName) const;
     void set_metatable(i32 idx) const;
     auto new_metatable(string const& tableName) const -> i32;
+    auto new_metatable(char const* tableName) const -> i32;
 
     auto new_userdata(usize size) const -> void*;
     auto new_userdata(usize size, i32 nuvalue) const -> void*;

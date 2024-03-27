@@ -277,6 +277,11 @@ void state_view::push_string(string const& val) const
     lua_pushstring(_state, val.c_str());
 }
 
+void state_view::push_string(char const* val) const
+{
+    lua_pushstring(_state, val);
+}
+
 void state_view::push_lstring(string_view val) const
 {
     lua_pushlstring(_state, val.data(), val.size());
@@ -312,6 +317,11 @@ void state_view::get_metatable(string const& tableName) const
     luaL_getmetatable(_state, tableName.c_str());
 }
 
+void state_view::get_metatable(char const* tableName) const
+{
+    luaL_getmetatable(_state, tableName);
+}
+
 void state_view::set_table(i32 idx) const
 {
     lua_settable(_state, idx);
@@ -335,6 +345,11 @@ void state_view::create_table(i32 narr, i32 nrec) const
 auto state_view::new_metatable(string const& tableName) const -> i32
 {
     return luaL_newmetatable(_state, tableName.c_str());
+}
+
+auto state_view::new_metatable(char const* tableName) const -> i32
+{
+    return luaL_newmetatable(_state, tableName);
 }
 
 auto state_view::new_userdata(usize size) const -> void*
