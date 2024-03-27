@@ -141,9 +141,7 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
 
 void widget_painter::draw_text(element::text const& style, rect_f const& refRect, utf8_string const& text)
 {
-    if (text.empty()) {
-        return;
-    }
+    if (text.empty()) { return; }
 
     draw_text(style, refRect, format_text(style, refRect, text));
 }
@@ -455,6 +453,7 @@ void widget_painter::draw_item(element::item const& style, rect_f const& rect, u
 
     if (style.Text.Font) {
         itemRect -= style.Padding;
+        itemRect -= style.Border.get_thickness();
         draw_text(style.Text, itemRect, text);
     }
 }
