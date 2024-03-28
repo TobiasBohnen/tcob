@@ -375,14 +375,6 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
 }
 
 template <typename R>
-inline auto function<R>::call_async(auto&&... params) const -> std::future<result<return_type>>
-{
-    return std::async(std::launch::async, [&, params...] {
-        return call<R>(params...);
-    });
-}
-
-template <typename R>
 inline auto function<R>::Acquire(vm_view view, SQInteger idx) -> function<return_type>
 {
     return function {view, idx};

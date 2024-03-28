@@ -222,7 +222,6 @@ public:
     auto operator()(auto&&... params) const -> return_type;
 
     auto call(auto&&... params) const -> result<return_type>;
-    auto call_async(auto&&... params) const -> std::future<result<return_type>>;
 
     auto static Acquire(vm_view view, SQInteger idx) -> function<return_type>;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
@@ -263,7 +262,6 @@ public:
 private:
     auto get_thread() const -> vm_view;
 };
-
 
 }
 

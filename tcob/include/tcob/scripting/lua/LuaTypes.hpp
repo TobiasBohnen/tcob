@@ -135,8 +135,6 @@ public:
 
     auto call(auto&&... params) const -> result<return_type>;
 
-    auto call_async(auto&&... params) const -> std::future<result<return_type>>;
-
     auto static Acquire(state_view view, i32 idx) -> function<R>;
 
 protected:
