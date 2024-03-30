@@ -268,15 +268,22 @@ TEST_CASE("Data.Sqlite.DropTable")
 TEST_CASE("Data.Sqlite.VacuumInto")
 {
     std::string tableName {"testTable"};
+    std::string fileName {"test0.db"};
+    {
+        database db {database::OpenMemory()};
 
-    database db {database::OpenMemory()};
+        REQUIRE(db.create_table(tableName, column {"ID", type::Integer, true, primary_key {}}));
 
-    REQUIRE(db.create_table(tableName, column {"ID", type::Integer, true, primary_key {}}));
-
-    io::delete_file("test0.db");
-    REQUIRE_FALSE(io::exists("test0.db"));
-    REQUIRE(db.vacuum_into("test0.db"));
-    REQUIRE(io::exists("test0.db"));
+        io::delete_file(fileName);
+        REQUIRE_FALSE(io::exists(fileName));
+        REQUIRE(db.vacuum_into(fileName));
+    }
+    {
+        REQUIRE(io::exists(fileName));
+        auto db {database::Open(fileName)};
+        REQUIRE(db);
+        REQUIRE(db->table_exists(tableName));
+    }
 }
 
 TEST_CASE("Data.Sqlite.Blobs")

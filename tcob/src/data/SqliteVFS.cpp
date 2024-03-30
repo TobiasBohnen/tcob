@@ -63,7 +63,7 @@ auto static xWrite(sqlite3_file* f, void const* src, int iAmt, sqlite3_int64 iOf
         return SQLITE_IOERR;
     }
 
-    fs::ofstream stream {file->FileName, true};
+    fs::ofstream stream {file->FileName, 4096, true};
 
     if (!stream.seek(iOfst, io::seek_dir::Begin)) {
         return SQLITE_IOERR_SEEK;

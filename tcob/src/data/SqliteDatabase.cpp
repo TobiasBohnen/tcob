@@ -67,6 +67,23 @@ database::database(database_view db)
 {
 }
 
+database::database(database&& other) noexcept
+    : _db {std::exchange(other._db, database_view {nullptr})}
+    , _commitHookFunc {std::exchange(other._commitHookFunc, {})}
+    , _rbHookFunc {std::exchange(other._rbHookFunc, {})}
+    , _updateHookFunc {std::exchange(other._updateHookFunc, {})}
+{
+}
+
+auto database::operator=(database&& other) noexcept -> database&
+{
+    std::swap(_db, other._db);
+    std::swap(_commitHookFunc, other._commitHookFunc);
+    std::swap(_rbHookFunc, other._rbHookFunc);
+    std::swap(_updateHookFunc, other._updateHookFunc);
+    return *this;
+}
+
 database::~database()
 {
     close();
@@ -205,7 +222,7 @@ void database::call_update_hook(update_mode mode, utf8_string const& dbName, utf
 
 auto database::Open(path const& file) -> std::optional<database>
 {
-    if (!io::is_file(file)) { return std::nullopt; }
+    if (!io::is_file(file)) { io::create_file(file); }
 
     database_view db {nullptr};
     if (db.open(file)) {

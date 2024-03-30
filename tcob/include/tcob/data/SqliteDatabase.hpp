@@ -41,6 +41,8 @@ class TCOB_API database final : public non_copyable {
 public:
     database();
     explicit database(database_view db);
+    database(database&& other) noexcept;
+    auto operator=(database&& other) noexcept -> database&;
     ~database();
 
     void set_journal_mode(journal_mode mode) const;
@@ -82,9 +84,9 @@ private:
 
     database_view _db {nullptr};
 
-    std::function<i32(database*)>                                              _commitHookFunc;
-    std::function<void(database*)>                                             _rbHookFunc;
-    std::function<void(database*, update_mode, utf8_string, utf8_string, i64)> _updateHookFunc;
+    std::function<i32(database*)>                                              _commitHookFunc {};
+    std::function<void(database*)>                                             _rbHookFunc {};
+    std::function<void(database*, update_mode, utf8_string, utf8_string, i64)> _updateHookFunc {};
 };
 
 }
