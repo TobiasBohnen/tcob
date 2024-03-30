@@ -17,6 +17,11 @@ auto no_constraint::str() const -> utf8_string
     return "";
 }
 
+unique::unique()
+    : Columns {}
+{
+}
+
 auto unique::str() const -> utf8_string
 {
     if (Columns.empty()) {

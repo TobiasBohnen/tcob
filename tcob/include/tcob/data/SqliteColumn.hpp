@@ -90,7 +90,7 @@ public:
 
 class TCOB_API unique {
 public:
-    unique() = default;
+    unique();
     unique(auto&&... columns);
 
     utf8_string Columns;
