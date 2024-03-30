@@ -11,10 +11,20 @@
     #include <set>
 
     #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteColumn.hpp"
     #include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::data::sqlite {
+////////////////////////////////////////////////////////////
+
+struct distinct_t { };
+inline constexpr distinct_t distinct;
+
+struct ignore_t { };
+inline constexpr ignore_t ignore;
+
+struct replace_t { };
+inline constexpr replace_t replace;
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API table final {
@@ -28,12 +38,19 @@ public:
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
     template <typename... Values>
-    auto select_from(distinct, auto&&... columns) const -> select_statement<Values...>;
+    auto select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>;
+
     auto insert_into(auto&&... columns) const -> insert_statement;
+    auto insert_into(replace_t, auto&&... columns) const -> insert_statement;
+    auto insert_into(ignore_t, auto&&... columns) const -> insert_statement;
+
     auto update(auto&&... columns) const -> update_statement;
+
     auto delete_from() const -> delete_statement;
 
 private:
+    auto insert_into(insert_statement::mode mode, auto&&... columns) const -> insert_statement;
+
     auto check_columns(auto&&... columns) const -> bool;
 
     database_view _db;
@@ -49,7 +66,7 @@ public:
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
     template <typename... Values>
-    auto select_from(distinct, auto&&... columns) const -> select_statement<Values...>;
+    auto select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>;
 
 private:
     database_view _db;

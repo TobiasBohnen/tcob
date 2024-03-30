@@ -103,14 +103,21 @@ auto update_statement::get_query() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
-insert_statement::insert_statement(database_view db, utf8_string const& table, utf8_string const& columns)
+insert_statement::insert_statement(database_view db, mode mode, utf8_string const& table, utf8_string const& columns)
     : statement {db}
 {
-    // INSERT INTO TABLE_NAME [(column1, column2, column3,...columnN)]
+    // INSERT (OR IGNORE) INTO TABLE_NAME [(column1, column2, column3,...columnN)]
     // VALUES (value1, value2, value3,...valueN);
 
+    string modeStr;
+    switch (mode) {
+    case Normal: modeStr = ""; break;
+    case Ignore: modeStr = "OR IGNORE"; break;
+    case Replace: modeStr = "OR REPLACE"; break;
+    }
+
     // create query
-    _sql = std::format("INSERT INTO {} ({})", table, columns);
+    _sql = std::format("INSERT {} INTO {} ({})", modeStr, table, columns);
 }
 
 auto insert_statement::get_query(usize valueSize, usize valueCount) const -> utf8_string

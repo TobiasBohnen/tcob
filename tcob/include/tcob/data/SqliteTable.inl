@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include "tcob/core/StringUtils.hpp"
+    #include "tcob/data/SqliteColumn.hpp"
 
 namespace tcob::data::sqlite {
 
@@ -42,18 +43,33 @@ inline auto table::select_from(auto&&... columns) const -> select_statement<Valu
 }
 
 template <typename... Values>
-inline auto table::select_from(distinct, auto&&... columns) const -> select_statement<Values...>
+inline auto table::select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>
 {
     return detail::create_select<Values...>(_db, _name, true, columns...);
 }
 
 inline auto table::insert_into(auto&&... columns) const -> insert_statement
 {
+    return insert_into(insert_statement::mode::Normal, std::move(columns)...);
+}
+
+inline auto table::insert_into(replace_t, auto&&... columns) const -> insert_statement
+{
+    return insert_into(insert_statement::mode::Replace, std::move(columns)...);
+}
+
+inline auto table::insert_into(ignore_t, auto&&... columns) const -> insert_statement
+{
+    return insert_into(insert_statement::mode::Ignore, std::move(columns)...);
+}
+
+inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) const -> insert_statement
+{
     assert(check_columns(columns...));
 
     std::vector<utf8_string> columnStrings;
     ((columnStrings.push_back(quote_string(utf8_string {columns}))), ...);
-    return insert_statement {_db, _name, helper::join(columnStrings, ", ")};
+    return insert_statement {_db, mode, _name, helper::join(columnStrings, ", ")};
 }
 
 inline auto table::update(auto&&... columns) const -> update_statement
@@ -91,7 +107,7 @@ inline auto view::select_from(auto&&... columns) const -> select_statement<Value
 }
 
 template <typename... Values>
-inline auto view::select_from(distinct, auto&&... columns) const -> select_statement<Values...>
+inline auto view::select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>
 {
     return detail::create_select<Values...>(_db, _name, true, columns...);
 }

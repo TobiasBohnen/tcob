@@ -49,7 +49,7 @@ private:
 template <typename... Values>
 class select_statement : public statement {
 public:
-    select_statement(database_view db, bool distinct, utf8_string const& table, utf8_string const& columns);
+    select_statement(database_view db, bool addDistinct, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] ();
 
@@ -104,7 +104,13 @@ private:
 
 class TCOB_API insert_statement : public statement {
 public:
-    insert_statement(database_view db, utf8_string const& table, utf8_string const& columns);
+    enum mode {
+        Normal,
+        Ignore,
+        Replace
+    };
+
+    insert_statement(database_view db, mode mode, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
 

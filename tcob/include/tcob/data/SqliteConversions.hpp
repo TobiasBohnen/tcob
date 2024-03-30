@@ -18,6 +18,7 @@
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/core/Size.hpp"
+    #include "tcob/core/ext/magic_enum_reduced.hpp"
     #include "tcob/data/Sqlite.hpp"
 
 namespace tcob::data::sqlite {
@@ -66,6 +67,20 @@ struct converter<bool> {
     auto static To(statement_view stmt, i32& idx, bool value) -> bool
     {
         return stmt.bind(idx++, value ? 1 : 0);
+    }
+};
+
+template <Enum T>
+struct converter<T> {
+    auto static From(statement_view stmt, i32 col, T& value) -> bool
+    {
+        value = tcob::detail::magic_enum_reduced::string_to_enum<T>(stmt.column_text(col));
+        return true;
+    }
+
+    auto static To(statement_view stmt, i32& idx, T const& value) -> bool
+    {
+        return stmt.bind(idx++, tcob::detail::magic_enum_reduced::enum_to_string(value));
     }
 };
 

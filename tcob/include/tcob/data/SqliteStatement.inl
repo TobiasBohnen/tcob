@@ -31,9 +31,9 @@ inline auto statement::bind_parameter(i32& idx, T&& value) const -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>
-inline select_statement<Values...>::select_statement(database_view db, bool distinct, utf8_string const& table, utf8_string const& columns)
+inline select_statement<Values...>::select_statement(database_view db, bool addDistinct, utf8_string const& table, utf8_string const& columns)
     : statement {db}
-    , _distinct {distinct}
+    , _distinct {addDistinct}
 {
     // SELECT column1, column2, columnN FROM table_name;
     // create query

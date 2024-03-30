@@ -77,7 +77,7 @@ TEST_CASE("Data.Sqlite.Select")
     }
     SUBCASE("distinct")
     {
-        auto rows = dbTable->select_from<bool>(distinct {}, "Alive")();
+        auto rows = dbTable->select_from<bool>(distinct, "Alive")();
         REQUIRE(rows.size() == 2);
         REQUIRE(rows[0] == false);
         REQUIRE(rows[1] == true);
