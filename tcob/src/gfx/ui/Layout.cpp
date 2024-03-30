@@ -114,7 +114,7 @@ void dock_layout::do_layout(size_f size)
             layoutRect.Width -= width;
             break;
         case dock_style::Right:
-            cbounds.X     = cbounds.Width - width;
+            cbounds.X     = cbounds.right() - width;
             cbounds.Width = width;
 
             layoutRect.Width -= width;
@@ -126,7 +126,7 @@ void dock_layout::do_layout(size_f size)
             layoutRect.Height -= height;
             break;
         case dock_style::Bottom:
-            cbounds.Y      = cbounds.Height - height;
+            cbounds.Y      = cbounds.bottom() - height;
             cbounds.Height = height;
 
             layoutRect.Height -= height;
