@@ -80,23 +80,29 @@ class TCOB_API canvas_widget : public widget {
 public:
     explicit canvas_widget(init const& wi);
 
+    // Render styles
     void set_fill_style(color c);
     void set_fill_style(canvas_paint const& paint);
     void set_stroke_style(color c);
     void set_stroke_style(canvas_paint const& paint);
     void set_stroke_width(f32 size);
+    void set_edge_antialias(bool enabled);
+    void set_shape_antialias(bool enabled);
+    void set_miter_limit(f32 limit);
     void set_line_cap(line_cap cap);
     void set_line_join(line_join join);
+    void set_global_alpha(f32 alpha);
 
+    // Paths
     void begin_path();
     void close_path();
-
+    void set_path_winding(winding dir);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
     void quad_bezier_to(point_f cp, point_f end);
     void arc_to(point_f pos1, point_f pos2, f32 radius);
-    void arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, gfx::winding dir);
+    void arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir);
     void rect(rect_f const& rect);
     void rounded_rect(rect_f const& rect, f32 r);
     void rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
@@ -112,7 +118,23 @@ public:
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);
 
+    void path_2d(string_view path);
+
+    // Transforms
+    void translate(point_f c);
+    void rotate(degree_f angle);
+    void rotate_at(degree_f angle, point_f p);
+    void scale(size_f scale);
+    void scale_at(size_f scale, point_f p);
+    void skew(degree_f angleX, degree_f angleY);
+    void skew_at(degree_f angleX, degree_f angleY, point_f p);
+    void set_transform(transform xform);
+    void reset_transform();
+
+    // fill
     void fill();
+
+    // stroke
     void stroke();
 
     void clear();

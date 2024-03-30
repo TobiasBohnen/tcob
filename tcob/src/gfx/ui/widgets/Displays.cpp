@@ -268,6 +268,21 @@ void canvas_widget::set_stroke_width(f32 size)
     _commands.emplace_back([=](canvas& canvas) { canvas.set_stroke_width(size); });
 }
 
+void canvas_widget::set_edge_antialias(bool enabled)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_edge_antialias(enabled); });
+}
+
+void canvas_widget::set_shape_antialias(bool enabled)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_shape_antialias(enabled); });
+}
+
+void canvas_widget::set_miter_limit(f32 limit)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_miter_limit(limit); });
+}
+
 void canvas_widget::set_line_cap(line_cap cap)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.set_line_cap(cap); });
@@ -278,6 +293,11 @@ void canvas_widget::set_line_join(line_join join)
     _commands.emplace_back([=](canvas& canvas) { canvas.set_line_join(join); });
 }
 
+void canvas_widget::set_global_alpha(f32 alpha)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_global_alpha(alpha); });
+}
+
 void canvas_widget::begin_path()
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.begin_path(); });
@@ -286,6 +306,11 @@ void canvas_widget::begin_path()
 void canvas_widget::close_path()
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.close_path(); });
+}
+
+void canvas_widget::set_path_winding(winding dir)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_path_winding(dir); });
 }
 
 void canvas_widget::move_to(point_f pos)
@@ -381,6 +406,56 @@ void canvas_widget::star(point_f pos, f32 outerR, f32 innerR, i32 n)
 void canvas_widget::triangle(point_f a, point_f b, point_f c)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.triangle(a, b, c); });
+}
+
+void canvas_widget::path_2d(string_view path)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.path_2d(path); });
+}
+
+void canvas_widget::translate(point_f c)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.translate(c); });
+}
+
+void canvas_widget::rotate(degree_f angle)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.rotate(angle); });
+}
+
+void canvas_widget::rotate_at(degree_f angle, point_f p)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.rotate_at(angle, p); });
+}
+
+void canvas_widget::scale(size_f scale)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.scale(scale); });
+}
+
+void canvas_widget::scale_at(size_f scale, point_f p)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.scale_at(scale, p); });
+}
+
+void canvas_widget::skew(degree_f angleX, degree_f angleY)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.skew(angleX, angleY); });
+}
+
+void canvas_widget::skew_at(degree_f angleX, degree_f angleY, point_f p)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.skew_at(angleX, angleY, p); });
+}
+
+void canvas_widget::set_transform(transform xform)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_transform(xform); });
+}
+
+void canvas_widget::reset_transform()
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.reset_transform(); });
 }
 
 void canvas_widget::fill()
