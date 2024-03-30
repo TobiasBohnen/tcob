@@ -19,8 +19,7 @@ inline auto database::create_table(utf8_string const& tableName, auto&&... colum
     // .....
     // columnN datatype
     // );
-    std::vector<utf8_string> colStrings {};
-    ((colStrings.push_back(columns.str())), ...);
+    std::vector<utf8_string> colStrings {columns.str()...};
 
     utf8_string const sql {std::format("CREATE TABLE IF NOT EXISTS {} ({});",
                                        tableName, helper::join(colStrings, ", "))};

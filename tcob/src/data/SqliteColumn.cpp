@@ -19,7 +19,11 @@ auto no_constraint::str() const -> utf8_string
 
 auto unique::str() const -> utf8_string
 {
-    return "UNIQUE";
+    if (Columns.empty()) {
+        return "UNIQUE";
+    }
+
+    return std::format("UNIQUE({})", Columns);
 }
 
 auto primary_key::str() const -> utf8_string

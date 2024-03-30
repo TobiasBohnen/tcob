@@ -9,6 +9,9 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <format>
+    #include <unordered_set>
+
+    #include "tcob/core/StringUtils.hpp"
 
 namespace tcob::data::sqlite {
 
@@ -22,6 +25,13 @@ template <typename T>
 inline auto default_value<T>::str() const -> utf8_string
 {
     return std::format(" DEFAULT {}", DefaultValue);
+}
+
+////////////////////////////////////////////////////////////
+
+inline unique::unique(auto&&... columns)
+    : Columns {helper::join(std::unordered_set<utf8_string> {("\"" + utf8_string {columns} + "\"")...}, ",")}
+{
 }
 
 ////////////////////////////////////////////////////////////
