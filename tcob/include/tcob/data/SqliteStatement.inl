@@ -70,6 +70,8 @@ inline select_statement<Values...>::select_statement(database_view db, bool addD
     : statement {db}
     , _distinct {addDistinct}
 {
+    static_assert(sizeof...(Values) > 0);
+
     // SELECT column1, column2, columnN FROM table_name;
     // create query
     _values.Columns = columns;
@@ -141,16 +143,16 @@ inline auto select_statement<Values...>::get_query() const -> utf8_string
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... values)
+inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... params)
 {
     // prepare
     bool const prepared {prepare(get_query())};
 
-    if constexpr (sizeof...(values) > 0) {
+    if constexpr (sizeof...(params) > 0) {
         if (prepared) {
             // bind parameters
             i32 idx {1};
-            ((bind_parameter(idx, values)), ...);
+            ((bind_parameter(idx, params)), ...);
         }
     }
 
@@ -166,7 +168,9 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... val
         }
 
         return retValue;
-    } else {
+    }
+
+    if constexpr (sizeof...(Values) == 1) {
         std::vector<Values...> retValue;
 
         // prepare
@@ -187,13 +191,20 @@ inline select_statement<Values...>::operator std::vector<T>()
 {
     std::vector<T> retValue;
 
+    static_assert(sizeof...(Values) > 1);
+
     if constexpr (sizeof...(Values) > 1) {
-        auto const values {operator()()};
-        for (auto const& tup : values) {
-            retValue.push_back(std::make_from_tuple<T>(tup));
+        std::vector<std::tuple<Values...>> values;
+        // prepare
+        if (prepare(get_query())) {
+            if (sizeof...(Values) != get_column_count()) { return retValue; }
+
+            // get columns
+            values = get_column_value<std::vector<std::tuple<Values...>>>(0);
+            for (auto const& tup : values) {
+                retValue.push_back(std::make_from_tuple<T>(tup));
+            }
         }
-    } else {
-        retValue = operator()();
     }
 
     return retValue;
@@ -250,7 +261,6 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
     // execute
     return step() == step_status::Done;
 }
-
 }
 
 #endif

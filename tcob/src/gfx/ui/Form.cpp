@@ -234,8 +234,8 @@ void form::on_draw_to(render_target& target)
         pos.Y -= static_cast<i32>(Bounds->Y);
         pos = scale_mouse(pos);
 
-        (*_topWidget->Tooltip->Bounds).X = pos.X;
-        (*_topWidget->Tooltip->Bounds).Y = pos.Y;
+        (*_topWidget->Tooltip->Bounds).X = static_cast<f32>(pos.X);
+        (*_topWidget->Tooltip->Bounds).Y = static_cast<f32>(pos.Y);
 
         _canvas.begin_frame(bounds, 1.0f, 1);
         _topWidget->Tooltip->paint(*_painter);

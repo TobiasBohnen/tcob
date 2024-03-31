@@ -51,10 +51,10 @@ class select_statement : public statement {
 public:
     select_statement(database_view db, bool addDistinct, utf8_string const& table, utf8_string const& columns);
 
-    auto operator() [[nodiscard]] (auto&&... values);
+    auto operator() [[nodiscard]] (auto&&... params);
 
     template <typename T>
-    operator std::vector<T>();
+    explicit operator std::vector<T>();
 
     auto where(utf8_string const& expr) -> select_statement&;
 

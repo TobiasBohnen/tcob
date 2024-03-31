@@ -1933,7 +1933,7 @@ void canvas::append_commands(std::span<f32 const> vals)
     point_f p;
     while (i < nvals) {
         i32 cmd {static_cast<i32>(vals[i])};
-        _commands.push_back(cmd);
+        _commands.push_back(static_cast<f32>(cmd));
         switch (cmd) {
         case MoveTo:
         case LineTo:
