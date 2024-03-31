@@ -51,12 +51,13 @@ class select_statement : public statement {
 public:
     select_statement(database_view db, bool addDistinct, utf8_string const& table, utf8_string const& columns);
 
-    auto operator() [[nodiscard]] ();
+    auto operator() [[nodiscard]] (auto&&... values);
 
     template <typename T>
     operator std::vector<T>();
 
     auto where(utf8_string const& expr) -> select_statement&;
+
     auto order_by(utf8_string const& term) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
     auto group_by(utf8_string const& column) -> select_statement&;
@@ -126,7 +127,7 @@ class TCOB_API delete_statement : public statement {
 public:
     delete_statement(database_view db, utf8_string const& table);
 
-    auto operator() [[nodiscard]] () -> bool;
+    auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
     auto where(utf8_string const& expr) -> delete_statement&;
 

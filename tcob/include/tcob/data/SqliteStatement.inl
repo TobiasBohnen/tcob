@@ -14,6 +14,41 @@
 
 namespace tcob::data::sqlite {
 
+namespace detail {
+    template <typename T>
+    struct value_size {
+        static constexpr usize Size {1};
+    };
+
+    template <typename... Ts>
+    struct value_size<std::tuple<Ts...>> {
+        static constexpr usize Size {sizeof...(Ts)};
+    };
+
+    template <typename... Ts>
+    struct value_size<std::vector<std::tuple<Ts...>>> {
+        static constexpr usize Size {sizeof...(Ts)};
+    };
+
+    auto value_count(auto&& value, auto&&... values) -> usize
+    {
+        usize retValue {};
+        if constexpr (HasSize<std::remove_cvref_t<decltype(value)>>) {
+            retValue = value.size();
+        } else {
+            retValue = 1;
+        }
+
+        if constexpr (sizeof...(values) > 0) {
+            return value_count(values...) + retValue;
+        } else {
+            return retValue;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////
+
 template <typename T>
 inline auto statement::get_column_value(i32 col) const -> T
 {
@@ -106,16 +141,25 @@ inline auto select_statement<Values...>::get_query() const -> utf8_string
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::operator()()
+inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... values)
 {
+    // prepare
+    bool const prepared {prepare(get_query())};
+
+    if constexpr (sizeof...(values) > 0) {
+        if (prepared) {
+            // bind parameters
+            i32 idx {1};
+            ((bind_parameter(idx, values)), ...);
+        }
+    }
+
     if constexpr (sizeof...(Values) > 1) {
         std::vector<std::tuple<Values...>> retValue;
 
         // prepare
-        if (prepare(get_query())) {
-            if (sizeof...(Values) != get_column_count()) {
-                return retValue;
-            }
+        if (prepared) {
+            if (sizeof...(Values) != get_column_count()) { return retValue; }
 
             // get columns
             retValue = get_column_value<std::vector<std::tuple<Values...>>>(0);
@@ -126,7 +170,7 @@ inline auto select_statement<Values...>::operator()()
         std::vector<Values...> retValue;
 
         // prepare
-        if (prepare(get_query())) {
+        if (prepared) {
             if (get_column_count() != 1) { return retValue; }
 
             // get columns
@@ -172,39 +216,6 @@ inline auto update_statement::operator()(auto&&... values) -> bool
 
 ////////////////////////////////////////////////////////////
 
-namespace detail {
-    template <typename T>
-    struct value_size {
-        static constexpr usize Size {1};
-    };
-
-    template <typename... Ts>
-    struct value_size<std::tuple<Ts...>> {
-        static constexpr usize Size {sizeof...(Ts)};
-    };
-
-    template <typename... Ts>
-    struct value_size<std::vector<std::tuple<Ts...>>> {
-        static constexpr usize Size {sizeof...(Ts)};
-    };
-
-    auto value_count(auto&& value, auto&&... values) -> usize
-    {
-        usize retValue {};
-        if constexpr (HasSize<std::remove_cvref_t<decltype(value)>>) {
-            retValue = value.size();
-        } else {
-            retValue = 1;
-        }
-
-        if constexpr (sizeof...(values) > 0) {
-            return value_count(values...) + retValue;
-        } else {
-            return retValue;
-        }
-    }
-}
-
 inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
 {
     // prepare
@@ -225,10 +236,16 @@ inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
 
 ////////////////////////////////////////////////////////////
 
-inline auto delete_statement::operator()() -> bool
+inline auto delete_statement::operator()(auto&&... values) -> bool
 {
     // prepare
     if (!prepare(get_query())) { return false; }
+
+    if constexpr (sizeof...(values) > 0) {
+        // bind parameters
+        i32 idx {1};
+        ((bind_parameter(idx, values)), ...);
+    }
 
     // execute
     return step() == step_status::Done;

@@ -51,11 +51,17 @@ TEST_CASE("Data.Sqlite.Select")
     }
     SUBCASE("where")
     {
-        auto rows = dbTable->select_from<i32, std::string, i32, f32, bool>().where("Age = 100")();
-        REQUIRE(rows.size() == 1);
-        REQUIRE(rows[0] == std::tuple {1, "1", 100, 1.5f, false});
+        {
+            auto rows = dbTable->select_from<i32, std::string, i32, f32, bool>().where("Age = 100")();
+            REQUIRE(rows.size() == 1);
+            REQUIRE(rows[0] == std::tuple {1, "1", 100, 1.5f, false});
+        }
+        {
+            auto rows = dbTable->select_from<i32, std::string, i32, f32, bool>().where("Age = ?")(500);
+            REQUIRE(rows.size() == 1);
+            REQUIRE(rows[0] == std::tuple {5, "5", 500, 7.5f, false});
+        }
     }
-
     SUBCASE("order_by")
     {
         auto rows = dbTable->select_from<i32, std::string, i32, f32, bool>().order_by("Name DESC")();
