@@ -52,6 +52,7 @@ public:
     auto find_widget_at(point_f pos) -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) -> std::shared_ptr<widget>;
     auto get_top_widget() const -> widget*;
+    auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const&;
     auto get_all_widgets() -> std::vector<widget*>;
 
     auto get_focus_widget() const -> widget*;

@@ -32,6 +32,7 @@ public:
 
     void clear();
 
+    auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const&;
     auto get_widgets() -> std::vector<std::shared_ptr<widget>>&;
 
 protected:

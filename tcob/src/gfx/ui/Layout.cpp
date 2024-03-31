@@ -44,6 +44,11 @@ void layout::clear()
     mark_dirty();
 }
 
+auto layout::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+{
+    return _widgets;
+}
+
 auto layout::get_widgets() -> std::vector<std::shared_ptr<widget>>&
 {
     return _widgets;

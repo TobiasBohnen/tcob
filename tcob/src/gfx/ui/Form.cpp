@@ -80,6 +80,11 @@ auto form::find_widget_by_name(string const& name) -> std::shared_ptr<widget>
     return nullptr;
 }
 
+auto form::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+{
+    return _layout.get_widgets();
+}
+
 auto form::get_all_widgets() -> std::vector<widget*>
 {
     std::vector<widget*> retValue;
@@ -536,5 +541,4 @@ auto form::scale_mouse(point_i mp) const -> point_i
 {
     return {static_cast<i32>(mp.X / Scale->Width), static_cast<i32>(mp.Y / Scale->Height)};
 }
-
 }
