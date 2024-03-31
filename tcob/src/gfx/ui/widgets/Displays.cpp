@@ -470,8 +470,10 @@ void canvas_widget::stroke()
 
 void canvas_widget::clear()
 {
-    _commands.clear();
-    force_redraw(get_name() + ": commands cleared.");
+    if (!_commands.empty()) {
+        _commands.clear();
+        force_redraw(get_name() + ": commands cleared.");
+    }
 }
 
 void canvas_widget::on_paint(widget_painter& painter)
