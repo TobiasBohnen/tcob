@@ -28,7 +28,7 @@ void timer::start(milliseconds interval, mode mode)
                 sw.start();
                 for (;;) {
                     std::this_thread::yield();
-                    if (sw.get_elapsed() >= interval) {
+                    if (stoken.stop_requested() || sw.get_elapsed() >= interval) {
                         break;
                     }
                 }
