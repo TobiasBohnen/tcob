@@ -80,6 +80,8 @@ class TCOB_API canvas_widget : public widget {
 public:
     explicit canvas_widget(init const& wi);
 
+    void clear();
+
     void set_global_composite_operation(composite_operation op);
     void set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor);
     void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
@@ -128,6 +130,9 @@ public:
 
     void path_2d(string_view path);
 
+    void fill();
+    void stroke();
+
     // Transforms
     void translate(point_f c);
     void rotate(degree_f angle);
@@ -139,13 +144,12 @@ public:
     void set_transform(transform xform);
     void reset_transform();
 
-    // fill
-    void fill();
+    // Font
+    void set_font(font* font);
+    void set_text_halign(horizontal_alignment align);
+    void set_text_valign(vertical_alignment align);
 
-    // stroke
-    void stroke();
-
-    void clear();
+    void draw_textbox(rect_f const& rect, utf8_string_view text);
 
 protected:
     void on_paint(widget_painter& painter) override;

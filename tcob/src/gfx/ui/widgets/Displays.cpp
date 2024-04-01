@@ -483,6 +483,26 @@ void canvas_widget::reset_transform()
     _commands.emplace_back([=](canvas& canvas) { canvas.reset_transform(); });
 }
 
+void canvas_widget::set_font(font* font)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_font(font); });
+}
+
+void canvas_widget::set_text_halign(horizontal_alignment align)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_text_halign(align); });
+}
+
+void canvas_widget::set_text_valign(vertical_alignment align)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_text_valign(align); });
+}
+
+void canvas_widget::draw_textbox(rect_f const& rect, utf8_string_view text)
+{
+    _commands.emplace_back([=, str = utf8_string {text}](canvas& canvas) { canvas.draw_textbox(rect, str); });
+}
+
 void canvas_widget::fill()
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.fill(); });

@@ -202,6 +202,9 @@ public:
 
     auto path_2d(string_view path) -> bool;
 
+    void fill();
+    void stroke();
+
     // Paints
     auto create_linear_gradient [[nodiscard]] (point_f s, point_f e, color_gradient const& gradient) -> canvas_paint;
     auto create_box_gradient [[nodiscard]] (rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> canvas_paint;
@@ -241,7 +244,6 @@ public:
     auto measure_text(f32 height, utf8_string_view text) -> size_f;
 
     // fill
-    void fill();
     void fill_rect(rect_f const& rect);
     void fill_rounded_rect(rect_f const& r, f32 rad);
     void fill_rounded_rect_varying(rect_f const& r, f32 rtl, f32 rtr, f32 rbr, f32 rbl);
@@ -256,7 +258,6 @@ public:
     void fill_dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
 
     // stroke
-    void stroke();
     void stroke_rect(rect_f const& rect);
     void stroke_rounded_rect(rect_f const& r, f32 rad);
     void stroke_rounded_rect_varying(rect_f const& r, f32 rtl, f32 rtr, f32 rbr, f32 rbl);
