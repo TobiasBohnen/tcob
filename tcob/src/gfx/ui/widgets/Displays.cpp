@@ -243,6 +243,31 @@ canvas_widget::canvas_widget(init const& wi)
 {
 }
 
+void canvas_widget::set_global_composite_operation(composite_operation op)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_global_composite_operation(op); });
+}
+
+void canvas_widget::set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_global_composite_blendfunc(sfactor, dfactor); });
+}
+
+void canvas_widget::set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_global_composite_blendfunc_separate(srcRGB, dstRGB, srcAlpha, dstAlpha); });
+}
+
+void canvas_widget::save()
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.save(); });
+}
+
+void canvas_widget::restore()
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.restore(); });
+}
+
 void canvas_widget::set_fill_style(color c)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.set_fill_style(c); });
@@ -483,9 +508,7 @@ void canvas_widget::on_paint(widget_painter& painter)
 
     canvas.set_scissor(Bounds);
     canvas.translate(Bounds->get_position());
-    for (auto& command : _commands) {
-        command(canvas);
-    }
+    for (auto const& command : _commands) { command(canvas); }
 }
 
 void canvas_widget::on_update(milliseconds /* deltaTime */)

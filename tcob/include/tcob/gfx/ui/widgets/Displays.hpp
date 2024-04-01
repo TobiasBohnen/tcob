@@ -80,6 +80,14 @@ class TCOB_API canvas_widget : public widget {
 public:
     explicit canvas_widget(init const& wi);
 
+    void set_global_composite_operation(composite_operation op);
+    void set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor);
+    void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
+
+    // State handling
+    void save();
+    void restore();
+
     // Render styles
     void set_fill_style(color c);
     void set_fill_style(canvas_paint const& paint);
