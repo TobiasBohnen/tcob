@@ -2356,132 +2356,169 @@ canvas::state_guard::state_guard::~state_guard()
 
 ////////////////////////////////////////////////////////////
 
-canvas::path2d::path2d(string_view path)
+auto canvas::path2d::Parse(string_view path) -> std::optional<path2d>
 {
-    usize      idx {0};
-    auto const getValues {[&](usize size) -> std::optional<std::vector<f32>> {
-        std::vector<f32> retValue;
-        retValue.resize(size);
-        for (usize i {0}; i < size; ++i) {
-            char c {path[++idx]};
-            while (c == ' ' || c == ',') { c = path[++idx]; } // skip
+    auto static const getPoint {[](std::optional<std::vector<f32>> const& values) -> point_f { return {(*values)[0], (*values)[1]}; }};
 
-            string val;
-            for (; idx < path.size(); ++idx) {
-                c = path[idx];
-                if (!std::isdigit(c) && c != '-' && c != '+' && c != '.') {
-                    break;
-                }
-                val += c;
-            }
-            auto [end, err] = std::from_chars(val.data(), val.data() + val.size(), retValue[i]);
-            if (err != std::errc() || end != (val.data() + val.size())) { return std::nullopt; }
-        }
-        idx--;
-        return retValue;
-    }};
-    auto static const getPoint {[](std::optional<std::vector<f32>> const& values) -> point_f {
-        return {(*values)[0], (*values)[1]};
-    }};
+    auto const commands {GetCommands(path)};
+    if (!commands) { return std::nullopt; }
+
+    path2d retValue;
 
     point_f lastPoint;
     point_f lastQuadControlPoint;
     point_f lastCubicControlPoint;
-    Commands.emplace_back([](canvas& canvas) { canvas.begin_path(); });
+    retValue.Commands.emplace_back([](canvas& canvas) { canvas.begin_path(); });
 
-    for (; idx < path.size(); ++idx) {
-        bool const isAbs {std::isupper(path[idx]) != 0};
-        char const command {static_cast<char>(std::toupper(path[idx]))};
-        if (command == ' ') { continue; }
+    char command {0};
+    for (usize idx {0}; idx < commands->size();) {
+        auto const getValues {[&idx, &commands](usize size) -> std::optional<std::vector<f32>> {
+            std::vector<f32> values;
+            values.resize(size);
+            for (usize i {0}; i < size; ++i) {
+                if (idx >= commands->size()) { return std::nullopt; }
+
+                if (auto const* c {std::get_if<f32>(&commands->at(idx++))}) {
+                    values[i] = *c;
+                }
+            }
+
+            return values;
+        }};
+
+        if (auto const* c {std::get_if<char>(&commands->at(idx))}) {
+            command = *c;
+            idx++;
+        }
+        bool const isAbs {std::isupper(command) != 0};
 
         switch (command) {
+        case 'm':
         case 'M': {
             auto const p {getValues(2)};
-            if (!p) { return; }
+            if (!p) { return std::nullopt; }
             lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
-            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.move_to(lastPoint); });
-
-            usize oldIdx {idx};
-            while (auto const lp {getValues(2)}) {
-                lastPoint = isAbs ? getPoint(lp) : getPoint(lp) + lastPoint;
-                Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
-                oldIdx = idx;
-            }
-            idx = oldIdx;
+            retValue.Commands.emplace_back([lastPoint](canvas& canvas) { canvas.move_to(lastPoint); });
+            command = isAbs ? 'L' : 'l';
         } break;
+        case 'l':
         case 'L': {
             auto const p {getValues(2)};
-            if (!p) { return; }
+            if (!p) { return std::nullopt; }
             lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
-            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+            retValue.Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
         } break;
+        case 'h':
         case 'H': {
             auto const p {getValues(1)};
-            if (!p) { return; }
+            if (!p) { return std::nullopt; }
             lastPoint = isAbs ? point_f {(*p)[0], lastPoint.Y} : point_f {(*p)[0] + lastPoint.X, lastPoint.Y};
-            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+            retValue.Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
         } break;
+        case 'v':
         case 'V': {
             auto const p {getValues(1)};
-            if (!p) { return; }
+            if (!p) { return std::nullopt; }
             lastPoint = isAbs ? point_f {lastPoint.X, (*p)[0]} : point_f {lastPoint.X, (*p)[0] + lastPoint.Y};
-            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+            retValue.Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
         } break;
+        case 'q':
         case 'Q': {
             auto const cpv {getValues(2)};
             auto const endv {getValues(2)};
-            if (!cpv || !endv) { return; }
+            if (!cpv || !endv) { return std::nullopt; }
             point_f const cp {isAbs ? getPoint(cpv) : getPoint(cpv) + lastPoint};
             point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
+            retValue.Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
             lastQuadControlPoint = cp;
             lastPoint            = end;
         } break;
+        case 't':
         case 'T': {
             auto const endv {getValues(2)};
-            if (!endv) { return; }
+            if (!endv) { return std::nullopt; }
             point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
             point_f const cp {2 * lastPoint.X - lastQuadControlPoint.X, 2 * lastPoint.Y - lastQuadControlPoint.Y};
-            Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
+            retValue.Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
             lastQuadControlPoint = cp;
             lastPoint            = end;
         } break;
+        case 'c':
         case 'C': {
             auto const cp0v {getValues(2)};
             auto const cp1v {getValues(2)};
             auto const endv {getValues(2)};
-            if (!cp0v || !cp1v || !endv) { return; }
+            if (!cp0v || !cp1v || !endv) { return std::nullopt; }
             auto const cp0 {isAbs ? getPoint(cp0v) : getPoint(cp0v) + lastPoint};
             auto const cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
             auto const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });
+            retValue.Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });
             lastCubicControlPoint = cp1;
             lastPoint             = end;
         } break;
+        case 's':
         case 'S': {
             auto const cp1v {getValues(2)};
             auto const endv {getValues(2)};
-            if (!cp1v || !endv) { return; }
+            if (!cp1v || !endv) { return std::nullopt; }
             point_f const cp0 {2 * lastPoint.X - lastCubicControlPoint.X, 2 * lastPoint.Y - lastCubicControlPoint.Y};
             auto const    cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
             auto const    end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });
+            retValue.Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });
             lastCubicControlPoint = cp1;
             lastPoint             = end;
         } break;
+        case 'a':
         case 'A': {
             auto const valv {getValues(7)};
-            if (!valv) { return; }
+            if (!valv) { return std::nullopt; }
             auto const& val {*valv};
-            Commands.emplace_back([lastPoint, val, isAbs](canvas& canvas) { canvas.path_arc_to(lastPoint.X, lastPoint.Y, val, !isAbs); });
+            retValue.Commands.emplace_back([lastPoint, val, isAbs](canvas& canvas) { canvas.path_arc_to(lastPoint.X, lastPoint.Y, val, !isAbs); });
             lastPoint = isAbs ? point_f {val[5], val[6]} : point_f {val[5], val[6]} + lastPoint;
         } break;
+        case 'z':
         case 'Z':
-            Commands.emplace_back([](canvas& canvas) { canvas.close_path(); });
+            retValue.Commands.emplace_back([](canvas& canvas) { canvas.close_path(); });
             break;
         default:
-            break;
+            return std::nullopt;
         }
     }
+
+    return retValue;
 }
+
+auto canvas::path2d::GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>
+{
+    std::vector<std::variant<char, f32>> commands;
+    string                               valStr;
+
+    auto const getFloat {[&valStr, &commands]() -> bool {
+        if (!valStr.empty()) {
+            f32 val {0};
+            auto [end, err] = std::from_chars(valStr.data(), valStr.data() + valStr.size(), val);
+            if (err == std::errc() && end == (valStr.data() + valStr.size())) {
+                commands.emplace_back(val);
+            } else {
+                return false;
+            }
+            valStr = "";
+        }
+        return true;
+    }};
+
+    for (auto const c : path) {
+        if (c == ' ' || c == ',') {
+            if (!getFloat()) { return std::nullopt; }
+        } else if (std::isdigit(c) || c == '-' || c == '+' || c == '.') {
+            valStr += c;
+        } else {
+            commands.emplace_back(c);
+        }
+    }
+    if (!getFloat()) { return std::nullopt; }
+
+    return commands;
+}
+
 }

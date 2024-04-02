@@ -146,10 +146,14 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    struct TCOB_API path2d {
-        path2d(string_view path);
+    class TCOB_API path2d {
+    public:
+        auto static Parse(string_view path) -> std::optional<path2d>;
 
         std::vector<std::function<void(canvas&)>> Commands;
+
+    private:
+        auto static GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>;
     };
 
     ////////////////////////////////////////////////////////////
