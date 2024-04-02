@@ -133,6 +133,8 @@ namespace render_backend {
 
 class TCOB_API canvas final : public non_copyable {
 public:
+    ////////////////////////////////////////////////////////////
+
     class TCOB_API state_guard final : public non_copyable {
     public:
         explicit state_guard(canvas* c);
@@ -141,6 +143,16 @@ public:
     private:
         canvas* _canvas;
     };
+
+    ////////////////////////////////////////////////////////////
+
+    struct TCOB_API path2d {
+        path2d(string_view path);
+
+        std::vector<std::function<void(canvas&)>> Commands;
+    };
+
+    ////////////////////////////////////////////////////////////
 
     canvas();
     ~canvas() = default;
@@ -200,7 +212,7 @@ public:
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);
 
-    auto path_2d(string_view path) -> bool;
+    void path_2d(path2d const& path);
 
     void fill();
     void stroke();

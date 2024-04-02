@@ -433,7 +433,7 @@ void canvas_widget::triangle(point_f a, point_f b, point_f c)
     _commands.emplace_back([=](canvas& canvas) { canvas.triangle(a, b, c); });
 }
 
-void canvas_widget::path_2d(string_view path)
+void canvas_widget::path_2d(canvas::path2d const& path)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.path_2d(path); });
 }

@@ -89,19 +89,23 @@ void CanvasEx::prepare_canvas()
     sprite1->Bounds   = {{0.f, 0.f}, {1000.f, 800.f}};
 }
 
+canvas::path2d p0 {"m 108,229 -6,-2.5 -5,3.5 0.4,-6.5 -5.0,-4 6.0,-1.5 2.2,-6 3.5,5.5 6.5,0.3 -4.0,5 z"};
+canvas::path2d p1 {"m 200,100 a 99,99 0 0 0 0,150"};
+canvas::path2d p2 {"m 200,100 a 99,99 0 0 1 0,150"};
+
 void CanvasEx::paint_to_canvas()
 {
     _canvas.begin_frame({1000, 800}, 1);
 
     _canvas.set_stroke_width(10);
     _canvas.set_stroke_style(colors::Blue);
-    _canvas.path_2d("m 108,229 -6,-2.5 -5,3.5 0.4,-6.5 -5.0,-4 6.0,-1.5 2.2,-6 3.5,5.5 6.5,0.3 -4.0,5 z");
+    _canvas.path_2d(p0);
     _canvas.stroke();
     _canvas.set_stroke_style(colors::Red);
-    _canvas.path_2d("m 200,100 a 99,99 0 0 0 0,150");
+    _canvas.path_2d(p1);
     _canvas.stroke();
     _canvas.set_stroke_style(colors::YellowGreen);
-    _canvas.path_2d("m 200,100 a 99,99 0 0 1 0,150");
+    _canvas.path_2d(p2);
     _canvas.stroke();
     /*
        _canvas.set_fill_style(colors::Green);

@@ -856,136 +856,11 @@ void canvas::triangle(point_f a, point_f b, point_f c)
     line_to(a);
 }
 
-auto canvas::path_2d(string_view path) -> bool
+auto canvas::path_2d(path2d const& path) -> void
 {
-    usize      idx {0};
-    auto const getValues {[&](usize size) -> std::optional<std::vector<f32>> {
-        std::vector<f32> retValue;
-        retValue.resize(size);
-        for (usize i {0}; i < size; ++i) {
-            char c {path[++idx]};
-            while (c == ' ' || c == ',') { c = path[++idx]; } // skip
-
-            string val;
-            for (; idx < path.size(); ++idx) {
-                c = path[idx];
-                if (!std::isdigit(c) && c != '-' && c != '+' && c != '.') {
-                    break;
-                }
-                val += c;
-            }
-            auto [end, err] = std::from_chars(val.data(), val.data() + val.size(), retValue[i]);
-            if (err != std::errc() || end != (val.data() + val.size())) { return std::nullopt; }
-        }
-        idx--;
-        return retValue;
-    }};
-    auto static const getPoint {[](std::optional<std::vector<f32>> const& values) -> point_f {
-        return {(*values)[0], (*values)[1]};
-    }};
-
-    point_f lastPoint;
-    point_f lastQuadControlPoint;
-    point_f lastCubicControlPoint;
-    begin_path();
-
-    for (; idx < path.size(); ++idx) {
-        bool const isAbs {std::isupper(path[idx]) != 0};
-        char const command {static_cast<char>(std::toupper(path[idx]))};
-        if (command == ' ') { continue; }
-
-        switch (command) {
-        case 'M': {
-            auto const p {getValues(2)};
-            if (!p) { return false; }
-            lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
-            move_to(lastPoint);
-
-            usize oldIdx {idx};
-            while (auto const lp {getValues(2)}) {
-                lastPoint = isAbs ? getPoint(lp) : getPoint(lp) + lastPoint;
-                line_to(lastPoint);
-                oldIdx = idx;
-            }
-            idx = oldIdx;
-        } break;
-        case 'L': {
-            auto const p {getValues(2)};
-            if (!p) { return false; }
-            lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
-            line_to(lastPoint);
-        } break;
-        case 'H': {
-            auto const p {getValues(1)};
-            if (!p) { return false; }
-            lastPoint = isAbs ? point_f {(*p)[0], lastPoint.Y} : point_f {(*p)[0] + lastPoint.X, lastPoint.Y};
-            line_to(lastPoint);
-        } break;
-        case 'V': {
-            auto const p {getValues(1)};
-            if (!p) { return false; }
-            lastPoint = isAbs ? point_f {lastPoint.X, (*p)[0]} : point_f {lastPoint.X, (*p)[0] + lastPoint.Y};
-            line_to(lastPoint);
-        } break;
-        case 'Q': {
-            auto const cpv {getValues(2)};
-            auto const endv {getValues(2)};
-            if (!cpv || !endv) { return false; }
-            point_f const cp {isAbs ? getPoint(cpv) : getPoint(cpv) + lastPoint};
-            point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            quad_bezier_to(cp, end);
-            lastQuadControlPoint = cp;
-            lastPoint            = end;
-        } break;
-        case 'T': {
-            auto const endv {getValues(2)};
-            if (!endv) { return false; }
-            point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            point_f const cp {2 * lastPoint.X - lastQuadControlPoint.X, 2 * lastPoint.Y - lastQuadControlPoint.Y};
-            quad_bezier_to(cp, end);
-            lastQuadControlPoint = cp;
-            lastPoint            = end;
-        } break;
-        case 'C': {
-            auto const cp0v {getValues(2)};
-            auto const cp1v {getValues(2)};
-            auto const endv {getValues(2)};
-            if (!cp0v || !cp1v || !endv) { return false; }
-            auto const cp0 {isAbs ? getPoint(cp0v) : getPoint(cp0v) + lastPoint};
-            auto const cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
-            auto const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            cubic_bezier_to(cp0, cp1, end);
-            lastCubicControlPoint = cp1;
-            lastPoint             = end;
-        } break;
-        case 'S': {
-            auto const cp1v {getValues(2)};
-            auto const endv {getValues(2)};
-            if (!cp1v || !endv) { return false; }
-            point_f const cp0 {2 * lastPoint.X - lastCubicControlPoint.X, 2 * lastPoint.Y - lastCubicControlPoint.Y};
-            auto const    cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
-            auto const    end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            cubic_bezier_to(cp0, cp1, end);
-            lastCubicControlPoint = cp1;
-            lastPoint             = end;
-        } break;
-        case 'A': {
-            auto const valv {getValues(7)};
-            if (!valv) { return false; }
-            auto const& val {*valv};
-            f32 const   x {val[5]};
-            f32 const   y {val[6]};
-            path_arc_to(lastPoint.X, lastPoint.Y, val, !isAbs);
-            lastPoint = isAbs ? point_f {x, y} : point_f {x, y} + lastPoint;
-        } break;
-        case 'Z':
-            close_path();
-            break;
-        default:
-            break;
-        }
+    for (auto const& command : path.Commands) {
+        command(*this);
     }
-    return true;
 }
 
 void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
@@ -2477,5 +2352,136 @@ canvas::state_guard::state_guard(canvas* c)
 canvas::state_guard::state_guard::~state_guard()
 {
     _canvas->restore();
+}
+
+////////////////////////////////////////////////////////////
+
+canvas::path2d::path2d(string_view path)
+{
+    usize      idx {0};
+    auto const getValues {[&](usize size) -> std::optional<std::vector<f32>> {
+        std::vector<f32> retValue;
+        retValue.resize(size);
+        for (usize i {0}; i < size; ++i) {
+            char c {path[++idx]};
+            while (c == ' ' || c == ',') { c = path[++idx]; } // skip
+
+            string val;
+            for (; idx < path.size(); ++idx) {
+                c = path[idx];
+                if (!std::isdigit(c) && c != '-' && c != '+' && c != '.') {
+                    break;
+                }
+                val += c;
+            }
+            auto [end, err] = std::from_chars(val.data(), val.data() + val.size(), retValue[i]);
+            if (err != std::errc() || end != (val.data() + val.size())) { return std::nullopt; }
+        }
+        idx--;
+        return retValue;
+    }};
+    auto static const getPoint {[](std::optional<std::vector<f32>> const& values) -> point_f {
+        return {(*values)[0], (*values)[1]};
+    }};
+
+    point_f lastPoint;
+    point_f lastQuadControlPoint;
+    point_f lastCubicControlPoint;
+    Commands.emplace_back([](canvas& canvas) { canvas.begin_path(); });
+
+    for (; idx < path.size(); ++idx) {
+        bool const isAbs {std::isupper(path[idx]) != 0};
+        char const command {static_cast<char>(std::toupper(path[idx]))};
+        if (command == ' ') { continue; }
+
+        switch (command) {
+        case 'M': {
+            auto const p {getValues(2)};
+            if (!p) { return; }
+            lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
+            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.move_to(lastPoint); });
+
+            usize oldIdx {idx};
+            while (auto const lp {getValues(2)}) {
+                lastPoint = isAbs ? getPoint(lp) : getPoint(lp) + lastPoint;
+                Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+                oldIdx = idx;
+            }
+            idx = oldIdx;
+        } break;
+        case 'L': {
+            auto const p {getValues(2)};
+            if (!p) { return; }
+            lastPoint = isAbs ? getPoint(p) : getPoint(p) + lastPoint;
+            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+        } break;
+        case 'H': {
+            auto const p {getValues(1)};
+            if (!p) { return; }
+            lastPoint = isAbs ? point_f {(*p)[0], lastPoint.Y} : point_f {(*p)[0] + lastPoint.X, lastPoint.Y};
+            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+        } break;
+        case 'V': {
+            auto const p {getValues(1)};
+            if (!p) { return; }
+            lastPoint = isAbs ? point_f {lastPoint.X, (*p)[0]} : point_f {lastPoint.X, (*p)[0] + lastPoint.Y};
+            Commands.emplace_back([lastPoint](canvas& canvas) { canvas.line_to(lastPoint); });
+        } break;
+        case 'Q': {
+            auto const cpv {getValues(2)};
+            auto const endv {getValues(2)};
+            if (!cpv || !endv) { return; }
+            point_f const cp {isAbs ? getPoint(cpv) : getPoint(cpv) + lastPoint};
+            point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
+            lastQuadControlPoint = cp;
+            lastPoint            = end;
+        } break;
+        case 'T': {
+            auto const endv {getValues(2)};
+            if (!endv) { return; }
+            point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            point_f const cp {2 * lastPoint.X - lastQuadControlPoint.X, 2 * lastPoint.Y - lastQuadControlPoint.Y};
+            Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
+            lastQuadControlPoint = cp;
+            lastPoint            = end;
+        } break;
+        case 'C': {
+            auto const cp0v {getValues(2)};
+            auto const cp1v {getValues(2)};
+            auto const endv {getValues(2)};
+            if (!cp0v || !cp1v || !endv) { return; }
+            auto const cp0 {isAbs ? getPoint(cp0v) : getPoint(cp0v) + lastPoint};
+            auto const cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
+            auto const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });
+            lastCubicControlPoint = cp1;
+            lastPoint             = end;
+        } break;
+        case 'S': {
+            auto const cp1v {getValues(2)};
+            auto const endv {getValues(2)};
+            if (!cp1v || !endv) { return; }
+            point_f const cp0 {2 * lastPoint.X - lastCubicControlPoint.X, 2 * lastPoint.Y - lastCubicControlPoint.Y};
+            auto const    cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
+            auto const    end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
+            Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });
+            lastCubicControlPoint = cp1;
+            lastPoint             = end;
+        } break;
+        case 'A': {
+            auto const valv {getValues(7)};
+            if (!valv) { return; }
+            auto const& val {*valv};
+            Commands.emplace_back([lastPoint, val, isAbs](canvas& canvas) { canvas.path_arc_to(lastPoint.X, lastPoint.Y, val, !isAbs); });
+            lastPoint = isAbs ? point_f {val[5], val[6]} : point_f {val[5], val[6]} + lastPoint;
+        } break;
+        case 'Z':
+            Commands.emplace_back([](canvas& canvas) { canvas.close_path(); });
+            break;
+        default:
+            break;
+        }
+    }
 }
 }
