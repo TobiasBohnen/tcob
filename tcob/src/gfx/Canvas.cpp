@@ -2380,6 +2380,8 @@ auto canvas::path2d::Parse(string_view path) -> std::optional<path2d>
 
                 if (auto const* c {std::get_if<f32>(&commands->at(idx++))}) {
                     values[i] = *c;
+                } else {
+                    return std::nullopt;
                 }
             }
 
