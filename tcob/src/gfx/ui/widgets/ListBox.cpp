@@ -49,15 +49,21 @@ auto list_box::select_item(utf8_string const& item) -> bool
 
 void list_box::scroll_to_selected()
 {
-    if (SelectedItemIndex < 0) { return; }
+    if (SelectedItemIndex < 1) { return; }
 
     f32 value {0.0f};
     if (auto const style {get_style<list_box::style>()}) {
         rect_f const listRect {get_content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.Height)};
+        auto const   scrollMax {get_scroll_max_value(orientation::Vertical)};
+
         for (i32 i {0}; i < SelectedItemIndex; ++i) {
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
             value += itemRect.Height;
+            if (value >= scrollMax) {
+                value = scrollMax;
+                break;
+            }
         }
     }
 

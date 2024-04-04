@@ -159,6 +159,7 @@ void text_box::insert_text(string const& newText)
 
 void text_box::on_styles_changed()
 {
+    widget::on_styles_changed();
     _textDirty = true;
 }
 
