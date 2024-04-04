@@ -52,6 +52,11 @@ auto style_collection::get(string const& name, flags flags, widget_attributes co
     return bestCandidate;
 }
 
+void style_collection::clear()
+{
+    _styles.clear();
+}
+
 namespace element {
     auto thumb::calc(rect_f const& rect, context const& ctx) const -> rect_f
     {

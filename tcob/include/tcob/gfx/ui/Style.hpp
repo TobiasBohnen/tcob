@@ -302,6 +302,8 @@ public:
 
     auto get(string const& name, flags flags, widget_attributes const& attribs) const -> std::shared_ptr<style_base>;
 
+    void clear();
+
 private:
     std::vector<std::tuple<string, flags, style_attributes, std::shared_ptr<style_base>>> _styles;
 };
