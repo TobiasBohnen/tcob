@@ -34,7 +34,7 @@ void drawable::draw_to(render_target& target)
 {
     std::scoped_lock lock {_mutex};
     if (target.Camera->VisibilityMask & VisibilityMask) {
-        if (_visible) {
+        if (is_visible()) {
             on_draw_to(target);
         }
     }

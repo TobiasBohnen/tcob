@@ -226,7 +226,7 @@ void scene_node::on_draw_to(gfx::render_target& target)
 
 auto scene_node::can_draw() const -> bool
 {
-    return _entity && _entity->is_visible();
+    return !_children.empty() || (_entity && _entity->is_visible());
 }
 
 }
