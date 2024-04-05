@@ -25,6 +25,9 @@ public:
 
     auto virtual get_widgets() const -> std::vector<std::shared_ptr<widget>> const& = 0;
 
+    template <SubmitTarget Target>
+    void submit(Target& target);
+
 protected:
     void collect_widgets(std::vector<widget*>& vec) override;
 
@@ -33,6 +36,6 @@ protected:
     auto get_paint_offset() const -> point_f;
 };
 
-////////////////////////////////////////////////////////////
-
 }
+
+#include "WidgetContainer.inl"

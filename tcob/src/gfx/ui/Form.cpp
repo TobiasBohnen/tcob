@@ -460,6 +460,7 @@ void form::on_bounds_changed()
     _renderer.set_material(_material);
 
     force_redraw("bounds changed");
+    on_styles_changed();
 }
 
 void form::on_visiblity_changed()

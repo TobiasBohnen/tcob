@@ -261,13 +261,12 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
 {
     auto const guard {_canvas.create_guard()};
 
-    f32 width {style.Size.calc(std::min(refRect.Height, refRect.Width))};
     if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
         draw_nine_patch(*np, refRect, {});
     } else {
         switch (style.Type) {
         case element::tick::type::Checkmark: {
-            width /= 4;
+            f32 const width {style.Size.calc(std::min(refRect.Height, refRect.Width)) / 4};
             _canvas.set_stroke_width(width);
             _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
             _canvas.begin_path();
@@ -277,7 +276,7 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
             _canvas.stroke();
         } break;
         case element::tick::type::Cross: {
-            width /= 4;
+            f32 const width {style.Size.calc(std::min(refRect.Height, refRect.Width)) / 4};
             _canvas.set_stroke_width(width);
             _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
             _canvas.begin_path();
@@ -288,17 +287,26 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
             _canvas.stroke();
         } break;
         case element::tick::type::Circle: {
-            width /= 3;
+            f32 const width {style.Size.calc(std::min(refRect.Height, refRect.Width)) / 3};
             _canvas.set_stroke_width(width);
             _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
             _canvas.stroke_circle(refRect.get_center(), width);
         } break;
         case element::tick::type::Disc: {
-            width /= 2;
+            f32 const width {style.Size.calc(std::min(refRect.Height, refRect.Width)) / 2};
             _canvas.set_fill_style(get_paint(style.Foreground, refRect));
             _canvas.fill_circle(refRect.get_center(), width);
         } break;
+        case element::tick::type::Rect: {
+            rect_f const newRect {refRect.X + style.Size.calc(refRect.Width),
+                                  refRect.Y + style.Size.calc(refRect.Height),
+                                  refRect.Width - (style.Size.calc(refRect.Width) + style.Size.calc(refRect.Width)),
+                                  refRect.Height - (style.Size.calc(refRect.Height) + style.Size.calc(refRect.Height))};
+            _canvas.set_fill_style(get_paint(style.Foreground, newRect));
+            _canvas.fill_rect(newRect);
+        } break;
         case element::tick::type::Square: {
+            f32 const    width {style.Size.calc(std::min(refRect.Height, refRect.Width))};
             rect_f const newRect {refRect.get_center() - point_f {width, width} / 2, {width, width}};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
             _canvas.fill_rect(newRect);

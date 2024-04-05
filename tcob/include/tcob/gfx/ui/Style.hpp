@@ -142,6 +142,7 @@ namespace element {
             Cross,
             Disc,
             Circle,
+            Rect,
             Square
         };
 

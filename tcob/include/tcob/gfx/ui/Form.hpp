@@ -100,7 +100,7 @@ private:
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
 
-    void on_styles_changed();
+    void on_styles_changed(); // TODO: rename
 
     auto can_popup_tooltip() const -> bool;
     void hide_tooltip();

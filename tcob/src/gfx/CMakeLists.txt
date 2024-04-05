@@ -128,6 +128,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Widget.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Widget.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/WidgetContainer.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/WidgetContainer.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Form.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Form.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.hpp
