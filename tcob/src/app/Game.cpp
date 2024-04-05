@@ -32,7 +32,6 @@ game::game(init const& init)
     FrameLimit.Changed.connect([&](f32 value) { _frameLimit = milliseconds {1000 / value}; });
     FrameLimit(6000.0f);
 
-    connect_config_events();
     setup_rendersystem();
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
 }
@@ -187,8 +186,10 @@ void game::on_key_down(input::keyboard::event& ev)
 
 void game::setup_rendersystem()
 {
+    auto& config {locate_service<data::config_file>()};
+
     // get config
-    auto const video {locate_service<data::config_file>()[Cfg::Video::Name].as<data::config::object>()};
+    auto const video {config[Cfg::Video::Name].as<data::config::object>()};
 
     size_i const resolution {video[Cfg::Video::use_desktop_resolution].as<bool>()
                                  ? locate_service<platform>().get_display_size(0)
@@ -208,6 +209,13 @@ void game::setup_rendersystem()
     _window->clear();
     _window->draw_to(*_defaultTarget);
     _window->swap_buffer();
+
+    _window->FullScreen.Changed.connect([&](bool value) { config[Cfg::Video::Name][Cfg::Video::fullscreen] = value; });
+    _window->VSync.Changed.connect([&](bool value) { config[Cfg::Video::Name][Cfg::Video::vsync] = value; });
+    _window->Size.Changed.connect([&](size_i value) {
+        config[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<platform>().get_display_size(0);
+        config[Cfg::Video::Name][Cfg::Video::resolution]             = value;
+    });
 }
 
 auto game::get_config_defaults() const -> data::config::object
@@ -223,19 +231,6 @@ auto game::get_config_defaults() const -> data::config::object
     data::config::object defaults {};
     defaults[Cfg::Video::Name] = video;
     return defaults;
-}
-
-void game::connect_config_events()
-{
-    if (_window) {
-        auto& config {locate_service<data::config_file>()};
-        _window->FullScreen.Changed.connect([&](bool value) { config[Cfg::Video::Name][Cfg::Video::fullscreen] = value; });
-        _window->VSync.Changed.connect([&](bool value) { config[Cfg::Video::Name][Cfg::Video::vsync] = value; });
-        _window->Size.Changed.connect([&](size_i value) {
-            config[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<platform>().get_display_size(0);
-            config[Cfg::Video::Name][Cfg::Video::resolution]             = value;
-        });
-    }
 }
 
 ////////////////////////////////////////////////////////////

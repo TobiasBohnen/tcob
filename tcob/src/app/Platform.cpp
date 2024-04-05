@@ -104,9 +104,8 @@ platform::platform(game* game, game::init const& ginit)
 
     // init assets
     auto factory {register_service<assets::loader_manager::factory>()};
-    factory->add(
-        {".ini", ".json", ".xml", ".yaml"},
-        [](assets::group& group) { return std::make_unique<detail::cfg_asset_loader_manager>(group); });
+    factory->add({".ini", ".json", ".xml", ".yaml"},
+                 [](assets::group& group) { return std::make_unique<detail::cfg_asset_loader_manager>(group); });
     register_service<assets::library>();
 
     if (_game) {

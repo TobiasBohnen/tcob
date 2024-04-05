@@ -94,8 +94,6 @@ private:
     //! Sets up the rendering system.
     void setup_rendersystem();
 
-    void connect_config_events();
-
     //! Main game loop.
     void loop();
 
