@@ -7,22 +7,22 @@
 
 namespace tcob::gfx::null {
 
-auto null_render_system::get_name() -> string
+auto null_render_system::get_name() const -> string
 {
     return "NULL";
 }
 
-auto null_render_system::get_capabilities() -> capabilities
+auto null_render_system::get_capabilities() const -> capabilities
 {
     return {};
 }
 
-auto null_render_system::get_displays() -> std::map<i32, display>
+auto null_render_system::get_displays() const -> std::map<i32, display>
 {
     return {};
 }
 
-auto null_render_system::get_rtt_coords() -> rect_f
+auto null_render_system::get_rtt_coords() const -> rect_f
 {
     return {};
 }

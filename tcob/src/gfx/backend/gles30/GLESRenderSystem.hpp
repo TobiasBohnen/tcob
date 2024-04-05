@@ -12,10 +12,10 @@ namespace tcob::gfx::gles30 {
 
 class gl_render_system final : public render_system {
 public:
-    auto get_name() -> string override;
-    auto get_capabilities() -> capabilities override;
-    auto get_displays() -> std::map<i32, display> override;
-    auto get_rtt_coords() -> rect_f override;
+    auto get_name() const -> string override;
+    auto get_capabilities() const -> capabilities override;
+    auto get_displays() const -> std::map<i32, display> override;
+    auto get_rtt_coords() const -> rect_f override;
 
     auto create_canvas() -> std::unique_ptr<render_backend::canvas_base> override;
     auto create_render_target(texture* tex) -> std::unique_ptr<render_backend::render_target_base> override;

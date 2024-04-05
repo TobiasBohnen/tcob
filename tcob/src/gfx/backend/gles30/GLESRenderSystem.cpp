@@ -18,12 +18,12 @@
 
 namespace tcob::gfx::gles30 {
 
-auto gl_render_system::get_name() -> string
+auto gl_render_system::get_name() const -> string
 {
     return "OPENGLES30";
 }
 
-auto gl_render_system::get_capabilities() -> capabilities
+auto gl_render_system::get_capabilities() const -> capabilities
 {
     capabilities retValue;
 
@@ -35,7 +35,7 @@ auto gl_render_system::get_capabilities() -> capabilities
     return retValue;
 }
 
-auto gl_render_system::get_displays() -> std::map<i32, display>
+auto gl_render_system::get_displays() const -> std::map<i32, display>
 {
     std::map<i32, display> retValue;
 
@@ -57,7 +57,7 @@ auto gl_render_system::get_displays() -> std::map<i32, display>
     return retValue;
 }
 
-auto gl_render_system::get_rtt_coords() -> rect_f
+auto gl_render_system::get_rtt_coords() const -> rect_f
 {
     return {0, 0, 1, -1};
 }
