@@ -47,10 +47,10 @@ public:
     render_system()          = default;
     virtual ~render_system() = default;
 
-    auto virtual get_name() -> string                     = 0;
-    auto virtual get_capabilities() -> capabilities       = 0;
-    auto virtual get_displays() -> std::map<i32, display> = 0;
-    auto virtual get_rtt_coords() -> rect_f               = 0;
+    auto virtual get_name() const -> string                     = 0;
+    auto virtual get_capabilities() const -> capabilities       = 0;
+    auto virtual get_displays() const -> std::map<i32, display> = 0;
+    auto virtual get_rtt_coords() const -> rect_f               = 0;
 
     auto virtual create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
     auto virtual create_render_target [[nodiscard]] (texture* tex) -> std::unique_ptr<render_backend::render_target_base>          = 0;
