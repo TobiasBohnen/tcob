@@ -5,9 +5,9 @@
 
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-#include "tcob/gfx/ui/Form.hpp"
-
 #include <ranges>
+
+#include "tcob/gfx/ui/Form.hpp"
 
 namespace tcob::gfx::ui {
 
@@ -27,7 +27,7 @@ void widget_container::update(milliseconds deltaTime)
 
 auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
-    for (auto const& w : get_widgets() | std::views::reverse) {
+    for (auto const& w : get_widgets_by_zorder() | std::views::reverse) {
         if (w->hit_test(pos)) {
             if (auto retValue {w->find_child_at(pos)}) {
                 return retValue;
@@ -50,6 +50,15 @@ auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr
     }
 
     return nullptr;
+}
+
+auto widget_container::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
+{
+    auto retValue {get_widgets()};
+    std::sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) {
+        return a->ZOrder() < b->ZOrder();
+    });
+    return retValue;
 }
 
 void widget_container::collect_widgets(std::vector<widget*>& vec)

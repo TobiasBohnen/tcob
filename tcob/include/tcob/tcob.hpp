@@ -105,6 +105,7 @@
 #include <tcob/gfx/ui/widgets/Checkbox.hpp>
 #include <tcob/gfx/ui/widgets/CycleButton.hpp>
 #include <tcob/gfx/ui/widgets/Displays.hpp>
+#include <tcob/gfx/ui/widgets/DropDownList.hpp>
 #include <tcob/gfx/ui/widgets/GridView.hpp>
 #include <tcob/gfx/ui/widgets/ImageBox.hpp>
 #include <tcob/gfx/ui/widgets/Label.hpp>

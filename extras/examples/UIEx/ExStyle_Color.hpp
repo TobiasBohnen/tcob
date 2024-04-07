@@ -32,6 +32,7 @@ struct color_theme {
     void apply(std::shared_ptr<button::style> const& style) const;
     void apply(std::shared_ptr<checkbox::style> const& style) const;
     void apply(std::shared_ptr<cycle_button::style> const& style) const;
+    void apply(std::shared_ptr<drop_down_list::style> const& style) const;
     void apply(std::shared_ptr<grid_view::style> const& style) const;
     void apply(std::shared_ptr<image_box::style> const& style) const;
     void apply(std::shared_ptr<label::style> const& style) const;

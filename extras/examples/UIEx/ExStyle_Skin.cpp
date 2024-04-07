@@ -264,6 +264,31 @@ auto create_skinned_styles() -> style_collection
         disabledStyle->Background = colors::FireBrick;
     }
     {
+        auto style {retValue.create<drop_down_list>("drop_down_list", {})};
+        style->Background                      = grey.Panel;
+        style->Border.Size                     = 3_px;
+        style->Margin                          = {5_px};
+        style->Padding                         = {5_px};
+        style->DropShadow.Color                = color {0, 0, 0, 128};
+        style->Text.Style                      = {false, font::weight::Normal};
+        style->Text.Font                       = resGrp->get<font_family>("Poppins");
+        style->Text.Size                       = 50_pct;
+        style->Text.Shadow.OffsetX             = 0_px;
+        style->Text.Shadow.OffsetY             = 1_px;
+        style->Text.Alignment                  = {horizontal_alignment::Centered, vertical_alignment::Middle};
+        style->ItemHeight                      = 150_pct;
+        style->ItemClass                       = "list_items";
+        style->VScrollBar.ThumbClass           = "v_scrollbar_thumb";
+        style->VScrollBar.Bar.Type             = element::bar::type::Continuous;
+        style->VScrollBar.Bar.Size             = 30_px;
+        style->VScrollBar.Bar.LowerBackground  = yellow.Panel;
+        style->VScrollBar.Bar.HigherBackground = yellow.Panel;
+        style->VScrollBar.Bar.Delay            = 250ms;
+
+        auto disabledStyle {retValue.create<drop_down_list>("drop_down_list", {.Disabled = true})};
+        disabledStyle->Background = colors::FireBrick;
+    }
+    {
         auto style {retValue.create<grid_view>("grid_view", {})};
         style->Background                      = grey.Panel;
         style->Border.Size                     = 3_px;

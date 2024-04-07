@@ -45,6 +45,7 @@ public:
     prop<string>   Class;
     prop_fn<f32>   Alpha;
     prop<tab_stop> TabStop;
+    prop<usize>    ZOrder;
 
     prop<dimensions> Flex;
 

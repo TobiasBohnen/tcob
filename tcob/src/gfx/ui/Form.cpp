@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/Form.hpp"
 
+#include <ranges>
 #include <utility>
 
 #include "tcob/core/Logger.hpp"
@@ -54,9 +55,9 @@ auto form::get_top_widget() const -> widget*
     return _topWidget;
 }
 
-auto form::find_widget_at(point_f pos) -> std::shared_ptr<widget>
+auto form::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 {
-    for (auto& container : _layout.get_widgets()) {
+    for (auto& container : get_widgets_by_zorder() | std::views::reverse) {
         if (container->hit_test(pos)) {
             if (auto retValue {container->find_child_at(pos)}) {
                 return retValue;
@@ -67,9 +68,9 @@ auto form::find_widget_at(point_f pos) -> std::shared_ptr<widget>
     return nullptr;
 }
 
-auto form::find_widget_by_name(string const& name) -> std::shared_ptr<widget>
+auto form::find_widget_by_name(string const& name) const -> std::shared_ptr<widget>
 {
-    for (auto& container : _layout.get_widgets()) {
+    for (auto const& container : get_widgets()) {
         if (container->get_name() == name) {
             return container;
         }
@@ -85,10 +86,10 @@ auto form::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
     return _layout.get_widgets();
 }
 
-auto form::get_all_widgets() -> std::vector<widget*>
+auto form::get_all_widgets() const -> std::vector<widget*>
 {
     std::vector<widget*> retValue;
-    for (auto& container : _layout.get_widgets()) {
+    for (auto const& container : get_widgets()) {
         container->collect_widgets(retValue);
     }
     return retValue;
@@ -153,7 +154,7 @@ void form::on_update(milliseconds /* deltaTime */)
 
 void form::on_fixed_update(milliseconds deltaTime)
 {
-    auto const& widgets {_layout.get_widgets()};
+    auto const& widgets {get_widgets()};
 
     // tooltip
     if (_topWidget) {
@@ -190,7 +191,7 @@ void form::on_fixed_update(milliseconds deltaTime)
 void form::on_styles_changed()
 {
     _updateWidgets = true;
-    for (auto& container : _layout.get_widgets()) {
+    for (auto const& container : get_widgets()) {
         container->on_styles_changed();
     }
 }
@@ -213,7 +214,7 @@ void form::on_draw_to(render_target& target)
     if (_redrawWidgets) {
         _canvas.begin_frame(bounds, 1.0f, 0);
 
-        for (auto& container : _layout.get_widgets()) {
+        for (auto const& container : get_widgets_by_zorder()) {
             _canvas.reset();
             container->paint(*_painter);
         }
@@ -476,6 +477,15 @@ void form::on_visiblity_changed()
         }
     }
     // TODO: else inject mouse_motion
+}
+
+auto form::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
+{
+    auto retValue {get_widgets()};
+    std::sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) {
+        return a->ZOrder() < b->ZOrder();
+    });
+    return retValue;
 }
 
 void form::on_text_input(input::keyboard::text_input_event& ev)

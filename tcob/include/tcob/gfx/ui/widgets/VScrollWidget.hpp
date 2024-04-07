@@ -15,6 +15,8 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API vscroll_widget : public widget {
+    friend class scrollbar<vscroll_widget>;
+
 public:
     class TCOB_API style : public background_style {
     public:
@@ -22,11 +24,6 @@ public:
     };
 
     explicit vscroll_widget(init const& wi);
-
-    auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
-    auto get_scroll_min_value(orientation orien) const -> f32;
-    auto get_scroll_max_value(orientation orien) const -> f32;
-    auto get_scroll_style(orientation orien) const -> element::scrollbar*;
 
 protected:
     void on_styles_changed() override;
@@ -43,6 +40,11 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
+
+    auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
+    auto get_scroll_min_value(orientation orien) const -> f32;
+    auto get_scroll_max_value(orientation orien) const -> f32;
+    auto get_scroll_style(orientation orien) const -> element::scrollbar*;
 
     auto virtual get_list_height() const -> f32       = 0;
     auto virtual get_list_item_count() const -> isize = 0;

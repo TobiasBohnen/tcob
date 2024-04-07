@@ -29,6 +29,8 @@ widget::widget(init const& wi)
 
     Flex.Changed.connect([&](auto const&) { force_redraw(_name + ": Flex changed"); });
 
+    ZOrder.Changed.connect([&](auto const&) { force_redraw(_name + ": ZOrder changed"); });
+
     static i32 tabIndex {0};
     (*TabStop).Index = tabIndex++;
 }

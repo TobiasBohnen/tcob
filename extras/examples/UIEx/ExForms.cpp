@@ -126,7 +126,15 @@ auto create_form0(window* wnd) -> std::shared_ptr<form>
         fb->Flex = {100_pct, 20_pct};
     }
 
-    auto listbox0 {panel0Layout->create_widget<list_box>({1200, 10, 150, 300}, "Listbox0")};
+    auto dropDownList0 {panel0Layout->create_widget<drop_down_list>({1200, 10, 150, 50}, "DropDownList0")};
+    for (i32 i {0}; i < 4; ++i) {
+        dropDownList0->add_item("item " + std::to_string(i));
+    }
+    dropDownList0->SelectedItemIndex.Changed.connect([label0, dropDownList0](i32 value) { label0->Label = "selected: " + std::to_string(value); });
+    dropDownList0->HoveredItemIndex.Changed.connect([label0, dropDownList0](i32 value) { label0->Label = "hovered: " + std::to_string(value); });
+    dropDownList0->ZOrder = 1;
+
+    auto listbox0 {panel0Layout->create_widget<list_box>({1200, 80, 150, 300}, "Listbox0")};
     for (i32 i {0}; i < 4; ++i) {
         listbox0->add_item("item " + std::to_string(i));
     }
@@ -150,6 +158,7 @@ auto create_form0(window* wnd) -> std::shared_ptr<form>
             ? 0
             : progressBar0->Value + 10;
         listbox0->add_item(std::to_string(progressBar0->Value));
+        dropDownList0->add_item(std::to_string(progressBar0->Value));
         gridView0->add_row({"XXX", "XX", std::to_string(progressBar0->Value * 10), "XXXXX"});
     });
 

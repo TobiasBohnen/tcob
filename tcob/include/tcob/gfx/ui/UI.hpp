@@ -24,6 +24,7 @@ class form;
 class button;
 class checkbox;
 class cycle_button;
+class drop_down_list;
 class grid_view;
 class image_box;
 class label;
@@ -37,7 +38,6 @@ class text_box;
 class toggle;
 
 // TODO:
-// class drop_down_list;
 // class html_control;
 // class video_control;
 // class color_picker;

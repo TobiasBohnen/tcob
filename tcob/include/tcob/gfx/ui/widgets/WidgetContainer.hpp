@@ -24,6 +24,7 @@ public:
     auto find_child_by_name(string const& name) -> std::shared_ptr<widget> override;
 
     auto virtual get_widgets() const -> std::vector<std::shared_ptr<widget>> const& = 0;
+    auto get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>;
 
     template <SubmitTarget Target>
     void submit(Target& target);

@@ -142,7 +142,7 @@ void panel::on_paint(widget_painter& painter)
         point_f const translate {rect.get_position() + get_paint_offset()};
         xform.translate(translate);
 
-        for (auto const& w : get_widgets()) {
+        for (auto const& w : get_widgets_by_zorder()) {
             painter.begin(Alpha, xform);
             w->paint(painter);
             painter.end();
