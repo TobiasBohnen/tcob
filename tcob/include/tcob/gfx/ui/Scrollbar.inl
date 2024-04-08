@@ -199,7 +199,7 @@ template <typename Parent>
 inline auto scrollbar<Parent>::get_thumb_style(flags flags) -> std::shared_ptr<thumb_style>
 {
     if (auto* const style {_parent.get_scroll_style(_orien)}) {
-        return std::dynamic_pointer_cast<thumb_style>(_parent.get_form()->Styles->get(style->ThumbClass, flags, {}));
+        return std::static_pointer_cast<thumb_style>(_parent.get_form()->Styles->get(style->ThumbClass, flags, {}));
     }
 
     return nullptr;

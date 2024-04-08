@@ -11,13 +11,13 @@ namespace tcob::gfx::ui {
 template <std::derived_from<style_base> T>
 inline auto widget::get_style() const -> std::shared_ptr<T>
 {
-    return std::dynamic_pointer_cast<T>(_style);
+    return std::static_pointer_cast<T>(_style);
 }
 
 template <std::derived_from<style_base> T>
 inline auto widget::get_sub_style(string const& styleClass, flags flags) const -> std::shared_ptr<T>
 {
-    return std::dynamic_pointer_cast<T>(get_styles().get(styleClass, flags, {}));
+    return std::static_pointer_cast<T>(get_styles().get(styleClass, flags, {}));
 }
 
 }
