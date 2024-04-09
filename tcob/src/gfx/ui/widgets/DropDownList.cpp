@@ -93,6 +93,16 @@ void drop_down_list::on_paint(widget_painter& painter)
             painter.draw_text(style->Text, rect, get_selected_item());
         }
 
+        auto const& flags {get_flags()};
+        auto        normalArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {})};
+        auto        hoverArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Hover = true})};
+        auto        activeArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Active = true})};
+        if (_mouseOverBox) {
+            painter.draw_nav_arrow(flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
+        } else {
+            painter.draw_nav_arrow(normalArrow->NavArrow, rect);
+        }
+
         if (_isExtended) {
             f32 const itemHeight {style->ItemHeight.calc(rect.Height)};
 
@@ -134,18 +144,22 @@ void drop_down_list::on_mouse_leave()
     widget::on_mouse_leave();
 
     HoveredItemIndex = -1;
+    if (_mouseOverBox) {
+        _mouseOverBox = false;
+        force_redraw(get_name() + ": mouse left");
+    }
 }
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event& ev)
 {
     HoveredItemIndex = -1;
-    _mouseOverBox    = false;
 
     widget::on_mouse_hover(ev);
 
     if (auto const style {get_style<drop_down_list::style>()}) {
         rect_f listRect {get_global_content_bounds()};
         if (_vScrollbar.inject_mouse_hover(ev.Position)) {
+            _mouseOverBox = false;
             force_redraw(get_name() + ": scrollbar mouse hover");
             ev.Handled = true;
         } else {
@@ -159,16 +173,19 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event& ev)
                     rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
                     if (itemRect.contains(ev.Position)) {
                         HoveredItemIndex = i;
+                        _mouseOverBox    = false;
                         ev.Handled       = true;
                         return;
                     }
                 }
             }
 
-            _mouseOverBox = true;
+            if (!_mouseOverBox) {
+                _mouseOverBox = true;
+                ev.Handled    = true;
+                force_redraw(get_name() + ": mouse enter");
+            }
         }
-
-        ev.Handled = true;
     }
 }
 

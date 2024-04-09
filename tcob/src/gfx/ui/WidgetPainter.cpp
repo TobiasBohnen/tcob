@@ -402,6 +402,30 @@ auto widget_painter::draw_scrollbar(element::scrollbar const& style, element::th
     return retValue;
 }
 
+void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f const& refRect)
+{
+    auto const guard {_canvas.create_guard()};
+
+    rect_f const navRect {style.calc(refRect)};
+
+    rect_f decRect {navRect};
+    draw_bordered_rect(decRect, style.DecBackground, style.Border);
+
+    switch (style.Type) {
+    case element::nav_arrow::type::Triangle: {
+        _canvas.set_fill_style(get_paint(style.Foreground, navRect));
+        _canvas.begin_path();
+        _canvas.triangle(
+            {navRect.left() + 2, navRect.Y + 4},
+            {navRect.get_center().X, navRect.bottom() - 4},
+            {navRect.right() - 2, navRect.Y + 4});
+        _canvas.fill();
+    } break;
+    case element::nav_arrow::type::None:
+        break;
+    }
+}
+
 void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& refRect)
 {
     auto const guard {_canvas.create_guard()};

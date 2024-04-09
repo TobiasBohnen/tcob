@@ -20,8 +20,8 @@ class TCOB_API drop_down_list : public widget {
 public:
     class TCOB_API style : public background_style {
     public:
-        element::text Text;
-
+        element::text      Text;
+        utf8_string        ArrowClass {"nav_arrows"};
         length             ItemHeight {};
         utf8_string        ItemClass {"list_items"};
         element::scrollbar VScrollBar;
