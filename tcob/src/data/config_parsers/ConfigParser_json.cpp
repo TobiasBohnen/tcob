@@ -28,27 +28,17 @@ auto json_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
 auto json_reader::ReadKeyValuePair(entry& currentEntry, object& obj, utf8_string_view line) -> bool
 {
     auto const separatorPos {line.find(':')};
-    if (separatorPos == utf8_string::npos) {
-        return false; // ERROR:  invalid pair
-    }
+    if (separatorPos == utf8_string::npos) { return false; } // ERROR: invalid pair
 
     auto keyStr {helper::trim(line.substr(0, separatorPos))};
     auto valueStr {helper::trim(line.substr(separatorPos + 1))};
 
-    if (keyStr.size() <= 1 || valueStr.empty()) {
-        return false; //  ERROR: empty key or value
-    }
-    if (keyStr[0] != '\"' || keyStr[keyStr.size() - 1] != '\"') {
-        return false; //  ERROR: invalid key
-    }
-    if (valueStr == "null") {
-        return true;  // ignore nulled keys
-    }
+    if (keyStr.size() <= 1 || valueStr.empty()) { return false; }                 //  ERROR: empty key or value
+    if (keyStr[0] != '\"' || keyStr[keyStr.size() - 1] != '\"') { return false; } //  ERROR: invalid key
+    if (valueStr == "null") { return true; }                                      // ignore nulled keys
 
     // read value utf8_string
-    if (!ReadValue(currentEntry, valueStr)) {
-        return false; // invalid value
-    }
+    if (!ReadValue(currentEntry, valueStr)) { return false; } // ERROR: invalid value
 
     // unescape key
     utf8_string const valueKey {keyStr.substr(1, keyStr.size() - 2)};
@@ -202,9 +192,7 @@ void json_writer::write_object(ostream& stream, i32 indent, object const& obj) c
     stream << "{\n";
     bool first {true};
     for (auto const& [k, v] : obj) {
-        if (!first) {
-            stream << ", \n";
-        }
+        if (!first) { stream << ", \n"; }
         stream << indentEntry << "\"" << k << "\": ";
         write_entry(stream, indent + INDENT_SPACES, v);
 
@@ -223,9 +211,7 @@ void json_writer::write_array(ostream& stream, i32 indent, array const& arr) con
     stream << "[\n";
     bool first {true};
     for (auto const& v : arr) {
-        if (!first) {
-            stream << ", \n";
-        }
+        if (!first) { stream << ", \n"; }
         stream << indentItem;
         write_entry(stream, indent + INDENT_SPACES, v);
 

@@ -24,7 +24,7 @@ private:
     auto read_line(utf8_string_view line) -> bool;
 
     auto read_comment(utf8_string_view line) -> bool;
-    auto read_section(utf8_string_view line) -> bool;
+    auto read_section_header(utf8_string_view line) -> bool;
     auto read_key_value_pair(entry& currentEntry, object const& obj, utf8_string_view line) -> bool;
 
     auto read_value(entry& currentEntry, utf8_string_view line) -> bool;

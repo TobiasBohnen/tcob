@@ -61,7 +61,7 @@ auto ini_reader::read_line(utf8_string_view line) -> bool
     entry currentEntry;
     return line.empty()
         || read_comment(line)
-        || read_section(line)
+        || read_section_header(line)
         || read_key_value_pair(currentEntry, _parentSection, line);
 }
 
@@ -78,31 +78,32 @@ auto ini_reader::read_comment(utf8_string_view line) -> bool
     return false;
 }
 
-auto ini_reader::read_section(utf8_string_view line) -> bool
+auto ini_reader::read_section_header(utf8_string_view line) -> bool
 {
     // read object header
     if (line[0] == '[') {
         auto const endPos {line.find(']')};
         if (endPos == utf8_string::npos || endPos == 1) { return false; } // ERROR: invalid object header
 
-        // read sub-sections
-        bool first {true};
-        helper::split_for_each(
-            line.substr(1, endPos - 1), '.',
-            [&first, this](utf8_string_view token) {
-                if (first) {
-                    auto secRes {_section[utf8_string {token}]};
+        auto const lineSize {line.size()};
+        if ((line[1] == '\'' && line[lineSize - 2] == '\'') || (line[1] == '"' && line[lineSize - 2] == '"')) {
+            line = line.substr(2, lineSize - 4);
+            auto secRes {_section[utf8_string {line}]};
+            if (!secRes.is<object>()) { secRes = object {}; }
+            _parentSection = secRes.as<object>();
+        } else {
+            // read sub-sections
+            bool first {true};
+            helper::split_for_each(
+                line.substr(1, endPos - 1), '.',
+                [&first, this](utf8_string_view token) {
+                    auto secRes {(first ? _section : _parentSection)[utf8_string {token}]};
                     if (!secRes.is<object>()) { secRes = object {}; }
                     _parentSection = secRes.as<object>();
                     first          = false;
-                } else {
-                    auto secRes {_parentSection[utf8_string {token}]};
-                    if (!secRes.is<object>()) { secRes = object {}; }
-                    _parentSection = secRes.as<object>();
-                }
-
-                return true;
-            });
+                    return true;
+                });
+        }
 
         return true;
     }
@@ -113,24 +114,22 @@ auto ini_reader::read_section(utf8_string_view line) -> bool
 auto ini_reader::read_key_value_pair(entry& currentEntry, object const& obj, utf8_string_view line) -> bool
 {
     auto const separatorPos {line.find('=')};
-    if (separatorPos == utf8_string::npos) {
-        return false; // ERROR:  invalid pair
-    }
+    if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
 
-    auto keyStr {helper::trim(line.substr(0, separatorPos))};
-    auto valueStr {helper::trim(line.substr(separatorPos + 1))};
+    auto const keyStr {helper::trim(line.substr(0, separatorPos))};
+    auto const valueStr {helper::trim(line.substr(separatorPos + 1))};
 
-    if (keyStr.empty() || valueStr.empty()) { return false; }                   //  ERROR: empty key or value
-    if (keyStr[0] == '.' || keyStr[keyStr.size() - 1] == '.') { return false; } //  ERROR: dot at start or end of key
+    if (keyStr.empty() || valueStr.empty()) { return false; }                //  ERROR: empty key or value
+    auto const keyStrSize {keyStr.size()};
+    if (keyStr[0] == '.' || keyStr[keyStrSize - 1] == '.') { return false; } //  ERROR: dot at start or end of key
 
     object      currentSection {obj};
     utf8_string entryKey {};
     bool        first {true};
 
     // unescape key
-    if ((keyStr[0] == '\'' && keyStr[keyStr.size() - 1] == '\'')
-        || (keyStr[0] == '"' && keyStr[keyStr.size() - 1] == '"')) {
-        entryKey = keyStr.substr(1, keyStr.size() - 2);
+    if ((keyStr[0] == '\'' && keyStr[keyStrSize - 1] == '\'') || (keyStr[0] == '"' && keyStr[keyStrSize - 1] == '"')) {
+        entryKey = keyStr.substr(1, keyStrSize - 2);
     } else { // read sub-keys
         helper::split_for_each(
             keyStr, '.',
@@ -176,9 +175,7 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
             arrayLine += get_next_line();
         }
 
-        if (arrayLine[arrayLine.size() - 1] != ']') {
-            return false;
-        }
+        if (arrayLine[arrayLine.size() - 1] != ']') { return false; }
 
         array arr {};
         if (!helper::split_preserve_brackets_for_each(
@@ -191,7 +188,6 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
                         arr.add_entry(arrEntry);
                         return true;
                     }
-
                     return false;
                 })) {
             return false;
@@ -331,8 +327,18 @@ void ini_writer::write_section(ostream& stream, object const& obj, utf8_string c
         }
 
         bool const needsEscape {k.find('.') != utf8_string::npos};
-        if (v.is<object>() && !needsEscape) {
-            objects.insert(k, v.as<object>());
+        if (v.is<object>()) {
+            if (needsEscape) {
+                if (prefix.empty()) {
+                    objects.insert("'" + k + "'", v.as<object>());
+                } else {
+                    stream << "'" << k << "' = ";
+                    write_entry(stream, v);
+                    stream << "\n";
+                }
+            } else {
+                objects.insert(k, v.as<object>());
+            }
         } else {
             if (needsEscape) {
                 stream << "'" << k << "' = ";
@@ -402,5 +408,4 @@ void ini_writer::write_entry(ostream& stream, entry const& ent) const
         write_inline_section(stream, ent.as<object>());
     }
 }
-
 }
