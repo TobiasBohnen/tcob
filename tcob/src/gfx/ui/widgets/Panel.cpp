@@ -58,7 +58,7 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
 
 auto panel::get_scroll_style(orientation orien) const -> element::scrollbar*
 {
-    if (auto const style {get_style<panel::style>()}) {
+    if (auto* style {get_style<panel::style>()}) {
         if (orien == orientation::Horizontal) {
             return &style->HScrollBar;
         }
@@ -125,7 +125,7 @@ void panel::clear()
 
 void panel::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<panel::style>()}) {
+    if (auto const* style {get_style<panel::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -225,7 +225,7 @@ void panel::on_mouse_wheel(input::mouse::wheel_event& ev)
     widget_container::on_mouse_wheel(ev);
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (auto const style {get_style<panel::style>()}) {
+        if (auto const* style {get_style<panel::style>()}) {
             orientation  orien {};
             bool         invert {false};
             milliseconds delay {};
@@ -259,7 +259,7 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const style {get_style<panel::style>()}) {
+        if (auto const* style {get_style<panel::style>()}) {
             if (_vScrollbar.Visible) {
                 bounds.Width -= style->VScrollBar.Bar.Size.calc(bounds.Width);
             }

@@ -9,7 +9,6 @@
 #include <array>
 #include <variant>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -169,7 +168,7 @@ enum class dock_style {
 ////////////////////////////////////////////////////////////
 
 using attributes        = std::variant<i32, bool, string, orientation>;
-using widget_attributes = flat_map<string, attributes>;
+using widget_attributes = std::unordered_map<string, attributes>;
 
 template <typename Target>
 concept SubmitTarget = requires(Target target, string const& name, widget_attributes const& properties) {

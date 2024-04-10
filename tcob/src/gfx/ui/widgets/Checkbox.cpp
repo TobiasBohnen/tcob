@@ -19,7 +19,7 @@ checkbox::checkbox(init const& wi)
 
 void checkbox::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<checkbox::style>()}) {
+    if (auto const* style {get_style<checkbox::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -48,10 +48,11 @@ void checkbox::on_click()
     Checked = !Checked;
 }
 
-auto checkbox::get_properties() const -> widget_attributes
+auto checkbox::get_attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_properties()};
-    retValue["checked"] = Checked();
+    widget_attributes retValue {{"checked", Checked()}};
+    auto const        base {widget::get_attributes()};
+    retValue.insert(base.begin(), base.end());
     return retValue;
 }
 

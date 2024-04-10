@@ -36,7 +36,6 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto get_attributes() const -> widget_attributes override;
-    auto get_properties() const -> widget_attributes override;
 
 private:
     enum class arrow {

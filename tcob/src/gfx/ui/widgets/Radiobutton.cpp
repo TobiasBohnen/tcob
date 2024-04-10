@@ -20,7 +20,7 @@ radio_button::radio_button(init const& wi)
 
 void radio_button::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<radio_button::style>()}) {
+    if (auto const* style {get_style<radio_button::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -61,10 +61,11 @@ void radio_button::on_click()
     }
 }
 
-auto radio_button::get_properties() const -> widget_attributes
+auto radio_button::get_attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_properties()};
-    retValue["checked"] = Checked();
+    widget_attributes retValue {{"checked", Checked()}};
+    auto const        base {widget::get_attributes()};
+    retValue.insert(base.begin(), base.end());
     return retValue;
 }
 

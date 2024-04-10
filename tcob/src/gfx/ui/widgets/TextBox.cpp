@@ -27,7 +27,7 @@ text_box::text_box(init const& wi)
 
 void text_box::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<text_box::style>()}) {
+    if (auto const* style {get_style<text_box::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -117,7 +117,7 @@ void text_box::on_focus_gained()
 {
     using namespace tcob::tweening;
 
-    if (auto const style {get_style<text_box::style>()}) {
+    if (auto const* style {get_style<text_box::style>()}) {
         _caretTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate, 1.0f, 0.0f);
         _caretTween->Value.Changed.connect([&](auto val) {
             _caretVisible = val;
@@ -138,13 +138,6 @@ auto text_box::get_attributes() const -> widget_attributes
     widget_attributes retValue {{"text", Text()}};
     auto const        base {widget::get_attributes()};
     retValue.insert(base.begin(), base.end());
-    return retValue;
-}
-
-auto text_box::get_properties() const -> widget_attributes
-{
-    auto retValue {widget::get_properties()};
-    retValue["text"] = Text();
     return retValue;
 }
 

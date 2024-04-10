@@ -52,7 +52,7 @@ void list_box::scroll_to_selected()
     if (SelectedItemIndex < 1) { return; }
 
     f32 value {0.0f};
-    if (auto const style {get_style<list_box::style>()}) {
+    if (auto const* style {get_style<list_box::style>()}) {
         rect_f const listRect {get_content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.Height)};
         auto const   scrollMax {get_scroll_max_value(orientation::Vertical)};
@@ -96,7 +96,7 @@ void list_box::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHei
 
 void list_box::paint_content(widget_painter& painter, rect_f const& rect)
 {
-    if (auto const style {get_style<list_box::style>()}) {
+    if (auto const* style {get_style<list_box::style>()}) {
         rect_f listRect {rect};
 
         f32 const itemHeight {style->ItemHeight.calc(listRect.Height)};
@@ -156,7 +156,7 @@ void list_box::on_mouse_hover(input::mouse::motion_event& ev)
 
     vscroll_widget::on_mouse_hover(ev);
 
-    if (auto const style {get_style<list_box::style>()}) {
+    if (auto const* style {get_style<list_box::style>()}) {
         rect_f const listRect {get_global_content_bounds()};
         if (listRect.contains(ev.Position)) {
             // over list
@@ -195,9 +195,9 @@ auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) co
     return retValue;
 }
 
-auto list_box::get_item_style(isize index) const -> std::shared_ptr<item_style>
+auto list_box::get_item_style(isize index) const -> item_style*
 {
-    auto const style {get_style<list_box::style>()};
+    auto const* style {get_style<list_box::style>()};
     return index == SelectedItemIndex ? get_sub_style<item_style>(style->ItemClass, {.Active = true})
         : index == HoveredItemIndex   ? get_sub_style<item_style>(style->ItemClass, {.Hover = true})
                                       : get_sub_style<item_style>(style->ItemClass, {});
@@ -207,7 +207,7 @@ auto list_box::get_list_height() const -> f32
 {
     f32 retValue {0.0f};
 
-    if (auto const style {get_style<list_box::style>()}) {
+    if (auto const* style {get_style<list_box::style>()}) {
         rect_f const listRect {get_content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.Height)};
         for (i32 i {0}; i < std::ssize(_items); ++i) {
@@ -224,9 +224,9 @@ auto list_box::get_list_item_count() const -> isize
     return get_item_count();
 }
 
-auto list_box::get_properties() const -> widget_attributes
+auto list_box::get_attributes() const -> widget_attributes
 {
-    auto retValue {vscroll_widget::get_properties()};
+    auto retValue {vscroll_widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
         retValue["selected"] = get_selected_item();
     }

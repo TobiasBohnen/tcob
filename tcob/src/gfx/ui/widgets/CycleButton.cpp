@@ -48,7 +48,7 @@ auto cycle_button::get_item_count() const -> isize
 
 void cycle_button::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<cycle_button::style>()}) {
+    if (auto const* style {get_style<cycle_button::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -78,9 +78,9 @@ void cycle_button::on_update(milliseconds /*deltaTime*/)
 {
 }
 
-auto cycle_button::get_properties() const -> widget_attributes
+auto cycle_button::get_attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_properties()};
+    auto retValue {widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
         retValue["selected"] = get_selected_item();
     }

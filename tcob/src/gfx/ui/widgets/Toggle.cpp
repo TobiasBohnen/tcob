@@ -20,7 +20,7 @@ toggle::toggle(init const& wi)
 
 void toggle::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<toggle::style>()}) {
+    if (auto const* style {get_style<toggle::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -44,7 +44,7 @@ void toggle::on_update(milliseconds deltaTime)
 
 void toggle::on_enabled_changed()
 {
-    if (auto const style {get_style<toggle::style>()}) {
+    if (auto const* style {get_style<toggle::style>()}) {
         if (Enabled) {
             _tween.start(1.0f, style->Delay * (1.0f - _tween.get_current_value()));
         } else {
@@ -60,10 +60,11 @@ void toggle::on_click()
     Enabled = !Enabled;
 }
 
-auto toggle::get_properties() const -> widget_attributes
+auto toggle::get_attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_properties()};
-    retValue["enabled"] = Enabled();
+    widget_attributes retValue {{"enabled", Enabled()}};
+    auto const        base {widget::get_attributes()};
+    retValue.insert(base.begin(), base.end());
     return retValue;
 }
 

@@ -43,7 +43,6 @@ protected:
     void on_focus_lost() override;
 
     auto get_attributes() const -> widget_attributes override;
-    auto get_properties() const -> widget_attributes override;
 
     void insert_text(string const& newText);
 

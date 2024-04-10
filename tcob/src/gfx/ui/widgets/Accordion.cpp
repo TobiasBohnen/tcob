@@ -45,7 +45,7 @@ auto accordion::get_widgets() const -> std::vector<std::shared_ptr<widget>> cons
 
 void accordion::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<accordion::style>()}) {
+    if (auto const* style {get_style<accordion::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -94,7 +94,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event& ev)
 
     widget_container::on_mouse_hover(ev);
 
-    if (auto const style {get_style<accordion::style>()}) {
+    if (auto const* style {get_style<accordion::style>()}) {
         auto const mp {global_to_parent_local(ev.Position)};
         for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
             if (_sectionRects[i].contains(mp)) {
@@ -137,9 +137,9 @@ auto accordion::get_section_rect(isize index, f32 sectionHeight, rect_f const& r
     return retValue;
 }
 
-auto accordion::get_section_style(isize index) const -> std::shared_ptr<item_style>
+auto accordion::get_section_style(isize index) const -> item_style*
 {
-    auto const style {get_style<accordion::style>()};
+    auto const* style {get_style<accordion::style>()};
     return index == ActiveSectionIndex ? get_sub_style<item_style>(style->SectionItemClass, {.Active = true})
         : index == HoveredSectionIndex ? get_sub_style<item_style>(style->SectionItemClass, {.Hover = true})
                                        : get_sub_style<item_style>(style->SectionItemClass, {});
@@ -157,7 +157,7 @@ void accordion::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const style {get_style<accordion::style>()}) {
+        if (auto const* style {get_style<accordion::style>()}) {
             offset_section_content(bounds, *style);
         }
     }

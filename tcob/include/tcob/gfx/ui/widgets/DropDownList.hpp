@@ -61,7 +61,7 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto get_properties() const -> widget_attributes override;
+    auto get_attributes() const -> widget_attributes override;
 
 private:
     auto get_item_height() const -> f32;
@@ -76,7 +76,7 @@ private:
     void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
 
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& listRect) const -> rect_f;
-    auto get_item_style(isize index) const -> std::shared_ptr<item_style>;
+    auto get_item_style(isize index) const -> item_style*;
 
     std::vector<utf8_string> _items;
     bool                     _isExtended {false};

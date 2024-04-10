@@ -41,7 +41,7 @@ auto vscroll_widget::get_scroll_max_value(orientation orien) const -> f32
 
 auto vscroll_widget::get_scroll_style(orientation orien) const -> element::scrollbar*
 {
-    if (auto const style {get_style<vscroll_widget::style>()}) {
+    if (auto* style {get_style<vscroll_widget::style>()}) {
         if (orien == orientation::Vertical) {
             return &style->VScrollBar;
         }
@@ -58,7 +58,7 @@ void vscroll_widget::on_styles_changed()
 
 void vscroll_widget::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<vscroll_widget::style>()}) {
+    if (auto const* style {get_style<vscroll_widget::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -121,7 +121,7 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event& ev)
 
     if (!_vScrollbar.Visible) { return; }
 
-    if (auto const style {get_style<vscroll_widget::style>()}) {
+    if (auto const* style {get_style<vscroll_widget::style>()}) {
         orientation  orien {};
         bool         invert {false};
         milliseconds delay {};
@@ -150,7 +150,7 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const style {get_style<vscroll_widget::style>()}) {
+        if (auto const* style {get_style<vscroll_widget::style>()}) {
             if (_vScrollbar.Visible) {
                 bounds.Width -= style->VScrollBar.Bar.Size.calc(bounds.Width);
             }

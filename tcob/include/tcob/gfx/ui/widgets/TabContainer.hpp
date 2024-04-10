@@ -61,7 +61,7 @@ protected:
 
 private:
     auto get_tab_rect(isize index, isize maxItems, rect_f const& rect) const -> rect_f;
-    auto get_tab_style(isize index) const -> std::shared_ptr<item_style>;
+    auto get_tab_style(isize index) const -> item_style*;
 
     void offset_tab_content(rect_f& bounds, style const& style) const;
 

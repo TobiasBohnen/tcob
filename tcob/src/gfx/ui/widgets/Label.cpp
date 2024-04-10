@@ -19,7 +19,7 @@ label::label(init const& wi)
 
 void label::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<label::style>()}) {
+    if (auto const* style {get_style<label::style>()}) {
         rect_f rect {Bounds()};
 
         // background

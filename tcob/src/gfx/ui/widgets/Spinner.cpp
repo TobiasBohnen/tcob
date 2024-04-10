@@ -37,7 +37,7 @@ spinner::spinner(init const& wi)
 
 void spinner::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<spinner::style>()}) {
+    if (auto const* style {get_style<spinner::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -52,9 +52,9 @@ void spinner::on_paint(widget_painter& painter)
 
         // arrows
         auto const& flags {get_flags()};
-        auto        normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
-        auto        hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
-        auto        activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
+        auto*       normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
+        auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
+        auto*       activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
         if (_hoverArrow == arrow::None) {
             painter.draw_nav_arrows(normalArrow->NavArrow, normalArrow->NavArrow, rect);
         } else if (_hoverArrow == arrow::Increase) {
@@ -69,9 +69,9 @@ void spinner::on_mouse_hover(input::mouse::motion_event& ev)
 {
     ev.Handled = true;
 
-    if (auto const style {get_style<spinner::style>()}) {
+    if (auto const* style {get_style<spinner::style>()}) {
         rect_f const rect {get_global_content_bounds()};
-        auto         normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
+        auto*        normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         rect_f const navRect {normalArrow->NavArrow.calc(rect)};
         if (navRect.contains(ev.Position)) {
             if (ev.Position.Y <= navRect.get_center().Y) {
@@ -126,13 +126,6 @@ auto spinner::get_attributes() const -> widget_attributes
                                 {"value", Value()}};
     auto const        base {widget::get_attributes()};
     retValue.insert(base.begin(), base.end());
-    return retValue;
-}
-
-auto spinner::get_properties() const -> widget_attributes
-{
-    auto retValue {widget::get_properties()};
-    retValue["value"] = Value();
     return retValue;
 }
 

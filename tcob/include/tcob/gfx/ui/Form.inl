@@ -30,7 +30,7 @@ inline void form::submit(Target& target)
 {
     auto widgets {get_all_widgets()};
     for (auto* widget : widgets) {
-        auto const props {widget->get_properties()};
+        auto const props {widget->get_attributes()};
         auto const name {widget->get_name()};
         if (!props.empty() && !name.empty()) {
             target[name] = props;

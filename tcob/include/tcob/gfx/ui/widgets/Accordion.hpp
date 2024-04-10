@@ -48,7 +48,7 @@ protected:
 
 private:
     auto get_section_rect(isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f;
-    auto get_section_style(isize index) const -> std::shared_ptr<item_style>;
+    auto get_section_style(isize index) const -> item_style*;
 
     void offset_section_content(rect_f& bounds, style const& style) const;
 

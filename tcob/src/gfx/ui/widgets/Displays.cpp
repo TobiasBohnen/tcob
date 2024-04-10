@@ -24,7 +24,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
         return;
     }
 
-    if (auto const style {get_style<dot_matrix_display::style>()}) {
+    if (auto const* style {get_style<dot_matrix_display::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -43,11 +43,11 @@ void dot_matrix_display::on_paint(widget_painter& painter)
 
             switch (style->Dot.Type) {
             case dot::type::Disc: {
-                canvas.set_fill_style(style->Dot.Colors[Dots->at(idx)]);
+                canvas.set_fill_style(style->Dot.Colors.at(Dots->at(idx)));
                 canvas.fill_circle(dotRect.get_center(), width / 2);
             } break;
             case dot::type::Square: {
-                canvas.set_fill_style(style->Dot.Colors[Dots->at(idx)]);
+                canvas.set_fill_style(style->Dot.Colors.at(Dots->at(idx)));
                 canvas.fill_rect(dotRect);
             } break;
             }
@@ -145,7 +145,7 @@ auto seven_segment_display::get_segment(char c) -> std::bitset<7>
 
 void seven_segment_display::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<seven_segment_display::style>()}) {
+    if (auto* const style {get_style<seven_segment_display::style>()}) {
         rect_f rect {Bounds()};
 
         // background

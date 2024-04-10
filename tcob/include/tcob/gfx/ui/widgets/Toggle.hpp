@@ -33,7 +33,7 @@ protected:
 
     void on_click() override;
 
-    auto get_properties() const -> widget_attributes override;
+    auto get_attributes() const -> widget_attributes override;
     auto get_flags() -> flags override;
 
 private:

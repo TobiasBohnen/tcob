@@ -82,21 +82,23 @@ void drop_down_list::paint_item(widget_painter& painter, rect_f& listRect, f32 i
 
 void drop_down_list::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {get_style<drop_down_list::style>()}) {
         rect_f rect {Bounds()};
 
         // background
         painter.draw_background_and_border(*style, rect, false);
 
         // text
+        // TODO: subtract nav-arrow width
         if (style->Text.Font && SelectedItemIndex >= 0) {
             painter.draw_text(style->Text, rect, get_selected_item());
         }
 
         auto const& flags {get_flags()};
-        auto        normalArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {})};
-        auto        hoverArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Hover = true})};
-        auto        activeArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Active = true})};
+        auto*       normalArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {})};
+        auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Hover = true})};
+        auto*       activeArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Active = true})};
+        assert(normalArrow && hoverArrow && activeArrow);
         if (_mouseOverBox) {
             painter.draw_nav_arrow(flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
         } else {
@@ -156,7 +158,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event& ev)
 
     widget::on_mouse_hover(ev);
 
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {get_style<drop_down_list::style>()}) {
         rect_f listRect {get_global_content_bounds()};
         if (_vScrollbar.inject_mouse_hover(ev.Position)) {
             _mouseOverBox = false;
@@ -233,7 +235,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event& ev)
 {
     if (!_vScrollbar.Visible) { return; }
 
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {get_style<drop_down_list::style>()}) {
         orientation  orien {};
         bool         invert {false};
         milliseconds delay {};
@@ -279,7 +281,7 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
 
     widget::offset_content(bounds, isHitTest);
 
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {get_style<drop_down_list::style>()}) {
         if (_isExtended) {
             if (!isHitTest) {
                 bounds.Y += height;
@@ -303,17 +305,17 @@ auto drop_down_list::get_item_rect(isize index, f32 itemHeight, rect_f const& li
     return retValue;
 }
 
-auto drop_down_list::get_item_style(isize index) const -> std::shared_ptr<item_style>
+auto drop_down_list::get_item_style(isize index) const -> item_style*
 {
-    auto const style {get_style<drop_down_list::style>()};
+    auto const* style {get_style<drop_down_list::style>()};
     return index == SelectedItemIndex ? get_sub_style<item_style>(style->ItemClass, {.Active = true})
         : index == HoveredItemIndex   ? get_sub_style<item_style>(style->ItemClass, {.Hover = true})
                                       : get_sub_style<item_style>(style->ItemClass, {});
 }
 
-auto drop_down_list::get_properties() const -> widget_attributes
+auto drop_down_list::get_attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_properties()};
+    auto retValue {widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
         retValue["selected"] = get_selected_item();
     }
@@ -322,7 +324,7 @@ auto drop_down_list::get_properties() const -> widget_attributes
 
 auto drop_down_list::get_item_height() const -> f32
 {
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {get_style<drop_down_list::style>()}) {
         rect_f bounds {Bounds()};
         widget::offset_content(bounds, false);
         return style->ItemHeight.calc(bounds.Height);
@@ -351,7 +353,7 @@ auto drop_down_list::get_scroll_max_value(orientation orien) const -> f32
         return 0;
     }
 
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {get_style<drop_down_list::style>()}) {
         f32 const itemHeight {get_item_height()};
         return std::max(0.0f, (itemHeight * std::ssize(_items)) - get_content_bounds().Height);
     }
@@ -361,7 +363,7 @@ auto drop_down_list::get_scroll_max_value(orientation orien) const -> f32
 
 auto drop_down_list::get_scroll_style(orientation orien) const -> element::scrollbar*
 {
-    if (auto const style {get_style<drop_down_list::style>()}) {
+    if (auto* style {get_style<drop_down_list::style>()}) {
         if (orien == orientation::Vertical) {
             return &style->VScrollBar;
         }

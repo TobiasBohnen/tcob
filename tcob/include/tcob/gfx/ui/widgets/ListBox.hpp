@@ -45,7 +45,7 @@ protected:
     void on_mouse_hover(input::mouse::motion_event& ev) override;
     void on_mouse_down(input::mouse::button_event& ev) override;
 
-    auto get_properties() const -> widget_attributes override;
+    auto get_attributes() const -> widget_attributes override;
 
     auto get_list_height() const -> f32 override;
     auto get_list_item_count() const -> isize override;
@@ -54,7 +54,7 @@ private:
     void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
 
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f;
-    auto get_item_style(isize index) const -> std::shared_ptr<item_style>;
+    auto get_item_style(isize index) const -> item_style*;
 
     std::vector<utf8_string> _items;
 };

@@ -56,7 +56,7 @@ void grid_view::clear_rows()
 
 void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 {
-    if (auto const style {get_style<grid_view::style>()}) {
+    if (auto const* style {get_style<grid_view::style>()}) {
         // content
         scissor_guard const guard {painter, this};
 
@@ -110,7 +110,7 @@ auto grid_view::get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX
     return retValue;
 }
 
-auto grid_view::get_cell_style(point_i /* idx */, string const& className) const -> std::shared_ptr<item_style>
+auto grid_view::get_cell_style(point_i /* idx */, string const& className) const -> item_style*
 {
     // TODO: implement Hover and Active cell
     return get_sub_style<item_style>(className, {});
@@ -129,7 +129,7 @@ auto grid_view::get_list_height() const -> f32
     }
 
     f32 retValue {0.0f};
-    if (auto const style {get_style<grid_view::style>()}) {
+    if (auto const* style {get_style<grid_view::style>()}) {
         rect_f const listRect {get_content_bounds()};
         f32 const    itemHeight {style->RowHeight.calc(listRect.Height)};
         retValue += itemHeight * (_rows.size() + 1);

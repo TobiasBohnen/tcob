@@ -28,7 +28,7 @@ progress_bar::progress_bar(init const& wi)
 
 void progress_bar::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<progress_bar::style>()}) {
+    if (auto const* style {get_style<progress_bar::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -58,7 +58,7 @@ void progress_bar::on_update(milliseconds deltaTime)
 void progress_bar::on_value_changed(i32 newVal)
 {
     f32 const newFrac {static_cast<f32>(newVal - Min) / (Max - Min)};
-    if (auto const style {get_style<progress_bar::style>()}) {
+    if (auto const* style {get_style<progress_bar::style>()}) {
         _tween.start(newFrac, style->Bar.Delay);
     } else {
         _tween.reset(newFrac);
@@ -72,13 +72,6 @@ auto progress_bar::get_attributes() const -> widget_attributes
                                 {"value", Value()}};
     auto const        base {widget::get_attributes()};
     retValue.insert(base.begin(), base.end());
-    return retValue;
-}
-
-auto progress_bar::get_properties() const -> widget_attributes
-{
-    auto retValue {widget::get_properties()};
-    retValue["value"] = Value();
     return retValue;
 }
 

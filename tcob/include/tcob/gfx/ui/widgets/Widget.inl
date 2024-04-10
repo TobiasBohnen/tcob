@@ -9,15 +9,15 @@
 namespace tcob::gfx::ui {
 
 template <std::derived_from<style_base> T>
-inline auto widget::get_style() const -> std::shared_ptr<T>
+inline auto widget::get_style() const -> T*
 {
-    return std::static_pointer_cast<T>(_style);
+    return static_cast<T*>(_style.get());
 }
 
 template <std::derived_from<style_base> T>
-inline auto widget::get_sub_style(string const& styleClass, flags flags) const -> std::shared_ptr<T>
+inline auto widget::get_sub_style(string const& styleClass, flags flags) const -> T*
 {
-    return std::static_pointer_cast<T>(get_styles().get(styleClass, flags, {}));
+    return static_cast<T*>(get_styles().get(styleClass, flags, get_attributes()).get());
 }
 
 }

@@ -70,7 +70,7 @@ void tab_container::on_styles_changed()
 
 void tab_container::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<tab_container::style>()}) {
+    if (auto const* style {get_style<tab_container::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -124,7 +124,7 @@ void tab_container::on_mouse_hover(input::mouse::motion_event& ev)
 
     widget_container::on_mouse_hover(ev);
 
-    if (auto const style {get_style<tab_container::style>()}) {
+    if (auto const* style {get_style<tab_container::style>()}) {
         auto const mp {global_to_parent_local(ev.Position)};
         for (i32 i {0}; i < std::ssize(_tabRects); ++i) {
             if (_tabRects[i].contains(mp)) {
@@ -172,9 +172,9 @@ auto tab_container::get_tab_rect(isize index, isize maxItems, rect_f const& rect
     return retValue;
 }
 
-auto tab_container::get_tab_style(isize index) const -> std::shared_ptr<item_style>
+auto tab_container::get_tab_style(isize index) const -> item_style*
 {
-    auto const style {get_style<tab_container::style>()};
+    auto const* style {get_style<tab_container::style>()};
     return index == ActiveTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Active = true})
         : index == HoveredTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Hover = true})
                                    : get_sub_style<item_style>(style->TabItemClass, {});
@@ -198,7 +198,7 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const style {get_style<tab_container::style>()}) {
+        if (auto const* style {get_style<tab_container::style>()}) {
             offset_tab_content(bounds, *style);
         }
     }

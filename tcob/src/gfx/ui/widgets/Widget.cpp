@@ -470,11 +470,6 @@ auto widget::get_attributes() const -> widget_attributes
     return {{"name", _name}, {"orientation", get_orientation()}};
 }
 
-auto widget::get_properties() const -> widget_attributes
-{
-    return {};
-}
-
 auto widget::get_flags() -> flags
 {
     _flags.Disabled = !is_enabled();

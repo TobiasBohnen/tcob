@@ -45,7 +45,7 @@ slider::slider(init const& wi)
 
 void slider::on_paint(widget_painter& painter)
 {
-    if (auto const style {get_style<slider::style>()}) {
+    if (auto const* style {get_style<slider::style>()}) {
         rect_f const rect {get_content_bounds()};
 
         scissor_guard const guard {painter, this};
@@ -186,8 +186,8 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(i32 newVal)
 {
-    f32 const  newFrac {static_cast<f32>(newVal - Min) / (Max - Min)};
-    auto const style {get_style<slider::style>()};
+    f32 const   newFrac {static_cast<f32>(newVal - Min) / (Max - Min)};
+    auto const* style {get_style<slider::style>()};
     if (style && !_overThumb && !_isDragging) {
         _tween.start(newFrac, style->Bar.Delay);
     } else {
@@ -228,13 +228,6 @@ auto slider::get_attributes() const -> widget_attributes
                                 {"value", Value()}};
     auto const        base {widget::get_attributes()};
     retValue.insert(base.begin(), base.end());
-    return retValue;
-}
-
-auto slider::get_properties() const -> widget_attributes
-{
-    auto retValue {widget::get_properties()};
-    retValue["value"] = Value();
     return retValue;
 }
 

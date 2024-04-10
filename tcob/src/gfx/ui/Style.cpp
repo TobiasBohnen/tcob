@@ -33,10 +33,10 @@ auto style_collection::get(string const& name, flags flags, widget_attributes co
     std::shared_ptr<style_base> bestCandidate;
     i32                         bestScore {std::numeric_limits<i32>::min()};
 
-    for (auto const& [sname, sflags, sattribs, style] : _styles) {
+    for (auto const& [sname, sflags, styleAttribs, style] : _styles) {
         if (sname == name) {
             // check attributes
-            if (sattribs.check(attribs)) {
+            if (styleAttribs.check(attribs)) {
                 // check flags
                 i32 const score {sflags.check(flags)};
                 if (score == bestScore) {

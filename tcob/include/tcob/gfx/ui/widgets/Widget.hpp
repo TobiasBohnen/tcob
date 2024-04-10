@@ -68,7 +68,7 @@ public:
     auto get_name() const -> string const&;
 
     template <std::derived_from<style_base> T>
-    auto get_style() const -> std::shared_ptr<T>;
+    auto get_style() const -> T*;
 
     auto get_global_position() const -> point_f;
     auto get_global_content_bounds() const -> rect_f;
@@ -109,7 +109,7 @@ protected:
     auto get_styles() const -> style_collection const&;
 
     template <std::derived_from<style_base> T>
-    auto get_sub_style(string const& styleClass, flags flags) const -> std::shared_ptr<T>;
+    auto get_sub_style(string const& styleClass, flags flags) const -> T*;
 
     void virtual on_paint(widget_painter& painter) = 0;
 
@@ -139,7 +139,6 @@ protected:
     void virtual on_bounds_changed();
 
     auto virtual get_attributes() const -> widget_attributes;
-    auto virtual get_properties() const -> widget_attributes;
     auto virtual get_flags() -> flags;
 
     auto get_orientation() const -> orientation;

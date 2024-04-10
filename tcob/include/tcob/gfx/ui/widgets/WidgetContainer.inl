@@ -13,7 +13,7 @@ inline void widget_container::submit(Target& target)
 {
     auto widgets {get_widgets()};
     for (auto const& widget : widgets) {
-        auto const props {widget->get_properties()};
+        auto const props {widget->get_attributes()};
         auto const name {widget->get_name()};
         if (!props.empty() && !name.empty()) {
             target[name] = props;
