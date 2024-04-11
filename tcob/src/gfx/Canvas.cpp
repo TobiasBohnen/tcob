@@ -1278,8 +1278,8 @@ void canvas::set_fill_style(color c)
 void canvas::set_fill_style(canvas_paint const& paint)
 {
     state& s {get_state()};
-    s.Fill = paint;
-    s.Fill.XForm *= s.XForm;
+    s.Fill       = paint;
+    s.Fill.XForm = s.XForm * s.Fill.XForm;
 }
 
 void canvas::set_stroke_style(color c)
@@ -1290,8 +1290,8 @@ void canvas::set_stroke_style(color c)
 void canvas::set_stroke_style(canvas_paint const& paint)
 {
     state& s {get_state()};
-    s.Stroke = paint;
-    s.Stroke.XForm *= s.XForm;
+    s.Stroke       = paint;
+    s.Stroke.XForm = s.XForm * s.Stroke.XForm;
 }
 
 void canvas::set_shape_antialias(bool enabled)
@@ -1548,9 +1548,7 @@ void canvas::set_scissor(rect_f const& rect, bool transform)
     s.Scissor.XForm = transform::Identity;
 
     s.Scissor.XForm.translate({x + w * 0.5f, y + h * 0.5f});
-    if (transform) {
-        s.Scissor.XForm *= s.XForm;
-    }
+    if (transform) { s.Scissor.XForm = s.XForm * s.Scissor.XForm; }
 
     s.Scissor.Extent[0] = w * 0.5f;
     s.Scissor.Extent[1] = h * 0.5f;
