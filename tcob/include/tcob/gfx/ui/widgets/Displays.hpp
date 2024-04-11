@@ -73,4 +73,24 @@ private:
     auto get_segment(char c) -> std::bitset<7>;
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API color_picker : public widget {
+public:
+    explicit color_picker(init const& wi);
+
+    prop<color>    SelectedColor;
+    prop<degree_f> BaseHue;
+
+protected:
+    void on_paint(widget_painter& painter) override;
+
+    void on_mouse_down(input::mouse::button_event& ev) override;
+
+    void on_update(milliseconds deltaTime) override;
+
+private:
+    auto static GetGradient() -> color_gradient const&;
+};
+
 }

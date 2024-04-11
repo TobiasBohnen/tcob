@@ -12,6 +12,7 @@ namespace tcob::gfx::ui {
 canvas_widget::canvas_widget(init const& wi)
     : widget {wi}
 {
+    Class("canvas_widget");
 }
 
 void canvas_widget::set_global_composite_operation(composite_operation op)

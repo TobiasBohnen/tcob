@@ -236,4 +236,79 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 {
 }
 
+////////////////////////////////////////////////////////////
+
+color_picker::color_picker(init const& wi)
+    : widget {wi}
+{
+    BaseHue.Changed.connect([&](auto const&) { force_redraw(get_name() + ": BaseHue changed"); });
+    BaseHue(0);
+
+    Class("color_picker");
+}
+
+void color_picker::on_paint(widget_painter& painter)
+{
+    auto& canvas {painter.get_canvas()};
+    auto  guard {canvas.create_guard()};
+
+    auto const bounds {Bounds()};
+
+    canvas.set_scissor(bounds);
+    canvas.translate(bounds.get_position());
+
+    // color gradient
+    size_f const rect0 {bounds.Width * 0.9f, bounds.Height};
+
+    canvas.begin_path();
+    canvas.rect({point_f::Zero, rect0});
+
+    canvas.set_fill_style(colors::White);
+    canvas.fill();
+
+    color const baseColor {color::FromHSVA({BaseHue, 1.0, 1.0f})};
+    canvas.set_fill_style(canvas.create_linear_gradient(
+        {0, 0}, {rect0.Width, 0},
+        {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
+    canvas.fill();
+    canvas.set_fill_style(canvas.create_linear_gradient(
+        {0, 0}, {0, rect0.Height},
+        {color {0, 0, 0, 0}, color {0, 0, 0, 255}}));
+    canvas.fill();
+
+    // hue gradient
+    size_f const rect1 {bounds.Width * 0.1f, bounds.Height};
+
+    canvas.begin_path();
+    canvas.rect({{rect0.Width, 0}, rect1});
+    canvas.set_fill_style(canvas.create_linear_gradient({0, 0}, {0, rect1.Height}, GetGradient()));
+    canvas.fill();
+}
+
+void color_picker::on_mouse_down(input::mouse::button_event& ev)
+{
+    rect_f const rect {get_global_content_bounds()};
+    if (rect.contains(ev.Position)) {
+        f32 const s {(ev.Position.X - rect.X) / (rect.Width * 0.9f)};
+        f32 const v {(ev.Position.Y - rect.Y) / rect.Height};
+        if (s > 1.0f) {
+            auto const col {GetGradient().get_colors().at(static_cast<i32>(255 * v))};
+            BaseHue = col.to_hsv().Hue;
+        } else {
+            SelectedColor = color::FromHSVA({BaseHue, s, 1 - v});
+        }
+    }
+}
+
+void color_picker::on_update(milliseconds /* deltaTime */)
+{
+}
+
+auto color_picker::GetGradient() -> color_gradient const&
+{
+    static std::array<color_stop, 7> colorStops {{{0.f, colors::Red}, {1 / 6.f, colors::Orange}, {2 / 6.f, colors::Yellow}, {3 / 6.f, colors::Green}, {4 / 6.f, colors::Blue}, {5 / 6.f, colors::Indigo}, {1.f, colors::Violet}}};
+    static color_gradient            grad {colorStops};
+    return grad;
+}
+
 } // namespace display

@@ -302,6 +302,22 @@ auto create_form_displays(window* wnd) -> std::shared_ptr<form>
     return retValue;
 }
 
+auto create_form_colorpicker(window* wnd) -> std::shared_ptr<form>
+{
+    auto retValue {std::make_shared<form>("form2", wnd)};
+
+    auto panel0 {retValue->create_container<panel>(dock_style::Fill, "Panel0")};
+    panel0->Flex = {25_pct, 25_pct};
+    auto panel0Layout {panel0->get_layout<fixed_layout>()};
+    auto colorPicker00 {panel0Layout->create_widget<color_picker>({5, 5, 300, 200}, "CP1")};
+    colorPicker00->SelectedColor.Changed.connect([wnd](auto val) {
+        wnd->ClearColor = val;
+    });
+
+    // styles
+    return retValue;
+}
+
 auto create_form_tabcontainer(window* wnd) -> std::shared_ptr<form>
 {
     auto retValue {std::make_shared<form>("form3", wnd)};

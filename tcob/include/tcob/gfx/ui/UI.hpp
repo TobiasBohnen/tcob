@@ -23,6 +23,7 @@ class form;
 class button;
 class canvas_widget;
 class checkbox;
+class color_picker;
 class cycle_button;
 class drop_down_list;
 class grid_view;
@@ -40,7 +41,6 @@ class toggle;
 // TODO:
 // class html_control;
 // class video_control;
-// class color_picker;
 // class menu;
 // class context_menu;
 
@@ -50,6 +50,7 @@ class seven_segment_display;
 
 // container
 class accordion;
+class glass;
 class panel;
 class tab_container;
 class tooltip;
