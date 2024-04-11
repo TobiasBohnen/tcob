@@ -21,6 +21,7 @@ class form;
 
 // widgets
 class button;
+class canvas_widget;
 class checkbox;
 class cycle_button;
 class drop_down_list;

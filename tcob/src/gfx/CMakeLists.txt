@@ -38,6 +38,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/TileMap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CanvasWidget.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Checkbox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CycleButton.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Displays.cpp
@@ -106,6 +107,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Button.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/CanvasWidget.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Checkbox.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/CycleButton.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Displays.hpp
