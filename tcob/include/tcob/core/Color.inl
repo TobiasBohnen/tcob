@@ -24,38 +24,80 @@ auto constexpr color::FromRGBA(u32 value) -> color
             static_cast<u8>((value & 0x000000ff) >> 0)};
 }
 
-auto constexpr color::FromHSLA(degree_f h, f32 s, f32 l, u8 a) -> color
+auto constexpr color::FromHSLA(hsx const& hsl, u8 a) -> color
 {
     auto constexpr HueToRGB {[](f32 v1, f32 v2, f32 vH) {
-        if (vH < 0) {
-            vH += 1;
-        }
-        if (vH > 1) {
-            vH -= 1;
-        }
-        if ((vH * 6) < 1) {
-            return (v1 + (v2 - v1) * 6 * vH);
-        }
-        if ((vH * 2) < 1) {
-            return v2;
-        }
-        if ((vH * 3) < 2) {
-            return (v1 + (v2 - v1) * ((2.0f / 3) - vH) * 6);
-        }
+        if (vH < 0) { vH += 1; }
+        if (vH > 1) { vH -= 1; }
+        if ((vH * 6) < 1) { return (v1 + (v2 - v1) * 6 * vH); }
+        if ((vH * 2) < 1) { return v2; }
+        if ((vH * 3) < 2) { return (v1 + (v2 - v1) * ((2.0f / 3) - vH) * 6); }
         return v1;
     }};
 
     color retValue;
-    if (s == 0) {
-        retValue.R = retValue.G = retValue.B = static_cast<u8>(l * 255);
+    if (hsl.Saturation == 0) {
+        retValue.R = retValue.G = retValue.B = static_cast<u8>(hsl.X * 255);
     } else {
-        f32 const hue {h.Value / 360};
-        f32 const v2 {(l < 0.5f) ? (l * (1 + s)) : ((l + s) - (l * s))};
-        f32 const v1 {2 * l - v2};
+        f32 const hue {hsl.Hue.Value / 360};
+        f32 const v2 {(hsl.X < 0.5f) ? (hsl.X * (1 + hsl.Saturation)) : ((hsl.X + hsl.Saturation) - (hsl.X * hsl.Saturation))};
+        f32 const v1 {2 * hsl.X - v2};
 
-        retValue.R = static_cast<u8>(255 * HueToRGB(v1, v2, hue + (1.0f / 3)));
-        retValue.G = static_cast<u8>(255 * HueToRGB(v1, v2, hue));
-        retValue.B = static_cast<u8>(255 * HueToRGB(v1, v2, hue - (1.0f / 3)));
+        retValue.R = static_cast<u8>(std::round(HueToRGB(v1, v2, hue + (1.0f / 3)) * 255.0f));
+        retValue.G = static_cast<u8>(std::round(HueToRGB(v1, v2, hue) * 255.0f));
+        retValue.B = static_cast<u8>(std::round(HueToRGB(v1, v2, hue - (1.0f / 3)) * 255.0f));
+    }
+
+    retValue.A = a;
+    return retValue;
+}
+
+auto constexpr color::FromHSVA(hsx const& hsv, u8 a) -> color
+{
+    color retValue;
+    if (hsv.Saturation == 0.0f) {
+        retValue.R = retValue.G = retValue.B = static_cast<u8>(std::round(hsv.X * 255.0f));
+    } else {
+        i32 const hi {static_cast<i32>(hsv.Hue.Value / 60) % 6};
+        f32 const f {hsv.Hue.Value / 60 - hi};
+        f32 const p {hsv.X * (1 - hsv.Saturation)};
+        f32 const q {hsv.X * (1 - (hsv.Saturation * f))};
+        f32 const t {hsv.X * (1 - (hsv.Saturation * (1 - f)))};
+
+        switch (hi) {
+        case 0:
+            retValue.R = static_cast<u8>(std::round(hsv.X * 255.0f));
+            retValue.G = static_cast<u8>(std::round(t * 255.0f));
+            retValue.B = static_cast<u8>(std::round(p * 255.0f));
+            break;
+        case 1:
+            retValue.R = static_cast<u8>(std::round(q * 255.0f));
+            retValue.G = static_cast<u8>(std::round(hsv.X * 255.0f));
+            retValue.B = static_cast<u8>(std::round(p * 255.0f));
+            break;
+        case 2:
+            retValue.R = static_cast<u8>(std::round(p * 255.0f));
+            retValue.G = static_cast<u8>(std::round(hsv.X * 255.0f));
+            retValue.B = static_cast<u8>(std::round(t * 255.0f));
+            break;
+        case 3:
+            retValue.R = static_cast<u8>(std::round(p * 255.0f));
+            retValue.G = static_cast<u8>(std::round(q * 255.0f));
+            retValue.B = static_cast<u8>(std::round(hsv.X * 255.0f));
+            break;
+        case 4:
+            retValue.R = static_cast<u8>(std::round(t * 255.0f));
+            retValue.G = static_cast<u8>(std::round(p * 255.0f));
+            retValue.B = static_cast<u8>(std::round(hsv.X * 255.0f));
+            break;
+        case 5:
+            retValue.R = static_cast<u8>(std::round(hsv.X * 255.0f));
+            retValue.G = static_cast<u8>(std::round(p * 255.0f));
+            retValue.B = static_cast<u8>(std::round(q * 255.0f));
+            break;
+        default:
+            break;
+        }
     }
 
     retValue.A = a;
@@ -96,6 +138,70 @@ auto constexpr color::value() const -> u32
     return static_cast<u32>(R << 24 | G << 16 | B << 8 | A);
 }
 
+auto constexpr color::to_hsl() const -> hsx
+{
+    f32 const r {R / 255.0f};
+    f32 const g {G / 255.0f};
+    f32 const b {B / 255.0f};
+
+    f32 const max_val {std::max({r, g, b})};
+    f32 const min_val {std::min({r, g, b})};
+
+    f32       h {0}, s {0};
+    f32 const l {(max_val + min_val) / 2.0f};
+
+    if (max_val == min_val) {
+        h = s = 0; // achromatic
+    } else {
+        f32 const d {max_val - min_val};
+        s = l > 0.5f ? d / (2.0f - max_val - min_val) : d / (max_val + min_val);
+
+        if (max_val == r) {
+            h = (g - b) / d + (g < b ? 6.0f : 0.0f);
+        } else if (max_val == g) {
+            h = (b - r) / d + 2.0f;
+        } else {
+            h = (r - g) / d + 4.0f;
+        }
+
+        h /= 6.0f;
+    }
+
+    return {degree_f {h * 360.0f}, s, l};
+}
+
+auto constexpr color::to_hsv() const -> hsx
+{
+    f32 const r {R / 255.0f};
+    f32 const g {G / 255.0f};
+    f32 const b {B / 255.0f};
+
+    f32 const max_val {std::max({r, g, b})};
+    f32 const min_val {std::min({r, g, b})};
+
+    f32       h {0};
+    f32 const v {max_val};
+
+    f32 const d {max_val - min_val};
+    f32 const s {max_val == 0 ? 0 : d / max_val};
+
+    if (max_val == min_val) {
+        h = 0; // achromatic
+    } else {
+        if (max_val == r) {
+            h = (g - b) / d + (g < b ? 6.0f : 0.0f);
+        } else if (max_val == g) {
+            h = (b - r) / d + 2.0f;
+        } else {
+            h = (r - g) / d + 4.0f;
+        }
+
+        h /= 6.0f;
+    }
+
+    return {degree_f {h * 360.0f}, s, v};
+}
+
 inline void color::Serialize(color v, auto&& s)
 {
     s["r"] = v.R;
@@ -123,6 +229,16 @@ auto constexpr operator==(color left, color right) -> bool
 inline auto operator<<(std::ostream& os, color m) -> std::ostream&
 {
     return os << "r:" << static_cast<u32>(m.R) << "|g:" << static_cast<u32>(m.G) << "|b:" << static_cast<u32>(m.B) << "|a:" << static_cast<u32>(m.A);
+}
+
+auto constexpr operator==(hsx left, hsx right) -> bool
+{
+    return (left.Hue == right.Hue) && (left.Saturation == right.Saturation) && (left.X == right.X);
+}
+
+inline auto operator<<(std::ostream& os, hsx m) -> std::ostream&
+{
+    return os << "h:" << m.Hue.Value << "|s:" << m.Saturation << "|x:" << m.X;
 }
 
 }

@@ -101,12 +101,35 @@ TEST_CASE("Core.POD.Color")
         REQUIRE(color::FromString("RebeccaPurple") == "RebeccaPurple"_color);
     }
 
-    SUBCASE("FromHSLA")
+    SUBCASE("HSLA")
     {
-        REQUIRE(color::FromHSLA(0, 0, 0) == colors::Black);
-        REQUIRE(color::FromHSLA(240, 1.f, 0.5f) == colors::Blue);
-        REQUIRE(color::FromHSLA(0, 1.f, 0.5f) == colors::Red);
-        REQUIRE(color::FromHSLA(43, 0.744f, 0.49f) == color {217, 165, 31});
+        REQUIRE(color::FromHSLA({0, 0, 0}) == colors::Black);
+        REQUIRE(color::FromHSLA({240, 1.f, 0.5f}) == colors::Blue);
+        REQUIRE(color::FromHSLA({0, 1.f, 0.5f}) == colors::Red);
+        REQUIRE(color::FromHSLA({43, 0.75, 0.5}) == color {223, 169, 32});
+
+        REQUIRE(hsx {0, 0, 0} == colors::Black.to_hsl());
+        REQUIRE(hsx {240, 1.f, 0.5f} == colors::Blue.to_hsl());
+        REQUIRE(hsx {0, 1.f, 0.5f} == colors::Red.to_hsl());
+    }
+
+    SUBCASE("HSVA")
+    {
+        REQUIRE(color::FromHSVA({0, 0, 0}) == colors::Black);
+        REQUIRE(color::FromHSVA({240, 1.f, 1.f}) == colors::Blue);
+        REQUIRE(color::FromHSVA({0, 1.f, 1.f}) == colors::Red);
+        REQUIRE(color::FromHSVA({43, 0.8565f, 0.851f}) == color {217, 164, 31});
+        REQUIRE(color::FromHSVA({45, 0.5f, 0.75f}) == color::FromString("#BFA760"));
+        REQUIRE(color::FromHSVA({90, 0.5f, 0.75f}) == color::FromString("#8FBF60"));
+        REQUIRE(color::FromHSVA({135, 0.5f, 0.75f}) == color::FromString("#60BF78"));
+        REQUIRE(color::FromHSVA({180, 0.5f, 0.75f}) == color::FromString("#60BFBF"));
+        REQUIRE(color::FromHSVA({225, 0.5f, 0.75f}) == color::FromString("#6078BF"));
+        REQUIRE(color::FromHSVA({270, 0.5f, 0.75f}) == color::FromString("#8F60BF"));
+        REQUIRE(color::FromHSVA({315, 0.5f, 0.75f}) == color::FromString("#BF60A7"));
+
+        REQUIRE(hsx {0, 0, 0} == colors::Black.to_hsv());
+        REQUIRE(hsx {240, 1.f, 1.f} == colors::Blue.to_hsv());
+        REQUIRE(hsx {0, 1.f, 1.f} == colors::Red.to_hsv());
     }
 
     SUBCASE("Format")
