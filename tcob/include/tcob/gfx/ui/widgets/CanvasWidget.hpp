@@ -83,6 +83,10 @@ public:
     void set_transform(transform xform);
     void reset_transform();
 
+    // Scissoring
+    void set_scissor(rect_f const& rect, bool transform = true);
+    void reset_scissor();
+
     // Font
     void set_font(font* font);
     void set_text_halign(horizontal_alignment align);

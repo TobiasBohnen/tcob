@@ -255,6 +255,16 @@ void canvas_widget::reset_transform()
     _commands.emplace_back([](canvas& canvas) { canvas.reset_transform(); });
 }
 
+void canvas_widget::set_scissor(rect_f const& rect, bool transform)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_scissor(rect, transform); });
+}
+
+void canvas_widget::reset_scissor()
+{
+    _commands.emplace_back([](canvas& canvas) { canvas.reset_scissor(); });
+}
+
 void canvas_widget::set_font(font* font)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.set_font(font); });
