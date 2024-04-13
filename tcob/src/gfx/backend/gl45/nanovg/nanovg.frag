@@ -50,8 +50,10 @@ float stroke_mask() {
 void main(void) {
     vec4 result;
     float scissor = scissor_mask(fs_in.Position);
+    if (scissor == 0)discard;
     float strokeAlpha = stroke_mask();
     if (strokeAlpha < frag.StrokeThr)discard;
+
     if (frag.Type == 0) {// Gradient
         // Calculate gradient color using box gradient
         vec4 color;
