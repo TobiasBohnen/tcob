@@ -88,21 +88,25 @@ void drop_down_list::on_paint(widget_painter& painter)
         // background
         painter.draw_background_and_border(*style, rect, false);
 
-        // text
-        // TODO: subtract nav-arrow width
-        if (style->Text.Font && SelectedItemIndex >= 0) {
-            painter.draw_text(style->Text, rect, get_selected_item());
-        }
-
+        // arrow
         auto const& flags {get_flags()};
         auto*       normalArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {})};
         auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Hover = true})};
         auto*       activeArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Active = true})};
         assert(normalArrow && hoverArrow && activeArrow);
+
+        element::nav_arrow arrowStyle;
         if (_mouseOverBox) {
-            painter.draw_nav_arrow(flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
+            arrowStyle = flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow;
         } else {
-            painter.draw_nav_arrow(normalArrow->NavArrow, rect);
+            arrowStyle = normalArrow->NavArrow;
+        }
+        painter.draw_nav_arrow(arrowStyle, rect);
+
+        // text
+        if (style->Text.Font && SelectedItemIndex >= 0) {
+            f32 const arrowWidth {arrowStyle.Width.calc(rect.Width)};
+            painter.draw_text(style->Text, {rect.X, rect.Y, rect.Width - arrowWidth, rect.Height}, get_selected_item());
         }
 
         if (_isExtended) {

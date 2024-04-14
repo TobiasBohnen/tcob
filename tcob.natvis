@@ -18,4 +18,7 @@
     <Type Name="tcob::radian&lt;*&gt;">
         <DisplayString>{Value} rad</DisplayString>
     </Type>
+    <Type Name="solitaire::card">
+        <DisplayString>{{Suit={_suit};Rank={_rank}}}</DisplayString>
+    </Type>
 </AutoVisualizer>
