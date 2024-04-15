@@ -198,17 +198,7 @@ void game::setup_rendersystem()
     auto& renderSystem {locate_service<gfx::render_system>()};
 
     // create window (and context)
-    _window             = std::unique_ptr<gfx::window> {new gfx::window(renderSystem.create_window(resolution))};
-    _window->FullScreen = video[Cfg::Video::fullscreen].as<bool>();
-    _window->VSync      = video[Cfg::Video::vsync].as<bool>();
-    _window->Size       = resolution;
-    _window->Title      = _name;
-
-    _defaultTarget = std::make_unique<gfx::default_render_target>();
-
-    _window->clear();
-    _window->draw_to(*_defaultTarget);
-    _window->swap_buffer();
+    _window = std::unique_ptr<gfx::window> {new gfx::window(renderSystem.create_window(resolution))};
 
     _window->FullScreen.Changed.connect([&](bool value) { config[Cfg::Video::Name][Cfg::Video::fullscreen] = value; });
     _window->VSync.Changed.connect([&](bool value) { config[Cfg::Video::Name][Cfg::Video::vsync] = value; });
@@ -216,15 +206,25 @@ void game::setup_rendersystem()
         config[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<platform>().get_display_size(0);
         config[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
+
+    _window->FullScreen(video[Cfg::Video::fullscreen].as<bool>());
+    _window->VSync(video[Cfg::Video::vsync].as<bool>());
+    _window->Size(resolution);
+    _window->Title(_name);
+
+    _defaultTarget = std::make_unique<gfx::default_render_target>();
+
+    _window->clear();
+    _window->draw_to(*_defaultTarget);
+    _window->swap_buffer();
 }
 
 auto game::get_config_defaults() const -> data::config::object
 {
     // set defaults
     data::config::object video {};
-    video[Cfg::Video::fullscreen]             = false;
-    video[Cfg::Video::use_desktop_resolution] = false;
-    video[Cfg::Video::resolution]             = size_i {1600, 900};
+    video[Cfg::Video::fullscreen]             = true;
+    video[Cfg::Video::use_desktop_resolution] = true;
     video[Cfg::Video::vsync]                  = false;
     video[Cfg::Video::render_system]          = "OPENGL45";
 
