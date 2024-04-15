@@ -206,7 +206,8 @@ void drop_down_list::on_mouse_down(input::mouse::button_event& ev)
         } else if (HoveredItemIndex != -1) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
-            } // else SelectedItemClicked event?
+                set_extended(false); // close on select
+            }
         }
 
         ev.Handled = true;
@@ -255,15 +256,6 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event& ev)
             _vScrollbar.set_target_value(_vScrollbar.get_target_value() + diff, delay);
         }
         ev.Handled = true;
-    }
-}
-
-void drop_down_list::on_double_click()
-{
-    widget::on_double_click();
-
-    if (SelectedItemIndex == HoveredItemIndex) {
-        get_form()->focus_widget(nullptr);
     }
 }
 

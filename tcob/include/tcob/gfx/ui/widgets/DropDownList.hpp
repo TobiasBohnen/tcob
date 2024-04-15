@@ -53,7 +53,6 @@ protected:
     void on_mouse_drag(input::mouse::motion_event& ev) override;
     void on_mouse_up(input::mouse::button_event& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event& ev) override;
-    void on_double_click() override;
 
     void on_focus_lost() override;
 
