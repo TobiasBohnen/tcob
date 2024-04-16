@@ -1596,10 +1596,10 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
             auto const topLeft {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
             auto const bottomRight {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
 
-            f32 const left {topLeft.X};
-            f32 const right {bottomRight.X};
-            f32 const top {topLeft.Y};
-            f32 const bottom {bottomRight.Y};
+            f32 const left {std::floor(topLeft.X + 0.5f)};
+            f32 const right {std::floor(bottomRight.X + 0.5f)};
+            f32 const top {std::floor(topLeft.Y + 0.5f)};
+            f32 const bottom {std::floor(bottomRight.Y + 0.5f)};
 
             auto const& uvRect {quad.TexRegion.UVRect};
             f32 const   uvLeft {uvRect.X};
