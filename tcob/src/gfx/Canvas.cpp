@@ -1584,7 +1584,9 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
     f32 const invscale {1.0f / scale};
     auto*     verts {alloc_temp_verts(formatResult.QuadCount * 6)};
     usize     nverts {0};
-    auto [x, y] {offset};
+
+    f32 const x {std::floor(offset.X + 0.5f)};
+    f32 const y {std::floor(offset.Y + 0.5f)};
 
     for (auto const& token : formatResult.Tokens) {
         for (usize i {0}; i < token.Quads.size(); ++i) {
@@ -1597,9 +1599,9 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
             auto const bottomRight {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
 
             f32 const left {std::floor(topLeft.X + 0.5f)};
-            f32 const right {std::floor(bottomRight.X + 0.5f)};
-            f32 const top {std::floor(topLeft.Y + 0.5f)};
+            f32 const right {left + std::floor(bottomRight.X - topLeft.X + 0.5f)};
             f32 const bottom {std::floor(bottomRight.Y + 0.5f)};
+            f32 const top {bottom - std::floor(bottomRight.Y - topLeft.Y + 0.5f)};
 
             auto const& uvRect {quad.TexRegion.UVRect};
             f32 const   uvLeft {uvRect.X};
