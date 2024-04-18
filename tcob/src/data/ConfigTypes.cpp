@@ -219,6 +219,37 @@ auto object::save(ostream& out, string const& ext) const -> bool
     return false;
 }
 
+auto object::clone(bool deep) const -> object
+{
+    object retValue;
+    if (deep) {
+        for (auto const& [k, v] : *_kvps) {
+            auto const type {get_type(k)};
+            switch (type) {
+            case type::Null: break;
+            case type::String:
+            case type::Float:
+            case type::Integer:
+            case type::Bool:
+                retValue._kvps->emplace_back(k, v);
+                break;
+            case type::Array:
+                retValue._kvps->emplace_back(k, v.as<array>().clone(true));
+                break;
+            case type::Object:
+                retValue._kvps->emplace_back(k, v.as<object>().clone(true));
+                break;
+            }
+        }
+    } else {
+        for (auto const& entry : *_kvps) {
+            retValue._kvps->push_back(entry);
+        }
+    }
+
+    return retValue;
+}
+
 void object::merge(object const& other, bool onConflictTakeOther)
 {
     for (auto const& [k, v] : *other._kvps) {
@@ -426,6 +457,37 @@ void array::add_entry(entry const& newEntry)
 void array::pop_back()
 {
     _values->pop_back();
+}
+
+auto array::clone(bool deep) const -> array
+{
+    array retValue;
+    if (deep) {
+        for (isize i {0}; i < get_size(); ++i) {
+            auto const type {get_type(i)};
+            switch (type) {
+            case type::Null:
+            case type::String:
+            case type::Float:
+            case type::Integer:
+            case type::Bool:
+                retValue._values->emplace_back(_values->at(i));
+                break;
+            case type::Array:
+                retValue._values->emplace_back(_values->at(i).as<array>().clone(true));
+                break;
+            case type::Object:
+                retValue._values->emplace_back(_values->at(i).as<object>().clone(true));
+                break;
+            }
+        }
+    } else {
+        for (auto const& entry : *_values) {
+            retValue._values->push_back(entry);
+        }
+    }
+
+    return retValue;
 }
 
 auto array::str() const -> string

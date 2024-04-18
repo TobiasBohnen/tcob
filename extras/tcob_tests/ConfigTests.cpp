@@ -580,6 +580,25 @@ TEST_CASE("Data.Ini.Sections")
         REQUIRE_FALSE(t.has("section1"));
     }
 
+    SUBCASE("clone")
+    {
+        object s0;
+        s0["section1"]["a"] = 100;
+
+        object s1 = s0;
+        REQUIRE(s1["section1"]["a"].as<i32>() == 100);
+        s1["section1"]["a"] = 200;
+        REQUIRE(s0["section1"]["a"].as<i32>() == 200);
+        REQUIRE(s1["section1"]["a"].as<i32>() == 200);
+
+        object s2 = s0.clone(true);
+        REQUIRE(s2["section1"]["a"].as<i32>() == 200);
+        s2["section1"]["a"] = 400;
+        REQUIRE(s0["section1"]["a"].as<i32>() == 200);
+        REQUIRE(s1["section1"]["a"].as<i32>() == 200);
+        REQUIRE(s2["section1"]["a"].as<i32>() == 400);
+    }
+
     SUBCASE("merge")
     {
         {

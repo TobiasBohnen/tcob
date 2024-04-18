@@ -87,6 +87,7 @@ public:
 
     auto has(string const& key, auto&&... keys) const -> bool;
 
+    auto clone(bool deep = false) const -> object;
     void merge(object const& other, bool onConflictTakeOther = true);
 
     auto str() const -> string;
@@ -160,6 +161,8 @@ public:
     void add_entry(entry const& newEntry);
 
     void pop_back();
+
+    auto clone(bool deep = false) const -> array;
 
     auto str() const -> string;
 
