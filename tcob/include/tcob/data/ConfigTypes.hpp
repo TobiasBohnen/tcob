@@ -25,14 +25,14 @@ struct comment {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API object {
+    friend auto operator==(object const& left, object const& right) -> bool;
+
 public:
     object() noexcept;
     object(std::shared_ptr<cfg_object_entries> const& entries) noexcept;
 
     auto operator[](string const& key) -> proxy<object, string>;
     auto operator[](string const& key) const -> proxy<object const, string>;
-
-    friend auto operator==(object const& left, object const& right) -> bool;
 
     auto load(path const& file, bool skipBinary = false) noexcept -> load_status;
     auto load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
@@ -113,6 +113,8 @@ struct converter<object> {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API array {
+    friend auto operator==(array const& left, array const& right) -> bool;
+
 public:
     array() noexcept;
     template <ConvertibleTo... Ts>
@@ -122,9 +124,6 @@ public:
 
     auto operator[](isize index) -> proxy<array, isize>;
     auto operator[](isize index) const -> proxy<array const, isize>;
-
-    friend auto operator==(array const& left, array const& right) -> bool;
-
     auto load(path const& file, bool skipBinary = false) -> load_status;
     auto load(istream& in, string const& ext, bool skipBinary = false) -> load_status;
     auto load_async(path const& file) -> std::future<load_status>;
@@ -182,12 +181,12 @@ struct converter<array> {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API entry {
+    friend auto operator==(entry const& left, entry const& right) -> bool;
+
 public:
     entry() noexcept;
     template <typename T>
     entry(T val);
-
-    friend auto operator==(entry const& left, entry const& right) -> bool;
 
     template <typename T>
     auto as() const -> T;

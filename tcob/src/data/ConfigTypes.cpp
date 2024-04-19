@@ -40,17 +40,6 @@ auto object::operator[](string const& key) const -> proxy<object const, string>
     return proxy<object const, string> {*this, std::tuple {key}};
 }
 
-auto operator==(object const& left, object const& right) -> bool
-{
-    if (left.get_size() != right.get_size()) {
-        return false;
-    }
-
-    return std::all_of(left.begin(), left.end(), [&right](auto const& entry) {
-        return right.has(entry.first) && *right.get_entry(entry.first) == entry.second;
-    });
-}
-
 auto object::begin() -> cfg_object_entries::iterator
 {
     return _kvps->begin();
@@ -299,21 +288,6 @@ auto array::operator[](isize index) const -> proxy<array const, isize>
     return proxy<array const, isize> {*this, std::tuple {index}};
 }
 
-auto operator==(array const& left, array const& right) -> bool
-{
-    if (left.get_size() != right.get_size()) {
-        return false;
-    }
-
-    for (isize i {0}; i < left.get_size(); ++i) {
-        if (*left.get_entry(i) != *right.get_entry(i)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 auto array::load(path const& file, bool skipBinary) -> load_status
 {
     if (auto fs {io::ifstream::Open(file)}) {
@@ -507,11 +481,6 @@ auto array::Parse(string_view config, string const& ext) -> std::optional<array>
 ////////////////////////////////////////////////////////////
 
 entry::entry() noexcept = default;
-
-auto operator==(entry const& left, entry const& right) -> bool
-{
-    return left._value == right._value;
-}
 
 auto entry::get_comment() const -> comment const&
 {

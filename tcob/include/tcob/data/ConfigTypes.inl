@@ -275,4 +275,35 @@ inline auto entry::is() const -> bool
 
 ////////////////////////////////////////////////////////////
 
+inline auto operator==(entry const& left, entry const& right) -> bool
+{
+    return left._value == right._value;
+}
+
+inline auto operator==(object const& left, object const& right) -> bool
+{
+    if (left._kvps->size() != right._kvps->size()) {
+        return false;
+    }
+
+    return std::all_of(left.begin(), left.end(), [&right](auto const& entry) {
+        return right.has(entry.first) && *right.get_entry(entry.first) == entry.second;
+    });
+}
+
+inline auto operator==(array const& left, array const& right) -> bool
+{
+    if (left._values->size() != right._values->size()) {
+        return false;
+    }
+
+    for (isize i {0}; i < left.get_size(); ++i) {
+        if (*left.get_entry(i) != *right.get_entry(i)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 }
