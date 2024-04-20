@@ -7,12 +7,27 @@
 
 #include <utility>
 
+#include "tcob/gfx/Camera.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/RenderTexture.hpp"
+
 namespace tcob::gfx {
 
 void renderer::render_to_target(render_target& target, bool debug)
 {
-    target.prepare_render(debug);
+    prepare_render(target, debug);
     on_render_to_target(target);
+    finalize_render(target);
+}
+
+void renderer::prepare_render(render_target& target, bool debug)
+{
+    target.prepare_render(debug);
+}
+
+void renderer::finalize_render(render_target& target)
+{
     target.finalize_render();
 }
 
@@ -264,6 +279,58 @@ void polygon_renderer::on_render_to_target(render_target& target)
     target.bind_material(_material.get_obj());
     _vertexArray->draw_elements(primitive_type::Triangles, _numIndices, 0);
     target.unbind_material();
+}
+
+////////////////////////////////////////////////////////////
+
+canvas_renderer::canvas_renderer(canvas& c)
+    : _vertexArray {std::make_unique<vertex_array>(buffer_usage_hint::StaticDraw)}
+    , _canvas {c}
+{
+    usize const vertCount {4};
+    usize const indCount {6};
+
+    _vertexArray->resize(vertCount, indCount);
+
+    std::array<u32, 6> inds {0, 1, 3, 1, 2, 3};
+    _vertexArray->update_data(inds, 0);
+}
+
+void canvas_renderer::set_bounds(rect_f const& bounds)
+{
+    quad q {};
+    geometry::set_position(q, bounds);
+    geometry::set_color(q, colors::White);
+    geometry::set_texcoords(q, {render_texture::GetTexcoords(), 0});
+    _vertexArray->update_data(std::span {&q, 1}, 0);
+}
+
+void canvas_renderer::set_layer(i32 layer)
+{
+    _material->Texture = _canvas.get_texture(layer);
+}
+
+void canvas_renderer::prepare_render(render_target& target, bool debug)
+{
+    camera newCam {};
+    _oldCam = *target.Camera;
+    newCam.set_size(_oldCam.get_size());
+    target.Camera = newCam;
+
+    target.prepare_render(debug);
+}
+
+void canvas_renderer::on_render_to_target(render_target& target)
+{
+    target.bind_material(_material.get_obj());
+    _vertexArray->draw_elements(primitive_type::Triangles, 6, 0);
+    target.unbind_material();
+}
+
+void canvas_renderer::finalize_render(render_target& target)
+{
+    target.Camera = _oldCam;
+    target.finalize_render();
 }
 
 }

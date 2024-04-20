@@ -26,7 +26,9 @@ public:
     void render_to_target(render_target& target, bool debug = false);
 
 protected:
+    void virtual prepare_render(render_target& target, bool debug);
     void virtual on_render_to_target(render_target& target) = 0;
+    void virtual finalize_render(render_target& target);
 };
 
 ////////////////////////////////////////////////////////////
@@ -122,6 +124,27 @@ private:
     usize                       _numIndices {0};
 
     std::unique_ptr<vertex_array> _vertexArray;
+};
+
+////////////////////////////////////////////////////////////
+class canvas;
+
+class TCOB_API canvas_renderer final : public renderer {
+public:
+    explicit canvas_renderer(canvas& c);
+
+    void set_bounds(rect_f const& bounds);
+    void set_layer(i32 layer);
+
+protected:
+    void prepare_render(render_target& target, bool debug) override;
+    void on_render_to_target(render_target& target) override;
+    void finalize_render(render_target& target) override;
+
+    std::unique_ptr<vertex_array>      _vertexArray;
+    canvas&                            _canvas;
+    assets::manual_asset_ptr<material> _material {};
+    camera                             _oldCam;
 };
 
 }

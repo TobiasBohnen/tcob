@@ -13,11 +13,8 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Camera.hpp"
 #include "tcob/gfx/Canvas.hpp"
-#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
@@ -108,9 +105,8 @@ private:
 
     auto scale_mouse(point_i mp) const -> point_i;
 
-    quad_renderer _renderer {buffer_usage_hint::StaticDraw};
-    canvas        _canvas {};
-    camera        _camera {};
+    canvas          _canvas {};
+    canvas_renderer _renderer;
 
     window* _window;
 
@@ -131,8 +127,7 @@ private:
     tcob::detail::connection_manager _connections {};
     dock_layout                      _layout;
 
-    std::unique_ptr<widget_painter>    _painter {};
-    assets::manual_asset_ptr<material> _material {};
+    std::unique_ptr<widget_painter> _painter {};
 
     string _name;
 };

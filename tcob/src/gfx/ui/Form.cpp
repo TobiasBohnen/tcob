@@ -10,7 +10,6 @@
 
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
-#include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
@@ -27,6 +26,7 @@ form::form(string name, window* window)
 
 form::form(string name, window* window, rect_f const& bounds)
     : Bounds {bounds}
+    , _renderer {_canvas}
     , _window {window}
     , _layout {this}
     , _painter {std::make_unique<widget_painter>(_canvas)}
@@ -244,21 +244,13 @@ void form::on_draw_to(render_target& target)
     }
 
     // render
-    // store old camera and set new identity camera
-    auto const oldCam {*target.Camera};
-    _camera.set_size(oldCam.get_size());
-    target.Camera = _camera;
-
-    _material->Texture = _canvas.get_texture(0);
+    _renderer.set_layer(0);
     _renderer.render_to_target(target);
 
     if (_isTooltipVisible) {
-        _material->Texture = _canvas.get_texture(1);
+        _renderer.set_layer(1);
         _renderer.render_to_target(target);
     }
-
-    // restore old camera
-    target.Camera = oldCam;
 }
 
 auto form::get_focus_widget() const -> widget*
@@ -446,7 +438,6 @@ void form::on_controller_button_up(input::controller::button_event& ev)
 
 void form::on_bounds_changed()
 {
-    quad   q {};
     rect_f bounds {Bounds};
     if (Scale != size_f::One) {
         bounds.X *= Scale->Width;
@@ -454,11 +445,7 @@ void form::on_bounds_changed()
         bounds.Y *= Scale->Height;
         bounds.Height *= Scale->Height;
     }
-    geometry::set_position(q, bounds);
-    geometry::set_color(q, colors::White);
-    geometry::set_texcoords(q, {render_texture::GetTexcoords(), 0});
-    _renderer.set_geometry(q);
-    _renderer.set_material(_material);
+    _renderer.set_bounds(bounds);
 
     force_redraw("bounds changed");
     on_styles_changed();
