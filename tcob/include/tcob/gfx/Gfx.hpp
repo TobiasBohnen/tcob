@@ -114,7 +114,21 @@ enum class vertical_alignment : u8 {
 struct alignments {
     horizontal_alignment Horizontal {horizontal_alignment::Left};
     vertical_alignment   Vertical {vertical_alignment::Top};
+
+    void static Serialize(alignments const& v, auto&& s);
+    auto static Deserialize(alignments& v, auto&& s) -> bool;
 };
+
+inline void alignments::Serialize(alignments const& v, auto&& s)
+{
+    s["horizontal"] = v.Horizontal;
+    s["vertical"]   = v.Vertical;
+}
+
+inline auto alignments::Deserialize(alignments& v, auto&& s) -> bool
+{
+    return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
+}
 
 inline auto operator==(alignments const& left, alignments const& right) -> bool
 {
