@@ -41,4 +41,26 @@ TEST_CASE("Core.POD.Transform")
             REQUIRE(p.Y == Approx(0.f));
         }
     }
+    SUBCASE("is_translate_only")
+    {
+        transform good0;
+        good0.translate({1.f, 2.f});
+        REQUIRE(good0.is_translate_only());
+        good0.translate({5.f, -2.f});
+        REQUIRE(good0.is_translate_only());
+        good0.translate({1.23f, 4.63f});
+        REQUIRE(good0.is_translate_only());
+        transform good1 {good0};
+        good1.scale_at({1, 1}, {4, 5});
+        REQUIRE(good1.is_translate_only());
+        transform bad0 {good0};
+        bad0.rotate({90.f});
+        REQUIRE_FALSE(bad0.is_translate_only());
+        transform bad1 {good0};
+        bad1.rotate_at({90.f}, {20, 30});
+        REQUIRE_FALSE(bad0.is_translate_only());
+        transform bad2 {good0};
+        bad2.skew({90.f, 10});
+        REQUIRE_FALSE(bad0.is_translate_only());
+    }
 }

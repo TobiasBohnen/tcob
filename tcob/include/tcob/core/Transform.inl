@@ -77,6 +77,11 @@ auto constexpr transform::as_inverted() const -> transform
     return Identity;
 }
 
+auto constexpr transform::is_translate_only() const -> bool
+{
+    return Matrix[0] == 1.0f && Matrix[1] == 0.0f && Matrix[2] == 0.0f && Matrix[3] == 0.0f && Matrix[4] == 1.0f && Matrix[5] == 0.0f;
+}
+
 void constexpr transform::to_identity()
 {
     Matrix[0] = 1.0f;

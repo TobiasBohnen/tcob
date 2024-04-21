@@ -1588,20 +1588,12 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
     f32 const x {std::floor(offset.X + 0.5f)};
     f32 const y {std::floor(offset.Y + 0.5f)};
 
+    bool const isTranslation {s.XForm.is_translate_only()};
+
     for (auto const& token : formatResult.Tokens) {
         for (usize i {0}; i < token.Quads.size(); ++i) {
             auto const& quad {token.Quads[i]};
             auto const& posRect {quad.Rect};
-
-            f32 const level {static_cast<f32>(quad.TexRegion.Level)};
-
-            auto const topLeft {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
-            auto const bottomRight {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
-
-            f32 const left {std::floor(topLeft.X + 0.5f)};
-            f32 const right {left + std::floor(bottomRight.X - topLeft.X + 0.5f)};
-            f32 const bottom {std::floor(bottomRight.Y + 0.5f)};
-            f32 const top {bottom - std::floor(bottomRight.Y - topLeft.Y + 0.5f)};
 
             auto const& uvRect {quad.TexRegion.UVRect};
             f32 const   uvLeft {uvRect.X};
@@ -1609,12 +1601,39 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
             f32 const   uvTop {uvRect.Y};
             f32 const   uvBottom {uvRect.bottom()};
 
-            SetVertex(&verts[nverts++], left, top, uvLeft, uvTop, level);
-            SetVertex(&verts[nverts++], right, bottom, uvRight, uvBottom, level);
-            SetVertex(&verts[nverts++], right, top, uvRight, uvTop, level);
-            SetVertex(&verts[nverts++], left, top, uvLeft, uvTop, level);
-            SetVertex(&verts[nverts++], left, bottom, uvLeft, uvBottom, level);
-            SetVertex(&verts[nverts++], right, bottom, uvRight, uvBottom, level);
+            f32 const level {static_cast<f32>(quad.TexRegion.Level)};
+
+            point_f topLeft {}, topRight {}, bottomLeft {}, bottomRight {};
+
+            if (isTranslation) {
+                auto const tl {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
+                auto const br {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
+
+                topLeft.X = bottomLeft.X = std::floor(tl.X + 0.5f);
+                topRight.X = bottomRight.X = topLeft.X + std::floor(br.X - tl.X + 0.5f);
+                bottomLeft.Y = bottomRight.Y = std::floor(br.Y + 0.5f);
+                topLeft.Y = topRight.Y = bottomLeft.Y - std::floor(br.Y - tl.Y + 0.5f);
+            } else {
+                topLeft       = {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
+                topLeft.X     = std::floor(topLeft.X + 0.5f);
+                topLeft.Y     = std::floor(topLeft.Y + 0.5f);
+                topRight      = {s.XForm * point_f {posRect.right() * invscale + x, posRect.top() * invscale + y}};
+                topRight.X    = std::floor(topRight.X + 0.5f);
+                topRight.Y    = std::floor(topRight.Y + 0.5f);
+                bottomRight   = {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
+                bottomRight.X = std::floor(bottomRight.X + 0.5f);
+                bottomRight.Y = std::floor(bottomRight.Y + 0.5f);
+                bottomLeft    = {s.XForm * point_f {posRect.left() * invscale + x, posRect.bottom() * invscale + y}};
+                bottomLeft.X  = std::floor(bottomLeft.X + 0.5f);
+                bottomLeft.Y  = std::floor(bottomLeft.Y + 0.5f);
+            }
+
+            SetVertex(&verts[nverts++], topLeft.X, topLeft.Y, uvLeft, uvTop, level);
+            SetVertex(&verts[nverts++], bottomRight.X, bottomRight.Y, uvRight, uvBottom, level);
+            SetVertex(&verts[nverts++], topRight.X, topRight.Y, uvRight, uvTop, level);
+            SetVertex(&verts[nverts++], topLeft.X, topLeft.Y, uvLeft, uvTop, level);
+            SetVertex(&verts[nverts++], bottomLeft.X, bottomLeft.Y, uvLeft, uvBottom, level);
+            SetVertex(&verts[nverts++], bottomRight.X, bottomRight.Y, uvRight, uvBottom, level);
         }
     }
 
@@ -2523,5 +2542,4 @@ auto canvas::path2d::GetCommands(string_view path) -> std::optional<std::vector<
 
     return commands;
 }
-
 }

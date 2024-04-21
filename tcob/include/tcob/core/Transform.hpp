@@ -28,6 +28,8 @@ public:
 
     auto constexpr as_inverted() const -> transform;
 
+    auto constexpr is_translate_only() const -> bool;
+
     void constexpr to_identity();
 
     void constexpr translate(point_f offset);
