@@ -44,7 +44,7 @@ void progress_bar::on_paint(widget_painter& painter)
             rect,
             {.Orientation = get_orientation(),
              .Inverted    = false,
-             .Alignment   = element::bar::alignment::CenterOrMiddle,
+             .Position    = element::bar::position::CenterOrMiddle,
              .BlockCount  = numBlocks,
              .Fraction    = _tween.get_current_value()});
     }

@@ -155,7 +155,7 @@ namespace element {
 
     class TCOB_API bar {
     public:
-        enum class alignment : u8 {
+        enum class position : u8 {
             LeftOrTop,
             RightOrBottom,
             CenterOrMiddle
@@ -169,7 +169,7 @@ namespace element {
         struct context {
             orientation Orientation {orientation::Horizontal};
             bool        Inverted {false};
-            alignment   Alignment {alignment::CenterOrMiddle};
+            position    Position {position::CenterOrMiddle};
             i32         BlockCount {0};
             f32         Fraction {0};
         };
@@ -181,7 +181,7 @@ namespace element {
         border       Border {};
         milliseconds Delay {0};
 
-        auto calc(rect_f const& rect, orientation orien, alignment align) const -> rect_f;
+        auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
     };
 
     ////////////////////////////////////////////////////////////

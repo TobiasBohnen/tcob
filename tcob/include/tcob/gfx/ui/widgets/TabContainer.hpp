@@ -15,17 +15,17 @@ namespace tcob::gfx::ui {
 
 class TCOB_API tab_container : public widget_container {
 public:
-    enum class alignment {
+    enum class position {
         Top,
         Bottom
     };
 
     class TCOB_API style : public background_style {
     public:
-        length    TabBarHeight;
-        isize     MaxTabs {-1};
-        alignment TabBarAlignment {alignment::Top};
-        string    TabItemClass {"tab_items"};
+        length   TabBarHeight;
+        isize    MaxTabs {-1};
+        position TabBarPosition {position::Top};
+        string   TabItemClass {"tab_items"};
     };
 
     explicit tab_container(init const& wi);

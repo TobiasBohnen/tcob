@@ -35,7 +35,7 @@ inline void scrollbar<Parent>::paint(widget_painter& painter, element::scrollbar
         element::bar::context const barCtx {
             .Orientation = _orien,
             .Inverted    = _orien == orientation::Vertical,
-            .Alignment   = element::bar::alignment::RightOrBottom,
+            .Position    = element::bar::position::RightOrBottom,
             .BlockCount  = numBlocks,
             .Fraction    = frac};
 

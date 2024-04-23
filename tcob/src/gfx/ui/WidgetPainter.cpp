@@ -319,7 +319,7 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
 
 auto widget_painter::draw_bar(element::bar const& style, rect_f const& refRect, element::bar::context const& barCtx) -> rect_f
 {
-    rect_f retValue {style.calc(refRect, barCtx.Orientation, barCtx.Alignment)};
+    rect_f retValue {style.calc(refRect, barCtx.Orientation, barCtx.Position)};
     rect_f lowRech {retValue};
 
     if (style.Type == element::bar::type::Continuous) {

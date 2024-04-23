@@ -154,8 +154,8 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::ve
             continue;
         }
 
-        f32 testWidth {currentLine.RemainingWidth};
-        if (currentToken.Width * scale > testWidth || currentToken.Type == token_type::Newline) {
+        f32 const testWidth {currentLine.RemainingWidth};
+        if (std::floor(currentToken.Width * scale) > testWidth || currentToken.Type == token_type::Newline) {
             if (!currentLine.Tokens.empty()) {
                 if (currentLine.Tokens.back()->Type == token_type::Whitespace) { // remove whitespace if last word of line
                     currentLine.WhiteSpaceCount--;
@@ -182,11 +182,9 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::ve
                 currentLine.Tokens.push_back(&currentToken);
             }
 
+            currentLine.RemainingWidth -= currentToken.Width * scale;
             if (currentToken.Type == token_type::Whitespace) {
                 currentLine.WhiteSpaceCount++;
-                currentLine.RemainingWidth -= currentToken.Width * scale;
-            } else {
-                currentLine.RemainingWidth -= currentToken.Width * scale;
             }
         }
     }

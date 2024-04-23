@@ -92,7 +92,7 @@ namespace element {
         return retValue - Border.get_thickness();
     }
 
-    auto bar::calc(rect_f const& rect, orientation orien, alignment align) const -> rect_f
+    auto bar::calc(rect_f const& rect, orientation orien, position align) const -> rect_f
     {
         rect_f retValue {rect};
 
@@ -101,10 +101,10 @@ namespace element {
             retValue.Height = Size.calc(rect.Height);
 
             switch (align) {
-            case alignment::RightOrBottom:
+            case position::RightOrBottom:
                 retValue.Y += rect.Height - retValue.Height;
                 break;
-            case alignment::CenterOrMiddle:
+            case position::CenterOrMiddle:
                 retValue.Y += (rect.Height - retValue.Height) / 2.0f;
                 break;
             default: break;
@@ -114,10 +114,10 @@ namespace element {
             retValue.Width = Size.calc(rect.Width);
 
             switch (align) {
-            case alignment::RightOrBottom:
+            case position::RightOrBottom:
                 retValue.X += rect.Width - retValue.Width;
                 break;
-            case alignment::CenterOrMiddle:
+            case position::CenterOrMiddle:
                 retValue.X += (rect.Width - retValue.Width) / 2.0f;
                 break;
             default: break;

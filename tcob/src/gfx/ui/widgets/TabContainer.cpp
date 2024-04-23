@@ -79,7 +79,7 @@ void tab_container::on_paint(widget_painter& painter)
         // tabs
         rect_f tabBarRowRect {rect};
         tabBarRowRect.Height = style->TabBarHeight.calc(tabBarRowRect.Height);
-        if (style->TabBarAlignment == alignment::Bottom) {
+        if (style->TabBarPosition == position::Bottom) {
             f32 const tabRows {std::ceil(std::ssize(_tabs) / static_cast<f32>(style->MaxTabs))};
             tabBarRowRect.Y = rect.bottom() - (tabBarRowRect.Height * tabRows);
         }
@@ -188,7 +188,7 @@ void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
     }
 
     bounds.Height -= barHeight;
-    if (style.TabBarAlignment == alignment::Top) {
+    if (style.TabBarPosition == position::Top) {
         bounds.Y += barHeight;
     }
 }

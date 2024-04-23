@@ -52,7 +52,7 @@ void slider::on_paint(widget_painter& painter)
 
         i32 const  numBlocks {10};
         auto const orien {get_orientation()};
-        auto const pos {element::bar::alignment::CenterOrMiddle};
+        auto const pos {element::bar::position::CenterOrMiddle};
 
         // bar
         _paintResult.Bar = painter.draw_bar(
@@ -60,7 +60,7 @@ void slider::on_paint(widget_painter& painter)
             rect,
             {.Orientation = orien,
              .Inverted    = false,
-             .Alignment   = pos,
+             .Position    = pos,
              .BlockCount  = numBlocks,
              .Fraction    = _tween.get_current_value()});
 
