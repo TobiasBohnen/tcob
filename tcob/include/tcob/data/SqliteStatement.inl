@@ -203,14 +203,11 @@ inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -
     }
 
     std::vector<T> retValue;
-
-    std::vector<std::tuple<Values...>> values;
-    // prepare
-    if (prepare(get_query())) {
+    if (prepared) {
         if (sizeof...(Values) != get_column_count()) { return retValue; }
 
         // get columns
-        values = get_column_value<std::vector<std::tuple<Values...>>>(0);
+        auto const values {get_column_value<std::vector<std::tuple<Values...>>>(0)};
         retValue.reserve(values.size());
         for (auto const& tup : values) {
             retValue.push_back(std::make_from_tuple<T>(tup));
