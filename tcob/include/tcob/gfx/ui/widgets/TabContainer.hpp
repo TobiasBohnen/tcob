@@ -13,6 +13,7 @@
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
+// TODO: scrollable tab bar
 class TCOB_API tab_container : public widget_container {
 public:
     enum class position {
@@ -22,16 +23,16 @@ public:
 
     class TCOB_API style : public background_style {
     public:
-        length   TabBarHeight;
-        isize    MaxTabs {-1};
-        position TabBarPosition {position::Top};
         string   TabItemClass {"tab_items"};
+        position TabBarPosition {position::Top};
+        length   TabBarHeight;
     };
 
     explicit tab_container(init const& wi);
 
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
+    prop<isize>     MaxTabs;
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;

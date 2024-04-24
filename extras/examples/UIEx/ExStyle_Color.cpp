@@ -468,7 +468,6 @@ auto create_color_styles() -> style_collection
         style->TabBarHeight     = 10_pct;
         style->TabItemClass     = "tab_items";
         style->TabBarPosition   = tab_container::position::Bottom;
-        style->MaxTabs          = 2;
 
         auto hoverStyle {retValue.create<tab_container>("tab_container", {.Hover = true})};
         *hoverStyle = *style;

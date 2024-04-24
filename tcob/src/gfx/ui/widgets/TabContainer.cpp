@@ -19,6 +19,8 @@ tab_container::tab_container(init const& wi)
     ActiveTabIndex(-1);
     HoveredTabIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": HoveredTab changed"); });
     HoveredTabIndex(-1);
+    MaxTabs.Changed.connect([&](auto const&) { force_redraw(get_name() + ": MaxTabs changed"); });
+    MaxTabs(-1);
 
     Class("tab_container");
 }
@@ -80,14 +82,14 @@ void tab_container::on_paint(widget_painter& painter)
         rect_f tabBarRowRect {rect};
         tabBarRowRect.Height = style->TabBarHeight.calc(tabBarRowRect.Height);
         if (style->TabBarPosition == position::Bottom) {
-            f32 const tabRows {std::ceil(std::ssize(_tabs) / static_cast<f32>(style->MaxTabs))};
+            f32 const tabRows {std::ceil(std::ssize(_tabs) / static_cast<f32>(MaxTabs))};
             tabBarRowRect.Y = rect.bottom() - (tabBarRowRect.Height * tabRows);
         }
 
         _tabRects.clear();
         for (i32 i {0}; i < std::ssize(_tabs); ++i) {
             auto const&  tabStyle {get_tab_style(i)};
-            rect_f const tabRect {get_tab_rect(i, style->MaxTabs, tabBarRowRect)};
+            rect_f const tabRect {get_tab_rect(i, MaxTabs, tabBarRowRect)};
             painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
             _tabRects.push_back(tabRect);
         }
@@ -183,8 +185,8 @@ auto tab_container::get_tab_style(isize index) const -> item_style*
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
 {
     f32 barHeight {style.TabBarHeight.calc(bounds.Height)};
-    if (style.MaxTabs != -1) {
-        barHeight *= std::ceil(std::ssize(_tabs) / static_cast<f32>(style.MaxTabs));
+    if (MaxTabs != -1) {
+        barHeight *= std::ceil(std::ssize(_tabs) / static_cast<f32>(MaxTabs));
     }
 
     bounds.Height -= barHeight;

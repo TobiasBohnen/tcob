@@ -11,13 +11,15 @@
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
+// TODO: horizontal scrolling
 class TCOB_API grid_view : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
     public:
-        length RowHeight {};
+        bool   AutoSizeColumns {true};
         string HeaderClass {"header_items"};
         string RowClass {"row_items"};
+        length RowHeight {};
     };
 
     explicit grid_view(init const& wi);
@@ -39,6 +41,6 @@ private:
 
     std::vector<utf8_string>              _columns;
     std::vector<std::vector<utf8_string>> _rows;
-    std::vector<isize>                    _rowSizes;
+    std::vector<isize>                    _colSizes;
 };
 }

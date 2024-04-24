@@ -17,8 +17,8 @@ class TCOB_API list_box : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
     public:
-        length      ItemHeight {};
         utf8_string ItemClass {"list_items"};
+        length      ItemHeight {};
     };
 
     explicit list_box(init const& wi);

@@ -22,9 +22,9 @@ void grid_view::set_columns(std::vector<utf8_string> const& col)
     clear_rows();
 
     _columns = col;
-    _rowSizes.resize(_columns.size());
-    for (usize x {0}; x < _rowSizes.size(); ++x) {
-        _rowSizes[x] = std::ssize(col[x]);
+    _colSizes.resize(_columns.size());
+    for (usize x {0}; x < _colSizes.size(); ++x) {
+        _colSizes[x] = std::ssize(col[x]);
     }
 
     force_redraw(get_name() + ": column headers set");
@@ -35,13 +35,12 @@ void grid_view::add_row(std::vector<utf8_string> const& row)
     std::vector<utf8_string> r {row};
     r.resize(_columns.size());
 
+    _rows.push_back(r);
     if (!_rows.empty()) {
         for (usize x {0}; x < r.size(); ++x) {
-            _rowSizes[x] = std::max(_rowSizes[x], std::ssize(r[x]));
+            _colSizes[x] = std::max(_colSizes[x], std::ssize(r[x]));
         }
     }
-
-    _rows.push_back(r);
 
     force_redraw(get_name() + ": row added");
 }
@@ -49,8 +48,9 @@ void grid_view::add_row(std::vector<utf8_string> const& row)
 void grid_view::clear_rows()
 {
     _rows.clear();
-    _rowSizes.clear();
-
+    _colSizes.clear();
+    _colSizes.resize(_columns.size());
+    set_scrollbar_value(0);
     force_redraw(get_name() + ": rows cleared");
 }
 
@@ -118,8 +118,16 @@ auto grid_view::get_cell_style(point_i /* idx */, string const& className) const
 
 auto grid_view::get_column_width(i32 col, f32 width) const -> f32
 {
-    auto const sum {std::reduce(_rowSizes.begin(), _rowSizes.end())};
-    return width * (_rowSizes[col] / static_cast<f32>(sum));
+    if (auto const* style {get_style<grid_view::style>()}) {
+        if (style->AutoSizeColumns) {
+            auto const sum {std::reduce(_colSizes.begin(), _colSizes.end())};
+            return width * (_colSizes[col] / static_cast<f32>(sum));
+        }
+
+        return width / _columns.size();
+    }
+
+    return 0;
 }
 
 auto grid_view::get_list_height() const -> f32

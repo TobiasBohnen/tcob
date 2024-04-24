@@ -360,19 +360,24 @@ auto create_form_tabcontainer(window* wnd) -> std::shared_ptr<form>
         auto tabContainer0 {retValue->create_container<tab_container>(dock_style::Left, "TabContainer0")};
         tabContainer0->Flex = {50_pct, 100_pct};
         createTabs(tabContainer0);
+        tabContainer0->MaxTabs = 2;
     }
 
     {
         auto tabContainer0 {retValue->create_container<tab_container>(dock_style::Left, "TabContainer0")};
-        tabContainer0->Flex = {50_pct, 100_pct};
+        tabContainer0->Flex    = {50_pct, 100_pct};
+        tabContainer0->MaxTabs = 2;
 
         auto tabContainer1 {tabContainer0->create_tab<tab_container>("TabContainer1")};
+        tabContainer1->MaxTabs = 2;
         createTabs(tabContainer1);
 
         auto tabContainer2 {tabContainer0->create_tab<tab_container>("TabContainer2")};
+        tabContainer2->MaxTabs = 2;
         createTabs(tabContainer2);
 
         auto tabContainer3 {tabContainer0->create_tab<tab_container>("TabContainer3")};
+        tabContainer3->MaxTabs = 2;
         createTabs(tabContainer3);
     }
 

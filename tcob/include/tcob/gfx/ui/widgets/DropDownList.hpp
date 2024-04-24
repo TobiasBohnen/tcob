@@ -22,8 +22,8 @@ public:
     public:
         element::text      Text;
         utf8_string        ArrowClass {"nav_arrows"};
-        length             ItemHeight {};
         utf8_string        ItemClass {"list_items"};
+        length             ItemHeight {};
         element::scrollbar VScrollBar;
     };
 
