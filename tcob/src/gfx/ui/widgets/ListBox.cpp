@@ -203,10 +203,13 @@ auto list_box::get_item_style(isize index) const -> item_style*
                                       : get_sub_style<item_style>(style->ItemClass, {});
 }
 
-auto list_box::get_list_height() const -> f32
+auto list_box::get_scroll_content_height() const -> f32
 {
-    f32 retValue {0.0f};
+    if (_items.empty()) {
+        return 0;
+    }
 
+    f32 retValue {0.0f};
     if (auto const* style {get_style<list_box::style>()}) {
         rect_f const listRect {get_content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.Height)};
@@ -219,7 +222,7 @@ auto list_box::get_list_height() const -> f32
     return retValue;
 }
 
-auto list_box::get_list_item_count() const -> isize
+auto list_box::get_scroll_item_count() const -> isize
 {
     return get_item_count();
 }

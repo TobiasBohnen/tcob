@@ -46,8 +46,8 @@ protected:
     auto get_scroll_max_value(orientation orien) const -> f32;
     auto get_scroll_style(orientation orien) const -> element::scrollbar*;
 
-    auto virtual get_list_height() const -> f32       = 0;
-    auto virtual get_list_item_count() const -> isize = 0;
+    auto virtual get_scroll_content_height() const -> f32 = 0;
+    auto virtual get_scroll_item_count() const -> isize   = 0;
     auto get_scrollbar_value() const -> f32;
     void set_scrollbar_value(f32 value);
 

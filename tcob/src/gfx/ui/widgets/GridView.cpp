@@ -73,7 +73,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
             f32         offsetX {0.f};
 
             for (i32 x {0}; x < std::ssize(_columns); ++x) {
-                f32 const colWidth {colWidths[x] = get_column_width(x, gridRect.Width)};
+                f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.Width)};
 
                 rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.get_position(), {colWidth, rowHeight}, offsetX)};
                 if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
@@ -86,7 +86,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
         f32 offsetX {0.f};
         for (i32 x {0}; x < std::ssize(_columns); ++x) {
             // headers
-            f32 const colWidth {colWidths[x] = get_column_width(x, gridRect.Width)};
+            f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.Width)};
 
             rect_f const cellRect {get_cell_rect({x, 0}, gridRect.get_position(), {colWidth, rowHeight}, offsetX)};
             if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
@@ -116,21 +116,17 @@ auto grid_view::get_cell_style(point_i /* idx */, string const& className) const
     return get_sub_style<item_style>(className, {});
 }
 
-auto grid_view::get_column_width(i32 col, f32 width) const -> f32
+auto grid_view::get_column_width(grid_view::style const* style, i32 col, f32 width) const -> f32
 {
-    if (auto const* style {get_style<grid_view::style>()}) {
-        if (style->AutoSizeColumns) {
-            auto const sum {std::reduce(_colSizes.begin(), _colSizes.end())};
-            return width * (_colSizes[col] / static_cast<f32>(sum));
-        }
-
-        return width / _columns.size();
+    if (style->AutoSizeColumns) {
+        auto const sum {std::reduce(_colSizes.begin(), _colSizes.end())};
+        return width * (_colSizes[col] / static_cast<f32>(sum));
     }
 
-    return 0;
+    return width / _columns.size();
 }
 
-auto grid_view::get_list_height() const -> f32
+auto grid_view::get_scroll_content_height() const -> f32
 {
     if (_columns.empty()) {
         return 0;
@@ -146,7 +142,7 @@ auto grid_view::get_list_height() const -> f32
     return retValue;
 }
 
-auto grid_view::get_list_item_count() const -> isize
+auto grid_view::get_scroll_item_count() const -> isize
 {
     return std::ssize(_rows);
 }

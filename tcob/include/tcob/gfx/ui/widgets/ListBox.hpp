@@ -47,8 +47,8 @@ protected:
 
     auto get_attributes() const -> widget_attributes override;
 
-    auto get_list_height() const -> f32 override;
-    auto get_list_item_count() const -> isize override;
+    auto get_scroll_content_height() const -> f32 override;
+    auto get_scroll_item_count() const -> isize override;
 
 private:
     void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
