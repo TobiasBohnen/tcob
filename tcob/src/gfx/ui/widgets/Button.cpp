@@ -13,6 +13,7 @@ button::button(init const& wi)
     : widget {wi}
 {
     Label.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Label changed"); });
+    Icon.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Icon changed"); });
 
     Class("button");
 }
@@ -27,9 +28,25 @@ void button::on_paint(widget_painter& painter)
 
         scissor_guard const guard {painter, this};
 
-        // text
-        if (style->Text.Font) {
-            painter.draw_text(style->Text, rect, Label());
+        bool const drawText {!Label->empty() && (style->Display == display_mode::OnlyText || style->Display == display_mode::TextAndIcon)};
+        bool const drawIcon {Icon() && (style->Display == display_mode::OnlyIcon || style->Display == display_mode::TextAndIcon)};
+
+        if (drawText) { // text
+            rect_f textRect {rect};
+            if (drawIcon) {
+                textRect = {rect.get_center().X, rect.Y, rect.Width / 2, rect.Height};
+                rect.Width /= 2;
+            }
+
+            if (style->Text.Font) {
+                painter.draw_text(style->Text, textRect, Label());
+            }
+        }
+        if (drawIcon) { // icon
+            f32 const factor {Icon->get_size().Height / static_cast<f32>(Icon->get_size().Width)};
+            f32 const width {rect.Height * factor};
+            rect = {{rect.get_center().X - width / 2, rect.Y}, {width, rect.Height}};
+            painter.get_canvas().draw_image(Icon().get_obj(), rect, style->Text.Color);
         }
     }
 }

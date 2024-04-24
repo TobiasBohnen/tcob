@@ -93,57 +93,64 @@ void CanvasEx::paint_to_canvas()
 {
     _canvas.begin_frame({1000, 800}, 1);
 
+    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto  img = _canvas.create_image_pattern({0, 0}, {128, 128}, 0, resGrp->get<texture>("burger").get_obj(), 1);
+    img.Color = colors::Red;
+    _canvas.set_fill_style(img);
+    _canvas.fill_rect({0, 0, 128, 128});
+
     // auto p0 {canvas::path2d::Parse("m 108,229 -6,-2.5 -5,3.5 0.4,-6.5 -5.0,-4 6.0,-1.5 2.2,-6 3.5,5.5 6.5,0.3 -4.0,5 z")};
-    auto p0 {canvas::path2d::Parse("m 35,44 c 1,3 5,11 12,11 9,0 13,-6 13,-14 0,-5.5 -2.5,-9 -5,-13 -2.5,-4.5 -6.5,-8.5 -10,-12.5 -4.5,-5 -15,-15 -15,-15 0,0 -10.5,9.5 -15,15 C 11.5,19 7.5,23 5,27 2.5,31.5 0,35 0,40.5 c 0,8 4,14 13,14 7,0 11,-8 12,-11 1,-1 1,0 1,1 -1,6 -1,8 -2,12.5 -1,5 -4,13 -4,13 5,-1.5 15,-1.5 20,0 0,0 -3,-8.5 -4,-13 -1,-5 -1,-6 -2,-12.5 0,-1 0,-1.5 1,-1 z")};
-    auto p1 {canvas::path2d::Parse("m 200,100 a 99,99 0 0 0 0,150")};
-    auto p2 {canvas::path2d::Parse("m 200,100 a 99,99 0 0 1 0,150")};
-    assert(p0 && p1 && p2);
-
-    _canvas.set_fill_style(colors::Black);
-    _canvas.path_2d(*p0);
-    _canvas.fill();
-    _canvas.set_stroke_width(10);
-    _canvas.set_stroke_style(colors::Red);
-    _canvas.path_2d(*p1);
-    _canvas.stroke();
-    _canvas.set_stroke_style(colors::YellowGreen);
-    _canvas.path_2d(*p2);
-    _canvas.stroke();
     /*
-       _canvas.set_fill_style(colors::Green);
-       _canvas.begin_path();
-       _canvas.star({400, 300}, 50, 50 / 2, 5);
-       _canvas.fill();
+   auto p0 {canvas::path2d::Parse("m 35,44 c 1,3 5,11 12,11 9,0 13,-6 13,-14 0,-5.5 -2.5,-9 -5,-13 -2.5,-4.5 -6.5,-8.5 -10,-12.5 -4.5,-5 -15,-15 -15,-15 0,0 -10.5,9.5 -15,15 C 11.5,19 7.5,23 5,27 2.5,31.5 0,35 0,40.5 c 0,8 4,14 13,14 7,0 11,-8 12,-11 1,-1 1,0 1,1 -1,6 -1,8 -2,12.5 -1,5 -4,13 -4,13 5,-1.5 15,-1.5 20,0 0,0 -3,-8.5 -4,-13 -1,-5 -1,-6 -2,-12.5 0,-1 0,-1.5 1,-1 z")};
+   auto p1 {canvas::path2d::Parse("m 200,100 a 99,99 0 0 0 0,150")};
+   auto p2 {canvas::path2d::Parse("m 200,100 a 99,99 0 0 1 0,150")};
+   assert(p0 && p1 && p2);
 
-       _canvas.set_fill_style(colors::Red);
-       _canvas.begin_path();
-       _canvas.rect({400 - 25, 300 - 25, 50, 50});
-       _canvas.fill();
+   _canvas.set_fill_style(colors::Black);
+   _canvas.path_2d(*p0);
+   _canvas.fill();
+   _canvas.set_stroke_width(10);
+   _canvas.set_stroke_style(colors::Red);
+   _canvas.path_2d(*p1);
+   _canvas.stroke();
+   _canvas.set_stroke_style(colors::YellowGreen);
+   _canvas.path_2d(*p2);
+   _canvas.stroke();
 
-           _canvas.set_fill_style(colors::Gainsboro);
-           _canvas.fill_rect({0, 0, 800, 600});
+      _canvas.set_fill_style(colors::Green);
+      _canvas.begin_path();
+      _canvas.star({400, 300}, 50, 50 / 2, 5);
+      _canvas.fill();
 
-           _canvas.set_stroke_width(5);
-           _canvas.set_stroke_style(colors::Green);
-           _canvas.stroke_wavy_line({10, 300}, {300, 150}, 10, 0.2f);
+      _canvas.set_fill_style(colors::Red);
+      _canvas.begin_path();
+      _canvas.rect({400 - 25, 300 - 25, 50, 50});
+      _canvas.fill();
 
-           _canvas.set_stroke_style(colors::Red);
-           _canvas.stroke_line({10, 300}, {300, 150});
+          _canvas.set_fill_style(colors::Gainsboro);
+          _canvas.fill_rect({0, 0, 800, 600});
 
-           _canvas.set_stroke_width(1);
-           _canvas.set_stroke_style(colors::Green);
-           _canvas.stroke_wavy_line({300, 50}, {900, 150}, 10, 0.5f);
+          _canvas.set_stroke_width(5);
+          _canvas.set_stroke_style(colors::Green);
+          _canvas.stroke_wavy_line({10, 300}, {300, 150}, 10, 0.2f);
 
-           _canvas.set_stroke_style(colors::Red);
-           _canvas.stroke_line({300, 50}, {900, 150});
+          _canvas.set_stroke_style(colors::Red);
+          _canvas.stroke_line({10, 300}, {300, 150});
 
-           _canvas.set_stroke_width(5);
-           _canvas.set_stroke_style(colors::Green);
-           _canvas.stroke_wavy_line({300, 10}, {10, 10}, 10, 0.2f);
+          _canvas.set_stroke_width(1);
+          _canvas.set_stroke_style(colors::Green);
+          _canvas.stroke_wavy_line({300, 50}, {900, 150}, 10, 0.5f);
 
-           _canvas.set_stroke_style(colors::Red);
-           _canvas.stroke_line({10, 10}, {300, 10});
-       */
+          _canvas.set_stroke_style(colors::Red);
+          _canvas.stroke_line({300, 50}, {900, 150});
+
+          _canvas.set_stroke_width(5);
+          _canvas.set_stroke_style(colors::Green);
+          _canvas.stroke_wavy_line({300, 10}, {10, 10}, 10, 0.2f);
+
+          _canvas.set_stroke_style(colors::Red);
+          _canvas.stroke_line({10, 10}, {300, 10});
+      */
     /*
     rect_f uvlt {rect_f::FromLTRB(20 / 60.f, 20 / 60.f, 40 / 60.f, 40 / 60.f)};
     _canvas.draw_nine_patch(NP1, "default", {10, 290, 300, 200}, {50, 50}, {50, 50}, uvlt);

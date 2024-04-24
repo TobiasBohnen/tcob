@@ -229,8 +229,8 @@ public:
     auto create_image_pattern [[nodiscard]] (point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> canvas_paint;
 
     // Image
-    void draw_image(texture* image, rect_f const& rect);
-    void draw_image_clipped(texture* image, rect_f const& srect, rect_f const& rect);
+    void draw_image(texture* image, rect_f const& rect, color color = colors::White);
+    void draw_image_clipped(texture* image, rect_f const& srect, rect_f const& rect, color color = colors::White);
     void draw_nine_patch(texture* image, string const& region, rect_f const& rect, point_f offsetCenterLT, point_f offsetCenterRB, rect_f const& localCenterUV);
     void draw_nine_patch(texture* image, string const& region, rect_f const& rect, rect_f const& center, rect_f const& localCenterUV);
 

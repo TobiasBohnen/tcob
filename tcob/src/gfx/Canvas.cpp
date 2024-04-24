@@ -1666,22 +1666,24 @@ void canvas::set_text_valign(vertical_alignment align)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::draw_image(texture* image, rect_f const& rect)
+void canvas::draw_image(texture* image, rect_f const& rect, color color)
 {
-    canvas_paint const img {create_image_pattern(rect.get_position(), rect.get_size(), 0, image, 1)};
+    canvas_paint img {create_image_pattern(rect.get_position(), rect.get_size(), 0, image, 1)};
+    img.Color = color;
 
     set_fill_style(img);
     fill_rect(rect);
 }
 
-void canvas::draw_image_clipped(texture* image, rect_f const& srect, rect_f const& rect)
+void canvas::draw_image_clipped(texture* image, rect_f const& srect, rect_f const& rect, color color)
 {
     size_i const i {image->get_size()};
 
     f32 const ax {rect.Width / srect.Width};
     f32 const ay {rect.Height / srect.Height};
 
-    canvas_paint const img {create_image_pattern({rect.left() - srect.left() * ax, rect.top() - srect.top() * ay}, {i.Width * ax, i.Height * ay}, 0, image, 1)};
+    canvas_paint img {create_image_pattern({rect.left() - srect.left() * ax, rect.top() - srect.top() * ay}, {i.Width * ax, i.Height * ay}, 0, image, 1)};
+    img.Color = color;
 
     set_fill_style(img);
     fill_rect(rect);

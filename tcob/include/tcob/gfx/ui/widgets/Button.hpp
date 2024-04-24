@@ -13,14 +13,22 @@ namespace tcob::gfx::ui {
 
 class TCOB_API button : public widget {
 public:
+    enum class display_mode {
+        TextAndIcon,
+        OnlyIcon,
+        OnlyText
+    };
+
     class TCOB_API style : public background_style {
     public:
+        display_mode  Display {display_mode::TextAndIcon};
         element::text Text;
     };
 
     explicit button(init const& wi);
 
-    prop<utf8_string> Label;
+    prop<utf8_string>                Label;
+    prop<assets::asset_ptr<texture>> Icon;
 
 protected:
     void on_paint(widget_painter& painter) override;
