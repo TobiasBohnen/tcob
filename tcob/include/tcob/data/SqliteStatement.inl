@@ -187,23 +187,33 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... par
 
 template <typename... Values>
 template <typename T>
-inline select_statement<Values...>::operator std::vector<T>()
+inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -> std::vector<T>
 {
-    std::vector<T> retValue;
-
     static_assert(sizeof...(Values) > 1);
 
-    if constexpr (sizeof...(Values) > 1) {
-        std::vector<std::tuple<Values...>> values;
-        // prepare
-        if (prepare(get_query())) {
-            if (sizeof...(Values) != get_column_count()) { return retValue; }
+    // prepare
+    bool const prepared {prepare(get_query())};
 
-            // get columns
-            values = get_column_value<std::vector<std::tuple<Values...>>>(0);
-            for (auto const& tup : values) {
-                retValue.push_back(std::make_from_tuple<T>(tup));
-            }
+    if constexpr (sizeof...(params) > 0) {
+        if (prepared) {
+            // bind parameters
+            i32 idx {1};
+            ((bind_parameter(idx, params)), ...);
+        }
+    }
+
+    std::vector<T> retValue;
+
+    std::vector<std::tuple<Values...>> values;
+    // prepare
+    if (prepare(get_query())) {
+        if (sizeof...(Values) != get_column_count()) { return retValue; }
+
+        // get columns
+        values = get_column_value<std::vector<std::tuple<Values...>>>(0);
+        retValue.reserve(values.size());
+        for (auto const& tup : values) {
+            retValue.push_back(std::make_from_tuple<T>(tup));
         }
     }
 

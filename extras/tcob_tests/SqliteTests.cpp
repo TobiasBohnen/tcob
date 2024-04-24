@@ -90,7 +90,7 @@ TEST_CASE("Data.Sqlite.Select")
     }
     SUBCASE("tuple to type")
     {
-        std::vector<foo> rows {dbTable->select_from<i32, std::string, i32, f32, bool>()};
+        std::vector<foo> rows {dbTable->select_from<i32, std::string, i32, f32, bool>().exec<foo>()};
         REQUIRE(rows.size() == 100);
         REQUIRE(rows[0] == foo {1, "1", 100, 1.5f, false});
         REQUIRE(rows[1] == foo {2, "2", 200, 3.0f, true});

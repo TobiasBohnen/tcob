@@ -54,7 +54,7 @@ public:
     auto operator() [[nodiscard]] (auto&&... params);
 
     template <typename T>
-    explicit operator std::vector<T>();
+    auto exec [[nodiscard]] (auto&&... params) -> std::vector<T>;
 
     auto where(utf8_string const& expr) -> select_statement&;
 
