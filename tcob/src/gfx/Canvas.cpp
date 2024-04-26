@@ -2534,7 +2534,7 @@ auto canvas::path2d::GetCommands(string_view path) -> std::optional<std::vector<
     for (auto const c : path) {
         if (c == ' ' || c == ',') {
             if (!getFloat()) { return std::nullopt; }
-        } else if (std::isdigit(c) || c == '-' || c == '+' || c == '.') {
+        } else if (std::isdigit(c) || c == '-' || c == '+' || c == '.' || c == 'e') {
             valStr += c;
         } else {
             commands.emplace_back(c);
