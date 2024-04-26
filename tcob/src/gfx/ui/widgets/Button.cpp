@@ -43,8 +43,9 @@ void button::on_paint(widget_painter& painter)
             }
         }
         if (drawIcon) { // icon
-            f32 const factor {Icon->get_size().Height / static_cast<f32>(Icon->get_size().Width)};
-            f32 const width {rect.Height * factor};
+            auto const iconSize {Icon->get_size()};
+            f32 const  factor {iconSize.Height / static_cast<f32>(iconSize.Width)};
+            f32 const  width {rect.Height * factor};
             rect = {{rect.get_center().X - width / 2, rect.Y}, {width, rect.Height}};
             painter.get_canvas().draw_image(Icon().get_obj(), rect, style->Text.Color);
         }
