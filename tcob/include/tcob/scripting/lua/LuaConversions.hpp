@@ -59,6 +59,21 @@ struct converter<R(P...)> {
 };
 
 template <typename R, typename... P>
+struct converter<R (*)(P...)> {
+    void static To(state_view view, R (*value)(P...))
+    {
+        view.push_lightuserdata(reinterpret_cast<void*>(value));
+        view.push_cclosure(
+            [](lua_State* l) -> i32 {
+                state_view                      s {l};
+                detail::native_closure<R(P...)> cl {reinterpret_cast<R (*)(P...)>(s.to_userdata(state_view::GetUpvalueIndex(1)))};
+                return cl(s);
+            },
+            1);
+    }
+};
+
+template <typename R, typename... P>
 struct converter<std::function<R(P...)>*> {
     void static To(state_view view, std::function<R(P...)>* value)
     {

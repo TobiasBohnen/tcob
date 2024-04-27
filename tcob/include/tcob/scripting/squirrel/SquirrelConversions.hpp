@@ -49,6 +49,23 @@ struct converter<R(P...)> {
 };
 
 template <typename R, typename... P>
+struct converter<R (*)(P...)> {
+    void static To(vm_view view, R (*value)(P...))
+    {
+        view.push_userpointer(reinterpret_cast<void*>(value));
+        view.new_closure(
+            [](HSQUIRRELVM l) -> SQInteger {
+                vm_view s {l};
+                void*   ptr {nullptr};
+                s.get_userpointer(-1, &ptr);
+                detail::native_closure<R(P...)> cl {reinterpret_cast<R (*)(P...)>(ptr)};
+                return cl(s);
+            },
+            1);
+    }
+};
+
+template <typename R, typename... P>
 struct converter<std::function<R(P...)>*> {
     void static To(vm_view view, std::function<R(P...)>* value)
     {

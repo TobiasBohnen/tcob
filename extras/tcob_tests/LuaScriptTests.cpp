@@ -125,6 +125,11 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Closures")
             REQUIRE(x == testfuncpair({4, 6.5f}));
         }
         {
+            global["testFunc"] = +[](i32 i) { return (f32)i * 2.5f; };
+            f32 x              = *run<f32>("return testFunc(2)");
+            REQUIRE(x == 5.0f);
+        }
+        {
             auto l             = std::function([](i32 i) { return (f32)i * 2.5f; });
             global["testFunc"] = &l;
             f32 x              = *run<f32>("return testFunc(2)");
