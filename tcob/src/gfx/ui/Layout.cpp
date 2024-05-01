@@ -29,6 +29,7 @@ void layout::update()
                 }},
             _parent);
 
+        on_update();
         _isDirty = false;
     }
 }
@@ -102,43 +103,41 @@ void dock_layout::do_layout(size_f size)
 
     rect_f layoutRect {point_f::Zero, size};
     for (auto const& widget : widgets) {
-        if (layoutRect.Height <= 0 || layoutRect.Width <= 0) {
-            break;
-        }
+        if (layoutRect.Height <= 0 || layoutRect.Width <= 0) { break; }
 
         f32 const width {std::min(layoutRect.Width, widget->Flex->Width.calc(size.Width))};     // TODO: replace with preferred size
         f32 const height {std::min(layoutRect.Height, widget->Flex->Height.calc(size.Height))}; // TODO: replace with preferred size
 
-        rect_f cbounds {layoutRect};
+        rect_f widgetBounds {layoutRect};
 
         switch (_widgetDock.at(widget.get())) {
         case dock_style::Left:
-            cbounds.Width = width;
+            widgetBounds.Width = width;
 
             layoutRect.X += width;
             layoutRect.Width -= width;
             break;
         case dock_style::Right:
-            cbounds.X     = cbounds.right() - width;
-            cbounds.Width = width;
+            widgetBounds.X     = widgetBounds.right() - width;
+            widgetBounds.Width = width;
 
             layoutRect.Width -= width;
             break;
         case dock_style::Top:
-            cbounds.Height = height;
+            widgetBounds.Height = height;
 
             layoutRect.Y += height;
             layoutRect.Height -= height;
             break;
         case dock_style::Bottom:
-            cbounds.Y      = cbounds.bottom() - height;
-            cbounds.Height = height;
+            widgetBounds.Y      = widgetBounds.bottom() - height;
+            widgetBounds.Height = height;
 
             layoutRect.Height -= height;
             break;
         case dock_style::Fill:
-            cbounds.Width  = width;
-            cbounds.Height = height;
+            widgetBounds.Width  = width;
+            widgetBounds.Height = height;
 
             layoutRect.X += width;
             layoutRect.Width -= width;
@@ -147,8 +146,14 @@ void dock_layout::do_layout(size_f size)
             break;
         }
 
-        widget->Bounds = cbounds;
+        widget->Bounds = widgetBounds;
     }
+}
+
+void dock_layout::on_update()
+{
+    auto& widgets {get_widgets()};
+    std::stable_sort(widgets.begin(), widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
 }
 
 ////////////////////////////////////////////////////////////

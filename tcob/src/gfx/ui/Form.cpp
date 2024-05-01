@@ -173,12 +173,12 @@ void form::on_fixed_update(milliseconds deltaTime)
             container->update_style();
         }
 
-        // layout
-        _layout.update();
-
         _updateWidgets = false;
         _redrawWidgets = true;
     }
+
+    // layout
+    _layout.update();
 
     // update widgets
     for (auto const& container : widgets) {
@@ -442,9 +442,7 @@ void form::on_visiblity_changed()
 auto form::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
 {
     auto retValue {get_widgets()};
-    std::sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) {
-        return a->ZOrder() < b->ZOrder();
-    });
+    std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
     return retValue;
 }
 

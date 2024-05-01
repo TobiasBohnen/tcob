@@ -55,9 +55,7 @@ auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr
 auto widget_container::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
 {
     auto retValue {get_widgets()};
-    std::sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) {
-        return a->ZOrder() < b->ZOrder();
-    });
+    std::sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
     return retValue;
 }
 

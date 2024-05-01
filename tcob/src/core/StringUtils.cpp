@@ -113,6 +113,15 @@ auto case_insensitive_equals(string_view lhs, string_view rhs) -> bool
                       [](char a, char b) { return std::tolower(a) == std::tolower(b); });
 }
 
+auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
+{
+    return std::search(
+               lhs.begin(), lhs.end(),
+               rhs.begin(), rhs.end(),
+               [](char a, char b) { return std::toupper(a) == std::toupper(b); })
+        != lhs.end();
+}
+
 auto wildcard_match(string_view str, string_view pattern) -> bool
 {
     if (pattern.empty()) {

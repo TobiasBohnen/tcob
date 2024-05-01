@@ -40,6 +40,7 @@ protected:
     auto add_widget(string const& name) -> std::shared_ptr<T>;
 
     void virtual do_layout(size_f size) = 0;
+    void virtual on_update() { }
 
 private:
     auto create_init(string const& name) const -> widget::init;
@@ -86,6 +87,7 @@ public:
 
 protected:
     void do_layout(size_f size) override;
+    void on_update() override;
 
 private:
     std::unordered_map<widget*, dock_style> _widgetDock;

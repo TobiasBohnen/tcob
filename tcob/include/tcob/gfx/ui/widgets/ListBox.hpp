@@ -23,8 +23,9 @@ public:
 
     explicit list_box(init const& wi);
 
-    prop_val<isize> SelectedItemIndex;
-    prop_val<isize> HoveredItemIndex;
+    prop_val<isize>   SelectedItemIndex;
+    prop_val<isize>   HoveredItemIndex;
+    prop<utf8_string> Filter;
 
     void add_item(utf8_string const& item);
     void clear_items();
@@ -51,11 +52,14 @@ protected:
     auto get_scroll_item_count() const -> isize override;
 
 private:
+    auto get_items() const -> std::vector<utf8_string> const&;
+
     void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
 
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f;
     auto get_item_style(isize index) const -> item_style*;
 
     std::vector<utf8_string> _items;
+    std::vector<utf8_string> _filteredItems;
 };
 }
