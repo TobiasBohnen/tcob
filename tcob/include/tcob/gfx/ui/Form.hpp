@@ -33,7 +33,6 @@ public:
     ~form() override;
 
     prop<rect_f> Bounds;
-    prop<size_f> Scale;
 
     prop<style_collection>                Styles;
     prop<control_map>                     Controls;
@@ -102,8 +101,6 @@ private:
 
     auto can_popup_tooltip() const -> bool;
     void hide_tooltip();
-
-    auto scale_mouse(point_i mp) const -> point_i;
 
     canvas          _canvas {};
     canvas_renderer _renderer;

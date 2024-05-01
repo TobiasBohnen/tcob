@@ -32,8 +32,6 @@ form::form(string name, window* window, rect_f const& bounds)
     , _painter {std::make_unique<widget_painter>(_canvas)}
     , _name {std::move(name)}
 {
-    Scale(size_f::One);
-    Scale.Changed.connect([&](auto const&) { on_bounds_changed(); });
     Bounds.Changed.connect([&](auto const&) { on_bounds_changed(); });
     on_bounds_changed();
 
@@ -225,18 +223,20 @@ void form::on_draw_to(render_target& target)
 
     // tooltip
     if (_isTooltipVisible) {
-        point_i pos;
-        if (_window && _window->Cursor()) {
-            pos = static_cast<point_i>(_window->Cursor->get_bounds().get_center());
-        } else {
-            pos = input::system::GetMousePosition();
-        }
-        pos.X -= static_cast<i32>(Bounds->X);
-        pos.Y -= static_cast<i32>(Bounds->Y);
-        pos = scale_mouse(pos);
+        point_i const pos {(_window && _window->Cursor()
+                                ? _window->Cursor->get_bounds().bottom_right()
+                                : input::system::GetMousePosition())
+                           - static_cast<point_i>(Bounds->get_position())};
 
-        (*_topWidget->Tooltip->Bounds).X = static_cast<f32>(pos.X);
-        (*_topWidget->Tooltip->Bounds).Y = static_cast<f32>(pos.Y);
+        auto& ttBounds {*_topWidget->Tooltip->Bounds};
+        ttBounds.X = static_cast<f32>(pos.X);
+        ttBounds.Y = static_cast<f32>(pos.Y);
+        if (ttBounds.right() > Bounds->right()) {
+            ttBounds.X -= ttBounds.Width;
+            if (_window && _window->Cursor()) {
+                ttBounds.X -= _window->Cursor->get_bounds().Width;
+            }
+        }
 
         _canvas.begin_frame(bounds, 1.0f, 1);
         _topWidget->Tooltip->paint(*_painter);
@@ -337,25 +337,17 @@ void form::on_key_up(input::keyboard::event& ev)
     _injector.on_key_up(_focusWidget, ev);
 }
 
-void form::on_mouse_motion(input::mouse::motion_event& mev)
+void form::on_mouse_motion(input::mouse::motion_event& ev)
 {
-    auto ev {mev};
-    ev.Position = scale_mouse(ev.Position);
-
     if (_isLButtonDown) {
         _injector.on_mouse_drag(_focusWidget, ev);
     } else {
         find_top_widget(ev);
     }
-
-    mev.Handled = ev.Handled;
 }
 
-void form::on_mouse_button_down(input::mouse::button_event& mev)
+void form::on_mouse_button_down(input::mouse::button_event& ev)
 {
-    auto ev {mev};
-    ev.Position = scale_mouse(ev.Position);
-
     hide_tooltip();
 
     focus_widget(_topWidget);
@@ -367,15 +359,10 @@ void form::on_mouse_button_down(input::mouse::button_event& mev)
             _isRButtonDown = true;
         }
     }
-
-    mev.Handled = ev.Handled;
 }
 
-void form::on_mouse_button_up(input::mouse::button_event& mev)
+void form::on_mouse_button_up(input::mouse::button_event& ev)
 {
-    auto ev {mev};
-    ev.Position = scale_mouse(ev.Position);
-
     hide_tooltip();
 
     if (_focusWidget) {
@@ -388,7 +375,7 @@ void form::on_mouse_button_up(input::mouse::button_event& mev)
                 if (ev.Clicks == 1) {
                     _clickPos = ev.Position;
                 }
-                if (ev.Clicks == 2 && _clickPos.distance_to(mev.Position) <= 5) {
+                if (ev.Clicks == 2 && _clickPos.distance_to(ev.Position) <= 5) {
                     _injector.on_double_click(_focusWidget);
                 }
             }
@@ -400,15 +387,10 @@ void form::on_mouse_button_up(input::mouse::button_event& mev)
             _isRButtonDown = false;
         }
     }
-
-    mev.Handled = ev.Handled;
 }
 
-void form::on_mouse_wheel(input::mouse::wheel_event& mev)
+void form::on_mouse_wheel(input::mouse::wheel_event& ev)
 {
-    auto ev {mev};
-    ev.Position = scale_mouse(ev.Position);
-
     hide_tooltip();
 
     if (_topWidget) {
@@ -416,8 +398,6 @@ void form::on_mouse_wheel(input::mouse::wheel_event& mev)
     } else if (_focusWidget) {
         _injector.on_mouse_wheel(_focusWidget, ev);
     }
-
-    mev.Handled = ev.Handled;
 }
 
 void form::on_controller_axis_motion(input::controller::axis_event& /*ev*/)
@@ -438,14 +418,7 @@ void form::on_controller_button_up(input::controller::button_event& ev)
 
 void form::on_bounds_changed()
 {
-    rect_f bounds {Bounds};
-    if (Scale != size_f::One) {
-        bounds.X *= Scale->Width;
-        bounds.Width *= Scale->Width;
-        bounds.Y *= Scale->Height;
-        bounds.Height *= Scale->Height;
-    }
-    _renderer.set_bounds(bounds);
+    _renderer.set_bounds(Bounds);
 
     force_redraw("bounds changed");
     on_styles_changed();
@@ -535,8 +508,4 @@ void form::hide_tooltip()
     _isTooltipVisible = false;
 }
 
-auto form::scale_mouse(point_i mp) const -> point_i
-{
-    return {static_cast<i32>(mp.X / Scale->Width), static_cast<i32>(mp.Y / Scale->Height)};
-}
 }

@@ -111,7 +111,7 @@ void dock_layout::do_layout(size_f size)
 
         rect_f cbounds {layoutRect};
 
-        switch (_widgetDock[widget.get()]) {
+        switch (_widgetDock.at(widget.get())) {
         case dock_style::Left:
             cbounds.Width = width;
 
