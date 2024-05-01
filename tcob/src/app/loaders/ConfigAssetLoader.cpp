@@ -822,8 +822,9 @@ void cfg_texture_loader::declare()
 
             // texture objects
             if (object assetSection; v.try_get(assetSection)) {
+                std::vector<path> files;
+
                 if (std::vector<path> items; assetSection.try_get(items, API::Texture::source)) {
-                    std::vector<path> files;
                     for (auto const& item : items) {
                         path const f {mp + item};
                         if (io::exists(f)) { // file or folder
@@ -843,13 +844,21 @@ void cfg_texture_loader::declare()
                         }
                     }
 
-                    for (u32 i {0}; i < files.size(); ++i) {
-                        auto const& file {files[i]};
-                        auto const  regionName {io::get_stem(file)};
-                        asset->assetPtr->add_region(regionName, {{0.0f, 0.0f, 1.0f, 1.0f}, i});
-                        asset->images.emplace_back(i, file); //{.Depth = i, .Path = file});
+                } else if (path file; assetSection.try_get(file, API::Texture::source)) {
+                    path const f {mp + file};
+                    if (io::is_file(f)) {
+                        files.push_back(f);
+                    } else {
+                        logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->get_name(), file);
                     }
                 }
+                for (u32 i {0}; i < files.size(); ++i) {
+                    auto const& file {files[i]};
+                    auto const  regionName {io::get_stem(file)};
+                    asset->assetPtr->add_region(regionName, {{0.0f, 0.0f, 1.0f, 1.0f}, i});
+                    asset->images.emplace_back(i, file);
+                }
+
                 if (object xyRegions; assetSection.try_get(xyRegions, API::Texture::xy_regions)) {
                     for (auto const& [regk, regv] : xyRegions) {
                         asset->abs_regions[regk] = regv.as<texture_region>();
