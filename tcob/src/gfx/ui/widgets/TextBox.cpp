@@ -17,6 +17,7 @@ text_box::text_box(init const& wi)
     Text.Changed.connect([&](auto const& val) {
         _textLength = utf8::length(val);
         _textDirty  = true;
+        if (_caretPos > _textLength) { _caretPos = _textLength; }
         force_redraw(get_name() + ": Text changed");
     });
 
@@ -85,8 +86,8 @@ void text_box::on_key_down(input::keyboard::event& ev)
         }
     } else if (ev.KeyCode == controls->BackwardDeleteKey) {
         if (_textLength > 0 && _caretPos > 0) {
-            Text = utf8::remove(Text(), _caretPos - 1);
             --_caretPos;
+            Text = utf8::remove(Text(), _caretPos);
         }
     } else if (ev.KeyCode == controls->SubmitKey) {
         Submit({this});
