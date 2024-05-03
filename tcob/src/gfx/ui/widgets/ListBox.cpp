@@ -54,6 +54,8 @@ void list_box::clear_items()
 {
     _items.clear();
     _filteredItems.clear();
+    SelectedItemIndex = -1;
+    HoveredItemIndex  = -1;
     force_redraw(get_name() + ": items cleared");
 }
 
