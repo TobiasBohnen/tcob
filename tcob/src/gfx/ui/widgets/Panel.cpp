@@ -270,6 +270,11 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     }
 }
 
+auto panel::get_layout() -> std::shared_ptr<layout>
+{
+    return _layout;
+}
+
 auto panel::get_scroll_offset() const -> point_f
 {
     return {_hScrollbar.get_current_value(), _vScrollbar.get_current_value()};

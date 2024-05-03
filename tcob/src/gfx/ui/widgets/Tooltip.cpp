@@ -5,6 +5,8 @@
 
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
+#include "tcob/gfx/ui/Layout.hpp"
+
 namespace tcob::gfx::ui {
 
 tooltip::tooltip(init const& wi)
@@ -15,6 +17,7 @@ tooltip::tooltip(init const& wi)
 
 void tooltip::force_redraw(string const& /* reason */)
 {
+    get_layout()->mark_dirty();
 }
 
 void tooltip::on_update(milliseconds deltaTime)

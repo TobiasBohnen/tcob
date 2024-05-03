@@ -146,6 +146,12 @@ auto form::get_update_mode() const -> update_mode
     return update_mode::Fixed;
 }
 
+auto form::measure_text(element::text const& style, u32 fontSize, utf8_string const& text) const -> size_f
+{
+    auto* const font {style.Font->get_font(style.Style, fontSize).get_obj()};
+    return text_formatter::measure_text(text, *font, -1, true);
+}
+
 void form::on_update(milliseconds /* deltaTime */)
 {
 }
@@ -235,6 +241,12 @@ void form::on_draw_to(render_target& target)
             ttBounds.X -= ttBounds.Width;
             if (_window && _window->Cursor()) {
                 ttBounds.X -= _window->Cursor->get_bounds().Width;
+            }
+        }
+        if (ttBounds.bottom() > Bounds->bottom()) {
+            ttBounds.Y -= ttBounds.Height;
+            if (_window && _window->Cursor()) {
+                ttBounds.Y -= _window->Cursor->get_bounds().Height;
             }
         }
 

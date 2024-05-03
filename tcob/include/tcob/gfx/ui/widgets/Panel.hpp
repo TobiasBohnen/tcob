@@ -55,6 +55,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
+    auto get_layout() -> std::shared_ptr<layout>;
+
 private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
     auto get_scroll_min_value(orientation orien) const -> f32;
