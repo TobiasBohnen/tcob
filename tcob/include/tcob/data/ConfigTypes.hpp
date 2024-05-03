@@ -32,7 +32,7 @@ public:
     object(std::shared_ptr<cfg_object_entries> const& entries) noexcept;
 
     auto operator[](string const& key) -> proxy<object, string>;
-    auto operator[](string const& key) const -> proxy<object const, string>;
+    auto operator[](string const& key) const -> proxy<object const, string> const;
 
     auto load(path const& file, bool skipBinary = false) noexcept -> load_status;
     auto load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;

@@ -35,7 +35,7 @@ auto object::operator[](string const& key) -> proxy<object, string>
     return proxy<object, string> {*this, std::tuple {key}};
 }
 
-auto object::operator[](string const& key) const -> proxy<object const, string>
+auto object::operator[](string const& key) const -> proxy<object const, string> const
 {
     return proxy<object const, string> {*this, std::tuple {key}};
 }

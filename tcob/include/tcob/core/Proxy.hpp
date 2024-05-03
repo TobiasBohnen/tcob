@@ -20,9 +20,12 @@ public:
     explicit operator T() const;
 
     auto operator=(auto&& other) -> proxy&;
+    auto operator=(auto&& other) const -> proxy& = delete;
 
     template <typename Key>
-    auto operator[](Key key) const -> proxy<Object, Keys..., Key>;
+    auto operator[](Key key) -> proxy<Object, Keys..., Key>;
+    template <typename Key>
+    auto operator[](Key key) const -> proxy<Object, Keys..., Key> const;
 
     template <typename T>
     auto as() const -> T;

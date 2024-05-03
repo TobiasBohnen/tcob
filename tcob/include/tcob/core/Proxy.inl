@@ -31,7 +31,14 @@ inline auto proxy<Object, Keys...>::operator=(auto&& other) -> proxy&
 
 template <typename Object, typename... Keys>
 template <typename Key>
-inline auto proxy<Object, Keys...>::operator[](Key key) const -> proxy<Object, Keys..., Key>
+inline auto proxy<Object, Keys...>::operator[](Key key) -> proxy<Object, Keys..., Key>
+{
+    return proxy<Object, Keys..., Key>(_object, std::tuple_cat(_keys, std::tuple {key}));
+}
+
+template <typename Object, typename... Keys>
+template <typename Key>
+inline auto proxy<Object, Keys...>::operator[](Key key) const -> proxy<Object, Keys..., Key> const
 {
     return proxy<Object, Keys..., Key>(_object, std::tuple_cat(_keys, std::tuple {key}));
 }
