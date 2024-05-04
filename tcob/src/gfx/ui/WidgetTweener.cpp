@@ -54,6 +54,7 @@ void widget_tweener::reset(f32 value)
     if (_tween) {
         _tween->stop();
     }
+    _parent.force_redraw(_parent.get_name() + ": Tween value changed");
 }
 
 } // namespace ui
