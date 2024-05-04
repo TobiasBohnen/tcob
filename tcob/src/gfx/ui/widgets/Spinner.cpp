@@ -13,9 +13,7 @@ spinner::spinner(init const& wi)
     : widget {wi}
     , Min {{[&](i32 val) -> i32 { return std::min(val, Max()); }}}
     , Max {{[&](i32 val) -> i32 { return std::max(val, Min()); }}}
-    , Value {{[&](i32 val) -> i32 {
-        return std::clamp(val, Min(), Max());
-    }}}
+    , Value {{[&](i32 val) -> i32 { return std::clamp(val, Min(), Max()); }}}
 {
     Min.Changed.connect([&](auto const& val) {
         Value = std::min(val, Value());
@@ -45,22 +43,23 @@ void spinner::on_paint(widget_painter& painter)
 
         scissor_guard const guard {painter, this};
 
-        // text
-        if (style->Text.Font) {
-            painter.draw_text(style->Text, rect, std::to_string(Value()));
-        }
-
         // arrows
         auto const& flags {get_flags()};
         auto*       normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
         auto*       activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
+        f32 const   arrowWidth {normalArrow->NavArrow.Width.calc(rect.Width)}; // FIXME: max arrow style width
         if (_hoverArrow == arrow::None) {
             painter.draw_nav_arrows(normalArrow->NavArrow, normalArrow->NavArrow, rect);
         } else if (_hoverArrow == arrow::Increase) {
             painter.draw_nav_arrows(flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, normalArrow->NavArrow, rect);
         } else if (_hoverArrow == arrow::Decrease) {
             painter.draw_nav_arrows(normalArrow->NavArrow, flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
+        }
+
+        // text
+        if (style->Text.Font) {
+            painter.draw_text(style->Text, {rect.X, rect.Y, rect.Width - arrowWidth, rect.Height}, std::to_string(Value()));
         }
     }
 }

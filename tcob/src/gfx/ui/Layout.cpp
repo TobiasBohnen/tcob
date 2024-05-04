@@ -19,6 +19,8 @@ layout::layout(parent parent)
 void layout::update()
 {
     if (_isDirty) {
+        std::stable_sort(_widgets.begin(), _widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+
         std::visit(
             tcob::detail::overloaded {
                 [&](widget_container* parent) {
@@ -28,8 +30,6 @@ void layout::update()
                     do_layout(parent->Bounds().get_size());
                 }},
             _parent);
-
-        on_update();
         _isDirty = false;
     }
 }
@@ -150,12 +150,6 @@ void dock_layout::do_layout(size_f size)
     }
 }
 
-void dock_layout::on_update()
-{
-    auto& widgets {get_widgets()};
-    std::stable_sort(widgets.begin(), widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
-}
-
 ////////////////////////////////////////////////////////////
 
 grid_layout::grid_layout(parent parent, size_i initSize)
@@ -181,6 +175,30 @@ void grid_layout::do_layout(size_f size)
         bounds.Height = widget->Flex->Height.calc(bounds.Height);
 
         widget->Bounds = bounds;
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+box_layout::box_layout(parent parent, size_i boxSize)
+    : layout {parent}
+    , _box {boxSize}
+{
+}
+
+void box_layout::do_layout(size_f size)
+{
+    auto& widgets {get_widgets()};
+
+    f32 const horiSize {size.Width / _box.Width};
+    f32 const vertSize {size.Height / _box.Height};
+
+    for (i32 i {0}; i < std::ssize(widgets) && i < _box.Width * _box.Height; ++i) {
+        auto& widget {widgets[i]};
+        widget->Bounds =
+            {i % _box.Width * horiSize, i / _box.Width * vertSize,
+             widget->Flex->Width.calc(horiSize),
+             widget->Flex->Height.calc(vertSize)};
     }
 }
 

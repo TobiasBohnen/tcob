@@ -31,7 +31,19 @@ void cycle_button::clear_items()
     force_redraw(get_name() + ": items cleared");
 }
 
-auto cycle_button::get_item_at(i32 index) const -> utf8_string const&
+auto cycle_button::select_item(utf8_string const& item) -> bool
+{
+    for (isize i {0}; i < std::ssize(_items); ++i) {
+        if (_items[i] == item) {
+            SelectedItemIndex = i;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+auto cycle_button::get_item_at(isize index) const -> utf8_string const&
 {
     return _items.at(static_cast<usize>(index));
 }

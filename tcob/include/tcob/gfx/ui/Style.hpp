@@ -8,10 +8,10 @@
 
 #include <initializer_list>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -288,7 +288,7 @@ public:
     auto check(widget_attributes const& widgetAttribs) const -> bool;
 
 private:
-    flat_map<string, std::set<attributes>> _values;
+    std::unordered_map<string, std::set<attributes>> _values;
 };
 
 ////////////////////////////////////////////////////////////

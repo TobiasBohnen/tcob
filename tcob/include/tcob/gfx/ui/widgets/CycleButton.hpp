@@ -20,12 +20,14 @@ public:
 
     explicit cycle_button(init const& wi);
 
-    prop_val<i32> SelectedItemIndex;
+    prop_val<isize> SelectedItemIndex;
 
     void add_item(utf8_string const& item);
     void clear_items();
 
-    auto get_item_at(i32 index) const -> utf8_string const&;
+    auto select_item(utf8_string const& item) -> bool;
+
+    auto get_item_at(isize index) const -> utf8_string const&;
     auto get_selected_item() const -> utf8_string const&;
     auto get_item_count() const -> isize;
 

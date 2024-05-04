@@ -40,7 +40,6 @@ protected:
     auto add_widget(string const& name) -> std::shared_ptr<T>;
 
     void virtual do_layout(size_f size) = 0;
-    void virtual on_update() { }
 
 private:
     auto create_init(string const& name) const -> widget::init;
@@ -87,7 +86,6 @@ public:
 
 protected:
     void do_layout(size_f size) override;
-    void on_update() override;
 
 private:
     std::unordered_map<widget*, dock_style> _widgetDock;
@@ -107,8 +105,25 @@ protected:
     void do_layout(size_f size) override;
 
 private:
-    size_i                    _grid {size_i::Zero};
-    flat_map<widget*, rect_i> _widgetBounds;
+    size_i                              _grid {size_i::Zero};
+    std::unordered_map<widget*, rect_i> _widgetBounds;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API box_layout final : public layout {
+public:
+    using layout::layout;
+    explicit box_layout(parent parent, size_i boxSize);
+
+    template <std::derived_from<widget> T>
+    auto create_widget(string const& name) -> std::shared_ptr<T>;
+
+protected:
+    void do_layout(size_f size) override;
+
+private:
+    size_i _box {size_i::Zero};
 };
 
 ////////////////////////////////////////////////////////////

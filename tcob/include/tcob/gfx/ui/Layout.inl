@@ -67,6 +67,15 @@ inline auto grid_layout::create_widget(rect_i const& bounds, string const& name)
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
+inline auto box_layout::create_widget(string const& name) -> std::shared_ptr<T>
+{
+    auto retValue {add_widget<T>(name)};
+    return std::static_pointer_cast<T>(retValue);
+}
+
+////////////////////////////////////////////////////////////
+
+template <std::derived_from<widget> T>
 inline auto hbox_layout::create_widget(string const& name) -> std::shared_ptr<T>
 {
     auto retValue {add_widget<T>(name)};

@@ -82,14 +82,14 @@ void tab_container::on_paint(widget_painter& painter)
         rect_f tabBarRowRect {rect};
         tabBarRowRect.Height = style->TabBarHeight.calc(tabBarRowRect.Height);
         if (style->TabBarPosition == position::Bottom) {
-            f32 const tabRows {std::ceil(std::ssize(_tabs) / static_cast<f32>(MaxTabs))};
+            f32 const tabRows {MaxTabs > 0 ? std ::ceil(std::ssize(_tabs) / static_cast<f32>(MaxTabs)) : std::ssize(_tabs)};
             tabBarRowRect.Y = rect.bottom() - (tabBarRowRect.Height * tabRows);
         }
 
         _tabRects.clear();
         for (i32 i {0}; i < std::ssize(_tabs); ++i) {
             auto const&  tabStyle {get_tab_style(i)};
-            rect_f const tabRect {get_tab_rect(i, MaxTabs, tabBarRowRect)};
+            rect_f const tabRect {get_tab_rect(i, tabBarRowRect)};
             painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
             _tabRects.push_back(tabRect);
         }
@@ -162,9 +162,10 @@ void tab_container::on_update(milliseconds /* deltaTime */)
     }
 }
 
-auto tab_container::get_tab_rect(isize index, isize maxItems, rect_f const& rect) const -> rect_f
+auto tab_container::get_tab_rect(isize index, rect_f const& rect) const -> rect_f
 {
-    rect_f retValue {rect};
+    isize const maxItems {MaxTabs > 0 ? MaxTabs : std::ssize(_tabs)};
+    rect_f      retValue {rect};
     retValue.X      = rect.X + (rect.Width / maxItems) * (index % maxItems);
     retValue.Width  = rect.Width / maxItems;
     retValue.Y      = retValue.Y + (rect.Height * (index / maxItems));
