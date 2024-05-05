@@ -39,6 +39,17 @@ void layout::mark_dirty()
     _isDirty = true;
 }
 
+void layout::remove_widget(widget* widget)
+{
+    for (isize i {0}; i < std::ssize(_widgets); ++i) {
+        if (_widgets[i].get() == widget) {
+            _widgets.erase(_widgets.begin() + i);
+            break;
+        }
+    }
+    _isDirty = true;
+}
+
 void layout::clear()
 {
     _widgets.clear();

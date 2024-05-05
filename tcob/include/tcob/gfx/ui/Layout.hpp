@@ -30,6 +30,7 @@ public:
 
     void mark_dirty();
 
+    void remove_widget(widget* widget);
     void clear();
 
     auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const&;

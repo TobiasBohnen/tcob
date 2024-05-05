@@ -45,6 +45,8 @@ public:
     template <std::derived_from<tooltip> T>
     auto create_tooltip(string const& name) -> std::shared_ptr<T>;
 
+    void remove_container(widget* wc);
+
     auto find_widget_at(point_f pos) const -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
     auto get_top_widget() const -> widget*;

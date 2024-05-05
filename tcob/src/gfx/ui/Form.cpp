@@ -48,6 +48,11 @@ auto form::get_name() const -> string const&
     return _name;
 }
 
+void form::remove_container(widget* wc)
+{
+    _layout.remove_widget(wc);
+}
+
 auto form::get_top_widget() const -> widget*
 {
     return _topWidget;
