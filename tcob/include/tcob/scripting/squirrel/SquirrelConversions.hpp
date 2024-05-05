@@ -954,6 +954,16 @@ struct converter<proxy<table, Keys...>> {
     }
 };
 
+template <typename... Keys>
+struct converter<proxy<table const, Keys...>> {
+    void static To(vm_view, proxy<table const, Keys...> const& value)
+    {
+        if (ref val; value.try_get(val)) {
+            val.push_self();
+        }
+    }
+};
+
 template <Serializable<table> T>
 struct converter<T> {
     auto static IsType(vm_view view, SQInteger idx) -> bool

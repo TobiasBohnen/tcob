@@ -1017,6 +1017,16 @@ struct converter<proxy<table, Keys...>> {
     }
 };
 
+template <typename... Keys>
+struct converter<proxy<table const, Keys...>> {
+    void static To(state_view, proxy<table const, Keys...> const& value)
+    {
+        if (ref val; value.try_get(val)) {
+            val.push_self();
+        }
+    }
+};
+
 template <Serializable<table> T>
 struct converter<T> {
     auto static IsType(state_view view, i32 idx) -> bool

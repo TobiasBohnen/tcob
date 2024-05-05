@@ -1956,6 +1956,16 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
             REQUIRE(tab["x"]["a"].as<i32>() == 100);
             REQUIRE(tab["y"]["a"].as<i32>() == 100);
         }
+        SUBCASE("const table")
+        {
+            auto const tab  = *run<table>(" return {x=100}");
+            auto       tab2 = table {get_view()};
+            tab2["a"]       = 100;
+            tab["x"]        = tab2;
+            tab["y"]        = tab["x"];
+            REQUIRE(tab["x"]["a"].as<i32>() == 100);
+            REQUIRE(tab["y"]["a"].as<i32>() == 100);
+        }
         SUBCASE("undefined")
         {
             auto tab = table {get_view()};
