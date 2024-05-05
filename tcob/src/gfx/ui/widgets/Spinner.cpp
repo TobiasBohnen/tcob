@@ -64,6 +64,12 @@ void spinner::on_paint(widget_painter& painter)
     }
 }
 
+void spinner::on_mouse_leave()
+{
+    _mouseDown = false;
+    _holdCount = 1;
+}
+
 void spinner::on_mouse_hover(input::mouse::motion_event& ev)
 {
     ev.Handled = true;
@@ -95,13 +101,25 @@ void spinner::on_mouse_hover(input::mouse::motion_event& ev)
     }
 }
 
-void spinner::on_mouse_down(input::mouse::button_event& /* ev */)
+void spinner::on_mouse_down(input::mouse::button_event& ev)
 {
+    if (_hoverArrow == arrow::None) { return; }
+
     if (_hoverArrow == arrow::Increase) {
         Value += Step();
     } else if (_hoverArrow == arrow::Decrease) {
         Value -= Step();
     }
+
+    ev.Handled = true;
+    _mouseDown = true;
+    _holdTime.restart();
+}
+
+void spinner::on_mouse_up(input::mouse::button_event& /* ev */)
+{
+    _mouseDown = false;
+    _holdCount = 1;
 }
 
 void spinner::on_mouse_wheel(input::mouse::wheel_event& ev)
@@ -115,6 +133,15 @@ void spinner::on_mouse_wheel(input::mouse::wheel_event& ev)
 
 void spinner::on_update(milliseconds /*deltaTime*/)
 {
+    if (_mouseDown && _holdTime.get_elapsed_milliseconds() > (250.f / _holdCount)) {
+        if (_hoverArrow == arrow::Increase) {
+            Value += Step();
+        } else if (_hoverArrow == arrow::Decrease) {
+            Value -= Step();
+        }
+        _holdTime.restart();
+        _holdCount += 0.1f;
+    }
 }
 
 auto spinner::get_attributes() const -> widget_attributes

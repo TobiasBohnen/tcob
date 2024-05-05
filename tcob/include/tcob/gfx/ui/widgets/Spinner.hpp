@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Stopwatch.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
@@ -29,8 +30,10 @@ public:
 protected:
     void on_paint(widget_painter& painter) override;
 
+    void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event& ev) override;
     void on_mouse_down(input::mouse::button_event& ev) override;
+    void on_mouse_up(input::mouse::button_event& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event& ev) override;
 
     void on_update(milliseconds deltaTime) override;
@@ -45,5 +48,9 @@ private:
     };
 
     arrow _hoverArrow {arrow::None};
+
+    bool      _mouseDown {false};
+    stopwatch _holdTime;
+    f32       _holdCount {1};
 };
 }
