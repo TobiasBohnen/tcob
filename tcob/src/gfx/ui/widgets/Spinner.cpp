@@ -45,9 +45,9 @@ void spinner::on_paint(widget_painter& painter)
 
         // arrows
         auto const& flags {get_flags()};
-        auto*       normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
-        auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
-        auto*       activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
+        auto const* normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
+        auto const* hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
+        auto const* activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
         f32 const   arrowWidth {normalArrow->NavArrow.Width.calc(rect.Width)}; // FIXME: max arrow style width
         if (_hoverArrow == arrow::None) {
             painter.draw_nav_arrows(normalArrow->NavArrow, normalArrow->NavArrow, rect);
@@ -76,7 +76,7 @@ void spinner::on_mouse_hover(input::mouse::motion_event& ev)
 
     if (auto const* style {get_style<spinner::style>()}) {
         rect_f const rect {get_global_content_bounds()};
-        auto*        normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
+        auto const*  normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         rect_f const navRect {normalArrow->NavArrow.calc(rect)};
         if (navRect.contains(ev.Position)) {
             if (ev.Position.Y <= navRect.get_center().Y) {

@@ -28,24 +28,24 @@ auto style_attributes::check(widget_attributes const& widgetAttribs) const -> bo
 
 ////////////////////////////////////////////////////////////
 
-auto style_collection::get(string const& name, flags flags, widget_attributes const& attribs) const -> std::shared_ptr<style_base>
+auto style_collection::get(string const& name, flags flags, widget_attributes const& attribs) const -> style_base*
 {
-    std::shared_ptr<style_base> bestCandidate;
-    i32                         bestScore {std::numeric_limits<i32>::min()};
+    style_base* bestCandidate {nullptr};
+    i32         bestScore {std::numeric_limits<i32>::min()};
 
-    for (auto const& [sname, sflags, styleAttribs, style] : _styles) {
-        if (sname == name) {
-            // check attributes
-            if (styleAttribs.check(attribs)) {
-                // check flags
-                i32 const score {sflags.check(flags)};
-                if (score == bestScore) {
-                    bestCandidate = style;
-                } else if (score > bestScore) {
-                    bestScore     = score;
-                    bestCandidate = style;
-                }
-            }
+    for (auto const& [styleName, styleFlags, styleAttribs, style] : _styles) {
+        if (styleName != name) { continue; }
+
+        // check attributes
+        if (!styleAttribs.check(attribs)) { continue; }
+
+        // check flags
+        i32 const score {styleFlags.check(flags)};
+        if (score == bestScore) {
+            bestCandidate = style.get();
+        } else if (score > bestScore) {
+            bestScore     = score;
+            bestCandidate = style.get();
         }
     }
 

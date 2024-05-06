@@ -301,7 +301,7 @@ public:
     template <std::derived_from<widget> T>
     auto create(string const& name, flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<typename T::style>;
 
-    auto get(string const& name, flags flags, widget_attributes const& attribs) const -> std::shared_ptr<style_base>;
+    auto get(string const& name, flags flags, widget_attributes const& attribs) const -> style_base*;
 
     void clear();
 

@@ -172,15 +172,15 @@ private:
 
     tcob::detail::connection_manager _connections;
 
-    bool                        _visible {true};
-    bool                        _enabled {true};
-    bool                        _inert {false};
-    flags                       _flags {};
-    f32                         _alpha {1.0f};
-    form*                       _form {nullptr};
-    widget*                     _parent {nullptr};
-    std::shared_ptr<style_base> _style;
-    string                      _name;
+    bool        _visible {true};
+    bool        _enabled {true};
+    bool        _inert {false};
+    flags       _flags {};
+    f32         _alpha {1.0f};
+    form*       _form {nullptr};
+    widget*     _parent {nullptr};
+    style_base* _style {nullptr};
+    string      _name;
 };
 
 ////////////////////////////////////////////////////////////
