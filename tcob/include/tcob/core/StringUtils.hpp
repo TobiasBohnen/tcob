@@ -31,6 +31,8 @@ TCOB_API void split_preserve_brackets_to(string_view str, char delim, std::vecto
 
 TCOB_API auto trim(string_view source) -> string_view;
 
+TCOB_API auto find_unquoted(string_view source, char needle) -> string_view::size_type;
+
 TCOB_API auto to_lower(string_view source) -> string;
 
 TCOB_API auto case_insensitive_equals(string_view lhs, string_view rhs) -> bool;

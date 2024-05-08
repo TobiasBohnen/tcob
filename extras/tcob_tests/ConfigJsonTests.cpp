@@ -158,13 +158,15 @@ TEST_CASE("Data.Json.Parse")
             },
             "stringArray": ["One", "Two", "Three"],
             "intArray": [1, 2, 3],
-            "bla": null
+            "bla": null,
+            "co:lon": "o:k"
         })"};
 
         object obj;
         REQUIRE(obj.parse(jsonString, EXT));
 
         REQUIRE(obj["string"].as<std::string>() == "Test");
+        REQUIRE(obj["co:lon"].as<std::string>() == "o:k");
         REQUIRE(obj["number"].as<i32>() == 12);
         REQUIRE(obj["float"].as<f64>() == 1.2);
         REQUIRE(obj["bool"].as<bool>() == true);

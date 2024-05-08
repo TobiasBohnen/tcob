@@ -113,7 +113,7 @@ auto ini_reader::read_section_header(utf8_string_view line) -> bool
 
 auto ini_reader::read_key_value_pair(entry& currentEntry, object const& obj, utf8_string_view line) -> bool
 {
-    auto const separatorPos {line.find('=')};
+    auto const separatorPos {helper::find_unquoted(line, '=')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};

@@ -25,7 +25,8 @@ TEST_CASE("Data.Ini.Get")
             valueInt   = 42
             #comment6_6
             valueFloat = 456.78
-            'value.Str' = '123'
+            'value.Str' = '123' 
+            'value=Str' = '123'
         )";
     object t;
     REQUIRE(t.parse(iniString, EXT));
@@ -47,6 +48,7 @@ TEST_CASE("Data.Ini.Get")
         REQUIRE(t.as<bool>("section1", "valueBool") == true);
         REQUIRE(t.as<std::string>("section1", "valueStr") == "test123");
         REQUIRE(t.as<std::string>("section2", "value.Str") == "123");
+        REQUIRE(t.as<std::string>("section2", "value=Str") == "123");
         REQUIRE(t.as<f64>("section1", "valueFloat") == 123.45);
         REQUIRE(t.as<f64>("section1", "valueSec", "a") == 100);
         REQUIRE(t.as<bool>("section1", "valueSec", "b") == false);
@@ -1253,6 +1255,7 @@ TEST_CASE("Data.Ini.Parse")
     REQUIRE(object::Parse("a=a", EXT));
     REQUIRE(object::Parse("a.a=a", EXT));
     REQUIRE(object::Parse("", EXT));
+    REQUIRE(object::Parse("'a=b'=1", EXT));
 
     REQUIRE_FALSE(object::Parse("a=", EXT));
     REQUIRE_FALSE(object::Parse("=a", EXT));
