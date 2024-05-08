@@ -53,7 +53,8 @@ auto vscroll_widget::get_scroll_style(orientation orien) const -> element::scrol
 void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
-    set_scrollbar_value(0);
+    f32 const max {get_scroll_max_value(orientation::Vertical)};
+    if (get_scrollbar_value() > max) { set_scrollbar_value(max); }
 }
 
 void vscroll_widget::on_paint(widget_painter& painter)
