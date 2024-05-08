@@ -547,7 +547,7 @@ auto create_color_styles() -> style_collection
     // THUMBS
     {
         auto style {retValue.create<thumb_style>("slider_thumb", {}, {})};
-        style->Thumb.Type          = element::thumb::type::Rectangle;
+        style->Thumb.Type          = element::thumb::type::Rect;
         style->Thumb.LongSide      = 25_pct;
         style->Thumb.ShortSide     = 80_pct;
         style->Thumb.Border.Size   = 3_px;
@@ -565,7 +565,7 @@ auto create_color_styles() -> style_collection
     }
     {
         auto style {retValue.create<thumb_style>("scrollbar_thumb", {}, {})};
-        style->Thumb.Type        = element::thumb::type::Rectangle;
+        style->Thumb.Type        = element::thumb::type::Rect;
         style->Thumb.LongSide    = 25_pct;
         style->Thumb.ShortSide   = 80_pct;
         style->Thumb.Border.Size = 3_px;

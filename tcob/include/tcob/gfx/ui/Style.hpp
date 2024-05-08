@@ -113,7 +113,7 @@ namespace element {
     class TCOB_API thumb {
     public:
         enum class type : u8 {
-            Rectangle,
+            Rect,
             Disc
         };
 
@@ -123,7 +123,7 @@ namespace element {
             f32         Fraction {0.0f};
         };
 
-        type     Type {type::Rectangle};
+        type     Type {type::Rect};
         ui_paint Background {colors::White};
         length   LongSide {};
         length   ShortSide {};

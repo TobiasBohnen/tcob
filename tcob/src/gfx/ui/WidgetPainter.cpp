@@ -373,7 +373,7 @@ auto widget_painter::draw_thumb(element::thumb const& style, rect_f const& refRe
 {
     rect_f retValue {style.calc(refRect, thumbCtx)};
 
-    if (style.Type == element::thumb::type::Rectangle) {
+    if (style.Type == element::thumb::type::Rect) {
         draw_bordered_rect(retValue, style.Background, style.Border);
     } else if (style.Type == element::thumb::type::Disc) {
         draw_bordered_circle(retValue, style.Background, style.Border);

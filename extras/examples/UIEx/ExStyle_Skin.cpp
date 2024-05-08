@@ -358,7 +358,7 @@ auto create_skinned_styles() -> style_collection
     // THUMBS
     {
         auto style {retValue.create<thumb_style>("v_slider_thumb", {}, {})};
-        style->Thumb.Type       = element::thumb::type::Rectangle;
+        style->Thumb.Type       = element::thumb::type::Rect;
         style->Thumb.LongSide   = 25_pct;
         style->Thumb.ShortSide  = 80_pct;
         style->Thumb.Background = blue.SliderRight;
@@ -371,7 +371,7 @@ auto create_skinned_styles() -> style_collection
     }
     {
         auto style {retValue.create<thumb_style>("h_slider_thumb", {}, {})};
-        style->Thumb.Type       = element::thumb::type::Rectangle;
+        style->Thumb.Type       = element::thumb::type::Rect;
         style->Thumb.LongSide   = 25_pct;
         style->Thumb.ShortSide  = 80_pct;
         style->Thumb.Background = blue.SliderUp;
@@ -385,7 +385,7 @@ auto create_skinned_styles() -> style_collection
     {
         auto style {retValue.create<thumb_style>("v_scrollbar_thumb", {}, {})};
         style->Thumb.Background = blue.SliderRight;
-        style->Thumb.Type       = element::thumb::type::Rectangle;
+        style->Thumb.Type       = element::thumb::type::Rect;
         style->Thumb.LongSide   = 5_pct;
         style->Thumb.ShortSide  = 80_pct;
 
@@ -398,7 +398,7 @@ auto create_skinned_styles() -> style_collection
     {
         auto style {retValue.create<thumb_style>("h_scrollbar_thumb", {}, {})};
         style->Thumb.Background = blue.SliderUp;
-        style->Thumb.Type       = element::thumb::type::Rectangle;
+        style->Thumb.Type       = element::thumb::type::Rect;
         style->Thumb.LongSide   = 5_pct;
         style->Thumb.ShortSide  = 80_pct;
 
