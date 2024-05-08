@@ -51,6 +51,9 @@ public:
     struct style {
         bool   IsItalic {false};
         weight Weight {weight::Normal};
+
+        void static Serialize(style const& v, auto&& s);
+        auto static Deserialize(style& v, auto&& s) -> bool;
     };
 
     struct info final {
@@ -80,6 +83,17 @@ private:
 inline auto operator==(font::style const& lhs, font::style const& rhs)
 {
     return lhs.IsItalic == rhs.IsItalic && lhs.Weight == rhs.Weight;
+}
+
+inline void font::style::Serialize(style const& v, auto&& s)
+{
+    s["is_italic"] = v.IsItalic;
+    s["weight"]    = v.Weight;
+}
+
+inline auto font::style::Deserialize(style& v, auto&& s) -> bool
+{
+    return s.try_get(v.IsItalic, "is_italic") && s.try_get(v.Weight, "weight");
 }
 
 ////////////////////////////////////////////////////////////
