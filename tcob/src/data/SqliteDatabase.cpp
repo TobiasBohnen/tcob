@@ -225,9 +225,7 @@ auto database::Open(path const& file) -> std::optional<database>
     if (!io::is_file(file)) { io::create_file(file); }
 
     database_view db {nullptr};
-    if (db.open(file)) {
-        return std::make_optional<database>(db);
-    }
+    if (db.open(file)) { return std::make_optional<database>(db); }
 
     return std::nullopt;
 }
