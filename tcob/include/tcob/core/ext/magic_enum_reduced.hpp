@@ -50,7 +50,7 @@ private:
 
 auto constexpr is_pretty(char ch) noexcept
 {
-    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9');
 }
 
 auto constexpr pretty_name(string_view sv) noexcept
