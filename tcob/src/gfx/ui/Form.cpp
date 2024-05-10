@@ -233,7 +233,7 @@ void form::on_draw_to(render_target& target)
     }
 
     // tooltip
-    if (_isTooltipVisible) {
+    if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         point_i const pos {(_window && _window->Cursor()
                                 ? _window->Cursor->get_bounds().bottom_right()
                                 : input::system::GetMousePosition())
