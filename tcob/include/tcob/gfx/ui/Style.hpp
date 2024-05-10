@@ -209,7 +209,7 @@ namespace element {
         type     Type {type::Triangle};
         ui_paint IncBackground {colors::Transparent};
         ui_paint DecBackground {colors::Transparent};
-        color    Foreground {colors::Transparent};
+        ui_paint Foreground {colors::Transparent};
         length   Width {};
         length   Height {};
         border   Border {};

@@ -114,7 +114,7 @@ void list_box::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHei
 {
     auto const&  itemStyle {get_item_style(i)};
     rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-    if (itemRect.bottom() > 0 && itemRect.top() < listRect.bottom()) {
+    if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
         painter.draw_item(itemStyle->Item, itemRect, get_items()[i]);
     }
 }
