@@ -94,10 +94,73 @@ void CanvasEx::paint_to_canvas()
     _canvas.begin_frame({1000, 800}, 1);
 
     auto* resGrp {locate_service<assets::library>().get_group("res")};
-    auto  img = _canvas.create_image_pattern({0, 0}, {128, 128}, 0, resGrp->get<texture>("burger").get_obj(), 1);
-    img.Color = colors::Red;
-    _canvas.set_fill_style(img);
-    _canvas.fill_rect({0, 0, 128, 128});
+    f32   x {20};
+    f32   y {20};
+    f32   height {300};
+    f32   width {600};
+    f32   radius {6};
+    f32   strokeWidth {10};
+
+    color topColor    = colors::Gray;
+    color rightColor  = colors::LightGray;
+    color leftColor   = colors::Gray;
+    color bottomColor = colors::LightGray;
+
+    _canvas.set_stroke_width(strokeWidth);
+
+    _canvas.set_fill_style(colors::Blue);
+    _canvas.fill_rounded_rect({x, y, width, height}, radius);
+    _canvas.set_stroke_style(colors::GhostWhite);
+    _canvas.stroke_rounded_rect({x, y, width, height}, radius);
+    f32     offset {strokeWidth / 2};
+    point_f outerTL {x - offset, y - offset};
+    point_f outerTR {x + offset + width, y - offset};
+    point_f outerBL {x - offset, y + offset + height};
+    point_f outerBR {x + offset + width, y + offset + height};
+    point_f innerTL {x + offset, y + offset};
+    point_f innerTR {x - offset + width, y + offset};
+    point_f innerBL {x + offset, y - offset + height};
+    point_f innerBR {x - offset + width, y - offset + height};
+
+    _canvas.set_shape_antialias(false);
+    _canvas.begin_path();
+    _canvas.move_to(outerTL);
+    _canvas.line_to(innerTL);
+    _canvas.line_to(innerBL);
+    _canvas.line_to(outerBL);
+    _canvas.set_fill_style(leftColor);
+    _canvas.fill();
+    _canvas.begin_path();
+    _canvas.move_to(outerTL);
+    _canvas.line_to(outerTR);
+    _canvas.line_to(innerTR);
+    _canvas.line_to(innerTL);
+    _canvas.set_fill_style(topColor);
+    _canvas.fill();
+    _canvas.begin_path();
+    _canvas.move_to(outerTR);
+    _canvas.line_to(outerBR);
+    _canvas.line_to(innerBR);
+    _canvas.line_to(innerTR);
+    _canvas.set_fill_style(rightColor);
+    _canvas.fill();
+    _canvas.begin_path();
+    _canvas.move_to(outerBL);
+    _canvas.line_to(outerBR);
+    _canvas.line_to(innerBR);
+    _canvas.line_to(innerBL);
+    _canvas.set_fill_style(bottomColor);
+    _canvas.fill();
+
+    if (radius > 0) {
+        _canvas.set_global_composite_blendfunc(gfx::blend_func::One, gfx::blend_func::Zero);
+        _canvas.set_stroke_style(colors::Transparent);
+        _canvas.begin_path();
+        _canvas.rect({x - strokeWidth, y - strokeWidth, width + strokeWidth * 2, height + strokeWidth * 2});
+        _canvas.rounded_rect({x - strokeWidth, y - strokeWidth, width + strokeWidth * 2, height + strokeWidth * 2}, radius + strokeWidth);
+        _canvas.stroke();
+        _canvas.set_global_composite_blendfunc(gfx::blend_func::SrcAlpha, gfx::blend_func::OneMinusSrcAlpha);
+    }
 
     // auto p0 {canvas::path2d::Parse("m 108,229 -6,-2.5 -5,3.5 0.4,-6.5 -5.0,-4 6.0,-1.5 2.2,-6 3.5,5.5 6.5,0.3 -4.0,5 z")};
     /*

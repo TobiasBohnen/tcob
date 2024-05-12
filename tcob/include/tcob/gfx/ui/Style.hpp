@@ -95,8 +95,12 @@ namespace element {
         enum class type : u8 {
             Solid,
             Double,
-            //   Dotted,
-            //   Dashed,
+            // Dotted,
+            // Dashed,
+            // Inset,
+            // Outset,
+            // Groove,
+            // Ridge
             Hidden
         };
 

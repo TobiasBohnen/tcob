@@ -2187,7 +2187,7 @@ void canvas::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJo
             Normalize(dx, dy);
             if (lineCap == line_cap::Butt) {
                 dst = ButtCapStart(dst, *p0, dx, dy, w, -aa * 0.5f, aa, u0, u1);
-            } else if (lineCap == line_cap::Butt || lineCap == line_cap::Square) {
+            } else if (lineCap == line_cap::Square) {
                 dst = ButtCapStart(dst, *p0, dx, dy, w, w - aa, aa, u0, u1);
             } else if (lineCap == line_cap::Round) {
                 dst = RoundCapStart(dst, *p0, dx, dy, w, ncap, u0, u1);
@@ -2223,7 +2223,7 @@ void canvas::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJo
             Normalize(dx, dy);
             if (lineCap == line_cap::Butt) {
                 dst = ButtCapEnd(dst, *p1, dx, dy, w, -aa * 0.5f, aa, u0, u1);
-            } else if (lineCap == line_cap::Butt || lineCap == line_cap::Square) {
+            } else if (lineCap == line_cap::Square) {
                 dst = ButtCapEnd(dst, *p1, dx, dy, w, w - aa, aa, u0, u1);
             } else if (lineCap == line_cap::Round) {
                 dst = RoundCapEnd(dst, *p1, dx, dy, w, ncap, u0, u1);
