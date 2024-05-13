@@ -36,7 +36,9 @@ void element_painter::draw_background(background_draw_context const& ctx)
         _canvas.set_fill_style(ctx.BackgroundColor);
     }
 
-    _canvas.fill_rounded_rect_varying(ctx.ClipBox, ctx.BorderRadii.TopLeft, ctx.BorderRadii.TopRight, ctx.BorderRadii.BottomRight, ctx.BorderRadii.BottomLeft);
+    _canvas.begin_path();
+    _canvas.rounded_rect_varying(ctx.ClipBox, ctx.BorderRadii.TopLeft, ctx.BorderRadii.TopRight, ctx.BorderRadii.BottomRight, ctx.BorderRadii.BottomLeft);
+    _canvas.fill();
 
     if (ctx.Image) { // image optional?
         if (ctx.Repeat == background_repeat::NoRepeat) {
@@ -47,13 +49,19 @@ void element_painter::draw_background(background_draw_context const& ctx)
 
             switch (ctx.Repeat) {
             case background_repeat::Repeat:
-                _canvas.fill_rect(ctx.OriginBox);
+                _canvas.begin_path();
+                _canvas.rect(ctx.OriginBox);
+                _canvas.fill();
                 break;
             case background_repeat::RepeatX:
-                _canvas.fill_rect({ctx.OriginBox.top_left(), {ctx.OriginBox.Width, ctx.ImageSize.Height}});
+                _canvas.begin_path();
+                _canvas.rect({ctx.OriginBox.top_left(), {ctx.OriginBox.Width, ctx.ImageSize.Height}});
+                _canvas.fill();
                 break;
             case background_repeat::RepeatY:
-                _canvas.fill_rect({ctx.OriginBox.top_left(), {ctx.ImageSize.Width, ctx.OriginBox.Height}});
+                _canvas.begin_path();
+                _canvas.rect({ctx.OriginBox.top_left(), {ctx.ImageSize.Width, ctx.OriginBox.Height}});
+                _canvas.fill();
                 break;
             case background_repeat::NoRepeat:
                 break;
@@ -191,15 +199,21 @@ void element_painter::draw_list_marker(list_marker_draw_context const& ctx)
     switch (ctx.Type) {
     case list_marker_type::Circle:
         _canvas.set_stroke_style(ctx.Color);
-        _canvas.stroke_circle(ctx.Box.get_center(), ctx.Box.Width);
+        _canvas.begin_path();
+        _canvas.circle(ctx.Box.get_center(), ctx.Box.Width);
+        _canvas.stroke();
         break;
     case list_marker_type::Disc:
         _canvas.set_fill_style(ctx.Color);
-        _canvas.fill_circle(ctx.Box.get_center(), ctx.Box.Width);
+        _canvas.begin_path();
+        _canvas.circle(ctx.Box.get_center(), ctx.Box.Width);
+        _canvas.fill();
         break;
     case list_marker_type::Square:
         _canvas.set_fill_style(ctx.Color);
-        _canvas.fill_rect(ctx.Box);
+        _canvas.begin_path();
+        _canvas.rect(ctx.Box);
+        _canvas.fill();
         break;
     case list_marker_type::Image:
         _canvas.draw_image(ctx.Image, ctx.Box);

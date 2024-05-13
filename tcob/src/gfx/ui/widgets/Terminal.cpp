@@ -266,7 +266,9 @@ void terminal::on_paint(widget_painter& painter)
 
         // cells
         canvas.set_fill_style(DEFAULT_COLORS.second);
-        canvas.fill_rect(rect);
+        canvas.begin_path();
+        canvas.rect(rect);
+        canvas.fill();
         auto const& buffer {get_front_buffer()};
         for (isize i {_bufferSize - 1}; i >= 0; --i) {
             auto const& cell {buffer[i]};
@@ -279,7 +281,9 @@ void terminal::on_paint(widget_painter& painter)
 
             if (cell.Colors.second != DEFAULT_COLORS.second) {
                 canvas.set_fill_style(cell.Colors.second);
-                canvas.fill_rect(cellRect);
+                canvas.begin_path();
+                canvas.rect(cellRect);
+                canvas.fill();
             }
 
             if (cell.Text.empty()) { continue; }

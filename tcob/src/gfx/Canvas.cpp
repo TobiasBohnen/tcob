@@ -576,6 +576,11 @@ void canvas::set_path_winding(winding dir)
     append_commands(std::vector<f32> {Winding, static_cast<f32>(dir)});
 }
 
+void canvas::set_path_winding(solidity s)
+{
+    append_commands(std::vector<f32> {Winding, static_cast<f32>(s)});
+}
+
 ////////////////////////////////////////////////////////////
 
 void canvas::move_to(point_f pos)
@@ -622,26 +627,6 @@ void canvas::stroke_lines(std::span<point_f const> points)
     for (u32 i {1}; i < points.size(); ++i) {
         line_to(points[i]);
     }
-
-    stroke();
-}
-
-void canvas::stroke_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end)
-{
-    begin_path();
-
-    move_to(start);
-    cubic_bezier_to(cp0, cp1, end);
-
-    stroke();
-}
-
-void canvas::stroke_quad_bezier(point_f start, point_f cp, point_f end)
-{
-    begin_path();
-
-    move_to(start);
-    quad_bezier_to(cp, end);
 
     stroke();
 }
@@ -703,69 +688,6 @@ void canvas::stroke_dashed_circle(point_f center, f32 r, i32 numDashes)
         line_to(func(t + inc) * r + center);
     }
 
-    stroke();
-}
-
-void canvas::fill_dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
-{
-    begin_path();
-    dotted_cubic_bezier(start, cp0, cp1, end, r, numDots);
-    fill();
-}
-
-void canvas::fill_dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots)
-{
-    begin_path();
-    dotted_quad_bezier(start, cp, end, r, numDots);
-    fill();
-}
-
-void canvas::fill_dotted_line(point_f from, point_f to, f32 r, i32 numDots)
-{
-    begin_path();
-    dotted_line(from, to, r, numDots);
-    fill();
-}
-
-void canvas::fill_dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
-{
-    begin_path();
-    dotted_circle(center, rcircle, rdots, numDots);
-    fill();
-}
-
-void canvas::stroke_dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
-{
-    begin_path();
-    dotted_cubic_bezier(start, cp0, cp1, end, r, numDots);
-    stroke();
-}
-
-void canvas::stroke_dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots)
-{
-    begin_path();
-    dotted_quad_bezier(start, cp, end, r, numDots);
-    stroke();
-}
-
-void canvas::stroke_dotted_line(point_f from, point_f to, f32 r, i32 numDots)
-{
-    begin_path();
-    dotted_line(from, to, r, numDots);
-    stroke();
-}
-
-void canvas::stroke_dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
-{
-    begin_path();
-    dotted_circle(center, rcircle, rdots, numDots);
-    stroke();
-}
-
-void canvas::stroke_wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase)
-{
-    begin_path();
-    wavy_line(from, to, amp, freq, phase);
     stroke();
 }
 
@@ -1069,20 +991,6 @@ void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, windi
     append_commands(vals);
 }
 
-void canvas::fill_arc(point_f center, f32 r, degree_f a0, degree_f a1, winding wind)
-{
-    begin_path();
-    arc(center, r, a0, a1, wind);
-    fill();
-}
-
-void canvas::stroke_arc(point_f center, f32 r, degree_f a0, degree_f a1, winding wind)
-{
-    begin_path();
-    arc(center, r, a0, a1, wind);
-    stroke();
-}
-
 void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 {
     if (_commands.empty()) {
@@ -1147,37 +1055,9 @@ void canvas::rect(rect_f const& rec)
         Close});
 }
 
-void canvas::fill_rect(rect_f const& r)
-{
-    begin_path();
-    rect(r);
-    fill();
-}
-
-void canvas::stroke_rect(rect_f const& r)
-{
-    begin_path();
-    rect(r);
-    stroke();
-}
-
 void canvas::rounded_rect(rect_f const& r, f32 rad)
 {
     rounded_rect_varying(r, rad, rad, rad, rad);
-}
-
-void canvas::fill_rounded_rect(rect_f const& r, f32 rad)
-{
-    begin_path();
-    rounded_rect(r, rad);
-    fill();
-}
-
-void canvas::stroke_rounded_rect(rect_f const& r, f32 rad)
-{
-    begin_path();
-    rounded_rect(r, rad);
-    stroke();
 }
 
 void canvas::rounded_rect_varying(rect_f const& rec, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
@@ -1207,20 +1087,6 @@ void canvas::rounded_rect_varying(rect_f const& rec, f32 radTL, f32 radTR, f32 r
         Close});
 }
 
-void canvas::fill_rounded_rect_varying(rect_f const& r, f32 rtl, f32 rtr, f32 rbr, f32 rbl)
-{
-    begin_path();
-    rounded_rect_varying(r, rtl, rtr, rbr, rbl);
-    fill();
-}
-
-void canvas::stroke_rounded_rect_varying(rect_f const& r, f32 rtl, f32 rtr, f32 rbr, f32 rbl)
-{
-    begin_path();
-    rounded_rect_varying(r, rtl, rtr, rbr, rbl);
-    stroke();
-}
-
 ////////////////////////////////////////////////////////////
 
 void canvas::ellipse(point_f c, f32 rx, f32 ry)
@@ -1235,37 +1101,9 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
         Close});
 }
 
-void canvas::fill_ellipse(point_f center, f32 hr, f32 vr)
-{
-    begin_path();
-    ellipse(center, hr, vr);
-    fill();
-}
-
-void canvas::stroke_ellipse(point_f center, f32 hr, f32 vr)
-{
-    begin_path();
-    ellipse(center, hr, vr);
-    stroke();
-}
-
 void canvas::circle(point_f c, f32 r)
 {
     ellipse(c, r, r);
-}
-
-void canvas::fill_circle(point_f center, f32 r)
-{
-    begin_path();
-    circle(center, r);
-    fill();
-}
-
-void canvas::stroke_circle(point_f center, f32 r)
-{
-    begin_path();
-    circle(center, r);
-    stroke();
 }
 
 ////////////////////////////////////////////////////////////
@@ -1672,7 +1510,9 @@ void canvas::draw_image(texture* image, rect_f const& rect, color color)
     img.Color = color;
 
     set_fill_style(img);
-    fill_rect(rect);
+    begin_path();
+    this->rect(rect);
+    fill();
 }
 
 void canvas::draw_image_clipped(texture* image, rect_f const& srect, rect_f const& rect, color color)
@@ -1686,7 +1526,9 @@ void canvas::draw_image_clipped(texture* image, rect_f const& srect, rect_f cons
     img.Color = color;
 
     set_fill_style(img);
-    fill_rect(rect);
+    begin_path();
+    this->rect(rect);
+    fill();
 }
 
 void canvas::draw_nine_patch(texture* image, string const& region, rect_f const& rect, point_f offsetCenterLT, point_f offsetCenterRB, rect_f const& localCenterUV)

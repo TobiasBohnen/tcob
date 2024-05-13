@@ -81,7 +81,9 @@ void widget_painter::draw_bordered_rect(rect_f const& rect, ui_paint const& back
         // background
         f32 const borderRadius {borderStyle.Radius.calc(rect.Width)};
         _canvas.set_fill_style(get_paint(back, rect));
-        _canvas.fill_rounded_rect(rect, borderRadius);
+        _canvas.begin_path();
+        _canvas.rounded_rect(rect, borderRadius);
+        _canvas.fill();
 
         // border
         f32 const borderSize {borderStyle.Size.calc(rect.Width)};
@@ -99,7 +101,9 @@ void widget_painter::draw_bordered_circle(rect_f const& rect, ui_paint const& ba
         // background
         _canvas.set_fill_style(get_paint(back, rect));
         f32 const r {std::min(rect.Height, rect.Width) / 2};
-        _canvas.fill_circle(rect.get_center(), r);
+        _canvas.begin_path();
+        _canvas.circle(rect.get_center(), r);
+        _canvas.fill();
 
         // border
         f32 const borderSize {borderStyle.Size.calc(rect.Width)};
@@ -125,14 +129,19 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
     case element::border::type::Solid: {
         _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
         _canvas.set_stroke_width(borderSize);
-        _canvas.stroke_rounded_rect(rect, borderRadius);
+        _canvas.begin_path();
+        _canvas.rounded_rect(rect, borderRadius);
+        _canvas.stroke();
     } break;
     case element::border::type::Double: {
         _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
         f32 const dborderSize {borderSize / 3};
         _canvas.set_stroke_width(dborderSize);
-        _canvas.stroke_rounded_rect({rect.X - dborderSize * 2, rect.Y - dborderSize * 2, rect.Width + dborderSize * 4, rect.Height + dborderSize * 4}, borderRadius);
-        _canvas.stroke_rounded_rect(rect, borderRadius);
+        _canvas.begin_path();
+        _canvas.rounded_rect({rect.X - dborderSize * 2, rect.Y - dborderSize * 2, rect.Width + dborderSize * 4, rect.Height + dborderSize * 4}, borderRadius);
+        _canvas.rounded_rect(rect, borderRadius);
+        _canvas.stroke();
+
     } break;
     case element::border::type::Hidden:
         break;
@@ -194,7 +203,9 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
                         break;
                     case text_decoration::style::Dotted:
                         _canvas.set_fill_style(deco.Color);
-                        _canvas.fill_dotted_line(p0 + offset, p1 + offset, strokeWidth, std::max(1, static_cast<i32>((p1.X - p0.X) / (strokeWidth * 2.5f))));
+                        _canvas.begin_path();
+                        _canvas.dotted_line(p0 + offset, p1 + offset, strokeWidth, std::max(1, static_cast<i32>((p1.X - p0.X) / (strokeWidth * 2.5f))));
+                        _canvas.fill();
                         break;
                     case text_decoration::style::Dashed:
                         _canvas.set_stroke_width(strokeWidth);
@@ -204,7 +215,9 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
                     case text_decoration::style::Wavy:
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
-                        _canvas.stroke_wavy_line(p0 + offset, p1 + offset, strokeWidth * 1.25f, 0.5f);
+                        _canvas.begin_path();
+                        _canvas.wavy_line(p0 + offset, p1 + offset, strokeWidth * 1.25f, 0.5f);
+                        _canvas.stroke();
                         break;
                     }
                 }};
@@ -290,12 +303,16 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
             f32 const width {style.Size.calc(std::min(refRect.Height, refRect.Width)) / 3};
             _canvas.set_stroke_width(width);
             _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
-            _canvas.stroke_circle(refRect.get_center(), width);
+            _canvas.begin_path();
+            _canvas.circle(refRect.get_center(), width);
+            _canvas.stroke();
         } break;
         case element::tick::type::Disc: {
             f32 const width {style.Size.calc(std::min(refRect.Height, refRect.Width)) / 2};
             _canvas.set_fill_style(get_paint(style.Foreground, refRect));
-            _canvas.fill_circle(refRect.get_center(), width);
+            _canvas.begin_path();
+            _canvas.circle(refRect.get_center(), width);
+            _canvas.fill();
         } break;
         case element::tick::type::Rect: {
             rect_f const newRect {refRect.X + style.Size.calc(refRect.Width),
@@ -303,13 +320,17 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
                                   refRect.Width - (style.Size.calc(refRect.Width) + style.Size.calc(refRect.Width)),
                                   refRect.Height - (style.Size.calc(refRect.Height) + style.Size.calc(refRect.Height))};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
-            _canvas.fill_rect(newRect);
+            _canvas.begin_path();
+            _canvas.rect(newRect);
+            _canvas.fill();
         } break;
         case element::tick::type::Square: {
             f32 const    width {style.Size.calc(std::min(refRect.Height, refRect.Width))};
             rect_f const newRect {refRect.get_center() - point_f {width, width} / 2, {width, width}};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
-            _canvas.fill_rect(newRect);
+            _canvas.begin_path();
+            _canvas.rect(newRect);
+            _canvas.fill();
         } break;
         case element::tick::type::None:
             break;

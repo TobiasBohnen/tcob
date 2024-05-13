@@ -73,7 +73,9 @@ void Box2DEx::on_draw_to(render_target& target)
     _canvas.begin_frame({800, 600}, 1);
     _canvas.set_global_alpha(0.5f);
     _canvas.set_fill_style(colors::White);
-    _canvas.fill_rect({0, 0, 800, 600});
+    _canvas.begin_path();
+    _canvas.rect({0, 0, 800, 600});
+    _canvas.fill();
     _world.do_debug_draw(B2DDebugDraw {_canvas});
     _canvas.end_frame();
 
@@ -564,13 +566,17 @@ void B2DDebugDraw::draw_circle(point_f center, f32 radius, color color)
 {
     _canvas.set_stroke_width(3);
     _canvas.set_stroke_style(color);
-    _canvas.stroke_circle(center * point_f {12, 12}, radius * 12);
+    _canvas.begin_path();
+    _canvas.circle(center * point_f {12, 12}, radius * 12);
+    _canvas.stroke();
 }
 
 void B2DDebugDraw::draw_solid_circle(point_f center, f32 radius, point_f axis, color color)
 {
     _canvas.set_fill_style(color);
-    _canvas.fill_circle(center * point_f {12, 12}, radius * 12);
+    _canvas.begin_path();
+    _canvas.circle(center * point_f {12, 12}, radius * 12);
+    _canvas.fill();
 }
 
 void B2DDebugDraw::draw_segment(point_f p1, point_f p2, color color)
@@ -587,5 +593,7 @@ void B2DDebugDraw::draw_transform(box2d::body_transform const& xf)
 void B2DDebugDraw::draw_point(point_f p, f32 size, color color)
 {
     _canvas.set_fill_style(color);
-    _canvas.fill_circle(p * point_f {12, 12}, size);
+    _canvas.begin_path();
+    _canvas.circle(p * point_f {12, 12}, size);
+    _canvas.fill();
 }

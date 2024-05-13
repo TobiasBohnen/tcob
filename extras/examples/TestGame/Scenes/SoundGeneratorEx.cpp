@@ -131,7 +131,9 @@ void SoundGeneratorEx::draw_wave()
     color c {colors::DarkRed};
     c.A = 180;
     _canvas.set_fill_style(c);
-    _canvas.fill_rect(crect);
+    _canvas.begin_path();
+    _canvas.rect(crect);
+    _canvas.fill();
 
     _canvas.set_stroke_width(1);
     _canvas.set_stroke_style(colors::Black);

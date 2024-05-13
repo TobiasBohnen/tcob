@@ -44,11 +44,15 @@ void dot_matrix_display::on_paint(widget_painter& painter)
             switch (style->Dot.Type) {
             case dot::type::Disc: {
                 canvas.set_fill_style(style->Dot.Colors.at(Dots->at(idx)));
-                canvas.fill_circle(dotRect.get_center(), width / 2);
+                canvas.begin_path();
+                canvas.circle(dotRect.get_center(), width / 2);
+                canvas.fill();
             } break;
             case dot::type::Square: {
                 canvas.set_fill_style(style->Dot.Colors.at(Dots->at(idx)));
-                canvas.fill_rect(dotRect);
+                canvas.begin_path();
+                canvas.rect(dotRect);
+                canvas.fill();
             } break;
             }
         }

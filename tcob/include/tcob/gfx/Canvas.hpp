@@ -50,6 +50,10 @@ enum class winding : u8 {
     CCW = 1, // Winding for solid shapes
     CW  = 2, // Winding for holes
 };
+enum class solidity : u8 {
+    Solid = 1,
+    Hole  = 2,
+};
 
 enum class line_cap : u8 {
     Butt   = 0,
@@ -61,11 +65,6 @@ enum class line_join : u8 {
     Round = 1,
     Bevel = 3,
     Miter = 4,
-};
-
-enum class solidity : u8 {
-    Solid = 1,
-    Hole  = 2,
 };
 
 enum class composite_operation : u8 {
@@ -195,6 +194,7 @@ public:
     void begin_path();
     void close_path();
     void set_path_winding(winding dir);
+    void set_path_winding(solidity s);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
@@ -211,7 +211,7 @@ public:
     void dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots);
     void dotted_line(point_f from, point_f to, f32 r, i32 numDots);
     void dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
-    void wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase);
+    void wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase = 0.f);
     void regular_polygon(point_f pos, size_f size, i32 n);
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);
@@ -260,42 +260,16 @@ public:
     auto measure_text(f32 height, utf8_string_view text) -> size_f;
 
     // fill
-    void fill_rect(rect_f const& rect);
-    void fill_rounded_rect(rect_f const& r, f32 rad);
-    void fill_rounded_rect_varying(rect_f const& r, f32 rtl, f32 rtr, f32 rbr, f32 rbl);
-    void fill_circle(point_f center, f32 r);
-    void fill_ellipse(point_f center, f32 hr, f32 vr);
-    void fill_arc(point_f center, f32 r, degree_f a0, degree_f a1, winding wind);
     void fill_lines(std::span<point_f const> points);
 
-    void fill_dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots);
-    void fill_dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots);
-    void fill_dotted_line(point_f from, point_f to, f32 r, i32 numDots);
-    void fill_dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
-
     // stroke
-    void stroke_rect(rect_f const& rect);
-    void stroke_rounded_rect(rect_f const& r, f32 rad);
-    void stroke_rounded_rect_varying(rect_f const& r, f32 rtl, f32 rtr, f32 rbr, f32 rbl);
-    void stroke_circle(point_f center, f32 r);
-    void stroke_ellipse(point_f center, f32 hr, f32 vr);
-    void stroke_arc(point_f center, f32 r, degree_f a0, degree_f a1, winding wind);
     void stroke_line(point_f from, point_f to);
     void stroke_lines(std::span<point_f const> points);
-    void stroke_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end);
-    void stroke_quad_bezier(point_f start, point_f cp, point_f end);
 
     void stroke_dashed_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, i32 numDashes);
     void stroke_dashed_quad_bezier(point_f start, point_f cp, point_f end, i32 numDashes);
     void stroke_dashed_line(point_f from, point_f to, i32 numDashes);
     void stroke_dashed_circle(point_f center, f32 r, i32 numDashes);
-
-    void stroke_dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots);
-    void stroke_dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots);
-    void stroke_dotted_line(point_f from, point_f to, f32 r, i32 numDots);
-    void stroke_dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
-
-    void stroke_wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase = 0.f);
 
     auto get_impl() const -> render_backend::canvas_base*;
 
