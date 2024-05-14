@@ -91,20 +91,21 @@ void CanvasEx::prepare_canvas()
 
 void CanvasEx::paint_to_canvas()
 {
-    _canvas.begin_frame({1000, 800}, 1);
+    _canvas.begin_frame({1000, 800}, 2);
 
-    f32 x {20};
+    f32 x {15};
     f32 y {20};
     f32 height {300};
     f32 width {600};
-    f32 radius {6};
+    f32 radius {12};
     f32 strokeWidth {10};
 
+    _canvas.set_path_winding(solidity::Solid);
     _canvas.set_fill_style(colors::Blue);
     _canvas.begin_path();
     _canvas.rounded_rect({x, y, width, height}, radius);
-    // _canvas.set_path_winding(winding::CW);
-    //_canvas.rounded_rect({x + width / 4, y + height / 4, width / 2, height / 2}, radius);
+    _canvas.set_path_winding(solidity::Hole);
+    _canvas.circle(rect_f {x, y, width, height}.get_center(), 20);
     _canvas.fill();
 
     auto* resGrp {locate_service<assets::library>().get_group("res")};
