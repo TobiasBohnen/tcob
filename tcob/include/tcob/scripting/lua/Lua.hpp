@@ -21,6 +21,7 @@ using lua_CFunction    = int (*)(lua_State*);
 using lua_WarnFunction = void (*)(void*, char const*, int);
 using lua_Hook         = void (*)(lua_State*, lua_Debug*);
 using lua_Writer       = int (*)(lua_State*, void const* p, size_t sz, void* ud);
+using lua_Alloc        = void* (*)(void* ud, void* ptr, size_t osize, size_t nsize);
 
 ////////////////////////////////////////////////////////////
 
@@ -279,6 +280,8 @@ public:
     auto static NewState() -> lua_State*;
     void close() const;
 
+    void set_allocf(lua_Alloc f, void* ud);
+
     auto is_valid() const -> bool;
 
 private:
@@ -296,7 +299,6 @@ private:
 
     lua_State* _state;
 };
-
 }
 
     #include "Lua.inl"

@@ -1257,52 +1257,6 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Run")
     }
 }
 
-TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.RunAsync")
-{
-    {
-        std::string script = R"-(
-            function fibo(n) {
-                function inner(m) {
-                    if (m < 2) return m;
-                    return inner(m - 1) + inner(m - 2);
-                }
-                return inner(n);
-            }
-            return fibo(10);
-        )-";
-
-        auto ftr = run_async<i64>(script);
-        ftr.wait();
-        auto res = ftr.get();
-        REQUIRE(res);
-        REQUIRE(res.value() == 55);
-    }
-    {
-        std::string script = R"-(
-            function fibo(n) {
-                function inner(m) {
-                    if (m < 2) return m;
-                    return inner(m - 1) + inner(m - 2);
-                }
-                return inner(n);
-            }
-            return fibo(10);
-        )-";
-
-        io::delete_file("asynctest.nut");
-        {
-            io::ofstream stream {"asynctest.nut"};
-            stream.write(script);
-        }
-
-        auto ftr = run_file_async<i64>("asynctest.nut");
-        ftr.wait();
-        auto res = ftr.get();
-        REQUIRE(res);
-        REQUIRE(res.value() == 55);
-    }
-}
-
 TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
 {
     SUBCASE("table as parameter")

@@ -31,23 +31,9 @@ inline auto script<ScriptImpl>::run_file(path const& file) const -> result<R>
 
 template <typename ScriptImpl>
 template <typename R>
-inline auto script<ScriptImpl>::run_file_async(path const& file) const -> std::future<result<R>>
-{
-    return std::async(std::launch::async, [&, file] { return run_file<R>(file); });
-}
-
-template <typename ScriptImpl>
-template <typename R>
 inline auto script<ScriptImpl>::run(string_view script, string const& name) const -> result<R>
 {
     return get_impl()->template impl_run<R>(script, name);
-}
-
-template <typename ScriptImpl>
-template <typename R>
-inline auto script<ScriptImpl>::run_async(string_view script, string const& name) const -> std::future<result<R>>
-{
-    return std::async(std::launch::async, [&, script, name] { return run<R>(script, name); });
 }
 
 template <typename ScriptImpl>

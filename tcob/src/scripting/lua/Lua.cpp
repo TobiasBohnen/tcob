@@ -558,6 +558,11 @@ void state_view::close() const
     }
 }
 
+void state_view::set_allocf(lua_Alloc f, void* ud)
+{
+    lua_setallocf(_state, f, ud);
+}
+
 auto state_view::is_valid() const -> bool
 {
     return _state != nullptr;

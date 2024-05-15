@@ -1608,50 +1608,6 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Results")
     }
 }
 
-TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.RunAsync")
-{
-    {
-        std::string script = R"-(
-            function fibo(n)
-                local function inner(m)
-                    if m < 2 then return m end
-                    return inner(m - 1) + inner(m - 2)
-                end
-                return inner(n)
-            end
-            return fibo(10);
-        )-";
-
-        auto ftr = run_async<i64>(script);
-        ftr.wait();
-        auto res = ftr.get();
-        REQUIRE(res);
-        REQUIRE(res.value() == 55);
-    }
-    {
-        std::string script = R"-(
-            function fibo(n)
-                local function inner(m)
-                    if m < 2 then return m end
-                    return inner(m - 1) + inner(m - 2)
-                end
-                return inner(n)
-            end
-            return fibo(10);
-        )-";
-
-        io::delete_file("asynctest.lua");
-        io::ofstream stream {"asynctest.lua"};
-        stream.write(script);
-        stream.flush();
-        auto ftr = run_file_async<i64>("asynctest.lua");
-        ftr.wait();
-        auto res = ftr.get();
-        REQUIRE(res);
-        REQUIRE(res.value() == 55);
-    }
-}
-
 TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
 {
     SUBCASE("basic operations")

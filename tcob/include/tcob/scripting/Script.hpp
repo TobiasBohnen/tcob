@@ -22,11 +22,7 @@ public:
     template <typename R = void>
     auto run_file(path const& file) const -> result<R>;
     template <typename R = void>
-    auto run_file_async(path const& file) const -> std::future<result<R>>;
-    template <typename R = void>
     auto run(string_view script, string const& name = "main") const -> result<R>;
-    template <typename R = void>
-    auto run_async(string_view script, string const& name = "main") const -> std::future<result<R>>;
 
     template <typename T>
     auto create_wrapper(string const& name);
