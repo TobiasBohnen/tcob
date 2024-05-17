@@ -8,7 +8,6 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
-    #include <future>
     #include <vector>
 
     #include "tcob/core/Proxy.hpp"
