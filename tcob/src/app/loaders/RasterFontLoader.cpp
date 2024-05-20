@@ -24,11 +24,12 @@ auto ini_raster_font_loader::load(gfx::raster_font& font, path const& file, stri
 
     // glyphs
     for (auto& [_, s] : config["glyphs"].as<object>()) {
-        auto       g {s.get<object>().value()};
-        gfx::glyph glyph {.Size      = g["size"].as<size_i>(),
-                          .Offset    = g["offset"].as<point_f>(),
-                          .AdvanceX  = g["advance_x"].as<f32>(),
-                          .TexRegion = g["tex_region"].as<gfx::texture_region>()};
+        auto                g {s.get<object>().value()};
+        gfx::rendered_glyph glyph;
+        glyph.Size      = g["size"].as<size_i>();
+        glyph.Offset    = g["offset"].as<point_f>();
+        glyph.AdvanceX  = g["advance_x"].as<f32>();
+        glyph.TexRegion = g["tex_region"].as<gfx::texture_region>();
         glyph.TexRegion.UVRect.X /= fontTextureSize.Width;
         glyph.TexRegion.UVRect.Width /= fontTextureSize.Width;
         glyph.TexRegion.UVRect.Y /= fontTextureSize.Height;
@@ -130,11 +131,11 @@ auto fnt_raster_font_loader::load(gfx::raster_font& font, path const& file, stri
                 fs.seek(1, seek_dir::Current);
 
                 // create glyph
-                gfx::glyph glyph {
-                    .Size      = size_i {width, height},
-                    .Offset    = point_f {static_cast<f32>(xoffset), static_cast<f32>(yoffset)},
-                    .AdvanceX  = static_cast<f32>(xadvance),
-                    .TexRegion = {rect_f {static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(width), static_cast<f32>(height)}, page}};
+                gfx::rendered_glyph glyph;
+                glyph.Size      = size_i {width, height};
+                glyph.Offset    = point_f {static_cast<f32>(xoffset), static_cast<f32>(yoffset)};
+                glyph.AdvanceX  = static_cast<f32>(xadvance);
+                glyph.TexRegion = {rect_f {static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(width), static_cast<f32>(height)}, page};
                 glyph.TexRegion.UVRect.X /= fontTextureSize.Width;
                 glyph.TexRegion.UVRect.Width /= fontTextureSize.Width;
                 glyph.TexRegion.UVRect.Y /= fontTextureSize.Height;

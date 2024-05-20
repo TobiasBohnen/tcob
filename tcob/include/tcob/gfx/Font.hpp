@@ -25,10 +25,26 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 struct glyph {
-    size_i         Size {size_i::Zero};
-    point_f        Offset {point_f::Zero};
-    f32            AdvanceX {0.0f};
+    size_i  Size {size_i::Zero};
+    point_f Offset {point_f::Zero};
+    f32     AdvanceX {0.0f};
+};
+
+struct rendered_glyph : glyph {
     texture_region TexRegion {rect_f::Zero, 0};
+};
+
+struct glyph_bitmap {
+    std::vector<ubyte> Bitmap {};
+    size_i             BitmapSize {};
+};
+
+struct decompose_callbacks {
+    std::function<void(point_f)>                   MoveTo;
+    std::function<void(point_f)>                   LineTo;
+    std::function<void(point_f, point_f)>          ConicTo;
+    std::function<void(point_f, point_f, point_f)> CubicTo;
+    point_f                                        Offset {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -69,7 +85,7 @@ public:
     auto virtual get_info() const -> info const& = 0;
     auto get_texture() const -> assets::asset_ptr<texture>;
 
-    auto virtual shape_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<glyph> = 0;
+    auto virtual render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph> = 0;
 
     static inline char const* asset_name {"font"};
 
@@ -125,10 +141,10 @@ public:
     auto load [[nodiscard]] (path const& file, string const& textureFolder) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file, string const& textureFolder) noexcept -> std::future<load_status>;
 
-    auto shape_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<glyph> override;
+    auto render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph> override;
 
     void add_image(image const& img);
-    void add_glyph(u32 idx, glyph const& gl);
+    void add_glyph(u32 idx, rendered_glyph const& gl);
     void add_kerning_pair(u32 first, u32 second, i16 amount);
 
 protected:
@@ -137,7 +153,7 @@ protected:
 private:
     font::info _info {};
 
-    std::unordered_map<u32, glyph>                        _glyphs {};
+    std::unordered_map<u32, rendered_glyph>               _glyphs {};
     std::unordered_map<u32, std::unordered_map<u32, i16>> _kerning {};
 
     std::vector<image> _fontImages {};
@@ -149,19 +165,14 @@ private:
 
 class TCOB_API truetype_font_engine : public non_copyable {
 public:
-    struct glyph_bitmap {
-        glyph              Glyph {};
-        std::vector<ubyte> Bitmap {};
-        size_i             BitmapSize {};
-    };
-
     truetype_font_engine() = default;
     ~truetype_font_engine();
 
     auto load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info>;
     auto get_kerning(u32 cp0, u32 cp1) -> f32;
 
-    auto render_glyph(u32 cp) -> glyph_bitmap;
+    auto render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>;
+    auto decompose_glyph(u32 cp, decompose_callbacks& funcs) -> glyph;
     auto load_glyph(u32 cp) -> glyph;
 
     auto static Init() -> bool;
@@ -189,20 +200,22 @@ public:
     auto load [[nodiscard]] (istream& stream, u32 size) noexcept -> load_status;
     auto load [[nodiscard]] (std::span<ubyte const> fontData, u32 size) noexcept -> load_status;
 
-    auto shape_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<glyph> override;
+    auto render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph> override;
+    void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
 
 protected:
     void setup_texture() override;
 
 private:
-    auto cache_glyph(u32 cp) -> bool;
+    auto cache_render_glyph(u32 cp) -> bool;
 
-    std::unordered_map<u32, glyph> _glyphs {};
-    point_i                        _fontTextureCursor {point_i::Zero};
-    u32                            _fontTextureLayer {0};
-    info                           _info;
-    bool                           _textureNeedsSetup {false};
-    std::vector<ubyte>             _fontData {};
+    std::unordered_map<u32, rendered_glyph> _renderGlyphCache {};
+    point_i                                 _fontTextureCursor {point_i::Zero};
+    u32                                     _fontTextureLayer {0};
+    bool                                    _textureNeedsSetup {false};
+
+    info               _info;
+    std::vector<ubyte> _fontData {};
 
     truetype_font_engine _engine;
 };

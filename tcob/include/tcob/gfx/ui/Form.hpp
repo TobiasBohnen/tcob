@@ -67,8 +67,6 @@ public:
     template <SubmitTarget Target>
     void submit(Target& target);
 
-    auto measure_text(element::text const& style, u32 fontSize, utf8_string const& text) const -> size_f;
-
 protected:
     void on_update(milliseconds deltaTime) override;
     void on_fixed_update(milliseconds deltaTime) override;

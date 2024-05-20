@@ -16,7 +16,6 @@
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
-#include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Transformable.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 
@@ -57,8 +56,7 @@ private:
     bool _needsReshape {true};
     bool _needsFormat {true};
 
-    std::vector<quad>                  _quads {};
-    std::vector<text_formatter::token> _shaperTokens {};
+    std::vector<quad> _quads {};
 
     quad_renderer                      _renderer {buffer_usage_hint::DynamicDraw};
     assets::manual_asset_ptr<material> _material {};

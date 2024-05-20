@@ -198,7 +198,7 @@ auto container::create_font(char const* faceName, i32 size, i32 weight, litehtml
     fm->ascent      = static_cast<i32>(fontInfo.Ascender);
     fm->descent     = -static_cast<i32>(fontInfo.Descender);
     fm->height      = fm->ascent + fm->descent;
-    fm->x_height    = font->shape_text("x", false, true)[0].Size.Height;
+    fm->x_height    = font->render_text("x", false, true)[0].Size.Height;
     fm->draw_spaces = true;
     _fonts.push_back(font.get_obj());
     usize const retValue {_fonts.size() - 1};
@@ -216,7 +216,7 @@ auto container::text_width(char const* text, litehtml::uint_ptr hFont) -> i32
 {
     auto* f {_fonts[hFont - 1]};
     return f
-        ? static_cast<i32>(text_formatter::measure_text(text, *f, -1, true).Width)
+        ? static_cast<i32>(text_formatter::measure(text, *f, -1, true).Width)
         : -1;
 }
 

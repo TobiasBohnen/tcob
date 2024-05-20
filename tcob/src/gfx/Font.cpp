@@ -16,10 +16,44 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <freetype/ftoutln.h>
 
 using namespace std::chrono_literals;
 
 namespace tcob::gfx {
+
+extern "C" {
+auto static move_to(FT_Vector const* to, void* user) -> i32
+{
+    auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
+    funcs->MoveTo({to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    return 0;
+}
+
+auto static line_to(FT_Vector const* to, void* user) -> i32
+{
+    auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
+    funcs->LineTo({to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    return 0;
+}
+
+auto static conic_to(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
+{
+    auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
+    funcs->ConicTo({control->x / 64.0f + funcs->Offset.X, control->y / 64.0f + funcs->Offset.Y},
+                   {to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    return 0;
+}
+
+auto static cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
+{
+    auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
+    funcs->CubicTo({control1->x / 64.0f + funcs->Offset.X, control1->y / 64.0f + funcs->Offset.Y},
+                   {control2->x / 64.0f + funcs->Offset.X, control2->y / 64.0f + funcs->Offset.Y},
+                   {to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    return 0;
+}
+}
 
 // based on: https://github.com/brofield/simpleini/blob/master/ConvertUTF.c
 auto static convert_UTF8_to_UTF32(string_view text) -> std::u32string
@@ -127,15 +161,16 @@ void raster_font::setup_texture()
     _textureNeedsUpdate = false;
 }
 
-auto raster_font::shape_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<glyph>
+auto raster_font::render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>
 {
     if (_textureNeedsUpdate && !readOnlyCache) {
         setup_texture();
     }
 
-    auto const         utf32text {convert_UTF8_to_UTF32(text)};
-    usize const        len {utf32text.size()};
-    std::vector<glyph> retValue {};
+    auto const  utf32text {convert_UTF8_to_UTF32(text)};
+    usize const len {utf32text.size()};
+
+    std::vector<rendered_glyph> retValue {};
     retValue.reserve(len);
 
     for (u32 i {0}; i < len; ++i) {
@@ -164,7 +199,7 @@ void raster_font::add_image(image const& img)
     _textureNeedsUpdate = true;
 }
 
-void raster_font::add_glyph(u32 idx, glyph const& gl)
+void raster_font::add_glyph(u32 idx, rendered_glyph const& gl)
 {
     _glyphs[idx] = gl;
 }
@@ -220,13 +255,13 @@ auto truetype_font_engine::get_kerning(u32 cp0, u32 cp1) -> f32
     return kerning.x / 64.0f;
 }
 
-auto truetype_font_engine::render_glyph(u32 cp) -> glyph_bitmap
+auto truetype_font_engine::render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>
 {
     assert(_face);
     assert(library);
-    glyph_bitmap retValue {};
+    std::pair<glyph, glyph_bitmap> retValue {};
 
-    retValue.Glyph = load_glyph(cp);
+    retValue.first = load_glyph(cp);
     FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
 
     /*
@@ -238,10 +273,37 @@ auto truetype_font_engine::render_glyph(u32 cp) -> glyph_bitmap
         }
     */
 
-    retValue.Bitmap = std::vector<ubyte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
+    retValue.second.Bitmap = std::vector<ubyte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
 
-    retValue.BitmapSize.Width  = _face->glyph->bitmap.width;
-    retValue.BitmapSize.Height = _face->glyph->bitmap.rows;
+    retValue.second.BitmapSize.Width  = _face->glyph->bitmap.width;
+    retValue.second.BitmapSize.Height = _face->glyph->bitmap.rows;
+
+    return retValue;
+}
+
+auto truetype_font_engine::decompose_glyph(u32 cp, decompose_callbacks& funcs) -> glyph
+{
+    auto const retValue {load_glyph(cp)};
+
+    FT_Outline_Funcs ftFuncs = {
+        .move_to  = &move_to,
+        .line_to  = &line_to,
+        .conic_to = &conic_to,
+        .cubic_to = &cubic_to,
+        .shift    = 0,
+        .delta    = 0,
+    };
+
+    FT_Outline& outline {_face->glyph->outline};
+
+    FT_Matrix matrix;
+    matrix.xx = 1L << 16;
+    matrix.xy = 0L << 16;
+    matrix.yx = 0L << 16;
+    matrix.yy = -1L << 16;
+    FT_Outline_Transform(&outline, &matrix);
+
+    FT_Outline_Decompose(&outline, &ftFuncs, reinterpret_cast<void*>(&funcs));
 
     return retValue;
 }
@@ -312,7 +374,7 @@ auto truetype_font::load(std::span<ubyte const> fontData, u32 size) noexcept -> 
 {
     if (auto info {_engine.load_data(fontData, size)}) {
         _info = *info;
-        _glyphs.clear();
+        _renderGlyphCache.clear();
         _textureNeedsSetup = true;
         return load_status::Ok;
     }
@@ -333,34 +395,35 @@ void truetype_font::setup_texture()
     _textureNeedsSetup = false;
 }
 
-auto truetype_font::shape_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<glyph>
+auto truetype_font::render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>
 {
     if (_textureNeedsSetup && !readOnlyCache) {
         setup_texture();
     }
 
-    auto const         utf32text {convert_UTF8_to_UTF32(text)};
-    usize const        len {utf32text.size()};
-    std::vector<glyph> retValue;
+    auto const  utf32text {convert_UTF8_to_UTF32(text)};
+    usize const len {utf32text.size()};
+
+    std::vector<rendered_glyph> retValue;
     retValue.reserve(len);
 
     for (u32 i {0}; i < len; ++i) {
         u32 const cp0 {utf32text[i]};
         if (!readOnlyCache) {
-            if (!cache_glyph(cp0)) {
+            if (!cache_render_glyph(cp0)) {
                 logger::Error("TrueTypeFont: shaping of text \"{}\" failed.", text);
                 return {};
             }
 
-            auto& glyph {retValue.emplace_back(_glyphs[cp0])};
+            auto& glyph {retValue.emplace_back(_renderGlyphCache[cp0])};
             if (kerning && i < len - 1) {
                 glyph.AdvanceX += _engine.get_kerning(cp0, utf32text[i + 1]);
             }
         } else {
-            if (_glyphs.contains(cp0)) {
-                retValue.push_back(_glyphs[cp0]);
+            if (_renderGlyphCache.contains(cp0)) {
+                retValue.push_back(_renderGlyphCache[cp0]);
             } else {
-                retValue.push_back(_engine.load_glyph(cp0));
+                retValue.push_back({_engine.load_glyph(cp0)});
             }
         }
     }
@@ -368,16 +431,32 @@ auto truetype_font::shape_text(utf8_string_view text, bool kerning, bool readOnl
     return retValue;
 }
 
+void truetype_font::decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs)
+{
+    auto const  utf32text {convert_UTF8_to_UTF32(text)};
+    usize const len {utf32text.size()};
+
+    funcs.Offset.Y += _info.Ascender;
+    for (u32 i {0}; i < len; ++i) {
+        u32 const  cp0 {utf32text[i]};
+        auto const gl {_engine.decompose_glyph(cp0, funcs)};
+        funcs.Offset.X += static_cast<i32>(gl.AdvanceX);
+        if (kerning && i < len - 1) {
+            funcs.Offset.X += static_cast<i32>(_engine.get_kerning(cp0, utf32text[i + 1]));
+        }
+    }
+}
+
 auto truetype_font::get_info() const -> font::info const&
 {
     return _info;
 }
 
-auto truetype_font::cache_glyph(u32 cp) -> bool
+auto truetype_font::cache_render_glyph(u32 cp) -> bool
 {
-    if (!_glyphs.contains(cp)) {
+    if (!_renderGlyphCache.contains(cp)) {
         auto       gb {_engine.render_glyph(cp)};
-        auto const bitmapSize {gb.BitmapSize};
+        auto const bitmapSize {gb.second.BitmapSize};
         if (bitmapSize.Width < 0 || bitmapSize.Height < 0) {
             return false;
         }
@@ -397,14 +476,15 @@ auto truetype_font::cache_glyph(u32 cp) -> bool
         }
 
         // write to texture
-        get_texture()->update_data(_fontTextureCursor, bitmapSize, gb.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
+        get_texture()->update_data(_fontTextureCursor, bitmapSize, gb.second.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
 
         // create glyph
-        gb.Glyph.TexRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
-                                         bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
-                              .Level  = _fontTextureLayer};
+        rendered_glyph gl {gb.first};
+        gl.TexRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
+                                   bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
+                        .Level  = _fontTextureLayer};
 
-        _glyphs[cp] = gb.Glyph;
+        _renderGlyphCache[cp] = gl;
 
         // advance cursor
         _fontTextureCursor.X += bitmapSize.Width + GLYPH_PADDING;
@@ -549,7 +629,7 @@ auto font_family::get_images() const -> std::vector<image>
     std::vector<image> retValue;
     for (auto const& f : _fontAssets) {
         for (auto const& fa : f.second) {
-            fa.second->shape_text("a", false, false);
+            fa.second->render_text("a", false, false);
             for (u32 level {0}; level < FONT_TEXTURE_LAYERS; ++level) {
                 retValue.push_back(fa.second->get_texture()->copy_to_image(level));
             }

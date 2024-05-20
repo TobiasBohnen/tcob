@@ -236,7 +236,7 @@ void terminal::dump(ostream& stream) const
 
 auto static get_font_width(font* font) -> f32
 {
-    auto qs {font->shape_text(" ", false, true)};
+    auto qs {font->render_text(" ", false, true)};
     if (qs.empty()) { return 0; }
 
     return qs[0].AdvanceX;

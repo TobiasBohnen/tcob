@@ -74,15 +74,11 @@ void text::format()
 
     _needsFormat = false;
 
-    // abort when we have no tokens or target size hasn't been set
-    if (_shaperTokens.empty()) {
-        return;
-    }
+    if (Text->empty()) { return; }
 
     // format text
     auto const size {Bounds->get_size()};
-    auto const lines {text_formatter::wrap(_shaperTokens, size.Width, 1.0f)};
-    auto const formatResult {text_formatter::format(lines, *_font, Style->Alignment, size.Height, 1.0f)};
+    auto const formatResult {text_formatter::format(Text(), *_font, Style->Alignment, size, 1.0f, false)};
     _quads.reserve(formatResult.QuadCount);
 
     color c {Style->Color};
@@ -134,8 +130,6 @@ void text::format()
 
 void text::reshape()
 {
-    _shaperTokens = text_formatter::shape(Text(), *_font, Style->KerningEnabled, false);
-
     _needsFormat  = true;
     _needsReshape = false;
 }

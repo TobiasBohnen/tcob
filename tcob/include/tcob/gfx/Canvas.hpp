@@ -170,6 +170,7 @@ public:
     void set_global_composite_operation(composite_operation op);
     void set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor);
     void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
+    void set_global_enforce_path_winding(bool force);
 
     // State handling
     void save();
@@ -276,14 +277,14 @@ public:
 private:
     struct state {
         blend_funcs    CompositeOperation {};
-        bool           ShapeAntiAlias {false};
+        bool           ShapeAntiAlias {true};
         canvas_paint   Fill {};
         canvas_paint   Stroke {};
-        f32            StrokeWidth {0};
-        f32            MiterLimit {0};
-        line_join      LineJoin {line_join::Round};
+        f32            StrokeWidth {1};
+        f32            MiterLimit {10.0f};
+        line_join      LineJoin {line_join::Miter};
         line_cap       LineCap {line_cap::Butt};
-        f32            Alpha {0};
+        f32            Alpha {1};
         transform      XForm {transform::Identity};
         canvas_scissor Scissor {};
         alignments     TextAlign {};
@@ -331,6 +332,7 @@ private:
     size_i _windowSize;
 
     bool _edgeAntiAlias {true};
+    bool _enforceWinding {true};
 
     flat_map<i32, assets::manual_asset_ptr<render_texture>> _rtt {};
     i32                                                     _activeRtt {0};

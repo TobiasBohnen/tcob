@@ -9,6 +9,28 @@
 
 namespace tcob::gfx::text_formatter {
 
+enum class token_type : u8 {
+    None,
+    Text,
+    Whitespace,
+    Newline,
+    Command
+};
+
+struct token {
+    token_type                  Type {token_type::None}; // shape
+    string                      Text {};                 // shape
+    command_definition          Command {};              // shape
+    f32                         Width {0};               // shape
+    std::vector<rendered_glyph> Glyphs {};               // shape
+};
+
+struct line_definition {
+    std::vector<token const*> Tokens {};
+    f32                       RemainingWidth {0};
+    f32                       WhiteSpaceCount {0};
+};
+
 void static HandleCommands(token& token)
 {
     static std::locale loc {"en_US.UTF8"};
@@ -120,7 +142,7 @@ auto static Tokenize(utf8_string_view text) -> std::vector<token>
     return retValue;
 }
 
-auto shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) -> std::vector<token>
+auto static Shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) -> std::vector<token>
 {
     auto retValue {Tokenize(text)};
 
@@ -128,7 +150,7 @@ auto shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) 
         switch (token.Type) {
         case token_type::Text:
         case token_type::Whitespace:
-            token.Glyphs = font.shape_text(token.Text, kerning, readOnlyCache);
+            token.Glyphs = font.render_text(token.Text, kerning, readOnlyCache);
             for (auto const& glyph : token.Glyphs) {
                 token.Width += glyph.AdvanceX;
             }
@@ -141,7 +163,7 @@ auto shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) 
     return retValue;
 }
 
-auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>
+auto static Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>
 {
     std::vector<line_definition> retValue {};
     line_definition              currentLine {};
@@ -195,7 +217,7 @@ auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::ve
     return retValue;
 }
 
-auto format(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
+auto static Format(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
 {
     availableHeight = availableHeight < 0 ? std::numeric_limits<f32>::max() : availableHeight;
 
@@ -266,18 +288,18 @@ auto format(std::vector<line_definition> const& lines, font& font, alignments al
     return retValue;
 }
 
-auto format_text(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result
+auto format(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result
 {
-    auto shaperTokens {shape(text, font, kerning, false)};
-    auto lines {wrap(shaperTokens, availableSize.Width, scale)};
-    return format(lines, font, align, availableSize.Height, scale);
+    auto shaperTokens {Shape(text, font, kerning, false)};
+    auto lines {Wrap(shaperTokens, availableSize.Width, scale)};
+    return Format(lines, font, align, availableSize.Height, scale);
 }
 
-auto measure_text(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f
+auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f
 {
-    auto shaperTokens {shape(text, font, kerning, true)};
-    auto lines {wrap(shaperTokens, -1, 1.0f)};
-    return format(lines, font, {}, availableHeight, 1.0f).UsedSize;
+    auto shaperTokens {Shape(text, font, kerning, true)};
+    auto lines {Wrap(shaperTokens, -1, 1.0f)};
+    return Format(lines, font, {}, availableHeight, 1.0f).UsedSize;
 }
 
 ////////////////////////////////////////////////////////////

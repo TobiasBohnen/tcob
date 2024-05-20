@@ -1320,6 +1320,11 @@ void canvas::set_global_composite_blendfunc_separate(blend_func srcRGB, blend_fu
     get_state().CompositeOperation = op;
 }
 
+void canvas::set_global_enforce_path_winding(bool force)
+{
+    _enforceWinding = force;
+}
+
 ////////////////////////////////////////////////////////////
 
 void canvas::translate(point_f c)
@@ -1482,14 +1487,14 @@ auto canvas::format_text(size_f const& size, utf8_string_view text, f32 scale) -
 {
     state& s {get_state()};
     if (!s.Font) { return {}; }
-    return text_formatter::format_text(text, *s.Font, s.TextAlign, size, scale, true);
+    return text_formatter::format(text, *s.Font, s.TextAlign, size, scale, true);
 }
 
 auto canvas::measure_text(f32 height, utf8_string_view text) -> size_f
 {
     state& s {get_state()};
     if (!s.Font) { return {}; }
-    return text_formatter::measure_text(text, *s.Font, height, true);
+    return text_formatter::measure(text, *s.Font, height, true);
 }
 
 void canvas::set_text_halign(horizontal_alignment align)
@@ -1865,7 +1870,7 @@ void canvas::flatten_paths()
         }
 
         // Enforce winding.
-        if (path.Count > 2) {
+        if (_enforceWinding && path.Count > 2) {
             f32 const area {PolyArea({pts, path.Count})};
             if (path.Winding == winding::CCW && area < 0.0f) {
                 PolyReverse({pts, path.Count});

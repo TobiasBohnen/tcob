@@ -17,14 +17,6 @@ namespace tcob::gfx::text_formatter {
 
 ////////////////////////////////////////////////////////////
 
-enum class token_type : u8 {
-    None,
-    Text,
-    Whitespace,
-    Newline,
-    Command
-};
-
 enum class command_type : u8 {
     None,
     Color,
@@ -42,20 +34,6 @@ struct command_definition {
 struct quad_definition {
     rect_f         Rect {rect_f::Zero};
     texture_region TexRegion {};
-};
-
-struct token {
-    token_type         Type {token_type::None}; // shape
-    string             Text {};                 // shape
-    command_definition Command {};              // shape
-    f32                Width {0};               // shape
-    std::vector<glyph> Glyphs {};               // shape
-};
-
-struct line_definition {
-    std::vector<token const*> Tokens {};
-    f32                       RemainingWidth {0};
-    f32                       WhiteSpaceCount {0};
 };
 
 struct format_token {
@@ -77,10 +55,6 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-TCOB_API auto shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) -> std::vector<token>;
-TCOB_API auto wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>;
-TCOB_API auto format(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result;
-
-TCOB_API auto format_text(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result;
-TCOB_API auto measure_text(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f;
+TCOB_API auto format(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result;
+TCOB_API auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f;
 }
