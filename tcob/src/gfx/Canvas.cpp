@@ -154,7 +154,7 @@ auto static constexpr TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -
     return acx * aby - abx * acy;
 }
 
-void static constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
+void static inline constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 {
     vtx->Position[0] = x;
     vtx->Position[1] = y;

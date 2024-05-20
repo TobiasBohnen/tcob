@@ -122,7 +122,7 @@ public:
     class TCOB_API loader : public non_copyable {
     public:
         struct factory : public type_factory<std::unique_ptr<loader>> {
-            static inline char const* service_name {"gfx::raster_font::raster_font::factory"};
+            static inline char const* service_name {"gfx::raster_font::factory"};
         };
 
         loader()          = default;

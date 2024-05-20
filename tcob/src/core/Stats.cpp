@@ -41,8 +41,8 @@ void stats::update(milliseconds delta)
 
     if (_frameCount >= FRAME_VALUES) {
         _averageFrames = 1000.0f / (std::accumulate(_frameTimes.begin(), _frameTimes.end(), 0.0f) / FRAME_VALUES);
-        _bestFrames    = std::max(_bestFrames, _averageFrames);
-        _worstFrames   = std::min(_worstFrames, _averageFrames);
+        _bestFrames    = std::max(_bestFrames, 1000.0f / *std::min_element(_frameTimes.begin(), _frameTimes.end()));
+        _worstFrames   = std::min(_worstFrames, 1000.0f / *std::max_element(_frameTimes.begin(), _frameTimes.end()));
     } else {
         _averageFrames = 1000.0f / (std::accumulate(_frameTimes.begin(), _frameTimes.end(), 0.0f) / _frameCount);
     }
