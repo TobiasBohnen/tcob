@@ -253,11 +253,11 @@ auto static convert_fnt(std::shared_ptr<io::ifstream>& in, std::string const& sr
                 in->seek(1, seek_dir::Current);
 
                 // create glyph
-                gfx::glyph glyph {
-                    .Size      = size_i {width, height},
-                    .Offset    = point_f {static_cast<f32>(xoffset), static_cast<f32>(yoffset)},
-                    .AdvanceX  = static_cast<f32>(xadvance),
-                    .TexRegion = {rect_f {static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(width), static_cast<f32>(height)}, page}};
+                gfx::rendered_glyph glyph;
+                glyph.Size      = size_i {width, height},
+                glyph.Offset    = point_f {static_cast<f32>(xoffset), static_cast<f32>(yoffset)},
+                glyph.AdvanceX  = static_cast<f32>(xadvance),
+                glyph.TexRegion = {rect_f {static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(width), static_cast<f32>(height)}, page};
                 glyph.TexRegion.UVRect.X /= fontTextureSize.Width;
                 glyph.TexRegion.UVRect.Width /= fontTextureSize.Width;
                 glyph.TexRegion.UVRect.Y /= fontTextureSize.Height;

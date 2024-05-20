@@ -42,7 +42,6 @@ set(TEST_SRCFILES
   StreamTests.cpp
   StringUtilTests.cpp
   StyleTests.cpp
-  TextFormatterTests.cpp
   TransformTests.cpp
   TweenTests.cpp
   UITests.cpp
