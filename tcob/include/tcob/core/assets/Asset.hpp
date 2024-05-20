@@ -68,7 +68,6 @@ public:
     auto get_status() const -> status;
 
     auto get() const -> type*;
-    auto get_ptr() const -> std::shared_ptr<T>;
 
     auto reset(std::weak_ptr<T> ptr);
 
@@ -111,7 +110,6 @@ public:
     auto operator*() const -> type&;
 
     auto get() const -> asset<T>*;
-    auto get_ptr() const -> std::shared_ptr<T>;
     auto get_obj() const -> T*;
 
     auto get_use_count() const -> i32;

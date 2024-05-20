@@ -63,12 +63,6 @@ inline auto asset<T>::get() const -> type*
 }
 
 template <typename T>
-inline auto asset<T>::get_ptr() const -> std::shared_ptr<T>
-{
-    return !_object.expired() ? _object.lock() : nullptr;
-}
-
-template <typename T>
 inline void asset<T>::unload(bool greedy)
 {
     if (_loader) {
@@ -165,19 +159,13 @@ inline auto asset_ptr<T>::operator->() const -> type*
 template <typename T>
 inline auto asset_ptr<T>::operator*() const -> type&
 {
-    return *get_ptr();
+    return *get_obj();
 }
 
 template <typename T>
 inline auto asset_ptr<T>::get() const -> asset<T>*
 {
     return _asset.get();
-}
-
-template <typename T>
-inline auto asset_ptr<T>::get_ptr() const -> std::shared_ptr<T>
-{
-    return _asset->get_ptr();
 }
 
 template <typename T>
