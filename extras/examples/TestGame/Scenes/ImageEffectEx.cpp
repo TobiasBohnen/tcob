@@ -16,8 +16,8 @@ ImageEffectEx::ImageEffectEx(game& game)
     : scene(game)
 {
     _mat0->Texture = _tex0;
-    image img {*image::Load("res/tex/testing.png")};
-    image img0 {grayscale_filter {}(img)};
+    image img0 {*image::Load("res/tex/tee1.png")};
+    //  image img0 {grayscale_filter {}(img)};
     auto  imgSize {img0.get_info().Size};
     _tex0->create(imgSize, 7, texture::format::RGBA8);
 
@@ -25,18 +25,18 @@ ImageEffectEx::ImageEffectEx(game& game)
     _tex0->add_region("normal", {{0, 0, 1, 1}, 0});
 
     {
-        blur_filter filter;
-        image       filterImg {filter(img0)};
-        _tex0->update_data(filterImg.get_data(), 1);
-        _tex0->add_region("blur", {{0, 0, 1, 1}, 1});
-    }
-
-    {
         edge_detect_filter filter;
         filter.IncludeAlpha = true;
         image filterImg {filter(img0)};
+        _tex0->update_data(filterImg.get_data(), 1);
+        _tex0->add_region("edgedetect", {{0, 0, 1, 1}, 1});
+    }
+
+    {
+        blur_filter filter;
+        image       filterImg {filter(img0)};
         _tex0->update_data(filterImg.get_data(), 2);
-        _tex0->add_region("edgedetect", {{0, 0, 1, 1}, 2});
+        _tex0->add_region("blur", {{0, 0, 1, 1}, 2});
     }
 
     {
@@ -89,27 +89,31 @@ void ImageEffectEx::on_start()
     auto sprite2           = _layer1.create_sprite();
     sprite2->Material      = _mat0;
     sprite2->TextureRegion = "edgedetect";
-    sprite1->Bounds        = {{0.f, 200.f}, {128, 192}};
+    sprite2->Bounds        = {{0.f, 200.f}, {128, 192}};
+
     //////////
     auto sprite3           = _layer1.create_sprite();
     sprite3->Material      = _mat0;
     sprite3->TextureRegion = "emboss";
-    sprite1->Bounds        = {{0.f, 400.f}, {128, 192}};
+    sprite3->Bounds        = {{0.f, 400.f}, {128, 192}};
+
     //////////
     auto sprite4           = _layer1.create_sprite();
     sprite4->Material      = _mat0;
     sprite4->TextureRegion = "edgeenhance";
-    sprite1->Bounds        = {{0.f, 600.f}, {128, 192}};
+    sprite4->Bounds        = {{600.f, 0.f}, {128, 192}};
+
     //////////
     auto sprite5           = _layer1.create_sprite();
     sprite5->Material      = _mat0;
     sprite5->TextureRegion = "motionblur";
-    sprite1->Bounds        = {{600.f, 200.f}, {128, 192}};
+    sprite5->Bounds        = {{600.f, 200.f}, {128, 192}};
+
     //////////
     auto sprite6           = _layer1.create_sprite();
     sprite6->Material      = _mat0;
     sprite6->TextureRegion = "sharpen";
-    sprite1->Bounds        = {{600.f, 400.f}, {128, 192}};
+    sprite6->Bounds        = {{600.f, 400.f}, {128, 192}};
 }
 
 void ImageEffectEx::on_draw_to(render_target& target)
