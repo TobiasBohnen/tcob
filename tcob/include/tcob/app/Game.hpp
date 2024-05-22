@@ -104,7 +104,7 @@ private:
     //! Pops the top scene from the scene stack.
     void pop_scene();
 
-    std::unique_ptr<gfx::window>                _window;        //!< The game's window instance.
+    std::unique_ptr<gfx::window>                _window;        //!< The game's window instance. TODO: move to platform?
     utf8_string                                 _name {};       //!< The name of the game.
     milliseconds                                _frameLimit {}; //!< Frame rate limit.
     std::stack<std::shared_ptr<scene>>          _scenes {};     //!< Stack of active scenes.
