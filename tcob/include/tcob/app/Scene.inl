@@ -13,8 +13,10 @@ namespace tcob {
 void scene::handle_input_event(auto&& event, auto&& handler)
 {
     // TODO: add 'focused' entity
-    _rootNode->handle_input_event(event, handler);
-    if (event.Handled) { return; }
+    if (_rootNode) {
+        _rootNode->handle_input_event(event, handler);
+        if (event.Handled) { return; }
+    }
 
     // then the scene itself
     (this->*handler)(event);
