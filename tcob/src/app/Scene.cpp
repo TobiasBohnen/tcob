@@ -19,8 +19,6 @@ scene::scene(game& parent)
 
 void scene::start()
 {
-    _rootNode = std::make_shared<scene_node>();
-
     attach_events();
     on_start();
 }
@@ -47,27 +45,36 @@ void scene::sleep()
 
 void scene::draw_to(gfx::render_target& target)
 {
-    _rootNode->draw_to(target);
+    if (_rootNode) {
+        _rootNode->draw_to(target);
+    }
 
     on_draw_to(target);
 }
 
 void scene::update(milliseconds deltaTime)
 {
-    _rootNode->update(deltaTime);
+    if (_rootNode) {
+        _rootNode->update(deltaTime);
+    }
 
     on_update(deltaTime);
 }
 
 void scene::fixed_update(milliseconds deltaTime)
 {
-    _rootNode->fixed_update(deltaTime);
+    if (_rootNode) {
+        _rootNode->fixed_update(deltaTime);
+    }
 
     on_fixed_update(deltaTime);
 }
 
 auto scene::get_root_node() -> std::shared_ptr<scene_node>
 {
+    if (!_rootNode) {
+        _rootNode = std::make_shared<scene_node>();
+    }
     return _rootNode;
 }
 

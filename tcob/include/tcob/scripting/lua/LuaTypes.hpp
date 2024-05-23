@@ -8,7 +8,6 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include <future>
     #include <unordered_set>
     #include <vector>
 
