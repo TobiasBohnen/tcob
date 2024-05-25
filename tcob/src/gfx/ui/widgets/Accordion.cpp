@@ -57,6 +57,7 @@ void accordion::on_paint(widget_painter& painter)
         for (i32 i {0}; i < std::ssize(_sections); ++i) {
             auto const&  sectionStyle {get_section_style(i)};
             rect_f const sectionRect {get_section_rect(i, sectionHeight, rect)};
+            // TODO: translation hook
             painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
             _sectionRects.push_back(sectionRect);
         }
@@ -94,14 +95,12 @@ void accordion::on_mouse_hover(input::mouse::motion_event& ev)
 
     widget_container::on_mouse_hover(ev);
 
-    if (auto const* style {get_style<accordion::style>()}) {
-        auto const mp {global_to_parent_local(ev.Position)};
-        for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
-            if (_sectionRects[i].contains(mp)) {
-                HoveredSectionIndex = i;
-                ev.Handled          = true;
-                break;
-            }
+    auto const mp {global_to_parent_local(ev.Position)};
+    for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
+        if (_sectionRects[i].contains(mp)) {
+            HoveredSectionIndex = i;
+            ev.Handled          = true;
+            break;
         }
     }
 }

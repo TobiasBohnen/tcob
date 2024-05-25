@@ -126,17 +126,15 @@ void tab_container::on_mouse_hover(input::mouse::motion_event& ev)
 
     widget_container::on_mouse_hover(ev);
 
-    if (auto const* style {get_style<tab_container::style>()}) {
-        auto const mp {global_to_parent_local(ev.Position)};
-        for (i32 i {0}; i < std::ssize(_tabRects); ++i) {
-            if (_tabRects[i].contains(mp)) {
-                HoveredTabIndex = i;
-                break;
-            }
+    auto const mp {global_to_parent_local(ev.Position)};
+    for (i32 i {0}; i < std::ssize(_tabRects); ++i) {
+        if (_tabRects[i].contains(mp)) {
+            HoveredTabIndex = i;
+            break;
         }
-
-        ev.Handled = true;
     }
+
+    ev.Handled = true;
 }
 
 void tab_container::on_mouse_down(input::mouse::button_event& ev)

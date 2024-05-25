@@ -349,12 +349,8 @@ auto drop_down_list::get_scroll_max_value(orientation orien) const -> f32
         return 0;
     }
 
-    if (auto const* style {get_style<drop_down_list::style>()}) {
-        f32 const itemHeight {get_item_height()};
-        return std::max(0.0f, (itemHeight * std::ssize(_items)) - get_content_bounds().Height);
-    }
-
-    return 0;
+    f32 const itemHeight {get_item_height()};
+    return std::max(0.0f, (itemHeight * std::ssize(_items)) - get_content_bounds().Height);
 }
 
 auto drop_down_list::get_scroll_style(orientation orien) const -> element::scrollbar*

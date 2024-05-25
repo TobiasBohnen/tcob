@@ -40,8 +40,8 @@ private:
     auto get_cell_style(point_i idx, string const& className) const -> item_style*;
     auto get_column_width(grid_view::style const* style, i32 col, f32 width) const -> f32;
 
-    std::vector<utf8_string>              _columns;
+    std::vector<utf8_string>              _columnHeaders;
+    std::vector<isize>                    _columnSizes;
     std::vector<std::vector<utf8_string>> _rows;
-    std::vector<isize>                    _colSizes;
 };
 }

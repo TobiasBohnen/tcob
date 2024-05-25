@@ -12,7 +12,10 @@ namespace tcob::gfx::ui {
 label::label(init const& wi)
     : widget {wi}
 {
-    Label.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Label changed"); });
+    Label.Changed.connect([&](auto const&) {
+        // TODO: translation hook
+        force_redraw(get_name() + ": Label changed");
+    });
 
     Class("label");
 }
