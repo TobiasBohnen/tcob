@@ -234,6 +234,11 @@ auto get_stem(path const& file) -> string
     return std::filesystem::path {file}.stem().string();
 }
 
+auto get_filename(path const& file) -> string
+{
+    return std::filesystem::path {file}.filename().string();
+}
+
 auto get_parent_folder(path const& file) -> string
 {
     return std::filesystem::path {file}.parent_path().string();

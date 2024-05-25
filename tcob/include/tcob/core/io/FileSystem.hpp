@@ -80,5 +80,6 @@ TCOB_API auto get_file_size(path const& file) -> i64;
 
 TCOB_API auto get_extension(path const& file) -> string;
 TCOB_API auto get_stem(path const& file) -> string;
+TCOB_API auto get_filename(path const& file) -> string;
 TCOB_API auto get_parent_folder(path const& file) -> string;
 }
