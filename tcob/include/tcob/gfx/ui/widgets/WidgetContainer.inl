@@ -11,7 +11,8 @@ namespace tcob::gfx::ui {
 template <SubmitTarget Target>
 inline void widget_container::submit(Target& target)
 {
-    auto widgets {get_widgets()};
+    std::vector<widget*> widgets;
+    collect_widgets(widgets);
     for (auto const& widget : widgets) {
         auto const props {widget->get_attributes()};
         auto const name {widget->get_name()};

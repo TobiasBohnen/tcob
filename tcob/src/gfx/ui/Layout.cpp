@@ -123,33 +123,22 @@ void dock_layout::do_layout(size_f size)
 
         switch (_widgetDock.at(widget.get())) {
         case dock_style::Left:
-            widgetBounds.Width = width;
-
             layoutRect.X += width;
             layoutRect.Width -= width;
             break;
         case dock_style::Right:
-            widgetBounds.X     = widgetBounds.right() - width;
-            widgetBounds.Width = width;
-
+            widgetBounds.X = widgetBounds.right() - width;
             layoutRect.Width -= width;
             break;
         case dock_style::Top:
-            widgetBounds.Height = height;
-
             layoutRect.Y += height;
             layoutRect.Height -= height;
             break;
         case dock_style::Bottom:
-            widgetBounds.Y      = widgetBounds.bottom() - height;
-            widgetBounds.Height = height;
-
+            widgetBounds.Y = widgetBounds.bottom() - height;
             layoutRect.Height -= height;
             break;
         case dock_style::Fill:
-            widgetBounds.Width  = width;
-            widgetBounds.Height = height;
-
             layoutRect.X += width;
             layoutRect.Width -= width;
             layoutRect.Y += height;
@@ -157,7 +146,9 @@ void dock_layout::do_layout(size_f size)
             break;
         }
 
-        widget->Bounds = widgetBounds;
+        widgetBounds.Width  = width;
+        widgetBounds.Height = height;
+        widget->Bounds      = widgetBounds;
     }
 }
 
