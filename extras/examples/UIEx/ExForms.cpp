@@ -138,8 +138,8 @@ auto create_form0(window* wnd) -> std::shared_ptr<form>
     for (i32 i {0}; i < 4; ++i) {
         listbox0->add_item("item " + std::to_string(i));
     }
-    listbox0->SelectedItemIndex.Changed.connect([label0, listbox0](i32 value) { label0->Label = "selected: " + std::to_string(value); });
-    listbox0->HoveredItemIndex.Changed.connect([label0, listbox0](i32 value) { label0->Label = "hovered: " + std::to_string(value); });
+    listbox0->SelectedItemIndex.Changed.connect([label0, listbox0](isize value) { label0->Label = "selected: " + std::to_string(value); });
+    listbox0->HoveredItemIndex.Changed.connect([label0, listbox0](isize value) { label0->Label = "hovered: " + std::to_string(value); });
 
     auto  imgBox0 {panel0Layout->create_widget<image_box>({750, 20, 150, 200}, "ImageBox0")};
     auto* resGrp {locate_service<assets::library>().get_group("ui")};
