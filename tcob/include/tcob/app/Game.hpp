@@ -52,7 +52,7 @@ public:
     signal<gfx::render_target> Draw;        //!< Signal emitted when rendering is required.
     signal<path const>         DropFile;    //!< Signal emitted when a file is dropped onto the game window.
 
-    prop<f32> FrameLimit;                   //!< Property to control the frame rate limit.
+    prop<i32> FrameLimit;                   //!< Property to control the frame rate limit.
 
     //! Retrieves the game's window instance.
     //! @return A reference to the game's window object.

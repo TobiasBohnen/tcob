@@ -29,8 +29,7 @@ game::game(init const& init)
     register_service<platform>(std::make_shared<platform>(this, init));
 
     // properties
-    FrameLimit.Changed.connect([&](f32 value) { _frameLimit = milliseconds {1000 / value}; });
-    FrameLimit(6000.0f);
+    FrameLimit.Changed.connect([&](i32 value) { _frameLimit = milliseconds {1000.f / value}; });
 
     setup_rendersystem();
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
@@ -195,6 +194,11 @@ void game::setup_rendersystem()
                                  ? locate_service<platform>().get_display_size(0)
                                  : video[Cfg::Video::resolution].as<size_i>()};
 
+    FrameLimit.Changed.connect([&](i32 value) {
+        config[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
+    });
+    FrameLimit = video[Cfg::Video::frame_limit].as<i32>();
+
     auto& renderSystem {locate_service<gfx::render_system>()};
 
     // create window (and context)
@@ -226,6 +230,7 @@ auto game::get_config_defaults() const -> data::config::object
     video[Cfg::Video::fullscreen]             = true;
     video[Cfg::Video::use_desktop_resolution] = true;
     video[Cfg::Video::vsync]                  = false;
+    video[Cfg::Video::frame_limit]            = 6000;
     video[Cfg::Video::render_system]          = "OPENGL45";
 
     data::config::object defaults {};
