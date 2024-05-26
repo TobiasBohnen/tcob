@@ -114,7 +114,10 @@ void dock_layout::do_layout(size_f size)
 
     rect_f layoutRect {point_f::Zero, size};
     for (auto const& widget : widgets) {
-        if (layoutRect.Height <= 0 || layoutRect.Width <= 0) { break; }
+        if (layoutRect.Height <= 0 || layoutRect.Width <= 0) {
+            widget->Bounds = rect_f::Zero;
+            continue;
+        }
 
         f32 const width {std::min(layoutRect.Width, widget->Flex->Width.calc(size.Width))};     // TODO: replace with preferred size
         f32 const height {std::min(layoutRect.Height, widget->Flex->Height.calc(size.Height))}; // TODO: replace with preferred size
