@@ -23,7 +23,8 @@ public:
 
     explicit text_box(init const& wi);
 
-    signal<widget_event const> Submit;
+    signal<text_event>       BeforeTextInserted;
+    signal<text_event const> Submit;
 
     prop<utf8_string> Text;
     prop<usize>       MaxLength;
@@ -44,7 +45,7 @@ protected:
 
     auto get_attributes() const -> widget_attributes override;
 
-    void insert_text(string const& newText);
+    void insert_text(utf8_string const& newText);
 
     void on_styles_changed() override;
 

@@ -292,6 +292,11 @@ struct controller_button_event {
     input::controller::button_event& Event;
 };
 
+struct text_event {
+    widget*     Sender {nullptr};
+    utf8_string Text;
+};
+
 struct tooltip_event {
     tooltip* Sender {nullptr};
     widget*  Widget {nullptr};

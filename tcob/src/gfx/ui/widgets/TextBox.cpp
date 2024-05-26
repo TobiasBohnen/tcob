@@ -90,7 +90,7 @@ void text_box::on_key_down(input::keyboard::event& ev)
             Text = utf8::remove(Text(), _caretPos);
         }
     } else if (ev.KeyCode == controls->SubmitKey) {
-        Submit({this});
+        Submit({this, Text()});
     }
 
     ev.Handled = true;
@@ -142,11 +142,13 @@ auto text_box::get_attributes() const -> widget_attributes
     return retValue;
 }
 
-void text_box::insert_text(string const& newText)
+void text_box::insert_text(utf8_string const& newText)
 {
-    usize const newTextLength {utf8::length(newText)};
-    if (_textLength + newTextLength <= MaxLength) {
-        Text = utf8::insert(Text(), newText, _caretPos);
+    text_event ev {this, newText};
+    BeforeTextInserted(ev);
+    usize const newTextLength {utf8::length(ev.Text)};
+    if (newTextLength > 0 && _textLength + newTextLength <= MaxLength) {
+        Text = utf8::insert(Text(), ev.Text, _caretPos);
         _caretPos += newTextLength;
     }
 }
