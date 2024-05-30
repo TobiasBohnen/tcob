@@ -42,7 +42,7 @@ void element_painter::draw_background(background_draw_context const& ctx)
 
     if (ctx.Image) { // image optional?
         if (ctx.Repeat == background_repeat::NoRepeat) {
-            _canvas.draw_image(ctx.Image, ctx.OriginBox);
+            _canvas.draw_image(ctx.Image, "default", ctx.OriginBox);
         } else {
             auto const imgPattern {_canvas.create_image_pattern(ctx.OriginBox.top_left(), ctx.ImageSize, degree_f {0.0f}, ctx.Image, 1)};
             _canvas.set_fill_style(imgPattern);
@@ -216,7 +216,7 @@ void element_painter::draw_list_marker(list_marker_draw_context const& ctx)
         _canvas.fill();
         break;
     case list_marker_type::Image:
-        _canvas.draw_image(ctx.Image, ctx.Box);
+        _canvas.draw_image(ctx.Image, "default", ctx.Box);
         break;
     }
 

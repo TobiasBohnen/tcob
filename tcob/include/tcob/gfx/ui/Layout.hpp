@@ -100,7 +100,7 @@ public:
     explicit grid_layout(parent parent, size_i initSize);
 
     template <std::derived_from<widget> T>
-    auto create_widget(rect_i const& bounds, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(rect_i const& bounds, string const& name, bool growGrid = true) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;

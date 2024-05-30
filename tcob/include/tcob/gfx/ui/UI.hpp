@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <array>
+#include <utility>
 #include <variant>
 
 #include "tcob/core/Rect.hpp"
@@ -236,6 +237,21 @@ struct image_pattern {
 };
 
 auto operator==(image_pattern const& left, image_pattern const& right) -> bool;
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API image_def final {
+public:
+    assets::asset_ptr<texture> Texture;
+    string                     Region;
+
+    image_def() = default;
+    image_def(assets::asset_ptr<texture> texture, string region = "default")
+        : Texture {std::move(texture)}
+        , Region {std::move(region)}
+    {
+    }
+};
 
 ////////////////////////////////////////////////////////////
 

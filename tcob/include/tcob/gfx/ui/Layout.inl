@@ -53,13 +53,15 @@ inline auto dock_layout::create_widget(dock_style dock, string const& name) -> s
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto grid_layout::create_widget(rect_i const& bounds, string const& name) -> std::shared_ptr<T>
+inline auto grid_layout::create_widget(rect_i const& bounds, string const& name, bool growGrid) -> std::shared_ptr<T>
 {
     auto retValue {add_widget<T>(name)};
 
     _widgetBounds[retValue.get()] = bounds;
-    _grid.Width                   = std::max(_grid.Width, bounds.right());
-    _grid.Height                  = std::max(_grid.Height, bounds.bottom());
+    if (growGrid) {
+        _grid.Width  = std::max(_grid.Width, bounds.right());
+        _grid.Height = std::max(_grid.Height, bounds.bottom());
+    }
 
     return std::static_pointer_cast<T>(retValue);
 }

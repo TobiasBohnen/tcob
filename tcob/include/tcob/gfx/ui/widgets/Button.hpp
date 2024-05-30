@@ -27,8 +27,8 @@ public:
 
     explicit button(init const& wi);
 
-    prop<utf8_string>                Label;
-    prop<assets::asset_ptr<texture>> Icon;
+    prop<utf8_string> Label;
+    prop<image_def>   Icon;
 
 protected:
     void on_paint(widget_painter& painter) override;

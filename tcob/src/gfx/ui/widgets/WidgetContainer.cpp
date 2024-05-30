@@ -78,6 +78,7 @@ void widget_container::update_style()
 
 void widget_container::on_styles_changed()
 {
+    widget::on_styles_changed();
     for (auto const& w : get_widgets()) {
         w->on_styles_changed();
     }

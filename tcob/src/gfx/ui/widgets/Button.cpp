@@ -32,7 +32,7 @@ void button::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         bool const drawText {!Label->empty() && (style->Display == display_mode::OnlyText || style->Display == display_mode::TextAndIcon)};
-        bool const drawIcon {Icon() && (style->Display == display_mode::OnlyIcon || style->Display == display_mode::TextAndIcon)};
+        bool const drawIcon {Icon->Texture && (style->Display == display_mode::OnlyIcon || style->Display == display_mode::TextAndIcon)};
 
         if (drawText) { // text
             rect_f textRect {rect};
@@ -46,11 +46,13 @@ void button::on_paint(widget_painter& painter)
             }
         }
         if (drawIcon) { // icon
-            auto const iconSize {Icon->get_size()};
+            auto const iconSize {Icon->Texture->get_size()};
             f32 const  factor {iconSize.Height / static_cast<f32>(iconSize.Width)};
             f32 const  width {rect.Height * factor};
             rect = {{rect.get_center().X - width / 2, rect.Y}, {width, rect.Height}};
-            painter.get_canvas().draw_image(Icon().get_obj(), rect, style->Text.Color);
+            auto& canvas {painter.get_canvas()};
+            canvas.set_fill_style(style->Text.Color);
+            canvas.draw_image(Icon->Texture.get_obj(), Icon->Region, rect);
         }
     }
 }

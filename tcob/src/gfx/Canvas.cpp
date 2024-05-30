@@ -1509,31 +1509,31 @@ void canvas::set_text_valign(vertical_alignment align)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::draw_image(texture* image, rect_f const& rect, color color)
+void canvas::draw_image(texture* image, string const& region, rect_f const& rect)
 {
-    canvas_paint img {create_image_pattern(rect.get_position(), rect.get_size(), 0, image, 1)};
-    img.Color = color;
+    state&       s {get_state()};
+    canvas_paint paint {s.Fill};
 
-    set_fill_style(img);
-    begin_path();
-    this->rect(rect);
-    fill();
-}
+    // Render triangles.
+    paint.Image = image;
 
-void canvas::draw_image_clipped(texture* image, rect_f const& srect, rect_f const& rect, color color)
-{
-    size_i const i {image->get_size()};
+    // Apply global alpha
+    multiply_alpha_paint(paint.Color, s.Alpha);
 
-    f32 const ax {rect.Width / srect.Width};
-    f32 const ay {rect.Height / srect.Height};
+    texture_region texRegion {paint.Image->get_region(region)};
 
-    canvas_paint img {create_image_pattern({rect.left() - srect.left() * ax, rect.top() - srect.top() * ay}, {i.Width * ax, i.Height * ay}, 0, image, 1)};
-    img.Color = color;
+    quad quad {};
+    geometry::set_position(quad, rect, s.XForm);
+    geometry::set_color(quad, colors::White);
+    geometry::set_texcoords(quad, texRegion);
 
-    set_fill_style(img);
-    begin_path();
-    this->rect(rect);
-    fill();
+    for (auto& vert : quad) {
+        vert.Position[0] = std::floor(vert.Position[0] + 0.5f);
+        vert.Position[1] = std::floor(vert.Position[1] + 0.5f);
+    }
+
+    std::array<vertex, 6> const verts {quad[3], quad[1], quad[0], quad[3], quad[2], quad[1]};
+    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
 }
 
 void canvas::draw_nine_patch(texture* image, string const& region, rect_f const& rect, point_f offsetCenterLT, point_f offsetCenterRB, rect_f const& localCenterUV)

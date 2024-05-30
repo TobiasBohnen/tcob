@@ -29,7 +29,7 @@ public:
 
     explicit image_box(init const& wi);
 
-    prop<assets::asset_ptr<texture>> Image;
+    prop<image_def> Image;
 
 protected:
     void on_paint(widget_painter& painter) override;

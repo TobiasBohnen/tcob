@@ -28,15 +28,16 @@ void image_box::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         // image
-        if (Image()) {
-            rect_f targetRect {};
+        if (Image->Texture) {
+            auto const& tex {Image->Texture};
+            rect_f      targetRect {};
 
             switch (style->Fit) {
             case fit_mode::None:
-                targetRect = {rect.get_position(), static_cast<size_f>(Image->get_size())};
+                targetRect = {rect.get_position(), static_cast<size_f>(tex->get_size())};
                 break;
             case fit_mode::Contain: {
-                size_f const imgSize {static_cast<size_f>(Image->get_size())};
+                size_f const imgSize {static_cast<size_f>(tex->get_size())};
                 f32 const    aspectRatioToShrink {imgSize.Width / imgSize.Height};
                 f32 const    aspectRatioTarget {rect.Width / rect.Height};
                 f32 const    factor {(aspectRatioToShrink > aspectRatioTarget) ? (rect.Width / imgSize.Width) : (rect.Height / imgSize.Height)};
@@ -46,11 +47,11 @@ void image_box::on_paint(widget_painter& painter)
                 targetRect = rect;
                 break;
             case fit_mode::FitWidth: {
-                f32 const factor {Image->get_size().Width / static_cast<f32>(Image->get_size().Height)};
+                f32 const factor {tex->get_size().Width / static_cast<f32>(tex->get_size().Height)};
                 targetRect = {rect.get_position(), {rect.Width, rect.Width * factor}};
             } break;
             case fit_mode::FitHeight: {
-                f32 const factor {Image->get_size().Height / static_cast<f32>(Image->get_size().Width)};
+                f32 const factor {tex->get_size().Height / static_cast<f32>(tex->get_size().Width)};
                 targetRect = {rect.get_position(), {rect.Height * factor, rect.Height}};
             } break;
             }
@@ -76,7 +77,9 @@ void image_box::on_paint(widget_painter& painter)
                 break;
             }
 
-            painter.get_canvas().draw_image(Image().get_obj(), targetRect);
+            auto& canvas {painter.get_canvas()};
+            canvas.set_fill_style(colors::White);
+            canvas.draw_image(tex.get_obj(), Image->Region, targetRect);
         }
     }
 }
