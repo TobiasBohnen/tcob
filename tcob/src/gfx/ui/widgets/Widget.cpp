@@ -522,7 +522,7 @@ void widget::on_styles_changed()
 {
     _style = _form->Styles->get(Class(), get_flags(), get_attributes());
     if (Tooltip) {
-        Tooltip->_style = nullptr;
+        Tooltip->_style = _form->Styles->get(Tooltip->Class(), Tooltip->get_flags(), Tooltip->get_attributes());
     }
 }
 
