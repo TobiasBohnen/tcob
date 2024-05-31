@@ -132,11 +132,11 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
             paint_item(painter, listRect, itemHeight, i);
         }
 
-        if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paint_item(painter, listRect, itemHeight, HoveredItemIndex);
-        }
         if (SelectedItemIndex >= 0) {
             paint_item(painter, listRect, itemHeight, SelectedItemIndex);
+        }
+        if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
+            paint_item(painter, listRect, itemHeight, HoveredItemIndex);
         }
     }
 }

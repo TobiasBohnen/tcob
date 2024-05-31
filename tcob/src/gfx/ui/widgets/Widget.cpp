@@ -520,7 +520,7 @@ void widget::collect_widgets(std::vector<widget*>& vec)
 
 void widget::on_styles_changed()
 {
-    _style = nullptr;
+    _style = _form->Styles->get(Class(), get_flags(), get_attributes());
     if (Tooltip) {
         Tooltip->_style = nullptr;
     }
