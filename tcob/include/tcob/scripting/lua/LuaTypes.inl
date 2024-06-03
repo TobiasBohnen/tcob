@@ -35,14 +35,13 @@ inline auto table::get(auto&&... keys) const -> result<T>
 template <ConvertibleFrom T>
 inline auto table::try_get(T& value, auto&& key) const -> bool
 {
-    auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const res {get<T>(key)};
+    if (res.has_value()) {
+        value = res.value();
+        return true;
+    }
 
-    push_self();
-    view.push_convert(key);
-    view.get_table(-2);
-
-    return view.pull_convert_idx(-1, value);
+    return false;
 }
 
 inline void table::set(auto&&... keysOrValue) const
