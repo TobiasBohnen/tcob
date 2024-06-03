@@ -50,7 +50,7 @@ float strokeMask() {
 void main(void) {
     vec4 result;
     float scissor = scissorMask(vertPosition);
-    if (scissor == 0)discard;
+    if (scissor == 0.0)discard;
     float strokeAlpha = strokeMask();
     if (strokeAlpha < frag.strokeThr)discard;
 
