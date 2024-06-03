@@ -62,8 +62,10 @@ public:
     template <ConvertibleFrom T>
     auto get(string const& key, isize index) const -> result<T>;
 
+    template <ConvertibleFrom T>
+    auto try_get(T& value, string const& key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto try_get(T& value, Keys&&... keys) const -> bool;
+    auto try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool;
 
     auto get_type(string const& key) const -> type;
     auto get_entry(string const& key) const -> entry*;
@@ -185,6 +187,8 @@ class TCOB_API entry {
 
 public:
     entry() noexcept;
+    entry(entry const& other)                    = default;
+    auto operator=(entry const& other) -> entry& = default;
     template <typename T>
     entry(T val);
 

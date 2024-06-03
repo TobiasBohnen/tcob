@@ -60,15 +60,29 @@ inline auto object::get(string const& key, isize index) const -> result<T>
     return result<T> {error_code::Undefined};
 }
 
-template <ConvertibleFrom T, typename... Keys>
-inline auto object::try_get(T& value, Keys&&... keys) const -> bool
+template <ConvertibleFrom T>
+inline auto object::try_get(T& value, string const& key) const -> bool
 {
-    auto const res {get<T>(std::forward<Keys>(keys)...)};
-    if (res.has_value()) {
-        value = res.value();
-        return true;
+    auto it {find_key(key)};
+    if (it != _kvps->end()) {
+        return it->second.template try_get(value);
     }
 
+    return false;
+}
+
+template <ConvertibleFrom T, typename... Keys>
+inline auto object::try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool
+{
+    auto it {find_key(key)};
+    if (it != _kvps->end()) {
+        auto const& ent {it->second};
+        if (object sub; ent.try_get(sub)) {                                    // If the value is a object (a nested key-value pair)
+            return sub.try_get<T>(value, subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
+        }
+    }
+
+    // If the key was not found, return a default-constructed value and an error code
     return false;
 }
 
@@ -82,7 +96,9 @@ inline void object::set(string const& key, Value&& value)
     }
 
     // key not found -> add new entry
-    add_entry(key, entry {value});
+    entry ent; // TODO: -> constructor
+    ent.set(value);
+    add_entry(key, ent);
 }
 
 template <typename... KeysOrValue>
@@ -246,13 +262,7 @@ inline auto entry::get() const -> result<T>
 template <typename T>
 inline auto entry::try_get(T& value) const -> bool
 {
-    auto const res {get<T>()};
-    if (res.has_value()) {
-        value = res.value();
-        return true;
-    }
-
-    return false;
+    return converter<T>::From(_value, value);
 }
 
 template <typename T>
