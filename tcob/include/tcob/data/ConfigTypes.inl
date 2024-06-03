@@ -65,7 +65,7 @@ inline auto object::try_get(T& value, string const& key) const -> bool
 {
     auto it {find_key(key)};
     if (it != _kvps->end()) {
-        return it->second.template try_get(value);
+        return it->second.try_get(value);
     }
 
     return false;
