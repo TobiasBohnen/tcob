@@ -1312,6 +1312,11 @@ TEST_CASE_FIXTURE(SquirrelScriptTests, "Script.Squirrel.Table")
             REQUIRE(x == 10);
 
             REQUIRE_FALSE(global.try_get<i32>(x, "x"));
+            REQUIRE_FALSE(global.try_get<i32>(x, "tableX"));
+
+            point_f y;
+            REQUIRE(global["tableX"].as<table>().try_get(y, "top"));
+            REQUIRE_FALSE(global["tableX"].as<table>().try_get(y, "x"));
         }
         {
             table tab = *run<table>("return {left=2.7, top=3.1, width=2.3, height=55.2} ");

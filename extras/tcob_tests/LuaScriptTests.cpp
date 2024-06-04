@@ -1635,6 +1635,10 @@ TEST_CASE_FIXTURE(LuaScriptTests, "Script.Lua.Table")
 
             REQUIRE_FALSE(global.try_get<i32>(x, "x"));
             REQUIRE_FALSE(global.try_get<i32>(x, "tableX"));
+
+            point_f y;
+            REQUIRE(global["tableX"].as<table>().try_get(y, "top"));
+            REQUIRE_FALSE(global["tableX"].as<table>().try_get(y, "x"));
         }
         {
             auto res = run("tableX = {1,{x=1,y=2} }");
