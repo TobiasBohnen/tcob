@@ -13,11 +13,6 @@ tween_base::tween_base(milliseconds duration)
 {
 }
 
-tween_base::~tween_base()
-{
-    stop();
-}
-
 auto tween_base::get_progress() const -> f64
 {
     auto const retValue {_duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration)};

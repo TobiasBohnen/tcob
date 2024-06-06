@@ -52,7 +52,7 @@ public:
     auto operator=(tween_base const& other) noexcept -> tween_base& = delete;
     tween_base(tween_base&& other) noexcept                         = delete;
     auto operator=(tween_base&& other) noexcept -> tween_base&      = delete;
-    ~tween_base() override;
+    ~tween_base() override                                          = default;
 
     std::optional<milliseconds> Interval {};
     signal<>                    Finished;
