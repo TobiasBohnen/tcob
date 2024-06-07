@@ -25,7 +25,6 @@ set(TEST_SRCFILES
   CSVTests.cpp
   FlatMapTests.cpp
   FontFamilyTests.cpp
-  FileSystemTests.cpp
   HelperTests.cpp
   ImageTests.cpp
   ConfigTests.cpp
@@ -66,6 +65,12 @@ endif()
 if(TCOB_ENABLE_ADDON_DATA_SQLITE)
   list(APPEND TEST_SRCFILES
     SqliteTests.cpp
+  )
+endif()
+
+if(NOT TCOB_IS_CI)
+  list(APPEND TEST_SRCFILES
+    FileSystemTests.cpp
   )
 endif()
 
