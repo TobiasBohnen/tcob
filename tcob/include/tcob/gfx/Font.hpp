@@ -19,6 +19,8 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Texture.hpp"
 
+#include "tcob/core/ext/magic_enum_reduced.hpp"
+
 using FT_Face = struct FT_FaceRec_*;
 
 namespace tcob::gfx {
@@ -109,7 +111,8 @@ inline void font::style::Serialize(style const& v, auto&& s)
 
 inline auto font::style::Deserialize(style& v, auto&& s) -> bool
 {
-    return s.try_get(v.IsItalic, "is_italic") && s.try_get(v.Weight, "weight");
+    return s.try_get(v.IsItalic, "is_italic")
+        && s.try_get(v.Weight, "weight");
 }
 
 ////////////////////////////////////////////////////////////
@@ -254,6 +257,12 @@ private:
 
 ////////////////////////////////////////////////////////////
 }
+
+template <>
+struct tcob::detail::magic_enum_reduced::custom_range<tcob::gfx::font::weight> {
+    static constexpr i32 Min {100};
+    static constexpr i32 Max {900};
+};
 
 template <>
 struct std::formatter<tcob::gfx::font::style> {

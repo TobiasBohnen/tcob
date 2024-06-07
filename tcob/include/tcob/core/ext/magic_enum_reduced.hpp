@@ -31,8 +31,11 @@
 
 namespace tcob::detail::magic_enum_reduced {
 
-auto constexpr ENUM_MIN_VALUE = 0;
-auto constexpr ENUM_MAX_VALUE = 128;
+template <typename E>
+struct custom_range {
+    static constexpr i32 Min {0};
+    static constexpr i32 Max {128};
+};
 
 template <std::size_t N>
 struct static_string {
@@ -84,7 +87,7 @@ auto constexpr is_valid()
 template <typename E>
 auto constexpr ualue(std::size_t v)
 {
-    return static_cast<E>(ENUM_MIN_VALUE + v);
+    return static_cast<E>(custom_range<E>::Min + v);
 }
 
 template <std::size_t N>
@@ -118,7 +121,7 @@ auto constexpr values(std::index_sequence<I...>) noexcept
 template <typename E>
 auto constexpr values() noexcept
 {
-    auto constexpr enum_size = ENUM_MAX_VALUE - ENUM_MIN_VALUE + 1;
+    auto constexpr enum_size = custom_range<E>::Max - custom_range<E>::Min + 1;
     return values<E>(std::make_index_sequence<enum_size>({}));
 }
 
