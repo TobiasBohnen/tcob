@@ -64,7 +64,6 @@ void tween_base::stop()
         _status          = playback_status::Stopped;
         _elapsedTime     = 0ms;
         _currentInterval = 0ms;
-        Finished();
     }
 }
 
@@ -133,7 +132,6 @@ void tween_base::on_update(milliseconds deltaTime)
         update_values();
         if (shouldStop) {
             stop();
-            Finished();
         }
     }
 }

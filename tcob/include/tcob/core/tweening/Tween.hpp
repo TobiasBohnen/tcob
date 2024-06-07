@@ -55,7 +55,6 @@ public:
     ~tween_base() override                                          = default;
 
     std::optional<milliseconds> Interval {};
-    signal<>                    Finished;
 
     auto get_progress() const -> f64;
     auto get_status() const -> playback_status;
