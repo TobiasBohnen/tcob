@@ -52,9 +52,10 @@ public:
     auto operator=(tween_base const& other) noexcept -> tween_base& = delete;
     tween_base(tween_base&& other) noexcept                         = delete;
     auto operator=(tween_base&& other) noexcept -> tween_base&      = delete;
-    ~tween_base() override                                          = default;
+    ~tween_base() override;
 
     std::optional<milliseconds> Interval {};
+    signal<>                    Finished;
 
     auto get_progress() const -> f64;
     auto get_status() const -> playback_status;

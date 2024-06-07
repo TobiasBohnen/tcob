@@ -13,6 +13,11 @@ tween_base::tween_base(milliseconds duration)
 {
 }
 
+tween_base::~tween_base()
+{
+    stop();
+}
+
 auto tween_base::get_progress() const -> f64
 {
     auto const retValue {_duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration)};
@@ -64,6 +69,7 @@ void tween_base::stop()
         _status          = playback_status::Stopped;
         _elapsedTime     = 0ms;
         _currentInterval = 0ms;
+        Finished();
     }
 }
 
@@ -132,6 +138,7 @@ void tween_base::on_update(milliseconds deltaTime)
         update_values();
         if (shouldStop) {
             stop();
+            Finished();
         }
     }
 }
@@ -151,8 +158,8 @@ void queue::start(playback_style mode)
 void queue::stop()
 {
     if (_isRunning) {
-        std::queue<std::shared_ptr<tween_base>> empty {};
         _isRunning = false;
+        std::queue<std::shared_ptr<tween_base>> empty {};
         _queue.swap(empty);
     }
 }
