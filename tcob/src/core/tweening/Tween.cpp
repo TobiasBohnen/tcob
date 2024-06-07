@@ -151,8 +151,8 @@ void queue::start(playback_style mode)
 void queue::stop()
 {
     if (_isRunning) {
-        _isRunning = false;
         std::queue<std::shared_ptr<tween_base>> empty {};
+        _isRunning = false;
         _queue.swap(empty);
     }
 }
