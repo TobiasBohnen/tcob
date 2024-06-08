@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Tobias Bohnen
+﻿// Copyright (c) 2024 Tobias Bohnen
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -13,67 +13,67 @@ AutomationEx::AutomationEx(game& game)
 
 AutomationEx::~AutomationEx() = default;
 
-milliseconds duration{5000};
+milliseconds duration {5000};
 
 void AutomationEx::on_start()
 {
-    auto* resGrp{locate_service<assets::library>().get_group("res")};
+    auto* resGrp {locate_service<assets::library>().get_group("res")};
 
-    auto          circleMat{resGrp->get<material>("mat-circle")};
-    f32           endX{800 - 60};
-    point_f       position{0, -65};
-    point_f const posOffset{position.X, -position.Y};
+    auto          circleMat {resGrp->get<material>("mat-circle")};
+    f32           endX {800 - 60};
+    point_f       position {0, -65};
+    point_f const posOffset {position.X, -position.Y};
     {
         position += posOffset;
-        auto auto0{make_shared_tween<linear_tween<point_f>>(duration, position, point_f{endX, position.Y})};
+        auto auto0 {make_shared_tween<linear_tween<point_f>>(duration, position, point_f {endX, position.Y})};
         create_circle(circleMat, position, colors::Blue, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<smoothstep_tween<point_f>>(duration, position, point_f{endX, position.Y})};
+        auto auto0 {make_shared_tween<smoothstep_tween<point_f>>(duration, position, point_f {endX, position.Y})};
         create_circle(circleMat, position, colors::Red, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<smootherstep_tween<point_f>>(duration, position, point_f{endX, position.Y})};
+        auto auto0 {make_shared_tween<smootherstep_tween<point_f>>(duration, position, point_f {endX, position.Y})};
         create_circle(circleMat, position, colors::Yellow, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<sine_wave_tween<point_f>>(duration, position, point_f{endX, position.Y}, 0.5f, 0.f)};
+        auto auto0 {make_shared_tween<sine_wave_tween<point_f>>(duration, position, point_f {endX, position.Y}, 0.5f, 0.f)};
         create_circle(circleMat, position, colors::Orange, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<power_tween<point_f>>(duration, position, point_f{endX, position.Y}, 0.75f)};
+        auto auto0 {make_shared_tween<power_tween<point_f>>(duration, position, point_f {endX, position.Y}, 0.75f)};
         create_circle(circleMat, position, colors::LawnGreen, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<inverse_power_tween<point_f>>(duration, position, point_f{endX, position.Y}, 2.f)};
+        auto auto0 {make_shared_tween<inverse_power_tween<point_f>>(duration, position, point_f {endX, position.Y}, 2.f)};
         create_circle(circleMat, position, colors::Brown, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<power_tween<point_f>>(duration, position, point_f{endX, position.Y}, 2.f)};
+        auto auto0 {make_shared_tween<power_tween<point_f>>(duration, position, point_f {endX, position.Y}, 2.f)};
         create_circle(circleMat, position, colors::Green, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<inverse_power_tween<point_f>>(duration, position, point_f{endX, position.Y}, 0.5f)};
+        auto auto0 {make_shared_tween<inverse_power_tween<point_f>>(duration, position, point_f {endX, position.Y}, 0.5f)};
         create_circle(circleMat, position, colors::Orchid, auto0);
     }
 
     {
         position += posOffset;
-        auto auto0{make_shared_tween<square_wave_tween<point_f>>(duration, position, point_f{endX, position.Y}, 1.f, 0.f)};
+        auto auto0 {make_shared_tween<square_wave_tween<point_f>>(duration, position, point_f {endX, position.Y}, 1.f, 0.f)};
         create_circle(circleMat, position, colors::RebeccaPurple, auto0);
     }
 
@@ -138,7 +138,7 @@ void AutomationEx::on_key_down(keyboard::event& ev)
         break;
     case scan_code::D6:
         for (auto& auto0 : _tweens) {
-            auto0->Interval = milliseconds{0};
+            auto0->Interval = milliseconds {0};
         }
         break;
     case scan_code::BACKSPACE:

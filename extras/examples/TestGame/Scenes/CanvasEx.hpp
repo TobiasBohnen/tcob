@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Tobias Bohnen
+// Copyright (c) 2024 Tobias Bohnen
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -25,8 +25,8 @@ protected:
 private:
     void         prepare_canvas();
     void         paint_to_canvas();
-    texture*     Image{0};
-    texture*     NP1{0};
+    texture*     Image {0};
+    texture*     NP1 {0};
     canvas_paint ImagePattern;
     canvas_paint LinearGradient;
     canvas_paint BoxGradient;
@@ -36,6 +36,6 @@ private:
     canvas _canvas;
 
     sprite_batch                       _layer1;
-    assets::manual_asset_ptr<material> _material{};
+    assets::manual_asset_ptr<material> _material {};
     tweening::triange_wave_tween<f32>  _ninePatchTween;
 };

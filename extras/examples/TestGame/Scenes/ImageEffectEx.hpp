@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Tobias Bohnen
+// Copyright (c) 2024 Tobias Bohnen
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -27,6 +27,6 @@ protected:
 
 private:
     sprite_batch               _layer1;
-    manual_asset_ptr<material> _mat0{};
-    manual_asset_ptr<texture>  _tex0{};
+    manual_asset_ptr<material> _mat0 {};
+    manual_asset_ptr<texture>  _tex0 {};
 };
