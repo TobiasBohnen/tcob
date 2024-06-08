@@ -23,6 +23,27 @@ accordion::accordion(init const& wi)
     Class("accordion");
 }
 
+void accordion::remove_section(widget* sec)
+{
+    for (isize i {0}; i < std::ssize(_sections); ++i) {
+        if (_sections[i].get() == sec) {
+            _sections.erase(_sections.begin() + i);
+            _sectionLabels.erase(_sectionLabels.begin() + i);
+            break;
+        }
+    }
+    ActiveSectionIndex = 0;
+    force_redraw(get_name() + ": section removed");
+}
+
+void accordion::clear_sections()
+{
+    _sections.clear();
+    _sectionLabels.clear();
+    ActiveSectionIndex = 0;
+    force_redraw(get_name() + ": sections cleared");
+}
+
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {

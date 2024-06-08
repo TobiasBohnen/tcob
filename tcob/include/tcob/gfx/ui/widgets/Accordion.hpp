@@ -31,6 +31,9 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_section(utf8_string const& name, utf8_string const& label) -> std::shared_ptr<T>;
 
+    void remove_section(widget* sec);
+    void clear_sections();
+
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
     auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const& override;

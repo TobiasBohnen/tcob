@@ -32,7 +32,7 @@ public:
 
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
-    prop<isize>     MaxTabs;
+    prop<isize>     MaxTabs; // TODO: move to style
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
@@ -40,6 +40,7 @@ public:
     auto create_tab(utf8_string const& name, utf8_string const& label) -> std::shared_ptr<T>;
 
     void remove_tab(widget* tab);
+    void clear_tabs();
 
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 

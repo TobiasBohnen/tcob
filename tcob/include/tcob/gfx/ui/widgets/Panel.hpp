@@ -35,7 +35,7 @@ public:
 
     auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
-    void clear();
+    void clear_widgets();
 
     auto get_scroll_offset() const -> point_f override;
     void set_scroll_offset(point_f off);

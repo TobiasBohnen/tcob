@@ -38,6 +38,14 @@ void tab_container::remove_tab(widget* tab)
     force_redraw(get_name() + ": tab removed");
 }
 
+void tab_container::clear_tabs()
+{
+    _tabs.clear();
+    _tabLabels.clear();
+    ActiveTabIndex = 0;
+    force_redraw(get_name() + ": tabs cleared");
+}
+
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {

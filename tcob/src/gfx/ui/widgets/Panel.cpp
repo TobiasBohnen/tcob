@@ -117,7 +117,7 @@ auto panel::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
     return _layout->get_widgets();
 }
 
-void panel::clear()
+void panel::clear_widgets()
 {
     _layout->clear();
     force_redraw(get_name() + ": clearing");
