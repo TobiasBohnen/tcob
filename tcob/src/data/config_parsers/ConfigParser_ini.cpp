@@ -5,8 +5,6 @@
 
 #include "ConfigParser_ini.hpp"
 
-#include <charconv>
-
 #include "tcob/core/StringUtils.hpp"
 
 namespace tcob::data::config::detail {
@@ -230,25 +228,14 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
 
 auto ini_reader::read_number(entry& currentEntry, utf8_string_view line) const -> bool
 {
-    auto const* valueStrData {line.data()};
-    auto const  valueStrSize {line.size()};
-
-    {
-        i64 valueInt {0};
-        auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, valueInt)};
-        if (ec == std::errc {} && p == valueStrData + valueStrSize) {
-            currentEntry.set_value(valueInt);
-            return true;
-        }
+    if (auto intVal {helper::to_number<i64>(line)}) {
+        currentEntry.set_value(*intVal);
+        return true;
     }
 
-    {
-        f64 valueFloat {0};
-        auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, valueFloat)};
-        if (ec == std::errc {} && p == valueStrData + valueStrSize) {
-            currentEntry.set_value(valueFloat);
-            return true;
-        }
+    if (auto floatVal {helper::to_number<f64>(line)}) {
+        currentEntry.set_value(*floatVal);
+        return true;
     }
 
     return false;

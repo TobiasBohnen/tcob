@@ -7,8 +7,6 @@
 
 #include "ConfigParser_json.hpp"
 
-#include <charconv>
-
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"
 
@@ -736,26 +734,14 @@ auto yaml_reader::parse_alias() -> utf8_string
 
 auto yaml_reader::convert_scalar(entry& currentEntry, utf8_string const& value) -> bool
 {
-    // number
-    auto const* valueStrData {value.data()};
-    auto const  valueStrSize {value.size()};
-
-    {
-        i64 valueInt {0};
-        auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, valueInt)};
-        if (ec == std::errc {} && p == valueStrData + valueStrSize) {
-            currentEntry.set_value(valueInt);
-            return true;
-        }
+    if (auto intVal {helper::to_number<i64>(value)}) {
+        currentEntry.set_value(*intVal);
+        return true;
     }
 
-    {
-        f64 valueFloat {0};
-        auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, valueFloat)};
-        if (ec == std::errc {} && p == valueStrData + valueStrSize) {
-            currentEntry.set_value(valueFloat);
-            return true;
-        }
+    if (auto floatVal {helper::to_number<f64>(value)}) {
+        currentEntry.set_value(*floatVal);
+        return true;
     }
 
     // bool

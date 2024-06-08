@@ -6,7 +6,6 @@
 #include "ConfigParser_xml.hpp"
 
 #include <algorithm>
-#include <charconv>
 
 #include "tcob/core/StringUtils.hpp"
 
@@ -312,26 +311,14 @@ auto xml_reader::convert_to_array(element const& n) -> array
 
 void xml_reader::convert_value(entry& currentEntry, utf8_string const& str)
 {
-    // number
-    auto const* valueStrData {str.data()};
-    auto const  valueStrSize {str.size()};
-
-    {
-        i64 valueInt {0};
-        auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, valueInt)};
-        if (ec == std::errc {} && p == valueStrData + valueStrSize) {
-            currentEntry.set_value(valueInt);
-            return;
-        }
+    if (auto intVal {helper::to_number<i64>(str)}) {
+        currentEntry.set_value(*intVal);
+        return;
     }
 
-    {
-        f64 valueFloat {0};
-        auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, valueFloat)};
-        if (ec == std::errc {} && p == valueStrData + valueStrSize) {
-            currentEntry.set_value(valueFloat);
-            return;
-        }
+    if (auto floatVal {helper::to_number<f64>(str)}) {
+        currentEntry.set_value(*floatVal);
+        return;
     }
 
     // bool

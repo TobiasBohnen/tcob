@@ -19,6 +19,9 @@ template <typename T>
 auto          to_string(T&& value) -> string;
 TCOB_API auto to_string(char const* s) -> string;
 
+template <Arithmetic T>
+auto to_number(string_view str) -> std::optional<T>;
+
 auto join(auto&& container, string_view delim) -> string;
 
 auto          split_for_each(string_view str, char delim, auto&& f) -> bool;
@@ -39,6 +42,7 @@ TCOB_API auto case_insensitive_equals(string_view lhs, string_view rhs) -> bool;
 TCOB_API auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool;
 
 TCOB_API auto wildcard_match(string_view str, string_view pattern) -> bool;
+
 }
 
 namespace tcob::utf8 {

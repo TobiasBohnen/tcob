@@ -6,6 +6,8 @@
 #pragma once
 #include "StringUtils.hpp"
 
+#include <charconv>
+
 namespace tcob::helper {
 
 auto split_for_each(string_view str, char delim, auto&& f) -> bool
@@ -95,6 +97,21 @@ auto to_string(T&& value) -> string
     } else {
         return std::to_string(value);
     }
+}
+
+template <Arithmetic T>
+auto to_number(string_view str) -> std::optional<T>
+{
+    auto const* valueStrData {str.data()};
+    auto const  valueStrSize {str.size()};
+
+    T retValue {0};
+    auto [p, ec] {std::from_chars(valueStrData, valueStrData + valueStrSize, retValue)};
+    if (ec == std::errc {} && p == valueStrData + valueStrSize) {
+        return retValue;
+    }
+
+    return std::nullopt;
 }
 
 auto join(auto&& container, string_view delim) -> string
