@@ -43,6 +43,8 @@ TCOB_API auto case_insensitive_contains(string_view lhs, string_view rhs) -> boo
 
 TCOB_API auto wildcard_match(string_view str, string_view pattern) -> bool;
 
+TCOB_API auto random_string(usize length) -> string;
+
 }
 
 namespace tcob::utf8 {

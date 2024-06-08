@@ -10,6 +10,8 @@
 
 #include <utf8/unchecked.h>
 
+#include "tcob/core/random/Random.hpp"
+
 namespace tcob::helper {
 
 auto get_levenshtein_distance(string_view lhs, string_view rhs) -> u32
@@ -165,6 +167,19 @@ auto wildcard_match(string_view str, string_view pattern) -> bool
     }
 
     return wildcard_match(str.substr(1), pattern.substr(1));
+}
+
+auto random_string(usize length) -> string
+{
+    std::string static const characters {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"};
+    rng static rand;
+
+    std::string retValue;
+    for (usize i {0}; i < length; ++i) {
+        retValue += characters[rand(isize {0}, std::ssize(characters) - 1)];
+    }
+
+    return retValue;
 }
 
 }

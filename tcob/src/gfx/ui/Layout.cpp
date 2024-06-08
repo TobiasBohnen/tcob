@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/Layout.hpp"
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
@@ -69,7 +70,11 @@ auto layout::get_widgets() -> std::vector<std::shared_ptr<widget>>&
 auto layout::create_init(string const& name) const -> widget::init
 {
     widget::init retValue {};
-    retValue.Name = name;
+    if (name.empty()) {
+        retValue.Name = helper::random_string(12);
+    } else {
+        retValue.Name = name;
+    }
 
     std::visit(
         tcob::detail::overloaded {
