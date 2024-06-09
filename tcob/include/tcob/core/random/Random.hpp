@@ -172,6 +172,22 @@ namespace random {
     };
 
     ////////////////////////////////////////////////////////////
+
+    // based on: http://lomont.org/papers/2008/Lomont_PRNG_2008.pdf
+    class TCOB_API well_512_a final {
+    public:
+        using state_type  = std::array<u32, 16>;
+        using seed_type   = u32;
+        using result_type = u32;
+
+        auto operator()(state_type& state) -> result_type;
+        void seed(state_type& state, seed_type seed) const;
+
+    private:
+        isize _index {0};
+    };
+
+    ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
 
     class uniform_distribution {
@@ -234,6 +250,7 @@ namespace random {
     using rng_xoshiro_256_plus        = random_number_generator<xoshiro_256_plus>;
     using rng_xoshiro_256_plus_plus   = random_number_generator<xoshiro_256_plus_plus>;
     using rng_xoshiro_256_star_star   = random_number_generator<xoshiro_256_star_star>;
+    using rng_well_512_a              = random_number_generator<well_512_a>;
 
     ////////////////////////////////////////////////////////////
 

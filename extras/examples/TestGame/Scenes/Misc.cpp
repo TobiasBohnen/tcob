@@ -349,6 +349,8 @@ void MiscScene::on_key_down(keyboard::event& ev)
         draw_dice(dice<20, rng_split_mix_32> {static_cast<u32>(seed)});
         std::cout << "----game_rand" << '\n';
         draw_dice(dice<20, rng_game_rand> {static_cast<u32>(seed)});
+        std::cout << "----well_512_a" << '\n';
+        draw_dice(dice<20, rng_well_512_a> {static_cast<u32>(seed)});
 
         random_number_generator<xorshift_64, normal_distribution> normalRng {static_cast<u32>(seed)};
         std::cout << "----normal xorshift_64" << '\n';

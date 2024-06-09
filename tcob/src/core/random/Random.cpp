@@ -247,4 +247,29 @@ void xoshiro_256_star_star::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
+auto well_512_a::operator()(state_type& state) -> result_type
+{
+    u32 a {state[_index]};
+    u32 c {state[(_index + 13) & 15]};
+    u32 b {a ^ c ^ (a << 16) ^ (c << 15)};
+    c = state[(_index + 9) & 15];
+    c ^= (c >> 11);
+    a = state[_index] = b ^ c;
+    u32 d {a ^ ((a << 5) & 0xDA442D24UL)};
+    _index        = (_index + 15) & 15;
+    a             = state[_index];
+    state[_index] = a ^ b ^ d ^ (a << 2) ^ (b << 18) ^ (c << 28);
+    return state[_index];
+}
+
+void well_512_a::seed(state_type& state, seed_type seed) const
+{
+    rng_split_mix_32 rnd {seed};
+    for (usize i {0}; i < state.size(); ++i) {
+        state[i] = rnd.next();
+    }
+}
+
+////////////////////////////////////////////////////////////
+
 }
