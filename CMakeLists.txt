@@ -70,9 +70,7 @@ if(MSVC AND TCOB_USE_DEFAULT_MSVC_OPTIONS)
   add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
   add_compile_definitions(_ITERATOR_DEBUG_LEVEL=0)
 
-  if(NOT TCOB_IS_CI)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-  endif()
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 # subdirs######################################################################
