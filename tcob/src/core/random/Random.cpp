@@ -255,7 +255,7 @@ auto well_512_a::operator()(state_type& state) -> result_type
     c = state[(_index + 9) & 15];
     c ^= (c >> 11);
     a = state[_index] = b ^ c;
-    u32 d {a ^ ((a << 5) & 0xDA442D24UL)};
+    u32 d {a ^ ((a << 5) & 0xDA442D24)};
     _index        = (_index + 15) & 15;
     a             = state[_index];
     state[_index] = a ^ b ^ d ^ (a << 2) ^ (b << 18) ^ (c << 28);
