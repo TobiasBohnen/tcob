@@ -58,10 +58,10 @@ private:
     {
         std::map<f32, i32> hist;
         for (int n = 0; n < 100000; ++n) {
-            ++hist[static_cast<i32>(rng(5.f, 3.f) * 1)];
+            ++hist[static_cast<i32>(rng() * 1)];
         }
         for (auto p : hist) {
-            std::cout << p.first << ' ' << std::string(p.second / 250, '*') << '\n';
+            std::cout << std::setfill('0') << std::setw(2) << p.first << ' ' << std::string(p.second / 250, '*') << '\n';
         }
     }
 

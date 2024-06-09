@@ -198,12 +198,33 @@ namespace random {
 
     class normal_distribution {
     public:
+        normal_distribution(f32 mean, f32 stdDev);
+
         template <typename R>
-        auto operator()(R& rng, f32 mean, f32 stdDev) -> f32;
+        auto operator()(R& rng) -> f32;
 
     private:
+        f32                   _mean;
+        f32                   _stdDev;
         [[maybe_unused]] bool _toggle {false};
         [[maybe_unused]] f32  _x2 {0.0f};
+    };
+
+    class rep_seq_distribution {
+    public:
+        rep_seq_distribution(i64 min, i64 max, isize period);
+
+        template <typename R>
+        auto operator()(R& rng) -> i64;
+
+    private:
+        template <typename R>
+        void gen_seq(R& rng);
+
+        i64              _min;
+        i64              _max;
+        isize            _period;
+        std::vector<i64> _seq;
     };
 
     ////////////////////////////////////////////////////////////
@@ -217,24 +238,18 @@ namespace random {
         using result_type        = typename E::result_type;
         using distribution_type  = D;
 
-        explicit random_number_generator(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
-        explicit random_number_generator(state_type state);
+        explicit random_number_generator(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
+        explicit random_number_generator(state_type state, auto&&... distArgs);
 
         auto operator()(auto&&... arg);
 
         auto next() -> result_type;
         auto get_state() const -> state_type const&;
 
-        template <typename X>
-        void shuffle(std::span<X> span);
-
-        auto constexpr static min() -> result_type;
-        auto constexpr static max() -> result_type;
-
     private:
         random_engine_type _engine {};
         state_type         _state {};
-        distribution_type  _distribution {};
+        distribution_type  _distribution;
     };
 
     ////////////////////////////////////////////////////////////
@@ -254,11 +269,11 @@ namespace random {
 
     ////////////////////////////////////////////////////////////
 
-    template <i32 N, typename RandomGenerator = rng_xoroshiro_128_plus_plus>
+    template <i32 N, RandomEngine E = xoroshiro_128_plus_plus>
     class dice final {
         static_assert(N > 0, "N must be greater than 0");
-        using state_type = typename RandomGenerator::state_type;
-        using seed_type  = typename RandomGenerator::seed_type;
+        using state_type = typename E::state_type;
+        using seed_type  = typename E::seed_type;
 
     public:
         explicit dice(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
@@ -271,7 +286,26 @@ namespace random {
         auto roll_n(usize n) -> std::vector<i32>;
 
     private:
-        RandomGenerator _random {};
+        random_number_generator<E> _random {};
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    template <typename T, RandomEngine E = xoroshiro_128_plus_plus>
+    class shuffle final {
+    public:
+        using state_type = typename E::state_type;
+        using seed_type  = typename E::seed_type;
+
+        explicit shuffle(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
+        explicit shuffle(state_type state);
+
+        auto get_state() const -> state_type const&;
+
+        void operator()(std::span<T> span);
+
+    private:
+        random_number_generator<E> _random {};
     };
 
 }
