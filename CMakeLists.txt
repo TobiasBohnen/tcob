@@ -82,6 +82,7 @@ add_subdirectory(tcob)
 if(PROJECT_IS_TOP_LEVEL)
   # ctest
   set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+  option(BUILD_TESTING "" OFF)
   include(CTest)
   enable_testing()
 
