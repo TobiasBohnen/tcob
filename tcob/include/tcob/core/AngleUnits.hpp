@@ -11,7 +11,7 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-template <template <typename> typename Type, typename ValueType>
+template <FloatingPoint ValueType, double OneTurn>
 class [[nodiscard]] angle_unit {
 public:
     using value_type = ValueType;
@@ -19,10 +19,10 @@ public:
     constexpr angle_unit() = default;
     constexpr angle_unit(value_type value);
 
-    template <template <typename> typename Type2>
-    constexpr angle_unit(angle_unit<Type2, ValueType> const& other) noexcept;
-    template <template <typename> typename Type2, typename ValueType2>
-    explicit constexpr angle_unit(angle_unit<Type2, ValueType2> const& other) noexcept;
+    template <FloatingPoint ValueType2, double OneTurn2>
+    explicit constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;
+    template <FloatingPoint ValueType2, double OneTurn2>
+    auto operator=(angle_unit<ValueType2, OneTurn2> const& other) noexcept -> angle_unit<ValueType, OneTurn>&;
 
     auto sin [[nodiscard]] () const -> value_type;
     auto asin [[nodiscard]] () const -> value_type;
@@ -31,106 +31,74 @@ public:
     auto tan [[nodiscard]] () const -> value_type;
     auto atan [[nodiscard]] () const -> value_type;
 
-    auto constexpr as_normalized [[nodiscard]] () -> Type<ValueType>;
+    auto constexpr as_normalized [[nodiscard]] () -> angle_unit<ValueType, OneTurn>;
 
-    auto static constexpr Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> Type<ValueType>;
+    auto static constexpr Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>;
 
     value_type Value {0};
 };
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator+(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> Type<ValueType>;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator+(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>;
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator+=(angle_unit<Type, ValueType>& left, angle_unit<Type, ValueType> const& right) -> angle_unit<Type, ValueType>&;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator+=(angle_unit<ValueType, OneTurn>& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>&;
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator-(angle_unit<Type, ValueType> const& right) -> Type<ValueType>;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator-(angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>;
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator-(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> Type<ValueType>;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator-(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>;
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator-=(angle_unit<Type, ValueType>& left, angle_unit<Type, ValueType> const& right) -> angle_unit<Type, ValueType>&;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator-=(angle_unit<ValueType, OneTurn>& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>&;
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator*(angle_unit<Type, ValueType> const& left, R const& right) -> Type<ValueType>;
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator*(angle_unit<ValueType, OneTurn> const& left, R const& right) -> angle_unit<ValueType, OneTurn>;
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator*=(angle_unit<Type, ValueType>& left, R right) -> angle_unit<Type, ValueType>&;
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator*=(angle_unit<ValueType, OneTurn>& left, R right) -> angle_unit<ValueType, OneTurn>&;
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator/(angle_unit<Type, ValueType> const& left, R right) -> Type<ValueType>;
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator/(angle_unit<ValueType, OneTurn> const& left, R right) -> angle_unit<ValueType, OneTurn>;
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator/=(angle_unit<Type, ValueType>& left, R right) -> angle_unit<Type, ValueType>&;
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator/=(angle_unit<ValueType, OneTurn>& left, R right) -> angle_unit<ValueType, OneTurn>&;
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator==(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> bool;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator==(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> bool;
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator==(angle_unit<Type, ValueType> const& left, R right) -> bool;
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator==(angle_unit<ValueType, OneTurn> const& left, R right) -> bool;
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator<=>(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> std::partial_ordering;
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> std::partial_ordering;
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator<=>(angle_unit<Type, ValueType> const& left, R right) -> std::partial_ordering;
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, R right) -> std::partial_ordering;
 
-template <template <typename> typename Type, typename ValueType>
-inline auto operator<<(std::ostream& os, angle_unit<Type, ValueType> const& m) -> std::ostream&;
-
-////////////////////////////////////////////////////////////
-
-template <FloatingPoint T>
-class [[nodiscard]] degree final : public angle_unit<degree, T> {
-public:
-    using angle_unit<degree, T>::angle_unit;
-
-    static constexpr T OneTurn {static_cast<T>(360)};
-};
-
-using degree_f = degree<f32>;
-using degree_d = degree<f64>;
+template <FloatingPoint ValueType, double OneTurn>
+inline auto operator<<(std::ostream& os, angle_unit<ValueType, OneTurn> const& m) -> std::ostream&;
 
 ////////////////////////////////////////////////////////////
 
-template <FloatingPoint T>
-class [[nodiscard]] radian final : public angle_unit<radian, T> {
-public:
-    using angle_unit<radian, T>::angle_unit;
-
-    static constexpr T OneTurn {static_cast<T>(TAU)};
-};
-
-using radian_f = radian<f32>;
-using radian_d = radian<f64>;
+using degree_f = angle_unit<f32, 360.>;
+using degree_d = angle_unit<f64, 360.>;
 
 ////////////////////////////////////////////////////////////
 
-template <FloatingPoint T>
-class [[nodiscard]] turn final : public angle_unit<turn, T> {
-public:
-    using angle_unit<turn, T>::angle_unit;
-
-    static constexpr T OneTurn {static_cast<T>(1)};
-};
-
-using turn_f = turn<f32>;
-using turn_d = turn<f64>;
+using radian_f = angle_unit<f32, TAU>;
+using radian_d = angle_unit<f64, TAU>;
 
 ////////////////////////////////////////////////////////////
 
-template <FloatingPoint T>
-class [[nodiscard]] gradian final : public angle_unit<gradian, T> {
-public:
-    using angle_unit<gradian, T>::angle_unit;
+using turn_f = angle_unit<f32, 1.>;
+using turn_d = angle_unit<f64, 1.>;
 
-    static constexpr T OneTurn {static_cast<T>(400)};
-};
+////////////////////////////////////////////////////////////
 
-using gradian_f = gradian<f32>;
-using gradian_d = gradian<f64>;
+using gradian_f = angle_unit<f32, 400.>;
+using gradian_d = angle_unit<f64, 400.>;
 
 ////////////////////////////////////////////////////////////
 

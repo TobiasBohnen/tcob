@@ -638,24 +638,24 @@ struct converter<T> {
     }
 };
 
-template <FloatingPoint T>
-struct converter<radian<T>> {
+template <FloatingPoint ValueType, double OneTurn>
+struct converter<angle_unit<ValueType, OneTurn>> {
     auto static IsType(cfg_value const& config) -> bool
     {
-        return converter<T>::IsType(config);
+        return converter<ValueType>::IsType(config);
     }
 
-    auto static From(cfg_value const& config, radian<T>& value) -> bool
+    auto static From(cfg_value const& config, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (IsType(config)) {
-            converter<T>::From(config, value.Value);
+            converter<ValueType>::From(config, value.Value);
             return true;
         }
 
         return false;
     }
 
-    void static To(cfg_value& config, radian<T> const& value)
+    void static To(cfg_value& config, angle_unit<ValueType, OneTurn> const& value)
     {
         config = value.Value;
     }

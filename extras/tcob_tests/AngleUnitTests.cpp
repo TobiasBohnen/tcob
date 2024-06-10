@@ -138,4 +138,10 @@ TEST_CASE("Core.POD.AngleUnits")
             REQUIRE(90_grad + 270_grad == gradian_f {360});
         }
     }
+    SUBCASE("trig")
+    {
+        REQUIRE(degree_f {90}.sin() == 1.0f);
+        REQUIRE(degree_f {270}.sin() == -1.0f);
+        REQUIRE(radian_f {0.5f}.sin() == std::sin(0.5f));
+    }
 }

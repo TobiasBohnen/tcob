@@ -1053,17 +1053,17 @@ struct converter<T> {
     }
 };
 
-template <FloatingPoint T>
-struct converter<degree<T>> {
+template <FloatingPoint ValueType, double OneTurn>
+struct converter<angle_unit<ValueType, OneTurn>> {
     auto static IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::Number;
     }
 
-    auto static From(state_view view, i32& idx, degree<T>& value) -> bool
+    auto static From(state_view view, i32& idx, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (view.is_number(idx)) {
-            value = static_cast<T>(view.to_number(idx++));
+            value = static_cast<ValueType>(view.to_number(idx++));
             return true;
         }
 
@@ -1071,31 +1071,7 @@ struct converter<degree<T>> {
         return false;
     }
 
-    void static To(state_view view, degree<T> const& value)
-    {
-        view.push_number(value.Value);
-    }
-};
-
-template <FloatingPoint T>
-struct converter<radian<T>> {
-    auto static IsType(state_view view, i32 idx) -> bool
-    {
-        return view.get_type(idx) == type::Number;
-    }
-
-    auto static From(state_view view, i32& idx, radian<T>& value) -> bool
-    {
-        if (view.is_number(idx)) {
-            value = static_cast<T>(view.to_number(idx++));
-            return true;
-        }
-
-        idx++;
-        return false;
-    }
-
-    void static To(state_view view, radian<T> const& value)
+    void static To(state_view view, angle_unit<ValueType, OneTurn> const& value)
     {
         view.push_number(value.Value);
     }

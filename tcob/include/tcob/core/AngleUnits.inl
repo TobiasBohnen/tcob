@@ -10,158 +10,183 @@
 
 namespace tcob {
 
-template <template <typename> typename Type, typename ValueType>
-constexpr angle_unit<Type, ValueType>::angle_unit(value_type value)
+template <FloatingPoint ValueType, double OneTurn>
+constexpr angle_unit<ValueType, OneTurn>::angle_unit(value_type value)
     : Value {value}
 {
 }
 
-template <template <typename> typename Type, typename ValueType>
-template <template <typename> typename Type2>
-constexpr angle_unit<Type, ValueType>::angle_unit(angle_unit<Type2, ValueType> const& other) noexcept
-    : Value {static_cast<ValueType>(other.Value / Type2<ValueType>::OneTurn) * Type<ValueType>::OneTurn}
+template <FloatingPoint ValueType, double OneTurn>
+template <FloatingPoint ValueType2, double OneTurn2>
+constexpr angle_unit<ValueType, OneTurn>::angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept
 {
+    *this = other;
 }
 
-template <template <typename> typename Type, typename ValueType>
-template <template <typename> typename Type2, typename ValueType2>
-constexpr angle_unit<Type, ValueType>::angle_unit(angle_unit<Type2, ValueType2> const& other) noexcept
-    : Value {static_cast<ValueType>(other.Value / Type2<ValueType2>::OneTurn) * Type<ValueType>::OneTurn}
+template <FloatingPoint ValueType, double OneTurn>
+template <FloatingPoint ValueType2, double OneTurn2>
+inline auto angle_unit<ValueType, OneTurn>::operator=(angle_unit<ValueType2, OneTurn2> const& other) noexcept -> angle_unit<ValueType, OneTurn>&
 {
+    Value = static_cast<ValueType>(other.Value / OneTurn2 * OneTurn);
+    return *this;
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto angle_unit<Type, ValueType>::sin() const -> value_type
+template <FloatingPoint ValueType, double OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::sin() const -> value_type
 {
-    return std::sin(radian<value_type> {*this}.Value);
+    if constexpr (OneTurn == TAU) {
+        return std::sin(Value);
+    } else {
+        return std::sin(angle_unit<value_type, TAU> {*this}.Value);
+    }
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto angle_unit<Type, ValueType>::asin() const -> value_type
+template <FloatingPoint ValueType, double OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::asin() const -> value_type
 {
-    return std::asin(radian<value_type> {*this}.Value);
+    if constexpr (OneTurn == TAU) {
+        return std::asin(Value);
+    } else {
+        return std::asin(angle_unit<value_type, TAU> {*this}.Value);
+    }
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto angle_unit<Type, ValueType>::cos() const -> value_type
+template <FloatingPoint ValueType, double OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::cos() const -> value_type
 {
-    return std::cos(radian<value_type> {*this}.Value);
+    if constexpr (OneTurn == TAU) {
+        return std::cos(Value);
+    } else {
+        return std::cos(angle_unit<value_type, TAU> {*this}.Value);
+    }
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto angle_unit<Type, ValueType>::acos() const -> value_type
+template <FloatingPoint ValueType, double OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::acos() const -> value_type
 {
-    return std::acos(radian<value_type> {*this}.Value);
+    if constexpr (OneTurn == TAU) {
+        return std::acos(Value);
+    } else {
+        return std::acos(angle_unit<value_type, TAU> {*this}.Value);
+    }
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto angle_unit<Type, ValueType>::tan() const -> value_type
+template <FloatingPoint ValueType, double OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::tan() const -> value_type
 {
-    return std::tan(radian<value_type> {*this}.Value);
+    if constexpr (OneTurn == TAU) {
+        return std::tan(Value);
+    } else {
+        return std::tan(angle_unit<value_type, TAU> {*this}.Value);
+    }
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto angle_unit<Type, ValueType>::atan() const -> value_type
+template <FloatingPoint ValueType, double OneTurn>
+inline auto angle_unit<ValueType, OneTurn>::atan() const -> value_type
 {
-    return std::atan(radian<value_type> {*this}.Value);
+    if constexpr (OneTurn == TAU) {
+        return std::atan(Value);
+    } else {
+        return std::atan(angle_unit<value_type, TAU> {*this}.Value);
+    }
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr angle_unit<Type, ValueType>::as_normalized() -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::as_normalized() -> angle_unit<value_type, OneTurn>
 {
-    return {std::fmod(this->Value, Type<value_type>::OneTurn)};
+    return {std::fmod(this->Value, static_cast<value_type>(OneTurn))};
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr angle_unit<Type, ValueType>::Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<value_type, OneTurn>
 {
     return {static_cast<value_type>(left.Value + ((right.Value - left.Value) * step))};
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator+(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator+(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>
 {
     return {left.Value + static_cast<ValueType>(right.Value)};
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator+=(angle_unit<Type, ValueType>& left, angle_unit<Type, ValueType> const& right) -> angle_unit<Type, ValueType>&
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator+=(angle_unit<ValueType, OneTurn>& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>&
 {
     left.Value += static_cast<ValueType>(right.Value);
     return left;
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator-(angle_unit<Type, ValueType> const& right) -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator-(angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>
 {
     return {static_cast<ValueType>(-right.Value)};
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator-(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator-(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>
 {
     return {left.Value - static_cast<ValueType>(right.Value)};
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator-=(angle_unit<Type, ValueType>& left, angle_unit<Type, ValueType> const& right) -> angle_unit<Type, ValueType>&
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator-=(angle_unit<ValueType, OneTurn>& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>&
 {
     left.Value -= static_cast<ValueType>(right.Value);
     return left;
 }
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator*(angle_unit<Type, ValueType> const& left, R const& right) -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator*(angle_unit<ValueType, OneTurn> const& left, R const& right) -> angle_unit<ValueType, OneTurn>
 {
     return {left.Value * static_cast<ValueType>(right)};
 }
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator*=(angle_unit<Type, ValueType>& left, R right) -> angle_unit<Type, ValueType>&
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator*=(angle_unit<ValueType, OneTurn>& left, R right) -> angle_unit<ValueType, OneTurn>&
 {
     left.Value *= static_cast<ValueType>(right);
     return left;
 }
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator/(angle_unit<Type, ValueType> const& left, R right) -> Type<ValueType>
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator/(angle_unit<ValueType, OneTurn> const& left, R right) -> angle_unit<ValueType, OneTurn>
 {
     return {left.Value / static_cast<ValueType>(right)};
 }
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator/=(angle_unit<Type, ValueType>& left, R right) -> angle_unit<Type, ValueType>&
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator/=(angle_unit<ValueType, OneTurn>& left, R right) -> angle_unit<ValueType, OneTurn>&
 {
     left.Value /= static_cast<ValueType>(right);
     return left;
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator==(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> bool
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator==(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> bool
 {
     return (left.Value == static_cast<ValueType>(right.Value));
 }
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator==(angle_unit<Type, ValueType> const& left, R right) -> bool
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator==(angle_unit<ValueType, OneTurn> const& left, R right) -> bool
 {
     return (left.Value == static_cast<ValueType>(right));
 }
 
-template <template <typename> typename Type, typename ValueType>
-auto constexpr operator<=>(angle_unit<Type, ValueType> const& left, angle_unit<Type, ValueType> const& right) -> std::partial_ordering
+template <FloatingPoint ValueType, double OneTurn>
+auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> std::partial_ordering
 {
     return left.Value <=> static_cast<ValueType>(right.Value);
 }
 
-template <template <typename> typename Type, typename ValueType, Arithmetic R>
-auto constexpr operator<=>(angle_unit<Type, ValueType> const& left, R right) -> std::partial_ordering
+template <FloatingPoint ValueType, double OneTurn, Arithmetic R>
+auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, R right) -> std::partial_ordering
 {
     return left.Value <=> static_cast<ValueType>(right);
 }
 
-template <template <typename> typename Type, typename ValueType>
-inline auto operator<<(std::ostream& os, angle_unit<Type, ValueType> const& m) -> std::ostream&
+template <FloatingPoint ValueType, double OneTurn>
+inline auto operator<<(std::ostream& os, angle_unit<ValueType, OneTurn> const& m) -> std::ostream&
 {
     return os << "value:" << m.Value;
 }
