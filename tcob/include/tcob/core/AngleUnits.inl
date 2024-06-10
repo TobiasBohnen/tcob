@@ -19,16 +19,8 @@ constexpr angle_unit<ValueType, OneTurn>::angle_unit(value_type value)
 template <FloatingPoint ValueType, double OneTurn>
 template <FloatingPoint ValueType2, double OneTurn2>
 constexpr angle_unit<ValueType, OneTurn>::angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept
+    : Value(static_cast<ValueType>(other.Value / OneTurn2 * OneTurn))
 {
-    *this = other;
-}
-
-template <FloatingPoint ValueType, double OneTurn>
-template <FloatingPoint ValueType2, double OneTurn2>
-inline auto angle_unit<ValueType, OneTurn>::operator=(angle_unit<ValueType2, OneTurn2> const& other) noexcept -> angle_unit<ValueType, OneTurn>&
-{
-    Value = static_cast<ValueType>(other.Value / OneTurn2 * OneTurn);
-    return *this;
 }
 
 template <FloatingPoint ValueType, double OneTurn>

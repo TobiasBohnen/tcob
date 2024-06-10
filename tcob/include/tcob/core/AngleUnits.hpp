@@ -20,9 +20,7 @@ public:
     constexpr angle_unit(value_type value);
 
     template <FloatingPoint ValueType2, double OneTurn2>
-    explicit constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;
-    template <FloatingPoint ValueType2, double OneTurn2>
-    auto operator=(angle_unit<ValueType2, OneTurn2> const& other) noexcept -> angle_unit<ValueType, OneTurn>&;
+    constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;
 
     auto sin [[nodiscard]] () const -> value_type;
     auto asin [[nodiscard]] () const -> value_type;
