@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <any>
+
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Interfaces.hpp"
 
@@ -28,11 +30,12 @@ public:
 
     auto get_preferred_locals() const -> std::vector<locale> const&;
     auto get_display_size(i32 display) const -> size_i;
-    auto is_running_on_wine() const -> bool;
 
     void remove_services() const;
 
     auto static HeadlessInit(char const* argv0, path logFile = "") -> platform;
+
+    auto static IsRunningOnWine() -> bool;
 
     static inline char const* service_name {"platform"};
 
@@ -49,6 +52,19 @@ private:
 
     game*               _game {nullptr};
     std::vector<locale> _locales {};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API single_instance {
+public:
+    single_instance(string const& name);
+    ~single_instance();
+    operator bool() const;
+
+private:
+    std::any _handle;
+    bool     _locked {false};
 };
 
 }

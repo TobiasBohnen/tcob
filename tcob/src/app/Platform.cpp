@@ -42,6 +42,11 @@
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
     #include "Windows.h"
+#else
+    #include <fcntl.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <unistd.h>
 #endif
 
 namespace tcob {
@@ -177,6 +182,16 @@ auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
              .AsyncLoadThreads = 0}};
 }
 
+auto platform::IsRunningOnWine() -> bool
+{
+#if defined(_MSC_VER)
+    auto* ntdll {GetModuleHandleA("ntdll.dll")};
+    return ntdll ? GetProcAddress(ntdll, "wine_get_version") != nullptr : false;
+#else
+    return false;
+#endif
+}
+
 void platform::process_events(gfx::window* window) const
 {
     SDL_Event ev;
@@ -249,16 +264,6 @@ auto platform::get_display_size(i32 display) const -> size_i
     SDL_DisplayMode mode;
     SDL_GetDesktopDisplayMode(display, &mode);
     return {mode.w, mode.h};
-}
-
-auto platform::is_running_on_wine() const -> bool
-{
-#if defined(_MSC_VER)
-    auto* ntdll {GetModuleHandleA("ntdll.dll")};
-    return ntdll ? GetProcAddress(ntdll, "wine_get_version") != nullptr : false;
-#else
-    return false;
-#endif
 }
 
 void platform::InitSDL()
@@ -458,6 +463,52 @@ void platform::InitRenderSystem(string const& renderer)
         throw std::runtime_error("Render system creation failed!");
     }
     register_service<gfx::render_system>(renderSystem);
+}
+
+////////////////////////////////////////////////////////////
+single_instance::single_instance(string const& name)
+{
+#ifdef _MSC_VER
+    HANDLE mutex {CreateMutex(nullptr, TRUE, ("Global\\" + name).c_str())};
+    if (mutex == nullptr) { return; }
+
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        CloseHandle(mutex);
+        return;
+    }
+
+    _handle = mutex;
+    _locked = true;
+#else
+    int fd {open(("/tmp/" + name + ".lock").c_str(), O_CREAT | O_RDWR, 0666)};
+    if (fd == -1) { return; }
+
+    if (lockf(fd, F_TLOCK, 0) == -1) {
+        close(fd);
+        return;
+    }
+
+    _handle = fd;
+    _locked = true;
+#endif
+}
+
+single_instance::~single_instance()
+{
+#if defined(_MSC_VER)
+    if (_locked) {
+        CloseHandle(std::any_cast<HANDLE>(_handle));
+    }
+#else
+    if (_locked) {
+        close(std::any_cast<int>(_handle));
+    }
+#endif
+}
+
+single_instance::operator bool() const
+{
+    return _locked;
 }
 
 }
