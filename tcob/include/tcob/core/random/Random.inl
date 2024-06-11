@@ -50,26 +50,23 @@ inline normal_distribution::normal_distribution(f32 mean, f32 stdDev)
 template <typename R>
 inline auto normal_distribution::operator()(R& rng) -> f32
 {
-    f32 x1 {0.0f};
     if (_toggle) {
-        x1 = _x2;
-    } else {
-        f32                  v1 {0.0f}, v2 {0.0f};
-        f32                  s {0.0f};
-        uniform_distribution uniform {};
-        for (;;) {
-            v1 = 2 * uniform(rng, 0.0f, 1.0f) - 1;
-            v2 = 2 * uniform(rng, 0.0f, 1.0f) - 1;
-            s  = v1 * v1 + v2 * v2;
-
-            if (s < 1 && s != 0) { break; }
-        }
-
-        x1  = v1 * std::sqrt(-2 * std::log(s) / s);
-        _x2 = v2 * std::sqrt(-2 * std::log(s) / s);
+        _toggle = false;
+        return _x2 * _stdDev + _mean;
     }
-    _toggle = !_toggle;
-    return x1 * _stdDev + _mean;
+
+    f32                  v1 {}, v2 {}, s {0};
+    uniform_distribution uniform {};
+    do {
+        v1 = 2 * uniform(rng, 0.0f, 1.0f) - 1;
+        v2 = 2 * uniform(rng, 0.0f, 1.0f) - 1;
+        s  = v1 * v1 + v2 * v2;
+    } while (s >= 1 || s == 0);
+
+    f32 const multiplier {std::sqrt(-2 * std::log(s) / s)};
+    _x2     = v2 * multiplier;
+    _toggle = true;
+    return v1 * multiplier * _stdDev + _mean;
 }
 
 ////////////////////////////////////////////////////////////
