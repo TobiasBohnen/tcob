@@ -468,7 +468,7 @@ void platform::InitRenderSystem(string const& renderer)
 ////////////////////////////////////////////////////////////
 single_instance::single_instance(string const& name)
 {
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
     HANDLE mutex {CreateMutex(nullptr, TRUE, ("Global\\" + name).c_str())};
     if (mutex == nullptr) { return; }
 
