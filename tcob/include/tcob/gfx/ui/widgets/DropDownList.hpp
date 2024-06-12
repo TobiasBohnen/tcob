@@ -32,7 +32,7 @@ public:
 
     prop_val<isize> SelectedItemIndex;
     prop_val<isize> HoveredItemIndex;
-    prop<isize>     VisibleItems;
+    prop<isize>     VisibleItems; // TODO: style?
 
     void add_item(utf8_string const& item);
     void clear_items();
