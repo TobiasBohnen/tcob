@@ -34,6 +34,8 @@ public:
     void remove_section(widget* sec);
     void clear_sections();
 
+    void change_section_label(widget* tab, utf8_string const& label);
+
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
     auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const& override;

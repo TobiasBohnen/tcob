@@ -42,6 +42,8 @@ public:
     void remove_tab(widget* tab);
     void clear_tabs();
 
+    void change_tab_label(widget* tab, utf8_string const& label);
+
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
     auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const& override;

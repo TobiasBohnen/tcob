@@ -25,7 +25,9 @@ public:
 
     explicit grid_view(init const& wi);
 
-    void set_columns(std::vector<utf8_string> const& col);
+    void set_columns(std::vector<utf8_string> const& col, bool clearRows = true);
+    void change_column(isize idx, utf8_string const& col);
+
     void add_row(std::vector<utf8_string> const& row);
     void clear_rows();
 

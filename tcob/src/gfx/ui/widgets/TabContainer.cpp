@@ -46,6 +46,17 @@ void tab_container::clear_tabs()
     force_redraw(get_name() + ": tabs cleared");
 }
 
+void tab_container::change_tab_label(widget* tab, utf8_string const& label)
+{
+    for (isize i {0}; i < std::ssize(_tabs); ++i) {
+        if (_tabs[i].get() == tab) {
+            _tabLabels[i] = label;
+            break;
+        }
+    }
+    force_redraw(get_name() + ": tab renamed");
+}
+
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {

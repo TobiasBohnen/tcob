@@ -17,18 +17,27 @@ grid_view::grid_view(init const& wi)
     Class("grid_view");
 }
 
-void grid_view::set_columns(std::vector<utf8_string> const& col)
+void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
 {
-    clear_rows();
+    if (clearRows) { clear_rows(); }
 
     _columnHeaders = col;
-    // TODO: translation hook
     _columnSizes.resize(_columnHeaders.size());
     for (usize x {0}; x < _columnSizes.size(); ++x) {
         _columnSizes[x] = std::ssize(col[x]);
     }
 
     force_redraw(get_name() + ": column headers set");
+}
+
+void grid_view::change_column(isize idx, utf8_string const& col)
+{
+    if (idx < 0 || idx >= std::ssize(_columnHeaders)) { return; }
+
+    _columnHeaders[idx] = col;
+    _columnSizes[idx]   = std::ssize(col);
+
+    force_redraw(get_name() + ": column header changed");
 }
 
 void grid_view::add_row(std::vector<utf8_string> const& row)
