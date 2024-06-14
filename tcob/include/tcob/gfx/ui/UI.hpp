@@ -323,28 +323,31 @@ struct tooltip_event {
 namespace detail {
     class TCOB_API input_injector {
     public:
-        void on_key_down(widget* widget, input::keyboard::event& ev);
-        void on_key_up(widget* widget, input::keyboard::event& ev);
+        void on_key_down(widget* widget, input::keyboard::event& ev) const;
+        void on_key_up(widget* widget, input::keyboard::event& ev) const;
 
-        void on_text_input(widget* widget, input::keyboard::text_input_event& ev);
-        void on_text_editing(widget* widget, input::keyboard::text_editing_event& ev);
+        void on_text_input(widget* widget, input::keyboard::text_input_event& ev) const;
+        void on_text_editing(widget* widget, input::keyboard::text_editing_event& ev) const;
 
-        void on_mouse_enter(widget* widget);
-        void on_mouse_leave(widget* widget);
-        void on_mouse_down(widget* widget, input::mouse::button_event& ev);
-        void on_mouse_up(widget* widget, input::mouse::button_event& ev);
-        void on_mouse_hover(widget* widget, input::mouse::motion_event& ev);
-        void on_mouse_drag(widget* widget, input::mouse::motion_event& ev);
-        void on_mouse_wheel(widget* widget, input::mouse::wheel_event& ev);
+        void on_mouse_enter(widget* widget) const;
+        void on_mouse_leave(widget* widget) const;
+        void on_mouse_down(widget* widget, input::mouse::button_event& ev) const;
+        void on_mouse_up(widget* widget, input::mouse::button_event& ev) const;
+        void on_mouse_hover(widget* widget, input::mouse::motion_event& ev) const;
+        void on_mouse_drag(widget* widget, input::mouse::motion_event& ev) const;
+        void on_mouse_wheel(widget* widget, input::mouse::wheel_event& ev) const;
 
-        void on_controller_button_down(widget* widget, input::controller::button_event& ev);
-        void on_controller_button_up(widget* widget, input::controller::button_event& ev);
+        void on_controller_button_down(widget* widget, input::controller::button_event& ev) const;
+        void on_controller_button_up(widget* widget, input::controller::button_event& ev) const;
 
-        void on_click(widget* widget);
-        void on_double_click(widget* widget);
+        void on_click(widget* widget) const;
+        void on_double_click(widget* widget) const;
 
-        void on_focus_gained(widget* widget);
-        void on_focus_lost(widget* widget);
+        void on_focus_gained(widget* widget) const;
+        void on_focus_lost(widget* widget) const;
+
+    private:
+        auto check(widget* widget) const -> bool;
     };
 }
 

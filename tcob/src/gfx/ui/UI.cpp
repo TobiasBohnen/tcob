@@ -94,123 +94,94 @@ auto flags::as_array() const -> std::array<bool, Size>
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-    void input_injector::on_key_down(widget* widget, input::keyboard::event& ev)
+    void input_injector::on_key_down(widget* widget, input::keyboard::event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_key_down(ev);
-        }
+        if (check(widget)) { widget->do_key_down(ev); }
     }
 
-    void input_injector::on_key_up(widget* widget, input::keyboard::event& ev)
+    void input_injector::on_key_up(widget* widget, input::keyboard::event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_key_up(ev);
-        }
+        if (check(widget)) { widget->do_key_up(ev); }
     }
 
-    void input_injector::on_text_input(widget* widget, input::keyboard::text_input_event& ev)
+    void input_injector::on_text_input(widget* widget, input::keyboard::text_input_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_text_input(ev);
-        }
+        if (check(widget)) { widget->do_text_input(ev); }
     }
 
-    void input_injector::on_text_editing(widget* widget, input::keyboard::text_editing_event& ev)
+    void input_injector::on_text_editing(widget* widget, input::keyboard::text_editing_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_text_editing(ev);
-        }
+        if (check(widget)) { widget->do_text_editing(ev); }
     }
 
-    void input_injector::on_mouse_enter(widget* widget)
+    void input_injector::on_mouse_enter(widget* widget) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_enter();
-        }
+        if (check(widget)) { widget->do_mouse_enter(); }
     }
 
-    void input_injector::on_mouse_leave(widget* widget)
+    void input_injector::on_mouse_leave(widget* widget) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_leave();
-        }
+        if (check(widget)) { widget->do_mouse_leave(); }
     }
 
-    void input_injector::on_mouse_down(widget* widget, input::mouse::button_event& ev)
+    void input_injector::on_mouse_down(widget* widget, input::mouse::button_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_down(ev);
-        }
+        if (check(widget)) { widget->do_mouse_down(ev); }
     }
 
-    void input_injector::on_mouse_up(widget* widget, input::mouse::button_event& ev)
+    void input_injector::on_mouse_up(widget* widget, input::mouse::button_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_up(ev);
-        }
+        if (check(widget)) { widget->do_mouse_up(ev); }
     }
 
-    void input_injector::on_mouse_hover(widget* widget, input::mouse::motion_event& ev)
+    void input_injector::on_mouse_hover(widget* widget, input::mouse::motion_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_hover(ev);
-        }
+        if (check(widget)) { widget->do_mouse_hover(ev); }
     }
 
-    void input_injector::on_mouse_drag(widget* widget, input::mouse::motion_event& ev)
+    void input_injector::on_mouse_drag(widget* widget, input::mouse::motion_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_drag(ev);
-        }
+        if (check(widget)) { widget->do_mouse_drag(ev); }
     }
 
-    void input_injector::on_mouse_wheel(widget* widget, input::mouse::wheel_event& ev)
+    void input_injector::on_mouse_wheel(widget* widget, input::mouse::wheel_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_mouse_wheel(ev);
-        }
+        if (check(widget)) { widget->do_mouse_wheel(ev); }
     }
 
-    void input_injector::on_controller_button_down(widget* widget, input::controller::button_event& ev)
+    void input_injector::on_controller_button_down(widget* widget, input::controller::button_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_controller_button_down(ev);
-        }
+        if (check(widget)) { widget->do_controller_button_down(ev); }
     }
 
-    void input_injector::on_controller_button_up(widget* widget, input::controller::button_event& ev)
+    void input_injector::on_controller_button_up(widget* widget, input::controller::button_event& ev) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_controller_button_up(ev);
-        }
+        if (check(widget)) { widget->do_controller_button_up(ev); }
     }
 
-    void input_injector::on_click(widget* widget)
+    void input_injector::on_click(widget* widget) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_click();
-        }
+        if (check(widget)) { widget->do_click(); }
     }
 
-    void input_injector::on_double_click(widget* widget)
+    void input_injector::on_double_click(widget* widget) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_double_click();
-        }
+        if (check(widget)) { widget->do_double_click(); }
     }
 
-    void input_injector::on_focus_gained(widget* widget)
+    void input_injector::on_focus_gained(widget* widget) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_focus_gained();
-        }
+        if (check(widget)) { widget->do_focus_gained(); }
     }
 
-    void input_injector::on_focus_lost(widget* widget)
+    void input_injector::on_focus_lost(widget* widget) const
     {
-        if (widget && widget->is_enabled() && !widget->is_inert()) {
-            widget->do_focus_lost();
-        }
+        if (check(widget)) { widget->do_focus_lost(); }
+    }
+
+    auto input_injector::check(widget* widget) const -> bool
+    {
+        return widget && widget->is_enabled() && !widget->is_inert();
     }
 
 }
