@@ -234,7 +234,7 @@ void platform::process_events(gfx::window* window) const
     }
 }
 
-auto platform::get_preferred_locals() const -> std::vector<locale> const&
+auto platform::get_preferred_locales() const -> std::vector<locale> const&
 {
     return _locales;
 }

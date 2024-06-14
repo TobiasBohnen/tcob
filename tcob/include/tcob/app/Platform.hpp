@@ -28,7 +28,7 @@ public:
 
     void process_events(gfx::window* window) const;
 
-    auto get_preferred_locals() const -> std::vector<locale> const&;
+    auto get_preferred_locales() const -> std::vector<locale> const&;
     auto get_display_size(i32 display) const -> size_i;
 
     void remove_services() const;
