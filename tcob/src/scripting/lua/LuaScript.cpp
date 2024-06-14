@@ -50,6 +50,11 @@ auto script::get_global_table() -> table&
     return _globalTable;
 }
 
+auto script::get_environment() const -> std::optional<table>
+{
+    return _environment;
+}
+
 void script::set_environment(table const& env)
 {
     _environment = env;

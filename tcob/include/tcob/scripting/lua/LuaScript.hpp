@@ -78,6 +78,7 @@ public:
     signal<warning_event const> Warning;
 
     auto get_global_table() -> table&;
+    auto get_environment() const -> std::optional<table>;
     void set_environment(table const& env);
 
     auto get_view() const -> state_view;
