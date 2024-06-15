@@ -318,6 +318,7 @@ void form::on_key_down(input::keyboard::event& ev)
         auto const vec {get_all_widgets()};
 
         if ((ev.KeyMods & Controls->TabMod) == Controls->TabMod) {
+            // shift tab
             widget* nextWidget {find_prev_tab_widget(vec)};
             if (!nextWidget) {
                 _currentTabIndex = std::numeric_limits<i32>::max();
@@ -325,6 +326,7 @@ void form::on_key_down(input::keyboard::event& ev)
             }
             focus_widget(nextWidget);
         } else {
+            // tab
             widget* nextWidget {find_next_tab_widget(vec)};
             if (!nextWidget) {
                 _currentTabIndex = -1;
@@ -500,9 +502,13 @@ auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget
 auto form::can_popup_tooltip() const -> bool
 {
     if (!_isTooltipVisible
-        && _topWidget && _topWidget->Tooltip && _focusWidget != _topWidget
-        && !_isLButtonDown && !_isRButtonDown
+        && _topWidget
+        && _topWidget->Tooltip
+        /* && _focusWidget != _topWidget */
+        && !_isLButtonDown
+        && !_isRButtonDown
         && locate_service<input::system>().CurrentInputMode == input::mode::KeyboardMouse) {
+
         if (auto* style {_topWidget->Tooltip->get_style<tooltip::style>()}) {
             return _mouseOverTime > style->Delay;
         }
