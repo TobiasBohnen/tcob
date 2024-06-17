@@ -1452,10 +1452,10 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
                 auto const tl {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
                 auto const br {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
 
-                topLeft.X = bottomLeft.X = std::floor(tl.X);
-                topRight.X = bottomRight.X = std::round(br.X);
-                topLeft.Y = topRight.Y = std::round(tl.Y);
-                bottomLeft.Y = bottomRight.Y = std::floor(br.Y);
+                topLeft.X = bottomLeft.X = std::floor(tl.X + 0.5f);
+                topRight.X = bottomRight.X = std::floor(br.X + 0.5f);
+                topLeft.Y = topRight.Y = std::floor(tl.Y + 0.5f);
+                bottomLeft.Y = bottomRight.Y = std::floor(br.Y + 0.5f);
             } else {
                 topLeft       = {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
                 topLeft.X     = std::floor(topLeft.X + 0.5f);
