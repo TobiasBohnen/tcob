@@ -25,6 +25,7 @@ public:
 
     prop_val<isize> ActiveSectionIndex;
     prop_val<isize> HoveredSectionIndex;
+    prop<bool>      MaximizeActiveSection;
 
     template <std::derived_from<widget_container> T>
     auto create_section(utf8_string const& name) -> std::shared_ptr<T>;
@@ -52,7 +53,7 @@ protected:
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
 private:
-    auto get_section_rect(isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f;
+    auto get_section_rect(item_style* itemStyle, isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f;
     auto get_section_style(isize index) const -> item_style*;
 
     void offset_section_content(rect_f& bounds, style const& style) const;

@@ -27,9 +27,7 @@ inline auto accordion::create_section(utf8_string const& name, utf8_string const
     auto retValue {std::make_shared<T>(wi)};
     _sections.push_back(retValue);
     _sectionLabels.push_back(label);
-    if (ActiveSectionIndex == -1) {
-        ActiveSectionIndex = 0;
-    }
+
     return retValue;
 }
 }
