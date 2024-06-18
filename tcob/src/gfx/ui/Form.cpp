@@ -504,7 +504,7 @@ auto form::can_popup_tooltip() const -> bool
     if (!_isTooltipVisible
         && _topWidget
         && _topWidget->Tooltip
-        /* && _focusWidget != _topWidget */
+        && _focusWidget != _topWidget
         && !_isLButtonDown
         && !_isRButtonDown
         && locate_service<input::system>().CurrentInputMode == input::mode::KeyboardMouse) {

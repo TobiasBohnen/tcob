@@ -96,19 +96,21 @@ void tab_container::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // tabs
-        rect_f tabBarRowRect {rect};
-        tabBarRowRect.Height = style->TabBarHeight.calc(tabBarRowRect.Height);
-        if (style->TabBarPosition == position::Bottom) {
-            f32 const tabRows {style->MaxTabsPerRow > 0 ? std ::ceil(std::ssize(_tabs) / static_cast<f32>(style->MaxTabsPerRow)) : 1};
-            tabBarRowRect.Y = rect.bottom() - (tabBarRowRect.Height * tabRows);
-        }
-
         _tabRects.clear();
-        for (i32 i {0}; i < std::ssize(_tabs); ++i) {
-            if (auto const* tabStyle {get_tab_style(i)}) {
-                rect_f const tabRect {get_tab_rect(*style, *tabStyle, i, tabBarRowRect)};
-                painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
-                _tabRects.push_back(tabRect);
+        if (style->TabBarPosition != position::Hidden) {
+            rect_f tabBarRowRect {rect};
+            tabBarRowRect.Height = style->TabBarHeight.calc(tabBarRowRect.Height);
+            if (style->TabBarPosition == position::Bottom) {
+                f32 const tabRows {style->MaxTabsPerRow > 0 ? std ::ceil(std::ssize(_tabs) / static_cast<f32>(style->MaxTabsPerRow)) : 1};
+                tabBarRowRect.Y = rect.bottom() - (tabBarRowRect.Height * tabRows);
+            }
+
+            for (i32 i {0}; i < std::ssize(_tabs); ++i) {
+                if (auto const* tabStyle {get_tab_style(i)}) {
+                    rect_f const tabRect {get_tab_rect(*style, *tabStyle, i, tabBarRowRect)};
+                    painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
+                    _tabRects.push_back(tabRect);
+                }
             }
         }
 

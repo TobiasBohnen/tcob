@@ -18,7 +18,8 @@ class TCOB_API tab_container : public widget_container {
 public:
     enum class position {
         Top,
-        Bottom
+        Bottom,
+        Hidden
     };
 
     class TCOB_API style : public background_style {
