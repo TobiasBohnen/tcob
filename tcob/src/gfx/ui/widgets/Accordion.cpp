@@ -89,17 +89,19 @@ void accordion::on_paint(widget_painter& painter)
         f32 const sectionHeight {style->SectionBarHeight.calc(rect.Height)};
         _sectionRects.clear();
         if (MaximizeActiveSection && ActiveSectionIndex >= 0) {
-            isize const  i {ActiveSectionIndex()};
-            auto*        sectionStyle {get_section_style(i)};
-            rect_f const sectionRect {get_section_rect(sectionStyle, 0, sectionHeight, rect)};
-            painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
-            _sectionRects.push_back(sectionRect);
-        } else {
-            for (isize i {0}; i < std::ssize(_sections); ++i) {
-                auto*        sectionStyle {get_section_style(i)};
-                rect_f const sectionRect {get_section_rect(sectionStyle, i, sectionHeight, rect)};
+            isize const i {ActiveSectionIndex()};
+            if (auto const* sectionStyle {get_section_style(i)}) {
+                rect_f const sectionRect {get_section_rect(*sectionStyle, 0, sectionHeight, rect)};
                 painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
                 _sectionRects.push_back(sectionRect);
+            }
+        } else {
+            for (isize i {0}; i < std::ssize(_sections); ++i) {
+                if (auto const* sectionStyle {get_section_style(i)}) {
+                    rect_f const sectionRect {get_section_rect(*sectionStyle, i, sectionHeight, rect)};
+                    painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
+                    _sectionRects.push_back(sectionRect);
+                }
             }
         }
 
@@ -175,12 +177,12 @@ void accordion::on_update(milliseconds /* deltaTime */)
 {
 }
 
-auto accordion::get_section_rect(item_style* itemStyle, isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f
+auto accordion::get_section_rect(item_style const& itemStyle, isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f
 {
     rect_f retValue {rect};
     retValue.Y += sectionHeight * index;
     retValue.Height = sectionHeight;
-    retValue -= itemStyle->Item.Border.get_thickness();
+    retValue -= itemStyle.Item.Border.get_thickness();
     if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
         retValue.Y += get_content_bounds().Height;
     }

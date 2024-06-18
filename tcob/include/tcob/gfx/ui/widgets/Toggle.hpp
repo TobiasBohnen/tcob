@@ -22,14 +22,14 @@ public:
 
     explicit toggle(init const& wi);
 
-    prop<bool> Enabled;
+    prop<bool> Checked;
 
 protected:
     void on_paint(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 
-    void virtual on_enabled_changed();
+    void virtual on_checked_changed();
 
     void on_click() override;
 

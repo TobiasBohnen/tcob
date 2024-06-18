@@ -73,7 +73,7 @@ auto create_form0(window* wnd) -> std::shared_ptr<form>
     textBox0->Submit.connect([label0, textBox0](auto const&) { label0->Label = "submitted: " + textBox0->Text(); });
 
     auto toggle0 {panel0Layout->create_widget<toggle>({890, 500, 150, 75}, "Toggle0")};
-    toggle0->Enabled = true;
+    toggle0->Checked = true;
 
     auto gridPanel {panel0Layout->create_widget<panel>({230, 20, 250, 250}, "SPanel0")};
     (*gridPanel->TabStop).Enabled = false;
@@ -360,24 +360,19 @@ auto create_form_tabcontainer(window* wnd) -> std::shared_ptr<form>
         auto tabContainer0 {retValue->create_container<tab_container>(dock_style::Left, "TabContainer0")};
         tabContainer0->Flex = {50_pct, 100_pct};
         createTabs(tabContainer0);
-        tabContainer0->MaxTabs = 2;
     }
 
     {
         auto tabContainer0 {retValue->create_container<tab_container>(dock_style::Left, "TabContainer0")};
-        tabContainer0->Flex    = {50_pct, 100_pct};
-        tabContainer0->MaxTabs = 2;
+        tabContainer0->Flex = {50_pct, 100_pct};
 
         auto tabContainer1 {tabContainer0->create_tab<tab_container>("TabContainer1")};
-        tabContainer1->MaxTabs = 2;
         createTabs(tabContainer1);
 
         auto tabContainer2 {tabContainer0->create_tab<tab_container>("TabContainer2")};
-        tabContainer2->MaxTabs = 2;
         createTabs(tabContainer2);
 
         auto tabContainer3 {tabContainer0->create_tab<tab_container>("TabContainer3")};
-        tabContainer3->MaxTabs = 2;
         createTabs(tabContainer3);
     }
 

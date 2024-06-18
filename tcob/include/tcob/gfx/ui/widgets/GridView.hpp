@@ -13,6 +13,8 @@ namespace tcob::gfx::ui {
 
 // TODO: horizontal scrolling
 // TODO: datasource
+// TODO: sort by column
+// TODO: select row
 class TCOB_API grid_view : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {

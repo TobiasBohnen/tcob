@@ -13,7 +13,7 @@ toggle::toggle(init const& wi)
     : widget {wi}
     , _tween {*this}
 {
-    Enabled.Changed.connect([&](auto const&) { on_enabled_changed(); });
+    Checked.Changed.connect([&](auto const&) { on_checked_changed(); });
 
     Class("toggle");
 }
@@ -42,27 +42,27 @@ void toggle::on_update(milliseconds deltaTime)
     _tween.update(deltaTime);
 }
 
-void toggle::on_enabled_changed()
+void toggle::on_checked_changed()
 {
     if (auto const* style {get_style<toggle::style>()}) {
-        if (Enabled) {
+        if (Checked) {
             _tween.start(1.0f, style->Delay * (1.0f - _tween.get_current_value()));
         } else {
             _tween.start(0.0f, style->Delay * _tween.get_current_value());
         }
     } else {
-        _tween.reset(Enabled ? 1.0f : 0.0f);
+        _tween.reset(Checked ? 1.0f : 0.0f);
     }
 }
 
 void toggle::on_click()
 {
-    Enabled = !Enabled;
+    Checked = !Checked;
 }
 
 auto toggle::get_attributes() const -> widget_attributes
 {
-    widget_attributes retValue {{"enabled", Enabled()}};
+    widget_attributes retValue {{"checked", Checked()}};
     auto const        base {widget::get_attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;

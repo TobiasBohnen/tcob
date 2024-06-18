@@ -26,13 +26,13 @@ public:
         string   TabItemClass {"tab_items"};
         position TabBarPosition {position::Top};
         length   TabBarHeight;
+        isize    MaxTabsPerRow {-1};
     };
 
     explicit tab_container(init const& wi);
 
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
-    prop<isize>     MaxTabs; // TODO: style?
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
@@ -64,7 +64,7 @@ protected:
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
 private:
-    auto get_tab_rect(isize index, rect_f const& rect) const -> rect_f;
+    auto get_tab_rect(style const& style, item_style const& itemStyle, isize index, rect_f const& rect) const -> rect_f;
     auto get_tab_style(isize index) const -> item_style*;
 
     void offset_tab_content(rect_f& bounds, style const& style) const;

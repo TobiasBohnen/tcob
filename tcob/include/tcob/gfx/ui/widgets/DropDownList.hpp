@@ -21,10 +21,14 @@ class TCOB_API drop_down_list : public widget {
 public:
     class TCOB_API style : public background_style {
     public:
-        element::text      Text;
-        utf8_string        ArrowClass {"nav_arrows"};
-        utf8_string        ItemClass {"list_items"};
-        length             ItemHeight {};
+        element::text Text;
+
+        utf8_string ArrowClass {"nav_arrows"};
+
+        utf8_string ItemClass {"list_items"};
+        length      ItemHeight {};
+        isize       VisibleItemCount {5};
+
         element::scrollbar VScrollBar;
     };
 
@@ -32,7 +36,6 @@ public:
 
     prop_val<isize> SelectedItemIndex;
     prop_val<isize> HoveredItemIndex;
-    prop<isize>     VisibleItems; // TODO: style?
 
     void add_item(utf8_string const& item);
     void clear_items();
