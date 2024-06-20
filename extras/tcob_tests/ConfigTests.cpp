@@ -195,6 +195,45 @@ TEST_CASE("Data.Ini.Is")
     REQUIRE_FALSE(t.is<bool>("section1", "valueInt"));
 }
 
+TEST_CASE("Data.Ini.ValueRef")
+{
+    {
+        std::string const iniString =
+            R"([section1]
+                   b = { a = 100 }
+                   c = @section1.b.a
+                )";
+
+        object t;
+        REQUIRE(t.parse(iniString, EXT));
+        REQUIRE(t["section1"]["c"].as<i32>() == 100);
+    }
+    {
+        std::string const iniString =
+            R"([section1]
+                   b = { a = 100 }
+                   [section2]
+                   c = @section1.b
+                )";
+
+        object t;
+        REQUIRE(t.parse(iniString, EXT));
+        REQUIRE(t["section2"]["c"]["a"].as<i32>() == 100);
+    }
+    {
+        std::string const iniString =
+            R"([section1]
+                   b = { a = 100 }
+                   [section2]
+                   c = @section1
+                )";
+
+        object t;
+        REQUIRE(t.parse(iniString, EXT));
+        REQUIRE(t["section2"]["c"]["b"]["a"].as<i32>() == 100);
+    }
+}
+
 TEST_CASE("Data.Ini.Array")
 {
     SUBCASE("parse")

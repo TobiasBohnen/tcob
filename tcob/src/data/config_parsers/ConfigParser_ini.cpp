@@ -25,28 +25,33 @@ auto static check_brackets(utf8_string_view str, char openBr, char closeBr)
 
 auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 {
-    _ini           = txt;
-    _section       = {};
-    _parentSection = _section;
-    return read_lines() ? std::optional {_section} : std::nullopt;
+    _ini         = txt;
+    _iniBegin    = 0;
+    _iniEnd      = 0;
+    _mainSection = {};
+
+    object kvp {_mainSection};
+    return read_lines(kvp) ? std::optional {_mainSection} : std::nullopt;
 }
 
 auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
 {
-    _ini           = txt;
-    _section       = {};
-    _parentSection = _section;
+    _ini         = txt;
+    _iniBegin    = 0;
+    _iniEnd      = 0;
+    _mainSection = {};
+
     entry currentEntry {};
     read_inline_array(currentEntry, get_next_line());
 
     return currentEntry.is<array>() ? std::optional {currentEntry.as<array>()} : std::nullopt;
 }
 
-auto ini_reader::read_lines() -> bool
+auto ini_reader::read_lines(object& kvpTarget) -> bool
 {
     auto line {get_next_line()};
     for (;;) {
-        if (!read_line(line)) { return false; }
+        if (!read_line(kvpTarget, line)) { return false; }
         if (is_eof()) { break; }
         line = get_next_line();
     }
@@ -54,13 +59,13 @@ auto ini_reader::read_lines() -> bool
     return true;
 }
 
-auto ini_reader::read_line(utf8_string_view line) -> bool
+auto ini_reader::read_line(object& kvpTarget, utf8_string_view line) -> bool
 {
     entry currentEntry;
     return line.empty()
         || read_comment(line)
-        || read_section_header(line)
-        || read_key_value_pair(currentEntry, _parentSection, line);
+        || read_section_header(kvpTarget, line)
+        || read_key_value_pair(currentEntry, kvpTarget, line);
 }
 
 auto ini_reader::read_comment(utf8_string_view line) -> bool
@@ -76,7 +81,7 @@ auto ini_reader::read_comment(utf8_string_view line) -> bool
     return false;
 }
 
-auto ini_reader::read_section_header(utf8_string_view line) -> bool
+auto ini_reader::read_section_header(object& kvpTarget, utf8_string_view line) -> bool
 {
     // read object header
     if (line[0] == '[') {
@@ -84,21 +89,23 @@ auto ini_reader::read_section_header(utf8_string_view line) -> bool
         if (endPos == utf8_string::npos || endPos == 1) { return false; } // ERROR: invalid object header
 
         auto const lineSize {line.size()};
+        // quoted key
         if ((line[1] == '\'' && line[lineSize - 2] == '\'') || (line[1] == '"' && line[lineSize - 2] == '"')) {
             line = line.substr(2, lineSize - 4);
-            auto secRes {_section[utf8_string {line}]};
+            auto secRes {_mainSection[utf8_string {line}]};
             if (!secRes.is<object>()) { secRes = object {}; }
-            _parentSection = secRes.as<object>();
+            kvpTarget = secRes.as<object>();
         } else {
             // read sub-sections
             bool first {true};
             helper::split_for_each(
                 line.substr(1, endPos - 1), '.',
-                [&first, this](utf8_string_view token) {
-                    auto secRes {(first ? _section : _parentSection)[utf8_string {token}]};
+                [&first, &kvpTarget, this](utf8_string_view token) {
+                    if (token.empty()) { return false; }
+                    auto secRes {(first ? _mainSection : kvpTarget)[utf8_string {token}]};
                     if (!secRes.is<object>()) { secRes = object {}; }
-                    _parentSection = secRes.as<object>();
-                    first          = false;
+                    kvpTarget = secRes.as<object>();
+                    first     = false;
                     return true;
                 });
         }
@@ -109,7 +116,7 @@ auto ini_reader::read_section_header(utf8_string_view line) -> bool
     return false;
 }
 
-auto ini_reader::read_key_value_pair(entry& currentEntry, object const& obj, utf8_string_view line) -> bool
+auto ini_reader::read_key_value_pair(entry& currentEntry, object const& kvpTarget, utf8_string_view line) -> bool
 {
     auto const separatorPos {helper::find_unquoted(line, '=')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
@@ -121,7 +128,7 @@ auto ini_reader::read_key_value_pair(entry& currentEntry, object const& obj, utf
     auto const keyStrSize {keyStr.size()};
     if (keyStr[0] == '.' || keyStr[keyStrSize - 1] == '.') { return false; } //  ERROR: dot at start or end of key
 
-    object      currentSection {obj};
+    object      sec {kvpTarget};
     utf8_string entryKey {};
     bool        first {true};
 
@@ -131,26 +138,28 @@ auto ini_reader::read_key_value_pair(entry& currentEntry, object const& obj, utf
     } else { // read sub-keys
         helper::split_for_each(
             keyStr, '.',
-            [&first, &entryKey, &currentSection](utf8_string_view token) {
+            [&first, &entryKey, &sec](utf8_string_view token) {
                 if (first) {
                     entryKey = utf8_string {token};
                     first    = false;
                 } else {
-                    auto secRes {currentSection[entryKey]};
+                    auto secRes {sec[entryKey]};
                     if (!secRes.is<object>()) { secRes = object {}; }
-                    currentSection = secRes.as<object>();
-                    entryKey       = utf8_string {token};
+                    sec      = secRes.as<object>();
+                    entryKey = utf8_string {token};
                 }
                 return true;
             });
     }
 
     // read value string
-    if (!read_value(currentEntry, valueStr)) { return false; } // invalid value
+    if (!read_ref(currentEntry, valueStr)) {
+        if (!read_value(currentEntry, valueStr)) { return false; } // invalid value
+    }
 
     currentEntry.set_comment(_currentComment);
     _currentComment = {};
-    currentSection.set_entry(entryKey, currentEntry);
+    sec.set_entry(entryKey, currentEntry);
     return true;
 }
 
@@ -162,6 +171,29 @@ auto ini_reader::read_value(entry& currentEntry, utf8_string_view line) -> bool
             || read_number(currentEntry, line)
             || read_bool(currentEntry, line)
             || read_string(currentEntry, line));
+}
+
+auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
+{
+    if (line[0] == '@') {
+        line = line.substr(1);
+        auto keys {helper::split(line, '.')};
+        if (keys.empty()) { return false; }
+
+        object obj {_mainSection};
+        if (keys.size() > 1) {
+            for (usize i {0}; i < keys.size() - 1; ++i) {
+                if (!obj.try_get(obj, keys[i])) {
+                    return false;
+                }
+            }
+        }
+
+        currentEntry = *obj.get_entry(keys[keys.size() - 1]);
+        return true;
+    }
+
+    return false;
 }
 
 auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -> bool

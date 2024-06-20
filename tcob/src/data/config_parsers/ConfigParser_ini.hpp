@@ -20,13 +20,14 @@ public:
     auto read_as_array(utf8_string_view txt) -> std::optional<array> override;
 
 private:
-    auto read_lines() -> bool;
-    auto read_line(utf8_string_view line) -> bool;
+    auto read_lines(object& kvpTarget) -> bool;
+    auto read_line(object& kvpTarget, utf8_string_view line) -> bool;
 
     auto read_comment(utf8_string_view line) -> bool;
-    auto read_section_header(utf8_string_view line) -> bool;
-    auto read_key_value_pair(entry& currentEntry, object const& obj, utf8_string_view line) -> bool;
+    auto read_section_header(object& kvpTarget, utf8_string_view line) -> bool;
+    auto read_key_value_pair(entry& currentEntry, object const& kvpTarget, utf8_string_view line) -> bool;
 
+    auto read_ref(entry& currentEntry, utf8_string_view line) -> bool;
     auto read_value(entry& currentEntry, utf8_string_view line) -> bool;
     auto read_inline_array(entry& currentEntry, utf8_string_view line) -> bool;
     auto read_inline_section(entry& currentEntry, utf8_string_view line) -> bool;
@@ -37,12 +38,11 @@ private:
     auto get_next_line() -> utf8_string_view;
     auto is_eof() const -> bool;
 
-    usize            _iniBegin {0};
-    usize            _iniEnd {0};
+    usize            _iniBegin;
+    usize            _iniEnd;
     utf8_string_view _ini;
 
-    object  _section {};
-    object  _parentSection {};
+    object  _mainSection;
     comment _currentComment {};
 };
 
