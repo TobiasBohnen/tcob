@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include "tcob/core/random/Engine.hpp"
+
 #include "tcob/core/random/Random.hpp"
 
 namespace tcob::random {

@@ -352,13 +352,37 @@ void MiscScene::on_key_down(keyboard::event& ev)
         std::cout << "----well_512_a" << '\n';
         draw_dice(dice<20, well_512_a> {static_cast<u32>(seed)});
 
-        random_number_generator<xorshift_64, normal_distribution> normalRng {static_cast<u32>(seed), 5.f, 3.f};
+        random_number_generator<xorshift_64, normal_distribution> rng0 {static_cast<u32>(seed), 5.f, 3.f};
         std::cout << "----normal xorshift_64" << '\n';
-        draw_rng(normalRng);
+        draw_rng(rng0);
 
-        random_number_generator<xorshift_64, rep_seq_distribution> repSeqRng {static_cast<u32>(seed), 1, 20, 5};
-        std::cout << "----rep_seq xorshift_64" << '\n';
-        draw_rng(repSeqRng);
+        random_number_generator<xorshift_64, poisson_distribution> rng1 {static_cast<u32>(seed), 15.f};
+        std::cout << "----poisson xorshift_64" << '\n';
+        draw_rng(rng1);
+
+        random_number_generator<xorshift_64, triangular_distribution> rng2 {static_cast<u32>(seed), 0.f, 30.f, 25.f};
+        std::cout << "----triangular xorshift_64" << '\n';
+        draw_rng(rng2);
+
+        random_number_generator<xorshift_64, beta_distribution> rng3 {static_cast<u32>(seed), 2.f, 2.f};
+        std::cout << "----beta xorshift_64" << '\n';
+        draw_rng(rng3, 10);
+
+        random_number_generator<xorshift_64, weibull_distribution> rng4 {static_cast<u32>(seed), 1.f, 10.f};
+        std::cout << "----weibull xorshift_64" << '\n';
+        draw_rng(rng4);
+
+        random_number_generator<xorshift_64, pareto_distribution> rng5 {static_cast<u32>(seed), 2.f, 10.f};
+        std::cout << "----pareto xorshift_64" << '\n';
+        draw_rng(rng5);
+
+        random_number_generator<xorshift_64, exponential_distribution> rng6 {static_cast<u32>(seed), 0.5f};
+        std::cout << "----exp xorshift_64" << '\n';
+        draw_rng(rng6);
+
+        random_number_generator<xorshift_64, bag_distribution> rng10 {static_cast<u32>(seed), 1, 20, 5};
+        std::cout << "----bag xorshift_64" << '\n';
+        draw_rng(rng10);
     } else if (ev.ScanCode == scan_code::D5) {
         asset_ptr<animated_texture> aniTex = resMgr.get_group("res")->get<texture>("test-ani");
         aniTex->start(true);

@@ -6,98 +6,7 @@
 #pragma once
 #include "Random.hpp"
 
-#include <cassert>
-#include <cmath>
-
 namespace tcob::random {
-
-template <typename R, Arithmetic T>
-inline auto uniform_distribution::operator()(R& rng, T min, T max) -> T
-{
-    assert(min <= max);
-    if (min == max) { return min; }
-
-    using result_type = typename R::result_type;
-    static_assert(sizeof(result_type) == 8 || sizeof(result_type) == 4);
-    if constexpr (FloatingPoint<T>) {
-        using int_type   = std::conditional_t<sizeof(result_type) == 4, i32, std::conditional_t<sizeof(result_type) == 8, i64, void>>;
-        using float_type = std::conditional_t<sizeof(result_type) == 4, f32, std::conditional_t<sizeof(result_type) == 8, f64, void>>;
-        float_type const value {
-            static_cast<int_type>(rng.next() >> ((sizeof(float_type) * 8) - std::numeric_limits<float_type>::digits))
-            / static_cast<float_type>(1LL << std::numeric_limits<float_type>::digits)};
-        return static_cast<T>(min + (value * (max - min)));
-    } else if constexpr (Integral<T>) {
-        result_type const range {static_cast<result_type>(max - min + 1)};
-        result_type const unbiasedMax {std::numeric_limits<result_type>::max() / range * range - 1};
-        result_type       value;
-        do {
-            value = rng.next();
-        } while (value > unbiasedMax);
-        return static_cast<T>(min + static_cast<T>(value % range));
-    } else {
-        return T {};
-    }
-}
-
-////////////////////////////////////////////////////////////
-
-inline normal_distribution::normal_distribution(f32 mean, f32 stdDev)
-    : _mean {mean}
-    , _stdDev {stdDev}
-{
-}
-
-template <typename R>
-inline auto normal_distribution::operator()(R& rng) -> f32
-{
-    if (_toggle) {
-        _toggle = false;
-        return _x2 * _stdDev + _mean;
-    }
-
-    f32                  v1 {}, v2 {}, s {0};
-    uniform_distribution uniform {};
-    do {
-        v1 = 2 * uniform(rng, 0.0f, 1.0f) - 1;
-        v2 = 2 * uniform(rng, 0.0f, 1.0f) - 1;
-        s  = v1 * v1 + v2 * v2;
-    } while (s >= 1 || s == 0);
-
-    f32 const multiplier {std::sqrt(-2 * std::log(s) / s)};
-    _x2     = v2 * multiplier;
-    _toggle = true;
-    return v1 * multiplier * _stdDev + _mean;
-}
-
-////////////////////////////////////////////////////////////
-
-inline rep_seq_distribution::rep_seq_distribution(i64 min, i64 max, isize period)
-    : _min {min}
-    , _max {max}
-    , _period {period}
-{
-}
-
-template <typename R>
-inline auto rep_seq_distribution::operator()(R& rng) -> i64
-{
-    if (_seq.empty()) { gen_seq(rng); }
-
-    i64 const retValue {_seq.back()};
-    _seq.pop_back();
-    return retValue;
-}
-
-template <typename R>
-inline void rep_seq_distribution::gen_seq(R& rng)
-{
-    std::vector<i64> sequence;
-    for (i64 i {_min}; i <= _max; ++i) { sequence.push_back(i); }
-    for (isize i {0}; i < _period; ++i) { _seq.insert(_seq.end(), sequence.begin(), sequence.end()); }
-
-    auto const range {_seq.size()};
-    for (usize i {range - 1}; i > 0; --i) { std::swap(_seq[i], _seq[rng.next() % range]); }
-}
 
 ////////////////////////////////////////////////////////////
 
@@ -198,5 +107,4 @@ inline void shuffle<T, E>::operator()(std::span<T> span)
         swap(span[i], span[j]);
     }
 }
-
 }

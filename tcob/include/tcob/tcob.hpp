@@ -47,6 +47,8 @@
 #include <tcob/core/io/Magic.hpp>
 #include <tcob/core/io/MemoryStream.hpp>
 #include <tcob/core/io/SpanStream.hpp>
+#include <tcob/core/random/Distribution.hpp>
+#include <tcob/core/random/Engine.hpp>
 #include <tcob/core/random/Random.hpp>
 #include <tcob/core/tweening/Tween.hpp>
 
