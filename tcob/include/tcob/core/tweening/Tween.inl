@@ -311,14 +311,6 @@ namespace funcs {
 
     ////////////////////////////////////////////////////////////
 
-    template <typename T>
-    inline auto random<T>::operator()(f64) const -> type
-    {
-        return RNG(MinValue, MaxValue);
-    }
-
-    ////////////////////////////////////////////////////////////
-
     template <auto Func>
     inline auto function<Func>::operator()(f64 t) const -> type
     {

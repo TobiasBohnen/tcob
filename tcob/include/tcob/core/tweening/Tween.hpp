@@ -18,7 +18,6 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/random/Random.hpp"
 
 namespace tcob::tweening {
 ////////////////////////////////////////////////////////////
@@ -346,20 +345,6 @@ namespace funcs {
 
     ////////////////////////////////////////////////////////////
 
-    template <typename T>
-    class random final {
-    public:
-        using type = T;
-
-        type        MinValue {};
-        type        MaxValue {};
-        mutable rng RNG {};
-
-        auto operator()(f64) const -> type;
-    };
-
-    ////////////////////////////////////////////////////////////
-
     template <auto Func>
     class function final {
     public:
@@ -424,9 +409,6 @@ using quad_bezier_curve_tween = tween<funcs::quad_bezier_curve>;
 using cubic_bezier_curve_tween = tween<funcs::cubic_bezier_curve>;
 
 using bezier_curve_tween = tween<funcs::bezier_curve>;
-
-template <typename T>
-using random_tween = tween<funcs::random<T>>;
 
 template <auto Func>
 using function_tween = tween<funcs::function<Func>>;

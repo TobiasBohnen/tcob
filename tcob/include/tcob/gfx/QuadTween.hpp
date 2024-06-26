@@ -13,6 +13,7 @@
 
 #include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/random/Random.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Geometry.hpp"
 

@@ -57,25 +57,6 @@ TEST_CASE("Core.Tween.Queue")
     REQUIRE(out == std::vector<f32> {50.0f, 40.0f, 30.0f, 20.0f, 10.0f, 50.0f, 75.0f, 100.0f, 125.0f, 150.f});
 }
 
-TEST_CASE("Core.Tween.RandomFunction")
-{
-    f32               out {};
-    rng               rnd {12345};
-    random_tween<f32> contr {milliseconds {100}, {10.f, 50.f, rnd}};
-
-    contr.Value.Changed.connect([&out](f32 newVal) { out = newVal; });
-    contr.start(playback_style::Looped);
-    REQUIRE(out == rnd(10.f, 50.f));
-    contr.update(1ms);
-    REQUIRE(out == rnd(10.f, 50.f));
-    contr.update(1ms);
-    REQUIRE(out == rnd(10.f, 50.f));
-    contr.update(1ms);
-    REQUIRE(out == rnd(10.f, 50.f));
-    contr.update(1ms);
-    REQUIRE(out == rnd(10.f, 50.f));
-}
-
 TEST_CASE("Core.Tween.LinearFunction")
 {
     {
