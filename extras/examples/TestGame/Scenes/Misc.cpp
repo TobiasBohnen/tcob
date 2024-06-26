@@ -380,6 +380,18 @@ void MiscScene::on_key_down(keyboard::event& ev)
         std::cout << "----exp xorshift_64" << '\n';
         draw_rng(rng6);
 
+        random_number_generator<xorshift_64, discrete_distribution> rng7 {static_cast<u32>(seed), std::array {0.1f, 0.2f, 0.2f, 0.1f, 0.4f}};
+        std::cout << "----discrete xorshift_64" << '\n';
+        draw_rng(rng7);
+
+        random_number_generator<xorshift_64, cauchy_distribution> rng8 {static_cast<u32>(seed), -2.f, 1.f};
+        std::cout << "----cauchy xorshift_64" << '\n';
+        draw_rng(rng8);
+
+        random_number_generator<xorshift_64, bernoulli_distribution> rng9 {static_cast<u32>(seed), 0.75f};
+        std::cout << "----bernoulli  xorshift_64" << '\n';
+        draw_rng(rng9);
+
         random_number_generator<xorshift_64, bag_distribution> rng10 {static_cast<u32>(seed), 1, 20, 5};
         std::cout << "----bag xorshift_64" << '\n';
         draw_rng(rng10);

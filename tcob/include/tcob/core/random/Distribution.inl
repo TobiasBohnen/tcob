@@ -38,6 +38,31 @@ inline auto uniform_distribution::operator()(R& rng, T min, T max) -> T
     }
 }
 
+template <typename R>
+inline auto uniform_distribution::random01(R& rng) -> f32
+{
+    return operator()(rng, 0.0f, 1.0f);
+}
+
+template <typename R>
+inline auto uniform_distribution::Random01(R& rng) -> f32
+{
+    return uniform_distribution {}.random01(rng);
+}
+
+////////////////////////////////////////////////////////////
+
+inline bernoulli_distribution::bernoulli_distribution(f32 p)
+    : _p {p}
+{
+}
+
+template <typename R>
+inline auto bernoulli_distribution::operator()(R& rng) -> bool
+{
+    return uniform_distribution::Random01(rng) < _p;
+}
+
 ////////////////////////////////////////////////////////////
 
 inline beta_distribution::beta_distribution(f32 a, f32 b)
@@ -49,13 +74,58 @@ inline beta_distribution::beta_distribution(f32 a, f32 b)
 template <typename R>
 inline auto beta_distribution::operator()(R& rng) -> f32
 {
-    gamma_distribution gamma_alpha {_a};
-    gamma_distribution gamma_beta {_b};
+    gamma_distribution a {_a};
+    gamma_distribution b {_b};
 
-    f32 const gamma_alpha_val {gamma_alpha(rng)};
-    f32 const gamma_beta_val {gamma_beta(rng)};
+    f32 const aVal {a(rng)};
+    f32 const bVal {b(rng)};
 
-    return gamma_alpha_val / (gamma_alpha_val + gamma_beta_val);
+    return aVal / (aVal + bVal);
+}
+
+////////////////////////////////////////////////////////////
+
+inline cauchy_distribution::cauchy_distribution(f32 x0, f32 gamma)
+    : _x0 {x0}
+    , _gamma {gamma}
+{
+}
+
+template <typename R>
+inline auto cauchy_distribution::operator()(R& rng) -> f32
+{
+    f32 const u {uniform_distribution::Random01(rng)};
+    return _x0 + _gamma * std::tan(TAU_F / 2 * (u - 0.5f));
+}
+
+////////////////////////////////////////////////////////////
+
+inline discrete_distribution::discrete_distribution(std::span<f32> probabilities)
+{
+    f32 sum {0.0f};
+    for (f32 const prob : probabilities) {
+        assert(prob >= 0.0);
+        sum += prob;
+    }
+    assert(std::abs(sum - 1.0f) < 1e-9);
+
+    _probs.push_back(probabilities[0]);
+    for (usize i {1}; i < probabilities.size(); ++i) {
+        _probs.push_back(_probs[i - 1] + probabilities[i]);
+    }
+}
+
+template <typename R>
+inline auto discrete_distribution::operator()(R& rng) -> i32
+{
+    f32 const u {uniform_distribution::Random01(rng)};
+
+    for (usize i {0}; i < _probs.size(); ++i) {
+        if (u < _probs[i]) {
+            return static_cast<i32>(i);
+        }
+    }
+    return static_cast<i32>(_probs.size() - 1);
 }
 
 ////////////////////////////////////////////////////////////
@@ -68,9 +138,7 @@ inline exponential_distribution::exponential_distribution(f32 lambda)
 template <typename R>
 inline auto exponential_distribution::operator()(R& rng) -> f32
 {
-    uniform_distribution uniform {};
-
-    f32 const u {uniform(rng, 0.0f, 1.0f)};
+    f32 const u {uniform_distribution::Random01(rng)};
     return -std::log(1 - u) / _lambda;
 }
 
@@ -90,7 +158,7 @@ inline auto gamma_distribution::operator()(R& rng) -> f32
     if (_shape == 1.0) {
         f32 u {0};
         do {
-            u = uniform(rng, 0.0f, 1.0f);
+            u = uniform.random01(rng);
         } while (u <= 1e-7 || u >= 1.0);
 
         return -std::log(u);
@@ -99,11 +167,11 @@ inline auto gamma_distribution::operator()(R& rng) -> f32
     f32 u {0}, v {0};
     if (_shape < 1.0) {
         do {
-            u = uniform(rng, 0.0f, 1.0f);
+            u = uniform.random01(rng);
         } while (u <= 1e-7 || u >= 1.0);
 
         do {
-            v = uniform(rng, 0.0f, 1.0f);
+            v = uniform.random01(rng);
         } while (v <= 1e-7 || v >= 1.0);
 
         x = std::pow(u, 1.0f / _shape);
@@ -112,11 +180,11 @@ inline auto gamma_distribution::operator()(R& rng) -> f32
         }
     } else {
         do {
-            v = uniform(rng, 0.0f, 1.0f);
+            v = uniform.random01(rng);
         } while (v <= 1e-7 || v >= 1.0);
 
         do {
-            u = uniform(rng, 0.0f, 1.0f);
+            u = uniform.random01(rng);
         } while (u <= 1e-7 || u >= 1.0);
 
         x = -std::log(u * v);
@@ -124,8 +192,8 @@ inline auto gamma_distribution::operator()(R& rng) -> f32
         f32 const c {x < 1.0 ? std::exp(d) : d};
 
         do {
-            u = uniform(rng, 0.0f, 1.0f);
-            v = uniform(rng, 0.0f, 1.0f);
+            u = uniform.random01(rng);
+            v = uniform.random01(rng);
         } while (v <= 1e-7 || u > std::pow(c * (1.0f - 1.0f / _shape), _shape - 1.0f));
 
         x = c * u * u * u;
@@ -175,9 +243,7 @@ inline pareto_distribution::pareto_distribution(f32 alpha, f32 xm)
 template <typename R>
 inline auto pareto_distribution::operator()(R& rng) -> f32
 {
-    uniform_distribution uniform {};
-
-    f32 const u {uniform(rng, 0.0f, 1.0f)};
+    f32 const u {uniform_distribution::Random01(rng)};
     return _xm / std::pow(u, 1.0f / _alpha);
 }
 
@@ -217,9 +283,7 @@ inline triangular_distribution::triangular_distribution(f32 min, f32 max, f32 pe
 template <typename R>
 inline auto triangular_distribution::operator()(R& rng) -> f32
 {
-    uniform_distribution uniform {};
-
-    f32 const u {uniform(rng, 0.0f, 1.0f)};
+    f32 const u {uniform_distribution::Random01(rng)};
     f32 const F {(_peak - _min) / (_max - _min)};
     return u < F ? _min + std::sqrt(u * (_max - _min) * (_peak - _min))
                  : _max - std::sqrt((1 - u) * (_max - _min) * (_max - _peak));
@@ -236,9 +300,7 @@ inline weibull_distribution::weibull_distribution(f32 shape, f32 scale)
 template <typename R>
 inline auto weibull_distribution::operator()(R& rng) -> f32
 {
-    uniform_distribution uniform {};
-
-    f32 const u {uniform(rng, 0.0f, 1.0f)};
+    f32 const u {uniform_distribution::Random01(rng)};
     return _scale * std::pow(-std::log(1 - u), 1 / _shape);
 }
 

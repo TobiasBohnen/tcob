@@ -15,6 +15,25 @@ class uniform_distribution {
 public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;
+
+    template <typename R>
+    auto random01(R& rng) -> f32;
+
+    template <typename R>
+    auto static Random01(R& rng) -> f32;
+};
+
+////////////////////////////////////////////////////////////
+
+class bernoulli_distribution {
+public:
+    bernoulli_distribution(f32 p);
+
+    template <typename R>
+    auto operator()(R& rng) -> bool;
+
+private:
+    f32 _p;
 };
 
 ////////////////////////////////////////////////////////////
@@ -29,6 +48,33 @@ public:
 private:
     f32 _a;
     f32 _b;
+};
+
+////////////////////////////////////////////////////////////
+
+class cauchy_distribution {
+public:
+    cauchy_distribution(f32 x0, f32 gamma);
+
+    template <typename R>
+    auto operator()(R& rng) -> f32;
+
+private:
+    f32 _x0;
+    f32 _gamma;
+};
+
+////////////////////////////////////////////////////////////
+
+class discrete_distribution {
+public:
+    discrete_distribution(std::span<f32> probabilities);
+
+    template <typename R>
+    auto operator()(R& rng) -> i32;
+
+private:
+    std::vector<f32> _probs;
 };
 
 ////////////////////////////////////////////////////////////
