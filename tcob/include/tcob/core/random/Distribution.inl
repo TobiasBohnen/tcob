@@ -96,7 +96,7 @@ inline auto cauchy_distribution::operator()(R& rng) -> f32
 
 inline discrete_distribution::discrete_distribution(std::span<f32> probabilities)
 {
-    f32 sum {0.0f};
+    [[maybe_unused]] f32 sum {0.0f};
     for (f32 const prob : probabilities) {
         assert(prob >= 0.0);
         sum += prob;
