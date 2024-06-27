@@ -41,7 +41,7 @@ inline auto uniform_distribution::operator()(R& rng, T min, T max) -> T
 template <typename R>
 inline auto uniform_distribution::NextFloat(R& rng) -> f32
 {
-    return uniform_distribution {}(rng);
+    return uniform_distribution {}(rng, 0.0f, 0.1f);
 }
 
 ////////////////////////////////////////////////////////////
