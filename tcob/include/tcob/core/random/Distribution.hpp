@@ -17,10 +17,7 @@ public:
     auto operator()(R& rng, T min, T max) -> T;
 
     template <typename R>
-    auto random01(R& rng) -> f32;
-
-    template <typename R>
-    auto static Random01(R& rng) -> f32;
+    auto static NextFloat(R& rng) -> f32;
 };
 
 ////////////////////////////////////////////////////////////
