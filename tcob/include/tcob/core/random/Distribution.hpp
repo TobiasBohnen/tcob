@@ -16,88 +16,69 @@ public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;
 
-    template <typename R>
-    auto static NextFloat(R& rng) -> f32;
+    auto static NextFloat(auto&& rng) -> f32;
 };
 
 ////////////////////////////////////////////////////////////
 
 class bernoulli_distribution {
 public:
-    bernoulli_distribution(f32 p);
-
-    template <typename R>
-    auto operator()(R& rng) -> bool;
-
-private:
-    f32 _p;
-};
-
-////////////////////////////////////////////////////////////
-
-class beta_distribution {
-public:
-    beta_distribution(f32 a, f32 b);
-
-    template <typename R>
-    auto operator()(R& rng) -> f32;
-
-private:
-    f32 _a;
-    f32 _b;
+    auto operator()(auto&& rng, f32 p) -> bool;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cauchy_distribution {
 public:
-    cauchy_distribution(f32 x0, f32 gamma);
-
-    template <typename R>
-    auto operator()(R& rng) -> f32;
-
-private:
-    f32 _x0;
-    f32 _gamma;
-};
-
-////////////////////////////////////////////////////////////
-
-class discrete_distribution {
-public:
-    discrete_distribution(std::span<f32> probabilities);
-
-    template <typename R>
-    auto operator()(R& rng) -> i32;
-
-private:
-    std::vector<f32> _probs;
+    auto operator()(auto&& rng, f32 x0, f32 gamma) -> f32;
 };
 
 ////////////////////////////////////////////////////////////
 
 class exponential_distribution {
 public:
-    exponential_distribution(f32 lambda);
-
-    template <typename R>
-    auto operator()(R& rng) -> f32;
-
-private:
-    f32 _lambda;
+    auto operator()(auto&& rng, f32 lambda) -> f32;
 };
 
 ////////////////////////////////////////////////////////////
 
-class gamma_distribution {
+class pareto_distribution {
 public:
-    gamma_distribution(f32 shape);
+    auto operator()(auto&& rng, f32 alpha, f32 xm) -> f32;
+};
 
-    template <typename R>
-    auto operator()(R& rng) -> f32;
+////////////////////////////////////////////////////////////
+
+class poisson_distribution {
+public:
+    auto operator()(auto&& rng, f32 mean) -> i32;
+};
+
+////////////////////////////////////////////////////////////
+
+class triangular_distribution {
+public:
+    auto operator()(auto&& rng, f32 min, f32 max, f32 peak) -> f32;
+};
+
+////////////////////////////////////////////////////////////
+
+class weibull_distribution {
+public:
+    auto operator()(auto&& rng, f32 shape, f32 scale) -> f32;
+};
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+class discrete_distribution {
+public:
+    discrete_distribution(std::span<f32 const> probabilities);
+
+    auto operator()(auto&& rng) -> i32;
 
 private:
-    f32 _shape;
+    std::vector<f32> _probs;
 };
 
 ////////////////////////////////////////////////////////////
@@ -106,8 +87,7 @@ class normal_distribution {
 public:
     normal_distribution(f32 mean, f32 stdDev);
 
-    template <typename R>
-    auto operator()(R& rng) -> f32;
+    auto operator()(auto&& rng) -> f32;
 
 private:
     f32  _mean;
@@ -118,58 +98,15 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class pareto_distribution {
+class piecewise_constant_distribution {
 public:
-    pareto_distribution(f32 alpha, f32 xm);
+    piecewise_constant_distribution(std::span<f32 const> intervals, std::span<f32 const> weights);
 
-    template <typename R>
-    auto operator()(R& rng) -> f32;
+    auto operator()(auto&& rng) -> f32;
 
 private:
-    f32 _alpha;
-    f32 _xm;
-};
-
-////////////////////////////////////////////////////////////
-
-class poisson_distribution {
-public:
-    poisson_distribution(f32 mean);
-
-    template <typename R>
-    auto operator()(R& rng) -> i32;
-
-private:
-    f32 _mean;
-};
-
-////////////////////////////////////////////////////////////
-
-class triangular_distribution {
-public:
-    triangular_distribution(f32 min, f32 max, f32 peak);
-
-    template <typename R>
-    auto operator()(R& rng) -> f32;
-
-private:
-    f32 _min;
-    f32 _max;
-    f32 _peak;
-};
-
-////////////////////////////////////////////////////////////
-
-class weibull_distribution {
-public:
-    weibull_distribution(f32 shape, f32 scale);
-
-    template <typename R>
-    auto operator()(R& rng) -> f32;
-
-private:
-    f32 _shape;
-    f32 _scale;
+    std::vector<f32> _intervals;
+    std::vector<f32> _cumulativeWeights;
 };
 
 ////////////////////////////////////////////////////////////
@@ -178,12 +115,10 @@ class bag_distribution {
 public:
     bag_distribution(i64 min, i64 max, isize period);
 
-    template <typename R>
-    auto operator()(R& rng) -> i64;
+    auto operator()(auto&& rng) -> i64;
 
 private:
-    template <typename R>
-    void gen_seq(R& rng);
+    void gen_seq(auto&& rng);
 
     i64              _min;
     i64              _max;

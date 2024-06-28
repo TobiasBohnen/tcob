@@ -25,9 +25,9 @@ inline random_number_generator<E, D>::random_number_generator(state_type state, 
 }
 
 template <RandomEngine E, typename D>
-inline auto random_number_generator<E, D>::operator()(auto&&... arg)
+inline auto random_number_generator<E, D>::operator()(auto&&... distArgs)
 {
-    return _distribution(*this, arg...);
+    return _distribution(*this, distArgs...);
 }
 
 template <RandomEngine E, typename D>

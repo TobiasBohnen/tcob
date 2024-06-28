@@ -54,11 +54,11 @@ private:
         }
     }
 
-    void draw_rng(auto&& rng, f32 scale = 1.0)
+    void draw_rng(auto&& rng, f32 scale = 1.0, auto&&... args)
     {
         std::map<f32, i32> hist;
         for (int n = 0; n < 100000; ++n) {
-            ++hist[static_cast<i32>(rng() * scale)];
+            ++hist[static_cast<i32>(rng(args...) * scale)];
         }
         for (auto p : hist) {
             if (p.second / 250 > 0) {

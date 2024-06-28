@@ -31,7 +31,7 @@ namespace random {
         explicit random_number_generator(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
         explicit random_number_generator(state_type state, auto&&... distArgs);
 
-        auto operator()(auto&&... arg);
+        auto operator()(auto&&... distArgs);
 
         auto next() -> result_type;
         auto get_state() const -> state_type const&;
