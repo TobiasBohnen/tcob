@@ -584,8 +584,8 @@ auto create_color_styles() -> style_collection
     // NAV ARROWS
     {
         auto style {retValue.create<nav_arrows_style>("nav_arrows", {}, {})};
-        style->NavArrow.Height        = {0.75f, length::type::Relative};
-        style->NavArrow.Width         = {0.25f, length::type::Relative};
+        style->NavArrow.Size.Height   = {0.75f, length::type::Relative};
+        style->NavArrow.Size.Width    = {0.25f, length::type::Relative};
         style->NavArrow.Border.Size   = 3_px;
         style->NavArrow.Border.Radius = 0_px;
 

@@ -83,13 +83,13 @@ namespace element {
     {
         rect_f retValue {rect};
 
-        retValue.Width  = Width.calc(rect.Width);
-        retValue.Height = Height.calc(rect.Height);
+        retValue.Width  = Size.Width.calc(rect.Width);
+        retValue.Height = Size.Height.calc(rect.Height);
 
         retValue.X += rect.Width - retValue.Width;
         retValue.Y += (rect.Height - retValue.Height) / 2;
 
-        return retValue - Border.get_thickness();
+        return retValue - Border.get_thickness() - Padding;
     }
 
     auto bar::calc(rect_f const& rect, orientation orien, position align) const -> rect_f

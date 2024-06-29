@@ -103,7 +103,7 @@ void drop_down_list::on_paint(widget_painter& painter)
 
         // text
         if (style->Text.Font && SelectedItemIndex >= 0) {
-            f32 const arrowWidth {arrowStyle.Width.calc(rect.Width)};
+            f32 const arrowWidth {arrowStyle.Size.Width.calc(rect.Width)};
             painter.draw_text(style->Text, {rect.X, rect.Y, rect.Width - arrowWidth, rect.Height}, get_selected_item());
         }
 

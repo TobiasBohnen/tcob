@@ -210,13 +210,13 @@ namespace element {
             Triangle
         };
 
-        type     Type {type::Triangle};
-        ui_paint IncBackground {colors::Transparent};
-        ui_paint DecBackground {colors::Transparent};
-        ui_paint Foreground {colors::Transparent};
-        length   Width {};
-        length   Height {};
-        border   Border {};
+        type       Type {type::Triangle};
+        ui_paint   IncBackground {colors::Transparent};
+        ui_paint   DecBackground {colors::Transparent};
+        ui_paint   Foreground {colors::Transparent};
+        dimensions Size {};
+        border     Border {};
+        thickness  Padding {};
 
         auto calc(rect_f const& rect) const -> rect_f;
     };

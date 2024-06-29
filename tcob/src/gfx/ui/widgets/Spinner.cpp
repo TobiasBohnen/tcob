@@ -48,7 +48,7 @@ void spinner::on_paint(widget_painter& painter)
         auto const* normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         auto const* hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
         auto const* activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
-        f32 const   arrowWidth {normalArrow->NavArrow.Width.calc(rect.Width)}; // FIXME: max arrow style width
+        f32 const   arrowWidth {normalArrow->NavArrow.Size.Width.calc(rect.Width)}; // FIXME: max arrow style width
         if (_hoverArrow == arrow::None) {
             painter.draw_nav_arrows(normalArrow->NavArrow, normalArrow->NavArrow, rect);
         } else if (_hoverArrow == arrow::Increase) {

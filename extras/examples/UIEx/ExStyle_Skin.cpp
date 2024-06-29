@@ -412,8 +412,8 @@ auto create_skinned_styles() -> style_collection
     {
         auto style {retValue.create<nav_arrows_style>("nav_arrows", {}, {})};
         style->NavArrow.Type          = element::nav_arrow::type::None;
-        style->NavArrow.Height        = {0.75f, length::type::Relative};
-        style->NavArrow.Width         = {0.25f, length::type::Relative};
+        style->NavArrow.Size.Height   = {0.75f, length::type::Relative};
+        style->NavArrow.Size.Width    = {0.25f, length::type::Relative};
         style->NavArrow.IncBackground = blue.SliderUp;
         style->NavArrow.DecBackground = blue.SliderDown;
     }
