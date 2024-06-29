@@ -8,10 +8,10 @@
 
 #include "tcob/core/Concepts.hpp"
 
-////////////////////////////////////////////////////////////
 namespace tcob::random {
+////////////////////////////////////////////////////////////
 
-class uniform_distribution {
+class uniform_distribution_base {
 public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;
@@ -21,64 +21,65 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+template <Arithmetic T>
+class uniform_distribution {
+public:
+    uniform_distribution(T min, T max);
+
+    auto operator()(auto&& rng) -> T;
+
+private:
+    T _min;
+    T _max;
+};
+
+////////////////////////////////////////////////////////////
+
 class bernoulli_distribution {
 public:
-    auto operator()(auto&& rng, f32 p) -> bool;
+    bernoulli_distribution(f32 p);
+
+    auto operator()(auto&& rng) -> bool;
+
+private:
+    f32 _p;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cauchy_distribution {
 public:
-    auto operator()(auto&& rng, f32 x0, f32 gamma) -> f32;
+    cauchy_distribution(f32 x0, f32 gamma);
+
+    auto operator()(auto&& rng) -> f32;
+
+private:
+    f32 _x0;
+    f32 _gamma;
+};
+
+////////////////////////////////////////////////////////////
+
+class discrete_distribution {
+public:
+    discrete_distribution(std::span<f32> probabilities);
+
+    auto operator()(auto&& rng) -> i32;
+
+private:
+    std::vector<f32> _probs;
 };
 
 ////////////////////////////////////////////////////////////
 
 class exponential_distribution {
 public:
-    auto operator()(auto&& rng, f32 lambda) -> f32;
-};
+    exponential_distribution(f32 lambda);
 
-////////////////////////////////////////////////////////////
-
-class pareto_distribution {
-public:
-    auto operator()(auto&& rng, f32 alpha, f32 xm) -> f32;
-};
-
-////////////////////////////////////////////////////////////
-
-class poisson_distribution {
-public:
-    auto operator()(auto&& rng, f32 mean) -> i32;
-};
-
-////////////////////////////////////////////////////////////
-
-class triangular_distribution {
-public:
-    auto operator()(auto&& rng, f32 min, f32 max, f32 peak) -> f32;
-};
-
-////////////////////////////////////////////////////////////
-
-class weibull_distribution {
-public:
-    auto operator()(auto&& rng, f32 shape, f32 scale) -> f32;
-};
-
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-class discrete_distribution {
-public:
-    discrete_distribution(std::span<f32 const> probabilities);
-
-    auto operator()(auto&& rng) -> i32;
+    auto operator()(auto&& rng) -> f32;
 
 private:
-    std::vector<f32> _probs;
+    f32 _lambda;
 };
 
 ////////////////////////////////////////////////////////////
@@ -98,6 +99,19 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+class pareto_distribution {
+public:
+    pareto_distribution(f32 alpha, f32 xm);
+
+    auto operator()(auto&& rng) -> f32;
+
+private:
+    f32 _alpha;
+    f32 _xm;
+};
+
+////////////////////////////////////////////////////////////
+
 class piecewise_constant_distribution {
 public:
     piecewise_constant_distribution(std::span<f32 const> intervals, std::span<f32 const> weights);
@@ -107,6 +121,45 @@ public:
 private:
     std::vector<f32> _intervals;
     std::vector<f32> _cumulativeWeights;
+};
+
+////////////////////////////////////////////////////////////
+
+class poisson_distribution {
+public:
+    poisson_distribution(f32 mean);
+
+    auto operator()(auto&& rng) -> i32;
+
+private:
+    f32 _mean;
+};
+
+////////////////////////////////////////////////////////////
+
+class triangular_distribution {
+public:
+    triangular_distribution(f32 min, f32 max, f32 peak);
+
+    auto operator()(auto&& rng) -> f32;
+
+private:
+    f32 _min;
+    f32 _max;
+    f32 _peak;
+};
+
+////////////////////////////////////////////////////////////
+
+class weibull_distribution {
+public:
+    weibull_distribution(f32 shape, f32 scale);
+
+    auto operator()(auto&& rng) -> f32;
+
+private:
+    f32 _shape;
+    f32 _scale;
 };
 
 ////////////////////////////////////////////////////////////

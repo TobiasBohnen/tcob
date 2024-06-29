@@ -12,7 +12,7 @@
 namespace tcob::random {
 
 template <typename R, Arithmetic T>
-inline auto uniform_distribution::operator()(R& rng, T min, T max) -> T
+inline auto uniform_distribution_base::operator()(R& rng, T min, T max) -> T
 {
     assert(min <= max);
     if (min == max) { return min; }
@@ -39,79 +39,56 @@ inline auto uniform_distribution::operator()(R& rng, T min, T max) -> T
     }
 }
 
-inline auto uniform_distribution::NextFloat(auto&& rng) -> f32
+inline auto uniform_distribution_base::NextFloat(auto&& rng) -> f32
 {
-    return uniform_distribution {}(rng, 0.0f, 1.0f);
+    return uniform_distribution_base {}(rng, 0.0f, 1.0f);
 }
 
 ////////////////////////////////////////////////////////////
 
-inline auto bernoulli_distribution::operator()(auto&& rng, f32 p) -> bool
+template <Arithmetic T>
+inline uniform_distribution<T>::uniform_distribution(T min, T max)
+    : _min {min}
+    , _max {max}
 {
-    return uniform_distribution::NextFloat(rng) < p;
+}
+
+template <Arithmetic T>
+inline auto uniform_distribution<T>::operator()(auto&& rng) -> T
+{
+    uniform_distribution_base uniform;
+    return uniform(rng, _min, _max);
 }
 
 ////////////////////////////////////////////////////////////
 
-inline auto cauchy_distribution::operator()(auto&& rng, f32 x0, f32 gamma) -> f32
+inline bernoulli_distribution::bernoulli_distribution(f32 p)
+    : _p {p}
 {
-    f32 const u {uniform_distribution::NextFloat(rng)};
-    return x0 + gamma * std::tan(TAU_F / 2 * (u - 0.5f));
+}
+
+inline auto bernoulli_distribution::operator()(auto&& rng) -> bool
+{
+    return uniform_distribution_base::NextFloat(rng) < _p;
 }
 
 ////////////////////////////////////////////////////////////
 
-inline auto exponential_distribution::operator()(auto&& rng, f32 lambda) -> f32
+inline cauchy_distribution::cauchy_distribution(f32 x0, f32 gamma)
+    : _x0 {x0}
+    , _gamma {gamma}
 {
-    f32 const u {uniform_distribution::NextFloat(rng)};
-    return -std::log(1 - u) / lambda;
+}
+
+inline auto cauchy_distribution::operator()(auto&& rng) -> f32
+{
+    f32 const u {uniform_distribution_base::NextFloat(rng)};
+    return _x0 + _gamma * std::tan(TAU_F / 2 * (u - 0.5f));
 }
 
 ////////////////////////////////////////////////////////////
 
-inline auto pareto_distribution::operator()(auto&& rng, f32 alpha, f32 xm) -> f32
-{
-    f32 const u {uniform_distribution::NextFloat(rng)};
-    return xm / std::pow(u, 1.0f / alpha);
-}
-
-////////////////////////////////////////////////////////////
-
-inline auto poisson_distribution::operator()(auto&& rng, f32 mean) -> i32
-{
-    f32 const L {std::exp(-mean)};
-    i32       k {0};
-    f32       p {1.0};
-
-    do {
-        ++k;
-        p *= uniform_distribution::NextFloat(rng);
-    } while (p > L);
-
-    return k - 1;
-}
-
-////////////////////////////////////////////////////////////
-
-inline auto triangular_distribution::operator()(auto&& rng, f32 min, f32 max, f32 peak) -> f32
-{
-    f32 const u {uniform_distribution::NextFloat(rng)};
-    f32 const F {(peak - min) / (max - min)};
-    return u < F ? min + std::sqrt(u * (max - min) * (peak - min))
-                 : max - std::sqrt((1 - u) * (max - min) * (max - peak));
-}
-
-////////////////////////////////////////////////////////////
-
-inline auto weibull_distribution::operator()(auto&& rng, f32 shape, f32 scale) -> f32
-{
-    f32 const u {uniform_distribution::NextFloat(rng)};
-    return scale * std::pow(-std::log(1 - u), 1 / shape);
-}
-
-////////////////////////////////////////////////////////////
-
-inline discrete_distribution::discrete_distribution(std::span<f32 const> probabilities)
+inline discrete_distribution::discrete_distribution(std::span<f32> probabilities)
 {
     [[maybe_unused]] f32 sum {0.0f};
     for (f32 const prob : probabilities) {
@@ -128,7 +105,7 @@ inline discrete_distribution::discrete_distribution(std::span<f32 const> probabi
 
 inline auto discrete_distribution::operator()(auto&& rng) -> i32
 {
-    f32 const u {uniform_distribution::NextFloat(rng)};
+    f32 const u {uniform_distribution_base::NextFloat(rng)};
 
     for (usize i {0}; i < _probs.size(); ++i) {
         if (u < _probs[i]) {
@@ -136,6 +113,19 @@ inline auto discrete_distribution::operator()(auto&& rng) -> i32
         }
     }
     return static_cast<i32>(_probs.size() - 1);
+}
+
+////////////////////////////////////////////////////////////
+
+inline exponential_distribution::exponential_distribution(f32 lambda)
+    : _lambda {lambda}
+{
+}
+
+inline auto exponential_distribution::operator()(auto&& rng) -> f32
+{
+    f32 const u {uniform_distribution_base::NextFloat(rng)};
+    return -std::log(1 - u) / _lambda;
 }
 
 ////////////////////////////////////////////////////////////
@@ -155,8 +145,8 @@ inline auto normal_distribution::operator()(auto&& rng) -> f32
 
     f32 v1 {}, v2 {}, s {0};
     do {
-        v1 = 2 * uniform_distribution::NextFloat(rng) - 1;
-        v2 = 2 * uniform_distribution::NextFloat(rng) - 1;
+        v1 = 2 * uniform_distribution_base::NextFloat(rng) - 1;
+        v2 = 2 * uniform_distribution_base::NextFloat(rng) - 1;
         s  = v1 * v1 + v2 * v2;
     } while (s >= 1 || s == 0);
 
@@ -164,6 +154,20 @@ inline auto normal_distribution::operator()(auto&& rng) -> f32
     _x2     = v2 * multiplier;
     _toggle = true;
     return v1 * multiplier * _stdDev + _mean;
+}
+
+////////////////////////////////////////////////////////////
+
+inline pareto_distribution::pareto_distribution(f32 alpha, f32 xm)
+    : _alpha {alpha}
+    , _xm {xm}
+{
+}
+
+inline auto pareto_distribution::operator()(auto&& rng) -> f32
+{
+    f32 const u {uniform_distribution_base::NextFloat(rng)};
+    return _xm / std::pow(u, 1.0f / _alpha);
 }
 
 ////////////////////////////////////////////////////////////
@@ -177,7 +181,7 @@ inline piecewise_constant_distribution::piecewise_constant_distribution(std::spa
 
 inline auto piecewise_constant_distribution::operator()(auto&& rng) -> f32
 {
-    uniform_distribution uniform;
+    uniform_distribution_base uniform;
 
     f32 const u {uniform(rng, 0.f, _cumulativeWeights.back())};
 
@@ -185,6 +189,58 @@ inline auto piecewise_constant_distribution::operator()(auto&& rng) -> f32
     isize const index {std::distance(_cumulativeWeights.begin(), it)};
 
     return uniform(rng, _intervals[index], _intervals[index + 1]);
+}
+
+////////////////////////////////////////////////////////////
+
+inline poisson_distribution::poisson_distribution(f32 mean)
+    : _mean {mean}
+{
+}
+
+inline auto poisson_distribution::operator()(auto&& rng) -> i32
+{
+    f32 const L {std::exp(-_mean)};
+    i32       k {0};
+    f32       p {1.0};
+
+    do {
+        ++k;
+        p *= uniform_distribution_base::NextFloat(rng);
+    } while (p > L);
+
+    return k - 1;
+}
+
+////////////////////////////////////////////////////////////
+
+inline triangular_distribution::triangular_distribution(f32 min, f32 max, f32 peak)
+    : _min {min}
+    , _max {max}
+    , _peak {peak}
+{
+}
+
+inline auto triangular_distribution::operator()(auto&& rng) -> f32
+{
+    f32 const u {uniform_distribution_base::NextFloat(rng)};
+    f32 const F {(_peak - _min) / (_max - _min)};
+    return u < F ? _min + std::sqrt(u * (_max - _min) * (_peak - _min))
+                 : _max - std::sqrt((1 - u) * (_max - _min) * (_max - _peak));
+}
+
+////////////////////////////////////////////////////////////
+
+inline weibull_distribution::weibull_distribution(f32 shape, f32 scale)
+    : _shape {shape}
+    , _scale {scale}
+{
+}
+
+inline auto weibull_distribution::operator()(auto&& rng) -> f32
+{
+    f32 const u {uniform_distribution_base::NextFloat(rng)};
+    return _scale * std::pow(-std::log(1 - u), 1 / _shape);
 }
 
 ////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@ namespace random {
 
     ////////////////////////////////////////////////////////////
 
-    template <RandomEngine E, typename D = uniform_distribution>
+    template <RandomEngine E, typename D = uniform_distribution_base>
     class random_number_generator final {
     public:
         using random_engine_type = E;
