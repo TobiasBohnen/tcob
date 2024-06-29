@@ -57,12 +57,12 @@ private:
     void draw_rng(auto&& rng, f32 scale = 1.0)
     {
         std::map<f32, i32> hist;
-        for (int n = 0; n < 100000; ++n) {
+        for (int n = 0; n < 10'000; ++n) {
             ++hist[static_cast<i32>(rng() * scale)];
         }
         for (auto p : hist) {
-            if (p.second / 250 > 0) {
-                std::cout << std::setfill('0') << std::setw(2) << p.first << ' ' << std::string(p.second / 250, '*') << '\n';
+            if (p.second / 100 > 0) {
+                std::cout << std::setfill('0') << std::setw(2) << p.first << ' ' << std::string(p.second / 100, '*') << '\n';
             }
         }
     }

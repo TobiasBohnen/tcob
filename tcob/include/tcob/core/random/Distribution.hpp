@@ -16,7 +16,7 @@ public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;
 
-    auto static NextFloat(auto&& rng) -> f32;
+    auto static NextFloat(auto&& rng) -> f64;
 };
 
 ////////////////////////////////////////////////////////////
@@ -37,129 +37,193 @@ private:
 
 class bernoulli_distribution {
 public:
-    bernoulli_distribution(f32 p);
+    bernoulli_distribution(f64 p);
 
     auto operator()(auto&& rng) -> bool;
 
 private:
-    f32 _p;
+    f64 _p;
+};
+
+////////////////////////////////////////////////////////////
+
+class beta_distribution {
+public:
+    beta_distribution(f64 alpha, f64 beta);
+
+    auto operator()(auto&& rng) -> f64;
+
+private:
+    f64 _alpha;
+    f64 _beta;
+};
+
+////////////////////////////////////////////////////////////
+
+class binomial_distribution {
+public:
+    binomial_distribution(i32 trials, f64 p);
+
+    auto operator()(auto&& rng) -> i32;
+
+private:
+    i32 _trials;
+    f64 _p;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cauchy_distribution {
 public:
-    cauchy_distribution(f32 x0, f32 gamma);
+    cauchy_distribution(f64 x0, f64 gamma);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    f32 _x0;
-    f32 _gamma;
+    f64 _x0;
+    f64 _gamma;
 };
 
 ////////////////////////////////////////////////////////////
 
 class discrete_distribution {
 public:
-    discrete_distribution(std::span<f32> probabilities);
+    discrete_distribution(std::span<f64 const> probabilities);
 
     auto operator()(auto&& rng) -> i32;
 
 private:
-    std::vector<f32> _probs;
+    std::vector<f64> _probs;
 };
 
 ////////////////////////////////////////////////////////////
 
 class exponential_distribution {
 public:
-    exponential_distribution(f32 lambda);
+    exponential_distribution(f64 lambda);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    f32 _lambda;
+    f64 _lambda;
+};
+
+////////////////////////////////////////////////////////////
+
+class gamma_distribution {
+public:
+    gamma_distribution(f64 shape, f64 scale);
+
+    auto operator()(auto&& rng) -> f64;
+
+private:
+    f64 _shape;
+    f64 _scale;
+};
+
+////////////////////////////////////////////////////////////
+
+class negative_binomial_distribution {
+public:
+    negative_binomial_distribution(i32 successes, f64 p);
+
+    auto operator()(auto&& rng) -> i32;
+
+private:
+    i32 _successes;
+    f64 _p;
 };
 
 ////////////////////////////////////////////////////////////
 
 class normal_distribution {
 public:
-    normal_distribution(f32 mean, f32 stdDev);
+    normal_distribution(f64 mean, f64 stdDev);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    f32  _mean;
-    f32  _stdDev;
+    f64  _mean;
+    f64  _stdDev;
     bool _toggle {false};
-    f32  _x2 {0.0f};
+    f64  _x2 {0.0f};
+};
+
+////////////////////////////////////////////////////////////
+
+class lognormal_distribution {
+public:
+    lognormal_distribution(f64 logScale, f64 shape);
+
+    auto operator()(auto&& rng) -> f64;
+
+private:
+    normal_distribution _normal;
 };
 
 ////////////////////////////////////////////////////////////
 
 class pareto_distribution {
 public:
-    pareto_distribution(f32 alpha, f32 xm);
+    pareto_distribution(f64 alpha, f64 xm);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    f32 _alpha;
-    f32 _xm;
+    f64 _alpha;
+    f64 _xm;
 };
 
 ////////////////////////////////////////////////////////////
 
 class piecewise_constant_distribution {
 public:
-    piecewise_constant_distribution(std::span<f32 const> intervals, std::span<f32 const> weights);
+    piecewise_constant_distribution(std::span<f64 const> intervals, std::span<f64 const> weights);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    std::vector<f32> _intervals;
-    std::vector<f32> _cumulativeWeights;
+    std::vector<f64> _intervals;
+    std::vector<f64> _cumulativeWeights;
 };
 
 ////////////////////////////////////////////////////////////
 
 class poisson_distribution {
 public:
-    poisson_distribution(f32 mean);
+    poisson_distribution(f64 mean);
 
     auto operator()(auto&& rng) -> i32;
 
 private:
-    f32 _mean;
+    f64 _mean;
 };
 
 ////////////////////////////////////////////////////////////
 
 class triangular_distribution {
 public:
-    triangular_distribution(f32 min, f32 max, f32 peak);
+    triangular_distribution(f64 min, f64 max, f64 peak);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    f32 _min;
-    f32 _max;
-    f32 _peak;
+    f64 _min;
+    f64 _max;
+    f64 _peak;
 };
 
 ////////////////////////////////////////////////////////////
 
 class weibull_distribution {
 public:
-    weibull_distribution(f32 shape, f32 scale);
+    weibull_distribution(f64 shape, f64 scale);
 
-    auto operator()(auto&& rng) -> f32;
+    auto operator()(auto&& rng) -> f64;
 
 private:
-    f32 _shape;
-    f32 _scale;
+    f64 _shape;
+    f64 _scale;
 };
 
 ////////////////////////////////////////////////////////////

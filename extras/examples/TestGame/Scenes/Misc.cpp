@@ -353,61 +353,84 @@ void MiscScene::on_key_down(keyboard::event& ev)
         draw_dice(dice<20, well_512_a> {static_cast<u32>(seed)});
 
         random_number_generator<xorshift_64, normal_distribution> rng0 {static_cast<u32>(seed), 5.f, 3.f};
-        std::cout << "----normal xorshift_64" << '\n';
+        std::cout << "----normal " << '\n';
         draw_rng(rng0);
 
         random_number_generator<xorshift_64, poisson_distribution> rng1 {static_cast<u32>(seed), 15.f};
-        std::cout << "----poisson xorshift_64" << '\n';
+        std::cout << "----poisson " << '\n';
         draw_rng(rng1);
 
         random_number_generator<xorshift_64, triangular_distribution> rng2 {static_cast<u32>(seed), 0.f, 30.f, 25.f};
-        std::cout << "----triangular xorshift_64" << '\n';
+        std::cout << "----triangular " << '\n';
         draw_rng(rng2);
 
-        random_number_generator<xorshift_64, uniform_distribution<f32>> rng3a {static_cast<u32>(seed), 5.f, 10.f};
-        std::cout << "----uniform f32 xorshift_64" << '\n';
+        random_number_generator<xorshift_64, uniform_distribution<f32>> rng3a {static_cast<u32>(seed), 5.f, 7.f};
+        std::cout << "----uniform f32 " << '\n';
         draw_rng(rng3a, 10);
-        random_number_generator<xorshift_64, uniform_distribution<f64>> rng3b {static_cast<u32>(seed), 5., 10.};
-        std::cout << "----uniform f64 xorshift_64" << '\n';
+        random_number_generator<xorshift_64, uniform_distribution<f64>> rng3b {static_cast<u32>(seed), 5., 7.};
+        std::cout << "----uniform f64 " << '\n';
         draw_rng(rng3b, 10);
-        random_number_generator<xorshift_64, uniform_distribution<i32>> rng3c {static_cast<u32>(seed), 5, 10};
-        std::cout << "----uniform i32 xorshift_64" << '\n';
+        random_number_generator<xorshift_64, uniform_distribution<i32>> rng3c {static_cast<u32>(seed), 5, 7};
+        std::cout << "----uniform i32 " << '\n';
         draw_rng(rng3c);
-        random_number_generator<xorshift_64, uniform_distribution<i64>> rng3d {static_cast<u32>(seed), 5, 10};
-        std::cout << "----uniform i64 xorshift_64" << '\n';
+        random_number_generator<xorshift_64, uniform_distribution<i64>> rng3d {static_cast<u32>(seed), 5, 7};
+        std::cout << "----uniform i64 " << '\n';
         draw_rng(rng3d);
 
         random_number_generator<xorshift_64, weibull_distribution> rng4 {static_cast<u32>(seed), 1.f, 10.f};
-        std::cout << "----weibull xorshift_64" << '\n';
+        std::cout << "----weibull " << '\n';
         draw_rng(rng4);
 
         random_number_generator<xorshift_64, pareto_distribution> rng5 {static_cast<u32>(seed), 2.f, 10.f};
-        std::cout << "----pareto xorshift_64" << '\n';
+        std::cout << "----pareto " << '\n';
         draw_rng(rng5);
 
         random_number_generator<xorshift_64, exponential_distribution> rng6 {static_cast<u32>(seed), 0.5f};
-        std::cout << "----exp xorshift_64" << '\n';
+        std::cout << "----exp " << '\n';
         draw_rng(rng6);
 
-        random_number_generator<xorshift_64, discrete_distribution> rng7 {static_cast<u32>(seed), std::array {0.1f, 0.2f, 0.2f, 0.1f, 0.4f}};
-        std::cout << "----discrete xorshift_64" << '\n';
-        draw_rng(rng7);
+        random_number_generator<xorshift_64, discrete_distribution> rng7a {static_cast<u32>(seed), std::array {1., 1., 2., 2., 1.}};
+        std::cout << "----discrete int " << '\n';
+        draw_rng(rng7a);
+        random_number_generator<xorshift_64, discrete_distribution> rng7b {static_cast<u32>(seed), std::array {0.2, 0.2, 0.1, 0.1, 0.2}};
+        std::cout << "----discrete float " << '\n';
+        draw_rng(rng7b);
 
         random_number_generator<xorshift_64, cauchy_distribution> rng8 {static_cast<u32>(seed), -2.f, 1.f};
-        std::cout << "----cauchy xorshift_64" << '\n';
+        std::cout << "----cauchy " << '\n';
         draw_rng(rng8);
 
         random_number_generator<xorshift_64, bernoulli_distribution> rng9 {static_cast<u32>(seed), 0.75f};
-        std::cout << "----bernoulli  xorshift_64" << '\n';
+        std::cout << "----bernoulli" << '\n';
         draw_rng(rng9);
 
         random_number_generator<xorshift_64, bag_distribution> rng10 {static_cast<u32>(seed), 1, 20, 5};
-        std::cout << "----bag xorshift_64" << '\n';
+        std::cout << "----bag " << '\n';
         draw_rng(rng10);
 
-        random_number_generator<xorshift_64, piecewise_constant_distribution> rng11 {static_cast<u32>(seed), std::array {0.f, 1.f, 10.f, 15.f}, std::array {1.f, 0.f, 1.f}};
-        std::cout << "----pc  xorshift_64" << '\n';
+        random_number_generator<xorshift_64, piecewise_constant_distribution> rng11 {static_cast<u32>(seed), std::array {0., 1., 10., 15.}, std::array {1., 0., 1.}};
+        std::cout << "----pc" << '\n';
         draw_rng(rng11);
+
+        random_number_generator<xorshift_64, binomial_distribution> rng12 {static_cast<u32>(seed), 4, 0.5};
+        std::cout << "----binomial" << '\n';
+        draw_rng(rng12);
+
+        random_number_generator<xorshift_64, negative_binomial_distribution> rng13 {static_cast<u32>(seed), 5, 0.75};
+        std::cout << "----neg binomial" << '\n';
+        draw_rng(rng13);
+
+        random_number_generator<xorshift_64, gamma_distribution> rng14 {static_cast<u32>(seed), 1., 2.};
+        std::cout << "----gamma" << '\n';
+        draw_rng(rng14);
+
+        random_number_generator<xorshift_64, beta_distribution> rng15 {static_cast<u32>(seed), 2., 2.};
+        std::cout << "----beta" << '\n';
+        draw_rng(rng15, 10);
+
+        random_number_generator<xorshift_64, lognormal_distribution> rng16 {static_cast<u32>(seed), 1.6, 0.25};
+        std::cout << "----log normal" << '\n';
+        draw_rng(rng16);
 
     } else if (ev.ScanCode == scan_code::D5) {
         asset_ptr<animated_texture> aniTex = resMgr.get_group("res")->get<texture>("test-ani");
