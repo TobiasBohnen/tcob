@@ -223,6 +223,13 @@ void database_view::update_hook(void (*callback)(void*, int, char const*, char c
     sqlite3_update_hook(_db, callback, userdata);
 }
 
+auto database_view::config(i32 key, i32 value) const -> bool
+{
+    i32  actual {};
+    auto err = sqlite3_db_config(_db, key, value, &actual);
+    return err == SQLITE_OK && value == actual;
+}
+
 auto quote_string(utf8_string_view str) -> utf8_string
 {
     return std::format("\"{}\"", str);

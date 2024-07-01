@@ -103,6 +103,16 @@ public:
     auto str() const -> utf8_string;
 };
 
+class TCOB_API foreign_key {
+public:
+    utf8_string Column;
+
+    utf8_string ForeignTable;
+    utf8_string ForeignColumn;
+
+    auto str() const -> utf8_string;
+};
+
 class TCOB_API check {
 public:
     check(utf8_string check);

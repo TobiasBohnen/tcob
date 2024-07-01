@@ -122,6 +122,8 @@ public:
     void rollback_hook(void (*callback)(void*), void* userdata) const;
     void update_hook(void (*callback)(void*, int, char const*, char const*, long long int), void* userdata) const;
 
+    auto config(i32 key, i32 value) const -> bool;
+
 private:
     sqlite3* _db {nullptr};
 };

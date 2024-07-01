@@ -225,7 +225,10 @@ auto database::Open(path const& file) -> std::optional<database>
     if (!io::is_file(file)) { io::create_file(file); }
 
     database_view db {nullptr};
-    if (db.open(file)) { return std::make_optional<database>(db); }
+    if (db.open(file)) {
+        db.config(1002, 1); // foreign key
+        return std::make_optional<database>(db);
+    }
 
     return std::nullopt;
 }
@@ -234,6 +237,7 @@ auto database::OpenMemory() -> database
 {
     database_view db {nullptr};
     db.open(":memory:");
+    db.config(1002, 1); // foreign key
     return database {db};
 }
 

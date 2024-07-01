@@ -36,6 +36,11 @@ auto primary_key::str() const -> utf8_string
     return "PRIMARY KEY";
 }
 
+auto foreign_key::str() const -> utf8_string
+{
+    return std::format(R"(FOREIGN KEY("{}") REFERENCES {}("{}"))", Column, ForeignTable, ForeignColumn);
+}
+
 check::check(utf8_string check)
     : Check {std::move(check)}
 {
