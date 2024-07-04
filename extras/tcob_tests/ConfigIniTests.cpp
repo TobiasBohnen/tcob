@@ -104,6 +104,11 @@ TEST_CASE("Data.Ini.Multiline")
                 cobble_blood10 = { level = 0, height = 32, width = 32, x = 71, y = 771  }
             }
 
+            multiLineString1 = |
+  abc
+  def 
+  ghi
+|  
             multiLineString = "abc
                                def
                                ghi"                        
@@ -126,6 +131,9 @@ TEST_CASE("Data.Ini.Multiline")
 
     REQUIRE(t["section1"]["multiLineString"].is<std::string>());
     REQUIRE(t["section1"]["multiLineString"].as<std::string>() == "abc\ndef\nghi");
+
+    REQUIRE(t["section1"]["multiLineString1"].is<std::string>());
+    REQUIRE(t["section1"]["multiLineString1"].as<std::string>() == "  abc\n  def \n  ghi");
 }
 
 TEST_CASE("Data.Ini.Sections")
@@ -148,6 +156,7 @@ TEST_CASE("Data.Ini.Sections")
             dotSection.e   = {a=1,b=2,c=3}
             dotSection.c.d = 69
             dotSection.x   = { a.x = 100, a.y = 300 }
+            string1 = |abcdefghi|  
 
             [section1.subsection]
             a = 100
@@ -187,6 +196,8 @@ TEST_CASE("Data.Ini.Sections")
         REQUIRE(t["section1"]["subsection"]["b"].as<i32>() == 500);
         REQUIRE(t["section1"]["subsection"]["subsection"]["x"].as<i32>() == 300);
         REQUIRE(t["section1"]["subsection"]["subsection"]["y"].as<i32>() == 600);
+
+        REQUIRE(t["section1"]["string1"].as<string>() == "abcdefghi");
 
         REQUIRE(t["section1"]["valueSection"].is<object>());
         object sec0 {t["section1"]["valueSection"].as<object>()};

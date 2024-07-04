@@ -42,18 +42,18 @@ auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
     _mainSection = {};
 
     entry currentEntry {};
-    read_inline_array(currentEntry, get_next_line());
+    read_inline_array(currentEntry, get_trimmed_next_line());
 
     return currentEntry.is<array>() ? std::optional {currentEntry.as<array>()} : std::nullopt;
 }
 
 auto ini_reader::read_lines(object& kvpTarget) -> bool
 {
-    auto line {get_next_line()};
+    auto line {get_trimmed_next_line()};
     for (;;) {
         if (!read_line(kvpTarget, line)) { return false; }
         if (is_eof()) { break; }
-        line = get_next_line();
+        line = get_trimmed_next_line();
     }
 
     return true;
@@ -202,7 +202,7 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
         utf8_string arrayLine {line};
         while (!is_eof()
                && (arrayLine.size() <= 1 || arrayLine[arrayLine.size() - 1] != ']' || !check_brackets(arrayLine, '[', ']'))) {
-            arrayLine += get_next_line();
+            arrayLine += get_trimmed_next_line();
         }
 
         if (arrayLine[arrayLine.size() - 1] != ']') { return false; }
@@ -236,7 +236,7 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
         utf8_string sectionLine {line};
         while (!is_eof()
                && (sectionLine.size() <= 1 || sectionLine[sectionLine.size() - 1] != '}' || !check_brackets(sectionLine, '{', '}'))) {
-            sectionLine += get_next_line();
+            sectionLine += get_trimmed_next_line();
         }
 
         if (sectionLine[sectionLine.size() - 1] != '}') { return false; }
@@ -285,12 +285,30 @@ auto ini_reader::read_bool(entry& currentEntry, utf8_string_view line) const -> 
 
 auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line.size() > 1) {
+    if (!line.empty()) {
         char const first {line[0]};
+        if (first == '|') {
+            utf8_string stringLine {line};
+            bool        firstLine {true};
+            while (!is_eof() && (firstLine || helper::trim(stringLine).back() != first)) {
+                if (firstLine) {
+                    stringLine += utf8_string {get_next_line()};
+                    firstLine = false;
+                } else {
+                    stringLine += "\n" + utf8_string {get_next_line()};
+                }
+            }
+
+            auto val {stringLine.substr(1, stringLine.find(first, 1) - 1)};
+            if (val.back() == '\n') { val = val.substr(0, val.size() - 1); } // cut last \n
+            currentEntry.set_value(val);
+            return true;
+        }
+
         if (first == '"' || first == '\'') {
             utf8_string stringLine {line};
-            while (!is_eof() && stringLine[stringLine.size() - 1] != first) {
-                stringLine += "\n" + utf8_string {get_next_line()};
+            while (!is_eof() && stringLine.size() > 1 && stringLine.back() != first) {
+                stringLine += "\n" + utf8_string {get_trimmed_next_line()};
             }
 
             currentEntry.set_value(stringLine.substr(1, stringLine.size() - 2));
@@ -314,7 +332,12 @@ auto ini_reader::get_next_line() -> utf8_string_view
         ++_iniEnd;
     }
 
-    return helper::trim(_ini.substr(_iniBegin, _iniEnd - _iniBegin - 1));
+    return _ini.substr(_iniBegin, _iniEnd - _iniBegin - 1);
+}
+
+auto ini_reader::get_trimmed_next_line() -> utf8_string_view
+{
+    return helper::trim(get_next_line());
 }
 
 auto ini_reader::is_eof() const -> bool

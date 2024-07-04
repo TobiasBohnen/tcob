@@ -36,6 +36,7 @@ private:
     auto read_string(entry& currentEntry, utf8_string_view line) -> bool;
 
     auto get_next_line() -> utf8_string_view;
+    auto get_trimmed_next_line() -> utf8_string_view;
     auto is_eof() const -> bool;
 
     usize            _iniBegin;
