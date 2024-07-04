@@ -28,6 +28,7 @@ set(TEST_SRCFILES
   HelperTests.cpp
   ImageTests.cpp
   ConfigTests.cpp
+  ConfigIniTests.cpp
   ConfigJsonTests.cpp
   ConfigYamlTests.cpp
   ConfigXMLTests.cpp
