@@ -122,36 +122,70 @@ TEST_CASE("Core.Helper.SplitPreserveStrings")
 }
 TEST_CASE("Core.Helper.WildcardMatch")
 {
+    SUBCASE("w/o wildcard")
+    {
+        REQUIRE(helper::wildcard_match("", ""));
+        REQUIRE(helper::wildcard_match("a", "a"));
+
+        REQUIRE_FALSE(helper::wildcard_match("", "a"));
+        REQUIRE_FALSE(helper::wildcard_match("a", ""));
+    }
+
     SUBCASE("*")
     {
         REQUIRE(helper::wildcard_match("xyz..txt", "*.txt"));
         REQUIRE(helper::wildcard_match("xyyz", "x*z"));
         REQUIRE(helper::wildcard_match("xyyz", "x*z*"));
-        REQUIRE_FALSE(helper::wildcard_match("xyyb", "x*z"));
-        REQUIRE_FALSE(helper::wildcard_match("xyyb", "x*z*"));
         REQUIRE(helper::wildcard_match("xyz.txt", "*.txt"));
-        REQUIRE_FALSE(helper::wildcard_match("xyz.txt.bla", "*.txt"));
         REQUIRE(helper::wildcard_match("xyz.txt.bla", "*.txt*"));
-        REQUIRE_FALSE(helper::wildcard_match("xyz.txt", "*.lua"));
         REQUIRE(helper::wildcard_match("xyz.assets.txt", "*.assets.*"));
         REQUIRE(helper::wildcard_match("xyz.assets..txt", "*.assets.*"));
         REQUIRE(helper::wildcard_match("xyz", "*"));
         REQUIRE(helper::wildcard_match("xyz", "**"));
         REQUIRE(helper::wildcard_match("xyz", "***"));
         REQUIRE(helper::wildcard_match("xyz", "****"));
+        REQUIRE(helper::wildcard_match("abc", "a*c"));
+        REQUIRE(helper::wildcard_match("abcd", "a*d"));
+        REQUIRE(helper::wildcard_match("abcd", "a*c*d"));
+        REQUIRE(helper::wildcard_match("abcd", "*"));
+        REQUIRE(helper::wildcard_match("abcd", "*d"));
+        REQUIRE(helper::wildcard_match("abcd", "a*"));
+        REQUIRE(helper::wildcard_match("abcd", "a**d"));
+        REQUIRE(helper::wildcard_match("", "*"));
+        REQUIRE(helper::wildcard_match("abcde", "a*e"));
+        REQUIRE(helper::wildcard_match("abcde", "*bc*e*"));
+
+        REQUIRE_FALSE(helper::wildcard_match("xyyb", "x*z"));
+        REQUIRE_FALSE(helper::wildcard_match("xyyb", "x*z*"));
+        REQUIRE_FALSE(helper::wildcard_match("xyz.txt.bla", "*.txt"));
+        REQUIRE_FALSE(helper::wildcard_match("xyz.txt", "*.lua"));
+        REQUIRE_FALSE(helper::wildcard_match("abc", "a*d"));
+        REQUIRE_FALSE(helper::wildcard_match("abc", "a*b*d"));
+        REQUIRE_FALSE(helper::wildcard_match("abc", "*a"));
+        REQUIRE_FALSE(helper::wildcard_match("abc", "b*"));
+        REQUIRE_FALSE(helper::wildcard_match("abcde", "a*c"));
     }
     SUBCASE("?")
     {
         REQUIRE(helper::wildcard_match("x", "?"));
-        REQUIRE_FALSE(helper::wildcard_match("x", "??"));
         REQUIRE(helper::wildcard_match("xyz", "x?z"));
-        REQUIRE_FALSE(helper::wildcard_match("xyyb", "x?b"));
         REQUIRE(helper::wildcard_match("a.txt", "?.txt"));
+        REQUIRE(helper::wildcard_match("aaa.txt", "???.txt"));
+        REQUIRE(helper::wildcard_match("a", "?"));
+
+        REQUIRE_FALSE(helper::wildcard_match("xyyb", "x?b"));
         REQUIRE_FALSE(helper::wildcard_match("xyz.txt", "?.txt"));
+        REQUIRE_FALSE(helper::wildcard_match("x", "??"));
     }
     SUBCASE("*?")
     {
         REQUIRE(helper::wildcard_match("xyyza", "x*z?"));
+        REQUIRE(helper::wildcard_match("abc", "a*?"));
+        REQUIRE(helper::wildcard_match("abcd", "a*c?"));
+        REQUIRE(helper::wildcard_match("a", "*?"));
+        REQUIRE(helper::wildcard_match("a", "?*"));
+
+        REQUIRE_FALSE(helper::wildcard_match("abc", "a*c?"));
         REQUIRE_FALSE(helper::wildcard_match("xyyz", "x*z?"));
     }
 }

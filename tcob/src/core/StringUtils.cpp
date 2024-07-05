@@ -146,27 +146,32 @@ auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
 
 auto wildcard_match(string_view str, string_view pattern) -> bool
 {
-    if (pattern.empty()) {
-        return str.empty();
-    }
-    if (str.empty()) {
-        return pattern.empty() || (pattern.size() == 1 && pattern[0] == '*');
-    }
+    auto strIt {str.begin()};
+    auto patternIt {pattern.begin()};
 
-    if (pattern[0] == '*') {
-        for (usize s {0}; s <= str.size(); ++s) {
-            if (wildcard_match(str.substr(s), pattern.substr(1))) {
-                return true;
-            }
+    auto strLastStar {str.end()};
+    auto patternLastStar {pattern.end()};
+
+    while (strIt != str.end()) {
+        if (patternIt != pattern.end() && (*patternIt == '?' || *patternIt == *strIt)) { // match
+            ++strIt;
+            ++patternIt;
+        } else if (patternIt != pattern.end() && *patternIt == '*') {                    // begin star matching
+            patternLastStar = patternIt++;
+            strLastStar     = strIt;
+        } else if (patternLastStar != pattern.end()) {                                   // continue star matching
+            patternIt = patternLastStar + 1;
+            strIt     = ++strLastStar;
+        } else {
+            return false;
         }
-        return false;
     }
 
-    if (pattern[0] != '?' && pattern[0] != str[0]) {
-        return false;
+    while (patternIt != pattern.end() && *patternIt == '*') {
+        ++patternIt;
     }
 
-    return wildcard_match(str.substr(1), pattern.substr(1));
+    return patternIt == pattern.end();
 }
 
 auto random_string(usize length) -> string
