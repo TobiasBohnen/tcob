@@ -95,24 +95,12 @@ void object::clear()
 
 auto object::get_type(string const& key) const -> type
 {
-    if (is<string>(key)) {
-        return type::String;
-    }
-    if (is<i64>(key)) {
-        return type::Integer;
-    }
-    if (is<f64>(key)) {
-        return type::Float;
-    }
-    if (is<bool>(key)) {
-        return type::Bool;
-    }
-    if (is<array>(key)) {
-        return type::Array;
-    }
-    if (is<object>(key)) {
-        return type::Object;
-    }
+    if (is<string>(key)) { return type::String; }
+    if (is<i64>(key)) { return type::Integer; }
+    if (is<f64>(key)) { return type::Float; }
+    if (is<bool>(key)) { return type::Bool; }
+    if (is<array>(key)) { return type::Array; }
+    if (is<object>(key)) { return type::Object; }
 
     return type::Null;
 }
