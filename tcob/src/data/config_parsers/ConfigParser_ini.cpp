@@ -287,25 +287,31 @@ auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
 {
     if (!line.empty()) {
         char const first {line[0]};
-        if (first == '|') {
+        if (first == '\'') {
             utf8_string stringLine {line};
             bool        firstLine {true};
-            while (!is_eof() && (firstLine || helper::trim(stringLine).back() != first)) {
+
+            while (!is_eof() && ((firstLine && line.size() == 1) || helper::trim(stringLine).back() != first)) {
                 if (firstLine) {
-                    stringLine += utf8_string {get_next_line()};
                     firstLine = false;
                 } else {
-                    stringLine += "\n" + utf8_string {get_next_line()};
+                    stringLine += "\n";
                 }
+                stringLine += get_next_line();
             }
 
-            auto val {stringLine.substr(1, stringLine.find(first, 1) - 1)};
-            if (val.back() == '\n') { val = val.substr(0, val.size() - 1); } // cut last \n
+            auto const endPos {stringLine.find(first, 1)};
+            auto       val {stringLine.substr(1, endPos - 1)};
+
+            if (!val.empty() && val.back() == '\n') {
+                val.pop_back(); // Remove the last '\n'
+            }
+
             currentEntry.set_value(val);
             return true;
         }
 
-        if (first == '"' || first == '\'') {
+        if (first == '"') {
             utf8_string stringLine {line};
             while (!is_eof() && stringLine.size() > 1 && stringLine.back() != first) {
                 stringLine += "\n" + utf8_string {get_trimmed_next_line()};

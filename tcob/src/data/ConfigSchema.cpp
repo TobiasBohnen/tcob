@@ -274,12 +274,12 @@ auto schema::validate_property(object const& obj, array_property const& prop) co
             retValue.Constraint = "Type";
         } else {
             auto const val {obj.as<array>(prop.Name)};
-            if (prop.MaxSize && val.get_size() > *prop.MaxSize) {
+            if (prop.MaxSize && val.size() > *prop.MaxSize) {
                 retValue.Constraint = "MaxSize";
-            } else if (prop.MinSize && val.get_size() < *prop.MinSize) {
+            } else if (prop.MinSize && val.size() < *prop.MinSize) {
                 retValue.Constraint = "MinSize";
             } else if (prop.ItemType) {
-                for (isize i {0}; i < val.get_size(); ++i) {
+                for (isize i {0}; i < val.size(); ++i) {
                     bool test {false};
                     switch (*prop.ItemType) {
                     case type::Array:

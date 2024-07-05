@@ -50,7 +50,7 @@ TEST_CASE("Data.Json.Save")
                 REQUIRE(load["section2"]["valueStr"].as<std::string>() == "test456");
                 REQUIRE(load["section2"]["valueFloat"].as<f64>() == 456.78);
 
-                REQUIRE(load["section3"]["valueArray"].as<array>().get_size() == 4);
+                REQUIRE(load["section3"]["valueArray"].as<array>().size() == 4);
                 REQUIRE(load["section3"]["valueArray"][0].as<std::string>() == "a");
                 REQUIRE(load["section3"]["valueArray"][1].as<f64>() == 1);
                 REQUIRE(load["section3"]["valueArray"][2].as<bool>() == false);
@@ -114,7 +114,7 @@ TEST_CASE("Data.Json.Save")
             array load;
             REQUIRE(load.load(file) == load_status::Ok);
 
-            REQUIRE(load.get_size() == 5);
+            REQUIRE(load.size() == 5);
             REQUIRE(load[0].as<std::string>() == "a");
             REQUIRE(load[1].as<f64>() == 1);
             REQUIRE(load[2].as<bool>() == false);
@@ -192,7 +192,7 @@ TEST_CASE("Data.Json.Parse")
 
         array arr;
         REQUIRE(arr.parse(arrString, EXT));
-        REQUIRE(arr.get_size() == 6);
+        REQUIRE(arr.size() == 6);
         REQUIRE(arr[0].as<i64>() == 1);
         REQUIRE(arr[1].as<i64>() == 2);
         REQUIRE(arr[2].as<i64>() == 3);

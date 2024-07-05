@@ -193,6 +193,7 @@ template <ConvertibleTo... Ts>
 inline array::array(Ts... values)
     : array {}
 {
+    reserve(sizeof...(values));
     ((add(values)), ...);
 }
 
@@ -206,7 +207,7 @@ inline array::array(std::span<T> value)
 template <ConvertibleFrom T>
 inline auto array::get(isize index) const -> result<T>
 {
-    if (index < 0 || index >= get_size()) { return result<T> {error_code::Undefined}; }
+    if (index < 0 || index >= size()) { return result<T> {error_code::Undefined}; }
 
     return (*_values)[static_cast<usize>(index)].get<T>();
 }
@@ -215,7 +216,7 @@ template <ConvertibleTo T>
 inline void array::set(isize index, T&& value)
 {
     if (index >= 0) {
-        if (index >= get_size()) {
+        if (index >= size()) {
             _values->resize(static_cast<usize>(index + 1));
         }
 
@@ -226,7 +227,7 @@ inline void array::set(isize index, T&& value)
 template <ConvertibleFrom T>
 inline auto array::is(isize index) const -> bool
 {
-    if (index < 0 || index >= get_size()) { return false; }
+    if (index < 0 || index >= size()) { return false; }
 
     return (*_values)[static_cast<usize>(index)].is<T>();
 }
@@ -307,7 +308,7 @@ inline auto operator==(array const& left, array const& right) -> bool
         return false;
     }
 
-    for (isize i {0}; i < left.get_size(); ++i) {
+    for (isize i {0}; i < left.size(); ++i) {
         if (*left.get_entry(i) != *right.get_entry(i)) {
             return false;
         }

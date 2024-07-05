@@ -29,6 +29,7 @@ class TCOB_API object {
 
 public:
     object() noexcept;
+    object(std::initializer_list<std::pair<utf8_string, cfg_value>> items);
     object(std::shared_ptr<cfg_object_entries> const& entries) noexcept;
 
     auto operator[](string const& key) -> proxy<object, string>;
@@ -48,7 +49,9 @@ public:
     auto end() const -> cfg_object_entries::const_iterator;
 
     auto empty() const -> bool;
-    auto get_size() const -> isize;
+    auto size() const -> isize;
+    auto capacity() const -> usize;
+    void reserve(usize cap);
 
     void clear();
 
@@ -140,7 +143,9 @@ public:
     auto end() const -> cfg_array_entries::const_iterator;
 
     auto empty() const -> bool;
-    auto get_size() const -> isize;
+    auto size() const -> isize;
+    auto capacity() const -> usize;
+    void reserve(usize cap);
 
     void clear();
 

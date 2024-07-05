@@ -53,7 +53,7 @@ TEST_CASE("Data.Ini.Array")
 
             auto arr {array::Parse(arrString, EXT)};
             REQUIRE(arr);
-            REQUIRE(arr->get_size() == 6);
+            REQUIRE(arr->size() == 6);
             REQUIRE((*arr)[0].as<i64>() == 1);
             REQUIRE((*arr)[1].as<i64>() == 2);
             REQUIRE((*arr)[2].as<i64>() == 3);
@@ -66,7 +66,7 @@ TEST_CASE("Data.Ini.Array")
 
             auto arr {array::Parse(arrString, EXT)};
             REQUIRE(arr);
-            REQUIRE(arr->get_size() == 0);
+            REQUIRE(arr->size() == 0);
         }
     }
 }
@@ -104,14 +104,26 @@ TEST_CASE("Data.Ini.Multiline")
                 cobble_blood10 = { level = 0, height = 32, width = 32, x = 71, y = 771  }
             }
 
-            multiLineString1 = |
+            multiLineString0 = '
   abc
   def 
   ghi
-|  
-            multiLineString = "abc
-                               def
-                               ghi"                        
+'  
+            multiLineString1 = '
+  abc
+   def 
+
+  ghi'  
+
+            multiLineString2 = "abc
+                                def
+                                ghi"      
+            multiLineString3 = "abc
+
+
+                                def
+
+                                ghi"                                                 
         )";
 
     object t;
@@ -129,11 +141,14 @@ TEST_CASE("Data.Ini.Multiline")
     REQUIRE(t["section1"]["multiLineSection"]["c"].as<i32>() == 5);
     REQUIRE(t["section1"]["multiLineSection"]["d"].as<i32>() == 7);
 
-    REQUIRE(t["section1"]["multiLineString"].is<std::string>());
-    REQUIRE(t["section1"]["multiLineString"].as<std::string>() == "abc\ndef\nghi");
-
+    REQUIRE(t["section1"]["multiLineString0"].is<std::string>());
+    REQUIRE(t["section1"]["multiLineString0"].as<std::string>() == "  abc\n  def \n  ghi");
     REQUIRE(t["section1"]["multiLineString1"].is<std::string>());
-    REQUIRE(t["section1"]["multiLineString1"].as<std::string>() == "  abc\n  def \n  ghi");
+    REQUIRE(t["section1"]["multiLineString1"].as<std::string>() == "  abc\n   def \n\n  ghi");
+    REQUIRE(t["section1"]["multiLineString2"].is<std::string>());
+    REQUIRE(t["section1"]["multiLineString2"].as<std::string>() == "abc\ndef\nghi");
+    REQUIRE(t["section1"]["multiLineString3"].is<std::string>());
+    REQUIRE(t["section1"]["multiLineString3"].as<std::string>() == "abc\n\n\ndef\n\nghi");
 }
 
 TEST_CASE("Data.Ini.Sections")
@@ -156,7 +171,7 @@ TEST_CASE("Data.Ini.Sections")
             dotSection.e   = {a=1,b=2,c=3}
             dotSection.c.d = 69
             dotSection.x   = { a.x = 100, a.y = 300 }
-            string1 = |abcdefghi|  
+            string1 = 'abcdefghi'  
 
             [section1.subsection]
             a = 100
@@ -238,16 +253,14 @@ TEST_CASE("Data.Ini.Sections")
     SUBCASE("empty section")
     {
         {
-            std::string const iniString =
-                R"([section1])";
+            std::string const iniString = R"([section1])";
 
             object t;
             REQUIRE(t.parse(iniString, EXT));
             REQUIRE(t["section1"].is<object>());
         }
         {
-            std::string const iniString =
-                R"(sec = { })";
+            std::string const iniString = R"(sec = { })";
 
             object t;
             REQUIRE(t.parse(iniString, EXT));
@@ -271,223 +284,6 @@ TEST_CASE("Data.Ini.Sections")
             REQUIRE(t["section2"]["a"].is<i64>());
             REQUIRE(t["section3"].is<object>());
         }
-    }
-
-    SUBCASE("modify section")
-    {
-        object t;
-        t["section1"]["valueSection"] = object {};
-        REQUIRE(t["section1"]["valueSection"].is<object>());
-
-        object obj {t["section1"]["valueSection"].as<object>()};
-
-        object obj1 {t["section1"]["valueSection"].as<object>()};
-        obj["a"] = 100;
-        REQUIRE(obj1["a"].as<f64>() == 100);
-        obj["b"] = false;
-        REQUIRE(obj1["b"].as<bool>() == false);
-        obj["xyz"] = "testString";
-        REQUIRE(obj1["xyz"].as<std::string>() == "testString");
-
-        object obj2 {t["section1"]["valueSection"].as<object>()};
-        REQUIRE(obj2["a"].as<f64>() == 100);
-        REQUIRE(obj2["b"].as<bool>() == false);
-        REQUIRE(obj2["xyz"].as<std::string>() == "testString");
-    }
-
-    SUBCASE("adding and removing object")
-    {
-        object t;
-
-        object obj {};
-        obj["a"]   = 100;
-        obj["b"]   = false;
-        obj["xyz"] = "testString";
-        t.set("section1", obj);
-
-        REQUIRE(t.has("section1"));
-        object sec2 {t["section1"].as<object>()};
-        REQUIRE(sec2["a"].as<f64>() == 100);
-        REQUIRE(sec2["xyz"].as<std::string>() == "testString");
-        REQUIRE(sec2["b"].as<bool>() == false);
-
-        t.set("section1", nullptr);
-        REQUIRE_FALSE(t.has("section1"));
-    }
-
-    SUBCASE("clone")
-    {
-        object s0;
-        s0["section1"]["a"] = 100;
-
-        object s1 = s0;
-        REQUIRE(s1["section1"]["a"].as<i32>() == 100);
-        s1["section1"]["a"] = 200;
-        REQUIRE(s0["section1"]["a"].as<i32>() == 200);
-        REQUIRE(s1["section1"]["a"].as<i32>() == 200);
-
-        object s2 = s0.clone(true);
-        REQUIRE(s2["section1"]["a"].as<i32>() == 200);
-        s2["section1"]["a"] = 400;
-        REQUIRE(s0["section1"]["a"].as<i32>() == 200);
-        REQUIRE(s1["section1"]["a"].as<i32>() == 200);
-        REQUIRE(s2["section1"]["a"].as<i32>() == 400);
-    }
-
-    SUBCASE("merge")
-    {
-        {
-            object s0;
-            s0["section1"]["a"] = 100;
-            s0["section1"]["b"] = 200;
-            s0["section2"]["a"] = 300;
-
-            object s1;
-            s1["section1"]["a"] = 150;
-            s1["section1"]["c"] = 400;
-            s1["section3"]["a"] = 500;
-
-            s0.merge(s1, true);
-
-            REQUIRE(s0["section1"]["a"].as<i32>() == 150);
-            REQUIRE(s0["section1"]["b"].as<i32>() == 200);
-            REQUIRE(s0["section1"]["c"].as<i32>() == 400);
-            REQUIRE(s0["section2"]["a"].as<i32>() == 300);
-            REQUIRE(s0["section3"]["a"].as<i32>() == 500);
-        }
-
-        {
-            object s0;
-            s0["section1"]["a"] = 100;
-            s0["section1"]["b"] = 200;
-            s0["section2"]["a"] = 300;
-
-            object s1;
-            s1["section1"]["a"] = 150;
-            s1["section1"]["c"] = 400;
-            s1["section3"]["a"] = 500;
-
-            s0.merge(s1, false);
-
-            REQUIRE(s0["section1"]["a"].as<i32>() == 100);
-            REQUIRE(s0["section1"]["b"].as<i32>() == 200);
-            REQUIRE(s0["section1"]["c"].as<i32>() == 400);
-            REQUIRE(s0["section2"]["a"].as<i32>() == 300);
-            REQUIRE(s0["section3"]["a"].as<i32>() == 500);
-        }
-        {
-            std::string const section0Str =
-                R"(
-                    [texture.tex1]
-                    source = tex1.png
-                 )";
-            object s0;
-            s0.parse(section0Str, EXT);
-
-            std::string const section1Str =
-                R"(
-                    [texture.tex2]
-                    source = tex2.png
-                 )";
-            object s1;
-            s1.parse(section1Str, EXT);
-
-            object tex;
-            tex.merge(s0, true);
-            tex.merge(s1, true);
-
-            REQUIRE(tex["texture"]["tex1"]["source"].as<std::string>() == "tex1.png");
-            REQUIRE(tex["texture"]["tex2"]["source"].as<std::string>() == "tex2.png");
-        }
-    }
-
-    SUBCASE("removing keys")
-    {
-        object obj {};
-        obj["a"]      = 100;
-        obj["b"]      = false;
-        obj["xyz"]    = "testString";
-        obj["c"]["d"] = 1;
-        obj["c"]["e"] = 2;
-
-        REQUIRE(obj.has("a"));
-        REQUIRE(obj.has("b"));
-        REQUIRE(obj.has("xyz"));
-        REQUIRE(obj.has("c", "d"));
-        REQUIRE(obj.has("c", "e"));
-
-        obj["a"]      = nullptr;
-        obj["b"]      = nullptr;
-        obj["xyz"]    = nullptr;
-        obj["c"]["d"] = nullptr;
-        obj["c"]["e"] = nullptr;
-
-        REQUIRE_FALSE(obj.has("a"));
-        REQUIRE_FALSE(obj.has("b"));
-        REQUIRE_FALSE(obj.has("xyz"));
-        REQUIRE_FALSE(obj.has("c", "d"));
-        REQUIRE_FALSE(obj.has("c", "e"));
-
-        // delete non-existing key
-        REQUIRE_FALSE(obj.has("c", "x"));
-        obj["c"]["x"]["s"] = nullptr;
-        REQUIRE_FALSE(obj.has("c", "x"));
-        REQUIRE_FALSE(obj.has("c", "x", "s"));
-    }
-
-    SUBCASE("equality")
-    {
-        using namespace tcob::literals;
-
-        object test {
-            R"(
-                a = 100
-                b = 200
-                c = [1,2,3]
-                d = {a = 100, b = 300, c = 400}
-            )"_ini};
-
-        object good {
-            R"(
-                a = 100
-                b = 200
-                c = [1,2,3]
-                d = {a = 100, b = 300, c = 400}
-            )"_ini};
-
-        REQUIRE(test == good);
-
-        object bad {
-            R"(
-                a = 100
-                b = 200
-                c = true
-                d = false
-            )"_ini};
-
-        REQUIRE_FALSE(test == bad);
-    }
-
-    SUBCASE("get_type")
-    {
-        using namespace tcob::literals;
-
-        object t = R"(
-            string = "abc"
-            float  = 1.2
-            int    = 100
-            bool   = true
-            array  = [1,2,3]
-            object = {a=1,b=2,c=3}
-        )"_ini;
-
-        REQUIRE(t.get_type("string") == type::String);
-        REQUIRE(t.get_type("float") == type::Float);
-        REQUIRE(t.get_type("int") == type::Integer);
-        REQUIRE(t.get_type("bool") == type::Bool);
-        REQUIRE(t.get_type("array") == type::Array);
-        REQUIRE(t.get_type("object") == type::Object);
-        REQUIRE(t.get_type("foobar") == type::Null);
     }
 }
 
@@ -603,7 +399,7 @@ TEST_CASE("Data.Ini.Save")
             REQUIRE(load["section2"]["valueFloat8"].as<f64>() == 856.788);
             REQUIRE(load["section2"]["valueFloat9"].as<f64>() == 956.789);
             REQUIRE(load["section2"]["valueFloat.10"].as<f64>() == 448.789);
-            REQUIRE(load["section3"]["valueArray"].as<array>().get_size() == 5);
+            REQUIRE(load["section3"]["valueArray"].as<array>().size() == 5);
             REQUIRE(load["section3"]["valueArray"][0].as<std::string>() == "a");
             REQUIRE(load["section3"]["valueArray"][1].as<f64>() == 1);
             REQUIRE(load["section3"]["valueArray"][2].as<bool>() == false);
@@ -635,7 +431,7 @@ TEST_CASE("Data.Ini.Save")
             array load;
             REQUIRE(load.load(file) == load_status::Ok);
 
-            REQUIRE(load.get_size() == 5);
+            REQUIRE(load.size() == 5);
             REQUIRE(load[0].as<std::string>() == "a");
             REQUIRE(load[1].as<f64>() == 1);
             REQUIRE(load[2].as<bool>() == false);
@@ -687,7 +483,7 @@ TEST_CASE("Data.Ini.Save")
             REQUIRE(load["section2"]["valueFloat8"].as<f64>() == 856.788);
             REQUIRE(load["section2"]["valueFloat9"].as<f64>() == 956.789);
 
-            REQUIRE(load["section3"]["valueArray"].as<array>().get_size() == 5);
+            REQUIRE(load["section3"]["valueArray"].as<array>().size() == 5);
             REQUIRE(load["section3"]["valueArray"][0].as<std::string>() == "a");
             REQUIRE(load["section3"]["valueArray"][1].as<f64>() == 1);
             REQUIRE(load["section3"]["valueArray"][2].as<bool>() == false);
@@ -718,7 +514,7 @@ TEST_CASE("Data.Ini.Save")
             array load;
             REQUIRE(load.load(file) == load_status::Ok);
 
-            REQUIRE(load.get_size() == 5);
+            REQUIRE(load.size() == 5);
             REQUIRE(load[0].as<std::string>() == "a");
             REQUIRE(load[1].as<f64>() == 1);
             REQUIRE(load[2].as<bool>() == false);
@@ -815,7 +611,7 @@ TEST_CASE("Data.Ini.Literals")
             [section1]
             ;comment1
             valueBool  = true
-            valueStr   = test123
+            valueStr   = 'test123'
             valueSec   = { a = 100, b = false, c = { l = 1, m = 32 } }
             valueArr   = [ 3, 5, 9, 13 ]
             ;comment1b

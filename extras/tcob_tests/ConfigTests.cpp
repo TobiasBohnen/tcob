@@ -182,19 +182,224 @@ TEST_CASE("Data.Config.Is")
     REQUIRE_FALSE(t.is<bool>("section1", "valueInt"));
 }
 
+TEST_CASE("Data.Config.Object")
+{
+    SUBCASE("modify section")
+    {
+        object t;
+        t["section1"]["valueSection"] = object {};
+        REQUIRE(t["section1"]["valueSection"].is<object>());
+
+        object obj {t["section1"]["valueSection"].as<object>()};
+
+        object obj1 {t["section1"]["valueSection"].as<object>()};
+        obj["a"] = 100;
+        REQUIRE(obj1["a"].as<f64>() == 100);
+        obj["b"] = false;
+        REQUIRE(obj1["b"].as<bool>() == false);
+        obj["xyz"] = "testString";
+        REQUIRE(obj1["xyz"].as<std::string>() == "testString");
+
+        object obj2 {t["section1"]["valueSection"].as<object>()};
+        REQUIRE(obj2["a"].as<f64>() == 100);
+        REQUIRE(obj2["b"].as<bool>() == false);
+        REQUIRE(obj2["xyz"].as<std::string>() == "testString");
+    }
+
+    SUBCASE("adding and removing object")
+    {
+        object t;
+        object obj {{"a", 100}, {"b", false}, {"xyz", "testString"}};
+        t.set("section1", obj);
+
+        REQUIRE(t.has("section1"));
+        object sec2 {t["section1"].as<object>()};
+        REQUIRE(sec2["a"].as<f64>() == 100);
+        REQUIRE(sec2["xyz"].as<std::string>() == "testString");
+        REQUIRE(sec2["b"].as<bool>() == false);
+
+        t.set("section1", nullptr);
+        REQUIRE_FALSE(t.has("section1"));
+    }
+
+    SUBCASE("clone")
+    {
+        object s0;
+        s0["section1"]["a"] = 100;
+
+        object s1 = s0;
+        REQUIRE(s1["section1"]["a"].as<i32>() == 100);
+        s1["section1"]["a"] = 200;
+        REQUIRE(s0["section1"]["a"].as<i32>() == 200);
+        REQUIRE(s1["section1"]["a"].as<i32>() == 200);
+
+        object s2 = s0.clone(true);
+        REQUIRE(s2["section1"]["a"].as<i32>() == 200);
+        s2["section1"]["a"] = 400;
+        REQUIRE(s0["section1"]["a"].as<i32>() == 200);
+        REQUIRE(s1["section1"]["a"].as<i32>() == 200);
+        REQUIRE(s2["section1"]["a"].as<i32>() == 400);
+    }
+
+    SUBCASE("merge")
+    {
+        {
+            object s0;
+            s0["section1"] = object {{"a", 100}, {"b", 200}};
+            s0["section2"] = object {{"a", 300}};
+
+            object s1;
+            s1["section1"] = object {{"a", 150}, {"c", 400}};
+            s1["section3"] = object {{"a", 500}};
+
+            s0.merge(s1, true);
+
+            REQUIRE(s0["section1"]["a"].as<i32>() == 150);
+            REQUIRE(s0["section1"]["b"].as<i32>() == 200);
+            REQUIRE(s0["section1"]["c"].as<i32>() == 400);
+            REQUIRE(s0["section2"]["a"].as<i32>() == 300);
+            REQUIRE(s0["section3"]["a"].as<i32>() == 500);
+        }
+
+        {
+            object s0;
+            s0["section1"]["a"] = 100;
+            s0["section1"]["b"] = 200;
+            s0["section2"]["a"] = 300;
+
+            object s1;
+            s1["section1"]["a"] = 150;
+            s1["section1"]["c"] = 400;
+            s1["section3"]["a"] = 500;
+
+            s0.merge(s1, false);
+
+            REQUIRE(s0["section1"]["a"].as<i32>() == 100);
+            REQUIRE(s0["section1"]["b"].as<i32>() == 200);
+            REQUIRE(s0["section1"]["c"].as<i32>() == 400);
+            REQUIRE(s0["section2"]["a"].as<i32>() == 300);
+            REQUIRE(s0["section3"]["a"].as<i32>() == 500);
+        }
+        {
+            object s0;
+            s0["texture"]["tex1"]["source"] = "tex1.png";
+
+            object s1;
+            s1["texture"]["tex2"]["source"] = "tex2.png";
+
+            object tex;
+            tex.merge(s0, true);
+            tex.merge(s1, true);
+
+            REQUIRE(tex["texture"]["tex1"]["source"].as<std::string>() == "tex1.png");
+            REQUIRE(tex["texture"]["tex2"]["source"].as<std::string>() == "tex2.png");
+        }
+    }
+
+    SUBCASE("removing keys")
+    {
+        object obj {};
+        obj["a"]      = 100;
+        obj["b"]      = false;
+        obj["xyz"]    = "testString";
+        obj["c"]["d"] = 1;
+        obj["c"]["e"] = 2;
+
+        REQUIRE(obj.has("a"));
+        REQUIRE(obj.has("b"));
+        REQUIRE(obj.has("xyz"));
+        REQUIRE(obj.has("c", "d"));
+        REQUIRE(obj.has("c", "e"));
+
+        obj["a"]      = nullptr;
+        obj["b"]      = nullptr;
+        obj["xyz"]    = nullptr;
+        obj["c"]["d"] = nullptr;
+        obj["c"]["e"] = nullptr;
+
+        REQUIRE_FALSE(obj.has("a"));
+        REQUIRE_FALSE(obj.has("b"));
+        REQUIRE_FALSE(obj.has("xyz"));
+        REQUIRE_FALSE(obj.has("c", "d"));
+        REQUIRE_FALSE(obj.has("c", "e"));
+
+        // delete non-existing key
+        REQUIRE_FALSE(obj.has("c", "x"));
+        obj["c"]["x"]["s"] = nullptr;
+        REQUIRE_FALSE(obj.has("c", "x"));
+        REQUIRE_FALSE(obj.has("c", "x", "s"));
+    }
+
+    SUBCASE("equality")
+    {
+        object test;
+        test["a"]      = 100;
+        test["b"]      = 200;
+        test["c"]      = array {1, 2, 3};
+        test["d"]["a"] = 100;
+        test["d"]["b"] = 300;
+        test["d"]["c"] = 400;
+
+        object good;
+        good["a"]      = 100;
+        good["b"]      = 200;
+        good["c"]      = array {1, 2, 3};
+        good["d"]["a"] = 100;
+        good["d"]["b"] = 300;
+        good["d"]["c"] = 400;
+
+        REQUIRE(test == good);
+
+        object bad0;
+        bad0["a"] = 100;
+        bad0["b"] = 200;
+        bad0["c"] = true;
+        bad0["d"] = false;
+
+        REQUIRE_FALSE(test == bad0);
+
+        object bad1;
+        bad1["a"]      = 100;
+        bad1["b"]      = 200;
+        bad1["c"]      = array {1, 2, 1};
+        bad1["d"]["a"] = 100;
+        bad1["d"]["b"] = 300;
+        bad1["d"]["c"] = 400;
+        REQUIRE_FALSE(test == bad1);
+    }
+
+    SUBCASE("get_type")
+    {
+        object t;
+        t["string"]      = "abc";
+        t["float"]       = 1.2;
+        t["int"]         = 100;
+        t["bool"]        = true;
+        t["array"]       = array {1, 2, 3};
+        t["object"]["a"] = 1;
+        t["object"]["b"] = 2;
+        t["object"]["c"] = 3;
+
+        REQUIRE(t.get_type("string") == type::String);
+        REQUIRE(t.get_type("float") == type::Float);
+        REQUIRE(t.get_type("int") == type::Integer);
+        REQUIRE(t.get_type("bool") == type::Bool);
+        REQUIRE(t.get_type("array") == type::Array);
+        REQUIRE(t.get_type("object") == type::Object);
+        REQUIRE(t.get_type("foobar") == type::Null);
+    }
+}
+
 TEST_CASE("Data.Config.Array")
 {
-    object t;
-    t["section1"]["valueBool"]  = true;
-    t["section1"]["valueStr"]   = "test123";
-    t["section1"]["valueArray"] = std::vector<std::variant<int, std::string, bool>> {1, "a", true};
-    t["section1"]["valueFloat"] = 123.45;
-
     SUBCASE("access items")
     {
+        object t;
+        t["section1"]["valueArray"] = array {1, "a", true};
+
         REQUIRE(t["section1"]["valueArray"].is<array>());
         array arr {t["section1"]["valueArray"].as<array>()};
-        REQUIRE(arr.get_size() == 3);
+        REQUIRE(arr.size() == 3);
         REQUIRE(arr[0].is<i64>());
         REQUIRE(arr[1].is<std::string>());
         REQUIRE(arr[2].is<bool>());
@@ -205,10 +410,13 @@ TEST_CASE("Data.Config.Array")
 
     SUBCASE("modify array")
     {
+        object t;
+        t["section1"]["valueArray"] = array {1, "a", true};
+
         REQUIRE(t["section1"]["valueArray"].is<array>());
 
         array arr {t["section1"]["valueArray"].as<array>()};
-        REQUIRE(arr.get_size() == 3);
+        REQUIRE(arr.size() == 3);
 
         array arr1 {t["section1"]["valueArray"].as<array>()};
         arr[0] = 100;
@@ -228,7 +436,7 @@ TEST_CASE("Data.Config.Array")
     {
         array a;
         a[100] = 1;
-        REQUIRE(a.get_size() == 101);
+        REQUIRE(a.size() == 101);
         REQUIRE(a[100].as<i32>() == 1);
     }
 
@@ -237,7 +445,7 @@ TEST_CASE("Data.Config.Array")
         {
             std::vector<i32> vec {1, 2, 3, 4, 5, 6};
             array            testArray {std::span<i32 const> {vec}};
-            REQUIRE(testArray.get_size() == vec.size());
+            REQUIRE(testArray.size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
                 REQUIRE(testArray[static_cast<isize>(i)].as<i32>() == vec[i]);
             }
@@ -245,7 +453,7 @@ TEST_CASE("Data.Config.Array")
         {
             std::vector<f64> vec {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
             array            testArray {std::span<f64 const> {vec}};
-            REQUIRE(testArray.get_size() == vec.size());
+            REQUIRE(testArray.size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
                 REQUIRE(testArray[static_cast<isize>(i)].as<f64>() == vec[i]);
             }
@@ -257,7 +465,7 @@ TEST_CASE("Data.Config.Array")
         {
             std::vector<i32> vec {1, 2, 3, 4, 5, 6};
             array            testArray {1, 2, 3, 4, 5, 6};
-            REQUIRE(testArray.get_size() == vec.size());
+            REQUIRE(testArray.size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
                 REQUIRE(testArray[static_cast<isize>(i)].as<i32>() == vec[i]);
             }
@@ -265,7 +473,7 @@ TEST_CASE("Data.Config.Array")
         {
             std::vector<f64> vec {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
             array            testArray {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
-            REQUIRE(testArray.get_size() == vec.size());
+            REQUIRE(testArray.size() == vec.size());
             for (usize i {0}; i < vec.size(); ++i) {
                 REQUIRE(testArray[static_cast<isize>(i)].as<f64>() == vec[i]);
             }
@@ -274,8 +482,6 @@ TEST_CASE("Data.Config.Array")
 
     SUBCASE("equality")
     {
-        using namespace tcob::literals;
-
         array test {1, 2, 3};
         array good {1, 2, 3};
 
@@ -288,13 +494,8 @@ TEST_CASE("Data.Config.Array")
 
     SUBCASE("get_type")
     {
-        using namespace tcob::literals;
+        array arr {"a", 1.2, 3, true, array {}, object {}};
 
-        object obj = R"(
-            array  = ["a",1.2,3,true,[1,2,3],{a=1,b=2,c=3}]
-        )"_ini;
-
-        auto arr = obj["array"].as<array>();
         REQUIRE(arr.get_type(0) == type::String);
         REQUIRE(arr.get_type(1) == type::Float);
         REQUIRE(arr.get_type(2) == type::Integer);
@@ -940,17 +1141,12 @@ enum class TestEnum1 {
 
 TEST_CASE("Data.Config.Enum")
 {
-    using namespace tcob::literals;
-
     SUBCASE("FromString translation")
     {
-
-        object const t =
-            R"(
-            valueEnum0 = True
-            valueEnum1 = False
-            valueEnum2 = FileNotFound
-        )"_ini;
+        object t;
+        t["valueEnum0"] = "True";
+        t["valueEnum1"] = "False";
+        t["valueEnum2"] = "FileNotFound";
 
         REQUIRE(t["valueEnum0"].is<TestEnum1>());
         REQUIRE(t["valueEnum1"].is<TestEnum1>());
@@ -962,7 +1158,6 @@ TEST_CASE("Data.Config.Enum")
     }
     SUBCASE("ToString translation")
     {
-
         object t {};
         t["valueEnum0"] = TestEnum1::True;
         t["valueEnum1"] = TestEnum1::False;

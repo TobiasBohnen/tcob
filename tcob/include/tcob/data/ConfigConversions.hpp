@@ -452,7 +452,7 @@ struct converter<std::pair<K, V>> {
     {
         if (std::holds_alternative<array>(config)) {
             array const arr {std::get<array>(config)};
-            return arr.get_size() >= 2 && arr[0].is<K>() && arr[1].is<V>();
+            return arr.size() >= 2 && arr[0].is<K>() && arr[1].is<V>();
         }
 
         return false;
@@ -482,7 +482,7 @@ struct converter<std::array<T, Size>> {
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
-            if (arr.get_size() > 0) {
+            if (arr.size() > 0) {
                 return arr.is<T>(0);
             }
             return true;
@@ -494,7 +494,7 @@ struct converter<std::array<T, Size>> {
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
-            for (isize i {0}; i < arr.get_size(); ++i) {
+            for (isize i {0}; i < arr.size(); ++i) {
                 value[static_cast<usize>(i)] = *arr.get<T>(i);
             }
             return true;
@@ -520,7 +520,7 @@ struct converter<T> {
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
-            if (arr.get_size() > 0) {
+            if (arr.size() > 0) {
                 return arr.is<value_type>(0);
             }
             return true;
@@ -532,7 +532,7 @@ struct converter<T> {
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
-            for (i32 i {0}; i < arr.get_size(); ++i) {
+            for (i32 i {0}; i < arr.size(); ++i) {
                 value.push_back(*arr.get<value_type>(i));
             }
             return true;

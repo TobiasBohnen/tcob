@@ -47,7 +47,7 @@ TEST_CASE("Data.Yaml.Save")
                 REQUIRE(load["section2"]["valueStr"].as<std::string>() == "test456");
                 REQUIRE(load["section2"]["valueFloat"].as<f64>() == 456.78);
 
-                REQUIRE(load["section3"]["valueArray"].as<array>().get_size() == 4);
+                REQUIRE(load["section3"]["valueArray"].as<array>().size() == 4);
                 REQUIRE(load["section3"]["valueArray"][0].as<std::string>() == "a");
                 REQUIRE(load["section3"]["valueArray"][1].as<f64>() == 1);
                 REQUIRE(load["section3"]["valueArray"][2].as<bool>() == false);
@@ -111,7 +111,7 @@ TEST_CASE("Data.Yaml.Save")
             array load;
             REQUIRE(load.load(file) == load_status::Ok);
 
-            REQUIRE(load.get_size() == 5);
+            REQUIRE(load.size() == 5);
             REQUIRE(load[0].as<std::string>() == "a");
             REQUIRE(load[1].as<f64>() == 1);
             REQUIRE(load[2].as<bool>() == false);
@@ -236,7 +236,7 @@ flowmap: {"a": 1, "b": 2})"};
 
         array arr;
         REQUIRE(arr.parse(arrString, EXT));
-        REQUIRE(arr.get_size() == 6);
+        REQUIRE(arr.size() == 6);
         REQUIRE(arr[0].as<i64>() == 1);
         REQUIRE(arr[1].as<i64>() == 2);
         REQUIRE(arr[2].as<i64>() == 3);
@@ -305,9 +305,9 @@ y:
 )"};
         object obj;
         REQUIRE(obj.parse(yamlString, EXT));
-        REQUIRE(obj["x"].as<array>().get_size() == 3);
+        REQUIRE(obj["x"].as<array>().size() == 3);
         REQUIRE(obj["x"][0].as<i32>() == 1);
-        REQUIRE(obj["x"][1].as<array>().get_size() == 1);
+        REQUIRE(obj["x"][1].as<array>().size() == 1);
         REQUIRE(obj["x"][1].as<array>()[0].as<i32>() == 2);
         REQUIRE(obj["x"][2].as<i32>() == 3);
         REQUIRE(obj["y"].as<i32>() == 34);

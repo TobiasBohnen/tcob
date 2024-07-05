@@ -22,7 +22,15 @@ namespace tcob::data::config {
 object::object() noexcept
     : object {std::make_shared<cfg_object_entries>()}
 {
-    _kvps->reserve(10);
+}
+
+object::object(std::initializer_list<std::pair<utf8_string, cfg_value>> items)
+    : object {}
+{
+    reserve(items.size());
+    for (auto const& item : items) {
+        set(item.first, item.second);
+    }
 }
 
 object::object(std::shared_ptr<cfg_object_entries> const& entries) noexcept
@@ -65,9 +73,19 @@ auto object::empty() const -> bool
     return _kvps->empty();
 }
 
-auto object::get_size() const -> isize
+auto object::size() const -> isize
 {
     return std::ssize(*_kvps);
+}
+
+auto object::capacity() const -> usize
+{
+    return _kvps->capacity();
+}
+
+void object::reserve(usize cap)
+{
+    _kvps->reserve(cap);
 }
 
 void object::clear()
@@ -275,7 +293,6 @@ auto object::find_key(string const& key) const -> cfg_object_entries::const_iter
 array::array() noexcept
     : _values {std::make_shared<cfg_array_entries>()}
 {
-    _values->reserve(10);
 }
 
 auto array::operator[](isize index) -> proxy<array, isize>
@@ -380,9 +397,19 @@ auto array::empty() const -> bool
     return _values->empty();
 }
 
-auto array::get_size() const -> isize
+auto array::size() const -> isize
 {
     return std::ssize(*_values);
+}
+
+auto array::capacity() const -> usize
+{
+    return _values->capacity();
+}
+
+void array::reserve(usize cap)
+{
+    _values->reserve(cap);
 }
 
 void array::clear()
@@ -392,24 +419,12 @@ void array::clear()
 
 auto array::get_type(isize index) const -> type
 {
-    if (is<string>(index)) {
-        return type::String;
-    }
-    if (is<i64>(index)) {
-        return type::Integer;
-    }
-    if (is<f64>(index)) {
-        return type::Float;
-    }
-    if (is<bool>(index)) {
-        return type::Bool;
-    }
-    if (is<array>(index)) {
-        return type::Array;
-    }
-    if (is<object>(index)) {
-        return type::Object;
-    }
+    if (is<string>(index)) { return type::String; }
+    if (is<i64>(index)) { return type::Integer; }
+    if (is<f64>(index)) { return type::Float; }
+    if (is<bool>(index)) { return type::Bool; }
+    if (is<array>(index)) { return type::Array; }
+    if (is<object>(index)) { return type::Object; }
 
     return type::Null;
 }
@@ -437,7 +452,7 @@ auto array::clone(bool deep) const -> array
 {
     array retValue;
     if (deep) {
-        for (isize i {0}; i < get_size(); ++i) {
+        for (isize i {0}; i < size(); ++i) {
             auto const type {get_type(i)};
             switch (type) {
             case type::Null:
