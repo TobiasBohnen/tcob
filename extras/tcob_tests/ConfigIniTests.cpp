@@ -5,42 +5,83 @@ using namespace tcob::data::config;
 
 static std::string const EXT {".ini"};
 
-TEST_CASE("Data.Ini.ValueRef")
+TEST_CASE("Data.Ini.Reference")
 {
+    SUBCASE("ref value")
     {
         std::string const iniString =
             R"([section1]
                    b = { a = 100 }
-                   c = @section1.b.a
+                   c = @section1.b.a       
+                   b = { a = 75 }
                 )";
 
         object t;
         REQUIRE(t.parse(iniString, EXT));
         REQUIRE(t["section1"]["c"].as<i32>() == 100);
+        REQUIRE(t["section1"]["b"]["a"].as<i32>() == 75);
     }
+    SUBCASE("ref section")
     {
         std::string const iniString =
-            R"([section1]
-                   b = { a = 100 }
-                   [section2]
-                   c = @section1.b
-                )";
+            R"(
+            [section1]
+                b = { a = 100, c = 300 }
+            [section2]
+                c = @section1.b
+                d = @section1
+                d.b.a = 200
+            )";
 
         object t;
         REQUIRE(t.parse(iniString, EXT));
+        REQUIRE(t["section1"]["b"]["a"].as<i32>() == 100);
         REQUIRE(t["section2"]["c"]["a"].as<i32>() == 100);
+        REQUIRE(t["section2"]["c"]["c"].as<i32>() == 300);
+        REQUIRE(t["section2"]["d"]["b"]["a"].as<i32>() == 200);
+        REQUIRE(t["section2"]["d"]["b"]["c"].as<i32>() == 300);
     }
+    SUBCASE("ref in inline section")
+    {
+        std::string const iniString =
+            R"(
+            [section1]
+                b = { a = 100, c = 300 }
+            [section2]
+                c = { d = @section1.b.c }
+            )";
+
+        object t;
+        REQUIRE(t.parse(iniString, EXT));
+        REQUIRE(t["section2"]["c"]["d"].as<i32>() == 300);
+    }
+    SUBCASE("inheritance")
     {
         std::string const iniString =
             R"([section1]
-                   b = { a = 100 }
-                   [section2]
-                   c = @section1
+                    b = { a = 100 }
+               [sect@ion1]
+                    b = 444
+               [section2] @section1
+                    c = 240
                 )";
 
         object t;
         REQUIRE(t.parse(iniString, EXT));
-        REQUIRE(t["section2"]["c"]["b"]["a"].as<i32>() == 100);
+        REQUIRE(t["sect@ion1"]["b"].as<i32>() == 444);
+        REQUIRE(t["section2"]["b"]["a"].as<i32>() == 100);
+        REQUIRE(t["section2"]["c"].as<i32>() == 240);
+    }
+    SUBCASE("unknown ref")
+    {
+        std::string const iniString =
+            R"([section1]
+                   b = { a = 100 }
+                   c = @section2
+                )";
+
+        object t;
+        REQUIRE_FALSE(t.parse(iniString, EXT));
     }
 }
 
@@ -180,6 +221,7 @@ TEST_CASE("Data.Ini.Sections")
             [section1.subsection.subsection]
             x = 300
             y = 600
+            c = @
         )";
 
         object t;
@@ -211,6 +253,7 @@ TEST_CASE("Data.Ini.Sections")
         REQUIRE(t["section1"]["subsection"]["b"].as<i32>() == 500);
         REQUIRE(t["section1"]["subsection"]["subsection"]["x"].as<i32>() == 300);
         REQUIRE(t["section1"]["subsection"]["subsection"]["y"].as<i32>() == 600);
+        REQUIRE(t["section1"]["subsection"]["subsection"]["c"].as<std::string>() == "@");
 
         REQUIRE(t["section1"]["string1"].as<string>() == "abcdefghi");
 
@@ -226,28 +269,17 @@ TEST_CASE("Data.Ini.Sections")
 
     SUBCASE("inline section")
     {
-        {
-            std::string const iniString =
-                R"([section1.a]
-                   b = 100)";
+        std::string const iniString =
+            R"(
+            [section1]
+                b = { a = 100 }
+            [section1.c]
+                a = 100)";
 
-            object t;
-            REQUIRE(t.parse(iniString, EXT));
-            REQUIRE(t["section1"]["a"].is<object>());
-            REQUIRE(t["section1"]["a"]["b"].as<i32>() == 100);
-        }
-        {
-            std::string const iniString =
-                R"([section1]
-                   b = { a = 100 }
-                   [section1.c]
-                   a = 100)";
-
-            object t;
-            REQUIRE(t.parse(iniString, EXT));
-            REQUIRE(t["section1"]["c"].is<object>());
-            REQUIRE(t["section1"]["c"]["a"].as<i32>() == 100);
-        }
+        object t;
+        REQUIRE(t.parse(iniString, EXT));
+        REQUIRE(t["section1"]["c"].is<object>());
+        REQUIRE(t["section1"]["c"]["a"].as<i32>() == 100);
     }
 
     SUBCASE("empty section")
@@ -270,9 +302,9 @@ TEST_CASE("Data.Ini.Sections")
             std::string const iniString =
                 R"([section1]
                    [section1.x]
-                   b = 300
+                    b = 300
                    [section2]
-                   a = 100
+                    a = 100
                    [section3])";
 
             object t;

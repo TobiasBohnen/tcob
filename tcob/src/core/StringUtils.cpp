@@ -93,9 +93,8 @@ void split_preserve_brackets_to(string_view str, char delim, std::vector<string>
 auto trim(string_view source) -> string_view
 {
     auto front {source.find_first_not_of(" \n\r\t")};
-    if (front == string_view::npos) {
-        return "";
-    }
+    if (front == string_view::npos) { return ""; }
+
     auto back {source.find_last_not_of(" \n\r\t")};
     back = back == string_view::npos ? source.size() - 1 : back;
     return source.substr(front, back - front + 1);

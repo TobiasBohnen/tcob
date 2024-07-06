@@ -23,7 +23,7 @@ auto json_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
     return ReadArray(currentEntry, helper::trim(txt)) ? std::optional<array> {currentEntry.as<array>()} : std::nullopt;
 }
 
-auto json_reader::ReadKeyValuePair(entry& currentEntry, object& obj, utf8_string_view line) -> bool
+auto json_reader::ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string_view line) -> bool
 {
     auto const separatorPos {helper::find_unquoted(line, ':')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR: invalid pair
@@ -112,7 +112,7 @@ auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
                 splitLine, ',',
                 [&obj](utf8_string_view token) {
                     entry objValue;
-                    return ReadKeyValuePair(objValue, obj, helper::trim(token));
+                    return ReadKeyValuePair(obj, objValue, helper::trim(token));
                 })) {
             currentEntry.set_value(obj);
             return true;

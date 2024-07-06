@@ -47,11 +47,11 @@ auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
     return currentEntry.is<array>() ? std::optional {currentEntry.as<array>()} : std::nullopt;
 }
 
-auto ini_reader::read_lines(object& kvpTarget) -> bool
+auto ini_reader::read_lines(object& targetObject) -> bool
 {
     auto line {get_trimmed_next_line()};
     for (;;) {
-        if (!read_line(kvpTarget, line)) { return false; }
+        if (!read_line(targetObject, line)) { return false; }
         if (is_eof()) { break; }
         line = get_trimmed_next_line();
     }
@@ -59,13 +59,13 @@ auto ini_reader::read_lines(object& kvpTarget) -> bool
     return true;
 }
 
-auto ini_reader::read_line(object& kvpTarget, utf8_string_view line) -> bool
+auto ini_reader::read_line(object& targetObject, utf8_string_view line) -> bool
 {
     entry currentEntry;
     return line.empty()
         || read_comment(line)
-        || read_section_header(kvpTarget, line)
-        || read_key_value_pair(currentEntry, kvpTarget, line);
+        || read_section_header(targetObject, line)
+        || read_key_value_pair(targetObject, currentEntry, line);
 }
 
 auto ini_reader::read_comment(utf8_string_view line) -> bool
@@ -81,7 +81,7 @@ auto ini_reader::read_comment(utf8_string_view line) -> bool
     return false;
 }
 
-auto ini_reader::read_section_header(object& kvpTarget, utf8_string_view line) -> bool
+auto ini_reader::read_section_header(object& targetObject, utf8_string_view line) -> bool
 {
     // read object header
     if (line[0] == '[') {
@@ -94,20 +94,41 @@ auto ini_reader::read_section_header(object& kvpTarget, utf8_string_view line) -
             line = line.substr(2, lineSize - 4);
             auto secRes {_mainSection[utf8_string {line}]};
             if (!secRes.is<object>()) { secRes = object {}; }
-            kvpTarget = secRes.as<object>();
+            targetObject = secRes.as<object>();
         } else {
             // read sub-sections
             bool first {true};
             helper::split_for_each(
                 line.substr(1, endPos - 1), '.',
-                [&first, &kvpTarget, this](utf8_string_view token) {
+                [&first, &targetObject, this](utf8_string_view token) {
                     if (token.empty()) { return false; }
-                    auto secRes {(first ? _mainSection : kvpTarget)[utf8_string {token}]};
+                    auto secRes {(first ? _mainSection : targetObject)[utf8_string {token}]};
                     if (!secRes.is<object>()) { secRes = object {}; }
-                    kvpTarget = secRes.as<object>();
-                    first     = false;
+                    targetObject = secRes.as<object>();
+                    first        = false;
                     return true;
                 });
+        }
+
+        // inheritance
+        if (line.find('@', endPos) != utf8_string::npos) {
+            auto const inh {helper::split_preserve_brackets(line, '@')};
+            if (inh.size() != 2) { return false; }
+
+            object obj {_mainSection};
+            auto   keys {helper::split(inh[1], '.')};
+            if (keys.size() > 1) {
+                for (usize i {0}; i < keys.size() - 1; ++i) {
+                    if (!obj.try_get(obj, keys[i])) { return false; }
+                }
+            }
+            if (auto* entry {obj.get_entry(keys[keys.size() - 1])}) {
+                if (entry->is<object>()) {
+                    targetObject.merge(entry->as<object>());
+                } else {
+                    return false;
+                }
+            }
         }
 
         return true;
@@ -116,7 +137,7 @@ auto ini_reader::read_section_header(object& kvpTarget, utf8_string_view line) -
     return false;
 }
 
-auto ini_reader::read_key_value_pair(entry& currentEntry, object const& kvpTarget, utf8_string_view line) -> bool
+auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
 {
     auto const separatorPos {helper::find_unquoted(line, '=')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
@@ -128,7 +149,7 @@ auto ini_reader::read_key_value_pair(entry& currentEntry, object const& kvpTarge
     auto const keyStrSize {keyStr.size()};
     if (keyStr[0] == '.' || keyStr[keyStrSize - 1] == '.') { return false; } //  ERROR: dot at start or end of key
 
-    object      sec {kvpTarget};
+    object      sec {targetObject};
     utf8_string entryKey {};
     bool        first {true};
 
@@ -153,8 +174,12 @@ auto ini_reader::read_key_value_pair(entry& currentEntry, object const& kvpTarge
     }
 
     // read value string
-    if (!read_ref(currentEntry, valueStr)) {
-        if (!read_value(currentEntry, valueStr)) { return false; } // invalid value
+    if (valueStr[0] == '@' && valueStr.size() > 1) {
+        if (!read_ref(currentEntry, valueStr.substr(1))) {
+            return false; // invalid ref
+        }
+    } else if (!read_value(currentEntry, valueStr)) {
+        return false;     // invalid value
     }
 
     currentEntry.set_comment(_currentComment);
@@ -175,21 +200,23 @@ auto ini_reader::read_value(entry& currentEntry, utf8_string_view line) -> bool
 
 auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line[0] == '@') {
-        line = line.substr(1);
-        auto keys {helper::split(line, '.')};
-        if (keys.empty()) { return false; }
+    object obj {_mainSection};
+    auto   keys {helper::split(line, '.')};
+    if (keys.size() > 1) {
+        for (usize i {0}; i < keys.size() - 1; ++i) {
+            if (!obj.try_get(obj, keys[i])) { return false; }
+        }
+    }
 
-        object obj {_mainSection};
-        if (keys.size() > 1) {
-            for (usize i {0}; i < keys.size() - 1; ++i) {
-                if (!obj.try_get(obj, keys[i])) {
-                    return false;
-                }
-            }
+    if (auto* entry {obj.get_entry(keys[keys.size() - 1])}) {
+        if (entry->is<object>()) {
+            currentEntry = entry->as<object>().clone(true);
+        } else if (entry->is<array>()) {
+            currentEntry = entry->as<array>().clone(true);
+        } else {
+            currentEntry = *entry;
         }
 
-        currentEntry = *obj.get_entry(keys[keys.size() - 1]);
         return true;
     }
 
@@ -248,7 +275,7 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
                     auto const tokenString {helper::trim(token)};
                     if (tokenString.empty()) { return true; } // allow empty entries
                     entry secEntry;
-                    return read_key_value_pair(secEntry, obj, tokenString);
+                    return read_key_value_pair(obj, secEntry, tokenString);
                 })) {
             currentEntry.set_value(obj);
             return true;
@@ -260,12 +287,12 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
 
 auto ini_reader::read_number(entry& currentEntry, utf8_string_view line) const -> bool
 {
-    if (auto intVal {helper::to_number<i64>(line)}) {
+    if (auto const intVal {helper::to_number<i64>(line)}) {
         currentEntry.set_value(*intVal);
         return true;
     }
 
-    if (auto floatVal {helper::to_number<f64>(line)}) {
+    if (auto const floatVal {helper::to_number<f64>(line)}) {
         currentEntry.set_value(*floatVal);
         return true;
     }
@@ -287,7 +314,7 @@ auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
 {
     if (!line.empty()) {
         char const first {line[0]};
-        if (first == '\'') {
+        if (first == '\'') { // single-quoted (literal multi-line)
             utf8_string stringLine {line};
             bool        firstLine {true};
 
@@ -311,7 +338,7 @@ auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
             return true;
         }
 
-        if (first == '"') {
+        if (first == '"') { // double-quoted (trimmed multi-line)
             utf8_string stringLine {line};
             while (!is_eof() && stringLine.size() > 1 && stringLine.back() != first) {
                 stringLine += "\n" + utf8_string {get_trimmed_next_line()};

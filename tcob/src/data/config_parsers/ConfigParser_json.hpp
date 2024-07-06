@@ -23,7 +23,7 @@ public:
     auto static ReadObject(entry& currentEntry, utf8_string_view line) -> bool;
 
 private:
-    auto static ReadKeyValuePair(entry& currentEntry, object& obj, utf8_string_view line) -> bool;
+    auto static ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string_view line) -> bool;
 
     auto static ReadValue(entry& currentEntry, utf8_string_view line) -> bool;
     auto static ReadNumber(entry& currentEntry, utf8_string_view line) -> bool;
