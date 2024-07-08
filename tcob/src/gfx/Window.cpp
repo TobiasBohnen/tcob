@@ -184,6 +184,9 @@ auto window::get_fullscreen() const -> bool
 void window::set_fullscreen(bool value)
 {
     SDL_SetWindowFullscreen(_window, value ? SDL_WINDOW_FULLSCREEN : 0);
+    if (!value) {
+        SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    }
 }
 
 auto window::get_title() const -> string
