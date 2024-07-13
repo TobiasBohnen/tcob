@@ -24,7 +24,57 @@ struct comment {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API object {
+template <typename Impl, typename Container>
+class base_type {
+    using iterator       = Container::iterator;
+    using const_iterator = Container::const_iterator;
+
+public:
+    base_type() noexcept = default;
+    base_type(std::shared_ptr<Container> const& entries) noexcept;
+    base_type(base_type const& other) noexcept                    = default;
+    auto operator=(base_type const& other) noexcept -> base_type& = default;
+    base_type(base_type&& other) noexcept                         = default;
+    auto operator=(base_type&& other) noexcept -> base_type&      = default;
+    virtual ~base_type()                                          = default;
+
+    auto load(path const& file, bool skipBinary = false) noexcept -> load_status;
+    auto load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
+    auto load_async(path const& file, bool skipBinary = false) noexcept -> std::future<load_status>;
+
+    auto save(path const& file) const -> bool;
+    auto save(ostream& out, string const& ext) const -> bool;
+
+    auto begin() -> iterator;
+    auto begin() const -> const_iterator;
+
+    auto end() -> iterator;
+    auto end() const -> const_iterator;
+
+    auto empty() const -> bool;
+    auto size() const -> isize;
+    auto capacity() const -> usize;
+    void reserve(usize cap);
+    void clear();
+
+    template <typename Key>
+    auto get_type(Key key) const -> type;
+
+protected:
+    auto virtual on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status = 0;
+
+    auto values() -> Container*;
+    auto values() const -> Container*;
+
+    auto swap(Impl& other);
+
+private:
+    std::shared_ptr<Container> _values;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API object : public base_type<object, cfg_object_entries> {
     friend auto operator==(object const& left, object const& right) -> bool;
 
 public:
@@ -35,25 +85,7 @@ public:
     auto operator[](string const& key) -> proxy<object, string>;
     auto operator[](string const& key) const -> proxy<object const, string> const;
 
-    auto load(path const& file, bool skipBinary = false) noexcept -> load_status;
-    auto load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
-    auto load_async(path const& file, bool skipBinary = false) noexcept -> std::future<load_status>;
     auto parse(string_view config, string const& ext) noexcept -> bool;
-
-    auto save(path const& file) const -> bool;
-    auto save(ostream& out, string const& ext) const -> bool;
-
-    auto begin() -> cfg_object_entries::iterator;
-    auto begin() const -> cfg_object_entries::const_iterator;
-    auto end() -> cfg_object_entries::iterator;
-    auto end() const -> cfg_object_entries::const_iterator;
-
-    auto empty() const -> bool;
-    auto size() const -> isize;
-    auto capacity() const -> usize;
-    void reserve(usize cap);
-
-    void clear();
 
     template <ConvertibleFrom T, typename... Keys>
     auto as(string const& key, Keys&&... keys) const -> T;
@@ -70,7 +102,6 @@ public:
     template <ConvertibleFrom T, typename... Keys>
     auto try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool;
 
-    auto get_type(string const& key) const -> type;
     auto get_entry(string const& key) const -> entry*;
 
     template <ConvertibleTo Value>
@@ -99,13 +130,14 @@ public:
 
     auto static Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
 
+protected:
+    auto on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
+
 private:
     void add_entry(string const& key, entry const& entry);
 
-    auto find_key(string const& key) -> cfg_object_entries::iterator;
-    auto find_key(string const& key) const -> cfg_object_entries::const_iterator;
-
-    std::shared_ptr<cfg_object_entries> _kvps;
+    auto find(string const& key) -> cfg_object_entries::iterator;
+    auto find(string const& key) const -> cfg_object_entries::const_iterator;
 };
 
 template <>
@@ -117,7 +149,7 @@ struct converter<object> {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API array {
+class TCOB_API array : public base_type<array, cfg_array_entries> {
     friend auto operator==(array const& left, array const& right) -> bool;
 
 public:
@@ -129,30 +161,12 @@ public:
 
     auto operator[](isize index) -> proxy<array, isize>;
     auto operator[](isize index) const -> proxy<array const, isize>;
-    auto load(path const& file, bool skipBinary = false) -> load_status;
-    auto load(istream& in, string const& ext, bool skipBinary = false) -> load_status;
-    auto load_async(path const& file) -> std::future<load_status>;
+
     auto parse(string_view config, string const& ext) -> bool;
-
-    auto save(path const& file) const -> bool;
-    auto save(ostream& out, string const& ext) const -> bool;
-
-    auto begin() -> cfg_array_entries::iterator;
-    auto begin() const -> cfg_array_entries::const_iterator;
-    auto end() -> cfg_array_entries::iterator;
-    auto end() const -> cfg_array_entries::const_iterator;
-
-    auto empty() const -> bool;
-    auto size() const -> isize;
-    auto capacity() const -> usize;
-    void reserve(usize cap);
-
-    void clear();
 
     template <ConvertibleFrom T>
     auto get(isize index) const -> result<T>;
 
-    auto get_type(isize index) const -> type;
     auto get_entry(isize index) const -> entry*;
 
     template <ConvertibleTo T>
@@ -174,8 +188,8 @@ public:
 
     auto static Parse(string_view config, string const& ext) -> std::optional<array>; // TODO: change to result
 
-private:
-    std::shared_ptr<cfg_array_entries> _values;
+protected:
+    auto on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
 };
 
 template <>

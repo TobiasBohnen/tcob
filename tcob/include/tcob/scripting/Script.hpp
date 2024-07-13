@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <future>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"

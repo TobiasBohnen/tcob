@@ -6,9 +6,150 @@
 #pragma once
 #include "ConfigTypes.hpp"
 
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/FileSystem.hpp"
 #include "tcob/data/ConfigConversions.hpp" // IWYU pragma: keep
 
 namespace tcob::data::config {
+
+////////////////////////////////////////////////////////////
+
+template <typename Impl, typename Container>
+inline base_type<Impl, Container>::base_type(std::shared_ptr<Container> const& entries) noexcept
+    : _values {entries}
+{
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::load(path const& file, bool skipBinary) noexcept -> load_status
+{
+    if (auto fs {io::ifstream::Open(file)}) {
+        return load(*fs, io::get_extension(file), skipBinary);
+    }
+
+    return load_status::FileNotFound;
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::load(istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+{
+    return on_load(in, ext, skipBinary);
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::load_async(path const& file, bool skipBinary) noexcept -> std::future<load_status>
+{
+    return std::async(std::launch::async, [&, file, skipBinary] { return load(file, skipBinary); });
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::save(path const& file) const -> bool
+{
+    io::ofstream of {file};
+    return save(of, io::get_extension(file));
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::save(ostream& out, string const& ext) const -> bool
+{
+    if (auto txtWriter {locate_service<text_writer::factory>().create(ext)}) {
+        return txtWriter->write(out, *static_cast<Impl const*>(this));
+    }
+
+    if (auto binWriter {locate_service<binary_writer::factory>().create(ext)}) {
+        return binWriter->write(out, *static_cast<Impl const*>(this));
+    }
+
+    return false;
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::begin() -> Container::iterator
+{
+    return _values->begin();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::begin() const -> Container::const_iterator
+{
+    return _values->begin();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::end() -> Container::iterator
+{
+    return _values->end();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::end() const -> Container::const_iterator
+{
+    return _values->end();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::empty() const -> bool
+{
+    return _values->empty();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::size() const -> isize
+{
+    return std::ssize(*_values);
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::capacity() const -> usize
+{
+    return _values->capacity();
+}
+
+template <typename Impl, typename Container>
+inline void base_type<Impl, Container>::reserve(usize cap)
+{
+    _values->reserve(cap);
+}
+
+template <typename Impl, typename Container>
+inline void base_type<Impl, Container>::clear()
+{
+    _values->clear();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::values() -> Container*
+{
+    return _values.get();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::values() const -> Container*
+{
+    return _values.get();
+}
+
+template <typename Impl, typename Container>
+inline auto base_type<Impl, Container>::swap(Impl& other)
+{
+    return std::swap(_values, other._values);
+}
+
+template <typename Impl, typename Container>
+template <typename Key>
+inline auto base_type<Impl, Container>::get_type(Key key) const -> type
+{
+    auto* that {static_cast<Impl const*>(this)};
+    if (that->template is<string>(key)) { return type::String; }
+    if (that->template is<i64>(key)) { return type::Integer; }
+    if (that->template is<f64>(key)) { return type::Float; }
+    if (that->template is<bool>(key)) { return type::Bool; }
+    if (that->template is<array>(key)) { return type::Array; }
+    if (that->template is<object>(key)) { return type::Object; }
+
+    return type::Null;
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -21,8 +162,7 @@ inline auto object::as(string const& key, Keys&&... keys) const -> T
 template <ConvertibleFrom T>
 inline auto object::get(string const& key) const -> result<T>
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         return it->second.template get<T>();
     }
 
@@ -33,8 +173,7 @@ inline auto object::get(string const& key) const -> result<T>
 template <ConvertibleFrom T, typename... Keys>
 inline auto object::get(string const& key, string const& subkey, Keys&&... keys) const -> result<T>
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
         if (object sub; ent.try_get(sub)) {                         // If the value is a object (a nested key-value pair)
             return sub.get<T>(subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
@@ -48,8 +187,7 @@ inline auto object::get(string const& key, string const& subkey, Keys&&... keys)
 template <ConvertibleFrom T>
 inline auto object::get(string const& key, isize index) const -> result<T>
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
         if (array sub; ent.try_get(sub)) { // If the value is an array
             return sub.get<T>(index);      // Recursively search the array for the value
@@ -63,8 +201,7 @@ inline auto object::get(string const& key, isize index) const -> result<T>
 template <ConvertibleFrom T>
 inline auto object::try_get(T& value, string const& key) const -> bool
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         return it->second.try_get(value);
     }
 
@@ -74,8 +211,7 @@ inline auto object::try_get(T& value, string const& key) const -> bool
 template <ConvertibleFrom T, typename... Keys>
 inline auto object::try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
         if (object sub; ent.try_get(sub)) {                                    // If the value is a object (a nested key-value pair)
             return sub.try_get<T>(value, subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
@@ -89,8 +225,7 @@ inline auto object::try_get(T& value, string const& key, string const& subkey, K
 template <ConvertibleTo Value>
 inline void object::set(string const& key, Value&& value)
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         it->second.set(std::forward<Value>(value));
         return;
     }
@@ -104,8 +239,7 @@ inline void object::set(string const& key, Value&& value)
 template <typename... KeysOrValue>
 inline void object::set(string const& key, string const& subkey, KeysOrValue&&... keys)
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         auto&  ent {it->second};
         object sub {};
         if (!ent.try_get(sub)) { ent.set(sub); }                    // Convert the value to a object
@@ -123,8 +257,7 @@ inline void object::set(string const& key, string const& subkey, KeysOrValue&&..
 template <ConvertibleTo Value>
 inline void object::set(string const& key, isize index, Value&& value)
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         auto& ent {it->second};
         array sub {};
         if (!ent.try_get(sub)) { ent.set(sub); }           // Convert the value to an array
@@ -139,8 +272,7 @@ inline void object::set(string const& key, isize index, Value&& value)
 template <ConvertibleFrom T>
 inline auto object::is(string const& key) const -> bool
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) { return it->second.template is<T>(); }
+    if (auto it {find(key)}; it != values()->end()) { return it->second.template is<T>(); }
 
     return false;
 }
@@ -148,8 +280,7 @@ inline auto object::is(string const& key) const -> bool
 template <ConvertibleFrom T, typename... Keys>
 inline auto object::is(string const& key, string const& subkey, Keys&&... keys) const -> bool
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         if (object sub {}; it->second.try_get(sub)) {              // If the value is a object (a nested key-value pair)
             return sub.is<T>(subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
         }
@@ -161,8 +292,7 @@ inline auto object::is(string const& key, string const& subkey, Keys&&... keys) 
 template <ConvertibleFrom T>
 inline auto object::is(string const& key, isize index) const -> bool
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         if (array sub; it->second.try_get(sub)) { // If the value is an array
             return sub.is<T>(index);              // Recursively search the array for the value
         }
@@ -173,8 +303,7 @@ inline auto object::is(string const& key, isize index) const -> bool
 
 inline auto object::has(string const& key, auto&&... keys) const -> bool
 {
-    auto it {find_key(key)};
-    if (it != _kvps->end()) {
+    if (auto it {find(key)}; it != values()->end()) {
         if constexpr (sizeof...(keys) > 0) {
             if (object sub {}; it->second.try_get(sub)) {
                 return sub.has(keys...);
@@ -201,7 +330,7 @@ template <ConvertibleTo T>
 inline array::array(std::span<T> value)
     : array {}
 {
-    _values->insert(_values->end(), value.begin(), value.end());
+    values()->insert(end(), value.begin(), value.end());
 }
 
 template <ConvertibleFrom T>
@@ -209,7 +338,7 @@ inline auto array::get(isize index) const -> result<T>
 {
     if (index < 0 || index >= size()) { return result<T> {error_code::Undefined}; }
 
-    return (*_values)[static_cast<usize>(index)].get<T>();
+    return (*values())[static_cast<usize>(index)].get<T>();
 }
 
 template <ConvertibleTo T>
@@ -217,10 +346,10 @@ inline void array::set(isize index, T&& value)
 {
     if (index >= 0) {
         if (index >= size()) {
-            _values->resize(static_cast<usize>(index + 1));
+            values()->resize(static_cast<usize>(index + 1));
         }
 
-        (*_values)[static_cast<usize>(index)].set(std::forward<T>(value));
+        (*values())[static_cast<usize>(index)].set(std::forward<T>(value));
     }
 }
 
@@ -229,13 +358,13 @@ inline auto array::is(isize index) const -> bool
 {
     if (index < 0 || index >= size()) { return false; }
 
-    return (*_values)[static_cast<usize>(index)].is<T>();
+    return (*values())[static_cast<usize>(index)].is<T>();
 }
 
 template <ConvertibleTo T>
 inline void array::add(T const& addValue)
 {
-    _values->emplace_back().set(addValue);
+    values()->emplace_back().set(addValue);
 }
 
 ////////////////////////////////////////////////////////////
@@ -293,7 +422,7 @@ inline auto operator==(entry const& left, entry const& right) -> bool
 
 inline auto operator==(object const& left, object const& right) -> bool
 {
-    if (left._kvps->size() != right._kvps->size()) {
+    if (left.values()->size() != right.values()->size()) {
         return false;
     }
 
@@ -304,7 +433,7 @@ inline auto operator==(object const& left, object const& right) -> bool
 
 inline auto operator==(array const& left, array const& right) -> bool
 {
-    if (left._values->size() != right._values->size()) {
+    if (left.values()->size() != right.values()->size()) {
         return false;
     }
 

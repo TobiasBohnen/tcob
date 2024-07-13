@@ -26,7 +26,7 @@ public:
     explicit config_file(string file);
     config_file(config_file const&)                    = delete;
     auto operator=(config_file const&) -> config_file& = delete;
-    ~config_file();
+    ~config_file() override;
 
     void save() const;
 
