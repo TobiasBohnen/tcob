@@ -102,8 +102,6 @@ public:
     template <ConvertibleFrom T, typename... Keys>
     auto try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool;
 
-    auto get_entry(string const& key) const -> entry*;
-
     template <ConvertibleTo Value>
     void set(string const& key, Value&& val);
     template <typename... KeysOrValue>
@@ -111,8 +109,6 @@ public:
     template <ConvertibleTo Value>
     void set(string const& key, isize index, Value&& val);
     void set(string const& key, std::nullptr_t);
-
-    void set_entry(string const& key, entry const& entry);
 
     template <ConvertibleFrom T>
     auto is(string const& key) const -> bool;
@@ -129,6 +125,9 @@ public:
     auto str() const -> string;
 
     auto static Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
+
+    auto get_entry(string const& key) const -> entry*;
+    void set_entry(string const& key, entry const& entry);
 
 protected:
     auto on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
@@ -167,8 +166,6 @@ public:
     template <ConvertibleFrom T>
     auto get(isize index) const -> result<T>;
 
-    auto get_entry(isize index) const -> entry*;
-
     template <ConvertibleTo T>
     void set(isize index, T&& value);
 
@@ -178,8 +175,6 @@ public:
     template <ConvertibleTo T>
     void add(T const& addValue);
 
-    void add_entry(entry const& newEntry);
-
     void pop_back();
 
     auto clone(bool deep = false) const -> array;
@@ -187,6 +182,9 @@ public:
     auto str() const -> string;
 
     auto static Parse(string_view config, string const& ext) -> std::optional<array>; // TODO: change to result
+
+    auto get_entry(isize index) const -> entry*;
+    void add_entry(entry const& newEntry);
 
 protected:
     auto on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;

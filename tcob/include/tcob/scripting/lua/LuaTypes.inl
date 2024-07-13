@@ -8,7 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include "tcob/scripting/lua/LuaConversions.hpp" // IWYU pragma: keep
+    #include "tcob/scripting/lua/LuaConversions.inl" // IWYU pragma: keep
 
 namespace tcob::scripting::lua {
 

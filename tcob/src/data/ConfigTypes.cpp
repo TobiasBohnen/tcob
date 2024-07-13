@@ -45,38 +45,9 @@ auto object::operator[](string const& key) const -> proxy<object const, string> 
     return proxy<object const, string> {*this, std::tuple {key}};
 }
 
-auto object::get_entry(string const& key) const -> entry*
-{
-    for (auto& [k, v] : *values()) {
-        if (helper::case_insensitive_equals(k, key)) {
-            return &v;
-        }
-    }
-
-    return nullptr;
-}
-
 void object::set(string const& key, std::nullptr_t)
 {
     std::erase_if(*values(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
-}
-
-void object::add_entry(string const& key, entry const& entry)
-{
-    values()->emplace_back(key, entry);
-}
-
-void object::set_entry(string const& key, entry const& entry)
-{
-    for (auto& [k, v] : *values()) {
-        if (helper::case_insensitive_equals(k, key)) {
-            v = entry;
-            return;
-        }
-    }
-
-    // new key
-    add_entry(key, entry);
 }
 
 auto object::str() const -> string
@@ -175,16 +146,43 @@ auto object::Parse(string_view config, string const& ext) -> std::optional<objec
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
 }
 
+auto object::get_entry(string const& key) const -> entry*
+{
+    for (auto& [k, v] : *values()) {
+        if (helper::case_insensitive_equals(k, key)) {
+            return &v;
+        }
+    }
+
+    return nullptr;
+}
+
+void object::set_entry(string const& key, entry const& entry)
+{
+    for (auto& [k, v] : *values()) {
+        if (helper::case_insensitive_equals(k, key)) {
+            v = entry;
+            return;
+        }
+    }
+
+    // new key
+    add_entry(key, entry);
+}
+
+void object::add_entry(string const& key, entry const& entry)
+{
+    values()->emplace_back(key, entry);
+}
+
 auto object::find(string const& key) -> cfg_object_entries::iterator
 {
-    auto* kvps {values()};
-    return std::find_if(kvps->begin(), kvps->end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
+    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
 }
 
 auto object::find(string const& key) const -> cfg_object_entries::const_iterator
 {
-    auto* kvps {values()};
-    return std::find_if(kvps->begin(), kvps->end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
+    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
 }
 
 ////////////////////////////////////////////////////////////
@@ -238,18 +236,6 @@ auto array::parse(string_view config, string const& ext) -> bool
     return false;
 }
 
-auto array::get_entry(isize index) const -> entry*
-{
-    if (index >= size()) { return nullptr; }
-
-    return &values()->at(index);
-}
-
-void array::add_entry(entry const& newEntry)
-{
-    values()->push_back(newEntry);
-}
-
 void array::pop_back()
 {
     values()->pop_back();
@@ -301,6 +287,18 @@ auto array::Parse(string_view config, string const& ext) -> std::optional<array>
 {
     array retValue;
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
+}
+
+auto array::get_entry(isize index) const -> entry*
+{
+    if (index >= size()) { return nullptr; }
+
+    return &values()->at(index);
+}
+
+void array::add_entry(entry const& newEntry)
+{
+    values()->push_back(newEntry);
 }
 
 ////////////////////////////////////////////////////////////

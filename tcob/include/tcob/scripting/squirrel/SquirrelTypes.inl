@@ -8,7 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
-    #include "tcob/scripting/squirrel/SquirrelConversions.hpp" // IWYU pragma: keep
+    #include "tcob/scripting/squirrel/SquirrelConversions.inl" // IWYU pragma: keep
 
 namespace tcob::scripting::squirrel {
 
