@@ -342,6 +342,8 @@ TEST_CASE("Data.Ini.DefaultSection")
 TEST_CASE("Data.Ini.Save")
 {
     object save;
+    save["1"]                                                    = "a";
+    save["2"]                                                    = "a";
     save["key1"]                                                 = 123.;
     save["key.10"]                                               = 321.;
     save["section1"]["valueBool"]                                = true;
@@ -353,11 +355,18 @@ TEST_CASE("Data.Ini.Save")
     save["secTion2"]["valueStr2"]                                = "test4562";
     save["secTion2"]["valueStr3"]                                = "test4563";
     save["secTion2"]["valueStr4"]                                = "test4564";
+    save["secTion2"]["valueStr5"]                                = "test4564";
+    save["secTion2"]["valueStr6"]                                = "aaa";
+    save["secTion2"]["valueStr7"]                                = "aaa";
+    save["secTion2"]["valueStr8"]                                = "aaaaa";
+    save["secTion2"]["valueStr9"]                                = "aaaaa";
     save["secTion2"]["valueInt0"]                                = 16;
     save["secTion2"]["valueInt1"]                                = 256;
     save["secTion2"]["valueInt2"]                                = 32800;
     save["secTion2"]["valueInt3"]                                = 4563;
     save["secTion2"]["valueInt4"]                                = 4564;
+    save["secTion2"]["valueInt5"]                                = 236;
+    save["secTion2"]["valueInt6"]                                = 12;
     save["section2"]["valueFloat0"]                              = 56.5;
     save["section2"]["valueFloat1"]                              = 156.5;
     save["section2"]["valueFloat2"]                              = 256.782;
@@ -420,6 +429,8 @@ TEST_CASE("Data.Ini.Save")
             REQUIRE(load["section2"]["valueInt2"].as<i64>() == 32800);
             REQUIRE(load["section2"]["valueInt3"].as<i64>() == 4563);
             REQUIRE(load["section2"]["valueInt4"].as<i64>() == 4564);
+            REQUIRE(load["section2"]["valueInt5"].as<i64>() == 236);
+            REQUIRE(load["section2"]["valueInt6"].as<i64>() == 12);
             REQUIRE(load["section2"]["valueFloat0"].as<f64>() == 56.5);
             REQUIRE(load["section2"]["valueFloat1"].as<f64>() == 156.5);
             REQUIRE(load["section2"]["valueFloat2"].as<f64>() == 256.782);
@@ -489,6 +500,9 @@ TEST_CASE("Data.Ini.Save")
             REQUIRE(load.load(file) == load_status::Ok);
             REQUIRE(load["key1"].as<f64>() == 123);
 
+            REQUIRE(load["1"].as<std::string>() == "a");
+            REQUIRE(load["2"].as<std::string>() == "a");
+
             REQUIRE(load["section1"]["valueBool"].as<bool>() == true);
             REQUIRE(load["section1"]["valueStr"].as<std::string>() == "test123");
             REQUIRE(load["section1"]["valueFloat"].as<f64>() == Approx(123.45));
@@ -499,11 +513,18 @@ TEST_CASE("Data.Ini.Save")
             REQUIRE(load["section2"]["valueStr2"].as<std::string>() == "test4562");
             REQUIRE(load["section2"]["valueStr3"].as<std::string>() == "test4563");
             REQUIRE(load["section2"]["valueStr4"].as<std::string>() == "test4564");
+            REQUIRE(load["section2"]["valueStr5"].as<std::string>() == "test4564");
+            REQUIRE(load["section2"]["valueStr6"].as<std::string>() == "aaa");
+            REQUIRE(load["section2"]["valueStr7"].as<std::string>() == "aaa");
+            REQUIRE(load["section2"]["valueStr8"].as<std::string>() == "aaaaa");
+            REQUIRE(load["section2"]["valueStr9"].as<std::string>() == "aaaaa");
             REQUIRE(load["section2"]["valueInt0"].as<i64>() == 16);
             REQUIRE(load["section2"]["valueInt1"].as<i64>() == 256);
             REQUIRE(load["section2"]["valueInt2"].as<i64>() == 32800);
             REQUIRE(load["section2"]["valueInt3"].as<i64>() == 4563);
             REQUIRE(load["section2"]["valueInt4"].as<i64>() == 4564);
+            REQUIRE(load["section2"]["valueInt5"].as<i64>() == 236);
+            REQUIRE(load["section2"]["valueInt6"].as<i64>() == 12);
             REQUIRE(load["section2"]["valueFloat0"].as<f64>() == 56.5);
             REQUIRE(load["section2"]["valueFloat1"].as<f64>() == 156.5);
             REQUIRE(load["section2"]["valueFloat2"].as<f64>() == 256.782);
