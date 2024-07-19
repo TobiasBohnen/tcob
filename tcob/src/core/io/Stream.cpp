@@ -10,8 +10,10 @@ namespace tcob::io {
 auto istream::read_string(std::streamsize length) -> string
 {
     string retValue;
-    retValue.resize(static_cast<usize>(length));
-    retValue.resize(static_cast<usize>(read_bytes(retValue.data(), length)));
+    if (length > 0) {
+        retValue.resize(static_cast<usize>(length));
+        retValue.resize(static_cast<usize>(read_bytes(retValue.data(), length)));
+    }
     return retValue;
 }
 
@@ -20,10 +22,7 @@ auto istream::read_string_until(char delim) -> string
     string retValue;
     while (!is_eof()) {
         char const c {read<char>()};
-        if (c == delim) {
-            break;
-        }
-
+        if (c == delim) { break; }
         retValue += c;
     }
 

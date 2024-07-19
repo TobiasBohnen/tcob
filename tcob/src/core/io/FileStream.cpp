@@ -32,9 +32,7 @@ file_sink::file_sink(PHYSFS_File* handle)
 
 file_sink::~file_sink()
 {
-    if (_handle) {
-        close();
-    }
+    if (_handle) { close(); }
 }
 
 file_sink::file_sink(file_sink&& other) noexcept

@@ -48,9 +48,7 @@ auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
 
 auto memory_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize
 {
-    if (sizeInBytes == 0) {
-        return 0;
-    }
+    if (sizeInBytes == 0) { return 0; }
 
     std::streamsize const retValue {std::min(sizeInBytes, size_in_bytes() - _pos)};
 

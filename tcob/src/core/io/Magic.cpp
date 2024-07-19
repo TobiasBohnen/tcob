@@ -46,9 +46,7 @@ auto get_signature(istream& stream) -> std::optional<signature>
                 break;
             }
         }
-        if (found) {
-            return sig;
-        }
+        if (found) { return sig; }
     }
 
     return std::nullopt;
@@ -57,9 +55,7 @@ auto get_signature(istream& stream) -> std::optional<signature>
 auto get_group(path const& ext) -> path
 {
     for (auto const& sig : GetSignatures()) {
-        if (sig.Extension == ext) {
-            return sig.Group;
-        }
+        if (sig.Extension == ext) { return sig.Group; }
     }
 
     return "";
