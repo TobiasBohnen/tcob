@@ -31,7 +31,8 @@ namespace bsbd {
         Float64      = 0x0D,
         BoolTrue     = 0x0E,
         BoolFalse    = 0x0F,
-        String       = 0x10,
+        LongString   = 0x10,
+        ShortString  = 0x11,
         LitInt       = 0x14
     };
 
@@ -60,11 +61,11 @@ public:
     auto write(ostream& stream, array const& arr) -> bool override;
 
 private:
-    void write_section(ostream& stream, object const& obj, utf8_string const& name) const;
-    void write_array(ostream& stream, array const& arr, utf8_string const& name) const;
-    void write_entry(ostream& stream, entry const& ent, utf8_string const& name) const;
+    auto write_section(ostream& stream, object const& obj, utf8_string const& name) const -> bool;
+    auto write_array(ostream& stream, array const& arr, utf8_string const& name) const -> bool;
+    auto write_entry(ostream& stream, entry const& ent, utf8_string const& name) const -> bool;
 
-    void write_entry_header(ostream& stream, bsbd::marker_type type, utf8_string const& name) const;
+    auto write_entry_header(ostream& stream, bsbd::marker_type type, utf8_string const& name) const -> bool;
 };
 
 }
