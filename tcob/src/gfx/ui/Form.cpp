@@ -502,11 +502,9 @@ auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget
 auto form::can_popup_tooltip() const -> bool
 {
     if (!_isTooltipVisible
-        && _topWidget
-        && _topWidget->Tooltip
+        && _topWidget && _topWidget->Tooltip
         && _focusWidget != _topWidget
-        && !_isLButtonDown
-        && !_isRButtonDown
+        && !_isLButtonDown && !_isRButtonDown
         && locate_service<input::system>().CurrentInputMode == input::mode::KeyboardMouse) {
 
         if (auto* style {_topWidget->Tooltip->get_style<tooltip::style>()}) {

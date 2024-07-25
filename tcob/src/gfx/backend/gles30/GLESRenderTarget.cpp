@@ -13,7 +13,6 @@
 #include "GLESShaderProgram.hpp"
 
 #include "tcob/gfx/RenderTarget.hpp"
-#include "tcob/gfx/UniformBuffer.hpp"
 
 namespace tcob::gfx::gles30 {
 
@@ -134,19 +133,27 @@ void gl_render_target::bind_material(material* mat) const
 
     if (mat->Shader.is_ready()) {
         auto* shader {mat->Shader->get_impl<gl_shader>()};
-        shader->set_uniform(shader->get_uniform_location("u_pointsize"), mat->PointSize);
         glUseProgram(shader->get_id());
+        GLCHECK(glUniformBlockBinding(shader->get_id(), glGetUniformBlockIndex(shader->get_id(), "Material"), 1));
     } else {
         if (mat->Texture.is_ready()) {
             if (mat->Texture->get_format() == texture::format::R8) {
                 GLCHECK(glUseProgram(gl_context::DefaultFontShader));
+                GLCHECK(glUniformBlockBinding(gl_context::DefaultFontShader, glGetUniformBlockIndex(gl_context::DefaultFontShader, "Material"), 1));
             } else {
                 GLCHECK(glUseProgram(gl_context::DefaultTexturedShader));
+                GLCHECK(glUniformBlockBinding(gl_context::DefaultTexturedShader, glGetUniformBlockIndex(gl_context::DefaultTexturedShader, "Material"), 1));
             }
         } else {
             GLCHECK(glUseProgram(gl_context::DefaultShader));
+            GLCHECK(glUniformBlockBinding(gl_context::DefaultTexturedShader, glGetUniformBlockIndex(gl_context::DefaultTexturedShader, "Material"), 1));
         }
     }
+
+    usize offset {0};
+    offset += _matUniformBuffer.update(mat->Color.as_float_array(), offset);
+    offset += _matUniformBuffer.update(mat->PointSize, offset);
+    _matUniformBuffer.bind_base(1);
 
     // set blend mode
     GLCHECK(glEnable(GL_BLEND));

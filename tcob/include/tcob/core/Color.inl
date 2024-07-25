@@ -133,6 +133,11 @@ auto constexpr color::as_array() const -> std::array<u8, 4>
     return {R, G, B, A};
 }
 
+auto constexpr color::as_float_array [[nodiscard]] () const -> std::array<f32, 4>
+{
+    return {R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f};
+}
+
 auto constexpr color::value() const -> u32
 {
     return static_cast<u32>(R << 24 | G << 16 | B << 8 | A);

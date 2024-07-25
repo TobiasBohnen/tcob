@@ -13,7 +13,6 @@
 #include "GLTexture.hpp"
 
 #include "tcob/gfx/RenderTarget.hpp"
-#include "tcob/gfx/UniformBuffer.hpp"
 
 namespace tcob::gfx::gl45 {
 
@@ -149,6 +148,11 @@ void gl_render_target::bind_material(material* mat) const
             glUseProgram(gl_context::DefaultShader);
         }
     }
+
+    usize offset {0};
+    offset += _matUniformBuffer.update(mat->Color.as_float_array(), offset);
+    offset += _matUniformBuffer.update(mat->PointSize, offset);
+    _matUniformBuffer.bind_base(1);
 
     // set blend mode
     glEnable(GL_BLEND);

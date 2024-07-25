@@ -74,6 +74,7 @@ namespace Material {
     static char const* separate_blend_func {"separate_blend_func"};
     static char const* blend_equation {"blend_equation"};
     static char const* point_size {"point_size"};
+    static char const* color {"color"};
 }
 
 namespace Shader {
@@ -657,6 +658,9 @@ void cfg_material_loader::declare()
             }
             if (blend_equation blendEquation {}; assetSection.try_get(blendEquation, API::Material::blend_equation)) {
                 asset->assetPtr->BlendEquation = blendEquation;
+            }
+            if (color c {colors::White}; assetSection.try_get(c, API::Material::color)) {
+                asset->assetPtr->Color = c;
             }
             if (f32 pointSize {0}; assetSection.try_get(pointSize, API::Material::point_size)) {
                 asset->assetPtr->PointSize = pointSize;

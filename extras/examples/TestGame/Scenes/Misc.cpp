@@ -55,8 +55,9 @@ void MiscScene::on_start()
         f32 y {rnd(0.0f, 6000.f)};
 
         auto sprite0 {std::make_shared<sprite>()};
-        sprite0->Material = resGrp->get<material>("spriteMat");
-        sprite0->Bounds   = {{x, y}, {150, 150}};
+        sprite0->Material        = resGrp->get<material>("spriteMat");
+        sprite0->Material->Color = colors::Red;
+        sprite0->Bounds          = {{x, y}, {150, 150}};
         sprites.push_back(sprite0);
     }
     _layer1 = std::make_shared<static_sprite_batch>(sprites);

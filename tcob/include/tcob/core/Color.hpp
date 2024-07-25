@@ -37,6 +37,7 @@ public:
     auto constexpr as_grayscale [[nodiscard]] (f32 redFactor = 0.299f, f32 greenFactor = 0.587f, f32 blueFactor = 0.114f) const -> color;
     auto constexpr as_alpha_premultiplied [[nodiscard]] () const -> color;
     auto constexpr as_array [[nodiscard]] () const -> std::array<u8, 4>;
+    auto constexpr as_float_array [[nodiscard]] () const -> std::array<f32, 4>;
 
     auto constexpr value() const -> u32;
 

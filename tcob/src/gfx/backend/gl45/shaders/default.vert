@@ -14,17 +14,23 @@ layout(std140, binding = 0)uniform Globals
 	bool debug; 
 } global;
 
+layout(std140, binding = 1)uniform Material
+{
+	vec4 color;
+	float point_size;
+} material;
+
 layout(location = 0)out VS_OUT
 {
-	vec4 Color;
-	vec3 TexCoords;
+	vec4 color;
+	vec3 tex_coords;
 } vs_out;
 
 void main()
 {
 	vec4 pos = global.camera * vec4(vertInPos.xy, 0.0, 1.0);
 	gl_Position = vec4(((pos.x / global.view_size.x) * 2.0 - 1.0), (1.0 - 2.0 * (pos.y / global.view_size.y)), 0.0, 1.0);
-	vs_out.Color = vertInColor;
-	vs_out.TexCoords = vertInTexCoords;
+	vs_out.color = vertInColor;
+	vs_out.tex_coords = vertInTexCoords;
 }
 )"

@@ -15,6 +15,7 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 struct material {
+    color Color {colors::White};
 
     assets::asset_ptr<shader>  Shader {};
     assets::asset_ptr<texture> Texture {};
@@ -28,7 +29,8 @@ struct material {
 
 inline auto operator==(material const& left, material const& right) -> bool
 {
-    return (left.Texture == right.Texture)
+    return (left.Color == right.Color)
+        && (left.Texture == right.Texture)
         && (left.Shader == right.Shader)
         && (left.BlendFuncs == right.BlendFuncs)
         && (left.BlendEquation == right.BlendEquation)

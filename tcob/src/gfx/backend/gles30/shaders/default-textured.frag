@@ -3,6 +3,12 @@ R"(
 precision mediump float;
 precision highp sampler2DArray;
 
+uniform Material
+{
+	vec4 matColor;
+   float matPointSize;
+};
+
 out vec4 fragColor;
 
 in vec4 vertColor;
@@ -12,7 +18,7 @@ uniform sampler2DArray texture0;
 
 void main()
 {
-   fragColor = texture(texture0, vertTexCoords) * vertColor;
+   fragColor = texture(texture0, vertTexCoords) * vertColor * matColor;
 }
 
 )"
