@@ -7,4 +7,9 @@
 
 namespace tcob::gfx {
 
+auto render_system::get_stats() -> stats&
+{
+    return _stats;
+}
+
 }

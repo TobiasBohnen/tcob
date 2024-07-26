@@ -274,9 +274,10 @@ void MiscScene::on_fixed_update(milliseconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
-    stream << "avg FPS:" << locate_service<stats>().get_average_FPS();
-    stream << " best FPS:" << locate_service<stats>().get_best_FPS();
-    stream << " worst FPS:" << locate_service<stats>().get_worst_FPS();
+    auto const& stats {locate_service<gfx::render_system>().get_stats()};
+    stream << "avg FPS:" << stats.get_average_FPS();
+    stream << " best FPS:" << stats.get_best_FPS();
+    stream << " worst FPS:" << stats.get_worst_FPS();
     if (_music0.is_ready()) {
         stream << "|" << _music0->get_duration().count() / 1000;
         stream << "|" << _music0->get_playback_position().count() / 1000;

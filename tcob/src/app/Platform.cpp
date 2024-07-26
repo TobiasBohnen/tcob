@@ -21,7 +21,6 @@
 #include "tcob/core/CommandQueue.hpp"
 #include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
-#include "tcob/core/Stats.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Magic.hpp"
 #include "tcob/data/ConfigFile.hpp"
@@ -92,9 +91,6 @@ platform::platform(game* game, game::init const& ginit)
     // init command queue
     register_service<command_queue>();
 
-    // init stats
-    register_service<stats>();
-
     // init image codecs
     InitImageCodecs();
 
@@ -147,7 +143,6 @@ platform::~platform()
 
 void platform::remove_services() const
 {
-    remove_service<stats>();
     remove_service<command_queue>();
     remove_service<assets::library>();
     remove_service<input::system>();

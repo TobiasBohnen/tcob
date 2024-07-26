@@ -12,6 +12,7 @@
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/Stats.hpp"
 #include "tcob/core/TypeFactory.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
@@ -52,6 +53,8 @@ public:
     auto virtual get_displays() const -> std::map<i32, display> = 0;
     auto virtual get_rtt_coords() const -> rect_f               = 0;
 
+    auto get_stats() -> stats&;
+
     auto virtual create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
     auto virtual create_render_target [[nodiscard]] (texture* tex) -> std::unique_ptr<render_backend::render_target_base>          = 0;
     auto virtual create_shader [[nodiscard]] () -> std::unique_ptr<render_backend::shader_base>                                    = 0;
@@ -61,6 +64,9 @@ public:
     auto virtual create_window [[nodiscard]] (size_i size) -> std::unique_ptr<render_backend::window_base>                         = 0;
 
     static inline char const* service_name {"render_system"};
+
+private:
+    stats _stats;
 };
 
 }

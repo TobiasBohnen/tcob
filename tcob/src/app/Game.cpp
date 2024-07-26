@@ -166,7 +166,7 @@ void game::loop()
                 }
             }
 
-            locate_service<stats>().update(deltaUpdate);
+            locate_service<gfx::render_system>().get_stats().update(deltaUpdate);
         }
 
     } while (!_shouldQuit);

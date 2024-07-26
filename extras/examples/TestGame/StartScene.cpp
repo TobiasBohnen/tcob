@@ -66,7 +66,7 @@ void start_scene::on_start()
     _text->Shader = resGrp->get<shader>("default2darray");
 
     std::string sceneText {};
-    for (auto [k, v] : Scenes) {
+    for (auto const& [k, v] : Scenes) {
         sceneText += std::to_string(k) + ": " + v.Name + "\n";
     }
 
@@ -89,9 +89,10 @@ void start_scene::on_fixed_update(milliseconds deltaTime)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2);
-    stream << "avg FPS:" << locate_service<stats>().get_average_FPS();
-    stream << " best FPS:" << locate_service<stats>().get_best_FPS();
-    stream << " worst FPS:" << locate_service<stats>().get_worst_FPS();
+    auto const& stats {locate_service<gfx::render_system>().get_stats()};
+    stream << "avg FPS:" << stats.get_average_FPS();
+    stream << " best FPS:" << stats.get_best_FPS();
+    stream << " worst FPS:" << stats.get_worst_FPS();
     stream << " load complete:" << std::boolalpha << locate_service<assets::library>().is_loading_complete();
 
     stream << "|" << locate_service<assets::library>().get_loading_progress();
@@ -116,7 +117,7 @@ void start_scene::on_key_down(keyboard::event& ev)
         get_game().push_scene(Scenes[idx].Func(get_game()));
     }
 
-    locate_service<stats>().reset();
+    locate_service<gfx::render_system>().get_stats().reset();
 }
 
 void start_scene::on_mouse_motion(mouse::motion_event& ev)

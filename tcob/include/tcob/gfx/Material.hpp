@@ -15,25 +15,25 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 struct material {
-    color Color {colors::White};
-
     assets::asset_ptr<shader>  Shader {};
     assets::asset_ptr<texture> Texture {};
 
     blend_funcs    BlendFuncs {};
     blend_equation BlendEquation {blend_equation::Add};
-    f32            PointSize {1};
+
+    color Color {colors::White};
+    f32   PointSize {1};
 
     static inline char const* asset_name {"material"};
 };
 
 inline auto operator==(material const& left, material const& right) -> bool
 {
-    return (left.Color == right.Color)
-        && (left.Texture == right.Texture)
+    return (left.Texture == right.Texture)
         && (left.Shader == right.Shader)
         && (left.BlendFuncs == right.BlendFuncs)
         && (left.BlendEquation == right.BlendEquation)
+        && (left.Color == right.Color)
         && (left.PointSize == right.PointSize);
 }
 }

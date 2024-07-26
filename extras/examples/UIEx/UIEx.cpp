@@ -55,9 +55,11 @@ void UIEx::on_fixed_update(milliseconds deltaTime)
 
     std::stringstream stream;
     stream << std::fixed << std::setprecision(0) << std::setfill('0');
-    stream << "avg FPS:" << std::setw(4) << locate_service<stats>().get_average_FPS();
-    stream << " best FPS:" << std::setw(4) << locate_service<stats>().get_best_FPS();
-    stream << " worst FPS:" << std::setw(4) << locate_service<stats>().get_worst_FPS();
+    auto const& stats {locate_service<gfx::render_system>().get_stats()};
+    stream << "avg FPS:" << stats.get_average_FPS();
+    stream << " best FPS:" << stats.get_best_FPS();
+    stream << " worst FPS:" << stats.get_worst_FPS();
+
     stream << " | " << input::system::GetMousePosition();
     get_window().Title = "TestGame " + stream.str();
 }
@@ -85,7 +87,7 @@ void UIEx::on_key_down(keyboard::event& ev)
         auto _ = img.save("screen0.png");
     } break;
     case scan_code::R: {
-        locate_service<stats>().reset();
+        locate_service<gfx::render_system>().get_stats().reset();
     } break;
     case scan_code::V: {
         get_window().VSync = !get_window().VSync;

@@ -24,8 +24,6 @@ public:
     void update(milliseconds delta);
     void reset();
 
-    static inline char const* service_name {"stats"};
-
 private:
     std::array<f32, FRAME_VALUES> _frameTimes {};
     u64                           _frameCount {0};
