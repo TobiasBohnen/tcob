@@ -315,7 +315,6 @@ auto png_decoder::prepare() -> i32
     i32        retValue {0};
     auto const depth {_ihdr.BitDepth};
 
-    // See PNG Specification 11.2 for allowed combinations of color type and bit depth
     switch (_ihdr.ColorType) {
     case png::color_type::Grayscale: // Grayscale
         if (depth != 1 && depth != 2
@@ -560,8 +559,8 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
             }
         }
 
-        if (_pixel.X == -1) {      // First u8 is filter type for the line.
-            _filter      = dat[0]; // See PNG Specification 4.5.4 Filtering, 9 Filtering
+        if (_pixel.X == -1) { // First byte is filter type for the line.
+            _filter      = dat[0];
             _inLineCount = 0;
             ++_pixel.X;
             bufferIndex = bufferIndex - pixelSize + 1;
