@@ -76,6 +76,7 @@ public:
     auto virtual get_config_defaults() const -> data::config::object;
 
     auto get_library() -> assets::library&;
+    auto get_queue() -> command_queue&;
 
 protected:
     //! Called when the game finishes.
@@ -94,6 +95,7 @@ private:
     //! Pops the top scene from the scene stack.
     void pop_scene();
 
+    command_queue   _queue;
     assets::library _mainLibrary;
 
     milliseconds                       _frameLimit {}; //!< Frame rate limit.

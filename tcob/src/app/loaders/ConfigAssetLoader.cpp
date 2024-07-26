@@ -147,39 +147,38 @@ auto default_check_async_load(auto&& cache, auto&& stateSetter) -> command_statu
     return cache.empty() ? command_status::Finished : command_status::Running;
 }
 
-cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
-    : _group {group}
+cfg_asset_loader_manager::cfg_asset_loader_manager(group& group, command_queue& commandQueue)
 {
-    _group.add_bucket<gfx::shader>();
-    add_loader(std::make_unique<cfg_shader_loader>(_group, _object));
+    group.add_bucket<gfx::shader>();
+    add_loader(std::make_unique<cfg_shader_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<gfx::texture>();
-    add_loader(std::make_unique<cfg_texture_loader>(_group, _object));
+    group.add_bucket<gfx::texture>();
+    add_loader(std::make_unique<cfg_texture_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<gfx::material>();
-    add_loader(std::make_unique<cfg_material_loader>(_group, _object));
+    group.add_bucket<gfx::material>();
+    add_loader(std::make_unique<cfg_material_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<gfx::cursor>();
-    add_loader(std::make_unique<cfg_cursor_loader>(_group, _object));
+    group.add_bucket<gfx::cursor>();
+    add_loader(std::make_unique<cfg_cursor_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<gfx::font>();
-    add_loader(std::make_unique<cfg_font_loader>(_group, _object));
+    group.add_bucket<gfx::font>();
+    add_loader(std::make_unique<cfg_font_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<gfx::font_family>();
-    add_loader(std::make_unique<cfg_font_family_loader>(_group, _object));
+    group.add_bucket<gfx::font_family>();
+    add_loader(std::make_unique<cfg_font_family_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<gfx::frame_animation>();
-    add_loader(std::make_unique<cfg_frame_animation_loader>(_group, _object));
+    group.add_bucket<gfx::frame_animation>();
+    add_loader(std::make_unique<cfg_frame_animation_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<audio::music>();
-    add_loader(std::make_unique<cfg_music_loader>(_group, _object));
+    group.add_bucket<audio::music>();
+    add_loader(std::make_unique<cfg_music_loader>(group, commandQueue, _object));
 
-    _group.add_bucket<audio::sound>();
-    add_loader(std::make_unique<cfg_sound_loader>(_group, _object));
+    group.add_bucket<audio::sound>();
+    add_loader(std::make_unique<cfg_sound_loader>(group, commandQueue, _object));
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
-    _group.add_bucket<audio::sound_font>();
-    add_loader(std::make_unique<cfg_sound_font_loader>(_group, _object));
+    group.add_bucket<audio::sound_font>();
+    add_loader(std::make_unique<cfg_sound_font_loader>(group, commandQueue, _object));
 #endif
 }
 
@@ -195,8 +194,8 @@ void cfg_asset_loader_manager::load(path const& file)
 
 ////////////////////////////////////////////////////////////
 
-cfg_frame_animation_loader::cfg_frame_animation_loader(group& group, object& object)
-    : loader {group}
+cfg_frame_animation_loader::cfg_frame_animation_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -233,8 +232,8 @@ void cfg_frame_animation_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_music_loader::cfg_music_loader(group& group, object& object)
-    : loader {group}
+cfg_music_loader::cfg_music_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -288,8 +287,8 @@ void cfg_music_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_sound_loader::cfg_sound_loader(group& group, object& object)
-    : loader {group}
+cfg_sound_loader::cfg_sound_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -336,7 +335,7 @@ void cfg_sound_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<command_queue>().add([&]() {
+    get_queue().add([&]() {
         return default_check_async_load(_cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -345,8 +344,8 @@ void cfg_sound_loader::prepare()
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 
-cfg_sound_font_loader::cfg_sound_font_loader(group& group, object& object)
-    : loader {group}
+cfg_sound_font_loader::cfg_sound_font_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -393,7 +392,7 @@ void cfg_sound_font_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<command_queue>().add([&]() {
+    get_queue().add([&]() {
         return default_check_async_load(_cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -402,8 +401,8 @@ void cfg_sound_font_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_cursor_loader::cfg_cursor_loader(group& group, object& object)
-    : loader {group}
+cfg_cursor_loader::cfg_cursor_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -452,8 +451,8 @@ void cfg_cursor_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_font_loader::cfg_font_loader(group& group, object& object)
-    : loader {group}
+cfg_font_loader::cfg_font_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -550,15 +549,15 @@ void cfg_font_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<command_queue>().add([&]() {
+    get_queue().add([&]() {
         return default_check_async_load(_cacheRaster, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
 ////////////////////////////////////////////////////////////
 
-cfg_font_family_loader::cfg_font_family_loader(group& group, object& object)
-    : loader {group}
+cfg_font_family_loader::cfg_font_family_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -605,8 +604,8 @@ void cfg_font_family_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_material_loader::cfg_material_loader(group& group, object& object)
-    : loader {group}
+cfg_material_loader::cfg_material_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -702,8 +701,8 @@ void cfg_material_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_shader_loader::cfg_shader_loader(group& group, object& object)
-    : loader {group}
+cfg_shader_loader::cfg_shader_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -772,8 +771,8 @@ void cfg_shader_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_texture_loader::cfg_texture_loader(group& group, object& object)
-    : loader {group}
+cfg_texture_loader::cfg_texture_loader(assets::group& group, command_queue& commandQueue, data::config::object& object)
+    : loader {group, commandQueue}
     , _object {object}
 {
 }
@@ -995,7 +994,7 @@ void cfg_texture_loader::prepare()
     }
     _cacheAni.clear();
 
-    locate_service<command_queue>().add([&]() { return check_async_load(); });
+    get_queue().add([&]() { return check_async_load(); });
 }
 
 auto cfg_texture_loader::check_async_load() -> command_status

@@ -89,9 +89,6 @@ platform::platform(game* game, game::init const& ginit)
     // init config formats
     InitConfigFormats();
 
-    // init command queue
-    register_service<command_queue>();
-
     // init image codecs
     InitImageCodecs();
 
@@ -108,7 +105,9 @@ platform::platform(game* game, game::init const& ginit)
     // init assets
     auto factory {register_service<assets::loader_manager::factory>()};
     factory->add({".ini", ".json", ".xml", ".yaml"},
-                 [](assets::group& group) { return std::make_unique<detail::cfg_asset_loader_manager>(group); });
+                 [](assets::group& group, command_queue& queue) {
+                     return std::make_unique<detail::cfg_asset_loader_manager>(group, queue);
+                 });
 
     if (_game) {
         // init audio system
@@ -147,7 +146,6 @@ platform::~platform()
 
 void platform::remove_services() const
 {
-    remove_service<command_queue>();
     remove_service<input::system>();
     remove_service<audio::system>();
     remove_service<gfx::render_system>();

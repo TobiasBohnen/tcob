@@ -20,6 +20,7 @@ constexpr milliseconds FIXED_FRAMES {1000.0f / 50.0f};
 constexpr u8           MAX_FRAME_SKIP {10};
 
 game::game(init const& init)
+    : _mainLibrary {_queue}
 {
     // init platform
     auto plt {register_service<platform>(std::make_shared<platform>(this, init))};
@@ -50,9 +51,8 @@ void game::start()
 void game::finish()
 {
     // wait for command queue
-    auto& cq {locate_service<command_queue>()};
-    while (!cq.is_empty()) {
-        cq.process();
+    while (!_queue.is_empty()) {
+        _queue.process();
     }
 
     // pop all scenes
@@ -76,13 +76,13 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
 
         return command_status::Finished;
     }};
-    locate_service<command_queue>().add(std::move(command));
+    _queue.add(std::move(command));
 }
 
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        locate_service<command_queue>().add({[&]() {
+        _queue.add({[&]() {
             pop_scene();
             return command_status::Finished;
         }});
@@ -117,7 +117,7 @@ void game::loop()
 
     do {
         plt.process_events();
-        locate_service<command_queue>().process();
+        _queue.process();
 
         if (_scenes.empty()) {
             queue_finish();
@@ -184,6 +184,11 @@ auto game::get_config_defaults() const -> data::config::object
 auto game::get_library() -> assets::library&
 {
     return _mainLibrary;
+}
+
+auto game::get_queue() -> command_queue&
+{
+    return _queue;
 }
 
 ////////////////////////////////////////////////////////////

@@ -28,8 +28,6 @@ public:
     void add(func_type&& func);
     void process();
 
-    static inline char const* service_name {"command_queue"}; // TODO: remove
-
 private:
     std::queue<func_type> _queue {};
 };
