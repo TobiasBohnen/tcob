@@ -130,7 +130,7 @@ private:
     auto prepare() -> i32;
     auto read_image(std::span<ubyte const> idat) -> bool;
 
-    void filter8(i32 x, i32 y, i32 unitLength);
+    void filter(i32 x, i32 y, i32 unitLength);
 
     void get_image_data_delegate();
 
@@ -176,7 +176,7 @@ private:
     std::optional<png::tRNS_chunk> _trns;
 
     point_i _pixel {-1, 0};
-    i32     _inLineCount {0};
+    i32     _lineIndex {0};
     i32     _dataIndex {0};
     i32     _filter {0};
     u32     _interlacePass {0};

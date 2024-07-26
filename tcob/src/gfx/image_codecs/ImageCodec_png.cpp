@@ -210,7 +210,7 @@ auto static paeth(u8 a, u8 b, u8 c) -> u8
     return t1;
 }
 
-void png_decoder::filter8(i32 x, i32 y, i32 unitLength)
+void png_decoder::filter(i32 x, i32 y, i32 unitLength)
 {
     if (_filter == 0) { return; }
 
@@ -294,9 +294,7 @@ auto png_decoder::get_interlace_dimensions() const -> rect_i
 
 void png_decoder::next_line_interlaced(i32 hei)
 {
-    ++_pixel.Y;
-    _pixel.X = -1;
-    _curLine.swap(_prvLine);
+    next_line_non_interlaced();
     if (_pixel.Y >= hei) {
         _pixel.Y = 0;
         ++_interlacePass;
@@ -316,33 +314,20 @@ auto png_decoder::prepare() -> i32
     auto const depth {_ihdr.BitDepth};
 
     switch (_ihdr.ColorType) {
-    case png::color_type::Grayscale: // Grayscale
-        if (depth != 1 && depth != 2
-            && depth != 4 && depth != 8
-            && depth != 16) {
-            return false;
-        }
+    case png::color_type::Grayscale:      // Grayscale
+        if (depth != 1 && depth != 2 && depth != 4 && depth != 8 && depth != 16) { return false; }
         break;
-    case png::color_type::TrueColor: // Truecolor
-        if (depth != 8 && depth != 16) {
-            return false;
-        }
+    case png::color_type::TrueColor:      // Truecolor
+        if (depth != 8 && depth != 16) { return false; }
         break;
-    case png::color_type::Indexed: // Indexed-color
-        if (depth != 1 && depth != 2
-            && depth != 4 && depth != 8) {
-            return false;
-        }
+    case png::color_type::Indexed:        // Indexed-color
+        if (depth != 1 && depth != 2 && depth != 4 && depth != 8) { return false; }
         break;
     case png::color_type::GrayscaleAlpha: // Grayscale with alpha
-        if (depth != 8 && depth != 16) {
-            return false;
-        }
+        if (depth != 8 && depth != 16) { return false; }
         break;
     case png::color_type::TrueColorAlpha: // Truecolor with alpha
-        if (depth != 8 && depth != 16) {
-            return false;
-        }
+        if (depth != 8 && depth != 16) { return false; }
         break;
     }
 
@@ -377,54 +362,34 @@ auto png_decoder::prepare() -> i32
         break;
     case png::color_type::TrueColor: // Truecolor
         switch (depth) {
-        case 8:
-            retValue = 3;
-            break;
-        case 16:
-            retValue = 6;
-            break;
+        case 8: retValue = 3; break;
+        case 16: retValue = 6; break;
         }
 
         lineSize = _ihdr.Width * retValue;
         break;
     case png::color_type::Indexed: // Indexed-color
         switch (depth) {
-        case 1:
-            lineSize = (_ihdr.Width + 7) / 8;
-            break;
-        case 2:
-            lineSize = (_ihdr.Width + 3) / 4;
-            break;
-        case 4:
-            lineSize = (_ihdr.Width + 1) / 2;
-            break;
-        case 8:
-            lineSize = _ihdr.Width;
-            break;
+        case 1: lineSize = (_ihdr.Width + 7) / 8; break;
+        case 2: lineSize = (_ihdr.Width + 3) / 4; break;
+        case 4: lineSize = (_ihdr.Width + 1) / 2; break;
+        case 8: lineSize = _ihdr.Width; break;
         }
 
         retValue = 1;
         break;
     case png::color_type::GrayscaleAlpha: // Grayscale with alpha
         switch (depth) {
-        case 8:
-            retValue = 2;
-            break;
-        case 16:
-            retValue = 4;
-            break;
+        case 8: retValue = 2; break;
+        case 16: retValue = 4; break;
         }
 
         lineSize = _ihdr.Width * retValue;
         break;
     case png::color_type::TrueColorAlpha: // Truecolor with alpha
         switch (depth) {
-        case 8:
-            retValue = 4;
-            break;
-        case 16:
-            retValue = 8;
-            break;
+        case 8: retValue = 4; break;
+        case 16: retValue = 8; break;
         }
 
         lineSize = _ihdr.Width * retValue;
@@ -560,8 +525,8 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
         }
 
         if (_pixel.X == -1) { // First byte is filter type for the line.
-            _filter      = dat[0];
-            _inLineCount = 0;
+            _filter    = dat[0];
+            _lineIndex = 0;
             ++_pixel.X;
             bufferIndex = bufferIndex - pixelSize + 1;
         } else {
