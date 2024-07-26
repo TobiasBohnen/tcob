@@ -18,7 +18,7 @@ public:
     void acquire();
     void release();
 
-    static inline char const* service_name {"semaphore"};
+    static inline char const* service_name {"semaphore"}; // TODO: remove
 
 private:
     std::counting_semaphore<> _semaphore;

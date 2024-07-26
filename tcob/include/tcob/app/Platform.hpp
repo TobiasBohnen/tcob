@@ -10,6 +10,9 @@
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/data/ConfigFile.hpp"
+#include "tcob/gfx/Window.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
@@ -26,11 +29,13 @@ public:
     platform(game* game, game::init const& ginit);
     ~platform();
 
-    void process_events(gfx::window* window) const;
+    auto has_window() const -> bool;
+    auto get_window() const -> gfx::window&;
+    auto get_default_target() const -> gfx::default_render_target&;
+
+    void process_events() const;
 
     auto get_preferred_locales() const -> std::vector<locale> const&;
-
-    void remove_services() const;
 
     auto static HeadlessInit(char const* argv0, path logFile = "") -> platform;
 
@@ -40,6 +45,11 @@ public:
 
 private:
     void init_locales();
+    void init_render_system(data::config_file const& config);
+
+    void remove_services() const;
+
+    void on_key_down(input::keyboard::event& ev);
 
     void static InitSDL();
     void static InitSignatures();
@@ -47,10 +57,12 @@ private:
     void static InitImageCodecs();
     void static InitAudioCodecs();
     void static InitFontEngines();
-    void static InitRenderSystem(string const& renderer);
 
     game*               _game {nullptr};
     std::vector<locale> _locales {};
+
+    std::unique_ptr<gfx::window>                _window;
+    std::unique_ptr<gfx::default_render_target> _defaultTarget;
 };
 
 ////////////////////////////////////////////////////////////

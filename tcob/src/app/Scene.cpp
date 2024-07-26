@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "tcob/app/Game.hpp"
+#include "tcob/app/Platform.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 
 namespace tcob {
@@ -85,7 +86,7 @@ auto scene::get_game() -> game&
 
 auto scene::get_window() -> gfx::window&
 {
-    return _game.get_window();
+    return locate_service<platform>().get_window();
 }
 
 void scene::attach_events()

@@ -30,7 +30,7 @@ public:
 
     void save() const;
 
-    static inline char const* service_name {"config_file"};
+    static inline char const* service_name {"config_file"}; // TODO: remove
 
 private:
     string _fileName;

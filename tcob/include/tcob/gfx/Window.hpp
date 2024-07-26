@@ -20,7 +20,7 @@ using SDL_Event = union SDL_Event;
 struct SDL_Window;
 
 namespace tcob {
-class game;
+class platform;
 namespace gfx::render_backend {
     class window_base;
 }
@@ -38,7 +38,7 @@ enum class messagebox_type : u8 {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API window final : public render_target {
-    friend class tcob::game;
+    friend class tcob::platform;
 
 public:
     struct event {

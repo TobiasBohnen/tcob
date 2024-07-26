@@ -21,6 +21,7 @@
 #include "tcob/core/CommandQueue.hpp"
 #include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Magic.hpp"
 #include "tcob/data/ConfigFile.hpp"
@@ -101,7 +102,8 @@ platform::platform(game* game, game::init const& ginit)
     InitFontEngines();
 
     // init input
-    register_service<input::system>();
+    auto input {register_service<input::system>()};
+    input->KeyDown.connect<&platform::on_key_down>(this);
 
     // init assets
     auto factory {register_service<assets::loader_manager::factory>()};
@@ -119,7 +121,7 @@ platform::platform(game* game, game::init const& ginit)
         config->merge(_game->get_config_defaults(), false); // merge config with default
 
         // init render system
-        InitRenderSystem((*config)[Cfg::Video::Name][Cfg::Video::render_system].as<string>());
+        init_render_system(*config);
     } else {
 #if defined(TCOB_ENABLE_RENDERER_NULL)
         register_service<gfx::render_system, gfx::null::null_render_system>();
@@ -129,6 +131,9 @@ platform::platform(game* game, game::init const& ginit)
 
 platform::~platform()
 {
+    remove_services();
+    _window = nullptr;
+
     //  file system
     logger::Info("exiting");
     remove_service<logger>();
@@ -166,6 +171,17 @@ void platform::remove_services() const
     remove_service<gfx::render_system::factory>();
 }
 
+void platform::on_key_down(input::keyboard::event& ev)
+{
+    using namespace tcob::enum_ops;
+    if (!ev.Repeat) {
+        // Alt+Enter -> toggle fullscreen
+        if (ev.ScanCode == input::scan_code::RETURN && (ev.KeyMods & input::key_mod::LeftAlt) == input::key_mod::LeftAlt) {
+            _window->FullScreen = !_window->FullScreen();
+        }
+    }
+}
+
 auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
 {
     return {nullptr,
@@ -187,7 +203,7 @@ auto platform::IsRunningOnWine() -> bool
 #endif
 }
 
-void platform::process_events(gfx::window* window) const
+void platform::process_events() const
 {
     SDL_Event ev;
     auto&     inputMgr {locate_service<input::system>()};
@@ -221,7 +237,7 @@ void platform::process_events(gfx::window* window) const
             inputMgr.process_events(&ev);
             break;
         case SDL_WINDOWEVENT:
-            window->process_events(&ev);
+            _window->process_events(&ev);
             break;
         default:
             break;
@@ -232,6 +248,21 @@ void platform::process_events(gfx::window* window) const
 auto platform::get_preferred_locales() const -> std::vector<locale> const&
 {
     return _locales;
+}
+
+auto platform::has_window() const -> bool
+{
+    return _window != nullptr;
+}
+
+auto platform::get_window() const -> gfx::window&
+{
+    return *_window;
+}
+
+auto platform::get_default_target() const -> gfx::default_render_target&
+{
+    return *_defaultTarget;
 }
 
 void platform::init_locales()
@@ -252,6 +283,60 @@ void platform::init_locales()
         }
         SDL_free(sdlLocales);
     }
+}
+
+void platform::init_render_system(data::config_file const& config)
+{
+    auto rsFactory {register_service<gfx::render_system::factory>()};
+#if defined(TCOB_ENABLE_RENDERER_OPENGL45)
+    rsFactory->add({"OPENGL45"}, std::make_shared<gfx::gl45::gl_render_system>);
+#endif
+#if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
+    rsFactory->add({"OPENGLES30"}, std::make_shared<gfx::gles30::gl_render_system>);
+#endif
+#if defined(TCOB_ENABLE_RENDERER_NULL)
+    rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
+#endif
+
+    string renderer {config[Cfg::Video::Name][Cfg::Video::render_system].as<string>()};
+
+    // create rendersystem
+    logger::Info("RenderSystem: {}", renderer);
+    auto renderSystem {rsFactory->create(renderer)};
+    if (!renderSystem) { throw std::runtime_error("Render system creation failed!"); }
+    register_service<gfx::render_system>(renderSystem);
+
+    // get config
+    auto const video {locate_service<data::config_file>()[Cfg::Video::Name].as<data::config::object>()};
+
+    size_i const resolution {video[Cfg::Video::use_desktop_resolution].as<bool>()
+                                 ? renderSystem->get_desktop_size(0)
+                                 : video[Cfg::Video::resolution].as<size_i>()};
+
+    // create window (and context)
+    _window = std::unique_ptr<gfx::window> {new gfx::window(renderSystem->create_window(resolution))};
+
+    _window->FullScreen.Changed.connect([](bool value) {
+        locate_service<data::config_file>()[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
+    });
+    _window->VSync.Changed.connect([](bool value) {
+        locate_service<data::config_file>()[Cfg::Video::Name][Cfg::Video::vsync] = value;
+    });
+    _window->Size.Changed.connect([](size_i value) {
+        auto& cfg {locate_service<data::config_file>()};
+        cfg[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<gfx::render_system>().get_desktop_size(0);
+        cfg[Cfg::Video::Name][Cfg::Video::resolution]             = value;
+    });
+
+    _window->FullScreen(video[Cfg::Video::fullscreen].as<bool>());
+    _window->VSync(video[Cfg::Video::vsync].as<bool>());
+    _window->Size(resolution);
+
+    _defaultTarget = std::make_unique<gfx::default_render_target>();
+
+    _window->clear();
+    _window->draw_to(*_defaultTarget);
+    _window->swap_buffer();
 }
 
 void platform::InitSDL()
@@ -429,28 +514,6 @@ void platform::InitFontEngines()
     auto rasFactory {register_service<gfx::raster_font::loader::factory>()};
     rasFactory->add({".ini", ".json", ".xml", ".yaml"}, std::make_unique<detail::ini_raster_font_loader>);
     rasFactory->add({".fnt"}, std::make_unique<detail::fnt_raster_font_loader>);
-}
-
-void platform::InitRenderSystem(string const& renderer)
-{
-    auto rsFactory {register_service<gfx::render_system::factory>()};
-#if defined(TCOB_ENABLE_RENDERER_OPENGL45)
-    rsFactory->add({"OPENGL45"}, std::make_shared<gfx::gl45::gl_render_system>);
-#endif
-#if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    rsFactory->add({"OPENGLES30"}, std::make_shared<gfx::gles30::gl_render_system>);
-#endif
-#if defined(TCOB_ENABLE_RENDERER_NULL)
-    rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
-#endif
-
-    // create rendersystem
-    logger::Info("RenderSystem: {}", renderer);
-    auto renderSystem {rsFactory->create(renderer)};
-    if (!renderSystem) {
-        throw std::runtime_error("Render system creation failed!");
-    }
-    register_service<gfx::render_system>(renderSystem);
 }
 
 ////////////////////////////////////////////////////////////

@@ -12,9 +12,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigTypes.hpp"
-#include "tcob/gfx/Window.hpp"
 
 namespace tcob {
 
@@ -54,10 +52,6 @@ public:
 
     prop<i32> FrameLimit;                   //!< Property to control the frame rate limit.
 
-    //! Retrieves the game's window instance.
-    //! @return A reference to the game's window object.
-    auto get_window() const -> gfx::window&;
-
     //! Starts the game.
     void start();
 
@@ -91,26 +85,16 @@ protected:
     void virtual on_finish() { }
 
 private:
-    //! Sets up the rendering system.
-    void setup_rendersystem();
-
     //! Main game loop.
     void loop();
-
-    //! Handles the key down event.
-    //! @param ev The keyboard event data.
-    void on_key_down(input::keyboard::event& ev);
 
     //! Pops the top scene from the scene stack.
     void pop_scene();
 
-    std::unique_ptr<gfx::window>                _window;        //!< The game's window instance. TODO: move to platform?
-    utf8_string                                 _name {};       //!< The name of the game.
-    milliseconds                                _frameLimit {}; //!< Frame rate limit.
-    std::stack<std::shared_ptr<scene>>          _scenes {};     //!< Stack of active scenes.
-    std::unique_ptr<gfx::default_render_target> _defaultTarget; //!< Default render target.
+    milliseconds                       _frameLimit {}; //!< Frame rate limit.
+    std::stack<std::shared_ptr<scene>> _scenes {};     //!< Stack of active scenes.
 
-    bool _shouldQuit {false};                                   //!< Flag indicating if the game should quit.
+    bool _shouldQuit {false};                          //!< Flag indicating if the game should quit.
 };
 
 }

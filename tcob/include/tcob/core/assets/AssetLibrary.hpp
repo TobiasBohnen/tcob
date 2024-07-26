@@ -160,7 +160,7 @@ public:
 
     auto get_asset_stats(string const& groupName) const -> group_stats;
 
-    static inline char const* service_name {"asset_library"};
+    static inline char const* service_name {"asset_library"}; // TODO: remove
 
 private:
     flat_map<string, std::unique_ptr<group>> _groups {};
