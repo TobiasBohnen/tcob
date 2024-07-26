@@ -38,7 +38,7 @@ start_scene::~start_scene() = default;
 
 void start_scene::on_start()
 {
-    auto& resMgr {locate_service<assets::library>()};
+    auto& resMgr {get_game().get_library()};
 
     lua::script script;
     if (io::exists("bootstrap.lua")) {
@@ -93,9 +93,9 @@ void start_scene::on_fixed_update(milliseconds deltaTime)
     stream << "avg FPS:" << stats.get_average_FPS();
     stream << " best FPS:" << stats.get_best_FPS();
     stream << " worst FPS:" << stats.get_worst_FPS();
-    stream << " load complete:" << std::boolalpha << locate_service<assets::library>().is_loading_complete();
+    stream << " load complete:" << std::boolalpha << get_game().get_library().is_loading_complete();
 
-    stream << "|" << locate_service<assets::library>().get_loading_progress();
+    stream << "|" << get_game().get_library().get_loading_progress();
 
     get_window().Title = "TestGame " + stream.str();
 }

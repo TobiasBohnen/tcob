@@ -47,7 +47,7 @@ void Box2DEx::on_start()
     _world.BeginContact.connect<&Box2DEx::on_begin_contact>(this);
     _world.EndContact.connect<&Box2DEx::on_end_contact>(this);
 
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
 
     _boxMat    = resGrp->get<material>("mat-solid");
     _circleMat = resGrp->get<material>("mat-circle");
@@ -306,7 +306,7 @@ void Chipmunk2DEx::on_start()
     _space.BeginContact.connect<&Chipmunk2DEx::on_begin_contact>(this);
     _space.EndContact.connect<&Chipmunk2DEx::on_end_contact>(this);
 
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
 
     _boxMat    = resGrp->get<material>("mat-solid");
     _circleMat = resGrp->get<material>("mat-circle");

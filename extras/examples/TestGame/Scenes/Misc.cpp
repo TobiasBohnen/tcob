@@ -32,7 +32,7 @@ f32 pointSize {1.0f};
 
 void MiscScene::on_start()
 {
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
 
     _htmlDoc = std::make_shared<html::document>(
         html::document::config {.AssetGroup      = resGrp,
@@ -266,7 +266,7 @@ void MiscScene::on_update(milliseconds deltaTime)
     _pointTween.update(deltaTime);
     _tileMap->update(deltaTime);
 
-    asset_ptr<animated_texture> aniTex = locate_service<assets::library>().get_group("res")->get<texture>("test-ani");
+    asset_ptr<animated_texture> aniTex = get_game().get_library().get_group("res")->get<texture>("test-ani");
     aniTex->update(deltaTime);
 }
 
@@ -295,7 +295,7 @@ void MiscScene::on_key_down(keyboard::event& ev)
     float moveFactor {10};
     auto& window {get_window()};
     auto& camera {*window.Camera};
-    auto& resMgr {locate_service<assets::library>()};
+    auto& resMgr {get_game().get_library()};
 
     if (ev.ScanCode == scan_code::D1) {
         _particleSystem0->restart();

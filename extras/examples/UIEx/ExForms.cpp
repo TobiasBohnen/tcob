@@ -4,7 +4,7 @@ using namespace tcob::literals;
 
 ////////////////////////////////////////////////////////////
 
-auto create_form0(window* wnd) -> std::shared_ptr<form>
+auto create_form0(window* wnd, assets::group const& resGrp) -> std::shared_ptr<form>
 {
     auto retValue {std::make_shared<form>("form0", wnd)};
 
@@ -141,9 +141,8 @@ auto create_form0(window* wnd) -> std::shared_ptr<form>
     listbox0->SelectedItemIndex.Changed.connect([label0, listbox0](isize value) { label0->Label = "selected: " + std::to_string(value); });
     listbox0->HoveredItemIndex.Changed.connect([label0, listbox0](isize value) { label0->Label = "hovered: " + std::to_string(value); });
 
-    auto  imgBox0 {panel0Layout->create_widget<image_box>({750, 20, 150, 200}, "ImageBox0")};
-    auto* resGrp {locate_service<assets::library>().get_group("ui")};
-    imgBox0->Image = resGrp->get<texture>("blue_boxCross");
+    auto imgBox0 {panel0Layout->create_widget<image_box>({750, 20, 150, 200}, "ImageBox0")};
+    imgBox0->Image = resGrp.get<texture>("blue_boxCross");
 
     auto gridView0 {panel0Layout->create_widget<grid_view>({1080, 400, 450, 400}, "GridView0")};
     gridView0->set_columns({"Last", "First", "Age", "City"});
@@ -162,14 +161,13 @@ auto create_form0(window* wnd) -> std::shared_ptr<form>
         gridView0->add_row({"XXX", "XX", std::to_string(progressBar0->Value * 10), "XXXXX"});
     });
 
-    locate_service<input::system>().CurrentInputMode.Changed.connect([retValue, wnd](input::mode mode) {
+    locate_service<input::system>().CurrentInputMode.Changed.connect([retValue, wnd, &resGrp](input::mode mode) {
         if (mode == input::mode::Controller) {
             retValue->find_widget_by_name("gridB0")->focus();
             wnd->Cursor = nullptr;
             wnd->hide_system_cursor(true);
         } else {
-            auto* resGrp {locate_service<assets::library>().get_group("ui")};
-            auto  defaultCursor {resGrp->get<cursor>("default")};
+            auto defaultCursor {resGrp.get<cursor>("default")};
             wnd->Cursor               = defaultCursor;
             defaultCursor->ActiveMode = "default";
         }

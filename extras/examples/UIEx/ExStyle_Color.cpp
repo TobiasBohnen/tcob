@@ -2,7 +2,7 @@
 
 using namespace std::chrono_literals;
 
-auto create_color_styles() -> style_collection
+auto create_color_styles(assets::group const& resGrp) -> style_collection
 {
     color_theme normal;
     normal.Background     = colors::LightBlue;
@@ -66,7 +66,6 @@ auto create_color_styles() -> style_collection
     disabled.Background = colors::Gray;
 
     using namespace tcob::literals;
-    auto* resGrp {locate_service<assets::library>().get_group("ui")};
 
     linear_gradient           grad0;
     std::array<color_stop, 2> colors0 {{{0.f, colors::Orange}, {1.f, colors::Teal}}};
@@ -84,7 +83,7 @@ auto create_color_styles() -> style_collection
         style->Border.Size          = 3_px;
         style->Border.Radius        = 5_px;
         style->Text.Style           = {false, font::weight::Normal};
-        style->Text.Font            = resGrp->get<font_family>("Poppins");
+        style->Text.Font            = resGrp.get<font_family>("Poppins");
         style->Text.Size            = 50_pct;
         style->Text.Shadow.OffsetX  = 0_px;
         style->Text.Shadow.OffsetY  = 1_px;
@@ -120,7 +119,7 @@ auto create_color_styles() -> style_collection
     {
         auto style {retValue.create<label>("label", {})};
         style->Text.Style     = {false, font::weight::Normal};
-        style->Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Text.Font      = resGrp.get<font_family>("Poppins");
         style->Text.Size      = 50_pct;
         style->Text.Alignment = {horizontal_alignment::Left, vertical_alignment::Middle};
 
@@ -288,7 +287,7 @@ auto create_color_styles() -> style_collection
         style->Border.Size         = 3_px;
         style->Border.Radius       = 5_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Shadow.OffsetX = 0_px;
         style->Text.Shadow.OffsetY = 1_px;
@@ -311,7 +310,7 @@ auto create_color_styles() -> style_collection
         style->Border.Size         = 3_px;
         style->Border.Radius       = 5_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Shadow.OffsetX = 0_px;
         style->Text.Shadow.OffsetY = 1_px;
@@ -411,7 +410,7 @@ auto create_color_styles() -> style_collection
         style->Padding                    = {5_px};
         style->DropShadow.Color           = color {0, 0, 0, 128};
         style->Text.Style                 = {false, font::weight::Normal};
-        style->Text.Font                  = resGrp->get<font_family>("Poppins");
+        style->Text.Font                  = resGrp.get<font_family>("Poppins");
         style->Text.Size                  = 50_pct;
         style->Text.Shadow.OffsetX        = 0_px;
         style->Text.Shadow.OffsetY        = 1_px;
@@ -504,7 +503,7 @@ auto create_color_styles() -> style_collection
         style->Border.Size         = 3_px;
         style->Border.Radius       = 5_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Shadow.OffsetX = 0_px;
         style->Text.Shadow.OffsetY = 1_px;
@@ -526,7 +525,7 @@ auto create_color_styles() -> style_collection
     {
         auto style {retValue.create<terminal>("terminal", {})};
         style->FlashDuration   = 100ms;
-        style->Text.Font       = resGrp->get<font_family>("DejaVuSansMono");
+        style->Text.Font       = resGrp.get<font_family>("DejaVuSansMono");
         style->Text.Style      = {.IsItalic = false, .Weight = font::weight::Bold};
         style->Text.Size       = 24_px;
         style->Caret.BlinkRate = 500ms;
@@ -604,7 +603,7 @@ auto create_color_styles() -> style_collection
         auto style {retValue.create<item_style>("tab_items", {}, {})};
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
         style->Item.Border.Size    = 3_px;
@@ -624,7 +623,7 @@ auto create_color_styles() -> style_collection
         auto style {retValue.create<item_style>("section_items", {}, {})};
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 50_pct;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
         style->Item.Border.Size    = 3_px;
@@ -644,7 +643,7 @@ auto create_color_styles() -> style_collection
         auto style {retValue.create<item_style>("list_items", {}, {})};
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 50_pct;
         style->Item.Text.Alignment = {horizontal_alignment::Left, vertical_alignment::Middle};
         style->Item.Border.Size    = 3_px;
@@ -664,7 +663,7 @@ auto create_color_styles() -> style_collection
         auto style {retValue.create<item_style>("header_items", {}, {})};
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Bold};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.AutoSize  = element::text::auto_size_mode::Always;
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
@@ -685,7 +684,7 @@ auto create_color_styles() -> style_collection
         auto style {retValue.create<item_style>("row_items", {}, {})};
         style->Item.Padding        = {5_px};
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.AutoSize  = element::text::auto_size_mode::Always;
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Color     = normal.Text;

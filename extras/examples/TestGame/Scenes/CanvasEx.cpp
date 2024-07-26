@@ -73,7 +73,7 @@ void CanvasEx::on_mouse_motion(mouse::motion_event& ev)
 
 void CanvasEx::prepare_canvas()
 {
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
 
     Image        = resGrp->get<texture>("testing").get_obj();
     ImagePattern = _canvas.create_image_pattern({10, 550 - 256}, {128, 128}, 0, Image, 1);
@@ -100,7 +100,7 @@ void CanvasEx::paint_to_canvas()
         .ConicTo = [&](point_f control, point_f to) { _canvas.quad_bezier_to(control, to); },
         .CubicTo = [&](point_f control1, point_f control2, point_f to) { _canvas.cubic_bezier_to(control1, control2, to); }};
 
-    auto*                    resGrp {locate_service<assets::library>().get_group("res")};
+    auto*                    resGrp {get_game().get_library().get_group("res")};
     asset_ptr<truetype_font> ttf {resGrp->get<font>("defaultFont")};
     _canvas.set_fill_style(colors::White);
     _canvas.set_stroke_style(colors::Red);

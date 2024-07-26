@@ -109,7 +109,6 @@ platform::platform(game* game, game::init const& ginit)
     auto factory {register_service<assets::loader_manager::factory>()};
     factory->add({".ini", ".json", ".xml", ".yaml"},
                  [](assets::group& group) { return std::make_unique<detail::cfg_asset_loader_manager>(group); });
-    register_service<assets::library>();
 
     if (_game) {
         // init audio system
@@ -149,7 +148,6 @@ platform::~platform()
 void platform::remove_services() const
 {
     remove_service<command_queue>();
-    remove_service<assets::library>();
     remove_service<input::system>();
     remove_service<audio::system>();
     remove_service<gfx::render_system>();

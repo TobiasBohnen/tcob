@@ -12,6 +12,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob {
@@ -74,6 +75,8 @@ public:
     //! @return An instance of `data::config::object` containing default configuration values.
     auto virtual get_config_defaults() const -> data::config::object;
 
+    auto get_library() -> assets::library&;
+
 protected:
     //! Called when the game finishes.
     void finish();
@@ -90,6 +93,8 @@ private:
 
     //! Pops the top scene from the scene stack.
     void pop_scene();
+
+    assets::library _mainLibrary;
 
     milliseconds                       _frameLimit {}; //!< Frame rate limit.
     std::stack<std::shared_ptr<scene>> _scenes {};     //!< Stack of active scenes.

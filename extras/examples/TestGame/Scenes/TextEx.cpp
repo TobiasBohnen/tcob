@@ -17,7 +17,7 @@ TextEx::~TextEx() = default;
 
 void TextEx::on_start()
 {
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
     auto  rfont {resGrp->get<font>("raster-font1")};
     auto  tfont {resGrp->get<font>("DejaVuSans32")};
 

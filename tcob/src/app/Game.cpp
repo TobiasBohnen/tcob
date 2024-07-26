@@ -12,7 +12,6 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stats.hpp"
 #include "tcob/data/ConfigFile.hpp"
-#include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
 namespace tcob {
@@ -36,6 +35,7 @@ game::game(init const& init)
 
 game::~game()
 {
+    _mainLibrary.destroy_all_groups();
     remove_service<platform>();
 }
 
@@ -179,6 +179,11 @@ auto game::get_config_defaults() const -> data::config::object
     data::config::object defaults {};
     defaults[Cfg::Video::Name] = video;
     return defaults;
+}
+
+auto game::get_library() -> assets::library&
+{
+    return _mainLibrary;
 }
 
 ////////////////////////////////////////////////////////////

@@ -4,32 +4,31 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-skin::skin(std::string const& color, assets::group* resGrp)
-    : Button00 {.Texture = resGrp->get<texture>(color + "_button00"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
-    , Button01 {.Texture = resGrp->get<texture>(color + "_button01"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 45.f, 185 / 190.f, 40 / 45.f)}
-    , Button02 {.Texture = resGrp->get<texture>(color + "_button02"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
-    , Button03 {.Texture = resGrp->get<texture>(color + "_button03"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 45.f, 185 / 190.f, 40 / 45.f)}
-    , Button04 {.Texture = resGrp->get<texture>(color + "_button04"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
-    , Button05 {.Texture = resGrp->get<texture>(color + "_button05"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 45.f, 185 / 190.f, 40 / 45.f)}
-    , Button06 {.Texture = resGrp->get<texture>(color + "_button06"), .UV = rect_f::FromLTRB(5 / 49.f, 5 / 45.f, 43 / 49.f, 40 / 49.f)}
-    , Button13 {.Texture = resGrp->get<texture>(color + "_button13"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
-    , BoxCheckmark {.Texture = resGrp->get<texture>(color + "_boxCheckmark"), .UV = rect_f::FromLTRB(6 / 38.f, 5 / 36.f, 31 / 38.f, 31 / 36.f)}
-    , BoxCross {.Texture = resGrp->get<texture>(color + "_boxCross"), .UV = rect_f::FromLTRB(6 / 38.f, 5 / 36.f, 31 / 38.f, 31 / 36.f)}
-    , BoxTick {.Texture = resGrp->get<texture>(color + "_boxTick"), .UV = {0, 0, 1, 1}}
-    , Circle {.Texture = resGrp->get<texture>(color + "_circle"), .UV = {0, 0, 1, 1}}
-    , Checkmark {.Texture = resGrp->get<texture>(color + "_checkmark"), .UV = {0, 0, 1, 1}}
-    , Cross {.Texture = resGrp->get<texture>(color + "_cross"), .UV = {0, 0, 1, 1}}
-    , SliderUp {.Texture = resGrp->get<texture>(color + "_sliderUp"), .UV = {0, 0, 1, 1}}
-    , SliderDown {.Texture = resGrp->get<texture>(color + "_sliderDown"), .UV = {0, 0, 1, 1}}
-    , SliderRight {.Texture = resGrp->get<texture>(color + "_sliderRight"), .UV = {0, 0, 1, 1}}
-    , Panel {.Texture = resGrp->get<texture>(color + "_panel"), .UV = rect_f::FromLTRB(5 / 100.f, 5 / 100.f, 95 / 100.f, 95 / 100.f)}
+skin::skin(std::string const& color, assets::group const& resGrp)
+    : Button00 {.Texture = resGrp.get<texture>(color + "_button00"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
+    , Button01 {.Texture = resGrp.get<texture>(color + "_button01"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 45.f, 185 / 190.f, 40 / 45.f)}
+    , Button02 {.Texture = resGrp.get<texture>(color + "_button02"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
+    , Button03 {.Texture = resGrp.get<texture>(color + "_button03"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 45.f, 185 / 190.f, 40 / 45.f)}
+    , Button04 {.Texture = resGrp.get<texture>(color + "_button04"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
+    , Button05 {.Texture = resGrp.get<texture>(color + "_button05"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 45.f, 185 / 190.f, 40 / 45.f)}
+    , Button06 {.Texture = resGrp.get<texture>(color + "_button06"), .UV = rect_f::FromLTRB(5 / 49.f, 5 / 45.f, 43 / 49.f, 40 / 49.f)}
+    , Button13 {.Texture = resGrp.get<texture>(color + "_button13"), .UV = rect_f::FromLTRB(5 / 190.f, 5 / 49.f, 185 / 190.f, 40 / 49.f)}
+    , BoxCheckmark {.Texture = resGrp.get<texture>(color + "_boxCheckmark"), .UV = rect_f::FromLTRB(6 / 38.f, 5 / 36.f, 31 / 38.f, 31 / 36.f)}
+    , BoxCross {.Texture = resGrp.get<texture>(color + "_boxCross"), .UV = rect_f::FromLTRB(6 / 38.f, 5 / 36.f, 31 / 38.f, 31 / 36.f)}
+    , BoxTick {.Texture = resGrp.get<texture>(color + "_boxTick"), .UV = {0, 0, 1, 1}}
+    , Circle {.Texture = resGrp.get<texture>(color + "_circle"), .UV = {0, 0, 1, 1}}
+    , Checkmark {.Texture = resGrp.get<texture>(color + "_checkmark"), .UV = {0, 0, 1, 1}}
+    , Cross {.Texture = resGrp.get<texture>(color + "_cross"), .UV = {0, 0, 1, 1}}
+    , SliderUp {.Texture = resGrp.get<texture>(color + "_sliderUp"), .UV = {0, 0, 1, 1}}
+    , SliderDown {.Texture = resGrp.get<texture>(color + "_sliderDown"), .UV = {0, 0, 1, 1}}
+    , SliderRight {.Texture = resGrp.get<texture>(color + "_sliderRight"), .UV = {0, 0, 1, 1}}
+    , Panel {.Texture = resGrp.get<texture>(color + "_panel"), .UV = rect_f::FromLTRB(5 / 100.f, 5 / 100.f, 95 / 100.f, 95 / 100.f)}
 {
 }
 
-auto create_skinned_styles() -> style_collection
+auto create_skinned_styles(assets::group const& resGrp) -> style_collection
 {
     using namespace tcob::literals;
-    auto* resGrp {locate_service<assets::library>().get_group("ui")};
 
     skin blue {"blue", resGrp};
     skin green {"green", resGrp};
@@ -43,7 +42,7 @@ auto create_skinned_styles() -> style_collection
         style->Background          = green.Button00;
         style->Border.Size         = 5_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Color          = colors::Black;
         style->Text.Shadow.Color   = colors::White;
@@ -76,7 +75,7 @@ auto create_skinned_styles() -> style_collection
     {
         auto style {retValue.create<label>("label", {})};
         style->Text.Style     = {false, font::weight::Normal};
-        style->Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Text.Font      = resGrp.get<font_family>("Poppins");
         style->Text.Size      = 50_pct;
         style->Text.Color     = colors::Black;
         style->Text.Alignment = {horizontal_alignment::Left, vertical_alignment::Middle};
@@ -172,7 +171,7 @@ auto create_skinned_styles() -> style_collection
         style->Background          = green.Button00;
         style->Border.Size         = 5_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Color          = colors::Black;
         style->Text.Shadow.Color   = colors::White;
@@ -191,7 +190,7 @@ auto create_skinned_styles() -> style_collection
         style->Background          = blue.Button00;
         style->Border.Size         = 3_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Color          = colors::Black;
         style->Text.Shadow.Color   = colors::White;
@@ -271,7 +270,7 @@ auto create_skinned_styles() -> style_collection
         style->Padding                         = {5_px};
         style->DropShadow.Color                = color {0, 0, 0, 128};
         style->Text.Style                      = {false, font::weight::Normal};
-        style->Text.Font                       = resGrp->get<font_family>("Poppins");
+        style->Text.Font                       = resGrp.get<font_family>("Poppins");
         style->Text.Size                       = 50_pct;
         style->Text.Shadow.OffsetX             = 0_px;
         style->Text.Shadow.OffsetY             = 1_px;
@@ -340,7 +339,7 @@ auto create_skinned_styles() -> style_collection
         style->Background          = blue.Button13;
         style->Border.Size         = 5_px;
         style->Text.Style          = {false, font::weight::Normal};
-        style->Text.Font           = resGrp->get<font_family>("Poppins");
+        style->Text.Font           = resGrp.get<font_family>("Poppins");
         style->Text.Size           = 50_pct;
         style->Text.Color          = colors::Black;
         style->Text.Shadow.Color   = colors::White;
@@ -423,7 +422,7 @@ auto create_skinned_styles() -> style_collection
         style->Item.Padding        = {5_px};
         style->Item.Background     = blue.Button00;
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Color     = colors::Black;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
@@ -443,7 +442,7 @@ auto create_skinned_styles() -> style_collection
         style->Item.Padding        = {5_px};
         style->Item.Background     = blue.Button00;
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 50_pct;
         style->Item.Text.Color     = colors::Black;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
@@ -463,7 +462,7 @@ auto create_skinned_styles() -> style_collection
         style->Item.Padding        = {5_px};
         style->Item.Background     = yellow.Button13;
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 50_pct;
         style->Item.Text.Color     = colors::Black;
         style->Item.Text.Alignment = {horizontal_alignment::Left, vertical_alignment::Middle};
@@ -483,7 +482,7 @@ auto create_skinned_styles() -> style_collection
         style->Item.Padding        = {5_px};
         style->Item.Background     = grey.Button13;
         style->Item.Text.Style     = {false, font::weight::Bold};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Color     = colors::Black;
         style->Item.Text.Alignment = {horizontal_alignment::Centered, vertical_alignment::Middle};
@@ -503,7 +502,7 @@ auto create_skinned_styles() -> style_collection
         style->Item.Padding        = {7_px};
         style->Item.Background     = yellow.Button13;
         style->Item.Text.Style     = {false, font::weight::Normal};
-        style->Item.Text.Font      = resGrp->get<font_family>("Poppins");
+        style->Item.Text.Font      = resGrp.get<font_family>("Poppins");
         style->Item.Text.Size      = 25_pct;
         style->Item.Text.Color     = colors::Black;
         style->Item.Text.Alignment = {horizontal_alignment::Left, vertical_alignment::Middle};

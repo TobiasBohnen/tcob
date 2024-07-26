@@ -13,7 +13,7 @@ auto main(int argc, char* argv[]) -> int
                       .Name    = "UIEx",
                       .LogFile = "stdout"}};
 
-    auto& resMgr {tcob::locate_service<tcob::assets::library>()};
+    auto& resMgr {game.get_library()};
     auto& resGrp {resMgr.create_or_get_group("ui")};
     resGrp.mount("./uiex.zip");
     resMgr.load_all_groups();

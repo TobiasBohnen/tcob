@@ -17,7 +17,7 @@ milliseconds duration {5000};
 
 void AutomationEx::on_start()
 {
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
 
     auto          circleMat {resGrp->get<material>("mat-circle")};
     f32           endX {800 - 60};

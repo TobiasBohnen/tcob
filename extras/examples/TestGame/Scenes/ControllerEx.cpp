@@ -22,7 +22,7 @@ void ControllerEx::on_start()
         return;
     }
 
-    auto* resGrp {locate_service<assets::library>().get_group("res")};
+    auto* resGrp {get_game().get_library().get_group("res")};
 
     _text         = std::make_shared<text>(resGrp->get<font>("raster-font1"));
     _text->Text   = "1: High freq \n"

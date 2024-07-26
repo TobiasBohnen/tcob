@@ -13,7 +13,7 @@ using namespace tcob::input;
 
 class skin {
 public:
-    skin(std::string const& color, assets::group* resGrp);
+    skin(std::string const& color, assets::group const& resGrp);
 
     nine_patch Button00;
     nine_patch Button01;
@@ -35,4 +35,4 @@ public:
     nine_patch Panel;
 };
 
-auto create_skinned_styles() -> style_collection;
+auto create_skinned_styles(assets::group const& resGrp) -> style_collection;

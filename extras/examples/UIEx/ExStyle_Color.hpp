@@ -53,4 +53,4 @@ struct color_theme {
     void apply(std::shared_ptr<nav_arrows_style> const& style) const;
 };
 
-auto create_color_styles() -> style_collection;
+auto create_color_styles(assets::group const& resGrp) -> style_collection;
