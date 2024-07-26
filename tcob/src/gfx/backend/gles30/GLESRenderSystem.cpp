@@ -5,8 +5,6 @@
 
 #include "GLESRenderSystem.hpp"
 
-#include <SDL.h>
-
 #include "GLESFramebuffer.hpp"
 #include "GLESRenderTarget.hpp"
 #include "GLESShaderProgram.hpp"
@@ -31,28 +29,6 @@ auto gl_render_system::get_capabilities() const -> capabilities
     retValue.PointSizeGranularity = 0.01f;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.MaxTextureSize);
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &retValue.MaxArrayTextureLayers);
-
-    return retValue;
-}
-
-auto gl_render_system::get_displays() const -> std::map<i32, display>
-{
-    std::map<i32, display> retValue;
-
-    SDL_DisplayMode mode {};
-    i32 const       numDisplays {SDL_GetNumVideoDisplays()};
-    for (i32 i {0}; i < numDisplays; ++i) {
-        i32 const numModes {SDL_GetNumDisplayModes(i)};
-        for (i32 j {0}; j < numModes; ++j) {
-            SDL_GetDisplayMode(i, j, &mode);
-            retValue[i].Modes.push_back({.Size        = {mode.w, mode.h},
-                                         .RefreshRate = mode.refresh_rate});
-        }
-
-        SDL_GetDesktopDisplayMode(i, &mode);
-        retValue[i].DesktopMode = {.Size        = {mode.w, mode.h},
-                                   .RefreshRate = mode.refresh_rate};
-    }
 
     return retValue;
 }

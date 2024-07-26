@@ -17,11 +17,6 @@ auto null_render_system::get_capabilities() const -> capabilities
     return {};
 }
 
-auto null_render_system::get_displays() const -> std::map<i32, display>
-{
-    return {};
-}
-
 auto null_render_system::get_rtt_coords() const -> rect_f
 {
     return {};

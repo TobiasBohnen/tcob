@@ -254,13 +254,6 @@ void platform::init_locales()
     }
 }
 
-auto platform::get_display_size(i32 display) const -> size_i
-{
-    SDL_DisplayMode mode;
-    SDL_GetDesktopDisplayMode(display, &mode);
-    return {mode.w, mode.h};
-}
-
 void platform::InitSDL()
 {
     SDL_SetMainReady();

@@ -15,7 +15,6 @@ class null_render_system final : public render_system {
 public:
     auto get_name() const -> string override;
     auto get_capabilities() const -> capabilities override;
-    auto get_displays() const -> std::map<i32, display> override;
     auto get_rtt_coords() const -> rect_f override;
 
     auto create_canvas() -> std::unique_ptr<render_backend::canvas_base> override;
