@@ -28,10 +28,10 @@ game::game(init const& init)
 
     // properties
     FrameLimit.Changed.connect([&](i32 value) {
-        locate_service<data::config_file>()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
-        _frameLimit                                                                    = milliseconds {1000.f / value};
+        plt->get_config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
+        _frameLimit                                                  = milliseconds {1000.f / value};
     });
-    FrameLimit = locate_service<data::config_file>()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
+    FrameLimit = plt->get_config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
 }
 
 game::~game()

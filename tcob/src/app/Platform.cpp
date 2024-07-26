@@ -113,15 +113,13 @@ platform::platform(game* game, game::init const& ginit)
 
     if (_game) {
         // init audio system
-        register_service<audio::system>(); // DON'T MOVE AGAIN
+        register_service<audio::system>();                                   // DON'T MOVE AGAIN
 
-        // load config
-        auto config {std::make_shared<data::config_file>(ginit.ConfigFile)};
-        register_service<data::config_file>(config);
-        config->merge(_game->get_config_defaults(), false); // merge config with default
+        _configFile = std::make_unique<data::config_file>(ginit.ConfigFile); // load config
+        _configFile->merge(_game->get_config_defaults(), false);             // merge config with default
 
         // init render system
-        init_render_system(*config);
+        init_render_system();
     } else {
 #if defined(TCOB_ENABLE_RENDERER_NULL)
         register_service<gfx::render_system, gfx::null::null_render_system>();
@@ -131,8 +129,10 @@ platform::platform(game* game, game::init const& ginit)
 
 platform::~platform()
 {
+    _configFile = nullptr;
     remove_services();
-    _window = nullptr;
+    _window        = nullptr;
+    _defaultTarget = nullptr;
 
     //  file system
     logger::Info("exiting");
@@ -153,7 +153,6 @@ void platform::remove_services() const
     remove_service<input::system>();
     remove_service<audio::system>();
     remove_service<gfx::render_system>();
-    remove_service<data::config_file>();
     remove_service<semaphore>();
 
     remove_service<assets::loader_manager::factory>();
@@ -265,6 +264,11 @@ auto platform::get_default_target() const -> gfx::default_render_target&
     return *_defaultTarget;
 }
 
+auto platform::get_config() const -> data::config_file&
+{
+    return *_configFile;
+}
+
 void platform::init_locales()
 {
     if (auto* sdlLocales {SDL_GetPreferredLocales()}) {
@@ -285,7 +289,7 @@ void platform::init_locales()
     }
 }
 
-void platform::init_render_system(data::config_file const& config)
+void platform::init_render_system()
 {
     auto rsFactory {register_service<gfx::render_system::factory>()};
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)
@@ -298,7 +302,7 @@ void platform::init_render_system(data::config_file const& config)
     rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
 #endif
 
-    string renderer {config[Cfg::Video::Name][Cfg::Video::render_system].as<string>()};
+    string renderer {(*_configFile)[Cfg::Video::Name][Cfg::Video::render_system].as<string>()};
 
     // create rendersystem
     logger::Info("RenderSystem: {}", renderer);
@@ -307,7 +311,7 @@ void platform::init_render_system(data::config_file const& config)
     register_service<gfx::render_system>(renderSystem);
 
     // get config
-    auto const video {locate_service<data::config_file>()[Cfg::Video::Name].as<data::config::object>()};
+    auto const video {(*_configFile)[Cfg::Video::Name].as<data::config::object>()};
 
     size_i const resolution {video[Cfg::Video::use_desktop_resolution].as<bool>()
                                  ? renderSystem->get_desktop_size(0)
@@ -316,16 +320,15 @@ void platform::init_render_system(data::config_file const& config)
     // create window (and context)
     _window = std::unique_ptr<gfx::window> {new gfx::window(renderSystem->create_window(resolution))};
 
-    _window->FullScreen.Changed.connect([](bool value) {
-        locate_service<data::config_file>()[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
+    _window->FullScreen.Changed.connect([&](bool value) {
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
-    _window->VSync.Changed.connect([](bool value) {
-        locate_service<data::config_file>()[Cfg::Video::Name][Cfg::Video::vsync] = value;
+    _window->VSync.Changed.connect([&](bool value) {
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
-    _window->Size.Changed.connect([](size_i value) {
-        auto& cfg {locate_service<data::config_file>()};
-        cfg[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<gfx::render_system>().get_desktop_size(0);
-        cfg[Cfg::Video::Name][Cfg::Video::resolution]             = value;
+    _window->Size.Changed.connect([&](size_i value) {
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<gfx::render_system>().get_desktop_size(0);
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
     _window->FullScreen(video[Cfg::Video::fullscreen].as<bool>());

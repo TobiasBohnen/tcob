@@ -33,6 +33,8 @@ public:
     auto get_window() const -> gfx::window&;
     auto get_default_target() const -> gfx::default_render_target&;
 
+    auto get_config() const -> data::config_file&;
+
     void process_events() const;
 
     auto get_preferred_locales() const -> std::vector<locale> const&;
@@ -45,7 +47,7 @@ public:
 
 private:
     void init_locales();
-    void init_render_system(data::config_file const& config);
+    void init_render_system();
 
     void remove_services() const;
 
@@ -63,6 +65,7 @@ private:
 
     std::unique_ptr<gfx::window>                _window;
     std::unique_ptr<gfx::default_render_target> _defaultTarget;
+    std::unique_ptr<data::config_file>          _configFile;
 };
 
 ////////////////////////////////////////////////////////////
