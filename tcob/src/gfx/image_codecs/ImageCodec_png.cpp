@@ -398,8 +398,8 @@ auto png_decoder::prepare() -> i32
 
     _prvLine.resize(lineSize * 2);
     _curLine.resize(lineSize * 2);
-    _stride = _ihdr.Width * png::BPP;
-    _data.resize(_stride * _ihdr.Height);
+    _data.resize(_ihdr.Width * png::BPP * _ihdr.Height);
+    _dataIt = _data.begin();
     get_image_data_delegate();
     return retValue;
 }
