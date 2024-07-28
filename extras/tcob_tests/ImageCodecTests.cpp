@@ -182,7 +182,7 @@ TEST_CASE("GFX.Decoder.BSI")
 
 TEST_CASE("GFX.Decoder.BMP")
 {
-    TEST_IMAGE_PNG(basi0g16);
+    TEST_IMAGE_BMP(basi0g16);
     TEST_IMAGE_BMP(basi3p01);
     TEST_IMAGE_BMP(basi3p02);
     TEST_IMAGE_BMP(basi6a08);
