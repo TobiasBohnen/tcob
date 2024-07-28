@@ -526,7 +526,7 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
 
         if (_pixel.X == -1) { // First byte is filter type for the line.
             _filter    = dat[0];
-            _lineIndex = 0;
+            _curLineIt = _curLine.begin();
             ++_pixel.X;
             bufferIndex = bufferIndex - pixelSize + 1;
         } else {

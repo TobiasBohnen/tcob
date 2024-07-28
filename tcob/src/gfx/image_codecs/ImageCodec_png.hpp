@@ -181,8 +181,8 @@ private:
 
     std::vector<u8> _prvLine;
 
-    std::vector<u8> _curLine;
-    i32             _lineIndex {0};
+    std::vector<u8>           _curLine;
+    std::vector<u8>::iterator _curLineIt;
 
     std::vector<u8>           _data;
     std::vector<u8>::iterator _dataIt;
