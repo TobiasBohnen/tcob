@@ -25,7 +25,7 @@ namespace png {
     }
 
     constexpr i32 BPP {4};
-    constexpr i32 MAX_SIZE {16384};
+    constexpr i32 MAX_SIZE {0x4000};
 
     enum class blend_op {
         Source = 0,
@@ -108,7 +108,7 @@ namespace png {
     struct pHYs_chunk {
         pHYs_chunk(std::span<u8 const> data);
 
-        f32 Value {0.f};
+        f32 Value {1.f};
     };
 
 }
@@ -116,7 +116,7 @@ namespace png {
 ////////////////////////////////////////////////////////////
 
 class png_decoder final : public image_decoder {
-    using get_image_data = void (png_decoder::*)(std::span<u8 const>);
+    using get_image_data = void (png_decoder::*)();
 
 public:
     auto decode(istream& in) -> std::optional<image> override;
@@ -128,48 +128,47 @@ private:
     auto check_sig(istream& in) -> bool;
 
     void prepare();
+    void prepare_delegate();
     auto read_image(std::span<ubyte const> idat) -> bool;
 
-    void filter(i32 x, i32 y);
-
-    void get_image_data_delegate();
+    void filter_current_pixel();
 
     auto get_interlace_dimensions() const -> rect_i;
-    void next_line_interlaced(i32 hei);
 
+    void next_line_interlaced(i32 hei);
     void next_line_non_interlaced();
 
-    void get_image_data_interlaced_G1(std::span<u8 const> pix);
-    void get_image_data_interlaced_G2(std::span<u8 const> pix);
-    void get_image_data_interlaced_G4(std::span<u8 const> pix);
-    void get_image_data_interlaced_G8(std::span<u8 const> pix);
-    void get_image_data_interlaced_G16(std::span<u8 const> pix);
-    void get_image_data_interlaced_GA8(std::span<u8 const> pix);
-    void get_image_data_interlaced_GA16(std::span<u8 const> pix);
-    void get_image_data_interlaced_I1(std::span<u8 const> pix);
-    void get_image_data_interlaced_I2(std::span<u8 const> pix);
-    void get_image_data_interlaced_I4(std::span<u8 const> pix);
-    void get_image_data_interlaced_I8(std::span<u8 const> pix);
-    void get_image_data_interlaced_TC8(std::span<u8 const> pix);
-    void get_image_data_interlaced_TC16(std::span<u8 const> pix);
-    void get_image_data_interlaced_TCA8(std::span<u8 const> pix);
-    void get_image_data_interlaced_TCA16(std::span<u8 const> pix);
+    void interlaced_G1();
+    void interlaced_G2();
+    void interlaced_G4();
+    void interlaced_G8();
+    void interlaced_G16();
+    void interlaced_GA8();
+    void interlaced_GA16();
+    void interlaced_I1();
+    void interlaced_I2();
+    void interlaced_I4();
+    void interlaced_I8();
+    void interlaced_TC8();
+    void interlaced_TC16();
+    void interlaced_TCA8();
+    void interlaced_TCA16();
 
-    void get_image_data_non_interlaced_G1(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_G2(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_G4(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_G8(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_G16(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_GA8(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_GA16(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_I1(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_I2(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_I4(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_I8(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_TC8(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_TC16(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_TCA8(std::span<u8 const> pix);
-    void get_image_data_non_interlaced_TCA16(std::span<u8 const> pix);
+    void non_interlaced_G1();
+    void non_interlaced_G2();
+    void non_interlaced_G4();
+    void non_interlaced_G8();
+    void non_interlaced_G16();
+    void non_interlaced_GA8();
+    void non_interlaced_GA16();
+    void non_interlaced_I1();
+    void non_interlaced_I2();
+    void non_interlaced_I4();
+    void non_interlaced_I8();
+    void non_interlaced_TC8();
+    void non_interlaced_TC16();
+    void non_interlaced_TCA8();
+    void non_interlaced_TCA16();
 
     png::IHDR_chunk                _ihdr;
     std::optional<png::PLTE_chunk> _plte;
@@ -178,7 +177,7 @@ private:
     point_i _pixel {-1, 0};
     u8      _filter {0};
     u8      _pixelSize {0};
-    u32     _interlacePass {0};
+    u32     _interlacePass {1};
 
     std::vector<u8> _prvLine;
 
