@@ -30,7 +30,7 @@ void test_image(std::string const& imageName, std::string const& ext, auto&& arr
     if (info.bytes_per_pixel() == 4) {
         REQUIRE(size == std::ssize(array));
         for (u32 i {0}; i < array.size(); ++i) {
-            REQUIRE(buf[i] == array[i]);
+            REQUIRE_MESSAGE(buf[i] == array[i], std::format("{} {}:{}", i, buf[i], array[i]));
         }
     } else if (info.bytes_per_pixel() == 3) {
         REQUIRE(size == std::ssize(array) / 4 * 3);

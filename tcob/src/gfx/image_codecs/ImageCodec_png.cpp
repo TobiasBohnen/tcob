@@ -61,7 +61,7 @@ png::tRNS_chunk::tRNS_chunk(std::span<u8 const> data, color_type colorType, std:
 
     case color_type::Indexed:
         if (plte) {
-            for (i32 i {0}; i < std::ssize(data); i++) {
+            for (i32 i {0}; i < std::ssize(data); ++i) {
                 plte->Entries[i].A = data[i];
             }
         }
@@ -203,7 +203,7 @@ auto static paeth(u8 a, u8 b, u8 c) -> u8
     return t1;
 }
 
-void png_decoder::filter_current_pixel()
+void png_decoder::filter_pixel()
 {
     if (_filter == 0) { return; }
 
@@ -214,18 +214,18 @@ void png_decoder::filter_current_pixel()
     switch (_filter) {
     case 1: {
         if (x <= 0) { return; }
-        for (i32 i {0}; i < _pixelSize; i++) {
+        for (i32 i {0}; i < _pixelSize; ++i) {
             *(_curLineIt + i) += _curLine[xLength + i - _pixelSize];
         }
     } break;
     case 2: {
         if (_pixel.Y <= 0) { return; }
-        for (i32 i {0}; i < _pixelSize; i++) {
+        for (i32 i {0}; i < _pixelSize; ++i) {
             *(_curLineIt + i) += _prvLine[xLength + i];
         }
     } break;
     case 3: {
-        for (i32 i {0}; i < _pixelSize; i++) {
+        for (i32 i {0}; i < _pixelSize; ++i) {
             i32 const a {
                 (x > 0 ? _curLine[xLength + i - _pixelSize] : 0)
                 + (_pixel.Y > 0 ? _prvLine[xLength + i] : 0)};
@@ -233,14 +233,63 @@ void png_decoder::filter_current_pixel()
         }
     } break;
     case 4: {
-        for (i32 i {0}; i < _pixelSize; i++) {
+        for (i32 i {0}; i < _pixelSize; ++i) {
             u8 const a {(x > 0 ? _curLine[xLength + i - _pixelSize] : u8 {0})};
             u8 const b {(_pixel.Y > 0 ? _prvLine[xLength + i] : u8 {0})};
-            u8 const c {((x > 0 && _pixel.Y > 0) ? _prvLine[xLength - _pixelSize + i] : u8 {0})};
+            u8 const c {((x > 0 && _pixel.Y > 0) ? _prvLine[xLength + i - _pixelSize] : u8 {0})};
             *(_curLineIt + i) += paeth(a, b, c);
         }
     } break;
     }
+}
+
+void png_decoder::filter_line()
+{
+    if (_filter == 0) { return; }
+
+    switch (_filter) {
+    case 1: {
+        for (usize i {_pixelSize}; i < _curLine.size(); ++i) {
+            _curLine[i] += _curLine[i - _pixelSize];
+        }
+    } break;
+    case 2: {
+        if (_pixel.Y <= 0) { return; }
+        for (usize i {0}; i < _curLine.size(); ++i) {
+            _curLine[i] += _prvLine[i];
+        }
+    } break;
+    case 3: {
+        for (usize i {0}; i < _curLine.size(); ++i) {
+            i32 const a {(i >= _pixelSize ? _curLine[i - _pixelSize] : 0) + (_pixel.Y > 0 ? _prvLine[i] : 0)};
+            *(_curLineIt + i) += static_cast<u8>(a / 2);
+        }
+    } break;
+    case 4: {
+        for (usize i {0}; i < _curLine.size(); ++i) {
+            u8 const a {(i >= _pixelSize ? _curLine[i - _pixelSize] : u8 {0})};
+            u8 const b {(_pixel.Y > 0 ? _prvLine[i] : u8 {0})};
+            u8 const c {((i >= _pixelSize && _pixel.Y > 0) ? _prvLine[i - _pixelSize] : u8 {0})};
+            *(_curLineIt + i) += paeth(a, b, c);
+        }
+    } break;
+    }
+}
+
+void png_decoder::next_line_interlaced(i32 hei)
+{
+    next_line_non_interlaced();
+    if (_pixel.Y >= hei) {
+        _pixel.Y = 0;
+        ++_interlacePass;
+    }
+}
+
+void png_decoder::next_line_non_interlaced()
+{
+    ++_pixel.Y;
+    _pixel.X = -1;
+    _curLine.swap(_prvLine);
 }
 
 auto png_decoder::get_interlace_dimensions() const -> rect_i
@@ -284,22 +333,6 @@ auto png_decoder::get_interlace_dimensions() const -> rect_i
     }
 
     return {};
-}
-
-void png_decoder::next_line_interlaced(i32 hei)
-{
-    next_line_non_interlaced();
-    if (_pixel.Y >= hei) {
-        _pixel.Y = 0;
-        ++_interlacePass;
-    }
-}
-
-void png_decoder::next_line_non_interlaced()
-{
-    ++_pixel.Y;
-    _pixel.X = -1;
-    _curLine.swap(_prvLine);
 }
 
 void png_decoder::prepare()
@@ -502,16 +535,24 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
         if (_pixel.X == -1) { // First byte is filter type for the line.
             _filter    = *(idat.begin() + bufferIndex);
             _curLineIt = _curLine.begin();
-            ++_pixel.X;
+            _pixel.X   = 0;
+
+            if (_ihdr.NonInterlaced) { // copy and filter whole line if not interlaced
+                std::copy(idat.begin() + bufferIndex + 1, idat.begin() + bufferIndex + 1 + _curLine.size(), _curLineIt);
+                filter_line();
+            }
+
             bufferIndex = bufferIndex - _pixelSize + 1;
         } else {
-            std::copy(idat.begin() + bufferIndex, idat.begin() + bufferIndex + _pixelSize, _curLineIt);
-            filter_current_pixel();
+            if (!_ihdr.NonInterlaced) { // copy and filter one by one if interlaced
+                std::copy(idat.begin() + bufferIndex, idat.begin() + bufferIndex + _pixelSize, _curLineIt);
+                filter_pixel();
+            }
+
             (this->*_getImageData)();
             _curLineIt += _pixelSize;
         }
     }
-
     return true;
 }
 

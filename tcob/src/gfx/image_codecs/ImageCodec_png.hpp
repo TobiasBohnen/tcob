@@ -131,12 +131,13 @@ private:
     void prepare_delegate();
     auto read_image(std::span<ubyte const> idat) -> bool;
 
-    void filter_current_pixel();
-
-    auto get_interlace_dimensions() const -> rect_i;
+    void filter_pixel();
+    void filter_line();
 
     void next_line_interlaced(i32 hei);
     void next_line_non_interlaced();
+
+    auto get_interlace_dimensions() const -> rect_i;
 
     void interlaced_G1();
     void interlaced_G2();
