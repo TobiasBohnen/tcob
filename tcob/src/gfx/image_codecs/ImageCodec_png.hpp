@@ -127,10 +127,10 @@ private:
     auto read_chunk(istream& in) const -> png::chunk;
     auto check_sig(istream& in) -> bool;
 
-    auto prepare() -> i32;
+    void prepare();
     auto read_image(std::span<ubyte const> idat) -> bool;
 
-    void filter(i32 x, i32 y, i32 unitLength);
+    void filter(i32 x, i32 y);
 
     void get_image_data_delegate();
 
@@ -176,7 +176,8 @@ private:
     std::optional<png::tRNS_chunk> _trns;
 
     point_i _pixel {-1, 0};
-    i32     _filter {0};
+    u8      _filter {0};
+    u8      _pixelSize {0};
     u32     _interlacePass {0};
 
     std::vector<u8> _prvLine;

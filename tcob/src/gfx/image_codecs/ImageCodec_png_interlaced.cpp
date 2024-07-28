@@ -12,7 +12,7 @@ void png_decoder::get_image_data_interlaced_G1(std::span<u8 const> pix)
     auto iRect {get_interlace_dimensions()};
 
     _curLine[_pixel.X / 8] = pix[0];
-    filter(_pixel.X / 8, _pixel.Y, 1);
+    filter(_pixel.X / 8, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i++) {
         u8 const  c {static_cast<u8>(png::get_bits(_curLine[_pixel.X / 8], 7 - i, 1) * 255)};
@@ -37,7 +37,7 @@ void png_decoder::get_image_data_interlaced_G2(std::span<u8 const> pix)
     auto iRect {get_interlace_dimensions()};
 
     _curLine[_pixel.X / 4] = pix[0];
-    filter(_pixel.X / 4, _pixel.Y, 1);
+    filter(_pixel.X / 4, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 2) {
         u8 const  c {static_cast<u8>(png::get_bits(_curLine[_pixel.X / 4], 6 - i, 2) / 3.0f * 255)};
@@ -62,7 +62,7 @@ void png_decoder::get_image_data_interlaced_G4(std::span<u8 const> pix)
     auto iRect {get_interlace_dimensions()};
 
     _curLine[_pixel.X / 2] = pix[0];
-    filter(_pixel.X / 2, _pixel.Y, 1);
+    filter(_pixel.X / 2, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 4) {
         u8 const  c {static_cast<u8>(png::get_bits(_curLine[_pixel.X / 2], 4 - i, 4) / 15.0f * 255)};
@@ -87,7 +87,7 @@ void png_decoder::get_image_data_interlaced_G8(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     *_curLineIt = pix[0];
-    filter(_pixel.X, _pixel.Y, 1);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const  c {*_curLineIt++};
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
@@ -108,7 +108,7 @@ void png_decoder::get_image_data_interlaced_G16(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 2);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const  c {*_curLineIt};
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
@@ -130,7 +130,7 @@ void png_decoder::get_image_data_interlaced_GA8(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 2);
+    filter(_pixel.X, _pixel.Y);
 
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {
@@ -148,7 +148,7 @@ void png_decoder::get_image_data_interlaced_GA16(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 4);
+    filter(_pixel.X, _pixel.Y);
 
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {
@@ -167,7 +167,7 @@ void png_decoder::get_image_data_interlaced_I1(std::span<u8 const> pix)
     auto iRect {get_interlace_dimensions()};
 
     _curLine[_pixel.X / 8] = pix[0];
-    filter(_pixel.X / 8, _pixel.Y, 1);
+    filter(_pixel.X / 8, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i++) {
         i32 const dataIndex {iRect.X * png::BPP + iRect.Y * _ihdr.Width * png::BPP};
@@ -195,7 +195,7 @@ void png_decoder::get_image_data_interlaced_I2(std::span<u8 const> pix)
     auto iRect {get_interlace_dimensions()};
 
     _curLine[_pixel.X / 4] = pix[0];
-    filter(_pixel.X / 4, _pixel.Y, 1);
+    filter(_pixel.X / 4, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 2) {
         i32 const dataIndex {iRect.X * png::BPP + iRect.Y * _ihdr.Width * png::BPP};
@@ -223,7 +223,7 @@ void png_decoder::get_image_data_interlaced_I4(std::span<u8 const> pix)
     auto iRect {get_interlace_dimensions()};
 
     _curLine[_pixel.X / 2] = pix[0];
-    filter(_pixel.X / 2, _pixel.Y, 1);
+    filter(_pixel.X / 2, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 4) {
         i32 const dataIndex {iRect.X * png::BPP + iRect.Y * _ihdr.Width * png::BPP};
@@ -251,7 +251,7 @@ void png_decoder::get_image_data_interlaced_I8(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     *_curLineIt = pix[0];
-    filter(_pixel.X, _pixel.Y, 1);
+    filter(_pixel.X, _pixel.Y);
 
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {
@@ -275,7 +275,7 @@ void png_decoder::get_image_data_interlaced_TC8(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 3);
+    filter(_pixel.X, _pixel.Y);
 
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {
@@ -298,7 +298,7 @@ void png_decoder::get_image_data_interlaced_TC16(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 6);
+    filter(_pixel.X, _pixel.Y);
 
     i32 const dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {
@@ -322,7 +322,7 @@ void png_decoder::get_image_data_interlaced_TCA8(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 4);
+    filter(_pixel.X, _pixel.Y);
 
     i32 dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {
@@ -341,7 +341,7 @@ void png_decoder::get_image_data_interlaced_TCA16(std::span<u8 const> pix)
     auto const [ix, iy, iw, ih] {get_interlace_dimensions()};
 
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 8);
+    filter(_pixel.X, _pixel.Y);
 
     i32 dataIndex {ix * png::BPP + iy * _ihdr.Width * png::BPP};
     if (dataIndex + 3 < std::ssize(_data)) {

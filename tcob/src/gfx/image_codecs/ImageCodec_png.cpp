@@ -210,39 +210,38 @@ auto static paeth(u8 a, u8 b, u8 c) -> u8
     return t1;
 }
 
-void png_decoder::filter(i32 x, i32 y, i32 unitLength)
+void png_decoder::filter(i32 x, i32 y)
 {
     if (_filter == 0) { return; }
 
-    i32 const xLength {x * unitLength};
+    i32 const xLength {x * _pixelSize};
+    assert(xLength + _pixelSize <= std::ssize(_curLine));
     switch (_filter) {
     case 1:
-        if (x > 0) {
-            for (i32 i {0}; i < unitLength; i++) {
-                _curLine[xLength + i] += _curLine[xLength + i - unitLength];
-            }
+        if (x <= 0) { return; }
+        for (i32 i {0}; i < _pixelSize; i++) {
+            _curLine[xLength + i] += _curLine[xLength + i - _pixelSize];
         }
         break;
     case 2:
-        if (y > 0) {
-            for (i32 i {0}; i < unitLength; i++) {
-                _curLine[xLength + i] += _prvLine[xLength + i];
-            }
+        if (y <= 0) { return; }
+        for (i32 i {0}; i < _pixelSize; i++) {
+            _curLine[xLength + i] += _prvLine[xLength + i];
         }
         break;
     case 3:
-        for (i32 i {0}; i < unitLength; i++) {
+        for (i32 i {0}; i < _pixelSize; i++) {
             i32 const a {
-                (x > 0 ? _curLine[xLength + i - unitLength] : 0)
+                (x > 0 ? _curLine[xLength + i - _pixelSize] : 0)
                 + (y > 0 ? _prvLine[xLength + i] : 0)};
             _curLine[xLength + i] += static_cast<u8>(a / 2);
         }
         break;
     case 4:
-        for (i32 i {0}; i < unitLength; i++) {
-            u8 const a {(x > 0 ? _curLine[xLength + i - unitLength] : u8 {0})};
+        for (i32 i {0}; i < _pixelSize; i++) {
+            u8 const a {(x > 0 ? _curLine[xLength + i - _pixelSize] : u8 {0})};
             u8 const b {(y > 0 ? _prvLine[xLength + i] : u8 {0})};
-            u8 const c {((x > 0 && y > 0) ? _prvLine[xLength - unitLength + i] : u8 {0})};
+            u8 const c {((x > 0 && y > 0) ? _prvLine[xLength - _pixelSize + i] : u8 {0})};
             _curLine[xLength + i] += paeth(a, b, c);
         }
         break;
@@ -308,26 +307,25 @@ void png_decoder::next_line_non_interlaced()
     _curLine.swap(_prvLine);
 }
 
-auto png_decoder::prepare() -> i32
+void png_decoder::prepare()
 {
-    i32        retValue {0};
     auto const depth {_ihdr.BitDepth};
 
     switch (_ihdr.ColorType) {
     case png::color_type::Grayscale:      // Grayscale
-        if (depth != 1 && depth != 2 && depth != 4 && depth != 8 && depth != 16) { return false; }
+        if (depth != 1 && depth != 2 && depth != 4 && depth != 8 && depth != 16) { return; }
         break;
     case png::color_type::TrueColor:      // Truecolor
-        if (depth != 8 && depth != 16) { return false; }
+        if (depth != 8 && depth != 16) { return; }
         break;
     case png::color_type::Indexed:        // Indexed-color
-        if (depth != 1 && depth != 2 && depth != 4 && depth != 8) { return false; }
+        if (depth != 1 && depth != 2 && depth != 4 && depth != 8) { return; }
         break;
     case png::color_type::GrayscaleAlpha: // Grayscale with alpha
-        if (depth != 8 && depth != 16) { return false; }
+        if (depth != 8 && depth != 16) { return; }
         break;
     case png::color_type::TrueColorAlpha: // Truecolor with alpha
-        if (depth != 8 && depth != 16) { return false; }
+        if (depth != 8 && depth != 16) { return; }
         break;
     }
 
@@ -338,35 +336,35 @@ auto png_decoder::prepare() -> i32
     case png::color_type::Grayscale: // Grayscale
         switch (depth) {
         case 1:
-            retValue = 1;
-            lineSize = (_ihdr.Width + 7) / 8;
+            _pixelSize = 1;
+            lineSize   = (_ihdr.Width + 7) / 8;
             break;
         case 2:
-            retValue = 1;
-            lineSize = (_ihdr.Width + 3) / 4;
+            _pixelSize = 1;
+            lineSize   = (_ihdr.Width + 3) / 4;
             break;
         case 4:
-            retValue = 1;
-            lineSize = (_ihdr.Width + 1) / 2;
+            _pixelSize = 1;
+            lineSize   = (_ihdr.Width + 1) / 2;
             break;
         case 8:
-            retValue = 1;
-            lineSize = _ihdr.Width;
+            _pixelSize = 1;
+            lineSize   = _ihdr.Width;
             break;
         case 16:
-            retValue = 2;
-            lineSize = _ihdr.Width * 2;
+            _pixelSize = 2;
+            lineSize   = _ihdr.Width * 2;
             break;
         }
 
         break;
     case png::color_type::TrueColor: // Truecolor
         switch (depth) {
-        case 8: retValue = 3; break;
-        case 16: retValue = 6; break;
+        case 8: _pixelSize = 3; break;
+        case 16: _pixelSize = 6; break;
         }
 
-        lineSize = _ihdr.Width * retValue;
+        lineSize = _ihdr.Width * _pixelSize;
         break;
     case png::color_type::Indexed: // Indexed-color
         switch (depth) {
@@ -376,32 +374,31 @@ auto png_decoder::prepare() -> i32
         case 8: lineSize = _ihdr.Width; break;
         }
 
-        retValue = 1;
+        _pixelSize = 1;
         break;
     case png::color_type::GrayscaleAlpha: // Grayscale with alpha
         switch (depth) {
-        case 8: retValue = 2; break;
-        case 16: retValue = 4; break;
+        case 8: _pixelSize = 2; break;
+        case 16: _pixelSize = 4; break;
         }
 
-        lineSize = _ihdr.Width * retValue;
+        lineSize = _ihdr.Width * _pixelSize;
         break;
     case png::color_type::TrueColorAlpha: // Truecolor with alpha
         switch (depth) {
-        case 8: retValue = 4; break;
-        case 16: retValue = 8; break;
+        case 8: _pixelSize = 4; break;
+        case 16: _pixelSize = 8; break;
         }
 
-        lineSize = _ihdr.Width * retValue;
+        lineSize = _ihdr.Width * _pixelSize;
         break;
     }
 
-    _prvLine.resize(lineSize * 2);
-    _curLine.resize(lineSize * 2);
+    _prvLine.resize(lineSize);
+    _curLine.resize(lineSize);
     _data.resize(_ihdr.Width * png::BPP * _ihdr.Height);
     _dataIt = _data.begin();
     get_image_data_delegate();
-    return retValue;
 }
 
 void png_decoder::get_image_data_delegate()
@@ -508,11 +505,11 @@ void png_decoder::get_image_data_delegate()
 
 auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
 {
-    i32 const pixelSize {prepare()};
-    if (pixelSize == 0) { return false; }
+    prepare();
+    if (_pixelSize == 0) { return false; }
 
-    for (i32 bufferIndex {0}; bufferIndex < std::ssize(idat); bufferIndex += pixelSize) {
-        std::span<u8 const> const dat {idat.begin() + bufferIndex, idat.begin() + bufferIndex + pixelSize};
+    for (i32 bufferIndex {0}; bufferIndex < std::ssize(idat); bufferIndex += _pixelSize) {
+        std::span<u8 const> const dat {idat.begin() + bufferIndex, idat.begin() + bufferIndex + _pixelSize};
 
         if (_pixel.Y >= _ihdr.Height) { return false; }
 
@@ -528,7 +525,7 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
             _filter    = dat[0];
             _curLineIt = _curLine.begin();
             ++_pixel.X;
-            bufferIndex = bufferIndex - pixelSize + 1;
+            bufferIndex = bufferIndex - _pixelSize + 1;
         } else {
             (this->*_getImageData)(dat);
         }

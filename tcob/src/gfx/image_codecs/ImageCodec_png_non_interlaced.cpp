@@ -10,7 +10,7 @@ namespace tcob::gfx::detail {
 void png_decoder::get_image_data_non_interlaced_G1(std::span<u8 const> pix)
 {
     _curLine[_pixel.X / 8] = pix[0];
-    filter(_pixel.X / 8, _pixel.Y, 1);
+    filter(_pixel.X / 8, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i++) {
         u8 const c {static_cast<u8>(png::get_bits(_curLine[_pixel.X / 8], 7 - i, 1) * 255)};
@@ -28,7 +28,7 @@ void png_decoder::get_image_data_non_interlaced_G1(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_G2(std::span<u8 const> pix)
 {
     _curLine[_pixel.X / 4] = pix[0];
-    filter(_pixel.X / 4, _pixel.Y, 1);
+    filter(_pixel.X / 4, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 2) {
         u8 const c {static_cast<u8>(png::get_bits(_curLine[_pixel.X / 4], 6 - i, 2) / 3.0f * 255)};
@@ -46,7 +46,7 @@ void png_decoder::get_image_data_non_interlaced_G2(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_G4(std::span<u8 const> pix)
 {
     _curLine[_pixel.X / 2] = pix[0];
-    filter(_pixel.X / 2, _pixel.Y, 1);
+    filter(_pixel.X / 2, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 4) {
         u8 const c {static_cast<u8>(png::get_bits(_curLine[_pixel.X / 2], 4 - i, 4) / 15.0f * 255)};
@@ -64,7 +64,7 @@ void png_decoder::get_image_data_non_interlaced_G4(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_G8(std::span<u8 const> pix)
 {
     _curLine[_pixel.X] = pix[0];
-    filter(_pixel.X, _pixel.Y, 1);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const c {_curLine[_pixel.X]};
     std::fill_n(_dataIt, 3, c);
@@ -79,7 +79,7 @@ void png_decoder::get_image_data_non_interlaced_G8(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_G16(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 2);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const c {*_curLineIt};
     std::fill_n(_dataIt, 3, c);
@@ -95,7 +95,7 @@ void png_decoder::get_image_data_non_interlaced_G16(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_GA8(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 2);
+    filter(_pixel.X, _pixel.Y);
 
     std::fill_n(_dataIt, 3, *_curLineIt++);
     *(_dataIt + 3) = *_curLineIt++;
@@ -109,7 +109,7 @@ void png_decoder::get_image_data_non_interlaced_GA8(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_GA16(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 4);
+    filter(_pixel.X, _pixel.Y);
 
     std::fill_n(_dataIt, 3, *_curLineIt);
     *(_dataIt + 3) = *(_curLineIt + 2);
@@ -124,7 +124,7 @@ void png_decoder::get_image_data_non_interlaced_GA16(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_I1(std::span<u8 const> pix)
 {
     _curLine[_pixel.X / 8] = pix[0];
-    filter(_pixel.X / 8, _pixel.Y, 1);
+    filter(_pixel.X / 8, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i++) {
         u8 const idx {png::get_bits(_curLine[_pixel.X / 8], 7 - i, 1)};
@@ -145,7 +145,7 @@ void png_decoder::get_image_data_non_interlaced_I1(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_I2(std::span<u8 const> pix)
 {
     _curLine[_pixel.X / 4] = pix[0];
-    filter(_pixel.X / 4, _pixel.Y, 1);
+    filter(_pixel.X / 4, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 2) {
         u8 const idx {png::get_bits(_curLine[_pixel.X / 4], 6 - i, 2)};
@@ -166,7 +166,7 @@ void png_decoder::get_image_data_non_interlaced_I2(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_I4(std::span<u8 const> pix)
 {
     _curLine[_pixel.X / 2] = pix[0];
-    filter(_pixel.X / 2, _pixel.Y, 1);
+    filter(_pixel.X / 2, _pixel.Y);
 
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 4) {
         u8 const idx {png::get_bits(_curLine[_pixel.X / 2], 4 - i, 4)};
@@ -187,7 +187,7 @@ void png_decoder::get_image_data_non_interlaced_I4(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_I8(std::span<u8 const> pix)
 {
     _curLine[_pixel.X] = pix[0];
-    filter(_pixel.X, _pixel.Y, 1);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const idx {_curLine[_pixel.X]};
     assert(_plte && _plte->Entries.size() > idx);
@@ -206,7 +206,7 @@ void png_decoder::get_image_data_non_interlaced_I8(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_TC8(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 3);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const r {*_curLineIt++};
     u8 const g {*_curLineIt++};
@@ -225,7 +225,7 @@ void png_decoder::get_image_data_non_interlaced_TC8(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_TC16(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 6);
+    filter(_pixel.X, _pixel.Y);
 
     u8 const r {*_curLineIt};
     u8 const g {*(_curLineIt + 2)};
@@ -245,7 +245,7 @@ void png_decoder::get_image_data_non_interlaced_TC16(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_TCA8(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 4);
+    filter(_pixel.X, _pixel.Y);
 
     for (i32 i {0}; i < 4; ++i) {
         *_dataIt++ = *_curLineIt++;
@@ -259,7 +259,7 @@ void png_decoder::get_image_data_non_interlaced_TCA8(std::span<u8 const> pix)
 void png_decoder::get_image_data_non_interlaced_TCA16(std::span<u8 const> pix)
 {
     std::copy(pix.begin(), pix.end(), _curLineIt);
-    filter(_pixel.X, _pixel.Y, 8);
+    filter(_pixel.X, _pixel.Y);
 
     for (i32 i {0}; i < 4; ++i) {
         *_dataIt++ = *_curLineIt;
