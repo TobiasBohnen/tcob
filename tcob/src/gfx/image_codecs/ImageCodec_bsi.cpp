@@ -12,7 +12,7 @@ namespace tcob::gfx::detail {
 void bsi::header::read(istream& reader)
 {
     reader.read_to<ubyte>(Sig);
-    Size   = {static_cast<i32>(reader.read<u32>(std::endian::little)), static_cast<i32>(reader.read<u32>(std::endian::little))};
+    Size   = {static_cast<i32>(reader.read<u32>()), static_cast<i32>(reader.read<u32, std::endian::little>())};
     Format = static_cast<image::format>(reader.read<u8>());
 }
 
@@ -49,8 +49,8 @@ auto bsi_encoder::encode(image const& img, ostream& out) const -> bool
 {
     out.write(SIGNATURE);
     auto const& info {img.get_info()};
-    out.write<u32>(info.Size.Width, std::endian::little);
-    out.write<u32>(info.Size.Height, std::endian::little);
+    out.write<u32, std::endian::little>(info.Size.Width);
+    out.write<u32, std::endian::little>(info.Size.Height);
     out.write<u8>(static_cast<u8>(info.Format));
 
     if (auto buf {io::zlib_filter {}.to(img.get_data())}) {

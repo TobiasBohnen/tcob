@@ -26,8 +26,8 @@ auto bsa_decoder::open() -> std::optional<buffer::info>
 
     if (sig == SIGNATURE) {
         _info.Channels   = reader.read<u8>();
-        _info.FrameCount = reader.read<u32>(std::endian::little);
-        _info.SampleRate = reader.read<u32>(std::endian::little);
+        _info.FrameCount = reader.read<u32, std::endian::little>();
+        _info.SampleRate = reader.read<u32, std::endian::little>();
         return _info;
     }
 
@@ -51,8 +51,8 @@ auto bsa_encoder::encode(std::span<f32 const> samples, buffer::info const& info,
 {
     out.write(SIGNATURE);
     out.write<u8>(static_cast<u8>(info.Channels));
-    out.write<u32>(static_cast<u32>(info.FrameCount), std::endian::little);
-    out.write<u32>(static_cast<u32>(info.SampleRate), std::endian::little);
+    out.write<u32, std::endian::little>(static_cast<u32>(info.FrameCount));
+    out.write<u32, std::endian::little>(static_cast<u32>(info.SampleRate));
 
     std::vector<i16> buffer;
     buffer.resize(samples.size());

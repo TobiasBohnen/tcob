@@ -36,8 +36,8 @@ auto qoi_decoder::decode_header(istream& in) -> std::optional<image::info>
     in.read_to<u8>(buf);
     if (buf != std::array<u8, 4> {'q', 'o', 'i', 'f'}) { return std::nullopt; }
 
-    i32 const w {static_cast<i32>(in.read<u32>(std::endian::big))};
-    i32 const h {static_cast<i32>(in.read<u32>(std::endian::big))};
+    i32 const w {static_cast<i32>(in.read<u32, std::endian::big>())};
+    i32 const h {static_cast<i32>(in.read<u32, std::endian::big>())};
     u8 const  bpp {in.read<u8>()};
     return image::info {{w, h}, bpp == 3 ? image::format::RGB : image::format::RGBA};
 }

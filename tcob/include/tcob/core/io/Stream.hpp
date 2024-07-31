@@ -29,11 +29,8 @@ class TCOB_API istream : public non_copyable {
 public:
     virtual ~istream() = default;
 
-    template <POD T>
+    template <POD T, std::endian Endianess = std::endian::native>
     auto read() -> T;
-
-    template <POD T>
-    auto read(std::endian endianness) -> T;
 
     template <POD T>
     auto read_to(std::span<T> target) -> std::streamsize;
@@ -106,11 +103,8 @@ class TCOB_API ostream : public non_copyable {
 public:
     virtual ~ostream() = default;
 
-    template <NotStringLikePOD T>
+    template <NotStringLikePOD T, std::endian Endianess = std::endian::native>
     auto write(T s) -> std::streamsize;
-
-    template <NotStringLikePOD T>
-    auto write(T s, std::endian endianness) -> std::streamsize;
 
     template <StringLike T>
     auto write(T s) -> std::streamsize;

@@ -173,15 +173,15 @@ auto png_decoder::read_header(istream& in) -> bool
 auto png_decoder::read_chunk(istream& in) const -> png::chunk
 {
     png::chunk retValue;
-    retValue.Length = in.read<u32>(std::endian::big);
-    retValue.Type   = static_cast<png::chunk_type>(in.read<u32>(std::endian::big));
+    retValue.Length = in.read<u32, std::endian::big>();
+    retValue.Type   = static_cast<png::chunk_type>(in.read<u32, std::endian::big>());
 
     if (retValue.Length > 0) {
         retValue.Data.resize(retValue.Length);
         in.read_to<u8>(retValue.Data);
     }
 
-    retValue.Crc = in.read<u32>(std::endian::big);
+    retValue.Crc = in.read<u32, std::endian::big>();
 
     return retValue;
 }
@@ -680,10 +680,10 @@ void png_encoder::write_chunk(ostream& out, std::span<u8 const> buf) const
 
 void png_encoder::write_chunk(ostream& out, std::span<u8 const> buf, u32 length) const
 {
-    out.write(length - 4, std::endian::big);
+    out.write<u32, std::endian::big>(length - 4);
     out.write<u8 const>({buf.data(), length});
     u32 const crc {static_cast<u32>(mz_crc32(MZ_CRC32_INIT, buf.data(), length))};
-    out.write(crc, std::endian::big);
+    out.write<u32, std::endian::big>(crc);
 }
 
 }

@@ -247,8 +247,8 @@ void tga::footer::read(istream& reader)
         Format = format::New;
 
         reader.seek(-(SignatureOffset + static_cast<i32>(SIGNATURE.size())), io::seek_dir::Current);
-        ExtensionAreaOffset      = reader.read<u32>(std::endian::little);
-        DeveloperDirectoryOffset = reader.read<u32>(std::endian::little);
+        ExtensionAreaOffset      = reader.read<u32, std::endian::little>();
+        DeveloperDirectoryOffset = reader.read<u32, std::endian::little>();
     } else {
         Format = format::Original;
     }
@@ -265,10 +265,10 @@ void tga::image_descriptor::read(istream& reader)
 
 void tga::image_specifications::read(istream& reader)
 {
-    XOrigin       = reader.read<u16>(std::endian::little);
-    YOrigin       = reader.read<u16>(std::endian::little);
-    Width         = reader.read<u16>(std::endian::little);
-    Height        = reader.read<u16>(std::endian::little);
+    XOrigin       = reader.read<u16, std::endian::little>();
+    YOrigin       = reader.read<u16, std::endian::little>();
+    Width         = reader.read<u16, std::endian::little>();
+    Height        = reader.read<u16, std::endian::little>();
     PixelDepth    = reader.read<u8>();
     BytesPerPixel = PixelDepth / 8;
 
@@ -277,8 +277,8 @@ void tga::image_specifications::read(istream& reader)
 
 void tga::color_map_specifications::read(istream& reader)
 {
-    FirstEntryIndex   = reader.read<u16>(std::endian::little);
-    ColorMapLength    = reader.read<u16>(std::endian::little);
+    FirstEntryIndex   = reader.read<u16, std::endian::little>();
+    ColorMapLength    = reader.read<u16, std::endian::little>();
     ColorMapEntrySize = reader.read<u8>();
 
     i32 bytes {0};
@@ -402,10 +402,10 @@ void tga_encoder::write_header(image::info const& image, ostream& out) const
     colorMapSpec.fill(0);
     out.write(colorMapSpec);
 
-    out.write<u16>(0, std::endian::little);
-    out.write<u16>(0, std::endian::little);
-    out.write<u16>(static_cast<u16>(image.Size.Width), std::endian::little);
-    out.write<u16>(static_cast<u16>(image.Size.Height), std::endian::little);
+    out.write<u16, std::endian::little>(0);
+    out.write<u16, std::endian::little>(0);
+    out.write<u16, std::endian::little>(static_cast<u16>(image.Size.Width));
+    out.write<u16, std::endian::little>(static_cast<u16>(image.Size.Height));
     out.write<u8>(static_cast<u8>(image.bytes_per_pixel() * 8));
     out.write<u8>(40);
 }

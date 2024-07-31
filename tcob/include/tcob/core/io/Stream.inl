@@ -10,22 +10,14 @@
 
 namespace tcob::io {
 
-template <POD T>
+template <POD T, std::endian Endianess>
 inline auto istream::read() -> T
 {
     T s {};
     read_bytes(&s, sizeof(T));
-    return s;
-}
-
-template <POD T>
-inline auto istream::read(std::endian endianness) -> T
-{
-    T s {read<T>()};
-    if (endianness != std::endian::native) {
+    if constexpr (Endianess != std::endian::native) {
         s = helper::byteswap(s);
     }
-
     return s;
 }
 
@@ -114,20 +106,14 @@ inline auto sink_istream<Sink>::seek(std::streamoff off, seek_dir way) -> bool
 
 ////////////////////////////////////////////////////////////
 
-template <NotStringLikePOD T>
+template <NotStringLikePOD T, std::endian Endianess>
 inline auto ostream::write(T s) -> std::streamsize
 {
-    return write_bytes(&s, sizeof(T));
-}
-
-template <NotStringLikePOD T>
-inline auto ostream::write(T s, std::endian endianness) -> std::streamsize
-{
-    if (endianness != std::endian::native) {
+    if constexpr (Endianess != std::endian::native) {
         s = helper::byteswap(s);
     }
 
-    return write(s);
+    return write_bytes(&s, sizeof(T));
 }
 
 template <StringLike T>

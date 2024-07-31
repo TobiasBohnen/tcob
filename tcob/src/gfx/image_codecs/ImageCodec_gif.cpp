@@ -34,8 +34,8 @@ void gif::header::read(istream& reader)
 
     //.ReadLogicalScreenDescriptor(s);
     // logical screen size
-    Width  = static_cast<u32>(reader.read<u16>(std::endian::little));
-    Height = static_cast<u32>(reader.read<u16>(std::endian::little));
+    Width  = static_cast<u32>(reader.read<u16, std::endian::little>());
+    Height = static_cast<u32>(reader.read<u16, std::endian::little>());
 
     // packed fields
     i32 packed {reader.read<u8>()};
@@ -177,12 +177,12 @@ auto gif_decoder_base::decode_frame_data(istream& reader, u16 iw, u16 ih) -> std
     std::array<u8, MaxStackSize>     suffix {};
 
     //  Initialize GIF data stream decoder.
-    i32 dataSize {reader.read<u8>()};
-    i32 clear {1 << dataSize};
-    i32 endOfInformation {clear + 1};
-    i32 available {clear + 2};
-    i32 codeSize {dataSize + 1};
-    i32 codeMask {(1 << codeSize) - 1};
+    i32 const dataSize {reader.read<u8>()};
+    i32 const clear {1 << dataSize};
+    i32 const endOfInformation {clear + 1};
+    i32       available {clear + 2};
+    i32       codeSize {dataSize + 1};
+    i32       codeMask {(1 << codeSize) - 1};
 
     i32 nullCode {-1}, inCode {0}, code {0};
     i32 oldCode {nullCode};
@@ -308,7 +308,7 @@ void gif_decoder_base::read_graphic_control_ext(istream& reader)
 
     _transparency = (packed & 1) != 0;
 
-    milliseconds const delay {reader.read<u16>(std::endian::little) * 10};
+    milliseconds const delay {reader.read<u16, std::endian::little>() * 10};
     _currentTimeStamp += delay;
 
     _transIndex = reader.read<u8>(); // transparent color index
@@ -317,10 +317,10 @@ void gif_decoder_base::read_graphic_control_ext(istream& reader)
 
 void gif_decoder_base::read_frame(istream& reader, gif::header const& header)
 {
-    u16 const ix {reader.read<u16>(std::endian::little)}; // (sub)image position & size
-    u16 const iy {reader.read<u16>(std::endian::little)};
-    u16 const iw {reader.read<u16>(std::endian::little)};
-    u16 const ih {reader.read<u16>(std::endian::little)};
+    u16 const ix {reader.read<u16, std::endian::little>()}; // (sub)image position & size
+    u16 const iy {reader.read<u16, std::endian::little>()};
+    u16 const iw {reader.read<u16, std::endian::little>()};
+    u16 const ih {reader.read<u16, std::endian::little>()};
 
     u8 const   packed {reader.read<u8>()};
     bool const lctFlag {(packed & 0x80) != 0}; // 1 - local color table flag

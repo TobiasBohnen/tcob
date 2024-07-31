@@ -65,22 +65,22 @@ void pcx::header::read(istream& reader)
     Version      = static_cast<version>(reader.read<u8>());
     Encoding     = static_cast<encoding>(reader.read<u8>());
     BitsPerPixel = reader.read<u8>();
-    XMin         = reader.read<u16>(std::endian::little);
-    YMin         = reader.read<u16>(std::endian::little);
-    XMax         = reader.read<u16>(std::endian::little);
-    YMax         = reader.read<u16>(std::endian::little);
-    HortDPI      = reader.read<u16>(std::endian::little);
-    VertDPI      = reader.read<u16>(std::endian::little);
+    XMin         = reader.read<u16, std::endian::little>();
+    YMin         = reader.read<u16, std::endian::little>();
+    XMax         = reader.read<u16, std::endian::little>();
+    YMax         = reader.read<u16, std::endian::little>();
+    HortDPI      = reader.read<u16, std::endian::little>();
+    VertDPI      = reader.read<u16, std::endian::little>();
 
     // skip palette
     reader.seek(HeaderPaletteLength, io::seek_dir::Current);
 
     Reserved         = reader.read<u8>();
     ColorPlanesCount = reader.read<u8>();
-    BytesPerLine     = reader.read<u16>(std::endian::little);
-    PaletteType      = static_cast<palette_type>(reader.read<u16>(std::endian::little));
-    HScrSize         = reader.read<u16>(std::endian::little);
-    VScrSize         = reader.read<u16>(std::endian::little);
+    BytesPerLine     = reader.read<u16, std::endian::little>();
+    PaletteType      = static_cast<palette_type>(reader.read<u16, std::endian::little>());
+    HScrSize         = reader.read<u16, std::endian::little>();
+    VScrSize         = reader.read<u16, std::endian::little>();
 }
 
 void pcx::header::Write(image::info const& info, ostream& writer)
