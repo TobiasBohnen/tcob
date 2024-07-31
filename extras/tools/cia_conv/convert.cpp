@@ -85,7 +85,7 @@ auto convert_audio(std::shared_ptr<io::ifstream>& in, std::string const& src, st
     return 0;
 }
 
-auto static convert_rfx(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> int
+auto static convert_rfx(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& dst) -> int
 {
     std::cout << "converting rfx: " << src << " to " << dst << "\n";
 
@@ -177,7 +177,7 @@ auto static convert_rfx(std::shared_ptr<io::ifstream>& in, std::string const& sr
     return print_error("unsupported convert target format: " + dst);
 }
 
-auto static convert_fnt(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> int
+auto static convert_fnt(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& dst) -> int
 {
     std::cout << "converting fnt: " << src << " to " << dst << "\n";
 
@@ -193,7 +193,7 @@ auto static convert_fnt(std::shared_ptr<io::ifstream>& in, std::string const& sr
     }
 
     u16    pages {0};
-    size_i fontTextureSize {size_u::Zero};
+    size_f fontTextureSize {size_f::Zero};
     u16    lineHeight {0};
     u16    base {0};
 
@@ -254,9 +254,9 @@ auto static convert_fnt(std::shared_ptr<io::ifstream>& in, std::string const& sr
 
                 // create glyph
                 gfx::rendered_glyph glyph;
-                glyph.Size      = size_i {width, height},
-                glyph.Offset    = point_f {static_cast<f32>(xoffset), static_cast<f32>(yoffset)},
-                glyph.AdvanceX  = static_cast<f32>(xadvance),
+                glyph.Size      = size_i {width, height};
+                glyph.Offset    = point_f {static_cast<f32>(xoffset), static_cast<f32>(yoffset)};
+                glyph.AdvanceX  = static_cast<f32>(xadvance);
                 glyph.TexRegion = {rect_f {static_cast<f32>(x), static_cast<f32>(y), static_cast<f32>(width), static_cast<f32>(height)}, page};
                 glyph.TexRegion.UVRect.X /= fontTextureSize.Width;
                 glyph.TexRegion.UVRect.Width /= fontTextureSize.Width;
@@ -300,20 +300,20 @@ auto static convert_fnt(std::shared_ptr<io::ifstream>& in, std::string const& sr
     obj["info"]["line_height"]  = static_cast<f32>(base);
 
     if (!obj.save(dst)) {
-        return print_error("error saving rfx config: " + dst);
+        return print_error("error saving fnt config: " + dst);
     }
 
     std::cout << "done!\n";
     return 0;
 }
 
-auto convert_misc(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> int
+auto convert_misc(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> i32
 {
     if (srcExt == ".rfx") {
-        return convert_rfx(in, src, srcExt, dst);
+        return convert_rfx(in, src, dst);
     }
     if (srcExt == ".fnt") {
-        return convert_fnt(in, src, srcExt, dst);
+        return convert_fnt(in, src, dst);
     }
     return print_error("unsupported file: " + src);
 }

@@ -354,9 +354,6 @@ void platform::InitSignatures()
 {
     using namespace io;
 
-    // misc
-    magic::add_signature({{{0, {'r', 'F', 'X', ' '}}}, ".rfx", "misc"});
-    magic::add_signature({{{0, {'B', 'M', 'F'}}}, ".fnt", "misc"});
     // image
     magic::add_signature({{{0, {'B', 'M'}}}, ".bmp", "image"});
     magic::add_signature({{{0, {'B', 'S', 'I'}}}, ".bsi", "image"});
@@ -364,7 +361,7 @@ void platform::InitSignatures()
     magic::add_signature({{{0, {'G', 'I', 'F', '8', '9', 'a'}}}, ".gif", "image"});
     magic::add_signature({{{0, {0x0a, 0x05, 0x00}}}, ".pcx", "image"});
     magic::add_signature({{{0, {0x0a, 0x05, 0x01}}}, ".pcx", "image"});
-    magic::add_signature({{{0, {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a}}}, ".png", "image"});
+    magic::add_signature({{{0, {0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a}}}, ".png", "image"});
     magic::add_signature({{{0, {'P', '1'}}}, ".pnm", "image"});
     magic::add_signature({{{0, {'P', '2'}}}, ".pnm", "image"});
     magic::add_signature({{{0, {'P', '3'}}}, ".pnm", "image"});

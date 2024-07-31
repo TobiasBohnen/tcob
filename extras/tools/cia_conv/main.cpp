@@ -6,11 +6,6 @@
 #include "../shared/argparse.hpp"
 #include "common.hpp"
 
-auto convert_audio(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst, std::string const& ctx) -> int;
-auto convert_config(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> int;
-auto convert_image(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> int;
-auto convert_misc(std::shared_ptr<io::ifstream>& in, std::string const& src, std::string const& srcExt, std::string const& dst) -> int;
-
 void static list_formats()
 {
     std::cout <<
@@ -61,6 +56,9 @@ Supported file formats:
 
 auto main(int argc, char* argv[]) -> int
 {
+    io::magic::add_signature({{{0, {'r', 'F', 'X', ' '}}}, ".rfx", "misc"});
+    io::magic::add_signature({{{0, {'B', 'M', 'F'}}}, ".fnt", "misc"});
+
     argparse::ArgumentParser program("cia_conv");
     program.add_argument("input");
     program.add_argument("output");
