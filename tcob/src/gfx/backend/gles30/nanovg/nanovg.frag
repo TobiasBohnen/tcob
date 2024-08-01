@@ -59,8 +59,7 @@ void main(void) {
         vec4 color;
         if (frag.isSingleColor) {
             color = frag.gradient[0].rgba;
-        }
-        else {
+        }else {
             vec2 pt = (frag.paintMat * vec4(vertPosition, 1.0, 1.0)).xy;
             int idx = int(clamp((sdroundrect(pt, frag.extent, frag.radius) + frag.feather * 0.5) / frag.feather, 0.0, 1.0) * 255.0);
             color = frag.gradient[idx].rgba;
@@ -75,8 +74,7 @@ void main(void) {
         if (frag.texType == 1) {
             // ARGB texture
             color = vec4(color.rgb * color.a, color.a);
-        }
-        if (frag.texType == 2) {
+        }else if (frag.texType == 2) {
             color = vec4(color.r);
         }
         // Apply color tint and alpha.
@@ -90,8 +88,7 @@ void main(void) {
         vec4 color = texture(texture0, vertTexCoords);
         if (frag.texType == 1) {
             color = vec4(color.rgb * color.a, color.a);
-        }
-        if (frag.texType == 2) {
+        }else if (frag.texType == 2) {
             color = vec4(color.r);
         }
         // Apply color tint and alpha.
