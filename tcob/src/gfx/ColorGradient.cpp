@@ -46,29 +46,30 @@ color_gradient::color_gradient(std::span<color_stop> colorStops, bool preMulAlph
 
 auto color_gradient::get_colors() const -> std::array<color, Size>
 {
-    std::array<vec4, Size> const colors {get_color_array(1)};
+    std::array<vec4, Size> const colors {as_array(1)};
 
     std::array<color, Size> retValue;
     for (u32 idx {0}; idx < Size; ++idx) {
-        retValue[idx].R = static_cast<u8>(colors[idx][0] * 255.0f);
-        retValue[idx].G = static_cast<u8>(colors[idx][1] * 255.0f);
-        retValue[idx].B = static_cast<u8>(colors[idx][2] * 255.0f);
-        retValue[idx].A = static_cast<u8>(colors[idx][3] * 255.0f);
+        auto& c {retValue[idx]};
+        c.R = static_cast<u8>(colors[idx][0] * 255.0f);
+        c.G = static_cast<u8>(colors[idx][1] * 255.0f);
+        c.B = static_cast<u8>(colors[idx][2] * 255.0f);
+        c.A = static_cast<u8>(colors[idx][3] * 255.0f);
     }
     return retValue;
 }
 
-auto color_gradient::get_color_array(f32 multAlpha) const -> std::array<vec4, Size>
+auto color_gradient::as_array(f32 multAlpha) const -> std::array<vec4, Size>
 {
     std::array<vec4, Size> retValue {};
 
     if (_colorStops.size() == 1) {
-        color const c {_colorStops.cbegin()->second};
+        color const c {_colorStops.begin()->second};
         retValue.fill({c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f * multAlpha});
     } else {
-        auto it2 {_colorStops.cbegin()};
+        auto it2 {_colorStops.begin()};
         auto it1 {it2++};
-        while (it2 != _colorStops.cend()) {
+        while (it2 != _colorStops.end()) {
             auto const [k1, col1] {*it1};
             auto const [k2, col2] {*it2};
 
@@ -76,15 +77,14 @@ auto color_gradient::get_color_array(f32 multAlpha) const -> std::array<vec4, Si
             u32 const size {k2 - start};
 
             for (u32 i {0}; i <= size; ++i) {
-                color c {color::Lerp(col1, col2, static_cast<f32>(i) / size)};
-                if (_premulAlpha) {
-                    c = c.as_alpha_premultiplied();
-                }
+                color col {color::Lerp(col1, col2, static_cast<f32>(i) / size)};
+                if (_premulAlpha) { col = col.as_alpha_premultiplied(); }
 
-                retValue[i + start][0] = c.R / 255.0f;
-                retValue[i + start][1] = c.G / 255.0f;
-                retValue[i + start][2] = c.B / 255.0f;
-                retValue[i + start][3] = c.A / 255.0f * multAlpha;
+                auto& c {retValue[i + start]};
+                c[0] = col.R / 255.0f;
+                c[1] = col.G / 255.0f;
+                c[2] = col.B / 255.0f;
+                c[3] = col.A / 255.0f * multAlpha;
             }
 
             it1 = it2;

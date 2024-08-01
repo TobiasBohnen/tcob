@@ -84,7 +84,7 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
         retValue.Gradient[0]   = {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
         retValue.IsSingleColor = true;
     } else if (auto const* arg1 {std::get_if<paint_gradient>(&paint.Color)}) {
-        retValue.Gradient      = arg1->second.get_color_array(arg1->first);
+        retValue.Gradient      = arg1->second.as_array(arg1->first);
         retValue.IsSingleColor = false;
     }
 

@@ -110,7 +110,7 @@ auto constexpr color::as_grayscale(f32 redFactor, f32 greenFactor, f32 blueFacto
     return {value, value, value};
 }
 
-auto constexpr tcob::color::Lerp(color left, color right, f64 step) -> color
+auto constexpr color::Lerp(color left, color right, f64 step) -> color
 {
     u8 const nr {static_cast<u8>(left.R + static_cast<f64>((right.R - left.R) * step))};
     u8 const ng {static_cast<u8>(left.G + static_cast<f64>((right.G - left.G) * step))};

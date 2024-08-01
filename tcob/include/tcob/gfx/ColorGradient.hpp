@@ -36,7 +36,7 @@ public:
     color_gradient(color startColor, color endColor, bool preMulAlpha = true);
     explicit color_gradient(std::span<color_stop> colorStops, bool preMulAlpha = true);
 
-    auto get_color_array(f32 multAlpha) const -> std::array<vec4, Size>;
+    auto as_array(f32 multAlpha) const -> std::array<vec4, Size>;
     auto get_colors() const -> std::array<color, Size>;
 
     friend auto operator==(color_gradient const& left, color_gradient const& right) -> bool;
