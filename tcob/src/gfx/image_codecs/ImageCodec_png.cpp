@@ -435,28 +435,20 @@ void png_decoder::prepare_delegate()
                 : &png_decoder::interlaced_G4;
             break;
         case 8:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_G8
-                : &png_decoder::interlaced_G8;
-            break;
         case 16:
             _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_G16
-                : &png_decoder::interlaced_G16;
+                ? &png_decoder::non_interlaced_G8_16
+                : &png_decoder::interlaced_G8_16;
             break;
         }
         break;
     case png::color_type::TrueColor:
         switch (_ihdr.BitDepth) {
         case 8:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_TC8
-                : &png_decoder::interlaced_TC8;
-            break;
         case 16:
             _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_TC16
-                : &png_decoder::interlaced_TC16;
+                ? &png_decoder::non_interlaced_TC8_16
+                : &png_decoder::interlaced_TC8_16;
             break;
         }
         break;
@@ -487,29 +479,20 @@ void png_decoder::prepare_delegate()
     case png::color_type::GrayscaleAlpha:
         switch (_ihdr.BitDepth) {
         case 8:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_GA8
-                : &png_decoder::interlaced_GA8;
-            break;
         case 16:
             _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_GA16
-                : &png_decoder::interlaced_GA16;
+                ? &png_decoder::non_interlaced_GA8_16
+                : &png_decoder::interlaced_GA8_16;
             break;
         }
         break;
     case png::color_type::TrueColorAlpha:
         switch (_ihdr.BitDepth) {
         case 8:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_TCA8
-                : &png_decoder::interlaced_TCA8;
-            break;
-
         case 16:
             _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_TCA16
-                : &png_decoder::interlaced_TCA16;
+                ? &png_decoder::non_interlaced_TCA8_16
+                : &png_decoder::interlaced_TCA8_16;
             break;
         }
         break;
@@ -521,31 +504,39 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
     prepare();
     if (_pixelSize == 0) { return false; }
 
-    for (i32 bufferIndex {0}; bufferIndex < std::ssize(idat); bufferIndex += _pixelSize) {
+    auto const idatSize {std::ssize(idat)};
+    if (_ihdr.NonInterlaced) { // size check for non-interlaced
+        if (_ihdr.Height * (1 + std::ssize(_curLine)) != idatSize) { return false; }
+    }
+
+    for (i32 bufferIndex {0}; bufferIndex < idatSize; bufferIndex += _pixelSize) {
         if (_pixel.Y >= _ihdr.Height) { return false; }
 
-        if (_ihdr.Width < 5 || _ihdr.Height < 5) {
-            rect_i rect {get_interlace_dimensions()};
-            while (rect.Width <= 0 || rect.Height <= 0) {
-                ++_interlacePass;
-                rect = get_interlace_dimensions();
+        if (!_ihdr.NonInterlaced) {
+            if (_ihdr.Width < 5 || _ihdr.Height < 5) {
+                rect_i rect {get_interlace_dimensions()};
+                while (rect.Width <= 0 || rect.Height <= 0) {
+                    ++_interlacePass;
+                    rect = get_interlace_dimensions();
+                }
             }
         }
 
+        auto const idatIt {idat.begin() + bufferIndex};
         if (_pixel.X == -1) { // First byte is filter type for the line.
-            _filter    = *(idat.begin() + bufferIndex);
+            _filter    = *idatIt;
             _curLineIt = _curLine.begin();
             _pixel.X   = 0;
 
             if (_ihdr.NonInterlaced) { // copy and filter whole line if not interlaced
-                std::copy(idat.begin() + bufferIndex + 1, idat.begin() + bufferIndex + 1 + _curLine.size(), _curLineIt);
+                std::copy(idatIt + 1, idatIt + 1 + _curLine.size(), _curLineIt);
                 filter_line();
             }
 
             bufferIndex = bufferIndex - _pixelSize + 1;
         } else {
             if (!_ihdr.NonInterlaced) { // copy and filter one by one if interlaced
-                std::copy(idat.begin() + bufferIndex, idat.begin() + bufferIndex + _pixelSize, _curLineIt);
+                std::copy(idatIt, idatIt + _pixelSize, _curLineIt);
                 filter_pixel();
             }
 
