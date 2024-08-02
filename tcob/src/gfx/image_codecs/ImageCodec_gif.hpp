@@ -38,7 +38,19 @@ namespace gif {
 
 ////////////////////////////////////////////////////////////
 
-class gif_decoder_base {
+class gif_decoder final : public image_decoder, public animated_image_decoder {
+public:
+    // image_decoder
+    auto decode(istream& in) -> std::optional<image> override;
+    auto decode_header(istream& in) -> std::optional<image::info> override;
+
+    // animated_image_decoder
+    auto open() -> std::optional<image::info> override;
+
+    auto get_current_frame() const -> u8 const* override;
+    auto seek_from_current(milliseconds ts) -> animated_image_decoder::status override;
+    void reset() override;
+
 protected:
     auto read_contents(istream& reader, gif::header const& header) -> animated_image_decoder::status;
 
@@ -46,13 +58,8 @@ protected:
     auto read_block(istream& reader) -> i32;
     void read_graphic_control_ext(istream& reader);
     void read_frame(istream& reader, gif::header const& header);
-    void skip(istream& reader);
 
     void clear_pixel_cache();
-    void seek_to_first_frame(istream& reader) const;
-
-    image        _currentFrame;
-    milliseconds _currentTimeStamp {0};
 
 private:
     std::array<u8, 256> _block {};      // current data block
@@ -65,31 +72,10 @@ private:
 
     std::streamsize _firstFrameOffset {0};
     bool            _firstFrame {true};
-};
 
-////////////////////////////////////////////////////////////
+    image        _currentFrame;
+    milliseconds _currentTimeStamp {0};
 
-class gif_decoder final : public gif_decoder_base, public image_decoder {
-public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_header(istream& in) -> std::optional<image::info> override;
-
-private:
-    gif::header _header {};
-};
-
-////////////////////////////////////////////////////////////
-
-class gif_anim_decoder final : public gif_decoder_base, public animated_image_decoder {
-public:
-    auto get_current_frame() const -> u8 const* override;
-    auto seek_from_current(milliseconds ts) -> animated_image_decoder::status override;
-    void reset() override;
-
-protected:
-    auto open() -> std::optional<image::info> override;
-
-private:
     gif::header _header {};
 };
 

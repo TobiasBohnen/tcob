@@ -449,7 +449,7 @@ void platform::InitImageCodecs()
     // animated
     // decoders
     auto iadFactory {register_service<gfx::animated_image_decoder::factory>()};
-    iadFactory->add({".gif"}, std::make_unique<gfx::detail::gif_anim_decoder>);
+    iadFactory->add({".gif"}, std::make_unique<gfx::detail::gif_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
     iadFactory->add({".webp"}, std::make_unique<gfx::detail::webp_anim_decoder>);
 #endif

@@ -154,7 +154,14 @@ TEST_CASE("GFX.Decoder.PNG")
 
 TEST_CASE("GFX.Decoder.GIF")
 {
-    TEST_IMAGE_GIF(basi3p02);
+    TEST_IMAGE_GIF(basn0g01);
+    TEST_IMAGE_GIF(basn0g02);
+    TEST_IMAGE_GIF(basn0g04);
+    TEST_IMAGE_GIF(basn0g08);
+    TEST_IMAGE_GIF(basn3p01);
+    TEST_IMAGE_GIF(basn3p02);
+    TEST_IMAGE_GIF(basn3p04);
+    TEST_IMAGE_GIF(basn3p08);
 }
 
 #define TEST_IMAGE_PCX(imageName) TEST_IMAGE(imageName, "pcx")
