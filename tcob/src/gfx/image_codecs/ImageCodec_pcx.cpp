@@ -114,7 +114,7 @@ void pcx::header::Write(image::info const& info, ostream& writer)
 
 auto pcx_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (decode_header(in)) {
+    if (decode_info(in)) {
         auto const palette {read_palette(in)};
         auto const imageData {pcx::read_image_data(in, _header)};
 
@@ -157,7 +157,7 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto pcx_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto pcx_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Manufacturer == ManufacturerMagicNumber) {

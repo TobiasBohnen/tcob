@@ -43,7 +43,7 @@ namespace pnm {
 class pnm_decoder final : public image_decoder {
 public:
     auto decode(istream& in) -> std::optional<image> override;
-    auto decode_header(istream& in) -> std::optional<image::info> override;
+    auto decode_info(istream& in) -> std::optional<image::info> override;
 
 private:
     pnm::header _header;

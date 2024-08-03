@@ -314,7 +314,7 @@ void tga::header::read(istream& reader)
 
 auto tga_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (decode_header(in)) {
+    if (decode_info(in)) {
         in.seek(18 + _header.IDLength, io::seek_dir::Begin); // skip ID
         auto const colorMap {tga::read_color_map(in, _header.ColorMapSpecs.ColorMapLength, _header.ColorMapSpecs.ColorMapEntrySize)};
 
@@ -363,7 +363,7 @@ auto tga_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto tga_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto tga_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _footer.read(in);
     _header.read(in);

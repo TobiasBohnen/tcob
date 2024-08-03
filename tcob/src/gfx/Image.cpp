@@ -186,7 +186,7 @@ auto image::LoadInfo(path const& file) noexcept -> std::optional<info>
 {
     if (auto fs {io::ifstream::Open(file)}) {
         if (auto decoder {locate_service<image_decoder::factory>().create_from_sig_or_ext(*fs, io::get_extension(file))}) {
-            return decoder->decode_header(*fs);
+            return decoder->decode_info(*fs);
         }
     }
 

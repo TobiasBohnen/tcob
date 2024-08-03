@@ -155,7 +155,7 @@ void pnm::header::read(istream& reader)
 
 auto pnm_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (decode_header(in)) {
+    if (decode_info(in)) {
         std::vector<u8> imgData;
         switch (_header.Format) {
         case pnm::format::P1:
@@ -178,7 +178,7 @@ auto pnm_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto pnm_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto pnm_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     return check_supported_format(_header)

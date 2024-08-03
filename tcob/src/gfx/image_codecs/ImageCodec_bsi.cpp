@@ -22,7 +22,7 @@ constexpr std::array<ubyte, 3> SIGNATURE {'B', 'S', 'I'};
 
 auto bsi_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (auto info {decode_header(in)}) {
+    if (auto info {decode_info(in)}) {
         auto const buffer {in.read_all<ubyte>()};
         if (auto const pixels {io::zlib_filter {}.from(buffer)}) {
             if (std::ssize(*pixels) == info->size_in_bytes()) {
@@ -34,7 +34,7 @@ auto bsi_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto bsi_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto bsi_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     bsi::header header {};
     header.read(in);

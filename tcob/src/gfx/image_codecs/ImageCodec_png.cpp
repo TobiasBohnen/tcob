@@ -99,7 +99,7 @@ constexpr std::array<ubyte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1
 
 auto png_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (decode_header(in)) {
+    if (decode_info(in)) {
         if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
 
         std::vector<ubyte>             idat {};
@@ -151,7 +151,7 @@ auto png_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto png_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto png_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     if (check_sig(in) && read_header(in)) {
         return image::info {{_ihdr.Width, _ihdr.Height}, image::format::RGBA};

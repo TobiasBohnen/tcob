@@ -55,7 +55,7 @@ auto bmp_decoder::decode(istream& in) -> std::optional<image>
 {
     auto const offset {in.tell()};
 
-    if (auto info {decode_header(in)}) {
+    if (auto info {decode_info(in)}) {
         in.seek(offset + _infoHeader.HeaderSize + 14, io::seek_dir::Begin);
 
         auto const palette {get_palette(in)};
@@ -88,7 +88,7 @@ auto bmp_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto bmp_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto bmp_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Signature == SIGNATURE) {

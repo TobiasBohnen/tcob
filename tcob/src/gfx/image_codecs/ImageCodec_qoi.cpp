@@ -13,7 +13,7 @@ constexpr i32 HEADERSIZE {13};
 
 auto qoi_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (auto info {decode_header(in)}) {
+    if (auto info {decode_info(in)}) {
         in.seek(-HEADERSIZE, io::seek_dir::Current);
         std::vector<u8> buf {in.read_all<u8>()};
 
@@ -30,7 +30,7 @@ auto qoi_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto qoi_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto qoi_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     std::array<u8, 4> buf {};
     in.read_to<u8>(buf);

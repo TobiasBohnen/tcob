@@ -42,7 +42,7 @@ class gif_decoder final : public image_decoder, public animated_image_decoder {
 public:
     // image_decoder
     auto decode(istream& in) -> std::optional<image> override;
-    auto decode_header(istream& in) -> std::optional<image::info> override;
+    auto decode_info(istream& in) -> std::optional<image::info> override;
 
     // animated_image_decoder
     auto open() -> std::optional<image::info> override;

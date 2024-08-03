@@ -56,7 +56,7 @@ void gif::header::read(istream& reader)
 
 auto gif_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (decode_header(in)) {
+    if (decode_info(in)) {
         read_contents(in, _header);
         return _currentFrame;
     }
@@ -64,7 +64,7 @@ auto gif_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto gif_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto gif_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Id.rfind("GIF", 0) == 0) {

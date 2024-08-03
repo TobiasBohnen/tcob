@@ -13,7 +13,7 @@ namespace tcob::gfx::detail {
 
 auto webp_decoder::decode(istream& in) -> std::optional<image>
 {
-    if (auto info {decode_header(in)}) {
+    if (auto info {decode_info(in)}) {
         u8* data {nullptr};
         if (info->Format == image::format::RGBA) {
             data = WebPDecodeRGBA(_buffer.data(), _buffer.size(), nullptr, nullptr);
@@ -31,7 +31,7 @@ auto webp_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto webp_decoder::decode_header(istream& in) -> std::optional<image::info>
+auto webp_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _buffer = in.read_all<u8>();
 

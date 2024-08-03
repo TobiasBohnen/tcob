@@ -92,8 +92,8 @@ public:
     image_decoder()          = default;
     virtual ~image_decoder() = default;
 
-    auto virtual decode(istream& in) -> std::optional<image>              = 0;
-    auto virtual decode_header(istream& in) -> std::optional<image::info> = 0;
+    auto virtual decode(istream& in) -> std::optional<image>            = 0;
+    auto virtual decode_info(istream& in) -> std::optional<image::info> = 0;
 };
 
 ////////////////////////////////////////////////////////////
