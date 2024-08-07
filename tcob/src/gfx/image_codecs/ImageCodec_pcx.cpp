@@ -6,15 +6,12 @@
 #include "ImageCodec_pcx.hpp"
 
 /*
+supported formats:
  Bit Depth 	Planes 	Number of Colors
- 4 	        1 	    16 colors from a palette
-X8 	        1 	    256 colors from a palette
- 8 	        1 	    256 shades of gray
- 4 	        4 	    4096 colors with 16 levels of transparency
-X8 	        3 	    16.7 million, 24-bit "true color"
- 8 	        4 	    16.7 million with 256 levels of transparency
- 1 	        1 	    2 colors monochrome (1-Bit) (Win 3.1 Paintbrush)
- 1 	        4 	    16 colors RGBi (4-Bit) in 4 planes (Win 3.1 Paintbrush)
+ 8 	        1 	    indexed 8-bit
+ 8 	        3 	    RGB
+ 1 	        1 	    monochrome
+ 1 	        4 	    indexed 4-bit
 */
 
 namespace tcob::gfx::detail {
@@ -137,13 +134,14 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
 
         image retValue {image::CreateEmpty({width, height}, image::format::RGB)};
         auto* imgData {retValue.get_data().data()};
+        i32   index {0};
 
         if (!palette.empty()) {
             // indexed
             if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 1) {
-                i32 index {0}, srcIndex {0};
-                for (i32 y {0}; y < height; y++) {
-                    for (i32 x {0}; x < width; x++) {
+                i32 srcIndex {0};
+                for (i32 y {0}; y < height; ++y) {
+                    for (i32 x {0}; x < width; ++x) {
                         usize const idx {data[srcIndex++]};
                         if (idx >= palette.size()) { return std::nullopt; }
                         color const c {palette[idx]};
@@ -152,10 +150,41 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
                         imgData[index++] = c.B;
                     }
                 }
+            } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
+                for (i32 y {0}; y < height; ++y) {
+                    for (i32 x {0}; x < width;) {
+                        auto getColor {[&]() -> std::optional<color> {
+                            if (x >= width) { return std::nullopt; }
+
+                            u32 c1 {0};
+                            for (i32 i {0}; i < 4; i++) {
+                                i32 const off {(x / 8) + ((y * bpl * 4) + (bpl * i))};
+                                assert(off < std::ssize(data));
+                                i32 const b {data[off]};
+                                u32 const l {helper::get_bits(b, 7 - (x % 8), 1)};
+                                c1 += l << i;
+                            }
+
+                            x++;
+                            return palette[c1];
+                        }};
+
+                        if (auto col1 {getColor()}) {
+                            imgData[index++] = col1->R;
+                            imgData[index++] = col1->G;
+                            imgData[index++] = col1->B;
+                        }
+
+                        if (auto col2 {getColor()}) {
+                            imgData[index++] = col2->R;
+                            imgData[index++] = col2->G;
+                            imgData[index++] = col2->B;
+                        }
+                    }
+                }
             }
         } else if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 3) {
             // RGB
-            i32 index {0};
             for (i32 y {0}; y < height; ++y) {
                 for (i32 x {0}; x < width; ++x) {
                     for (i32 i {0}; i < 3; ++i) {
@@ -163,6 +192,16 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
                     }
                 }
             }
+        } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 1) {
+            // monochrome
+            for (i32 i {0}; i < std::ssize(data); ++i) {
+                u8 b {data[i]};
+                for (i32 j {0}; j < 8; ++j) {
+                    u8 col {helper::get_bits(b, 7 - j, 1) == 0 ? u8 {0} : u8 {255}};
+                    imgData[index++] = imgData[index++] = imgData[index++] = col;
+                }
+            }
+
         } else {
             return std::nullopt;
         }
@@ -187,7 +226,7 @@ auto pcx_decoder::read_palette(istream& in) const -> std::vector<color>
 {
     if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
         in.seek(HeaderPaletteOffset, io::seek_dir::Begin);
-        return pcx::read_color_palette(in, HeaderPaletteLength);
+        return pcx::read_color_palette(in, HeaderPaletteLength / 3);
     }
     if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 1) {
         in.seek(in.size_in_bytes() - PaletteOffset, io::seek_dir::Begin);

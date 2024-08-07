@@ -35,9 +35,9 @@ void test_image(std::string const& imageName, std::string const& ext, auto&& arr
     } else if (info.bytes_per_pixel() == 3) {
         REQUIRE(size == std::ssize(array) / 4 * 3);
         for (u32 i {0}, x {0}; i < size; i += 3, x++) {
-            REQUIRE(buf[i + 0] == array[i + 0 + x]);
-            REQUIRE(buf[i + 1] == array[i + 1 + x]);
-            REQUIRE(buf[i + 2] == array[i + 2 + x]);
+            REQUIRE_MESSAGE(buf[i + 0] == array[i + 0 + x], std::format("{} {}:{}", i, buf[i], array[i]));
+            REQUIRE_MESSAGE(buf[i + 1] == array[i + 1 + x], std::format("{} {}:{}", i, buf[i], array[i]));
+            REQUIRE_MESSAGE(buf[i + 2] == array[i + 2 + x], std::format("{} {}:{}", i, buf[i], array[i]));
         }
     }
 }
@@ -168,8 +168,10 @@ TEST_CASE("GFX.Decoder.GIF")
 
 TEST_CASE("GFX.Decoder.PCX")
 {
+    TEST_IMAGE_PCX(basn0g01);
     TEST_IMAGE_PCX(basn0g08);
     TEST_IMAGE_PCX(basn2c08);
+    TEST_IMAGE_PCX(basn3p02);
     TEST_IMAGE_PCX(basn3p08);
 }
 
@@ -177,7 +179,10 @@ TEST_CASE("GFX.Decoder.PCX")
 
 TEST_CASE("GFX.Decoder.TGA")
 {
-    TEST_IMAGE_TGA(basi3p02);
+    TEST_IMAGE_TGA(basn0g08);
+    TEST_IMAGE_TGA(basn2c08);
+    TEST_IMAGE_TGA(basn3p02);
+    TEST_IMAGE_TGA(basn3p08);
 }
 
 #define TEST_IMAGE_BSI(imageName) TEST_IMAGE(imageName, "bsi")
@@ -226,6 +231,15 @@ TEST_CASE("GFX.Encoder.RGBA")
         srcData[i] = i;
     }
 
+    auto compareRGB {[srcData](std::span<u8> s1) {
+        REQUIRE(srcData.size_bytes() / 4 * 3 == s1.size_bytes());
+        for (u32 i {0}, x {0}; i < s1.size(); i += 3, x++) {
+            REQUIRE(srcData[i + 0 + x] == s1[i + 0]);
+            REQUIRE(srcData[i + 1 + x] == s1[i + 1]);
+            REQUIRE(srcData[i + 2 + x] == s1[i + 2]);
+        }
+    }};
+
     auto compareRGBA {[srcData](std::span<u8> s1) {
         REQUIRE(srcData.size_bytes() == s1.size_bytes());
         for (usize i {0}; i < srcData.size(); ++i) {
@@ -254,15 +268,6 @@ TEST_CASE("GFX.Encoder.RGBA")
 
     SUBCASE("pcx")
     {
-        auto compareRGB {[srcData](std::span<u8> s1) {
-            REQUIRE(srcData.size_bytes() / 4 * 3 == s1.size_bytes());
-            for (u32 i {0}, x {0}; i < s1.size(); i += 3, x++) {
-                REQUIRE(srcData[i + 0 + x] == s1[i + 0]);
-                REQUIRE(srcData[i + 1 + x] == s1[i + 1]);
-                REQUIRE(srcData[i + 2 + x] == s1[i + 2]);
-            }
-        }};
-
         compareRGB(test(".pcx")->get_data());
     }
 
@@ -306,6 +311,15 @@ TEST_CASE("GFX.Encoder.RGB")
         }
     }};
 
+    auto compareRGBA {[srcData](std::span<u8> s1) {
+        REQUIRE(srcData.size_bytes() / 3 * 4 == s1.size_bytes());
+        for (u32 i {0}, x {0}; i < srcData.size(); i += 3, x++) {
+            REQUIRE(srcData[i + 0] == s1[i + 0 + x]);
+            REQUIRE(srcData[i + 1] == s1[i + 1 + x]);
+            REQUIRE(srcData[i + 2] == s1[i + 2 + x]);
+        }
+    }};
+
     auto test {[&src](string const& ext) {
         io::iomstream str {};
         REQUIRE(src.save(str, ext));
@@ -317,15 +331,6 @@ TEST_CASE("GFX.Encoder.RGB")
 
     SUBCASE("png")
     {
-        auto compareRGBA {[srcData](std::span<u8> s1) {
-            REQUIRE(srcData.size_bytes() / 3 * 4 == s1.size_bytes());
-            for (u32 i {0}, x {0}; i < srcData.size(); i += 3, x++) {
-                REQUIRE(srcData[i + 0] == s1[i + 0 + x]);
-                REQUIRE(srcData[i + 1] == s1[i + 1 + x]);
-                REQUIRE(srcData[i + 2] == s1[i + 2 + x]);
-            }
-        }};
-
         compareRGBA(test(".png")->get_data());
     }
 
