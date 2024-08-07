@@ -295,41 +295,13 @@ void png_decoder::next_line_non_interlaced()
 auto png_decoder::get_interlace_dimensions() const -> rect_i
 {
     switch (_interlacePass) {
-    case 1:
-        return {(_pixel.X * 8),
-                (_pixel.Y * 8),
-                (_ihdr.Width + 7) / 8,
-                (_ihdr.Height + 7) / 8};
-    case 2:
-        return {(4 + _pixel.X * 8),
-                (_pixel.Y * 8),
-                (_ihdr.Width + 3) / 8,
-                (_ihdr.Height + 7) / 8};
-    case 3:
-        return {(_pixel.X * 4),
-                (4 + _pixel.Y * 8),
-                (_ihdr.Width + 3) / 4,
-                (_ihdr.Height + 3) / 8};
-    case 4:
-        return {(2 + _pixel.X * 4),
-                (_pixel.Y * 4),
-                (_ihdr.Width + 1) / 4,
-                (_ihdr.Height + 3) / 4};
-    case 5:
-        return {(_pixel.X * 2),
-                (2 + _pixel.Y * 4),
-                (_ihdr.Width + 1) / 2,
-                (_ihdr.Height + 1) / 4};
-    case 6:
-        return {(1 + _pixel.X * 2),
-                (_pixel.Y * 2),
-                (_ihdr.Width) / 2,
-                (_ihdr.Height + 1) / 2};
-    case 7:
-        return {_pixel.X,
-                (1 + _pixel.Y * 2),
-                _ihdr.Width,
-                _ihdr.Height / 2};
+    case 1: return {(0 + _pixel.X * 8), (0 + _pixel.Y * 8), (_ihdr.Width + 7) / 8, (_ihdr.Height + 7) / 8};
+    case 2: return {(4 + _pixel.X * 8), (0 + _pixel.Y * 8), (_ihdr.Width + 3) / 8, (_ihdr.Height + 7) / 8};
+    case 3: return {(0 + _pixel.X * 4), (4 + _pixel.Y * 8), (_ihdr.Width + 3) / 4, (_ihdr.Height + 3) / 8};
+    case 4: return {(2 + _pixel.X * 4), (0 + _pixel.Y * 4), (_ihdr.Width + 1) / 4, (_ihdr.Height + 3) / 4};
+    case 5: return {(0 + _pixel.X * 2), (2 + _pixel.Y * 4), (_ihdr.Width + 1) / 2, (_ihdr.Height + 1) / 4};
+    case 6: return {(1 + _pixel.X * 2), (0 + _pixel.Y * 2), (_ihdr.Width + 0) / 2, (_ihdr.Height + 1) / 2};
+    case 7: return {(0 + _pixel.X * 1), (1 + _pixel.Y * 2), (_ihdr.Width + 0) / 1, (_ihdr.Height + 0) / 2};
     }
 
     return {};

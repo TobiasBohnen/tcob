@@ -154,13 +154,8 @@ auto bmp_decoder::get_rgb_data(istream& in, size_i size, u16 bitCount, std::vect
     i32 const srcStride {static_cast<i32>(std::ceil(width * bitCount / 32.f) * 4)};
     i32 const dstStride {_info.stride()};
 
-    if (bitCount == 1) {
-        return {};
-    }
-
-    if (bitCount == 16) {
-        return {};
-    }
+    if (bitCount == 1) { return {}; }
+    if (bitCount == 16) { return {}; }
 
     if (bitCount == 4) {
         i32 index {dstStride * (height - 1)};

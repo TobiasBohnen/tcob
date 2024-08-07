@@ -208,9 +208,7 @@ auto gif_decoder::decode_frame_data(istream& reader, u16 iw, u16 ih) -> std::vec
                 if (count == 0) {
                     // Read a new data block.
                     count = read_block(reader);
-                    if (count <= 0) {
-                        break;
-                    }
+                    if (count <= 0) { break; }
                     bi = 0;
                 }
                 datum += (static_cast<i32>(_block[bi]) & 0xff) << bits;
@@ -255,9 +253,7 @@ auto gif_decoder::decode_frame_data(istream& reader, u16 iw, u16 ih) -> std::vec
             first = static_cast<i32>(suffix[code]) & 0xff;
 
             //  Add a new string to the string table,
-            if (available >= MaxStackSize) {
-                break;
-            }
+            if (available >= MaxStackSize) { break; }
             pixelStack[top++] = static_cast<u8>(first);
             prefix[available] = static_cast<i16>(oldCode);
             suffix[available] = static_cast<u8>(first);
@@ -290,9 +286,7 @@ auto gif_decoder::read_block(istream& reader) -> i32
         i32 count {0};
         while (n < _blockSize) {
             count = static_cast<i32>(reader.read_to<u8>({_block.data(), static_cast<usize>(_blockSize - n)}));
-            if (reader.is_eof()) {
-                break;
-            }
+            if (reader.is_eof()) { break; }
             n += count;
         }
     }
