@@ -5,9 +5,22 @@
 
 #include "ImageCodec_pcx.hpp"
 
+/*
+ Bit Depth 	Planes 	Number of Colors
+ 4 	        1 	    16 colors from a palette
+X8 	        1 	    256 colors from a palette
+ 8 	        1 	    256 shades of gray
+ 4 	        4 	    4096 colors with 16 levels of transparency
+X8 	        3 	    16.7 million, 24-bit "true color"
+ 8 	        4 	    16.7 million with 256 levels of transparency
+ 1 	        1 	    2 colors monochrome (1-Bit) (Win 3.1 Paintbrush)
+ 1 	        4 	    16 colors RGBi (4-Bit) in 4 planes (Win 3.1 Paintbrush)
+*/
+
 namespace tcob::gfx::detail {
 
 constexpr i32  HeaderPaletteLength {48};
+constexpr i32  HeaderPaletteOffset {16};
 constexpr byte ManufacturerMagicNumber {0x0a};
 constexpr byte PaletteMagicNumber {12};
 constexpr i32  PaletteOffset {769};
@@ -116,12 +129,14 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
         auto const palette {read_palette(in)};
-        auto const imageData {pcx::read_image_data(in, _header)};
+        auto const data {pcx::read_image_data(in, _header)};
 
-        i32 const       width {_header.Width()};
-        i32 const       height {_header.Height()};
-        std::vector<u8> imgData;
-        imgData.resize(width * pcx::BPP * height);
+        i32 const width {_header.Width()};
+        i32 const height {_header.Height()};
+        i16 const bpl {_header.BytesPerLine};
+
+        image retValue {image::CreateEmpty({width, height}, image::format::RGB)};
+        auto* imgData {retValue.get_data().data()};
 
         if (!palette.empty()) {
             // indexed
@@ -129,7 +144,9 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
                 i32 index {0}, srcIndex {0};
                 for (i32 y {0}; y < height; y++) {
                     for (i32 x {0}; x < width; x++) {
-                        color const c {palette[imageData[srcIndex++]]};
+                        usize const idx {data[srcIndex++]};
+                        if (idx >= palette.size()) { return std::nullopt; }
+                        color const c {palette[idx]};
                         imgData[index++] = c.R;
                         imgData[index++] = c.G;
                         imgData[index++] = c.B;
@@ -138,12 +155,11 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
             }
         } else if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 3) {
             // RGB
-            i16 const bpl {_header.BytesPerLine};
-            i32       index {0};
+            i32 index {0};
             for (i32 y {0}; y < height; ++y) {
                 for (i32 x {0}; x < width; ++x) {
                     for (i32 i {0}; i < 3; ++i) {
-                        imgData[index++] = imageData[x + ((y * bpl) * 3) + (bpl * i)];
+                        imgData[index++] = data[x + ((y * bpl) * 3) + (bpl * i)];
                     }
                 }
             }
@@ -151,7 +167,7 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
             return std::nullopt;
         }
 
-        return image::Create({width, height}, image::format::RGB, imgData);
+        return retValue;
     }
 
     return std::nullopt;
@@ -169,6 +185,10 @@ auto pcx_decoder::decode_info(istream& in) -> std::optional<image::info>
 
 auto pcx_decoder::read_palette(istream& in) const -> std::vector<color>
 {
+    if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
+        in.seek(HeaderPaletteOffset, io::seek_dir::Begin);
+        return pcx::read_color_palette(in, HeaderPaletteLength);
+    }
     if (_header.BitsPerPixel == 8 && _header.ColorPlanesCount == 1) {
         in.seek(in.size_in_bytes() - PaletteOffset, io::seek_dir::Begin);
         if (in.read<u8>() == PaletteMagicNumber) {

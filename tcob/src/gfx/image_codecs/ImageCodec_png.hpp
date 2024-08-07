@@ -19,11 +19,6 @@ namespace tcob::gfx::detail {
 ////////////////////////////////////////////////////////////
 
 namespace png {
-    inline auto get_bits(i32 i, i32 offset, i32 count) -> u8
-    {
-        return static_cast<u8>(i >> offset) & ((1 << count) - 1);
-    }
-
     constexpr i32 BPP {4};
     constexpr i32 MAX_SIZE {0x4000};
 

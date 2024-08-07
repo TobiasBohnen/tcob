@@ -96,7 +96,11 @@ list(APPEND CMAKE_MODULE_PATH ${doctest_SOURCE_DIR}/scripts/cmake/)
 include(doctest)
 doctest_discover_tests(tcob_tests)
 
-file(COPY testfiles DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+add_custom_target(tcob_tests_copyFiles ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testfiles ${CMAKE_CURRENT_BINARY_DIR}/testfiles
+)
+
+add_dependencies(tcob_tests_copyFiles tcob_tests)
 
 # if(TCOB_ASAN)
 # target_compile_definitions(tcob_tests PUBLIC _DISABLE_STRING_ANNOTATION PUBLIC _DISABLE_VECTOR_ANNOTATION)

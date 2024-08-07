@@ -10,7 +10,7 @@ namespace tcob::gfx::detail {
 void png_decoder::non_interlaced_G1()
 {
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i++) {
-        u8 const c {static_cast<u8>(png::get_bits(*_curLineIt, 7 - i, 1) * 255)};
+        u8 const c {static_cast<u8>(helper::get_bits(*_curLineIt, 7 - i, 1) * 255)};
 
         std::fill_n(_dataIt, 3, c);
         *(_dataIt + 3) = _trns && _trns->is_gray_transparent(c) ? 0 : 255;
@@ -25,7 +25,7 @@ void png_decoder::non_interlaced_G1()
 void png_decoder::non_interlaced_G2()
 {
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 2) {
-        u8 const c {static_cast<u8>(png::get_bits(*_curLineIt, 6 - i, 2) / 3.0f * 255)};
+        u8 const c {static_cast<u8>(helper::get_bits(*_curLineIt, 6 - i, 2) / 3.0f * 255)};
 
         std::fill_n(_dataIt, 3, c);
         *(_dataIt + 3) = _trns && _trns->is_gray_transparent(c) ? 0 : 255;
@@ -40,7 +40,7 @@ void png_decoder::non_interlaced_G2()
 void png_decoder::non_interlaced_G4()
 {
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 4) {
-        u8 const c {static_cast<u8>(png::get_bits(*_curLineIt, 4 - i, 4) / 15.0f * 255)};
+        u8 const c {static_cast<u8>(helper::get_bits(*_curLineIt, 4 - i, 4) / 15.0f * 255)};
 
         std::fill_n(_dataIt, 3, c);
         *(_dataIt + 3) = _trns && _trns->is_gray_transparent(c) ? 0 : 255;
@@ -76,7 +76,7 @@ void png_decoder::non_interlaced_GA8_16()
 void png_decoder::non_interlaced_I1()
 {
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i++) {
-        u8 const idx {png::get_bits(*_curLineIt, 7 - i, 1)};
+        u8 const idx {static_cast<u8>(helper::get_bits(*_curLineIt, 7 - i, 1))};
 
         auto const color {_plte->Entries.at(idx)};
         *_dataIt++ = color.R;
@@ -93,7 +93,7 @@ void png_decoder::non_interlaced_I1()
 void png_decoder::non_interlaced_I2()
 {
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 2) {
-        u8 const idx {png::get_bits(*_curLineIt, 6 - i, 2)};
+        u8 const idx {static_cast<u8>(helper::get_bits(*_curLineIt, 6 - i, 2))};
 
         auto const color {_plte->Entries.at(idx)};
         *_dataIt++ = color.R;
@@ -110,7 +110,7 @@ void png_decoder::non_interlaced_I2()
 void png_decoder::non_interlaced_I4()
 {
     for (i32 i {0}; i < 8 && _pixel.X < _ihdr.Width; i += 4) {
-        u8 const idx {png::get_bits(*_curLineIt, 4 - i, 4)};
+        u8 const idx {static_cast<u8>(helper::get_bits(*_curLineIt, 4 - i, 4))};
 
         auto const color {_plte->Entries.at(idx)};
         *_dataIt++ = color.R;

@@ -49,11 +49,6 @@ auto static check_supported_format(tga::header const& h) -> bool
     return false;
 }
 
-auto static get_bits(i32 i, i32 offset, i32 count) -> i32
-{
-    return (i >> offset) & ((1 << count) - 1);
-}
-
 auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 {
     if (bitsPerPixel < 8) {
@@ -65,20 +60,20 @@ auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 
 auto static get_color(u8 one, u8 two) -> color
 {
-    i32 r1 {get_bits(one, 2, 5)};
+    u32 r1 {helper::get_bits(one, 2, 5)};
     u8  r {static_cast<u8>(r1 << 3)};
 
-    i32 bit {get_bits(one, 0, 2)};
-    i32 g1 {bit << 6};
+    u32 bit {helper::get_bits(one, 0, 2)};
+    u32 g1 {bit << 6};
 
-    bit = get_bits(two, 5, 3);
-    i32 g2 {bit << 3};
+    bit = helper::get_bits(two, 5, 3);
+    u32 g2 {bit << 3};
     u8  g {static_cast<u8>(g1 + g2)};
 
-    i32 b1 {get_bits(two, 0, 5)};
+    u32 b1 {helper::get_bits(two, 0, 5)};
     u8  b {static_cast<u8>(b1 << 3)};
 
-    i32 a1 {get_bits(one, 7, 1)};
+    u32 a1 {helper::get_bits(one, 7, 1)};
     u8  a {static_cast<u8>(a1 * 255)};
 
     return {r, g, b, a};
@@ -259,8 +254,8 @@ void tga::footer::read(istream& reader)
 void tga::image_descriptor::read(istream& reader)
 {
     u8 imgDesc            = reader.read<u8>();
-    AttributeBits         = get_bits(imgDesc, 0, 4);
-    FirstPixelDestination = static_cast<first_pixel_destination>(get_bits(imgDesc, 4, 2));
+    AttributeBits         = helper::get_bits(imgDesc, 0, 4);
+    FirstPixelDestination = static_cast<first_pixel_destination>(helper::get_bits(imgDesc, 4, 2));
 }
 
 void tga::image_specifications::read(istream& reader)

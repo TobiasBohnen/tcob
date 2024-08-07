@@ -168,7 +168,9 @@ TEST_CASE("GFX.Decoder.GIF")
 
 TEST_CASE("GFX.Decoder.PCX")
 {
-    TEST_IMAGE_PCX(basi3p02);
+    TEST_IMAGE_PCX(basn0g08);
+    TEST_IMAGE_PCX(basn2c08);
+    TEST_IMAGE_PCX(basn3p08);
 }
 
 #define TEST_IMAGE_TGA(imageName) TEST_IMAGE(imageName, "tga")
