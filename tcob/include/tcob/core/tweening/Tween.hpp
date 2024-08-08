@@ -345,6 +345,17 @@ namespace funcs {
 
     ////////////////////////////////////////////////////////////
 
+    class catmull_rom final {
+    public:
+        using type = point_f;
+
+        std::vector<type> ControlPoints;
+
+        auto operator()(f64 t) const -> type;
+    };
+
+    ////////////////////////////////////////////////////////////
+
     template <auto Func>
     class function final {
     public:
@@ -409,6 +420,8 @@ using quad_bezier_curve_tween = tween<funcs::quad_bezier_curve>;
 using cubic_bezier_curve_tween = tween<funcs::cubic_bezier_curve>;
 
 using bezier_curve_tween = tween<funcs::bezier_curve>;
+
+using catmull_rom_tween = tween<funcs::catmull_rom>;
 
 template <auto Func>
 using function_tween = tween<funcs::function<Func>>;

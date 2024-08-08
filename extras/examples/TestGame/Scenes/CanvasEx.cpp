@@ -95,10 +95,34 @@ void CanvasEx::paint_to_canvas()
 {
     _canvas.begin_frame({1000, 800}, 2);
 
-    _canvas.set_fill_style(LinearGradient);
+    _canvas.set_fill_style(colors::White);
     _canvas.begin_path();
-    _canvas.rect({50, 50, 200, 200});
+    _canvas.rect({150, 150, 500, 500});
     _canvas.fill();
+
+    funcs::catmull_rom cm;
+    cm.ControlPoints = {{150, 300},
+                        {150, 150},
+                        {350, 300},
+                        {200, 300},
+                        {250, 15}};
+
+    std::vector<point_f> points;
+    for (f32 f {0}; f < 1.0f; f += 0.01f) {
+        points.push_back(cm(f));
+    }
+    points.push_back(points.front());
+
+    _canvas.set_stroke_style(colors::Blue);
+    _canvas.set_stroke_width(5);
+    _canvas.stroke_lines(points);
+
+    for (auto const& pt : cm.ControlPoints) {
+        _canvas.begin_path();
+        _canvas.set_fill_style(colors::Orange);
+        _canvas.circle(pt, 10);
+        _canvas.fill();
+    }
 
     _canvas.end_frame();
 }

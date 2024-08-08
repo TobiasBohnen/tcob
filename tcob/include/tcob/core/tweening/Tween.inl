@@ -295,9 +295,9 @@ namespace funcs {
 
     inline auto bezier_curve::operator()(f64 t) const -> type
     {
-        std::vector<point_f> points {ControlPoints};
-        usize                numPoints(ControlPoints.size());
-        f32 const            oneMinusT {1.0f - static_cast<f32>(t)};
+        std::vector<type> points {ControlPoints};
+        usize             numPoints(ControlPoints.size());
+        f32 const         oneMinusT {1.0f - static_cast<f32>(t)};
 
         while (numPoints > 1) {
             for (usize i {0}; i < numPoints - 1; ++i) {
@@ -307,6 +307,34 @@ namespace funcs {
         }
 
         return points[0];
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    inline auto catmull_rom::operator()(f64 t) const -> type
+    {
+        if (ControlPoints.size() < 4) { return {}; }
+
+        f64 const curveP {t * (ControlPoints.size() - 1)};
+        i32 const curveNum {static_cast<i32>(curveP)};
+
+        i32 const b {curveNum};
+        i32 const a {b > 0 ? b - 1 : 0};
+        i32 const c {b + 1};
+        i32 const d {std::min<i32>(c + 1, static_cast<i32>(ControlPoints.size()) - 1)};
+
+        type const& p0 {ControlPoints[a]};
+        type const& p1 {ControlPoints[b]};
+        type const& p2 {ControlPoints[c]};
+        type const& p3 {ControlPoints[d]};
+
+        f64 const exp0 {curveP - curveNum};
+        f64 const exp1 {exp0 * exp0};
+        f64 const exp2 {exp1 * exp0};
+
+        f32 const x {static_cast<f32>(0.5 * ((2 * p1.X) + (-p0.X + p2.X) * exp0 + (2 * p0.X - 5 * p1.X + 4 * p2.X - p3.X) * exp1 + (-p0.X + 3 * p1.X - 3 * p2.X + p3.X) * exp2))};
+        f32 const y {static_cast<f32>(0.5 * ((2 * p1.Y) + (-p0.Y + p2.Y) * exp0 + (2 * p0.Y - 5 * p1.Y + 4 * p2.Y - p3.Y) * exp1 + (-p0.Y + 3 * p1.Y - 3 * p2.Y + p3.Y) * exp2))};
+        return {x, y};
     }
 
     ////////////////////////////////////////////////////////////
@@ -330,7 +358,6 @@ namespace funcs {
     {
         return _obj(t);
     }
-
 }
 
 ////////////////////////////////////////////////////////////
