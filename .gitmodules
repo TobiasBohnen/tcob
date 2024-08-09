@@ -17,3 +17,6 @@
 [submodule "extras/tools"]
 	path = extras/tools
 	url = https://github.com/TobiasBohnen/tcob_tools
+[submodule "extras/benchmarks"]
+	path = extras/benchmarks
+	url = https://github.com/TobiasBohnen/tcob_benchmarks
