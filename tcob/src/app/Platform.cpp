@@ -309,7 +309,8 @@ void platform::init_render_system()
     // get config
     auto const video {(*_configFile)[Cfg::Video::Name].as<data::config::object>()};
 
-    size_i const resolution {video[Cfg::Video::use_desktop_resolution].as<bool>()
+    bool const   useDesktopRes {video[Cfg::Video::use_desktop_resolution].as<bool>()};
+    size_i const resolution {useDesktopRes
                                  ? renderSystem->get_desktop_size(0)
                                  : video[Cfg::Video::resolution].as<size_i>()};
 
@@ -327,7 +328,7 @@ void platform::init_render_system()
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
-    _window->FullScreen(video[Cfg::Video::fullscreen].as<bool>());
+    _window->FullScreen(video[Cfg::Video::fullscreen].as<bool>() || useDesktopRes);
     _window->VSync(video[Cfg::Video::vsync].as<bool>());
     _window->Size(resolution);
 

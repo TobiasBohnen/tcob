@@ -37,6 +37,7 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::manu
     _material->Texture = _texture;
     _renderer.set_material(_material);
 
+    SDL_SetWindowBordered(_window, SDL_TRUE);
     set_size(Size());
 }
 
