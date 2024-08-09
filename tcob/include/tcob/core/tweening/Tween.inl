@@ -323,10 +323,10 @@ namespace funcs {
         i32 const c {b + 1};
         i32 const d {std::min<i32>(c + 1, static_cast<i32>(ControlPoints.size()) - 1)};
 
-        type const& p0 {ControlPoints[a]};
-        type const& p1 {ControlPoints[b]};
-        type const& p2 {ControlPoints[c]};
-        type const& p3 {ControlPoints[d]};
+        type const& p0 {ControlPoints[static_cast<u32>(a)]};
+        type const& p1 {ControlPoints[static_cast<u32>(b)]};
+        type const& p2 {ControlPoints[static_cast<u32>(c)]};
+        type const& p3 {ControlPoints[static_cast<u32>(d)]};
 
         f64 const exp0 {curveP - curveNum};
         f64 const exp1 {exp0 * exp0};

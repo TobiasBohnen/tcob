@@ -87,7 +87,7 @@ if(PROJECT_IS_TOP_LEVEL)
   enable_testing()
 
   if(TCOB_BUILD_TESTS)
-    add_subdirectory(extras/tcob_tests)
+    add_subdirectory(extras/tests)
   endif()
 
   if(TCOB_BUILD_BENCHMARKS)
