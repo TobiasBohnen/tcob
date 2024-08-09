@@ -31,8 +31,8 @@ inline void scene_node::handle_input_event(auto&& event, auto&& handler)
     }
 
     // then entity
-    if (_entity && _entity->is_visible()) {
-        ((_entity.get())->*handler)(event);
+    if (*Entity && Entity->is_visible()) {
+        ((*Entity).get()->*handler)(event);
         if (event.Handled) { return; }
     }
 }

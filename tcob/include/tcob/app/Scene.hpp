@@ -28,13 +28,12 @@ class TCOB_API scene_node : public gfx::drawable {
 public:
     scene_node();
 
+    prop<std::shared_ptr<gfx::entity>> Entity;
+
     auto create_child() -> std::shared_ptr<scene_node>;
     auto get_child_count() const -> isize;
     auto get_child_at(usize index) const -> std::shared_ptr<scene_node>;
     void clear_children();
-
-    auto get_entity() const -> std::shared_ptr<gfx::entity>;
-    void attach_entity(std::shared_ptr<gfx::entity> ent);
 
     void move_to_front();
     void send_to_back();
@@ -55,7 +54,6 @@ private:
 
     void handle_input_event(auto&& event, auto&& handler);
 
-    std::shared_ptr<gfx::entity>             _entity;
     std::vector<std::shared_ptr<scene_node>> _children;
     scene_node*                              _parent;
 };

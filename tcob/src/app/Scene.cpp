@@ -6,7 +6,6 @@
 #include "tcob/app/Scene.hpp"
 
 #include <algorithm>
-#include <utility>
 
 #include "tcob/app/Game.hpp"
 #include "tcob/app/Platform.hpp"
@@ -163,16 +162,6 @@ void scene_node::clear_children()
     _children.clear();
 }
 
-auto scene_node::get_entity() const -> std::shared_ptr<gfx::entity>
-{
-    return _entity;
-}
-
-void scene_node::attach_entity(std::shared_ptr<gfx::entity> ent)
-{
-    _entity = std::move(ent);
-}
-
 void scene_node::move_to_front()
 {
     if (_parent) { _parent->move_child_to_front(this); }
@@ -201,8 +190,8 @@ void scene_node::send_child_to_back(scene_node* node)
 
 void scene_node::fixed_update(milliseconds deltaTime)
 {
-    if (_entity && (_entity->get_update_mode() == update_mode::Fixed || _entity->get_update_mode() == update_mode::Both)) {
-        _entity->fixed_update(deltaTime);
+    if (*Entity && (Entity->get_update_mode() == update_mode::Fixed || Entity->get_update_mode() == update_mode::Both)) {
+        Entity->fixed_update(deltaTime);
     }
 
     for (auto& child : _children) {
@@ -212,8 +201,8 @@ void scene_node::fixed_update(milliseconds deltaTime)
 
 void scene_node::on_update(milliseconds deltaTime)
 {
-    if (_entity && (_entity->get_update_mode() == update_mode::Normal || _entity->get_update_mode() == update_mode::Both)) {
-        _entity->update(deltaTime);
+    if (*Entity && (Entity->get_update_mode() == update_mode::Normal || Entity->get_update_mode() == update_mode::Both)) {
+        Entity->update(deltaTime);
     }
 
     for (auto& child : _children) {
@@ -223,8 +212,8 @@ void scene_node::on_update(milliseconds deltaTime)
 
 void scene_node::on_draw_to(gfx::render_target& target)
 {
-    if (_entity) {
-        _entity->draw_to(target);
+    if (*Entity) {
+        Entity->draw_to(target);
     }
 
     for (auto& child : _children) {
@@ -234,7 +223,7 @@ void scene_node::on_draw_to(gfx::render_target& target)
 
 auto scene_node::can_draw() const -> bool
 {
-    return !_children.empty() || (_entity && _entity->is_visible());
+    return !_children.empty() || (*Entity && Entity->is_visible());
 }
 
 }

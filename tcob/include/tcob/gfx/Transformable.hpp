@@ -59,17 +59,12 @@ public:
     prop<rect_f>                 Bounds;
     prop<std::optional<point_f>> Pivot;
 
-    auto virtual get_global_position() const -> point_f;
-    auto get_global_transform() -> transform;
-
     void move_by(point_f offset);
 
     void reset_transform() override;
 
 protected:
     auto get_pivot() const -> point_f override;
-
-    auto virtual get_transform_parent() const -> rect_transformable*;
 };
 
 }
