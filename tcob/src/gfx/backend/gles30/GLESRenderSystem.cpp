@@ -21,6 +21,12 @@ auto gl_render_system::get_name() const -> string
     return "OPENGLES30";
 }
 
+auto gl_render_system::get_device_name() const -> string
+{
+    auto const* str {glGetString(GL_RENDERER)};
+    return str ? reinterpret_cast<char const*>(str) : "";
+}
+
 auto gl_render_system::get_capabilities() const -> capabilities
 {
     capabilities retValue;

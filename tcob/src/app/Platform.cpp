@@ -317,6 +317,8 @@ void platform::init_render_system()
     // create window (and context)
     _window = std::unique_ptr<gfx::window> {new gfx::window(renderSystem->create_window(resolution))};
 
+    logger::Info("Device: {}", renderSystem->get_device_name());
+
     _window->FullScreen.Changed.connect([&](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });

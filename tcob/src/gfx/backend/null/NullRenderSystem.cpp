@@ -12,6 +12,11 @@ auto null_render_system::get_name() const -> string
     return "NULL";
 }
 
+auto null_render_system::get_device_name() const -> string
+{
+    return "NULL";
+}
+
 auto null_render_system::get_capabilities() const -> capabilities
 {
     return {};

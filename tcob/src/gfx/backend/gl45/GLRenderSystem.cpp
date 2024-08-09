@@ -5,6 +5,8 @@
 
 #include "GLRenderSystem.hpp"
 
+#include <glad/gl45.h>
+
 #include "GLRenderTarget.hpp"
 #include "GLShaderProgram.hpp"
 #include "GLTexture.hpp"
@@ -18,6 +20,12 @@ namespace tcob::gfx::gl45 {
 auto gl_render_system::get_name() const -> string
 {
     return "OPENGL45";
+}
+
+auto gl_render_system::get_device_name() const -> string
+{
+    auto const* str {glGetString(GL_RENDERER)};
+    return str ? reinterpret_cast<char const*>(str) : "";
 }
 
 auto gl_render_system::get_capabilities() const -> capabilities
