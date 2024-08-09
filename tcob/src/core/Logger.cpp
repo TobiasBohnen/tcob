@@ -84,7 +84,7 @@ auto logger::format_message(string const& message, level level) const -> string
     }
 
     auto const time {std::chrono::current_zone()->to_local(std::chrono::system_clock::now())};
-    return std::vformat("{} ({:%F - %T}) {}\n", std::make_format_args(prefix, time, message));
+    return std::format("{} ({:%F - %T}) {}\n", prefix, time, message);
 }
 
 ////////////////////////////////////////////////////////////
