@@ -91,7 +91,7 @@ if(PROJECT_IS_TOP_LEVEL)
   endif()
 
   if(TCOB_BUILD_BENCHMARKS)
-    add_subdirectory(extras/tcob_benchmarks)
+    add_subdirectory(extras/benchmarks)
   endif()
 
   if(TCOB_BUILD_TOOLS)
