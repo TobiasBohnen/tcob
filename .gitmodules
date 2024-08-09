@@ -8,3 +8,6 @@
 [submodule "extras/games"]
 	path = extras/games
 	url = https://github.com/TobiasBohnen/tcob_games
+[submodule "extras/examples"]
+	path = extras/examples
+	url = https://github.com/TobiasBohnen/tcob_examples
