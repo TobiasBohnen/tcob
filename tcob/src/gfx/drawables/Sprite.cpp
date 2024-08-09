@@ -11,103 +11,127 @@
 
 namespace tcob::gfx {
 
-static_sprite_batch::static_sprite_batch(std::span<std::shared_ptr<sprite>> sprites)
+static_mesh_batch::static_mesh_batch(std::span<std::shared_ptr<mesh>> meshes)
 {
-    _renderer.prepare(sprites.size());
-    for (auto& sprite : sprites) {
-        sprite->update(milliseconds {0});
-        if (sprite->is_visible()) {
-            _renderer.add_geometry(sprite->_quad, sprite->Material());
+    for (auto& mesh : meshes) {
+        mesh->update(milliseconds {0});
+        if (mesh->is_visible()) {
+            auto const gd {mesh->get_geometry()};
+            _renderer.add_geometry(gd.Vertices, gd.Indices, mesh->Material());
         }
     }
 }
 
-void static_sprite_batch::on_update(milliseconds)
+void static_mesh_batch::on_update(milliseconds)
 {
     // nothing to do
 }
 
-auto static_sprite_batch::can_draw() const -> bool
+auto static_mesh_batch::can_draw() const -> bool
 {
     return true;
 }
 
-void static_sprite_batch::on_draw_to(render_target& target)
+void static_mesh_batch::on_draw_to(render_target& target)
 {
     _renderer.render_to_target(target);
 }
 
 ////////////////////////////////////////////////////////////
 
-sprite_batch::sprite_batch()
+mesh_batch::mesh_batch()
 {
     _children.reserve(32);
 }
 
-auto sprite_batch::create_sprite() -> std::shared_ptr<sprite>
+void mesh_batch::remove_mesh(mesh const& mesh)
 {
-    return _children.emplace_back(std::make_shared<sprite>());
+    _children.erase(std::find_if(_children.begin(), _children.end(), [&mesh](auto const& val) {
+        return val.get() == &mesh;
+    }));
 }
 
-void sprite_batch::remove_sprite(std::shared_ptr<sprite> const& sprite)
-{
-    _children.erase(std::find(_children.begin(), _children.end(), sprite));
-}
-
-void sprite_batch::clear()
+void mesh_batch::clear()
 {
     _children.clear();
 }
 
-void sprite_batch::move_to_front(std::shared_ptr<sprite> const& sprite)
+void mesh_batch::move_to_front(mesh const& mesh)
 {
-    auto it {std::find(_children.begin(), _children.end(), sprite)};
+    auto it {std::find_if(_children.begin(), _children.end(), [&mesh](auto const& val) {
+        return val.get() == &mesh;
+    })};
     if (it != _children.end()) {
         std::rotate(it, it + 1, _children.end());
     }
 }
 
-void sprite_batch::send_to_back(std::shared_ptr<sprite> const& sprite)
+void mesh_batch::send_to_back(mesh const& mesh)
 {
-    auto it {std::find(_children.begin(), _children.end(), sprite)};
+    auto it {std::find_if(_children.begin(), _children.end(), [&mesh](auto const& val) {
+        return val.get() == &mesh;
+    })};
     if (it != _children.end()) {
         std::rotate(_children.begin(), it, it + 1);
     }
 }
 
-auto sprite_batch::get_sprite_count() const -> isize
+auto mesh_batch::get_mesh_count() const -> isize
 {
     return std::ssize(_children);
 }
 
-auto sprite_batch::get_sprite_at(usize index) const -> std::shared_ptr<sprite>
+auto mesh_batch::is_empty() const -> bool
+{
+    return _children.empty();
+}
+
+auto mesh_batch::get_mesh_at(usize index) const -> std::shared_ptr<mesh>
 {
     return _children.at(index);
 }
 
-void sprite_batch::on_update(milliseconds deltaTime)
+void mesh_batch::on_update(milliseconds deltaTime)
 {
     for (auto& child : _children) {
         child->update(deltaTime);
     }
 }
 
-auto sprite_batch::can_draw() const -> bool
+auto mesh_batch::can_draw() const -> bool
 {
     return !_children.empty();
 }
 
-void sprite_batch::on_draw_to(render_target& target)
+void mesh_batch::on_draw_to(render_target& target)
 {
-    _renderer.prepare(_children.size());
+    _renderer.reset_geometry();
 
-    for (auto& child : _children) {
-        if (child->is_visible()) {
-            _renderer.add_geometry(child->_quad, child->Material());
+    for (auto& mesh : _children) {
+        if (mesh->is_visible()) {
+            auto const gd {mesh->get_geometry()};
+            _renderer.add_geometry(gd.Vertices, gd.Indices, mesh->Material());
         }
     }
 
     _renderer.render_to_target(target);
+}
+
+////////////////////////////////////////////////////////////
+
+void mesh::show()
+{
+    _visible = true;
+}
+
+void mesh::hide()
+{
+    _visible = false;
+}
+
+auto mesh::is_visible() const -> bool
+{
+    return _visible && Material();
 }
 
 ////////////////////////////////////////////////////////////
@@ -134,6 +158,15 @@ sprite::sprite()
         });
 
     TextureRegion("default");
+}
+
+auto sprite::get_geometry() -> geometry_data
+{
+    static std::array<u32, 6> Inds {0, 1, 3, 1, 2, 3};
+    return {
+        .Vertices = _quad,
+        .Indices  = Inds,
+    };
 }
 
 void sprite::on_transform_dirty()
@@ -174,20 +207,4 @@ void sprite::on_update(milliseconds delta)
         geometry::scroll_texcoords(_quad, TextureScroll() * (delta.count() / 1000.0f));
     }
 }
-
-auto sprite::is_visible() const -> bool
-{
-    return _visible && Material();
-}
-
-void sprite::show()
-{
-    _visible = true;
-}
-
-void sprite::hide()
-{
-    _visible = false;
-}
-
 }

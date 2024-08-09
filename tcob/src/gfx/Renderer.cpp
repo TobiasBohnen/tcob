@@ -283,6 +283,79 @@ void polygon_renderer::on_render_to_target(render_target& target)
 
 ////////////////////////////////////////////////////////////
 
+batch_polygon_renderer::batch_polygon_renderer()
+    : _vertexArray {std::make_unique<vertex_array>(buffer_usage_hint::DynamicDraw)}
+{
+}
+
+void batch_polygon_renderer::add_geometry(std::span<vertex const> vertices, std::span<u32 const> indices, assets::asset_ptr<material> const& mat)
+{
+    // check if we have to break the batch
+    if (_currentBatch.NumInds > 0 && *_currentBatch.MaterialPtr != *mat) {
+        _batches.push_back(_currentBatch);
+        _currentBatch.OffsetInds += _currentBatch.NumInds;
+        _currentBatch.OffsetVerts += _currentBatch.NumVerts;
+        _currentBatch.NumInds  = 0;
+        _currentBatch.NumVerts = 0;
+    }
+
+    _currentBatch.MaterialPtr = mat;
+
+    // copy indices
+    if (!_verts.empty()) {
+        _indices.reserve(_indices.size() + indices.size());
+        for (auto const& ind : indices) {
+            _indices.push_back(static_cast<u32>(ind + _verts.size()));
+        }
+    } else {
+        _indices.insert(_indices.end(), indices.begin(), indices.end());
+    }
+    _currentBatch.NumInds += std::ssize(indices);
+
+    // copy vertices
+    _verts.insert(_verts.end(), vertices.begin(), vertices.end());
+    _currentBatch.NumVerts += std::ssize(vertices);
+
+    _vertexArray->resize(_verts.size(), _indices.size());
+}
+
+void batch_polygon_renderer::reset_geometry()
+{
+    _batches.clear();
+    _currentBatch = {};
+
+    _verts.clear();
+    _indices.clear();
+}
+
+void batch_polygon_renderer::on_render_to_target(render_target& target)
+{
+    if (_currentBatch.NumVerts == 0 && _batches.empty()) { // nothing to draw
+        return;
+    }
+
+    if (_currentBatch.NumVerts > 0) { // push current batch
+        _batches.push_back(_currentBatch);
+        _currentBatch = {};
+
+        _vertexArray->update_data(_indices, 0);
+        _vertexArray->update_data(_verts, 0);
+    }
+
+    for (auto const& batch : _batches) { // draw batches
+        if (batch.NumVerts == 0 || !batch.MaterialPtr) {
+            continue;
+        }
+
+        target.bind_material(batch.MaterialPtr.get_obj());
+        _vertexArray->draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
+    }
+
+    target.unbind_material();
+}
+
+////////////////////////////////////////////////////////////
+
 canvas_renderer::canvas_renderer(canvas& c)
     : _vertexArray {std::make_unique<vertex_array>(buffer_usage_hint::StaticDraw)}
     , _canvas {c}

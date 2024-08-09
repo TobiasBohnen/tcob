@@ -29,6 +29,11 @@ inline auto operator==(vertex const& left, vertex const& right) -> bool
 using triangle = std::array<vertex, 3>;
 using quad     = std::array<vertex, 4>;
 
+struct geometry_data {
+    std::span<vertex> Vertices;
+    std::span<u32>    Indices;
+};
+
 namespace geometry {
     TCOB_API void set_position(quad& q, rect_f const& rect);
     TCOB_API void set_position(quad& q, rect_f const& rect, transform const& xform);

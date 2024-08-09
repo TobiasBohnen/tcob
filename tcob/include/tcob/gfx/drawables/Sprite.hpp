@@ -21,24 +21,34 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sprite final : public rect_transformable, public updatable {
-    friend class sprite_batch;
-    friend class static_sprite_batch;
-
+class TCOB_API mesh : public updatable {
 public:
-    sprite();
-
     prop<assets::asset_ptr<material>> Material;
-    prop<color>                       Color;
-    prop<string>                      TextureRegion;
-    prop<point_f>                     TextureScroll;
-    prop_fn<f32>                      Transparency;
-
-    auto get_AABB() const -> rect_f;
 
     void show();
     void hide();
     auto is_visible() const -> bool;
+
+    auto virtual get_geometry() -> geometry_data = 0;
+
+private:
+    bool _visible {true};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API sprite final : public rect_transformable, public mesh {
+public:
+    sprite();
+
+    prop<color>   Color;
+    prop<string>  TextureRegion;
+    prop<point_f> TextureScroll;
+    prop_fn<f32>  Transparency;
+
+    auto get_geometry() -> geometry_data override;
+
+    auto get_AABB() const -> rect_f;
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -51,15 +61,14 @@ private:
     quad   _quad {};
     rect_f _aabb {rect_f::Zero};
 
-    bool _visible {true};
     bool _isDirty {true};
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API static_sprite_batch final : public drawable {
+class TCOB_API static_mesh_batch final : public drawable {
 public:
-    explicit static_sprite_batch(std::span<std::shared_ptr<sprite>> sprites);
+    explicit static_mesh_batch(std::span<std::shared_ptr<mesh>> meshes);
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -68,24 +77,31 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    batch_quad_renderer _renderer {};
+    batch_polygon_renderer _renderer {};
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sprite_batch final : public drawable {
+class TCOB_API mesh_batch final : public drawable {
 public:
-    sprite_batch();
+    mesh_batch();
 
-    auto create_sprite() -> std::shared_ptr<sprite>;
-    void remove_sprite(std::shared_ptr<sprite> const& sprite);
+    template <std::derived_from<mesh> T>
+    auto create_mesh() -> std::shared_ptr<T>
+    {
+        return std::static_pointer_cast<T>(_children.emplace_back(std::make_shared<T>()));
+    }
+
+    void remove_mesh(mesh const& mesh);
     void clear();
 
-    void move_to_front(std::shared_ptr<sprite> const& sprite);
-    void send_to_back(std::shared_ptr<sprite> const& sprite);
+    void move_to_front(mesh const& mesh);
+    void send_to_back(mesh const& mesh);
 
-    auto get_sprite_count() const -> isize;
-    auto get_sprite_at(usize index) const -> std::shared_ptr<sprite>;
+    auto get_mesh_count() const -> isize;
+    auto is_empty() const -> bool;
+
+    auto get_mesh_at(usize index) const -> std::shared_ptr<mesh>;
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -94,7 +110,7 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    std::vector<std::shared_ptr<sprite>> _children {};
-    batch_quad_renderer                  _renderer {};
+    std::vector<std::shared_ptr<mesh>> _children {};
+    batch_polygon_renderer             _renderer {};
 };
 }

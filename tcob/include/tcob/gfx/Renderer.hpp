@@ -127,6 +127,35 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
+
+class TCOB_API batch_polygon_renderer final : public renderer {
+public:
+    batch_polygon_renderer();
+
+    void add_geometry(std::span<vertex const> vertices, std::span<u32 const> indices, assets::asset_ptr<material> const& mat);
+    void reset_geometry();
+
+private:
+    void on_render_to_target(render_target& target) override;
+
+    std::vector<u32>    _indices;
+    std::vector<vertex> _verts;
+
+    std::unique_ptr<vertex_array> _vertexArray;
+
+    struct batch {
+        assets::asset_ptr<material> MaterialPtr {nullptr};
+        u32                         NumVerts {0};
+        u32                         NumInds {0};
+        u32                         OffsetVerts {0};
+        u32                         OffsetInds {0};
+    };
+
+    batch              _currentBatch;
+    std::vector<batch> _batches;
+};
+
+////////////////////////////////////////////////////////////
 class canvas;
 
 class TCOB_API canvas_renderer final : public renderer {

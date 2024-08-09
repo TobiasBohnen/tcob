@@ -63,13 +63,11 @@ void point_cloud::on_update(milliseconds)
 
 auto point_cloud::can_draw() const -> bool
 {
-    return !Material().is_expired();
+    return !Material().is_expired() && !_points.empty();
 }
 
 void point_cloud::on_draw_to(render_target& target)
 {
-    if (_points.empty()) { return; }
-
     _renderer.set_geometry(_points);
     _renderer.render_to_target(target);
 }
