@@ -11,3 +11,6 @@
 [submodule "extras/examples"]
 	path = extras/examples
 	url = https://github.com/TobiasBohnen/tcob_examples
+[submodule "extras/tests"]
+	path = extras/tests
+	url = https://github.com/TobiasBohnen/tcob_tests
