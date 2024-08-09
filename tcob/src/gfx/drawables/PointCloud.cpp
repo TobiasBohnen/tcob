@@ -41,6 +41,11 @@ auto point_cloud::create_point() -> vertex&
     return _points.emplace_back();
 }
 
+void point_cloud::clear()
+{
+    _points.clear();
+}
+
 auto point_cloud::get_point_count() const -> i32
 {
     return static_cast<i32>(std::ssize(_points));
@@ -63,6 +68,8 @@ auto point_cloud::can_draw() const -> bool
 
 void point_cloud::on_draw_to(render_target& target)
 {
+    if (_points.empty()) { return; }
+
     _renderer.set_geometry(_points);
     _renderer.render_to_target(target);
 }
