@@ -88,8 +88,8 @@ class TCOB_API rect_shape final : public shape {
 public:
     rect_shape();
 
-    prop<point_f> TextureScroll;
     prop<rect_f>  Bounds;
+    prop<point_f> TextureScroll;
 
     auto get_geometry() -> geometry_data override;
 

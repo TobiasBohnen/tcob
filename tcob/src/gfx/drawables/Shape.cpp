@@ -130,10 +130,7 @@ shape::shape()
 
     Material.Changed.connect([&]() { TextureRegion("default"); });
 
-    TextureRegion.Changed.connect([&](string const& texRegion) {
-        // TODO: calculate tex-coordinates relative to bounds
-        on_texture_region_changed(texRegion);
-    });
+    TextureRegion.Changed.connect([&](string const& texRegion) { on_texture_region_changed(texRegion); });
 
     Color.Changed.connect([&](auto const& color) { on_color_changed(color); });
 }
@@ -208,20 +205,37 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
 
         if (Segments < 3 || Radius < 1) { return; }
 
+        // calc vertices
         f32 const angleStep {TAU_F / Segments};
+        f32 const radius {Radius()};
+        auto const [centerX, centerY] {Center()};
 
-        _verts.push_back({.Position  = {Center->X, Center->Y},
+        texture_region texReg {};
+        if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
+            texReg = Material->Texture->get_region(TextureRegion);
+        } else {
+            texReg = {{0, 0, 1, 1}, 1};
+        }
+
+        _verts.push_back({.Position  = {centerX, centerY},
                           .Color     = Color->as_array(),
-                          .TexCoords = {}});
+                          .TexCoords = {0.5f + texReg.UVRect.X, 0.5f + texReg.UVRect.Y, static_cast<f32>(texReg.Level)}});
 
+        auto const square {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
         for (i32 i {0}; i < Segments; ++i) {
             f32 const angle {i * angleStep};
-            f32 const x {Radius * std::cos(angle) + Center->X};
-            f32 const y {Radius * std::sin(angle) + Center->Y};
+            f32 const x {radius * std::cos(angle) + centerX};
+            f32 const y {radius * std::sin(angle) + centerY};
+
             _verts.push_back({.Position  = {x, y},
                               .Color     = Color->as_array(),
-                              .TexCoords = {}});
+                              .TexCoords = {
+                                  ((x - square.X) / square.Width) + texReg.UVRect.X,
+                                  ((y - square.Y) / square.Height) + texReg.UVRect.Y,
+                                  static_cast<f32>(texReg.Level)}});
         }
+
+        // calc indices
         for (i32 i {1}; i < Segments; ++i) {
             _indices.push_back(0);
             _indices.push_back(i + 1);
