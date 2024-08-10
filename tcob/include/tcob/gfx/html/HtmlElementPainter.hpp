@@ -8,22 +8,12 @@
 
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
 
-    #include <optional>
-
-    #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Color.hpp"
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/core/Rect.hpp"
-    #include "tcob/core/Size.hpp"
     #include "tcob/gfx/Canvas.hpp"
 
 namespace tcob::gfx::html {
-////////////////////////////////////////////////////////////
-
-struct linear_gradient {
-    degree_f       Angle;
-    color_gradient Colors;
-};
 
 ////////////////////////////////////////////////////////////
 
@@ -108,15 +98,23 @@ auto constexpr operator==(margins const& left, margins const& right) -> bool
 
 ////////////////////////////////////////////////////////////
 
-struct background_draw_context {
-    rect_f                         ClipBox {};
-    rect_f                         OriginBox {};
-    texture*                       Image {nullptr};
-    size_f                         ImageSize {};
-    std::optional<linear_gradient> Gradient;
-    background_repeat              Repeat {};
-    color                          BackgroundColor {};
-    border_radii                   BorderRadii {};
+struct base_draw_context {
+    rect_f            ClipBox {};
+    rect_f            OriginBox {};
+    background_repeat Repeat {};
+    border_radii      BorderRadii {};
+};
+
+struct image_draw_context : public base_draw_context {
+    texture* Image {nullptr};
+};
+
+struct solid_draw_context : public base_draw_context {
+    color BackgroundColor {};
+};
+
+struct gradient_draw_context : public base_draw_context {
+    canvas_paint Gradient {};
 };
 
 struct text_draw_context {
@@ -137,15 +135,16 @@ struct list_marker_draw_context {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API element_painter : public non_copyable {
+class TCOB_API element_painter final : public non_copyable {
 public:
     explicit element_painter(canvas& c);
-    virtual ~element_painter() = default;
 
-    void virtual draw_background(background_draw_context const& ctx);
-    void virtual draw_borders(borders const& brds);
-    void virtual draw_text(text_draw_context const& ctx);
-    void virtual draw_list_marker(list_marker_draw_context const& ctx);
+    void draw_image(image_draw_context const& ctx);
+    void draw_solid_color(solid_draw_context const& ctx);
+    void draw_gradient(gradient_draw_context const& ctx);
+    void draw_borders(borders const& brds);
+    void draw_text(text_draw_context const& ctx);
+    void draw_list_marker(list_marker_draw_context const& ctx);
 
 protected:
     auto get_canvas() -> canvas&;

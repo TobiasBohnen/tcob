@@ -21,30 +21,18 @@ auto element_painter::get_canvas() -> canvas&
     return _canvas;
 }
 
-void element_painter::draw_background(background_draw_context const& ctx)
+void element_painter::draw_image(image_draw_context const& ctx)
 {
     _canvas.save();
 
     _canvas.set_scissor(ctx.ClipBox);
 
-    if (ctx.Gradient) {
-        degree_f const angle {ctx.Gradient->Angle + degree_f {90}};
-        point_f const  p0 {ctx.OriginBox.find_edge(angle)};
-        point_f const  p1 {ctx.OriginBox.find_edge(angle - degree_f {180})};
-        _canvas.set_fill_style(_canvas.create_linear_gradient(p0, p1, ctx.Gradient->Colors));
-    } else {
-        _canvas.set_fill_style(ctx.BackgroundColor);
-    }
-
-    _canvas.begin_path();
-    _canvas.rounded_rect_varying(ctx.ClipBox, ctx.BorderRadii.TopLeft, ctx.BorderRadii.TopRight, ctx.BorderRadii.BottomRight, ctx.BorderRadii.BottomLeft);
-    _canvas.fill();
-
     if (ctx.Image) { // image optional?
         if (ctx.Repeat == background_repeat::NoRepeat) {
             _canvas.draw_image(ctx.Image, "default", ctx.OriginBox);
         } else {
-            auto const imgPattern {_canvas.create_image_pattern(ctx.OriginBox.top_left(), ctx.ImageSize, degree_f {0.0f}, ctx.Image, 1)};
+            size_f     imgSize {ctx.Image->get_size()};
+            auto const imgPattern {_canvas.create_image_pattern(ctx.OriginBox.top_left(), imgSize, degree_f {0.0f}, ctx.Image, 1)};
             _canvas.set_fill_style(imgPattern);
 
             switch (ctx.Repeat) {
@@ -55,12 +43,12 @@ void element_painter::draw_background(background_draw_context const& ctx)
                 break;
             case background_repeat::RepeatX:
                 _canvas.begin_path();
-                _canvas.rect({ctx.OriginBox.top_left(), {ctx.OriginBox.Width, ctx.ImageSize.Height}});
+                _canvas.rect({ctx.OriginBox.top_left(), {ctx.OriginBox.Width, imgSize.Height}});
                 _canvas.fill();
                 break;
             case background_repeat::RepeatY:
                 _canvas.begin_path();
-                _canvas.rect({ctx.OriginBox.top_left(), {ctx.ImageSize.Width, ctx.OriginBox.Height}});
+                _canvas.rect({ctx.OriginBox.top_left(), {imgSize.Width, ctx.OriginBox.Height}});
                 _canvas.fill();
                 break;
             case background_repeat::NoRepeat:
@@ -68,6 +56,38 @@ void element_painter::draw_background(background_draw_context const& ctx)
             }
         }
     }
+
+    _canvas.restore();
+}
+
+void element_painter::draw_solid_color(solid_draw_context const& ctx)
+{
+    _canvas.save();
+
+    _canvas.set_scissor(ctx.ClipBox);
+
+    _canvas.set_fill_style(ctx.BackgroundColor);
+
+    _canvas.begin_path();
+    _canvas.rounded_rect_varying(ctx.ClipBox, ctx.BorderRadii.TopLeft, ctx.BorderRadii.TopRight, ctx.BorderRadii.BottomRight, ctx.BorderRadii.BottomLeft);
+    _canvas.fill();
+
+    _canvas.restore();
+}
+
+void element_painter::draw_gradient(gradient_draw_context const& ctx)
+{
+    _canvas.save();
+
+    _canvas.set_scissor(ctx.ClipBox);
+
+    _canvas.set_fill_style(ctx.Gradient);
+
+    _canvas.begin_path();
+    _canvas.rounded_rect_varying(ctx.ClipBox, ctx.BorderRadii.TopLeft, ctx.BorderRadii.TopRight, ctx.BorderRadii.BottomRight, ctx.BorderRadii.BottomLeft);
+    _canvas.fill();
+
+    // TODO: repeat?
 
     _canvas.restore();
 }

@@ -24,6 +24,7 @@ namespace tcob::gfx::html::detail {
 ////////////////////////////////////////////////////////////
 
 auto to_rect(litehtml::position const& pos) -> rect_f;
+auto to_point(litehtml::pointF const& pos) -> point_f;
 auto to_color(litehtml::web_color const& col) -> color;
 
 ////////////////////////////////////////////////////////////
@@ -31,7 +32,6 @@ auto to_color(litehtml::web_color const& col) -> color;
 class container : public litehtml::document_container {
 public:
     container(document& doc, document::config& config, canvas& canvas, element_painter& painter);
-    virtual ~container() = default;
 
     auto get_document() -> document&;
 
@@ -59,12 +59,16 @@ public:
     void change_language(string const& language, string const& culture);
 
     void draw_list_marker(litehtml::uint_ptr hdc, litehtml::list_marker const& marker) override;
-    void draw_background(litehtml::uint_ptr hdc, std::vector<litehtml::background_paint> const& bg) override;
+    void draw_image(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, std::string const& url, std::string const& base_url) override;
+    void draw_solid_fill(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, litehtml::web_color const& color) override;
+    void draw_linear_gradient(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, litehtml::background_layer::linear_gradient const& gradient) override;
+    void draw_radial_gradient(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, litehtml::background_layer::radial_gradient const& gradient) override;
+    void draw_conic_gradient(litehtml::uint_ptr hdc, litehtml::background_layer const& layer, litehtml::background_layer::conic_gradient const& gradient) override;
     void draw_borders(litehtml::uint_ptr hdc, litehtml::borders const& b, litehtml::position const& draw_pos, bool root) override;
     void draw_text(litehtml::uint_ptr hdc, char const* text, litehtml::uint_ptr hFont, litehtml::web_color color, litehtml::position const& pos) override;
 
 private:
-    void init_background_draw_context(background_draw_context& ctx, litehtml::background_paint const& bg);
+    void init_background(base_draw_context& ctx, litehtml::background_layer const& layer);
     void init_borders(borders& brds, litehtml::borders const& b, litehtml::position const& draw_pos);
 
     document&         _document;
@@ -75,7 +79,6 @@ private:
     string                             _baseUrl;
     string                             _caption;
     flat_map<string, texture*>         _images {};
-    flat_map<string, linear_gradient>  _gradients {};
     std::vector<font*>                 _fonts;
     flat_map<usize, u32>               _fontDecorations {};
     std::vector<std::function<void()>> _overlayFunctions;
