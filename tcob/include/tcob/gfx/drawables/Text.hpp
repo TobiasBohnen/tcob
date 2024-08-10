@@ -47,7 +47,7 @@ protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
-    void on_transform_dirty() override;
+    void on_transform_changed() override;
 
 private:
     void reshape();

@@ -112,17 +112,17 @@ public:
     explicit polygon_renderer(buffer_usage_hint usage);
 
     void set_material(assets::asset_ptr<material> material);
-    void set_geometry(std::span<vertex const> vertices, std::span<u32 const> indices);
-    void modify_geometry(std::span<vertex const> vertices, std::span<u32 const> indices, usize offset) const;
+    void set_geometry(geometry_data const& gd);
+    void modify_geometry(geometry_data const& gd, usize offset);
     void reset_geometry();
 
 private:
     void prepare(usize vcount, usize icount);
     void on_render_to_target(render_target& target) override;
 
-    assets::asset_ptr<material> _material {nullptr};
-    usize                       _numIndices {0};
-
+    assets::asset_ptr<material>   _material {nullptr};
+    usize                         _numIndices {0};
+    primitive_type                _type {};
     std::unique_ptr<vertex_array> _vertexArray;
 };
 
@@ -132,7 +132,7 @@ class TCOB_API batch_polygon_renderer final : public renderer {
 public:
     batch_polygon_renderer();
 
-    void add_geometry(std::span<vertex const> vertices, std::span<u32 const> indices, assets::asset_ptr<material> const& mat);
+    void add_geometry(geometry_data const& gd, assets::asset_ptr<material> const& mat);
     void reset_geometry();
 
 private:
@@ -145,6 +145,7 @@ private:
 
     struct batch {
         assets::asset_ptr<material> MaterialPtr {nullptr};
+        primitive_type              Type {};
         u32                         NumVerts {0};
         u32                         NumInds {0};
         u32                         OffsetVerts {0};

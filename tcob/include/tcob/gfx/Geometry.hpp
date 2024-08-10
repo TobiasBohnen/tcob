@@ -32,13 +32,18 @@ using quad     = std::array<vertex, 4>;
 struct geometry_data {
     std::span<vertex> Vertices;
     std::span<u32>    Indices;
+    primitive_type    Type {};
 };
 
 namespace geometry {
     TCOB_API void set_position(quad& q, rect_f const& rect);
     TCOB_API void set_position(quad& q, rect_f const& rect, transform const& xform);
+
     TCOB_API void set_color(quad& q, color c);
+    TCOB_API void set_color(std::span<vertex> verts, color c);
+
     TCOB_API void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally = false, bool flipVertically = false);
+
     TCOB_API void scroll_texcoords(quad& q, point_f offset);
 }
 

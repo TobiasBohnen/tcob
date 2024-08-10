@@ -7,9 +7,42 @@
 
 namespace tcob::gfx::geometry {
 
+void set_position(quad& q, rect_f const& rect, transform const& xform)
+{
+    point_f const topRight {xform * rect.top_right()};
+    point_f const bottomRight {xform * rect.bottom_right()};
+    point_f const bottomLeft {xform * rect.bottom_left()};
+    point_f const topLeft {xform * rect.top_left()};
+
+    q[0].Position = {topRight.X, topRight.Y};
+    q[1].Position = {bottomRight.X, bottomRight.Y};
+    q[2].Position = {bottomLeft.X, bottomLeft.Y};
+    q[3].Position = {topLeft.X, topLeft.Y};
+}
+
+void set_position(quad& q, rect_f const& rect)
+{
+    point_f const topRight {rect.top_right()};
+    point_f const bottomRight {rect.bottom_right()};
+    point_f const bottomLeft {rect.bottom_left()};
+    point_f const topLeft {rect.top_left()};
+
+    q[0].Position = {topRight.X, topRight.Y};
+    q[1].Position = {bottomRight.X, bottomRight.Y};
+    q[2].Position = {bottomLeft.X, bottomLeft.Y};
+    q[3].Position = {topLeft.X, topLeft.Y};
+}
+
 void set_color(quad& q, color c)
 {
     q[0].Color = q[1].Color = q[2].Color = q[3].Color = c.as_array();
+}
+
+void set_color(std::span<vertex> verts, color c)
+{
+    for (auto& v : verts) {
+        v.Color = c.as_array();
+    }
 }
 
 void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally, bool flipVertically)
@@ -51,32 +84,6 @@ void scroll_texcoords(quad& q, point_f offset)
     q[1].TexCoords = {rect.right(), rect.bottom(), level};
     q[2].TexCoords = {rect.left(), rect.bottom(), level};
     q[3].TexCoords = {rect.left(), rect.top(), level};
-}
-
-void set_position(quad& q, rect_f const& rect, transform const& xform)
-{
-    point_f const topRight {xform * rect.top_right()};
-    point_f const bottomRight {xform * rect.bottom_right()};
-    point_f const bottomLeft {xform * rect.bottom_left()};
-    point_f const topLeft {xform * rect.top_left()};
-
-    q[0].Position = {topRight.X, topRight.Y};
-    q[1].Position = {bottomRight.X, bottomRight.Y};
-    q[2].Position = {bottomLeft.X, bottomLeft.Y};
-    q[3].Position = {topLeft.X, topLeft.Y};
-}
-
-void set_position(quad& q, rect_f const& rect)
-{
-    point_f const topRight {rect.top_right()};
-    point_f const bottomRight {rect.bottom_right()};
-    point_f const bottomLeft {rect.bottom_left()};
-    point_f const topLeft {rect.top_left()};
-
-    q[0].Position = {topRight.X, topRight.Y};
-    q[1].Position = {bottomRight.X, bottomRight.Y};
-    q[2].Position = {bottomLeft.X, bottomLeft.Y};
-    q[3].Position = {topLeft.X, topLeft.Y};
 }
 
 }

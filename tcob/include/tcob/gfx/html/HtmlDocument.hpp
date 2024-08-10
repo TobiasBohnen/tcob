@@ -70,7 +70,7 @@ protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
-    void on_transform_dirty() override;
+    void on_transform_changed() override;
 
     void on_mouse_motion(input::mouse::motion_event& ev) override;
     void on_mouse_button_down(input::mouse::button_event& ev) override;

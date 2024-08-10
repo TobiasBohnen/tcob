@@ -46,7 +46,7 @@ void transformable::mark_transform_dirty()
 {
     if (!_isDirty) {
         _isDirty = true;
-        on_transform_dirty();
+        on_transform_changed();
     }
 }
 
@@ -97,12 +97,6 @@ auto rect_transformable::get_pivot() const -> point_f
     }
 
     return Center();
-}
-
-void rect_transformable::reset_transform()
-{
-    transformable::reset_transform();
-    Bounds = rect_f::Zero;
 }
 
 }

@@ -56,7 +56,7 @@ void text::on_draw_to(render_target& target)
     _renderer.render_to_target(target);
 }
 
-void text::on_transform_dirty()
+void text::on_transform_changed()
 {
     _needsFormat = true;
 }

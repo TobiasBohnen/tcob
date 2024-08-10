@@ -39,7 +39,7 @@ public:
 
 protected:
     auto virtual get_pivot() const -> point_f = 0;
-    void virtual on_transform_dirty()         = 0;
+    void virtual on_transform_changed()       = 0;
     void mark_transform_dirty();
     void update_transform();
 
@@ -60,8 +60,6 @@ public:
     prop<std::optional<point_f>> Pivot;
 
     void move_by(point_f offset);
-
-    void reset_transform() override;
 
 protected:
     auto get_pivot() const -> point_f override;

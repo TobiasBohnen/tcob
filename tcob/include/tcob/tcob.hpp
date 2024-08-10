@@ -91,7 +91,7 @@
 #include <tcob/gfx/drawables/Drawable.hpp>
 #include <tcob/gfx/drawables/ParticleSystem.hpp>
 #include <tcob/gfx/drawables/PointCloud.hpp>
-#include <tcob/gfx/drawables/Sprite.hpp>
+#include <tcob/gfx/drawables/Shape.hpp>
 #include <tcob/gfx/drawables/Text.hpp>
 #include <tcob/gfx/drawables/TileMap.hpp>
 #include <tcob/gfx/html/HtmlDocument.hpp>

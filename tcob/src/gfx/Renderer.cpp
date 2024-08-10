@@ -129,12 +129,12 @@ void quad_renderer::prepare(usize quadCount)
         std::vector<u32> inds;
         inds.resize(indCount);
         for (u32 i {0}, j {0}; i < quadCount; ++i, j += 4) {
-            inds[i * 6 + 0] = 0 + j;
+            inds[i * 6 + 0] = 3 + j;
             inds[i * 6 + 1] = 1 + j;
-            inds[i * 6 + 2] = 3 + j;
-            inds[i * 6 + 3] = 1 + j;
+            inds[i * 6 + 2] = 0 + j;
+            inds[i * 6 + 3] = 3 + j;
             inds[i * 6 + 4] = 2 + j;
-            inds[i * 6 + 5] = 3 + j;
+            inds[i * 6 + 5] = 1 + j;
         }
 
         _vertexArray->update_data(inds, 0);
@@ -197,12 +197,12 @@ void batch_quad_renderer::add_geometry(std::span<quad const> quads, assets::asse
     u32* ptr {&_indices[_currentBatch.OffsetInds]};
 
     for (u32 i {0}, j {(_currentBatch.NumQuads + _currentBatch.OffsetQuads) * 4}; i < quads.size(); ++i, j += 4) {
+        ptr[_currentBatch.NumInds++] = (3 + j);
+        ptr[_currentBatch.NumInds++] = (1 + j);
         ptr[_currentBatch.NumInds++] = (0 + j);
-        ptr[_currentBatch.NumInds++] = (1 + j);
         ptr[_currentBatch.NumInds++] = (3 + j);
-        ptr[_currentBatch.NumInds++] = (1 + j);
         ptr[_currentBatch.NumInds++] = (2 + j);
-        ptr[_currentBatch.NumInds++] = (3 + j);
+        ptr[_currentBatch.NumInds++] = (1 + j);
         _currentBatch.NumQuads++;
     }
 }
@@ -245,17 +245,18 @@ void polygon_renderer::set_material(assets::asset_ptr<material> material)
     _material = std::move(material);
 }
 
-void polygon_renderer::set_geometry(std::span<vertex const> vertices, std::span<u32 const> indices)
+void polygon_renderer::set_geometry(geometry_data const& gd)
 {
-    prepare(vertices.size(), indices.size());
-    modify_geometry(vertices, indices, 0);
-    _numIndices = indices.size();
+    prepare(gd.Vertices.size(), gd.Indices.size());
+    modify_geometry(gd, 0);
+    _numIndices = gd.Indices.size();
 }
 
-void polygon_renderer::modify_geometry(std::span<vertex const> vertices, std::span<u32 const> indices, usize offset) const
+void polygon_renderer::modify_geometry(geometry_data const& gd, usize offset)
 {
-    _vertexArray->update_data(indices, offset);
-    _vertexArray->update_data(vertices, offset);
+    _vertexArray->update_data(gd.Indices, offset);
+    _vertexArray->update_data(gd.Vertices, offset);
+    _type = gd.Type;
 }
 
 void polygon_renderer::reset_geometry()
@@ -277,7 +278,7 @@ void polygon_renderer::on_render_to_target(render_target& target)
     }
 
     target.bind_material(_material.get_obj());
-    _vertexArray->draw_elements(primitive_type::Triangles, _numIndices, 0);
+    _vertexArray->draw_elements(_type, _numIndices, 0);
     target.unbind_material();
 }
 
@@ -288,10 +289,10 @@ batch_polygon_renderer::batch_polygon_renderer()
 {
 }
 
-void batch_polygon_renderer::add_geometry(std::span<vertex const> vertices, std::span<u32 const> indices, assets::asset_ptr<material> const& mat)
+void batch_polygon_renderer::add_geometry(geometry_data const& gd, assets::asset_ptr<material> const& mat)
 {
     // check if we have to break the batch
-    if (_currentBatch.NumInds > 0 && *_currentBatch.MaterialPtr != *mat) {
+    if (_currentBatch.NumInds > 0 && (_currentBatch.Type != gd.Type || *_currentBatch.MaterialPtr != *mat)) {
         _batches.push_back(_currentBatch);
         _currentBatch.OffsetInds += _currentBatch.NumInds;
         _currentBatch.OffsetVerts += _currentBatch.NumVerts;
@@ -300,21 +301,22 @@ void batch_polygon_renderer::add_geometry(std::span<vertex const> vertices, std:
     }
 
     _currentBatch.MaterialPtr = mat;
+    _currentBatch.Type        = gd.Type;
 
     // copy indices
     if (!_verts.empty()) {
-        _indices.reserve(_indices.size() + indices.size());
-        for (auto const& ind : indices) {
+        _indices.reserve(_indices.size() + gd.Indices.size());
+        for (auto const& ind : gd.Indices) {
             _indices.push_back(static_cast<u32>(ind + _verts.size()));
         }
     } else {
-        _indices.insert(_indices.end(), indices.begin(), indices.end());
+        _indices.insert(_indices.end(), gd.Indices.begin(), gd.Indices.end());
     }
-    _currentBatch.NumInds += std::ssize(indices);
+    _currentBatch.NumInds += std::ssize(gd.Indices);
 
     // copy vertices
-    _verts.insert(_verts.end(), vertices.begin(), vertices.end());
-    _currentBatch.NumVerts += std::ssize(vertices);
+    _verts.insert(_verts.end(), gd.Vertices.begin(), gd.Vertices.end());
+    _currentBatch.NumVerts += std::ssize(gd.Vertices);
 
     _vertexArray->resize(_verts.size(), _indices.size());
 }
@@ -365,7 +367,7 @@ canvas_renderer::canvas_renderer(canvas& c)
 
     _vertexArray->resize(vertCount, indCount);
 
-    std::array<u32, 6> inds {0, 1, 3, 1, 2, 3};
+    std::array<u32, 6> inds {3, 1, 0, 3, 2, 1};
     _vertexArray->update_data(inds, 0);
 }
 
