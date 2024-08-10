@@ -217,11 +217,15 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
             texReg = {{0, 0, 1, 1}, 1};
         }
 
+        auto const& uvRect {texReg.UVRect};
         _verts.push_back({.Position  = {centerX, centerY},
                           .Color     = Color->as_array(),
-                          .TexCoords = {0.5f + texReg.UVRect.X, 0.5f + texReg.UVRect.Y, static_cast<f32>(texReg.Level)}});
+                          .TexCoords = {0.5f * uvRect.Width + uvRect.X,
+                                        0.5f * uvRect.Height + uvRect.Y,
+                                        static_cast<f32>(texReg.Level)}});
 
         auto const square {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
+
         for (i32 i {0}; i < Segments; ++i) {
             f32 const angle {i * angleStep};
             f32 const x {radius * std::cos(angle) + centerX};
@@ -229,10 +233,9 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
 
             _verts.push_back({.Position  = {x, y},
                               .Color     = Color->as_array(),
-                              .TexCoords = {
-                                  ((x - square.X) / square.Width) + texReg.UVRect.X,
-                                  ((y - square.Y) / square.Height) + texReg.UVRect.Y,
-                                  static_cast<f32>(texReg.Level)}});
+                              .TexCoords = {((x - square.X) / square.Width) * uvRect.Width + uvRect.X,
+                                            ((y - square.Y) / square.Height) * uvRect.Height + uvRect.Y,
+                                            static_cast<f32>(texReg.Level)}});
         }
 
         // calc indices
