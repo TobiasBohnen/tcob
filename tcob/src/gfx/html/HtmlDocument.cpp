@@ -53,7 +53,7 @@ void document::from_string(string const& html)
         masterCss = stream.read_string(stream.size_in_bytes());
     }
 
-    _lhdoc = litehtml::document::createFromString(html.c_str(), _container.get(), masterCss.c_str());
+    _lhdoc = litehtml::document::createFromString(html, _container.get(), masterCss);
     force_redraw();
 }
 
@@ -69,9 +69,7 @@ auto document::load(path const& file) noexcept -> load_status
 
 void document::change_language(string const& language, string const& culture)
 {
-    if (!_lhdoc) {
-        return;
-    }
+    if (!_lhdoc) { return; }
 
     _container->change_language(language, culture);
     _lhdoc->lang_changed();
@@ -102,9 +100,7 @@ auto document::can_draw() const -> bool
 
 void document::on_draw_to(render_target& target)
 {
-    if (!_lhdoc) {
-        return;
-    }
+    if (!_lhdoc) { return; }
 
     if (_needsRedraw) {
         litehtml::position::vector redraw {};
@@ -132,9 +128,7 @@ void document::on_transform_changed()
 
 void document::on_mouse_motion(input::mouse::motion_event& ev)
 {
-    if (!_lhdoc) {
-        return;
-    }
+    if (!_lhdoc) { return; }
 
     litehtml::position::vector redraw {};
 
@@ -162,9 +156,7 @@ void document::on_mouse_motion(input::mouse::motion_event& ev)
 
 void document::on_mouse_button_down(input::mouse::button_event& ev)
 {
-    if (!_lhdoc) {
-        return;
-    }
+    if (!_lhdoc) { return; }
 
     if (ev.Button == input::mouse::button::Left && _isMouseOver) {
         _buttonDown = true;
@@ -182,9 +174,7 @@ void document::on_mouse_button_down(input::mouse::button_event& ev)
 
 void document::on_mouse_button_up(input::mouse::button_event& ev)
 {
-    if (!_lhdoc) {
-        return;
-    }
+    if (!_lhdoc) { return; }
 
     if (ev.Button == input::mouse::button::Left && _isMouseOver) {
         _buttonDown = false;

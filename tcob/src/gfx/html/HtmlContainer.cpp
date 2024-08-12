@@ -152,9 +152,7 @@ void container::get_image_size(char const* src, char const* baseurl, litehtml::s
 {
     static_cast<void>(baseurl);
 
-    if (!_images.contains(src)) {
-        return;
-    }
+    if (!_images.contains(src)) { return; }
 
     auto* const tex {_images[src]};
     if (tex) {
@@ -348,9 +346,7 @@ void container::draw_borders(litehtml::uint_ptr hdc, litehtml::borders const& b,
 {
     static_cast<void>(hdc);
     static_cast<void>(root);
-    if (!b.is_visible()) {
-        return;
-    }
+    if (!b.is_visible()) { return; }
 
     borders brds;
     init_borders(brds, b, draw_pos);
