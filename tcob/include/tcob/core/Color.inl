@@ -24,6 +24,13 @@ auto constexpr color::FromRGBA(u32 value) -> color
             static_cast<u8>((value & 0x000000ff) >> 0)};
 }
 
+auto constexpr color::FromRGB(u32 value) -> color
+{
+    return {static_cast<u8>((value & 0xff0000) >> 16),
+            static_cast<u8>((value & 0x00ff00) >> 8),
+            static_cast<u8>((value & 0x0000ff) >> 0)};
+}
+
 auto constexpr color::FromHSLA(hsx const& hsl, u8 a) -> color
 {
     auto constexpr HueToRGB {[](f32 v1, f32 v2, f32 vH) {

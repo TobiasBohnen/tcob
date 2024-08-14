@@ -31,6 +31,7 @@ public:
     constexpr color(u8 r, u8 g, u8 b, u8 a = 255);
 
     auto static constexpr FromRGBA(u32 value) -> color;
+    auto static constexpr FromRGB(u32 value) -> color;
     auto static constexpr FromHSLA(hsx const& hsl, u8 a = 255) -> color;
     auto static constexpr FromHSVA(hsx const& hsv, u8 a = 255) -> color;
 
