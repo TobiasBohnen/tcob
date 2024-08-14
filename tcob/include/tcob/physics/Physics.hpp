@@ -15,4 +15,11 @@ enum class body_type : u8 {
     Dynamic
 };
 
+namespace detail {
+    class b2dWorld;
+    class b2dBody;
+    class b2dJoint;
+    class b2dShape;
+}
+
 }

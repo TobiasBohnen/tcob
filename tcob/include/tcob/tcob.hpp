@@ -126,18 +126,10 @@
 #include <tcob/gfx/ui/widgets/Widget.hpp>
 #include <tcob/gfx/ui/widgets/WidgetContainer.hpp>
 
-#include <tcob/physics/box2d/B2D.hpp>
-#include <tcob/physics/box2d/B2DBody.hpp>
-#include <tcob/physics/box2d/B2DDebugDraw.hpp>
-#include <tcob/physics/box2d/B2DFixture.hpp>
-#include <tcob/physics/box2d/B2DJoint.hpp>
-#include <tcob/physics/box2d/B2DShape.hpp>
-#include <tcob/physics/box2d/B2DWorld.hpp>
-#include <tcob/physics/chipmunk2d/CP.hpp>
-#include <tcob/physics/chipmunk2d/CPBody.hpp>
-#include <tcob/physics/chipmunk2d/CPConstraint.hpp>
-#include <tcob/physics/chipmunk2d/CPShape.hpp>
-#include <tcob/physics/chipmunk2d/CPSpace.hpp>
+#include <tcob/physics/Body.hpp>
+#include <tcob/physics/Joint.hpp>
+#include <tcob/physics/Shape.hpp>
+#include <tcob/physics/World.hpp>
 
 #include <tcob/scripting/Script.hpp>
 #include <tcob/scripting/Scripting.hpp>

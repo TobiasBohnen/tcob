@@ -127,11 +127,10 @@ shape::shape()
 
 {
     Pivot.Changed.connect([&]() { mark_dirty(); });
+    Center.Changed.connect([&](auto const& value) { on_center_changed(value); });
 
     Material.Changed.connect([&]() { TextureRegion("default"); });
-
     TextureRegion.Changed.connect([&](string const& texRegion) { on_texture_region_changed(texRegion); });
-
     Color.Changed.connect([&](auto const& color) { on_color_changed(color); });
 }
 

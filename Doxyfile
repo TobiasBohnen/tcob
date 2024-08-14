@@ -2352,7 +2352,6 @@ PREDEFINED             = TCOB_ENABLE_RENDERER_OPENGL45 \
                         TCOB_ENABLE_RENDERER_OPENGLES30 \
                         TCOB_ENABLE_RENDERER_NULL \
                         TCOB_ENABLE_ADDON_PHYSICS_BOX2D \
-                        TCOB_ENABLE_ADDON_PHYSICS_CHIPMUNK2D \
                         TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT \
                         TCOB_ENABLE_ADDON_SCRIPTING_LUA \
                         TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL \
