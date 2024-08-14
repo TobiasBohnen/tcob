@@ -36,10 +36,10 @@ public:
     ~joint();
 
 protected:
-    joint(std::unique_ptr<detail::b2dJoint> impl);
+    joint(std::unique_ptr<detail::b2d_joint> impl);
 
 private:
-    std::unique_ptr<detail::b2dJoint> _impl;
+    std::unique_ptr<detail::b2d_joint> _impl;
 };
 
 ////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ class TCOB_API distance_joint final : public joint {
     friend class world;
 
 private:
-    distance_joint(detail::b2dWorld* world, distance_joint_settings const& jointSettings);
+    distance_joint(detail::b2d_world* world, distance_joint_settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ class TCOB_API motor_joint final : public joint {
     friend class world;
 
 private:
-    motor_joint(detail::b2dWorld* world, motor_joint_settings const& jointSettings);
+    motor_joint(detail::b2d_world* world, motor_joint_settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ class TCOB_API mouse_joint final : public joint {
     friend class world;
 
 private:
-    mouse_joint(detail::b2dWorld* world, mouse_joint_settings const& jointSettings);
+    mouse_joint(detail::b2d_world* world, mouse_joint_settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ class TCOB_API prismatic_joint final : public joint {
     friend class world;
 
 private:
-    prismatic_joint(detail::b2dWorld* world, prismatic_joint_settings const& jointSettings);
+    prismatic_joint(detail::b2d_world* world, prismatic_joint_settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -241,7 +241,7 @@ class TCOB_API revolute_joint final : public joint {
     friend class world;
 
 private:
-    revolute_joint(detail::b2dWorld* world, revolute_joint_settings const& jointSettings);
+    revolute_joint(detail::b2d_world* world, revolute_joint_settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -274,7 +274,7 @@ class TCOB_API weld_joint final : public joint {
     friend class world;
 
 private:
-    weld_joint(detail::b2dWorld* world, weld_joint_settings const& jointSettings);
+    weld_joint(detail::b2d_world* world, weld_joint_settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -322,7 +322,7 @@ class TCOB_API wheel_joint final : public joint {
     friend class world;
 
 private:
-    wheel_joint(detail::b2dWorld* world, wheel_joint_settings const& jointSettings);
+    wheel_joint(detail::b2d_world* world, wheel_joint_settings const& jointSettings);
 };
 
 }

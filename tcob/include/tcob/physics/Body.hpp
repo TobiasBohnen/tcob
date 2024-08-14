@@ -39,22 +39,23 @@ struct body_settings {
     /// Note: if a dynamic body would have zero mass, the mass is set to one.
     body_type Type {body_type::Static};
 
-    /// The linear velocity of the body's origin in world co-ordinates.
+    /// The initial linear velocity of the body's origin. Typically in meters per second.
     point_f LinearVelocity {point_f::Zero};
 
-    /// The angular velocity of the body.
+    /// The initial angular velocity of the body. Radians per second.
     radian_f AngularVelocity {0.0f};
 
     /// Linear damping is use to reduce the linear velocity. The damping parameter
-    /// can be larger than 1.0f but the damping effect becomes sensitive to the
+    /// can be larger than 1 but the damping effect becomes sensitive to the
     /// time step when the damping parameter is large.
-    /// Units are 1/time
+    ///	Generally linear damping is undesirable because it makes objects move slowly
+    ///	as if they are floating.
     f32 LinearDamping {0.0f};
 
     /// Angular damping is use to reduce the angular velocity. The damping parameter
     /// can be larger than 1.0f but the damping effect becomes sensitive to the
     /// time step when the damping parameter is large.
-    /// Units are 1/time
+    ///	Angular damping can be use slow down rotating bodies.
     f32 AngularDamping {0.0f};
 
     /// Set this flag to false if this body should never fall asleep. Note that
@@ -78,11 +79,22 @@ struct body_settings {
 
     /// Scale the gravity applied to this body.
     f32 GravityScale {1.0f};
+
+    /// Sleep velocity threshold, default is 0.05 meter per second
+    f32 SleepThreshold {0.05f};
+
+    /// Automatically compute mass and related properties on this body from shapes.
+    /// Triggers whenever a shape is add/removed/changed. Default is true.
+    bool AutomaticMass {true};
+
+    /// This allows this body to bypass rotational speed limits. Should only be used
+    ///	for circular objects, like wheels.
+    bool AllowFastRotation {false};
 };
 
 class TCOB_API body final {
     friend class world;
-    friend class detail::b2dJoint;
+    friend class detail::b2d_joint;
 
 public:
     prop_fn<body_type>      Type;
@@ -90,7 +102,7 @@ public:
     prop_fn<radian_f>       AngularVelocity;
     prop_fn<f32>            LinearDamping;
     prop_fn<f32>            AngularDamping;
-    prop_fn<bool>           AllowSleep;
+    prop_fn<bool>           EnableSleep;
     prop_fn<bool>           Awake;
     prop_fn<bool>           IsFixedRotation;
     prop_fn<bool>           IsBullet;
@@ -103,10 +115,8 @@ public:
     auto get_local_center() const -> point_f;
 
     template <typename T>
-    auto create_shape(auto&& shapeSettings) -> std::shared_ptr<T>
-    {
-        return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {_impl.get(), shapeSettings}}));
-    }
+    auto create_shape(auto&& shapeSettings) -> std::shared_ptr<T>;
+    void destroy_shape(shape const& shapePtr);
 
     void apply_force(point_f force, point_f point, bool wake = true) const;
     void apply_force_to_center(point_f force, bool wake = true) const;
@@ -119,12 +129,18 @@ public:
     void sleep() const;
 
 private:
-    body(detail::b2dWorld* world, body_transform const& xform, body_settings const& bodySettings);
+    body(detail::b2d_world* world, body_transform const& xform, body_settings const& bodySettings);
 
-    std::unique_ptr<detail::b2dBody> _impl;
+    std::unique_ptr<detail::b2d_body> _impl;
 
     std::vector<std::shared_ptr<shape>> _shapes;
 };
+
+template <typename T>
+inline auto body::create_shape(auto&& shapeSettings) -> std::shared_ptr<T>
+{
+    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {_impl.get(), shapeSettings}}));
+}
 
 }
 

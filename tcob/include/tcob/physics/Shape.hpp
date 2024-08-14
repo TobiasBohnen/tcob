@@ -48,11 +48,11 @@ public:
 
 class TCOB_API shape : public non_copyable {
 protected:
-    explicit shape(std::unique_ptr<detail::b2dShape> impl);
+    explicit shape(std::unique_ptr<detail::b2d_shape> impl);
     ~shape();
 
 private:
-    std::unique_ptr<detail::b2dShape> _impl;
+    std::unique_ptr<detail::b2d_shape> _impl;
 };
 
 ////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ class TCOB_API polygon_shape final : public shape {
     friend class body;
 
 private:
-    polygon_shape(detail::b2dBody* body, polygon_shape_settings const& shapeSettings);
+    polygon_shape(detail::b2d_body* body, polygon_shape_settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ class TCOB_API rect_shape final : public shape {
     friend class body;
 
 private:
-    rect_shape(detail::b2dBody* body, rect_shape_settings const& shapeSettings);
+    rect_shape(detail::b2d_body* body, rect_shape_settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ class TCOB_API circle_shape final : public shape {
     friend class body;
 
 private:
-    circle_shape(detail::b2dBody* body, circle_shape_settings const& shapeSettings);
+    circle_shape(detail::b2d_body* body, circle_shape_settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ class TCOB_API segment_shape final : public shape {
     friend class body;
 
 private:
-    segment_shape(detail::b2dBody* body, segment_shape_settings const& shapeSettings);
+    segment_shape(detail::b2d_body* body, segment_shape_settings const& shapeSettings);
 };
 
 }

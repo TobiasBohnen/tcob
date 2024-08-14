@@ -15,43 +15,43 @@ namespace tcob::physics {
 
 joint::~joint() = default;
 
-joint::joint(std::unique_ptr<detail::b2dJoint> impl)
+joint::joint(std::unique_ptr<detail::b2d_joint> impl)
     : _impl {std::move(impl)}
 {
 }
 
-distance_joint::distance_joint(detail::b2dWorld* world, distance_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+distance_joint::distance_joint(detail::b2d_world* world, distance_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 
-motor_joint::motor_joint(detail::b2dWorld* world, motor_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+motor_joint::motor_joint(detail::b2d_world* world, motor_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 
-mouse_joint::mouse_joint(detail::b2dWorld* world, mouse_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+mouse_joint::mouse_joint(detail::b2d_world* world, mouse_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 
-prismatic_joint::prismatic_joint(detail::b2dWorld* world, prismatic_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+prismatic_joint::prismatic_joint(detail::b2d_world* world, prismatic_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 
-revolute_joint::revolute_joint(detail::b2dWorld* world, revolute_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+revolute_joint::revolute_joint(detail::b2d_world* world, revolute_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 
-weld_joint::weld_joint(detail::b2dWorld* world, weld_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+weld_joint::weld_joint(detail::b2d_world* world, weld_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 
-wheel_joint::wheel_joint(detail::b2dWorld* world, wheel_joint_settings const& jointSettings)
-    : joint {std::make_unique<detail::b2dJoint>(world, jointSettings)}
+wheel_joint::wheel_joint(detail::b2d_world* world, wheel_joint_settings const& jointSettings)
+    : joint {std::make_unique<detail::b2d_joint>(world, jointSettings)}
 {
 }
 

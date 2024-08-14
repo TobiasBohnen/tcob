@@ -127,6 +127,7 @@
 #include <tcob/gfx/ui/widgets/WidgetContainer.hpp>
 
 #include <tcob/physics/Body.hpp>
+#include <tcob/physics/DebugDraw.hpp>
 #include <tcob/physics/Joint.hpp>
 #include <tcob/physics/Shape.hpp>
 #include <tcob/physics/World.hpp>

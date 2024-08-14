@@ -10,8 +10,9 @@
 
     #include "tcob/core/Point.hpp"
     #include "tcob/physics/Body.hpp"
+    #include "tcob/physics/DebugDraw.hpp"
+    #include "tcob/physics/Joint.hpp"
     #include "tcob/physics/Physics.hpp" // IWYU pragma: keep
-    #include "tcob/physics/World.hpp"   // IWYU pragma: keep
 
     #include <box2d/box2d.h>
 
@@ -19,24 +20,25 @@ namespace tcob::physics::detail {
 
 ////////////////////////////////////////////////////////////
 
-class b2dWorld {
+class b2d_world {
 public:
-    b2dWorld(point_f gravity);
-    ~b2dWorld();
+    b2d_world(point_f gravity);
+    ~b2d_world();
 
     b2WorldId ID {};
 
     void step(f32 delta, i32 subSteps) const;
     void set_gravity(point_f value) const;
-    void set_allow_sleeping(bool value) const;
+    void set_enable_sleeping(bool value) const;
+    void draw(b2d_debug_draw* draw) const;
 };
 
 ////////////////////////////////////////////////////////////
 
-class b2dBody {
+class b2d_body {
 public:
-    b2dBody(b2dWorld* world, body_transform const& xform, body_settings const& bodySettings);
-    ~b2dBody();
+    b2d_body(b2d_world* world, body_transform const& xform, body_settings const& bodySettings);
+    ~b2d_body();
 
     auto get_type() const -> body_type;
     void set_type(body_type type) const;
@@ -53,8 +55,8 @@ public:
     auto get_angular_damping() const -> f32;
     void set_angular_damping(f32 value) const;
 
-    auto get_allow_sleep() const -> bool;
-    void set_allow_sleep(bool value) const;
+    auto get_enable_sleep() const -> bool;
+    void set_enable_sleep(bool value) const;
 
     auto get_awake() const -> bool;
     void set_awake(bool value) const;
@@ -89,31 +91,52 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class b2dJoint {
+class b2d_joint {
 public:
-    b2dJoint(b2dWorld* world, distance_joint_settings const& jointSettings);
-    b2dJoint(b2dWorld* world, motor_joint_settings const& jointSettings);
-    b2dJoint(b2dWorld* world, mouse_joint_settings const& jointSettings);
-    b2dJoint(b2dWorld* world, prismatic_joint_settings const& jointSettings);
-    b2dJoint(b2dWorld* world, revolute_joint_settings const& jointSettings);
-    b2dJoint(b2dWorld* world, weld_joint_settings const& jointSettings);
-    b2dJoint(b2dWorld* world, wheel_joint_settings const& jointSettings);
-    ~b2dJoint();
+    b2d_joint(b2d_world* world, distance_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, motor_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, mouse_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, prismatic_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, revolute_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, weld_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, wheel_joint_settings const& jointSettings);
+    ~b2d_joint();
 
     b2JointId ID {};
 };
 
 ////////////////////////////////////////////////////////////
 
-class b2dShape {
+class b2d_shape {
 public:
-    b2dShape(b2dBody* body, polygon_shape_settings const& shapeSettings);
-    b2dShape(b2dBody* body, rect_shape_settings const& shapeSettings);
-    b2dShape(b2dBody* body, circle_shape_settings const& shapeSettings);
-    b2dShape(b2dBody* body, segment_shape_settings const& shapeSettings);
-    ~b2dShape();
+    b2d_shape(b2d_body* body, polygon_shape_settings const& shapeSettings);
+    b2d_shape(b2d_body* body, rect_shape_settings const& shapeSettings);
+    b2d_shape(b2d_body* body, circle_shape_settings const& shapeSettings);
+    b2d_shape(b2d_body* body, segment_shape_settings const& shapeSettings);
+    ~b2d_shape();
 
     b2ShapeId ID {};
+};
+
+////////////////////////////////////////////////////////////
+
+class b2d_debug_draw {
+public:
+    b2d_debug_draw(debug_draw* parent, debug_draw_settings settings);
+
+    void draw_polygon(std::span<point_f const> vertices, color color);
+    void draw_solid_polygon(body_transform xform, std::span<point_f const> vertices, f32 radius, color color);
+    void draw_circle(point_f center, f32 radius, color color);
+    void draw_solid_circle(body_transform xform, f32 radius, color color);
+    void draw_segment(point_f p1, point_f p2, color color);
+    void draw_transform(body_transform const& xf);
+    void draw_point(point_f p, f32 size, color color);
+    void draw_string(point_f p, string const& text);
+
+    b2DebugDraw ID {};
+
+private:
+    debug_draw* _parent;
 };
 
 }

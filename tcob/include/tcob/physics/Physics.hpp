@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Point.hpp"
+
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
@@ -15,11 +17,17 @@ enum class body_type : u8 {
     Dynamic
 };
 
+struct AABB {
+    point_f LowerBounds;
+    point_f UpperBounds;
+};
+
 namespace detail {
-    class b2dWorld;
-    class b2dBody;
-    class b2dJoint;
-    class b2dShape;
+    class b2d_world;
+    class b2d_body;
+    class b2d_joint;
+    class b2d_shape;
+    class b2d_debug_draw;
 }
 
 }

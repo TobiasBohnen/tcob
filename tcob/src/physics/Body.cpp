@@ -13,7 +13,7 @@
 
 namespace tcob::physics {
 
-body::body(detail::b2dWorld* world, body_transform const& xform, body_settings const& bodySettings)
+body::body(detail::b2d_world* world, body_transform const& xform, body_settings const& bodySettings)
     : Type {{[&]() { return _impl->get_type(); },
              [&](auto const& value) { _impl->set_type(value); }}}
     , LinearVelocity {{[&]() -> point_f { return _impl->get_linear_velocity(); },
@@ -24,8 +24,8 @@ body::body(detail::b2dWorld* world, body_transform const& xform, body_settings c
                       [&](auto const& value) { _impl->set_linear_damping(value); }}}
     , AngularDamping {{[&]() -> f32 { return _impl->get_angular_damping(); },
                        [&](auto const& value) { _impl->set_angular_damping(value); }}}
-    , AllowSleep {{[&]() -> bool { return _impl->get_allow_sleep(); },
-                   [&](auto const& value) { _impl->set_allow_sleep(value); }}}
+    , EnableSleep {{[&]() -> bool { return _impl->get_enable_sleep(); },
+                    [&](auto const& value) { _impl->set_enable_sleep(value); }}}
     , Awake {{[&]() -> bool { return _impl->get_awake(); },
               [&](auto const& value) { _impl->set_awake(value); }}}
     , IsFixedRotation {{[&]() -> bool { return _impl->get_fixed_rotation(); },
@@ -38,7 +38,7 @@ body::body(detail::b2dWorld* world, body_transform const& xform, body_settings c
                      [&](auto const& value) { _impl->set_gravity_scale(value); }}}
     , Transform {{[&]() -> body_transform { return _impl->get_transform(); },
                   [&](auto const& value) { _impl->set_transform(value); }}}
-    , _impl {std::make_unique<detail::b2dBody>(world, xform, bodySettings)}
+    , _impl {std::make_unique<detail::b2d_body>(world, xform, bodySettings)}
 {
 }
 
@@ -83,6 +83,13 @@ auto body::get_center() const -> point_f
 auto body::get_local_center() const -> point_f
 {
     return _impl->get_local_center();
+}
+
+void body::destroy_shape(shape const& shapePtr)
+{
+    _shapes.erase(std::find_if(_shapes.begin(), _shapes.end(), [&shapePtr](auto const& val) {
+        return val.get() == &shapePtr;
+    }));
 }
 
 void body::wake_up() const

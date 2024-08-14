@@ -14,7 +14,7 @@
 namespace tcob::physics {
 
 world::world()
-    : _impl {std::make_unique<detail::b2dWorld>(point_f::Zero)}
+    : _impl {std::make_unique<detail::b2d_world>(point_f::Zero)}
 {
     Gravity.Changed.connect([&](point_f value) {
         _impl->set_gravity(value);
@@ -22,7 +22,7 @@ world::world()
     Gravity(point_f::Zero);
 
     AllowSleeping.Changed.connect([&](bool value) {
-        _impl->set_allow_sleeping(value);
+        _impl->set_enable_sleeping(value);
     });
     AllowSleeping(true);
 }
@@ -44,14 +44,23 @@ auto world::create_body(body_transform const& xform, body_settings const& bodySe
     return _bodies.emplace_back(std::shared_ptr<body> {new body {_impl.get(), xform, bodySettings}});
 }
 
-void world::destroy_body(std::shared_ptr<body> const& bodyPtr)
+void world::destroy_body(body const& bodyPtr)
 {
-    _bodies.erase(std::find(_bodies.begin(), _bodies.end(), bodyPtr));
+    _bodies.erase(std::find_if(_bodies.begin(), _bodies.end(), [&bodyPtr](auto const& val) {
+        return val.get() == &bodyPtr;
+    }));
 }
 
-void world::destroy_joint(std::shared_ptr<joint> const& jointPtr)
+void world::destroy_joint(joint const& jointPtr)
 {
-    _joints.erase(std::find(_joints.begin(), _joints.end(), jointPtr));
+    _joints.erase(std::find_if(_joints.begin(), _joints.end(), [&jointPtr](auto const& val) {
+        return val.get() == &jointPtr;
+    }));
+}
+
+void world::draw(debug_draw const& draw) const
+{
+    _impl->draw(draw._impl.get());
 }
 
 void world::on_update(milliseconds deltaTime)
