@@ -30,13 +30,15 @@ public:
 };
 
 class TCOB_API joint : public non_copyable {
-    friend class world;
-
 public:
     ~joint();
 
+    auto operator==(joint const& other) const -> bool;
+
 protected:
     joint(std::unique_ptr<detail::b2d_joint> impl);
+
+    auto get_body_impl(body const& body) const -> detail::b2d_body&;
 
 private:
     std::unique_ptr<detail::b2d_joint> _impl;

@@ -16,8 +16,35 @@
     #include "tcob/physics/Body.hpp"
     #include "tcob/physics/DebugDraw.hpp"
     #include "tcob/physics/Joint.hpp"
+    #include "tcob/physics/Shape.hpp"
 
 namespace tcob::physics {
+
+////////////////////////////////////////////////////////////
+
+struct contact_begin_touch_event {
+    std::shared_ptr<shape> ShapeA;
+    std::shared_ptr<shape> ShapeB;
+};
+
+struct contact_end_touch_event {
+    std::shared_ptr<shape> ShapeA;
+    std::shared_ptr<shape> ShapeB;
+};
+
+struct contact_hit_event {
+    std::shared_ptr<shape> ShapeA;
+    std::shared_ptr<shape> ShapeB;
+    point_f                Point;
+    point_f                Normal;
+    f32                    ApproachSpeed;
+};
+
+struct contact_events {
+    std::vector<contact_begin_touch_event> BeginTouch;
+    std::vector<contact_end_touch_event>   EndTouch;
+    std::vector<contact_hit_event>         Hit;
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -33,13 +60,17 @@ public:
     auto get_bodies() -> std::span<std::shared_ptr<body>>;
 
     auto create_body(body_transform const& xform, body_settings const& settings) -> std::shared_ptr<body>;
-    void destroy_body(body const& bodyPtr);
+    void destroy_body(body const& body);
+
+    auto find_body(shape const& s) -> std::shared_ptr<body>;
 
     auto get_joints() -> std::span<std::shared_ptr<joint>>;
 
     template <typename T>
     auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;
-    void destroy_joint(joint const& jointPtr);
+    void destroy_joint(joint const& joint);
+
+    auto get_contact_events() const -> contact_events;
 
     void draw(debug_draw const& draw) const;
 

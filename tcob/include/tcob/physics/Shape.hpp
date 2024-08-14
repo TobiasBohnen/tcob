@@ -39,7 +39,7 @@ public:
     bool EnableContactEvents {true};
 
     /// Enable hit events for this shape. Only applies to kinematic and dynamic bodies. Ignored for sensors.
-    bool EnableHitEvents {false};
+    bool EnableHitEvents {true};
 
     /// Enable pre-solve contact events for this shape. Only applies to dynamic bodies. These are expensive
     ///	and must be carefully handled due to threading. Ignored for sensors.
@@ -47,6 +47,11 @@ public:
 };
 
 class TCOB_API shape : public non_copyable {
+    friend class detail::b2d_world;
+
+public:
+    auto operator==(shape const& other) const -> bool;
+
 protected:
     explicit shape(std::unique_ptr<detail::b2d_shape> impl);
     ~shape();

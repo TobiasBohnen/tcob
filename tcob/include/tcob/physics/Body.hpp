@@ -94,7 +94,7 @@ struct body_settings {
 
 class TCOB_API body final {
     friend class world;
-    friend class detail::b2d_joint;
+    friend class joint;
 
 public:
     prop_fn<body_type>      Type;
@@ -111,8 +111,12 @@ public:
     prop_fn<body_transform> Transform;
     prop<std::any>          UserData;
 
+    auto operator==(body const& other) const -> bool;
+
     auto get_center() const -> point_f;
     auto get_local_center() const -> point_f;
+
+    auto get_shapes() -> std::span<std::shared_ptr<shape>>;
 
     template <typename T>
     auto create_shape(auto&& shapeSettings) -> std::shared_ptr<T>;

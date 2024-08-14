@@ -75,6 +75,11 @@ void body::apply_angular_impulse(f32 impulse, bool wake) const
     _impl->apply_angular_impulse(impulse, wake);
 }
 
+auto body::operator==(body const& other) const -> bool
+{
+    return _impl.get() == other._impl.get();
+}
+
 auto body::get_center() const -> point_f
 {
     return _impl->get_center();
@@ -83,6 +88,11 @@ auto body::get_center() const -> point_f
 auto body::get_local_center() const -> point_f
 {
     return _impl->get_local_center();
+}
+
+auto body::get_shapes() -> std::span<std::shared_ptr<shape>>
+{
+    return _shapes;
 }
 
 void body::destroy_shape(shape const& shapePtr)

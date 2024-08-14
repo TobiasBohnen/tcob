@@ -46,6 +46,52 @@ void b2d_world::draw(b2d_debug_draw* draw, debug_draw::settings const& settings)
     b2World_Draw(ID, &draw->ID);
 }
 
+auto b2d_world::get_contact_events(std::span<std::shared_ptr<body> const> bodies) const -> contact_events
+{
+    auto const     events {b2World_GetContactEvents(ID)};
+    contact_events retValue;
+    retValue.BeginTouch.reserve(events.beginCount);
+    retValue.EndTouch.reserve(events.endCount);
+    retValue.Hit.reserve(events.hitCount);
+
+    auto const findShapePtr {[&](b2ShapeId const& val) -> std::shared_ptr<tcob::physics::shape> {
+        for (auto const& body : bodies) {
+            for (auto const& shape : body->get_shapes()) {
+                if (B2_ID_EQUALS(shape->_impl->ID, val)) { return shape; }
+            }
+        }
+        return nullptr;
+    }};
+
+    std::span<b2ContactBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
+    for (auto& event : begin) {
+        contact_begin_touch_event ev;
+        ev.ShapeA = findShapePtr(event.shapeIdA);
+        ev.ShapeB = findShapePtr(event.shapeIdB);
+        retValue.BeginTouch.push_back(ev);
+    }
+    std::span<b2ContactEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
+    for (auto& event : end) {
+        contact_end_touch_event ev;
+        ev.ShapeA = findShapePtr(event.shapeIdA);
+        ev.ShapeB = findShapePtr(event.shapeIdB);
+        retValue.EndTouch.push_back(ev);
+    }
+
+    std::span<b2ContactHitEvent> const hit {events.hitEvents, static_cast<usize>(events.hitCount)};
+    for (auto& event : hit) {
+        contact_hit_event ev;
+        ev.ShapeA        = findShapePtr(event.shapeIdA);
+        ev.ShapeB        = findShapePtr(event.shapeIdB);
+        ev.ApproachSpeed = event.approachSpeed;
+        ev.Normal        = {event.normal.x, event.normal.y};
+        ev.Point         = {event.point.x, event.point.y};
+        retValue.Hit.push_back(ev);
+    }
+
+    return retValue;
+}
+
 ////////////////////////////////////////////////////////////
 
 b2d_body::b2d_body(b2d_world* world, body_transform const& xform, body_settings const& bodySettings)
@@ -259,11 +305,11 @@ void b2d_body::apply_angular_impulse(f32 impulse, bool wake) const
 
 ////////////////////////////////////////////////////////////
 
-b2d_joint::b2d_joint(b2d_world* world, distance_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint_settings const& jointSettings)
 {
     auto def {b2DefaultDistanceJointDef()};
-    def.bodyIdA          = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB          = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA          = bodyA.ID;
+    def.bodyIdB          = bodyB.ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.localAnchorA     = to_b2Vec2(jointSettings.LocalAnchorA);
     def.localAnchorB     = to_b2Vec2(jointSettings.LocalAnchorB);
@@ -281,11 +327,11 @@ b2d_joint::b2d_joint(b2d_world* world, distance_joint_settings const& jointSetti
     ID = b2CreateDistanceJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, motor_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint_settings const& jointSettings)
 {
     auto def {b2DefaultMotorJointDef()};
-    def.bodyIdA          = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB          = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA          = bodyA.ID;
+    def.bodyIdB          = bodyB.ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.linearOffset     = to_b2Vec2(jointSettings.LinearOffset);
     def.angularOffset    = jointSettings.AngularOffset.Value;
@@ -296,11 +342,11 @@ b2d_joint::b2d_joint(b2d_world* world, motor_joint_settings const& jointSettings
     ID = b2CreateMotorJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, mouse_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint_settings const& jointSettings)
 {
     auto def {b2DefaultMouseJointDef()};
-    def.bodyIdA          = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB          = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA          = bodyA.ID;
+    def.bodyIdB          = bodyB.ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.hertz            = jointSettings.Hertz;
     def.dampingRatio     = jointSettings.DampingRatio;
@@ -309,11 +355,11 @@ b2d_joint::b2d_joint(b2d_world* world, mouse_joint_settings const& jointSettings
     ID = b2CreateMouseJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, prismatic_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint_settings const& jointSettings)
 {
     auto def {b2DefaultPrismaticJointDef()};
-    def.bodyIdA          = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB          = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA          = bodyA.ID;
+    def.bodyIdB          = bodyB.ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.localAnchorA     = to_b2Vec2(jointSettings.LocalAnchorA);
     def.localAnchorB     = to_b2Vec2(jointSettings.LocalAnchorB);
@@ -331,11 +377,11 @@ b2d_joint::b2d_joint(b2d_world* world, prismatic_joint_settings const& jointSett
     ID = b2CreatePrismaticJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, revolute_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint_settings const& jointSettings)
 {
     auto def {b2DefaultRevoluteJointDef()};
-    def.bodyIdA          = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB          = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA          = bodyA.ID;
+    def.bodyIdB          = bodyB.ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.localAnchorA     = to_b2Vec2(jointSettings.LocalAnchorA);
     def.localAnchorB     = to_b2Vec2(jointSettings.LocalAnchorB);
@@ -354,11 +400,11 @@ b2d_joint::b2d_joint(b2d_world* world, revolute_joint_settings const& jointSetti
     ID = b2CreateRevoluteJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, weld_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint_settings const& jointSettings)
 {
     auto def {b2DefaultWeldJointDef()};
-    def.bodyIdA             = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB             = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA             = bodyA.ID;
+    def.bodyIdB             = bodyB.ID;
     def.collideConnected    = jointSettings.IsCollideConnected;
     def.referenceAngle      = jointSettings.ReferenceAngle.Value;
     def.linearHertz         = jointSettings.LinearHertz;
@@ -369,11 +415,11 @@ b2d_joint::b2d_joint(b2d_world* world, weld_joint_settings const& jointSettings)
     ID = b2CreateWeldJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, wheel_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint_settings const& jointSettings)
 {
     auto def {b2DefaultWheelJointDef()};
-    def.bodyIdA          = jointSettings.BodyA->_impl->ID;
-    def.bodyIdB          = jointSettings.BodyB->_impl->ID;
+    def.bodyIdA          = bodyA.ID;
+    def.bodyIdB          = bodyB.ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.enableSpring     = jointSettings.EnableSpring;
     def.hertz            = jointSettings.Hertz;
@@ -474,6 +520,11 @@ b2d_shape::b2d_shape(b2d_body* body, segment_shape_settings const& shapeSettings
 b2d_shape::~b2d_shape()
 {
     b2DestroyShape(ID);
+}
+
+auto b2d_shape::equal(b2d_shape const* other) const -> bool
+{
+    return B2_ID_EQUALS(ID, other->ID);
 }
 
 ////////////////////////////////////////////////////////////

@@ -13,6 +13,7 @@
     #include "tcob/physics/DebugDraw.hpp"
     #include "tcob/physics/Joint.hpp"
     #include "tcob/physics/Physics.hpp" // IWYU pragma: keep
+    #include "tcob/physics/World.hpp"
 
     #include <box2d/box2d.h>
 
@@ -25,12 +26,13 @@ public:
     b2d_world(point_f gravity);
     ~b2d_world();
 
-    b2WorldId ID {};
-
     void step(f32 delta, i32 subSteps) const;
     void set_gravity(point_f value) const;
     void set_enable_sleeping(bool value) const;
     void draw(b2d_debug_draw* draw, debug_draw::settings const& settings) const;
+    auto get_contact_events(std::span<std::shared_ptr<body> const> bodies) const -> contact_events;
+
+    b2WorldId ID {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -93,13 +95,13 @@ public:
 
 class b2d_joint {
 public:
-    b2d_joint(b2d_world* world, distance_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, motor_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, mouse_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, prismatic_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, revolute_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, weld_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, wheel_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint_settings const& jointSettings);
     ~b2d_joint();
 
     b2JointId ID {};
@@ -114,6 +116,8 @@ public:
     b2d_shape(b2d_body* body, circle_shape_settings const& shapeSettings);
     b2d_shape(b2d_body* body, segment_shape_settings const& shapeSettings);
     ~b2d_shape();
+
+    auto equal(b2d_shape const* other) const -> bool;
 
     b2ShapeId ID {};
 };

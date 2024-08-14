@@ -13,6 +13,11 @@ namespace tcob::physics {
 
 ////////////////////////////////////////////////////////////
 
+auto shape::operator==(shape const& other) const -> bool
+{
+    return _impl->equal(other._impl.get());
+}
+
 shape::shape(std::unique_ptr<detail::b2d_shape> impl)
     : _impl {std::move(impl)}
 {

@@ -40,18 +40,36 @@ auto world::create_body(body_transform const& xform, body_settings const& bodySe
     return _bodies.emplace_back(std::shared_ptr<body> {new body {_impl.get(), xform, bodySettings}});
 }
 
-void world::destroy_body(body const& bodyPtr)
+void world::destroy_body(body const& body)
 {
-    _bodies.erase(std::find_if(_bodies.begin(), _bodies.end(), [&bodyPtr](auto const& val) {
-        return val.get() == &bodyPtr;
+    _bodies.erase(std::find_if(_bodies.begin(), _bodies.end(), [ptr = &body](auto const& val) {
+        return val.get() == ptr;
     }));
 }
 
-void world::destroy_joint(joint const& jointPtr)
+auto world::find_body(shape const& s) -> std::shared_ptr<body>
 {
-    _joints.erase(std::find_if(_joints.begin(), _joints.end(), [&jointPtr](auto const& val) {
-        return val.get() == &jointPtr;
+    for (auto& body : _bodies) {
+        for (auto& shape : body->get_shapes()) {
+            if (*shape == s) {
+                return body;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+void world::destroy_joint(joint const& joint)
+{
+    _joints.erase(std::find_if(_joints.begin(), _joints.end(), [ptr = &joint](auto const& val) {
+        return val.get() == ptr;
     }));
+}
+
+auto world::get_contact_events() const -> contact_events
+{
+    return _impl->get_contact_events(_bodies);
 }
 
 void world::draw(debug_draw const& draw) const
