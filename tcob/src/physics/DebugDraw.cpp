@@ -11,8 +11,8 @@
 
 namespace tcob::physics {
 
-debug_draw::debug_draw(debug_draw_settings settings)
-    : _impl {std::make_unique<detail::b2d_debug_draw>(this, settings)}
+debug_draw::debug_draw()
+    : _impl {std::make_unique<detail::b2d_debug_draw>(this)}
 {
 }
 

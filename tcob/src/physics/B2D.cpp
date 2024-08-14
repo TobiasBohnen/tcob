@@ -40,8 +40,9 @@ void b2d_world::set_enable_sleeping(bool value) const
     b2World_EnableSleeping(ID, value);
 }
 
-void b2d_world::draw(b2d_debug_draw* draw) const
+void b2d_world::draw(b2d_debug_draw* draw, debug_draw::settings const& settings) const
 {
+    draw->apply_settings(settings);
     b2World_Draw(ID, &draw->ID);
 }
 
@@ -549,7 +550,7 @@ void static DrawString(b2Vec2 p, char const* s, void* context)
 }
 }
 
-b2d_debug_draw::b2d_debug_draw(debug_draw* parent, debug_draw_settings settings)
+b2d_debug_draw::b2d_debug_draw(debug_draw* parent)
     : _parent {parent}
 {
     ID.context          = this;
@@ -563,21 +564,6 @@ b2d_debug_draw::b2d_debug_draw(debug_draw* parent, debug_draw_settings settings)
     ID.DrawTransform    = &DrawTransform;
     ID.DrawPoint        = &DrawPoint;
     ID.DrawString       = &DrawString; // TODO
-
-    if (settings.DrawingBounds) {
-        ID.drawingBounds    = {to_b2Vec2(settings.DrawingBounds->LowerBounds), to_b2Vec2(settings.DrawingBounds->UpperBounds)};
-        ID.useDrawingBounds = true;
-    }
-
-    ID.drawShapes           = settings.DrawShapes;
-    ID.drawJoints           = settings.DrawJoints;
-    ID.drawJointExtras      = settings.DrawJointExtras;
-    ID.drawAABBs            = settings.DrawAABBs;
-    ID.drawContacts         = settings.DrawContacts;
-    ID.drawGraphColors      = settings.DrawGraphColors;
-    ID.drawContactNormals   = settings.DrawContactNormals;
-    ID.drawContactImpulses  = settings.DrawContactImpulses;
-    ID.drawFrictionImpulses = settings.DrawFrictionImpulses;
 }
 
 void b2d_debug_draw::draw_polygon(std::span<point_f const> vertices, color color)
@@ -618,6 +604,24 @@ void b2d_debug_draw::draw_point(point_f p, f32 size, color color)
 void b2d_debug_draw::draw_string(point_f p, string const& text)
 {
     _parent->draw_string(p, text);
+}
+
+void b2d_debug_draw::apply_settings(debug_draw::settings const& settings)
+{
+    if (settings.DrawingBounds) {
+        ID.drawingBounds    = {to_b2Vec2(settings.DrawingBounds->LowerBounds), to_b2Vec2(settings.DrawingBounds->UpperBounds)};
+        ID.useDrawingBounds = true;
+    }
+
+    ID.drawShapes           = settings.DrawShapes;
+    ID.drawJoints           = settings.DrawJoints;
+    ID.drawJointExtras      = settings.DrawJointExtras;
+    ID.drawAABBs            = settings.DrawAABBs;
+    ID.drawContacts         = settings.DrawContacts;
+    ID.drawGraphColors      = settings.DrawGraphColors;
+    ID.drawContactNormals   = settings.DrawContactNormals;
+    ID.drawContactImpulses  = settings.DrawContactImpulses;
+    ID.drawFrictionImpulses = settings.DrawFrictionImpulses;
 }
 }
 

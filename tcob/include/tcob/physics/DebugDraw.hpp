@@ -20,47 +20,51 @@
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
-struct debug_draw_settings {
-    /// Bounds to use if restricting drawing to a rectangular region
-    std::optional<AABB> DrawingBounds {};
-
-    /// Option to draw shapes
-    bool DrawShapes {true};
-
-    /// Option to draw joints
-    bool DrawJoints {true};
-
-    /// Option to draw additional information for joints
-    bool DrawJointExtras {false};
-
-    /// Option to draw the bounding boxes for shapes
-    bool DrawAABBs {true};
-
-    /// Option to draw the mass and center of mass of dynamic bodies
-    bool DrawMass {false};
-
-    /// Option to draw contact points
-    bool DrawContacts {true};
-
-    /// Option to visualize the graph coloring used for contacts and joints
-    bool DrawGraphColors {false};
-
-    /// Option to draw contact normals
-    bool DrawContactNormals {true};
-
-    /// Option to draw contact normal impulses
-    bool DrawContactImpulses {true};
-
-    /// Option to draw contact friction impulses
-    bool DrawFrictionImpulses {true};
-};
-
 class TCOB_API debug_draw : public non_copyable {
     friend class world;
 
 public:
-    debug_draw(debug_draw_settings settings);
+    struct settings {
+        /// Bounds to use if restricting drawing to a rectangular region
+        std::optional<AABB> DrawingBounds {};
+
+        /// Option to draw shapes
+        bool DrawShapes {true};
+
+        /// Option to draw joints
+        bool DrawJoints {true};
+
+        /// Option to draw additional information for joints
+        bool DrawJointExtras {true};
+
+        /// Option to draw the bounding boxes for shapes
+        bool DrawAABBs {true};
+
+        /// Option to draw the mass and center of mass of dynamic bodies
+        bool DrawMass {true};
+
+        /// Option to draw contact points
+        bool DrawContacts {true};
+
+        /// Option to visualize the graph coloring used for contacts and joints
+        bool DrawGraphColors {true};
+
+        /// Option to draw contact normals
+        bool DrawContactNormals {true};
+
+        /// Option to draw contact normal impulses
+        bool DrawContactImpulses {true};
+
+        /// Option to draw contact friction impulses
+        bool DrawFrictionImpulses {true};
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    debug_draw();
     virtual ~debug_draw();
+
+    settings Settings;
 
     /// Draw a closed polygon provided in CCW order.
     void virtual draw_polygon(std::span<point_f const> vertices, color color) = 0;

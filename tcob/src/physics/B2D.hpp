@@ -30,7 +30,7 @@ public:
     void step(f32 delta, i32 subSteps) const;
     void set_gravity(point_f value) const;
     void set_enable_sleeping(bool value) const;
-    void draw(b2d_debug_draw* draw) const;
+    void draw(b2d_debug_draw* draw, debug_draw::settings const& settings) const;
 };
 
 ////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ public:
 
 class b2d_debug_draw {
 public:
-    b2d_debug_draw(debug_draw* parent, debug_draw_settings settings);
+    b2d_debug_draw(debug_draw* parent);
 
     void draw_polygon(std::span<point_f const> vertices, color color);
     void draw_solid_polygon(body_transform xform, std::span<point_f const> vertices, f32 radius, color color);
@@ -132,6 +132,8 @@ public:
     void draw_transform(body_transform const& xf);
     void draw_point(point_f p, f32 size, color color);
     void draw_string(point_f p, string const& text);
+
+    void apply_settings(debug_draw::settings const& settings);
 
     b2DebugDraw ID {};
 

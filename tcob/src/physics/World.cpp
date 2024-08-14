@@ -16,14 +16,10 @@ namespace tcob::physics {
 world::world()
     : _impl {std::make_unique<detail::b2d_world>(point_f::Zero)}
 {
-    Gravity.Changed.connect([&](point_f value) {
-        _impl->set_gravity(value);
-    });
+    Gravity.Changed.connect([&](point_f value) { _impl->set_gravity(value); });
     Gravity(point_f::Zero);
 
-    AllowSleeping.Changed.connect([&](bool value) {
-        _impl->set_enable_sleeping(value);
-    });
+    AllowSleeping.Changed.connect([&](bool value) { _impl->set_enable_sleeping(value); });
     AllowSleeping(true);
 }
 
@@ -60,7 +56,7 @@ void world::destroy_joint(joint const& jointPtr)
 
 void world::draw(debug_draw const& draw) const
 {
-    _impl->draw(draw._impl.get());
+    _impl->draw(draw._impl.get(), draw.Settings);
 }
 
 void world::on_update(milliseconds deltaTime)
