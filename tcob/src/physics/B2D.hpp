@@ -39,7 +39,7 @@ public:
 
 class b2d_body {
 public:
-    b2d_body(b2d_world* world, body_transform const& xform, body_settings const& bodySettings);
+    b2d_body(b2d_world* world, body_transform const& xform, body::settings const& bodySettings);
     ~b2d_body();
 
     auto get_type() const -> body_type;
@@ -95,13 +95,13 @@ public:
 
 class b2d_joint {
 public:
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint_settings const& jointSettings);
-    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint_settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint::settings const& jointSettings);
     ~b2d_joint();
 
     b2JointId ID {};
@@ -111,10 +111,11 @@ public:
 
 class b2d_shape {
 public:
-    b2d_shape(b2d_body* body, polygon_shape_settings const& shapeSettings);
-    b2d_shape(b2d_body* body, rect_shape_settings const& shapeSettings);
-    b2d_shape(b2d_body* body, circle_shape_settings const& shapeSettings);
-    b2d_shape(b2d_body* body, segment_shape_settings const& shapeSettings);
+    b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, circle_shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, segment_shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSettings);
     ~b2d_shape();
 
     auto equal(b2d_shape const* other) const -> bool;

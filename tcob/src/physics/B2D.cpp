@@ -94,7 +94,7 @@ auto b2d_world::get_contact_events(std::span<std::shared_ptr<body> const> bodies
 
 ////////////////////////////////////////////////////////////
 
-b2d_body::b2d_body(b2d_world* world, body_transform const& xform, body_settings const& bodySettings)
+b2d_body::b2d_body(b2d_world* world, body_transform const& xform, body::settings const& bodySettings)
 {
     b2BodyDef def {b2DefaultBodyDef()};
     switch (bodySettings.Type) {
@@ -305,7 +305,7 @@ void b2d_body::apply_angular_impulse(f32 impulse, bool wake) const
 
 ////////////////////////////////////////////////////////////
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint::settings const& jointSettings)
 {
     auto def {b2DefaultDistanceJointDef()};
     def.bodyIdA          = bodyA.ID;
@@ -327,7 +327,7 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateDistanceJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint::settings const& jointSettings)
 {
     auto def {b2DefaultMotorJointDef()};
     def.bodyIdA          = bodyA.ID;
@@ -342,7 +342,7 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateMotorJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint::settings const& jointSettings)
 {
     auto def {b2DefaultMouseJointDef()};
     def.bodyIdA          = bodyA.ID;
@@ -355,7 +355,7 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateMouseJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint::settings const& jointSettings)
 {
     auto def {b2DefaultPrismaticJointDef()};
     def.bodyIdA          = bodyA.ID;
@@ -377,7 +377,7 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreatePrismaticJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint::settings const& jointSettings)
 {
     auto def {b2DefaultRevoluteJointDef()};
     def.bodyIdA          = bodyA.ID;
@@ -400,7 +400,7 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateRevoluteJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint::settings const& jointSettings)
 {
     auto def {b2DefaultWeldJointDef()};
     def.bodyIdA             = bodyA.ID;
@@ -415,7 +415,7 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateWeldJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint_settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint::settings const& jointSettings)
 {
     auto def {b2DefaultWheelJointDef()};
     def.bodyIdA          = bodyA.ID;
@@ -441,7 +441,7 @@ b2d_joint::~b2d_joint()
 
 ////////////////////////////////////////////////////////////
 
-b2d_shape::b2d_shape(b2d_body* body, polygon_shape_settings const& shapeSettings)
+b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSettings)
 {
     std::vector<b2Vec2> v;
     v.reserve(shapeSettings.Verts.size());
@@ -465,7 +465,7 @@ b2d_shape::b2d_shape(b2d_body* body, polygon_shape_settings const& shapeSettings
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
 }
 
-b2d_shape::b2d_shape(b2d_body* body, rect_shape_settings const& shapeSettings)
+b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings)
 {
     auto const& rect {shapeSettings.Extents};
     auto        poly {b2MakeOffsetBox(rect.Width / 2, rect.Height / 2, to_b2Vec2(rect.top_left()), shapeSettings.Angle.Value)};
@@ -483,7 +483,7 @@ b2d_shape::b2d_shape(b2d_body* body, rect_shape_settings const& shapeSettings)
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
 }
 
-b2d_shape::b2d_shape(b2d_body* body, circle_shape_settings const& shapeSettings)
+b2d_shape::b2d_shape(b2d_body* body, circle_shape::settings const& shapeSettings)
 {
     b2Circle poly {to_b2Vec2(shapeSettings.Center), shapeSettings.Radius};
 
@@ -500,7 +500,7 @@ b2d_shape::b2d_shape(b2d_body* body, circle_shape_settings const& shapeSettings)
     ID = b2CreateCircleShape(body->ID, &shapeDef, &poly);
 }
 
-b2d_shape::b2d_shape(b2d_body* body, segment_shape_settings const& shapeSettings)
+b2d_shape::b2d_shape(b2d_body* body, segment_shape::settings const& shapeSettings)
 {
     b2Segment poly {to_b2Vec2(shapeSettings.Point0), to_b2Vec2(shapeSettings.Point1)};
 
@@ -515,6 +515,23 @@ b2d_shape::b2d_shape(b2d_body* body, segment_shape_settings const& shapeSettings
     shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
 
     ID = b2CreateSegmentShape(body->ID, &shapeDef, &poly);
+}
+
+b2d_shape::b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSettings)
+{
+    b2Capsule poly {to_b2Vec2(shapeSettings.Center0), to_b2Vec2(shapeSettings.Center1), shapeSettings.Radius};
+
+    b2ShapeDef shapeDef {b2DefaultShapeDef()};
+    shapeDef.friction             = shapeSettings.Friction;
+    shapeDef.restitution          = shapeSettings.Restitution;
+    shapeDef.density              = shapeSettings.Density;
+    shapeDef.isSensor             = shapeSettings.IsSensor;
+    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
+    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
+    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
+    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
+
+    ID = b2CreateCapsuleShape(body->ID, &shapeDef, &poly);
 }
 
 b2d_shape::~b2d_shape()

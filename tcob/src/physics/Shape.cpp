@@ -25,22 +25,27 @@ shape::shape(std::unique_ptr<detail::b2d_shape> impl)
 
 shape::~shape() = default;
 
-polygon_shape::polygon_shape(detail::b2d_body* body, polygon_shape_settings const& shapeSettings)
+polygon_shape::polygon_shape(detail::b2d_body* body, settings const& shapeSettings)
     : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
 {
 }
 
-rect_shape::rect_shape(detail::b2d_body* body, rect_shape_settings const& shapeSettings)
+rect_shape::rect_shape(detail::b2d_body* body, settings const& shapeSettings)
     : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
 {
 }
 
-circle_shape::circle_shape(detail::b2d_body* body, circle_shape_settings const& shapeSettings)
+circle_shape::circle_shape(detail::b2d_body* body, settings const& shapeSettings)
     : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
 {
 }
 
-segment_shape::segment_shape(detail::b2d_body* body, segment_shape_settings const& shapeSettings)
+segment_shape::segment_shape(detail::b2d_body* body, settings const& shapeSettings)
+    : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
+{
+}
+
+capsule_shape::capsule_shape(detail::b2d_body* body, settings const& shapeSettings)
     : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
 {
 }

@@ -35,7 +35,7 @@ auto world::get_joints() -> std::span<std::shared_ptr<joint>>
     return _joints;
 }
 
-auto world::create_body(body_transform const& xform, body_settings const& bodySettings) -> std::shared_ptr<body>
+auto world::create_body(body_transform const& xform, body::settings const& bodySettings) -> std::shared_ptr<body>
 {
     return _bodies.emplace_back(std::shared_ptr<body> {new body {_impl.get(), xform, bodySettings}});
 }

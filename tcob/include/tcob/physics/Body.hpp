@@ -34,69 +34,69 @@ inline auto operator==(body_transform const& left, body_transform const& right) 
 
 ////////////////////////////////////////////////////////////
 
-struct body_settings {
-    /// The body type: static, kinematic, or dynamic.
-    /// Note: if a dynamic body would have zero mass, the mass is set to one.
-    body_type Type {body_type::Static};
-
-    /// The initial linear velocity of the body's origin. Typically in meters per second.
-    point_f LinearVelocity {point_f::Zero};
-
-    /// The initial angular velocity of the body. Radians per second.
-    radian_f AngularVelocity {0.0f};
-
-    /// Linear damping is use to reduce the linear velocity. The damping parameter
-    /// can be larger than 1 but the damping effect becomes sensitive to the
-    /// time step when the damping parameter is large.
-    ///	Generally linear damping is undesirable because it makes objects move slowly
-    ///	as if they are floating.
-    f32 LinearDamping {0.0f};
-
-    /// Angular damping is use to reduce the angular velocity. The damping parameter
-    /// can be larger than 1.0f but the damping effect becomes sensitive to the
-    /// time step when the damping parameter is large.
-    ///	Angular damping can be use slow down rotating bodies.
-    f32 AngularDamping {0.0f};
-
-    /// Set this flag to false if this body should never fall asleep. Note that
-    /// this increases CPU usage.
-    bool EnableSleep {true};
-
-    /// Is this body initially awake or sleeping?
-    bool IsAwake {true};
-
-    /// Should this body be prevented from rotating? Useful for characters.
-    bool IsFixedRotation {false};
-
-    /// Is this a fast moving body that should be prevented from tunneling through
-    /// other moving bodies? Note that all bodies are prevented from tunneling through
-    /// kinematic and static bodies. This setting is only considered on dynamic bodies.
-    /// @warning You should use this flag sparingly since it increases processing time.
-    bool IsBullet {false};
-
-    /// Does this body start out enabled?
-    bool IsEnabled {true};
-
-    /// Scale the gravity applied to this body.
-    f32 GravityScale {1.0f};
-
-    /// Sleep velocity threshold, default is 0.05 meter per second
-    f32 SleepThreshold {0.05f};
-
-    /// Automatically compute mass and related properties on this body from shapes.
-    /// Triggers whenever a shape is add/removed/changed. Default is true.
-    bool AutomaticMass {true};
-
-    /// This allows this body to bypass rotational speed limits. Should only be used
-    ///	for circular objects, like wheels.
-    bool AllowFastRotation {false};
-};
-
 class TCOB_API body final {
     friend class world;
     friend class joint;
 
 public:
+    struct settings {
+        /// The body type: static, kinematic, or dynamic.
+        /// Note: if a dynamic body would have zero mass, the mass is set to one.
+        body_type Type {body_type::Static};
+
+        /// The initial linear velocity of the body's origin. Typically in meters per second.
+        point_f LinearVelocity {point_f::Zero};
+
+        /// The initial angular velocity of the body. Radians per second.
+        radian_f AngularVelocity {0.0f};
+
+        /// Linear damping is use to reduce the linear velocity. The damping parameter
+        /// can be larger than 1 but the damping effect becomes sensitive to the
+        /// time step when the damping parameter is large.
+        ///	Generally linear damping is undesirable because it makes objects move slowly
+        ///	as if they are floating.
+        f32 LinearDamping {0.0f};
+
+        /// Angular damping is use to reduce the angular velocity. The damping parameter
+        /// can be larger than 1.0f but the damping effect becomes sensitive to the
+        /// time step when the damping parameter is large.
+        ///	Angular damping can be use slow down rotating bodies.
+        f32 AngularDamping {0.0f};
+
+        /// Set this flag to false if this body should never fall asleep. Note that
+        /// this increases CPU usage.
+        bool EnableSleep {true};
+
+        /// Is this body initially awake or sleeping?
+        bool IsAwake {true};
+
+        /// Should this body be prevented from rotating? Useful for characters.
+        bool IsFixedRotation {false};
+
+        /// Is this a fast moving body that should be prevented from tunneling through
+        /// other moving bodies? Note that all bodies are prevented from tunneling through
+        /// kinematic and static bodies. This setting is only considered on dynamic bodies.
+        /// @warning You should use this flag sparingly since it increases processing time.
+        bool IsBullet {false};
+
+        /// Does this body start out enabled?
+        bool IsEnabled {true};
+
+        /// Scale the gravity applied to this body.
+        f32 GravityScale {1.0f};
+
+        /// Sleep velocity threshold, default is 0.05 meter per second
+        f32 SleepThreshold {0.05f};
+
+        /// Automatically compute mass and related properties on this body from shapes.
+        /// Triggers whenever a shape is add/removed/changed. Default is true.
+        bool AutomaticMass {true};
+
+        /// This allows this body to bypass rotational speed limits. Should only be used
+        ///	for circular objects, like wheels.
+        bool AllowFastRotation {false};
+    };
+
     prop_fn<body_type>      Type;
     prop_fn<point_f>        LinearVelocity;
     prop_fn<radian_f>       AngularVelocity;
@@ -133,7 +133,7 @@ public:
     void sleep() const;
 
 private:
-    body(detail::b2d_world* world, body_transform const& xform, body_settings const& bodySettings);
+    body(detail::b2d_world* world, body_transform const& xform, settings const& bodySettings);
 
     std::unique_ptr<detail::b2d_body> _impl;
 
