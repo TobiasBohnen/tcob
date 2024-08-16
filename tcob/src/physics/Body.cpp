@@ -41,6 +41,7 @@ body::body(world& world, body_transform const& xform, settings const& bodySettin
     , _impl {std::make_unique<detail::b2d_body>(detail::get_impl(world), xform, bodySettings)}
     , _world {world}
 {
+    _impl->set_user_data(this);
 }
 
 void body::apply_force(point_f force, point_f point, bool wake) const

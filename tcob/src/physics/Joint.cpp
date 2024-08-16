@@ -17,6 +17,7 @@ joint::joint(world& world, std::unique_ptr<detail::b2d_joint> impl)
     : _impl {std::move(impl)}
     , _world {world}
 {
+    _impl->set_user_data(this);
 }
 
 joint::~joint() = default;

@@ -22,22 +22,32 @@ namespace tcob::physics {
 
 ////////////////////////////////////////////////////////////
 
+struct body_move_event {
+    body_transform Transform;
+    body*          Body {nullptr};
+    bool           FellAsleep {};
+};
+
+struct body_events {
+    std::vector<body_move_event> Move;
+};
+
 struct contact_begin_touch_event {
-    std::shared_ptr<shape> ShapeA;
-    std::shared_ptr<shape> ShapeB;
+    shape* ShapeA {};
+    shape* ShapeB {};
 };
 
 struct contact_end_touch_event {
-    std::shared_ptr<shape> ShapeA;
-    std::shared_ptr<shape> ShapeB;
+    shape* ShapeA {};
+    shape* ShapeB {};
 };
 
 struct contact_hit_event {
-    std::shared_ptr<shape> ShapeA;
-    std::shared_ptr<shape> ShapeB;
-    point_f                Point;
-    point_f                Normal;
-    f32                    ApproachSpeed;
+    shape*  ShapeA {};
+    shape*  ShapeB {};
+    point_f Point {};
+    point_f Normal {};
+    f32     ApproachSpeed {};
 };
 
 struct contact_events {
@@ -46,18 +56,71 @@ struct contact_events {
     std::vector<contact_hit_event>         Hit;
 };
 
+struct sensor_begin_touch_event {
+    shape* Sensor {};
+    shape* Visitor {};
+};
+
+struct sensor_end_touch_event {
+    shape* Sensor {};
+    shape* Visitor {};
+};
+
+struct sensor_events {
+    std::vector<sensor_begin_touch_event> BeginTouch;
+    std::vector<sensor_end_touch_event>   EndTouch;
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API world final : public updatable, public non_copyable {
     friend auto detail::get_impl(world const& t) -> detail::b2d_world*;
 
 public:
+    class TCOB_API settings {
+    public:
+        /// Gravity vector.
+        point_f Gravity {0, 10.f};
+
+        /// Restitution velocity threshold, usually in m/s. Collisions above this
+        /// speed have restitution applied (will bounce).
+        f32 RestitutionThreshold {1.0f};
+
+        /// This parameter controls how fast overlap is resolved and has units of meters per second
+        f32 ContactPushoutVelocity {3.0f};
+
+        /// Threshold velocity for hit events. Usually meters per second.
+        f32 HitEventThreshold {1.0f};
+
+        /// Contact stiffness. Cycles per second.
+        f32 ContactHertz {30};
+
+        /// Contact bounciness. Non-dimensional.
+        f32 ContactDampingRatio {10};
+
+        /// Joint stiffness. Cycles per second.
+        f32 JointHertz {60};
+
+        /// Joint bounciness. Non-dimensional.
+        f32 JointDampingRatio {2.0f};
+
+        /// Maximum linear velocity. Usually meters per second.
+        f32 MaximumLinearVelocity {400.0f};
+
+        /// Can bodies go to sleep to improve performance
+        bool EnableSleep {true};
+
+        /// Enable continuous collision
+        bool EnableContinous {true};
+    };
+
     world();
+    explicit world(settings const& settings);
     ~world() override;
 
-    i32           SubSteps {4};
-    prop<point_f> Gravity;
-    prop<bool>    AllowSleeping;
+    i32              SubSteps {4};
+    prop_fn<point_f> Gravity;
+    prop<bool>       EnableSleeping;
 
     auto get_bodies() -> std::span<std::shared_ptr<body>>;
 
@@ -72,9 +135,13 @@ public:
     auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;
     void destroy_joint(joint const& joint);
 
+    auto get_body_events() const -> body_events;
     auto get_contact_events() const -> contact_events;
+    auto get_sensor_events() const -> sensor_events;
 
     void draw(debug_draw const& draw) const;
+
+    void explode(point_f pos, f32 radius, f32 impulse) const;
 
 private:
     void on_update(milliseconds deltaTime) override;

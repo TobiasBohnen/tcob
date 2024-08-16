@@ -17,6 +17,7 @@ shape::shape(body& body, std::unique_ptr<detail::b2d_shape> impl)
     : _impl {std::move(impl)}
     , _body {body}
 {
+    _impl->set_user_data(this);
 }
 
 shape::~shape() = default;

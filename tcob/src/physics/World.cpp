@@ -14,13 +14,16 @@
 namespace tcob::physics {
 
 world::world()
-    : _impl {std::make_unique<detail::b2d_world>(point_f::Zero)}
+    : world {settings {}}
 {
-    Gravity.Changed.connect([&](point_f value) { _impl->set_gravity(value); });
-    Gravity(point_f::Zero);
+}
 
-    AllowSleeping.Changed.connect([&](bool value) { _impl->set_enable_sleeping(value); });
-    AllowSleeping(true);
+world::world(settings const& settings)
+    : Gravity {{[&]() -> point_f { return _impl->get_gravity(); },
+                [&](auto const& value) { _impl->set_gravity(value); }}}
+    , _impl {std::make_unique<detail::b2d_world>(settings)}
+{
+    EnableSleeping.Changed.connect([&](bool value) { _impl->set_enable_sleeping(value); });
 }
 
 world::~world() = default;
@@ -67,14 +70,29 @@ void world::destroy_joint(joint const& joint)
     }));
 }
 
+auto world::get_body_events() const -> body_events
+{
+    return _impl->get_body_events();
+}
+
 auto world::get_contact_events() const -> contact_events
 {
-    return _impl->get_contact_events(_bodies);
+    return _impl->get_contact_events();
+}
+
+auto world::get_sensor_events() const -> sensor_events
+{
+    return _impl->get_sensor_events();
 }
 
 void world::draw(debug_draw const& draw) const
 {
     _impl->draw(draw._impl.get(), draw.Settings);
+}
+
+void world::explode(point_f pos, f32 radius, f32 impulse) const
+{
+    _impl->explode(pos, radius, impulse);
 }
 
 void world::on_update(milliseconds deltaTime)

@@ -22,14 +22,23 @@ namespace tcob::physics::detail {
 
 class b2d_world {
 public:
-    b2d_world(point_f gravity);
+    b2d_world(world::settings const& settings);
     ~b2d_world();
 
     void step(f32 delta, i32 subSteps) const;
-    void set_gravity(point_f value) const;
-    void set_enable_sleeping(bool value) const;
+
     void draw(b2d_debug_draw* draw, debug_draw::settings const& settings) const;
-    auto get_contact_events(std::span<std::shared_ptr<body> const> bodies) const -> contact_events;
+
+    auto get_gravity() const -> point_f;
+    void set_gravity(point_f value) const;
+
+    void set_enable_sleeping(bool value) const;
+
+    void explode(point_f pos, f32 radius, f32 impulse) const;
+
+    auto get_body_events() const -> body_events;
+    auto get_contact_events() const -> contact_events;
+    auto get_sensor_events() const -> sensor_events;
 
     b2WorldId ID {};
 };
@@ -87,6 +96,8 @@ public:
     void apply_torque(f32 torque, bool wake) const;
     void apply_angular_impulse(f32 impulse, bool wake) const;
 
+    void set_user_data(void* ptr) const;
+
     b2BodyId ID {};
 };
 
@@ -102,6 +113,8 @@ public:
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, weld_joint::settings const& jointSettings);
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, wheel_joint::settings const& jointSettings);
     ~b2d_joint();
+
+    void set_user_data(void* ptr) const;
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -289,6 +302,8 @@ public:
     b2d_shape(b2d_body* body, segment_shape::settings const& shapeSettings);
     b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSettings);
     ~b2d_shape();
+
+    void set_user_data(void* ptr) const;
 
     auto equal(b2d_shape const* other) const -> bool;
 

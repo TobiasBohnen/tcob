@@ -15,11 +15,22 @@ auto static to_b2Vec2(point_f val) -> b2Vec2
     return {val.X, val.Y};
 }
 
-b2d_world::b2d_world(point_f gravity)
+b2d_world::b2d_world(world::settings const& settings)
 {
     b2WorldDef worldDef {b2DefaultWorldDef()};
-    worldDef.gravity = to_b2Vec2(gravity);
-    ID               = b2CreateWorld(&worldDef);
+    worldDef.gravity               = to_b2Vec2(settings.Gravity);
+    worldDef.restitutionThreshold  = settings.RestitutionThreshold;
+    worldDef.contactDampingRatio   = settings.ContactPushoutVelocity;
+    worldDef.hitEventThreshold     = settings.HitEventThreshold;
+    worldDef.contactHertz          = settings.ContactHertz;
+    worldDef.contactDampingRatio   = settings.ContactDampingRatio;
+    worldDef.jointHertz            = settings.JointHertz;
+    worldDef.jointDampingRatio     = settings.JointDampingRatio;
+    worldDef.maximumLinearVelocity = settings.MaximumLinearVelocity;
+    worldDef.enableSleep           = settings.EnableSleep;
+    worldDef.enableContinous       = settings.EnableContinous;
+
+    ID = b2CreateWorld(&worldDef);
 }
 
 b2d_world::~b2d_world()
@@ -32,6 +43,12 @@ void b2d_world::step(f32 delta, i32 subSteps) const
     b2World_Step(ID, delta, subSteps);
 }
 
+auto b2d_world::get_gravity() const -> point_f
+{
+    auto const val {b2World_GetGravity(ID)};
+    return {val.x, val.y};
+}
+
 void b2d_world::set_gravity(point_f value) const
 {
     b2World_SetGravity(ID, to_b2Vec2(value));
@@ -42,13 +59,36 @@ void b2d_world::set_enable_sleeping(bool value) const
     b2World_EnableSleeping(ID, value);
 }
 
+void b2d_world::explode(point_f pos, f32 radius, f32 impulse) const
+{
+    b2World_Explode(ID, to_b2Vec2(pos), radius, impulse);
+}
+
 void b2d_world::draw(b2d_debug_draw* draw, debug_draw::settings const& settings) const
 {
     draw->apply_settings(settings);
     b2World_Draw(ID, &draw->ID);
 }
 
-auto b2d_world::get_contact_events(std::span<std::shared_ptr<body> const> bodies) const -> contact_events
+auto b2d_world::get_body_events() const -> body_events
+{
+    auto const  events {b2World_GetBodyEvents(ID)};
+    body_events retValue;
+    retValue.Move.reserve(events.moveCount);
+
+    std::span<b2BodyMoveEvent> const move {events.moveEvents, static_cast<usize>(events.moveCount)};
+    for (auto& event : move) {
+        body_move_event ev;
+        ev.Body       = reinterpret_cast<body*>(b2Body_GetUserData(event.bodyId));
+        ev.Transform  = {{event.transform.p.x, event.transform.p.y}, b2Rot_GetAngle(event.transform.q)};
+        ev.FellAsleep = event.fellAsleep;
+        retValue.Move.push_back(ev);
+    }
+
+    return retValue;
+}
+
+auto b2d_world::get_contact_events() const -> contact_events
 {
     auto const     events {b2World_GetContactEvents(ID)};
     contact_events retValue;
@@ -56,39 +96,55 @@ auto b2d_world::get_contact_events(std::span<std::shared_ptr<body> const> bodies
     retValue.EndTouch.reserve(events.endCount);
     retValue.Hit.reserve(events.hitCount);
 
-    auto const findShapePtr {[&](b2ShapeId const& val) -> std::shared_ptr<tcob::physics::shape> {
-        for (auto const& body : bodies) {
-            for (auto const& shape : body->get_shapes()) {
-                if (B2_ID_EQUALS(get_impl(*shape)->ID, val)) { return shape; }
-            }
-        }
-        return nullptr;
-    }};
-
     std::span<b2ContactBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
     for (auto& event : begin) {
         contact_begin_touch_event ev;
-        ev.ShapeA = findShapePtr(event.shapeIdA);
-        ev.ShapeB = findShapePtr(event.shapeIdB);
+        ev.ShapeA = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdA));
+        ev.ShapeB = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdB));
         retValue.BeginTouch.push_back(ev);
     }
     std::span<b2ContactEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
     for (auto& event : end) {
         contact_end_touch_event ev;
-        ev.ShapeA = findShapePtr(event.shapeIdA);
-        ev.ShapeB = findShapePtr(event.shapeIdB);
+        ev.ShapeA = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdA));
+        ev.ShapeB = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdB));
         retValue.EndTouch.push_back(ev);
     }
 
     std::span<b2ContactHitEvent> const hit {events.hitEvents, static_cast<usize>(events.hitCount)};
     for (auto& event : hit) {
         contact_hit_event ev;
-        ev.ShapeA        = findShapePtr(event.shapeIdA);
-        ev.ShapeB        = findShapePtr(event.shapeIdB);
+        ev.ShapeA        = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdA));
+        ev.ShapeB        = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdB));
         ev.ApproachSpeed = event.approachSpeed;
         ev.Normal        = {event.normal.x, event.normal.y};
         ev.Point         = {event.point.x, event.point.y};
         retValue.Hit.push_back(ev);
+    }
+
+    return retValue;
+}
+
+auto b2d_world::get_sensor_events() const -> sensor_events
+{
+    auto const    events {b2World_GetSensorEvents(ID)};
+    sensor_events retValue;
+    retValue.BeginTouch.reserve(events.beginCount);
+    retValue.EndTouch.reserve(events.endCount);
+
+    std::span<b2SensorBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
+    for (auto& event : begin) {
+        sensor_begin_touch_event ev;
+        ev.Sensor  = reinterpret_cast<shape*>(b2Shape_GetUserData(event.sensorShapeId));
+        ev.Visitor = reinterpret_cast<shape*>(b2Shape_GetUserData(event.visitorShapeId));
+        retValue.BeginTouch.push_back(ev);
+    }
+    std::span<b2SensorEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
+    for (auto& event : end) {
+        sensor_end_touch_event ev;
+        ev.Sensor  = reinterpret_cast<shape*>(b2Shape_GetUserData(event.sensorShapeId));
+        ev.Visitor = reinterpret_cast<shape*>(b2Shape_GetUserData(event.visitorShapeId));
+        retValue.EndTouch.push_back(ev);
     }
 
     return retValue;
@@ -305,6 +361,11 @@ void b2d_body::apply_angular_impulse(f32 impulse, bool wake) const
     b2Body_ApplyAngularImpulse(ID, impulse, wake);
 }
 
+void b2d_body::set_user_data(void* ptr) const
+{
+    b2Body_SetUserData(ID, ptr);
+}
+
 ////////////////////////////////////////////////////////////
 
 b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, distance_joint::settings const& jointSettings)
@@ -439,6 +500,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bo
 b2d_joint::~b2d_joint()
 {
     b2DestroyJoint(ID);
+}
+
+void b2d_joint::set_user_data(void* ptr) const
+{
+    b2Joint_SetUserData(ID, ptr);
 }
 
 void b2d_joint::distance_joint_set_length(f32 length) const
@@ -1051,6 +1117,11 @@ b2d_shape::b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSetting
 b2d_shape::~b2d_shape()
 {
     b2DestroyShape(ID);
+}
+
+void b2d_shape::set_user_data(void* ptr) const
+{
+    b2Shape_SetUserData(ID, ptr);
 }
 
 auto b2d_shape::equal(b2d_shape const* other) const -> bool
