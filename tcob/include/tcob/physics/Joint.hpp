@@ -18,6 +18,8 @@ namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API joint : public non_copyable {
+    friend auto detail::get_impl(joint const& t) -> detail::b2d_joint*;
+
 public:
     class TCOB_API settings {
     public:
@@ -35,13 +37,16 @@ public:
 
     auto operator==(joint const& other) const -> bool;
 
-protected:
-    joint(std::unique_ptr<detail::b2d_joint> impl);
+    auto get_world() -> world&;
 
-    auto get_body_impl(body const& body) const -> detail::b2d_body&;
+protected:
+    joint(world& world, std::unique_ptr<detail::b2d_joint> impl);
+
+    auto get_impl() const -> detail::b2d_joint&;
 
 private:
     std::unique_ptr<detail::b2d_joint> _impl;
+    world&                             _world;
 };
 
 ////////////////////////////////////////////////////////////
@@ -90,8 +95,23 @@ public:
         f32 MotorSpeed {0.0f};
     };
 
+    prop_fn<f32>  Length;
+    prop_fn<bool> EnableSpring;
+    prop_fn<f32>  Hertz;
+    prop_fn<f32>  DampingRatio;
+    prop_fn<bool> EnableLimit;
+    prop_fn<f32>  MinLength;
+    prop_fn<f32>  MaxLength;
+    prop_fn<bool> EnableMotor;
+    prop_fn<f32>  MotorSpeed;
+    prop_fn<f32>  MaxMotorForce;
+
+    auto get_current_length() const -> f32;
+
+    auto get_motor_force() const -> f32;
+
 private:
-    distance_joint(detail::b2d_world* world, settings const& jointSettings);
+    distance_joint(world& world, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -118,8 +138,14 @@ public:
         f32 CorrectionFactor {0.3f};
     };
 
+    prop_fn<point_f> LinearOffset;
+    prop_fn<f32>     AngularOffset;
+    prop_fn<f32>     MaxForce;
+    prop_fn<f32>     MaxTorque;
+    prop_fn<f32>     CorrectionFactor;
+
 private:
-    motor_joint(detail::b2d_world* world, settings const& jointSettings);
+    motor_joint(world& world, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -143,8 +169,13 @@ public:
         f32 MaxForce {1.0f};
     };
 
+    prop_fn<point_f> Target;
+    prop_fn<f32>     Hertz;
+    prop_fn<f32>     DampingRatio;
+    prop_fn<f32>     MaxForce;
+
 private:
-    mouse_joint(detail::b2d_world* world, settings const& jointSettings);
+    mouse_joint(world& world, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -195,8 +226,20 @@ public:
         f32 MotorSpeed {0.0f};
     };
 
+    prop_fn<bool> EnableSpring;
+    prop_fn<f32>  Hertz;
+    prop_fn<f32>  DampingRatio;
+    prop_fn<bool> EnableLimit;
+    prop_fn<f32>  LowerTranslation;
+    prop_fn<f32>  UpperTranslation;
+    prop_fn<bool> EnableMotor;
+    prop_fn<f32>  MaxMotorForce;
+    prop_fn<f32>  MotorSpeed;
+
+    auto get_motor_force() const -> f32;
+
 private:
-    prismatic_joint(detail::b2d_world* world, settings const& jointSettings);
+    prismatic_joint(world& world, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -247,8 +290,22 @@ public:
         f32 DrawSize {0.25f};
     };
 
+    prop_fn<bool> EnableSpring;
+    prop_fn<f32>  Hertz;
+    prop_fn<f32>  DampingRatio;
+    prop_fn<bool> EnableLimit;
+    prop_fn<f32>  LowerAngle;
+    prop_fn<f32>  UpperAngle;
+    prop_fn<bool> EnableMotor;
+    prop_fn<f32>  MaxMotorTorque;
+    prop_fn<f32>  MotorSpeed;
+
+    auto get_angle() const -> radian_f;
+
+    auto get_motor_torque() const -> f32;
+
 private:
-    revolute_joint(detail::b2d_world* world, settings const& jointSettings);
+    revolute_joint(world& world, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -281,8 +338,13 @@ public:
         f32 AngularDampingRatio {0.0f};
     };
 
+    prop_fn<f32> LinearHertz;
+    prop_fn<f32> AngularHertz;
+    prop_fn<f32> LinearDampingRatio;
+    prop_fn<f32> AngularDampingRatio;
+
 private:
-    weld_joint(detail::b2d_world* world, settings const& jointSettings);
+    weld_joint(world& world, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -330,8 +392,20 @@ public:
         f32 MotorSpeed {0.0f};
     };
 
+    prop_fn<bool> EnableSpring;
+    prop_fn<f32>  Hertz;
+    prop_fn<f32>  DampingRatio;
+    prop_fn<bool> EnableLimit;
+    prop_fn<f32>  LowerTranslation;
+    prop_fn<f32>  UpperTranslation;
+    prop_fn<bool> EnableMotor;
+    prop_fn<f32>  MaxMotorTorque;
+    prop_fn<f32>  MotorSpeed;
+
+    auto get_motor_torque() const -> f32;
+
 private:
-    wheel_joint(detail::b2d_world* world, settings const& jointSettings);
+    wheel_joint(world& world, settings const& jointSettings);
 };
 
 }

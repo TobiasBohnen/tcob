@@ -49,6 +49,8 @@ struct contact_events {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API world final : public updatable, public non_copyable {
+    friend auto detail::get_impl(world const& t) -> detail::b2d_world*;
+
 public:
     world();
     ~world() override;
@@ -86,7 +88,7 @@ private:
 template <typename T>
 inline auto world::create_joint(auto&& jointSettings) -> std::shared_ptr<T>
 {
-    return std::static_pointer_cast<T>(_joints.emplace_back(std::shared_ptr<T> {new T {_impl.get(), jointSettings}}));
+    return std::static_pointer_cast<T>(_joints.emplace_back(std::shared_ptr<T> {new T {*this, jointSettings}}));
 }
 
 }

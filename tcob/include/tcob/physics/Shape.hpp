@@ -19,7 +19,7 @@ namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API shape : public non_copyable {
-    friend class detail::b2d_world;
+    friend auto detail::get_impl(shape const& t) -> detail::b2d_shape*;
 
 public:
     class TCOB_API settings {
@@ -52,12 +52,15 @@ public:
 
     auto operator==(shape const& other) const -> bool;
 
+    auto get_body() -> body&;
+
 protected:
-    explicit shape(std::unique_ptr<detail::b2d_shape> impl);
+    shape(body& body, std::unique_ptr<detail::b2d_shape> impl);
     ~shape();
 
 private:
     std::unique_ptr<detail::b2d_shape> _impl;
+    body&                              _body;
 };
 
 ////////////////////////////////////////////////////////////
@@ -73,7 +76,7 @@ public:
     };
 
 private:
-    polygon_shape(detail::b2d_body* body, settings const& shapeSettings);
+    polygon_shape(body& body, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -89,7 +92,7 @@ public:
     };
 
 private:
-    rect_shape(detail::b2d_body* body, settings const& shapeSettings);
+    rect_shape(body& body, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -105,7 +108,7 @@ public:
     };
 
 private:
-    circle_shape(detail::b2d_body* body, settings const& shapeSettings);
+    circle_shape(body& body, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -121,7 +124,7 @@ public:
     };
 
 private:
-    segment_shape(detail::b2d_body* body, settings const& shapeSettings);
+    segment_shape(body& body, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -138,7 +141,7 @@ public:
     };
 
 private:
-    capsule_shape(detail::b2d_body* body, settings const& shapeSettings);
+    capsule_shape(body& body, settings const& shapeSettings);
 };
 }
 

@@ -36,7 +36,7 @@ inline auto operator==(body_transform const& left, body_transform const& right) 
 
 class TCOB_API body final {
     friend class world;
-    friend class joint;
+    friend auto detail::get_impl(body const& t) -> detail::b2d_body*;
 
 public:
     struct settings {
@@ -116,10 +116,12 @@ public:
     auto get_center() const -> point_f;
     auto get_local_center() const -> point_f;
 
+    auto get_world() -> world&;
+
     auto get_shapes() -> std::span<std::shared_ptr<shape>>;
 
     template <typename T>
-    auto create_shape(auto&& shapeSettings) -> std::shared_ptr<T>;
+    auto create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>;
     void destroy_shape(shape const& shapePtr);
 
     void apply_force(point_f force, point_f point, bool wake = true) const;
@@ -133,17 +135,17 @@ public:
     void sleep() const;
 
 private:
-    body(detail::b2d_world* world, body_transform const& xform, settings const& bodySettings);
+    body(world& world, body_transform const& xform, settings const& bodySettings);
 
-    std::unique_ptr<detail::b2d_body> _impl;
-
+    std::unique_ptr<detail::b2d_body>   _impl;
+    world&                              _world;
     std::vector<std::shared_ptr<shape>> _shapes;
 };
 
 template <typename T>
-inline auto body::create_shape(auto&& shapeSettings) -> std::shared_ptr<T>
+inline auto body::create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>
 {
-    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {_impl.get(), shapeSettings}}));
+    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {*this, shapeSettings}}));
 }
 
 }

@@ -13,40 +13,48 @@ namespace tcob::physics {
 
 ////////////////////////////////////////////////////////////
 
-auto shape::operator==(shape const& other) const -> bool
-{
-    return _impl->equal(other._impl.get());
-}
-
-shape::shape(std::unique_ptr<detail::b2d_shape> impl)
+shape::shape(body& body, std::unique_ptr<detail::b2d_shape> impl)
     : _impl {std::move(impl)}
+    , _body {body}
 {
 }
 
 shape::~shape() = default;
 
-polygon_shape::polygon_shape(detail::b2d_body* body, settings const& shapeSettings)
-    : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
+auto shape::operator==(shape const& other) const -> bool
+{
+    return _impl->equal(other._impl.get());
+}
+
+auto shape::get_body() -> body&
+{
+    return _body;
+}
+
+////////////////////////////////////////////////////////////
+
+polygon_shape::polygon_shape(body& body, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
 {
 }
 
-rect_shape::rect_shape(detail::b2d_body* body, settings const& shapeSettings)
-    : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
+rect_shape::rect_shape(body& body, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
 {
 }
 
-circle_shape::circle_shape(detail::b2d_body* body, settings const& shapeSettings)
-    : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
+circle_shape::circle_shape(body& body, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
 {
 }
 
-segment_shape::segment_shape(detail::b2d_body* body, settings const& shapeSettings)
-    : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
+segment_shape::segment_shape(body& body, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
 {
 }
 
-capsule_shape::capsule_shape(detail::b2d_body* body, settings const& shapeSettings)
-    : shape {std::make_unique<detail::b2d_shape>(body, shapeSettings)}
+capsule_shape::capsule_shape(body& body, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
 {
 }
 

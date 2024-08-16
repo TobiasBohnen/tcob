@@ -7,6 +7,8 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+B2_API auto b2RevoluteJoint_IsSpringEnabled(b2JointId jointId) -> bool;
+
 namespace tcob::physics::detail {
 auto static to_b2Vec2(point_f val) -> b2Vec2
 {
@@ -57,7 +59,7 @@ auto b2d_world::get_contact_events(std::span<std::shared_ptr<body> const> bodies
     auto const findShapePtr {[&](b2ShapeId const& val) -> std::shared_ptr<tcob::physics::shape> {
         for (auto const& body : bodies) {
             for (auto const& shape : body->get_shapes()) {
-                if (B2_ID_EQUALS(shape->_impl->ID, val)) { return shape; }
+                if (B2_ID_EQUALS(get_impl(*shape)->ID, val)) { return shape; }
             }
         }
         return nullptr;
@@ -305,11 +307,11 @@ void b2d_body::apply_angular_impulse(f32 impulse, bool wake) const
 
 ////////////////////////////////////////////////////////////
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, distance_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, distance_joint::settings const& jointSettings)
 {
     auto def {b2DefaultDistanceJointDef()};
-    def.bodyIdA          = bodyA.ID;
-    def.bodyIdB          = bodyB.ID;
+    def.bodyIdA          = bodyA->ID;
+    def.bodyIdB          = bodyB->ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.localAnchorA     = to_b2Vec2(jointSettings.LocalAnchorA);
     def.localAnchorB     = to_b2Vec2(jointSettings.LocalAnchorB);
@@ -327,11 +329,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateDistanceJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, motor_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, motor_joint::settings const& jointSettings)
 {
     auto def {b2DefaultMotorJointDef()};
-    def.bodyIdA          = bodyA.ID;
-    def.bodyIdB          = bodyB.ID;
+    def.bodyIdA          = bodyA->ID;
+    def.bodyIdB          = bodyB->ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.linearOffset     = to_b2Vec2(jointSettings.LinearOffset);
     def.angularOffset    = jointSettings.AngularOffset.Value;
@@ -342,11 +344,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateMotorJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, mouse_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, mouse_joint::settings const& jointSettings)
 {
     auto def {b2DefaultMouseJointDef()};
-    def.bodyIdA          = bodyA.ID;
-    def.bodyIdB          = bodyB.ID;
+    def.bodyIdA          = bodyA->ID;
+    def.bodyIdB          = bodyB->ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.hertz            = jointSettings.Hertz;
     def.dampingRatio     = jointSettings.DampingRatio;
@@ -355,11 +357,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateMouseJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, prismatic_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, prismatic_joint::settings const& jointSettings)
 {
     auto def {b2DefaultPrismaticJointDef()};
-    def.bodyIdA          = bodyA.ID;
-    def.bodyIdB          = bodyB.ID;
+    def.bodyIdA          = bodyA->ID;
+    def.bodyIdB          = bodyB->ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.localAnchorA     = to_b2Vec2(jointSettings.LocalAnchorA);
     def.localAnchorB     = to_b2Vec2(jointSettings.LocalAnchorB);
@@ -377,11 +379,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreatePrismaticJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, revolute_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, revolute_joint::settings const& jointSettings)
 {
     auto def {b2DefaultRevoluteJointDef()};
-    def.bodyIdA          = bodyA.ID;
-    def.bodyIdB          = bodyB.ID;
+    def.bodyIdA          = bodyA->ID;
+    def.bodyIdB          = bodyB->ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.localAnchorA     = to_b2Vec2(jointSettings.LocalAnchorA);
     def.localAnchorB     = to_b2Vec2(jointSettings.LocalAnchorB);
@@ -400,11 +402,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateRevoluteJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, weld_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, weld_joint::settings const& jointSettings)
 {
     auto def {b2DefaultWeldJointDef()};
-    def.bodyIdA             = bodyA.ID;
-    def.bodyIdB             = bodyB.ID;
+    def.bodyIdA             = bodyA->ID;
+    def.bodyIdB             = bodyB->ID;
     def.collideConnected    = jointSettings.IsCollideConnected;
     def.referenceAngle      = jointSettings.ReferenceAngle.Value;
     def.linearHertz         = jointSettings.LinearHertz;
@@ -415,11 +417,11 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
     ID = b2CreateWeldJoint(world->ID, &def);
 }
 
-b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bodyB, wheel_joint::settings const& jointSettings)
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, wheel_joint::settings const& jointSettings)
 {
     auto def {b2DefaultWheelJointDef()};
-    def.bodyIdA          = bodyA.ID;
-    def.bodyIdB          = bodyB.ID;
+    def.bodyIdA          = bodyA->ID;
+    def.bodyIdB          = bodyB->ID;
     def.collideConnected = jointSettings.IsCollideConnected;
     def.enableSpring     = jointSettings.EnableSpring;
     def.hertz            = jointSettings.Hertz;
@@ -437,6 +439,518 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const& bodyA, b2d_body const& bo
 b2d_joint::~b2d_joint()
 {
     b2DestroyJoint(ID);
+}
+
+void b2d_joint::distance_joint_set_length(f32 length) const
+{
+    b2DistanceJoint_SetLength(ID, length);
+}
+
+auto b2d_joint::distance_joint_get_length() const -> f32
+{
+    return b2DistanceJoint_GetLength(ID);
+}
+
+void b2d_joint::distance_joint_enable_spring(bool enableSpring) const
+{
+    b2DistanceJoint_EnableSpring(ID, enableSpring);
+}
+
+auto b2d_joint::distance_joint_is_spring_enabled() const -> bool
+{
+    return b2DistanceJoint_IsSpringEnabled(ID);
+}
+
+void b2d_joint::distance_joint_set_spring_hertz(f32 hertz) const
+{
+    b2DistanceJoint_SetSpringHertz(ID, hertz);
+}
+
+auto b2d_joint::distance_joint_get_hertz() const -> f32
+{
+    return b2DistanceJoint_GetHertz(ID);
+}
+
+void b2d_joint::distance_joint_set_spring_damping_ratio(f32 dampingRatio) const
+{
+    b2DistanceJoint_SetSpringDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::distance_joint_get_damping_ratio() const -> f32
+{
+    return b2DistanceJoint_GetDampingRatio(ID);
+}
+
+void b2d_joint::distance_joint_enable_limit(bool enableLimit) const
+{
+    b2DistanceJoint_EnableLimit(ID, enableLimit);
+}
+
+auto b2d_joint::distance_joint_is_limit_enabled() const -> bool
+{
+    return b2DistanceJoint_IsLimitEnabled(ID);
+}
+
+void b2d_joint::distance_joint_set_length_range(f32 minLength, f32 maxLength) const
+{
+    b2DistanceJoint_SetLengthRange(ID, minLength, maxLength);
+}
+
+auto b2d_joint::distance_joint_get_min_length() const -> f32
+{
+    return b2DistanceJoint_GetMinLength(ID);
+}
+
+auto b2d_joint::distance_joint_get_max_length() const -> f32
+{
+    return b2DistanceJoint_GetMaxLength(ID);
+}
+
+auto b2d_joint::distance_joint_get_current_length() const -> f32
+{
+    return b2DistanceJoint_GetCurrentLength(ID);
+}
+
+void b2d_joint::distance_joint_enable_motor(bool enableMotor) const
+{
+    b2DistanceJoint_EnableMotor(ID, enableMotor);
+}
+
+auto b2d_joint::distance_joint_is_motor_enabled() const -> bool
+{
+    return b2DistanceJoint_IsMotorEnabled(ID);
+}
+
+void b2d_joint::distance_joint_set_motor_speed(f32 motorSpeed) const
+{
+    b2DistanceJoint_SetMotorSpeed(ID, motorSpeed);
+}
+
+auto b2d_joint::distance_joint_get_motor_speed() const -> f32
+{
+    return b2DistanceJoint_GetMotorSpeed(ID);
+}
+
+void b2d_joint::distance_joint_set_max_motor_force(f32 force) const
+{
+    b2DistanceJoint_SetMaxMotorForce(ID, force);
+}
+
+auto b2d_joint::distance_joint_get_max_motor_force() const -> f32
+{
+    return b2DistanceJoint_GetMaxMotorForce(ID);
+}
+
+auto b2d_joint::distance_joint_get_motor_force() const -> f32
+{
+    return b2DistanceJoint_GetMotorForce(ID);
+}
+
+void b2d_joint::motor_joint_set_linear_offset(point_f linearOffset) const
+{
+    b2MotorJoint_SetLinearOffset(ID, to_b2Vec2(linearOffset));
+}
+
+auto b2d_joint::motor_joint_get_linear_offset() const -> point_f
+{
+    auto const val {b2MotorJoint_GetLinearOffset(ID)};
+    return {val.x, val.y};
+}
+
+void b2d_joint::motor_joint_set_angular_offset(f32 angularOffset) const
+{
+    b2MotorJoint_SetAngularOffset(ID, angularOffset);
+}
+
+auto b2d_joint::motor_joint_get_angular_offset() const -> f32
+{
+    return b2MotorJoint_GetAngularOffset(ID);
+}
+
+void b2d_joint::motor_joint_set_max_force(f32 maxForce) const
+{
+    b2MotorJoint_SetMaxForce(ID, maxForce);
+}
+
+auto b2d_joint::motor_joint_get_max_force() const -> f32
+{
+    return b2MotorJoint_GetMaxForce(ID);
+}
+
+void b2d_joint::motor_joint_set_max_torque(f32 maxTorque) const
+{
+    b2MotorJoint_SetMaxTorque(ID, maxTorque);
+}
+
+auto b2d_joint::motor_joint_get_max_torque() const -> f32
+{
+    return b2MotorJoint_GetMaxTorque(ID);
+}
+
+void b2d_joint::motor_joint_set_correction_factor(f32 correctionFactor) const
+{
+    b2MotorJoint_SetCorrectionFactor(ID, correctionFactor);
+}
+
+auto b2d_joint::motor_joint_get_correction_factor() const -> f32
+{
+    return b2MotorJoint_GetCorrectionFactor(ID);
+}
+
+void b2d_joint::mouse_joint_set_target(point_f target) const
+{
+    b2MouseJoint_SetTarget(ID, to_b2Vec2(target));
+}
+
+auto b2d_joint::mouse_joint_get_target() const -> point_f
+{
+    auto const val {b2MouseJoint_GetTarget(ID)};
+    return {val.x, val.y};
+}
+
+void b2d_joint::mouse_joint_set_spring_hertz(f32 hertz) const
+{
+    b2MouseJoint_SetSpringHertz(ID, hertz);
+}
+
+auto b2d_joint::mouse_joint_get_spring_hertz() const -> f32
+{
+    return b2MouseJoint_GetSpringHertz(ID);
+}
+
+void b2d_joint::mouse_joint_set_spring_damping_ratio(f32 dampingRatio) const
+{
+    b2MouseJoint_SetSpringDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::mouse_joint_get_spring_damping_ratio() const -> f32
+{
+    return b2MouseJoint_GetSpringDampingRatio(ID);
+}
+
+void b2d_joint::mouse_joint_set_max_force(f32 maxForce) const
+{
+    b2MouseJoint_SetMaxForce(ID, maxForce);
+}
+
+auto b2d_joint::mouse_joint_get_max_force() const -> f32
+{
+    return b2MouseJoint_GetMaxForce(ID);
+}
+
+void b2d_joint::prismatic_joint_enable_spring(bool enableSpring) const
+{
+    b2PrismaticJoint_EnableSpring(ID, enableSpring);
+}
+
+auto b2d_joint::prismatic_joint_is_spring_enabled() const -> bool
+{
+    return b2PrismaticJoint_IsSpringEnabled(ID);
+}
+
+void b2d_joint::prismatic_joint_set_spring_hertz(f32 hertz) const
+{
+    b2PrismaticJoint_SetSpringHertz(ID, hertz);
+}
+
+auto b2d_joint::prismatic_joint_get_spring_hertz() const -> f32
+{
+    return b2PrismaticJoint_GetSpringHertz(ID);
+}
+
+void b2d_joint::prismatic_joint_set_spring_damping_ratio(f32 dampingRatio) const
+{
+    b2PrismaticJoint_SetSpringDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::prismatic_joint_get_spring_damping_ratio() const -> f32
+{
+    return b2PrismaticJoint_GetSpringDampingRatio(ID);
+}
+
+void b2d_joint::prismatic_joint_enable_limit(bool enableLimit) const
+{
+    b2PrismaticJoint_EnableLimit(ID, enableLimit);
+}
+
+auto b2d_joint::prismatic_joint_is_limit_enabled() const -> bool
+{
+    return b2PrismaticJoint_IsLimitEnabled(ID);
+}
+
+auto b2d_joint::prismatic_joint_get_lower_limit() const -> f32
+{
+    return b2PrismaticJoint_GetLowerLimit(ID);
+}
+
+auto b2d_joint::prismatic_joint_get_upper_limit() const -> f32
+{
+    return b2PrismaticJoint_GetUpperLimit(ID);
+}
+
+void b2d_joint::prismatic_joint_set_limits(f32 lower, f32 upper) const
+{
+    b2PrismaticJoint_SetLimits(ID, lower, upper);
+}
+
+void b2d_joint::prismatic_joint_enable_motor(bool enableMotor) const
+{
+    b2PrismaticJoint_EnableMotor(ID, enableMotor);
+}
+
+auto b2d_joint::prismatic_joint_is_motor_enabled() const -> bool
+{
+    return b2PrismaticJoint_IsMotorEnabled(ID);
+}
+
+void b2d_joint::prismatic_joint_set_motor_speed(f32 motorSpeed) const
+{
+    b2PrismaticJoint_SetMotorSpeed(ID, motorSpeed);
+}
+
+auto b2d_joint::prismatic_joint_get_motor_speed() const -> f32
+{
+    return b2PrismaticJoint_GetMotorSpeed(ID);
+}
+
+void b2d_joint::prismatic_joint_set_max_motor_force(f32 force) const
+{
+    b2PrismaticJoint_SetMaxMotorForce(ID, force);
+}
+
+auto b2d_joint::prismatic_joint_get_max_motor_force() const -> f32
+{
+    return b2PrismaticJoint_GetMaxMotorForce(ID);
+}
+
+auto b2d_joint::prismatic_joint_get_motor_force() const -> f32
+{
+    return b2PrismaticJoint_GetMotorForce(ID);
+}
+
+void b2d_joint::revolute_joint_enable_spring(bool enableSpring) const
+{
+    b2RevoluteJoint_EnableSpring(ID, enableSpring);
+}
+
+auto b2d_joint::revolute_joint_is_spring_enabled() const -> bool
+{
+    return b2RevoluteJoint_IsSpringEnabled(ID);
+}
+
+void b2d_joint::revolute_joint_set_spring_hertz(f32 hertz) const
+{
+    b2RevoluteJoint_SetSpringHertz(ID, hertz);
+}
+
+auto b2d_joint::revolute_joint_get_spring_hertz() const -> f32
+{
+    return b2RevoluteJoint_GetSpringHertz(ID);
+}
+
+void b2d_joint::revolute_joint_set_spring_damping_ratio(f32 dampingRatio) const
+{
+    b2RevoluteJoint_SetSpringDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::revolute_joint_get_spring_damping_ratio() const -> f32
+{
+    return b2RevoluteJoint_GetSpringDampingRatio(ID);
+}
+
+auto b2d_joint::revolute_joint_get_angle() const -> radian_f
+{
+    return radian_f {b2RevoluteJoint_GetAngle(ID)};
+}
+
+void b2d_joint::revolute_joint_enable_limit(bool enableLimit) const
+{
+    b2RevoluteJoint_EnableLimit(ID, enableLimit);
+}
+
+auto b2d_joint::revolute_joint_is_limit_enabled() const -> bool
+{
+    return b2RevoluteJoint_IsLimitEnabled(ID);
+}
+
+auto b2d_joint::revolute_joint_get_lower_limit() const -> f32
+{
+    return b2RevoluteJoint_GetLowerLimit(ID);
+}
+
+auto b2d_joint::revolute_joint_get_upper_limit() const -> f32
+{
+    return b2RevoluteJoint_GetUpperLimit(ID);
+}
+
+void b2d_joint::revolute_joint_set_limits(f32 lower, f32 upper) const
+{
+    b2RevoluteJoint_SetLimits(ID, lower, upper);
+}
+
+void b2d_joint::revolute_joint_enable_motor(bool enableMotor) const
+{
+    b2RevoluteJoint_EnableMotor(ID, enableMotor);
+}
+
+auto b2d_joint::revolute_joint_is_motor_enabled() const -> bool
+{
+    return b2RevoluteJoint_IsMotorEnabled(ID);
+}
+
+void b2d_joint::revolute_joint_set_motor_speed(f32 motorSpeed) const
+{
+    b2RevoluteJoint_SetMotorSpeed(ID, motorSpeed);
+}
+
+auto b2d_joint::revolute_joint_get_motor_speed() const -> f32
+{
+    return b2RevoluteJoint_GetMotorSpeed(ID);
+}
+
+auto b2d_joint::revolute_joint_get_motor_torque() const -> f32
+{
+    return b2RevoluteJoint_GetMotorTorque(ID);
+}
+
+void b2d_joint::revolute_joint_set_max_motor_torque(f32 torque) const
+{
+    b2RevoluteJoint_SetMaxMotorTorque(ID, torque);
+}
+
+auto b2d_joint::revolute_joint_get_max_motor_torque() const -> f32
+{
+    return b2RevoluteJoint_GetMaxMotorTorque(ID);
+}
+
+void b2d_joint::weld_joint_set_linear_hertz(f32 hertz) const
+{
+    b2WeldJoint_SetLinearHertz(ID, hertz);
+}
+
+auto b2d_joint::weld_joint_get_linear_hertz() const -> f32
+{
+    return b2WeldJoint_GetLinearHertz(ID);
+}
+
+void b2d_joint::weld_joint_set_linear_damping_ratio(f32 dampingRatio) const
+{
+    b2WeldJoint_SetLinearDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::weld_joint_get_linear_damping_ratio() const -> f32
+{
+    return b2WeldJoint_GetLinearDampingRatio(ID);
+}
+
+void b2d_joint::weld_joint_set_angular_hertz(f32 hertz) const
+{
+    b2WeldJoint_SetAngularHertz(ID, hertz);
+}
+
+auto b2d_joint::weld_joint_get_angular_hertz() const -> f32
+{
+    return b2WeldJoint_GetAngularHertz(ID);
+}
+
+void b2d_joint::weld_joint_set_angular_damping_ratio(f32 dampingRatio) const
+{
+    b2WeldJoint_SetAngularDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::weld_joint_get_angular_damping_ratio() const -> f32
+{
+    return b2WeldJoint_GetAngularDampingRatio(ID);
+}
+
+void b2d_joint::wheel_joint_enable_spring(bool enableSpring) const
+{
+    b2WheelJoint_EnableSpring(ID, enableSpring);
+}
+
+auto b2d_joint::wheel_joint_is_spring_enabled() const -> bool
+{
+    return b2WheelJoint_IsSpringEnabled(ID);
+}
+
+void b2d_joint::wheel_joint_set_spring_hertz(f32 hertz) const
+{
+    b2WheelJoint_SetSpringHertz(ID, hertz);
+}
+
+auto b2d_joint::wheel_joint_get_spring_hertz() const -> f32
+{
+    return b2WheelJoint_GetSpringHertz(ID);
+}
+
+void b2d_joint::wheel_joint_set_spring_damping_ratio(f32 dampingRatio) const
+{
+    b2WheelJoint_SetSpringDampingRatio(ID, dampingRatio);
+}
+
+auto b2d_joint::wheel_joint_get_spring_damping_ratio() const -> f32
+{
+    return b2WheelJoint_GetSpringDampingRatio(ID);
+}
+
+void b2d_joint::wheel_joint_enable_limit(bool enableLimit) const
+{
+    b2WheelJoint_EnableLimit(ID, enableLimit);
+}
+
+auto b2d_joint::wheel_joint_is_limit_enabled() const -> bool
+{
+    return b2WheelJoint_IsLimitEnabled(ID);
+}
+
+auto b2d_joint::wheel_joint_get_lower_limit() const -> f32
+{
+    return b2WheelJoint_GetLowerLimit(ID);
+}
+
+auto b2d_joint::wheel_joint_get_upper_limit() const -> f32
+{
+    return b2WheelJoint_GetUpperLimit(ID);
+}
+
+void b2d_joint::wheel_joint_set_limits(f32 lower, f32 upper) const
+{
+    b2WheelJoint_SetLimits(ID, lower, upper);
+}
+
+void b2d_joint::wheel_joint_enable_motor(bool enableMotor) const
+{
+    b2WheelJoint_EnableMotor(ID, enableMotor);
+}
+
+auto b2d_joint::wheel_joint_is_motor_enabled() const -> bool
+{
+    return b2WheelJoint_IsMotorEnabled(ID);
+}
+
+void b2d_joint::wheel_joint_set_motor_speed(f32 motorSpeed) const
+{
+    b2WheelJoint_SetMotorSpeed(ID, motorSpeed);
+}
+
+auto b2d_joint::wheel_joint_get_motor_speed() const -> f32
+{
+    return b2WheelJoint_GetMotorSpeed(ID);
+}
+
+void b2d_joint::wheel_joint_set_max_motor_torque(f32 torque) const
+{
+    b2WheelJoint_SetMaxMotorTorque(ID, torque);
+}
+
+auto b2d_joint::wheel_joint_get_max_motor_torque() const -> f32
+{
+    return b2WheelJoint_GetMaxMotorTorque(ID);
+}
+
+auto b2d_joint::wheel_joint_get_motor_torque() const -> f32
+{
+    return b2WheelJoint_GetMotorTorque(ID);
 }
 
 ////////////////////////////////////////////////////////////
@@ -583,14 +1097,16 @@ void static DrawSolidCircle(b2Transform transform, float radius, b2HexColor colo
     ddraw->draw_solid_circle({{transform.p.x, transform.p.y}, b2Rot_GetAngle(transform.q)}, radius, color::FromRGB(color));
 }
 
-void static DrawCapsule(b2Vec2 /* p1 */, b2Vec2 /* p2 */, float /* radius */, b2HexColor /* color */, void* /* context */)
+void static DrawCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
 {
-    // auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
+    auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
+    ddraw->draw_capsule({p1.x, p1.y}, {p2.x, p2.y}, radius, color::FromRGB(color));
 }
 
-void static DrawSolidCapsule(b2Vec2 /* p1 */, b2Vec2 /* p2 */, float /* radius */, b2HexColor /* color */, void* /* context */)
+void static DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
 {
-    //  auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
+    auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
+    ddraw->draw_solid_capsule({p1.x, p1.y}, {p2.x, p2.y}, radius, color::FromRGB(color));
 }
 
 void static DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context)
@@ -652,6 +1168,16 @@ void b2d_debug_draw::draw_circle(point_f center, f32 radius, color color)
 void b2d_debug_draw::draw_solid_circle(body_transform xform, f32 radius, color color)
 {
     _parent->draw_solid_circle(xform, radius, color);
+}
+
+void b2d_debug_draw::draw_capsule(point_f p1, point_f p2, f32 radius, color color)
+{
+    _parent->draw_capsule(p1, p2, radius, color);
+}
+
+void b2d_debug_draw::draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color)
+{
+    _parent->draw_solid_capsule(p1, p2, radius, color);
 }
 
 void b2d_debug_draw::draw_segment(point_f p1, point_f p2, color color)

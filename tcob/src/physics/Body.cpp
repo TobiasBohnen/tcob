@@ -13,7 +13,7 @@
 
 namespace tcob::physics {
 
-body::body(detail::b2d_world* world, body_transform const& xform, body::settings const& bodySettings)
+body::body(world& world, body_transform const& xform, settings const& bodySettings)
     : Type {{[&]() { return _impl->get_type(); },
              [&](auto const& value) { _impl->set_type(value); }}}
     , LinearVelocity {{[&]() -> point_f { return _impl->get_linear_velocity(); },
@@ -38,7 +38,8 @@ body::body(detail::b2d_world* world, body_transform const& xform, body::settings
                      [&](auto const& value) { _impl->set_gravity_scale(value); }}}
     , Transform {{[&]() -> body_transform { return _impl->get_transform(); },
                   [&](auto const& value) { _impl->set_transform(value); }}}
-    , _impl {std::make_unique<detail::b2d_body>(world, xform, bodySettings)}
+    , _impl {std::make_unique<detail::b2d_body>(detail::get_impl(world), xform, bodySettings)}
+    , _world {world}
 {
 }
 
@@ -49,19 +50,16 @@ void body::apply_force(point_f force, point_f point, bool wake) const
 
 void body::apply_force_to_center(point_f force, bool wake) const
 {
-
     _impl->apply_force_to_center({force.X, force.Y}, wake);
 }
 
 void body::apply_linear_impulse(point_f imp, point_f point, bool wake) const
 {
-
     _impl->apply_linear_impulse({imp.X, imp.Y}, {point.X, point.Y}, wake);
 }
 
 void body::apply_linear_impulse_to_center(point_f imp, bool wake) const
 {
-
     _impl->apply_linear_impulse_to_center({imp.X, imp.Y}, wake);
 }
 
@@ -88,6 +86,11 @@ auto body::get_center() const -> point_f
 auto body::get_local_center() const -> point_f
 {
     return _impl->get_local_center();
+}
+
+auto body::get_world() -> world&
+{
+    return _world;
 }
 
 auto body::get_shapes() -> std::span<std::shared_ptr<shape>>

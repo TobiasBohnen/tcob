@@ -78,6 +78,12 @@ public:
     /// Draw a solid circle.
     void virtual draw_solid_circle(body_transform xform, f32 radius, color color) = 0;
 
+    /// Draw a capsule.
+    void virtual draw_capsule(point_f p1, point_f p2, f32 radius, color color) = 0;
+
+    /// Draw a solid capsule.
+    void virtual draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color) = 0;
+
     /// Draw a line segment.
     void virtual draw_segment(point_f p1, point_f p2, color color) = 0;
 
