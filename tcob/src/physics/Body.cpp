@@ -44,6 +44,8 @@ body::body(world& world, body_transform const& xform, settings const& bodySettin
     _impl->set_user_data(this);
 }
 
+body::~body() = default;
+
 void body::apply_force(point_f force, point_f point, bool wake) const
 {
     _impl->apply_force({force.X, force.Y}, {point.X, point.Y}, wake);

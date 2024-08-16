@@ -97,6 +97,8 @@ public:
         bool AllowFastRotation {false};
     };
 
+    ~body();
+
     prop_fn<body_type>      Type;
     prop_fn<point_f>        LinearVelocity;
     prop_fn<radian_f>       AngularVelocity;
