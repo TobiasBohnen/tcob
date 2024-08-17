@@ -125,7 +125,7 @@ public:
     auto get_bodies() -> std::span<std::shared_ptr<body>>;
 
     auto create_body(body_transform const& xform, body::settings const& settings) -> std::shared_ptr<body>;
-    void destroy_body(body const& body);
+    void remove_body(body const& body);
 
     auto find_body(shape const& s) -> std::shared_ptr<body>;
 
@@ -133,7 +133,7 @@ public:
 
     template <typename T>
     auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;
-    void destroy_joint(joint const& joint);
+    void remove_joint(joint const& joint);
 
     auto get_body_events() const -> body_events;
     auto get_contact_events() const -> contact_events;

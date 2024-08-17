@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+#include "tcob/core/Property.hpp"
 #include "tcob/tcob_config.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
@@ -50,9 +51,25 @@ public:
         bool EnablePreSolveEvents {false};
     };
 
-    auto operator==(shape const& other) const -> bool;
+    prop_fn<f32>  Friction;
+    prop_fn<f32>  Restitution;
+    prop_fn<f32>  Density;
+    prop_fn<bool> EnableSensorEvents;
+    prop_fn<bool> EnableContactEvents;
+    prop_fn<bool> EnableHitEvents;
+    prop_fn<bool> EnablePreSolveEvents;
 
     auto get_body() -> body&;
+
+    auto is_sensor() const -> bool;
+
+    auto get_aabb() const -> AABB;
+
+    auto test_point(point_f point) const -> bool;
+
+    auto get_closest_point(point_f target) const -> point_f;
+
+    auto operator==(shape const& other) const -> bool;
 
 protected:
     shape(body& body, std::unique_ptr<detail::b2d_shape> impl);

@@ -1119,6 +1119,98 @@ b2d_shape::~b2d_shape()
     b2DestroyShape(ID);
 }
 
+auto b2d_shape::is_sensor() const -> bool
+{
+    return b2Shape_IsSensor(ID);
+}
+
+void b2d_shape::set_density(f32 density) const
+{
+    b2Shape_SetDensity(ID, density);
+}
+
+auto b2d_shape::get_density() const -> f32
+{
+    return b2Shape_GetDensity(ID);
+}
+
+void b2d_shape::set_friction(f32 friction) const
+{
+    b2Shape_SetFriction(ID, friction);
+}
+
+auto b2d_shape::get_friction() const -> f32
+{
+    return b2Shape_GetFriction(ID);
+}
+
+void b2d_shape::set_restitution(f32 restitution) const
+{
+    b2Shape_SetRestitution(ID, restitution);
+}
+
+auto b2d_shape::get_restitution() const -> f32
+{
+    return b2Shape_GetRestitution(ID);
+}
+
+void b2d_shape::enable_sensor_events(bool flag) const
+{
+    b2Shape_EnableSensorEvents(ID, flag);
+}
+
+auto b2d_shape::are_sensor_events_enabled() const -> bool
+{
+    return b2Shape_AreSensorEventsEnabled(ID);
+}
+
+void b2d_shape::enable_contact_events(bool flag) const
+{
+    b2Shape_EnableContactEvents(ID, flag);
+}
+
+auto b2d_shape::are_contact_events_enabled() const -> bool
+{
+    return b2Shape_AreContactEventsEnabled(ID);
+}
+
+void b2d_shape::enable_pre_solve_events(bool flag) const
+{
+    b2Shape_EnablePreSolveEvents(ID, flag);
+}
+
+auto b2d_shape::are_pre_solve_events_enabled() const -> bool
+{
+    return b2Shape_ArePreSolveEventsEnabled(ID);
+}
+
+void b2d_shape::enable_hit_events(bool flag) const
+{
+    b2Shape_EnableHitEvents(ID, flag);
+}
+
+auto b2d_shape::are_hit_events_enabled() const -> bool
+{
+    return b2Shape_AreHitEventsEnabled(ID);
+}
+
+auto b2d_shape::test_point(point_f point) const -> bool
+{
+    return b2Shape_TestPoint(ID, to_b2Vec2(point));
+}
+
+auto b2d_shape::get_aabb() const -> AABB
+{
+    auto const val {b2Shape_GetAABB(ID)};
+    return {{val.lowerBound.x, val.lowerBound.y}, {val.upperBound.x, val.upperBound.y}};
+}
+
+auto b2d_shape::get_closest_point(point_f target) const -> point_f
+{
+    auto const val {b2Shape_GetClosestPoint(ID, to_b2Vec2(target))};
+    return {val.x, val.y};
+}
+
 void b2d_shape::set_user_data(void* ptr) const
 {
     b2Shape_SetUserData(ID, ptr);

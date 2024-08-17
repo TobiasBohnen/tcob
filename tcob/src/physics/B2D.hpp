@@ -303,6 +303,35 @@ public:
     b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSettings);
     ~b2d_shape();
 
+    auto is_sensor() const -> bool;
+
+    void set_density(f32 density) const;
+    auto get_density() const -> f32;
+
+    void set_friction(f32 friction) const;
+    auto get_friction() const -> f32;
+
+    void set_restitution(f32 restitution) const;
+    auto get_restitution() const -> f32;
+
+    void enable_sensor_events(bool flag) const;
+    auto are_sensor_events_enabled() const -> bool;
+
+    void enable_contact_events(bool flag) const;
+    auto are_contact_events_enabled() const -> bool;
+
+    void enable_pre_solve_events(bool flag) const;
+    auto are_pre_solve_events_enabled() const -> bool;
+
+    void enable_hit_events(bool flag) const;
+    auto are_hit_events_enabled() const -> bool;
+
+    auto test_point(point_f point) const -> bool;
+
+    auto get_aabb() const -> AABB;
+
+    auto get_closest_point(point_f target) const -> point_f;
+
     void set_user_data(void* ptr) const;
 
     auto equal(b2d_shape const* other) const -> bool;

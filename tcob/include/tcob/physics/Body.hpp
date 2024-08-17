@@ -105,7 +105,7 @@ public:
     prop_fn<f32>            LinearDamping;
     prop_fn<f32>            AngularDamping;
     prop_fn<bool>           EnableSleep;
-    prop_fn<bool>           Awake;
+    prop_fn<bool>           IsAwake;
     prop_fn<bool>           IsFixedRotation;
     prop_fn<bool>           IsBullet;
     prop_fn<bool>           Enabled;
@@ -124,7 +124,7 @@ public:
 
     template <typename T>
     auto create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>;
-    void destroy_shape(shape const& shapePtr);
+    void remove_shape(shape const& shapePtr);
 
     void apply_force(point_f force, point_f point, bool wake = true) const;
     void apply_force_to_center(point_f force, bool wake = true) const;

@@ -26,8 +26,8 @@ body::body(world& world, body_transform const& xform, settings const& bodySettin
                        [&](auto const& value) { _impl->set_angular_damping(value); }}}
     , EnableSleep {{[&]() -> bool { return _impl->get_enable_sleep(); },
                     [&](auto const& value) { _impl->set_enable_sleep(value); }}}
-    , Awake {{[&]() -> bool { return _impl->get_awake(); },
-              [&](auto const& value) { _impl->set_awake(value); }}}
+    , IsAwake {{[&]() -> bool { return _impl->get_awake(); },
+                [&](auto const& value) { _impl->set_awake(value); }}}
     , IsFixedRotation {{[&]() -> bool { return _impl->get_fixed_rotation(); },
                         [&](auto const& value) { _impl->set_fixed_rotation(value); }}}
     , IsBullet {{[&]() -> bool { return _impl->get_bullet(); },
@@ -101,7 +101,7 @@ auto body::get_shapes() -> std::span<std::shared_ptr<shape>>
     return _shapes;
 }
 
-void body::destroy_shape(shape const& shapePtr)
+void body::remove_shape(shape const& shapePtr)
 {
     _shapes.erase(std::find_if(_shapes.begin(), _shapes.end(), [&shapePtr](auto const& val) {
         return val.get() == &shapePtr;
