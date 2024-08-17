@@ -127,11 +127,21 @@ shape::shape()
 
 {
     Pivot.Changed.connect([&]() { mark_dirty(); });
-    Center.Changed.connect([&](auto const& value) { on_center_changed(value); });
+    Center.Changed.connect([&](auto const& value) {
+        on_center_changed(value);
+        mark_dirty();
+        mark_transform_dirty();
+    });
 
     Material.Changed.connect([&]() { TextureRegion("default"); });
-    TextureRegion.Changed.connect([&](string const& texRegion) { on_texture_region_changed(texRegion); });
-    Color.Changed.connect([&](auto const& color) { on_color_changed(color); });
+    TextureRegion.Changed.connect([&](string const& texRegion) {
+        on_texture_region_changed(texRegion);
+        mark_dirty();
+    });
+    Color.Changed.connect([&](auto const& color) {
+        on_color_changed(color);
+        mark_dirty();
+    });
 }
 
 void shape::show()
@@ -204,40 +214,41 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
 
         if (Segments < 3 || Radius < 1) { return; }
 
-        // calc vertices
-        f32 const angleStep {TAU_F / Segments};
-        f32 const radius {Radius()};
-        auto const [centerX, centerY] {Center()};
+        // vertices
+        auto const& xform {get_transform()};
+        f32 const   angleStep {TAU_F / Segments};
+        f32 const   radius {Radius()};
 
         texture_region texReg {};
         if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
             texReg = Material->Texture->get_region(TextureRegion);
         } else {
-            texReg = {{0, 0, 1, 1}, 1};
+            texReg = {{0, 0, 1, 1}, 0};
         }
+        f32 const texLevel {static_cast<f32>(texReg.Level)};
 
+        auto const [centerX, centerY] {Center()};
         auto const& uvRect {texReg.UVRect};
-        _verts.push_back({.Position  = {centerX, centerY},
+        _verts.push_back({.Position  = (xform * Center()).as_array(),
                           .Color     = Color->as_array(),
                           .TexCoords = {0.5f * uvRect.Width + uvRect.X,
                                         0.5f * uvRect.Height + uvRect.Y,
-                                        static_cast<f32>(texReg.Level)}});
+                                        texLevel}});
 
-        auto const square {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
+        auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
 
         for (i32 i {0}; i < Segments; ++i) {
             f32 const angle {i * angleStep};
             f32 const x {radius * std::cos(angle) + centerX};
             f32 const y {radius * std::sin(angle) + centerY};
-
-            _verts.push_back({.Position  = {x, y},
+            _verts.push_back({.Position  = (xform * point_f {x, y}).as_array(),
                               .Color     = Color->as_array(),
-                              .TexCoords = {((x - square.X) / square.Width) * uvRect.Width + uvRect.X,
-                                            ((y - square.Y) / square.Height) * uvRect.Height + uvRect.Y,
-                                            static_cast<f32>(texReg.Level)}});
+                              .TexCoords = {(((x - uvSquare.X) / uvSquare.Width) * uvRect.Width) + uvRect.X,
+                                            (((y - uvSquare.Y) / uvSquare.Height) * uvRect.Height) + uvRect.Y,
+                                            texLevel}});
         }
 
-        // calc indices
+        // indices
         for (i32 i {1}; i < Segments; ++i) {
             _indices.push_back(0);
             _indices.push_back(i + 1);
@@ -257,7 +268,6 @@ void circle_shape::on_color_changed(color c)
 
 void circle_shape::on_center_changed(point_f /* center */)
 {
-    mark_dirty();
 }
 
 void circle_shape::on_texture_region_changed(string const& /* texRegion */)

@@ -9,28 +9,18 @@ namespace tcob::gfx::geometry {
 
 void set_position(quad& q, rect_f const& rect, transform const& xform)
 {
-    point_f const topRight {xform * rect.top_right()};
-    point_f const bottomRight {xform * rect.bottom_right()};
-    point_f const bottomLeft {xform * rect.bottom_left()};
-    point_f const topLeft {xform * rect.top_left()};
-
-    q[0].Position = {topRight.X, topRight.Y};
-    q[1].Position = {bottomRight.X, bottomRight.Y};
-    q[2].Position = {bottomLeft.X, bottomLeft.Y};
-    q[3].Position = {topLeft.X, topLeft.Y};
+    q[0].Position = (xform * rect.top_right()).as_array();
+    q[1].Position = (xform * rect.bottom_right()).as_array();
+    q[2].Position = (xform * rect.bottom_left()).as_array();
+    q[3].Position = (xform * rect.top_left()).as_array();
 }
 
 void set_position(quad& q, rect_f const& rect)
 {
-    point_f const topRight {rect.top_right()};
-    point_f const bottomRight {rect.bottom_right()};
-    point_f const bottomLeft {rect.bottom_left()};
-    point_f const topLeft {rect.top_left()};
-
-    q[0].Position = {topRight.X, topRight.Y};
-    q[1].Position = {bottomRight.X, bottomRight.Y};
-    q[2].Position = {bottomLeft.X, bottomLeft.Y};
-    q[3].Position = {topLeft.X, topLeft.Y};
+    q[0].Position = rect.top_right().as_array();
+    q[1].Position = rect.bottom_right().as_array();
+    q[2].Position = rect.bottom_left().as_array();
+    q[3].Position = rect.top_left().as_array();
 }
 
 void set_color(quad& q, color c)
