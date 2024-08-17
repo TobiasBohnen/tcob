@@ -26,6 +26,12 @@ constexpr point<T>::point(point<U> const& p)
 }
 
 template <Arithmetic T>
+auto constexpr point<T>::as_array [[nodiscard]] () const -> std::array<T, 2>
+{
+    return {X, Y};
+}
+
+template <Arithmetic T>
 inline auto point<T>::length() const -> f32
 {
     return static_cast<f32>(std::sqrt((X * X) + (Y * Y)));
