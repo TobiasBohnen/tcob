@@ -18,16 +18,14 @@ namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API joint : public non_copyable {
-    friend auto detail::get_impl(joint const& t) -> detail::b2d_joint*;
-
 public:
     class TCOB_API settings {
     public:
         /// The first attached body.
-        std::shared_ptr<body> BodyA;
+        body* BodyA {nullptr};
 
         /// The second attached body.
-        std::shared_ptr<body> BodyB;
+        body* BodyB {nullptr};
 
         /// Set this flag to true if the attached bodies should collide.
         bool IsCollideConnected {false};
@@ -42,6 +40,7 @@ public:
 protected:
     joint(world& world, std::unique_ptr<detail::b2d_joint> impl);
 
+    auto get_body_impl(body* body) const -> detail::b2d_body*;
     auto get_impl() const -> detail::b2d_joint&;
 
 private:
@@ -111,7 +110,7 @@ public:
     auto get_motor_force() const -> f32;
 
 private:
-    distance_joint(world& world, settings const& jointSettings);
+    distance_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -145,7 +144,7 @@ public:
     prop_fn<f32>     CorrectionFactor;
 
 private:
-    motor_joint(world& world, settings const& jointSettings);
+    motor_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -175,7 +174,7 @@ public:
     prop_fn<f32>     MaxForce;
 
 private:
-    mouse_joint(world& world, settings const& jointSettings);
+    mouse_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -239,7 +238,7 @@ public:
     auto get_motor_force() const -> f32;
 
 private:
-    prismatic_joint(world& world, settings const& jointSettings);
+    prismatic_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -305,7 +304,7 @@ public:
     auto get_motor_torque() const -> f32;
 
 private:
-    revolute_joint(world& world, settings const& jointSettings);
+    revolute_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -344,7 +343,7 @@ public:
     prop_fn<f32> AngularDampingRatio;
 
 private:
-    weld_joint(world& world, settings const& jointSettings);
+    weld_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -405,7 +404,7 @@ public:
     auto get_motor_torque() const -> f32;
 
 private:
-    wheel_joint(world& world, settings const& jointSettings);
+    wheel_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 }

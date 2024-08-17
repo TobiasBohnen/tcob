@@ -27,8 +27,8 @@ b2d_world::b2d_world(world::settings const& settings)
     worldDef.jointHertz            = settings.JointHertz;
     worldDef.jointDampingRatio     = settings.JointDampingRatio;
     worldDef.maximumLinearVelocity = settings.MaximumLinearVelocity;
-    worldDef.enableSleep           = settings.EnableSleep;
-    worldDef.enableContinous       = settings.EnableContinous;
+    worldDef.enableSleep           = settings.EnableSleeping;
+    worldDef.enableContinous       = settings.EnableContinuous;
 
     ID = b2CreateWorld(&worldDef);
 }
@@ -57,6 +57,21 @@ void b2d_world::set_gravity(point_f value) const
 void b2d_world::set_enable_sleeping(bool value) const
 {
     b2World_EnableSleeping(ID, value);
+}
+
+void b2d_world::set_enable_continuous(bool value) const
+{
+    b2World_EnableContinuous(ID, value);
+}
+
+void b2d_world::set_restitution_threshold(f32 value) const
+{
+    b2World_SetRestitutionThreshold(ID, value);
+}
+
+void b2d_world::set_hit_event_threshold(f32 value) const
+{
+    b2World_SetHitEventThreshold(ID, value);
 }
 
 void b2d_world::explode(point_f pos, f32 radius, f32 impulse) const
@@ -1021,6 +1036,22 @@ auto b2d_joint::wheel_joint_get_motor_torque() const -> f32
 
 ////////////////////////////////////////////////////////////
 
+auto static GetShapeDef(shape::settings const& shapeSettings)
+{
+    b2ShapeDef shapeDef {b2DefaultShapeDef()};
+    shapeDef.friction             = shapeSettings.Friction;
+    shapeDef.restitution          = shapeSettings.Restitution;
+    shapeDef.density              = shapeSettings.Density;
+    shapeDef.customColor          = static_cast<u32>(shapeSettings.CustomColor.R << 16 | shapeSettings.CustomColor.G << 8 | shapeSettings.CustomColor.B);
+    shapeDef.isSensor             = shapeSettings.IsSensor;
+    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
+    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
+    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
+    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
+    shapeDef.forceContactCreation = shapeSettings.ForceContactCreation;
+    return shapeDef;
+}
+
 b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSettings)
 {
     std::vector<b2Vec2> v;
@@ -1032,16 +1063,7 @@ b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSetting
     b2Hull h {b2ComputeHull(v.data(), static_cast<i32>(v.size()))};
     auto   poly {b2MakePolygon(&h, shapeSettings.Radius)};
 
-    b2ShapeDef shapeDef {b2DefaultShapeDef()};
-    shapeDef.friction             = shapeSettings.Friction;
-    shapeDef.restitution          = shapeSettings.Restitution;
-    shapeDef.density              = shapeSettings.Density;
-    shapeDef.isSensor             = shapeSettings.IsSensor;
-    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
-    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
-    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
-    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
-
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
 }
 
@@ -1050,16 +1072,7 @@ b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings)
     auto const& rect {shapeSettings.Extents};
     auto        poly {b2MakeOffsetBox(rect.Width / 2, rect.Height / 2, to_b2Vec2(rect.top_left()), shapeSettings.Angle.Value)};
 
-    b2ShapeDef shapeDef {b2DefaultShapeDef()};
-    shapeDef.friction             = shapeSettings.Friction;
-    shapeDef.restitution          = shapeSettings.Restitution;
-    shapeDef.density              = shapeSettings.Density;
-    shapeDef.isSensor             = shapeSettings.IsSensor;
-    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
-    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
-    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
-    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
-
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
 }
 
@@ -1067,16 +1080,7 @@ b2d_shape::b2d_shape(b2d_body* body, circle_shape::settings const& shapeSettings
 {
     b2Circle poly {to_b2Vec2(shapeSettings.Center), shapeSettings.Radius};
 
-    b2ShapeDef shapeDef {b2DefaultShapeDef()};
-    shapeDef.friction             = shapeSettings.Friction;
-    shapeDef.restitution          = shapeSettings.Restitution;
-    shapeDef.density              = shapeSettings.Density;
-    shapeDef.isSensor             = shapeSettings.IsSensor;
-    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
-    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
-    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
-    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
-
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreateCircleShape(body->ID, &shapeDef, &poly);
 }
 
@@ -1084,16 +1088,7 @@ b2d_shape::b2d_shape(b2d_body* body, segment_shape::settings const& shapeSetting
 {
     b2Segment poly {to_b2Vec2(shapeSettings.Point0), to_b2Vec2(shapeSettings.Point1)};
 
-    b2ShapeDef shapeDef {b2DefaultShapeDef()};
-    shapeDef.friction             = shapeSettings.Friction;
-    shapeDef.restitution          = shapeSettings.Restitution;
-    shapeDef.density              = shapeSettings.Density;
-    shapeDef.isSensor             = shapeSettings.IsSensor;
-    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
-    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
-    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
-    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
-
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreateSegmentShape(body->ID, &shapeDef, &poly);
 }
 
@@ -1101,16 +1096,7 @@ b2d_shape::b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSetting
 {
     b2Capsule poly {to_b2Vec2(shapeSettings.Center0), to_b2Vec2(shapeSettings.Center1), shapeSettings.Radius};
 
-    b2ShapeDef shapeDef {b2DefaultShapeDef()};
-    shapeDef.friction             = shapeSettings.Friction;
-    shapeDef.restitution          = shapeSettings.Restitution;
-    shapeDef.density              = shapeSettings.Density;
-    shapeDef.isSensor             = shapeSettings.IsSensor;
-    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
-    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
-    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
-    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
-
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreateCapsuleShape(body->ID, &shapeDef, &poly);
 }
 
@@ -1305,12 +1291,12 @@ b2d_debug_draw::b2d_debug_draw(debug_draw* parent)
     ID.DrawSolidPolygon = &DrawSolidPolygon;
     ID.DrawCircle       = &DrawCircle;
     ID.DrawSolidCircle  = &DrawSolidCircle;
-    ID.DrawCapsule      = &DrawCapsule;      // TODO
-    ID.DrawSolidCapsule = &DrawSolidCapsule; // TODO
+    ID.DrawCapsule      = &DrawCapsule;
+    ID.DrawSolidCapsule = &DrawSolidCapsule;
     ID.DrawSegment      = &DrawSegment;
     ID.DrawTransform    = &DrawTransform;
     ID.DrawPoint        = &DrawPoint;
-    ID.DrawString       = &DrawString; // TODO
+    ID.DrawString       = &DrawString;
 }
 
 void b2d_debug_draw::draw_polygon(std::span<point_f const> vertices, color color)

@@ -22,10 +22,11 @@ struct AABB {
     point_f UpperBounds;
 };
 
+class world;
 class body;
 class shape;
 class joint;
-class world;
+class debug_draw;
 
 namespace detail {
     class b2d_world;
@@ -33,11 +34,6 @@ namespace detail {
     class b2d_shape;
     class b2d_joint;
     class b2d_debug_draw;
-
-    TCOB_API auto get_impl(world const& t) -> b2d_world*;
-    TCOB_API auto get_impl(body const& t) -> b2d_body*;
-    TCOB_API auto get_impl(shape const& t) -> b2d_shape*;
-    TCOB_API auto get_impl(joint const& t) -> b2d_joint*;
 }
 
 }

@@ -23,7 +23,17 @@ world::world(settings const& settings)
                 [&](auto const& value) { _impl->set_gravity(value); }}}
     , _impl {std::make_unique<detail::b2d_world>(settings)}
 {
+    EnableSleeping(settings.EnableSleeping);
     EnableSleeping.Changed.connect([&](bool value) { _impl->set_enable_sleeping(value); });
+
+    EnableContinuous(settings.EnableContinuous);
+    EnableContinuous.Changed.connect([&](bool value) { _impl->set_enable_continuous(value); });
+
+    RestitutionThreshold(settings.RestitutionThreshold);
+    RestitutionThreshold.Changed.connect([&](bool value) { _impl->set_restitution_threshold(value); });
+
+    HitEventThreshold(settings.HitEventThreshold);
+    HitEventThreshold.Changed.connect([&](bool value) { _impl->set_hit_event_threshold(value); });
 }
 
 world::~world() = default;
@@ -40,7 +50,7 @@ auto world::get_joints() -> std::span<std::shared_ptr<joint>>
 
 auto world::create_body(body_transform const& xform, body::settings const& bodySettings) -> std::shared_ptr<body>
 {
-    return _bodies.emplace_back(std::shared_ptr<body> {new body {*this, xform, bodySettings}});
+    return _bodies.emplace_back(std::shared_ptr<body> {new body {*this, _impl.get(), xform, bodySettings}});
 }
 
 void world::remove_body(body const& body)

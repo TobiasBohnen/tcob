@@ -74,8 +74,6 @@ struct sensor_events {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API world final : public updatable, public non_copyable {
-    friend auto detail::get_impl(world const& t) -> detail::b2d_world*;
-
 public:
     class TCOB_API settings {
     public:
@@ -108,10 +106,10 @@ public:
         f32 MaximumLinearVelocity {400.0f};
 
         /// Can bodies go to sleep to improve performance
-        bool EnableSleep {true};
+        bool EnableSleeping {true};
 
         /// Enable continuous collision
-        bool EnableContinous {true};
+        bool EnableContinuous {true};
     };
 
     world();
@@ -121,6 +119,9 @@ public:
     i32              SubSteps {4};
     prop_fn<point_f> Gravity;
     prop<bool>       EnableSleeping;
+    prop<bool>       EnableContinuous;
+    prop<f32>        RestitutionThreshold;
+    prop<f32>        HitEventThreshold;
 
     auto get_bodies() -> std::span<std::shared_ptr<body>>;
 
@@ -155,7 +156,7 @@ private:
 template <typename T>
 inline auto world::create_joint(auto&& jointSettings) -> std::shared_ptr<T>
 {
-    return std::static_pointer_cast<T>(_joints.emplace_back(std::shared_ptr<T> {new T {*this, jointSettings}}));
+    return std::static_pointer_cast<T>(_joints.emplace_back(std::shared_ptr<T> {new T {*this, _impl.get(), jointSettings}}));
 }
 
 }

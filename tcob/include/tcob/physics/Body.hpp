@@ -36,7 +36,7 @@ inline auto operator==(body_transform const& left, body_transform const& right) 
 
 class TCOB_API body final {
     friend class world;
-    friend auto detail::get_impl(body const& t) -> detail::b2d_body*;
+    friend class joint; // for _impl
 
 public:
     struct settings {
@@ -137,7 +137,7 @@ public:
     void sleep() const;
 
 private:
-    body(world& world, body_transform const& xform, settings const& bodySettings);
+    body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings);
 
     std::unique_ptr<detail::b2d_body>   _impl;
     world&                              _world;
@@ -147,7 +147,7 @@ private:
 template <typename T>
 inline auto body::create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>
 {
-    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {*this, shapeSettings}}));
+    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {*this, _impl.get(), shapeSettings}}));
 }
 
 }

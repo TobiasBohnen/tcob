@@ -13,7 +13,7 @@
 
 namespace tcob::physics {
 
-body::body(world& world, body_transform const& xform, settings const& bodySettings)
+body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings)
     : Type {{[&]() { return _impl->get_type(); },
              [&](auto const& value) { _impl->set_type(value); }}}
     , LinearVelocity {{[&]() -> point_f { return _impl->get_linear_velocity(); },
@@ -38,7 +38,7 @@ body::body(world& world, body_transform const& xform, settings const& bodySettin
                      [&](auto const& value) { _impl->set_gravity_scale(value); }}}
     , Transform {{[&]() -> body_transform { return _impl->get_transform(); },
                   [&](auto const& value) { _impl->set_transform(value); }}}
-    , _impl {std::make_unique<detail::b2d_body>(detail::get_impl(world), xform, bodySettings)}
+    , _impl {std::make_unique<detail::b2d_body>(b2dWorld, xform, bodySettings)}
     , _world {world}
 {
     _impl->set_user_data(this);

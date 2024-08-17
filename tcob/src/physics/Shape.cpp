@@ -68,28 +68,28 @@ auto shape::get_closest_point(point_f target) const -> point_f
 
 ////////////////////////////////////////////////////////////
 
-polygon_shape::polygon_shape(body& body, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
+polygon_shape::polygon_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
 {
 }
 
-rect_shape::rect_shape(body& body, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
+rect_shape::rect_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
 {
 }
 
-circle_shape::circle_shape(body& body, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
+circle_shape::circle_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
 {
 }
 
-segment_shape::segment_shape(body& body, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
+segment_shape::segment_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
 {
 }
 
-capsule_shape::capsule_shape(body& body, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(detail::get_impl(body), shapeSettings)}
+capsule_shape::capsule_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
 {
 }
 

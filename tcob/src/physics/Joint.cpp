@@ -7,7 +7,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
-    #include <box2d/box2d.h>
+    #include <cassert>
 
     #include "B2D.hpp"
 
@@ -32,6 +32,12 @@ auto joint::get_world() -> world&
     return _world;
 }
 
+auto joint::get_body_impl(body* body) const -> detail::b2d_body*
+{
+    assert(body);
+    return body->_impl.get();
+}
+
 auto joint::get_impl() const -> detail::b2d_joint&
 {
     return *_impl;
@@ -39,8 +45,8 @@ auto joint::get_impl() const -> detail::b2d_joint&
 
 ////////////////////////////////////////////////////////////
 
-distance_joint::distance_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+distance_joint::distance_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , Length {{[&]() -> f32 { return get_impl().distance_joint_get_length(); },
                [&](auto const& value) { get_impl().distance_joint_set_length(value); }}}
     , EnableSpring {{[&]() -> bool { return get_impl().distance_joint_is_spring_enabled(); },
@@ -76,8 +82,8 @@ auto distance_joint::get_motor_force() const -> f32
 
 ////////////////////////////////////////////////////////////
 
-motor_joint::motor_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+motor_joint::motor_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , LinearOffset {{[&]() -> point_f { return get_impl().motor_joint_get_linear_offset(); },
                      [&](auto const& value) { get_impl().motor_joint_set_linear_offset(value); }}}
     , AngularOffset {{[&]() -> f32 { return get_impl().motor_joint_get_angular_offset(); },
@@ -93,8 +99,8 @@ motor_joint::motor_joint(world& world, settings const& jointSettings)
 
 ////////////////////////////////////////////////////////////
 
-mouse_joint::mouse_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+mouse_joint::mouse_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , Target {{[&]() -> point_f { return get_impl().mouse_joint_get_target(); },
                [&](auto const& value) { get_impl().mouse_joint_set_target(value); }}}
     , Hertz {{[&]() -> f32 { return get_impl().mouse_joint_get_spring_hertz(); },
@@ -108,8 +114,8 @@ mouse_joint::mouse_joint(world& world, settings const& jointSettings)
 
 ////////////////////////////////////////////////////////////
 
-prismatic_joint::prismatic_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+prismatic_joint::prismatic_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , EnableSpring {{[&]() -> bool { return get_impl().prismatic_joint_is_spring_enabled(); },
                      [&](auto const& value) { get_impl().prismatic_joint_enable_spring(value); }}}
     , Hertz {{[&]() -> f32 { return get_impl().prismatic_joint_get_spring_hertz(); },
@@ -138,8 +144,8 @@ auto prismatic_joint::get_motor_force() const -> f32
 
 ////////////////////////////////////////////////////////////
 
-revolute_joint::revolute_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+revolute_joint::revolute_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , EnableSpring {{[&]() -> bool { return get_impl().revolute_joint_is_spring_enabled(); },
                      [&](auto const& value) { get_impl().revolute_joint_enable_spring(value); }}}
     , Hertz {{[&]() -> f32 { return get_impl().revolute_joint_get_spring_hertz(); },
@@ -173,8 +179,8 @@ auto revolute_joint::get_motor_torque() const -> f32
 
 ////////////////////////////////////////////////////////////
 
-weld_joint::weld_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+weld_joint::weld_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , LinearHertz {{[&]() -> f32 { return get_impl().weld_joint_get_linear_hertz(); },
                     [&](auto const& value) { get_impl().weld_joint_set_linear_hertz(value); }}}
     , AngularHertz {{[&]() -> f32 { return get_impl().weld_joint_get_angular_hertz(); },
@@ -188,8 +194,8 @@ weld_joint::weld_joint(world& world, settings const& jointSettings)
 
 ////////////////////////////////////////////////////////////
 
-wheel_joint::wheel_joint(world& world, settings const& jointSettings)
-    : joint {world, std::make_unique<detail::b2d_joint>(detail::get_impl(world), detail::get_impl(*jointSettings.BodyA), detail::get_impl(*jointSettings.BodyB), jointSettings)}
+wheel_joint::wheel_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , EnableSpring {{[&]() -> bool { return get_impl().wheel_joint_is_spring_enabled(); },
                      [&](auto const& value) { get_impl().wheel_joint_enable_spring(value); }}}
     , Hertz {{[&]() -> f32 { return get_impl().wheel_joint_get_spring_hertz(); },
@@ -216,6 +222,6 @@ auto wheel_joint::get_motor_torque() const -> f32
     return get_impl().wheel_joint_get_motor_torque();
 }
 
-} // namespace box2d
+}
 
 #endif

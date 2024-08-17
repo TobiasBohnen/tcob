@@ -33,6 +33,10 @@ public:
     void set_gravity(point_f value) const;
 
     void set_enable_sleeping(bool value) const;
+    void set_enable_continuous(bool value) const;
+
+    void set_restitution_threshold(f32 value) const;
+    void set_hit_event_threshold(f32 value) const;
 
     void explode(point_f pos, f32 radius, f32 impulse) const;
 

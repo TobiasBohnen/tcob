@@ -4,7 +4,6 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "tcob/core/Property.hpp"
 #include "tcob/tcob_config.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
@@ -12,7 +11,9 @@
     #include <span>
 
     #include "tcob/core/AngleUnits.hpp"
+    #include "tcob/core/Color.hpp"
     #include "tcob/core/Interfaces.hpp"
+    #include "tcob/core/Property.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/physics/Physics.hpp"
 
@@ -20,8 +21,6 @@ namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API shape : public non_copyable {
-    friend auto detail::get_impl(shape const& t) -> detail::b2d_shape*;
-
 public:
     class TCOB_API settings {
     public:
@@ -34,6 +33,9 @@ public:
         /// The density, usually in kg/m^2.
         f32 Density {1.0f};
 
+        /// Custom debug draw color.
+        color CustomColor;
+
         /// A sensor shape generates overlap events but never generates a collision response.
         bool IsSensor {false};
 
@@ -44,11 +46,16 @@ public:
         bool EnableContactEvents {true};
 
         /// Enable hit events for this shape. Only applies to kinematic and dynamic bodies. Ignored for sensors.
-        bool EnableHitEvents {true};
+        bool EnableHitEvents {false};
 
         /// Enable pre-solve contact events for this shape. Only applies to dynamic bodies. These are expensive
         ///	and must be carefully handled due to threading. Ignored for sensors.
         bool EnablePreSolveEvents {false};
+
+        /// Normally shapes on static bodies don't invoke contact creation when they are added to the world. This overrides
+        ///	that behavior and causes contact creation. This significantly slows down static body creation which can be important
+        ///	when there are many static shapes.
+        bool ForceContactCreation {false};
     };
 
     prop_fn<f32>  Friction;
@@ -93,7 +100,7 @@ public:
     };
 
 private:
-    polygon_shape(body& body, settings const& shapeSettings);
+    polygon_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -109,7 +116,7 @@ public:
     };
 
 private:
-    rect_shape(body& body, settings const& shapeSettings);
+    rect_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -125,7 +132,7 @@ public:
     };
 
 private:
-    circle_shape(body& body, settings const& shapeSettings);
+    circle_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -141,7 +148,7 @@ public:
     };
 
 private:
-    segment_shape(body& body, settings const& shapeSettings);
+    segment_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -158,7 +165,7 @@ public:
     };
 
 private:
-    capsule_shape(body& body, settings const& shapeSettings);
+    capsule_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
 };
 }
 
