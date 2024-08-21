@@ -10,6 +10,7 @@
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/gfx/Window.hpp"
@@ -26,8 +27,10 @@ struct locale {
 
 class TCOB_API platform final : public non_copyable {
 public:
-    platform(game* game, game::init const& ginit);
+    platform(bool headless, game::init const& ginit);
     ~platform();
+
+    signal<path const> DropFile;
 
     auto has_window() const -> bool;
     auto get_window() const -> gfx::window&;
@@ -35,7 +38,7 @@ public:
 
     auto get_config() const -> data::config_file&;
 
-    void process_events() const;
+    auto process_events() const -> bool;
 
     auto get_preferred_locales() const -> std::vector<locale> const&;
 
@@ -60,7 +63,6 @@ private:
     void static InitAudioCodecs();
     void static InitFontEngines();
 
-    game*               _game {nullptr};
     std::vector<locale> _locales {};
 
     std::unique_ptr<gfx::window>                _window;

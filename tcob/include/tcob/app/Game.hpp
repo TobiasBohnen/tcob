@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
 #include <stack>
 
 #include "tcob/app/Scene.hpp"
@@ -27,17 +28,18 @@ class TCOB_API game : public non_copyable {
 public:
     //! Initialization parameters for the game.
     struct init {
-        path Path {};                   //!< The path to the game.
-        path Name {};                   //!< The name of the game.
-        path ConfigFile {"config.ini"}; //!< The configuration file name.
-        path OrgName {"tcob"};          //!< The organization name.
-        path LogFile {"tcob.log"};      //!< The log file name.
-        u32  AsyncLoadThreads {0};      //!< The number of concurrent asynchronous threads.
+        path                                Path {};                         //!< The path to the game.
+        path                                Name {};                         //!< The name of the game.
+        path                                OrgName {"tcob"};                //!< The organization name.
+        path                                LogFile {"tcob.log"};            //!< The log file name.
+        path                                ConfigFile {"config.ini"};       //!< The configuration file name.
+        std::optional<data::config::object> ConfigDefaults {std::nullopt};
+        std::optional<u32>                  AsyncLoadThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
     };
 
     //! Constructs a game instance with the specified initialization parameters.
-    //! @param init The initialization parameters for the game.
-    explicit game(init const& init);
+    //! @param gameInit The initialization parameters for the game.
+    explicit game(init const& gameInit);
 
     //! Destructor for the game instance.
     virtual ~game();
@@ -49,7 +51,6 @@ public:
     signal<milliseconds const> Update;      //!< Signal emitted during the main update.
     signal<milliseconds const> PostUpdate;  //!< Signal emitted after the main update.
     signal<gfx::render_target> Draw;        //!< Signal emitted when rendering is required.
-    signal<path const>         DropFile;    //!< Signal emitted when a file is dropped onto the game window.
 
     prop<i32> FrameLimit;                   //!< Property to control the frame rate limit.
 
@@ -71,10 +72,6 @@ public:
     //! Requests to finish the game.
     void queue_finish();
 
-    //! Retrieves the default configuration settings for the game.
-    //! @return An instance of `data::config::object` containing default configuration values.
-    auto virtual get_config_defaults() const -> data::config::object;
-
     auto get_library() -> assets::library&;
     auto get_queue() -> command_queue&;
 
@@ -89,6 +86,8 @@ protected:
     void virtual on_finish() { }
 
 private:
+    auto get_config_defaults() const -> data::config::object;
+
     //! Main game loop.
     void loop();
 

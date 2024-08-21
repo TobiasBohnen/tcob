@@ -51,11 +51,10 @@
 
 namespace tcob {
 
-platform::platform(game* game, game::init const& ginit)
-    : _game {game}
+platform::platform(bool headless, game::init const& ginit)
 {
     //  file system
-    if (_game) {
+    if (!headless) {
         io::detail::init(ginit.Path.c_str(), ginit.Name, ginit.OrgName);
     } else {
         io::detail::simple_init(ginit.Path.c_str());
@@ -81,8 +80,8 @@ platform::platform(game* game, game::init const& ginit)
     InitSignatures();
 
     // global semaphore
-    u32 const threads {ginit.AsyncLoadThreads != 0
-                           ? ginit.AsyncLoadThreads
+    u32 const threads {ginit.AsyncLoadThreads
+                           ? *ginit.AsyncLoadThreads
                            : std::thread::hardware_concurrency() * 2};
     register_service<semaphore>(std::make_shared<semaphore>(threads));
 
@@ -109,12 +108,12 @@ platform::platform(game* game, game::init const& ginit)
                      return std::make_unique<detail::cfg_asset_loader_manager>(group, queue);
                  });
 
-    if (_game) {
+    if (!headless) {
         // init audio system
         register_service<audio::system>();                                   // DON'T MOVE AGAIN
 
         _configFile = std::make_unique<data::config_file>(ginit.ConfigFile); // load config
-        _configFile->merge(_game->get_config_defaults(), false);             // merge config with default
+        _configFile->merge(*ginit.ConfigDefaults, false);                    // merge config with default
 
         // init render system
         init_render_system();
@@ -179,12 +178,13 @@ void platform::on_key_down(input::keyboard::event& ev)
 
 auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
 {
-    return {nullptr,
+    return {true,
             {.Path             = argv0,
              .Name             = "",
-             .ConfigFile       = "config.ini",
              .OrgName          = "",
              .LogFile          = std::move(logFile),
+             .ConfigFile       = "config.ini",
+             .ConfigDefaults   = {},
              .AsyncLoadThreads = 0}};
 }
 
@@ -198,7 +198,7 @@ auto platform::IsRunningOnWine() -> bool
 #endif
 }
 
-void platform::process_events() const
+bool platform::process_events() const
 {
     SDL_Event ev;
     auto&     inputMgr {locate_service<input::system>()};
@@ -207,11 +207,10 @@ void platform::process_events() const
         case SDL_DROPFILE: {
             string path {ev.drop.file};
             SDL_free(ev.drop.file);
-            _game->DropFile(path);
+            DropFile(path);
         } break;
         case SDL_QUIT:
-            _game->queue_finish();
-            break;
+            return false;
         case SDL_KEYDOWN:
         case SDL_KEYUP:
         case SDL_TEXTINPUT:
@@ -238,6 +237,8 @@ void platform::process_events() const
             break;
         }
     }
+
+    return true;
 }
 
 auto platform::get_preferred_locales() const -> std::vector<locale> const&

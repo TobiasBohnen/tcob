@@ -19,12 +19,16 @@ namespace tcob {
 constexpr milliseconds FIXED_FRAMES {1000.0f / 50.0f};
 constexpr u8           MAX_FRAME_SKIP {10};
 
-game::game(init const& init)
+game::game(init const& gameInit)
     : _mainLibrary {_queue}
 {
     // init platform
-    auto plt {register_service<platform>(std::make_shared<platform>(this, init))};
-    plt->get_window().Title(init.Name);
+    init i {gameInit};
+    if (!i.ConfigDefaults) {
+        i.ConfigDefaults = get_config_defaults();
+    }
+    auto plt {register_service<platform>(std::make_shared<platform>(false, i))};
+    plt->get_window().Title(gameInit.Name);
 
     // properties
     FrameLimit.Changed.connect([&](i32 value) {
@@ -116,12 +120,11 @@ void game::loop()
     auto& plt {locate_service<platform>()};
 
     do {
-        plt.process_events();
+        if (!plt.process_events()) { queue_finish(); }
+
         _queue.process();
 
-        if (_scenes.empty()) {
-            queue_finish();
-        }
+        if (_scenes.empty()) { queue_finish(); }
 
         // fixed update
         u8 fixedUpdateLoops {0};
@@ -144,10 +147,6 @@ void game::loop()
             // render
             if (plt.has_window()) {
                 auto& window {plt.get_window()};
-                if (window.Cursor()) {
-                    window.Cursor()->ActiveMode = "default"; // set cursor to default mode if available
-                }
-
                 auto& dft {plt.get_default_target()};
                 dft.set_size(window.Size());
                 window.clear();
@@ -156,6 +155,7 @@ void game::loop()
                 window.swap_buffer();
 
                 if (window.Cursor()) {
+                    window.Cursor->ActiveMode = "default"; // set cursor to default mode if available
                     window.Cursor->update(deltaUpdate);
                 }
             }
