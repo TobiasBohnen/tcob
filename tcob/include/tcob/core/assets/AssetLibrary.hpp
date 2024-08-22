@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tcob/core/CommandQueue.hpp"
 #include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
@@ -101,7 +100,7 @@ struct script_preload_event {
 
 class TCOB_API group final : public non_copyable {
 public:
-    group(string name, command_queue& commandQueue);
+    explicit group(string name);
 
     signal<script_preload_event> PreScriptLoad;
 
@@ -132,7 +131,6 @@ public:
 
 private:
     string                                                 _name;
-    command_queue&                                         _commandQueue;
     flat_map<string, std::unique_ptr<detail::bucket_base>> _buckets;
     flat_map<string, std::unique_ptr<loader_manager>>      _loaderManagers;
 };
@@ -141,7 +139,7 @@ private:
 
 class TCOB_API library final : public non_copyable {
 public:
-    explicit library(command_queue& commandQueue);
+    explicit library();
     ~library();
 
     auto get_loading_progress() const -> f32;
@@ -163,7 +161,6 @@ public:
     auto get_asset_stats(string const& groupName) const -> group_stats;
 
 private:
-    command_queue&                           _commandQueue;
     flat_map<string, std::unique_ptr<group>> _groups {};
 };
 
@@ -184,7 +181,7 @@ namespace detail {
 template <typename T>
 class loader : public detail::loader_base {
 public:
-    loader(group& group, command_queue& commandQueue);
+    loader(group& group);
 
     void unload(asset<T>& asset, bool greedy);
 
@@ -198,19 +195,16 @@ protected:
 
     auto get_bucket() -> bucket<T>*;
 
-    auto get_queue() -> command_queue&;
-
     void set_asset_status(asset_ptr<T> asset, status status);
 
 private:
-    group&         _group;
-    command_queue& _commandQueue;
+    group& _group;
 };
 ////////////////////////////////////////////////////////////
 
 class TCOB_API loader_manager : public non_copyable {
 public:
-    struct factory : public type_factory<std::unique_ptr<loader_manager>, group&, command_queue&> {
+    struct factory : public type_factory<std::unique_ptr<loader_manager>, group&> {
         static inline char const* service_name {"assets::loader_manager::factory"};
     };
 

@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "tcob/core/Common.hpp"
-#include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
@@ -173,13 +173,7 @@ auto image::load(istream& in, string const& ext) noexcept -> load_status
 
 auto image::load_async(path const& file) noexcept -> std::future<load_status>
 {
-    return std::async(std::launch::async, [&, file] {
-        auto& sema {locate_service<semaphore>()};
-        sema.acquire();
-        auto retValue {load(file)};
-        sema.release();
-        return retValue;
-    });
+    return locate_service<task_manager>().run_async<load_status>([&, file]() { return load(file); });
 }
 
 auto image::LoadInfo(path const& file) noexcept -> std::optional<info>

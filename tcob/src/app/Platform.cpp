@@ -5,7 +5,6 @@
 
 #include "tcob/app/Platform.hpp"
 
-#include <thread>
 #include <utility>
 
 #include <SDL.h>
@@ -18,10 +17,9 @@
 #include "loaders/RasterFontLoader.hpp"
 
 #include "tcob/audio/AudioSystem.hpp"
-#include "tcob/core/CommandQueue.hpp"
-#include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Magic.hpp"
 #include "tcob/data/ConfigFile.hpp"
@@ -79,11 +77,8 @@ platform::platform(bool headless, game::init const& ginit)
     // magic signatures
     InitSignatures();
 
-    // global semaphore
-    u32 const threads {ginit.AsyncLoadThreads
-                           ? *ginit.AsyncLoadThreads
-                           : std::thread::hardware_concurrency() * 2};
-    register_service<semaphore>(std::make_shared<semaphore>(threads));
+    // task manager
+    register_service<task_manager>(std::make_shared<task_manager>(ginit.AsyncLoadThreads));
 
     // init config formats
     InitConfigFormats();
@@ -104,8 +99,8 @@ platform::platform(bool headless, game::init const& ginit)
     // init assets
     auto factory {register_service<assets::loader_manager::factory>()};
     factory->add({".ini", ".json", ".xml", ".yaml"},
-                 [](assets::group& group, command_queue& queue) {
-                     return std::make_unique<detail::cfg_asset_loader_manager>(group, queue);
+                 [](assets::group& group) {
+                     return std::make_unique<detail::cfg_asset_loader_manager>(group);
                  });
 
     if (!headless) {
@@ -148,7 +143,7 @@ void platform::remove_services() const
     remove_service<input::system>();
     remove_service<audio::system>();
     remove_service<gfx::render_system>();
-    remove_service<semaphore>();
+    remove_service<task_manager>();
 
     remove_service<assets::loader_manager::factory>();
     remove_service<data::config::text_reader::factory>();

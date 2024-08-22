@@ -12,10 +12,7 @@
 
 namespace tcob::assets {
 
-library::library(command_queue& commandQueue)
-    : _commandQueue {commandQueue}
-{
-}
+library::library() = default;
 
 library::~library()
 {
@@ -25,7 +22,7 @@ library::~library()
 auto library::create_or_get_group(string const& groupName) -> group&
 {
     if (!_groups.contains(groupName)) {
-        _groups[groupName] = std::make_unique<group>(groupName, _commandQueue);
+        _groups[groupName] = std::make_unique<group>(groupName);
     }
 
     return *_groups[groupName].get();
@@ -129,9 +126,8 @@ auto library::get_asset_stats(string const& group) const -> group_stats
 
 ////////////////////////////////////////////////////////////
 
-group::group(string name, command_queue& commandQueue)
+group::group(string name)
     : _name {std::move(name)}
-    , _commandQueue {commandQueue}
 {
 }
 
@@ -168,7 +164,7 @@ void group::load()
         auto const ext {io::get_extension(file)};
 
         if (!_loaderManagers.contains(ext)) {
-            if (auto mgr {locate_service<loader_manager::factory>().create(ext, *this, _commandQueue)}) {
+            if (auto mgr {locate_service<loader_manager::factory>().create(ext, *this)}) {
                 _loaderManagers[ext] = std::move(mgr);
             } else {
                 continue;

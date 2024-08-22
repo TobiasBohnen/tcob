@@ -6,8 +6,8 @@
 #include "tcob/audio/Buffer.hpp"
 
 #include "tcob/audio/AudioSource.hpp"
-#include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
@@ -54,13 +54,7 @@ auto buffer::load(std::shared_ptr<istream> in, string const& ext, std::any& ctx)
 
 auto buffer::load_async(path const& file, std::any& ctx) noexcept -> std::future<load_status>
 {
-    return std::async(std::launch::async, [&, file, ctx]() mutable {
-        auto& sema {locate_service<semaphore>()};
-        sema.acquire();
-        auto retValue {load(file, ctx)};
-        sema.release();
-        return retValue;
-    });
+    return locate_service<task_manager>().run_async<load_status>([&, file, ctx]() mutable { return load(file, ctx); });
 }
 
 auto buffer::save(path const& file) const -> bool

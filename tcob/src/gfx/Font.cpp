@@ -9,8 +9,8 @@
 #include <utility>
 
 #include "tcob/core/Logger.hpp"
-#include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
@@ -129,15 +129,9 @@ auto raster_font::load(path const& file, string const& textureFolder) noexcept -
     return load_status::Error;
 }
 
-auto raster_font::load_async(path const& filename, string const& textureFolder) noexcept -> std::future<load_status>
+auto raster_font::load_async(path const& file, string const& textureFolder) noexcept -> std::future<load_status>
 {
-    return std::async(std::launch::async, [&, filename, textureFolder]() {
-        auto& sema {locate_service<semaphore>()};
-        sema.acquire();
-        auto const retValue {load(filename, textureFolder)};
-        sema.release();
-        return retValue;
-    });
+    return locate_service<task_manager>().run_async<load_status>([&, file, textureFolder]() { return load(file, textureFolder); });
 }
 
 void raster_font::setup_texture()

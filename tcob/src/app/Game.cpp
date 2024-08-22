@@ -8,9 +8,9 @@
 #include <memory>
 
 #include "tcob/app/Platform.hpp"
-#include "tcob/core/CommandQueue.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stats.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
@@ -20,7 +20,6 @@ constexpr milliseconds FIXED_FRAMES {1000.0f / 50.0f};
 constexpr u8           MAX_FRAME_SKIP {10};
 
 game::game(init const& gameInit)
-    : _mainLibrary {_queue}
 {
     // init platform
     init i {gameInit};
@@ -55,8 +54,9 @@ void game::start()
 void game::finish()
 {
     // wait for command queue
-    while (!_queue.is_empty()) {
-        _queue.process();
+    auto& tm {locate_service<task_manager>()};
+    while (tm.process_queue() == command_status::Running) { // TODO: abort?
+        std::this_thread::yield();
     }
 
     // pop all scenes
@@ -80,13 +80,13 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
 
         return command_status::Finished;
     }};
-    _queue.add(std::move(command));
+    locate_service<task_manager>().add_to_queue(std::move(command));
 }
 
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        _queue.add({[&]() {
+        locate_service<task_manager>().add_to_queue({[&]() {
             pop_scene();
             return command_status::Finished;
         }});
@@ -118,11 +118,12 @@ void game::loop()
     Start();
 
     auto& plt {locate_service<platform>()};
+    auto& tm {locate_service<task_manager>()};
 
     do {
         if (!plt.process_events()) { queue_finish(); }
 
-        _queue.process();
+        tm.process_queue();
 
         if (_scenes.empty()) { queue_finish(); }
 
@@ -184,11 +185,6 @@ auto game::get_config_defaults() const -> data::config::object
 auto game::get_library() -> assets::library&
 {
     return _mainLibrary;
-}
-
-auto game::get_queue() -> command_queue&
-{
-    return _queue;
 }
 
 ////////////////////////////////////////////////////////////

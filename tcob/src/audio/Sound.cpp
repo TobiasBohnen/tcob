@@ -7,8 +7,8 @@
 
 #include "tcob/audio/AudioSource.hpp"
 #include "tcob/core/Common.hpp"
-#include "tcob/core/Semaphore.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
@@ -62,13 +62,7 @@ auto sound::load(std::shared_ptr<istream> in, string const& ext) noexcept -> loa
 
 auto sound::load_async(path const& file) noexcept -> std::future<load_status>
 {
-    return std::async(std::launch::async, [&, file]() {
-        auto& sema {locate_service<semaphore>()};
-        sema.acquire();
-        auto retValue {load(file)};
-        sema.release();
-        return retValue;
-    });
+    return locate_service<task_manager>().run_async<load_status>([&, file]() { return load(file); });
 }
 
 void sound::on_start()

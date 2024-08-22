@@ -19,7 +19,6 @@
 
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>
-#include <tcob/core/CommandQueue.hpp>
 #include <tcob/core/Common.hpp>
 #include <tcob/core/FlatMap.hpp>
 #include <tcob/core/Formatters.hpp>
@@ -35,6 +34,7 @@
 #include <tcob/core/Stats.hpp>
 #include <tcob/core/Stopwatch.hpp>
 #include <tcob/core/StringUtils.hpp>
+#include <tcob/core/TaskManager.hpp>
 #include <tcob/core/Timer.hpp>
 #include <tcob/core/Transform.hpp>
 #include <tcob/core/TypeFactory.hpp>

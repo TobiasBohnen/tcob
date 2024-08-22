@@ -135,9 +135,8 @@ inline auto group::has(string const& assetName) const -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline loader<T>::loader(group& group, command_queue& commandQueue)
+inline loader<T>::loader(group& group)
     : _group {group}
-    , _commandQueue {commandQueue}
 {
 }
 
@@ -167,12 +166,6 @@ template <typename T>
 inline auto loader<T>::get_bucket() -> bucket<T>*
 {
     return _group.get_bucket<T>();
-}
-
-template <typename T>
-inline auto loader<T>::get_queue() -> command_queue&
-{
-    return _commandQueue;
 }
 
 template <typename T>

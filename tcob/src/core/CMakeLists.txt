@@ -14,16 +14,15 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tweening/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Color.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/CommandQueue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Logger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Semaphore.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ServiceLocator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Signal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Stats.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Stopwatch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/StringUtils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/TaskManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Transform.cpp
 )
@@ -56,7 +55,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/AngleUnits.inl
     ${TCOB_INC_DIR}/tcob/core/Color.hpp
     ${TCOB_INC_DIR}/tcob/core/Color.inl
-    ${TCOB_INC_DIR}/tcob/core/CommandQueue.hpp
     ${TCOB_INC_DIR}/tcob/core/Common.hpp
     ${TCOB_INC_DIR}/tcob/core/Concepts.hpp
     ${TCOB_INC_DIR}/tcob/core/FlatMap.hpp
@@ -75,7 +73,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Rect.inl
     ${TCOB_INC_DIR}/tcob/core/Result.hpp
     ${TCOB_INC_DIR}/tcob/core/Result.inl
-    ${TCOB_INC_DIR}/tcob/core/Semaphore.hpp
     ${TCOB_INC_DIR}/tcob/core/ServiceLocator.hpp
     ${TCOB_INC_DIR}/tcob/core/ServiceLocator.inl
     ${TCOB_INC_DIR}/tcob/core/Signal.hpp
@@ -86,6 +83,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Stopwatch.hpp
     ${TCOB_INC_DIR}/tcob/core/StringUtils.hpp
     ${TCOB_INC_DIR}/tcob/core/StringUtils.inl
+    ${TCOB_INC_DIR}/tcob/core/TaskManager.hpp
+    ${TCOB_INC_DIR}/tcob/core/TaskManager.inl
     ${TCOB_INC_DIR}/tcob/core/Timer.hpp
     ${TCOB_INC_DIR}/tcob/core/Transform.hpp
     ${TCOB_INC_DIR}/tcob/core/TypeFactory.hpp

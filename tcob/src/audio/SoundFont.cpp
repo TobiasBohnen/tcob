@@ -11,8 +11,8 @@
         #pragma warning(disable : 4201)
     #endif
 
-    #include "tcob/core/Semaphore.hpp"
     #include "tcob/core/ServiceLocator.hpp"
+    #include "tcob/core/TaskManager.hpp"
     #include "tcob/core/io/FileStream.hpp"
 
     #include "ALObjects.hpp"
@@ -65,13 +65,7 @@ auto sound_font::load(istream& stream, bool stereo, i32 sampleRate) noexcept -> 
 
 auto sound_font::load_async(path const& file, bool stereo, i32 sampleRate) noexcept -> std::future<load_status>
 {
-    return std::async(std::launch::async, [&, file, stereo, sampleRate]() {
-        auto& sema {locate_service<semaphore>()};
-        sema.acquire();
-        auto retValue {load(file, stereo, sampleRate)};
-        sema.release();
-        return retValue;
-    });
+    return locate_service<task_manager>().run_async<load_status>([&, file, stereo, sampleRate]() { return load(file, stereo, sampleRate); });
 }
 
 auto sound_font::create_buffer(sound_font_commands const& commands) const -> buffer
