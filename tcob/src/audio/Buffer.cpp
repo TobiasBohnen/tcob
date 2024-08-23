@@ -54,7 +54,7 @@ auto buffer::load(std::shared_ptr<istream> in, string const& ext, std::any& ctx)
 
 auto buffer::load_async(path const& file, std::any& ctx) noexcept -> std::future<load_status>
 {
-    return locate_service<task_manager>().run_async<load_status>([&, file, ctx]() mutable { return load(file, ctx); });
+    return locate_service<task_manager>().run_async([&, file, ctx]() mutable { return load(file, ctx); });
 }
 
 auto buffer::save(path const& file) const -> bool

@@ -16,31 +16,37 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-enum class command_status : u8 {
+enum class queue_status : u8 {
     Finished,
     Running
 };
 
+struct task_context {
+    i32 Start {0};
+    i32 End {0};
+    i32 Thread {0};
+};
+
 class TCOB_API task_manager {
 public:
-    using func_type = std::function<command_status()>;
+    using queue_func = std::function<queue_status()>;
 
     explicit task_manager(std::optional<i32> threads);
 
-    template <typename T>
-    auto run_async(auto&& func) -> std::future<T>;
+    auto run_async(auto&& func) -> std::future<std::invoke_result_t<decltype(func)>>;
 
-    void add_to_queue(func_type&& func);
-    auto process_queue() -> command_status;
+    void run_task(auto&& func, i32 count);
+
+    void enqueue(queue_func&& func);
+    auto process_queue() -> queue_status;
 
     static inline char const* service_name {"task_manager"};
 
 private:
-    i32                       _threads;
-    std::counting_semaphore<> _semaphore;
-    std::thread::id           _mainThreadID;
-
-    std::queue<func_type>        _queue {};
+    i32                          _threads;
+    std::counting_semaphore<>    _semaphore;
+    std::thread::id              _mainThreadID;
+    std::queue<queue_func>       _queue {};
     mutable std::recursive_mutex _mutex {};
 };
 

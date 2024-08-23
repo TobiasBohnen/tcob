@@ -131,7 +131,7 @@ auto raster_font::load(path const& file, string const& textureFolder) noexcept -
 
 auto raster_font::load_async(path const& file, string const& textureFolder) noexcept -> std::future<load_status>
 {
-    return locate_service<task_manager>().run_async<load_status>([&, file, textureFolder]() { return load(file, textureFolder); });
+    return locate_service<task_manager>().run_async([&, file, textureFolder]() { return load(file, textureFolder); });
 }
 
 void raster_font::setup_texture()

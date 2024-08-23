@@ -55,7 +55,7 @@ void game::finish()
 {
     // wait for command queue
     auto& tm {locate_service<task_manager>()};
-    while (tm.process_queue() == command_status::Running) { // TODO: abort?
+    while (tm.process_queue() == queue_status::Running) { // TODO: abort?
         std::this_thread::yield();
     }
 
@@ -78,17 +78,17 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
             _scenes.push(scene);
         }
 
-        return command_status::Finished;
+        return queue_status::Finished;
     }};
-    locate_service<task_manager>().add_to_queue(std::move(command));
+    locate_service<task_manager>().enqueue(std::move(command));
 }
 
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        locate_service<task_manager>().add_to_queue({[&]() {
+        locate_service<task_manager>().enqueue({[&]() {
             pop_scene();
-            return command_status::Finished;
+            return queue_status::Finished;
         }});
     }
 }
