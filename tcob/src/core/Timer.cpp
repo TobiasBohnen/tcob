@@ -16,39 +16,31 @@ timer::~timer()
     stop();
 }
 
-void timer::start(milliseconds interval, mode mode)
+void timer::start(milliseconds interval, mode mode, bool looping)
 {
     stop();
 
-    switch (mode) {
-    case mode::BusyLoop: {
-        _thread = std::jthread {[&, interval](std::stop_token const& stoken) {
-            stopwatch sw;
-            while (!stoken.stop_requested()) {
-                sw.start();
-                for (;;) {
+    _thread = std::jthread([=, this](std::stop_token const& stoken) {
+        stopwatch sw;
+        while (!stoken.stop_requested()) {
+            sw.start();
+
+            if (mode == mode::BusyLoop) {
+                while (!stoken.stop_requested() && sw.get_elapsed() < interval) {
                     std::this_thread::yield();
-                    if (stoken.stop_requested() || sw.get_elapsed() >= interval) {
-                        break;
-                    }
                 }
-                sw.stop();
-                Tick(sw.get_elapsed());
-            }
-        }};
-    } break;
-    case mode::Sleep: {
-        _thread = std::jthread {[&, interval](std::stop_token const& stoken) {
-            stopwatch sw;
-            while (!stoken.stop_requested()) {
-                sw.start();
+            } else {
                 std::this_thread::sleep_for(interval);
-                sw.stop();
-                Tick(sw.get_elapsed());
             }
-        }};
-    } break;
-    }
+
+            sw.stop();
+            Tick(sw.get_elapsed());
+
+            if (!looping) { break; }
+        }
+
+        _isRunning = false;
+    });
 
     _isRunning = true;
 }

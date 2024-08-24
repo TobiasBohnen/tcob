@@ -27,11 +27,11 @@ public:
 
     auto is_running() const -> bool;
 
-    void start(milliseconds interval, mode mode = mode::Sleep);
+    void start(milliseconds interval, mode mode = mode::Sleep, bool looping = true);
     void stop();
 
 private:
-    std::jthread _thread;
     bool         _isRunning {false};
+    std::jthread _thread;
 };
 }
