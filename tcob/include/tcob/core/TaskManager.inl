@@ -10,7 +10,8 @@
 
 namespace tcob {
 
-inline auto task_manager::run_async(auto&& func) -> std::future<std::invoke_result_t<decltype(func)>>
+template <typename Func>
+inline auto task_manager::run_async(Func&& func) -> std::future<std::invoke_result_t<Func>>
 {
     return std::async(std::launch::async, [this, func]() mutable {
         _semaphore.acquire();
@@ -20,7 +21,8 @@ inline auto task_manager::run_async(auto&& func) -> std::future<std::invoke_resu
     });
 }
 
-inline void task_manager::run_task(auto&& func, i32 count)
+template <typename Func>
+inline void task_manager::run_task(Func&& func, i32 count)
 {
     // TODO thread pool
     std::atomic_int counter {_threads};

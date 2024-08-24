@@ -33,9 +33,11 @@ public:
 
     explicit task_manager(std::optional<i32> threads);
 
-    auto run_async(auto&& func) -> std::future<std::invoke_result_t<decltype(func)>>;
+    template <typename Func>
+    auto run_async(Func&& func) -> std::future<std::invoke_result_t<Func>>;
 
-    void run_task(auto&& func, i32 count);
+    template <typename Func>
+    void run_task(Func&& func, i32 count);
 
     void enqueue(queue_func&& func);
     auto process_queue() -> queue_status;
