@@ -180,7 +180,7 @@ auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
              .LogFile          = std::move(logFile),
              .ConfigFile       = "config.ini",
              .ConfigDefaults   = {},
-             .AsyncLoadThreads = 0}};
+             .AsyncLoadThreads = std::nullopt}};
 }
 
 auto platform::IsRunningOnWine() -> bool

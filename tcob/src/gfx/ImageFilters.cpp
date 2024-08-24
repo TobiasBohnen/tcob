@@ -188,7 +188,7 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
                 retValue.set_pixel({x, y}, img.get_pixel({srcX, srcY}));
             }
         },
-        imgWidth * imgHeight);
+        newWidth * newHeight);
 
     return retValue;
 }
