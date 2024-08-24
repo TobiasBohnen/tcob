@@ -7,6 +7,9 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include "tcob/core/ServiceLocator.hpp"
+    #include "tcob/core/TaskManager.hpp"
+
 B2_API auto b2RevoluteJoint_IsSpringEnabled(b2JointId jointId) -> bool;
 
 namespace tcob::physics::detail {
@@ -30,6 +33,19 @@ b2d_world::b2d_world(world::settings const& settings)
     worldDef.enableSleep           = settings.EnableSleeping;
     worldDef.enableContinous       = settings.EnableContinuous;
 
+    worldDef.workerCount = locate_service<task_manager>().get_thread_count();
+    worldDef.enqueueTask = [](b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* /* userContext */) -> void* {
+        locate_service<task_manager>().run_task(
+            [task, taskContext](task_context ctx) {
+                task(ctx.Start, ctx.End, ctx.Thread, taskContext);
+            },
+            itemCount, minRange);
+
+        return nullptr;
+    };
+    worldDef.finishTask = [](void* /* userTask */, void* /* userContext */) {
+
+    };
     ID = b2CreateWorld(&worldDef);
 }
 
