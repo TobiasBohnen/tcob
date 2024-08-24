@@ -14,29 +14,29 @@ task_manager::task_manager(std::optional<i32> threads)
 {
 }
 
-void task_manager::enqueue(queue_func&& func)
+void task_manager::run_deferred(queue_func&& func)
 {
     std::scoped_lock lock {_mutex};
-    _queue.push(std::move(func));
+    _deferredQueue.push(std::move(func));
 }
 
 auto task_manager::process_queue() -> queue_status
 {
     assert(std::this_thread::get_id() == _mainThreadID);
-    if (_queue.empty()) { return queue_status::Finished; }
+    if (_deferredQueue.empty()) { return queue_status::Finished; }
     std::scoped_lock lock {_mutex};
 
     std::queue<queue_func> newQueue {};
 
-    while (!_queue.empty()) {
-        auto& front {_queue.front()};
+    while (!_deferredQueue.empty()) {
+        auto& front {_deferredQueue.front()};
         if (front() == queue_status::Running) {
             newQueue.push(front);
         }
-        _queue.pop();
+        _deferredQueue.pop();
     }
 
-    _queue.swap(newQueue);
+    _deferredQueue.swap(newQueue);
     return queue_status::Running;
 }
 

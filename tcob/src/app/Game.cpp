@@ -80,13 +80,13 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
 
         return queue_status::Finished;
     }};
-    locate_service<task_manager>().enqueue(std::move(command));
+    locate_service<task_manager>().run_deferred(std::move(command));
 }
 
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        locate_service<task_manager>().enqueue({[&]() {
+        locate_service<task_manager>().run_deferred({[&]() {
             pop_scene();
             return queue_status::Finished;
         }});

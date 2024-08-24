@@ -335,7 +335,7 @@ void cfg_sound_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<task_manager>().enqueue([&]() {
+    locate_service<task_manager>().run_deferred([&]() {
         return default_check_async_load(_cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -392,7 +392,7 @@ void cfg_sound_font_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<task_manager>().enqueue([&]() {
+    locate_service<task_manager>().run_deferred([&]() {
         return default_check_async_load(_cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -549,7 +549,7 @@ void cfg_font_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<task_manager>().enqueue([&]() {
+    locate_service<task_manager>().run_deferred([&]() {
         return default_check_async_load(_cacheRaster, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -994,7 +994,7 @@ void cfg_texture_loader::prepare()
     }
     _cacheAni.clear();
 
-    locate_service<task_manager>().enqueue([&]() { return check_async_load(); });
+    locate_service<task_manager>().run_deferred([&]() { return check_async_load(); });
 }
 
 auto cfg_texture_loader::check_async_load() -> queue_status

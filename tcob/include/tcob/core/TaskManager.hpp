@@ -39,7 +39,8 @@ public:
     template <typename Func>
     void run_task(Func&& func, i32 count);
 
-    void enqueue(queue_func&& func);
+    void run_deferred(queue_func&& func);
+
     auto process_queue() -> queue_status;
 
     static inline char const* service_name {"task_manager"};
@@ -48,7 +49,7 @@ private:
     i32                          _threads;
     std::counting_semaphore<>    _semaphore;
     std::thread::id              _mainThreadID;
-    std::queue<queue_func>       _queue {};
+    std::queue<queue_func>       _deferredQueue {};
     mutable std::recursive_mutex _mutex {};
 };
 
