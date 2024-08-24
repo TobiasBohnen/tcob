@@ -13,7 +13,7 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API timer final {
+class TCOB_API timer final { // TODO: add to task_manager
 public:
     enum class mode : u8 {
         BusyLoop,

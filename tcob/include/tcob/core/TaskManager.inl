@@ -22,27 +22,30 @@ inline auto task_manager::run_async(Func&& func) -> std::future<std::invoke_resu
 }
 
 template <typename Func>
-inline void task_manager::run_task(Func&& func, i32 count)
+inline void task_manager::run_task(Func&& func, i32 count, i32 minRange)
 {
-    // TODO thread pool
-    std::atomic_int counter {_threads};
+    i32 const numThreads {std::min(_threadCount, count / minRange)};
 
-    i32 const partitionSize {count / _threads};
+    if (numThreads <= 1 || count < _threadCount) {
+        task_context const ctx {.Start = 0, .End = count, .Thread = 0};
+        func(ctx);
+    } else {
+        i32 const partitionSize {count / numThreads};
+        _activeTasks = numThreads;
 
-    for (i32 i {0}; i < _threads; ++i) {
-        task_context const ctx {.Start  = i * partitionSize,
-                                .End    = (i == _threads - 1) ? count : ctx.Start + partitionSize,
-                                .Thread = i};
-        std::thread {[this, func, ctx, &counter]() {
-            _semaphore.acquire();
-            func(ctx);
-            _semaphore.release();
-            --counter;
-        }}.detach();
-    }
+        for (i32 i {0}; i < numThreads; ++i) {
+            task_context const ctx {.Start  = i * partitionSize,
+                                    .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
+                                    .Thread = i};
+            {
+                std::scoped_lock lock {_taskMutex};
+                _taskQueue.emplace([func, ctx]() { func(ctx); });
+            }
 
-    while (counter > 0) {
-        std::this_thread::yield();
+            _taskCondition.notify_one();
+        }
+
+        while (_activeTasks > 0) { std::this_thread::yield(); }
     }
 }
 
