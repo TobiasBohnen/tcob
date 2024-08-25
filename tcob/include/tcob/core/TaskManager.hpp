@@ -10,7 +10,6 @@
 #include <mutex>
 #include <optional>
 #include <queue>
-#include <semaphore>
 #include <thread>
 
 namespace tcob {
@@ -27,14 +26,16 @@ struct task_context {
     i32 Thread {0};
 };
 
+////////////////////////////////////////////////////////////
+
 class TCOB_API task_manager final {
+    friend class game; // loop -> process_queue
+
 public:
     using queue_func = std::function<queue_status()>;
 
     explicit task_manager(std::optional<i32> threads);
     ~task_manager();
-
-    auto get_thread_count() const -> i32;
 
     template <typename Func>
     auto run_async(Func&& func) -> std::future<std::invoke_result_t<Func>>;
@@ -44,25 +45,25 @@ public:
 
     void run_deferred(queue_func&& func);
 
-    auto process_queue() -> queue_status;
+    auto get_thread_count() const -> i32;
 
     static inline char const* service_name {"task_manager"};
 
 private:
+    auto process_queue() -> queue_status;
+
     void worker_thread(std::stop_token const& stopToken);
 
-    i32                       _threadCount;
-    std::counting_semaphore<> _semaphore;
-    std::thread::id           _mainThreadID;
+    i32             _threadCount;
+    std::thread::id _mainThreadID;
 
     std::queue<std::function<void()>> _taskQueue;
     std::mutex                        _taskMutex;
     std::vector<std::jthread>         _taskWorkers;
     std::condition_variable_any       _taskCondition;
-    std::atomic_int                   _activeTasks;
 
-    std::queue<queue_func>       _deferredQueue {};
-    mutable std::recursive_mutex _deferredMutex {};
+    std::queue<queue_func> _deferredQueue {};
+    std::recursive_mutex   _deferredMutex {};
 };
 
 }

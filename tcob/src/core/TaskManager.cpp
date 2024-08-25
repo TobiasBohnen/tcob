@@ -9,7 +9,6 @@ namespace tcob {
 
 task_manager::task_manager(std::optional<i32> threads)
     : _threadCount {(threads && *threads > 0) ? *threads : static_cast<i32>(std::thread::hardware_concurrency() * 2)}
-    , _semaphore {_threadCount}
     , _mainThreadID {std::this_thread::get_id()}
 {
     for (i32 i {0}; i < _threadCount; ++i) {
@@ -74,10 +73,7 @@ void task_manager::worker_thread(std::stop_token const& stopToken)
             _taskQueue.pop();
         }
 
-        _semaphore.acquire();
         task();
-        _semaphore.release();
-        --_activeTasks;
     }
 }
 
