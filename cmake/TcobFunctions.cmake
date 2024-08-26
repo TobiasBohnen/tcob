@@ -21,7 +21,7 @@ function(tcob_add_obj_library module sources headers)
         -Wno-unsafe-buffer-usage -Wno-ctad-maybe-unsupported -Wno-c++20-compat -Wno-c++98-compat -Wno-c++98-compat-pedantic
         -Wno-exit-time-destructors
         -fexperimental-library>
-        $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic-Wno-missing-field-initializers>
+        $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic -Wno-missing-field-initializers>
     )
 
     set_target_properties(${module} PROPERTIES
