@@ -23,6 +23,8 @@ inline auto task_manager::run_async(Func&& func) -> std::future<std::invoke_resu
             _taskQueue.emplace([task]() { (*task)(); });
         }
         _taskCondition.notify_one();
+    } else {
+        (*task)();
     }
 
     return retValue;

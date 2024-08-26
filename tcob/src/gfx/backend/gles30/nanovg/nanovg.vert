@@ -1,5 +1,4 @@
-R"(	
-#version 300 es
+R"(#version 300 es
 precision mediump float;
 
 uniform vec2 viewSize;
