@@ -36,6 +36,8 @@ TCOB_API auto trim(string_view source) -> string_view;
 
 TCOB_API auto find_unquoted(string_view source, char needle) -> string_view::size_type;
 
+TCOB_API auto replace(string_view source, string_view from, string_view to) -> string;
+
 TCOB_API auto to_lower(string_view source) -> string;
 
 TCOB_API auto case_insensitive_equals(string_view lhs, string_view rhs) -> bool;

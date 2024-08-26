@@ -120,6 +120,24 @@ auto find_unquoted(string_view source, char needle) -> string_view::size_type
     return string_view::npos;
 }
 
+auto replace(string_view source, string_view from, string_view to) -> string
+{
+    string retValue;
+    usize  startPos {0};
+    usize  fromPos {0};
+    retValue.reserve(source.size());
+
+    while ((fromPos = source.find(from, startPos)) != string_view::npos) {
+        retValue.append(source.substr(startPos, fromPos - startPos));
+        retValue.append(to);
+        startPos = fromPos + from.size();
+    }
+
+    retValue.append(source.substr(startPos));
+
+    return retValue;
+}
+
 auto to_lower(string_view source) -> string
 {
     string retValue {source};
