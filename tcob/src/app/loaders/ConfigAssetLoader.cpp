@@ -9,6 +9,7 @@
 
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
@@ -634,7 +635,8 @@ void cfg_material_loader::declare()
                 asset->texture = texture;
             }
             if (string shader; assetSection.try_get(shader, API::Material::shader)) {
-                asset->shader = shader;
+                // FIXME: proper render system handling in material
+                asset->shader = helper::replace(shader, "${TCOB_RENDER_SYSTEM}", locate_service<render_system>().get_name());
             }
             if (object blendFunc; assetSection.try_get(blendFunc, API::Material::blend_func)) {
                 blend_func s {blendFunc["source"].as<blend_func>()};
