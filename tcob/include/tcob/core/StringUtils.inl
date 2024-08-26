@@ -102,6 +102,7 @@ auto to_string(T&& value) -> string
 template <Arithmetic T>
 auto to_number(string_view str) -> std::optional<T>
 {
+#ifdef __cpp_lib_to_chars
     auto const* valueStrData {str.data()};
     auto const  valueStrSize {str.size()};
 
@@ -112,6 +113,24 @@ auto to_number(string_view str) -> std::optional<T>
     }
 
     return std::nullopt;
+#else
+    string temp {str};
+    if constexpr (Integral<T>) {
+        char*     end {nullptr};
+        i64 const result {std::strtol(temp.c_str(), &end, 10)};
+        if (*end == '\0' && errno != ERANGE) {
+            return static_cast<T>(result);
+        }
+        return std::nullopt;
+    } else if constexpr (FloatingPoint<T>) {
+        char*     end {nullptr};
+        f64 const result {std::strtod(temp.c_str(), &end)};
+        if (*end == '\0' && errno != ERANGE) {
+            return static_cast<T>(result);
+        }
+        return std::nullopt;
+    }
+#endif
 }
 
 auto join(auto&& container, string_view delim) -> string

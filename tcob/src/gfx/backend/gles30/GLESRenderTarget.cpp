@@ -146,7 +146,7 @@ void gl_render_target::bind_material(material* mat) const
             }
         } else {
             GLCHECK(glUseProgram(gl_context::DefaultShader));
-            GLCHECK(glUniformBlockBinding(gl_context::DefaultTexturedShader, glGetUniformBlockIndex(gl_context::DefaultTexturedShader, "Material"), 1));
+            GLCHECK(glUniformBlockBinding(gl_context::DefaultShader, glGetUniformBlockIndex(gl_context::DefaultShader, "Material"), 1));
         }
     }
 

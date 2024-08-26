@@ -89,6 +89,7 @@ private:
 
     //! Main game loop.
     void loop();
+    void step();
 
     //! Pops the top scene from the scene stack.
     void pop_scene();
@@ -98,7 +99,9 @@ private:
     milliseconds                       _frameLimit {}; //!< Frame rate limit.
     std::stack<std::shared_ptr<scene>> _scenes {};     //!< Stack of active scenes.
 
-    bool _shouldQuit {false};                          //!< Flag indicating if the game should quit.
+    bool         _shouldQuit {false};                  //!< Flag indicating if the game should quit.
+    milliseconds _nextFixedUpdate {};
+    milliseconds _lastUpdate {};
 };
 
 }

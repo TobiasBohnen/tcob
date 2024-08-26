@@ -17,13 +17,14 @@ inline auto task_manager::run_async(Func&& func) -> std::future<std::invoke_resu
 
     auto task {std::make_shared<std::packaged_task<result_type()>>(std::forward<Func>(func))};
     auto retValue {task->get_future()};
-
-    {
-        std::scoped_lock lock {_taskMutex};
-        _taskQueue.emplace([task]() { (*task)(); });
+    if (_threadCount > 0) {
+        {
+            std::scoped_lock lock {_taskMutex};
+            _taskQueue.emplace([task]() { (*task)(); });
+        }
+        _taskCondition.notify_one();
     }
 
-    _taskCondition.notify_one();
     return retValue;
 }
 

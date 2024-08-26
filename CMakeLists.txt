@@ -73,6 +73,15 @@ if(MSVC AND TCOB_USE_DEFAULT_MSVC_OPTIONS)
   endif()
 endif()
 
+if(EMSCRIPTEN)
+  set(TCOB_ENABLE_RENDERER_OPENGLES30 ON CACHE BOOL "" FORCE)
+  set(TCOB_ENABLE_RENDERER_OPENGL45 OFF CACHE BOOL "" FORCE)
+  set(TCOB_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(TCOB_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+  set(TCOB_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+  set(CMAKE_EXECUTABLE_SUFFIX ".html")
+endif()
+
 # subdirs######################################################################
 set(TCOB_LIBS "")
 add_subdirectory(tcob)

@@ -573,7 +573,9 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
 {
     auto fallbackStyle {get_fallback_style(style)};
     if (!fallbackStyle) {
+#if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
         logger::Error("FontFamily {}: no sources for font style: style {}, size {}.", _name, style, size);
+#endif
         return {};
     }
 
@@ -586,7 +588,9 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
         }
     }
 
+#if !defined(__EMSCRIPTEN__) // TODO: fixed in llvm 19
     logger::Info("FontFamily {}: created new font: style {}, size {}.", _name, fontStyle, size);
+#endif
 
     // check if font data has already been loaded
     if (!_fontData.contains(fontStyle)) {

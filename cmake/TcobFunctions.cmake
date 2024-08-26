@@ -20,6 +20,7 @@ function(tcob_add_obj_library module sources headers)
         -Wno-float-equal -Wno-double-promotion -Wno-implicit-int-float-conversion -Wno-sign-conversion -Wno-switch-enum -Wno-switch-default
         -Wno-unsafe-buffer-usage -Wno-ctad-maybe-unsupported -Wno-c++20-compat -Wno-c++98-compat -Wno-c++98-compat-pedantic
         -Wno-exit-time-destructors>
+        -fexperimental-library
         $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic
         -Wno-missing-field-initializers>
     )

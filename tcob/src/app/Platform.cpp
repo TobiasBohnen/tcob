@@ -77,8 +77,12 @@ platform::platform(bool headless, game::init const& ginit)
     // magic signatures
     InitSignatures();
 
-    // task manager
+// task manager
+#if defined(__EMSCRIPTEN__)
+    register_service<task_manager>(std::make_shared<task_manager>(0));
+#else
     register_service<task_manager>(std::make_shared<task_manager>(ginit.AsyncLoadThreads));
+#endif
 
     // init config formats
     InitConfigFormats();

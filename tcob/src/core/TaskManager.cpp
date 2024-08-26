@@ -8,7 +8,7 @@
 namespace tcob {
 
 task_manager::task_manager(std::optional<i32> threads)
-    : _threadCount {(threads && *threads > 0) ? *threads : static_cast<i32>(std::thread::hardware_concurrency() * 2)}
+    : _threadCount {threads ? *threads : static_cast<i32>(std::thread::hardware_concurrency() * 2)}
     , _mainThreadID {std::this_thread::get_id()}
 {
     for (i32 i {0}; i < _threadCount; ++i) {

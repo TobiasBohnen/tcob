@@ -5,12 +5,12 @@
 
 #include "tcob/gfx/Canvas.hpp"
 
-#include <charconv>
 #include <cmath>
 #include <vector>
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
@@ -2366,10 +2366,8 @@ auto canvas::path2d::GetCommands(string_view path) -> std::optional<std::vector<
 
     auto const getFloat {[&valStr, &commands]() -> bool {
         if (!valStr.empty()) {
-            f32 val {0};
-            auto [end, err] = std::from_chars(valStr.data(), valStr.data() + valStr.size(), val);
-            if (err == std::errc() && end == (valStr.data() + valStr.size())) {
-                commands.emplace_back(val);
+            if (auto value {helper::to_number<f32>(valStr)}) {
+                commands.emplace_back(*value);
             } else {
                 return false;
             }

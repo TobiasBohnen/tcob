@@ -6,6 +6,7 @@
 #include "tcob/core/Logger.hpp"
 
 #include <iostream>
+#include <version>
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/io/FileSystem.hpp"
@@ -82,9 +83,12 @@ auto logger::format_message(string const& message, level level) const -> string
     case level::Off:
         break;
     }
-
+#if __cpp_lib_chrono >= 201907L
     auto const time {std::chrono::current_zone()->to_local(std::chrono::system_clock::now())};
     return std::format("{} ({:%F - %T}) {}\n", prefix, time, message);
+#else
+    return std::format("{} {}\n", prefix, message);
+#endif
 }
 
 ////////////////////////////////////////////////////////////
@@ -134,6 +138,7 @@ void stdout_logger::log(string const& message, level level) const
     if (level < MinLevel) {
         return;
     }
+#if !defined(__EMSCRIPTEN__)
     std::cout << "\033[";
 
     switch (level) {
@@ -155,6 +160,9 @@ void stdout_logger::log(string const& message, level level) const
     std::cout << "m"
               << format_message(message, level)
               << "\033[0m";
+#else
+    std::cout << format_message(message, level);
+#endif
 }
 
 }

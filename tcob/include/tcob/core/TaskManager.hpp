@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <condition_variable>
 #include <functional>
 #include <mutex>
 #include <optional>
