@@ -298,7 +298,9 @@ void platform::init_render_system()
     rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
 #endif
 
-    string renderer {(*_configFile)[Cfg::Video::Name][Cfg::Video::render_system].as<string>()};
+    auto video {(*_configFile)[Cfg::Video::Name].as<data::video_config>()};
+
+    string renderer {video.RenderSystem};
 
     // create rendersystem
     logger::Info("RenderSystem: {}", renderer);
@@ -307,12 +309,10 @@ void platform::init_render_system()
     register_service<gfx::render_system>(renderSystem);
 
     // get config
-    auto const video {(*_configFile)[Cfg::Video::Name].as<data::config::object>()};
-
-    bool const   useDesktopRes {video[Cfg::Video::use_desktop_resolution].as<bool>()};
+    bool const   useDesktopRes {video.UseDesktopResolution};
     size_i const resolution {useDesktopRes
                                  ? renderSystem->get_desktop_size(0)
-                                 : video[Cfg::Video::resolution].as<size_i>()};
+                                 : video.Resolution};
 
     // create window (and context)
     _window = std::unique_ptr<gfx::window> {new gfx::window(renderSystem->create_window(resolution))};
@@ -330,8 +330,8 @@ void platform::init_render_system()
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
-    _window->FullScreen(video[Cfg::Video::fullscreen].as<bool>() || useDesktopRes);
-    _window->VSync(video[Cfg::Video::vsync].as<bool>());
+    _window->FullScreen(video.FullScreen || useDesktopRes);
+    _window->VSync(video.VSync);
     _window->Size(resolution);
 
     _defaultTarget = std::make_unique<gfx::default_render_target>();

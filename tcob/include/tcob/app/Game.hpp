@@ -85,8 +85,6 @@ protected:
     void virtual on_finish() { }
 
 private:
-    auto get_config_defaults() const -> data::config::object;
-
     //! Main game loop.
     void loop();
     void step();

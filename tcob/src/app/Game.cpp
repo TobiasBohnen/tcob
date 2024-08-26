@@ -28,7 +28,9 @@ game::game(init const& gameInit)
     // init platform
     init i {gameInit};
     if (!i.ConfigDefaults) {
-        i.ConfigDefaults = get_config_defaults();
+        data::config::object obj;
+        obj[Cfg::Video::Name] = data::video_config {};
+        i.ConfigDefaults      = obj;
     }
     auto plt {register_service<platform>(std::make_shared<platform>(false, i))};
     plt->get_window().Title(gameInit.Name);
@@ -177,25 +179,6 @@ void game::step()
 
         locate_service<gfx::render_system>().get_stats().update(deltaUpdate);
     }
-}
-
-auto game::get_config_defaults() const -> data::config::object
-{
-    // set defaults
-    data::config::object video {};
-    video[Cfg::Video::fullscreen]             = true;
-    video[Cfg::Video::use_desktop_resolution] = true;
-    video[Cfg::Video::vsync]                  = false;
-    video[Cfg::Video::frame_limit]            = 6000;
-#if defined(__EMSCRIPTEN__)
-    video[Cfg::Video::render_system] = "OPENGLES30";
-#else
-    video[Cfg::Video::render_system] = "OPENGL45";
-#endif
-
-    data::config::object defaults {};
-    defaults[Cfg::Video::Name] = video;
-    return defaults;
 }
 
 auto game::get_library() -> assets::library&
