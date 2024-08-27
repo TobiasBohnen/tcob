@@ -135,9 +135,8 @@ stdout_logger::stdout_logger() = default;
 
 void stdout_logger::log(string const& message, level level) const
 {
-    if (level < MinLevel) {
-        return;
-    }
+    if (level < MinLevel) { return; }
+
 #if !defined(__EMSCRIPTEN__)
     std::cout << "\033[";
 
