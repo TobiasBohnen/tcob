@@ -197,7 +197,7 @@ auto platform::IsRunningOnWine() -> bool
 #endif
 }
 
-bool platform::process_events() const
+auto platform::process_events() const -> bool
 {
     SDL_Event ev;
     auto&     inputMgr {locate_service<input::system>()};
