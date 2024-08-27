@@ -77,12 +77,8 @@ platform::platform(bool headless, game::init const& ginit)
     // magic signatures
     InitSignatures();
 
-// task manager
-#if defined(__EMSCRIPTEN__)
-    register_service<task_manager>(std::make_shared<task_manager>(0));
-#else
-    register_service<task_manager>(std::make_shared<task_manager>(ginit.AsyncLoadThreads));
-#endif
+    // task manager
+    register_service<task_manager>(std::make_shared<task_manager>(ginit.WorkerThreads));
 
     // init config formats
     InitConfigFormats();
@@ -178,13 +174,13 @@ void platform::on_key_down(input::keyboard::event& ev)
 auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
 {
     return {true,
-            {.Path             = argv0,
-             .Name             = "",
-             .OrgName          = "",
-             .LogFile          = std::move(logFile),
-             .ConfigFile       = "config.ini",
-             .ConfigDefaults   = {},
-             .AsyncLoadThreads = std::nullopt}};
+            {.Path           = argv0,
+             .Name           = "",
+             .OrgName        = "",
+             .LogFile        = std::move(logFile),
+             .ConfigFile     = "config.ini",
+             .ConfigDefaults = {},
+             .WorkerThreads  = std::nullopt}};
 }
 
 auto platform::IsRunningOnWine() -> bool

@@ -19,10 +19,14 @@ function(tcob_add_obj_library module sources headers)
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra
         -Wno-float-equal -Wno-double-promotion -Wno-implicit-int-float-conversion -Wno-sign-conversion -Wno-switch-enum -Wno-switch-default
         -Wno-unsafe-buffer-usage -Wno-ctad-maybe-unsupported -Wno-c++20-compat -Wno-c++98-compat -Wno-c++98-compat-pedantic
-        -Wno-exit-time-destructors
-        -fexperimental-library>
+        -Wno-exit-time-destructors>
         $<$<CXX_COMPILER_ID:GNU>: -Wall -Wextra -pedantic -Wno-missing-field-initializers>
     )
+
+    if(EMSCRIPTEN)
+        target_compile_options(${module} PRIVATE -fexperimental-library -pthread)
+        target_link_options(${module} PRIVATE -sFULL_ES3 -pthread)
+    endif()
 
     set_target_properties(${module} PROPERTIES
         CXX_STANDARD 20
