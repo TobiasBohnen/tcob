@@ -40,15 +40,9 @@ struct blend_funcs {
     blend_func DestinationColorBlendFunc {blend_func::OneMinusSrcAlpha};
     blend_func SourceAlphaBlendFunc {blend_func::SrcAlpha};
     blend_func DestinationAlphaBlendFunc {blend_func::OneMinusSrcAlpha};
-};
 
-inline auto operator==(blend_funcs const& left, blend_funcs const& right) -> bool
-{
-    return (left.SourceColorBlendFunc == right.SourceColorBlendFunc)
-        && (left.DestinationColorBlendFunc == right.DestinationColorBlendFunc)
-        && (left.SourceAlphaBlendFunc == right.SourceAlphaBlendFunc)
-        && (left.DestinationAlphaBlendFunc == right.DestinationAlphaBlendFunc);
-}
+    auto operator==(blend_funcs const& other) const -> bool = default;
+};
 
 enum class blend_equation : u8 {
     Add,
@@ -117,6 +111,8 @@ struct alignments {
 
     void static Serialize(alignments const& v, auto&& s);
     auto static Deserialize(alignments& v, auto&& s) -> bool;
+
+    auto operator==(alignments const& other) const -> bool = default;
 };
 
 inline void alignments::Serialize(alignments const& v, auto&& s)
@@ -128,12 +124,6 @@ inline void alignments::Serialize(alignments const& v, auto&& s)
 inline auto alignments::Deserialize(alignments& v, auto&& s) -> bool
 {
     return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
-}
-
-inline auto operator==(alignments const& left, alignments const& right) -> bool
-{
-    return (left.Horizontal == right.Horizontal)
-        && (left.Vertical == right.Vertical);
 }
 
 }

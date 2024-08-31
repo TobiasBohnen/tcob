@@ -45,12 +45,9 @@ public:
     size_f TileSize {size_f::Zero};
 
     auto get_quad_bounds(point_f offset, i32 column, i32 row) const -> rect_f;
-};
 
-auto constexpr operator==(orthogonal_grid const& left, orthogonal_grid const& right) -> bool
-{
-    return (left.TileSize == right.TileSize);
-}
+    auto operator==(orthogonal_grid const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -60,12 +57,9 @@ public:
     point_f Center {0.5f, 0.5f};
 
     auto get_quad_bounds(point_f offset, i32 column, i32 row) const -> rect_f;
-};
 
-auto constexpr operator==(isometric_grid const& left, isometric_grid const& right) -> bool
-{
-    return (left.TileSize == right.TileSize) && (left.Center == right.Center);
-}
+    auto operator==(isometric_grid const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 

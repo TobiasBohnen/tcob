@@ -95,9 +95,4 @@ auto color_gradient::as_array(f32 multAlpha) const -> std::array<vec4, Size>
     return retValue;
 }
 
-auto operator==(color_gradient const& left, color_gradient const& right) -> bool
-{
-    return left._premulAlpha == right._premulAlpha && right._colorStops == left._colorStops;
-}
-
 } // namespace gfx

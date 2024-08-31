@@ -108,7 +108,6 @@ struct control_map {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API length final {
-    friend auto operator==(length const& left, length const& right) -> bool;
     friend auto operator/(length const& left, f32 right) -> length;
 
 public:
@@ -126,10 +125,10 @@ public:
     auto calc(f32 min, f32 refSize) const -> f32;
     auto calc(f32 refSize) const -> f32;
 
+    auto operator==(length const& other) const -> bool = default;
     auto operator-() const -> length;
 };
 
-auto operator==(length const& left, length const& right) -> bool;
 auto operator/(length const& left, f32 right) -> length;
 
 ////////////////////////////////////////////////////////////
@@ -145,9 +144,10 @@ public:
     length Right {};
     length Top {};
     length Bottom {};
+
+    auto operator==(thickness const& other) const -> bool = default;
 };
 
-auto operator==(thickness const& left, thickness const& right) -> bool;
 auto operator-(rect_f const& left, thickness const& right) -> rect_f;
 auto operator-=(rect_f& left, thickness const& right) -> rect_f&;
 
@@ -156,6 +156,8 @@ auto operator-=(rect_f& left, thickness const& right) -> rect_f&;
 struct dimensions {
     length Width {1, length::type::Relative};
     length Height {1, length::type::Relative};
+
+    auto operator==(dimensions const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
@@ -195,18 +197,18 @@ public:
     auto check(flags other) const -> i32;
 
     auto as_array() const -> std::array<bool, Size>;
-};
 
-auto operator==(flags const& left, flags const& right) -> bool;
+    auto operator==(flags const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
 struct linear_gradient {
     degree_f       Angle {0};
     color_gradient Colors;
-};
 
-auto operator==(linear_gradient const& left, linear_gradient const& right) -> bool;
+    auto operator==(linear_gradient const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -215,9 +217,9 @@ struct radial_gradient {
     length         OuterRadius {1.0f, length::type::Relative};
     size_f         Scale {size_f::One};
     color_gradient Colors;
-};
 
-auto operator==(radial_gradient const& left, radial_gradient const& right) -> bool;
+    auto operator==(radial_gradient const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -225,18 +227,18 @@ struct box_gradient {
     length         Radius {0.25f, length::type::Relative};
     length         Feather {0.50f, length::type::Relative};
     color_gradient Colors;
-};
 
-auto operator==(box_gradient const& left, box_gradient const& right) -> bool;
+    auto operator==(box_gradient const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
 struct image_pattern {
     assets::asset_ptr<texture> Texture;
     bool                       Stretch {false};
-};
 
-auto operator==(image_pattern const& left, image_pattern const& right) -> bool;
+    auto operator==(image_pattern const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -259,9 +261,9 @@ struct nine_patch {
     assets::asset_ptr<texture> Texture;
     string                     Region {"default"};
     rect_f                     UV;
-};
 
-auto operator==(nine_patch const& left, nine_patch const& right) -> bool;
+    auto operator==(nine_patch const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 

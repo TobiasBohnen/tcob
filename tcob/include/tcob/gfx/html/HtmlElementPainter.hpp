@@ -88,13 +88,9 @@ public:
     i32 Right {0};
     i32 Top {0};
     i32 Bottom {0};
-};
 
-auto constexpr operator==(margins const& left, margins const& right) -> bool
-{
-    return (left.Left == right.Left) && (left.Top == right.Top)
-        && (left.Right == right.Right) && (left.Bottom == right.Bottom);
-}
+    auto operator==(margins const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 

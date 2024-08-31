@@ -19,12 +19,9 @@ struct vertex final {
     std::array<f32, 2> Position;  // x, y
     std::array<u8, 4>  Color;     // r, g, b, a
     std::array<f32, 3> TexCoords; // u, v, level
-};
 
-inline auto operator==(vertex const& left, vertex const& right) -> bool
-{
-    return left.Color == right.Color && left.Position == right.Position && left.TexCoords == right.TexCoords;
-}
+    auto operator==(vertex const& other) const -> bool = default;
+};
 
 using triangle = std::array<vertex, 3>;
 using quad     = std::array<vertex, 4>;

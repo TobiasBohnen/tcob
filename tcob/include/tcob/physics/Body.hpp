@@ -24,13 +24,9 @@ struct body_transform {
 
     /// The world angle of the body in radians.
     radian_f Angle {0.0f};
-};
 
-inline auto operator==(body_transform const& left, body_transform const& right) -> bool
-{
-    return (left.Center == right.Center)
-        && (left.Angle == right.Angle);
-}
+    auto operator==(body_transform const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 
