@@ -50,7 +50,7 @@ inline void queue::push(auto&&... autom)
 
 ////////////////////////////////////////////////////////////
 
-namespace funcs {
+namespace func {
 
     template <typename T>
     inline linear_chain<T>::linear_chain(std::span<type const> elements)

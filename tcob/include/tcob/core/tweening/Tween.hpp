@@ -125,7 +125,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-namespace funcs {
+namespace func {
 
     template <typename T>
     class linear_chain final {
@@ -384,50 +384,50 @@ namespace funcs {
 }
 
 template <typename T>
-using linear_chain_tween = tween<funcs::linear_chain<T>>;
+using linear_chain_tween = tween<func::linear_chain<T>>;
 
 template <typename T>
-using power_tween = tween<funcs::power<T>>;
+using power_tween = tween<func::power<T>>;
 
 template <typename T>
-using inverse_power_tween = tween<funcs::inverse_power<T>>;
+using inverse_power_tween = tween<func::inverse_power<T>>;
 
 template <typename T>
-using linear_tween = tween<funcs::linear<T>>;
+using linear_tween = tween<func::linear<T>>;
 
-using circular_tween = tween<funcs::circular>;
-
-template <typename T>
-using smoothstep_tween = tween<funcs::smoothstep<T>>;
+using circular_tween = tween<func::circular>;
 
 template <typename T>
-using smootherstep_tween = tween<funcs::smootherstep<T>>;
+using smoothstep_tween = tween<func::smoothstep<T>>;
 
 template <typename T>
-using sine_wave_tween = tween<funcs::sine_wave<T>>;
+using smootherstep_tween = tween<func::smootherstep<T>>;
 
 template <typename T>
-using triange_wave_tween = tween<funcs::triange_wave<T>>;
+using sine_wave_tween = tween<func::sine_wave<T>>;
 
 template <typename T>
-using square_wave_tween = tween<funcs::square_wave<T>>;
+using triange_wave_tween = tween<func::triange_wave<T>>;
 
 template <typename T>
-using sawtooth_wave_tween = tween<funcs::sawtooth_wave<T>>;
+using square_wave_tween = tween<func::square_wave<T>>;
 
-using quad_bezier_curve_tween = tween<funcs::quad_bezier_curve>;
+template <typename T>
+using sawtooth_wave_tween = tween<func::sawtooth_wave<T>>;
 
-using cubic_bezier_curve_tween = tween<funcs::cubic_bezier_curve>;
+using quad_bezier_curve_tween = tween<func::quad_bezier_curve>;
 
-using bezier_curve_tween = tween<funcs::bezier_curve>;
+using cubic_bezier_curve_tween = tween<func::cubic_bezier_curve>;
 
-using catmull_rom_tween = tween<funcs::catmull_rom>;
+using bezier_curve_tween = tween<func::bezier_curve>;
+
+using catmull_rom_tween = tween<func::catmull_rom>;
 
 template <auto Func>
-using function_tween = tween<funcs::function<Func>>;
+using function_tween = tween<func::function<Func>>;
 
 template <typename T>
-using callable_tween = tween<funcs::callable<T>>;
+using callable_tween = tween<func::callable<T>>;
 
 }
 

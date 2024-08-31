@@ -635,8 +635,8 @@ void canvas::stroke_dashed_cubic_bezier(point_f start, point_f cp0, point_f cp1,
 {
     begin_path();
 
-    funcs::cubic_bezier_curve func {start, cp0, cp1, end};
-    f32 const                 inc {1.0f / (numDashes * 2)};
+    func::cubic_bezier_curve func {start, cp0, cp1, end};
+    f32 const                inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t));
@@ -650,8 +650,8 @@ void canvas::stroke_dashed_quad_bezier(point_f start, point_f cp, point_f end, i
 {
     begin_path();
 
-    funcs::quad_bezier_curve func {start, cp, end};
-    f32 const                inc {1.0f / (numDashes * 2)};
+    func::quad_bezier_curve func {start, cp, end};
+    f32 const               inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t));
@@ -665,8 +665,8 @@ void canvas::stroke_dashed_line(point_f from, point_f to, i32 numDashes)
 {
     begin_path();
 
-    funcs::linear<point_f> func {from, to};
-    f32 const              inc {1.0f / (numDashes * 2)};
+    func::linear<point_f> func {from, to};
+    f32 const             inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t));
@@ -680,8 +680,8 @@ void canvas::stroke_dashed_circle(point_f center, f32 r, i32 numDashes)
 {
     begin_path();
 
-    funcs::circular func {degree_f {0}, degree_f {360}};
-    f32 const       inc {1.0f / (numDashes * 2)};
+    func::circular func {degree_f {0}, degree_f {360}};
+    f32 const      inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t) * r + center);
@@ -693,8 +693,8 @@ void canvas::stroke_dashed_circle(point_f center, f32 r, i32 numDashes)
 
 void canvas::dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
 {
-    funcs::cubic_bezier_curve func {start, cp0, cp1, end};
-    f32 const                 inc {1.0f / numDots};
+    func::cubic_bezier_curve func {start, cp0, cp1, end};
+    f32 const                inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
         circle(func(t), r);
@@ -703,8 +703,8 @@ void canvas::dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_
 
 void canvas::dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots)
 {
-    funcs::quad_bezier_curve func {start, cp, end};
-    f32 const                inc {1.0f / numDots};
+    func::quad_bezier_curve func {start, cp, end};
+    f32 const               inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
         circle(func(t), r);
@@ -713,8 +713,8 @@ void canvas::dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i
 
 void canvas::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
 {
-    funcs::linear<point_f> func {from, to};
-    f32 const              inc {1.0f / numDots};
+    func::linear<point_f> func {from, to};
+    f32 const             inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
         circle(func(t), r);
@@ -723,8 +723,8 @@ void canvas::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
 
 void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
 {
-    funcs::circular func {degree_f {0}, degree_f {360}};
-    f32 const       inc {1.0f / numDots};
+    func::circular func {degree_f {0}, degree_f {360}};
+    f32 const      inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
         circle(func(t) * rcircle + center, rdots);
