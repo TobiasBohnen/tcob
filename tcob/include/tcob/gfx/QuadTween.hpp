@@ -73,10 +73,10 @@ private:
 class TCOB_API quad_tweens : public updatable {
 public:
     template <QuadTweenFunction Func, typename... Args>
-    auto create(u8 id, milliseconds duration, Args&&... args) -> quad_tween<Func>*;
+    auto create(u8 id, milliseconds duration, Args&&... args) -> std::shared_ptr<quad_tween<Func>>;
 
     template <typename... Funcs>
-    auto create(u8 id, milliseconds duration, Funcs&&... args) -> quad_tween<Funcs...>*;
+    auto create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>;
 
     auto has(u8 id) const -> bool;
 
@@ -89,7 +89,7 @@ public:
 private:
     void on_update(milliseconds deltaTime) override;
 
-    flat_map<u8, std::unique_ptr<quad_tween_base>> _effects {};
+    flat_map<u8, std::shared_ptr<quad_tween_base>> _effects {};
 };
 
 ////////////////////////////////////////////////////////////

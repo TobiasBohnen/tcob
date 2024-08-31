@@ -25,30 +25,28 @@ inline void quad_tween<Funcs...>::update_values()
 ////////////////////////////////////////////////////////////
 
 template <QuadTweenFunction Func, typename... Args>
-inline auto quad_tweens::create(u8 id, milliseconds duration, Args&&... args) -> quad_tween<Func>*
+inline auto quad_tweens::create(u8 id, milliseconds duration, Args&&... args) -> std::shared_ptr<quad_tween<Func>>
 {
     if (id == 0) {
         // TODO: log error
         return nullptr;
     }
 
-    auto  ptr {std::unique_ptr<quad_tween<Func>>(new quad_tween<Func> {duration, Func {std::move(args)...}})};
-    auto* retValue {ptr.get()};
-    _effects[id] = std::move(ptr);
+    auto retValue {std::shared_ptr<quad_tween<Func>>(new quad_tween<Func> {duration, Func {std::move(args)...}})};
+    _effects[id] = retValue;
     return retValue;
 }
 
 template <typename... Funcs>
-inline auto quad_tweens::create(u8 id, milliseconds duration, Funcs&&... args) -> quad_tween<Funcs...>*
+inline auto quad_tweens::create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>
 {
     if (id == 0) {
         // TODO: log error
         return nullptr;
     }
 
-    auto  ptr {std::unique_ptr<quad_tween<Funcs...>>(new quad_tween<Funcs...> {duration, std::forward<Funcs>(args)...})};
-    auto* retValue {ptr.get()};
-    _effects[id] = std::move(ptr);
+    auto retValue {std::shared_ptr<quad_tween<Funcs...>>(new quad_tween<Funcs...> {duration, std::forward<Funcs>(args)...})};
+    _effects[id] = retValue;
     return retValue;
 }
 
