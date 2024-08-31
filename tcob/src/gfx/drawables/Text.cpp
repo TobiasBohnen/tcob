@@ -21,27 +21,16 @@ text::text(assets::asset_ptr<font> font)
     Style.Changed.connect([&](auto const&) { _needsReshape = true; });
 }
 
-auto text::get_effects() -> quad_tweens&
-{
-    return _textEffects;
-}
-
 void text::on_update(milliseconds deltaTime)
 {
-    if (!_font.is_ready()) {
-        return;
-    }
+    if (!_font.is_ready()) { return; }
 
-    if (_needsReshape) {
-        reshape();
-    }
+    if (_needsReshape) { reshape(); }
 
-    if (_needsFormat) {
-        format();
-    }
+    if (_needsFormat) { format(); }
 
     if (is_visible()) {
-        _textEffects.update(deltaTime);
+        Effects.update(deltaTime);
     }
 }
 
@@ -70,7 +59,7 @@ void text::format()
 {
     // clear quads
     _quads.clear();
-    _textEffects.clear_quads();
+    Effects.clear_quads();
 
     _needsFormat = false;
 
@@ -99,7 +88,7 @@ void text::format()
                 break;
             case text_formatter::command_type::Effect: {
                 currentEffectIdx = std::get<u8>(token.Command.Value);
-                if (!_textEffects.has(currentEffectIdx)) {
+                if (!Effects.has(currentEffectIdx)) {
                     currentEffectIdx = 0;
                 }
             } break;
@@ -122,7 +111,7 @@ void text::format()
             geometry::set_position(q, quadRect, xform);
 
             if (currentEffectIdx != 0) {
-                _textEffects.add_quad(currentEffectIdx, q);
+                Effects.add_quad(currentEffectIdx, q);
             }
         }
     }

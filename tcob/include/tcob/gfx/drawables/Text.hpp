@@ -29,6 +29,8 @@ public:
         color      Color {colors::White};
         alignments Alignment {};
         bool       KerningEnabled {true};
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit text(assets::asset_ptr<font> font);
@@ -36,8 +38,7 @@ public:
     prop<utf8_string>               Text;
     prop<style>                     Style;
     prop<assets::asset_ptr<shader>> Shader;
-
-    auto get_effects() -> quad_tweens&;
+    quad_tweens                     Effects;
 
     void force_reshape();
 
@@ -61,15 +62,7 @@ private:
     quad_renderer                      _renderer {buffer_usage_hint::DynamicDraw};
     assets::manual_asset_ptr<material> _material {};
 
-    quad_tweens             _textEffects {};
     assets::asset_ptr<font> _font;
 };
-
-inline auto operator==(text::style const& left, text::style const& right) -> bool
-{
-    return (left.Color == right.Color)
-        && (left.Alignment == right.Alignment)
-        && (left.KerningEnabled == right.KerningEnabled);
-}
 
 }

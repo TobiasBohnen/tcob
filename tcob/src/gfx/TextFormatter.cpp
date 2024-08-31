@@ -184,9 +184,8 @@ auto static Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
                     currentLine.RemainingWidth += currentLine.Tokens.back()->Width * scale;
                     currentLine.Tokens.pop_back();
                 }
-
-                retValue.push_back(currentLine);
             }
+            retValue.push_back(currentLine);
 
             // reset currentLine
             currentLine.Tokens.clear();

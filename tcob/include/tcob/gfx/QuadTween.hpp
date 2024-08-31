@@ -32,7 +32,7 @@ template <typename T>
 concept QuadTweenFunction =
     requires(T& t, quad_tween_properties const& prop) {
         {
-            t.apply(prop)
+            t(prop)
         };
     };
 
@@ -47,9 +47,7 @@ public:
     void clear_quads();
 
 protected:
-    auto get_destination_quads() const -> std::vector<std::reference_wrapper<quad>> const&;
-
-    auto get_source_quads() const -> std::vector<quad> const&;
+    auto get_props() const -> quad_tween_properties;
 
 private:
     std::vector<std::reference_wrapper<quad>> _dstQuads {};
@@ -74,7 +72,12 @@ private:
 
 class TCOB_API quad_tweens : public updatable {
 public:
-    void add(u8 id, std::shared_ptr<quad_tween_base> effect);
+    template <QuadTweenFunction Func, typename... Args>
+    auto create(u8 id, milliseconds duration, Args&&... args) -> quad_tween<Func>*;
+
+    template <typename... Funcs>
+    auto create(u8 id, milliseconds duration, Funcs&&... args) -> quad_tween<Funcs...>*;
+
     auto has(u8 id) const -> bool;
 
     void start_all(playback_style mode = playback_style::Normal);
@@ -86,66 +89,65 @@ public:
 private:
     void on_update(milliseconds deltaTime) override;
 
-    flat_map<u8, std::shared_ptr<quad_tween_base>> _effects {};
+    flat_map<u8, std::unique_ptr<quad_tween_base>> _effects {};
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API typing_effect final {
-public:
-    void operator()(quad_tween_properties const& prop) const;
-};
+namespace effect {
 
-////////////////////////////////////////////////////////////
+    class TCOB_API typing final {
+    public:
+        void operator()(quad_tween_properties const& prop) const;
+    };
 
-class TCOB_API fade_in_effect final {
-public:
-    void operator()(quad_tween_properties const& prop) const;
-};
+    ////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////
+    class TCOB_API fade_in final {
+    public:
+        void operator()(quad_tween_properties const& prop) const;
+    };
 
-class TCOB_API fade_out_effect final {
-public:
-    void operator()(quad_tween_properties const& prop) const;
-};
+    ////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////
+    class TCOB_API fade_out final {
+    public:
+        void operator()(quad_tween_properties const& prop) const;
+    };
 
-class TCOB_API blink_effect final {
-public:
-    color Color0;
-    color Color1;
-    f32   Frequency {0};
+    ////////////////////////////////////////////////////////////
 
-    void operator()(quad_tween_properties const& prop);
-};
+    class TCOB_API blink final {
+    public:
+        color Color0;
+        color Color1;
+        f32   Frequency {0};
 
-////////////////////////////////////////////////////////////
+        void operator()(quad_tween_properties const& prop);
+    };
 
-class TCOB_API shake_effect final {
-public:
-    f32 Intensity {0};
-    f32 Frequency {0};
-    rng RNG;
+    ////////////////////////////////////////////////////////////
 
-    void operator()(quad_tween_properties const& prop);
-};
+    class TCOB_API shake final {
+    public:
+        f32 Intensity {0};
+        f32 Frequency {0};
+        rng RNG;
 
-////////////////////////////////////////////////////////////
+        void operator()(quad_tween_properties const& prop);
+    };
 
-class TCOB_API wave_effect final {
-public:
-    f32 Height;
-    f32 Amplitude;
+    ////////////////////////////////////////////////////////////
 
-    void operator()(quad_tween_properties const& prop) const;
-};
+    class TCOB_API wave final {
+    public:
+        f32 Height;
+        f32 Amplitude;
 
-template <typename... Funcs>
-auto make_unique_quad_tween(milliseconds duration, Funcs&&... args) -> std::unique_ptr<quad_tween<Funcs...>>;
-template <typename... Funcs>
-auto make_shared_quad_tween(milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>;
+        void operator()(quad_tween_properties const& prop) const;
+    };
+
+}
 
 }
 

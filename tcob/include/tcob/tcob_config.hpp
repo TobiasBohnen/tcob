@@ -70,7 +70,7 @@ using utf8_string_view = std::string_view; // TODO: create real utf-8 string_vie
 
 using path = utf8_string;
 
-#define TCOB_ENABLE_RENDERER_OPENGL45
+/* #undef TCOB_ENABLE_RENDERER_OPENGL45 */
 #define TCOB_ENABLE_RENDERER_OPENGLES30
 #define TCOB_ENABLE_RENDERER_NULL
 
