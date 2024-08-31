@@ -55,10 +55,10 @@ public:
     using type = T;
 
     asset(string name, std::weak_ptr<T> ptr, loader<T>* loader);
-    template <BaseOrDerivedOf<T> U>
+    template <BaseOfOrDerivedFrom<T> U>
     asset(asset<U> const& other) noexcept;
 
-    template <BaseOrDerivedOf<T> U>
+    template <BaseOfOrDerivedFrom<T> U>
     auto operator=(asset<U> const& other) noexcept -> asset<T>&;
 
     auto operator->() const -> type*;
@@ -100,10 +100,10 @@ public:
     asset_ptr() = default;
     asset_ptr(std::nullptr_t);
     explicit asset_ptr(std::shared_ptr<asset<T>> ptr);
-    template <BaseOrDerivedOf<T> U>
+    template <BaseOfOrDerivedFrom<T> U>
     asset_ptr(asset_ptr<U> const& other) noexcept;
 
-    template <BaseOrDerivedOf<T> U>
+    template <BaseOfOrDerivedFrom<T> U>
     auto operator=(asset_ptr<U> const& other) noexcept -> asset_ptr<T>&;
 
     auto operator->() const -> type*;
@@ -138,7 +138,7 @@ public:
 
     auto operator->() const -> type*;
     auto operator*() const -> type&;
-    template <BaseOrDerivedOf<T> U>
+    template <BaseOfOrDerivedFrom<T> U>
     operator asset_ptr<U>() const;
 
     auto get_obj() const -> type*;

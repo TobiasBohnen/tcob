@@ -42,10 +42,13 @@ template <typename T>
 concept Reference = std::is_reference_v<T>;
 
 template <typename T, typename D>
-concept BaseOf = std::is_base_of_v<T, D>;
+concept BaseOf = std::is_base_of_v<T, D> && std::is_convertible_v<D const*, T const*>;
 
 template <typename T, typename D>
-concept BaseOrDerivedOf = std::is_base_of_v<T, D> || std::is_base_of_v<D, T>;
+concept DerivedFrom = std::derived_from<D, T>;
+
+template <typename T, typename D>
+concept BaseOfOrDerivedFrom = BaseOf<T, D> || DerivedFrom<D, T>;
 
 template <typename T>
 concept POD = std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T>;

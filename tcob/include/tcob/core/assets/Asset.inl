@@ -20,14 +20,14 @@ inline asset<T>::asset(string name, std::weak_ptr<T> ptr, loader<T>* loader)
 }
 
 template <typename T>
-template <BaseOrDerivedOf<T> U>
+template <BaseOfOrDerivedFrom<T> U>
 inline asset<T>::asset(asset<U> const& other) noexcept
 {
     *this = other;
 }
 
 template <typename T>
-template <BaseOrDerivedOf<T> U>
+template <BaseOfOrDerivedFrom<T> U>
 inline auto asset<T>::operator=(asset<U> const& other) noexcept -> asset<T>&
 {
     _name   = other._name;
@@ -136,14 +136,14 @@ inline asset_ptr<T>::asset_ptr(std::shared_ptr<asset<T>> ptr)
 }
 
 template <typename T>
-template <BaseOrDerivedOf<T> U>
+template <BaseOfOrDerivedFrom<T> U>
 inline asset_ptr<T>::asset_ptr(asset_ptr<U> const& other) noexcept
 {
     *this = other;
 }
 
 template <typename T>
-template <BaseOrDerivedOf<T> U>
+template <BaseOfOrDerivedFrom<T> U>
 inline auto asset_ptr<T>::operator=(asset_ptr<U> const& other) noexcept -> asset_ptr<T>&
 {
     _asset = std::make_shared<asset<T>>(asset<T> {*other._asset.get()});
@@ -242,7 +242,7 @@ inline auto manual_asset_ptr<T>::operator*() const -> type&
 }
 
 template <typename T>
-template <BaseOrDerivedOf<T> U>
+template <BaseOfOrDerivedFrom<T> U>
 inline manual_asset_ptr<T>::operator asset_ptr<U>() const
 {
     return _assetPtr;

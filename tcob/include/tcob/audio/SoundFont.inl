@@ -13,7 +13,7 @@ namespace tcob::audio {
 template <std::derived_from<sound_font_command> T>
 inline void sound_font_commands::add(auto&&... args)
 {
-    _commands.back().second.push_back(std::make_unique<T>(args...));
+    _commands.back().second.push_back(std::make_unique<T>(std::move(args)...));
 }
 
 }
