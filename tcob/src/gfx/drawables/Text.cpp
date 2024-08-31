@@ -67,7 +67,7 @@ void text::format()
 
     // format text
     auto const size {Bounds->get_size()};
-    auto const formatResult {text_formatter::format(Text(), *_font, Style->Alignment, size, 1.0f, false)};
+    auto const formatResult {text_formatter::format(Text(), *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled)};
     _quads.reserve(formatResult.QuadCount);
 
     color c {Style->Color};

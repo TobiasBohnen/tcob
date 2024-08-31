@@ -72,15 +72,12 @@ private:
 
 class TCOB_API quad_tweens : public updatable {
 public:
-    template <QuadTweenFunction Func, typename... Args>
-    auto create(u8 id, milliseconds duration, Args&&... args) -> std::shared_ptr<quad_tween<Func>>;
-
     template <typename... Funcs>
     auto create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>;
 
     auto has(u8 id) const -> bool;
 
-    void start_all(playback_style mode = playback_style::Normal);
+    void start_all(playback_mode mode = playback_mode::Normal);
     void stop_all();
 
     void add_quad(u8 id, quad& q) const;
@@ -144,6 +141,24 @@ namespace effect {
         f32 Height;
         f32 Amplitude;
 
+        void operator()(quad_tween_properties const& prop) const;
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API height final {
+    public:
+        f32                Begin {0};
+        f32                End {1};
+        vertical_alignment Anchor {vertical_alignment::Middle};
+
+        void operator()(quad_tween_properties const& prop) const;
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API rotate final {
+    public:
         void operator()(quad_tween_properties const& prop) const;
     };
 

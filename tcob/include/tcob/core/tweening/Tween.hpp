@@ -58,10 +58,10 @@ public:
 
     auto get_progress() const -> f64;
     auto get_status() const -> playback_status;
-    auto get_mode() const -> playback_style;
+    auto get_mode() const -> playback_mode;
     auto is_looping() const -> bool;
 
-    void start(playback_style mode = playback_style::Normal);
+    void start(playback_mode mode = playback_mode::Normal);
     void stop();
     void restart();
 
@@ -79,7 +79,7 @@ private:
     milliseconds _currentInterval {0};
 
     playback_status _status {playback_status::Stopped};
-    playback_style  _mode {};
+    playback_mode   _mode {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ public:
     void push(auto&&... autom);
     void pop();
 
-    void start(playback_style mode = playback_style::Normal);
+    void start(playback_mode mode = playback_mode::Normal);
     void stop();
 
 private:
@@ -120,7 +120,7 @@ private:
     std::queue<std::shared_ptr<tween_base>> _queue {};
     bool                                    _isRunning {false};
     bool                                    _isLooping {false};
-    playback_style                          _mode {};
+    playback_mode                           _mode {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -311,7 +311,7 @@ namespace func {
     public:
         using type = point_f;
 
-        type Start {};
+        type Begin {};
         type ControlPoint {};
         type End {};
 
@@ -324,7 +324,7 @@ namespace func {
     public:
         using type = point_f;
 
-        type Start {};
+        type Begin {};
         type ControlPoint0 {};
         type ControlPoint1 {};
         type End {};

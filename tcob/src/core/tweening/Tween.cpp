@@ -23,14 +23,14 @@ auto tween_base::get_progress() const -> f64
     auto const retValue {_duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration)};
 
     switch (_mode) {
-    case playback_style::Normal:
-    case playback_style::Looped:
+    case playback_mode::Normal:
+    case playback_mode::Looped:
         return retValue;
-    case playback_style::Reversed:
-    case playback_style::ReversedLooped:
+    case playback_mode::Reversed:
+    case playback_mode::ReversedLooped:
         return 1. - retValue;
-    case playback_style::Alternated:
-    case playback_style::AlternatedLooped:
+    case playback_mode::Alternated:
+    case playback_mode::AlternatedLooped:
         return retValue <= 0.5
             ? retValue * 2.
             : (1. - retValue) * 2.;
@@ -44,12 +44,12 @@ auto tween_base::get_status() const -> playback_status
     return _status;
 }
 
-auto tween_base::get_mode() const -> playback_style
+auto tween_base::get_mode() const -> playback_mode
 {
     return _mode;
 }
 
-void tween_base::start(playback_style mode)
+void tween_base::start(playback_mode mode)
 {
     if (_status == playback_status::Stopped) { // start if stopped
         _mode            = mode;
@@ -104,9 +104,9 @@ void tween_base::toggle_pause()
 
 auto tween_base::is_looping() const -> bool
 {
-    return _mode == playback_style::Looped
-        || _mode == playback_style::AlternatedLooped
-        || _mode == playback_style::ReversedLooped;
+    return _mode == playback_mode::Looped
+        || _mode == playback_mode::AlternatedLooped
+        || _mode == playback_mode::ReversedLooped;
 }
 
 void tween_base::on_update(milliseconds deltaTime)
@@ -145,12 +145,12 @@ void tween_base::on_update(milliseconds deltaTime)
 
 ////////////////////////////////////////////////////////////
 
-void queue::start(playback_style mode)
+void queue::start(playback_mode mode)
 {
     if (!_isRunning && !_queue.empty()) {
         _isRunning = true;
         _mode      = mode;
-        _isLooping = mode == playback_style::AlternatedLooped || mode == playback_style::Looped || mode == playback_style::ReversedLooped;
+        _isLooping = mode == playback_mode::AlternatedLooped || mode == playback_mode::Looped || mode == playback_mode::ReversedLooped;
         _queue.front()->start(_mode);
     }
 }

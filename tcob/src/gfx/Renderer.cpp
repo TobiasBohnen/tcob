@@ -312,11 +312,11 @@ void batch_polygon_renderer::add_geometry(geometry_data const& gd, assets::asset
     } else {
         _indices.insert(_indices.end(), gd.Indices.begin(), gd.Indices.end());
     }
-    _currentBatch.NumInds += std::ssize(gd.Indices);
+    _currentBatch.NumInds += static_cast<u32>(gd.Indices.size());
 
     // copy vertices
     _verts.insert(_verts.end(), gd.Vertices.begin(), gd.Vertices.end());
-    _currentBatch.NumVerts += std::ssize(gd.Vertices);
+    _currentBatch.NumVerts += static_cast<u32>(gd.Vertices.size());
 
     _vertexArray->resize(_verts.size(), _indices.size());
 }

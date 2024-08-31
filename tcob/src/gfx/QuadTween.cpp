@@ -37,7 +37,7 @@ auto quad_tween_base::get_props() const -> quad_tween_properties
 
 ////////////////////////////////////////////////////////////
 
-void quad_tweens::start_all(playback_style mode)
+void quad_tweens::start_all(playback_mode mode)
 {
     for (auto& [_, effect] : _effects) {
         effect->start(mode);
@@ -219,6 +219,64 @@ namespace effect {
         }
     }
 
-}
+    ////////////////////////////////////////////////////////////
 
+    void height::operator()(quad_tween_properties const& prop) const
+    {
+        f32 maxHeight {0};
+        for (auto const& src : prop.SrcQuads) {
+            f32 const height {src[2].Position[1] - src[3].Position[1]};
+            if (height > maxHeight) { maxHeight = height; }
+        }
+
+        f32 const difference {End - Begin};
+        f32 const fac {difference > 0 ? static_cast<f32>(prop.Progress * difference)
+                                      : static_cast<f32>(1.0 - (prop.Progress * -difference))};
+
+        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
+            quad&       dest {prop.DestQuads[idx].get()};
+            quad const& src {prop.SrcQuads[idx]};
+
+            rect_f const rect {rect_f::FromLTRB(src[3].Position[0], src[3].Position[1], src[1].Position[0], src[1].Position[1])};
+            transform    scale;
+
+            switch (Anchor) {
+            case vertical_alignment::Top:
+                scale.scale_at({1, fac}, {rect.get_center().X, rect.top() - maxHeight + rect.Height});
+                break;
+            case vertical_alignment::Middle:
+                scale.scale_at({1, fac}, {rect.get_center().X, rect.get_center().Y - (maxHeight - rect.Height) / 2});
+                break;
+            case vertical_alignment::Bottom:
+                scale.scale_at({1, fac}, {rect.get_center().X, rect.bottom()});
+                break;
+            }
+
+            for (i32 i {0}; i < 4; ++i) {
+                dest[i].Position[1] = (scale * point_f {0, src[i].Position[1]}).Y;
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    void rotate::operator()(quad_tween_properties const& prop) const
+    {
+        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
+            quad&       dest {prop.DestQuads[idx].get()};
+            quad const& src {prop.SrcQuads[idx]};
+
+            rect_f const rect {rect_f::FromLTRB(src[3].Position[0], src[3].Position[1], src[1].Position[0], src[1].Position[1])};
+            transform    rot;
+            rot.rotate_at(degree_f {static_cast<f32>(360 * prop.Progress)}, rect.get_center());
+
+            for (i32 i {0}; i < 4; ++i) {
+                point_f const pos {rot * point_f {src[i].Position[0], src[i].Position[1]}};
+                dest[i].Position[0] = pos.X;
+                dest[i].Position[1] = pos.Y;
+            }
+        }
+    }
+
+}
 }

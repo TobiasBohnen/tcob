@@ -124,7 +124,7 @@ void text_box::on_focus_gained()
             _caretVisible = val;
             force_redraw(get_name() + ": Caret blink");
         });
-        _caretTween->start(playback_style::Looped);
+        _caretTween->start(playback_mode::Looped);
     }
 }
 

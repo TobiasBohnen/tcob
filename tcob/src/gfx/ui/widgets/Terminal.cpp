@@ -146,7 +146,7 @@ void terminal::flash()
             }
             force_redraw(get_name() + ": flashing");
         });
-        _flashTween->start(playback_style::Normal);
+        _flashTween->start(playback_mode::Normal);
     }
 }
 
@@ -456,7 +456,7 @@ void terminal::on_focus_gained()
             _cursorVisible = val;
             force_redraw(get_name() + ": cursor blink");
         });
-        _cursorTween->start(playback_style::Looped);
+        _cursorTween->start(playback_mode::Looped);
     }
 }
 
