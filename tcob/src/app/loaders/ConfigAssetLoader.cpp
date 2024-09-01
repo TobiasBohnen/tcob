@@ -51,15 +51,9 @@ namespace Cursor {
 }
 
 namespace TrueTypeFont {
-    static char const* Name {"truetype_font"};
+    static char const* Name {"font"};
     static char const* source {"source"};
     static char const* size {"size"};
-}
-
-namespace RasterFont {
-    static char const* Name {"raster_font"};
-    static char const* source {"source"};
-    static char const* texture_folder {"texture_folder"};
 }
 
 namespace FontFamily {
@@ -464,9 +458,6 @@ void cfg_font_loader::unload_asset(asset<font>& asset, bool)
     if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
         _object[API::TrueTypeFont::Name][name] = nullptr;
     }
-    if (_object[API::RasterFont::Name].as<object>().has(name)) {
-        _object[API::RasterFont::Name][name] = nullptr;
-    }
 }
 
 auto cfg_font_loader::reload_asset(asset<font>& asset) -> bool
@@ -475,22 +466,12 @@ auto cfg_font_loader::reload_asset(asset<font>& asset) -> bool
     auto const  mp {get_group().get_mount_point()};
     if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
         auto  info {_object[API::TrueTypeFont::Name][name]};
-        auto* ttf {dynamic_cast<truetype_font*>(asset.get())};
+        auto* ttf {dynamic_cast<font*>(asset.get())};
         if (ttf->load(mp + info[API::TrueTypeFont::source].as<path>(), info[API::TrueTypeFont::size].as<u32>()) != load_status::Ok) {
-            logger::Error("truetype_font asset: Error reloading file: {}", info[API::TrueTypeFont::source].as<path>());
+            logger::Error("font asset: Error reloading file: {}", info[API::TrueTypeFont::source].as<path>());
             return false;
         }
 
-        return true;
-    }
-
-    if (_object[API::RasterFont::Name].as<object>().has(name)) {
-        auto  info {_object[API::RasterFont::Name][name]};
-        auto* raster {dynamic_cast<raster_font*>(asset.get())};
-        if (raster->load(mp + info[API::RasterFont::source].as<path>(), info[API::RasterFont::texture_folder].as<string>()) != load_status::Ok) {
-            logger::Error("raster_font asset: Error reloading file: {}", info[API::TrueTypeFont::source].as<path>());
-            return false;
-        }
         return true;
     }
 
@@ -502,7 +483,7 @@ void cfg_font_loader::declare()
     if (object fontSection; _object.try_get(fontSection, API::TrueTypeFont::Name)) {
         for (auto const& [k, v] : fontSection) {
             if (object assetSection; v.try_get(assetSection)) {
-                auto* asset {default_new<truetype_font, ttf_asset_def>(k, this, get_bucket(), _cacheTTF)};
+                auto* asset {default_new<font, asset_def>(k, this, get_bucket(), _cache)};
                 if (string source; assetSection.try_get(source, API::TrueTypeFont::source)) {
                     asset->source = source;
                 }
@@ -512,26 +493,12 @@ void cfg_font_loader::declare()
             }
         }
     }
-
-    if (object fontSection; _object.try_get(fontSection, API::RasterFont::Name)) {
-        for (auto const& [k, v] : fontSection) {
-            if (object assetSection; v.try_get(assetSection)) {
-                auto* asset {default_new<raster_font, raster_asset_def>(k, this, get_bucket(), _cacheRaster)};
-                if (string source; assetSection.try_get(source, API::RasterFont::source)) {
-                    asset->source = source;
-                }
-                if (string textureFolder; assetSection.try_get(textureFolder, API::RasterFont::texture_folder)) {
-                    asset->folder = textureFolder;
-                }
-            }
-        }
-    }
 }
 
 void cfg_font_loader::prepare()
 {
-    for (auto& def : _cacheTTF) {
-        auto* ttf {dynamic_cast<truetype_font*>(def->assetPtr.get_obj())};
+    for (auto& def : _cache) {
+        auto* ttf {dynamic_cast<font*>(def->assetPtr.get_obj())};
         if (ttf) {
             if (ttf->load(get_group().get_mount_point() + def->source, def->size) == load_status::Ok) {
                 set_asset_status(def->assetPtr, status::Loaded);
@@ -541,18 +508,7 @@ void cfg_font_loader::prepare()
         }
     }
 
-    _cacheTTF.clear();
-
-    for (auto& def : _cacheRaster) {
-        auto  mp {get_group().get_mount_point()};
-        auto* raster {dynamic_cast<raster_font*>(def->assetPtr.get_obj())};
-        def->future = raster->load_async(mp + def->source, mp + def->folder);
-        set_asset_status(def->assetPtr, status::Loading);
-    }
-
-    locate_service<task_manager>().run_deferred([&]() {
-        return default_check_async_load(_cacheRaster, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
-    });
+    _cache.clear();
 }
 
 ////////////////////////////////////////////////////////////

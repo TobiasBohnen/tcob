@@ -4,7 +4,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Platform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Scene.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/loaders/ConfigAssetLoader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/loaders/RasterFontLoader.cpp
 )
 
 list(APPEND HDR

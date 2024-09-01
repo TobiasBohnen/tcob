@@ -14,7 +14,6 @@
 #include "../gfx/image_codecs/ImageCodecs.hpp"
 
 #include "loaders/ConfigAssetLoader.hpp"
-#include "loaders/RasterFontLoader.hpp"
 
 #include "tcob/audio/AudioSystem.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -156,7 +155,6 @@ void platform::remove_services() const
     remove_service<gfx::animated_image_encoder::factory>();
     remove_service<audio::decoder::factory>();
     remove_service<audio::encoder::factory>();
-    remove_service<gfx::raster_font::loader::factory>();
     remove_service<gfx::render_system::factory>();
 }
 
@@ -504,11 +502,6 @@ void platform::InitFontEngines()
 {
     /// init ttf engines
     gfx::truetype_font_engine::Init();
-
-    /// init raster font loader
-    auto rasFactory {register_service<gfx::raster_font::loader::factory>()};
-    rasFactory->add({".ini", ".json", ".xml", ".yaml"}, std::make_unique<detail::ini_raster_font_loader>);
-    rasFactory->add({".fnt"}, std::make_unique<detail::fnt_raster_font_loader>);
 }
 
 ////////////////////////////////////////////////////////////

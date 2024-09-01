@@ -154,24 +154,13 @@ public:
     void prepare() override;
 
 private:
-    // ttf
-    struct ttf_asset_def {
+    struct asset_def {
         assets::asset_ptr<gfx::font> assetPtr;
         string                       source;
         u32                          size {0};
     };
 
-    std::vector<std::unique_ptr<ttf_asset_def>> _cacheTTF;
-
-    // raster
-    struct raster_asset_def {
-        assets::asset_ptr<gfx::font> assetPtr;
-        std::future<load_status>     future;
-        string                       source;
-        string                       folder;
-    };
-
-    std::vector<std::unique_ptr<raster_asset_def>> _cacheRaster;
+    std::vector<std::unique_ptr<asset_def>> _cache;
 
     data::config::object& _object;
 };

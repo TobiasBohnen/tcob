@@ -9,8 +9,6 @@
 #include <utility>
 
 #include "tcob/core/Logger.hpp"
-#include "tcob/core/ServiceLocator.hpp"
-#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
@@ -100,110 +98,6 @@ auto static convert_UTF8_to_UTF32(string_view text) -> std::u32string
     return retValue;
 }
 
-font::font() = default;
-
-auto font::get_texture() const -> assets::asset_ptr<texture>
-{
-    return _texture;
-}
-
-////////////////////////////////////////////////////////////
-raster_font::raster_font() = default;
-
-auto raster_font::get_info() const -> font::info const&
-{
-    return _info;
-}
-
-auto raster_font::load(path const& file, string const& textureFolder) noexcept -> load_status
-{
-    if (!io::is_file(file)) { return load_status::FileNotFound; }
-
-    if (auto dec {locate_service<loader::factory>().create(io::get_extension(file))}) {
-        if (auto info {dec->load(*this, file, textureFolder)}) {
-            _info = *info;
-            return load_status::Ok;
-        }
-    }
-
-    return load_status::Error;
-}
-
-auto raster_font::load_async(path const& file, string const& textureFolder) noexcept -> std::future<load_status>
-{
-    return locate_service<task_manager>().run_async([&, file, textureFolder]() { return load(file, textureFolder); });
-}
-
-void raster_font::setup_texture()
-{
-    if (_fontImages.empty()) {
-        return;
-    }
-
-    u32 const  pages {static_cast<u32>(_fontImages.size())};
-    auto const texSize {_fontImages[0].get_info().Size};
-    auto       texture {get_texture()};
-    texture->create(texSize, pages, texture::format::RGBA8);
-    texture->Filtering = texture::filtering::NearestNeighbor;
-
-    for (u32 i {0}; i < pages; ++i) {
-        texture->update_data(_fontImages[i].get_data(), i);
-    }
-
-    _fontImages.clear();
-
-    _textureNeedsUpdate = false;
-}
-
-auto raster_font::render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>
-{
-    if (_textureNeedsUpdate && !readOnlyCache) {
-        setup_texture();
-    }
-
-    auto const  utf32text {convert_UTF8_to_UTF32(text)};
-    usize const len {utf32text.size()};
-
-    std::vector<rendered_glyph> retValue {};
-    retValue.reserve(len);
-
-    for (u32 i {0}; i < len; ++i) {
-        u32 const first {utf32text[i]};
-
-        auto it {_glyphs.find(first)};
-        if (it == _glyphs.end()) {
-            logger::Warning("RasterFont: glyph not found: {}", first);
-        }
-
-        auto& glyph {retValue.emplace_back(it->second)};
-        if (kerning && i < len - 1) {
-            u32 const second {utf32text[i + 1]};
-            if (_kerning.contains(first) && _kerning[first].contains(second)) {
-                glyph.AdvanceX += _kerning[first][second];
-            }
-        }
-    }
-
-    return retValue;
-}
-
-void raster_font::add_image(image const& img)
-{
-    _fontImages.push_back(img);
-    _textureNeedsUpdate = true;
-}
-
-void raster_font::add_glyph(u32 idx, rendered_glyph const& gl)
-{
-    _glyphs[idx] = gl;
-}
-
-void raster_font::add_kerning_pair(u32 first, u32 second, i16 amount)
-{
-    _kerning[first][second] = amount;
-}
-
-////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 static FT_Library library {nullptr};
@@ -215,7 +109,7 @@ truetype_font_engine::~truetype_font_engine()
     }
 }
 
-auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info>
+auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font_info>
 {
     assert(library);
 
@@ -349,22 +243,27 @@ constexpr u32 FONT_TEXTURE_LAYERS {3};
 
 constexpr i32 GLYPH_PADDING {4};
 
-truetype_font::truetype_font() = default;
+font::font() = default;
 
-auto truetype_font::load(path const& file, u32 size) noexcept -> load_status
+auto font::get_texture() const -> assets::asset_ptr<texture>
+{
+    return _texture;
+}
+
+auto font::load(path const& file, u32 size) noexcept -> load_status
 {
     if (auto fs {io::ifstream::Open(file)}) { return load(*fs, size); }
 
     return load_status::FileNotFound;
 }
 
-auto truetype_font::load(istream& stream, u32 size) noexcept -> load_status
+auto font::load(istream& stream, u32 size) noexcept -> load_status
 {
     _fontData = stream.read_all<ubyte>();
     return load(_fontData, size);
 }
 
-auto truetype_font::load(std::span<ubyte const> fontData, u32 size) noexcept -> load_status
+auto font::load(std::span<ubyte const> fontData, u32 size) noexcept -> load_status
 {
     if (auto info {_engine.load_data(fontData, size)}) {
         _info = *info;
@@ -376,7 +275,7 @@ auto truetype_font::load(std::span<ubyte const> fontData, u32 size) noexcept -> 
     return load_status::Error;
 }
 
-void truetype_font::setup_texture()
+void font::setup_texture()
 {
     auto texture {get_texture()};
     texture->create({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, FONT_TEXTURE_LAYERS, texture::format::R8);
@@ -389,7 +288,7 @@ void truetype_font::setup_texture()
     _textureNeedsSetup = false;
 }
 
-auto truetype_font::render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>
+auto font::render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>
 {
     if (_textureNeedsSetup && !readOnlyCache) {
         setup_texture();
@@ -425,7 +324,7 @@ auto truetype_font::render_text(utf8_string_view text, bool kerning, bool readOn
     return retValue;
 }
 
-void truetype_font::decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs)
+void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs)
 {
     auto const  utf32text {convert_UTF8_to_UTF32(text)};
     usize const len {utf32text.size()};
@@ -441,12 +340,12 @@ void truetype_font::decompose_text(utf8_string_view text, bool kerning, decompos
     }
 }
 
-auto truetype_font::get_info() const -> font::info const&
+auto font::get_info() const -> font_info const&
 {
     return _info;
 }
 
-auto truetype_font::cache_render_glyph(u32 cp) -> bool
+auto font::cache_render_glyph(u32 cp) -> bool
 {
     if (!_renderGlyphCache.contains(cp)) {
         auto       gb {_engine.render_glyph(cp)};
