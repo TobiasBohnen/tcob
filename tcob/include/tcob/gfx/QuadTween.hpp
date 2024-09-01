@@ -96,6 +96,8 @@ namespace effect {
 
     class TCOB_API fade_in final { // Color
     public:
+        i32 Width {1};             // in chars
+
         void operator()(f64 t, std::span<quad> quads) const;
     };
 
@@ -103,6 +105,8 @@ namespace effect {
 
     class TCOB_API fade_out final { // Color
     public:
+        i32 Width {1};              // in chars
+
         void operator()(f64 t, std::span<quad> quads) const;
     };
 
@@ -110,18 +114,27 @@ namespace effect {
 
     class TCOB_API blink final { // Color
     public:
-        color Color0;
-        color Color1;
-        f32   Frequency {0};
+        color Color0 {colors::White};
+        color Color1 {colors::Black};
+        f32   Frequency {1.0f};
 
         void operator()(f64 t, std::span<quad> quads);
     };
 
     ////////////////////////////////////////////////////////////
 
+    class TCOB_API gradient final { // Color
+    public:
+        std::array<color, 256> Gradient;
+
+        void operator()(f64 t, std::span<quad> quads) const;
+    };
+
+    ////////////////////////////////////////////////////////////
+
     class TCOB_API shake final { // X,Y
     public:
-        f32 Intensity {0};
+        f32 Intensity {1.0f};    // in pixel
         rng RNG;
 
         void operator()(f64 t, std::span<quad> quads);
@@ -131,8 +144,8 @@ namespace effect {
 
     class TCOB_API wave final { // Y
     public:
-        f32 Height;
-        f32 Amplitude;
+        f32 Height {0};         // in pixel
+        f32 Amplitude {1.0f};
 
         void operator()(f64 t, std::span<quad> quads) const;
     };
@@ -142,9 +155,9 @@ namespace effect {
     class TCOB_API size final { // X,Y
     public:
         f32 WidthStart {0};
-        f32 WidthEnd {0};
+        f32 WidthEnd {1.0f};
         f32 HeightStart {0};
-        f32 HeightEnd {0};
+        f32 HeightEnd {1.0f};
 
         alignments Anchor {};
 
@@ -155,6 +168,8 @@ namespace effect {
 
     class TCOB_API rotate final { // X,Y
     public:
+        f32 Speed {1.0f};
+
         void operator()(f64 t, std::span<quad> quads) const;
     };
 

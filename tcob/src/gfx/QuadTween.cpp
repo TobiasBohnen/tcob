@@ -85,8 +85,9 @@ namespace effect {
 
     void typing::operator()(f64 t, std::span<quad> quads) const
     {
-        usize const fadeidx {static_cast<usize>(t * quads.size())};
-        for (usize idx {0}; idx < quads.size(); ++idx) {
+        usize const size {quads.size()};
+        usize const fadeidx {static_cast<usize>(t * size)};
+        for (usize idx {0}; idx < size; ++idx) {
             quad& dst {quads[idx]};
             if (idx <= fadeidx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
@@ -100,15 +101,18 @@ namespace effect {
 
     void fade_in::operator()(f64 t, std::span<quad> quads) const
     {
-        usize const fadeidx {static_cast<usize>(t * quads.size())};
-        for (usize idx {0}; idx < quads.size(); ++idx) {
+        usize const totalQuads {quads.size()};
+        usize const fadeIdx {static_cast<usize>(t * (totalQuads + Width))};
+
+        for (usize idx {0}; idx < totalQuads; ++idx) {
             quad& dst {quads[idx]};
-            if (idx < fadeidx) {
+
+            if (idx + Width - 1 < fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
-            } else if (idx > fadeidx) {
+            } else if (idx > fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
             } else {
-                f64 const val {(t * quads.size()) - fadeidx};
+                f64 const val {((t * (totalQuads + Width)) - static_cast<f64>(idx)) / static_cast<f64>(Width)};
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
             }
         }
@@ -118,15 +122,18 @@ namespace effect {
 
     void fade_out::operator()(f64 t, std::span<quad> quads) const
     {
-        usize const fadeidx {static_cast<usize>(t * quads.size())};
-        for (usize idx {0}; idx < quads.size(); ++idx) {
+        usize const totalQuads {quads.size()};
+        usize const fadeIdx {static_cast<usize>(t * (totalQuads + Width))};
+
+        for (usize idx {0}; idx < totalQuads; ++idx) {
             quad& dst {quads[idx]};
-            if (fadeidx < idx) {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
-            } else if (fadeidx > idx) {
+
+            if (idx + Width - 1 < fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
+            } else if (idx > fadeIdx) {
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
             } else {
-                f64 const val {1 - ((t * quads.size()) - fadeidx)};
+                f64 const val {1.0 - (((t * (totalQuads + Width) - static_cast<f64>(idx))) / static_cast<f64>(Width))};
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
             }
         }
@@ -136,10 +143,19 @@ namespace effect {
 
     void blink::operator()(f64 t, std::span<quad> quads)
     {
-        f64 const  x {std::round(Frequency * t) / 2};
-        bool const flip {2 * (x - std::floor(x)) == 0.};
-        for (usize idx {0}; idx < quads.size(); ++idx) {
-            geometry::set_color(quads[idx], flip ? Color0 : Color1);
+        tweening::func::square_wave<bool> wave {.Frequency = Frequency};
+        bool const                        flip {wave(t)};
+        for (auto& q : quads) {
+            geometry::set_color(q, flip ? Color0 : Color1);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    void gradient::operator()(f64 t, std::span<quad> quads) const
+    {
+        for (auto& q : quads) {
+            geometry::set_color(q, Gradient[static_cast<u8>(255 * t)]);
         }
     }
 
@@ -175,10 +191,8 @@ namespace effect {
         for (usize idx {0}; idx < quads.size(); ++idx) {
             quad& dst {quads[idx]};
 
-            f64 const phase {static_cast<f64>(idx) / quads.size()};
-            f64 const factor {(std::sin((TAU * t) + (0.75 * TAU) + phase * Amplitude) + 1) / 2};
-
-            f64 const val {factor * Height};
+            tweening::func::sine_wave<f64> wave {.MinValue = 0, .MaxValue = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
+            f64 const                      val {wave(t) * Height};
 
             for (i32 i {0}; i < 4; ++i) {
                 dst[i].Position[1] = static_cast<f32>(dst[i].Position[1] + val);
@@ -250,7 +264,7 @@ namespace effect {
         for (auto& q : quads) {
             rect_f const rect {rect_f::FromLTRB(q[3].Position[0], q[3].Position[1], q[1].Position[0], q[1].Position[1])};
             transform    rot;
-            rot.rotate_at(degree_f {static_cast<f32>(360 * t)}, rect.get_center());
+            rot.rotate_at(degree_f {static_cast<f32>(360 * t * Speed)}, rect.get_center());
 
             for (i32 i {0}; i < 4; ++i) {
                 point_f const pos {rot * point_f {q[i].Position[0], q[i].Position[1]}};

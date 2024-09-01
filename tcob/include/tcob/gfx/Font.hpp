@@ -72,6 +72,8 @@ public:
 
         void static Serialize(style const& v, auto&& s);
         auto static Deserialize(style& v, auto&& s) -> bool;
+
+        auto operator==(font::style const& other) const -> bool = default;
     };
 
     struct info final {
@@ -97,11 +99,6 @@ protected:
 private:
     assets::manual_asset_ptr<texture> _texture {};
 };
-
-inline auto operator==(font::style const& lhs, font::style const& rhs)
-{
-    return lhs.IsItalic == rhs.IsItalic && lhs.Weight == rhs.Weight;
-}
 
 inline void font::style::Serialize(style const& v, auto&& s)
 {
