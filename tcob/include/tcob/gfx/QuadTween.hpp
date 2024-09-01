@@ -18,21 +18,14 @@
 #include "tcob/gfx/Geometry.hpp"
 
 namespace tcob::gfx {
-////////////////////////////////////////////////////////////
-
-struct quad_tween_properties {
-    f64                                           Progress {};
-    std::span<quad const>                         SrcQuads {};
-    std::span<std::reference_wrapper<quad> const> DestQuads {};
-};
 
 ////////////////////////////////////////////////////////////
 
 template <typename T>
 concept QuadTweenFunction =
-    requires(T& t, quad_tween_properties const& prop) {
+    requires(T& f, f64 t, std::span<quad> quads) {
         {
-            t(prop)
+            f(t, quads)
         };
     };
 
@@ -42,12 +35,13 @@ class TCOB_API quad_tween_base : public tweening::tween_base {
 public:
     quad_tween_base(milliseconds duration);
 
-    void add_quad(quad& q);
+    void add_quad(std::reference_wrapper<quad> q);
 
     void clear_quads();
 
 protected:
-    auto get_props() const -> quad_tween_properties;
+    auto get_source_quads() const -> std::vector<quad> const&;
+    void set_quads(std::span<quad> quads);
 
 private:
     std::vector<std::reference_wrapper<quad>> _dstQuads {};
@@ -80,7 +74,7 @@ public:
     void start_all(playback_mode mode = playback_mode::Normal);
     void stop_all();
 
-    void add_quad(u8 id, quad& q) const;
+    void add_quad(u8 id, std::reference_wrapper<quad> q) const; // FIXME: better API
     void clear_quads();
 
 private:
@@ -93,73 +87,75 @@ private:
 
 namespace effect {
 
-    class TCOB_API typing final {
+    class TCOB_API typing final { // Color
     public:
-        void operator()(quad_tween_properties const& prop) const;
+        void operator()(f64 t, std::span<quad> quads) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API fade_in final {
+    class TCOB_API fade_in final { // Color
     public:
-        void operator()(quad_tween_properties const& prop) const;
+        void operator()(f64 t, std::span<quad> quads) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API fade_out final {
+    class TCOB_API fade_out final { // Color
     public:
-        void operator()(quad_tween_properties const& prop) const;
+        void operator()(f64 t, std::span<quad> quads) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API blink final {
+    class TCOB_API blink final { // Color
     public:
         color Color0;
         color Color1;
         f32   Frequency {0};
 
-        void operator()(quad_tween_properties const& prop);
+        void operator()(f64 t, std::span<quad> quads);
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API shake final {
+    class TCOB_API shake final { // X,Y
     public:
         f32 Intensity {0};
-        f32 Frequency {0};
         rng RNG;
 
-        void operator()(quad_tween_properties const& prop);
+        void operator()(f64 t, std::span<quad> quads);
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API wave final {
+    class TCOB_API wave final { // Y
     public:
         f32 Height;
         f32 Amplitude;
 
-        void operator()(quad_tween_properties const& prop) const;
+        void operator()(f64 t, std::span<quad> quads) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API height final {
+    class TCOB_API size final { // X,Y
     public:
-        f32                Begin {0};
-        f32                End {1};
-        vertical_alignment Anchor {vertical_alignment::Middle};
+        f32 WidthStart {0};
+        f32 WidthEnd {0};
+        f32 HeightStart {0};
+        f32 HeightEnd {0};
 
-        void operator()(quad_tween_properties const& prop) const;
+        alignments Anchor {};
+
+        void operator()(f64 t, std::span<quad> quads) const;
     };
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API rotate final {
+    class TCOB_API rotate final { // X,Y
     public:
-        void operator()(quad_tween_properties const& prop) const;
+        void operator()(f64 t, std::span<quad> quads) const;
     };
 
 }

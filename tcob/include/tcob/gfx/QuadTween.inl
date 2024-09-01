@@ -18,8 +18,17 @@ inline quad_tween<Funcs...>::quad_tween(milliseconds duration, Funcs&&... ptr)
 template <typename... Funcs>
 inline void quad_tween<Funcs...>::update_values()
 {
-    auto const props {get_props()};
-    std::apply([&](auto&&... funcs) { (funcs(props), ...); }, _functions);
+    f64 const progress {get_progress()};
+
+    // copy original quads
+    auto source {get_source_quads()};
+    if (source.empty()) { return; }
+
+    // run functions
+    std::apply([&](auto&&... funcs) { (funcs(progress, source), ...); }, _functions);
+
+    // set target
+    set_quads(source);
 }
 
 ////////////////////////////////////////////////////////////
@@ -27,10 +36,7 @@ inline void quad_tween<Funcs...>::update_values()
 template <typename... Funcs>
 inline auto quad_tweens::create(u8 id, milliseconds duration, Funcs&&... args) -> std::shared_ptr<quad_tween<Funcs...>>
 {
-    if (id == 0) {
-        // TODO: log error
-        return nullptr;
-    }
+    if (id == 0) { return nullptr; } // TODO: log error
 
     auto retValue {std::shared_ptr<quad_tween<Funcs...>>(new quad_tween<Funcs...> {duration, std::forward<Funcs>(args)...})};
     _effects[id] = retValue;

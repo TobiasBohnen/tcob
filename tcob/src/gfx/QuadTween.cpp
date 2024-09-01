@@ -15,7 +15,7 @@ quad_tween_base::quad_tween_base(milliseconds duration)
 {
 }
 
-void quad_tween_base::add_quad(quad& q)
+void quad_tween_base::add_quad(std::reference_wrapper<quad> q)
 {
     _dstQuads.emplace_back(q);
     _srcQuads.push_back(q);
@@ -27,12 +27,16 @@ void quad_tween_base::clear_quads()
     _srcQuads.clear();
 }
 
-auto quad_tween_base::get_props() const -> quad_tween_properties
+auto quad_tween_base::get_source_quads() const -> std::vector<quad> const&
 {
-    return {
-        .Progress  = get_progress(),
-        .SrcQuads  = _srcQuads,
-        .DestQuads = _dstQuads};
+    return _srcQuads;
+}
+
+void quad_tween_base::set_quads(std::span<quad> quads)
+{
+    for (usize i {0}; i < quads.size(); ++i) {
+        _dstQuads[i].get() = quads[i];
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -51,7 +55,7 @@ void quad_tweens::stop_all()
     }
 }
 
-void quad_tweens::add_quad(u8 id, quad& q) const
+void quad_tweens::add_quad(u8 id, std::reference_wrapper<quad> q) const
 {
     _effects.at(id)->add_quad(q);
 }
@@ -79,119 +83,84 @@ void quad_tweens::on_update(milliseconds deltaTime)
 
 namespace effect {
 
-    void typing::operator()(quad_tween_properties const& prop) const
+    void typing::operator()(f64 t, std::span<quad> quads) const
     {
-        usize const fadeidx {static_cast<usize>(prop.Progress * prop.DestQuads.size())};
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad& dest {prop.DestQuads[idx].get()};
+        usize const fadeidx {static_cast<usize>(t * quads.size())};
+        for (usize idx {0}; idx < quads.size(); ++idx) {
+            quad& dst {quads[idx]};
             if (idx <= fadeidx) {
-                dest[3].Color[3] = 255;
-                dest[1].Color[3] = 255;
-                dest[0].Color[3] = 255;
-                dest[2].Color[3] = 255;
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
             } else {
-                dest[3].Color[3] = 0;
-                dest[1].Color[3] = 0;
-                dest[0].Color[3] = 0;
-                dest[2].Color[3] = 0;
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
             }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void fade_in::operator()(quad_tween_properties const& prop) const
+    void fade_in::operator()(f64 t, std::span<quad> quads) const
     {
-        usize const fadeidx {static_cast<usize>(prop.Progress * prop.DestQuads.size())};
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad& dest {prop.DestQuads[idx].get()};
+        usize const fadeidx {static_cast<usize>(t * quads.size())};
+        for (usize idx {0}; idx < quads.size(); ++idx) {
+            quad& dst {quads[idx]};
             if (idx < fadeidx) {
-                dest[3].Color[3] = 255;
-                dest[1].Color[3] = 255;
-                dest[0].Color[3] = 255;
-                dest[2].Color[3] = 255;
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
             } else if (idx > fadeidx) {
-                dest[3].Color[3] = 0;
-                dest[1].Color[3] = 0;
-                dest[0].Color[3] = 0;
-                dest[2].Color[3] = 0;
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
             } else {
-                f64 const val {(prop.Progress * prop.DestQuads.size()) - fadeidx};
-                dest[3].Color[3] = static_cast<u8>(val * 255.);
-                dest[1].Color[3] = static_cast<u8>(val * 255.);
-                dest[0].Color[3] = static_cast<u8>(val * 255.);
-                dest[2].Color[3] = static_cast<u8>(val * 255.);
+                f64 const val {(t * quads.size()) - fadeidx};
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
             }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void fade_out::operator()(quad_tween_properties const& prop) const
+    void fade_out::operator()(f64 t, std::span<quad> quads) const
     {
-        usize const fadeidx {static_cast<usize>(prop.Progress * prop.DestQuads.size())};
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad& dest {prop.DestQuads[idx].get()};
+        usize const fadeidx {static_cast<usize>(t * quads.size())};
+        for (usize idx {0}; idx < quads.size(); ++idx) {
+            quad& dst {quads[idx]};
             if (fadeidx < idx) {
-                dest[3].Color[3] = 255;
-                dest[1].Color[3] = 255;
-                dest[0].Color[3] = 255;
-                dest[2].Color[3] = 255;
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
             } else if (fadeidx > idx) {
-                dest[3].Color[3] = 0;
-                dest[1].Color[3] = 0;
-                dest[0].Color[3] = 0;
-                dest[2].Color[3] = 0;
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
             } else {
-                f64 const val {1 - ((prop.Progress * prop.DestQuads.size()) - fadeidx)};
-                dest[3].Color[3] = static_cast<u8>(val * 255.);
-                dest[1].Color[3] = static_cast<u8>(val * 255.);
-                dest[0].Color[3] = static_cast<u8>(val * 255.);
-                dest[2].Color[3] = static_cast<u8>(val * 255.);
+                f64 const val {1 - ((t * quads.size()) - fadeidx)};
+                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
             }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void blink::operator()(quad_tween_properties const& prop)
+    void blink::operator()(f64 t, std::span<quad> quads)
     {
-        f64 const  x {std::round(Frequency * prop.Progress) / 2};
+        f64 const  x {std::round(Frequency * t) / 2};
         bool const flip {2 * (x - std::floor(x)) == 0.};
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            geometry::set_color(prop.DestQuads[idx], flip ? Color0 : Color1);
+        for (usize idx {0}; idx < quads.size(); ++idx) {
+            geometry::set_color(quads[idx], flip ? Color0 : Color1);
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void shake::operator()(quad_tween_properties const& prop)
+    void shake::operator()(f64 /* t */, std::span<quad> quads)
     {
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad& dest {prop.DestQuads[idx].get()};
-
-            f32 const   r {RNG(-Intensity, Intensity)};
-            quad const& src {prop.SrcQuads[idx]};
+        for (auto& q : quads) {
+            f32 const r {RNG(-Intensity, Intensity)};
             switch (RNG(0, 1)) {
             case 0:
-                dest[3].Position[0] = src[3].Position[0] + r;
-                dest[3].Position[1] = src[3].Position[1] + r;
-                dest[1].Position[0] = src[1].Position[0] + r;
-                dest[1].Position[1] = src[1].Position[1] + r;
-                dest[0].Position[0] = src[0].Position[0] + r;
-                dest[0].Position[1] = src[0].Position[1] + r;
-                dest[2].Position[0] = src[2].Position[0] + r;
-                dest[2].Position[1] = src[2].Position[1] + r;
+                for (i32 i {0}; i < 4; ++i) {
+                    q[i].Position[0] += r;
+                    q[i].Position[1] += r;
+                }
                 break;
             case 1:
-                dest[3].Position[0] = src[3].Position[0] + r;
-                dest[3].Position[1] = src[3].Position[1] - r;
-                dest[1].Position[0] = src[1].Position[0] + r;
-                dest[1].Position[1] = src[1].Position[1] - r;
-                dest[0].Position[0] = src[0].Position[0] + r;
-                dest[0].Position[1] = src[0].Position[1] - r;
-                dest[2].Position[0] = src[2].Position[0] + r;
-                dest[2].Position[1] = src[2].Position[1] - r;
+                for (i32 i {0}; i < 4; ++i) {
+                    q[i].Position[0] += r;
+                    q[i].Position[1] -= r;
+                }
                 break;
             default:
                 break;
@@ -201,79 +170,92 @@ namespace effect {
 
     ////////////////////////////////////////////////////////////
 
-    void wave::operator()(quad_tween_properties const& prop) const
+    void wave::operator()(f64 t, std::span<quad> quads) const
     {
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad& dest {prop.DestQuads[idx].get()};
+        for (usize idx {0}; idx < quads.size(); ++idx) {
+            quad& dst {quads[idx]};
 
-            quad const& src {prop.SrcQuads[idx]};
-            f64 const   phase {static_cast<f64>(idx) / prop.DestQuads.size()};
-            f64 const   factor {(std::sin((TAU * prop.Progress) + (0.75 * TAU) + phase * Amplitude) + 1) / 2};
+            f64 const phase {static_cast<f64>(idx) / quads.size()};
+            f64 const factor {(std::sin((TAU * t) + (0.75 * TAU) + phase * Amplitude) + 1) / 2};
 
             f64 const val {factor * Height};
 
-            dest[3].Position[1] = static_cast<f32>(src[3].Position[1] + val);
-            dest[1].Position[1] = static_cast<f32>(src[1].Position[1] + val);
-            dest[0].Position[1] = static_cast<f32>(src[0].Position[1] + val);
-            dest[2].Position[1] = static_cast<f32>(src[2].Position[1] + val);
+            for (i32 i {0}; i < 4; ++i) {
+                dst[i].Position[1] = static_cast<f32>(dst[i].Position[1] + val);
+            }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void height::operator()(quad_tween_properties const& prop) const
+    void size::operator()(f64 t, std::span<quad> quads) const
     {
-        f32 maxHeight {0};
-        for (auto const& src : prop.SrcQuads) {
-            f32 const height {src[2].Position[1] - src[3].Position[1]};
-            if (height > maxHeight) { maxHeight = height; }
+        size_f maxSize {size_f::Zero};
+        for (auto const& q : quads) {
+            f32 const width {q[1].Position[0] - q[3].Position[0]};
+            if (width > maxSize.Width) { maxSize.Width = width; }
+            f32 const height {q[1].Position[1] - q[3].Position[1]};
+            if (height > maxSize.Height) { maxSize.Height = height; }
         }
 
-        f32 const difference {End - Begin};
-        f32 const fac {difference > 0 ? static_cast<f32>(prop.Progress * difference)
-                                      : static_cast<f32>(1.0 - (prop.Progress * -difference))};
+        f32 const wDiff {WidthEnd - WidthStart};
+        f32 const wFac {wDiff > 0 ? static_cast<f32>(t * wDiff)
+                                  : static_cast<f32>(1.0 - (t * -wDiff))};
+        f32 const hDiff {HeightEnd - HeightStart};
+        f32 const hFac {hDiff > 0 ? static_cast<f32>(t * hDiff)
+                                  : static_cast<f32>(1.0 - (t * -hDiff))};
 
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad&       dest {prop.DestQuads[idx].get()};
-            quad const& src {prop.SrcQuads[idx]};
+        for (auto& q : quads) {
+            rect_f const rect {rect_f::FromLTRB(q[3].Position[0], q[3].Position[1], q[1].Position[0], q[1].Position[1])};
+            transform    xform;
+            size_f const scale {wFac, hFac};
+            point_f      center {point_f::Zero};
 
-            rect_f const rect {rect_f::FromLTRB(src[3].Position[0], src[3].Position[1], src[1].Position[0], src[1].Position[1])};
-            transform    scale;
-
-            switch (Anchor) {
+            switch (Anchor.Horizontal) {
+            case horizontal_alignment::Left:
+                center.X = rect.left() - maxSize.Width + rect.Width;
+                break;
+            case horizontal_alignment::Centered:
+                center.X = rect.get_center().X - (maxSize.Width - rect.Width) / 2;
+                break;
+            case horizontal_alignment::Right:
+                center.X = rect.right();
+                break;
+            }
+            switch (Anchor.Vertical) {
             case vertical_alignment::Top:
-                scale.scale_at({1, fac}, {rect.get_center().X, rect.top() - maxHeight + rect.Height});
+                center.Y = rect.top() - maxSize.Height + rect.Height;
                 break;
             case vertical_alignment::Middle:
-                scale.scale_at({1, fac}, {rect.get_center().X, rect.get_center().Y - (maxHeight - rect.Height) / 2});
+                center.Y = rect.get_center().Y - (maxSize.Height - rect.Height) / 2;
                 break;
             case vertical_alignment::Bottom:
-                scale.scale_at({1, fac}, {rect.get_center().X, rect.bottom()});
+                center.Y = rect.bottom();
                 break;
             }
 
+            xform.scale_at(scale, center);
             for (i32 i {0}; i < 4; ++i) {
-                dest[i].Position[1] = (scale * point_f {0, src[i].Position[1]}).Y;
+                point_f const pos {xform * point_f {q[i].Position[0], q[i].Position[1]}};
+                q[i].Position[0] = pos.X;
+                q[i].Position[1] = pos.Y;
             }
         }
     }
 
     ////////////////////////////////////////////////////////////
 
-    void rotate::operator()(quad_tween_properties const& prop) const
+    void rotate::operator()(f64 t, std::span<quad> quads) const
     {
-        for (usize idx {0}; idx < prop.DestQuads.size(); ++idx) {
-            quad&       dest {prop.DestQuads[idx].get()};
-            quad const& src {prop.SrcQuads[idx]};
-
-            rect_f const rect {rect_f::FromLTRB(src[3].Position[0], src[3].Position[1], src[1].Position[0], src[1].Position[1])};
+        for (auto& q : quads) {
+            rect_f const rect {rect_f::FromLTRB(q[3].Position[0], q[3].Position[1], q[1].Position[0], q[1].Position[1])};
             transform    rot;
-            rot.rotate_at(degree_f {static_cast<f32>(360 * prop.Progress)}, rect.get_center());
+            rot.rotate_at(degree_f {static_cast<f32>(360 * t)}, rect.get_center());
 
             for (i32 i {0}; i < 4; ++i) {
-                point_f const pos {rot * point_f {src[i].Position[0], src[i].Position[1]}};
-                dest[i].Position[0] = pos.X;
-                dest[i].Position[1] = pos.Y;
+                point_f const pos {rot * point_f {q[i].Position[0], q[i].Position[1]}};
+                q[i].Position[0] = pos.X;
+                q[i].Position[1] = pos.Y;
             }
         }
     }
