@@ -9,7 +9,6 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
-#include <optional>
 #include <queue>
 #include <thread>
 
@@ -31,26 +30,31 @@ struct task_context {
 
 class TCOB_API task_manager final {
     friend class game; // loop -> process_queue
+    using task_func = std::function<void()>;
 
 public:
-    using queue_func = std::function<queue_status()>;
+    template <typename T>
+    using async_func = std::function<T()>;
+    using par_func   = std::function<void(task_context const&)>;
+    using def_func   = std::function<queue_status()>;
 
-    explicit task_manager(std::optional<i32> threads);
+    explicit task_manager(i32 threads);
     ~task_manager();
 
-    template <typename Func>
-    auto run_async(Func&& func) -> std::future<std::invoke_result_t<Func>>;
+    template <typename T>
+    auto run_async(async_func<T>&& func) -> std::future<T>;
 
-    template <typename Func>
-    void run_task(Func&& func, i32 count, i32 minRange = 1);
+    void run_parallel(par_func&& func, i32 count, i32 minRange = 1);
 
-    void run_deferred(queue_func&& func);
+    void run_deferred(def_func&& func);
 
     auto get_thread_count() const -> i32;
 
     static inline char const* service_name {"task_manager"};
 
 private:
+    void add_task(task_func&& func);
+
     auto process_queue() -> queue_status;
 
     void worker_thread(std::stop_token const& stopToken);
@@ -58,13 +62,13 @@ private:
     i32             _threadCount;
     std::thread::id _mainThreadID;
 
-    std::queue<std::function<void()>> _taskQueue;
-    std::mutex                        _taskMutex;
-    std::vector<std::jthread>         _taskWorkers;
-    std::condition_variable_any       _taskCondition;
+    std::queue<task_func>       _taskQueue;
+    std::mutex                  _taskMutex;
+    std::vector<std::jthread>   _taskWorkers;
+    std::condition_variable_any _taskCondition;
 
-    std::queue<queue_func> _deferredQueue {};
-    std::recursive_mutex   _deferredMutex {};
+    std::queue<def_func> _deferredQueue {};
+    std::recursive_mutex _deferredMutex {};
 };
 
 }

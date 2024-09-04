@@ -146,7 +146,7 @@ auto grayscale_filter::operator()(image const& img) const -> image
 
     auto const [imgWidth, imgHeight] {info.Size};
 
-    locate_service<task_manager>().run_task(
+    locate_service<task_manager>().run_parallel(
         [&](task_context ctx) {
             for (i32 pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 i32 const idx {pixIdx * bpp};
@@ -176,7 +176,7 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
 
     auto retValue {image::CreateEmpty(NewSize, info.Format)};
 
-    locate_service<task_manager>().run_task(
+    locate_service<task_manager>().run_parallel(
         [&](task_context ctx) {
             for (i32 pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 i32 const x {pixIdx % newWidth};
@@ -209,7 +209,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
 
     auto retValue {image::CreateEmpty(NewSize, info.Format)};
 
-    locate_service<task_manager>().run_task(
+    locate_service<task_manager>().run_parallel(
         [&](task_context ctx) {
             for (i32 pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 i32 const x {pixIdx % newWidth};

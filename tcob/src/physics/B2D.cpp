@@ -35,7 +35,7 @@ b2d_world::b2d_world(world::settings const& settings)
 
     worldDef.workerCount = locate_service<task_manager>().get_thread_count();
     worldDef.enqueueTask = [](b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* /* userContext */) -> void* {
-        locate_service<task_manager>().run_task(
+        locate_service<task_manager>().run_parallel(
             [task, taskContext](task_context ctx) {
                 task(ctx.Start, ctx.End, ctx.Thread, taskContext);
             },

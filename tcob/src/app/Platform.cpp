@@ -77,7 +77,10 @@ platform::platform(bool headless, game::init const& ginit)
     InitSignatures();
 
     // task manager
-    register_service<task_manager>(std::make_shared<task_manager>(ginit.WorkerThreads));
+    register_service<task_manager>(std::make_shared<task_manager>(
+        ginit.WorkerThreads
+            ? *ginit.WorkerThreads
+            : static_cast<i32>(std::thread::hardware_concurrency() * 2)));
 
     // init config formats
     InitConfigFormats();
