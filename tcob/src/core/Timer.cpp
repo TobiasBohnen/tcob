@@ -5,7 +5,9 @@
 
 #include "tcob/core/Timer.hpp"
 
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stopwatch.hpp"
+#include "tcob/core/TaskManager.hpp"
 
 namespace tcob {
 
@@ -20,13 +22,13 @@ void timer::start(milliseconds interval, mode mode, bool looping)
 {
     stop();
 
-    _thread = std::jthread([=, this](std::stop_token const& stoken) {
+    locate_service<task_manager>().run_async<void>([=, this]() {
         stopwatch sw;
-        while (!stoken.stop_requested()) {
+        while (!_stopRequested) {
             sw.start();
 
             if (mode == mode::BusyLoop) {
-                while (!stoken.stop_requested() && sw.get_elapsed() < interval) {
+                while (!_stopRequested && sw.get_elapsed() < interval) {
                     std::this_thread::yield();
                 }
             } else {
@@ -47,8 +49,11 @@ void timer::start(milliseconds interval, mode mode, bool looping)
 
 void timer::stop()
 {
-    _thread.request_stop();
-    _isRunning = false;
+    if (!_isRunning) { return; }
+
+    _stopRequested = true;
+    while (_isRunning) { std::this_thread::yield(); }
+    _stopRequested = false;
 }
 
 auto timer::is_running() const -> bool

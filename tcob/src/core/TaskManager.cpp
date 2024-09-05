@@ -5,6 +5,8 @@
 
 #include "tcob/core/TaskManager.hpp"
 
+#include <atomic>
+
 namespace tcob {
 
 task_manager::task_manager(i32 threads)

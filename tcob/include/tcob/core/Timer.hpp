@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <thread>
+#include <atomic>
 
 #include "tcob/core/Signal.hpp"
 
@@ -31,7 +31,7 @@ public:
     void stop();
 
 private:
-    bool         _isRunning {false};
-    std::jthread _thread;
+    std::atomic_bool _isRunning {false};
+    std::atomic_bool _stopRequested {false};
 };
 }
