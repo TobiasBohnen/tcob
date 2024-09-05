@@ -102,6 +102,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/ParticleSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/PointCloud.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Shape.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/drawables/Shape.inl
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Text.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp

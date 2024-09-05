@@ -35,7 +35,8 @@ config_file::~config_file()
 void config_file::save() const
 {
     logger::Info("Config: saving '{}'", _fileName);
-    data::config::object::save(_fileName);
-    logger::Info("Config: saving completed");
+    if (data::config::object::save(_fileName)) {
+        logger::Info("Config: saving completed");
+    }
 }
 }

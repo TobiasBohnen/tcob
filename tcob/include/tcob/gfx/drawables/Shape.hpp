@@ -134,10 +134,7 @@ public:
     shape_batch();
 
     template <std::derived_from<shape> T>
-    auto create_shape() -> std::shared_ptr<T>
-    {
-        return std::static_pointer_cast<T>(_children.emplace_back(std::make_shared<T>()));
-    }
+    auto create_shape() -> std::shared_ptr<T>;
 
     void remove_shape(shape const& shape);
     void clear();
@@ -160,4 +157,7 @@ private:
     std::vector<std::shared_ptr<shape>> _children {};
     batch_polygon_renderer              _renderer {};
 };
+
 }
+
+#include "Shape.inl"
