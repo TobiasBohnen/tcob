@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <thread>
+#include <atomic>
 
 #include "tcob/audio/AudioSource.hpp"
 #include "tcob/core/Common.hpp"
@@ -52,6 +52,8 @@ private:
     i32                         _samplesPlayed {0};
     std::optional<buffer::info> _info;
     buffer_array                _buffers {};
-    std::jthread                _thread {};
+
+    std::atomic_bool _isRunning {false};
+    std::atomic_bool _stopRequested {false};
 };
 }

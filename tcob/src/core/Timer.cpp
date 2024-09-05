@@ -22,6 +22,7 @@ void timer::start(milliseconds interval, mode mode, bool looping)
 {
     stop();
 
+    _isRunning = true;
     locate_service<task_manager>().run_async<void>([=, this]() {
         stopwatch sw;
         while (!_stopRequested) {
@@ -43,8 +44,6 @@ void timer::start(milliseconds interval, mode mode, bool looping)
 
         _isRunning = false;
     });
-
-    _isRunning = true;
 }
 
 void timer::stop()

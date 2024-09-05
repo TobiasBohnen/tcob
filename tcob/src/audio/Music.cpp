@@ -11,6 +11,7 @@
 
 #include "tcob/audio/AudioSource.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
@@ -78,7 +79,8 @@ auto music::get_playback_position() const -> milliseconds
 void music::on_start()
 {
     stop_stream();
-    _thread = std::jthread {&music::update_stream, this};
+    _isRunning = true;
+    locate_service<task_manager>().run_async<void>([this]() { update_stream(); });
 }
 
 void music::on_stop()
@@ -93,15 +95,13 @@ auto music::can_start() const -> bool
 
 void music::update_stream()
 {
-    auto stoken {_thread.get_stop_token()};
-
     initialize_buffers();
 
     auto* s {get_source()};
     s->play();
 
     for (;;) {
-        if (stoken.stop_requested() || get_status() == source::status::Stopped) {
+        if (_stopRequested || get_status() == source::status::Stopped) {
             s->stop();
             s->set_buffer(0);
             break;
@@ -122,11 +122,17 @@ void music::update_stream()
 
         std::this_thread::sleep_for(1ms);
     }
+
+    _isRunning = false;
 }
 
 void music::stop_stream()
 {
-    _thread.request_stop();
+    if (!_isRunning) { return; }
+
+    _stopRequested = true;
+    while (_isRunning) { std::this_thread::yield(); }
+    _stopRequested = false;
 }
 
 void music::queue_buffers(std::vector<u32> const& bufferIDs)
