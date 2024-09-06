@@ -43,6 +43,7 @@ namespace detail {
     {
         auto& layer {_layers.at(layerIdx)};
         _tileMap[layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)] = setIdx;
+        // TODO: only mark affected cells as dirty
         _isDirty                                                          = true;
     }
 
@@ -92,8 +93,7 @@ namespace detail {
                     if (setIdx == 0) { continue; }
 
                     setup_quad(_quads.emplace_back(),
-                               i % layer.Size.Width + layer.Offset.X,
-                               i / layer.Size.Width + layer.Offset.Y,
+                               {i % layer.Size.Width + layer.Offset.X, i / layer.Size.Width + layer.Offset.Y},
                                _tileSet.Set[setIdx]);
                 }
             }
@@ -124,15 +124,23 @@ namespace detail {
     }
 }
 
-auto orthogonal_grid::get_quad_bounds(point_f offset, i32 column, i32 row) const -> rect_f
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+auto orthogonal_grid::get_quad_bounds(point_f offset, point_i coord) const -> rect_f
 {
-    return {{offset.X + TileSize.Width * column, offset.Y + TileSize.Height * row}, TileSize};
+    return {{offset.X + TileSize.Width * coord.X, offset.Y + TileSize.Height * coord.Y}, TileSize};
 }
 
-auto isometric_grid::get_quad_bounds(point_f offset, i32 column, i32 row) const -> rect_f
+////////////////////////////////////////////////////////////
+
+auto isometric_grid::get_quad_bounds(point_f offset, point_i coord) const -> rect_f
 {
-    return {{offset.X + (TileSize.Width * Center.X / 2) * (column - row),
-             offset.Y + (TileSize.Height * Center.Y / 2) * (row + column)},
+    return {{offset.X + ((TileSize.Width * SurfaceCenter.X) * (coord.X - coord.Y)),
+             offset.Y + ((TileSize.Height * SurfaceCenter.Y) * (coord.Y + coord.X))},
             TileSize};
 }
+
+////////////////////////////////////////////////////////////
+
 }

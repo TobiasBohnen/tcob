@@ -44,7 +44,7 @@ class TCOB_API orthogonal_grid {
 public:
     size_f TileSize {size_f::Zero};
 
-    auto get_quad_bounds(point_f offset, i32 column, i32 row) const -> rect_f;
+    auto get_quad_bounds(point_f offset, point_i coord) const -> rect_f;
 
     auto operator==(orthogonal_grid const& other) const -> bool = default;
 };
@@ -54,9 +54,9 @@ public:
 class TCOB_API isometric_grid {
 public:
     size_f  TileSize {size_f::Zero};
-    point_f Center {0.5f, 0.5f};
+    point_f SurfaceCenter {0.5f, 0.5f};
 
-    auto get_quad_bounds(point_f offset, i32 column, i32 row) const -> rect_f;
+    auto get_quad_bounds(point_f offset, point_i coord) const -> rect_f;
 
     auto operator==(isometric_grid const& other) const -> bool = default;
 };
@@ -93,7 +93,7 @@ namespace detail {
         void mark_dirty();
 
     private:
-        void virtual setup_quad(quad& q, i32 column, i32 row, tile const& tile) const = 0;
+        void virtual setup_quad(quad& q, point_i coord, tile const& tile) const = 0;
 
         std::vector<tile_index_t> _tileMap {};
 
@@ -113,28 +113,27 @@ namespace detail {
         bool              _isDirty {true};
         bool              _updateGeometry {true};
     };
-
-    ////////////////////////////////////////////////////////////
-
-    template <typename GridType>
-    class tilemap : public detail::tilemap_base {
-        using grid_type = GridType;
-
-    public:
-        explicit tilemap(tileset set);
-
-        prop<grid_type> Grid;
-
-    private:
-        void setup_quad(quad& q, i32 column, i32 row, tile const& tile) const override;
-    };
-
 }
 
 ////////////////////////////////////////////////////////////
 
-using tilemap           = detail::tilemap<orthogonal_grid>;
-using isometric_tilemap = detail::tilemap<isometric_grid>;
+template <typename GridType>
+class tilemap : public detail::tilemap_base {
+    using grid_type = GridType;
+
+public:
+    explicit tilemap(tileset set);
+
+    prop<grid_type> Grid;
+
+private:
+    void setup_quad(quad& q, point_i coord, tile const& tile) const override;
+};
+
+////////////////////////////////////////////////////////////
+
+using orthogonal_tilemap = tilemap<orthogonal_grid>;
+using isometric_tilemap  = tilemap<isometric_grid>;
 
 }
 
