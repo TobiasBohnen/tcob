@@ -46,6 +46,14 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API z85_filter : public filter_base {
+public:
+    auto to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>> override;
+    auto from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>> override;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API reverser_filter : public filter_base {
 public:
     auto to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>> override;

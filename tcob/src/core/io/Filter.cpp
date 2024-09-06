@@ -9,6 +9,8 @@
 
 #include <miniz.h>
 
+using namespace std::literals;
+
 namespace tcob::io {
 
 ////////////////////////////////////////////////////////////
@@ -86,10 +88,10 @@ static inline auto is_base64(byte c) -> bool
     return (isalnum(static_cast<ubyte>(c)) || (c == '+') || (c == '/'));
 }
 
+static string_view const base64_chars {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"sv};
+
 auto base64_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
 {
-    static string const base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
     ubyte const*         buf {bytes.data()};
     isize                bufLen {std::ssize(bytes)};
     i32                  i {0};
@@ -138,8 +140,6 @@ auto base64_filter::to(std::span<ubyte const> bytes) const -> std::optional<std:
 
 auto base64_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
 {
-    static string const base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
     isize                bufLen {std::ssize(bytes)};
     i32                  i {0};
     i32                  in {0};
@@ -187,6 +187,80 @@ auto base64_filter::from(std::span<ubyte const> bytes) const -> std::optional<st
     }
 
     return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+static string_view const          z85_encode {"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#"sv};
+static std::array<byte, 96> const z85_decode = {0x00, 0x44, 0x00, 0x54, 0x53, 0x52, 0x48, 0x00,
+                                                0x4B, 0x4C, 0x46, 0x41, 0x00, 0x3F, 0x3E, 0x45,
+                                                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                                0x08, 0x09, 0x40, 0x00, 0x49, 0x42, 0x4A, 0x47,
+                                                0x51, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A,
+                                                0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32,
+                                                0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A,
+                                                0x3B, 0x3C, 0x3D, 0x4D, 0x00, 0x4E, 0x43, 0x00,
+                                                0x00, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
+                                                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+                                                0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
+                                                0x21, 0x22, 0x23, 0x4F, 0x00, 0x50, 0x00, 0x00};
+
+auto z85_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+{
+    usize const bufLen {bytes.size()};
+
+    if (bufLen % 4) { return std::nullopt; }
+
+    usize const        encodedLen {bufLen * 5 / 4};
+    std::vector<ubyte> encoded;
+    encoded.resize(encodedLen);
+
+    u32 charNbr {0};
+    u32 byteNbr {0};
+    u32 value {0};
+    while (byteNbr < bufLen) {
+        value = value * 256 + bytes[byteNbr++];
+        if (byteNbr % 4 == 0) {
+            u32 divisor {85 * 85 * 85 * 85};
+            while (divisor) {
+                encoded[charNbr++] = z85_encode[value / divisor % 85];
+                divisor /= 85;
+            }
+            value = 0;
+        }
+    }
+
+    assert(charNbr == encodedLen);
+    return encoded;
+}
+
+auto z85_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+{
+    usize const bufLen {bytes.size()};
+
+    if (bufLen % 5) { return std::nullopt; }
+
+    usize const        decodedSize {bufLen * 4 / 5};
+    std::vector<ubyte> decoded;
+    decoded.resize(decodedSize);
+
+    u32 charNbr {0};
+    u32 byteNbr {0};
+    u32 value {0};
+    while (charNbr < bufLen) {
+        value = value * 85 + z85_decode[bytes[charNbr++] - 32];
+        if (charNbr % 5 == 0) {
+            u32 divisor = 256 * 256 * 256;
+            while (divisor) {
+                decoded[byteNbr++] = static_cast<ubyte>(value / divisor % 256);
+                divisor /= 256;
+            }
+            value = 0;
+        }
+    }
+
+    assert(byteNbr == decodedSize);
+    return decoded;
 }
 
 ////////////////////////////////////////////////////////////
