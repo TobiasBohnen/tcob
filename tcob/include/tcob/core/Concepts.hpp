@@ -132,15 +132,4 @@ concept StringLike = std::is_convertible_v<T, string_view>;
 template <typename T>
 concept NotStringLikePOD = POD<T> && !StringLike<T> && !std::is_same_v<T, std::span<std::remove_const_t<T>>>;
 
-namespace detail {
-    // from https://stackoverflow.com/questions/16337610/how-to-know-if-a-type-is-a-specialization-of-stdvector
-    template <typename Test, template <typename...> typename Ref>
-    struct is_specialization : std::false_type { };
-    template <template <typename...> typename Ref, typename... Args>
-    struct is_specialization<Ref<Args...>, Ref> : std::true_type { };
-}
-
-template <typename T, template <typename...> typename S>
-concept IsSpecialization = tcob::detail::is_specialization<T, S>::value;
-
 }
