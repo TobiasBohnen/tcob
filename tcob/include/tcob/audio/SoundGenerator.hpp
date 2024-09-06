@@ -68,6 +68,8 @@ public:
 
     void static Serialize(sound_wave const& v, auto&& s);
     auto static Deserialize(sound_wave& v, auto&& s) -> bool;
+
+    auto operator==(sound_wave const& other) const -> bool = default;
 };
 
 inline void sound_wave::Serialize(sound_wave const& v, auto&& s)
@@ -149,6 +151,7 @@ public:
 
     auto create_buffer [[nodiscard]] (sound_wave const& wave) -> buffer;
     auto create_sound [[nodiscard]] (sound_wave const& wave) -> sound;
+    auto create_sound [[nodiscard]] (buffer const& buffer, sound_wave const& wave) -> sound;
 
 private:
     random::rng_split_mix_64 _random;

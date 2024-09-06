@@ -28,12 +28,16 @@ struct font_info final {
     f32 Ascender {0};
     f32 Descender {0};
     f32 LineHeight {0};
+
+    auto operator==(font_info const& other) const -> bool = default;
 };
 
 struct glyph {
     size_i  Size {size_i::Zero};
     point_f Offset {point_f::Zero};
     f32     AdvanceX {0.0f};
+
+    auto operator==(glyph const& other) const -> bool = default;
 };
 
 struct rendered_glyph : glyph {

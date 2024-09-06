@@ -11,7 +11,7 @@
 
 namespace tcob::audio {
 
-void static generate_noise(std::array<f32, 32>& buffer, random::rng_split_mix_64& random)
+void static generate_noise(std::span<f32> buffer, random::rng_split_mix_64& random)
 {
     for (f32& f : buffer) {
         f = random(-1.0f, 1.0f);
@@ -312,71 +312,29 @@ auto sound_generator::mutate_wave(sound_wave const& wave) -> sound_wave
 {
     sound_wave retValue {wave};
 
-    if (_random(0, 1) == 1) {
-        retValue.StartFrequency += _random(-0.05f, 0.05f);
-    }
+    if (_random(0, 1) == 1) { retValue.StartFrequency += _random(-0.05f, 0.05f); }
     // if (_random(0, 1) == 1) retValue.minFrequency += _random(-0.05f, 0.05f);
-    if (_random(0, 1) == 1) {
-        retValue.Slide += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.DeltaSlide += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.SquareDuty += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.DutySweep += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.VibratoDepth += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.VibratoSpeed += _random(-0.05f, 0.05f);
-    }
+    if (_random(0, 1) == 1) { retValue.Slide += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.DeltaSlide += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.SquareDuty += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.DutySweep += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.VibratoDepth += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.VibratoSpeed += _random(-0.05f, 0.05f); }
     // if (_random(0, 1) == 1) wave.vibratoPhaseDelay += _random(-0.05f, 0.05f);
-    if (_random(0, 1) == 1) {
-        retValue.AttackTime += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.SustainTime += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.DecayTime += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.SustainPunch += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.LowPassFilterResonance += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.LowPassFilterCutoff += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.LowPassFilterCutoffSweep += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.HighPassFilterCutoff += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.HighPassFilterCutoffSweep += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.PhaserOffset += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.PhaserSweep += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.RepeatSpeed += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.ChangeSpeed += _random(-0.05f, 0.05f);
-    }
-    if (_random(0, 1) == 1) {
-        retValue.ChangeAmount += _random(-0.05f, 0.05f);
-    }
+    if (_random(0, 1) == 1) { retValue.AttackTime += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.SustainTime += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.DecayTime += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.SustainPunch += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.LowPassFilterResonance += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.LowPassFilterCutoff += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.LowPassFilterCutoffSweep += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.HighPassFilterCutoff += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.HighPassFilterCutoffSweep += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.PhaserOffset += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.PhaserSweep += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.RepeatSpeed += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.ChangeSpeed += _random(-0.05f, 0.05f); }
+    if (_random(0, 1) == 1) { retValue.ChangeAmount += _random(-0.05f, 0.05f); }
 
     return sanitize_wave(retValue);
 }
@@ -423,10 +381,10 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 {
     random::rng_split_mix_64 noiseRandom {wave.RandomSeed};
 
-    sound_wave newWave {wave};
-#define MAX_WAVE_LENGTH_SECONDS 10   // Max length for wave: 10 seconds
-#define MAX_SUPERSAMPLING 8
-#define SAMPLE_SCALE_COEFICIENT 0.2f // NOTE: Used to scale sample value to [-1..1]
+    sound_wave    newWave {wave};
+    constexpr i32 MAX_WAVE_LENGTH_SECONDS {10};   // Max length for wave: 10 seconds
+    constexpr i32 MAX_SUPERSAMPLING {8};
+    constexpr f32 SAMPLE_SCALE_COEFICIENT {0.2f}; // NOTE: Used to scale sample value to [-1..1]
 
     // Configuration parameters for generation
     // NOTE: Those parameters are calculated from selected values
@@ -644,7 +602,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
                 sample = 1.0f - fp * 2;
                 break;
             case sound_wave::type::Sine:
-                sample = static_cast<f32>(std::sin(fp * TAU));
+                sample = std::sin(fp * TAU_F);
                 break;
             case sound_wave::type::Noise:
                 sample = noiseBuffer[phase * 32 / period];
@@ -698,9 +656,14 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 auto sound_generator::create_sound(sound_wave const& wave) -> sound
 {
     auto audioData {create_buffer(wave)};
-    auto buffer {std::make_shared<al::al_buffer>()};
-    buffer->buffer_data(audioData.get_data(), 1, wave.SampleRate);
-    return sound {buffer};
+    return create_sound(audioData, wave);
+}
+
+auto sound_generator::create_sound [[nodiscard]] (buffer const& buffer, sound_wave const& wave) -> sound
+{
+    auto albuffer {std::make_shared<al::al_buffer>()};
+    albuffer->buffer_data(buffer.get_data(), 1, wave.SampleRate);
+    return sound {albuffer};
 }
 
 }
