@@ -134,7 +134,7 @@ class manual_asset_ptr {
 public:
     using type = T;
 
-    manual_asset_ptr(string const& name = "");
+    manual_asset_ptr(string const& name = "", auto&&... args);
 
     auto operator->() const -> type*;
     auto operator*() const -> type&;

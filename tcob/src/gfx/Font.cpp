@@ -578,4 +578,15 @@ void font_family::FindSources(font_family& fam, path const& source)
 
     fam._fontData.reserve(fam._fontSources.size());
 }
+
+void font_family::SingleFont(font_family& fam, std::span<ubyte const> font)
+{
+    fam._fontSources.clear();
+    fam._fontData.clear();
+    fam._fontAssets.clear();
+
+    fam._fontData[{}].assign(font.begin(), font.end());
+    fam._fontSources[{}] = "";
+}
+
 }

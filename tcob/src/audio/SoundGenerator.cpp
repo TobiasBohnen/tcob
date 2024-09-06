@@ -384,6 +384,9 @@ auto sound_generator::mutate_wave(sound_wave const& wave) -> sound_wave
 auto sound_generator::sanitize_wave(sound_wave const& wave) -> sound_wave
 {
     return {
+        .RandomSeed = wave.RandomSeed,
+        .WaveType   = wave.WaveType,
+
         .AttackTime   = std::clamp(wave.AttackTime, 0.0f, 1.0f),
         .SustainTime  = std::clamp(wave.SustainTime, 0.0f, 1.0f),
         .SustainPunch = std::clamp(wave.SustainPunch, 0.0f, 1.0f),

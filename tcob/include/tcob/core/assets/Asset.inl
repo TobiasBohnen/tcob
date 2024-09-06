@@ -223,8 +223,8 @@ inline auto operator==(asset_ptr<T> const& left, asset_ptr<T> const& right) -> b
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline manual_asset_ptr<T>::manual_asset_ptr(string const& name)
-    : _object {std::make_shared<T>()}
+inline manual_asset_ptr<T>::manual_asset_ptr(string const& name, auto&&... args)
+    : _object {std::make_shared<T>(args...)}
     , _assetPtr {std::make_shared<asset<T>>(name, _object, nullptr)}
 {
 }

@@ -125,10 +125,9 @@ public:
 
     static inline char const* asset_name {"font"};
 
-protected:
+private:
     void setup_texture();
 
-private:
     auto cache_render_glyph(u32 cp) -> bool;
 
     std::unordered_map<u32, rendered_glyph> _renderGlyphCache {};
@@ -175,6 +174,7 @@ public:
     auto get_images() const -> std::vector<image>;
 
     void static FindSources(font_family& fam, path const& source);
+    void static SingleFont(font_family& fam, std::span<ubyte const> font);
 
     static inline char const* asset_name {"font_family"};
 
