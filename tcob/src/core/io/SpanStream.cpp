@@ -9,7 +9,7 @@
 
 namespace tcob::io {
 
-ispan_sink::ispan_sink(std::span<byte const> span)
+ispan_sink::ispan_sink(std::span<ubyte const> span)
     : _span {span}
 {
 }
@@ -65,7 +65,7 @@ auto ispan_sink::read_bytes(void* s, std::streamsize sizeInBytes) -> std::stream
 
 ////////////////////////////////////////////////////////////
 
-isstream::isstream(std::span<byte const> span)
+isstream::isstream(std::span<ubyte const> span)
     : sink_istream<ispan_sink> {&_sink}
     , _sink {span}
 {
@@ -73,7 +73,7 @@ isstream::isstream(std::span<byte const> span)
 
 ////////////////////////////////////////////////////////////
 
-ospan_sink::ospan_sink(std::span<byte> span)
+ospan_sink::ospan_sink(std::span<ubyte> span)
     : _span {span}
 {
 }
@@ -114,7 +114,7 @@ auto ospan_sink::write_bytes(void const* s, std::streamsize sizeInBytes) -> std:
 
 ////////////////////////////////////////////////////////////
 
-osstream::osstream(std::span<byte> span)
+osstream::osstream(std::span<ubyte> span)
     : sink_ostream<ospan_sink> {&_sink}
     , _sink {span}
 {
