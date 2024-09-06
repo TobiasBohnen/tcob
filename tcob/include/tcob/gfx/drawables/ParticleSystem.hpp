@@ -39,15 +39,11 @@ public:
     color  Color {colors::White};
     rect_f Bounds {rect_f::Zero};
     size_f Scale {size_f::One};
+    bool   Visible {true};
 
     auto get_lifetime_ratio() const -> f32;
     auto is_alive() const -> bool;
-
     void set_lifetime(milliseconds life);
-
-    void show();
-    void hide();
-    auto is_visible() const -> bool;
 
     void set_texture_region(texture_region const& texRegion);
 
@@ -58,7 +54,6 @@ public:
 private:
     texture_region _region {};
     transform      _transform {};
-    bool           _visible {true};
     milliseconds   _startingLife {0};
     milliseconds   _remainingLife {0};
 };
@@ -80,6 +75,7 @@ struct particle_template {
 class TCOB_API particle_emitter final {
 public:
     particle_emitter();
+    virtual ~particle_emitter();
 
     particle_template Template;
     rect_f            SpawnArea {rect_f::Zero};
@@ -91,7 +87,7 @@ public:
 
     void reset();
 
-    void emit_particles(particle_system& system, milliseconds time);
+    void virtual emit_particles(particle_system& system, milliseconds time);
 
 private:
     rng          _randomGen;
@@ -119,7 +115,8 @@ public:
     void restart();
     void stop();
 
-    auto create_emitter() -> particle_emitter&; // TODO: change to shared_ptr
+    template <typename T = particle_emitter>
+    auto create_emitter(auto&&... args) -> std::shared_ptr<T>;
     void remove_all_emitters();
 
     auto activate_particle() -> particle&;
@@ -133,10 +130,18 @@ protected:
 private:
     void deactivate_particle(particle& particle);
 
-    bool                          _isRunning {false};
-    quad_renderer                 _renderer {buffer_usage_hint::DynamicDraw};
-    std::vector<particle>         _particles {};
-    isize                         _aliveParticleCount {0};
-    std::vector<particle_emitter> _emitters {};
+    bool                                           _isRunning {false};
+    quad_renderer                                  _renderer {buffer_usage_hint::DynamicDraw};
+    std::vector<particle>                          _particles {};
+    isize                                          _aliveParticleCount {0};
+    std::vector<std::shared_ptr<particle_emitter>> _emitters {};
 };
+
+template <typename T>
+inline auto particle_system::create_emitter(auto&&... args) -> std::shared_ptr<T>
+{
+    auto retValue {std::make_shared<T>(args...)};
+    _emitters.push_back(retValue);
+    return retValue;
+}
 }

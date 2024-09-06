@@ -6,6 +6,7 @@
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
 
 #include <algorithm>
+#include <utility>
 
 namespace tcob::gfx {
 using namespace std::chrono_literals;
@@ -23,7 +24,7 @@ void particle_system::start()
 
     _isRunning = true;
     for (auto& emitter : _emitters) {
-        emitter.reset();
+        emitter->reset();
     }
 
     _particles.reserve(100);
@@ -44,11 +45,6 @@ void particle_system::stop()
     _renderer.reset_geometry();
     _particles.clear();
     _aliveParticleCount = 0;
-}
-
-auto particle_system::create_emitter() -> particle_emitter&
-{
-    return _emitters.emplace_back();
 }
 
 auto particle_system::get_particle_count() const -> isize
@@ -91,8 +87,8 @@ void particle_system::on_update(milliseconds deltaTime)
     /*     Material->update(deltaTime); */
 
     for (auto& emitter : _emitters) {
-        if (emitter.is_alive()) {
-            emitter.emit_particles(*this, deltaTime);
+        if (emitter->is_alive()) {
+            emitter->emit_particles(*this, deltaTime);
         }
     }
 
@@ -127,7 +123,7 @@ void particle_system::on_draw_to(render_target& target)
 
     for (i32 i {0}; i < _aliveParticleCount; ++i) {
         auto& particle {_particles[i]};
-        if (particle.is_visible()) {
+        if (particle.Visible) {
             particle.to_quad(quad);
             ++quad;
             ++count;
@@ -141,6 +137,8 @@ void particle_system::on_draw_to(render_target& target)
 ////////////////////////////////////////////////////////////
 
 particle_emitter::particle_emitter() = default;
+
+particle_emitter::~particle_emitter() = default;
 
 auto particle_emitter::is_alive() const -> bool
 {
@@ -191,7 +189,7 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
         // set bounds
         particle.Bounds = {{x + sysPos.X, y + sysPos.Y}, Template.Size};
 
-        particle.show();
+        particle.Visible = true;
     }
 }
 
@@ -254,18 +252,4 @@ void particle::to_quad(quad* quad)
     geometry::set_texcoords(*quad, _region);
 }
 
-auto particle::is_visible() const -> bool
-{
-    return _visible;
-}
-
-void particle::show()
-{
-    _visible = true;
-}
-
-void particle::hide()
-{
-    _visible = false;
-}
 }
