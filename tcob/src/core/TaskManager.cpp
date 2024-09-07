@@ -74,24 +74,24 @@ void task_manager::add_task(task_func&& func)
     _taskCondition.notify_one();
 }
 
-auto task_manager::process_queue() -> queue_status
+auto task_manager::process_queue() -> bool
 {
     assert(std::this_thread::get_id() == _mainThreadID);
-    if (_deferredQueue.empty()) { return queue_status::Finished; }
+    if (_deferredQueue.empty()) { return true; }
     std::scoped_lock lock {_deferredMutex};
 
     std::queue<def_func> newQueue {};
 
     while (!_deferredQueue.empty()) {
         auto& front {_deferredQueue.front()};
-        if (front() == queue_status::Running) {
+        if (front() == task_status::Running) {
             newQueue.push(front);
         }
         _deferredQueue.pop();
     }
 
     _deferredQueue.swap(newQueue);
-    return queue_status::Running;
+    return false;
 }
 
 void task_manager::worker_thread(std::stop_token const& stopToken)

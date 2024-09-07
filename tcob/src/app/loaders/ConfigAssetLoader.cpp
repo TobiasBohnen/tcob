@@ -109,12 +109,12 @@ auto default_new(string const& name, Loader* loader, Bucket* bucket, Cache& cach
     return retValue;
 }
 
-auto default_check_async_load(auto&& cache, auto&& stateSetter) -> queue_status
+auto default_check_async_load(auto&& cache, auto&& stateSetter) -> task_status
 {
     using namespace std::chrono_literals;
 
     if (cache.empty()) {
-        return queue_status::Finished;
+        return task_status::Finished;
     }
 
     bool loadingDone {true};
@@ -139,7 +139,7 @@ auto default_check_async_load(auto&& cache, auto&& stateSetter) -> queue_status
         cache.clear();
     }
 
-    return cache.empty() ? queue_status::Finished : queue_status::Running;
+    return cache.empty() ? task_status::Finished : task_status::Running;
 }
 
 cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
@@ -955,10 +955,10 @@ void cfg_texture_loader::prepare()
     locate_service<task_manager>().run_deferred([&]() { return check_async_load(); });
 }
 
-auto cfg_texture_loader::check_async_load() -> queue_status
+auto cfg_texture_loader::check_async_load() -> task_status
 {
     if (_cacheTex.empty()) {
-        return queue_status::Finished;
+        return task_status::Finished;
     }
 
     // check if async images have been loaded and update textures
@@ -1015,7 +1015,7 @@ auto cfg_texture_loader::check_async_load() -> queue_status
         _cacheTex.clear();
     }
 
-    return _cacheTex.empty() ? queue_status::Finished : queue_status::Running;
+    return _cacheTex.empty() ? task_status::Finished : task_status::Running;
 }
 
 }

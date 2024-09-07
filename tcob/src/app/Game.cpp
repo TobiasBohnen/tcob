@@ -70,7 +70,7 @@ void game::finish()
 {
     // wait for command queue
     auto& tm {locate_service<task_manager>()};
-    while (tm.process_queue() == queue_status::Running) { // TODO: abort?
+    while (!tm.process_queue()) { // TODO: abort?
         std::this_thread::yield();
     }
 
@@ -94,7 +94,7 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
             _scenes.push(scene);
         }
 
-        return queue_status::Finished;
+        return task_status::Finished;
     }};
     locate_service<task_manager>().run_deferred(std::move(command));
 }
@@ -104,7 +104,7 @@ void game::pop_current_scene()
     if (!_scenes.empty()) {
         locate_service<task_manager>().run_deferred({[&]() {
             pop_scene();
-            return queue_status::Finished;
+            return task_status::Finished;
         }});
     }
 }

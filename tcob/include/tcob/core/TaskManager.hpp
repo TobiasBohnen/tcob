@@ -15,7 +15,7 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-enum class queue_status : u8 {
+enum class task_status : u8 {
     Finished,
     Running
 };
@@ -36,7 +36,7 @@ public:
     template <typename T>
     using async_func = std::function<T()>;
     using par_func   = std::function<void(task_context const&)>;
-    using def_func   = std::function<queue_status()>;
+    using def_func   = std::function<task_status()>;
 
     explicit task_manager(i32 threads);
     ~task_manager();
@@ -55,7 +55,7 @@ public:
 private:
     void add_task(task_func&& func);
 
-    auto process_queue() -> queue_status;
+    auto process_queue() -> bool;
 
     void worker_thread(std::stop_token const& stopToken);
 
