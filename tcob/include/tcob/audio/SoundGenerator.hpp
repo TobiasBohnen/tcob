@@ -13,7 +13,7 @@
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class sound_wave {
+class TCOB_API [[nodiscard]] sound_wave {
 public:
     enum class type : u8 {
         Square   = 0,
@@ -65,6 +65,8 @@ public:
     f32 LowPassFilterResonance {0.0f};    // 0 to 1
     f32 HighPassFilterCutoff {0.0f};      // 0 to 1
     f32 HighPassFilterCutoffSweep {0.0f}; // -1 to 1
+
+    void sanitize();
 
     void static Serialize(sound_wave const& v, auto&& s);
     auto static Deserialize(sound_wave& v, auto&& s) -> bool;
@@ -147,7 +149,6 @@ public:
     auto generate_random() -> sound_wave;
 
     auto mutate_wave(sound_wave const& wave) -> sound_wave;
-    auto sanitize_wave(sound_wave const& wave) -> sound_wave;
 
     auto create_buffer [[nodiscard]] (sound_wave const& wave) -> buffer;
     auto create_sound [[nodiscard]] (sound_wave const& wave) -> sound;

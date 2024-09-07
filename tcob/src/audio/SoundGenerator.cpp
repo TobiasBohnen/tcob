@@ -8,15 +8,11 @@
 #include "tcob/audio/SoundGenerator.hpp"
 
 #include "ALObjects.hpp"
+#include "SoundGenerator_types.hpp"
 
 namespace tcob::audio {
 
-void static generate_noise(std::span<f32> buffer, random::rng_split_mix_64& random)
-{
-    for (f32& f : buffer) {
-        f = random(-1.0f, 1.0f);
-    }
-}
+////////////////////////////////////////////////////////////
 
 sound_generator::sound_generator(random::rng_split_mix_64 random)
     : _random {random}
@@ -304,7 +300,8 @@ auto sound_generator::generate_random() -> sound_wave
     retValue.ChangeSpeed               = _random(-1.0f, 1.0f);
     retValue.ChangeAmount              = _random(-1.0f, 1.0f);
 
-    return sanitize_wave(retValue);
+    retValue.sanitize();
+    return retValue;
 }
 
 // Mutate current sound
@@ -336,186 +333,91 @@ auto sound_generator::mutate_wave(sound_wave const& wave) -> sound_wave
     if (_random(0, 1) == 1) { retValue.ChangeSpeed += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.ChangeAmount += _random(-0.05f, 0.05f); }
 
-    return sanitize_wave(retValue);
-}
-
-auto sound_generator::sanitize_wave(sound_wave const& wave) -> sound_wave
-{
-    return {
-        .RandomSeed = wave.RandomSeed,
-        .WaveType   = wave.WaveType,
-
-        .AttackTime   = std::clamp(wave.AttackTime, 0.0f, 1.0f),
-        .SustainTime  = std::clamp(wave.SustainTime, 0.0f, 1.0f),
-        .SustainPunch = std::clamp(wave.SustainPunch, 0.0f, 1.0f),
-        .DecayTime    = std::clamp(wave.DecayTime, 0.0f, 1.0f),
-
-        .StartFrequency = std::clamp(wave.StartFrequency, 0.0f, 1.0f),
-        .MinFrequency   = std::clamp(wave.MinFrequency, 0.0f, 1.0f),
-        .Slide          = std::clamp(wave.Slide, -1.0f, 1.0f),
-        .DeltaSlide     = std::clamp(wave.DeltaSlide, -1.0f, 1.0f),
-        .VibratoDepth   = std::clamp(wave.VibratoDepth, 0.0f, 1.0f),
-        .VibratoSpeed   = std::clamp(wave.VibratoSpeed, 0.0f, 1.0f),
-
-        .ChangeAmount = std::clamp(wave.ChangeAmount, -1.0f, 1.0f),
-        .ChangeSpeed  = std::clamp(wave.ChangeSpeed, 0.0f, 1.0f),
-
-        .SquareDuty = std::clamp(wave.SquareDuty, 0.0f, 1.0f),
-        .DutySweep  = std::clamp(wave.DutySweep, -1.0f, 1.0f),
-
-        .RepeatSpeed = std::clamp(wave.RepeatSpeed, 0.0f, 1.0f),
-
-        .PhaserOffset = std::clamp(wave.PhaserOffset, -1.0f, 1.0f),
-        .PhaserSweep  = std::clamp(wave.PhaserSweep, -1.0f, 1.0f),
-
-        .LowPassFilterCutoff       = std::clamp(wave.LowPassFilterCutoff, 0.0f, 1.0f),
-        .LowPassFilterCutoffSweep  = std::clamp(wave.LowPassFilterCutoffSweep, -1.0f, 1.0f),
-        .LowPassFilterResonance    = std::clamp(wave.LowPassFilterResonance, 0.0f, 1.0f),
-        .HighPassFilterCutoff      = std::clamp(wave.HighPassFilterCutoff, 0.0f, 1.0f),
-        .HighPassFilterCutoffSweep = std::clamp(wave.HighPassFilterCutoffSweep, -1.0f, 1.0f)};
+    retValue.sanitize();
+    return retValue;
 }
 
 // Generates new wave from wave parameters
 // NOTE: By default wave is generated as 44100Hz, 32bit float, mono
 auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 {
-    random::rng_split_mix_64 noiseRandom {wave.RandomSeed};
-
-    sound_wave    newWave {wave};
     constexpr i32 MAX_WAVE_LENGTH_SECONDS {10};   // Max length for wave: 10 seconds
     constexpr i32 MAX_SUPERSAMPLING {8};
     constexpr f32 SAMPLE_SCALE_COEFICIENT {0.2f}; // NOTE: Used to scale sample value to [-1..1]
 
-    // Configuration parameters for generation
-    // NOTE: Those parameters are calculated from selected values
+    i32 repeatTime {0};
 
-    if (newWave.MinFrequency > newWave.StartFrequency) {
-        newWave.MinFrequency = newWave.StartFrequency;
-    }
-    if (newWave.Slide < newWave.DeltaSlide) {
-        newWave.Slide = newWave.DeltaSlide;
-    }
+    f64 fperiod {0};
+    f64 fmaxperiod {0};
+    f64 fslide {0};
+    f64 fdslide {0};
+    f32 squareDuty {0};
+    f32 squareSlide {0};
 
-    // Reset sample parameters
-    //----------------------------------------------------------------------------------------
-    f64 fperiod {100.0 / (newWave.StartFrequency * newWave.StartFrequency + 0.001)};
-    f64 fmaxperiod {100.0 / (newWave.MinFrequency * newWave.MinFrequency + 0.001)};
-    f64 fslide {1.0 - std::pow(static_cast<f64>(newWave.Slide), 3.0) * 0.01};
-    f64 fdslide {-std::pow(static_cast<f64>(newWave.DeltaSlide), 3.0) * 0.000001};
-    f32 squareDuty {0.5f - newWave.SquareDuty * 0.5f};
-    f32 squareSlide {-newWave.DutySweep * 0.00005f};
+    arpeggio arpeggio;
 
-    f64 arpeggioModulation {
-        newWave.ChangeAmount >= 0.0f
-            ? 1.0 - std::pow(static_cast<f64>(newWave.ChangeAmount), 2.0) * 0.9
-            : 1.0 + std::pow(static_cast<f64>(newWave.ChangeAmount), 2.0) * 10.0};
+    auto const reset_sample_parameters {[&]() {
+        repeatTime = 0;
 
-    i32 arpeggioLimit {static_cast<i32>(std::pow(1.0f - newWave.ChangeSpeed, 2.0f) * 20000 + 32)};
-    if (newWave.ChangeSpeed == 1.0f) {
-        arpeggioLimit = 0; // WATCH OUT: f32 comparison
-    }
+        fperiod    = {100.0 / (wave.StartFrequency * wave.StartFrequency + 0.001)};
+        fmaxperiod = {100.0 / (wave.MinFrequency * wave.MinFrequency + 0.001)};
 
-    // Reset filter parameters
-    f32 fltw {std::pow(newWave.LowPassFilterCutoff, 3.0f) * 0.1f};
-    f32 fltwd {1.0f + newWave.LowPassFilterCutoffSweep * 0.0001f};
-    f32 fltdmp {5.0f / (1.0f + std::pow(newWave.LowPassFilterResonance, 2.0f) * 20.0f) * (0.01f + fltw)};
-    if (fltdmp > 0.8f) {
-        fltdmp = 0.8f;
-    }
-    f32 flthp {std::pow(newWave.HighPassFilterCutoff, 2.0f) * 0.1f};
-    f32 flthpd {1.0f + newWave.HighPassFilterCutoffSweep * 0.0003f};
+        fslide  = {1.0 - std::pow(static_cast<f64>(wave.Slide), 3.0) * 0.01};
+        fdslide = {-std::pow(static_cast<f64>(wave.DeltaSlide), 3.0) * 0.000001};
 
-    // Reset vibrato
-    f32 vibratoSpeed {std::pow(newWave.VibratoSpeed, 2.0f) * 0.01f};
-    f32 vibratoAmplitude {newWave.VibratoDepth * 0.5f};
+        squareDuty  = {0.5f - wave.SquareDuty * 0.5f};
+        squareSlide = {-wave.DutySweep * 0.00005f};
 
-    // Reset envelope
-    std::array<i32, 3> envelopeLength {
-        static_cast<i32>(newWave.AttackTime * newWave.AttackTime * 100000.0f),
-        static_cast<i32>(newWave.SustainTime * newWave.SustainTime * 100000.0f),
-        static_cast<i32>(newWave.DecayTime * newWave.DecayTime * 100000.0f)};
+        arpeggio.reset(wave);
+    }};
 
-    f32 fphase {std::pow(newWave.PhaserOffset, 2.0f) * 1020.0f};
-    if (newWave.PhaserOffset < 0.0f) {
-        fphase = -fphase;
-    }
+    reset_sample_parameters();
 
-    f32 fdphase {std::pow(newWave.PhaserSweep, 2.0f) * 1.0f};
-    if (newWave.PhaserSweep < 0.0f) {
-        fdphase = -fdphase;
-    }
+    // filter
+    filter filter {wave};
 
-    i32 iphase {0};
+    // vibrato
+    vibrato vibrato {wave};
 
-    std::array<f32, 32> noiseBuffer {}; // Required for noise wave, depends on random seed!
-    if (newWave.WaveType == sound_wave::type::Noise) {
-        generate_noise(noiseBuffer, noiseRandom);
-    }
+    // envelope
+    envelope envelope {wave};
 
-    i32 repeatLimit {newWave.RepeatSpeed == 0.0f
+    // phaser
+    phaser phaser {wave};
+
+    // noise
+    noise noise {wave};
+    if (wave.WaveType == sound_wave::type::Noise) { noise.generate(); }
+
+    i32 repeatLimit {wave.RepeatSpeed == 0.0f
                          ? 0
-                         : static_cast<i32>(std::pow(1.0f - newWave.RepeatSpeed, 2.0f) * 20000 + 32)};
-
-    //----------------------------------------------------------------------------------------
+                         : static_cast<i32>(std::pow(1.0f - wave.RepeatSpeed, 2.0f) * 20000 + 32)};
 
     // NOTE: We reserve enough space for up to 10 seconds of wave audio at given sample rate
     // By default we use f32 size samples, they are converted to desired sample size at the end
     std::vector<f32> samples;
     samples.resize(MAX_WAVE_LENGTH_SECONDS * wave.SampleRate);
 
-    bool                  generatingSample {true};
-    i32                   sampleCount {0};
-    i32                   phase {0};
-    i32                   envelopeStage {0};
-    i32                   envelopeTime {0};
-    f32                   envelopeVolume {0.0f};
-    i32                   ipp {0};
-    f32                   fltp {0.0f};
-    f32                   fltdp {0.0f};
-    f32                   fltphp {0.0f};
-    f32                   vibratoPhase {0.0f};
-    i32                   repeatTime {0};
-    i32                   arpeggioTime {0};
-    std::array<f32, 1024> phaserBuffer {};
+    bool generatingSample {true};
+    i32  sampleCount {0};
+    i32  phase {0};
 
-    for (i32 i {0}; i < MAX_WAVE_LENGTH_SECONDS * wave.SampleRate; i++) {
+    for (i32 i {0}; i < MAX_WAVE_LENGTH_SECONDS * wave.SampleRate; ++i) {
         if (!generatingSample) {
             sampleCount = i;
             break;
         }
 
         // Generate sample using selected parameters
-        //------------------------------------------------------------------------------------
-        repeatTime++;
+        ++repeatTime;
 
         if (repeatLimit != 0 && repeatTime >= repeatLimit) {
             // Reset sample parameters (only some of them)
-            repeatTime = 0;
-
-            fperiod     = 100.0 / (newWave.StartFrequency * newWave.StartFrequency + 0.001);
-            fmaxperiod  = 100.0 / (newWave.MinFrequency * newWave.MinFrequency + 0.001);
-            fslide      = 1.0 - std::pow(static_cast<f64>(newWave.Slide), 3.0) * 0.01;
-            fdslide     = -std::pow(static_cast<f64>(newWave.DeltaSlide), 3.0) * 0.000001;
-            squareDuty  = 0.5f - newWave.SquareDuty * 0.5f;
-            squareSlide = -newWave.DutySweep * 0.00005f;
-
-            arpeggioModulation = newWave.ChangeAmount >= 0.0f
-                ? 1.0 - std::pow(static_cast<f64>(newWave.ChangeAmount), 2.0) * 0.9
-                : 1.0 + std::pow(static_cast<f64>(newWave.ChangeAmount), 2.0) * 10.0;
-
-            arpeggioTime  = 0;
-            arpeggioLimit = newWave.ChangeSpeed == 1.0f
-                ? 0
-                : static_cast<i32>(std::pow(1.0f - newWave.ChangeSpeed, 2.0f) * 20000 + 32);
+            reset_sample_parameters();
         }
 
         // Frequency envelopes/arpeggios
-        arpeggioTime++;
-
-        if (arpeggioLimit != 0 && arpeggioTime >= arpeggioLimit) {
-            arpeggioLimit = 0;
-            fperiod *= arpeggioModulation;
-        }
+        arpeggio.apply(fperiod);
 
         fslide += fdslide;
         fperiod *= fslide;
@@ -523,81 +425,41 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
         if (fperiod > fmaxperiod) {
             fperiod = fmaxperiod;
 
-            if (newWave.MinFrequency > 0.0f) {
-                generatingSample = false;
-            }
+            if (wave.MinFrequency > 0.0f) { generatingSample = false; }
         }
-
-        f32 rfperiod {static_cast<f32>(fperiod)};
-
-        if (vibratoAmplitude > 0.0f) {
-            vibratoPhase += vibratoSpeed;
-            rfperiod = static_cast<f32>(fperiod * (1.0f + std::sin(vibratoPhase) * vibratoAmplitude));
-        }
-
-        i32 const period {std::max(8, static_cast<i32>(rfperiod))};
-
-        squareDuty += squareSlide;
-        squareDuty = std::clamp(squareDuty, 0.0f, 0.5f);
 
         // Volume envelope
-        envelopeTime++;
+        if (!envelope.increment_time()) { generatingSample = false; }
 
-        while (envelopeTime > envelopeLength[envelopeStage]) {
-            envelopeTime = 0;
-            envelopeStage++;
+        // Phaser
+        phaser.step();
 
-            if (envelopeStage == 3) {
-                generatingSample = false;
-                break;
-            }
-        }
+        // Filter
+        filter.step();
 
-        switch (envelopeStage) {
-        case 0:
-            envelopeVolume = static_cast<f32>(envelopeTime) / static_cast<f32>(envelopeLength[0]);
-            break;
-        case 1:
-            envelopeVolume = 1.0f + std::pow(1.0f - static_cast<f32>(envelopeTime) / static_cast<f32>(envelopeLength[1]), 1.0f) * 2.0f * newWave.SustainPunch;
-            break;
-        case 2:
-            envelopeVolume = 1.0f - static_cast<f32>(envelopeTime) / static_cast<f32>(envelopeLength[2]);
-            break;
-        default:
-            break;
-        }
-
-        // Phaser step
-        fphase += fdphase;
-        iphase = std::min(1023, std::abs(static_cast<i32>(fphase)));
-
-        if (flthpd != 0.0f) {
-            flthp *= flthpd;
-            flthp = std::clamp(flthp, 0.00001f, 0.1f);
-        }
-
-        f32 ssample {0.0f};
+        i32 const period {std::max(8, static_cast<i32>(vibrato.get(fperiod)))};
+        f32       ssample {0.0f};
 
         // Supersampling x8
         for (i32 si {0}; si < MAX_SUPERSAMPLING; ++si) {
-            f32 sample {0.0f};
-            phase++;
+            ++phase;
 
             if (phase >= period) {
                 phase %= period;
-
-                if (newWave.WaveType == sound_wave::type::Noise) {
-                    generate_noise(noiseBuffer, noiseRandom);
-                }
+                if (wave.WaveType == sound_wave::type::Noise) { noise.generate(); }
             }
 
             // base waveform
             f32 const fp {static_cast<f32>(phase) / static_cast<f32>(period)};
 
-            switch (newWave.WaveType) {
-            case sound_wave::type::Square:
-                sample = fp < squareDuty ? 0.5f : -0.5f;
-                break;
+            f32 sample {0.0f};
+
+            switch (wave.WaveType) {
+            case sound_wave::type::Square: {
+                squareDuty += squareSlide;
+                squareDuty = std::clamp(squareDuty, 0.0f, 0.5f);
+                sample     = fp < squareDuty ? 0.5f : -0.5f;
+            } break;
             case sound_wave::type::Sawtooth:
                 sample = 1.0f - fp * 2;
                 break;
@@ -605,42 +467,21 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
                 sample = std::sin(fp * TAU_F);
                 break;
             case sound_wave::type::Noise:
-                sample = noiseBuffer[phase * 32 / period];
+                sample = noise.get(phase * 32 / period);
                 break;
             case sound_wave::type::Triangle:
                 sample = 1.0f - std::abs(std::round(fp) - fp) * 4;
                 break;
             }
 
-            // LP filter
-            f32 const pp {fltp};
-            fltw *= fltwd;
-
-            fltw = std::clamp(fltw, 0.0f, 0.1f);
-
-            if (newWave.LowPassFilterCutoff != 1.0f) // WATCH OUT!
-            {
-                fltdp += (sample - fltp) * fltw;
-                fltdp -= fltdp * fltdmp;
-            } else {
-                fltp  = sample;
-                fltdp = 0.0f;
-            }
-
-            fltp += fltdp;
-
-            // HP filter
-            fltphp += fltp - pp;
-            fltphp -= fltphp * flthp;
-            sample = fltphp;
+            // Filter
+            filter.apply(sample);
 
             // Phaser
-            phaserBuffer[ipp & 1023] = sample;
-            sample += phaserBuffer[(ipp - iphase + 1024) & 1023];
-            ipp = (ipp + 1) & 1023;
+            phaser.apply(sample);
 
             // Final accumulation and envelope application
-            ssample += sample * envelopeVolume;
+            ssample += sample * envelope.get();
         }
 
         ssample = (ssample / MAX_SUPERSAMPLING) * SAMPLE_SCALE_COEFICIENT;
@@ -666,4 +507,37 @@ auto sound_generator::create_sound [[nodiscard]] (buffer const& buffer, sound_wa
     return sound {albuffer};
 }
 
+////////////////////////////////////////////////////////////
+
+void sound_wave::sanitize()
+{
+    AttackTime   = std::clamp(AttackTime, 0.0f, 1.0f);
+    SustainTime  = std::clamp(SustainTime, 0.0f, 1.0f);
+    SustainPunch = std::clamp(SustainPunch, 0.0f, 1.0f);
+    DecayTime    = std::clamp(DecayTime, 0.0f, 1.0f);
+
+    MinFrequency   = std::clamp(MinFrequency, 0.0f, 1.0f);
+    StartFrequency = std::clamp(std::max(MinFrequency, StartFrequency), 0.0f, 1.0f);
+    DeltaSlide     = std::clamp(DeltaSlide, -1.0f, 1.0f);
+    Slide          = std::clamp(Slide, -1.0f, 1.0f);
+    VibratoDepth   = std::clamp(VibratoDepth, 0.0f, 1.0f);
+    VibratoSpeed   = std::clamp(VibratoSpeed, 0.0f, 1.0f);
+
+    ChangeAmount = std::clamp(ChangeAmount, -1.0f, 1.0f);
+    ChangeSpeed  = std::clamp(ChangeSpeed, 0.0f, 1.0f);
+
+    SquareDuty = std::clamp(SquareDuty, 0.0f, 1.0f);
+    DutySweep  = std::clamp(DutySweep, -1.0f, 1.0f);
+
+    RepeatSpeed = std::clamp(RepeatSpeed, 0.0f, 1.0f);
+
+    PhaserOffset = std::clamp(PhaserOffset, -1.0f, 1.0f);
+    PhaserSweep  = std::clamp(PhaserSweep, -1.0f, 1.0f);
+
+    LowPassFilterCutoff       = std::clamp(LowPassFilterCutoff, 0.0f, 1.0f);
+    LowPassFilterCutoffSweep  = std::clamp(LowPassFilterCutoffSweep, -1.0f, 1.0f);
+    LowPassFilterResonance    = std::clamp(LowPassFilterResonance, 0.0f, 1.0f);
+    HighPassFilterCutoff      = std::clamp(HighPassFilterCutoff, 0.0f, 1.0f);
+    HighPassFilterCutoffSweep = std::clamp(HighPassFilterCutoffSweep, -1.0f, 1.0f);
+}
 }
