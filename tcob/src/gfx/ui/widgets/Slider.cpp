@@ -186,7 +186,7 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(i32 newVal)
 {
-    f32 const   newFrac {static_cast<f32>(newVal - Min) / (Max - Min)};
+    f32 const   newFrac {Max != Min ? static_cast<f32>(newVal - Min) / (Max - Min) : 0.f};
     auto const* style {get_style<slider::style>()};
     if (style && !_overThumb && !_isDragging) {
         _tween.start(newFrac, style->Bar.Delay);
