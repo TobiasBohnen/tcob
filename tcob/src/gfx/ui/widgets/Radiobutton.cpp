@@ -69,7 +69,7 @@ auto radio_button::get_attributes() const -> widget_attributes
     return retValue;
 }
 
-auto radio_button::get_flags() -> flags
+auto radio_button::get_flags() -> widget_flags
 {
     auto retValue {widget::get_flags()};
     retValue.Checked = Checked;

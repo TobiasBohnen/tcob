@@ -297,20 +297,33 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API style_flags final {
+public:
+    std::optional<bool> Focus {};
+    std::optional<bool> Active {};
+    std::optional<bool> Hover {};
+    std::optional<bool> Checked {};
+    std::optional<bool> Disabled {};
+
+    auto check(widget_flags other) const -> i32;
+
+    auto operator==(style_flags const& other) const -> bool = default;
+};
+
 class TCOB_API style_collection final {
 public:
     template <std::derived_from<style_base> T>
-    auto create(string const& name, flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<T>;
+    auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<T>;
 
     template <std::derived_from<widget> T>
-    auto create(string const& name, flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<typename T::style>;
+    auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<typename T::style>;
 
-    auto get(string const& name, flags flags, widget_attributes const& attribs) const -> style_base*;
+    auto get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style_base*;
 
     void clear();
 
 private:
-    std::vector<std::tuple<string, flags, style_attributes, std::shared_ptr<style_base>>> _styles;
+    std::vector<std::tuple<string, style_flags, style_attributes, std::shared_ptr<style_base>>> _styles;
 };
 
 }

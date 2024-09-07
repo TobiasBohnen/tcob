@@ -67,32 +67,6 @@ thickness::thickness(length all)
 
 ////////////////////////////////////////////////////////////
 
-auto flags::check(flags other) const -> i32
-{
-    i32 retValue {0};
-
-    auto const myBits {as_array()};
-    auto const otherBits {other.as_array()};
-
-    for (u32 i {0}; i < Size; ++i) {
-        if (myBits[i] && !otherBits[i]) {
-            return std::numeric_limits<i32>::min();
-        }
-        if (myBits[i] && otherBits[i]) {
-            ++retValue;
-        }
-    }
-
-    return retValue;
-}
-
-auto flags::as_array() const -> std::array<bool, Size>
-{
-    return {Focus, Hover, Active, Checked, Disabled};
-}
-
-////////////////////////////////////////////////////////////
-
 namespace detail {
     void input_injector::on_key_down(widget* widget, input::keyboard::event& ev) const
     {

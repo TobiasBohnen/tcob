@@ -56,7 +56,7 @@ auto checkbox::get_attributes() const -> widget_attributes
     return retValue;
 }
 
-auto checkbox::get_flags() -> flags
+auto checkbox::get_flags() -> widget_flags
 {
     auto retValue {widget::get_flags()};
     retValue.Checked = Checked;

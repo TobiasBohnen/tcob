@@ -109,7 +109,7 @@ protected:
     auto get_styles() const -> style_collection const&;
 
     template <std::derived_from<style_base> T>
-    auto get_sub_style(string const& styleClass, flags flags) const -> T*;
+    auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;
 
     void virtual on_paint(widget_painter& painter) = 0;
 
@@ -139,7 +139,7 @@ protected:
     void virtual on_bounds_changed();
 
     auto virtual get_attributes() const -> widget_attributes;
-    auto virtual get_flags() -> flags;
+    auto virtual get_flags() -> widget_flags;
 
     auto get_orientation() const -> orientation;
 
@@ -172,15 +172,15 @@ private:
 
     tcob::detail::connection_manager _connections;
 
-    bool        _visible {true};
-    bool        _enabled {true};
-    bool        _inert {false};
-    flags       _flags {};
-    f32         _alpha {1.0f};
-    form*       _form {nullptr};
-    widget*     _parent {nullptr};
-    style_base* _style {nullptr};
-    string      _name;
+    bool         _visible {true};
+    bool         _enabled {true};
+    bool         _inert {false};
+    widget_flags _flags {};
+    f32          _alpha {1.0f};
+    form*        _form {nullptr};
+    widget*      _parent {nullptr};
+    style_base*  _style {nullptr};
+    string       _name;
 };
 
 ////////////////////////////////////////////////////////////

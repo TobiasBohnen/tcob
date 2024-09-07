@@ -65,9 +65,9 @@ void slider::on_paint(widget_painter& painter)
              .Fraction    = _tween.get_current_value()});
 
         // thumb
-        auto const thumbFlags {!_overThumb              ? flags {}
-                                   : get_flags().Active ? flags {.Active = true}
-                                                        : flags {.Hover = true}};
+        auto const thumbFlags {!_overThumb              ? widget_flags {}
+                                   : get_flags().Active ? widget_flags {.Active = true}
+                                                        : widget_flags {.Hover = true}};
         _paintResult.Thumb = painter.draw_thumb(
             get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb,
             rect,

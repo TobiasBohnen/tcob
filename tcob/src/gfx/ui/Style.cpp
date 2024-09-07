@@ -28,7 +28,26 @@ auto style_attributes::check(widget_attributes const& widgetAttribs) const -> bo
 
 ////////////////////////////////////////////////////////////
 
-auto style_collection::get(string const& name, flags flags, widget_attributes const& attribs) const -> style_base*
+auto style_flags::check(widget_flags other) const -> i32
+{
+    i32                                      retValue {0};
+    std::array<std::optional<bool>, 5> const flagSet {Focus, Active, Hover, Checked, Disabled};
+    std::array<bool, 5> const                otherFlagSet {other.Focus, other.Active, other.Hover, other.Checked, other.Disabled};
+
+    for (usize i {0}; i < flagSet.size(); ++i) {
+        if (flagSet[i]) {
+            if (*flagSet[i] != otherFlagSet[i]) {
+                return std::numeric_limits<i32>::min();
+            }
+            ++retValue;
+        }
+    }
+    return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+auto style_collection::get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style_base*
 {
     style_base* bestCandidate {nullptr};
     i32         bestScore {std::numeric_limits<i32>::min()};

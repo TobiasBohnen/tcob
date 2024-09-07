@@ -68,7 +68,7 @@ auto toggle::get_attributes() const -> widget_attributes
     return retValue;
 }
 
-auto toggle::get_flags() -> flags
+auto toggle::get_flags() -> widget_flags
 {
     auto retValue {widget::get_flags()};
     retValue.Checked = _tween.get_current_value() >= 0.5f;

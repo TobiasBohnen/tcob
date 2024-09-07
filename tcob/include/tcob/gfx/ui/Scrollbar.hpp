@@ -39,7 +39,7 @@ private:
     auto requires_scroll(rect_f const& rect) const -> bool;
     void calculate_value(point_f mp);
 
-    auto get_thumb_style(flags flags) -> thumb_style*;
+    auto get_thumb_style(widget_flags flags) -> thumb_style*;
 
     bool    _isDragging {false};
     bool    _overThumb {false};

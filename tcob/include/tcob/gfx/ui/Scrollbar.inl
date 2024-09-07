@@ -40,9 +40,9 @@ inline void scrollbar<Parent>::paint(widget_painter& painter, element::scrollbar
             .Fraction    = frac};
 
         rect_f const scrRect {rect};
-        auto const   thumbFlags {!_overThumb    ? flags {}
-                                     : isActive ? flags {.Active = true}
-                                                : flags {.Hover = true}};
+        auto const   thumbFlags {!_overThumb    ? widget_flags {}
+                                     : isActive ? widget_flags {.Active = true}
+                                                : widget_flags {.Hover = true}};
         _paintResult = painter.draw_scrollbar(style, get_thumb_style(thumbFlags)->Thumb, scrRect, barCtx);
 
         if (_orien == orientation::Vertical) {
@@ -196,7 +196,7 @@ inline void scrollbar<Parent>::calculate_value(point_f mp)
 }
 
 template <typename Parent>
-inline auto scrollbar<Parent>::get_thumb_style(flags flags) -> thumb_style*
+inline auto scrollbar<Parent>::get_thumb_style(widget_flags flags) -> thumb_style*
 {
     if (auto* const style {_parent.get_scroll_style(_orien)}) {
         return static_cast<thumb_style*>(_parent.get_form()->Styles->get(style->ThumbClass, flags, {}));

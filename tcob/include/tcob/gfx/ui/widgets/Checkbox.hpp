@@ -32,6 +32,6 @@ protected:
     void on_click() override;
 
     auto get_attributes() const -> widget_attributes override;
-    auto get_flags() -> flags override;
+    auto get_flags() -> widget_flags override;
 };
 }
