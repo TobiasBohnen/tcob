@@ -13,7 +13,8 @@
 namespace tcob::gfx {
 using namespace std::chrono_literals;
 
-particle_system::particle_system()
+particle_system::particle_system(bool multiThreaded)
+    : _multiThreaded {multiThreaded}
 {
     Material.Changed.connect([&](auto const& value) { _renderer.set_material(value); });
 }
@@ -60,7 +61,7 @@ void particle_system::clear_emitters()
     stop();
 }
 
-auto particle_system::get_particle_count() const -> isize
+auto particle_system::get_particle_count() const -> i32
 {
     return _aliveParticleCount;
 }
@@ -77,6 +78,7 @@ auto particle_system::activate_particle() -> particle&
 
 void particle_system::deactivate_particle(particle& particle)
 {
+    assert(_aliveParticleCount > 0);
     std::swap(particle, _particles[--_aliveParticleCount]);
 }
 
@@ -105,7 +107,7 @@ void particle_system::on_update(milliseconds deltaTime)
                 }
             }
         },
-        static_cast<i32>(_aliveParticleCount));
+        _aliveParticleCount, _multiThreaded ? 1 : _aliveParticleCount);
 
     for (auto const& i : toBeDeactivated) {
         deactivate_particle(_particles[i]);
@@ -133,7 +135,7 @@ void particle_system::on_draw_to(render_target& target)
                 }
             }
         },
-        static_cast<i32>(_aliveParticleCount));
+        _aliveParticleCount, _multiThreaded ? 1 : _aliveParticleCount);
 
     _renderer.set_geometry({quads.data(), count});
 

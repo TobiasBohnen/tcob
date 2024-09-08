@@ -117,7 +117,7 @@ struct particle_event {
 
 class TCOB_API particle_system final : public drawable {
 public:
-    particle_system();
+    explicit particle_system(bool multiThreaded = false);
     ~particle_system() override = default;
 
     signal<particle_event const> ParticleUpdate;
@@ -137,7 +137,7 @@ public:
     void remove_emitter(particle_emitter const& emitter);
     void clear_emitters();
 
-    auto get_particle_count() const -> isize;
+    auto get_particle_count() const -> i32;
 
     auto activate_particle() -> particle&;
     void deactivate_particle(particle& particle);
@@ -152,10 +152,11 @@ private:
     bool                                           _isRunning {false};
     quad_renderer                                  _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<particle>                          _particles {};
-    isize                                          _aliveParticleCount {0};
+    i32                                            _aliveParticleCount {0};
     std::vector<std::shared_ptr<particle_emitter>> _emitters {};
 
     std::mutex _mutex {};
+    bool       _multiThreaded;
 };
 
 }
