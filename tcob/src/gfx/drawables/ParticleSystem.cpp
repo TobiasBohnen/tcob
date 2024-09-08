@@ -4,6 +4,8 @@
 // https://opensource.org/licenses/MIT
 
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -18,9 +20,7 @@ particle_system::particle_system()
 
 void particle_system::start()
 {
-    if (_isRunning) {
-        return;
-    }
+    if (_isRunning) { return; }
 
     _isRunning = true;
     for (auto& emitter : _emitters) {
@@ -47,6 +47,19 @@ void particle_system::stop()
     _aliveParticleCount = 0;
 }
 
+void particle_system::remove_emitter(particle_emitter const& emitter)
+{
+    _emitters.erase(std::find_if(_emitters.begin(), _emitters.end(), [&emitter](auto const& val) {
+        return val.get() == &emitter;
+    }));
+}
+
+void particle_system::clear_emitters()
+{
+    _emitters.clear();
+    stop();
+}
+
 auto particle_system::get_particle_count() const -> isize
 {
     return _aliveParticleCount;
@@ -56,35 +69,20 @@ auto particle_system::activate_particle() -> particle&
 {
     if (_aliveParticleCount == std::ssize(_particles)) {
         _aliveParticleCount++;
-        auto& particle {_particles.emplace_back()};
-        ParticleSpawn(particle);
-        return particle;
+        return _particles.emplace_back();
     }
 
-    auto& particle {_particles[_aliveParticleCount++]};
-    ParticleSpawn(particle);
-    return particle;
+    return _particles[_aliveParticleCount++];
 }
 
 void particle_system::deactivate_particle(particle& particle)
 {
-    ParticleDeath(particle);
     std::swap(particle, _particles[--_aliveParticleCount]);
-}
-
-void particle_system::remove_all_emitters()
-{
-    _emitters.clear();
-    stop();
 }
 
 void particle_system::on_update(milliseconds deltaTime)
 {
-    if (!_isRunning || !Material()) {
-        return;
-    }
-
-    /*     Material->update(deltaTime); */
+    if (!_isRunning || !Material()) { return; }
 
     for (auto& emitter : _emitters) {
         if (emitter->is_alive()) {
@@ -92,19 +90,25 @@ void particle_system::on_update(milliseconds deltaTime)
         }
     }
 
-    for (i32 i {0}; i < _aliveParticleCount; ++i) {
-        auto& particle {_particles[i]};
-        if (particle.is_alive()) {
-            // call affectors on particle
-            ParticleUpdate(particle);
+    std::set<i32, std::greater<>> toBeDeactivated;
 
-            // update
-            particle.update(deltaTime);
+    locate_service<task_manager>().run_parallel(
+        [&](task_context const& ctx) {
+            for (i32 i {ctx.Start}; i < ctx.End; ++i) {
+                auto& particle {_particles[i]};
+                if (particle.is_alive()) {
+                    ParticleUpdate({particle, deltaTime});
+                    particle.update(deltaTime);
+                } else {
+                    std::scoped_lock lock {_mutex};
+                    toBeDeactivated.insert(i);
+                }
+            }
+        },
+        static_cast<i32>(_aliveParticleCount));
 
-        } else {
-            deactivate_particle(particle);
-            i--;
-        }
+    for (auto const& i : toBeDeactivated) {
+        deactivate_particle(_particles[i]);
     }
 }
 
@@ -115,20 +119,22 @@ auto particle_system::can_draw() const -> bool
 
 void particle_system::on_draw_to(render_target& target)
 {
-    usize count {0};
-
     std::vector<quad> quads;
     quads.reserve(_aliveParticleCount);
-    quad* quad {quads.data()};
+    std::atomic<usize> count {0};
 
-    for (i32 i {0}; i < _aliveParticleCount; ++i) {
-        auto& particle {_particles[i]};
-        if (particle.Visible) {
-            particle.to_quad(quad);
-            ++quad;
-            ++count;
-        }
-    }
+    locate_service<task_manager>().run_parallel(
+        [&](task_context const& ctx) {
+            for (i32 i {ctx.Start}; i < ctx.End; ++i) {
+                auto& particle {_particles[i]};
+                if (particle.Visible) {
+                    particle.to_quad(&quads[i]);
+                    ++count;
+                }
+            }
+        },
+        static_cast<i32>(_aliveParticleCount));
+
     _renderer.set_geometry({quads.data(), count});
 
     _renderer.render_to_target(target);
@@ -142,12 +148,14 @@ particle_emitter::~particle_emitter() = default;
 
 auto particle_emitter::is_alive() const -> bool
 {
-    return _remainLife > 0ms || IsLooping;
+    return !Lifetime || _remainLife > 0ms;
 }
 
 void particle_emitter::reset()
 {
-    _remainLife = Lifetime;
+    if (Lifetime) {
+        _remainLife = *Lifetime;
+    }
 }
 
 void particle_emitter::emit_particles(particle_system& system, milliseconds time)
@@ -173,7 +181,7 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
         particle.Spin         = _randomGen(Template.Spin.first.Value, Template.Spin.second.Value);
         particle.Acceleration = _randomGen(Template.Acceleration.first, Template.Acceleration.second);
         particle.UserData     = 0;
-        particle.Color        = color {255, 255, 255, alpha};
+        particle.Color        = color {Template.Color.R, Template.Color.G, Template.Color.B, static_cast<u8>((Template.Color.A + alpha) / 2)};
 
         // set scale
         f32 const scaleF {_randomGen(Template.Scale.first, Template.Scale.second)};

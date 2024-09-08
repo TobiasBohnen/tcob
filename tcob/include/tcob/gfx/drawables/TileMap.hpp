@@ -102,7 +102,7 @@ namespace detail {
             i32     TileCount {0};
             i32     TileMapStart {0};
             point_i Offset {point_i::Zero};
-            bool    IsVisible {true};
+            bool    Visible {true};
         };
 
         std::vector<layer> _layers {};

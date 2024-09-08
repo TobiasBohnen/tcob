@@ -55,13 +55,13 @@ namespace detail {
 
     auto tilemap_base::is_visible(usize layerIdx) const -> bool
     {
-        return _layers.at(layerIdx).IsVisible;
+        return _layers.at(layerIdx).Visible;
     }
 
     void tilemap_base::set_visible(usize layerIdx, bool visible)
     {
-        _layers.at(layerIdx).IsVisible = visible;
-        _isDirty                       = true;
+        _layers.at(layerIdx).Visible = visible;
+        _isDirty                     = true;
     }
 
     auto tilemap_base::get_size(usize layerIdx) const -> size_i
@@ -86,7 +86,7 @@ namespace detail {
             _quads.clear();
             _quads.reserve(_tileMap.size());
             for (auto const& layer : _layers) {
-                if (!layer.IsVisible) { continue; }
+                if (!layer.Visible) { continue; }
 
                 for (i32 i {0}; i < layer.TileCount; ++i) {
                     auto const setIdx {_tileMap[i + layer.TileMapStart]};

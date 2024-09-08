@@ -43,6 +43,7 @@ class toggle;
 // class video_control;
 // class menu;
 // class context_menu;
+// class range_slider;
 
 // displays
 class dot_matrix_display;

@@ -60,7 +60,8 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-struct particle_template {
+class TCOB_API [[nodiscard]] particle_template {
+public:
     std::pair<f32, f32>                   Acceleration;
     std::pair<degree_f, degree_f>         Direction;
     std::pair<milliseconds, milliseconds> Lifetime;
@@ -69,25 +70,35 @@ struct particle_template {
     std::pair<f32, f32>                   Speed;
     std::pair<degree_f, degree_f>         Spin;
     string                                Texture;
+    color                                 Color;
     std::pair<f32, f32>                   Transparency;
+
+    void static Serialize(particle_template const& v, auto&& s);
+    auto static Deserialize(particle_template& v, auto&& s) -> bool;
+
+    auto operator==(particle_template const& other) const -> bool = default;
 };
+
+////////////////////////////////////////////////////////////
 
 class TCOB_API particle_emitter final {
 public:
     particle_emitter();
     virtual ~particle_emitter();
 
-    particle_template Template;
-    rect_f            SpawnArea {rect_f::Zero};
-    f32               SpawnRate {0};
-    bool              IsLooping {false};
-    milliseconds      Lifetime {1000};
+    particle_template           Template;
+    rect_f                      SpawnArea {rect_f::Zero};
+    f32                         SpawnRate {0};
+    std::optional<milliseconds> Lifetime {};
 
     auto is_alive() const -> bool;
 
     void reset();
 
     void virtual emit_particles(particle_system& system, milliseconds time);
+
+    void static Serialize(particle_emitter const& v, auto&& s);
+    auto static Deserialize(particle_emitter& v, auto&& s) -> bool;
 
 private:
     rng          _randomGen;
@@ -97,19 +108,22 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+struct particle_event {
+    particle&    Particle;
+    milliseconds Time;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API particle_system final : public drawable {
 public:
     particle_system();
     ~particle_system() override = default;
 
-    signal<particle> ParticleSpawn;
-    signal<particle> ParticleDeath;
-    signal<particle> ParticleUpdate;
+    signal<particle_event const> ParticleUpdate;
 
     prop<assets::asset_ptr<material>> Material;
     point_f                           Position;
-
-    auto get_particle_count() const -> isize;
 
     void start();
     void restart();
@@ -117,9 +131,16 @@ public:
 
     template <typename T = particle_emitter>
     auto create_emitter(auto&&... args) -> std::shared_ptr<T>;
-    void remove_all_emitters();
+    template <typename T = particle_emitter>
+    void add_emitter(std::shared_ptr<T> const& emitter);
+
+    void remove_emitter(particle_emitter const& emitter);
+    void clear_emitters();
+
+    auto get_particle_count() const -> isize;
 
     auto activate_particle() -> particle&;
+    void deactivate_particle(particle& particle);
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -128,20 +149,15 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    void deactivate_particle(particle& particle);
-
     bool                                           _isRunning {false};
     quad_renderer                                  _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<particle>                          _particles {};
     isize                                          _aliveParticleCount {0};
     std::vector<std::shared_ptr<particle_emitter>> _emitters {};
+
+    std::mutex _mutex {};
 };
 
-template <typename T>
-inline auto particle_system::create_emitter(auto&&... args) -> std::shared_ptr<T>
-{
-    auto retValue {std::make_shared<T>(args...)};
-    _emitters.push_back(retValue);
-    return retValue;
 }
-}
+
+#include "ParticleSystem.inl"
