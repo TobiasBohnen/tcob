@@ -7,9 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <bitset>
+#include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -25,9 +25,8 @@ public:
             Square
         };
 
-        length               Size;
-        flat_map<u16, color> Colors;
-        type                 Type {type::Disc};
+        std::unordered_map<u16, color> Colors;
+        type                           Type {type::Disc};
     };
 
     class TCOB_API style : public background_style {
@@ -37,13 +36,17 @@ public:
 
     explicit dot_matrix_display(init const& wi);
 
-    prop<size_i>           Size;
-    prop<std::vector<u16>> Dots;
+    prop<size_i>                 Size;
+    prop<std::vector<u16> const> Dots;
 
 protected:
     void on_paint(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
+
+private:
+    bool                                          _isDirty {false};
+    std::unordered_map<u16, std::vector<point_i>> _sortedDots;
 };
 
 ////////////////////////////////////////////////////////////
