@@ -8,7 +8,6 @@
 
 #include <unordered_map>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
@@ -299,7 +298,7 @@ public:
     static inline char const* service_name {"input_system"};
 
 private:
-    flat_map<i32, std::shared_ptr<controller>> _controllers;
+    std::unordered_map<i32, std::shared_ptr<controller>> _controllers;
 };
 
 ////////////////////////////////////////////////////////////

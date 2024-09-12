@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/TypeFactory.hpp"
@@ -26,12 +25,12 @@ struct stat {
 };
 
 struct bucket_stats {
-    flat_map<string, stat> Assets;
-    flat_map<status, i32>  Statuses;
+    std::unordered_map<string, stat> Assets;
+    std::unordered_map<status, i32>  Statuses;
 };
 
 struct group_stats {
-    flat_map<string, bucket_stats> Buckets;
+    std::unordered_map<string, bucket_stats> Buckets;
 };
 
 ////////////////////////////////////////////////////////////
@@ -130,9 +129,9 @@ public:
     void destroy();
 
 private:
-    string                                                 _name;
-    flat_map<string, std::unique_ptr<detail::bucket_base>> _buckets;
-    flat_map<string, std::unique_ptr<loader_manager>>      _loaderManagers;
+    string                                                           _name;
+    std::unordered_map<string, std::unique_ptr<detail::bucket_base>> _buckets;
+    std::unordered_map<string, std::unique_ptr<loader_manager>>      _loaderManagers;
 };
 
 ////////////////////////////////////////////////////////////
@@ -161,7 +160,7 @@ public:
     auto get_asset_stats(string const& groupName) const -> group_stats;
 
 private:
-    flat_map<string, std::unique_ptr<group>> _groups {};
+    std::unordered_map<string, std::unique_ptr<group>> _groups {};
 };
 
 ////////////////////////////////////////////////////////////

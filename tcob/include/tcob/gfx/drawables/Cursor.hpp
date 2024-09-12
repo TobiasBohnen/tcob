@@ -6,7 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/FlatMap.hpp"
+#include <unordered_map>
+
 #include "tcob/core/Property.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -41,10 +42,10 @@ private:
         point_i Hotspot {point_i::Zero};
     };
 
-    flat_map<string, cursor_mode> _modes {};
-    cursor_mode                   _currentMode {};
-    vertex                        _vertex {};
-    point_renderer                _renderer {buffer_usage_hint::StreamDraw};
-    i32                           _size {0};
+    std::unordered_map<string, cursor_mode> _modes {};
+    cursor_mode                             _currentMode {};
+    vertex                                  _vertex {};
+    point_renderer                          _renderer {buffer_usage_hint::StreamDraw};
+    i32                                     _size {0};
 };
 }

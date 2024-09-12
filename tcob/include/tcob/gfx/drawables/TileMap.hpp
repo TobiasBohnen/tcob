@@ -6,9 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
@@ -30,7 +30,7 @@ struct tile {
 };
 
 struct tileset {
-    flat_map<tile_index_t, tile> Set;
+    std::unordered_map<tile_index_t, tile> Set;
 };
 
 struct tilemap_layer {

@@ -494,7 +494,6 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
     // check if font data has already been loaded
     if (!_fontData.contains(fontStyle)) {
         auto fs {io::ifstream::Open(_fontSources[fontStyle])};
-        assert(_fontData.capacity() > _fontData.size()); // _fontData shall not reallocate
         _fontData[fontStyle] = fs->read_all<ubyte>();
     }
 

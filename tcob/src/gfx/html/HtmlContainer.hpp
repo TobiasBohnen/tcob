@@ -9,9 +9,9 @@
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
 
     #include <functional>
+    #include <unordered_map>
     #include <vector>
 
-    #include "tcob/core/FlatMap.hpp"
     #include "tcob/gfx/Font.hpp"
     #include "tcob/gfx/html/HtmlDocument.hpp"
 
@@ -76,14 +76,14 @@ private:
     canvas&           _canvas;
     element_painter&  _painter;
 
-    string                             _baseUrl;
-    string                             _caption;
-    flat_map<string, texture*>         _images {};
-    std::vector<font*>                 _fonts;
-    flat_map<usize, u32>               _fontDecorations {};
-    std::vector<std::function<void()>> _overlayFunctions;
-    string                             _language {"en"};
-    string                             _culture;
+    string                               _baseUrl;
+    string                               _caption;
+    std::unordered_map<string, texture*> _images {};
+    std::vector<font*>                   _fonts;
+    std::unordered_map<usize, u32>       _fontDecorations {};
+    std::vector<std::function<void()>>   _overlayFunctions;
+    string                               _language {"en"};
+    string                               _culture;
 };
 
 }

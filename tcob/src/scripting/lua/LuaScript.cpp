@@ -11,7 +11,8 @@
     #include <lua.h>
     #include <lualib.h>
 
-    #include "tcob/core/FlatMap.hpp"
+    #include <unordered_map>
+
     #include "tcob/core/Logger.hpp"
 
 namespace tcob::scripting::lua {
@@ -98,7 +99,7 @@ auto script::load_binary_buffer(string_view script, string const& name) const ->
 
 void script::load_library(library lib)
 {
-    static flat_map<library, std::pair<char const*, lua_CFunction>> const libraries {
+    static std::unordered_map<library, std::pair<char const*, lua_CFunction>> const libraries {
         {library::Table, {LUA_TABLIBNAME, luaopen_table}},
         {library::String, {LUA_STRLIBNAME, luaopen_string}},
         {library::Math, {LUA_MATHLIBNAME, luaopen_math}},

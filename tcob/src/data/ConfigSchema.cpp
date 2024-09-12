@@ -80,7 +80,7 @@ auto schema::FromObject(object const& obj) -> std::shared_ptr<schema>
     auto retValue {std::make_shared<schema>()};
 
     if (object propsSec; obj.try_get(propsSec, "Properties")) {
-        flat_map<string, property> props;
+        std::unordered_map<string, property> props;
 
         for (auto const& [k, v] : propsSec) {
             if (object propSec; v.try_get(propSec)) {

@@ -20,7 +20,6 @@
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>
 #include <tcob/core/Common.hpp>
-#include <tcob/core/FlatMap.hpp>
 #include <tcob/core/Formatters.hpp>
 #include <tcob/core/Interfaces.hpp>
 #include <tcob/core/Logger.hpp>

@@ -7,13 +7,13 @@
 #include "tcob/tcob_config.hpp"
 
 #include <future>
+#include <unordered_map>
 #include <vector>
 
 #include "tcob/audio/Music.hpp"
 #include "tcob/audio/Sound.hpp"
 #include "tcob/audio/SoundFont.hpp"
 #include "tcob/core/Common.hpp"
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
@@ -260,15 +260,15 @@ private:
     };
 
     struct tex_asset_def {
-        assets::asset_ptr<gfx::texture>       assetPtr;
-        gfx::texture::filtering               filtering {gfx::texture::filtering::NearestNeighbor};
-        gfx::texture::wrapping                wrapping {gfx::texture::wrapping::Repeat};
-        size_i                                size {size_i::Zero};
-        flat_map<string, gfx::texture_region> abs_regions;
+        assets::asset_ptr<gfx::texture>                 assetPtr;
+        gfx::texture::filtering                         filtering {gfx::texture::filtering::NearestNeighbor};
+        gfx::texture::wrapping                          wrapping {gfx::texture::wrapping::Repeat};
+        size_i                                          size {size_i::Zero};
+        std::unordered_map<string, gfx::texture_region> abs_regions;
 
         std::vector<image_ftr> images;
     };
-    flat_map<string, std::vector<reload_info>> _reloadInfoTex;
+    std::unordered_map<string, std::vector<reload_info>> _reloadInfoTex;
 
     std::vector<std::unique_ptr<tex_asset_def>> _cacheTex;
 

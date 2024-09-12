@@ -25,12 +25,12 @@
 #include "tcob/tcob_config.hpp"
 
 #include <span>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -333,7 +333,7 @@ private:
     bool _edgeAntiAlias {true};
     bool _enforceWinding {true};
 
-    flat_map<i32, assets::manual_asset_ptr<render_texture>> _rtt {};
-    i32                                                     _activeRtt {0};
+    std::unordered_map<i32, assets::manual_asset_ptr<render_texture>> _rtt {};
+    i32                                                               _activeRtt {0};
 };
 }

@@ -115,7 +115,7 @@ auto xml_reader::read_tag_attributes(tag& t) -> bool
             return false;
         }
 
-        t.Attributes.insert(key, value);
+        t.Attributes.emplace(key, value);
 
         skip_whitespace();
         if (peek() == '>' || peek() == '/') {
@@ -247,11 +247,11 @@ auto xml_reader::convert_to_object(element const& n) -> object
     for (auto const& el : n.Children) {
         // entry -> childless, single attribute named 'value' or non-empty value
         if (el->Children.empty()
-            && ((el->Tag.Attributes.size() == 1 && el->Tag.Attributes.front().first == "value")
+            && ((el->Tag.Attributes.size() == 1 && el->Tag.Attributes.begin()->first == "value")
                 || !el->Value.empty())) {
             entry e;
             if (el->Tag.Attributes.size() == 1) {
-                convert_value(e, el->Tag.Attributes.front().first);
+                convert_value(e, el->Tag.Attributes.begin()->first);
             } else {
                 convert_value(e, el->Value);
             }
@@ -292,11 +292,11 @@ auto xml_reader::convert_to_array(element const& n) -> array
     array retValue;
     for (auto const& el : n.Children) {
         if (el->Children.empty()
-            && ((el->Tag.Attributes.size() == 1 && el->Tag.Attributes.front().first == "value")
+            && ((el->Tag.Attributes.size() == 1 && el->Tag.Attributes.begin()->first == "value")
                 || !el->Value.empty())) {
             entry entry;
             if (el->Tag.Attributes.size() == 1) {
-                convert_value(entry, el->Tag.Attributes.front().first);
+                convert_value(entry, el->Tag.Attributes.begin()->first);
             } else {
                 convert_value(entry, el->Value);
             }

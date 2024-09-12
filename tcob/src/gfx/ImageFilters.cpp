@@ -7,8 +7,6 @@
 
 namespace tcob::gfx {
 
-using iterator = tcob::detail::counting_iterator<i32>;
-
 ////////////////////////////////////////////////////////////
 
 auto blur_filter::get_factor() const -> f64

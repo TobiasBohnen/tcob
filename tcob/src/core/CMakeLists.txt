@@ -57,8 +57,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Color.inl
     ${TCOB_INC_DIR}/tcob/core/Common.hpp
     ${TCOB_INC_DIR}/tcob/core/Concepts.hpp
-    ${TCOB_INC_DIR}/tcob/core/FlatMap.hpp
-    ${TCOB_INC_DIR}/tcob/core/FlatMap.inl
     ${TCOB_INC_DIR}/tcob/core/Formatters.hpp
     ${TCOB_INC_DIR}/tcob/core/Interfaces.hpp
     ${TCOB_INC_DIR}/tcob/core/Logger.hpp

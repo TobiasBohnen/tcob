@@ -7,9 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
@@ -100,7 +100,7 @@ private:
     yaml_tokenizer::token _nextToken;
     usize                 _nextTokenIndex {0};
 
-    flat_map<utf8_string, entry> _anchors;
+    std::unordered_map<utf8_string, entry> _anchors;
 };
 
 //////////////////////////////////////////////////////////////////////

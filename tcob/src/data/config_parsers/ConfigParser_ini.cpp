@@ -394,7 +394,7 @@ auto ini_writer::write(ostream& stream, array const& arr) -> bool
 
 void ini_writer::write_section(ostream& stream, object const& obj, utf8_string const& prefix) const
 {
-    flat_map<utf8_string, object> objects;
+    std::unordered_map<utf8_string, object> objects;
     for (auto const& [k, v] : obj) {
         auto const& comment {v.get_comment()};
         for (auto const& c : helper::split(comment.Text, '\n')) {
@@ -405,14 +405,14 @@ void ini_writer::write_section(ostream& stream, object const& obj, utf8_string c
         if (v.is<object>()) {
             if (needsEscape) {
                 if (prefix.empty()) {
-                    objects.insert("'" + k + "'", v.as<object>());
+                    objects.emplace("'" + k + "'", v.as<object>());
                 } else {
                     stream << "'" << k << "' = ";
                     write_entry(stream, v);
                     stream << "\n";
                 }
             } else {
-                objects.insert(k, v.as<object>());
+                objects.emplace(k, v.as<object>());
             }
         } else {
             if (needsEscape) {

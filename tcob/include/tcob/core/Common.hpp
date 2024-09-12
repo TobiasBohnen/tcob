@@ -6,8 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <functional>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -129,93 +127,6 @@ namespace detail {
     template <typename... Ts>
     using last_element_t = typename last_element<Ts...>::type;
 
-    ////////////////////////////////////////////////////////////
-
-    template <typename T>
-    class counting_iterator {
-    public:
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type        = T;
-        using difference_type   = T;
-        using pointer           = T const*;
-        using reference         = T;
-
-        counting_iterator() = default;
-
-        counting_iterator(T value)
-            : _value {value}
-        {
-        }
-
-        auto operator*() const -> T const&
-        {
-            return _value;
-        }
-
-        void operator++()
-        {
-            ++_value;
-        }
-
-        auto operator!=(counting_iterator const& other) const -> bool
-        {
-            return _value != other._value;
-        }
-
-        auto operator+(counting_iterator const& other) const -> T
-        {
-            return _value + other._value;
-        }
-
-        auto operator-(counting_iterator const& other) const -> T
-        {
-            return _value - other._value;
-        }
-
-        auto operator[](T x) -> T
-        {
-            return _value + x;
-        }
-
-    private:
-        T _value {};
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    template <typename T>
-    inline void hash_combine(std::size_t& seed, T const& v)
-    {
-        seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-
-    // Recursive template code derived from Matthieu M.
-    template <typename Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
-    struct hash_value_impl {
-        void static apply(size_t& seed, Tuple const& tuple)
-        {
-            hash_value_impl<Tuple, Index - 1>::apply(seed, tuple);
-            hash_combine(seed, std::get<Index>(tuple));
-        }
-    };
-
-    template <typename Tuple>
-    struct hash_value_impl<Tuple, 0> {
-        void static apply(size_t& seed, Tuple const& tuple)
-        {
-            hash_combine(seed, std::get<0>(tuple));
-        }
-    };
-
-    template <typename T>
-    struct tuple_hasher {
-        auto operator()(T const& tt) const -> size_t
-        {
-            size_t seed = 0;
-            hash_value_impl<T>::apply(seed, tt);
-            return seed;
-        }
-    };
 }
 
 ////////////////////////////////////////////////////////////

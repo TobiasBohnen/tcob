@@ -7,9 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
@@ -24,9 +24,9 @@ class xml_reader : public text_reader {
     };
 
     struct tag {
-        utf8_string                        Name;
-        flat_map<utf8_string, utf8_string> Attributes;
-        tag_type                           Type {};
+        utf8_string                                  Name;
+        std::unordered_map<utf8_string, utf8_string> Attributes;
+        tag_type                                     Type {};
     };
 
     struct element {

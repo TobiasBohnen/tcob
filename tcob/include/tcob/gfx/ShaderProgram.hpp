@@ -6,7 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/FlatMap.hpp"
+#include <unordered_map>
+
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
 namespace tcob::gfx {
@@ -29,7 +30,7 @@ public:
     static inline char const* asset_name {"shader"};
 
 private:
-    flat_map<string, i32> _uniformBlockBindings {};
+    std::unordered_map<string, i32> _uniformBlockBindings {};
 
     std::unique_ptr<render_backend::shader_base> _impl;
 };

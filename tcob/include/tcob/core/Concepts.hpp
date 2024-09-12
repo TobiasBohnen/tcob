@@ -15,8 +15,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "tcob/core/FlatMap.hpp"
-
 ////////////////////////////////////////////////////////////
 namespace tcob {
 
@@ -99,8 +97,7 @@ concept Serializable =
 template <typename T>
 concept Map =
     std::same_as<T, std::map<typename T::key_type, typename T::mapped_type, typename T::key_compare, typename T::allocator_type>>
-    || std::same_as<T, std::unordered_map<typename T::key_type, typename T::mapped_type, typename T::hasher, typename T::key_equal, typename T::allocator_type>>
-    || std::same_as<T, flat_map<typename T::key_type, typename T::value_type>>;
+    || std::same_as<T, std::unordered_map<typename T::key_type, typename T::mapped_type, typename T::hasher, typename T::key_equal, typename T::allocator_type>>;
 
 template <typename T>
 concept Set =

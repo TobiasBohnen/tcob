@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
@@ -160,6 +160,24 @@ inline auto font::style::Deserialize(style& v, auto&& s) -> bool
 }
 
 ////////////////////////////////////////////////////////////
+}
+
+namespace std {
+template <>
+struct hash<tcob::gfx::font::style> {
+    auto operator()(tcob::gfx::font::style const& s) const noexcept -> std::size_t
+    {
+        std::size_t hash_value = 0;
+        hash_value ^= std::hash<bool> {}(s.IsItalic) + 0x9e3779b9 + (hash_value << 6) + (hash_value >> 2);
+        hash_value ^= std::hash<int> {}(static_cast<int>(s.Weight)) + 0x9e3779b9 + (hash_value << 6) + (hash_value >> 2);
+        return hash_value;
+    }
+};
+}
+
+////////////////////////////////////////////////////////////
+
+namespace tcob::gfx {
 
 class TCOB_API font_family final {
 public:
@@ -187,9 +205,9 @@ private:
 
     string _name;
 
-    flat_map<font::style, path>                                          _fontSources;
-    flat_map<font::style, std::vector<ubyte>>                            _fontData;
-    flat_map<font::style, flat_map<u32, assets::manual_asset_ptr<font>>> _fontAssets;
+    std::unordered_map<font::style, path>                                                    _fontSources;
+    std::unordered_map<font::style, std::vector<ubyte>>                                      _fontData;
+    std::unordered_map<font::style, std::unordered_map<u32, assets::manual_asset_ptr<font>>> _fontAssets;
 };
 
 ////////////////////////////////////////////////////////////

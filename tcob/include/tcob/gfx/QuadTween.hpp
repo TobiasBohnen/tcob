@@ -9,9 +9,9 @@
 #include <concepts>
 #include <functional>
 #include <span>
+#include <unordered_map>
 #include <vector>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/core/tweening/Tween.hpp"
@@ -80,7 +80,7 @@ public:
 private:
     void on_update(milliseconds deltaTime) override;
 
-    flat_map<u8, std::shared_ptr<quad_tween_base>> _effects {};
+    std::unordered_map<u8, std::shared_ptr<quad_tween_base>> _effects {};
 };
 
 ////////////////////////////////////////////////////////////

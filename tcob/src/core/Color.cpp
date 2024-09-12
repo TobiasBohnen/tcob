@@ -5,14 +5,15 @@
 
 #include "tcob/core/Color.hpp"
 
-#include "tcob/core/FlatMap.hpp"
+#include <unordered_map>
+
 #include "tcob/core/StringUtils.hpp"
 
 namespace tcob {
 
 auto color::FromString(string_view name) -> color
 {
-    static flat_map<string, color> const colorMap {
+    static std::unordered_map<string, color> const colorMap {
         {"transparent", colors::Transparent},
         {"aliceblue", colors::AliceBlue},
         {"antiquewhite", colors::AntiqueWhite},

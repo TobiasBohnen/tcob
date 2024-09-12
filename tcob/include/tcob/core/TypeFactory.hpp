@@ -7,8 +7,8 @@
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
+#include <unordered_map>
 
-#include "tcob/core/FlatMap.hpp"
 #include "tcob/core/io/Stream.hpp"
 
 namespace tcob {
@@ -26,7 +26,7 @@ public:
     auto create_from_sig_or_ext(istream& in, string const& ext, Args&&... args) -> ReturnType;
 
 private:
-    flat_map<string, func> _functions;
+    std::unordered_map<string, func> _functions;
 };
 
 }
