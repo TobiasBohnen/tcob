@@ -82,7 +82,7 @@ public:
     auto get_buffers_queued() const -> i32;
     auto get_buffers_processed() const -> i32;
 
-    auto get_status() const -> source::status;
+    auto get_status() const -> playback_status;
 
     void queue_buffers(u32 const* buffers, i32 bufferCount) const;
     auto unqueue_buffers(i32 bufferCount) const -> std::vector<u32>;

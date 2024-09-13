@@ -27,13 +27,6 @@ namespace al {
 
 class TCOB_API source {
 public:
-    enum class status : u8 {
-        Initial,
-        Stopped,
-        Paused,
-        Playing
-    };
-
     source();
     source(source const& other) noexcept;
     auto operator=(source const& other) noexcept -> source&;
@@ -45,7 +38,7 @@ public:
 
     auto virtual get_duration() const -> milliseconds          = 0;
     auto virtual get_playback_position() const -> milliseconds = 0;
-    auto get_status() const -> status;
+    auto get_status() const -> playback_status;
     auto is_looping() const -> bool;
 
     void play(bool looping = false);

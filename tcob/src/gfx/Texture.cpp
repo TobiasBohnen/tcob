@@ -135,19 +135,9 @@ auto animated_texture::load(std::shared_ptr<istream> in, string const& ext) noex
     return load_status::Error;
 }
 
-auto animated_texture::is_running() const -> bool
+auto animated_texture::get_status() const -> playback_status
 {
-    return _status == playback_status::Running;
-}
-
-auto animated_texture::is_paused() const -> bool
-{
-    return _status == playback_status::Paused;
-}
-
-auto animated_texture::is_stopped() const -> bool
-{
-    return _status == playback_status::Stopped;
+    return _status;
 }
 
 auto animated_texture::is_looping() const -> bool
@@ -157,13 +147,13 @@ auto animated_texture::is_looping() const -> bool
 
 void animated_texture::start(bool looping)
 {
-    if (is_stopped()) { // start if stopped
+    if (get_status() == playback_status::Stopped) { // start if stopped
         if (_decoder) {
             _isLooping = looping;
             _status    = playback_status::Running;
             reset_decoder();
         }
-    } else if (is_paused()) { // resume if paused
+    } else if (get_status() == playback_status::Paused) { // resume if paused
         _isLooping = looping;
         resume();
     }
@@ -171,7 +161,7 @@ void animated_texture::start(bool looping)
 
 void animated_texture::stop()
 {
-    if (!is_stopped()) { // stop if running or paused
+    if (get_status() != playback_status::Stopped) { // stop if running or paused
         _status = playback_status::Stopped;
         reset_decoder();
     }
@@ -185,21 +175,21 @@ void animated_texture::restart()
 
 void animated_texture::pause()
 {
-    if (is_running()) { // pause if running
+    if (get_status() == playback_status::Running) { // pause if running
         _status = playback_status::Paused;
     }
 }
 
 void animated_texture::resume()
 {
-    if (is_paused()) { // resume if paused
+    if (get_status() == playback_status::Paused) { // resume if paused
         _status = playback_status::Running;
     }
 }
 
 void animated_texture::toggle_pause()
 {
-    is_paused() ? resume() : pause();
+    get_status() == playback_status::Paused ? resume() : pause();
 }
 
 void animated_texture::reset_decoder()
@@ -212,7 +202,7 @@ void animated_texture::reset_decoder()
 
 void animated_texture::on_update(milliseconds deltaTime)
 {
-    if (!is_running() || !_decoder) {
+    if (get_status() != playback_status::Running || !_decoder) {
         return;
     }
 

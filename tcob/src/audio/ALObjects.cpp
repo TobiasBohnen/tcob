@@ -281,22 +281,21 @@ void al_source::set_looping(bool value) const
     alSourcei(_id, AL_LOOPING, value);
 }
 
-auto al_source::get_status() const -> source::status
+auto al_source::get_status() const -> playback_status
 {
     assert(_id);
     i32 retValue {0};
     alGetSourcei(_id, AL_SOURCE_STATE, &retValue);
     switch (retValue) {
     case AL_INITIAL:
-        return source::status::Initial;
-    case AL_PLAYING:
-        return source::status::Playing;
     case AL_STOPPED:
-        return source::status::Stopped;
+        return playback_status::Stopped;
+    case AL_PLAYING:
+        return playback_status::Running;
     case AL_PAUSED:
-        return source::status::Paused;
+        return playback_status::Paused;
     default:
-        return source::status::Initial;
+        return playback_status::Stopped;
     }
 }
 
