@@ -163,13 +163,13 @@ inline auto asset_ptr<T>::operator*() const -> type&
 }
 
 template <typename T>
-inline auto asset_ptr<T>::get() const -> asset<T>*
+inline auto asset_ptr<T>::get() const -> asset<type>*
 {
     return _asset.get();
 }
 
 template <typename T>
-inline auto asset_ptr<T>::get_obj() const -> T*
+inline auto asset_ptr<T>::get_obj() const -> type*
 {
     return _asset->get();
 }

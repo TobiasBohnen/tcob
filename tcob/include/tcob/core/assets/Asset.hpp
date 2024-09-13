@@ -109,8 +109,8 @@ public:
     auto operator->() const -> type*;
     auto operator*() const -> type&;
 
-    auto get() const -> asset<T>*;
-    auto get_obj() const -> T*;
+    auto get() const -> asset<type>*;
+    auto get_obj() const -> type*;
 
     auto get_use_count() const -> i32;
 
