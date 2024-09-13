@@ -493,9 +493,10 @@ void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt)
     _activeRtt  = rtt;
     _windowSize = windowSize;
 
-    _rtt[_activeRtt]->Size = windowSize;
-    _rtt[_activeRtt]->prepare_render();
-    _rtt[_activeRtt]->clear({0, 0, 0, 0});
+    auto& artt {_rtt[_activeRtt]};
+    artt->Size = windowSize;
+    artt->prepare_render();
+    artt->clear({0, 0, 0, 0});
 
     _states = {};
 
