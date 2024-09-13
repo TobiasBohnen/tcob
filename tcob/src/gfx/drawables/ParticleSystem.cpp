@@ -48,7 +48,7 @@ void particle_system::stop()
     _aliveParticleCount = 0;
 }
 
-void particle_system::remove_emitter(particle_emitter const& emitter)
+void particle_system::remove_emitter(particle_emitter_base const& emitter)
 {
     _emitters.erase(std::find_if(_emitters.begin(), _emitters.end(), [&emitter](auto const& val) {
         return val.get() == &emitter;
@@ -87,9 +87,7 @@ void particle_system::on_update(milliseconds deltaTime)
     if (!_isRunning || !Material()) { return; }
 
     for (auto& emitter : _emitters) {
-        if (emitter->is_alive()) {
-            emitter->emit_particles(*this, deltaTime);
-        }
+        emitter->emit_particles(*this, deltaTime);
     }
 
     std::set<i32, std::greater<>> toBeDeactivated;
@@ -107,7 +105,7 @@ void particle_system::on_update(milliseconds deltaTime)
                 }
             }
         },
-        _aliveParticleCount, _multiThreaded ? 1 : _aliveParticleCount);
+        _aliveParticleCount, _multiThreaded ? 64 : _aliveParticleCount);
 
     for (auto const& i : toBeDeactivated) {
         deactivate_particle(_particles[i]);
@@ -123,21 +121,16 @@ void particle_system::on_draw_to(render_target& target)
 {
     std::vector<quad> quads;
     quads.reserve(_aliveParticleCount);
-    std::atomic<usize> count {0};
 
     locate_service<task_manager>().run_parallel(
         [&](task_context const& ctx) {
             for (i32 i {ctx.Start}; i < ctx.End; ++i) {
-                auto& particle {_particles[i]};
-                if (particle.Visible) {
-                    particle.to_quad(&quads[i]);
-                    ++count;
-                }
+                _particles[i].to_quad(&quads[i]);
             }
         },
-        _aliveParticleCount, _multiThreaded ? 1 : _aliveParticleCount);
+        _aliveParticleCount, _multiThreaded ? 64 : _aliveParticleCount);
 
-    _renderer.set_geometry({quads.data(), count});
+    _renderer.set_geometry({quads.data(), static_cast<usize>(_aliveParticleCount)});
 
     _renderer.render_to_target(target);
 }
@@ -162,6 +155,8 @@ void particle_emitter::reset()
 
 void particle_emitter::emit_particles(particle_system& system, milliseconds time)
 {
+    if (!is_alive()) { return; }
+
     _remainLife -= time;
 
     f64 const particleAmount {SpawnRate * (time.count() / 1000) + _emissionDiff};
@@ -182,8 +177,10 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
         particle.Speed        = _randomGen(Template.Speed.first, Template.Speed.second);
         particle.Spin         = _randomGen(Template.Spin.first.Value, Template.Spin.second.Value);
         particle.Acceleration = _randomGen(Template.Acceleration.first, Template.Acceleration.second);
-        particle.UserData     = 0;
         particle.Color        = color {Template.Color.R, Template.Color.G, Template.Color.B, static_cast<u8>((Template.Color.A + alpha) / 2)};
+
+        //  reset userdata
+        particle.UserData.reset();
 
         // set scale
         f32 const scaleF {_randomGen(Template.Scale.first, Template.Scale.second)};
@@ -258,7 +255,7 @@ void particle::set_texture_region(texture_region const& texRegion)
 void particle::to_quad(quad* quad)
 {
     geometry::set_position(*quad, Bounds, _transform);
-    geometry::set_color(*quad, Color);
+    geometry::set_color(*quad, Visible ? Color : colors::Transparent);
     geometry::set_texcoords(*quad, _region);
 }
 

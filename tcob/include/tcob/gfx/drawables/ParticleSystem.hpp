@@ -81,10 +81,21 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API particle_emitter final {
+class TCOB_API particle_emitter_base {
+public:
+    virtual ~particle_emitter_base() = default;
+
+    void virtual reset() = 0;
+
+    void virtual emit_particles(particle_system& system, milliseconds time) = 0;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API particle_emitter final : public particle_emitter_base {
 public:
     particle_emitter();
-    virtual ~particle_emitter();
+    ~particle_emitter() override;
 
     particle_template           Template;
     rect_f                      SpawnArea {rect_f::Zero};
@@ -93,9 +104,9 @@ public:
 
     auto is_alive() const -> bool;
 
-    void reset();
+    void reset() override;
 
-    void virtual emit_particles(particle_system& system, milliseconds time);
+    void emit_particles(particle_system& system, milliseconds time) override;
 
     void static Serialize(particle_emitter const& v, auto&& s);
     auto static Deserialize(particle_emitter& v, auto&& s) -> bool;
@@ -134,7 +145,7 @@ public:
     template <typename T = particle_emitter>
     void add_emitter(std::shared_ptr<T> const& emitter);
 
-    void remove_emitter(particle_emitter const& emitter);
+    void remove_emitter(particle_emitter_base const& emitter);
     void clear_emitters();
 
     auto get_particle_count() const -> i32;
@@ -149,11 +160,11 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    bool                                           _isRunning {false};
-    quad_renderer                                  _renderer {buffer_usage_hint::DynamicDraw};
-    std::vector<particle>                          _particles {};
-    i32                                            _aliveParticleCount {0};
-    std::vector<std::shared_ptr<particle_emitter>> _emitters {};
+    bool                                                _isRunning {false};
+    quad_renderer                                       _renderer {buffer_usage_hint::DynamicDraw};
+    std::vector<particle>                               _particles {};
+    i32                                                 _aliveParticleCount {0};
+    std::vector<std::shared_ptr<particle_emitter_base>> _emitters {};
 
     std::mutex _mutex {};
     bool       _multiThreaded;
