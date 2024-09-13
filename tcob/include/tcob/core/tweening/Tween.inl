@@ -53,32 +53,34 @@ inline void queue::push(auto&&... autom)
 namespace func {
 
     template <typename T>
-    inline linear_chain<T>::linear_chain(std::span<type const> elements)
+    inline curve<T>::curve(std::span<point const> elements)
         : _elements {elements.begin(), elements.end()}
     {
+        // TODO: ensure positions between 0 and 1; and sorted
     }
 
     template <typename T>
-    inline auto linear_chain<T>::operator()(f64 t) const -> type
+    inline auto curve<T>::operator()(f64 t) const -> type
     {
-        if (_elements.empty()) {
-            return T {};
-        }
+        usize const size {_elements.size()};
+        if (size == 0) { return T {}; }
+        if (size == 1) { return _elements.back().Value; }
 
-        usize const size {_elements.size() - 1};
-        f64 const   relElapsed {size * t};
-        usize const index {static_cast<usize>(relElapsed)};
-        if (index >= size) {
-            return _elements[index];
+        usize index {0};
+        for (usize i {1}; i < size; ++i) {
+            if (_elements[i].Position > t) { break; }
+            index = i;
         }
+        if (index == size - 1) { return _elements.back().Value; }
 
-        type const& current {_elements[index]};
-        type const& next {_elements[index + 1]};
+        point const& current {_elements[index]};
+        point const& next {_elements[index + 1]};
+        f64 const    pos {(t - current.Position) / (next.Position - current.Position)};
 
         if constexpr (Lerpable<type>) {
-            return type::Lerp(current, next, relElapsed - static_cast<f64>(index));
+            return type::Lerp(current.Value, next.Value, pos);
         } else {
-            return static_cast<type>(current + ((next - current) * (relElapsed - static_cast<f64>(index))));
+            return static_cast<type>(current.Value + ((next.Value - current.Value) * pos));
         }
     }
 

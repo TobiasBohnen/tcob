@@ -128,16 +128,21 @@ private:
 namespace func {
 
     template <typename T>
-    class linear_chain final {
+    class curve final {
     public:
         using type = T;
 
-        linear_chain(std::span<type const> elements);
+        struct point {
+            f32  Position;
+            type Value;
+        };
+
+        curve(std::span<point const> elements);
 
         auto operator()(f64 t) const -> type;
 
     private:
-        std::vector<type> _elements {};
+        std::vector<point> _elements {};
     };
 
     ////////////////////////////////////////////////////////////
@@ -384,7 +389,9 @@ namespace func {
 }
 
 template <typename T>
-using linear_chain_tween = tween<func::linear_chain<T>>;
+using curve_tween = tween<func::curve<T>>;
+template <typename T>
+using curve_point = func::curve<T>::point;
 
 template <typename T>
 using power_tween = tween<func::power<T>>;
