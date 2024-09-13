@@ -12,6 +12,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
@@ -116,6 +117,8 @@ public:
 
     font();
     virtual ~font() = default;
+
+    signal<std::span<ubyte>> Render;
 
     auto get_info() const -> font_info const&;
     auto get_texture() const -> assets::asset_ptr<texture>;

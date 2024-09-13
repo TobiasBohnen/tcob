@@ -368,6 +368,11 @@ auto font::cache_render_glyph(u32 cp) -> bool
             _fontTextureCursor = point_i::Zero;
         }
 
+        if (Render.get_slot_count() > 0) {
+            std::span<ubyte> pix {gb.second.Bitmap};
+            Render(pix);
+        }
+
         // write to texture
         get_texture()->update_data(_fontTextureCursor, bitmapSize, gb.second.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
 
