@@ -18,12 +18,12 @@ auto frame_animation::get_frame_at(milliseconds time) const -> string
 {
     for (auto const& frame : Frames) {
         if (time <= frame.Duration) {
-            return frame.RegionName;
+            return frame.Name;
         }
         time -= frame.Duration;
     }
 
-    return Frames[Frames.size() - 1].RegionName;
+    return Frames[Frames.size() - 1].Name;
 }
 
 auto frame_animation::get_duration() const -> milliseconds

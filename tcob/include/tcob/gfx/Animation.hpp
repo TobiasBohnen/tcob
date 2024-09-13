@@ -14,7 +14,7 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 struct frame {
-    string       RegionName {};
+    string       Name {};
     milliseconds Duration {};
 
     void static Serialize(frame const& v, auto&& s);
@@ -23,13 +23,13 @@ struct frame {
 
 inline void frame::Serialize(frame const& v, auto&& s)
 {
-    s["name"]     = v.RegionName;
+    s["name"]     = v.Name;
     s["duration"] = v.Duration;
 }
 
 inline auto frame::Deserialize(frame& v, auto&& s) -> bool
 {
-    return s.try_get(v.RegionName, "name") && s.try_get(v.Duration, "duration");
+    return s.try_get(v.Name, "name") && s.try_get(v.Duration, "duration");
 }
 
 class TCOB_API frame_animation final {
