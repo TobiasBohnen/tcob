@@ -20,4 +20,10 @@ inline auto service_locator::get() const -> T*
     return static_cast<T*>(_services.at(T::service_name).get());
 }
 
+template <typename T>
+inline auto service_locator::has() const -> bool
+{
+    return _services.contains(T::service_name);
+}
+
 }

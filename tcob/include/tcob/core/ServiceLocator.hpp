@@ -27,6 +27,9 @@ public:
     template <typename T>
     auto get() const -> T*;
 
+    template <typename T>
+    auto has() const -> bool;
+
 private:
     std::unordered_map<char const*, std::shared_ptr<void>> _services;
 };
@@ -44,6 +47,12 @@ auto locate_service() -> T&
     auto* retValue {service_locator::GetInstance().get<T>()};
     assert(retValue);
     return *retValue;
+}
+
+template <typename T>
+auto has_service() -> bool
+{
+    return service_locator::GetInstance().has<T>();
 }
 
 template <typename T>

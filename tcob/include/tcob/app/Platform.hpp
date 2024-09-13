@@ -13,7 +13,6 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigFile.hpp"
-#include "tcob/gfx/Window.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
@@ -32,10 +31,6 @@ public:
 
     signal<path const> DropFile;
 
-    auto has_window() const -> bool;
-    auto get_window() const -> gfx::window&;
-    auto get_default_target() const -> gfx::default_render_target&;
-
     auto get_config() const -> data::config_file&;
 
     auto process_events() const -> bool;
@@ -50,7 +45,7 @@ public:
 
 private:
     void init_locales();
-    void init_render_system();
+    void init_render_system(string const& windowTitle);
 
     void remove_services() const;
 
@@ -65,9 +60,7 @@ private:
 
     std::vector<locale> _locales {};
 
-    std::unique_ptr<gfx::window>                _window;
-    std::unique_ptr<gfx::default_render_target> _defaultTarget;
-    std::unique_ptr<data::config_file>          _configFile;
+    std::unique_ptr<data::config_file> _configFile;
 };
 
 ////////////////////////////////////////////////////////////

@@ -96,7 +96,6 @@ platform::platform(bool headless, game::init const& ginit)
 
     // init input
     auto input {register_service<input::system>()};
-    input->KeyDown.connect<&platform::on_key_down>(this);
 
     // init assets
     auto factory {register_service<assets::loader_manager::factory>()};
@@ -113,7 +112,7 @@ platform::platform(bool headless, game::init const& ginit)
         _configFile->merge(*ginit.ConfigDefaults, false);                    // merge config with default
 
         // init render system
-        init_render_system();
+        init_render_system(ginit.Name);
     } else {
 #if defined(TCOB_ENABLE_RENDERER_NULL)
         register_service<gfx::render_system, gfx::null::null_render_system>();
@@ -125,8 +124,6 @@ platform::~platform()
 {
     _configFile = nullptr;
     remove_services();
-    _window        = nullptr;
-    _defaultTarget = nullptr;
 
     //  file system
     logger::Info("exiting");
@@ -159,17 +156,6 @@ void platform::remove_services() const
     remove_service<audio::decoder::factory>();
     remove_service<audio::encoder::factory>();
     remove_service<gfx::render_system::factory>();
-}
-
-void platform::on_key_down(input::keyboard::event& ev)
-{
-    using namespace tcob::enum_ops;
-    if (!ev.Repeat) {
-        // Alt+Enter -> toggle fullscreen
-        if (ev.ScanCode == input::scan_code::RETURN && (ev.KeyMods & input::key_mod::LeftAlt) == input::key_mod::LeftAlt) {
-            _window->FullScreen = !_window->FullScreen();
-        }
-    }
 }
 
 auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
@@ -227,7 +213,7 @@ auto platform::process_events() const -> bool
             inputMgr.process_events(&ev);
             break;
         case SDL_WINDOWEVENT:
-            _window->process_events(&ev);
+            locate_service<gfx::render_system>().get_window().process_events(&ev);
             break;
         default:
             break;
@@ -240,21 +226,6 @@ auto platform::process_events() const -> bool
 auto platform::get_preferred_locales() const -> std::vector<locale> const&
 {
     return _locales;
-}
-
-auto platform::has_window() const -> bool
-{
-    return _window != nullptr;
-}
-
-auto platform::get_window() const -> gfx::window&
-{
-    return *_window;
-}
-
-auto platform::get_default_target() const -> gfx::default_render_target&
-{
-    return *_defaultTarget;
 }
 
 auto platform::get_config() const -> data::config_file&
@@ -282,7 +253,7 @@ void platform::init_locales()
     }
 }
 
-void platform::init_render_system()
+void platform::init_render_system(string const& windowTitle)
 {
     auto rsFactory {register_service<gfx::render_system::factory>()};
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)
@@ -295,47 +266,30 @@ void platform::init_render_system()
     rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
 #endif
 
-    auto video {(*_configFile)[Cfg::Video::Name].as<data::video_config>()};
+    auto video {(*_configFile)[Cfg::Video::Name].as<gfx::video_config>()};
 
     string renderer {video.RenderSystem};
 
-    // create rendersystem
+    // create rendersystem (and window (and context))
     logger::Info("RenderSystem: {}", renderer);
+
     auto renderSystem {rsFactory->create(renderer)};
     if (!renderSystem) { throw std::runtime_error("Render system creation failed!"); }
     register_service<gfx::render_system>(renderSystem);
+    renderSystem->init_window(video, windowTitle);
 
-    // get config
-    bool const   useDesktopRes {video.UseDesktopResolution};
-    size_i const resolution {useDesktopRes
-                                 ? renderSystem->get_desktop_size(0)
-                                 : video.Resolution};
-
-    // create window (and context)
-    _window = std::unique_ptr<gfx::window> {new gfx::window(renderSystem->create_window(resolution))};
-
-    logger::Info("Device: {}", renderSystem->get_device_name());
-
-    _window->FullScreen.Changed.connect([&](bool value) {
+    renderSystem->get_window().FullScreen.Changed.connect([&](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
-    _window->VSync.Changed.connect([&](bool value) {
+    renderSystem->get_window().VSync.Changed.connect([&](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
-    _window->Size.Changed.connect([&](size_i value) {
+    renderSystem->get_window().Size.Changed.connect([&](size_i value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<gfx::render_system>().get_desktop_size(0);
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
-    _window->FullScreen(video.FullScreen || useDesktopRes);
-    _window->VSync(video.VSync);
-    _window->Size(resolution);
-
-    _defaultTarget = std::make_unique<gfx::default_render_target>();
-
-    _window->clear();
-    _window->draw_to(*_defaultTarget);
-    _window->swap_buffer();
+    logger::Info("Device: {}", renderSystem->get_device_name());
 }
 
 void platform::InitSDL()

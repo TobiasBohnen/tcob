@@ -20,7 +20,9 @@ using SDL_Event = union SDL_Event;
 struct SDL_Window;
 
 namespace tcob {
-class platform;
+namespace gfx {
+    class render_system;
+}
 namespace gfx::render_backend {
     class window_base;
 }
@@ -31,7 +33,7 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API window final : public render_target {
-    friend class tcob::platform;
+    friend class tcob::gfx::render_system;
 
 public:
     struct event {

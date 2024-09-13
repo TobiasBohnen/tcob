@@ -8,8 +8,8 @@
 #include <algorithm>
 
 #include "tcob/app/Game.hpp"
-#include "tcob/app/Platform.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
 
 namespace tcob {
 scene::scene(game& parent)
@@ -85,7 +85,7 @@ auto scene::get_game() -> game&
 
 auto scene::get_window() -> gfx::window&
 {
-    return locate_service<platform>().get_window();
+    return locate_service<gfx::render_system>().get_window();
 }
 
 void scene::attach_events()

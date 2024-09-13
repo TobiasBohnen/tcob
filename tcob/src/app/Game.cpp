@@ -15,7 +15,7 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stats.hpp"
 #include "tcob/core/TaskManager.hpp"
-#include "tcob/data/ConfigFile.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
 namespace tcob {
@@ -29,11 +29,10 @@ game::game(init const& gameInit)
     init i {gameInit};
     if (!i.ConfigDefaults) {
         data::config::object obj;
-        obj[Cfg::Video::Name] = data::video_config {};
+        obj[Cfg::Video::Name] = gfx::video_config {};
         i.ConfigDefaults      = obj;
     }
     auto plt {register_service<platform>(std::make_shared<platform>(false, i))};
-    plt->get_window().Title(gameInit.Name);
 
     // properties
     FrameLimit.Changed.connect([&](i32 value) {
@@ -41,6 +40,8 @@ game::game(init const& gameInit)
         _frameLimit                                                  = milliseconds {1000.f / value};
     });
     FrameLimit = plt->get_config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
+
+    locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
 }
 
 game::~game()
@@ -162,9 +163,10 @@ void game::step()
         _lastUpdate = now;
 
         // render
-        if (plt.has_window()) {
-            auto& window {plt.get_window()};
-            auto& dft {plt.get_default_target()};
+        if (has_service<gfx::render_system>()) {
+            auto& rs {locate_service<gfx::render_system>()};
+            auto& window {rs.get_window()};
+            auto& dft {rs.get_default_target()};
             dft.set_size(window.Size());
             window.clear();
             Draw(window);
@@ -175,15 +177,27 @@ void game::step()
                 window.Cursor->ActiveMode = "default"; // set cursor to default mode if available
                 window.Cursor->update(deltaUpdate);
             }
-        }
 
-        locate_service<gfx::render_system>().get_stats().update(deltaUpdate);
+            rs.get_stats().update(deltaUpdate);
+        }
     }
 }
 
 auto game::get_library() -> assets::library&
 {
     return _mainLibrary;
+}
+
+void game::on_key_down(input::keyboard::event& ev)
+{
+    using namespace tcob::enum_ops;
+    if (!ev.Repeat) {
+        // Alt+Enter -> toggle fullscreen
+        if (ev.ScanCode == input::scan_code::RETURN && (ev.KeyMods & input::key_mod::LeftAlt) == input::key_mod::LeftAlt) {
+            auto& window {locate_service<gfx::render_system>().get_window()};
+            window.FullScreen = !window.FullScreen();
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////

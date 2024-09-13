@@ -92,6 +92,8 @@ private:
     //! Pops the top scene from the scene stack.
     void pop_scene();
 
+    void on_key_down(input::keyboard::event& ev);
+
     assets::library _mainLibrary {};
 
     milliseconds                       _frameLimit {}; //!< Frame rate limit.
