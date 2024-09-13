@@ -350,8 +350,8 @@ namespace func {
     ////////////////////////////////////////////////////////////
 
     template <typename T>
-    inline callable<T>::callable(T& obj)
-        : _obj {obj}
+    inline callable<T>::callable(T obj)
+        : _obj {std::move(obj)}
     {
     }
 

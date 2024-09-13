@@ -376,12 +376,12 @@ namespace func {
     public:
         using type = std::invoke_result_t<decltype(&T::operator()), T, f64>;
 
-        callable(T& obj);
+        callable(T obj);
 
         auto operator()(f64 t) const -> type;
 
     private:
-        T& _obj;
+        T _obj;
     };
 
     ////////////////////////////////////////////////////////////
