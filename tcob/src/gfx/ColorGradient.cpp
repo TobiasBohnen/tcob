@@ -32,7 +32,12 @@ color_gradient::color_gradient(color startColor, color endColor, bool preMulAlph
     }
 }
 
-color_gradient::color_gradient(std::span<color_stop> colorStops, bool preMulAlpha)
+color_gradient::color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha)
+    : color_gradient {std::span<color_stop const> {colorStops}, preMulAlpha}
+{
+}
+
+color_gradient::color_gradient(std::span<color_stop const> colorStops, bool preMulAlpha)
     : _premulAlpha {preMulAlpha}
 {
     for (auto const& cs : colorStops) {
