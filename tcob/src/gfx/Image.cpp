@@ -121,6 +121,20 @@ auto image::get_pixel(point_i pos) const -> color
     return {r, g, b, a};
 }
 
+auto image::count_colors [[nodiscard]] () const -> isize
+{
+    std::unordered_set<u32> colors;
+    for (u32 i {0}; i < _buffer.size(); i += _info.bytes_per_pixel()) {
+        u8 const r {_buffer[i + 0]};
+        u8 const g {_buffer[i + 1]};
+        u8 const b {_buffer[i + 2]};
+        u8 const a {_info.Format == image::format::RGBA ? _buffer[i + 3] : static_cast<u8>(255)};
+        colors.insert(static_cast<u32>(r << 24 | g << 16 | b << 8 | a));
+    }
+
+    return std::ssize(colors);
+}
+
 auto image::Create(size_i size, format f, std::span<u8 const> data) -> image
 {
     return {size, f, data};
