@@ -111,9 +111,7 @@ auto tween_base::is_looping() const -> bool
 
 void tween_base::on_update(milliseconds deltaTime)
 {
-    if (_status != playback_status::Running) {
-        return;
-    }
+    if (_status != playback_status::Running) { return; }
 
     _elapsedTime += deltaTime;
 
@@ -136,10 +134,7 @@ void tween_base::on_update(milliseconds deltaTime)
         }
 
         update_values();
-        if (shouldStop) {
-            stop();
-            Finished();
-        }
+        if (shouldStop) { stop(); }
     }
 }
 
