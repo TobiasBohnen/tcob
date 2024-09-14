@@ -50,6 +50,11 @@ auto connection::get_id() const -> i32
 
 ////////////////////////////////////////////////////////////
 
+scoped_connection::scoped_connection()
+    : connection {nullptr, detail::signal_base::INVALID_ID}
+{
+}
+
 scoped_connection::scoped_connection(connection const& other)
     : connection {other}
 {

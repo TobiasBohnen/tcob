@@ -55,6 +55,7 @@ protected:
 
 class [[nodiscard]] TCOB_API scoped_connection final : public connection, public non_copyable {
 public:
+    scoped_connection();
     scoped_connection(connection const& other);
     scoped_connection(scoped_connection&& other) noexcept;
     auto operator=(scoped_connection&& other) noexcept -> scoped_connection&;
