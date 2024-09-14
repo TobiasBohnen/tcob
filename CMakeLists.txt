@@ -110,7 +110,7 @@ if(PROJECT_IS_TOP_LEVEL)
     add_subdirectory(extras/examples)
   endif()
 
-  if(TCOB_BUILD_GAMES AND NOT EMSCRIPTEN)
+  if(TCOB_BUILD_GAMES)
     add_subdirectory(extras/games)
   endif()
 endif()

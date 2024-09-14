@@ -39,10 +39,12 @@ namespace Sound {
     static char const* source {"source"};
 }
 
+#if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 namespace SoundFont {
     static char const* Name {"sound_font"};
     static char const* source {"source"};
 }
+#endif
 
 namespace Cursor {
     static char const* Name {"cursor"};
