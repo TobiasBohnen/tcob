@@ -17,7 +17,7 @@ render_system::~render_system()
     _defaultTarget = nullptr;
 }
 
-void render_system::init_window(video_config const& config, string const& windowTitle)
+auto render_system::init_window(video_config const& config, string const& windowTitle) -> window&
 {
     size_i const resolution {config.UseDesktopResolution ? get_desktop_size(0) : config.Resolution};
 
@@ -33,6 +33,8 @@ void render_system::init_window(video_config const& config, string const& window
     _window->clear();
     _window->draw_to(*_defaultTarget);
     _window->swap_buffer();
+
+    return *_window;
 }
 
 auto render_system::get_stats() -> stats&

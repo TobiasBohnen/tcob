@@ -50,7 +50,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-template <typename... Funcs>
+template <QuadTweenFunction... Funcs>
 class quad_tween : public quad_tween_base {
 public:
     quad_tween(milliseconds duration, Funcs&&... ptr);

@@ -275,16 +275,16 @@ void platform::init_render_system(string const& windowTitle)
 
     auto renderSystem {rsFactory->create(renderer)};
     if (!renderSystem) { throw std::runtime_error("Render system creation failed!"); }
-    register_service<gfx::render_system>(renderSystem);
-    renderSystem->init_window(video, windowTitle);
 
-    renderSystem->get_window().FullScreen.Changed.connect([&](bool value) {
+    register_service<gfx::render_system>(renderSystem);
+    auto& window {renderSystem->init_window(video, windowTitle)};
+    window.FullScreen.Changed.connect([&](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
-    renderSystem->get_window().VSync.Changed.connect([&](bool value) {
+    window.VSync.Changed.connect([&](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
-    renderSystem->get_window().Size.Changed.connect([&](size_i value) {
+    window.Size.Changed.connect([&](size_i value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<gfx::render_system>().get_desktop_size(0);
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });

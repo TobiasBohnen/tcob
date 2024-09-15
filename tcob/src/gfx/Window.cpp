@@ -28,16 +28,11 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::manu
     , _impl {std::move(window)}
     , _window {_impl->get_handle()}
 {
-    FullScreen(false);
-    VSync(false);
-    Title("");
-
     Cursor.Changed.connect([&](auto const& value) { hide_system_cursor(value.is_ready()); });
 
     _material->Texture = _texture;
     _renderer.set_material(_material);
 
-    SDL_SetWindowBordered(_window, SDL_TRUE);
     set_size(Size());
 }
 
@@ -187,6 +182,7 @@ void window::set_fullscreen(bool value)
     SDL_SetWindowFullscreen(_window, value ? SDL_WINDOW_FULLSCREEN : 0);
     if (!value) {
         SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        SDL_SetWindowBordered(_window, SDL_TRUE);
     }
 }
 

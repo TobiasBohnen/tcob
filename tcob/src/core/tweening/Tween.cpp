@@ -140,9 +140,14 @@ void tween_base::on_update(milliseconds deltaTime)
 
 ////////////////////////////////////////////////////////////
 
+auto queue::is_empty() const -> bool
+{
+    return _queue.empty();
+}
+
 void queue::start(playback_mode mode)
 {
-    if (!_isRunning && !_queue.empty()) {
+    if (!_isRunning && !is_empty()) {
         _isRunning = true;
         _mode      = mode;
         _isLooping = mode == playback_mode::AlternatedLooped || mode == playback_mode::Looped || mode == playback_mode::ReversedLooped;
@@ -157,11 +162,6 @@ void queue::stop()
         std::queue<std::shared_ptr<tween_base>> empty {};
         _queue.swap(empty);
     }
-}
-
-auto queue::is_empty() const -> bool
-{
-    return _queue.empty();
 }
 
 void queue::pop()

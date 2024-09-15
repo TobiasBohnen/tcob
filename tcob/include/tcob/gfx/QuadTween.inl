@@ -8,14 +8,14 @@
 
 namespace tcob::gfx {
 
-template <typename... Funcs>
+template <QuadTweenFunction... Funcs>
 inline quad_tween<Funcs...>::quad_tween(milliseconds duration, Funcs&&... ptr)
     : quad_tween_base {duration}
     , _functions {ptr...}
 {
 }
 
-template <typename... Funcs>
+template <QuadTweenFunction... Funcs>
 inline void quad_tween<Funcs...>::update_values()
 {
     f64 const progress {get_progress()};
