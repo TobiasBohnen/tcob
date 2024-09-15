@@ -36,7 +36,7 @@ struct group_stats {
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-    class bucket_base {
+    class TCOB_API bucket_base {
     public:
         explicit bucket_base(string assetName);
         virtual ~bucket_base() = default;
