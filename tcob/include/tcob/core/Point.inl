@@ -44,6 +44,16 @@ inline auto point<T>::distance_to(point<T> const& p) const -> f32
 }
 
 template <Arithmetic T>
+inline auto point<T>::angle_to(point<T> const& p) const -> degree_f
+{
+    radian_f const ang {std::atan2(p.Y - Y, p.X - X)};
+    degree_f       retValue {ang};
+    retValue += degree_f {90};
+    if (retValue.Value < 0) { retValue += degree_f {360}; }
+    return retValue;
+}
+
+template <Arithmetic T>
 inline auto point<T>::as_normalized() const -> point<f32>
 {
     f32 const l {length()};

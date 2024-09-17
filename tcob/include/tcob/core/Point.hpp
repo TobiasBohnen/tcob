@@ -8,6 +8,7 @@
 
 #include <ostream>
 
+#include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Concepts.hpp"
 
 namespace tcob {
@@ -28,6 +29,7 @@ public:
 
     auto length() const -> f32;
     auto distance_to(point<T> const& p) const -> f32;
+    auto angle_to(point<T> const& p) const -> degree_f;
     auto as_normalized() const -> point<f32>;
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;
