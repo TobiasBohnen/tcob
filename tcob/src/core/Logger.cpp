@@ -11,6 +11,11 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
+#if defined(_MSC_VER)
+    #define WIN32_LEAN_AND_MEAN
+    #include "Windows.h"
+#endif
+
 namespace tcob {
 
 logger::~logger() = default;
@@ -135,6 +140,11 @@ stdout_logger::stdout_logger() = default;
 
 void stdout_logger::log(string const& message, level level) const
 {
+#if defined(_MSC_VER)
+    SetConsoleOutputCP(CP_UTF8);
+    setvbuf(stdout, nullptr, _IOFBF, 1000);
+#endif
+
     if (level < MinLevel) { return; }
 
 #if !defined(__EMSCRIPTEN__)
