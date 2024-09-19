@@ -23,7 +23,7 @@ void layout::update()
         std::stable_sort(_widgets.begin(), _widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
 
         std::visit(
-            tcob::detail::overloaded {
+            overloaded {
                 [&](widget_container* parent) {
                     do_layout(parent->get_content_bounds().get_size());
                 },
@@ -77,7 +77,7 @@ auto layout::create_init(string const& name) const -> widget::init
     }
 
     std::visit(
-        tcob::detail::overloaded {
+        overloaded {
             [&](widget_container* parent) {
                 retValue.Form   = parent->get_form();
                 retValue.Parent = parent;
