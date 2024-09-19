@@ -116,6 +116,7 @@ void shape_batch::on_draw_to(render_target& target)
 }
 
 ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 shape::shape()
     : TextureRegion("default")
@@ -127,11 +128,6 @@ shape::shape()
 
 {
     Pivot.Changed.connect([&]() { mark_dirty(); });
-    Center.Changed.connect([&](auto const& value) {
-        on_center_changed(value);
-        mark_dirty();
-        mark_transform_dirty();
-    });
 
     Material.Changed.connect([&]() { TextureRegion("default"); });
     TextureRegion.Changed.connect([&](string const& texRegion) {
@@ -185,13 +181,14 @@ auto shape::get_pivot() const -> point_f
         return *Pivot();
     }
 
-    return Center();
+    return get_center();
 }
 
 ////////////////////////////////////////////////////////////
 
 circle_shape::circle_shape()
 {
+    Center.Changed.connect([&]() { mark_dirty(); });
     Radius.Changed.connect([&]() { mark_dirty(); });
     Segments.Changed.connect([&]() { mark_dirty(); });
     Segments(90);
@@ -201,64 +198,64 @@ auto circle_shape::get_geometry() -> geometry_data
 {
     return {
         .Vertices = _verts,
-        .Indices  = _indices,
+        .Indices  = _inds,
         .Type     = primitive_type::Triangles};
 }
 
 void circle_shape::on_update(milliseconds /* deltaTime */)
 {
-    if (is_dirty()) {
-        _verts.clear();
-        _indices.clear();
-        mark_clean();
+    if (!is_dirty()) { return; }
 
-        if (Segments < 3 || Radius < 1) { return; }
+    _verts.clear();
+    _inds.clear();
+    mark_clean();
 
-        // vertices
-        auto const& xform {get_transform()};
-        f32 const   angleStep {TAU_F / Segments};
-        f32 const   radius {Radius()};
+    if (Segments < 3 || Radius < 1) { return; }
 
-        texture_region texReg {};
-        if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-            texReg = Material->Texture->get_region(TextureRegion);
-        } else {
-            texReg = {{0, 0, 1, 1}, 0};
-        }
-        f32 const texLevel {static_cast<f32>(texReg.Level)};
+    // vertices
+    auto const& xform {get_transform()};
+    f32 const   angleStep {TAU_F / Segments};
+    f32 const   radius {Radius()};
 
-        auto const [centerX, centerY] {Center()};
-        auto const& uvRect {texReg.UVRect};
-        _verts.push_back({.Position  = (xform * Center()).as_array(),
-                          .Color     = Color->as_array(),
-                          .TexCoords = {0.5f * uvRect.Width + uvRect.X,
-                                        0.5f * uvRect.Height + uvRect.Y,
-                                        texLevel}});
-
-        auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
-
-        for (i32 i {0}; i < Segments; ++i) {
-            f32 const angle {i * angleStep};
-            f32 const x {radius * std::cos(angle) + centerX};
-            f32 const y {radius * std::sin(angle) + centerY};
-            _verts.push_back({.Position  = (xform * point_f {x, y}).as_array(),
-                              .Color     = Color->as_array(),
-                              .TexCoords = {(((x - uvSquare.X) / uvSquare.Width) * uvRect.Width) + uvRect.X,
-                                            (((y - uvSquare.Y) / uvSquare.Height) * uvRect.Height) + uvRect.Y,
-                                            texLevel}});
-        }
-
-        // indices
-        for (i32 i {1}; i < Segments; ++i) {
-            _indices.push_back(0);
-            _indices.push_back(i + 1);
-            _indices.push_back(i);
-        }
-
-        _indices.push_back(0);
-        _indices.push_back(1);
-        _indices.push_back(Segments);
+    texture_region texReg {};
+    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
+        texReg = Material->Texture->get_region(TextureRegion);
+    } else {
+        texReg = {{0, 0, 1, 1}, 0};
     }
+    f32 const texLevel {static_cast<f32>(texReg.Level)};
+
+    auto const [centerX, centerY] {Center()};
+    auto const& uvRect {texReg.UVRect};
+    _verts.push_back({.Position  = (xform * Center()).as_array(),
+                      .Color     = Color->as_array(),
+                      .TexCoords = {0.5f * uvRect.Width + uvRect.X,
+                                    0.5f * uvRect.Height + uvRect.Y,
+                                    texLevel}});
+
+    auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
+
+    for (i32 i {0}; i < Segments; ++i) {
+        f32 const angle {i * angleStep};
+        f32 const x {radius * std::cos(angle) + centerX};
+        f32 const y {radius * std::sin(angle) + centerY};
+        _verts.push_back({.Position  = (xform * point_f {x, y}).as_array(),
+                          .Color     = Color->as_array(),
+                          .TexCoords = {(((x - uvSquare.X) / uvSquare.Width) * uvRect.Width) + uvRect.X,
+                                        (((y - uvSquare.Y) / uvSquare.Height) * uvRect.Height) + uvRect.Y,
+                                        texLevel}});
+    }
+
+    // indices
+    for (i32 i {1}; i < Segments; ++i) {
+        _inds.push_back(0);
+        _inds.push_back(i + 1);
+        _inds.push_back(i);
+    }
+
+    _inds.push_back(0);
+    _inds.push_back(1);
+    _inds.push_back(Segments);
 }
 
 void circle_shape::on_color_changed(color c)
@@ -266,22 +263,21 @@ void circle_shape::on_color_changed(color c)
     geometry::set_color(_verts, c);
 }
 
-void circle_shape::on_center_changed(point_f /* center */)
-{
-}
-
 void circle_shape::on_texture_region_changed(string const& /* texRegion */)
 {
+    // TODO
+}
+
+auto circle_shape::get_center() const -> point_f
+{
+    return Center();
 }
 
 ////////////////////////////////////////////////////////////
 
 rect_shape::rect_shape()
 {
-    Bounds.Changed.connect([&](auto const& val) {
-        Center = val.get_center();
-        mark_dirty();
-    });
+    Bounds.Changed.connect([&](auto const&) { mark_dirty(); });
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
@@ -304,25 +300,6 @@ auto rect_shape::get_AABB() const -> rect_f
 void rect_shape::move_by(point_f offset)
 {
     Bounds = {Bounds->get_position() + offset, Bounds->get_size()};
-}
-
-void rect_shape::on_color_changed(color c)
-{
-    geometry::set_color(_quad, c);
-}
-
-void rect_shape::on_center_changed(point_f center)
-{
-    Bounds = Bounds->with_position({center.X - Bounds->Width / 2.0f, center.Y - Bounds->Height / 2.0f});
-}
-
-void rect_shape::on_texture_region_changed(string const& texRegion)
-{
-    if (Material() && Material->Texture && Material->Texture->has_region(texRegion)) {
-        geometry::set_texcoords(_quad, Material->Texture->get_region(texRegion));
-    } else {
-        geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
-    }
 }
 
 void rect_shape::update_aabb()
@@ -353,4 +330,138 @@ void rect_shape::on_update(milliseconds deltaTime)
         geometry::scroll_texcoords(_quad, TextureScroll() * (deltaTime.count() / 1000.0f));
     }
 }
+
+void rect_shape::on_color_changed(color c)
+{
+    geometry::set_color(_quad, c);
+}
+
+void rect_shape::on_texture_region_changed(string const& texRegion)
+{
+    if (Material() && Material->Texture && Material->Texture->has_region(texRegion)) {
+        geometry::set_texcoords(_quad, Material->Texture->get_region(texRegion));
+    } else {
+        geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
+    }
+}
+
+auto rect_shape::get_center() const -> point_f
+{
+    return Bounds->get_center();
+}
+
+////////////////////////////////////////////////////////////
+
+convex_poly_shape::convex_poly_shape()
+{
+    Points.Changed.connect([&](auto const&) { mark_dirty(); });
+}
+
+auto convex_poly_shape::get_geometry() -> geometry_data
+{
+    return {
+        .Vertices = _verts,
+        .Indices  = _inds,
+        .Type     = primitive_type::Triangles};
+}
+
+void convex_poly_shape::move_by(point_f offset)
+{
+    for (auto& p : *Points) {
+        p += offset;
+    }
+
+    mark_dirty();
+}
+
+void convex_poly_shape::on_update(milliseconds /* deltaTime */)
+{
+    if (!is_dirty()) { return; }
+
+    auto const& points {Points()};
+    usize const n {points.size()};
+    if (n < 3) { return; }
+
+    calc();
+
+    _verts.clear();
+    _inds.clear();
+    mark_clean();
+
+    auto const& xform {get_transform()};
+
+    texture_region texReg {};
+    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
+        texReg = Material->Texture->get_region(TextureRegion);
+    } else {
+        texReg = {{0, 0, 1, 1}, 0};
+    }
+    f32 const   texLevel {static_cast<f32>(texReg.Level)};
+    auto const& uvRect {texReg.UVRect};
+
+    for (u32 i {0}; i < n; i++) {
+        auto const& [x, y] {points[i]};
+        _verts.push_back({.Position  = (xform * points[i]).as_array(),
+                          .Color     = Color->as_array(),
+                          .TexCoords = {(((x - _boundingBox.X) / _boundingBox.Width) * uvRect.Width) + uvRect.X,
+                                        (((y - _boundingBox.Y) / _boundingBox.Height) * uvRect.Height) + uvRect.Y,
+                                        texLevel}});
+    }
+    for (u32 i {1}; i < n - 1; ++i) {
+        _inds.push_back(0);
+        _inds.push_back(i);
+        _inds.push_back(i + 1);
+    }
+}
+
+void convex_poly_shape::on_color_changed(color c)
+{
+    auto const carr {c.as_array()};
+    for (auto& vert : _verts) {
+        vert.Color = carr;
+    }
+}
+
+void convex_poly_shape::on_texture_region_changed(string const& /* texRegion */)
+{
+    // TODO
+}
+
+auto convex_poly_shape::get_center() const -> point_f
+{
+    return _centroid;
+}
+
+void convex_poly_shape::calc()
+{
+    point_f max {std::numeric_limits<f32>::denorm_min(), std::numeric_limits<f32>::denorm_min()};
+    point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
+
+    f32 signedArea {0.0f};
+    _centroid = point_f::Zero;
+
+    auto const& points {Points()};
+    usize const n {points.size()};
+
+    for (usize i {0}; i < n; ++i) {
+        point_f const& p0 {points[i]};
+        max.X = std::max(p0.X, max.X);
+        max.Y = std::max(p0.Y, max.Y);
+        min.X = std::min(p0.X, min.X);
+        min.Y = std::min(p0.Y, min.Y);
+
+        point_f const& p1 {points[(i + 1) % n]};
+        f32 const      a {p0.X * p1.Y - p1.X * p0.Y};
+        signedArea += a;
+        _centroid.X += (p0.X + p1.X) * a;
+        _centroid.Y += (p0.Y + p1.Y) * a;
+    }
+
+    signedArea *= 0.5f;
+    _centroid /= (6.0f * signedArea);
+
+    _boundingBox = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
+}
+
+////////////////////////////////////////////////////////////
 }

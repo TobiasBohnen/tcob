@@ -33,7 +33,6 @@ public:
     prop_fn<f32> Transparency;
 
     prop<std::optional<point_f>> Pivot;
-    prop<point_f>                Center;
 
     void show();
     void hide();
@@ -42,10 +41,10 @@ public:
     auto virtual get_geometry() -> geometry_data = 0;
 
 protected:
+    auto virtual get_center() const -> point_f = 0;
     auto get_pivot() const -> point_f override;
 
     void virtual on_color_changed(color c)                          = 0;
-    void virtual on_center_changed(point_f center)                  = 0;
     void virtual on_texture_region_changed(string const& texRegion) = 0;
 
     void on_transform_changed() override;
@@ -65,20 +64,21 @@ class TCOB_API circle_shape : public shape {
 public:
     circle_shape();
 
-    prop<f32> Radius;
-    prop<i32> Segments;
+    prop<point_f> Center;
+    prop<f32>     Radius;
+    prop<i32>     Segments;
 
     auto get_geometry() -> geometry_data override;
 
 protected:
     void on_update(milliseconds deltaTime) override;
 
+    auto get_center() const -> point_f override;
     void on_color_changed(color c) override;
-    void on_center_changed(point_f center) override;
     void on_texture_region_changed(string const& texRegion) override;
 
 private:
-    std::vector<u32>    _indices;
+    std::vector<u32>    _inds;
     std::vector<vertex> _verts;
 };
 
@@ -100,8 +100,8 @@ public:
 protected:
     void on_update(milliseconds deltaTime) override;
 
+    auto get_center() const -> point_f override;
     void on_color_changed(color c) override;
-    void on_center_changed(point_f center) override;
     void on_texture_region_changed(string const& texRegion) override;
 
 private:
@@ -111,6 +111,35 @@ private:
     rect_f _aabb {rect_f::Zero};
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API convex_poly_shape final : public shape {
+public:
+    convex_poly_shape();
+
+    prop<std::vector<point_f>> Points;
+
+    auto get_geometry() -> geometry_data override;
+
+    void move_by(point_f offset);
+
+protected:
+    void on_update(milliseconds deltaTime) override;
+
+    auto get_center() const -> point_f override;
+    void on_color_changed(color c) override;
+    void on_texture_region_changed(string const& texRegion) override;
+
+private:
+    void calc();
+
+    std::vector<vertex> _verts {};
+    std::vector<u32>    _inds;
+    rect_f              _boundingBox;
+    point_f             _centroid;
+};
+
+////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API static_shape_batch final : public drawable {
