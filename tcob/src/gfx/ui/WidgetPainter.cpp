@@ -603,7 +603,7 @@ auto widget_painter::transform_text(element::text::transform xform, utf8_string_
 auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_paint
 {
     return std::visit(
-        tcob::detail::overloaded {
+        overloaded {
             [&](color const& arg) -> canvas_paint {
                 return canvas_paint {
                     .Feather = 1.0f,

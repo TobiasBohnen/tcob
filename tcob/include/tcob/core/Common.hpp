@@ -8,6 +8,7 @@
 
 #include <type_traits>
 #include <utility>
+#include <variant>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -98,12 +99,12 @@ enum class playback_status : u8 {
 
 ////////////////////////////////////////////////////////////
 
-namespace detail {
-    template <typename... Ts>
-    struct overloaded : Ts... {
-        using Ts::operator()...;
-    };
+template <typename... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
 
+namespace detail {
     ////////////////////////////////////////////////////////////
 
     template <typename T, typename... Ts>
