@@ -48,6 +48,7 @@ public:
     void constexpr resize_by(size<U> const& size);
 
     auto constexpr with_position(point<T> const& point) const -> rect<T>;
+    auto constexpr with_center(point<T> const& center) const -> rect<T>;
     auto constexpr with_size(size<T> const& size) const -> rect<T>;
 
     auto static constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;

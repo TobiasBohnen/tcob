@@ -251,6 +251,12 @@ auto constexpr rect<T>::with_position(point<T> const& point) const -> rect<T>
 }
 
 template <Arithmetic T>
+auto constexpr rect<T>::with_center(point<T> const& center) const -> rect<T>
+{
+    return with_position({center.X - Width / 2.0f, center.Y - Height / 2.0f});
+}
+
+template <Arithmetic T>
 auto constexpr rect<T>::with_size(size<T> const& size) const -> rect<T>
 {
     return {get_position(), size};
