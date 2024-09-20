@@ -250,6 +250,7 @@ void polygon_renderer::set_geometry(geometry_data const& gd)
     prepare(gd.Vertices.size(), gd.Indices.size());
     modify_geometry(gd, 0);
     _numIndices = gd.Indices.size();
+    _numVerts   = gd.Vertices.size();
 }
 
 void polygon_renderer::modify_geometry(geometry_data const& gd, usize offset)
@@ -262,18 +263,19 @@ void polygon_renderer::modify_geometry(geometry_data const& gd, usize offset)
 void polygon_renderer::reset_geometry()
 {
     _numIndices = 0;
+    _numVerts   = 0;
 }
 
 void polygon_renderer::prepare(usize vcount, usize icount)
 {
-    if (icount > _numIndices) {
+    if (vcount > _numVerts || icount > _numIndices) {
         _vertexArray->resize(vcount, icount);
     }
 }
 
 void polygon_renderer::on_render_to_target(render_target& target)
 {
-    if (_numIndices == 0 || !_material) {
+    if (_numIndices == 0 || _numVerts == 0 || !_material) {
         return;
     }
 

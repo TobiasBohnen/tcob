@@ -120,8 +120,10 @@ private:
     void prepare(usize vcount, usize icount);
     void on_render_to_target(render_target& target) override;
 
-    assets::asset_ptr<material>   _material {nullptr};
-    usize                         _numIndices {0};
+    assets::asset_ptr<material> _material {nullptr};
+    usize                       _numIndices {0};
+    usize                       _numVerts {0};
+
     primitive_type                _type {};
     std::unique_ptr<vertex_array> _vertexArray;
 };

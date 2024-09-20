@@ -133,10 +133,11 @@ protected:
 private:
     void calc();
 
-    std::vector<vertex> _verts {};
     std::vector<u32>    _inds;
-    rect_f              _boundingBox;
-    point_f             _centroid;
+    std::vector<vertex> _verts;
+
+    rect_f  _boundingBox;
+    point_f _centroid;
 };
 
 ////////////////////////////////////////////////////////////

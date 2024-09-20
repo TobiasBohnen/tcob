@@ -47,12 +47,6 @@ public:
     template <Arithmetic U>
     void constexpr resize_by(size<U> const& size);
 
-    auto constexpr with_position(point<T> const& point) const -> rect<T>;
-    auto constexpr with_center(point<T> const& center) const -> rect<T>;
-    auto constexpr with_size(size<T> const& size) const -> rect<T>;
-
-    auto static constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
-
     template <Arithmetic U>
     auto constexpr contains [[nodiscard]] (point<U> const& point) const -> bool;
     template <Arithmetic U>
@@ -64,9 +58,14 @@ public:
 
     auto constexpr find_edge(degree_f angle) const -> point<T>;
 
-    auto constexpr as_intersected(rect const& other) const -> rect;
-    auto constexpr as_merged(rect const& other) const -> rect;
-    auto constexpr as_padded(size<T> const& size) const -> rect;
+    auto constexpr as_moved_to(point<T> const& point) const -> rect<T>;
+    auto constexpr as_centered_at(point<T> const& center) const -> rect<T>;
+    auto constexpr as_resized_to(size<T> const& size) const -> rect<T>;
+    auto constexpr as_intersection_with(rect const& other) const -> rect;
+    auto constexpr as_union_with(rect const& other) const -> rect;
+    auto constexpr as_padded_by(size<T> const& size) const -> rect;
+
+    auto static constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
 
     auto static constexpr Lerp(rect const& left, rect const& right, f64 step) -> rect;
 

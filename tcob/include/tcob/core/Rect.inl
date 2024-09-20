@@ -109,7 +109,25 @@ auto constexpr rect<T>::find_edge(degree_f angle) const -> point<T>
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_intersected(rect const& other) const -> rect
+auto constexpr rect<T>::as_moved_to(point<T> const& point) const -> rect<T>
+{
+    return {point, get_size()};
+}
+
+template <Arithmetic T>
+auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect<T>
+{
+    return as_moved_to({center.X - Width / 2.0f, center.Y - Height / 2.0f});
+}
+
+template <Arithmetic T>
+auto constexpr rect<T>::as_resized_to(size<T> const& size) const -> rect<T>
+{
+    return {get_position(), size};
+}
+
+template <Arithmetic T>
+auto constexpr rect<T>::as_intersection_with(rect const& other) const -> rect
 {
     T const x1 {std::max(X, other.X)};
     T const y1 {std::max(Y, other.Y)};
@@ -127,7 +145,7 @@ auto constexpr rect<T>::as_intersected(rect const& other) const -> rect
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_merged(rect const& other) const -> rect
+auto constexpr rect<T>::as_union_with(rect const& other) const -> rect
 {
     T const x1 {std::min(X, other.X)};
     T const y1 {std::min(Y, other.Y)};
@@ -138,7 +156,7 @@ auto constexpr rect<T>::as_merged(rect const& other) const -> rect
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_padded(size<T> const& size) const -> rect
+auto constexpr rect<T>::as_padded_by(size<T> const& size) const -> rect
 {
     T const x {X + static_cast<T>(size.Width / 2)};
     T const y {Y + static_cast<T>(size.Height / 2)};
@@ -242,24 +260,6 @@ void constexpr rect<T>::resize_by(size<U> const& size)
 {
     Width += static_cast<T>(size.Width);
     Height += static_cast<T>(size.Height);
-}
-
-template <Arithmetic T>
-auto constexpr rect<T>::with_position(point<T> const& point) const -> rect<T>
-{
-    return {point, get_size()};
-}
-
-template <Arithmetic T>
-auto constexpr rect<T>::with_center(point<T> const& center) const -> rect<T>
-{
-    return with_position({center.X - Width / 2.0f, center.Y - Height / 2.0f});
-}
-
-template <Arithmetic T>
-auto constexpr rect<T>::with_size(size<T> const& size) const -> rect<T>
-{
-    return {get_position(), size};
 }
 
 template <Arithmetic T>

@@ -28,8 +28,12 @@ public:
     auto constexpr as_array [[nodiscard]] () const -> std::array<T, 2>;
 
     auto length() const -> f32;
+    auto dot(point<T> const& p) const -> f32;
+
     auto distance_to(point<T> const& p) const -> f32;
     auto angle_to(point<T> const& p) const -> degree_f;
+    auto angle_between(point<T> const& p) const -> radian_f;
+
     auto as_normalized() const -> point<f32>;
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;

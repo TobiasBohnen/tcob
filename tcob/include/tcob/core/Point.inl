@@ -38,6 +38,12 @@ inline auto point<T>::length() const -> f32
 }
 
 template <Arithmetic T>
+inline auto point<T>::dot(point<T> const& p) const -> f32
+{
+    return X * p.X + Y * p.Y;
+}
+
+template <Arithmetic T>
 inline auto point<T>::distance_to(point<T> const& p) const -> f32
 {
     return (*this - p).length();
@@ -46,11 +52,16 @@ inline auto point<T>::distance_to(point<T> const& p) const -> f32
 template <Arithmetic T>
 inline auto point<T>::angle_to(point<T> const& p) const -> degree_f
 {
-    radian_f const ang {std::atan2(p.Y - Y, p.X - X)};
-    degree_f       retValue {ang};
+    degree_f retValue {angle_between(p)};
     retValue += degree_f {90};
     if (retValue.Value < 0) { retValue += degree_f {360}; }
     return retValue;
+}
+
+template <Arithmetic T>
+inline auto point<T>::angle_between(point<T> const& p) const -> radian_f
+{
+    return {std::atan2(p.Y - Y, p.X - X)};
 }
 
 template <Arithmetic T>

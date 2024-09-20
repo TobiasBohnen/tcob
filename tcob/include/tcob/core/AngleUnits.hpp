@@ -29,7 +29,7 @@ public:
     auto tan [[nodiscard]] () const -> value_type;
     auto atan [[nodiscard]] () const -> value_type;
 
-    auto constexpr as_normalized [[nodiscard]] () -> angle_unit<ValueType, OneTurn>;
+    auto constexpr as_normalized [[nodiscard]] () const -> angle_unit<ValueType, OneTurn>;
 
     auto static constexpr Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>;
 

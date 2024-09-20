@@ -141,10 +141,10 @@ auto widget::get_hit_test_bounds() const -> rect_f
     offset_content(retValue, true);
 
     if (_parent) {
-        retValue = retValue.as_intersected(_parent->get_global_content_bounds());
+        retValue = retValue.as_intersection_with(_parent->get_global_content_bounds());
     }
     if (_form) {
-        retValue = retValue.as_intersected(_form->Bounds);
+        retValue = retValue.as_intersection_with(_form->Bounds);
     }
 
     return retValue;

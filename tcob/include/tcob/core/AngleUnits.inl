@@ -84,7 +84,7 @@ inline auto angle_unit<ValueType, OneTurn>::atan() const -> value_type
 }
 
 template <FloatingPoint ValueType, double OneTurn>
-auto constexpr angle_unit<ValueType, OneTurn>::as_normalized() -> angle_unit<value_type, OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::as_normalized() const -> angle_unit<value_type, OneTurn>
 {
     return {std::fmod(this->Value, static_cast<value_type>(OneTurn))};
 }
