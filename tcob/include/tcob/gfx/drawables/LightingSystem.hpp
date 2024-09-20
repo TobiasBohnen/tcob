@@ -19,11 +19,11 @@ class lighting_system;
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API light_source_base {
+class TCOB_API light_source {
     friend class lighting_system;
 
 public:
-    virtual ~light_source_base() = default;
+    virtual ~light_source() = default;
 
     prop<color>                   Color {colors::White};
     prop<point_f>                 Position;
@@ -32,7 +32,7 @@ public:
     prop<std::optional<degree_f>> EndAngle;
 
 protected:
-    light_source_base(lighting_system* parent);
+    light_source(lighting_system* parent);
     void request_redraw();
 
 private:
@@ -41,16 +41,16 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API shadow_caster_base {
+class TCOB_API shadow_caster {
     friend class lighting_system;
 
 public:
-    virtual ~shadow_caster_base() = default;
+    virtual ~shadow_caster() = default;
 
     prop<std::vector<point_f>> Points;
 
 protected:
-    shadow_caster_base(lighting_system* parent);
+    shadow_caster(lighting_system* parent);
     void request_redraw();
 
 private:
@@ -66,16 +66,16 @@ public:
 
     prop<rect_f> Bounds;
 
-    template <typename T = light_source_base>
+    template <typename T = light_source>
     auto create_light_source(auto&&... args) -> std::shared_ptr<T>;
 
-    void remove_light_source(light_source_base const& emitter);
+    void remove_light_source(light_source const& emitter);
     void clear_light_sources();
 
-    template <typename T = shadow_caster_base>
+    template <typename T = shadow_caster>
     auto create_shadow_caster(auto&&... args) -> std::shared_ptr<T>;
 
-    void remove_shadow_caster(shadow_caster_base const& emitter);
+    void remove_shadow_caster(shadow_caster const& emitter);
     void clear_shadow_casters();
 
     void request_redraw();
@@ -91,8 +91,8 @@ protected:
 private:
     auto ray_intersects_polygon(point_f rayOrigin, f32 rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>;
 
-    std::vector<std::shared_ptr<light_source_base>>  _lightSources {};
-    std::vector<std::shared_ptr<shadow_caster_base>> _shadowCasters {};
+    std::vector<std::shared_ptr<light_source>>  _lightSources {};
+    std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};
 
     bool _isDirty {false};
     bool _updateGeometry {false};

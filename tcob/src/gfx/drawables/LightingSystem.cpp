@@ -18,7 +18,7 @@ lighting_system::lighting_system()
     _renderer.set_material(_material);
 }
 
-void lighting_system::remove_light_source(light_source_base const& emitter)
+void lighting_system::remove_light_source(light_source const& emitter)
 {
     _lightSources.erase(std::find_if(_lightSources.begin(), _lightSources.end(), [&emitter](auto const& val) {
         if (val.get() == &emitter) {
@@ -38,7 +38,7 @@ void lighting_system::clear_light_sources()
     request_redraw();
 }
 
-void lighting_system::remove_shadow_caster(shadow_caster_base const& emitter)
+void lighting_system::remove_shadow_caster(shadow_caster const& emitter)
 {
     _shadowCasters.erase(std::find_if(_shadowCasters.begin(), _shadowCasters.end(), [&emitter](auto const& val) {
         if (val.get() == &emitter) {
@@ -69,15 +69,15 @@ void lighting_system::set_blend_funcs(blend_funcs funcs)
 }
 
 struct collision_result {
-    point_f             Point {};
-    f32                 Distance {};
-    usize               CollisionCount {};
-    shadow_caster_base* Caster {nullptr};
+    point_f        Point {};
+    f32            Distance {};
+    usize          CollisionCount {};
+    shadow_caster* Caster {nullptr};
 };
 
 struct caster_points {
     std::span<point_f const> Points {};
-    shadow_caster_base*      Caster {nullptr};
+    shadow_caster*           Caster {nullptr};
 };
 
 static auto IsPointInPolygon(point_f p, std::span<point_f const> points) -> bool
@@ -130,6 +130,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
         bool lightInsideShadowCaster {false};
         for (usize i {0}; i < casterPoints.size() - 1; ++i) {
+            if (casterPoints[i].Points.empty()) { continue; }
             lightInsideShadowCaster = IsPointInPolygon(ls->Position, casterPoints[i].Points);
             if (lightInsideShadowCaster) { break; }
         }
@@ -292,7 +293,7 @@ void lighting_system::on_draw_to(render_target& target)
 
 ////////////////////////////////////////////////////////////
 
-light_source_base::light_source_base(lighting_system* parent)
+light_source::light_source(lighting_system* parent)
     : _parent {parent}
 {
     Color.Changed.connect([&](auto const&) { request_redraw(); });
@@ -302,20 +303,20 @@ light_source_base::light_source_base(lighting_system* parent)
     EndAngle.Changed.connect([&](auto const&) { request_redraw(); });
 }
 
-void light_source_base::request_redraw()
+void light_source::request_redraw()
 {
     if (_parent) {
         _parent->request_redraw();
     }
 }
 
-shadow_caster_base::shadow_caster_base(lighting_system* parent)
+shadow_caster::shadow_caster(lighting_system* parent)
     : _parent {parent}
 {
     Points.Changed.connect([&](auto const&) { request_redraw(); });
 }
 
-void shadow_caster_base::request_redraw()
+void shadow_caster::request_redraw()
 {
     if (_parent) {
         _parent->request_redraw();
