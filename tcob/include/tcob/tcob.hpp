@@ -88,6 +88,7 @@
 #include <tcob/gfx/Window.hpp>
 #include <tcob/gfx/drawables/Cursor.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>
+#include <tcob/gfx/drawables/LightingSystem.hpp>
 #include <tcob/gfx/drawables/ParticleSystem.hpp>
 #include <tcob/gfx/drawables/PointCloud.hpp>
 #include <tcob/gfx/drawables/Shape.hpp>

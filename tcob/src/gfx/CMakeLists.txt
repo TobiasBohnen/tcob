@@ -31,6 +31,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Cursor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Drawable.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drawables/LightingSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/ParticleSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/PointCloud.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Shape.cpp
@@ -99,6 +100,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Window.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Cursor.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Drawable.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/drawables/LightingSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/ParticleSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/PointCloud.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Shape.hpp
