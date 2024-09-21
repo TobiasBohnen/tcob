@@ -113,9 +113,9 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API convex_poly_shape final : public shape {
+class TCOB_API poly_shape final : public shape {
 public:
-    convex_poly_shape();
+    poly_shape();
 
     prop<std::vector<point_f>> Points;
 

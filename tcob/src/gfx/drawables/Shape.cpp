@@ -7,7 +7,26 @@
 
 #include <algorithm>
 
+#include "earcut/earcut.hpp"
+
 #include "tcob/gfx/Renderer.hpp"
+
+namespace mapbox::util {
+template <>
+struct nth<0, tcob::point_f> {
+    static auto get(tcob::point_f const& t)
+    {
+        return t.X;
+    }
+};
+template <>
+struct nth<1, tcob::point_f> {
+    static auto get(tcob::point_f const& t)
+    {
+        return t.Y;
+    }
+};
+}
 
 namespace tcob::gfx {
 
@@ -221,7 +240,7 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
     if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
         texReg = Material->Texture->get_region(TextureRegion);
     } else {
-        texReg = {{0, 0, 1, 1}, 0};
+        texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }
     f32 const texLevel {static_cast<f32>(texReg.Level)};
 
@@ -352,12 +371,12 @@ auto rect_shape::get_center() const -> point_f
 
 ////////////////////////////////////////////////////////////
 
-convex_poly_shape::convex_poly_shape()
+poly_shape::poly_shape()
 {
     Points.Changed.connect([&](auto const&) { mark_dirty(); });
 }
 
-auto convex_poly_shape::get_geometry() -> geometry_data
+auto poly_shape::get_geometry() -> geometry_data
 {
     return {
         .Vertices = _verts,
@@ -365,7 +384,7 @@ auto convex_poly_shape::get_geometry() -> geometry_data
         .Type     = primitive_type::Triangles};
 }
 
-void convex_poly_shape::move_by(point_f offset)
+void poly_shape::move_by(point_f offset)
 {
     for (auto& p : *Points) {
         p += offset;
@@ -374,7 +393,7 @@ void convex_poly_shape::move_by(point_f offset)
     mark_dirty();
 }
 
-void convex_poly_shape::on_update(milliseconds /* deltaTime */)
+void poly_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
 
@@ -394,7 +413,7 @@ void convex_poly_shape::on_update(milliseconds /* deltaTime */)
     if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
         texReg = Material->Texture->get_region(TextureRegion);
     } else {
-        texReg = {{0, 0, 1, 1}, 0};
+        texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }
     f32 const   texLevel {static_cast<f32>(texReg.Level)};
     auto const& uvRect {texReg.UVRect};
@@ -407,14 +426,18 @@ void convex_poly_shape::on_update(milliseconds /* deltaTime */)
                                         (((y - _boundingBox.Y) / _boundingBox.Height) * uvRect.Height) + uvRect.Y,
                                         texLevel}});
     }
-    for (u32 i {1}; i < n - 1; ++i) {
-        _inds.push_back(0);
-        _inds.push_back(i);
-        _inds.push_back(i + 1);
+
+    std::vector<std::span<point_f const>> polygon;
+    polygon.emplace_back(points);
+    auto const indices {mapbox::earcut<u32>(polygon)};
+    for (u32 i {0}; i < indices.size(); i += 3) {
+        _inds.push_back(indices[i + 2]);
+        _inds.push_back(indices[i + 1]);
+        _inds.push_back(indices[i + 0]);
     }
 }
 
-void convex_poly_shape::on_color_changed(color c)
+void poly_shape::on_color_changed(color c)
 {
     auto const carr {c.as_array()};
     for (auto& vert : _verts) {
@@ -422,17 +445,17 @@ void convex_poly_shape::on_color_changed(color c)
     }
 }
 
-void convex_poly_shape::on_texture_region_changed(string const& /* texRegion */)
+void poly_shape::on_texture_region_changed(string const& /* texRegion */)
 {
     // TODO
 }
 
-auto convex_poly_shape::get_center() const -> point_f
+auto poly_shape::get_center() const -> point_f
 {
     return _centroid;
 }
 
-void convex_poly_shape::calc()
+void poly_shape::calc()
 {
     point_f max {std::numeric_limits<f32>::denorm_min(), std::numeric_limits<f32>::denorm_min()};
     point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
