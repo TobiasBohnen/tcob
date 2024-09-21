@@ -80,23 +80,31 @@ inline auto operator<<(std::ostream& os, angle_unit<ValueType, OneTurn> const& m
 
 ////////////////////////////////////////////////////////////
 
-using degree_f = angle_unit<f32, 360.>;
-using degree_d = angle_unit<f64, 360.>;
+template <typename T>
+using degree   = angle_unit<T, 360.>;
+using degree_d = degree<f64>;
+using degree_f = degree<f32>;
 
 ////////////////////////////////////////////////////////////
 
-using radian_f = angle_unit<f32, TAU>;
-using radian_d = angle_unit<f64, TAU>;
+template <typename T>
+using radian   = angle_unit<T, TAU>;
+using radian_d = radian<f64>;
+using radian_f = radian<f32>;
 
 ////////////////////////////////////////////////////////////
 
-using turn_f = angle_unit<f32, 1.>;
-using turn_d = angle_unit<f64, 1.>;
+template <typename T>
+using turn   = angle_unit<T, 1.>;
+using turn_d = turn<f64>;
+using turn_f = turn<f32>;
 
 ////////////////////////////////////////////////////////////
 
-using gradian_f = angle_unit<f32, 400.>;
-using gradian_d = angle_unit<f64, 400.>;
+template <typename T>
+using gradian   = angle_unit<T, 400.>;
+using gradian_d = gradian<f64>;
+using gradian_f = gradian<f32>;
 
 ////////////////////////////////////////////////////////////
 
