@@ -24,7 +24,7 @@ class shadow_caster;
 
 struct light_collision {
     point_f        Point {};
-    f32            Distance {};
+    f64            Distance {};
     usize          CollisionCount {};
     light_source*  Source {nullptr};
     shadow_caster* Caster {nullptr};
@@ -112,7 +112,7 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    auto ray_intersects_polygon(point_f rayOrigin, f32 rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>;
+    auto ray_intersects_polygon(point_d rayOrigin, degree_d rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>;
     auto is_point_in_polygon(point_f p, std::span<point_f const> points) const -> bool;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};

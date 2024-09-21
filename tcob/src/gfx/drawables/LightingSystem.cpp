@@ -121,14 +121,14 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
             }
 
             // collect angles
-            std::set<f32> angles0;
+            std::set<f64> angles0;
             for (auto const& cp : casterPoints) {
                 for (auto const& scp : cp.Points) {
-                    std::array<f32, 3> constexpr vars {-minAngle, 0, minAngle};
-                    for (f32 var : vars) {
+                    std::array<f64, 3> constexpr vars {-minAngle, 0, minAngle};
+                    for (f64 var : vars) {
                         auto const deg {lightPosition.angle_to(scp).as_normalized()};
-                        if (limitAngle && (deg < *ls->StartAngle || deg > *ls->EndAngle)) { continue; }
-                        angles0.insert(degree_f {deg.Value - 90 + var}.as_normalized().Value);
+                        if (limitAngle && (deg.Value < ls->StartAngle->Value || deg.Value > ls->EndAngle->Value)) { continue; }
+                        angles0.insert(degree_d {deg.Value - 90 + var}.as_normalized().Value);
                     }
                 }
             }
@@ -147,30 +147,30 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
             }
 
             // discard angles
-            std::vector<f32> angles1;
+            std::vector<f64> angles1;
             angles1.reserve(angles0.size());
-            for (f32 const angle : angles0) {
+            for (f64 const angle : angles0) {
                 if (!angles1.empty() && angle - angles1.back() < minAngle) { continue; }
                 angles1.push_back(angle);
             }
 
             // ray cast
-            std::map<f32, light_collision, std::greater<>> collisionResult0;
-            for (f32 const angle : angles1) {
+            std::map<f64, light_collision, std::greater<>> collisionResult0;
+            for (f64 const angle : angles1) {
                 light_collision nearestPoint;
                 nearestPoint.Distance = std::numeric_limits<f32>::max();
                 nearestPoint.Source   = ls.get();
 
                 for (auto const& cp : casterPoints) {
-                    auto const result {ray_intersects_polygon(lightPosition, angle, cp.Points)};
+                    auto const result {ray_intersects_polygon(point_d {lightPosition}, angle, cp.Points)};
                     for (auto const& p : result) {
-                        f32 const dist {lightPosition.distance_to(p)};
+                        f64 const dist {lightPosition.distance_to(p)};
                         if (p == lightPosition) { continue; }
                         if (dist >= nearestPoint.Distance) { continue; }
 
                         if (limitRange && dist > lightRange) {
                             // move out-of-range points into range
-                            point_f const direction = (p - lightPosition).as_normalized();
+                            point_d const direction = (p - lightPosition).as_normalized();
                             nearestPoint.Point      = lightPosition + direction * lightRange;
                             nearestPoint.Distance   = lightRange;
                             nearestPoint.Caster     = nullptr;
@@ -212,7 +212,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
             auto col {ls->Color()};
             if (limitRange && ls->Falloff) {
                 // FIXME: should be inverse square
-                f32 const falloff {std::clamp(1.0f - (p.Distance / lightRange), 0.0f, 1.0f)};
+                f64 const falloff {std::clamp(1.0 - (p.Distance / lightRange), 0.0, 1.0)};
                 col.R = static_cast<u8>(col.R * falloff);
                 col.G = static_cast<u8>(col.G * falloff);
                 col.B = static_cast<u8>(col.B * falloff);
@@ -238,29 +238,29 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     }
 }
 
-auto lighting_system::ray_intersects_polygon(point_f rayOrigin, f32 rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>
+auto lighting_system::ray_intersects_polygon(point_d rayOrigin, degree_d rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>
 {
-    f32 constexpr epsilon {1e-6f};
+    f64 constexpr epsilon {std::numeric_limits<f64>::epsilon()};
 
     auto static const RayIntersectsSegment {
-        [](point_f ro, point_f rd, point_f p0, point_f p1) -> std::optional<f32> {
-            point_f const seg {p1 - p0};
-            point_f const segPerp {seg.Y, -seg.X};
+        [](point_d const& ro, point_d const& rd, point_d const& p0, point_d const& p1) -> std::optional<f64> {
+            point_d const seg {p1 - p0};
+            point_d const segPerp {seg.Y, -seg.X};
 
-            f32 const denom {segPerp.dot(rd)};
+            f64 const denom {segPerp.dot(rd)};
             if (std::abs(denom) < epsilon) { return std::nullopt; }
 
-            point_f const d {p0 - ro};
-            f32 const     distance {segPerp.dot(d) / denom};
-            f32 const     s {point_f {rd.Y, -rd.X}.dot(d) / denom};
-            if (distance >= 0.0f && s >= 0.0f && s <= 1.0f) { return distance; }
+            point_d const d {p0 - ro};
+            f64 const     distance {segPerp.dot(d) / denom};
+            f64 const     s {point_d {rd.Y, -rd.X}.dot(d) / denom};
+            if (distance >= 0.0 && s >= 0.0 && s <= 1.0) { return distance; }
             return std::nullopt;
         }};
 
     std::vector<point_f> retValue;
 
-    radian_f const rad {degree_f {rayDirection}};
-    point_f        rayDir {rad.cos(), rad.sin()};
+    radian_d const rad {rayDirection};
+    point_d        rayDir {rad.cos(), rad.sin()};
     rayDir = rayDir.as_normalized();
     if (std::abs(rayDir.X) < epsilon && std::abs(rayDir.Y) < epsilon) {
         return retValue; // Invalid ray direction
@@ -268,8 +268,8 @@ auto lighting_system::ray_intersects_polygon(point_f rayOrigin, f32 rayDirection
 
     usize const n {polygon.size()};
     for (usize i {0}; i < n; ++i) {
-        if (auto distance {RayIntersectsSegment(rayOrigin, rayDir, polygon[i], polygon[(i + 1) % n])}) {
-            retValue.push_back(rayOrigin + rayDir * *distance);
+        if (auto distance {RayIntersectsSegment(rayOrigin, rayDir, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
+            retValue.emplace_back(rayOrigin + rayDir * *distance);
         }
     }
 
