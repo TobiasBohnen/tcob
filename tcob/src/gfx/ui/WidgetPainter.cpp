@@ -115,7 +115,7 @@ void widget_painter::draw_nine_patch(nine_patch const& np, rect_f const& rect, e
 {
     _canvas.set_fill_style(colors::White);
     f32 const    borderSize {borderStyle.Size.calc(rect.Width)};
-    rect_f const center {rect.X + borderSize, rect.Y + borderSize, rect.Width - borderSize * 2, rect.Height - borderSize * 2};
+    rect_f const center {rect.X + borderSize, rect.Y + borderSize, rect.Width - (borderSize * 2), rect.Height - (borderSize * 2)};
     _canvas.draw_nine_patch(np.Texture.get_obj(), np.Region, rect, center, np.UV);
 }
 
@@ -138,7 +138,7 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
         f32 const dborderSize {borderSize / 3};
         _canvas.set_stroke_width(dborderSize);
         _canvas.begin_path();
-        _canvas.rounded_rect({rect.X - dborderSize * 2, rect.Y - dborderSize * 2, rect.Width + dborderSize * 4, rect.Height + dborderSize * 4}, borderRadius);
+        _canvas.rounded_rect({rect.X - (dborderSize * 2), rect.Y - (dborderSize * 2), rect.Width + (dborderSize * 4), rect.Height + (dborderSize * 4)}, borderRadius);
         _canvas.rounded_rect(rect, borderRadius);
         _canvas.stroke();
 

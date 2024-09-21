@@ -125,7 +125,7 @@ void element_painter::draw_text(text_draw_context const& ctx)
         _canvas.set_stroke_width(std::max(ctx.TextBox.Height / 10, 3.0f));
 
         if ((ctx.FontDecorations & font_decorations::Linethrough) == font_decorations::Linethrough) {
-            _canvas.stroke_line({ctx.TextBox.left(), ctx.TextBox.top() + ctx.TextBox.Height / 2}, {ctx.TextBox.right(), ctx.TextBox.top() + ctx.TextBox.Height / 2});
+            _canvas.stroke_line({ctx.TextBox.left(), ctx.TextBox.top() + (ctx.TextBox.Height / 2)}, {ctx.TextBox.right(), ctx.TextBox.top() + (ctx.TextBox.Height / 2)});
         }
         if ((ctx.FontDecorations & font_decorations::Overline) == font_decorations::Overline) {
             _canvas.stroke_line({ctx.TextBox.left(), ctx.TextBox.top()}, {ctx.TextBox.right(), ctx.TextBox.top()});

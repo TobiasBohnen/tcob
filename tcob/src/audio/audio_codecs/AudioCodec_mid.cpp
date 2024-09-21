@@ -12,6 +12,8 @@
     #include <TinySoundFont/tml.h>
     #include <TinySoundFont/tsf.h>
 
+    #include <algorithm>
+
 namespace tcob::audio::detail {
 
     #define RENDER_EFFECTSAMPLEBLOCK 64
@@ -81,9 +83,7 @@ auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
         if (samplesRemaining < 0) {
             sampleBlock += samplesRemaining;
         }
-        if (sampleBlock > samplesRemaining) {
-            sampleBlock = samplesRemaining;
-        }
+        sampleBlock = std::min(sampleBlock, samplesRemaining);
 
         // Loop through all MIDI messages which need to be played up until the current playback time
         for (_currentTime += sampleBlock * (1000.0 / static_cast<f64>(_info.SampleRate));

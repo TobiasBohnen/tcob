@@ -27,7 +27,7 @@ void al_buffer::buffer_data(std::span<i16 const> data, i32 channels, i32 freq) c
     alBufferData(
         _id,
         channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-        data.data(), static_cast<i32>(data.size_bytes()), static_cast<i32>(freq));
+        data.data(), static_cast<i32>(data.size_bytes()), freq);
 }
 
 void al_buffer::buffer_data(std::span<f32 const> data, i32 channels, i32 freq) const
@@ -36,7 +36,7 @@ void al_buffer::buffer_data(std::span<f32 const> data, i32 channels, i32 freq) c
     alBufferData(
         _id,
         channels == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-        data.data(), static_cast<i32>(data.size_bytes()), static_cast<i32>(freq));
+        data.data(), static_cast<i32>(data.size_bytes()), freq);
 }
 
 auto al_buffer::get_frequency() const -> i32

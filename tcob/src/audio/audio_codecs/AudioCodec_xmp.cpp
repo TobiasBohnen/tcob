@@ -72,7 +72,7 @@ auto xmp_decoder::open() -> std::optional<buffer::info>
         _info.FrameCount = static_cast<u64>(
             (static_cast<f32>(mi.total_time) / 1000.0f) * static_cast<f32>(_info.SampleRate));
 
-        xmp_start_player(_context, static_cast<i32>(_info.SampleRate), 0);
+        xmp_start_player(_context, _info.SampleRate, 0);
 
         return _info;
     }

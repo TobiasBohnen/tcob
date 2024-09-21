@@ -291,8 +291,8 @@ void container::init_borders(borders& brds, litehtml::borders const& b, litehtml
     brds.Left.Width              = static_cast<f32>(b.left.width);
     brds.Right.Width             = static_cast<f32>(b.right.width);
     brds.Top.Width               = static_cast<f32>(b.top.width);
-    brds.DrawBox                 = rect_f::FromLTRB(rect.X + brds.Left.Width / 2, rect.Y + brds.Top.Width / 2,
-                                                    rect.right() - brds.Right.Width / 2, rect.bottom() - brds.Bottom.Width / 2);
+    brds.DrawBox                 = rect_f::FromLTRB(rect.X + (brds.Left.Width / 2), rect.Y + (brds.Top.Width / 2),
+                                                    rect.right() - (brds.Right.Width / 2), rect.bottom() - (brds.Bottom.Width / 2));
 }
 
 void container::draw_text(litehtml::uint_ptr hdc, char const* text, litehtml::uint_ptr hFont, litehtml::web_color col, litehtml::position const& pos)

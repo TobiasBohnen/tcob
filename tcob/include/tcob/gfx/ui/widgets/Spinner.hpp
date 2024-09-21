@@ -41,7 +41,7 @@ protected:
     auto get_attributes() const -> widget_attributes override;
 
 private:
-    enum class arrow {
+    enum class arrow : u8 {
         None,
         Increase,
         Decrease

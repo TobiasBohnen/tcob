@@ -49,7 +49,7 @@ void button::on_paint(widget_painter& painter)
             auto const iconSize {Icon->Texture->get_size()};
             f32 const  factor {iconSize.Height / static_cast<f32>(iconSize.Width)};
             f32 const  width {rect.Height * factor};
-            rect = {{rect.get_center().X - width / 2, rect.Y}, {width, rect.Height}};
+            rect = {{rect.get_center().X - (width / 2), rect.Y}, {width, rect.Height}};
             auto& canvas {painter.get_canvas()};
             canvas.set_fill_style(style->Text.Color);
             canvas.draw_image(Icon->Texture.get_obj(), Icon->Region, rect);

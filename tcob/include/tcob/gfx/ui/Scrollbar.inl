@@ -189,7 +189,7 @@ inline void scrollbar<Parent>::calculate_value(point_f mp)
 
         f32 const min {get_min_value()};
         f32 const max {get_max_value()};
-        set_target_value(min + (max - min) * frac, delay);
+        set_target_value(min + ((max - min) * frac), delay);
 
         _overThumb = true;
     }

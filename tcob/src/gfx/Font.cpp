@@ -24,31 +24,31 @@ extern "C" {
 auto static move_to(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->MoveTo({to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    funcs->MoveTo({(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
 auto static line_to(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->LineTo({to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    funcs->LineTo({(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
 auto static conic_to(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->ConicTo({control->x / 64.0f + funcs->Offset.X, control->y / 64.0f + funcs->Offset.Y},
-                   {to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    funcs->ConicTo({(control->x / 64.0f) + funcs->Offset.X, (control->y / 64.0f) + funcs->Offset.Y},
+                   {(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
 auto static cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->CubicTo({control1->x / 64.0f + funcs->Offset.X, control1->y / 64.0f + funcs->Offset.Y},
-                   {control2->x / 64.0f + funcs->Offset.X, control2->y / 64.0f + funcs->Offset.Y},
-                   {to->x / 64.0f + funcs->Offset.X, to->y / 64.0f + funcs->Offset.Y});
+    funcs->CubicTo({(control1->x / 64.0f) + funcs->Offset.X, (control1->y / 64.0f) + funcs->Offset.Y},
+                   {(control2->x / 64.0f) + funcs->Offset.X, (control2->y / 64.0f) + funcs->Offset.Y},
+                   {(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 }

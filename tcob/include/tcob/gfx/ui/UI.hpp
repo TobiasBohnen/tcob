@@ -163,7 +163,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-enum class dock_style {
+enum class dock_style : u8 {
     Left,
     Right,
     Top,

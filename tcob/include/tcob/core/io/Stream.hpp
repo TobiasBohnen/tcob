@@ -17,7 +17,7 @@ namespace tcob::io {
 
 ////////////////////////////////////////////////////////////
 
-enum class seek_dir {
+enum class seek_dir : u8 {
     Begin   = std::ios::beg,
     Current = std::ios::cur,
     End     = std::ios::end

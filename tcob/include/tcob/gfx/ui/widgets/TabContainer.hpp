@@ -16,7 +16,7 @@ namespace tcob::gfx::ui {
 // TODO: scrollable tab bar
 class TCOB_API tab_container : public widget_container {
 public:
-    enum class position {
+    enum class position : u8 {
         Top,
         Bottom,
         Hidden

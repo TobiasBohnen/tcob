@@ -229,16 +229,16 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
     auto const& uvRect {texReg.UVRect};
     _verts.push_back({.Position  = (xform * Center()).as_array(),
                       .Color     = Color->as_array(),
-                      .TexCoords = {0.5f * uvRect.Width + uvRect.X,
-                                    0.5f * uvRect.Height + uvRect.Y,
+                      .TexCoords = {(0.5f * uvRect.Width) + uvRect.X,
+                                    (0.5f * uvRect.Height) + uvRect.Y,
                                     texLevel}});
 
     auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
 
     for (i32 i {0}; i < Segments; ++i) {
         f32 const angle {i * angleStep};
-        f32 const x {radius * std::cos(angle) + centerX};
-        f32 const y {radius * std::sin(angle) + centerY};
+        f32 const x {(radius * std::cos(angle)) + centerX};
+        f32 const y {(radius * std::sin(angle)) + centerY};
         _verts.push_back({.Position  = (xform * point_f {x, y}).as_array(),
                           .Color     = Color->as_array(),
                           .TexCoords = {(((x - uvSquare.X) / uvSquare.Width) * uvRect.Width) + uvRect.X,
@@ -451,7 +451,7 @@ void convex_poly_shape::calc()
         min.Y = std::min(p0.Y, min.Y);
 
         point_f const& p1 {points[(i + 1) % n]};
-        f32 const      a {p0.X * p1.Y - p1.X * p0.Y};
+        f32 const      a {(p0.X * p1.Y) - (p1.X * p0.Y)};
         signedArea += a;
         _centroid.X += (p0.X + p1.X) * a;
         _centroid.Y += (p0.Y + p1.Y) * a;

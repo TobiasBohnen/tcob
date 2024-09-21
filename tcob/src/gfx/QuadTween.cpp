@@ -5,6 +5,8 @@
 
 #include "tcob/gfx/QuadTween.hpp"
 
+#include <algorithm>
+
 namespace tcob::gfx {
 using namespace std::chrono_literals;
 
@@ -207,9 +209,9 @@ namespace effect {
         size_f maxSize {size_f::Zero};
         for (auto const& q : quads) {
             f32 const width {q[1].Position[0] - q[3].Position[0]};
-            if (width > maxSize.Width) { maxSize.Width = width; }
+            maxSize.Width = std::max(width, maxSize.Width);
             f32 const height {q[1].Position[1] - q[3].Position[1]};
-            if (height > maxSize.Height) { maxSize.Height = height; }
+            maxSize.Height = std::max(height, maxSize.Height);
         }
 
         f32 const wDiff {WidthEnd - WidthStart};

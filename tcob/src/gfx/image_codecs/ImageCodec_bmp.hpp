@@ -26,7 +26,7 @@ namespace bmp {
         void read(istream& reader);
     };
 
-    enum class compression {
+    enum class compression : u8 {
         Rgb       = 0,
         Rle8      = 1,
         Rle4      = 2,

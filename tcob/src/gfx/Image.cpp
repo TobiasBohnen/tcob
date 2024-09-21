@@ -52,7 +52,7 @@ auto image::get_data(rect_i const& bounds) const -> std::vector<u8>
     // TODO: bounds check
 
     for (i32 y {bounds.Y}; y < bounds.bottom(); ++y) {
-        u8 const* src {&_buffer[y * srcStride + bounds.X * bpp]};
+        u8 const* src {&_buffer[(y * srcStride) + (bounds.X * bpp)]};
         i32 const dst {(y - bounds.Y) * dstStride};
         std::copy(src, src + dstStride, retValue.begin() + dst);
     }

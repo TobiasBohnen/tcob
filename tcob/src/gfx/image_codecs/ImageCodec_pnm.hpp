@@ -17,7 +17,7 @@ namespace tcob::gfx::detail {
 namespace pnm {
     constexpr i32 BPP {3};
 
-    enum class format {
+    enum class format : u8 {
         P1 = 1,
         P2 = 2,
         P3 = 3,

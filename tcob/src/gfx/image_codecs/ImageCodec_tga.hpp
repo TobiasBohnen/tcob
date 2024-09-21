@@ -17,7 +17,7 @@ namespace tcob::gfx::detail {
 ////////////////////////////////////////////////////////////
 
 namespace tga {
-    enum class rle_packet_type {
+    enum class rle_packet_type : u8 {
         Raw        = 0,
         Compressed = 1
     };
@@ -35,14 +35,14 @@ namespace tga {
         ColorMapIncluded   = 1
     };
 
-    enum class first_pixel_destination {
+    enum class first_pixel_destination : u8 {
         BottomLeft  = 0,
         BottomRight = 1,
         TopLeft     = 2,
         TopRight    = 3
     };
 
-    enum class format {
+    enum class format : u8 {
         Original,
         New
     };

@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <algorithm>
+
 #include "tcob/gfx/ui/widgets/TextBox.hpp"
 
 #include "tcob/core/StringUtils.hpp"
@@ -17,7 +19,7 @@ text_box::text_box(init const& wi)
     Text.Changed.connect([&](auto const& val) {
         _textLength = utf8::length(val);
         _textDirty  = true;
-        if (_caretPos > _textLength) { _caretPos = _textLength; }
+        _caretPos   = std::min(_caretPos, _textLength);
         force_redraw(get_name() + ": Text changed");
     });
 

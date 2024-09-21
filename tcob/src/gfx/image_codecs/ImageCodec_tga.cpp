@@ -412,7 +412,7 @@ void tga_encoder::write_image_data(image const& img, ostream& out) const
     std::vector<u8> rlePackage;
 
     auto const& imgInfo {img.get_info()};
-    i32 const   bytesPerPixel {static_cast<i32>(imgInfo.bytes_per_pixel())};
+    i32 const   bytesPerPixel {imgInfo.bytes_per_pixel()};
     i32 const   paddingByteCount {get_padding_bytes(bytesPerPixel * 8, imgInfo.stride(), imgInfo.Size.Width)};
     i32 const   sizeInBytes {static_cast<i32>(imgInfo.size_in_bytes())};
 

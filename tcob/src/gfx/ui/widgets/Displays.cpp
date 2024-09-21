@@ -49,8 +49,8 @@ void dot_matrix_display::on_paint(widget_painter& painter)
             canvas.begin_path();
 
             for (auto const& dot : dots) {
-                rect_f const dotRect {dot.X * width + rect.left(),
-                                      dot.Y * height + rect.top(),
+                rect_f const dotRect {(dot.X * width) + rect.left(),
+                                      (dot.Y * height) + rect.top(),
                                       width, height};
 
                 switch (style->Dot.Type) {
@@ -184,29 +184,29 @@ void seven_segment_display::on_paint(widget_painter& painter)
         point_f const lineOffset {1, 0};
 
         std::array<point_f, 18> const points {{
-            {0, 0},                                     // 01
-            {width, 0},                                 // 02
-            {width - thickness, thickness},             // 03
-            {thickness, thickness},                     // 04
+            {0, 0},                                       // 01
+            {width, 0},                                   // 02
+            {width - thickness, thickness},               // 03
+            {thickness, thickness},                       // 04
 
-            {0, width - thickness / 2},                 // 05
-            {thickness, width - thickness / 2},         // 06
-            {thickness / 2, width},                     // 07
+            {0, width - (thickness / 2)},                 // 05
+            {thickness, width - (thickness / 2)},         // 06
+            {thickness / 2, width},                       // 07
 
-            {0, width + thickness / 2},                 // 08
-            {thickness, width + thickness / 2},         // 09
-            {0, width * 2},                             // 10
-            {thickness, width * 2 - thickness},         // 11
+            {0, width + (thickness / 2)},                 // 08
+            {thickness, width + (thickness / 2)},         // 09
+            {0, width * 2},                               // 10
+            {thickness, (width * 2) - thickness},         // 11
 
-            {width - thickness, width * 2 - thickness}, // 12
-            {width, width * 2},                         // 13
+            {width - thickness, (width * 2) - thickness}, // 12
+            {width, width * 2},                           // 13
 
-            {width - thickness, width + thickness / 2}, // 14
-            {width, width + thickness / 2},             // 15
-            {width - thickness / 2, width},             // 16
+            {width - thickness, width + (thickness / 2)}, // 14
+            {width, width + (thickness / 2)},             // 15
+            {width - (thickness / 2), width},             // 16
 
-            {width - thickness, width - thickness / 2}, // 17
-            {width, width - thickness / 2},             // 18
+            {width - thickness, width - (thickness / 2)}, // 17
+            {width, width - (thickness / 2)},             // 18
         }};
 
         for (auto const c : Text()) {

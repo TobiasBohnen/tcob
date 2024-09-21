@@ -159,7 +159,7 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
 
     _remainLife -= time;
 
-    f64 const particleAmount {SpawnRate * (time.count() / 1000) + _emissionDiff};
+    f64 const particleAmount {(SpawnRate * (time.count() / 1000)) + _emissionDiff};
     i32 const particleCount {static_cast<i32>(particleAmount)};
     _emissionDiff = particleAmount - particleCount;
 
@@ -190,8 +190,8 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
         particle.set_lifetime(milliseconds {_randomGen(Template.Lifetime.first.count(), Template.Lifetime.second.count())});
 
         // calculate random postion
-        f32 const x {_randomGen(SpawnArea.left(), SpawnArea.right()) - Template.Size.Width / 2};
-        f32 const y {_randomGen(SpawnArea.top(), SpawnArea.bottom()) - Template.Size.Height / 2};
+        f32 const x {_randomGen(SpawnArea.left(), SpawnArea.right()) - (Template.Size.Width / 2)};
+        f32 const y {_randomGen(SpawnArea.top(), SpawnArea.bottom()) - (Template.Size.Height / 2)};
 
         // set bounds
         particle.Bounds = {{x + sysPos.X, y + sysPos.Y}, Template.Size};

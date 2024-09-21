@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <algorithm>
+
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 
 #include "tcob/gfx/ui/Form.hpp"
@@ -33,9 +35,7 @@ auto panel::get_scroll_min_value(orientation orien) const -> f32
             retValue = std::min(retValue, bounds.Y);
         }
     }
-    if (retValue > 0) {
-        retValue = 0;
-    }
+    retValue = std::min<f32>(retValue, 0);
 
     return retValue * 1.05f;
 }

@@ -8,7 +8,7 @@
 
 namespace tcob::input {
 // from SDL2:
-enum class scan_code {
+enum class scan_code : u16 {
     UNKNOWN = 0,
 
     /**

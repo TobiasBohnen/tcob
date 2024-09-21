@@ -33,9 +33,9 @@ png::PLTE_chunk::PLTE_chunk(std::span<u8 const> data)
 
     for (u32 i {0}; i < size; ++i) {
         auto& color {Entries[i]};
-        color.R = data[i * 3 + 0];
-        color.G = data[i * 3 + 1];
-        color.B = data[i * 3 + 2];
+        color.R = data[(i * 3) + 0];
+        color.G = data[(i * 3) + 1];
+        color.B = data[(i * 3) + 2];
         color.A = 255;
     }
 }
@@ -195,7 +195,7 @@ auto png_decoder::check_sig(istream& in) -> bool
 
 auto static paeth(u8 a, u8 b, u8 c) -> u8
 { // https://github.com/nothings/stb/blob/f4a71b13373436a2866c5d68f8f80ac6f0bc1ffe/stb_image.h#L4656C1-L4667C1
-    i32 const thresh {c * 3 - (a + b)};
+    i32 const thresh {(c * 3) - (a + b)};
     u8 const  lo {a < b ? a : b};
     u8 const  hi {a < b ? b : a};
     u8 const  t0 {(hi <= thresh) ? lo : c};
@@ -295,13 +295,13 @@ void png_decoder::next_line_non_interlaced()
 auto png_decoder::get_interlace_dimensions() const -> rect_i
 {
     switch (_interlacePass) {
-    case 1: return {(0 + _pixel.X * 8), (0 + _pixel.Y * 8), (_ihdr.Width + 7) / 8, (_ihdr.Height + 7) / 8};
-    case 2: return {(4 + _pixel.X * 8), (0 + _pixel.Y * 8), (_ihdr.Width + 3) / 8, (_ihdr.Height + 7) / 8};
-    case 3: return {(0 + _pixel.X * 4), (4 + _pixel.Y * 8), (_ihdr.Width + 3) / 4, (_ihdr.Height + 3) / 8};
-    case 4: return {(2 + _pixel.X * 4), (0 + _pixel.Y * 4), (_ihdr.Width + 1) / 4, (_ihdr.Height + 3) / 4};
-    case 5: return {(0 + _pixel.X * 2), (2 + _pixel.Y * 4), (_ihdr.Width + 1) / 2, (_ihdr.Height + 1) / 4};
-    case 6: return {(1 + _pixel.X * 2), (0 + _pixel.Y * 2), (_ihdr.Width + 0) / 2, (_ihdr.Height + 1) / 2};
-    case 7: return {(0 + _pixel.X * 1), (1 + _pixel.Y * 2), (_ihdr.Width + 0) / 1, (_ihdr.Height + 0) / 2};
+    case 1: return {(0 + (_pixel.X * 8)), (0 + (_pixel.Y * 8)), (_ihdr.Width + 7) / 8, (_ihdr.Height + 7) / 8};
+    case 2: return {(4 + (_pixel.X * 8)), (0 + (_pixel.Y * 8)), (_ihdr.Width + 3) / 8, (_ihdr.Height + 7) / 8};
+    case 3: return {(0 + (_pixel.X * 4)), (4 + (_pixel.Y * 8)), (_ihdr.Width + 3) / 4, (_ihdr.Height + 3) / 8};
+    case 4: return {(2 + (_pixel.X * 4)), (0 + (_pixel.Y * 4)), (_ihdr.Width + 1) / 4, (_ihdr.Height + 3) / 4};
+    case 5: return {(0 + (_pixel.X * 2)), (2 + (_pixel.Y * 4)), (_ihdr.Width + 1) / 2, (_ihdr.Height + 1) / 4};
+    case 6: return {(1 + (_pixel.X * 2)), (0 + (_pixel.Y * 2)), (_ihdr.Width + 0) / 2, (_ihdr.Height + 1) / 2};
+    case 7: return {(0 + (_pixel.X * 1)), (1 + (_pixel.Y * 2)), (_ihdr.Width + 0) / 1, (_ihdr.Height + 0) / 2};
     }
 
     return {};

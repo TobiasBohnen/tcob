@@ -36,9 +36,9 @@ auto constexpr color::FromHSLA(hsx const& hsl, u8 a) -> color
     auto constexpr HueToRGB {[](f32 v1, f32 v2, f32 vH) {
         if (vH < 0) { vH += 1; }
         if (vH > 1) { vH -= 1; }
-        if ((vH * 6) < 1) { return (v1 + (v2 - v1) * 6 * vH); }
+        if ((vH * 6) < 1) { return (v1 + ((v2 - v1) * 6 * vH)); }
         if ((vH * 2) < 1) { return v2; }
-        if ((vH * 3) < 2) { return (v1 + (v2 - v1) * ((2.0f / 3) - vH) * 6); }
+        if ((vH * 3) < 2) { return (v1 + ((v2 - v1) * ((2.0f / 3) - vH) * 6)); }
         return v1;
     }};
 
@@ -48,7 +48,7 @@ auto constexpr color::FromHSLA(hsx const& hsl, u8 a) -> color
     } else {
         f32 const hue {hsl.Hue.Value / 360};
         f32 const v2 {(hsl.X < 0.5f) ? (hsl.X * (1 + hsl.Saturation)) : ((hsl.X + hsl.Saturation) - (hsl.X * hsl.Saturation))};
-        f32 const v1 {2 * hsl.X - v2};
+        f32 const v1 {(2 * hsl.X) - v2};
 
         retValue.R = static_cast<u8>(std::round(HueToRGB(v1, v2, hue + (1.0f / 3)) * 255.0f));
         retValue.G = static_cast<u8>(std::round(HueToRGB(v1, v2, hue) * 255.0f));
@@ -66,7 +66,7 @@ auto constexpr color::FromHSVA(hsx const& hsv, u8 a) -> color
         retValue.R = retValue.G = retValue.B = static_cast<u8>(std::round(hsv.X * 255.0f));
     } else {
         i32 const hi {static_cast<i32>(hsv.Hue.Value / 60) % 6};
-        f32 const f {hsv.Hue.Value / 60 - hi};
+        f32 const f {(hsv.Hue.Value / 60) - hi};
         f32 const p {hsv.X * (1 - hsv.Saturation)};
         f32 const q {hsv.X * (1 - (hsv.Saturation * f))};
         f32 const t {hsv.X * (1 - (hsv.Saturation * (1 - f)))};
@@ -113,7 +113,7 @@ auto constexpr color::FromHSVA(hsx const& hsv, u8 a) -> color
 
 auto constexpr color::as_grayscale(f32 redFactor, f32 greenFactor, f32 blueFactor) const -> color
 {
-    u8 const value {static_cast<u8>(R * redFactor + G * greenFactor + B * blueFactor)};
+    u8 const value {static_cast<u8>((R * redFactor) + (G * greenFactor) + (B * blueFactor))};
     return {value, value, value};
 }
 

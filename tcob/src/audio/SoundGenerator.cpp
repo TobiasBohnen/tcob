@@ -5,6 +5,8 @@
 
 // based on: sfxr and rFXGen
 
+#include <algorithm>
+
 #include "tcob/audio/SoundGenerator.hpp"
 
 #include "ALObjects.hpp"
@@ -52,11 +54,7 @@ auto sound_generator::generate_laser_shoot() -> sound_wave
     }
 
     retValue.StartFrequency = _random(0.5f, 1.0f);
-    retValue.MinFrequency   = retValue.StartFrequency - _random(0.2f, 0.8f);
-
-    if (retValue.MinFrequency < 0.2f) {
-        retValue.MinFrequency = 0.2f;
-    }
+    retValue.MinFrequency   = std::max(retValue.StartFrequency - _random(0.2f, 0.8f), 0.2f);
 
     retValue.Slide = -_random(-0.35f, -0.15f);
 
@@ -362,10 +360,10 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
         fperiod    = {100.0 / (wave.StartFrequency * wave.StartFrequency + 0.001)};
         fmaxperiod = {100.0 / (wave.MinFrequency * wave.MinFrequency + 0.001)};
 
-        fslide  = {1.0 - std::pow(static_cast<f64>(wave.Slide), 3.0) * 0.01};
+        fslide  = {1.0 - (std::pow(static_cast<f64>(wave.Slide), 3.0) * 0.01)};
         fdslide = {-std::pow(static_cast<f64>(wave.DeltaSlide), 3.0) * 0.000001};
 
-        squareDuty  = {0.5f - wave.SquareDuty * 0.5f};
+        squareDuty  = {0.5f - (wave.SquareDuty * 0.5f)};
         squareSlide = {-wave.DutySweep * 0.00005f};
 
         arpeggio.reset(wave);
@@ -391,7 +389,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 
     i32 repeatLimit {wave.RepeatSpeed == 0.0f
                          ? 0
-                         : static_cast<i32>(std::pow(1.0f - wave.RepeatSpeed, 2.0f) * 20000 + 32)};
+                         : static_cast<i32>((std::pow(1.0f - wave.RepeatSpeed, 2.0f) * 20000) + 32)};
 
     // NOTE: We reserve enough space for up to 10 seconds of wave audio at given sample rate
     // By default we use f32 size samples, they are converted to desired sample size at the end

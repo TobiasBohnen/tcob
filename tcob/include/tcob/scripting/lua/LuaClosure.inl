@@ -54,7 +54,7 @@ inline auto compare_types(state_view view, i32 startIndex, std::function<R(Args.
 }
 
 template <typename Arg, typename... Args>
-inline consteval auto args_count_impl() -> i32
+consteval auto args_count_impl() -> i32
 {
     using converter_type = std::remove_cvref_t<Arg>;
     return get_stacksize<converter_type>();

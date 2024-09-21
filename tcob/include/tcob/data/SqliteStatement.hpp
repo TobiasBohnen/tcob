@@ -105,7 +105,7 @@ private:
 
 class TCOB_API insert_statement : public statement {
 public:
-    enum mode {
+    enum mode : u8 {
         Normal,
         Ignore,
         Replace

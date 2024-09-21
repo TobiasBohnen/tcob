@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/Canvas.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -22,7 +23,7 @@ using namespace tcob::tweening;
 
 auto constexpr NVG_KAPPA90 = 0.5522847493f; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
 
-enum commands {
+enum commands : u8 {
     MoveTo   = 0,
     LineTo   = 1,
     BezierTo = 2,
@@ -30,7 +31,7 @@ enum commands {
     Winding  = 4,
 };
 
-enum point_flags {
+enum point_flags : u8 {
     Corner     = 0x01,
     Left       = 0x02,
     Bevel      = 0x04,
@@ -39,11 +40,11 @@ enum point_flags {
 
 auto static constexpr signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
 
-auto static constexpr cross(f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return dx1 * dy0 - dx0 * dy1; }
+auto static constexpr cross(f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return (dx1 * dy0) - (dx0 * dy1); }
 
 auto static Normalize(f32& x, f32& y) -> f32
 {
-    f32 const d {std::sqrt(x * x + y * y)};
+    f32 const d {std::sqrt((x * x) + (y * y))};
     if (d > 1e-6f) {
         f32 const id {1.0f / d};
         x *= id;
@@ -123,8 +124,8 @@ auto static constexpr DistancePointSegment(f32 x, f32 y, f32 px, f32 py, f32 qx,
     f32 const pqy {qy - py};
     f32       dx {x - px};
     f32       dy {y - py};
-    f32 const d {pqx * pqx + pqy * pqy};
-    f32       t {pqx * dx + pqy * dy};
+    f32 const d {(pqx * pqx) + (pqy * pqy)};
+    f32       t {(pqx * dx) + (pqy * dy)};
     if (d > 0) {
         t /= d;
     }
@@ -135,13 +136,13 @@ auto static constexpr DistancePointSegment(f32 x, f32 y, f32 px, f32 py, f32 qx,
     }
     dx = px + t * pqx - x;
     dy = py + t * pqy - y;
-    return dx * dx + dy * dy;
+    return (dx * dx) + (dy * dy);
 }
 
 auto static GetAverageScale(mat3 const& t) -> f32
 {
-    f32 const sx {std::sqrt(t[0] * t[0] + t[3] * t[3])};
-    f32 const sy {std::sqrt(t[1] * t[1] + t[4] * t[4])};
+    f32 const sx {std::sqrt((t[0] * t[0]) + (t[3] * t[3]))};
+    f32 const sy {std::sqrt((t[1] * t[1]) + (t[4] * t[4]))};
     return (sx + sy) * 0.5f;
 }
 
@@ -151,10 +152,10 @@ auto static constexpr TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -
     f32 const aby {by - ay};
     f32 const acx {cx - ax};
     f32 const acy {cy - ay};
-    return acx * aby - abx * acy;
+    return (acx * aby) - (abx * acy);
 }
 
-void static inline constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
+void static constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 {
     vtx->Position[0] = x;
     vtx->Position[1] = y;
@@ -231,15 +232,15 @@ auto static RoundJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
 
         SetVertex(dst, lx0, ly0, lu, 1);
         dst++;
-        SetVertex(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+        SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
         dst++;
 
         i32 const n {std::clamp(static_cast<i32>(ceilf(((a0 - a1) / (TAU_F / 2)) * ncap)), 2, ncap)};
         for (i32 i {0}; i < n; ++i) {
             f32 const u {i / static_cast<f32>(n - 1)};
-            f32 const a {a0 + u * (a1 - a0)};
-            f32 const rx {p1.X + std::cos(a) * rw};
-            f32 const ry {p1.Y + std::sin(a) * rw};
+            f32 const a {a0 + (u * (a1 - a0))};
+            f32 const rx {p1.X + (std::cos(a) * rw)};
+            f32 const ry {p1.Y + (std::sin(a) * rw)};
             SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
             dst++;
             SetVertex(dst, rx, ry, ru, 1);
@@ -248,7 +249,7 @@ auto static RoundJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
 
         SetVertex(dst, lx1, ly1, lu, 1);
         dst++;
-        SetVertex(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
+        SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
         dst++;
     } else {
         f32 rx0 {0}, ry0 {0}, rx1 {0}, ry1 {0}, a0 {0}, a1 {0};
@@ -259,7 +260,7 @@ auto static RoundJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
             a1 += TAU_F;
         }
 
-        SetVertex(dst, p1.X + dlx0 * rw, p1.Y + dly0 * rw, lu, 1);
+        SetVertex(dst, p1.X + (dlx0 * rw), p1.Y + (dly0 * rw), lu, 1);
         dst++;
         SetVertex(dst, rx0, ry0, ru, 1);
         dst++;
@@ -267,16 +268,16 @@ auto static RoundJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
         i32 const n {std::clamp(static_cast<i32>(std::ceil(((a1 - a0) / (TAU_F / 2)) * ncap)), 2, ncap)};
         for (i32 i {0}; i < n; ++i) {
             f32 const u {i / static_cast<f32>(n - 1)};
-            f32 const a {a0 + u * (a1 - a0)};
-            f32 const lx {p1.X + std::cos(a) * lw};
-            f32 const ly {p1.Y + std::sin(a) * lw};
+            f32 const a {a0 + (u * (a1 - a0))};
+            f32 const lx {p1.X + (std::cos(a) * lw)};
+            f32 const ly {p1.Y + (std::sin(a) * lw)};
             SetVertex(dst, lx, ly, lu, 1);
             dst++;
             SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
             dst++;
         }
 
-        SetVertex(dst, p1.X + dlx1 * rw, p1.Y + dly1 * rw, lu, 1);
+        SetVertex(dst, p1.X + (dlx1 * rw), p1.Y + (dly1 * rw), lu, 1);
         dst++;
         SetVertex(dst, rx1, ry1, ru, 1);
         dst++;
@@ -298,26 +299,26 @@ auto static BevelJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
 
         SetVertex(dst, lx0, ly0, lu, 1);
         dst++;
-        SetVertex(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+        SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
         dst++;
 
         if (p1.Flags & Bevel) {
             SetVertex(dst, lx0, ly0, lu, 1);
             dst++;
-            SetVertex(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+            SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
             dst++;
 
             SetVertex(dst, lx1, ly1, lu, 1);
             dst++;
-            SetVertex(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
+            SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
             dst++;
         } else {
-            f32 const rx0 {p1.X - p1.DMX * rw};
-            f32 const ry0 {p1.Y - p1.DMY * rw};
+            f32 const rx0 {p1.X - (p1.DMX * rw)};
+            f32 const ry0 {p1.Y - (p1.DMY * rw)};
 
             SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
             dst++;
-            SetVertex(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+            SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
             dst++;
 
             SetVertex(dst, rx0, ry0, ru, 1);
@@ -327,38 +328,38 @@ auto static BevelJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
 
             SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
             dst++;
-            SetVertex(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
+            SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
             dst++;
         }
 
         SetVertex(dst, lx1, ly1, lu, 1);
         dst++;
-        SetVertex(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
+        SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
         dst++;
     } else {
         f32 rx0 {0}, ry0 {0}, rx1 {0}, ry1 {0};
         ChooseBevel(p1.Flags & InnerBevel, p0, p1, -rw, rx0, ry0, rx1, ry1);
 
-        SetVertex(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
+        SetVertex(dst, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
         dst++;
         SetVertex(dst, rx0, ry0, ru, 1);
         dst++;
 
         if (p1.Flags & Bevel) {
-            SetVertex(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
+            SetVertex(dst, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
             dst++;
             SetVertex(dst, rx0, ry0, ru, 1);
             dst++;
 
-            SetVertex(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+            SetVertex(dst, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
             dst++;
             SetVertex(dst, rx1, ry1, ru, 1);
             dst++;
         } else {
-            f32 const lx0 {p1.X + p1.DMX * lw};
-            f32 const ly0 {p1.Y + p1.DMY * lw};
+            f32 const lx0 {p1.X + (p1.DMX * lw)};
+            f32 const ly0 {p1.Y + (p1.DMY * lw)};
 
-            SetVertex(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
+            SetVertex(dst, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
             dst++;
             SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
             dst++;
@@ -368,13 +369,13 @@ auto static BevelJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
             SetVertex(dst, lx0, ly0, lu, 1);
             dst++;
 
-            SetVertex(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+            SetVertex(dst, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
             dst++;
             SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
             dst++;
         }
 
-        SetVertex(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+        SetVertex(dst, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
         dst++;
         SetVertex(dst, rx1, ry1, ru, 1);
         dst++;
@@ -387,17 +388,17 @@ auto static ButtCapStart(vertex* dst, detail::canvas_point const& p,
                          f32 dx, f32 dy, f32 w, f32 d,
                          f32 aa, f32 u0, f32 u1) -> vertex*
 {
-    f32 const px {p.X - dx * d};
-    f32 const py {p.Y - dy * d};
+    f32 const px {p.X - (dx * d)};
+    f32 const py {p.Y - (dy * d)};
     f32 const dlx {dy};
     f32 const dly {-dx};
-    SetVertex(dst, px + dlx * w - dx * aa, py + dly * w - dy * aa, u0, 0);
+    SetVertex(dst, px + (dlx * w) - (dx * aa), py + (dly * w) - (dy * aa), u0, 0);
     dst++;
-    SetVertex(dst, px - dlx * w - dx * aa, py - dly * w - dy * aa, u1, 0);
+    SetVertex(dst, px - (dlx * w) - (dx * aa), py - (dly * w) - (dy * aa), u1, 0);
     dst++;
-    SetVertex(dst, px + dlx * w, py + dly * w, u0, 1);
+    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
     dst++;
-    SetVertex(dst, px - dlx * w, py - dly * w, u1, 1);
+    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
     dst++;
     return dst;
 }
@@ -406,17 +407,17 @@ auto static ButtCapEnd(vertex* dst, detail::canvas_point const& p,
                        f32 dx, f32 dy, f32 w, f32 d,
                        f32 aa, f32 u0, f32 u1) -> vertex*
 {
-    f32 const px {p.X + dx * d};
-    f32 const py {p.Y + dy * d};
+    f32 const px {p.X + (dx * d)};
+    f32 const py {p.Y + (dy * d)};
     f32 const dlx {dy};
     f32 const dly {-dx};
-    SetVertex(dst, px + dlx * w, py + dly * w, u0, 1);
+    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
     dst++;
-    SetVertex(dst, px - dlx * w, py - dly * w, u1, 1);
+    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
     dst++;
-    SetVertex(dst, px + dlx * w + dx * aa, py + dly * w + dy * aa, u0, 0);
+    SetVertex(dst, px + (dlx * w) + (dx * aa), py + (dly * w) + (dy * aa), u0, 0);
     dst++;
-    SetVertex(dst, px - dlx * w + dx * aa, py - dly * w + dy * aa, u1, 0);
+    SetVertex(dst, px - (dlx * w) + (dx * aa), py - (dly * w) + (dy * aa), u1, 0);
     dst++;
     return dst;
 }
@@ -432,14 +433,14 @@ auto static RoundCapStart(vertex* dst, detail::canvas_point const& p,
     for (i32 i {0}; i < ncap; ++i) {
         f32 const a {i / static_cast<f32>(ncap - 1) * (TAU_F / 2)};
         f32 const ax {std::cos(a) * w}, ay {std::sin(a) * w};
-        SetVertex(dst, px - dlx * ax - dx * ay, py - dly * ax - dy * ay, u0, 1);
+        SetVertex(dst, px - (dlx * ax) - (dx * ay), py - (dly * ax) - (dy * ay), u0, 1);
         dst++;
         SetVertex(dst, px, py, 0.5f, 1);
         dst++;
     }
-    SetVertex(dst, px + dlx * w, py + dly * w, u0, 1);
+    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
     dst++;
-    SetVertex(dst, px - dlx * w, py - dly * w, u1, 1);
+    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
     dst++;
     return dst;
 }
@@ -452,16 +453,16 @@ auto static RoundCapEnd(vertex* dst, detail::canvas_point const& p,
     f32 const dlx {dy};
     f32 const dly {-dx};
 
-    SetVertex(dst, px + dlx * w, py + dly * w, u0, 1);
+    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
     dst++;
-    SetVertex(dst, px - dlx * w, py - dly * w, u1, 1);
+    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
     dst++;
     for (i32 i {0}; i < ncap; ++i) {
         f32 const a {i / static_cast<f32>(ncap - 1) * (TAU_F / 2)};
         f32 const ax {std::cos(a) * w}, ay {std::sin(a) * w};
         SetVertex(dst, px, py, 0.5f, 1);
         dst++;
-        SetVertex(dst, px - dlx * ax + dx * ay, py - dly * ax + dy * ay, u0, 1);
+        SetVertex(dst, px - (dlx * ax) + (dx * ay), py - (dly * ax) + (dy * ay), u0, 1);
         dst++;
     }
     return dst;
@@ -469,7 +470,7 @@ auto static RoundCapEnd(vertex* dst, detail::canvas_point const& p,
 
 auto static Quantize(f32 a, f32 d) -> f32
 {
-    return (static_cast<i32>(a / d + 0.5f)) * d;
+    return (static_cast<i32>((a / d) + 0.5f)) * d;
 }
 
 ////////////////////////////////////////////////////////////
@@ -704,7 +705,7 @@ void canvas::dotted_cubic_bezier(point_f begin, point_f cp0, point_f cp1, point_
 
 void canvas::dotted_quad_bezier(point_f begin, point_f cp, point_f end, f32 r, i32 numDots)
 {
-    func::quad_bezier_curve func {begin, cp, end};
+    func::quad_bezier_curve func {.Begin = begin, .ControlPoint = cp, .End = end};
     f32 const               inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -714,7 +715,7 @@ void canvas::dotted_quad_bezier(point_f begin, point_f cp, point_f end, f32 r, i
 
 void canvas::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
 {
-    func::linear<point_f> func {from, to};
+    func::linear<point_f> func {.StartValue = from, .EndValue = to};
     f32 const             inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -724,7 +725,7 @@ void canvas::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
 
 void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
 {
-    func::circular func {degree_f {0}, degree_f {360}};
+    func::circular func {.Start = degree_f {0}, .End = degree_f {360}};
     f32 const      inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -739,7 +740,7 @@ void canvas::wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase)
 
     for (f32 f {0}; f < xDiff; ++f) {
         f32 const x {f + xMin};
-        f32 const y {amp * std::sin(freq * x + phase) + (from.Y + (to.Y - from.Y) * (x - from.X) / (to.X - from.X))};
+        f32 const y {(amp * std::sin((freq * x) + phase)) + (from.Y + (to.Y - from.Y) * (x - from.X) / (to.X - from.X))};
         line_to({x, y});
     }
 }
@@ -798,7 +799,7 @@ void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
     }};
     auto static nsvg_sqr {[](f32 x) -> f32 { return x * x; }};
     auto static nsvg_vecang {[](f32 ux, f32 uy, f32 vx, f32 vy) -> f32 {
-        f32 const r {(ux * vx + uy * vy) / (std::sqrt(ux * ux + uy * uy) * std::sqrt(vx * vx + vy * vy))};
+        f32 const r {(ux * vx + uy * vy) / (std::sqrt((ux * ux) + (uy * uy)) * std::sqrt((vx * vx) + (vy * vy)))};
         return ((ux * vy < uy * vx) ? -1.0f : 1.0f) * std::acos(std::clamp(r, -1.0f, 1.0f));
     }};
 
@@ -821,7 +822,7 @@ void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
 
     f32 dx {x1 - x2};
     f32 dy {y1 - y2};
-    f32 d {std::sqrt(dx * dx + dy * dy)};
+    f32 d {std::sqrt((dx * dx) + (dy * dy))};
     if (d < 1e-6f || rx < 1e-6f || ry < 1e-6f) {
         line_to({x2, y2});
         return;
@@ -833,8 +834,8 @@ void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
     // Convert to center point parameterization.
     // http://www.w3.org/TR/SVG11/implnote.html#ArcImplementationNotes
     // 1) Compute x1', y1'
-    f32 const x1p {cosrx * dx / 2.0f + sinrx * dy / 2.0f};
-    f32 const y1p {-sinrx * dx / 2.0f + cosrx * dy / 2.0f};
+    f32 const x1p {(cosrx * dx / 2.0f) + (sinrx * dy / 2.0f)};
+    f32 const y1p {(-sinrx * dx / 2.0f) + (cosrx * dy / 2.0f)};
     d = nsvg_sqr(x1p) / nsvg_sqr(rx) + nsvg_sqr(y1p) / nsvg_sqr(ry);
     if (d > 1) {
         d = std::sqrt(d);
@@ -843,17 +844,16 @@ void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
     }
     // 2) Compute cx', cy'
     f32       s {0.0f};
-    f32       sa {nsvg_sqr(rx) * nsvg_sqr(ry) - nsvg_sqr(rx) * nsvg_sqr(y1p) - nsvg_sqr(ry) * nsvg_sqr(x1p)};
-    f32 const sb {nsvg_sqr(rx) * nsvg_sqr(y1p) + nsvg_sqr(ry) * nsvg_sqr(x1p)};
-    if (sa < 0.0f) { sa = 0.0f; }
+    f32 const sa {std::max((nsvg_sqr(rx) * nsvg_sqr(ry)) - (nsvg_sqr(rx) * nsvg_sqr(y1p)) - (nsvg_sqr(ry) * nsvg_sqr(x1p)), 0.0f)};
+    f32 const sb {(nsvg_sqr(rx) * nsvg_sqr(y1p)) + (nsvg_sqr(ry) * nsvg_sqr(x1p))};
     if (sb > 0.0f) { s = std::sqrt(sa / sb); }
     if (fa == fs) { s = -s; }
     f32 const cxp {s * rx * y1p / ry};
     f32 const cyp {s * -ry * x1p / rx};
 
     // 3) Compute cx,cy from cx',cy'
-    f32 const cx {(x1 + x2) / 2.0f + cosrx * cxp - sinrx * cyp};
-    f32 const cy {(y1 + y2) / 2.0f + sinrx * cxp + cosrx * cyp};
+    f32 const cx {((x1 + x2) / 2.0f) + (cosrx * cxp) - (sinrx * cyp)};
+    f32 const cy {((y1 + y2) / 2.0f) + (sinrx * cxp) + (cosrx * cyp)};
 
     // 4) Calculate theta1, and delta theta.
     f32 const ux {(x1p - cxp) / rx};
@@ -874,7 +874,7 @@ void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
 
     // Split arc into max 90 degree segments.
     // The loop assumes an iteration per end point (including start and end), this +1.
-    i32 const ndivs {static_cast<i32>(std::fabs(da) / (TAU_F / 4) + 1.0f)};
+    i32 const ndivs {static_cast<i32>((std::abs(da) / (TAU_F / 4)) + 1.0f)};
     f32       hda {(da / static_cast<f32>(ndivs)) / 2.0f};
     // Fix for ticket #179: division by 0: avoid cotangens around 0 (infinite)
     if ((hda < 1e-3f) && (hda > -1e-3f)) {
@@ -890,7 +890,7 @@ void canvas::path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel)
     f32 px {0}, py {0};
     f32 ptanx {0}, ptany {0};
     for (i32 i {0}; i <= ndivs; ++i) {
-        f32 const a {a1 + da * (static_cast<f32>(i) / static_cast<f32>(ndivs))};
+        f32 const a {a1 + (da * (static_cast<f32>(i) / static_cast<f32>(ndivs)))};
         dx = std::cos(a);
         dy = std::sin(a);
         nsvg_xformPoint(&x, &y, dx * rx, dy * ry, t);                      // position
@@ -916,8 +916,8 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 
     append_commands(std::vector<f32> {
         BezierTo,
-        x0 + 2.0f / 3.0f * (cp.X - x0), y0 + 2.0f / 3.0f * (cp.Y - y0),
-        end.X + 2.0f / 3.0f * (cp.X - end.X), end.Y + 2.0f / 3.0f * (cp.Y - end.Y),
+        x0 + (2.0f / 3.0f * (cp.X - x0)), y0 + (2.0f / 3.0f * (cp.Y - y0)),
+        end.X + (2.0f / 3.0f * (cp.X - end.X)), end.Y + (2.0f / 3.0f * (cp.Y - end.Y)),
         end.X, end.Y});
 }
 
@@ -950,7 +950,7 @@ void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, windi
     }
 
     // Split arc into max 90 degree segments.
-    i32 const ndivs {std::max(1, std::min(static_cast<i32>(std::abs(da) / (TAU_F * 0.25f) + 0.5f), 5))};
+    i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
     f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
     f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
     if (dir == winding::CCW) {
@@ -962,11 +962,11 @@ void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, windi
     std::vector<f32> vals;
     vals.reserve(138);
     for (i32 i {0}; i <= ndivs; ++i) {
-        f32 const a {a0 + da * (i / static_cast<f32>(ndivs))};
+        f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
         f32 const dx {std::cos(a)};
         f32 const dy {std::sin(a)};
-        f32 const x {c.X + dx * r};
-        f32 const y {c.Y + dy * r};
+        f32 const x {c.X + (dx * r)};
+        f32 const y {c.Y + (dy * r)};
         f32 const tanx {-dy * r * kappa};
         f32 const tany {dx * r * kappa};
 
@@ -1016,7 +1016,7 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     f32 dy1 {pos2.Y - pos1.Y};
     Normalize(dx0, dy0);
     Normalize(dx1, dy1);
-    f32 const a {std::acos(dx0 * dx1 + dy0 * dy1)};
+    f32 const a {std::acos((dx0 * dx1) + (dy0 * dy1))};
     f32 const d {radius / std::tan(a / 2.0f)};
 
     if (d > 10000.0f) {
@@ -1078,13 +1078,13 @@ void canvas::rounded_rect_varying(rect_f const& rec, f32 radTL, f32 radTR, f32 r
     append_commands(std::vector<f32> {
         MoveTo, x, y + ryTL,
         LineTo, x, y + h - ryBL,
-        BezierTo, x, y + h - ryBL * (1 - NVG_KAPPA90), x + rxBL * (1 - NVG_KAPPA90), y + h, x + rxBL, y + h,
+        BezierTo, x, y + h - (ryBL * (1 - NVG_KAPPA90)), x + (rxBL * (1 - NVG_KAPPA90)), y + h, x + rxBL, y + h,
         LineTo, x + w - rxBR, y + h,
-        BezierTo, x + w - rxBR * (1 - NVG_KAPPA90), y + h, x + w, y + h - ryBR * (1 - NVG_KAPPA90), x + w, y + h - ryBR,
+        BezierTo, x + w - (rxBR * (1 - NVG_KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - NVG_KAPPA90)), x + w, y + h - ryBR,
         LineTo, x + w, y + ryTR,
-        BezierTo, x + w, y + ryTR * (1 - NVG_KAPPA90), x + w - rxTR * (1 - NVG_KAPPA90), y, x + w - rxTR, y,
+        BezierTo, x + w, y + (ryTR * (1 - NVG_KAPPA90)), x + w - (rxTR * (1 - NVG_KAPPA90)), y, x + w - rxTR, y,
         LineTo, x + rxTL, y,
-        BezierTo, x + rxTL * (1 - NVG_KAPPA90), y, x, y + ryTL * (1 - NVG_KAPPA90), x, y + ryTL,
+        BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
         Close});
 }
 
@@ -1095,10 +1095,10 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
     auto const [cx, cy] {c};
     append_commands(std::vector<f32> {
         MoveTo, cx - rx, cy,
-        BezierTo, cx - rx, cy + ry * NVG_KAPPA90, cx - rx * NVG_KAPPA90, cy + ry, cx, cy + ry,
-        BezierTo, cx + rx * NVG_KAPPA90, cy + ry, cx + rx, cy + ry * NVG_KAPPA90, cx + rx, cy,
-        BezierTo, cx + rx, cy - ry * NVG_KAPPA90, cx + rx * NVG_KAPPA90, cy - ry, cx, cy - ry,
-        BezierTo, cx - rx * NVG_KAPPA90, cy - ry, cx - rx, cy - ry * NVG_KAPPA90, cx - rx, cy,
+        BezierTo, cx - rx, cy + (ry * NVG_KAPPA90), cx - (rx * NVG_KAPPA90), cy + ry, cx, cy + ry,
+        BezierTo, cx + (rx * NVG_KAPPA90), cy + ry, cx + rx, cy + (ry * NVG_KAPPA90), cx + rx, cy,
+        BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
+        BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
         Close});
 }
 
@@ -1234,7 +1234,7 @@ auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& 
     // Calculate transform aligned to the line
     f32       dx {e.X - s.X};
     f32       dy {e.Y - s.Y};
-    f32 const d {std::sqrt(dx * dx + dy * dy)};
+    f32 const d {std::sqrt((dx * dx) + (dy * dy))};
     if (d > 0.0001f) {
         dx /= d;
         dy /= d;
@@ -1244,10 +1244,10 @@ auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& 
     }
 
     return {
-        .XForm   = {dy, dx, s.X - dx * large,
-                    -dx, dy, s.Y - dy * large,
+        .XForm   = {dy, dx, s.X - (dx * large),
+                    -dx, dy, s.Y - (dy * large),
                     0, 0, 1},
-        .Extent  = {large, large + d * 0.5f},
+        .Extent  = {large, large + (d * 0.5f)},
         .Radius  = 0.0f,
         .Feather = std::max(1.0f, d),
         .Color   = paint_gradient {1.0f, gradient}};
@@ -1391,7 +1391,7 @@ void canvas::set_scissor(rect_f const& rect, bool transform)
 
     s.Scissor.XForm = transform::Identity;
 
-    s.Scissor.XForm.translate({x + w * 0.5f, y + h * 0.5f});
+    s.Scissor.XForm.translate({x + (w * 0.5f), y + (h * 0.5f)});
     if (transform) { s.Scissor.XForm = s.XForm * s.Scissor.XForm; }
 
     s.Scissor.Extent[0] = w * 0.5f;
@@ -1450,24 +1450,24 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
             point_f topLeft {}, topRight {}, bottomLeft {}, bottomRight {};
 
             if (isTranslation) {
-                auto const tl {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
-                auto const br {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
+                auto const tl {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
+                auto const br {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
 
                 topLeft.X = bottomLeft.X = std::floor(tl.X + 0.5f);
                 topRight.X = bottomRight.X = std::floor(br.X + 0.5f);
                 topLeft.Y = topRight.Y = std::floor(tl.Y + 0.5f);
                 bottomLeft.Y = bottomRight.Y = std::floor(br.Y + 0.5f);
             } else {
-                topLeft       = {s.XForm * point_f {posRect.left() * invscale + x, posRect.top() * invscale + y}};
+                topLeft       = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
                 topLeft.X     = std::floor(topLeft.X + 0.5f);
                 topLeft.Y     = std::floor(topLeft.Y + 0.5f);
-                topRight      = {s.XForm * point_f {posRect.right() * invscale + x, posRect.top() * invscale + y}};
+                topRight      = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.top() * invscale) + y}};
                 topRight.X    = std::floor(topRight.X + 0.5f);
                 topRight.Y    = std::floor(topRight.Y + 0.5f);
-                bottomRight   = {s.XForm * point_f {posRect.right() * invscale + x, posRect.bottom() * invscale + y}};
+                bottomRight   = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
                 bottomRight.X = std::floor(bottomRight.X + 0.5f);
                 bottomRight.Y = std::floor(bottomRight.Y + 0.5f);
-                bottomLeft    = {s.XForm * point_f {posRect.left() * invscale + x, posRect.bottom() * invscale + y}};
+                bottomLeft    = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.bottom() * invscale) + y}};
                 bottomLeft.X  = std::floor(bottomLeft.X + 0.5f);
                 bottomLeft.Y  = std::floor(bottomLeft.Y + 0.5f);
             }
@@ -1785,8 +1785,8 @@ void canvas::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
 
     f32 const dx {x4 - x1};
     f32 const dy {y4 - y1};
-    f32 const d2 {std::abs(((x2 - x4) * dy - (y2 - y4) * dx))};
-    f32 const d3 {std::abs(((x3 - x4) * dy - (y3 - y4) * dx))};
+    f32 const d2 {std::abs((((x2 - x4) * dy) - ((y2 - y4) * dx)))};
+    f32 const d3 {std::abs((((x3 - x4) * dy) - ((y3 - y4) * dx)))};
 
     if ((d2 + d3) * (d2 + d3) < _tessTol * (dx * dx + dy * dy)) {
         add_point(x4, y4, type);
@@ -1922,12 +1922,9 @@ void canvas::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
             // Calculate extrusions
             p1->DMX = (dlx0 + dlx1) * 0.5f;
             p1->DMY = (dly0 + dly1) * 0.5f;
-            f32 const dmr2 {p1->DMX * p1->DMX + p1->DMY * p1->DMY};
+            f32 const dmr2 {(p1->DMX * p1->DMX) + (p1->DMY * p1->DMY)};
             if (dmr2 > 0.000001f) {
-                f32 scale {1.0f / dmr2};
-                if (scale > 600.0f) {
-                    scale = 600.0f;
-                }
+                f32 const scale {std::min(1.0f / dmr2, 600.0f)};
                 p1->DMX *= scale;
                 p1->DMY *= scale;
             }
@@ -1936,7 +1933,7 @@ void canvas::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
             p1->Flags = (p1->Flags & Corner) ? Corner : 0;
 
             // Keep track of left turns.
-            f32 const cross {p1->DX * p0->DY - p0->DX * p1->DY};
+            f32 const cross {(p1->DX * p0->DY) - (p0->DX * p1->DY)};
             if (cross > 0.0f) {
                 nleft++;
                 p1->Flags |= Left;
@@ -2129,15 +2126,15 @@ void canvas::expand_fill(f32 w, line_join lineJoin, f32 miterLimit)
                     f32 const dlx1 {p1->DY};
                     f32 const dly1 {-p1->DX};
                     if (p1->Flags & Left) {
-                        f32 const lx {p1->X + p1->DMX * woff};
-                        f32 const ly {p1->Y + p1->DMY * woff};
+                        f32 const lx {p1->X + (p1->DMX * woff)};
+                        f32 const ly {p1->Y + (p1->DMY * woff)};
                         SetVertex(dst, lx, ly, 0.5f, 1);
                         dst++;
                     } else {
-                        f32 const lx0 {p1->X + dlx0 * woff};
-                        f32 const ly0 {p1->Y + dly0 * woff};
-                        f32 const lx1 {p1->X + dlx1 * woff};
-                        f32 const ly1 {p1->Y + dly1 * woff};
+                        f32 const lx0 {p1->X + (dlx0 * woff)};
+                        f32 const ly0 {p1->Y + (dly0 * woff)};
+                        f32 const lx1 {p1->X + (dlx1 * woff)};
+                        f32 const ly1 {p1->Y + (dly1 * woff)};
                         SetVertex(dst, lx0, ly0, 0.5f, 1);
                         dst++;
                         SetVertex(dst, lx1, ly1, 0.5f, 1);
@@ -2310,7 +2307,7 @@ auto canvas::path2d::Parse(string_view path) -> std::optional<path2d>
             auto const endv {getValues(2)};
             if (!endv) { return std::nullopt; }
             point_f const end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
-            point_f const cp {2 * lastPoint.X - lastQuadControlPoint.X, 2 * lastPoint.Y - lastQuadControlPoint.Y};
+            point_f const cp {(2 * lastPoint.X) - lastQuadControlPoint.X, (2 * lastPoint.Y) - lastQuadControlPoint.Y};
             retValue.Commands.emplace_back([cp, end](canvas& canvas) { canvas.quad_bezier_to(cp, end); });
             lastQuadControlPoint = cp;
             lastPoint            = end;
@@ -2333,7 +2330,7 @@ auto canvas::path2d::Parse(string_view path) -> std::optional<path2d>
             auto const cp1v {getValues(2)};
             auto const endv {getValues(2)};
             if (!cp1v || !endv) { return std::nullopt; }
-            point_f const cp0 {2 * lastPoint.X - lastCubicControlPoint.X, 2 * lastPoint.Y - lastCubicControlPoint.Y};
+            point_f const cp0 {(2 * lastPoint.X) - lastCubicControlPoint.X, (2 * lastPoint.Y) - lastCubicControlPoint.Y};
             auto const    cp1 {isAbs ? getPoint(cp1v) : getPoint(cp1v) + lastPoint};
             auto const    end {isAbs ? getPoint(endv) : getPoint(endv) + lastPoint};
             retValue.Commands.emplace_back([cp0, cp1, end](canvas& canvas) { canvas.cubic_bezier_to(cp0, cp1, end); });

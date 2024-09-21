@@ -20,7 +20,7 @@ namespace tcob::gfx::ui {
 class TCOB_API dot_matrix_display : public widget {
 public:
     struct dot {
-        enum class type {
+        enum class type : u8 {
             Disc,
             Square
         };

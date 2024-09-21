@@ -16,7 +16,7 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API terminal : public widget {
-    inline static constexpr std::pair<color, color> DEFAULT_COLORS {std::pair {colors::White, colors::Black}};
+    static constexpr std::pair<color, color> DEFAULT_COLORS {std::pair {colors::White, colors::Black}};
 
 public:
     class TCOB_API style : public ui::style {

@@ -22,12 +22,12 @@ namespace png {
     constexpr i32 BPP {4};
     constexpr i32 MAX_SIZE {0x4000};
 
-    enum class blend_op {
+    enum class blend_op : u8 {
         Source = 0,
         Over   = 1,
     };
 
-    enum class color_type {
+    enum class color_type : u8 {
         Grayscale      = 0,
         TrueColor      = 2,
         Indexed        = 3,
@@ -36,7 +36,7 @@ namespace png {
     };
     ;
 
-    enum class dispose_op {
+    enum class dispose_op : u8 {
         None       = 0,
         Background = 1,
         Previous   = 2

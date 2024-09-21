@@ -245,8 +245,8 @@ auto static Format(std::vector<line_definition> const& lines, font& font, alignm
 
             for (auto const& glyph : shapeToken->Glyphs) {
                 auto&     quadDef {formatToken.Quads.emplace_back()};
-                f32 const offsetX {x + glyph.Offset.X * scale};
-                f32 const offsetY {y + glyph.Offset.Y * scale};
+                f32 const offsetX {x + (glyph.Offset.X * scale)};
+                f32 const offsetY {y + (glyph.Offset.Y * scale)};
                 if (shapeToken->Type == token_type::Whitespace) {
                     quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.AdvanceX * scale, 0.f}};
                 } else {

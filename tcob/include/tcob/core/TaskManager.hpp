@@ -44,7 +44,7 @@ public:
     template <typename T>
     auto run_async(async_func<T>&& func) -> std::future<T>;
 
-    void run_parallel(par_func&& func, i32 count, i32 minRange = 1);
+    void run_parallel(par_func const& func, i32 count, i32 minRange = 1);
 
     void run_deferred(def_func&& func);
 

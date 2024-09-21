@@ -129,12 +129,12 @@ void quad_renderer::prepare(usize quadCount)
         std::vector<u32> inds;
         inds.resize(indCount);
         for (u32 i {0}, j {0}; i < quadCount; ++i, j += 4) {
-            inds[i * 6 + 0] = 3 + j;
-            inds[i * 6 + 1] = 1 + j;
-            inds[i * 6 + 2] = 0 + j;
-            inds[i * 6 + 3] = 3 + j;
-            inds[i * 6 + 4] = 2 + j;
-            inds[i * 6 + 5] = 1 + j;
+            inds[(i * 6) + 0] = 3 + j;
+            inds[(i * 6) + 1] = 1 + j;
+            inds[(i * 6) + 2] = 0 + j;
+            inds[(i * 6) + 3] = 3 + j;
+            inds[(i * 6) + 4] = 2 + j;
+            inds[(i * 6) + 5] = 1 + j;
         }
 
         _vertexArray->update_data(inds, 0);

@@ -99,8 +99,8 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
         retValue.ScissorExtent[0] = scissor.Extent[0];
         retValue.ScissorExtent[1] = scissor.Extent[1];
         auto const& mat {scissor.XForm.Matrix};
-        retValue.ScissorScale[0] = std::sqrt(mat[0] * mat[0] + mat[3] * mat[3]) / fringe;
-        retValue.ScissorScale[1] = std::sqrt(mat[1] * mat[1] + mat[4] * mat[4]) / fringe;
+        retValue.ScissorScale[0] = std::sqrt((mat[0] * mat[0]) + (mat[3] * mat[3])) / fringe;
+        retValue.ScissorScale[1] = std::sqrt((mat[1] * mat[1]) + (mat[4] * mat[4])) / fringe;
     }
 
     retValue.Extent     = paint.Extent;
@@ -327,7 +327,7 @@ auto gl_canvas::get_max_vertcount(std::vector<canvas_path> const& paths) -> usiz
 auto gl_canvas::alloc_verts(usize n) -> usize
 {
     if (_nverts + n > _verts.capacity()) {
-        usize cverts {std::max<usize>(_nverts + n, 4096) + _verts.capacity() / 2};
+        usize cverts {std::max<usize>(_nverts + n, 4096) + (_verts.capacity() / 2)};
         _verts.resize(cverts);
     }
     usize ret {_nverts};
@@ -339,7 +339,7 @@ auto gl_canvas::alloc_frag_uniforms(usize n) -> usize
 {
     usize ret {0}, structSize {_fragSize};
     if ((_nuniforms + n) * structSize > _uniforms.capacity()) {
-        usize cuniforms {std::max<usize>(_nuniforms + n, 128) + _uniforms.capacity() / structSize / 2};
+        usize cuniforms {std::max<usize>(_nuniforms + n, 128) + (_uniforms.capacity() / structSize / 2)};
         _uniforms.resize(structSize * cuniforms);
     }
     ret = _nuniforms * structSize;
@@ -455,7 +455,7 @@ void gl_canvas::render_stroke(canvas_paint const& paint, blend_funcs const& comp
     call.UniformOffset = alloc_frag_uniforms(2);
 
     *get_frag_uniformptr(call.UniformOffset)             = convert_paint(paint, scissor, strokeWidth, fringe, -1.0f);
-    *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - 0.5f / 255.0f);
+    *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
 }
 
 void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,

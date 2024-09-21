@@ -765,7 +765,7 @@ struct converter<bool> {
     auto static From(state_view view, i32& idx, bool& value) -> bool
     {
         if (view.is_bool(idx)) {
-            value = static_cast<bool>(view.to_bool(idx++));
+            value = view.to_bool(idx++);
             return true;
         }
 

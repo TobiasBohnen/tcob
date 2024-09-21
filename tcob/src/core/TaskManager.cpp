@@ -29,7 +29,7 @@ task_manager::~task_manager()
     }
 }
 
-void task_manager::run_parallel(par_func&& func, i32 count, i32 minRange)
+void task_manager::run_parallel(par_func const& func, i32 count, i32 minRange)
 {
     i32 const numThreads {std::min(_threadCount, count / minRange)};
 

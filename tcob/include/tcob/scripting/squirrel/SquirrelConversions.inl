@@ -724,7 +724,7 @@ struct converter<bool> {
     auto static From(vm_view view, SQInteger& idx, bool& value) -> bool
     {
         if (view.is_bool(idx)) {
-            value = static_cast<bool>(view.get_bool(idx++));
+            value = view.get_bool(idx++);
             return true;
         }
 

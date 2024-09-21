@@ -212,7 +212,7 @@ auto bmp_decoder::get_rgb_data(istream& in, size_i size, u16 bitCount, std::vect
         }
     } else if (bitCount == 24) {
         i32       index {dstStride * (height - 1)};
-        i32 const pad {srcStride - width * 3};
+        i32 const pad {srcStride - (width * 3)};
 
         for (i32 y {0}; y < height; y++) {
             for (i32 x {0}; x < width; x++) {

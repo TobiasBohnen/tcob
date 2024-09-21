@@ -28,7 +28,7 @@ inline auto uniform_distribution_base::operator()(R& rng, T min, T max) -> T
         return static_cast<T>(min + (value * (max - min)));
     } else if constexpr (Integral<T>) {
         result_type const range {static_cast<result_type>(max - min + 1)};
-        result_type const unbiasedMax {std::numeric_limits<result_type>::max() / range * range - 1};
+        result_type const unbiasedMax {(std::numeric_limits<result_type>::max() / range * range) - 1};
         result_type       value;
         do {
             value = rng.next();
@@ -121,7 +121,7 @@ inline cauchy_distribution::cauchy_distribution(f64 x0, f64 gamma)
 inline auto cauchy_distribution::operator()(auto&& rng) -> f64
 {
     f64 const u {uniform_distribution_base::NextFloat(rng)};
-    return _x0 + _gamma * std::tan(TAU_F / 2 * (u - 0.5f));
+    return _x0 + (_gamma * std::tan(TAU_F / 2 * (u - 0.5f)));
 }
 
 ////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ inline gamma_distribution::gamma_distribution(f64 shape, f64 scale)
 
 inline auto gamma_distribution::operator()(auto&& rng) -> f64
 {
-    f64 const d {_shape - 1.0 / 3.0};
+    f64 const d {_shape - (1.0 / 3.0)};
     f64 const c {1.0 / sqrt(9.0 * d)};
 
     normal_distribution normal {0.0, 1.0};
@@ -223,7 +223,7 @@ inline auto normal_distribution::operator()(auto&& rng) -> f64
 {
     if (_toggle) {
         _toggle = false;
-        return _x2 * _stdDev + _mean;
+        return (_x2 * _stdDev) + _mean;
     }
 
     f64 v1 {}, v2 {}, s {0};
@@ -236,7 +236,7 @@ inline auto normal_distribution::operator()(auto&& rng) -> f64
     f64 const multiplier {std::sqrt(-2 * std::log(s) / s)};
     _x2     = v2 * multiplier;
     _toggle = true;
-    return v1 * multiplier * _stdDev + _mean;
+    return (v1 * multiplier * _stdDev) + _mean;
 }
 
 ////////////////////////////////////////////////////////////

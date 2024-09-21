@@ -4,8 +4,12 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+
+// IWYU pragma: always_keep
+
 #include "tcob/tcob_config.hpp"
 
+#include <algorithm>
 #include <functional>
 #include <vector>
 
@@ -72,7 +76,7 @@ struct case_insensitive_hash { // for std::unordered_map
 struct case_insensitive_equal { // for std::unordered_map
     auto operator()(string const& lhs, string const& rhs) const -> bool
     {
-        return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), [](char lhc, char rhc) {
+        return std::ranges::equal(lhs, rhs, [](char lhc, char rhc) {
             return std::tolower(lhc) == std::tolower(rhc);
         });
     }

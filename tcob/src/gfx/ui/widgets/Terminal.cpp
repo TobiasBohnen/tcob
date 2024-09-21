@@ -274,8 +274,8 @@ void terminal::on_paint(widget_painter& painter)
             auto const& cell {buffer[i]};
 
             rect_f const cellRect {
-                rect.X + (i % Size->Width) * fontWidth,
-                rect.Y + (i / Size->Width) * fontHeight,
+                rect.X + ((i % Size->Width) * fontWidth),
+                rect.Y + ((i / Size->Width) * fontHeight),
                 fontWidth,
                 fontHeight};
 
@@ -764,6 +764,6 @@ void terminal::cursor_line_break()
 
 auto terminal::get_offset(point_i p) const -> i32
 {
-    return p.X + p.Y * Size->Width;
+    return p.X + (p.Y * Size->Width);
 }
 }

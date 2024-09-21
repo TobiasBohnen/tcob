@@ -78,9 +78,7 @@ namespace detail {
 
     void tilemap_base::on_update(milliseconds /* deltaTime */)
     {
-        if (_tileMap.empty() || !Material()) {
-            return;
-        }
+        if (_tileMap.empty() || !Material()) { return; }
 
         if (_isDirty) {
             _quads.clear();
@@ -93,7 +91,7 @@ namespace detail {
                     if (setIdx == 0) { continue; }
 
                     setup_quad(_quads.emplace_back(),
-                               {i % layer.Size.Width + layer.Offset.X, i / layer.Size.Width + layer.Offset.Y},
+                               {(i % layer.Size.Width) + layer.Offset.X, (i / layer.Size.Width) + layer.Offset.Y},
                                _tileSet.Set[setIdx]);
                 }
             }
@@ -129,7 +127,7 @@ namespace detail {
 
 auto orthogonal_grid::get_quad_bounds(point_f offset, point_i coord) const -> rect_f
 {
-    return {{offset.X + TileSize.Width * coord.X, offset.Y + TileSize.Height * coord.Y}, TileSize};
+    return {{offset.X + (TileSize.Width * coord.X), offset.Y + (TileSize.Height * coord.Y)}, TileSize};
 }
 
 ////////////////////////////////////////////////////////////

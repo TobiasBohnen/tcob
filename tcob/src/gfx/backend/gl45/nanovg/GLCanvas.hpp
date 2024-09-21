@@ -33,14 +33,14 @@
 
 namespace tcob::gfx::gl45 {
 
-enum class nvg_shader_type : i32 {
+enum class nvg_shader_type : i32 { // NOLINT part of frag shader
     Gradient    = 0,
     Image       = 1,
     StencilFill = 2,
     Triangles   = 3
 };
 
-enum class nvg_call_type {
+enum class nvg_call_type : u8 {
     None = 0,
     Fill,
     ConvexFill,
@@ -50,13 +50,13 @@ enum class nvg_call_type {
 
 struct nvg_call {
     nvg_call_type Type {0};
+    blend_funcs   BlendFunc {};
     texture*      Image {};
     usize         PathOffset {0};
     usize         PathCount {0};
     usize         TriangleOffset {0};
     usize         TriangleCount {0};
     usize         UniformOffset {0};
-    blend_funcs   BlendFunc {};
 };
 
 struct nvg_path {

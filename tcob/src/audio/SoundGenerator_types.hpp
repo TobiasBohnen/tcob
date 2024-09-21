@@ -18,10 +18,10 @@ class filter {
 public:
     explicit filter(sound_wave const& wave)
         : _fltw {std::pow(wave.LowPassFilterCutoff, 3.0f) * 0.1f}
-        , _fltwd {1.0f + wave.LowPassFilterCutoffSweep * 0.0001f}
+        , _fltwd {1.0f + (wave.LowPassFilterCutoffSweep * 0.0001f)}
         , _fltdmp {std::min(0.8f, 5.0f / (1.0f + std::pow(wave.LowPassFilterResonance, 2.0f) * 20.0f) * (0.01f + _fltw))}
         , _flthp {std::pow(wave.HighPassFilterCutoff, 2.0f) * 0.1f}
-        , _flthpd {1.0f + wave.HighPassFilterCutoffSweep * 0.0003f}
+        , _flthpd {1.0f + (wave.HighPassFilterCutoffSweep * 0.0003f)}
         , _lpfcCheck {wave.LowPassFilterCutoff != 1.0f}
     {
     }
@@ -101,8 +101,8 @@ public:
     {
         switch (_stage) {
         case 0: return static_cast<f32>(_time) / static_cast<f32>(_attackTime);
-        case 1: return 1.0f + std::pow(1.0f - static_cast<f32>(_time) / static_cast<f32>(_sustainTime), 1.0f) * 2.0f * _sustainPunch;
-        case 2: return 1.0f - static_cast<f32>(_time) / static_cast<f32>(_decayTime);
+        case 1: return 1.0f + (std::pow(1.0f - (static_cast<f32>(_time) / static_cast<f32>(_sustainTime)), 1.0f) * 2.0f * _sustainPunch);
+        case 2: return 1.0f - (static_cast<f32>(_time) / static_cast<f32>(_decayTime));
         }
 
         return 0;
@@ -223,10 +223,10 @@ public:
     {
         _modulation =
             wave.ChangeAmount >= 0.0f
-            ? 1.0 - std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 0.9
-            : 1.0 + std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 10.0;
+            ? 1.0 - (std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 0.9)
+            : 1.0 + (std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 10.0);
 
-        _limit = static_cast<i32>(std::pow(1.0f - wave.ChangeSpeed, 2.0f) * 20000 + 32);
+        _limit = static_cast<i32>((std::pow(1.0f - wave.ChangeSpeed, 2.0f) * 20000) + 32);
 
         _time = 0;
     }

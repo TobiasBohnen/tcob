@@ -211,7 +211,7 @@ void slider::calculate_value(point_f mp)
     } break;
     }
 
-    i32 const val {static_cast<i32>(Min + (Max - Min + 1) * frac)};
+    i32 const val {static_cast<i32>(Min + ((Max - Min + 1) * frac))};
     Value = helper::round_to_multiple(val, Step());
 
     if (!_overThumb) {

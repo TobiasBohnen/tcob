@@ -13,7 +13,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API image_box : public widget {
 public:
-    enum class fit_mode {
+    enum class fit_mode : u8 {
         None,
         Contain,
         Fill,

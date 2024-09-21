@@ -146,7 +146,7 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& in
         // uninterleave samples
         for (i32 i {0}; i < readFrames; i++) {
             for (i32 j {0}; j < info.Channels; ++j) {
-                buffer[j][i] = readBuffer[i * info.Channels + j];
+                buffer[j][i] = readBuffer[(i * info.Channels) + j];
             }
         }
 

@@ -190,7 +190,7 @@ auto vm_view::get_integer(SQInteger idx) const -> SQInteger
 {
     SQInteger retValue {0};
     sq_getinteger(_vm, idx, &retValue);
-    return static_cast<SQInteger>(retValue);
+    return retValue;
 }
 
 auto vm_view::get_float(SQInteger idx) const -> f32

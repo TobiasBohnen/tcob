@@ -91,7 +91,7 @@ private:
 class TCOB_API font : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
-    enum class weight {
+    enum class weight : u16 {
         Thin       = 100, // Hairline
         ExtraLight = 200, // Ultra Light
         Light      = 300,
