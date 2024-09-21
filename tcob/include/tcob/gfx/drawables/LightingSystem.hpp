@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Renderer.hpp"
@@ -16,6 +17,18 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class lighting_system;
+class light_source;
+class shadow_caster;
+
+////////////////////////////////////////////////////////////
+
+struct light_collision {
+    point_f        Point {};
+    f32            Distance {};
+    usize          CollisionCount {};
+    light_source*  Source {nullptr};
+    shadow_caster* Caster {nullptr};
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -25,9 +38,12 @@ class TCOB_API light_source {
 public:
     virtual ~light_source() = default;
 
+    std::any UserData;
+
     prop<color>                   Color {colors::White};
     prop<point_f>                 Position;
     prop<std::optional<f32>>      Range;
+    prop<bool>                    Falloff {true};
     prop<std::optional<degree_f>> StartAngle;
     prop<std::optional<degree_f>> EndAngle;
 
@@ -36,7 +52,9 @@ protected:
     void request_redraw();
 
 private:
-    lighting_system* _parent;
+    lighting_system*             _parent;
+    bool                         _isDirty {true};
+    std::vector<light_collision> _collisionResult;
 };
 
 ////////////////////////////////////////////////////////////
@@ -47,7 +65,10 @@ class TCOB_API shadow_caster {
 public:
     virtual ~shadow_caster() = default;
 
-    prop<std::vector<point_f>> Points;
+    std::any UserData;
+
+    signal<light_collision const> Hit;
+    prop<std::vector<point_f>>    Points;
 
 protected:
     shadow_caster(lighting_system* parent);
@@ -55,12 +76,15 @@ protected:
 
 private:
     lighting_system* _parent;
+    bool             _isDirty {true};
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API lighting_system final : public drawable {
 public:
+    ////////////////////////////////////////////////////////////
+
     lighting_system();
     ~lighting_system() override = default;
 
@@ -79,7 +103,6 @@ public:
     void clear_shadow_casters();
 
     void request_redraw();
-
     void set_blend_funcs(blend_funcs funcs);
 
 protected:
@@ -90,6 +113,7 @@ protected:
 
 private:
     auto ray_intersects_polygon(point_f rayOrigin, f32 rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>;
+    auto is_point_in_polygon(point_f p, std::span<point_f const> points) const -> bool;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};

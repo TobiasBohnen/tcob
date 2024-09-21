@@ -15,6 +15,10 @@ lighting_system::lighting_system()
 {
     Bounds.Changed.connect([&](auto const&) { request_redraw(); });
 
+    blend_funcs funcs;
+    funcs.SourceAlphaBlendFunc = funcs.SourceColorBlendFunc = blend_func::SrcAlpha;
+    funcs.DestinationAlphaBlendFunc = funcs.DestinationColorBlendFunc = blend_func::One;
+    set_blend_funcs(funcs);
     _renderer.set_material(_material);
 }
 
@@ -68,42 +72,10 @@ void lighting_system::set_blend_funcs(blend_funcs funcs)
     _material->BlendFuncs = funcs;
 }
 
-struct collision_result {
-    point_f        Point {};
-    f32            Distance {};
-    usize          CollisionCount {};
-    shadow_caster* Caster {nullptr};
-};
-
 struct caster_points {
     std::span<point_f const> Points {};
     shadow_caster*           Caster {nullptr};
 };
-
-static auto IsPointInPolygon(point_f p, std::span<point_f const> points) -> bool
-{
-    f32 minX {points[0].X};
-    f32 maxX {points[0].X};
-    f32 minY {points[0].Y};
-    f32 maxY {points[0].Y};
-    for (usize i {1}; i < points.size(); i++) {
-        point_f const& q {points[i]};
-        minX = std::min(q.X, minX);
-        maxX = std::max(q.X, maxX);
-        minY = std::min(q.Y, minY);
-        maxY = std::max(q.Y, maxY);
-    }
-
-    if (p.X < minX || p.X > maxX || p.Y < minY || p.Y > maxY) { return false; }
-    bool inside {false};
-    for (usize i {0}, j {points.size() - 1}; i < points.size(); j = i++) {
-        if ((points[i].Y > p.Y) != (points[j].Y > p.Y) && p.X < (points[j].X - points[i].X) * (p.Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X) {
-            inside = !inside;
-        }
-    }
-
-    return inside;
-}
 
 void lighting_system::on_update(milliseconds /* deltaTime */)
 {
@@ -116,104 +88,130 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     _inds.clear();
     i32 indOffset {0};
 
+    constexpr f32 minAngle {0.00005f};
+
     // collect collision points
+    bool shadowCasterDirty {false};
+
     std::vector<caster_points> casterPoints;
     casterPoints.reserve(_shadowCasters.size() + 1);
-    for (auto const& sc : _shadowCasters) { casterPoints.emplace_back(sc->Points(), sc.get()); }
+    for (auto const& sc : _shadowCasters) {
+        casterPoints.emplace_back(sc->Points(), sc.get());
+        shadowCasterDirty = shadowCasterDirty || sc->_isDirty;
+        sc->_isDirty      = false;
+    }
+
     std::array<point_f, 4> boundPoints {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}};
     casterPoints.emplace_back(boundPoints);
 
     for (auto const& ls : _lightSources) {
-        bool const limitAngle {ls->StartAngle() || ls->EndAngle()};
-        auto const lightPosition {ls->Position()};
         bool const limitRange {ls->Range()};
+        f32 const  lightRange {limitRange ? *ls->Range() : std::numeric_limits<f32>::max()};
+        bool const limitAngle {ls->StartAngle() || ls->EndAngle()};
+        if (shadowCasterDirty || ls->_isDirty) {
+            auto const lightPosition {ls->Position()};
+            ls->_isDirty = false;
 
-        bool lightInsideShadowCaster {false};
-        for (usize i {0}; i < casterPoints.size() - 1; ++i) {
-            if (casterPoints[i].Points.empty()) { continue; }
-            lightInsideShadowCaster = IsPointInPolygon(ls->Position, casterPoints[i].Points);
-            if (lightInsideShadowCaster) { break; }
-        }
-
-        std::map<f32, collision_result, std::greater<>> collisionResult;
-        std::set<f32>                                   angles;
-
-        // collect angles
-        for (auto const& cp : casterPoints) {
-            for (auto const& scp : cp.Points) {
-                std::array<f32, 3> vars {-0.00005f, 0, 0.00005f};
-                for (f32 var : vars) {
-                    auto const deg {lightPosition.angle_to(scp).as_normalized()};
-                    if (limitAngle && (deg < *ls->StartAngle || deg > *ls->EndAngle)) { continue; }
-                    angles.insert(degree_f {deg.Value - 90 + var}.as_normalized().Value);
-                }
+            // check if light source is inside a shadow caster
+            bool lightInsideShadowCaster {false};
+            for (usize i {0}; i < casterPoints.size() - 1; ++i) {
+                if (casterPoints[i].Points.empty()) { continue; }
+                lightInsideShadowCaster = is_point_in_polygon(ls->Position, casterPoints[i].Points);
+                if (lightInsideShadowCaster) { break; }
             }
-        }
-        if (limitAngle) {
-            angles.insert(degree_f {ls->StartAngle->Value - 90}.as_normalized().Value);
-            angles.insert(degree_f {ls->EndAngle->Value - 90}.as_normalized().Value);
-        }
 
-        if (limitRange) {
-            if (limitAngle) {
-                for (f32 i {ls->StartAngle->Value}; i < ls->EndAngle->Value; ++i) { angles.insert(i - 90); }
-            } else {
-                for (i32 i {0}; i < 360; ++i) { angles.insert(i - 90); }
-            }
-        }
-
-        // ray cast
-        for (auto angle : angles) {
-            collision_result nearestPoint;
-            nearestPoint.Distance = std::numeric_limits<f32>::max();
-
+            // collect angles
+            std::set<f32> angles0;
             for (auto const& cp : casterPoints) {
-                auto const result {ray_intersects_polygon(lightPosition, angle, cp.Points)};
-                if (result.empty()) { continue; }
-                for (auto const& p : result) {
-                    f32 const dist {lightPosition.distance_to(p)};
-                    if (dist >= nearestPoint.Distance) { continue; }
-
-                    nearestPoint.Point          = p;
-                    nearestPoint.Distance       = dist;
-                    nearestPoint.CollisionCount = result.size();
-                    nearestPoint.Caster         = cp.Caster;
+                for (auto const& scp : cp.Points) {
+                    std::array<f32, 3> constexpr vars {-minAngle, 0, minAngle};
+                    for (f32 var : vars) {
+                        auto const deg {lightPosition.angle_to(scp).as_normalized()};
+                        if (limitAngle && (deg < *ls->StartAngle || deg > *ls->EndAngle)) { continue; }
+                        angles0.insert(degree_f {deg.Value - 90 + var}.as_normalized().Value);
+                    }
                 }
             }
 
-            if (nearestPoint.Distance == std::numeric_limits<f32>::max()) { continue; }
-            collisionResult[angle] = nearestPoint;
-        }
-
-        // discard close and stray(FIXME) points
-        // move out-of-range points into range
-        std::vector<collision_result> collisionResult1;
-        collisionResult1.reserve(collisionResult.size());
-        for (auto& [k, v] : collisionResult) {
-            if (!lightInsideShadowCaster && (v.CollisionCount == 1 && v.Caster != nullptr)) { continue; }
-            if (!collisionResult1.empty() && collisionResult1.back().Point.distance_to(v.Point) < 1) { continue; }
-            if (limitRange && v.Distance > *ls->Range) {
-                f32 const lightRange {*ls->Range()};
-                point_f   direction = (v.Point - lightPosition).as_normalized();
-                v.Point             = lightPosition + direction * lightRange;
-                v.Distance          = lightRange;
+            if (limitRange && !lightInsideShadowCaster) {
+                if (limitAngle) {
+                    for (f32 i {ls->StartAngle->Value}; i < ls->EndAngle->Value; ++i) { angles0.insert(i - 90); }
+                } else {
+                    for (i32 i {0}; i < 360; ++i) { angles0.insert(i - 90); }
+                }
+            } else {
+                if (limitAngle) {
+                    angles0.insert(degree_f {ls->StartAngle->Value - 90}.as_normalized().Value);
+                    angles0.insert(degree_f {ls->EndAngle->Value - 90}.as_normalized().Value);
+                }
             }
 
-            collisionResult1.push_back(v);
+            // discard angles
+            std::vector<f32> angles1;
+            angles1.reserve(angles0.size());
+            for (f32 const angle : angles0) {
+                if (!angles1.empty() && angle - angles1.back() < minAngle) { continue; }
+                angles1.push_back(angle);
+            }
+
+            // ray cast
+            std::map<f32, light_collision, std::greater<>> collisionResult0;
+            for (f32 const angle : angles1) {
+                light_collision nearestPoint;
+                nearestPoint.Distance = std::numeric_limits<f32>::max();
+                nearestPoint.Source   = ls.get();
+
+                for (auto const& cp : casterPoints) {
+                    auto const result {ray_intersects_polygon(lightPosition, angle, cp.Points)};
+                    for (auto const& p : result) {
+                        f32 const dist {lightPosition.distance_to(p)};
+                        if (p == lightPosition) { continue; }
+                        if (dist >= nearestPoint.Distance) { continue; }
+
+                        if (limitRange && dist > lightRange) {
+                            // move out-of-range points into range
+                            point_f const direction = (p - lightPosition).as_normalized();
+                            nearestPoint.Point      = lightPosition + direction * lightRange;
+                            nearestPoint.Distance   = lightRange;
+                            nearestPoint.Caster     = nullptr;
+                        } else {
+                            nearestPoint.Point    = p;
+                            nearestPoint.Distance = dist;
+                            nearestPoint.Caster   = cp.Caster;
+                        }
+
+                        nearestPoint.CollisionCount = result.size();
+                    }
+                }
+
+                if (nearestPoint.Distance == std::numeric_limits<f32>::max()) { continue; }
+                collisionResult0[angle] = nearestPoint;
+            }
+
+            // discard close points
+            ls->_collisionResult.clear();
+            ls->_collisionResult.reserve(collisionResult0.size());
+            for (auto const& [k, v] : collisionResult0) {
+                if (!ls->_collisionResult.empty() && ls->_collisionResult.back().Point.distance_to(v.Point) < 1) { continue; }
+                if (!lightInsideShadowCaster && (v.CollisionCount == 1 && v.Caster != nullptr)) { continue; } // FIXME: ray only intersects with backside segment
+
+                ls->_collisionResult.push_back(v);
+                if (v.Caster) { v.Caster->Hit(v); }
+            }
         }
 
         // prepare geometry
-        u32 const n {static_cast<u32>(collisionResult1.size())};
-        if (n < 2) { continue; }
+        u32 const n {static_cast<u32>(ls->_collisionResult.size())};
+        if (n <= 1) { continue; }
 
         _verts.push_back({.Position  = ls->Position->as_array(),
                           .Color     = ls->Color->as_array(),
                           .TexCoords = {0, 0, 0}});
 
-        for (auto const& p : collisionResult1) {
+        for (auto const& p : ls->_collisionResult) {
             auto col {ls->Color()};
-            if (limitRange) {
-                f32 const lightRange {*ls->Range()};
+            if (limitRange && ls->Falloff) {
+                // FIXME: should be inverse square
                 f32 const falloff {std::clamp(1.0f - (p.Distance / lightRange), 0.0f, 1.0f)};
                 col.R = static_cast<u8>(col.R * falloff);
                 col.G = static_cast<u8>(col.G * falloff);
@@ -242,28 +240,33 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
 auto lighting_system::ray_intersects_polygon(point_f rayOrigin, f32 rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>
 {
-    radian_f const rad {degree_f {rayDirection}};
-    point_f        rayDir {rad.cos(), rad.sin()};
-    rayDir = rayDir.as_normalized();
+    f32 constexpr epsilon {1e-6f};
 
     auto static const RayIntersectsSegment {
         [](point_f ro, point_f rd, point_f p0, point_f p1) -> std::optional<f32> {
             point_f const seg {p1 - p0};
             point_f const segPerp {seg.Y, -seg.X};
 
-            f32 const     denom {segPerp.dot(rd)};
-            constexpr f32 epsilon = 1e-6f;
+            f32 const denom {segPerp.dot(rd)};
             if (std::abs(denom) < epsilon) { return std::nullopt; }
 
             point_f const d {p0 - ro};
-            f32 const     retValue {segPerp.dot(d) / denom};
+            f32 const     distance {segPerp.dot(d) / denom};
             f32 const     s {point_f {rd.Y, -rd.X}.dot(d) / denom};
-            if (retValue >= 0.0f && retValue <= std::numeric_limits<f32>::max() && s >= 0.0f && s <= 1.0f) { return retValue; }
+            if (distance >= 0.0f && s >= 0.0f && s <= 1.0f) { return distance; }
             return std::nullopt;
         }};
 
     std::vector<point_f> retValue;
-    usize const          n {polygon.size()};
+
+    radian_f const rad {degree_f {rayDirection}};
+    point_f        rayDir {rad.cos(), rad.sin()};
+    rayDir = rayDir.as_normalized();
+    if (std::abs(rayDir.X) < epsilon && std::abs(rayDir.Y) < epsilon) {
+        return retValue; // Invalid ray direction
+    }
+
+    usize const n {polygon.size()};
     for (usize i {0}; i < n; ++i) {
         if (auto distance {RayIntersectsSegment(rayOrigin, rayDir, polygon[i], polygon[(i + 1) % n])}) {
             retValue.push_back(rayOrigin + rayDir * *distance);
@@ -271,6 +274,31 @@ auto lighting_system::ray_intersects_polygon(point_f rayOrigin, f32 rayDirection
     }
 
     return retValue;
+}
+
+auto lighting_system::is_point_in_polygon(point_f p, std::span<point_f const> points) const -> bool
+{
+    f32 minX {points[0].X};
+    f32 maxX {points[0].X};
+    f32 minY {points[0].Y};
+    f32 maxY {points[0].Y};
+    for (usize i {1}; i < points.size(); i++) {
+        point_f const& q {points[i]};
+        minX = std::min(q.X, minX);
+        maxX = std::max(q.X, maxX);
+        minY = std::min(q.Y, minY);
+        maxY = std::max(q.Y, maxY);
+    }
+
+    if (p.X < minX || p.X > maxX || p.Y < minY || p.Y > maxY) { return false; }
+    bool inside {false};
+    for (usize i {0}, j {points.size() - 1}; i < points.size(); j = i++) {
+        if ((points[i].Y > p.Y) != (points[j].Y > p.Y) && p.X < (points[j].X - points[i].X) * (p.Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X) {
+            inside = !inside;
+        }
+    }
+
+    return inside;
 }
 
 auto lighting_system::can_draw() const -> bool
@@ -299,6 +327,7 @@ light_source::light_source(lighting_system* parent)
     Color.Changed.connect([&](auto const&) { request_redraw(); });
     Position.Changed.connect([&](auto const&) { request_redraw(); });
     Range.Changed.connect([&](auto const&) { request_redraw(); });
+    Falloff.Changed.connect([&](auto const&) { request_redraw(); });
     StartAngle.Changed.connect([&](auto const&) { request_redraw(); });
     EndAngle.Changed.connect([&](auto const&) { request_redraw(); });
 }
@@ -308,6 +337,7 @@ void light_source::request_redraw()
     if (_parent) {
         _parent->request_redraw();
     }
+    _isDirty = true;
 }
 
 shadow_caster::shadow_caster(lighting_system* parent)
@@ -321,6 +351,7 @@ void shadow_caster::request_redraw()
     if (_parent) {
         _parent->request_redraw();
     }
+    _isDirty = true;
 }
 
 } // namespace gfx
