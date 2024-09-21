@@ -32,45 +32,45 @@ auto constexpr point<T>::as_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-inline auto point<T>::length() const -> f32
+inline auto point<T>::length() const -> f64
 {
-    return static_cast<f32>(std::sqrt((X * X) + (Y * Y)));
+    return static_cast<f64>(std::sqrt((X * X) + (Y * Y)));
 }
 
 template <Arithmetic T>
-inline auto point<T>::dot(point<T> const& p) const -> f32
+inline auto point<T>::dot(point<T> const& p) const -> f64
 {
-    return X * p.X + Y * p.Y;
+    return static_cast<f64>(X * p.X + Y * p.Y);
 }
 
 template <Arithmetic T>
-inline auto point<T>::distance_to(point<T> const& p) const -> f32
+inline auto point<T>::distance_to(point<T> const& p) const -> f64
 {
     return (*this - p).length();
 }
 
 template <Arithmetic T>
-inline auto point<T>::angle_to(point<T> const& p) const -> degree_f
+inline auto point<T>::angle_to(point<T> const& p) const -> degree_d
 {
-    degree_f retValue {angle_between(p)};
-    retValue += degree_f {90};
-    if (retValue.Value < 0) { retValue += degree_f {360}; }
+    degree_d retValue {angle_between(p)};
+    retValue += degree_d {90};
+    if (retValue.Value < 0) { retValue += degree_d {360}; }
     return retValue;
 }
 
 template <Arithmetic T>
-inline auto point<T>::angle_between(point<T> const& p) const -> radian_f
+inline auto point<T>::angle_between(point<T> const& p) const -> radian_d
 {
-    return {std::atan2(p.Y - Y, p.X - X)};
+    return {static_cast<f64>(std::atan2(p.Y - Y, p.X - X))};
 }
 
 template <Arithmetic T>
-inline auto point<T>::as_normalized() const -> point<f32>
+inline auto point<T>::as_normalized() const -> point<f64>
 {
-    f32 const l {length()};
-    if (l != 0) { return {X / l, Y / l}; }
+    f64 const l {length()};
+    if (l != 0) { return {static_cast<f64>(X) / l, static_cast<f64>(Y) / l}; }
 
-    return *this;
+    return {static_cast<f64>(X), static_cast<f64>(Y)};
 }
 
 template <Arithmetic T>
@@ -114,7 +114,7 @@ auto constexpr operator+=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator+(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {left.X + right.X, left.Y + right.Y};
+    return {static_cast<T>(left.X + right.X), static_cast<T>(left.Y + right.Y)};
 }
 
 template <Arithmetic T>
@@ -135,13 +135,13 @@ auto constexpr operator-=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator-(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {left.X - right.X, left.Y - right.Y};
+    return {static_cast<T>(left.X - right.X), static_cast<T>(left.Y - right.Y)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {left.X * right.X, left.Y * right.Y};
+    return {static_cast<T>(left.X * right.X), static_cast<T>(left.Y * right.Y)};
 }
 
 template <Arithmetic T, Arithmetic R>
@@ -171,13 +171,13 @@ auto constexpr operator*=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {left.X / right.X, left.Y / right.Y};
+    return {static_cast<T>(left.X / right.X), static_cast<T>(left.Y / right.Y)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(point<T> const& left, R const right) -> point<T>
 {
-    return {left.X / right, left.Y / right};
+    return {static_cast<T>(left.X / right), static_cast<T>(left.Y / right)};
 }
 
 template <Arithmetic T, Arithmetic R>
