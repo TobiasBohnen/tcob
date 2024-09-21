@@ -65,22 +65,22 @@ auto sound::load_async(path const& file) noexcept -> std::future<load_status>
     return locate_service<task_manager>().run_async<load_status>([&, file]() { return load(file); });
 }
 
-void sound::on_start()
+auto sound::on_start() -> bool
 {
+    if (_buffer->get_size() <= 0) { return false; }
+
     stop();
     auto* s {get_source()};
     s->set_buffer(_buffer->get_id());
     s->play();
+
+    return true;
 }
 
-void sound::on_stop()
+auto sound::on_stop() -> bool
 {
     stop_source();
-}
-
-auto sound::can_start() const -> bool
-{
-    return _buffer->get_size() > 0;
+    return true;
 }
 
 auto sound::get_duration() const -> milliseconds

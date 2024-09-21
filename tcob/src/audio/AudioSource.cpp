@@ -31,6 +31,7 @@ auto source::operator=(source const& other) noexcept -> source&
 {
     if (this != &other) {
         _source = other._source;
+        Volume  = other.Volume();
     }
 
     return *this;
@@ -49,9 +50,8 @@ auto source::is_looping() const -> bool
 void source::play(bool looping)
 {
     if (get_status() == playback_status::Stopped) { // start if stopped
-        if (can_start()) {
+        if (on_start()) {
             _source->set_looping(looping);
-            on_start();
         }
     } else if (get_status() == playback_status::Paused) { // resume if paused
         _source->set_looping(looping);

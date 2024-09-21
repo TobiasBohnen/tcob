@@ -50,9 +50,8 @@ public:
     void toggle_pause();
 
 protected:
-    void virtual on_start()                = 0;
-    void virtual on_stop()                 = 0;
-    auto virtual can_start() const -> bool = 0;
+    auto virtual on_start() -> bool = 0;
+    auto virtual on_stop() -> bool  = 0;
 
     auto get_source() const -> audio::al::al_source*;
 

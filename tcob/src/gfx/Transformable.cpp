@@ -44,25 +44,25 @@ void transformable::skew_by(std::pair<degree_f, degree_f> factor)
 
 void transformable::mark_transform_dirty()
 {
-    if (!_isDirty) {
-        _isDirty = true;
-        on_transform_changed();
-    }
+    if (_isDirty) { return; }
+
+    _isDirty = true;
+    on_transform_changed();
 }
 
 void transformable::update_transform()
 {
-    if (_isDirty) {
-        point_f const pivot {get_pivot()};
-        _transform.to_identity();
+    if (!_isDirty) { return; }
 
-        if (Scale != size_f::One) { _transform.scale_at(Scale(), pivot); }
-        if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation(), pivot); }
-        if (Skew->first != 0 || Skew->second != 0) { _transform.skew_at(Skew(), pivot); }
-        if (Translation != point_f::Zero) { _transform.translate(Translation()); }
+    point_f const pivot {get_pivot()};
+    _transform.to_identity();
 
-        _isDirty = false;
-    }
+    if (Scale != size_f::One) { _transform.scale_at(Scale(), pivot); }
+    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation(), pivot); }
+    if (Skew->first != 0 || Skew->second != 0) { _transform.skew_at(Skew(), pivot); }
+    if (Translation != point_f::Zero) { _transform.translate(Translation()); }
+
+    _isDirty = false;
 }
 
 void transformable::reset_transform()

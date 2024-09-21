@@ -36,9 +36,8 @@ public:
     static inline char const* asset_name {"sound"};
 
 private:
-    void on_start() override;
-    void on_stop() override;
-    auto can_start() const -> bool override;
+    auto on_start() -> bool override;
+    auto on_stop() -> bool override;
 
     void stop_source();
 

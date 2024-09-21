@@ -76,21 +76,21 @@ auto music::get_playback_position() const -> milliseconds
     return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->SampleRate) / static_cast<f32>(_info->Channels)) * 1000.0f};
 }
 
-void music::on_start()
+auto music::on_start() -> bool
 {
+    if (_decoder == nullptr) { return false; }
+
     stop_stream();
     _isRunning = true;
     locate_service<task_manager>().run_async<void>([this]() { update_stream(); });
+
+    return true;
 }
 
-void music::on_stop()
+auto music::on_stop() -> bool
 {
     stop_stream();
-}
-
-auto music::can_start() const -> bool
-{
-    return _decoder != nullptr;
+    return true;
 }
 
 void music::update_stream()
