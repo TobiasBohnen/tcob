@@ -10,6 +10,7 @@
 #include <optional>
 
 #include "tcob/audio/AudioSource.hpp"
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 
 namespace tcob::audio {
@@ -18,6 +19,7 @@ namespace tcob::audio {
 class TCOB_API sound final : public source {
 public:
     sound();
+    explicit sound(audio::buffer const& buffer);
     explicit sound(std::shared_ptr<audio::al::al_buffer> buffer);
     sound(sound const& other) noexcept                    = default;
     auto operator=(sound const& other) noexcept -> sound& = default;

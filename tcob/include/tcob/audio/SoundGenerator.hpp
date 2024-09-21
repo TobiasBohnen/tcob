@@ -152,7 +152,6 @@ public:
 
     auto create_buffer [[nodiscard]] (sound_wave const& wave) -> buffer;
     auto create_sound [[nodiscard]] (sound_wave const& wave) -> sound;
-    auto create_sound [[nodiscard]] (buffer const& buffer, sound_wave const& wave) -> sound;
 
 private:
     random::rng_split_mix_64 _random;

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25.0)
-project(tcob VERSION 0.0.1)
+project(tcob LANGUAGES C CXX VERSION 0.0.1)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 

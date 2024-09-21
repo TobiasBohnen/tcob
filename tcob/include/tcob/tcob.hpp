@@ -16,6 +16,7 @@
 #include <tcob/audio/Sound.hpp>
 #include <tcob/audio/SoundFont.hpp>
 #include <tcob/audio/SoundGenerator.hpp>
+#include <tcob/audio/SpeechGenerator.hpp>
 
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>

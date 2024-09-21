@@ -5,11 +5,10 @@
 
 // based on: sfxr and rFXGen
 
-#include <algorithm>
-
 #include "tcob/audio/SoundGenerator.hpp"
 
-#include "ALObjects.hpp"
+#include <algorithm>
+
 #include "SoundGenerator_types.hpp"
 
 namespace tcob::audio {
@@ -495,14 +494,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 auto sound_generator::create_sound(sound_wave const& wave) -> sound
 {
     auto audioData {create_buffer(wave)};
-    return create_sound(audioData, wave);
-}
-
-auto sound_generator::create_sound [[nodiscard]] (buffer const& buffer, sound_wave const& wave) -> sound
-{
-    auto albuffer {std::make_shared<al::al_buffer>()};
-    albuffer->buffer_data(buffer.get_data(), 1, wave.SampleRate);
-    return sound {albuffer};
+    return sound {audioData};
 }
 
 ////////////////////////////////////////////////////////////
