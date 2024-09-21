@@ -88,7 +88,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     _inds.clear();
     i32 indOffset {0};
 
-    constexpr f32 minAngle {0.00005f};
+    constexpr f32 minAngle {0.0005f};
 
     // collect collision points
     bool shadowCasterDirty {false};
@@ -101,13 +101,14 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
         sc->_isDirty      = false;
     }
 
-    std::array<point_f, 4> boundPoints {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}};
+    std::array<point_f, 4> const boundPoints {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}};
     casterPoints.emplace_back(boundPoints);
 
     for (auto const& ls : _lightSources) {
         bool const limitRange {ls->Range()};
         f32 const  lightRange {limitRange ? *ls->Range() : std::numeric_limits<f32>::max()};
         bool const limitAngle {ls->StartAngle() || ls->EndAngle()};
+
         if (shadowCasterDirty || ls->_isDirty) {
             auto const lightPosition {ls->Position()};
             ls->_isDirty = false;
@@ -193,7 +194,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
             ls->_collisionResult.reserve(collisionResult0.size());
             for (auto const& [k, v] : collisionResult0) {
                 if (!ls->_collisionResult.empty() && ls->_collisionResult.back().Point.distance_to(v.Point) < 1) { continue; }
-                if (!lightInsideShadowCaster && (v.CollisionCount == 1 && v.Caster != nullptr)) { continue; } // FIXME: ray only intersects with backside segment
+                if (!lightInsideShadowCaster && (v.CollisionCount == 1 && v.Caster != nullptr)) { continue; }
 
                 ls->_collisionResult.push_back(v);
                 if (v.Caster) { v.Caster->Hit(v); }
