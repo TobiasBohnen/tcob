@@ -243,7 +243,7 @@ auto lighting_system::ray_intersects_polygon(point_d rayOrigin, degree_d rayDire
 {
     f64 constexpr epsilon {std::numeric_limits<f64>::epsilon()};
 
-    auto static const RayIntersectsSegment {
+    auto static const rayIntersectsSegment {
         [](point_d const& ro, point_d const& rd, point_d const& p0, point_d const& p1) -> std::optional<f64> {
             point_d const seg {p1 - p0};
             point_d const segPerp {seg.Y, -seg.X};
@@ -269,7 +269,7 @@ auto lighting_system::ray_intersects_polygon(point_d rayOrigin, degree_d rayDire
 
     usize const n {polygon.size()};
     for (usize i {0}; i < n; ++i) {
-        if (auto distance {RayIntersectsSegment(rayOrigin, rayDir, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
+        if (auto distance {rayIntersectsSegment(rayOrigin, rayDir, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
             retValue.emplace_back(rayOrigin + rayDir * *distance);
         }
     }

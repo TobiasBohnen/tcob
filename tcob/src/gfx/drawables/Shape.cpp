@@ -7,26 +7,8 @@
 
 #include <algorithm>
 
-#include "earcut/earcut.hpp"
-
+#include "../EarcutHelper.hpp"
 #include "tcob/gfx/Renderer.hpp"
-
-namespace mapbox::util {
-template <>
-struct nth<0, tcob::point_f> {
-    static auto get(tcob::point_f const& t)
-    {
-        return t.X;
-    }
-};
-template <>
-struct nth<1, tcob::point_f> {
-    static auto get(tcob::point_f const& t)
-    {
-        return t.Y;
-    }
-};
-}
 
 namespace tcob::gfx {
 
@@ -397,7 +379,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
 
-    auto const& points {Points()};
+    auto        points {Points()};
     usize const n {points.size()};
     if (n < 3) { return; }
 
@@ -418,17 +400,24 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     f32 const   texLevel {static_cast<f32>(texReg.Level)};
     auto const& uvRect {texReg.UVRect};
 
-    for (u32 i {0}; i < n; i++) {
-        auto const& [x, y] {points[i]};
-        _verts.push_back({.Position  = (xform * points[i]).as_array(),
+    auto const pushVert {[&](point_f point) {
+        auto const& [x, y] {point};
+        _verts.push_back({.Position  = (xform * point).as_array(),
                           .Color     = Color->as_array(),
                           .TexCoords = {(((x - _boundingBox.X) / _boundingBox.Width) * uvRect.Width) + uvRect.X,
                                         (((y - _boundingBox.Y) / _boundingBox.Height) * uvRect.Height) + uvRect.Y,
                                         texLevel}});
+    }};
+
+    for (u32 i {0}; i < n; i++) { pushVert(points[i]); }
+    for (auto const& hole : Holes()) {
+        for (auto const holePoint : hole) { pushVert(holePoint); }
     }
 
     std::vector<std::span<point_f const>> polygon;
-    polygon.emplace_back(points);
+    polygon.emplace_back(Points());
+    polygon.insert(polygon.end(), Holes->begin(), Holes->end());
+
     auto const indices {mapbox::earcut<u32>(polygon)};
     for (u32 i {0}; i < indices.size(); i += 3) {
         _inds.push_back(indices[i + 2]);

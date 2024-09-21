@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -117,7 +118,8 @@ class TCOB_API poly_shape final : public shape {
 public:
     poly_shape();
 
-    prop<std::vector<point_f>> Points;
+    prop<std::vector<point_f>>              Points;
+    prop<std::vector<std::vector<point_f>>> Holes;
 
     auto get_geometry() -> geometry_data override;
 
