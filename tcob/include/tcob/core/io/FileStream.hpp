@@ -36,6 +36,8 @@ public:
     auto read_bytes(void* s, std::streamsize sizeInBytes) const -> std::streamsize;
     auto write_bytes(void const* s, std::streamsize sizeInBytes) const -> std::streamsize;
 
+    auto is_valid() const -> bool;
+
     auto static OpenRead(path const& path) -> file_sink;
     auto static OpenWrite(path const& path) -> file_sink;
     auto static OpenAppend(path const& path) -> file_sink;
@@ -54,6 +56,8 @@ public:
 
     auto close() -> bool;
     auto flush() -> bool;
+
+    auto is_valid() const -> bool override;
 
     auto static Open(path const& path, u64 bufferSize = 4096) -> std::optional<ifstream>; // TODO: change to result
 

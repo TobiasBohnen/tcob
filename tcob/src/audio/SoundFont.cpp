@@ -34,15 +34,14 @@ sound_font::~sound_font()
 
 auto sound_font::load(path const& file, bool stereo, i32 sampleRate) noexcept -> load_status
 {
-    if (auto fs {io::ifstream::Open(file)}) {
-        return load(*fs, stereo, sampleRate);
-    }
-
-    return load_status::FileNotFound;
+    io::ifstream fs {file};
+    return load(fs, stereo, sampleRate);
 }
 
 auto sound_font::load(istream& stream, bool stereo, i32 sampleRate) noexcept -> load_status
 {
+    if (!stream) { return load_status::Error; }
+
     if (_font) {
         reset();
         tsf_close(_font);

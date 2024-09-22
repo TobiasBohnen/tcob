@@ -252,13 +252,14 @@ auto font::get_texture() const -> assets::asset_ptr<texture>
 
 auto font::load(path const& file, u32 size) noexcept -> load_status
 {
-    if (auto fs {io::ifstream::Open(file)}) { return load(*fs, size); }
-
-    return load_status::FileNotFound;
+    io::ifstream fs {file};
+    return load(fs, size);
 }
 
 auto font::load(istream& stream, u32 size) noexcept -> load_status
 {
+    if (!stream) { return load_status::Error; }
+
     _fontData = stream.read_all<ubyte>();
     return load(_fontData, size);
 }
@@ -498,8 +499,8 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
 
     // check if font data has already been loaded
     if (!_fontData.contains(fontStyle)) {
-        auto fs {io::ifstream::Open(_fontSources[fontStyle])};
-        _fontData[fontStyle] = fs->read_all<ubyte>();
+        io::ifstream fs {_fontSources[fontStyle]};
+        _fontData[fontStyle] = fs.read_all<ubyte>();
     }
 
     // load font

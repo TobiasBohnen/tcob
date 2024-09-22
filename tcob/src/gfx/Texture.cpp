@@ -108,13 +108,12 @@ void texture::update_data(point_i origin, size_i size, void const* data, u32 dep
 
 auto animated_texture::load(path const& file) noexcept -> load_status
 {
-    if (!io::is_file(file)) { return load_status::FileNotFound; }
-
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
 auto animated_texture::load(std::shared_ptr<istream> in, string const& ext) noexcept -> load_status
 {
+    if (!in) { return load_status::Error; }
     stop();
 
     _decoder = locate_service<animated_image_decoder::factory>().create_from_sig_or_ext(*in, ext);

@@ -64,7 +64,6 @@ namespace enum_ops {
 
 enum class load_status : u8 {
     Ok,
-    FileNotFound,
     Error
 };
 

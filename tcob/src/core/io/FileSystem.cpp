@@ -25,9 +25,7 @@ file_hasher::file_hasher(path file)
 
 auto file_hasher::crc32() const -> u32
 {
-    if (!is_file(_path)) {
-        return 0;
-    }
+    if (!is_file(_path)) { return 0; }
 
     ifstream           fs {_path};
     std::vector<ubyte> fileData {fs.read_all<ubyte>()};

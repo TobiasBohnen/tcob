@@ -30,13 +30,13 @@ auto buffer::get_data() -> std::span<f32>
 
 auto buffer::load(path const& file, std::any& ctx) noexcept -> load_status
 {
-    if (!io::is_file(file)) { return load_status::FileNotFound; }
-
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file), ctx);
 }
 
 auto buffer::load(std::shared_ptr<istream> in, string const& ext, std::any& ctx) noexcept -> load_status
 {
+    if (!in || !(*in)) { return load_status::Error; }
+
     auto decoder {locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext)};
     if (decoder) {
         if (auto info {decoder->open(std::move(in), ctx)}) {

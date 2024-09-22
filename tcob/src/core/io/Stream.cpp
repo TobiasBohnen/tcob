@@ -29,6 +29,16 @@ auto istream::read_string_until(char delim) -> string
     return retValue;
 }
 
+auto istream::is_valid() const -> bool
+{
+    return true;
+}
+
+istream::operator bool() const
+{
+    return is_valid();
+}
+
 ////////////////////////////////////////////////////////////
 
 auto ostream::write_string(string_view s) -> std::streamsize

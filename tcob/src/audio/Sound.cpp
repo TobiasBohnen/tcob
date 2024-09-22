@@ -48,13 +48,13 @@ auto sound::get_info() const -> std::optional<buffer::info>
 
 auto sound::load(path const& file) noexcept -> load_status
 {
-    if (!io::is_file(file)) { return load_status::FileNotFound; }
-
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
 auto sound::load(std::shared_ptr<istream> in, string const& ext) noexcept -> load_status
 {
+    if (!in || !(*in)) { return load_status::Error; }
+
     stop_source();
 
     buffer bfr;

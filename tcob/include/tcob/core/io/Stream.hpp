@@ -47,6 +47,9 @@ public:
     auto virtual size_in_bytes() const -> std::streamsize       = 0;
     auto virtual is_eof() const -> bool                         = 0;
 
+    auto virtual is_valid() const -> bool;
+    explicit operator bool() const;
+
 protected:
     auto virtual read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize = 0;
 };

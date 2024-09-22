@@ -59,12 +59,10 @@ void document::from_string(string const& html)
 
 auto document::load(path const& file) noexcept -> load_status
 {
-    if (auto fs {io::ifstream::Open(file)}) {
-        from_string(io::read_as_string(file));
-        return load_status::Ok;
-    }
-
-    return load_status::FileNotFound;
+    io::ifstream fs {file};
+    if (!fs) { return load_status::Error; }
+    from_string(io::read_as_string(file));
+    return load_status::Ok;
 }
 
 void document::change_language(string const& language, string const& culture)

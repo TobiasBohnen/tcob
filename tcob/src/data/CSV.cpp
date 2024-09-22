@@ -6,7 +6,6 @@
 #include "tcob/data/CSV.hpp"
 
 #include "tcob/core/io/FileStream.hpp"
-#include "tcob/core/io/FileSystem.hpp"
 
 namespace tcob::data::csv {
 
@@ -14,15 +13,13 @@ static byte const LineEnding {'\n'};
 
 auto table::load(path const& file, settings s) noexcept -> load_status
 {
-    if (auto fs {io::ifstream::Open(file)}) {
-        return parse(io::read_as_string(file), s) ? load_status::Ok : load_status::Error;
-    }
-
-    return load_status::FileNotFound;
+    io::ifstream fs {file};
+    return load(fs, s);
 }
 
 auto table::load(istream& in, settings s) noexcept -> load_status
 {
+    if (!in) { return load_status::Error; }
     return parse(in.read_string(in.size_in_bytes()), s) ? load_status::Ok : load_status::Error;
 }
 

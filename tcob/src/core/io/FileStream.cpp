@@ -27,7 +27,6 @@ static inline auto check(string const& msg, i32 c) -> bool
 file_sink::file_sink(PHYSFS_File* handle)
     : _handle {handle}
 {
-    assert(handle);
 }
 
 file_sink::~file_sink()
@@ -48,6 +47,8 @@ auto file_sink::operator=(file_sink&& other) noexcept -> file_sink&
 
 auto file_sink::close() -> bool
 {
+    if (!is_valid()) { return false; }
+
     if (check("close", PHYSFS_close(_handle))) {
         _handle = nullptr;
         return true;
@@ -58,26 +59,33 @@ auto file_sink::close() -> bool
 
 auto file_sink::flush() const -> bool
 {
+    if (!is_valid()) { return false; }
+
     return check("flush", PHYSFS_flush(_handle));
 }
 
 auto file_sink::is_eof() const -> bool
 {
+    if (!is_valid()) { return true; }
     return PHYSFS_eof(_handle) != 0;
 }
 
 auto file_sink::tell() const -> std::streamsize
 {
+    if (!is_valid()) { return 0; }
     return static_cast<std::streamsize>(PHYSFS_tell(_handle));
 }
 
 auto file_sink::size_in_bytes() const -> std::streamsize
 {
+    if (!is_valid()) { return 0; }
     return static_cast<std::streamsize>(PHYSFS_fileLength(_handle));
 }
 
 auto file_sink::seek(std::streamoff off, seek_dir way) const -> bool
 {
+    if (!is_valid()) { return false; }
+
     PHYSFS_sint64 pos {off};
     if (way == seek_dir::Current) {
         pos = PHYSFS_tell(_handle) + off;
@@ -107,21 +115,29 @@ auto file_sink::OpenAppend(path const& path) -> file_sink
 
 void file_sink::set_buffer_size(u64 size)
 {
+    if (!is_valid()) { return; }
     check("set_buffer_size", PHYSFS_setBuffer(_handle, size));
 }
 
 auto file_sink::read_bytes(void* s, std::streamsize sizeInBytes) const -> std::streamsize
 {
+    if (!is_valid()) { return 0; }
     return static_cast<std::streamsize>(PHYSFS_readBytes(_handle, s, static_cast<u64>(sizeInBytes)));
 }
 
 auto file_sink::write_bytes(void const* s, std::streamsize sizeInBytes) const -> std::streamsize
 {
+    if (!is_valid()) { return 0; }
     auto const retValue {static_cast<std::streamsize>(PHYSFS_writeBytes(_handle, s, static_cast<u64>(sizeInBytes)))};
     if (retValue != sizeInBytes) {
         logger::Error("write_bytes: " + string {PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())});
     }
     return retValue;
+}
+
+auto file_sink::is_valid() const -> bool
+{
+    return _handle != nullptr;
 }
 
 ////////////////////////////////////////////////////////////
@@ -141,6 +157,11 @@ auto ifstream::close() -> bool
 auto ifstream::flush() -> bool
 {
     return _sink.flush();
+}
+
+auto ifstream::is_valid() const -> bool
+{
+    return _sink.is_valid();
 }
 
 auto ifstream::Open(path const& path, u64 bufferSize) -> std::optional<ifstream>

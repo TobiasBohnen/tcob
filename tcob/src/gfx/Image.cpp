@@ -19,7 +19,7 @@
 namespace tcob::gfx {
 
 image::image(size_i size, format f)
-    : _info {size, f}
+    : _info {.Size = size, .Format = f}
 {
 }
 
@@ -165,15 +165,14 @@ auto image::Load(istream& in, string const& ext) noexcept -> std::optional<image
 
 auto image::load(path const& file) noexcept -> load_status
 {
-    if (auto fs {io::ifstream::Open(file)}) {
-        return load(*fs, io::get_extension(file));
-    }
-
-    return load_status::FileNotFound;
+    io::ifstream fs {file};
+    return load(fs, io::get_extension(file));
 }
 
 auto image::load(istream& in, string const& ext) noexcept -> load_status
 {
+    if (!in) { return load_status::Error; }
+
     if (auto decoder {locate_service<image_decoder::factory>().create_from_sig_or_ext(in, ext)}) {
         if (auto img {decoder->decode(in)}) {
             std::swap(_buffer, img->_buffer);
@@ -192,10 +191,9 @@ auto image::load_async(path const& file) noexcept -> std::future<load_status>
 
 auto image::LoadInfo(path const& file) noexcept -> std::optional<info>
 {
-    if (auto fs {io::ifstream::Open(file)}) {
-        if (auto decoder {locate_service<image_decoder::factory>().create_from_sig_or_ext(*fs, io::get_extension(file))}) {
-            return decoder->decode_info(*fs);
-        }
+    io::ifstream fs {file};
+    if (auto decoder {locate_service<image_decoder::factory>().create_from_sig_or_ext(fs, io::get_extension(file))}) {
+        return decoder->decode_info(fs);
     }
 
     return std::nullopt;
@@ -270,5 +268,4 @@ auto animated_image_decoder::get_stream() -> istream&
 {
     return *_stream;
 }
-
 }

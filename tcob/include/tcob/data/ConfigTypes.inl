@@ -24,16 +24,14 @@ inline base_type<Impl, Container>::base_type(std::shared_ptr<Container> const& e
 template <typename Impl, typename Container>
 inline auto base_type<Impl, Container>::load(path const& file, bool skipBinary) noexcept -> load_status
 {
-    if (auto fs {io::ifstream::Open(file)}) {
-        return load(*fs, io::get_extension(file), skipBinary);
-    }
-
-    return load_status::FileNotFound;
+    io::ifstream fs {file};
+    return load(fs, io::get_extension(file), skipBinary);
 }
 
 template <typename Impl, typename Container>
 inline auto base_type<Impl, Container>::load(istream& in, string const& ext, bool skipBinary) noexcept -> load_status
 {
+    if (!in) { return load_status::Error; }
     return on_load(in, ext, skipBinary);
 }
 

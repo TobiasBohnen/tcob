@@ -32,13 +32,13 @@ auto music::get_info() const -> std::optional<buffer::info>
 
 auto music::open(path const& file) -> load_status
 {
-    if (!io::is_file(file)) { return load_status::FileNotFound; }
-
     return open(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
 auto music::open(std::shared_ptr<istream> in, string const& ext) -> load_status
 {
+    if (!in || !(*in)) { return load_status::Error; }
+
     stop();
 
     _decoder = locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext);
