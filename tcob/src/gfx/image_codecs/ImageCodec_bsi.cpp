@@ -23,11 +23,9 @@ constexpr std::array<ubyte, 3> SIGNATURE {'B', 'S', 'I'};
 auto bsi_decoder::decode(istream& in) -> std::optional<image>
 {
     if (auto info {decode_info(in)}) {
-        auto const buffer {in.read_all<ubyte>()};
-        if (auto const pixels {io::zlib_filter {}.from(buffer)}) {
-            if (std::ssize(*pixels) == info->size_in_bytes()) {
-                return image::Create(info->Size, info->Format, *pixels);
-            }
+        auto const pixels {in.read_filtered<ubyte>(in.size_in_bytes(), io::zlib_filter {})};
+        if (std::ssize(pixels) == info->size_in_bytes()) {
+            return image::Create(info->Size, info->Format, pixels);
         }
     }
 
@@ -53,11 +51,7 @@ auto bsi_encoder::encode(image const& img, ostream& out) const -> bool
     out.write<u32, std::endian::little>(info.Size.Height);
     out.write<u8>(static_cast<u8>(info.Format));
 
-    if (auto buf {io::zlib_filter {}.to(img.get_data())}) {
-        out.write<ubyte>(*buf);
-        return true;
-    }
-    return false;
+    return out.write_filtered<ubyte>(img.get_data(), io::zlib_filter {}) > 0;
 }
 
 }

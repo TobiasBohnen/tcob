@@ -37,6 +37,9 @@ public:
     template <POD T>
     auto read_n(std::streamsize n) -> std::vector<T>;
     template <POD T>
+    auto read_filtered(std::streamsize n, auto&&... filters) -> std::vector<T>;
+
+    template <POD T>
     auto read_all() -> std::vector<T>;
 
     auto read_string(std::streamsize length) -> string;
@@ -114,6 +117,9 @@ public:
 
     template <POD T>
     auto write(std::span<T const> s) -> std::streamsize;
+
+    template <POD T>
+    auto write_filtered(std::span<T const> s, auto&& filter, auto&&... filters) -> std::streamsize;
 
     auto virtual tell() const -> std::streamsize                = 0;
     auto virtual seek(std::streamoff off, seek_dir way) -> bool = 0;

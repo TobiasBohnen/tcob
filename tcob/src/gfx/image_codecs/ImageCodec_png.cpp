@@ -132,7 +132,8 @@ auto png_decoder::decode(istream& in) -> std::optional<image>
             }
         }
 
-        if (auto const idatInflated {io::zlib_filter {}.from(idat)}; read_image(*idatInflated)) {
+        auto const idatInflated {io::zlib_filter {}.from(idat)};
+        if (read_image(idatInflated)) {
             size_i const size {_ihdr.Width, _ihdr.Height};
             auto         retValue {image::Create(size, image::format::RGBA, _data)};
 
@@ -608,11 +609,11 @@ void png_encoder::write_image(image const& image, ostream& out) const
 {
     // compress
     auto buf {io::zlib_filter {}.to(get_data(image))};
-    if (!buf.has_value()) { return; }
+    if (buf.empty()) { return; }
 
     // write in 8192 byte chunks
     isize offset {0};
-    isize total {std::ssize(*buf)};
+    isize total {std::ssize(buf)};
 
     constexpr isize                idatLength {8192};
     std::array<u8, idatLength + 4> idat {};
@@ -621,7 +622,7 @@ void png_encoder::write_image(image const& image, ostream& out) const
     while (total > 0) {
         memcpy(idat.data(), &type, 4);
         isize const length {std::min(idatLength, total)};
-        memcpy(idat.data() + 4, buf->data() + offset, length);
+        memcpy(idat.data() + 4, buf.data() + offset, length);
         write_chunk(out, idat, static_cast<u32>(length + 4));
         offset += length;
         total -= length;

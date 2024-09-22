@@ -5,6 +5,7 @@
 
 #include "tcob/core/io/Filter.hpp"
 
+#include <algorithm>
 #include <cctype>
 
 #include <miniz.h>
@@ -20,7 +21,7 @@ zlib_filter::zlib_filter(i32 complevel)
 {
 }
 
-auto zlib_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto zlib_filter::to(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     static constexpr usize BUFFER_SIZE {1024};
     std::vector<ubyte>     retValue;
@@ -43,14 +44,14 @@ auto zlib_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::v
         retValue.resize(stream.total_out);
     } else {
         mz_deflateEnd(&stream);
-        return std::nullopt;
+        return {};
     }
 
     mz_deflateEnd(&stream);
     return retValue;
 }
 
-auto zlib_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto zlib_filter::from(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     static constexpr usize BUFFER_SIZE {1024};
     std::vector<ubyte>     retValue;
@@ -73,7 +74,7 @@ auto zlib_filter::from(std::span<ubyte const> bytes) const -> std::optional<std:
         retValue.resize(stream.total_out);
     } else {
         mz_inflateEnd(&stream);
-        return std::nullopt;
+        return {};
     }
 
     mz_inflateEnd(&stream);
@@ -90,7 +91,7 @@ static inline auto is_base64(byte c) -> bool
 
 static string_view const base64_chars {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"sv};
 
-auto base64_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto base64_filter::to(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     ubyte const*         buf {bytes.data()};
     isize                bufLen {std::ssize(bytes)};
@@ -138,7 +139,7 @@ auto base64_filter::to(std::span<ubyte const> bytes) const -> std::optional<std:
     return retValue;
 }
 
-auto base64_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto base64_filter::from(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     isize                bufLen {std::ssize(bytes)};
     i32                  i {0};
@@ -205,11 +206,11 @@ static std::array<byte, 96> const z85_decode = {0x00, 0x44, 0x00, 0x54, 0x53, 0x
                                                 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
                                                 0x21, 0x22, 0x23, 0x4F, 0x00, 0x50, 0x00, 0x00};
 
-auto z85_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto z85_filter::to(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     usize const bufLen {bytes.size()};
 
-    if (bufLen % 4) { return std::nullopt; }
+    if (bufLen % 4) { return {}; }
 
     usize const        encodedLen {bufLen * 5 / 4};
     std::vector<ubyte> encoded;
@@ -234,11 +235,11 @@ auto z85_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::ve
     return encoded;
 }
 
-auto z85_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto z85_filter::from(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     usize const bufLen {bytes.size()};
 
-    if (bufLen % 5) { return std::nullopt; }
+    if (bufLen % 5) { return {}; }
 
     usize const        decodedSize {bufLen * 4 / 5};
     std::vector<ubyte> decoded;
@@ -265,14 +266,14 @@ auto z85_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::
 
 ////////////////////////////////////////////////////////////
 
-auto reverser_filter::to(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto reverser_filter::to(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     std::vector<ubyte> retValue {bytes.begin(), bytes.end()};
-    std::reverse(retValue.begin(), retValue.end());
+    std::ranges::reverse(retValue);
     return retValue;
 }
 
-auto reverser_filter::from(std::span<ubyte const> bytes) const -> std::optional<std::vector<ubyte>>
+auto reverser_filter::from(std::span<ubyte const> bytes) const -> std::vector<ubyte>
 {
     return to(bytes);
 }
