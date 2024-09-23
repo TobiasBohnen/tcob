@@ -84,9 +84,22 @@ inline auto angle_unit<ValueType, OneTurn>::atan() const -> value_type
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-auto constexpr angle_unit<ValueType, OneTurn>::as_normalized() const -> angle_unit<value_type, OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mode) const -> angle_unit<value_type, OneTurn>
 {
-    return {std::fmod(this->Value, static_cast<value_type>(OneTurn))};
+    auto result {std::fmod(this->Value, static_cast<ValueType>(OneTurn))};
+
+    switch (mode) {
+    case angle_normalize::FullTurnSymmetric: break;
+    case angle_normalize::HalfTurnSymmetric:
+        result = std::fmod(result + static_cast<ValueType>(OneTurn), static_cast<ValueType>(OneTurn));
+        if (result > OneTurn / 2) { result -= static_cast<ValueType>(OneTurn); }
+        break;
+    case angle_normalize::PositiveFullTurn:
+        if (result < 0) { result += static_cast<ValueType>(OneTurn); }
+        break;
+    }
+
+    return {result};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
