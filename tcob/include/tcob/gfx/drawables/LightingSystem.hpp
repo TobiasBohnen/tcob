@@ -68,7 +68,7 @@ public:
     std::any UserData;
 
     signal<light_collision const> Hit;
-    prop<std::vector<point_f>>    Points;
+    prop<polygon>                 Polygon;
 
 protected:
     shadow_caster(lighting_system* parent);

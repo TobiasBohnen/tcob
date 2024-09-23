@@ -20,6 +20,11 @@ char const* const render_system {"render_system"};
 }
 
 namespace tcob::gfx {
+
+////////////////////////////////////////////////////////////
+
+using polygon = std::vector<point_f>;
+
 ////////////////////////////////////////////////////////////
 
 enum class buffer_usage_hint : u8 {

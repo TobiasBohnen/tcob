@@ -96,7 +96,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     std::vector<caster_points> casterPoints;
     casterPoints.reserve(_shadowCasters.size() + 1);
     for (auto const& sc : _shadowCasters) {
-        casterPoints.emplace_back(sc->Points(), sc.get());
+        casterPoints.emplace_back(sc->Polygon(), sc.get());
         shadowCasterDirty = shadowCasterDirty || sc->_isDirty;
         sc->_isDirty      = false;
     }
@@ -344,7 +344,7 @@ void light_source::request_redraw()
 shadow_caster::shadow_caster(lighting_system* parent)
     : _parent {parent}
 {
-    Points.Changed.connect([&](auto const&) { request_redraw(); });
+    Polygon.Changed.connect([&](auto const&) { request_redraw(); });
 }
 
 void shadow_caster::request_redraw()

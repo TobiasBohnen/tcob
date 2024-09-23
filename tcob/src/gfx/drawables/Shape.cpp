@@ -355,7 +355,7 @@ auto rect_shape::get_center() const -> point_f
 
 poly_shape::poly_shape()
 {
-    Points.Changed.connect([&](auto const&) { mark_dirty(); });
+    Polygon.Changed.connect([&](auto const&) { mark_dirty(); });
 }
 
 auto poly_shape::get_geometry() -> geometry_data
@@ -368,7 +368,7 @@ auto poly_shape::get_geometry() -> geometry_data
 
 void poly_shape::move_by(point_f offset)
 {
-    for (auto& p : *Points) {
+    for (auto& p : *Polygon) {
         p += offset;
     }
 
@@ -379,7 +379,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
 
-    auto        points {Points()};
+    auto        points {Polygon()};
     usize const n {points.size()};
     if (n < 3) { return; }
 
@@ -415,7 +415,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     }
 
     std::vector<std::span<point_f const>> polygon;
-    polygon.emplace_back(Points());
+    polygon.emplace_back(Polygon());
     polygon.insert(polygon.end(), Holes->begin(), Holes->end());
 
     auto const indices {mapbox::earcut<u32>(polygon)};
@@ -452,7 +452,7 @@ void poly_shape::calc()
     f32 signedArea {0.0f};
     _centroid = point_f::Zero;
 
-    auto const& points {Points()};
+    auto const& points {Polygon()};
     usize const n {points.size()};
 
     for (usize i {0}; i < n; ++i) {

@@ -118,8 +118,8 @@ class TCOB_API poly_shape final : public shape {
 public:
     poly_shape();
 
-    prop<std::vector<point_f>>              Points;
-    prop<std::vector<std::vector<point_f>>> Holes;
+    prop<polygon>              Polygon;
+    prop<std::vector<polygon>> Holes;
 
     auto get_geometry() -> geometry_data override;
 
