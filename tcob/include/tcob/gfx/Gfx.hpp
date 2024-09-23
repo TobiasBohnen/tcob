@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <span>
+#include <vector>
+
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -23,7 +26,8 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-using polygon = std::vector<point_f>;
+using polygon      = std::vector<point_f>;
+using polygon_span = std::span<point_f const>;
 
 ////////////////////////////////////////////////////////////
 

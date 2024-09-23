@@ -414,7 +414,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
         for (auto const holePoint : hole) { pushVert(holePoint); }
     }
 
-    std::vector<std::span<point_f const>> polygon;
+    std::vector<polygon_span> polygon;
     polygon.emplace_back(Polygon());
     polygon.insert(polygon.end(), Holes->begin(), Holes->end());
 

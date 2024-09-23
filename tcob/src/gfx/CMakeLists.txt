@@ -18,6 +18,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/QuadTween.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RenderSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RenderTarget.cpp
@@ -83,6 +84,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Geometry.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.inl
+    ${TCOB_INC_DIR}/tcob/gfx/Ray.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Renderer.hpp
     ${TCOB_INC_DIR}/tcob/gfx/RenderSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/RenderSystemImpl.hpp

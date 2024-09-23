@@ -17,7 +17,8 @@ namespace tcob {
 template <Arithmetic T>
 class [[nodiscard]] point final {
 public:
-    using type = T;
+    using type       = T;
+    using float_type = f64;
 
     constexpr point() = default;
     constexpr point(T x, T y);
@@ -27,14 +28,14 @@ public:
 
     auto constexpr as_array [[nodiscard]] () const -> std::array<T, 2>;
 
-    auto length() const -> f64;
-    auto dot(point<T> const& p) const -> f64;
+    auto length() const -> float_type;
+    auto dot(point<T> const& p) const -> float_type;
+    auto cross(point<T> const& p) const -> float_type;
 
-    auto distance_to(point<T> const& p) const -> f64;
-    auto angle_to(point<T> const& p) const -> degree_d;
-    auto angle_between(point<T> const& p) const -> radian_d;
-
-    auto as_normalized() const -> point<f64>;
+    auto distance_to(point<T> const& p) const -> float_type;
+    auto angle_to(point<T> const& p) const -> degree<float_type>;
+    auto angle_between(point<T> const& p) const -> radian<float_type>;
+    auto as_normalized() const -> point<float_type>;
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;
 

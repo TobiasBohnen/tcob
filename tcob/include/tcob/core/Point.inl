@@ -32,45 +32,51 @@ auto constexpr point<T>::as_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-inline auto point<T>::length() const -> f64
+inline auto point<T>::length() const -> float_type
 {
-    return static_cast<f64>(std::sqrt((X * X) + (Y * Y)));
+    return static_cast<float_type>(std::sqrt((X * X) + (Y * Y)));
 }
 
 template <Arithmetic T>
-inline auto point<T>::dot(point<T> const& p) const -> f64
+inline auto point<T>::dot(point<T> const& p) const -> float_type
 {
-    return static_cast<f64>(X * p.X + Y * p.Y);
+    return static_cast<float_type>(X * p.X + Y * p.Y);
 }
 
 template <Arithmetic T>
-inline auto point<T>::distance_to(point<T> const& p) const -> f64
+inline auto point<T>::cross(point<T> const& p) const -> float_type
+{
+    return static_cast<float_type>(X * p.Y - Y * p.Y);
+}
+
+template <Arithmetic T>
+inline auto point<T>::distance_to(point<T> const& p) const -> float_type
 {
     return (*this - p).length();
 }
 
 template <Arithmetic T>
-inline auto point<T>::angle_to(point<T> const& p) const -> degree_d
+inline auto point<T>::angle_to(point<T> const& p) const -> degree<float_type>
 {
-    degree_d retValue {angle_between(p)};
-    retValue += degree_d {90};
-    if (retValue.Value < 0) { retValue += degree_d {360}; }
+    degree<float_type> retValue {angle_between(p)};
+    retValue += degree<float_type> {90};
+    if (retValue.Value < 0) { retValue += degree<float_type> {360}; }
     return retValue;
 }
 
 template <Arithmetic T>
-inline auto point<T>::angle_between(point<T> const& p) const -> radian_d
+inline auto point<T>::angle_between(point<T> const& p) const -> radian<float_type>
 {
-    return {static_cast<f64>(std::atan2(p.Y - Y, p.X - X))};
+    return {static_cast<float_type>(std::atan2(p.Y - Y, p.X - X))};
 }
 
 template <Arithmetic T>
-inline auto point<T>::as_normalized() const -> point<f64>
+inline auto point<T>::as_normalized() const -> point<float_type>
 {
-    f64 const l {length()};
-    if (l != 0) { return {static_cast<f64>(X) / l, static_cast<f64>(Y) / l}; }
+    auto const l {static_cast<float_type>(length())};
+    if (l != 0) { return {static_cast<float_type>(X) / l, static_cast<float_type>(Y) / l}; }
 
-    return {static_cast<f64>(X), static_cast<f64>(Y)};
+    return {static_cast<float_type>(X), static_cast<float_type>(Y)};
 }
 
 template <Arithmetic T>

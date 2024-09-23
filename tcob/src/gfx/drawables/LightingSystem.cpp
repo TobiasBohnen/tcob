@@ -7,6 +7,8 @@
 
 #include <optional>
 
+#include "tcob/gfx/Ray.hpp"
+
 namespace tcob::gfx {
 
 lighting_system::lighting_system()
@@ -73,8 +75,8 @@ void lighting_system::set_blend_funcs(blend_funcs funcs)
 }
 
 struct caster_points {
-    std::span<point_f const> Points {};
-    shadow_caster*           Caster {nullptr};
+    polygon_span   Points {};
+    shadow_caster* Caster {nullptr};
 };
 
 void lighting_system::on_update(milliseconds /* deltaTime */)
@@ -129,21 +131,21 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
                     for (f64 var : vars) {
                         auto const deg {lightPosition.angle_to(scp).as_normalized()};
                         if (limitAngle && (deg.Value < ls->StartAngle->Value || deg.Value > ls->EndAngle->Value)) { continue; }
-                        angles0.insert(degree_d {deg.Value - 90 + var}.as_normalized().Value);
+                        angles0.insert(degree_d {deg.Value + var}.as_normalized().Value);
                     }
                 }
             }
 
             if (limitRange && !lightInsideShadowCaster) {
                 if (limitAngle) {
-                    for (f32 i {ls->StartAngle->Value}; i < ls->EndAngle->Value; ++i) { angles0.insert(i - 90); }
+                    for (f32 i {ls->StartAngle->Value}; i < ls->EndAngle->Value; ++i) { angles0.insert(i); }
                 } else {
-                    for (i32 i {0}; i < 360; ++i) { angles0.insert(i - 90); }
+                    for (i32 i {0}; i < 360; ++i) { angles0.insert(i); }
                 }
             } else {
                 if (limitAngle) {
-                    angles0.insert(degree_f {ls->StartAngle->Value - 90}.as_normalized().Value);
-                    angles0.insert(degree_f {ls->EndAngle->Value - 90}.as_normalized().Value);
+                    angles0.insert(degree_f {ls->StartAngle->Value}.as_normalized().Value);
+                    angles0.insert(degree_f {ls->EndAngle->Value}.as_normalized().Value);
                 }
             }
 
@@ -163,7 +165,8 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
                 nearestPoint.Source   = ls.get();
 
                 for (auto const& cp : casterPoints) {
-                    auto const result {ray_intersects_polygon(point_d {lightPosition}, angle, cp.Points)};
+                    ray const  ray {lightPosition, degree_d {angle}};
+                    auto const result {ray.intersect_polygon(cp.Points)};
                     for (auto const& p : result) {
                         f64 const dist {lightPosition.distance_to(p)};
                         if (p == lightPosition) { continue; }
@@ -239,45 +242,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     }
 }
 
-auto lighting_system::ray_intersects_polygon(point_d rayOrigin, degree_d rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>
-{
-    f64 constexpr epsilon {std::numeric_limits<f64>::epsilon()};
-
-    auto static const rayIntersectsSegment {
-        [](point_d const& ro, point_d const& rd, point_d const& p0, point_d const& p1) -> std::optional<f64> {
-            point_d const seg {p1 - p0};
-            point_d const segPerp {seg.Y, -seg.X};
-
-            f64 const denom {segPerp.dot(rd)};
-            if (std::abs(denom) < epsilon) { return std::nullopt; }
-
-            point_d const d {p0 - ro};
-            f64 const     distance {segPerp.dot(d) / denom};
-            f64 const     s {point_d {rd.Y, -rd.X}.dot(d) / denom};
-            if (distance >= 0.0 && s >= 0.0 && s <= 1.0) { return distance; }
-            return std::nullopt;
-        }};
-
-    std::vector<point_f> retValue;
-
-    radian_d const rad {rayDirection};
-    point_d        rayDir {rad.cos(), rad.sin()};
-    rayDir = rayDir.as_normalized();
-    if (std::abs(rayDir.X) < epsilon && std::abs(rayDir.Y) < epsilon) {
-        return retValue; // Invalid ray direction
-    }
-
-    usize const n {polygon.size()};
-    for (usize i {0}; i < n; ++i) {
-        if (auto distance {rayIntersectsSegment(rayOrigin, rayDir, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
-            retValue.emplace_back(rayOrigin + rayDir * *distance);
-        }
-    }
-
-    return retValue;
-}
-
-auto lighting_system::is_point_in_polygon(point_f p, std::span<point_f const> points) const -> bool
+auto lighting_system::is_point_in_polygon(point_f p, polygon_span points) const -> bool
 {
     f32 minX {points[0].X};
     f32 maxX {points[0].X};

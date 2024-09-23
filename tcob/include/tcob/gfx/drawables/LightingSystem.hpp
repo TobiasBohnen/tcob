@@ -112,8 +112,7 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    auto ray_intersects_polygon(point_d rayOrigin, degree_d rayDirection, std::span<point_f const> polygon) const -> std::vector<point_f>;
-    auto is_point_in_polygon(point_f p, std::span<point_f const> points) const -> bool;
+    auto is_point_in_polygon(point_f p, polygon_span points) const -> bool;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};

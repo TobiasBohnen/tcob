@@ -75,6 +75,7 @@
 #include <tcob/gfx/ImageFilters.hpp>
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/QuadTween.hpp>
+#include <tcob/gfx/Ray.hpp>
 #include <tcob/gfx/RenderSystem.hpp>
 #include <tcob/gfx/RenderSystemImpl.hpp>
 #include <tcob/gfx/RenderTarget.hpp>
