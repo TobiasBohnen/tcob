@@ -136,8 +136,7 @@ namespace func {
 
     inline auto circular::operator()(f64 t) const -> type
     {
-        degree_f const angle {degree_f::Lerp(Start, End, t)};
-        return {angle.cos(), angle.sin()};
+        return point_f::FromDirection(degree_f::Lerp(StartAngle, EndAngle, t));
     }
 
     ////////////////////////////////////////////////////////////

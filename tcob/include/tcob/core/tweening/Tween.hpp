@@ -192,8 +192,8 @@ namespace func {
     public:
         using type = point_f;
 
-        degree_f Start {};
-        degree_f End {};
+        degree_f StartAngle {};
+        degree_f EndAngle {};
 
         auto operator()(f64 t) const -> type;
     };
