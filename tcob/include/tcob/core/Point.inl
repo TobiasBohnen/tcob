@@ -88,6 +88,13 @@ auto constexpr point<T>::Lerp(point<T> const& left, point<T> const& right, f64 s
 }
 
 template <Arithmetic T>
+auto constexpr point<T>::FromDirection(degree<float_type> angle) -> point<T>
+{
+    radian<float_type> const rad {angle - degree<float_type> {90}};
+    return point<T> {point_d {rad.cos(), rad.sin()}.as_normalized()};
+}
+
+template <Arithmetic T>
 auto constexpr point<T>::equals(point<T> const& other, T tol) const -> bool
 {
     T const dx {other.X - X};
