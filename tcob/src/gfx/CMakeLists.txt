@@ -85,6 +85,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.inl
     ${TCOB_INC_DIR}/tcob/gfx/Ray.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Ray.inl
     ${TCOB_INC_DIR}/tcob/gfx/Renderer.hpp
     ${TCOB_INC_DIR}/tcob/gfx/RenderSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/RenderSystemImpl.hpp
