@@ -26,20 +26,21 @@ auto ray::intersect_line(point_f a, point_f b) const -> std::optional<point_f>
     return std::nullopt;
 }
 
-auto ray::intersect_rect(rect_f const& rect) const -> std::vector<point_f>
+auto ray::intersect_rect(rect_f const& rect, transform const& xform) const -> std::vector<point_f>
 {
+    auto const r {get_direction()};
+    if (!r) { return {}; }
+
+    point_d const topLeft {xform * rect.top_left()};
+    point_d const topRight {xform * rect.top_right()};
+    point_d const bottomLeft {xform * rect.bottom_left()};
+    point_d const bottomRight {xform * rect.bottom_right()};
+
     std::vector<point_f> retValue;
-
-    point_f const topLeft {rect.top_left()};
-    point_f const topRight {rect.top_right()};
-    point_f const bottomLeft {rect.bottom_left()};
-    point_f const bottomRight {rect.bottom_right()};
-
-    if (auto intersection {intersect_line(topLeft, topRight)}) { retValue.push_back(*intersection); }
-    if (auto intersection {intersect_line(topRight, bottomRight)}) { retValue.push_back(*intersection); }
-    if (auto intersection {intersect_line(bottomRight, bottomLeft)}) { retValue.push_back(*intersection); }
-    if (auto intersection {intersect_line(bottomLeft, topLeft)}) { retValue.push_back(*intersection); }
-
+    if (auto distance {intersect_segment(*r, topLeft, topRight)}) { retValue.emplace_back(Origin + *r * *distance); }
+    if (auto distance {intersect_segment(*r, topRight, bottomRight)}) { retValue.emplace_back(Origin + *r * *distance); }
+    if (auto distance {intersect_segment(*r, bottomRight, bottomLeft)}) { retValue.emplace_back(Origin + *r * *distance); }
+    if (auto distance {intersect_segment(*r, bottomLeft, topLeft)}) { retValue.emplace_back(Origin + *r * *distance); }
     return retValue;
 }
 
@@ -59,8 +60,8 @@ auto ray::intersect_circle(point_f const& center, f32 radius) -> std::vector<poi
     f64 const s2 {(-b + sqrtDiscr) / 2};
 
     std::vector<point_f> retValue;
-    if (s1 >= 0) { retValue.push_back(Origin + *r * s1); }
-    if (s2 >= 0 && s2 != s1) { retValue.push_back(Origin + *r * s2); }
+    if (s1 >= 0) { retValue.emplace_back(Origin + *r * s1); }
+    if (s2 >= 0 && s2 != s1) { retValue.emplace_back(Origin + *r * s2); }
     return retValue;
 }
 

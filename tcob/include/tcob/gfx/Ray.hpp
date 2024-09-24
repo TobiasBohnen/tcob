@@ -11,6 +11,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 
 namespace tcob::gfx {
 
@@ -22,7 +23,7 @@ public:
     degree_d Direction;
 
     auto intersect_line(point_f a, point_f b) const -> std::optional<point_f>;
-    auto intersect_rect(rect_f const& rect) const -> std::vector<point_f>;
+    auto intersect_rect(rect_f const& rect, transform const& xform = transform::Identity) const -> std::vector<point_f>;
     auto intersect_circle(point_f const& center, f32 radius) -> std::vector<point_f>;
 
     auto intersect_polygon(auto&& polygon) const -> std::vector<point_f>;
