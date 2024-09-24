@@ -619,9 +619,7 @@ void canvas::stroke_line(point_f from, point_f to)
 
 void canvas::stroke_lines(std::span<point_f const> points)
 {
-    if (points.size() == 1) {
-        return;
-    }
+    if (points.size() == 1) { return; }
 
     begin_path();
 
@@ -637,7 +635,7 @@ void canvas::stroke_dashed_cubic_bezier(point_f start, point_f cp0, point_f cp1,
 {
     begin_path();
 
-    func::cubic_bezier_curve func {start, cp0, cp1, end};
+    func::cubic_bezier_curve func {.Begin = start, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .End = end};
     f32 const                inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
@@ -652,7 +650,7 @@ void canvas::stroke_dashed_quad_bezier(point_f start, point_f cp, point_f end, i
 {
     begin_path();
 
-    func::quad_bezier_curve func {start, cp, end};
+    func::quad_bezier_curve func {.Begin = start, .ControlPoint = cp, .End = end};
     f32 const               inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
@@ -667,7 +665,7 @@ void canvas::stroke_dashed_line(point_f from, point_f to, i32 numDashes)
 {
     begin_path();
 
-    func::linear<point_f> func {from, to};
+    func::linear<point_f> func {.StartValue = from, .EndValue = to};
     f32 const             inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
@@ -682,7 +680,7 @@ void canvas::stroke_dashed_circle(point_f center, f32 r, i32 numDashes)
 {
     begin_path();
 
-    func::circular func {degree_f {0}, degree_f {360}};
+    func::circular func {.StartAngle = degree_f {0}, .EndAngle = degree_f {360}};
     f32 const      inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
@@ -695,7 +693,7 @@ void canvas::stroke_dashed_circle(point_f center, f32 r, i32 numDashes)
 
 void canvas::dotted_cubic_bezier(point_f begin, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
 {
-    func::cubic_bezier_curve func {begin, cp0, cp1, end};
+    func::cubic_bezier_curve func {.Begin = begin, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .End = end};
     f32 const                inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -725,7 +723,7 @@ void canvas::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
 
 void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
 {
-    func::circular func {.Start = degree_f {0}, .End = degree_f {360}};
+    func::circular func {.StartAngle = degree_f {0}, .EndAngle = degree_f {360}};
     f32 const      inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
