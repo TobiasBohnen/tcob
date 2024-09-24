@@ -85,7 +85,7 @@ class TCOB_API lighting_system final : public drawable {
 public:
     ////////////////////////////////////////////////////////////
 
-    lighting_system();
+    explicit lighting_system(bool multiThreaded = false);
     ~lighting_system() override = default;
 
     prop<rect_f> Bounds;
@@ -125,6 +125,9 @@ private:
     std::vector<u32>    _inds;
 
     assets::manual_asset_ptr<material> _material;
+
+    std::mutex _mutex {};
+    bool       _multiThreaded;
 };
 
 }
