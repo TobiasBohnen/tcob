@@ -10,47 +10,42 @@ namespace tcob::gfx {
 f32 constexpr epsilon {std::numeric_limits<f32>::epsilon()};
 
 ray::ray(point_f origin, degree_d direction)
-    : Origin {origin}
-    , Direction {direction}
+    : _origin {origin}
+    , _direction {point_d::FromDirection(direction)}
 {
 }
 
 auto ray::intersect_line(point_f a, point_f b) const -> std::optional<point_f>
 {
-    auto const r {get_direction()};
-    if (!r) { return std::nullopt; }
-
-    if (auto distance {intersect_segment(*r, point_d {a}, point_d {b})}) {
-        return point_f {Origin + *r * *distance};
+    if (auto distance {intersect_segment(_direction, point_d {a}, point_d {b})}) {
+        return point_f {_origin + _direction * *distance};
     }
     return std::nullopt;
 }
 
+auto ray::intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<point_f>
+{
+    std::vector<point_f> retValue;
+    if (auto distance {intersect_segment(_direction, point_d {topLeft}, point_d {topRight})}) { retValue.emplace_back(_origin + _direction * *distance); }
+    if (auto distance {intersect_segment(_direction, point_d {topRight}, point_d {bottomRight})}) { retValue.emplace_back(_origin + _direction * *distance); }
+    if (auto distance {intersect_segment(_direction, point_d {bottomRight}, point_d {bottomLeft})}) { retValue.emplace_back(_origin + _direction * *distance); }
+    if (auto distance {intersect_segment(_direction, point_d {bottomLeft}, point_d {topLeft})}) { retValue.emplace_back(_origin + _direction * *distance); }
+    return retValue;
+}
+
 auto ray::intersect_rect(rect_f const& rect, transform const& xform) const -> std::vector<point_f>
 {
-    auto const r {get_direction()};
-    if (!r) { return {}; }
-
-    point_d const topLeft {xform * rect.top_left()};
-    point_d const topRight {xform * rect.top_right()};
-    point_d const bottomLeft {xform * rect.bottom_left()};
-    point_d const bottomRight {xform * rect.bottom_right()};
-
-    std::vector<point_f> retValue;
-    if (auto distance {intersect_segment(*r, topLeft, topRight)}) { retValue.emplace_back(Origin + *r * *distance); }
-    if (auto distance {intersect_segment(*r, topRight, bottomRight)}) { retValue.emplace_back(Origin + *r * *distance); }
-    if (auto distance {intersect_segment(*r, bottomRight, bottomLeft)}) { retValue.emplace_back(Origin + *r * *distance); }
-    if (auto distance {intersect_segment(*r, bottomLeft, topLeft)}) { retValue.emplace_back(Origin + *r * *distance); }
-    return retValue;
+    point_f const topLeft {xform * rect.top_left()};
+    point_f const topRight {xform * rect.top_right()};
+    point_f const bottomLeft {xform * rect.bottom_left()};
+    point_f const bottomRight {xform * rect.bottom_right()};
+    return intersect_rect(topLeft, topRight, bottomLeft, bottomRight);
 }
 
 auto ray::intersect_circle(point_f const& center, f32 radius) -> std::vector<point_f>
 {
-    auto const r {get_direction()};
-    if (!r) { return {}; }
-
-    f64 const b {2.0 * ((Origin.X - center.X) * r->X + (Origin.Y - center.Y) * r->Y)};
-    f64 const c {((Origin.X - center.X) * (Origin.X - center.X)) + ((Origin.Y - center.Y) * (Origin.Y - center.Y)) - (radius * radius)};
+    f64 const b {2.0 * ((_origin.X - center.X) * _direction.X + (_origin.Y - center.Y) * _direction.Y)};
+    f64 const c {((_origin.X - center.X) * (_origin.X - center.X)) + ((_origin.Y - center.Y) * (_origin.Y - center.Y)) - (radius * radius)};
 
     f64 const discr {(b * b) - (4 * c)};
     if (discr < 0) { return {}; }
@@ -60,14 +55,37 @@ auto ray::intersect_circle(point_f const& center, f32 radius) -> std::vector<poi
     f64 const s2 {(-b + sqrtDiscr) / 2};
 
     std::vector<point_f> retValue;
-    if (s1 >= 0) { retValue.emplace_back(Origin + *r * s1); }
-    if (s2 >= 0 && s2 != s1) { retValue.emplace_back(Origin + *r * s2); }
+    if (s1 >= 0) { retValue.emplace_back(_origin + _direction * s1); }
+    if (s2 >= 0 && s2 != s1) { retValue.emplace_back(_origin + _direction * s2); }
     return retValue;
+}
+
+auto ray::intersect_function(func const& func, f64 tolerance) const -> std::vector<point_f>
+{
+    std::vector<point_f> retValue;
+
+    point_f lastPoint {func(0)};
+    for (f64 t {0}; t <= 1; t += tolerance) {
+        point_f const cp {func(t)};
+        if (auto distance {intersect_segment(_direction, point_d {lastPoint}, point_d {cp})}) {
+            auto const p {_origin + _direction * *distance};
+            if (!retValue.empty() && retValue.back() == p) { continue; }
+            retValue.push_back(p);
+        }
+        lastPoint = cp;
+    }
+
+    return retValue;
+}
+
+auto ray::get_point(f32 distance) -> point_f
+{
+    return _origin + (_direction * distance);
 }
 
 auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>
 {
-    point_d const ro {Origin};
+    point_d const ro {_origin};
     point_d const seg {p1 - p0};
     point_d const segPerp {seg.Y, -seg.X};
 
@@ -82,13 +100,4 @@ auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const&
     return std::nullopt;
 }
 
-auto ray::get_direction() const -> std::optional<point_d>
-{
-    auto const r {point_d::FromDirection(Direction)};
-    if (std::abs(r.X) < epsilon && std::abs(r.Y) < epsilon) {
-        return std::nullopt; // Invalid ray direction
-    }
-
-    return r;
-}
 }
