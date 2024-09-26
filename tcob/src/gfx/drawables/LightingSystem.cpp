@@ -183,20 +183,19 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
                         for (auto const& cp : casterPoints) {
                             ray const  ray {lightPosition, degree_d {angle}};
                             auto const result {ray.intersect_polygon(cp.Points)};
-                            for (auto const& p : result) {
-                                f64 const dist {lightPosition.distance_to(p)};
-                                if (p == lightPosition) { continue; }
-                                if (dist >= nearestPoint.Distance) { continue; }
+                            for (auto const& [point, distance] : result) {
+                                if (point == lightPosition) { continue; }
+                                if (distance >= nearestPoint.Distance) { continue; }
 
-                                if (limitRange && dist > lightRange) {
+                                if (limitRange && distance > lightRange) {
                                     // move out-of-range points into range
-                                    point_d const direction {(p - lightPosition).as_normalized()};
+                                    point_d const direction {(point - lightPosition).as_normalized()};
                                     nearestPoint.Point    = lightPosition + direction * lightRange;
                                     nearestPoint.Distance = lightRange;
                                     nearestPoint.Caster   = nullptr;
                                 } else {
-                                    nearestPoint.Point    = p;
-                                    nearestPoint.Distance = dist;
+                                    nearestPoint.Point    = point;
+                                    nearestPoint.Distance = distance;
                                     nearestPoint.Caster   = cp.Caster;
                                 }
 

@@ -431,10 +431,10 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
         // Look for available weights between the target and 500, in ascending order.
         retValue.Weight = font::weight::Medium;
         if (has_style(retValue)) { return retValue; }
-        retValue.Weight = font::weight::Normal;
-        if (has_style(retValue)) { return retValue; }
 
         // If no match is found, look for available weights less than the target, in descending order.
+        retValue.Weight = font::weight::Normal;
+        if (has_style(retValue)) { return retValue; }
         if (descendWhile()) { return retValue; }
         // If no match is found, look for available weights greater than 500, in ascending order.
         retValue.Weight = font::weight::Medium;
