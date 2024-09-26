@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -15,6 +16,7 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/Ray.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/Transformable.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
@@ -35,11 +37,14 @@ public:
 
     prop<std::optional<point_f>> Pivot;
 
+    u32 RayCastMask {0xFFFFFFFF};
+
     void show();
     void hide();
     auto is_visible() const -> bool;
 
-    auto virtual get_geometry() -> geometry_data = 0;
+    auto virtual get_geometry() -> geometry_data                       = 0;
+    auto virtual intersect(ray const& ray) -> std::vector<ray::result> = 0;
 
 protected:
     auto virtual get_center() const -> point_f = 0;
@@ -70,6 +75,7 @@ public:
     prop<i32>     Segments;
 
     auto get_geometry() -> geometry_data override;
+    auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -93,6 +99,7 @@ public:
     prop<point_f> TextureScroll;
 
     auto get_geometry() -> geometry_data override;
+    auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
     auto get_AABB() const -> rect_f;
 
@@ -122,6 +129,7 @@ public:
     prop<std::vector<polygon>> Holes;
 
     auto get_geometry() -> geometry_data override;
+    auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
     void move_by(point_f offset);
 
@@ -147,7 +155,7 @@ private:
 
 class TCOB_API static_shape_batch final : public drawable {
 public:
-    explicit static_shape_batch(std::span<std::shared_ptr<shape>> shapees);
+    explicit static_shape_batch(std::span<std::shared_ptr<shape>> shapes);
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -178,6 +186,8 @@ public:
     auto is_empty() const -> bool;
 
     auto get_shape_at(usize index) const -> std::shared_ptr<shape>;
+
+    auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) -> std::unordered_map<shape*, std::vector<ray::result>>;
 
 protected:
     void on_update(milliseconds deltaTime) override;

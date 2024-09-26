@@ -12,9 +12,9 @@
 
 namespace tcob::gfx {
 
-static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapees)
+static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapes)
 {
-    for (auto& shape : shapees) {
+    for (auto& shape : shapes) {
         shape->update(milliseconds {0});
         if (shape->is_visible()) {
             _renderer.add_geometry(shape->get_geometry(), shape->Material());
@@ -46,7 +46,7 @@ shape_batch::shape_batch()
 
 void shape_batch::remove_shape(shape const& shape)
 {
-    _children.erase(std::find_if(_children.begin(), _children.end(), [&shape](auto const& val) {
+    _children.erase(std::ranges::find_if(_children, [&shape](auto const& val) {
         return val.get() == &shape;
     }));
 }
@@ -58,7 +58,7 @@ void shape_batch::clear()
 
 void shape_batch::move_to_front(shape const& shape)
 {
-    auto it {std::find_if(_children.begin(), _children.end(), [&shape](auto const& val) {
+    auto it {std::ranges::find_if(_children, [&shape](auto const& val) {
         return val.get() == &shape;
     })};
     if (it != _children.end()) {
@@ -68,7 +68,7 @@ void shape_batch::move_to_front(shape const& shape)
 
 void shape_batch::send_to_back(shape const& shape)
 {
-    auto it {std::find_if(_children.begin(), _children.end(), [&shape](auto const& val) {
+    auto it {std::ranges::find_if(_children, [&shape](auto const& val) {
         return val.get() == &shape;
     })};
     if (it != _children.end()) {
@@ -89,6 +89,19 @@ auto shape_batch::is_empty() const -> bool
 auto shape_batch::get_shape_at(usize index) const -> std::shared_ptr<shape>
 {
     return _children.at(index);
+}
+
+auto shape_batch::intersect(ray const& ray, u32 mask) -> std::unordered_map<shape*, std::vector<ray::result>>
+{
+    std::unordered_map<shape*, std::vector<ray::result>> retValue;
+    for (auto& child : _children) {
+        if (child->RayCastMask & mask) {
+            auto const points {child->intersect(ray)};
+            if (points.empty()) { continue; }
+            retValue[child.get()] = points;
+        }
+    }
+    return retValue;
 }
 
 void shape_batch::on_update(milliseconds deltaTime)
@@ -203,6 +216,11 @@ auto circle_shape::get_geometry() -> geometry_data
         .Type     = primitive_type::Triangles};
 }
 
+auto circle_shape::intersect(ray const& ray) -> std::vector<ray::result>
+{
+    return ray.intersect_circle(get_transform() * Center(), Radius());
+}
+
 void circle_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
@@ -293,6 +311,11 @@ auto rect_shape::get_geometry() -> geometry_data
         .Type     = primitive_type::Triangles};
 }
 
+auto rect_shape::intersect(ray const& ray) -> std::vector<ray::result>
+{
+    return ray.intersect_rect(Bounds(), get_transform());
+}
+
 auto rect_shape::get_AABB() const -> rect_f
 {
     return _aabb;
@@ -364,6 +387,16 @@ auto poly_shape::get_geometry() -> geometry_data
         .Vertices = _verts,
         .Indices  = _inds,
         .Type     = primitive_type::Triangles};
+}
+
+auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
+{
+    auto retValue {ray.intersect_polygon(Polygon(), get_transform())};
+    for (auto const& hole : Holes()) {
+        auto points {ray.intersect_polygon(hole, get_transform())};
+        retValue.insert(retValue.end(), points.begin(), points.end());
+    }
+    return retValue;
 }
 
 void poly_shape::move_by(point_f offset)
