@@ -21,6 +21,7 @@ public:
     struct result {
         point_f Point {};
         f64     Distance {0};
+        auto    operator==(result const&) const -> bool = default;
     };
     using func = std::function<point_f(f64)>;
 
