@@ -149,11 +149,17 @@ inline auto alignments::Deserialize(alignments& v, auto&& s) -> bool
 ////////////////////////////////////////////////////////////
 
 struct video_config {
+#if defined(TCOB_DEBUG)
+    bool   FullScreen {false};
+    bool   UseDesktopResolution {false};
+    size_i Resolution {1600, 900};
+#else
     bool   FullScreen {true};
     bool   UseDesktopResolution {true};
     size_i Resolution {};
-    i32    FrameLimit {6000};
-    bool   VSync {false};
+#endif
+    i32  FrameLimit {6000};
+    bool VSync {false};
 #if defined(__EMSCRIPTEN__)
     string RenderSystem {"OPENGLES30"};
 #else
