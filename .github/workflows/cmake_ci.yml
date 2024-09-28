@@ -30,12 +30,6 @@ jobs:
             cc:   'clang-18'
             cxx:  'clang++-18'
             install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 18; sudo apt install -y libstdc++-13-dev'
-          - name: 'Clang-19'
-            os:   'ubuntu-24.04'
-            cc:   'clang-19'
-            cxx:  'clang++-19'
-            cxxflags: '-stdlib=libc++ -fexperimental-library'
-            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 19'
         include:
           - variant:    'minimal'
             definition: '-DTCOB_MINIMAL=ON'
