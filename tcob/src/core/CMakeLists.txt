@@ -4,6 +4,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/../tcob_config.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetLibrary.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/input/Input.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/input/InputEnums.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Filter.cpp

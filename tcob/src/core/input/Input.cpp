@@ -7,160 +7,10 @@
 
 #include <cassert>
 
+#include "InputEnums.hpp"
 #include <SDL.h>
 
 namespace tcob::input {
-
-auto static convert_enum(controller::button button) -> SDL_GameControllerButton
-{
-    switch (button) {
-    case controller::button::Invalid:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_INVALID;
-    case controller::button::A:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_A;
-    case controller::button::B:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_B;
-    case controller::button::X:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X;
-    case controller::button::Y:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_Y;
-    case controller::button::Back:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_BACK;
-    case controller::button::Guide:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_GUIDE;
-    case controller::button::Start:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_START;
-    case controller::button::LeftStick:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSTICK;
-    case controller::button::RightStick:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-    case controller::button::LeftShoulder:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-    case controller::button::RightShoulder:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-    case controller::button::DPadUp:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_UP;
-    case controller::button::DPadDown:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-    case controller::button::DPadLeft:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-    case controller::button::DPadRight:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
-    case controller::button::Misc1:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_MISC1;
-    case controller::button::Paddle1:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE1;
-    case controller::button::Paddle2:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE2;
-    case controller::button::Paddle3:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE3;
-    case controller::button::Paddle4:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE4;
-    case controller::button::Touchpad:
-        return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_TOUCHPAD;
-    }
-
-    return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_INVALID;
-}
-
-auto static convert_enum(SDL_GameControllerButton button) -> controller::button
-{
-    switch (button) {
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_INVALID:
-        return controller::button::Invalid;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_A:
-        return controller::button::A;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_B:
-        return controller::button::B;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X:
-        return controller::button::X;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_Y:
-        return controller::button::Y;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_BACK:
-        return controller::button::Back;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_GUIDE:
-        return controller::button::Guide;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_START:
-        return controller::button::Start;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSTICK:
-        return controller::button::LeftStick;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSTICK:
-        return controller::button::RightStick;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-        return controller::button::LeftShoulder;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-        return controller::button::RightShoulder;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_UP:
-        return controller::button::DPadUp;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-        return controller::button::DPadDown;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-        return controller::button::DPadLeft;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-        return controller::button::DPadRight;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_MISC1:
-        return controller::button::Misc1;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE1:
-        return controller::button::Paddle1;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE2:
-        return controller::button::Paddle2;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE3:
-        return controller::button::Paddle3;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE4:
-        return controller::button::Paddle4;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_TOUCHPAD:
-        return controller::button::Touchpad;
-    case SDL_CONTROLLER_BUTTON_MAX: break;
-    }
-
-    return controller::button::Invalid;
-}
-
-auto static convert_enum(controller::axis axis) -> SDL_GameControllerAxis
-{
-    switch (axis) {
-    case controller::axis::Invalid:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_INVALID;
-    case controller::axis::LeftX:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX;
-    case controller::axis::LeftY:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY;
-    case controller::axis::RightX:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTX;
-    case controller::axis::RightY:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTY;
-    case controller::axis::TriggerLeft:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERLEFT;
-    case controller::axis::TriggerRight:
-        return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
-    }
-
-    return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_INVALID;
-}
-
-auto static convert_enum(SDL_GameControllerAxis axis) -> controller::axis
-{
-    switch (axis) {
-    case SDL_CONTROLLER_AXIS_INVALID:
-        return controller::axis::Invalid;
-    case SDL_CONTROLLER_AXIS_LEFTX:
-        return controller::axis::LeftX;
-    case SDL_CONTROLLER_AXIS_LEFTY:
-        return controller::axis::LeftY;
-    case SDL_CONTROLLER_AXIS_RIGHTX:
-        return controller::axis::RightX;
-    case SDL_CONTROLLER_AXIS_RIGHTY:
-        return controller::axis::RightY;
-    case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-        return controller::axis::TriggerLeft;
-    case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-        return controller::axis::TriggerRight;
-    case SDL_CONTROLLER_AXIS_MAX:
-        return controller::axis::Invalid;
-    }
-
-    return controller::axis::Invalid;
-}
 
 controller::controller(SDL_GameController* controller, i32 id)
     : _controller {controller}
@@ -243,12 +93,12 @@ auto controller::get_axis_name(controller::axis axis) const -> string
 
 auto keyboard::get_scancode(key_code key) const -> scan_code
 {
-    return static_cast<scan_code>(SDL_GetScancodeFromKey(static_cast<SDL_Keycode>(key))); // TODO: add switch here
+    return convert_enum(SDL_GetScancodeFromKey(convert_enum(key)));
 }
 
 auto keyboard::get_keycode(scan_code key) const -> key_code
 {
-    return static_cast<key_code>(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(key))); // TODO: add switch here
+    return convert_enum(SDL_GetKeyFromScancode(convert_enum(key)));
 }
 
 auto keyboard::is_key_down(scan_code key) const -> bool
@@ -348,10 +198,9 @@ void system::process_events(SDL_Event* ev)
         keyboard::event event {
             .Pressed  = ev->key.state == SDL_PRESSED,
             .Repeat   = ev->key.repeat != 0,
-            .ScanCode = static_cast<scan_code>(ev->key.keysym.scancode), // TODO: add switch here
-            .KeyCode  = static_cast<key_code>(ev->key.keysym.sym),       // TODO: add switch here
-            .KeyMods  = static_cast<key_mod>(ev->key.keysym.mod)         // TODO: add switch here
-        };
+            .ScanCode = convert_enum(ev->key.keysym.scancode),
+            .KeyCode  = convert_enum(ev->key.keysym.sym),
+            .KeyMods  = convert_enum(static_cast<SDL_Keymod>(ev->key.keysym.mod))};
         KeyDown(event);
         CurrentInputMode = mode::KeyboardMouse;
     } break;
@@ -359,10 +208,9 @@ void system::process_events(SDL_Event* ev)
         keyboard::event event {
             .Pressed  = ev->key.state == SDL_PRESSED,
             .Repeat   = ev->key.repeat != 0,
-            .ScanCode = static_cast<scan_code>(ev->key.keysym.scancode), // TODO: add switch here
-            .KeyCode  = static_cast<key_code>(ev->key.keysym.sym),       // TODO: add switch here
-            .KeyMods  = static_cast<key_mod>(ev->key.keysym.mod)         // TODO: add switch here
-        };
+            .ScanCode = convert_enum(ev->key.keysym.scancode),
+            .KeyCode  = convert_enum(ev->key.keysym.sym),
+            .KeyMods  = convert_enum(static_cast<SDL_Keymod>(ev->key.keysym.mod))};
         KeyUp(event);
         CurrentInputMode = mode::KeyboardMouse;
     } break;
@@ -387,7 +235,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_MOUSEBUTTONDOWN: {
         mouse::button_event event {
-            .Button   = static_cast<mouse::button>(ev->button.button), // TODO: add switch here
+            .Button   = convert_mouse_button(ev->button.button),
             .Pressed  = ev->button.state == SDL_PRESSED,
             .Clicks   = ev->button.clicks,
             .Position = {ev->button.x, ev->button.y}};
@@ -396,7 +244,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_MOUSEBUTTONUP: {
         mouse::button_event event {
-            .Button   = static_cast<mouse::button>(ev->button.button), // TODO: add switch here
+            .Button   = convert_mouse_button(ev->button.button),
             .Pressed  = ev->button.state == SDL_PRESSED,
             .Clicks   = ev->button.clicks,
             .Position = {ev->button.x, ev->button.y}};
@@ -422,7 +270,7 @@ void system::process_events(SDL_Event* ev)
     case SDL_JOYHATMOTION: {
         joystick::hat_event event {
             .ID    = ev->jhat.which,
-            .Hat   = static_cast<joystick::hat>(ev->jhat.hat), // TODO: add switch here
+            .Hat   = convert_joystick_hat(ev->jhat.hat),
             .Value = ev->jhat.value};
         JoystickHatMotion(event);
         CurrentInputMode = mode::Controller;
@@ -494,23 +342,24 @@ void system::process_events(SDL_Event* ev)
 auto system::IsKeyDown(scan_code key) -> bool
 {
     auto const* state {SDL_GetKeyboardState(nullptr)};
-    return state[static_cast<SDL_Scancode>(key)] != 0; // TODO: add switch here
+    return state[convert_enum(key)] != 0;
 }
 
 auto system::IsKeyDown(key_code key) -> bool
 {
-    return IsKeyDown(static_cast<scan_code>(SDL_GetScancodeFromKey(static_cast<SDL_Keycode>(key))));
+    auto const* state {SDL_GetKeyboardState(nullptr)};
+    return state[SDL_GetScancodeFromKey(convert_enum(key))] != 0;
 }
 
 auto system::IsKeyModDown(key_mod mod) -> bool
 {
     auto state {SDL_GetModState()};
-    return state & static_cast<SDL_Keymod>(mod); // TODO: add switch here
+    return state & convert_enum(mod);
 }
 
 auto system::IsMouseButtonDown(mouse::button button) -> bool
 {
-    return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(static_cast<i32>(button)); // TODO: add switch here
+    return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(convert_enum(button));
 }
 
 void system::SetMousePosition(point_i pos)

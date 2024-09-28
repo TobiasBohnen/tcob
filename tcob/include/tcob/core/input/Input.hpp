@@ -32,7 +32,7 @@ enum class mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
-enum class key_mod {
+enum class key_mod : u16 {
     None         = 0x0000,
     LeftShift    = 0x0001,
     RightShift   = 0x0002,
@@ -45,6 +45,7 @@ enum class key_mod {
     NumLock      = 0x1000,
     CapsLock     = 0x2000,
     Mode         = 0x4000,
+    Scroll       = 0x8000,
     Control      = LeftControl | RightControl,
     Shift        = LeftShift | RightShift,
     Alt          = LeftAlt | RightAlt,
@@ -130,7 +131,7 @@ class TCOB_API controller final {
     friend class system;
 
 public:
-    enum class button {
+    enum class button : i8 {
         Invalid = -1,
         A,
         B,
@@ -155,7 +156,7 @@ public:
         Touchpad
     };
 
-    enum class axis {
+    enum class axis : i8 {
         Invalid = -1,
         LeftX,
         LeftY,
