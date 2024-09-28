@@ -181,7 +181,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
                         nearestPoint.Source   = ls.get();
 
                         for (auto const& cp : casterPoints) {
-                            ray const  ray {lightPosition, degree_d {angle}};
+                            ray const  ray {{.Origin = lightPosition, .Direction = degree_d {angle}}};
                             auto const result {ray.intersect_polygon(cp.Points)};
                             for (auto const& [point, distance] : result) {
                                 if (point == lightPosition) { continue; }

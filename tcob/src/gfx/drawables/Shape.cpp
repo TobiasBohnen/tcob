@@ -224,10 +224,10 @@ auto circle_shape::intersect(ray const& ray) -> std::vector<ray::result>
 void circle_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
+    mark_clean();
 
     _verts.clear();
     _inds.clear();
-    mark_clean();
 
     if (Segments < 3 || Radius < 1) { return; }
 
@@ -411,6 +411,7 @@ void poly_shape::move_by(point_f offset)
 void poly_shape::on_update(milliseconds /* deltaTime */)
 {
     if (!is_dirty()) { return; }
+    mark_clean();
 
     auto        points {Polygon()};
     usize const n {points.size()};
@@ -420,7 +421,6 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
 
     _verts.clear();
     _inds.clear();
-    mark_clean();
 
     auto const& xform {get_transform()};
 

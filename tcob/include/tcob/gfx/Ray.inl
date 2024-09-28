@@ -15,7 +15,7 @@ inline auto ray::intersect_polygon(auto&& polygon) const -> std::vector<result>
     usize const n {polygon.size()};
     for (usize i {0}; i < n; ++i) {
         if (auto distance {intersect_segment(_direction, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
-            retValue.emplace_back(_origin + _direction * *distance, *distance);
+            retValue.emplace_back(get_result(*distance));
         }
     }
 

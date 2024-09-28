@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <limits>
 #include <optional>
 #include <vector>
 
@@ -21,17 +22,23 @@ public:
     struct result {
         point_f Point {};
         f64     Distance {0};
-        auto    operator==(result const&) const -> bool = default;
+
+        auto operator==(result const&) const -> bool = default;
+    };
+    struct init {
+        point_f  Origin {};
+        degree_d Direction {0};
+        f64      MaxDistance {std::numeric_limits<f64>::max()};
+
+        auto operator==(init const&) const -> bool = default;
     };
     using func = std::function<point_f(f64)>;
 
-    ray(point_f origin, degree_d direction);
+    ray(init init);
 
-    auto get_origin() const -> point_f;
-    auto get_direction() const -> degree_d;
     auto get_direction_vector() const -> point_d;
 
-    auto get_point(f32 distance) -> point_f;
+    auto get_point(f64 distance) const -> point_f;
 
     auto intersect_line(point_f a, point_f b) const -> std::optional<result>;
     auto intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<result>;
@@ -45,9 +52,10 @@ public:
 private:
     auto intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>;
 
-    point_f  _origin;
-    degree_d _angle;
-    point_d  _direction;
+    auto get_result(f64 distance) const -> result;
+
+    init    _init;
+    point_d _direction;
 };
 
 }
