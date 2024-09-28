@@ -16,6 +16,12 @@ namespace tcob {
 
 ////////////////////////////////////////////////////////////
 
+struct event_base {
+    mutable bool Handled {false};
+};
+
+////////////////////////////////////////////////////////////
+
 namespace detail {
     class TCOB_API signal_base : public non_copyable {
     public:

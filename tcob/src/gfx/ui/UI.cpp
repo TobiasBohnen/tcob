@@ -68,22 +68,22 @@ thickness::thickness(length all)
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-    void input_injector::on_key_down(widget* widget, input::keyboard::event& ev) const
+    void input_injector::on_key_down(widget* widget, input::keyboard::event const& ev) const
     {
         if (check(widget)) { widget->do_key_down(ev); }
     }
 
-    void input_injector::on_key_up(widget* widget, input::keyboard::event& ev) const
+    void input_injector::on_key_up(widget* widget, input::keyboard::event const& ev) const
     {
         if (check(widget)) { widget->do_key_up(ev); }
     }
 
-    void input_injector::on_text_input(widget* widget, input::keyboard::text_input_event& ev) const
+    void input_injector::on_text_input(widget* widget, input::keyboard::text_input_event const& ev) const
     {
         if (check(widget)) { widget->do_text_input(ev); }
     }
 
-    void input_injector::on_text_editing(widget* widget, input::keyboard::text_editing_event& ev) const
+    void input_injector::on_text_editing(widget* widget, input::keyboard::text_editing_event const& ev) const
     {
         if (check(widget)) { widget->do_text_editing(ev); }
     }
@@ -98,37 +98,37 @@ namespace detail {
         if (check(widget)) { widget->do_mouse_leave(); }
     }
 
-    void input_injector::on_mouse_down(widget* widget, input::mouse::button_event& ev) const
+    void input_injector::on_mouse_down(widget* widget, input::mouse::button_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_down(ev); }
     }
 
-    void input_injector::on_mouse_up(widget* widget, input::mouse::button_event& ev) const
+    void input_injector::on_mouse_up(widget* widget, input::mouse::button_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_up(ev); }
     }
 
-    void input_injector::on_mouse_hover(widget* widget, input::mouse::motion_event& ev) const
+    void input_injector::on_mouse_hover(widget* widget, input::mouse::motion_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_hover(ev); }
     }
 
-    void input_injector::on_mouse_drag(widget* widget, input::mouse::motion_event& ev) const
+    void input_injector::on_mouse_drag(widget* widget, input::mouse::motion_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_drag(ev); }
     }
 
-    void input_injector::on_mouse_wheel(widget* widget, input::mouse::wheel_event& ev) const
+    void input_injector::on_mouse_wheel(widget* widget, input::mouse::wheel_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_wheel(ev); }
     }
 
-    void input_injector::on_controller_button_down(widget* widget, input::controller::button_event& ev) const
+    void input_injector::on_controller_button_down(widget* widget, input::controller::button_event const& ev) const
     {
         if (check(widget)) { widget->do_controller_button_down(ev); }
     }
 
-    void input_injector::on_controller_button_up(widget* widget, input::controller::button_event& ev) const
+    void input_injector::on_controller_button_up(widget* widget, input::controller::button_event const& ev) const
     {
         if (check(widget)) { widget->do_controller_button_up(ev); }
     }

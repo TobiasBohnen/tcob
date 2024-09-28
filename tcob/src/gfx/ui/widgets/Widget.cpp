@@ -254,7 +254,7 @@ auto widget::get_name() const -> string const&
     return _name;
 }
 
-void widget::do_key_down(input::keyboard::event& ev)
+void widget::do_key_down(input::keyboard::event const& ev)
 {
     on_key_down(ev);
 
@@ -279,7 +279,7 @@ void widget::do_key_down(input::keyboard::event& ev)
     KeyDown({this, ev});
 }
 
-void widget::do_key_up(input::keyboard::event& ev)
+void widget::do_key_up(input::keyboard::event const& ev)
 {
     on_key_up(ev);
 
@@ -292,12 +292,12 @@ void widget::do_key_up(input::keyboard::event& ev)
     KeyUp({this, ev});
 }
 
-void widget::do_text_input(input::keyboard::text_input_event& ev)
+void widget::do_text_input(input::keyboard::text_input_event const& ev)
 {
     on_text_input(ev);
 }
 
-void widget::do_text_editing(input::keyboard::text_editing_event& ev)
+void widget::do_text_editing(input::keyboard::text_editing_event const& ev)
 {
     on_text_editing(ev);
 }
@@ -336,7 +336,7 @@ void widget::do_mouse_leave()
     MouseLeave({this});
 }
 
-void widget::do_mouse_hover(input::mouse::motion_event& ev)
+void widget::do_mouse_hover(input::mouse::motion_event const& ev)
 {
     on_mouse_hover(ev);
 
@@ -345,7 +345,7 @@ void widget::do_mouse_hover(input::mouse::motion_event& ev)
                 .Event            = ev});
 }
 
-void widget::do_mouse_drag(input::mouse::motion_event& ev)
+void widget::do_mouse_drag(input::mouse::motion_event const& ev)
 {
     on_mouse_drag(ev);
 
@@ -354,7 +354,7 @@ void widget::do_mouse_drag(input::mouse::motion_event& ev)
                .Event            = ev});
 }
 
-void widget::do_mouse_down(input::mouse::button_event& ev)
+void widget::do_mouse_down(input::mouse::button_event const& ev)
 {
     on_mouse_down(ev);
 
@@ -368,7 +368,7 @@ void widget::do_mouse_down(input::mouse::button_event& ev)
                .Event            = ev});
 }
 
-void widget::do_mouse_up(input::mouse::button_event& ev)
+void widget::do_mouse_up(input::mouse::button_event const& ev)
 {
     on_mouse_up(ev);
 
@@ -382,14 +382,14 @@ void widget::do_mouse_up(input::mouse::button_event& ev)
              .Event            = ev});
 }
 
-void widget::do_mouse_wheel(input::mouse::wheel_event& ev)
+void widget::do_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     on_mouse_wheel(ev);
 
     MouseWheel({this, ev});
 }
 
-void widget::do_controller_button_down(input::controller::button_event& ev)
+void widget::do_controller_button_down(input::controller::button_event const& ev)
 {
     on_controller_button_down(ev);
 
@@ -416,7 +416,7 @@ void widget::do_controller_button_down(input::controller::button_event& ev)
     ControllerButtonDown({this, ev});
 }
 
-void widget::do_controller_button_up(input::controller::button_event& ev)
+void widget::do_controller_button_up(input::controller::button_event const& ev)
 {
     on_controller_button_up(ev);
 

@@ -74,27 +74,27 @@ protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
-    void on_key_down(input::keyboard::event& ev) override;
-    void on_key_up(input::keyboard::event& ev) override;
+    void on_key_down(input::keyboard::event const& ev) override;
+    void on_key_up(input::keyboard::event const& ev) override;
 
-    void on_text_input(input::keyboard::text_input_event& ev) override;
-    void on_text_editing(input::keyboard::text_editing_event& ev) override;
+    void on_text_input(input::keyboard::text_input_event const& ev) override;
+    void on_text_editing(input::keyboard::text_editing_event const& ev) override;
 
-    void on_mouse_motion(input::mouse::motion_event& ev) override;
-    void on_mouse_button_down(input::mouse::button_event& ev) override;
-    void on_mouse_button_up(input::mouse::button_event& ev) override;
-    void on_mouse_wheel(input::mouse::wheel_event& ev) override;
+    void on_mouse_motion(input::mouse::motion_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
+    void on_mouse_button_up(input::mouse::button_event const& ev) override;
+    void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
 
-    void on_controller_axis_motion(input::controller::axis_event& ev) override;
-    void on_controller_button_down(input::controller::button_event& ev) override;
-    void on_controller_button_up(input::controller::button_event& ev) override;
+    void on_controller_axis_motion(input::controller::axis_event const& ev) override;
+    void on_controller_button_down(input::controller::button_event const& ev) override;
+    void on_controller_button_up(input::controller::button_event const& ev) override;
 
     void virtual on_bounds_changed();
     void on_visiblity_changed() override;
 
 private:
     auto get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>;
-    void find_top_widget(input::mouse::motion_event& ev);
+    void find_top_widget(input::mouse::motion_event const& ev);
 
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;

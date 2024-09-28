@@ -316,7 +316,7 @@ void terminal::on_update(milliseconds deltaTime)
     }
 }
 
-void terminal::on_key_down(input::keyboard::event& ev)
+void terminal::on_key_down(input::keyboard::event const& ev)
 {
     if (_cursorTween) {
         _cursorTween->pause();
@@ -384,7 +384,7 @@ void terminal::on_key_down(input::keyboard::event& ev)
     ev.Handled = true;
 }
 
-void terminal::on_key_up(input::keyboard::event& ev)
+void terminal::on_key_up(input::keyboard::event const& ev)
 {
     if (_cursorTween) {
         _cursorTween->resume();
@@ -392,7 +392,7 @@ void terminal::on_key_up(input::keyboard::event& ev)
     }
 }
 
-void terminal::on_text_input(input::keyboard::text_input_event& ev)
+void terminal::on_text_input(input::keyboard::text_input_event const& ev)
 {
     if (!_echoKeys) {
         return;
@@ -412,7 +412,7 @@ void terminal::on_mouse_leave()
     HoveredCell = {-1, -1};
 }
 
-void terminal::on_mouse_hover(input::mouse::motion_event& ev)
+void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     if (!_useMouse) { return; }
 
@@ -433,7 +433,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event& ev)
     }
 }
 
-void terminal::on_mouse_down(input::mouse::button_event& ev)
+void terminal::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (!_useMouse) { return; }
 

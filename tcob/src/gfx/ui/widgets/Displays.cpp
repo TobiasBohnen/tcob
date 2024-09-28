@@ -332,7 +332,7 @@ void color_picker::on_paint(widget_painter& painter)
     canvas.fill();
 }
 
-void color_picker::on_mouse_down(input::mouse::button_event& ev)
+void color_picker::on_mouse_down(input::mouse::button_event const& ev)
 {
     rect_f const rect {get_global_content_bounds()};
     if (rect.contains(ev.Position)) {

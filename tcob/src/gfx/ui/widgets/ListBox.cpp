@@ -141,7 +141,7 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
     }
 }
 
-void list_box::on_key_down(input::keyboard::event& ev)
+void list_box::on_key_down(input::keyboard::event const& ev)
 {
     using namespace tcob::enum_ops;
 
@@ -176,7 +176,7 @@ void list_box::on_mouse_leave()
     HoveredItemIndex = -1;
 }
 
-void list_box::on_mouse_hover(input::mouse::motion_event& ev)
+void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredItemIndex = -1;
 
@@ -199,7 +199,7 @@ void list_box::on_mouse_hover(input::mouse::motion_event& ev)
     }
 }
 
-void list_box::on_mouse_down(input::mouse::button_event& ev)
+void list_box::on_mouse_down(input::mouse::button_event const& ev)
 {
     vscroll_widget::on_mouse_down(ev);
 

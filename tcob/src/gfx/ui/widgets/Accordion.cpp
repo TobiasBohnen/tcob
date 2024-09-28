@@ -132,7 +132,7 @@ void accordion::on_mouse_leave()
     HoveredSectionIndex = -1;
 }
 
-void accordion::on_mouse_hover(input::mouse::motion_event& ev)
+void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredSectionIndex = -1;
 
@@ -153,7 +153,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event& ev)
     }
 }
 
-void accordion::on_mouse_down(input::mouse::button_event& ev)
+void accordion::on_mouse_down(input::mouse::button_event const& ev)
 {
     widget::on_mouse_down(ev);
 

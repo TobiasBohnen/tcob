@@ -284,30 +284,30 @@ struct widget_event {
 };
 
 struct keyboard_event {
-    widget*                 Sender {nullptr};
-    input::keyboard::event& Event;
+    widget*                       Sender {nullptr};
+    input::keyboard::event const& Event;
 };
 
 struct mouse_button_event {
-    widget*                     Sender {nullptr};
-    point_i                     RelativePosition {point_i::Zero};
-    input::mouse::button_event& Event;
+    widget*                           Sender {nullptr};
+    point_i                           RelativePosition {point_i::Zero};
+    input::mouse::button_event const& Event;
 };
 
 struct mouse_motion_event {
-    widget*                     Sender {nullptr};
-    point_i                     RelativePosition {point_i::Zero};
-    input::mouse::motion_event& Event;
+    widget*                           Sender {nullptr};
+    point_i                           RelativePosition {point_i::Zero};
+    input::mouse::motion_event const& Event;
 };
 
 struct mouse_wheel_event {
-    widget*                    Sender {nullptr};
-    input::mouse::wheel_event& Event;
+    widget*                          Sender {nullptr};
+    input::mouse::wheel_event const& Event;
 };
 
 struct controller_button_event {
-    widget*                          Sender {nullptr};
-    input::controller::button_event& Event;
+    widget*                                Sender {nullptr};
+    input::controller::button_event const& Event;
 };
 
 struct text_event {
@@ -325,22 +325,22 @@ struct tooltip_event {
 namespace detail {
     class TCOB_API input_injector {
     public:
-        void on_key_down(widget* widget, input::keyboard::event& ev) const;
-        void on_key_up(widget* widget, input::keyboard::event& ev) const;
+        void on_key_down(widget* widget, input::keyboard::event const& ev) const;
+        void on_key_up(widget* widget, input::keyboard::event const& ev) const;
 
-        void on_text_input(widget* widget, input::keyboard::text_input_event& ev) const;
-        void on_text_editing(widget* widget, input::keyboard::text_editing_event& ev) const;
+        void on_text_input(widget* widget, input::keyboard::text_input_event const& ev) const;
+        void on_text_editing(widget* widget, input::keyboard::text_editing_event const& ev) const;
 
         void on_mouse_enter(widget* widget) const;
         void on_mouse_leave(widget* widget) const;
-        void on_mouse_down(widget* widget, input::mouse::button_event& ev) const;
-        void on_mouse_up(widget* widget, input::mouse::button_event& ev) const;
-        void on_mouse_hover(widget* widget, input::mouse::motion_event& ev) const;
-        void on_mouse_drag(widget* widget, input::mouse::motion_event& ev) const;
-        void on_mouse_wheel(widget* widget, input::mouse::wheel_event& ev) const;
+        void on_mouse_down(widget* widget, input::mouse::button_event const& ev) const;
+        void on_mouse_up(widget* widget, input::mouse::button_event const& ev) const;
+        void on_mouse_hover(widget* widget, input::mouse::motion_event const& ev) const;
+        void on_mouse_drag(widget* widget, input::mouse::motion_event const& ev) const;
+        void on_mouse_wheel(widget* widget, input::mouse::wheel_event const& ev) const;
 
-        void on_controller_button_down(widget* widget, input::controller::button_event& ev) const;
-        void on_controller_button_up(widget* widget, input::controller::button_event& ev) const;
+        void on_controller_button_down(widget* widget, input::controller::button_event const& ev) const;
+        void on_controller_button_up(widget* widget, input::controller::button_event const& ev) const;
 
         void on_click(widget* widget) const;
         void on_double_click(widget* widget) const;

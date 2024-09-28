@@ -124,7 +124,7 @@ void document::on_transform_changed()
     _isTransformDirty = true;
 }
 
-void document::on_mouse_motion(input::mouse::motion_event& ev)
+void document::on_mouse_motion(input::mouse::motion_event const& ev)
 {
     if (!_lhdoc) { return; }
 
@@ -152,7 +152,7 @@ void document::on_mouse_motion(input::mouse::motion_event& ev)
     }
 }
 
-void document::on_mouse_button_down(input::mouse::button_event& ev)
+void document::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (!_lhdoc) { return; }
 
@@ -170,7 +170,7 @@ void document::on_mouse_button_down(input::mouse::button_event& ev)
     }
 }
 
-void document::on_mouse_button_up(input::mouse::button_event& ev)
+void document::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (!_lhdoc) { return; }
 

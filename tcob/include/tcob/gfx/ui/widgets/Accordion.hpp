@@ -45,8 +45,8 @@ protected:
     void on_paint(widget_painter& painter) override;
 
     void on_mouse_leave() override;
-    void on_mouse_hover(input::mouse::motion_event& ev) override;
-    void on_mouse_down(input::mouse::button_event& ev) override;
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
+    void on_mouse_down(input::mouse::button_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
 

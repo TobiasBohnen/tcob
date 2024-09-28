@@ -72,9 +72,9 @@ protected:
 
     void on_transform_changed() override;
 
-    void on_mouse_motion(input::mouse::motion_event& ev) override;
-    void on_mouse_button_down(input::mouse::button_event& ev) override;
-    void on_mouse_button_up(input::mouse::button_event& ev) override;
+    void on_mouse_motion(input::mouse::motion_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
+    void on_mouse_button_up(input::mouse::button_event const& ev) override;
 
     auto convert_screen_to_world(point_i pos) const -> point_i;
 

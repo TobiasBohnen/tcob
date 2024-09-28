@@ -56,8 +56,7 @@ enum class key_mod : u16 {
 
 class TCOB_API keyboard {
 public:
-    struct event {
-        bool      Handled {false};
+    struct event : event_base {
         bool      Pressed {false};
         bool      Repeat {false};
         scan_code ScanCode {scan_code::UNKNOWN};
@@ -65,13 +64,11 @@ public:
         key_mod   KeyMods {key_mod::None};
     };
 
-    struct text_input_event {
-        bool        Handled {false};
+    struct text_input_event : event_base {
         utf8_string Text {};
     };
 
-    struct text_editing_event {
-        bool        Handled {false};
+    struct text_editing_event : event_base {
         utf8_string Text {};
         i32         Start {0};
         i32         Length {0};
@@ -99,22 +96,19 @@ public:
         X2     = 5
     };
 
-    struct motion_event {
-        bool    Handled {false};
+    struct motion_event : event_base {
         point_i Position {point_i::Zero};
         point_i RelativeMotion {point_i::Zero};
     };
 
-    struct button_event {
-        bool    Handled {false};
+    struct button_event : event_base {
         button  Button {button::None};
         bool    Pressed {false};
         u8      Clicks {0};
         point_i Position {point_i::Zero};
     };
 
-    struct wheel_event {
-        bool    Handled {false};
+    struct wheel_event : event_base {
         point_i Scroll {point_i::Zero};
         point_f Precise {point_f::Zero};
         point_i Position {point_i::Zero};
@@ -166,16 +160,14 @@ public:
         TriggerRight,
     };
 
-    struct button_event {
-        bool                        Handled {false};
+    struct button_event : event_base {
         i32                         ID {0};
         std::shared_ptr<controller> Controller;
         button                      Button {button::Invalid};
         bool                        Pressed {false};
     };
 
-    struct axis_event {
-        bool                        Handled {false};
+    struct axis_event : event_base {
         i32                         ID {0};
         std::shared_ptr<controller> Controller;
         axis                        Axis {axis::Invalid};
@@ -224,25 +216,22 @@ public:
         LeftDown  = Left | Down,
     };
 
-    struct hat_event {
-        bool Handled {false};
-        i32  ID {0};
-        hat  Hat {hat::Centered};
-        u8   Value {0};
+    struct hat_event : event_base {
+        i32 ID {0};
+        hat Hat {hat::Centered};
+        u8  Value {0};
     };
 
-    struct button_event {
-        bool Handled {false};
+    struct button_event : event_base {
         i32  ID {0};
         u8   Button {0};
         bool Pressed {false};
     };
 
-    struct axis_event {
-        bool Handled {false};
-        i32  ID {0};
-        u8   Axis {0};
-        i16  Value {0};
+    struct axis_event : event_base {
+        i32 ID {0};
+        u8  Axis {0};
+        i16 Value {0};
     };
 };
 
@@ -309,17 +298,17 @@ public:
     receiver()          = default;
     virtual ~receiver() = default;
 
-    void virtual on_key_down(keyboard::event& ev)                        = 0;
-    void virtual on_key_up(keyboard::event& ev)                          = 0;
-    void virtual on_text_input(keyboard::text_input_event& ev)           = 0;
-    void virtual on_text_editing(keyboard::text_editing_event& ev)       = 0;
-    void virtual on_mouse_motion(mouse::motion_event& ev)                = 0;
-    void virtual on_mouse_button_down(mouse::button_event& ev)           = 0;
-    void virtual on_mouse_button_up(mouse::button_event& ev)             = 0;
-    void virtual on_mouse_wheel(mouse::wheel_event& ev)                  = 0;
-    void virtual on_controller_axis_motion(controller::axis_event& ev)   = 0;
-    void virtual on_controller_button_down(controller::button_event& ev) = 0;
-    void virtual on_controller_button_up(controller::button_event& ev)   = 0;
+    void virtual on_key_down(keyboard::event const& ev)                        = 0;
+    void virtual on_key_up(keyboard::event const& ev)                          = 0;
+    void virtual on_text_input(keyboard::text_input_event const& ev)           = 0;
+    void virtual on_text_editing(keyboard::text_editing_event const& ev)       = 0;
+    void virtual on_mouse_motion(mouse::motion_event const& ev)                = 0;
+    void virtual on_mouse_button_down(mouse::button_event const& ev)           = 0;
+    void virtual on_mouse_button_up(mouse::button_event const& ev)             = 0;
+    void virtual on_mouse_wheel(mouse::wheel_event const& ev)                  = 0;
+    void virtual on_controller_axis_motion(controller::axis_event const& ev)   = 0;
+    void virtual on_controller_button_down(controller::button_event const& ev) = 0;
+    void virtual on_controller_button_up(controller::button_event const& ev)   = 0;
 };
 
 ////////////////////////////////////////////////////////////

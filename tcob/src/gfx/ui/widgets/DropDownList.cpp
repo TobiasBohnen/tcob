@@ -154,7 +154,7 @@ void drop_down_list::on_mouse_leave()
     }
 }
 
-void drop_down_list::on_mouse_hover(input::mouse::motion_event& ev)
+void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredItemIndex = -1;
     bool const wasMouseOverBox {_mouseOverBox};
@@ -194,7 +194,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event& ev)
     }
 }
 
-void drop_down_list::on_mouse_down(input::mouse::button_event& ev)
+void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
 {
     widget::on_mouse_down(ev);
 
@@ -214,7 +214,7 @@ void drop_down_list::on_mouse_down(input::mouse::button_event& ev)
     }
 }
 
-void drop_down_list::on_mouse_drag(input::mouse::motion_event& ev)
+void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     widget::on_mouse_drag(ev);
 
@@ -224,7 +224,7 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event& ev)
     }
 }
 
-void drop_down_list::on_mouse_up(input::mouse::button_event& ev)
+void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 {
     widget::on_mouse_up(ev);
 
@@ -235,7 +235,7 @@ void drop_down_list::on_mouse_up(input::mouse::button_event& ev)
     }
 }
 
-void drop_down_list::on_mouse_wheel(input::mouse::wheel_event& ev)
+void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
 

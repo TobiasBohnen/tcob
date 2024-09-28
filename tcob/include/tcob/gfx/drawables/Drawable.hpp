@@ -58,17 +58,17 @@ protected:
     void on_update(milliseconds) override { }
     void virtual on_fixed_update(milliseconds) { }
 
-    void on_key_down(input::keyboard::event&) override { }
-    void on_key_up(input::keyboard::event&) override { }
-    void on_text_input(input::keyboard::text_input_event&) override { }
-    void on_text_editing(input::keyboard::text_editing_event&) override { }
-    void on_mouse_motion(input::mouse::motion_event&) override { }
-    void on_mouse_button_down(input::mouse::button_event&) override { }
-    void on_mouse_button_up(input::mouse::button_event&) override { }
-    void on_mouse_wheel(input::mouse::wheel_event&) override { }
-    void on_controller_axis_motion(input::controller::axis_event&) override { }
-    void on_controller_button_down(input::controller::button_event&) override { }
-    void on_controller_button_up(input::controller::button_event&) override { }
+    void on_key_down(input::keyboard::event const&) override { }
+    void on_key_up(input::keyboard::event const&) override { }
+    void on_text_input(input::keyboard::text_input_event const&) override { }
+    void on_text_editing(input::keyboard::text_editing_event const&) override { }
+    void on_mouse_motion(input::mouse::motion_event const&) override { }
+    void on_mouse_button_down(input::mouse::button_event const&) override { }
+    void on_mouse_button_up(input::mouse::button_event const&) override { }
+    void on_mouse_wheel(input::mouse::wheel_event const&) override { }
+    void on_controller_axis_motion(input::controller::axis_event const&) override { }
+    void on_controller_button_down(input::controller::button_event const&) override { }
+    void on_controller_button_up(input::controller::button_event const&) override { }
 };
 
 }

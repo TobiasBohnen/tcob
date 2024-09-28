@@ -52,11 +52,11 @@ protected:
     void on_paint(widget_painter& painter) final;
 
     void on_mouse_leave() override;
-    void on_mouse_hover(input::mouse::motion_event& ev) override;
-    void on_mouse_down(input::mouse::button_event& ev) override;
-    void on_mouse_drag(input::mouse::motion_event& ev) override;
-    void on_mouse_up(input::mouse::button_event& ev) override;
-    void on_mouse_wheel(input::mouse::wheel_event& ev) override;
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
+    void on_mouse_down(input::mouse::button_event const& ev) override;
+    void on_mouse_drag(input::mouse::motion_event const& ev) override;
+    void on_mouse_up(input::mouse::button_event const& ev) override;
+    void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
 
     void on_focus_lost() override;
 

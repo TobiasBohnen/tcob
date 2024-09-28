@@ -31,11 +31,11 @@ protected:
     void on_paint(widget_painter& painter) final;
     void virtual paint_content(widget_painter& painter, rect_f const& rect) = 0;
 
-    void on_mouse_hover(input::mouse::motion_event& ev) override;
-    void on_mouse_down(input::mouse::button_event& ev) override;
-    void on_mouse_drag(input::mouse::motion_event& ev) override;
-    void on_mouse_up(input::mouse::button_event& ev) override;
-    void on_mouse_wheel(input::mouse::wheel_event& ev) override;
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
+    void on_mouse_down(input::mouse::button_event const& ev) override;
+    void on_mouse_drag(input::mouse::motion_event const& ev) override;
+    void on_mouse_up(input::mouse::button_event const& ev) override;
+    void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
 

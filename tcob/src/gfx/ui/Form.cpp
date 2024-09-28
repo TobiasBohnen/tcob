@@ -289,7 +289,7 @@ void form::focus_widget(widget* newFocus)
     }
 }
 
-void form::find_top_widget(input::mouse::motion_event& ev)
+void form::find_top_widget(input::mouse::motion_event const& ev)
 {
     auto* newTop {find_widget_at(point_f {ev.Position}).get()};
     if (newTop && newTop->is_inert()) {
@@ -308,7 +308,7 @@ void form::find_top_widget(input::mouse::motion_event& ev)
     }
 }
 
-void form::on_key_down(input::keyboard::event& ev)
+void form::on_key_down(input::keyboard::event const& ev)
 {
     hide_tooltip();
 
@@ -344,13 +344,13 @@ void form::on_key_down(input::keyboard::event& ev)
     }
 }
 
-void form::on_key_up(input::keyboard::event& ev)
+void form::on_key_up(input::keyboard::event const& ev)
 {
     hide_tooltip();
     _injector.on_key_up(_focusWidget, ev);
 }
 
-void form::on_mouse_motion(input::mouse::motion_event& ev)
+void form::on_mouse_motion(input::mouse::motion_event const& ev)
 {
     if (_isLButtonDown) {
         _injector.on_mouse_drag(_focusWidget, ev);
@@ -359,7 +359,7 @@ void form::on_mouse_motion(input::mouse::motion_event& ev)
     }
 }
 
-void form::on_mouse_button_down(input::mouse::button_event& ev)
+void form::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
@@ -374,7 +374,7 @@ void form::on_mouse_button_down(input::mouse::button_event& ev)
     }
 }
 
-void form::on_mouse_button_up(input::mouse::button_event& ev)
+void form::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
@@ -402,7 +402,7 @@ void form::on_mouse_button_up(input::mouse::button_event& ev)
     }
 }
 
-void form::on_mouse_wheel(input::mouse::wheel_event& ev)
+void form::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     hide_tooltip();
 
@@ -413,17 +413,17 @@ void form::on_mouse_wheel(input::mouse::wheel_event& ev)
     }
 }
 
-void form::on_controller_axis_motion(input::controller::axis_event& /*ev*/)
+void form::on_controller_axis_motion(input::controller::axis_event const& /*ev*/)
 {
 }
 
-void form::on_controller_button_down(input::controller::button_event& ev)
+void form::on_controller_button_down(input::controller::button_event const& ev)
 {
     hide_tooltip();
     _injector.on_controller_button_down(_focusWidget, ev);
 }
 
-void form::on_controller_button_up(input::controller::button_event& ev)
+void form::on_controller_button_up(input::controller::button_event const& ev)
 {
     hide_tooltip();
     _injector.on_controller_button_up(_focusWidget, ev);
@@ -459,12 +459,12 @@ auto form::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
     return retValue;
 }
 
-void form::on_text_input(input::keyboard::text_input_event& ev)
+void form::on_text_input(input::keyboard::text_input_event const& ev)
 {
     _injector.on_text_input(_focusWidget, ev);
 }
 
-void form::on_text_editing(input::keyboard::text_editing_event& ev)
+void form::on_text_editing(input::keyboard::text_editing_event const& ev)
 {
     _injector.on_text_editing(_focusWidget, ev);
 }

@@ -36,7 +36,7 @@ class TCOB_API window final : public render_target {
     friend class tcob::gfx::render_system;
 
 public:
-    struct event {
+    struct event : event_base {
         u32 WindowID {0};
         i32 Data1 {0};
         i32 Data2 {0};

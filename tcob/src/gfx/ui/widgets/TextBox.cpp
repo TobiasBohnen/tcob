@@ -64,7 +64,7 @@ void text_box::on_update(milliseconds deltaTime)
     }
 }
 
-void text_box::on_key_down(input::keyboard::event& ev)
+void text_box::on_key_down(input::keyboard::event const& ev)
 {
     if (_caretTween) {
         _caretTween->pause();
@@ -98,7 +98,7 @@ void text_box::on_key_down(input::keyboard::event& ev)
     ev.Handled = true;
 }
 
-void text_box::on_key_up(input::keyboard::event& ev)
+void text_box::on_key_up(input::keyboard::event const& ev)
 {
     if (_caretTween) {
         _caretTween->resume();
@@ -106,13 +106,13 @@ void text_box::on_key_up(input::keyboard::event& ev)
     }
 }
 
-void text_box::on_text_input(input::keyboard::text_input_event& ev)
+void text_box::on_text_input(input::keyboard::text_input_event const& ev)
 {
     insert_text(ev.Text);
     ev.Handled = true;
 }
 
-void text_box::on_text_editing(input::keyboard::text_editing_event& /* ev */)
+void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev */)
 {
 }
 

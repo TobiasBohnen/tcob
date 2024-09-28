@@ -140,7 +140,7 @@ void tab_container::on_mouse_leave()
     HoveredTabIndex = -1;
 }
 
-void tab_container::on_mouse_hover(input::mouse::motion_event& ev)
+void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredTabIndex = -1;
 
@@ -157,7 +157,7 @@ void tab_container::on_mouse_hover(input::mouse::motion_event& ev)
     ev.Handled = true;
 }
 
-void tab_container::on_mouse_down(input::mouse::button_event& ev)
+void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 {
     widget::on_mouse_down(ev);
 

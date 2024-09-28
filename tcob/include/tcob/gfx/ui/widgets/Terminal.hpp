@@ -81,14 +81,14 @@ protected:
 
     void on_update(milliseconds deltaTime) override;
 
-    void on_key_down(input::keyboard::event& ev) override;
-    void on_key_up(input::keyboard::event& ev) override;
+    void on_key_down(input::keyboard::event const& ev) override;
+    void on_key_up(input::keyboard::event const& ev) override;
 
-    void on_text_input(input::keyboard::text_input_event& ev) override;
+    void on_text_input(input::keyboard::text_input_event const& ev) override;
 
     void on_mouse_leave() override;
-    void on_mouse_hover(input::mouse::motion_event& ev) override;
-    void on_mouse_down(input::mouse::button_event& ev) override;
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
+    void on_mouse_down(input::mouse::button_event const& ev) override;
 
     void on_focus_gained() override;
     void on_focus_lost() override;

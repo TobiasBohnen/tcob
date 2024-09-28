@@ -81,7 +81,7 @@ void slider::on_paint(widget_painter& painter)
     }
 }
 
-void slider::on_key_down(input::keyboard::event& ev)
+void slider::on_key_down(input::keyboard::event const& ev)
 {
     auto const& controls {get_form()->Controls};
     if (input::system::IsKeyDown(controls->ActivateKey)) {
@@ -106,7 +106,7 @@ void slider::on_mouse_leave()
     }
 }
 
-void slider::on_mouse_hover(input::mouse::motion_event& ev)
+void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     bool const overThumb {_paintResult.Thumb.contains(global_to_parent_local(ev.Position))};
     if (overThumb != _overThumb) {
@@ -116,13 +116,13 @@ void slider::on_mouse_hover(input::mouse::motion_event& ev)
     }
 }
 
-void slider::on_mouse_drag(input::mouse::motion_event& ev)
+void slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     calculate_value(global_to_local(ev.Position));
     ev.Handled = true;
 }
 
-void slider::on_mouse_up(input::mouse::button_event& ev)
+void slider::on_mouse_up(input::mouse::button_event const& ev)
 {
     _dragOffset = point_i::Zero;
     if (_overThumb && !hit_test(point_f {ev.Position})) {
@@ -132,7 +132,7 @@ void slider::on_mouse_up(input::mouse::button_event& ev)
     }
 }
 
-void slider::on_mouse_down(input::mouse::button_event& ev)
+void slider::on_mouse_down(input::mouse::button_event const& ev)
 {
     _isDragging = false;
 
@@ -147,7 +147,7 @@ void slider::on_mouse_down(input::mouse::button_event& ev)
     }
 }
 
-void slider::on_mouse_wheel(input::mouse::wheel_event& ev)
+void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (ev.Scroll.Y > 0) {
         Value += Step();
@@ -162,7 +162,7 @@ void slider::on_mouse_wheel(input::mouse::wheel_event& ev)
     ev.Handled = true;
 }
 
-void slider::on_controller_button_down(input::controller::button_event& ev)
+void slider::on_controller_button_down(input::controller::button_event const& ev)
 {
     auto const& controls {get_form()->Controls};
     if (ev.Controller->is_button_pressed(controls->ActivateButton)) {

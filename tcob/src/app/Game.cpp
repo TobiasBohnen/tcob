@@ -188,7 +188,7 @@ auto game::get_library() -> assets::library&
     return _mainLibrary;
 }
 
-void game::on_key_down(input::keyboard::event& ev)
+void game::on_key_down(input::keyboard::event const& ev)
 {
     using namespace tcob::enum_ops;
     if (!ev.Repeat) {

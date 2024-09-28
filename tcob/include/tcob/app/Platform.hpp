@@ -49,7 +49,7 @@ private:
 
     void remove_services() const;
 
-    void on_key_down(input::keyboard::event& ev);
+    void on_key_down(input::keyboard::event const& ev);
 
     void static InitSDL();
     void static InitSignatures();

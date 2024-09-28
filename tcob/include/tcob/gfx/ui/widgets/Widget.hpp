@@ -113,22 +113,22 @@ protected:
 
     void virtual on_paint(widget_painter& painter) = 0;
 
-    void virtual on_key_down(input::keyboard::event& /* ev */) { }
-    void virtual on_key_up(input::keyboard::event& /* ev */) { }
+    void virtual on_key_down(input::keyboard::event const& /* ev */) { }
+    void virtual on_key_up(input::keyboard::event const& /* ev */) { }
 
-    void virtual on_text_input(input::keyboard::text_input_event& /* ev */) { }
-    void virtual on_text_editing(input::keyboard::text_editing_event& /* ev */) { }
+    void virtual on_text_input(input::keyboard::text_input_event const& /* ev */) { }
+    void virtual on_text_editing(input::keyboard::text_editing_event const& /* ev */) { }
 
     void virtual on_mouse_enter() { }
     void virtual on_mouse_leave() { }
-    void virtual on_mouse_hover(input::mouse::motion_event& /* ev */) { }
-    void virtual on_mouse_drag(input::mouse::motion_event& /* ev */) { }
-    void virtual on_mouse_down(input::mouse::button_event& /* ev */) { }
-    void virtual on_mouse_up(input::mouse::button_event& /* ev */) { }
-    void virtual on_mouse_wheel(input::mouse::wheel_event& /* ev */) { }
+    void virtual on_mouse_hover(input::mouse::motion_event const& /* ev */) { }
+    void virtual on_mouse_drag(input::mouse::motion_event const& /* ev */) { }
+    void virtual on_mouse_down(input::mouse::button_event const& /* ev */) { }
+    void virtual on_mouse_up(input::mouse::button_event const& /* ev */) { }
+    void virtual on_mouse_wheel(input::mouse::wheel_event const& /* ev */) { }
 
-    void virtual on_controller_button_down(input::controller::button_event& /* ev */) { }
-    void virtual on_controller_button_up(input::controller::button_event& /* ev */) { }
+    void virtual on_controller_button_down(input::controller::button_event const& /* ev */) { }
+    void virtual on_controller_button_up(input::controller::button_event const& /* ev */) { }
 
     void virtual on_click() { }
     void virtual on_double_click() { }
@@ -147,19 +147,19 @@ protected:
     void set_inert(bool inert);
 
 private:
-    void do_key_down(input::keyboard::event& ev);
-    void do_key_up(input::keyboard::event& ev);
-    void do_text_input(input::keyboard::text_input_event& ev);
-    void do_text_editing(input::keyboard::text_editing_event& ev);
+    void do_key_down(input::keyboard::event const& ev);
+    void do_key_up(input::keyboard::event const& ev);
+    void do_text_input(input::keyboard::text_input_event const& ev);
+    void do_text_editing(input::keyboard::text_editing_event const& ev);
     void do_mouse_enter();
     void do_mouse_leave();
-    void do_mouse_hover(input::mouse::motion_event& ev);
-    void do_mouse_drag(input::mouse::motion_event& ev);
-    void do_mouse_down(input::mouse::button_event& ev);
-    void do_mouse_up(input::mouse::button_event& ev);
-    void do_mouse_wheel(input::mouse::wheel_event& ev);
-    void do_controller_button_down(input::controller::button_event& ev);
-    void do_controller_button_up(input::controller::button_event& ev);
+    void do_mouse_hover(input::mouse::motion_event const& ev);
+    void do_mouse_drag(input::mouse::motion_event const& ev);
+    void do_mouse_down(input::mouse::button_event const& ev);
+    void do_mouse_up(input::mouse::button_event const& ev);
+    void do_mouse_wheel(input::mouse::wheel_event const& ev);
+    void do_controller_button_down(input::controller::button_event const& ev);
+    void do_controller_button_up(input::controller::button_event const& ev);
     void do_click();
     void do_double_click();
     void do_focus_gained();

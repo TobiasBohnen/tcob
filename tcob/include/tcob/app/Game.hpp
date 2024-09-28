@@ -92,7 +92,7 @@ private:
     //! Pops the top scene from the scene stack.
     void pop_scene();
 
-    void on_key_down(input::keyboard::event& ev);
+    void on_key_down(input::keyboard::event const& ev);
 
     assets::library _mainLibrary {};
 
