@@ -23,25 +23,26 @@ template <FloatingPoint ValueType, f64 OneTurn>
 class [[nodiscard]] angle_unit {
 public:
     using value_type = ValueType;
+    static constexpr value_type one_turn {static_cast<ValueType>(OneTurn)};
 
     constexpr angle_unit() = default;
-    constexpr angle_unit(value_type value);
+    constexpr angle_unit(ValueType value);
 
     template <FloatingPoint ValueType2, f64 OneTurn2>
     constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;
 
-    auto sin [[nodiscard]] () const -> value_type;
-    auto asin [[nodiscard]] () const -> value_type;
-    auto cos [[nodiscard]] () const -> value_type;
-    auto acos [[nodiscard]] () const -> value_type;
-    auto tan [[nodiscard]] () const -> value_type;
-    auto atan [[nodiscard]] () const -> value_type;
+    auto sin [[nodiscard]] () const -> ValueType;
+    auto asin [[nodiscard]] () const -> ValueType;
+    auto cos [[nodiscard]] () const -> ValueType;
+    auto acos [[nodiscard]] () const -> ValueType;
+    auto tan [[nodiscard]] () const -> ValueType;
+    auto atan [[nodiscard]] () const -> ValueType;
 
     auto constexpr as_normalized [[nodiscard]] (angle_normalize mode = angle_normalize::FullTurnSymmetric) const -> angle_unit<ValueType, OneTurn>;
 
     auto static constexpr Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>;
 
-    value_type Value {0};
+    ValueType Value {0};
 };
 
 template <FloatingPoint ValueType, f64 OneTurn>

@@ -26,7 +26,6 @@ static u32 const GLNVG_FRAG_BINDING {0};
 
 gl_canvas::gl_canvas()
 {
-    i32 align {0};
 
     if (!_shader.compile(fillVertShader, fillFragShader)) {
         throw std::runtime_error("failed to compile nanovg shader");
@@ -37,8 +36,9 @@ gl_canvas::gl_canvas()
     //  glUniformBlockBinding(_shader.get_id(), 0, GLNVG_FRAG_BINDING);
     glCreateBuffers(1, &_fragBuf);
 
+    i32 align {0};
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align);
-    _fragSize = sizeof(nvg_frag_uniforms) + align - sizeof(nvg_frag_uniforms) % align;
+    _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - sizeof(nvg_frag_uniforms) % static_cast<u32>(align);
 }
 
 gl_canvas::~gl_canvas()

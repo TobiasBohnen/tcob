@@ -113,7 +113,7 @@ void gl_render_target::on_resize(size_i size)
 
 auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
 {
-    std::vector<u8> pixels(rect.Width * rect.Height * 4);
+    std::vector<u8> pixels(static_cast<usize>(rect.Width * rect.Height * 4));
     _frameBuffer->get_subimage(rect, pixels, GL_RGBA);
     auto retValue {image::Create(rect.get_size(), image::format::RGBA, pixels)};
     retValue.flip_vertically();

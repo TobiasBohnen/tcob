@@ -181,7 +181,7 @@ public:
     void seed(state_type& state, seed_type seed) const;
 
 private:
-    isize _index {0};
+    usize _index {0};
 };
 
 }

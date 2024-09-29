@@ -160,8 +160,8 @@ auto b2d_world::get_sensor_events() const -> sensor_events
 {
     auto const    events {b2World_GetSensorEvents(ID)};
     sensor_events retValue;
-    retValue.BeginTouch.reserve(events.beginCount);
-    retValue.EndTouch.reserve(events.endCount);
+    retValue.BeginTouch.reserve(static_cast<usize>(events.beginCount));
+    retValue.EndTouch.reserve(static_cast<usize>(events.endCount));
 
     std::span<b2SensorBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
     for (auto& event : begin) {

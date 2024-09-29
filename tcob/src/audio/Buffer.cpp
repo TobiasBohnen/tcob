@@ -41,7 +41,7 @@ auto buffer::load(std::shared_ptr<istream> in, string const& ext, std::any& ctx)
     if (decoder) {
         if (auto info {decoder->open(std::move(in), ctx)}) {
             _info = *info;
-            _buffer.resize(_info.Channels * _info.FrameCount);
+            _buffer.resize(static_cast<usize>(_info.Channels * _info.FrameCount));
             decoder->seek_from_start(milliseconds {0});
             if (decoder->decode_to_buffer(_buffer)) {
                 return load_status::Ok;

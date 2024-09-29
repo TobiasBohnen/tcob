@@ -104,17 +104,18 @@ namespace effect {
     void fade_in::operator()(f64 t, std::span<quad> quads) const
     {
         usize const totalQuads {quads.size()};
-        usize const fadeIdx {static_cast<usize>(t * (totalQuads + Width))};
+        usize const width {static_cast<usize>(Width)};
+        usize const fadeIdx {static_cast<usize>(t * (totalQuads + width))};
 
         for (usize idx {0}; idx < totalQuads; ++idx) {
             quad& dst {quads[idx]};
 
-            if (idx + Width - 1 < fadeIdx) {
+            if (idx + width - 1 < fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
             } else if (idx > fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
             } else {
-                f64 const val {((t * (totalQuads + Width)) - static_cast<f64>(idx)) / static_cast<f64>(Width)};
+                f64 const val {((t * (totalQuads + width)) - static_cast<f64>(idx)) / static_cast<f64>(width)};
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
             }
         }
@@ -125,17 +126,18 @@ namespace effect {
     void fade_out::operator()(f64 t, std::span<quad> quads) const
     {
         usize const totalQuads {quads.size()};
-        usize const fadeIdx {static_cast<usize>(t * (totalQuads + Width))};
+        usize const width {static_cast<usize>(Width)};
+        usize const fadeIdx {static_cast<usize>(t * (totalQuads + width))};
 
         for (usize idx {0}; idx < totalQuads; ++idx) {
             quad& dst {quads[idx]};
 
-            if (idx + Width - 1 < fadeIdx) {
+            if (idx + width - 1 < fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
             } else if (idx > fadeIdx) {
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
             } else {
-                f64 const val {1.0 - (((t * (totalQuads + Width) - static_cast<f64>(idx))) / static_cast<f64>(Width))};
+                f64 const val {1.0 - (((t * (totalQuads + width) - static_cast<f64>(idx))) / static_cast<f64>(width))};
                 dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
             }
         }
@@ -169,13 +171,13 @@ namespace effect {
             f32 const r {RNG(-Intensity, Intensity)};
             switch (RNG(0, 1)) {
             case 0:
-                for (i32 i {0}; i < 4; ++i) {
+                for (u32 i {0}; i < 4; ++i) {
                     q[i].Position[0] += r;
                     q[i].Position[1] += r;
                 }
                 break;
             case 1:
-                for (i32 i {0}; i < 4; ++i) {
+                for (u32 i {0}; i < 4; ++i) {
                     q[i].Position[0] += r;
                     q[i].Position[1] -= r;
                 }
@@ -196,7 +198,7 @@ namespace effect {
             tweening::func::sine_wave<f64> wave {.MinValue = 0, .MaxValue = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
             f64 const                      val {wave(t) * Height};
 
-            for (i32 i {0}; i < 4; ++i) {
+            for (u32 i {0}; i < 4; ++i) {
                 dst[i].Position[1] = static_cast<f32>(dst[i].Position[1] + val);
             }
         }
@@ -251,7 +253,7 @@ namespace effect {
             }
 
             xform.scale_at(scale, center);
-            for (i32 i {0}; i < 4; ++i) {
+            for (u32 i {0}; i < 4; ++i) {
                 point_f const pos {xform * point_f {q[i].Position[0], q[i].Position[1]}};
                 q[i].Position[0] = pos.X;
                 q[i].Position[1] = pos.Y;
@@ -268,7 +270,7 @@ namespace effect {
             transform    rot;
             rot.rotate_at(degree_f {static_cast<f32>(360 * t * Speed)}, rect.get_center());
 
-            for (i32 i {0}; i < 4; ++i) {
+            for (u32 i {0}; i < 4; ++i) {
                 point_f const pos {rot * point_f {q[i].Position[0], q[i].Position[1]}};
                 q[i].Position[0] = pos.X;
                 q[i].Position[1] = pos.Y;

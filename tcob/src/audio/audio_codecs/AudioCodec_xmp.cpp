@@ -69,8 +69,7 @@ auto xmp_decoder::open() -> std::optional<buffer::info>
 
         xmp_frame_info mi {};
         xmp_get_frame_info(_context, &mi);
-        _info.FrameCount = static_cast<u64>(
-            (static_cast<f32>(mi.total_time) / 1000.0f) * static_cast<f32>(_info.SampleRate));
+        _info.FrameCount = static_cast<i64>((static_cast<f32>(mi.total_time) / 1000.0f) * static_cast<f32>(_info.SampleRate));
 
         xmp_start_player(_context, _info.SampleRate, 0);
 
@@ -89,7 +88,7 @@ auto xmp_decoder::decode(std::span<f32> outputSamples) -> i32
         outputSamples[i] = static_cast<f32>(buffer[i]) / static_cast<f32>(std::numeric_limits<i16>::max());
     }
 
-    return res == 0 ? static_cast<i32>(outputSamples.size() / _info.Channels) : 0;
+    return res == 0 ? static_cast<i32>(std::ssize(outputSamples) / _info.Channels) : 0;
 }
 
 }

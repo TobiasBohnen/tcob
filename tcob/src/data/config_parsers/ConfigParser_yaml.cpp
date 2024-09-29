@@ -12,7 +12,7 @@
 
 namespace tcob::data::config::detail {
 
-constexpr i32 INDENT_SPACES {2};
+constexpr usize INDENT_SPACES {2};
 
 //////////////////////////////////////////////////////////////////////
 using token_type = yaml_tokenizer::token_type;
@@ -325,16 +325,16 @@ void yaml_tokenizer::optimize()
                 && Tokens[i + 3].Type == token_type::Indent) {
                 Tokens[i].Type  = token_type::KeyOrScalar;
                 Tokens[i].Value = Tokens[i + 1].Value;
-                Tokens.erase(Tokens.begin() + i + 1, Tokens.begin() + i + 4);
+                Tokens.erase(Tokens.begin() + static_cast<isize>(i) + 1, Tokens.begin() + static_cast<isize>(i) + 4);
             }
         }
         if (i + 1 < Tokens.size()) {
             // Tag
             if (Tokens[i].Type == token_type::Tag) {
                 if (Tokens[i + 1].Type == token_type::Whitespace) {
-                    Tokens.erase(Tokens.begin() + i, Tokens.begin() + i + 2);
+                    Tokens.erase(Tokens.begin() + static_cast<isize>(i), Tokens.begin() + static_cast<isize>(i) + 2);
                 } else {
-                    Tokens.erase(Tokens.begin() + i, Tokens.begin() + i + 1);
+                    Tokens.erase(Tokens.begin() + static_cast<isize>(i), Tokens.begin() + static_cast<isize>(i) + 1);
                 }
             }
         }
@@ -796,7 +796,7 @@ auto yaml_writer::write(ostream& stream, array const& arr) -> bool
     return write_array(stream, 0, arr);
 }
 
-auto yaml_writer::write_object(ostream& stream, i32 indent, object const& obj) const -> bool
+auto yaml_writer::write_object(ostream& stream, usize indent, object const& obj) const -> bool
 {
     if (obj.empty()) {
         stream << "{}";
@@ -816,7 +816,7 @@ auto yaml_writer::write_object(ostream& stream, i32 indent, object const& obj) c
     return true;
 }
 
-auto yaml_writer::write_array(ostream& stream, i32 indent, array const& arr) const -> bool
+auto yaml_writer::write_array(ostream& stream, usize indent, array const& arr) const -> bool
 {
     if (arr.empty()) {
         stream << "[]";
@@ -836,7 +836,7 @@ auto yaml_writer::write_array(ostream& stream, i32 indent, array const& arr) con
     return true;
 }
 
-void yaml_writer::write_entry(ostream& stream, i32 indent, entry const& ent) const
+void yaml_writer::write_entry(ostream& stream, usize indent, entry const& ent) const
 {
     if (object csec; ent.try_get(csec)) {
         if (!csec.empty()) { stream << "\n"; }

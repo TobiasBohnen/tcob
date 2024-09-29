@@ -68,7 +68,7 @@ auto midi_decoder::open() -> std::optional<buffer::info>
     _currentMessage = _firstMessage;
     u32 duration {0};
     tml_get_info(_firstMessage, nullptr, nullptr, nullptr, nullptr, &duration);
-    _info.FrameCount = static_cast<u64>((static_cast<f32>(duration) / 1000.0f) * static_cast<f32>(_info.SampleRate));
+    _info.FrameCount = static_cast<i64>((static_cast<f32>(duration) / 1000.0f) * static_cast<f32>(_info.SampleRate));
 
     tsf_reset(_font->get_font());
     return _info;
@@ -76,7 +76,7 @@ auto midi_decoder::open() -> std::optional<buffer::info>
 
 auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    i32  samplesRemaining {static_cast<i32>(outputSamples.size() / _info.Channels)};
+    i32  samplesRemaining {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Channels))};
     i32  sampleCount {0};
     f32* dataPtr {outputSamples.data()};
     for (i32 sampleBlock {RENDER_EFFECTSAMPLEBLOCK}; samplesRemaining > 0 && _currentMessage; samplesRemaining -= sampleBlock) {

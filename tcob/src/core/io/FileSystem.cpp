@@ -111,14 +111,14 @@ extern "C" {
 auto static mz_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ifstream*>(pOpaque)};
-    fs->seek(file_ofs, seek_dir::Begin);
+    fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
     return static_cast<size_t>(fs->read_to<byte>({static_cast<byte*>(pBuf), n}));
 }
 
 auto static mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ofstream*>(pOpaque)};
-    fs->seek(file_ofs, seek_dir::Begin);
+    fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
     return static_cast<size_t>(fs->write<byte>({static_cast<byte const*>(pBuf), n}));
 }
 }
@@ -141,14 +141,14 @@ auto zip(path const& srcFileOrFolder, path const& dstFile, bool relative, i32 le
         for (auto const& file : files) {
             ifstream istream {file};
             string   name {relative ? file.substr(srcFileOrFolder.size()) : file};
-            if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, istream.size_in_bytes(), nullptr, nullptr, 0, level, nullptr, 0, nullptr, 0)) {
+            if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, static_cast<u64>(istream.size_in_bytes()), nullptr, nullptr, 0, static_cast<u32>(level), nullptr, 0, nullptr, 0)) {
                 return false;
             }
         }
     } else if (is_file(srcFileOrFolder)) {
         ifstream istream {srcFileOrFolder};
         string   name {relative ? std::filesystem::path {srcFileOrFolder}.filename().string() : srcFileOrFolder};
-        if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, istream.size_in_bytes(), nullptr, nullptr, 0, level, nullptr, 0, nullptr, 0)) {
+        if (!mz_zip_writer_add_read_buf_callback(&zip, name.c_str(), &mz_read, &istream, static_cast<u64>(istream.size_in_bytes()), nullptr, nullptr, 0, static_cast<u32>(level), nullptr, 0, nullptr, 0)) {
             return false;
         }
     } else {
@@ -169,7 +169,7 @@ auto unzip(path const& srcFile, path const& dstFolder) -> bool
     zip.m_pRead      = &mz_read;
     zip.m_pIO_opaque = &stream;
 
-    if (!mz_zip_reader_init(&zip, stream.size_in_bytes(), 0)) { return false; }
+    if (!mz_zip_reader_init(&zip, static_cast<u64>(stream.size_in_bytes()), 0)) { return false; }
 
     mz_uint const n {mz_zip_reader_get_num_files(&zip)};
     for (mz_uint i {0}; i < n; ++i) {
@@ -215,7 +215,7 @@ auto read_as_string(path const& file) -> string
     do {
         std::array<byte, 1024> buffer {};
         read = PHYSFS_readBytes(handle, buffer.data(), buffer.size());
-        retValue.append(buffer.data(), read);
+        retValue.append(buffer.data(), static_cast<usize>(read));
     } while (read != 0);
 
     check("close", PHYSFS_close(handle));

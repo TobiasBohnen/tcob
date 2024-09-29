@@ -44,8 +44,8 @@ auto flac_decoder::open() -> std::optional<buffer::info>
     _flac = drflac_open(&read_flac, &seek_flac, &get_stream(), nullptr);
     if (_flac) {
         _info.Channels   = _flac->channels;
-        _info.SampleRate = _flac->sampleRate;
-        _info.FrameCount = _flac->totalPCMFrameCount;
+        _info.SampleRate = static_cast<i32>(_flac->sampleRate);
+        _info.FrameCount = static_cast<i64>(_flac->totalPCMFrameCount);
         return _info;
     }
 
@@ -54,7 +54,7 @@ auto flac_decoder::open() -> std::optional<buffer::info>
 
 auto flac_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    u64 const wantRead {outputSamples.size() / _info.Channels};
+    u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
     return static_cast<i32>(drflac_read_pcm_frames_f32(_flac, wantRead, outputSamples.data()));
 }
 

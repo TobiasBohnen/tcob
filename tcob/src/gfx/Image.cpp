@@ -47,7 +47,7 @@ auto image::get_data(rect_i const& bounds) const -> std::vector<u8>
     i32 const dstStride {bounds.Width * bpp};
 
     std::vector<u8> retValue;
-    retValue.resize(bounds.Height * dstStride);
+    retValue.resize(static_cast<usize>(bounds.Height * dstStride));
 
     // TODO: bounds check
 
@@ -101,7 +101,7 @@ void image::flip_vertically()
 void image::set_pixel(point_i pos, color c)
 {
     assert(_info.Size.contains(pos));
-    isize const idx {(pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel()};
+    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
     _buffer[idx + 0] = c.R;
     _buffer[idx + 1] = c.G;
     _buffer[idx + 2] = c.B;
@@ -113,7 +113,7 @@ void image::set_pixel(point_i pos, color c)
 auto image::get_pixel(point_i pos) const -> color
 {
     assert(_info.Size.contains(pos));
-    isize const idx {(pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel()};
+    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
     u8 const    r {_buffer[idx + 0]};
     u8 const    g {_buffer[idx + 1]};
     u8 const    b {_buffer[idx + 2]};
@@ -143,7 +143,7 @@ auto image::Create(size_i size, format f, std::span<u8 const> data) -> image
 auto image::CreateEmpty(size_i size, format f) -> image
 {
     image retValue {size, f};
-    retValue._buffer.resize(size.Width * size.Height * image::info::GetBPP(f));
+    retValue._buffer.resize(static_cast<usize>(size.Width * size.Height * image::info::GetBPP(f)));
     return retValue;
 }
 

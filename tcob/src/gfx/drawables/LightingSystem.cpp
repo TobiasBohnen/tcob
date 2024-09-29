@@ -93,7 +93,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
     _verts.clear();
     _inds.clear();
-    i32 indOffset {0};
+    u32 indOffset {0};
 
     constexpr f32 minAngle {0.0005f};
     auto&         tm {locate_service<task_manager>()};

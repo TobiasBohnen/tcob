@@ -9,7 +9,7 @@
 
 namespace tcob::data::config::detail {
 
-constexpr i32 INDENT_SPACES {2};
+constexpr usize INDENT_SPACES {2};
 
 auto json_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 {
@@ -171,7 +171,7 @@ auto json_writer::write(ostream& stream, array const& arr) -> bool
     return true;
 }
 
-void json_writer::write_object(ostream& stream, i32 indent, object const& obj) const
+void json_writer::write_object(ostream& stream, usize indent, object const& obj) const
 {
     utf8_string indentEntry(indent + INDENT_SPACES, ' ');
     utf8_string indentClose(indent, ' ');
@@ -190,7 +190,7 @@ void json_writer::write_object(ostream& stream, i32 indent, object const& obj) c
            << indentClose << "}";
 }
 
-void json_writer::write_array(ostream& stream, i32 indent, array const& arr) const
+void json_writer::write_array(ostream& stream, usize indent, array const& arr) const
 {
     utf8_string indentItem(indent + INDENT_SPACES, ' ');
     utf8_string indentClose(indent, ' ');
@@ -209,7 +209,7 @@ void json_writer::write_array(ostream& stream, i32 indent, array const& arr) con
            << indentClose << "]";
 }
 
-void json_writer::write_entry(ostream& stream, i32 indent, entry const& ent) const
+void json_writer::write_entry(ostream& stream, usize indent, entry const& ent) const
 {
     if (ent.is<bool>()) {
         stream << (ent.as<bool>() ? "true" : "false");

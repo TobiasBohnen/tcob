@@ -181,7 +181,7 @@ public:
 
     auto get(i32 idx) const -> f32
     {
-        return _buffer[idx];
+        return _buffer[static_cast<usize>(idx)];
     }
 
 private:

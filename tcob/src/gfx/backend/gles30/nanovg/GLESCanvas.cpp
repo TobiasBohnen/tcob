@@ -37,7 +37,7 @@ gl_canvas::gl_canvas()
 
     i32 align {0};
     GLCHECK(glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align));
-    _fragSize = sizeof(nvg_frag_uniforms) + align - sizeof(nvg_frag_uniforms) % align;
+    _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - sizeof(nvg_frag_uniforms) % static_cast<u32>(align);
 }
 
 gl_canvas::~gl_canvas()

@@ -42,9 +42,9 @@ void mp3_decoder::seek_from_start(milliseconds pos)
 auto mp3_decoder::open() -> std::optional<buffer::info>
 {
     if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &get_stream(), nullptr)) {
-        _info.Channels   = _mp3.channels;
-        _info.SampleRate = _mp3.sampleRate;
-        _info.FrameCount = drmp3_get_pcm_frame_count(&_mp3);
+        _info.Channels   = static_cast<i32>(_mp3.channels);
+        _info.SampleRate = static_cast<i32>(_mp3.sampleRate);
+        _info.FrameCount = static_cast<i64>(drmp3_get_pcm_frame_count(&_mp3));
         return _info;
     }
 
@@ -53,7 +53,7 @@ auto mp3_decoder::open() -> std::optional<buffer::info>
 
 auto mp3_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    u64 const wantRead {outputSamples.size() / _info.Channels};
+    u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
     return static_cast<i32>(drmp3_read_pcm_frames_f32(&_mp3, wantRead, outputSamples.data()));
 }
 }

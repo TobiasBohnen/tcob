@@ -80,7 +80,7 @@ auto opus_decoder::decode(std::span<f32> outputSamples) -> i32
             break;
         }
 
-        auto const readBuffer {outputSamples.subspan(readOffset)};
+        auto const readBuffer {outputSamples.subspan(static_cast<u32>(readOffset))};
         auto const read {op_read_float(_file, readBuffer.data(), static_cast<i32>(readBuffer.size()), nullptr)};
         readOffset += read * _info.Channels;
     }
@@ -127,9 +127,9 @@ auto opus_encoder::encode(std::span<f32 const> samples, buffer::info const& info
             break;
         }
 
-        auto const readBuffer {samples.subspan(readOffset, read)};
+        auto const readBuffer {samples.subspan(static_cast<u32>(readOffset), static_cast<u32>(read))};
         readOffset += read;
-        ope_encoder_write_float(encoder, readBuffer.data(), static_cast<i32>(readBuffer.size() / info.Channels));
+        ope_encoder_write_float(encoder, readBuffer.data(), static_cast<i32>(readBuffer.size() / static_cast<u32>(info.Channels)));
     }
 
     ope_encoder_drain(encoder);

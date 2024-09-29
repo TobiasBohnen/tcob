@@ -113,7 +113,7 @@ void music::update_stream()
             assert(processedCount == std::ssize(bufferIDs));
             if (processedCount > 0) {
                 for (u32 bufferID : bufferIDs) {
-                    _samplesPlayed += static_cast<i32>(al::al_buffer::GetSize(bufferID) / sizeof(f32)); // buffer is float32
+                    _samplesPlayed += static_cast<i32>(static_cast<usize>(al::al_buffer::GetSize(bufferID)) / sizeof(f32)); // buffer is float32
                 }
 
                 queue_buffers(bufferIDs);

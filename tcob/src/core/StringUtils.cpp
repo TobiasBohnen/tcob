@@ -197,7 +197,7 @@ auto random_string(usize length) -> string
 
     std::string retValue;
     for (usize i {0}; i < length; ++i) {
-        retValue += characters[rand(isize {0}, std::ssize(characters) - 1)];
+        retValue += characters[rand(usize {0}, characters.size() - 1)];
     }
 
     return retValue;
@@ -209,7 +209,7 @@ namespace tcob::utf8 {
 
 auto length(utf8_string_view str) -> usize
 {
-    return ::utf8::unchecked::distance(str.begin(), str.end());
+    return static_cast<usize>(::utf8::unchecked::distance(str.begin(), str.end()));
 }
 
 auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string

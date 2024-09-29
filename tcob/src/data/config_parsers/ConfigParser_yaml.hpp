@@ -111,9 +111,9 @@ public:
     auto write(ostream& stream, array const& arr) -> bool override;
 
 private:
-    auto write_object(ostream& stream, i32 indent, object const& obj) const -> bool;
-    auto write_array(ostream& stream, i32 indent, array const& arr) const -> bool;
-    void write_entry(ostream& stream, i32 indent, entry const& ent) const;
+    auto write_object(ostream& stream, usize indent, object const& obj) const -> bool;
+    auto write_array(ostream& stream, usize indent, array const& arr) const -> bool;
+    void write_entry(ostream& stream, usize indent, entry const& ent) const;
     void write_scalar(ostream& stream, entry const& ent) const;
     void write_comment(ostream& stream, entry const& ent) const;
 };

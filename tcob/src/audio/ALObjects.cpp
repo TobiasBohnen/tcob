@@ -312,7 +312,7 @@ auto al_source::unqueue_buffers(i32 bufferCount) const -> std::vector<u32>
     }
 
     assert(_id);
-    std::vector<u32> retValue(bufferCount);
+    std::vector<u32> retValue(static_cast<usize>(bufferCount));
     alSourceUnqueueBuffers(_id, bufferCount, retValue.data());
     return retValue;
 }

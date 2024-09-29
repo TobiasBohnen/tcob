@@ -79,7 +79,7 @@ auto bsbd_reader::read_section_entry(istream& stream, bsbd::marker_type type, ob
     case bsbd::marker_type::BoolFalse: obj.set_entry(name, false); break;
 
     case bsbd::marker_type::LongString: {
-        obj.set_entry(name, stream.read_string(stream.read<u64>()));
+        obj.set_entry(name, stream.read_string(static_cast<std::streamsize>(stream.read<u64>())));
     } break;
 
     case bsbd::marker_type::ShortString: {
@@ -143,7 +143,7 @@ auto bsbd_reader::read_array_entry(istream& stream, bsbd::marker_type type, arra
     case bsbd::marker_type::BoolTrue: arr.add_entry(true); break;
     case bsbd::marker_type::BoolFalse: arr.add_entry(false); break;
 
-    case bsbd::marker_type::LongString: arr.add_entry(stream.read_string(stream.read<u64>())); break;
+    case bsbd::marker_type::LongString: arr.add_entry(stream.read_string(static_cast<std::streamsize>(stream.read<u64>()))); break;
     case bsbd::marker_type::ShortString: arr.add_entry(stream.read_string(stream.read<u8>())); break;
 
     case bsbd::marker_type::SectionStart: {

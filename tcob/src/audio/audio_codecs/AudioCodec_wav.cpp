@@ -50,8 +50,8 @@ auto wav_decoder::open() -> std::optional<buffer::info>
 {
     if (drwav_init(&_wav, &read_wav, &seek_wav, &get_stream(), nullptr)) {
         _info.Channels   = _wav.channels;
-        _info.SampleRate = _wav.sampleRate;
-        _info.FrameCount = _wav.totalPCMFrameCount;
+        _info.SampleRate = static_cast<i32>(_wav.sampleRate);
+        _info.FrameCount = static_cast<i64>(_wav.totalPCMFrameCount);
         return _info;
     }
 
@@ -60,7 +60,7 @@ auto wav_decoder::open() -> std::optional<buffer::info>
 
 auto wav_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    u64 const wantRead {outputSamples.size() / _info.Channels};
+    u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
     return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()));
 }
 
@@ -71,16 +71,16 @@ auto wav_encoder::encode(std::span<f32 const> samples, buffer::info const& info,
     drwav_data_format format;
     format.format        = DR_WAVE_FORMAT_PCM;
     format.bitsPerSample = 16;
-    format.sampleRate    = info.SampleRate;
-    format.channels      = info.Channels;
+    format.sampleRate    = static_cast<u32>(info.SampleRate);
+    format.channels      = static_cast<u32>(info.Channels);
     format.container     = drwav_container_riff;
 
     std::vector<drwav_int16> pcms(samples.size());
     drwav_f32_to_s16(pcms.data(), samples.data(), samples.size());
 
     drwav wav;
-    drwav_init_write_sequential_pcm_frames(&wav, &format, info.FrameCount, &write_wav, &out, nullptr);
-    drwav_write_pcm_frames(&wav, info.FrameCount, pcms.data());
+    drwav_init_write_sequential_pcm_frames(&wav, &format, static_cast<u64>(info.FrameCount), &write_wav, &out, nullptr);
+    drwav_write_pcm_frames(&wav, static_cast<u64>(info.FrameCount), pcms.data());
     drwav_uninit(&wav);
     return true;
 }

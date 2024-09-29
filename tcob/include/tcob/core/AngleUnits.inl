@@ -11,7 +11,7 @@
 namespace tcob {
 
 template <FloatingPoint ValueType, f64 OneTurn>
-constexpr angle_unit<ValueType, OneTurn>::angle_unit(value_type value)
+constexpr angle_unit<ValueType, OneTurn>::angle_unit(ValueType value)
     : Value {value}
 {
 }
@@ -19,83 +19,83 @@ constexpr angle_unit<ValueType, OneTurn>::angle_unit(value_type value)
 template <FloatingPoint ValueType, f64 OneTurn>
 template <FloatingPoint ValueType2, f64 OneTurn2>
 constexpr angle_unit<ValueType, OneTurn>::angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept
-    : Value(static_cast<ValueType>(other.Value / OneTurn2 * OneTurn))
+    : Value(static_cast<ValueType>(static_cast<f64>(other.Value) / OneTurn2 * OneTurn))
 {
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::sin() const -> value_type
+inline auto angle_unit<ValueType, OneTurn>::sin() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::sin(Value);
     } else {
-        return std::sin(angle_unit<value_type, TAU> {*this}.Value);
+        return std::sin(angle_unit<ValueType, TAU> {*this}.Value);
     }
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::asin() const -> value_type
+inline auto angle_unit<ValueType, OneTurn>::asin() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::asin(Value);
     } else {
-        return std::asin(angle_unit<value_type, TAU> {*this}.Value);
+        return std::asin(angle_unit<ValueType, TAU> {*this}.Value);
     }
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::cos() const -> value_type
+inline auto angle_unit<ValueType, OneTurn>::cos() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::cos(Value);
     } else {
-        return std::cos(angle_unit<value_type, TAU> {*this}.Value);
+        return std::cos(angle_unit<ValueType, TAU> {*this}.Value);
     }
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::acos() const -> value_type
+inline auto angle_unit<ValueType, OneTurn>::acos() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::acos(Value);
     } else {
-        return std::acos(angle_unit<value_type, TAU> {*this}.Value);
+        return std::acos(angle_unit<ValueType, TAU> {*this}.Value);
     }
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::tan() const -> value_type
+inline auto angle_unit<ValueType, OneTurn>::tan() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::tan(Value);
     } else {
-        return std::tan(angle_unit<value_type, TAU> {*this}.Value);
+        return std::tan(angle_unit<ValueType, TAU> {*this}.Value);
     }
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-inline auto angle_unit<ValueType, OneTurn>::atan() const -> value_type
+inline auto angle_unit<ValueType, OneTurn>::atan() const -> ValueType
 {
     if constexpr (OneTurn == TAU) {
         return std::atan(Value);
     } else {
-        return std::atan(angle_unit<value_type, TAU> {*this}.Value);
+        return std::atan(angle_unit<ValueType, TAU> {*this}.Value);
     }
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mode) const -> angle_unit<value_type, OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mode) const -> angle_unit<ValueType, OneTurn>
 {
-    auto result {std::fmod(this->Value, static_cast<ValueType>(OneTurn))};
+    auto result {std::fmod(this->Value, one_turn)};
 
     switch (mode) {
     case angle_normalize::FullTurnSymmetric: break;
     case angle_normalize::HalfTurnSymmetric:
-        result = std::fmod(result + static_cast<ValueType>(OneTurn), static_cast<ValueType>(OneTurn));
-        if (result > OneTurn / 2) { result -= static_cast<ValueType>(OneTurn); }
+        result = std::fmod(result + one_turn, one_turn);
+        if (result > one_turn / 2) { result -= one_turn; }
         break;
     case angle_normalize::PositiveFullTurn:
-        if (result < 0) { result += static_cast<ValueType>(OneTurn); }
+        if (result < 0) { result += one_turn; }
         break;
     }
 
@@ -103,9 +103,11 @@ auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mod
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<value_type, OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>
 {
-    return {static_cast<value_type>(left.Value + ((right.Value - left.Value) * step))};
+    ValueType const leftVal {static_cast<ValueType>(left.Value)};
+    ValueType const rightVal {static_cast<ValueType>(right.Value)};
+    return {leftVal + (rightVal - leftVal) * static_cast<ValueType>(step)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>

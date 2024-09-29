@@ -79,7 +79,7 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     f32* ptr {samples.data()};
 
     // call 'apply' on all commands; then render them
-    commands.render(_font, ptr, _channels, _sampleRate);
+    commands.render(_font, ptr, static_cast<u8>(_channels), _sampleRate);
 
     return buffer::Create({.Channels = _channels, .SampleRate = _sampleRate, .FrameCount = std::ssize(samples) / _channels}, samples);
 }

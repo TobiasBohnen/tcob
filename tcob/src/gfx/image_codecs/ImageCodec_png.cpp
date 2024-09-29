@@ -61,7 +61,7 @@ png::tRNS_chunk::tRNS_chunk(std::span<u8 const> data, color_type colorType, std:
 
     case color_type::Indexed:
         if (plte) {
-            for (i32 i {0}; i < std::ssize(data); ++i) {
+            for (usize i {0}; i < data.size(); ++i) {
                 plte->Entries[i].A = data[i];
             }
         }
@@ -215,18 +215,18 @@ void png_decoder::filter_pixel()
     switch (_filter) {
     case 1: {
         if (x <= 0) { return; }
-        for (i32 i {0}; i < _pixelSize; ++i) {
+        for (u8 i {0}; i < _pixelSize; ++i) {
             *(_curLineIt + i) += _curLine[xLength + i - _pixelSize];
         }
     } break;
     case 2: {
         if (_pixel.Y <= 0) { return; }
-        for (i32 i {0}; i < _pixelSize; ++i) {
+        for (u8 i {0}; i < _pixelSize; ++i) {
             *(_curLineIt + i) += _prvLine[xLength + i];
         }
     } break;
     case 3: {
-        for (i32 i {0}; i < _pixelSize; ++i) {
+        for (u8 i {0}; i < _pixelSize; ++i) {
             i32 const a {
                 (x > 0 ? _curLine[xLength + i - _pixelSize] : 0)
                 + (_pixel.Y > 0 ? _prvLine[xLength + i] : 0)};
@@ -234,7 +234,7 @@ void png_decoder::filter_pixel()
         }
     } break;
     case 4: {
-        for (i32 i {0}; i < _pixelSize; ++i) {
+        for (u8 i {0}; i < _pixelSize; ++i) {
             u8 const a {(x > 0 ? _curLine[xLength + i - _pixelSize] : u8 {0})};
             u8 const b {(_pixel.Y > 0 ? _prvLine[xLength + i] : u8 {0})};
             u8 const c {((x > 0 && _pixel.Y > 0) ? _prvLine[xLength + i - _pixelSize] : u8 {0})};
@@ -380,9 +380,9 @@ void png_decoder::prepare()
         break;
     }
 
-    _prvLine.resize(lineSize);
-    _curLine.resize(lineSize);
-    _data.resize(_ihdr.Width * png::BPP * _ihdr.Height);
+    _prvLine.resize(static_cast<usize>(lineSize));
+    _curLine.resize(static_cast<usize>(lineSize));
+    _data.resize(static_cast<usize>(_ihdr.Width * png::BPP * _ihdr.Height));
     _dataIt = _data.begin();
     prepare_delegate();
 }
@@ -502,7 +502,7 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
             _pixel.X   = 0;
 
             if (_ihdr.NonInterlaced) { // copy and filter whole line if not interlaced
-                std::copy(idatIt + 1, idatIt + 1 + _curLine.size(), _curLineIt);
+                std::copy(idatIt + 1, idatIt + 1 + std::ssize(_curLine), _curLineIt);
                 filter_line();
             }
 
@@ -573,7 +573,7 @@ auto static get_data(image const& image) -> std::vector<u8>
     auto const& info {image.get_info()};
 
     std::vector<u8> retValue;
-    retValue.resize(info.size_in_bytes() + info.Size.Height);
+    retValue.resize(static_cast<usize>(info.size_in_bytes() + info.Size.Height));
 
     auto const format {info.Format};
 
@@ -613,15 +613,15 @@ void png_encoder::write_image(image const& image, ostream& out) const
 
     // write in 8192 byte chunks
     isize offset {0};
-    isize total {std::ssize(buf)};
+    usize total {buf.size()};
 
-    constexpr isize                idatLength {8192};
+    constexpr usize                idatLength {8192};
     std::array<u8, idatLength + 4> idat {};
 
     u32 const type {helper::byteswap(static_cast<u32>(png::chunk_type::IDAT))};
     while (total > 0) {
         memcpy(idat.data(), &type, 4);
-        isize const length {std::min(idatLength, total)};
+        usize const length {std::min(idatLength, total)};
         memcpy(idat.data() + 4, buf.data() + offset, length);
         write_chunk(out, idat, static_cast<u32>(length + 4));
         offset += length;

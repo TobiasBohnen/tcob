@@ -39,9 +39,9 @@ public:
     auto write(ostream& stream, array const& arr) -> bool override;
 
 private:
-    void write_object(ostream& stream, i32 indent, object const& obj) const;
-    void write_array(ostream& stream, i32 indent, array const& arr) const;
-    void write_entry(ostream& stream, i32 indent, entry const& ent) const;
+    void write_object(ostream& stream, usize indent, object const& obj) const;
+    void write_array(ostream& stream, usize indent, array const& arr) const;
+    void write_entry(ostream& stream, usize indent, entry const& ent) const;
 };
 
 }

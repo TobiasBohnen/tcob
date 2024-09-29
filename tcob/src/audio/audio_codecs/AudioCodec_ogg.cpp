@@ -71,7 +71,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     f32** pcm {nullptr};
     i32   offsetSamples {0};
-    i32   wantFrames {static_cast<i32>(outputSamples.size() / _info.Channels)};
+    i32   wantFrames {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Channels))};
     for (;;) {
         i32 const readFrames {static_cast<i32>(ov_read_float(&_file, &pcm, wantFrames, &_section))};
         if (readFrames <= 0) {
@@ -81,7 +81,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
         for (i32 i {0}; i < readFrames; ++i) {
             for (i32 ch {0}; ch < _info.Channels; ++ch) {
                 assert(offsetSamples < std::ssize(outputSamples));
-                outputSamples[offsetSamples++] = pcm[ch][i];
+                outputSamples[static_cast<u32>(offsetSamples++)] = pcm[ch][i];
             }
         }
         wantFrames -= readFrames;
@@ -115,7 +115,7 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& in
     vorbis_block_init(&vd, &vb);
 
     random::rng_game_rand rng;
-    ogg_stream_init(&os, rng.next());
+    ogg_stream_init(&os, static_cast<i32>(rng.next()));
 
     {
         ogg_packet header;
@@ -140,13 +140,13 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& in
         }
         i32 const  readFrames {read / info.Channels};
         f32**      buffer {vorbis_analysis_buffer(&vd, readFrames)};
-        auto const readBuffer {samples.subspan(readOffset, read)};
+        auto const readBuffer {samples.subspan(static_cast<u32>(readOffset), static_cast<u32>(read))};
         readOffset += read;
 
         // uninterleave samples
         for (i32 i {0}; i < readFrames; i++) {
             for (i32 j {0}; j < info.Channels; ++j) {
-                buffer[j][i] = readBuffer[(i * info.Channels) + j];
+                buffer[j][i] = readBuffer[static_cast<u32>((i * info.Channels) + j)];
             }
         }
 
