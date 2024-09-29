@@ -102,7 +102,7 @@ auto to_string(T&& value) -> string
 template <Arithmetic T>
 auto to_number(string_view str) -> std::optional<T>
 {
-#ifdef __cpp_lib_to_chars
+#if defined(__cpp_lib_to_chars)
     auto const* valueStrData {str.data()};
     auto const  valueStrSize {str.size()};
 

@@ -141,15 +141,14 @@ auto replace(string_view source, string_view from, string_view to) -> string
 auto to_lower(string_view source) -> string
 {
     string retValue {source};
-    std::transform(retValue.begin(), retValue.end(), retValue.begin(), [](char c) { return std::tolower(c); });
+    std::ranges::transform(retValue, retValue.begin(), [](char c) { return std::tolower(c); });
     return retValue;
 }
 
 auto case_insensitive_equals(string_view lhs, string_view rhs) -> bool
 {
-    return std::equal(lhs.begin(), lhs.end(),
-                      rhs.begin(), rhs.end(),
-                      [](char a, char b) { return std::tolower(a) == std::tolower(b); });
+    return std::ranges::equal(lhs, rhs,
+                              [](char a, char b) { return std::tolower(a) == std::tolower(b); });
 }
 
 auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool

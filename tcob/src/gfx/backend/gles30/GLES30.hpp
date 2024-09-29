@@ -11,7 +11,7 @@
 
 namespace tcob::gfx::gles30 {
 
-#ifdef TCOB_DEBUG
+#if defined(TCOB_DEBUG)
 
     #define GLCHECK(_CALL) /*NOLINT*/                                                                \
         do {                                                                                         \
