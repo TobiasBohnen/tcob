@@ -114,6 +114,7 @@ auto to_number(string_view str) -> std::optional<T>
 
     return std::nullopt;
 #else
+    if (str.empty() || str[0] == '\0') { return std::nullopt; }
     string temp {str};
     if constexpr (Integral<T>) {
         char*     end {nullptr};
