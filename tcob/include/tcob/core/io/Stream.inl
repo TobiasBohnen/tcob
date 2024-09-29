@@ -142,9 +142,9 @@ inline auto ostream::write_filtered(std::span<T const> s, auto&& filter, auto&&.
     auto vec {filter.to(s)};
     if constexpr (sizeof...(filters) > 0) {
         return write_filtered<T>(vec, filters...);
+    } else {
+        return write<T>(vec);
     }
-
-    return write<T>(vec);
 }
 
 template <typename T>

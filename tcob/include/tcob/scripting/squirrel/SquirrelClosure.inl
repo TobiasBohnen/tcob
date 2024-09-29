@@ -58,7 +58,7 @@ namespace detail {
     }
 
     template <typename R, typename... Args>
-    inline auto compare_types(vm_view view, SQInteger startIndex, std::function<R(Args...)> const&) -> bool
+    inline auto compare_types([[maybe_unused]] vm_view view, SQInteger startIndex, std::function<R(Args...)> const&) -> bool
     {
         return ((compare_types_impl<Args>(view, startIndex++)) && ...);
     }

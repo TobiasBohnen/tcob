@@ -48,7 +48,7 @@ inline auto compare_types_impl(state_view view, i32& startIndex) -> bool
 }
 
 template <typename R, typename... Args>
-inline auto compare_types(state_view view, i32 startIndex, std::function<R(Args...)> const&) -> bool
+inline auto compare_types([[maybe_unused]] state_view view, [[maybe_unused]] i32 startIndex, std::function<R(Args...)> const&) -> bool
 {
     return ((compare_types_impl<Args>(view, startIndex)) && ...);
 }

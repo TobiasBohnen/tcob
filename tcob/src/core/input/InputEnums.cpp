@@ -962,6 +962,8 @@ auto convert_enum(key_code code) -> SDL_Keycode
     case key_code::CALL: return SDLK_CALL;
     case key_code::ENDCALL: return SDLK_ENDCALL;
     }
+
+    return SDLK_UNKNOWN;
 }
 
 auto convert_enum(SDL_Keycode code) -> key_code

@@ -198,7 +198,9 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
                 u8 b {data[i]};
                 for (i32 j {0}; j < 8; ++j) {
                     u8 col {helper::get_bits(b, 7 - j, 1) == 0 ? u8 {0} : u8 {255}};
-                    imgData[index++] = imgData[index++] = imgData[index++] = col;
+                    imgData[index++] = col;
+                    imgData[index++] = col;
+                    imgData[index++] = col;
                 }
             }
 
@@ -216,7 +218,7 @@ auto pcx_decoder::decode_info(istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Manufacturer == ManufacturerMagicNumber) {
-        return image::info {{_header.Width(), _header.Height()}, image::format::RGB};
+        return image::info {.Size = {_header.Width(), _header.Height()}, .Format = image::format::RGB};
     }
 
     return std::nullopt;

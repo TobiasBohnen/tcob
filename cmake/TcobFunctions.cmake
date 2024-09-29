@@ -22,7 +22,7 @@ function(tcob_add_obj_library module sources headers)
         -Wno-implicit-int-float-conversion # TODO
         -Wno-double-promotion # TODO
         -Wno-float-equal # WONTFIX
-        -Wno-switch-enum -Wno-switch-default # TODO
+        -Wno-switch-default -Wno-switch-enum # WONTFIX
         -Wno-unsafe-buffer-usage # WONTFIX
         -Wno-ctad-maybe-unsupported # WONTFIX
         -Wno-c++98-compat-pedantic -Wno-c++20-compat-pedantic # WONTFIX
