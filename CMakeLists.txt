@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.25.0)
 project(tcob LANGUAGES C CXX VERSION 0.0.1)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 set(TCOB_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tcob/include)
 include(cmake/TcobFunctions.cmake)
@@ -12,7 +13,6 @@ option(TCOB_BUILD_GAMES "Build games" ON)
 option(TCOB_BUILD_TESTS "Build tests" ON)
 option(TCOB_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(TCOB_BUILD_TOOLS "Build tools" ON)
-option(TCOB_USE_DEFAULT_MSVC_OPTIONS "" ON)
 option(TCOB_BUILD_SHARED "Build shared library" OFF)
 
 if(TCOB_BUILD_SHARED OR BUILD_SHARED_LIBS)
@@ -62,7 +62,7 @@ if(TCOB_MINIMAL)
 endif()
 
 # compile options##############################################################
-if(MSVC AND TCOB_USE_DEFAULT_MSVC_OPTIONS)
+if(MSVC)
   add_compile_options(/utf-8)
   add_compile_options(/bigobj)
   add_compile_options(/arch:AVX2)

@@ -15,7 +15,7 @@ function(tcob_add_obj_library module sources headers)
     )
 
     target_compile_options(${module} PRIVATE
-        $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<BOOL:TCOB_USE_DEFAULT_MSVC_OPTIONS>>: /W4>
+        $<$<CXX_COMPILER_ID:MSVC>: /W4>
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra
         -Wno-sign-conversion # TODO
         -Wno-exit-time-destructors # TODO
