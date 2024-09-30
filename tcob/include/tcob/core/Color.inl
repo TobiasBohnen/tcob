@@ -211,26 +211,7 @@ auto constexpr color::to_hsv() const -> hsx
         h /= 6.0f;
     }
 
-    return {degree_f {h * 360.0f}, s, v};
-}
-
-inline void color::Serialize(color v, auto&& s)
-{
-    s["r"] = v.R;
-    s["g"] = v.G;
-    s["b"] = v.B;
-    s["a"] = v.A;
-}
-
-inline auto color::Deserialize(color& v, auto&& s) -> bool
-{
-    if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
-        if (!s.try_get(v.A, "a")) {
-            v.A = static_cast<u8>(255);
-        }
-        return true;
-    }
-    return false;
+    return {.Hue = degree_f {h * 360.0f}, .Saturation = s, .X = v};
 }
 
 auto constexpr operator==(color left, color right) -> bool

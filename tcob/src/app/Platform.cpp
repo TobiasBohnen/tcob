@@ -15,6 +15,7 @@
 
 #include "loaders/ConfigAssetLoader.hpp"
 
+#include "tcob/app/SerializeHelper.hpp"
 #include "tcob/audio/AudioSystem.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"

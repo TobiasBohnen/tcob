@@ -47,9 +47,6 @@ public:
 
     auto static constexpr Lerp(color left, color right, f64 step) -> color;
 
-    void static Serialize(color v, auto&& s);
-    auto static Deserialize(color& v, auto&& s) -> bool;
-
     auto static FromString(string_view name) -> color;
 
     u8 R {0};

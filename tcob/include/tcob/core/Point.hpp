@@ -42,9 +42,6 @@ public:
     auto static constexpr Lerp(point<T> const& left, point<T> const& right, f64 step) -> point<T>;
     auto static constexpr FromDirection(degree<float_type> angle) -> point<T>;
 
-    void static Serialize(point const& v, auto&& s);
-    auto static Deserialize(point& v, auto&& s) -> bool;
-
     T X {0};
     T Y {0};
 

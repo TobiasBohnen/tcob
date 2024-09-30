@@ -100,21 +100,7 @@ class texture_region final {
 public:
     rect_f UVRect {rect_f::Zero};
     u32    Level {0};
-
-    void static Serialize(texture_region const& v, auto&& s);
-    auto static Deserialize(texture_region& v, auto&& s) -> bool;
 };
-
-inline void texture_region::Serialize(texture_region const& v, auto&& s)
-{
-    s["level"] = v.Level;
-    rect_f::Serialize(v.UVRect, s);
-}
-
-inline auto texture_region::Deserialize(texture_region& v, auto&& s) -> bool
-{
-    return s.try_get(v.Level, "level") && rect_f::Deserialize(v.UVRect, s);
-}
 
 ////////////////////////////////////////////////////////////
 
@@ -141,22 +127,8 @@ struct alignments {
     horizontal_alignment Horizontal {horizontal_alignment::Left};
     vertical_alignment   Vertical {vertical_alignment::Top};
 
-    void static Serialize(alignments const& v, auto&& s);
-    auto static Deserialize(alignments& v, auto&& s) -> bool;
-
     auto operator==(alignments const& other) const -> bool = default;
 };
-
-inline void alignments::Serialize(alignments const& v, auto&& s)
-{
-    s["horizontal"] = v.Horizontal;
-    s["vertical"]   = v.Vertical;
-}
-
-inline auto alignments::Deserialize(alignments& v, auto&& s) -> bool
-{
-    return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
-}
 
 ////////////////////////////////////////////////////////////
 
@@ -177,26 +149,6 @@ struct video_config {
 #else
     string RenderSystem {"OPENGL45"};
 #endif
-
-    void static Serialize(video_config const& v, auto&& s)
-    {
-        s[Cfg::Video::fullscreen]             = v.FullScreen;
-        s[Cfg::Video::use_desktop_resolution] = v.UseDesktopResolution;
-        s[Cfg::Video::resolution]             = v.Resolution;
-        s[Cfg::Video::frame_limit]            = v.FrameLimit;
-        s[Cfg::Video::vsync]                  = v.VSync;
-        s[Cfg::Video::render_system]          = v.RenderSystem;
-    }
-
-    auto static Deserialize(video_config& v, auto&& s) -> bool
-    {
-        return s.try_get(v.FullScreen, Cfg::Video::fullscreen)
-            && s.try_get(v.UseDesktopResolution, Cfg::Video::use_desktop_resolution)
-            && s.try_get(v.Resolution, Cfg::Video::resolution)
-            && s.try_get(v.FrameLimit, Cfg::Video::frame_limit)
-            && s.try_get(v.VSync, Cfg::Video::vsync)
-            && s.try_get(v.RenderSystem, Cfg::Video::render_system);
-    }
 };
 
 }

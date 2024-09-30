@@ -617,7 +617,7 @@ struct converter<T> {
     {
         if (std::holds_alternative<object>(config)) {
             T t {};
-            return T::Deserialize(t, std::get<object>(config));
+            return Deserialize(t, std::get<object>(config));
         }
         return false;
     }
@@ -625,7 +625,7 @@ struct converter<T> {
     auto static From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<object>(config)) {
-            return T::Deserialize(value, std::get<object>(config));
+            return Deserialize(value, std::get<object>(config));
         }
         return false;
     }
@@ -633,7 +633,7 @@ struct converter<T> {
     void static To(cfg_value& config, T const& value)
     {
         object obj {};
-        T::Serialize(value, obj);
+        Serialize(value, obj);
         config = obj;
     }
 };

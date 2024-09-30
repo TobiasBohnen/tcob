@@ -87,10 +87,10 @@ template <typename T, typename S>
 concept Serializable =
     requires(T& t, S& s) {
         {
-            T::Serialize(t, s)
+            Serialize(t, s)
         };
         {
-            T::Deserialize(t, s)
+            Deserialize(t, s)
         };
     };
 

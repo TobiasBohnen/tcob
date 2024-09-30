@@ -263,22 +263,6 @@ void constexpr rect<T>::resize_by(size<U> const& size)
 }
 
 template <Arithmetic T>
-inline void rect<T>::Serialize(rect<T> const& v, auto&& s)
-{
-    s["x"]      = v.X;
-    s["y"]      = v.Y;
-    s["width"]  = v.Width;
-    s["height"] = v.Height;
-}
-
-template <Arithmetic T>
-inline auto rect<T>::Deserialize(rect<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.X, "x") && s.try_get(v.Y, "y")
-        && s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
-}
-
-template <Arithmetic T>
 template <Arithmetic U>
 auto constexpr rect<T>::contains(rect<U> const& rect) const -> bool
 {

@@ -73,9 +73,6 @@ public:
     color                                 Color;
     std::pair<f32, f32>                   Transparency;
 
-    void static Serialize(particle_template const& v, auto&& s);
-    auto static Deserialize(particle_template& v, auto&& s) -> bool;
-
     auto operator==(particle_template const& other) const -> bool = default;
 };
 
@@ -107,9 +104,6 @@ public:
     void reset() override;
 
     void emit_particles(particle_system& system, milliseconds time) override;
-
-    void static Serialize(particle_emitter const& v, auto&& s);
-    auto static Deserialize(particle_emitter& v, auto&& s) -> bool;
 
 private:
     rng          _randomGen;

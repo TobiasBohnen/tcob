@@ -21,9 +21,6 @@ public:
 
     f32   Position {0};
     color Value {};
-
-    void static Serialize(color_stop const& v, auto&& s);
-    auto static Deserialize(color_stop& v, auto&& s) -> bool;
 };
 
 ////////////////////////////////////////////////////////////
@@ -48,5 +45,3 @@ private:
 };
 
 }
-
-#include "ColorGradient.inl"

@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "tcob/app/Platform.hpp"
+#include "tcob/app/SerializeHelper.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stats.hpp"
 #include "tcob/core/TaskManager.hpp"

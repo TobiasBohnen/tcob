@@ -102,19 +102,6 @@ auto constexpr point<T>::equals(point<T> const& other, T tol) const -> bool
     return dx * dx + dy * dy <= tol * tol;
 }
 
-template <Arithmetic T>
-inline void point<T>::Serialize(point<T> const& v, auto&& s)
-{
-    s["x"] = v.X;
-    s["y"] = v.Y;
-}
-
-template <Arithmetic T>
-inline auto point<T>::Deserialize(point<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
-}
-
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator+=(point<T>& left, point<R> const& right) -> point<T>&
 {

@@ -69,9 +69,6 @@ public:
 
     auto static constexpr Lerp(rect const& left, rect const& right, f64 step) -> rect;
 
-    void static Serialize(rect const& v, auto&& s);
-    auto static Deserialize(rect& v, auto&& s) -> bool;
-
     T X {0};
     T Y {0};
     T Width {0};

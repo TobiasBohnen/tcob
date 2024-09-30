@@ -107,9 +107,6 @@ public:
         bool   IsItalic {false};
         weight Weight {weight::Normal};
 
-        void static Serialize(style const& v, auto&& s);
-        auto static Deserialize(style& v, auto&& s) -> bool;
-
         auto operator==(font::style const& other) const -> bool = default;
     };
 
@@ -149,18 +146,6 @@ private:
 
     assets::manual_asset_ptr<texture> _texture {};
 };
-
-inline void font::style::Serialize(style const& v, auto&& s)
-{
-    s["is_italic"] = v.IsItalic;
-    s["weight"]    = v.Weight;
-}
-
-inline auto font::style::Deserialize(style& v, auto&& s) -> bool
-{
-    return s.try_get(v.IsItalic, "is_italic")
-        && s.try_get(v.Weight, "weight");
-}
 
 ////////////////////////////////////////////////////////////
 }

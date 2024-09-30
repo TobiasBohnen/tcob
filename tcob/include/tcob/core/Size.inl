@@ -32,19 +32,6 @@ auto constexpr size<T>::Lerp(size<T> const& left, size<T> const& right, f64 step
 }
 
 template <Arithmetic T>
-inline void size<T>::Serialize(size<T> const& v, auto&& s)
-{
-    s["width"]  = v.Width;
-    s["height"] = v.Height;
-}
-
-template <Arithmetic T>
-inline auto size<T>::Deserialize(size<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
-}
-
-template <Arithmetic T>
 template <Arithmetic U>
 auto constexpr size<T>::contains(point<U> const& point) const -> bool
 {

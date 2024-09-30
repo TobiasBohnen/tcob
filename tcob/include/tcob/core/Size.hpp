@@ -32,9 +32,6 @@ public:
 
     auto static constexpr Lerp(size<T> const& left, size<T> const& right, f64 step) -> size<T>;
 
-    void static Serialize(size const& v, auto&& s);
-    auto static Deserialize(size& v, auto&& s) -> bool;
-
     T Width {0};
     T Height {0};
 

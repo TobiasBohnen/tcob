@@ -8,6 +8,7 @@
 #include <tcob/app/Game.hpp>
 #include <tcob/app/Platform.hpp>
 #include <tcob/app/Scene.hpp>
+#include <tcob/app/SerializeHelper.hpp>
 
 #include <tcob/audio/AudioSource.hpp>
 #include <tcob/audio/AudioSystem.hpp>

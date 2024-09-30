@@ -1034,7 +1034,7 @@ struct converter<T> {
         if (view.is_table(idx)) {
             table tab {table::Acquire(view, idx)};
             T     t {};
-            return T::Deserialize(t, tab);
+            return Deserialize(t, tab);
         }
 
         return false;
@@ -1043,13 +1043,13 @@ struct converter<T> {
     auto static From(state_view view, i32& idx, T& value) -> bool
     {
         table tab {table::Acquire(view, idx++)};
-        return T::Deserialize(value, tab);
+        return Deserialize(value, tab);
     }
 
     void static To(state_view view, T const& value)
     {
         table tab {table::PushNew(view)};
-        T::Serialize(value, tab);
+        Serialize(value, tab);
     }
 };
 
