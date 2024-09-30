@@ -26,10 +26,22 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-using polygon      = std::vector<point_f>;
-using polygon_span = std::span<point_f const>;
+using polyline      = std::vector<point_f>;
+using polyline_span = std::span<point_f const>;
+
+struct polygon {
+    polyline              Outline; // ccw
+    std::vector<polyline> Holes;   // cw
+
+    auto operator==(polygon const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
+
+enum class winding : u8 {
+    CCW = 1, // Winding for solid shapes
+    CW  = 2, // Winding for holes
+};
 
 enum class buffer_usage_hint : u8 {
     DynamicDraw,

@@ -80,7 +80,7 @@ void lighting_system::set_blend_funcs(blend_funcs funcs)
 }
 
 struct caster_points {
-    polygon_span   Points {};
+    polyline_span  Points {};
     shadow_caster* Caster {nullptr};
 };
 
@@ -182,7 +182,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
                         for (auto const& cp : casterPoints) {
                             ray const  ray {{.Origin = lightPosition, .Direction = degree_d {angle}}};
-                            auto const result {ray.intersect_polygon(cp.Points)};
+                            auto const result {ray.intersect_polyline(cp.Points)};
                             for (auto const& [point, distance] : result) {
                                 if (point == lightPosition) { continue; }
                                 if (distance >= nearestPoint.Distance) { continue; }
@@ -265,7 +265,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     }
 }
 
-auto lighting_system::is_point_in_polygon(point_f p, polygon_span points) const -> bool
+auto lighting_system::is_point_in_polygon(point_f p, polyline_span points) const -> bool
 {
     f32 minX {points[0].X};
     f32 maxX {points[0].X};

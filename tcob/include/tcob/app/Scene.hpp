@@ -35,7 +35,7 @@ public:
     auto get_child_at(usize index) const -> std::shared_ptr<scene_node>;
     void clear_children();
 
-    void move_to_front();
+    void bring_to_front();
     void send_to_back();
 
     void fixed_update(milliseconds deltaTime);

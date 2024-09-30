@@ -162,7 +162,7 @@ void scene_node::clear_children()
     _children.clear();
 }
 
-void scene_node::move_to_front()
+void scene_node::bring_to_front()
 {
     if (_parent) { _parent->move_child_to_front(this); }
 }

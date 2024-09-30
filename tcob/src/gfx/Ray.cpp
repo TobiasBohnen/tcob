@@ -88,6 +88,30 @@ auto ray::intersect_function(func const& func, f64 tolerance) const -> std::vect
     return retValue;
 }
 
+auto ray::intersect_polyline(polyline_span polygon) const -> std::vector<result>
+{
+    std::vector<result> retValue;
+
+    usize const n {polygon.size()};
+    for (usize i {0}; i < n; ++i) {
+        if (auto distance {intersect_segment(_direction, point_d {polygon[i]}, point_d {polygon[(i + 1) % n]})}) {
+            retValue.emplace_back(get_result(*distance));
+        }
+    }
+
+    return retValue;
+}
+
+auto ray::intersect_polyline(polyline_span polygon, transform const& xform) const -> std::vector<result>
+{
+    std::vector<point_f> points;
+    points.reserve(polygon.size());
+    for (auto const& point : polygon) {
+        points.push_back(xform * point);
+    }
+    return intersect_polyline(points);
+}
+
 auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>
 {
     point_d const ro {_init.Origin};

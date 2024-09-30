@@ -68,7 +68,7 @@ public:
     std::any UserData;
 
     signal<light_collision const> Hit;
-    prop<polygon>                 Polygon;
+    prop<polyline>                Polygon;
 
 protected:
     shadow_caster(lighting_system* parent);
@@ -112,7 +112,7 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    auto is_point_in_polygon(point_f p, polygon_span points) const -> bool;
+    auto is_point_in_polygon(point_f p, polyline_span points) const -> bool;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};

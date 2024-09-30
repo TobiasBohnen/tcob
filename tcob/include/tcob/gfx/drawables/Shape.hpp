@@ -85,6 +85,8 @@ protected:
     void on_texture_region_changed(string const& texRegion) override;
 
 private:
+    void create();
+
     std::vector<u32>    _inds;
     std::vector<vertex> _verts;
 };
@@ -121,15 +123,23 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+enum class clip_mode : u8 {
+    Intersection,
+    Union,
+    Difference,
+    Xor
+};
+
 class TCOB_API poly_shape final : public shape {
 public:
     poly_shape();
 
-    prop<polygon>              Polygon;
-    prop<std::vector<polygon>> Holes;
+    prop<std::vector<polygon>> Polygons;
 
     auto get_geometry() -> geometry_data override;
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
+
+    void clip(poly_shape const& other, clip_mode mode);
 
     void move_by(point_f offset);
 
@@ -142,6 +152,7 @@ protected:
 
 private:
     void calc();
+    void create();
 
     std::vector<u32>    _inds;
     std::vector<vertex> _verts;
@@ -179,7 +190,7 @@ public:
     void remove_shape(shape const& shape);
     void clear();
 
-    void move_to_front(shape const& shape);
+    void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);
 
     auto get_shape_count() const -> isize;

@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include <clipper2/clipper.h>
+
 #include "../EarcutHelper.hpp"
 #include "tcob/gfx/Renderer.hpp"
 
@@ -56,7 +58,7 @@ void shape_batch::clear()
     _children.clear();
 }
 
-void shape_batch::move_to_front(shape const& shape)
+void shape_batch::bring_to_front(shape const& shape)
 {
     auto it {std::ranges::find_if(_children, [&shape](auto const& val) {
         return val.get() == &shape;
@@ -226,6 +228,21 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
+    create();
+}
+
+void circle_shape::on_color_changed(color c)
+{
+    geometry::set_color(_verts, c);
+}
+
+void circle_shape::on_texture_region_changed(string const& /* texRegion */)
+{
+    // TODO
+}
+
+void circle_shape::create()
+{
     _verts.clear();
     _inds.clear();
 
@@ -275,16 +292,6 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
     _inds.push_back(0);
     _inds.push_back(1);
     _inds.push_back(Segments);
-}
-
-void circle_shape::on_color_changed(color c)
-{
-    geometry::set_color(_verts, c);
-}
-
-void circle_shape::on_texture_region_changed(string const& /* texRegion */)
-{
-    // TODO
 }
 
 auto circle_shape::get_center() const -> point_f
@@ -378,7 +385,7 @@ auto rect_shape::get_center() const -> point_f
 
 poly_shape::poly_shape()
 {
-    Polygon.Changed.connect([&](auto const&) { mark_dirty(); });
+    Polygons.Changed.connect([&](auto const&) { mark_dirty(); });
 }
 
 auto poly_shape::get_geometry() -> geometry_data
@@ -391,18 +398,117 @@ auto poly_shape::get_geometry() -> geometry_data
 
 auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
-    auto retValue {ray.intersect_polygon(Polygon(), get_transform())};
-    for (auto const& hole : Holes()) {
-        auto points {ray.intersect_polygon(hole, get_transform())};
+    std::vector<ray::result> retValue;
+    for (auto const& polygon : Polygons()) {
+        auto points {ray.intersect_polyline(polygon.Outline, get_transform())};
         retValue.insert(retValue.end(), points.begin(), points.end());
+
+        for (auto const& hole : polygon.Holes) {
+            auto holePoints {ray.intersect_polyline(hole, get_transform())};
+            retValue.insert(retValue.end(), holePoints.begin(), holePoints.end());
+        }
     }
     return retValue;
 }
 
+static auto check_winding_order(polyline_span points) -> winding
+{
+    if (points.size() < 3) { return {}; }
+    f32 signedArea {0.0f};
+    for (usize i {0}; i < points.size(); ++i) {
+        point_f const& current {points[i]};
+        point_f const& next {points[(i + 1) % points.size()]};
+        signedArea += (next.X - current.X) * (next.Y + current.Y);
+    }
+    if (signedArea > 0) { return winding::CCW; }
+    if (signedArea < 0) { return winding::CW; }
+    return {};
+}
+
+void poly_shape::clip(poly_shape const& other, clip_mode mode)
+{
+    using namespace Clipper2Lib;
+
+    // Helper function to create Clipper paths
+    auto const createPath {[](poly_shape const& shape) -> PathsD {
+        auto const addPolygonPath = [](auto const& polyline, PathsD& retValue) {
+            std::vector<f32> points;
+            for (auto const& p : polyline) {
+                points.push_back(p.X);
+                points.push_back(p.Y);
+            }
+            if (points.size() < 2) { return; } // Ignore degenerate polygons
+            points.push_back(points[0]);       // Close the path
+            points.push_back(points[1]);
+            retValue.push_back(MakePathD(points));
+        };
+
+        PathsD retValue;
+        for (auto const& poly : shape.Polygons()) {
+            addPolygonPath(poly.Outline, retValue);
+            for (auto const& hole : poly.Holes) {
+                addPolygonPath(hole, retValue);
+            }
+        }
+
+        return retValue;
+    }};
+
+    ClipperD clipper;
+    clipper.AddSubject(createPath(*this));
+    clipper.AddClip(createPath(other));
+
+    ClipType type {ClipType::None};
+    switch (mode) {
+    case clip_mode::Intersection: type = ClipType::Intersection; break;
+    case clip_mode::Union: type = ClipType::Union; break;
+    case clip_mode::Difference: type = ClipType::Difference; break;
+    case clip_mode::Xor: type = ClipType::Xor; break;
+    }
+
+    PolyPathD                   solution;
+    [[maybe_unused]] bool const result {clipper.Execute(type, FillRule::NonZero, solution)};
+    assert(result);
+
+    mark_dirty();
+    (*Polygons).clear();
+
+    std::function<void(PolyPathD*, polygon*)> const parseSolution {
+        [&](PolyPathD* node, polygon* parentPoly) {
+            polyline* target {nullptr};
+            if (!node->IsHole()) { // If not a hole, it's a new polygon outline
+                parentPoly = &(*Polygons).emplace_back();
+                target     = &parentPoly->Outline;
+            } else {               // It's a hole, add to the parent polygon
+                assert(parentPoly);
+                target = &parentPoly->Holes.emplace_back();
+            }
+
+            for (auto const& pt : node->Polygon()) { target->emplace_back(pt.x, pt.y); }
+            if (!node->IsHole()) {
+                if (check_winding_order(*target) == winding::CW) { std::ranges::reverse(*target); }
+            } else {
+                if (check_winding_order(*target) == winding::CCW) { std::ranges::reverse(*target); }
+            }
+
+            for (usize i {0}; i < node->Count(); ++i) {
+                parseSolution(node->Child(i), parentPoly);
+            }
+        }};
+
+    assert(solution.Polygon().empty()); // Ensure no top-level polygons
+    for (u32 i {0}; i < solution.Count(); ++i) {
+        parseSolution(solution.Child(i), nullptr);
+    }
+}
+
 void poly_shape::move_by(point_f offset)
 {
-    for (auto& p : *Polygon) {
-        p += offset;
+    for (auto& polygon : *Polygons) {
+        for (auto& p : polygon.Outline) { p += offset; }
+        for (auto& hole : polygon.Holes) {
+            for (auto& p : hole) { p += offset; }
+        }
     }
 
     mark_dirty();
@@ -413,50 +519,8 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
-    auto        points {Polygon()};
-    usize const n {points.size()};
-    if (n < 3) { return; }
-
     calc();
-
-    _verts.clear();
-    _inds.clear();
-
-    auto const& xform {get_transform()};
-
-    texture_region texReg {};
-    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        texReg = Material->Texture->get_region(TextureRegion);
-    } else {
-        texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
-    }
-    f32 const   texLevel {static_cast<f32>(texReg.Level)};
-    auto const& uvRect {texReg.UVRect};
-
-    auto const pushVert {[&](point_f point) {
-        auto const& [x, y] {point};
-        _verts.push_back({.Position  = (xform * point).as_array(),
-                          .Color     = Color->as_array(),
-                          .TexCoords = {(((x - _boundingBox.X) / _boundingBox.Width) * uvRect.Width) + uvRect.X,
-                                        (((y - _boundingBox.Y) / _boundingBox.Height) * uvRect.Height) + uvRect.Y,
-                                        texLevel}});
-    }};
-
-    for (u32 i {0}; i < n; i++) { pushVert(points[i]); }
-    for (auto const& hole : Holes()) {
-        for (auto const holePoint : hole) { pushVert(holePoint); }
-    }
-
-    std::vector<polygon_span> polygon;
-    polygon.emplace_back(Polygon());
-    polygon.insert(polygon.end(), Holes->begin(), Holes->end());
-
-    auto const indices {mapbox::earcut<u32>(polygon)};
-    for (u32 i {0}; i < indices.size(); i += 3) {
-        _inds.push_back(indices[i + 2]);
-        _inds.push_back(indices[i + 1]);
-        _inds.push_back(indices[i + 0]);
-    }
+    create();
 }
 
 void poly_shape::on_color_changed(color c)
@@ -485,7 +549,11 @@ void poly_shape::calc()
     f32 signedArea {0.0f};
     _centroid = point_f::Zero;
 
-    auto const& points {Polygon()};
+    std::vector<point_f> points;
+    for (auto const& polygon : Polygons()) {
+        points.insert(points.end(), polygon.Outline.begin(), polygon.Outline.end());
+    }
+
     usize const n {points.size()};
 
     for (usize i {0}; i < n; ++i) {
@@ -506,6 +574,63 @@ void poly_shape::calc()
     _centroid /= (6.0f * signedArea);
 
     _boundingBox = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
+}
+
+void poly_shape::create()
+{
+    _verts.clear();
+    _inds.clear();
+    u32 indOffset {0};
+
+    // create verts
+    auto const&    xform {get_transform()};
+    texture_region texReg {};
+    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
+        texReg = Material->Texture->get_region(TextureRegion);
+    } else {
+        texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
+    }
+    f32 const   texLevel {static_cast<f32>(texReg.Level)};
+    auto const& uvRect {texReg.UVRect};
+
+    auto const pushVert {[&](point_f point) {
+        auto const& [x, y] {point};
+        _verts.push_back({.Position  = (xform * point).as_array(),
+                          .Color     = Color->as_array(),
+                          .TexCoords = {(((x - _boundingBox.X) / _boundingBox.Width) * uvRect.Width) + uvRect.X,
+                                        (((y - _boundingBox.Y) / _boundingBox.Height) * uvRect.Height) + uvRect.Y,
+                                        texLevel}});
+    }};
+
+    for (auto const& polygon : Polygons()) {
+        // outline
+        // push verts
+        for (auto const& p : polygon.Outline) { pushVert(p); }
+        assert(check_winding_order(polygon.Outline) == winding::CCW);
+
+        // create inds
+        std::vector<polyline_span> earcut;
+        earcut.emplace_back(polygon.Outline);
+        earcut.insert(earcut.end(), polygon.Holes.begin(), polygon.Holes.end());
+
+        auto const indices {mapbox::earcut<u32>(earcut)};
+        for (u32 i {0}; i < indices.size(); i += 3) {
+            _inds.push_back(indices[i + 2] + indOffset);
+            _inds.push_back(indices[i + 1] + indOffset);
+            _inds.push_back(indices[i + 0] + indOffset);
+        }
+        indOffset += polygon.Outline.size();
+
+        // holes
+        for (auto const& hole : polygon.Holes) {
+            assert(check_winding_order(hole) == winding::CW);
+
+            // push verts
+            for (auto const p : hole) { pushVert(p); }
+
+            indOffset += hole.size();
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////

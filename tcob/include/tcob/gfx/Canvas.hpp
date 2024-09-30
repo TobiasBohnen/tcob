@@ -46,10 +46,6 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-enum class winding : u8 {
-    CCW = 1, // Winding for solid shapes
-    CW  = 2, // Winding for holes
-};
 enum class solidity : u8 {
     Solid = 1,
     Hole  = 2,
