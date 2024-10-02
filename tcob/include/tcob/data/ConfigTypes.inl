@@ -6,6 +6,8 @@
 #pragma once
 #include "ConfigTypes.hpp"
 
+#include <numeric>
+
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
@@ -329,6 +331,38 @@ inline array::array(std::span<T> value)
     : array {}
 {
     values()->insert(end(), value.begin(), value.end());
+}
+
+template <ConvertibleFrom T>
+inline auto array::as(isize index) const -> T
+{
+    return get<T>(index).value();
+}
+
+template <typename T, typename... Args>
+inline auto array::make(auto&&... indices) const -> T
+{
+    constexpr usize argsCount {sizeof...(Args)};
+    constexpr usize indCount {sizeof...(indices)};
+
+    std::array<isize, argsCount> inds;
+
+    if constexpr (indCount > 0) {
+        static_assert(argsCount == indCount);
+        inds = {indices...};
+    } else {
+        std::iota(inds.begin(), inds.end(), 0);
+    }
+
+    std::tuple<Args...> tup {};
+    std::apply(
+        [&](auto&&... item) {
+            usize idx {0};
+            ((item = get<Args>(inds[idx++]).value()), ...);
+        },
+        tup);
+
+    return std::make_from_tuple<T>(tup);
 }
 
 template <ConvertibleFrom T>

@@ -164,6 +164,12 @@ public:
     auto parse(string_view config, string const& ext) -> bool;
 
     template <ConvertibleFrom T>
+    auto as(isize index) const -> T;
+
+    template <typename T, typename... Args>
+    auto make(auto&&... indices) const -> T;
+
+    template <ConvertibleFrom T>
     auto get(isize index) const -> result<T>;
 
     template <ConvertibleTo T>
