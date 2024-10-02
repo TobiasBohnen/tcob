@@ -17,6 +17,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer.cpp
@@ -82,6 +83,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.inl
     ${TCOB_INC_DIR}/tcob/gfx/Material.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Geometry.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.inl
     ${TCOB_INC_DIR}/tcob/gfx/Ray.hpp

@@ -16,6 +16,7 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Ray.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/Transformable.hpp"
@@ -46,6 +47,8 @@ public:
     auto virtual get_geometry() -> geometry_data                       = 0;
     auto virtual intersect(ray const& ray) -> std::vector<ray::result> = 0;
 
+    auto is_dirty() const -> bool;
+
 protected:
     auto virtual get_center() const -> point_f = 0;
     auto get_pivot() const -> point_f override;
@@ -55,7 +58,6 @@ protected:
 
     void on_transform_changed() override;
 
-    auto is_dirty() const -> bool;
     void mark_dirty();
     void mark_clean();
 
@@ -123,18 +125,11 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-enum class clip_mode : u8 {
-    Intersection,
-    Union,
-    Difference,
-    Xor
-};
-
 class TCOB_API poly_shape final : public shape {
 public:
     poly_shape();
 
-    prop<std::vector<polygon>> Polygons;
+    prop<polygons> Polygons;
 
     auto get_geometry() -> geometry_data override;
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
@@ -151,7 +146,6 @@ protected:
     void on_texture_region_changed(string const& texRegion) override;
 
 private:
-    void calc();
     void create();
 
     std::vector<u32>    _inds;
@@ -207,6 +201,7 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
+    bool                                _isDirty {false};
     std::vector<std::shared_ptr<shape>> _children {};
     batch_polygon_renderer              _renderer {};
 };

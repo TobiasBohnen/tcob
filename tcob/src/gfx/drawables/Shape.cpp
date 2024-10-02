@@ -7,9 +7,6 @@
 
 #include <algorithm>
 
-#include <clipper2/clipper.h>
-
-#include "../EarcutHelper.hpp"
 #include "tcob/gfx/Renderer.hpp"
 
 namespace tcob::gfx {
@@ -108,7 +105,10 @@ auto shape_batch::intersect(ray const& ray, u32 mask) -> std::unordered_map<shap
 
 void shape_batch::on_update(milliseconds deltaTime)
 {
+    _isDirty = false;
     for (auto& child : _children) {
+        if (child->is_dirty()) { _isDirty = true; }
+
         child->update(deltaTime);
     }
 }
@@ -120,11 +120,14 @@ auto shape_batch::can_draw() const -> bool
 
 void shape_batch::on_draw_to(render_target& target)
 {
-    _renderer.reset_geometry();
+    if (_isDirty) {
+        _isDirty = false;
+        _renderer.reset_geometry();
 
-    for (auto& shape : _children) {
-        if (shape->is_visible()) {
-            _renderer.add_geometry(shape->get_geometry(), shape->Material());
+        for (auto& shape : _children) {
+            if (shape->is_visible()) {
+                _renderer.add_geometry(shape->get_geometry(), shape->Material());
+            }
         }
     }
 
@@ -411,106 +414,15 @@ auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
     return retValue;
 }
 
-static auto check_winding_order(polyline_span points) -> winding
-{
-    if (points.size() < 3) { return {}; }
-    f32 signedArea {0.0f};
-    for (usize i {0}; i < points.size(); ++i) {
-        point_f const& current {points[i]};
-        point_f const& next {points[(i + 1) % points.size()]};
-        signedArea += (next.X - current.X) * (next.Y + current.Y);
-    }
-    if (signedArea > 0) { return winding::CCW; }
-    if (signedArea < 0) { return winding::CW; }
-    return {};
-}
-
 void poly_shape::clip(poly_shape const& other, clip_mode mode)
 {
-    using namespace Clipper2Lib;
-
-    // Helper function to create Clipper paths
-    auto const createPath {[](poly_shape const& shape) -> PathsD {
-        auto const addPolygonPath = [](auto const& polyline, PathsD& retValue) {
-            std::vector<f32> points;
-            for (auto const& p : polyline) {
-                points.push_back(p.X);
-                points.push_back(p.Y);
-            }
-            if (points.size() < 2) { return; } // Ignore degenerate polygons
-            points.push_back(points[0]);       // Close the path
-            points.push_back(points[1]);
-            retValue.push_back(MakePathD(points));
-        };
-
-        PathsD retValue;
-        for (auto const& poly : shape.Polygons()) {
-            addPolygonPath(poly.Outline, retValue);
-            for (auto const& hole : poly.Holes) {
-                addPolygonPath(hole, retValue);
-            }
-        }
-
-        return retValue;
-    }};
-
-    ClipperD clipper;
-    clipper.AddSubject(createPath(*this));
-    clipper.AddClip(createPath(other));
-
-    ClipType type {ClipType::None};
-    switch (mode) {
-    case clip_mode::Intersection: type = ClipType::Intersection; break;
-    case clip_mode::Union: type = ClipType::Union; break;
-    case clip_mode::Difference: type = ClipType::Difference; break;
-    case clip_mode::Xor: type = ClipType::Xor; break;
-    }
-
-    PolyPathD                   solution;
-    [[maybe_unused]] bool const result {clipper.Execute(type, FillRule::NonZero, solution)};
-    assert(result);
-
     mark_dirty();
-    (*Polygons).clear();
-
-    std::function<void(PolyPathD*, polygon*)> const parseSolution {
-        [&](PolyPathD* node, polygon* parentPoly) {
-            polyline* target {nullptr};
-            if (!node->IsHole()) { // If not a hole, it's a new polygon outline
-                parentPoly = &(*Polygons).emplace_back();
-                target     = &parentPoly->Outline;
-            } else {               // It's a hole, add to the parent polygon
-                assert(parentPoly);
-                target = &parentPoly->Holes.emplace_back();
-            }
-
-            for (auto const& pt : node->Polygon()) { target->emplace_back(pt.x, pt.y); }
-            if (!node->IsHole()) {
-                if (check_winding_order(*target) == winding::CW) { std::ranges::reverse(*target); }
-            } else {
-                if (check_winding_order(*target) == winding::CCW) { std::ranges::reverse(*target); }
-            }
-
-            for (usize i {0}; i < node->Count(); ++i) {
-                parseSolution(node->Child(i), parentPoly);
-            }
-        }};
-
-    assert(solution.Polygon().empty()); // Ensure no top-level polygons
-    for (u32 i {0}; i < solution.Count(); ++i) {
-        parseSolution(solution.Child(i), nullptr);
-    }
+    (*Polygons).clip(other.Polygons, mode);
 }
 
 void poly_shape::move_by(point_f offset)
 {
-    for (auto& polygon : *Polygons) {
-        for (auto& p : polygon.Outline) { p += offset; }
-        for (auto& hole : polygon.Holes) {
-            for (auto& p : hole) { p += offset; }
-        }
-    }
-
+    (*Polygons).move_by(offset);
     mark_dirty();
 }
 
@@ -519,7 +431,10 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
-    calc();
+    auto const info {Polygons->get_info()};
+    _boundingBox = info.BoundingBox;
+    _centroid    = info.Centroid;
+
     create();
 }
 
@@ -539,41 +454,6 @@ void poly_shape::on_texture_region_changed(string const& /* texRegion */)
 auto poly_shape::get_center() const -> point_f
 {
     return _centroid;
-}
-
-void poly_shape::calc()
-{
-    point_f max {std::numeric_limits<f32>::denorm_min(), std::numeric_limits<f32>::denorm_min()};
-    point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
-
-    f32 signedArea {0.0f};
-    _centroid = point_f::Zero;
-
-    std::vector<point_f> points;
-    for (auto const& polygon : Polygons()) {
-        points.insert(points.end(), polygon.Outline.begin(), polygon.Outline.end());
-    }
-
-    usize const n {points.size()};
-
-    for (usize i {0}; i < n; ++i) {
-        point_f const& p0 {points[i]};
-        max.X = std::max(p0.X, max.X);
-        max.Y = std::max(p0.Y, max.Y);
-        min.X = std::min(p0.X, min.X);
-        min.Y = std::min(p0.Y, min.Y);
-
-        point_f const& p1 {points[(i + 1) % n]};
-        f32 const      a {(p0.X * p1.Y) - (p1.X * p0.Y)};
-        signedArea += a;
-        _centroid.X += (p0.X + p1.X) * a;
-        _centroid.Y += (p0.Y + p1.Y) * a;
-    }
-
-    signedArea *= 0.5f;
-    _centroid /= (6.0f * signedArea);
-
-    _boundingBox = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
 }
 
 void poly_shape::create()
@@ -606,14 +486,9 @@ void poly_shape::create()
         // outline
         // push verts
         for (auto const& p : polygon.Outline) { pushVert(p); }
-        assert(check_winding_order(polygon.Outline) == winding::CCW);
 
         // create inds
-        std::vector<polyline_span> earcut;
-        earcut.emplace_back(polygon.Outline);
-        earcut.insert(earcut.end(), polygon.Holes.begin(), polygon.Holes.end());
-
-        auto const indices {mapbox::earcut<u32>(earcut)};
+        auto const indices {polygon.earcut()};
         for (u32 i {0}; i < indices.size(); i += 3) {
             _inds.push_back(indices[i + 2] + indOffset);
             _inds.push_back(indices[i + 1] + indOffset);
@@ -623,8 +498,6 @@ void poly_shape::create()
 
         // holes
         for (auto const& hole : polygon.Holes) {
-            assert(check_winding_order(hole) == winding::CW);
-
             // push verts
             for (auto const p : hole) { pushVert(p); }
 

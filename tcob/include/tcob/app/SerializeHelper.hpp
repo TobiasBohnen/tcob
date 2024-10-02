@@ -80,6 +80,7 @@ void Serialize(color v, auto&& s)
     s["b"] = v.B;
     s["a"] = v.A;
 }
+
 auto Deserialize(color& v, auto&& s) -> bool
 {
     if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {

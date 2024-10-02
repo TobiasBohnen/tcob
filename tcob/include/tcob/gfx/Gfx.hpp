@@ -6,9 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <span>
-#include <vector>
-
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -23,18 +20,6 @@ char const* const render_system {"render_system"};
 }
 
 namespace tcob::gfx {
-
-////////////////////////////////////////////////////////////
-
-using polyline      = std::vector<point_f>;
-using polyline_span = std::span<point_f const>;
-
-struct polygon {
-    polyline              Outline; // ccw
-    std::vector<polyline> Holes;   // cw
-
-    auto operator==(polygon const& other) const -> bool = default;
-};
 
 ////////////////////////////////////////////////////////////
 
