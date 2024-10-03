@@ -17,6 +17,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ray.cpp

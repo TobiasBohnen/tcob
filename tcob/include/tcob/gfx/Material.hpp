@@ -25,15 +25,10 @@ struct material {
     f32   PointSize {1};
 
     static inline char const* asset_name {"material"};
+
+    auto static Empty() -> assets::manual_asset_ptr<material>;
+
+    auto operator==(material const& other) const -> bool = default;
 };
 
-inline auto operator==(material const& left, material const& right) -> bool
-{
-    return (left.Texture == right.Texture)
-        && (left.Shader == right.Shader)
-        && (left.BlendFuncs == right.BlendFuncs)
-        && (left.BlendEquation == right.BlendEquation)
-        && (left.Color == right.Color)
-        && (left.PointSize == right.PointSize);
-}
 }
