@@ -23,8 +23,9 @@ namespace tcob::gfx {
 struct canvas_paint;
 struct canvas_scissor;
 struct canvas_path;
-struct material;
 struct render_properties;
+
+class material;
 
 }
 

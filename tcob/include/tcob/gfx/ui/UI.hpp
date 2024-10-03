@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <utility>
 #include <variant>
 
 #include "tcob/core/Rect.hpp"
@@ -153,8 +152,7 @@ auto operator-=(rect_f& left, thickness const& right) -> rect_f&;
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API dimensions {
-public:
+struct dimensions {
     length Width {1, length::type::Relative};
     length Height {1, length::type::Relative};
 
@@ -185,8 +183,7 @@ concept SubmitTarget = requires(Target target, string const& name, widget_attrib
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API widget_flags {
-public:
+struct widget_flags {
     bool Focus {false};
     bool Active {false};
     bool Hover {false};
@@ -198,8 +195,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API linear_gradient {
-public:
+struct linear_gradient {
     degree_f       Angle {0};
     color_gradient Colors;
 
@@ -208,8 +204,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API radial_gradient {
-public:
+struct radial_gradient {
     length         InnerRadius {0.0f, length::type::Relative};
     length         OuterRadius {1.0f, length::type::Relative};
     size_f         Scale {size_f::One};
@@ -220,8 +215,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API box_gradient {
-public:
+struct box_gradient {
     length         Radius {0.25f, length::type::Relative};
     length         Feather {0.50f, length::type::Relative};
     color_gradient Colors;
@@ -231,8 +225,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API image_pattern {
-public:
+struct image_pattern {
     assets::asset_ptr<texture> Texture;
     bool                       Stretch {false};
 
@@ -247,17 +240,12 @@ public:
     string                     Region;
 
     image_def() = default;
-    image_def(assets::asset_ptr<texture> texture, string region = "default")
-        : Texture {std::move(texture)}
-        , Region {std::move(region)}
-    {
-    }
+    image_def(assets::asset_ptr<texture> texture, string region = "default");
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API nine_patch {
-public:
+struct nine_patch {
     assets::asset_ptr<texture> Texture;
     string                     Region {"default"};
     rect_f                     UV;

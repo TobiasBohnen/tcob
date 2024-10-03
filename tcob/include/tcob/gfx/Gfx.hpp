@@ -81,8 +81,7 @@ enum class primitive_type : u8 {
 
 ////////////////////////////////////////////////////////////
 
-class texture_region final {
-public:
+struct texture_region final {
     rect_f UVRect {rect_f::Zero};
     u32    Level {0};
 };

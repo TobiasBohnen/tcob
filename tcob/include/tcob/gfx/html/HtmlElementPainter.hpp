@@ -17,7 +17,7 @@ namespace tcob::gfx::html {
 
 ////////////////////////////////////////////////////////////
 
-enum class background_repeat {
+enum class background_repeat : u8 {
     Repeat,
     RepeatX,
     RepeatY,
@@ -26,7 +26,7 @@ enum class background_repeat {
 
 ////////////////////////////////////////////////////////////
 
-enum class list_marker_type {
+enum class list_marker_type : u8 {
     Image,
     Circle,
     Disc,
@@ -35,7 +35,7 @@ enum class list_marker_type {
 
 ////////////////////////////////////////////////////////////
 
-enum class font_decorations {
+enum class font_decorations : u8 {
     None        = 0x00,
     Underline   = 0x01,
     Linethrough = 0x02,
@@ -44,7 +44,7 @@ enum class font_decorations {
 
 ////////////////////////////////////////////////////////////
 
-enum class border_style {
+enum class border_style : u8 {
     None,
     Hidden,
     Dotted,

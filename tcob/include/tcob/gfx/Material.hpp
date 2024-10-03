@@ -14,7 +14,8 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-struct material {
+class TCOB_API material {
+public:
     assets::asset_ptr<shader>  Shader {};
     assets::asset_ptr<texture> Texture {};
 

@@ -60,8 +60,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API [[nodiscard]] particle_template {
-public:
+struct [[nodiscard]] particle_template {
     std::pair<f32, f32>                   Acceleration;
     std::pair<degree_f, degree_f>         Direction;
     std::pair<milliseconds, milliseconds> Lifetime;
