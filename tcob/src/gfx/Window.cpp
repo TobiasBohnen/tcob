@@ -28,6 +28,7 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::manu
     , _impl {std::move(window)}
 {
     Cursor.Changed.connect([&](auto const& value) { SystemCursorEnabled = !value.is_ready(); });
+    SystemCursorEnabled(true);
     SystemCursorEnabled.Changed.connect([&](bool value) { SDL_ShowCursor(value ? SDL_ENABLE : SDL_DISABLE); });
 
     _material->Texture = _texture;
