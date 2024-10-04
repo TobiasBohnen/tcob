@@ -72,7 +72,7 @@ public:
     auto operator=(decoder const& other) noexcept -> decoder& = delete;
     virtual ~decoder();
 
-    auto open(std::shared_ptr<istream> in, std::any& ctx) -> std::optional<buffer::info>;
+    auto open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>;
 
     auto decode_to_buffer(al::al_buffer* buffer, i64 wantSamples) -> bool;
     auto decode_to_buffer(std::span<f32> buffer) -> bool;
@@ -83,13 +83,13 @@ protected:
     auto virtual open() -> std::optional<buffer::info>       = 0;
     auto virtual decode(std::span<f32> outputSamples) -> i32 = 0;
 
-    auto get_stream() -> istream&;
+    auto get_stream() -> io::istream&;
     auto get_context() -> std::any&;
 
 private:
-    std::shared_ptr<istream>    _stream;
-    std::any                    _ctx;
-    std::optional<buffer::info> _info;
+    std::shared_ptr<io::istream> _stream;
+    std::any                     _ctx;
+    std::optional<buffer::info>  _info;
 };
 
 ////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ public:
     encoder()          = default;
     virtual ~encoder() = default;
 
-    auto virtual encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool = 0;
+    auto virtual encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool = 0;
 };
 
 }

@@ -159,19 +159,19 @@ auto json_reader::ReadString(entry& currentEntry, utf8_string_view line) -> bool
 
 //////////////////////////////////////////////////////////////////////
 
-auto json_writer::write(ostream& stream, object const& obj) -> bool
+auto json_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     write_object(stream, 0, obj);
     return true;
 }
 
-auto json_writer::write(ostream& stream, array const& arr) -> bool
+auto json_writer::write(io::ostream& stream, array const& arr) -> bool
 {
     write_array(stream, 0, arr);
     return true;
 }
 
-void json_writer::write_object(ostream& stream, usize indent, object const& obj) const
+void json_writer::write_object(io::ostream& stream, usize indent, object const& obj) const
 {
     utf8_string indentEntry(indent + INDENT_SPACES, ' ');
     utf8_string indentClose(indent, ' ');
@@ -190,7 +190,7 @@ void json_writer::write_object(ostream& stream, usize indent, object const& obj)
            << indentClose << "}";
 }
 
-void json_writer::write_array(ostream& stream, usize indent, array const& arr) const
+void json_writer::write_array(io::ostream& stream, usize indent, array const& arr) const
 {
     utf8_string indentItem(indent + INDENT_SPACES, ' ');
     utf8_string indentClose(indent, ' ');
@@ -209,7 +209,7 @@ void json_writer::write_array(ostream& stream, usize indent, array const& arr) c
            << indentClose << "]";
 }
 
-void json_writer::write_entry(ostream& stream, usize indent, entry const& ent) const
+void json_writer::write_entry(io::ostream& stream, usize indent, entry const& ent) const
 {
     if (ent.is<bool>()) {
         stream << (ent.as<bool>() ? "true" : "false");

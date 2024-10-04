@@ -7,6 +7,8 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
 
+    #include "tcob/core/io/Stream.hpp"
+
 ////////////////////////////////////////////////////////////
 
 namespace tcob::audio::detail {
@@ -14,13 +16,13 @@ namespace tcob::audio::detail {
 extern "C" {
 auto static read_opus(void* _stream, unsigned char* _ptr, int _nbytes) -> int
 {
-    auto* stream {static_cast<istream*>(_stream)};
+    auto* stream {static_cast<io::istream*>(_stream)};
     return static_cast<int>(stream->read_to<byte>({reinterpret_cast<byte*>(_ptr), static_cast<usize>(_nbytes)}));
 }
 
 auto static seek_opus(void* _stream, opus_int64 _offset, int _whence) -> int
 {
-    auto*      stream {static_cast<istream*>(_stream)};
+    auto*      stream {static_cast<io::istream*>(_stream)};
     auto const dir {static_cast<io::seek_dir>(_whence)};
     stream->seek(_offset, dir);
     return 0;
@@ -28,7 +30,7 @@ auto static seek_opus(void* _stream, opus_int64 _offset, int _whence) -> int
 
 auto static tell_opus(void* _stream) -> opus_int64
 {
-    istream* stream {static_cast<istream*>(_stream)};
+    io::istream* stream {static_cast<io::istream*>(_stream)};
     return static_cast<long>(stream->tell());
 }
 
@@ -93,7 +95,7 @@ auto opus_decoder::decode(std::span<f32> outputSamples) -> i32
 extern "C" {
 auto static write_opus(void* user_data, unsigned char const* ptr, opus_int32 len) -> int
 {
-    auto* stream {static_cast<ostream*>(user_data)};
+    auto* stream {static_cast<io::ostream*>(user_data)};
     return static_cast<int>(stream->write<unsigned char>({ptr, static_cast<usize>(len)})) == len ? 0 : 1;
 }
 
@@ -109,7 +111,7 @@ static OpusEncCallbacks opusEncCallbacks {
 
 ////////////////////////////////////////////////////////////
 
-auto opus_encoder::encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool
+auto opus_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
 {
     OggOpusComments* comments {ope_comments_create()};
 

@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "tcob/core/io/Stream.hpp"
+
 namespace tcob::io::magic {
 
 constexpr u8 BUFFER_LENGTH {128};

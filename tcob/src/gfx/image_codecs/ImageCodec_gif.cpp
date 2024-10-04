@@ -5,9 +5,11 @@
 
 #include "ImageCodec_gif.hpp"
 
+#include "tcob/core/io/Stream.hpp"
+
 namespace tcob::gfx::detail {
 
-auto gif::read_color_table(i32 ncolors, istream& reader) -> std::vector<color>
+auto gif::read_color_table(i32 ncolors, io::istream& reader) -> std::vector<color>
 {
     std::vector<u8> c(ncolors * 3);
     reader.read_to<u8>(c);
@@ -24,7 +26,7 @@ auto gif::read_color_table(i32 ncolors, istream& reader) -> std::vector<color>
     return retValue;
 }
 
-void gif::header::read(istream& reader)
+void gif::header::read(io::istream& reader)
 {
     Id = "";
     for (i32 i {0}; i < 6; i++) {
@@ -53,7 +55,7 @@ void gif::header::read(istream& reader)
 
 ////////////////////////////////////////////////////////////
 
-auto gif_decoder::decode(istream& in) -> std::optional<image>
+auto gif_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
         read_contents(in, _header);
@@ -63,7 +65,7 @@ auto gif_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto gif_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Id.rfind("GIF", 0) == 0) {
@@ -120,7 +122,7 @@ void gif_decoder::reset()
 
 ////////////////////////////////////////////////////////////
 
-auto gif_decoder::read_contents(istream& reader, gif::header const& header) -> animated_image_decoder::status
+auto gif_decoder::read_contents(io::istream& reader, gif::header const& header) -> animated_image_decoder::status
 {
     auto retValue {animated_image_decoder::status::NoMoreFrames};
 
@@ -170,7 +172,7 @@ auto gif_decoder::read_contents(istream& reader, gif::header const& header) -> a
     return retValue;
 }
 
-auto gif_decoder::decode_frame_data(istream& reader, u16 iw, u16 ih) -> std::vector<u8>
+auto gif_decoder::decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std::vector<u8>
 {
     static constexpr i32             MaxStackSize {4096};
     std::array<u8, MaxStackSize + 1> pixelStack {};
@@ -276,7 +278,7 @@ auto gif_decoder::decode_frame_data(istream& reader, u16 iw, u16 ih) -> std::vec
     return retValue;
 }
 
-auto gif_decoder::read_block(istream& reader) -> i32
+auto gif_decoder::read_block(io::istream& reader) -> i32
 {
     _blockSize = reader.read<u8>();
     i32 n {0};
@@ -291,7 +293,7 @@ auto gif_decoder::read_block(istream& reader) -> i32
     return n;
 }
 
-void gif_decoder::read_graphic_control_ext(istream& reader)
+void gif_decoder::read_graphic_control_ext(io::istream& reader)
 {
     reader.read<u8>();                    // block size
     i32 const packed {reader.read<u8>()}; // packed fields
@@ -309,7 +311,7 @@ void gif_decoder::read_graphic_control_ext(istream& reader)
     reader.read<u8>();               // block terminator
 }
 
-void gif_decoder::read_frame(istream& reader, gif::header const& header)
+void gif_decoder::read_frame(io::istream& reader, gif::header const& header)
 {
     u16 const ix {reader.read<u16, std::endian::little>()}; // (sub)image position & size
     u16 const iy {reader.read<u16, std::endian::little>()};

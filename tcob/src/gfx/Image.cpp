@@ -154,7 +154,7 @@ auto image::Load(path const& file) noexcept -> std::optional<image>
     return std::nullopt;
 }
 
-auto image::Load(istream& in, string const& ext) noexcept -> std::optional<image>
+auto image::Load(io::istream& in, string const& ext) noexcept -> std::optional<image>
 {
     image retValue;
     if (retValue.load(in, ext) == load_status::Ok) { return retValue; }
@@ -168,7 +168,7 @@ auto image::load(path const& file) noexcept -> load_status
     return load(fs, io::get_extension(file));
 }
 
-auto image::load(istream& in, string const& ext) noexcept -> load_status
+auto image::load(io::istream& in, string const& ext) noexcept -> load_status
 {
     if (!in) { return load_status::Error; }
 
@@ -204,7 +204,7 @@ auto image::save(path const& file) const -> bool
     return save(of, io::get_extension(file));
 }
 
-auto image::save(ostream& out, string const& ext) const -> bool
+auto image::save(io::ostream& out, string const& ext) const -> bool
 {
     if (_info.Format != image::format::RGBA
         && _info.Format != image::format::RGB) { // TODO:
@@ -257,13 +257,13 @@ auto image::info::GetBPP(format f) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto animated_image_decoder::open(std::shared_ptr<istream> in) -> std::optional<image::info>
+auto animated_image_decoder::open(std::shared_ptr<io::istream> in) -> std::optional<image::info>
 {
     _stream = std::move(in);
     return open();
 }
 
-auto animated_image_decoder::get_stream() -> istream&
+auto animated_image_decoder::get_stream() -> io::istream&
 {
     return *_stream;
 }

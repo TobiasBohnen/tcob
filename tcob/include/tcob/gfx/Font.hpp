@@ -14,7 +14,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Texture.hpp"
 
@@ -121,7 +120,7 @@ public:
     auto get_texture() const -> assets::asset_ptr<texture>;
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
-    auto load [[nodiscard]] (istream& stream, u32 size) noexcept -> load_status;
+    auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> load_status;
     auto load [[nodiscard]] (std::span<ubyte const> fontData, u32 size) noexcept -> load_status;
 
     auto render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>;

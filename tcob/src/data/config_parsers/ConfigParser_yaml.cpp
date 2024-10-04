@@ -785,18 +785,18 @@ auto yaml_reader::check_next(token_type next) const -> bool
 
 //////////////////////////////////////////////////////////////////////
 
-auto yaml_writer::write(ostream& stream, object const& obj) -> bool
+auto yaml_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     stream << "---\n";
     return write_object(stream, 0, obj);
 }
 
-auto yaml_writer::write(ostream& stream, array const& arr) -> bool
+auto yaml_writer::write(io::ostream& stream, array const& arr) -> bool
 {
     return write_array(stream, 0, arr);
 }
 
-auto yaml_writer::write_object(ostream& stream, usize indent, object const& obj) const -> bool
+auto yaml_writer::write_object(io::ostream& stream, usize indent, object const& obj) const -> bool
 {
     if (obj.empty()) {
         stream << "{}";
@@ -816,7 +816,7 @@ auto yaml_writer::write_object(ostream& stream, usize indent, object const& obj)
     return true;
 }
 
-auto yaml_writer::write_array(ostream& stream, usize indent, array const& arr) const -> bool
+auto yaml_writer::write_array(io::ostream& stream, usize indent, array const& arr) const -> bool
 {
     if (arr.empty()) {
         stream << "[]";
@@ -836,7 +836,7 @@ auto yaml_writer::write_array(ostream& stream, usize indent, array const& arr) c
     return true;
 }
 
-void yaml_writer::write_entry(ostream& stream, usize indent, entry const& ent) const
+void yaml_writer::write_entry(io::ostream& stream, usize indent, entry const& ent) const
 {
     if (object csec; ent.try_get(csec)) {
         if (!csec.empty()) { stream << "\n"; }
@@ -850,12 +850,12 @@ void yaml_writer::write_entry(ostream& stream, usize indent, entry const& ent) c
     stream << "\n";
 }
 
-void yaml_writer::write_scalar(ostream& stream, entry const& ent) const
+void yaml_writer::write_scalar(io::ostream& stream, entry const& ent) const
 {
     stream << ent.as<utf8_string>();
 }
 
-void yaml_writer::write_comment(ostream& stream, entry const& ent) const
+void yaml_writer::write_comment(io::ostream& stream, entry const& ent) const
 {
     auto const& comment {ent.get_comment()};
     for (auto const& cl : helper::split(comment.Text, '\n')) {

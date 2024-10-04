@@ -7,11 +7,13 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
 
+    #include "tcob/core/io/Stream.hpp"
+
 namespace tcob::gfx::detail {
 
 constexpr i32 HEADERSIZE {13};
 
-auto qoi_decoder::decode(istream& in) -> std::optional<image>
+auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (auto info {decode_info(in)}) {
         in.seek(-HEADERSIZE, io::seek_dir::Current);
@@ -30,7 +32,7 @@ auto qoi_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto qoi_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     std::array<u8, 4> buf {};
     in.read_to<u8>(buf);
@@ -44,7 +46,7 @@ auto qoi_decoder::decode_info(istream& in) -> std::optional<image::info>
 
 ////////////////////////////////////////////////////////////
 
-auto qoi_encoder::encode(image const& image, ostream& out) const -> bool
+auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
     auto const& info {image.get_info()};
     qoi_desc    desc;

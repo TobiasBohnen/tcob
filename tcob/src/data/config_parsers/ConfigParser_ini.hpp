@@ -8,7 +8,6 @@
 
 #include <optional>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
@@ -51,15 +50,15 @@ private:
 
 class ini_writer : public text_writer {
 public:
-    auto write(ostream& stream, object const& obj) -> bool override;
-    auto write(ostream& stream, array const& arr) -> bool override;
+    auto write(io::ostream& stream, object const& obj) -> bool override;
+    auto write(io::ostream& stream, array const& arr) -> bool override;
 
-    void write_inline_section(ostream& stream, object const& obj) const;
+    void write_inline_section(io::ostream& stream, object const& obj) const;
 
 private:
-    void write_array(ostream& stream, array const& arr) const;
-    void write_section(ostream& stream, object const& obj, utf8_string const& prefix) const;
-    void write_entry(ostream& stream, entry const& ent) const;
+    void write_array(io::ostream& stream, array const& arr) const;
+    void write_section(io::ostream& stream, object const& obj, utf8_string const& prefix) const;
+    void write_entry(io::ostream& stream, entry const& ent) const;
 };
 
 }

@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <span>
 #include <vector>
 
 namespace tcob::io {

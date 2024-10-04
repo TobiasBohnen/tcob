@@ -256,7 +256,7 @@ auto font::load(path const& file, u32 size) noexcept -> load_status
     return load(fs, size);
 }
 
-auto font::load(istream& stream, u32 size) noexcept -> load_status
+auto font::load(io::istream& stream, u32 size) noexcept -> load_status
 {
     if (!stream) { return load_status::Error; }
 

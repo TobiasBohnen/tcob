@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include "tcob/core/io/Stream.hpp"
+
 namespace tcob::gfx::detail {
 
 constexpr std::array<ubyte, 18> SIGNATURE {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'};
@@ -79,7 +81,7 @@ auto static get_color(u8 one, u8 two) -> color
     return {r, g, b, a};
 }
 
-auto tga::read_color_map(istream& reader, i32 colorMapLength, i32 colorMapEntrySize) -> std::vector<color>
+auto tga::read_color_map(io::istream& reader, i32 colorMapLength, i32 colorMapEntrySize) -> std::vector<color>
 {
     std::vector<color> retValue;
     retValue.reserve(colorMapLength);
@@ -111,7 +113,7 @@ auto tga::read_color_map(istream& reader, i32 colorMapLength, i32 colorMapEntryS
     return retValue;
 }
 
-auto tga::read_data(istream& reader, header const& h) -> std::vector<u8>
+auto tga::read_data(io::istream& reader, header const& h) -> std::vector<u8>
 {
     i32 const imgRowSize {h.ImageSpecs.Width * h.ImageSpecs.BytesPerPixel};
     i32 const imgSize {imgRowSize * h.ImageSpecs.Height};
@@ -230,7 +232,7 @@ auto tga::read_data(istream& reader, header const& h) -> std::vector<u8>
     return retValue;
 }
 
-void tga::footer::read(istream& reader)
+void tga::footer::read(io::istream& reader)
 {
     reader.seek(-Offset + SignatureOffset, io::seek_dir::End);
 
@@ -251,14 +253,14 @@ void tga::footer::read(istream& reader)
     reader.seek(0, io::seek_dir::Begin); // FIXME: store position
 }
 
-void tga::image_descriptor::read(istream& reader)
+void tga::image_descriptor::read(io::istream& reader)
 {
     u8 imgDesc            = reader.read<u8>();
     AttributeBits         = helper::get_bits(imgDesc, 0, 4);
     FirstPixelDestination = static_cast<first_pixel_destination>(helper::get_bits(imgDesc, 4, 2));
 }
 
-void tga::image_specifications::read(istream& reader)
+void tga::image_specifications::read(io::istream& reader)
 {
     XOrigin       = reader.read<u16, std::endian::little>();
     YOrigin       = reader.read<u16, std::endian::little>();
@@ -270,7 +272,7 @@ void tga::image_specifications::read(istream& reader)
     ImageDescriptor.read(reader);
 }
 
-void tga::color_map_specifications::read(istream& reader)
+void tga::color_map_specifications::read(io::istream& reader)
 {
     FirstEntryIndex   = reader.read<u16, std::endian::little>();
     ColorMapLength    = reader.read<u16, std::endian::little>();
@@ -292,7 +294,7 @@ void tga::color_map_specifications::read(istream& reader)
     ColorMapTotalSize = ColorMapLength * bytes;
 }
 
-void tga::header::read(istream& reader)
+void tga::header::read(io::istream& reader)
 {
     IDLength         = reader.read<u8>();
     ColorMapIncluded = reader.read<color_map_type>() == tga::color_map_type::ColorMapIncluded;
@@ -307,7 +309,7 @@ void tga::header::read(istream& reader)
 
 ////////////////////////////////////////////////////////////
 
-auto tga_decoder::decode(istream& in) -> std::optional<image>
+auto tga_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
         in.seek(18 + _header.IDLength, io::seek_dir::Begin); // skip ID
@@ -357,7 +359,7 @@ auto tga_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto tga_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     _footer.read(in);
     _header.read(in);
@@ -374,7 +376,7 @@ auto tga_decoder::decode_info(istream& in) -> std::optional<image::info>
 
 ////////////////////////////////////////////////////////////
 
-auto tga_encoder::encode(image const& img, ostream& out) const -> bool
+auto tga_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
     write_header(img.get_info(), out);
     write_image_data(img, out);
@@ -387,7 +389,7 @@ auto tga_encoder::encode(image const& img, ostream& out) const -> bool
     return true;
 }
 
-void tga_encoder::write_header(image::info const& image, ostream& out) const
+void tga_encoder::write_header(image::info const& image, io::ostream& out) const
 {
     out.write<u8>(0);
     out.write<u8>(static_cast<u8>(tga::color_map_type::NoColorMapIncluded));
@@ -404,7 +406,7 @@ void tga_encoder::write_header(image::info const& image, ostream& out) const
     out.write<u8>(40);
 }
 
-void tga_encoder::write_image_data(image const& img, ostream& out) const
+void tga_encoder::write_image_data(image const& img, io::ostream& out) const
 {
     std::vector<u8> rle;
     std::vector<u8> rawPackage;
@@ -488,7 +490,7 @@ void tga_encoder::write_image_data(image const& img, ostream& out) const
     out.write<u8>(rle);
 }
 
-void tga_encoder::write_extension_area(ostream& out) const
+void tga_encoder::write_extension_area(io::ostream& out) const
 {
     out.write<u16>(495);
 
@@ -499,7 +501,7 @@ void tga_encoder::write_extension_area(ostream& out) const
     out.write<u8>(static_cast<u8>(tga::attribute_type::Alpha));
 }
 
-void tga_encoder::write_footer(ostream& out, std::streamsize extOffset) const
+void tga_encoder::write_footer(io::ostream& out, std::streamsize extOffset) const
 {
     out.write<u32>(static_cast<u32>(extOffset));
     out.write<ubyte>(SIGNATURE);

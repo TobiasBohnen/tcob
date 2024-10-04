@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include "tcob/core/io/Stream.hpp"
+
 namespace tcob::gfx::detail {
 
 auto static check_supported_format(pnm::header const& h) -> bool
@@ -14,7 +16,7 @@ auto static check_supported_format(pnm::header const& h) -> bool
     return h.FormatString[0] == 'P' && (h.FormatString[1] == '1' || h.FormatString[1] == '2' || h.FormatString[1] == '3');
 }
 
-auto static read_until_space(istream& reader, std::span<byte> buffer, i32 offset) -> i32
+auto static read_until_space(io::istream& reader, std::span<byte> buffer, i32 offset) -> i32
 {
     i32 read {0};
 
@@ -31,7 +33,7 @@ auto static read_until_space(istream& reader, std::span<byte> buffer, i32 offset
     return read;
 }
 
-auto static read_char_after_whitespace(istream& reader) -> u8
+auto static read_char_after_whitespace(io::istream& reader) -> u8
 {
     u8 retValue {0};
 
@@ -51,7 +53,7 @@ auto static read_char_after_whitespace(istream& reader) -> u8
 }
 
 template <typename T>
-auto read_int(istream& reader) -> T
+auto read_int(io::istream& reader) -> T
 {
     std::array<byte, 256> buffer {};
     buffer[0] = read_char_after_whitespace(reader);
@@ -81,7 +83,7 @@ auto static read_string(ifstream* reader) -> string
 }
 */
 
-auto static read_p1_data(istream& reader, int width, int height) -> std::vector<u8>
+auto static read_p1_data(io::istream& reader, int width, int height) -> std::vector<u8>
 {
     // black and white
     std::vector<u8> retValue;
@@ -102,7 +104,7 @@ auto static read_p1_data(istream& reader, int width, int height) -> std::vector<
     return retValue;
 }
 
-auto static read_p2_data(istream& reader, pnm::header const& h) -> std::vector<u8>
+auto static read_p2_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
 {
     // grayscale
     std::vector<u8> retValue;
@@ -118,7 +120,7 @@ auto static read_p2_data(istream& reader, pnm::header const& h) -> std::vector<u
     return retValue;
 }
 
-auto static read_p3_data(istream& reader, pnm::header const& h) -> std::vector<u8>
+auto static read_p3_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
 {
     // RGB
     std::vector<u8> retValue;
@@ -134,7 +136,7 @@ auto static read_p3_data(istream& reader, pnm::header const& h) -> std::vector<u
     return retValue;
 }
 
-void pnm::header::read(istream& reader)
+void pnm::header::read(io::istream& reader)
 {
     FormatString = reader.read_string(2);
     IsAscii      = FormatString[1] < '4';
@@ -153,7 +155,7 @@ void pnm::header::read(istream& reader)
 
 ////////////////////////////////////////////////////////////
 
-auto pnm_decoder::decode(istream& in) -> std::optional<image>
+auto pnm_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
         std::vector<u8> imgData;
@@ -178,7 +180,7 @@ auto pnm_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto pnm_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto pnm_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     return check_supported_format(_header)

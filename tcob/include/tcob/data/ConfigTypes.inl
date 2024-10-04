@@ -31,7 +31,7 @@ inline auto base_type<Impl, Container>::load(path const& file, bool skipBinary) 
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::load(istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+inline auto base_type<Impl, Container>::load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
 {
     if (!in) { return load_status::Error; }
     return on_load(in, ext, skipBinary);
@@ -51,7 +51,7 @@ inline auto base_type<Impl, Container>::save(path const& file) const -> bool
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::save(ostream& out, string const& ext) const -> bool
+inline auto base_type<Impl, Container>::save(io::ostream& out, string const& ext) const -> bool
 {
     if (auto txtWriter {locate_service<text_writer::factory>().create(ext)}) {
         return txtWriter->write(out, *static_cast<Impl const*>(this));

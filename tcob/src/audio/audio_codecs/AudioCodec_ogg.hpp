@@ -14,7 +14,6 @@
     #include <vorbis/vorbisfile.h>
 
     #include "tcob/audio/AudioSource.hpp"
-    #include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////
@@ -40,10 +39,10 @@ private:
 
 class vorbis_encoder final : public encoder {
 public:
-    auto encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool override;
+    auto encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool override;
 
 private:
-    void flush(ostream& out, ogg_stream_state& os, ogg_page& og, ogg_packet& op, vorbis_dsp_state& vd, vorbis_block& vb) const;
+    void flush(io::ostream& out, ogg_stream_state& os, ogg_page& og, ogg_packet& op, vorbis_dsp_state& vd, vorbis_block& vb) const;
 };
 
 }

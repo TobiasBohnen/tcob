@@ -25,6 +25,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <span>
+#include <stack>
 #include <unordered_map>
 #include <variant>
 #include <vector>

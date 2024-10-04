@@ -32,7 +32,7 @@ public:
     auto get_playback_position() const -> milliseconds override;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
-    auto load [[nodiscard]] (std::shared_ptr<istream> in, string const& ext) noexcept -> load_status;
+    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<load_status>;
 
     static inline char const* asset_name {"sound"};

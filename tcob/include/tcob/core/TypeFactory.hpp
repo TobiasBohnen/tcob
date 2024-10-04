@@ -9,8 +9,6 @@
 #include <functional>
 #include <unordered_map>
 
-#include "tcob/core/io/Stream.hpp"
-
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
@@ -23,7 +21,7 @@ public:
 
     auto create(string const& name, Args&&... args) -> ReturnType;
 
-    auto create_from_sig_or_ext(istream& in, string const& ext, Args&&... args) -> ReturnType;
+    auto create_from_sig_or_ext(io::istream& in, string const& ext, Args&&... args) -> ReturnType;
 
 private:
     std::unordered_map<string, func> _functions;

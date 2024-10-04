@@ -38,7 +38,7 @@ auto sound_font::load(path const& file, bool stereo, i32 sampleRate) noexcept ->
     return load(fs, stereo, sampleRate);
 }
 
-auto sound_font::load(istream& stream, bool stereo, i32 sampleRate) noexcept -> load_status
+auto sound_font::load(io::istream& stream, bool stereo, i32 sampleRate) noexcept -> load_status
 {
     if (!stream) { return load_status::Error; }
 

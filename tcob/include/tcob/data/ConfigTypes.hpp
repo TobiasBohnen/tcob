@@ -39,11 +39,11 @@ public:
     virtual ~base_type()                                          = default;
 
     auto load(path const& file, bool skipBinary = false) noexcept -> load_status;
-    auto load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
+    auto load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
     auto load_async(path const& file, bool skipBinary = false) noexcept -> std::future<load_status>;
 
     auto save(path const& file) const -> bool;
-    auto save(ostream& out, string const& ext) const -> bool;
+    auto save(io::ostream& out, string const& ext) const -> bool;
 
     auto begin() -> iterator;
     auto begin() const -> const_iterator;
@@ -61,7 +61,7 @@ public:
     auto get_type(Key key) const -> type;
 
 protected:
-    auto virtual on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status = 0;
+    auto virtual on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status = 0;
 
     auto values() -> Container*;
     auto values() const -> Container*;
@@ -130,7 +130,7 @@ public:
     void set_entry(string const& key, entry const& entry);
 
 protected:
-    auto on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
+    auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
 
 private:
     void add_entry(string const& key, entry const& entry);
@@ -193,7 +193,7 @@ public:
     void add_entry(entry const& newEntry);
 
 protected:
-    auto on_load(istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
+    auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
 };
 
 template <>

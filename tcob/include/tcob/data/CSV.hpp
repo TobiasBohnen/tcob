@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "tcob/core/Common.hpp"
-#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::data::csv {
 ////////////////////////////////////////////////////////////
@@ -28,11 +27,11 @@ public:
     std::vector<std::vector<string>> Rows;
 
     auto load(path const& file, settings s = {}) noexcept -> load_status;
-    auto load(istream& in, settings s = {}) noexcept -> load_status;
+    auto load(io::istream& in, settings s = {}) noexcept -> load_status;
     auto parse(string const& csv, settings s = {}) -> bool;
 
     auto save(path const& file, settings s = {}) const -> bool;
-    auto save(ostream& out, settings s = {}) const -> bool;
+    auto save(io::ostream& out, settings s = {}) const -> bool;
 };
 
 }

@@ -8,6 +8,8 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <any>
+
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Property.hpp"

@@ -333,17 +333,17 @@ void xml_reader::convert_value(entry& currentEntry, utf8_string const& str)
 
 //////////////////////////////////////////////////////////////////////
 
-auto xml_writer::write(ostream& stream, object const& obj) -> bool
+auto xml_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     return write_element(stream, 0, "root", obj);
 }
 
-auto xml_writer::write(ostream& stream, array const& arr) -> bool
+auto xml_writer::write(io::ostream& stream, array const& arr) -> bool
 {
     return write_array(stream, 0, "root", arr);
 }
 
-auto xml_writer::write_element(ostream& stream, u32 indent, utf8_string const& name, object const& obj) const -> bool
+auto xml_writer::write_element(io::ostream& stream, u32 indent, utf8_string const& name, object const& obj) const -> bool
 {
     std::map<utf8_string, object> sections;
     std::map<utf8_string, array>  arrays;
@@ -384,7 +384,7 @@ auto xml_writer::write_element(ostream& stream, u32 indent, utf8_string const& n
     return true;
 }
 
-auto xml_writer::write_array(ostream& stream, u32 indent, utf8_string const& name, array const& arr) const -> bool
+auto xml_writer::write_array(io::ostream& stream, u32 indent, utf8_string const& name, array const& arr) const -> bool
 {
     utf8_string indentArray(indent, ' ');
     utf8_string indentValues(indent + INDENT_SPACES, ' ');
@@ -405,7 +405,7 @@ auto xml_writer::write_array(ostream& stream, u32 indent, utf8_string const& nam
     return true;
 }
 
-void xml_writer::write_attribute(ostream& stream, utf8_string const& name, entry const& ent) const
+void xml_writer::write_attribute(io::ostream& stream, utf8_string const& name, entry const& ent) const
 {
     stream << " " << name << " = \"" << ent.as<utf8_string>() << "\"";
 }

@@ -103,7 +103,7 @@ using namespace std::chrono_literals;
 decoder::decoder()  = default;
 decoder::~decoder() = default;
 
-auto decoder::open(std::shared_ptr<istream> in, std::any& ctx) -> std::optional<buffer::info>
+auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>
 {
     _stream = std::move(in);
     _ctx    = ctx;
@@ -129,7 +129,7 @@ auto decoder::decode_to_buffer(std::span<f32> buffer) -> bool
     return true; // TODO check
 }
 
-auto decoder::get_stream() -> istream&
+auto decoder::get_stream() -> io::istream&
 {
     return *_stream;
 }

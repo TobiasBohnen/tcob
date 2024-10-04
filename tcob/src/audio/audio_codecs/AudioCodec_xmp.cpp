@@ -7,6 +7,8 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
 
+    #include "tcob/core/io/Stream.hpp"
+
 ////////////////////////////////////////////////////////////
 
 namespace tcob::audio::detail {
@@ -14,13 +16,13 @@ namespace tcob::audio::detail {
 extern "C" {
 auto static read_xmp(void* dest, unsigned long len, unsigned long nmemb, void* priv) -> unsigned long
 {
-    auto* stream {static_cast<istream*>(priv)};
+    auto* stream {static_cast<io::istream*>(priv)};
     return static_cast<unsigned long>(stream->read_to<byte>({static_cast<byte*>(dest), len * nmemb}) / len);
 }
 
 auto static seek_xmp(void* priv, long offset, int whence) -> int
 {
-    auto*      stream {static_cast<istream*>(priv)};
+    auto*      stream {static_cast<io::istream*>(priv)};
     auto const dir {static_cast<io::seek_dir>(whence)};
     stream->seek(offset, dir);
     return 0;
@@ -28,7 +30,7 @@ auto static seek_xmp(void* priv, long offset, int whence) -> int
 
 auto static tell_xmp(void* priv) -> long
 {
-    istream* stream {static_cast<istream*>(priv)};
+    io::istream* stream {static_cast<io::istream*>(priv)};
     return static_cast<long>(stream->tell());
 }
 

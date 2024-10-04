@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
@@ -68,13 +67,13 @@ private:
 
 class xml_writer : public text_writer {
 public:
-    auto write(ostream& stream, object const& obj) -> bool override;
-    auto write(ostream& stream, array const& arr) -> bool override;
+    auto write(io::ostream& stream, object const& obj) -> bool override;
+    auto write(io::ostream& stream, array const& arr) -> bool override;
 
 private:
-    auto write_element(ostream& stream, u32 indent, utf8_string const& name, object const& obj) const -> bool;
-    auto write_array(ostream& stream, u32 indent, utf8_string const& name, array const& arr) const -> bool;
-    void write_attribute(ostream& stream, utf8_string const& name, entry const& ent) const;
+    auto write_element(io::ostream& stream, u32 indent, utf8_string const& name, object const& obj) const -> bool;
+    auto write_array(io::ostream& stream, u32 indent, utf8_string const& name, array const& arr) const -> bool;
+    void write_attribute(io::ostream& stream, utf8_string const& name, entry const& ent) const;
 };
 
 }

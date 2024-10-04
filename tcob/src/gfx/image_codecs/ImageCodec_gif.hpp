@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -20,7 +19,7 @@ namespace tcob::gfx::detail {
 namespace gif {
     constexpr i32 BPP {4};
 
-    auto read_color_table(int ncolors, istream& reader) -> std::vector<color>;
+    auto read_color_table(int ncolors, io::istream& reader) -> std::vector<color>;
 
     struct header {
         i32                BackgroundIndex;
@@ -32,7 +31,7 @@ namespace gif {
         i32                PixelAspect;
         u32                Width;
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 }
 
@@ -41,8 +40,8 @@ namespace gif {
 class gif_decoder final : public image_decoder, public animated_image_decoder {
 public:
     // image_decoder
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
     // animated_image_decoder
     auto open() -> std::optional<image::info> override;
@@ -52,12 +51,12 @@ public:
     void reset() override;
 
 protected:
-    auto read_contents(istream& reader, gif::header const& header) -> animated_image_decoder::status;
+    auto read_contents(io::istream& reader, gif::header const& header) -> animated_image_decoder::status;
 
-    auto decode_frame_data(istream& reader, u16 iw, u16 ih) -> std::vector<u8>;
-    auto read_block(istream& reader) -> i32;
-    void read_graphic_control_ext(istream& reader);
-    void read_frame(istream& reader, gif::header const& header);
+    auto decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std::vector<u8>;
+    auto read_block(io::istream& reader) -> i32;
+    void read_graphic_control_ext(io::istream& reader);
+    void read_frame(io::istream& reader, gif::header const& header);
 
     void clear_pixel_cache();
 

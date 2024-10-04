@@ -12,7 +12,7 @@ namespace tcob::data::config::detail {
 constexpr std::array<ubyte, 5> MAGIC {'B', 'S', 'B', 'D', 1};
 constexpr u8                   LitIntVal {static_cast<u8>(bsbd::marker_type::LitInt)};
 
-auto bsbd_reader::read_as_object(istream& stream) -> std::optional<object>
+auto bsbd_reader::read_as_object(io::istream& stream) -> std::optional<object>
 {
     std::array<ubyte, 5> buf {};
     stream.read_to<ubyte>(buf);
@@ -27,7 +27,7 @@ auto bsbd_reader::read_as_object(istream& stream) -> std::optional<object>
         : std::nullopt;
 }
 
-auto bsbd_reader::read_as_array(istream& stream) -> std::optional<array>
+auto bsbd_reader::read_as_array(io::istream& stream) -> std::optional<array>
 {
     std::array<ubyte, 5> buf {};
     stream.read_to<ubyte>(buf);
@@ -42,7 +42,7 @@ auto bsbd_reader::read_as_array(istream& stream) -> std::optional<array>
         : std::nullopt;
 }
 
-auto bsbd_reader::read_section(istream& stream) const -> std::optional<object>
+auto bsbd_reader::read_section(io::istream& stream) const -> std::optional<object>
 {
     object obj {};
 
@@ -56,7 +56,7 @@ auto bsbd_reader::read_section(istream& stream) const -> std::optional<object>
     return obj;
 }
 
-auto bsbd_reader::read_section_entry(istream& stream, bsbd::marker_type type, object& obj) const -> bool
+auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type, object& obj) const -> bool
 {
     auto const name {stream.read_string(stream.read<u8>())};
 
@@ -109,7 +109,7 @@ auto bsbd_reader::read_section_entry(istream& stream, bsbd::marker_type type, ob
     return true;
 }
 
-auto bsbd_reader::read_array(istream& stream) const -> std::optional<array>
+auto bsbd_reader::read_array(io::istream& stream) const -> std::optional<array>
 {
     array arr {};
 
@@ -123,7 +123,7 @@ auto bsbd_reader::read_array(istream& stream) const -> std::optional<array>
     return arr;
 }
 
-auto bsbd_reader::read_array_entry(istream& stream, bsbd::marker_type type, array& arr) const -> bool
+auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, array& arr) const -> bool
 {
     if (u8 val {static_cast<u8>(type)}; val >= LitIntVal) {
         arr.add_entry(val - LitIntVal);
@@ -196,19 +196,19 @@ auto static fit_float(f64 value) -> bsbd::marker_type
     return std::fabs(static_cast<f32>(value) - value) > std::numeric_limits<f32>::epsilon() ? bsbd::marker_type::Float64 : bsbd::marker_type::Float32;
 }
 
-auto bsbd_writer::write(ostream& stream, object const& obj) -> bool
+auto bsbd_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     stream.write(MAGIC);
     return write_section(stream, obj, "");
 }
 
-auto bsbd_writer::write(ostream& stream, array const& arr) -> bool
+auto bsbd_writer::write(io::ostream& stream, array const& arr) -> bool
 {
     stream.write(MAGIC);
     return write_array(stream, arr, "");
 }
 
-auto bsbd_writer::write_section(ostream& stream, object const& obj, utf8_string const& name) const -> bool
+auto bsbd_writer::write_section(io::ostream& stream, object const& obj, utf8_string const& name) const -> bool
 {
     if (write_entry_header(stream, bsbd::marker_type::SectionStart, name)
         && std::ranges::all_of(obj, [&](auto const& pair) { return write_entry(stream, pair.second, pair.first); })) {
@@ -219,7 +219,7 @@ auto bsbd_writer::write_section(ostream& stream, object const& obj, utf8_string 
     return false;
 }
 
-auto bsbd_writer::write_array(ostream& stream, array const& arr, utf8_string const& name) const -> bool
+auto bsbd_writer::write_array(io::ostream& stream, array const& arr, utf8_string const& name) const -> bool
 {
     if (write_entry_header(stream, bsbd::marker_type::ArrayStart, name)
         && std::ranges::all_of(arr, [&](auto const& v) { return write_entry(stream, v, ""); })) {
@@ -230,7 +230,7 @@ auto bsbd_writer::write_array(ostream& stream, array const& arr, utf8_string con
     return false;
 }
 
-auto bsbd_writer::write_entry(ostream& stream, entry const& ent, utf8_string const& name) const -> bool
+auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string const& name) const -> bool
 {
     if (ent.is<bool>()) {
         if (!write_entry_header(stream, ent.as<bool>() ? bsbd::marker_type::BoolTrue : bsbd::marker_type::BoolFalse, name)) { return false; }
@@ -276,7 +276,7 @@ auto bsbd_writer::write_entry(ostream& stream, entry const& ent, utf8_string con
     return true;
 }
 
-auto bsbd_writer::write_entry_header(ostream& stream, bsbd::marker_type type, utf8_string const& name) const -> bool
+auto bsbd_writer::write_entry_header(io::ostream& stream, bsbd::marker_type type, utf8_string const& name) const -> bool
 {
     stream.write(type);
     if (!name.empty()) {

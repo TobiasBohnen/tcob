@@ -7,6 +7,7 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
 
+    #include "tcob/core/io/Stream.hpp"
     #include "tcob/core/random/Random.hpp"
 
 ////////////////////////////////////////////////////////////
@@ -16,13 +17,13 @@ namespace tcob::audio::detail {
 extern "C" {
 auto static read_vorbis(void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 {
-    auto* stream {static_cast<istream*>(datasource)};
+    auto* stream {static_cast<io::istream*>(datasource)};
     return static_cast<size_t>(stream->read_to<byte>({reinterpret_cast<byte*>(ptr), static_cast<usize>(size * nmemb)}));
 }
 
 auto static seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
 {
-    auto*      stream {static_cast<istream*>(datasource)};
+    auto*      stream {static_cast<io::istream*>(datasource)};
     auto const dir {static_cast<io::seek_dir>(whence)};
     stream->seek(offset, dir);
     return 0;
@@ -30,7 +31,7 @@ auto static seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
 
 auto static tell_vorbis(void* datasource) -> long
 {
-    istream* stream {static_cast<istream*>(datasource)};
+    io::istream* stream {static_cast<io::istream*>(datasource)};
     return static_cast<long>(stream->tell());
 }
 
@@ -92,7 +93,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool
+auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
 {
     ogg_stream_state os; /* take physical pages, weld into a logical stream of packets */
     ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
@@ -166,7 +167,7 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& in
     return true;
 }
 
-void vorbis_encoder::flush(ostream& out, ogg_stream_state& os, ogg_page& og, ogg_packet& op, vorbis_dsp_state& vd, vorbis_block& vb) const
+void vorbis_encoder::flush(io::ostream& out, ogg_stream_state& os, ogg_page& og, ogg_packet& op, vorbis_dsp_state& vd, vorbis_block& vb) const
 {
     while (vorbis_analysis_blockout(&vd, &vb) == 1) {
         vorbis_analysis(&vb, nullptr);

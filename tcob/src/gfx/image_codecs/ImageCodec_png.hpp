@@ -12,7 +12,6 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -114,13 +113,13 @@ class png_decoder final : public image_decoder {
     using get_image_data = void (png_decoder::*)();
 
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
 private:
-    auto read_header(istream& in) -> bool;
-    auto read_chunk(istream& in) const -> png::chunk;
-    auto check_sig(istream& in) -> bool;
+    auto read_header(io::istream& in) -> bool;
+    auto read_chunk(io::istream& in) const -> png::chunk;
+    auto check_sig(io::istream& in) -> bool;
 
     void prepare();
     void prepare_delegate();
@@ -182,15 +181,15 @@ private:
 
 class png_encoder final : public image_encoder {
 public:
-    auto encode(image const& image, ostream& out) const -> bool override;
+    auto encode(image const& image, io::ostream& out) const -> bool override;
 
 private:
-    void write_header(image const& image, ostream& out) const;
-    void write_image(image const& image, ostream& out) const;
-    void write_end(ostream& out) const;
+    void write_header(image const& image, io::ostream& out) const;
+    void write_image(image const& image, io::ostream& out) const;
+    void write_end(io::ostream& out) const;
 
-    void write_chunk(ostream& out, std::span<u8 const> buf) const;
-    void write_chunk(ostream& out, std::span<u8 const> buf, u32 length) const;
+    void write_chunk(io::ostream& out, std::span<u8 const> buf) const;
+    void write_chunk(io::ostream& out, std::span<u8 const> buf, u32 length) const;
 };
 
 }

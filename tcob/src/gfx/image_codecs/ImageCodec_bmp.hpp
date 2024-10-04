@@ -8,7 +8,6 @@
 
 #include <optional>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -23,7 +22,7 @@ namespace bmp {
         u16 Signature {0};
         u32 Size {0};
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 
     enum class compression : u8 {
@@ -56,9 +55,9 @@ namespace bmp {
         u32                SizeImage {0};
         i32                Width {0};
 
-        void read(istream& reader);
+        void read(io::istream& reader);
 
-        void read40(istream& reader);
+        void read40(io::istream& reader);
     };
 }
 
@@ -66,13 +65,13 @@ namespace bmp {
 
 class bmp_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
 private:
-    auto get_palette(istream& in) const -> std::vector<color>;
+    auto get_palette(io::istream& in) const -> std::vector<color>;
 
-    auto get_rgb_data(istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>;
+    auto get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>;
 
     bmp::bitmap_file_header _header;
     bmp::bitmap_info_header _infoHeader;
@@ -84,7 +83,7 @@ private:
 
 class bmp_encoder final : public image_encoder {
 public:
-    auto encode(image const& img, ostream& out) const -> bool override;
+    auto encode(image const& img, io::ostream& out) const -> bool override;
 };
 
 }

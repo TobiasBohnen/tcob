@@ -8,7 +8,6 @@
 
 #include <optional>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
@@ -42,30 +41,30 @@ namespace bsbd {
 
 class bsbd_reader : public binary_reader {
 public:
-    auto read_as_object(istream& stream) -> std::optional<object> override;
-    auto read_as_array(istream& stream) -> std::optional<array> override;
+    auto read_as_object(io::istream& stream) -> std::optional<object> override;
+    auto read_as_array(io::istream& stream) -> std::optional<array> override;
 
 private:
-    auto read_section(istream& stream) const -> std::optional<object>;
-    auto read_section_entry(istream& stream, bsbd::marker_type type, object& obj) const -> bool;
+    auto read_section(io::istream& stream) const -> std::optional<object>;
+    auto read_section_entry(io::istream& stream, bsbd::marker_type type, object& obj) const -> bool;
 
-    auto read_array(istream& stream) const -> std::optional<array>;
-    auto read_array_entry(istream& stream, bsbd::marker_type type, array& arr) const -> bool;
+    auto read_array(io::istream& stream) const -> std::optional<array>;
+    auto read_array_entry(io::istream& stream, bsbd::marker_type type, array& arr) const -> bool;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 class bsbd_writer : public binary_writer {
 public:
-    auto write(ostream& stream, object const& obj) -> bool override;
-    auto write(ostream& stream, array const& arr) -> bool override;
+    auto write(io::ostream& stream, object const& obj) -> bool override;
+    auto write(io::ostream& stream, array const& arr) -> bool override;
 
 private:
-    auto write_section(ostream& stream, object const& obj, utf8_string const& name) const -> bool;
-    auto write_array(ostream& stream, array const& arr, utf8_string const& name) const -> bool;
-    auto write_entry(ostream& stream, entry const& ent, utf8_string const& name) const -> bool;
+    auto write_section(io::ostream& stream, object const& obj, utf8_string const& name) const -> bool;
+    auto write_array(io::ostream& stream, array const& arr, utf8_string const& name) const -> bool;
+    auto write_entry(io::ostream& stream, entry const& ent, utf8_string const& name) const -> bool;
 
-    auto write_entry_header(ostream& stream, bsbd::marker_type type, utf8_string const& name) const -> bool;
+    auto write_entry_header(io::ostream& stream, bsbd::marker_type type, utf8_string const& name) const -> bool;
 };
 
 }

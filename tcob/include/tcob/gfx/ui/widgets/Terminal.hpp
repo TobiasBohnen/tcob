@@ -73,8 +73,8 @@ public:
     void hline(utf8_string_view ch, i32 size);
     void hline(point_i pos, utf8_string_view ch, i32 size);
 
-    auto restore [[nodiscard]] (istream& stream) -> bool;
-    void dump(ostream& stream) const;
+    auto restore [[nodiscard]] (io::istream& stream) -> bool;
+    void dump(io::ostream& stream) const;
 
 protected:
     void on_paint(widget_painter& painter) override;

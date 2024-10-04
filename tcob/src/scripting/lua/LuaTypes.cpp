@@ -9,6 +9,7 @@
 
     #include <cassert>
 
+    #include "tcob/core/io/Stream.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
 
     #include <lauxlib.h>
@@ -163,7 +164,7 @@ auto table::Acquire(state_view view, i32 idx) -> table
     return table {view, idx};
 }
 
-void table::dump(ostream& stream) const
+void table::dump(io::ostream& stream) const
 {
     auto const guard {get_view().create_stack_guard()};
     push_self();
@@ -171,7 +172,7 @@ void table::dump(ostream& stream) const
     stream << '\n';
 }
 
-void table::write_to_stream(ostream& stream, usize indent) const
+void table::write_to_stream(io::ostream& stream, usize indent) const
 {
     auto const view {get_view()};
 
@@ -259,12 +260,12 @@ namespace detail {
 
     auto static writer(lua_State*, void const* p, usize sz, void* ud) -> i32
     {
-        auto* stream {static_cast<ostream*>(ud)};
+        auto* stream {static_cast<io::ostream*>(ud)};
         stream->write<byte>({static_cast<byte const*>(p), sz});
         return 0;
     }
 
-    void function_base::dump(ostream& stream) const
+    void function_base::dump(io::ostream& stream) const
     {
         auto const view {get_view()};
         push_self();

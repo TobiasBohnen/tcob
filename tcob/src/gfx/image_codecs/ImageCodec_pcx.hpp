@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -64,23 +63,23 @@ namespace pcx {
             return static_cast<i32>(XMax - XMin + 1);
         }
 
-        void read(istream& reader);
-        void static Write(image::info const& info, ostream& writer);
+        void read(io::istream& reader);
+        void static Write(image::info const& info, io::ostream& writer);
     };
 
-    auto read_image_data(istream& reader, header const& h) -> std::vector<u8>;
-    auto read_color_palette(istream& reader, i32 size) -> std::vector<color>;
+    auto read_image_data(io::istream& reader, header const& h) -> std::vector<u8>;
+    auto read_color_palette(io::istream& reader, i32 size) -> std::vector<color>;
 }
 
 ////////////////////////////////////////////////////////////
 
 class pcx_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
 private:
-    auto read_palette(istream& in) const -> std::vector<color>;
+    auto read_palette(io::istream& in) const -> std::vector<color>;
 
     pcx::header _header;
 };
@@ -89,7 +88,7 @@ private:
 
 class pcx_encoder final : public image_encoder {
 public:
-    auto encode(image const& img, ostream& out) const -> bool override;
+    auto encode(image const& img, io::ostream& out) const -> bool override;
 };
 
 }

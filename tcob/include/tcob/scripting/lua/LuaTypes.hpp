@@ -12,7 +12,6 @@
     #include <vector>
 
     #include "tcob/core/Proxy.hpp"
-    #include "tcob/core/io/Stream.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
 
 namespace tcob::scripting::lua {
@@ -77,7 +76,7 @@ public:
     template <typename T>
     auto get_keys() const -> std::vector<T>;
 
-    void dump(ostream& stream) const;
+    void dump(io::ostream& stream) const;
 
     auto static PushNew(state_view view) -> table;
     auto static Acquire(state_view view, i32 idx) -> table;
@@ -85,7 +84,7 @@ public:
 private:
     table(state_view view, i32 idx);
 
-    void write_to_stream(ostream& stream, usize indent) const;
+    void write_to_stream(io::ostream& stream, usize indent) const;
 
     template <typename T>
     auto get(state_view view, auto&& key, auto&&... keys) const -> result<T>;
@@ -107,7 +106,7 @@ namespace detail {
     public:
         function_base() = default;
 
-        void dump(ostream& stream) const;
+        void dump(io::ostream& stream) const;
 
         auto get_upvalues() const -> std::unordered_set<string>;
         auto set_upvalue(string const& name, ref const& value) -> bool;

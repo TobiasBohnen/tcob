@@ -5,6 +5,8 @@
 
 #include "AudioCodec_bsa.hpp"
 
+#include "tcob/core/io/Stream.hpp"
+
 ////////////////////////////////////////////////////////////
 
 namespace tcob::audio::detail {
@@ -46,7 +48,7 @@ auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto bsa_encoder::encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool
+auto bsa_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
     out.write<u8>(static_cast<u8>(info.Channels));

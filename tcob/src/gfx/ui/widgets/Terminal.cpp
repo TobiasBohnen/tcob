@@ -196,7 +196,7 @@ void terminal::hline(point_i pos, utf8_string_view ch, i32 size)
     hline(ch, size);
 }
 
-auto terminal::restore(istream& stream) -> bool
+auto terminal::restore(io::istream& stream) -> bool
 {
     std::array<char, 6> sig {};
     stream.read_to<char>(sig);
@@ -220,7 +220,7 @@ auto terminal::restore(istream& stream) -> bool
     return false;
 }
 
-void terminal::dump(ostream& stream) const
+void terminal::dump(io::ostream& stream) const
 {
     stream.write("TTERM");
     stream.write<u8>(1);

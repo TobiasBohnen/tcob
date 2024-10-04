@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
@@ -107,14 +106,14 @@ private:
 
 class yaml_writer : public text_writer {
 public:
-    auto write(ostream& stream, object const& obj) -> bool override;
-    auto write(ostream& stream, array const& arr) -> bool override;
+    auto write(io::ostream& stream, object const& obj) -> bool override;
+    auto write(io::ostream& stream, array const& arr) -> bool override;
 
 private:
-    auto write_object(ostream& stream, usize indent, object const& obj) const -> bool;
-    auto write_array(ostream& stream, usize indent, array const& arr) const -> bool;
-    void write_entry(ostream& stream, usize indent, entry const& ent) const;
-    void write_scalar(ostream& stream, entry const& ent) const;
-    void write_comment(ostream& stream, entry const& ent) const;
+    auto write_object(io::ostream& stream, usize indent, object const& obj) const -> bool;
+    auto write_array(io::ostream& stream, usize indent, array const& arr) const -> bool;
+    void write_entry(io::ostream& stream, usize indent, entry const& ent) const;
+    void write_scalar(io::ostream& stream, entry const& ent) const;
+    void write_comment(io::ostream& stream, entry const& ent) const;
 };
 }

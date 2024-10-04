@@ -10,6 +10,7 @@
 #include <miniz/miniz.h>
 
 #include "tcob/core/io/Filter.hpp"
+#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/ImageFilters.hpp"
 
 namespace tcob::gfx::detail {
@@ -97,7 +98,7 @@ constexpr std::array<ubyte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1
 
 ////////////////////////////////////////////////////////////
 
-auto png_decoder::decode(istream& in) -> std::optional<image>
+auto png_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
         if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
@@ -152,7 +153,7 @@ auto png_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto png_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto png_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     if (check_sig(in) && read_header(in)) {
         return image::info {{_ihdr.Width, _ihdr.Height}, image::format::RGBA};
@@ -161,7 +162,7 @@ auto png_decoder::decode_info(istream& in) -> std::optional<image::info>
     return std::nullopt;
 }
 
-auto png_decoder::read_header(istream& in) -> bool
+auto png_decoder::read_header(io::istream& in) -> bool
 {
     auto const chunk {read_chunk(in)}; // The IHDR chunk must appear FIRST.
     if (chunk.Type == png::chunk_type::IHDR && chunk.Data.size() == 13) {
@@ -171,7 +172,7 @@ auto png_decoder::read_header(istream& in) -> bool
     return false;
 }
 
-auto png_decoder::read_chunk(istream& in) const -> png::chunk
+auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 {
     png::chunk retValue;
     retValue.Length = in.read<u32, std::endian::big>();
@@ -187,7 +188,7 @@ auto png_decoder::read_chunk(istream& in) const -> png::chunk
     return retValue;
 }
 
-auto png_decoder::check_sig(istream& in) -> bool
+auto png_decoder::check_sig(io::istream& in) -> bool
 {
     std::array<ubyte, 8> buf {};
     in.read_to<ubyte>(buf);
@@ -522,7 +523,7 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
 
 ////////////////////////////////////////////////////////////
 
-auto png_encoder::encode(image const& image, ostream& out) const -> bool
+auto png_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
     write_header(image, out);
@@ -531,7 +532,7 @@ auto png_encoder::encode(image const& image, ostream& out) const -> bool
     return true;
 }
 
-void png_encoder::write_header(image const& image, ostream& out) const
+void png_encoder::write_header(image const& image, io::ostream& out) const
 {
     auto const& info {image.get_info()};
 
@@ -604,7 +605,7 @@ auto static get_data(image const& image) -> std::vector<u8>
     return retValue;
 }
 
-void png_encoder::write_image(image const& image, ostream& out) const
+void png_encoder::write_image(image const& image, io::ostream& out) const
 {
     // compress
     auto buf {io::zlib_filter {}.to(get_data(image))};
@@ -628,7 +629,7 @@ void png_encoder::write_image(image const& image, ostream& out) const
     }
 }
 
-void png_encoder::write_end(ostream& out) const
+void png_encoder::write_end(io::ostream& out) const
 {
     std::array<u8, 4> iend {};
     u32 const         type {helper::byteswap(static_cast<u32>(png::chunk_type::IEND))};
@@ -636,12 +637,12 @@ void png_encoder::write_end(ostream& out) const
     write_chunk(out, iend);
 }
 
-void png_encoder::write_chunk(ostream& out, std::span<u8 const> buf) const
+void png_encoder::write_chunk(io::ostream& out, std::span<u8 const> buf) const
 {
     write_chunk(out, buf, static_cast<u32>(buf.size()));
 }
 
-void png_encoder::write_chunk(ostream& out, std::span<u8 const> buf, u32 length) const
+void png_encoder::write_chunk(io::ostream& out, std::span<u8 const> buf, u32 length) const
 {
     out.write<u32, std::endian::big>(length - 4);
     out.write<u8 const>({buf.data(), length});

@@ -8,7 +8,6 @@
 
 #include <optional>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -20,7 +19,7 @@ namespace bsi {
         size_i               Size {};
         image::format        Format {};
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 }
 
@@ -28,15 +27,15 @@ namespace bsi {
 
 class bsi_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class bsi_encoder final : public image_encoder {
 public:
-    auto encode(image const& img, ostream& out) const -> bool override;
+    auto encode(image const& img, io::ostream& out) const -> bool override;
 };
 
 }

@@ -17,7 +17,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TypeFactory.hpp"
-#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -53,11 +52,11 @@ public:
     auto get_data(rect_i const& bounds) const -> std::vector<u8>;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
-    auto load [[nodiscard]] (istream& in, string const& ext) noexcept -> load_status;
+    auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<load_status>;
 
     auto save [[nodiscard]] (path const& file) const -> bool;
-    auto save [[nodiscard]] (ostream& out, string const& ext) const -> bool;
+    auto save [[nodiscard]] (io::ostream& out, string const& ext) const -> bool;
     auto save_async [[nodiscard]] (path const& file) const -> std::future<bool>;
 
     void flip_horizontally();
@@ -71,9 +70,9 @@ public:
     auto static Create(size_i size, format f, std::span<u8 const> data) -> image;
     auto static CreateEmpty(size_i size, format f) -> image;
 
-    auto static Load(path const& file) noexcept -> std::optional<image>;               // TODO: change to result
-    auto static Load(istream& in, string const& ext) noexcept -> std::optional<image>; // TODO: change to result
-    auto static LoadInfo(path const& file) noexcept -> std::optional<info>;            // TODO: change to result
+    auto static Load(path const& file) noexcept -> std::optional<image>;                   // TODO: change to result
+    auto static Load(io::istream& in, string const& ext) noexcept -> std::optional<image>; // TODO: change to result
+    auto static LoadInfo(path const& file) noexcept -> std::optional<info>;                // TODO: change to result
 
 private:
     image(size_i size, format f);
@@ -94,8 +93,8 @@ public:
     image_decoder()          = default;
     virtual ~image_decoder() = default;
 
-    auto virtual decode(istream& in) -> std::optional<image>            = 0;
-    auto virtual decode_info(istream& in) -> std::optional<image::info> = 0;
+    auto virtual decode(io::istream& in) -> std::optional<image>            = 0;
+    auto virtual decode_info(io::istream& in) -> std::optional<image::info> = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -109,7 +108,7 @@ public:
     image_encoder()          = default;
     virtual ~image_encoder() = default;
 
-    auto virtual encode(image const& img, ostream& out) const -> bool = 0;
+    auto virtual encode(image const& img, io::ostream& out) const -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -130,7 +129,7 @@ public:
     animated_image_decoder()          = default;
     virtual ~animated_image_decoder() = default;
 
-    auto open(std::shared_ptr<istream> in) -> std::optional<image::info>;
+    auto open(std::shared_ptr<io::istream> in) -> std::optional<image::info>;
 
     auto virtual get_current_frame() const -> u8 const*       = 0;
     auto virtual seek_from_current(milliseconds ts) -> status = 0;
@@ -139,10 +138,10 @@ public:
 protected:
     auto virtual open() -> std::optional<image::info> = 0;
 
-    auto get_stream() -> istream&;
+    auto get_stream() -> io::istream&;
 
 private:
-    std::shared_ptr<istream> _stream;
+    std::shared_ptr<io::istream> _stream;
 };
 
 ////////////////////////////////////////////////////////////
@@ -161,7 +160,7 @@ public:
         milliseconds TimeStamp {0};
     };
 
-    auto virtual encode(std::span<frame const> frames, ostream& out) -> bool = 0;
+    auto virtual encode(std::span<frame const> frames, io::ostream& out) -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////

@@ -6,10 +6,11 @@
 #include "ImageCodec_bsi.hpp"
 
 #include "tcob/core/io/Filter.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::gfx::detail {
 
-void bsi::header::read(istream& reader)
+void bsi::header::read(io::istream& reader)
 {
     reader.read_to<ubyte>(Sig);
     Size   = {static_cast<i32>(reader.read<u32>()), static_cast<i32>(reader.read<u32, std::endian::little>())};
@@ -20,7 +21,7 @@ constexpr std::array<ubyte, 3> SIGNATURE {'B', 'S', 'I'};
 
 ////////////////////////////////////////////////////////////
 
-auto bsi_decoder::decode(istream& in) -> std::optional<image>
+auto bsi_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (auto info {decode_info(in)}) {
         auto const pixels {in.read_filtered<ubyte>(in.size_in_bytes(), io::zlib_filter {})};
@@ -32,7 +33,7 @@ auto bsi_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto bsi_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     bsi::header header {};
     header.read(in);
@@ -43,7 +44,7 @@ auto bsi_decoder::decode_info(istream& in) -> std::optional<image::info>
 
 ////////////////////////////////////////////////////////////
 
-auto bsi_encoder::encode(image const& img, ostream& out) const -> bool
+auto bsi_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
     auto const& info {img.get_info()};

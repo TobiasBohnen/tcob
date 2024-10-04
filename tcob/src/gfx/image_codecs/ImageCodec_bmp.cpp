@@ -5,11 +5,13 @@
 
 #include "ImageCodec_bmp.hpp"
 
+#include "tcob/core/io/Stream.hpp"
+
 namespace tcob::gfx::detail {
 
 namespace bmp {
 
-    void bitmap_file_header::read(istream& reader)
+    void bitmap_file_header::read(io::istream& reader)
     {
         Signature = reader.read<u16>();
         Size      = reader.read<u32>();
@@ -17,7 +19,7 @@ namespace bmp {
         BitsOffset = reader.read<u32>();
     }
 
-    void bitmap_info_header::read(istream& reader)
+    void bitmap_info_header::read(io::istream& reader)
     {
         read40(reader);
         RedMask   = reader.read<u32>();
@@ -31,7 +33,7 @@ namespace bmp {
         GammaBlue  = reader.read<u32>();
     }
 
-    void bitmap_info_header::read40(istream& reader)
+    void bitmap_info_header::read40(io::istream& reader)
     {
         HeaderSize    = reader.read<u32>();
         Width         = reader.read<i32>();
@@ -51,7 +53,7 @@ constexpr i16 SIGNATURE {0x4d42};
 
 ////////////////////////////////////////////////////////////
 
-auto bmp_decoder::decode(istream& in) -> std::optional<image>
+auto bmp_decoder::decode(io::istream& in) -> std::optional<image>
 {
     auto const offset {in.tell()};
 
@@ -88,7 +90,7 @@ auto bmp_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto bmp_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto bmp_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Signature == SIGNATURE) {
@@ -99,7 +101,7 @@ auto bmp_decoder::decode_info(istream& in) -> std::optional<image::info>
     return std::nullopt;
 }
 
-auto bmp_decoder::get_palette(istream& in) const -> std::vector<color>
+auto bmp_decoder::get_palette(io::istream& in) const -> std::vector<color>
 {
     u32 colorTableSize {0};
     if (_infoHeader.BitCount == 1) {
@@ -145,7 +147,7 @@ void static CheckAlpha(std::vector<u8>& data)
     }
 }
 
-auto bmp_decoder::get_rgb_data(istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>
+auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>
 {
     std::vector<u8> retValue(_info.size_in_bytes());
 
@@ -254,7 +256,7 @@ auto bmp_decoder::get_rgb_data(istream& in, size_i size, u16 bitCount, std::vect
 
 ////////////////////////////////////////////////////////////
 
-void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSize, ostream& writer)
+void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSize, io::ostream& writer)
 {
     writer.write(SIGNATURE);
     writer.write<u32>(static_cast<u32>(fileSize));
@@ -262,7 +264,7 @@ void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSiz
     writer.write<u32>(static_cast<u32>(imageOffset));
 }
 
-void static WriteImageData(image const& img, ostream& writer)
+void static WriteImageData(image const& img, io::ostream& writer)
 {
     auto const& info {img.get_info()};
     auto const  data {img.get_data()};
@@ -286,7 +288,7 @@ void static WriteImageData(image const& img, ostream& writer)
     writer.write<u8>(buffer);
 }
 
-void static WriteInfoHeader(image::info const& info, ostream& writer)
+void static WriteInfoHeader(image::info const& info, io::ostream& writer)
 {
     writer.write(40);
     writer.write<i32>(info.Size.Width);
@@ -301,7 +303,7 @@ void static WriteInfoHeader(image::info const& info, ostream& writer)
     writer.write(0);
 }
 
-auto bmp_encoder::encode(image const& img, ostream& out) const -> bool
+auto bmp_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
     auto const& info {img.get_info()};
 

@@ -14,7 +14,6 @@
 
     #include <qoi/qoi.h>
 
-    #include "tcob/core/io/Stream.hpp"
     #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -22,15 +21,15 @@ namespace tcob::gfx::detail {
 
 class qoi_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class qoi_encoder final : public image_encoder {
 public:
-    auto encode(image const& image, ostream& out) const -> bool override;
+    auto encode(image const& image, io::ostream& out) const -> bool override;
 };
 
 }

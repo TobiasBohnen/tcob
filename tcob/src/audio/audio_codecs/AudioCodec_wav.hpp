@@ -14,7 +14,6 @@
     #include <dr_libs/dr_wav.h>
 
     #include "tcob/audio/AudioSource.hpp"
-    #include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////
@@ -38,7 +37,7 @@ private:
 
 class wav_encoder final : public encoder {
 public:
-    auto encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool override;
+    auto encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool override;
 };
 
 }

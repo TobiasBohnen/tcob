@@ -7,24 +7,26 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
 
+    #include "tcob/core/io/Stream.hpp"
+
 namespace tcob::gfx::detail {
 
 extern "C" {
 auto static read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
 {
-    auto* stream {static_cast<istream*>(io->userdata)};
+    auto* stream {static_cast<io::istream*>(io->userdata)};
     return static_cast<long>(stream->read_to<byte>({static_cast<byte*>(buf), static_cast<usize>(buflen)}));
 }
 
 auto static streamlen(THEORAPLAY_Io* io) -> long
 {
-    auto* stream {static_cast<istream*>(io->userdata)};
+    auto* stream {static_cast<io::istream*>(io->userdata)};
     return static_cast<long>(stream->size_in_bytes());
 }
 
 auto static seek(THEORAPLAY_Io* io, long absolute_offset) -> int
 {
-    auto* stream {static_cast<istream*>(io->userdata)};
+    auto* stream {static_cast<io::istream*>(io->userdata)};
     return stream->seek(absolute_offset, io::seek_dir::Begin) ? 0 : -1;
 }
 
@@ -76,7 +78,7 @@ auto theora_decoder::open() -> std::optional<image::info>
         }
         _size = {static_cast<i32>(video->width), static_cast<i32>(video->height)};
         THEORAPLAY_freeVideo(video);
-        return image::info {_size, image::format::RGBA};
+        return image::info {.Size = _size, .Format = image::format::RGBA};
     }
 
     return std::nullopt;

@@ -17,7 +17,7 @@ auto table::load(path const& file, settings s) noexcept -> load_status
     return load(fs, s);
 }
 
-auto table::load(istream& in, settings s) noexcept -> load_status
+auto table::load(io::istream& in, settings s) noexcept -> load_status
 {
     if (!in) { return load_status::Error; }
     return parse(in.read_string(in.size_in_bytes()), s) ? load_status::Ok : load_status::Error;
@@ -82,7 +82,7 @@ auto table::parse(string const& csv, settings s) -> bool
     return true;
 }
 
-void static write_line(std::vector<string> const& row, ostream& ss, settings const& s)
+void static write_line(std::vector<string> const& row, io::ostream& ss, settings const& s)
 {
     for (usize i {0}; i < row.size(); ++i) {
         string const& value {row[i]};
@@ -104,7 +104,7 @@ auto table::save(path const& file, settings s) const -> bool
     return save(stream, s);
 }
 
-auto table::save(ostream& out, settings s) const -> bool
+auto table::save(io::ostream& out, settings s) const -> bool
 {
     if (!Header.empty()) {
         write_line(Header, out, s);

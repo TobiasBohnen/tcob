@@ -58,7 +58,7 @@ auto object::str() const -> string
     return stream.read_string(stream.size_in_bytes());
 }
 
-auto object::on_load(istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
 {
     if (!skipBinary) {
         if (auto binParser {locate_service<binary_reader::factory>().create_from_sig_or_ext(in, ext)}) {
@@ -202,7 +202,7 @@ auto array::operator[](isize index) const -> proxy<array const, isize>
     return proxy<array const, isize> {*this, std::tuple {index}};
 }
 
-auto array::on_load(istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
 {
     if (!skipBinary) {
         if (auto binParser {locate_service<binary_reader::factory>().create_from_sig_or_ext(in, ext)}) {

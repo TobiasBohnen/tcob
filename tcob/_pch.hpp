@@ -1,35 +1,14 @@
-
+// IWYU pragma: begin_keep
 #include <algorithm>
-#include <any>
 #include <array>
-#include <atomic>
-#include <bit>
 #include <cassert>
-#include <chrono>
 #include <cmath>
-#include <compare>
-#include <concepts>
-#include <format>
 #include <functional>
-#include <future>
-#include <list>
-#include <map>
 #include <memory>
-#include <mutex>
-#include <numbers>
 #include <optional>
-#include <ostream>
-#include <queue>
-#include <set>
 #include <span>
-#include <stack>
 #include <string>
-#include <string_view>
-#include <thread>
-#include <tuple>
-#include <type_traits>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
-#include <variant>
 #include <vector>
+// IWYU pragma: end_keep

@@ -8,7 +8,6 @@
 
 #include <optional>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
@@ -35,13 +34,13 @@ private:
 
 class json_writer : public text_writer {
 public:
-    auto write(ostream& stream, object const& obj) -> bool override;
-    auto write(ostream& stream, array const& arr) -> bool override;
+    auto write(io::ostream& stream, object const& obj) -> bool override;
+    auto write(io::ostream& stream, array const& arr) -> bool override;
 
 private:
-    void write_object(ostream& stream, usize indent, object const& obj) const;
-    void write_array(ostream& stream, usize indent, array const& arr) const;
-    void write_entry(ostream& stream, usize indent, entry const& ent) const;
+    void write_object(io::ostream& stream, usize indent, object const& obj) const;
+    void write_array(io::ostream& stream, usize indent, array const& arr) const;
+    void write_entry(io::ostream& stream, usize indent, entry const& ent) const;
 };
 
 }

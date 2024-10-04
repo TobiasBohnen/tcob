@@ -18,7 +18,6 @@
     #include <webp/encode.h>
     #include <webp/mux.h>
 
-    #include "tcob/core/io/Stream.hpp"
     #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -26,8 +25,8 @@ namespace tcob::gfx::detail {
 
 class webp_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
 private:
     std::vector<u8> _buffer;
@@ -37,7 +36,7 @@ private:
 
 class webp_encoder final : public image_encoder {
 public:
-    auto encode(image const& image, ostream& out) const -> bool override;
+    auto encode(image const& image, io::ostream& out) const -> bool override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -70,7 +69,7 @@ public:
     webp_anim_encoder();
     ~webp_anim_encoder() override;
 
-    auto encode(std::span<frame const> frames, ostream& out) -> bool override;
+    auto encode(std::span<frame const> frames, io::ostream& out) -> bool override;
 
 private:
     WebPAnimEncoder* _encoder {nullptr};

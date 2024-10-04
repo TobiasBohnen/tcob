@@ -7,6 +7,8 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
+    #include "tcob/core/io/Stream.hpp"
+
 ////////////////////////////////////////////////////////////
 
 namespace tcob::audio::detail {
@@ -14,13 +16,13 @@ namespace tcob::audio::detail {
 extern "C" {
 auto static read_flac(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
-    auto* stream {static_cast<istream*>(userdata)};
+    auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
 }
 
 auto static seek_flac(void* userdata, i32 offset, drflac_seek_origin origin) -> drflac_bool32
 {
-    auto*      stream {static_cast<istream*>(userdata)};
+    auto*      stream {static_cast<io::istream*>(userdata)};
     auto const dir {origin == drflac_seek_origin_current ? io::seek_dir::Current : io::seek_dir::Begin};
     return stream->seek(offset, dir);
 }

@@ -32,7 +32,7 @@ inline auto type_factory<ReturnType, Args...>::create(string const& name, Args&&
 }
 
 template <typename ReturnType, typename... Args>
-inline auto type_factory<ReturnType, Args...>::create_from_sig_or_ext(istream& in, string const& ext, Args&&... args) -> ReturnType
+inline auto type_factory<ReturnType, Args...>::create_from_sig_or_ext(io::istream& in, string const& ext, Args&&... args) -> ReturnType
 {
     auto retValue {create(io::magic::get_extension(in))};
     if (!retValue) { retValue = create(ext, std::move(args)...); }

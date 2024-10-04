@@ -35,7 +35,7 @@ public:
     auto get_sample_rate() const -> i32;
 
     auto load [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
-    auto load [[nodiscard]] (istream& stream, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
+    auto load [[nodiscard]] (io::istream& stream, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> std::future<load_status>;
 
     auto create_buffer [[nodiscard]] (sound_font_commands const& commands) const -> buffer;

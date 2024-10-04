@@ -35,7 +35,7 @@ auto music::open(path const& file) -> load_status
     return open(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
-auto music::open(std::shared_ptr<istream> in, string const& ext) -> load_status
+auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_status
 {
     if (!in || !(*in)) { return load_status::Error; }
 

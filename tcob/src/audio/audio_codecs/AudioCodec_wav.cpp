@@ -7,6 +7,8 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
+    #include "tcob/core/io/Stream.hpp"
+
 ////////////////////////////////////////////////////////////
 
 namespace tcob::audio::detail {
@@ -14,20 +16,20 @@ namespace tcob::audio::detail {
 extern "C" {
 auto static read_wav(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
-    auto* stream {static_cast<istream*>(userdata)};
+    auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
 }
 
 auto static write_wav(void* userdata, void const* buffer, usize bytesToWrite) -> usize
 {
-    auto*      stream {static_cast<ostream*>(userdata)};
+    auto*      stream {static_cast<io::ostream*>(userdata)};
     auto const retValue {stream->write<byte>({static_cast<byte const*>(buffer), bytesToWrite})};
     return static_cast<usize>(std::max<isize>(0, retValue));
 }
 
 auto static seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> drwav_bool32
 {
-    auto*      stream {static_cast<istream*>(userdata)};
+    auto*      stream {static_cast<io::istream*>(userdata)};
     auto const dir {origin == drwav_seek_origin_current ? io::seek_dir::Current : io::seek_dir::Begin};
     return stream->seek(offset, dir);
 }
@@ -66,7 +68,7 @@ auto wav_decoder::decode(std::span<f32> outputSamples) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto wav_encoder::encode(std::span<f32 const> samples, buffer::info const& info, ostream& out) const -> bool
+auto wav_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
 {
     drwav_data_format format;
     format.format        = DR_WAVE_FORMAT_PCM;

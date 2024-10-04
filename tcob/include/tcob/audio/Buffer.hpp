@@ -6,8 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <any>
+#include <future>
+
 #include "tcob/core/Common.hpp"
-#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
@@ -26,11 +28,11 @@ public:
     auto get_data() -> std::span<f32>;
 
     auto load [[nodiscard]] (path const& file, std::any& ctx) noexcept -> load_status;
-    auto load [[nodiscard]] (std::shared_ptr<istream> in, string const& ext, std::any& ctx) noexcept -> load_status;
+    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file, std::any& ctx) noexcept -> std::future<load_status>;
 
     auto save [[nodiscard]] (path const& file) const -> bool;
-    auto save [[nodiscard]] (ostream& out, string const& ext) const -> bool;
+    auto save [[nodiscard]] (io::ostream& out, string const& ext) const -> bool;
     auto save_async [[nodiscard]] (path const& file) const -> std::future<bool>;
 
     auto static Create(info const& info, std::span<f32> data) -> buffer;

@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -65,14 +64,14 @@ namespace tga {
         u32    ExtensionAreaOffset;
         format Format;
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 
     struct image_descriptor {
         i32                     AttributeBits;
         first_pixel_destination FirstPixelDestination;
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 
     struct image_specifications {
@@ -84,7 +83,7 @@ namespace tga {
         u16              XOrigin;
         u16              YOrigin;
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 
     struct color_map_specifications {
@@ -93,7 +92,7 @@ namespace tga {
         i32 ColorMapTotalSize;
         u16 FirstEntryIndex;
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 
     struct header {
@@ -103,19 +102,19 @@ namespace tga {
         image_specifications     ImageSpecs;
         image_type               ImageType;
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 
-    auto read_data(istream& reader, header const& head) -> std::vector<u8>;
-    auto read_color_map(istream& reader, i32 colorMapLength, i32 colorMapEntrySize) -> std::vector<color>;
+    auto read_data(io::istream& reader, header const& head) -> std::vector<u8>;
+    auto read_color_map(io::istream& reader, i32 colorMapLength, i32 colorMapEntrySize) -> std::vector<color>;
 }
 
 ////////////////////////////////////////////////////////////
 
 class tga_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
 private:
     tga::footer _footer {};
@@ -126,13 +125,13 @@ private:
 
 class tga_encoder final : public image_encoder {
 public:
-    auto encode(image const& img, ostream& out) const -> bool override;
+    auto encode(image const& img, io::ostream& out) const -> bool override;
 
 private:
-    void write_header(image::info const& image, ostream& out) const;
-    void write_image_data(image const& img, ostream& out) const;
-    void write_extension_area(ostream& out) const;
-    void write_footer(ostream& out, std::streamsize extOffset) const;
+    void write_header(image::info const& image, io::ostream& out) const;
+    void write_image_data(image const& img, io::ostream& out) const;
+    void write_extension_area(io::ostream& out) const;
+    void write_footer(io::ostream& out, std::streamsize extOffset) const;
 };
 
 }

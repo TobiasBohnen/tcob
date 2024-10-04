@@ -14,7 +14,6 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Result.hpp"
 #include "tcob/core/TypeFactory.hpp"
-#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::data::config {
 ////////////////////////////////////////////////////////////
@@ -98,8 +97,8 @@ public:
 
     virtual ~text_writer() = default;
 
-    auto virtual write(ostream& stream, object const& obj) -> bool = 0;
-    auto virtual write(ostream& stream, array const& arr) -> bool  = 0;
+    auto virtual write(io::ostream& stream, object const& obj) -> bool = 0;
+    auto virtual write(io::ostream& stream, array const& arr) -> bool  = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -112,8 +111,8 @@ public:
 
     virtual ~binary_reader() = default;
 
-    auto virtual read_as_object(istream& stream) -> std::optional<object> = 0;
-    auto virtual read_as_array(istream& stream) -> std::optional<array>   = 0;
+    auto virtual read_as_object(io::istream& stream) -> std::optional<object> = 0;
+    auto virtual read_as_array(io::istream& stream) -> std::optional<array>   = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -126,8 +125,8 @@ public:
 
     virtual ~binary_writer() = default;
 
-    auto virtual write(ostream& stream, object const& obj) -> bool = 0;
-    auto virtual write(ostream& stream, array const& arr) -> bool  = 0;
+    auto virtual write(io::ostream& stream, object const& obj) -> bool = 0;
+    auto virtual write(io::ostream& stream, array const& arr) -> bool  = 0;
 };
 
 ////////////////////////////////////////////////////////////

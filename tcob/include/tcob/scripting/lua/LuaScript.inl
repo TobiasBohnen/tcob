@@ -58,7 +58,7 @@ inline auto script::load_binary(path const& file) const -> function<R>
 }
 
 template <typename R>
-inline auto script::load_binary(istream& in, string const& name) const -> function<R>
+inline auto script::load_binary(io::istream& in, string const& name) const -> function<R>
 {
     auto const guard {_view.create_stack_guard()};
 

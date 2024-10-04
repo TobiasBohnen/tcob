@@ -380,19 +380,19 @@ auto ini_reader::is_eof() const -> bool
 
 //////////////////////////////////////////////////////////////////////
 
-auto ini_writer::write(ostream& stream, object const& obj) -> bool
+auto ini_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     write_section(stream, obj, "");
     return true;
 }
 
-auto ini_writer::write(ostream& stream, array const& arr) -> bool
+auto ini_writer::write(io::ostream& stream, array const& arr) -> bool
 {
     write_array(stream, arr);
     return true;
 }
 
-void ini_writer::write_section(ostream& stream, object const& obj, utf8_string const& prefix) const
+void ini_writer::write_section(io::ostream& stream, object const& obj, utf8_string const& prefix) const
 {
     std::unordered_map<utf8_string, object> objects;
     for (auto const& [k, v] : obj) {
@@ -434,7 +434,7 @@ void ini_writer::write_section(ostream& stream, object const& obj, utf8_string c
     }
 }
 
-void ini_writer::write_inline_section(ostream& stream, object const& obj) const
+void ini_writer::write_inline_section(io::ostream& stream, object const& obj) const
 {
     stream << "{ ";
     bool first {true};
@@ -454,7 +454,7 @@ void ini_writer::write_inline_section(ostream& stream, object const& obj) const
     stream << " }";
 }
 
-void ini_writer::write_array(ostream& stream, array const& arr) const
+void ini_writer::write_array(io::ostream& stream, array const& arr) const
 {
     stream << "[ ";
     bool first {true};
@@ -467,7 +467,7 @@ void ini_writer::write_array(ostream& stream, array const& arr) const
     stream << " ]";
 }
 
-void ini_writer::write_entry(ostream& stream, entry const& ent) const
+void ini_writer::write_entry(io::ostream& stream, entry const& ent) const
 {
     if (ent.is<bool>()) {
         stream << (ent.as<bool>() ? "true" : "false");

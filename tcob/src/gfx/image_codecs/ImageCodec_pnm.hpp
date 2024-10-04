@@ -8,7 +8,6 @@
 
 #include <optional>
 
-#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
@@ -34,7 +33,7 @@ namespace pnm {
         u32    Width {};
         u32    Height {};
 
-        void read(istream& reader);
+        void read(io::istream& reader);
     };
 }
 
@@ -42,8 +41,8 @@ namespace pnm {
 
 class pnm_decoder final : public image_decoder {
 public:
-    auto decode(istream& in) -> std::optional<image> override;
-    auto decode_info(istream& in) -> std::optional<image::info> override;
+    auto decode(io::istream& in) -> std::optional<image> override;
+    auto decode_info(io::istream& in) -> std::optional<image::info> override;
 
 private:
     pnm::header _header;

@@ -5,6 +5,8 @@
 
 #include "ImageCodec_pcx.hpp"
 
+#include "tcob/core/io/Stream.hpp"
+
 /*
 supported formats:
  Bit Depth 	Planes 	Number of Colors
@@ -23,7 +25,7 @@ constexpr byte PaletteMagicNumber {12};
 constexpr i32  PaletteOffset {769};
 constexpr i32  HeaderLength {128};
 
-auto pcx::read_image_data(istream& reader, header const& h) -> std::vector<u8>
+auto pcx::read_image_data(io::istream& reader, header const& h) -> std::vector<u8>
 {
     reader.seek(HeaderLength, io::seek_dir::Begin);
 
@@ -55,7 +57,7 @@ auto pcx::read_image_data(istream& reader, header const& h) -> std::vector<u8>
     return retValue;
 }
 
-auto pcx::read_color_palette(istream& reader, i32 size) -> std::vector<color>
+auto pcx::read_color_palette(io::istream& reader, i32 size) -> std::vector<color>
 {
     std::vector<color> retValue;
     for (i32 i {0}; i < size; ++i) {
@@ -67,7 +69,7 @@ auto pcx::read_color_palette(istream& reader, i32 size) -> std::vector<color>
     return retValue;
 }
 
-void pcx::header::read(istream& reader)
+void pcx::header::read(io::istream& reader)
 {
     Manufacturer = reader.read<u8>();
 
@@ -92,7 +94,7 @@ void pcx::header::read(istream& reader)
     VScrSize         = reader.read<u16, std::endian::little>();
 }
 
-void pcx::header::Write(image::info const& info, ostream& writer)
+void pcx::header::Write(image::info const& info, io::ostream& writer)
 {
     byte bpp {8}, cpc {3};
 
@@ -121,7 +123,7 @@ void pcx::header::Write(image::info const& info, ostream& writer)
 
 ////////////////////////////////////////////////////////////
 
-auto pcx_decoder::decode(istream& in) -> std::optional<image>
+auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
         auto const palette {read_palette(in)};
@@ -213,7 +215,7 @@ auto pcx_decoder::decode(istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto pcx_decoder::decode_info(istream& in) -> std::optional<image::info>
+auto pcx_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     _header.read(in);
     if (_header.Manufacturer == ManufacturerMagicNumber) {
@@ -223,7 +225,7 @@ auto pcx_decoder::decode_info(istream& in) -> std::optional<image::info>
     return std::nullopt;
 }
 
-auto pcx_decoder::read_palette(istream& in) const -> std::vector<color>
+auto pcx_decoder::read_palette(io::istream& in) const -> std::vector<color>
 {
     if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
         in.seek(HeaderPaletteOffset, io::seek_dir::Begin);
@@ -286,7 +288,7 @@ auto static Compress(std::span<u8> buf, i32 lineWidth) -> std::vector<u8>
     return retValue;
 }
 
-auto pcx_encoder::encode(image const& img, ostream& out) const -> bool
+auto pcx_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
     auto const& info {img.get_info()};
 

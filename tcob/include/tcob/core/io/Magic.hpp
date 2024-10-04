@@ -5,8 +5,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/io/Stream.hpp"
-
 namespace tcob::io::magic {
 
 ////////////////////////////////////////////////////////////
@@ -26,7 +24,7 @@ struct signature {
 
 TCOB_API void add_signature(signature const& sig);
 
-TCOB_API auto get_extension(istream& stream) -> path;
-TCOB_API auto get_signature(istream& stream) -> std::optional<signature>;
+TCOB_API auto get_extension(io::istream& stream) -> path;
+TCOB_API auto get_signature(io::istream& stream) -> std::optional<signature>;
 TCOB_API auto get_group(path const& ext) -> path;
 }

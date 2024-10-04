@@ -167,9 +167,4 @@ private:
 
 }
 
-namespace tcob {
-using istream = io::istream;
-using ostream = io::ostream;
-}
-
 #include "Stream.inl"

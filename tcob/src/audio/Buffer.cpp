@@ -33,7 +33,7 @@ auto buffer::load(path const& file, std::any& ctx) noexcept -> load_status
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file), ctx);
 }
 
-auto buffer::load(std::shared_ptr<istream> in, string const& ext, std::any& ctx) noexcept -> load_status
+auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status
 {
     if (!in || !(*in)) { return load_status::Error; }
 
@@ -63,7 +63,7 @@ auto buffer::save(path const& file) const -> bool
     return save(of, io::get_extension(file));
 }
 
-auto buffer::save(ostream& out, string const& ext) const -> bool
+auto buffer::save(io::ostream& out, string const& ext) const -> bool
 {
     if (_info.FrameCount == 0) { return false; }
 
