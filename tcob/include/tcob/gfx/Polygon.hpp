@@ -24,6 +24,13 @@ enum class clip_mode : u8 {
     Xor
 };
 
+enum class offset_join : u8 {
+    Square,
+    Bevel,
+    Round,
+    Miter
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API polygon final {
@@ -55,6 +62,7 @@ namespace polygons {
     TCOB_API void move_by(std::span<polygon> polygons, point_f offset);
 
     TCOB_API void clip(std::vector<polygon>& polygons, std::span<polygon const> other, clip_mode mode);
+    TCOB_API void offset(std::vector<polygon>& polygons, f64 delta, offset_join join);
 };
 
 ////////////////////////////////////////////////////////////

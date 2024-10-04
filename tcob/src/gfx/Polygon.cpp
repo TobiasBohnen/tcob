@@ -186,4 +186,78 @@ void polygons::clip(std::vector<polygon>& polygons, std::span<polygon const> oth
     }
 }
 
+void polygons::offset(std::vector<polygon>& polygons, f64 delta, offset_join join)
+{
+    using namespace Clipper2Lib;
+
+    // Helper function to create Clipper paths
+    auto const createPath {[](std::span<polygon const> polys) -> Paths64 {
+        auto const addPolygonPath = [](auto const& polyline, Paths64& retValue) {
+            std::vector<i64> points;
+            for (auto const& p : polyline) {
+                points.push_back(static_cast<i64>(p.X));
+                points.push_back(static_cast<i64>(p.Y));
+            }
+            if (points.size() < 2) { return; } // Ignore degenerate polygons
+            points.push_back(points[0]);       // Close the path
+            points.push_back(points[1]);
+            retValue.push_back(MakePath(points));
+        };
+
+        Paths64 retValue;
+        for (auto const& poly : polys) {
+            addPolygonPath(poly.Outline, retValue);
+            for (auto const& hole : poly.Holes) {
+                addPolygonPath(hole, retValue);
+            }
+        }
+
+        return retValue;
+    }};
+
+    JoinType joinType {JoinType::Round};
+    switch (join) {
+    case offset_join::Square: joinType = JoinType::Square; break;
+    case offset_join::Bevel: joinType = JoinType::Bevel; break;
+    case offset_join::Round: joinType = JoinType::Round; break;
+    case offset_join::Miter: joinType = JoinType::Miter; break;
+    }
+
+    ClipperOffset clipper;
+    clipper.AddPaths(createPath(polygons), joinType, EndType::Polygon);
+
+    polygons.clear();
+
+    PolyPath64 solution;
+    clipper.Execute(delta, solution);
+
+    std::function<void(PolyPath64*, polygon*)> const parseSolution {
+        [&](PolyPath64* node, polygon* parentPoly) {
+            polyline* target {nullptr};
+            if (!node->IsHole()) { // If not a hole, it's a new polygon outline
+                parentPoly = &polygons.emplace_back();
+                target     = &parentPoly->Outline;
+            } else {               // It's a hole, add to the parent polygon
+                assert(parentPoly);
+                target = &parentPoly->Holes.emplace_back();
+            }
+
+            for (auto const& pt : node->Polygon()) { target->emplace_back(pt.x, pt.y); }
+            if (!node->IsHole()) {
+                if (polygons::get_winding(*target) == winding::CW) { std::ranges::reverse(*target); }
+            } else {
+                if (polygons::get_winding(*target) == winding::CCW) { std::ranges::reverse(*target); }
+            }
+
+            for (usize i {0}; i < node->Count(); ++i) {
+                parseSolution(node->Child(i), parentPoly);
+            }
+        }};
+
+    assert(solution.Polygon().empty()); // Ensure no top-level polygons
+    for (u32 i {0}; i < solution.Count(); ++i) {
+        parseSolution(solution.Child(i), nullptr);
+    }
+}
+
 } // namespace gfx

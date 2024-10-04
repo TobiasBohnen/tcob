@@ -216,7 +216,7 @@ auto static Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
     return retValue;
 }
 
-auto static Format(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
+auto static Layout(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
 {
     availableHeight = availableHeight < 0 ? std::numeric_limits<f32>::max() : availableHeight;
 
@@ -291,14 +291,14 @@ auto format(utf8_string_view text, font& font, alignments align, size_f availabl
 {
     auto shaperTokens {Shape(text, font, kerning, false)};
     auto lines {Wrap(shaperTokens, availableSize.Width, scale)};
-    return Format(lines, font, align, availableSize.Height, scale);
+    return Layout(lines, font, align, availableSize.Height, scale);
 }
 
 auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f
 {
     auto shaperTokens {Shape(text, font, kerning, true)};
     auto lines {Wrap(shaperTokens, -1, 1.0f)};
-    return Format(lines, font, {}, availableHeight, 1.0f).UsedSize;
+    return Layout(lines, font, {}, availableHeight, 1.0f).UsedSize;
 }
 
 ////////////////////////////////////////////////////////////
