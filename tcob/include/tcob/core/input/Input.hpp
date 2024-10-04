@@ -60,8 +60,8 @@ public:
         bool      Pressed {false};
         bool      Repeat {false};
         scan_code ScanCode {scan_code::UNKNOWN};
-        key_code  KeyCode {key_code::UNKNOWN};
         key_mod   KeyMods {key_mod::None};
+        key_code  KeyCode {key_code::UNKNOWN};
     };
 
     struct text_input_event : event_base {
@@ -242,28 +242,28 @@ public:
     system();
     ~system();
 
-    signal<keyboard::event>              KeyDown;
-    signal<keyboard::event>              KeyUp;
-    signal<keyboard::text_input_event>   TextInput;
-    signal<keyboard::text_editing_event> TextEditing;
+    signal<keyboard::event const>              KeyDown;
+    signal<keyboard::event const>              KeyUp;
+    signal<keyboard::text_input_event const>   TextInput;
+    signal<keyboard::text_editing_event const> TextEditing;
 
-    signal<mouse::motion_event> MouseMotion;
-    signal<mouse::button_event> MouseButtonDown;
-    signal<mouse::button_event> MouseButtonUp;
-    signal<mouse::wheel_event>  MouseWheel;
+    signal<mouse::motion_event const> MouseMotion;
+    signal<mouse::button_event const> MouseButtonDown;
+    signal<mouse::button_event const> MouseButtonUp;
+    signal<mouse::wheel_event const>  MouseWheel;
 
-    signal<joystick::axis_event>   JoystickAxisMotion;
-    signal<joystick::hat_event>    JoystickHatMotion;
-    signal<joystick::button_event> JoystickButtonDown;
-    signal<joystick::button_event> JoystickButtonUp;
-    signal<i32>                    JoystickAdded;
-    signal<i32>                    JoystickRemoved;
+    signal<joystick::axis_event const>   JoystickAxisMotion;
+    signal<joystick::hat_event const>    JoystickHatMotion;
+    signal<joystick::button_event const> JoystickButtonDown;
+    signal<joystick::button_event const> JoystickButtonUp;
+    signal<i32 const>                    JoystickAdded;
+    signal<i32 const>                    JoystickRemoved;
 
-    signal<controller::axis_event>   ControllerAxisMotion;
-    signal<controller::button_event> ControllerButtonDown;
-    signal<controller::button_event> ControllerButtonUp;
-    signal<i32>                      ControllerAdded;
-    signal<i32>                      ControllerRemoved;
+    signal<controller::axis_event const>   ControllerAxisMotion;
+    signal<controller::button_event const> ControllerButtonDown;
+    signal<controller::button_event const> ControllerButtonUp;
+    signal<i32 const>                      ControllerAdded;
+    signal<i32 const>                      ControllerRemoved;
 
     prop<mode> CurrentInputMode;
 
