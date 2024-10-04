@@ -484,6 +484,8 @@ canvas::canvas()
     set_device_pixel_ratio(1.0f);
 }
 
+canvas::~canvas() = default;
+
 auto canvas::get_texture(i32 level) -> assets::asset_ptr<texture>
 {
     return _rtt[level];

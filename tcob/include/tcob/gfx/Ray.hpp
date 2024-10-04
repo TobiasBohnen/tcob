@@ -17,6 +17,7 @@
 #include "tcob/gfx/Polygon.hpp"
 
 namespace tcob::gfx {
+////////////////////////////////////////////////////////////
 
 class TCOB_API ray final {
 public:

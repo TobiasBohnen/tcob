@@ -80,7 +80,7 @@ auto render_target::copy_to_image() const -> image
 
 void render_target::set_size(size_i size)
 {
-    (*Camera).set_size(size_f {size}); // FIXME: don't change camera size
+    (*Camera).Size = size_f {size}; // FIXME: don't change camera size
 
     if (size.Width <= 0 || size.Height <= 0) { return; }
 

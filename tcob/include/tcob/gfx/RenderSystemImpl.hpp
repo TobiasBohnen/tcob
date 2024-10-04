@@ -17,18 +17,6 @@
 
 struct SDL_Window;
 
-namespace tcob::gfx {
-////////////////////////////////////////////////////////////
-
-struct canvas_paint;
-struct canvas_scissor;
-struct canvas_path;
-struct render_properties;
-
-class material;
-
-}
-
 namespace tcob::gfx::render_backend {
 ////////////////////////////////////////////////////////////
 

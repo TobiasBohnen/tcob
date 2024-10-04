@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 
-#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

@@ -31,12 +31,6 @@ struct render_properties {
 
 ////////////////////////////////////////////////////////////
 
-namespace render_backend {
-    class render_target_base;
-}
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API render_target {
 public:
     explicit render_target(texture* tex);

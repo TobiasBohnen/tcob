@@ -136,3 +136,25 @@ struct video_config {
 };
 
 }
+
+////////////////////////////////////////////////////////////
+// forward declarations
+
+namespace tcob {
+namespace gfx {
+    class render_system;
+    struct render_properties;
+    class material;
+    struct canvas_paint;
+    struct canvas_scissor;
+    struct canvas_path;
+}
+namespace gfx::render_backend {
+    class canvas_base;
+    class render_target_base;
+    class shader_base;
+    class texture_base;
+    class vertex_array_base;
+    class window_base;
+}
+}

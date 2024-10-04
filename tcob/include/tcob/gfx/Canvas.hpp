@@ -38,6 +38,7 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
@@ -120,12 +121,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-namespace render_backend {
-    class canvas_base;
-}
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API canvas final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
@@ -154,7 +149,7 @@ public:
     ////////////////////////////////////////////////////////////
 
     canvas();
-    ~canvas() = default;
+    ~canvas();
 
     auto get_texture(i32 level = 0) -> assets::asset_ptr<texture>;
     auto get_size() const -> size_i;

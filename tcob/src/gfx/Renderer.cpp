@@ -377,7 +377,7 @@ void canvas_renderer::set_bounds(rect_f const& bounds)
     quad q {};
     geometry::set_position(q, bounds);
     geometry::set_color(q, colors::White);
-    geometry::set_texcoords(q, {render_texture::GetTexcoords(), 0});
+    geometry::set_texcoords(q, {.UVRect = render_texture::GetTexcoords(), .Level = 0});
     _vertexArray->update_data(std::span {&q, 1}, 0);
 }
 
@@ -389,8 +389,8 @@ void canvas_renderer::set_layer(i32 layer)
 void canvas_renderer::prepare_render(render_target& target, bool debug)
 {
     camera newCam {};
-    _oldCam = *target.Camera;
-    newCam.set_size(_oldCam.get_size());
+    _oldCam       = *target.Camera;
+    newCam.Size   = _oldCam.Size();
     target.Camera = newCam;
 
     target.prepare_render(debug);

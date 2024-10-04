@@ -14,15 +14,10 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-namespace render_backend {
-    class vertex_array_base;
-}
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API vertex_array {
 public:
     explicit vertex_array(buffer_usage_hint usage);
+    ~vertex_array();
 
     void resize(usize vertCount, usize indCount);
 

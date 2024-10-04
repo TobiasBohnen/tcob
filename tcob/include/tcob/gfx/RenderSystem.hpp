@@ -19,7 +19,6 @@
 #include "tcob/gfx/Window.hpp"
 
 namespace tcob::gfx {
-
 ////////////////////////////////////////////////////////////
 
 struct display_mode {

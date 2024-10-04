@@ -10,6 +10,7 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/drawables/Cursor.hpp"
@@ -18,15 +19,6 @@
 
 using SDL_Event = union SDL_Event;
 struct SDL_Window;
-
-namespace tcob {
-namespace gfx {
-    class render_system;
-}
-namespace gfx::render_backend {
-    class window_base;
-}
-}
 
 namespace tcob::gfx {
 

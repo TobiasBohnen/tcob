@@ -7,6 +7,7 @@
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
 
 namespace tcob::gfx {
 
@@ -14,6 +15,8 @@ vertex_array::vertex_array(buffer_usage_hint usage)
     : _impl {locate_service<render_system>().create_vertex_array(usage)}
 {
 }
+
+vertex_array::~vertex_array() = default;
 
 void vertex_array::resize(usize vertCount, usize indCount)
 {

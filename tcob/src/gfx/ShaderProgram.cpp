@@ -7,6 +7,7 @@
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
 
 namespace tcob::gfx {
 
