@@ -9,11 +9,11 @@ namespace tcob::gfx {
 
 transformable::transformable()
 {
-    Translation.Changed.connect([&]() { mark_transform_dirty(); });
-    Rotation.Changed.connect([&]() { mark_transform_dirty(); });
-    Scale.Changed.connect([&]() { mark_transform_dirty(); });
+    Translation.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Rotation.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Scale.Changed.connect([&](auto const&) { mark_transform_dirty(); });
     Scale(size_f::One);
-    Skew.Changed.connect([&]() { mark_transform_dirty(); });
+    Skew.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 }
 
 auto transformable::get_transform() -> transform const&
@@ -81,8 +81,8 @@ rect_transformable::rect_transformable()
     : Center {{[&]() { return Bounds->get_center(); },
                [&](point_f const& value) { Bounds = Bounds->as_moved_to({value.X - (Bounds->Width / 2.0f), value.Y - (Bounds->Height / 2.0f)}); }}}
 {
-    Bounds.Changed.connect([&]() { mark_transform_dirty(); });
-    Pivot.Changed.connect([&]() { mark_transform_dirty(); });
+    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 }
 
 void rect_transformable::move_by(point_f offset)

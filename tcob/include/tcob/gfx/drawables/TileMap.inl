@@ -12,7 +12,7 @@ template <typename GridType>
 inline tilemap<GridType>::tilemap(tileset set)
     : detail::tilemap_base {std::move(set), buffer_usage_hint::DynamicDraw}
 {
-    Grid.Changed.connect([&] { mark_dirty(); });
+    Grid.Changed.connect([&](auto const&) { mark_dirty(); });
 }
 
 template <typename GridType>

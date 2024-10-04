@@ -146,9 +146,9 @@ shape::shape()
                          Color = c; }}}
 
 {
-    Pivot.Changed.connect([&]() { mark_dirty(); });
+    Pivot.Changed.connect([&](auto const&) { mark_dirty(); });
 
-    Material.Changed.connect([&]() { TextureRegion("default"); });
+    Material.Changed.connect([&](auto const&) { TextureRegion("default"); });
     TextureRegion.Changed.connect([&](string const& texRegion) {
         on_texture_region_changed(texRegion);
         mark_dirty();
@@ -207,9 +207,9 @@ auto shape::get_pivot() const -> point_f
 
 circle_shape::circle_shape()
 {
-    Center.Changed.connect([&]() { mark_dirty(); });
-    Radius.Changed.connect([&]() { mark_dirty(); });
-    Segments.Changed.connect([&]() { mark_dirty(); });
+    Center.Changed.connect([&](auto const&) { mark_dirty(); });
+    Radius.Changed.connect([&](auto const&) { mark_dirty(); });
+    Segments.Changed.connect([&](auto const&) { mark_dirty(); });
     Segments(90);
 }
 

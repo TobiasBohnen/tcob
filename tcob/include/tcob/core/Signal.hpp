@@ -111,7 +111,7 @@ public:
     auto get_slot_count() const -> isize;
 
 private:
-    [[maybe_unused]] mutable slots _slots;
+    mutable slots _slots;
 };
 
 ////////////////////////////////////////////////////////////

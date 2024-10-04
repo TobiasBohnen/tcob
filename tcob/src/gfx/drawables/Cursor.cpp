@@ -31,7 +31,7 @@ cursor::cursor()
         _renderer.set_material(Material());
     });
 
-    Material.Changed.connect([&]() {
+    Material.Changed.connect([&](auto const&) {
         Material->PointSize = static_cast<f32>(_size);
     });
 
