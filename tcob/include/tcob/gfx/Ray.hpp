@@ -14,13 +14,14 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
-#include "tcob/gfx/Polygon.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API ray final {
 public:
+    ////////////////////////////////////////////////////////////
     struct result {
         point_f Point {};
         f64     Distance {0};
@@ -35,6 +36,8 @@ public:
         auto operator==(init const&) const -> bool = default;
     };
     using func = std::function<point_f(f64)>;
+
+    ////////////////////////////////////////////////////////////
 
     ray(init init);
 

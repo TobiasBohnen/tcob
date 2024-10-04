@@ -12,13 +12,11 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
-
-using polyline      = std::vector<point_f>;
-using polyline_span = std::span<point_f const>;
 
 enum class clip_mode : u8 {
     Intersection,

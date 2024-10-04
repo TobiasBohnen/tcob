@@ -267,7 +267,10 @@ void gl_canvas::flush()
         _stencilFunc     = GL_ALWAYS;
         _stencilFuncRef  = 0;
         _stencilFuncMask = 0xffffffff;
-        _blendFunc       = {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
+        _blendFunc       = {.SourceColorBlendFunc      = blend_func::Invalid,
+                            .DestinationColorBlendFunc = blend_func::Invalid,
+                            .SourceAlphaBlendFunc      = blend_func::Invalid,
+                            .DestinationAlphaBlendFunc = blend_func::Invalid};
 
         // Upload ubo for frag shaders
         glNamedBufferData(_fragBuf, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW);

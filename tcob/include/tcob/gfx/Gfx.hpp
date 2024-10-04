@@ -23,6 +23,11 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
+using polyline      = std::vector<point_f>;
+using polyline_span = std::span<point_f const>;
+
+////////////////////////////////////////////////////////////
+
 enum class winding : u8 {
     CCW = 1, // Winding for solid shapes
     CW  = 2, // Winding for holes
