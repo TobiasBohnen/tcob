@@ -61,15 +61,16 @@ public:
     signal<event const> TakeFocus;
     signal<event const> HitTest;
 
-    prop_fn<bool>                      FullScreen;
-    prop_fn<string>                    Title;
-    prop_fn<bool>                      VSync;
-    prop<assets::asset_ptr<cursor>>    Cursor;
+    prop_fn<bool>   FullScreen;
+    prop_fn<string> Title;
+    prop_fn<bool>   VSync;
+
+    prop<assets::asset_ptr<cursor>> Cursor;
+    prop<bool>                      SystemCursorEnabled;
+
     prop_fn<assets::asset_ptr<shader>> Shader;
 
     void load_icon(path const& file);
-
-    void hide_system_cursor(bool value);
 
     auto has_focus() const -> bool;
     void grab_input(bool grab);
@@ -97,7 +98,6 @@ private:
     assets::manual_asset_ptr<material> _material {};
 
     std::unique_ptr<render_backend::window_base> _impl;
-    SDL_Window*                                  _window;
     quad_renderer                                _renderer {buffer_usage_hint::StaticDraw};
 };
 

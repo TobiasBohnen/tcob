@@ -26,9 +26,9 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::manu
                [&](auto const& value) { _material->Shader = value; }}}
     , _texture {texture}
     , _impl {std::move(window)}
-    , _window {_impl->get_handle()}
 {
-    Cursor.Changed.connect([&](auto const& value) { hide_system_cursor(value.is_ready()); });
+    Cursor.Changed.connect([&](auto const& value) { SystemCursorEnabled = !value.is_ready(); });
+    SystemCursorEnabled.Changed.connect([&](bool value) { SDL_ShowCursor(value ? SDL_DISABLE : SDL_ENABLE); });
 
     _material->Texture = _texture;
     _renderer.set_material(_material);
@@ -48,20 +48,20 @@ void window::load_icon(path const& file)
                 info.Size.Width, info.Size.Height, 32, info.stride(),
                 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000)};
 
-        SDL_SetWindowIcon(_window, surface);
+        SDL_SetWindowIcon(_impl->get_handle(), surface);
         SDL_FreeSurface(surface);
     }
 }
 
 auto window::has_focus() const -> bool
 {
-    return (SDL_GetWindowFlags(_window) & SDL_WINDOW_MOUSE_FOCUS)
-        && (SDL_GetWindowFlags(_window) & SDL_WINDOW_INPUT_FOCUS);
+    return (SDL_GetWindowFlags(_impl->get_handle()) & SDL_WINDOW_MOUSE_FOCUS)
+        && (SDL_GetWindowFlags(_impl->get_handle()) & SDL_WINDOW_INPUT_FOCUS);
 }
 
 void window::grab_input(bool grab)
 {
-    SDL_SetWindowGrab(_window, grab ? SDL_TRUE : SDL_FALSE);
+    SDL_SetWindowGrab(_impl->get_handle(), grab ? SDL_TRUE : SDL_FALSE);
 }
 
 void window::on_clear(color c) const
@@ -71,12 +71,14 @@ void window::on_clear(color c) const
 
 void window::set_size(size_i newSize)
 {
-    SDL_SetWindowSize(_window, newSize.Width, newSize.Height);
+    if (newSize != get_size()) {
+        SDL_SetWindowSize(_impl->get_handle(), newSize.Width, newSize.Height);
+    }
 
     quad q {};
     geometry::set_color(q, colors::White);
     geometry::set_position(q, {0, 0, static_cast<f32>(newSize.Width), static_cast<f32>(newSize.Height)});
-    geometry::set_texcoords(q, {render_texture::GetTexcoords(), 0});
+    geometry::set_texcoords(q, {.UVRect = render_texture::GetTexcoords(), .Level = 0});
     _renderer.set_geometry(q);
 
     render_target::set_size(newSize);
@@ -85,70 +87,36 @@ void window::set_size(size_i newSize)
 auto window::get_size() const -> size_i
 {
     i32 vpWidth {}, vpHeight {};
-    SDL_GetWindowSize(_window, &vpWidth, &vpHeight);
+    SDL_GetWindowSize(_impl->get_handle(), &vpWidth, &vpHeight);
     return {vpWidth, vpHeight};
 }
 
 void window::process_events(SDL_Event* sdlEv)
 {
-    event const ev {
-        .WindowID = sdlEv->window.windowID,
-        .Data1    = sdlEv->window.data1,
-        .Data2    = sdlEv->window.data2};
+    event const ev {.WindowID = sdlEv->window.windowID,
+                    .Data1    = sdlEv->window.data1,
+                    .Data2    = sdlEv->window.data2};
 
     switch (sdlEv->window.event) {
-    case SDL_WINDOWEVENT_SHOWN:
-        Shown(ev);
-        break;
-    case SDL_WINDOWEVENT_HIDDEN:
-        Hidden(ev);
-        break;
-    case SDL_WINDOWEVENT_EXPOSED:
-        Exposed(ev);
-        break;
-    case SDL_WINDOWEVENT_MOVED:
-        Moved(ev);
-        break;
+    case SDL_WINDOWEVENT_SHOWN: Shown(ev); break;
+    case SDL_WINDOWEVENT_HIDDEN: Hidden(ev); break;
+    case SDL_WINDOWEVENT_EXPOSED: Exposed(ev); break;
+    case SDL_WINDOWEVENT_MOVED: Moved(ev); break;
     case SDL_WINDOWEVENT_RESIZED:
+        set_size({ev.Data1, ev.Data2});
         Resized(ev);
         break;
-    case SDL_WINDOWEVENT_SIZE_CHANGED: {
-        size_i const newSize {ev.Data1, ev.Data2};
-        if (newSize != get_size()) {
-            set_size(newSize);
-            SizeChanged(ev);
-        }
-    } break;
-    case SDL_WINDOWEVENT_MINIMIZED:
-        Minimized(ev);
-        break;
-    case SDL_WINDOWEVENT_MAXIMIZED:
-        Maximized(ev);
-        break;
-    case SDL_WINDOWEVENT_RESTORED:
-        Restored(ev);
-        break;
-    case SDL_WINDOWEVENT_ENTER:
-        Enter(ev);
-        break;
-    case SDL_WINDOWEVENT_LEAVE:
-        Leave(ev);
-        break;
-    case SDL_WINDOWEVENT_FOCUS_GAINED:
-        FocusGained(ev);
-        break;
-    case SDL_WINDOWEVENT_FOCUS_LOST:
-        FocusLost(ev);
-        break;
-    case SDL_WINDOWEVENT_CLOSE:
-        Close(ev);
-        break;
-    case SDL_WINDOWEVENT_TAKE_FOCUS:
-        TakeFocus(ev);
-        break;
-    case SDL_WINDOWEVENT_HIT_TEST:
-        HitTest(ev);
-        break;
+    case SDL_WINDOWEVENT_SIZE_CHANGED: SizeChanged(ev); break;
+    case SDL_WINDOWEVENT_MINIMIZED: Minimized(ev); break;
+    case SDL_WINDOWEVENT_MAXIMIZED: Maximized(ev); break;
+    case SDL_WINDOWEVENT_RESTORED: Restored(ev); break;
+    case SDL_WINDOWEVENT_ENTER: Enter(ev); break;
+    case SDL_WINDOWEVENT_LEAVE: Leave(ev); break;
+    case SDL_WINDOWEVENT_FOCUS_GAINED: FocusGained(ev); break;
+    case SDL_WINDOWEVENT_FOCUS_LOST: FocusLost(ev); break;
+    case SDL_WINDOWEVENT_CLOSE: Close(ev); break;
+    case SDL_WINDOWEVENT_TAKE_FOCUS: TakeFocus(ev); break;
+    case SDL_WINDOWEVENT_HIT_TEST: HitTest(ev); break;
     }
 }
 
@@ -167,33 +135,29 @@ void window::swap_buffer() const
     _impl->swap_buffer();
 }
 
-void window::hide_system_cursor(bool value)
-{
-    SDL_ShowCursor(value ? SDL_DISABLE : SDL_ENABLE);
-}
-
 auto window::get_fullscreen() const -> bool
 {
-    return (SDL_GetWindowFlags(_window) & SDL_WINDOW_FULLSCREEN) != 0;
+    return (SDL_GetWindowFlags(_impl->get_handle()) & SDL_WINDOW_FULLSCREEN) != 0;
 }
 
 void window::set_fullscreen(bool value)
 {
-    SDL_SetWindowFullscreen(_window, value ? SDL_WINDOW_FULLSCREEN : 0);
+    auto* window {_impl->get_handle()};
+    SDL_SetWindowFullscreen(window, value ? SDL_WINDOW_FULLSCREEN : 0);
     if (!value) {
-        SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-        SDL_SetWindowBordered(_window, SDL_TRUE);
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        SDL_SetWindowBordered(window, SDL_TRUE);
     }
 }
 
 auto window::get_title() const -> string
 {
-    return SDL_GetWindowTitle(_window);
+    return SDL_GetWindowTitle(_impl->get_handle());
 }
 
 void window::set_title(string const& value)
 {
-    SDL_SetWindowTitle(_window, value.c_str());
+    SDL_SetWindowTitle(_impl->get_handle(), value.c_str());
 }
 
 }
