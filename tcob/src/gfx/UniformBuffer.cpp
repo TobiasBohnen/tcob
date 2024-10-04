@@ -15,6 +15,8 @@ uniform_buffer::uniform_buffer(usize size)
 {
 }
 
+uniform_buffer::~uniform_buffer() = default;
+
 auto uniform_buffer::update(bool data, usize offset) const -> usize
 {
     u32 const d {data}; // bools are u32 in GLSL and HLSL

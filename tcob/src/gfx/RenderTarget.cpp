@@ -9,6 +9,7 @@
 #include "tcob/core/Stats.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
 
 namespace tcob::gfx {
 
@@ -18,6 +19,8 @@ render_target::render_target(texture* tex)
     , _impl {locate_service<render_system>().create_render_target(tex)}
 {
 }
+
+render_target::~render_target() = default;
 
 void render_target::clear() const
 {

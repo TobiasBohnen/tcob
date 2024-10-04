@@ -13,10 +13,10 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API shader {
+class TCOB_API shader final {
 public:
     shader();
-    virtual ~shader() = default;
+    ~shader();
 
     explicit operator bool() const;
 

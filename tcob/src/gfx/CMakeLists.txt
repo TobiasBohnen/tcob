@@ -101,6 +101,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Texture.inl
     ${TCOB_INC_DIR}/tcob/gfx/Transformable.hpp
     ${TCOB_INC_DIR}/tcob/gfx/UniformBuffer.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/UniformBuffer.inl
     ${TCOB_INC_DIR}/tcob/gfx/VertexArray.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Window.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Cursor.hpp

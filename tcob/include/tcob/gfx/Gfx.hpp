@@ -154,6 +154,7 @@ namespace gfx::render_backend {
     class render_target_base;
     class shader_base;
     class texture_base;
+    class uniform_buffer_base;
     class vertex_array_base;
     class window_base;
 }

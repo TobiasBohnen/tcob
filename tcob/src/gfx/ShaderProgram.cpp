@@ -16,6 +16,8 @@ shader::shader()
 {
 }
 
+shader::~shader() = default;
+
 shader::operator bool() const
 {
     return _impl->is_valid();
