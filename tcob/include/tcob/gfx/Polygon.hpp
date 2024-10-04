@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <initializer_list>
 #include <span>
 #include <vector>
 
@@ -47,36 +46,15 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API polygons final {
-    using iterator       = std::vector<polygon>::iterator;
-    using const_iterator = std::vector<polygon>::const_iterator;
+namespace polygons {
+    TCOB_API auto get_winding(polyline_span polyline) -> winding;
+    TCOB_API auto check_winding(std::span<polygon const> polygons) -> bool;
 
-public:
-    polygons() = default;
-    polygons(std::initializer_list<polygon> polygons);
-    polygons(std::span<polygon const> polygons);
+    TCOB_API auto get_info(std::span<polygon const> polygons) -> polygon::info;
 
-    auto begin() -> iterator;
-    auto begin() const -> const_iterator;
+    TCOB_API void move_by(std::span<polygon> polygons, point_f offset);
 
-    auto end() -> iterator;
-    auto end() const -> const_iterator;
-
-    auto add() -> polygon&;
-    auto size() const -> isize;
-    auto is_empty() const -> bool;
-    void clear();
-
-    auto check_winding() const -> bool;
-    auto get_info() const -> polygon::info;
-
-    void move_by(point_f offset);
-    void clip(polygons const& other, clip_mode mode);
-
-    auto operator==(polygons const& other) const -> bool = default;
-
-private:
-    std::vector<polygon> _polygons;
+    TCOB_API void clip(std::vector<polygon>& polygons, std::span<polygon const> other, clip_mode mode);
 };
 
 ////////////////////////////////////////////////////////////

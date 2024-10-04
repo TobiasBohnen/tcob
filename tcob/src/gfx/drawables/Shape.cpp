@@ -416,13 +416,13 @@ auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
 
 void poly_shape::clip(poly_shape const& other, clip_mode mode)
 {
+    polygons::clip(*Polygons, *other.Polygons, mode);
     mark_dirty();
-    (*Polygons).clip(other.Polygons, mode);
 }
 
 void poly_shape::move_by(point_f offset)
 {
-    (*Polygons).move_by(offset);
+    polygons::move_by(*Polygons, offset);
     mark_dirty();
 }
 
@@ -431,7 +431,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
-    auto const info {Polygons->get_info()};
+    auto const info {polygons::get_info(*Polygons)};
     _boundingBox = info.BoundingBox;
     _centroid    = info.Centroid;
 

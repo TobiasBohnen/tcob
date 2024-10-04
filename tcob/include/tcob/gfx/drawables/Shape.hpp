@@ -129,7 +129,7 @@ class TCOB_API poly_shape final : public shape {
 public:
     poly_shape();
 
-    prop<polygons> Polygons;
+    prop<std::vector<polygon>> Polygons;
 
     auto get_geometry() -> geometry_data override;
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
@@ -180,6 +180,8 @@ public:
 
     template <std::derived_from<shape> T>
     auto create_shape() -> std::shared_ptr<T>;
+    template <std::derived_from<shape> T>
+    void add_shape(std::shared_ptr<T> const& shape);
 
     void remove_shape(shape const& shape);
     void clear();
