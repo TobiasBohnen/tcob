@@ -30,8 +30,7 @@ inline auto istream::read_to(std::span<T> target) -> std::streamsize
 template <POD T>
 inline auto istream::read_n(std::streamsize n) -> std::vector<T>
 {
-    std::vector<T> retValue {};
-    retValue.resize(static_cast<usize>(n));
+    std::vector<T> retValue(static_cast<usize>(n));
     retValue.resize(static_cast<usize>(read_bytes(retValue.data(), n)));
     return retValue;
 }

@@ -141,7 +141,7 @@ public:
     void remove_emitter(particle_emitter_base const& emitter);
     void clear_emitters();
 
-    auto get_particle_count() const -> i32;
+    auto get_particle_count() const -> isize;
 
     auto activate_particle() -> particle&;
     void deactivate_particle(particle& particle);
@@ -156,7 +156,7 @@ private:
     bool                                                _isRunning {false};
     quad_renderer                                       _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<particle>                               _particles {};
-    i32                                                 _aliveParticleCount {0};
+    isize                                               _aliveParticleCount {0};
     std::vector<std::shared_ptr<particle_emitter_base>> _emitters {};
 
     std::mutex _mutex {};

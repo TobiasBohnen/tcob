@@ -36,8 +36,7 @@ auto bsa_decoder::open() -> std::optional<buffer::info>
 
 auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    std::vector<i16> buffer;
-    buffer.resize(outputSamples.size());
+    std::vector<i16> buffer(outputSamples.size());
     get_stream().read_to<i16>(buffer);
     for (usize i {0}; i < outputSamples.size(); ++i) {
         outputSamples[i] = static_cast<f32>(buffer[i]) / std::numeric_limits<i16>::max();
@@ -54,8 +53,7 @@ auto bsa_encoder::encode(std::span<f32 const> samples, buffer::info const& info,
     out.write<u32, std::endian::little>(static_cast<u32>(info.FrameCount));
     out.write<u32, std::endian::little>(static_cast<u32>(info.SampleRate));
 
-    std::vector<i16> buffer;
-    buffer.resize(samples.size());
+    std::vector<i16> buffer(samples.size());
     for (usize i {0}; i < samples.size(); ++i) {
         buffer[i] = static_cast<i16>(samples[i] * std::numeric_limits<i16>::max());
     }

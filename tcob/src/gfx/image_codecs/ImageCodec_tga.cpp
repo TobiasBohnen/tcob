@@ -329,9 +329,8 @@ auto tga_decoder::decode(istream& in) -> std::optional<image>
             return std::nullopt;
         }
 
-        std::vector<u8> pixels;
-        pixels.resize(imgSize.Width * imgSize.Height * 4);
-        u8* pixPtr {pixels.data()};
+        std::vector<u8> pixels(imgSize.Width * imgSize.Height * 4);
+        u8*             pixPtr {pixels.data()};
 
         if (is_colormapped(_header) && !colorMap.empty()) {
             // indexed

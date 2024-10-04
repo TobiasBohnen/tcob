@@ -27,8 +27,7 @@ auto pcx::read_image_data(istream& reader, header const& h) -> std::vector<u8>
 {
     reader.seek(HeaderLength, io::seek_dir::Begin);
 
-    std::vector<u8> retValue;
-    retValue.resize(h.BytesPerLine * h.ColorPlanesCount * h.Height());
+    std::vector<u8> retValue(h.BytesPerLine * h.ColorPlanesCount * h.Height());
 
     i32 total {0};
 
@@ -98,26 +97,26 @@ void pcx::header::Write(image::info const& info, ostream& writer)
     byte bpp {8}, cpc {3};
 
     writer.write(ManufacturerMagicNumber);
-    writer.write(static_cast<byte>(5));
-    writer.write(static_cast<byte>(1));
+    writer.write(byte {5});
+    writer.write(byte {1});
     writer.write(bpp);
-    writer.write(static_cast<i16>(0));
-    writer.write(static_cast<i16>(0));
+    writer.write(i16 {0});
+    writer.write(i16 {0});
     writer.write(static_cast<i16>(info.Size.Width - 1));
     writer.write(static_cast<i16>(info.Size.Height - 1));
 
-    writer.write(static_cast<i16>(72));
-    writer.write(static_cast<i16>(72));
+    writer.write(i16 {72});
+    writer.write(i16 {72});
 
     writer.seek(HeaderPaletteLength, io::seek_dir::Current);
 
-    writer.write(static_cast<byte>(0));
+    writer.write(byte {0});
     writer.write(cpc);
 
     writer.write(static_cast<i16>(info.Size.Width));
-    writer.write(static_cast<byte>(1));
-    writer.write(static_cast<i16>(0));
-    writer.write(static_cast<i16>(0));
+    writer.write(byte {1});
+    writer.write(i16 {0});
+    writer.write(i16 {0});
 }
 
 ////////////////////////////////////////////////////////////
@@ -295,8 +294,7 @@ auto pcx_encoder::encode(image const& img, ostream& out) const -> bool
     pcx::header::Write(info, out);
     out.seek(pos + HeaderLength, io::seek_dir::Begin);
 
-    std::vector<u8> buffer {};
-    buffer.resize(info.Size.Width * info.Size.Height * pcx::BPP);
+    std::vector<u8> buffer(info.Size.Width * info.Size.Height * pcx::BPP);
 
     for (i32 x {0}; x < info.Size.Width; ++x) {
         usize i {0};

@@ -124,8 +124,7 @@ void gl_texture::set_wrapping(texture::wrapping val) const
 
 auto gl_texture::copy_to_image(u32 depth) const -> image
 {
-    std::vector<ubyte> buffer;
-    buffer.resize(static_cast<usize>(_size.Width * _size.Height * 4));
+    std::vector<ubyte> buffer(static_cast<usize>(_size.Width * _size.Height * 4));
 
     glGetTextureSubImage(ID, 0, 0, 0, depth, _size.Width, _size.Height, 1, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<GLsizei>(buffer.capacity()), buffer.data());
 

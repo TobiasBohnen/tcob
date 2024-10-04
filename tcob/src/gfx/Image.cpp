@@ -46,8 +46,7 @@ auto image::get_data(rect_i const& bounds) const -> std::vector<u8>
     i32 const srcStride {_info.stride()};
     i32 const dstStride {bounds.Width * bpp};
 
-    std::vector<u8> retValue;
-    retValue.resize(static_cast<usize>(bounds.Height * dstStride));
+    std::vector<u8> retValue(static_cast<usize>(bounds.Height * dstStride));
 
     // TODO: bounds check
 

@@ -34,7 +34,7 @@ public:
         path                                LogFile {"tcob.log"};         //!< The log file name.
         path                                ConfigFile {"config.ini"};    //!< The configuration file name.
         std::optional<data::config::object> ConfigDefaults {std::nullopt};
-        std::optional<i32>                  WorkerThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
+        std::optional<isize>                WorkerThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
     };
 
     //! Constructs a game instance with the specified initialization parameters.

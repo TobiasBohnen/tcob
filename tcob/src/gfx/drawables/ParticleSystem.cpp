@@ -61,7 +61,7 @@ void particle_system::clear_emitters()
     stop();
 }
 
-auto particle_system::get_particle_count() const -> i32
+auto particle_system::get_particle_count() const -> isize
 {
     return _aliveParticleCount;
 }
@@ -90,14 +90,14 @@ void particle_system::on_update(milliseconds deltaTime)
         emitter->emit_particles(*this, deltaTime);
     }
 
-    std::set<i32, std::greater<>> toBeDeactivated;
+    std::set<isize, std::greater<>> toBeDeactivated;
 
     locate_service<task_manager>().run_parallel(
         [&](task_context const& ctx) {
-            for (i32 i {ctx.Start}; i < ctx.End; ++i) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
                 auto& particle {_particles[i]};
                 if (particle.is_alive()) {
-                    ParticleUpdate({particle, deltaTime});
+                    ParticleUpdate({.Particle = particle, .Time = deltaTime});
                     particle.update(deltaTime);
                 } else {
                     std::scoped_lock lock {_mutex};
@@ -124,7 +124,7 @@ void particle_system::on_draw_to(render_target& target)
 
     locate_service<task_manager>().run_parallel(
         [&](task_context const& ctx) {
-            for (i32 i {ctx.Start}; i < ctx.End; ++i) {
+            for (isize i {ctx.Start}; i < ctx.End; ++i) {
                 _particles[i].to_quad(&quads[i]);
             }
         },

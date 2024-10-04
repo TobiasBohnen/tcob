@@ -74,9 +74,8 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     // calculate duration
     f64 const duration {commands.get_total_duration().count() / 1000};
 
-    std::vector<f32> samples;
-    samples.resize(static_cast<usize>(duration * _sampleRate * _channels));
-    f32* ptr {samples.data()};
+    std::vector<f32> samples(static_cast<usize>(duration * _sampleRate * _channels));
+    f32*             ptr {samples.data()};
 
     // call 'apply' on all commands; then render them
     commands.render(_font, ptr, static_cast<u8>(_channels), _sampleRate);

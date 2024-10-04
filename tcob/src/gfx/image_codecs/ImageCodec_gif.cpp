@@ -9,12 +9,11 @@ namespace tcob::gfx::detail {
 
 auto gif::read_color_table(i32 ncolors, istream& reader) -> std::vector<color>
 {
-    std::vector<color> retValue {};
-
-    std::vector<u8> c {};
-    c.resize(3 * ncolors);
+    std::vector<u8> c(ncolors * 3);
     reader.read_to<u8>(c);
 
+    std::vector<color> retValue;
+    retValue.reserve(ncolors);
     for (i32 i {0}, j {0}; i < ncolors; i++) {
         u8 const r {static_cast<u8>(static_cast<u32>(c[j++]) & 0xff)};
         u8 const g {static_cast<u8>(static_cast<u32>(c[j++]) & 0xff)};
@@ -197,8 +196,7 @@ auto gif_decoder::decode_frame_data(istream& reader, u16 iw, u16 ih) -> std::vec
     //  Decode GIF pixel stream.
     i32 datum {0}, bits {0}, count {0}, first {0}, top {0}, index {0}, bi {0};
 
-    std::vector<u8> retValue;
-    retValue.resize(iw * ih);
+    std::vector<u8> retValue(iw * ih);
 
     i32 const npix {iw * ih};
     for (i32 i {0}; i < npix;) {

@@ -29,18 +29,18 @@ task_manager::~task_manager()
     }
 }
 
-void task_manager::run_parallel(par_func const& func, i32 count, i32 minRange)
+void task_manager::run_parallel(par_func const& func, isize count, isize minRange)
 {
-    i32 const numThreads {std::min(_threadCount, count / minRange)};
+    isize const numThreads {std::min(_threadCount, count / minRange)};
 
     if (numThreads <= 1 || count < _threadCount) {
         task_context const ctx {.Start = 0, .End = count, .Thread = 0};
         func(ctx);
     } else {
-        i32 const       partitionSize {count / numThreads};
-        std::atomic_int activeTasks {numThreads};
+        isize const        partitionSize {count / numThreads};
+        std::atomic<isize> activeTasks {numThreads};
 
-        for (i32 i {0}; i < numThreads; ++i) {
+        for (isize i {0}; i < numThreads; ++i) {
             task_context const ctx {.Start  = i * partitionSize,
                                     .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
                                     .Thread = i};
@@ -60,7 +60,7 @@ void task_manager::run_deferred(def_func&& func)
     _deferredQueue.push(std::move(func));
 }
 
-auto task_manager::get_thread_count() const -> i32
+auto task_manager::get_thread_count() const -> isize
 {
     return _threadCount;
 }

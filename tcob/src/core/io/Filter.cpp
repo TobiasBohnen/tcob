@@ -213,8 +213,7 @@ auto z85_filter::to(std::span<ubyte const> bytes) const -> std::vector<ubyte>
     if (bufLen % 4) { return {}; }
 
     usize const        encodedLen {bufLen * 5 / 4};
-    std::vector<ubyte> encoded;
-    encoded.resize(encodedLen);
+    std::vector<ubyte> encoded(encodedLen);
 
     u32 charNbr {0};
     u32 byteNbr {0};
@@ -242,8 +241,7 @@ auto z85_filter::from(std::span<ubyte const> bytes) const -> std::vector<ubyte>
     if (bufLen % 5) { return {}; }
 
     usize const        decodedSize {bufLen * 4 / 5};
-    std::vector<ubyte> decoded;
-    decoded.resize(decodedSize);
+    std::vector<ubyte> decoded(decodedSize);
 
     u32 charNbr {0};
     u32 byteNbr {0};

@@ -392,8 +392,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 
     // NOTE: We reserve enough space for up to 10 seconds of wave audio at given sample rate
     // By default we use f32 size samples, they are converted to desired sample size at the end
-    std::vector<f32> samples;
-    samples.resize(static_cast<usize>(MAX_WAVE_LENGTH_SECONDS * wave.SampleRate));
+    std::vector<f32> samples(static_cast<usize>(MAX_WAVE_LENGTH_SECONDS * wave.SampleRate));
 
     bool generatingSample {true};
     i32  sampleCount {0};

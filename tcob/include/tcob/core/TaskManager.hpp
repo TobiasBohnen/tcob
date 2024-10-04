@@ -21,9 +21,9 @@ enum class task_status : u8 {
 };
 
 struct task_context {
-    i32 Start {0};
-    i32 End {0};
-    i32 Thread {0};
+    isize Start {0};
+    isize End {0};
+    isize Thread {0};
 };
 
 ////////////////////////////////////////////////////////////
@@ -42,13 +42,13 @@ public:
     ~task_manager();
 
     template <typename T>
-    auto run_async(async_func<T>&& func) -> std::future<T>;
+    auto run_async(async_func<T> const& func) -> std::future<T>;
 
-    void run_parallel(par_func const& func, i32 count, i32 minRange = 1);
+    void run_parallel(par_func const& func, isize count, isize minRange = 1);
 
     void run_deferred(def_func&& func);
 
-    auto get_thread_count() const -> i32;
+    auto get_thread_count() const -> isize;
 
     static inline char const* service_name {"task_manager"};
 
@@ -59,7 +59,7 @@ private:
 
     void worker_thread(std::stop_token const& stopToken);
 
-    i32             _threadCount;
+    isize           _threadCount;
     std::thread::id _mainThreadID;
 
     std::queue<task_func>       _taskQueue;

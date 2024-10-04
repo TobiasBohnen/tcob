@@ -102,7 +102,7 @@ inline void shuffle<T, E>::operator()(std::span<T> span)
     if (span.size() <= 1) { return; }
 
     for (usize i {span.size() - 1}; i > 0; --i) {
-        usize const j {_random(static_cast<usize>(0), i)};
+        usize const j {_random(usize {0}, i)};
         using std::swap;
         swap(span[i], span[j]);
     }

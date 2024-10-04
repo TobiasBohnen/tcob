@@ -896,7 +896,7 @@ void cfg_texture_loader::prepare()
 
         size_i    texSize {def->size};
         auto      texFormat {texture::format::RGBA8}; // TODO: api
-        u32 const texDepth {static_cast<u32>(std::ssize(def->images))};
+        u32 const texDepth {static_cast<u32>(def->images.size())};
 
         if (texSize == size_i::Zero) {
             auto const& path {def->images.front().Path};

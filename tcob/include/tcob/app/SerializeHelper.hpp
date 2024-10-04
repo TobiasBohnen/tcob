@@ -85,7 +85,7 @@ auto Deserialize(color& v, auto&& s) -> bool
 {
     if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
         if (!s.try_get(v.A, "a")) {
-            v.A = static_cast<u8>(255);
+            v.A = u8 {255};
         }
         return true;
     }

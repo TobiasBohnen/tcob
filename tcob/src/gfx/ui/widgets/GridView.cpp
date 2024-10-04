@@ -74,8 +74,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 
         f32 const rowHeight {style->RowHeight.calc(gridRect.Height)};
 
-        std::vector<f32> colWidths;
-        colWidths.resize(_columnHeaders.size());
+        std::vector<f32> colWidths(_columnHeaders.size());
 
         // rows
         for (i32 y {0}; y < std::ssize(_rows); ++y) {

@@ -146,9 +146,9 @@ auto grayscale_filter::operator()(image const& img) const -> image
 
     locate_service<task_manager>().run_parallel(
         [&](task_context ctx) {
-            for (i32 pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                i32 const idx {pixIdx * bpp};
-                u8 const  value {static_cast<u8>((srcBuffer[idx] * RedFactor) + (srcBuffer[idx + 1] * GreenFactor) + (srcBuffer[idx + 2] * BlueFactor))};
+            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
+                isize const idx {pixIdx * bpp};
+                u8 const    value {static_cast<u8>((srcBuffer[idx] * RedFactor) + (srcBuffer[idx + 1] * GreenFactor) + (srcBuffer[idx + 2] * BlueFactor))};
                 dstBuffer[idx] = dstBuffer[idx + 1] = dstBuffer[idx + 2] = value;
                 if (info.Format == image::format::RGBA) {
                     dstBuffer[idx + 3] = srcBuffer[idx + 3];
@@ -176,14 +176,14 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
 
     locate_service<task_manager>().run_parallel(
         [&](task_context ctx) {
-            for (i32 pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                i32 const x {pixIdx % newWidth};
-                i32 const y {pixIdx / newWidth};
+            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
+                isize const x {pixIdx % newWidth};
+                isize const y {pixIdx / newWidth};
 
                 i32 const srcY {static_cast<i32>(y * yFactor)};
                 i32 const srcX {static_cast<i32>(x * xFactor)};
 
-                retValue.set_pixel({x, y}, img.get_pixel({srcX, srcY}));
+                retValue.set_pixel({static_cast<i32>(x), static_cast<i32>(y)}, img.get_pixel({srcX, srcY}));
             }
         },
         newWidth * newHeight);
@@ -209,9 +209,9 @@ auto resize_bilinear::operator()(image const& img) const -> image
 
     locate_service<task_manager>().run_parallel(
         [&](task_context ctx) {
-            for (i32 pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                i32 const x {pixIdx % newWidth};
-                i32 const y {pixIdx / newWidth};
+            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
+                isize const x {pixIdx % newWidth};
+                isize const y {pixIdx / newWidth};
 
                 f64 const oy {y * yFactor};
                 i32 const y1 {static_cast<i32>(oy)};
@@ -236,7 +236,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
                 u8 const b {static_cast<u8>((dy2 * (dx2 * c1.B + dx1 * c2.B)) + (dy1 * (dx2 * c3.B + dx1 * c4.B)))};
                 u8 const a {static_cast<u8>((dy2 * (dx2 * c1.A + dx1 * c2.A)) + (dy1 * (dx2 * c3.A + dx1 * c4.A)))};
 
-                retValue.set_pixel({x, y}, {r, g, b, a});
+                retValue.set_pixel({static_cast<i32>(x), static_cast<i32>(y)}, {r, g, b, a});
             }
         },
         newWidth * newHeight);

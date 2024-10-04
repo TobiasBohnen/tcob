@@ -83,7 +83,7 @@ auto gl_framebuffer::read_pixel(point_i pos) const -> color
 void gl_framebuffer::clear(color c) const
 {
     assert(ID);
-    vec4 color {static_cast<f32>(c.R) / 255.0f, static_cast<f32>(c.G) / 255.0f, static_cast<f32>(c.B) / 255.0f, static_cast<f32>(c.A) / 255.0f};
+    vec4 color {c.as_float_array()};
     glClearNamedFramebufferfv(ID, GL_COLOR, 0, color.data());
     glClearNamedFramebufferfi(ID, GL_DEPTH_STENCIL, 0, 1, 0);
 }

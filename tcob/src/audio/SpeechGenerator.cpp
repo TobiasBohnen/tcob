@@ -17,8 +17,7 @@ auto speech_generator::create_buffer [[nodiscard]] (std::string const& text) -> 
     i32   frames {0};
     auto* data {speech_gen(&frames, text.c_str(), nullptr)};
 
-    std::vector<f32> databuf;
-    databuf.resize(static_cast<usize>(frames * channels));
+    std::vector<f32> databuf(static_cast<usize>(frames * channels));
     for (i32 i {0}; i < frames * channels; ++i) { databuf[static_cast<usize>(i)] = data[i] / 32768.0f; }
     speech_free(data, nullptr);
 

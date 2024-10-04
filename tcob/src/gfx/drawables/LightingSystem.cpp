@@ -173,7 +173,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
                     std::vector<std::pair<f64, light_collision>> taskCollisionResult;
                     taskCollisionResult.reserve(ctx.End - ctx.Start);
 
-                    for (i32 idx {ctx.Start}; idx < ctx.End; ++idx) {
+                    for (isize idx {ctx.Start}; idx < ctx.End; ++idx) {
                         f64 const angle {filteredAngles[idx]};
 
                         light_collision nearestPoint;

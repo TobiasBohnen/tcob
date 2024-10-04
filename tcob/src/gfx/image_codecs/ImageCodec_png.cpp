@@ -572,8 +572,7 @@ auto static get_data(image const& image) -> std::vector<u8>
     auto const  buffer {image.get_data()};
     auto const& info {image.get_info()};
 
-    std::vector<u8> retValue;
-    retValue.resize(static_cast<usize>(info.size_in_bytes() + info.Size.Height));
+    std::vector<u8> retValue(static_cast<usize>(info.size_in_bytes() + info.Size.Height));
 
     auto const format {info.Format};
 

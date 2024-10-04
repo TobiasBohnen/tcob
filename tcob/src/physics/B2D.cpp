@@ -33,11 +33,11 @@ b2d_world::b2d_world(world::settings const& settings)
     worldDef.enableSleep           = settings.EnableSleeping;
     worldDef.enableContinous       = settings.EnableContinuous;
 
-    worldDef.workerCount = locate_service<task_manager>().get_thread_count();
+    worldDef.workerCount = static_cast<i32>(locate_service<task_manager>().get_thread_count());
     worldDef.enqueueTask = [](b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* /* userContext */) -> void* {
         locate_service<task_manager>().run_parallel(
             [task, taskContext](task_context ctx) {
-                task(ctx.Start, ctx.End, ctx.Thread, taskContext);
+                task(static_cast<i32>(ctx.Start), static_cast<i32>(ctx.End), static_cast<i32>(ctx.Thread), taskContext);
             },
             itemCount, minRange);
 

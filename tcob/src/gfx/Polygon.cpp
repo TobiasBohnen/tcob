@@ -91,8 +91,8 @@ polygons::polygons(std::initializer_list<polygon> polygons)
 }
 
 polygons::polygons(std::span<polygon const> polygons)
+    : _polygons {polygons.begin(), polygons.end()}
 {
-    _polygons.assign(polygons.begin(), polygons.end());
 }
 
 auto polygons::begin() -> iterator

@@ -147,8 +147,7 @@ void static CheckAlpha(std::vector<u8>& data)
 
 auto bmp_decoder::get_rgb_data(istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>
 {
-    std::vector<u8> retValue;
-    retValue.resize(_info.size_in_bytes());
+    std::vector<u8> retValue(_info.size_in_bytes());
 
     auto const [width, height] {size};
     i32 const srcStride {static_cast<i32>(std::ceil(width * bitCount / 32.f) * 4)};
@@ -270,8 +269,7 @@ void static WriteImageData(image const& img, ostream& writer)
     i32 const   stride {info.stride()};
     i32 const   bpp {info.bytes_per_pixel()};
 
-    std::vector<u8> buffer {};
-    buffer.resize(info.Size.Height * info.Size.Width * bmp::BPP);
+    std::vector<u8> buffer(info.Size.Height * info.Size.Width * bmp::BPP);
 
     usize dstIndex {0};
     for (i32 y {info.Size.Height - 1}; y >= 0; y--) {

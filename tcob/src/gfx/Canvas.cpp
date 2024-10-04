@@ -2238,8 +2238,7 @@ auto canvas::path2d::Parse(string_view path) -> std::optional<path2d>
     char command {0};
     for (usize idx {0}; idx < commands->size();) {
         auto const getValues {[&idx, &commands](usize size) -> std::optional<std::vector<f32>> {
-            std::vector<f32> values;
-            values.resize(size);
+            std::vector<f32> values(size);
             for (usize i {0}; i < size; ++i) {
                 if (idx >= commands->size()) { return std::nullopt; }
 
