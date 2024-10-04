@@ -15,6 +15,7 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 #include "tcob/core/ext/magic_enum_reduced.hpp"
@@ -124,6 +125,7 @@ public:
     auto load [[nodiscard]] (std::span<ubyte const> fontData, u32 size) noexcept -> load_status;
 
     auto render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>;
+    auto polygonize_text(utf8_string_view text, bool kerning) -> std::vector<polygon>;
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
 
     static inline char const* asset_name {"font"};
