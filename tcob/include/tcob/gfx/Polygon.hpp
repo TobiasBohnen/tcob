@@ -11,6 +11,7 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Transform.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
@@ -43,10 +44,11 @@ public:
     polyline              Outline; // ccw
     std::vector<polyline> Holes;   // cw
 
-    auto check_winding() const -> bool;
     auto get_info() const -> info;
 
     auto earcut() const -> std::vector<u32>;
+
+    void apply_transform(transform const& xform);
 
     auto operator==(polygon const& other) const -> bool = default;
 };

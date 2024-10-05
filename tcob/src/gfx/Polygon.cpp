@@ -46,14 +46,6 @@ static auto get_poly_info(polyline_span points) -> polygon::info
     return retValue;
 }
 
-auto polygon::check_winding() const -> bool
-{
-    if (polygons::get_winding(Outline) != winding::CCW) { return false; }
-    return std::ranges::all_of(Holes, [](auto const& hole) {
-        return polygons::get_winding(hole) == winding::CW;
-    });
-}
-
 auto polygon::get_info() const -> info
 {
     std::vector<point_f> points;
@@ -67,6 +59,14 @@ auto polygon::earcut() const -> std::vector<u32>
     earcut.emplace_back(Outline);
     earcut.insert(earcut.end(), Holes.begin(), Holes.end());
     return mapbox::earcut<u32>(earcut);
+}
+
+void polygon::apply_transform(transform const& xform)
+{
+    for (auto& p : Outline) { p = xform * p; }
+    for (auto& hole : Holes) {
+        for (auto& p : hole) { p = xform * p; }
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -87,7 +87,12 @@ auto polygons::get_winding(polyline_span polyline) -> winding
 
 auto polygons::check_winding(std::span<polygon const> polygons) -> bool
 {
-    return std::ranges::all_of(polygons, [](auto const& poly) { return poly.check_winding(); });
+    return std::ranges::all_of(polygons, [](auto const& poly) {
+        if (get_winding(poly.Outline) != winding::CCW) { return false; }
+        return std::ranges::all_of(poly.Holes, [](auto const& hole) {
+            return get_winding(hole) == winding::CW;
+        });
+    });
 }
 
 auto polygons::get_info(std::span<polygon const> polygons) -> polygon::info

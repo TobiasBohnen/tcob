@@ -53,6 +53,7 @@ void transformable::mark_transform_dirty()
 void transformable::update_transform()
 {
     if (!_isDirty) { return; }
+    _isDirty = false;
 
     point_f const pivot {get_pivot()};
     _transform.to_identity();
@@ -61,8 +62,6 @@ void transformable::update_transform()
     if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation(), pivot); }
     if (Skew->first != 0 || Skew->second != 0) { _transform.skew_at(Skew(), pivot); }
     if (Translation != point_f::Zero) { _transform.translate(Translation()); }
-
-    _isDirty = false;
 }
 
 void transformable::reset_transform()
