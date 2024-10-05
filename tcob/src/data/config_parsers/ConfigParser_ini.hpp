@@ -7,10 +7,25 @@
 #include "tcob/tcob_config.hpp"
 
 #include <optional>
+#include <unordered_set>
+#include <utility>
 
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
+//////////////////////////////////////////////////////////////////////
+
+struct ini_settings {
+    char                     KeyValueDelim {'='};
+    char                     Path {'.'};
+    char                     Reference {'@'};
+    std::unordered_set<char> Comment {';', '#'};
+    std::pair<char, char>    Section {'[', ']'};
+    std::pair<char, char>    Object {'{', '}'};
+    std::pair<char, char>    Array {'[', ']'};
+    char                     Settings {'$'};
+};
+
 //////////////////////////////////////////////////////////////////////
 
 class ini_reader : public text_reader {
@@ -34,6 +49,8 @@ private:
     auto read_bool(entry& currentEntry, utf8_string_view line) const -> bool;
     auto read_string(entry& currentEntry, utf8_string_view line) -> bool;
 
+    auto read_settings() -> bool;
+
     auto get_next_line() -> utf8_string_view;
     auto get_trimmed_next_line() -> utf8_string_view;
     auto is_eof() const -> bool;
@@ -42,8 +59,9 @@ private:
     usize            _iniEnd;
     utf8_string_view _ini;
 
-    object  _mainSection;
-    comment _currentComment {};
+    object       _mainSection;
+    comment      _currentComment {};
+    ini_settings _settings;
 };
 
 //////////////////////////////////////////////////////////////////////

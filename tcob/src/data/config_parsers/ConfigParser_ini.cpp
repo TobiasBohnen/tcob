@@ -20,6 +20,7 @@ auto static check_brackets(utf8_string_view str, char openBr, char closeBr)
             b--;
         }
     }
+    if (openBr == closeBr) { return b % 2 == 0; }
     return b == 0;
 }
 
@@ -31,6 +32,9 @@ auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
     _mainSection = {};
 
     object kvp {_mainSection};
+    if (txt[0] == _settings.Settings) {
+        if (!read_settings()) { return std::nullopt; }
+    }
     return read_lines(kvp) ? std::optional {_mainSection} : std::nullopt;
 }
 
@@ -70,7 +74,7 @@ auto ini_reader::read_line(object& targetObject, utf8_string_view line) -> bool
 
 auto ini_reader::read_comment(utf8_string_view line) -> bool
 {
-    if (line[0] == ';' || line[0] == '#') {
+    if (_settings.Comment.contains(line[0])) {
         if (line.size() > 1) {
             _currentComment.Text += line.substr(1);
             _currentComment.Text += "\n";
@@ -84,13 +88,13 @@ auto ini_reader::read_comment(utf8_string_view line) -> bool
 auto ini_reader::read_section_header(object& targetObject, utf8_string_view line) -> bool
 {
     // read object header
-    if (line[0] == '[') {
-        auto const endPos {line.find(']')};
+    if (line[0] == _settings.Section.first) {
+        auto const endPos {line.find(_settings.Section.second)};
         if (endPos == utf8_string::npos || endPos == 1) { return false; } // ERROR: invalid object header
 
         auto const lineSize {line.size()};
         // quoted key
-        if ((line[1] == '\'' && line[lineSize - 2] == '\'') || (line[1] == '"' && line[lineSize - 2] == '"')) {
+        if ((line[1] == '\'' || line[1] == '"') && line[1] == line[lineSize - 2]) {
             line = line.substr(2, lineSize - 4);
             auto secRes {_mainSection[utf8_string {line}]};
             if (!secRes.is<object>()) { secRes = object {}; }
@@ -99,7 +103,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
             // read sub-sections
             bool first {true};
             helper::split_for_each(
-                line.substr(1, endPos - 1), '.',
+                line.substr(1, endPos - 1), _settings.Path,
                 [&first, &targetObject, this](utf8_string_view token) {
                     if (token.empty()) { return false; }
                     auto secRes {(first ? _mainSection : targetObject)[utf8_string {token}]};
@@ -111,12 +115,12 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
         }
 
         // inheritance
-        if (line.find('@', endPos) != utf8_string::npos) {
-            auto const inh {helper::split_preserve_brackets(line, '@')};
+        if (line.find(_settings.Reference, endPos) != utf8_string::npos) {
+            auto const inh {helper::split_preserve_brackets(line, _settings.Reference)};
             if (inh.size() != 2) { return false; }
 
             object obj {_mainSection};
-            auto   keys {helper::split(inh[1], '.')};
+            auto   keys {helper::split(inh[1], _settings.Path)};
             if (keys.size() > 1) {
                 for (usize i {0}; i < keys.size() - 1; ++i) {
                     if (!obj.try_get(obj, keys[i])) { return false; }
@@ -139,26 +143,26 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
 
 auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
 {
-    auto const separatorPos {helper::find_unquoted(line, '=')};
+    auto const separatorPos {helper::find_unquoted(line, _settings.KeyValueDelim)};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
     auto const valueStr {helper::trim(line.substr(separatorPos + 1))};
 
-    if (keyStr.empty() || valueStr.empty()) { return false; }                //  ERROR: empty key or value
+    if (keyStr.empty() || valueStr.empty()) { return false; }                                      //  ERROR: empty key or value
     auto const keyStrSize {keyStr.size()};
-    if (keyStr[0] == '.' || keyStr[keyStrSize - 1] == '.') { return false; } //  ERROR: dot at start or end of key
+    if (keyStr[0] == _settings.Path || keyStr[keyStrSize - 1] == _settings.Path) { return false; } //  ERROR: dot at start or end of key
 
     object      sec {targetObject};
     utf8_string entryKey {};
     bool        first {true};
 
     // unescape key
-    if ((keyStr[0] == '\'' && keyStr[keyStrSize - 1] == '\'') || (keyStr[0] == '"' && keyStr[keyStrSize - 1] == '"')) {
+    if ((keyStr[0] == '\'' || keyStr[0] == '"') && keyStr[0] == keyStr[keyStrSize - 1]) {
         entryKey = keyStr.substr(1, keyStrSize - 2);
     } else { // read sub-keys
         helper::split_for_each(
-            keyStr, '.',
+            keyStr, _settings.Path,
             [&first, &entryKey, &sec](utf8_string_view token) {
                 if (first) {
                     entryKey = utf8_string {token};
@@ -174,7 +178,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     }
 
     // read value string
-    if (valueStr[0] == '@' && valueStr.size() > 1) {
+    if (valueStr[0] == _settings.Reference && valueStr.size() > 1) {
         if (!read_ref(currentEntry, valueStr.substr(1))) {
             return false; // invalid ref
         }
@@ -201,7 +205,7 @@ auto ini_reader::read_value(entry& currentEntry, utf8_string_view line) -> bool
 auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
 {
     object obj {_mainSection};
-    auto   keys {helper::split(line, '.')};
+    auto   keys {helper::split(line, _settings.Path)};
     if (keys.size() > 1) {
         for (usize i {0}; i < keys.size() - 1; ++i) {
             if (!obj.try_get(obj, keys[i])) { return false; }
@@ -225,14 +229,16 @@ auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
 
 auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line[0] == '[') {
+    if (line[0] == _settings.Array.first) {
         utf8_string arrayLine {line};
         while (!is_eof()
-               && (arrayLine.size() <= 1 || arrayLine[arrayLine.size() - 1] != ']' || !check_brackets(arrayLine, '[', ']'))) {
+               && (arrayLine.size() <= 1
+                   || arrayLine[arrayLine.size() - 1] != _settings.Array.second
+                   || !check_brackets(arrayLine, _settings.Array.first, _settings.Array.second))) {
             arrayLine += get_trimmed_next_line();
         }
 
-        if (arrayLine[arrayLine.size() - 1] != ']') { return false; }
+        if (arrayLine[arrayLine.size() - 1] != _settings.Array.second) { return false; }
 
         array arr {};
         if (!helper::split_preserve_brackets_for_each(
@@ -259,14 +265,16 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
 
 auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line[0] == '{') {
+    if (line[0] == _settings.Object.first) {
         utf8_string sectionLine {line};
         while (!is_eof()
-               && (sectionLine.size() <= 1 || sectionLine[sectionLine.size() - 1] != '}' || !check_brackets(sectionLine, '{', '}'))) {
+               && (sectionLine.size() <= 1
+                   || sectionLine[sectionLine.size() - 1] != _settings.Object.second
+                   || !check_brackets(sectionLine, _settings.Object.first, _settings.Object.second))) {
             sectionLine += get_trimmed_next_line();
         }
 
-        if (sectionLine[sectionLine.size() - 1] != '}') { return false; }
+        if (sectionLine[sectionLine.size() - 1] != _settings.Object.second) { return false; }
 
         object obj {};
         if (helper::split_preserve_brackets_for_each(
@@ -350,6 +358,44 @@ auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
     }
 
     currentEntry.set_value(utf8_string {line});
+    return true;
+}
+
+auto ini_reader::read_settings() -> bool
+{
+    //$kvp : $path | $ref @ $comment ;# $section <> $object -| $array +|
+    _iniEnd = 1;
+    auto line {get_trimmed_next_line()};
+
+    std::vector<string> const result {helper::split(line, _settings.Settings)};
+    for (auto const& kvp : result) { // NOLINT
+        auto const settings {helper::split(helper::trim(kvp), ' ')};
+        if (settings.size() < 2) { return false; }
+
+        string const& key {helper::trim(settings[0])};
+        string const& value {helper::trim(settings[1])};
+
+        if (key == "kvp") {
+            _settings.KeyValueDelim = value[0];
+        } else if (key == "path") {
+            _settings.Path = value[0];
+        } else if (key == "ref") {
+            _settings.Reference = value[0];
+        } else if (key == "comment") {
+            _settings.Comment.clear();
+            _settings.Comment.insert(value.begin(), value.end());
+        } else if (key == "section") {
+            if (value.size() < 2) { return false; }
+            _settings.Section = {value[0], value[1]};
+        } else if (key == "object") {
+            if (value.size() < 2) { return false; }
+            _settings.Object = {value[0], value[1]};
+        } else if (key == "array") {
+            if (value.size() < 2) { return false; }
+            _settings.Array = {value[0], value[1]};
+        }
+    }
+
     return true;
 }
 
