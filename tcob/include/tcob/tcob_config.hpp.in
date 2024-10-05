@@ -6,7 +6,6 @@
 #pragma once
 
 // IWYU pragma: always_keep
-// NOLINTBEGIN
 
 #if !defined(NDEBUG) || defined(_DEBUG)
     #define TCOB_DEBUG
@@ -72,9 +71,12 @@ using path = utf8_string;
 
 namespace io {
     class istream;
+    class ifstream;
     class ostream;
+    class ofstream;
 }
 
+// NOLINTBEGIN
 #cmakedefine TCOB_ENABLE_RENDERER_OPENGL45
 #cmakedefine TCOB_ENABLE_RENDERER_OPENGLES30
 #cmakedefine TCOB_ENABLE_RENDERER_NULL
@@ -95,6 +97,7 @@ namespace io {
 #cmakedefine TCOB_ENABLE_FILETYPES_GFX_THEORA
 
 #cmakedefine TCOB_BUILD_SHARED
+// NOLINTEND
 
 #if defined(TCOB_BUILD_SHARED)
     #if defined(_MSC_VER)
@@ -110,7 +113,5 @@ namespace io {
 #else
     #define TCOB_API
 #endif
-
-// NOLINTEND
 
 }

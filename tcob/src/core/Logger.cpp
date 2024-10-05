@@ -9,6 +9,7 @@
 #include <version>
 
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
 #if defined(_MSC_VER)

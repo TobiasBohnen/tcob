@@ -10,7 +10,6 @@
 #include <source_location>
 
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/io/FileStream.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////

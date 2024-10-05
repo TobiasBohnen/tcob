@@ -5,11 +5,12 @@
 
 #include "tcob/gfx/ui/widgets/Terminal.hpp"
 
+#include <charconv>
+
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-
-#include <charconv>
 
 namespace tcob::gfx::ui {
 

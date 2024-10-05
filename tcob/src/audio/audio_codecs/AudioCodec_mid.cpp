@@ -14,6 +14,8 @@
 
     #include <algorithm>
 
+    #include "tcob/core/io/Stream.hpp"
+
 namespace tcob::audio::detail {
 
     #define RENDER_EFFECTSAMPLEBLOCK 64
