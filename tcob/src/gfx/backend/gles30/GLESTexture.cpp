@@ -16,12 +16,9 @@ namespace tcob::gfx::gles30 {
 auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 {
     switch (format) {
-    case texture::format::R8:
-        return {GL_R8, GL_RED};
-    case texture::format::RGB8:
-        return {GL_RGB8, GL_RGB};
-    case texture::format::RGBA8:
-        return {GL_RGBA8, GL_RGBA};
+    case texture::format::R8: return {GL_R8, GL_RED};
+    case texture::format::RGB8: return {GL_RGB8, GL_RGB};
+    case texture::format::RGBA8: return {GL_RGBA8, GL_RGBA};
     }
 
     return {};
@@ -30,10 +27,8 @@ auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 auto constexpr convert_enum(texture::filtering filtering) -> GLenum
 {
     switch (filtering) {
-    case texture::filtering::Linear:
-        return GL_LINEAR;
-    case texture::filtering::NearestNeighbor:
-        return GL_NEAREST;
+    case texture::filtering::Linear: return GL_LINEAR;
+    case texture::filtering::NearestNeighbor: return GL_NEAREST;
     }
 
     return {};
@@ -46,10 +41,8 @@ auto constexpr convert_enum(texture::wrapping wrap) -> GLenum
     case texture::wrapping::ClampToBorder:     // TODO: not supported
     case texture::wrapping::MirrorClampToEdge: // TODO: not supported
         return GL_CLAMP_TO_EDGE;
-    case texture::wrapping::MirroredRepeat:
-        return GL_MIRRORED_REPEAT;
-    case texture::wrapping::Repeat:
-        return GL_REPEAT;
+    case texture::wrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
+    case texture::wrapping::Repeat: return GL_REPEAT;
     }
 
     return {};
@@ -76,10 +69,8 @@ auto gl_texture::get_filtering() const -> texture::filtering
     GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, &filtering));
 
     switch (filtering) {
-    case GL_LINEAR:
-        return texture::filtering::Linear;
-    case GL_NEAREST:
-        return texture::filtering::NearestNeighbor;
+    case GL_LINEAR: return texture::filtering::Linear;
+    case GL_NEAREST: return texture::filtering::NearestNeighbor;
     }
 
     return texture::filtering::Linear;
@@ -102,15 +93,12 @@ auto gl_texture::get_wrapping() const -> texture::wrapping
     GLint wrapS {0};
     GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, &wrapS));
 
-    auto convertWrap {
+    auto const convertWrap {
         [](GLint wrap) {
             switch (wrap) {
-            case GL_CLAMP_TO_EDGE:
-                return texture::wrapping::ClampToEdge;
-            case GL_MIRRORED_REPEAT:
-                return texture::wrapping::MirroredRepeat;
-            case GL_REPEAT:
-                return texture::wrapping::Repeat;
+            case GL_CLAMP_TO_EDGE: return texture::wrapping::ClampToEdge;
+            case GL_MIRRORED_REPEAT: return texture::wrapping::MirroredRepeat;
+            case GL_REPEAT: return texture::wrapping::Repeat;
             }
             return texture::wrapping::Repeat;
         }};
