@@ -63,9 +63,10 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API file_logger : public logger {
+class TCOB_API file_logger final : public logger {
 public:
     explicit file_logger(path const& logfile);
+    ~file_logger() override;
 
 protected:
     void log(string const& message, level level) const override;
@@ -76,7 +77,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API null_logger : public logger {
+class TCOB_API null_logger final : public logger {
 public:
     null_logger();
 
@@ -86,7 +87,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API stdout_logger : public logger {
+class TCOB_API stdout_logger final : public logger {
 public:
     stdout_logger();
 

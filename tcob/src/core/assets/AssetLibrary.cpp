@@ -109,8 +109,8 @@ auto library::get_loading_progress() const -> f32
 
 auto library::is_loading_complete() const -> bool
 {
-    return std::all_of(_groups.begin(), _groups.end(),
-                       [](auto&& value) { return value.second->is_loading_complete(); });
+    return std::ranges::all_of(_groups,
+                               [](auto&& value) { return value.second->is_loading_complete(); });
 }
 
 auto library::get_asset_stats(string const& group) const -> group_stats

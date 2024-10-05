@@ -6,8 +6,6 @@
 #pragma once
 #include "Asset.hpp"
 
-#include "tcob/core/Logger.hpp"
-
 namespace tcob::assets {
 
 template <typename T>
@@ -37,9 +35,6 @@ inline auto asset<T>::operator=(asset<U> const& other) noexcept -> asset<T>&
     }
 
     _object = std::dynamic_pointer_cast<T>(other._object.lock());
-    if (_object.expired()) {
-        logger::Error("asset: conversion failed: {}", _name);
-    }
 
     return *this;
 }

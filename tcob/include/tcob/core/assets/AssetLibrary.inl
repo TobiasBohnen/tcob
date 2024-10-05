@@ -6,6 +6,8 @@
 #pragma once
 #include "AssetLibrary.hpp"
 
+#include "tcob/core/Logger.hpp"
+
 namespace tcob::assets {
 
 template <typename T>

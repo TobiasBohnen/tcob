@@ -118,6 +118,8 @@ file_logger::file_logger(path const& logfile)
 {
 }
 
+file_logger::~file_logger() = default;
+
 void file_logger::log(string const& message, level level) const
 {
     if (level < MinLevel) {
