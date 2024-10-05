@@ -116,9 +116,7 @@ auto default_check_async_load(auto&& cache, auto&& stateSetter) -> task_status
 {
     using namespace std::chrono_literals;
 
-    if (cache.empty()) {
-        return task_status::Finished;
-    }
+    if (cache.empty()) { return task_status::Finished; }
 
     bool loadingDone {true};
 
@@ -206,9 +204,7 @@ void cfg_frame_animation_loader::unload_asset(asset<gfx::frame_animation>& asset
 void cfg_frame_animation_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Animation::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::Animation::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
@@ -243,9 +239,7 @@ void cfg_music_loader::unload_asset(asset<music>& asset, bool)
 
 auto cfg_music_loader::reload_asset(asset<music>& asset) -> bool
 {
-    if (!_object[API::Music::Name].as<object>().has(asset.get_name())) {
-        return false;
-    }
+    if (!_object[API::Music::Name].as<object>().has(asset.get_name())) { return false; }
 
     string const& source {_object[API::Music::Name][asset.get_name()][API::Music::source].as<string>()};
     return asset->open(get_group().get_mount_point() + source) == load_status::Ok;
@@ -254,9 +248,7 @@ auto cfg_music_loader::reload_asset(asset<music>& asset) -> bool
 void cfg_music_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Music::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::Music::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<music, asset_def>(k, this, get_bucket(), _cache)};
@@ -298,9 +290,7 @@ void cfg_sound_loader::unload_asset(asset<sound>& asset, bool)
 
 auto cfg_sound_loader::reload_asset(asset<sound>& asset) -> bool
 {
-    if (!_object[API::Sound::Name].as<object>().has(asset.get_name())) {
-        return false;
-    }
+    if (!_object[API::Sound::Name].as<object>().has(asset.get_name())) { return false; }
 
     string const& source {_object[API::Sound::Name][asset.get_name()][API::Sound::source].as<string>()};
     return asset->load(get_group().get_mount_point() + source) == load_status::Ok;
@@ -309,9 +299,7 @@ auto cfg_sound_loader::reload_asset(asset<sound>& asset) -> bool
 void cfg_sound_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Sound::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::Sound::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<sound, asset_def>(k, this, get_bucket(), _cache)};
@@ -355,9 +343,7 @@ void cfg_sound_font_loader::unload_asset(asset<sound_font>& asset, bool)
 
 auto cfg_sound_font_loader::reload_asset(asset<sound_font>& asset) -> bool
 {
-    if (!_object[API::SoundFont::Name].as<object>().has(asset.get_name())) {
-        return false;
-    }
+    if (!_object[API::SoundFont::Name].as<object>().has(asset.get_name())) { return false; }
 
     string const& source {_object[API::SoundFont::Name][asset.get_name()][API::SoundFont::source].as<string>()};
     return asset->load(get_group().get_mount_point() + source) == load_status::Ok;
@@ -366,9 +352,7 @@ auto cfg_sound_font_loader::reload_asset(asset<sound_font>& asset) -> bool
 void cfg_sound_font_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::SoundFont::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::SoundFont::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<sound_font, asset_def>(k, this, get_bucket(), _cache)};
@@ -416,9 +400,7 @@ void cfg_cursor_loader::unload_asset(asset<cursor>& asset, bool greedy)
 void cfg_cursor_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Cursor::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::Cursor::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
@@ -530,9 +512,7 @@ void cfg_font_family_loader::unload_asset(asset<gfx::font_family>& asset, bool)
 void cfg_font_family_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::FontFamily::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::FontFamily::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         auto asset {std::make_unique<asset_def>()};
@@ -583,9 +563,7 @@ void cfg_material_loader::unload_asset(asset<material>& asset, bool greedy)
 void cfg_material_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Material::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::Material::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
@@ -675,21 +653,19 @@ void cfg_shader_loader::unload_asset(asset<shader>& asset, bool)
 auto cfg_shader_loader::reload_asset(asset<shader>& asset) -> bool
 {
     auto const& name {asset.get_name()};
-    if (!_object[API::Shader::Name].as<object>().has(name)) {
-        return false;
-    }
+    object      obj;
+    if (!_object.try_get(obj, API::Shader::Name, name)) { return false; }
+    obj.try_get(obj, locate_service<render_system>().get_name());
 
-    auto const vertSource {io::read_as_string(get_group().get_mount_point() + _object[API::Shader::Name][name][API::Shader::vertex].as<string>())};
-    auto const fragSource {io::read_as_string(get_group().get_mount_point() + _object[API::Shader::Name][name][API::Shader::fragment].as<string>())};
+    auto const vertSource {io::read_as_string(get_group().get_mount_point() + obj[API::Shader::vertex].as<string>())};
+    auto const fragSource {io::read_as_string(get_group().get_mount_point() + obj[API::Shader::fragment].as<string>())};
     return asset->create(vertSource, fragSource);
 }
 
 void cfg_shader_loader::declare()
 {
     object obj;
-    if (!_object.try_get(obj, API::Shader::Name)) {
-        return;
-    }
+    if (!_object.try_get(obj, API::Shader::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
@@ -912,14 +888,9 @@ void cfg_texture_loader::prepare()
             texSize = imgInfo->Size;
 
             switch (imgInfo->bytes_per_pixel()) {
-            case 3:
-                texFormat = texture::format::RGB8;
-                break;
-            case 4:
-                texFormat = texture::format::RGBA8;
-                break;
-            default:
-                continue;
+            case 3: texFormat = texture::format::RGB8; break;
+            case 4: texFormat = texture::format::RGBA8; break;
+            default: continue;
             }
         }
 
@@ -970,9 +941,8 @@ auto cfg_texture_loader::check_async_load() -> task_status
     bool loadingDone {true};
     for (auto it {_cacheTex.begin()}; it != _cacheTex.end(); ++it) {
         auto const& def {*it};
-        if (def->assetPtr.get()->get_status() == status::Loaded) {
-            continue;
-        }
+        if (def->assetPtr.get()->get_status() == status::Loaded) { continue; }
+
         auto& images {def->images};
 
         bool assetLoadingDone {true};
