@@ -14,7 +14,7 @@ namespace tcob::gfx {
 render_texture::render_texture()
     : render_target {this}
 {
-    add_region("default", {GetTexcoords(), 0});
+    add_region("default", {.UVRect = GetTexcoords(), .Level = 0});
 }
 
 auto render_texture::GetTexcoords() -> rect_f
