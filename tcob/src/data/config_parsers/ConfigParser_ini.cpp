@@ -119,8 +119,8 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
             auto const inh {helper::split_preserve_brackets(line, _settings.Reference)};
             if (inh.size() != 2) { return false; }
 
-            object obj {_mainSection};
-            auto   keys {helper::split(inh[1], _settings.Path)};
+            object     obj {_mainSection};
+            auto const keys {helper::split(inh[1], _settings.Path)};
             if (keys.size() > 1) {
                 for (usize i {0}; i < keys.size() - 1; ++i) {
                     if (!obj.try_get(obj, keys[i])) { return false; }
@@ -363,13 +363,13 @@ auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
 
 auto ini_reader::read_settings() -> bool
 {
-    //$kvp : $path | $ref @ $comment ;# $section <> $object -| $array +|
+    //! kvp=: path=| ref=@ comment=;# section=<> object=-- array=++
     _iniEnd = 1;
     auto line {get_trimmed_next_line()};
 
-    std::vector<string> const result {helper::split(line, _settings.Settings)};
+    std::vector<string> const result {helper::split(line, ' ')};
     for (auto const& kvp : result) { // NOLINT
-        auto const settings {helper::split(helper::trim(kvp), ' ')};
+        auto const settings {helper::split(helper::trim(kvp), '=')};
         if (settings.size() < 2) { return false; }
 
         string_view key {helper::trim(settings[0])};

@@ -23,7 +23,7 @@ struct ini_settings {
     std::pair<char, char>    Section {'[', ']'};
     std::pair<char, char>    Object {'{', '}'};
     std::pair<char, char>    Array {'[', ']'};
-    char                     Settings {'$'};
+    char                     Settings {'!'};
 };
 
 //////////////////////////////////////////////////////////////////////
