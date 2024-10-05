@@ -372,8 +372,8 @@ auto ini_reader::read_settings() -> bool
         auto const settings {helper::split(helper::trim(kvp), ' ')};
         if (settings.size() < 2) { return false; }
 
-        string const& key {helper::trim(settings[0])};
-        string const& value {helper::trim(settings[1])};
+        string_view key {helper::trim(settings[0])};
+        string_view value {helper::trim(settings[1])};
 
         if (key == "kvp") {
             _settings.KeyValueDelim = value[0];
