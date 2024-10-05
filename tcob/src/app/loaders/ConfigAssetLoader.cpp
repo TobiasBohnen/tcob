@@ -902,7 +902,7 @@ void cfg_texture_loader::prepare()
         // convert region from pixels to relative
         auto const [w, h] {texSize};
         for (auto const& [k, v] : def->abs_regions) {
-            tex.add_region(k, {{v.UVRect.left() / w, v.UVRect.top() / h, v.UVRect.Width / w, v.UVRect.Height / h}, v.Level});
+            tex.add_region(k, {.UVRect = {v.UVRect.left() / w, v.UVRect.top() / h, v.UVRect.Width / w, v.UVRect.Height / h}, .Level = v.Level});
         }
 
         // load images
