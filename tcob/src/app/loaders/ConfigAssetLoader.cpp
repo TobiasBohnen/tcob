@@ -594,8 +594,7 @@ void cfg_material_loader::declare()
                 asset->texture = texture;
             }
             if (string shader; assetSection.try_get(shader, API::Material::shader)) {
-                // FIXME: proper render system handling in material
-                asset->shader = helper::replace(shader, "${TCOB_RENDER_SYSTEM}", locate_service<render_system>().get_name());
+                asset->shader = shader;
             }
             if (object blendFunc; assetSection.try_get(blendFunc, API::Material::blend_func)) {
                 blend_func s {blendFunc["source"].as<blend_func>()};
@@ -694,6 +693,9 @@ void cfg_shader_loader::declare()
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
+            // try getting render system specific shader
+            assetSection.try_get(assetSection, locate_service<render_system>().get_name());
+
             auto* asset {default_new<shader, asset_def>(k, this, get_bucket(), _cache)};
             if (string vertex; assetSection.try_get(vertex, API::Shader::vertex)) {
                 asset->vertex = vertex;
