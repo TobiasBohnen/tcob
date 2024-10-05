@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include "tcob/data/ConfigConversions.hpp"
+
 namespace tcob::data::config::detail {
 
 constexpr std::array<ubyte, 5> MAGIC {'B', 'S', 'B', 'D', 1};

@@ -11,7 +11,6 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
-#include "tcob/data/ConfigConversions.inl" // IWYU pragma: keep
 
 namespace tcob::data::config {
 

@@ -16,6 +16,7 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stats.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/data/ConfigConversions.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 

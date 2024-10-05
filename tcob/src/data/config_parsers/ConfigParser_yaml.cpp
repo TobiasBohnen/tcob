@@ -9,6 +9,7 @@
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"
+#include "tcob/data/ConfigConversions.hpp"
 
 namespace tcob::data::config::detail {
 

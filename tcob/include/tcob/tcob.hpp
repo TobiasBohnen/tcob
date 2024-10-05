@@ -55,15 +55,18 @@
 
 #include <tcob/data/CSV.hpp>
 #include <tcob/data/Config.hpp>
+#include <tcob/data/ConfigConversions.hpp>
 #include <tcob/data/ConfigFile.hpp>
 #include <tcob/data/ConfigSchema.hpp>
 #include <tcob/data/ConfigTypes.hpp>
 #include <tcob/data/Sqlite.hpp>
 #include <tcob/data/SqliteColumn.hpp>
+#include <tcob/data/SqliteConversions.hpp>
 #include <tcob/data/SqliteDatabase.hpp>
 #include <tcob/data/SqliteSavepoint.hpp>
 #include <tcob/data/SqliteStatement.hpp>
 #include <tcob/data/SqliteTable.hpp>
+
 
 #include <tcob/gfx/Animation.hpp>
 #include <tcob/gfx/Camera.hpp>
@@ -141,10 +144,12 @@
 #include <tcob/scripting/Wrapper.hpp>
 #include <tcob/scripting/lua/Lua.hpp>
 #include <tcob/scripting/lua/LuaClosure.hpp>
+#include <tcob/scripting/lua/LuaConversions.hpp>
 #include <tcob/scripting/lua/LuaScript.hpp>
 #include <tcob/scripting/lua/LuaTypes.hpp>
 #include <tcob/scripting/lua/LuaWrapper.hpp>
 #include <tcob/scripting/squirrel/Squirrel.hpp>
 #include <tcob/scripting/squirrel/SquirrelClosure.hpp>
+#include <tcob/scripting/squirrel/SquirrelConversions.hpp>
 #include <tcob/scripting/squirrel/SquirrelScript.hpp>
 #include <tcob/scripting/squirrel/SquirrelTypes.hpp>

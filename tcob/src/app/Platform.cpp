@@ -23,6 +23,7 @@
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Magic.hpp"
+#include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Font.hpp"

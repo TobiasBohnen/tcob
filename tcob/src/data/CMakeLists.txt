@@ -15,7 +15,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/data/ConfigFile.hpp
     ${TCOB_INC_DIR}/tcob/data/CSV.hpp
     ${TCOB_INC_DIR}/tcob/data/Config.hpp
-    ${TCOB_INC_DIR}/tcob/data/ConfigConversions.inl
+    ${TCOB_INC_DIR}/tcob/data/ConfigConversions.hpp
     ${TCOB_INC_DIR}/tcob/data/ConfigSchema.hpp
     ${TCOB_INC_DIR}/tcob/data/ConfigTypes.hpp
     ${TCOB_INC_DIR}/tcob/data/ConfigTypes.inl
@@ -34,6 +34,7 @@ if(TCOB_ENABLE_ADDON_DATA_SQLITE)
     )
     list(APPEND HDR
         ${TCOB_INC_DIR}/tcob/data/Sqlite.hpp
+        ${TCOB_INC_DIR}/tcob/data/SqliteConversions.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteColumn.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteColumn.inl
         ${TCOB_INC_DIR}/tcob/data/SqliteDatabase.hpp

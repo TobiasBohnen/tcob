@@ -10,8 +10,6 @@
 
     #include <format>
 
-    #include "tcob/data/SqliteConversions.inl" // IWYU pragma: keep
-
 namespace tcob::data::sqlite {
 
 namespace detail {

@@ -12,6 +12,7 @@
 
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteConversions.hpp"
 
 namespace tcob::data::sqlite {
 ////////////////////////////////////////////////////////////
