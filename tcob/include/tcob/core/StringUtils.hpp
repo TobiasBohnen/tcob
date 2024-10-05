@@ -29,12 +29,11 @@ auto to_number(string_view str) -> std::optional<T>;
 auto join(auto&& container, string_view delim) -> string;
 
 auto          split_for_each(string_view str, char delim, auto&& f) -> bool;
-TCOB_API auto split(string_view str, char delim) -> std::vector<string>;
-TCOB_API void split_to(string_view str, char delim, std::vector<string>& out);
+TCOB_API auto split(string_view str, char delim) -> std::vector<string_view>;
+TCOB_API auto split_once(string_view str, char delim) -> std::pair<string_view, string_view>;
 
 auto          split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> bool;
-TCOB_API auto split_preserve_brackets(string_view str, char delim) -> std::vector<string>;
-TCOB_API void split_preserve_brackets_to(string_view str, char delim, std::vector<string>& out);
+TCOB_API auto split_preserve_brackets(string_view str, char delim) -> std::vector<string_view>;
 
 TCOB_API auto trim(string_view source) -> string_view;
 

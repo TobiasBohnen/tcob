@@ -89,7 +89,7 @@ enum class coroutine_status : u8 {
 
 ////////////////////////////////////////////////////////////
 
-enum class debug_event : u32 { // NOLINT
+enum class debug_event : u32 { // NOLINT(performance-enum-size)
     Call     = 0,
     Return   = 1,
     Line     = 2,

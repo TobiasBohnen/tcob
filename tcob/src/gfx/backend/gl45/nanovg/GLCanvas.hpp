@@ -33,7 +33,7 @@
 
 namespace tcob::gfx::gl45 {
 
-enum class nvg_shader_type : i32 { // NOLINT part of frag shader
+enum class nvg_shader_type : i32 { // NOLINT(performance-enum-size) part of frag shader
     Gradient    = 0,
     Image       = 1,
     StencilFill = 2,

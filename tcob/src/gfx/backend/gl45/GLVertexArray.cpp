@@ -119,7 +119,7 @@ void gl_vertex_array::draw_elements(primitive_type mode, usize count, u32 offset
 {
     assert(ID);
     glBindVertexArray(ID);
-    glDrawElements(convert_enum(mode), static_cast<i32>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint))); // NOLINT
+    glDrawElements(convert_enum(mode), static_cast<i32>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint))); // NOLINT(performance-no-int-to-ptr)
     glBindVertexArray(0);
 }
 

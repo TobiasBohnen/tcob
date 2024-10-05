@@ -49,45 +49,43 @@ auto to_string(char const* s) -> string
     return s == nullptr ? string {} : s;
 }
 
-auto split(string_view str, char delim) -> std::vector<string>
+auto split(string_view str, char delim) -> std::vector<string_view>
 {
-    std::vector<string> retValue;
+    std::vector<string_view> retValue;
     retValue.reserve(10);
-    split_to(str, delim, retValue);
-    return retValue;
-}
-
-void split_to(string_view str, char delim, std::vector<string>& out)
-{
-    out.clear();
 
     usize start {0};
     usize end {str.find(delim)};
     while (end != string_view::npos) {
-        out.emplace_back(str.substr(start, end - start));
+        retValue.emplace_back(str.substr(start, end - start));
         start = end + 1;
         end   = str.find(delim, start);
     }
     if (start < str.size()) {
-        out.emplace_back(str.substr(start));
+        retValue.emplace_back(str.substr(start));
     }
-}
-
-auto split_preserve_brackets(string_view str, char delim) -> std::vector<string>
-{
-    std::vector<string> retValue;
-    retValue.reserve(10);
-    split_preserve_brackets_to(str, delim, retValue);
     return retValue;
 }
 
-void split_preserve_brackets_to(string_view str, char delim, std::vector<string>& out)
+auto split_once(string_view str, char delim) -> std::pair<string_view, string_view>
 {
-    out.clear();
-    split_preserve_brackets_for_each(str, delim, [&out](string_view token) {
-        out.emplace_back(token);
+    usize const pos {str.find(delim)};
+    if (pos == string_view::npos) { return {str, ""}; }
+
+    string_view key {str.substr(0, pos)};
+    string_view value {str.substr(pos + 1)};
+    return {key, value};
+}
+
+auto split_preserve_brackets(string_view str, char delim) -> std::vector<string_view>
+{
+    std::vector<string_view> retValue;
+    retValue.reserve(10);
+    split_preserve_brackets_for_each(str, delim, [&retValue](string_view token) {
+        retValue.emplace_back(token);
         return true;
     });
+    return retValue;
 }
 
 auto trim(string_view source) -> string_view
@@ -153,7 +151,7 @@ auto case_insensitive_equals(string_view lhs, string_view rhs) -> bool
 
 auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
 {
-    return std::search(
+    return std::search( // NOLINT(modernize-use-ranges)
                lhs.begin(), lhs.end(),
                rhs.begin(), rhs.end(),
                [](char a, char b) { return std::toupper(a) == std::toupper(b); })

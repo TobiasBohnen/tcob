@@ -546,7 +546,10 @@ auto static GetESC(utf8_string_view text, i32& i, i32 len) -> esc_seq
         }
     }
 
-    retValue.Values = helper::split(seq, ';');
+    auto values {helper::split(seq, ';')};
+    for (auto value : values) {
+        retValue.Values.emplace_back(value);
+    }
     return retValue;
 }
 

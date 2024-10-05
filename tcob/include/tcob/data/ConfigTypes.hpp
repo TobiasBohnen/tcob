@@ -88,36 +88,36 @@ public:
     auto parse(string_view config, string const& ext) noexcept -> bool;
 
     template <ConvertibleFrom T, typename... Keys>
-    auto as(string const& key, Keys&&... keys) const -> T;
+    auto as(string_view key, Keys&&... keys) const -> T;
 
     template <ConvertibleFrom T>
-    auto get(string const& key) const -> result<T>;
+    auto get(string_view key) const -> result<T>;
     template <ConvertibleFrom T, typename... Keys>
-    auto get(string const& key, string const& subkey, Keys&&... keys) const -> result<T>;
+    auto get(string_view key, string_view subkey, Keys&&... keys) const -> result<T>;
     template <ConvertibleFrom T>
-    auto get(string const& key, isize index) const -> result<T>;
+    auto get(string_view key, isize index) const -> result<T>;
 
     template <ConvertibleFrom T>
-    auto try_get(T& value, string const& key) const -> bool;
+    auto try_get(T& value, string_view key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool;
+    auto try_get(T& value, string_view key, string_view subkey, Keys&&... keys) const -> bool;
 
     template <ConvertibleTo Value>
-    void set(string const& key, Value&& val);
+    void set(string_view key, Value&& val);
     template <typename... KeysOrValue>
-    void set(string const& key, string const& subkey, KeysOrValue&&... keys);
+    void set(string_view key, string_view subkey, KeysOrValue&&... keys);
     template <ConvertibleTo Value>
-    void set(string const& key, isize index, Value&& val);
-    void set(string const& key, std::nullptr_t);
+    void set(string_view key, isize index, Value&& val);
+    void set(string_view key, std::nullptr_t);
 
     template <ConvertibleFrom T>
-    auto is(string const& key) const -> bool;
+    auto is(string_view key) const -> bool;
     template <ConvertibleFrom T, typename... Keys>
-    auto is(string const& key, string const& subkey, Keys&&... keys) const -> bool;
+    auto is(string_view key, string_view subkey, Keys&&... keys) const -> bool;
     template <ConvertibleFrom T>
-    auto is(string const& key, isize index) const -> bool;
+    auto is(string_view key, isize index) const -> bool;
 
-    auto has(string const& key, auto&&... keys) const -> bool;
+    auto has(string_view key, auto&&... keys) const -> bool;
 
     auto clone(bool deep = false) const -> object;
     void merge(object const& other, bool onConflictTakeOther = true);
@@ -126,17 +126,17 @@ public:
 
     auto static Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
 
-    auto get_entry(string const& key) const -> entry*;
-    void set_entry(string const& key, entry const& entry);
+    auto get_entry(string_view key) const -> entry*;
+    void set_entry(string_view key, entry const& entry);
 
 protected:
     auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
 
 private:
-    void add_entry(string const& key, entry const& entry);
+    void add_entry(string_view key, entry const& entry);
 
-    auto find(string const& key) -> cfg_object_entries::iterator;
-    auto find(string const& key) const -> cfg_object_entries::const_iterator;
+    auto find(string_view key) -> cfg_object_entries::iterator;
+    auto find(string_view key) const -> cfg_object_entries::const_iterator;
 };
 
 template <>

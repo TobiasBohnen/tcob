@@ -97,7 +97,7 @@ namespace io {
 #cmakedefine TCOB_ENABLE_FILETYPES_GFX_THEORA
 
 #cmakedefine TCOB_BUILD_SHARED
-// NOLINTEND
+
 
 #if defined(TCOB_BUILD_SHARED)
     #if defined(_MSC_VER)
@@ -113,5 +113,7 @@ namespace io {
 #else
     #define TCOB_API
 #endif
+
+// NOLINTEND
 
 }

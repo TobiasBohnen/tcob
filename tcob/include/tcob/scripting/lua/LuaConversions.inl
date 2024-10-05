@@ -687,7 +687,7 @@ struct converter<char const*> {
 };
 
 template <usize N>
-struct converter<char const[N]> { // NOLINT
+struct converter<char const[N]> { // NOLINT(*-avoid-c-arrays)
     auto static IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;
@@ -970,7 +970,7 @@ struct converter<scripting::owned_ptr<T>> {
         T** obj {static_cast<T**>(state_view {l}.to_userdata(-1))};
 
         if (obj && *obj) {
-            delete (*obj); // NOLINT
+            delete (*obj); // NOLINT(cppcoreguidelines-owning-memory)
         }
 
         return 0;

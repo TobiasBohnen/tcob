@@ -91,7 +91,7 @@ struct converter<char const*> {
 };
 
 template <usize N>
-struct converter<char[N]> { // NOLINT
+struct converter<char[N]> { // NOLINT(*-avoid-c-arrays)
     void static To(cfg_value& config, char const* value)
     {
         config = utf8_string {value};

@@ -25,7 +25,7 @@ auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
 
         image img {image::Create(info->Size, info->Format,
                                  {static_cast<u8*>(data), static_cast<usize>(info->size_in_bytes())})};
-        free(data); // NOLINT
+        free(data); // NOLINT(cppcoreguidelines-owning-memory)
         return img;
     }
 
@@ -58,7 +58,7 @@ auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
     i32 outputSize {0};
     if (auto* output {qoi_encode(image.get_data().data(), &desc, &outputSize)}) {
         out.write<u8>({static_cast<u8*>(output), static_cast<usize>(outputSize)});
-        free(output); // NOLINT
+        free(output); // NOLINT(cppcoreguidelines-owning-memory)
         return true;
     }
 

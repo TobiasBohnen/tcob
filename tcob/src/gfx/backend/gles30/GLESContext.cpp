@@ -53,7 +53,7 @@ gl_context::gl_context(SDL_Window* window)
 
     logger::Info("GLESContext: want OpenGLES version: {}.{}", glMajor, glMinor);
 
-    _context = SDL_GL_CreateContext(window); // NOLINT
+    _context = SDL_GL_CreateContext(window); // NOLINT(cppcoreguidelines-prefer-member-initializer)
     if (!_context) {
         logger::Error("GLESContext: OpenGL context creation failed!");
         throw std::runtime_error("OpenGL context creation failed");

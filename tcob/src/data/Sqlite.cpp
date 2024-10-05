@@ -132,19 +132,19 @@ auto statement_view::bind(i32 idx, i64 value) const -> bool
 auto statement_view::bind(i32 idx, utf8_string_view value) const -> bool
 {
     assert(_stmt);
-    return sqlite3_bind_text(_stmt, idx, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT) == SQLITE_OK; // NOLINT
+    return sqlite3_bind_text(_stmt, idx, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT) == SQLITE_OK;
 }
 
 auto statement_view::bind(i32 idx, char const* value) const -> bool
 {
     assert(_stmt);
-    return sqlite3_bind_text(_stmt, idx, value, -1, SQLITE_TRANSIENT) == SQLITE_OK; // NOLINT
+    return sqlite3_bind_text(_stmt, idx, value, -1, SQLITE_TRANSIENT) == SQLITE_OK;
 }
 
 auto statement_view::bind(i32 idx, void const* value, i64 size) const -> bool
 {
     assert(_stmt);
-    return sqlite3_bind_blob64(_stmt, idx, value, size, SQLITE_TRANSIENT) == SQLITE_OK; // NOLINT
+    return sqlite3_bind_blob64(_stmt, idx, value, size, SQLITE_TRANSIENT) == SQLITE_OK;
 }
 
 auto statement_view::bind_null(i32 idx) -> bool

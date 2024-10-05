@@ -154,13 +154,13 @@ inline auto base_type<Impl, Container>::get_type(Key key) const -> type
 ////////////////////////////////////////////////////////////
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::as(string const& key, Keys&&... keys) const -> T
+inline auto object::as(string_view key, Keys&&... keys) const -> T
 {
     return get<T>(key, std::forward<Keys>(keys)...).value();
 }
 
 template <ConvertibleFrom T>
-inline auto object::get(string const& key) const -> result<T>
+inline auto object::get(string_view key) const -> result<T>
 {
     if (auto it {find(key)}; it != values()->end()) {
         return it->second.template get<T>();
@@ -171,7 +171,7 @@ inline auto object::get(string const& key) const -> result<T>
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::get(string const& key, string const& subkey, Keys&&... keys) const -> result<T>
+inline auto object::get(string_view key, string_view subkey, Keys&&... keys) const -> result<T>
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
@@ -185,7 +185,7 @@ inline auto object::get(string const& key, string const& subkey, Keys&&... keys)
 }
 
 template <ConvertibleFrom T>
-inline auto object::get(string const& key, isize index) const -> result<T>
+inline auto object::get(string_view key, isize index) const -> result<T>
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
@@ -199,7 +199,7 @@ inline auto object::get(string const& key, isize index) const -> result<T>
 }
 
 template <ConvertibleFrom T>
-inline auto object::try_get(T& value, string const& key) const -> bool
+inline auto object::try_get(T& value, string_view key) const -> bool
 {
     if (auto it {find(key)}; it != values()->end()) {
         return it->second.try_get(value);
@@ -209,7 +209,7 @@ inline auto object::try_get(T& value, string const& key) const -> bool
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::try_get(T& value, string const& key, string const& subkey, Keys&&... keys) const -> bool
+inline auto object::try_get(T& value, string_view key, string_view subkey, Keys&&... keys) const -> bool
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
@@ -223,7 +223,7 @@ inline auto object::try_get(T& value, string const& key, string const& subkey, K
 }
 
 template <ConvertibleTo Value>
-inline void object::set(string const& key, Value&& value)
+inline void object::set(string_view key, Value&& value)
 {
     if (auto it {find(key)}; it != values()->end()) {
         it->second.set(std::forward<Value>(value));
@@ -237,7 +237,7 @@ inline void object::set(string const& key, Value&& value)
 }
 
 template <typename... KeysOrValue>
-inline void object::set(string const& key, string const& subkey, KeysOrValue&&... keys)
+inline void object::set(string_view key, string_view subkey, KeysOrValue&&... keys)
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto&  ent {it->second};
@@ -255,7 +255,7 @@ inline void object::set(string const& key, string const& subkey, KeysOrValue&&..
 }
 
 template <ConvertibleTo Value>
-inline void object::set(string const& key, isize index, Value&& value)
+inline void object::set(string_view key, isize index, Value&& value)
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto& ent {it->second};
@@ -270,7 +270,7 @@ inline void object::set(string const& key, isize index, Value&& value)
 }
 
 template <ConvertibleFrom T>
-inline auto object::is(string const& key) const -> bool
+inline auto object::is(string_view key) const -> bool
 {
     if (auto it {find(key)}; it != values()->end()) { return it->second.template is<T>(); }
 
@@ -278,7 +278,7 @@ inline auto object::is(string const& key) const -> bool
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::is(string const& key, string const& subkey, Keys&&... keys) const -> bool
+inline auto object::is(string_view key, string_view subkey, Keys&&... keys) const -> bool
 {
     if (auto it {find(key)}; it != values()->end()) {
         if (object sub {}; it->second.try_get(sub)) {              // If the value is a object (a nested key-value pair)
@@ -290,7 +290,7 @@ inline auto object::is(string const& key, string const& subkey, Keys&&... keys) 
 }
 
 template <ConvertibleFrom T>
-inline auto object::is(string const& key, isize index) const -> bool
+inline auto object::is(string_view key, isize index) const -> bool
 {
     if (auto it {find(key)}; it != values()->end()) {
         if (array sub; it->second.try_get(sub)) { // If the value is an array
@@ -301,7 +301,7 @@ inline auto object::is(string const& key, isize index) const -> bool
     return false;
 }
 
-inline auto object::has(string const& key, auto&&... keys) const -> bool
+inline auto object::has(string_view key, auto&&... keys) const -> bool
 {
     if (auto it {find(key)}; it != values()->end()) {
         if constexpr (sizeof...(keys) > 0) {

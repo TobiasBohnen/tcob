@@ -377,7 +377,7 @@ inline auto wrapper<T>::gc(lua_State* l) -> i32
     T** obj {static_cast<T**>(state_view {l}.to_userdata(-1))};
 
     if (obj && *obj) {
-        delete (*obj); // NOLINT
+        delete (*obj); // NOLINT(cppcoreguidelines-owning-memory)
     }
 
     return 0;

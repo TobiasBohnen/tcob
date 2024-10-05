@@ -9,7 +9,7 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-enum class update_mode {
+enum class update_mode : u8 {
     Normal,
     Fixed,
     Both
@@ -38,8 +38,8 @@ protected:
     non_copyable()  = default;
     ~non_copyable() = default;
 
-    non_copyable(non_copyable const&)                    = delete; // NOLINT
-    auto operator=(non_copyable const&) -> non_copyable& = delete; // NOLINT
+    non_copyable(non_copyable const&)                    = delete; // NOLINT(modernize-use-equals-delete)
+    auto operator=(non_copyable const&) -> non_copyable& = delete; // NOLINT(modernize-use-equals-delete)
 };
 
 ////////////////////////////////////////////////////////////

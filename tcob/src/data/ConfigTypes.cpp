@@ -45,7 +45,7 @@ auto object::operator[](string const& key) const -> proxy<object const, string> 
     return proxy<object const, string> {*this, std::tuple {key}};
 }
 
-void object::set(string const& key, std::nullptr_t)
+void object::set(string_view key, std::nullptr_t)
 {
     std::erase_if(*values(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
 }
@@ -146,7 +146,7 @@ auto object::Parse(string_view config, string const& ext) -> std::optional<objec
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
 }
 
-auto object::get_entry(string const& key) const -> entry*
+auto object::get_entry(string_view key) const -> entry*
 {
     for (auto& [k, v] : *values()) {
         if (helper::case_insensitive_equals(k, key)) {
@@ -157,7 +157,7 @@ auto object::get_entry(string const& key) const -> entry*
     return nullptr;
 }
 
-void object::set_entry(string const& key, entry const& entry)
+void object::set_entry(string_view key, entry const& entry)
 {
     for (auto& [k, v] : *values()) {
         if (helper::case_insensitive_equals(k, key)) {
@@ -170,19 +170,19 @@ void object::set_entry(string const& key, entry const& entry)
     add_entry(key, entry);
 }
 
-void object::add_entry(string const& key, entry const& entry)
+void object::add_entry(string_view key, entry const& entry)
 {
     values()->emplace_back(key, entry);
 }
 
-auto object::find(string const& key) -> cfg_object_entries::iterator
+auto object::find(string_view key) -> cfg_object_entries::iterator
 {
-    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
+    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); }); // NOLINT(modernize-use-ranges)
 }
 
-auto object::find(string const& key) const -> cfg_object_entries::const_iterator
+auto object::find(string_view key) const -> cfg_object_entries::const_iterator
 {
-    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
+    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); }); // NOLINT(modernize-use-ranges)
 }
 
 ////////////////////////////////////////////////////////////

@@ -36,19 +36,22 @@ void gl_vertex_array::setup_attributes() const
 
     // position attribute
     GLCHECK(glEnableVertexAttribArray(index));
-    GLCHECK(glVertexAttribPointer(index, std::tuple_size_v<decltype(vertex::Position)>, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT
+    GLCHECK(glVertexAttribPointer(
+        index, std::tuple_size_v<decltype(vertex::Position)>, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
     offset += sizeof(vertex::Position);
     index++;
 
     // color attribute
     GLCHECK(glEnableVertexAttribArray(index));
-    GLCHECK(glVertexAttribPointer(index, std::tuple_size_v<decltype(vertex::Color)>, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT
+    GLCHECK(glVertexAttribPointer(
+        index, std::tuple_size_v<decltype(vertex::Color)>, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
     offset += sizeof(vertex::Color);
     index++;
 
     // texture coord attribute
     GLCHECK(glEnableVertexAttribArray(index));
-    GLCHECK(glVertexAttribPointer(index, std::tuple_size_v<decltype(vertex::TexCoords)>, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT
+    GLCHECK(glVertexAttribPointer(
+        index, std::tuple_size_v<decltype(vertex::TexCoords)>, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
     offset += sizeof(vertex::TexCoords);
     index++;
 
@@ -135,7 +138,7 @@ void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset) co
 void gl_vertex_array::draw_elements(primitive_type mode, usize count, u32 offset) const
 {
     bind();
-    GLCHECK(glDrawElements(convert_enum(mode), static_cast<i32>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint)))); // NOLINT
+    GLCHECK(glDrawElements(convert_enum(mode), static_cast<i32>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint)))); // NOLINT(performance-no-int-to-ptr)
     unbind();
 }
 

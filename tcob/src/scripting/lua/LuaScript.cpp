@@ -33,7 +33,7 @@ script::script()
     _globalTable.acquire(_view, -1);
     _view.pop(1);
 
-    _environment = _globalTable; // NOLINT
+    _environment = _globalTable; // NOLINT(cppcoreguidelines-prefer-member-initializer)
 
     _view.set_warnf(&warn, this);
 }

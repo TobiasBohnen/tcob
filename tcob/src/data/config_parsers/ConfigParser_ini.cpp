@@ -367,13 +367,12 @@ auto ini_reader::read_settings() -> bool
     _iniEnd = 1;
     auto line {get_trimmed_next_line()};
 
-    std::vector<string> const result {helper::split(line, ' ')};
-    for (auto const& kvp : result) { // NOLINT
-        auto const settings {helper::split(helper::trim(kvp), '=')};
-        if (settings.size() < 2) { return false; }
+    return helper::split_for_each(line, ' ', [&](auto kvp) {
+        auto settings {helper::split_once(helper::trim(kvp), '=')};
+        if (settings.second.empty()) { return false; }
 
-        string_view key {helper::trim(settings[0])};
-        string_view value {helper::trim(settings[1])};
+        auto key {helper::trim(settings.first)};
+        auto value {helper::trim(settings.second)};
 
         if (key == "kvp") {
             _settings.KeyValueDelim = value[0];
@@ -394,9 +393,9 @@ auto ini_reader::read_settings() -> bool
             if (value.size() < 2) { return false; }
             _settings.Array = {value[0], value[1]};
         }
-    }
 
-    return true;
+        return true;
+    });
 }
 
 auto ini_reader::get_next_line() -> utf8_string_view

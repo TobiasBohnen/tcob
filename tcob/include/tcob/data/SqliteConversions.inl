@@ -35,7 +35,7 @@ struct converter<char const*> {
 };
 
 template <usize N>
-struct converter<char[N]> { // NOLINT
+struct converter<char[N]> { // NOLINT(*-avoid-c-arrays)
     auto static To(statement_view stmt, i32& idx, char const* value) -> bool
     {
         return stmt.bind(idx++, value);
