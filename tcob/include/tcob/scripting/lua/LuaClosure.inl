@@ -39,35 +39,16 @@ inline auto native_closure<R(Args...)>::operator()(state_view view) -> i32
 ////////////////////////////////////////////////////////////
 
 template <typename Arg>
-inline auto compare_types_impl(state_view view, i32& startIndex) -> bool
+inline auto compare_types_impl(state_view view, i32 startIndex) -> bool
 {
     using converter_type = std::remove_cvref_t<Arg>;
-    bool const result {converter<converter_type>::IsType(view, startIndex)};
-    startIndex += get_stacksize<converter_type>();
-    return result;
+    return {converter<converter_type>::IsType(view, startIndex)};
 }
 
 template <typename R, typename... Args>
 inline auto compare_types([[maybe_unused]] state_view view, [[maybe_unused]] i32 startIndex, std::function<R(Args...)> const&) -> bool
 {
-    return ((compare_types_impl<Args>(view, startIndex)) && ...);
-}
-
-template <typename Arg, typename... Args>
-consteval auto args_count_impl() -> i32
-{
-    using converter_type = std::remove_cvref_t<Arg>;
-    return get_stacksize<converter_type>();
-}
-
-template <typename R, typename... Args>
-inline auto args_count(std::function<R(Args...)> const&) -> i32
-{
-    if constexpr (sizeof...(Args) == 0) {
-        return 0;
-    } else {
-        return ((args_count_impl<Args>()) + ...);
-    }
+    return ((compare_types_impl<Args>(view, startIndex++)) && ...);
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,7 +91,7 @@ template <typename... Funcs>
 template <typename R, typename... Args>
 inline auto native_overload<Funcs...>::check_func(state_view view, i32 top, std::function<R(Args...)> const& func) -> bool
 {
-    if (top == args_count(func) && compare_types(view, 1, func)) {
+    if (top == sizeof...(Args) && compare_types(view, 1, func)) {
         call_func(view, func);
         return true;
     }

@@ -30,16 +30,6 @@
 
 namespace tcob::scripting::lua {
 
-template <typename T>
-consteval auto get_stacksize() -> i32
-{
-    if constexpr (requires {{ converter<T>::StackSize()}; }) {
-        return converter<T>::StackSize();
-    } else {
-        return 1;
-    }
-}
-
 ////functions/////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
@@ -108,11 +98,6 @@ struct converter<detail::native_closure_base*> {
 
 template <typename T>
 struct converter<std::optional<T>> {
-    static consteval auto StackSize() -> i32
-    {
-        return get_stacksize<T>();
-    }
-
     auto static IsType(state_view, i32) -> bool
     {
         return true;
@@ -326,11 +311,6 @@ private:
 
 template <typename... T>
 struct converter<std::tuple<T...>> {
-    static consteval auto StackSize() -> i32
-    {
-        return static_cast<i32>(std::tuple_size_v<std::tuple<T...>>);
-    }
-
     auto static IsType(state_view view, i32 idx) -> bool
     {
         return (converter<T>::IsType(view, idx++) && ...);
@@ -370,11 +350,6 @@ private:
 
 template <typename K, typename V>
 struct converter<std::pair<K, V>> {
-    static consteval auto StackSize() -> i32
-    {
-        return 2;
-    }
-
     auto static IsType(state_view view, i32 idx) -> bool
     {
         return converter<K>::IsType(view, idx) && converter<V>::IsType(view, idx + 1);
@@ -979,11 +954,6 @@ struct converter<scripting::owned_ptr<T>> {
 
 template <typename T>
 struct converter<result<T>> {
-    static consteval auto StackSize() -> i32
-    {
-        return get_stacksize<T>();
-    }
-
     auto static IsType(state_view view, i32 idx) -> bool
     {
         return converter<T>::IsType(view, idx);
