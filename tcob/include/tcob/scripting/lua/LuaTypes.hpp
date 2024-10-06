@@ -60,6 +60,9 @@ public:
 
     auto get_raw_length() const -> u64;
 
+    template <typename... Args, typename T>
+    auto try_make(T& value, auto&&... keys) const -> bool;
+
     template <ConvertibleFrom T>
     auto get(auto&&... keys) const -> result<T>;
 

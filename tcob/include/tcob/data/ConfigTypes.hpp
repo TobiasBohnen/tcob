@@ -90,6 +90,9 @@ public:
     template <ConvertibleFrom T, typename... Keys>
     auto as(string_view key, Keys&&... keys) const -> T;
 
+    template <typename... Args, typename T>
+    auto try_make(T& value, auto&&... keys) const -> bool;
+
     template <ConvertibleFrom T>
     auto get(string_view key) const -> result<T>;
     template <ConvertibleFrom T, typename... Keys>

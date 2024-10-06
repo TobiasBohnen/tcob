@@ -22,6 +22,25 @@ inline auto table::operator[](Key key) const -> proxy<table const, Key>
     return proxy<table const, Key> {*this, std::tuple {key}};
 }
 
+template <typename... Args, typename T>
+inline auto table::try_make(T& value, auto&&... keys) const -> bool
+{
+    constexpr usize argsCount {sizeof...(Args)};
+    constexpr usize keyCount {sizeof...(keys)};
+    static_assert(argsCount == keyCount);
+
+    std::tuple<Args...> tup {};
+    if (std::apply(
+            [&](auto&&... item) {
+                return (try_get(item, keys) && ...);
+            },
+            tup)) {
+        value = std::make_from_tuple<T>(tup);
+        return true;
+    }
+    return false;
+}
+
 template <ConvertibleFrom T>
 inline auto table::get(auto&&... keys) const -> result<T>
 {

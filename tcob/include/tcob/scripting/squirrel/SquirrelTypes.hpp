@@ -59,6 +59,9 @@ public:
     auto get_delegate() const -> table;
     void set_delegate(table const& mt) const;
 
+    template <typename... Args, typename T>
+    auto try_make(T& value, auto&&... keys) const -> bool;
+
     template <ConvertibleFrom T>
     auto get(auto&&... keys) const -> result<T>;
 

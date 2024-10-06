@@ -158,6 +158,25 @@ inline auto object::as(string_view key, Keys&&... keys) const -> T
     return get<T>(key, std::forward<Keys>(keys)...).value();
 }
 
+template <typename... Args, typename T>
+inline auto object::try_make(T& value, auto&&... keys) const -> bool
+{
+    constexpr usize argsCount {sizeof...(Args)};
+    constexpr usize keyCount {sizeof...(keys)};
+    static_assert(argsCount == keyCount);
+
+    std::tuple<Args...> tup {};
+    if (std::apply(
+            [&](auto&&... item) {
+                return (try_get(item, keys) && ...);
+            },
+            tup)) {
+        value = std::make_from_tuple<T>(tup);
+        return true;
+    }
+    return false;
+}
+
 template <ConvertibleFrom T>
 inline auto object::get(string_view key) const -> result<T>
 {
@@ -476,5 +495,4 @@ inline auto operator==(array const& left, array const& right) -> bool
 
     return true;
 }
-
 }
