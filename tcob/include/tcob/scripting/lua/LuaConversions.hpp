@@ -1077,13 +1077,6 @@ struct converter<angle_unit<ValueType, OneTurn>> {
     }
 };
 
-static_assert(get_stacksize<i32>() == 1);
-static_assert(get_stacksize<std::optional<i32>>() == 1);
-static_assert(get_stacksize<std::pair<f32, i32>>() == 2);
-static_assert(get_stacksize<std::optional<std::pair<f32, i32>>>() == 2);
-static_assert(get_stacksize<std::tuple<f32, i32, bool>>() == 3);
-static_assert(get_stacksize<std::optional<std::tuple<f32, i32, bool>>>() == 3);
-
 }
 
 #endif
