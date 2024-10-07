@@ -95,7 +95,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     _inds.clear();
     u32 indOffset {0};
 
-    constexpr f32 minAngle {0.0005f};
+    constexpr f32 minAngle {0.05f}; // 0.0005f
     auto&         tm {locate_service<task_manager>()};
 
     // collect collision points
