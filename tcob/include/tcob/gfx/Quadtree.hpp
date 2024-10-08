@@ -16,7 +16,7 @@
 
 #include "tcob/core/Rect.hpp"
 
-namespace tcob {
+namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 template <typename T, auto GetRect>

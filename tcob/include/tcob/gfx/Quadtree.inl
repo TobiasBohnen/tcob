@@ -6,7 +6,7 @@
 #pragma once
 #include "Quadtree.hpp"
 
-namespace tcob {
+namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 template <typename T, auto GetRect>
