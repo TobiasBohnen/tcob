@@ -87,6 +87,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.inl
+    ${TCOB_INC_DIR}/tcob/gfx/Quadtree.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Quadtree.inl
     ${TCOB_INC_DIR}/tcob/gfx/Ray.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Renderer.hpp
     ${TCOB_INC_DIR}/tcob/gfx/RenderSystem.hpp

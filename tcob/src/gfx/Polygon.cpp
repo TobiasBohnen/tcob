@@ -105,6 +105,11 @@ auto polygons::get_info(std::span<polygon const> polygons) -> polygon::info
     return get_poly_info(points);
 }
 
+auto polygons::get_info(polyline_span polyline) -> polygon::info
+{
+    return get_poly_info(polyline);
+}
+
 void polygons::move_by(std::span<polygon> polygons, point_f offset)
 {
     for (auto& polygon : polygons) {

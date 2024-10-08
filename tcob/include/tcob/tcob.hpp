@@ -67,7 +67,6 @@
 #include <tcob/data/SqliteStatement.hpp>
 #include <tcob/data/SqliteTable.hpp>
 
-
 #include <tcob/gfx/Animation.hpp>
 #include <tcob/gfx/Camera.hpp>
 #include <tcob/gfx/Canvas.hpp>
@@ -80,6 +79,7 @@
 #include <tcob/gfx/Material.hpp>
 #include <tcob/gfx/Polygon.hpp>
 #include <tcob/gfx/QuadTween.hpp>
+#include <tcob/gfx/Quadtree.hpp>
 #include <tcob/gfx/Ray.hpp>
 #include <tcob/gfx/RenderSystem.hpp>
 #include <tcob/gfx/RenderSystemImpl.hpp>

@@ -11,6 +11,7 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/Quadtree.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 
@@ -48,6 +49,10 @@ public:
     prop<bool>                    Falloff {true};
     prop<std::optional<degree_f>> StartAngle;
     prop<std::optional<degree_f>> EndAngle;
+
+    auto is_range_limited() const -> bool;
+    auto is_angle_limited() const -> bool;
+    auto get_range() const -> f32;
 
 protected:
     light_source(lighting_system* parent);
@@ -101,7 +106,7 @@ public:
     template <typename T = shadow_caster>
     auto create_shadow_caster(auto&&... args) -> std::shared_ptr<T>;
 
-    void remove_shadow_caster(shadow_caster const& emitter);
+    void remove_shadow_caster(shadow_caster const& caster);
     void clear_shadow_casters();
 
     void request_redraw();
@@ -114,12 +119,24 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
+    struct caster_points {
+        polyline_span  Points {};
+        shadow_caster* Caster {nullptr};
+    };
+
+    void rebuild_quadtree();
+    void process_light(light_source& light, bool force, u32& indOffset);
+    void build_geometry(light_source& light, u32& indOffset);
+    auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<caster_points> const& casterPoints) const -> std::vector<f64>;
+    auto is_in_shadowcaster(light_source& light, std::vector<caster_points> const& casterPoints) const -> bool;
+
     auto is_point_in_polygon(point_f p, polyline_span points) const -> bool;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};
 
     bool _isDirty {false};
+    bool _boundsDirty {false};
     bool _updateGeometry {false};
 
     polygon_renderer    _renderer {buffer_usage_hint::DynamicDraw};
@@ -130,6 +147,9 @@ private:
 
     std::mutex _mutex {};
     bool       _multiThreaded;
+
+    auto static get_rect(caster_points caster) -> rect_f;
+    std::unique_ptr<quadtree<caster_points, &get_rect>> _quadTree;
 };
 
 }

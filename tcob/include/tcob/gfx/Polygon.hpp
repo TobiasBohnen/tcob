@@ -60,6 +60,7 @@ namespace polygons {
     TCOB_API auto check_winding(std::span<polygon const> polygons) -> bool;
 
     TCOB_API auto get_info(std::span<polygon const> polygons) -> polygon::info;
+    TCOB_API auto get_info(polyline_span polyline) -> polygon::info;
 
     TCOB_API void move_by(std::span<polygon> polygons, point_f offset);
 
