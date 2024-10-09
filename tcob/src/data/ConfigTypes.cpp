@@ -48,7 +48,7 @@ auto object::operator[](string const& key) const -> proxy<object const, string> 
 
 void object::set(string_view key, std::nullptr_t)
 {
-    std::erase_if(*values(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); });
+    std::erase_if(*values(), [&key](auto const& p) { return p.first == key; });
 }
 
 auto object::str() const -> string
@@ -150,9 +150,7 @@ auto object::Parse(string_view config, string const& ext) -> std::optional<objec
 auto object::get_entry(string_view key) const -> entry*
 {
     for (auto& [k, v] : *values()) {
-        if (helper::case_insensitive_equals(k, key)) {
-            return &v;
-        }
+        if (k == key) { return &v; }
     }
 
     return nullptr;
@@ -161,7 +159,7 @@ auto object::get_entry(string_view key) const -> entry*
 void object::set_entry(string_view key, entry const& entry)
 {
     for (auto& [k, v] : *values()) {
-        if (helper::case_insensitive_equals(k, key)) {
+        if (k == key) {
             v = entry;
             return;
         }
@@ -178,12 +176,12 @@ void object::add_entry(string_view key, entry const& entry)
 
 auto object::find(string_view key) -> cfg_object_entries::iterator
 {
-    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); }); // NOLINT(modernize-use-ranges)
+    return std::find_if(begin(), end(), [&key](auto const& p) { return p.first == key; }); // NOLINT(modernize-use-ranges)
 }
 
 auto object::find(string_view key) const -> cfg_object_entries::const_iterator
 {
-    return std::find_if(begin(), end(), [&key](auto const& p) { return helper::case_insensitive_equals(p.first, key); }); // NOLINT(modernize-use-ranges)
+    return std::find_if(begin(), end(), [&key](auto const& p) { return p.first == key; }); // NOLINT(modernize-use-ranges)
 }
 
 ////////////////////////////////////////////////////////////

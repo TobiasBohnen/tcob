@@ -9,8 +9,6 @@
 
 #include "tcob/tcob_config.hpp"
 
-#include <algorithm>
-#include <functional>
 #include <vector>
 
 #include "tcob/core/Concepts.hpp"
@@ -58,35 +56,6 @@ TCOB_API auto length(utf8_string_view str) -> usize;
 TCOB_API auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string;
 TCOB_API auto remove(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;
 TCOB_API auto substr(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;
-
-}
-
-////////////////////////////////////////////////////////////
-
-namespace tcob::detail {
-
-struct case_insensitive_hash { // for std::unordered_map
-    auto operator()(string const& s) const -> usize
-    {
-        return std::hash<string> {}(helper::to_lower(s));
-    }
-};
-
-struct case_insensitive_equal { // for std::unordered_map
-    auto operator()(string const& lhs, string const& rhs) const -> bool
-    {
-        return std::ranges::equal(lhs, rhs, [](char lhc, char rhc) {
-            return std::tolower(lhc) == std::tolower(rhc);
-        });
-    }
-};
-
-struct case_insensitive_compare { // for std::map
-    auto operator()(string const& lhs, string const& rhs) const -> bool
-    {
-        return helper::to_lower(lhs) < helper::to_lower(rhs);
-    }
-};
 
 }
 
