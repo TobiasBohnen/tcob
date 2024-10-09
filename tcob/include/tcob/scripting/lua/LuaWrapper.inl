@@ -107,7 +107,7 @@ inline void wrapper<T>::wrap_metamethod(metamethod method, auto&& func)
 
 template <typename T>
 template <typename... Ts>
-inline void wrapper<T>::wrap_constructor(std::optional<table> targetTable)
+inline void wrapper<T>::wrap_constructors(std::optional<table> targetTable)
 {
     auto& dstTable {targetTable.has_value() ? targetTable.value() : *_globalTable};
 
@@ -116,13 +116,23 @@ inline void wrapper<T>::wrap_constructor(std::optional<table> targetTable)
         dstTable[_name] = table {};
     }
 
-    _constructor = scripting::wrapper<wrapper<T>>::make_unique_closure(
-        std::function<owned_ptr<T>(Ts...)> {[](Ts... args) {
-            return owned_ptr<T> {new T(std::forward<Ts>(args)...)};
-        }});
+    if constexpr (sizeof...(Ts) > 1) {
+        _constructor = scripting::wrapper<wrapper<T>>::make_unique_overload(process_constructor(constructor<Ts> {})...);
+    } else {
+        _constructor = scripting::wrapper<wrapper<T>>::make_unique_closure(process_constructor(constructor<Ts> {})...);
+    }
 
     // create 'new' function
     dstTable[_name]["new"] = _constructor.get();
+}
+
+template <typename T>
+template <typename... Args>
+inline auto wrapper<T>::process_constructor(constructor<T(Args...)>&&) -> std::function<owned_ptr<T>(Args...)>
+{
+    return std::function<owned_ptr<T>(Args...)> {[](Args... args) {
+        return owned_ptr<T> {new T(std::forward<Args>(args)...)};
+    }};
 }
 
 ////////////////////////////////////////////////////////////

@@ -118,11 +118,19 @@ public:
     void wrap_metamethod(metamethod method, auto&& func);
 
     template <typename... Ts>
-    void wrap_constructor(std::optional<table> targetTable = std::nullopt);
+    void wrap_constructors(std::optional<table> targetTable = std::nullopt);
 
     void hide_metatable(auto&& value) const;
 
 private:
+    template <typename... Args>
+    struct constructor;
+    template <typename... Args>
+    struct constructor<T(Args...)> { };
+
+    template <typename... Args>
+    auto process_constructor(constructor<T(Args...)>&&) -> std::function<owned_ptr<T>(Args...)>;
+
     template <typename R, typename... P>
     auto static impl_make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr;
     template <typename... Funcs>
