@@ -26,11 +26,11 @@ class shadow_caster;
 ////////////////////////////////////////////////////////////
 
 struct light_collision {
-    point_f        Point {};
-    f64            Distance {};
-    usize          CollisionCount {};
-    light_source*  Source {nullptr};
-    shadow_caster* Caster {nullptr};
+    point_f              Point {};
+    f64                  Distance {};
+    usize                CollisionCount {};
+    light_source const*  Source {nullptr};
+    shadow_caster const* Caster {nullptr};
 };
 
 ////////////////////////////////////////////////////////////
@@ -83,12 +83,15 @@ protected:
 
 private:
     lighting_system* _parent;
-    bool             _isDirty {true};
+    rect_f           _bounds;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API lighting_system final : public drawable {
+    friend class light_source;
+    friend class shadow_caster;
+
 public:
     ////////////////////////////////////////////////////////////
 
@@ -100,16 +103,15 @@ public:
     template <typename T = light_source>
     auto create_light_source(auto&&... args) -> std::shared_ptr<T>;
 
-    void remove_light_source(light_source const& emitter);
+    void remove_light_source(light_source const& light);
     void clear_light_sources();
 
     template <typename T = shadow_caster>
     auto create_shadow_caster(auto&&... args) -> std::shared_ptr<T>;
 
-    void remove_shadow_caster(shadow_caster const& caster);
+    void remove_shadow_caster(shadow_caster const& shadow);
     void clear_shadow_casters();
 
-    void request_redraw();
     void set_blend_funcs(blend_funcs funcs);
 
 protected:
@@ -119,16 +121,29 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    struct caster_points {
-        polyline_span  Points {};
-        shadow_caster* Caster {nullptr};
+    void notify_light_changed(light_source* light);
+    void notify_shadow_changed(shadow_caster* shadow);
+
+    struct quadtree_node {
+        rect_f               Bounds;
+        shadow_caster const* Caster {nullptr};
+
+        auto operator==(quadtree_node const& other) const -> bool
+        {
+            return Caster == other.Caster;
+        }
+    };
+
+    struct shadow_caster_points {
+        polyline_span        Points {};
+        shadow_caster const* Caster {nullptr};
     };
 
     void rebuild_quadtree();
-    void process_light(light_source& light, bool force, u32& indOffset);
+    void process_light(light_source& light, u32& indOffset);
     void build_geometry(light_source& light, u32& indOffset);
-    auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<caster_points> const& casterPoints) const -> std::vector<f64>;
-    auto is_in_shadowcaster(light_source& light, std::vector<caster_points> const& casterPoints) const -> bool;
+    auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>;
+    auto is_in_shadowcaster(light_source& light, std::vector<shadow_caster_points> const& casterPoints) const -> bool;
 
     auto is_point_in_polygon(point_f p, polyline_span points) const -> bool;
 
@@ -136,7 +151,7 @@ private:
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};
 
     bool _isDirty {false};
-    bool _boundsDirty {false};
+    bool _quadTreeDirty {false};
     bool _updateGeometry {false};
 
     polygon_renderer    _renderer {buffer_usage_hint::DynamicDraw};
@@ -148,8 +163,8 @@ private:
     std::mutex _mutex {};
     bool       _multiThreaded;
 
-    auto static get_rect(caster_points caster) -> rect_f;
-    std::unique_ptr<quadtree<caster_points, &get_rect>> _quadTree;
+    auto static get_rect(quadtree_node const& node) -> rect_f;
+    std::unique_ptr<quadtree<quadtree_node, &get_rect>> _quadTree;
 };
 
 }

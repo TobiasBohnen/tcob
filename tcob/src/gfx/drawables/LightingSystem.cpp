@@ -22,8 +22,8 @@ lighting_system::lighting_system(bool multiThreaded)
     , _multiThreaded {multiThreaded}
 {
     Bounds.Changed.connect([&](auto const&) {
-        _boundsDirty = true;
-        request_redraw();
+        rebuild_quadtree();
+        _isDirty = true;
     });
 
     blend_funcs funcs;
@@ -33,52 +33,70 @@ lighting_system::lighting_system(bool multiThreaded)
     _renderer.set_material(_material);
 }
 
-void lighting_system::remove_light_source(light_source const& emitter)
+void lighting_system::remove_light_source(light_source const& light)
 {
-    _lightSources.erase(std::find_if(_lightSources.begin(), _lightSources.end(), [&emitter](auto const& val) {
-        if (val.get() == &emitter) {
+    _lightSources.erase(std::find_if(_lightSources.begin(), _lightSources.end(), [&light](auto const& val) {
+        if (val.get() == &light) {
             val.get()->_parent = nullptr;
             return true;
         }
 
         return false;
     }));
-    request_redraw();
+    _isDirty = true;
 }
 
 void lighting_system::clear_light_sources()
 {
     for (auto& ls : _lightSources) { ls->_parent = nullptr; }
     _lightSources.clear();
-    request_redraw();
+    _isDirty = true;
 }
 
-void lighting_system::remove_shadow_caster(shadow_caster const& caster)
+void lighting_system::notify_light_changed(light_source* /* light */)
 {
-    _shadowCasters.erase(std::find_if(_shadowCasters.begin(), _shadowCasters.end(), [&caster](auto const& val) {
-        if (val.get() == &caster) {
+    _isDirty = true;
+}
+
+void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
+{
+    if (_quadTree) {
+        _quadTree->remove({.Bounds = shadow._bounds, .Caster = &shadow});
+        _quadTreeDirty = true;
+    }
+
+    _shadowCasters.erase(std::find_if(_shadowCasters.begin(), _shadowCasters.end(), [&shadow](auto const& val) {
+        if (val.get() == &shadow) {
             val.get()->_parent = nullptr;
             return true;
         }
 
         return false;
     }));
-    request_redraw();
-    // TODO: update quadtree
+
+    _isDirty = true;
 }
 
 void lighting_system::clear_shadow_casters()
 {
     for (auto& sc : _shadowCasters) { sc->_parent = nullptr; }
     _shadowCasters.clear();
-    request_redraw();
+    _isDirty = true;
 
-    if (_quadTree) { _quadTree->clear(); }
+    if (_quadTree) {
+        _quadTree->clear();
+        _quadTreeDirty = true;
+    }
 }
 
-void lighting_system::request_redraw()
+void lighting_system::notify_shadow_changed(shadow_caster* shadow)
 {
-    _isDirty = true;
+    if (_quadTree) {
+        _quadTreeDirty = true;
+        if (shadow->_bounds != rect_f::Zero) { _quadTree->remove({.Bounds = shadow->_bounds, .Caster = shadow}); }
+        shadow->_bounds = polygons::get_info(shadow->Polygon()).BoundingBox;
+        _quadTree->add({.Bounds = shadow->_bounds, .Caster = shadow});
+    }
 }
 
 void lighting_system::set_blend_funcs(blend_funcs funcs)
@@ -97,29 +115,21 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     _inds.clear();
 
     // collect collision points
-    bool shadowCasterDirty {false};
-    for (auto const& sc : _shadowCasters) {
-        shadowCasterDirty = shadowCasterDirty || sc->_isDirty;
-        sc->_isDirty      = false;
-    }
-
-    if (shadowCasterDirty || _boundsDirty) {
-        rebuild_quadtree();
-    }
-
     u32 indOffset {0};
     for (auto const& ls : _lightSources) {
-        process_light(*ls, shadowCasterDirty, indOffset);
+        process_light(*ls, indOffset);
     }
+    _quadTreeDirty = false;
 }
 
 constexpr f32 minAngle {0.05f}; // 0.0005f
 
-void lighting_system::process_light(light_source& light, bool force, u32& indOffset)
+void lighting_system::process_light(light_source& light, u32& indOffset)
 {
     auto& tm {locate_service<task_manager>()};
 
-    if (force || light._isDirty) {
+    // ray cast
+    if (_quadTreeDirty || light._isDirty) {
         light._isDirty = false;
 
         bool const   limitRange {light.Range()};
@@ -127,14 +137,18 @@ void lighting_system::process_light(light_source& light, bool force, u32& indOff
         auto const   lightPosition {light.Position()};
         rect_f const lightBounds {limitRange ? rect_f {point_f::Zero, {lightRange * 2, lightRange * 2}}.as_centered_at(lightPosition) : Bounds()};
 
-        std::vector<caster_points> casterPoints {_quadTree->query(lightBounds)};
+        auto                              casters {_quadTree->query(lightBounds)};
+        std::vector<shadow_caster_points> casterPoints {};
+        casterPoints.reserve(casters.size());
+        for (auto const& caster : casters) {
+            casterPoints.push_back({.Points = caster.Caster->Polygon(), .Caster = caster.Caster});
+        }
         casterPoints.emplace_back(std::array<point_f, 4> {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}});
 
         bool const lightInsideShadowCaster {is_in_shadowcaster(light, casterPoints)};
 
         std::vector<f64> const angles {collect_angles(light, lightInsideShadowCaster, casterPoints)};
 
-        // ray cast
         std::vector<std::pair<f64, light_collision>> collisionResult;
         collisionResult.reserve(angles.size());
         i32 const angleCount {static_cast<i32>(angles.size())};
@@ -241,7 +255,7 @@ void lighting_system::build_geometry(light_source& light, u32& indOffset)
     indOffset += n + 1;
 }
 
-auto lighting_system::is_in_shadowcaster(light_source& light, std::vector<caster_points> const& casterPoints) const -> bool
+auto lighting_system::is_in_shadowcaster(light_source& light, std::vector<shadow_caster_points> const& casterPoints) const -> bool
 {
     bool retValue {false};
     for (usize i {0}; i < casterPoints.size() - 1; ++i) {
@@ -252,7 +266,7 @@ auto lighting_system::is_in_shadowcaster(light_source& light, std::vector<caster
     return retValue;
 }
 
-auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<caster_points> const& casterPoints) const -> std::vector<f64>
+auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>
 {
     auto const lightPosition {light.Position()};
     bool const limitAngle {light.is_angle_limited()};
@@ -295,10 +309,9 @@ auto lighting_system::collect_angles(light_source& light, bool lightInsideShadow
 
 void lighting_system::rebuild_quadtree()
 {
-    _boundsDirty = false;
-    _quadTree    = std::make_unique<quadtree<caster_points, &get_rect>>(Bounds());
+    _quadTree = std::make_unique<quadtree<quadtree_node, &get_rect>>(Bounds());
     for (auto& sc : _shadowCasters) {
-        _quadTree->add(caster_points {.Points = sc->Polygon(), .Caster = sc.get()});
+        _quadTree->add(quadtree_node {.Bounds = polygons::get_info(sc->Polygon()).BoundingBox, .Caster = sc.get()});
     }
 }
 
@@ -327,9 +340,9 @@ auto lighting_system::is_point_in_polygon(point_f p, polyline_span points) const
     return inside;
 }
 
-auto lighting_system::get_rect(caster_points caster) -> rect_f
+auto lighting_system::get_rect(quadtree_node const& node) -> rect_f
 {
-    return polygons::get_info(caster.Points).BoundingBox;
+    return node.Bounds;
 }
 
 auto lighting_system::can_draw() const -> bool
@@ -381,7 +394,7 @@ light_source::light_source(lighting_system* parent)
 void light_source::request_redraw()
 {
     if (_parent) {
-        _parent->request_redraw();
+        _parent->notify_light_changed(this);
     }
     _isDirty = true;
 }
@@ -395,9 +408,8 @@ shadow_caster::shadow_caster(lighting_system* parent)
 void shadow_caster::request_redraw()
 {
     if (_parent) {
-        _parent->request_redraw();
+        _parent->notify_shadow_changed(this);
     }
-    _isDirty = true;
 }
 
 } // namespace gfx
