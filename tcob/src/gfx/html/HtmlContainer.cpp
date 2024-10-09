@@ -97,7 +97,7 @@ auto container::create_font(char const* faceName, i32 size, i32 weight, litehtml
     fm->height      = fm->ascent + fm->descent;
     fm->x_height    = font->render_text("x", false, true)[0].Size.Height;
     fm->draw_spaces = true;
-    _fonts.push_back(font.get_obj());
+    _fonts.push_back(font.get_ptr());
     usize const retValue {_fonts.size() - 1};
     _fontDecorations[retValue] = decoration;
     return retValue + 1;
@@ -139,7 +139,7 @@ void container::load_image(char const* src, char const* baseurl, bool redraw_on_
 
     if (!_images.contains(src)) {
         if (auto tex {_config.AssetGroup->get<texture>(src)}; tex.is_ready()) {
-            _images[src] = tex.get_obj();
+            _images[src] = tex.get_ptr();
 
             if (redraw_on_ready) {
                 _document.force_redraw();

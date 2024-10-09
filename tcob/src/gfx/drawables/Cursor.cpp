@@ -21,14 +21,14 @@ cursor::cursor()
         }
 
         _currentMode = _modes[name];
+
         auto const  tex {Material->Texture};
         auto const& region {tex->get_region(name)};
-        _vertex.TexCoords = {region.UVRect.left(), region.UVRect.top(), static_cast<f32>(region.Level)};
-
+        _vertex.TexCoords   = {region.UVRect.left(), region.UVRect.top(), static_cast<f32>(region.Level)};
         _size               = tex->get_size().Width;
         Material->PointSize = static_cast<f32>(_size);
 
-        _renderer.set_material(Material());
+        _renderer.set_material(Material().get_ptr());
     });
 
     Material.Changed.connect([&](auto const&) {

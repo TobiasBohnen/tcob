@@ -484,7 +484,7 @@ void cfg_font_loader::declare()
 void cfg_font_loader::prepare()
 {
     for (auto& def : _cache) {
-        auto* ttf {dynamic_cast<font*>(def->assetPtr.get_obj())};
+        auto* ttf {dynamic_cast<font*>(def->assetPtr.get_ptr())};
         if (ttf) {
             if (ttf->load(get_group().get_mount_point() + def->source, def->size) == load_status::Ok) {
                 set_asset_status(def->assetPtr, status::Loaded);
@@ -918,7 +918,7 @@ void cfg_texture_loader::prepare()
     }
 
     for (auto const& def : _cacheAni) {
-        auto* ani {dynamic_cast<animated_texture*>(def->assetPtr.get_obj())};
+        auto* ani {dynamic_cast<animated_texture*>(def->assetPtr.get_ptr())};
         if (ani && ani->load(def->textureFile) == load_status::Ok) {
             ani->Filtering = def->filtering;
             ani->Wrapping  = def->wrapping;

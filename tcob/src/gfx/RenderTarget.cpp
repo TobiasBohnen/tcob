@@ -52,7 +52,7 @@ void render_target::finalize_render() const
     _impl->finalize_render();
 }
 
-void render_target::bind_material(material* mat) const
+void render_target::bind_material(material const* mat) const
 {
     _impl->bind_material(mat);
 }

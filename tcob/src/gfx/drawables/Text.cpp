@@ -15,7 +15,7 @@ text::text(assets::asset_ptr<font> font)
     : _font {std::move(font)}
 {
     _material->Texture = _font->get_texture();
-    _renderer.set_material(_material);
+    _renderer.set_material(_material.get_ptr());
     Shader.Changed.connect([&](auto const& value) { _material->Shader = value; });
     Text.Changed.connect([&](auto const&) { _needsReshape = true; });
     Style.Changed.connect([&](auto const&) { _needsReshape = true; });

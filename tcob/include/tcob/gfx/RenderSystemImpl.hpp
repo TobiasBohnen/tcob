@@ -48,7 +48,7 @@ public:
 
     void virtual prepare_render(render_properties const& props) = 0;
     void virtual finalize_render() const                        = 0;
-    void virtual bind_material(material* mat) const             = 0;
+    void virtual bind_material(material const* mat) const       = 0;
     void virtual unbind_material() const                        = 0;
 
     void virtual enable_scissor(rect_i const& rect, i32 height) const = 0;

@@ -52,7 +52,7 @@ void button::on_paint(widget_painter& painter)
             rect = {{rect.get_center().X - (width / 2), rect.Y}, {width, rect.Height}};
             auto& canvas {painter.get_canvas()};
             canvas.set_fill_style(style->Text.Color);
-            canvas.draw_image(Icon->Texture.get_obj(), Icon->Region, rect);
+            canvas.draw_image(Icon->Texture.get_ptr(), Icon->Region, rect);
         }
     }
 }

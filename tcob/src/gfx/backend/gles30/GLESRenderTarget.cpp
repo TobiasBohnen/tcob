@@ -120,11 +120,9 @@ auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
     return retValue;
 }
 
-void gl_render_target::bind_material(material* mat) const
+void gl_render_target::bind_material(material const* mat) const
 {
-    if (!mat) {
-        return;
-    }
+    if (!mat) { return; }
 
     if (mat->Texture.is_ready()) {
         GLCHECK(glActiveTexture(GL_TEXTURE0));

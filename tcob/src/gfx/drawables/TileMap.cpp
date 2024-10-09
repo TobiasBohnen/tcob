@@ -15,7 +15,7 @@ namespace detail {
         : _tileSet {std::move(set)}
         , _renderer {usage}
     {
-        Material.Changed.connect([&](auto const& value) { _renderer.set_material(value); });
+        Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.get_ptr()); });
         Position.Changed.connect([&](auto const&) { _isDirty = true; });
     }
 

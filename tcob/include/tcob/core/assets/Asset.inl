@@ -148,13 +148,13 @@ inline auto asset_ptr<T>::operator=(asset_ptr<U> const& other) noexcept -> asset
 template <typename T>
 inline auto asset_ptr<T>::operator->() const -> type*
 {
-    return get_obj();
+    return get_ptr();
 }
 
 template <typename T>
 inline auto asset_ptr<T>::operator*() const -> type&
 {
-    return *get_obj();
+    return *get_ptr();
 }
 
 template <typename T>
@@ -164,7 +164,7 @@ inline auto asset_ptr<T>::get() const -> asset<type>*
 }
 
 template <typename T>
-inline auto asset_ptr<T>::get_obj() const -> type*
+inline auto asset_ptr<T>::get_ptr() const -> type*
 {
     return _asset->get();
 }
@@ -212,7 +212,7 @@ inline auto operator==(asset_ptr<T> const& left, asset_ptr<T> const& right) -> b
         return true;
     }
 
-    return left.get_obj() == right.get_obj();
+    return left.get_ptr() == right.get_ptr();
 }
 
 ////////////////////////////////////////////////////////////
@@ -244,7 +244,7 @@ inline manual_asset_ptr<T>::operator asset_ptr<U>() const
 }
 
 template <typename T>
-inline auto manual_asset_ptr<T>::get_obj() const -> type*
+inline auto manual_asset_ptr<T>::get_ptr() const -> type*
 {
     return _object.get();
 }

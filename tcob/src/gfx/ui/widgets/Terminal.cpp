@@ -257,7 +257,7 @@ void terminal::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         u32 const   fontSize {style->Text.calc_font_size(rect)};
-        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).get_obj()};
+        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).get_ptr()};
         f32 const   fontHeight {font->get_info().LineHeight};
         f32 const   fontWidth {get_font_width(font)};
 
@@ -421,7 +421,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
         rect_f const rect {get_global_content_bounds()};
         if (rect.contains(ev.Position)) {
             u32 const   fontSize {style->Text.calc_font_size(rect)};
-            auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).get_obj()};
+            auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).get_ptr()};
             f32 const   fontWidth {get_font_width(font)};
             f32 const   fontHeight {font->get_info().LineHeight};
 

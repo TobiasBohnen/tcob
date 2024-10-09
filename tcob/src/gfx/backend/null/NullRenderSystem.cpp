@@ -91,7 +91,7 @@ auto null_render_target::copy_to_image(rect_i const&) const -> image
     return {};
 }
 
-void null_render_target::bind_material(material*) const
+void null_render_target::bind_material(material const*) const
 {
 }
 

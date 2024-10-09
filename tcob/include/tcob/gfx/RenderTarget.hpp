@@ -52,7 +52,7 @@ public:
     // Renderer
     void virtual prepare_render(bool debug = false);
     void virtual finalize_render() const;
-    void bind_material(material* mat) const;
+    void bind_material(material const* mat) const;
     void unbind_material() const;
 
     template <std::derived_from<render_backend::render_target_base> T>

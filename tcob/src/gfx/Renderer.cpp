@@ -5,8 +5,6 @@
 
 #include "tcob/gfx/Renderer.hpp"
 
-#include <utility>
-
 #include "tcob/gfx/Camera.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -38,9 +36,9 @@ point_renderer::point_renderer(buffer_usage_hint usage)
 {
 }
 
-void point_renderer::set_material(assets::asset_ptr<material> material)
+void point_renderer::set_material(material const* material)
 {
-    _material = std::move(material);
+    _material = material;
 }
 
 void point_renderer::set_geometry(vertex const& v)
@@ -78,7 +76,7 @@ void point_renderer::on_render_to_target(render_target& target)
         return;
     }
 
-    target.bind_material(_material.get_obj());
+    target.bind_material(_material);
     _vertexArray->draw_arrays(primitive_type::Points, 0, _numVerts);
     target.unbind_material();
 }
@@ -90,9 +88,9 @@ quad_renderer::quad_renderer(buffer_usage_hint usage)
 {
 }
 
-void quad_renderer::set_material(assets::asset_ptr<material> material)
+void quad_renderer::set_material(material const* material)
 {
-    _material = std::move(material);
+    _material = material;
 }
 
 void quad_renderer::set_geometry(quad const& q)
@@ -146,7 +144,7 @@ void quad_renderer::on_render_to_target(render_target& target)
         return;
     }
 
-    target.bind_material(_material.get_obj());
+    target.bind_material(_material);
     _vertexArray->draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
     target.unbind_material();
 }
@@ -171,12 +169,12 @@ void batch_quad_renderer::prepare(usize quadCount)
     _currentBatch = {};
 }
 
-void batch_quad_renderer::add_geometry(quad const& q, assets::asset_ptr<material> const& mat)
+void batch_quad_renderer::add_geometry(quad const& q, material const* mat)
 {
     add_geometry(std::span {&q, 1}, mat);
 }
 
-void batch_quad_renderer::add_geometry(std::span<quad const> quads, assets::asset_ptr<material> const& mat)
+void batch_quad_renderer::add_geometry(std::span<quad const> quads, material const* mat)
 {
     // TODO: add VertexArray size check
 
@@ -225,7 +223,7 @@ void batch_quad_renderer::on_render_to_target(render_target& target)
             continue;
         }
 
-        target.bind_material(batch.MaterialPtr.get_obj());
+        target.bind_material(batch.MaterialPtr);
         _vertexArray->draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
     }
 
@@ -239,9 +237,9 @@ polygon_renderer::polygon_renderer(buffer_usage_hint usage)
 {
 }
 
-void polygon_renderer::set_material(assets::asset_ptr<material> material)
+void polygon_renderer::set_material(material const* material)
 {
-    _material = std::move(material);
+    _material = material;
 }
 
 void polygon_renderer::set_geometry(geometry_data const& gd)
@@ -278,7 +276,7 @@ void polygon_renderer::on_render_to_target(render_target& target)
         return;
     }
 
-    target.bind_material(_material.get_obj());
+    target.bind_material(_material);
     _vertexArray->draw_elements(_type, _numIndices, 0);
     target.unbind_material();
 }
@@ -290,7 +288,7 @@ batch_polygon_renderer::batch_polygon_renderer()
 {
 }
 
-void batch_polygon_renderer::add_geometry(geometry_data const& gd, assets::asset_ptr<material> const& mat)
+void batch_polygon_renderer::add_geometry(geometry_data const& gd, material const* mat)
 {
     // check if we have to break the batch
     if (_currentBatch.NumInds > 0 && (_currentBatch.Type != gd.Type || *_currentBatch.MaterialPtr != *mat)) {
@@ -350,7 +348,7 @@ void batch_polygon_renderer::on_render_to_target(render_target& target)
             continue;
         }
 
-        target.bind_material(batch.MaterialPtr.get_obj());
+        target.bind_material(batch.MaterialPtr);
         _vertexArray->draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
     }
 
@@ -398,7 +396,7 @@ void canvas_renderer::prepare_render(render_target& target, bool debug)
 
 void canvas_renderer::on_render_to_target(render_target& target)
 {
-    target.bind_material(_material.get_obj());
+    target.bind_material(_material.get_ptr());
     _vertexArray->draw_elements(primitive_type::Triangles, 6, 0);
     target.unbind_material();
 }

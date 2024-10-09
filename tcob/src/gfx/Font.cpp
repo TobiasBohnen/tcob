@@ -563,7 +563,7 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
 
     // load font
     auto const& asset {_fontAssets[fontStyle][size]};
-    if (asset.get_obj()->load(_fontData[fontStyle], size) == load_status::Ok) {
+    if (asset.get_ptr()->load(_fontData[fontStyle], size) == load_status::Ok) {
         return asset;
     }
 

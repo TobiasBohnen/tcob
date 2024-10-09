@@ -37,7 +37,7 @@ class TCOB_API point_renderer final : public renderer {
 public:
     explicit point_renderer(buffer_usage_hint usage);
 
-    void set_material(assets::asset_ptr<material> material);
+    void set_material(material const* material);
     void set_geometry(vertex const& v);
     void set_geometry(std::span<vertex const> vertices);
     void modify_geometry(std::span<vertex const> vertices, usize offset) const;
@@ -47,8 +47,8 @@ private:
     void prepare(usize vertCount);
     void on_render_to_target(render_target& target) override;
 
-    assets::asset_ptr<material> _material {nullptr};
-    usize                       _numVerts {0};
+    material const* _material {nullptr};
+    usize           _numVerts {0};
 
     std::unique_ptr<vertex_array> _vertexArray;
 };
@@ -59,7 +59,7 @@ class TCOB_API quad_renderer final : public renderer {
 public:
     explicit quad_renderer(buffer_usage_hint usage);
 
-    void set_material(assets::asset_ptr<material> material);
+    void set_material(material const* material);
     void set_geometry(quad const& q);
     void set_geometry(std::span<quad const> quads);
     void modify_geometry(std::span<quad const> quads, usize offset) const;
@@ -69,8 +69,8 @@ private:
     void prepare(usize quadCount);
     void on_render_to_target(render_target& target) override;
 
-    assets::asset_ptr<material> _material {nullptr};
-    usize                       _numQuads {0};
+    material const* _material {nullptr};
+    usize           _numQuads {0};
 
     std::unique_ptr<vertex_array> _vertexArray;
 };
@@ -82,8 +82,8 @@ public:
     batch_quad_renderer();
 
     void prepare(usize quadCount);
-    void add_geometry(quad const& q, assets::asset_ptr<material> const& mat);
-    void add_geometry(std::span<quad const> quads, assets::asset_ptr<material> const& mat);
+    void add_geometry(quad const& q, material const* mat);
+    void add_geometry(std::span<quad const> quads, material const* mat);
 
 private:
     void on_render_to_target(render_target& target) override;
@@ -94,11 +94,11 @@ private:
     std::unique_ptr<vertex_array> _vertexArray;
 
     struct batch {
-        assets::asset_ptr<material> MaterialPtr {nullptr};
-        u32                         NumQuads {0};
-        u32                         NumInds {0};
-        u32                         OffsetQuads {0};
-        u32                         OffsetInds {0};
+        material const* MaterialPtr {nullptr};
+        u32             NumQuads {0};
+        u32             NumInds {0};
+        u32             OffsetQuads {0};
+        u32             OffsetInds {0};
     };
 
     batch              _currentBatch;
@@ -111,7 +111,7 @@ class TCOB_API polygon_renderer final : public renderer {
 public:
     explicit polygon_renderer(buffer_usage_hint usage);
 
-    void set_material(assets::asset_ptr<material> material);
+    void set_material(material const* material);
     void set_geometry(geometry_data const& gd);
     void modify_geometry(geometry_data const& gd, usize offset);
     void reset_geometry();
@@ -120,9 +120,9 @@ private:
     void prepare(usize vcount, usize icount);
     void on_render_to_target(render_target& target) override;
 
-    assets::asset_ptr<material> _material {nullptr};
-    usize                       _numIndices {0};
-    usize                       _numVerts {0};
+    material const* _material {nullptr};
+    usize           _numIndices {0};
+    usize           _numVerts {0};
 
     primitive_type                _type {};
     std::unique_ptr<vertex_array> _vertexArray;
@@ -134,7 +134,7 @@ class TCOB_API batch_polygon_renderer final : public renderer {
 public:
     batch_polygon_renderer();
 
-    void add_geometry(geometry_data const& gd, assets::asset_ptr<material> const& mat);
+    void add_geometry(geometry_data const& gd, material const* mat);
     void reset_geometry();
 
 private:
@@ -146,12 +146,12 @@ private:
     std::unique_ptr<vertex_array> _vertexArray;
 
     struct batch {
-        assets::asset_ptr<material> MaterialPtr {nullptr};
-        primitive_type              Type {};
-        u32                         NumVerts {0};
-        u32                         NumInds {0};
-        u32                         OffsetVerts {0};
-        u32                         OffsetInds {0};
+        material const* MaterialPtr {nullptr};
+        primitive_type  Type {};
+        u32             NumVerts {0};
+        u32             NumInds {0};
+        u32             OffsetVerts {0};
+        u32             OffsetInds {0};
     };
 
     batch              _currentBatch;

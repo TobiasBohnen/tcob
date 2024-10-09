@@ -16,7 +16,7 @@ static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapes)
     for (auto& shape : shapes) {
         shape->update(milliseconds {0});
         if (shape->is_visible()) {
-            _renderer.add_geometry(shape->get_geometry(), shape->Material());
+            _renderer.add_geometry(shape->get_geometry(), shape->Material().get_ptr());
         }
     }
 }
@@ -126,7 +126,7 @@ void shape_batch::on_draw_to(render_target& target)
 
         for (auto& shape : _children) {
             if (shape->is_visible()) {
-                _renderer.add_geometry(shape->get_geometry(), shape->Material());
+                _renderer.add_geometry(shape->get_geometry(), shape->Material().get_ptr());
             }
         }
     }
