@@ -19,12 +19,16 @@ inline quadtree<T, GetRect>::quadtree(rect_f const& rect)
 template <typename T, auto GetRect>
 inline void quadtree<T, GetRect>::add(T const& value)
 {
+    if (!_bounds.contains(GetRect(value))) { return; }
+
     add(_root.get(), 0, _bounds, value);
 }
 
 template <typename T, auto GetRect>
 inline void quadtree<T, GetRect>::remove(T const& value)
 {
+    if (!_bounds.contains(GetRect(value))) { return; }
+
     remove(_root.get(), _bounds, value);
 }
 
@@ -37,6 +41,8 @@ inline void quadtree<T, GetRect>::clear()
 template <typename T, auto GetRect>
 inline auto quadtree<T, GetRect>::query(rect_f const& rect) const -> std::vector<T>
 {
+    if (!_bounds.intersects(rect)) { return {}; }
+
     std::vector<T> retValue {};
     query(_root.get(), _bounds, rect, retValue);
     return retValue;
@@ -176,7 +182,7 @@ inline void quadtree<T, GetRect>::remove_value(node* node, T const& value)
 {
     // Find the value in node->values
     auto it {std::find_if(std::begin(node->Values), std::end(node->Values),
-                          [this, &value](auto const& rhs) { return value = rhs; })};
+                          [&value](auto const& rhs) { return value == rhs; })};
     assert(it != std::end(node->Values) && "Trying to remove a value that is not present in the node");
     // Swap with the last element and pop back
     *it = std::move(node->Values.back());
@@ -192,13 +198,13 @@ inline auto quadtree<T, GetRect>::try_merge(node* node) -> bool
     auto nbValues {node->Values.size()};
     for (auto const& child : node->Children) {
         if (!is_leaf(child.get())) { return false; }
-        nbValues += child->values.size();
+        nbValues += child->Values.size();
     }
     if (nbValues <= Threshold) {
         node->Values.reserve(nbValues);
         // Merge the values of all the children
         for (auto const& child : node->Children) {
-            for (auto const& value : child->values) {
+            for (auto const& value : child->Values) {
                 node->Values.push_back(value);
             }
         }
@@ -214,7 +220,7 @@ template <typename T, auto GetRect>
 inline void quadtree<T, GetRect>::query(node* node, rect_f const& rect, rect_f const& queryRect, std::vector<T>& values) const
 {
     assert(node != nullptr);
-    if (!queryRect.intersects(rect)) { return; }
+    assert(queryRect.intersects(rect));
 
     for (auto const& value : node->Values) {
         if (queryRect.intersects(GetRect(value))) {
