@@ -13,6 +13,7 @@
     #include <unordered_map>
     #include <vector>
 
+    #include "tcob/core/Common.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Signal.hpp"
     #include "tcob/scripting/Wrapper.hpp"
@@ -124,12 +125,7 @@ public:
 
 private:
     template <typename... Args>
-    struct constructor;
-    template <typename... Args>
-    struct constructor<T(Args...)> { };
-
-    template <typename... Args>
-    auto process_constructor(constructor<T(Args...)>&&) -> std::function<owned_ptr<T>(Args...)>;
+    auto process_constructor(arg_list<T(Args...)>) -> std::function<owned_ptr<T>(Args...)>;
 
     template <typename R, typename... P>
     auto static impl_make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr;

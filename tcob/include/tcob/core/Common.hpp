@@ -102,6 +102,11 @@ struct overloaded : Ts... {
     using Ts::operator()...;
 };
 
+template <typename T, typename... Args>
+struct arg_list;
+template <typename T, typename... Args>
+struct arg_list<T(Args...)> { };
+
 namespace detail {
     ////////////////////////////////////////////////////////////
 
@@ -125,7 +130,6 @@ namespace detail {
 
     template <typename... Ts>
     using last_element_t = typename last_element<Ts...>::type;
-
 }
 
 ////////////////////////////////////////////////////////////

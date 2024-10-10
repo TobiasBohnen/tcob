@@ -117,9 +117,9 @@ inline void wrapper<T>::wrap_constructors(std::optional<table> targetTable)
     }
 
     if constexpr (sizeof...(Ts) > 1) {
-        _constructor = scripting::wrapper<wrapper<T>>::make_unique_overload(process_constructor(constructor<Ts> {})...);
+        _constructor = scripting::wrapper<wrapper<T>>::make_unique_overload(process_constructor(arg_list<Ts> {})...);
     } else {
-        _constructor = scripting::wrapper<wrapper<T>>::make_unique_closure(process_constructor(constructor<Ts> {})...);
+        _constructor = scripting::wrapper<wrapper<T>>::make_unique_closure(process_constructor(arg_list<Ts> {})...);
     }
 
     // create 'new' function
@@ -128,7 +128,7 @@ inline void wrapper<T>::wrap_constructors(std::optional<table> targetTable)
 
 template <typename T>
 template <typename... Args>
-inline auto wrapper<T>::process_constructor(constructor<T(Args...)>&&) -> std::function<owned_ptr<T>(Args...)>
+inline auto wrapper<T>::process_constructor(arg_list<T(Args...)>) -> std::function<owned_ptr<T>(Args...)>
 {
     return std::function<owned_ptr<T>(Args...)> {[](Args... args) {
         return owned_ptr<T> {new T(std::forward<Args>(args)...)};
