@@ -140,6 +140,7 @@ private:
     };
 
     void rebuild_quadtree();
+    void mark_lights_dirty();
     void process_light(light_source& light, u32& indOffset);
     void build_geometry(light_source& light, u32& indOffset);
     auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>;
@@ -151,7 +152,6 @@ private:
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};
 
     bool _isDirty {false};
-    bool _quadTreeDirty {false};
     bool _updateGeometry {false};
 
     polygon_renderer    _renderer {buffer_usage_hint::DynamicDraw};

@@ -22,9 +22,7 @@ inline auto lighting_system::create_shadow_caster(auto&&... args) -> std::shared
 {
     auto retValue {std::shared_ptr<T>(new T {this, args...})};
     _shadowCasters.push_back(retValue);
-    _isDirty       = true;
-    _quadTreeDirty = true;
-    if (!_quadTree) { _quadTree = std::make_unique<quadtree<quadtree_node, &get_rect>>(Bounds()); }
+    _isDirty = true;
     return retValue;
 }
 

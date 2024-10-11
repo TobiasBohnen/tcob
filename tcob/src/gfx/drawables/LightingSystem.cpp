@@ -62,7 +62,7 @@ void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
 {
     if (_quadTree) {
         _quadTree->remove({.Bounds = shadow._bounds, .Caster = &shadow});
-        _quadTreeDirty = true;
+        mark_lights_dirty();
     }
 
     _shadowCasters.erase(std::find_if(_shadowCasters.begin(), _shadowCasters.end(), [&shadow](auto const& val) {
@@ -85,18 +85,19 @@ void lighting_system::clear_shadow_casters()
 
     if (_quadTree) {
         _quadTree->clear();
-        _quadTreeDirty = true;
+        mark_lights_dirty();
     }
 }
 
 void lighting_system::notify_shadow_changed(shadow_caster* shadow)
 {
-    if (_quadTree) {
-        _quadTreeDirty = true;
-        if (shadow->_bounds != rect_f::Zero) { _quadTree->remove({.Bounds = shadow->_bounds, .Caster = shadow}); }
-        shadow->_bounds = polygons::get_info(shadow->Polygon()).BoundingBox;
-        _quadTree->add({.Bounds = shadow->_bounds, .Caster = shadow});
-    }
+    if (!_quadTree) { _quadTree = std::make_unique<quadtree<quadtree_node, &get_rect>>(Bounds()); }
+
+    mark_lights_dirty();
+    if (shadow->_bounds != rect_f::Zero) { _quadTree->remove({.Bounds = shadow->_bounds, .Caster = shadow}); }
+    if (shadow->Polygon->empty()) { return; }
+    shadow->_bounds = polygons::get_info(shadow->Polygon()).BoundingBox;
+    _quadTree->add({.Bounds = shadow->_bounds, .Caster = shadow});
 }
 
 void lighting_system::set_blend_funcs(blend_funcs funcs)
@@ -108,9 +109,6 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 {
     if (!_isDirty) { return; }
 
-    _updateGeometry = true;
-    _isDirty        = false;
-
     _verts.clear();
     _inds.clear();
 
@@ -119,7 +117,9 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     for (auto const& ls : _lightSources) {
         process_light(*ls, indOffset);
     }
-    _quadTreeDirty = false;
+
+    _updateGeometry = true;
+    _isDirty        = false;
 }
 
 constexpr f32 minAngle {0.05f}; // 0.0005f
@@ -129,13 +129,17 @@ void lighting_system::process_light(light_source& light, u32& indOffset)
     auto& tm {locate_service<task_manager>()};
 
     // ray cast
-    if (_quadTreeDirty || light._isDirty) {
+    if (light._isDirty) {
         light._isDirty = false;
 
-        bool const   limitRange {light.Range()};
-        f32 const    lightRange {light.get_range()};
-        auto const   lightPosition {light.Position()};
-        rect_f const lightBounds {limitRange ? rect_f {point_f::Zero, {lightRange * 2, lightRange * 2}}.as_centered_at(lightPosition) : Bounds()};
+        bool const limitRange {light.Range()};
+        f32 const  lightRange {light.get_range()};
+        auto const lightPosition {light.Position()};
+
+        rect_f const lightBounds {limitRange ? rect_f {point_f::Zero, {lightRange * 2, lightRange * 2}}
+                                                   .as_centered_at(lightPosition)
+                                                   .as_intersection_with(Bounds())
+                                             : Bounds()};
 
         auto                              casters {_quadTree->query(lightBounds)};
         std::vector<shadow_caster_points> casterPoints {};
@@ -143,7 +147,9 @@ void lighting_system::process_light(light_source& light, u32& indOffset)
         for (auto const& caster : casters) {
             casterPoints.push_back({.Points = caster.Caster->Polygon(), .Caster = caster.Caster});
         }
-        casterPoints.emplace_back(std::array<point_f, 4> {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}});
+
+        std::array<point_f, 4> const boundPoints {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}};
+        casterPoints.emplace_back(boundPoints, nullptr);
 
         bool const lightInsideShadowCaster {is_in_shadowcaster(light, casterPoints)};
 
@@ -309,9 +315,19 @@ auto lighting_system::collect_angles(light_source& light, bool lightInsideShadow
 
 void lighting_system::rebuild_quadtree()
 {
-    _quadTree = std::make_unique<quadtree<quadtree_node, &get_rect>>(Bounds());
-    for (auto& sc : _shadowCasters) {
-        _quadTree->add(quadtree_node {.Bounds = polygons::get_info(sc->Polygon()).BoundingBox, .Caster = sc.get()});
+    if (_quadTree) {
+        _quadTree->clear();
+        mark_lights_dirty();
+        for (auto& sc : _shadowCasters) {
+            _quadTree->add(quadtree_node {.Bounds = polygons::get_info(sc->Polygon()).BoundingBox, .Caster = sc.get()});
+        }
+    }
+}
+
+void lighting_system::mark_lights_dirty()
+{
+    for (auto& light : _lightSources) {
+        light->_isDirty = true;
     }
 }
 
