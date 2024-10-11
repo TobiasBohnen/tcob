@@ -307,9 +307,9 @@ auto state_view::get_table(i32 idx) const -> type
     return GetType(lua_gettable(_state, idx));
 }
 
-auto state_view::get_metatable(i32 objindex) const -> i32
+auto state_view::get_metatable(i32 objindex) const -> bool
 {
-    return lua_getmetatable(_state, objindex);
+    return lua_getmetatable(_state, objindex) == 1;
 }
 
 void state_view::get_metatable(string const& tableName) const

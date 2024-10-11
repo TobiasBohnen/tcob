@@ -128,7 +128,7 @@ auto table::get_raw_length() const -> u64
     return view.raw_len(-1);
 }
 
-auto table::get_metatable() const -> table
+auto table::create_or_get_metatable() const -> table
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -136,7 +136,12 @@ auto table::get_metatable() const -> table
     table retValue {};
 
     push_self();
-    if (view.get_metatable(-1) != 0) {
+    if (!view.get_metatable(-1)) {
+        view.new_table();
+        retValue.acquire(view, -1);
+        view.set_metatable(-2);
+    }
+    if (!view.get_metatable(-1)) {
         retValue.acquire(view, -1);
     }
 

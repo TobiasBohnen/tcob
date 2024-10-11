@@ -55,7 +55,7 @@ public:
     template <typename Key>
     auto operator[](Key key) const -> proxy<table const, Key>;
 
-    auto get_metatable() const -> table;
+    auto create_or_get_metatable() const -> table;
     void set_metatable(table const& mt) const;
 
     auto get_raw_length() const -> u64;
