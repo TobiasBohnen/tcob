@@ -5,14 +5,11 @@
 
 #include "tcob/core/random/Engine.hpp"
 
+#include <bit>
+
 #include "tcob/core/random/Random.hpp"
 
 namespace tcob::random {
-
-auto static constexpr rotl(u64 x, u32 k) -> u64
-{
-    return (x << k) | (x >> (64 - k));
-}
 
 ////////////////////////////////////////////////////////////
 
@@ -103,8 +100,8 @@ auto xoroshiro_128_plus::operator()(state_type& state) -> result_type
     u64 const result {s0 + s1};
 
     s1 ^= s0;
-    state[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-    state[1] = rotl(s1, 37);                   // c
+    state[0] = std::rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+    state[1] = std::rotl(s1, 37);                   // c
 
     return result;
 }
@@ -122,11 +119,11 @@ auto xoroshiro_128_plus_plus::operator()(state_type& state) -> result_type
 {
     u64 const s0 {state[0]};
     u64       s1 {state[1]};
-    u64 const result {rotl(s0 + s1, 17) + s0};
+    u64 const result {std::rotl(s0 + s1, 17) + s0};
 
     s1 ^= s0;
-    state[0] = rotl(s0, 49) ^ s1 ^ (s1 << 21); // a, b
-    state[1] = rotl(s1, 28);                   // c
+    state[0] = std::rotl(s0, 49) ^ s1 ^ (s1 << 21); // a, b
+    state[1] = std::rotl(s1, 28);                   // c
 
     return result;
 }
@@ -144,11 +141,11 @@ auto xoroshiro_128_star_star::operator()(state_type& state) -> result_type
 {
     u64 const s0 {state[0]};
     u64       s1 {state[1]};
-    u64 const result {rotl(s0 * 5, 7) * 9};
+    u64 const result {std::rotl(s0 * 5, 7) * 9};
 
     s1 ^= s0;
-    state[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-    state[1] = rotl(s1, 37);                   // c
+    state[0] = std::rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+    state[1] = std::rotl(s1, 37);                   // c
 
     return result;
 }
@@ -175,7 +172,7 @@ auto xoshiro_256_plus::operator()(state_type& state) -> result_type
 
     state[2] ^= t;
 
-    state[3] = rotl(state[3], 45);
+    state[3] = std::rotl(state[3], 45);
 
     return result;
 }
@@ -193,7 +190,7 @@ void xoshiro_256_plus::seed(state_type& state, seed_type seed) const
 
 auto xoshiro_256_plus_plus::operator()(state_type& state) -> result_type
 {
-    u64 const result {rotl(state[0] + state[3], 23) + state[0]};
+    u64 const result {std::rotl(state[0] + state[3], 23) + state[0]};
 
     u64 const t {state[1] << 17};
 
@@ -204,7 +201,7 @@ auto xoshiro_256_plus_plus::operator()(state_type& state) -> result_type
 
     state[2] ^= t;
 
-    state[3] = rotl(state[3], 45);
+    state[3] = std::rotl(state[3], 45);
 
     return result;
 }
@@ -222,7 +219,7 @@ void xoshiro_256_plus_plus::seed(state_type& state, seed_type seed) const
 
 auto xoshiro_256_star_star::operator()(state_type& state) -> result_type
 {
-    u64 const result {rotl(state[1] * 5, 7) * 9};
+    u64 const result {std::rotl(state[1] * 5, 7) * 9};
 
     u64 const t {state[1] << 17};
 
@@ -233,7 +230,7 @@ auto xoshiro_256_star_star::operator()(state_type& state) -> result_type
 
     state[2] ^= t;
 
-    state[3] = rotl(state[3], 45);
+    state[3] = std::rotl(state[3], 45);
 
     return result;
 }
