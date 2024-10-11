@@ -91,7 +91,7 @@ void lighting_system::clear_shadow_casters()
 
 void lighting_system::notify_shadow_changed(shadow_caster* shadow)
 {
-    if (!_quadTree) { _quadTree = std::make_unique<quadtree<quadtree_node, &get_rect>>(Bounds()); }
+    if (!_quadTree) { _quadTree = std::make_unique<quadtree_t>(Bounds()); }
 
     mark_lights_dirty();
     if (shadow->_bounds != rect_f::Zero) { _quadTree->remove({.Bounds = shadow->_bounds, .Caster = shadow}); }

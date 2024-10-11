@@ -164,7 +164,8 @@ private:
     bool       _multiThreaded;
 
     auto static get_rect(quadtree_node const& node) -> rect_f;
-    std::unique_ptr<quadtree<quadtree_node, &get_rect>> _quadTree;
+    using quadtree_t = quadtree<quadtree_node, &get_rect>;
+    std::unique_ptr<quadtree_t> _quadTree;
 };
 
 }
