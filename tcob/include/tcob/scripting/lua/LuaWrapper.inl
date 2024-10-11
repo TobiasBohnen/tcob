@@ -128,10 +128,10 @@ inline void wrapper<T>::wrap_constructors(std::optional<table> targetTable)
 
 template <typename T>
 template <typename... Args>
-inline auto wrapper<T>::process_constructor(arg_list<T(Args...)>) -> std::function<owned_ptr<T>(Args...)>
+inline auto wrapper<T>::process_constructor(arg_list<T(Args...)>) -> std::function<managed_ptr<T>(Args...)>
 {
-    return std::function<owned_ptr<T>(Args...)> {[](Args... args) {
-        return owned_ptr<T> {new T(std::forward<Args>(args)...)};
+    return std::function<managed_ptr<T>(Args...)> {[](Args... args) {
+        return managed_ptr<T> {new T(std::forward<Args>(args)...)};
     }};
 }
 
@@ -238,35 +238,35 @@ inline void wrapper<T>::create_metatable(string const& name, bool gc)
     // unm metamethod
     if constexpr (Negatable<T>) {
         push_metamethod("__unm",
-                        std::function {[](T* instance) { return owned_ptr<T> {new T(-*instance)}; }},
+                        std::function {[](T* instance) { return managed_ptr<T> {new T(-*instance)}; }},
                         tableIdx);
     }
 
     // add metamethod
     if constexpr (Addable<T>) {
         push_metamethod("__add",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 + *instance2)}; }},
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 + *instance2)}; }},
                         tableIdx);
     }
 
     // sub metamethod
     if constexpr (Subtractable<T>) {
         push_metamethod("__sub",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 - *instance2)}; }},
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 - *instance2)}; }},
                         tableIdx);
     }
 
     // mul metamethod
     if constexpr (Multipliable<T>) {
         push_metamethod("__mul",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 * *instance2)}; }},
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 * *instance2)}; }},
                         tableIdx);
     }
 
     // div metamethod
     if constexpr (Dividable<T>) {
         push_metamethod("__div",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 / *instance2)}; }},
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 / *instance2)}; }},
                         tableIdx);
     }
 

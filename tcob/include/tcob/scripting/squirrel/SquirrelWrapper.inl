@@ -209,31 +209,31 @@ inline void wrapper<T>::create_metatable(string const& name)
     // unm metamethod
     if constexpr (Negatable<T>) {
         push_metamethod("_unm",
-                        std::function {[](T* instance) { return owned_ptr<T> {new T(-*instance)}; }});
+                        std::function {[](T* instance) { return managed_ptr<T> {new T(-*instance)}; }});
     }
 
     // add metamethod
     if constexpr (Addable<T>) {
         push_metamethod("_add",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 + *instance2)}; }});
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 + *instance2)}; }});
     }
 
     // sub metamethod
     if constexpr (Subtractable<T>) {
         push_metamethod("_sub",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 - *instance2)}; }});
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 - *instance2)}; }});
     }
 
     // mul metamethod
     if constexpr (Multipliable<T>) {
         push_metamethod("_mul",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 * *instance2)}; }});
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 * *instance2)}; }});
     }
 
     // div metamethod
     if constexpr (Dividable<T>) {
         push_metamethod("_div",
-                        std::function {[](T* instance1, T* instance2) { return owned_ptr<T> {new T(*instance1 / *instance2)}; }});
+                        std::function {[](T* instance1, T* instance2) { return managed_ptr<T> {new T(*instance1 / *instance2)}; }});
     }
 }
 

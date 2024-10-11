@@ -898,8 +898,8 @@ struct converter<T> {
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct converter<scripting::owned_ptr<T>> {
-    void static To(vm_view view, scripting::owned_ptr<T> const& value)
+struct converter<scripting::managed_ptr<T>> {
+    void static To(vm_view view, scripting::managed_ptr<T> const& value)
     {
         converter<T*>::To(view, value.Pointer);
         if constexpr (std::is_destructible_v<T>) {

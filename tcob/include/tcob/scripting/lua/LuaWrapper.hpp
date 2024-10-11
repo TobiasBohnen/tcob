@@ -125,7 +125,7 @@ public:
 
 private:
     template <typename... Args>
-    auto process_constructor(arg_list<T(Args...)>) -> std::function<owned_ptr<T>(Args...)>;
+    auto process_constructor(arg_list<T(Args...)>) -> std::function<managed_ptr<T>(Args...)>;
 
     template <typename R, typename... P>
     auto static impl_make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr;

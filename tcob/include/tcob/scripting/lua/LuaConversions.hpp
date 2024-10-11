@@ -914,8 +914,8 @@ struct converter<T> {
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct converter<scripting::owned_ptr<T>> {
-    void static To(state_view view, scripting::owned_ptr<T> const& value)
+struct converter<scripting::managed_ptr<T>> {
+    void static To(state_view view, scripting::managed_ptr<T> const& value)
     {
         static string TypeName {typeid(T).name()};
 
