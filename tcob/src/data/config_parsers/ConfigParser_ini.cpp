@@ -205,8 +205,8 @@ auto ini_reader::read_value(entry& currentEntry, utf8_string_view line) -> bool
 
 auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
 {
-    object obj {_mainSection};
-    auto   keys {helper::split(line, _settings.Path)};
+    object     obj {_mainSection};
+    auto const keys {helper::split(line, _settings.Path)};
     if (keys.size() > 1) {
         for (usize i {0}; i < keys.size() - 1; ++i) {
             if (!obj.try_get(obj, keys[i])) { return false; }
@@ -366,14 +366,14 @@ auto ini_reader::read_settings() -> bool
 {
     //! kvp=: path=| ref=@ comment=;# section=<> object=-- array=++
     _iniEnd = 1;
-    auto line {get_trimmed_next_line()};
+    auto const line {get_trimmed_next_line()};
 
     return helper::split_for_each(line, ' ', [&](auto kvp) {
-        auto settings {helper::split_once(helper::trim(kvp), '=')};
+        auto const settings {helper::split_once(helper::trim(kvp), '=')};
         if (settings.second.empty()) { return false; }
 
-        auto key {helper::trim(settings.first)};
-        auto value {helper::trim(settings.second)};
+        auto const key {helper::trim(settings.first)};
+        auto const value {helper::trim(settings.second)};
 
         if (key == "kvp") {
             _settings.KeyValueDelim = value[0];

@@ -29,8 +29,8 @@ auto json_reader::ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string
     auto const separatorPos {helper::find_unquoted(line, ':')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR: invalid pair
 
-    auto keyStr {helper::trim(line.substr(0, separatorPos))};
-    auto valueStr {helper::trim(line.substr(separatorPos + 1))};
+    auto const keyStr {helper::trim(line.substr(0, separatorPos))};
+    auto const valueStr {helper::trim(line.substr(separatorPos + 1))};
 
     if (keyStr.size() <= 1 || valueStr.empty()) { return false; }                 //  ERROR: empty key or value
     if (keyStr[0] != '\"' || keyStr[keyStr.size() - 1] != '\"') { return false; } //  ERROR: invalid key
@@ -58,13 +58,11 @@ auto json_reader::ReadValue(entry& currentEntry, utf8_string_view line) -> bool
 auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
 {
     if (line[0] == '[') {
-        if (line[line.size() - 1] != ']') {
-            return false;
-        }
+        if (line[line.size() - 1] != ']') { return false; }
 
         array arr {};
 
-        auto splitLine {helper::trim(line.substr(1, line.size() - 2))};
+        auto const splitLine {helper::trim(line.substr(1, line.size() - 2))};
         if (splitLine.empty()) {
             currentEntry.set_value(arr);
             return true;
@@ -97,13 +95,11 @@ auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
 auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
 {
     if (line[0] == '{') {
-        if (line[line.size() - 1] != '}') {
-            return false;
-        }
+        if (line[line.size() - 1] != '}') { return false; }
 
         object obj {};
 
-        auto splitLine {helper::trim(line.substr(1, line.size() - 2))};
+        auto const splitLine {helper::trim(line.substr(1, line.size() - 2))};
         if (splitLine.empty()) {
             currentEntry.set_value(obj);
             return true;
@@ -125,12 +121,12 @@ auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
 
 auto json_reader::ReadNumber(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (auto intVal {helper::to_number<i64>(line)}) {
+    if (auto const intVal {helper::to_number<i64>(line)}) {
         currentEntry.set_value(*intVal);
         return true;
     }
 
-    if (auto floatVal {helper::to_number<f64>(line)}) {
+    if (auto const floatVal {helper::to_number<f64>(line)}) {
         currentEntry.set_value(*floatVal);
         return true;
     }

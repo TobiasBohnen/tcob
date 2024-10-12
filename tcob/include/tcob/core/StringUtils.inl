@@ -45,12 +45,8 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
             case '[':
             case '{':
             case '<':
-                if (topBracket == 0) {
-                    topBracket = c;
-                }
-                if (c == topBracket) {
-                    ++bracketCount;
-                }
+                if (topBracket == 0) { topBracket = c; }
+                if (c == topBracket) { ++bracketCount; }
                 break;
             case ')':
             case ']':
@@ -59,9 +55,7 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
                 if (bracketCount > 0) {
                     if ((topBracket == '(' && c == ')') || (topBracket == '[' && c == ']') || (topBracket == '{' && c == '}') || (topBracket == '<' && c == '>')) {
                         --bracketCount;
-                        if (bracketCount == 0) {
-                            topBracket = 0;
-                        }
+                        if (bracketCount == 0) { topBracket = 0; }
                     }
                 }
                 break;

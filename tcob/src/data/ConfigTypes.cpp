@@ -20,6 +20,7 @@ namespace tcob::data::config {
 object::object() noexcept
     : object {std::make_shared<cfg_object_entries>()}
 {
+    reserve(10);
 }
 
 object::object(std::initializer_list<std::pair<utf8_string, cfg_value>> items)
