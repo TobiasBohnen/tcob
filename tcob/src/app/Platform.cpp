@@ -312,36 +312,36 @@ void platform::InitSignatures()
     using namespace io;
 
     // image
-    magic::add_signature({{{0, {'B', 'M'}}}, ".bmp", "image"});
-    magic::add_signature({{{0, {'B', 'S', 'I'}}}, ".bsi", "image"});
-    magic::add_signature({{{0, {'G', 'I', 'F', '8', '7', 'a'}}}, ".gif", "image"});
-    magic::add_signature({{{0, {'G', 'I', 'F', '8', '9', 'a'}}}, ".gif", "image"});
-    magic::add_signature({{{0, {0x0a, 0x05, 0x00}}}, ".pcx", "image"});
-    magic::add_signature({{{0, {0x0a, 0x05, 0x01}}}, ".pcx", "image"});
-    magic::add_signature({{{0, {0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a}}}, ".png", "image"});
-    magic::add_signature({{{0, {'P', '1'}}}, ".pnm", "image"});
-    magic::add_signature({{{0, {'P', '2'}}}, ".pnm", "image"});
-    magic::add_signature({{{0, {'P', '3'}}}, ".pnm", "image"});
-    magic::add_signature({{{0, {'q', 'o', 'i', 'f'}}}, ".qoi", "image"});
-    magic::add_signature({{{0, {'R', 'I', 'F', 'F'}}, {8, {'W', 'E', 'B', 'P'}}}, ".webp", "image"});
-    magic::add_signature({{{0, {'O', 'g', 'g', 'S'}}, {29, {'t', 'h', 'e', 'o', 'r', 'a'}}}, ".ogv", "image"});
-    magic::add_signature({{{-18, {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'}}}, ".tga", "image"});
+    magic::add_signature({".bmp", "image", {{0, {'B', 'M'}}}});
+    magic::add_signature({".bsi", "image", {{0, {'B', 'S', 'I'}}}});
+    magic::add_signature({".gif", "image", {{0, {'G', 'I', 'F', '8', '7', 'a'}}}});
+    magic::add_signature({".gif", "image", {{0, {'G', 'I', 'F', '8', '9', 'a'}}}});
+    magic::add_signature({".pcx", "image", {{0, {0x0a, 0x05, 0x00}}}});
+    magic::add_signature({".pcx", "image", {{0, {0x0a, 0x05, 0x01}}}});
+    magic::add_signature({".png", "image", {{0, {0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a}}}});
+    magic::add_signature({".pnm", "image", {{0, {'P', '1'}}}});
+    magic::add_signature({".pnm", "image", {{0, {'P', '2'}}}});
+    magic::add_signature({".pnm", "image", {{0, {'P', '3'}}}});
+    magic::add_signature({".qoi", "image", {{0, {'q', 'o', 'i', 'f'}}}});
+    magic::add_signature({".webp", "image", {{0, {'R', 'I', 'F', 'F'}}, {8, {'W', 'E', 'B', 'P'}}}});
+    magic::add_signature({".ogv", "image", {{0, {'O', 'g', 'g', 'S'}}, {29, {'t', 'h', 'e', 'o', 'r', 'a'}}}});
+    magic::add_signature({".tga", "image", {{-18, {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'}}}});
     // audio
-    magic::add_signature({{{0, {'B', 'S', 'A'}}}, ".bsa", "audio"});
-    magic::add_signature({{{0, {'f', 'L', 'a', 'C'}}}, ".flac", "audio"});
-    magic::add_signature({{{0, {0xff, 0xfb}}}, ".mp3", "audio"});
-    magic::add_signature({{{0, {0xff, 0xf3}}}, ".mp3", "audio"});
-    magic::add_signature({{{0, {0xff, 0xf2}}}, ".mp3", "audio"});
-    magic::add_signature({{{0, {'I', 'D', '3'}}}, ".mp3", "audio"});
-    magic::add_signature({{{0, {'R', 'I', 'F', 'F'}}, {8, {'W', 'A', 'V', 'E'}}}, ".wav", "audio"});
-    magic::add_signature({{{0, {'O', 'g', 'g', 'S'}}, {29, {'v', 'o', 'r', 'b', 'i', 's'}}}, ".ogg", "audio"});
-    magic::add_signature({{{0, {'O', 'g', 'g', 'S'}}, {28, {'O', 'p', 'u', 's', 'H', 'e', 'a', 'd'}}}, ".opus", "audio"});
-    magic::add_signature({{{0, {'M', 'T', 'h', 'd'}}}, ".mid", "audio"});
-    magic::add_signature({{{0, {'I', 'M', 'P', 'M'}}}, ".it", "audio"});
-    magic::add_signature({{{0, {0x45, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x20, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65}}}, ".xm", "audio"});
-    magic::add_signature({{{44, {'S', 'C', 'R', 'M'}}}, ".s3m", "audio"});
+    magic::add_signature({".bsa", "audio", {{0, {'B', 'S', 'A'}}}});
+    magic::add_signature({".flac", "audio", {{0, {'f', 'L', 'a', 'C'}}}});
+    magic::add_signature({".mp3", "audio", {{0, {0xff, 0xfb}}}});
+    magic::add_signature({".mp3", "audio", {{0, {0xff, 0xf3}}}});
+    magic::add_signature({".mp3", "audio", {{0, {0xff, 0xf2}}}});
+    magic::add_signature({".mp3", "audio", {{0, {'I', 'D', '3'}}}});
+    magic::add_signature({".wav", "audio", {{0, {'R', 'I', 'F', 'F'}}, {8, {'W', 'A', 'V', 'E'}}}});
+    magic::add_signature({".ogg", "audio", {{0, {'O', 'g', 'g', 'S'}}, {29, {'v', 'o', 'r', 'b', 'i', 's'}}}});
+    magic::add_signature({".opus", "audio", {{0, {'O', 'g', 'g', 'S'}}, {28, {'O', 'p', 'u', 's', 'H', 'e', 'a', 'd'}}}});
+    magic::add_signature({".mid", "audio", {{0, {'M', 'T', 'h', 'd'}}}});
+    magic::add_signature({".it", "audio", {{0, {'I', 'M', 'P', 'M'}}}});
+    magic::add_signature({".xm", "audio", {{0, {0x45, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x20, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65}}}});
+    magic::add_signature({".s3m", "audio", {{44, {'S', 'C', 'R', 'M'}}}});
     // config
-    magic::add_signature({{{0, {'B', 'S', 'B', 'D', 1}}}, ".bsbd", "config"});
+    magic::add_signature({".bsbd", "config", {{0, {'B', 'S', 'B', 'D', 1}}}});
 }
 
 void platform::InitConfigFormats()

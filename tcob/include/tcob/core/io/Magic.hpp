@@ -15,9 +15,10 @@ struct signature {
         std::vector<ubyte> Bytes;
     };
 
+    path   Extension;
+    string Group;
+
     std::vector<part> Parts;
-    path              Extension;
-    string            Group;
 };
 
 ////////////////////////////////////////////////////////////
