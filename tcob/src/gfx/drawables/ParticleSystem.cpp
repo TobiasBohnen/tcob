@@ -174,12 +174,13 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
         u8 const alpha {static_cast<u8>(255 - static_cast<u8>(255 * std::clamp(_randomGen(Template.Transparency.first, Template.Transparency.second), 0.0f, 1.0f)))};
 
         particle.Direction    = _randomGen(Template.Direction.first.Value, Template.Direction.second.Value);
+        particle.Acceleration = _randomGen(Template.Acceleration.first, Template.Acceleration.second);
         particle.Speed        = _randomGen(Template.Speed.first, Template.Speed.second);
         particle.Spin         = _randomGen(Template.Spin.first.Value, Template.Spin.second.Value);
-        particle.Acceleration = _randomGen(Template.Acceleration.first, Template.Acceleration.second);
+        particle.Rotation     = _randomGen(Template.Rotation.first, Template.Rotation.second);
         particle.Color        = color {Template.Color.R, Template.Color.G, Template.Color.B, static_cast<u8>((Template.Color.A + alpha) / 2)};
 
-        //  reset userdata
+        // reset userdata
         particle.UserData.reset();
 
         // set scale
@@ -195,8 +196,6 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
 
         // set bounds
         particle.Bounds = {{x + sysPos.X, y + sysPos.Y}, Template.Size};
-
-        particle.Visible = true;
     }
 }
 
@@ -209,31 +208,18 @@ auto particle::is_alive() const -> bool
 
 void particle::update(milliseconds delta)
 {
-    f64 const seconds {delta.count() / 1000};
+    f32 const seconds {static_cast<f32>(delta.count() / 1000)};
 
     // age
     _remainingLife -= delta;
 
     // move
     Speed += Acceleration * seconds;
-    f64 const      var {Speed * seconds};
-    degree_f const angle {Direction.as_normalized() - degree_f {90}};
-    point_f const  direction {static_cast<f32>(angle.cos()), static_cast<f32>(angle.sin())};
-    point_f const  offset {static_cast<f32>(direction.X * var), static_cast<f32>(direction.Y * var)};
-    Bounds = {Bounds.get_position() + offset, Bounds.get_size()};
+    point_f const offset {point_f::FromDirection(Direction) * (Speed * seconds)};
+    Bounds = Bounds.as_moved_to(Bounds.get_position() + offset);
 
     // spin
     Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
-
-    point_f const origin {Bounds.get_center()};
-    _transform.to_identity();
-
-    if (Scale != size_f::One) {
-        _transform.scale_at(Scale, origin);
-    }
-    if (Rotation != degree_f {0}) {
-        _transform.rotate_at(Rotation, origin);
-    }
 }
 
 void particle::set_lifetime(milliseconds life)
@@ -254,8 +240,13 @@ void particle::set_texture_region(texture_region const& texRegion)
 
 void particle::to_quad(quad* quad)
 {
-    geometry::set_position(*quad, Bounds, _transform);
-    geometry::set_color(*quad, Visible ? Color : colors::Transparent);
+    point_f const origin {Bounds.get_center()};
+    transform     xform {};
+    if (Scale != size_f::One) { xform.scale_at(Scale, origin); }
+    if (Rotation != degree_f {0}) { xform.rotate_at(Rotation, origin); }
+
+    geometry::set_position(*quad, Bounds, xform);
+    geometry::set_color(*quad, Color);
     geometry::set_texcoords(*quad, _region);
 }
 

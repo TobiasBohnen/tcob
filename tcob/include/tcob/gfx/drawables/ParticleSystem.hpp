@@ -29,17 +29,17 @@ class TCOB_API particle final {
 public:
     std::any UserData;
 
-    f64 Speed {0.};
-    f32 Acceleration {0.0f};
+    size_f Scale {size_f::One};
+    rect_f Bounds {rect_f::Zero};
 
-    degree_f Direction {0.0f};
     degree_f Spin {0.0f};
     degree_f Rotation {0};
 
-    color  Color {colors::White};
-    rect_f Bounds {rect_f::Zero};
-    size_f Scale {size_f::One};
-    bool   Visible {true};
+    f32      Acceleration {0.0f};
+    f32      Speed {0.0};
+    degree_f Direction {0.0f};
+
+    color Color {colors::White};
 
     auto get_lifetime_ratio() const -> f32;
     auto is_alive() const -> bool;
@@ -53,7 +53,6 @@ public:
 
 private:
     texture_region _region {};
-    transform      _transform {};
     milliseconds   _startingLife {0};
     milliseconds   _remainingLife {0};
 };
@@ -61,16 +60,21 @@ private:
 ////////////////////////////////////////////////////////////
 
 struct [[nodiscard]] particle_template {
-    std::pair<f32, f32>                   Acceleration;
-    std::pair<degree_f, degree_f>         Direction;
+    std::pair<f32, f32> Scale;
+    size_f              Size;
+
+    std::pair<degree_f, degree_f> Spin;
+    std::pair<f32, f32>           Rotation;
+
+    std::pair<f32, f32>           Acceleration;
+    std::pair<f32, f32>           Speed;
+    std::pair<degree_f, degree_f> Direction;
+
+    string              Texture;
+    color               Color;
+    std::pair<f32, f32> Transparency;
+
     std::pair<milliseconds, milliseconds> Lifetime;
-    std::pair<f32, f32>                   Scale;
-    size_f                                Size;
-    std::pair<f32, f32>                   Speed;
-    std::pair<degree_f, degree_f>         Spin;
-    string                                Texture;
-    color                                 Color;
-    std::pair<f32, f32>                   Transparency;
 
     auto operator==(particle_template const& other) const -> bool = default;
 };

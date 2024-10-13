@@ -109,6 +109,7 @@ void Serialize(particle_template const& v, auto&& s)
     s["size"]         = v.Size;
     s["speed"]        = v.Speed;
     s["spin"]         = v.Spin;
+    s["rotation"]     = v.Rotation;
     s["texture"]      = v.Texture;
     s["color"]        = v.Color;
     s["transparency"] = v.Transparency;
@@ -123,6 +124,7 @@ auto Deserialize(particle_template& v, auto&& s) -> bool
         && s.try_get(v.Size, "size")
         && s.try_get(v.Speed, "speed")
         && s.try_get(v.Spin, "spin")
+        && s.try_get(v.Rotation, "rotation")
         && s.try_get(v.Texture, "texture")
         && s.try_get(v.Color, "color")
         && s.try_get(v.Transparency, "transparency");
