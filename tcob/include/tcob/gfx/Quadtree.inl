@@ -66,7 +66,7 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::find_all_intersectio
 }
 
 template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::get_bounds() const -> rect_f
+inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::get_bounds() const -> rect_f const&
 {
     return _bounds;
 }
@@ -108,8 +108,6 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::add(usize dept
 template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
 inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::split(rect_f const& rect)
 {
-    assert(is_leaf() && "Only leaves can be split");
-
     // Create children
     for (auto& child : _children) {
         child = std::make_unique<node>();
@@ -161,6 +159,30 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::remove(rect_f 
 }
 
 template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::try_merge() -> bool
+{
+    auto nbValues {_values.size()};
+    for (auto const& child : _children) {
+        if (!child->is_leaf()) { return false; }
+        nbValues += child->_values.size();
+    }
+    if (nbValues <= SplitThreshold) {
+        _values.reserve(nbValues);
+        // Merge the values of all the children
+        for (auto const& child : _children) {
+            for (auto const& value : child->_values) {
+                _values.push_back(value);
+            }
+        }
+        // Remove the children
+        for (auto& child : _children) { child.reset(); }
+        return true;
+    }
+
+    return false;
+}
+
+template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::replace(rect_f const& rect, T const& oldValue, T const& newValue) -> bool
 {
     // Ensure the rect contains both oldValue and newValue
@@ -191,32 +213,6 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::replace(rect_f
     remove(rect, oldValue);
     add(0, rect, newValue);
     return true;
-}
-
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::try_merge() -> bool
-{
-    assert(!is_leaf() && "Only interior nodes can be merged");
-
-    auto nbValues {_values.size()};
-    for (auto const& child : _children) {
-        if (!child->is_leaf()) { return false; }
-        nbValues += child->_values.size();
-    }
-    if (nbValues <= SplitThreshold) {
-        _values.reserve(nbValues);
-        // Merge the values of all the children
-        for (auto const& child : _children) {
-            for (auto const& value : child->_values) {
-                _values.push_back(value);
-            }
-        }
-        // Remove the children
-        for (auto& child : _children) { child.reset(); }
-        return true;
-    }
-
-    return false;
 }
 
 template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>

@@ -36,7 +36,7 @@ public:
 
     auto find_all_intersections() const -> std::vector<std::pair<T, T>>;
 
-    auto get_bounds() const -> rect_f;
+    auto get_bounds() const -> rect_f const&;
 
 private:
     class node {
@@ -49,9 +49,9 @@ private:
 
         auto remove(rect_f const& rect, T const& value) -> bool;
 
-        auto replace(rect_f const& rect, T const& oldValue, T const& newValue) -> bool;
-
         auto try_merge() -> bool;
+
+        auto replace(rect_f const& rect, T const& oldValue, T const& newValue) -> bool;
 
         void query(rect_f const& rect, rect_f const& queryRect, std::vector<T>& values) const;
 
