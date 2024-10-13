@@ -207,7 +207,7 @@ auto shape::get_pivot() const -> point_f
 
 circle_shape::circle_shape()
 {
-    Center.Changed.connect([&](auto const&) { mark_dirty(); });
+    Center.Changed.connect([&](auto const&) { mark_transform_dirty(); });
     Radius.Changed.connect([&](auto const&) { mark_dirty(); });
     Segments.Changed.connect([&](auto const&) { mark_dirty(); });
     Segments(90);
@@ -306,7 +306,7 @@ auto circle_shape::get_center() const -> point_f
 
 rect_shape::rect_shape()
 {
-    Bounds.Changed.connect([&](auto const&) { mark_dirty(); });
+    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
@@ -388,7 +388,7 @@ auto rect_shape::get_center() const -> point_f
 
 poly_shape::poly_shape()
 {
-    Polygons.Changed.connect([&](auto const&) { mark_dirty(); });
+    Polygons.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 }
 
 auto poly_shape::get_geometry() -> geometry_data
