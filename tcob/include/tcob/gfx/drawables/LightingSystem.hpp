@@ -56,7 +56,7 @@ public:
 
 protected:
     light_source(lighting_system* parent);
-    void request_redraw();
+    void notify_parent();
 
 private:
     lighting_system*             _parent;
@@ -79,7 +79,7 @@ public:
 
 protected:
     shadow_caster(lighting_system* parent);
-    void request_redraw();
+    void notify_parent();
 
 private:
     lighting_system* _parent;
@@ -128,10 +128,8 @@ private:
         rect_f               Bounds;
         shadow_caster const* Caster {nullptr};
 
-        auto operator==(quadtree_node const& other) const -> bool
-        {
-            return Caster == other.Caster;
-        }
+        auto get_rect() const -> rect_f const& { return Bounds; }
+        auto operator==(quadtree_node const& other) const -> bool { return Caster == other.Caster; }
     };
 
     struct shadow_caster_points {
@@ -141,7 +139,8 @@ private:
 
     void rebuild_quadtree();
     void mark_lights_dirty();
-    void process_light(light_source& light, u32& indOffset);
+
+    void cast_ray(light_source& light);
     void build_geometry(light_source& light, u32& indOffset);
     auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>;
     auto is_in_shadowcaster(light_source& light, std::vector<shadow_caster_points> const& casterPoints) const -> bool;
@@ -163,9 +162,7 @@ private:
     std::mutex _mutex {};
     bool       _multiThreaded;
 
-    auto static get_rect(quadtree_node const& node) -> rect_f;
-    using quadtree_t = quadtree<quadtree_node, &get_rect>;
-    std::unique_ptr<quadtree_t> _quadTree;
+    std::unique_ptr<quadtree<quadtree_node>> _quadTree;
 };
 
 }

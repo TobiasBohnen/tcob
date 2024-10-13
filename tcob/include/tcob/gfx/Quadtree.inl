@@ -9,46 +9,46 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline quadtree<T, GetRect, SplitThreshold, MaxDepth>::quadtree(rect_f const& rect)
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline quadtree<T, SplitThreshold, MaxDepth>::quadtree(rect_f const& rect)
     : _bounds {rect}
     , _root {std::make_unique<node>()}
 {
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::add(T const& value) -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::add(T const& value) -> bool
 {
-    if (!_bounds.contains(GetRect(value))) { return false; }
+    if (!_bounds.contains(value.get_rect())) { return false; }
 
     _root->add(0, _bounds, value);
     return true;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::remove(T const& value) -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::remove(T const& value) -> bool
 {
-    if (!_bounds.contains(GetRect(value))) { return false; }
+    if (!_bounds.contains(value.get_rect())) { return false; }
 
     return _root->remove(_bounds, value);
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::replace(T const& oldValue, T const& newValue) -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::replace(T const& oldValue, T const& newValue) -> bool
 {
-    if (!_bounds.contains(GetRect(oldValue)) || !_bounds.contains(GetRect(newValue))) { return false; }
+    if (!_bounds.contains(oldValue.get_rect()) || !_bounds.contains(newValue.get_rect())) { return false; }
 
     return _root->replace(_bounds, oldValue, newValue);
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::clear()
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline void quadtree<T, SplitThreshold, MaxDepth>::clear()
 {
     _root = std::make_unique<node>();
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::query(rect_f const& rect) const -> std::vector<T>
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::query(rect_f const& rect) const -> std::vector<T>
 {
     if (!_bounds.intersects(rect)) { return {}; }
 
@@ -57,32 +57,32 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::query(rect_f const& 
     return retValue;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::find_all_intersections() const -> std::vector<std::pair<T, T>>
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::find_all_intersections() const -> std::vector<std::pair<T, T>>
 {
     std::vector<std::pair<T, T>> retValue {};
     _root->find_all_intersections(retValue);
     return retValue;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::get_bounds() const -> rect_f const&
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::get_bounds() const -> rect_f const&
 {
     return _bounds;
 }
 
 ////////////////////////////////////////////////////////////
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::is_leaf() const -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::node::is_leaf() const -> bool
 {
     return _children[0] == nullptr;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::add(usize depth, rect_f const& rect, T const& value)
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline void quadtree<T, SplitThreshold, MaxDepth>::node::add(usize depth, rect_f const& rect, T const& value)
 {
-    assert(rect.contains(GetRect(value)));
+    assert(rect.contains(value.get_rect()));
 
     if (is_leaf()) {
         // Insert the value in this node if possible
@@ -94,7 +94,7 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::add(usize dept
             add(depth, rect, value);
         }
     } else {
-        auto const i {GetQuadrant(rect, GetRect(value))};
+        auto const i {GetQuadrant(rect, value.get_rect())};
         if (i != -1) {
             // Add the value in a child if the value is entirely contained in it
             _children[static_cast<usize>(i)]->add(depth + 1, ComputeRect(rect, i), value);
@@ -105,8 +105,8 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::add(usize dept
     }
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::split(rect_f const& rect)
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline void quadtree<T, SplitThreshold, MaxDepth>::node::split(rect_f const& rect)
 {
     // Create children
     for (auto& child : _children) {
@@ -115,7 +115,7 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::split(rect_f c
     // Assign values to children
     std::vector<T> newValues {}; // New values for this node
     for (auto const& value : _values) {
-        i32 const i {GetQuadrant(rect, GetRect(value))};
+        i32 const i {GetQuadrant(rect, value.get_rect())};
         if (i != -1) {
             _children[static_cast<usize>(i)]->_values.push_back(value);
         } else {
@@ -125,10 +125,10 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::split(rect_f c
     _values = std::move(newValues);
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::remove(rect_f const& rect, T const& value) -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::node::remove(rect_f const& rect, T const& value) -> bool
 {
-    assert(rect.contains(GetRect(value)));
+    assert(rect.contains(value.get_rect()));
 
     auto const removeValue {[&]() {
         // Find the value in node->values
@@ -146,7 +146,7 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::remove(rect_f 
         return true;
     }
     // Remove the value in a child if the value is entirely contained in it
-    i32 const i {GetQuadrant(rect, GetRect(value))};
+    i32 const i {GetQuadrant(rect, value.get_rect())};
     if (i != -1) {
         if (_children[static_cast<usize>(i)]->remove(ComputeRect(rect, i), value)) {
             return try_merge();
@@ -158,8 +158,8 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::remove(rect_f 
     return false;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::try_merge() -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::node::try_merge() -> bool
 {
     auto nbValues {_values.size()};
     for (auto const& child : _children) {
@@ -182,12 +182,12 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::try_merge() ->
     return false;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::replace(rect_f const& rect, T const& oldValue, T const& newValue) -> bool
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::node::replace(rect_f const& rect, T const& oldValue, T const& newValue) -> bool
 {
     // Ensure the rect contains both oldValue and newValue
-    assert(rect.contains(GetRect(oldValue)));
-    assert(rect.contains(GetRect(newValue)));
+    assert(rect.contains(oldValue.get_rect()));
+    assert(rect.contains(newValue.get_rect()));
 
     if (is_leaf()) {
         // Find and replace the oldValue with newValue in this node
@@ -201,8 +201,8 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::replace(rect_f
     }
 
     // If this node is not a leaf, determine in which quadrant oldValue and newValue lie
-    i32 const oldIndex {GetQuadrant(rect, GetRect(oldValue))};
-    i32 const newIndex {GetQuadrant(rect, GetRect(newValue))};
+    i32 const oldIndex {GetQuadrant(rect, oldValue.get_rect())};
+    i32 const newIndex {GetQuadrant(rect, newValue.get_rect())};
 
     // If they are both in the same quadrant
     if (oldIndex == newIndex && oldIndex != -1) {
@@ -215,13 +215,13 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::replace(rect_f
     return true;
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::query(rect_f const& rect, rect_f const& queryRect, std::vector<T>& values) const
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline void quadtree<T, SplitThreshold, MaxDepth>::node::query(rect_f const& rect, rect_f const& queryRect, std::vector<T>& values) const
 {
     assert(queryRect.intersects(rect));
 
     for (auto const& value : _values) {
-        if (queryRect.intersects(GetRect(value))) {
+        if (queryRect.intersects(value.get_rect())) {
             values.push_back(value);
         }
     }
@@ -234,14 +234,14 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::query(rect_f c
     }
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::find_all_intersections(std::vector<std::pair<T, T>>& intersections) const
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline void quadtree<T, SplitThreshold, MaxDepth>::node::find_all_intersections(std::vector<std::pair<T, T>>& intersections) const
 {
     // Find intersections between values stored in this node
     // Make sure to not report the same intersection twice
     for (usize i {0}; i < _values.size(); ++i) {
         for (usize j {0}; j < i; ++j) {
-            if (GetRect(_values[i]).intersects(GetRect(_values[j]))) {
+            if (_values[i].get_rect().intersects(_values[j].get_rect())) {
                 intersections.emplace_back(_values[i], _values[j]);
             }
         }
@@ -260,12 +260,12 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::find_all_inter
     }
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::find_intersections_in_descendants(T const& value, std::vector<std::pair<T, T>>& intersections) const
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline void quadtree<T, SplitThreshold, MaxDepth>::node::find_intersections_in_descendants(T const& value, std::vector<std::pair<T, T>>& intersections) const
 {
     // Test against the values stored in this node
     for (auto const& other : _values) {
-        if (GetRect(value).intersects(GetRect(other))) {
+        if (value.get_rect().intersects(other.get_rect())) {
             intersections.emplace_back(value, other);
         }
     }
@@ -277,8 +277,8 @@ inline void quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::find_intersect
     }
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::ComputeRect(rect_f const& rect, i32 i) -> rect_f
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::node::ComputeRect(rect_f const& rect, i32 i) -> rect_f
 {
     auto const origin {rect.top_left()};
     auto const childSize {rect.get_size() / 2.f};
@@ -293,8 +293,8 @@ inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::ComputeRect(re
     }
 }
 
-template <typename T, auto GetRect, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, GetRect, SplitThreshold, MaxDepth>::node::GetQuadrant(rect_f const& nodeRect, rect_f const& valueRect) -> i32
+template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
+inline auto quadtree<T, SplitThreshold, MaxDepth>::node::GetQuadrant(rect_f const& nodeRect, rect_f const& valueRect) -> i32
 {
     auto const center {nodeRect.get_center()};
 

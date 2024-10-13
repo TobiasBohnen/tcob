@@ -19,7 +19,16 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-template <typename T, auto GetRect, usize SplitThreshold = 16, usize MaxDepth = 8>
+template <typename T>
+concept QuadtreeValue =
+    requires(T& t) {
+        { t.get_rect() } -> std::convertible_to<rect_f>;
+        { t == t } -> std::same_as<bool>;
+    };
+
+////////////////////////////////////////////////////////////
+
+template <QuadtreeValue T, usize SplitThreshold = 16, usize MaxDepth = 8>
 class quadtree {
 public:
     quadtree(rect_f const& rect);
