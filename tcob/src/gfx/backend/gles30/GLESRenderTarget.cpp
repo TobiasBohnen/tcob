@@ -54,7 +54,7 @@ void gl_render_target::prepare_render(render_properties const& props)
     usize offset {0};
 
     offset += buffer.update(props.ViewMatrix, offset);
-    offset += buffer.update(props.Viewport.get_size(), offset);
+    offset += buffer.update(props.Viewport.Size, offset);
     offset += buffer.update(props.MousePosition, offset);
     offset += buffer.update(props.Time, offset);
     offset += buffer.update(props.Debug, offset);
@@ -77,20 +77,20 @@ void gl_render_target::finalize_render() const
 void gl_render_target::set_viewport(rect_i const& rect)
 {
     if (_tex) {
-        GLCHECK(glViewport(rect.X, _tex->get_size().Height - rect.Height - rect.Y, rect.Width, rect.Height));
+        GLCHECK(glViewport(rect.left(), _tex->get_size().Height - rect.height() - rect.top(), rect.width(), rect.height()));
     } else {
-        GLCHECK(glViewport(rect.X, rect.Y, rect.Width, rect.Height));
+        GLCHECK(glViewport(rect.left(), rect.top(), rect.width(), rect.height()));
     }
 }
 
 void gl_render_target::enable_scissor(rect_i const& rect, i32 height) const
 {
-    if (rect.Width < 0 || rect.Height < 0) {
+    if (rect.width() < 0 || rect.height() < 0) {
         return;
     }
 
     GLCHECK(glEnable(GL_SCISSOR_TEST));
-    GLCHECK(glScissor(rect.left(), height - rect.top() - rect.Height, rect.Width, rect.Height));
+    GLCHECK(glScissor(rect.left(), height - rect.top() - rect.height(), rect.width(), rect.height()));
 }
 
 void gl_render_target::disable_scissor() const
@@ -113,9 +113,9 @@ void gl_render_target::on_resize(size_i size)
 
 auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
 {
-    std::vector<u8> pixels(static_cast<usize>(rect.Width * rect.Height * 4));
+    std::vector<u8> pixels(static_cast<usize>(rect.width() * rect.height() * 4));
     _frameBuffer->get_subimage(rect, pixels, GL_RGBA);
-    auto retValue {image::Create(rect.get_size(), image::format::RGBA, pixels)};
+    auto retValue {image::Create(rect.Size, image::format::RGBA, pixels)};
     retValue.flip_vertically();
     return retValue;
 }

@@ -37,8 +37,8 @@ void button::on_paint(widget_painter& painter)
         if (drawText) { // text
             rect_f textRect {rect};
             if (drawIcon) {
-                textRect = {rect.get_center().X, rect.Y, rect.Width / 2, rect.Height};
-                rect.Width /= 2;
+                textRect = {rect.get_center().X, rect.top(), rect.width() / 2, rect.height()};
+                rect.Size.Width /= 2;
             }
 
             if (style->Text.Font) {
@@ -48,8 +48,8 @@ void button::on_paint(widget_painter& painter)
         if (drawIcon) { // icon
             auto const iconSize {Icon->Texture->get_size()};
             f32 const  factor {iconSize.Height / static_cast<f32>(iconSize.Width)};
-            f32 const  width {rect.Height * factor};
-            rect = {{rect.get_center().X - (width / 2), rect.Y}, {width, rect.Height}};
+            f32 const  width {rect.height() * factor};
+            rect = {{rect.get_center().X - (width / 2), rect.top()}, {width, rect.height()}};
             auto& canvas {painter.get_canvas()};
             canvas.set_fill_style(style->Text.Color);
             canvas.draw_image(Icon->Texture.get_ptr(), Icon->Region, rect);

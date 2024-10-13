@@ -22,7 +22,7 @@ auto vscroll_widget::requires_scroll(orientation orien, rect_f const& rect) cons
         return false;
     }
 
-    return get_scroll_content_height() - 1 > rect.Height;
+    return get_scroll_content_height() - 1 > rect.height();
 }
 
 auto vscroll_widget::get_scroll_min_value(orientation /* orien */) const -> f32
@@ -36,7 +36,7 @@ auto vscroll_widget::get_scroll_max_value(orientation orien) const -> f32
         return 0;
     }
 
-    return std::max(0.0f, get_scroll_content_height() - get_content_bounds().Height);
+    return std::max(0.0f, get_scroll_content_height() - get_content_bounds().height());
 }
 
 auto vscroll_widget::get_scroll_style(orientation orien) const -> element::scrollbar*
@@ -153,7 +153,7 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     if (!isHitTest) {
         if (auto const* style {get_style<vscroll_widget::style>()}) {
             if (_vScrollbar.Visible) {
-                bounds.Width -= style->VScrollBar.Bar.Size.calc(bounds.Width);
+                bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
             }
         }
     }

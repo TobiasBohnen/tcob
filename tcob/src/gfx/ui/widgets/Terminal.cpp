@@ -158,10 +158,10 @@ void terminal::rectangle(rect_i const& rect)
 
 void terminal::rectangle(rect_i const& rect, border const& b)
 {
-    hline({rect.X + 1, rect.Y}, b.TopSide, rect.Width - 1);
-    hline({rect.X + 1, rect.bottom()}, b.BottomSide, rect.Width - 1);
-    vline({rect.X, rect.Y + 1}, b.LeftSide, rect.Height - 1);
-    vline({rect.right(), rect.Y + 1}, b.RightSide, rect.Height - 1);
+    hline({rect.left() + 1, rect.top()}, b.TopSide, rect.width() - 1);
+    hline({rect.left() + 1, rect.bottom()}, b.BottomSide, rect.width() - 1);
+    vline({rect.left(), rect.top() + 1}, b.LeftSide, rect.height() - 1);
+    vline({rect.right(), rect.top() + 1}, b.RightSide, rect.height() - 1);
 
     add_str(rect.top_left(), b.TopLeft);
     add_str(rect.top_right(), b.TopRight);
@@ -275,8 +275,8 @@ void terminal::on_paint(widget_painter& painter)
             auto const& cell {buffer[i]};
 
             rect_f const cellRect {
-                rect.X + ((i % Size->Width) * fontWidth),
-                rect.Y + ((i / Size->Width) * fontHeight),
+                rect.left() + ((i % Size->Width) * fontWidth),
+                rect.top() + ((i / Size->Width) * fontHeight),
                 fontWidth,
                 fontHeight};
 
@@ -299,7 +299,7 @@ void terminal::on_paint(widget_painter& painter)
         if (_cursorVisible) {
             rect_f        caretRect {rect};
             point_f const offset {_currentCursor.X * fontWidth, _currentCursor.Y * fontHeight};
-            caretRect.Height = fontHeight;
+            caretRect.Size.Height = fontHeight;
             painter.draw_caret(style->Caret, caretRect, offset);
         }
 
@@ -425,8 +425,8 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
             f32 const   fontWidth {get_font_width(font)};
             f32 const   fontHeight {font->get_info().LineHeight};
 
-            i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.X) / fontWidth) + 0.5f))};
-            i32 const y {static_cast<i32>((ev.Position.Y - rect.Y) / fontHeight)};
+            i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
+            i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
             HoveredCell = {x, y};
 
             ev.Handled = true;

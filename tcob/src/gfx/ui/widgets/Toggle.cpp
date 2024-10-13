@@ -29,10 +29,10 @@ void toggle::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         // tick
-        f32 const tickWidth {rect.Width / 2};
+        f32 const tickWidth {rect.width() / 2};
 
-        rect.Width = tickWidth;
-        rect.X += tickWidth * _tween.get_current_value();
+        rect.Size.Width = tickWidth;
+        rect.Position.X += tickWidth * _tween.get_current_value();
         painter.draw_tick(style->Tick, rect);
     }
 }

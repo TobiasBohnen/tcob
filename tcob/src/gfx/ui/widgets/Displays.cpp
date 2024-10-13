@@ -41,8 +41,8 @@ void dot_matrix_display::on_paint(widget_painter& painter)
         auto& canvas {painter.get_canvas()};
         canvas.save();
 
-        f32 const width {rect.Width / Size->Width};
-        f32 const height {rect.Height / Size->Height};
+        f32 const width {rect.width() / Size->Width};
+        f32 const height {rect.height() / Size->Height};
 
         for (auto const& [colorIdx, dots] : _sortedDots) {
             canvas.set_fill_style(style->Dot.Colors.at(colorIdx));
@@ -177,7 +177,7 @@ void seven_segment_display::on_paint(widget_painter& painter)
         auto& canvas {painter.get_canvas()};
         canvas.save();
 
-        f32 const width {style->Segment.Size.calc(rect.Width)};
+        f32 const width {style->Segment.Size.calc(rect.width())};
         f32 const thickness {width / 4};
 
         point_f       offset {rect.top_left()};
@@ -302,10 +302,10 @@ void color_picker::on_paint(widget_painter& painter)
     auto const bounds {Bounds()};
 
     canvas.set_scissor(bounds);
-    canvas.translate(bounds.get_position());
+    canvas.translate(bounds.Position);
 
     // color gradient
-    size_f const rect0 {bounds.Width * 0.9f, bounds.Height};
+    size_f const rect0 {bounds.width() * 0.9f, bounds.height()};
 
     canvas.begin_path();
     canvas.rect({point_f::Zero, rect0});
@@ -324,7 +324,7 @@ void color_picker::on_paint(widget_painter& painter)
     canvas.fill();
 
     // hue gradient
-    size_f const rect1 {bounds.Width * 0.1f, bounds.Height};
+    size_f const rect1 {bounds.width() * 0.1f, bounds.height()};
 
     canvas.begin_path();
     canvas.rect({{rect0.Width, 0}, rect1});
@@ -336,8 +336,8 @@ void color_picker::on_mouse_down(input::mouse::button_event const& ev)
 {
     rect_f const rect {get_global_content_bounds()};
     if (rect.contains(ev.Position)) {
-        f32 const s {(ev.Position.X - rect.X) / (rect.Width * 0.9f)};
-        f32 const v {(ev.Position.Y - rect.Y) / rect.Height};
+        f32 const s {(ev.Position.X - rect.left()) / (rect.width() * 0.9f)};
+        f32 const v {(ev.Position.Y - rect.top()) / rect.height()};
         if (s > 1.0f) {
             auto const col {GetGradient().get_colors().at(static_cast<i32>(255 * v))};
             BaseHue = col.to_hsv().Hue;

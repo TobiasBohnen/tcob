@@ -1086,7 +1086,7 @@ b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSetting
 b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings)
 {
     auto const& rect {shapeSettings.Extents};
-    auto        poly {b2MakeOffsetBox(rect.Width / 2, rect.Height / 2, to_b2Vec2(rect.top_left()), shapeSettings.Angle.Value)};
+    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.top_left()), shapeSettings.Angle.Value)};
 
     b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);

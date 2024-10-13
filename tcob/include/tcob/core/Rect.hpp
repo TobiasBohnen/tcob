@@ -22,8 +22,8 @@ public:
     using type = T;
 
     constexpr rect() = default;
+    constexpr rect(point<T> p, size<T> s);
     constexpr rect(T left, T top, T width, T height);
-    constexpr rect(point<T> tl, size<T> s);
 
     template <Arithmetic U>
     explicit constexpr rect(rect<U> const& p);
@@ -37,8 +37,9 @@ public:
     auto constexpr bottom_left() const -> point<T>;
     auto constexpr bottom_right() const -> point<T>;
 
-    auto constexpr get_position() const -> point<T>;
-    auto constexpr get_size() const -> size<T>;
+    auto constexpr width() const -> T;
+    auto constexpr height() const -> T;
+
     auto constexpr get_center() const -> point_f;
     auto constexpr get_local_center() const -> point_f;
 
@@ -69,10 +70,8 @@ public:
 
     auto static constexpr Lerp(rect const& left, rect const& right, f64 step) -> rect;
 
-    T X {0};
-    T Y {0};
-    T Width {0};
-    T Height {0};
+    point<T> Position;
+    size<T>  Size;
 
     static rect<T> const Zero;
 };

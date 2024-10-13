@@ -279,7 +279,7 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
 
         for (auto& token : retValue.Tokens) {
             for (auto& quad : token.Quads) {
-                quad.Rect.Y += offset;
+                quad.Rect.Position.Y += offset;
             }
         }
     }

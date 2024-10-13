@@ -231,10 +231,10 @@ namespace effect {
 
             switch (Anchor.Horizontal) {
             case horizontal_alignment::Left:
-                center.X = rect.left() - maxSize.Width + rect.Width;
+                center.X = rect.left() - maxSize.Width + rect.width();
                 break;
             case horizontal_alignment::Centered:
-                center.X = rect.get_center().X - (maxSize.Width - rect.Width) / 2;
+                center.X = rect.get_center().X - (maxSize.Width - rect.width()) / 2;
                 break;
             case horizontal_alignment::Right:
                 center.X = rect.right();
@@ -242,10 +242,10 @@ namespace effect {
             }
             switch (Anchor.Vertical) {
             case vertical_alignment::Top:
-                center.Y = rect.top() - maxSize.Height + rect.Height;
+                center.Y = rect.top() - maxSize.Height + rect.height();
                 break;
             case vertical_alignment::Middle:
-                center.Y = rect.get_center().Y - (maxSize.Height - rect.Height) / 2;
+                center.Y = rect.get_center().Y - (maxSize.Height - rect.height()) / 2;
                 break;
             case vertical_alignment::Bottom:
                 center.Y = rect.bottom();

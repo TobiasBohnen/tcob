@@ -74,9 +74,9 @@ void slider::on_paint(widget_painter& painter)
             {.Orientation = orien, .Inverted = false, .Fraction = _tween.get_current_value()});
 
         if (orien == orientation::Vertical) {
-            _paintResult.Thumb.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.Width);
+            _paintResult.Thumb.Size.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.width());
         } else if (orien == orientation::Horizontal) {
-            _paintResult.Thumb.Height -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.Height);
+            _paintResult.Thumb.Size.Height -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.height());
         }
     }
 }
@@ -202,12 +202,12 @@ void slider::calculate_value(point_f mp)
 
     switch (get_orientation()) {
     case orientation::Horizontal: {
-        f32 const tw {_paintResult.Thumb.Width};
-        frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.Width - tw);
+        f32 const tw {_paintResult.Thumb.width()};
+        frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
     } break;
     case orientation::Vertical: {
-        f32 const th {_paintResult.Thumb.Height};
-        frac = 1.0f - ((mp.Y - _dragOffset.Y - (th / 2)) / (rect.Height - th));
+        f32 const th {_paintResult.Thumb.height()};
+        frac = 1.0f - ((mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th));
     } break;
     }
 

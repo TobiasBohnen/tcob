@@ -99,10 +99,10 @@ void tab_container::on_paint(widget_painter& painter)
         _tabRects.clear();
         if (style->TabBarPosition != position::Hidden) {
             rect_f tabBarRowRect {rect};
-            tabBarRowRect.Height = style->TabBarHeight.calc(tabBarRowRect.Height);
+            tabBarRowRect.Size.Height = style->TabBarHeight.calc(tabBarRowRect.height());
             if (style->TabBarPosition == position::Bottom) {
                 f32 const tabRows {style->MaxTabsPerRow > 0 ? std ::ceil(std::ssize(_tabs) / static_cast<f32>(style->MaxTabsPerRow)) : 1};
-                tabBarRowRect.Y = rect.bottom() - (tabBarRowRect.Height * tabRows);
+                tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * tabRows);
             }
 
             for (i32 i {0}; i < std::ssize(_tabs); ++i) {
@@ -122,7 +122,7 @@ void tab_container::on_paint(widget_painter& painter)
             offset_tab_content(rect, *style);
 
             auto          xform {transform::Identity};
-            point_f const translate {rect.get_position() + get_paint_offset()};
+            point_f const translate {rect.Position + get_paint_offset()};
             xform.translate(translate);
 
             auto& tab {_tabs[ActiveTabIndex]};
@@ -184,10 +184,10 @@ auto tab_container::get_tab_rect(style const& style, item_style const& itemStyle
 {
     isize const maxItems {std::min(style.MaxTabsPerRow, std::ssize(_tabs))};
     rect_f      retValue {rect};
-    retValue.X      = rect.X + (rect.Width / maxItems) * (index % maxItems);
-    retValue.Width  = rect.Width / maxItems;
-    retValue.Y      = retValue.Y + (rect.Height * (index / maxItems));
-    retValue.Height = rect.Height;
+    retValue.Position.X  = rect.left() + (rect.width() / maxItems) * (index % maxItems);
+    retValue.Size.Width  = rect.width() / maxItems;
+    retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
+    retValue.Size.Height = rect.height();
 
     retValue -= itemStyle.Item.Border.get_thickness();
     return retValue;
@@ -203,14 +203,14 @@ auto tab_container::get_tab_style(isize index) const -> item_style*
 
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
 {
-    f32 barHeight {style.TabBarHeight.calc(bounds.Height)};
+    f32 barHeight {style.TabBarHeight.calc(bounds.height())};
     if (style.MaxTabsPerRow != -1) {
         barHeight *= std::ceil(std::ssize(_tabs) / static_cast<f32>(style.MaxTabsPerRow));
     }
 
-    bounds.Height -= barHeight;
+    bounds.Size.Height -= barHeight;
     if (style.TabBarPosition == position::Top) {
-        bounds.Y += barHeight;
+        bounds.Position.Y += barHeight;
     }
 }
 
@@ -229,7 +229,7 @@ void tab_container::update_tab_bounds()
 {
     auto rect {get_content_bounds()};
     for (auto& t : _tabs) {
-        t->Bounds = {point_f::Zero, rect.get_size()};
+        t->Bounds = {point_f::Zero, rect.Size};
     }
 }
 

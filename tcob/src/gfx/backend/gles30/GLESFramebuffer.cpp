@@ -69,7 +69,7 @@ void gl_framebuffer::attach_texture(gl_texture const* tex, u32 depth)
 void gl_framebuffer::get_subimage(rect_i const& rect, std::span<u8> pixels, GLenum format) const
 {
     bind();
-    GLCHECK(glReadPixels(rect.X, rect.Y, rect.Width, rect.Height, format, GL_UNSIGNED_BYTE, pixels.data()));
+    GLCHECK(glReadPixels(rect.left(), rect.top(), rect.width(), rect.height(), format, GL_UNSIGNED_BYTE, pixels.data()));
 }
 
 auto gl_framebuffer::read_pixel(point_i pos) const -> color

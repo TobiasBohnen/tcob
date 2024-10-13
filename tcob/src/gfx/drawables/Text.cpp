@@ -66,7 +66,7 @@ void text::format()
     if (Text->empty()) { return; }
 
     // format text
-    auto const size {Bounds->get_size()};
+    auto const size {Bounds->Size};
     auto const formatResult {text_formatter::format(Text(), *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled)};
     _quads.reserve(formatResult.QuadCount);
 
@@ -74,7 +74,7 @@ void text::format()
     u8    alpha {c.A};
     u8    currentEffectIdx {0};
 
-    auto const [x, y] {Bounds->get_position()};
+    auto const [x, y] {Bounds->Position};
     auto const& xform {get_transform()};
     for (auto const& token : formatResult.Tokens) {
         // handle text commands
@@ -107,7 +107,7 @@ void text::format()
             geometry::set_texcoords(q, token.Quads[i].TexRegion);
 
             auto const&  posRect {token.Quads[i].Rect};
-            rect_f const quadRect {x + posRect.left(), y + posRect.top(), posRect.Width, posRect.Height};
+            rect_f const quadRect {x + posRect.left(), y + posRect.top(), posRect.width(), posRect.height()};
             geometry::set_position(q, quadRect, xform);
 
             if (currentEffectIdx != 0) {

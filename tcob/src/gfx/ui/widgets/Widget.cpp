@@ -108,7 +108,7 @@ auto widget::is_enabled() const -> bool
 
 void widget::paint(widget_painter& painter)
 {
-    if (!is_visible() || Bounds->Width <= 0 || Bounds->Height <= 0) {
+    if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) {
         return;
     }
 
@@ -137,7 +137,7 @@ auto widget::hit_test(point_f pos) const -> bool
 
 auto widget::get_hit_test_bounds() const -> rect_f
 {
-    rect_f retValue {get_global_position(), Bounds->get_size()};
+    rect_f retValue {get_global_position(), Bounds->Size};
     offset_content(retValue, true);
 
     if (_parent) {
@@ -152,18 +152,18 @@ auto widget::get_hit_test_bounds() const -> rect_f
 
 auto widget::get_global_position() const -> point_f
 {
-    auto retValue {Bounds->get_position()};
+    auto retValue {Bounds->Position};
     if (_parent) {
-        retValue += _parent->get_global_content_bounds().get_position() - _parent->get_scroll_offset();
+        retValue += _parent->get_global_content_bounds().Position - _parent->get_scroll_offset();
     } else if (_form) {
-        retValue += _form->Bounds->get_position();
+        retValue += _form->Bounds->Position;
     }
     return retValue;
 }
 
 auto widget::get_global_content_bounds() const -> rect_f
 {
-    rect_f retValue {get_global_position(), Bounds->get_size()};
+    rect_f retValue {get_global_position(), Bounds->Size};
     offset_content(retValue, false);
     return retValue;
 }
@@ -177,16 +177,16 @@ auto widget::get_content_bounds() const -> rect_f
 
 auto widget::global_to_local(point_i p) const -> point_f
 {
-    return point_f {p} - get_global_content_bounds().get_position();
+    return point_f {p} - get_global_content_bounds().Position;
 }
 
 auto widget::global_to_parent_local(point_i p) const -> point_f
 {
     point_f retValue {p};
     if (_parent) {
-        retValue -= (_parent->get_global_content_bounds().get_position() - _parent->get_scroll_offset());
+        retValue -= (_parent->get_global_content_bounds().Position - _parent->get_scroll_offset());
     } else if (_form) {
-        retValue -= point_f {_form->Bounds->get_position()};
+        retValue -= point_f {_form->Bounds->Position};
     }
 
     return retValue;
@@ -341,7 +341,7 @@ void widget::do_mouse_hover(input::mouse::motion_event const& ev)
     on_mouse_hover(ev);
 
     MouseHover({.Sender           = this,
-                .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
+                .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
                 .Event            = ev});
 }
 
@@ -350,7 +350,7 @@ void widget::do_mouse_drag(input::mouse::motion_event const& ev)
     on_mouse_drag(ev);
 
     MouseDrag({.Sender           = this,
-               .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
+               .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
                .Event            = ev});
 }
 
@@ -364,7 +364,7 @@ void widget::do_mouse_down(input::mouse::button_event const& ev)
     }
 
     MouseDown({.Sender           = this,
-               .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
+               .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
                .Event            = ev});
 }
 
@@ -378,7 +378,7 @@ void widget::do_mouse_up(input::mouse::button_event const& ev)
     }
 
     MouseUp({.Sender           = this,
-             .RelativePosition = ev.Position - point_i {get_hit_test_bounds().get_position()},
+             .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
              .Event            = ev});
 }
 
@@ -484,7 +484,7 @@ auto widget::get_flags() -> widget_flags
 
 auto widget::get_orientation() const -> orientation
 {
-    return Bounds->Width >= Bounds->Height ? orientation::Horizontal : orientation::Vertical;
+    return Bounds->width() >= Bounds->height() ? orientation::Horizontal : orientation::Vertical;
 }
 
 auto widget::is_inert() const -> bool

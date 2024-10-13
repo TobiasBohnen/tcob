@@ -25,10 +25,10 @@ void layout::update()
         std::visit(
             overloaded {
                 [&](widget_container* parent) {
-                    do_layout(parent->get_content_bounds().get_size());
+                    do_layout(parent->get_content_bounds().Size);
                 },
                 [&](form* parent) {
-                    do_layout(parent->Bounds().get_size());
+                    do_layout(parent->Bounds().Size);
                 }},
             _parent);
         _isDirty = false;
@@ -106,8 +106,8 @@ void flex_size_layout::do_layout(size_f size)
     auto& widgets {get_widgets()};
 
     for (auto const& widget : widgets) {
-        (*widget->Bounds).Width  = widget->Flex->Width.calc(size.Width);
-        (*widget->Bounds).Height = widget->Flex->Height.calc(size.Height);
+        (*widget->Bounds).Size.Width  = widget->Flex->Width.calc(size.Width);
+        (*widget->Bounds).Size.Height = widget->Flex->Height.calc(size.Height);
     }
 }
 
@@ -119,44 +119,44 @@ void dock_layout::do_layout(size_f size)
 
     rect_f layoutRect {point_f::Zero, size};
     for (auto const& widget : widgets) {
-        if (layoutRect.Height <= 0 || layoutRect.Width <= 0) {
+        if (layoutRect.height() <= 0 || layoutRect.width() <= 0) {
             widget->Bounds = rect_f::Zero;
             continue;
         }
 
-        f32 const width {std::min(layoutRect.Width, widget->Flex->Width.calc(size.Width))};     // TODO: replace with preferred size
-        f32 const height {std::min(layoutRect.Height, widget->Flex->Height.calc(size.Height))}; // TODO: replace with preferred size
+        f32 const width {std::min(layoutRect.width(), widget->Flex->Width.calc(size.Width))};     // TODO: replace with preferred size
+        f32 const height {std::min(layoutRect.height(), widget->Flex->Height.calc(size.Height))}; // TODO: replace with preferred size
 
         rect_f widgetBounds {layoutRect};
 
         switch (_widgetDock.at(widget.get())) {
         case dock_style::Left:
-            layoutRect.X += width;
-            layoutRect.Width -= width;
+            layoutRect.Position.X += width;
+            layoutRect.Size.Width -= width;
             break;
         case dock_style::Right:
-            widgetBounds.X = widgetBounds.right() - width;
-            layoutRect.Width -= width;
+            widgetBounds.Position.X = widgetBounds.right() - width;
+            layoutRect.Size.Width -= width;
             break;
         case dock_style::Top:
-            layoutRect.Y += height;
-            layoutRect.Height -= height;
+            layoutRect.Position.Y += height;
+            layoutRect.Size.Height -= height;
             break;
         case dock_style::Bottom:
-            widgetBounds.Y = widgetBounds.bottom() - height;
-            layoutRect.Height -= height;
+            widgetBounds.Position.Y = widgetBounds.bottom() - height;
+            layoutRect.Size.Height -= height;
             break;
         case dock_style::Fill:
-            layoutRect.X += width;
-            layoutRect.Width -= width;
-            layoutRect.Y += height;
-            layoutRect.Height -= height;
+            layoutRect.Position.X += width;
+            layoutRect.Size.Width -= width;
+            layoutRect.Position.Y += height;
+            layoutRect.Size.Height -= height;
             break;
         }
 
-        widgetBounds.Width  = width;
-        widgetBounds.Height = height;
-        widget->Bounds      = widgetBounds;
+        widgetBounds.Size.Width  = width;
+        widgetBounds.Size.Height = height;
+        widget->Bounds           = widgetBounds;
     }
 }
 
@@ -177,12 +177,12 @@ void grid_layout::do_layout(size_f size)
 
     for (auto const& widget : widgets) {
         rect_f bounds {_widgetBounds[widget.get()]};
-        bounds.X *= horiSize;
-        bounds.Width *= horiSize;
-        bounds.Width = widget->Flex->Width.calc(bounds.Width);
-        bounds.Y *= vertSize;
-        bounds.Height *= vertSize;
-        bounds.Height = widget->Flex->Height.calc(bounds.Height);
+        bounds.Position.X *= horiSize;
+        bounds.Size.Width *= horiSize;
+        bounds.Size.Width = widget->Flex->Width.calc(bounds.width());
+        bounds.Position.Y *= vertSize;
+        bounds.Size.Height *= vertSize;
+        bounds.Size.Height = widget->Flex->Height.calc(bounds.height());
 
         widget->Bounds = bounds;
     }

@@ -72,7 +72,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 
         rect_f gridRect {rect};
 
-        f32 const rowHeight {style->RowHeight.calc(gridRect.Height)};
+        f32 const rowHeight {style->RowHeight.calc(gridRect.height())};
 
         std::vector<f32> colWidths(_columnHeaders.size());
 
@@ -82,9 +82,9 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
             f32         offsetX {0.f};
 
             for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-                f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.Width)};
+                f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.width())};
 
-                rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.get_position(), {colWidth, rowHeight}, offsetX)};
+                rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
                 if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
                     auto const& cellStyle {get_cell_style({x, y + 1}, style->RowClass)->Item};
                     painter.draw_item(cellStyle, cellRect, row[x]);
@@ -95,9 +95,9 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
         f32 offsetX {0.f};
         for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
             // headers
-            f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.Width)};
+            f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.width())};
 
-            rect_f const cellRect {get_cell_rect({x, 0}, gridRect.get_position(), {colWidth, rowHeight}, offsetX)};
+            rect_f const cellRect {get_cell_rect({x, 0}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
             if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
                 auto const& cellStyle {get_cell_style({x, 0}, style->HeaderClass)->Item};
                 painter.draw_item(cellStyle, cellRect, _columnHeaders[x]);
@@ -110,10 +110,10 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 auto grid_view::get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX) const -> rect_f
 {
     rect_f retValue {point_f::Zero, size};
-    retValue.X = pos.X + offsetX;
-    retValue.Y = pos.Y + (size.Height * idx.Y);
+    retValue.Position.X = pos.X + offsetX;
+    retValue.Position.Y = pos.Y + (size.Height * idx.Y);
     if (idx.Y > 0) {
-        retValue.Y -= get_scrollbar_value();
+        retValue.Position.Y -= get_scrollbar_value();
     }
 
     return retValue;
@@ -142,7 +142,7 @@ auto grid_view::get_scroll_content_height() const -> f32
     f32 retValue {0.0f};
     if (auto const* style {get_style<grid_view::style>()}) {
         rect_f const listRect {get_content_bounds()};
-        f32 const    itemHeight {style->RowHeight.calc(listRect.Height)};
+        f32 const    itemHeight {style->RowHeight.calc(listRect.height())};
         retValue += itemHeight * (_rows.size() + 1);
     }
 

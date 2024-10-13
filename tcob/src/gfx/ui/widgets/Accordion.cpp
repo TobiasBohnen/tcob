@@ -86,7 +86,7 @@ void accordion::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // sections
-        f32 const sectionHeight {style->SectionBarHeight.calc(rect.Height)};
+        f32 const sectionHeight {style->SectionBarHeight.calc(rect.height())};
         _sectionRects.clear();
         if (MaximizeActiveSection && ActiveSectionIndex >= 0) {
             isize const i {ActiveSectionIndex()};
@@ -114,7 +114,7 @@ void accordion::on_paint(widget_painter& painter)
             update_section_bounds(rect);
 
             auto          xform {transform::Identity};
-            point_f const translate {rect.get_position() + get_paint_offset()};
+            point_f const translate {rect.Position + get_paint_offset()};
             xform.translate(translate);
 
             auto& tab {_sections[ActiveSectionIndex]};
@@ -180,11 +180,11 @@ void accordion::on_update(milliseconds /* deltaTime */)
 auto accordion::get_section_rect(item_style const& itemStyle, isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f
 {
     rect_f retValue {rect};
-    retValue.Y += sectionHeight * index;
-    retValue.Height = sectionHeight;
+    retValue.Position.Y += sectionHeight * index;
+    retValue.Size.Height = sectionHeight;
     retValue -= itemStyle.Item.Border.get_thickness();
     if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
-        retValue.Y += get_content_bounds().Height;
+        retValue.Position.Y += get_content_bounds().height();
     }
     return retValue;
 }
@@ -199,9 +199,9 @@ auto accordion::get_section_style(isize index) const -> item_style*
 
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
-    f32 const barHeight {style.SectionBarHeight.calc(bounds.Height)};
-    bounds.Height -= barHeight * (MaximizeActiveSection ? 1 : _sections.size());
-    bounds.Y += barHeight * (MaximizeActiveSection ? 1 : ActiveSectionIndex + 1);
+    f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
+    bounds.Size.Height -= barHeight * (MaximizeActiveSection ? 1 : _sections.size());
+    bounds.Position.Y += barHeight * (MaximizeActiveSection ? 1 : ActiveSectionIndex + 1);
 }
 
 void accordion::offset_content(rect_f& bounds, bool isHitTest) const
@@ -218,7 +218,7 @@ void accordion::offset_content(rect_f& bounds, bool isHitTest) const
 void accordion::update_section_bounds(rect_f const& bounds)
 {
     for (auto& t : _sections) {
-        t->Bounds = {point_f::Zero, bounds.get_size()};
+        t->Bounds = {point_f::Zero, bounds.Size};
     }
 }
 

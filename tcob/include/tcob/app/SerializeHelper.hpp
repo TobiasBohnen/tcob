@@ -43,17 +43,22 @@ auto Deserialize(point<T>& v, auto&& s) -> bool
 template <Arithmetic T>
 void Serialize(rect<T> const& v, auto&& s)
 {
-    s["x"]      = v.X;
-    s["y"]      = v.Y;
-    s["width"]  = v.Width;
-    s["height"] = v.Height;
+    s["x"]      = v.left();
+    s["y"]      = v.top();
+    s["width"]  = v.width();
+    s["height"] = v.height();
 }
 
 template <Arithmetic T>
 auto Deserialize(rect<T>& v, auto&& s) -> bool
 {
-    return s.try_get(v.X, "x") && s.try_get(v.Y, "y")
-        && s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
+    T x, y, w, h;
+    if (s.try_get(x, "x") && s.try_get(y, "y") && s.try_get(w, "width") && s.try_get(h, "height")) {
+        v.Position = {x, y};
+        v.Size     = {w, h};
+        return true;
+    }
+    return false;
 }
 
 ////////////////////////////////////////////////////////////

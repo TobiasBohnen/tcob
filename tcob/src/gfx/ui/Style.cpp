@@ -83,16 +83,16 @@ namespace element {
 
         switch (ctx.Orientation) {
         case orientation::Horizontal:
-            retValue.Width  = LongSide.calc(rect.Width);
-            retValue.Height = ShortSide.calc(rect.Height);
-            retValue.X += (rect.Width - retValue.Width) * (ctx.Inverted ? (1.0f - ctx.Fraction) : ctx.Fraction);
-            retValue.Y += (rect.Height - retValue.Height) / 2.0f;
+            retValue.Size.Width  = LongSide.calc(rect.width());
+            retValue.Size.Height = ShortSide.calc(rect.height());
+            retValue.Position.X += (rect.width() - retValue.width()) * (ctx.Inverted ? (1.0f - ctx.Fraction) : ctx.Fraction);
+            retValue.Position.Y += (rect.height() - retValue.height()) / 2.0f;
             break;
         case orientation::Vertical:
-            retValue.Height = LongSide.calc(rect.Height);
-            retValue.Width  = ShortSide.calc(rect.Width);
-            retValue.Y += (rect.Height - retValue.Height) * (!ctx.Inverted ? (1.0f - ctx.Fraction) : ctx.Fraction);
-            retValue.X += (rect.Width - retValue.Width) / 2.0f;
+            retValue.Size.Height = LongSide.calc(rect.height());
+            retValue.Size.Width  = ShortSide.calc(rect.width());
+            retValue.Position.Y += (rect.height() - retValue.height()) * (!ctx.Inverted ? (1.0f - ctx.Fraction) : ctx.Fraction);
+            retValue.Position.X += (rect.width() - retValue.width()) / 2.0f;
         }
 
         return retValue - Border.get_thickness();
@@ -102,11 +102,11 @@ namespace element {
     {
         rect_f retValue {rect};
 
-        retValue.Width  = Size.Width.calc(rect.Width);
-        retValue.Height = Size.Height.calc(rect.Height);
+        retValue.Size.Width  = Size.Width.calc(rect.width());
+        retValue.Size.Height = Size.Height.calc(rect.height());
 
-        retValue.X += rect.Width - retValue.Width;
-        retValue.Y += (rect.Height - retValue.Height) / 2;
+        retValue.Position.X += rect.width() - retValue.width();
+        retValue.Position.Y += (rect.height() - retValue.height()) / 2;
 
         return retValue - Border.get_thickness() - Padding;
     }
@@ -117,27 +117,27 @@ namespace element {
 
         switch (orien) {
         case orientation::Horizontal:
-            retValue.Height = Size.calc(rect.Height);
+            retValue.Size.Height = Size.calc(rect.height());
 
             switch (align) {
             case position::RightOrBottom:
-                retValue.Y += rect.Height - retValue.Height;
+                retValue.Position.Y += rect.height() - retValue.height();
                 break;
             case position::CenterOrMiddle:
-                retValue.Y += (rect.Height - retValue.Height) / 2.0f;
+                retValue.Position.Y += (rect.height() - retValue.height()) / 2.0f;
                 break;
             default: break;
             }
             break;
         case orientation::Vertical:
-            retValue.Width = Size.calc(rect.Width);
+            retValue.Size.Width = Size.calc(rect.width());
 
             switch (align) {
             case position::RightOrBottom:
-                retValue.X += rect.Width - retValue.Width;
+                retValue.Position.X += rect.width() - retValue.width();
                 break;
             case position::CenterOrMiddle:
-                retValue.X += (rect.Width - retValue.Width) / 2.0f;
+                retValue.Position.X += (rect.width() - retValue.width()) / 2.0f;
                 break;
             default: break;
             }
@@ -154,7 +154,7 @@ namespace element {
 
     auto text::calc_font_size(rect_f const& rect) const -> u32
     {
-        return static_cast<u32>(std::ceil(Size.calc(1.0f, rect.Height)));
+        return static_cast<u32>(std::ceil(Size.calc(1.0f, rect.height())));
     }
 }
 

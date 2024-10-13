@@ -1047,7 +1047,8 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 
 void canvas::rect(rect_f const& rec)
 {
-    auto const [x, y, w, h] {rec};
+    auto const [x, y] {rec.Position};
+    auto const [w, h] {rec.Size};
     append_commands(std::vector<f32> {
         MoveTo, x, y,
         LineTo, x, y + h,
@@ -1063,7 +1064,8 @@ void canvas::rounded_rect(rect_f const& r, f32 rad)
 
 void canvas::rounded_rect_varying(rect_f const& rec, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
 {
-    auto const [x, y, w, h] {rec};
+    auto const [x, y] {rec.Position};
+    auto const [w, h] {rec.Size};
     if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) {
         rect(rec);
         return;
@@ -1260,7 +1262,7 @@ auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradien
         .XForm   = {1.0f, 0.0f, c.X,
                     0.0f, 1.0f, c.Y,
                     0.0f, 0.0f, 1.0f},
-        .Extent  = {rect.Width * 0.5f, rect.Height * 0.5f},
+        .Extent  = {rect.width() * 0.5f, rect.height() * 0.5f},
         .Radius  = r,
         .Feather = std::max(1.0f, f),
         .Color   = paint_gradient {1.0f, gradient}};
@@ -1385,7 +1387,8 @@ void canvas::set_scissor(rect_f const& rect, bool transform)
 {
     state& s {get_state()};
 
-    auto [x, y, w, h] {rect};
+    auto [x, y] {rect.Position};
+    auto [w, h] {rect.Size};
     w = std::max(0.0f, w);
     h = std::max(0.0f, h);
 
@@ -1416,7 +1419,7 @@ void canvas::set_font(font* font)
 
 void canvas::draw_textbox(rect_f const& rect, utf8_string_view text)
 {
-    draw_textbox(rect.get_position(), format_text(rect.get_size(), text));
+    draw_textbox(rect.Position, format_text(rect.Size, text));
 }
 
 void canvas::draw_textbox(point_f offset, text_formatter::result const& formatResult)
@@ -1440,9 +1443,9 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
             auto const& posRect {quad.Rect};
 
             auto const& uvRect {quad.TexRegion.UVRect};
-            f32 const   uvLeft {uvRect.X};
+            f32 const   uvLeft {uvRect.left()};
             f32 const   uvRight {uvRect.right()};
-            f32 const   uvTop {uvRect.Y};
+            f32 const   uvTop {uvRect.top()};
             f32 const   uvBottom {uvRect.bottom()};
 
             f32 const level {static_cast<f32>(quad.TexRegion.Level)};

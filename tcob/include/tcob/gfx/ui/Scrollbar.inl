@@ -46,9 +46,9 @@ inline void scrollbar<Parent>::paint(widget_painter& painter, element::scrollbar
         _paintResult = painter.draw_scrollbar(style, get_thumb_style(thumbFlags)->Thumb, scrRect, barCtx);
 
         if (_orien == orientation::Vertical) {
-            rect.Width -= _paintResult.Bar.Width + style.Bar.Border.Size.calc(_paintResult.Bar.Width);
+            rect.Size.Width -= _paintResult.Bar.width() + style.Bar.Border.Size.calc(_paintResult.Bar.width());
         } else if (_orien == orientation::Horizontal) {
-            rect.Height -= _paintResult.Bar.Height + style.Bar.Border.Size.calc(_paintResult.Bar.Height);
+            rect.Size.Height -= _paintResult.Bar.height() + style.Bar.Border.Size.calc(_paintResult.Bar.height());
         }
     }
 }
@@ -176,13 +176,13 @@ inline void scrollbar<Parent>::calculate_value(point_f mp)
 
         switch (_orien) {
         case orientation::Horizontal: {
-            f32 const tw {_paintResult.Thumb.Width};
-            frac  = (mp.X - _dragOffset.X - (tw / 2)) / (rect.Width - tw);
+            f32 const tw {_paintResult.Thumb.width()};
+            frac  = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
             delay = style->Bar.Delay;
         } break;
         case orientation::Vertical: {
-            f32 const th {_paintResult.Thumb.Height};
-            frac  = (mp.Y - _dragOffset.Y - (th / 2)) / (rect.Height - th);
+            f32 const th {_paintResult.Thumb.height()};
+            frac  = (mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th);
             delay = style->Bar.Delay;
         } break;
         }

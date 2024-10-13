@@ -211,7 +211,7 @@ void form::on_draw_to(render_target& target)
         _window->Cursor->ActiveMode = _topWidget->get_style<style>()->Cursor;
     }
 
-    size_i const bounds {size_i {Bounds->get_size()}};
+    size_i const bounds {size_i {Bounds->Size}};
 
     // redraw
     if (_redrawWidgets) {
@@ -231,21 +231,21 @@ void form::on_draw_to(render_target& target)
         point_i const pos {(_window && _window->Cursor()
                                 ? _window->Cursor->get_bounds().bottom_right()
                                 : input::system::GetMousePosition())
-                           - static_cast<point_i>(Bounds->get_position())};
+                           - static_cast<point_i>(Bounds->Position)};
 
         auto& ttBounds {*_topWidget->Tooltip->Bounds};
-        ttBounds.X = static_cast<f32>(pos.X);
-        ttBounds.Y = static_cast<f32>(pos.Y);
+        ttBounds.Position.X = static_cast<f32>(pos.X);
+        ttBounds.Position.Y = static_cast<f32>(pos.Y);
         if (ttBounds.right() > Bounds->right()) {
-            ttBounds.X -= ttBounds.Width;
+            ttBounds.Position.X -= ttBounds.width();
             if (_window && _window->Cursor()) {
-                ttBounds.X -= _window->Cursor->get_bounds().Width;
+                ttBounds.Position.X -= _window->Cursor->get_bounds().width();
             }
         }
         if (ttBounds.bottom() > Bounds->bottom()) {
-            ttBounds.Y -= ttBounds.Height;
+            ttBounds.Position.Y -= ttBounds.height();
             if (_window && _window->Cursor()) {
-                ttBounds.Y -= _window->Cursor->get_bounds().Height;
+                ttBounds.Position.Y -= _window->Cursor->get_bounds().height();
             }
         }
 

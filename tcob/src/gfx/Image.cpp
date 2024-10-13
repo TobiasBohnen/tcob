@@ -44,15 +44,15 @@ auto image::get_data(rect_i const& bounds) const -> std::vector<u8>
 {
     i32 const bpp {_info.bytes_per_pixel()};
     i32 const srcStride {_info.stride()};
-    i32 const dstStride {bounds.Width * bpp};
+    i32 const dstStride {bounds.width() * bpp};
 
-    std::vector<u8> retValue(static_cast<usize>(bounds.Height * dstStride));
+    std::vector<u8> retValue(static_cast<usize>(bounds.height() * dstStride));
 
     // TODO: bounds check
 
-    for (i32 y {bounds.Y}; y < bounds.bottom(); ++y) {
-        u8 const* src {&_buffer[(y * srcStride) + (bounds.X * bpp)]};
-        i32 const dst {(y - bounds.Y) * dstStride};
+    for (i32 y {bounds.top()}; y < bounds.bottom(); ++y) {
+        u8 const* src {&_buffer[(y * srcStride) + (bounds.left() * bpp)]};
+        i32 const dst {(y - bounds.top()) * dstStride};
         std::copy(src, src + dstStride, retValue.begin() + dst);
     }
 

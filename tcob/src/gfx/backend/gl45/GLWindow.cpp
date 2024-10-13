@@ -73,7 +73,7 @@ void gl_window::clear(color c) const
 
 void gl_window::set_viewport(rect_i const& rect)
 {
-    glViewport(rect.left(), rect.top(), rect.Width, rect.Height);
+    glViewport(rect.left(), rect.top(), rect.width(), rect.height());
 }
 
 void gl_window::swap_buffer() const

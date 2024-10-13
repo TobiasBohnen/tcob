@@ -34,25 +34,25 @@ void image_box::on_paint(widget_painter& painter)
 
             switch (style->Fit) {
             case fit_mode::None:
-                targetRect = {rect.get_position(), static_cast<size_f>(tex->get_size())};
+                targetRect = {rect.Position, static_cast<size_f>(tex->get_size())};
                 break;
             case fit_mode::Contain: {
                 size_f const imgSize {static_cast<size_f>(tex->get_size())};
                 f32 const    aspectRatioToShrink {imgSize.Width / imgSize.Height};
-                f32 const    aspectRatioTarget {rect.Width / rect.Height};
-                f32 const    factor {(aspectRatioToShrink > aspectRatioTarget) ? (rect.Width / imgSize.Width) : (rect.Height / imgSize.Height)};
-                targetRect = {rect.get_position(), {imgSize.Width * factor, imgSize.Height * factor}};
+                f32 const    aspectRatioTarget {rect.width() / rect.height()};
+                f32 const    factor {(aspectRatioToShrink > aspectRatioTarget) ? (rect.width() / imgSize.Width) : (rect.height() / imgSize.Height)};
+                targetRect = {rect.Position, {imgSize.Width * factor, imgSize.Height * factor}};
             } break;
             case fit_mode::Fill:
                 targetRect = rect;
                 break;
             case fit_mode::FitWidth: {
                 f32 const factor {tex->get_size().Width / static_cast<f32>(tex->get_size().Height)};
-                targetRect = {rect.get_position(), {rect.Width, rect.Width * factor}};
+                targetRect = {rect.Position, {rect.width(), rect.width() * factor}};
             } break;
             case fit_mode::FitHeight: {
                 f32 const factor {tex->get_size().Height / static_cast<f32>(tex->get_size().Width)};
-                targetRect = {rect.get_position(), {rect.Height * factor, rect.Height}};
+                targetRect = {rect.Position, {rect.height() * factor, rect.height()}};
             } break;
             }
 
@@ -60,20 +60,20 @@ void image_box::on_paint(widget_painter& painter)
             case horizontal_alignment::Left:
                 break;
             case horizontal_alignment::Right:
-                targetRect.X += rect.Width - targetRect.Width;
+                targetRect.Position.X += rect.width() - targetRect.width();
                 break;
             case horizontal_alignment::Centered:
-                targetRect.X += (rect.Width - targetRect.Width) / 2;
+                targetRect.Position.X += (rect.width() - targetRect.width()) / 2;
                 break;
             }
             switch (style->Alignment.Vertical) {
             case vertical_alignment::Top:
                 break;
             case vertical_alignment::Bottom:
-                targetRect.Y += rect.Height - targetRect.Height;
+                targetRect.Position.Y += rect.height() - targetRect.height();
                 break;
             case vertical_alignment::Middle:
-                targetRect.Y += (rect.Height - targetRect.Height) / 2;
+                targetRect.Position.Y += (rect.height() - targetRect.height()) / 2;
                 break;
             }
 

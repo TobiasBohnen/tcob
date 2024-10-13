@@ -48,7 +48,7 @@ struct std::formatter<tcob::rect<T>> {
 
     auto format(tcob::rect<T> val, format_context& ctx) const
     {
-        return format_to(ctx.out(), "(x:{},y:{},w:{},h:{})", val.X, val.Y, val.Width, val.Height);
+        return format_to(ctx.out(), "(x:{},y:{},w:{},h:{})", val.left(), val.top(), val.width(), val.height());
     }
 };
 

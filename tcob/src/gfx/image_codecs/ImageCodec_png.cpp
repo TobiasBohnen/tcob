@@ -489,7 +489,7 @@ auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
         if (!_ihdr.NonInterlaced) {
             if (_ihdr.Width < 5 || _ihdr.Height < 5) {
                 rect_i rect {get_interlace_dimensions()};
-                while (rect.Width <= 0 || rect.Height <= 0) {
+                while (rect.width() <= 0 || rect.height() <= 0) {
                     ++_interlacePass;
                     rect = get_interlace_dimensions();
                 }

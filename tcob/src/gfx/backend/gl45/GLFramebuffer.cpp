@@ -65,7 +65,7 @@ void gl_framebuffer::get_subimage(rect_i const& rect, std::span<u8> pixels)
     glGetTextureSubImage(
         _texID,
         0,
-        rect.left(), rect.top(), 0, rect.Width, rect.Height,
+        rect.left(), rect.top(), 0, rect.width(), rect.height(),
         1,
         GL_RGBA, GL_UNSIGNED_BYTE,
         static_cast<i32>(pixels.size_bytes()), pixels.data());

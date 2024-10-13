@@ -79,12 +79,12 @@ void list_box::scroll_to_selected()
     f32 value {0.0f};
     if (auto const* style {get_style<list_box::style>()}) {
         rect_f const listRect {get_content_bounds()};
-        f32 const    itemHeight {style->ItemHeight.calc(listRect.Height)};
+        f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
         auto const   scrollMax {get_scroll_max_value(orientation::Vertical)};
 
         for (i32 i {0}; i < SelectedItemIndex; ++i) {
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-            value += itemRect.Height;
+            value += itemRect.height();
             if (value >= scrollMax) {
                 value = scrollMax;
                 break;
@@ -124,7 +124,7 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
     if (auto const* style {get_style<list_box::style>()}) {
         rect_f listRect {rect};
 
-        f32 const itemHeight {style->ItemHeight.calc(listRect.Height)};
+        f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
 
         for (i32 i {0}; i < get_item_count(); ++i) {
             if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
@@ -186,7 +186,7 @@ void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
         rect_f const listRect {get_global_content_bounds()};
         if (listRect.contains(ev.Position)) {
             // over list
-            f32 const itemHeight {style->ItemHeight.calc(listRect.Height)};
+            f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
             for (i32 i {0}; i < get_item_count(); ++i) {
                 rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
                 if (itemRect.contains(ev.Position)) {
@@ -216,8 +216,8 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
 auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f
 {
     rect_f retValue {rect};
-    retValue.Height = itemHeight;
-    retValue.Y      = rect.Y + (retValue.Height * index) - get_scrollbar_value();
+    retValue.Size.Height = itemHeight;
+    retValue.Position.Y  = rect.top() + (retValue.height() * index) - get_scrollbar_value();
     return retValue;
 }
 
@@ -236,10 +236,10 @@ auto list_box::get_scroll_content_height() const -> f32
     f32 retValue {0.0f};
     if (auto const* style {get_style<list_box::style>()}) {
         rect_f const listRect {get_content_bounds()};
-        f32 const    itemHeight {style->ItemHeight.calc(listRect.Height)};
+        f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
         for (i32 i {0}; i < get_item_count(); ++i) {
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-            retValue += itemRect.Height;
+            retValue += itemRect.height();
         }
     }
 

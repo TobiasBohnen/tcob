@@ -78,7 +78,7 @@ void transformable::reset_transform()
 
 rect_transformable::rect_transformable()
     : Center {{[&]() { return Bounds->get_center(); },
-               [&](point_f const& value) { Bounds = Bounds->as_moved_to({value.X - (Bounds->Width / 2.0f), value.Y - (Bounds->Height / 2.0f)}); }}}
+               [&](point_f const& value) { Bounds = Bounds->as_moved_to({value.X - (Bounds->width() / 2.0f), value.Y - (Bounds->height() / 2.0f)}); }}}
 {
     Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });
@@ -86,7 +86,7 @@ rect_transformable::rect_transformable()
 
 void rect_transformable::move_by(point_f offset)
 {
-    Bounds = {Bounds->get_position() + offset, Bounds->get_size()};
+    Bounds = {Bounds->Position + offset, Bounds->Size};
 }
 
 auto rect_transformable::get_pivot() const -> point_f

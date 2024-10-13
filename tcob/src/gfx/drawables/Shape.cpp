@@ -268,8 +268,8 @@ void circle_shape::create()
     auto const& uvRect {texReg.UVRect};
     _verts.push_back({.Position  = (xform * Center()).as_array(),
                       .Color     = Color->as_array(),
-                      .TexCoords = {(0.5f * uvRect.Width) + uvRect.X,
-                                    (0.5f * uvRect.Height) + uvRect.Y,
+                      .TexCoords = {(0.5f * uvRect.width()) + uvRect.left(),
+                                    (0.5f * uvRect.height()) + uvRect.top(),
                                     texLevel}});
 
     auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
@@ -280,8 +280,8 @@ void circle_shape::create()
         f32 const y {(radius * std::sin(angle)) + centerY};
         _verts.push_back({.Position  = (xform * point_f {x, y}).as_array(),
                           .Color     = Color->as_array(),
-                          .TexCoords = {(((x - uvSquare.X) / uvSquare.Width) * uvRect.Width) + uvRect.X,
-                                        (((y - uvSquare.Y) / uvSquare.Height) * uvRect.Height) + uvRect.Y,
+                          .TexCoords = {(((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
+                                        (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
                                         texLevel}});
     }
 
@@ -333,7 +333,7 @@ auto rect_shape::get_AABB() const -> rect_f
 
 void rect_shape::move_by(point_f offset)
 {
-    Bounds = {Bounds->get_position() + offset, Bounds->get_size()};
+    Bounds = {Bounds->Position + offset, Bounds->Size};
 }
 
 void rect_shape::update_aabb()
@@ -477,8 +477,8 @@ void poly_shape::create()
         auto const& [x, y] {point};
         _verts.push_back({.Position  = (xform * point).as_array(),
                           .Color     = Color->as_array(),
-                          .TexCoords = {(((x - _boundingBox.X) / _boundingBox.Width) * uvRect.Width) + uvRect.X,
-                                        (((y - _boundingBox.Y) / _boundingBox.Height) * uvRect.Height) + uvRect.Y,
+                          .TexCoords = {(((x - _boundingBox.left()) / _boundingBox.width()) * uvRect.width()) + uvRect.left(),
+                                        (((y - _boundingBox.top()) / _boundingBox.height()) * uvRect.height()) + uvRect.top(),
                                         texLevel}});
     }};
 

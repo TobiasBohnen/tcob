@@ -30,9 +30,9 @@ auto panel::get_scroll_min_value(orientation orien) const -> f32
     for (auto const& w : get_widgets()) {
         auto const& bounds {w->Bounds()};
         if (orien == orientation::Horizontal) {
-            retValue = std::min(retValue, bounds.X);
+            retValue = std::min(retValue, bounds.left());
         } else if (orien == orientation::Vertical) {
-            retValue = std::min(retValue, bounds.Y);
+            retValue = std::min(retValue, bounds.top());
         }
     }
     retValue = std::min<f32>(retValue, 0);
@@ -47,9 +47,9 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
         auto const& bounds {w->Bounds()};
         auto const  content {get_content_bounds()};
         if (orien == orientation::Horizontal) {
-            retValue = std::max(retValue, bounds.right() - content.Width);
+            retValue = std::max(retValue, bounds.right() - content.width());
         } else if (orien == orientation::Vertical) {
-            retValue = std::max(retValue, bounds.bottom() - content.Height);
+            retValue = std::max(retValue, bounds.bottom() - content.height());
         }
     }
 
@@ -93,19 +93,11 @@ auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
     return std::ranges::any_of(get_widgets(), [orien, rect](auto const& w) {
         auto const& bounds {w->Bounds()};
         if (orien == orientation::Horizontal) {
-            if (bounds.X < 0) {
-                return true;
-            }
-            if (bounds.right() > rect.Width) {
-                return true;
-            }
+            if (bounds.left() < 0) { return true; }
+            if (bounds.right() > rect.width()) { return true; }
         } else if (orien == orientation::Vertical) {
-            if (bounds.Y < 0) {
-                return true;
-            }
-            if (bounds.bottom() > rect.Height) {
-                return true;
-            }
+            if (bounds.top() < 0) { return true; }
+            if (bounds.bottom() > rect.height()) { return true; }
         }
 
         return false;
@@ -139,7 +131,7 @@ void panel::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         auto          xform {transform::Identity};
-        point_f const translate {rect.get_position() + get_paint_offset()};
+        point_f const translate {rect.Position + get_paint_offset()};
         xform.translate(translate);
 
         for (auto const& w : get_widgets_by_zorder()) {
@@ -261,10 +253,10 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     if (!isHitTest) {
         if (auto const* style {get_style<panel::style>()}) {
             if (_vScrollbar.Visible) {
-                bounds.Width -= style->VScrollBar.Bar.Size.calc(bounds.Width);
+                bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
             }
             if (_hScrollbar.Visible) {
-                bounds.Height -= style->HScrollBar.Bar.Size.calc(bounds.Height);
+                bounds.Size.Height -= style->HScrollBar.Bar.Size.calc(bounds.height());
             }
         }
     }
@@ -304,7 +296,7 @@ void glass::on_paint(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     auto          xform {transform::Identity};
-    point_f const translate {rect.get_position() + get_paint_offset()};
+    point_f const translate {rect.Position + get_paint_offset()};
     xform.translate(translate);
 
     for (auto const& w : get_widgets()) {
