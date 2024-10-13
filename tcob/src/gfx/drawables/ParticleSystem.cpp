@@ -220,6 +220,12 @@ void particle::update(milliseconds delta)
 
     // spin
     Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
+
+    // transform
+    point_f const origin {Bounds.get_center()};
+    _transform.to_identity();
+    if (Scale != size_f::One) { _transform.scale_at(Scale, origin); }
+    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
 }
 
 void particle::set_lifetime(milliseconds life)
@@ -240,12 +246,7 @@ void particle::set_texture_region(texture_region const& texRegion)
 
 void particle::to_quad(quad* quad)
 {
-    point_f const origin {Bounds.get_center()};
-    transform     xform {};
-    if (Scale != size_f::One) { xform.scale_at(Scale, origin); }
-    if (Rotation != degree_f {0}) { xform.rotate_at(Rotation, origin); }
-
-    geometry::set_position(*quad, Bounds, xform);
+    geometry::set_position(*quad, Bounds, _transform);
     geometry::set_color(*quad, Color);
     geometry::set_texcoords(*quad, _region);
 }

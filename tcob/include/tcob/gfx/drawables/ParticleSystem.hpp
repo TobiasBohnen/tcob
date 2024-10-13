@@ -53,6 +53,7 @@ public:
 
 private:
     texture_region _region {};
+    transform      _transform {};
     milliseconds   _startingLife {0};
     milliseconds   _remainingLife {0};
 };
