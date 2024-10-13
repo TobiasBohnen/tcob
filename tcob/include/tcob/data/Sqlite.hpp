@@ -22,24 +22,16 @@ struct converter;
 template <typename T>
 concept ConvertibleTo =
     requires(statement_view stmt, i32& idx, T const& t) {
-        {
-            converter<T>::To(stmt, idx, t)
-        };
+        { converter<T>::To(stmt, idx, t) };
     } || requires(statement_view stmt, i32 idx, T const& t) {
-        {
-            converter<std::remove_cvref_t<T>>::To(stmt, idx, t)
-        };
+        { converter<std::remove_cvref_t<T>>::To(stmt, idx, t) };
     };
 
 template <typename T>
 concept ConvertibleFrom = requires(statement_view stmt, i32 col, T& t) {
-    {
-        converter<T>::From(stmt, col, t)
-    };
+    { converter<T>::From(stmt, col, t) };
 } || requires(statement_view stmt, i32 col, T& t) {
-    {
-        converter<std::remove_cvref_t<T>>::From(stmt, col, t)
-    };
+    { converter<std::remove_cvref_t<T>>::From(stmt, col, t) };
 };
 
 ////////////////////////////////////////////////////////////

@@ -176,9 +176,7 @@ using widget_attributes = std::unordered_map<string, attributes>;
 
 template <typename Target>
 concept SubmitTarget = requires(Target target, string const& name, widget_attributes const& properties) {
-    {
-        target[name] = properties
-    };
+    { target[name] = properties };
 };
 
 ////////////////////////////////////////////////////////////

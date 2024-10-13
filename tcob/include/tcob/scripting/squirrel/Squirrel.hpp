@@ -49,25 +49,17 @@ class vm_view;
 template <typename T>
 concept ConvertibleTo =
     requires(T& t, vm_view state) {
-        {
-            converter<T>::To(state, t)
-        };
+        { converter<T>::To(state, t) };
     } || requires(T& t, vm_view state) {
-        {
-            converter<std::remove_cvref_t<T>>::To(state, t)
-        };
+        { converter<std::remove_cvref_t<T>>::To(state, t) };
     };
 
 template <typename T>
 concept ConvertibleFrom =
     requires(T& t, SQInteger& idx, vm_view state) {
-        {
-            converter<T>::From(state, idx, t)
-        };
+        { converter<T>::From(state, idx, t) };
     } || requires(T& t, SQInteger& idx, vm_view state) {
-        {
-            converter<std::remove_cvref_t<T>>::From(state, idx, t)
-        };
+        { converter<std::remove_cvref_t<T>>::From(state, idx, t) };
     };
 
 ////////////////////////////////////////////////////////////

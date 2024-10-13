@@ -34,20 +34,14 @@ struct converter;
 template <typename T>
 concept ConvertibleTo =
     requires(cfg_value& config, T const& t) {
-        {
-            converter<std::remove_cvref_t<T>>::To(config, t)
-        };
+        { converter<std::remove_cvref_t<T>>::To(config, t) };
     };
 
 template <typename T>
 concept ConvertibleFrom =
     requires(cfg_value& config, T& t) {
-        {
-            converter<T>::From(config, t)
-        };
-        {
-            converter<T>::IsType(config)
-        };
+        { converter<T>::From(config, t) };
+        { converter<T>::IsType(config) };
     };
 
 ////////////////////////////////////////////////////////////

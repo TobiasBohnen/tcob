@@ -6,8 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <mutex>
-
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -38,8 +36,7 @@ protected:
     void virtual on_visiblity_changed();
 
 private:
-    bool       _visible {true};
-    std::mutex _mutex {};
+    bool _visible {true};
 };
 
 ////////////////////////////////////////////////////////////

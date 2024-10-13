@@ -39,13 +39,9 @@ class state_view;
 template <typename T>
 concept ConvertibleTo =
     requires(T& t, state_view view) {
-        {
-            converter<T>::To(view, t)
-        };
+        { converter<T>::To(view, t) };
     } || requires(T& t, state_view view) {
-        {
-            converter<std::remove_cvref_t<T>>::To(view, t)
-        };
+        { converter<std::remove_cvref_t<T>>::To(view, t) };
     };
 
 template <typename T>

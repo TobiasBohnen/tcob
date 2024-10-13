@@ -24,9 +24,7 @@ namespace tcob::gfx {
 template <typename T>
 concept QuadTweenFunction =
     requires(T& f, f64 t, std::span<quad> quads) {
-        {
-            f(t, quads)
-        };
+        { f(t, quads) };
     };
 
 ////////////////////////////////////////////////////////////

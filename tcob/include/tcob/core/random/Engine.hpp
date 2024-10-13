@@ -20,13 +20,8 @@ concept RandomEngine =
         typename T::seed_type;
         typename T::result_type;
 
-        {
-            rnd.operator()(state)
-        } -> std::same_as<typename T::result_type>;
-
-        {
-            rnd.seed(state, seed)
-        };
+        { rnd.operator()(state) } -> std::same_as<typename T::result_type>;
+        { rnd.seed(state, seed) };
     };
 
 ////////////////////////////////////////////////////////////

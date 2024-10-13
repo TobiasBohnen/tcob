@@ -65,21 +65,11 @@ inline auto operator>>(istream& is, T& m) -> istream&;
 template <typename T>
 concept ISink =
     requires(T& t, void* s, std::streamsize sib, std::streamoff off, seek_dir way) {
-        {
-            t.size_in_bytes()
-        } -> std::same_as<std::streamsize>;
-        {
-            t.is_eof()
-        } -> std::same_as<bool>;
-        {
-            t.read_bytes(s, sib)
-        } -> std::same_as<std::streamsize>;
-        {
-            t.tell()
-        } -> std::same_as<std::streamsize>;
-        {
-            t.seek(off, way)
-        } -> std::same_as<bool>;
+        { t.size_in_bytes() } -> std::same_as<std::streamsize>;
+        { t.is_eof() } -> std::same_as<bool>;
+        { t.read_bytes(s, sib) } -> std::same_as<std::streamsize>;
+        { t.tell() } -> std::same_as<std::streamsize>;
+        { t.seek(off, way) } -> std::same_as<bool>;
     };
 
 ////////////////////////////////////////////////////////////
@@ -137,15 +127,9 @@ inline auto operator<<(ostream& os, T const& m) -> ostream&;
 template <typename T>
 concept OSink =
     requires(T& t, void const* cs, std::streamsize sib, std::streamoff off, seek_dir way) {
-        {
-            t.write_bytes(cs, sib)
-        } -> std::same_as<std::streamsize>;
-        {
-            t.tell()
-        } -> std::same_as<std::streamsize>;
-        {
-            t.seek(off, way)
-        } -> std::same_as<bool>;
+        { t.write_bytes(cs, sib) } -> std::same_as<std::streamsize>;
+        { t.tell() } -> std::same_as<std::streamsize>;
+        { t.seek(off, way) } -> std::same_as<bool>;
     };
 
 ////////////////////////////////////////////////////////////

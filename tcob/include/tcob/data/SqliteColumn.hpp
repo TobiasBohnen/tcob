@@ -16,9 +16,7 @@ namespace tcob::data::sqlite {
 template <typename T>
 concept Aggregate =
     requires(T t) {
-        {
-            t.str()
-        } -> std::same_as<utf8_string>;
+        { t.str() } -> std::same_as<utf8_string>;
     };
 
 class TCOB_API avg {

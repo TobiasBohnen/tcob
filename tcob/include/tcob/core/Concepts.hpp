@@ -86,12 +86,8 @@ concept OverloadsArrowOp = requires(T a) { { a.operator->() } -> Pointer; };
 template <typename T, typename S>
 concept Serializable =
     requires(T& t, S& s) {
-        {
-            Serialize(t, s)
-        };
-        {
-            Deserialize(t, s)
-        };
+        { Serialize(t, s) };
+        { Deserialize(t, s) };
     };
 
 template <typename T>
@@ -109,18 +105,10 @@ concept Container =
     requires(T& container, typename T::value_type& value) {
         typename T::value_type;
 
-        {
-            container.push_back(value)
-        };
-        {
-            container.resize(usize {})
-        };
-        {
-            container.size()
-        } -> std::same_as<usize>;
-        {
-            container.operator[](usize {})
-        };
+        { container.push_back(value) };
+        { container.resize(usize {}) };
+        { container.size() } -> std::same_as<usize>;
+        { container.operator[](usize {}) };
     };
 
 template <typename T>

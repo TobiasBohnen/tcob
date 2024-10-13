@@ -14,25 +14,24 @@ auto drawable::is_visible() const -> bool
 
 void drawable::show()
 {
-    if (!_visible) {
-        _visible = true;
-        on_visiblity_changed();
-        VisibilityChanged(true);
-    }
+    if (_visible) { return; }
+
+    _visible = true;
+    on_visiblity_changed();
+    VisibilityChanged(true);
 }
 
 void drawable::hide()
 {
-    if (_visible) {
-        _visible = false;
-        on_visiblity_changed();
-        VisibilityChanged(false);
-    }
+    if (!_visible) { return; }
+
+    _visible = false;
+    on_visiblity_changed();
+    VisibilityChanged(false);
 }
 
 void drawable::draw_to(render_target& target)
 {
-    std::scoped_lock lock {_mutex};
     if (target.Camera->VisibilityMask & VisibilityMask) {
         if (is_visible()) {
             on_draw_to(target);
@@ -42,7 +41,6 @@ void drawable::draw_to(render_target& target)
 
 void drawable::update(milliseconds deltaTime)
 {
-    std::scoped_lock lock {_mutex};
     on_update(deltaTime);
 }
 

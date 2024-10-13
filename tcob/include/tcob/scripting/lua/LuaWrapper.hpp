@@ -60,17 +60,13 @@ namespace detail {
             typename T::value_type;
             typename T::size_type;
 
-            {
-                t[u]
-            } -> ConvertibleTo;
+            { t[u] } -> ConvertibleTo;
         };
 
     template <typename T>
     concept StringIndexable =
         requires(T& t, string&& u) {
-            {
-                t[u]
-            } -> ConvertibleTo;
+            { t[u] } -> ConvertibleTo;
         };
 }
 

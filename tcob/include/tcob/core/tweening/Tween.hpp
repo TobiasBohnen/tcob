@@ -27,9 +27,7 @@ concept TweenFunction =
     requires(T& t, f32 time) {
         typename T::type;
 
-        {
-            t.operator()(time)
-        } -> std::same_as<typename T::type>;
+        { t.operator()(time) } -> std::same_as<typename T::type>;
     };
 
 ////////////////////////////////////////////////////////////
@@ -37,9 +35,7 @@ concept TweenFunction =
 template <typename T>
 concept Lerpable =
     requires(T const& t, f32 time) {
-        {
-            T::Lerp(t, t, time)
-        } -> std::same_as<T>;
+        { T::Lerp(t, t, time) } -> std::same_as<T>;
     };
 
 ////////////////////////////////////////////////////////////
