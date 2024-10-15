@@ -34,6 +34,7 @@ gl_canvas::gl_canvas()
 
     // gradient
     _gradientTexture.create({GRADIENT_SIZE, GRADIENT_SIZE}, 1, texture::format::RGBA8);
+    _gradientTexture.Wrapping = texture::wrapping::ClampToEdge;
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
     // Create UBOs
