@@ -23,14 +23,18 @@ static char const* fillFragShader {
 };
 
 static u32 const GLNVG_FRAG_BINDING {0};
+static i32 const GRADIENT_SIZE {256};
 
 gl_canvas::gl_canvas()
 {
-
     if (!_shader.compile(fillVertShader, fillFragShader)) {
         throw std::runtime_error("failed to compile nanovg shader");
     }
     _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
+
+    // gradient
+    _gradientTexture.create({GRADIENT_SIZE, GRADIENT_SIZE}, 1, texture::format::RGBA8);
+    _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
     // Create UBOs
     //  glUniformBlockBinding(_shader.get_id(), 0, GLNVG_FRAG_BINDING);
@@ -38,7 +42,7 @@ gl_canvas::gl_canvas()
 
     i32 align {0};
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align);
-    _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - sizeof(nvg_frag_uniforms) % static_cast<u32>(align);
+    _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - (sizeof(nvg_frag_uniforms) % static_cast<u32>(align));
 }
 
 gl_canvas::~gl_canvas()
@@ -82,11 +86,13 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
 
     if (auto const* arg0 {std::get_if<color>(&paint.Color)}) {
         auto const c {arg0->as_alpha_premultiplied()};
-        retValue.Gradient[0]   = {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
-        retValue.IsSingleColor = true;
+        retValue.GradientIndex = -1;
+        retValue.GradientAlpha = 1;
+        retValue.GradientColor = {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
     } else if (auto const* arg1 {std::get_if<paint_gradient>(&paint.Color)}) {
-        retValue.Gradient      = arg1->second.as_array(arg1->first);
-        retValue.IsSingleColor = false;
+        retValue.GradientIndex = arg1->second / static_cast<f32>(GRADIENT_SIZE - 1.f);
+        retValue.GradientAlpha = arg1->first;
+        retValue.GradientColor = {1, 1, 1, 1};
     }
 
     if (scissor.Extent[0] < -0.5f || scissor.Extent[1] < -0.5f) {
@@ -127,20 +133,17 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
     return retValue;
 }
 
-void gl_canvas::set_uniforms(usize uniformOffset) const
-{
-    glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms));
-}
-
 void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
 {
-    set_uniforms(uniformOffset);
+    glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms));
 
     if (image) {
         glBindTextureUnit(0, image->get_impl<gl_texture>()->get_id());
     } else {
         glBindTextureUnit(0, 0);
     }
+
+    glBindTextureUnit(1, _gradientTexture.get_impl<gl_texture>()->get_id());
 }
 
 void gl_canvas::set_size(size_f size)
@@ -483,4 +486,11 @@ void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& c
     *frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
     frag->Type = nvg_shader_type::Triangles;
 }
+
+void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
+{
+    auto const colors {gradient.get_colors()};
+    _gradientTexture.update_data({0, idx}, {GRADIENT_SIZE, 1}, colors.data(), 0, GRADIENT_SIZE, 1);
+}
+
 }

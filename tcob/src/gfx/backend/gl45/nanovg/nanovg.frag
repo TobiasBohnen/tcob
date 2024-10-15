@@ -4,20 +4,27 @@ R"(
 layout(std140, binding = 0)uniform Ubo {
     mat4 ScissorMatrix;
     mat4 PaintMatrix;
-    vec4 Gradient[256];
+
     vec2 ScissorExt;
     vec2 ScissorScale;
+
     vec2 Extent;
     float Radius;
     float Feather;
+
     float StrokeMult;
     float StrokeThr;
+
     int TexType;
     int Type;
-    bool IsSingleColor;
+
+    vec4 GradientColor;
+    float GradientIndex;
+    float GradientAlpha;
 } frag;
 
 uniform sampler2DArray texture0;
+uniform sampler2DArray gradientTexture;
 
 in VS_OUT {
     vec2 Position;
@@ -57,12 +64,13 @@ void main(void) {
     if (frag.Type == 0) {// Gradient
         // Calculate gradient color using box gradient
         vec4 color;
-        if (frag.IsSingleColor) {
-            color = frag.Gradient[0].rgba;
+        if (frag.GradientIndex == -1) {
+            color = frag.GradientColor;
         } else {
             vec2 pt = (frag.PaintMatrix * vec4(fs_in.Position, 1.0, 1.0)).xy;
-            int idx = int(clamp((sd_round_rect(pt, frag.Extent, frag.Radius) + frag.Feather * 0.5) / frag.Feather, 0.0, 1.0) * 255.0);
-            color = frag.Gradient[idx].rgba;
+            float idx = clamp((sd_round_rect(pt, frag.Extent, frag.Radius) + frag.Feather * 0.5) / frag.Feather, 0.0, 1.0);
+            color = texture(gradientTexture, vec3(idx, frag.GradientIndex, 0));
+            color.a *= frag.GradientAlpha;
         }
         // Combine alpha
         color *= strokeAlpha * scissor;
@@ -78,7 +86,7 @@ void main(void) {
             color = vec4(color.r);
         }
         // Apply color tint and alpha.
-        color *= frag.Gradient[0].rgba;
+        color *= frag.GradientColor.rgba;
         // Combine alpha
         color *= strokeAlpha * scissor;
         result = color;
@@ -92,7 +100,7 @@ void main(void) {
             color = vec4(color.r);
         }
         // Apply color tint and alpha.
-        color *= frag.Gradient[0].rgba;
+        color *= frag.GradientColor.rgba;
         // Combine alpha
         color *= scissor;
         result = color;

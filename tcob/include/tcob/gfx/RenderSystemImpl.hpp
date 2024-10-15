@@ -10,6 +10,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
@@ -37,7 +38,8 @@ public:
         f32 fringe, f32 strokeWidth, std::vector<canvas_path> const& paths) = 0;
     void virtual render_triangles(
         canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
-        std::span<vertex const> verts, f32 fringe) = 0;
+        std::span<vertex const> verts, f32 fringe)                     = 0;
+    void virtual add_gradient(i32 idx, color_gradient const& gradient) = 0;
 };
 
 ////////////////////////////////////////////////////////////

@@ -1252,7 +1252,7 @@ auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& 
         .Extent  = {large, large + (d * 0.5f)},
         .Radius  = 0.0f,
         .Feather = std::max(1.0f, d),
-        .Color   = paint_gradient {1.0f, gradient}};
+        .Color   = paint_gradient {1.0f, create_gradient(gradient)}};
 }
 
 auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> canvas_paint
@@ -1265,7 +1265,7 @@ auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradien
         .Extent  = {rect.width() * 0.5f, rect.height() * 0.5f},
         .Radius  = r,
         .Feather = std::max(1.0f, f),
-        .Color   = paint_gradient {1.0f, gradient}};
+        .Color   = paint_gradient {1.0f, create_gradient(gradient)}};
 }
 
 auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, color_gradient const& gradient) -> canvas_paint
@@ -1285,7 +1285,21 @@ auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, 
         .Extent  = {r, r},
         .Radius  = r,
         .Feather = std::max(1.0f, f),
-        .Color   = paint_gradient {1.0f, gradient}};
+        .Color   = paint_gradient {1.0f, create_gradient(gradient)}};
+}
+
+auto canvas::create_gradient(color_gradient const& gradient) -> i32
+{
+    for (usize i {0}; i < _gradients.size(); ++i) {
+        if (_gradients[i] == gradient) {
+            return static_cast<i32>(i);
+        }
+    }
+
+    i32 const retValue {static_cast<i32>(_gradients.size())};
+    _gradients.push_back(gradient);
+    _impl->add_gradient(retValue, gradient);
+    return retValue;
 }
 
 auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> canvas_paint

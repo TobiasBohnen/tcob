@@ -67,19 +67,27 @@ struct nvg_path {
 };
 
 struct nvg_frag_uniforms {
-    mat4                  ScissorMatrix {};
-    mat4                  PaintMatrix {};
-    std::array<vec4, 256> Gradient {};
-    vec2                  ScissorExtent {};
-    vec2                  ScissorScale {};
-    vec2                  Extent {};
-    f32                   Radius {0};
-    f32                   Feather {0};
-    f32                   StrokeMult {0};
-    f32                   StrokeThr {0};
-    i32                   TexType {0};
-    nvg_shader_type       Type {};
-    u32                   IsSingleColor {0};
+    mat4 ScissorMatrix {};
+    mat4 PaintMatrix {};
+
+    vec2 ScissorExtent {0};
+    vec2 ScissorScale {0};
+
+    vec2 Extent {0};
+    f32  Radius {0};
+    f32  Feather {0};
+
+    f32 StrokeMult {0};
+    f32 StrokeThr {0};
+
+    i32             TexType {0};
+    nvg_shader_type Type {};
+
+    vec4 GradientColor {0};
+    f32  GradientIndex {0};
+    f32  GradientAlpha {0};
+
+    vec2 padding {};
 };
 
 class gl_canvas final : public tcob::gfx::render_backend::canvas_base {
@@ -96,13 +104,13 @@ public:
                        f32 strokeWidth, std::vector<canvas_path> const& paths) override;
     void render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
                           std::span<vertex const> verts, f32 fringe) override;
+    void add_gradient(i32 idx, color_gradient const& gradient) override;
 
 private:
     void set_stencil_mask(GLuint mask);
     void set_stencil_func(GLenum func, GLint ref, GLuint mask);
     void set_blendfunc_separate(blend_funcs const& blend);
-    void set_uniforms(usize uniformOffset) const;
-    void set_uniforms(usize uniformOffset, texture* image) const;
+    void set_uniforms(usize uniformOffset, texture* image = nullptr) const;
     auto convert_paint(canvas_paint const& paint, canvas_scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
     void fill(nvg_call const& call);
     void convex_fill(nvg_call const& call);
@@ -131,5 +139,7 @@ private:
     GLint                 _stencilFuncRef {0};
     GLuint                _stencilFuncMask {0};
     blend_funcs           _blendFunc {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
+
+    texture _gradientTexture;
 };
 }

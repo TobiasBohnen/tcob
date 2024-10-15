@@ -80,7 +80,7 @@ enum class composite_operation : u8 {
 };
 
 ////////////////////////////////////////////////////////////
-using paint_gradient = std::pair<f32, color_gradient>;
+using paint_gradient = std::pair<f32, i32>;
 using paint_color    = std::variant<color, paint_gradient>;
 
 struct canvas_paint {
@@ -309,12 +309,14 @@ private:
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit);
     void render_text(font* font, std::span<vertex const> verts);
     void path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel);
+    auto create_gradient(color_gradient const& gradient) -> i32;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
     std::vector<f32>                             _commands {};
     point_f                                      _commandPoint {point_f::Zero};
     std::stack<state>                            _states {};
     path_cache                                   _cache {};
+    std::vector<color_gradient>                  _gradients;
 
     f32    _tessTol {0};
     f32    _distTol {0};

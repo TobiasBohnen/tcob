@@ -219,6 +219,10 @@ void null_canvas::render_triangles(canvas_paint const&, blend_funcs const&, canv
 {
 }
 
+void null_canvas::add_gradient(i32, color_gradient const&)
+{
+}
+
 void null_uniform_buffer::update(void const*, usize, usize) const
 {
 }

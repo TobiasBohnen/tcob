@@ -130,6 +130,7 @@ public:
                        f32 strokeWidth, std::vector<canvas_path> const& paths) override;
     void render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
                           std::span<vertex const> verts, f32 fringe) override;
+    void add_gradient(i32 idx, color_gradient const& gradient) override;
 };
 
 } // namespace gfx
