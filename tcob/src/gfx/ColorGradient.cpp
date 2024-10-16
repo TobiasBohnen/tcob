@@ -51,26 +51,10 @@ color_gradient::color_gradient(std::span<color_stop const> colorStops, bool preM
 
 auto color_gradient::get_colors() const -> std::array<color, Size>
 {
-    std::array<vec4, Size> const colors {as_array(1)};
-
-    std::array<color, Size> retValue;
-    for (u32 idx {0}; idx < Size; ++idx) {
-        auto& c {retValue[idx]};
-        c.R = static_cast<u8>(colors[idx][0] * 255.0f);
-        c.G = static_cast<u8>(colors[idx][1] * 255.0f);
-        c.B = static_cast<u8>(colors[idx][2] * 255.0f);
-        c.A = static_cast<u8>(colors[idx][3] * 255.0f);
-    }
-    return retValue;
-}
-
-auto color_gradient::as_array(f32 multAlpha) const -> std::array<vec4, Size>
-{
-    std::array<vec4, Size> retValue {};
+    std::array<color, Size> retValue {};
 
     if (_colorStops.size() == 1) {
-        color const c {_colorStops.begin()->second};
-        retValue.fill({c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f * multAlpha});
+        retValue.fill(_colorStops.begin()->second);
     } else {
         auto it2 {_colorStops.begin()};
         auto it1 {it2++};
@@ -85,11 +69,7 @@ auto color_gradient::as_array(f32 multAlpha) const -> std::array<vec4, Size>
                 color col {color::Lerp(col1, col2, static_cast<f32>(i) / size)};
                 if (_premulAlpha) { col = col.as_alpha_premultiplied(); }
 
-                auto& c {retValue[i + start]};
-                c[0] = col.R / 255.0f;
-                c[1] = col.G / 255.0f;
-                c[2] = col.B / 255.0f;
-                c[3] = col.A / 255.0f * multAlpha;
+                retValue[i + start] = col;
             }
 
             it1 = it2;
@@ -98,6 +78,11 @@ auto color_gradient::as_array(f32 multAlpha) const -> std::array<vec4, Size>
     }
 
     return retValue;
+}
+
+auto color_gradient::get_single_color() const -> std::optional<color>
+{
+    return _colorStops.size() == 1 ? std::optional<color> {_colorStops.begin()->second} : std::nullopt;
 }
 
 } // namespace gfx
