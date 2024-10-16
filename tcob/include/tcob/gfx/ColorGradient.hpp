@@ -26,9 +26,9 @@ public:
 ////////////////////////////////////////////////////////////
 
 class TCOB_API color_gradient final {
+public:
     static constexpr u32 Size {256};
 
-public:
     color_gradient();
     color_gradient(color startColor, color endColor, bool preMulAlpha = true);
     explicit color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha = true);
