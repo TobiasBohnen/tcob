@@ -23,7 +23,6 @@ static char const* fillFragShader {
 };
 
 static u32 const GLNVG_FRAG_BINDING {0};
-static i32 const GRADIENTS {1024};
 
 gl_canvas::gl_canvas()
 {
@@ -33,7 +32,7 @@ gl_canvas::gl_canvas()
     _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
 
     // gradient
-    _gradientTexture.create({color_gradient::Size, GRADIENTS}, 1, texture::format::RGBA8);
+    _gradientTexture.create({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
     _gradientTexture.Wrapping = texture::wrapping::ClampToEdge;
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
@@ -91,7 +90,7 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
         retValue.GradientAlpha = 1;
         retValue.GradientColor = {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
     } else if (auto const* arg1 {std::get_if<paint_gradient>(&paint.Color)}) {
-        retValue.GradientIndex = arg1->second / static_cast<f32>(GRADIENTS - 1.f);
+        retValue.GradientIndex = arg1->second / (_gradientTexture.get_size().Height - 1.f);
         retValue.GradientAlpha = arg1->first;
         retValue.GradientColor = {1, 1, 1, 1};
     }
@@ -490,6 +489,14 @@ void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& c
 
 void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
 {
+    i32 const size {_gradientTexture.get_size().Height};
+    if (idx >= size) { // grow texture
+        auto const img {_gradientTexture.copy_to_image(0)};
+        _gradientTexture.create({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
+        _gradientTexture.Wrapping = texture::wrapping::ClampToEdge;
+        _gradientTexture.update_data(point_i::Zero, img.get_info().Size, img.get_data().data(), 0, color_gradient::Size, 1);
+    }
+
     auto const colors {gradient.get_colors()};
     _gradientTexture.update_data({0, idx}, {color_gradient::Size, 1}, colors.data(), 0, color_gradient::Size, 1);
 }
