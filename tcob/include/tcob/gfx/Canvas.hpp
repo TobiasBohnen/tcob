@@ -41,6 +41,7 @@
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Path2d.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Texture.hpp"
@@ -77,6 +78,14 @@ enum class composite_operation : u8 {
     Lighter,
     Copy,
     Xor,
+};
+
+enum commands : u8 {
+    MoveTo   = 0,
+    LineTo   = 1,
+    BezierTo = 2,
+    Close    = 3,
+    Winding  = 4,
 };
 
 ////////////////////////////////////////////////////////////
@@ -133,18 +142,6 @@ public:
 
     private:
         canvas* _canvas;
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    class TCOB_API path2d {
-    public:
-        auto static Parse(string_view path) -> std::optional<path2d>;
-
-        std::vector<std::function<void(canvas&)>> Commands;
-
-    private:
-        auto static GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>;
     };
 
     ////////////////////////////////////////////////////////////
@@ -308,7 +305,6 @@ private:
     void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit);
     void render_text(font* font, std::span<vertex const> verts);
-    void path_arc_to(f32 x1, f32 y1, std::vector<f32> const& args, bool rel);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};

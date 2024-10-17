@@ -77,6 +77,7 @@
 #include <tcob/gfx/Image.hpp>
 #include <tcob/gfx/ImageFilters.hpp>
 #include <tcob/gfx/Material.hpp>
+#include <tcob/gfx/Path2d.hpp>
 #include <tcob/gfx/Polygon.hpp>
 #include <tcob/gfx/QuadTween.hpp>
 #include <tcob/gfx/Quadtree.hpp>

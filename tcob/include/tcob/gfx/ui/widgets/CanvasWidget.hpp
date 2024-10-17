@@ -67,7 +67,7 @@ public:
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);
 
-    void path_2d(canvas::path2d const& path);
+    void path_2d(path2d const& path);
 
     void fill();
     void stroke();

@@ -6,18 +6,10 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorGradient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bmp.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bsi.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_gif.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pcx.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png_interlaced.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png_non_interlaced.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pnm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Path2d.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ray.cpp
@@ -40,6 +32,15 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Shape.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/Text.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/drawables/TileMap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bmp.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_bsi.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_gif.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pcx.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png_interlaced.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png_non_interlaced.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pnm.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CanvasWidget.cpp
@@ -84,6 +85,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.inl
     ${TCOB_INC_DIR}/tcob/gfx/Material.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Geometry.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Path2d.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.inl
