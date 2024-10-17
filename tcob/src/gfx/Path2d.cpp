@@ -6,6 +6,7 @@
 #include "tcob/gfx/Path2d.hpp"
 
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Canvas.hpp"
 
 namespace tcob::gfx {
@@ -280,6 +281,68 @@ void path2d::arc_to(f32 radiusX, f32 radiusY, degree_f rotX, bool largeArc, bool
 void path2d::close()
 {
     Commands.emplace_back(Close);
+}
+
+auto path2d::polygonize() -> std::vector<polygon>
+{
+    std::vector<polygon> retValue;
+
+    f32 constexpr tolerance {0.05f};
+    point_f              curPos;
+    std::vector<point_f> points;
+
+    auto const addPoly {[&] {
+        if (!points.empty()) {
+            auto const winding {polygons::get_winding(points)};
+            if (winding == winding::CCW) {
+                retValue.emplace_back().Outline = points;
+            } else if (!retValue.empty()) {
+                retValue.at(retValue.size() - 1).Holes.push_back(points);
+            }
+
+            points.clear();
+        }
+    }};
+
+    usize       idx {0};
+    usize const nvals {Commands.size()};
+    while (idx < nvals) {
+        i32 cmd {static_cast<i32>(Commands[idx])};
+        switch (cmd) {
+        case MoveTo: {
+            curPos = point_f {Commands[idx + 1], Commands[idx + 2]};
+            idx += 3;
+        } break;
+        case LineTo: {
+            points.push_back(curPos);
+            points.emplace_back(Commands[idx + 1], Commands[idx + 2]);
+            curPos = points.back();
+            idx += 3;
+        } break;
+        case BezierTo: {
+            tweening::func::quad_bezier_curve func;
+            func.Begin        = {Commands[idx + 1], Commands[idx + 2]};
+            func.ControlPoint = {Commands[idx + 3], Commands[idx + 4]};
+            func.End          = {Commands[idx + 5], Commands[idx + 6]};
+            for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
+            curPos = func.End;
+            idx += 7;
+        } break;
+        case Close: {
+            tweening::func::linear<point_f> func;
+            func.StartValue = points[0];
+            func.EndValue   = curPos;
+            for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
+            curPos = func.EndValue;
+            ++idx;
+            addPoly();
+        } break;
+        default:
+            ++idx;
+        }
+    }
+
+    return retValue;
 }
 
 auto path2d::GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>

@@ -147,12 +147,13 @@ struct video_config {
 
 namespace tcob {
 namespace gfx {
-    class render_system;
-    struct render_properties;
-    class material;
+    class canvas;
     struct canvas_paint;
     struct canvas_scissor;
     struct canvas_path;
+    class material;
+    class render_system;
+    struct render_properties;
 }
 namespace gfx::render_backend {
     class canvas_base;

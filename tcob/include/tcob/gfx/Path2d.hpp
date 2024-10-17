@@ -29,11 +29,15 @@
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Polygon.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API path2d {
+    friend class canvas;
+
 public:
     std::vector<f32> Commands;
 
@@ -44,14 +48,16 @@ public:
     void arc_to(f32 radiusX, f32 radiusY, degree_f rotX, bool largeArc, bool sweep, point_f end);
     void close();
 
+    auto polygonize() -> std::vector<polygon>;
+
     auto static Parse(string_view path) -> std::optional<path2d>;
 
+private:
     auto static CommandsMoveTo(point_f pos) -> std::vector<f32>;
     auto static CommandsLineTo(point_f pos) -> std::vector<f32>;
     auto static CommandsCubicTo(point_f cp0, point_f cp1, point_f end) -> std::vector<f32>;
     auto static CommandsQuadTo(point_f start, point_f cp, point_f end) -> std::vector<f32>;
 
-private:
     auto static GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>;
 
     point_f _lastPoint {point_f::Zero};

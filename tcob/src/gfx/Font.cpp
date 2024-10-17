@@ -354,10 +354,8 @@ auto font::polygonize_text(utf8_string_view text, bool kerning) -> std::vector<p
         addPoly();
     };
     cb.LineTo = [&](point_f p) {
-        tweening::func::linear<point_f> func;
-        func.StartValue = curPos;
-        func.EndValue   = p;
-        for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
+        points.push_back(curPos);
+        points.push_back(p);
         curPos = p;
     };
     cb.ConicTo = [&](point_f p0, point_f p1) {
