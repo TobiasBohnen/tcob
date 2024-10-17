@@ -201,6 +201,12 @@ public:
     void dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots);
     void dotted_line_to(point_f to, f32 r, i32 numDots);
     void dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
+
+    void dashed_line_to(point_f to, i32 numDashes);
+    void dashed_circle(point_f center, f32 r, i32 numDashes);
+    void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, i32 numDashes);
+    void dashed_quad_bezier_to(point_f cp, point_f end, i32 numDashes);
+
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
     void regular_polygon(point_f pos, size_f size, i32 n);
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
@@ -254,11 +260,6 @@ public:
     // stroke
     void stroke_line(point_f from, point_f to);
     void stroke_lines(std::span<point_f const> points);
-
-    void stroke_dashed_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, i32 numDashes);
-    void stroke_dashed_quad_bezier(point_f start, point_f cp, point_f end, i32 numDashes);
-    void stroke_dashed_line(point_f from, point_f to, i32 numDashes);
-    void stroke_dashed_circle(point_f center, f32 r, i32 numDashes);
 
     auto get_impl() const -> render_backend::canvas_base*;
 
