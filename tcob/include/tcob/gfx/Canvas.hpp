@@ -197,11 +197,11 @@ public:
     void ellipse(point_f c, f32 rx, f32 ry);
     void circle(point_f c, f32 r);
 
-    void dotted_cubic_bezier(point_f begin, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots);
-    void dotted_quad_bezier(point_f begin, point_f cp, point_f end, f32 r, i32 numDots);
-    void dotted_line(point_f from, point_f to, f32 r, i32 numDots);
+    void dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots);
+    void dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots);
+    void dotted_line_to(point_f to, f32 r, i32 numDots);
     void dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
-    void wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase = 0.f);
+    void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
     void regular_polygon(point_f pos, size_f size, i32 n);
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);

@@ -57,6 +57,7 @@ public:
     auto is_button_down() const -> bool;
 
     void from_string(string const& html);
+    void from_string(string const& html, string const& css);
     auto load(path const& file) noexcept -> load_status;
 
     void change_language(string const& language, string const& culture);

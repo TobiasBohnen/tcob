@@ -685,9 +685,9 @@ void canvas::stroke_dashed_circle(point_f center, f32 r, i32 numDashes)
     stroke();
 }
 
-void canvas::dotted_cubic_bezier(point_f begin, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
+void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
 {
-    func::cubic_bezier_curve func {.Begin = begin, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .End = end};
+    func::cubic_bezier_curve func {.Begin = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .End = end};
     f32 const                inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -695,9 +695,9 @@ void canvas::dotted_cubic_bezier(point_f begin, point_f cp0, point_f cp1, point_
     }
 }
 
-void canvas::dotted_quad_bezier(point_f begin, point_f cp, point_f end, f32 r, i32 numDots)
+void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
 {
-    func::quad_bezier_curve func {.Begin = begin, .ControlPoint = cp, .End = end};
+    func::quad_bezier_curve func {.Begin = _commandPoint, .ControlPoint = cp, .End = end};
     f32 const               inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -705,9 +705,9 @@ void canvas::dotted_quad_bezier(point_f begin, point_f cp, point_f end, f32 r, i
     }
 }
 
-void canvas::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
+void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
 {
-    func::linear<point_f> func {.StartValue = from, .EndValue = to};
+    func::linear<point_f> func {.StartValue = _commandPoint, .EndValue = to};
     f32 const             inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -725,10 +725,11 @@ void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
     }
 }
 
-void canvas::wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase)
+void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 {
-    f32 const xMin {std::min(from.X, to.X)};
-    f32 const xDiff {std::abs(from.X - to.X)};
+    auto const from {_commandPoint};
+    f32 const  xMin {std::min(from.X, to.X)};
+    f32 const  xDiff {std::abs(from.X - to.X)};
 
     for (f32 f {0}; f < xDiff; ++f) {
         f32 const x {f + xMin};

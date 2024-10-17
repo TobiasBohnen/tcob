@@ -47,15 +47,18 @@ auto document::is_button_down() const -> bool
 
 void document::from_string(string const& html)
 {
-    string masterCss;
+    string css;
     if (io::is_file(_config.MasterCSSPath)) {
         io::ifstream stream {_config.MasterCSSPath};
-        masterCss = stream.read_string(stream.size_in_bytes());
-    } else {
-        masterCss = litehtml::master_css;
+        css = stream.read_string(stream.size_in_bytes());
     }
 
-    _lhdoc = litehtml::document::createFromString(html, _container.get(), masterCss);
+    from_string(html, css);
+}
+
+void document::from_string(string const& html, string const& css)
+{
+    _lhdoc = litehtml::document::createFromString(html, _container.get(), litehtml::master_css, css);
     force_redraw();
 }
 

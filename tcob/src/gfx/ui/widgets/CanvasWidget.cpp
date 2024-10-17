@@ -165,19 +165,19 @@ void canvas_widget::circle(point_f c, f32 r)
     _commands.emplace_back([=](canvas& canvas) { canvas.circle(c, r); });
 }
 
-void canvas_widget::dotted_cubic_bezier(point_f start, point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
+void canvas_widget::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
 {
-    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_cubic_bezier(start, cp0, cp1, end, r, numDots); });
+    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_cubic_bezier_to(cp0, cp1, end, r, numDots); });
 }
 
-void canvas_widget::dotted_quad_bezier(point_f start, point_f cp, point_f end, f32 r, i32 numDots)
+void canvas_widget::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
 {
-    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_quad_bezier(start, cp, end, r, numDots); });
+    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_quad_bezier_to(cp, end, r, numDots); });
 }
 
-void canvas_widget::dotted_line(point_f from, point_f to, f32 r, i32 numDots)
+void canvas_widget::dotted_line_to(point_f to, f32 r, i32 numDots)
 {
-    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_line(from, to, r, numDots); });
+    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_line_to(to, r, numDots); });
 }
 
 void canvas_widget::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
@@ -185,9 +185,9 @@ void canvas_widget::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 nu
     _commands.emplace_back([=](canvas& canvas) { canvas.dotted_circle(center, rcircle, rdots, numDots); });
 }
 
-void canvas_widget::wavy_line(point_f from, point_f to, f32 amp, f32 freq, f32 phase)
+void canvas_widget::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 {
-    _commands.emplace_back([=](canvas& canvas) { canvas.wavy_line(from, to, amp, freq, phase); });
+    _commands.emplace_back([=](canvas& canvas) { canvas.wavy_line_to(to, amp, freq, phase); });
 }
 
 void canvas_widget::regular_polygon(point_f pos, size_f size, i32 n)

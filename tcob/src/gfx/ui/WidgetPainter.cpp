@@ -204,19 +204,23 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
                     case text_decoration::style::Dotted:
                         _canvas.set_fill_style(deco.Color);
                         _canvas.begin_path();
-                        _canvas.dotted_line(p0 + offset, p1 + offset, strokeWidth, std::max(1, static_cast<i32>((p1.X - p0.X) / (strokeWidth * 2.5f))));
+                        _canvas.move_to(p0 + offset);
+                        _canvas.dotted_line_to(p1 + offset, strokeWidth, std::max(1, static_cast<i32>((p1.X - p0.X) / (strokeWidth * 2.5f))));
                         _canvas.fill();
                         break;
                     case text_decoration::style::Dashed:
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
+                        _canvas.begin_path();
                         _canvas.stroke_dashed_line(p0 + offset, p1 + offset, std::max(1, static_cast<i32>((p1.X - p0.X) / (strokeWidth * 2.5f))));
+                        _canvas.stroke();
                         break;
                     case text_decoration::style::Wavy:
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
                         _canvas.begin_path();
-                        _canvas.wavy_line(p0 + offset, p1 + offset, strokeWidth * 1.25f, 0.5f);
+                        _canvas.move_to(p0 + offset);
+                        _canvas.wavy_line_to(p1 + offset, strokeWidth * 1.25f, 0.5f);
                         _canvas.stroke();
                         break;
                     }

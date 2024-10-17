@@ -47,14 +47,14 @@ enum class font_decorations : u8 {
 enum class border_style : u8 {
     None,
     Hidden,
-    Dotted,
-    Dashed,
-    Solid,
-    Double,
-    Groove,
-    Ridge,
-    Inset,
-    Outset
+    Solid, // ok
+           // Dotted,
+           // Dashed,
+           // Double,
+           // Groove,
+           // Ridge,
+           // Inset,
+           // Outset
 };
 
 struct border_radii {
