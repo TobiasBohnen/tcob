@@ -321,11 +321,11 @@ auto path2d::polygonize() -> std::vector<polygon>
         } break;
         case BezierTo: {
             tweening::func::quad_bezier_curve func;
-            func.Begin        = {Commands[idx + 1], Commands[idx + 2]};
+            func.StartPoint   = {Commands[idx + 1], Commands[idx + 2]};
             func.ControlPoint = {Commands[idx + 3], Commands[idx + 4]};
-            func.End          = {Commands[idx + 5], Commands[idx + 6]};
+            func.EndPoint     = {Commands[idx + 5], Commands[idx + 6]};
             for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
-            curPos = func.End;
+            curPos = func.EndPoint;
             idx += 7;
         } break;
         case Close: {

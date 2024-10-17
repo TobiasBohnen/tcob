@@ -271,8 +271,8 @@ namespace func {
         f64 const exp1 {2. * t * oneMinusT};
         f64 const exp2 {t * t};
 
-        f32 const x {static_cast<f32>((exp0 * Begin.X) + (exp1 * ControlPoint.X) + (exp2 * End.X))};
-        f32 const y {static_cast<f32>((exp0 * Begin.Y) + (exp1 * ControlPoint.Y) + (exp2 * End.Y))};
+        f32 const x {static_cast<f32>((exp0 * StartPoint.X) + (exp1 * ControlPoint.X) + (exp2 * EndPoint.X))};
+        f32 const y {static_cast<f32>((exp0 * StartPoint.Y) + (exp1 * ControlPoint.Y) + (exp2 * EndPoint.Y))};
         return {x, y};
     }
 
@@ -287,8 +287,8 @@ namespace func {
         f64 const exp2 {3 * t * t * oneMinusT};
         f64 const exp3 {t * t * t};
 
-        f32 const x {static_cast<f32>((exp0 * Begin.X) + (exp1 * ControlPoint0.X) + (exp2 * ControlPoint1.X) + (exp3 * End.X))};
-        f32 const y {static_cast<f32>((exp0 * Begin.Y) + (exp1 * ControlPoint0.Y) + (exp2 * ControlPoint1.Y) + (exp3 * End.Y))};
+        f32 const x {static_cast<f32>((exp0 * StartPoint.X) + (exp1 * ControlPoint0.X) + (exp2 * ControlPoint1.X) + (exp3 * EndPoint.X))};
+        f32 const y {static_cast<f32>((exp0 * StartPoint.Y) + (exp1 * ControlPoint0.Y) + (exp2 * ControlPoint1.Y) + (exp3 * EndPoint.Y))};
         return {x, y};
     }
 

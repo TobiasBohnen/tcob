@@ -627,7 +627,7 @@ void canvas::stroke_lines(std::span<point_f const> points)
 
 void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
 {
-    func::cubic_bezier_curve func {.Begin = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .End = end};
+    func::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
     f32 const                inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -637,7 +637,7 @@ void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r
 
 void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
 {
-    func::quad_bezier_curve func {.Begin = _commandPoint, .ControlPoint = cp, .End = end};
+    func::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
     f32 const               inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -689,7 +689,7 @@ void canvas::dashed_circle(point_f center, f32 r, i32 numDashes)
 
 void canvas::dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, i32 numDashes)
 {
-    func::cubic_bezier_curve func {.Begin = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .End = end};
+    func::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
     f32 const                inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
@@ -700,7 +700,7 @@ void canvas::dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, i32 n
 
 void canvas::dashed_quad_bezier_to(point_f cp, point_f end, i32 numDashes)
 {
-    func::quad_bezier_curve func {.Begin = _commandPoint, .ControlPoint = cp, .End = end};
+    func::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
     f32 const               inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {

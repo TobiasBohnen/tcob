@@ -312,9 +312,9 @@ namespace func {
     public:
         using type = point_f;
 
-        type Begin {};
+        type StartPoint {};
         type ControlPoint {};
-        type End {};
+        type EndPoint {};
 
         auto operator()(f64 t) const -> type;
     };
@@ -325,10 +325,10 @@ namespace func {
     public:
         using type = point_f;
 
-        type Begin {};
+        type StartPoint {};
         type ControlPoint0 {};
         type ControlPoint1 {};
-        type End {};
+        type EndPoint {};
 
         auto operator()(f64 t) const -> type;
     };
