@@ -47,6 +47,7 @@ public:
     void set_base_url(char const* base_url) override;
     void link(std::shared_ptr<litehtml::document> const& doc, litehtml::element::ptr const& el) override;
     void on_anchor_click(char const* url, litehtml::element::ptr const& el) override;
+    void on_mouse_event(litehtml::element::ptr const& el, litehtml::mouse_event event) override;
     void set_cursor(char const* cursor) override;
     void transform_text(string& text, litehtml::text_transform tt) override;
     void import_css(string& text, string const& url, string& baseurl) override;

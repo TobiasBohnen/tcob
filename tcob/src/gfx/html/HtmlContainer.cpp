@@ -21,18 +21,6 @@
     #include <litehtml/html.h>
     #include <litehtml/render_item.h>
 
-/* TODO:
-TAGS:
-    dialog
-    datalist
-
-INPUT TYPES:
-   <input type="number">
-   <input type="password">
-   <input type="text"> (default value)
-
-*/
-
 namespace tcob::gfx::html::detail {
 
 ////////////////////////////////////////////////////////////
@@ -181,6 +169,12 @@ void container::on_anchor_click(char const* url, litehtml::element::ptr const& e
 {
     el->set_pseudo_class(litehtml::_id("visited"), true);
     _document.AnchorClick(url);
+}
+
+void container::on_mouse_event(litehtml::element::ptr const& el, litehtml::mouse_event event)
+{ // TODO
+    static_cast<void>(el);
+    static_cast<void>(event);
 }
 
 void container::set_cursor(char const* cursor)

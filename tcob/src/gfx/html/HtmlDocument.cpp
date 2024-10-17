@@ -51,6 +51,8 @@ void document::from_string(string const& html)
     if (io::is_file(_config.MasterCSSPath)) {
         io::ifstream stream {_config.MasterCSSPath};
         masterCss = stream.read_string(stream.size_in_bytes());
+    } else {
+        masterCss = litehtml::master_css;
     }
 
     _lhdoc = litehtml::document::createFromString(html, _container.get(), masterCss);
@@ -190,7 +192,7 @@ void document::on_mouse_button_up(input::mouse::button_event const& ev)
 
 auto document::convert_screen_to_world(point_i pos) const -> point_i
 {
-    return point_i {(*_config.Window->Camera).convert_screen_to_world(pos)};
+    return point_i {_config.Window->Camera->convert_screen_to_world(pos)};
 }
 }
 
