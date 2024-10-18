@@ -154,6 +154,7 @@ namespace gfx {
     class material;
     class render_system;
     struct render_properties;
+    class window;
 }
 namespace gfx::render_backend {
     class canvas_base;

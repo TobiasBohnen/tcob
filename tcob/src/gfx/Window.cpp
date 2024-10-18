@@ -146,8 +146,8 @@ void window::set_fullscreen(bool value)
     auto* window {_impl->get_handle()};
     SDL_SetWindowFullscreen(window, value ? SDL_WINDOW_FULLSCREEN : 0);
     if (!value) {
-        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         SDL_SetWindowBordered(window, SDL_TRUE);
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
 }
 

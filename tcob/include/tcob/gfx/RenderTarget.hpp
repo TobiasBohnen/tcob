@@ -12,6 +12,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Camera.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Texture.hpp"
@@ -71,14 +72,17 @@ private:
 
 class default_render_target : public render_target {
 public:
-    default_render_target();
+    default_render_target(window* win);
 
+protected:
     auto get_size() const -> size_i override;
-    void set_size(size_i newsize) override;
+
     void prepare_render(bool) override;
 
 private:
-    size_i _size {size_i::Zero};
+    void set_size(size_i newsize) override;
+
+    window* _window;
 };
 
 }

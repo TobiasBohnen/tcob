@@ -168,11 +168,10 @@ void game::step()
         if (has_service<gfx::render_system>()) {
             auto& rs {locate_service<gfx::render_system>()};
             auto& window {rs.get_window()};
-            auto& dft {rs.get_default_target()};
-            dft.set_size(window.Size());
+
             window.clear();
             Draw(window);
-            window.draw_to(dft);
+            window.draw_to(rs.get_default_target());
             window.swap_buffer();
 
             if (window.Cursor()) {

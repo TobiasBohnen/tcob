@@ -110,10 +110,8 @@ void gl_render_target::clear(color c) const
 
 void gl_render_target::on_resize(size_i size)
 {
-    if (_tex) {
-        _tex->create(size, 1, texture::format::RGBA8);
-        _frameBuffer->attach_texture(_tex);
-    }
+    _tex->create(size, 1, texture::format::RGBA8);
+    _frameBuffer->attach_texture(_tex);
 }
 
 auto gl_render_target::copy_to_image(rect_i const& rect) const -> image

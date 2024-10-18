@@ -92,19 +92,17 @@ void render_target::set_size(size_i size)
 
 ////////////////////////////////////////////////////////////
 
-default_render_target::default_render_target()
+default_render_target::default_render_target(window* win)
     : render_target {nullptr}
+    , _window {win}
 {
 }
 
-auto default_render_target::get_size() const -> size_i { return _size; }
+auto default_render_target::get_size() const -> size_i { return _window->Size; }
 
-void default_render_target::set_size(size_i newsize)
+void default_render_target::set_size(size_i /* newsize */)
 {
-    if (newsize != _size) {
-        _size = newsize;
-        render_target::set_size(_size);
-    }
+    assert(false);
 }
 
 void default_render_target::prepare_render(bool)

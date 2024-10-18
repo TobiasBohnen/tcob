@@ -28,7 +28,7 @@ auto render_system::init_window(video_config const& config, string const& window
     _window->Size(resolution);
     _window->Title = windowTitle;
 
-    _defaultTarget = std::make_unique<gfx::default_render_target>();
+    _defaultTarget = std::make_unique<gfx::default_render_target>(_window.get());
 
     _window->clear();
     _window->draw_to(*_defaultTarget);
