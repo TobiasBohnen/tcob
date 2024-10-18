@@ -132,7 +132,18 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     _isDirty        = false;
 }
 
-constexpr f32 minAngle {0.05f}; // 0.0005f
+constexpr f32 angleTolerance {0.05f}; // 0.0005f
+
+auto static is_in_shadowcaster(light_source& light, auto&& casterPoints) -> bool
+{
+    bool retValue {false};
+    for (usize i {0}; i < casterPoints.size() - 1; ++i) {
+        if (casterPoints[i].Points.empty()) { continue; }
+        retValue = polygons::is_point_inside(light.Position, casterPoints[i].Points);
+        if (retValue) { break; }
+    }
+    return retValue;
+}
 
 void lighting_system::cast_ray(light_source& light)
 {
@@ -265,17 +276,6 @@ void lighting_system::build_geometry(light_source& light, u32& indOffset)
     indOffset += n + 1;
 }
 
-auto lighting_system::is_in_shadowcaster(light_source& light, std::vector<shadow_caster_points> const& casterPoints) const -> bool
-{
-    bool retValue {false};
-    for (usize i {0}; i < casterPoints.size() - 1; ++i) {
-        if (casterPoints[i].Points.empty()) { continue; }
-        retValue = is_point_in_polygon(light.Position, casterPoints[i].Points);
-        if (retValue) { break; }
-    }
-    return retValue;
-}
-
 auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>
 {
     auto const lightPosition {light.Position()};
@@ -284,7 +284,7 @@ auto lighting_system::collect_angles(light_source& light, bool lightInsideShadow
     std::set<f64> angles;
     for (auto const& cp : casterPoints) {
         for (auto const& scp : cp.Points) {
-            std::array<f64, 3> constexpr vars {-minAngle, 0, minAngle};
+            std::array<f64, 3> constexpr vars {-angleTolerance, 0, angleTolerance};
             for (f64 var : vars) {
                 auto const deg {lightPosition.angle_to(scp).as_normalized()};
                 if (limitAngle && (deg.Value < light.StartAngle->Value || deg.Value > light.EndAngle->Value)) { continue; }
@@ -310,7 +310,7 @@ auto lighting_system::collect_angles(light_source& light, bool lightInsideShadow
     std::vector<f64> retValue;
     retValue.reserve(angles.size());
     for (f64 const angle : angles) {
-        if (!retValue.empty() && angle - retValue.back() < minAngle) { continue; }
+        if (!retValue.empty() && angle - retValue.back() < angleTolerance) { continue; }
         retValue.push_back(angle);
     }
 
@@ -335,31 +335,6 @@ void lighting_system::mark_lights_dirty()
     for (auto& light : _lightSources) {
         light->_isDirty = true;
     }
-}
-
-auto lighting_system::is_point_in_polygon(point_f p, polyline_span points) const -> bool
-{
-    f32 minX {points[0].X};
-    f32 maxX {points[0].X};
-    f32 minY {points[0].Y};
-    f32 maxY {points[0].Y};
-    for (usize i {1}; i < points.size(); i++) {
-        point_f const& q {points[i]};
-        minX = std::min(q.X, minX);
-        maxX = std::max(q.X, maxX);
-        minY = std::min(q.Y, minY);
-        maxY = std::max(q.Y, maxY);
-    }
-
-    if (p.X < minX || p.X > maxX || p.Y < minY || p.Y > maxY) { return false; }
-    bool inside {false};
-    for (usize i {0}, j {points.size() - 1}; i < points.size(); j = i++) {
-        if ((points[i].Y > p.Y) != (points[j].Y > p.Y) && p.X < (points[j].X - points[i].X) * (p.Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X) {
-            inside = !inside;
-        }
-    }
-
-    return inside;
 }
 
 auto lighting_system::can_draw() const -> bool

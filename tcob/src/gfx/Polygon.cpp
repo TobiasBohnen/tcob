@@ -95,6 +95,32 @@ auto polygons::check_winding(std::span<polygon const> polygons) -> bool
     });
 }
 
+auto polygons::is_point_inside(point_f point, polyline_span polyline) -> bool
+{
+    f32 minX {polyline[0].X};
+    f32 maxX {polyline[0].X};
+    f32 minY {polyline[0].Y};
+    f32 maxY {polyline[0].Y};
+    for (usize i {1}; i < polyline.size(); i++) {
+        point_f const& q {polyline[i]};
+        minX = std::min(q.X, minX);
+        maxX = std::max(q.X, maxX);
+        minY = std::min(q.Y, minY);
+        maxY = std::max(q.Y, maxY);
+    }
+
+    if (point.X < minX || point.X > maxX || point.Y < minY || point.Y > maxY) { return false; }
+    bool inside {false};
+    for (usize i {0}, j {polyline.size() - 1}; i < polyline.size(); j = i++) {
+        if ((polyline[i].Y > point.Y) != (polyline[j].Y > point.Y)
+            && point.X < (polyline[j].X - polyline[i].X) * (point.Y - polyline[i].Y) / (polyline[j].Y - polyline[i].Y) + polyline[i].X) {
+            inside = !inside;
+        }
+    }
+
+    return inside;
+}
+
 auto polygons::get_info(std::span<polygon const> polygons) -> polygon::info
 {
     std::vector<point_f> points;

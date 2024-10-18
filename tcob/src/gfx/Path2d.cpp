@@ -139,6 +139,7 @@ auto path2d::Parse(string_view path) -> std::optional<path2d>
 void path2d::move_to(point_f pos)
 {
     std::vector<f32> const cmd {CommandsMoveTo(pos)};
+
     Commands.insert(Commands.end(), cmd.begin(), cmd.end());
     _lastPoint = pos;
 }
@@ -146,6 +147,7 @@ void path2d::move_to(point_f pos)
 void path2d::line_to(point_f pos)
 {
     std::vector<f32> const cmd {CommandsLineTo(pos)};
+
     Commands.insert(Commands.end(), cmd.begin(), cmd.end());
     _lastPoint = pos;
 }
@@ -153,8 +155,8 @@ void path2d::line_to(point_f pos)
 void path2d::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
     std::vector<f32> const cmd {CommandsCubicTo(cp0, cp1, end)};
-    Commands.insert(Commands.end(), cmd.begin(), cmd.end());
 
+    Commands.insert(Commands.end(), cmd.begin(), cmd.end());
     _lastPoint             = end;
     _lastCubicControlPoint = cp1;
 }

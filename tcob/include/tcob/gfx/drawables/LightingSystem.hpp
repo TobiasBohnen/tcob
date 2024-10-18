@@ -143,9 +143,6 @@ private:
     void cast_ray(light_source& light);
     void build_geometry(light_source& light, u32& indOffset);
     auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>;
-    auto is_in_shadowcaster(light_source& light, std::vector<shadow_caster_points> const& casterPoints) const -> bool;
-
-    auto is_point_in_polygon(point_f p, polyline_span points) const -> bool;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};
     std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};
@@ -153,7 +150,7 @@ private:
     bool _isDirty {false};
     bool _updateGeometry {false};
 
-    polygon_renderer    _renderer {buffer_usage_hint::DynamicDraw};
+    polygon_renderer    _renderer {buffer_usage_hint::StreamDraw};
     std::vector<vertex> _verts;
     std::vector<u32>    _inds;
 

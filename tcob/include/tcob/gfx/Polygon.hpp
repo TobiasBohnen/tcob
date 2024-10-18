@@ -59,6 +59,8 @@ namespace polygons {
     TCOB_API auto get_winding(polyline_span polyline) -> winding;
     TCOB_API auto check_winding(std::span<polygon const> polygons) -> bool;
 
+    TCOB_API auto is_point_inside(point_f point, polyline_span polyline) -> bool;
+
     TCOB_API auto get_info(std::span<polygon const> polygons) -> polygon::info;
     TCOB_API auto get_info(polyline_span polyline) -> polygon::info;
 
