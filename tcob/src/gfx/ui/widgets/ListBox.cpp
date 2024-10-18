@@ -30,7 +30,7 @@ list_box::list_box(init const& wi)
         if (!val.empty()) {
             _filteredItems.reserve(_items.size());
             for (i32 i {0}; i < std::ssize(_items); ++i) {
-                if (helper::case_insensitive_contains(_items[i], Filter())) {
+                if (helper::case_insensitive_contains(_items[i].Text, Filter())) {
                     _filteredItems.push_back(_items[i]);
                 }
             }
@@ -43,8 +43,14 @@ list_box::list_box(init const& wi)
 
 void list_box::add_item(utf8_string const& item)
 {
+    list_item const litem {.Text = item, .UserData = {}};
+    add_item(litem);
+}
+
+void list_box::add_item(list_item const& item)
+{
     _items.push_back(item);
-    if (!Filter->empty() && helper::case_insensitive_contains(item, Filter())) {
+    if (!Filter->empty() && helper::case_insensitive_contains(item.Text, Filter())) {
         _filteredItems.push_back(item);
     }
     force_redraw(get_name() + ": item added");
@@ -63,7 +69,7 @@ auto list_box::select_item(utf8_string const& item) -> bool
 {
     auto const& items {get_items()};
     for (isize i {0}; i < std::ssize(items); ++i) {
-        if (items[i] == item) {
+        if (items[i].Text == item) {
             SelectedItemIndex = i;
             return true;
         }
@@ -95,12 +101,12 @@ void list_box::scroll_to_selected()
     set_scrollbar_value(value);
 }
 
-auto list_box::get_item_at(isize index) const -> utf8_string const&
+auto list_box::get_item_at(isize index) const -> list_item const&
 {
     return get_items().at(static_cast<usize>(index));
 }
 
-auto list_box::get_selected_item() const -> utf8_string const&
+auto list_box::get_selected_item() const -> list_item const&
 {
     return get_items().at(SelectedItemIndex);
 }
@@ -115,7 +121,7 @@ void list_box::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHei
     auto const&  itemStyle {get_item_style(i)};
     rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
     if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-        painter.draw_item(itemStyle->Item, itemRect, get_items()[i]);
+        painter.draw_item(itemStyle->Item, itemRect, get_items()[i].Text);
     }
 }
 
@@ -159,7 +165,7 @@ void list_box::on_key_down(input::keyboard::event const& ev)
                 idx++;
                 if (idx >= std::ssize(items)) { idx = 0; }
             }
-            if (!items[idx].empty() && std::tolower(items[idx][0]) == kc) {
+            if (!items[idx].Text.empty() && std::tolower(items[idx].Text[0]) == kc) {
                 SelectedItemIndex = idx;
                 scroll_to_selected();
                 ev.Handled = true;
@@ -251,7 +257,7 @@ auto list_box::get_scroll_item_count() const -> isize
     return get_item_count();
 }
 
-auto list_box::get_items() const -> std::vector<utf8_string> const&
+auto list_box::get_items() const -> std::vector<list_item> const&
 {
     return Filter->empty() ? _items : _filteredItems;
 }
@@ -260,7 +266,7 @@ auto list_box::get_attributes() const -> widget_attributes
 {
     auto retValue {vscroll_widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(get_items())) {
-        retValue["selected"] = get_selected_item();
+        retValue["selected"] = get_selected_item().Text;
     }
     return retValue;
 }

@@ -26,6 +26,11 @@ drop_down_list::drop_down_list(init const& wi)
 
 void drop_down_list::add_item(utf8_string const& item)
 {
+    add_item({.Text = item, .UserData = {}});
+}
+
+void drop_down_list::add_item(list_item const& item)
+{
     _items.push_back(item);
     force_redraw(get_name() + ": item added");
 }
@@ -39,7 +44,7 @@ void drop_down_list::clear_items()
 auto drop_down_list::select_item(utf8_string const& item) -> bool
 {
     for (isize i {0}; i < std::ssize(_items); ++i) {
-        if (_items[i] == item) {
+        if (_items[i].Text == item) {
             SelectedItemIndex = i;
             return true;
         }
@@ -48,12 +53,12 @@ auto drop_down_list::select_item(utf8_string const& item) -> bool
     return false;
 }
 
-auto drop_down_list::get_item_at(isize index) const -> utf8_string const&
+auto drop_down_list::get_item_at(isize index) const -> list_item const&
 {
     return _items.at(static_cast<usize>(index));
 }
 
-auto drop_down_list::get_selected_item() const -> utf8_string const&
+auto drop_down_list::get_selected_item() const -> list_item const&
 {
     return _items.at(SelectedItemIndex);
 }
@@ -74,7 +79,7 @@ void drop_down_list::paint_item(widget_painter& painter, rect_f& listRect, f32 i
     auto const&  itemStyle {get_item_style(i)};
     rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
     if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-        painter.draw_item(itemStyle->Item, itemRect, _items[i]);
+        painter.draw_item(itemStyle->Item, itemRect, _items[i].Text);
     }
 }
 
@@ -104,7 +109,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         // text
         if (style->Text.Font && SelectedItemIndex >= 0) {
             f32 const arrowWidth {arrowStyle.Size.Width.calc(rect.width())};
-            painter.draw_text(style->Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, get_selected_item());
+            painter.draw_text(style->Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, get_selected_item().Text);
         }
 
         if (_isExtended) {
@@ -312,7 +317,7 @@ auto drop_down_list::get_attributes() const -> widget_attributes
 {
     auto retValue {widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
-        retValue["selected"] = get_selected_item();
+        retValue["selected"] = get_selected_item().Text;
     }
     return retValue;
 }

@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <any>
 #include <variant>
 
 #include "tcob/core/Rect.hpp"
@@ -59,6 +60,13 @@ class tooltip;
 class widget;
 class vscroll_widget;
 class widget_container;
+
+////////////////////////////////////////////////////////////
+
+struct list_item {
+    utf8_string Text;
+    std::any    UserData;
+};
 
 ////////////////////////////////////////////////////////////
 

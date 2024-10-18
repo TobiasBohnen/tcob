@@ -38,12 +38,13 @@ public:
     prop_val<isize> HoveredItemIndex;
 
     void add_item(utf8_string const& item);
+    void add_item(list_item const& item);
     void clear_items();
 
     auto select_item(utf8_string const& item) -> bool;
 
-    auto get_item_at(isize index) const -> utf8_string const&;
-    auto get_selected_item() const -> utf8_string const&;
+    auto get_item_at(isize index) const -> list_item const&;
+    auto get_selected_item() const -> list_item const&;
     auto get_item_count() const -> isize;
 
 protected:
@@ -81,9 +82,9 @@ private:
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& listRect) const -> rect_f;
     auto get_item_style(isize index) const -> item_style*;
 
-    std::vector<utf8_string> _items;
-    bool                     _isExtended {false};
-    bool                     _mouseOverBox {false};
+    std::vector<list_item> _items;
+    bool                   _isExtended {false};
+    bool                   _mouseOverBox {false};
 
     scrollbar<drop_down_list> _vScrollbar;
 };

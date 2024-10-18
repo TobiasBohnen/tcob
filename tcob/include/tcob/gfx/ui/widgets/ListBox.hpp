@@ -14,6 +14,7 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 // TODO: datasource
+
 class TCOB_API list_box : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
@@ -29,13 +30,14 @@ public:
     prop<utf8_string> Filter;
 
     void add_item(utf8_string const& item);
+    void add_item(list_item const& item);
     void clear_items();
 
     auto select_item(utf8_string const& item) -> bool;
     void scroll_to_selected();
 
-    auto get_item_at(isize index) const -> utf8_string const&;
-    auto get_selected_item() const -> utf8_string const&;
+    auto get_item_at(isize index) const -> list_item const&;
+    auto get_selected_item() const -> list_item const&;
     auto get_item_count() const -> isize;
 
 protected:
@@ -53,14 +55,14 @@ protected:
     auto get_scroll_item_count() const -> isize override;
 
 private:
-    auto get_items() const -> std::vector<utf8_string> const&;
+    auto get_items() const -> std::vector<list_item> const&;
 
     void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
 
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f;
     auto get_item_style(isize index) const -> item_style*;
 
-    std::vector<utf8_string> _items;
-    std::vector<utf8_string> _filteredItems;
+    std::vector<list_item> _items;
+    std::vector<list_item> _filteredItems;
 };
 }
