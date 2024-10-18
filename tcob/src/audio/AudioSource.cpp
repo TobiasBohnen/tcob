@@ -111,22 +111,13 @@ auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optio
     return _info;
 }
 
-auto decoder::decode_to_buffer(al::al_buffer* buffer, i64 wantSamples) -> bool
+auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
 {
-    if (!_info || wantSamples <= 0) { return false; }
+    if (!_info || size <= 0) { return std::nullopt; }
 
-    std::vector<f32> data(static_cast<usize>(wantSamples));
-    if (decode(data) > 0) {
-        buffer->buffer_data(data, _info->Channels, _info->SampleRate);
-        return true;
-    }
-    return false;
-}
-
-auto decoder::decode_to_buffer(std::span<f32> buffer) -> bool
-{
-    decode(buffer);
-    return true; // TODO check
+    std::vector<f32> buffer(static_cast<usize>(size));
+    decode(buffer); // TODO check
+    return buffer;
 }
 
 auto decoder::get_stream() -> io::istream&

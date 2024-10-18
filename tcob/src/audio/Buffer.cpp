@@ -35,15 +35,16 @@ auto buffer::load(path const& file, std::any& ctx) noexcept -> load_status
 
 auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status
 {
+    _buffer.clear();
     if (!in || !(*in)) { return load_status::Error; }
 
     auto decoder {locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext)};
     if (decoder) {
         if (auto info {decoder->open(std::move(in), ctx)}) {
             _info = *info;
-            _buffer.resize(static_cast<usize>(_info.Channels * _info.FrameCount));
             decoder->seek_from_start(milliseconds {0});
-            if (decoder->decode_to_buffer(_buffer)) {
+            if (auto data {decoder->decode(_info.Channels * _info.FrameCount)}) {
+                _buffer = std::move(*data);
                 return load_status::Ok;
             }
         }

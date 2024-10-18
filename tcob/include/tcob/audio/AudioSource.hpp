@@ -74,8 +74,7 @@ public:
 
     auto open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>;
 
-    auto decode_to_buffer(al::al_buffer* buffer, i64 wantSamples) -> bool;
-    auto decode_to_buffer(std::span<f32> buffer) -> bool;
+    auto decode(isize size) -> std::optional<std::vector<f32>>;
 
     void virtual seek_from_start(milliseconds pos) = 0;
 

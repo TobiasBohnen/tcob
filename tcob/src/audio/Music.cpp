@@ -52,26 +52,16 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
 
 auto music::get_duration() const -> milliseconds
 {
-    if (!_decoder || !_info) {
-        return 0ms;
-    }
-
-    if (_info->SampleRate == 0) {
-        return 0ms;
-    }
+    if (!_decoder || !_info) { return 0ms; }
+    if (_info->SampleRate == 0) { return 0ms; }
 
     return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->SampleRate)) * 1000.0f};
 }
 
 auto music::get_playback_position() const -> milliseconds
 {
-    if (!_decoder || !_info) {
-        return 0ms;
-    }
-
-    if (_info->Channels == 0 || _info->SampleRate == 0) {
-        return 0ms;
-    }
+    if (!_decoder || !_info) { return 0ms; }
+    if (_info->Channels == 0 || _info->SampleRate == 0) { return 0ms; }
 
     return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->SampleRate) / static_cast<f32>(_info->Channels)) * 1000.0f};
 }
@@ -142,7 +132,8 @@ void music::queue_buffers(std::vector<u32> const& bufferIDs)
     for (u32 bufferID : bufferIDs) {
         for (u32 i {0}; i < STREAM_BUFFER_COUNT; ++i) {
             if (bufferID == _buffers[i]->get_id()) {
-                if (_decoder->decode_to_buffer(_buffers[i].get(), STREAM_BUFFER_SIZE)) {
+                if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
+                    _buffers[i]->buffer_data(*data, _info->Channels, _info->SampleRate);
                     s->queue_buffers(&bufferID, 1);
                 } else {
                     if (s->is_looping()) {
