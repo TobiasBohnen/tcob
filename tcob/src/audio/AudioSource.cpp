@@ -116,8 +116,7 @@ auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
     if (!_info || size <= 0) { return std::nullopt; }
 
     std::vector<f32> buffer(static_cast<usize>(size));
-    decode(buffer); // TODO check
-    return buffer;
+    return decode(buffer) > 0 ? std::optional<std::vector<f32>> {buffer} : std::nullopt;
 }
 
 auto decoder::get_stream() -> io::istream&
