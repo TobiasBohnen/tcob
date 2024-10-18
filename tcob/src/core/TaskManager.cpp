@@ -20,13 +20,9 @@ task_manager::task_manager(i32 threads)
 
 task_manager::~task_manager()
 {
-    for (auto& worker : _taskWorkers) {
-        worker.request_stop();
-    }
+    for (auto& worker : _taskWorkers) { worker.request_stop(); }
     _taskCondition.notify_all();
-    for (auto& worker : _taskWorkers) {
-        worker.join();
-    }
+    for (auto& worker : _taskWorkers) { worker.join(); }
 }
 
 void task_manager::run_parallel(par_func const& func, isize count, isize minRange)
@@ -83,10 +79,7 @@ auto task_manager::process_queue() -> bool
     std::queue<def_func> newQueue {};
 
     while (!_deferredQueue.empty()) {
-        auto& front {_deferredQueue.front()};
-        if (front() == task_status::Running) {
-            newQueue.push(front);
-        }
+        if (auto& front {_deferredQueue.front()}; front() == task_status::Running) { newQueue.push(front); }
         _deferredQueue.pop();
     }
 
