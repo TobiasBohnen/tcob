@@ -13,16 +13,16 @@ class TCOB_API stopwatch final {
     using duration = clock::duration;
 
 public:
-    auto get_elapsed [[nodiscard]] () const -> duration;
-    auto get_elapsed_milliseconds [[nodiscard]] () const -> f64;
-    auto get_elapsed_nanoseconds [[nodiscard]] () const -> f64;
-    auto is_running [[nodiscard]] () const -> bool;
-
     auto static StartNew() -> stopwatch;
     void start();
     void stop();
     void restart();
     void reset();
+
+    auto get_elapsed [[nodiscard]] () const -> duration;
+    auto get_elapsed_milliseconds [[nodiscard]] () const -> f64;
+    auto get_elapsed_nanoseconds [[nodiscard]] () const -> f64;
+    auto is_running [[nodiscard]] () const -> bool;
 
 private:
     duration _start {};
