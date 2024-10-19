@@ -19,7 +19,6 @@ public:
 
 protected:
     auto get_size() const -> size_i override;
-    void set_size(size_i size) override;
 };
 
 }
