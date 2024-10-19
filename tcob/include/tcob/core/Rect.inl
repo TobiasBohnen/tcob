@@ -101,21 +101,9 @@ auto constexpr rect<T>::find_edge(degree_f angle) const -> point<T>
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_moved_to(point<T> const& point) const -> rect<T>
-{
-    return {point, Size};
-}
-
-template <Arithmetic T>
 auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect<T>
 {
-    return as_moved_to({center.X - Size.Width / 2.0f, center.Y - Size.Height / 2.0f});
-}
-
-template <Arithmetic T>
-auto constexpr rect<T>::as_resized_to(size<T> const& size) const -> rect<T>
-{
-    return {Position, size};
+    return {{center.X - Size.Width / 2.0f, center.Y - Size.Height / 2.0f}, Size};
 }
 
 template <Arithmetic T>

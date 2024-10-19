@@ -78,7 +78,7 @@ void transformable::reset_transform()
 
 rect_transformable::rect_transformable()
     : Center {{[&]() { return Bounds->get_center(); },
-               [&](point_f const& value) { Bounds = Bounds->as_moved_to({value.X - (Bounds->width() / 2.0f), value.Y - (Bounds->height() / 2.0f)}); }}}
+               [&](point_f const& value) { Bounds = Bounds->as_centered_at(value); }}}
 {
     Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });

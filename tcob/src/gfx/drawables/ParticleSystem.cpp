@@ -216,7 +216,7 @@ void particle::update(milliseconds delta)
     // move
     Speed += Acceleration * seconds;
     point_f const offset {point_f::FromDirection(Direction) * (Speed * seconds)};
-    Bounds = Bounds.as_moved_to(Bounds.Position + offset);
+    Bounds = {{Bounds.Position + offset}, Bounds.Size};
 
     // spin
     Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
