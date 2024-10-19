@@ -6,41 +6,23 @@
 #include "tcob/gfx/Camera.hpp"
 
 #include "tcob/core/Rect.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
 
-camera::camera()
+camera::camera(render_target& parent)
+    : _parent {parent}
 {
-    Size.Changed.connect([&](auto const&) { update_transform(); });
-    Zoom(size_f::One);
-    Zoom.Changed.connect([&](auto const&) { update_transform(); });
-    Position.Changed.connect([&](auto const&) { update_transform(); });
-}
-
-camera::camera(camera const& other) noexcept
-{
-    *this = other;
-}
-
-auto camera::operator=(camera const& other) noexcept -> camera&
-{
-    Size           = other.Size();
-    Zoom           = other.Zoom();
-    Position       = other.Position();
-    Offset         = other.Offset();
-    VisibilityMask = other.VisibilityMask;
-
-    return *this;
 }
 
 auto camera::get_matrix() const -> mat4
 {
-    return _transform.as_matrix4();
+    return get_transform().as_matrix4();
 }
 
 auto camera::get_viewport() const -> rect_f
 {
-    return {Offset, Size};
+    return {ViewOffset, size_f {_parent.Size()}};
 }
 
 auto camera::get_transformed_viewport() const -> rect_f
@@ -50,23 +32,23 @@ auto camera::get_transformed_viewport() const -> rect_f
 
 void camera::zoom_by(size_f factor)
 {
-    Zoom = (Zoom() * factor);
+    Zoom = (Zoom * factor);
 }
 
 void camera::move_by(point_f offset)
 {
-    Position = (Position() + offset);
+    Position = (Position + offset);
 }
 
 void camera::look_at(point_f pos)
 {
-    point_f const offset {get_transformed_viewport().get_local_center() * point_f {Zoom->Width, Zoom->Height}};
+    point_f const offset {get_transformed_viewport().get_local_center() * point_f {Zoom.Width, Zoom.Height}};
     Position = pos - offset;
 }
 
 auto camera::get_look_at() const -> point_f
 {
-    return Position() + get_transformed_viewport().get_local_center() * point_f {Zoom->Width, Zoom->Height};
+    return Position + get_transformed_viewport().get_local_center() * point_f {Zoom.Width, Zoom.Height};
 }
 
 auto camera::convert_world_to_screen(rect_f const& rect) const -> rect_i
@@ -79,7 +61,7 @@ auto camera::convert_world_to_screen(rect_f const& rect) const -> rect_i
 
 auto camera::convert_world_to_screen(point_f point) const -> point_i
 {
-    return point_i {_transform * point + Offset()};
+    return point_i {get_transform() * point + ViewOffset};
 }
 
 auto camera::convert_screen_to_world(rect_i const& rect) const -> rect_f
@@ -92,17 +74,35 @@ auto camera::convert_screen_to_world(rect_i const& rect) const -> rect_f
 
 auto camera::convert_screen_to_world(point_i point) const -> point_f
 {
-    return _transform.as_inverted() * (point_f {point} - Offset());
+    return get_transform().as_inverted() * (point_f {point} - ViewOffset);
 }
 
-void camera::update_transform()
+void camera::push_state()
 {
-    _transform.to_identity();
+    _states.emplace(Zoom, Position);
+    Zoom     = size_f::One;
+    Position = point_f::Zero;
+}
+
+void camera::pop_state()
+{
+    if (_states.empty()) { return; }
+    Zoom     = _states.top().Zoom;
+    Position = _states.top().Position;
+    _states.pop();
+}
+
+auto camera::get_transform() const -> transform
+{
+    transform xform;
     if (Zoom != size_f::One) {
-        _transform.scale_at(Zoom, {Size->Width / 2, Size->Height / 2});
+        auto const size {_parent.Size()};
+        xform.scale_at(Zoom, {size.Width / 2.f, size.Height / 2.f});
     }
     if (Position != point_f::Zero) {
-        _transform.translate({-Position->X, -Position->Y});
+        xform.translate({-Position.X, -Position.Y});
     }
+    return xform;
 }
+
 }

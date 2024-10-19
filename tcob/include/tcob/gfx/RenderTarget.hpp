@@ -37,10 +37,11 @@ public:
     explicit render_target(texture* tex);
     virtual ~render_target();
 
-    prop<camera>    Camera;
     prop_fn<size_i> Size;
 
     color ClearColor {colors::DarkGray};
+
+    auto get_camera() -> camera&;
 
     void clear() const;
     void clear(color c) const;
@@ -66,6 +67,7 @@ protected:
 
 private:
     std::unique_ptr<render_backend::render_target_base> _impl;
+    camera                                              _camera;
 };
 
 ////////////////////////////////////////////////////////////

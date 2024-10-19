@@ -27,4 +27,9 @@ auto render_texture::get_size() const -> size_i
     return texture::get_size();
 }
 
+void render_texture::set_size(size_i size)
+{
+    render_target::set_size(size);
+}
+
 }

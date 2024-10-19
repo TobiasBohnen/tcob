@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/Renderer.hpp"
 
-#include "tcob/gfx/Camera.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
@@ -386,11 +385,7 @@ void canvas_renderer::set_layer(i32 layer)
 
 void canvas_renderer::prepare_render(render_target& target, bool debug)
 {
-    camera newCam {};
-    _oldCam       = *target.Camera;
-    newCam.Size   = _oldCam.Size();
-    target.Camera = newCam;
-
+    target.get_camera().push_state();
     target.prepare_render(debug);
 }
 
@@ -403,7 +398,7 @@ void canvas_renderer::on_render_to_target(render_target& target)
 
 void canvas_renderer::finalize_render(render_target& target)
 {
-    target.Camera = _oldCam;
+    target.get_camera().pop_state();
     target.finalize_render();
 }
 

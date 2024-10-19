@@ -17,10 +17,16 @@ render_target::render_target(texture* tex)
     : Size {{[&]() { return get_size(); },
              [&](auto const& value) { set_size(value); }}}
     , _impl {locate_service<render_system>().create_render_target(tex)}
+    , _camera {*this}
 {
 }
 
 render_target::~render_target() = default;
+
+auto render_target::get_camera() -> camera&
+{
+    return _camera;
+}
 
 void render_target::clear() const
 {
@@ -37,10 +43,9 @@ void render_target::prepare_render(bool debug)
 {
     auto const& stats {locate_service<render_system>().get_stats()};
 
-    auto& cam {*Camera};
     _impl->prepare_render(
-        {.ViewMatrix            = cam.get_matrix(),
-         .Viewport              = rect_i {cam.get_viewport()},
+        {.ViewMatrix            = _camera.get_matrix(),
+         .Viewport              = rect_i {_camera.get_viewport()},
          .MousePosition         = input::system::GetMousePosition(),
          .Time                  = stats.get_time(),
          .Debug                 = debug,
@@ -83,8 +88,6 @@ auto render_target::copy_to_image() const -> image
 
 void render_target::set_size(size_i size)
 {
-    (*Camera).Size = size_f {size}; // FIXME: don't change camera size
-
     if (size.Width <= 0 || size.Height <= 0) { return; }
 
     _impl->on_resize(size);

@@ -6,10 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <stack>
+
 #include "tcob/core/Point.hpp"
-#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -18,14 +20,12 @@ class TCOB_API camera final {
     friend auto constexpr operator==(camera const&, camera const&) -> bool;
 
 public:
-    camera();
-    camera(camera const& other) noexcept;
-    auto operator=(camera const& other) noexcept -> camera&;
+    camera(render_target& parent);
 
-    prop<size_f>  Size;
-    prop<size_f>  Zoom;
-    prop<point_f> Position;
-    prop<point_f> Offset;
+    point_f ViewOffset;
+
+    size_f  Zoom {size_f::One};
+    point_f Position;
 
     u32 VisibilityMask {0xFFFFFFFF};
 
@@ -44,19 +44,19 @@ public:
     auto convert_screen_to_world(rect_i const& rect) const -> rect_f;
     auto convert_screen_to_world(point_i point) const -> point_f;
 
+    void push_state();
+    void pop_state();
+
 private:
-    void update_transform();
+    auto get_transform() const -> transform;
 
-    transform _transform {transform::Identity};
+    struct xform_state {
+        size_f  Zoom;
+        point_f Position;
+    };
+
+    std::stack<xform_state> _states;
+    render_target&          _parent;
 };
-
-auto constexpr operator==(camera const& left, camera const& right) -> bool
-{
-    return left.VisibilityMask == right.VisibilityMask
-        && left.Size == right.Size
-        && left.Zoom == right.Zoom
-        && left.Position == right.Position
-        && left.Offset == right.Offset;
-}
 
 }

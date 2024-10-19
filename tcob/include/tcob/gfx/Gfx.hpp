@@ -153,6 +153,7 @@ namespace gfx {
     struct canvas_path;
     class material;
     class render_system;
+    class render_target;
     struct render_properties;
     class window;
 }

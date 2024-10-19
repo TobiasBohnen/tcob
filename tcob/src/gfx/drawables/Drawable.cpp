@@ -32,7 +32,7 @@ void drawable::hide()
 
 void drawable::draw_to(render_target& target)
 {
-    if (target.Camera->VisibilityMask & VisibilityMask) {
+    if (target.get_camera().VisibilityMask & VisibilityMask) {
         if (is_visible()) {
             on_draw_to(target);
         }

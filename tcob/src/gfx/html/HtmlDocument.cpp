@@ -195,7 +195,7 @@ void document::on_mouse_button_up(input::mouse::button_event const& ev)
 
 auto document::convert_screen_to_world(point_i pos) const -> point_i
 {
-    return point_i {_config.Window->Camera->convert_screen_to_world(pos)};
+    return point_i {_config.Window->get_camera().convert_screen_to_world(pos)};
 }
 }
 
