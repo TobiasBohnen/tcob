@@ -113,11 +113,14 @@ auto default_new(string const& name, Loader* loader, Bucket* bucket, Cache& cach
     return retValue;
 }
 
-auto default_check_async_load(auto&& cache, auto&& stateSetter) -> task_status
+void default_check_async_load(def_task_context& ctx, auto&& cache, auto&& stateSetter)
 {
     using namespace std::chrono_literals;
 
-    if (cache.empty()) { return task_status::Finished; }
+    if (cache.empty()) {
+        ctx.Status = task_status::Finished;
+        return;
+    }
 
     bool loadingDone {true};
 
@@ -137,11 +140,9 @@ auto default_check_async_load(auto&& cache, auto&& stateSetter) -> task_status
         }
     }
 
-    if (loadingDone) {
-        cache.clear();
-    }
+    if (loadingDone) { cache.clear(); }
 
-    return cache.empty() ? task_status::Finished : task_status::Running;
+    ctx.Status = cache.empty() ? task_status::Finished : task_status::Running;
 }
 
 cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
@@ -322,8 +323,8 @@ void cfg_sound_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<task_manager>().run_deferred([&]() {
-        return default_check_async_load(_cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+    locate_service<task_manager>().run_deferred([&](def_task_context& ctx) {
+        return default_check_async_load(ctx, _cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
@@ -375,8 +376,8 @@ void cfg_sound_font_loader::prepare()
         set_asset_status(def->assetPtr, status::Loading);
     }
 
-    locate_service<task_manager>().run_deferred([&]() {
-        return default_check_async_load(_cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+    locate_service<task_manager>().run_deferred([&](def_task_context& ctx) {
+        return default_check_async_load(ctx, _cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
@@ -929,13 +930,14 @@ void cfg_texture_loader::prepare()
     }
     _cacheAni.clear();
 
-    locate_service<task_manager>().run_deferred([&]() { return check_async_load(); });
+    locate_service<task_manager>().run_deferred([&](def_task_context& ctx) { return check_async_load(ctx); });
 }
 
-auto cfg_texture_loader::check_async_load() -> task_status
+void cfg_texture_loader::check_async_load(def_task_context& ctx)
 {
     if (_cacheTex.empty()) {
-        return task_status::Finished;
+        ctx.Status = task_status::Finished;
+        return;
     }
 
     // check if async images have been loaded and update textures
@@ -991,7 +993,7 @@ auto cfg_texture_loader::check_async_load() -> task_status
         _cacheTex.clear();
     }
 
-    return _cacheTex.empty() ? task_status::Finished : task_status::Running;
+    ctx.Status = _cacheTex.empty() ? task_status::Finished : task_status::Running;
 }
 
 }

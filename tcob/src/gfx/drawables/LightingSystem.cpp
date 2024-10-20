@@ -178,7 +178,7 @@ void lighting_system::cast_ray(light_source& light)
 
     // ray cast
     locate_service<task_manager>().run_parallel(
-        [&](task_context const& ctx) {
+        [&](par_task_context const& ctx) {
             std::vector<std::pair<f64, light_collision>> taskCollisionResult;
             taskCollisionResult.reserve(ctx.End - ctx.Start);
 

@@ -69,6 +69,8 @@ using utf8_string_view = std::string_view; // TODO: create real utf-8 string_vie
 
 using path = utf8_string;
 
+static constexpr i32 INVALID_ID {-1};
+
 namespace io {
     class istream;
     class ifstream;

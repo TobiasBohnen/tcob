@@ -7,6 +7,8 @@
 
 #include <atomic>
 
+#include "tcob/core/random/Random.hpp"
+
 namespace tcob {
 
 task_manager::task_manager(i32 threads)
@@ -30,16 +32,16 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
     isize const numThreads {std::min(_threadCount, count / minRange)};
 
     if (numThreads <= 1 || count < _threadCount) {
-        task_context const ctx {.Start = 0, .End = count, .Thread = 0};
+        par_task_context const ctx {.Start = 0, .End = count, .Thread = 0};
         func(ctx);
     } else {
         isize const        partitionSize {count / numThreads};
         std::atomic<isize> activeTasks {numThreads};
 
         for (isize i {0}; i < numThreads; ++i) {
-            task_context const ctx {.Start  = i * partitionSize,
-                                    .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
-                                    .Thread = i};
+            par_task_context const ctx {.Start  = i * partitionSize,
+                                        .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
+                                        .Thread = i};
             add_task([func, ctx, &activeTasks]() {
                 func(ctx);
                 --activeTasks;
@@ -50,10 +52,22 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
     }
 }
 
-void task_manager::run_deferred(def_func&& func)
+auto task_manager::run_deferred(def_func&& func) -> i32
+{
+    static rng rand {0x1badbad1};
+
+    std::scoped_lock lock {_deferredMutex};
+    i32 const        id {rand(0, std::numeric_limits<i32>::max() - 0xff)};
+    _deferredQueueFront.emplace_back(std::move(func), id);
+    return id;
+}
+
+void task_manager::remove_deferred(i32 id)
 {
     std::scoped_lock lock {_deferredMutex};
-    _deferredQueue.push(std::move(func));
+
+    std::erase_if(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; });
+    std::erase_if(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
 }
 
 auto task_manager::get_thread_count() const -> isize
@@ -73,17 +87,19 @@ void task_manager::add_task(task_func&& func)
 auto task_manager::process_queue() -> bool
 {
     assert(std::this_thread::get_id() == _mainThreadID);
-    if (_deferredQueue.empty()) { return true; }
+    if (_deferredQueueFront.empty()) { return true; }
     std::scoped_lock lock {_deferredMutex};
 
-    std::queue<def_func> newQueue {};
-
-    while (!_deferredQueue.empty()) {
-        if (auto& front {_deferredQueue.front()}; front() == task_status::Running) { newQueue.push(front); }
-        _deferredQueue.pop();
+    while (!_deferredQueueFront.empty()) {
+        def_task_context ctx;
+        auto&            front {_deferredQueueFront.front()};
+        front.first(ctx);
+        if (ctx.Status == task_status::Running) { _deferredQueueBack.emplace_back(front); }
+        _deferredQueueFront.pop_front();
     }
 
-    _deferredQueue.swap(newQueue);
+    _deferredQueueFront.swap(_deferredQueueBack);
+    _deferredQueueBack = {};
     return false;
 }
 

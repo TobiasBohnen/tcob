@@ -5,6 +5,8 @@
 
 #include "tcob/core/Signal.hpp"
 
+#include "tcob/core/random/Random.hpp"
+
 namespace tcob {
 
 namespace detail {
@@ -21,7 +23,8 @@ namespace detail {
 
     auto signal_base::get_next_id() const -> i32
     {
-        return ++_currentId;
+        static rng rand {0x1badbad1};
+        return rand(0, std::numeric_limits<i32>::max() - 0xff);
     }
 
 }
@@ -38,7 +41,7 @@ connection::~connection() = default;
 
 void connection::disconnect()
 {
-    if (_signal && _id != detail::signal_base::INVALID_ID) {
+    if (_signal && _id != INVALID_ID) {
         _signal->disconnect(_id);
     }
 }
@@ -51,7 +54,7 @@ auto connection::get_id() const -> i32
 ////////////////////////////////////////////////////////////
 
 scoped_connection::scoped_connection()
-    : connection {nullptr, detail::signal_base::INVALID_ID}
+    : connection {nullptr, INVALID_ID}
 {
 }
 
@@ -68,7 +71,7 @@ scoped_connection::~scoped_connection()
 scoped_connection::scoped_connection(scoped_connection&& other) noexcept
     : connection {other._signal, other._id}
 {
-    std::exchange(other._id, detail::signal_base::INVALID_ID);
+    std::exchange(other._id, INVALID_ID);
     std::exchange(other._signal, nullptr);
 }
 

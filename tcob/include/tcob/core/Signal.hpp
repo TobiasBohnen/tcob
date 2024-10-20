@@ -25,17 +25,12 @@ struct event_base {
 namespace detail {
     class TCOB_API signal_base : public non_copyable {
     public:
-        static constexpr i32 INVALID_ID {-1};
-
         signal_base() = default;
         virtual ~signal_base();
 
         void virtual disconnect(i32 id) const = 0;
 
         auto get_next_id() const -> i32;
-
-    private:
-        mutable i32 _currentId {INVALID_ID};
     };
 }
 
@@ -56,7 +51,7 @@ public:
 
 protected:
     detail::signal_base const* _signal;
-    i32                        _id {detail::signal_base::INVALID_ID};
+    i32                        _id {INVALID_ID};
 };
 
 class [[nodiscard]] TCOB_API scoped_connection final : public connection, public non_copyable {

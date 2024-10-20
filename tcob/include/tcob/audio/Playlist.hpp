@@ -28,10 +28,14 @@ public:
     void add(string const& name, source* source);
 
     void play(string const& name);
+
     void queue(string const& name);
+    void clear_queue();
 
 private:
-    auto update() -> task_status;
+    void launch_task();
+    void update(def_task_context& ctx);
+
     void play(source* source);
 
     std::unordered_map<string, source*> _sources;
@@ -39,7 +43,7 @@ private:
     std::vector<source*> _playing;
     std::queue<source*>  _waiting;
 
-    bool _deferred {false};
+    i32 _deferred {INVALID_ID};
 };
 
 }

@@ -21,10 +21,14 @@ enum class task_status : u8 {
     Running
 };
 
-struct task_context {
+struct par_task_context {
     isize Start {0};
     isize End {0};
     isize Thread {0};
+};
+
+struct def_task_context {
+    task_status Status {task_status::Running};
 };
 
 ////////////////////////////////////////////////////////////
@@ -36,8 +40,8 @@ class TCOB_API task_manager final {
 public:
     template <typename T>
     using async_func = std::function<T()>;
-    using par_func   = std::function<void(task_context const&)>;
-    using def_func   = std::function<task_status()>;
+    using par_func   = std::function<void(par_task_context const&)>;
+    using def_func   = std::function<void(def_task_context&)>;
 
     explicit task_manager(i32 threads);
     ~task_manager();
@@ -47,7 +51,8 @@ public:
 
     void run_parallel(par_func const& func, isize count, isize minRange = 1);
 
-    void run_deferred(def_func&& func);
+    auto run_deferred(def_func&& func) -> i32;
+    void remove_deferred(i32 id);
 
     auto get_thread_count() const -> isize;
 
@@ -68,7 +73,9 @@ private:
     std::vector<std::jthread>   _taskWorkers;
     std::condition_variable_any _taskCondition;
 
-    std::queue<def_func> _deferredQueue {};
+    using deferred_queue = std::deque<std::pair<def_func, i32>>;
+    deferred_queue       _deferredQueueFront {};
+    deferred_queue       _deferredQueueBack {};
     std::recursive_mutex _deferredMutex {};
 };
 

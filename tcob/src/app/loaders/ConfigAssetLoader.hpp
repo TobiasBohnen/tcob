@@ -246,7 +246,7 @@ public:
     void prepare() override;
 
 private:
-    auto check_async_load() -> task_status;
+    void check_async_load(def_task_context& ctx);
 
     // texture
     struct reload_info {
