@@ -5,7 +5,7 @@
 
 #include "tcob/audio/Sound.hpp"
 
-#include "tcob/audio/AudioSource.hpp"
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"

@@ -7,9 +7,7 @@
 
 #include <cassert>
 #include <thread>
-#include <utility>
 
-#include "tcob/audio/AudioSource.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"

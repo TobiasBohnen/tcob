@@ -3,9 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <utility>
-
-#include "tcob/audio/AudioSource.hpp"
+#include "tcob/audio/Source.hpp"
 
 #include "ALObjects.hpp"
 
@@ -94,39 +92,6 @@ void source::toggle_pause()
 auto source::get_source() const -> audio::al::al_source*
 {
     return _source.get();
-}
-
-////////////////////////////////////////////////////////////
-
-using namespace std::chrono_literals;
-
-decoder::decoder()  = default;
-decoder::~decoder() = default;
-
-auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>
-{
-    _stream = std::move(in);
-    _ctx    = ctx;
-    _info   = open();
-    return _info;
-}
-
-auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
-{
-    if (!_info || size <= 0) { return std::nullopt; }
-
-    std::vector<f32> buffer(static_cast<usize>(size));
-    return decode(buffer) > 0 ? std::optional<std::vector<f32>> {buffer} : std::nullopt;
-}
-
-auto decoder::get_stream() -> io::istream&
-{
-    return *_stream;
-}
-
-auto decoder::get_context() -> std::any&
-{
-    return _ctx;
 }
 
 }

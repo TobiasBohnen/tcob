@@ -1,10 +1,11 @@
 # audio
 list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ALObjects.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/AudioSource.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AudioSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Buffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Music.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Playlist.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sound.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/SoundGenerator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/SpeechGenerator.cpp
@@ -12,10 +13,12 @@ list(APPEND SRC
 )
 
 list(APPEND HDR
-    ${TCOB_INC_DIR}/tcob/audio/AudioSource.hpp
+    ${TCOB_INC_DIR}/tcob/audio/Audio.hpp
+    ${TCOB_INC_DIR}/tcob/audio/Source.hpp
     ${TCOB_INC_DIR}/tcob/audio/AudioSystem.hpp
     ${TCOB_INC_DIR}/tcob/audio/Buffer.hpp
     ${TCOB_INC_DIR}/tcob/audio/Music.hpp
+    ${TCOB_INC_DIR}/tcob/audio/Playlist.hpp
     ${TCOB_INC_DIR}/tcob/audio/Sound.hpp
     ${TCOB_INC_DIR}/tcob/audio/SoundGenerator.hpp
     ${TCOB_INC_DIR}/tcob/audio/SpeechGenerator.hpp

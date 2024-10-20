@@ -1,0 +1,21 @@
+// Copyright (c) 2024 Tobias Bohnen
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+#pragma once
+#include "tcob/tcob_config.hpp"
+
+namespace tcob::audio {
+
+////////////////////////////////////////////////////////////
+// forward declarations
+
+namespace al {
+    class al_buffer;
+    class al_source;
+}
+
+class source;
+
+}

@@ -13,7 +13,7 @@
     #define DR_WAV_NO_STDIO
     #include <dr_libs/dr_wav.h>
 
-    #include "tcob/audio/AudioSource.hpp"
+    #include "tcob/audio/Buffer.hpp"
 
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////

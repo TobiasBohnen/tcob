@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "tcob/audio/AudioSource.hpp"
+#include "tcob/audio/Source.hpp"
 #include "tcob/core/Interfaces.hpp"
 
 #define AL_FORMAT_MONO_FLOAT32 0x10010

@@ -13,7 +13,7 @@
     #define DR_FLAC_NO_STDIO
     #include <dr_libs/dr_flac.h>
 
-    #include "tcob/audio/AudioSource.hpp"
+    #include "tcob/audio/Buffer.hpp"
 
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////

@@ -9,9 +9,10 @@
 #include <future>
 #include <optional>
 
-#include "tcob/audio/AudioSource.hpp"
 #include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"
+
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////

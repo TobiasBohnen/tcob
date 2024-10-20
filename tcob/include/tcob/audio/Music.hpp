@@ -8,7 +8,8 @@
 
 #include <atomic>
 
-#include "tcob/audio/AudioSource.hpp"
+#include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 

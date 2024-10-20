@@ -13,7 +13,7 @@
     #include <vorbis/vorbisenc.h>
     #include <vorbis/vorbisfile.h>
 
-    #include "tcob/audio/AudioSource.hpp"
+    #include "tcob/audio/Buffer.hpp"
 
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////

@@ -5,7 +5,6 @@
 
 #include "tcob/audio/Buffer.hpp"
 
-#include "tcob/audio/AudioSource.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
@@ -89,6 +88,39 @@ auto buffer::Create(info const& info, std::span<f32> data) -> buffer
     retValue._info   = info;
     retValue._buffer = {data.begin(), data.end()};
     return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+using namespace std::chrono_literals;
+
+decoder::decoder()  = default;
+decoder::~decoder() = default;
+
+auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>
+{
+    _stream = std::move(in);
+    _ctx    = ctx;
+    _info   = open();
+    return _info;
+}
+
+auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
+{
+    if (!_info || size <= 0) { return std::nullopt; }
+
+    std::vector<f32> buffer(static_cast<usize>(size));
+    return decode(buffer) > 0 ? std::optional<std::vector<f32>> {buffer} : std::nullopt;
+}
+
+auto decoder::get_stream() -> io::istream&
+{
+    return *_stream;
+}
+
+auto decoder::get_context() -> std::any&
+{
+    return _ctx;
 }
 
 }

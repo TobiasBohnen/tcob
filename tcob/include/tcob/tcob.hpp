@@ -10,13 +10,14 @@
 #include <tcob/app/Scene.hpp>
 #include <tcob/app/SerializeHelper.hpp>
 
-#include <tcob/audio/AudioSource.hpp>
 #include <tcob/audio/AudioSystem.hpp>
 #include <tcob/audio/Buffer.hpp>
 #include <tcob/audio/Music.hpp>
+#include <tcob/audio/Playlist.hpp>
 #include <tcob/audio/Sound.hpp>
 #include <tcob/audio/SoundFont.hpp>
 #include <tcob/audio/SoundGenerator.hpp>
+#include <tcob/audio/Source.hpp>
 #include <tcob/audio/SpeechGenerator.hpp>
 
 #include <tcob/core/AngleUnits.hpp>
