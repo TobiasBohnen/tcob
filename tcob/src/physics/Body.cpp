@@ -7,6 +7,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <algorithm>
     #include <cassert>
 
     #include "B2D.hpp"
@@ -103,7 +104,7 @@ auto body::get_shapes() -> std::span<std::shared_ptr<shape>>
 
 void body::remove_shape(shape const& shapePtr)
 {
-    _shapes.erase(std::find_if(_shapes.begin(), _shapes.end(), [&shapePtr](auto const& val) {
+    _shapes.erase(std::ranges::find_if(_shapes, [&shapePtr](auto const& val) {
         return val.get() == &shapePtr;
     }));
 }

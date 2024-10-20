@@ -5,6 +5,7 @@
 
 #include "tcob/core/TaskManager.hpp"
 
+#include <algorithm>
 #include <atomic>
 
 #include "tcob/core/random/Random.hpp"
@@ -66,8 +67,8 @@ void task_manager::remove_deferred(i32 id)
 {
     std::scoped_lock lock {_deferredMutex};
 
-    std::erase_if(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; });
-    std::erase_if(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
+    _deferredQueueFront.erase(std::ranges::find_if(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; }));
+    _deferredQueueBack.erase(std::ranges::find_if(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; }));
 }
 
 auto task_manager::get_thread_count() const -> isize

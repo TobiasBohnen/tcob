@@ -9,6 +9,7 @@
 
     #include <B2D.hpp>
 
+    #include <algorithm>
     #include <memory>
 
 namespace tcob::physics {
@@ -55,7 +56,7 @@ auto world::create_body(body_transform const& xform, body::settings const& bodyS
 
 void world::remove_body(body const& body)
 {
-    _bodies.erase(std::find_if(_bodies.begin(), _bodies.end(), [ptr = &body](auto const& val) {
+    _bodies.erase(std::ranges::find_if(_bodies, [ptr = &body](auto const& val) {
         return val.get() == ptr;
     }));
 }
@@ -75,7 +76,7 @@ auto world::find_body(shape const& s) -> std::shared_ptr<body>
 
 void world::remove_joint(joint const& joint)
 {
-    _joints.erase(std::find_if(_joints.begin(), _joints.end(), [ptr = &joint](auto const& val) {
+    _joints.erase(std::ranges::find_if(_joints, [ptr = &joint](auto const& val) {
         return val.get() == ptr;
     }));
 }

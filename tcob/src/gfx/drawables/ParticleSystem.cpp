@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
+
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 
@@ -50,7 +51,7 @@ void particle_system::stop()
 
 void particle_system::remove_emitter(particle_emitter_base const& emitter)
 {
-    _emitters.erase(std::find_if(_emitters.begin(), _emitters.end(), [&emitter](auto const& val) {
+    _emitters.erase(std::ranges::find_if(_emitters, [&emitter](auto const& val) {
         return val.get() == &emitter;
     }));
 }

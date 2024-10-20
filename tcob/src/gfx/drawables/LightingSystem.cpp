@@ -35,7 +35,7 @@ lighting_system::lighting_system(bool multiThreaded)
 
 void lighting_system::remove_light_source(light_source const& light)
 {
-    _lightSources.erase(std::find_if(_lightSources.begin(), _lightSources.end(), [&light](auto const& val) {
+    _lightSources.erase(std::ranges::find_if(_lightSources, [&light](auto const& val) {
         if (val.get() == &light) {
             val.get()->_parent = nullptr;
             return true;
@@ -43,6 +43,7 @@ void lighting_system::remove_light_source(light_source const& light)
 
         return false;
     }));
+
     _isDirty = true;
 }
 
@@ -65,7 +66,7 @@ void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
         mark_lights_dirty();
     }
 
-    _shadowCasters.erase(std::find_if(_shadowCasters.begin(), _shadowCasters.end(), [&shadow](auto const& val) {
+    _shadowCasters.erase(std::ranges::find_if(_shadowCasters, [&shadow](auto const& val) {
         if (val.get() == &shadow) {
             val.get()->_parent = nullptr;
             return true;

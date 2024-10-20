@@ -49,7 +49,7 @@ auto object::operator[](string const& key) const -> proxy<object const, string> 
 
 void object::set(string_view key, std::nullptr_t)
 {
-    std::erase_if(*values(), [&key](auto const& p) { return p.first == key; });
+    values()->erase(find(key));
 }
 
 auto object::str() const -> string

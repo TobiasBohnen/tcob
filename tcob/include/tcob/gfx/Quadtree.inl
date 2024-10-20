@@ -6,6 +6,8 @@
 #pragma once
 #include "Quadtree.hpp"
 
+#include <algorithm>
+
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
@@ -132,8 +134,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::remove(rect_f const& re
 
     auto const removeValue {[&]() {
         // Find the value in node->values
-        auto it {std::find_if(std::begin(_values), std::end(_values),
-                              [&value](auto const& rhs) { return value == rhs; })};
+        auto it {std::ranges::find_if(_values, [&value](auto const& rhs) { return value == rhs; })};
         assert(it != std::end(_values) && "Trying to remove a value that is not present in the node");
         // Swap with the last element and pop back
         *it = std::move(_values.back());
@@ -191,8 +192,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::replace(rect_f const& r
 
     if (is_leaf()) {
         // Find and replace the oldValue with newValue in this node
-        auto it {std::find_if(std::begin(_values), std::end(_values),
-                              [&oldValue](auto const& rhs) { return oldValue == rhs; })};
+        auto it {std::ranges::find_if(_values, [&oldValue](auto const& rhs) { return oldValue == rhs; })};
         if (it != std::end(_values)) {
             *it = newValue;
             return true;
