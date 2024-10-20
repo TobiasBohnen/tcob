@@ -270,7 +270,6 @@ auto sound_generator::generate_random() -> sound_wave
     retValue.DutySweep    = std::pow(_random(-1.0f, 1.0f), 3.0f);
     retValue.VibratoDepth = std::pow(_random(-1.0f, 1.0f), 3.0f);
     retValue.VibratoSpeed = _random(-1.0f, 1.0f);
-    // retValue.vibratoPhaseDelay = _random(-1.0f, 1.0f);
     retValue.AttackTime   = std::pow(_random(-1.0f, 1.0f), 3.0f);
     retValue.SustainTime  = std::pow(_random(-1.0f, 1.0f), 2.0f);
     retValue.DecayTime    = _random(-1.0f, 1.0f);
@@ -307,14 +306,12 @@ auto sound_generator::mutate_wave(sound_wave const& wave) -> sound_wave
     sound_wave retValue {wave};
 
     if (_random(0, 1) == 1) { retValue.StartFrequency += _random(-0.05f, 0.05f); }
-    // if (_random(0, 1) == 1) retValue.minFrequency += _random(-0.05f, 0.05f);
     if (_random(0, 1) == 1) { retValue.Slide += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.DeltaSlide += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.SquareDuty += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.DutySweep += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.VibratoDepth += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.VibratoSpeed += _random(-0.05f, 0.05f); }
-    // if (_random(0, 1) == 1) wave.vibratoPhaseDelay += _random(-0.05f, 0.05f);
     if (_random(0, 1) == 1) { retValue.AttackTime += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.SustainTime += _random(-0.05f, 0.05f); }
     if (_random(0, 1) == 1) { retValue.DecayTime += _random(-0.05f, 0.05f); }
@@ -342,56 +339,27 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
     constexpr i32 MAX_SUPERSAMPLING {8};
     constexpr f32 SAMPLE_SCALE_COEFICIENT {0.2f}; // NOTE: Used to scale sample value to [-1..1]
 
-    i32 repeatTime {0};
+    i32       repeatTime {0};
+    i32 const repeatLimit {wave.RepeatSpeed == 0.0f
+                               ? 0
+                               : static_cast<i32>((std::pow(1.0f - wave.RepeatSpeed, 2.0f) * 20000) + 32)};
 
-    f64 fperiod {0};
-    f64 fmaxperiod {0};
-    f64 fslide {0};
-    f64 fdslide {0};
-    f32 squareDuty {0};
-    f32 squareSlide {0};
-
-    arpeggio arpeggio;
-
-    auto const reset_sample_parameters {[&]() {
-        repeatTime = 0;
-
-        fperiod    = {100.0 / (wave.StartFrequency * wave.StartFrequency + 0.001)};
-        fmaxperiod = {100.0 / (wave.MinFrequency * wave.MinFrequency + 0.001)};
-
-        fslide  = {1.0 - (std::pow(static_cast<f64>(wave.Slide), 3.0) * 0.01)};
-        fdslide = {-std::pow(static_cast<f64>(wave.DeltaSlide), 3.0) * 0.000001};
-
-        squareDuty  = {0.5f - (wave.SquareDuty * 0.5f)};
-        squareSlide = {-wave.DutySweep * 0.00005f};
-
-        arpeggio.reset(wave);
+    square_duty squareDuty;
+    period      wavePeriod;
+    auto const  reset {[&]() {
+        wavePeriod = {wave};
+        squareDuty = {wave};
     }};
 
-    reset_sample_parameters();
+    reset();
 
-    // filter
-    filter filter {wave};
-
-    // vibrato
-    vibrato vibrato {wave};
-
-    // envelope
+    filter   filter {wave};
+    vibrato  vibrato {wave};
     envelope envelope {wave};
-
-    // phaser
-    phaser phaser {wave};
-
-    // noise
-    noise noise {wave};
+    phaser   phaser {wave};
+    noise    noise {wave};
     if (wave.WaveType == sound_wave::type::Noise) { noise.generate(); }
 
-    i32 repeatLimit {wave.RepeatSpeed == 0.0f
-                         ? 0
-                         : static_cast<i32>((std::pow(1.0f - wave.RepeatSpeed, 2.0f) * 20000) + 32)};
-
-    // NOTE: We reserve enough space for up to 10 seconds of wave audio at given sample rate
-    // By default we use f32 size samples, they are converted to desired sample size at the end
     std::vector<f32> samples(static_cast<usize>(MAX_WAVE_LENGTH_SECONDS * wave.SampleRate));
 
     bool generatingSample {true};
@@ -404,36 +372,17 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
             break;
         }
 
-        // Generate sample using selected parameters
-        ++repeatTime;
-
-        if (repeatLimit != 0 && repeatTime >= repeatLimit) {
-            // Reset sample parameters (only some of them)
-            reset_sample_parameters();
-        }
-
-        // Frequency envelopes/arpeggios
-        arpeggio.apply(fperiod);
-
-        fslide += fdslide;
-        fperiod *= fslide;
-
-        if (fperiod > fmaxperiod) {
-            fperiod = fmaxperiod;
-
-            if (wave.MinFrequency > 0.0f) { generatingSample = false; }
-        }
+        if (repeatLimit != 0 && ++repeatTime >= repeatLimit) { reset(); }
 
         // Volume envelope
-        if (!envelope.increment_time()) { generatingSample = false; }
+        if (!envelope.step()) { generatingSample = false; }
 
-        // Phaser
         phaser.step();
-
-        // Filter
         filter.step();
 
-        i32 const period {std::max(8, static_cast<i32>(vibrato.get(fperiod)))};
+        auto const fperiod {wavePeriod()};
+        if (wavePeriod.FrequencyOutOfBounds) { generatingSample = false; }
+        i32 const period {std::max(8, static_cast<i32>(vibrato(fperiod)))};
         f32       ssample {0.0f};
 
         // Supersampling x8
@@ -452,9 +401,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 
             switch (wave.WaveType) {
             case sound_wave::type::Square: {
-                squareDuty += squareSlide;
-                squareDuty = std::clamp(squareDuty, 0.0f, 0.5f);
-                sample     = fp < squareDuty ? 0.5f : -0.5f;
+                sample = fp < squareDuty() ? 0.5f : -0.5f;
             } break;
             case sound_wave::type::Sawtooth:
                 sample = 1.0f - fp * 2;
@@ -463,21 +410,18 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
                 sample = std::sin(fp * TAU_F);
                 break;
             case sound_wave::type::Noise:
-                sample = noise.get(phase * 32 / period);
+                sample = noise[phase * 32 / period];
                 break;
             case sound_wave::type::Triangle:
                 sample = 1.0f - std::abs(std::round(fp) - fp) * 4;
                 break;
             }
 
-            // Filter
-            filter.apply(sample);
-
-            // Phaser
-            phaser.apply(sample);
+            sample = filter(sample);
+            sample = phaser(sample);
 
             // Final accumulation and envelope application
-            ssample += sample * envelope.get();
+            ssample += sample * envelope();
         }
 
         ssample = (ssample / MAX_SUPERSAMPLING) * SAMPLE_SCALE_COEFICIENT;

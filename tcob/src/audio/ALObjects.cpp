@@ -178,7 +178,7 @@ auto al_source::get_gain() const -> f32
 void al_source::set_gain(f32 value) const
 {
     assert(_id);
-    alSourcef(_id, AL_GAIN, std::clamp(value, 0.0f, 1.0f));
+    alSourcef(_id, AL_GAIN, value);
 }
 
 auto al_source::get_position() const -> std::array<f32, 3>

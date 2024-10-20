@@ -16,47 +16,11 @@ namespace tcob::audio {
 
 class filter {
 public:
-    explicit filter(sound_wave const& wave)
-        : _fltw {std::pow(wave.LowPassFilterCutoff, 3.0f) * 0.1f}
-        , _fltwd {1.0f + (wave.LowPassFilterCutoffSweep * 0.0001f)}
-        , _fltdmp {std::min(0.8f, 5.0f / (1.0f + std::pow(wave.LowPassFilterResonance, 2.0f) * 20.0f) * (0.01f + _fltw))}
-        , _flthp {std::pow(wave.HighPassFilterCutoff, 2.0f) * 0.1f}
-        , _flthpd {1.0f + (wave.HighPassFilterCutoffSweep * 0.0003f)}
-        , _lpfcCheck {wave.LowPassFilterCutoff != 1.0f}
-    {
-    }
+    explicit filter(sound_wave const& wave);
 
-    void step()
-    {
-        if (_flthpd != 0.0f) {
-            _flthp *= _flthpd;
-            _flthp = std::clamp(_flthp, 0.00001f, 0.1f);
-        }
-    }
+    void step();
 
-    void apply(f32& sample)
-    {
-        // LP filter
-        f32 const pp {_fltp};
-        _fltw *= _fltwd;
-
-        _fltw = std::clamp(_fltw, 0.0f, 0.1f);
-
-        if (_lpfcCheck) {
-            _fltdp += (sample - _fltp) * _fltw;
-            _fltdp -= _fltdp * _fltdmp;
-        } else {
-            _fltp  = sample;
-            _fltdp = 0.0f;
-        }
-
-        _fltp += _fltdp;
-
-        // HP filter
-        _fltphp += _fltp - pp;
-        _fltphp -= _fltphp * _flthp;
-        sample = _fltphp;
-    }
+    auto operator()(f32 sample) -> f32;
 
 private:
     f32       _fltw;
@@ -76,49 +40,14 @@ private:
 
 class envelope {
 public:
-    explicit envelope(sound_wave const& wave)
-        : _attackTime {static_cast<i32>(wave.AttackTime * wave.AttackTime * 100000.0f)}
-        , _sustainTime {static_cast<i32>(wave.SustainTime * wave.SustainTime * 100000.0f)}
-        , _decayTime {static_cast<i32>(wave.DecayTime * wave.DecayTime * 100000.0f)}
-        , _sustainPunch {wave.SustainPunch}
-    {
-    }
+    explicit envelope(sound_wave const& wave);
 
-    auto increment_time() -> bool
-    {
-        ++_time;
-        while (_time > get_stage_time()) {
-            _time = 0;
-            ++_stage;
+    auto step() -> bool;
 
-            if (_stage >= 3) { return false; }
-        }
-
-        return true;
-    }
-
-    auto get() const -> f32
-    {
-        switch (_stage) {
-        case 0: return static_cast<f32>(_time) / static_cast<f32>(_attackTime);
-        case 1: return 1.0f + (std::pow(1.0f - (static_cast<f32>(_time) / static_cast<f32>(_sustainTime)), 1.0f) * 2.0f * _sustainPunch);
-        case 2: return 1.0f - (static_cast<f32>(_time) / static_cast<f32>(_decayTime));
-        }
-
-        return 0;
-    }
+    auto operator()() const -> f32;
 
 private:
-    auto get_stage_time() const -> i32
-    {
-        switch (_stage) {
-        case 0: return _attackTime;
-        case 1: return _sustainTime;
-        case 2: return _decayTime;
-        }
-
-        return 0;
-    }
+    auto get_stage_time() const -> i32;
 
     i32 _attackTime {0};
     i32 _sustainTime {0};
@@ -134,26 +63,11 @@ private:
 
 class phaser {
 public:
-    explicit phaser(sound_wave const& wave)
-        : _fphase {std::pow(wave.PhaserOffset, 2.0f) * 1020.0f}
-        , _fdphase {std::pow(wave.PhaserSweep, 2.0f) * 1.0f}
-    {
-        if (wave.PhaserOffset < 0.0f) { _fphase = -_fphase; }
-        if (wave.PhaserSweep < 0.0f) { _fdphase = -_fdphase; }
-    }
+    explicit phaser(sound_wave const& wave);
 
-    void step()
-    {
-        _fphase += _fdphase;
-        _iphase = std::min(1023, std::abs(static_cast<i32>(_fphase)));
-    }
+    void step();
 
-    void apply(f32& sample)
-    {
-        _phaserBuffer[_ipp & 1023] = sample;
-        sample += _phaserBuffer[(_ipp - _iphase + 1024) & 1023];
-        _ipp = (_ipp + 1) & 1023;
-    }
+    auto operator()(f32 sample) -> f32;
 
 private:
     f32                   _fphase {0};
@@ -167,22 +81,11 @@ private:
 
 class noise {
 public:
-    explicit noise(sound_wave const& wave)
-        : _random {wave.RandomSeed}
-    {
-    }
+    explicit noise(sound_wave const& wave);
 
-    void generate()
-    {
-        for (f32& f : _buffer) {
-            f = _random(-1.0f, 1.0f);
-        }
-    }
+    void generate();
 
-    auto get(i32 idx) const -> f32
-    {
-        return _buffer[static_cast<usize>(idx)];
-    }
+    auto operator[](i32 idx) const -> f32;
 
 private:
     random::rng_split_mix_64 _random {};
@@ -193,21 +96,9 @@ private:
 
 class vibrato {
 public:
-    explicit vibrato(sound_wave const& wave)
-        : _speed {std::pow(wave.VibratoSpeed, 2.0f) * 0.01f}
-        , _amplitude {wave.VibratoDepth * 0.5f}
-    {
-    }
+    explicit vibrato(sound_wave const& wave);
 
-    auto get(f64 fperiod) -> f32
-    {
-        if (_amplitude > 0.0f) {
-            _phase += _speed;
-            return static_cast<f32>(fperiod * (1.0f + std::sin(_phase) * _amplitude));
-        }
-
-        return static_cast<f32>(fperiod);
-    }
+    auto operator()(f64 fperiod) -> f32;
 
 private:
     f32 _speed;
@@ -219,32 +110,49 @@ private:
 
 class arpeggio {
 public:
-    void reset(sound_wave const& wave)
-    {
-        _modulation =
-            wave.ChangeAmount >= 0.0f
-            ? 1.0 - (std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 0.9)
-            : 1.0 + (std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 10.0);
+    arpeggio();
+    arpeggio(sound_wave const& wave);
 
-        _limit = static_cast<i32>((std::pow(1.0f - wave.ChangeSpeed, 2.0f) * 20000) + 32);
-
-        _time = 0;
-    }
-
-    void apply(f64& fperiod)
-    {
-        ++_time;
-
-        if (_limit != 0 && _time >= _limit) {
-            _limit = 0;
-            fperiod *= _modulation;
-        }
-    }
+    auto operator()(f64 fperiod) -> f64;
 
 private:
     f64 _modulation {0};
     i32 _limit {0};
     i32 _time {0};
+};
+
+////////////////////////////////////////////////////////////
+
+class square_duty {
+public:
+    square_duty() = default;
+    square_duty(sound_wave const& wave);
+
+    auto operator()() -> f32;
+
+private:
+    f32 _squareDuty {0};
+    f32 _squareSlide {0};
+};
+
+////////////////////////////////////////////////////////////
+
+class period {
+public:
+    period() = default;
+    period(sound_wave const& wave);
+
+    auto operator()() -> f64;
+
+    bool FrequencyOutOfBounds {false};
+
+private:
+    f64 _period {};
+    f64 _maxperiod {};
+    f64 _slide {};
+    f64 _deltaSlide {};
+
+    arpeggio _arpeggio {};
 };
 
 }

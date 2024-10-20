@@ -8,6 +8,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Playlist.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sound.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/SoundGenerator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SoundGenerator_types.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/SpeechGenerator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_bsa.cpp
 )
