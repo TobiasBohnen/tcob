@@ -34,8 +34,9 @@ struct tileset {
 };
 
 struct tilemap_layer {
-    std::vector<tile_index_t> Tiles;
-    size_i                    Size;
+    std::span<tile_index_t> Tiles; // TODO: mdspan
+    size_i                  Size {size_i::Zero};
+    point_i                 Offset {point_i::Zero};
 };
 
 ////////////////////////////////////////////////////////////
@@ -63,6 +64,18 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API hexagonal_grid {
+public:
+    size_f TileSize {size_f::Zero};
+    bool   FlatTop {false};
+
+    auto get_quad_bounds(point_f offset, point_i coord) const -> rect_f;
+
+    auto operator==(hexagonal_grid const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
 namespace detail {
     class TCOB_API tilemap_base : public drawable {
     public:
@@ -72,13 +85,14 @@ namespace detail {
         prop<assets::asset_ptr<material>> Material;
         prop<point_f>                     Position;
 
-        auto add_layer(tilemap_layer const& layer, point_i tileOffset = point_i::Zero) -> usize;
+        auto add_layer(tilemap_layer const& layer) -> id_t;
 
-        void change_tile(usize layerIdx, point_i pos, tile_index_t setIdx);
-        auto get_tile(usize layerIdx, point_i pos) const -> tile_index_t;
-        auto is_visible(usize layerIdx) const -> bool;
-        void set_visible(usize layerIdx, bool visible);
-        auto get_size(usize layerIdx) const -> size_i;
+        auto get_tile(id_t id, point_i pos) const -> tile_index_t;
+        void set_tile(id_t id, point_i pos, tile_index_t setIdx);
+
+        auto is_layer_visible(id_t id) const -> bool;
+        void set_layer_visible(id_t id, bool visible);
+        auto get_layer_size(id_t id) const -> size_i;
 
         void clear();
 
@@ -93,20 +107,23 @@ namespace detail {
         void mark_dirty();
 
     private:
-        void virtual setup_quad(quad& q, point_i coord, tile const& tile) const = 0;
-
-        std::vector<tile_index_t> _tileMap {};
-
         struct layer {
+            id_t    ID {INVALID_ID};
             size_i  Size {size_i::Zero};
-            i32     TileCount {0};
-            i32     TileMapStart {0};
             point_i Offset {point_i::Zero};
+            i32     TileMapStart {0};
             bool    Visible {true};
         };
 
+        auto get_layer(id_t id) -> layer*;
+        auto get_layer(id_t id) const -> layer const*;
+
+        void virtual setup_quad(quad& q, point_i coord, tile const& tile) const = 0;
+
         std::vector<layer> _layers {};
         tileset            _tileSet {};
+
+        std::vector<tile_index_t> _tileMap {};
 
         quad_renderer     _renderer;
         std::vector<quad> _quads {};
@@ -134,7 +151,7 @@ private:
 
 using orthogonal_tilemap = tilemap<orthogonal_grid>;
 using isometric_tilemap  = tilemap<isometric_grid>;
-
+using hexagonal_tilemap  = tilemap<hexagonal_grid>;
 }
 
 #include "TileMap.inl"

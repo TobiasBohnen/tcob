@@ -8,6 +8,8 @@
 #include <cassert>
 #include <utility>
 
+#include "tcob/core/random/Random.hpp"
+
 namespace tcob::gfx {
 namespace detail {
 
@@ -22,51 +24,57 @@ namespace detail {
     void tilemap_base::change_tileset(tile_index_t idx, tile const& t)
     {
         _tileSet.Set[idx] = t;
-        _isDirty          = true;
+        mark_dirty();
     }
 
-    auto tilemap_base::add_layer(tilemap_layer const& layer, point_i tileOffset) -> usize
+    auto tilemap_base::add_layer(tilemap_layer const& layer) -> id_t
     {
         assert(std::ssize(layer.Tiles) == layer.Size.Width * layer.Size.Height);
+        id_t const id {GetRandomID()};
 
-        _layers.push_back({.Size         = layer.Size,
-                           .TileCount    = layer.Size.Width * layer.Size.Height,
-                           .TileMapStart = static_cast<i32>(_tileMap.size()),
-                           .Offset       = tileOffset});
+        _layers.push_back({
+            .ID           = id,
+            .Size         = layer.Size,
+            .Offset       = layer.Offset,
+            .TileMapStart = static_cast<i32>(_tileMap.size()),
+            .Visible      = true,
+        });
+
         _tileMap.insert(_tileMap.end(), layer.Tiles.begin(), layer.Tiles.end());
 
-        _isDirty = true;
-        return _layers.size() - 1;
+        mark_dirty();
+        return id;
     }
 
-    void tilemap_base::change_tile(usize layerIdx, point_i pos, tile_index_t setIdx)
+    void tilemap_base::set_tile(id_t id, point_i pos, tile_index_t setIdx)
     {
-        auto& layer {_layers.at(layerIdx)};
-        _tileMap[layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)] = setIdx;
-        // TODO: only mark affected cells as dirty
-        _isDirty                                                          = true;
+        auto const& layer {*get_layer(id)};
+        i32 const   idx {layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)};
+        _tileMap[idx] = setIdx;
+
+        mark_dirty();
     }
 
-    auto tilemap_base::get_tile(usize layerIdx, point_i pos) const -> tile_index_t
+    auto tilemap_base::get_tile(id_t id, point_i pos) const -> tile_index_t
     {
-        auto const& layer {_layers.at(layerIdx)};
+        auto const& layer {*get_layer(id)};
         return _tileMap[layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)];
     }
 
-    auto tilemap_base::is_visible(usize layerIdx) const -> bool
+    auto tilemap_base::is_layer_visible(id_t id) const -> bool
     {
-        return _layers.at(layerIdx).Visible;
+        return get_layer(id)->Visible;
     }
 
-    void tilemap_base::set_visible(usize layerIdx, bool visible)
+    void tilemap_base::set_layer_visible(id_t id, bool visible)
     {
-        _layers.at(layerIdx).Visible = visible;
-        _isDirty                     = true;
+        get_layer(id)->Visible = visible;
+        mark_dirty();
     }
 
-    auto tilemap_base::get_size(usize layerIdx) const -> size_i
+    auto tilemap_base::get_layer_size(id_t id) const -> size_i
     {
-        return _layers.at(layerIdx).Size;
+        return get_layer(id)->Size;
     }
 
     void tilemap_base::clear()
@@ -79,25 +87,24 @@ namespace detail {
     void tilemap_base::on_update(milliseconds /* deltaTime */)
     {
         if (_tileMap.empty() || !Material()) { return; }
+        if (!_isDirty) { return; }
 
-        if (_isDirty) {
-            _quads.clear();
-            _quads.reserve(_tileMap.size());
-            for (auto const& layer : _layers) {
-                if (!layer.Visible) { continue; }
+        _isDirty        = false;
+        _updateGeometry = true;
 
-                for (i32 i {0}; i < layer.TileCount; ++i) {
-                    auto const setIdx {_tileMap[i + layer.TileMapStart]};
-                    if (setIdx == 0) { continue; }
+        _quads.clear();
+        _quads.reserve(_tileMap.size());
+        for (auto const& layer : _layers) {
+            if (!layer.Visible) { continue; }
 
-                    setup_quad(_quads.emplace_back(),
-                               {(i % layer.Size.Width) + layer.Offset.X, (i / layer.Size.Width) + layer.Offset.Y},
-                               _tileSet.Set[setIdx]);
-                }
+            for (i32 i {0}; i < (layer.Size.Width * layer.Size.Height); ++i) {
+                auto const setIdx {_tileMap[i + layer.TileMapStart]};
+                if (setIdx == 0) { continue; }
+
+                setup_quad(_quads.emplace_back(),
+                           {(i % layer.Size.Width) + layer.Offset.X, (i / layer.Size.Width) + layer.Offset.Y},
+                           _tileSet.Set[setIdx]);
             }
-
-            _isDirty        = false;
-            _updateGeometry = true;
         }
     }
 
@@ -120,6 +127,24 @@ namespace detail {
     {
         _isDirty = true;
     }
+
+    auto tilemap_base::get_layer(id_t id) -> layer*
+    {
+        for (auto& layer : _layers) {
+            if (layer.ID == id) { return &layer; }
+        }
+
+        return nullptr;
+    }
+
+    auto tilemap_base::get_layer(id_t id) const -> layer const*
+    {
+        for (auto const& layer : _layers) {
+            if (layer.ID == id) { return &layer; }
+        }
+
+        return nullptr;
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -127,7 +152,9 @@ namespace detail {
 
 auto orthogonal_grid::get_quad_bounds(point_f offset, point_i coord) const -> rect_f
 {
-    return {{offset.X + (TileSize.Width * coord.X), offset.Y + (TileSize.Height * coord.Y)}, TileSize};
+    return {{offset.X + (TileSize.Width * coord.X),
+             offset.Y + (TileSize.Height * coord.Y)},
+            TileSize};
 }
 
 ////////////////////////////////////////////////////////////
@@ -141,4 +168,14 @@ auto isometric_grid::get_quad_bounds(point_f offset, point_i coord) const -> rec
 
 ////////////////////////////////////////////////////////////
 
+auto hexagonal_grid::get_quad_bounds(point_f offset, point_i coord) const -> rect_f
+{
+    return FlatTop
+        ? rect_f {{offset.X + TileSize.Width * (3.0f / 4.0f * coord.X),
+                   offset.Y + TileSize.Height * (coord.Y + 0.5f * (coord.X & 1))},
+                  TileSize}
+        : rect_f {{offset.X + TileSize.Width * (coord.X + 0.5f * (coord.Y & 1)),
+                   offset.Y + TileSize.Height * (3.0f / 4.0f * coord.Y)},
+                  TileSize};
+}
 }
