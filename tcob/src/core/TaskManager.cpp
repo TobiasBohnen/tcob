@@ -53,12 +53,11 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
     }
 }
 
-auto task_manager::run_deferred(def_func const& func) -> i32
+auto task_manager::run_deferred(def_func const& func) -> id_t
 {
-    static rng rand {0x1badbad1};
+    id_t const id {GetRandomID()};
 
     std::scoped_lock lock {_deferredMutex};
-    i32 const        id {rand(0, std::numeric_limits<i32>::max() - 0xff)};
     _deferredQueueFront.emplace_back(func, id);
     return id;
 }

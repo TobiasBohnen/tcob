@@ -13,6 +13,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/io/SpanStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Engine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/random/Random.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tweening/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common.cpp

@@ -46,8 +46,8 @@ public:
 
     void run_parallel(par_func const& func, isize count, isize minRange = 1);
 
-    auto run_deferred(def_func const& func) -> i32;
-    void cancel_deferred(i32 id);
+    auto run_deferred(def_func const& func) -> id_t;
+    void cancel_deferred(id_t id);
 
     auto get_thread_count() const -> isize;
 

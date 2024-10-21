@@ -102,6 +102,8 @@ namespace random {
 
 using rng = random::rng_xoroshiro_128_plus_plus;
 
+TCOB_API auto GetRandomID() -> id_t;
+
 }
 
 #include "Random.inl"

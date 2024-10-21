@@ -21,17 +21,16 @@ namespace detail {
 
     signal_base::~signal_base() = default;
 
-    auto signal_base::get_next_id() const -> i32
+    auto signal_base::get_next_id() const -> id_t
     {
-        static rng rand {0x1badbad1};
-        return rand(0, std::numeric_limits<i32>::max() - 0xff);
+        return GetRandomID();
     }
 
 }
 
 ////////////////////////////////////////////////////////////
 
-connection::connection(detail::signal_base const* signal, i32 id)
+connection::connection(detail::signal_base const* signal, id_t id)
     : _signal {signal}
     , _id {id}
 {
@@ -46,7 +45,7 @@ void connection::disconnect()
     }
 }
 
-auto connection::get_id() const -> i32
+auto connection::get_id() const -> id_t
 {
     return _id;
 }
