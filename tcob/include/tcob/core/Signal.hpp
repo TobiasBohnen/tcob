@@ -28,9 +28,9 @@ namespace detail {
         signal_base() = default;
         virtual ~signal_base();
 
-        void virtual disconnect(id_t id) const = 0;
+        void virtual disconnect(uid id) const = 0;
 
-        auto get_next_id() const -> id_t;
+        auto get_next_id() const -> uid;
     };
 }
 
@@ -38,7 +38,7 @@ namespace detail {
 
 class TCOB_API connection {
 public:
-    connection(detail::signal_base const* signal, id_t id);
+    connection(detail::signal_base const* signal, uid id);
     connection(connection const& other) noexcept                    = default;
     auto operator=(connection const& other) noexcept -> connection& = default;
     connection(connection&& other) noexcept                         = default;
@@ -47,11 +47,11 @@ public:
 
     void disconnect();
 
-    auto get_id() const -> id_t;
+    auto get_id() const -> uid;
 
 protected:
     detail::signal_base const* _signal;
-    id_t                       _id {INVALID_ID};
+    uid                        _id {INVALID_ID};
 };
 
 class [[nodiscard]] TCOB_API scoped_connection final : public connection, public non_copyable {
@@ -68,7 +68,7 @@ public:
 template <typename EvArgs = void>
 class signal final : public detail::signal_base {
     using slot_func = std::function<void(EvArgs&)>;
-    using slots     = std::vector<std::pair<id_t, slot_func>>;
+    using slots     = std::vector<std::pair<uid, slot_func>>;
 
 public:
     void operator()(EvArgs& args) const;
@@ -78,7 +78,7 @@ public:
     template <auto Func, typename T>
     auto connect(T* inst) const -> connection;
 
-    void disconnect(id_t id) const override;
+    void disconnect(uid id) const override;
     void disconnect_all() const;
 
     auto get_slot_count() const -> isize;
@@ -90,7 +90,7 @@ private:
 template <>
 class signal<void> final : public detail::signal_base {
     using slot_func = std::function<void()>;
-    using slots     = std::vector<std::pair<id_t, slot_func>>;
+    using slots     = std::vector<std::pair<uid, slot_func>>;
 
 public:
     void operator()() const;
@@ -100,7 +100,7 @@ public:
     template <auto Func, typename T>
     auto connect(T* inst) const -> connection;
 
-    void disconnect(id_t id) const override;
+    void disconnect(uid id) const override;
     void disconnect_all() const;
 
     auto get_slot_count() const -> isize;

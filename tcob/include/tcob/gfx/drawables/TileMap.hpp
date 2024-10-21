@@ -85,14 +85,14 @@ namespace detail {
         prop<assets::asset_ptr<material>> Material;
         prop<point_f>                     Position;
 
-        auto add_layer(tilemap_layer const& layer) -> id_t;
+        auto add_layer(tilemap_layer const& layer) -> uid;
 
-        auto get_tile(id_t id, point_i pos) const -> tile_index_t;
-        void set_tile(id_t id, point_i pos, tile_index_t setIdx);
+        auto get_tile(uid id, point_i pos) const -> tile_index_t;
+        void set_tile(uid id, point_i pos, tile_index_t setIdx);
 
-        auto is_layer_visible(id_t id) const -> bool;
-        void set_layer_visible(id_t id, bool visible);
-        auto get_layer_size(id_t id) const -> size_i;
+        auto is_layer_visible(uid id) const -> bool;
+        void set_layer_visible(uid id, bool visible);
+        auto get_layer_size(uid id) const -> size_i;
 
         void clear();
 
@@ -108,15 +108,15 @@ namespace detail {
 
     private:
         struct layer {
-            id_t    ID {INVALID_ID};
+            uid     ID {INVALID_ID};
             size_i  Size {size_i::Zero};
             point_i Offset {point_i::Zero};
             i32     TileMapStart {0};
             bool    Visible {true};
         };
 
-        auto get_layer(id_t id) -> layer*;
-        auto get_layer(id_t id) const -> layer const*;
+        auto get_layer(uid id) -> layer*;
+        auto get_layer(uid id) const -> layer const*;
 
         void virtual setup_quad(quad& q, point_i coord, tile const& tile) const = 0;
 

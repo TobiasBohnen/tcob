@@ -29,7 +29,7 @@ template <typename Func>
 inline auto signal<EvArgs>::connect(Func func) const -> connection
 {
     if constexpr (std::is_convertible_v<Func, slot_func>) {
-        id_t const id {get_next_id()};
+        uid const id {get_next_id()};
         _slots.emplace_back(id, func);
         return connection {this, id};
     } else {
@@ -45,7 +45,7 @@ inline auto signal<EvArgs>::connect(T* inst) const -> connection
 }
 
 template <typename EvArgs>
-inline void signal<EvArgs>::disconnect(id_t id) const
+inline void signal<EvArgs>::disconnect(uid id) const
 {
     for (auto it {_slots.begin()}; it != _slots.end(); ++it) {
         if (it->first == id) {
@@ -85,7 +85,7 @@ template <typename Func>
 inline auto signal<void>::connect(Func func) const -> connection
 {
     if constexpr (std::is_convertible_v<Func, slot_func>) {
-        id_t const id {get_next_id()};
+        uid const id {get_next_id()};
         _slots.emplace_back(id, func);
         return connection {this, id};
     } else {
@@ -99,7 +99,7 @@ inline auto signal<void>::connect(T* inst) const -> connection
     return connect([=]() { (inst->*Func)(); });
 }
 
-inline void signal<void>::disconnect(id_t id) const
+inline void signal<void>::disconnect(uid id) const
 {
     for (auto it {_slots.begin()}; it != _slots.end(); ++it) {
         if (it->first == id) {

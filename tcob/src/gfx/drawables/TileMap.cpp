@@ -27,10 +27,10 @@ namespace detail {
         mark_dirty();
     }
 
-    auto tilemap_base::add_layer(tilemap_layer const& layer) -> id_t
+    auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
     {
         assert(std::ssize(layer.Tiles) == layer.Size.Width * layer.Size.Height);
-        id_t const id {GetRandomID()};
+        uid const id {GetRandomID()};
 
         _layers.push_back({
             .ID           = id,
@@ -46,7 +46,7 @@ namespace detail {
         return id;
     }
 
-    void tilemap_base::set_tile(id_t id, point_i pos, tile_index_t setIdx)
+    void tilemap_base::set_tile(uid id, point_i pos, tile_index_t setIdx)
     {
         auto const& layer {*get_layer(id)};
         i32 const   idx {layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)};
@@ -55,24 +55,24 @@ namespace detail {
         mark_dirty();
     }
 
-    auto tilemap_base::get_tile(id_t id, point_i pos) const -> tile_index_t
+    auto tilemap_base::get_tile(uid id, point_i pos) const -> tile_index_t
     {
         auto const& layer {*get_layer(id)};
         return _tileMap[layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)];
     }
 
-    auto tilemap_base::is_layer_visible(id_t id) const -> bool
+    auto tilemap_base::is_layer_visible(uid id) const -> bool
     {
         return get_layer(id)->Visible;
     }
 
-    void tilemap_base::set_layer_visible(id_t id, bool visible)
+    void tilemap_base::set_layer_visible(uid id, bool visible)
     {
         get_layer(id)->Visible = visible;
         mark_dirty();
     }
 
-    auto tilemap_base::get_layer_size(id_t id) const -> size_i
+    auto tilemap_base::get_layer_size(uid id) const -> size_i
     {
         return get_layer(id)->Size;
     }
@@ -128,7 +128,7 @@ namespace detail {
         _isDirty = true;
     }
 
-    auto tilemap_base::get_layer(id_t id) -> layer*
+    auto tilemap_base::get_layer(uid id) -> layer*
     {
         for (auto& layer : _layers) {
             if (layer.ID == id) { return &layer; }
@@ -137,7 +137,7 @@ namespace detail {
         return nullptr;
     }
 
-    auto tilemap_base::get_layer(id_t id) const -> layer const*
+    auto tilemap_base::get_layer(uid id) const -> layer const*
     {
         for (auto const& layer : _layers) {
             if (layer.ID == id) { return &layer; }

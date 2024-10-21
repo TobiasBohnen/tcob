@@ -21,7 +21,7 @@ namespace detail {
 
     signal_base::~signal_base() = default;
 
-    auto signal_base::get_next_id() const -> id_t
+    auto signal_base::get_next_id() const -> uid
     {
         return GetRandomID();
     }
@@ -30,7 +30,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-connection::connection(detail::signal_base const* signal, id_t id)
+connection::connection(detail::signal_base const* signal, uid id)
     : _signal {signal}
     , _id {id}
 {
@@ -45,7 +45,7 @@ void connection::disconnect()
     }
 }
 
-auto connection::get_id() const -> id_t
+auto connection::get_id() const -> uid
 {
     return _id;
 }

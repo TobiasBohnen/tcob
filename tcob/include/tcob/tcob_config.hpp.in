@@ -69,8 +69,8 @@ using utf8_string_view = std::string_view; // TODO: create real utf-8 string_vie
 
 using path = utf8_string;
 
-using id_t = i32;
-static constexpr id_t INVALID_ID {-1};
+using uid = i32;
+static constexpr uid INVALID_ID {-1};
 
 namespace io {
     class istream;

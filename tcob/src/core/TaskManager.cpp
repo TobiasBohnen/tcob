@@ -53,9 +53,9 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
     }
 }
 
-auto task_manager::run_deferred(def_func const& func) -> id_t
+auto task_manager::run_deferred(def_func const& func) -> uid
 {
-    id_t const id {GetRandomID()};
+    uid const id {GetRandomID()};
 
     std::scoped_lock lock {_deferredMutex};
     _deferredQueueFront.emplace_back(func, id);
