@@ -10,7 +10,7 @@ namespace tcob {
 auto GetRandomID() -> uid
 {
     static rng rand {0x1badbad1};
-    return rand(0, std::numeric_limits<uid>::max() - 0xff);
+    return rand(uid {0}, std::numeric_limits<uid>::max() - 0xff);
 }
 
 }

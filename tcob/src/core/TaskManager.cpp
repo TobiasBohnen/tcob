@@ -62,7 +62,7 @@ auto task_manager::run_deferred(def_func const& func) -> uid
     return id;
 }
 
-void task_manager::cancel_deferred(i32 id)
+void task_manager::cancel_deferred(uid id)
 {
     std::scoped_lock lock {_deferredMutex};
 

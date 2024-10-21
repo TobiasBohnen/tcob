@@ -69,7 +69,7 @@ using utf8_string_view = std::string_view; // TODO: create real utf-8 string_vie
 
 using path = utf8_string;
 
-using uid = i32;
+using uid = i64;
 static constexpr uid INVALID_ID {-1};
 
 namespace io {
