@@ -94,7 +94,7 @@ void particle_system::on_update(milliseconds deltaTime)
     std::set<isize, std::greater<>> toBeDeactivated;
 
     locate_service<task_manager>().run_parallel(
-        [&](par_task_context const& ctx) {
+        [&](par_task const& ctx) {
             for (isize i {ctx.Start}; i < ctx.End; ++i) {
                 auto& particle {_particles[i]};
                 if (particle.is_alive()) {
@@ -124,7 +124,7 @@ void particle_system::on_draw_to(render_target& target)
     quads.reserve(_aliveParticleCount);
 
     locate_service<task_manager>().run_parallel(
-        [&](par_task_context const& ctx) {
+        [&](par_task const& ctx) {
             for (isize i {ctx.Start}; i < ctx.End; ++i) {
                 _particles[i].to_quad(&quads[i]);
             }

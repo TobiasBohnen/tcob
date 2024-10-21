@@ -88,7 +88,7 @@ void game::finish()
 
 void game::push_scene(std::shared_ptr<scene> const& scene)
 {
-    auto command {[&, scene](def_task_context& ctx) {
+    auto command {[&, scene](def_task& ctx) {
         if (!_scenes.empty()) {
             _scenes.top()->sleep();
         }
@@ -97,7 +97,7 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
             _scenes.push(scene);
         }
 
-        ctx.Status = task_status::Finished;
+        ctx.Finished = true;
     }};
     locate_service<task_manager>().run_deferred(std::move(command));
 }
@@ -105,9 +105,9 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        locate_service<task_manager>().run_deferred({[&](def_task_context& ctx) {
+        locate_service<task_manager>().run_deferred({[&](def_task& ctx) {
             pop_scene();
-            ctx.Status = task_status::Finished;
+            ctx.Finished = true;
         }});
     }
 }

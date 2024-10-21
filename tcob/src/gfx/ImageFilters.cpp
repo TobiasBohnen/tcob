@@ -145,7 +145,7 @@ auto grayscale_filter::operator()(image const& img) const -> image
     auto const [imgWidth, imgHeight] {info.Size};
 
     locate_service<task_manager>().run_parallel(
-        [&](par_task_context ctx) {
+        [&](par_task const& ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 isize const idx {pixIdx * bpp};
                 u8 const    value {static_cast<u8>((srcBuffer[idx] * RedFactor) + (srcBuffer[idx + 1] * GreenFactor) + (srcBuffer[idx + 2] * BlueFactor))};
@@ -175,7 +175,7 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
     auto retValue {image::CreateEmpty(NewSize, info.Format)};
 
     locate_service<task_manager>().run_parallel(
-        [&](par_task_context ctx) {
+        [&](par_task const& ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 isize const x {pixIdx % newWidth};
                 isize const y {pixIdx / newWidth};
@@ -208,7 +208,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
     auto retValue {image::CreateEmpty(NewSize, info.Format)};
 
     locate_service<task_manager>().run_parallel(
-        [&](par_task_context ctx) {
+        [&](par_task const& ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 isize const x {pixIdx % newWidth};
                 isize const y {pixIdx / newWidth};

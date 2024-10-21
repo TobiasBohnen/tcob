@@ -33,16 +33,16 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
     isize const numThreads {std::min(_threadCount, count / minRange)};
 
     if (numThreads <= 1 || count < _threadCount) {
-        par_task_context const ctx {.Start = 0, .End = count, .Thread = 0};
+        par_task const ctx {.Start = 0, .End = count, .Thread = 0};
         func(ctx);
     } else {
         isize const        partitionSize {count / numThreads};
         std::atomic<isize> activeTasks {numThreads};
 
         for (isize i {0}; i < numThreads; ++i) {
-            par_task_context const ctx {.Start  = i * partitionSize,
-                                        .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
-                                        .Thread = i};
+            par_task const ctx {.Start  = i * partitionSize,
+                                .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
+                                .Thread = i};
             add_task([func, ctx, &activeTasks]() {
                 func(ctx);
                 --activeTasks;
@@ -53,17 +53,17 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
     }
 }
 
-auto task_manager::run_deferred(def_func&& func) -> i32
+auto task_manager::run_deferred(def_func const& func) -> i32
 {
     static rng rand {0x1badbad1};
 
     std::scoped_lock lock {_deferredMutex};
     i32 const        id {rand(0, std::numeric_limits<i32>::max() - 0xff)};
-    _deferredQueueFront.emplace_back(std::move(func), id);
+    _deferredQueueFront.emplace_back(func, id);
     return id;
 }
 
-void task_manager::remove_deferred(i32 id)
+void task_manager::cancel_deferred(i32 id)
 {
     std::scoped_lock lock {_deferredMutex};
 
@@ -92,10 +92,10 @@ auto task_manager::process_queue() -> bool
     std::scoped_lock lock {_deferredMutex};
 
     while (!_deferredQueueFront.empty()) {
-        def_task_context ctx;
-        auto&            front {_deferredQueueFront.front()};
+        def_task ctx;
+        auto&    front {_deferredQueueFront.front()};
         front.first(ctx);
-        if (ctx.Status == task_status::Running) { _deferredQueueBack.emplace_back(front); }
+        if (!ctx.Finished) { _deferredQueueBack.emplace_back(front); }
         _deferredQueueFront.pop_front();
     }
 

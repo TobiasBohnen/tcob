@@ -16,19 +16,14 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-enum class task_status : u8 {
-    Finished,
-    Running
-};
-
-struct par_task_context {
+struct par_task {
     isize Start {0};
     isize End {0};
     isize Thread {0};
 };
 
-struct def_task_context {
-    task_status Status {task_status::Running};
+struct def_task {
+    bool Finished {true};
 };
 
 ////////////////////////////////////////////////////////////
@@ -40,8 +35,8 @@ class TCOB_API task_manager final {
 public:
     template <typename T>
     using async_func = std::function<T()>;
-    using par_func   = std::function<void(par_task_context const&)>;
-    using def_func   = std::function<void(def_task_context&)>;
+    using par_func   = std::function<void(par_task const&)>;
+    using def_func   = std::function<void(def_task&)>;
 
     explicit task_manager(i32 threads);
     ~task_manager();
@@ -51,8 +46,8 @@ public:
 
     void run_parallel(par_func const& func, isize count, isize minRange = 1);
 
-    auto run_deferred(def_func&& func) -> i32;
-    void remove_deferred(i32 id);
+    auto run_deferred(def_func const& func) -> i32;
+    void cancel_deferred(i32 id);
 
     auto get_thread_count() const -> isize;
 

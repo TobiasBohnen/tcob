@@ -28,7 +28,7 @@ inline auto convolution_filter<Width, Height>::operator()(image const& img) cons
     auto const matrix {get_matrix()};
 
     locate_service<task_manager>().run_parallel(
-        [&](par_task_context ctx) {
+        [&](par_task ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
                 isize const x {pixIdx % imgWidth};
                 isize const y {pixIdx / imgWidth};
