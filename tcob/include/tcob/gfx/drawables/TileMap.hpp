@@ -20,18 +20,92 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
-////////////////////////////////////////////////////////////
 using tile_index_t = u16;
 
-struct tile {
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class tileset {
+public:
+    using tile_type = T;
+
+    tileset(std::unordered_map<tile_index_t, tile_type> const& set);
+
+    auto get_tile(tile_index_t idx) const -> tile_type const&;
+    void set_tile(tile_index_t idx, tile_type const& tile_type);
+    auto get_index(string const& texture) const -> tile_index_t;
+
+private:
+    std::unordered_map<tile_index_t, tile_type> _set;
+};
+
+////////////////////////////////////////////////////////////
+
+struct ortho_tile {
+    string TextureRegion {};
+    bool   FlipHorizontally {false};
+    bool   FlipVertically {false};
+    size_f Scale {size_f::One};
+};
+
+class TCOB_API ortho_grid {
+public:
+    using tile_type = ortho_tile;
+
+    size_f TileSize {size_f::Zero};
+
+    auto layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f;
+
+    auto operator==(ortho_grid const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
+struct iso_tile {
+    string  TextureRegion {};
+    bool    FlipHorizontally {false};
+    bool    FlipVertically {false};
+    point_f Center {0.5f, 0.5f};
+    f32     Height {0.0f};
+};
+
+class TCOB_API iso_grid {
+public:
+    using tile_type = iso_tile;
+
+    size_f TileSize {size_f::Zero};
+
+    auto layout_tile(iso_tile const& tile, point_i coord) const -> rect_f;
+
+    auto operator==(iso_grid const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
+struct hex_tile {
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
 };
 
-struct tileset {
-    std::unordered_map<tile_index_t, tile> Set;
+enum hex_top {
+    Pointy,
+    Flat
 };
+
+class TCOB_API hex_grid {
+public:
+    using tile_type = hex_tile;
+
+    size_f  TileSize {size_f::Zero};
+    hex_top Top {hex_top::Pointy};
+
+    auto layout_tile(hex_tile const& tile, point_i coord) const -> rect_f;
+
+    auto operator==(hex_grid const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
 
 struct tilemap_layer {
     std::span<tile_index_t> Tiles; // TODO: mdspan
@@ -41,117 +115,85 @@ struct tilemap_layer {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API orthogonal_grid {
+class TCOB_API tilemap_base : public drawable {
 public:
-    size_f TileSize {size_f::Zero};
+    tilemap_base();
+    ~tilemap_base() override = default;
 
-    auto get_quad_bounds(point_f offset, point_i coord) const -> rect_f;
+    prop<assets::asset_ptr<material>> Material;
+    prop<point_f>                     Position;
 
-    auto operator==(orthogonal_grid const& other) const -> bool = default;
-};
+    auto add_layer(tilemap_layer const& layer) -> uid;
 
-////////////////////////////////////////////////////////////
+    auto get_tile(uid layerId, point_i pos) const -> tile_index_t;
+    void set_tile(uid layerId, point_i pos, tile_index_t setIdx);
 
-class TCOB_API isometric_grid {
-public:
-    size_f  TileSize {size_f::Zero};
-    point_f SurfaceCenter {0.5f, 0.5f};
+    auto is_layer_visible(uid id) const -> bool;
+    void set_layer_visible(uid id, bool visible);
+    auto get_layer_size(uid id) const -> size_i;
 
-    auto get_quad_bounds(point_f offset, point_i coord) const -> rect_f;
+    void clear();
 
-    auto operator==(isometric_grid const& other) const -> bool = default;
-};
+protected:
+    void on_update(milliseconds deltaTime) override;
 
-////////////////////////////////////////////////////////////
+    auto can_draw() const -> bool override;
+    void on_draw_to(render_target& target) override;
 
-class TCOB_API hexagonal_grid {
-public:
-    size_f TileSize {size_f::Zero};
-    bool   FlatTop {false};
+    void mark_dirty();
 
-    auto get_quad_bounds(point_f offset, point_i coord) const -> rect_f;
-
-    auto operator==(hexagonal_grid const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-namespace detail {
-    class TCOB_API tilemap_base : public drawable {
-    public:
-        tilemap_base(tileset set, buffer_usage_hint usage);
-        ~tilemap_base() override = default;
-
-        prop<assets::asset_ptr<material>> Material;
-        prop<point_f>                     Position;
-
-        auto add_layer(tilemap_layer const& layer) -> uid;
-
-        auto get_tile(uid id, point_i pos) const -> tile_index_t;
-        void set_tile(uid id, point_i pos, tile_index_t setIdx);
-
-        auto is_layer_visible(uid id) const -> bool;
-        void set_layer_visible(uid id, bool visible);
-        auto get_layer_size(uid id) const -> size_i;
-
-        void clear();
-
-        void change_tileset(tile_index_t idx, tile const& t);
-
-    protected:
-        void on_update(milliseconds deltaTime) override;
-
-        auto can_draw() const -> bool override;
-        void on_draw_to(render_target& target) override;
-
-        void mark_dirty();
-
-    private:
-        struct layer {
-            uid     ID {INVALID_ID};
-            size_i  Size {size_i::Zero};
-            point_i Offset {point_i::Zero};
-            i32     TileMapStart {0};
-            bool    Visible {true};
-        };
-
-        auto get_layer(uid id) -> layer*;
-        auto get_layer(uid id) const -> layer const*;
-
-        void virtual setup_quad(quad& q, point_i coord, tile const& tile) const = 0;
-
-        std::vector<layer> _layers {};
-        tileset            _tileSet {};
-
-        std::vector<tile_index_t> _tileMap {};
-
-        quad_renderer     _renderer;
-        std::vector<quad> _quads {};
-        bool              _isDirty {true};
-        bool              _updateGeometry {true};
+private:
+    struct layer {
+        uid     ID {INVALID_ID};
+        size_i  Size {size_i::Zero};
+        point_i Offset {point_i::Zero};
+        i32     TileMapStart {0};
+        bool    Visible {true};
     };
-}
+
+    auto get_layer(uid id) -> layer*;
+    auto get_layer(uid id) const -> layer const*;
+
+    void virtual setup_quad(quad& q, point_i coord, tile_index_t idx) const = 0;
+
+    std::vector<layer>        _layers {};
+    std::vector<tile_index_t> _tileMap {};
+
+    quad_renderer                    _renderer;
+    std::vector<quad>                _quads {};
+    bool                             _isDirty {true};
+    bool                             _updateGeometry {true};
+    std::vector<std::pair<uid, i32>> _dirtyTiles;
+};
 
 ////////////////////////////////////////////////////////////
 
-template <typename GridType>
-class tilemap : public detail::tilemap_base {
-    using grid_type = GridType;
+template <typename G>
+class tilemap : public tilemap_base {
+    using grid_type = G;
+    using tile_type = G::tile_type;
+    using set_type  = tileset<tile_type>;
 
 public:
-    explicit tilemap(tileset set);
+    explicit tilemap(set_type set);
 
     prop<grid_type> Grid;
 
+    auto get_tile_index(string const& texture) const -> tile_index_t;
+    void change_tileset(tile_index_t idx, tile_type const& t);
+
 private:
-    void setup_quad(quad& q, point_i coord, tile const& tile) const override;
+    void setup_quad(quad& q, point_i coord, tile_index_t idx) const override;
+
+    set_type _tileSet;
 };
 
 ////////////////////////////////////////////////////////////
 
-using orthogonal_tilemap = tilemap<orthogonal_grid>;
-using isometric_tilemap  = tilemap<isometric_grid>;
-using hexagonal_tilemap  = tilemap<hexagonal_grid>;
+using ortho_tilemap = tilemap<ortho_grid>;
+using iso_tilemap   = tilemap<iso_grid>;
+using hex_tilemap   = tilemap<hex_grid>;
+
 }
 
 #include "TileMap.inl"
