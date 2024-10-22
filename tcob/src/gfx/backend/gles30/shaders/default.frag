@@ -3,7 +3,7 @@ precision mediump float;
 
 uniform Material
 {
-	vec4 matColor;
+   vec4 matColor;
    float matPointSize;
 };
 

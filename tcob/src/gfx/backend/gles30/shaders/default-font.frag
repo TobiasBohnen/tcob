@@ -1,5 +1,4 @@
 R"(#version 300 es
-
 precision mediump float;
 precision highp sampler2DArray;
 
