@@ -230,16 +230,14 @@ template <Arithmetic T>
 template <Arithmetic U>
 void constexpr rect<T>::move_by(point<U> const& point)
 {
-    Position.X += static_cast<T>(point.X);
-    Position.Y += static_cast<T>(point.Y);
+    Position += point;
 }
 
 template <Arithmetic T>
 template <Arithmetic U>
 void constexpr rect<T>::resize_by(size<U> const& size)
 {
-    Size.Width += static_cast<T>(size.Width);
-    Size.Height += static_cast<T>(size.Height);
+    Size += size;
 }
 
 template <Arithmetic T>
@@ -280,10 +278,8 @@ auto constexpr operator*(rect<T> const& left, R const& right) -> rect<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*=(rect<T>& left, R const& right) -> rect<T>&
 {
-    left.Position.X *= right;
-    left.Position.Y *= right;
-    left.Size.Width *= right;
-    left.Size.Height *= right;
+    left.Position *= right;
+    left.Size *= right;
 
     return left;
 }
@@ -298,10 +294,8 @@ auto constexpr operator/(rect<T> const& left, R const& right) -> rect<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/=(rect<T>& left, R const& right) -> rect<T>&
 {
-    left.Position.X /= right;
-    left.Position.Y /= right;
-    left.Size.Width /= right;
-    left.Size.Height /= right;
+    left.Position /= right;
+    left.Size /= right;
 
     return left;
 }
