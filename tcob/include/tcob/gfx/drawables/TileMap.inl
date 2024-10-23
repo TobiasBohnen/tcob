@@ -39,8 +39,8 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
     rect.move_by(Position());
 
     geometry::set_position(q, rect);
+    geometry::set_color(q, tile.Color);
     if (idx != 0) {
-        geometry::set_color(q, colors::White);
         geometry::set_texcoords(q, Material->Texture->get_region(tile.TextureRegion), tile.FlipHorizontally, tile.FlipVertically);
     } else {
         geometry::set_color(q, colors::Transparent);

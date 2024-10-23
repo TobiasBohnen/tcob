@@ -45,6 +45,8 @@ struct ortho_tile {
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
+    color  Color {colors::White};
+
     size_f Scale {size_f::One};
 };
 
@@ -62,9 +64,11 @@ public:
 ////////////////////////////////////////////////////////////
 
 struct iso_tile {
-    string  TextureRegion {};
-    bool    FlipHorizontally {false};
-    bool    FlipVertically {false};
+    string TextureRegion {};
+    bool   FlipHorizontally {false};
+    bool   FlipVertically {false};
+    color  Color {colors::White};
+
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
 };
@@ -86,6 +90,7 @@ struct hex_tile {
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
+    color  Color {colors::White};
 };
 
 enum hex_top {
@@ -104,6 +109,75 @@ public:
 
     auto operator==(hex_grid const& other) const -> bool = default;
 };
+
+////////////////////////////////////////////////////////////
+
+void SerializeTile(auto&& v, auto&& s)
+{
+    s["texture"] = v.TextureRegion;
+    s["h_flip"]  = v.FlipHorizontally;
+    s["v_flip"]  = v.FlipVertically;
+    s["color"]   = v.Color;
+}
+
+auto DeserializeTile(auto&& v, auto&& s) -> bool
+{
+    if (!s.try_get(v.TextureRegion, "texture")) {
+        return false;
+    }
+
+    s.try_get(v.FlipHorizontally, "h_flip");
+    s.try_get(v.FlipVertically, "v_flip");
+    s.try_get(v.Color, "color");
+
+    return true;
+}
+
+void Serialize(ortho_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+
+    s["scale"] = v.Scale;
+}
+
+auto Deserialize(ortho_tile& v, auto&& s) -> bool
+{
+    if (!DeserializeTile(v, s)) {
+        return false;
+    }
+
+    s.try_get(v.Scale, "scale");
+    return true;
+}
+
+void Serialize(iso_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+
+    s["center"] = v.Center;
+    s["height"] = v.Height;
+}
+
+auto Deserialize(iso_tile& v, auto&& s) -> bool
+{
+    if (!DeserializeTile(v, s)) {
+        return false;
+    }
+
+    s.try_get(v.Center, "center");
+    s.try_get(v.Height, "height");
+    return true;
+}
+
+void Serialize(hex_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+}
+
+auto Deserialize(hex_tile& v, auto&& s) -> bool
+{
+    return static_cast<bool>(DeserializeTile(v, s));
+}
 
 ////////////////////////////////////////////////////////////
 

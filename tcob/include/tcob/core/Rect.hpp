@@ -100,6 +100,27 @@ auto constexpr operator==(rect<T> const& left, rect<R> const& right) -> bool;
 template <Arithmetic T>
 inline auto operator<<(std::ostream& os, rect<T> const& m) -> std::ostream&;
 
+template <Arithmetic T>
+void Serialize(rect<T> const& v, auto&& s)
+{
+    s["x"]      = v.left();
+    s["y"]      = v.top();
+    s["width"]  = v.width();
+    s["height"] = v.height();
+}
+
+template <Arithmetic T>
+auto Deserialize(rect<T>& v, auto&& s) -> bool
+{
+    T x, y, w, h;
+    if (s.try_get(x, "x") && s.try_get(y, "y") && s.try_get(w, "width") && s.try_get(h, "height")) {
+        v.Position = {x, y};
+        v.Size     = {w, h};
+        return true;
+    }
+    return false;
+}
+
 }
 
 #include "Rect.inl"

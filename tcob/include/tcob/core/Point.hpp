@@ -105,6 +105,19 @@ auto constexpr operator==(point<T> const& left, point<R> const& right) -> bool;
 template <Arithmetic T>
 inline auto operator<<(std::ostream& os, point<T> const& m) -> std::ostream&;
 
+template <Arithmetic T>
+void Serialize(point<T> const& v, auto&& s)
+{
+    s["x"] = v.X;
+    s["y"] = v.Y;
+}
+
+template <Arithmetic T>
+auto Deserialize(point<T>& v, auto&& s) -> bool
+{
+    return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
+}
+
 }
 
 #include "Point.inl"

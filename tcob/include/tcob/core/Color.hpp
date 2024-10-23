@@ -59,6 +59,25 @@ auto constexpr operator==(color left, color right) -> bool;
 
 inline auto operator<<(std::ostream& os, color m) -> std::ostream&;
 
+void Serialize(color v, auto&& s)
+{
+    s["r"] = v.R;
+    s["g"] = v.G;
+    s["b"] = v.B;
+    s["a"] = v.A;
+}
+
+auto Deserialize(color& v, auto&& s) -> bool
+{
+    if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
+        if (!s.try_get(v.A, "a")) {
+            v.A = u8 {255};
+        }
+        return true;
+    }
+    return false;
+}
+
 }
 
 #include "Color.inl"

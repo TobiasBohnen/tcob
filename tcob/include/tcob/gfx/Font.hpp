@@ -110,6 +110,18 @@ public:
         auto operator==(font::style const& other) const -> bool = default;
     };
 
+    void Serialize(font::style const& v, auto&& s)
+    {
+        s["is_italic"] = v.IsItalic;
+        s["weight"]    = v.Weight;
+    }
+
+    auto Deserialize(font::style& v, auto&& s) -> bool
+    {
+        return s.try_get(v.IsItalic, "is_italic")
+            && s.try_get(v.Weight, "weight");
+    }
+
     ////////////////////////////////////////////////////////////
 
     font();

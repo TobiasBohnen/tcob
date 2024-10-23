@@ -91,6 +91,17 @@ struct texture_region final {
     u32    Level {0};
 };
 
+void Serialize(texture_region const& v, auto&& s)
+{
+    s["level"] = v.Level;
+    Serialize(v.UVRect, s);
+}
+
+auto Deserialize(texture_region& v, auto&& s) -> bool
+{
+    return s.try_get(v.Level, "level") && Deserialize(v.UVRect, s);
+}
+
 ////////////////////////////////////////////////////////////
 
 enum class orientation : u8 {
@@ -119,6 +130,17 @@ struct alignments {
     auto operator==(alignments const& other) const -> bool = default;
 };
 
+void Serialize(alignments const& v, auto&& s)
+{
+    s["horizontal"] = v.Horizontal;
+    s["vertical"]   = v.Vertical;
+}
+
+auto Deserialize(alignments& v, auto&& s) -> bool
+{
+    return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
+}
+
 ////////////////////////////////////////////////////////////
 
 struct video_config {
@@ -139,6 +161,26 @@ struct video_config {
     string RenderSystem {"OPENGL45"};
 #endif
 };
+
+void Serialize(video_config const& v, auto&& s)
+{
+    s[Cfg::Video::fullscreen]             = v.FullScreen;
+    s[Cfg::Video::use_desktop_resolution] = v.UseDesktopResolution;
+    s[Cfg::Video::resolution]             = v.Resolution;
+    s[Cfg::Video::frame_limit]            = v.FrameLimit;
+    s[Cfg::Video::vsync]                  = v.VSync;
+    s[Cfg::Video::render_system]          = v.RenderSystem;
+}
+
+auto Deserialize(video_config& v, auto&& s) -> bool
+{
+    return s.try_get(v.FullScreen, Cfg::Video::fullscreen)
+        && s.try_get(v.UseDesktopResolution, Cfg::Video::use_desktop_resolution)
+        && s.try_get(v.Resolution, Cfg::Video::resolution)
+        && s.try_get(v.FrameLimit, Cfg::Video::frame_limit)
+        && s.try_get(v.VSync, Cfg::Video::vsync)
+        && s.try_get(v.RenderSystem, Cfg::Video::render_system);
+}
 
 }
 

@@ -80,6 +80,36 @@ struct [[nodiscard]] particle_template {
     auto operator==(particle_template const& other) const -> bool = default;
 };
 
+void Serialize(particle_template const& v, auto&& s)
+{
+    s["acceleration"] = v.Acceleration;
+    s["direction"]    = v.Direction;
+    s["lifetime"]     = v.Lifetime;
+    s["scale"]        = v.Scale;
+    s["size"]         = v.Size;
+    s["speed"]        = v.Speed;
+    s["spin"]         = v.Spin;
+    s["rotation"]     = v.Rotation;
+    s["texture"]      = v.Texture;
+    s["color"]        = v.Color;
+    s["transparency"] = v.Transparency;
+}
+
+auto Deserialize(particle_template& v, auto&& s) -> bool
+{
+    return s.try_get(v.Acceleration, "acceleration")
+        && s.try_get(v.Direction, "direction")
+        && s.try_get(v.Lifetime, "lifetime")
+        && s.try_get(v.Scale, "scale")
+        && s.try_get(v.Size, "size")
+        && s.try_get(v.Speed, "speed")
+        && s.try_get(v.Spin, "spin")
+        && s.try_get(v.Rotation, "rotation")
+        && s.try_get(v.Texture, "texture")
+        && s.try_get(v.Color, "color")
+        && s.try_get(v.Transparency, "transparency");
+}
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API particle_emitter_base {
@@ -114,6 +144,26 @@ private:
     milliseconds _remainLife {1000};
     f64          _emissionDiff {0};
 };
+
+void Serialize(particle_emitter const& v, auto&& s)
+{
+    s["template"]   = v.Template;
+    s["spawn_area"] = v.SpawnArea;
+    s["spawn_rate"] = v.SpawnRate;
+    if (v.Lifetime) {
+        s["lifetime"] = *v.Lifetime;
+    }
+}
+
+auto Deserialize(particle_emitter& v, auto&& s) -> bool
+{
+    if (s.has("lifetime")) {
+        v.Lifetime = s["lifetime"].template as<milliseconds>();
+    }
+    return s.try_get(v.Template, "template")
+        && s.try_get(v.SpawnArea, "spawn_area")
+        && s.try_get(v.SpawnRate, "spawn_rate");
+}
 
 ////////////////////////////////////////////////////////////
 

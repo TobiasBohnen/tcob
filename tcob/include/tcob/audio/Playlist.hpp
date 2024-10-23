@@ -43,7 +43,7 @@ private:
     std::vector<source*> _playing;
     std::queue<source*>  _waiting;
 
-    i32 _deferred {INVALID_ID};
+    uid _deferred {INVALID_ID};
 };
 
 }

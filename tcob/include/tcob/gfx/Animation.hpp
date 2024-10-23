@@ -18,6 +18,19 @@ struct frame {
     milliseconds Duration {};
 };
 
+void Serialize(frame const& v, auto&& s)
+{
+    s["name"]     = v.Name;
+    s["duration"] = v.Duration;
+}
+
+auto Deserialize(frame& v, auto&& s) -> bool
+{
+    return s.try_get(v.Name, "name") && s.try_get(v.Duration, "duration");
+}
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API frame_animation final {
 public:
     std::vector<frame> Frames {};

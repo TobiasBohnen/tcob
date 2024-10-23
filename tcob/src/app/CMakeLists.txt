@@ -12,7 +12,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/app/Platform.hpp
     ${TCOB_INC_DIR}/tcob/app/Scene.hpp
     ${TCOB_INC_DIR}/tcob/app/Scene.inl
-    ${TCOB_INC_DIR}/tcob/app/SerializeHelper.hpp
 )
 
 tcob_add_obj_library(tcob_app "${SRC}" "${HDR}")

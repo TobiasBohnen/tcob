@@ -23,6 +23,17 @@ public:
     color Value {};
 };
 
+void Serialize(color_stop const& v, auto&& s)
+{
+    s["pos"]   = v.Position;
+    s["value"] = v.Value;
+}
+
+auto Deserialize(color_stop& v, auto&& s) -> bool
+{
+    return s.try_get(v.Position, "pos") && s.try_get(v.Value, "value");
+}
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API color_gradient final {
