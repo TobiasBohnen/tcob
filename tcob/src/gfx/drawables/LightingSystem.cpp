@@ -283,36 +283,40 @@ auto lighting_system::collect_angles(light_source& light, bool lightInsideShadow
     bool const limitAngle {light.is_angle_limited()};
 
     std::set<f64> angles;
+    std::array<f64, 3> constexpr vars {-angleTolerance, 0, angleTolerance};
+
     for (auto const& cp : casterPoints) {
         for (auto const& scp : cp.Points) {
-            std::array<f64, 3> constexpr vars {-angleTolerance, 0, angleTolerance};
-            for (f64 var : vars) {
-                auto const deg {lightPosition.angle_to(scp).as_normalized()};
-                if (limitAngle && (deg.Value < light.StartAngle->Value || deg.Value > light.EndAngle->Value)) { continue; }
-                angles.insert(degree_d {deg.Value + var}.as_normalized().Value);
+            auto const baseAngle {lightPosition.angle_to(scp).as_normalized().Value};
+
+            if (!limitAngle || (baseAngle >= light.StartAngle->Value && baseAngle <= light.EndAngle->Value)) {
+                for (f64 var : vars) {
+                    angles.insert(degree_d {baseAngle + var}.as_normalized().Value);
+                }
             }
         }
     }
 
     if (light.is_range_limited() && !lightInsideShadowCaster) {
-        if (limitAngle) {
-            for (f32 i {light.StartAngle->Value}; i < light.EndAngle->Value; ++i) { angles.insert(i); }
-        } else {
-            for (i32 i {0}; i < 360; ++i) { angles.insert(i); }
+        f64 const start {limitAngle ? light.StartAngle->Value : 0.0};
+        f64 const end {limitAngle ? light.EndAngle->Value : 360.0};
+
+        for (f64 i {start}; i < end; ++i) {
+            angles.insert(i);
         }
-    } else {
-        if (limitAngle) {
-            angles.insert(light.StartAngle->as_normalized().Value);
-            angles.insert(light.EndAngle->as_normalized().Value);
-        }
+    } else if (limitAngle) {
+        angles.insert(light.StartAngle->as_normalized().Value);
+        angles.insert(light.EndAngle->as_normalized().Value);
     }
 
-    // discard angles
+    // filter and store angles with tolerance
     std::vector<f64> retValue;
     retValue.reserve(angles.size());
+
     for (f64 const angle : angles) {
-        if (!retValue.empty() && angle - retValue.back() < angleTolerance) { continue; }
-        retValue.push_back(angle);
+        if (retValue.empty() || (angle - retValue.back() >= angleTolerance)) {
+            retValue.push_back(angle);
+        }
     }
 
     return retValue;
