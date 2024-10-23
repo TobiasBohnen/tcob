@@ -295,6 +295,11 @@ void canvas_widget::stroke()
     _commands.emplace_back([](canvas& canvas) { canvas.stroke(); });
 }
 
+void canvas_widget::draw_image(texture* image, string const& region, rect_f const& rect)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.draw_image(image, region, rect); });
+}
+
 void canvas_widget::clear()
 {
     if (!_commands.empty()) {

@@ -72,6 +72,9 @@ public:
     void fill();
     void stroke();
 
+    // Image
+    void draw_image(texture* image, string const& region, rect_f const& rect);
+
     // Transforms
     void translate(point_f c);
     void rotate(degree_f angle);
