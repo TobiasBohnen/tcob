@@ -9,30 +9,28 @@ namespace tcob::gfx::geometry {
 
 void set_position(quad& q, rect_f const& rect, transform const& xform)
 {
-    q[0].Position = (xform * rect.top_right()).as_array();
-    q[1].Position = (xform * rect.bottom_right()).as_array();
-    q[2].Position = (xform * rect.bottom_left()).as_array();
-    q[3].Position = (xform * rect.top_left()).as_array();
+    q[0].Position = (xform * rect.top_right());
+    q[1].Position = (xform * rect.bottom_right());
+    q[2].Position = (xform * rect.bottom_left());
+    q[3].Position = (xform * rect.top_left());
 }
 
 void set_position(quad& q, rect_f const& rect)
 {
-    q[0].Position = rect.top_right().as_array();
-    q[1].Position = rect.bottom_right().as_array();
-    q[2].Position = rect.bottom_left().as_array();
-    q[3].Position = rect.top_left().as_array();
+    q[0].Position = rect.top_right();
+    q[1].Position = rect.bottom_right();
+    q[2].Position = rect.bottom_left();
+    q[3].Position = rect.top_left();
 }
 
 void set_color(quad& q, color c)
 {
-    q[0].Color = q[1].Color = q[2].Color = q[3].Color = c.as_array();
+    q[0].Color = q[1].Color = q[2].Color = q[3].Color = c;
 }
 
 void set_color(std::span<vertex> verts, color c)
 {
-    for (auto& v : verts) {
-        v.Color = c.as_array();
-    }
+    for (auto& v : verts) { v.Color = c; }
 }
 
 void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally, bool flipVertically)
@@ -40,10 +38,10 @@ void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally,
     rect_f const rect {region.UVRect};
     f32 const    level {static_cast<f32>(region.Level)};
 
-    vec3 topRight {rect.right(), rect.top(), level};
-    vec3 bottomRight {rect.right(), rect.bottom(), level};
-    vec3 bottomLeft {rect.left(), rect.bottom(), level};
-    vec3 topLeft {rect.left(), rect.top(), level};
+    uv topRight {rect.right(), rect.top(), level};
+    uv bottomRight {rect.right(), rect.bottom(), level};
+    uv bottomLeft {rect.left(), rect.bottom(), level};
+    uv topLeft {rect.left(), rect.top(), level};
 
     if (flipHorizontally) {
         std::swap(topLeft, topRight);
@@ -62,13 +60,13 @@ void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally,
 
 void scroll_texcoords(quad& q, point_f offset)
 {
-    f32 const left {q[3].TexCoords[0] + offset.X};
-    f32 const top {q[3].TexCoords[1] + offset.Y};
-    f32 const right {q[1].TexCoords[0] + offset.X};
-    f32 const bottom {q[1].TexCoords[1] + offset.Y};
+    f32 const left {q[3].TexCoords.U + offset.X};
+    f32 const top {q[3].TexCoords.V + offset.Y};
+    f32 const right {q[1].TexCoords.U + offset.X};
+    f32 const bottom {q[1].TexCoords.V + offset.Y};
 
     rect_f const rect {left, top, right - left, bottom - top};
-    f32 const    level {q[0].TexCoords[2]};
+    f32 const    level {q[0].TexCoords.Level};
 
     q[0].TexCoords = {rect.right(), rect.top(), level};
     q[1].TexCoords = {rect.right(), rect.bottom(), level};

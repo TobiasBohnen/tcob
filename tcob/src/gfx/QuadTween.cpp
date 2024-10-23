@@ -92,9 +92,9 @@ namespace effect {
         for (usize idx {0}; idx < size; ++idx) {
             quad& dst {quads[idx]};
             if (idx <= fadeidx) {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 255;
             } else {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 0;
             }
         }
     }
@@ -111,12 +111,12 @@ namespace effect {
             quad& dst {quads[idx]};
 
             if (idx + width - 1 < fadeIdx) {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 255;
             } else if (idx > fadeIdx) {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 0;
             } else {
                 f64 const val {((t * (totalQuads + width)) - static_cast<f64>(idx)) / static_cast<f64>(width)};
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = static_cast<u8>(val * 255.);
             }
         }
     }
@@ -133,12 +133,12 @@ namespace effect {
             quad& dst {quads[idx]};
 
             if (idx + width - 1 < fadeIdx) {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 0;
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 0;
             } else if (idx > fadeIdx) {
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = 255;
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = 255;
             } else {
                 f64 const val {1.0 - (((t * (totalQuads + width) - static_cast<f64>(idx))) / static_cast<f64>(width))};
-                dst[0].Color[3] = dst[1].Color[3] = dst[2].Color[3] = dst[3].Color[3] = static_cast<u8>(val * 255.);
+                dst[0].Color.A = dst[1].Color.A = dst[2].Color.A = dst[3].Color.A = static_cast<u8>(val * 255.);
             }
         }
     }
@@ -172,14 +172,14 @@ namespace effect {
             switch (RNG(0, 1)) {
             case 0:
                 for (u32 i {0}; i < 4; ++i) {
-                    q[i].Position[0] += r;
-                    q[i].Position[1] += r;
+                    q[i].Position.X += r;
+                    q[i].Position.Y += r;
                 }
                 break;
             case 1:
                 for (u32 i {0}; i < 4; ++i) {
-                    q[i].Position[0] += r;
-                    q[i].Position[1] -= r;
+                    q[i].Position.X += r;
+                    q[i].Position.Y -= r;
                 }
                 break;
             default:
@@ -199,7 +199,7 @@ namespace effect {
             f64 const                      val {wave(t) * Height};
 
             for (u32 i {0}; i < 4; ++i) {
-                dst[i].Position[1] = static_cast<f32>(dst[i].Position[1] + val);
+                dst[i].Position.Y = static_cast<f32>(dst[i].Position.Y + val);
             }
         }
     }
@@ -210,9 +210,9 @@ namespace effect {
     {
         size_f maxSize {size_f::Zero};
         for (auto const& q : quads) {
-            f32 const width {q[1].Position[0] - q[3].Position[0]};
+            f32 const width {q[1].Position.X - q[3].Position.X};
             maxSize.Width = std::max(width, maxSize.Width);
-            f32 const height {q[1].Position[1] - q[3].Position[1]};
+            f32 const height {q[1].Position.Y - q[3].Position.Y};
             maxSize.Height = std::max(height, maxSize.Height);
         }
 
@@ -224,7 +224,7 @@ namespace effect {
                                   : static_cast<f32>(1.0 - (t * -hDiff))};
 
         for (auto& q : quads) {
-            rect_f const rect {rect_f::FromLTRB(q[3].Position[0], q[3].Position[1], q[1].Position[0], q[1].Position[1])};
+            rect_f const rect {rect_f::FromLTRB(q[3].Position.X, q[3].Position.Y, q[1].Position.X, q[1].Position.Y)};
             transform    xform;
             size_f const scale {wFac, hFac};
             point_f      center {point_f::Zero};
@@ -254,9 +254,9 @@ namespace effect {
 
             xform.scale_at(scale, center);
             for (u32 i {0}; i < 4; ++i) {
-                point_f const pos {xform * point_f {q[i].Position[0], q[i].Position[1]}};
-                q[i].Position[0] = pos.X;
-                q[i].Position[1] = pos.Y;
+                point_f const pos {xform * point_f {q[i].Position.X, q[i].Position.Y}};
+                q[i].Position.X = pos.X;
+                q[i].Position.Y = pos.Y;
             }
         }
     }
@@ -266,14 +266,14 @@ namespace effect {
     void rotate::operator()(f64 t, std::span<quad> quads) const
     {
         for (auto& q : quads) {
-            rect_f const rect {rect_f::FromLTRB(q[3].Position[0], q[3].Position[1], q[1].Position[0], q[1].Position[1])};
+            rect_f const rect {rect_f::FromLTRB(q[3].Position.X, q[3].Position.Y, q[1].Position.X, q[1].Position.Y)};
             transform    rot;
             rot.rotate_at(degree_f {static_cast<f32>(360 * t * Speed)}, rect.get_center());
 
             for (u32 i {0}; i < 4; ++i) {
-                point_f const pos {rot * point_f {q[i].Position[0], q[i].Position[1]}};
-                q[i].Position[0] = pos.X;
-                q[i].Position[1] = pos.Y;
+                point_f const pos {rot * point_f {q[i].Position.X, q[i].Position.Y}};
+                q[i].Position.X = pos.X;
+                q[i].Position.Y = pos.Y;
             }
         }
     }

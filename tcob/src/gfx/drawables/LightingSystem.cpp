@@ -11,7 +11,6 @@
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
-#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Ray.hpp"
 
 namespace tcob::gfx {
@@ -244,8 +243,8 @@ void lighting_system::build_geometry(light_source& light, u32& indOffset)
     u32 const n {static_cast<u32>(light._collisionResult.size())};
     if (n <= 1) { return; }
 
-    _verts.push_back({.Position  = light.Position->as_array(),
-                      .Color     = light.Color->as_array(),
+    _verts.push_back({.Position  = light.Position,
+                      .Color     = light.Color,
                       .TexCoords = {0, 0, 0}});
 
     for (auto const& p : light._collisionResult) {
@@ -259,8 +258,8 @@ void lighting_system::build_geometry(light_source& light, u32& indOffset)
             col.A = static_cast<u8>(col.A * falloff);
         }
 
-        _verts.push_back({.Position  = p.Point.as_array(),
-                          .Color     = col.as_array(),
+        _verts.push_back({.Position  = p.Point,
+                          .Color     = col,
                           .TexCoords = {0, 0, 0}});
     }
 

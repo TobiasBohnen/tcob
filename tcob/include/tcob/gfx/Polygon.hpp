@@ -34,6 +34,11 @@ enum class offset_join : u8 {
 
 ////////////////////////////////////////////////////////////
 
+using polyline      = std::vector<point_f>;
+using polyline_span = std::span<point_f const>;
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API polygon final {
 public:
     struct info {

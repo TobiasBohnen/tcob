@@ -149,12 +149,12 @@ auto static constexpr TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -
 
 void static constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 {
-    vtx->Position[0] = x;
-    vtx->Position[1] = y;
+    vtx->Position.X = x;
+    vtx->Position.Y = y;
 
-    vtx->TexCoords[0] = u;
-    vtx->TexCoords[1] = v;
-    vtx->TexCoords[2] = level;
+    vtx->TexCoords.U     = u;
+    vtx->TexCoords.V     = v;
+    vtx->TexCoords.Level = level;
 }
 
 auto static CurveDivs(f32 r, f32 arc, f32 tol) -> i32
@@ -1408,8 +1408,8 @@ void canvas::draw_image(texture* image, string const& region, rect_f const& rect
     geometry::set_texcoords(quad, texRegion);
 
     for (auto& vert : quad) {
-        vert.Position[0] = std::floor(vert.Position[0] + 0.5f);
-        vert.Position[1] = std::floor(vert.Position[1] + 0.5f);
+        vert.Position.X = std::floor(vert.Position.X + 0.5f);
+        vert.Position.Y = std::floor(vert.Position.Y + 0.5f);
     }
 
     std::array<vertex, 6> const verts {quad[3], quad[1], quad[0], quad[3], quad[2], quad[1]};
@@ -1470,8 +1470,8 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
         geometry::set_texcoords(q, {uv, level});
 
         for (auto& vert : q) {
-            vert.Position[0] = std::floor(vert.Position[0] + 0.5f);
-            vert.Position[1] = std::floor(vert.Position[1] + 0.5f);
+            vert.Position.X = std::floor(vert.Position.X + 0.5f);
+            vert.Position.Y = std::floor(vert.Position.Y + 0.5f);
         }
     }};
 
@@ -1936,9 +1936,9 @@ void canvas::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJo
 
         if (path.Closed) {
             // Loop it
-            SetVertex(dst, verts[0].Position[0], verts[0].Position[1], u0, 1);
+            SetVertex(dst, verts[0].Position.X, verts[0].Position.Y, u0, 1);
             dst++;
-            SetVertex(dst, verts[1].Position[0], verts[1].Position[1], u1, 1);
+            SetVertex(dst, verts[1].Position.X, verts[1].Position.Y, u1, 1);
             dst++;
         } else {
             // Add cap
@@ -2061,9 +2061,9 @@ void canvas::expand_fill(f32 w, line_join lineJoin, f32 miterLimit)
             }
 
             // Loop it
-            SetVertex(dst, verts[0].Position[0], verts[0].Position[1], lu, 1);
+            SetVertex(dst, verts[0].Position.X, verts[0].Position.Y, lu, 1);
             dst++;
-            SetVertex(dst, verts[1].Position[0], verts[1].Position[1], ru, 1);
+            SetVertex(dst, verts[1].Position.X, verts[1].Position.Y, ru, 1);
             dst++;
 
             path.StrokeCount = dst - verts;

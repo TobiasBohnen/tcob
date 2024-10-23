@@ -38,26 +38,27 @@ void gl_vertex_array::setup_attributes() const
 
     // position attribute
     glVertexArrayAttribBinding(ID, index, 0);
-    glVertexArrayAttribFormat(ID, index, std::tuple_size_v<decltype(vertex::Position)>, GL_FLOAT, GL_FALSE, offset);
+    glVertexArrayAttribFormat(ID, index, sizeof(decltype(vertex::Position)) / sizeof(f32), GL_FLOAT, GL_FALSE, offset);
     glEnableVertexArrayAttrib(ID, index);
     offset += sizeof(vertex::Position);
     index++;
 
     // color attribute
     glVertexArrayAttribBinding(ID, index, 0);
-    glVertexArrayAttribFormat(ID, index, std::tuple_size_v<decltype(vertex::Color)>, GL_UNSIGNED_BYTE, GL_TRUE, offset);
+    glVertexArrayAttribFormat(ID, index, sizeof(decltype(vertex::Color)) / sizeof(u8), GL_UNSIGNED_BYTE, GL_TRUE, offset);
     glEnableVertexArrayAttrib(ID, index);
     offset += sizeof(vertex::Color);
     index++;
 
     // texture coord attribute
     glVertexArrayAttribBinding(ID, index, 0);
-    glVertexArrayAttribFormat(ID, index, std::tuple_size_v<decltype(vertex::TexCoords)>, GL_FLOAT, GL_FALSE, offset);
+    glVertexArrayAttribFormat(ID, index, sizeof(decltype(vertex::TexCoords)) / sizeof(f32), GL_FLOAT, GL_FALSE, offset);
     glEnableVertexArrayAttrib(ID, index);
     offset += sizeof(vertex::TexCoords);
     index++;
 
     static_assert(sizeof(vertex) == sizeof(vertex::Position) + sizeof(vertex::Color) + sizeof(vertex::TexCoords));
+    static_assert(sizeof(vertex) == 24);
 }
 
 void gl_vertex_array::do_destroy()

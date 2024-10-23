@@ -266,8 +266,8 @@ void circle_shape::create()
 
     auto const [centerX, centerY] {Center()};
     auto const& uvRect {texReg.UVRect};
-    _verts.push_back({.Position  = (xform * Center()).as_array(),
-                      .Color     = Color->as_array(),
+    _verts.push_back({.Position  = (xform * Center()),
+                      .Color     = Color(),
                       .TexCoords = {(0.5f * uvRect.width()) + uvRect.left(),
                                     (0.5f * uvRect.height()) + uvRect.top(),
                                     texLevel}});
@@ -278,8 +278,8 @@ void circle_shape::create()
         f32 const angle {i * angleStep};
         f32 const x {(radius * std::cos(angle)) + centerX};
         f32 const y {(radius * std::sin(angle)) + centerY};
-        _verts.push_back({.Position  = (xform * point_f {x, y}).as_array(),
-                          .Color     = Color->as_array(),
+        _verts.push_back({.Position  = (xform * point_f {x, y}),
+                          .Color     = Color,
                           .TexCoords = {(((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
                                         (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
                                         texLevel}});
@@ -440,10 +440,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
 
 void poly_shape::on_color_changed(color c)
 {
-    auto const carr {c.as_array()};
-    for (auto& vert : _verts) {
-        vert.Color = carr;
-    }
+    for (auto& vert : _verts) { vert.Color = c; }
 }
 
 void poly_shape::on_texture_region_changed(string const& /* texRegion */)
@@ -475,8 +472,8 @@ void poly_shape::create()
 
     auto const pushVert {[&](point_f point) {
         auto const& [x, y] {point};
-        _verts.push_back({.Position  = (xform * point).as_array(),
-                          .Color     = Color->as_array(),
+        _verts.push_back({.Position  = (xform * point),
+                          .Color     = Color(),
                           .TexCoords = {(((x - _boundingBox.left()) / _boundingBox.width()) * uvRect.width()) + uvRect.left(),
                                         (((y - _boundingBox.top()) / _boundingBox.height()) * uvRect.height()) + uvRect.top(),
                                         texLevel}});

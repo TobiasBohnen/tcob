@@ -37,25 +37,26 @@ void gl_vertex_array::setup_attributes() const
     // position attribute
     GLCHECK(glEnableVertexAttribArray(index));
     GLCHECK(glVertexAttribPointer(
-        index, std::tuple_size_v<decltype(vertex::Position)>, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
+        index, sizeof(decltype(vertex::Position)) / sizeof(f32), GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
     offset += sizeof(vertex::Position);
     index++;
 
     // color attribute
     GLCHECK(glEnableVertexAttribArray(index));
     GLCHECK(glVertexAttribPointer(
-        index, std::tuple_size_v<decltype(vertex::Color)>, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
+        index, sizeof(decltype(vertex::Color)) / sizeof(u8), GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
     offset += sizeof(vertex::Color);
     index++;
 
     // texture coord attribute
     GLCHECK(glEnableVertexAttribArray(index));
     GLCHECK(glVertexAttribPointer(
-        index, std::tuple_size_v<decltype(vertex::TexCoords)>, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
+        index, sizeof(decltype(vertex::TexCoords)) / sizeof(f32), GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offset))); // NOLINT(performance-no-int-to-ptr)
     offset += sizeof(vertex::TexCoords);
     index++;
 
     static_assert(sizeof(vertex) == sizeof(vertex::Position) + sizeof(vertex::Color) + sizeof(vertex::TexCoords));
+    static_assert(sizeof(vertex) == 24);
     unbind();
 }
 

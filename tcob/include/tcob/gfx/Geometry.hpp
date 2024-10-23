@@ -16,9 +16,9 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 struct vertex final {
-    std::array<f32, 2> Position;  // x, y
-    std::array<u8, 4>  Color;     // r, g, b, a
-    std::array<f32, 3> TexCoords; // u, v, level
+    point_f Position {};  // x, y
+    color   Color {};     // r, g, b, a
+    uv      TexCoords {}; // u, v, level
 
     auto operator==(vertex const& other) const -> bool = default;
 };
