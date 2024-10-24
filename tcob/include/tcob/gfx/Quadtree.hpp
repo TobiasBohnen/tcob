@@ -28,16 +28,28 @@ concept QuadtreeValue =
 
 ////////////////////////////////////////////////////////////
 
+namespace detail {
+    constexpr auto contains(rect_f const& left, rect_f const& right) noexcept -> bool
+    {
+        return left.left() <= right.left() && right.right() <= left.right() && left.top() <= right.top() && right.bottom() <= left.bottom();
+    }
+
+    constexpr auto intersects(rect_f const& left, rect_f const& right) noexcept -> bool
+    {
+        return left.left() < right.right() && left.right() > right.left() && left.top() < right.bottom() && left.bottom() > right.top();
+    }
+}
+
 template <QuadtreeValue T, usize SplitThreshold = 16, usize MaxDepth = 8>
 class quadtree {
 public:
     quadtree(rect_f const& rect);
 
-    auto add(T const& value) -> bool;
+    void add(T const& value);
 
-    auto remove(T const& value) -> bool;
+    void remove(T const& value);
 
-    auto replace(T const& oldValue, T const& newValue) -> bool;
+    void replace(T const& oldValue, T const& newValue);
 
     void clear();
 
@@ -46,6 +58,7 @@ public:
     auto find_all_intersections() const -> std::vector<std::pair<T, T>>;
 
     auto get_bounds() const -> rect_f const&;
+    auto contains(rect_f const& rect) const -> bool;
 
 private:
     class node {
