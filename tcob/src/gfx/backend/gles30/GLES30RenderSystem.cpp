@@ -3,16 +3,16 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESRenderSystem.hpp"
+#include "GLES30RenderSystem.hpp"
 
-#include "GLESFramebuffer.hpp"
-#include "GLESRenderTarget.hpp"
-#include "GLESShaderProgram.hpp"
-#include "GLESTexture.hpp"
-#include "GLESUniformBuffer.hpp"
-#include "GLESVertexArray.hpp"
-#include "GLESWindow.hpp"
-#include "nanovg/GLESCanvas.hpp"
+#include "GLES30Framebuffer.hpp"
+#include "GLES30RenderTarget.hpp"
+#include "GLES30ShaderProgram.hpp"
+#include "GLES30Texture.hpp"
+#include "GLES30UniformBuffer.hpp"
+#include "GLES30VertexArray.hpp"
+#include "GLES30Window.hpp"
+#include "nanovg/GLES30Canvas.hpp"
 
 namespace tcob::gfx::gles30 {
 

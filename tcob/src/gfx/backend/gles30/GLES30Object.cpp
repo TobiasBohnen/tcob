@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESObject.hpp"
+#include "GLES30Object.hpp"
 
 namespace tcob::gfx::gles30 {
 

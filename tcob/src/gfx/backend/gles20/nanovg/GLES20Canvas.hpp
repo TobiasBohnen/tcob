@@ -23,15 +23,15 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
-#include "../GLESShaderProgram.hpp"
-#include "../GLESTexture.hpp"
-#include "../GLESVertexArray.hpp"
+#include "../GLES20ShaderProgram.hpp"
+#include "../GLES20Texture.hpp"
+#include "../GLES20VertexArray.hpp"
 
 #include "tcob/gfx/Canvas.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
 
 enum class nvg_shader_type : i32 { // NOLINT(performance-enum-size) part of frag shader
     Gradient    = 0,
@@ -110,7 +110,7 @@ private:
     void set_stencil_mask(GLuint mask);
     void set_stencil_func(GLenum func, GLint ref, GLuint mask);
     void set_blendfunc_separate(blend_funcs const& blend);
-    void set_uniforms(usize uniformOffset, texture* image = nullptr) const;
+    void set_uniforms(usize uniformOffset, texture* image = nullptr);
     auto convert_paint(canvas_paint const& paint, canvas_scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
     void fill(nvg_call const& call);
     void convex_fill(nvg_call const& call);
@@ -121,24 +121,24 @@ private:
     auto alloc_frag_uniforms(usize n) -> usize;
     auto get_frag_uniformptr(usize i) -> nvg_frag_uniforms*;
 
-    gl_shader             _shader;
-    size_f                _view {};
-    gl_vertex_array       _vertexArray {buffer_usage_hint::StreamDraw};
-    GLuint                _fragBuf {0};
-    usize                 _fragSize {0};
+    gl_shader                       _shader;
+    size_f                          _view {};
+    gl_vertex_array                 _vertexArray {buffer_usage_hint::StreamDraw};
+    std::unordered_map<string, i32> _uniformLocs;
+
     // Per frame buffers
-    std::vector<nvg_call> _calls;
-    std::vector<nvg_path> _paths;
-    std::vector<vertex>   _verts;
-    usize                 _nverts {0};
-    std::vector<ubyte>    _uniforms;
-    usize                 _nuniforms {0};
+    std::vector<nvg_call>          _calls;
+    std::vector<nvg_path>          _paths;
+    std::vector<vertex>            _verts;
+    usize                          _nverts {0};
+    std::vector<nvg_frag_uniforms> _uniforms;
+
     // cached state
-    GLuint                _stencilMask {0};
-    GLenum                _stencilFunc {0};
-    GLint                 _stencilFuncRef {0};
-    GLuint                _stencilFuncMask {0};
-    blend_funcs           _blendFunc {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
+    GLuint      _stencilMask {0};
+    GLenum      _stencilFunc {0};
+    GLint       _stencilFuncRef {0};
+    GLuint      _stencilFuncMask {0};
+    blend_funcs _blendFunc {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
 
     gl_texture _gradientTexture;
 };

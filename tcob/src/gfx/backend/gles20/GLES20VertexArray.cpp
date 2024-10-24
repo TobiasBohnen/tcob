@@ -3,23 +3,21 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESVertexArray.hpp"
+#include "GLES20VertexArray.hpp"
 
 #include <cassert>
 
-#include "GLES30.hpp"
-#include "GLESEnum.hpp"
+#include "GLES20.hpp"
+#include "GLES20Enum.hpp"
 #include "tcob/core/Logger.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
+
 gl_vertex_array::gl_vertex_array(buffer_usage_hint usage)
     : _usage {convert_enum(usage)}
 {
-    GLCHECK(glGenVertexArrays(1, &ID));
     GLCHECK(glGenBuffers(1, &_vbo));
     GLCHECK(glGenBuffers(1, &_ebo));
-
-    setup_attributes();
 }
 
 gl_vertex_array::~gl_vertex_array()
@@ -29,8 +27,6 @@ gl_vertex_array::~gl_vertex_array()
 
 void gl_vertex_array::setup_attributes() const
 {
-    bind();
-
     usize offset {0};
     u32   index {0};
 
@@ -57,12 +53,10 @@ void gl_vertex_array::setup_attributes() const
 
     static_assert(sizeof(vertex) == sizeof(vertex::Position) + sizeof(vertex::Color) + sizeof(vertex::TexCoords));
     static_assert(sizeof(vertex) == 24);
-    unbind();
 }
 
 void gl_vertex_array::do_destroy()
 {
-    GLCHECK(glDeleteVertexArrays(1, &ID));
     GLCHECK(glDeleteBuffers(1, &_vbo));
     _vbo = 0;
     GLCHECK(glDeleteBuffers(1, &_ebo));
@@ -71,7 +65,7 @@ void gl_vertex_array::do_destroy()
 
 void gl_vertex_array::resize(usize vertCount, usize indCount)
 {
-    assert(ID);
+    assert(_vbo);
 
     usize const newVboSize {vertCount * sizeof(vertex)};
     usize const newEboSize {indCount * sizeof(GLuint)};
@@ -81,12 +75,11 @@ void gl_vertex_array::resize(usize vertCount, usize indCount)
         _eboSize = std::max(newEboSize, _eboSize * 2);
 
         if (creating) {
-            logger::Debug("VertexArray: created ID {}: {} vertices, {} indices",
-                          ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
-
+            logger::Debug("VertexArray: created: {} vertices, {} indices",
+                          _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
         } else {
-            logger::Debug("VertexArray: resized ID {}: {} vertices, {} indices",
-                          ID, _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
+            logger::Debug("VertexArray: resized: {} vertices, {} indices",
+                          _vboSize / sizeof(vertex), _eboSize / sizeof(GLuint));
         }
 
         bind();
@@ -98,16 +91,14 @@ void gl_vertex_array::resize(usize vertCount, usize indCount)
 
 void gl_vertex_array::bind() const
 {
-    assert(ID);
-    GLCHECK(glBindVertexArray(ID));
+    assert(_vbo);
     GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, _vbo));
     GLCHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo));
+    setup_attributes();
 }
 
 void gl_vertex_array::unbind() const
 {
-    assert(ID);
-    GLCHECK(glBindVertexArray(0));
     GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GLCHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
@@ -150,4 +141,4 @@ void gl_vertex_array::draw_arrays(primitive_type mode, i32 first, usize count) c
     unbind();
 }
 
-}
+} // namespace tcob::gfx::gles20

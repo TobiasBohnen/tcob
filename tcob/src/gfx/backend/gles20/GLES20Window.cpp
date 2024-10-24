@@ -3,17 +3,17 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESWindow.hpp"
+#include "GLES20Window.hpp"
 
 #include <SDL.h>
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
 #include "tcob/core/Logger.hpp"
 
-#include "GLES30.hpp"
-#include "GLESContext.hpp"
+#include "GLES20.hpp"
+#include "GLES20Context.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
 
 gl_window::gl_window(size_i size)
 {
@@ -67,10 +67,9 @@ void gl_window::set_vsync(bool value)
 
 void gl_window::clear(color c) const
 {
-    vec4 const color {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
+    GLCHECK(glClearColor(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f));
     GLCHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-    GLCHECK(glClearBufferfv(GL_COLOR, 0, color.data()));
-    GLCHECK(glClearBufferfi(GL_DEPTH_STENCIL, 0, 1, 0));
+    GLCHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void gl_window::set_viewport(rect_i const& rect)

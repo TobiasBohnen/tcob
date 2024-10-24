@@ -8,15 +8,15 @@
 
 #include <span>
 
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
-#include "GLESObject.hpp"
+#include "GLES20Object.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
 ////////////////////////////////////////////////////////////
 
 class gl_vertex_array final : public gl_object, public tcob::gfx::render_backend::vertex_array_base {

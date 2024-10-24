@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "GLESObject.hpp"
+#include "GLES30Object.hpp"
 
 #include "tcob/gfx/RenderSystemImpl.hpp"
 

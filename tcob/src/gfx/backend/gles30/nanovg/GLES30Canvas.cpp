@@ -3,13 +3,13 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESCanvas.hpp"
+#include "GLES30Canvas.hpp"
 
 #include <cstring>
 #include <variant>
 
 #include "../GLES30.hpp"
-#include "../GLESEnum.hpp"
+#include "../GLES30Enum.hpp"
 
 #include "tcob/gfx/ColorGradient.hpp"
 

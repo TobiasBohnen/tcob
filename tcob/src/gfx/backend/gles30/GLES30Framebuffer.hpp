@@ -14,8 +14,8 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/gfx/Texture.hpp"
 
-#include "GLESObject.hpp"
-#include "GLESTexture.hpp"
+#include "GLES30Object.hpp"
+#include "GLES30Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 ////////////////////////////////////////////////////////////

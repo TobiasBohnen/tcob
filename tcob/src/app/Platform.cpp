@@ -32,7 +32,10 @@
     #include "../gfx/backend/gl45/GLRenderSystem.hpp"
 #endif
 #if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    #include "../gfx/backend/gles30/GLESRenderSystem.hpp"
+    #include "../gfx/backend/gles30/GLES30RenderSystem.hpp"
+#endif
+#if defined(TCOB_ENABLE_RENDERER_OPENGLES20)
+    #include "../gfx/backend/gles20/GLES20RenderSystem.hpp"
 #endif
 #if defined(TCOB_ENABLE_RENDERER_NULL)
     #include "../gfx/backend/null/NullRenderSystem.hpp"
@@ -263,6 +266,9 @@ void platform::init_render_system(string const& windowTitle)
 #endif
 #if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
     rsFactory->add({"OPENGLES30"}, std::make_shared<gfx::gles30::gl_render_system>);
+#endif
+#if defined(TCOB_ENABLE_RENDERER_OPENGLES20)
+    rsFactory->add({"OPENGLES20"}, std::make_shared<gfx::gles20::gl_render_system>);
 #endif
 #if defined(TCOB_ENABLE_RENDERER_NULL)
     rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);

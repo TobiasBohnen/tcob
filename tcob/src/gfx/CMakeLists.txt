@@ -193,18 +193,34 @@ endif()
 
 if(TCOB_ENABLE_RENDERER_OPENGLES30)
     list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESContext.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESEnum.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESFramebuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESObject.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESRenderSystem.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESRenderTarget.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESShaderProgram.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESTexture.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESUniformBuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESVertexArray.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLESWindow.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/nanovg/GLESCanvas.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Context.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Enum.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Framebuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Object.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30RenderSystem.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30RenderTarget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30ShaderProgram.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Texture.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30UniformBuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30VertexArray.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Window.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/nanovg/GLES30Canvas.cpp
+    )
+endif()
+
+if(TCOB_ENABLE_RENDERER_OPENGLES20)
+    list(APPEND SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Context.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Enum.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Framebuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Object.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20RenderSystem.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20RenderTarget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20ShaderProgram.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Texture.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20VertexArray.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Window.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/nanovg/GLES20Canvas.cpp
     )
 endif()
 

@@ -9,9 +9,9 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
-#include "GLESObject.hpp"
+#include "GLES20Object.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
 ////////////////////////////////////////////////////////////
 
 class gl_texture : public gl_object, public tcob::gfx::render_backend::texture_base {

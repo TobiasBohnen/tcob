@@ -9,7 +9,7 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
-#include "GLESObject.hpp"
+#include "GLES30Object.hpp"
 
 namespace tcob::gfx::gles30 {
 ////////////////////////////////////////////////////////////

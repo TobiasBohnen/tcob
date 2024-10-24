@@ -3,35 +3,16 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESRenderTarget.hpp"
+#include "GLES20RenderTarget.hpp"
 
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
-#include "GLES30.hpp"
-#include "GLESContext.hpp"
-#include "GLESEnum.hpp"
-#include "GLESShaderProgram.hpp"
+#include "GLES20.hpp"
+#include "GLES20Context.hpp"
+#include "GLES20Enum.hpp"
+#include "GLES20ShaderProgram.hpp"
 
-#include "tcob/gfx/RenderTarget.hpp"
-
-namespace tcob::gfx::gles30 {
-
-auto static GlobalUBO() -> gl_uniform_buffer&
-{
-    /*
-    layout(std140, binding = 0)uniform Globals
-    {
-        mat4 camera;
-        uvec2 view_size;
-        ivec2 mouse_pos;
-        float time;
-        bool debug;
-    };
-    */
-
-    static gl_uniform_buffer globalUniformBuffer {sizeof(mat4) + sizeof(uvec2) + sizeof(ivec2) + sizeof(f32) + sizeof(u32)};
-    return globalUniformBuffer;
-}
+namespace tcob::gfx::gles20 {
 
 gl_render_target::gl_render_target(texture* tex)
     : _tex {tex}
@@ -41,6 +22,8 @@ gl_render_target::gl_render_target(texture* tex)
 
 void gl_render_target::prepare_render(render_properties const& props)
 {
+    _props = props;
+
     if (props.UseDefaultFramebuffer) {
         _frameBuffer->bind_default();
     } else {
@@ -48,18 +31,6 @@ void gl_render_target::prepare_render(render_properties const& props)
     }
 
     set_viewport(props.Viewport);
-
-    // setup UBO
-    auto& buffer {GlobalUBO()};
-    usize offset {0};
-
-    offset += buffer.update(props.ViewMatrix, offset);
-    offset += buffer.update(props.Viewport.Size, offset);
-    offset += buffer.update(props.MousePosition, offset);
-    offset += buffer.update(props.Time, offset);
-    offset += buffer.update(props.Debug, offset);
-
-    buffer.bind_base(0);
 
     // set polygon mode
     if (props.Debug) {
@@ -126,32 +97,35 @@ void gl_render_target::bind_material(material const* mat) const
 
     if (mat->Texture.is_ready()) {
         GLCHECK(glActiveTexture(GL_TEXTURE0));
-        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, mat->Texture->get_impl<gl_texture>()->get_id()));
+        GLCHECK(glBindTexture(GL_TEXTURE_2D, mat->Texture->get_impl<gl_texture>()->get_id()));
     }
+
+    u32 shaderId {};
 
     if (mat->Shader.is_ready()) {
         auto* shader {mat->Shader->get_impl<gl_shader>()};
-        glUseProgram(shader->get_id());
-        GLCHECK(glUniformBlockBinding(shader->get_id(), glGetUniformBlockIndex(shader->get_id(), "Material"), 1));
+        shaderId = shader->get_id();
     } else {
         if (mat->Texture.is_ready()) {
             if (mat->Texture->get_format() == texture::format::R8) {
-                GLCHECK(glUseProgram(gl_context::DefaultFontShader));
-                GLCHECK(glUniformBlockBinding(gl_context::DefaultFontShader, glGetUniformBlockIndex(gl_context::DefaultFontShader, "Material"), 1));
+                shaderId = gl_context::DefaultFontShader;
             } else {
-                GLCHECK(glUseProgram(gl_context::DefaultTexturedShader));
-                GLCHECK(glUniformBlockBinding(gl_context::DefaultTexturedShader, glGetUniformBlockIndex(gl_context::DefaultTexturedShader, "Material"), 1));
+                shaderId = gl_context::DefaultTexturedShader;
             }
         } else {
-            GLCHECK(glUseProgram(gl_context::DefaultShader));
-            GLCHECK(glUniformBlockBinding(gl_context::DefaultShader, glGetUniformBlockIndex(gl_context::DefaultShader, "Material"), 1));
+            shaderId = gl_context::DefaultShader;
         }
     }
 
-    usize offset {0};
-    offset += _matUniformBuffer.update(mat->Color.as_float_array(), offset);
-    offset += _matUniformBuffer.update(mat->PointSize, offset);
-    _matUniformBuffer.bind_base(1);
+    GLCHECK(glUseProgram(shaderId));
+    glUniformMatrix4fv(glGetUniformLocation(shaderId, "camera"), 1, GL_FALSE, _props.ViewMatrix.data());
+    glUniform2i(glGetUniformLocation(shaderId, "view_size"), _props.Viewport.Size.Width, _props.Viewport.Size.Height);
+    glUniform2i(glGetUniformLocation(shaderId, "mouse_pos"), _props.MousePosition.X, _props.MousePosition.Y);
+    glUniform1f(glGetUniformLocation(shaderId, "time"), _props.Time);
+    glUniform1i(glGetUniformLocation(shaderId, "debug"), _props.Debug);
+
+    glUniform4f(glGetUniformLocation(shaderId, "matColor"), mat->Color.R / 255.f, mat->Color.G / 255.f, mat->Color.B / 255.f, mat->Color.A / 255.f);
+    glUniform1f(glGetUniformLocation(shaderId, "matPointSize"), mat->PointSize);
 
     // set blend mode
     GLCHECK(glEnable(GL_BLEND));
@@ -163,7 +137,7 @@ void gl_render_target::bind_material(material const* mat) const
 
 void gl_render_target::unbind_material() const
 {
-    GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, 0));
+    GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
     GLCHECK(glUseProgram(0));
 }
 

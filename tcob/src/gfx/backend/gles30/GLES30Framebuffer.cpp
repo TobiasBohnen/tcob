@@ -3,12 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESFramebuffer.hpp"
+#include "GLES30Framebuffer.hpp"
 
 #include <cassert>
 
 #include "GLES30.hpp"
-#include "GLESTexture.hpp"
+#include "GLES30Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 gl_framebuffer::gl_framebuffer()

@@ -6,13 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "GLESUniformBuffer.hpp"
+#include "GLES30UniformBuffer.hpp"
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
-#include "GLESFramebuffer.hpp"
+#include "GLES30Framebuffer.hpp"
 
 namespace tcob::gfx::gles30 {
 ////////////////////////////////////////////////////////////

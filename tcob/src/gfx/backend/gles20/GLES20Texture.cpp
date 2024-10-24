@@ -3,22 +3,23 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESTexture.hpp"
+#include "GLES20Texture.hpp"
 
 #include <cassert>
 
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
-#include "GLES30.hpp"
-#include "GLESFramebuffer.hpp"
+#include "GLES20.hpp"
+#include "GLES20Framebuffer.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
+
 auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 {
     switch (format) {
-    case texture::format::R8: return {GL_R8, GL_RED};
-    case texture::format::RGB8: return {GL_RGB8, GL_RGB};
-    case texture::format::RGBA8: return {GL_RGBA8, GL_RGBA};
+    case texture::format::R8: return {GL_LUMINANCE, GL_LUMINANCE}; // Use LUMINANCE for R8
+    case texture::format::RGB8: return {GL_RGB, GL_RGB};
+    case texture::format::RGBA8: return {GL_RGBA, GL_RGBA};
     }
 
     return {};
@@ -58,7 +59,7 @@ gl_texture::~gl_texture()
 void gl_texture::bind() const
 {
     assert(ID);
-    GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, ID));
+    GLCHECK(glBindTexture(GL_TEXTURE_2D, ID)); // Replaced GL_TEXTURE_2D_ARRAY with GL_TEXTURE_2D
 }
 
 auto gl_texture::get_filtering() const -> texture::filtering
@@ -66,7 +67,7 @@ auto gl_texture::get_filtering() const -> texture::filtering
     bind();
 
     GLint filtering {0};
-    GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, &filtering));
+    GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &filtering));
 
     switch (filtering) {
     case GL_LINEAR: return texture::filtering::Linear;
@@ -82,8 +83,8 @@ void gl_texture::set_filtering(texture::filtering val) const
 
     GLenum const filtering {convert_enum(val)};
 
-    GLCHECK(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, filtering));
-    GLCHECK(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, filtering));
+    GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering));
+    GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering));
 }
 
 auto gl_texture::get_wrapping() const -> texture::wrapping
@@ -91,7 +92,7 @@ auto gl_texture::get_wrapping() const -> texture::wrapping
     bind();
 
     GLint wrapS {0};
-    GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, &wrapS));
+    GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wrapS));
 
     auto const convertWrap {
         [](GLint wrap) {
@@ -109,8 +110,8 @@ auto gl_texture::get_wrapping() const -> texture::wrapping
 void gl_texture::set_wrapping(texture::wrapping val) const
 {
     bind();
-    GLCHECK(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, convert_enum(val)));
-    GLCHECK(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, convert_enum(val)));
+    GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, convert_enum(val)));
+    GLCHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, convert_enum(val)));
 }
 
 auto gl_texture::copy_to_image(u32 depth) const -> image
@@ -127,7 +128,7 @@ auto gl_texture::copy_to_image(u32 depth) const -> image
     return image::Create(_size, image::format::RGBA, buffer);
 }
 
-void gl_texture::create(size_i texsize, u32 depth, texture::format format)
+void gl_texture::create(size_i texsize, u32 /* depth */, texture::format format)
 {
     _size   = texsize;
     _format = format;
@@ -140,20 +141,19 @@ void gl_texture::create(size_i texsize, u32 depth, texture::format format)
     bind();
 
     auto const [iform, _] {convert_enum(format)};
-    GLCHECK(glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, iform, texsize.Width, texsize.Height, depth));
+    // Replaced glTexStorage3D with glTexImage2D for 2D textures
+    GLCHECK(glTexImage2D(GL_TEXTURE_2D, 0, iform, texsize.Width, texsize.Height, 0, iform, GL_UNSIGNED_BYTE, nullptr));
 
-    logger::Debug("Texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
+    logger::Debug("Texture: created ID {}: width {}, height {}", ID, texsize.Width, texsize.Height);
 }
 
-void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const
+void gl_texture::update(point_i origin, size_i size, void const* data, u32 /* depth */, i32 /* rowLength */, i32 alignment) const
 {
     bind();
     GLCHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, alignment));
-    GLCHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength));
     auto const [_, form] {convert_enum(_format)};
-    GLCHECK(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, origin.X, origin.Y, depth, size.Width, size.Height, 1, form, GL_UNSIGNED_BYTE, data));
+    GLCHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, origin.X, origin.Y, size.Width, size.Height, form, GL_UNSIGNED_BYTE, data));
     GLCHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
-    GLCHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));
 }
 
 auto gl_texture::is_valid() const -> bool

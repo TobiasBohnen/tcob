@@ -3,17 +3,17 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESContext.hpp"
+#include "GLES20Context.hpp"
 
 #include <SDL.h>
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
 #include "tcob/core/Logger.hpp"
 
-#include "GLESObject.hpp"
-#include "GLESShaderProgram.hpp"
+#include "GLES20Object.hpp"
+#include "GLES20ShaderProgram.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
 
 u32 gl_context::DefaultShader {0};
 u32 gl_context::DefaultTexturedShader {0};
@@ -42,7 +42,7 @@ auto static load(char const* c) -> GLADapiproc
 gl_context::gl_context(SDL_Window* window)
 {
     // Create OpenGL context
-    i32 const glMajor {3}, glMinor {0};
+    i32 const glMajor {2}, glMinor {0};
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glMajor);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glMinor);
 
@@ -59,17 +59,11 @@ gl_context::gl_context(SDL_Window* window)
         throw std::runtime_error("OpenGL context creation failed");
     }
 
-    if (!gladLoadGLES2(&load)) {
+    if (!gladLoadGLES20(&load)) {
         SDL_GL_DeleteContext(_context);
         logger::Error("GLESContext: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");
     }
-
-    i32 checkMajor {}, checkMinor {};
-    glGetIntegerv(GL_MAJOR_VERSION, &checkMajor);
-    glGetIntegerv(GL_MINOR_VERSION, &checkMinor);
-
-    logger::Info("GLESContext: have OpenGLES version: {}.{}", checkMajor, checkMinor);
 
     // init default shaders
     _defaultShader = std::make_shared<gl_shader>();

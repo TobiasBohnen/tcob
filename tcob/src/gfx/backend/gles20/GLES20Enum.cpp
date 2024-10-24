@@ -3,11 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLESEnum.hpp"
+#include "GLES20Enum.hpp"
 
-#include <glad/gles30.h>
+#include <glad/gles20.h>
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gles20 {
 
 auto convert_enum(buffer_usage_hint usage) -> u32
 {
@@ -68,10 +68,10 @@ auto convert_enum(blend_equation equ) -> u32
         return GL_FUNC_SUBTRACT;
     case blend_equation::ReverseSubtract:
         return GL_FUNC_REVERSE_SUBTRACT;
+
     case blend_equation::Min:
-        return GL_MIN;
     case blend_equation::Max:
-        return GL_MAX;
+        return GL_INVALID_ENUM;
     }
 
     return GL_INVALID_ENUM;
