@@ -118,7 +118,7 @@ void null_texture::create(size_i, u32, texture::format)
 {
 }
 
-void null_texture::update(point_i, size_i, void const*, u32, texture::format, i32, i32) const
+void null_texture::update(point_i, size_i, void const*, u32, i32, i32) const
 {
 }
 

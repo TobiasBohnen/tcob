@@ -83,7 +83,7 @@ public:
 
     void virtual create(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) = 0;
 
-    void virtual update(point_i origin, size_i size, void const* data, u32 depth, texture::format format, i32 rowLength, i32 alignment) const = 0;
+    void virtual update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const = 0;
 
     auto virtual get_filtering() const -> texture::filtering   = 0;
     void virtual set_filtering(texture::filtering props) const = 0;

@@ -26,10 +26,10 @@
 #include <glad/gles30.h>
 
 #include "../GLESShaderProgram.hpp"
+#include "../GLESTexture.hpp"
 #include "../GLESVertexArray.hpp"
 
 #include "tcob/gfx/Canvas.hpp"
-#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 
@@ -140,6 +140,6 @@ private:
     GLuint                _stencilFuncMask {0};
     blend_funcs           _blendFunc {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
 
-    texture _gradientTexture;
+    gl_texture _gradientTexture;
 };
 }

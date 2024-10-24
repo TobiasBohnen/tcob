@@ -16,7 +16,7 @@
 
 namespace tcob::gfx::gl45 {
 
-auto static GlobalUBO() -> uniform_buffer&
+auto static GlobalUBO() -> gl_uniform_buffer&
 {
     /*
     layout(std140, binding = 0)uniform Globals
@@ -29,7 +29,7 @@ auto static GlobalUBO() -> uniform_buffer&
     };
     */
 
-    static uniform_buffer globalUniformBuffer {sizeof(mat4) + sizeof(uvec2) + sizeof(ivec2) + sizeof(f32) + sizeof(u32)};
+    static gl_uniform_buffer globalUniformBuffer {sizeof(mat4) + sizeof(uvec2) + sizeof(ivec2) + sizeof(f32) + sizeof(u32)};
     return globalUniformBuffer;
 }
 

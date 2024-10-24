@@ -115,7 +115,9 @@ auto gl_texture::copy_to_image(u32 depth) const -> image
 
 void gl_texture::create(size_i texsize, u32 depth, texture::format format)
 {
-    _size = texsize;
+    _size   = texsize;
+    _format = format;
+
     if (ID) {
         do_destroy();
     }
@@ -128,12 +130,12 @@ void gl_texture::create(size_i texsize, u32 depth, texture::format format)
     logger::Debug("Texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
 }
 
-void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, texture::format format, i32 rowLength, i32 alignment) const
+void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const
 {
     assert(ID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength);
-    auto const [_, form] {convert_enum(format)};
+    auto const [_, form] {convert_enum(_format)};
     glTextureSubImage3D(ID, 0, origin.X, origin.Y, depth, size.Width, size.Height, 1, form, GL_UNSIGNED_BYTE, data);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -142,6 +144,11 @@ void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth
 auto gl_texture::is_valid() const -> bool
 {
     return ID != 0;
+}
+
+auto gl_texture::get_size() const -> size_i
+{
+    return _size;
 }
 
 auto gl_texture::get_id() const -> u32

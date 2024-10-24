@@ -26,10 +26,10 @@
 #include <glad/gl45.h>
 
 #include "../GLShaderProgram.hpp"
+#include "../GLTexture.hpp"
 #include "../GLVertexArray.hpp"
 
 #include "tcob/gfx/Canvas.hpp"
-#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 
@@ -140,6 +140,6 @@ private:
     GLuint                _stencilFuncMask {0};
     blend_funcs           _blendFunc {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
 
-    texture _gradientTexture;
+    gl_texture _gradientTexture;
 };
 }

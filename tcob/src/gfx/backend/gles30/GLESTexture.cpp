@@ -129,7 +129,8 @@ auto gl_texture::copy_to_image(u32 depth) const -> image
 
 void gl_texture::create(size_i texsize, u32 depth, texture::format format)
 {
-    _size = texsize;
+    _size   = texsize;
+    _format = format;
 
     if (ID) {
         do_destroy();
@@ -144,12 +145,12 @@ void gl_texture::create(size_i texsize, u32 depth, texture::format format)
     logger::Debug("Texture: created ID {}: width {}, height {}, depth {}", ID, texsize.Width, texsize.Height, depth);
 }
 
-void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, texture::format format, i32 rowLength, i32 alignment) const
+void gl_texture::update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const
 {
     bind();
     GLCHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, alignment));
     GLCHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength));
-    auto const [_, form] {convert_enum(format)};
+    auto const [_, form] {convert_enum(_format)};
     GLCHECK(glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, origin.X, origin.Y, depth, size.Width, size.Height, 1, form, GL_UNSIGNED_BYTE, data));
     GLCHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
     GLCHECK(glPixelStorei(GL_UNPACK_ROW_LENGTH, 0));

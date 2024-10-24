@@ -101,7 +101,7 @@ void texture::update_data(std::span<u8 const> data, u32 depth, i32 rowLength, i3
 
 void texture::update_data(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const
 {
-    _impl->update(origin, size, data, depth, _format, rowLength, alignment);
+    _impl->update(origin, size, data, depth, rowLength, alignment);
 }
 
 ////////////////////////////////////////////////////////////

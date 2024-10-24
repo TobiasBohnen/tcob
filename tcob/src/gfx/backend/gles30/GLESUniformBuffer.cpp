@@ -37,6 +37,13 @@ void gl_uniform_buffer::bind_base(u32 index) const
     GLCHECK(glBindBufferBase(GL_UNIFORM_BUFFER, index, ID));
 }
 
+auto gl_uniform_buffer::update(bool data, usize offset) const -> usize
+{
+    u32 const d {data}; // bools are u32 in GLSL and HLSL
+    update(&d, sizeof(d), offset);
+    return sizeof(d);
+}
+
 void gl_uniform_buffer::update(void const* data, usize size, usize offset) const
 {
     assert(ID);

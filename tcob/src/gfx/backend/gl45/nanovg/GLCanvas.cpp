@@ -9,7 +9,6 @@
 #include <variant>
 
 #include "../GLEnum.hpp"
-#include "../GLTexture.hpp"
 
 #include "tcob/gfx/ColorGradient.hpp"
 
@@ -33,7 +32,7 @@ gl_canvas::gl_canvas()
 
     // gradient
     _gradientTexture.create({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
-    _gradientTexture.Wrapping = texture::wrapping::ClampToEdge;
+    _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
     // Create UBOs
@@ -143,7 +142,7 @@ void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
         glBindTextureUnit(0, 0);
     }
 
-    glBindTextureUnit(1, _gradientTexture.get_impl<gl_texture>()->get_id());
+    glBindTextureUnit(1, _gradientTexture.get_id());
 }
 
 void gl_canvas::set_size(size_f size)
@@ -493,12 +492,12 @@ void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
     if (idx >= size) { // grow texture
         auto const img {_gradientTexture.copy_to_image(0)};
         _gradientTexture.create({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
-        _gradientTexture.Wrapping = texture::wrapping::ClampToEdge;
-        _gradientTexture.update_data(point_i::Zero, img.get_info().Size, img.get_data().data(), 0, color_gradient::Size, 1);
+        _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
+        _gradientTexture.update(point_i::Zero, img.get_info().Size, img.get_data().data(), 0, color_gradient::Size, 1);
     }
 
     auto const colors {gradient.get_colors()};
-    _gradientTexture.update_data({0, idx}, {color_gradient::Size, 1}, colors.data(), 0, color_gradient::Size, 1);
+    _gradientTexture.update({0, idx}, {color_gradient::Size, 1}, colors.data(), 0, color_gradient::Size, 1);
 }
 
 }

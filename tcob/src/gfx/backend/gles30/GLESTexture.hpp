@@ -19,7 +19,7 @@ public:
     ~gl_texture() override;
 
     void create(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) override;
-    void update(point_i origin, size_i size, void const* data, u32 depth, texture::format format, i32 rowLength = 0, i32 alignment = 4) const override;
+    void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const override;
 
     auto get_filtering() const -> texture::filtering override;
     void set_filtering(texture::filtering val) const override;
@@ -30,9 +30,8 @@ public:
 
     auto is_valid() const -> bool override;
 
-    auto get_id() const -> u32;
-
     auto get_size() const -> size_i;
+    auto get_id() const -> u32;
 
 protected:
     void create();
@@ -42,7 +41,8 @@ protected:
 private:
     void bind() const;
 
-    size_i _size {size_i::Zero};
+    size_i          _size {size_i::Zero};
+    texture::format _format {};
 };
 
 }

@@ -7,11 +7,11 @@
 #include "tcob/tcob_config.hpp"
 
 #include "GLFramebuffer.hpp"
+#include "GLUniformBuffer.hpp"
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
-#include "tcob/gfx/UniformBuffer.hpp"
 
 namespace tcob::gfx::gl45 {
 ////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ private:
 
     texture*                        _tex {nullptr};
     std::unique_ptr<gl_framebuffer> _frameBuffer;
-    uniform_buffer                  _matUniformBuffer {sizeof(vec4) + sizeof(f32)};
+    gl_uniform_buffer               _matUniformBuffer {sizeof(vec4) + sizeof(f32)};
 };
 
 }
