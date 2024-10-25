@@ -135,21 +135,21 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
 
 void gl_canvas::set_uniforms(usize uniformOffset, texture* image)
 {
-    auto* frag {get_frag_uniformptr(uniformOffset)};
-    _shader.set_uniform(_uniformLocs["scissorMat"], frag->ScissorMatrix);
-    _shader.set_uniform(_uniformLocs["paintMat"], frag->PaintMatrix);
-    _shader.set_uniform(_uniformLocs["scissorExt"], frag->ScissorExtent);
-    _shader.set_uniform(_uniformLocs["scissorScale"], frag->ScissorScale);
-    _shader.set_uniform(_uniformLocs["extent"], frag->Extent);
-    _shader.set_uniform(_uniformLocs["radius"], frag->Radius);
-    _shader.set_uniform(_uniformLocs["feather"], frag->Feather);
-    _shader.set_uniform(_uniformLocs["strokeMult"], frag->StrokeMult);
-    _shader.set_uniform(_uniformLocs["strokeThr"], frag->StrokeThr);
-    _shader.set_uniform(_uniformLocs["texType"], frag->TexType);
-    _shader.set_uniform(_uniformLocs["type"], static_cast<i32>(frag->Type));
-    _shader.set_uniform(_uniformLocs["gradientColor"], frag->GradientColor);
-    _shader.set_uniform(_uniformLocs["gradientIndex"], frag->GradientIndex);
-    _shader.set_uniform(_uniformLocs["gradientAlpha"], frag->GradientAlpha);
+    auto& frag {_uniforms[uniformOffset]};
+    _shader.set_uniform(_uniformLocs["scissorMat"], frag.ScissorMatrix);
+    _shader.set_uniform(_uniformLocs["paintMat"], frag.PaintMatrix);
+    _shader.set_uniform(_uniformLocs["scissorExt"], frag.ScissorExtent);
+    _shader.set_uniform(_uniformLocs["scissorScale"], frag.ScissorScale);
+    _shader.set_uniform(_uniformLocs["extent"], frag.Extent);
+    _shader.set_uniform(_uniformLocs["radius"], frag.Radius);
+    _shader.set_uniform(_uniformLocs["feather"], frag.Feather);
+    _shader.set_uniform(_uniformLocs["strokeMult"], frag.StrokeMult);
+    _shader.set_uniform(_uniformLocs["strokeThr"], frag.StrokeThr);
+    _shader.set_uniform(_uniformLocs["texType"], frag.TexType);
+    _shader.set_uniform(_uniformLocs["type"], static_cast<i32>(frag.Type));
+    _shader.set_uniform(_uniformLocs["gradientColor"], frag.GradientColor);
+    _shader.set_uniform(_uniformLocs["gradientIndex"], frag.GradientIndex);
+    _shader.set_uniform(_uniformLocs["gradientAlpha"], frag.GradientAlpha);
 
     GLCHECK(glActiveTexture(GL_TEXTURE0));
     if (image) {
@@ -359,11 +359,6 @@ auto gl_canvas::alloc_frag_uniforms(usize n) -> usize
     return retValue;
 }
 
-auto gl_canvas::get_frag_uniformptr(usize i) -> nvg_frag_uniforms*
-{
-    return &_uniforms[i];
-}
-
 void gl_canvas::render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
                             vec4 const& bounds, std::vector<canvas_path> const& paths)
 {
@@ -420,18 +415,18 @@ void gl_canvas::render_fill(canvas_paint const& paint, blend_funcs const& compos
         call.UniformOffset = alloc_frag_uniforms(2);
 
         // Simple shader for stencil
-        auto* frag {get_frag_uniformptr(call.UniformOffset)};
-        *frag           = {};
-        frag->StrokeThr = -1.0f;
-        frag->Type      = nvg_shader_type::StencilFill;
+        auto& frag {_uniforms[call.UniformOffset]};
+        frag           = {};
+        frag.StrokeThr = -1.0f;
+        frag.Type      = nvg_shader_type::StencilFill;
 
         // Fill shader
-        *get_frag_uniformptr(call.UniformOffset + 1) = convert_paint(paint, scissor, fringe, fringe, -1.0f);
+        _uniforms[call.UniformOffset + 1] = convert_paint(paint, scissor, fringe, fringe, -1.0f);
     } else {
         call.UniformOffset = alloc_frag_uniforms(1);
 
         // Fill shader
-        *get_frag_uniformptr(call.UniformOffset) = convert_paint(paint, scissor, fringe, fringe, -1.0f);
+        _uniforms[call.UniformOffset] = convert_paint(paint, scissor, fringe, fringe, -1.0f);
     }
 }
 
@@ -465,8 +460,8 @@ void gl_canvas::render_stroke(canvas_paint const& paint, blend_funcs const& comp
     // Fill shader
     call.UniformOffset = alloc_frag_uniforms(2);
 
-    *get_frag_uniformptr(call.UniformOffset)     = convert_paint(paint, scissor, strokeWidth, fringe, -1.0f);
-    *get_frag_uniformptr(call.UniformOffset + 1) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
+    _uniforms[call.UniformOffset]     = convert_paint(paint, scissor, strokeWidth, fringe, -1.0f);
+    _uniforms[call.UniformOffset + 1] = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
 }
 
 void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
@@ -487,9 +482,9 @@ void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& c
     // Fill shader
     call.UniformOffset = alloc_frag_uniforms(1);
 
-    auto* frag {get_frag_uniformptr(call.UniformOffset)};
-    *frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
-    frag->Type = nvg_shader_type::Triangles;
+    auto& frag {_uniforms[call.UniformOffset]};
+    frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
+    frag.Type = nvg_shader_type::Triangles;
 }
 
 void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)

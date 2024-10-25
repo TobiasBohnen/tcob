@@ -119,7 +119,6 @@ private:
     auto get_max_vertcount(std::vector<canvas_path> const& paths) -> usize;
     auto alloc_verts(usize n) -> usize;
     auto alloc_frag_uniforms(usize n) -> usize;
-    auto get_frag_uniformptr(usize i) -> nvg_frag_uniforms*;
 
     gl_shader                       _shader;
     size_f                          _view {};
