@@ -58,7 +58,7 @@ void gif::header::read(io::istream& reader)
 auto gif_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (decode_info(in)) {
-        read_contents(in, _header);
+        read_contents(in);
         return _currentFrame;
     }
 
@@ -68,6 +68,7 @@ auto gif_decoder::decode(io::istream& in) -> std::optional<image>
 auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 {
     _header.read(in);
+    _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.rfind("GIF", 0) == 0) {
         return image::info {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
     }
@@ -81,8 +82,9 @@ auto gif_decoder::open() -> std::optional<image::info>
 {
     auto& in {get_stream()};
     _header.read(in);
+    _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.rfind("GIF", 0) == 0) {
-        read_contents(in, _header);
+        read_contents(in);
         return image::info {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
     }
 
@@ -94,7 +96,7 @@ auto gif_decoder::get_current_frame() const -> u8 const*
     return _currentFrame.get_data().data();
 }
 
-auto gif_decoder::seek_from_current(milliseconds ts) -> animated_image_decoder::status
+auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 {
     if (_header.Id.rfind("GIF", 0) != 0) {
         return animated_image_decoder::status::DecodeFailure;
@@ -104,7 +106,7 @@ auto gif_decoder::seek_from_current(milliseconds ts) -> animated_image_decoder::
         return animated_image_decoder::status::OldFrame;
     }
 
-    while (read_contents(get_stream(), _header) != animated_image_decoder::status::NoMoreFrames) {
+    while (read_contents(get_stream()) != animated_image_decoder::status::NoMoreFrames) {
         if (ts <= _currentTimeStamp) {
             return animated_image_decoder::status::NewFrame;
         }
@@ -115,16 +117,22 @@ auto gif_decoder::seek_from_current(milliseconds ts) -> animated_image_decoder::
 
 void gif_decoder::reset()
 {
+    _firstFrame   = true;
+    _transparency = false;
+
     _currentTimeStamp = milliseconds {0};
-    get_stream().seek(_firstFrameOffset, io::seek_dir::Begin);
-    clear_pixel_cache();
+    get_stream().seek(_contentOffset, io::seek_dir::Begin);
 }
 
 ////////////////////////////////////////////////////////////
 
-auto gif_decoder::read_contents(io::istream& reader, gif::header const& header) -> animated_image_decoder::status
+auto gif_decoder::read_contents(io::istream& reader) -> animated_image_decoder::status
 {
     auto retValue {animated_image_decoder::status::NoMoreFrames};
+
+    if (_firstFrame) {
+        _contentOffset = reader.tell() - 1;
+    }
 
     // read GIF file content blocks
     bool done {false};
@@ -146,12 +154,8 @@ auto gif_decoder::read_contents(io::istream& reader, gif::header const& header) 
             }
             break;
 
-        case 0x2C: // image separator
-            if (_firstFrame) {
-                _firstFrameOffset = reader.tell() - 1;
-                _firstFrame       = false;
-            }
-            read_frame(reader, header);
+        case 0x2C:           // image separator
+            read_frame(reader);
             done     = true; // stop after one image
             retValue = animated_image_decoder::status::NewFrame;
             break;
@@ -311,7 +315,7 @@ void gif_decoder::read_graphic_control_ext(io::istream& reader)
     reader.read<u8>();               // block terminator
 }
 
-void gif_decoder::read_frame(io::istream& reader, gif::header const& header)
+void gif_decoder::read_frame(io::istream& reader)
 {
     u16 const ix {reader.read<u16, std::endian::little>()}; // (sub)image position & size
     u16 const iy {reader.read<u16, std::endian::little>()};
@@ -328,7 +332,7 @@ void gif_decoder::read_frame(io::istream& reader, gif::header const& header)
 
     std::vector<color> act {lctFlag
                                 ? gif::read_color_table(lctSize, reader)
-                                : header.GlobalColorTable};
+                                : _header.GlobalColorTable};
 
     if (_transparency) {
         act[_transIndex] = colors::Transparent;          // set transparent color if specified
@@ -336,7 +340,6 @@ void gif_decoder::read_frame(io::istream& reader, gif::header const& header)
 
     auto const data {decode_frame_data(reader, iw, ih)}; // decode pixel data
 
-    _pixelCache.resize(header.Height * header.Width * gif::BPP);
     u8* pixPtr {_pixelCache.data()};
 
     if (_dispose == 2 && !_firstFrame) { clear_pixel_cache(); }
@@ -350,15 +353,16 @@ void gif_decoder::read_frame(io::istream& reader, gif::header const& header)
             *pixPtr++ = b;
             *pixPtr++ = a;
         }
+        _firstFrame = false;
     } else {
         i32 index {0};
         for (i32 y {0}; y < ih; y++) {
             for (i32 x {0}; x < iw; x++) {
                 u8 palIdx {data[index++]};
-                if (palIdx != _transIndex || (palIdx == header.BackgroundIndex && !_transparency) || _dispose == 2) {
+                if (palIdx != _transIndex || (palIdx == _header.BackgroundIndex && !_transparency) || _dispose == 2) {
                     assert(palIdx < act.size());
                     auto [r, g, b, a] {act[palIdx]};
-                    u32 const pixInd {((x + ix) * gif::BPP) + ((y + iy) * (header.Width * gif::BPP))};
+                    u32 const pixInd {((x + ix) * gif::BPP) + ((y + iy) * (_header.Width * gif::BPP))};
                     pixPtr[pixInd + 0] = r;
                     pixPtr[pixInd + 1] = g;
                     pixPtr[pixInd + 2] = b;
@@ -368,7 +372,7 @@ void gif_decoder::read_frame(io::istream& reader, gif::header const& header)
         }
     }
 
-    _currentFrame = image::Create({static_cast<i32>(header.Width), static_cast<i32>(header.Height)}, image::format::RGBA, _pixelCache);
+    _currentFrame = image::Create({static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA, _pixelCache);
 }
 
 void gif_decoder::clear_pixel_cache()

@@ -107,7 +107,6 @@ private:
 
     std::unique_ptr<animated_image_decoder> _decoder {};
 
-    bool            _updateTexture {true};
     playback_status _status {playback_status::Stopped};
     bool            _isLooping {false};
 };

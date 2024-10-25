@@ -45,18 +45,17 @@ public:
 
     // animated_image_decoder
     auto open() -> std::optional<image::info> override;
-
     auto get_current_frame() const -> u8 const* override;
-    auto seek_from_current(milliseconds ts) -> animated_image_decoder::status override;
+    auto advance(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
 
 protected:
-    auto read_contents(io::istream& reader, gif::header const& header) -> animated_image_decoder::status;
+    auto read_contents(io::istream& reader) -> animated_image_decoder::status;
 
     auto decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std::vector<u8>;
     auto read_block(io::istream& reader) -> i32;
     void read_graphic_control_ext(io::istream& reader);
-    void read_frame(io::istream& reader, gif::header const& header);
+    void read_frame(io::istream& reader);
 
     void clear_pixel_cache();
 
@@ -69,7 +68,7 @@ private:
     i32             _transIndex {0};       // transparent color index
     bool            _transparency {false}; // use transparent color
 
-    std::streamsize _firstFrameOffset {0};
+    std::streamsize _contentOffset {0};
     bool            _firstFrame {true};
 
     image        _currentFrame;

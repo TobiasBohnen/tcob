@@ -122,28 +122,18 @@ void webp_anim_decoder::reset()
     }
 }
 
-auto webp_anim_decoder::seek_from_current(milliseconds ts) -> animated_image_decoder::status
+auto webp_anim_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 {
+    if (!_decoder) { return animated_image_decoder::status::DecodeFailure; }
+
     auto timestamp {static_cast<i32>(ts.count())};
-    if (!_decoder) {
-        return animated_image_decoder::status::DecodeFailure;
-    }
-
-    if (!WebPAnimDecoderHasMoreFrames(_decoder)) {
-        return animated_image_decoder::status::NoMoreFrames;
-    }
-
-    if (timestamp <= _currentTimeStamp) {
-        return animated_image_decoder::status::OldFrame;
-    }
+    if (timestamp <= _currentTimeStamp) { return animated_image_decoder::status::OldFrame; }
+    if (!WebPAnimDecoderHasMoreFrames(_decoder)) { return animated_image_decoder::status::NoMoreFrames; }
 
     while (timestamp > _currentTimeStamp) {
-        if (!WebPAnimDecoderGetNext(_decoder, &_buffer, &_currentTimeStamp)) {
-            return animated_image_decoder::status::DecodeFailure;
-        }
-        if (!WebPAnimDecoderHasMoreFrames(_decoder)) {
-            return animated_image_decoder::status::NewFrame;
-        }
+        if (!WebPAnimDecoderGetNext(_decoder, &_buffer, &_currentTimeStamp)) { return animated_image_decoder::status::DecodeFailure; }
+        if (timestamp <= _currentTimeStamp) { return animated_image_decoder::status::NewFrame; }
+        if (!WebPAnimDecoderHasMoreFrames(_decoder)) { return animated_image_decoder::status::NoMoreFrames; }
     }
 
     return animated_image_decoder::status::NewFrame;

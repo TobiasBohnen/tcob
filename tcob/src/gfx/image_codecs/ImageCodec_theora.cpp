@@ -93,7 +93,7 @@ auto theora_decoder::get_current_frame() const -> u8 const*
     return _currentFrame->pixels;
 }
 
-auto theora_decoder::seek_from_current(milliseconds ts) -> animated_image_decoder::status
+auto theora_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 {
     auto timestamp {static_cast<i32>(ts.count())};
     if (!_decoder) {

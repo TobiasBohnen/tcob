@@ -23,7 +23,7 @@ public:
     ~theora_decoder() override;
 
     auto get_current_frame() const -> u8 const* override;
-    auto seek_from_current(milliseconds ts) -> animated_image_decoder::status override;
+    auto advance(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
 
 protected:

@@ -206,33 +206,31 @@ void animated_texture::on_update(milliseconds deltaTime)
     }
 
     _elapsedTime += deltaTime;
+    auto const result {_decoder->advance(_elapsedTime)};
 
-    auto const result {_decoder->seek_from_current(_elapsedTime)};
+    bool updateTexture {false};
 
     switch (result) {
-    case animated_image_decoder::status::NewFrame:
-        _updateTexture = true;
-        break;
+    case animated_image_decoder::status::OldFrame: break;
+    case animated_image_decoder::status::NewFrame: updateTexture = true; break;
     case animated_image_decoder::status::NoMoreFrames:
         if (is_looping()) {
             restart();
         } else {
             stop();
         }
-        break;
+        return;
     default: // TODO: handle failure
         break;
     }
 
     auto const* textureBuffer {_decoder->get_current_frame()};
-    if (_updateTexture && textureBuffer) {
+    if (updateTexture && textureBuffer) {
         if (_frameInfo.bytes_per_pixel() == 4) {
             update_data(textureBuffer, 0, 0, 4);
         } else {
             update_data(textureBuffer, 0, 0, 1);
         }
-
-        _updateTexture = false;
     }
 }
 }

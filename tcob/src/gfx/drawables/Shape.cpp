@@ -138,9 +138,7 @@ void shape_batch::on_draw_to(render_target& target)
 ////////////////////////////////////////////////////////////
 
 shape::shape()
-    : TextureRegion("default")
-    , Color(colors::White)
-    , Transparency {{[&]() -> f32 { return static_cast<f32>(Color->A) / 255.0f; }, [&](f32 value) {
+    : Transparency {{[&]() -> f32 { return static_cast<f32>(Color->A) / 255.0f; }, [&](f32 value) {
                          color c {Color()};
                          c.A   = 255 - static_cast<u8>(255 * std::clamp(value, 0.0f, 1.0f));
                          Color = c; }}}
@@ -210,7 +208,6 @@ circle_shape::circle_shape()
     Center.Changed.connect([&](auto const&) { mark_transform_dirty(); });
     Radius.Changed.connect([&](auto const&) { mark_dirty(); });
     Segments.Changed.connect([&](auto const&) { mark_dirty(); });
-    Segments(90);
 }
 
 auto circle_shape::get_geometry() -> geometry_data

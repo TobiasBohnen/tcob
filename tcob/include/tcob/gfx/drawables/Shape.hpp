@@ -31,9 +31,9 @@ public:
     shape();
 
     prop<assets::asset_ptr<material>> Material;
-    prop<string>                      TextureRegion;
+    prop<string>                      TextureRegion {"default"};
 
-    prop<color>  Color;
+    prop<color>  Color {colors::White};
     prop_fn<f32> Transparency;
 
     prop<std::optional<point_f>> Pivot;
@@ -74,7 +74,7 @@ public:
 
     prop<point_f> Center;
     prop<f32>     Radius;
-    prop<i32>     Segments;
+    prop<i32>     Segments {90};
 
     auto get_geometry() -> geometry_data override;
     auto intersect(ray const& ray) -> std::vector<ray::result> override;

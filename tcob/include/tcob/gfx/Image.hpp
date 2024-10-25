@@ -131,9 +131,9 @@ public:
 
     auto open(std::shared_ptr<io::istream> in) -> std::optional<image::info>;
 
-    auto virtual get_current_frame() const -> u8 const*       = 0;
-    auto virtual seek_from_current(milliseconds ts) -> status = 0;
-    void virtual reset()                                      = 0;
+    auto virtual get_current_frame() const -> u8 const* = 0;
+    auto virtual advance(milliseconds ts) -> status     = 0;
+    void virtual reset()                                = 0;
 
 protected:
     auto virtual open() -> std::optional<image::info> = 0;
