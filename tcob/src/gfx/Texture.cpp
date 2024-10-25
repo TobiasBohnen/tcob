@@ -231,6 +231,7 @@ void animated_texture::on_update(milliseconds deltaTime)
         } else {
             update_data(textureBuffer, 0, 0, 1);
         }
+        NewFrame();
     }
 }
 }

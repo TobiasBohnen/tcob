@@ -82,6 +82,8 @@ public:
     animated_texture()           = default;
     ~animated_texture() override = default;
 
+    signal<> NewFrame;
+
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;
 
