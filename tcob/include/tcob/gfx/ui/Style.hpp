@@ -13,7 +13,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::gfx::ui {

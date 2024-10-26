@@ -12,7 +12,6 @@
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/data/ConfigConversions.hpp"
-#include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
 using namespace tcob::gfx;

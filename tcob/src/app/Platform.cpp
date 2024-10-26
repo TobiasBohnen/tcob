@@ -139,7 +139,7 @@ platform::~platform()
     SDL_Quit();
 
     //  FreeType
-    gfx::truetype_font_engine::Done();
+    gfx::font::Done();
 }
 
 void platform::remove_services() const
@@ -466,7 +466,7 @@ void platform::InitAudioCodecs()
 void platform::InitFontEngines()
 {
     /// init ttf engines
-    gfx::truetype_font_engine::Init();
+    gfx::font::Init();
 }
 
 ////////////////////////////////////////////////////////////

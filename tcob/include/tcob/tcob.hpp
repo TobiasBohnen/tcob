@@ -22,7 +22,6 @@
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>
 #include <tcob/core/Common.hpp>
-#include <tcob/core/Formatters.hpp>
 #include <tcob/core/Interfaces.hpp>
 #include <tcob/core/Logger.hpp>
 #include <tcob/core/Point.hpp>
@@ -72,6 +71,7 @@
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/ColorGradient.hpp>
 #include <tcob/gfx/Font.hpp>
+#include <tcob/gfx/FontFamily.hpp>
 #include <tcob/gfx/Geometry.hpp>
 #include <tcob/gfx/Gfx.hpp>
 #include <tcob/gfx/Image.hpp>

@@ -6,8 +6,6 @@
 #pragma once
 #include "Logger.hpp"
 
-#include "tcob/core/Formatters.hpp" // IWYU pragma: keep
-
 namespace tcob {
 
 inline void logger::Debug([[maybe_unused]] string const& message, [[maybe_unused]] auto&&... args)

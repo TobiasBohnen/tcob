@@ -124,3 +124,16 @@ auto Deserialize(rect<T>& v, auto&& s) -> bool
 }
 
 #include "Rect.inl"
+
+template <tcob::Arithmetic T>
+struct std::formatter<tcob::rect<T>> {
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    auto format(tcob::rect<T> val, format_context& ctx) const
+    {
+        return format_to(ctx.out(), "(x:{},y:{},w:{},h:{})", val.left(), val.top(), val.width(), val.height());
+    }
+};

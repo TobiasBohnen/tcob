@@ -5,6 +5,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorGradient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FontEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FontFamily.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
@@ -80,6 +82,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ColorGradient.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Gfx.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Font.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/FontFamily.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Image.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.inl

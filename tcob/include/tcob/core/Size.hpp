@@ -114,3 +114,16 @@ auto Deserialize(size<T>& v, auto&& s) -> bool
 }
 
 #include "Size.inl"
+
+template <tcob::Arithmetic T>
+struct std::formatter<tcob::size<T>> {
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    auto format(tcob::size<T> val, format_context& ctx) const
+    {
+        return format_to(ctx.out(), "(w:{},h:{})", val.Width, val.Height);
+    }
+};

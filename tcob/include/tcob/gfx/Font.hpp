@@ -14,24 +14,13 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
-#include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 #include "tcob/core/ext/magic_enum_reduced.hpp"
 
-using FT_Face = struct FT_FaceRec_*;
-
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
-
-struct font_info final {
-    f32 Ascender {0};
-    f32 Descender {0};
-    f32 LineHeight {0};
-
-    auto operator==(font_info const& other) const -> bool = default;
-};
 
 struct glyph {
     size_i  Size {size_i::Zero};
@@ -45,11 +34,6 @@ struct rendered_glyph : glyph {
     texture_region TexRegion {rect_f::Zero, 0};
 };
 
-struct glyph_bitmap {
-    std::vector<ubyte> Bitmap {};
-    size_i             BitmapSize {};
-};
-
 struct decompose_callbacks {
     std::function<void(point_f)>                   MoveTo;
     std::function<void(point_f)>                   LineTo;
@@ -59,38 +43,20 @@ struct decompose_callbacks {
 };
 
 ////////////////////////////////////////////////////////////
-
-class TCOB_API truetype_font_engine : public non_copyable {
-public:
-    truetype_font_engine() = default;
-    ~truetype_font_engine();
-
-    auto load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font_info>;
-    auto get_kerning(u32 cp0, u32 cp1) -> f32;
-
-    auto render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>;
-    auto decompose_glyph(u32 cp, decompose_callbacks& funcs) -> glyph;
-    auto load_glyph(u32 cp) -> glyph;
-
-    auto static Init() -> bool;
-    void static Done();
-
-private:
-    auto codepoint_to_glyphindex(u32 cp) -> u32;
-
-    FT_Face _face {nullptr};
-
-    u32                          _fontSize {0};
-    std::unordered_map<u32, u32> _glyphIndices {};
-    font_info                    _info {};
-};
-
 ////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
+class truetype_font_engine;
 
 class TCOB_API font : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
+    struct info final {
+        f32 Ascender {0};
+        f32 Descender {0};
+        f32 LineHeight {0};
+
+        auto operator==(info const& other) const -> bool = default;
+    };
+
     enum class weight : u16 {
         Thin       = 100, // Hairline
         ExtraLight = 200, // Ultra Light
@@ -113,11 +79,11 @@ public:
     ////////////////////////////////////////////////////////////
 
     font();
-    virtual ~font() = default;
+    virtual ~font();
 
     signal<std::span<ubyte>> Render;
 
-    auto get_info() const -> font_info const&;
+    auto get_info() const -> font::info const&;
     auto get_texture() const -> assets::asset_ptr<texture>;
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
@@ -130,6 +96,9 @@ public:
 
     static inline char const* asset_name {"font"};
 
+    auto static Init() -> bool;
+    void static Done();
+
 private:
     void setup_texture();
 
@@ -140,10 +109,10 @@ private:
     u32                                     _fontTextureLayer {0};
     bool                                    _textureNeedsSetup {false};
 
-    font_info          _info;
+    font::info         _info;
     std::vector<ubyte> _fontData {};
 
-    truetype_font_engine _engine;
+    std::unique_ptr<truetype_font_engine> _engine;
 
     assets::manual_asset_ptr<texture> _texture {};
 };
@@ -163,9 +132,14 @@ auto Deserialize(font::style& v, auto&& s) -> bool
 ////////////////////////////////////////////////////////////
 }
 
-namespace std {
 template <>
-struct hash<tcob::gfx::font::style> {
+struct tcob::detail::magic_enum_reduced::custom_range<tcob::gfx::font::weight> {
+    static constexpr i32 Min {100};
+    static constexpr i32 Max {900};
+};
+
+template <>
+struct std::hash<tcob::gfx::font::style> {
     auto operator()(tcob::gfx::font::style const& s) const noexcept -> std::size_t
     {
         std::size_t hash_value = 0;
@@ -173,51 +147,6 @@ struct hash<tcob::gfx::font::style> {
         hash_value ^= std::hash<int> {}(static_cast<int>(s.Weight)) + 0x9e3779b9 + (hash_value << 6) + (hash_value >> 2);
         return hash_value;
     }
-};
-}
-
-////////////////////////////////////////////////////////////
-
-namespace tcob::gfx {
-
-class TCOB_API font_family final {
-public:
-    explicit font_family(string name);
-
-    auto get_name() const -> string const&;
-    auto get_font(font::style style, u32 size) -> assets::asset_ptr<font>;
-
-    auto get_fallback_style(font::style style) const -> std::optional<font::style>;
-    auto has_style(font::style style) const -> bool;
-
-    void clear_assets();
-
-    auto get_font_count() const -> isize;
-
-    auto get_images() const -> std::vector<image>;
-
-    void static FindSources(font_family& fam, path const& source);
-    void static SingleFont(font_family& fam, std::span<ubyte const> font);
-
-    static inline char const* asset_name {"font_family"};
-
-private:
-    void set_source(font::style style, path const& file);
-
-    string _name;
-
-    std::unordered_map<font::style, path>                                                    _fontSources;
-    std::unordered_map<font::style, std::vector<ubyte>>                                      _fontData;
-    std::unordered_map<font::style, std::unordered_map<u32, assets::manual_asset_ptr<font>>> _fontAssets;
-};
-
-////////////////////////////////////////////////////////////
-}
-
-template <>
-struct tcob::detail::magic_enum_reduced::custom_range<tcob::gfx::font::weight> {
-    static constexpr i32 Min {100};
-    static constexpr i32 Max {900};
 };
 
 template <>
@@ -231,33 +160,15 @@ struct std::formatter<tcob::gfx::font::style> {
     {
         std::string weight;
         switch (val.Weight) {
-        case tcob::gfx::font::weight::Thin:
-            weight = "Thin";
-            break;
-        case tcob::gfx::font::weight::ExtraLight:
-            weight = "ExtraLight";
-            break;
-        case tcob::gfx::font::weight::Light:
-            weight = "Light";
-            break;
-        case tcob::gfx::font::weight::Normal:
-            weight = "Normal";
-            break;
-        case tcob::gfx::font::weight::Medium:
-            weight = "Medium";
-            break;
-        case tcob::gfx::font::weight::SemiBold:
-            weight = "SemiBold";
-            break;
-        case tcob::gfx::font::weight::Bold:
-            weight = "Bold";
-            break;
-        case tcob::gfx::font::weight::ExtraBold:
-            weight = "ExtraBold";
-            break;
-        case tcob::gfx::font::weight::Heavy:
-            weight = "Heavy";
-            break;
+        case tcob::gfx::font::weight::Thin: weight = "Thin"; break;
+        case tcob::gfx::font::weight::ExtraLight: weight = "ExtraLight"; break;
+        case tcob::gfx::font::weight::Light: weight = "Light"; break;
+        case tcob::gfx::font::weight::Normal: weight = "Normal"; break;
+        case tcob::gfx::font::weight::Medium: weight = "Medium"; break;
+        case tcob::gfx::font::weight::SemiBold: weight = "SemiBold"; break;
+        case tcob::gfx::font::weight::Bold: weight = "Bold"; break;
+        case tcob::gfx::font::weight::ExtraBold: weight = "ExtraBold"; break;
+        case tcob::gfx::font::weight::Heavy: weight = "Heavy"; break;
         }
         return format_to(ctx.out(), "(IsItalic:{},Weight:{})", val.IsItalic, weight);
     }

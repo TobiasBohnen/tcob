@@ -121,3 +121,16 @@ auto Deserialize(point<T>& v, auto&& s) -> bool
 }
 
 #include "Point.inl"
+
+template <tcob::Arithmetic T>
+struct std::formatter<tcob::point<T>> {
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    auto format(tcob::point<T> val, format_context& ctx) const
+    {
+        return format_to(ctx.out(), "(x:{},y:{})", val.X, val.Y);
+    }
+};

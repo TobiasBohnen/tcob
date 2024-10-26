@@ -14,7 +14,7 @@
     #include "tcob/core/assets/AssetLibrary.hpp"
     #include "tcob/core/input/Input.hpp"
     #include "tcob/gfx/Canvas.hpp"
-    #include "tcob/gfx/Font.hpp"
+    #include "tcob/gfx/FontFamily.hpp"
     #include "tcob/gfx/Geometry.hpp"
     #include "tcob/gfx/Material.hpp"
     #include "tcob/gfx/Renderer.hpp"

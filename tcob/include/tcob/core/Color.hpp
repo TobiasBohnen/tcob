@@ -81,3 +81,16 @@ auto Deserialize(color& v, auto&& s) -> bool
 }
 
 #include "Color.inl"
+
+template <>
+struct std::formatter<tcob::color> {
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    auto format(tcob::color val, format_context& ctx) const
+    {
+        return format_to(ctx.out(), "(r:{},g:{},b:{},a:{})", val.R, val.G, val.B, val.A);
+    }
+};

@@ -21,6 +21,7 @@
 #include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Animation.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
