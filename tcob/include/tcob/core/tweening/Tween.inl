@@ -9,9 +9,15 @@
 namespace tcob::tweening {
 
 template <TweenFunction Func>
-inline tween<Func>::tween(milliseconds duration, func_type&& ptr)
+inline tween<Func>::tween(milliseconds duration)
     : tween_base {duration}
-    , _function {std::move(ptr)}
+{
+}
+
+template <TweenFunction Func>
+inline tween<Func>::tween(milliseconds duration, func_type&& func)
+    : tween_base {duration}
+    , Function {std::move(func)}
 {
 }
 
@@ -24,7 +30,7 @@ inline auto tween<Func>::add_output(value_type* dest) -> connection
 template <TweenFunction Func>
 inline void tween<Func>::update_values()
 {
-    Value = _function(get_progress());
+    Value = Function(get_progress());
 }
 
 ////////////////////////////////////////////////////////////

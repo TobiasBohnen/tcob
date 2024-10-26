@@ -49,8 +49,9 @@ public:
     auto operator=(tween_base&& other) noexcept -> tween_base&      = delete;
     ~tween_base() override;
 
+    signal<> Finished;
+
     std::optional<milliseconds> Interval {};
-    signal<>                    Finished;
 
     auto get_progress() const -> f64;
     auto get_status() const -> playback_status;
@@ -86,16 +87,16 @@ public:
     using func_type  = Func;
     using value_type = typename Func::type;
 
-    tween(milliseconds duration, func_type&& ptr);
+    tween(milliseconds duration);
+    tween(milliseconds duration, func_type&& func);
 
     prop<value_type> Value;
+    func_type        Function;
 
     auto add_output(value_type* dest) -> connection;
 
 private:
     void update_values() override;
-
-    func_type _function;
 };
 
 ////////////////////////////////////////////////////////////
