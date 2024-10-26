@@ -209,7 +209,7 @@ enum class midi_note : u8 {
     ASharp7    = ASharp6 + 12,
     ASharp8    = ASharp7 + 12,
 
-    BNeg1 = 9,
+    BNeg1 = 11,
     B0    = BNeg1 + 12,
     B1    = B0 + 12,
     B2    = B1 + 12,
