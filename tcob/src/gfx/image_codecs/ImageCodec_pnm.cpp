@@ -33,7 +33,7 @@ auto static read_until_space(io::istream& reader, std::span<byte> buffer, i32 of
     return read;
 }
 
-auto static read_char_after_whitespace(io::istream& reader) -> u8
+auto static read_char(io::istream& reader) -> u8
 {
     u8 retValue {0};
 
@@ -46,7 +46,7 @@ auto static read_char_after_whitespace(io::istream& reader) -> u8
             retValue = reader.read<u8>();
         }
 
-        return read_char_after_whitespace(reader);
+        return read_char(reader);
     }
 
     return retValue;
@@ -56,32 +56,12 @@ template <typename T>
 auto read_int(io::istream& reader) -> T
 {
     std::array<byte, 256> buffer {};
-    buffer[0] = read_char_after_whitespace(reader);
+    buffer[0] = read_char(reader);
     i32    read {read_until_space(reader, buffer, 1) + 1};
     string str(buffer.begin(), buffer.begin() + read);
 
     return static_cast<T>(std::strtol(str.data(), nullptr, 10));
 }
-/*
-auto static read_float(ifstream* reader) -> f32
-{
-    std::array<byte, 256> buffer;
-    buffer[0] = read_next(reader);
-    read_until_space(reader, buffer, 1);
-
-    return std::strtof(buffer.data(), nullptr);
-}
-
-
-auto static read_string(ifstream* reader) -> string
-{
-    std::array<byte, 256> buffer;
-    buffer[0] = read_next(reader);
-    read_until_space(reader, buffer, 1);
-
-    return string(buffer.begin(), buffer.end());
-}
-*/
 
 auto static read_p1_data(io::istream& reader, int width, int height) -> std::vector<u8>
 {
@@ -89,7 +69,7 @@ auto static read_p1_data(io::istream& reader, int width, int height) -> std::vec
     std::vector<u8> retValue;
 
     for (i32 i {0}; i < width * height; ++i) {
-        u8 const pix {read_char_after_whitespace(reader)};
+        u8 const pix {read_char(reader)};
         if (pix == '0') {
             retValue.push_back(255);
             retValue.push_back(255);
