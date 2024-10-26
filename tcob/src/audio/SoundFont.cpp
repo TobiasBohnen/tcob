@@ -284,9 +284,7 @@ void sound_font_commands::render(tsf* font, f32* buffer, u8 channels, i32 sample
         }
 
         i32 const frameCount {static_cast<i32>(command.first.count() / 1000 * sampleRate)};
-        if (frameCount == 0) {
-            continue;
-        }
+        if (frameCount == 0) { continue; }
 
         tsf_render_float(font, buffer, frameCount);
         buffer += frameCount * channels;

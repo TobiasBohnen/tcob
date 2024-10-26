@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <any>
+
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -40,6 +42,8 @@ public:
 
     signal<widget_event const> FocusGained;
     signal<widget_event const> FocusLost;
+
+    std::any UserData;
 
     prop<rect_f>   Bounds;
     prop<string>   Class;
