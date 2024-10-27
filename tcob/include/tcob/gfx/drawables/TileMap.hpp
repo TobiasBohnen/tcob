@@ -20,6 +20,8 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
+////////////////////////////////////////////////////////////
+
 using tile_index_t = u64;
 
 ////////////////////////////////////////////////////////////
@@ -120,11 +122,21 @@ struct tilemap_layer {
 
 ////////////////////////////////////////////////////////////
 
+enum class render_direction : u8 {
+    RightDown,
+    RightUp,
+    LeftDown,
+    LeftUp
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API tilemap_base : public drawable {
 public:
     tilemap_base();
     ~tilemap_base() override = default;
 
+    prop<render_direction>            RenderDirection {render_direction::RightDown};
     prop<assets::asset_ptr<material>> Material;
     prop<point_f>                     Position;
 
@@ -148,12 +160,15 @@ protected:
     void mark_dirty();
 
 private:
-    struct layer {
+    class TCOB_API layer {
+    public:
         uid     ID {INVALID_ID};
         size_i  Size {size_i::Zero};
         point_i Offset {point_i::Zero};
         i32     TileMapStart {0};
         bool    Visible {true};
+
+        auto get_index(point_i pos) const -> i32;
     };
 
     auto get_layer(uid id) -> layer*;
@@ -164,11 +179,10 @@ private:
     std::vector<layer>        _layers {};
     std::vector<tile_index_t> _tileMap {};
 
-    quad_renderer                    _renderer;
-    std::vector<quad>                _quads {};
-    bool                             _isDirty {true};
-    bool                             _updateGeometry {true};
-    std::vector<std::pair<uid, i32>> _dirtyTiles;
+    quad_renderer     _renderer;
+    std::vector<quad> _quads {};
+    bool              _isDirty {true};
+    bool              _updateGeometry {true};
 };
 
 ////////////////////////////////////////////////////////////

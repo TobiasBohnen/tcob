@@ -11,11 +11,40 @@
 
 namespace tcob::gfx {
 
+auto static IndexToPosition(i32 i, render_direction direction, size_i layerSize) -> point_i
+{
+    i32 row {}, col {};
+
+    switch (direction) {
+    case render_direction::RightDown:
+        row = i / layerSize.Width;
+        col = i % layerSize.Width;
+        break;
+    case render_direction::RightUp:
+        row = i / layerSize.Width;
+        col = (layerSize.Width - 1) - (i % layerSize.Width);
+        break;
+    case render_direction::LeftDown:
+        row = (layerSize.Height - 1) - (i / layerSize.Width);
+        col = i % layerSize.Width;
+        break;
+    case render_direction::LeftUp:
+        row = (layerSize.Height - 1) - (i / layerSize.Width);
+        col = (layerSize.Width - 1) - (i % layerSize.Width);
+        break;
+    }
+
+    return {col, row};
+}
+
+////////////////////////////////////////////////////////////
+
 tilemap_base::tilemap_base()
     : _renderer {buffer_usage_hint::DynamicDraw}
 {
     Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.get_ptr()); });
-    Position.Changed.connect([&](auto const&) { _isDirty = true; });
+    Position.Changed.connect([&](auto const&) { mark_dirty(); });
+    RenderDirection.Changed.connect([&](auto const&) { mark_dirty(); });
 }
 
 auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
@@ -40,24 +69,31 @@ auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
 auto tilemap_base::get_tile_index(uid layerId, point_i pos) const -> tile_index_t
 {
     auto const& layer {*get_layer(layerId)};
-    return _tileMap[layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)];
+    i32 const   idx {layer.get_index(pos)};
+    if (idx >= std::ssize(_tileMap)) { return -1; }
+    return _tileMap[idx];
 }
 
 void tilemap_base::set_tile_index(uid layerId, point_i pos, tile_index_t setIdx)
 {
-    auto const&        layer {*get_layer(layerId)};
-    i32 const          idx {layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)};
-    tile_index_t const oldIdx {_tileMap[idx]};
-    if (setIdx == oldIdx) { return; }
+    auto const& layer {*get_layer(layerId)};
+    i32 const   idx {layer.get_index(pos)};
+    if (idx >= std::ssize(_tileMap)) { return; }
+    if (setIdx == _tileMap[idx]) { return; }
 
     _tileMap[idx] = setIdx;
 
-    if (oldIdx == 0 || idx >= std::ssize(_quads)) {
-        mark_dirty();
-    } else {
-        _dirtyTiles.emplace_back(layerId, idx);
-        _isDirty = true;
+    i32 quadIndex {0};
+    switch (RenderDirection()) {
+    case render_direction::RightDown: quadIndex = pos.Y * layer.Size.Width + pos.X; break;
+    case render_direction::LeftDown: quadIndex = pos.Y * layer.Size.Width + (layer.Size.Width - 1 - pos.X); break;
+    case render_direction::RightUp: quadIndex = (layer.Size.Height - 1 - pos.Y) * layer.Size.Width + pos.X; break;
+    case render_direction::LeftUp: quadIndex = (layer.Size.Height - 1 - pos.Y) * layer.Size.Width + (layer.Size.Width - 1 - pos.X); break;
     }
+
+    auto& quad {_quads[quadIndex]};
+    setup_quad(quad, {pos.X + layer.Offset.X, pos.Y + layer.Offset.Y}, setIdx);
+    _updateGeometry = true;
 }
 
 auto tilemap_base::is_layer_visible(uid id) const -> bool
@@ -91,26 +127,14 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
     _isDirty        = false;
     _updateGeometry = true;
 
-    if (_dirtyTiles.empty()) {
-        for (auto const& layer : _layers) {
-            if (!layer.Visible) { continue; }
+    for (auto const& layer : _layers) {
+        if (!layer.Visible) { continue; }
 
-            for (i32 i {0}; i < (layer.Size.Width * layer.Size.Height); ++i) {
-                auto const setIdx {_tileMap[i + layer.TileMapStart]};
-                setup_quad(_quads.emplace_back(),
-                           {(i % layer.Size.Width) + layer.Offset.X, (i / layer.Size.Width) + layer.Offset.Y},
-                           setIdx);
-            }
+        for (i32 i {0}; i < (layer.Size.Width * layer.Size.Height); ++i) {
+            point_i const      tilePos {IndexToPosition(i, RenderDirection(), layer.Size)};
+            tile_index_t const tileIdx {_tileMap[layer.get_index(tilePos)]};
+            setup_quad(_quads.emplace_back(), {tilePos.X + layer.Offset.X, tilePos.Y + layer.Offset.Y}, tileIdx);
         }
-    } else {
-        for (auto [id, idx] : _dirtyTiles) {
-            auto const&        layer {*get_layer(id)};
-            tile_index_t const setIdx {_tileMap[idx]};
-            setup_quad(_quads[idx],
-                       {(idx % layer.Size.Width) + layer.Offset.X, (idx / layer.Size.Width) + layer.Offset.Y},
-                       setIdx);
-        }
-        _dirtyTiles.clear();
     }
 }
 
@@ -135,7 +159,6 @@ void tilemap_base::mark_dirty()
 
     _quads.clear();
     _quads.reserve(_tileMap.size());
-    _dirtyTiles.clear();
 }
 
 auto tilemap_base::get_layer(uid id) -> layer*
@@ -154,6 +177,11 @@ auto tilemap_base::get_layer(uid id) const -> layer const*
     }
 
     return nullptr;
+}
+
+auto tilemap_base::layer::get_index(point_i pos) const -> i32
+{
+    return static_cast<i32>(TileMapStart + pos.X + (pos.Y * Size.Width));
 }
 
 ////////////////////////////////////////////////////////////
@@ -193,5 +221,4 @@ auto hex_grid::layout_tile(hex_tile const& /* tile */, point_i coord) const -> r
 }
 
 ////////////////////////////////////////////////////////////
-
 }
