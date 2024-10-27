@@ -34,14 +34,14 @@ public:
 
     void constexpr translate(point_f offset);
 
-    void rotate(degree_f angle);
-    void rotate_at(degree_f angle, point_f center);
+    void rotate(radian_f angle);
+    void rotate_at(radian_f angle, point_f center);
 
     void constexpr scale(size_f factors);
     void constexpr scale_at(size_f factors, point_f center);
 
-    void skew(std::pair<degree_f, degree_f> const& skew);
-    void skew_at(std::pair<degree_f, degree_f> const& skew, point_f center);
+    void skew(std::pair<radian_f, radian_f> const& skew);
+    void skew_at(std::pair<radian_f, radian_f> const& skew, point_f center);
 
     void constexpr combine(transform const& xform);
 

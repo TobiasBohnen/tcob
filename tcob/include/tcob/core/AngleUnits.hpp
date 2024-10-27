@@ -26,7 +26,7 @@ public:
     static constexpr value_type one_turn {static_cast<ValueType>(OneTurn)};
 
     constexpr angle_unit() = default;
-    constexpr angle_unit(ValueType value);
+    explicit constexpr angle_unit(ValueType value);
 
     template <FloatingPoint ValueType2, f64 OneTurn2>
     constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;

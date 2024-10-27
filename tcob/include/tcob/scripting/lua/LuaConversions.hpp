@@ -1033,7 +1033,7 @@ struct converter<angle_unit<ValueType, OneTurn>> {
     auto static From(state_view view, i32& idx, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (view.is_number(idx)) {
-            value = static_cast<ValueType>(view.to_number(idx++));
+            value = angle_unit<ValueType, OneTurn> {static_cast<ValueType>(view.to_number(idx++))};
             return true;
         }
 

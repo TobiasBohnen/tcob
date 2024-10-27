@@ -99,7 +99,7 @@ auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mod
         break;
     }
 
-    return {result};
+    return angle_unit<ValueType, OneTurn> {result};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
@@ -107,13 +107,13 @@ auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angl
 {
     ValueType const leftVal {static_cast<ValueType>(left.Value)};
     ValueType const rightVal {static_cast<ValueType>(right.Value)};
-    return {leftVal + (rightVal - leftVal) * static_cast<ValueType>(step)};
+    return angle_unit<ValueType, OneTurn> {leftVal + (rightVal - leftVal) * static_cast<ValueType>(step)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr operator+(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>
 {
-    return {left.Value + static_cast<ValueType>(right.Value)};
+    return angle_unit<ValueType, OneTurn> {left.Value + static_cast<ValueType>(right.Value)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
@@ -126,13 +126,13 @@ auto constexpr operator+=(angle_unit<ValueType, OneTurn>& left, angle_unit<Value
 template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr operator-(angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>
 {
-    return {static_cast<ValueType>(-right.Value)};
+    return angle_unit<ValueType, OneTurn> {static_cast<ValueType>(-right.Value)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr operator-(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> angle_unit<ValueType, OneTurn>
 {
-    return {left.Value - static_cast<ValueType>(right.Value)};
+    return angle_unit<ValueType, OneTurn> {left.Value - static_cast<ValueType>(right.Value)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
@@ -145,7 +145,7 @@ auto constexpr operator-=(angle_unit<ValueType, OneTurn>& left, angle_unit<Value
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
 auto constexpr operator*(angle_unit<ValueType, OneTurn> const& left, R const& right) -> angle_unit<ValueType, OneTurn>
 {
-    return {left.Value * static_cast<ValueType>(right)};
+    return angle_unit<ValueType, OneTurn> {left.Value * static_cast<ValueType>(right)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
@@ -158,7 +158,7 @@ auto constexpr operator*=(angle_unit<ValueType, OneTurn>& left, R right) -> angl
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
 auto constexpr operator/(angle_unit<ValueType, OneTurn> const& left, R right) -> angle_unit<ValueType, OneTurn>
 {
-    return {left.Value / static_cast<ValueType>(right)};
+    return angle_unit<ValueType, OneTurn> {left.Value / static_cast<ValueType>(right)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
@@ -171,13 +171,13 @@ auto constexpr operator/=(angle_unit<ValueType, OneTurn>& left, R right) -> angl
 template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr operator==(angle_unit<ValueType, OneTurn> const& left, angle_unit<ValueType, OneTurn> const& right) -> bool
 {
-    return (left.Value == static_cast<ValueType>(right.Value));
+    return left.Value == static_cast<ValueType>(right.Value);
 }
 
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
 auto constexpr operator==(angle_unit<ValueType, OneTurn> const& left, R right) -> bool
 {
-    return (left.Value == static_cast<ValueType>(right));
+    return left.Value == static_cast<ValueType>(right);
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>

@@ -83,7 +83,7 @@ public:
     explicit color_picker(init const& wi);
 
     prop<color>    SelectedColor;
-    prop<degree_f> BaseHue;
+    prop<degree_f> BaseHue {degree_f {0}};
 
 protected:
     void on_paint(widget_painter& painter) override;

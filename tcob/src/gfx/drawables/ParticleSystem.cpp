@@ -174,11 +174,11 @@ void particle_emitter::emit_particles(particle_system& system, milliseconds time
 
         u8 const alpha {static_cast<u8>(255 - static_cast<u8>(255 * std::clamp(_randomGen(Template.Transparency.first, Template.Transparency.second), 0.0f, 1.0f)))};
 
-        particle.Direction    = _randomGen(Template.Direction.first.Value, Template.Direction.second.Value);
+        particle.Direction    = degree_f {_randomGen(Template.Direction.first.Value, Template.Direction.second.Value)};
         particle.Acceleration = _randomGen(Template.Acceleration.first, Template.Acceleration.second);
         particle.Speed        = _randomGen(Template.Speed.first, Template.Speed.second);
-        particle.Spin         = _randomGen(Template.Spin.first.Value, Template.Spin.second.Value);
-        particle.Rotation     = _randomGen(Template.Rotation.first, Template.Rotation.second);
+        particle.Spin         = degree_f {_randomGen(Template.Spin.first.Value, Template.Spin.second.Value)};
+        particle.Rotation     = degree_f {_randomGen(Template.Rotation.first, Template.Rotation.second)};
         particle.Color        = color {Template.Color.R, Template.Color.G, Template.Color.B, static_cast<u8>((Template.Color.A + alpha) / 2)};
 
         // reset userdata

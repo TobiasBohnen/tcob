@@ -1000,7 +1000,7 @@ struct converter<angle_unit<ValueType, OneTurn>> {
     auto static From(vm_view view, SQInteger& idx, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (view.is_number(idx)) {
-            value = static_cast<ValueType>(view.get_float(idx++));
+            value = angle_unit<ValueType, OneTurn> {static_cast<ValueType>(view.get_float(idx++))};
             return true;
         }
 

@@ -20,7 +20,7 @@ body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xfor
     , LinearVelocity {{[&]() -> point_f { return _impl->get_linear_velocity(); },
                        [&](auto const& value) { _impl->set_linear_velocity(value); }}}
     , AngularVelocity {{[&]() -> radian_f { return radian_f {_impl->get_angular_velocity()}; },
-                        [&](auto const& value) { _impl->set_angular_velocity(value.Value); }}}
+                        [&](auto const& value) { _impl->set_angular_velocity(radian_f {value.Value}); }}}
     , LinearDamping {{[&]() -> f32 { return _impl->get_linear_damping(); },
                       [&](auto const& value) { _impl->set_linear_damping(value); }}}
     , AngularDamping {{[&]() -> f32 { return _impl->get_angular_damping(); },

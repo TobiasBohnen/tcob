@@ -70,7 +70,7 @@ void transformable::reset_transform()
     Rotation    = degree_f {0};
     Scale       = size_f::One;
     Translation = point_f::Zero;
-    Skew        = {0.0f, 0.0f};
+    Skew        = {degree_f {0.0f}, degree_f {0.0f}};
     mark_transform_dirty();
 }
 

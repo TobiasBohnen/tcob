@@ -67,7 +67,7 @@ inline auto point<T>::angle_to(point<T> const& p) const -> degree<float_type>
 template <Arithmetic T>
 inline auto point<T>::angle_between(point<T> const& p) const -> radian<float_type>
 {
-    return {static_cast<float_type>(std::atan2(p.Y - Y, p.X - X))};
+    return radian<float_type> {static_cast<float_type>(std::atan2(p.Y - Y, p.X - X))};
 }
 
 template <Arithmetic T>

@@ -111,7 +111,7 @@ auto b2d_world::get_body_events() const -> body_events
     for (auto& event : move) {
         body_move_event ev;
         ev.Body       = reinterpret_cast<body*>(b2Body_GetUserData(event.bodyId));
-        ev.Transform  = {{event.transform.p.x, event.transform.p.y}, b2Rot_GetAngle(event.transform.q)};
+        ev.Transform  = {{event.transform.p.x, event.transform.p.y}, radian_f {b2Rot_GetAngle(event.transform.q)}};
         ev.FellAsleep = event.fellAsleep;
         retValue.Move.push_back(ev);
     }
@@ -247,7 +247,7 @@ void b2d_body::set_linear_velocity(point_f value) const
 
 auto b2d_body::get_angular_velocity() const -> radian_f
 {
-    return b2Body_GetAngularVelocity(ID);
+    return radian_f {b2Body_GetAngularVelocity(ID)};
 }
 
 void b2d_body::set_angular_velocity(radian_f value) const
@@ -342,7 +342,7 @@ void b2d_body::set_gravity_scale(f32 value) const
 auto b2d_body::get_transform() const -> body_transform
 {
     auto val {b2Body_GetTransform(ID)};
-    return {{val.p.x, val.p.y}, b2Rot_GetAngle(val.q)};
+    return {{val.p.x, val.p.y}, radian_f {b2Rot_GetAngle(val.q)}};
 }
 
 void b2d_body::set_transform(body_transform value) const
@@ -1247,7 +1247,7 @@ void static DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int 
     verts.reserve(vertexCount);
     for (auto const& v : span) { verts.emplace_back(v.x, v.y); }
 
-    ddraw->draw_solid_polygon({{transform.p.x, transform.p.y}, b2Rot_GetAngle(transform.q)}, verts, radius, color::FromRGB(color));
+    ddraw->draw_solid_polygon({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, verts, radius, color::FromRGB(color));
 }
 
 void static DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* context)
@@ -1259,7 +1259,7 @@ void static DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* cont
 void static DrawSolidCircle(b2Transform transform, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_solid_circle({{transform.p.x, transform.p.y}, b2Rot_GetAngle(transform.q)}, radius, color::FromRGB(color));
+    ddraw->draw_solid_circle({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, radius, color::FromRGB(color));
 }
 
 void static DrawCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
@@ -1283,7 +1283,7 @@ void static DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context)
 void static DrawTransform(b2Transform transform, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_transform({{transform.p.x, transform.p.y}, b2Rot_GetAngle(transform.q)});
+    ddraw->draw_transform({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}});
 }
 
 void static DrawPoint(b2Vec2 p, float size, b2HexColor color, void* context)

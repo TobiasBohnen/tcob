@@ -289,7 +289,6 @@ color_picker::color_picker(init const& wi)
     : widget {wi}
 {
     BaseHue.Changed.connect([&](auto const&) { force_redraw(get_name() + ": BaseHue changed"); });
-    BaseHue(0);
 
     Class("color_picker");
 }

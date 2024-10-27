@@ -122,7 +122,7 @@ auto path2d::Parse(string_view path) -> std::optional<path2d>
             auto const&   val {*valv};
             point_f const end {isAbs ? point_f {val[5], val[6]} : point_f {val[5], val[6]} + retValue._lastPoint};
 
-            retValue.arc_to(val[0], val[1], val[2], val[3] > 1e-6, val[4] > 1e-6, end);
+            retValue.arc_to(val[0], val[1], degree_f {val[2]}, val[3] > 1e-6, val[4] > 1e-6, end);
         } break;
         case 'z':
         case 'Z':

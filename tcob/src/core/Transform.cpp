@@ -9,7 +9,7 @@ namespace tcob {
 ////////////////////////////////////////////////////////////
 transform const transform::Identity;
 
-void transform::rotate(degree_f angle)
+void transform::rotate(radian_f angle)
 {
     f32 const cos {angle.cos()};
     f32 const sin {angle.sin()};
@@ -24,7 +24,7 @@ void transform::rotate(degree_f angle)
               a[6], a[7], a[8]};
 }
 
-void transform::rotate_at(degree_f angle, point_f center)
+void transform::rotate_at(radian_f angle, point_f center)
 {
     f32 const cos {angle.cos()};
     f32 const sin {angle.sin()};
@@ -45,7 +45,7 @@ void transform::rotate_at(degree_f angle, point_f center)
               (a[2] * x1) + (a[5] * y1) + a[8]};
 }
 
-void transform::skew(std::pair<degree_f, degree_f> const& skew)
+void transform::skew(std::pair<radian_f, radian_f> const& skew)
 {
     f32 const skewX {skew.first.tan()};
     f32 const skewY {skew.second.tan()};
@@ -60,7 +60,7 @@ void transform::skew(std::pair<degree_f, degree_f> const& skew)
               a[6], a[7], a[8]};
 }
 
-void transform::skew_at(std::pair<degree_f, degree_f> const& skew, point_f center)
+void transform::skew_at(std::pair<radian_f, radian_f> const& skew, point_f center)
 {
     f32 const skewX {skew.first.tan()};
     f32 const skewY {skew.second.tan()};

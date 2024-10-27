@@ -887,14 +887,14 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
         cx  = pos1.X + dx0 * d + dy0 * radius;
         cy  = pos1.Y + dy0 * d + -dx0 * radius;
-        a0  = std::atan2(dx0, -dy0);
-        a1  = std::atan2(-dx1, dy1);
+        a0  = radian_f {std::atan2(dx0, -dy0)};
+        a1  = radian_f {std::atan2(-dx1, dy1)};
         dir = winding::CW;
     } else {
         cx  = pos1.X + dx0 * d + -dy0 * radius;
         cy  = pos1.Y + dy0 * d + dx0 * radius;
-        a0  = std::atan2(-dx0, dy0);
-        a1  = std::atan2(dx1, -dy1);
+        a0  = radian_f {std::atan2(-dx0, dy0)};
+        a1  = radian_f {std::atan2(dx1, -dy1)};
         dir = winding::CCW;
     }
 
