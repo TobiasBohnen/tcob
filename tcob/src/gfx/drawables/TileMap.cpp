@@ -37,13 +37,13 @@ auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
     return id;
 }
 
-auto tilemap_base::get_tile(uid layerId, point_i pos) const -> tile_index_t
+auto tilemap_base::get_tile_index(uid layerId, point_i pos) const -> tile_index_t
 {
     auto const& layer {*get_layer(layerId)};
     return _tileMap[layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)];
 }
 
-void tilemap_base::set_tile(uid layerId, point_i pos, tile_index_t setIdx)
+void tilemap_base::set_tile_index(uid layerId, point_i pos, tile_index_t setIdx)
 {
     auto const&        layer {*get_layer(layerId)};
     i32 const          idx {layer.TileMapStart + pos.X + (pos.Y * layer.Size.Width)};
@@ -170,9 +170,13 @@ auto ortho_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rec
 
 auto iso_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
 {
-    return {{((TileSize.Width * tile.Center.X) * (coord.X - coord.Y)),
-             ((TileSize.Height * tile.Center.Y) * (coord.Y + coord.X)) - (TileSize.Height * tile.Height)},
-            TileSize};
+    return Staggered
+        ? rect_f {{TileSize.Width * (coord.X + 0.5f * (coord.Y & 1)),
+                   TileSize.Height * (0.5f * coord.Y)},
+                  TileSize}
+        : rect_f {{((TileSize.Width * tile.Center.X) * (coord.X - coord.Y)),
+                   ((TileSize.Height * tile.Center.Y) * (coord.Y + coord.X)) - (TileSize.Height * tile.Height)},
+                  TileSize};
 }
 
 ////////////////////////////////////////////////////////////

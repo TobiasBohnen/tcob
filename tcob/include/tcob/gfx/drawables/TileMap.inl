@@ -18,9 +18,9 @@ inline tilemap<G>::tilemap(set_type set)
 }
 
 template <typename G>
-inline auto tilemap<G>::get_tile_index(string const& texture) const -> tile_index_t
+inline auto tilemap<G>::get_tile_bounds(uid layerId, point_i pos) const -> rect_f
 {
-    return _tileSet.get_index(texture);
+    return Grid->layout_tile(_tileSet.get_tile(get_tile_index(layerId, pos)), pos);
 }
 
 template <typename G>
@@ -65,16 +65,6 @@ template <typename T>
 void tileset<T>::set_tile(tile_index_t idx, tile_type const& tile)
 {
     _set[idx] = tile;
-}
-
-template <typename T>
-auto tileset<T>::get_index(string const& texture) const -> tile_index_t
-{
-    for (auto const& [k, v] : _set) {
-        if (v.TextureRegion == texture) { return k; }
-    }
-
-    return 0;
 }
 
 }

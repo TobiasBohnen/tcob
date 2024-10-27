@@ -20,7 +20,7 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
-using tile_index_t = u16;
+using tile_index_t = u64;
 
 ////////////////////////////////////////////////////////////
 
@@ -33,7 +33,6 @@ public:
 
     auto get_tile(tile_index_t idx) const -> tile_type const&;
     void set_tile(tile_index_t idx, tile_type const& tile_type);
-    auto get_index(string const& texture) const -> tile_index_t;
 
 private:
     std::unordered_map<tile_index_t, tile_type> _set;
@@ -78,6 +77,7 @@ public:
     using tile_type = iso_tile;
 
     size_f TileSize {size_f::Zero};
+    bool   Staggered {false};
 
     auto layout_tile(iso_tile const& tile, point_i coord) const -> rect_f;
 
@@ -112,75 +112,6 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-void SerializeTile(auto&& v, auto&& s)
-{
-    s["texture"] = v.TextureRegion;
-    s["h_flip"]  = v.FlipHorizontally;
-    s["v_flip"]  = v.FlipVertically;
-    s["color"]   = v.Color;
-}
-
-auto DeserializeTile(auto&& v, auto&& s) -> bool
-{
-    if (!s.try_get(v.TextureRegion, "texture")) {
-        return false;
-    }
-
-    s.try_get(v.FlipHorizontally, "h_flip");
-    s.try_get(v.FlipVertically, "v_flip");
-    s.try_get(v.Color, "color");
-
-    return true;
-}
-
-void Serialize(ortho_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-
-    s["scale"] = v.Scale;
-}
-
-auto Deserialize(ortho_tile& v, auto&& s) -> bool
-{
-    if (!DeserializeTile(v, s)) {
-        return false;
-    }
-
-    s.try_get(v.Scale, "scale");
-    return true;
-}
-
-void Serialize(iso_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-
-    s["center"] = v.Center;
-    s["height"] = v.Height;
-}
-
-auto Deserialize(iso_tile& v, auto&& s) -> bool
-{
-    if (!DeserializeTile(v, s)) {
-        return false;
-    }
-
-    s.try_get(v.Center, "center");
-    s.try_get(v.Height, "height");
-    return true;
-}
-
-void Serialize(hex_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-}
-
-auto Deserialize(hex_tile& v, auto&& s) -> bool
-{
-    return static_cast<bool>(DeserializeTile(v, s));
-}
-
-////////////////////////////////////////////////////////////
-
 struct tilemap_layer {
     std::span<tile_index_t> Tiles; // TODO: mdspan
     size_i                  Size {size_i::Zero};
@@ -199,8 +130,8 @@ public:
 
     auto add_layer(tilemap_layer const& layer) -> uid;
 
-    auto get_tile(uid layerId, point_i pos) const -> tile_index_t;
-    void set_tile(uid layerId, point_i pos, tile_index_t setIdx);
+    auto get_tile_index(uid layerId, point_i pos) const -> tile_index_t;
+    void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
 
     auto is_layer_visible(uid id) const -> bool;
     void set_layer_visible(uid id, bool visible);
@@ -253,7 +184,7 @@ public:
 
     prop<grid_type> Grid;
 
-    auto get_tile_index(string const& texture) const -> tile_index_t;
+    auto get_tile_bounds(uid layerId, point_i pos) const -> rect_f;
     void change_tileset(tile_index_t idx, tile_type const& t);
 
 private:
@@ -267,6 +198,63 @@ private:
 using ortho_tilemap = tilemap<ortho_grid>;
 using iso_tilemap   = tilemap<iso_grid>;
 using hex_tilemap   = tilemap<hex_grid>;
+
+////////////////////////////////////////////////////////////
+
+void SerializeTile(auto&& v, auto&& s)
+{
+    s["texture"] = v.TextureRegion;
+    s["h_flip"]  = v.FlipHorizontally;
+    s["v_flip"]  = v.FlipVertically;
+    s["color"]   = v.Color;
+}
+
+auto DeserializeTile(auto&& v, auto&& s) -> bool
+{
+    if (!s.try_get(v.TextureRegion, "texture")) { return false; }
+    s.try_get(v.FlipHorizontally, "h_flip");
+    s.try_get(v.FlipVertically, "v_flip");
+    s.try_get(v.Color, "color");
+    return true;
+}
+
+void Serialize(ortho_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+    s["scale"] = v.Scale;
+}
+
+auto Deserialize(ortho_tile& v, auto&& s) -> bool
+{
+    if (!DeserializeTile(v, s)) { return false; }
+    s.try_get(v.Scale, "scale");
+    return true;
+}
+
+void Serialize(iso_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+    s["center"] = v.Center;
+    s["height"] = v.Height;
+}
+
+auto Deserialize(iso_tile& v, auto&& s) -> bool
+{
+    if (!DeserializeTile(v, s)) { return false; }
+    s.try_get(v.Center, "center");
+    s.try_get(v.Height, "height");
+    return true;
+}
+
+void Serialize(hex_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+}
+
+auto Deserialize(hex_tile& v, auto&& s) -> bool
+{
+    return static_cast<bool>(DeserializeTile(v, s));
+}
 
 }
 
