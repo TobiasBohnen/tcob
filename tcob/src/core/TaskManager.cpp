@@ -12,11 +12,11 @@
 
 namespace tcob {
 
-task_manager::task_manager(i32 threads)
+task_manager::task_manager(isize threads)
     : _threadCount {threads}
     , _mainThreadID {std::this_thread::get_id()}
 {
-    for (i32 i {0}; i < _threadCount; ++i) {
+    for (isize i {0}; i < _threadCount; ++i) {
         _taskWorkers.emplace_back([this](std::stop_token const& stopToken) { worker_thread(stopToken); });
     }
 }

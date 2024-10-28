@@ -225,8 +225,8 @@ void database_view::update_hook(void (*callback)(void*, int, char const*, char c
 
 auto database_view::config(i32 key, i32 value) const -> bool
 {
-    i32  actual {};
-    auto err = sqlite3_db_config(_db, key, value, &actual);
+    i32        actual {};
+    auto const err {sqlite3_db_config(_db, key, value, &actual)};
     return err == SQLITE_OK && value == actual;
 }
 

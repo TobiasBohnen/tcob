@@ -32,25 +32,17 @@ auto static xRead(sqlite3_file* f, void* dst, int iAmt, sqlite3_int64 iOfst) -> 
     auto const* file {reinterpret_cast<physfs_sqlite3_file const*>(f)};
     assert(&file->SqliteFile == f);
 
-    if (!fs::is_file(file->FileName)) {
-        return SQLITE_IOERR;
-    }
+    if (!fs::is_file(file->FileName)) { return SQLITE_IOERR; }
 
     fs::ifstream stream {file->FileName};
 
-    if (!stream.seek(iOfst, io::seek_dir::Begin)) {
-        return SQLITE_IOERR_READ;
-    }
+    if (!stream.seek(iOfst, io::seek_dir::Begin)) { return SQLITE_IOERR_READ; }
 
     auto* dstBuffer {static_cast<byte*>(dst)};
     auto  nRead {stream.read_to<byte>({dstBuffer, static_cast<usize>(iAmt)})};
 
-    if (nRead < 0) {
-        return SQLITE_IOERR_READ;
-    }
-    if (nRead < iAmt) {
-        return SQLITE_IOERR_SHORT_READ;
-    }
+    if (nRead < 0) { return SQLITE_IOERR_READ; }
+    if (nRead < iAmt) { return SQLITE_IOERR_SHORT_READ; }
     return SQLITE_OK;
 }
 
@@ -59,15 +51,11 @@ auto static xWrite(sqlite3_file* f, void const* src, int iAmt, sqlite3_int64 iOf
     auto const* file {reinterpret_cast<physfs_sqlite3_file const*>(f)};
     assert(&file->SqliteFile == f);
 
-    if (!fs::is_file(file->FileName)) {
-        return SQLITE_IOERR;
-    }
+    if (!fs::is_file(file->FileName)) { return SQLITE_IOERR; }
 
     fs::ofstream stream {file->FileName, 4096, true};
 
-    if (!stream.seek(iOfst, io::seek_dir::Begin)) {
-        return SQLITE_IOERR_SEEK;
-    }
+    if (!stream.seek(iOfst, io::seek_dir::Begin)) { return SQLITE_IOERR_SEEK; }
 
     auto const* srcBuffer {static_cast<byte const*>(src)};
     auto const  written {stream.write<byte>({srcBuffer, static_cast<usize>(iAmt)})};
@@ -90,9 +78,7 @@ auto static xFileSize(sqlite3_file* f, sqlite3_int64* pSize) -> int
     auto const* file {reinterpret_cast<physfs_sqlite3_file const*>(f)};
     assert(&file->SqliteFile == f);
 
-    if (!fs::is_file(file->FileName)) {
-        return SQLITE_IOERR;
-    }
+    if (!fs::is_file(file->FileName)) { return SQLITE_IOERR; }
 
     *pSize = fs::get_file_size(file->FileName);
     return SQLITE_OK;
@@ -174,17 +160,10 @@ auto static xDelete(sqlite3_vfs*, char const* zName, int /* syncDir */) -> int
 auto static xAccess(sqlite3_vfs*, char const* zName, int flags, int* pResOut) -> int
 {
     switch (flags) {
-    case SQLITE_ACCESS_EXISTS:
-        *pResOut = fs::is_file(zName);
-        break;
-
-    case SQLITE_ACCESS_READ: {
-        *pResOut = fs::is_file(zName);
-        break;
-    }
+    case SQLITE_ACCESS_EXISTS: *pResOut = fs::is_file(zName); break;
+    case SQLITE_ACCESS_READ: *pResOut = fs::is_file(zName); break;
     case SQLITE_ACCESS_READWRITE:
-    default:
-        *pResOut = false;
+    default: *pResOut = false; break;
     }
 
     return SQLITE_OK;

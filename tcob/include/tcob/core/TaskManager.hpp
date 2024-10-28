@@ -38,7 +38,7 @@ public:
     using par_func   = std::function<void(par_task const&)>;
     using def_func   = std::function<void(def_task&)>;
 
-    explicit task_manager(i32 threads);
+    explicit task_manager(isize threads);
     ~task_manager();
 
     template <typename T>

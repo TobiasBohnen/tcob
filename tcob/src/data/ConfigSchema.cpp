@@ -50,9 +50,10 @@ auto schema::validate(object const& obj) const -> result
                 failures.push_back(*fail);
             } else {
                 if (test) {
-                    retValue.Failures.push_back({.Group      = "OneOf",
-                                                 .Name       = std::visit([](auto const& a) { return a.Name; }, e),
-                                                 .Constraint = "Group"});
+                    retValue.Failures.push_back(
+                        {.Group      = "OneOf",
+                         .Name       = std::visit([](auto const& a) { return a.Name; }, e),
+                         .Constraint = "Group"});
                 }
                 test = true;
             }
@@ -66,9 +67,10 @@ auto schema::validate(object const& obj) const -> result
     if (!NoneOf.empty()) {
         for (auto const& e : NoneOf) {
             if (!std::visit(valid, e)) {
-                retValue.Failures.push_back({.Group      = "NoneOf",
-                                             .Name       = std::visit([](auto const& a) { return a.Name; }, e),
-                                             .Constraint = "Group"});
+                retValue.Failures.push_back(
+                    {.Group      = "NoneOf",
+                     .Name       = std::visit([](auto const& a) { return a.Name; }, e),
+                     .Constraint = "Group"});
             }
         }
     }
@@ -84,80 +86,80 @@ auto schema::FromObject(object const& obj) -> std::shared_ptr<schema>
         std::unordered_map<string, property> props;
 
         for (auto const& [k, v] : propsSec) {
-            if (object propSec; v.try_get(propSec)) {
-                if (type propType {}; propSec.try_get(propType, "Type")) {
-                    property prop;
+            object propSec;
+            if (!v.try_get(propSec)) { continue; }
+            type propType {};
+            if (!propSec.try_get(propType, "Type")) { continue; }
 
-                    switch (propType) {
-                    case type::String: {
-                        string_property val;
-                        val.Name = k;
-                        if (usize max {0}; propSec.try_get(max, "MaxLength")) {
-                            val.MaxLength = max;
-                        }
-                        if (usize min {0}; propSec.try_get(min, "MinLength")) {
-                            val.MinLength = min;
-                        }
-                        propSec.try_get(val.Pattern, "Pattern");
-                        prop = val;
-                    } break;
-                    case type::Float: {
-                        float_property val;
-                        val.Name = k;
-                        if (f64 max {0}; propSec.try_get(max, "MaxValue")) {
-                            val.MaxValue = max;
-                        }
-                        if (f64 min {0}; propSec.try_get(min, "MinValue")) {
-                            val.MinValue = min;
-                        }
-                        prop = val;
-                    } break;
-                    case type::Integer: {
-                        int_property val;
-                        val.Name = k;
-                        if (i64 max {0}; propSec.try_get(max, "MaxValue")) {
-                            val.MaxValue = max;
-                        }
-                        if (i64 min {0}; propSec.try_get(min, "MinValue")) {
-                            val.MinValue = min;
-                        }
-                        prop = val;
-                    } break;
-                    case type::Bool: {
-                        bool_property val;
-                        val.Name = k;
-                        prop     = val;
-                    } break;
-                    case type::Array: {
-                        array_property val;
-                        val.Name = k;
-                        if (isize max {0}; propSec.try_get(max, "MaxSize")) {
-                            val.MaxSize = max;
-                        }
-                        if (isize min {0}; propSec.try_get(min, "MinSize")) {
-                            val.MinSize = min;
-                        }
-                        if (type itype {}; propSec.try_get(itype, "Type")) {
-                            val.ItemType = itype;
-                        }
-                        prop = val;
-                    } break;
-                    case type::Object: {
-                        object_property val;
-                        val.Name = k;
-                        if (string subSchemaName; propSec.try_get(subSchemaName, "Schema")) {
-                            if (object subSchema; obj.try_get(subSchema, "Schemas", subSchemaName)) {
-                                val.Schema = schema::FromObject(subSchema);
-                            }
-                        }
-                        prop = val;
-                    } break;
-                    case type::Null: break;
-                    }
-
-                    props[k] = prop;
+            property prop;
+            switch (propType) {
+            case type::String: {
+                string_property val;
+                val.Name = k;
+                if (usize max {0}; propSec.try_get(max, "MaxLength")) {
+                    val.MaxLength = max;
                 }
+                if (usize min {0}; propSec.try_get(min, "MinLength")) {
+                    val.MinLength = min;
+                }
+                propSec.try_get(val.Pattern, "Pattern");
+                prop = val;
+            } break;
+            case type::Float: {
+                float_property val;
+                val.Name = k;
+                if (f64 max {0}; propSec.try_get(max, "MaxValue")) {
+                    val.MaxValue = max;
+                }
+                if (f64 min {0}; propSec.try_get(min, "MinValue")) {
+                    val.MinValue = min;
+                }
+                prop = val;
+            } break;
+            case type::Integer: {
+                int_property val;
+                val.Name = k;
+                if (i64 max {0}; propSec.try_get(max, "MaxValue")) {
+                    val.MaxValue = max;
+                }
+                if (i64 min {0}; propSec.try_get(min, "MinValue")) {
+                    val.MinValue = min;
+                }
+                prop = val;
+            } break;
+            case type::Bool: {
+                bool_property val;
+                val.Name = k;
+                prop     = val;
+            } break;
+            case type::Array: {
+                array_property val;
+                val.Name = k;
+                if (isize max {0}; propSec.try_get(max, "MaxSize")) {
+                    val.MaxSize = max;
+                }
+                if (isize min {0}; propSec.try_get(min, "MinSize")) {
+                    val.MinSize = min;
+                }
+                if (type itype {}; propSec.try_get(itype, "Type")) {
+                    val.ItemType = itype;
+                }
+                prop = val;
+            } break;
+            case type::Object: {
+                object_property val;
+                val.Name = k;
+                if (string subSchemaName; propSec.try_get(subSchemaName, "Schema")) {
+                    if (object subSchema; obj.try_get(subSchema, "Schemas", subSchemaName)) {
+                        val.Schema = schema::FromObject(subSchema);
+                    }
+                }
+                prop = val;
+            } break;
+            case type::Null: break;
             }
+
+            props[k] = prop;
         }
 
         if (array allOf; obj.try_get(allOf, "AllOf")) {

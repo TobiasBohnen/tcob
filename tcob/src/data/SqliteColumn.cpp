@@ -24,9 +24,7 @@ unique::unique()
 
 auto unique::str() const -> utf8_string
 {
-    if (Columns.empty()) {
-        return "UNIQUE";
-    }
+    if (Columns.empty()) { return "UNIQUE"; }
 
     return std::format("UNIQUE({})", Columns);
 }

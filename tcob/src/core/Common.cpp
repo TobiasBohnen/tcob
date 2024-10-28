@@ -35,14 +35,10 @@ auto byteswap(u64 val) -> u64
 
 auto round_to_multiple(i32 num, i32 step) -> i32
 {
-    if (step <= 1) {
-        return num;
-    }
+    if (step <= 1) { return num; }
 
     i32 const rem {std::abs(num) % step};
-    if (rem == 0) {
-        return num;
-    }
+    if (rem == 0) { return num; }
 
     i32 const adjustment {rem > step / 2 ? step - rem : -rem};
     return num < 0 ? num - adjustment : num + adjustment;
@@ -50,14 +46,10 @@ auto round_to_multiple(i32 num, i32 step) -> i32
 
 auto round_up_to_multiple(i32 num, i32 step) -> i32
 {
-    if (step <= 1) {
-        return num;
-    }
+    if (step <= 1) { return num; }
 
     i32 const rem {std::abs(num) % step};
-    if (rem == 0) {
-        return num;
-    }
+    if (rem == 0) { return num; }
 
     return num < 0
         ? -(std::abs(num) - rem)
@@ -66,14 +58,10 @@ auto round_up_to_multiple(i32 num, i32 step) -> i32
 
 auto round_down_to_multiple(i32 num, i32 step) -> i32
 {
-    if (step <= 1) {
-        return num;
-    }
+    if (step <= 1) { return num; }
 
     i32 const rem {std::abs(num) % step};
-    if (rem == 0) {
-        return num;
-    }
+    if (rem == 0) { return num; }
 
     return num < 0
         ? -(std::abs(num) + rem)

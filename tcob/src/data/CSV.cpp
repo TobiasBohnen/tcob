@@ -37,9 +37,7 @@ auto table::parse(string const& csv, settings s) -> bool
     for (auto const& c : csv) {
         if (isInQuote) {
             if (c == s.Quote) {
-                if (value.empty()) {
-                    value += c;
-                }
+                if (value.empty()) { value += c; }
                 isInQuote = false;
             } else {
                 value += c;
@@ -68,9 +66,7 @@ auto table::parse(string const& csv, settings s) -> bool
         }
     }
 
-    if (!value.empty()) {
-        row.push_back(value);
-    }
+    if (!value.empty()) { row.push_back(value); }
     if (!row.empty()) {
         if (isInHeader) {
             Header = row;
@@ -91,9 +87,7 @@ void static write_line(std::vector<string> const& row, io::ostream& ss, settings
         } else {
             ss << value;
         }
-        if (i != row.size() - 1) {
-            ss << s.Separator;
-        }
+        if (i != row.size() - 1) { ss << s.Separator; }
     }
     ss << LineEnding;
 }
@@ -106,13 +100,9 @@ auto table::save(path const& file, settings s) const -> bool
 
 auto table::save(io::ostream& out, settings s) const -> bool
 {
-    if (!Header.empty()) {
-        write_line(Header, out, s);
-    }
+    if (!Header.empty()) { write_line(Header, out, s); }
 
-    for (auto const& row : Rows) {
-        write_line(row, out, s);
-    }
+    for (auto const& row : Rows) { write_line(row, out, s); }
 
     return true;
 }
