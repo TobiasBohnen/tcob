@@ -60,7 +60,7 @@ void lighting_system::notify_light_changed(light_source* /* light */)
 
 void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
 {
-    if (_quadTree) {
+    if (_quadTree && shadow._bounds != rect_f::Zero) {
         _quadTree->remove({.Bounds = shadow._bounds, .Caster = &shadow});
         mark_lights_dirty();
     }
