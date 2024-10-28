@@ -71,7 +71,7 @@ public:
 private:
     auto get_palette(io::istream& in) const -> std::vector<color>;
 
-    auto get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>;
+    auto get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::span<color const> palette) const -> std::vector<u8>;
 
     bmp::bitmap_file_header _header;
     bmp::bitmap_info_header _infoHeader;

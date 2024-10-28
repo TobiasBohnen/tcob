@@ -147,7 +147,7 @@ void static CheckAlpha(std::vector<u8>& data)
     }
 }
 
-auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::vector<color> palette) const -> std::vector<u8>
+auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::span<color const> palette) const -> std::vector<u8>
 {
     std::vector<u8> retValue(_info.size_in_bytes());
 
