@@ -34,10 +34,10 @@ void image_box::on_paint(widget_painter& painter)
 
             switch (style->Fit) {
             case fit_mode::None:
-                targetRect = {rect.Position, static_cast<size_f>(tex->get_size())};
+                targetRect = {rect.Position, size_f {tex->get_size()}};
                 break;
             case fit_mode::Contain: {
-                size_f const imgSize {static_cast<size_f>(tex->get_size())};
+                size_f const imgSize {size_f {tex->get_size()}};
                 f32 const    aspectRatioToShrink {imgSize.Width / imgSize.Height};
                 f32 const    aspectRatioTarget {rect.width() / rect.height()};
                 f32 const    factor {(aspectRatioToShrink > aspectRatioTarget) ? (rect.width() / imgSize.Width) : (rect.height() / imgSize.Height)};
