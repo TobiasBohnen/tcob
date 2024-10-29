@@ -36,6 +36,13 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+struct parallax_background_layer {
+    string TextureRegion;
+    f32    Factor {};
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API parallax_background final : public drawable {
 public:
     parallax_background();
@@ -43,7 +50,11 @@ public:
     prop<assets::asset_ptr<material>> Material;
     size_f                            TextureScale {size_f::One};
 
-    void add_layer(string const& textureRegion, f32 factor);
+    auto add_layer(parallax_background_layer const& layer) -> uid;
+
+    auto is_layer_visible(uid id) const -> bool;
+    void set_layer_visible(uid id, bool visible);
+    void set_layer_texture(uid id, string const& texture);
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -53,9 +64,14 @@ protected:
 
 private:
     struct layer {
+        uid    ID {INVALID_ID};
         string TextureRegion;
         f32    Factor {};
+        bool   Visible {true};
     };
+
+    auto get_layer(uid id) -> layer*;
+    auto get_layer(uid id) const -> layer const*;
 
     std::vector<layer> _layers;
     std::vector<quad>  _quads;
