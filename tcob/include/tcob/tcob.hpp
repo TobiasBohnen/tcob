@@ -94,6 +94,7 @@
 #include <tcob/gfx/UniformBuffer.hpp>
 #include <tcob/gfx/VertexArray.hpp>
 #include <tcob/gfx/Window.hpp>
+#include <tcob/gfx/drawables/Background.hpp>
 #include <tcob/gfx/drawables/Cursor.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>
 #include <tcob/gfx/drawables/LightingSystem.hpp>

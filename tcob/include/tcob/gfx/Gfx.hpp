@@ -194,6 +194,7 @@ auto Deserialize(video_config& v, auto&& s) -> bool
 
 namespace tcob {
 namespace gfx {
+    class background;
     class canvas;
     struct canvas_paint;
     struct canvas_scissor;
