@@ -57,7 +57,8 @@ auto parallax_background::add_layer(parallax_background_layer const& layer) -> u
     _layers.push_back({
         .ID            = id,
         .TextureRegion = layer.TextureRegion,
-        .Factor        = layer.Factor,
+        .ScrollScale   = layer.ScrollScale,
+        .Offset        = layer.Offset,
         .Visible       = true,
     });
     _quads.push_back({});
@@ -108,8 +109,8 @@ void parallax_background::on_draw_to(render_target& target)
             auto& uvRect {texReg.UVRect};
             uvRect.Size *= (targetSize / texSize);
 
-            uvRect.Position.X = (camera.Position.X / texSize.Width * layer.Factor);
-            uvRect.Position.Y = (camera.Position.Y / texSize.Height * layer.Factor);
+            uvRect.Position.X = ((camera.Position.X / texSize.Width) * layer.ScrollScale.Width) + layer.Offset.Width;
+            uvRect.Position.Y = ((camera.Position.Y / texSize.Height) * layer.ScrollScale.Height) + layer.Offset.Height;
 
             geometry::set_texcoords(quad, texReg);
         } else {

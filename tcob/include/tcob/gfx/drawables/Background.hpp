@@ -38,7 +38,8 @@ private:
 
 struct parallax_background_layer {
     string TextureRegion;
-    f32    Factor {};
+    size_f ScrollScale {size_f::One};
+    size_f Offset {size_f::Zero};
 };
 
 ////////////////////////////////////////////////////////////
@@ -66,7 +67,8 @@ private:
     struct layer {
         uid    ID {INVALID_ID};
         string TextureRegion;
-        f32    Factor {};
+        size_f ScrollScale;
+        size_f Offset;
         bool   Visible {true};
     };
 
