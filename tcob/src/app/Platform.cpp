@@ -196,8 +196,7 @@ auto platform::process_events() const -> bool
             SDL_free(ev.drop.file);
             DropFile(path);
         } break;
-        case SDL_QUIT:
-            return false;
+        case SDL_QUIT: return false;
         case SDL_KEYDOWN:
         case SDL_KEYUP:
         case SDL_TEXTINPUT:
