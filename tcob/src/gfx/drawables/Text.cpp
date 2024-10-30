@@ -14,6 +14,9 @@ namespace tcob::gfx {
 text::text(assets::asset_ptr<font> font)
     : _font {std::move(font)}
 {
+    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+
     _material->Texture = _font->get_texture();
     _renderer.set_material(_material.get_ptr());
     Shader.Changed.connect([&](auto const& value) { _material->Shader = value; });
@@ -43,6 +46,15 @@ void text::on_draw_to(render_target& target)
 {
     _renderer.set_geometry(_quads);
     _renderer.render_to_target(target);
+}
+
+auto text::get_pivot() const -> point_f
+{
+    if (Pivot().has_value()) {
+        return Bounds->top_left() + *Pivot();
+    }
+
+    return Bounds->get_center();
 }
 
 void text::on_transform_changed()

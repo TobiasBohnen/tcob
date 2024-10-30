@@ -6,12 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <optional>
-
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/core/Rect.hpp"
 #include "tcob/core/Transform.hpp"
 
 namespace tcob::gfx {
@@ -46,23 +43,6 @@ protected:
 private:
     transform _transform {};
     bool      _isDirty {true};
-};
-
-////////////////////////////////////////////////////////////
-
-//!@brief base class for rectangular transformable objects
-class TCOB_API rect_transformable : public transformable {
-public:
-    rect_transformable();
-
-    prop_fn<point_f>             Center;
-    prop<rect_f>                 Bounds;
-    prop<std::optional<point_f>> Pivot;
-
-    void move_by(point_f offset);
-
-protected:
-    auto get_pivot() const -> point_f override;
 };
 
 }

@@ -35,7 +35,7 @@ namespace detail {
 }
 
 ////////////////////////////////////////////////////////////
-class TCOB_API document final : public entity, public rect_transformable {
+class TCOB_API document final : public entity, public transformable {
 public:
     ////////////////////////////////////////////////////////////
     struct config {
@@ -52,6 +52,8 @@ public:
     ~document() override;
 
     signal<string const> AnchorClick;
+
+    prop<rect_f> Bounds;
 
     auto get_mouse_position() const -> point_i;
     auto is_button_down() const -> bool;
@@ -71,6 +73,7 @@ protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
+    auto get_pivot() const -> point_f override;
     void on_transform_changed() override;
 
     void on_mouse_motion(input::mouse::motion_event const& ev) override;

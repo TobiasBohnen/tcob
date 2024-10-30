@@ -23,7 +23,7 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API text final : public rect_transformable, public drawable {
+class TCOB_API text final : public transformable, public drawable {
 public:
     struct style {
         color      Color {colors::White};
@@ -34,6 +34,9 @@ public:
     };
 
     explicit text(assets::asset_ptr<font> font);
+
+    prop<rect_f>                 Bounds;
+    prop<std::optional<point_f>> Pivot;
 
     prop<utf8_string>               Text;
     prop<style>                     Style;
@@ -48,6 +51,7 @@ protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
+    auto get_pivot() const -> point_f override;
     void on_transform_changed() override;
 
 private:

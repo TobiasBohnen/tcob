@@ -74,28 +74,4 @@ void transformable::reset_transform()
     mark_transform_dirty();
 }
 
-////////////////////////////////////////////////////////////
-
-rect_transformable::rect_transformable()
-    : Center {{[&]() { return Bounds->get_center(); },
-               [&](point_f const& value) { Bounds = Bounds->as_centered_at(value); }}}
-{
-    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
-    Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });
-}
-
-void rect_transformable::move_by(point_f offset)
-{
-    Bounds = {Bounds->Position + offset, Bounds->Size};
-}
-
-auto rect_transformable::get_pivot() const -> point_f
-{
-    if (Pivot().has_value()) {
-        return Bounds->top_left() + *Pivot();
-    }
-
-    return Center();
-}
-
 }

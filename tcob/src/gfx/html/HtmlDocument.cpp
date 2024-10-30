@@ -27,6 +27,8 @@ document::document(config c)
     , _painter {std::make_unique<element_painter>(_canvas)}
     , _container {std::make_shared<detail::container>(*this, _config, _canvas, *_painter)}
 {
+    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {render_texture::GetTexcoords(), 0});
     _renderer.set_material(_material.get_ptr());
@@ -122,6 +124,11 @@ void document::on_draw_to(render_target& target)
 
     _renderer.set_geometry(_quad);
     _renderer.render_to_target(target);
+}
+
+auto document::get_pivot() const -> point_f
+{
+    return Bounds->get_center();
 }
 
 void document::on_transform_changed()
