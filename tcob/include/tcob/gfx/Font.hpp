@@ -142,10 +142,9 @@ template <>
 struct std::hash<tcob::gfx::font::style> {
     auto operator()(tcob::gfx::font::style const& s) const noexcept -> std::size_t
     {
-        std::size_t hash_value = 0;
-        hash_value ^= std::hash<bool> {}(s.IsItalic) + 0x9e3779b9 + (hash_value << 6) + (hash_value >> 2);
-        hash_value ^= std::hash<int> {}(static_cast<int>(s.Weight)) + 0x9e3779b9 + (hash_value << 6) + (hash_value >> 2);
-        return hash_value;
+        std::size_t const h1 {std::hash<bool> {}(s.IsItalic)};
+        std::size_t const h2 {std::hash<int> {}(static_cast<int>(s.Weight))};
+        return tcob::helper::hash_combine(h1, h2);
     }
 };
 

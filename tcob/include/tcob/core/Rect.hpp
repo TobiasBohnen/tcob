@@ -9,6 +9,7 @@
 #include <ostream>
 
 #include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
@@ -135,5 +136,15 @@ struct std::formatter<tcob::rect<T>> {
     auto format(tcob::rect<T> val, format_context& ctx) const
     {
         return format_to(ctx.out(), "(x:{},y:{},w:{},h:{})", val.left(), val.top(), val.width(), val.height());
+    }
+};
+
+template <tcob::Arithmetic T>
+struct std::hash<tcob::rect<T>> {
+    auto operator()(tcob::rect<T> const& r) const noexcept -> std::size_t
+    {
+        std::size_t const h1 {std::hash<tcob::point<T>> {}(r.Position)};
+        std::size_t const h2 {std::hash<tcob::size<T>> {}(r.Size)};
+        return tcob::helper::hash_combine(h1, h2);
     }
 };

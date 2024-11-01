@@ -8,6 +8,7 @@
 
 #include <ostream>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Point.hpp"
 
@@ -125,5 +126,15 @@ struct std::formatter<tcob::size<T>> {
     auto format(tcob::size<T> val, format_context& ctx) const
     {
         return format_to(ctx.out(), "(w:{},h:{})", val.Width, val.Height);
+    }
+};
+
+template <tcob::Arithmetic T>
+struct std::hash<tcob::size<T>> {
+    auto operator()(tcob::size<T> const& s) const -> std::size_t
+    {
+        std::size_t const h1 {std::hash<T> {}(s.Width)};
+        std::size_t const h2 {std::hash<T> {}(s.Height)};
+        return tcob::helper::hash_combine(h1, h2);
     }
 };

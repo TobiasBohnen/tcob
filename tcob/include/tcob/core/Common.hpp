@@ -39,6 +39,8 @@ namespace helper {
     TCOB_API auto round_down_to_multiple(i32 num, i32 step) -> i32;
 
     TCOB_API auto get_bits(u32 i, i32 offset, i32 count) -> u32;
+
+    TCOB_API auto hash_combine(usize h1, usize h2) -> usize;
 }
 
 ////////////////////////////////////////////////////////////
@@ -107,8 +109,9 @@ struct arg_list;
 template <typename T, typename... Args>
 struct arg_list<T(Args...)> { };
 
+////////////////////////////////////////////////////////////
+
 namespace detail {
-    ////////////////////////////////////////////////////////////
 
     template <typename T, typename... Ts>
     struct first_element {
@@ -133,4 +136,5 @@ namespace detail {
 }
 
 ////////////////////////////////////////////////////////////
+
 }
