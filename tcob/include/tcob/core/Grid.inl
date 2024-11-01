@@ -16,25 +16,25 @@ inline grid<T>::grid(size_type size, T const& defaultValue)
 }
 
 template <typename T>
-inline auto grid<T>::at(point_type pos) -> T&
+inline auto grid<T>::operator[](point_type pos) -> T&
 {
     return _data[get_index(pos)];
 }
 
 template <typename T>
-inline auto grid<T>::at(point_type pos) const -> T const&
+inline auto grid<T>::operator[](point_type pos) const -> T const&
 {
     return _data[get_index(pos)];
 }
 
 template <typename T>
-inline auto grid<T>::at(usize idx) -> T&
+inline auto grid<T>::operator[](usize idx) -> T&
 {
     return _data[idx];
 }
 
 template <typename T>
-inline auto grid<T>::at(usize idx) const -> T const&
+inline auto grid<T>::operator[](usize idx) const -> T const&
 {
     return _data[idx];
 }
@@ -42,7 +42,7 @@ inline auto grid<T>::at(usize idx) const -> T const&
 template <typename T>
 inline void grid<T>::fill(T const& value)
 {
-    _data = std::vector<T>(_size.Width * _size.Height, value);
+    std::fill(_data.begin(), _data.end(), value);
 }
 
 template <typename T>
@@ -90,7 +90,7 @@ inline auto grid<T>::get_extent() const -> size_type
 template <typename T>
 inline auto grid<T>::size() const -> usize
 {
-    return static_cast<usize>(_size.Height * _size.Width);
+    return _data.size();
 }
 
 template <typename T>

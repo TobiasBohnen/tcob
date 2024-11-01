@@ -21,10 +21,10 @@ class grid {
 public:
     grid(size_type size, T const& defaultValue = T {});
 
-    auto at(point_type pos) -> T&;
-    auto at(point_type pos) const -> T const&;
-    auto at(usize idx) -> T&;
-    auto at(usize idx) const -> T const&;
+    auto operator[](point_type pos) -> T&;
+    auto operator[](point_type pos) const -> T const&;
+    auto operator[](usize idx) -> T&;
+    auto operator[](usize idx) const -> T const&;
 
     void fill(T const& value);
 
