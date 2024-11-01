@@ -49,12 +49,11 @@ tilemap_base::tilemap_base()
 
 auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
 {
-    assert(std::ssize(layer.Tiles) == layer.Size.Width * layer.Size.Height);
     uid const id {GetRandomID()};
 
     _layers.push_back({
         .ID           = id,
-        .Size         = layer.Size,
+        .Size         = layer.Tiles.get_extent(),
         .Offset       = layer.Offset,
         .TileMapStart = static_cast<i32>(_tileMap.size()),
         .Visible      = true,

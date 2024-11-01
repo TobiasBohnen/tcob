@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
@@ -115,9 +116,8 @@ public:
 ////////////////////////////////////////////////////////////
 
 struct tilemap_layer {
-    std::span<tile_index_t> Tiles; // TODO: mdspan
-    size_i                  Size {size_i::Zero};
-    point_i                 Offset {point_i::Zero};
+    grid<tile_index_t> Tiles;
+    point_i            Offset {point_i::Zero};
 };
 
 ////////////////////////////////////////////////////////////

@@ -22,6 +22,7 @@
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>
 #include <tcob/core/Common.hpp>
+#include <tcob/core/Grid.hpp>
 #include <tcob/core/Interfaces.hpp>
 #include <tcob/core/Logger.hpp>
 #include <tcob/core/Point.hpp>
