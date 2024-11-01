@@ -9,6 +9,9 @@ configure_file(
 add_subdirectory(src/core)
 list(APPEND LIBS tcob_core)
 
+add_subdirectory(src/ai)
+list(APPEND LIBS tcob_ai)
+
 add_subdirectory(src/audio)
 list(APPEND LIBS tcob_audio)
 

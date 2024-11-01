@@ -18,24 +18,26 @@ inline grid<T>::grid(size_type size, T const& defaultValue)
 template <typename T>
 inline auto grid<T>::operator[](point_type pos) -> T&
 {
-    return _data[get_index(pos)];
+    return operator[](get_index(pos));
 }
 
 template <typename T>
 inline auto grid<T>::operator[](point_type pos) const -> T const&
 {
-    return _data[get_index(pos)];
+    return operator[](get_index(pos));
 }
 
 template <typename T>
 inline auto grid<T>::operator[](usize idx) -> T&
 {
+    assert(idx < _data.size());
     return _data[idx];
 }
 
 template <typename T>
 inline auto grid<T>::operator[](usize idx) const -> T const&
 {
+    assert(idx < _data.size());
     return _data[idx];
 }
 
