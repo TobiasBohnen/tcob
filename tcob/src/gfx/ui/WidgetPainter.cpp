@@ -102,7 +102,7 @@ void widget_painter::draw_bordered_circle(rect_f const& rect, ui_paint const& ba
         _canvas.set_fill_style(get_paint(back, rect));
         f32 const r {std::min(rect.height(), rect.width()) / 2};
         _canvas.begin_path();
-        _canvas.circle(rect.get_center(), r);
+        _canvas.circle(rect.center(), r);
         _canvas.fill();
 
         // border
@@ -288,8 +288,8 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
             _canvas.set_stroke_width(width);
             _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
             _canvas.begin_path();
-            _canvas.move_to({refRect.left(), refRect.get_center().Y});
-            _canvas.line_to({refRect.get_center().X, refRect.bottom()});
+            _canvas.move_to({refRect.left(), refRect.center().Y});
+            _canvas.line_to({refRect.center().X, refRect.bottom()});
             _canvas.line_to(refRect.top_right());
             _canvas.stroke();
         } break;
@@ -309,14 +309,14 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
             _canvas.set_stroke_width(width);
             _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
             _canvas.begin_path();
-            _canvas.circle(refRect.get_center(), width);
+            _canvas.circle(refRect.center(), width);
             _canvas.stroke();
         } break;
         case element::tick::type::Disc: {
             f32 const width {style.Size.calc(std::min(refRect.height(), refRect.width())) / 2};
             _canvas.set_fill_style(get_paint(style.Foreground, refRect));
             _canvas.begin_path();
-            _canvas.circle(refRect.get_center(), width);
+            _canvas.circle(refRect.center(), width);
             _canvas.fill();
         } break;
         case element::tick::type::Rect: {
@@ -331,7 +331,7 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
         } break;
         case element::tick::type::Square: {
             f32 const    width {style.Size.calc(std::min(refRect.height(), refRect.width()))};
-            rect_f const newRect {refRect.get_center() - point_f {width, width} / 2, {width, width}};
+            rect_f const newRect {refRect.center() - point_f {width, width} / 2, {width, width}};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
             _canvas.begin_path();
             _canvas.rect(newRect);
@@ -443,7 +443,7 @@ void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f cons
         _canvas.begin_path();
         _canvas.triangle(
             {navRect.left() + 2, navRect.top() + 4},
-            {navRect.get_center().X, navRect.bottom() - 4},
+            {navRect.center().X, navRect.bottom() - 4},
             {navRect.right() - 2, navRect.top() + 4});
         _canvas.fill();
     } break;
@@ -466,7 +466,7 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
 
         switch (decStyle.Type) {
         case element::nav_arrow::type::Triangle: {
-            point_f const center {navRect.get_center()};
+            point_f const center {navRect.center()};
             _canvas.set_fill_style(get_paint(decStyle.Foreground, navRect));
             _canvas.begin_path();
             _canvas.triangle(
@@ -489,7 +489,7 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
 
         switch (incStyle.Type) {
         case element::nav_arrow::type::Triangle: {
-            point_f const center {navRect.get_center()};
+            point_f const center {navRect.center()};
             _canvas.set_fill_style(get_paint(incStyle.Foreground, navRect));
             _canvas.begin_path();
             _canvas.triangle(
@@ -623,7 +623,7 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
             },
             [&](radial_gradient const& arg) -> canvas_paint {
                 return _canvas.create_radial_gradient(
-                    rect.get_center(),
+                    rect.center(),
                     arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
                     arg.Scale, arg.Colors);
             },

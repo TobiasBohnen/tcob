@@ -303,7 +303,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::ComputeRect(rect_f cons
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, SplitThreshold, MaxDepth>::node::GetQuadrant(rect_f const& nodeRect, rect_f const& valueRect) -> i32
 {
-    auto const center {nodeRect.get_center()};
+    auto const center {nodeRect.center()};
 
     if (valueRect.right() < center.X) {                  // West
         if (valueRect.bottom() < center.Y) { return 0; } // North West

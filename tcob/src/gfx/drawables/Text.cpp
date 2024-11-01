@@ -54,7 +54,7 @@ auto text::get_pivot() const -> point_f
         return Bounds->top_left() + *Pivot();
     }
 
-    return Bounds->get_center();
+    return Bounds->center();
 }
 
 void text::on_transform_changed()

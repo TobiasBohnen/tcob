@@ -1115,7 +1115,7 @@ auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& 
 
 auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> canvas_paint
 {
-    auto const& c {rect.get_center()};
+    auto const& c {rect.center()};
     return {
         .XForm   = {1.0f, 0.0f, c.X,
                     0.0f, 1.0f, c.Y,

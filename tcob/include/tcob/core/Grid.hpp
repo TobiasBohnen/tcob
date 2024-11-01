@@ -23,6 +23,8 @@ public:
 
     auto at(point_type pos) -> T&;
     auto at(point_type pos) const -> T const&;
+    auto at(usize idx) -> T&;
+    auto at(usize idx) const -> T const&;
 
     void fill(T const& value);
 

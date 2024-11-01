@@ -40,8 +40,8 @@ public:
     auto constexpr width() const -> T;
     auto constexpr height() const -> T;
 
-    auto constexpr get_center() const -> point_f;
-    auto constexpr get_local_center() const -> point_f;
+    auto constexpr center() const -> point_f;
+    auto constexpr local_center() const -> point_f;
 
     template <Arithmetic U>
     void constexpr move_by(point<U> const& point);

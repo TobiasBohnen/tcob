@@ -28,6 +28,18 @@ inline auto grid<T>::at(point_type pos) const -> T const&
 }
 
 template <typename T>
+inline auto grid<T>::at(usize idx) -> T&
+{
+    return _data[idx];
+}
+
+template <typename T>
+inline auto grid<T>::at(usize idx) const -> T const&
+{
+    return _data[idx];
+}
+
+template <typename T>
 inline void grid<T>::fill(T const& value)
 {
     _data = std::vector<T>(_size.Width * _size.Height, value);

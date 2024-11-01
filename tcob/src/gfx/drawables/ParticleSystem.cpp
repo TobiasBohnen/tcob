@@ -223,7 +223,7 @@ void particle::update(milliseconds delta)
     Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
 
     // transform
-    point_f const origin {Bounds.get_center()};
+    point_f const origin {Bounds.center()};
     _transform.to_identity();
     if (Scale != size_f::One) { _transform.scale_at(Scale, origin); }
     if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }

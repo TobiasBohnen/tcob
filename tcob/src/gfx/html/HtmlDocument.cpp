@@ -128,7 +128,7 @@ void document::on_draw_to(render_target& target)
 
 auto document::get_pivot() const -> point_f
 {
-    return Bounds->get_center();
+    return Bounds->center();
 }
 
 void document::on_transform_changed()

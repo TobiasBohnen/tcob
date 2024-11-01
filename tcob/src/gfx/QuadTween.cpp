@@ -234,7 +234,7 @@ namespace effect {
                 center.X = rect.left() - maxSize.Width + rect.width();
                 break;
             case horizontal_alignment::Centered:
-                center.X = rect.get_center().X - (maxSize.Width - rect.width()) / 2;
+                center.X = rect.center().X - (maxSize.Width - rect.width()) / 2;
                 break;
             case horizontal_alignment::Right:
                 center.X = rect.right();
@@ -245,7 +245,7 @@ namespace effect {
                 center.Y = rect.top() - maxSize.Height + rect.height();
                 break;
             case vertical_alignment::Middle:
-                center.Y = rect.get_center().Y - (maxSize.Height - rect.height()) / 2;
+                center.Y = rect.center().Y - (maxSize.Height - rect.height()) / 2;
                 break;
             case vertical_alignment::Bottom:
                 center.Y = rect.bottom();
@@ -268,7 +268,7 @@ namespace effect {
         for (auto& q : quads) {
             rect_f const rect {rect_f::FromLTRB(q[3].Position.X, q[3].Position.Y, q[1].Position.X, q[1].Position.Y)};
             transform    rot;
-            rot.rotate_at(degree_f {static_cast<f32>(360 * t * Speed)}, rect.get_center());
+            rot.rotate_at(degree_f {static_cast<f32>(360 * t * Speed)}, rect.center());
 
             for (u32 i {0}; i < 4; ++i) {
                 point_f const pos {rot * point_f {q[i].Position.X, q[i].Position.Y}};

@@ -378,7 +378,7 @@ void rect_shape::on_texture_region_changed(string const& texRegion)
 
 auto rect_shape::get_center() const -> point_f
 {
-    return Bounds->get_center();
+    return Bounds->center();
 }
 
 ////////////////////////////////////////////////////////////

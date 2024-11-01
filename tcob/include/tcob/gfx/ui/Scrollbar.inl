@@ -114,7 +114,7 @@ inline void scrollbar<Parent>::inject_mouse_down(point_i mp)
         if (!_overThumb) {
             calculate_value(_parent.global_to_local(mp));
         } else {
-            _dragOffset = point_i {_parent.global_to_parent_local(mp) - _paintResult.Thumb.get_center()};
+            _dragOffset = point_i {_parent.global_to_parent_local(mp) - _paintResult.Thumb.center()};
             _isDragging = true;
         }
     }

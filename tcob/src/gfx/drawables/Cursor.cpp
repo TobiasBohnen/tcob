@@ -51,7 +51,7 @@ auto cursor::get_bounds() const -> rect_i
 
 void cursor::on_update(milliseconds /* deltaTime */)
 {
-    point_f const pos {get_bounds().get_center()};
+    point_f const pos {get_bounds().center()};
     _vertex.Position = {pos.X, pos.Y};
 }
 

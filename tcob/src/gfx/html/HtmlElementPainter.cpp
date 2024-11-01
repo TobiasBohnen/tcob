@@ -220,13 +220,13 @@ void element_painter::draw_list_marker(list_marker_draw_context const& ctx)
     case list_marker_type::Circle:
         _canvas.set_stroke_style(ctx.Color);
         _canvas.begin_path();
-        _canvas.circle(ctx.Box.get_center(), ctx.Box.width());
+        _canvas.circle(ctx.Box.center(), ctx.Box.width());
         _canvas.stroke();
         break;
     case list_marker_type::Disc:
         _canvas.set_fill_style(ctx.Color);
         _canvas.begin_path();
-        _canvas.circle(ctx.Box.get_center(), ctx.Box.width());
+        _canvas.circle(ctx.Box.center(), ctx.Box.width());
         _canvas.fill();
         break;
     case list_marker_type::Square:

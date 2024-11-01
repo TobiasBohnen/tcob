@@ -140,7 +140,7 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
         if (!_overThumb) {
             calculate_value(global_to_local(ev.Position));
         } else {
-            _dragOffset = point_i {global_to_parent_local(ev.Position) - _paintResult.Thumb.get_center()};
+            _dragOffset = point_i {global_to_parent_local(ev.Position) - _paintResult.Thumb.center()};
             _isDragging = true;
         }
         ev.Handled = true;

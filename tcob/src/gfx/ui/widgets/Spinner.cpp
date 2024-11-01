@@ -79,7 +79,7 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
         auto const*  normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         rect_f const navRect {normalArrow->NavArrow.calc(rect)};
         if (navRect.contains(ev.Position)) {
-            if (ev.Position.Y <= navRect.get_center().Y) {
+            if (ev.Position.Y <= navRect.center().Y) {
                 if (_hoverArrow != arrow::Increase) {
                     _hoverArrow = arrow::Increase;
                     force_redraw(get_name() + ": arrow hover changed");

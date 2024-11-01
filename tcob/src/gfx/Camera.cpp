@@ -42,13 +42,13 @@ void camera::move_by(point_f offset)
 
 void camera::look_at(point_f pos)
 {
-    point_f const offset {get_transformed_viewport().get_local_center() * point_f {Zoom.Width, Zoom.Height}};
+    point_f const offset {get_transformed_viewport().local_center() * point_f {Zoom.Width, Zoom.Height}};
     Position = pos - offset;
 }
 
 auto camera::get_look_at() const -> point_f
 {
-    return Position + get_transformed_viewport().get_local_center() * point_f {Zoom.Width, Zoom.Height};
+    return Position + get_transformed_viewport().local_center() * point_f {Zoom.Width, Zoom.Height};
 }
 
 auto camera::convert_world_to_screen(rect_f const& rect) const -> rect_i
