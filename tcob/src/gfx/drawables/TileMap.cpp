@@ -84,10 +84,10 @@ void tilemap_base::set_tile_index(uid layerId, point_i pos, tile_index_t setIdx)
 
     i32 quadIndex {0};
     switch (RenderDirection()) {
-    case render_direction::RightDown: quadIndex = pos.Y * layer.Size.Width + pos.X; break;
-    case render_direction::LeftDown: quadIndex = pos.Y * layer.Size.Width + (layer.Size.Width - 1 - pos.X); break;
-    case render_direction::RightUp: quadIndex = (layer.Size.Height - 1 - pos.Y) * layer.Size.Width + pos.X; break;
-    case render_direction::LeftUp: quadIndex = (layer.Size.Height - 1 - pos.Y) * layer.Size.Width + (layer.Size.Width - 1 - pos.X); break;
+    case render_direction::RightDown: quadIndex = pos.Y * layer.Size.Width + pos.X + layer.TileMapStart; break;
+    case render_direction::LeftDown: quadIndex = pos.Y * layer.Size.Width + (layer.Size.Width - 1 - pos.X) + layer.TileMapStart; break;
+    case render_direction::RightUp: quadIndex = (layer.Size.Height - 1 - pos.Y) * layer.Size.Width + pos.X + layer.TileMapStart; break;
+    case render_direction::LeftUp: quadIndex = (layer.Size.Height - 1 - pos.Y) * layer.Size.Width + (layer.Size.Width - 1 - pos.X) + layer.TileMapStart; break;
     }
 
     auto& quad {_quads[quadIndex]};
