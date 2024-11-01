@@ -40,19 +40,24 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
 
     geometry::set_position(q, rect);
     geometry::set_color(q, tile.Color);
-    if (idx != 0) {
+    if (idx == 0) {
+        geometry::set_color(q, colors::Transparent);
+    } else if (Material->Texture && Material->Texture->has_region(tile.TextureRegion)) {
         geometry::set_texcoords(q, Material->Texture->get_region(tile.TextureRegion), tile.FlipHorizontally, tile.FlipVertically);
     } else {
-        geometry::set_color(q, colors::Transparent);
+        geometry::set_texcoords(q, {{0, 0, 1, 1}, 1});
     }
 }
 
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-tileset<T>::tileset(std::unordered_map<tile_index_t, tile_type> const& set)
-    : _set {set}
+inline tileset<T>::tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items)
 {
+    _set.reserve(items.size());
+    for (auto const& item : items) {
+        _set[item.first] = item.second;
+    }
 }
 
 template <typename T>

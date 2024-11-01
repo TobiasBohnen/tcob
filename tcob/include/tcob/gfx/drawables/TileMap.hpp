@@ -32,7 +32,7 @@ class tileset {
 public:
     using tile_type = T;
 
-    tileset(std::unordered_map<tile_index_t, tile_type> const& set);
+    tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items);
 
     auto get_tile(tile_index_t idx) const -> tile_type const&;
     void set_tile(tile_index_t idx, tile_type const& tile_type);
