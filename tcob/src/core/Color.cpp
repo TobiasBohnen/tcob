@@ -166,13 +166,25 @@ auto color::FromString(string_view name) -> color
     }
 
     if (name[0] == '#') {
-        u32               x {0};
         std::stringstream ss {};
-        if (name.size() == 7) {
-            ss << std::hex << name.substr(1) << "ff";
-        } else if (name.size() == 9) {
-            ss << std::hex << name.substr(1);
+
+        ss << std::hex;
+        string_view const color {name.substr(1)};
+        switch (color.size()) {
+        case 3:
+            for (char ch : color) { ss << std::string(2, ch); }
+            ss << "ff";
+            break;
+        case 4:
+            for (char ch : color) { ss << std::string(2, ch); }
+            break;
+        case 6:
+            ss << color << "ff";
+            break;
+        case 8: ss << color; break;
         }
+
+        u32 x {0};
         ss >> x;
         return color::FromRGBA(x);
     }
