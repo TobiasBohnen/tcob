@@ -3,11 +3,9 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/Animation.hpp"
+#include "tcob/gfx/animation/Animation.hpp"
 
 namespace tcob::gfx {
-using namespace std::chrono_literals;
-using namespace tcob::tweening;
 
 auto frame_animation::operator()(f64 t) const -> string
 {

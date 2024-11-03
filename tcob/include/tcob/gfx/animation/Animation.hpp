@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "tcob/core/tweening/Tween.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -43,6 +43,6 @@ public:
     static inline char const* asset_name {"frame_animation"};
 };
 
-using frame_animation_tween = tweening::callable_tween<frame_animation>;
+using frame_animation_tween = callable_tween<frame_animation>;
 
 }

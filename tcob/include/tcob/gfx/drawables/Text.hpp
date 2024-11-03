@@ -12,11 +12,11 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Material.hpp"
-#include "tcob/gfx/QuadTween.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/Transformable.hpp"
+#include "tcob/gfx/animation/QuadTween.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {

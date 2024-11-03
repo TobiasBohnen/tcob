@@ -118,8 +118,6 @@ void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev 
 
 void text_box::on_focus_gained()
 {
-    using namespace tcob::tweening;
-
     if (auto const* style {get_style<text_box::style>()}) {
         _caretTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate, 1.0f, 0.0f);
         _caretTween->Value.Changed.connect([&](auto val) {

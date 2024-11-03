@@ -19,7 +19,6 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/data/ConfigTypes.hpp"
-#include "tcob/gfx/Animation.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -27,6 +26,7 @@
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/drawables/Cursor.hpp"
 
 namespace tcob::detail {

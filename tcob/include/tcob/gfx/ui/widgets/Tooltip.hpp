@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/tweening/Tween.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 
 namespace tcob::gfx::ui {
@@ -34,6 +34,6 @@ protected:
     void virtual on_popup(widget* top);
 
 private:
-    std::unique_ptr<tweening::linear_tween<f32>> _fadeInTween;
+    std::unique_ptr<linear_tween<f32>> _fadeInTween;
 };
 }

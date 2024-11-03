@@ -14,7 +14,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/io/Stream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/random/Random.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tweening/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Color.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Common.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces.cpp
@@ -51,8 +50,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/random/Engine.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Random.hpp
     ${TCOB_INC_DIR}/tcob/core/random/Random.inl
-    ${TCOB_INC_DIR}/tcob/core/tweening/Tween.hpp
-    ${TCOB_INC_DIR}/tcob/core/tweening/Tween.inl
     ${TCOB_INC_DIR}/tcob/core/AngleUnits.hpp
     ${TCOB_INC_DIR}/tcob/core/AngleUnits.inl
     ${TCOB_INC_DIR}/tcob/core/Color.hpp

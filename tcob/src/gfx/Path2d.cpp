@@ -6,8 +6,8 @@
 #include "tcob/gfx/Path2d.hpp"
 
 #include "tcob/core/StringUtils.hpp"
-#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::gfx {
 
@@ -322,7 +322,7 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 3;
         } break;
         case BezierTo: {
-            tweening::func::quad_bezier_curve func;
+            easing::quad_bezier_curve func;
             func.StartPoint   = {Commands[idx + 1], Commands[idx + 2]};
             func.ControlPoint = {Commands[idx + 3], Commands[idx + 4]};
             func.EndPoint     = {Commands[idx + 5], Commands[idx + 6]};
@@ -331,7 +331,7 @@ auto path2d::polygonize() -> std::vector<polygon>
             idx += 7;
         } break;
         case Close: {
-            tweening::func::linear<point_f> func;
+            easing::linear<point_f> func;
             func.StartValue = points[0];
             func.EndValue   = curPos;
             for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }

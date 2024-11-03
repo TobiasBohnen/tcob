@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/QuadTween.hpp"
+#include "tcob/gfx/animation/QuadTween.hpp"
 
 #include <algorithm>
 
@@ -147,8 +147,8 @@ namespace effect {
 
     void blink::operator()(f64 t, std::span<quad> quads)
     {
-        tweening::func::square_wave<bool> wave {.Frequency = Frequency};
-        bool const                        flip {wave(t)};
+        easing::square_wave<bool> wave {.Frequency = Frequency};
+        bool const                flip {wave(t)};
         for (auto& q : quads) {
             geometry::set_color(q, flip ? Color0 : Color1);
         }
@@ -195,8 +195,8 @@ namespace effect {
         for (usize idx {0}; idx < quads.size(); ++idx) {
             quad& dst {quads[idx]};
 
-            tweening::func::sine_wave<f64> wave {.MinValue = 0, .MaxValue = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
-            f64 const                      val {wave(t) * Height};
+            easing::sine_wave<f64> wave {.MinValue = 0, .MaxValue = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
+            f64 const              val {wave(t) * Height};
 
             for (u32 i {0}; i < 4; ++i) {
                 dst[i].Position.Y = static_cast<f32>(dst[i].Position.Y + val);

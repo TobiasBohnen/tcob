@@ -6,8 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
@@ -50,9 +50,9 @@ protected:
     void on_styles_changed() override;
 
 private:
-    std::unique_ptr<tweening::square_wave_tween<bool>> _caretTween;
-    usize                                              _caretPos {0};
-    bool                                               _caretVisible {false};
+    std::unique_ptr<square_wave_tween<bool>> _caretTween;
+    usize                                    _caretPos {0};
+    bool                                     _caretVisible {false};
 
     text_formatter::result _formatResult;
     usize                  _textLength {0};

@@ -43,6 +43,7 @@
 #include <tcob/core/TypeFactory.hpp>
 #include <tcob/core/assets/Asset.hpp>
 #include <tcob/core/assets/AssetLibrary.hpp>
+#include <tcob/core/easing/Easing.hpp>
 #include <tcob/core/input/Input.hpp>
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/core/io/FileSystem.hpp>
@@ -53,7 +54,6 @@
 #include <tcob/core/random/Distribution.hpp>
 #include <tcob/core/random/Engine.hpp>
 #include <tcob/core/random/Random.hpp>
-#include <tcob/core/tweening/Tween.hpp>
 
 #include <tcob/data/CSV.hpp>
 #include <tcob/data/Config.hpp>
@@ -69,7 +69,6 @@
 #include <tcob/data/SqliteStatement.hpp>
 #include <tcob/data/SqliteTable.hpp>
 
-#include <tcob/gfx/Animation.hpp>
 #include <tcob/gfx/Camera.hpp>
 #include <tcob/gfx/Canvas.hpp>
 #include <tcob/gfx/ColorGradient.hpp>
@@ -83,7 +82,6 @@
 #include <tcob/gfx/Noise.hpp>
 #include <tcob/gfx/Path2d.hpp>
 #include <tcob/gfx/Polygon.hpp>
-#include <tcob/gfx/QuadTween.hpp>
 #include <tcob/gfx/Quadtree.hpp>
 #include <tcob/gfx/Ray.hpp>
 #include <tcob/gfx/RenderSystem.hpp>
@@ -107,7 +105,12 @@
 #include <tcob/gfx/drawables/Shape.hpp>
 #include <tcob/gfx/drawables/Text.hpp>
 #include <tcob/gfx/drawables/TileMap.hpp>
+
 #include <tcob/gfx/html/HtmlDocument.hpp>
+
+#include <tcob/gfx/animation/Animation.hpp>
+#include <tcob/gfx/animation/QuadTween.hpp>
+#include <tcob/gfx/animation/Tween.hpp>
 
 #include <tcob/gfx/ui/Form.hpp>
 #include <tcob/gfx/ui/Layout.hpp>

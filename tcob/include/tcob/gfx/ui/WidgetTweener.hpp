@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/tweening/Tween.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
@@ -25,10 +25,10 @@ public:
     void reset(f32 val);
 
 private:
-    widget&                                      _parent;
-    std::unique_ptr<tweening::linear_tween<f32>> _tween;
-    f32                                          _val {0.0f};
-    f32                                          _toval {0.0f};
+    widget&                            _parent;
+    std::unique_ptr<linear_tween<f32>> _tween;
+    f32                                _val {0.0f};
+    f32                                _toval {0.0f};
 };
 
 }

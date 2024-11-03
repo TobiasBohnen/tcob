@@ -1,6 +1,5 @@
 # gfx
 list(APPEND SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/Animation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Canvas.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorGradient.cpp
@@ -14,7 +13,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Path2d.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RenderSystem.cpp
@@ -45,6 +43,9 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pnm.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/animation/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CanvasWidget.cpp
@@ -78,7 +79,6 @@ list(APPEND SRC
 )
 
 list(APPEND HDR
-    ${TCOB_INC_DIR}/tcob/gfx/Animation.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Camera.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Canvas.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ColorGradient.hpp
@@ -93,8 +93,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Noise.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Path2d.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/QuadTween.inl
     ${TCOB_INC_DIR}/tcob/gfx/Quadtree.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Quadtree.inl
     ${TCOB_INC_DIR}/tcob/gfx/Ray.hpp
@@ -114,6 +112,11 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/UniformBuffer.inl
     ${TCOB_INC_DIR}/tcob/gfx/VertexArray.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Window.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/animation/Animation.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/animation/QuadTween.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/animation/QuadTween.inl
+    ${TCOB_INC_DIR}/tcob/gfx/animation/Tween.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/animation/Tween.inl
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Background.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Cursor.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Drawable.hpp

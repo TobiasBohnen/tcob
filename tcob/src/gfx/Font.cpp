@@ -10,7 +10,7 @@
 
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/io/FileStream.hpp"
-#include "tcob/core/tweening/Tween.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 
 #include "FontEngine.hpp"
 
@@ -193,7 +193,7 @@ auto font::polygonize_text(utf8_string_view text, bool kerning) -> std::vector<p
         curPos = p;
     };
     cb.ConicTo = [&](point_f p0, point_f p1) {
-        tweening::func::quad_bezier_curve func;
+        easing::quad_bezier_curve func;
         func.StartPoint   = curPos;
         func.ControlPoint = p0;
         func.EndPoint     = p1;
@@ -201,7 +201,7 @@ auto font::polygonize_text(utf8_string_view text, bool kerning) -> std::vector<p
         curPos = p1;
     };
     cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) {
-        tweening::func::cubic_bezier_curve func;
+        easing::cubic_bezier_curve func;
         func.StartPoint    = curPos;
         func.ControlPoint0 = p0;
         func.ControlPoint1 = p1;

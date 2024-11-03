@@ -14,8 +14,8 @@
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/random/Random.hpp"
-#include "tcob/core/tweening/Tween.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::gfx {
 
@@ -29,7 +29,7 @@ concept QuadTweenFunction =
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_tween_base : public tweening::tween_base {
+class TCOB_API quad_tween_base : public tween_base {
 public:
     quad_tween_base(milliseconds duration);
 

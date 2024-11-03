@@ -137,8 +137,6 @@ void terminal::noecho()
 
 void terminal::flash()
 {
-    using namespace tcob::tweening;
-
     if (auto const* style {get_style<terminal::style>()}) {
         _flashTween = make_unique_tween<square_wave_tween<bool>>(style->FlashDuration, 1.0f, 0.0f);
         _flashTween->Value.Changed.connect([&](auto) {
@@ -449,7 +447,6 @@ void terminal::on_mouse_down(input::mouse::button_event const& ev)
 void terminal::on_focus_gained()
 {
     if (!_showCursor) { return; }
-    using namespace tcob::tweening;
 
     if (auto const* style {get_style<terminal::style>()}) {
         _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);

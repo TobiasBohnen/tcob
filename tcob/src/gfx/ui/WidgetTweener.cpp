@@ -20,7 +20,6 @@ void widget_tweener::start(f32 toValue, milliseconds delay)
         _val = toValue;
         _parent.force_redraw(_parent.get_name() + ": Tween start");
     } else {
-        using namespace tcob::tweening;
         _tween = make_unique_tween<linear_tween<f32>>(delay, _val, toValue);
         _tween->Value.Changed.connect([&](auto val) {
             _val = val;

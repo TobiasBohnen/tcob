@@ -3,9 +3,9 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/core/tweening/Tween.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 
-namespace tcob::tweening {
+namespace tcob::gfx {
 using namespace std::chrono_literals;
 
 tween_base::tween_base(milliseconds duration)
@@ -140,12 +140,12 @@ void tween_base::on_update(milliseconds deltaTime)
 
 ////////////////////////////////////////////////////////////
 
-auto queue::is_empty() const -> bool
+auto tween_queue::is_empty() const -> bool
 {
     return _queue.empty();
 }
 
-void queue::start(playback_mode mode)
+void tween_queue::start(playback_mode mode)
 {
     if (!_isRunning && !is_empty()) {
         _isRunning = true;
@@ -155,7 +155,7 @@ void queue::start(playback_mode mode)
     }
 }
 
-void queue::stop()
+void tween_queue::stop()
 {
     if (_isRunning) {
         _isRunning = false;
@@ -164,12 +164,12 @@ void queue::stop()
     }
 }
 
-void queue::pop()
+void tween_queue::pop()
 {
     _queue.pop();
 }
 
-void queue::on_update(milliseconds deltaTime)
+void tween_queue::on_update(milliseconds deltaTime)
 {
     if (!_isRunning || is_empty()) {
         return;
