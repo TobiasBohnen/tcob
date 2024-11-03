@@ -34,7 +34,7 @@ private:
 
 class TCOB_API perlin_noise final : public noise_base {
 public:
-    explicit perlin_noise(f32 scale = 1.0f, u64 seed = clock::now().time_since_epoch().count());
+    explicit perlin_noise(f32 scale = 1.0f, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
     auto operator()(point_f p) const -> f32 override;
 
@@ -51,7 +51,7 @@ private:
 
 class TCOB_API cellular_noise final : public noise_base {
 public:
-    explicit cellular_noise(i32 points, u64 seed = clock::now().time_since_epoch().count());
+    explicit cellular_noise(i32 points, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
     auto operator()(point_f p) const -> f32 override;
 
@@ -66,7 +66,7 @@ private:
 
 class TCOB_API value_noise final : public noise_base {
 public:
-    value_noise(i32 gridSize, u64 seed = clock::now().time_since_epoch().count());
+    value_noise(i32 gridSize, u64 seed = static_cast<u64>(clock::now().time_since_epoch().count()));
 
     auto operator()(point_f p) const -> f32 override;
 
