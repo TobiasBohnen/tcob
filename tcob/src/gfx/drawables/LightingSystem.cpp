@@ -9,6 +9,7 @@
 #include <mutex>
 #include <optional>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/gfx/Ray.hpp"
@@ -34,14 +35,14 @@ lighting_system::lighting_system(bool multiThreaded)
 
 void lighting_system::remove_light_source(light_source const& light)
 {
-    _lightSources.erase(std::ranges::find_if(_lightSources, [&light](auto const& val) {
+    helper::erase(_lightSources, [&light](auto const& val) {
         if (val.get() == &light) {
             val.get()->_parent = nullptr;
             return true;
         }
 
         return false;
-    }));
+    });
 
     _isDirty = true;
 }
@@ -65,14 +66,14 @@ void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
         mark_lights_dirty();
     }
 
-    _shadowCasters.erase(std::ranges::find_if(_shadowCasters, [&shadow](auto const& val) {
+    helper::erase(_shadowCasters, [&shadow](auto const& val) {
         if (val.get() == &shadow) {
             val.get()->_parent = nullptr;
             return true;
         }
 
         return false;
-    }));
+    });
 
     _isDirty = true;
 }

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/gfx/Renderer.hpp"
 
 namespace tcob::gfx {
@@ -45,9 +46,7 @@ shape_batch::shape_batch()
 
 void shape_batch::remove_shape(shape const& shape)
 {
-    _children.erase(std::ranges::find_if(_children, [&shape](auto const& val) {
-        return val.get() == &shape;
-    }));
+    helper::erase(_children, [&shape](auto const& val) { return val.get() == &shape; });
 }
 
 void shape_batch::clear()

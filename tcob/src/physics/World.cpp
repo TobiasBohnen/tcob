@@ -7,10 +7,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <memory>
+
     #include <B2D.hpp>
 
-    #include <algorithm>
-    #include <memory>
+    #include "tcob/core/Common.hpp"
 
 namespace tcob::physics {
 
@@ -56,9 +57,7 @@ auto world::create_body(body_transform const& xform, body::settings const& bodyS
 
 void world::remove_body(body const& body)
 {
-    _bodies.erase(std::ranges::find_if(_bodies, [ptr = &body](auto const& val) {
-        return val.get() == ptr;
-    }));
+    helper::erase(_bodies, [ptr = &body](auto const& val) { return val.get() == ptr; });
 }
 
 auto world::find_body(shape const& s) -> std::shared_ptr<body>
@@ -76,9 +75,7 @@ auto world::find_body(shape const& s) -> std::shared_ptr<body>
 
 void world::remove_joint(joint const& joint)
 {
-    _joints.erase(std::ranges::find_if(_joints, [ptr = &joint](auto const& val) {
-        return val.get() == ptr;
-    }));
+    helper::erase(_joints, [ptr = &joint](auto const& val) { return val.get() == ptr; });
 }
 
 auto world::get_body_events() const -> body_events

@@ -5,11 +5,12 @@
 
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
 
-#include "tcob/core/ServiceLocator.hpp"
-#include "tcob/core/TaskManager.hpp"
-
 #include <algorithm>
 #include <utility>
+
+#include "tcob/core/Common.hpp"
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
 
 namespace tcob::gfx {
 using namespace std::chrono_literals;
@@ -51,9 +52,7 @@ void particle_system::stop()
 
 void particle_system::remove_emitter(particle_emitter_base const& emitter)
 {
-    _emitters.erase(std::ranges::find_if(_emitters, [&emitter](auto const& val) {
-        return val.get() == &emitter;
-    }));
+    helper::erase(_emitters, [&emitter](auto const& val) { return val.get() == &emitter; });
 }
 
 void particle_system::clear_emitters()

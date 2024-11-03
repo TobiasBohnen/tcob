@@ -7,10 +7,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
-    #include <algorithm>
     #include <cassert>
 
     #include "B2D.hpp"
+
+    #include "tcob/core/Common.hpp"
 
 namespace tcob::physics {
 
@@ -104,9 +105,7 @@ auto body::get_shapes() -> std::span<std::shared_ptr<shape>>
 
 void body::remove_shape(shape const& shapePtr)
 {
-    _shapes.erase(std::ranges::find_if(_shapes, [&shapePtr](auto const& val) {
-        return val.get() == &shapePtr;
-    }));
+    helper::erase(_shapes, [&shapePtr](auto const& val) { return val.get() == &shapePtr; });
 }
 
 void body::wake_up() const

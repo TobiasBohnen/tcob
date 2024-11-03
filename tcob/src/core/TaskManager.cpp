@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <atomic>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/random/Random.hpp"
 
 namespace tcob {
@@ -66,8 +67,8 @@ void task_manager::cancel_deferred(uid id)
 {
     std::scoped_lock lock {_deferredMutex};
 
-    _deferredQueueFront.erase(std::ranges::find_if(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; }));
-    _deferredQueueBack.erase(std::ranges::find_if(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; }));
+    helper::erase(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; });
+    helper::erase(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
 }
 
 auto task_manager::get_thread_count() const -> isize
@@ -121,5 +122,4 @@ void task_manager::worker_thread(std::stop_token const& stopToken)
         task();
     }
 }
-
 }

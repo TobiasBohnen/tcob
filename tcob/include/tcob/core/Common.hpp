@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <algorithm>
 #include <type_traits>
 #include <utility>
 
@@ -41,6 +42,13 @@ namespace helper {
     TCOB_API auto get_bits(u32 i, i32 offset, i32 count) -> u32;
 
     TCOB_API auto hash_combine(usize h1, usize h2) -> usize;
+
+    void erase(auto&& container, auto&& pred)
+    {
+        if (auto it {std::ranges::find_if(container, pred)}; it != container.end()) {
+            container.erase(it);
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////
