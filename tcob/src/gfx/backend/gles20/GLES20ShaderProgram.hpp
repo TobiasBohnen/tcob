@@ -21,8 +21,6 @@ public:
 
     auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool override;
 
-    auto get_uniform_block_binding(string const& name) const -> i32 override;
-
     auto get_uniform_location(string const& name) const -> i32;
 
     void set_uniform(i32 loc, i32 x) const;

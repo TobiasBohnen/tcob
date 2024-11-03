@@ -53,8 +53,6 @@ class null_shader : public tcob::gfx::render_backend::shader_base {
 public:
     auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool override;
 
-    auto get_uniform_block_binding(string const& name) const -> i32 override;
-
     auto is_valid() const -> bool override;
 };
 

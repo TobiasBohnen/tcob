@@ -70,8 +70,6 @@ public:
 
     auto virtual compile(string const& vert, string const& frag) -> bool = 0; // TODO: change to files
 
-    auto virtual get_uniform_block_binding(string const& name) const -> i32 = 0;
-
     auto virtual is_valid() const -> bool = 0;
 };
 

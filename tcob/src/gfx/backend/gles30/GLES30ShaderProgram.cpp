@@ -89,14 +89,6 @@ auto gl_shader::compile(string const& vertexShaderSource, string const& fragment
     return true;
 }
 
-auto gl_shader::get_uniform_block_binding(string const& name) const -> i32
-{
-    assert(ID);
-    GLint i {};
-    GLCHECK(glGetActiveUniformBlockiv(ID, glGetUniformBlockIndex(ID, name.c_str()), GL_UNIFORM_BLOCK_BINDING, &i));
-    return i;
-}
-
 void gl_shader::use() const
 {
     assert(ID);

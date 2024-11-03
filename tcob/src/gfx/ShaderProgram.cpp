@@ -28,13 +28,4 @@ auto shader::create(string const& vertexShaderSource, string const& fragmentShad
     return _impl->compile(vertexShaderSource, fragmentShaderSource);
 }
 
-auto shader::get_uniform_block_binding(string const& name) -> u32
-{
-    if (!_uniformBlockBindings.contains(name)) {
-        return _uniformBlockBindings[name] = _impl->get_uniform_block_binding(name);
-    }
-
-    return _uniformBlockBindings[name];
-}
-
 } // namespace tcob

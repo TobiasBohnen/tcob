@@ -104,11 +104,6 @@ auto null_shader::compile(string const&, string const&) -> bool
     return true;
 }
 
-auto null_shader::get_uniform_block_binding(string const&) const -> i32
-{
-    return 0;
-}
-
 auto null_shader::is_valid() const -> bool
 {
     return true;
