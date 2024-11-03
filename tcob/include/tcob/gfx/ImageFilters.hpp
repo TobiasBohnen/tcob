@@ -8,14 +8,13 @@
 
 #include <array>
 
-#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API filter_base : public non_copyable {
+class TCOB_API filter_base {
 public:
     filter_base()          = default;
     virtual ~filter_base() = default;
@@ -42,7 +41,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API blur_filter : public convolution_filter<5, 5> {
+class TCOB_API blur_filter final : public convolution_filter<5, 5> {
 protected:
     auto get_factor() const -> f64 override;
     auto get_offset() const -> u8 override;
@@ -51,7 +50,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API edge_detect_filter : public convolution_filter<3, 3> {
+class TCOB_API edge_detect_filter final : public convolution_filter<3, 3> {
 protected:
     auto get_factor() const -> f64 override;
     auto get_offset() const -> u8 override;
@@ -60,7 +59,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API edge_enhance_filter : public convolution_filter<3, 3> {
+class TCOB_API edge_enhance_filter final : public convolution_filter<3, 3> {
 protected:
     auto get_factor() const -> f64 override;
     auto get_offset() const -> u8 override;
@@ -69,7 +68,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API emboss_filter : public convolution_filter<3, 3> {
+class TCOB_API emboss_filter final : public convolution_filter<3, 3> {
 protected:
     auto get_factor() const -> f64 override;
     auto get_offset() const -> u8 override;
@@ -78,7 +77,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API motion_blur_filter : public convolution_filter<9, 9> {
+class TCOB_API motion_blur_filter final : public convolution_filter<9, 9> {
 protected:
     auto get_factor() const -> f64 override;
     auto get_offset() const -> u8 override;
@@ -87,7 +86,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sharpen_filter : public convolution_filter<5, 5> {
+class TCOB_API sharpen_filter final : public convolution_filter<5, 5> {
 protected:
     auto get_factor() const -> f64 override;
     auto get_offset() const -> u8 override;
@@ -96,7 +95,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API grayscale_filter : public filter_base {
+class TCOB_API grayscale_filter final : public filter_base {
 public:
     f32 RedFactor {0.299f};
     f32 GreenFactor {0.587f};
@@ -107,7 +106,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_nearest_neighbor : public filter_base {
+class TCOB_API resize_nearest_neighbor final : public filter_base {
 public:
     size_i NewSize {};
 
@@ -116,7 +115,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API resize_bilinear : public filter_base {
+class TCOB_API resize_bilinear final : public filter_base {
 public:
     size_i NewSize {};
 

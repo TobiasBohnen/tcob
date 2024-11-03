@@ -52,6 +52,12 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
 ////////////////////////////////////////////////////////////
 
 template <typename T>
+inline tileset<T>::tileset(std::unordered_map<tile_index_t, tile_type> set)
+    : _set {std::move(set)}
+{
+}
+
+template <typename T>
 inline tileset<T>::tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items)
 {
     _set.reserve(items.size());

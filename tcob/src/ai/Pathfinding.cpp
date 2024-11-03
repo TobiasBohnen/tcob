@@ -14,6 +14,8 @@ namespace tcob::ai {
 
 auto astar_pathfinding::find_path(grid<u64> const& testGrid, point_i start, point_i finish) -> std::vector<point_i>
 {
+    if (testGrid[finish] == IMPASSABLE_COST) { return {}; }
+
     std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
     std::unordered_set<point_i>                                  used;
     std::unordered_map<point_i, point_i>                         cameFrom;

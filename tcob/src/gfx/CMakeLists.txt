@@ -7,10 +7,11 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FontEngine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FontFamily.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Path2d.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/QuadTween.cpp
@@ -84,11 +85,12 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/Gfx.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Font.hpp
     ${TCOB_INC_DIR}/tcob/gfx/FontFamily.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Geometry.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Image.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.inl
     ${TCOB_INC_DIR}/tcob/gfx/Material.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/Geometry.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Noise.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Path2d.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/QuadTween.hpp
