@@ -68,7 +68,7 @@ private:
     std::vector<std::jthread>   _taskWorkers;
     std::condition_variable_any _taskCondition;
 
-    using deferred_queue = std::deque<std::pair<def_func, i32>>;
+    using deferred_queue = std::deque<std::pair<def_func, uid>>;
     deferred_queue       _deferredQueueFront {};
     deferred_queue       _deferredQueueBack {};
     std::recursive_mutex _deferredMutex {};
