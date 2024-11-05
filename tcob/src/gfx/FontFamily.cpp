@@ -30,7 +30,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
 
     if (has_style(retValue)) { return retValue; }
 
-    auto const ascendWhile {[&]() {
+    auto const ascend {[&]() {
         while (static_cast<i32>(retValue.Weight) <= static_cast<i32>(font::weight::Heavy)) {
             retValue.Weight = static_cast<font::weight>(static_cast<i32>(retValue.Weight) + 100);
             if (has_style(retValue)) { return true; }
@@ -38,7 +38,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
         return false;
     }};
 
-    auto const descendWhile {[&]() {
+    auto const descend {[&]() {
         while (static_cast<i32>(retValue.Weight) > 0) {
             retValue.Weight = static_cast<font::weight>(static_cast<i32>(retValue.Weight) - 100);
             if (has_style(retValue)) { return true; }
@@ -56,10 +56,10 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
         // If no match is found, look for available weights less than the target, in descending order.
         retValue.Weight = font::weight::Normal;
         if (has_style(retValue)) { return retValue; }
-        if (descendWhile()) { return retValue; }
+        if (descend()) { return retValue; }
         // If no match is found, look for available weights greater than 500, in ascending order.
         retValue.Weight = font::weight::Medium;
-        if (ascendWhile()) { return retValue; }
+        if (ascend()) { return retValue; }
 
         return std::nullopt;
     }
@@ -67,19 +67,19 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
     // If a weight less than 400 is given,
     if (static_cast<i32>(retValue.Weight) < 400) {
         // look for available weights less than the target, in descending order.
-        if (descendWhile()) { return retValue; }
+        if (descend()) { return retValue; }
         // If no match is found, look for available weights greater than the target, in ascending order.
         retValue.Weight = style.Weight;
-        if (ascendWhile()) { return retValue; }
+        if (ascend()) { return retValue; }
     }
 
     // If a weight greater than 500 is given,
     if (static_cast<i32>(retValue.Weight) > 500) {
         // look for available weights greater than the target, in ascending order.
-        if (ascendWhile()) { return retValue; }
+        if (ascend()) { return retValue; }
         // If no match is found, look for available weights less than the target, in descending order.
         retValue.Weight = style.Weight;
-        if (descendWhile()) { return retValue; }
+        if (descend()) { return retValue; }
     }
 
     return std::nullopt;
@@ -136,15 +136,6 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
 void font_family::clear_assets()
 {
     _fontAssets.clear();
-}
-
-auto font_family::get_font_count() const -> isize
-{
-    isize retValue {0};
-    for (auto const& a : _fontAssets) {
-        retValue += std::ssize(a.second);
-    }
-    return retValue;
 }
 
 void font_family::FindSources(font_family& fam, path const& source)

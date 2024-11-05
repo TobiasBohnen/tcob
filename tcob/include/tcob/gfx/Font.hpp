@@ -31,7 +31,7 @@ struct glyph {
 };
 
 struct rendered_glyph : glyph {
-    texture_region TexRegion {rect_f::Zero, 0};
+    texture_region TextureRegion {rect_f::Zero, 0};
 };
 
 struct decompose_callbacks {

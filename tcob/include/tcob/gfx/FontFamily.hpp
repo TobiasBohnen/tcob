@@ -27,8 +27,6 @@ public:
 
     void clear_assets();
 
-    auto get_font_count() const -> isize;
-
     void static FindSources(font_family& fam, path const& source);
     void static SingleFont(font_family& fam, std::span<ubyte const> font);
 

@@ -1,4 +1,4 @@
-tcob - total carnage over bayreuth
+tcob
 
 MIT License
 
@@ -21,8 +21,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
------------------------------------------------------------------------------------
-Canvas.hpp,Canvas.cpp,GLNVGcontext.hpp,GLNVGcontext.cpp,GLESNVGcontext.hpp,GLESNVGcontext.cpp,nanovg.frag,nanovg.vert
-based on nanovg:
-Copyright (c) 2013 Mikko Mononen memon@inside.org

@@ -34,10 +34,10 @@ auto gl_render_system::get_capabilities() const -> capabilities
 
     std::array<f32, 2> val0 {};
     glGetFloatv(GL_POINT_SIZE_RANGE, val0.data());
-    retValue.PointSizeRange = {val0[0], val0[1]};
-    glGetFloatv(GL_POINT_SIZE_GRANULARITY, &retValue.PointSizeGranularity);
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.MaxTextureSize);
-    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &retValue.MaxArrayTextureLayers);
+    retValue.PointSize.Range = {val0[0], val0[1]};
+    glGetFloatv(GL_POINT_SIZE_GRANULARITY, &retValue.PointSize.Granularity);
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.Texture.MaxSize);
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &retValue.Texture.MaxLayers);
 
     return retValue;
 }

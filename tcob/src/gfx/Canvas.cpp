@@ -1318,13 +1318,13 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
             auto const& quad {token.Quads[i]};
             auto const& posRect {quad.Rect};
 
-            auto const& uvRect {quad.TexRegion.UVRect};
+            auto const& uvRect {quad.TextureRegion.UVRect};
             f32 const   uvLeft {uvRect.left()};
             f32 const   uvRight {uvRect.right()};
             f32 const   uvTop {uvRect.top()};
             f32 const   uvBottom {uvRect.bottom()};
 
-            f32 const level {static_cast<f32>(quad.TexRegion.Level)};
+            f32 const level {static_cast<f32>(quad.TextureRegion.Level)};
 
             point_f topLeft {}, topRight {}, bottomLeft {}, bottomRight {};
 

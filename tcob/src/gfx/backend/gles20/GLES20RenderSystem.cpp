@@ -30,10 +30,10 @@ auto gl_render_system::get_capabilities() const -> capabilities
 {
     capabilities retValue;
 
-    retValue.PointSizeRange       = {0.0f, 4096.0f};
-    retValue.PointSizeGranularity = 0.01f;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.MaxTextureSize);
-    retValue.MaxArrayTextureLayers = 1;
+    retValue.PointSize.Range       = {0.0f, 4096.0f};
+    retValue.PointSize.Granularity = 0.01f;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.Texture.MaxSize);
+    retValue.Texture.MaxLayers = 1;
 
     return retValue;
 }

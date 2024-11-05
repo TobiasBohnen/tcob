@@ -252,7 +252,7 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
                 } else {
                     quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.Size} * scale};
                 }
-                quadDef.TexRegion = glyph.TexRegion;
+                quadDef.TextureRegion = glyph.TextureRegion;
 
                 retValue.QuadCount++;
                 x += glyph.AdvanceX * scale;

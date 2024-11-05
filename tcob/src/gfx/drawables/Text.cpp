@@ -116,7 +116,7 @@ void text::format()
             c.A = alpha;
             geometry::set_color(q, c);
 
-            geometry::set_texcoords(q, token.Quads[i].TexRegion);
+            geometry::set_texcoords(q, token.Quads[i].TextureRegion);
 
             auto const&  posRect {token.Quads[i].Rect};
             rect_f const quadRect {x + posRect.left(), y + posRect.top(), posRect.width(), posRect.height()};

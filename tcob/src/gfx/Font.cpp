@@ -279,9 +279,9 @@ auto font::cache_render_glyph(u32 cp) -> bool
 
         // create glyph
         rendered_glyph gl {gb.first};
-        gl.TexRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
-                                   bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
-                        .Level  = _fontTextureLayer};
+        gl.TextureRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
+                                       bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
+                            .Level  = _fontTextureLayer};
 
         _renderGlyphCache[cp] = gl;
 

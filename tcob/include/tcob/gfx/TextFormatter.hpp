@@ -33,7 +33,7 @@ struct command_definition {
 
 struct quad_definition {
     rect_f         Rect {rect_f::Zero};
-    texture_region TexRegion {};
+    texture_region TextureRegion {};
 };
 
 struct format_token {

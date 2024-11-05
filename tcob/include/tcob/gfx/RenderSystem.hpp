@@ -40,10 +40,18 @@ public:
     };
 
     struct capabilities {
-        std::pair<f32, f32> PointSizeRange;
-        f32                 PointSizeGranularity {};
-        i32                 MaxTextureSize {};
-        i32                 MaxArrayTextureLayers {};
+        struct point_size {
+            std::pair<f32, f32> Range;
+            f32                 Granularity {};
+        };
+        point_size PointSize;
+
+        struct texture {
+            i32 MaxSize {};
+            i32 MaxLayers {};
+        };
+
+        texture Texture;
     };
 
     render_system();
