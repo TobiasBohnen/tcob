@@ -37,6 +37,8 @@ public:
     auto get_row_count() const -> dimension_type;
     auto get_column_count() const -> dimension_type;
     auto get_extent() const -> size_type;
+    auto contains(point_type pos) const -> bool;
+
     auto size() const -> usize;
 
 private:

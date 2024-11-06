@@ -90,6 +90,12 @@ inline auto grid<T>::get_extent() const -> size_type
 }
 
 template <typename T>
+inline auto grid<T>::contains(point_type pos) const -> bool
+{
+    return get_extent().contains(pos);
+}
+
+template <typename T>
 inline auto grid<T>::size() const -> usize
 {
     return _data.size();
@@ -98,6 +104,7 @@ inline auto grid<T>::size() const -> usize
 template <typename T>
 inline auto grid<T>::get_index(point_type pos) const -> dimension_type
 {
+    assert(pos.X >= 0 && pos.Y >= 0);
     return pos.Y * _size.Width + pos.X;
 }
 
