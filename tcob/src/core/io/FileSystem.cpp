@@ -203,9 +203,7 @@ auto get_file_size(path const& file) -> i64
 
 auto read_as_string(path const& file) -> string
 {
-    if (!is_file(file)) {
-        return "";
-    }
+    if (!is_file(file)) { return ""; }
 
     string retValue {};
     retValue.reserve(static_cast<usize>(get_file_size(file)));
