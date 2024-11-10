@@ -7,7 +7,7 @@
 
 namespace tcob::gfx::null {
 
-auto null_render_system::get_name() const -> string
+auto null_render_system::name() const -> string
 {
     return "NULL";
 }

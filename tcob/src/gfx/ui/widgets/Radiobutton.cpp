@@ -42,7 +42,7 @@ void radio_button::on_update(milliseconds /*deltaTime*/)
 void radio_button::on_checked_changed()
 {
     if (Checked) {
-        for (auto const& w : get_parent()->get_widgets()) {
+        for (auto const& w : get_parent()->widgets()) {
             if (w.get() != this) {
                 if (auto rb {std::dynamic_pointer_cast<radio_button>(w)}) {
                     rb->Checked = false;
@@ -51,7 +51,7 @@ void radio_button::on_checked_changed()
         }
     }
 
-    force_redraw(get_name() + ": Checked changed");
+    force_redraw(this->name() + ": Checked changed");
 }
 
 void radio_button::on_click()

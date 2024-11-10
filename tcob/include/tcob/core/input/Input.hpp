@@ -175,8 +175,8 @@ public:
         f32                         RelativeValue {0};
     };
 
-    auto get_ID() const -> i32;
-    auto get_name() const -> string;
+    auto id() const -> i32;
+    auto name() const -> string;
     auto has_rumble() const -> bool;
     auto has_rumble_triggers() const -> bool;
 

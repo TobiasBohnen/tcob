@@ -18,7 +18,7 @@ using namespace std::chrono_literals;
 particle_system::particle_system(bool multiThreaded)
     : _multiThreaded {multiThreaded}
 {
-    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.get_ptr()); });
+    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
 }
 
 void particle_system::start()

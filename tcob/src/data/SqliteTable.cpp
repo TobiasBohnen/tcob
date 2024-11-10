@@ -15,7 +15,7 @@ table::table(database_view db, utf8_string name)
 {
 }
 
-auto table::get_name() const -> utf8_string const&
+auto table::name() const -> utf8_string const&
 {
     return _name;
 }

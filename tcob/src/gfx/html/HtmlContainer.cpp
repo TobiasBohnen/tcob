@@ -85,7 +85,7 @@ auto container::create_font(char const* faceName, i32 size, i32 weight, litehtml
     fm->height      = fm->ascent + fm->descent;
     fm->x_height    = font->render_text("x", false, true)[0].Size.Height;
     fm->draw_spaces = true;
-    _fonts.push_back(font.get_ptr());
+    _fonts.push_back(font.ptr());
     usize const retValue {_fonts.size() - 1};
     _fontDecorations[retValue] = decoration;
     return retValue + 1;
@@ -118,7 +118,7 @@ auto container::get_default_font_size() const -> i32
 
 auto container::get_default_font_name() const -> char const*
 {
-    return _config.Fonts->get_name().c_str();
+    return _config.Fonts->name().c_str();
 }
 
 void container::load_image(char const* src, char const* baseurl, bool redraw_on_ready)
@@ -127,7 +127,7 @@ void container::load_image(char const* src, char const* baseurl, bool redraw_on_
 
     if (!_images.contains(src)) {
         if (auto tex {_config.AssetGroup->get<texture>(src)}; tex.is_ready()) {
-            _images[src] = tex.get_ptr();
+            _images[src] = tex.ptr();
 
             if (redraw_on_ready) {
                 _document.force_redraw();

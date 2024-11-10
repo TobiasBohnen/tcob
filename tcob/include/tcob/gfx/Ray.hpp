@@ -41,7 +41,7 @@ public:
 
     ray(init init);
 
-    auto get_direction_vector() const -> point_d;
+    auto direction_vector() const -> point_d;
 
     auto get_point(f64 distance) const -> point_f;
 

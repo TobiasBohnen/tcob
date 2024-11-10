@@ -79,7 +79,7 @@ void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
     widget::on_mouse_hover(ev);
 
     if (_vScrollbar.inject_mouse_hover(ev.Position)) {
-        force_redraw(get_name() + ": scrollbar mouse hover");
+        force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
     }
 }
@@ -90,7 +90,7 @@ void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.inject_mouse_down(ev.Position);
-        force_redraw(get_name() + ": mouse down");
+        force_redraw(this->name() + ": mouse down");
         ev.Handled = true;
     }
 }
@@ -100,7 +100,7 @@ void vscroll_widget::on_mouse_drag(input::mouse::motion_event const& ev)
     widget::on_mouse_drag(ev);
 
     if (_vScrollbar.inject_mouse_drag(ev.Position)) {
-        force_redraw(get_name() + ": vertical scrollbar dragged");
+        force_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
 }
@@ -111,7 +111,7 @@ void vscroll_widget::on_mouse_up(input::mouse::button_event const& ev)
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.inject_mouse_up(ev.Position);
-        force_redraw(get_name() + ": mouse up");
+        force_redraw(this->name() + ": mouse up");
         ev.Handled = true;
     }
 }

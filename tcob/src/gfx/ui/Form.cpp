@@ -43,7 +43,7 @@ form::~form()
     // TODO: disconnect ALL events
 }
 
-auto form::get_name() const -> string const&
+auto form::name() const -> string const&
 {
     return _name;
 }
@@ -53,14 +53,14 @@ void form::remove_container(widget* wc)
     _layout.remove_widget(wc);
 }
 
-auto form::get_top_widget() const -> widget*
+auto form::top_widget() const -> widget*
 {
     return _topWidget;
 }
 
 auto form::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 {
-    for (auto& container : get_widgets_by_zorder() | std::views::reverse) {
+    for (auto& container : widgets_by_zorder() | std::views::reverse) {
         if (container->hit_test(pos)) {
             if (auto retValue {container->find_child_at(pos)}) {
                 return retValue;
@@ -73,8 +73,8 @@ auto form::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 
 auto form::find_widget_by_name(string const& name) const -> std::shared_ptr<widget>
 {
-    for (auto const& container : get_widgets()) {
-        if (container->get_name() == name) {
+    for (auto const& container : containers()) {
+        if (container->name() == name) {
             return container;
         }
         if (auto retValue {container->find_child_by_name(name)}) {
@@ -84,15 +84,15 @@ auto form::find_widget_by_name(string const& name) const -> std::shared_ptr<widg
     return nullptr;
 }
 
-auto form::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto form::containers() const -> std::vector<std::shared_ptr<widget>> const&
 {
-    return _layout.get_widgets();
+    return _layout.widgets();
 }
 
 auto form::get_all_widgets() const -> std::vector<widget*>
 {
     std::vector<widget*> retValue;
-    for (auto const& container : get_widgets()) {
+    for (auto const& container : containers()) {
         container->collect_widgets(retValue);
     }
     return retValue;
@@ -157,7 +157,7 @@ void form::on_update(milliseconds /* deltaTime */)
 
 void form::on_fixed_update(milliseconds deltaTime)
 {
-    auto const& widgets {get_widgets()};
+    auto const& widgets {containers()};
 
     // tooltip
     if (_topWidget) {
@@ -194,7 +194,7 @@ void form::on_fixed_update(milliseconds deltaTime)
 void form::on_styles_changed()
 {
     _updateWidgets = true;
-    for (auto const& container : get_widgets()) {
+    for (auto const& container : containers()) {
         container->on_styles_changed();
     }
 }
@@ -217,7 +217,7 @@ void form::on_draw_to(render_target& target)
     if (_redrawWidgets) {
         _canvas.begin_frame(bounds, 1.0f, 0);
 
-        for (auto const& container : get_widgets_by_zorder()) {
+        for (auto const& container : widgets_by_zorder()) {
             _canvas.reset();
             container->paint(*_painter);
         }
@@ -264,7 +264,7 @@ void form::on_draw_to(render_target& target)
     }
 }
 
-auto form::get_focus_widget() const -> widget*
+auto form::focussed_widget() const -> widget*
 {
     return _focusWidget;
 }
@@ -452,9 +452,9 @@ void form::on_visiblity_changed()
     // TODO: else inject mouse_motion
 }
 
-auto form::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
+auto form::widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
 {
-    auto retValue {get_widgets()};
+    auto retValue {containers()};
     std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
     return retValue;
 }

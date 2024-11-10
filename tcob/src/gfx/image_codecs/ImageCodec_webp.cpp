@@ -50,7 +50,7 @@ auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 auto webp_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
     auto const& info {image.get_info()};
-    auto const  imageBuffer {image.get_data()};
+    auto const  imageBuffer {image.buffer()};
     u8*         output {};
     if (info.Format == image::format::RGBA) {
         usize const outputSize {WebPEncodeLosslessRGBA(imageBuffer.data(), info.Size.Width, info.Size.Height, info.stride(), &output)};
@@ -175,9 +175,9 @@ auto webp_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) 
         }
 
         if (info.Format == image::format::RGBA) {
-            retValue = WebPPictureImportRGBA(&pic, frame.Image.get_data().data(), info.stride());
+            retValue = WebPPictureImportRGBA(&pic, frame.Image.buffer().data(), info.stride());
         } else if (info.Format == image::format::RGB) {
-            retValue = WebPPictureImportRGB(&pic, frame.Image.get_data().data(), info.stride());
+            retValue = WebPPictureImportRGB(&pic, frame.Image.buffer().data(), info.stride());
         }
 
         if (retValue) {

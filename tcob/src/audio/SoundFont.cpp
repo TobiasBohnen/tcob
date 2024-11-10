@@ -87,7 +87,7 @@ auto sound_font::create_sound(sound_font_commands const& commands) const -> soun
 {
     auto const audioData {create_buffer(commands)};
     auto const audioBuffer {std::make_shared<audio::al::al_buffer>()};
-    audioBuffer->buffer_data(audioData.get_data(), _channels, _sampleRate);
+    audioBuffer->buffer_data(audioData.data(), _channels, _sampleRate);
     return sound {audioBuffer};
 }
 

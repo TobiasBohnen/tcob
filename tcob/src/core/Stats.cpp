@@ -10,22 +10,22 @@
 namespace tcob {
 stats::stats() = default;
 
-auto stats::get_time() const -> f32
+auto stats::current_time() const -> f32
 {
     return _time;
 }
 
-auto stats::get_average_FPS() const -> f32
+auto stats::average_FPS() const -> f32
 {
     return _averageFrames;
 }
 
-auto stats::get_best_FPS() const -> f32
+auto stats::best_FPS() const -> f32
 {
     return _bestFrames;
 }
 
-auto stats::get_worst_FPS() const -> f32
+auto stats::worst_FPS() const -> f32
 {
     return _worstFrames;
 }

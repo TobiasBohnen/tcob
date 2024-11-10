@@ -20,7 +20,7 @@ text_box::text_box(init const& wi)
         _textLength = utf8::length(val);
         _textDirty  = true;
         _caretPos   = std::min(_caretPos, _textLength);
-        force_redraw(get_name() + ": Text changed");
+        force_redraw(this->name() + ": Text changed");
     });
 
     MaxLength(std::numeric_limits<usize>::max());
@@ -75,12 +75,12 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     if (ev.KeyCode == controls->NavLeftKey) {
         if (_caretPos > 0) {
             --_caretPos;
-            force_redraw(get_name() + ": Caret moved");
+            force_redraw(this->name() + ": Caret moved");
         }
     } else if (ev.KeyCode == controls->NavRightKey) {
         if (_caretPos < _formatResult.QuadCount) {
             ++_caretPos;
-            force_redraw(get_name() + ": Caret moved");
+            force_redraw(this->name() + ": Caret moved");
         }
     } else if (ev.KeyCode == controls->ForwardDeleteKey) {
         if (_textLength > 0 && _caretPos < _textLength) {
@@ -122,7 +122,7 @@ void text_box::on_focus_gained()
         _caretTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate, 1.0f, 0.0f);
         _caretTween->Value.Changed.connect([&](auto val) {
             _caretVisible = val;
-            force_redraw(get_name() + ": Caret blink");
+            force_redraw(this->name() + ": Caret blink");
         });
         _caretTween->start(playback_mode::Looped);
     }

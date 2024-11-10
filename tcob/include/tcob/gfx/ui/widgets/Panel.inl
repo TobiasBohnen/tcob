@@ -11,7 +11,7 @@ namespace tcob::gfx::ui {
 template <std::derived_from<layout> T>
 inline auto panel::create_layout(auto&&... args) -> std::shared_ptr<T>
 {
-    force_redraw(get_name() + ": layout created");
+    force_redraw(this->name() + ": layout created");
     _layout = std::make_shared<T>(this, std::move(args)...);
     return std::static_pointer_cast<T>(_layout);
 }

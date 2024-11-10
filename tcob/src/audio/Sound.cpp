@@ -28,7 +28,7 @@ sound::sound(audio::buffer const& buffer)
     : _buffer {std::make_shared<audio::al::al_buffer>()}
 {
     auto const& info {buffer.get_info()};
-    _buffer->buffer_data(buffer.get_data(), info.Channels, info.SampleRate);
+    _buffer->buffer_data(buffer.data(), info.Channels, info.SampleRate);
 }
 
 sound::sound(std::shared_ptr<audio::al::al_buffer> buffer)
@@ -60,7 +60,7 @@ auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept ->
     buffer bfr;
     if (bfr.load(std::move(in), ext, DecoderContext) == load_status::Ok) {
         _info = bfr.get_info();
-        _buffer->buffer_data(bfr.get_data(), _info.Channels, _info.SampleRate);
+        _buffer->buffer_data(bfr.data(), _info.Channels, _info.SampleRate);
         return load_status::Ok;
     }
 

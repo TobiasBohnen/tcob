@@ -46,7 +46,7 @@ auto shape::get_body() -> body&
     return _body;
 }
 
-auto shape::get_aabb() const -> AABB
+auto shape::aabb() const -> AABB
 {
     return _impl->get_aabb();
 }

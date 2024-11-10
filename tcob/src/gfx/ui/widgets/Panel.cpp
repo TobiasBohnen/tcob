@@ -18,7 +18,7 @@ panel::panel(init const& wi)
     , _vScrollbar {*this, orientation::Vertical}
     , _hScrollbar {*this, orientation::Horizontal}
 {
-    ScrollEnabled.Changed.connect([&](auto const&) { force_redraw(get_name() + ": ScrollEnabled changed"); });
+    ScrollEnabled.Changed.connect([&](auto const&) { force_redraw(this->name() + ": ScrollEnabled changed"); });
     ScrollEnabled(false);
 
     Class("panel");
@@ -27,7 +27,7 @@ panel::panel(init const& wi)
 auto panel::get_scroll_min_value(orientation orien) const -> f32
 {
     f32 retValue {std::numeric_limits<f32>::max()};
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         auto const& bounds {w->Bounds()};
         if (orien == orientation::Horizontal) {
             retValue = std::min(retValue, bounds.left());
@@ -43,7 +43,7 @@ auto panel::get_scroll_min_value(orientation orien) const -> f32
 auto panel::get_scroll_max_value(orientation orien) const -> f32
 {
     f32 retValue {0.0f};
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         auto const& bounds {w->Bounds()};
         auto const  content {get_content_bounds()};
         if (orien == orientation::Horizontal) {
@@ -90,7 +90,7 @@ auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
         return false;
     }
 
-    return std::ranges::any_of(get_widgets(), [orien, rect](auto const& w) {
+    return std::ranges::any_of(widgets(), [orien, rect](auto const& w) {
         auto const& bounds {w->Bounds()};
         if (orien == orientation::Horizontal) {
             if (bounds.left() < 0) { return true; }
@@ -104,15 +104,15 @@ auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
     });
 }
 
-auto panel::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto panel::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 {
-    return _layout->get_widgets();
+    return _layout->widgets();
 }
 
 void panel::clear_widgets()
 {
     _layout->clear();
-    force_redraw(get_name() + ": clearing");
+    force_redraw(this->name() + ": clearing");
 }
 
 void panel::on_paint(widget_painter& painter)
@@ -134,7 +134,7 @@ void panel::on_paint(widget_painter& painter)
         point_f const translate {rect.Position + get_paint_offset()};
         xform.translate(translate);
 
-        for (auto const& w : get_widgets_by_zorder()) {
+        for (auto const& w : widgets_by_zorder()) {
             painter.begin(Alpha, xform);
             w->paint(painter);
             painter.end();
@@ -156,12 +156,12 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (_vScrollbar.inject_mouse_hover(ev.Position)) {
-            force_redraw(get_name() + ": vertical scrollbar hover");
+            force_redraw(this->name() + ": vertical scrollbar hover");
             ev.Handled = true;
         }
 
         if (_hScrollbar.inject_mouse_hover(ev.Position)) {
-            force_redraw(get_name() + ": horizontal scrollbar hover");
+            force_redraw(this->name() + ": horizontal scrollbar hover");
             ev.Handled = true;
         }
     }
@@ -173,12 +173,12 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (_vScrollbar.inject_mouse_drag(ev.Position)) {
-            force_redraw(get_name() + ": vertical scrollbar dragged");
+            force_redraw(this->name() + ": vertical scrollbar dragged");
             ev.Handled = true;
         }
 
         if (_hScrollbar.inject_mouse_drag(ev.Position)) {
-            force_redraw(get_name() + ": horizontal scrollbar dragged");
+            force_redraw(this->name() + ": horizontal scrollbar dragged");
             ev.Handled = true;
         }
     }
@@ -192,7 +192,7 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
         if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
             _vScrollbar.inject_mouse_down(ev.Position);
             _hScrollbar.inject_mouse_down(ev.Position);
-            force_redraw(get_name() + ": mouse down");
+            force_redraw(this->name() + ": mouse down");
             ev.Handled = true;
         }
     }
@@ -206,7 +206,7 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
         if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
             _vScrollbar.inject_mouse_up(ev.Position);
             _hScrollbar.inject_mouse_up(ev.Position);
-            force_redraw(get_name() + ": mouse up");
+            force_redraw(this->name() + ": mouse up");
             ev.Handled = true;
         }
     }
@@ -276,7 +276,7 @@ void panel::set_scroll_offset(point_f off)
 {
     _hScrollbar.set_target_value(off.X, milliseconds {0});
     _vScrollbar.set_target_value(off.Y, milliseconds {0});
-    force_redraw(get_name() + ": set_scroll_offset");
+    force_redraw(this->name() + ": set_scroll_offset");
 }
 
 ////////////////////////////////////////////////////////////
@@ -299,7 +299,7 @@ void glass::on_paint(widget_painter& painter)
     point_f const translate {rect.Position + get_paint_offset()};
     xform.translate(translate);
 
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         painter.begin(Alpha, xform);
         w->paint(painter);
         painter.end();

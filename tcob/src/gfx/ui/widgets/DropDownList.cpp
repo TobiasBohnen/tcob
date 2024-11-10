@@ -16,9 +16,9 @@ drop_down_list::drop_down_list(init const& wi)
     , HoveredItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
-    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(-1);
-    HoveredItemIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(-1);
 
     Class("drop_down_list");
@@ -32,13 +32,13 @@ void drop_down_list::add_item(utf8_string const& item)
 void drop_down_list::add_item(list_item const& item)
 {
     _items.push_back(item);
-    force_redraw(get_name() + ": item added");
+    force_redraw(this->name() + ": item added");
 }
 
 void drop_down_list::clear_items()
 {
     _items.clear();
-    force_redraw(get_name() + ": items cleared");
+    force_redraw(this->name() + ": items cleared");
 }
 
 auto drop_down_list::select_item(utf8_string const& item) -> bool
@@ -155,7 +155,7 @@ void drop_down_list::on_mouse_leave()
     HoveredItemIndex = -1;
     if (_mouseOverBox) {
         _mouseOverBox = false;
-        force_redraw(get_name() + ": mouse left");
+        force_redraw(this->name() + ": mouse left");
     }
 }
 
@@ -169,14 +169,14 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 
     rect_f listRect {get_global_content_bounds()};
     if (_vScrollbar.inject_mouse_hover(ev.Position)) {
-        force_redraw(get_name() + ": scrollbar mouse hover");
+        force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
     } else {
         rect_f const boxRect {get_global_position(), Bounds->Size};
         if (boxRect.contains(ev.Position)) {
             _mouseOverBox = true;
             ev.Handled    = true;
-            if (!wasMouseOverBox) { force_redraw(get_name() + ": mouse enter"); }
+            if (!wasMouseOverBox) { force_redraw(this->name() + ": mouse enter"); }
         } else if (_isExtended) {
             // over list
             f32 const itemHeight {get_item_height()};
@@ -215,7 +215,7 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         }
 
         ev.Handled = true;
-        force_redraw(get_name() + ": mouse down");
+        force_redraw(this->name() + ": mouse down");
     }
 }
 
@@ -224,7 +224,7 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
     widget::on_mouse_drag(ev);
 
     if (_vScrollbar.inject_mouse_drag(ev.Position)) {
-        force_redraw(get_name() + ": vertical scrollbar dragged");
+        force_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
 }
@@ -235,7 +235,7 @@ void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.inject_mouse_up(ev.Position);
-        force_redraw(get_name() + ": mouse up");
+        force_redraw(this->name() + ": mouse up");
         ev.Handled = true;
     }
 }
@@ -375,7 +375,7 @@ void drop_down_list::set_extended(bool v)
 {
     if (_isExtended != v) {
         _isExtended = v;
-        force_redraw(get_name() + ": extended change");
+        force_redraw(this->name() + ": extended change");
     }
 }
 

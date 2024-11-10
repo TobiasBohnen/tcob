@@ -34,7 +34,7 @@ void terminal::move(point_i pos)
     if (_currentCursor != pos) {
         _currentCursor = pos;
         if (_cursorVisible) {
-            force_redraw(get_name() + ": cursor moved");
+            force_redraw(this->name() + ": cursor moved");
         }
     }
 }
@@ -48,7 +48,7 @@ void terminal::curs_set(bool visible)
 {
     if (_showCursor != visible) {
         _showCursor = visible;
-        force_redraw(get_name() + ": cursor visibility changed");
+        force_redraw(this->name() + ": cursor visibility changed");
 
         if (!visible) {
             _cursorTween = nullptr;
@@ -109,7 +109,7 @@ void terminal::insert_ln()
 
     insert_buffer_at(offset, Size->Width);
 
-    force_redraw(get_name() + ": line inserted");
+    force_redraw(this->name() + ": line inserted");
 }
 
 void terminal::delete_ln()
@@ -121,7 +121,7 @@ void terminal::delete_ln()
 
     erase_buffer_at(offset, Size->Width);
 
-    force_redraw(get_name() + ": line deleted");
+    force_redraw(this->name() + ": line deleted");
 }
 
 void terminal::echo(bool insertMode)
@@ -143,7 +143,7 @@ void terminal::flash()
             for (auto& cell : get_back_buffer()) {
                 cell.Colors = {cell.Colors.second, cell.Colors.first};
             }
-            force_redraw(get_name() + ": flashing");
+            force_redraw(this->name() + ": flashing");
         });
         _flashTween->start(playback_mode::Normal);
     }
@@ -255,7 +255,7 @@ void terminal::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         u32 const   fontSize {style->Text.calc_font_size(rect)};
-        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).get_ptr()};
+        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
         f32 const   fontHeight {font->get_info().LineHeight};
         f32 const   fontWidth {get_font_width(font)};
 
@@ -354,7 +354,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 } else {
                     get_back_buffer()[offset] = {};
                 }
-                force_redraw(get_name() + ": delete");
+                force_redraw(this->name() + ": delete");
             }
         } else if (ev.KeyCode == controls->BackwardDeleteKey) {
             i32 const offset {get_offset(_currentCursor) - 1};
@@ -369,7 +369,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 } else if (_currentCursor.Y > 0) {
                     move({Size->Width - 1, _currentCursor.Y - 1});
                 }
-                force_redraw(get_name() + ": backspace");
+                force_redraw(this->name() + ": backspace");
             }
         } else if (ev.KeyCode == controls->SubmitKey) {
             if (_echoInsertMode) {
@@ -419,7 +419,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
         rect_f const rect {get_global_content_bounds()};
         if (rect.contains(ev.Position)) {
             u32 const   fontSize {style->Text.calc_font_size(rect)};
-            auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).get_ptr()};
+            auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
             f32 const   fontWidth {get_font_width(font)};
             f32 const   fontHeight {font->get_info().LineHeight};
 
@@ -452,7 +452,7 @@ void terminal::on_focus_gained()
         _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);
         _cursorTween->Value.Changed.connect([&](auto val) {
             _cursorVisible = val;
-            force_redraw(get_name() + ": cursor blink");
+            force_redraw(this->name() + ": cursor blink");
         });
         _cursorTween->start(playback_mode::Looped);
     }
@@ -519,7 +519,7 @@ void terminal::clear_buffer()
     _buffers[0].resize(_bufferSize);
     _buffers[1].clear();
     _buffers[1].resize(_bufferSize);
-    force_redraw(get_name() + ": text buffer cleared");
+    force_redraw(this->name() + ": text buffer cleared");
 }
 
 struct esc_seq {
@@ -750,7 +750,7 @@ void terminal::set(utf8_string_view text, bool insert)
         }
     }
 
-    force_redraw(get_name() + ": text set");
+    force_redraw(this->name() + ": text set");
 }
 
 void terminal::cursor_line_break()

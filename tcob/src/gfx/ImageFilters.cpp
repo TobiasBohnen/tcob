@@ -139,8 +139,8 @@ auto grayscale_filter::operator()(image const& img) const -> image
     auto        retValue {image::CreateEmpty(info.Size, info.Format)};
     i32 const   bpp {info.bytes_per_pixel()};
 
-    auto const srcBuffer {img.get_data()};
-    auto       dstBuffer {retValue.get_data()};
+    auto const srcBuffer {img.buffer()};
+    auto       dstBuffer {retValue.buffer()};
 
     auto const [imgWidth, imgHeight] {info.Size};
 

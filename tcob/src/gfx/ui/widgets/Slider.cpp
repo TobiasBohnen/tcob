@@ -26,16 +26,16 @@ slider::slider(init const& wi)
     Min.Changed.connect([&](auto val) {
         Value = std::max(val, Value());
         on_value_changed(Value());
-        force_redraw(get_name() + ": Min changed");
+        force_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([&](auto val) {
         Value = std::min(val, Value());
         on_value_changed(Value());
-        force_redraw(get_name() + ": Max changed");
+        force_redraw(this->name() + ": Max changed");
     });
     Max(100);
-    Step.Changed.connect([&](auto) { force_redraw(get_name() + ": Step changed"); });
+    Step.Changed.connect([&](auto) { force_redraw(this->name() + ": Step changed"); });
     Step(1);
     Value.Changed.connect([&](auto val) { on_value_changed(val); });
     Value(Min());
@@ -102,7 +102,7 @@ void slider::on_mouse_leave()
 {
     if (_overThumb) {
         _overThumb = false;
-        force_redraw(get_name() + ": mouse left");
+        force_redraw(this->name() + ": mouse left");
     }
 }
 
@@ -111,7 +111,7 @@ void slider::on_mouse_hover(input::mouse::motion_event const& ev)
     bool const overThumb {_paintResult.Thumb.contains(global_to_parent_local(ev.Position))};
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
-        force_redraw(get_name() + ": thumb hover change");
+        force_redraw(this->name() + ": thumb hover change");
         ev.Handled = true;
     }
 }
@@ -127,7 +127,7 @@ void slider::on_mouse_up(input::mouse::button_event const& ev)
     _dragOffset = point_i::Zero;
     if (_overThumb && !hit_test(point_f {ev.Position})) {
         _overThumb = false;
-        force_redraw(get_name() + ": thumb hit");
+        force_redraw(this->name() + ": thumb hit");
         ev.Handled = true;
     }
 }
@@ -216,7 +216,7 @@ void slider::calculate_value(point_f mp)
 
     if (!_overThumb) {
         _overThumb = true;
-        force_redraw(get_name() + ": thumb move after value change");
+        force_redraw(this->name() + ": thumb move after value change");
     }
 }
 

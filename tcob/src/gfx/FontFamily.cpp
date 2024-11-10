@@ -90,7 +90,7 @@ auto font_family::has_style(font::style style) const -> bool
     return _fontSources.contains(style);
 }
 
-auto font_family::get_name() const -> string const&
+auto font_family::name() const -> string const&
 {
     return _name;
 }
@@ -126,7 +126,7 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
 
     // load font
     auto const& asset {_fontAssets[fontStyle][size]};
-    if (asset.get_ptr()->load(_fontData[fontStyle], size) == load_status::Ok) {
+    if (asset.ptr()->load(_fontData[fontStyle], size) == load_status::Ok) {
         return asset;
     }
 

@@ -41,7 +41,7 @@ namespace detail {
         explicit bucket_base(string assetName);
         virtual ~bucket_base() = default;
 
-        auto get_name() const -> string const&;
+        auto name() const -> string const&;
 
         void virtual get_asset_stats(bucket_stats& out) const = 0;
 
@@ -103,7 +103,7 @@ public:
 
     signal<script_preload_event> PreScriptLoad;
 
-    auto get_name() const -> string const&;
+    auto name() const -> string const&;
     auto get_mount_point() const -> string;
     auto get_asset_stats() const -> group_stats;
 

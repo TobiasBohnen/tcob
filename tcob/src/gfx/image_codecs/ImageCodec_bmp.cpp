@@ -267,7 +267,7 @@ void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSiz
 void static WriteImageData(image const& img, io::ostream& writer)
 {
     auto const& info {img.get_info()};
-    auto const  data {img.get_data()};
+    auto const  data {img.buffer()};
     i32 const   stride {info.stride()};
     i32 const   bpp {info.bytes_per_pixel()};
 

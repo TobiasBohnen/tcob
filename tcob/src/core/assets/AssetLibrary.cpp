@@ -131,7 +131,7 @@ group::group(string name)
 {
 }
 
-auto group::get_name() const -> string const&
+auto group::name() const -> string const&
 {
     return _name;
 }
@@ -145,7 +145,7 @@ auto group::get_asset_stats() const -> group_stats
 {
     group_stats retValue {};
     for (auto const& [_, bucket] : _buckets) {
-        bucket->get_asset_stats(retValue.Buckets[bucket->get_name()]);
+        bucket->get_asset_stats(retValue.Buckets[bucket->name()]);
     }
     return retValue;
 }
@@ -246,7 +246,7 @@ namespace detail {
     {
     }
 
-    auto bucket_base::get_name() const -> string const&
+    auto bucket_base::name() const -> string const&
     {
         return _assetName;
     }

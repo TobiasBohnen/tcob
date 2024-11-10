@@ -83,12 +83,12 @@ auto body::operator==(body const& other) const -> bool
     return _impl.get() == other._impl.get();
 }
 
-auto body::get_center() const -> point_f
+auto body::center() const -> point_f
 {
     return _impl->get_center();
 }
 
-auto body::get_local_center() const -> point_f
+auto body::local_center() const -> point_f
 {
     return _impl->get_local_center();
 }
@@ -98,7 +98,7 @@ auto body::get_world() -> world&
     return _world;
 }
 
-auto body::get_shapes() -> std::span<std::shared_ptr<shape>>
+auto body::shapes() -> std::span<std::shared_ptr<shape>>
 {
     return _shapes;
 }

@@ -30,7 +30,7 @@ lighting_system::lighting_system(bool multiThreaded)
     funcs.SourceAlphaBlendFunc = funcs.SourceColorBlendFunc = blend_func::SrcAlpha;
     funcs.DestinationAlphaBlendFunc = funcs.DestinationColorBlendFunc = blend_func::One;
     set_blend_funcs(funcs);
-    _renderer.set_material(_material.get_ptr());
+    _renderer.set_material(_material.ptr());
 }
 
 void lighting_system::remove_light_source(light_source const& light)

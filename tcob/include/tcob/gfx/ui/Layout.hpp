@@ -33,8 +33,8 @@ public:
     void remove_widget(widget* widget);
     void clear();
 
-    auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const&;
-    auto get_widgets() -> std::vector<std::shared_ptr<widget>>&;
+    auto widgets() const -> std::vector<std::shared_ptr<widget>> const&;
+    auto widgets() -> std::vector<std::shared_ptr<widget>>&;
 
 protected:
     template <std::derived_from<widget> T>

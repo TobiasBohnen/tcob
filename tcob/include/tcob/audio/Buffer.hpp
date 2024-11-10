@@ -27,8 +27,8 @@ public:
 
     auto get_info() const -> info const&;
 
-    auto get_data() const -> std::span<f32 const>;
-    auto get_data() -> std::span<f32>;
+    auto data() const -> std::span<f32 const>;
+    auto data() -> std::span<f32>;
 
     auto load [[nodiscard]] (path const& file, std::any& ctx) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status;

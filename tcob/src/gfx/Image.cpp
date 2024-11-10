@@ -30,17 +30,17 @@ image::image(size_i size, format f, std::span<u8 const> data)
     _buffer = {data.begin(), data.end()};
 }
 
-auto image::get_data() const -> std::span<u8 const>
+auto image::buffer() const -> std::span<u8 const>
 {
     return _buffer;
 }
 
-auto image::get_data() -> std::span<u8>
+auto image::buffer() -> std::span<u8>
 {
     return _buffer;
 }
 
-auto image::get_data(rect_i const& bounds) const -> std::vector<u8>
+auto image::buffer(rect_i const& bounds) const -> std::vector<u8>
 {
     i32 const bpp {_info.bytes_per_pixel()};
     i32 const srcStride {_info.stride()};

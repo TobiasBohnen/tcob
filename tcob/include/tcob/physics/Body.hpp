@@ -113,12 +113,12 @@ public:
 
     auto operator==(body const& other) const -> bool;
 
-    auto get_center() const -> point_f;
-    auto get_local_center() const -> point_f;
+    auto center() const -> point_f;
+    auto local_center() const -> point_f;
 
     auto get_world() -> world&;
 
-    auto get_shapes() -> std::span<std::shared_ptr<shape>>;
+    auto shapes() -> std::span<std::shared_ptr<shape>>;
 
     template <typename T>
     auto create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>;

@@ -47,7 +47,7 @@ void render_target::prepare_render(bool debug)
         {.ViewMatrix            = _camera.get_matrix(),
          .Viewport              = rect_i {_camera.get_viewport()},
          .MousePosition         = input::system::GetMousePosition(),
-         .Time                  = stats.get_time(),
+         .Time                  = stats.current_time(),
          .Debug                 = debug,
          .UseDefaultFramebuffer = false});
 }
@@ -121,7 +121,7 @@ void default_render_target::prepare_render(bool)
         .ViewMatrix            = Matrix,
         .Viewport              = {point_i::Zero, get_size()},
         .MousePosition         = input::system::GetMousePosition(),
-        .Time                  = stats.get_time(),
+        .Time                  = stats.current_time(),
         .Debug                 = false,
         .UseDefaultFramebuffer = true,
     });

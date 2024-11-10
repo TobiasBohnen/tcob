@@ -17,7 +17,7 @@
 
 namespace tcob::gfx::gl45 {
 
-auto gl_render_system::get_name() const -> string
+auto gl_render_system::name() const -> string
 {
     return "OPENGL45";
 }

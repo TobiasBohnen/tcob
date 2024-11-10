@@ -56,7 +56,7 @@ auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
     desc.width      = info.Size.Width;
 
     i32 outputSize {0};
-    if (auto* output {qoi_encode(image.get_data().data(), &desc, &outputSize)}) {
+    if (auto* output {qoi_encode(image.buffer().data(), &desc, &outputSize)}) {
         out.write<u8>({static_cast<u8*>(output), static_cast<usize>(outputSize)});
         free(output); // NOLINT(cppcoreguidelines-owning-memory)
         return true;

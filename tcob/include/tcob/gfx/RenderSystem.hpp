@@ -59,7 +59,7 @@ public:
 
     auto init_window(video_config const& config, string const& windowTitle) -> gfx::window&;
 
-    auto virtual get_name() const -> string               = 0;
+    auto virtual name() const -> string                   = 0;
     auto virtual get_device_name() const -> string        = 0;
     auto virtual get_capabilities() const -> capabilities = 0;
     auto virtual get_rtt_coords() const -> rect_f         = 0;

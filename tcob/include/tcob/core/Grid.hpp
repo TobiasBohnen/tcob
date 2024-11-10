@@ -34,12 +34,13 @@ public:
     auto end() -> iterator;
     auto end() const -> const_iterator;
 
-    auto get_row_count() const -> dimension_type;
-    auto get_column_count() const -> dimension_type;
+    auto height() const -> dimension_type;
+    auto width() const -> dimension_type;
     auto get_extent() const -> size_type;
     auto contains(point_type pos) const -> bool;
 
     auto size() const -> usize;
+    auto data() const -> T const*;
 
 private:
     auto get_index(point_type pos) const -> dimension_type;

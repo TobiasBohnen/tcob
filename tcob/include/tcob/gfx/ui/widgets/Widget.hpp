@@ -69,7 +69,7 @@ public:
     auto get_parent() const -> widget_container*;
     auto get_form() const -> form*;
 
-    auto get_name() const -> string const&;
+    auto name() const -> string const&;
 
     template <std::derived_from<style_base> T>
     auto get_style() const -> T*;

@@ -15,7 +15,7 @@ ray::ray(init init)
 {
 }
 
-auto ray::get_direction_vector() const -> point_d
+auto ray::direction_vector() const -> point_d
 {
     return _direction;
 }

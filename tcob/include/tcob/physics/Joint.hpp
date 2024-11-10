@@ -105,9 +105,9 @@ public:
     prop_fn<f32>  MotorSpeed;
     prop_fn<f32>  MaxMotorForce;
 
-    auto get_current_length() const -> f32;
+    auto current_length() const -> f32;
 
-    auto get_motor_force() const -> f32;
+    auto motor_force() const -> f32;
 
 private:
     distance_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
@@ -235,7 +235,7 @@ public:
     prop_fn<f32>  MaxMotorForce;
     prop_fn<f32>  MotorSpeed;
 
-    auto get_motor_force() const -> f32;
+    auto motor_force() const -> f32;
 
 private:
     prismatic_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
@@ -299,9 +299,9 @@ public:
     prop_fn<f32>  MaxMotorTorque;
     prop_fn<f32>  MotorSpeed;
 
-    auto get_angle() const -> radian_f;
+    auto angle() const -> radian_f;
 
-    auto get_motor_torque() const -> f32;
+    auto motor_torque() const -> f32;
 
 private:
     revolute_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
@@ -401,7 +401,7 @@ public:
     prop_fn<f32>  MaxMotorTorque;
     prop_fn<f32>  MotorSpeed;
 
-    auto get_motor_torque() const -> f32;
+    auto motor_torque() const -> f32;
 
 private:
     wheel_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);

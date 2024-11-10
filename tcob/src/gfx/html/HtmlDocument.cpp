@@ -31,7 +31,7 @@ document::document(config c)
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {render_texture::GetTexcoords(), 0});
-    _renderer.set_material(_material.get_ptr());
+    _renderer.set_material(_material.ptr());
     _material->Texture = _canvas.get_texture();
 }
 

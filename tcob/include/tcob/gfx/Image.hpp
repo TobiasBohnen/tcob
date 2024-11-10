@@ -47,9 +47,9 @@ public:
 
     auto get_info() const -> info const&;
 
-    auto get_data() const -> std::span<u8 const>;
-    auto get_data() -> std::span<u8>;
-    auto get_data(rect_i const& bounds) const -> std::vector<u8>;
+    auto buffer() const -> std::span<u8 const>;
+    auto buffer() -> std::span<u8>;
+    auto buffer(rect_i const& bounds) const -> std::vector<u8>;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> load_status;

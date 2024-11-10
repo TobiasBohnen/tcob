@@ -57,12 +57,12 @@ void layout::clear()
     mark_dirty();
 }
 
-auto layout::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto layout::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 {
     return _widgets;
 }
 
-auto layout::get_widgets() -> std::vector<std::shared_ptr<widget>>&
+auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
 {
     return _widgets;
 }
@@ -103,9 +103,9 @@ void fixed_layout::do_layout(size_f /* size */)
 
 void flex_size_layout::do_layout(size_f size)
 {
-    auto& widgets {get_widgets()};
+    auto& w {widgets()};
 
-    for (auto const& widget : widgets) {
+    for (auto const& widget : w) {
         (*widget->Bounds).Size.Width  = widget->Flex->Width.calc(size.Width);
         (*widget->Bounds).Size.Height = widget->Flex->Height.calc(size.Height);
     }
@@ -115,10 +115,10 @@ void flex_size_layout::do_layout(size_f size)
 
 void dock_layout::do_layout(size_f size)
 {
-    auto& widgets {get_widgets()};
+    auto& w {widgets()};
 
     rect_f layoutRect {point_f::Zero, size};
-    for (auto const& widget : widgets) {
+    for (auto const& widget : w) {
         if (layoutRect.height() <= 0 || layoutRect.width() <= 0) {
             widget->Bounds = rect_f::Zero;
             continue;
@@ -170,12 +170,12 @@ grid_layout::grid_layout(parent parent, size_i initSize)
 
 void grid_layout::do_layout(size_f size)
 {
-    auto& widgets {get_widgets()};
+    auto& w {widgets()};
 
     f32 const horiSize {size.Width / _grid.Width};
     f32 const vertSize {size.Height / _grid.Height};
 
-    for (auto const& widget : widgets) {
+    for (auto const& widget : w) {
         rect_f bounds {_widgetBounds[widget.get()]};
         bounds.Position.X *= horiSize;
         bounds.Size.Width *= horiSize;
@@ -198,13 +198,13 @@ box_layout::box_layout(parent parent, size_i boxSize)
 
 void box_layout::do_layout(size_f size)
 {
-    auto& widgets {get_widgets()};
+    auto& w {widgets()};
 
     f32 const horiSize {size.Width / _box.Width};
     f32 const vertSize {size.Height / _box.Height};
 
-    for (i32 i {0}; i < std::ssize(widgets) && i < _box.Width * _box.Height; ++i) {
-        auto& widget {widgets[i]};
+    for (i32 i {0}; i < std::ssize(w) && i < _box.Width * _box.Height; ++i) {
+        auto& widget {w[i]};
         widget->Bounds =
             {i % _box.Width * horiSize, i / _box.Width * vertSize,
              widget->Flex->Width.calc(horiSize),
@@ -216,13 +216,13 @@ void box_layout::do_layout(size_f size)
 
 void hbox_layout::do_layout(size_f size)
 {
-    auto& widgets {get_widgets()};
+    auto& w {widgets()};
 
-    f32 const horiSize {size.Width / widgets.size()};
+    f32 const horiSize {size.Width / w.size()};
     f32 const vertSize {size.Height};
 
-    for (i32 i {0}; i < std::ssize(widgets); ++i) {
-        auto& widget {widgets[i]};
+    for (i32 i {0}; i < std::ssize(w); ++i) {
+        auto& widget {w[i]};
         widget->Bounds =
             {i * horiSize, 0,
              widget->Flex->Width.calc(horiSize),
@@ -234,13 +234,13 @@ void hbox_layout::do_layout(size_f size)
 
 void vbox_layout::do_layout(size_f size)
 {
-    auto& widgets {get_widgets()};
+    auto& w {widgets()};
 
     f32 const horiSize {size.Width};
-    f32 const vertSize {size.Height / widgets.size()};
+    f32 const vertSize {size.Height / w.size()};
 
-    for (i32 i {0}; i < std::ssize(widgets); ++i) {
-        auto& widget {widgets[i]};
+    for (i32 i {0}; i < std::ssize(w); ++i) {
+        auto& widget {w[i]};
         widget->Bounds =
             {0, i * vertSize,
              widget->Flex->Width.calc(horiSize),

@@ -116,7 +116,7 @@ void widget_painter::draw_nine_patch(nine_patch const& np, rect_f const& rect, e
     _canvas.set_fill_style(colors::White);
     f32 const    borderSize {borderStyle.Size.calc(rect.width())};
     rect_f const center {rect.left() + borderSize, rect.top() + borderSize, rect.width() - (borderSize * 2), rect.height() - (borderSize * 2)};
-    _canvas.draw_nine_patch(np.Texture.get_ptr(), np.Region, rect, center, np.UV);
+    _canvas.draw_nine_patch(np.Texture.ptr(), np.Region, rect, center, np.UV);
 }
 
 void widget_painter::draw_border(rect_f const& rect, element::border const& borderStyle, f32 borderSize, f32 borderRadius)
@@ -551,7 +551,7 @@ auto widget_painter::format_text(element::text const& style, rect_f const& rect,
 {
     auto const guard {_canvas.create_guard()};
 
-    auto* const font {style.Font->get_font(style.Style, fontSize).get_ptr()};
+    auto* const font {style.Font->get_font(style.Style, fontSize).ptr()};
 
     _canvas.set_font(font);
     _canvas.set_text_halign(style.Alignment.Horizontal);
@@ -636,7 +636,7 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
                 return _canvas.create_image_pattern(
                     rect.top_left(),
                     arg.Stretch ? rect.Size : size_f {arg.Texture->get_size()},
-                    degree_f {0}, arg.Texture.get_ptr(), 1.0f);
+                    degree_f {0}, arg.Texture.ptr(), 1.0f);
             },
             [&](nine_patch const&) -> canvas_paint {
                 return {};

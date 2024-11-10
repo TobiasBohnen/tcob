@@ -120,7 +120,7 @@ value_noise::value_noise(i32 gridSize, u64 seed)
 
 auto value_noise::operator()(point_f p) const -> f32
 {
-    auto const gridSize {_grid.get_column_count()};
+    auto const gridSize {_grid.width()};
     i32 const  x0 {static_cast<i32>(std::floor(p.X * gridSize)) % gridSize};
     i32 const  x1 {(x0 + 1) % gridSize};
     i32 const  y0 {static_cast<i32>(std::floor(p.Y * gridSize)) % gridSize};

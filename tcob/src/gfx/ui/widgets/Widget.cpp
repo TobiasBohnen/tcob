@@ -249,7 +249,7 @@ auto widget::get_form() const -> form*
     return _form;
 }
 
-auto widget::get_name() const -> string const&
+auto widget::name() const -> string const&
 {
     return _name;
 }

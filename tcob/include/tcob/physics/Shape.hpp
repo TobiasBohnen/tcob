@@ -70,7 +70,7 @@ public:
 
     auto is_sensor() const -> bool;
 
-    auto get_aabb() const -> AABB;
+    auto aabb() const -> AABB;
 
     auto test_point(point_f point) const -> bool;
 

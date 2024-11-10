@@ -38,7 +38,7 @@ public:
     prop<control_map>                               Controls;
     prop<std::unordered_map<string, nav_map_entry>> NavMap;
 
-    auto get_name() const -> string const&;
+    auto name() const -> string const&;
 
     template <std::derived_from<widget_container> T>
     auto create_container(dock_style dock, string const& name) -> std::shared_ptr<T>;
@@ -49,11 +49,11 @@ public:
 
     auto find_widget_at(point_f pos) const -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
-    auto get_top_widget() const -> widget*;
-    auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const&;
+    auto top_widget() const -> widget*;
+    auto containers() const -> std::vector<std::shared_ptr<widget>> const&;
     auto get_all_widgets() const -> std::vector<widget*>;
 
-    auto get_focus_widget() const -> widget*;
+    auto focussed_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
     void clear();
@@ -93,7 +93,7 @@ protected:
     void on_visiblity_changed() override;
 
 private:
-    auto get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>;
+    auto widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>;
     void find_top_widget(input::mouse::motion_event const& ev);
 
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;

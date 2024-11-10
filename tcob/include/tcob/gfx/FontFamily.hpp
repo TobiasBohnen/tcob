@@ -19,7 +19,7 @@ class TCOB_API font_family final {
 public:
     explicit font_family(string name);
 
-    auto get_name() const -> string const&;
+    auto name() const -> string const&;
     auto get_font(font::style style, u32 size) -> assets::asset_ptr<font>;
 
     auto get_fallback_style(font::style style) const -> std::optional<font::style>;

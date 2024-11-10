@@ -33,7 +33,7 @@ public:
 
     void force_redraw(string const& reason) override;
 
-    auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
+    auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
     void clear_widgets();
 

@@ -21,14 +21,14 @@ void widget_container::update(milliseconds deltaTime)
 {
     widget::update(deltaTime);
 
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         w->update(deltaTime);
     }
 }
 
 auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
-    for (auto const& w : get_widgets_by_zorder() | std::views::reverse) {
+    for (auto const& w : widgets_by_zorder() | std::views::reverse) {
         if (w->hit_test(pos)) {
             if (auto retValue {w->find_child_at(pos)}) {
                 return retValue;
@@ -41,8 +41,8 @@ auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 
 auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr<widget>
 {
-    for (auto const& w : get_widgets()) {
-        if (w->get_name() == name) {
+    for (auto const& w : widgets()) {
+        if (w->name() == name) {
             return w;
         }
         if (auto retValue {w->find_child_by_name(name)}) {
@@ -53,9 +53,9 @@ auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr
     return nullptr;
 }
 
-auto widget_container::get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
+auto widget_container::widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
 {
-    auto retValue {get_widgets()};
+    auto retValue {widgets()};
     std::ranges::sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
     return retValue;
 }
@@ -63,7 +63,7 @@ auto widget_container::get_widgets_by_zorder() const -> std::vector<std::shared_
 void widget_container::collect_widgets(std::vector<widget*>& vec)
 {
     vec.push_back(this);
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         w->collect_widgets(vec);
     }
 }
@@ -72,7 +72,7 @@ void widget_container::update_style()
 {
     widget::update_style();
 
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         w->update_style();
     }
 }
@@ -80,7 +80,7 @@ void widget_container::update_style()
 void widget_container::on_styles_changed()
 {
     widget::on_styles_changed();
-    for (auto const& w : get_widgets()) {
+    for (auto const& w : widgets()) {
         w->on_styles_changed();
     }
 }

@@ -15,9 +15,9 @@ tab_container::tab_container(init const& wi)
     , ActiveTabIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
     , HoveredTabIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
 {
-    ActiveTabIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": ActiveTab changed"); });
+    ActiveTabIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": ActiveTab changed"); });
     ActiveTabIndex(-1);
-    HoveredTabIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": HoveredTab changed"); });
+    HoveredTabIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
     HoveredTabIndex(-1);
 
     Class("tab_container");
@@ -33,7 +33,7 @@ void tab_container::remove_tab(widget* tab)
         }
     }
     ActiveTabIndex = 0;
-    force_redraw(get_name() + ": tab removed");
+    force_redraw(this->name() + ": tab removed");
 }
 
 void tab_container::clear_tabs()
@@ -41,7 +41,7 @@ void tab_container::clear_tabs()
     _tabs.clear();
     _tabLabels.clear();
     ActiveTabIndex = 0;
-    force_redraw(get_name() + ": tabs cleared");
+    force_redraw(this->name() + ": tabs cleared");
 }
 
 void tab_container::change_tab_label(widget* tab, utf8_string const& label)
@@ -52,7 +52,7 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
             break;
         }
     }
-    force_redraw(get_name() + ": tab renamed");
+    force_redraw(this->name() + ": tab renamed");
 }
 
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -70,7 +70,7 @@ auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
     return nullptr;
 }
 
-auto tab_container::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 {
     return _tabs;
 }
@@ -162,7 +162,7 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
     widget::on_mouse_down(ev);
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
-        force_redraw(get_name() + ": mouse down");
+        force_redraw(this->name() + ": mouse down");
 
         if (HoveredTabIndex != -1) {
             ActiveTabIndex = HoveredTabIndex();

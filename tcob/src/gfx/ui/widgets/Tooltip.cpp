@@ -34,7 +34,7 @@ void tooltip::on_popup(widget* top)
         _fadeInTween = make_unique_tween<linear_tween<f32>>(style->FadeIn, 0.0f, 1.0f);
         _fadeInTween->Value.Changed.connect([&](auto val) {
             Alpha = val;
-            force_redraw(get_name() + ": Tooltip fade-in");
+            force_redraw(this->name() + ": Tooltip fade-in");
         });
         _fadeInTween->start();
     }

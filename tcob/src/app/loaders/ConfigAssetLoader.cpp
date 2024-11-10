@@ -198,7 +198,7 @@ cfg_frame_animation_loader::cfg_frame_animation_loader(assets::group& group, dat
 
 void cfg_frame_animation_loader::unload_asset(asset<gfx::frame_animation>& asset, bool)
 {
-    _object[API::Animation::Name][asset.get_name()] = nullptr;
+    _object[API::Animation::Name][asset.name()] = nullptr;
 }
 
 void cfg_frame_animation_loader::declare()
@@ -234,14 +234,14 @@ cfg_music_loader::cfg_music_loader(assets::group& group, data::config::object& o
 
 void cfg_music_loader::unload_asset(asset<music>& asset, bool)
 {
-    _object[API::Music::Name][asset.get_name()] = nullptr;
+    _object[API::Music::Name][asset.name()] = nullptr;
 }
 
 auto cfg_music_loader::reload_asset(asset<music>& asset) -> bool
 {
-    if (!_object[API::Music::Name].as<object>().has(asset.get_name())) { return false; }
+    if (!_object[API::Music::Name].as<object>().has(asset.name())) { return false; }
 
-    string const& source {_object[API::Music::Name][asset.get_name()][API::Music::source].as<string>()};
+    string const& source {_object[API::Music::Name][asset.name()][API::Music::source].as<string>()};
     return asset->open(get_group().get_mount_point() + source) == load_status::Ok;
 }
 
@@ -285,14 +285,14 @@ cfg_sound_loader::cfg_sound_loader(assets::group& group, data::config::object& o
 
 void cfg_sound_loader::unload_asset(asset<sound>& asset, bool)
 {
-    _object[API::Sound::Name][asset.get_name()] = nullptr;
+    _object[API::Sound::Name][asset.name()] = nullptr;
 }
 
 auto cfg_sound_loader::reload_asset(asset<sound>& asset) -> bool
 {
-    if (!_object[API::Sound::Name].as<object>().has(asset.get_name())) { return false; }
+    if (!_object[API::Sound::Name].as<object>().has(asset.name())) { return false; }
 
-    string const& source {_object[API::Sound::Name][asset.get_name()][API::Sound::source].as<string>()};
+    string const& source {_object[API::Sound::Name][asset.name()][API::Sound::source].as<string>()};
     return asset->load(get_group().get_mount_point() + source) == load_status::Ok;
 }
 
@@ -338,14 +338,14 @@ cfg_sound_font_loader::cfg_sound_font_loader(assets::group& group, data::config:
 
 void cfg_sound_font_loader::unload_asset(asset<sound_font>& asset, bool)
 {
-    _object[API::SoundFont::Name][asset.get_name()] = nullptr;
+    _object[API::SoundFont::Name][asset.name()] = nullptr;
 }
 
 auto cfg_sound_font_loader::reload_asset(asset<sound_font>& asset) -> bool
 {
-    if (!_object[API::SoundFont::Name].as<object>().has(asset.get_name())) { return false; }
+    if (!_object[API::SoundFont::Name].as<object>().has(asset.name())) { return false; }
 
-    string const& source {_object[API::SoundFont::Name][asset.get_name()][API::SoundFont::source].as<string>()};
+    string const& source {_object[API::SoundFont::Name][asset.name()][API::SoundFont::source].as<string>()};
     return asset->load(get_group().get_mount_point() + source) == load_status::Ok;
 }
 
@@ -391,7 +391,7 @@ cfg_cursor_loader::cfg_cursor_loader(assets::group& group, data::config::object&
 
 void cfg_cursor_loader::unload_asset(asset<cursor>& asset, bool greedy)
 {
-    _object[API::Cursor::Name][asset.get_name()] = nullptr;
+    _object[API::Cursor::Name][asset.name()] = nullptr;
     if (greedy) {
         asset->Material().get()->unload(true);
     }
@@ -439,7 +439,7 @@ cfg_font_loader::cfg_font_loader(assets::group& group, data::config::object& obj
 
 void cfg_font_loader::unload_asset(asset<font>& asset, bool)
 {
-    auto const& name {asset.get_name()};
+    auto const& name {asset.name()};
     if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
         _object[API::TrueTypeFont::Name][name] = nullptr;
     }
@@ -447,7 +447,7 @@ void cfg_font_loader::unload_asset(asset<font>& asset, bool)
 
 auto cfg_font_loader::reload_asset(asset<font>& asset) -> bool
 {
-    auto const& name {asset.get_name()};
+    auto const& name {asset.name()};
     auto const  mp {get_group().get_mount_point()};
     if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
         auto  info {_object[API::TrueTypeFont::Name][name]};
@@ -483,7 +483,7 @@ void cfg_font_loader::declare()
 void cfg_font_loader::prepare()
 {
     for (auto& def : _cache) {
-        auto* ttf {dynamic_cast<font*>(def->assetPtr.get_ptr())};
+        auto* ttf {dynamic_cast<font*>(def->assetPtr.ptr())};
         if (ttf) {
             if (ttf->load(get_group().get_mount_point() + def->source, def->size) == load_status::Ok) {
                 set_asset_status(def->assetPtr, status::Loaded);
@@ -506,7 +506,7 @@ cfg_font_family_loader::cfg_font_family_loader(assets::group& group, data::confi
 
 void cfg_font_family_loader::unload_asset(asset<gfx::font_family>& asset, bool)
 {
-    _object[API::FontFamily::Name][asset->get_name()] = nullptr;
+    _object[API::FontFamily::Name][asset->name()] = nullptr;
 }
 
 void cfg_font_family_loader::declare()
@@ -552,7 +552,7 @@ cfg_material_loader::cfg_material_loader(assets::group& group, data::config::obj
 
 void cfg_material_loader::unload_asset(asset<material>& asset, bool greedy)
 {
-    _object[API::Material::Name][asset.get_name()] = nullptr;
+    _object[API::Material::Name][asset.name()] = nullptr;
 
     if (greedy) {
         asset->Shader.get()->unload(true);
@@ -611,7 +611,7 @@ void cfg_material_loader::prepare()
     auto& grp {get_group()};
 
     for (auto const& def : _cache) {
-        auto const& name {def->assetPtr.get()->get_name()};
+        auto const& name {def->assetPtr.get()->name()};
 
         if (!def->shader.empty()) {
             if (!grp.has<shader>(def->shader)) {
@@ -647,15 +647,15 @@ cfg_shader_loader::cfg_shader_loader(assets::group& group, data::config::object&
 
 void cfg_shader_loader::unload_asset(asset<shader>& asset, bool)
 {
-    _object[API::Shader::Name][asset.get_name()] = nullptr;
+    _object[API::Shader::Name][asset.name()] = nullptr;
 }
 
 auto cfg_shader_loader::reload_asset(asset<shader>& asset) -> bool
 {
-    auto const& name {asset.get_name()};
+    auto const& name {asset.name()};
     object      obj;
     if (!_object.try_get(obj, API::Shader::Name, name)) { return false; }
-    obj.try_get(obj, locate_service<render_system>().get_name());
+    obj.try_get(obj, locate_service<render_system>().name());
 
     auto const vertSource {io::read_as_string(get_group().get_mount_point() + obj[API::Shader::vertex].as<string>())};
     auto const fragSource {io::read_as_string(get_group().get_mount_point() + obj[API::Shader::fragment].as<string>())};
@@ -670,7 +670,7 @@ void cfg_shader_loader::declare()
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
             // try getting render system specific shader
-            assetSection.try_get(assetSection, locate_service<render_system>().get_name());
+            assetSection.try_get(assetSection, locate_service<render_system>().name());
 
             auto* asset {default_new<shader, asset_def>(k, this, get_bucket(), _cache)};
             if (string vertex; assetSection.try_get(vertex, API::Shader::vertex)) {
@@ -689,13 +689,13 @@ void cfg_shader_loader::prepare()
         for (auto& def : _cache) {
             auto const vertSource {io::read_as_string(get_group().get_mount_point() + def->vertex)};
             if (vertSource.empty()) {
-                logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->get_name(), def->vertex);
+                logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
                 set_asset_status(def->assetPtr, status::Error);
                 continue;
             }
             auto const fragSource {io::read_as_string(get_group().get_mount_point() + def->fragment)};
             if (fragSource.empty()) {
-                logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->get_name(), def->fragment);
+                logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
                 set_asset_status(def->assetPtr, status::Error);
                 continue;
             }
@@ -718,7 +718,7 @@ cfg_texture_loader::cfg_texture_loader(assets::group& group, data::config::objec
 
 void cfg_texture_loader::unload_asset(asset<texture>& asset, bool)
 {
-    auto const& name {asset.get_name()};
+    auto const& name {asset.name()};
     if (_object[API::Texture::Name].as<object>().has(name)) {
         _object[API::Texture::Name][name] = nullptr;
     }
@@ -729,16 +729,16 @@ void cfg_texture_loader::unload_asset(asset<texture>& asset, bool)
 
 auto cfg_texture_loader::reload_asset(asset<texture>& asset) -> bool
 {
-    auto const& name {asset.get_name()};
+    auto const& name {asset.name()};
     if (_reloadInfoTex.contains(name)) {
         auto& info {_reloadInfoTex[name]};
         for (auto& img : info) {
-            auto const  image = *image::Load(img.Path);
+            auto const  image {*image::Load(img.Path)};
             auto const& imgInfo {image.get_info()};
             if (imgInfo.bytes_per_pixel() == 4) {
-                asset->update_data(image.get_data(), img.Depth, 0, 4);
+                asset->update_data(image.buffer(), img.Depth, 0, 4);
             } else {
-                asset->update_data(image.get_data(), img.Depth, 0, 1);
+                asset->update_data(image.buffer(), img.Depth, 0, 1);
             }
         }
         return true;
@@ -780,7 +780,7 @@ void cfg_texture_loader::declare()
                             if (auto const moreFiles {io::enumerate(io::get_parent_folder(f), {f, true}, false)}; !moreFiles.empty()) {
                                 files.insert(files.end(), moreFiles.begin(), moreFiles.end());
                             } else {
-                                logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->get_name(), f);
+                                logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->name(), f);
                                 continue;
                             }
                         }
@@ -791,7 +791,7 @@ void cfg_texture_loader::declare()
                     if (io::is_file(f)) {
                         files.push_back(f);
                     } else {
-                        logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->get_name(), file);
+                        logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->name(), file);
                     }
                 }
                 for (u32 i {0}; i < files.size(); ++i) {
@@ -858,7 +858,7 @@ void cfg_texture_loader::declare()
 void cfg_texture_loader::prepare()
 {
     for (auto const& def : _cacheTex) {
-        auto const& name {def->assetPtr.get()->get_name()};
+        auto const& name {def->assetPtr.get()->name()};
 
         if (def->images.empty()) {
             logger::Warning("texture asset '{}': No source files found.", name);
@@ -909,7 +909,7 @@ void cfg_texture_loader::prepare()
         for (auto& img : def->images) {
             img.Future = img.Image.load_async(img.Path);
 
-            auto& rel {_reloadInfoTex[def->assetPtr.get()->get_name()]};
+            auto& rel {_reloadInfoTex[def->assetPtr.get()->name()]};
             rel.push_back({.Depth = img.Depth, .Path = img.Path});
         }
 
@@ -917,7 +917,7 @@ void cfg_texture_loader::prepare()
     }
 
     for (auto const& def : _cacheAni) {
-        auto* ani {dynamic_cast<animated_texture*>(def->assetPtr.get_ptr())};
+        auto* ani {dynamic_cast<animated_texture*>(def->assetPtr.ptr())};
         if (ani && ani->load(def->textureFile) == load_status::Ok) {
             ani->Filtering = def->filtering;
             ani->Wrapping  = def->wrapping;
@@ -957,7 +957,7 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
 
                 // loading error -> log and continue
                 if (statusFuture.get() != load_status::Ok) {
-                    logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->get_name(), imgIt->Path);
+                    logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
                     set_asset_status(def->assetPtr, status::Error);
                     continue;
                 }
@@ -968,12 +968,12 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
                 auto const& imgInfo {img.get_info()};
 
                 if (tex.get_size() != imgInfo.Size) {
-                    logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->get_name(), imgIt->Path);
+                    logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
                     set_asset_status(def->assetPtr, status::Error);
                     continue;
                 }
 
-                tex.update_data(img.get_data(), imgIt->Depth, 0, imgInfo.bytes_per_pixel() == 4 ? 4 : 1);
+                tex.update_data(img.buffer(), imgIt->Depth, 0, imgInfo.bytes_per_pixel() == 4 ? 4 : 1);
                 imgIt->Image = {};
             }
         }

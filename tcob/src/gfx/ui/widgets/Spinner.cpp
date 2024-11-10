@@ -17,17 +17,17 @@ spinner::spinner(init const& wi)
 {
     Min.Changed.connect([&](auto const& val) {
         Value = std::min(val, Value());
-        force_redraw(get_name() + ": Min changed");
+        force_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([&](auto const& val) {
         Value = std::max(val, Value());
-        force_redraw(get_name() + ": Max changed");
+        force_redraw(this->name() + ": Max changed");
     });
     Max(100);
-    Step.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Step changed"); });
+    Step.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Step changed"); });
     Step(5);
-    Value.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Value changed"); });
+    Value.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Value changed"); });
     Value(0);
 
     Class("spinner");
@@ -82,12 +82,12 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
             if (ev.Position.Y <= navRect.center().Y) {
                 if (_hoverArrow != arrow::Increase) {
                     _hoverArrow = arrow::Increase;
-                    force_redraw(get_name() + ": arrow hover changed");
+                    force_redraw(this->name() + ": arrow hover changed");
                 }
             } else {
                 if (_hoverArrow != arrow::Decrease) {
                     _hoverArrow = arrow::Decrease;
-                    force_redraw(get_name() + ": arrow hover changed");
+                    force_redraw(this->name() + ": arrow hover changed");
                 }
             }
 
@@ -97,7 +97,7 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 
     if (_hoverArrow != arrow::None) {
         _hoverArrow = arrow::None;
-        force_redraw(get_name() + ": arrow hover changed");
+        force_redraw(this->name() + ": arrow hover changed");
     }
 }
 

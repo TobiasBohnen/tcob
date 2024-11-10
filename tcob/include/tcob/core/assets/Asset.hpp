@@ -64,7 +64,7 @@ public:
     auto operator->() const -> type*;
     auto operator*() const -> type&;
 
-    auto get_name() const -> string const&;
+    auto name() const -> string const&;
     auto get_status() const -> status;
 
     auto get() const -> type*;
@@ -110,9 +110,9 @@ public:
     auto operator*() const -> type&;
 
     auto get() const -> asset<type>*;
-    auto get_ptr() const -> type*;
+    auto ptr() const -> type*;
 
-    auto get_use_count() const -> i32;
+    auto use_count() const -> i32;
 
     explicit operator bool() const;
     auto     is_expired() const -> bool;
@@ -141,7 +141,7 @@ public:
     template <BaseOfOrDerivedFrom<T> U>
     operator asset_ptr<U>() const;
 
-    auto get_ptr() const -> type*;
+    auto ptr() const -> type*;
 
     void reset();
 

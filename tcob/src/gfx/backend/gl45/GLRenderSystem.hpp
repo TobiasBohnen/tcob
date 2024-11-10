@@ -12,7 +12,7 @@ namespace tcob::gfx::gl45 {
 
 class gl_render_system final : public render_system {
 public:
-    auto get_name() const -> string override;
+    auto name() const -> string override;
     auto get_device_name() const -> string override;
     auto get_capabilities() const -> capabilities override;
     auto get_rtt_coords() const -> rect_f override;

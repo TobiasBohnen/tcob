@@ -15,7 +15,7 @@
 
 namespace tcob::gfx::gles20 {
 
-auto gl_render_system::get_name() const -> string
+auto gl_render_system::name() const -> string
 {
     return "OPENGLES20";
 }

@@ -15,11 +15,11 @@ accordion::accordion(init const& wi)
     , ActiveSectionIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
     , HoveredSectionIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
 {
-    ActiveSectionIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": ActiveSection changed"); });
+    ActiveSectionIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": ActiveSection changed"); });
     ActiveSectionIndex(-1);
-    HoveredSectionIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": HoveredSection changed"); });
+    HoveredSectionIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredSection changed"); });
     HoveredSectionIndex(-1);
-    MaximizeActiveSection.Changed.connect([&](auto const&) { force_redraw(get_name() + ": MaximizeActiveSection changed"); });
+    MaximizeActiveSection.Changed.connect([&](auto const&) { force_redraw(this->name() + ": MaximizeActiveSection changed"); });
     MaximizeActiveSection(false);
 
     Class("accordion");
@@ -35,7 +35,7 @@ void accordion::remove_section(widget* sec)
         }
     }
     ActiveSectionIndex = 0;
-    force_redraw(get_name() + ": section removed");
+    force_redraw(this->name() + ": section removed");
 }
 
 void accordion::clear_sections()
@@ -43,7 +43,7 @@ void accordion::clear_sections()
     _sections.clear();
     _sectionLabels.clear();
     ActiveSectionIndex = 0;
-    force_redraw(get_name() + ": sections cleared");
+    force_redraw(this->name() + ": sections cleared");
 }
 
 void accordion::change_section_label(widget* tab, utf8_string const& label)
@@ -54,7 +54,7 @@ void accordion::change_section_label(widget* tab, utf8_string const& label)
             break;
         }
     }
-    force_redraw(get_name() + ": section renamed");
+    force_redraw(this->name() + ": section renamed");
 }
 
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -72,7 +72,7 @@ auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
     return nullptr;
 }
 
-auto accordion::get_widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 {
     return _sections;
 }
@@ -158,7 +158,7 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
     widget::on_mouse_down(ev);
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
-        force_redraw(get_name() + ": mouse down");
+        force_redraw(this->name() + ": mouse down");
 
         if (HoveredSectionIndex >= 0) {
             if (ActiveSectionIndex == HoveredSectionIndex) {

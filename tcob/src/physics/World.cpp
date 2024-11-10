@@ -40,12 +40,12 @@ world::world(settings const& settings)
 
 world::~world() = default;
 
-auto world::get_bodies() -> std::span<std::shared_ptr<body>>
+auto world::bodies() -> std::span<std::shared_ptr<body>>
 {
     return _bodies;
 }
 
-auto world::get_joints() -> std::span<std::shared_ptr<joint>>
+auto world::joints() -> std::span<std::shared_ptr<joint>>
 {
     return _joints;
 }
@@ -63,7 +63,7 @@ void world::remove_body(body const& body)
 auto world::find_body(shape const& s) -> std::shared_ptr<body>
 {
     for (auto& body : _bodies) {
-        for (auto& shape : body->get_shapes()) {
+        for (auto& shape : body->shapes()) {
             if (*shape == s) {
                 return body;
             }

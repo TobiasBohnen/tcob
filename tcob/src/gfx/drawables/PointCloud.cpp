@@ -10,7 +10,7 @@ namespace tcob::gfx {
 static_point_cloud::static_point_cloud(std::span<vertex> points)
 {
     _renderer.set_geometry(points);
-    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.get_ptr()); });
+    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
 }
 
 void static_point_cloud::on_update(milliseconds)
@@ -32,7 +32,7 @@ void static_point_cloud::on_draw_to(render_target& target)
 
 point_cloud::point_cloud(i32 reservedSize)
 {
-    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.get_ptr()); });
+    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
     _points.reserve(reservedSize);
 }
 

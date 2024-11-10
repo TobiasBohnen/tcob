@@ -304,7 +304,7 @@ void canvas_widget::clear()
 {
     if (!_commands.empty()) {
         _commands.clear();
-        force_redraw(get_name() + ": commands cleared.");
+        force_redraw(this->name() + ": commands cleared.");
     }
 }
 

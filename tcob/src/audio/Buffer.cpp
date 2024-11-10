@@ -17,12 +17,12 @@ auto buffer::get_info() const -> info const&
     return _info;
 }
 
-auto buffer::get_data() const -> std::span<f32 const>
+auto buffer::data() const -> std::span<f32 const>
 {
     return _buffer;
 }
 
-auto buffer::get_data() -> std::span<f32>
+auto buffer::data() -> std::span<f32>
 {
     return _buffer;
 }

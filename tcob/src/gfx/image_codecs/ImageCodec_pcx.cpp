@@ -134,7 +134,7 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
         i16 const bpl {_header.BytesPerLine};
 
         image retValue {image::CreateEmpty({width, height}, image::format::RGB)};
-        auto* imgData {retValue.get_data().data()};
+        auto* imgData {retValue.buffer().data()};
         i32   index {0};
 
         if (!palette.empty()) {

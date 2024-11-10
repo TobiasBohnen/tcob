@@ -42,7 +42,7 @@ auto static IndexToPosition(i32 i, render_direction direction, size_i layerSize)
 tilemap_base::tilemap_base()
     : _renderer {buffer_usage_hint::DynamicDraw}
 {
-    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.get_ptr()); });
+    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
     Position.Changed.connect([&](auto const&) { mark_dirty(); });
     RenderDirection.Changed.connect([&](auto const&) { mark_dirty(); });
 }

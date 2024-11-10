@@ -568,9 +568,9 @@ void png_encoder::write_header(image const& image, io::ostream& out) const
     write_chunk(out, header);
 }
 
-auto static get_data(image const& image) -> std::vector<u8>
+auto static data(image const& image) -> std::vector<u8>
 {
-    auto const  buffer {image.get_data()};
+    auto const  buffer {image.buffer()};
     auto const& info {image.get_info()};
 
     std::vector<u8> retValue(static_cast<usize>(info.size_in_bytes() + info.Size.Height));
@@ -608,7 +608,7 @@ auto static get_data(image const& image) -> std::vector<u8>
 void png_encoder::write_image(image const& image, io::ostream& out) const
 {
     // compress
-    auto buf {io::zlib_filter {}.to(get_data(image))};
+    auto buf {io::zlib_filter {}.to(data(image))};
     if (buf.empty()) { return; }
 
     // write in 8192 byte chunks

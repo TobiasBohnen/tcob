@@ -17,7 +17,7 @@ static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapes)
     for (auto& shape : shapes) {
         shape->update(milliseconds {0});
         if (shape->is_visible()) {
-            _renderer.add_geometry(shape->get_geometry(), shape->Material().get_ptr());
+            _renderer.add_geometry(shape->geometry(), shape->Material().ptr());
         }
     }
 }
@@ -125,7 +125,7 @@ void shape_batch::on_draw_to(render_target& target)
 
         for (auto& shape : _children) {
             if (shape->is_visible()) {
-                _renderer.add_geometry(shape->get_geometry(), shape->Material().get_ptr());
+                _renderer.add_geometry(shape->geometry(), shape->Material().ptr());
             }
         }
     }
@@ -209,7 +209,7 @@ circle_shape::circle_shape()
     Segments.Changed.connect([&](auto const&) { mark_dirty(); });
 }
 
-auto circle_shape::get_geometry() -> geometry_data
+auto circle_shape::geometry() -> geometry_data
 {
     return {
         .Vertices = _verts,
@@ -308,7 +308,7 @@ rect_shape::rect_shape()
     geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
 }
 
-auto rect_shape::get_geometry() -> geometry_data
+auto rect_shape::geometry() -> geometry_data
 {
     static std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
     return {
@@ -387,7 +387,7 @@ poly_shape::poly_shape()
     Polygons.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 }
 
-auto poly_shape::get_geometry() -> geometry_data
+auto poly_shape::geometry() -> geometry_data
 {
     return {
         .Vertices = _verts,

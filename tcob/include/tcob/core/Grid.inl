@@ -72,13 +72,13 @@ inline auto grid<T>::end() const -> const_iterator
 }
 
 template <typename T>
-inline auto grid<T>::get_row_count() const -> dimension_type
+inline auto grid<T>::height() const -> dimension_type
 {
     return _size.Height;
 }
 
 template <typename T>
-inline auto grid<T>::get_column_count() const -> dimension_type
+inline auto grid<T>::width() const -> dimension_type
 {
     return _size.Width;
 }
@@ -92,13 +92,19 @@ inline auto grid<T>::get_extent() const -> size_type
 template <typename T>
 inline auto grid<T>::contains(point_type pos) const -> bool
 {
-    return get_extent().contains(pos);
+    return _size.contains(pos);
 }
 
 template <typename T>
 inline auto grid<T>::size() const -> usize
 {
     return _data.size();
+}
+
+template <typename T>
+inline auto grid<T>::data() const -> T const*
+{
+    return _data.data();
 }
 
 template <typename T>

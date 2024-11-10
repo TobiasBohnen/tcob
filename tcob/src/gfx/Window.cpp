@@ -15,7 +15,7 @@
 namespace tcob::gfx {
 
 window::window(std::unique_ptr<render_backend::window_base> window, assets::manual_asset_ptr<texture> const& texture)
-    : render_target {texture.get_ptr()}
+    : render_target {texture.ptr()}
     , FullScreen {{[&]() { return get_fullscreen(); },
                    [&](auto const& value) { set_fullscreen(value); }}}
     , Title {{[&]() { return get_title(); },
@@ -32,7 +32,7 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::manu
     SystemCursorEnabled.Changed.connect([&](bool value) { SDL_ShowCursor(value ? SDL_ENABLE : SDL_DISABLE); });
 
     _material->Texture = _texture;
-    _renderer.set_material(_material.get_ptr());
+    _renderer.set_material(_material.ptr());
 
     set_size(Size());
 }
@@ -45,7 +45,7 @@ void window::load_icon(path const& file)
         auto const& info {img->get_info()};
         auto*       surface {
             SDL_CreateRGBSurfaceFrom(
-                img->get_data().data(),
+                img->buffer().data(),
                 info.Size.Width, info.Size.Height, 32, info.stride(),
                 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000)};
 

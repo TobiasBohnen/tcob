@@ -31,7 +31,7 @@ class TCOB_API table final {
 public:
     table(database_view db, utf8_string name);
 
-    auto get_name() const -> utf8_string const&;
+    auto name() const -> utf8_string const&;
     auto get_column_names() const -> std::set<utf8_string>;
     auto get_row_count() const -> i32;
 

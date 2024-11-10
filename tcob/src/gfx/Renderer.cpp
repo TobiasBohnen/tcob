@@ -391,7 +391,7 @@ void canvas_renderer::prepare_render(render_target& target, bool debug)
 
 void canvas_renderer::on_render_to_target(render_target& target)
 {
-    target.bind_material(_material.get_ptr());
+    target.bind_material(_material.ptr());
     _vertexArray->draw_elements(primitive_type::Triangles, 6, 0);
     target.unbind_material();
 }

@@ -14,7 +14,7 @@ label::label(init const& wi)
 {
     Label.Changed.connect([&](auto const&) {
         // TODO: translation hook
-        force_redraw(get_name() + ": Label changed");
+        force_redraw(this->name() + ": Label changed");
     });
 
     Class("label");

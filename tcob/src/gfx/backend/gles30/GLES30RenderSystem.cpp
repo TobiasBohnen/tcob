@@ -16,7 +16,7 @@
 
 namespace tcob::gfx::gles30 {
 
-auto gl_render_system::get_name() const -> string
+auto gl_render_system::name() const -> string
 {
     return "OPENGLES30";
 }

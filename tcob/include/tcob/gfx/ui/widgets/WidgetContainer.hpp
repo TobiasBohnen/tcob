@@ -23,8 +23,8 @@ public:
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
     auto find_child_by_name(string const& name) -> std::shared_ptr<widget> override;
 
-    auto virtual get_widgets() const -> std::vector<std::shared_ptr<widget>> const& = 0;
-    auto get_widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>;
+    auto virtual widgets() const -> std::vector<std::shared_ptr<widget>> const& = 0;
+    auto widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>;
 
     template <SubmitTarget Target>
     void submit(Target& target);

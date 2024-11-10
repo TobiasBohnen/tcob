@@ -16,9 +16,9 @@ list_box::list_box(init const& wi)
     , SelectedItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
     , HoveredItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(-1);
-    HoveredItemIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(-1);
 
     Filter.Changed.connect([&](auto const& val) {
@@ -35,7 +35,7 @@ list_box::list_box(init const& wi)
                 }
             }
         }
-        force_redraw(get_name() + ": Filter changed");
+        force_redraw(this->name() + ": Filter changed");
     });
 
     Class("list_box");
@@ -53,7 +53,7 @@ void list_box::add_item(list_item const& item)
     if (!Filter->empty() && helper::case_insensitive_contains(item.Text, Filter())) {
         _filteredItems.push_back(item);
     }
-    force_redraw(get_name() + ": item added");
+    force_redraw(this->name() + ": item added");
 }
 
 void list_box::clear_items()
@@ -62,7 +62,7 @@ void list_box::clear_items()
     _filteredItems.clear();
     SelectedItemIndex = -1;
     HoveredItemIndex  = -1;
-    force_redraw(get_name() + ": items cleared");
+    force_redraw(this->name() + ": items cleared");
 }
 
 auto list_box::select_item(utf8_string const& item) -> bool

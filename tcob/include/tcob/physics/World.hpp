@@ -123,14 +123,14 @@ public:
     prop<f32>        RestitutionThreshold;
     prop<f32>        HitEventThreshold;
 
-    auto get_bodies() -> std::span<std::shared_ptr<body>>;
+    auto bodies() -> std::span<std::shared_ptr<body>>;
 
     auto create_body(body_transform const& xform, body::settings const& settings) -> std::shared_ptr<body>;
     void remove_body(body const& body);
 
     auto find_body(shape const& s) -> std::shared_ptr<body>;
 
-    auto get_joints() -> std::span<std::shared_ptr<joint>>;
+    auto joints() -> std::span<std::shared_ptr<joint>>;
 
     template <typename T>
     auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;

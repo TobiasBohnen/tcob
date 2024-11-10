@@ -15,11 +15,11 @@ class TCOB_API stats {
 public:
     stats();
 
-    auto get_time() const -> f32;
+    auto current_time() const -> f32;
 
-    auto get_average_FPS() const -> f32;
-    auto get_best_FPS() const -> f32;
-    auto get_worst_FPS() const -> f32;
+    auto average_FPS() const -> f32;
+    auto best_FPS() const -> f32;
+    auto worst_FPS() const -> f32;
 
     void update(milliseconds delta);
     void reset();

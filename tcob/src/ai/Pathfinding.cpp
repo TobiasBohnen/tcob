@@ -77,7 +77,7 @@ auto astar_pathfinding::get_neighbors(grid<u64> const& grid, point_i pos) const 
 
     for (auto const& dir : directions) {
         point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
-        if (neighbor.X >= 0 && neighbor.X < grid.get_column_count() && neighbor.Y >= 0 && neighbor.Y < grid.get_row_count()) {
+        if (neighbor.X >= 0 && neighbor.X < grid.width() && neighbor.Y >= 0 && neighbor.Y < grid.height()) {
             retValue.push_back(neighbor);
         }
     }

@@ -14,9 +14,9 @@ button::button(init const& wi)
 {
     Label.Changed.connect([&](auto const&) {
         // TODO: translation hook
-        force_redraw(get_name() + ": Label changed");
+        force_redraw(this->name() + ": Label changed");
     });
-    Icon.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Icon changed"); });
+    Icon.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Icon changed"); });
 
     Class("button");
 }
@@ -52,7 +52,7 @@ void button::on_paint(widget_painter& painter)
             rect = {{rect.center().X - (width / 2), rect.top()}, {width, rect.height()}};
             auto& canvas {painter.get_canvas()};
             canvas.set_fill_style(style->Text.Color);
-            canvas.draw_image(Icon->Texture.get_ptr(), Icon->Region, rect);
+            canvas.draw_image(Icon->Texture.ptr(), Icon->Region, rect);
         }
     }
 }

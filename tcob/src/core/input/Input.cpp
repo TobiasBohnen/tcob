@@ -43,13 +43,13 @@ auto controller::rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds d
     return SDL_GameControllerRumbleTriggers(_controller, leftRumble, rightRumble, static_cast<u32>(duration.count())) == 0;
 }
 
-auto controller::get_ID() const -> i32
+auto controller::id() const -> i32
 {
     assert(_controller);
     return _id;
 }
 
-auto controller::get_name() const -> string
+auto controller::name() const -> string
 {
     assert(_controller);
     return SDL_GameControllerName(_controller);

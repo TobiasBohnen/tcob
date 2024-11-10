@@ -28,7 +28,7 @@ cursor::cursor()
         _size               = tex->get_size().Width;
         Material->PointSize = static_cast<f32>(_size);
 
-        _renderer.set_material(Material().get_ptr());
+        _renderer.set_material(Material().ptr());
     });
 
     Material.Changed.connect([&](auto const&) {

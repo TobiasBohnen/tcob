@@ -70,12 +70,12 @@ distance_joint::distance_joint(world& world, detail::b2d_world* b2dWorld, settin
 {
 }
 
-auto distance_joint::get_current_length() const -> f32
+auto distance_joint::current_length() const -> f32
 {
     return get_impl().distance_joint_get_current_length();
 }
 
-auto distance_joint::get_motor_force() const -> f32
+auto distance_joint::motor_force() const -> f32
 {
     return get_impl().distance_joint_get_motor_force();
 }
@@ -137,7 +137,7 @@ prismatic_joint::prismatic_joint(world& world, detail::b2d_world* b2dWorld, sett
 {
 }
 
-auto prismatic_joint::get_motor_force() const -> f32
+auto prismatic_joint::motor_force() const -> f32
 {
     return get_impl().prismatic_joint_get_motor_force();
 }
@@ -167,12 +167,12 @@ revolute_joint::revolute_joint(world& world, detail::b2d_world* b2dWorld, settin
 {
 }
 
-auto revolute_joint::get_angle() const -> radian_f
+auto revolute_joint::angle() const -> radian_f
 {
     return get_impl().revolute_joint_get_angle();
 }
 
-auto revolute_joint::get_motor_torque() const -> f32
+auto revolute_joint::motor_torque() const -> f32
 {
     return get_impl().revolute_joint_get_motor_torque();
 }
@@ -217,7 +217,7 @@ wheel_joint::wheel_joint(world& world, detail::b2d_world* b2dWorld, settings con
 {
 }
 
-auto wheel_joint::get_motor_torque() const -> f32
+auto wheel_joint::motor_torque() const -> f32
 {
     return get_impl().wheel_joint_get_motor_torque();
 }

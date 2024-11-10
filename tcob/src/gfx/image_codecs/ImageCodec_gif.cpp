@@ -93,7 +93,7 @@ auto gif_decoder::open() -> std::optional<image::info>
 
 auto gif_decoder::get_current_frame() const -> u8 const*
 {
-    return _currentFrame.get_data().data();
+    return _currentFrame.buffer().data();
 }
 
 auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status

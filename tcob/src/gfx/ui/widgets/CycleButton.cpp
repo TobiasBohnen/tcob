@@ -13,7 +13,7 @@ cycle_button::cycle_button(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(get_name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(-1);
 
     Class("cycle_button");
@@ -22,13 +22,13 @@ cycle_button::cycle_button(init const& wi)
 void cycle_button::add_item(utf8_string const& item)
 {
     _items.push_back(item);
-    force_redraw(get_name() + ": item added");
+    force_redraw(this->name() + ": item added");
 }
 
 void cycle_button::clear_items()
 {
     _items.clear();
-    force_redraw(get_name() + ": items cleared");
+    force_redraw(this->name() + ": items cleared");
 }
 
 auto cycle_button::select_item(utf8_string const& item) -> bool

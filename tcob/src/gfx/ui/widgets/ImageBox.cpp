@@ -12,7 +12,7 @@ namespace tcob::gfx::ui {
 image_box::image_box(init const& wi)
     : widget {wi}
 {
-    Image.Changed.connect([&](auto const&) { force_redraw(get_name() + ": Image changed"); });
+    Image.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Image changed"); });
 
     Class("image_box");
 }
@@ -79,7 +79,7 @@ void image_box::on_paint(widget_painter& painter)
 
             auto& canvas {painter.get_canvas()};
             canvas.set_fill_style(colors::White);
-            canvas.draw_image(tex.get_ptr(), Image->Region, targetRect);
+            canvas.draw_image(tex.ptr(), Image->Region, targetRect);
         }
     }
 }

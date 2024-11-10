@@ -27,7 +27,7 @@ void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
         _columnSizes[x] = std::ssize(col[x]);
     }
 
-    force_redraw(get_name() + ": column headers set");
+    force_redraw(this->name() + ": column headers set");
 }
 
 void grid_view::change_column(isize idx, utf8_string const& col)
@@ -37,7 +37,7 @@ void grid_view::change_column(isize idx, utf8_string const& col)
     _columnHeaders[idx] = col;
     _columnSizes[idx]   = std::ssize(col);
 
-    force_redraw(get_name() + ": column header changed");
+    force_redraw(this->name() + ": column header changed");
 }
 
 void grid_view::add_row(std::vector<utf8_string> const& row)
@@ -52,7 +52,7 @@ void grid_view::add_row(std::vector<utf8_string> const& row)
         }
     }
 
-    force_redraw(get_name() + ": row added");
+    force_redraw(this->name() + ": row added");
 }
 
 void grid_view::clear_rows()
@@ -61,7 +61,7 @@ void grid_view::clear_rows()
     _columnSizes.clear();
     _columnSizes.resize(_columnHeaders.size());
     set_scrollbar_value(0);
-    force_redraw(get_name() + ": rows cleared");
+    force_redraw(this->name() + ": rows cleared");
 }
 
 void grid_view::paint_content(widget_painter& painter, rect_f const& rect)

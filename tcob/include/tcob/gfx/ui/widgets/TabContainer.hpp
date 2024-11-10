@@ -47,7 +47,7 @@ public:
 
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
-    auto get_widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
+    auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
     void force_redraw(string const& reason) override;
 
