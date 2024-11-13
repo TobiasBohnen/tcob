@@ -20,8 +20,8 @@ auto astar_pathfinding::find_path(grid<u64> const& testGrid, point_i start, poin
     std::unordered_set<point_i>                                  used;
     std::unordered_map<point_i, point_i>                         cameFrom;
 
-    grid<u64> gScore {testGrid.get_extent(), std::numeric_limits<u64>::max()};
-    grid<u64> fScore {testGrid.get_extent(), std::numeric_limits<u64>::max()};
+    grid<u64> gScore {testGrid.extent(), std::numeric_limits<u64>::max()};
+    grid<u64> fScore {testGrid.extent(), std::numeric_limits<u64>::max()};
 
     gScore[start] = 0;
     fScore[start] = heuristic(start, finish);
