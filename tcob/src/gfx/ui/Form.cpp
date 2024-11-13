@@ -431,7 +431,7 @@ void form::on_controller_button_up(input::controller::button_event const& ev)
 
 void form::on_bounds_changed()
 {
-    _renderer.set_bounds(Bounds);
+    _renderer.set_bounds(Bounds());
 
     force_redraw("bounds changed");
     on_styles_changed();

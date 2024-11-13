@@ -60,7 +60,7 @@ auto drop_down_list::get_item_at(isize index) const -> list_item const&
 
 auto drop_down_list::get_selected_item() const -> list_item const&
 {
-    return _items.at(SelectedItemIndex);
+    return _items.at(SelectedItemIndex());
 }
 
 auto drop_down_list::get_item_count() const -> isize
@@ -139,10 +139,10 @@ void drop_down_list::on_paint(widget_painter& painter)
             }
 
             if (SelectedItemIndex >= 0) {
-                paint_item(painter, listRect, itemHeight, SelectedItemIndex);
+                paint_item(painter, listRect, itemHeight, SelectedItemIndex());
             }
             if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-                paint_item(painter, listRect, itemHeight, HoveredItemIndex);
+                paint_item(painter, listRect, itemHeight, HoveredItemIndex());
             }
         }
     }

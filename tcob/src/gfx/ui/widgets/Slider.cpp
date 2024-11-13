@@ -15,7 +15,7 @@ slider::slider(init const& wi)
     , Min {{[&](i32 val) -> i32 { return std::min(val, Max()); }}}
     , Max {{[&](i32 val) -> i32 { return std::max(val, Min()); }}}
     , Value {{[&](i32 val) -> i32 {
-        if (IncrementalChange && std::abs(Value - val) > Step) {
+        if (IncrementalChange && std::abs(Value() - val) > Step) {
             return Value();
         }
 
@@ -186,7 +186,7 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(i32 newVal)
 {
-    f32 const   newFrac {Max != Min ? static_cast<f32>(newVal - Min) / (Max - Min) : 0.f};
+    f32 const   newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / (Max() - Min()) : 0.f};
     auto const* style {get_style<slider::style>()};
     if (style && !_overThumb && !_isDragging) {
         _tween.start(newFrac, style->Bar.Delay);
@@ -211,7 +211,7 @@ void slider::calculate_value(point_f mp)
     } break;
     }
 
-    i32 const val {static_cast<i32>(Min + ((Max - Min + 1) * frac))};
+    i32 const val {static_cast<i32>(Min() + ((Max() - Min() + 1) * frac))};
     Value = helper::round_to_multiple(val, Step());
 
     if (!_overThumb) {

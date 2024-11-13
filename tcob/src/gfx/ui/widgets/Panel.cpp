@@ -86,9 +86,7 @@ void panel::on_styles_changed()
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
 {
-    if (!ScrollEnabled) {
-        return false;
-    }
+    if (!ScrollEnabled()) { return false; }
 
     return std::ranges::any_of(widgets(), [orien, rect](auto const& w) {
         auto const& bounds {w->Bounds()};
@@ -135,7 +133,7 @@ void panel::on_paint(widget_painter& painter)
         xform.translate(translate);
 
         for (auto const& w : widgets_by_zorder()) {
-            painter.begin(Alpha, xform);
+            painter.begin(Alpha(), xform);
             w->paint(painter);
             painter.end();
         }
@@ -300,7 +298,7 @@ void glass::on_paint(widget_painter& painter)
     xform.translate(translate);
 
     for (auto const& w : widgets()) {
-        painter.begin(Alpha, xform);
+        painter.begin(Alpha(), xform);
         w->paint(painter);
         painter.end();
     }

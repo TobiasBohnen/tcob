@@ -438,7 +438,7 @@ void terminal::on_mouse_down(input::mouse::button_event const& ev)
 
     if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
         if (HoveredCell->X >= 0 && HoveredCell->Y >= 0) {
-            move(HoveredCell);
+            move(HoveredCell());
             ev.Handled = true;
         }
     }

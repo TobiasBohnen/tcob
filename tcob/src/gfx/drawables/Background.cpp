@@ -30,8 +30,8 @@ void background::on_draw_to(render_target& target)
 {
     geometry::set_position(_quad, {point_f::Zero, size_f {target.Size()}});
     geometry::set_color(_quad, colors::White);
-    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        geometry::set_texcoords(_quad, Material->Texture->get_region(TextureRegion));
+    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion())) {
+        geometry::set_texcoords(_quad, Material->Texture->get_region(TextureRegion()));
     } else {
         geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
     }

@@ -50,7 +50,7 @@ auto cycle_button::get_item_at(isize index) const -> utf8_string const&
 
 auto cycle_button::get_selected_item() const -> utf8_string const&
 {
-    return _items.at(SelectedItemIndex);
+    return _items.at(SelectedItemIndex());
 }
 
 auto cycle_button::get_item_count() const -> isize
@@ -80,7 +80,7 @@ void cycle_button::on_mouse_down(input::mouse::button_event const& ev)
     if (SelectedItemIndex == get_item_count() - 1) {
         SelectedItemIndex = 0;
     } else {
-        SelectedItemIndex = SelectedItemIndex + 1;
+        SelectedItemIndex = SelectedItemIndex() + 1;
     }
 
     ev.Handled = true;

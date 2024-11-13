@@ -15,7 +15,7 @@ widget::widget(init const& wi)
     : Alpha {{[&]() {
                   f32 retValue {_alpha};
                   if (auto* parent {get_parent()}) {
-                      retValue *= parent->Alpha;
+                      retValue *= parent->Alpha();
                   }
                   return retValue;
               },
@@ -112,7 +112,7 @@ void widget::paint(widget_painter& painter)
         return;
     }
 
-    painter.begin(Alpha);
+    painter.begin(Alpha());
 
     on_paint(painter);
 
@@ -144,7 +144,7 @@ auto widget::get_hit_test_bounds() const -> rect_f
         retValue = retValue.as_intersection_with(_parent->get_global_content_bounds());
     }
     if (_form) {
-        retValue = retValue.as_intersection_with(_form->Bounds);
+        retValue = retValue.as_intersection_with(_form->Bounds());
     }
 
     return retValue;

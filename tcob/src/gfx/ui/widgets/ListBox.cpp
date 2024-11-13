@@ -108,7 +108,7 @@ auto list_box::get_item_at(isize index) const -> list_item const&
 
 auto list_box::get_selected_item() const -> list_item const&
 {
-    return get_items().at(SelectedItemIndex);
+    return get_items().at(SelectedItemIndex());
 }
 
 auto list_box::get_item_count() const -> isize
@@ -139,10 +139,10 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
         }
 
         if (SelectedItemIndex >= 0) {
-            paint_item(painter, listRect, itemHeight, SelectedItemIndex);
+            paint_item(painter, listRect, itemHeight, SelectedItemIndex());
         }
         if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paint_item(painter, listRect, itemHeight, HoveredItemIndex);
+            paint_item(painter, listRect, itemHeight, HoveredItemIndex());
         }
     }
 }
@@ -156,7 +156,7 @@ void list_box::on_key_down(input::keyboard::event const& ev)
     if (Filter->empty() && !items.empty() && SelectedItemIndex >= 0 && kc >= 'a' && kc <= 'z') { // TODO: make optional
         bool const reverse {(ev.KeyMods & input::key_mod::LeftShift) == input::key_mod::LeftShift};
 
-        isize idx {SelectedItemIndex};
+        isize idx {SelectedItemIndex()};
         do {
             if (reverse) {
                 idx--;

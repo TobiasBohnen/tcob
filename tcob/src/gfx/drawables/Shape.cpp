@@ -245,16 +245,16 @@ void circle_shape::create()
     _verts.clear();
     _inds.clear();
 
-    if (Segments < 3 || Radius < 1) { return; }
+    if (Segments < 3 || Radius < 1.0f) { return; }
 
     // vertices
     auto const& xform {get_transform()};
-    f32 const   angleStep {TAU_F / Segments};
+    f32 const   angleStep {TAU_F / Segments()};
     f32 const   radius {Radius()};
 
     texture_region texReg {};
-    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        texReg = Material->Texture->get_region(TextureRegion);
+    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion())) {
+        texReg = Material->Texture->get_region(TextureRegion());
     } else {
         texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }
@@ -275,7 +275,7 @@ void circle_shape::create()
         f32 const x {(radius * std::cos(angle)) + centerX};
         f32 const y {(radius * std::sin(angle)) + centerY};
         _verts.push_back({.Position  = (xform * point_f {x, y}),
-                          .Color     = Color,
+                          .Color     = Color(),
                           .TexCoords = {(((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
                                         (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
                                         texLevel}});
@@ -290,7 +290,7 @@ void circle_shape::create()
 
     _inds.push_back(0);
     _inds.push_back(1);
-    _inds.push_back(Segments);
+    _inds.push_back(Segments());
 }
 
 auto circle_shape::get_center() const -> point_f
@@ -458,8 +458,8 @@ void poly_shape::create()
     // create verts
     auto const&    xform {get_transform()};
     texture_region texReg {};
-    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        texReg = Material->Texture->get_region(TextureRegion);
+    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion())) {
+        texReg = Material->Texture->get_region(TextureRegion());
     } else {
         texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }

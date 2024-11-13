@@ -60,7 +60,7 @@ void accordion::change_section_label(widget* tab, utf8_string const& label)
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
-        auto& activeSection {_sections[ActiveSectionIndex]};
+        auto& activeSection {_sections[ActiveSectionIndex()]};
         if (activeSection->hit_test(pos)) {
             if (auto retValue {activeSection->find_child_at(pos)}) {
                 return retValue;
@@ -88,7 +88,7 @@ void accordion::on_paint(widget_painter& painter)
         // sections
         f32 const sectionHeight {style->SectionBarHeight.calc(rect.height())};
         _sectionRects.clear();
-        if (MaximizeActiveSection && ActiveSectionIndex >= 0) {
+        if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
             isize const i {ActiveSectionIndex()};
             if (auto const* sectionStyle {get_section_style(i)}) {
                 rect_f const sectionRect {get_section_rect(*sectionStyle, 0, sectionHeight, rect)};
@@ -117,8 +117,8 @@ void accordion::on_paint(widget_painter& painter)
             point_f const translate {rect.Position + get_paint_offset()};
             xform.translate(translate);
 
-            auto& tab {_sections[ActiveSectionIndex]};
-            painter.begin(Alpha, xform);
+            auto& tab {_sections[ActiveSectionIndex()]};
+            painter.begin(Alpha(), xform);
             tab->paint(painter);
             painter.end();
         }
@@ -141,7 +141,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
     auto const mp {global_to_parent_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
         if (_sectionRects[i].contains(mp)) {
-            if (MaximizeActiveSection && ActiveSectionIndex >= 0) {
+            if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
                 HoveredSectionIndex = ActiveSectionIndex();
             } else {
                 HoveredSectionIndex = i;
@@ -163,7 +163,7 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
         if (HoveredSectionIndex >= 0) {
             if (ActiveSectionIndex == HoveredSectionIndex) {
                 ActiveSectionIndex = -1;
-                if (MaximizeActiveSection) { HoveredSectionIndex = 0; }
+                if (MaximizeActiveSection()) { HoveredSectionIndex = 0; }
             } else {
                 ActiveSectionIndex = HoveredSectionIndex();
             }
@@ -200,8 +200,8 @@ auto accordion::get_section_style(isize index) const -> item_style*
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
-    bounds.Size.Height -= barHeight * (MaximizeActiveSection ? 1 : _sections.size());
-    bounds.Position.Y += barHeight * (MaximizeActiveSection ? 1 : ActiveSectionIndex + 1);
+    bounds.Size.Height -= barHeight * (MaximizeActiveSection() ? 1 : _sections.size());
+    bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : ActiveSectionIndex() + 1);
 }
 
 void accordion::offset_content(rect_f& bounds, bool isHitTest) const

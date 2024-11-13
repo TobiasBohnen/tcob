@@ -312,7 +312,7 @@ void color_picker::on_paint(widget_painter& painter)
     canvas.set_fill_style(colors::White);
     canvas.fill();
 
-    color const baseColor {color::FromHSVA({BaseHue, 1.0, 1.0f})};
+    color const baseColor {color::FromHSVA({BaseHue(), 1.0, 1.0f})};
     canvas.set_fill_style(canvas.create_linear_gradient(
         {0, 0}, {rect0.Width, 0},
         {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
@@ -341,7 +341,7 @@ void color_picker::on_mouse_down(input::mouse::button_event const& ev)
             auto const col {GetGradient().get_colors().at(static_cast<i32>(255 * v))};
             BaseHue = col.to_hsv().Hue;
         } else {
-            SelectedColor = color::FromHSVA({BaseHue, s, 1 - v});
+            SelectedColor = color::FromHSVA({BaseHue(), s, 1 - v});
         }
     }
 }

@@ -58,7 +58,7 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
-        auto& activeTab {_tabs[ActiveTabIndex]};
+        auto& activeTab {_tabs[ActiveTabIndex()]};
         if (activeTab->hit_test(pos)) {
             if (auto retValue {activeTab->find_child_at(pos)}) {
                 return retValue;
@@ -125,8 +125,8 @@ void tab_container::on_paint(widget_painter& painter)
             point_f const translate {rect.Position + get_paint_offset()};
             xform.translate(translate);
 
-            auto& tab {_tabs[ActiveTabIndex]};
-            painter.begin(Alpha, xform);
+            auto& tab {_tabs[ActiveTabIndex()]};
+            painter.begin(Alpha(), xform);
             tab->paint(painter);
             painter.end();
         }

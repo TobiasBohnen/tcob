@@ -140,7 +140,7 @@ auto static is_in_shadowcaster(light_source& light, auto&& casterPoints) -> bool
     bool retValue {false};
     for (usize i {0}; i < casterPoints.size() - 1; ++i) {
         if (casterPoints[i].Points.empty()) { continue; }
-        retValue = polygons::is_point_inside(light.Position, casterPoints[i].Points);
+        retValue = polygons::is_point_inside(light.Position(), casterPoints[i].Points);
         if (retValue) { break; }
     }
     return retValue;
@@ -244,13 +244,13 @@ void lighting_system::build_geometry(light_source& light, u32& indOffset)
     u32 const n {static_cast<u32>(light._collisionResult.size())};
     if (n <= 1) { return; }
 
-    _verts.push_back({.Position  = light.Position,
-                      .Color     = light.Color,
+    _verts.push_back({.Position  = light.Position(),
+                      .Color     = light.Color(),
                       .TexCoords = {0, 0, 0}});
 
     for (auto const& p : light._collisionResult) {
         auto col {light.Color()};
-        if (light.is_range_limited() && light.Falloff) {
+        if (light.is_range_limited() && light.Falloff()) {
             // FIXME: should be inverse square
             f64 const falloff {std::clamp(1.0 - (p.Distance / lightRange), 0.0, 1.0)};
             col.R = static_cast<u8>(col.R * falloff);
