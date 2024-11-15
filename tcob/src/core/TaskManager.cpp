@@ -33,7 +33,7 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
 {
     isize const numThreads {std::min(_threadCount, count / minRange)};
 
-    if (numThreads <= 1 || count < _threadCount) {
+    if (numThreads <= 1) {
         par_task const ctx {.Start = 0, .End = count, .Thread = 0};
         func(ctx);
     } else {
