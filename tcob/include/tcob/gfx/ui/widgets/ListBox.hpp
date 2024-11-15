@@ -37,8 +37,8 @@ public:
     void scroll_to_selected();
 
     auto get_item_at(isize index) const -> list_item const&;
-    auto get_selected_item() const -> list_item const&;
-    auto get_item_count() const -> isize;
+    auto selected_item() const -> list_item const&;
+    auto item_count() const -> isize;
 
 protected:
     void paint_content(widget_painter& painter, rect_f const& rect) override;

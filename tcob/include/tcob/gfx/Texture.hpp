@@ -43,9 +43,9 @@ public:
     prop_fn<filtering> Filtering;
     prop_fn<wrapping>  Wrapping;
 
-    auto get_size() const -> size_i;
-    auto get_format() const -> format;
-    auto get_depth() const -> u32;
+    auto get_size() const -> size_i;   // TODO: get_
+    auto get_format() const -> format; // TODO: get_
+    auto get_depth() const -> u32;     // TODO: get_
 
     void create(size_i size, u32 depth, format f);
 

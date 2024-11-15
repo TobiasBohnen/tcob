@@ -28,9 +28,9 @@ public:
     music() = default;
     ~music() override;
 
-    auto get_info() const -> std::optional<buffer::info>;
-    auto get_duration() const -> milliseconds override;
-    auto get_playback_position() const -> milliseconds override;
+    auto get_info() const -> std::optional<buffer::info>; // TODO: get_
+    auto duration() const -> milliseconds override;
+    auto playback_position() const -> milliseconds override;
 
     auto open [[nodiscard]] (path const& file) -> load_status;
     auto open [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) -> load_status;

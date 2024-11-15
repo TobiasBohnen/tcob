@@ -34,7 +34,7 @@ namespace random {
         auto operator()(auto&&... distArgs);
 
         auto next() -> result_type;
-        auto get_state() const -> state_type const&;
+        auto state() const -> state_type const&;
 
     private:
         random_engine_type _engine {};
@@ -69,7 +69,7 @@ namespace random {
         explicit dice(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
         explicit dice(state_type state);
 
-        auto get_state() const -> state_type const&;
+        auto state() const -> state_type const&;
 
         auto roll() -> i32;
 
@@ -90,7 +90,7 @@ namespace random {
         explicit shuffle(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()));
         explicit shuffle(state_type state);
 
-        auto get_state() const -> state_type const&;
+        auto state() const -> state_type const&;
 
         void operator()(std::span<T> span);
 

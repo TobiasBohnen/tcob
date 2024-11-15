@@ -64,12 +64,12 @@ public:
     auto virtual get_capabilities() const -> capabilities = 0;
     auto virtual get_rtt_coords() const -> rect_f         = 0;
 
-    auto get_stats() -> stats&;
-    auto get_displays() const -> std::map<i32, display>;
-    auto get_desktop_size(i32 display) const -> size_i;
+    auto get_stats() -> stats&;                                     // TODO: get_
+    auto get_displays() const -> std::map<i32, display>;            // TODO: get_
+    auto get_desktop_size(i32 display) const -> size_i;             // TODO: get_
 
-    auto get_window() const -> gfx::window&;
-    auto get_default_target() const -> gfx::default_render_target&;
+    auto get_window() const -> gfx::window&;                        // TODO: get_
+    auto get_default_target() const -> gfx::default_render_target&; // TODO: get_
 
     auto virtual create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
     auto virtual create_render_target [[nodiscard]] (texture* tex) -> std::unique_ptr<render_backend::render_target_base>          = 0;

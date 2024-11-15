@@ -25,7 +25,7 @@ public:
         i64 FrameCount {0};
     };
 
-    auto get_info() const -> info const&;
+    auto get_info() const -> info const&; // TODO: get_
 
     auto data() const -> std::span<f32 const>;
     auto data() -> std::span<f32>;

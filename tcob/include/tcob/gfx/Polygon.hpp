@@ -49,9 +49,9 @@ public:
     polyline              Outline; // ccw
     std::vector<polyline> Holes;   // cw
 
-    auto get_info() const -> info;
+    auto get_info() const -> info; // TODO: get_
 
-    auto earcut() const -> std::vector<u32>;
+    auto earcut [[nodiscard]] () const -> std::vector<u32>;
 
     void apply_transform(transform const& xform);
 

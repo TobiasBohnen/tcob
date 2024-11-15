@@ -49,7 +49,7 @@ public:
     auto run_deferred(def_func const& func) -> uid;
     void cancel_deferred(uid id);
 
-    auto get_thread_count() const -> isize;
+    auto get_thread_count() const -> isize; // TODO: get_
 
     static inline char const* service_name {"task_manager"};
 

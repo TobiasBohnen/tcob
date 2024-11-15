@@ -90,7 +90,7 @@ auto sound::on_stop() -> bool
     return true;
 }
 
-auto sound::get_duration() const -> milliseconds
+auto sound::duration() const -> milliseconds
 {
     i32 const size {_buffer->get_size()};
     i32 const channels {_buffer->get_channels()};
@@ -102,7 +102,7 @@ auto sound::get_duration() const -> milliseconds
     return milliseconds {(lengthInSamples / frequency) * 1000};
 }
 
-auto sound::get_playback_position() const -> milliseconds
+auto sound::playback_position() const -> milliseconds
 {
     return _buffer->get_size() > 0
         ? milliseconds {get_source()->get_sec_offset()}

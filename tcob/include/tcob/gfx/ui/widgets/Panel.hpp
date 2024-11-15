@@ -29,7 +29,7 @@ public:
     template <std::derived_from<layout> T>
     auto create_layout(auto&&... args) -> std::shared_ptr<T>;
     template <std::derived_from<layout> T>
-    auto get_layout() -> std::shared_ptr<T>;
+    auto get_layout() -> std::shared_ptr<T>; // TODO: get_
 
     void force_redraw(string const& reason) override;
 
@@ -37,7 +37,7 @@ public:
 
     void clear_widgets();
 
-    auto get_scroll_offset() const -> point_f override;
+    auto scroll_offset() const -> point_f override;
     void set_scroll_offset(point_f off);
 
 protected:

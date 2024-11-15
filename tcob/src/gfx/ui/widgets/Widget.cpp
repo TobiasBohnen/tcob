@@ -14,9 +14,7 @@ namespace tcob::gfx::ui {
 widget::widget(init const& wi)
     : Alpha {{[&]() {
                   f32 retValue {_alpha};
-                  if (auto* parent {get_parent()}) {
-                      retValue *= parent->Alpha();
-                  }
+                  if (auto* wparent {parent()}) { retValue *= wparent->Alpha(); }
                   return retValue;
               },
               [&](auto const& value) { _alpha = value; }}}
@@ -127,7 +125,7 @@ void widget::update(milliseconds deltaTime)
 auto widget::hit_test(point_f pos) const -> bool
 {
     if (is_visible() && is_enabled()) {
-        if (get_hit_test_bounds().contains(pos)) {
+        if (hit_test_bounds().contains(pos)) {
             return true;
         }
     }
@@ -135,13 +133,13 @@ auto widget::hit_test(point_f pos) const -> bool
     return false;
 }
 
-auto widget::get_hit_test_bounds() const -> rect_f
+auto widget::hit_test_bounds() const -> rect_f
 {
-    rect_f retValue {get_global_position(), Bounds->Size};
+    rect_f retValue {global_position(), Bounds->Size};
     offset_content(retValue, true);
 
     if (_parent) {
-        retValue = retValue.as_intersection_with(_parent->get_global_content_bounds());
+        retValue = retValue.as_intersection_with(_parent->global_content_bounds());
     }
     if (_form) {
         retValue = retValue.as_intersection_with(_form->Bounds());
@@ -150,25 +148,25 @@ auto widget::get_hit_test_bounds() const -> rect_f
     return retValue;
 }
 
-auto widget::get_global_position() const -> point_f
+auto widget::global_position() const -> point_f
 {
     auto retValue {Bounds->Position};
     if (_parent) {
-        retValue += _parent->get_global_content_bounds().Position - _parent->get_scroll_offset();
+        retValue += _parent->global_content_bounds().Position - _parent->scroll_offset();
     } else if (_form) {
         retValue += _form->Bounds->Position;
     }
     return retValue;
 }
 
-auto widget::get_global_content_bounds() const -> rect_f
+auto widget::global_content_bounds() const -> rect_f
 {
-    rect_f retValue {get_global_position(), Bounds->Size};
+    rect_f retValue {global_position(), Bounds->Size};
     offset_content(retValue, false);
     return retValue;
 }
 
-auto widget::get_content_bounds() const -> rect_f
+auto widget::content_bounds() const -> rect_f
 {
     rect_f retValue {Bounds()};
     offset_content(retValue, false);
@@ -177,14 +175,14 @@ auto widget::get_content_bounds() const -> rect_f
 
 auto widget::global_to_local(point_i p) const -> point_f
 {
-    return point_f {p} - get_global_content_bounds().Position;
+    return point_f {p} - global_content_bounds().Position;
 }
 
 auto widget::global_to_parent_local(point_i p) const -> point_f
 {
     point_f retValue {p};
     if (_parent) {
-        retValue -= (_parent->get_global_content_bounds().Position - _parent->get_scroll_offset());
+        retValue -= (_parent->global_content_bounds().Position - _parent->scroll_offset());
     } else if (_form) {
         retValue -= point_f {_form->Bounds->Position};
     }
@@ -199,7 +197,7 @@ void widget::offset_content(rect_f& bounds, bool isHitTest) const
     }
 }
 
-auto widget::get_scroll_offset() const -> point_f
+auto widget::scroll_offset() const -> point_f
 {
     return point_f::Zero;
 }
@@ -239,7 +237,7 @@ void widget::force_redraw(string const& reason)
     }
 }
 
-auto widget::get_parent() const -> widget_container*
+auto widget::parent() const -> widget_container*
 {
     return dynamic_cast<widget_container*>(_parent);
 }
@@ -341,7 +339,7 @@ void widget::do_mouse_hover(input::mouse::motion_event const& ev)
     on_mouse_hover(ev);
 
     MouseHover({.Sender           = this,
-                .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
+                .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
                 .Event            = ev});
 }
 
@@ -350,7 +348,7 @@ void widget::do_mouse_drag(input::mouse::motion_event const& ev)
     on_mouse_drag(ev);
 
     MouseDrag({.Sender           = this,
-               .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
+               .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
                .Event            = ev});
 }
 
@@ -364,7 +362,7 @@ void widget::do_mouse_down(input::mouse::button_event const& ev)
     }
 
     MouseDown({.Sender           = this,
-               .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
+               .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
                .Event            = ev});
 }
 
@@ -378,7 +376,7 @@ void widget::do_mouse_up(input::mouse::button_event const& ev)
     }
 
     MouseUp({.Sender           = this,
-             .RelativePosition = ev.Position - point_i {get_hit_test_bounds().Position},
+             .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
              .Event            = ev});
 }
 

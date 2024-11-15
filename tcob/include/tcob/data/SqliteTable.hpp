@@ -32,8 +32,8 @@ public:
     table(database_view db, utf8_string name);
 
     auto name() const -> utf8_string const&;
-    auto get_column_names() const -> std::set<utf8_string>;
-    auto get_row_count() const -> i32;
+    auto get_column_names() const -> std::set<utf8_string>; // TODO: get_
+    auto get_row_count() const -> i32;                      // TODO: get_
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;

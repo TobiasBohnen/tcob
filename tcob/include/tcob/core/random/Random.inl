@@ -37,7 +37,7 @@ inline auto random_number_generator<E, D>::next() -> result_type
 }
 
 template <RandomEngine E, typename D>
-inline auto random_number_generator<E, D>::get_state() const -> state_type const&
+inline auto random_number_generator<E, D>::state() const -> state_type const&
 {
     return _state;
 }
@@ -71,9 +71,9 @@ inline auto dice<N, E>::roll_n(usize n) -> std::vector<i32>
 }
 
 template <i32 N, RandomEngine E>
-inline auto dice<N, E>::get_state() const -> state_type const&
+inline auto dice<N, E>::state() const -> state_type const&
 {
-    return _random.get_state();
+    return _random.state();
 }
 
 ////////////////////////////////////////////////////////////
@@ -91,9 +91,9 @@ inline shuffle<T, E>::shuffle(state_type state)
 }
 
 template <typename T, RandomEngine E>
-inline auto shuffle<T, E>::get_state() const -> state_type const&
+inline auto shuffle<T, E>::state() const -> state_type const&
 {
-    return _random.get_state();
+    return _random.state();
 }
 
 template <typename T, RandomEngine E>

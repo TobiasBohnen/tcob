@@ -48,19 +48,19 @@ auto cycle_button::get_item_at(isize index) const -> utf8_string const&
     return _items.at(static_cast<usize>(index));
 }
 
-auto cycle_button::get_selected_item() const -> utf8_string const&
+auto cycle_button::selected_item() const -> utf8_string const&
 {
     return _items.at(SelectedItemIndex());
 }
 
-auto cycle_button::get_item_count() const -> isize
+auto cycle_button::item_count() const -> isize
 {
     return std::ssize(_items);
 }
 
 void cycle_button::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<cycle_button::style>()}) {
+    if (auto const* style {current_style<cycle_button::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -70,14 +70,14 @@ void cycle_button::on_paint(widget_painter& painter)
 
         // text
         if (style->Text.Font && SelectedItemIndex >= 0) {
-            painter.draw_text(style->Text, rect, get_selected_item());
+            painter.draw_text(style->Text, rect, selected_item());
         }
     }
 }
 
 void cycle_button::on_mouse_down(input::mouse::button_event const& ev)
 {
-    if (SelectedItemIndex == get_item_count() - 1) {
+    if (SelectedItemIndex == item_count() - 1) {
         SelectedItemIndex = 0;
     } else {
         SelectedItemIndex = SelectedItemIndex() + 1;
@@ -94,7 +94,7 @@ auto cycle_button::get_attributes() const -> widget_attributes
 {
     auto retValue {widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
-        retValue["selected"] = get_selected_item();
+        retValue["selected"] = selected_item();
     }
     return retValue;
 }

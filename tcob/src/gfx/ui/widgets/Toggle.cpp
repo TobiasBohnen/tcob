@@ -20,7 +20,7 @@ toggle::toggle(init const& wi)
 
 void toggle::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<toggle::style>()}) {
+    if (auto const* style {current_style<toggle::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -44,7 +44,7 @@ void toggle::on_update(milliseconds deltaTime)
 
 void toggle::on_checked_changed()
 {
-    if (auto const* style {get_style<toggle::style>()}) {
+    if (auto const* style {current_style<toggle::style>()}) {
         if (Checked()) {
             _tween.start(1.0f, style->Delay * (1.0f - _tween.get_current_value()));
         } else {

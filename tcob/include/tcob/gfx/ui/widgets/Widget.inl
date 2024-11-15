@@ -9,7 +9,7 @@
 namespace tcob::gfx::ui {
 
 template <std::derived_from<style_base> T>
-inline auto widget::get_style() const -> T*
+inline auto widget::current_style() const -> T*
 {
     return static_cast<T*>(_style);
 }

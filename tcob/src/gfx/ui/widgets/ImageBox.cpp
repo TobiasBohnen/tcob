@@ -19,7 +19,7 @@ image_box::image_box(init const& wi)
 
 void image_box::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<image_box::style>()}) {
+    if (auto const* style {current_style<image_box::style>()}) {
         rect_f rect {Bounds()};
 
         // background

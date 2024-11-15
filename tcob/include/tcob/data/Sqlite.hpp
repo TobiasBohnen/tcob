@@ -65,7 +65,7 @@ public:
 
     explicit operator bool() const;
 
-    auto get_column_count() const -> i32;
+    auto get_column_count() const -> i32; // TODO: get_
 
     auto step() const -> step_status;
 
@@ -100,7 +100,7 @@ public:
 
     explicit operator bool() const;
 
-    auto get_error_message() const -> utf8_string;
+    auto get_error_message() const -> utf8_string; // TODO: get_
 
     auto open(path const& file) -> bool;
 

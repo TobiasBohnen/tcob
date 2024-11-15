@@ -79,7 +79,7 @@ auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 
 void accordion::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<accordion::style>()}) {
+    if (auto const* style {current_style<accordion::style>()}) {
         rect_f rect {Bounds()};
         // TODO: section chevron
         //  background
@@ -184,14 +184,14 @@ auto accordion::get_section_rect(item_style const& itemStyle, isize index, f32 s
     retValue.Size.Height = sectionHeight;
     retValue -= itemStyle.Item.Border.get_thickness();
     if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
-        retValue.Position.Y += get_content_bounds().height();
+        retValue.Position.Y += content_bounds().height();
     }
     return retValue;
 }
 
 auto accordion::get_section_style(isize index) const -> item_style*
 {
-    auto const* style {get_style<accordion::style>()};
+    auto const* style {current_style<accordion::style>()};
     return index == ActiveSectionIndex ? get_sub_style<item_style>(style->SectionItemClass, {.Active = true})
         : index == HoveredSectionIndex ? get_sub_style<item_style>(style->SectionItemClass, {.Hover = true})
                                        : get_sub_style<item_style>(style->SectionItemClass, {});
@@ -209,7 +209,7 @@ void accordion::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const* style {get_style<accordion::style>()}) {
+        if (auto const* style {current_style<accordion::style>()}) {
             offset_section_content(bounds, *style);
         }
     }

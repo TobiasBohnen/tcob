@@ -72,7 +72,7 @@ public:
     //! Requests to finish the game.
     void queue_finish();
 
-    auto get_library() -> assets::library&;
+    auto get_library() -> assets::library&; // TODO: get_
 
 protected:
     //! Called when the game finishes.

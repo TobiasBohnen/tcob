@@ -104,10 +104,10 @@ public:
     signal<script_preload_event> PreScriptLoad;
 
     auto name() const -> string const&;
-    auto get_mount_point() const -> string;
-    auto get_asset_stats() const -> group_stats;
+    auto get_mount_point() const -> string;      // TODO: get_
+    auto get_asset_stats() const -> group_stats; // TODO: get_
 
-    auto get_loading_progress() const -> f32;
+    auto get_loading_progress() const -> f32;    // TODO: get_
     auto is_loading_complete() const -> bool;
 
     template <typename T>
@@ -141,11 +141,11 @@ public:
     explicit library();
     ~library();
 
-    auto get_loading_progress() const -> f32;
+    auto get_loading_progress() const -> f32; // TODO: get_
     auto is_loading_complete() const -> bool;
 
     auto create_or_get_group(string const& groupName) -> group&;
-    auto get_group(string const& groupName) const -> group*;
+    auto get_group(string const& groupName) const -> group*; // TODO: get_
     auto has_group(string const& groupName) const -> bool;
 
     void load_group(string const& groupName);

@@ -57,7 +57,7 @@ public:
 
     auto find_all_intersections() const -> std::vector<std::pair<T, T>>;
 
-    auto get_bounds() const -> rect_f const&;
+    auto get_bounds() const -> rect_f const&; // TODO: get_
     auto contains(rect_f const& rect) const -> bool;
 
 private:

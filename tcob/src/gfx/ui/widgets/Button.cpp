@@ -23,7 +23,7 @@ button::button(init const& wi)
 
 void button::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<button::style>()}) {
+    if (auto const* style {current_style<button::style>()}) {
         rect_f rect {Bounds()};
 
         // background

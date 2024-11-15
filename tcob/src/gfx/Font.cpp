@@ -269,7 +269,7 @@ auto font::cache_render_glyph(u32 cp) -> bool
             _fontTextureCursor = point_i::Zero;
         }
 
-        if (Render.get_slot_count() > 0) {
+        if (Render.used_slots() > 0) {
             std::span<ubyte> pix {gb.second.Bitmap};
             Render(pix);
         }

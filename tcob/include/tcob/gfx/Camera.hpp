@@ -29,9 +29,9 @@ public:
 
     u32 VisibilityMask {0xFFFFFFFF};
 
-    auto get_matrix() const -> mat4;
-    auto get_viewport() const -> rect_f;
-    auto get_transformed_viewport() const -> rect_f;
+    auto get_matrix() const -> mat4;                 // TODO: get_
+    auto get_viewport() const -> rect_f;             // TODO: get_
+    auto get_transformed_viewport() const -> rect_f; // TODO: get_
 
     void move_by(point_f offset);
     void look_at(point_f position);

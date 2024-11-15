@@ -24,7 +24,7 @@ sound_generator::sound_generator(random::rng_split_mix_64 random)
 auto sound_generator::generate_pickup_coin() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.StartFrequency = _random(0.4f, 0.9f);
     retValue.AttackTime     = 0.0f;
@@ -44,7 +44,7 @@ auto sound_generator::generate_pickup_coin() -> sound_wave
 auto sound_generator::generate_laser_shoot() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.WaveType = static_cast<sound_wave::type>(_random(0, 2));
 
@@ -95,7 +95,7 @@ auto sound_generator::generate_laser_shoot() -> sound_wave
 auto sound_generator::generate_explosion() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.WaveType = sound_wave::type::Noise;
 
@@ -144,7 +144,7 @@ auto sound_generator::generate_explosion() -> sound_wave
 auto sound_generator::generate_powerup() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     if (_random(0, 1) == 1) {
         retValue.WaveType = sound_wave::type::Sawtooth;
@@ -177,7 +177,7 @@ auto sound_generator::generate_powerup() -> sound_wave
 auto sound_generator::generate_hit_hurt() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.WaveType = static_cast<sound_wave::type>(_random(0, 2));
     if (retValue.WaveType == sound_wave::type::Sine) {
@@ -204,7 +204,7 @@ auto sound_generator::generate_hit_hurt() -> sound_wave
 auto sound_generator::generate_jump() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.WaveType       = sound_wave::type::Square;
     retValue.SquareDuty     = _random(0.0f, 0.6f);
@@ -228,7 +228,7 @@ auto sound_generator::generate_jump() -> sound_wave
 auto sound_generator::generate_blip_select() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.WaveType = static_cast<sound_wave::type>(_random(0, 1));
     if (retValue.WaveType == sound_wave::type::Square) {
@@ -247,7 +247,7 @@ auto sound_generator::generate_blip_select() -> sound_wave
 auto sound_generator::generate_random() -> sound_wave
 {
     sound_wave retValue {};
-    retValue.RandomSeed = _random.get_state()[0];
+    retValue.RandomSeed = _random.state()[0];
 
     retValue.StartFrequency = std::pow(_random(-1.0f, 1.0f), 2.0f);
 

@@ -38,7 +38,7 @@ public:
     auto operator()(f64 t) const -> string;
 
     auto get_frame_at(milliseconds time) const -> string;
-    auto get_duration() const -> milliseconds;
+    auto duration() const -> milliseconds;
 
     static inline char const* asset_name {"frame_animation"};
 };

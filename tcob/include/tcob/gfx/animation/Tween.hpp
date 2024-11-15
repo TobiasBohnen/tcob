@@ -41,9 +41,9 @@ public:
 
     std::optional<milliseconds> Interval {};
 
-    auto get_progress() const -> f64;
-    auto get_status() const -> playback_status;
-    auto get_mode() const -> playback_mode;
+    auto get_progress() const -> f64;           // TODO: get_
+    auto get_status() const -> playback_status; // TODO: get_
+    auto get_mode() const -> playback_mode;     // TODO: get_
     auto is_looping() const -> bool;
 
     void start(playback_mode mode = playback_mode::Normal);

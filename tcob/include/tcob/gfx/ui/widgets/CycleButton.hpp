@@ -28,8 +28,8 @@ public:
     auto select_item(utf8_string const& item) -> bool;
 
     auto get_item_at(isize index) const -> utf8_string const&;
-    auto get_selected_item() const -> utf8_string const&;
-    auto get_item_count() const -> isize;
+    auto selected_item() const -> utf8_string const&;
+    auto item_count() const -> isize;
 
 protected:
     void on_paint(widget_painter& painter) override;

@@ -41,7 +41,7 @@ public:
 
     color ClearColor {colors::DarkGray};
 
-    auto get_camera() -> camera&;
+    auto get_camera() -> camera&; // TODO: get_
 
     void clear() const;
     void clear(color c) const;

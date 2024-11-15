@@ -83,8 +83,8 @@ void list_box::scroll_to_selected()
     if (SelectedItemIndex < 1) { return; }
 
     f32 value {0.0f};
-    if (auto const* style {get_style<list_box::style>()}) {
-        rect_f const listRect {get_content_bounds()};
+    if (auto const* style {current_style<list_box::style>()}) {
+        rect_f const listRect {content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
         auto const   scrollMax {get_scroll_max_value(orientation::Vertical)};
 
@@ -106,12 +106,12 @@ auto list_box::get_item_at(isize index) const -> list_item const&
     return get_items().at(static_cast<usize>(index));
 }
 
-auto list_box::get_selected_item() const -> list_item const&
+auto list_box::selected_item() const -> list_item const&
 {
     return get_items().at(SelectedItemIndex());
 }
 
-auto list_box::get_item_count() const -> isize
+auto list_box::item_count() const -> isize
 {
     return std::ssize(get_items());
 }
@@ -127,12 +127,12 @@ void list_box::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHei
 
 void list_box::paint_content(widget_painter& painter, rect_f const& rect)
 {
-    if (auto const* style {get_style<list_box::style>()}) {
+    if (auto const* style {current_style<list_box::style>()}) {
         rect_f listRect {rect};
 
         f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
 
-        for (i32 i {0}; i < get_item_count(); ++i) {
+        for (i32 i {0}; i < item_count(); ++i) {
             if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
 
             paint_item(painter, listRect, itemHeight, i);
@@ -188,12 +188,12 @@ void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
 
     vscroll_widget::on_mouse_hover(ev);
 
-    if (auto const* style {get_style<list_box::style>()}) {
-        rect_f const listRect {get_global_content_bounds()};
+    if (auto const* style {current_style<list_box::style>()}) {
+        rect_f const listRect {global_content_bounds()};
         if (listRect.contains(ev.Position)) {
             // over list
             f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
-            for (i32 i {0}; i < get_item_count(); ++i) {
+            for (i32 i {0}; i < item_count(); ++i) {
                 rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
                 if (itemRect.contains(ev.Position)) {
                     HoveredItemIndex = i;
@@ -229,7 +229,7 @@ auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) co
 
 auto list_box::get_item_style(isize index) const -> item_style*
 {
-    auto const* style {get_style<list_box::style>()};
+    auto const* style {current_style<list_box::style>()};
     return index == SelectedItemIndex ? get_sub_style<item_style>(style->ItemClass, {.Active = true})
         : index == HoveredItemIndex   ? get_sub_style<item_style>(style->ItemClass, {.Hover = true})
                                       : get_sub_style<item_style>(style->ItemClass, {});
@@ -240,10 +240,10 @@ auto list_box::get_scroll_content_height() const -> f32
     if (_items.empty()) { return 0; }
 
     f32 retValue {0.0f};
-    if (auto const* style {get_style<list_box::style>()}) {
-        rect_f const listRect {get_content_bounds()};
+    if (auto const* style {current_style<list_box::style>()}) {
+        rect_f const listRect {content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
-        for (i32 i {0}; i < get_item_count(); ++i) {
+        for (i32 i {0}; i < item_count(); ++i) {
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
             retValue += itemRect.height();
         }
@@ -254,7 +254,7 @@ auto list_box::get_scroll_content_height() const -> f32
 
 auto list_box::get_scroll_item_count() const -> isize
 {
-    return get_item_count();
+    return item_count();
 }
 
 auto list_box::get_items() const -> std::vector<list_item> const&
@@ -266,7 +266,7 @@ auto list_box::get_attributes() const -> widget_attributes
 {
     auto retValue {vscroll_widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(get_items())) {
-        retValue["selected"] = get_selected_item().Text;
+        retValue["selected"] = selected_item().Text;
     }
     return retValue;
 }

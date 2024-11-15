@@ -56,7 +56,7 @@ public:
     template <typename Key>
     auto operator[](Key key) const -> proxy<table const, Key>;
 
-    auto get_delegate() const -> table;
+    auto get_delegate() const -> table; // TODO: get_
     void set_delegate(table const& mt) const;
 
     template <typename... Args, typename T>
@@ -76,7 +76,7 @@ public:
     auto has(auto&&... keys) const -> bool;
 
     template <typename T>
-    auto get_keys() const -> std::vector<T>;
+    auto get_keys() const -> std::vector<T>; // TODO: get_
 
     auto static PushNew(vm_view view) -> table;
     auto static Acquire(vm_view view, SQInteger idx) -> table;
@@ -111,7 +111,7 @@ public:
     auto operator[](SQInteger index) -> proxy<array, SQInteger>;
     auto operator[](SQInteger index) const -> proxy<array const, SQInteger>;
 
-    auto get_size() const -> SQInteger;
+    auto get_size() const -> SQInteger; // TODO: get_
 
     template <ConvertibleFrom T>
     auto get(SQInteger index) const -> result<T>;
@@ -257,7 +257,7 @@ public:
     template <typename R = void>
     auto wake_up(auto&& arg) const -> result<R>;
 
-    auto get_status() const -> vm_view::status;
+    auto get_status() const -> vm_view::status; // TODO: get_
 
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 

@@ -20,7 +20,7 @@ radio_button::radio_button(init const& wi)
 
 void radio_button::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<radio_button::style>()}) {
+    if (auto const* style {current_style<radio_button::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -42,7 +42,7 @@ void radio_button::on_update(milliseconds /*deltaTime*/)
 void radio_button::on_checked_changed()
 {
     if (Checked()) {
-        for (auto const& w : get_parent()->widgets()) {
+        for (auto const& w : parent()->widgets()) {
             if (w.get() != this) {
                 if (auto rb {std::dynamic_pointer_cast<radio_button>(w)}) {
                     rb->Checked = false;

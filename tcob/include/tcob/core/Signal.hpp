@@ -30,6 +30,7 @@ namespace detail {
 
         void virtual disconnect(uid id) const = 0;
 
+    protected:
         auto get_next_id() const -> uid;
     };
 }
@@ -47,7 +48,7 @@ public:
 
     void disconnect();
 
-    auto get_id() const -> uid;
+    auto id() const -> uid;
 
 protected:
     detail::signal_base const* _signal;
@@ -81,7 +82,7 @@ public:
     void disconnect(uid id) const override;
     void disconnect_all() const;
 
-    auto get_slot_count() const -> isize;
+    auto used_slots() const -> isize;
 
 private:
     mutable slots _slots;
@@ -103,7 +104,7 @@ public:
     void disconnect(uid id) const override;
     void disconnect_all() const;
 
-    auto get_slot_count() const -> isize;
+    auto used_slots() const -> isize;
 
 private:
     mutable slots _slots;

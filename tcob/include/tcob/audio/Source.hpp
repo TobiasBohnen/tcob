@@ -26,9 +26,9 @@ public:
 
     prop_fn<f32> Volume;
 
-    auto virtual get_duration() const -> milliseconds          = 0;
-    auto virtual get_playback_position() const -> milliseconds = 0;
-    auto get_status() const -> playback_status;
+    auto virtual duration() const -> milliseconds          = 0;
+    auto virtual playback_position() const -> milliseconds = 0;
+    auto get_status() const -> playback_status; // TODO: get_
     auto is_looping() const -> bool;
 
     void play(bool looping = false);

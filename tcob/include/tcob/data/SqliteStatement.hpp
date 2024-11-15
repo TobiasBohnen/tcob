@@ -27,7 +27,7 @@ public:
     auto prepare(utf8_string const& sql) -> bool;
     auto step() const -> step_status;
 
-    auto get_column_count() const -> i32;
+    auto get_column_count() const -> i32; // TODO: get_
     template <typename T>
     auto get_column_value(i32 col) const -> T;
     auto get_column_name(i32 col) const -> utf8_string;

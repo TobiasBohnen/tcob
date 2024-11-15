@@ -45,8 +45,8 @@ public:
     explicit color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha = true);
     explicit color_gradient(std::span<color_stop const> colorStops, bool preMulAlpha = true);
 
-    auto get_colors() const -> std::array<color, Size>;
-    auto get_single_color() const -> std::optional<color>; // meh
+    auto get_colors() const -> std::array<color, Size>;    // TODO: get_
+    auto get_single_color() const -> std::optional<color>; // TODO: get_// meh
 
     auto operator==(color_gradient const& other) const -> bool = default;
 

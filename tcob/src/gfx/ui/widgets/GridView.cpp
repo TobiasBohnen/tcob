@@ -66,7 +66,7 @@ void grid_view::clear_rows()
 
 void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 {
-    if (auto const* style {get_style<grid_view::style>()}) {
+    if (auto const* style {current_style<grid_view::style>()}) {
         // content
         scissor_guard const guard {painter, this};
 
@@ -140,8 +140,8 @@ auto grid_view::get_scroll_content_height() const -> f32
     if (_columnHeaders.empty()) { return 0; }
 
     f32 retValue {0.0f};
-    if (auto const* style {get_style<grid_view::style>()}) {
-        rect_f const listRect {get_content_bounds()};
+    if (auto const* style {current_style<grid_view::style>()}) {
+        rect_f const listRect {content_bounds()};
         f32 const    itemHeight {style->RowHeight.calc(listRect.height())};
         retValue += itemHeight * (_rows.size() + 1);
     }

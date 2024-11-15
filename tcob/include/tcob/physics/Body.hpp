@@ -116,7 +116,7 @@ public:
     auto center() const -> point_f;
     auto local_center() const -> point_f;
 
-    auto get_world() -> world&;
+    auto get_world() -> world&; // TODO: get_
 
     auto shapes() -> std::span<std::shared_ptr<shape>>;
 

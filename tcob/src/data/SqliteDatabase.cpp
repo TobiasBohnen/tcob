@@ -107,7 +107,7 @@ void database::set_journal_mode(journal_mode mode) const
     }
 }
 
-auto database::get_table_names() const -> std::set<utf8_string>
+auto database::table_names() const -> std::set<utf8_string>
 {
     // SELECT name FROM sqlite_master WHERE type='table' ORDER BY name
     statement select {_db};
@@ -121,7 +121,7 @@ auto database::get_table_names() const -> std::set<utf8_string>
     return select.get_column_value<std::set<utf8_string>>(0);
 }
 
-auto database::get_view_names() const -> std::set<utf8_string>
+auto database::view_names() const -> std::set<utf8_string>
 {
     // SELECT name FROM sqlite_master WHERE type='view' ORDER BY name
     statement select {_db};

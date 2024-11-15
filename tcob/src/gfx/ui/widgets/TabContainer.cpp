@@ -89,7 +89,7 @@ void tab_container::on_styles_changed()
 
 void tab_container::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<tab_container::style>()}) {
+    if (auto const* style {current_style<tab_container::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -195,7 +195,7 @@ auto tab_container::get_tab_rect(style const& style, item_style const& itemStyle
 
 auto tab_container::get_tab_style(isize index) const -> item_style*
 {
-    auto const* style {get_style<tab_container::style>()};
+    auto const* style {current_style<tab_container::style>()};
     return index == ActiveTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Active = true})
         : index == HoveredTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Hover = true})
                                    : get_sub_style<item_style>(style->TabItemClass, {});
@@ -219,7 +219,7 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const* style {get_style<tab_container::style>()}) {
+        if (auto const* style {current_style<tab_container::style>()}) {
             offset_tab_content(bounds, *style);
         }
     }
@@ -227,7 +227,7 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 
 void tab_container::update_tab_bounds()
 {
-    auto rect {get_content_bounds()};
+    auto rect {content_bounds()};
     for (auto& t : _tabs) {
         t->Bounds = {point_f::Zero, rect.Size};
     }

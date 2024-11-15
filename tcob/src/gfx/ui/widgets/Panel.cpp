@@ -45,7 +45,7 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
     f32 retValue {0.0f};
     for (auto const& w : widgets()) {
         auto const& bounds {w->Bounds()};
-        auto const  content {get_content_bounds()};
+        auto const  content {content_bounds()};
         if (orien == orientation::Horizontal) {
             retValue = std::max(retValue, bounds.right() - content.width());
         } else if (orien == orientation::Vertical) {
@@ -58,7 +58,7 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
 
 auto panel::get_scroll_style(orientation orien) const -> element::scrollbar*
 {
-    if (auto* style {get_style<panel::style>()}) {
+    if (auto* style {current_style<panel::style>()}) {
         if (orien == orientation::Horizontal) {
             return &style->HScrollBar;
         }
@@ -115,7 +115,7 @@ void panel::clear_widgets()
 
 void panel::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<panel::style>()}) {
+    if (auto const* style {current_style<panel::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -215,7 +215,7 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
     widget_container::on_mouse_wheel(ev);
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (auto const* style {get_style<panel::style>()}) {
+        if (auto const* style {current_style<panel::style>()}) {
             orientation  orien {};
             bool         invert {false};
             milliseconds delay {};
@@ -249,7 +249,7 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!isHitTest) {
-        if (auto const* style {get_style<panel::style>()}) {
+        if (auto const* style {current_style<panel::style>()}) {
             if (_vScrollbar.Visible) {
                 bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
             }
@@ -265,7 +265,7 @@ auto panel::get_layout() -> std::shared_ptr<layout>
     return _layout;
 }
 
-auto panel::get_scroll_offset() const -> point_f
+auto panel::scroll_offset() const -> point_f
 {
     return {_hScrollbar.get_current_value(), _vScrollbar.get_current_value()};
 }

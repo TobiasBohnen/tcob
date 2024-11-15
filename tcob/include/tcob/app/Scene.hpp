@@ -31,7 +31,7 @@ public:
     prop<std::shared_ptr<gfx::entity>> Entity;
 
     auto create_child() -> std::shared_ptr<scene_node>;
-    auto get_child_count() const -> isize;
+    auto child_count() const -> isize;
     auto get_child_at(usize index) const -> std::shared_ptr<scene_node>;
     void clear_children();
 
@@ -75,7 +75,7 @@ public:
     void update(milliseconds deltaTime) final;
     void fixed_update(milliseconds deltaTime);
 
-    auto get_root_node() -> std::shared_ptr<scene_node>;
+    auto root_node() -> std::shared_ptr<scene_node>;
 
 protected:
     auto get_game() -> game&;

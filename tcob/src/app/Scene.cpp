@@ -70,7 +70,7 @@ void scene::fixed_update(milliseconds deltaTime)
     on_fixed_update(deltaTime);
 }
 
-auto scene::get_root_node() -> std::shared_ptr<scene_node>
+auto scene::root_node() -> std::shared_ptr<scene_node>
 {
     if (!_rootNode) {
         _rootNode = std::make_shared<scene_node>();
@@ -147,7 +147,7 @@ auto scene_node::create_child() -> std::shared_ptr<scene_node>
     return _children.emplace_back(std::shared_ptr<scene_node>(new scene_node {this}));
 }
 
-auto scene_node::get_child_count() const -> isize
+auto scene_node::child_count() const -> isize
 {
     return std::ssize(_children);
 }

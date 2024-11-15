@@ -44,7 +44,7 @@ private:
 class TCOB_API entity : public drawable, public input::receiver {
 public:
     // TODO: bounds, mouse enter/leave
-    auto virtual get_update_mode() const -> update_mode;
+    auto virtual get_update_mode() const -> update_mode; // TODO: get_
 
     void virtual fixed_update(milliseconds deltaTime);
 

@@ -80,7 +80,7 @@ public:
     auto is_key_down(scan_code key) const -> bool;
     auto is_mod_down(key_mod mod) const -> bool;
 
-    auto get_mod_state() const -> std::unordered_map<key_mod, bool>;
+    auto get_mod_state() const -> std::unordered_map<key_mod, bool>; // TODO: get_
 };
 
 ////////////////////////////////////////////////////////////
@@ -267,11 +267,11 @@ public:
 
     prop<mode> CurrentInputMode;
 
-    auto get_controller_count() const -> isize;
+    auto get_controller_count() const -> isize; // TODO: get_
     auto get_controller(i32 index) const -> std::shared_ptr<controller>;
 
-    auto get_mouse() const -> mouse;
-    auto get_keyboard() const -> keyboard;
+    auto get_mouse() const -> mouse;            // TODO: get_
+    auto get_keyboard() const -> keyboard;      // TODO: get_
 
     void process_events(SDL_Event* ev);
 

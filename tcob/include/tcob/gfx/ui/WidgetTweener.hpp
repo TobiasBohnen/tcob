@@ -20,8 +20,8 @@ public:
 
     void update(milliseconds deltaTime);
 
-    auto get_current_value() const -> f32;
-    auto get_target_value() const -> f32;
+    auto get_current_value() const -> f32; // TODO: get_
+    auto get_target_value() const -> f32;  // TODO: get_
     void reset(f32 val);
 
 private:

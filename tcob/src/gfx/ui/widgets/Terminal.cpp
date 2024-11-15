@@ -137,7 +137,7 @@ void terminal::noecho()
 
 void terminal::flash()
 {
-    if (auto const* style {get_style<terminal::style>()}) {
+    if (auto const* style {current_style<terminal::style>()}) {
         _flashTween = make_unique_tween<square_wave_tween<bool>>(style->FlashDuration, 1.0f, 0.0f);
         _flashTween->Value.Changed.connect([&](auto) {
             for (auto& cell : get_back_buffer()) {
@@ -247,10 +247,10 @@ void terminal::on_paint(widget_painter& painter)
         return;
     }
 
-    if (auto const* style {get_style<terminal::style>()}) {
+    if (auto const* style {current_style<terminal::style>()}) {
         swap_buffers();
 
-        rect_f const rect {get_content_bounds()};
+        rect_f const rect {content_bounds()};
 
         scissor_guard const guard {painter, this};
 
@@ -415,8 +415,8 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     if (!_useMouse) { return; }
 
-    if (auto const* style {get_style<terminal::style>()}) {
-        rect_f const rect {get_global_content_bounds()};
+    if (auto const* style {current_style<terminal::style>()}) {
+        rect_f const rect {global_content_bounds()};
         if (rect.contains(ev.Position)) {
             u32 const   fontSize {style->Text.calc_font_size(rect)};
             auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
@@ -448,7 +448,7 @@ void terminal::on_focus_gained()
 {
     if (!_showCursor) { return; }
 
-    if (auto const* style {get_style<terminal::style>()}) {
+    if (auto const* style {current_style<terminal::style>()}) {
         _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);
         _cursorTween->Value.Changed.connect([&](auto val) {
             _cursorVisible = val;

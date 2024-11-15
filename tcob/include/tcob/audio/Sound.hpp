@@ -13,7 +13,6 @@
 #include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"
 
-
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
@@ -28,9 +27,9 @@ public:
     auto operator=(sound&& other) noexcept -> sound&      = default;
     ~sound() override;
 
-    auto get_info() const -> std::optional<buffer::info>;
-    auto get_duration() const -> milliseconds override;
-    auto get_playback_position() const -> milliseconds override;
+    auto get_info() const -> std::optional<buffer::info>; // TODO: get_
+    auto duration() const -> milliseconds override;
+    auto playback_position() const -> milliseconds override;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;

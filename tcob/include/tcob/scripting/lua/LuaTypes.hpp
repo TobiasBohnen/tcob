@@ -58,7 +58,7 @@ public:
     auto create_or_get_metatable() const -> table;
     void set_metatable(table const& mt) const;
 
-    auto get_raw_length() const -> u64;
+    auto get_raw_length() const -> u64; // TODO: get_
 
     template <typename... Args, typename T>
     auto try_make(T& value, auto&&... keys) const -> bool;
@@ -111,7 +111,7 @@ namespace detail {
 
         void dump(io::ostream& stream) const;
 
-        auto get_upvalues() const -> std::unordered_set<string>;
+        auto get_upvalues() const -> std::unordered_set<string>; // TODO: get_
         auto set_upvalue(string const& name, ref const& value) -> bool;
 
         auto set_environment(table const& env) -> bool;
@@ -153,7 +153,7 @@ public:
 
     auto close() -> coroutine_status;
 
-    auto get_status() const -> coroutine_status;
+    auto get_status() const -> coroutine_status; // TODO: get_
 
 private:
     auto get_thread() const -> state_view;

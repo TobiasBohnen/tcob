@@ -44,8 +44,8 @@ public:
     auto select_item(utf8_string const& item) -> bool;
 
     auto get_item_at(isize index) const -> list_item const&;
-    auto get_selected_item() const -> list_item const&;
-    auto get_item_count() const -> isize;
+    auto selected_item() const -> list_item const&;
+    auto item_count() const -> isize;
 
 protected:
     void on_styles_changed() override;

@@ -53,7 +53,6 @@ public:
 
     auto is_range_limited() const -> bool;
     auto is_angle_limited() const -> bool;
-    auto get_range() const -> f32;
 
 protected:
     light_source(lighting_system* parent);
@@ -141,8 +140,8 @@ private:
     void rebuild_quadtree();
     void mark_lights_dirty();
 
-    void cast_ray(light_source& light);
-    void build_geometry(light_source& light, u32& indOffset);
+    void cast_ray(light_source& light, f32 lightRange);
+    void build_geometry(light_source& light, f32 lightRange, u32& indOffset);
     auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>;
 
     std::vector<std::shared_ptr<light_source>>  _lightSources {};

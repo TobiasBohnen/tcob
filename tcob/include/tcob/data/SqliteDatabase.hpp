@@ -47,8 +47,8 @@ public:
 
     void set_journal_mode(journal_mode mode) const;
 
-    auto get_table_names() const -> std::set<utf8_string>;
-    auto get_view_names() const -> std::set<utf8_string>;
+    auto table_names() const -> std::set<utf8_string>;
+    auto view_names() const -> std::set<utf8_string>;
 
     auto create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>;
     template <typename... Values>

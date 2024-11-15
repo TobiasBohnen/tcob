@@ -58,12 +58,12 @@ auto drop_down_list::get_item_at(isize index) const -> list_item const&
     return _items.at(static_cast<usize>(index));
 }
 
-auto drop_down_list::get_selected_item() const -> list_item const&
+auto drop_down_list::selected_item() const -> list_item const&
 {
     return _items.at(SelectedItemIndex());
 }
 
-auto drop_down_list::get_item_count() const -> isize
+auto drop_down_list::item_count() const -> isize
 {
     return std::ssize(_items);
 }
@@ -85,7 +85,7 @@ void drop_down_list::paint_item(widget_painter& painter, rect_f& listRect, f32 i
 
 void drop_down_list::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {current_style<drop_down_list::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -109,7 +109,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         // text
         if (style->Text.Font && SelectedItemIndex >= 0) {
             f32 const arrowWidth {arrowStyle.Size.Width.calc(rect.width())};
-            painter.draw_text(style->Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, get_selected_item().Text);
+            painter.draw_text(style->Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, selected_item().Text);
         }
 
         if (_isExtended) {
@@ -167,12 +167,12 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 
     widget::on_mouse_hover(ev);
 
-    rect_f listRect {get_global_content_bounds()};
+    rect_f listRect {global_content_bounds()};
     if (_vScrollbar.inject_mouse_hover(ev.Position)) {
         force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
     } else {
-        rect_f const boxRect {get_global_position(), Bounds->Size};
+        rect_f const boxRect {global_position(), Bounds->Size};
         if (boxRect.contains(ev.Position)) {
             _mouseOverBox = true;
             ev.Handled    = true;
@@ -181,7 +181,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
             // over list
             f32 const itemHeight {get_item_height()};
             if (_vScrollbar.Visible) {
-                if (auto const* style {get_style<drop_down_list::style>()}) {
+                if (auto const* style {current_style<drop_down_list::style>()}) {
                     listRect.Size.Width -= style->VScrollBar.Bar.Size.calc(listRect.width());
                 }
             }
@@ -244,7 +244,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
 
-    if (auto const* style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {current_style<drop_down_list::style>()}) {
         orientation  orien {};
         bool         invert {false};
         milliseconds delay {};
@@ -282,7 +282,7 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (_isExtended) {
-        if (auto const* style {get_style<drop_down_list::style>()}) {
+        if (auto const* style {current_style<drop_down_list::style>()}) {
             if (!isHitTest) {
                 bounds.Position.Y += height;
             }
@@ -307,7 +307,7 @@ auto drop_down_list::get_item_rect(isize index, f32 itemHeight, rect_f const& li
 
 auto drop_down_list::get_item_style(isize index) const -> item_style*
 {
-    auto const* style {get_style<drop_down_list::style>()};
+    auto const* style {current_style<drop_down_list::style>()};
     return index == SelectedItemIndex ? get_sub_style<item_style>(style->ItemClass, {.Active = true})
         : index == HoveredItemIndex   ? get_sub_style<item_style>(style->ItemClass, {.Hover = true})
                                       : get_sub_style<item_style>(style->ItemClass, {});
@@ -317,14 +317,14 @@ auto drop_down_list::get_attributes() const -> widget_attributes
 {
     auto retValue {widget::get_attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
-        retValue["selected"] = get_selected_item().Text;
+        retValue["selected"] = selected_item().Text;
     }
     return retValue;
 }
 
 auto drop_down_list::get_item_height() const -> f32
 {
-    if (auto const* style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {current_style<drop_down_list::style>()}) {
         rect_f bounds {Bounds()};
         widget::offset_content(bounds, false);
         return style->ItemHeight.calc(bounds.height());
@@ -338,7 +338,7 @@ auto drop_down_list::requires_scroll(orientation orien, rect_f const& /* rect */
     if (orien == orientation::Horizontal) {
         return false;
     }
-    if (auto const* style {get_style<drop_down_list::style>()}) {
+    if (auto const* style {current_style<drop_down_list::style>()}) {
         return std::ssize(_items) > style->VisibleItemCount;
     }
 
@@ -357,12 +357,12 @@ auto drop_down_list::get_scroll_max_value(orientation orien) const -> f32
     }
 
     f32 const itemHeight {get_item_height()};
-    return std::max(0.0f, (itemHeight * std::ssize(_items)) - get_content_bounds().height());
+    return std::max(0.0f, (itemHeight * std::ssize(_items)) - content_bounds().height());
 }
 
 auto drop_down_list::get_scroll_style(orientation orien) const -> element::scrollbar*
 {
-    if (auto* style {get_style<drop_down_list::style>()}) {
+    if (auto* style {current_style<drop_down_list::style>()}) {
         if (orien == orientation::Vertical) {
             return &style->VScrollBar;
         }

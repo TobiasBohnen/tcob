@@ -48,7 +48,7 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     return load_status::Error;
 }
 
-auto music::get_duration() const -> milliseconds
+auto music::duration() const -> milliseconds
 {
     if (!_decoder || !_info) { return 0ms; }
     if (_info->SampleRate == 0) { return 0ms; }
@@ -56,7 +56,7 @@ auto music::get_duration() const -> milliseconds
     return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->SampleRate)) * 1000.0f};
 }
 
-auto music::get_playback_position() const -> milliseconds
+auto music::playback_position() const -> milliseconds
 {
     if (!_decoder || !_info) { return 0ms; }
     if (_info->Channels == 0 || _info->SampleRate == 0) { return 0ms; }

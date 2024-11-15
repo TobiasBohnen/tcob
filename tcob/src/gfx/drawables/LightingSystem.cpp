@@ -124,8 +124,9 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     if (_quadTree) {
         u32 indOffset {0};
         for (auto const& ls : _lightSources) {
-            cast_ray(*ls);
-            build_geometry(*ls, indOffset);
+            auto const lightRange {ls->is_range_limited() ? *ls->Range() : std::numeric_limits<f32>::max()};
+            cast_ray(*ls, lightRange);
+            build_geometry(*ls, lightRange, indOffset);
         }
     }
 
@@ -146,19 +147,18 @@ auto static is_in_shadowcaster(light_source& light, auto&& casterPoints) -> bool
     return retValue;
 }
 
-void lighting_system::cast_ray(light_source& light)
+void lighting_system::cast_ray(light_source& light, f32 lightRange)
 {
     if (!light._isDirty) { return; }
     light._isDirty = false;
 
-    bool const limitRange {light.Range()};
-    f32 const  lightRange {light.get_range()};
-    auto const lightPosition {light.Position()};
-
-    rect_f const lightBounds {limitRange ? rect_f {point_f::Zero, {lightRange * 2, lightRange * 2}}
-                                               .as_centered_at(lightPosition)
-                                               .as_intersection_with(Bounds())
-                                         : Bounds()};
+    bool const   limitRange {light.is_range_limited()};
+    auto const   lightPosition {light.Position()};
+    rect_f const lightBounds {limitRange
+                                  ? rect_f {point_f::Zero, {lightRange * 2, lightRange * 2}}
+                                        .as_centered_at(lightPosition)
+                                        .as_intersection_with(Bounds())
+                                  : Bounds()};
 
     auto                              casters {_quadTree->query(lightBounds)};
     std::vector<shadow_caster_points> casterPoints {};
@@ -237,10 +237,8 @@ void lighting_system::cast_ray(light_source& light)
     }
 }
 
-void lighting_system::build_geometry(light_source& light, u32& indOffset)
+void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& indOffset)
 {
-    f32 const lightRange {light.get_range()};
-
     u32 const n {static_cast<u32>(light._collisionResult.size())};
     if (n <= 1) { return; }
 
@@ -248,9 +246,11 @@ void lighting_system::build_geometry(light_source& light, u32& indOffset)
                       .Color     = light.Color(),
                       .TexCoords = {0, 0, 0}});
 
+    bool const limitRange {light.is_range_limited()};
+
     for (auto const& p : light._collisionResult) {
         auto col {light.Color()};
-        if (light.is_range_limited() && light.Falloff()) {
+        if (limitRange && light.Falloff()) {
             // FIXME: should be inverse square
             f64 const falloff {std::clamp(1.0 - (p.Distance / lightRange), 0.0, 1.0)};
             col.R = static_cast<u8>(col.R * falloff);
@@ -371,11 +371,6 @@ auto light_source::is_range_limited() const -> bool
 auto light_source::is_angle_limited() const -> bool
 {
     return StartAngle().has_value() || EndAngle().has_value();
-}
-
-auto light_source::get_range() const -> f32
-{
-    return is_range_limited() ? *Range() : std::numeric_limits<f32>::max();
 }
 
 light_source::light_source(lighting_system* parent)

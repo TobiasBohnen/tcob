@@ -66,19 +66,19 @@ public:
     void disable();
     auto is_enabled() const -> bool;
 
-    auto get_parent() const -> widget_container*;
-    auto get_form() const -> form*;
+    auto parent() const -> widget_container*;
+    auto get_form() const -> form*; // TODO: get_
 
     auto name() const -> string const&;
 
-    template <std::derived_from<style_base> T>
-    auto get_style() const -> T*;
+    auto global_position() const -> point_f;
+    auto global_content_bounds() const -> rect_f;
+    auto content_bounds() const -> rect_f;
+    auto hit_test_bounds() const -> rect_f;
+    auto virtual scroll_offset() const -> point_f;
 
-    auto get_global_position() const -> point_f;
-    auto get_global_content_bounds() const -> rect_f;
-    auto get_content_bounds() const -> rect_f;
-    auto get_hit_test_bounds() const -> rect_f;
-    auto virtual get_scroll_offset() const -> point_f;
+    template <std::derived_from<style_base> T>
+    auto current_style() const -> T*;
 
     auto global_to_local(point_i p) const -> point_f;
     auto global_to_parent_local(point_i p) const -> point_f;

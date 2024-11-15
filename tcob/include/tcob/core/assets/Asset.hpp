@@ -65,7 +65,7 @@ public:
     auto operator*() const -> type&;
 
     auto name() const -> string const&;
-    auto get_status() const -> status;
+    auto get_status() const -> status; // TODO: get_
 
     auto get() const -> type*;
 

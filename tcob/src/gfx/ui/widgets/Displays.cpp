@@ -30,7 +30,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
         return;
     }
 
-    if (auto const* style {get_style<dot_matrix_display::style>()}) {
+    if (auto const* style {current_style<dot_matrix_display::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -166,7 +166,7 @@ auto seven_segment_display::get_segment(char c) -> std::bitset<7>
 
 void seven_segment_display::on_paint(widget_painter& painter)
 {
-    if (auto* const style {get_style<seven_segment_display::style>()}) {
+    if (auto* const style {current_style<seven_segment_display::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -333,7 +333,7 @@ void color_picker::on_paint(widget_painter& painter)
 
 void color_picker::on_mouse_down(input::mouse::button_event const& ev)
 {
-    rect_f const rect {get_global_content_bounds()};
+    rect_f const rect {global_content_bounds()};
     if (rect.contains(ev.Position)) {
         f32 const s {(ev.Position.X - rect.left()) / (rect.width() * 0.9f)};
         f32 const v {(ev.Position.Y - rect.top()) / rect.height()};

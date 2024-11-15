@@ -45,8 +45,8 @@ slider::slider(init const& wi)
 
 void slider::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<slider::style>()}) {
-        rect_f const rect {get_content_bounds()};
+    if (auto const* style {current_style<slider::style>()}) {
+        rect_f const rect {content_bounds()};
 
         scissor_guard const guard {painter, this};
 
@@ -187,7 +187,7 @@ void slider::on_update(milliseconds deltaTime)
 void slider::on_value_changed(i32 newVal)
 {
     f32 const   newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / (Max() - Min()) : 0.f};
-    auto const* style {get_style<slider::style>()};
+    auto const* style {current_style<slider::style>()};
     if (style && !_overThumb && !_isDragging) {
         _tween.start(newFrac, style->Bar.Delay);
     } else {

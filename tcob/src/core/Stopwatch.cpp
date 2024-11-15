@@ -7,21 +7,21 @@
 
 namespace tcob {
 
-auto stopwatch::get_elapsed() const -> duration
+auto stopwatch::elapsed() const -> duration
 {
     if (_isRunning) { return tcob::clock::now().time_since_epoch() - _start; }
 
     return _stop - _start;
 }
 
-auto stopwatch::get_elapsed_milliseconds() const -> f64
+auto stopwatch::elapsed_milliseconds() const -> f64
 {
-    return std::chrono::duration_cast<std::chrono::duration<f64, std::milli>>(get_elapsed()).count();
+    return std::chrono::duration_cast<std::chrono::duration<f64, std::milli>>(elapsed()).count();
 }
 
-auto stopwatch::get_elapsed_nanoseconds() const -> f64
+auto stopwatch::elapsed_nanoseconds() const -> f64
 {
-    return std::chrono::duration_cast<std::chrono::duration<f64, std::nano>>(get_elapsed()).count();
+    return std::chrono::duration_cast<std::chrono::duration<f64, std::nano>>(elapsed()).count();
 }
 
 auto stopwatch::StartNew() -> stopwatch

@@ -83,8 +83,8 @@ public:
 
     signal<std::span<ubyte>> Render;
 
-    auto get_info() const -> font::info const&;
-    auto get_texture() const -> assets::asset_ptr<texture>;
+    auto get_info() const -> font::info const&;             // TODO: get_
+    auto get_texture() const -> assets::asset_ptr<texture>; // TODO: get_
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> load_status;

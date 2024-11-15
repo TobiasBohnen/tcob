@@ -45,7 +45,7 @@ void connection::disconnect()
     }
 }
 
-auto connection::get_id() const -> uid
+auto connection::id() const -> uid
 {
     return _id;
 }

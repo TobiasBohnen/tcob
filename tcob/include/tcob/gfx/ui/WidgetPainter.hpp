@@ -40,7 +40,7 @@ public:
     auto draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& refRect, element::bar::context const& barCtx) -> element::scrollbar::rects;
     void draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle);
 
-    auto get_canvas() -> canvas&;
+    auto get_canvas() -> canvas&; // TODO: get_
 
     auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text) -> text_formatter::result;
 

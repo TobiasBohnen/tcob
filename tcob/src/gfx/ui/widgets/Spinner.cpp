@@ -35,7 +35,7 @@ spinner::spinner(init const& wi)
 
 void spinner::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<spinner::style>()}) {
+    if (auto const* style {current_style<spinner::style>()}) {
         rect_f rect {Bounds()};
 
         // background
@@ -74,8 +74,8 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     ev.Handled = true;
 
-    if (auto const* style {get_style<spinner::style>()}) {
-        rect_f const rect {get_global_content_bounds()};
+    if (auto const* style {current_style<spinner::style>()}) {
+        rect_f const rect {global_content_bounds()};
         auto const*  normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         rect_f const navRect {normalArrow->NavArrow.calc(rect)};
         if (navRect.contains(ev.Position)) {
@@ -133,7 +133,7 @@ void spinner::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
 void spinner::on_update(milliseconds /*deltaTime*/)
 {
-    if (_mouseDown && _holdTime.get_elapsed_milliseconds() > (250.f / _holdCount)) {
+    if (_mouseDown && _holdTime.elapsed_milliseconds() > (250.f / _holdCount)) {
         if (_hoverArrow == arrow::Increase) {
             Value += Step();
         } else if (_hoverArrow == arrow::Decrease) {

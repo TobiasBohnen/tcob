@@ -19,7 +19,7 @@ checkbox::checkbox(init const& wi)
 
 void checkbox::on_paint(widget_painter& painter)
 {
-    if (auto const* style {get_style<checkbox::style>()}) {
+    if (auto const* style {current_style<checkbox::style>()}) {
         rect_f rect {Bounds()};
 
         // background

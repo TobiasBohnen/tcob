@@ -9,7 +9,7 @@ namespace tcob::gfx {
 
 auto frame_animation::operator()(f64 t) const -> string
 {
-    return get_frame_at(get_duration() * t);
+    return get_frame_at(duration() * t);
 }
 
 auto frame_animation::get_frame_at(milliseconds time) const -> string
@@ -22,7 +22,7 @@ auto frame_animation::get_frame_at(milliseconds time) const -> string
     return Frames[Frames.size() - 1].Name;
 }
 
-auto frame_animation::get_duration() const -> milliseconds
+auto frame_animation::duration() const -> milliseconds
 {
     milliseconds retValue {0};
     for (auto const& frame : Frames) {

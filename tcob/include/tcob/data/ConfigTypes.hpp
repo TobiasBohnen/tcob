@@ -236,7 +236,7 @@ public:
     template <typename T>
     auto is() const -> bool;
 
-    auto get_comment() const -> comment const&;
+    auto get_comment() const -> comment const&; // TODO: get_
     void set_comment(comment const& comment);
 
 private:

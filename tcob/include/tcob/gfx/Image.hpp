@@ -45,7 +45,7 @@ public:
 
     image() = default;
 
-    auto get_info() const -> info const&;
+    auto get_info() const -> info const&; // TODO: get_
 
     auto buffer() const -> std::span<u8 const>;
     auto buffer() -> std::span<u8>;

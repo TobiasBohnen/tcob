@@ -41,7 +41,7 @@ public:
 
     color Color {colors::White};
 
-    auto get_lifetime_ratio() const -> f32;
+    auto get_lifetime_ratio() const -> f32; // TODO: get_
     auto is_alive() const -> bool;
     void set_lifetime(milliseconds life);
 
@@ -196,7 +196,7 @@ public:
     void remove_emitter(particle_emitter_base const& emitter);
     void clear_emitters();
 
-    auto get_particle_count() const -> isize;
+    auto get_particle_count() const -> isize; // TODO: get_
 
     auto activate_particle() -> particle&;
     void deactivate_particle(particle& particle);

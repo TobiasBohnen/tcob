@@ -25,7 +25,7 @@ void layout::update()
         std::visit(
             overloaded {
                 [&](widget_container* parent) {
-                    do_layout(parent->get_content_bounds().Size);
+                    do_layout(parent->content_bounds().Size);
                 },
                 [&](form* parent) {
                     do_layout(parent->Bounds().Size);

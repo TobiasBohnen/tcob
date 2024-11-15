@@ -30,9 +30,9 @@ public:
     sound_font() = default;
     ~sound_font();
 
-    auto get_preset_count() const -> i32;
-    auto get_channel_count() const -> i8;
-    auto get_sample_rate() const -> i32;
+    auto get_preset_count() const -> i32; // TODO: get_
+    auto get_channel_count() const -> i8; // TODO: get_
+    auto get_sample_rate() const -> i32;  // TODO: get_
 
     auto load [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& stream, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;

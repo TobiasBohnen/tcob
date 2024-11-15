@@ -208,7 +208,7 @@ void form::on_draw_to(render_target& target)
 {
     // set cursor
     if (_window && _window->Cursor() && _topWidget && _topWidget->_style) {
-        _window->Cursor->ActiveMode = _topWidget->get_style<style>()->Cursor;
+        _window->Cursor->ActiveMode = _topWidget->current_style<style>()->Cursor;
     }
 
     size_i const bounds {size_i {Bounds->Size}};
@@ -507,7 +507,7 @@ auto form::can_popup_tooltip() const -> bool
         && !_isLButtonDown && !_isRButtonDown
         && locate_service<input::system>().CurrentInputMode == input::mode::KeyboardMouse) {
 
-        if (auto* style {_topWidget->Tooltip->get_style<tooltip::style>()}) {
+        if (auto* style {_topWidget->Tooltip->current_style<tooltip::style>()}) {
             return _mouseOverTime > style->Delay;
         }
     }

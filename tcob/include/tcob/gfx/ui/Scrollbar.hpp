@@ -23,8 +23,8 @@ public:
     void update(milliseconds deltaTime);
     void paint(widget_painter& painter, element::scrollbar const& style, rect_f& rect, bool isActive);
 
-    auto get_current_value() const -> f32;
-    auto get_target_value() const -> f32;
+    auto get_current_value() const -> f32; // TODO: get_
+    auto get_target_value() const -> f32;  // TODO: get_
     void set_target_value(f32 val, milliseconds delay);
 
     auto is_mouse_over() const -> bool;

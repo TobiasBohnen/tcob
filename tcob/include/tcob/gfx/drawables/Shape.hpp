@@ -105,7 +105,7 @@ public:
     auto geometry() -> geometry_data override;
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
-    auto get_AABB() const -> rect_f;
+    auto get_AABB() const -> rect_f; // TODO: get_
 
     void move_by(point_f offset);
 
@@ -189,7 +189,7 @@ public:
     void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);
 
-    auto get_shape_count() const -> isize;
+    auto get_shape_count() const -> isize; // TODO: get_
     auto is_empty() const -> bool;
 
     auto get_shape_at(usize index) const -> std::shared_ptr<shape>;

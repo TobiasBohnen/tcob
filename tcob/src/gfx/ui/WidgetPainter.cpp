@@ -650,7 +650,7 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
 scissor_guard::scissor_guard(widget_painter& painter, widget* w)
     : _painter {painter}
 {
-    rect_f bounds {w->get_global_content_bounds()};
+    rect_f bounds {w->global_content_bounds()};
 
     if (auto const* form {w->get_form()}) {
         point_f const off {form->Bounds->Position};

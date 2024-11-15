@@ -38,7 +38,7 @@ class TCOB_API gc final {
 public:
     explicit gc(state_view l);
 
-    auto get_count() const -> i32;
+    auto get_count() const -> i32; // TODO: get_
     auto is_running() const -> bool;
 
     void start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const;
@@ -78,12 +78,12 @@ public:
     signal<require_event>       Require;
     signal<warning_event const> Warning;
 
-    auto get_global_table() -> table&;
-    auto get_environment() const -> std::optional<table>;
+    auto get_global_table() -> table&;                    // TODO: get_
+    auto get_environment() const -> std::optional<table>; // TODO: get_
     void set_environment(table const& env);
 
-    auto get_view() const -> state_view;
-    auto get_GC() const -> gc;
+    auto get_view() const -> state_view;                  // TODO: get_
+    auto get_GC() const -> gc;                            // TODO: get_
 
     auto create_table() const -> table;
 

@@ -29,7 +29,7 @@ void timer::start(milliseconds interval, mode mode, bool looping)
             sw.start();
 
             if (mode == mode::BusyLoop) {
-                while (!_stopRequested && sw.get_elapsed() < interval) {
+                while (!_stopRequested && sw.elapsed() < interval) {
                     std::this_thread::yield();
                 }
             } else {
@@ -37,7 +37,7 @@ void timer::start(milliseconds interval, mode mode, bool looping)
             }
 
             sw.stop();
-            Tick(sw.get_elapsed());
+            Tick(sw.elapsed());
 
             if (!looping) { break; }
         }
