@@ -78,6 +78,7 @@ public:
     auto get_keycode(scan_code key) const -> key_code;
 
     auto is_key_down(scan_code key) const -> bool;
+    auto is_key_down(key_code key) const -> bool;
     auto is_mod_down(key_mod mod) const -> bool;
 
     auto get_mod_state() const -> std::unordered_map<key_mod, bool>; // TODO: get_
@@ -177,6 +178,7 @@ public:
 
     auto id() const -> i32;
     auto name() const -> string;
+
     auto has_rumble() const -> bool;
     auto has_rumble_triggers() const -> bool;
 
@@ -237,6 +239,15 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API clipboard {
+public:
+    auto has_text() const -> bool;
+    auto get_text() const -> utf8_string;
+    void set_text(utf8_string const& text);
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API system final {
 public:
     system();
@@ -267,23 +278,14 @@ public:
 
     prop<mode> CurrentInputMode;
 
-    auto get_controller_count() const -> isize; // TODO: get_
+    auto controller_count() const -> isize;
     auto get_controller(i32 index) const -> std::shared_ptr<controller>;
 
-    auto get_mouse() const -> mouse;            // TODO: get_
-    auto get_keyboard() const -> keyboard;      // TODO: get_
+    auto get_mouse() const -> mouse;         // TODO: get_
+    auto get_keyboard() const -> keyboard;   // TODO: get_
+    auto get_clipboard() const -> clipboard; // TODO: get_
 
     void process_events(SDL_Event* ev);
-
-    auto static IsKeyDown(scan_code key) -> bool;
-    auto static IsKeyDown(key_code key) -> bool;
-    auto static IsKeyModDown(key_mod mod) -> bool;
-    auto static IsMouseButtonDown(mouse::button button) -> bool;
-    auto static GetMousePosition() -> point_i;
-    void static SetMousePosition(point_i pos);
-
-    auto static GetClipboardText() -> utf8_string;
-    void static SetClipboardText(utf8_string const& text);
 
     static inline char const* service_name {"input_system"};
 

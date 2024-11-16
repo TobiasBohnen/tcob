@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
@@ -258,7 +259,7 @@ void widget::do_key_down(input::keyboard::event const& ev)
 
     if (!ev.Handled) {
         auto const& controls {_form->Controls};
-        if (!input::system::IsKeyDown(controls->ActivateKey)) {
+        if (!locate_service<input::system>().get_keyboard().is_key_down(controls->ActivateKey)) {
             if (ev.KeyCode == controls->NavLeftKey) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Left);
             } else if (ev.KeyCode == controls->NavRightKey) {

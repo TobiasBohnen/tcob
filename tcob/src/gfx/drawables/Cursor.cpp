@@ -5,14 +5,15 @@
 
 #include "tcob/gfx/drawables/Cursor.hpp"
 
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
 
 cursor::cursor()
-    : Position {{[]() -> point_i { return input::system::GetMousePosition(); },
-                 [](point_i value) { input::system::SetMousePosition(value); }}}
+    : Position {{[]() -> point_i { return locate_service<input::system>().get_mouse().get_position(); },
+                 [](point_i value) { locate_service<input::system>().get_mouse().set_position(value); }}}
 {
     ActiveMode.Changed.connect([&](string const& name) {
         if (!_modes.contains(name)) {

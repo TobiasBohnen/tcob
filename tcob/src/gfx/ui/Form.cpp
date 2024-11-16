@@ -230,7 +230,7 @@ void form::on_draw_to(render_target& target)
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         point_i const pos {(_window && _window->Cursor()
                                 ? _window->Cursor->get_bounds().bottom_right()
-                                : input::system::GetMousePosition())
+                                : locate_service<input::system>().get_mouse().get_position())
                            - static_cast<point_i>(Bounds->Position)};
 
         auto& ttBounds {*_topWidget->Tooltip->Bounds};
@@ -336,7 +336,7 @@ void form::on_key_down(input::keyboard::event const& ev)
         }
     } else if ((ev.KeyMods & Controls->CutCopyPasteMod) == Controls->CutCopyPasteMod) {
         if (ev.KeyCode == Controls->PasteKey) {
-            input::keyboard::text_input_event tev {.Text = input::system::GetClipboardText()};
+            input::keyboard::text_input_event tev {.Text = locate_service<input::system>().get_clipboard().get_text()};
             _injector.on_text_input(_focusWidget, tev);
         }
     } else {

@@ -103,12 +103,19 @@ auto keyboard::get_keycode(scan_code key) const -> key_code
 
 auto keyboard::is_key_down(scan_code key) const -> bool
 {
-    return system::IsKeyDown(key);
+    auto const* state {SDL_GetKeyboardState(nullptr)};
+    return state[convert_enum(key)] != 0;
+}
+
+auto keyboard::is_key_down(key_code key) const -> bool
+{
+    return is_key_down(get_scancode(key));
 }
 
 auto keyboard::is_mod_down(key_mod mod) const -> bool
 {
-    return system::IsKeyModDown(mod);
+    auto const state {SDL_GetModState()};
+    return state & convert_enum(mod);
 }
 
 auto keyboard::get_mod_state() const -> std::unordered_map<key_mod, bool>
@@ -137,17 +144,39 @@ auto keyboard::get_mod_state() const -> std::unordered_map<key_mod, bool>
 
 auto mouse::get_position() const -> point_i
 {
-    return system::GetMousePosition();
+    i32 x {0}, y {0};
+    SDL_GetMouseState(&x, &y);
+    return {x, y};
 }
 
 void mouse::set_position(point_i pos) const
 {
-    system::SetMousePosition(pos);
+    SDL_WarpMouseInWindow(nullptr, pos.X, pos.Y);
 }
 
 auto mouse::is_button_down(button button) const -> bool
 {
-    return system::IsMouseButtonDown(button);
+    return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(convert_enum(button));
+}
+
+////////////////////////////////////////////////////////////
+
+auto clipboard::has_text() const -> bool
+{
+    return SDL_HasClipboardText() == SDL_TRUE;
+}
+
+auto clipboard::get_text() const -> utf8_string
+{
+    auto*       c {SDL_GetClipboardText()};
+    utf8_string retValue {c};
+    SDL_free(c);
+    return retValue;
+}
+
+void clipboard::set_text(utf8_string const& text)
+{
+    SDL_SetClipboardText(text.c_str());
 }
 
 ////////////////////////////////////////////////////////////
@@ -166,7 +195,7 @@ system::~system()
     _controllers.clear();
 }
 
-auto system::get_controller_count() const -> isize
+auto system::controller_count() const -> isize
 {
     return std::ssize(_controllers);
 }
@@ -187,6 +216,11 @@ auto system::get_mouse() const -> mouse
 }
 
 auto system::get_keyboard() const -> keyboard
+{
+    return {};
+}
+
+auto system::get_clipboard() const -> clipboard
 {
     return {};
 }
@@ -336,54 +370,6 @@ void system::process_events(SDL_Event* ev)
         }
     } break;
     }
-}
-
-auto system::IsKeyDown(scan_code key) -> bool
-{
-    auto const* state {SDL_GetKeyboardState(nullptr)};
-    return state[convert_enum(key)] != 0;
-}
-
-auto system::IsKeyDown(key_code key) -> bool
-{
-    auto const* state {SDL_GetKeyboardState(nullptr)};
-    return state[SDL_GetScancodeFromKey(convert_enum(key))] != 0;
-}
-
-auto system::IsKeyModDown(key_mod mod) -> bool
-{
-    auto const state {SDL_GetModState()};
-    return state & convert_enum(mod);
-}
-
-auto system::IsMouseButtonDown(mouse::button button) -> bool
-{
-    return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(convert_enum(button));
-}
-
-void system::SetMousePosition(point_i pos)
-{
-    SDL_WarpMouseInWindow(nullptr, pos.X, pos.Y);
-}
-
-auto system::GetClipboardText() -> utf8_string
-{
-    auto*       c {SDL_GetClipboardText()};
-    utf8_string retValue {c};
-    SDL_free(c);
-    return retValue;
-}
-
-void system::SetClipboardText(utf8_string const& text)
-{
-    SDL_SetClipboardText(text.c_str());
-}
-
-auto system::GetMousePosition() -> point_i
-{
-    i32 x {0}, y {0};
-    SDL_GetMouseState(&x, &y);
-    return {x, y};
 }
 
 }

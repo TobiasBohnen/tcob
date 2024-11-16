@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Slider.hpp"
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 
 namespace tcob::gfx::ui {
@@ -84,7 +85,7 @@ void slider::on_paint(widget_painter& painter)
 void slider::on_key_down(input::keyboard::event const& ev)
 {
     auto const& controls {get_form()->Controls};
-    if (input::system::IsKeyDown(controls->ActivateKey)) {
+    if (locate_service<input::system>().get_keyboard().is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavLeftKey) {
             handle_dir_input(direction::Left);
         } else if (ev.KeyCode == controls->NavRightKey) {
