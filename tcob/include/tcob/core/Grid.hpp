@@ -19,6 +19,8 @@ class grid {
     using point_type     = point<dimension_type>;
 
 public:
+    using type = T;
+
     grid(size_type size, T const& defaultValue = T {});
 
     auto operator[](point_type pos) -> T&;
@@ -62,7 +64,10 @@ class static_grid {
     using point_type     = point<dimension_type>;
 
 public:
-    static_grid(T const& defaultValue = T {});
+    using type = T;
+
+    static_grid();
+    explicit static_grid(T const& defaultValue);
 
     auto operator[](point_type pos) -> T&;
     auto operator[](point_type pos) const -> T const&;

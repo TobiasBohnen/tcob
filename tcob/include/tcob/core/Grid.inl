@@ -117,6 +117,12 @@ inline auto grid<T>::get_index(point_type pos) const -> dimension_type
 ////////////////////////////////////////////////////////////
 
 template <typename T, usize Width, usize Height>
+inline static_grid<T, Width, Height>::static_grid()
+    : _data {}
+{
+}
+
+template <typename T, usize Width, usize Height>
 inline static_grid<T, Width, Height>::static_grid(T const& defaultValue)
     : _data {}
 {
