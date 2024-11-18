@@ -102,6 +102,12 @@ inline auto grid<T>::size() const -> usize
 }
 
 template <typename T>
+inline auto grid<T>::data() -> T*
+{
+    return _data.data();
+}
+
+template <typename T>
 inline auto grid<T>::data() const -> T const*
 {
     return _data.data();
@@ -213,6 +219,12 @@ template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::size() const -> usize
 {
     return _data.size();
+}
+
+template <typename T, usize Width, usize Height>
+inline auto static_grid<T, Width, Height>::data() -> T*
+{
+    return _data.data();
 }
 
 template <typename T, usize Width, usize Height>

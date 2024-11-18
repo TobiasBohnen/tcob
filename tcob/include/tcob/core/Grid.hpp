@@ -42,6 +42,7 @@ public:
     auto contains(point_type pos) const -> bool;
 
     auto size() const -> usize;
+    auto data() -> T*;
     auto data() const -> T const*;
 
 private:
@@ -88,6 +89,7 @@ public:
     auto contains(point_type pos) const -> bool;
 
     auto size() const -> usize;
+    auto data() -> T*;
     auto data() const -> T const*;
 
 private:
