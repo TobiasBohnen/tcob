@@ -153,9 +153,9 @@ void game::step()
         fixedUpdateLoops++;
     }
 
-    milliseconds now {clock::now().time_since_epoch()};
-
+    milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
+
     if (deltaUpdate >= _frameLimit) {
         // update
         PreUpdate(deltaUpdate);
