@@ -39,30 +39,20 @@ void drawable::draw_to(render_target& target)
     }
 }
 
-void drawable::update(milliseconds deltaTime)
-{
-    on_update(deltaTime);
-}
-
 void drawable::on_visiblity_changed()
 {
 }
 
 ////////////////////////////////////////////////////////////
 
-auto entity::get_update_mode() const -> update_mode
-{
-    return update_mode::Normal;
-}
-
-void entity::fixed_update(milliseconds deltaTime)
-{
-    on_fixed_update(deltaTime);
-}
-
 auto entity::can_draw() const -> bool
 {
     return true;
+}
+
+auto entity::get_update_mode() const -> update_mode
+{
+    return update_mode::Normal;
 }
 
 ////////////////////////////////////////////////////////////

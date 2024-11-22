@@ -20,6 +20,7 @@ public:
     virtual ~updatable() = default;
 
     void virtual update(milliseconds deltaTime);
+    void virtual fixed_update(milliseconds deltaTime);
 
 protected:
     updatable()                                                   = default;
@@ -28,7 +29,8 @@ protected:
     updatable(updatable&& other) noexcept                         = default;
     auto operator=(updatable&& other) noexcept -> updatable&      = default;
 
-    void virtual on_update(milliseconds deltaTime) = 0;
+    void virtual on_update(milliseconds deltaTime);
+    void virtual on_fixed_update(milliseconds deltaTime);
 };
 
 ////////////////////////////////////////////////////////////

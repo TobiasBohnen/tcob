@@ -27,8 +27,6 @@ public:
 
     void draw_to(render_target& target);
 
-    void update(milliseconds deltaTime) final;
-
 protected:
     void virtual on_draw_to(render_target& target) = 0;
     auto virtual can_draw() const -> bool          = 0;
@@ -46,14 +44,9 @@ public:
     // TODO: bounds, mouse enter/leave
     auto virtual get_update_mode() const -> update_mode; // TODO: get_
 
-    void virtual fixed_update(milliseconds deltaTime);
-
 protected:
     void on_draw_to(render_target&) override { }
     auto can_draw() const -> bool override;
-
-    void on_update(milliseconds) override { }
-    void virtual on_fixed_update(milliseconds) { }
 
     void on_key_down(input::keyboard::event const&) override { }
     void on_key_up(input::keyboard::event const&) override { }

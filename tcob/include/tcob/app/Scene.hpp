@@ -38,12 +38,11 @@ public:
     void bring_to_front();
     void send_to_back();
 
-    void fixed_update(milliseconds deltaTime);
-
 protected:
     explicit scene_node(scene_node* parent);
 
     void on_update(milliseconds deltaTime) override;
+    void on_fixed_update(milliseconds deltaTime) override;
 
     void on_draw_to(gfx::render_target& target) override;
     auto can_draw() const -> bool override;
@@ -73,15 +72,13 @@ public:
     void draw_to(gfx::render_target& target);
 
     void update(milliseconds deltaTime) final;
-    void fixed_update(milliseconds deltaTime);
+    void fixed_update(milliseconds deltaTime) final;
 
     auto root_node() -> std::shared_ptr<scene_node>;
 
 protected:
     auto get_game() -> game&;
     auto get_window() -> gfx::window&;
-
-    void virtual on_fixed_update(milliseconds /* deltaTime */) { }
 
     void virtual on_start();
     void virtual on_finish();
