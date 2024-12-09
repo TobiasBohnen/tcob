@@ -583,15 +583,10 @@ void cfg_material_loader::declare()
                 asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = d;
                 asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = d;
             } else if (object separateBlendFunc; assetSection.try_get(separateBlendFunc, API::Material::separate_blend_func)) {
-                blend_func sa {separateBlendFunc["source_alpha"].as<blend_func>()};
-                asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc = sa;
-                blend_func sc {separateBlendFunc["source_color"].as<blend_func>()};
-                asset->assetPtr->BlendFuncs.SourceColorBlendFunc = sc;
-
-                blend_func da {separateBlendFunc["destination_alpha"].as<blend_func>()};
-                asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = da;
-                blend_func ds {separateBlendFunc["destination_color"].as<blend_func>()};
-                asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = ds;
+                asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc      = separateBlendFunc["source_alpha"].as<blend_func>();
+                asset->assetPtr->BlendFuncs.SourceColorBlendFunc      = separateBlendFunc["source_color"].as<blend_func>();
+                asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = separateBlendFunc["destination_alpha"].as<blend_func>();
+                asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = separateBlendFunc["destination_color"].as<blend_func>();
             }
             if (blend_equation blendEquation {}; assetSection.try_get(blendEquation, API::Material::blend_equation)) {
                 asset->assetPtr->BlendEquation = blendEquation;

@@ -208,7 +208,7 @@ namespace detail {
     protected:
         function_base(vm_view view, SQInteger idx);
 
-        auto call_protected(SQInteger nargs, bool retValue) const -> error_code;
+        auto call(SQInteger nargs, bool retValue) const -> error_code;
     };
 }
 

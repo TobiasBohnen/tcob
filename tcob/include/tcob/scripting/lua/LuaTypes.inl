@@ -219,7 +219,7 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
     i32 const paramsCount {view.get_top() - oldTop};
 
     // call lua function
-    auto result {call_protected(paramsCount)};
+    auto result {protected_call(paramsCount)};
     if constexpr (std::is_void_v<R>) {
         return make_result(result);
     } else {

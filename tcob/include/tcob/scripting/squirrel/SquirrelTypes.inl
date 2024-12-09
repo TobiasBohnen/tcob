@@ -375,7 +375,7 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
     SQInteger const paramsCount {view.get_top() - oldTop};
 
     // call squirrel function
-    auto result {call_protected(paramsCount, !std::is_void_v<R>)};
+    auto result {call(paramsCount, !std::is_void_v<R>)};
     if constexpr (std::is_void_v<R>) {
         return make_result(result);
     } else {

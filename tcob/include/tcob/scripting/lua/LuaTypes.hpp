@@ -119,7 +119,7 @@ namespace detail {
     protected:
         function_base(state_view view, i32 idx);
 
-        auto call_protected(i32 nargs) const -> error_code;
+        auto protected_call(i32 nargs) const -> error_code;
     };
 }
 

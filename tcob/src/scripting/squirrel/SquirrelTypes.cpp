@@ -170,7 +170,7 @@ detail::function_base::function_base(vm_view view, SQInteger idx)
     acquire(view, idx);
 }
 
-auto detail::function_base::call_protected(SQInteger nargs, bool retValue) const -> error_code
+auto detail::function_base::call(SQInteger nargs, bool retValue) const -> error_code
 {
     return get_view().call(nargs, retValue, true);
 }
