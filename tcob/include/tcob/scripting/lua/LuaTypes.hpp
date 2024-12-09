@@ -119,7 +119,8 @@ namespace detail {
     protected:
         function_base(state_view view, i32 idx);
 
-        auto protected_call(i32 nargs) const -> error_code;
+        auto upcall(i32 nargs) const -> error_code;
+        auto pcall(i32 nargs) const -> error_code;
     };
 }
 
@@ -133,8 +134,8 @@ public:
     function() = default;
 
     auto operator()(auto&&... params) const -> return_type;
-
-    auto call(auto&&... params) const -> result<return_type>;
+    auto protected_call(auto&&... params) const -> result<return_type>;
+    auto unprotected_call(auto&&... params) const -> result<return_type>;
 
     auto static Acquire(state_view view, i32 idx) -> function<R>;
 

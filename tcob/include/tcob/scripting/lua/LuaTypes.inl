@@ -199,14 +199,14 @@ template <typename R>
 inline auto function<R>::operator()(auto&&... params) const -> return_type
 {
     if constexpr (std::is_void_v<R>) {
-        static_cast<void>(call(params...));
+        static_cast<void>(protected_call(params...));
     } else {
-        return call(params...).value();
+        return protected_call(params...).value();
     }
 }
 
 template <typename R>
-inline auto function<R>::call(auto&&... params) const -> result<return_type>
+inline auto function<R>::protected_call(auto&&... params) const -> result<return_type>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -219,7 +219,7 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
     i32 const paramsCount {view.get_top() - oldTop};
 
     // call lua function
-    auto result {protected_call(paramsCount)};
+    auto result {pcall(paramsCount)};
     if constexpr (std::is_void_v<R>) {
         return make_result(result);
     } else {
@@ -228,6 +228,33 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
             if (!view.pull_convert_idx(oldTop, retValue)) {
                 result = error_code::TypeMismatch;
             }
+        }
+
+        return make_result(std::move(retValue), result);
+    }
+}
+
+template <typename R>
+inline auto function<R>::unprotected_call(auto&&... params) const -> result<return_type>
+{
+    auto const view {get_view()};
+    auto const guard {view.create_stack_guard()};
+
+    push_self();
+
+    // push parameters to lua
+    i32 const oldTop {view.get_top()};
+    view.push_convert(params...);
+    i32 const paramsCount {view.get_top() - oldTop};
+
+    // call lua function
+    auto result {upcall(paramsCount)};
+    if constexpr (std::is_void_v<R>) {
+        return make_result(result);
+    } else {
+        R retValue {};
+        if (!view.pull_convert_idx(oldTop, retValue)) {
+            result = error_code::TypeMismatch;
         }
 
         return make_result(std::move(retValue), result);

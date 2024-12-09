@@ -452,6 +452,12 @@ void state_view::error(string const& message) const
     luaL_error(_state, message.c_str());
 }
 
+auto state_view::call(i32 nargs, i32 nret) const -> error_code
+{
+    lua_call(_state, nargs, nret);
+    return error_code::Ok;
+}
+
 auto static error_handler(lua_State* l) -> i32
 {
     i32 const n {lua_gettop(l)};

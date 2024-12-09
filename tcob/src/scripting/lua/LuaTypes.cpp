@@ -278,7 +278,12 @@ namespace detail {
         view.pop(1);
     }
 
-    auto function_base::protected_call(i32 nargs) const -> error_code
+    auto function_base::upcall(i32 nargs) const -> error_code
+    {
+        return get_view().call(nargs, LUA_MULTRET);
+    }
+
+    auto function_base::pcall(i32 nargs) const -> error_code
     {
         return get_view().pcall(nargs, LUA_MULTRET);
     }
