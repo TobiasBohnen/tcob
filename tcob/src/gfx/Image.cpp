@@ -75,9 +75,11 @@ void image::flip_horizontally()
             i32 const start {(y * stride) + x};
             i32 const end {start + bpp};
             i32 const targetstart {((y + 1) * stride) - x - bpp};
-            std::swap_ranges(
-                begin + start, begin + end,
-                begin + targetstart);
+            if (start != targetstart) {
+                std::swap_ranges(
+                    begin + start, begin + end,
+                    begin + targetstart);
+            }
         }
     }
 }

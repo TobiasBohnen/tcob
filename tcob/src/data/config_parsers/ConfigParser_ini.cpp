@@ -27,6 +27,8 @@ auto static check_brackets(utf8_string_view str, char openBr, char closeBr)
 
 auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 {
+    if (txt.empty()) { return object {}; }
+
     _ini         = txt;
     _iniBegin    = 0;
     _iniEnd      = 0;
@@ -41,6 +43,8 @@ auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 
 auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
 {
+    if (txt.empty()) { return array {}; }
+
     _ini         = txt;
     _iniBegin    = 0;
     _iniEnd      = 0;

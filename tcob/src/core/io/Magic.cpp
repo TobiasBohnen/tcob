@@ -38,9 +38,13 @@ auto get_signature(istream& stream) -> std::optional<signature>
         for (auto const& part : sig.Parts) {
             std::span<ubyte const> slice;
             if (part.Offset >= 0) {
-                slice = {startBuffer.begin() + part.Offset, part.Bytes.size()};
+                if (part.Offset + std::ssize(part.Bytes) < std::ssize(startBuffer)) {
+                    slice = {startBuffer.begin() + part.Offset, part.Bytes.size()};
+                }
             } else {
-                slice = {endBuffer.end() + part.Offset, part.Bytes.size()};
+                if (std::ssize(part.Bytes) <= std::ssize(endBuffer)) {
+                    slice = {endBuffer.end() + part.Offset, part.Bytes.size()};
+                }
             }
 
             if (!std::equal(slice.begin(), slice.end(), part.Bytes.begin())) {
