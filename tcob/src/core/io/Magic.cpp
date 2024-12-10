@@ -27,31 +27,40 @@ void add_signature(signature const& sig)
 
 auto get_signature(istream& stream) -> std::optional<signature>
 {
-    auto const sOffset {stream.tell()};
+    auto const offset {stream.tell()};
     auto const startBuffer {stream.read_n<ubyte>(BUFFER_LENGTH)};
     stream.seek(-std::min(stream.size_in_bytes(), static_cast<std::streamsize>(BUFFER_LENGTH)), seek_dir::End);
     auto const endBuffer {stream.read_n<ubyte>(BUFFER_LENGTH)};
-    stream.seek(sOffset, seek_dir::Begin);
+    stream.seek(offset, seek_dir::Begin);
 
     for (auto const& sig : GetSignatures()) {
         bool found {true};
         for (auto const& part : sig.Parts) {
             std::span<ubyte const> slice;
+
             if (part.Offset >= 0) {
-                if (part.Offset + std::ssize(part.Bytes) < std::ssize(startBuffer)) {
-                    slice = {startBuffer.begin() + part.Offset, part.Bytes.size()};
+                usize const startIndex {static_cast<usize>(part.Offset)};
+                usize const endIndex {startIndex + part.Bytes.size()};
+
+                if (startIndex < startBuffer.size() && endIndex <= startBuffer.size()) {
+                    slice = {startBuffer.data() + startIndex, part.Bytes.size()};
                 }
             } else {
-                if (std::ssize(part.Bytes) <= std::ssize(endBuffer)) {
-                    slice = {endBuffer.end() + part.Offset, part.Bytes.size()};
+                usize const startIndex {static_cast<usize>(endBuffer.size() + part.Offset)};
+                usize const endIndex {startIndex + part.Bytes.size()};
+
+                if (startIndex < endBuffer.size() && endIndex <= endBuffer.size()) {
+                    slice = {endBuffer.data() + startIndex, part.Bytes.size()};
                 }
             }
 
+            // Compare the slice with the signature part
             if (!std::equal(slice.begin(), slice.end(), part.Bytes.begin())) {
                 found = false;
                 break;
             }
         }
+
         if (found) { return sig; }
     }
 
