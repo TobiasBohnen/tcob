@@ -145,7 +145,6 @@ void stdout_logger::log(string const& message, level level) const
 {
 #if defined(_MSC_VER)
     SetConsoleOutputCP(CP_UTF8);
-    setvbuf(stdout, nullptr, _IOFBF, 1000);
 #endif
 
     if (level < MinLevel) { return; }
