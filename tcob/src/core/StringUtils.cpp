@@ -98,26 +98,6 @@ auto trim(string_view source) -> string_view
     return source.substr(front, back - front + 1);
 }
 
-auto find_unquoted(string_view source, char needle) -> string_view::size_type
-{
-    char const quote {source[0]};
-    bool       inQuotes {false};
-    if (quote != '"' && quote != '\'') {
-        return source.find(needle);
-    }
-
-    for (usize i {0}; i < source.size(); ++i) {
-        char const c {source[i]};
-        if (c == quote) {
-            inQuotes = !inQuotes;
-        } else if (!inQuotes && c == needle) {
-            return i;
-        }
-    }
-
-    return string_view::npos;
-}
-
 auto replace(string_view source, string_view from, string_view to) -> string
 {
     string retValue;

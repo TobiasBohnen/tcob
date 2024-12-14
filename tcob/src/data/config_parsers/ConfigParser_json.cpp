@@ -10,6 +10,27 @@
 
 namespace tcob::data::config::detail {
 
+auto static find_unquoted(string_view source, char needle) -> string_view::size_type
+{
+    char const quote {source[0]};
+    if (quote != '"' && quote != '\'') {
+        return source.find(needle);
+    }
+
+    bool  inQuotes {false};
+    usize pos {0};
+    for (auto const c : source) {
+        if (c == quote) {
+            inQuotes = !inQuotes;
+        } else if (!inQuotes && c == needle) {
+            return pos;
+        }
+        ++pos;
+    }
+
+    return string_view::npos;
+}
+
 constexpr usize INDENT_SPACES {2};
 
 auto json_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
@@ -28,7 +49,7 @@ auto json_reader::ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string
 {
     if (line.empty()) { return false; }
 
-    auto const separatorPos {helper::find_unquoted(line, ':')};
+    auto const separatorPos {find_unquoted(line, ':')};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR: invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
@@ -42,8 +63,8 @@ auto json_reader::ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string
     if (!ReadValue(currentEntry, valueStr)) { return false; } // ERROR: invalid value
 
     // unescape key
-    utf8_string const valueKey {keyStr.substr(1, keyStr.size() - 2)};
-    obj.set_entry(valueKey, currentEntry);
+    utf8_string const key {keyStr.substr(1, keyStr.size() - 2)};
+    obj.set_entry(key, currentEntry);
     return true;
 }
 
@@ -59,14 +80,15 @@ auto json_reader::ReadValue(entry& currentEntry, utf8_string_view line) -> bool
 
 auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line.empty()) { return false; }
+    auto const lineSize {line.size()};
+    if (lineSize <= 1) { return false; }
 
     if (line[0] == '[') {
-        if (line[line.size() - 1] != ']') { return false; }
+        if (line[lineSize - 1] != ']') { return false; }
 
         array arr {};
 
-        auto const splitLine {helper::trim(line.substr(1, line.size() - 2))};
+        auto const splitLine {helper::trim(line.substr(1, lineSize - 2))};
         if (splitLine.empty()) {
             currentEntry.set_value(arr);
             return true;
@@ -98,14 +120,15 @@ auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
 
 auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line.empty()) { return false; }
+    auto const lineSize {line.size()};
+    if (lineSize <= 1) { return false; }
 
     if (line[0] == '{') {
-        if (line[line.size() - 1] != '}') { return false; }
+        if (line[lineSize - 1] != '}') { return false; }
 
         object obj {};
 
-        auto const splitLine {helper::trim(line.substr(1, line.size() - 2))};
+        auto const splitLine {helper::trim(line.substr(1, lineSize - 2))};
         if (splitLine.empty()) {
             currentEntry.set_value(obj);
             return true;
@@ -152,8 +175,9 @@ auto json_reader::ReadBool(entry& currentEntry, utf8_string_view line) -> bool
 
 auto json_reader::ReadString(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line.size() > 1 && line[0] == '"' && line[line.size() - 1] == '"') {
-        currentEntry.set_value(utf8_string {line.substr(1, line.size() - 2)});
+    auto const lineSize {line.size()};
+    if (lineSize > 1 && line[0] == '"' && line[lineSize - 1] == '"') {
+        currentEntry.set_value(utf8_string {line.substr(1, lineSize - 2)});
         return true;
     }
 

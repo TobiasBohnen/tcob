@@ -10,6 +10,27 @@
 
 namespace tcob::data::config::detail {
 
+auto static find_unquoted(string_view source, char needle) -> string_view::size_type
+{
+    char const quote {source[0]};
+    if (quote != '"' && quote != '\'') {
+        return source.find(needle);
+    }
+
+    bool  inQuotes {false};
+    usize pos {0};
+    for (auto const c : source) {
+        if (c == quote) {
+            inQuotes = !inQuotes;
+        } else if (!inQuotes && c == needle) {
+            return pos;
+        }
+        ++pos;
+    }
+
+    return string_view::npos;
+}
+
 auto static check_brackets(utf8_string_view str, char openBr, char closeBr)
 {
     assert(str[str.size() - 1] == closeBr);
@@ -148,7 +169,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
 
 auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
 {
-    auto const separatorPos {helper::find_unquoted(line, _settings.KeyValueDelim)};
+    auto const separatorPos {find_unquoted(line, _settings.KeyValueDelim)};
     if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
@@ -159,24 +180,24 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     if (keyStr[0] == _settings.Path || keyStr[keyStrSize - 1] == _settings.Path) { return false; } //  ERROR: dot at start or end of key
 
     object      sec {targetObject};
-    utf8_string entryKey {};
+    utf8_string key {};
     bool        first {true};
 
     // unescape key
     if ((keyStr[0] == '\'' || keyStr[0] == '"') && keyStr[0] == keyStr[keyStrSize - 1]) {
-        entryKey = keyStr.substr(1, keyStrSize - 2);
+        key = keyStr.substr(1, keyStrSize - 2);
     } else { // read sub-keys
         helper::split_for_each(
             keyStr, _settings.Path,
-            [&first, &entryKey, &sec](utf8_string_view token) {
+            [&first, &key, &sec](utf8_string_view token) {
                 if (first) {
-                    entryKey = utf8_string {token};
-                    first    = false;
+                    key   = utf8_string {token};
+                    first = false;
                 } else {
-                    auto secRes {sec[entryKey]};
+                    auto secRes {sec[key]};
                     if (!secRes.is<object>()) { secRes = object {}; }
-                    sec      = secRes.as<object>();
-                    entryKey = utf8_string {token};
+                    sec = secRes.as<object>();
+                    key = utf8_string {token};
                 }
                 return true;
             });
@@ -193,7 +214,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
 
     currentEntry.set_comment(_currentComment);
     _currentComment = {};
-    sec.set_entry(entryKey, currentEntry);
+    sec.set_entry(key, currentEntry);
     return true;
 }
 

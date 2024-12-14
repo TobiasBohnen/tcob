@@ -35,8 +35,6 @@ TCOB_API auto split_preserve_brackets(string_view str, char delim) -> std::vecto
 
 TCOB_API auto trim(string_view source) -> string_view;
 
-TCOB_API auto find_unquoted(string_view source, char needle) -> string_view::size_type;
-
 TCOB_API auto replace(string_view source, string_view from, string_view to) -> string;
 
 TCOB_API auto to_lower(string_view source) -> string;

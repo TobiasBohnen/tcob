@@ -53,7 +53,10 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
             case '}':
             case '>':
                 if (bracketCount > 0) {
-                    if ((topBracket == '(' && c == ')') || (topBracket == '[' && c == ']') || (topBracket == '{' && c == '}') || (topBracket == '<' && c == '>')) {
+                    if ((topBracket == '(' && c == ')')
+                        || (topBracket == '[' && c == ']')
+                        || (topBracket == '{' && c == '}')
+                        || (topBracket == '<' && c == '>')) {
                         --bracketCount;
                         if (bracketCount == 0) { topBracket = 0; }
                     }
