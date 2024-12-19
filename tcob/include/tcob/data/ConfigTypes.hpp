@@ -9,7 +9,6 @@
 #include <future>
 #include <memory>
 #include <optional>
-#include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Proxy.hpp"
