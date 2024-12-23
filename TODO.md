@@ -1,4 +1,5 @@
 # todo
 
 - audio: add channels/etc.
-- cursor: add default shader
+- cursor: change to quad
+- ui: selective redraw
