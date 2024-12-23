@@ -3,9 +3,9 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/core/Transform.hpp"
+#include "tcob/gfx/Transform.hpp"
 
-namespace tcob {
+namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 transform const transform::Identity;
 

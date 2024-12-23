@@ -35,7 +35,6 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Transform.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Font.hpp"
@@ -45,6 +44,8 @@
 #include "tcob/gfx/RenderTexture.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/Transform.hpp"
+
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

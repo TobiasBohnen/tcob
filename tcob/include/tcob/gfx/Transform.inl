@@ -6,7 +6,7 @@
 #pragma once
 #include "Transform.hpp"
 
-namespace tcob {
+namespace tcob::gfx {
 
 auto constexpr operator==(transform const& left, transform const& right) -> bool
 {

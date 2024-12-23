@@ -21,6 +21,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ShaderProgram.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/TextFormatter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Texture.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Transform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Transformable.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/UniformBuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/VertexArray.cpp
@@ -107,6 +108,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/TextFormatter.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Texture.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Texture.inl
+    ${TCOB_INC_DIR}/tcob/gfx/Transform.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/Transform.inl
     ${TCOB_INC_DIR}/tcob/gfx/Transformable.hpp
     ${TCOB_INC_DIR}/tcob/gfx/UniformBuffer.hpp
     ${TCOB_INC_DIR}/tcob/gfx/UniformBuffer.inl

@@ -39,7 +39,6 @@
 #include <tcob/core/StringUtils.hpp>
 #include <tcob/core/TaskManager.hpp>
 #include <tcob/core/Timer.hpp>
-#include <tcob/core/Transform.hpp>
 #include <tcob/core/TypeFactory.hpp>
 #include <tcob/core/assets/Asset.hpp>
 #include <tcob/core/assets/AssetLibrary.hpp>
@@ -92,6 +91,7 @@
 #include <tcob/gfx/ShaderProgram.hpp>
 #include <tcob/gfx/TextFormatter.hpp>
 #include <tcob/gfx/Texture.hpp>
+#include <tcob/gfx/Transform.hpp>
 #include <tcob/gfx/Transformable.hpp>
 #include <tcob/gfx/UniformBuffer.hpp>
 #include <tcob/gfx/VertexArray.hpp>

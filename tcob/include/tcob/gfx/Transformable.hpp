@@ -9,7 +9,7 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/core/Transform.hpp"
+#include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
