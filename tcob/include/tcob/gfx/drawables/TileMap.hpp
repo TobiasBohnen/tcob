@@ -132,7 +132,7 @@ enum class render_direction : u8 {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API tilemap_base : public drawable {
+class TCOB_API tilemap_base : public drawable, public updatable {
 public:
     tilemap_base();
     ~tilemap_base() override = default;

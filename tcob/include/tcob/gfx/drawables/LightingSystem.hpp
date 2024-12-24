@@ -88,7 +88,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API lighting_system final : public drawable {
+class TCOB_API lighting_system final : public drawable, public updatable {
     friend class light_source;
     friend class shadow_caster;
 

@@ -94,8 +94,9 @@ void document::on_update(milliseconds)
     }
 }
 
-void document::on_fixed_update(milliseconds /* deltaTime */)
+auto document::get_update_mode() const -> update_mode
 {
+    return update_mode::Normal;
 }
 
 auto document::can_draw() const -> bool

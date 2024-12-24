@@ -68,7 +68,6 @@ public:
     void submit(Target& target);
 
 protected:
-    void on_update(milliseconds deltaTime) override;
     void on_fixed_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;

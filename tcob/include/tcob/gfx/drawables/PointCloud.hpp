@@ -26,8 +26,6 @@ public:
     prop<assets::asset_ptr<material>> Material;
 
 protected:
-    void on_update(milliseconds deltaTime) override;
-
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
@@ -50,8 +48,6 @@ public:
     auto get_point_at(i32 index) -> vertex&;
 
 protected:
-    void on_update(milliseconds deltaTime) override;
-
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 

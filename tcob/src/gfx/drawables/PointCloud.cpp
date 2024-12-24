@@ -13,11 +13,6 @@ static_point_cloud::static_point_cloud(std::span<vertex> points)
     Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
 }
 
-void static_point_cloud::on_update(milliseconds)
-{
-    // nothing to do
-}
-
 auto static_point_cloud::can_draw() const -> bool
 {
     return !Material().is_expired();
@@ -54,11 +49,6 @@ auto point_cloud::get_point_count() const -> i32
 auto point_cloud::get_point_at(i32 index) -> vertex&
 {
     return _points.at(index);
-}
-
-void point_cloud::on_update(milliseconds)
-{
-    // nothing to do
 }
 
 auto point_cloud::can_draw() const -> bool

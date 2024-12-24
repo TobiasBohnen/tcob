@@ -12,16 +12,18 @@ void updatable::update(milliseconds deltaTime)
     on_update(deltaTime);
 }
 
-void updatable::fixed_update(milliseconds deltaTime)
-{
-    on_fixed_update(deltaTime);
-}
-
 void updatable::on_update(milliseconds /* deltaTime */)
 {
 }
 
-void updatable::on_fixed_update(milliseconds /* deltaTime */)
+////////////////////////////////////////////////////////////
+
+void hybrid_updatable::fixed_update(milliseconds deltaTime)
+{
+    on_fixed_update(deltaTime);
+}
+
+void hybrid_updatable::on_fixed_update(milliseconds /* deltaTime */)
 {
 }
 

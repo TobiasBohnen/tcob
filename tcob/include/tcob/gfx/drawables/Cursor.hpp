@@ -17,7 +17,7 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API cursor final : public drawable {
+class TCOB_API cursor final : public drawable, public updatable {
 public:
     cursor();
 

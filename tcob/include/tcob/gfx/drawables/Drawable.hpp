@@ -13,9 +13,9 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API drawable : public updatable {
+class TCOB_API drawable {
 public:
-    ~drawable() override = default;
+    virtual ~drawable() = default;
 
     signal<bool const> VisibilityChanged;
 
@@ -39,7 +39,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API entity : public drawable, public input::receiver {
+class TCOB_API entity : public drawable, public hybrid_updatable, public input::receiver {
 public:
     // TODO: bounds, mouse enter/leave
     auto virtual get_update_mode() const -> update_mode; // TODO: get_

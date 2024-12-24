@@ -151,10 +151,6 @@ auto form::get_update_mode() const -> update_mode
     return update_mode::Fixed;
 }
 
-void form::on_update(milliseconds /* deltaTime */)
-{
-}
-
 void form::on_fixed_update(milliseconds deltaTime)
 {
     auto const& widgets {containers()};

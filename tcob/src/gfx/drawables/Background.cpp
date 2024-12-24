@@ -17,10 +17,6 @@ background::background()
     });
 }
 
-void background::on_update(milliseconds /* deltaTime */)
-{
-}
-
 auto background::can_draw() const -> bool
 {
     return !Material().is_expired();
@@ -79,10 +75,6 @@ void parallax_background::set_layer_visible(uid id, bool visible)
 void parallax_background::set_layer_texture(uid id, string const& texture)
 {
     get_layer(id)->TextureRegion = texture;
-}
-
-void parallax_background::on_update(milliseconds /* deltaTime */)
-{
 }
 
 auto parallax_background::can_draw() const -> bool

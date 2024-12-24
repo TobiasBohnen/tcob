@@ -20,7 +20,6 @@ public:
     virtual ~updatable() = default;
 
     void virtual update(milliseconds deltaTime);
-    void virtual fixed_update(milliseconds deltaTime);
 
 protected:
     updatable()                                                   = default;
@@ -30,6 +29,15 @@ protected:
     auto operator=(updatable&& other) noexcept -> updatable&      = default;
 
     void virtual on_update(milliseconds deltaTime);
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API hybrid_updatable : public updatable {
+public:
+    void virtual fixed_update(milliseconds deltaTime);
+
+protected:
     void virtual on_fixed_update(milliseconds deltaTime);
 };
 

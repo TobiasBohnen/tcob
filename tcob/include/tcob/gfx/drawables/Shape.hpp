@@ -163,8 +163,6 @@ public:
     explicit static_shape_batch(std::span<std::shared_ptr<shape>> shapes);
 
 protected:
-    void on_update(milliseconds deltaTime) override;
-
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
@@ -174,7 +172,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API shape_batch final : public drawable {
+class TCOB_API shape_batch final : public drawable, public updatable {
 public:
     shape_batch();
 

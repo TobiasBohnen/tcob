@@ -22,7 +22,7 @@ class game;
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API scene_node : public gfx::drawable {
+class TCOB_API scene_node : public gfx::drawable, public hybrid_updatable {
     friend class scene;
 
 public:
@@ -59,7 +59,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API scene : public updatable, public input::receiver {
+class TCOB_API scene : public hybrid_updatable, public input::receiver {
 public:
     scene(game& parent);
 

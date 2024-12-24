@@ -24,8 +24,6 @@ public:
     prop<string>                      TextureRegion {"default"};
 
 protected:
-    void on_update(milliseconds deltaTime) override;
-
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) final;
 
@@ -58,8 +56,6 @@ public:
     void set_layer_texture(uid id, string const& texture);
 
 protected:
-    void on_update(milliseconds deltaTime) override;
-
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) final;
 

@@ -174,7 +174,7 @@ struct particle_event {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API particle_system final : public drawable {
+class TCOB_API particle_system final : public drawable, public updatable {
 public:
     explicit particle_system(bool multiThreaded = false);
     ~particle_system() override = default;

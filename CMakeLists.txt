@@ -70,12 +70,15 @@ if(TCOB_MINIMAL)
 endif()
 
 # compile options##############################################################
+if(WIN32)
+  add_compile_definitions(_ITERATOR_DEBUG_LEVEL=0)
+endif()
+
 if(MSVC)
   add_compile_options(/utf-8)
   add_compile_options(/bigobj)
   add_compile_options(/arch:AVX2)
   add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-  add_compile_definitions(_ITERATOR_DEBUG_LEVEL=0)
 
   if(NOT TCOB_IS_CI)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

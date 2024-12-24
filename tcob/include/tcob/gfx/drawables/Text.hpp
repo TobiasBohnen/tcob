@@ -23,7 +23,7 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API text final : public transformable, public drawable {
+class TCOB_API text final : public transformable, public drawable, public updatable {
 public:
     struct style {
         color      Color {colors::White};
