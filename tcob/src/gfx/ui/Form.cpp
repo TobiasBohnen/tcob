@@ -264,7 +264,7 @@ void form::on_draw_to(render_target& target)
     }
 }
 
-auto form::focussed_widget() const -> widget*
+auto form::focused_widget() const -> widget*
 {
     return _focusWidget;
 }

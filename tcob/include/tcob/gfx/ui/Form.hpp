@@ -53,7 +53,7 @@ public:
     auto containers() const -> std::vector<std::shared_ptr<widget>> const&;
     auto get_all_widgets() const -> std::vector<widget*>;
 
-    auto focussed_widget() const -> widget*;
+    auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
     void clear();
