@@ -42,9 +42,13 @@ private:
 class TCOB_API entity : public drawable, public hybrid_updatable, public input::receiver {
 public:
     // TODO: bounds, mouse enter/leave
-    auto virtual get_update_mode() const -> update_mode; // TODO: get_
+
+    void update(milliseconds deltaTime) final;
+    void fixed_update(milliseconds deltaTime) final;
 
 protected:
+    entity(update_mode mode = update_mode::Normal);
+
     void on_draw_to(render_target&) override { }
     auto can_draw() const -> bool override;
 
@@ -59,6 +63,9 @@ protected:
     void on_controller_axis_motion(input::controller::axis_event const&) override { }
     void on_controller_button_down(input::controller::button_event const&) override { }
     void on_controller_button_up(input::controller::button_event const&) override { }
+
+private:
+    update_mode _mode;
 };
 
 }

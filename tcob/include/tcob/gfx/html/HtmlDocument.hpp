@@ -66,8 +66,6 @@ public:
 
     void force_redraw();
 
-    auto get_update_mode() const -> update_mode final; // TODO: get_
-
 protected:
     void on_update(milliseconds deltaTime) override;
 

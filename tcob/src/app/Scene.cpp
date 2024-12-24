@@ -190,7 +190,7 @@ void scene_node::send_child_to_back(scene_node* node)
 
 void scene_node::on_update(milliseconds deltaTime)
 {
-    if (*Entity && (Entity->get_update_mode() == update_mode::Normal || Entity->get_update_mode() == update_mode::Both)) {
+    if (*Entity) {
         Entity->update(deltaTime);
     }
 
@@ -201,7 +201,7 @@ void scene_node::on_update(milliseconds deltaTime)
 
 void scene_node::on_fixed_update(milliseconds deltaTime)
 {
-    if (*Entity && (Entity->get_update_mode() == update_mode::Fixed || Entity->get_update_mode() == update_mode::Both)) {
+    if (*Entity) {
         Entity->fixed_update(deltaTime);
     }
 

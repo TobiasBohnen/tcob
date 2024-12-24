@@ -25,7 +25,8 @@ form::form(string name, window* window)
 }
 
 form::form(string name, window* window, rect_f const& bounds)
-    : Bounds {bounds}
+    : entity {update_mode::Fixed}
+    , Bounds {bounds}
     , _renderer {_canvas}
     , _window {window}
     , _layout {this}
@@ -144,11 +145,6 @@ auto form::focus_nav_target(string const& widget, direction dir) -> bool
     }
 
     return false;
-}
-
-auto form::get_update_mode() const -> update_mode
-{
-    return update_mode::Fixed;
 }
 
 void form::on_fixed_update(milliseconds deltaTime)

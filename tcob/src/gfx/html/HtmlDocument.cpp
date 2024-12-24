@@ -94,11 +94,6 @@ void document::on_update(milliseconds)
     }
 }
 
-auto document::get_update_mode() const -> update_mode
-{
-    return update_mode::Normal;
-}
-
 auto document::can_draw() const -> bool
 {
     return _lhdoc != nullptr;

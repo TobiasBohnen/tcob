@@ -45,14 +45,28 @@ void drawable::on_visiblity_changed()
 
 ////////////////////////////////////////////////////////////
 
+entity::entity(update_mode mode)
+    : _mode {mode}
+{
+}
+
+void entity::update(milliseconds deltaTime)
+{
+    if (_mode == update_mode::Fixed) { return; }
+
+    on_update(deltaTime);
+}
+
+void entity::fixed_update(milliseconds deltaTime)
+{
+    if (_mode == update_mode::Normal) { return; }
+
+    on_fixed_update(deltaTime);
+}
+
 auto entity::can_draw() const -> bool
 {
     return true;
-}
-
-auto entity::get_update_mode() const -> update_mode
-{
-    return update_mode::Normal;
 }
 
 ////////////////////////////////////////////////////////////

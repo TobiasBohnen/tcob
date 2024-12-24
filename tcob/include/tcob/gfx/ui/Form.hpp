@@ -62,8 +62,6 @@ public:
 
     auto focus_nav_target(string const& widget, direction dir) -> bool;
 
-    auto get_update_mode() const -> update_mode override;
-
     template <SubmitTarget Target>
     void submit(Target& target);
 
