@@ -46,7 +46,7 @@ script::~script()
     _view.close();
 }
 
-auto script::get_global_table() -> table&
+auto script::global_table() -> table&
 {
     return _globalTable;
 }
@@ -66,9 +66,9 @@ auto script::get_view() const -> state_view
     return _view;
 }
 
-auto script::get_GC() const -> gc
+auto script::gc() const -> garbage_collector
 {
-    return gc {_view};
+    return garbage_collector {_view};
 }
 
 auto script::create_table() const -> table
@@ -174,42 +174,42 @@ void script::raise_error(string const& message)
 
 ////////////////////////////////////////////////////////////
 
-gc::gc(state_view l)
+garbage_collector::garbage_collector(state_view l)
     : _luaState {l}
 {
 }
 
-void gc::start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const
+void garbage_collector::start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const
 {
     _luaState.gc(LUA_GCINC, pause, stepmul, stepsize);
 }
 
-void gc::start_generational_mode(i32 minormul, i32 majormul) const
+void garbage_collector::start_generational_mode(i32 minormul, i32 majormul) const
 {
     _luaState.gc(LUA_GCGEN, minormul, majormul, 0);
 }
 
-void gc::collect() const
+void garbage_collector::collect() const
 {
     _luaState.gc(LUA_GCCOLLECT, 0, 0, 0);
 }
 
-void gc::stop() const
+void garbage_collector::stop() const
 {
     _luaState.gc(LUA_GCSTOP, 0, 0, 0);
 }
 
-void gc::restart() const
+void garbage_collector::restart() const
 {
     _luaState.gc(LUA_GCRESTART, 0, 0, 0);
 }
 
-auto gc::is_running() const -> bool
+auto garbage_collector::is_running() const -> bool
 {
     return _luaState.gc(LUA_GCISRUNNING, 0, 0, 0) != 0;
 }
 
-auto gc::get_count() const -> i32
+auto garbage_collector::count() const -> i32
 {
     return _luaState.gc(LUA_GCCOUNT, 0, 0, 0);
 }

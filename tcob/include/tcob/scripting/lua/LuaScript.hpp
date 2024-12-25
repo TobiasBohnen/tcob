@@ -34,11 +34,11 @@ enum class library : u8 {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API gc final {
+class TCOB_API garbage_collector final {
 public:
-    explicit gc(state_view l);
+    explicit garbage_collector(state_view l);
 
-    auto get_count() const -> i32; // TODO: get_
+    auto count() const -> i32;
     auto is_running() const -> bool;
 
     void start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const;
@@ -78,12 +78,12 @@ public:
     signal<require_event>       Require;
     signal<warning_event const> Warning;
 
-    auto get_global_table() -> table&;                    // TODO: get_
+    auto global_table() -> table&;
     auto get_environment() const -> std::optional<table>; // TODO: get_
     void set_environment(table const& env);
 
     auto get_view() const -> state_view;                  // TODO: get_
-    auto get_GC() const -> gc;                            // TODO: get_
+    auto gc() const -> garbage_collector;
 
     auto create_table() const -> table;
 

@@ -38,7 +38,7 @@ public:
     auto operator=(script&& other) noexcept -> script& = delete;
     ~script();
 
-    auto get_root_table() -> table&;  // TODO: get_
+    auto root_table() -> table&;
     auto get_view() const -> vm_view; // TODO: get_
 
     auto create_array() const -> array;

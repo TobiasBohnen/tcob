@@ -85,7 +85,7 @@ script::~script()
     _view.close();
 }
 
-auto script::get_root_table() -> table&
+auto script::root_table() -> table&
 {
     return _rootTable;
 }

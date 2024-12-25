@@ -164,6 +164,6 @@ private:
 
 }
 
-#endif
+    #include "LuaTypes.inl"
 
-#include "LuaTypes.inl"
+#endif
