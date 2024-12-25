@@ -35,6 +35,8 @@ public:
 
     auto preferred_locales() const -> std::vector<locale> const&;
 
+    auto was_paused() const -> bool; // WINDOWS: true if window was dragged
+
     auto process_events() const -> bool;
 
     auto static HeadlessInit(char const* argv0, path logFile = "") -> platform;
@@ -61,6 +63,7 @@ private:
     std::vector<locale> _locales {};
 
     std::unique_ptr<data::config_file> _configFile;
+    bool                               _wasPaused {false};
 };
 
 ////////////////////////////////////////////////////////////

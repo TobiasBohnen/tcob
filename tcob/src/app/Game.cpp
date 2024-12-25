@@ -145,6 +145,11 @@ void game::step()
 
     if (_scenes.empty()) { queue_finish(); }
 
+    if (plt.was_paused()) {
+        _lastUpdate      = clock::now().time_since_epoch();
+        _nextFixedUpdate = _lastUpdate + FIXED_FRAMES;
+    }
+
     // fixed update
     u8 fixedUpdateLoops {0};
     while (clock::now().time_since_epoch() > _nextFixedUpdate && fixedUpdateLoops < MAX_FRAME_SKIP) {

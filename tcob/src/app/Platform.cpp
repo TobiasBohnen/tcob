@@ -232,6 +232,11 @@ auto platform::preferred_locales() const -> std::vector<locale> const&
     return _locales;
 }
 
+auto platform::was_paused() const -> bool
+{
+    return _wasPaused;
+}
+
 auto platform::config() const -> data::config_file&
 {
     return *_configFile;
@@ -297,6 +302,14 @@ void platform::init_render_system(string const& windowTitle)
     });
 
     logger::Info("Device: {}", renderSystem->device_name());
+
+#if defined(_MSC_VER)
+    SDL_SetWindowsMessageHook([](void* userdata, void* /* hWnd */, unsigned int message, Uint64 /* wParam */, Sint64 /* lParam */) {
+        auto* plt {reinterpret_cast<platform*>(userdata)};
+        plt->_wasPaused = message == WM_NCLBUTTONDOWN; // left click on title bar
+    },
+                              this);
+#endif
 }
 
 void platform::InitSDL()
