@@ -12,17 +12,17 @@ auto null_render_system::name() const -> string
     return "NULL";
 }
 
-auto null_render_system::get_device_name() const -> string
+auto null_render_system::device_name() const -> string
 {
     return "NULL";
 }
 
-auto null_render_system::get_capabilities() const -> capabilities
+auto null_render_system::caps() const -> capabilities
 {
     return {};
 }
 
-auto null_render_system::get_rtt_coords() const -> rect_f
+auto null_render_system::rtt_coords() const -> rect_f
 {
     return {};
 }

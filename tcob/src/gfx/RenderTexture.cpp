@@ -19,7 +19,7 @@ render_texture::render_texture()
 
 auto render_texture::GetTexcoords() -> rect_f
 {
-    return locate_service<render_system>().get_rtt_coords();
+    return locate_service<render_system>().rtt_coords();
 }
 
 auto render_texture::get_size() const -> size_i

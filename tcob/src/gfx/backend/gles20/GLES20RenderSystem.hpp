@@ -13,9 +13,9 @@ namespace tcob::gfx::gles20 {
 class gl_render_system final : public render_system {
 public:
     auto name() const -> string override;
-    auto get_device_name() const -> string override;
-    auto get_capabilities() const -> capabilities override;
-    auto get_rtt_coords() const -> rect_f override;
+    auto device_name() const -> string override;
+    auto caps() const -> capabilities override;
+    auto rtt_coords() const -> rect_f override;
 
     auto create_canvas() -> std::unique_ptr<render_backend::canvas_base> override;
     auto create_render_target(texture* tex) -> std::unique_ptr<render_backend::render_target_base> override;

@@ -170,7 +170,7 @@ void game::step()
 
             window.clear();
             Draw(window);
-            window.draw_to(rs.get_default_target());
+            window.draw_to(rs.default_target());
             window.swap_buffer();
 
             if (window.Cursor()) {
@@ -178,7 +178,7 @@ void game::step()
                 window.Cursor->update(deltaUpdate);
             }
 
-            rs.get_stats().update(deltaUpdate);
+            rs.stats().update(deltaUpdate);
         }
     }
 }

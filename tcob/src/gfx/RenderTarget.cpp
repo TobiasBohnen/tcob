@@ -41,7 +41,7 @@ void render_target::clear(color c) const
 
 void render_target::prepare_render(bool debug)
 {
-    auto const& stats {locate_service<render_system>().get_stats()};
+    auto const& stats {locate_service<render_system>().stats()};
 
     _impl->prepare_render(
         {.ViewMatrix            = _camera.get_matrix(),
@@ -110,7 +110,7 @@ void default_render_target::set_size(size_i /* newsize */)
 
 void default_render_target::prepare_render(bool)
 {
-    auto const& stats {locate_service<render_system>().get_stats()};
+    auto const& stats {locate_service<render_system>().stats()};
 
     constexpr mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
                            0.0f, 1.0f, 0.0f, 0.0f,

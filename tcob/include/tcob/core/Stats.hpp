@@ -9,11 +9,11 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API stats {
+class TCOB_API statistics {
     static constexpr i32 FRAME_VALUES = 100;
 
 public:
-    stats();
+    statistics();
 
     auto current_time() const -> f32;
 

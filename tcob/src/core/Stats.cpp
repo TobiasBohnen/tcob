@@ -3,34 +3,34 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/core/Stats.hpp"
+#include "tcob/core/stats.hpp"
 
 #include <numeric>
 
 namespace tcob {
-stats::stats() = default;
+statistics::statistics() = default;
 
-auto stats::current_time() const -> f32
+auto statistics::current_time() const -> f32
 {
     return _time;
 }
 
-auto stats::average_FPS() const -> f32
+auto statistics::average_FPS() const -> f32
 {
     return _averageFrames;
 }
 
-auto stats::best_FPS() const -> f32
+auto statistics::best_FPS() const -> f32
 {
     return _bestFrames;
 }
 
-auto stats::worst_FPS() const -> f32
+auto statistics::worst_FPS() const -> f32
 {
     return _worstFrames;
 }
 
-void stats::update(milliseconds delta)
+void statistics::update(milliseconds delta)
 {
     f32 const count {static_cast<f32>(delta.count())};
 
@@ -48,7 +48,7 @@ void stats::update(milliseconds delta)
     }
 }
 
-void stats::reset()
+void statistics::reset()
 {
     _averageFrames = 0;
     _worstFrames   = std::numeric_limits<f32>::max();

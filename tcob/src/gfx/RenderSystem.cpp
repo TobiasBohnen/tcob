@@ -37,12 +37,12 @@ auto render_system::init_window(video_config const& config, string const& window
     return *_window;
 }
 
-auto render_system::get_stats() -> stats&
+auto render_system::stats() -> statistics&
 {
     return _stats;
 }
 
-auto render_system::get_displays() const -> std::map<i32, display>
+auto render_system::displays() const -> std::map<i32, display>
 {
     std::map<i32, display> retValue;
 
@@ -76,7 +76,7 @@ auto render_system::get_window() const -> gfx::window&
     return *_window;
 }
 
-auto render_system::get_default_target() const -> gfx::default_render_target&
+auto render_system::default_target() const -> gfx::default_render_target&
 {
     return *_defaultTarget;
 }

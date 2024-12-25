@@ -57,19 +57,20 @@ public:
     render_system();
     virtual ~render_system();
 
-    auto init_window(video_config const& config, string const& windowTitle) -> gfx::window&;
+    auto init_window(video_config const& config, string const& windowTitle) -> window&;
 
-    auto virtual name() const -> string                   = 0;
-    auto virtual get_device_name() const -> string        = 0;
-    auto virtual get_capabilities() const -> capabilities = 0;
-    auto virtual get_rtt_coords() const -> rect_f         = 0;
+    auto virtual name() const -> string        = 0;
+    auto virtual device_name() const -> string = 0;
+    auto virtual caps() const -> capabilities  = 0;
+    auto virtual rtt_coords() const -> rect_f  = 0;
 
-    auto get_stats() -> stats&;                                     // TODO: get_
-    auto get_displays() const -> std::map<i32, display>;            // TODO: get_
-    auto get_desktop_size(i32 display) const -> size_i;             // TODO: get_
+    auto stats() -> statistics&;
 
-    auto get_window() const -> gfx::window&;                        // TODO: get_
-    auto get_default_target() const -> gfx::default_render_target&; // TODO: get_
+    auto displays() const -> std::map<i32, display>;
+    auto get_desktop_size(i32 display) const -> size_i;
+
+    auto get_window() const -> window&; // TODO: get_
+    auto default_target() const -> default_render_target&;
 
     auto virtual create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
     auto virtual create_render_target [[nodiscard]] (texture* tex) -> std::unique_ptr<render_backend::render_target_base>          = 0;
@@ -82,7 +83,7 @@ public:
     static inline char const* service_name {"render_system"};
 
 private:
-    stats                                  _stats;
+    statistics                             _stats;
     std::unique_ptr<window>                _window;
     std::unique_ptr<default_render_target> _defaultTarget;
 };

@@ -20,13 +20,13 @@ auto gl_render_system::name() const -> string
     return "OPENGLES20";
 }
 
-auto gl_render_system::get_device_name() const -> string
+auto gl_render_system::device_name() const -> string
 {
     auto const* str {glGetString(GL_RENDERER)};
     return str ? reinterpret_cast<char const*>(str) : "";
 }
 
-auto gl_render_system::get_capabilities() const -> capabilities
+auto gl_render_system::caps() const -> capabilities
 {
     capabilities retValue;
 
@@ -38,7 +38,7 @@ auto gl_render_system::get_capabilities() const -> capabilities
     return retValue;
 }
 
-auto gl_render_system::get_rtt_coords() const -> rect_f
+auto gl_render_system::rtt_coords() const -> rect_f
 {
     return {0, 0, 1, -1};
 }

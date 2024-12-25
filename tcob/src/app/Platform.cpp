@@ -296,7 +296,7 @@ void platform::init_render_system(string const& windowTitle)
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
-    logger::Info("Device: {}", renderSystem->get_device_name());
+    logger::Info("Device: {}", renderSystem->device_name());
 }
 
 void platform::InitSDL()
