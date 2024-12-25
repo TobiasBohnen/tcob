@@ -118,7 +118,7 @@ auto keyboard::is_mod_down(key_mod mod) const -> bool
     return state & convert_enum(mod);
 }
 
-auto keyboard::get_mod_state() const -> std::unordered_map<key_mod, bool>
+auto keyboard::mod_state() const -> std::unordered_map<key_mod, bool>
 {
     auto const state {SDL_GetModState()};
     return {

@@ -128,9 +128,9 @@ void default_check_async_load(def_task& ctx, auto&& cache, auto&& stateSetter)
         if (ftr.valid()) {
             if (ftr.wait_for(0s) == std::future_status::ready) {
                 if (ftr.get() == load_status::Ok) {
-                    stateSetter(def->assetPtr, status::Loaded);
+                    stateSetter(def->assetPtr, asset_status::Loaded);
                 } else {
-                    stateSetter(def->assetPtr, status::Error);
+                    stateSetter(def->assetPtr, asset_status::Error);
                 }
             } else {
                 loadingDone = false;
@@ -219,7 +219,7 @@ void cfg_frame_animation_loader::declare()
 void cfg_frame_animation_loader::prepare()
 {
     for (auto& def : _cache) {
-        set_asset_status(def->assetPtr, status::Loaded);
+        set_asset_status(def->assetPtr, asset_status::Loaded);
     }
     _cache.clear();
 }
@@ -242,7 +242,7 @@ auto cfg_music_loader::reload_asset(asset<music>& asset) -> bool
     if (!_object[API::Music::Name].as<object>().has(asset.name())) { return false; }
 
     string const& source {_object[API::Music::Name][asset.name()][API::Music::source].as<string>()};
-    return asset->open(get_group().get_mount_point() + source) == load_status::Ok;
+    return asset->open(get_group().mount_point() + source) == load_status::Ok;
 }
 
 void cfg_music_loader::declare()
@@ -265,10 +265,10 @@ void cfg_music_loader::declare()
 void cfg_music_loader::prepare()
 {
     for (auto& def : _cache) {
-        if (def->assetPtr->open(get_group().get_mount_point() + def->source) == load_status::Ok) {
-            set_asset_status(def->assetPtr, status::Loaded);
+        if (def->assetPtr->open(get_group().mount_point() + def->source) == load_status::Ok) {
+            set_asset_status(def->assetPtr, asset_status::Loaded);
         } else {
-            set_asset_status(def->assetPtr, status::Error);
+            set_asset_status(def->assetPtr, asset_status::Error);
         }
     }
 
@@ -293,7 +293,7 @@ auto cfg_sound_loader::reload_asset(asset<sound>& asset) -> bool
     if (!_object[API::Sound::Name].as<object>().has(asset.name())) { return false; }
 
     string const& source {_object[API::Sound::Name][asset.name()][API::Sound::source].as<string>()};
-    return asset->load(get_group().get_mount_point() + source) == load_status::Ok;
+    return asset->load(get_group().mount_point() + source) == load_status::Ok;
 }
 
 void cfg_sound_loader::declare()
@@ -317,8 +317,8 @@ void cfg_sound_loader::declare()
 void cfg_sound_loader::prepare()
 {
     for (auto& def : _cache) {
-        def->future = def->assetPtr->load_async(get_group().get_mount_point() + def->source);
-        set_asset_status(def->assetPtr, status::Loading);
+        def->future = def->assetPtr->load_async(get_group().mount_point() + def->source);
+        set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
     locate_service<task_manager>().run_deferred([&](def_task& ctx) {
@@ -346,7 +346,7 @@ auto cfg_sound_font_loader::reload_asset(asset<sound_font>& asset) -> bool
     if (!_object[API::SoundFont::Name].as<object>().has(asset.name())) { return false; }
 
     string const& source {_object[API::SoundFont::Name][asset.name()][API::SoundFont::source].as<string>()};
-    return asset->load(get_group().get_mount_point() + source) == load_status::Ok;
+    return asset->load(get_group().mount_point() + source) == load_status::Ok;
 }
 
 void cfg_sound_font_loader::declare()
@@ -370,8 +370,8 @@ void cfg_sound_font_loader::declare()
 void cfg_sound_font_loader::prepare()
 {
     for (auto& def : _cache) {
-        def->future = def->assetPtr->load_async(get_group().get_mount_point() + def->source);
-        set_asset_status(def->assetPtr, status::Loading);
+        def->future = def->assetPtr->load_async(get_group().mount_point() + def->source);
+        set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
     locate_service<task_manager>().run_deferred([&](def_task& ctx) {
@@ -423,7 +423,7 @@ void cfg_cursor_loader::prepare()
 {
     for (auto& def : _cache) {
         def->assetPtr->Material = get_group().get<material>(def->material);
-        set_asset_status(def->assetPtr, status::Loaded);
+        set_asset_status(def->assetPtr, asset_status::Loaded);
     }
 
     _cache.clear();
@@ -448,7 +448,7 @@ void cfg_font_loader::unload_asset(asset<font>& asset, bool)
 auto cfg_font_loader::reload_asset(asset<font>& asset) -> bool
 {
     auto const& name {asset.name()};
-    auto const  mp {get_group().get_mount_point()};
+    auto const  mp {get_group().mount_point()};
     if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
         auto  info {_object[API::TrueTypeFont::Name][name]};
         auto* ttf {dynamic_cast<font*>(asset.get())};
@@ -485,10 +485,10 @@ void cfg_font_loader::prepare()
     for (auto& def : _cache) {
         auto* ttf {dynamic_cast<font*>(def->assetPtr.ptr())};
         if (ttf) {
-            if (ttf->load(get_group().get_mount_point() + def->source, def->size) == load_status::Ok) {
-                set_asset_status(def->assetPtr, status::Loaded);
+            if (ttf->load(get_group().mount_point() + def->source, def->size) == load_status::Ok) {
+                set_asset_status(def->assetPtr, asset_status::Loaded);
             } else {
-                set_asset_status(def->assetPtr, status::Error);
+                set_asset_status(def->assetPtr, asset_status::Error);
             }
         }
     }
@@ -535,8 +535,8 @@ void cfg_font_family_loader::prepare()
     auto& grp {get_group()};
 
     for (auto const& def : _cache) {
-        font_family::FindSources(*def->assetPtr, grp.get_mount_point() + def->source);
-        set_asset_status(def->assetPtr, status::Loaded);
+        font_family::FindSources(*def->assetPtr, grp.mount_point() + def->source);
+        set_asset_status(def->assetPtr, asset_status::Loaded);
     }
 
     _cache.clear();
@@ -611,7 +611,7 @@ void cfg_material_loader::prepare()
         if (!def->shader.empty()) {
             if (!grp.has<shader>(def->shader)) {
                 logger::Error("material asset '{}': Shader '{}' not found.", name, def->shader);
-                set_asset_status(def->assetPtr, status::Error);
+                set_asset_status(def->assetPtr, asset_status::Error);
             } else {
                 def->assetPtr->Shader = grp.get<shader>(def->shader);
             }
@@ -620,13 +620,13 @@ void cfg_material_loader::prepare()
         if (!def->texture.empty()) {
             if (!grp.has<texture>(def->texture)) {
                 logger::Error("material asset '{}': Texture '{}' not found.", name, def->texture);
-                set_asset_status(def->assetPtr, status::Error);
+                set_asset_status(def->assetPtr, asset_status::Error);
             } else {
                 def->assetPtr->Texture = grp.get<texture>(def->texture);
             }
         }
 
-        set_asset_status(def->assetPtr, status::Loaded);
+        set_asset_status(def->assetPtr, asset_status::Loaded);
     }
 
     _cache.clear();
@@ -652,8 +652,8 @@ auto cfg_shader_loader::reload_asset(asset<shader>& asset) -> bool
     if (!_object.try_get(obj, API::Shader::Name, name)) { return false; }
     obj.try_get(obj, locate_service<render_system>().name());
 
-    auto const vertSource {io::read_as_string(get_group().get_mount_point() + obj[API::Shader::vertex].as<string>())};
-    auto const fragSource {io::read_as_string(get_group().get_mount_point() + obj[API::Shader::fragment].as<string>())};
+    auto const vertSource {io::read_as_string(get_group().mount_point() + obj[API::Shader::vertex].as<string>())};
+    auto const fragSource {io::read_as_string(get_group().mount_point() + obj[API::Shader::fragment].as<string>())};
     return asset->create(vertSource, fragSource);
 }
 
@@ -682,21 +682,21 @@ void cfg_shader_loader::prepare()
 {
     if (!_cache.empty()) {
         for (auto& def : _cache) {
-            auto const vertSource {io::read_as_string(get_group().get_mount_point() + def->vertex)};
+            auto const vertSource {io::read_as_string(get_group().mount_point() + def->vertex)};
             if (vertSource.empty()) {
                 logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
-                set_asset_status(def->assetPtr, status::Error);
+                set_asset_status(def->assetPtr, asset_status::Error);
                 continue;
             }
-            auto const fragSource {io::read_as_string(get_group().get_mount_point() + def->fragment)};
+            auto const fragSource {io::read_as_string(get_group().mount_point() + def->fragment)};
             if (fragSource.empty()) {
                 logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
-                set_asset_status(def->assetPtr, status::Error);
+                set_asset_status(def->assetPtr, asset_status::Error);
                 continue;
             }
 
             def->assetPtr->create(vertSource, fragSource);
-            set_asset_status(def->assetPtr, status::Loaded);
+            set_asset_status(def->assetPtr, asset_status::Loaded);
         }
 
         _cache.clear();
@@ -742,7 +742,7 @@ auto cfg_texture_loader::reload_asset(asset<texture>& asset) -> bool
     if (_object[API::AnimatedTexture::Name].as<object>().has(name)) {
         auto  info {_object[API::AnimatedTexture::Name][name]};
         auto* ani {dynamic_cast<animated_texture*>(asset.get())};
-        return ani->load(get_group().get_mount_point() + info[API::AnimatedTexture::source].as<string>()) == load_status::Ok;
+        return ani->load(get_group().mount_point() + info[API::AnimatedTexture::source].as<string>()) == load_status::Ok;
     }
 
     return false;
@@ -750,7 +750,7 @@ auto cfg_texture_loader::reload_asset(asset<texture>& asset) -> bool
 
 void cfg_texture_loader::declare()
 {
-    path const mp {get_group().get_mount_point()};
+    path const mp {get_group().mount_point()};
 
     if (object textureSection; _object.try_get(textureSection, API::Texture::Name)) {
         for (auto const& [k, v] : textureSection) {
@@ -863,7 +863,7 @@ void cfg_texture_loader::prepare()
         auto& tex {*def->assetPtr};
         if (std::ssize(def->images) > locate_service<render_system>().caps().Texture.MaxLayers) {
             logger::Error("texture asset '{}': Layer count exceeds MaxArrayTextureLayers.", name);
-            set_asset_status(def->assetPtr, status::Error);
+            set_asset_status(def->assetPtr, asset_status::Error);
             continue;
         }
 
@@ -876,7 +876,7 @@ void cfg_texture_loader::prepare()
             auto        imgInfo {image::LoadInfo(path)};
             if (!imgInfo.has_value()) {
                 logger::Error("texture asset '{}': Error loading image {}.", name, path);
-                set_asset_status(def->assetPtr, status::Error);
+                set_asset_status(def->assetPtr, asset_status::Error);
                 continue;
             }
 
@@ -908,7 +908,7 @@ void cfg_texture_loader::prepare()
             rel.push_back({.Depth = img.Depth, .Path = img.Path});
         }
 
-        set_asset_status(def->assetPtr, status::Loading);
+        set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
     for (auto const& def : _cacheAni) {
@@ -916,9 +916,9 @@ void cfg_texture_loader::prepare()
         if (ani && ani->load(def->textureFile) == load_status::Ok) {
             ani->Filtering = def->filtering;
             ani->Wrapping  = def->wrapping;
-            set_asset_status(def->assetPtr, status::Loaded);
+            set_asset_status(def->assetPtr, asset_status::Loaded);
         } else {
-            set_asset_status(def->assetPtr, status::Error);
+            set_asset_status(def->assetPtr, asset_status::Error);
         }
     }
     _cacheAni.clear();
@@ -937,7 +937,7 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
     bool loadingDone {true};
     for (auto it {_cacheTex.begin()}; it != _cacheTex.end(); ++it) {
         auto const& def {*it};
-        if (def->assetPtr.get()->get_status() == status::Loaded) { continue; }
+        if (def->assetPtr.get()->status() == asset_status::Loaded) { continue; }
 
         auto& images {def->images};
 
@@ -953,7 +953,7 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
                 // loading error -> log and continue
                 if (statusFuture.get() != load_status::Ok) {
                     logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
-                    set_asset_status(def->assetPtr, status::Error);
+                    set_asset_status(def->assetPtr, asset_status::Error);
                     continue;
                 }
 
@@ -964,7 +964,7 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
 
                 if (tex.get_size() != imgInfo.Size) {
                     logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
-                    set_asset_status(def->assetPtr, status::Error);
+                    set_asset_status(def->assetPtr, asset_status::Error);
                     continue;
                 }
 
@@ -974,8 +974,8 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
         }
 
         if (assetLoadingDone) {
-            if (def->assetPtr.get()->get_status() != status::Error) {
-                set_asset_status(def->assetPtr, status::Loaded);
+            if (def->assetPtr.get()->status() != asset_status::Error) {
+                set_asset_status(def->assetPtr, asset_status::Loaded);
             }
         } else {
             loadingDone = false;

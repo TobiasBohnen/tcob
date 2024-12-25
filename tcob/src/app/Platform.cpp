@@ -227,12 +227,12 @@ auto platform::process_events() const -> bool
     return true;
 }
 
-auto platform::get_preferred_locales() const -> std::vector<locale> const&
+auto platform::preferred_locales() const -> std::vector<locale> const&
 {
     return _locales;
 }
 
-auto platform::get_config() const -> data::config_file&
+auto platform::config() const -> data::config_file&
 {
     return *_configFile;
 }

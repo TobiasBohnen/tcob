@@ -100,7 +100,7 @@ public:
 
     explicit operator bool() const;
 
-    auto get_error_message() const -> utf8_string; // TODO: get_
+    auto error_message() const -> utf8_string;
 
     auto open(path const& file) -> bool;
 

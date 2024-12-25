@@ -67,7 +67,7 @@ public:
     auto is_enabled() const -> bool;
 
     auto parent() const -> widget_container*;
-    auto get_form() const -> form*; // TODO: get_
+    auto parent_form() const -> form*;
 
     auto name() const -> string const&;
 

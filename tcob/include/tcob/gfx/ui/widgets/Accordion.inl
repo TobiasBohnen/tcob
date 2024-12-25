@@ -20,7 +20,7 @@ inline auto accordion::create_section(utf8_string const& name, utf8_string const
     force_redraw(this->name() + ": section created");
 
     widget::init wi {};
-    wi.Form   = get_form();
+    wi.Form   = parent_form();
     wi.Parent = this;
     wi.Name   = name;
 

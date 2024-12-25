@@ -233,7 +233,7 @@ auto thread::suspend() const -> bool
     return get_thread().suspend_vm();
 }
 
-auto thread::get_status() const -> vm_view::status
+auto thread::status() const -> vm_view::status
 {
     return get_thread().get_vm_state();
 }

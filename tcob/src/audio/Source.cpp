@@ -35,7 +35,7 @@ auto source::operator=(source const& other) noexcept -> source&
     return *this;
 }
 
-auto source::get_status() const -> playback_status
+auto source::status() const -> playback_status
 {
     return _source->get_status();
 }
@@ -47,11 +47,11 @@ auto source::is_looping() const -> bool
 
 void source::play(bool looping)
 {
-    if (get_status() == playback_status::Stopped) { // start if stopped
+    if (status() == playback_status::Stopped) { // start if stopped
         if (on_start()) {
             _source->set_looping(looping);
         }
-    } else if (get_status() == playback_status::Paused) { // resume if paused
+    } else if (status() == playback_status::Paused) { // resume if paused
         _source->set_looping(looping);
         resume();
     }
@@ -59,7 +59,7 @@ void source::play(bool looping)
 
 void source::stop()
 {
-    if (get_status() != playback_status::Stopped) { // stop if running or paused
+    if (status() != playback_status::Stopped) { // stop if running or paused
         on_stop();
     }
 }
@@ -72,21 +72,21 @@ void source::restart()
 
 void source::pause()
 {
-    if (get_status() == playback_status::Running) {
+    if (status() == playback_status::Running) {
         _source->pause();
     }
 }
 
 void source::resume()
 {
-    if (get_status() == playback_status::Paused) {
+    if (status() == playback_status::Paused) {
         _source->play();
     }
 }
 
 void source::toggle_pause()
 {
-    get_status() == playback_status::Paused ? resume() : pause();
+    status() == playback_status::Paused ? resume() : pause();
 }
 
 auto source::get_source() const -> audio::al::al_source*

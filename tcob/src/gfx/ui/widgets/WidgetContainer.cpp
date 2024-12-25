@@ -92,7 +92,7 @@ auto widget_container::get_paint_offset() const -> point_f
     if (auto const* wparent {parent()}) {
         retValue += wparent->global_content_bounds().Position;
         retValue -= wparent->scroll_offset();
-        if (auto const* form {get_form()}) {
+        if (auto const* form {parent_form()}) {
             retValue -= form->Bounds->Position;
         }
     }

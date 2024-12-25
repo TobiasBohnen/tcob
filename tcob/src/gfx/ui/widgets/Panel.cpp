@@ -187,7 +187,7 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
     widget_container::on_mouse_down(ev);
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+        if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
             _vScrollbar.inject_mouse_down(ev.Position);
             _hScrollbar.inject_mouse_down(ev.Position);
             force_redraw(this->name() + ": mouse down");
@@ -201,7 +201,7 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
     widget_container::on_mouse_up(ev);
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+        if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
             _vScrollbar.inject_mouse_up(ev.Position);
             _hScrollbar.inject_mouse_up(ev.Position);
             force_redraw(this->name() + ": mouse up");

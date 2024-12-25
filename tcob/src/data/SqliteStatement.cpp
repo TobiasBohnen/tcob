@@ -43,7 +43,7 @@ auto statement::prepare(utf8_string const& sql) -> bool
     _stmt.finalize();
     _stmt = _db.prepare(sql);
     if (!is_valid()) {
-        logger::Error("SQLite: {}", _db.get_error_message());
+        logger::Error("SQLite: {}", _db.error_message());
     }
     return is_valid();
 }
@@ -52,7 +52,7 @@ auto statement::step() const -> step_status
 {
     auto retValue {_stmt.step()};
     if (retValue == step_status::Error) {
-        logger::Error("SQLite: {}", _db.get_error_message());
+        logger::Error("SQLite: {}", _db.error_message());
     }
     return retValue;
 }

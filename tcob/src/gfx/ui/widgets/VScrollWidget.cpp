@@ -88,7 +88,7 @@ void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
 {
     widget::on_mouse_down(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.inject_mouse_down(ev.Position);
         force_redraw(this->name() + ": mouse down");
         ev.Handled = true;
@@ -109,7 +109,7 @@ void vscroll_widget::on_mouse_up(input::mouse::button_event const& ev)
 {
     widget::on_mouse_up(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.inject_mouse_up(ev.Position);
         force_redraw(this->name() + ": mouse up");
         ev.Handled = true;

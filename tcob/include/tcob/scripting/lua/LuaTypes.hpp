@@ -154,7 +154,7 @@ public:
 
     auto close() -> coroutine_status;
 
-    auto get_status() const -> coroutine_status; // TODO: get_
+    auto status() const -> coroutine_status;
 
 private:
     auto get_thread() const -> state_view;

@@ -18,7 +18,7 @@ tween_base::~tween_base()
     stop();
 }
 
-auto tween_base::get_progress() const -> f64
+auto tween_base::progress() const -> f64
 {
     auto const retValue {_duration.count() == 0 ? 1.0 : static_cast<f64>(_elapsedTime / _duration)};
 
@@ -39,14 +39,9 @@ auto tween_base::get_progress() const -> f64
     return 0.;
 }
 
-auto tween_base::get_status() const -> playback_status
+auto tween_base::status() const -> playback_status
 {
     return _status;
-}
-
-auto tween_base::get_mode() const -> playback_mode
-{
-    return _mode;
 }
 
 void tween_base::start(playback_mode mode)
@@ -177,7 +172,7 @@ void tween_queue::on_update(milliseconds deltaTime)
 
     auto* autom {_queue.front().get()};
     autom->update(deltaTime);
-    if (autom->get_status() != playback_status::Running) {
+    if (autom->status() != playback_status::Running) {
         if (_isLooping) {
             _queue.push(std::move(_queue.front()));
         }

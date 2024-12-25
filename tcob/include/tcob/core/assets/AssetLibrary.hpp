@@ -20,13 +20,13 @@ namespace tcob::assets {
 ////////////////////////////////////////////////////////////
 
 struct stat {
-    status Status;
-    i32    UseCount;
+    asset_status Status;
+    i32          UseCount;
 };
 
 struct bucket_stats {
-    std::unordered_map<string, stat> Assets;
-    std::unordered_map<status, i32>  Statuses;
+    std::unordered_map<string, stat>      Assets;
+    std::unordered_map<asset_status, i32> Statuses;
 };
 
 struct group_stats {
@@ -43,7 +43,7 @@ namespace detail {
 
         auto name() const -> string const&;
 
-        void virtual get_asset_stats(bucket_stats& out) const = 0;
+        void virtual asset_stats(bucket_stats& out) const = 0;
 
         void virtual destroy_all()               = 0;
         void virtual destroy(string const& name) = 0;
@@ -70,7 +70,7 @@ public:
 
     auto has(string const& name) const -> bool;
 
-    void get_asset_stats(bucket_stats& out) const override;
+    void asset_stats(bucket_stats& out) const override;
 
     void destroy_all() override;
     void destroy(string const& name) override;
@@ -104,10 +104,10 @@ public:
     signal<script_preload_event> PreScriptLoad;
 
     auto name() const -> string const&;
-    auto get_mount_point() const -> string;      // TODO: get_
-    auto get_asset_stats() const -> group_stats; // TODO: get_
+    auto mount_point() const -> string;
+    auto asset_stats() const -> group_stats;
 
-    auto get_loading_progress() const -> f32;    // TODO: get_
+    auto loading_progress() const -> f32;
     auto is_loading_complete() const -> bool;
 
     template <typename T>
@@ -141,11 +141,11 @@ public:
     explicit library();
     ~library();
 
-    auto get_loading_progress() const -> f32; // TODO: get_
+    auto loading_progress() const -> f32;
     auto is_loading_complete() const -> bool;
 
     auto create_or_get_group(string const& groupName) -> group&;
-    auto get_group(string const& groupName) const -> group*; // TODO: get_
+    auto get_group(string const& groupName) const -> group*;
     auto has_group(string const& groupName) const -> bool;
 
     void load_group(string const& groupName);
@@ -157,7 +157,7 @@ public:
     void destroy_group(string const& groupName);
     void destroy_all_groups();
 
-    auto get_asset_stats(string const& groupName) const -> group_stats;
+    auto asset_stats(string const& groupName) const -> group_stats;
 
 private:
     std::unordered_map<string, std::unique_ptr<group>> _groups {};
@@ -194,7 +194,7 @@ protected:
 
     auto get_bucket() -> bucket<T>*;
 
-    void set_asset_status(asset_ptr<T> asset, status status);
+    void set_asset_status(asset_ptr<T> asset, asset_status status);
 
 private:
     group& _group;

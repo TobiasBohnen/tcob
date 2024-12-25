@@ -243,7 +243,7 @@ auto widget::parent() const -> widget_container*
     return dynamic_cast<widget_container*>(_parent);
 }
 
-auto widget::get_form() const -> form*
+auto widget::parent_form() const -> form*
 {
     return _form;
 }
@@ -357,7 +357,7 @@ void widget::do_mouse_down(input::mouse::button_event const& ev)
 {
     on_mouse_down(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         activate();
         ev.Handled = true;
     }
@@ -371,7 +371,7 @@ void widget::do_mouse_up(input::mouse::button_event const& ev)
 {
     on_mouse_up(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         deactivate();
         ev.Handled = true;
     }

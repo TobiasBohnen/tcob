@@ -221,7 +221,7 @@ void form::on_draw_to(render_target& target)
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         point_i const pos {(_window && _window->Cursor()
-                                ? _window->Cursor->get_bounds().bottom_right()
+                                ? _window->Cursor->bounds().bottom_right()
                                 : locate_service<input::system>().get_mouse().get_position())
                            - static_cast<point_i>(Bounds->Position)};
 
@@ -231,13 +231,13 @@ void form::on_draw_to(render_target& target)
         if (ttBounds.right() > Bounds->right()) {
             ttBounds.Position.X -= ttBounds.width();
             if (_window && _window->Cursor()) {
-                ttBounds.Position.X -= _window->Cursor->get_bounds().width();
+                ttBounds.Position.X -= _window->Cursor->bounds().width();
             }
         }
         if (ttBounds.bottom() > Bounds->bottom()) {
             ttBounds.Position.Y -= ttBounds.height();
             if (_window && _window->Cursor()) {
-                ttBounds.Position.Y -= _window->Cursor->get_bounds().height();
+                ttBounds.Position.Y -= _window->Cursor->bounds().height();
             }
         }
 

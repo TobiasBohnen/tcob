@@ -84,7 +84,7 @@ void slider::on_paint(widget_painter& painter)
 
 void slider::on_key_down(input::keyboard::event const& ev)
 {
-    auto const& controls {get_form()->Controls};
+    auto const& controls {parent_form()->Controls};
     if (locate_service<input::system>().get_keyboard().is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavLeftKey) {
             handle_dir_input(direction::Left);
@@ -137,7 +137,7 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
 {
     _isDragging = false;
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         if (!_overThumb) {
             calculate_value(global_to_local(ev.Position));
         } else {
@@ -165,7 +165,7 @@ void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
 void slider::on_controller_button_down(input::controller::button_event const& ev)
 {
-    auto const& controls {get_form()->Controls};
+    auto const& controls {parent_form()->Controls};
     if (ev.Controller->is_button_pressed(controls->ActivateButton)) {
         if (ev.Button == controls->NavLeftButton) {
             handle_dir_input(direction::Left);

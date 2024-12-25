@@ -234,7 +234,7 @@ void particle::set_lifetime(milliseconds life)
     _remainingLife = life;
 }
 
-auto particle::get_lifetime_ratio() const -> f32
+auto particle::lifetime_ratio() const -> f32
 {
     return static_cast<f32>(_remainingLife / _startingLife);
 }

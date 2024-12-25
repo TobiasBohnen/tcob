@@ -14,7 +14,7 @@ inline asset<T>::asset(string name, std::weak_ptr<T> ptr, loader<T>* loader)
     , _object {std::move(ptr)}
     , _loader {loader}
 {
-    set_status(_loader ? status::Created : status::Loaded);
+    set_status(_loader ? asset_status::Created : asset_status::Loaded);
 }
 
 template <typename T>
@@ -65,7 +65,7 @@ inline void asset<T>::unload(bool greedy)
     }
 
     assert(!is_ready());
-    set_status(status::Unloaded);
+    set_status(asset_status::Unloaded);
 }
 
 template <typename T>
@@ -81,7 +81,7 @@ inline auto asset<T>::name() const -> string const&
 }
 
 template <typename T>
-inline auto asset<T>::get_status() const -> status
+inline auto asset<T>::status() const -> asset_status
 {
     return _status;
 }
@@ -101,11 +101,11 @@ inline asset<T>::operator bool() const
 template <typename T>
 inline auto asset<T>::is_ready() const -> bool
 {
-    return _status == status::Loaded && !is_expired();
+    return _status == asset_status::Loaded && !is_expired();
 }
 
 template <typename T>
-inline void asset<T>::set_status(status status)
+inline void asset<T>::set_status(asset_status status)
 {
     _status = status;
 }

@@ -161,7 +161,7 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 {
     widget::on_mouse_down(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         force_redraw(this->name() + ": mouse down");
 
         if (HoveredTabIndex != -1) {

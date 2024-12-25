@@ -209,7 +209,7 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
 {
     vscroll_widget::on_mouse_down(ev);
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         if (HoveredItemIndex != -1) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();

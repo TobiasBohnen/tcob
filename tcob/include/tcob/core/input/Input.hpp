@@ -81,7 +81,7 @@ public:
     auto is_key_down(key_code key) const -> bool;
     auto is_mod_down(key_mod mod) const -> bool;
 
-    auto get_mod_state() const -> std::unordered_map<key_mod, bool>; // TODO: get_
+    auto mod_state() const -> std::unordered_map<key_mod, bool>;
 };
 
 ////////////////////////////////////////////////////////////

@@ -346,7 +346,7 @@ auto coroutine::close() -> coroutine_status
     return _status;
 }
 
-auto coroutine::get_status() const -> coroutine_status
+auto coroutine::status() const -> coroutine_status
 {
     return is_valid() ? _status : coroutine_status::Error;
 }

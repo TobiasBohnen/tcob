@@ -71,7 +71,7 @@ void text_box::on_key_down(input::keyboard::event const& ev)
         _caretVisible = true;
     }
 
-    auto const& controls {get_form()->Controls};
+    auto const& controls {parent_form()->Controls};
     if (ev.KeyCode == controls->NavLeftKey) {
         if (_caretPos > 0) {
             --_caretPos;

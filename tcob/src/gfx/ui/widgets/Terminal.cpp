@@ -322,7 +322,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
         _cursorVisible = true;
     }
 
-    auto const& controls {get_form()->Controls};
+    auto const& controls {parent_form()->Controls};
     if (ev.KeyCode == controls->NavLeftKey) {
         if (_currentCursor.X > 0) {
             move({_currentCursor.X - 1, _currentCursor.Y});
@@ -436,7 +436,7 @@ void terminal::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (!_useMouse) { return; }
 
-    if (ev.Button == get_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         if (HoveredCell->X >= 0 && HoveredCell->Y >= 0) {
             move(HoveredCell());
             ev.Handled = true;

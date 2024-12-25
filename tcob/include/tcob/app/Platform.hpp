@@ -31,11 +31,11 @@ public:
 
     signal<path const> DropFile;
 
-    auto get_config() const -> data::config_file&; // TODO: get_
+    auto config() const -> data::config_file&;
+
+    auto preferred_locales() const -> std::vector<locale> const&;
 
     auto process_events() const -> bool;
-
-    auto get_preferred_locales() const -> std::vector<locale> const&; // TODO: get_
 
     auto static HeadlessInit(char const* argv0, path logFile = "") -> platform;
 

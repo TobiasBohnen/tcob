@@ -27,7 +27,7 @@ public:
 
     void add_mode(string const& name, point_i hotspot = point_i::Zero);
 
-    auto get_bounds() const -> rect_i; // TODO: get_
+    auto bounds() const -> rect_i;
 
     static inline char const* asset_name {"cursor"};
 

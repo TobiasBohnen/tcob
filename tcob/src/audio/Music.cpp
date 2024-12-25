@@ -89,13 +89,13 @@ void music::update_stream()
     s->play();
 
     for (;;) {
-        if (_stopRequested || get_status() == playback_status::Stopped) {
+        if (_stopRequested || status() == playback_status::Stopped) {
             s->stop();
             s->set_buffer(0);
             break;
         }
 
-        if (get_status() == playback_status::Running) {
+        if (status() == playback_status::Running) {
             i32 const  processedCount {s->get_buffers_processed()};
             auto const bufferIDs {s->unqueue_buffers(processedCount)};
             assert(processedCount == std::ssize(bufferIDs));

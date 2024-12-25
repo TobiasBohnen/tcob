@@ -199,7 +199,7 @@ auto database_view::exec(utf8_string const& sql) const -> bool
     return sqlite3_exec(_db, sql.c_str(), nullptr, nullptr, &err) == SQLITE_OK;
 }
 
-auto database_view::get_error_message() const -> utf8_string
+auto database_view::error_message() const -> utf8_string
 {
     assert(_db);
     return sqlite3_errmsg(_db);

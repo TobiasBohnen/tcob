@@ -76,7 +76,7 @@ public:
     auto has(auto&&... keys) const -> bool;
 
     template <typename T>
-    auto get_keys() const -> std::vector<T>; // TODO: get_
+    auto get_keys() const -> std::vector<T>;
 
     auto static PushNew(vm_view view) -> table;
     auto static Acquire(vm_view view, SQInteger idx) -> table;
@@ -257,7 +257,7 @@ public:
     template <typename R = void>
     auto wake_up(auto&& arg) const -> result<R>;
 
-    auto get_status() const -> vm_view::status; // TODO: get_
+    auto status() const -> vm_view::status;
 
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 

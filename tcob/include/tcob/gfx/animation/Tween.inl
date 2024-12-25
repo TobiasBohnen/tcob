@@ -32,7 +32,7 @@ inline auto tween<Func>::add_output(value_type* dest) -> connection
 template <TweenFunction Func>
 inline void tween<Func>::update_values()
 {
-    Value = Function(get_progress());
+    Value = Function(progress());
 }
 
 ////////////////////////////////////////////////////////////

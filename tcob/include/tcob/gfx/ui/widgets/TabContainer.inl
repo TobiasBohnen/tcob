@@ -20,7 +20,7 @@ inline auto tab_container::create_tab(utf8_string const& name, utf8_string const
     force_redraw(this->name() + ": tab created");
 
     widget::init wi {};
-    wi.Form   = get_form();
+    wi.Form   = parent_form();
     wi.Parent = this;
     wi.Name   = name;
 

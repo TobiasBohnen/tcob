@@ -209,7 +209,7 @@ void container::transform_text(string& text, litehtml::text_transform tt)
 void container::import_css(string& text, string const& url, string& baseurl)
 {
     string const burl {baseurl.empty() ? _baseUrl : baseurl};
-    string const path {_config.AssetGroup->get_mount_point() + burl + url};
+    string const path {_config.AssetGroup->mount_point() + burl + url};
     text = io::read_as_string(path);
 }
 

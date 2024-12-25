@@ -28,7 +28,7 @@ public:
 
     auto virtual duration() const -> milliseconds          = 0;
     auto virtual playback_position() const -> milliseconds = 0;
-    auto get_status() const -> playback_status; // TODO: get_
+    auto status() const -> playback_status;
     auto is_looping() const -> bool;
 
     void play(bool looping = false);

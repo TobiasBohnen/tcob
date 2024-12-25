@@ -41,7 +41,7 @@ public:
 
     color Color {colors::White};
 
-    auto get_lifetime_ratio() const -> f32; // TODO: get_
+    auto lifetime_ratio() const -> f32;
     auto is_alive() const -> bool;
     void set_lifetime(milliseconds life);
 

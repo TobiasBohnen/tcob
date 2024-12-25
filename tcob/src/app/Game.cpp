@@ -37,10 +37,10 @@ game::game(init const& gameInit)
 
     // properties
     FrameLimit.Changed.connect([&](i32 value) {
-        plt->get_config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
-        _frameLimit                                                  = milliseconds {1000.f / value};
+        plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
+        _frameLimit                                              = milliseconds {1000.f / value};
     });
-    FrameLimit = plt->get_config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
+    FrameLimit = plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
 
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
 }

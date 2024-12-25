@@ -87,16 +87,16 @@ void library::destroy_all_groups()
     _groups.clear();
 }
 
-auto library::get_loading_progress() const -> f32
+auto library::loading_progress() const -> f32
 {
     f32 assets {0.0f};
     f32 loaded {0.0f};
 
     for (auto const& [g, group] : _groups) {
-        auto stats {group->get_asset_stats().Buckets};
+        auto stats {group->asset_stats().Buckets};
         for (auto& [b, bucketStats] : stats) {
             assets += bucketStats.Assets.size();
-            loaded += static_cast<f32>(bucketStats.Statuses[status::Loaded]);
+            loaded += static_cast<f32>(bucketStats.Statuses[asset_status::Loaded]);
         }
     }
 
@@ -113,7 +113,7 @@ auto library::is_loading_complete() const -> bool
                                [](auto&& value) { return value.second->is_loading_complete(); });
 }
 
-auto library::get_asset_stats(string const& group) const -> group_stats
+auto library::asset_stats(string const& group) const -> group_stats
 {
     auto it {_groups.find(group)};
     if (it == _groups.end()) {
@@ -121,7 +121,7 @@ auto library::get_asset_stats(string const& group) const -> group_stats
         return {};
     }
 
-    return it->second->get_asset_stats();
+    return it->second->asset_stats();
 }
 
 ////////////////////////////////////////////////////////////
@@ -136,28 +136,28 @@ auto group::name() const -> string const&
     return _name;
 }
 
-auto group::get_mount_point() const -> string
+auto group::mount_point() const -> string
 {
     return _name + "/";
 }
 
-auto group::get_asset_stats() const -> group_stats
+auto group::asset_stats() const -> group_stats
 {
     group_stats retValue {};
     for (auto const& [_, bucket] : _buckets) {
-        bucket->get_asset_stats(retValue.Buckets[bucket->name()]);
+        bucket->asset_stats(retValue.Buckets[bucket->name()]);
     }
     return retValue;
 }
 
 void group::mount(path const& folderOrArchive) const
 {
-    io::mount(folderOrArchive, get_mount_point());
+    io::mount(folderOrArchive, mount_point());
 }
 
 void group::load()
 {
-    auto files {io::enumerate(get_mount_point(), {"*.assets.*"})};
+    auto files {io::enumerate(mount_point(), {"*.assets.*"})};
 
     // load script files
     for (auto const& file : files) {
@@ -212,23 +212,23 @@ void group::destroy()
 
 auto group::is_loading_complete() const -> bool
 {
-    auto stats {get_asset_stats().Buckets};
+    auto stats {asset_stats().Buckets};
     for (auto& [_, bucketStats] : stats) {
-        if (bucketStats.Statuses[status::Loading] > 0) { return false; }
+        if (bucketStats.Statuses[asset_status::Loading] > 0) { return false; }
     }
 
     return true;
 }
 
-auto group::get_loading_progress() const -> f32
+auto group::loading_progress() const -> f32
 {
     f32 assets {0.0f};
     f32 loaded {0.0f};
 
-    auto stats {get_asset_stats().Buckets};
+    auto stats {asset_stats().Buckets};
     for (auto& [_, bucketStats] : stats) {
         assets += bucketStats.Assets.size();
-        loaded += static_cast<f32>(bucketStats.Statuses[status::Loaded]);
+        loaded += static_cast<f32>(bucketStats.Statuses[asset_status::Loaded]);
     }
 
     if (assets == 0.0f) {

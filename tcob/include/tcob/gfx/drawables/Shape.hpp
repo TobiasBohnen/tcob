@@ -105,7 +105,7 @@ public:
     auto geometry() -> geometry_data override;
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
-    auto get_AABB() const -> rect_f; // TODO: get_
+    auto aabb() const -> rect_f;
 
     void move_by(point_f offset);
 

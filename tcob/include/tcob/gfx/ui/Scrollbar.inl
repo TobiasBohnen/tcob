@@ -199,7 +199,7 @@ template <typename Parent>
 inline auto scrollbar<Parent>::get_thumb_style(widget_flags flags) -> thumb_style*
 {
     if (auto* const style {_parent.get_scroll_style(_orien)}) {
-        return static_cast<thumb_style*>(_parent.get_form()->Styles->get(style->ThumbClass, flags, {}));
+        return static_cast<thumb_style*>(_parent.parent_form()->Styles->get(style->ThumbClass, flags, {}));
     }
 
     return nullptr;

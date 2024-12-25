@@ -29,7 +29,7 @@ public:
     template <std::derived_from<layout> T>
     auto create_layout(auto&&... args) -> std::shared_ptr<T>;
     template <std::derived_from<layout> T>
-    auto get_layout() -> std::shared_ptr<T>; // TODO: get_
+    auto get_layout() -> std::shared_ptr<T>;
 
     void force_redraw(string const& reason) override;
 

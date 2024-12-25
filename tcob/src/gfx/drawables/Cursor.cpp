@@ -45,14 +45,14 @@ void cursor::add_mode(string const& name, point_i hotspot)
     _modes[name] = {hotspot};
 }
 
-auto cursor::get_bounds() const -> rect_i
+auto cursor::bounds() const -> rect_i
 {
     return rect_i {{Position() - _currentMode.Hotspot}, {_size, _size}};
 }
 
 void cursor::on_update(milliseconds /* deltaTime */)
 {
-    point_f const pos {get_bounds().center()};
+    point_f const pos {bounds().center()};
     _vertex.Position = {pos.X, pos.Y};
 }
 

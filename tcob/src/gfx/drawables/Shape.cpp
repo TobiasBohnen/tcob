@@ -313,7 +313,7 @@ auto rect_shape::intersect(ray const& ray) -> std::vector<ray::result>
     return ray.intersect_rect(Bounds(), get_transform());
 }
 
-auto rect_shape::get_AABB() const -> rect_f
+auto rect_shape::aabb() const -> rect_f
 {
     return _aabb;
 }

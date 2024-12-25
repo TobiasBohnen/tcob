@@ -72,7 +72,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::find_all_intersections() cons
 }
 
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
-inline auto quadtree<T, SplitThreshold, MaxDepth>::get_bounds() const -> rect_f const&
+inline auto quadtree<T, SplitThreshold, MaxDepth>::bounds() const -> rect_f const&
 {
     return _bounds;
 }

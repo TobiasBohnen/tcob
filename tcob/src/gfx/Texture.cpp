@@ -134,7 +134,7 @@ auto animated_texture::load(std::shared_ptr<io::istream> in, string const& ext) 
     return load_status::Error;
 }
 
-auto animated_texture::get_status() const -> playback_status
+auto animated_texture::status() const -> playback_status
 {
     return _status;
 }
@@ -146,13 +146,13 @@ auto animated_texture::is_looping() const -> bool
 
 void animated_texture::start(bool looping)
 {
-    if (get_status() == playback_status::Stopped) { // start if stopped
+    if (status() == playback_status::Stopped) { // start if stopped
         if (_decoder) {
             _isLooping = looping;
             _status    = playback_status::Running;
             reset_decoder();
         }
-    } else if (get_status() == playback_status::Paused) { // resume if paused
+    } else if (status() == playback_status::Paused) { // resume if paused
         _isLooping = looping;
         resume();
     }
@@ -160,7 +160,7 @@ void animated_texture::start(bool looping)
 
 void animated_texture::stop()
 {
-    if (get_status() != playback_status::Stopped) { // stop if running or paused
+    if (status() != playback_status::Stopped) { // stop if running or paused
         _status = playback_status::Stopped;
         reset_decoder();
     }
@@ -174,21 +174,21 @@ void animated_texture::restart()
 
 void animated_texture::pause()
 {
-    if (get_status() == playback_status::Running) { // pause if running
+    if (status() == playback_status::Running) { // pause if running
         _status = playback_status::Paused;
     }
 }
 
 void animated_texture::resume()
 {
-    if (get_status() == playback_status::Paused) { // resume if paused
+    if (status() == playback_status::Paused) { // resume if paused
         _status = playback_status::Running;
     }
 }
 
 void animated_texture::toggle_pause()
 {
-    get_status() == playback_status::Paused ? resume() : pause();
+    status() == playback_status::Paused ? resume() : pause();
 }
 
 void animated_texture::reset_decoder()
@@ -201,7 +201,7 @@ void animated_texture::reset_decoder()
 
 void animated_texture::on_update(milliseconds deltaTime)
 {
-    if (get_status() != playback_status::Running || !_decoder) {
+    if (status() != playback_status::Running || !_decoder) {
         return;
     }
 

@@ -79,7 +79,7 @@ auto layout::create_init(string const& name) const -> widget::init
     std::visit(
         overloaded {
             [&](widget_container* parent) {
-                retValue.Form   = parent->get_form();
+                retValue.Form   = parent->parent_form();
                 retValue.Parent = parent;
                 parent->force_redraw(name + ": created");
             },

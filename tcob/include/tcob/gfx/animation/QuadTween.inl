@@ -18,14 +18,14 @@ inline quad_tween<Funcs...>::quad_tween(milliseconds duration, Funcs&&... ptr)
 template <QuadTweenFunction... Funcs>
 inline void quad_tween<Funcs...>::update_values()
 {
-    f64 const progress {get_progress()};
+    f64 const p {progress()};
 
     // copy original quads
     auto source {get_source_quads()};
     if (source.empty()) { return; }
 
     // run functions
-    std::apply([&](auto&&... funcs) { (funcs(progress, source), ...); }, _functions);
+    std::apply([&](auto&&... funcs) { (funcs(p, source), ...); }, _functions);
 
     // set target
     set_quads(source);

@@ -79,10 +79,10 @@ inline void bucket<T>::unload(string const& name)
 }
 
 template <typename T>
-inline void bucket<T>::get_asset_stats(bucket_stats& out) const
+inline void bucket<T>::asset_stats(bucket_stats& out) const
 {
     for (auto& [name, ptr] : _objects) {
-        auto st {ptr.second.get()->get_status()};
+        auto st {ptr.second.get()->status()};
         out.Assets[name] = {.Status   = st,
                             .UseCount = ptr.second.use_count()};
         out.Statuses[st]++;
@@ -171,22 +171,19 @@ inline auto loader<T>::get_bucket() -> bucket<T>*
 }
 
 template <typename T>
-inline void loader<T>::set_asset_status(asset_ptr<T> asset, status status)
+inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
 {
     asset.get()->set_status(status);
 
     switch (status) {
-    case status::Unloaded:
-        break;
-    case status::Created:
-        break;
-    case status::Loading:
-        break;
-    case status::Loaded:
+    case asset_status::Unloaded: break;
+    case asset_status::Created: break;
+    case asset_status::Loading: break;
+    case asset_status::Loaded:
         logger::Info("AssetLoader: group '{}' type '{}' -> asset '{}' successfully loaded",
                      get_group().name(), get_bucket()->name(), asset.get()->name());
         break;
-    case status::Error:
+    case asset_status::Error:
         logger::Error("AssetLoader: group '{}' type '{}' -> asset '{}' loading failed",
                       get_group().name(), get_bucket()->name(), asset.get()->name());
         break;

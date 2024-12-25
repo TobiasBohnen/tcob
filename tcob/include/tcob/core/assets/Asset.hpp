@@ -34,7 +34,7 @@ class loader_manager;
 
 ////////////////////////////////////////////////////////////
 
-enum class status : u8 {
+enum class asset_status : u8 {
     Unloaded,
     Created,
     Loading,
@@ -65,7 +65,7 @@ public:
     auto operator*() const -> type&;
 
     auto name() const -> string const&;
-    auto get_status() const -> status; // TODO: get_
+    auto status() const -> asset_status;
 
     auto get() const -> type*;
 
@@ -79,12 +79,12 @@ public:
     auto     is_ready() const -> bool;
 
 private:
-    void set_status(status status);
+    void set_status(asset_status status);
 
     string           _name {};
     std::weak_ptr<T> _object {};
     loader<T>*       _loader {nullptr};
-    status           _status {status::Error};
+    asset_status     _status {asset_status::Error};
 };
 
 ////////////////////////////////////////////////////////////
