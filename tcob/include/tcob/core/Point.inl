@@ -32,21 +32,21 @@ auto constexpr point<T>::as_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-inline auto point<T>::length() const -> float_type
-{
-    return static_cast<float_type>(std::sqrt((X * X) + (Y * Y)));
-}
-
-template <Arithmetic T>
-inline auto point<T>::dot(point<T> const& p) const -> float_type
+auto constexpr point<T>::dot(point<T> const& p) const -> float_type
 {
     return static_cast<float_type>(X * p.X + Y * p.Y);
 }
 
 template <Arithmetic T>
-inline auto point<T>::cross(point<T> const& p) const -> float_type
+auto constexpr point<T>::cross(point<T> const& p) const -> float_type
 {
     return static_cast<float_type>(X * p.Y - Y * p.Y);
+}
+
+template <Arithmetic T>
+inline auto point<T>::length() const -> float_type
+{
+    return static_cast<float_type>(std::sqrt((X * X) + (Y * Y)));
 }
 
 template <Arithmetic T>
@@ -58,16 +58,10 @@ inline auto point<T>::distance_to(point<T> const& p) const -> float_type
 template <Arithmetic T>
 inline auto point<T>::angle_to(point<T> const& p) const -> degree<float_type>
 {
-    degree<float_type> retValue {angle_between(p)};
+    degree<float_type> retValue {radian<float_type> {static_cast<float_type>(std::atan2(p.Y - Y, p.X - X))}};
     retValue += degree<float_type> {90};
     if (retValue.Value < 0) { retValue += degree<float_type> {360}; }
     return retValue;
-}
-
-template <Arithmetic T>
-inline auto point<T>::angle_between(point<T> const& p) const -> radian<float_type>
-{
-    return radian<float_type> {static_cast<float_type>(std::atan2(p.Y - Y, p.X - X))};
 }
 
 template <Arithmetic T>

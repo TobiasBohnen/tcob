@@ -29,13 +29,14 @@ public:
 
     auto constexpr as_array [[nodiscard]] () const -> std::array<T, 2>;
 
-    auto length() const -> float_type;
-    auto dot(point<T> const& p) const -> float_type;
-    auto cross(point<T> const& p) const -> float_type;
+    auto constexpr dot(point<T> const& p) const -> float_type;
+    auto constexpr cross(point<T> const& p) const -> float_type;
 
+    auto length() const -> float_type;
     auto distance_to(point<T> const& p) const -> float_type;
+
     auto angle_to(point<T> const& p) const -> degree<float_type>;
-    auto angle_between(point<T> const& p) const -> radian<float_type>;
+
     auto as_normalized() const -> point<float_type>;
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;
