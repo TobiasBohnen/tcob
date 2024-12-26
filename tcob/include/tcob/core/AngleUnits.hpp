@@ -40,6 +40,8 @@ public:
 
     auto constexpr as_normalized [[nodiscard]] (angle_normalize mode = angle_normalize::FullTurnSymmetric) const -> angle_unit<ValueType, OneTurn>;
 
+    auto constexpr equals(angle_unit const& other, value_type tol) const -> bool;
+
     auto static constexpr Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>;
 
     ValueType Value {0};

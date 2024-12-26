@@ -103,6 +103,14 @@ auto constexpr angle_unit<ValueType, OneTurn>::as_normalized(angle_normalize mod
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::equals(angle_unit const& other, value_type tol) const -> bool
+{
+    if (*this == other) { return true; }
+    auto const diff {std::abs((*this - other).as_normalized().Value)};
+    return diff <= tol || diff >= (OneTurn - tol);
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
 auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>
 {
     ValueType const leftVal {static_cast<ValueType>(left.Value)};
