@@ -201,7 +201,7 @@ auto array::operator[](SQInteger index) const -> proxy<array const, SQInteger>
     return proxy<array const, SQInteger> {*this, std::tuple {index}};
 }
 
-auto array::get_size() const -> SQInteger
+auto array::size() const -> SQInteger
 {
     auto view {get_view()};
     auto guard {view.create_stack_guard()};

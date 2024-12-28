@@ -20,7 +20,7 @@ auto table::name() const -> utf8_string const&
     return _name;
 }
 
-auto table::get_column_names() const -> std::set<utf8_string>
+auto table::column_names() const -> std::set<utf8_string>
 {
     // SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name
     std::set<utf8_string> retValue;
@@ -29,7 +29,7 @@ auto table::get_column_names() const -> std::set<utf8_string>
     if (select.prepare("SELECT * FROM " + _name + ";")) {
 
         if (select.step() != step_status::Error) {
-            i32 const count {select.get_column_count()};
+            i32 const count {select.column_count()};
             for (i32 i {0}; i < count; i++) {
                 retValue.insert(select.get_column_name(i));
             }
@@ -39,7 +39,7 @@ auto table::get_column_names() const -> std::set<utf8_string>
     return retValue;
 }
 
-auto table::get_row_count() const -> i32
+auto table::row_count() const -> i32
 {
     // SELECT COUNT(1) FROM table
     statement select {_db};

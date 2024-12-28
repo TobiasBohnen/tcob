@@ -44,8 +44,8 @@ void render_target::prepare_render(bool debug)
     auto const& stats {locate_service<render_system>().stats()};
 
     _impl->prepare_render(
-        {.ViewMatrix            = _camera.get_matrix(),
-         .Viewport              = rect_i {_camera.get_viewport()},
+        {.ViewMatrix            = _camera.matrix(),
+         .Viewport              = rect_i {_camera.viewport()},
          .MousePosition         = locate_service<input::system>().get_mouse().get_position(),
          .Time                  = stats.current_time(),
          .Debug                 = debug,

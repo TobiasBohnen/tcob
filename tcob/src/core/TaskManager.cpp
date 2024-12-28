@@ -71,7 +71,7 @@ void task_manager::cancel_deferred(uid id)
     helper::erase(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
 }
 
-auto task_manager::get_thread_count() const -> isize
+auto task_manager::thread_count() const -> isize
 {
     return _threadCount;
 }

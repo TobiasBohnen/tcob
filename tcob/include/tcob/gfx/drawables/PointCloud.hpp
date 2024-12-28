@@ -44,7 +44,7 @@ public:
     auto create_point() -> vertex&;
     void clear();
 
-    auto get_point_count() const -> i32; // TODO: get_
+    auto point_count() const -> i32;
     auto get_point_at(i32 index) -> vertex&;
 
 protected:

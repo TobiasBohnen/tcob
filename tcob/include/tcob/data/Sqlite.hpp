@@ -65,7 +65,7 @@ public:
 
     explicit operator bool() const;
 
-    auto get_column_count() const -> i32; // TODO: get_
+    auto column_count() const -> i32;
 
     auto step() const -> step_status;
 

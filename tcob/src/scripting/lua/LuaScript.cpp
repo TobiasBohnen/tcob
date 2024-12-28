@@ -137,7 +137,7 @@ void script::register_searcher()
         return &_loader;
     };
 
-    searchers[searchers.get_raw_length() + 1] = &_searcher;
+    searchers[searchers.raw_length() + 1] = &_searcher;
 }
 
 void static hook(lua_State* l, lua_Debug* ar)

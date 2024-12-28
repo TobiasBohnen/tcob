@@ -188,7 +188,7 @@ void game::step()
     }
 }
 
-auto game::get_library() -> assets::library&
+auto game::library() -> assets::library&
 {
     return _mainLibrary;
 }

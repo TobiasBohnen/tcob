@@ -28,7 +28,7 @@ public:
     music() = default;
     ~music() override;
 
-    auto get_info() const -> std::optional<buffer::info>; // TODO: get_
+    auto info() const -> std::optional<buffer::info>;
     auto duration() const -> milliseconds override;
     auto playback_position() const -> milliseconds override;
 

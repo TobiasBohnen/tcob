@@ -111,7 +111,7 @@ public:
     auto operator[](SQInteger index) -> proxy<array, SQInteger>;
     auto operator[](SQInteger index) const -> proxy<array const, SQInteger>;
 
-    auto get_size() const -> SQInteger; // TODO: get_
+    auto size() const -> SQInteger;
 
     template <ConvertibleFrom T>
     auto get(SQInteger index) const -> result<T>;

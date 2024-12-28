@@ -13,7 +13,6 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Transform.hpp"
 
-
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
@@ -30,9 +29,9 @@ public:
 
     u32 VisibilityMask {0xFFFFFFFF};
 
-    auto get_matrix() const -> mat4;                 // TODO: get_
-    auto get_viewport() const -> rect_f;             // TODO: get_
-    auto get_transformed_viewport() const -> rect_f; // TODO: get_
+    auto matrix() const -> mat4;
+    auto viewport() const -> rect_f;
+    auto transformed_viewport() const -> rect_f;
 
     void move_by(point_f offset);
     void look_at(point_f position);

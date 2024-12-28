@@ -58,7 +58,7 @@ public:
     auto create_or_get_metatable() const -> table;
     void set_metatable(table const& mt) const;
 
-    auto get_raw_length() const -> u64; // TODO: get_
+    auto raw_length() const -> u64;
 
     template <typename... Args, typename T>
     auto try_make(T& value, auto&&... keys) const -> bool;

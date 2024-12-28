@@ -159,7 +159,7 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... par
 
         // prepare
         if (prepared) {
-            if (sizeof...(Values) != get_column_count()) { return retValue; }
+            if (sizeof...(Values) != column_count()) { return retValue; }
 
             // get columns
             retValue = get_column_value<std::vector<std::tuple<Values...>>>(0);
@@ -173,7 +173,7 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... par
 
         // prepare
         if (prepared) {
-            if (get_column_count() != 1) { return retValue; }
+            if (column_count() != 1) { return retValue; }
 
             // get columns
             retValue = get_column_value<std::vector<Values...>>(0);
@@ -202,7 +202,7 @@ inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -
 
     std::vector<T> retValue;
     if (prepared) {
-        if (sizeof...(Values) != get_column_count()) { return retValue; }
+        if (sizeof...(Values) != column_count()) { return retValue; }
 
         // get columns
         auto const values {get_column_value<std::vector<std::tuple<Values...>>>(0)};

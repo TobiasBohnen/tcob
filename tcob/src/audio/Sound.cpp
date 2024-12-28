@@ -41,7 +41,7 @@ sound::~sound()
     stop_source();
 }
 
-auto sound::get_info() const -> std::optional<buffer::info>
+auto sound::info() const -> std::optional<buffer::info>
 {
     return _info;
 }

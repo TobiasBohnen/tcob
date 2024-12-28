@@ -37,7 +37,7 @@ document::document(config c)
 
 document::~document() = default;
 
-auto document::get_mouse_position() const -> point_i
+auto document::mouse_position() const -> point_i
 {
     return _mousePosition;
 }

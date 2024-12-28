@@ -119,7 +119,7 @@ table::table(state_view view, i32 idx)
     acquire(view, idx);
 }
 
-auto table::get_raw_length() const -> u64
+auto table::raw_length() const -> u64
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};

@@ -187,7 +187,7 @@ public:
     void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);
 
-    auto get_shape_count() const -> isize; // TODO: get_
+    auto shape_count() const -> isize;
     auto is_empty() const -> bool;
 
     auto get_shape_at(usize index) const -> std::shared_ptr<shape>;

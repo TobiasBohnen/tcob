@@ -15,19 +15,19 @@ camera::camera(render_target& parent)
 {
 }
 
-auto camera::get_matrix() const -> mat4
+auto camera::matrix() const -> mat4
 {
     return get_transform().as_matrix4();
 }
 
-auto camera::get_viewport() const -> rect_f
+auto camera::viewport() const -> rect_f
 {
     return {ViewOffset, size_f {_parent.Size()}};
 }
 
-auto camera::get_transformed_viewport() const -> rect_f
+auto camera::transformed_viewport() const -> rect_f
 {
-    return convert_screen_to_world(rect_i {get_viewport()});
+    return convert_screen_to_world(rect_i {viewport()});
 }
 
 void camera::zoom_by(size_f factor)
@@ -42,13 +42,13 @@ void camera::move_by(point_f offset)
 
 void camera::look_at(point_f pos)
 {
-    point_f const offset {get_transformed_viewport().local_center() * point_f {Zoom.Width, Zoom.Height}};
+    point_f const offset {transformed_viewport().local_center() * point_f {Zoom.Width, Zoom.Height}};
     Position = pos - offset;
 }
 
 auto camera::get_look_at() const -> point_f
 {
-    return Position + get_transformed_viewport().local_center() * point_f {Zoom.Width, Zoom.Height};
+    return Position + transformed_viewport().local_center() * point_f {Zoom.Width, Zoom.Height};
 }
 
 auto camera::convert_world_to_screen(rect_f const& rect) const -> rect_i

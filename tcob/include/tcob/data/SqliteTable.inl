@@ -84,7 +84,7 @@ inline auto table::update(auto&&... columns) const -> update_statement
 
 inline auto table::check_columns(auto&&... columns) const -> bool
 {
-    auto const tableColumns {get_column_names()};
+    auto const tableColumns {column_names()};
 
     auto const check {
         [&tableColumns](auto const& value) {

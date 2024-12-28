@@ -65,7 +65,7 @@ void shape_batch::send_to_back(shape const& shape)
     }
 }
 
-auto shape_batch::get_shape_count() const -> isize
+auto shape_batch::shape_count() const -> isize
 {
     return std::ssize(_children);
 }

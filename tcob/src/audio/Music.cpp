@@ -23,7 +23,7 @@ music::~music()
     stop_stream();
 }
 
-auto music::get_info() const -> std::optional<buffer::info>
+auto music::info() const -> std::optional<buffer::info>
 {
     return _info;
 }

@@ -196,7 +196,7 @@ public:
     void remove_emitter(particle_emitter_base const& emitter);
     void clear_emitters();
 
-    auto get_particle_count() const -> isize; // TODO: get_
+    auto particle_count() const -> isize;
 
     auto activate_particle() -> particle&;
     void deactivate_particle(particle& particle);

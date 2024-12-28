@@ -62,9 +62,9 @@ auto statement::get_column_name(i32 col) const -> utf8_string
     return _stmt.get_column_name(col);
 }
 
-auto statement::get_column_count() const -> i32
+auto statement::column_count() const -> i32
 {
-    return _stmt.get_column_count();
+    return _stmt.column_count();
 }
 
 auto statement::get_db() const -> database_view

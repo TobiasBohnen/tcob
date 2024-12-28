@@ -61,7 +61,7 @@ void particle_system::clear_emitters()
     stop();
 }
 
-auto particle_system::get_particle_count() const -> isize
+auto particle_system::particle_count() const -> isize
 {
     return _aliveParticleCount;
 }

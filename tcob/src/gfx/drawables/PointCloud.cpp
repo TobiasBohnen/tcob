@@ -41,7 +41,7 @@ void point_cloud::clear()
     _points.clear();
 }
 
-auto point_cloud::get_point_count() const -> i32
+auto point_cloud::point_count() const -> i32
 {
     return static_cast<i32>(std::ssize(_points));
 }

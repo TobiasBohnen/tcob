@@ -111,7 +111,7 @@ auto statement_view::get_column_type(i32 col) const -> type
     }
 }
 
-auto statement_view::get_column_count() const -> i32
+auto statement_view::column_count() const -> i32
 {
     assert(_stmt);
     return sqlite3_column_count(_stmt);
