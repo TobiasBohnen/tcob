@@ -305,7 +305,7 @@ public:
     std::optional<bool> Checked {};
     std::optional<bool> Disabled {};
 
-    auto check(widget_flags other) const -> i32;
+    auto score(widget_flags other) const -> i32;
 
     auto operator==(style_flags const& other) const -> bool = default;
 };

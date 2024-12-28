@@ -17,9 +17,7 @@ style_attributes::style_attributes(std::initializer_list<std::pair<string, attri
 
 auto style_attributes::check(widget_attributes const& widgetAttribs) const -> bool
 {
-    if (_values.empty()) {
-        return true;
-    }
+    if (_values.empty()) { return true; }
 
     return std::all_of(_values.begin(), _values.end(), [&](auto const& kv) {
         return widgetAttribs.contains(kv.first) && kv.second.contains(widgetAttribs.at(kv.first));
@@ -28,7 +26,7 @@ auto style_attributes::check(widget_attributes const& widgetAttribs) const -> bo
 
 ////////////////////////////////////////////////////////////
 
-auto style_flags::check(widget_flags other) const -> i32
+auto style_flags::score(widget_flags other) const -> i32
 {
     i32                                      retValue {0};
     std::array<std::optional<bool>, 5> const flagSet {Focus, Active, Hover, Checked, Disabled};
@@ -59,7 +57,7 @@ auto style_collection::get(string const& name, widget_flags flags, widget_attrib
         if (!styleAttribs.check(attribs)) { continue; }
 
         // check flags
-        i32 const score {styleFlags.check(flags)};
+        i32 const score {styleFlags.score(flags)};
         if (score == bestScore) {
             bestCandidate = style.get();
         } else if (score > bestScore) {
