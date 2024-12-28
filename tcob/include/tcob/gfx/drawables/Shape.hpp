@@ -50,8 +50,8 @@ public:
     auto is_dirty() const -> bool;
 
 protected:
-    auto virtual get_center() const -> point_f = 0;
-    auto get_pivot() const -> point_f override;
+    auto virtual center() const -> point_f = 0;
+    auto pivot() const -> point_f override;
 
     void virtual on_color_changed(color c)                          = 0;
     void virtual on_texture_region_changed(string const& texRegion) = 0;
@@ -82,7 +82,7 @@ public:
 protected:
     void on_update(milliseconds deltaTime) override;
 
-    auto get_center() const -> point_f override;
+    auto center() const -> point_f override;
     void on_color_changed(color c) override;
     void on_texture_region_changed(string const& texRegion) override;
 
@@ -112,7 +112,7 @@ public:
 protected:
     void on_update(milliseconds deltaTime) override;
 
-    auto get_center() const -> point_f override;
+    auto center() const -> point_f override;
     void on_color_changed(color c) override;
     void on_texture_region_changed(string const& texRegion) override;
 
@@ -141,7 +141,7 @@ public:
 protected:
     void on_update(milliseconds deltaTime) override;
 
-    auto get_center() const -> point_f override;
+    auto center() const -> point_f override;
     void on_color_changed(color c) override;
     void on_texture_region_changed(string const& texRegion) override;
 

@@ -66,9 +66,9 @@ void slider::on_paint(widget_painter& painter)
              .Fraction    = _tween.get_current_value()});
 
         // thumb
-        auto const thumbFlags {!_overThumb              ? widget_flags {}
-                                   : get_flags().Active ? widget_flags {.Active = true}
-                                                        : widget_flags {.Hover = true}};
+        auto const thumbFlags {!_overThumb          ? widget_flags {}
+                                   : flags().Active ? widget_flags {.Active = true}
+                                                    : widget_flags {.Hover = true}};
         _paintResult.Thumb = painter.draw_thumb(
             get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb,
             rect,
@@ -221,13 +221,13 @@ void slider::calculate_value(point_f mp)
     }
 }
 
-auto slider::get_attributes() const -> widget_attributes
+auto slider::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"min", Min()},
                                 {"max", Max()},
                                 {"step", Step()},
                                 {"value", Value()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }

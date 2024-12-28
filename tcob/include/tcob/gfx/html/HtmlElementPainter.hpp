@@ -143,7 +143,7 @@ public:
     void draw_list_marker(list_marker_draw_context const& ctx);
 
 protected:
-    auto get_canvas() -> canvas&;
+    auto get_canvas() -> canvas&; // TODO: get_
 
 private:
     void draw_left_border(borders const& brds);

@@ -45,7 +45,7 @@ public:
 
     // animated_image_decoder
     auto open() -> std::optional<image::info> override;
-    auto get_current_frame() const -> u8 const* override;
+    auto current_frame() const -> u8 const* override;
     auto advance(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
 

@@ -41,7 +41,7 @@ protected:
 
     void on_update(milliseconds deltaTime) override;
 
-    auto get_attributes() const -> widget_attributes override;
+    auto attributes() const -> widget_attributes override;
 
 private:
     detail::input_injector _injector;

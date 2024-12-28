@@ -262,9 +262,9 @@ auto list_box::get_items() const -> std::vector<list_item> const&
     return Filter->empty() ? _items : _filteredItems;
 }
 
-auto list_box::get_attributes() const -> widget_attributes
+auto list_box::attributes() const -> widget_attributes
 {
-    auto retValue {vscroll_widget::get_attributes()};
+    auto retValue {vscroll_widget::attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(get_items())) {
         retValue["selected"] = selected_item().Text;
     }

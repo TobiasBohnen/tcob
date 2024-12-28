@@ -91,7 +91,7 @@ auto gif_decoder::open() -> std::optional<image::info>
     return std::nullopt;
 }
 
-auto gif_decoder::get_current_frame() const -> u8 const*
+auto gif_decoder::current_frame() const -> u8 const*
 {
     return _currentFrame.buffer().data();
 }

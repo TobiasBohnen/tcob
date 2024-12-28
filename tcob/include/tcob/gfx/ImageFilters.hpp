@@ -34,63 +34,63 @@ public:
     auto operator()(image const& img) const -> image override;
 
 protected:
-    auto virtual get_factor() const -> f64                   = 0;
-    auto virtual get_offset() const -> u8                    = 0;
-    auto virtual get_matrix() const -> std::array<i32, Size> = 0;
+    auto virtual factor() const -> f64                   = 0;
+    auto virtual offset() const -> u8                    = 0;
+    auto virtual matrix() const -> std::array<i32, Size> = 0;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API blur_filter final : public convolution_filter<5, 5> {
 protected:
-    auto get_factor() const -> f64 override;
-    auto get_offset() const -> u8 override;
-    auto get_matrix() const -> std::array<i32, 25> override;
+    auto factor() const -> f64 override;
+    auto offset() const -> u8 override;
+    auto matrix() const -> std::array<i32, 25> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API edge_detect_filter final : public convolution_filter<3, 3> {
 protected:
-    auto get_factor() const -> f64 override;
-    auto get_offset() const -> u8 override;
-    auto get_matrix() const -> std::array<i32, 9> override;
+    auto factor() const -> f64 override;
+    auto offset() const -> u8 override;
+    auto matrix() const -> std::array<i32, 9> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API edge_enhance_filter final : public convolution_filter<3, 3> {
 protected:
-    auto get_factor() const -> f64 override;
-    auto get_offset() const -> u8 override;
-    auto get_matrix() const -> std::array<i32, 9> override;
+    auto factor() const -> f64 override;
+    auto offset() const -> u8 override;
+    auto matrix() const -> std::array<i32, 9> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API emboss_filter final : public convolution_filter<3, 3> {
 protected:
-    auto get_factor() const -> f64 override;
-    auto get_offset() const -> u8 override;
-    auto get_matrix() const -> std::array<i32, 9> override;
+    auto factor() const -> f64 override;
+    auto offset() const -> u8 override;
+    auto matrix() const -> std::array<i32, 9> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API motion_blur_filter final : public convolution_filter<9, 9> {
 protected:
-    auto get_factor() const -> f64 override;
-    auto get_offset() const -> u8 override;
-    auto get_matrix() const -> std::array<i32, 81> override;
+    auto factor() const -> f64 override;
+    auto offset() const -> u8 override;
+    auto matrix() const -> std::array<i32, 81> override;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API sharpen_filter final : public convolution_filter<5, 5> {
 protected:
-    auto get_factor() const -> f64 override;
-    auto get_offset() const -> u8 override;
-    auto get_matrix() const -> std::array<i32, 25> override;
+    auto factor() const -> f64 override;
+    auto offset() const -> u8 override;
+    auto matrix() const -> std::array<i32, 25> override;
 };
 
 ////////////////////////////////////////////////////////////

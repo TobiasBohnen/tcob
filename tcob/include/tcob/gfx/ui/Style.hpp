@@ -287,12 +287,12 @@ public:
 class TCOB_API style_attributes final {
 public:
     style_attributes() = default;
-    style_attributes(std::initializer_list<std::pair<string, attributes> const> values);
+    style_attributes(std::initializer_list<std::pair<string, widget_attribute_types> const> values);
 
     auto check(widget_attributes const& widgetAttribs) const -> bool;
 
 private:
-    std::unordered_map<string, std::set<attributes>> _values;
+    std::unordered_map<string, std::set<widget_attribute_types>> _values;
 };
 
 ////////////////////////////////////////////////////////////

@@ -179,8 +179,8 @@ enum class dock_style : u8 {
 
 ////////////////////////////////////////////////////////////
 
-using attributes        = std::variant<i32, bool, string, orientation>;
-using widget_attributes = std::unordered_map<string, attributes>;
+using widget_attribute_types = std::variant<i32, bool, string, orientation>;
+using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 
 template <typename Target>
 concept SubmitTarget = requires(Target target, string const& name, widget_attributes const& properties) {

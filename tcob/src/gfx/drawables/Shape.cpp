@@ -182,13 +182,13 @@ void shape::mark_clean()
     _isDirty = false;
 }
 
-auto shape::get_pivot() const -> point_f
+auto shape::pivot() const -> point_f
 {
     if (Pivot().has_value()) {
         return *Pivot();
     }
 
-    return get_center();
+    return center();
 }
 
 ////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ void circle_shape::create()
     _inds.push_back(Segments());
 }
 
-auto circle_shape::get_center() const -> point_f
+auto circle_shape::center() const -> point_f
 {
     return Center();
 }
@@ -366,7 +366,7 @@ void rect_shape::on_texture_region_changed(string const& texRegion)
     }
 }
 
-auto rect_shape::get_center() const -> point_f
+auto rect_shape::center() const -> point_f
 {
     return Bounds->center();
 }
@@ -435,7 +435,7 @@ void poly_shape::on_texture_region_changed(string const& /* texRegion */)
     // TODO
 }
 
-auto poly_shape::get_center() const -> point_f
+auto poly_shape::center() const -> point_f
 {
     return _centroid;
 }

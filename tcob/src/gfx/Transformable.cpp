@@ -55,12 +55,12 @@ void transformable::update_transform()
     if (!_isDirty) { return; }
     _isDirty = false;
 
-    point_f const pivot {get_pivot()};
+    point_f const p {pivot()};
     _transform.to_identity();
 
-    if (Scale != size_f::One) { _transform.scale_at(Scale(), pivot); }
-    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation(), pivot); }
-    if (Skew->first != 0 || Skew->second != 0) { _transform.skew_at(Skew(), pivot); }
+    if (Scale != size_f::One) { _transform.scale_at(Scale(), p); }
+    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation(), p); }
+    if (Skew->first != 0 || Skew->second != 0) { _transform.skew_at(Skew(), p); }
     if (Translation != point_f::Zero) { _transform.translate(Translation()); }
 }
 

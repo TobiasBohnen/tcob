@@ -110,7 +110,7 @@ protected:
 
     void virtual on_styles_changed();
 
-    auto get_styles() const -> style_collection const&;
+    auto get_styles() const -> style_collection const&; // TODO: get_
 
     template <std::derived_from<style_base> T>
     auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;
@@ -142,10 +142,10 @@ protected:
 
     void virtual on_bounds_changed();
 
-    auto virtual get_attributes() const -> widget_attributes;
-    auto virtual get_flags() -> widget_flags;
+    auto virtual attributes() const -> widget_attributes;
+    auto virtual flags() -> widget_flags;
 
-    auto get_orientation() const -> orientation;
+    auto get_orientation() const -> orientation; // TODO: get_
 
     auto is_inert() const -> bool;
     void set_inert(bool inert);

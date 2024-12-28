@@ -122,7 +122,7 @@ void document::on_draw_to(render_target& target)
     _renderer.render_to_target(target);
 }
 
-auto document::get_pivot() const -> point_f
+auto document::pivot() const -> point_f
 {
     return Bounds->center();
 }

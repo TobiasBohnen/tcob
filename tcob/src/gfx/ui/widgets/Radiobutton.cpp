@@ -61,17 +61,17 @@ void radio_button::on_click()
     }
 }
 
-auto radio_button::get_attributes() const -> widget_attributes
+auto radio_button::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"checked", Checked()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }
 
-auto radio_button::get_flags() -> widget_flags
+auto radio_button::flags() -> widget_flags
 {
-    auto retValue {widget::get_flags()};
+    auto retValue {widget::flags()};
     retValue.Checked = Checked();
     return retValue;
 }

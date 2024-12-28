@@ -115,7 +115,7 @@ public:
         point_i Position {point_i::Zero};
     };
 
-    auto get_position() const -> point_i;
+    auto get_position() const -> point_i; // TODO: get_
     void set_position(point_i pos) const;
     auto is_button_down(button button) const -> bool;
 };
@@ -242,7 +242,7 @@ public:
 class TCOB_API clipboard {
 public:
     auto has_text() const -> bool;
-    auto get_text() const -> utf8_string;
+    auto get_text() const -> utf8_string; // TODO: get_
     void set_text(utf8_string const& text);
 };
 

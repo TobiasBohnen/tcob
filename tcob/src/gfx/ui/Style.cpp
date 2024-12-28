@@ -8,7 +8,7 @@
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
-style_attributes::style_attributes(std::initializer_list<std::pair<string, attributes> const> values)
+style_attributes::style_attributes(std::initializer_list<std::pair<string, widget_attribute_types> const> values)
 {
     for (auto const& val : values) {
         _values[val.first].insert(val.second);

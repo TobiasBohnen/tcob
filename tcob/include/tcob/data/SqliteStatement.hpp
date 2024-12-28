@@ -67,7 +67,7 @@ public:
     auto inner_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
     auto cross_join(utf8_string const& table) -> select_statement&;
 
-    auto get_query() const -> utf8_string;
+    auto get_query() const -> utf8_string; // TODO: get_
 
 private:
     struct values {

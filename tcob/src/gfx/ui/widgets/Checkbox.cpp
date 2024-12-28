@@ -48,17 +48,17 @@ void checkbox::on_click()
     Checked = !Checked();
 }
 
-auto checkbox::get_attributes() const -> widget_attributes
+auto checkbox::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"checked", Checked()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }
 
-auto checkbox::get_flags() -> widget_flags
+auto checkbox::flags() -> widget_flags
 {
-    auto retValue {widget::get_flags()};
+    auto retValue {widget::flags()};
     retValue.Checked = Checked();
     return retValue;
 }

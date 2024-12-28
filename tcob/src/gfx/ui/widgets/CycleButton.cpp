@@ -90,9 +90,9 @@ void cycle_button::on_update(milliseconds /*deltaTime*/)
 {
 }
 
-auto cycle_button::get_attributes() const -> widget_attributes
+auto cycle_button::attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_attributes()};
+    auto retValue {widget::attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
         retValue["selected"] = selected_item();
     }

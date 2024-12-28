@@ -65,7 +65,7 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto get_attributes() const -> widget_attributes override;
+    auto attributes() const -> widget_attributes override;
 
 private:
     auto get_item_height() const -> f32;

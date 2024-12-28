@@ -43,7 +43,7 @@ public:
 
     auto get_preset_name(i32 index) const -> string;
 
-    auto get_font() const -> tsf*;
+    auto get_font() const -> tsf*; // TODO: get_
 
     static inline char const* asset_name {"sound_font"};
 
@@ -62,7 +62,7 @@ class TCOB_API sound_font_commands : public non_copyable {
     friend class sound_font;
 
 public:
-    auto get_total_duration() const -> milliseconds;
+    auto get_total_duration() const -> milliseconds; // TODO: get_
 
     void start_new_section(milliseconds duration);
 

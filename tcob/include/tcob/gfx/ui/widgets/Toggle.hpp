@@ -33,8 +33,8 @@ protected:
 
     void on_click() override;
 
-    auto get_attributes() const -> widget_attributes override;
-    auto get_flags() -> widget_flags override;
+    auto attributes() const -> widget_attributes override;
+    auto flags() -> widget_flags override;
 
 private:
     widget_tweener _tween;

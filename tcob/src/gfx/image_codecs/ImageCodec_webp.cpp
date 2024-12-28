@@ -109,7 +109,7 @@ auto webp_anim_decoder::open() -> std::optional<image::info>
     return std::nullopt;
 }
 
-auto webp_anim_decoder::get_current_frame() const -> u8 const*
+auto webp_anim_decoder::current_frame() const -> u8 const*
 {
     return _buffer;
 }

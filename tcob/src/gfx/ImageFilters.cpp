@@ -9,17 +9,17 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-auto blur_filter::get_factor() const -> f64
+auto blur_filter::factor() const -> f64
 {
     return 1.0 / 9;
 }
 
-auto blur_filter::get_offset() const -> u8
+auto blur_filter::offset() const -> u8
 {
     return 0;
 }
 
-auto blur_filter::get_matrix() const -> std::array<i32, 25>
+auto blur_filter::matrix() const -> std::array<i32, 25>
 {
     return {0, 0, 0, 0, 0,
             0, 1, 1, 1, 0,
@@ -30,17 +30,17 @@ auto blur_filter::get_matrix() const -> std::array<i32, 25>
 
 ////////////////////////////////////////////////////////////
 
-auto edge_detect_filter::get_factor() const -> f64
+auto edge_detect_filter::factor() const -> f64
 {
     return 1.5;
 }
 
-auto edge_detect_filter::get_offset() const -> u8
+auto edge_detect_filter::offset() const -> u8
 {
     return 0;
 }
 
-auto edge_detect_filter::get_matrix() const -> std::array<i32, 9>
+auto edge_detect_filter::matrix() const -> std::array<i32, 9>
 {
     return {0, 1, 0,
             1, -4, 1,
@@ -49,17 +49,17 @@ auto edge_detect_filter::get_matrix() const -> std::array<i32, 9>
 
 ////////////////////////////////////////////////////////////
 
-auto emboss_filter::get_factor() const -> f64
+auto emboss_filter::factor() const -> f64
 {
     return 1.0;
 }
 
-auto emboss_filter::get_offset() const -> u8
+auto emboss_filter::offset() const -> u8
 {
     return 128;
 }
 
-auto emboss_filter::get_matrix() const -> std::array<i32, 9>
+auto emboss_filter::matrix() const -> std::array<i32, 9>
 {
     return {-1, -1, 0,
             -1, 0, 1,
@@ -68,17 +68,17 @@ auto emboss_filter::get_matrix() const -> std::array<i32, 9>
 
 ////////////////////////////////////////////////////////////
 
-auto edge_enhance_filter::get_factor() const -> f64
+auto edge_enhance_filter::factor() const -> f64
 {
     return 2.0;
 }
 
-auto edge_enhance_filter::get_offset() const -> u8
+auto edge_enhance_filter::offset() const -> u8
 {
     return 0;
 }
 
-auto edge_enhance_filter::get_matrix() const -> std::array<i32, 9>
+auto edge_enhance_filter::matrix() const -> std::array<i32, 9>
 {
     return {0, 0, 0,
             -1, 1, 0,
@@ -87,17 +87,17 @@ auto edge_enhance_filter::get_matrix() const -> std::array<i32, 9>
 
 ////////////////////////////////////////////////////////////
 
-auto motion_blur_filter::get_factor() const -> f64
+auto motion_blur_filter::factor() const -> f64
 {
     return 1.0 / 9.0;
 }
 
-auto motion_blur_filter::get_offset() const -> u8
+auto motion_blur_filter::offset() const -> u8
 {
     return 0;
 }
 
-auto motion_blur_filter::get_matrix() const -> std::array<i32, 81>
+auto motion_blur_filter::matrix() const -> std::array<i32, 81>
 {
     return {1, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -112,17 +112,17 @@ auto motion_blur_filter::get_matrix() const -> std::array<i32, 81>
 
 ////////////////////////////////////////////////////////////
 
-auto sharpen_filter::get_factor() const -> f64
+auto sharpen_filter::factor() const -> f64
 {
     return 1.0;
 }
 
-auto sharpen_filter::get_offset() const -> u8
+auto sharpen_filter::offset() const -> u8
 {
     return 0;
 }
 
-auto sharpen_filter::get_matrix() const -> std::array<i32, 25>
+auto sharpen_filter::matrix() const -> std::array<i32, 25>
 {
     return {0, 0, 0, 0, 0,
             0, 0, -1, 0, 0,

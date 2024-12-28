@@ -92,7 +92,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // arrow
-        auto const& flags {get_flags()};
+        auto const& fls {flags()};
         auto*       normalArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {})};
         auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Hover = true})};
         auto*       activeArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Active = true})};
@@ -100,7 +100,7 @@ void drop_down_list::on_paint(widget_painter& painter)
 
         element::nav_arrow arrowStyle;
         if (_mouseOverBox) {
-            arrowStyle = flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow;
+            arrowStyle = fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow;
         } else {
             arrowStyle = normalArrow->NavArrow;
         }
@@ -127,7 +127,7 @@ void drop_down_list::on_paint(widget_painter& painter)
             painter.draw_background_and_border(*style, listRect, false);
 
             // scrollbar
-            _vScrollbar.paint(painter, style->VScrollBar, listRect, get_flags().Active);
+            _vScrollbar.paint(painter, style->VScrollBar, listRect, fls.Active);
 
             scissor_guard const guard {painter, this};
 
@@ -313,9 +313,9 @@ auto drop_down_list::get_item_style(isize index) const -> item_style*
                                       : get_sub_style<item_style>(style->ItemClass, {});
 }
 
-auto drop_down_list::get_attributes() const -> widget_attributes
+auto drop_down_list::attributes() const -> widget_attributes
 {
-    auto retValue {widget::get_attributes()};
+    auto retValue {widget::attributes()};
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
         retValue["selected"] = selected_item().Text;
     }

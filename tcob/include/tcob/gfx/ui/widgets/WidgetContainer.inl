@@ -14,7 +14,7 @@ inline void widget_container::submit(Target& target)
     std::vector<widget*> widgets;
     collect_widgets(widgets);
     for (auto const& widget : widgets) {
-        auto const props {widget->get_attributes()};
+        auto const props {widget->attributes()};
         auto const name {widget->name()};
         if (!props.empty() && !name.empty()) {
             target[name] = props;

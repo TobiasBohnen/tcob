@@ -122,8 +122,8 @@ void panel::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // scrollbar
-        _vScrollbar.paint(painter, style->VScrollBar, rect, get_flags().Active);
-        _hScrollbar.paint(painter, style->HScrollBar, rect, get_flags().Active);
+        _vScrollbar.paint(painter, style->VScrollBar, rect, flags().Active);
+        _hScrollbar.paint(painter, style->HScrollBar, rect, flags().Active);
 
         // content
         scissor_guard const guard {painter, this};

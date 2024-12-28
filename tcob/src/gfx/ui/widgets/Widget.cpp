@@ -206,7 +206,7 @@ auto widget::scroll_offset() const -> point_f
 void widget::update_style()
 {
     // TODO: only update if any attribute or form::Styles changes
-    _style = _form->Styles->get(Class(), get_flags(), get_attributes());
+    _style = _form->Styles->get(Class(), flags(), attributes());
 
     if (Tooltip) {
         Tooltip->update_style();
@@ -464,12 +464,12 @@ void widget::do_focus_lost()
     FocusLost({this});
 }
 
-auto widget::get_attributes() const -> widget_attributes
+auto widget::attributes() const -> widget_attributes
 {
     return {{"name", _name}, {"orientation", get_orientation()}};
 }
 
-auto widget::get_flags() -> widget_flags
+auto widget::flags() -> widget_flags
 {
     _flags.Disabled = !is_enabled();
     if (_flags.Disabled) {
@@ -519,9 +519,9 @@ void widget::collect_widgets(std::vector<widget*>& vec)
 
 void widget::on_styles_changed()
 {
-    _style = _form->Styles->get(Class(), get_flags(), get_attributes());
+    _style = _form->Styles->get(Class(), flags(), attributes());
     if (Tooltip) {
-        Tooltip->_style = _form->Styles->get(Tooltip->Class(), Tooltip->get_flags(), Tooltip->get_attributes());
+        Tooltip->_style = _form->Styles->get(Tooltip->Class(), Tooltip->flags(), Tooltip->attributes());
     }
 }
 

@@ -44,7 +44,7 @@ void spinner::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         // arrows
-        auto const& flags {get_flags()};
+        auto const& fls {flags()};
         auto const* normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
         auto const* hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
         auto const* activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
@@ -52,9 +52,9 @@ void spinner::on_paint(widget_painter& painter)
         if (_hoverArrow == arrow::None) {
             painter.draw_nav_arrows(normalArrow->NavArrow, normalArrow->NavArrow, rect);
         } else if (_hoverArrow == arrow::Increase) {
-            painter.draw_nav_arrows(flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, normalArrow->NavArrow, rect);
+            painter.draw_nav_arrows(fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, normalArrow->NavArrow, rect);
         } else if (_hoverArrow == arrow::Decrease) {
-            painter.draw_nav_arrows(normalArrow->NavArrow, flags.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
+            painter.draw_nav_arrows(normalArrow->NavArrow, fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
         }
 
         // text
@@ -144,13 +144,13 @@ void spinner::on_update(milliseconds /*deltaTime*/)
     }
 }
 
-auto spinner::get_attributes() const -> widget_attributes
+auto spinner::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"min", Min()},
                                 {"max", Max()},
                                 {"step", Step()},
                                 {"value", Value()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }

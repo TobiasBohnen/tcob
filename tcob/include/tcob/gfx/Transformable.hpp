@@ -35,8 +35,8 @@ public:
     void virtual reset_transform();
 
 protected:
-    auto virtual get_pivot() const -> point_f = 0;
-    void virtual on_transform_changed()       = 0;
+    auto virtual pivot() const -> point_f = 0;
+    void virtual on_transform_changed()   = 0;
     void mark_transform_dirty();
     void update_transform();
 

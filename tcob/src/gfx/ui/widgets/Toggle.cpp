@@ -60,17 +60,17 @@ void toggle::on_click()
     Checked = !Checked();
 }
 
-auto toggle::get_attributes() const -> widget_attributes
+auto toggle::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"checked", Checked()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }
 
-auto toggle::get_flags() -> widget_flags
+auto toggle::flags() -> widget_flags
 {
-    auto retValue {widget::get_flags()};
+    auto retValue {widget::flags()};
     retValue.Checked = _tween.get_current_value() >= 0.5f;
     return retValue;
 }

@@ -43,7 +43,7 @@ protected:
     void on_focus_gained() override;
     void on_focus_lost() override;
 
-    auto get_attributes() const -> widget_attributes override;
+    auto attributes() const -> widget_attributes override;
 
     void insert_text(utf8_string const& newText);
 

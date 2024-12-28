@@ -68,8 +68,8 @@ protected:
     auto virtual open() -> std::optional<buffer::info>       = 0;
     auto virtual decode(std::span<f32> outputSamples) -> i32 = 0;
 
-    auto get_stream() -> io::istream&;
-    auto get_context() -> std::any&;
+    auto get_stream() -> io::istream&; // TODO: get_
+    auto get_context() -> std::any&;   // TODO: get_
 
 private:
     std::shared_ptr<io::istream> _stream;

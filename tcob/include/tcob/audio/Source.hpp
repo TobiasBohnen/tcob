@@ -43,7 +43,7 @@ protected:
     auto virtual on_start() -> bool = 0;
     auto virtual on_stop() -> bool  = 0;
 
-    auto get_source() const -> audio::al::al_source*;
+    auto get_source() const -> audio::al::al_source*; // TODO: get_
 
 private:
     std::shared_ptr<audio::al::al_source> _source;

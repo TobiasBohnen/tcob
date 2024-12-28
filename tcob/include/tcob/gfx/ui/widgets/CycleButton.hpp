@@ -38,7 +38,7 @@ protected:
 
     void on_update(milliseconds deltaTime) override;
 
-    auto get_attributes() const -> widget_attributes override;
+    auto attributes() const -> widget_attributes override;
 
 private:
     std::vector<utf8_string> _items;

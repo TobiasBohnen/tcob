@@ -131,14 +131,14 @@ public:
 
     auto open(std::shared_ptr<io::istream> in) -> std::optional<image::info>;
 
-    auto virtual get_current_frame() const -> u8 const* = 0;
-    auto virtual advance(milliseconds ts) -> status     = 0;
-    void virtual reset()                                = 0;
+    auto virtual current_frame() const -> u8 const* = 0;
+    auto virtual advance(milliseconds ts) -> status = 0;
+    void virtual reset()                            = 0;
 
 protected:
     auto virtual open() -> std::optional<image::info> = 0;
 
-    auto get_stream() -> io::istream&;
+    auto get_stream() -> io::istream&; // TODO: get_
 
 private:
     std::shared_ptr<io::istream> _stream;

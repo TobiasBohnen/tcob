@@ -51,7 +51,7 @@ protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) override;
 
-    auto get_pivot() const -> point_f override;
+    auto pivot() const -> point_f override;
     void on_transform_changed() override;
 
 private:

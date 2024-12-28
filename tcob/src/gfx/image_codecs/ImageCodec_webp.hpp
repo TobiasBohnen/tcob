@@ -46,7 +46,7 @@ public:
     webp_anim_decoder();
     ~webp_anim_decoder() override;
 
-    auto get_current_frame() const -> u8 const* override;
+    auto current_frame() const -> u8 const* override;
     auto advance(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
 

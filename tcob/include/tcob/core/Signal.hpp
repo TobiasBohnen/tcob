@@ -31,7 +31,7 @@ namespace detail {
         void virtual disconnect(uid id) const = 0;
 
     protected:
-        auto get_next_id() const -> uid;
+        auto get_next_id() const -> uid; // TODO: get_
     };
 }
 

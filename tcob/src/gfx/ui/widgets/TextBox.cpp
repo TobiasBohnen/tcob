@@ -134,10 +134,10 @@ void text_box::on_focus_lost()
     _caretTween   = nullptr;
 }
 
-auto text_box::get_attributes() const -> widget_attributes
+auto text_box::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"text", Text()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }

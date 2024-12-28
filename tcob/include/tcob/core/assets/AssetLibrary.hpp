@@ -79,7 +79,7 @@ public:
     void unload(string const& name) override;
 
 protected:
-    auto get_group() -> group&;
+    auto get_group() -> group&; // TODO: get_
 
 private:
     group& _group;
@@ -190,9 +190,9 @@ protected:
     void virtual unload_asset(asset<T>& asset, bool greedy) = 0;
     auto virtual reload_asset(asset<T>& asset) -> bool;
 
-    auto get_group() -> group&;
+    auto get_group() -> group&;      // TODO: get_
 
-    auto get_bucket() -> bucket<T>*;
+    auto get_bucket() -> bucket<T>*; // TODO: get_
 
     void set_asset_status(asset_ptr<T> asset, asset_status status);
 

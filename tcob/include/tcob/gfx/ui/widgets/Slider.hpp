@@ -46,7 +46,7 @@ protected:
 
     void virtual on_value_changed(i32 newVal);
 
-    auto get_attributes() const -> widget_attributes override;
+    auto attributes() const -> widget_attributes override;
 
 private:
     void handle_dir_input(direction dir);

@@ -61,10 +61,10 @@ void button::on_update(milliseconds /*deltaTime*/)
 {
 }
 
-auto button::get_attributes() const -> widget_attributes
+auto button::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"label", Label()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }

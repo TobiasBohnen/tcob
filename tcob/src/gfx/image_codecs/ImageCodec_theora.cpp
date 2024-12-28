@@ -84,7 +84,7 @@ auto theora_decoder::open() -> std::optional<image::info>
     return std::nullopt;
 }
 
-auto theora_decoder::get_current_frame() const -> u8 const*
+auto theora_decoder::current_frame() const -> u8 const*
 {
     if (!_currentFrame) {
         return nullptr;

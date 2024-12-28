@@ -23,9 +23,9 @@ inline auto convolution_filter<Width, Height>::operator()(image const& img) cons
 
     bool const incAlpha {IncludeAlpha && info.Format == image::format::RGBA};
 
-    f64 const  factor {get_factor()};
-    u8 const   offset {get_offset()};
-    auto const matrix {get_matrix()};
+    f64 const  f {factor()};
+    u8 const   o {offset()};
+    auto const m {matrix()};
 
     locate_service<task_manager>().run_parallel(
         [&](par_task const& ctx) {
@@ -40,7 +40,7 @@ inline auto convolution_filter<Width, Height>::operator()(image const& img) cons
                         isize const imgX {(x - Width / 2 + filterX + imgWidth) % imgWidth};
                         isize const imgY {(y - Height / 2 + filterY + imgHeight) % imgHeight};
                         usize const idx {static_cast<usize>((imgX + (imgY * info.Size.Width)) * bpp)};
-                        i32 const   mat {matrix[static_cast<usize>(filterX + (filterY * Width))]};
+                        i32 const   mat {m[static_cast<usize>(filterX + (filterY * Width))]};
                         red += srcBuffer[idx] * mat;
                         green += srcBuffer[idx + 1] * mat;
                         blue += srcBuffer[idx + 2] * mat;
@@ -50,11 +50,11 @@ inline auto convolution_filter<Width, Height>::operator()(image const& img) cons
                     }
                 }
 
-                u8 const      r {static_cast<u8>(std::clamp(factor * red + offset, 0.0, 255.0))};
-                u8 const      g {static_cast<u8>(std::clamp(factor * green + offset, 0.0, 255.0))};
-                u8 const      b {static_cast<u8>(std::clamp(factor * blue + offset, 0.0, 255.0))};
+                u8 const      r {static_cast<u8>(std::clamp(f * red + o, 0.0, 255.0))};
+                u8 const      g {static_cast<u8>(std::clamp(f * green + o, 0.0, 255.0))};
+                u8 const      b {static_cast<u8>(std::clamp(f * blue + o, 0.0, 255.0))};
                 point_i const pos {static_cast<i32>(x), static_cast<i32>(y)};
-                u8 const      a {incAlpha ? static_cast<u8>(std::clamp(factor * alpha + offset, 0.0, 255.0)) : img.get_pixel(pos).A};
+                u8 const      a {incAlpha ? static_cast<u8>(std::clamp(f * alpha + o, 0.0, 255.0)) : img.get_pixel(pos).A};
                 retValue.set_pixel(pos, {r, g, b, a});
             }
         },

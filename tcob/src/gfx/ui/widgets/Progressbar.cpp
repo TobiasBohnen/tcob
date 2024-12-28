@@ -65,12 +65,12 @@ void progress_bar::on_value_changed(i32 newVal)
     }
 }
 
-auto progress_bar::get_attributes() const -> widget_attributes
+auto progress_bar::attributes() const -> widget_attributes
 {
     widget_attributes retValue {{"min", Min()},
                                 {"max", Max()},
                                 {"value", Value()}};
-    auto const        base {widget::get_attributes()};
+    auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
 }
