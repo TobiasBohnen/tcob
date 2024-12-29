@@ -41,7 +41,7 @@ using polyline_span = std::span<point_f const>;
 
 class TCOB_API polygon final {
 public:
-    struct info {
+    struct information {
         point_f Centroid;
         rect_f  BoundingBox;
     };
@@ -49,7 +49,7 @@ public:
     polyline              Outline; // ccw
     std::vector<polyline> Holes;   // cw
 
-    auto get_info() const -> info; // TODO: get_
+    auto info() const -> information;
 
     auto earcut [[nodiscard]] () const -> std::vector<u32>;
 
@@ -66,8 +66,8 @@ namespace polygons {
 
     TCOB_API auto is_point_inside(point_f point, polyline_span polyline) -> bool;
 
-    TCOB_API auto get_info(std::span<polygon const> polygons) -> polygon::info;
-    TCOB_API auto get_info(polyline_span polyline) -> polygon::info;
+    TCOB_API auto info(std::span<polygon const> polygons) -> polygon::information;
+    TCOB_API auto info(polyline_span polyline) -> polygon::information;
 
     TCOB_API void move_by(std::span<polygon> polygons, point_f offset);
 

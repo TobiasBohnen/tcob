@@ -24,7 +24,7 @@ auto render_texture::GetTexcoords() -> rect_f
 
 auto render_texture::get_size() const -> size_i
 {
-    return texture::get_size();
+    return info().Size;
 }
 
 }

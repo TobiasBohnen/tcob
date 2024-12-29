@@ -241,7 +241,7 @@ void font::Done()
     truetype_font_engine::Done();
 }
 
-auto font::get_info() const -> font::info const&
+auto font::info() const -> font::information const&
 {
     return _info;
 }
@@ -258,7 +258,7 @@ auto font::cache_render_glyph(u32 cp) -> bool
         // check font texture space
         if (_fontTextureCursor.X + bitmapSize.Width >= FONT_TEXTURE_SIZE) { // new line
             _fontTextureCursor.X = 0;
-            _fontTextureCursor.Y += static_cast<i32>(get_info().LineHeight) + GLYPH_PADDING;
+            _fontTextureCursor.Y += static_cast<i32>(info().LineHeight) + GLYPH_PADDING;
         }
 
         if (_fontTextureCursor.Y + bitmapSize.Height >= FONT_TEXTURE_SIZE) { // new level

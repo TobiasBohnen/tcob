@@ -130,7 +130,7 @@ inline auto select_statement<Values...>::cross_join(utf8_string const& table) ->
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::get_query() const -> utf8_string
+inline auto select_statement<Values...>::query_string() const -> utf8_string
 {
     return std::format(
         "SELECT {} {} FROM {} {} {} {} {} {} {};",
@@ -144,7 +144,7 @@ template <typename... Values>
 inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... params)
 {
     // prepare
-    bool const prepared {prepare(get_query())};
+    bool const prepared {prepare(query_string())};
 
     if constexpr (sizeof...(params) > 0) {
         if (prepared) {
@@ -190,7 +190,7 @@ inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -
     static_assert(sizeof...(Values) > 1);
 
     // prepare
-    bool const prepared {prepare(get_query())};
+    bool const prepared {prepare(query_string())};
 
     if constexpr (sizeof...(params) > 0) {
         if (prepared) {
@@ -220,7 +220,7 @@ inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -
 inline auto update_statement::operator()(auto&&... values) -> bool
 {
     // prepare
-    if (!prepare(get_query())) { return false; }
+    if (!prepare(query_string())) { return false; }
 
     // bind parameters
     i32 idx {1};
@@ -237,7 +237,7 @@ inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
     // prepare
     usize const valueSize {detail::value_size<std::remove_cvref_t<decltype(value)>>::Size};
     usize const valueCount {detail::value_count(value, values...)};
-    if (!prepare(get_query(valueSize, valueCount))) {
+    if (!prepare(query_string(valueSize, valueCount))) {
         return false;
     }
 
@@ -255,7 +255,7 @@ inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
 inline auto delete_statement::operator()(auto&&... values) -> bool
 {
     // prepare
-    if (!prepare(get_query())) { return false; }
+    if (!prepare(query_string())) { return false; }
 
     if constexpr (sizeof...(values) > 0) {
         // bind parameters

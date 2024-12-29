@@ -26,7 +26,7 @@ void element_painter::draw_image(image_draw_context const& ctx)
         if (ctx.Repeat == background_repeat::NoRepeat) {
             _canvas.draw_image(ctx.Image, "default", ctx.OriginBox);
         } else {
-            size_f     imgSize {ctx.Image->get_size()};
+            size_f     imgSize {ctx.Image->info().Size};
             auto const imgPattern {_canvas.create_image_pattern(ctx.OriginBox.top_left(), imgSize, degree_f {0.0f}, ctx.Image, 1)};
             _canvas.set_fill_style(imgPattern);
 

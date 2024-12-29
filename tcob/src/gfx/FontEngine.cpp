@@ -53,7 +53,7 @@ truetype_font_engine::~truetype_font_engine()
     }
 }
 
-auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info>
+auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::information>
 {
     assert(library);
 

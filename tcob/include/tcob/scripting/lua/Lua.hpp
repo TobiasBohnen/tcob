@@ -186,7 +186,7 @@ public:
 
     auto get_top() const -> i32;
 
-    auto get_info(string const& what, lua_Debug* ar) const -> bool;
+    auto info(string const& what, lua_Debug* ar) const -> bool;
     auto get_local(lua_Debug* ar, i32 n) const -> string;
     auto set_local(lua_Debug* ar, i32 n) const -> string;
 

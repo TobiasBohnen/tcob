@@ -93,7 +93,7 @@ auto body::local_center() const -> point_f
     return _impl->get_local_center();
 }
 
-auto body::get_world() -> world&
+auto body::parent() -> world&
 {
     return _world;
 }

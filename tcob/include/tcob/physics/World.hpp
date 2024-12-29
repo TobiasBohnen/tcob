@@ -136,9 +136,9 @@ public:
     auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;
     void remove_joint(joint const& joint);
 
-    auto get_body_events() const -> body_events;       // TODO: get_
-    auto get_contact_events() const -> contact_events; // TODO: get_
-    auto get_sensor_events() const -> sensor_events;   // TODO: get_
+    auto body_events() const -> physics::body_events;
+    auto contact_events() const -> physics::contact_events;
+    auto sensor_events() const -> physics::sensor_events;
 
     void draw(debug_draw const& draw) const;
 

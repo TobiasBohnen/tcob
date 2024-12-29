@@ -41,7 +41,7 @@ auto shape::operator==(shape const& other) const -> bool
     return _impl->equal(other._impl.get());
 }
 
-auto shape::get_body() -> body&
+auto shape::parent() -> body&
 {
     return _body;
 }

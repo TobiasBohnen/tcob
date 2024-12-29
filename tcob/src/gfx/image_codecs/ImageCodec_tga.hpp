@@ -114,7 +114,7 @@ namespace tga {
 class tga_decoder final : public image_decoder {
 public:
     auto decode(io::istream& in) -> std::optional<image> override;
-    auto decode_info(io::istream& in) -> std::optional<image::info> override;
+    auto decode_info(io::istream& in) -> std::optional<image::information> override;
 
 private:
     tga::footer _footer {};
@@ -128,7 +128,7 @@ public:
     auto encode(image const& img, io::ostream& out) const -> bool override;
 
 private:
-    void write_header(image::info const& image, io::ostream& out) const;
+    void write_header(image::information const& image, io::ostream& out) const;
     void write_image_data(image const& img, io::ostream& out) const;
     void write_extension_area(io::ostream& out) const;
     void write_footer(io::ostream& out, std::streamsize extOffset) const;

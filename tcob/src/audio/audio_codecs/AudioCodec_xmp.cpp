@@ -61,7 +61,7 @@ void xmp_decoder::seek_from_start(milliseconds pos)
     xmp_play_buffer(_context, nullptr, 0, 0);
 }
 
-auto xmp_decoder::open() -> std::optional<buffer::info>
+auto xmp_decoder::open() -> std::optional<buffer::information>
 {
     if (xmp_load_module_from_callbacks(_context, &stream(), xmpCallbacks) == 0) {
         xmp_module_info info {};

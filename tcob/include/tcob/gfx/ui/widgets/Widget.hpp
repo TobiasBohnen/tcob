@@ -110,7 +110,7 @@ protected:
 
     void virtual on_styles_changed();
 
-    auto get_styles() const -> style_collection const&; // TODO: get_
+    auto styles() const -> style_collection const&;
 
     template <std::derived_from<style_base> T>
     auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;

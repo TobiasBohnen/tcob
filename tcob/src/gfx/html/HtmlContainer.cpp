@@ -84,7 +84,7 @@ auto container::create_font(char const* faceName, i32 size, i32 weight, litehtml
 
     auto const font {_config.Fonts->get_font(style, size)};
 
-    auto const& fontInfo {font->get_info()};
+    auto const& fontInfo {font->info()};
     fm->ascent      = static_cast<i32>(fontInfo.Ascender);
     fm->descent     = -static_cast<i32>(fontInfo.Descender);
     fm->height      = fm->ascent + fm->descent;
@@ -149,8 +149,8 @@ void container::get_image_size(char const* src, char const* baseurl, litehtml::s
 
     auto* const tex {_images[src]};
     if (tex) {
-        sz.height = tex->get_size().Height;
-        sz.width  = tex->get_size().Width;
+        sz.height = tex->info().Size.Height;
+        sz.width  = tex->info().Size.Width;
     }
 }
 

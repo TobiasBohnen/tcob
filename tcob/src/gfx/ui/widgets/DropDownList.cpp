@@ -257,7 +257,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
         f32 const diff {get_item_height() / std::ssize(_items) * (invert ? -5 : 5)};
         if (orien == orientation::Vertical) {
-            _vScrollbar.set_target_value(_vScrollbar.get_target_value() + diff, delay);
+            _vScrollbar.set_target_value(_vScrollbar.target_value() + diff, delay);
         }
         ev.Handled = true;
     }
@@ -301,7 +301,7 @@ auto drop_down_list::get_item_rect(isize index, f32 itemHeight, rect_f const& li
 {
     rect_f retValue {listRect};
     retValue.Size.Height = itemHeight;
-    retValue.Position.Y  = listRect.top() + (retValue.height() * index) - _vScrollbar.get_current_value();
+    retValue.Position.Y  = listRect.top() + (retValue.height() * index) - _vScrollbar.current_value();
     return retValue;
 }
 

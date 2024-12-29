@@ -160,11 +160,11 @@ auto pnm_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto pnm_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto pnm_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
     return check_supported_format(_header)
-        ? std::optional {image::info {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGB}}
+        ? std::optional {image::information {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGB}}
         : std::nullopt;
 }
 }

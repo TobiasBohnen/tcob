@@ -189,7 +189,7 @@ auto state_view::get_top() const -> i32
     return lua_gettop(_state);
 }
 
-auto state_view::get_info(string const& what, lua_Debug* ar) const -> bool
+auto state_view::info(string const& what, lua_Debug* ar) const -> bool
 {
     return lua_getinfo(_state, what.c_str(), ar) != 0;
 }

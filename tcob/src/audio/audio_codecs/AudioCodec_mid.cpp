@@ -59,7 +59,7 @@ void midi_decoder::seek_from_start(milliseconds pos)
     }
 }
 
-auto midi_decoder::open() -> std::optional<buffer::info>
+auto midi_decoder::open() -> std::optional<buffer::information>
 {
     _font            = std::any_cast<assets::asset_ptr<sound_font>>(context());
     _info.SampleRate = _font->get_sample_rate();

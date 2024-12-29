@@ -26,19 +26,19 @@ public:
     void seek_from_start(milliseconds pos) override;
 
 protected:
-    auto open() -> std::optional<buffer::info> override;
+    auto open() -> std::optional<buffer::information> override;
     auto decode(std::span<f32> outputSamples) -> i32 override;
 
 private:
-    buffer::info _info {};
-    OggOpusFile* _file {nullptr};
+    buffer::information _info {};
+    OggOpusFile*        _file {nullptr};
 };
 
 ////////////////////////////////////////////////////////////
 
 class opus_encoder final : public encoder {
 public:
-    auto encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool override;
+    auto encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool override;
 };
 
 }

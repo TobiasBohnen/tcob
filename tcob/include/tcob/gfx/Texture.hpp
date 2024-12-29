@@ -16,6 +16,7 @@ namespace tcob::gfx {
 
 class TCOB_API texture {
 public:
+    ////////////////////////////////////////////////////////////
     enum class format : u8 {
         R8,
         RGB8,
@@ -35,6 +36,15 @@ public:
         MirrorClampToEdge
     };
 
+    struct information final {
+        size_i Size;
+        format Format {};
+        u32    Depth {};
+
+        auto operator==(information const& other) const -> bool = default;
+    };
+    ////////////////////////////////////////////////////////////
+
     texture();
     virtual ~texture();
 
@@ -43,9 +53,7 @@ public:
     prop_fn<filtering> Filtering;
     prop_fn<wrapping>  Wrapping;
 
-    auto get_size() const -> size_i;   // TODO: get_
-    auto get_format() const -> format; // TODO: get_
-    auto get_depth() const -> u32;     // TODO: get_
+    auto info() const -> information;
 
     void create(size_i size, u32 depth, format f);
 
@@ -104,8 +112,8 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    image::info  _frameInfo {};
-    milliseconds _elapsedTime {0};
+    image::information _frameInfo {};
+    milliseconds       _elapsedTime {0};
 
     std::unique_ptr<animated_image_decoder> _decoder {};
 

@@ -26,7 +26,7 @@ image::image(size_i size, format f)
 image::image(size_i size, format f, std::span<u8 const> data)
     : image {size, f}
 {
-    assert(std::ssize(data) == size.Width * size.Height * image::info::GetBPP(f));
+    assert(std::ssize(data) == size.Width * size.Height * image::information::GetBPP(f));
     _buffer = {data.begin(), data.end()};
 }
 
@@ -59,7 +59,7 @@ auto image::buffer(rect_i const& bounds) const -> std::vector<u8>
     return retValue;
 }
 
-auto image::get_info() const -> info const&
+auto image::info() const -> information const&
 {
     return _info;
 }
@@ -144,7 +144,7 @@ auto image::Create(size_i size, format f, std::span<u8 const> data) -> image
 auto image::CreateEmpty(size_i size, format f) -> image
 {
     image retValue {size, f};
-    retValue._buffer.resize(static_cast<usize>(size.Width * size.Height * image::info::GetBPP(f)));
+    retValue._buffer.resize(static_cast<usize>(size.Width * size.Height * image::information::GetBPP(f)));
     return retValue;
 }
 
@@ -190,7 +190,7 @@ auto image::load_async(path const& file) noexcept -> std::future<load_status>
     return locate_service<task_manager>().run_async<load_status>([&, file]() { return load(file); });
 }
 
-auto image::LoadInfo(path const& file) noexcept -> std::optional<info>
+auto image::LoadInfo(path const& file) noexcept -> std::optional<information>
 {
     io::ifstream fs {file};
     if (auto decoder {locate_service<image_decoder::factory>().create_from_sig_or_ext(fs, io::get_extension(file))}) {
@@ -230,22 +230,22 @@ auto image::save_async(path const& file) const -> std::future<bool>
 
 ////////////////////////////////////////////////////////////
 
-auto image::info::size_in_bytes() const -> isize
+auto image::information::size_in_bytes() const -> isize
 {
     return Size.Height * Size.Width * static_cast<isize>(bytes_per_pixel());
 }
 
-auto image::info::bytes_per_pixel() const -> i32
+auto image::information::bytes_per_pixel() const -> i32
 {
     return GetBPP(Format);
 }
 
-auto image::info::stride() const -> i32
+auto image::information::stride() const -> i32
 {
     return Size.Width * bytes_per_pixel(); // no padding bytes
 }
 
-auto image::info::GetBPP(format f) -> i32
+auto image::information::GetBPP(format f) -> i32
 {
     switch (f) {
     case image::format::RGB:
@@ -259,7 +259,7 @@ auto image::info::GetBPP(format f) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto animated_image_decoder::open(std::shared_ptr<io::istream> in) -> std::optional<image::info>
+auto animated_image_decoder::open(std::shared_ptr<io::istream> in) -> std::optional<image::information>
 {
     _stream = std::move(in);
     return open();

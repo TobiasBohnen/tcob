@@ -135,7 +135,7 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
         f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
         if (orien == orientation::Vertical) {
-            _vScrollbar.set_target_value(_vScrollbar.get_target_value() + diff, delay);
+            _vScrollbar.set_target_value(_vScrollbar.target_value() + diff, delay);
         }
         ev.Handled = true;
     }
@@ -161,7 +161,7 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
 
 auto vscroll_widget::get_scrollbar_value() const -> f32
 {
-    return _vScrollbar.get_current_value();
+    return _vScrollbar.current_value();
 }
 
 void vscroll_widget::set_scrollbar_value(f32 value)

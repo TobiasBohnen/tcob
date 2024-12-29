@@ -729,7 +729,7 @@ auto cfg_texture_loader::reload_asset(asset<texture>& asset) -> bool
         auto& info {_reloadInfoTex[name]};
         for (auto& img : info) {
             auto const  image {*image::Load(img.Path)};
-            auto const& imgInfo {image.get_info()};
+            auto const& imgInfo {image.info()};
             if (imgInfo.bytes_per_pixel() == 4) {
                 asset->update_data(image.buffer(), img.Depth, 0, 4);
             } else {
@@ -960,9 +960,9 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
                 // update texture
                 auto const& tex {*def->assetPtr};
                 auto const& img {imgIt->Image};
-                auto const& imgInfo {img.get_info()};
+                auto const& imgInfo {img.info()};
 
-                if (tex.get_size() != imgInfo.Size) {
+                if (tex.info().Size != imgInfo.Size) {
                     logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
                     set_asset_status(def->assetPtr, asset_status::Error);
                     continue;

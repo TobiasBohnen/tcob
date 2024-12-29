@@ -635,7 +635,7 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
             [&](image_pattern const& arg) -> canvas_paint {
                 return _canvas.create_image_pattern(
                     rect.top_left(),
-                    arg.Stretch ? rect.Size : size_f {arg.Texture->get_size()},
+                    arg.Stretch ? rect.Size : size_f {arg.Texture->info().Size},
                     degree_f {0}, arg.Texture.ptr(), 1.0f);
             },
             [&](nine_patch const&) -> canvas_paint {

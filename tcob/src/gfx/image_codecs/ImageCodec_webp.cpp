@@ -33,13 +33,13 @@ auto webp_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _buffer = in.read_all<u8>();
 
     WebPBitstreamFeatures features;
     if (WebPGetFeatures(_buffer.data(), _buffer.size(), &features) == VP8_STATUS_OK) {
-        return image::info {.Size = {features.width, features.height}, .Format = features.has_alpha ? image::format::RGBA : image::format::RGB};
+        return image::information {.Size = {features.width, features.height}, .Format = features.has_alpha ? image::format::RGBA : image::format::RGB};
     }
 
     return std::nullopt;
@@ -49,7 +49,7 @@ auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 
 auto webp_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
-    auto const& info {image.get_info()};
+    auto const& info {image.info()};
     auto const  imageBuffer {image.buffer()};
     u8*         output {};
     if (info.Format == image::format::RGBA) {
@@ -82,7 +82,7 @@ webp_anim_decoder::~webp_anim_decoder()
     }
 }
 
-auto webp_anim_decoder::open() -> std::optional<image::info>
+auto webp_anim_decoder::open() -> std::optional<image::information>
 {
     if (_decoder) { return std::nullopt; }
 
@@ -103,7 +103,7 @@ auto webp_anim_decoder::open() -> std::optional<image::info>
         WebPAnimInfo anim_info;
         WebPAnimDecoderGetInfo(_decoder, &anim_info);
         _size = {static_cast<i32>(anim_info.canvas_width), static_cast<i32>(anim_info.canvas_height)};
-        return image::info {_size, image::format::RGBA};
+        return image::information {_size, image::format::RGBA};
     }
 
     return std::nullopt;
@@ -162,7 +162,7 @@ auto webp_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) 
             break;
         }
 
-        auto const& info {frame.Image.get_info()};
+        auto const& info {frame.Image.info()};
         if (!_encoder) {
             _encoder = WebPAnimEncoderNew(info.Size.Width, info.Size.Height, nullptr);
             _imgSize = info.Size;

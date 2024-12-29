@@ -67,7 +67,7 @@ public:
     auto inner_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
     auto cross_join(utf8_string const& table) -> select_statement&;
 
-    auto get_query() const -> utf8_string; // TODO: get_
+    auto query_string() const -> utf8_string;
 
 private:
     struct values {
@@ -96,7 +96,7 @@ public:
     auto where(utf8_string const& expr) -> update_statement&;
 
 private:
-    auto get_query() const -> utf8_string;
+    auto query_string() const -> utf8_string;
 
     utf8_string _where;
     utf8_string _sql;
@@ -117,7 +117,7 @@ public:
     auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
 
 private:
-    auto get_query(usize valueSize, usize valueCount) const -> utf8_string;
+    auto query_string(usize valueSize, usize valueCount) const -> utf8_string;
 
     utf8_string _sql;
 };
@@ -133,7 +133,7 @@ public:
     auto where(utf8_string const& expr) -> delete_statement&;
 
 private:
-    auto get_query() const -> utf8_string;
+    auto query_string() const -> utf8_string;
 
     utf8_string _where;
     utf8_string _sql;

@@ -64,7 +64,7 @@ namespace pcx {
         }
 
         void read(io::istream& reader);
-        void static Write(image::info const& info, io::ostream& writer);
+        void static Write(image::information const& info, io::ostream& writer);
     };
 
     auto read_image_data(io::istream& reader, header const& h) -> std::vector<u8>;
@@ -76,7 +76,7 @@ namespace pcx {
 class pcx_decoder final : public image_decoder {
 public:
     auto decode(io::istream& in) -> std::optional<image> override;
-    auto decode_info(io::istream& in) -> std::optional<image::info> override;
+    auto decode_info(io::istream& in) -> std::optional<image::information> override;
 
 private:
     auto read_palette(io::istream& in) const -> std::vector<color>;

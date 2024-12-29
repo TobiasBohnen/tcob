@@ -256,7 +256,7 @@ void terminal::on_paint(widget_painter& painter)
 
         u32 const   fontSize {style->Text.calc_font_size(rect)};
         auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
-        f32 const   fontHeight {font->get_info().LineHeight};
+        f32 const   fontHeight {font->info().LineHeight};
         f32 const   fontWidth {get_font_width(font)};
 
         auto& canvas {painter.get_canvas()};
@@ -421,7 +421,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
             u32 const   fontSize {style->Text.calc_font_size(rect)};
             auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
             f32 const   fontWidth {get_font_width(font)};
-            f32 const   fontHeight {font->get_info().LineHeight};
+            f32 const   fontHeight {font->info().LineHeight};
 
             i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
             i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};

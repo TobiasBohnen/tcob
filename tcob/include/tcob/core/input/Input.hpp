@@ -115,7 +115,7 @@ public:
         point_i Position {point_i::Zero};
     };
 
-    auto get_position() const -> point_i; // TODO: get_
+    auto get_position() const -> point_i; // TODO: set_get_
     void set_position(point_i pos) const;
     auto is_button_down(button button) const -> bool;
 };
@@ -242,7 +242,7 @@ public:
 class TCOB_API clipboard {
 public:
     auto has_text() const -> bool;
-    auto get_text() const -> utf8_string; // TODO: get_
+    auto get_text() const -> utf8_string; // TODO: set_get_
     void set_text(utf8_string const& text);
 };
 
@@ -276,14 +276,14 @@ public:
     signal<i32 const>                      ControllerAdded;
     signal<i32 const>                      ControllerRemoved;
 
-    prop<mode> CurrentInputMode;
+    prop<mode> InputMode;
 
     auto controller_count() const -> isize;
     auto get_controller(i32 index) const -> std::shared_ptr<controller>;
 
-    auto get_mouse() const -> mouse;         // TODO: get_
-    auto get_keyboard() const -> keyboard;   // TODO: get_
-    auto get_clipboard() const -> clipboard; // TODO: get_
+    auto mouse() const -> input::mouse;
+    auto keyboard() const -> input::keyboard;
+    auto clipboard() const -> input::clipboard;
 
     void process_events(SDL_Event* ev);
 

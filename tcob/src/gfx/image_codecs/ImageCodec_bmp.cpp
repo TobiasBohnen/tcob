@@ -90,12 +90,12 @@ auto bmp_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto bmp_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto bmp_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
     if (_header.Signature == SIGNATURE) {
         _infoHeader.read(in);
-        _info = image::info {{_infoHeader.Width, _infoHeader.Height}, image::format::RGBA};
+        _info = image::information {{_infoHeader.Width, _infoHeader.Height}, image::format::RGBA};
         return _info;
     }
     return std::nullopt;
@@ -266,7 +266,7 @@ void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSiz
 
 void static WriteImageData(image const& img, io::ostream& writer)
 {
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
     auto const  data {img.buffer()};
     i32 const   stride {info.stride()};
     i32 const   bpp {info.bytes_per_pixel()};
@@ -288,7 +288,7 @@ void static WriteImageData(image const& img, io::ostream& writer)
     writer.write<u8>(buffer);
 }
 
-void static WriteInfoHeader(image::info const& info, io::ostream& writer)
+void static WriteInfoHeader(image::information const& info, io::ostream& writer)
 {
     writer.write(40);
     writer.write<i32>(info.Size.Width);
@@ -305,7 +305,7 @@ void static WriteInfoHeader(image::info const& info, io::ostream& writer)
 
 auto bmp_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
 
     auto startPos {out.tell()};
     out.seek(14, io::seek_dir::Current);

@@ -28,7 +28,7 @@ public:
     music() = default;
     ~music() override;
 
-    auto info() const -> std::optional<buffer::info>;
+    auto info() const -> std::optional<buffer::information>;
     auto duration() const -> milliseconds override;
     auto playback_position() const -> milliseconds override;
 
@@ -48,10 +48,10 @@ private:
 
     using buffer_array = std::array<std::shared_ptr<audio::al::al_buffer>, STREAM_BUFFER_COUNT>;
 
-    std::unique_ptr<decoder>    _decoder {};
-    i32                         _samplesPlayed {0};
-    std::optional<buffer::info> _info;
-    buffer_array                _buffers {};
+    std::unique_ptr<decoder>           _decoder {};
+    i32                                _samplesPlayed {0};
+    std::optional<buffer::information> _info;
+    buffer_array                       _buffers {};
 
     std::atomic_bool _isRunning {false};
     std::atomic_bool _stopRequested {false};

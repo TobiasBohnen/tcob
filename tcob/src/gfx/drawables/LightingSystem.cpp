@@ -99,7 +99,7 @@ void lighting_system::notify_shadow_changed(shadow_caster* shadow)
         return;
     }
 
-    rect_f const newBounds {polygons::get_info(shadow->Polygon()).BoundingBox};
+    rect_f const newBounds {polygons::info(shadow->Polygon()).BoundingBox};
     if (shadow->_bounds != rect_f::Zero) {
         _quadTree->replace({.Bounds = shadow->_bounds, .Caster = shadow}, {.Bounds = newBounds, .Caster = shadow});
     } else {
@@ -328,7 +328,7 @@ void lighting_system::rebuild_quadtree()
         _quadTree->clear();
         mark_lights_dirty();
         for (auto& sc : _shadowCasters) {
-            _quadTree->add(quadtree_node {.Bounds = polygons::get_info(sc->Polygon()).BoundingBox, .Caster = sc.get()});
+            _quadTree->add(quadtree_node {.Bounds = polygons::info(sc->Polygon()).BoundingBox, .Caster = sc.get()});
         }
     } else {
         _quadTree = std::make_unique<quadtree<quadtree_node>>(Bounds());

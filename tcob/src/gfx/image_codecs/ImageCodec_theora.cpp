@@ -57,7 +57,7 @@ theora_decoder::~theora_decoder()
 
 constexpr i32 MAX_FRAMES {20};
 
-auto theora_decoder::open() -> std::optional<image::info>
+auto theora_decoder::open() -> std::optional<image::information>
 {
     _io.userdata = &stream();
     _decoder     = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA);
@@ -78,7 +78,7 @@ auto theora_decoder::open() -> std::optional<image::info>
         }
         _size = {static_cast<i32>(video->width), static_cast<i32>(video->height)};
         THEORAPLAY_freeVideo(video);
-        return image::info {.Size = _size, .Format = image::format::RGBA};
+        return image::information {.Size = _size, .Format = image::format::RGBA};
     }
 
     return std::nullopt;

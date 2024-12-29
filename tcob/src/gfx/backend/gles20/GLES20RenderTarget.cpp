@@ -48,7 +48,7 @@ void gl_render_target::finalize_render() const
 void gl_render_target::set_viewport(rect_i const& rect)
 {
     if (_tex) {
-        GLCHECK(glViewport(rect.left(), _tex->get_size().Height - rect.height() - rect.top(), rect.width(), rect.height()));
+        GLCHECK(glViewport(rect.left(), _tex->info().Size.Height - rect.height() - rect.top(), rect.width(), rect.height()));
     } else {
         GLCHECK(glViewport(rect.left(), rect.top(), rect.width(), rect.height()));
     }
@@ -107,7 +107,7 @@ void gl_render_target::bind_material(material const* mat) const
         shaderId = shader->get_id();
     } else {
         if (mat->Texture.is_ready()) {
-            if (mat->Texture->get_format() == texture::format::R8) {
+            if (mat->Texture->info().Format == texture::format::R8) {
                 shaderId = gl_context::DefaultFontShader;
             } else {
                 shaderId = gl_context::DefaultTexturedShader;

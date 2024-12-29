@@ -234,9 +234,9 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
             f32 const max {get_scroll_max_value(orien)};
             f32 const diff {(max - min) / (invert ? -5 : 5)};
             if (orien == orientation::Vertical) {
-                _vScrollbar.set_target_value(_vScrollbar.get_target_value() + diff, delay);
+                _vScrollbar.set_target_value(_vScrollbar.target_value() + diff, delay);
             } else if (orien == orientation::Horizontal) {
-                _hScrollbar.set_target_value(_hScrollbar.get_target_value() + diff, delay);
+                _hScrollbar.set_target_value(_hScrollbar.target_value() + diff, delay);
             }
 
             ev.Handled = true;
@@ -267,7 +267,7 @@ auto panel::get_layout() -> std::shared_ptr<layout>
 
 auto panel::scroll_offset() const -> point_f
 {
-    return {_hScrollbar.get_current_value(), _vScrollbar.get_current_value()};
+    return {_hScrollbar.current_value(), _vScrollbar.current_value()};
 }
 
 void panel::set_scroll_offset(point_f off)

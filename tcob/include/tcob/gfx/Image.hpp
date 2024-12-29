@@ -29,7 +29,7 @@ public:
         RGBA
     };
 
-    class TCOB_API info {
+    class TCOB_API information {
     public:
         size_i Size {size_i::Zero};
         format Format {};
@@ -45,7 +45,7 @@ public:
 
     image() = default;
 
-    auto get_info() const -> info const&; // TODO: get_
+    auto info() const -> information const&;
 
     auto buffer() const -> std::span<u8 const>;
     auto buffer() -> std::span<u8>;
@@ -72,14 +72,14 @@ public:
 
     auto static Load(path const& file) noexcept -> std::optional<image>;                   // TODO: change to result
     auto static Load(io::istream& in, string const& ext) noexcept -> std::optional<image>; // TODO: change to result
-    auto static LoadInfo(path const& file) noexcept -> std::optional<info>;                // TODO: change to result
+    auto static LoadInfo(path const& file) noexcept -> std::optional<information>;         // TODO: change to result
 
 private:
     image(size_i size, format f);
     image(size_i size, format f, std::span<u8 const> data);
 
     std::vector<u8> _buffer;
-    info            _info;
+    information     _info;
 };
 
 ////////////////////////////////////////////////////////////
@@ -93,8 +93,8 @@ public:
     image_decoder()          = default;
     virtual ~image_decoder() = default;
 
-    auto virtual decode(io::istream& in) -> std::optional<image>            = 0;
-    auto virtual decode_info(io::istream& in) -> std::optional<image::info> = 0;
+    auto virtual decode(io::istream& in) -> std::optional<image>                   = 0;
+    auto virtual decode_info(io::istream& in) -> std::optional<image::information> = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -129,16 +129,16 @@ public:
     animated_image_decoder()          = default;
     virtual ~animated_image_decoder() = default;
 
-    auto open(std::shared_ptr<io::istream> in) -> std::optional<image::info>;
+    auto open(std::shared_ptr<io::istream> in) -> std::optional<image::information>;
 
     auto virtual current_frame() const -> u8 const* = 0;
     auto virtual advance(milliseconds ts) -> status = 0;
     void virtual reset()                            = 0;
 
 protected:
-    auto virtual open() -> std::optional<image::info> = 0;
+    auto virtual open() -> std::optional<image::information> = 0;
 
-    auto stream() -> io::istream&; // TODO: get_
+    auto stream() -> io::istream&;
 
 private:
     std::shared_ptr<io::istream> _stream;

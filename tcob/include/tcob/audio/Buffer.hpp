@@ -19,13 +19,15 @@ namespace tcob::audio {
 
 class TCOB_API buffer final {
 public:
-    struct info {
+    struct information {
         i32 Channels {0};
         i32 SampleRate {0};
         i64 FrameCount {0};
+
+        auto operator==(information const& other) const -> bool = default;
     };
 
-    auto get_info() const -> info const&; // TODO: get_
+    auto info() const -> information const&;
 
     auto data() const -> std::span<f32 const>;
     auto data() -> std::span<f32>;
@@ -38,10 +40,10 @@ public:
     auto save [[nodiscard]] (io::ostream& out, string const& ext) const -> bool;
     auto save_async [[nodiscard]] (path const& file) const -> std::future<bool>;
 
-    auto static Create(info const& info, std::span<f32> data) -> buffer;
+    auto static Create(information const& info, std::span<f32> data) -> buffer;
 
 private:
-    info             _info;
+    information      _info;
     std::vector<f32> _buffer;
 };
 
@@ -58,23 +60,23 @@ public:
     auto operator=(decoder const& other) noexcept -> decoder& = delete;
     virtual ~decoder();
 
-    auto open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>;
+    auto open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::information>;
 
     auto decode(isize size) -> std::optional<std::vector<f32>>;
 
     void virtual seek_from_start(milliseconds pos) = 0;
 
 protected:
-    auto virtual open() -> std::optional<buffer::info>       = 0;
-    auto virtual decode(std::span<f32> outputSamples) -> i32 = 0;
+    auto virtual open() -> std::optional<buffer::information> = 0;
+    auto virtual decode(std::span<f32> outputSamples) -> i32  = 0;
 
     auto stream() -> io::istream&;
     auto context() -> std::any&;
 
 private:
-    std::shared_ptr<io::istream> _stream;
-    std::any                     _ctx;
-    std::optional<buffer::info>  _info;
+    std::shared_ptr<io::istream>       _stream;
+    std::any                           _ctx;
+    std::optional<buffer::information> _info;
 };
 
 ////////////////////////////////////////////////////////////
@@ -88,7 +90,7 @@ public:
     encoder()          = default;
     virtual ~encoder() = default;
 
-    auto virtual encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool = 0;
+    auto virtual encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool = 0;
 };
 
 }

@@ -183,7 +183,7 @@ void clipboard::set_text(utf8_string const& text)
 
 system::system()
 {
-    CurrentInputMode = mode::KeyboardMouse;
+    InputMode = mode::KeyboardMouse;
 }
 
 system::~system()
@@ -210,17 +210,17 @@ auto system::get_controller(i32 index) const -> std::shared_ptr<controller>
     return it->second;
 }
 
-auto system::get_mouse() const -> mouse
+auto system::mouse() const -> input::mouse
 {
     return {};
 }
 
-auto system::get_keyboard() const -> keyboard
+auto system::keyboard() const -> input::keyboard
 {
     return {};
 }
 
-auto system::get_clipboard() const -> clipboard
+auto system::clipboard() const -> input::clipboard
 {
     return {};
 }
@@ -236,7 +236,7 @@ void system::process_events(SDL_Event* ev)
             .KeyMods  = convert_enum(static_cast<SDL_Keymod>(ev->key.keysym.mod)),
             .KeyCode  = convert_enum(ev->key.keysym.sym)};
         KeyDown(event);
-        CurrentInputMode = mode::KeyboardMouse;
+        InputMode = mode::KeyboardMouse;
     } break;
     case SDL_KEYUP: {
         keyboard::event const event {
@@ -246,7 +246,7 @@ void system::process_events(SDL_Event* ev)
             .KeyMods  = convert_enum(static_cast<SDL_Keymod>(ev->key.keysym.mod)),
             .KeyCode  = convert_enum(ev->key.keysym.sym)};
         KeyUp(event);
-        CurrentInputMode = mode::KeyboardMouse;
+        InputMode = mode::KeyboardMouse;
     } break;
     case SDL_TEXTINPUT: {
         keyboard::text_input_event const event {.Text = ev->text.text};
@@ -264,7 +264,7 @@ void system::process_events(SDL_Event* ev)
             .Position       = {ev->motion.x, ev->motion.y},
             .RelativeMotion = {ev->motion.xrel, ev->motion.yrel}};
         MouseMotion(event);
-        CurrentInputMode = mode::KeyboardMouse;
+        InputMode = mode::KeyboardMouse;
     } break;
     case SDL_MOUSEBUTTONDOWN: {
         mouse::button_event const event {
@@ -273,7 +273,7 @@ void system::process_events(SDL_Event* ev)
             .Clicks   = ev->button.clicks,
             .Position = {ev->button.x, ev->button.y}};
         MouseButtonDown(event);
-        CurrentInputMode = mode::KeyboardMouse;
+        InputMode = mode::KeyboardMouse;
     } break;
     case SDL_MOUSEBUTTONUP: {
         mouse::button_event const event {
@@ -282,7 +282,7 @@ void system::process_events(SDL_Event* ev)
             .Clicks   = ev->button.clicks,
             .Position = {ev->button.x, ev->button.y}};
         MouseButtonUp(event);
-        CurrentInputMode = mode::KeyboardMouse;
+        InputMode = mode::KeyboardMouse;
     } break;
     case SDL_MOUSEWHEEL: {
         mouse::wheel_event const event {
@@ -290,7 +290,7 @@ void system::process_events(SDL_Event* ev)
             .Precise  = ev->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? point_f {-ev->wheel.preciseX, -ev->wheel.preciseY} : point_f {ev->wheel.preciseX, ev->wheel.preciseY},
             .Position = {ev->wheel.mouseX, ev->wheel.mouseY}};
         MouseWheel(event);
-        CurrentInputMode = mode::KeyboardMouse;
+        InputMode = mode::KeyboardMouse;
     } break;
     case SDL_JOYAXISMOTION: {
         joystick::axis_event const event {
@@ -298,7 +298,7 @@ void system::process_events(SDL_Event* ev)
             .Axis  = ev->jaxis.axis,
             .Value = ev->jaxis.value};
         JoystickAxisMotion(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_JOYHATMOTION: {
         joystick::hat_event const event {
@@ -306,7 +306,7 @@ void system::process_events(SDL_Event* ev)
             .Hat   = convert_joystick_hat(ev->jhat.hat),
             .Value = ev->jhat.value};
         JoystickHatMotion(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_JOYBUTTONDOWN: {
         joystick::button_event const event {
@@ -314,7 +314,7 @@ void system::process_events(SDL_Event* ev)
             .Button  = ev->jbutton.button,
             .Pressed = ev->jbutton.state == SDL_PRESSED};
         JoystickButtonDown(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_JOYBUTTONUP: {
         joystick::button_event const event {
@@ -322,7 +322,7 @@ void system::process_events(SDL_Event* ev)
             .Button  = ev->jbutton.button,
             .Pressed = ev->jbutton.state == SDL_PRESSED};
         JoystickButtonUp(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_CONTROLLERAXISMOTION: {
         controller::axis_event const event {
@@ -332,7 +332,7 @@ void system::process_events(SDL_Event* ev)
             .Value         = ev->caxis.value,
             .RelativeValue = static_cast<f32>(ev->caxis.value) / std::numeric_limits<i16>::max()};
         ControllerAxisMotion(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_CONTROLLERBUTTONDOWN: {
         controller::button_event const event {
@@ -341,7 +341,7 @@ void system::process_events(SDL_Event* ev)
             .Button     = convert_enum(static_cast<SDL_GameControllerButton>(ev->cbutton.button)),
             .Pressed    = ev->cbutton.state == SDL_PRESSED};
         ControllerButtonDown(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_CONTROLLERBUTTONUP: {
         controller::button_event const event {
@@ -350,7 +350,7 @@ void system::process_events(SDL_Event* ev)
             .Button     = convert_enum(static_cast<SDL_GameControllerButton>(ev->cbutton.button)),
             .Pressed    = ev->cbutton.state == SDL_PRESSED};
         ControllerButtonUp(event);
-        CurrentInputMode = mode::Controller;
+        InputMode = mode::Controller;
     } break;
     case SDL_JOYDEVICEADDED: {
         i32 const id {ev->jdevice.which};

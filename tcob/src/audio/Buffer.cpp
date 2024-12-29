@@ -12,7 +12,7 @@
 
 namespace tcob::audio {
 
-auto buffer::get_info() const -> info const&
+auto buffer::info() const -> information const&
 {
     return _info;
 }
@@ -82,7 +82,7 @@ auto buffer::save_async(path const& file) const -> std::future<bool>
     return retValue;
 }
 
-auto buffer::Create(info const& info, std::span<f32> data) -> buffer
+auto buffer::Create(information const& info, std::span<f32> data) -> buffer
 {
     buffer retValue;
     retValue._info   = info;
@@ -97,7 +97,7 @@ using namespace std::chrono_literals;
 decoder::decoder()  = default;
 decoder::~decoder() = default;
 
-auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::info>
+auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::information>
 {
     _stream = std::move(in);
     _ctx    = ctx;

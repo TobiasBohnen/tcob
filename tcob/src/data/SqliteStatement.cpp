@@ -96,7 +96,7 @@ auto update_statement::where(utf8_string const& expr) -> update_statement&
     return *this;
 }
 
-auto update_statement::get_query() const -> utf8_string
+auto update_statement::query_string() const -> utf8_string
 {
     return std::format("{} WHERE {};", _sql, _where);
 }
@@ -120,7 +120,7 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
     _sql = std::format("INSERT {} INTO {} ({})", modeStr, table, columns);
 }
 
-auto insert_statement::get_query(usize valueSize, usize valueCount) const -> utf8_string
+auto insert_statement::query_string(usize valueSize, usize valueCount) const -> utf8_string
 {
     // values
     auto const paramLine {"(" + helper::join(std::vector<utf8_string>(valueSize, "?"), ", ") + ")"};
@@ -145,7 +145,7 @@ auto delete_statement::where(utf8_string const& expr) -> delete_statement&
     return *this;
 }
 
-auto delete_statement::get_query() const -> utf8_string
+auto delete_statement::query_string() const -> utf8_string
 {
     return std::format("{} WHERE {};", _sql, _where);
 }

@@ -259,7 +259,7 @@ void widget::do_key_down(input::keyboard::event const& ev)
 
     if (!ev.Handled) {
         auto const& controls {_form->Controls};
-        if (!locate_service<input::system>().get_keyboard().is_key_down(controls->ActivateKey)) {
+        if (!locate_service<input::system>().keyboard().is_key_down(controls->ActivateKey)) {
             if (ev.KeyCode == controls->NavLeftKey) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Left);
             } else if (ev.KeyCode == controls->NavRightKey) {
@@ -525,7 +525,7 @@ void widget::on_styles_changed()
     }
 }
 
-auto widget::get_styles() const -> style_collection const&
+auto widget::styles() const -> style_collection const&
 {
     return _form->Styles();
 }

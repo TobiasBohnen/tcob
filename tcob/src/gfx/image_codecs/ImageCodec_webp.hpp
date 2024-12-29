@@ -26,7 +26,7 @@ namespace tcob::gfx::detail {
 class webp_decoder final : public image_decoder {
 public:
     auto decode(io::istream& in) -> std::optional<image> override;
-    auto decode_info(io::istream& in) -> std::optional<image::info> override;
+    auto decode_info(io::istream& in) -> std::optional<image::information> override;
 
 private:
     std::vector<u8> _buffer;
@@ -51,7 +51,7 @@ public:
     void reset() override;
 
 protected:
-    auto open() -> std::optional<image::info> override;
+    auto open() -> std::optional<image::information> override;
 
 private:
     size_i _size {size_i::Zero};

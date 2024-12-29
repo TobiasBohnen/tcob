@@ -26,20 +26,20 @@ public:
     void seek_from_start(milliseconds pos) override;
 
 protected:
-    auto open() -> std::optional<buffer::info> override;
+    auto open() -> std::optional<buffer::information> override;
     auto decode(std::span<f32> outputSamples) -> i32 override;
 
 private:
-    buffer::info   _info {};
-    OggVorbis_File _file {};
-    i32            _section {0};
+    buffer::information _info {};
+    OggVorbis_File      _file {};
+    i32                 _section {0};
 };
 
 ////////////////////////////////////////////////////////////
 
 class vorbis_encoder final : public encoder {
 public:
-    auto encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool override;
+    auto encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool override;
 
 private:
     void flush(io::ostream& out, ogg_stream_state& os, ogg_page& og, ogg_packet& op, vorbis_dsp_state& vd, vorbis_block& vb) const;

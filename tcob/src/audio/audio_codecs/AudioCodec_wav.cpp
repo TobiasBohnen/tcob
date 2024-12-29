@@ -48,7 +48,7 @@ void wav_decoder::seek_from_start(milliseconds pos)
     drwav_seek_to_pcm_frame(&_wav, static_cast<u64>(offset));
 }
 
-auto wav_decoder::open() -> std::optional<buffer::info>
+auto wav_decoder::open() -> std::optional<buffer::information>
 {
     if (drwav_init(&_wav, &read_wav, &seek_wav, &stream(), nullptr)) {
         _info.Channels   = _wav.channels;
@@ -68,7 +68,7 @@ auto wav_decoder::decode(std::span<f32> outputSamples) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto wav_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
+auto wav_encoder::encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool
 {
     drwav_data_format format;
     format.format        = DR_WAVE_FORMAT_PCM;

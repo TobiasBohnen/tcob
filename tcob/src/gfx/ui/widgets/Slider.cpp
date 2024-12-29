@@ -63,7 +63,7 @@ void slider::on_paint(widget_painter& painter)
              .Inverted    = false,
              .Position    = pos,
              .BlockCount  = numBlocks,
-             .Fraction    = _tween.get_current_value()});
+             .Fraction    = _tween.current_value()});
 
         // thumb
         auto const thumbFlags {!_overThumb          ? widget_flags {}
@@ -72,7 +72,7 @@ void slider::on_paint(widget_painter& painter)
         _paintResult.Thumb = painter.draw_thumb(
             get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb,
             rect,
-            {.Orientation = orien, .Inverted = false, .Fraction = _tween.get_current_value()});
+            {.Orientation = orien, .Inverted = false, .Fraction = _tween.current_value()});
 
         if (orien == orientation::Vertical) {
             _paintResult.Thumb.Size.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.width());
@@ -85,7 +85,7 @@ void slider::on_paint(widget_painter& painter)
 void slider::on_key_down(input::keyboard::event const& ev)
 {
     auto const& controls {parent_form()->Controls};
-    if (locate_service<input::system>().get_keyboard().is_key_down(controls->ActivateKey)) {
+    if (locate_service<input::system>().keyboard().is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavLeftKey) {
             handle_dir_input(direction::Left);
         } else if (ev.KeyCode == controls->NavRightKey) {

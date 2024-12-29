@@ -27,7 +27,7 @@ public:
     auto operator=(sound&& other) noexcept -> sound&      = default;
     ~sound() override;
 
-    auto info() const -> std::optional<buffer::info>;
+    auto info() const -> std::optional<buffer::information>;
     auto duration() const -> milliseconds override;
     auto playback_position() const -> milliseconds override;
 
@@ -43,7 +43,7 @@ private:
 
     void stop_source();
 
-    buffer::info                          _info;
+    buffer::information                   _info;
     std::shared_ptr<audio::al::al_buffer> _buffer;
 };
 }

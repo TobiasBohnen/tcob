@@ -49,12 +49,12 @@ class truetype_font_engine;
 class TCOB_API font : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
-    struct info final {
+    struct information final {
         f32 Ascender {0};
         f32 Descender {0};
         f32 LineHeight {0};
 
-        auto operator==(info const& other) const -> bool = default;
+        auto operator==(information const& other) const -> bool = default;
     };
 
     enum class weight : u16 {
@@ -83,7 +83,7 @@ public:
 
     signal<std::span<ubyte>> Render;
 
-    auto get_info() const -> font::info const&;             // TODO: get_
+    auto info() const -> information const&;
     auto get_texture() const -> assets::asset_ptr<texture>; // TODO: get_
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
@@ -109,7 +109,7 @@ private:
     u32                                     _fontTextureLayer {0};
     bool                                    _textureNeedsSetup {false};
 
-    font::info         _info;
+    information        _info;
     std::vector<ubyte> _fontData {};
 
     std::unique_ptr<truetype_font_engine> _engine;

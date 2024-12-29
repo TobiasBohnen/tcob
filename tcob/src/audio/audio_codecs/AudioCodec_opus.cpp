@@ -59,7 +59,7 @@ void opus_decoder::seek_from_start(milliseconds pos)
     op_pcm_seek(_file, static_cast<i64>(offset));
 }
 
-auto opus_decoder::open() -> std::optional<buffer::info>
+auto opus_decoder::open() -> std::optional<buffer::information>
 {
     i32 err {0};
     _file = op_open_callbacks(&stream(), &opusCallbacks, nullptr, 0, &err);
@@ -111,7 +111,7 @@ static OpusEncCallbacks opusEncCallbacks {
 
 ////////////////////////////////////////////////////////////
 
-auto opus_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
+auto opus_encoder::encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool
 {
     OggOpusComments* comments {ope_comments_create()};
 

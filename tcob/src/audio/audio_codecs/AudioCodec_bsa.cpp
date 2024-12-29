@@ -20,7 +20,7 @@ void bsa_decoder::seek_from_start(milliseconds pos)
     stream().seek(static_cast<std::streamoff>(offset + OFFSET), io::seek_dir::Begin);
 }
 
-auto bsa_decoder::open() -> std::optional<buffer::info>
+auto bsa_decoder::open() -> std::optional<buffer::information>
 {
     auto&                reader {stream()};
     std::array<ubyte, 3> sig {};
@@ -48,7 +48,7 @@ auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto bsa_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
+auto bsa_encoder::encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
     out.write<u8>(static_cast<u8>(info.Channels));

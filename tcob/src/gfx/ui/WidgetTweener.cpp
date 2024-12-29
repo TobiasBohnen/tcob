@@ -36,12 +36,12 @@ void widget_tweener::update(milliseconds deltaTime)
     }
 }
 
-auto widget_tweener::get_current_value() const -> f32
+auto widget_tweener::current_value() const -> f32
 {
     return _val;
 }
 
-auto widget_tweener::get_target_value() const -> f32
+auto widget_tweener::target_value() const -> f32
 {
     return _toval;
 }

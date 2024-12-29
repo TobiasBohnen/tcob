@@ -25,12 +25,12 @@ public:
     void seek_from_start(milliseconds pos) override;
 
 protected:
-    auto open() -> std::optional<buffer::info> override;
+    auto open() -> std::optional<buffer::information> override;
     auto decode(std::span<f32> outputSamples) -> i32 override;
 
 private:
-    buffer::info _info {};
-    drflac*      _flac {nullptr};
+    buffer::information _info {};
+    drflac*             _flac {nullptr};
 };
 
 }

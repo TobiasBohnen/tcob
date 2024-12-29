@@ -41,7 +41,7 @@ void flac_decoder::seek_from_start(milliseconds pos)
     drflac_seek_to_pcm_frame(_flac, static_cast<u64>(offset));
 }
 
-auto flac_decoder::open() -> std::optional<buffer::info>
+auto flac_decoder::open() -> std::optional<buffer::information>
 {
     _flac = drflac_open(&read_flac, &seek_flac, &stream(), nullptr);
     if (_flac) {

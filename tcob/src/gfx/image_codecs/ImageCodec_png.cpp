@@ -153,10 +153,10 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto png_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto png_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     if (check_sig(in) && read_header(in)) {
-        return image::info {{_ihdr.Width, _ihdr.Height}, image::format::RGBA};
+        return image::information {{_ihdr.Width, _ihdr.Height}, image::format::RGBA};
     }
 
     return std::nullopt;
@@ -534,7 +534,7 @@ auto png_encoder::encode(image const& image, io::ostream& out) const -> bool
 
 void png_encoder::write_header(image const& image, io::ostream& out) const
 {
-    auto const& info {image.get_info()};
+    auto const& info {image.info()};
 
     std::array<u8, 17> header {};
 
@@ -571,7 +571,7 @@ void png_encoder::write_header(image const& image, io::ostream& out) const
 auto static data(image const& image) -> std::vector<u8>
 {
     auto const  buffer {image.buffer()};
-    auto const& info {image.get_info()};
+    auto const& info {image.info()};
 
     std::vector<u8> retValue(static_cast<usize>(info.size_in_bytes() + info.Size.Height));
 

@@ -56,7 +56,7 @@ public:
     template <typename Key>
     auto operator[](Key key) const -> proxy<table const, Key>;
 
-    auto get_delegate() const -> table; // TODO: get_
+    auto get_delegate() const -> table; // TODO: set_get_
     void set_delegate(table const& mt) const;
 
     template <typename... Args, typename T>

@@ -12,8 +12,8 @@
 namespace tcob::gfx {
 
 cursor::cursor()
-    : Position {{[]() -> point_i { return locate_service<input::system>().get_mouse().get_position(); },
-                 [](point_i value) { locate_service<input::system>().get_mouse().set_position(value); }}}
+    : Position {{[]() -> point_i { return locate_service<input::system>().mouse().get_position(); },
+                 [](point_i value) { locate_service<input::system>().mouse().set_position(value); }}}
 {
     ActiveMode.Changed.connect([&](string const& name) {
         if (!_modes.contains(name)) {
@@ -26,7 +26,7 @@ cursor::cursor()
         auto const  tex {Material->Texture};
         auto const& region {tex->get_region(name)};
         _vertex.TexCoords   = {region.UVRect.left(), region.UVRect.top(), static_cast<f32>(region.Level)};
-        _size               = tex->get_size().Width;
+        _size               = tex->info().Size.Width;
         Material->PointSize = static_cast<f32>(_size);
 
         _renderer.set_material(Material().ptr());

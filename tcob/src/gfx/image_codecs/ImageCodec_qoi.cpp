@@ -32,7 +32,7 @@ auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     std::array<u8, 4> buf {};
     in.read_to<u8>(buf);
@@ -41,14 +41,14 @@ auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::info>
     i32 const w {static_cast<i32>(in.read<u32, std::endian::big>())};
     i32 const h {static_cast<i32>(in.read<u32, std::endian::big>())};
     u8 const  bpp {in.read<u8>()};
-    return image::info {{w, h}, bpp == 3 ? image::format::RGB : image::format::RGBA};
+    return image::information {{w, h}, bpp == 3 ? image::format::RGB : image::format::RGBA};
 }
 
 ////////////////////////////////////////////////////////////
 
 auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
-    auto const& info {image.get_info()};
+    auto const& info {image.info()};
     qoi_desc    desc;
     desc.channels   = static_cast<u8>(info.bytes_per_pixel());
     desc.colorspace = 1;

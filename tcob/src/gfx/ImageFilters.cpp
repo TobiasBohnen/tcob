@@ -135,7 +135,7 @@ auto sharpen_filter::matrix() const -> std::array<i32, 25>
 
 auto grayscale_filter::operator()(image const& img) const -> image
 {
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
     auto        retValue {image::CreateEmpty(info.Size, info.Format)};
     i32 const   bpp {info.bytes_per_pixel()};
 
@@ -166,7 +166,7 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
     auto const [imgWidth, imgHeight] {info.Size};
 
     f64 const xFactor {static_cast<f64>(imgWidth) / newWidth};
@@ -197,7 +197,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
 {
     auto const [newWidth, newHeight] {NewSize};
 
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
     auto const [width, height] {info.Size};
 
     f64 const xFactor {static_cast<f64>(width) / newWidth};

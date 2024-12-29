@@ -30,14 +30,16 @@ void image_box::on_paint(widget_painter& painter)
         // image
         if (Image->Texture) {
             auto const& tex {Image->Texture};
-            rect_f      targetRect {};
+            auto const  texSize {size_f {tex->info().Size}};
+
+            rect_f targetRect {};
 
             switch (style->Fit) {
             case fit_mode::None:
-                targetRect = {rect.Position, size_f {tex->get_size()}};
+                targetRect = {rect.Position, texSize};
                 break;
             case fit_mode::Contain: {
-                size_f const imgSize {size_f {tex->get_size()}};
+                size_f const imgSize {texSize};
                 f32 const    aspectRatioToShrink {imgSize.Width / imgSize.Height};
                 f32 const    aspectRatioTarget {rect.width() / rect.height()};
                 f32 const    factor {(aspectRatioToShrink > aspectRatioTarget) ? (rect.width() / imgSize.Width) : (rect.height() / imgSize.Height)};
@@ -47,11 +49,11 @@ void image_box::on_paint(widget_painter& painter)
                 targetRect = rect;
                 break;
             case fit_mode::FitWidth: {
-                f32 const factor {tex->get_size().Width / static_cast<f32>(tex->get_size().Height)};
+                f32 const factor {texSize.Width / texSize.Height};
                 targetRect = {rect.Position, {rect.width(), rect.width() * factor}};
             } break;
             case fit_mode::FitHeight: {
-                f32 const factor {tex->get_size().Height / static_cast<f32>(tex->get_size().Width)};
+                f32 const factor {texSize.Height / texSize.Width};
                 targetRect = {rect.Position, {rect.height() * factor, rect.height()}};
             } break;
             }

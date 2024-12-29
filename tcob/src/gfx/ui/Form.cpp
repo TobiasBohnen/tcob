@@ -222,7 +222,7 @@ void form::on_draw_to(render_target& target)
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         point_i const pos {(_window && _window->Cursor()
                                 ? _window->Cursor->bounds().bottom_right()
-                                : locate_service<input::system>().get_mouse().get_position())
+                                : locate_service<input::system>().mouse().get_position())
                            - static_cast<point_i>(Bounds->Position)};
 
         auto& ttBounds {*_topWidget->Tooltip->Bounds};
@@ -328,7 +328,7 @@ void form::on_key_down(input::keyboard::event const& ev)
         }
     } else if ((ev.KeyMods & Controls->CutCopyPasteMod) == Controls->CutCopyPasteMod) {
         if (ev.KeyCode == Controls->PasteKey) {
-            input::keyboard::text_input_event tev {.Text = locate_service<input::system>().get_clipboard().get_text()};
+            input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
             _injector.on_text_input(_focusWidget, tev);
         }
     } else {
@@ -497,7 +497,7 @@ auto form::can_popup_tooltip() const -> bool
         && _topWidget && _topWidget->Tooltip
         && _focusWidget != _topWidget
         && !_isLButtonDown && !_isRButtonDown
-        && locate_service<input::system>().CurrentInputMode == input::mode::KeyboardMouse) {
+        && locate_service<input::system>().InputMode == input::mode::KeyboardMouse) {
 
         if (auto* style {_topWidget->Tooltip->current_style<tooltip::style>()}) {
             return _mouseOverTime > style->Delay;

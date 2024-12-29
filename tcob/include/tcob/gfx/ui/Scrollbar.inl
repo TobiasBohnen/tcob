@@ -30,7 +30,7 @@ inline void scrollbar<Parent>::paint(widget_painter& painter, element::scrollbar
         i32 const numBlocks {10};
         f32 const min {get_min_value()};
         f32 const max {get_max_value()};
-        f32 const frac {(get_current_value() - min) / ((max - min))};
+        f32 const frac {(current_value() - min) / ((max - min))};
 
         element::bar::context const barCtx {
             .Orientation = _orien,
@@ -127,15 +127,15 @@ inline auto scrollbar<Parent>::requires_scroll(rect_f const& rect) const -> bool
 }
 
 template <typename Parent>
-inline auto scrollbar<Parent>::get_current_value() const -> f32
+inline auto scrollbar<Parent>::current_value() const -> f32
 {
-    return _tween.get_current_value();
+    return _tween.current_value();
 }
 
 template <typename Parent>
-inline auto scrollbar<Parent>::get_target_value() const -> f32
+inline auto scrollbar<Parent>::target_value() const -> f32
 {
-    return _tween.get_target_value();
+    return _tween.target_value();
 }
 
 template <typename Parent>

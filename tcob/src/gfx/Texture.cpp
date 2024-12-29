@@ -33,19 +33,9 @@ texture::operator bool() const
     return _impl->is_valid();
 }
 
-auto texture::get_size() const -> size_i
+auto texture::info() const -> information
 {
-    return _size;
-}
-
-auto texture::get_format() const -> format
-{
-    return _format;
-}
-
-auto texture::get_depth() const -> u32
-{
-    return _depth;
+    return {.Size = _size, .Format = _format, .Depth = _depth};
 }
 
 auto texture::copy_to_image(u32 level) const -> image

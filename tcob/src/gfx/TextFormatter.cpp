@@ -220,7 +220,7 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
 {
     availableHeight = availableHeight < 0 ? std::numeric_limits<f32>::max() : availableHeight;
 
-    auto const& fontInfo {font.get_info()};
+    auto const& fontInfo {font.info()};
 
     f32    x {0}, y {0};
     result retValue {};

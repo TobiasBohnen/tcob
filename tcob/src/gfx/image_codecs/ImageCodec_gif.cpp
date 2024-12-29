@@ -65,12 +65,12 @@ auto gif_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.rfind("GIF", 0) == 0) {
-        return image::info {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
+        return image::information {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
     }
 
     return std::nullopt;
@@ -78,14 +78,14 @@ auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 
 ////////////////////////////////////////////////////////////
 
-auto gif_decoder::open() -> std::optional<image::info>
+auto gif_decoder::open() -> std::optional<image::information>
 {
     auto& in {stream()};
     _header.read(in);
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.rfind("GIF", 0) == 0) {
         read_contents(in);
-        return image::info {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
+        return image::information {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
     }
 
     return std::nullopt;

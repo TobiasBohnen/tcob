@@ -54,7 +54,7 @@ void vorbis_decoder::seek_from_start(milliseconds pos)
     ov_time_seek(&_file, pos.count());
 }
 
-auto vorbis_decoder::open() -> std::optional<buffer::info>
+auto vorbis_decoder::open() -> std::optional<buffer::information>
 {
     i32 const error {ov_open_callbacks(&stream(), &_file, nullptr, 0, vorbisCallbacks)};
     if (error == 0) {
@@ -93,7 +93,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::info const& info, io::ostream& out) const -> bool
+auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool
 {
     ogg_stream_state os; /* take physical pages, weld into a logical stream of packets */
     ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */

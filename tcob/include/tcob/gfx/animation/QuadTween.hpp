@@ -38,7 +38,7 @@ public:
     void clear_quads();
 
 protected:
-    auto source_quads() const -> std::vector<quad> const&; // TODO: get_
+    auto source_quads() const -> std::vector<quad> const&;
     void copy_to_dest(std::span<quad> quads);
 
 private:

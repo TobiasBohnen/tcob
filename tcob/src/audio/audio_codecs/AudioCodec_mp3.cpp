@@ -41,7 +41,7 @@ void mp3_decoder::seek_from_start(milliseconds pos)
     drmp3_seek_to_pcm_frame(&_mp3, static_cast<u64>(offset));
 }
 
-auto mp3_decoder::open() -> std::optional<buffer::info>
+auto mp3_decoder::open() -> std::optional<buffer::information>
 {
     if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &stream(), nullptr)) {
         _info.Channels   = static_cast<i32>(_mp3.channels);

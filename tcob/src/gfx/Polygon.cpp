@@ -12,9 +12,9 @@
 
 namespace tcob::gfx {
 
-static auto get_poly_info(polyline_span points) -> polygon::info
+static auto get_poly_info(polyline_span points) -> polygon::information
 {
-    polygon::info retValue;
+    polygon::information retValue;
 
     point_f max {std::numeric_limits<f32>::denorm_min(), std::numeric_limits<f32>::denorm_min()};
     point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
@@ -46,7 +46,7 @@ static auto get_poly_info(polyline_span points) -> polygon::info
     return retValue;
 }
 
-auto polygon::get_info() const -> info
+auto polygon::info() const -> information
 {
     std::vector<point_f> points;
     points.insert(points.end(), Outline.begin(), Outline.end());
@@ -121,7 +121,7 @@ auto polygons::is_point_inside(point_f point, polyline_span polyline) -> bool
     return inside;
 }
 
-auto polygons::get_info(std::span<polygon const> polygons) -> polygon::info
+auto polygons::info(std::span<polygon const> polygons) -> polygon::information
 {
     std::vector<point_f> points;
     for (auto const& polygon : polygons) {
@@ -131,7 +131,7 @@ auto polygons::get_info(std::span<polygon const> polygons) -> polygon::info
     return get_poly_info(points);
 }
 
-auto polygons::get_info(polyline_span polyline) -> polygon::info
+auto polygons::info(polyline_span polyline) -> polygon::information
 {
     return get_poly_info(polyline);
 }

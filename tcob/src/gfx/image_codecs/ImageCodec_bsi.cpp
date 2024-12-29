@@ -33,12 +33,12 @@ auto bsi_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     bsi::header header {};
     header.read(in);
     return header.Sig == SIGNATURE
-        ? std::optional {image::info {header.Size, header.Format}}
+        ? std::optional {image::information {header.Size, header.Format}}
         : std::nullopt;
 }
 
@@ -47,7 +47,7 @@ auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 auto bsi_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
     out.write<u32, std::endian::little>(info.Size.Width);
     out.write<u32, std::endian::little>(info.Size.Height);
     out.write<u8>(static_cast<u8>(info.Format));

@@ -418,7 +418,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
-    auto const info {polygons::get_info(*Polygons)};
+    auto const info {polygons::info(*Polygons)};
     _boundingBox = info.BoundingBox;
     _centroid    = info.Centroid;
 

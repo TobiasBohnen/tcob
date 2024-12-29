@@ -27,7 +27,7 @@ public:
     void reset() override;
 
 protected:
-    auto open() -> std::optional<image::info> override;
+    auto open() -> std::optional<image::information> override;
 
 private:
     size_i _size {size_i::Zero};

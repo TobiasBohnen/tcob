@@ -338,7 +338,7 @@ void color_picker::on_mouse_down(input::mouse::button_event const& ev)
         f32 const s {(ev.Position.X - rect.left()) / (rect.width() * 0.9f)};
         f32 const v {(ev.Position.Y - rect.top()) / rect.height()};
         if (s > 1.0f) {
-            auto const col {GetGradient().get_colors().at(static_cast<i32>(255 * v))};
+            auto const col {GetGradient().colors().at(static_cast<i32>(255 * v))};
             BaseHue = col.to_hsv().Hue;
         } else {
             SelectedColor = color::FromHSVA({BaseHue(), s, 1 - v});

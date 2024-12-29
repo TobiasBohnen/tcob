@@ -66,7 +66,7 @@ public:
     prop_fn<bool> EnableHitEvents;
     prop_fn<bool> EnablePreSolveEvents;
 
-    auto get_body() -> body&; // TODO: get_
+    auto parent() -> body&;
 
     auto is_sensor() const -> bool;
 

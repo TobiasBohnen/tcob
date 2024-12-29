@@ -23,7 +23,7 @@ public:
     truetype_font_engine() = default;
     ~truetype_font_engine();
 
-    auto load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::info>;
+    auto load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::information>;
     auto get_kerning(u32 cp0, u32 cp1) -> f32;
 
     auto render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>;
@@ -40,7 +40,7 @@ private:
 
     u32                          _fontSize {0};
     std::unordered_map<u32, u32> _glyphIndices {};
-    font::info                   _info {};
+    font::information            _info {};
 };
 
 }

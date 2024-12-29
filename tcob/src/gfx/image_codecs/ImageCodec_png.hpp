@@ -114,7 +114,7 @@ class png_decoder final : public image_decoder {
 
 public:
     auto decode(io::istream& in) -> std::optional<image> override;
-    auto decode_info(io::istream& in) -> std::optional<image::info> override;
+    auto decode_info(io::istream& in) -> std::optional<image::information> override;
 
 private:
     auto read_header(io::istream& in) -> bool;

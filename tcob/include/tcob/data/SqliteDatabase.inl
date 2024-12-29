@@ -33,7 +33,7 @@ template <typename... Values>
 inline auto database::create_view(utf8_string const& viewName, select_statement<Values...>& stmt, bool temp) -> std::optional<view>
 {
     utf8_string const sql {std::format("CREATE {} VIEW IF NOT EXISTS {} AS {};",
-                                       temp ? "TEMP" : "", viewName, stmt.get_query())};
+                                       temp ? "TEMP" : "", viewName, stmt.query_string())};
 
     return (stmt.prepare(sql) && stmt.step() == step_status::Done)
         ? std::optional<view> {view {_db, viewName}}

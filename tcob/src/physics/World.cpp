@@ -78,17 +78,17 @@ void world::remove_joint(joint const& joint)
     helper::erase(_joints, [ptr = &joint](auto const& val) { return val.get() == ptr; });
 }
 
-auto world::get_body_events() const -> body_events
+auto world::body_events() const -> physics::body_events
 {
     return _impl->get_body_events();
 }
 
-auto world::get_contact_events() const -> contact_events
+auto world::contact_events() const -> physics::contact_events
 {
     return _impl->get_contact_events();
 }
 
-auto world::get_sensor_events() const -> sensor_events
+auto world::sensor_events() const -> physics::sensor_events
 {
     return _impl->get_sensor_events();
 }

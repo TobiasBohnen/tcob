@@ -25,12 +25,12 @@ public:
     void seek_from_start(milliseconds pos) override;
 
 protected:
-    auto open() -> std::optional<buffer::info> override;
+    auto open() -> std::optional<buffer::information> override;
     auto decode(std::span<f32> outputSamples) -> i32 override;
 
 private:
-    buffer::info _info {};
-    drmp3        _mp3 {};
+    buffer::information _info {};
+    drmp3               _mp3 {};
 };
 
 }

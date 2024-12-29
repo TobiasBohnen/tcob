@@ -111,7 +111,7 @@ namespace detail {
 
         void dump(io::ostream& stream) const;
 
-        auto get_upvalues() const -> std::unordered_set<string>; // TODO: get_
+        auto get_upvalues() const -> std::unordered_set<string>; // TODO: set_get_
         auto set_upvalue(string const& name, ref const& value) -> bool;
 
         auto set_environment(table const& env) -> bool;

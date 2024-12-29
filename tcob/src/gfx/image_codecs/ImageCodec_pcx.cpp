@@ -94,7 +94,7 @@ void pcx::header::read(io::istream& reader)
     VScrSize         = reader.read<u16, std::endian::little>();
 }
 
-void pcx::header::Write(image::info const& info, io::ostream& writer)
+void pcx::header::Write(image::information const& info, io::ostream& writer)
 {
     byte bpp {8}, cpc {3};
 
@@ -215,11 +215,11 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto pcx_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto pcx_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _header.read(in);
     if (_header.Manufacturer == ManufacturerMagicNumber) {
-        return image::info {.Size = {_header.Width(), _header.Height()}, .Format = image::format::RGB};
+        return image::information {.Size = {_header.Width(), _header.Height()}, .Format = image::format::RGB};
     }
 
     return std::nullopt;
@@ -290,7 +290,7 @@ auto static Compress(std::span<u8> buf, i32 lineWidth) -> std::vector<u8>
 
 auto pcx_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
-    auto const& info {img.get_info()};
+    auto const& info {img.info()};
 
     auto const pos {out.tell()};
     pcx::header::Write(info, out);

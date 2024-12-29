@@ -42,7 +42,7 @@ window::~window() = default;
 void window::load_icon(path const& file)
 {
     if (auto img {image::Load(file)}) {
-        auto const& info {img->get_info()};
+        auto const& info {img->info()};
         auto*       surface {
             SDL_CreateRGBSurfaceFrom(
                 img->buffer().data(),

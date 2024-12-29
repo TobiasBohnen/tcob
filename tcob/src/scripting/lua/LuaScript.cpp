@@ -144,7 +144,7 @@ void static hook(lua_State* l, lua_Debug* ar)
 {
     state_view view {l};
     auto*      hook {*reinterpret_cast<script::HookFunc**>(view.get_extra_space())};
-    view.get_info("Slutnr", ar);
+    view.info("Slutnr", ar);
     (*hook)({&view, ar});
 }
 

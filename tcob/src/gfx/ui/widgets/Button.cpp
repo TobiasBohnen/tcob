@@ -46,7 +46,7 @@ void button::on_paint(widget_painter& painter)
             }
         }
         if (drawIcon) { // icon
-            auto const iconSize {Icon->Texture->get_size()};
+            auto const iconSize {Icon->Texture->info().Size};
             f32 const  factor {iconSize.Height / static_cast<f32>(iconSize.Width)};
             f32 const  width {rect.height() * factor};
             rect = {{rect.center().X - (width / 2), rect.top()}, {width, rect.height()}};

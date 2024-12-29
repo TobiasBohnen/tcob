@@ -66,7 +66,7 @@ namespace bmp {
 class bmp_decoder final : public image_decoder {
 public:
     auto decode(io::istream& in) -> std::optional<image> override;
-    auto decode_info(io::istream& in) -> std::optional<image::info> override;
+    auto decode_info(io::istream& in) -> std::optional<image::information> override;
 
 private:
     auto get_palette(io::istream& in) const -> std::vector<color>;
@@ -76,7 +76,7 @@ private:
     bmp::bitmap_file_header _header;
     bmp::bitmap_info_header _infoHeader;
 
-    image::info _info {};
+    image::information _info {};
 };
 
 ////////////////////////////////////////////////////////////

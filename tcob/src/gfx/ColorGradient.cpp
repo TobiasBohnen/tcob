@@ -49,7 +49,7 @@ color_gradient::color_gradient(std::span<color_stop const> colorStops, bool preM
     }
 }
 
-auto color_gradient::get_colors() const -> std::array<color, Size>
+auto color_gradient::colors() const -> std::array<color, Size>
 {
     std::array<color, Size> retValue {};
 
@@ -80,9 +80,14 @@ auto color_gradient::get_colors() const -> std::array<color, Size>
     return retValue;
 }
 
-auto color_gradient::get_single_color() const -> std::optional<color>
+auto color_gradient::is_single_color() const -> bool
 {
-    return _colorStops.size() == 1 ? std::optional<color> {_colorStops.begin()->second} : std::nullopt;
+    return _colorStops.size() == 1;
+}
+
+auto color_gradient::first_color() const -> color
+{
+    return _colorStops.begin()->second;
 }
 
 } // namespace gfx

@@ -359,7 +359,7 @@ auto tga_decoder::decode(io::istream& in) -> std::optional<image>
     return std::nullopt;
 }
 
-auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::info>
+auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     _footer.read(in);
     _header.read(in);
@@ -370,7 +370,7 @@ auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::info>
     }
 
     return _footer.Format == tga::format::New && check_supported_format(_header)
-        ? std::optional {image::info {{_header.ImageSpecs.Width, _header.ImageSpecs.Height}, bpp == 4 ? image::format::RGBA : image::format::RGB}}
+        ? std::optional {image::information {{_header.ImageSpecs.Width, _header.ImageSpecs.Height}, bpp == 4 ? image::format::RGBA : image::format::RGB}}
         : std::nullopt;
 }
 
@@ -378,7 +378,7 @@ auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 
 auto tga_encoder::encode(image const& img, io::ostream& out) const -> bool
 {
-    write_header(img.get_info(), out);
+    write_header(img.info(), out);
     write_image_data(img, out);
 
     auto extOffset {out.tell()};
@@ -389,7 +389,7 @@ auto tga_encoder::encode(image const& img, io::ostream& out) const -> bool
     return true;
 }
 
-void tga_encoder::write_header(image::info const& image, io::ostream& out) const
+void tga_encoder::write_header(image::information const& image, io::ostream& out) const
 {
     out.write<u8>(0);
     out.write<u8>(static_cast<u8>(tga::color_map_type::NoColorMapIncluded));
@@ -412,7 +412,7 @@ void tga_encoder::write_image_data(image const& img, io::ostream& out) const
     std::vector<u8> rawPackage;
     std::vector<u8> rlePackage;
 
-    auto const& imgInfo {img.get_info()};
+    auto const& imgInfo {img.info()};
     i32 const   bytesPerPixel {imgInfo.bytes_per_pixel()};
     i32 const   paddingByteCount {get_padding_bytes(bytesPerPixel * 8, imgInfo.stride(), imgInfo.Size.Width)};
     i32 const   sizeInBytes {static_cast<i32>(imgInfo.size_in_bytes())};

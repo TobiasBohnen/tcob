@@ -1148,8 +1148,8 @@ auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, 
 
 auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
 {
-    if (auto const color {gradient.get_single_color()}) {
-        return *color;
+    if (gradient.is_single_color()) {
+        return gradient.first_color();
     }
 
     for (usize i {0}; i < _gradients.size(); ++i) {

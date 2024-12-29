@@ -87,7 +87,7 @@ void parallax_background::on_draw_to(render_target& target)
     auto const& camera {target.get_camera()};
 
     auto const targetSize {size_f {target.Size()}};
-    auto const texSize {size_f {Material->Texture->get_size()} * TextureScale};
+    auto const texSize {size_f {Material->Texture->info().Size} * TextureScale};
 
     for (usize i {0}; i < _layers.size(); ++i) {
         auto const& layer {_layers[i]};

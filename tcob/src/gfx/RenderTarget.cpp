@@ -46,7 +46,7 @@ void render_target::prepare_render(bool debug)
     _impl->prepare_render(
         {.ViewMatrix            = _camera.matrix(),
          .Viewport              = rect_i {_camera.viewport()},
-         .MousePosition         = locate_service<input::system>().get_mouse().get_position(),
+         .MousePosition         = locate_service<input::system>().mouse().get_position(),
          .Time                  = stats.current_time(),
          .Debug                 = debug,
          .UseDefaultFramebuffer = false});
@@ -120,7 +120,7 @@ void default_render_target::prepare_render(bool)
     get_impl<render_backend::render_target_base>()->prepare_render({
         .ViewMatrix            = Matrix,
         .Viewport              = {point_i::Zero, get_size()},
-        .MousePosition         = locate_service<input::system>().get_mouse().get_position(),
+        .MousePosition         = locate_service<input::system>().mouse().get_position(),
         .Time                  = stats.current_time(),
         .Debug                 = false,
         .UseDefaultFramebuffer = true,
