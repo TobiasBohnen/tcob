@@ -253,15 +253,15 @@ public:
     system();
     ~system();
 
-    signal<keyboard::event const>              KeyDown;
-    signal<keyboard::event const>              KeyUp;
-    signal<keyboard::text_input_event const>   TextInput;
-    signal<keyboard::text_editing_event const> TextEditing;
+    signal<input::keyboard::event const>              KeyDown;
+    signal<input::keyboard::event const>              KeyUp;
+    signal<input::keyboard::text_input_event const>   TextInput;
+    signal<input::keyboard::text_editing_event const> TextEditing;
 
-    signal<mouse::motion_event const> MouseMotion;
-    signal<mouse::button_event const> MouseButtonDown;
-    signal<mouse::button_event const> MouseButtonUp;
-    signal<mouse::wheel_event const>  MouseWheel;
+    signal<input::mouse::motion_event const> MouseMotion;
+    signal<input::mouse::button_event const> MouseButtonDown;
+    signal<input::mouse::button_event const> MouseButtonUp;
+    signal<input::mouse::wheel_event const>  MouseWheel;
 
     signal<joystick::axis_event const>   JoystickAxisMotion;
     signal<joystick::hat_event const>    JoystickHatMotion;
