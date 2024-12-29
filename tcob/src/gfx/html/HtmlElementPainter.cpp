@@ -16,11 +16,6 @@ element_painter::element_painter(canvas& c)
 {
 }
 
-auto element_painter::get_canvas() -> canvas&
-{
-    return _canvas;
-}
-
 void element_painter::draw_image(image_draw_context const& ctx)
 {
     _canvas.save();

@@ -80,7 +80,7 @@ auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::info>
 
 auto gif_decoder::open() -> std::optional<image::info>
 {
-    auto& in {get_stream()};
+    auto& in {stream()};
     _header.read(in);
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
     if (_header.Id.rfind("GIF", 0) == 0) {
@@ -106,7 +106,7 @@ auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status
         return animated_image_decoder::status::OldFrame;
     }
 
-    while (read_contents(get_stream()) != animated_image_decoder::status::NoMoreFrames) {
+    while (read_contents(stream()) != animated_image_decoder::status::NoMoreFrames) {
         if (ts <= _currentTimeStamp) {
             return animated_image_decoder::status::NewFrame;
         }
@@ -121,7 +121,7 @@ void gif_decoder::reset()
     _transparency = false;
 
     _currentTimeStamp = milliseconds {0};
-    get_stream().seek(_contentOffset, io::seek_dir::Begin);
+    stream().seek(_contentOffset, io::seek_dir::Begin);
 }
 
 ////////////////////////////////////////////////////////////

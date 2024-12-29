@@ -63,7 +63,7 @@ void xmp_decoder::seek_from_start(milliseconds pos)
 
 auto xmp_decoder::open() -> std::optional<buffer::info>
 {
-    if (xmp_load_module_from_callbacks(_context, &get_stream(), xmpCallbacks) == 0) {
+    if (xmp_load_module_from_callbacks(_context, &stream(), xmpCallbacks) == 0) {
         xmp_module_info info {};
         xmp_get_module_info(_context, &info);
         _info.Channels   = 2;

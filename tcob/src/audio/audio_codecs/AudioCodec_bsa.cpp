@@ -17,12 +17,12 @@ constexpr std::streamsize      OFFSET {sizeof(SIGNATURE) + sizeof(u8) + sizeof(u
 void bsa_decoder::seek_from_start(milliseconds pos)
 {
     f64 const offset {pos.count() / 1000 * _info.SampleRate / _info.Channels};
-    get_stream().seek(static_cast<std::streamoff>(offset + OFFSET), io::seek_dir::Begin);
+    stream().seek(static_cast<std::streamoff>(offset + OFFSET), io::seek_dir::Begin);
 }
 
 auto bsa_decoder::open() -> std::optional<buffer::info>
 {
-    auto&                reader {get_stream()};
+    auto&                reader {stream()};
     std::array<ubyte, 3> sig {};
     reader.read_to<ubyte>(sig);
 
@@ -39,7 +39,7 @@ auto bsa_decoder::open() -> std::optional<buffer::info>
 auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     std::vector<i16> buffer(outputSamples.size());
-    get_stream().read_to<i16>(buffer);
+    stream().read_to<i16>(buffer);
     for (usize i {0}; i < outputSamples.size(); ++i) {
         outputSamples[i] = static_cast<f32>(buffer[i]) / std::numeric_limits<i16>::max();
     }

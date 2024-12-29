@@ -265,7 +265,7 @@ auto animated_image_decoder::open(std::shared_ptr<io::istream> in) -> std::optio
     return open();
 }
 
-auto animated_image_decoder::get_stream() -> io::istream&
+auto animated_image_decoder::stream() -> io::istream&
 {
     return *_stream;
 }

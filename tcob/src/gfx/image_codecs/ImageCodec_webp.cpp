@@ -87,7 +87,7 @@ auto webp_anim_decoder::open() -> std::optional<image::info>
     if (_decoder) { return std::nullopt; }
 
     WebPDataInit(_data);
-    auto buffer {get_stream().read_all<u8>()};
+    auto buffer {stream().read_all<u8>()};
     u8*  buf {reinterpret_cast<u8*>(WebPMalloc(buffer.size()))};
     std::copy(buffer.begin(), buffer.end(), buf);
     _data->bytes = buf;

@@ -62,7 +62,7 @@ void opus_decoder::seek_from_start(milliseconds pos)
 auto opus_decoder::open() -> std::optional<buffer::info>
 {
     i32 err {0};
-    _file = op_open_callbacks(&get_stream(), &opusCallbacks, nullptr, 0, &err);
+    _file = op_open_callbacks(&stream(), &opusCallbacks, nullptr, 0, &err);
     if (!_file) {
         return std::nullopt;
     }

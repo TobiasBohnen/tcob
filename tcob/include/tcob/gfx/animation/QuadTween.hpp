@@ -38,8 +38,8 @@ public:
     void clear_quads();
 
 protected:
-    auto get_source_quads() const -> std::vector<quad> const&; // TODO: get_
-    void set_quads(std::span<quad> quads);
+    auto source_quads() const -> std::vector<quad> const&; // TODO: get_
+    void copy_to_dest(std::span<quad> quads);
 
 private:
     std::vector<std::reference_wrapper<quad>> _dstQuads {};

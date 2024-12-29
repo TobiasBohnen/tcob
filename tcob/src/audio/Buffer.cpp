@@ -113,12 +113,12 @@ auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
     return decode(buffer) > 0 ? std::optional<std::vector<f32>> {buffer} : std::nullopt;
 }
 
-auto decoder::get_stream() -> io::istream&
+auto decoder::stream() -> io::istream&
 {
     return *_stream;
 }
 
-auto decoder::get_context() -> std::any&
+auto decoder::context() -> std::any&
 {
     return _ctx;
 }

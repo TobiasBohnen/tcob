@@ -43,7 +43,7 @@ void mp3_decoder::seek_from_start(milliseconds pos)
 
 auto mp3_decoder::open() -> std::optional<buffer::info>
 {
-    if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &get_stream(), nullptr)) {
+    if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &stream(), nullptr)) {
         _info.Channels   = static_cast<i32>(_mp3.channels);
         _info.SampleRate = static_cast<i32>(_mp3.sampleRate);
         _info.FrameCount = static_cast<i64>(drmp3_get_pcm_frame_count(&_mp3));

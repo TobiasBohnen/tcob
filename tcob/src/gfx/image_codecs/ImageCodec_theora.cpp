@@ -59,7 +59,7 @@ constexpr i32 MAX_FRAMES {20};
 
 auto theora_decoder::open() -> std::optional<image::info>
 {
-    _io.userdata = &get_stream();
+    _io.userdata = &stream();
     _decoder     = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA);
     if (_decoder) {
         // wait til initialized
@@ -129,7 +129,7 @@ void theora_decoder::reset()
     _currentTimeStamp = 0;
     if (_decoder) {
         if (!THEORAPLAY_isDecoding(_decoder)) {
-            get_stream().seek(0, io::seek_dir::Begin); // FIXME: store position
+            stream().seek(0, io::seek_dir::Begin); // FIXME: store position
             THEORAPLAY_stopDecode(_decoder);
             _decoder = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA);
             while (!THEORAPLAY_isInitialized(_decoder)) {

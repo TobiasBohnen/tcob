@@ -78,14 +78,14 @@ auto scene::root_node() -> std::shared_ptr<scene_node>
     return _rootNode;
 }
 
-auto scene::get_game() -> game&
+auto scene::parent() -> game&
 {
     return _game;
 }
 
-auto scene::get_window() -> gfx::window&
+auto scene::window() -> gfx::window&
 {
-    return locate_service<gfx::render_system>().get_window();
+    return locate_service<gfx::render_system>().window();
 }
 
 void scene::attach_events()

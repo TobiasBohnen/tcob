@@ -51,7 +51,7 @@ public:
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
     auto top_widget() const -> widget*;
     auto containers() const -> std::vector<std::shared_ptr<widget>> const&;
-    auto get_all_widgets() const -> std::vector<widget*>; // TODO: get_
+    auto all_widgets() const -> std::vector<widget*>; // TODO: get_
 
     auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);

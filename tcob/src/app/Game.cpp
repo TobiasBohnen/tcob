@@ -171,7 +171,7 @@ void game::step()
         // render
         if (has_service<gfx::render_system>()) {
             auto& rs {locate_service<gfx::render_system>()};
-            auto& window {rs.get_window()};
+            auto& window {rs.window()};
 
             window.clear();
             Draw(window);
@@ -199,7 +199,7 @@ void game::on_key_down(input::keyboard::event const& ev)
     if (!ev.Repeat) {
         // Alt+Enter -> toggle fullscreen
         if (ev.ScanCode == input::scan_code::RETURN && (ev.KeyMods & input::key_mod::LeftAlt) == input::key_mod::LeftAlt) {
-            auto& window {locate_service<gfx::render_system>().get_window()};
+            auto& window {locate_service<gfx::render_system>().window()};
             window.FullScreen = !window.FullScreen();
         }
     }

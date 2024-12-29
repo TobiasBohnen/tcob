@@ -57,7 +57,7 @@ public:
     render_system();
     virtual ~render_system();
 
-    auto init_window(video_config const& config, string const& windowTitle) -> window&;
+    auto init_window(video_config const& config, string const& windowTitle) -> gfx::window&;
 
     auto virtual name() const -> string        = 0;
     auto virtual device_name() const -> string = 0;
@@ -69,7 +69,7 @@ public:
     auto displays() const -> std::map<i32, display>;
     auto get_desktop_size(i32 display) const -> size_i;
 
-    auto get_window() const -> window&; // TODO: get_
+    auto window() const -> window&;
     auto default_target() const -> default_render_target&;
 
     auto virtual create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
@@ -84,7 +84,7 @@ public:
 
 private:
     statistics                             _stats;
-    std::unique_ptr<window>                _window;
+    std::unique_ptr<gfx::window>           _window;
     std::unique_ptr<default_render_target> _defaultTarget;
 };
 

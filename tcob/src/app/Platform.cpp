@@ -217,7 +217,7 @@ auto platform::process_events() const -> bool
             inputMgr.process_events(&ev);
             break;
         case SDL_WINDOWEVENT:
-            locate_service<gfx::render_system>().get_window().process_events(&ev);
+            locate_service<gfx::render_system>().window().process_events(&ev);
             break;
         default:
             break;

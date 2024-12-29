@@ -61,7 +61,7 @@ namespace detail {
 template <typename T>
 class bucket final : public detail::bucket_base {
 public:
-    explicit bucket(group& groupName);
+    explicit bucket(group& parent);
 
     template <typename R = T, typename... Args>
     auto create_or_get(string const& name, loader<T>* loader, Args&&... args) -> assets::asset_ptr<T>;
@@ -79,7 +79,7 @@ public:
     void unload(string const& name) override;
 
 protected:
-    auto get_group() -> group&; // TODO: get_
+    auto parent() -> group&;
 
 private:
     group& _group;

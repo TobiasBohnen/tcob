@@ -1502,11 +1502,6 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
 
 ////////////////////////////////////////////////////////////
 
-auto canvas::get_size() const -> size_i
-{
-    return _windowSize;
-}
-
 auto canvas::get_impl() const -> render_backend::canvas_base*
 {
     return _impl.get();

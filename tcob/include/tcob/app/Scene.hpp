@@ -77,8 +77,8 @@ public:
     auto root_node() -> std::shared_ptr<scene_node>;
 
 protected:
-    auto get_game() -> game&;          // TODO: get_
-    auto get_window() -> gfx::window&; // TODO: get_
+    auto parent() -> game&;
+    auto window() -> gfx::window&;
 
     void virtual on_start();
     void virtual on_finish();

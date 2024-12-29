@@ -61,11 +61,11 @@ void midi_decoder::seek_from_start(milliseconds pos)
 
 auto midi_decoder::open() -> std::optional<buffer::info>
 {
-    _font            = std::any_cast<assets::asset_ptr<sound_font>>(get_context());
+    _font            = std::any_cast<assets::asset_ptr<sound_font>>(context());
     _info.SampleRate = _font->get_sample_rate();
     _info.Channels   = _font->get_channel_count();
 
-    auto const buffer {get_stream().read_all<byte>()};
+    auto const buffer {stream().read_all<byte>()};
     _firstMessage   = {tml_load_memory(buffer.data(), static_cast<i32>(buffer.size()))};
     _currentMessage = _firstMessage;
     u32 duration {0};

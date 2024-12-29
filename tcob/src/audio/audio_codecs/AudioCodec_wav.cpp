@@ -50,7 +50,7 @@ void wav_decoder::seek_from_start(milliseconds pos)
 
 auto wav_decoder::open() -> std::optional<buffer::info>
 {
-    if (drwav_init(&_wav, &read_wav, &seek_wav, &get_stream(), nullptr)) {
+    if (drwav_init(&_wav, &read_wav, &seek_wav, &stream(), nullptr)) {
         _info.Channels   = _wav.channels;
         _info.SampleRate = static_cast<i32>(_wav.sampleRate);
         _info.FrameCount = static_cast<i64>(_wav.totalPCMFrameCount);

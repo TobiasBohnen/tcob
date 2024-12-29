@@ -138,7 +138,7 @@ public:
 protected:
     auto virtual open() -> std::optional<image::info> = 0;
 
-    auto get_stream() -> io::istream&; // TODO: get_
+    auto stream() -> io::istream&; // TODO: get_
 
 private:
     std::shared_ptr<io::istream> _stream;

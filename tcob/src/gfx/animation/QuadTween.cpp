@@ -29,12 +29,12 @@ void quad_tween_base::clear_quads()
     _srcQuads.clear();
 }
 
-auto quad_tween_base::get_source_quads() const -> std::vector<quad> const&
+auto quad_tween_base::source_quads() const -> std::vector<quad> const&
 {
     return _srcQuads;
 }
 
-void quad_tween_base::set_quads(std::span<quad> quads)
+void quad_tween_base::copy_to_dest(std::span<quad> quads)
 {
     for (usize i {0}; i < quads.size(); ++i) {
         _dstQuads[i].get() = quads[i];

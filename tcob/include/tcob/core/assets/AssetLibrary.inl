@@ -11,9 +11,9 @@
 namespace tcob::assets {
 
 template <typename T>
-inline bucket<T>::bucket(group& groupName)
+inline bucket<T>::bucket(group& parent)
     : detail::bucket_base {T::asset_name}
-    , _group {groupName}
+    , _group {parent}
 {
 }
 
@@ -90,7 +90,7 @@ inline void bucket<T>::asset_stats(bucket_stats& out) const
 }
 
 template <typename T>
-inline auto bucket<T>::get_group() -> group&
+inline auto bucket<T>::parent() -> group&
 {
     return _group;
 }

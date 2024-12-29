@@ -109,6 +109,7 @@ void document::on_draw_to(render_target& target)
 
         size_i const size {Bounds->Size};
 
+        _container->set_size(size);
         _canvas.begin_frame(size, 1.0f);
         _lhdoc->render(size.Width);
         litehtml::position const pos {0, 0, size.Width, size.Height};

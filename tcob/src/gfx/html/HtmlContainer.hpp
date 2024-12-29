@@ -34,6 +34,7 @@ public:
     container(document& doc, document::config& config, canvas& canvas, element_painter& painter);
 
     auto get_document() -> document&;
+    void set_size(size_i size);
 
     auto create_font(char const* faceName, i32 size, i32 weight, litehtml::font_style italic, u32 decoration, litehtml::font_metrics* fm) -> litehtml::uint_ptr override;
     void delete_font(litehtml::uint_ptr hFont) override;
@@ -76,6 +77,7 @@ private:
     document::config& _config;
     canvas&           _canvas;
     element_painter&  _painter;
+    size_i            _windowSize;
 
     string                               _baseUrl;
     string                               _caption;

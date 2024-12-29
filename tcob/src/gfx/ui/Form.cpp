@@ -90,7 +90,7 @@ auto form::containers() const -> std::vector<std::shared_ptr<widget>> const&
     return _layout.widgets();
 }
 
-auto form::get_all_widgets() const -> std::vector<widget*>
+auto form::all_widgets() const -> std::vector<widget*>
 {
     std::vector<widget*> retValue;
     for (auto const& container : containers()) {
@@ -307,7 +307,7 @@ void form::on_key_down(input::keyboard::event const& ev)
     using namespace tcob::enum_ops;
 
     if (ev.KeyCode == Controls->TabKey) {
-        auto const vec {get_all_widgets()};
+        auto const vec {all_widgets()};
 
         if ((ev.KeyMods & Controls->TabMod) == Controls->TabMod) {
             // shift tab

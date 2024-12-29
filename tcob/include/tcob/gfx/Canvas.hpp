@@ -46,7 +46,6 @@
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/Transform.hpp"
 
-
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
@@ -151,7 +150,6 @@ public:
     ~canvas();
 
     auto get_texture(i32 level = 0) -> assets::asset_ptr<texture>;
-    auto get_size() const -> size_i; // TODO: get_
 
     void begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt = 0);
     void end_frame();

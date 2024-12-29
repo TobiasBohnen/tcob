@@ -21,14 +21,14 @@ inline void quad_tween<Funcs...>::update_values()
     f64 const p {progress()};
 
     // copy original quads
-    auto source {get_source_quads()};
+    auto source {source_quads()};
     if (source.empty()) { return; }
 
     // run functions
     std::apply([&](auto&&... funcs) { (funcs(p, source), ...); }, _functions);
 
     // set target
-    set_quads(source);
+    copy_to_dest(source);
 }
 
 ////////////////////////////////////////////////////////////

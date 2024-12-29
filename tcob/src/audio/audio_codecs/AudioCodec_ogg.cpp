@@ -56,7 +56,7 @@ void vorbis_decoder::seek_from_start(milliseconds pos)
 
 auto vorbis_decoder::open() -> std::optional<buffer::info>
 {
-    i32 const error {ov_open_callbacks(&get_stream(), &_file, nullptr, 0, vorbisCallbacks)};
+    i32 const error {ov_open_callbacks(&stream(), &_file, nullptr, 0, vorbisCallbacks)};
     if (error == 0) {
         auto* info {ov_info(&_file, -1)};
         _info.Channels   = info->channels;

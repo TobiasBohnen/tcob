@@ -28,7 +28,7 @@ inline auto form::create_tooltip(string const& name) -> std::shared_ptr<T>
 template <SubmitTarget Target>
 inline void form::submit(Target& target)
 {
-    auto widgets {get_all_widgets()};
+    auto widgets {all_widgets()};
     for (auto* widget : widgets) {
         auto const props {widget->attributes()};
         auto const name {widget->name()};

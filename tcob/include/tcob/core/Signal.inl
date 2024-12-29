@@ -29,7 +29,7 @@ template <typename Func>
 inline auto signal<EvArgs>::connect(Func func) const -> connection
 {
     if constexpr (std::is_convertible_v<Func, slot_func>) {
-        uid const id {get_next_id()};
+        uid const id {next_id()};
         _slots.emplace_back(id, func);
         return connection {this, id};
     } else {
@@ -85,7 +85,7 @@ template <typename Func>
 inline auto signal<void>::connect(Func func) const -> connection
 {
     if constexpr (std::is_convertible_v<Func, slot_func>) {
-        uid const id {get_next_id()};
+        uid const id {next_id()};
         _slots.emplace_back(id, func);
         return connection {this, id};
     } else {

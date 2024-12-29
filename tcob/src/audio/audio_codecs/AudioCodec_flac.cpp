@@ -43,7 +43,7 @@ void flac_decoder::seek_from_start(milliseconds pos)
 
 auto flac_decoder::open() -> std::optional<buffer::info>
 {
-    _flac = drflac_open(&read_flac, &seek_flac, &get_stream(), nullptr);
+    _flac = drflac_open(&read_flac, &seek_flac, &stream(), nullptr);
     if (_flac) {
         _info.Channels   = _flac->channels;
         _info.SampleRate = static_cast<i32>(_flac->sampleRate);

@@ -142,16 +142,13 @@ public:
     void draw_text(text_draw_context const& ctx);
     void draw_list_marker(list_marker_draw_context const& ctx);
 
-protected:
-    auto get_canvas() -> canvas&; // TODO: get_
-
 private:
     void draw_left_border(borders const& brds);
     void draw_top_border(borders const& brds);
     void draw_right_border(borders const& brds);
     void draw_bottom_border(borders const& brds);
 
-    canvas& _canvas;
+    gfx::canvas& _canvas;
 };
 
 ////////////////////////////////////////////////////////////
