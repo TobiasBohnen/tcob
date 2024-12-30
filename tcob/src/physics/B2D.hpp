@@ -87,7 +87,7 @@ public:
     auto get_gravity_scale() const -> f32;
     void set_gravity_scale(f32 value) const;
 
-    auto transform() const -> body_transform;
+    auto get_transform() const -> body_transform;
     void set_transform(body_transform value) const;
 
     auto get_center() const -> point_f;
