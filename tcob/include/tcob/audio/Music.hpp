@@ -11,7 +11,6 @@
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"
-#include "tcob/core/Interfaces.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
@@ -23,7 +22,7 @@ class decoder;
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API music : public source, public non_copyable {
+class TCOB_API music : public source {
 public:
     music() = default;
     ~music() override;

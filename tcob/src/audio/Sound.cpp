@@ -20,20 +20,15 @@ namespace tcob::audio {
 using namespace std::chrono_literals;
 
 sound::sound()
-    : _buffer {std::make_shared<audio::al::al_buffer>()}
+    : _buffer {std::make_unique<audio::al::al_buffer>()}
 {
 }
 
 sound::sound(audio::buffer const& buffer)
-    : _buffer {std::make_shared<audio::al::al_buffer>()}
+    : _buffer {std::make_unique<audio::al::al_buffer>()}
 {
     auto const& info {buffer.info()};
     _buffer->buffer_data(buffer.data(), info.Channels, info.SampleRate);
-}
-
-sound::sound(std::shared_ptr<audio::al::al_buffer> buffer)
-    : _buffer {std::move(buffer)}
-{
 }
 
 sound::~sound()

@@ -12,28 +12,12 @@ namespace tcob::audio {
 source::source()
     : Volume {{[&]() { return _source->get_gain(); },
                [&](auto const& value) { _source->set_gain(value); }}}
-    , _source {std::make_shared<audio::al::al_source>()}
+    , _source {std::make_unique<audio::al::al_source>()}
 {
     Volume(1.0f);
 }
 
 source::~source() = default;
-
-source::source(source const& other) noexcept
-    : source {}
-{
-    *this = other;
-}
-
-auto source::operator=(source const& other) noexcept -> source&
-{
-    if (this != &other) {
-        _source = other._source;
-        Volume  = other.Volume();
-    }
-
-    return *this;
-}
 
 auto source::status() const -> playback_status
 {

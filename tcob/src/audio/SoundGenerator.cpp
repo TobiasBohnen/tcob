@@ -434,10 +434,10 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
     return buffer::Create({.Channels = 1, .SampleRate = wave.SampleRate, .FrameCount = std::ssize(samples)}, samples);
 }
 
-auto sound_generator::create_sound(sound_wave const& wave) -> sound
+auto sound_generator::create_sound(sound_wave const& wave) -> std::shared_ptr<sound>
 {
     auto audioData {create_buffer(wave)};
-    return sound {audioData};
+    return std::make_shared<sound>(audioData);
 }
 
 ////////////////////////////////////////////////////////////

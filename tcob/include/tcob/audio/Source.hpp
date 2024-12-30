@@ -15,11 +15,9 @@
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API source {
+class TCOB_API source : public non_copyable {
 public:
     source();
-    source(source const& other) noexcept;
-    auto operator=(source const& other) noexcept -> source&;
     virtual ~source();
 
     std::any DecoderContext;
@@ -46,7 +44,7 @@ protected:
     auto get_impl() const -> audio::al::al_source*;
 
 private:
-    std::shared_ptr<audio::al::al_source> _source;
+    std::unique_ptr<audio::al::al_source> _source;
 };
 
 }

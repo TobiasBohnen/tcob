@@ -20,11 +20,6 @@ class TCOB_API sound final : public source {
 public:
     sound();
     explicit sound(audio::buffer const& buffer);
-    explicit sound(std::shared_ptr<audio::al::al_buffer> buffer);
-    sound(sound const& other) noexcept                    = default;
-    auto operator=(sound const& other) noexcept -> sound& = default;
-    sound(sound&& other) noexcept                         = default;
-    auto operator=(sound&& other) noexcept -> sound&      = default;
     ~sound() override;
 
     auto info() const -> std::optional<buffer::information>;
@@ -44,6 +39,6 @@ private:
     void stop_source();
 
     buffer::information                   _info;
-    std::shared_ptr<audio::al::al_buffer> _buffer;
+    std::unique_ptr<audio::al::al_buffer> _buffer;
 };
 }

@@ -15,8 +15,6 @@
     #include "tcob/core/TaskManager.hpp"
     #include "tcob/core/io/FileStream.hpp"
 
-    #include "ALObjects.hpp"
-
     #include <TinySoundFont/tml.h>
     #include <TinySoundFont/tsf.h>
 
@@ -89,12 +87,9 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     return buffer::Create({.Channels = _channels, .SampleRate = _sampleRate, .FrameCount = std::ssize(samples) / _channels}, samples);
 }
 
-auto sound_font::create_sound(sound_font_commands const& commands) const -> sound
+auto sound_font::create_sound(sound_font_commands const& commands) const -> std::shared_ptr<sound>
 {
-    auto const audioData {create_buffer(commands)};
-    auto const audioBuffer {std::make_shared<audio::al::al_buffer>()};
-    audioBuffer->buffer_data(audioData.data(), _channels, _sampleRate);
-    return sound {audioBuffer};
+    return std::make_shared<sound>(create_buffer(commands));
 }
 
 auto sound_font::get_preset_name(i32 index) const -> string

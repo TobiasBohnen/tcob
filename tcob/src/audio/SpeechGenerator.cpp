@@ -24,10 +24,10 @@ auto speech_generator::create_buffer [[nodiscard]] (std::string const& text) -> 
     return buffer::Create({.Channels = channels, .SampleRate = sampleRate, .FrameCount = frames}, databuf);
 }
 
-auto speech_generator::create_sound [[nodiscard]] (std::string const& text) -> sound
+auto speech_generator::create_sound [[nodiscard]] (std::string const& text) -> std::shared_ptr<sound>
 {
     auto audioData {create_buffer(text)};
-    return sound {audioData};
+    return std::make_shared<sound>(audioData);
 }
 
 ////////////////////////////////////////////////////////////

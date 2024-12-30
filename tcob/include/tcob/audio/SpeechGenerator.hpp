@@ -17,7 +17,7 @@ public:
     speech_generator() = default;
 
     auto create_buffer [[nodiscard]] (std::string const& text) -> buffer;
-    auto create_sound [[nodiscard]] (std::string const& text) -> sound;
+    auto create_sound [[nodiscard]] (std::string const& text) -> std::shared_ptr<sound>;
 
 private:
 };

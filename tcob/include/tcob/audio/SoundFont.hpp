@@ -47,7 +47,7 @@ public:
     auto load_async [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> std::future<load_status>;
 
     auto create_buffer [[nodiscard]] (sound_font_commands const& commands) const -> buffer;
-    auto create_sound [[nodiscard]] (sound_font_commands const& commands) const -> sound;
+    auto create_sound [[nodiscard]] (sound_font_commands const& commands) const -> std::shared_ptr<sound>;
 
     auto get_preset_name(i32 index) const -> string;
 

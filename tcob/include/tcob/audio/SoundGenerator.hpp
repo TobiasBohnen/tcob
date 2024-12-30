@@ -148,7 +148,7 @@ public:
     auto mutate_wave(sound_wave const& wave) -> sound_wave;
 
     auto create_buffer [[nodiscard]] (sound_wave const& wave) -> buffer;
-    auto create_sound [[nodiscard]] (sound_wave const& wave) -> sound;
+    auto create_sound [[nodiscard]] (sound_wave const& wave) -> std::shared_ptr<sound>;
 
 private:
     random::rng_split_mix_64 _random;
