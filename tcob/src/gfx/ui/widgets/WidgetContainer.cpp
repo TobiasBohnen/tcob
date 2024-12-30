@@ -85,7 +85,7 @@ void widget_container::on_styles_changed()
     }
 }
 
-auto widget_container::get_paint_offset() const -> point_f
+auto widget_container::paint_offset() const -> point_f
 {
     point_f retValue {point_f::Zero};
 

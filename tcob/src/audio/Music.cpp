@@ -85,7 +85,7 @@ void music::update_stream()
 {
     initialize_buffers();
 
-    auto* s {get_source()};
+    auto* s {get_impl()};
     s->play();
 
     for (;;) {
@@ -125,7 +125,7 @@ void music::stop_stream()
 
 void music::queue_buffers(std::vector<u32> const& bufferIDs)
 {
-    auto* s {get_source()};
+    auto* s {get_impl()};
 
     for (u32 bufferID : bufferIDs) {
         for (u32 i {0}; i < STREAM_BUFFER_COUNT; ++i) {

@@ -310,7 +310,7 @@ void canvas_widget::clear()
 
 void canvas_widget::on_paint(widget_painter& painter)
 {
-    auto& canvas {painter.get_canvas()};
+    auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
     canvas.set_scissor(Bounds());

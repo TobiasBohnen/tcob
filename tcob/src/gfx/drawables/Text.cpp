@@ -17,7 +17,7 @@ text::text(assets::asset_ptr<font> font)
     Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 
-    _material->Texture = _font->get_texture();
+    _material->Texture = _font->texture();
     _renderer.set_material(_material.ptr());
     Shader.Changed.connect([&](auto const& value) { _material->Shader = value; });
     Text.Changed.connect([&](auto const&) { _needsReshape = true; });
@@ -87,7 +87,7 @@ void text::format()
     u8    currentEffectIdx {0};
 
     auto const [x, y] {Bounds->Position};
-    auto const& xform {get_transform()};
+    auto const& xform {transform()};
     for (auto const& token : formatResult.Tokens) {
         // handle text commands
         if (token.Command.Type != text_formatter::command_type::None) {

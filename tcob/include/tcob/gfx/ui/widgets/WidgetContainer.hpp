@@ -34,7 +34,7 @@ protected:
 
     void on_styles_changed() override;
 
-    auto get_paint_offset() const -> point_f; // TODO: get_
+    auto paint_offset() const -> point_f;
 };
 
 }

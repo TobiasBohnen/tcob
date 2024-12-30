@@ -129,7 +129,7 @@ void panel::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         auto          xform {transform::Identity};
-        point_f const translate {rect.Position + get_paint_offset()};
+        point_f const translate {rect.Position + paint_offset()};
         xform.translate(translate);
 
         for (auto const& w : widgets_by_zorder()) {
@@ -294,7 +294,7 @@ void glass::on_paint(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     auto          xform {transform::Identity};
-    point_f const translate {rect.Position + get_paint_offset()};
+    point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
     for (auto const& w : widgets()) {

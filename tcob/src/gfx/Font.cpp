@@ -9,8 +9,8 @@
 #include <utility>
 
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/easing/Easing.hpp"
 #include "tcob/core/io/FileStream.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 
 #include "FontEngine.hpp"
 
@@ -80,7 +80,7 @@ font::font()
 
 font::~font() = default;
 
-auto font::get_texture() const -> assets::asset_ptr<texture>
+auto font::texture() const -> assets::asset_ptr<gfx::texture>
 {
     return _texture;
 }
@@ -113,10 +113,9 @@ auto font::load(std::span<ubyte const> fontData, u32 size) noexcept -> load_stat
 
 void font::setup_texture()
 {
-    auto texture {get_texture()};
-    texture->create({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, FONT_TEXTURE_LAYERS, texture::format::R8);
-    texture->Filtering = texture::filtering::Linear;
-    texture->Wrapping  = texture::wrapping::ClampToBorder;
+    _texture->create({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, FONT_TEXTURE_LAYERS, texture::format::R8);
+    _texture->Filtering = texture::filtering::Linear;
+    _texture->Wrapping  = texture::wrapping::ClampToBorder;
 
     _fontTextureCursor = {0, 0};
     _fontTextureLayer  = 0;
@@ -275,7 +274,7 @@ auto font::cache_render_glyph(u32 cp) -> bool
         }
 
         // write to texture
-        get_texture()->update_data(_fontTextureCursor, bitmapSize, gb.second.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
+        _texture->update_data(_fontTextureCursor, bitmapSize, gb.second.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
 
         // create glyph
         rendered_glyph gl {gb.first};

@@ -145,7 +145,7 @@ protected:
     auto virtual attributes() const -> widget_attributes;
     auto virtual flags() -> widget_flags;
 
-    auto get_orientation() const -> orientation; // TODO: get_
+    auto current_orientation() const -> orientation;
 
     auto is_inert() const -> bool;
     void set_inert(bool inert);

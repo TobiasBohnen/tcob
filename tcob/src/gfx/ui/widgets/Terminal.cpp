@@ -259,7 +259,7 @@ void terminal::on_paint(widget_painter& painter)
         f32 const   fontHeight {font->info().LineHeight};
         f32 const   fontWidth {get_font_width(font)};
 
-        auto& canvas {painter.get_canvas()};
+        auto& canvas {painter.canvas()};
         canvas.save();
         canvas.set_shape_antialias(false);
 

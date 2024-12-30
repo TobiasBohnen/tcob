@@ -42,7 +42,7 @@ void progress_bar::on_paint(widget_painter& painter)
         (void)painter.draw_bar(
             style->Bar,
             rect,
-            {.Orientation = get_orientation(),
+            {.Orientation = current_orientation(),
              .Inverted    = false,
              .Position    = element::bar::position::CenterOrMiddle,
              .BlockCount  = numBlocks,

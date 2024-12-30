@@ -385,7 +385,7 @@ void canvas_renderer::set_layer(i32 layer)
 
 void canvas_renderer::prepare_render(render_target& target, bool debug)
 {
-    target.get_camera().push_state();
+    target.camera().push_state();
     target.prepare_render(debug);
 }
 
@@ -398,7 +398,7 @@ void canvas_renderer::on_render_to_target(render_target& target)
 
 void canvas_renderer::finalize_render(render_target& target)
 {
-    target.get_camera().pop_state();
+    target.camera().pop_state();
     target.finalize_render();
 }
 

@@ -79,7 +79,7 @@ void image_box::on_paint(widget_painter& painter)
                 break;
             }
 
-            auto& canvas {painter.get_canvas()};
+            auto& canvas {painter.canvas()};
             canvas.set_fill_style(colors::White);
             canvas.draw_image(tex.ptr(), Image->Region, targetRect);
         }

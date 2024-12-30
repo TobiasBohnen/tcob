@@ -2075,8 +2075,8 @@ void canvas::render_text(font* font, std::span<vertex const> verts)
     state&       s {get_state()};
     canvas_paint paint {s.Fill};
 
-    // Render triangles.
-    paint.Image = font->get_texture().ptr();
+    // Render triangles
+    paint.Image = font->texture().ptr();
 
     // Apply global alpha
     multiply_alpha_paint(paint.Color, s.Alpha);

@@ -25,7 +25,7 @@ public:
     prop<size_f>                        Scale;
     prop<std::pair<degree_f, degree_f>> Skew;
 
-    auto get_transform() -> transform const&; // TODO: get_
+    auto transform() -> gfx::transform const&;
 
     void translate_by(point_f offset);
     void rotate_by(degree_f angle);
@@ -41,8 +41,8 @@ protected:
     void update_transform();
 
 private:
-    transform _transform {};
-    bool      _isDirty {true};
+    gfx::transform _transform {};
+    bool           _isDirty {true};
 };
 
 }

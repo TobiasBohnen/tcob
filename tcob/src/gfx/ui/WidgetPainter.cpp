@@ -11,7 +11,7 @@
 
 namespace tcob::gfx::ui {
 
-widget_painter::widget_painter(canvas& canvas)
+widget_painter::widget_painter(gfx::canvas& canvas)
     : _canvas {canvas}
 {
 }
@@ -68,7 +68,7 @@ void widget_painter::draw_background_and_border(background_style const& style, r
     refRect -= style.Padding;
 
     // add border
-    refRect -= style.Border.get_thickness();
+    refRect -= style.Border.thickness();
 }
 
 void widget_painter::draw_bordered_rect(rect_f const& rect, ui_paint const& back, element::border const& borderStyle)
@@ -511,7 +511,7 @@ void widget_painter::draw_item(element::item const& style, rect_f const& rect, u
 
     if (style.Text.Font) {
         itemRect -= style.Padding;
-        itemRect -= style.Border.get_thickness();
+        itemRect -= style.Border.thickness();
         draw_text(style.Text, itemRect, text);
     }
 }
@@ -534,7 +534,7 @@ void widget_painter::draw_shadow(element::shadow const& style, rect_f const& ref
     }
 }
 
-auto widget_painter::get_canvas() -> canvas&
+auto widget_painter::canvas() -> gfx::canvas&
 {
     return _canvas;
 }

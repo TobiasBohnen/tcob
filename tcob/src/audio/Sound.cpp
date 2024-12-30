@@ -77,7 +77,7 @@ auto sound::on_start() -> bool
     if (_buffer->get_size() <= 0) { return false; }
 
     stop();
-    auto* s {get_source()};
+    auto* s {get_impl()};
     s->set_buffer(_buffer->get_id());
     s->play();
 
@@ -105,13 +105,13 @@ auto sound::duration() const -> milliseconds
 auto sound::playback_position() const -> milliseconds
 {
     return _buffer->get_size() > 0
-        ? milliseconds {get_source()->get_sec_offset()}
+        ? milliseconds {get_impl()->get_sec_offset()}
         : 0ms;
 }
 
 void sound::stop_source()
 {
-    auto* s {get_source()};
+    auto* s {get_impl()};
     s->stop();
     s->set_buffer(0);
 }

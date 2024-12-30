@@ -17,7 +17,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API widget_painter {
 public:
-    explicit widget_painter(canvas& canvas);
+    explicit widget_painter(gfx::canvas& canvas);
 
     void begin(f32 alpha);
     void begin(f32 alpha, transform const& xform);
@@ -40,7 +40,7 @@ public:
     auto draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& refRect, element::bar::context const& barCtx) -> element::scrollbar::rects;
     void draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle);
 
-    auto get_canvas() -> canvas&; // TODO: get_
+    auto canvas() -> gfx::canvas&;
 
     auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text) -> text_formatter::result;
 
@@ -55,7 +55,7 @@ private:
     auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> text_formatter::result;
     auto transform_text(element::text::transform xform, utf8_string_view text) const -> utf8_string;
 
-    canvas&            _canvas;
+    gfx::canvas&       _canvas;
     std::stack<rect_f> _scissorStack;
 };
 

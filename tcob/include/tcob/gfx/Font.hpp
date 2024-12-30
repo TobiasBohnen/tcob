@@ -84,7 +84,7 @@ public:
     signal<std::span<ubyte>> Render;
 
     auto info() const -> information const&;
-    auto get_texture() const -> assets::asset_ptr<texture>; // TODO: get_
+    auto texture() const -> assets::asset_ptr<gfx::texture>;
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> load_status;
@@ -114,7 +114,7 @@ private:
 
     std::unique_ptr<truetype_font_engine> _engine;
 
-    assets::manual_asset_ptr<texture> _texture {};
+    assets::manual_asset_ptr<gfx::texture> _texture {};
 };
 
 void Serialize(font::style const& v, auto&& s)

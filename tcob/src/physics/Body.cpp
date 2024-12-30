@@ -38,7 +38,7 @@ body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xfor
                 [&](auto const& value) { _impl->set_enabled(value); }}}
     , GravityScale {{[&]() { return _impl->get_gravity_scale(); },
                      [&](auto const& value) { _impl->set_gravity_scale(value); }}}
-    , Transform {{[&]() -> body_transform { return _impl->get_transform(); },
+    , Transform {{[&]() -> body_transform { return _impl->transform(); },
                   [&](auto const& value) { _impl->set_transform(value); }}}
     , _impl {std::make_unique<detail::b2d_body>(b2dWorld, xform, bodySettings)}
     , _world {world}

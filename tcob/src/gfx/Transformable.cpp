@@ -16,7 +16,7 @@ transformable::transformable()
     Skew.Changed.connect([&](auto const&) { mark_transform_dirty(); });
 }
 
-auto transformable::get_transform() -> transform const&
+auto transformable::transform() -> gfx::transform const&
 {
     update_transform();
     return _transform;

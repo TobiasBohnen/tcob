@@ -114,7 +114,7 @@ public:
     void add_bucket();
 
     template <typename T>
-    auto get_bucket() -> bucket<T>*;
+    auto bucket() -> assets::bucket<T>*;
 
     template <typename T>
     auto get(string const& assetName) const -> assets::asset_ptr<T>;
@@ -180,7 +180,7 @@ namespace detail {
 template <typename T>
 class loader : public detail::loader_base {
 public:
-    loader(group& group);
+    loader(assets::group& group);
 
     void unload(asset<T>& asset, bool greedy);
 
@@ -190,14 +190,13 @@ protected:
     void virtual unload_asset(asset<T>& asset, bool greedy) = 0;
     auto virtual reload_asset(asset<T>& asset) -> bool;
 
-    auto get_group() -> group&;      // TODO: get_
-
-    auto get_bucket() -> bucket<T>*; // TODO: get_
+    auto group() -> assets::group&;
+    auto bucket() -> assets::bucket<T>*;
 
     void set_asset_status(asset_ptr<T> asset, asset_status status);
 
 private:
-    group& _group;
+    assets::group& _group;
 };
 ////////////////////////////////////////////////////////////
 

@@ -210,7 +210,7 @@ auto circle_shape::geometry() -> geometry_data
 
 auto circle_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
-    return ray.intersect_circle(get_transform() * Center(), Radius());
+    return ray.intersect_circle(transform() * Center(), Radius());
 }
 
 void circle_shape::on_update(milliseconds /* deltaTime */)
@@ -239,7 +239,7 @@ void circle_shape::create()
     if (Segments < 3 || Radius < 1.0f) { return; }
 
     // vertices
-    auto const& xform {get_transform()};
+    auto const& xform {transform()};
     f32 const   angleStep {TAU_F / Segments()};
     f32 const   radius {Radius()};
 
@@ -310,7 +310,7 @@ auto rect_shape::geometry() -> geometry_data
 
 auto rect_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
-    return ray.intersect_rect(Bounds(), get_transform());
+    return ray.intersect_rect(Bounds(), transform());
 }
 
 auto rect_shape::aabb() const -> rect_f
@@ -325,7 +325,7 @@ void rect_shape::move_by(point_f offset)
 
 void rect_shape::update_aabb()
 {
-    auto const& xform {get_transform()};
+    auto const& xform {transform()};
     auto const& rect {Bounds()};
 
     auto const topLeft {xform * rect.top_left()};
@@ -342,7 +342,7 @@ void rect_shape::update_aabb()
 void rect_shape::on_update(milliseconds deltaTime)
 {
     if (is_dirty()) {
-        geometry::set_position(_quad, Bounds(), get_transform());
+        geometry::set_position(_quad, Bounds(), transform());
         update_aabb();
         mark_clean();
     }
@@ -390,11 +390,11 @@ auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
     std::vector<ray::result> retValue;
     for (auto const& polygon : Polygons()) {
-        auto points {ray.intersect_polyline(polygon.Outline, get_transform())};
+        auto points {ray.intersect_polyline(polygon.Outline, transform())};
         retValue.insert(retValue.end(), points.begin(), points.end());
 
         for (auto const& hole : polygon.Holes) {
-            auto holePoints {ray.intersect_polyline(hole, get_transform())};
+            auto holePoints {ray.intersect_polyline(hole, transform())};
             retValue.insert(retValue.end(), holePoints.begin(), holePoints.end());
         }
     }
@@ -447,7 +447,7 @@ void poly_shape::create()
     u32 indOffset {0};
 
     // create verts
-    auto const&    xform {get_transform()};
+    auto const&    xform {transform()};
     texture_region texReg {};
     if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion())) {
         texReg = Material->Texture->get_region(TextureRegion());

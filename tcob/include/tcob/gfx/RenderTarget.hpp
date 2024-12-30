@@ -41,7 +41,7 @@ public:
 
     color ClearColor {colors::DarkGray};
 
-    auto get_camera() -> camera&; // TODO: get_
+    auto camera() -> gfx::camera&;
 
     void clear() const;
     void clear(color c) const;
@@ -67,7 +67,7 @@ protected:
 
 private:
     std::unique_ptr<render_backend::render_target_base> _impl;
-    camera                                              _camera;
+    gfx::camera                                         _camera;
 };
 
 ////////////////////////////////////////////////////////////

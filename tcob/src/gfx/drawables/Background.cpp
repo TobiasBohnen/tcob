@@ -34,9 +34,9 @@ void background::on_draw_to(render_target& target)
 
     _renderer.set_geometry(_quad);
 
-    target.get_camera().push_state();
+    target.camera().push_state();
     _renderer.render_to_target(target);
-    target.get_camera().pop_state();
+    target.camera().pop_state();
 }
 
 ////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ auto parallax_background::can_draw() const -> bool
 
 void parallax_background::on_draw_to(render_target& target)
 {
-    auto const& camera {target.get_camera()};
+    auto const& camera {target.camera()};
 
     auto const targetSize {size_f {target.Size()}};
     auto const texSize {size_f {Material->Texture->info().Size} * TextureScale};
@@ -112,9 +112,9 @@ void parallax_background::on_draw_to(render_target& target)
 
     _renderer.set_geometry(_quads);
 
-    target.get_camera().push_state();
+    target.camera().push_state();
     _renderer.render_to_target(target);
-    target.get_camera().pop_state();
+    target.camera().pop_state();
 }
 
 auto parallax_background::get_layer(uid id) -> layer*

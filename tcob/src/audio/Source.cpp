@@ -89,7 +89,7 @@ void source::toggle_pause()
     status() == playback_status::Paused ? resume() : pause();
 }
 
-auto source::get_source() const -> audio::al::al_source*
+auto source::get_impl() const -> audio::al::al_source*
 {
     return _source.get();
 }

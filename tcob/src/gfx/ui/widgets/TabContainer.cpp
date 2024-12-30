@@ -122,7 +122,7 @@ void tab_container::on_paint(widget_painter& painter)
             offset_tab_content(rect, *style);
 
             auto          xform {transform::Identity};
-            point_f const translate {rect.Position + get_paint_offset()};
+            point_f const translate {rect.Position + paint_offset()};
             xform.translate(translate);
 
             auto& tab {_tabs[ActiveTabIndex()]};
@@ -189,7 +189,7 @@ auto tab_container::get_tab_rect(style const& style, item_style const& itemStyle
     retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
     retValue.Size.Height = rect.height();
 
-    retValue -= itemStyle.Item.Border.get_thickness();
+    retValue -= itemStyle.Item.Border.thickness();
     return retValue;
 }
 

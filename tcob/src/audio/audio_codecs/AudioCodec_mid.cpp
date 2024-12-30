@@ -50,11 +50,11 @@ midi_decoder::~midi_decoder()
 
 void midi_decoder::seek_from_start(milliseconds pos)
 {
-    tsf_reset(_font->get_font());
+    tsf_reset(_font->get_impl());
     _currentMessage = _firstMessage;
     _currentTime    = pos.count();
     while (_currentTime > _currentMessage->time) {
-        handle_message(_font->get_font(), _currentMessage);
+        handle_message(_font->get_impl(), _currentMessage);
         _currentMessage = _currentMessage->next;
     }
 }
@@ -62,8 +62,8 @@ void midi_decoder::seek_from_start(milliseconds pos)
 auto midi_decoder::open() -> std::optional<buffer::information>
 {
     _font            = std::any_cast<assets::asset_ptr<sound_font>>(context());
-    _info.SampleRate = _font->get_sample_rate();
-    _info.Channels   = _font->get_channel_count();
+    _info.SampleRate = _font->info().SampleRate;
+    _info.Channels   = _font->info().Channels;
 
     auto const buffer {stream().read_all<byte>()};
     _firstMessage   = {tml_load_memory(buffer.data(), static_cast<i32>(buffer.size()))};
@@ -72,7 +72,7 @@ auto midi_decoder::open() -> std::optional<buffer::information>
     tml_get_info(_firstMessage, nullptr, nullptr, nullptr, nullptr, &duration);
     _info.FrameCount = static_cast<i64>((static_cast<f32>(duration) / 1000.0f) * static_cast<f32>(_info.SampleRate));
 
-    tsf_reset(_font->get_font());
+    tsf_reset(_font->get_impl());
     return _info;
 }
 
@@ -91,11 +91,11 @@ auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
         for (_currentTime += sampleBlock * (1000.0 / static_cast<f64>(_info.SampleRate));
              _currentMessage && _currentTime >= _currentMessage->time;
              _currentMessage = _currentMessage->next) {
-            handle_message(_font->get_font(), _currentMessage);
+            handle_message(_font->get_impl(), _currentMessage);
         }
 
         // Render the block of audio samples in float format
-        tsf_render_float(_font->get_font(), dataPtr, sampleBlock, 0);
+        tsf_render_float(_font->get_impl(), dataPtr, sampleBlock, 0);
         dataPtr += sampleBlock * _info.Channels;
         sampleCount += sampleBlock;
     }

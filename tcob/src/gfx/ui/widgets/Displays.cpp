@@ -38,7 +38,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
 
         scissor_guard const guard {painter, this};
 
-        auto& canvas {painter.get_canvas()};
+        auto& canvas {painter.canvas()};
         canvas.save();
 
         f32 const width {rect.width() / Size->Width};
@@ -174,7 +174,7 @@ void seven_segment_display::on_paint(widget_painter& painter)
 
         scissor_guard const guard {painter, this};
 
-        auto& canvas {painter.get_canvas()};
+        auto& canvas {painter.canvas()};
         canvas.save();
 
         f32 const width {style->Segment.Size.calc(rect.width())};
@@ -295,7 +295,7 @@ color_picker::color_picker(init const& wi)
 
 void color_picker::on_paint(widget_painter& painter)
 {
-    auto& canvas {painter.get_canvas()};
+    auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
     auto const bounds {Bounds()};

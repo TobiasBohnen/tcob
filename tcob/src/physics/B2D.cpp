@@ -339,7 +339,7 @@ void b2d_body::set_gravity_scale(f32 value) const
     b2Body_SetGravityScale(ID, value);
 }
 
-auto b2d_body::get_transform() const -> body_transform
+auto b2d_body::transform() const -> body_transform
 {
     auto val {b2Body_GetTransform(ID)};
     return {{val.p.x, val.p.y}, radian_f {b2Rot_GetAngle(val.q)}};

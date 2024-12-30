@@ -27,12 +27,20 @@ class sound_font_commands;
 
 class TCOB_API sound_font final : public non_copyable {
 public:
+    ////////////////////////////////////////////////////////////
+
+    struct information {
+        i32 PresetCount {};
+        i8  Channels {};
+        i32 SampleRate {};
+    };
+
+    ////////////////////////////////////////////////////////////
+
     sound_font() = default;
     ~sound_font();
 
-    auto get_preset_count() const -> i32; // TODO: get_
-    auto get_channel_count() const -> i8; // TODO: get_
-    auto get_sample_rate() const -> i32;  // TODO: get_
+    auto info() const -> information;
 
     auto load [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& stream, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
@@ -43,7 +51,7 @@ public:
 
     auto get_preset_name(i32 index) const -> string;
 
-    auto get_font() const -> tsf*; // TODO: get_
+    auto get_impl() const -> tsf*;
 
     static inline char const* asset_name {"sound_font"};
 
@@ -62,12 +70,12 @@ class TCOB_API sound_font_commands : public non_copyable {
     friend class sound_font;
 
 public:
-    auto get_total_duration() const -> milliseconds; // TODO: get_
-
     void start_new_section(milliseconds duration);
 
     template <std::derived_from<sound_font_command> T>
     void add(auto&&... args);
+
+    auto duration() const -> milliseconds;
 
 private:
     void render(tsf* font, f32* buffer, u8 channels, i32 sampleRate) const;

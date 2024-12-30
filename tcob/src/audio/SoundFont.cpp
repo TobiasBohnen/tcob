@@ -32,6 +32,12 @@ sound_font::~sound_font()
     }
 }
 
+auto sound_font::info() const -> information
+{
+    assert(_font);
+    return information {.PresetCount = tsf_get_presetcount(_font), .Channels = _channels, .SampleRate = _sampleRate};
+}
+
 auto sound_font::load(path const& file, bool stereo, i32 sampleRate) noexcept -> load_status
 {
     io::ifstream fs {file};
@@ -72,9 +78,9 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     reset();
 
     // calculate duration
-    f64 const duration {commands.get_total_duration().count() / 1000};
+    f64 const d {commands.duration().count() / 1000};
 
-    std::vector<f32> samples(static_cast<usize>(duration * _sampleRate * _channels));
+    std::vector<f32> samples(static_cast<usize>(d * _sampleRate * _channels));
     f32*             ptr {samples.data()};
 
     // call 'apply' on all commands; then render them
@@ -91,29 +97,13 @@ auto sound_font::create_sound(sound_font_commands const& commands) const -> soun
     return sound {audioBuffer};
 }
 
-auto sound_font::get_preset_count() const -> i32
-{
-    assert(_font);
-    return tsf_get_presetcount(_font);
-}
-
-auto sound_font::get_channel_count() const -> i8
-{
-    return _channels;
-}
-
-auto sound_font::get_sample_rate() const -> i32
-{
-    return _sampleRate;
-}
-
 auto sound_font::get_preset_name(i32 index) const -> string
 {
     assert(_font);
     return tsf_get_presetname(_font, index);
 }
 
-auto sound_font::get_font() const -> tsf*
+auto sound_font::get_impl() const -> tsf*
 {
     return _font;
 }
@@ -271,7 +261,7 @@ void sound_font_commands::start_new_section(milliseconds duration)
     _commands.emplace_back(duration, std::vector<std::unique_ptr<sound_font_command>> {});
 }
 
-auto sound_font_commands::get_total_duration() const -> milliseconds
+auto sound_font_commands::duration() const -> milliseconds
 {
     return _totalDuration;
 }

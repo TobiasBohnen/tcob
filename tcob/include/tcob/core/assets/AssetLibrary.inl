@@ -104,14 +104,14 @@ inline void group::add_bucket()
         return;
     }
 
-    _buckets[T::asset_name] = std::make_unique<bucket<T>>(*this);
+    _buckets[T::asset_name] = std::make_unique<assets::bucket<T>>(*this);
 }
 
 template <typename T>
-inline auto group::get_bucket() -> bucket<T>*
+inline auto group::bucket() -> assets::bucket<T>*
 {
     auto it {_buckets.find(T::asset_name)};
-    return it != _buckets.end() ? dynamic_cast<bucket<T>*>(it->second.get()) : nullptr;
+    return it != _buckets.end() ? dynamic_cast<assets::bucket<T>*>(it->second.get()) : nullptr;
 }
 
 template <typename T>
@@ -122,7 +122,7 @@ inline auto group::get(string const& assetName) const -> assets::asset_ptr<T>
         return assets::asset_ptr<T> {nullptr};
     }
 
-    return dynamic_cast<bucket<T>*>(_buckets.at(T::asset_name).get())->get(assetName);
+    return dynamic_cast<assets::bucket<T>*>(_buckets.at(T::asset_name).get())->get(assetName);
 }
 
 template <typename T>
@@ -131,13 +131,13 @@ inline auto group::has(string const& assetName) const -> bool
     auto it {_buckets.find(T::asset_name)};
     if (it == _buckets.end()) { return false; }
 
-    return dynamic_cast<bucket<T>*>(it->second.get())->has(assetName);
+    return dynamic_cast<assets::bucket<T>*>(it->second.get())->has(assetName);
 }
 
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline loader<T>::loader(group& group)
+inline loader<T>::loader(assets::group& group)
     : _group {group}
 {
 }
@@ -146,7 +146,7 @@ template <typename T>
 inline void loader<T>::unload(asset<T>& asset, bool greedy)
 {
     unload_asset(asset, greedy);
-    get_bucket()->unload(asset.name());
+    bucket()->unload(asset.name());
 }
 
 template <typename T>
@@ -159,15 +159,15 @@ template <typename T>
 inline auto loader<T>::reload_asset(asset<T>& /*asset*/) -> bool { return false; };
 
 template <typename T>
-inline auto loader<T>::get_group() -> group&
+inline auto loader<T>::group() -> assets::group&
 {
     return _group;
 }
 
 template <typename T>
-inline auto loader<T>::get_bucket() -> bucket<T>*
+inline auto loader<T>::bucket() -> assets::bucket<T>*
 {
-    return _group.get_bucket<T>();
+    return _group.bucket<T>();
 }
 
 template <typename T>
@@ -181,11 +181,11 @@ inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
     case asset_status::Loading: break;
     case asset_status::Loaded:
         logger::Info("AssetLoader: group '{}' type '{}' -> asset '{}' successfully loaded",
-                     get_group().name(), get_bucket()->name(), asset.get()->name());
+                     group().name(), bucket()->name(), asset.get()->name());
         break;
     case asset_status::Error:
         logger::Error("AssetLoader: group '{}' type '{}' -> asset '{}' loading failed",
-                      get_group().name(), get_bucket()->name(), asset.get()->name());
+                      group().name(), bucket()->name(), asset.get()->name());
         break;
     }
 }

@@ -50,7 +50,7 @@ void button::on_paint(widget_painter& painter)
             f32 const  factor {iconSize.Height / static_cast<f32>(iconSize.Width)};
             f32 const  width {rect.height() * factor};
             rect = {{rect.center().X - (width / 2), rect.top()}, {width, rect.height()}};
-            auto& canvas {painter.get_canvas()};
+            auto& canvas {painter.canvas()};
             canvas.set_fill_style(style->Text.Color);
             canvas.draw_image(Icon->Texture.ptr(), Icon->Region, rect);
         }

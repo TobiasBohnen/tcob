@@ -88,7 +88,7 @@ void document::force_redraw()
 void document::on_update(milliseconds)
 {
     if (_isTransformDirty) {
-        geometry::set_position(_quad, Bounds(), get_transform());
+        geometry::set_position(_quad, Bounds(), transform());
         _isTransformDirty = false;
         _needsRedraw      = true;
     }
@@ -199,7 +199,7 @@ void document::on_mouse_button_up(input::mouse::button_event const& ev)
 
 auto document::convert_screen_to_world(point_i pos) const -> point_i
 {
-    return point_i {_config.Window->get_camera().convert_screen_to_world(pos)};
+    return point_i {_config.Window->camera().convert_screen_to_world(pos)};
 }
 }
 

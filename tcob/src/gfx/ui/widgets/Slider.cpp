@@ -52,7 +52,7 @@ void slider::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         i32 const  numBlocks {10};
-        auto const orien {get_orientation()};
+        auto const orien {current_orientation()};
         auto const pos {element::bar::position::CenterOrMiddle};
 
         // bar
@@ -201,7 +201,7 @@ void slider::calculate_value(point_f mp)
     rect_f const rect {_paintResult.Bar};
     f32          frac {0.0f};
 
-    switch (get_orientation()) {
+    switch (current_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {_paintResult.Thumb.width()};
         frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
@@ -234,7 +234,7 @@ auto slider::attributes() const -> widget_attributes
 
 void slider::handle_dir_input(direction dir)
 {
-    switch (get_orientation()) {
+    switch (current_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
         case direction::Left:

@@ -93,7 +93,7 @@ namespace element {
             retValue.Position.X += (rect.width() - retValue.width()) / 2.0f;
         }
 
-        return retValue - Border.get_thickness();
+        return retValue - Border.thickness();
     }
 
     auto nav_arrow::calc(rect_f const& rect) const -> rect_f
@@ -106,7 +106,7 @@ namespace element {
         retValue.Position.X += rect.width() - retValue.width();
         retValue.Position.Y += (rect.height() - retValue.height()) / 2;
 
-        return retValue - Border.get_thickness() - Padding;
+        return retValue - Border.thickness() - Padding;
     }
 
     auto bar::calc(rect_f const& rect, orientation orien, position align) const -> rect_f
@@ -142,10 +142,10 @@ namespace element {
             break;
         }
 
-        return retValue - Border.get_thickness();
+        return retValue - Border.thickness();
     }
 
-    auto border::get_thickness() const -> thickness
+    auto border::thickness() const -> gfx::ui::thickness
     {
         return {Size / 2};
     }
@@ -168,7 +168,7 @@ void background_style::offset_content(rect_f& bounds, bool isHitTest) const
 {
     style::offset_content(bounds, isHitTest);
     if (!isHitTest) {
-        bounds -= Border.get_thickness();
+        bounds -= Border.thickness();
     }
 }
 

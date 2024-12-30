@@ -114,7 +114,7 @@ void accordion::on_paint(widget_painter& painter)
             update_section_bounds(rect);
 
             auto          xform {transform::Identity};
-            point_f const translate {rect.Position + get_paint_offset()};
+            point_f const translate {rect.Position + paint_offset()};
             xform.translate(translate);
 
             auto& tab {_sections[ActiveSectionIndex()]};
@@ -182,7 +182,7 @@ auto accordion::get_section_rect(item_style const& itemStyle, isize index, f32 s
     rect_f retValue {rect};
     retValue.Position.Y += sectionHeight * index;
     retValue.Size.Height = sectionHeight;
-    retValue -= itemStyle.Item.Border.get_thickness();
+    retValue -= itemStyle.Item.Border.thickness();
     if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
         retValue.Position.Y += content_bounds().height();
     }

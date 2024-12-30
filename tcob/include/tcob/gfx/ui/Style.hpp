@@ -109,7 +109,7 @@ namespace element {
         length   Radius {};
         length   Size {};
 
-        auto get_thickness() const -> thickness; // TODO: get_
+        auto thickness() const -> thickness;
     };
 
     ////////////////////////////////////////////////////////////
