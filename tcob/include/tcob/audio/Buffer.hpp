@@ -36,9 +36,9 @@ public:
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file, std::any& ctx) noexcept -> std::future<load_status>;
 
-    auto save [[nodiscard]] (path const& file) const -> bool;
-    auto save [[nodiscard]] (io::ostream& out, string const& ext) const -> bool;
-    auto save_async [[nodiscard]] (path const& file) const -> std::future<bool>;
+    auto save [[nodiscard]] (path const& file) const noexcept -> bool;
+    auto save [[nodiscard]] (io::ostream& out, string const& ext) const noexcept -> bool;
+    auto save_async [[nodiscard]] (path const& file) const noexcept -> std::future<bool>;
 
     auto static Create(information const& info, std::span<f32> data) -> buffer;
 

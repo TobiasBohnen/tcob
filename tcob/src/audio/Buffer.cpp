@@ -57,13 +57,13 @@ auto buffer::load_async(path const& file, std::any& ctx) noexcept -> std::future
     return locate_service<task_manager>().run_async<load_status>([&, file, ctx]() mutable { return load(file, ctx); });
 }
 
-auto buffer::save(path const& file) const -> bool
+auto buffer::save(path const& file) const noexcept -> bool
 {
     io::ofstream of {file};
     return save(of, io::get_extension(file));
 }
 
-auto buffer::save(io::ostream& out, string const& ext) const -> bool
+auto buffer::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
     if (_info.FrameCount == 0) { return false; }
 
@@ -74,7 +74,7 @@ auto buffer::save(io::ostream& out, string const& ext) const -> bool
     return false;
 }
 
-auto buffer::save_async(path const& file) const -> std::future<bool>
+auto buffer::save_async(path const& file) const noexcept -> std::future<bool>
 {
     std::promise<bool> pro;
     auto               retValue {pro.get_future()};

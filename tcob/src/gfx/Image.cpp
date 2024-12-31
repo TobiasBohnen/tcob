@@ -200,13 +200,13 @@ auto image::LoadInfo(path const& file) noexcept -> std::optional<information>
     return std::nullopt;
 }
 
-auto image::save(path const& file) const -> bool
+auto image::save(path const& file) const noexcept -> bool
 {
     io::ofstream of {file};
     return save(of, io::get_extension(file));
 }
 
-auto image::save(io::ostream& out, string const& ext) const -> bool
+auto image::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
     if (_info.Format != image::format::RGBA
         && _info.Format != image::format::RGB) { // TODO:
@@ -220,7 +220,7 @@ auto image::save(io::ostream& out, string const& ext) const -> bool
     return false;
 }
 
-auto image::save_async(path const& file) const -> std::future<bool>
+auto image::save_async(path const& file) const noexcept -> std::future<bool>
 {
     std::promise<bool> pro;
     auto               retValue {pro.get_future()};

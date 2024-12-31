@@ -43,14 +43,14 @@ inline auto base_type<Impl, Container>::load_async(path const& file, bool skipBi
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::save(path const& file) const -> bool
+inline auto base_type<Impl, Container>::save(path const& file) const noexcept -> bool
 {
     io::ofstream of {file};
     return save(of, io::get_extension(file));
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::save(io::ostream& out, string const& ext) const -> bool
+inline auto base_type<Impl, Container>::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
     if (auto txtWriter {locate_service<text_writer::factory>().create(ext)}) {
         return txtWriter->write(out, *static_cast<Impl const*>(this));

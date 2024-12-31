@@ -41,8 +41,8 @@ public:
     auto load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
     auto load_async(path const& file, bool skipBinary = false) noexcept -> std::future<load_status>;
 
-    auto save(path const& file) const -> bool;
-    auto save(io::ostream& out, string const& ext) const -> bool;
+    auto save(path const& file) const noexcept -> bool;
+    auto save(io::ostream& out, string const& ext) const noexcept -> bool;
 
     auto begin() -> iterator;
     auto begin() const -> const_iterator;
