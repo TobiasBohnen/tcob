@@ -118,7 +118,7 @@ public:
 
     void virtual reset() = 0;
 
-    void virtual emit_particles(particle_system& system, milliseconds time) = 0;
+    void virtual emit(particle_system& system, milliseconds time) = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -137,11 +137,11 @@ public:
 
     void reset() override;
 
-    void emit_particles(particle_system& system, milliseconds time) override;
+    void emit(particle_system& system, milliseconds time) override;
 
 private:
     rng          _randomGen;
-    milliseconds _remainLife {1000};
+    milliseconds _remainingLife {1000};
     f64          _emissionDiff {0};
 };
 
@@ -208,14 +208,16 @@ protected:
     void on_draw_to(render_target& target) override;
 
 private:
-    bool                                                _isRunning {false};
-    quad_renderer                                       _renderer {buffer_usage_hint::DynamicDraw};
+    quad_renderer _renderer {buffer_usage_hint::DynamicDraw};
+
     std::vector<particle>                               _particles {};
     isize                                               _aliveParticleCount {0};
     std::vector<std::shared_ptr<particle_emitter_base>> _emitters {};
 
     std::mutex _mutex {};
     bool       _multiThreaded;
+
+    bool _isRunning {false};
 };
 
 }
