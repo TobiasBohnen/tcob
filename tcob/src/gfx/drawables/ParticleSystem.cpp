@@ -68,7 +68,6 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
     _emissionDiff = particleAmount - particleCount;
 
     auto const& texRegion {system.Material->Texture->get_region(Settings.Template.Texture)};
-    auto const& sysPos {system.Position};
 
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};
@@ -101,7 +100,7 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
         f32 const y {_randomGen(Settings.SpawnArea.top(), Settings.SpawnArea.bottom()) - (Settings.Template.Size.Height / 2)};
 
         // set bounds
-        particle.Bounds = {{x + sysPos.X, y + sysPos.Y}, Settings.Template.Size};
+        particle.Bounds = {{x, y}, Settings.Template.Size};
     }
 }
 
@@ -155,7 +154,6 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
     _emissionDiff = particleAmount - particleCount;
 
     auto const& texRegion {system.Material->Texture->get_region(Settings.Template.Texture)};
-    auto const& sysPos {system.Position};
 
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};
@@ -182,7 +180,7 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
         f32 const y {_randomGen(Settings.SpawnArea.top(), Settings.SpawnArea.bottom())};
 
         // set position
-        particle.Position = {x + sysPos.X, y + sysPos.Y};
+        particle.Position = {x, y};
     }
 }
 

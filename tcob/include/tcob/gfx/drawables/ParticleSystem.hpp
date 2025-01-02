@@ -59,7 +59,6 @@ public:
     signal<particle_event<particle_type> const> ParticleUpdate;
 
     prop<assets::asset_ptr<material>> Material;
-    point_f                           Position;
 
     auto is_running() const -> bool;
 
