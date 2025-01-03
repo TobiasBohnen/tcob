@@ -35,6 +35,8 @@ struct particle_event {
 
 template <typename Emitter>
 class particle_system final : public drawable, public updatable {
+    ////////////////////////////////////////////////////////////
+
     using particle_type = typename Emitter::particle_type;
     using emitter_type  = Emitter;
     using geometry_type = typename Emitter::geometry_type;
@@ -49,9 +51,9 @@ class particle_system final : public drawable, public updatable {
         { t.reset() };
         { t.emit(system, deltaTime) }; }, "Invalid emitter type");
 
-public:
     ////////////////////////////////////////////////////////////
 
+public:
     explicit particle_system(bool multiThreaded = false);
 
     ~particle_system() override = default;
@@ -143,15 +145,14 @@ public:
     milliseconds StartingLife {0};
     milliseconds RemainingLife {0};
 
-    void set_texture_region(texture_region const& texRegion);
+    texture_region Region {};
 
     void convert_to(quad* quad) const;
 
     void update(milliseconds deltaTime);
 
 private:
-    texture_region _region {};
-    transform      _transform {};
+    transform _transform {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -225,14 +226,11 @@ public:
     milliseconds StartingLife {0};
     milliseconds RemainingLife {0};
 
-    void set_texture_region(texture_region const& texRegion);
+    texture_region Region {};
 
     void convert_to(vertex* vertex) const;
 
     void update(milliseconds deltaTime);
-
-private:
-    texture_region _region {};
 };
 
 ////////////////////////////////////////////////////////////

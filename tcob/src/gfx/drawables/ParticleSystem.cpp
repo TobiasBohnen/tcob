@@ -11,16 +11,11 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-void quad_particle::set_texture_region(texture_region const& texRegion)
-{
-    _region = texRegion;
-}
-
 void quad_particle::convert_to(quad* quad) const
 {
     geometry::set_position(*quad, Bounds, _transform);
     geometry::set_color(*quad, Color);
-    geometry::set_texcoords(*quad, _region);
+    geometry::set_texcoords(*quad, Region);
 }
 
 void quad_particle::update(milliseconds delta)
@@ -72,7 +67,7 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};
 
-        particle.set_texture_region(texRegion);
+        particle.Region = texRegion;
 
         u8 const alpha {static_cast<u8>(255 - static_cast<u8>(255 * std::clamp(_randomGen(Settings.Template.Transparency.first, Settings.Template.Transparency.second), 0.0f, 1.0f)))};
 
@@ -106,16 +101,11 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
 
 ////////////////////////////////////////////////////////////
 
-void point_particle::set_texture_region(texture_region const& texRegion)
-{
-    _region = texRegion;
-}
-
 void point_particle::convert_to(vertex* vertex) const
 {
     vertex->Position  = Position;
     vertex->Color     = Color;
-    vertex->TexCoords = {_region.UVRect.left(), _region.UVRect.top(), static_cast<f32>(_region.Level)};
+    vertex->TexCoords = {Region.UVRect.left(), Region.UVRect.top(), static_cast<f32>(Region.Level)};
 }
 
 void point_particle::update(milliseconds deltaTime)
@@ -158,7 +148,7 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};
 
-        particle.set_texture_region(texRegion);
+        particle.Region = texRegion;
 
         u8 const alpha {static_cast<u8>(255 - static_cast<u8>(255 * std::clamp(_randomGen(Settings.Template.Transparency.first, Settings.Template.Transparency.second), 0.0f, 1.0f)))};
 
