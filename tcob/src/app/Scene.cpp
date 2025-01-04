@@ -88,6 +88,11 @@ auto scene::window() -> gfx::window&
     return locate_service<gfx::render_system>().window();
 }
 
+auto scene::library() -> assets::library&
+{
+    return _game.library();
+}
+
 void scene::attach_events()
 {
     _connections.connect<&scene::draw_to>(_game.Draw, this);

@@ -79,6 +79,7 @@ public:
 protected:
     auto parent() -> game&;
     auto window() -> gfx::window&;
+    auto library() -> assets::library&;
 
     void virtual on_start();
     void virtual on_finish();
