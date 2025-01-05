@@ -853,7 +853,7 @@ struct converter<T> {
 
         if (view.is_userdata(idx)) {
             // try uservalue
-            [[maybe_unused]] i32 const err {view.get_uservalue(idx, 1)};
+            [[maybe_unused]] i32 const err {view.get_uservalue(idx)};
             assert(err != 0);
             string const userDataType {view.to_string(-1)};
             view.pop(1);
@@ -898,11 +898,11 @@ struct converter<T> {
     {
         static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
-        T* obj {static_cast<T*>(view.new_userdata(sizeof(T*), 1))};
+        T* obj {static_cast<T*>(view.new_userdata(sizeof(T*)))};
         *obj = value;
 
         view.push_string(TypeName);
-        [[maybe_unused]] i32 const err {view.set_uservalue(-2, 1)};
+        [[maybe_unused]] i32 const err {view.set_uservalue(-2)};
         assert(err != 0);
 
         view.new_metatable(TypeName);
@@ -919,11 +919,11 @@ struct converter<scripting::managed_ptr<T>> {
     {
         static string TypeName {typeid(T).name()};
 
-        T** obj {static_cast<T**>(view.new_userdata(sizeof(T*), 1))};
+        T** obj {static_cast<T**>(view.new_userdata(sizeof(T*)))};
         *obj = value.Pointer;
 
         view.push_string(TypeName);
-        if (view.set_uservalue(-2, 1) != 0) {
+        if (view.set_uservalue(-2) != 0) {
             if (view.new_metatable((TypeName + "_gc")) == 0) {
                 // GC table exists
                 view.set_metatable(-2);

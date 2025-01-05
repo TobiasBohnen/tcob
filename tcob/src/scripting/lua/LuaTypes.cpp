@@ -7,14 +7,13 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <lauxlib.h>
+    #include <lua.h>
+
     #include <cassert>
 
     #include "tcob/core/io/Stream.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
-
-    #include <lauxlib.h>
-    #include <lua.h>
-    #include <lualib.h>
 
 namespace tcob::scripting::lua {
 
@@ -280,12 +279,12 @@ namespace detail {
 
     auto function_base::upcall(i32 nargs) const -> error_code
     {
-        return get_view().call(nargs, LUA_MULTRET);
+        return get_view().call(nargs);
     }
 
     auto function_base::pcall(i32 nargs) const -> error_code
     {
-        return get_view().pcall(nargs, LUA_MULTRET);
+        return get_view().pcall(nargs);
     }
 
     auto function_base::get_upvalues() const -> std::unordered_set<string>

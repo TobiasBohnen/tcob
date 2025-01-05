@@ -354,12 +354,7 @@ auto state_view::new_metatable(char const* tableName) const -> i32
 
 auto state_view::new_userdata(usize size) const -> void*
 {
-    return lua_newuserdatauv(_state, size, 0);
-}
-
-auto state_view::new_userdata(usize size, i32 nuvalue) const -> void*
-{
-    return lua_newuserdatauv(_state, size, nuvalue);
+    return lua_newuserdata(_state, size);
 }
 
 void state_view::set_registry_field(string const& name) const
@@ -397,14 +392,14 @@ void state_view::raw_set(i32 idx) const
     lua_rawset(_state, idx);
 }
 
-auto state_view::get_uservalue(i32 index, i32 n) const -> i32
+auto state_view::get_uservalue(i32 idx) const -> i32
 {
-    return lua_getiuservalue(_state, index, n);
+    return lua_getuservalue(_state, idx);
 }
 
-auto state_view::set_uservalue(i32 index, i32 n) const -> i32
+auto state_view::set_uservalue(i32 idx) const -> i32
 {
-    return lua_setiuservalue(_state, index, n);
+    return lua_setuservalue(_state, idx);
 }
 
 auto state_view::GetUpvalueIndex(i32 n) -> i32
@@ -442,19 +437,14 @@ auto state_view::close_thread() const -> i32
     return lua_closethread(_state, nullptr);
 }
 
-auto state_view::close_thread(state_view from) const -> i32
-{
-    return lua_closethread(_state, from._state);
-}
-
 void state_view::error(string const& message) const
 {
     luaL_error(_state, message.c_str());
 }
 
-auto state_view::call(i32 nargs, i32 nret) const -> error_code
+auto state_view::call(i32 nargs) const -> error_code
 {
-    lua_call(_state, nargs, nret);
+    lua_call(_state, nargs, LUA_MULTRET);
     return error_code::Ok;
 }
 
@@ -467,13 +457,13 @@ auto static error_handler(lua_State* l) -> i32
     return 0;
 }
 
-auto state_view::pcall(i32 nargs, i32 nret) const -> error_code
+auto state_view::pcall(i32 nargs) const -> error_code
 {
     i32 const hpos {get_top() - nargs};
 
     push_cfunction(&error_handler);
     insert(hpos);
-    i32 const err {lua_pcall(_state, nargs, nret, hpos)};
+    i32 const err {lua_pcall(_state, nargs, LUA_MULTRET, hpos)};
     remove(hpos);
 
     switch (err) {
@@ -531,11 +521,6 @@ auto state_view::set_upvalue(i32 funcindex, i32 n) const -> char const*
     return lua_setupvalue(_state, funcindex, n);
 }
 
-auto state_view::get_extra_space() const -> void*
-{
-    return lua_getextraspace(_state);
-}
-
 void state_view::push_globaltable() const
 {
     lua_pushglobaltable(_state);
@@ -557,21 +542,59 @@ auto state_view::NewState() -> lua_State*
     return luaL_newstate();
 }
 
-void state_view::close() const
+void state_view::close()
 {
     if (_state != nullptr) {
         lua_close(_state);
+        _state = nullptr;
     }
-}
-
-void state_view::set_allocf(lua_Alloc f, void* ud)
-{
-    lua_setallocf(_state, f, ud);
 }
 
 auto state_view::is_valid() const -> bool
 {
     return _state != nullptr;
+}
+
+////////////////////////////////////////////////////////////
+
+garbage_collector::garbage_collector(state_view l)
+    : _luaState {l}
+{
+}
+
+void garbage_collector::start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const
+{
+    _luaState.gc(LUA_GCINC, pause, stepmul, stepsize);
+}
+
+void garbage_collector::start_generational_mode(i32 minormul, i32 majormul) const
+{
+    _luaState.gc(LUA_GCGEN, minormul, majormul, 0);
+}
+
+void garbage_collector::collect() const
+{
+    _luaState.gc(LUA_GCCOLLECT, 0, 0, 0);
+}
+
+void garbage_collector::stop() const
+{
+    _luaState.gc(LUA_GCSTOP, 0, 0, 0);
+}
+
+void garbage_collector::restart() const
+{
+    _luaState.gc(LUA_GCRESTART, 0, 0, 0);
+}
+
+auto garbage_collector::is_running() const -> bool
+{
+    return _luaState.gc(LUA_GCISRUNNING, 0, 0, 0) != 0;
+}
+
+auto garbage_collector::count() const -> i32
+{
+    return _luaState.gc(LUA_GCCOUNT, 0, 0, 0);
 }
 
 ////////////////////////////////////////////////////////////

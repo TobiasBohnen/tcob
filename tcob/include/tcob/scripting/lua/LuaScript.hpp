@@ -34,27 +34,6 @@ enum class library : u8 {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API garbage_collector final {
-public:
-    explicit garbage_collector(state_view l);
-
-    auto count() const -> i32;
-    auto is_running() const -> bool;
-
-    void start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const;
-    void start_generational_mode(i32 minormul, i32 majormul) const;
-
-    void collect() const;
-
-    void stop() const;
-    void restart() const;
-
-private:
-    state_view _luaState;
-};
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API script : public scripting::script<script> {
     friend class scripting::script<script>;
 

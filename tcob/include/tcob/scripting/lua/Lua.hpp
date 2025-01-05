@@ -223,9 +223,8 @@ public:
     auto new_metatable(char const* tableName) const -> i32;
 
     auto new_userdata(usize size) const -> void*;
-    auto new_userdata(usize size, i32 nuvalue) const -> void*;
-    auto set_uservalue(i32 index, i32 n) const -> i32;
-    auto get_uservalue(i32 index, i32 n) const -> i32;
+    auto set_uservalue(i32 idx) const -> i32;
+    auto get_uservalue(i32 idx) const -> i32;
 
     void set_registry_field(string const& name) const;
     void insert(i32 idx) const;
@@ -245,12 +244,11 @@ public:
     auto is_yieldable() const -> bool;
     auto resume(i32 argCount, i32* resultCount) const -> coroutine_status;
     auto close_thread() const -> i32;
-    auto close_thread(state_view from) const -> i32;
 
     void error(string const& message) const;
 
-    auto call(i32 nargs, i32 nret) const -> error_code;
-    auto pcall(i32 nargs, i32 nret) const -> error_code;
+    auto call(i32 nargs) const -> error_code;
+    auto pcall(i32 nargs) const -> error_code;
 
     auto traceback(i32 level) const -> string;
 
@@ -270,15 +268,11 @@ public:
     auto get_upvalue(i32 funcindex, i32 n) const -> char const*;
     auto set_upvalue(i32 funcindex, i32 n) const -> char const*;
 
-    auto get_extra_space() const -> void*; // used for hook
-
     auto static GetUpvalueIndex(i32 n) -> i32;
 
     auto static NewState() -> lua_State*;
-    void close() const;
 
-    void set_allocf(lua_Alloc f, void* ud);
-
+    void close();
     auto is_valid() const -> bool;
 
 private:
@@ -296,6 +290,30 @@ private:
 
     lua_State* _state;
 };
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API garbage_collector final {
+public:
+    explicit garbage_collector(state_view l);
+
+    auto count() const -> i32;
+    auto is_running() const -> bool;
+
+    void start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const;
+    void start_generational_mode(i32 minormul, i32 majormul) const;
+
+    void collect() const;
+
+    void stop() const;
+    void restart() const;
+
+private:
+    state_view _luaState;
+};
+
+////////////////////////////////////////////////////////////
+
 }
 
     #include "Lua.inl"

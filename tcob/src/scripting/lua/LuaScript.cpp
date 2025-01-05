@@ -7,7 +7,6 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include <lauxlib.h>
     #include <lua.h>
     #include <lualib.h>
 
@@ -83,7 +82,7 @@ auto script::call_buffer(string_view script, string const& name) const -> error_
             function<void> func {function<void>::Acquire(_view, -1)};
             func.set_environment(*_environment);
         }
-        return _view.pcall(0, LUA_MULTRET);
+        return _view.pcall(0);
     }
 
     i32 const n {_view.get_top()};
@@ -142,15 +141,29 @@ void script::register_searcher()
 
 void static hook(lua_State* l, lua_Debug* ar)
 {
-    state_view view {l};
-    auto*      hook {*reinterpret_cast<script::HookFunc**>(view.get_extra_space())};
-    view.info("Slutnr", ar);
-    (*hook)({&view, ar});
+    state_view ls {l};
+    auto const guard {ls.create_stack_guard()};
+
+    ls.get_metatable("_tcob");
+    table lt {table::Acquire(ls, -1)};
+    if (lt.has("_hook")) {
+        auto* hook {reinterpret_cast<std::function<void(debug const&)>*>(lt["_hook"].as<void*>())};
+        lua_getinfo(l, "Slutnr", ar);
+        debug dbg {&ls, ar};
+        (*hook)(dbg);
+    }
 }
 
 void script::set_hook(HookFunc&& func, debug_mask mask)
 {
+    auto const guard {_view.create_stack_guard()};
+
+    _view.new_metatable("_tcob");
+    i32 const tableIdx {_view.get_top()};
+    _view.push_convert("_hook");
     _hookFunc = std::move(func);
+    _view.push_convert(reinterpret_cast<void*>(&_hookFunc));
+    _view.set_table(tableIdx);
 
     i32 dmask {0};
     if (mask.Call) { dmask |= LUA_MASKCALL; }
@@ -158,7 +171,6 @@ void script::set_hook(HookFunc&& func, debug_mask mask)
     if (mask.Line) { dmask |= LUA_MASKLINE; }
     if (mask.Count) { dmask |= LUA_MASKCOUNT; }
 
-    *reinterpret_cast<script::HookFunc**>(_view.get_extra_space()) = &_hookFunc;
     _view.set_hook(&hook, dmask, 1);
 }
 
@@ -172,47 +184,6 @@ void script::raise_error(string const& message)
     _view.error(message);
 }
 
-////////////////////////////////////////////////////////////
-
-garbage_collector::garbage_collector(state_view l)
-    : _luaState {l}
-{
-}
-
-void garbage_collector::start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const
-{
-    _luaState.gc(LUA_GCINC, pause, stepmul, stepsize);
-}
-
-void garbage_collector::start_generational_mode(i32 minormul, i32 majormul) const
-{
-    _luaState.gc(LUA_GCGEN, minormul, majormul, 0);
-}
-
-void garbage_collector::collect() const
-{
-    _luaState.gc(LUA_GCCOLLECT, 0, 0, 0);
-}
-
-void garbage_collector::stop() const
-{
-    _luaState.gc(LUA_GCSTOP, 0, 0, 0);
-}
-
-void garbage_collector::restart() const
-{
-    _luaState.gc(LUA_GCRESTART, 0, 0, 0);
-}
-
-auto garbage_collector::is_running() const -> bool
-{
-    return _luaState.gc(LUA_GCISRUNNING, 0, 0, 0) != 0;
-}
-
-auto garbage_collector::count() const -> i32
-{
-    return _luaState.gc(LUA_GCCOUNT, 0, 0, 0);
-}
 }
 
 ////////////////////////////////////////////////////////////
