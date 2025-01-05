@@ -17,10 +17,13 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////
 
 template <typename Emitter>
-inline particle_system<Emitter>::particle_system(bool multiThreaded)
+particle_system<Emitter>::particle_system(bool multiThreaded, isize reservedParticleCount)
     : _multiThreaded {multiThreaded}
 {
     Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
+    if (reservedParticleCount > 0) {
+        _particles.reserve(reservedParticleCount);
+    }
 }
 
 template <typename Emitter>
@@ -35,9 +38,7 @@ inline void particle_system<Emitter>::start()
     if (_isRunning) { return; }
 
     _isRunning = true;
-    for (auto& emitter : _emitters) {
-        emitter->reset();
-    }
+    for (auto& emitter : _emitters) { emitter->reset(); }
 
     _particles.clear();
     _aliveParticleCount = 0;

@@ -11,92 +11,12 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-void quad_particle::convert_to(quad* quad) const
+void static calc_velocity(auto&& particle, point_f pos, f32 seconds)
 {
-    geometry::set_position(*quad, Bounds, _transform);
-    geometry::set_color(*quad, Color);
-    geometry::set_texcoords(*quad, Region);
-}
-
-void quad_particle::update(milliseconds delta)
-{
-    f32 const seconds {static_cast<f32>(delta.count() / 1000)};
-
-    // age
-    RemainingLife -= delta;
-
-    // move
-    Speed += Acceleration * seconds;
-    point_f const offset {point_f::FromDirection(Direction) * (Speed * seconds)};
-    Bounds = {{Bounds.Position + offset}, Bounds.Size};
-
-    // spin
-    Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
-
-    // transform
-    point_f const origin {Bounds.center()};
-    _transform.to_identity();
-    if (Scale != size_f::One) { _transform.scale_at(Scale, origin); }
-    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
-}
-
-////////////////////////////////////////////////////////////
-
-auto quad_particle_emitter::is_alive() const -> bool
-{
-    return !Settings.Lifetime || _remainingLife > 0ms;
-}
-
-void quad_particle_emitter::reset()
-{
-    if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
-}
-
-void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system, milliseconds deltaTime)
-{
-    if (!is_alive()) { return; }
-
-    _remainingLife -= deltaTime;
-
-    f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
-    i32 const particleCount {static_cast<i32>(particleAmount)};
-    _emissionDiff = particleAmount - particleCount;
-
-    auto const& texRegion {system.Material->Texture->get_region(Settings.Template.Texture)};
-
-    for (i32 i {0}; i < particleCount; ++i) {
-        auto& particle {system.activate_particle()};
-
-        particle.Region = texRegion;
-
-        u8 const alpha {static_cast<u8>(255 - static_cast<u8>(255 * std::clamp(_randomGen(Settings.Template.Transparency.first, Settings.Template.Transparency.second), 0.0f, 1.0f)))};
-
-        particle.Direction    = degree_f {_randomGen(Settings.Template.Direction.first.Value, Settings.Template.Direction.second.Value)};
-        particle.Acceleration = _randomGen(Settings.Template.Acceleration.first, Settings.Template.Acceleration.second);
-        particle.Speed        = _randomGen(Settings.Template.Speed.first, Settings.Template.Speed.second);
-        particle.Spin         = degree_f {_randomGen(Settings.Template.Spin.first.Value, Settings.Template.Spin.second.Value)};
-        particle.Rotation     = degree_f {_randomGen(Settings.Template.Rotation.first, Settings.Template.Rotation.second)};
-        particle.Color        = color {Settings.Template.Color.R, Settings.Template.Color.G, Settings.Template.Color.B, static_cast<u8>((Settings.Template.Color.A + alpha) / 2)};
-
-        // reset userdata
-        particle.UserData.reset();
-
-        // set scale
-        f32 const scaleF {_randomGen(Settings.Template.Scale.first, Settings.Template.Scale.second)};
-        particle.Scale = {scaleF, scaleF};
-
-        // set life
-        auto const life {milliseconds {_randomGen(Settings.Template.Lifetime.first.count(), Settings.Template.Lifetime.second.count())}};
-        particle.RemainingLife = life;
-        particle.StartingLife  = life;
-
-        // calculate random postion
-        f32 const x {_randomGen(Settings.SpawnArea.left(), Settings.SpawnArea.right()) - (Settings.Template.Size.Width / 2)};
-        f32 const y {_randomGen(Settings.SpawnArea.top(), Settings.SpawnArea.bottom()) - (Settings.Template.Size.Height / 2)};
-
-        // set bounds
-        particle.Bounds = {{x, y}, Settings.Template.Size};
-    }
+    point_f const radial {pos * particle.RadialAcceleration};
+    point_f const tangential {point_f {-pos.Y, pos.X} * particle.TangentialAcceleration};
+    particle.Velocity += (radial + tangential + particle.LinearAcceleration + particle.Gravity) * seconds;
+    particle.Velocity *= 1.0f / (1.0f + (particle.LinearDamping * seconds));
 }
 
 ////////////////////////////////////////////////////////////
@@ -116,21 +36,98 @@ void point_particle::update(milliseconds deltaTime)
     RemainingLife -= deltaTime;
 
     // move
-    Speed += Acceleration * seconds;
-    point_f const offset {point_f::FromDirection(Direction) * (Speed * seconds)};
-    Position += offset;
+    point_f const pos {(Position - Origin).as_normalized()};
+    calc_velocity(*this, pos, seconds);
+    Position += Velocity * seconds;
+}
+
+////////////////////////////////////////////////////////////
+
+void quad_particle::convert_to(quad* quad) const
+{
+    geometry::set_position(*quad, Bounds, _transform);
+    geometry::set_color(*quad, Color);
+    geometry::set_texcoords(*quad, Region);
+}
+
+void quad_particle::update(milliseconds delta)
+{
+    f32 const seconds {static_cast<f32>(delta.count() / 1000)};
+
+    // age
+    RemainingLife -= delta;
+
+    // move
+    point_f const pos {(Bounds.center() - Origin).as_normalized()};
+    calc_velocity(*this, pos, seconds);
+    Bounds = {{Bounds.Position + Velocity * seconds}, Bounds.Size};
+
+    // spin
+    Rotation += degree_f {Spin.Value * static_cast<f32>(seconds)};
+
+    // transform
+    point_f const origin {Bounds.center()};
+    _transform.to_identity();
+    if (Scale != size_f::One) { _transform.scale_at(Scale, origin); }
+    if (Rotation != degree_f {0}) { _transform.rotate_at(Rotation, origin); }
+}
+
+////////////////////////////////////////////////////////////
+
+auto static minmax_rng(min_max<f32> const& range, auto&& rng) -> f32
+{
+    return rng(range.first, range.second);
+}
+
+auto static minmax_rng(min_max<point_f> const& range, auto&& rng) -> point_f
+{
+    return point_f {rng(range.first.X, range.second.X), rng(range.first.Y, range.second.Y)};
+}
+
+auto static minmax_rng(min_max<degree_f> const& range, auto&& rng) -> degree_f
+{
+    return degree_f {rng(range.first.Value, range.second.Value)};
+}
+
+auto static minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> milliseconds
+{
+    return milliseconds {rng(range.first.count(), range.second.count())};
+}
+
+void static setup_particle(auto&& particle, auto&& tmpl, auto&& _randomGen)
+{
+    auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, _randomGen))};
+    particle.Velocity               = dir * minmax_rng(tmpl.Speed, _randomGen);
+    particle.LinearAcceleration     = dir * minmax_rng(tmpl.LinearAcceleration, _randomGen);
+    particle.LinearDamping          = minmax_rng(tmpl.LinearDamping, _randomGen);
+    particle.RadialAcceleration     = minmax_rng(tmpl.RadialAcceleration, _randomGen);
+    particle.TangentialAcceleration = minmax_rng(tmpl.TangentialAcceleration, _randomGen);
+    particle.Gravity                = minmax_rng(tmpl.Gravity, _randomGen);
+
+    auto const col {tmpl.Colors.empty() ? colors::White : tmpl.Colors[_randomGen(usize {0}, tmpl.Colors.size() - 1)]};
+    u8 const   alpha {static_cast<u8>(col.A * (1.0f - std::clamp(minmax_rng(tmpl.Transparency, _randomGen), 0.0f, 1.0f)))};
+    particle.Color = color {col.R, col.G, col.B, alpha};
+
+    // reset userdata
+    particle.UserData.reset();
+
+    // set life
+    auto const life {minmax_rng(tmpl.Lifetime, _randomGen)};
+    particle.RemainingLife = life;
+    particle.StartingLife  = life;
 }
 
 ////////////////////////////////////////////////////////////
 
 auto point_particle_emitter::is_alive() const -> bool
 {
-    return !Settings.Lifetime || _remainingLife > 0ms;
+    return _alive && (!Settings.Lifetime || _remainingLife > 0ms);
 }
 
 void point_particle_emitter::reset()
 {
     if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
+    _alive = true;
 }
 
 void point_particle_emitter::emit(particle_system<point_particle_emitter>& system, milliseconds deltaTime)
@@ -139,31 +136,25 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
 
     _remainingLife -= deltaTime;
 
-    f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
-    i32 const particleCount {static_cast<i32>(particleAmount)};
-    _emissionDiff = particleAmount - particleCount;
+    i32 particleCount {0};
+    if (Settings.Explosion) {
+        particleCount = Settings.SpawnRate;
+        _alive        = false;
+    } else {
+        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
+        particleCount = static_cast<i32>(particleAmount);
+        _emissionDiff = particleAmount - particleCount;
+    }
 
-    auto const& texRegion {system.Material->Texture->get_region(Settings.Template.Texture)};
+    auto const& tmpl {Settings.Template};
+    auto const& texRegion {system.Material->Texture->get_region(tmpl.Texture)};
 
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};
 
         particle.Region = texRegion;
 
-        u8 const alpha {static_cast<u8>(255 - static_cast<u8>(255 * std::clamp(_randomGen(Settings.Template.Transparency.first, Settings.Template.Transparency.second), 0.0f, 1.0f)))};
-
-        particle.Direction    = degree_f {_randomGen(Settings.Template.Direction.first.Value, Settings.Template.Direction.second.Value)};
-        particle.Acceleration = _randomGen(Settings.Template.Acceleration.first, Settings.Template.Acceleration.second);
-        particle.Speed        = _randomGen(Settings.Template.Speed.first, Settings.Template.Speed.second);
-        particle.Color        = color {Settings.Template.Color.R, Settings.Template.Color.G, Settings.Template.Color.B, static_cast<u8>((Settings.Template.Color.A + alpha) / 2)};
-
-        // reset userdata
-        particle.UserData.reset();
-
-        // set life
-        auto const life {milliseconds {_randomGen(Settings.Template.Lifetime.first.count(), Settings.Template.Lifetime.second.count())}};
-        particle.RemainingLife = life;
-        particle.StartingLife  = life;
+        setup_particle(particle, tmpl, _randomGen);
 
         // calculate random postion
         f32 const x {_randomGen(Settings.SpawnArea.left(), Settings.SpawnArea.right())};
@@ -171,9 +162,66 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
 
         // set position
         particle.Position = {x, y};
+        particle.Origin   = particle.Position;
     }
 }
 
 ////////////////////////////////////////////////////////////
 
+auto quad_particle_emitter::is_alive() const -> bool
+{
+    return _alive && (!Settings.Lifetime || _remainingLife > 0ms);
+}
+
+void quad_particle_emitter::reset()
+{
+    if (Settings.Lifetime) { _remainingLife = *Settings.Lifetime; }
+    _alive = true;
+}
+
+void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system, milliseconds deltaTime)
+{
+    if (!is_alive()) { return; }
+
+    _remainingLife -= deltaTime;
+
+    i32 particleCount {0};
+    if (Settings.Explosion) {
+        particleCount = Settings.SpawnRate;
+        _alive        = false;
+    } else {
+        f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
+        particleCount = static_cast<i32>(particleAmount);
+        _emissionDiff = particleAmount - particleCount;
+    }
+
+    auto const& tmpl {Settings.Template};
+    auto const& texRegion {system.Material->Texture->get_region(tmpl.Texture)};
+
+    for (i32 i {0}; i < particleCount; ++i) {
+        auto& particle {system.activate_particle()};
+
+        particle.Region = texRegion;
+
+        setup_particle(particle, tmpl, _randomGen);
+
+        // set scale
+        f32 const scaleF {minmax_rng(tmpl.Scale, _randomGen)};
+        particle.Scale = {scaleF, scaleF};
+
+        // set spin and rotation
+        particle.Spin     = minmax_rng(tmpl.Spin, _randomGen);
+        particle.Rotation = minmax_rng(tmpl.Rotation, _randomGen);
+
+        // calculate random postion
+        f32 const x {_randomGen(Settings.SpawnArea.left(), Settings.SpawnArea.right()) - (tmpl.Size.Width / 2)};
+        f32 const y {_randomGen(Settings.SpawnArea.top(), Settings.SpawnArea.bottom()) - (tmpl.Size.Height / 2)};
+
+        // set bounds
+        particle.Bounds = {{x, y}, tmpl.Size};
+        particle.Origin = particle.Bounds.center();
+    }
+}
+
+////////////////////////////////////////////////////////////
 }
