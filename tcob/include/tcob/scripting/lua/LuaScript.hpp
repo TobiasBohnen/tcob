@@ -20,25 +20,13 @@
 namespace tcob::scripting::lua {
 ////////////////////////////////////////////////////////////
 
-enum class library : u8 {
-    Table,
-    String,
-    Math,
-    Coroutine,
-    IO,
-    OS,
-    Utf8,
-    Debug,
-    Package
-};
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API script : public scripting::script<script> {
     friend class scripting::script<script>;
 
 public:
-    using HookFunc = std::function<void(debug const&)>;
+    using HookFunc    = std::function<void(debug const&)>;
+    using LoaderFunc  = std::function<table(string const&)>;
+    using SeacherFunc = std::function<LoaderFunc*(string const&)>;
 
     struct require_event {
         string               Name;
@@ -98,9 +86,9 @@ private:
     table                _globalTable;
     std::optional<table> _environment;
 
-    HookFunc                                                           _hookFunc;
-    std::function<std::function<table(string const&)>*(string const&)> _searcher;
-    std::function<table(string const&)>                                _loader;
+    HookFunc    _hookFunc;
+    SeacherFunc _searcher;
+    LoaderFunc  _loader;
 };
 
 }

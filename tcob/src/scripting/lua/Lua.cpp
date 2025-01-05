@@ -11,9 +11,16 @@
     #include <lua.h>
     #include <lualib.h>
 
+    #include <unordered_map>
+
     #include "tcob/core/Logger.hpp"
 
 namespace tcob::scripting::lua {
+
+static_assert(NOREF == LUA_NOREF);
+static_assert(REGISTRYINDEX == LUA_REGISTRYINDEX);
+
+////////////////////////////////////////////////////////////
 
 debug::debug(state_view* view, lua_Debug* ar)
     : Event {static_cast<debug_event>(ar->event)}
@@ -44,6 +51,16 @@ auto debug::get_local(i32 n) const -> string
 auto debug::set_local(i32 n) const -> string
 {
     return _view->set_local(_ar, n);
+}
+
+auto debug::GetMask(debug_mask mask) -> i32
+{
+    i32 retValue {0};
+    if (mask.Call) { retValue |= LUA_MASKCALL; }
+    if (mask.Return) { retValue |= LUA_MASKRET; }
+    if (mask.Line) { retValue |= LUA_MASKLINE; }
+    if (mask.Count) { retValue |= LUA_MASKCOUNT; }
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
@@ -432,9 +449,9 @@ auto state_view::status() const -> i32
     return lua_status(_state);
 }
 
-auto state_view::close_thread() const -> i32
+auto state_view::close_thread() const -> bool
 {
-    return lua_closethread(_state, nullptr);
+    return lua_closethread(_state, nullptr) == LUA_OK;
 }
 
 void state_view::error(string const& message) const
@@ -481,14 +498,31 @@ void state_view::requiref(string const& modname, lua_CFunction openf, bool glb) 
     luaL_requiref(_state, modname.c_str(), openf, static_cast<i32>(glb));
 }
 
-auto state_view::load_buffer(string_view script, string const& name) const -> i32
+void state_view::require_library(library lib) const
 {
-    return luaL_loadbuffer(_state, script.data(), script.size(), name.c_str());
+    static std::unordered_map<library, std::pair<char const*, lua_CFunction>> const libraries {
+        {library::Base, {"", luaopen_base}},
+        {library::Table, {LUA_TABLIBNAME, luaopen_table}},
+        {library::String, {LUA_STRLIBNAME, luaopen_string}},
+        {library::Math, {LUA_MATHLIBNAME, luaopen_math}},
+        {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},
+        {library::IO, {LUA_IOLIBNAME, luaopen_io}},
+        {library::OS, {LUA_OSLIBNAME, luaopen_os}},
+        {library::Utf8, {LUA_UTF8LIBNAME, luaopen_utf8}},
+        {library::Debug, {LUA_DBLIBNAME, luaopen_debug}},
+        {library::Package, {LUA_LOADLIBNAME, luaopen_package}}};
+    auto const& [name, func] {libraries.at(lib)};
+    requiref(name, func, true);
 }
 
-auto state_view::load_buffer(string_view script, string const& name, string const& mode) const -> i32
+auto state_view::load_buffer(string_view script, string const& name) const -> bool
 {
-    return luaL_loadbufferx(_state, script.data(), script.size(), name.c_str(), mode.c_str());
+    return luaL_loadbuffer(_state, script.data(), script.size(), name.c_str()) == LUA_OK;
+}
+
+auto state_view::load_buffer(string_view script, string const& name, string const& mode) const -> bool
+{
+    return luaL_loadbufferx(_state, script.data(), script.size(), name.c_str(), mode.c_str()) == LUA_OK;
 }
 
 void state_view::set_warnf(lua_WarnFunction f, void* ud) const
@@ -499,6 +533,11 @@ void state_view::set_warnf(lua_WarnFunction f, void* ud) const
 void state_view::set_hook(lua_Hook func, i32 mask, i32 count) const
 {
     lua_sethook(_state, func, mask, count);
+}
+
+void state_view::get_info(lua_Debug* ar) const
+{
+    lua_getinfo(_state, "Slutnr", ar);
 }
 
 auto state_view::gc(i32 what, i32 a, i32 b, i32 c) const -> i32

@@ -26,10 +26,13 @@ using lua_Alloc        = void* (*)(void* ud, void* ptr, size_t osize, size_t nsi
 ////////////////////////////////////////////////////////////
 
 namespace tcob::scripting::lua {
+
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-consteval auto get_stacksize() -> i32;
+constexpr i32 NOREF         = -2;       //  LUA_NOREF
+constexpr i32 REGISTRYINDEX = -1001000; //  LUA_REGISTRYINDEX
+
+////////////////////////////////////////////////////////////
 
 template <typename T>
 struct converter;
@@ -55,6 +58,21 @@ concept ConvertibleFrom =
             converter<std::remove_cvref_t<T>>::From(view, i, t)
         };
     };
+
+////////////////////////////////////////////////////////////
+
+enum class library : u8 {
+    Base,
+    Table,
+    String,
+    Math,
+    Coroutine,
+    IO,
+    OS,
+    Utf8,
+    Debug,
+    Package
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -102,8 +120,6 @@ struct debug_mask {
 
 ////////////////////////////////////////////////////////////
 
-class state_view;
-
 class TCOB_API debug {
 public:
     debug(state_view* view, lua_Debug* ar);
@@ -126,6 +142,8 @@ public:
 
     auto get_local(i32 n) const -> string;
     auto set_local(i32 n) const -> string;
+
+    auto static GetMask(debug_mask mask) -> i32;
 
 private:
     state_view* _view;
@@ -243,7 +261,7 @@ public:
 
     auto is_yieldable() const -> bool;
     auto resume(i32 argCount, i32* resultCount) const -> coroutine_status;
-    auto close_thread() const -> i32;
+    auto close_thread() const -> bool;
 
     void error(string const& message) const;
 
@@ -253,13 +271,15 @@ public:
     auto traceback(i32 level) const -> string;
 
     void requiref(string const& modname, lua_CFunction openf, bool glb) const;
+    void require_library(library lib) const;
 
-    auto load_buffer(string_view script, string const& name) const -> i32;
-    auto load_buffer(string_view script, string const& name, string const& mode) const -> i32;
+    auto load_buffer(string_view script, string const& name) const -> bool;
+    auto load_buffer(string_view script, string const& name, string const& mode) const -> bool;
 
     void set_warnf(lua_WarnFunction f, void* ud) const;
 
     void set_hook(lua_Hook func, i32 mask, i32 count) const;
+    void get_info(lua_Debug* ar) const;
 
     auto gc(i32 what, i32 a, i32 b, i32 c) const -> i32;
 

@@ -7,9 +7,6 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include <lauxlib.h>
-    #include <lua.h>
-
     #include <cassert>
 
     #include "tcob/core/io/Stream.hpp"
@@ -31,7 +28,7 @@ auto ref::operator=(ref const& other) noexcept -> ref&
         if (other._view.is_valid()) {
             other.push_self();
             acquire(other._view, -1);
-            if (_ref != LUA_NOREF) {
+            if (_ref != NOREF) {
                 _view.pop(1); // pop extra copy
             }
         }
@@ -42,7 +39,7 @@ auto ref::operator=(ref const& other) noexcept -> ref&
 
 ref::ref(ref&& other) noexcept
     : _view {std::exchange(other._view, state_view {nullptr})}
-    , _ref {std::exchange(other._ref, LUA_NOREF)}
+    , _ref {std::exchange(other._ref, NOREF)}
 {
 }
 
@@ -65,15 +62,15 @@ void ref::acquire(state_view view, i32 idx)
 
     if (_view.is_valid()) {
         _view.push_value(idx); // push copy of ref to top
-        _ref = _view.ref(LUA_REGISTRYINDEX);
+        _ref = _view.ref(REGISTRYINDEX);
     }
 }
 
 void ref::release()
 {
     if (is_valid()) {
-        _view.unref(LUA_REGISTRYINDEX, _ref);
-        _ref  = LUA_NOREF;
+        _view.unref(REGISTRYINDEX, _ref);
+        _ref  = NOREF;
         _view = state_view {nullptr};
     }
 }
@@ -81,7 +78,7 @@ void ref::release()
 void ref::push_self() const
 {
     assert(is_valid());
-    _view.raw_get(LUA_REGISTRYINDEX, _ref);
+    _view.raw_get(REGISTRYINDEX, _ref);
 }
 
 auto ref::get_view() const -> state_view
@@ -91,7 +88,7 @@ auto ref::get_view() const -> state_view
 
 auto ref::is_valid() const -> bool
 {
-    return _ref != LUA_NOREF && _view.is_valid();
+    return _ref != NOREF && _view.is_valid();
 }
 
 auto operator==(ref const& left, ref const& right) -> bool
@@ -341,7 +338,7 @@ namespace detail {
 
 auto coroutine::close() -> coroutine_status
 {
-    _status = (get_thread().close_thread() == LUA_OK) ? coroutine_status::Dead : coroutine_status::Error;
+    _status = get_thread().close_thread() ? coroutine_status::Dead : coroutine_status::Error;
     return _status;
 }
 

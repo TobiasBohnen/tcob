@@ -7,11 +7,6 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include <lua.h>
-    #include <lualib.h>
-
-    #include <unordered_map>
-
     #include "tcob/core/Logger.hpp"
 
 namespace tcob::scripting::lua {
@@ -25,7 +20,7 @@ void static warn(void* ud, char const* msg, int toCont)
 script::script()
     : _view {state_view::NewState()}
 {
-    _view.requiref("", luaopen_base, true);
+    _view.require_library(library::Base);
     _view.pop(1);
 
     _view.push_globaltable();
@@ -77,7 +72,7 @@ auto script::create_table() const -> table
 
 auto script::call_buffer(string_view script, string const& name) const -> error_code
 {
-    if (_view.load_buffer(script, name) == LUA_OK) {
+    if (_view.load_buffer(script, name)) {
         if (_environment) {
             function<void> func {function<void>::Acquire(_view, -1)};
             func.set_environment(*_environment);
@@ -85,44 +80,27 @@ auto script::call_buffer(string_view script, string const& name) const -> error_
         return _view.pcall(0);
     }
 
-    i32 const n {_view.get_top()};
-    logger::Error("Lua: {}", _view.to_string(n));
+    logger::Error("Lua: {}", _view.to_string(_view.get_top()));
 
     return error_code::Error;
 }
 
 auto script::load_binary_buffer(string_view script, string const& name) const -> bool
 {
-    return _view.load_buffer(script, name, "b") == LUA_OK;
+    return _view.load_buffer(script, name, "b");
 }
 
 void script::load_library(library lib)
 {
-    static std::unordered_map<library, std::pair<char const*, lua_CFunction>> const libraries {
-        {library::Table, {LUA_TABLIBNAME, luaopen_table}},
-        {library::String, {LUA_STRLIBNAME, luaopen_string}},
-        {library::Math, {LUA_MATHLIBNAME, luaopen_math}},
-        {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},
-        {library::IO, {LUA_IOLIBNAME, luaopen_io}},
-        {library::OS, {LUA_OSLIBNAME, luaopen_os}},
-        {library::Utf8, {LUA_UTF8LIBNAME, luaopen_utf8}},
-        {library::Debug, {LUA_DBLIBNAME, luaopen_debug}},
-        {library::Package, {LUA_LOADLIBNAME, luaopen_package}}};
-
-    auto const& [name, func] = libraries.at(lib);
-    _view.requiref(name, func, true);
+    _view.require_library(lib);
     _view.pop(1);
 
-    if (lib == library::Package) {
-        register_searcher();
-    }
+    if (lib == library::Package) { register_searcher(); }
 }
 
 void script::register_searcher()
 {
-    if (!_globalTable.has("package", "searchers")) {
-        return;
-    }
+    if (!_globalTable.has("package", "searchers")) { return; }
 
     table searchers {_globalTable["package"]["searchers"].as<table>()};
 
@@ -132,9 +110,7 @@ void script::register_searcher()
         return ev.Table.has_value() ? *ev.Table : run_file<table>(name + ".lua").value();
     };
 
-    _searcher = [&](string const&) -> std::function<table(string const&)>* {
-        return &_loader;
-    };
+    _searcher = [&](string const&) -> LoaderFunc* { return &_loader; };
 
     searchers[searchers.raw_length() + 1] = &_searcher;
 }
@@ -147,8 +123,8 @@ void static hook(lua_State* l, lua_Debug* ar)
     ls.get_metatable("_tcob");
     table lt {table::Acquire(ls, -1)};
     if (lt.has("_hook")) {
-        auto* hook {reinterpret_cast<std::function<void(debug const&)>*>(lt["_hook"].as<void*>())};
-        lua_getinfo(l, "Slutnr", ar);
+        auto* hook {reinterpret_cast<script::HookFunc*>(lt["_hook"].as<void*>())};
+        ls.get_info(ar);
         debug dbg {&ls, ar};
         (*hook)(dbg);
     }
@@ -165,13 +141,7 @@ void script::set_hook(HookFunc&& func, debug_mask mask)
     _view.push_convert(reinterpret_cast<void*>(&_hookFunc));
     _view.set_table(tableIdx);
 
-    i32 dmask {0};
-    if (mask.Call) { dmask |= LUA_MASKCALL; }
-    if (mask.Return) { dmask |= LUA_MASKRET; }
-    if (mask.Line) { dmask |= LUA_MASKLINE; }
-    if (mask.Count) { dmask |= LUA_MASKCOUNT; }
-
-    _view.set_hook(&hook, dmask, 1);
+    _view.set_hook(&hook, debug::GetMask(mask), 1);
 }
 
 void script::remove_hook()

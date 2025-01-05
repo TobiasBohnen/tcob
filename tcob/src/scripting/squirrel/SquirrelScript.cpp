@@ -7,10 +7,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <squirrel.h>
+
     #include <cstdarg>
     #include <iostream>
-
-    #include <squirrel.h>
 
     #include "tcob/core/Logger.hpp"
 
