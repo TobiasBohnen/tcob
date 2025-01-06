@@ -152,7 +152,8 @@ inline void table::set(state_view view, auto&& key, auto&&... keysOrValue) const
         lt.set(view, keysOrValue...);
     } else {
         view.push_convert(keysOrValue...);
-        if (view.is_table(-3)) {
+
+        if (view.get_top() >= 3 && view.is_table(-3)) {
             view.set_table(-3);
         } // TODO: else error
     }
@@ -281,8 +282,7 @@ inline auto coroutine::resume(auto&&... params) -> result<R>
     i32 const paramsCount {thread.get_top() - oldTop};
 
     // call lua function
-    i32 resultCount {0};
-    _status = thread.resume(paramsCount, &resultCount);
+    _status = thread.resume(paramsCount);
     if (_status == coroutine_status::Suspended || _status == coroutine_status::Dead) {
         if constexpr (std::is_void_v<R>) {
             return {};

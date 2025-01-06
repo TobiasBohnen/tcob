@@ -853,10 +853,21 @@ struct converter<T> {
 
         if (view.is_userdata(idx)) {
             // try uservalue
-            [[maybe_unused]] i32 const err {view.get_uservalue(idx)};
-            assert(err != 0);
+            [[maybe_unused]] type const err {view.get_uservalue(idx)};
+
+    #if defined(TCOB_USE_LUAJIT)
+            assert(err == type::Table);
+            view.push_string("__type");
+            view.get_table(-2);
+            if (!view.is_string(-1)) { return false; }
+            string const userDataType {view.to_string(-1)};
+            view.pop(2);
+
+    #else
+            assert(err == type::String);
             string const userDataType {view.to_string(-1)};
             view.pop(1);
+    #endif
 
             void* ptr {nullptr};
 
@@ -901,7 +912,14 @@ struct converter<T> {
         T* obj {static_cast<T*>(view.new_userdata(sizeof(T*)))};
         *obj = value;
 
+    #if defined(TCOB_USE_LUAJIT)
+        view.new_table();
         view.push_string(TypeName);
+        view.set_field(-2, "__type");
+    #else
+        view.push_string(TypeName);
+    #endif
+
         [[maybe_unused]] i32 const err {view.set_uservalue(-2)};
         assert(err != 0);
 
@@ -922,7 +940,14 @@ struct converter<scripting::managed_ptr<T>> {
         T** obj {static_cast<T**>(view.new_userdata(sizeof(T*)))};
         *obj = value.Pointer;
 
+    #if defined(TCOB_USE_LUAJIT)
+        view.new_table();
         view.push_string(TypeName);
+        view.set_field(-2, "__type");
+    #else
+        view.push_string(TypeName);
+    #endif
+
         if (view.set_uservalue(-2) != 0) {
             if (view.new_metatable((TypeName + "_gc")) == 0) {
                 // GC table exists

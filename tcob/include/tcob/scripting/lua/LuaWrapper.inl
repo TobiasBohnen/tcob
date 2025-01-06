@@ -273,7 +273,9 @@ inline void wrapper<T>::create_metatable(string const& name, bool gc)
     // length operator
     if constexpr (HasSize<T>) {
         push_metamethod("__len",
-                        std::function {[](T* instance) { return instance->size(); }},
+                        std::function {[](T* instance) {
+                            return instance->size();
+                        }},
                         tableIdx);
     }
 
@@ -337,9 +339,7 @@ inline void wrapper<T>::index(T* b, string const& arg)
         } else {
             unknown_get_event ev {b, arg, _view};
             UnknownGet(ev);
-            if (!ev.Handled) {
-                _view.push_nil();
-            }
+            if (!ev.Handled) { _view.push_nil(); }
         }
     }
 }
@@ -354,6 +354,9 @@ inline void wrapper<T>::newindex(T* b, i32 arg)
         if constexpr (Container<T>) {
             if (arg == std::ssize(*b) + 1) { // add to vector if index is size + 1
                 b->push_back(val);
+    #if defined(TCOB_USE_LUAJIT)
+                _view.push_convert(b);
+    #endif
                 return;
             }
         }
@@ -362,6 +365,9 @@ inline void wrapper<T>::newindex(T* b, i32 arg)
     } else {
         _view.error("unknown set: " + std::to_string(arg));
     }
+    #if defined(TCOB_USE_LUAJIT)
+    _view.push_convert(b);
+    #endif
 }
 
 template <typename T>
@@ -375,10 +381,11 @@ inline void wrapper<T>::newindex(T* b, string const& arg)
     } else {
         unknown_set_event ev {b, arg, _view};
         UnknownSet(ev);
-        if (!ev.Handled) {
-            _view.error("unknown set: " + arg);
-        }
+        if (!ev.Handled) { _view.error("unknown set: " + arg); }
     }
+    #if defined(TCOB_USE_LUAJIT)
+    _view.push_convert(b);
+    #endif
 }
 
 template <typename T>

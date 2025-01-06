@@ -29,8 +29,12 @@ namespace tcob::scripting::lua {
 
 ////////////////////////////////////////////////////////////
 
-constexpr i32 NOREF         = -2;       //  LUA_NOREF
+constexpr i32 NOREF = -2;             //  LUA_NOREF
+    #if defined(TCOB_USE_LUAJIT)
+constexpr i32 REGISTRYINDEX = -10000; //  LUA_REGISTRYINDEX
+    #else
 constexpr i32 REGISTRYINDEX = -1001000; //  LUA_REGISTRYINDEX
+    #endif
 
 ////////////////////////////////////////////////////////////
 
@@ -66,12 +70,17 @@ enum class library : u8 {
     Table,
     String,
     Math,
-    Coroutine,
     IO,
     OS,
-    Utf8,
     Debug,
-    Package
+    Package,
+    #if defined(TCOB_USE_LUAJIT)
+    JIT,
+    #else
+    Coroutine,
+    Utf8,
+    #endif
+
 };
 
 ////////////////////////////////////////////////////////////
@@ -126,12 +135,12 @@ public:
 
     debug_event Event {};
     string      Name;                      /* (n) */
-    string      NameWhat;                  /* (n) */
     string      What;                      /* (S) */
     string      Source;                    /* (S) */
     i32         CurrentLine {0};           /* (l) */
     i32         LineDefined {0};           /* (S) */
     i32         LastLineDefined {0};       /* (S) */
+    string      NameWhat;                  /* (n) */
     ubyte       UpvalueCount {0};          /* (u) number of upvalues */
     ubyte       ParameterCount {0};        /* (u) number of parameters */
     bool        IsVarArg {false};          /* (u) */
@@ -241,9 +250,12 @@ public:
     auto new_metatable(char const* tableName) const -> i32;
 
     auto new_userdata(usize size) const -> void*;
-    auto set_uservalue(i32 idx) const -> i32;
-    auto get_uservalue(i32 idx) const -> i32;
 
+    auto set_uservalue(i32 idx) const -> i32;
+    auto get_uservalue(i32 idx) const -> type;
+
+    void get_field(i32 idx, string const& name) const;
+    void set_field(i32 idx, string const& name) const;
     void set_registry_field(string const& name) const;
     void insert(i32 idx) const;
 
@@ -260,7 +272,7 @@ public:
     auto status() const -> i32;
 
     auto is_yieldable() const -> bool;
-    auto resume(i32 argCount, i32* resultCount) const -> coroutine_status;
+    auto resume(i32 argCount) const -> coroutine_status;
     auto close_thread() const -> bool;
 
     void error(string const& message) const;
@@ -333,7 +345,6 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
-
 }
 
     #include "Lua.inl"

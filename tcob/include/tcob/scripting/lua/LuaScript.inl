@@ -16,9 +16,16 @@ template <typename... Args>
 inline void script::open_libraries(Args... args)
 {
     if constexpr (sizeof...(args) == 0) {
+    #if defined(TCOB_USE_LUAJIT)
+        load_library(library::Table, library::String,
+                     library::Math, library::JIT,
+                     library::IO, library::Package);
+    #else
         load_library(library::Table, library::String,
                      library::Math, library::Coroutine,
                      library::IO, library::Utf8, library::Package);
+    #endif
+
     } else {
         load_library(args...);
     }

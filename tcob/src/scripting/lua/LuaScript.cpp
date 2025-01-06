@@ -75,7 +75,9 @@ auto script::call_buffer(string_view script, string const& name) const -> error_
     if (_view.load_buffer(script, name)) {
         if (_environment) {
             function<void> func {function<void>::Acquire(_view, -1)};
-            func.set_environment(*_environment);
+            if (!func.set_environment(*_environment)) {
+                return error_code::Error;
+            }
         }
         return _view.pcall(0);
     }

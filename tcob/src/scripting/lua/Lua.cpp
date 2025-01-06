@@ -7,9 +7,13 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-    #include <lauxlib.h>
-    #include <lua.h>
-    #include <lualib.h>
+    #if defined(TCOB_USE_LUAJIT)
+        #include <lua.hpp>
+    #else
+        #include <lauxlib.h>
+        #include <lua.h>
+        #include <lualib.h>
+    #endif
 
     #include <unordered_map>
 
@@ -25,18 +29,20 @@ static_assert(REGISTRYINDEX == LUA_REGISTRYINDEX);
 debug::debug(state_view* view, lua_Debug* ar)
     : Event {static_cast<debug_event>(ar->event)}
     , Name {ar->name != nullptr ? ar->name : ""}
-    , NameWhat {ar->namewhat != nullptr ? ar->namewhat : ""}
     , What {ar->what != nullptr ? ar->what : ""}
     , Source {ar->source != nullptr ? ar->source : ""}
     , CurrentLine {ar->currentline}
     , LineDefined {ar->linedefined}
     , LastLineDefined {ar->lastlinedefined}
+    #if !defined(TCOB_USE_LUAJIT)
+    , NameWhat {ar->namewhat != nullptr ? ar->namewhat : ""}
     , UpvalueCount {ar->nups}
     , ParameterCount {ar->nparams}
     , IsVarArg {ar->isvararg != 0}
     , IsTailCall {ar->istailcall != 0}
     , FirstTransfer {ar->ftransfer}
     , TransferredValueCount {ar->ntransfer}
+    #endif
     , ShortSource {ar->short_src}
     , _view {view}
     , _ar {ar}
@@ -123,7 +129,11 @@ auto state_view::is_function(i32 idx) const -> bool
 
 auto state_view::is_integer(i32 idx) const -> bool
 {
+    #if defined(TCOB_USE_LUAJIT)
+    return is_number(idx) && to_number(idx) == to_integer(idx);
+    #else
     return lua_isinteger(_state, idx) != 0;
+    #endif
 }
 
 auto state_view::is_number(i32 idx) const -> bool
@@ -228,9 +238,15 @@ auto state_view::check_stack(i32 size) const -> bool
     return lua_checkstack(_state, size) != 0;
 }
 
-auto state_view::resume(i32 argCount, i32* resultCount) const -> coroutine_status
+auto state_view::resume(i32 argCount) const -> coroutine_status
 {
-    i32 const err {lua_resume(_state, nullptr, argCount, resultCount)};
+    #if defined(TCOB_USE_LUAJIT)
+    i32 const err {lua_resume(_state, argCount)};
+    #else
+    i32       resultCount {0};
+    i32 const err {lua_resume(_state, nullptr, argCount, &resultCount)};
+    #endif
+
     switch (err) {
     case LUA_OK:
         return coroutine_status::Dead;
@@ -321,7 +337,12 @@ void state_view::remove(i32 idx) const
 
 auto state_view::get_table(i32 idx) const -> type
 {
+    #if defined(TCOB_USE_LUAJIT)
+    lua_gettable(_state, idx);
+    return GetType(lua_type(_state, -1));
+    #else
     return GetType(lua_gettable(_state, idx));
+    #endif
 }
 
 auto state_view::get_metatable(i32 objindex) const -> bool
@@ -374,6 +395,11 @@ auto state_view::new_userdata(usize size) const -> void*
     return lua_newuserdata(_state, size);
 }
 
+void state_view::set_field(i32 idx, string const& name) const
+{
+    lua_setfield(_state, idx, name.c_str());
+}
+
 void state_view::set_registry_field(string const& name) const
 {
     lua_setfield(_state, LUA_REGISTRYINDEX, name.c_str());
@@ -386,17 +412,31 @@ void state_view::insert(i32 idx) const
 
 auto state_view::raw_len(i32 idx) const -> u64
 {
+    #if defined(TCOB_USE_LUAJIT)
+    return lua_objlen(_state, idx);
+    #else
     return lua_rawlen(_state, idx);
+    #endif
 }
 
 auto state_view::raw_get(i32 idx, i64 n) const -> type
 {
+    #if defined(TCOB_USE_LUAJIT)
+    lua_rawgeti(_state, idx, n);
+    return GetType(lua_type(_state, -1));
+    #else
     return GetType(lua_rawgeti(_state, idx, n));
+    #endif
 }
 
 auto state_view::raw_get(i32 idx) const -> type
 {
+    #if defined(TCOB_USE_LUAJIT)
+    lua_rawget(_state, idx);
+    return GetType(lua_type(_state, -1));
+    #else
     return GetType(lua_rawget(_state, idx));
+    #endif
 }
 
 void state_view::raw_set(i32 idx, i64 n) const
@@ -409,14 +449,28 @@ void state_view::raw_set(i32 idx) const
     lua_rawset(_state, idx);
 }
 
-auto state_view::get_uservalue(i32 idx) const -> i32
+auto state_view::get_uservalue(i32 idx) const -> type
 {
-    return lua_getuservalue(_state, idx);
+    #if defined(TCOB_USE_LUAJIT)
+    lua_getfenv(_state, idx);
+    return GetType(lua_type(_state, -1));
+    #else
+    return GetType(lua_getuservalue(_state, idx));
+    #endif
+}
+
+void state_view::get_field(i32 idx, string const& name) const
+{
+    lua_getfield(_state, idx, name.c_str());
 }
 
 auto state_view::set_uservalue(i32 idx) const -> i32
 {
+    #if defined(TCOB_USE_LUAJIT)
+    return lua_setfenv(_state, idx);
+    #else
     return lua_setuservalue(_state, idx);
+    #endif
 }
 
 auto state_view::GetUpvalueIndex(i32 n) -> i32
@@ -451,7 +505,11 @@ auto state_view::status() const -> i32
 
 auto state_view::close_thread() const -> bool
 {
+    #if defined(TCOB_USE_LUAJIT)
+    return false; // TODO
+    #else
     return lua_closethread(_state, nullptr) == LUA_OK;
+    #endif
 }
 
 void state_view::error(string const& message) const
@@ -495,7 +553,32 @@ auto state_view::pcall(i32 nargs) const -> error_code
 
 void state_view::requiref(string const& modname, lua_CFunction openf, bool glb) const
 {
+    #if defined(TCOB_USE_LUAJIT)
+    lua_getfield(_state, LUA_REGISTRYINDEX, "_LOADED");
+    if (lua_type(_state, -1) != LUA_TTABLE) {
+        lua_pop(_state, 1);                                 /* remove previous result */
+        lua_newtable(_state);
+        lua_pushvalue(_state, -1);                          /* copy to be left at top */
+        lua_setfield(_state, LUA_REGISTRYINDEX, "_LOADED"); /* assign new table to field */
+    }
+
+    lua_getfield(_state, -1, modname.c_str());              /* LOADED[modname] */
+    if (!lua_toboolean(_state, -1)) {                       /* package not already loaded? */
+        lua_pop(_state, 1);                                 /* remove field */
+        lua_pushcfunction(_state, openf);
+        lua_pushstring(_state, modname.c_str());            /* argument to open function */
+        lua_call(_state, 1, 1);                             /* call 'openf' to open module */
+        lua_pushvalue(_state, -1);                          /* make copy of module (call result) */
+        lua_setfield(_state, -3, modname.c_str());          /* LOADED[modname] = module */
+    }
+    lua_remove(_state, -2);                                 /* remove LOADED table */
+    if (glb) {
+        lua_pushvalue(_state, -1);                          /* copy of module */
+        lua_setglobal(_state, modname.c_str());             /* _G[modname] = module */
+    }
+    #else
     luaL_requiref(_state, modname.c_str(), openf, static_cast<i32>(glb));
+    #endif
 }
 
 void state_view::require_library(library lib) const
@@ -505,12 +588,17 @@ void state_view::require_library(library lib) const
         {library::Table, {LUA_TABLIBNAME, luaopen_table}},
         {library::String, {LUA_STRLIBNAME, luaopen_string}},
         {library::Math, {LUA_MATHLIBNAME, luaopen_math}},
-        {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},
         {library::IO, {LUA_IOLIBNAME, luaopen_io}},
         {library::OS, {LUA_OSLIBNAME, luaopen_os}},
-        {library::Utf8, {LUA_UTF8LIBNAME, luaopen_utf8}},
         {library::Debug, {LUA_DBLIBNAME, luaopen_debug}},
-        {library::Package, {LUA_LOADLIBNAME, luaopen_package}}};
+        {library::Package, {LUA_LOADLIBNAME, luaopen_package}},
+    #if defined(TCOB_USE_LUAJIT)
+        {library::JIT, {LUA_JITLIBNAME, luaopen_jit}},
+    #else
+        {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},
+        {library::Utf8, {LUA_UTF8LIBNAME, luaopen_utf8}},
+    #endif
+    };
     auto const& [name, func] {libraries.at(lib)};
     requiref(name, func, true);
 }
@@ -525,9 +613,13 @@ auto state_view::load_buffer(string_view script, string const& name, string cons
     return luaL_loadbufferx(_state, script.data(), script.size(), name.c_str(), mode.c_str()) == LUA_OK;
 }
 
-void state_view::set_warnf(lua_WarnFunction f, void* ud) const
+void state_view::set_warnf([[maybe_unused]] lua_WarnFunction f, [[maybe_unused]] void* ud) const
 {
+    #if defined(TCOB_USE_LUAJIT)
+    // TODO
+    #else
     lua_setwarnf(_state, f, ud);
+    #endif
 }
 
 void state_view::set_hook(lua_Hook func, i32 mask, i32 count) const
@@ -540,14 +632,22 @@ void state_view::get_info(lua_Debug* ar) const
     lua_getinfo(_state, "Slutnr", ar);
 }
 
-auto state_view::gc(i32 what, i32 a, i32 b, i32 c) const -> i32
+auto state_view::gc(i32 what, i32 a, [[maybe_unused]] i32 b, [[maybe_unused]] i32 c) const -> i32
 {
+    #if defined(TCOB_USE_LUAJIT)
+    return lua_gc(_state, what, a);
+    #else
     return lua_gc(_state, what, a, b, c);
+    #endif
 }
 
-auto state_view::dump(lua_Writer writer, void* data, i32 strip) const -> i32
+auto state_view::dump(lua_Writer writer, void* data, [[maybe_unused]] i32 strip) const -> i32
 {
+    #if defined(TCOB_USE_LUAJIT)
+    return lua_dump(_state, writer, data);
+    #else
     return lua_dump(_state, writer, data, strip);
+    #endif
 }
 
 auto state_view::get_upvalue(i32 funcindex, i32 n) const -> char const*
@@ -562,7 +662,11 @@ auto state_view::set_upvalue(i32 funcindex, i32 n) const -> char const*
 
 void state_view::push_globaltable() const
 {
+    #if defined(TCOB_USE_LUAJIT)
+    lua_pushvalue(_state, LUA_GLOBALSINDEX);
+    #else
     lua_pushglobaltable(_state);
+    #endif
 }
 
 auto state_view::traceback(i32 level) const -> string
@@ -601,14 +705,22 @@ garbage_collector::garbage_collector(state_view l)
 {
 }
 
-void garbage_collector::start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const
+void garbage_collector::start_incremental_mode([[maybe_unused]] i32 pause, [[maybe_unused]] i32 stepmul, [[maybe_unused]] i32 stepsize) const
 {
+    #if defined(TCOB_USE_LUAJIT)
+        // TODO
+    #else
     _luaState.gc(LUA_GCINC, pause, stepmul, stepsize);
+    #endif
 }
 
-void garbage_collector::start_generational_mode(i32 minormul, i32 majormul) const
+void garbage_collector::start_generational_mode([[maybe_unused]] i32 minormul, [[maybe_unused]] i32 majormul) const
 {
+    #if defined(TCOB_USE_LUAJIT)
+        // TODO
+    #else
     _luaState.gc(LUA_GCGEN, minormul, majormul, 0);
+    #endif
 }
 
 void garbage_collector::collect() const
