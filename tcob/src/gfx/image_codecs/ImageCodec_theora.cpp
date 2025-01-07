@@ -57,10 +57,16 @@ theora_decoder::~theora_decoder()
 
 constexpr i32 MAX_FRAMES {20};
 
+    #if !defined(__EMSCRIPTEN__) && !defined(__EMSCRIPTEN_PTHREADS__)
+constexpr bool MULTI_THREADED {true};
+    #else
+constexpr bool MULTI_THREADED {false};
+    #endif
+
 auto theora_decoder::open() -> std::optional<image::information>
 {
     _io.userdata = &stream();
-    _decoder     = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA);
+    _decoder     = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA, nullptr, MULTI_THREADED);
     if (_decoder) {
         // wait til initialized
         while (!THEORAPLAY_isInitialized(_decoder)) {
@@ -131,7 +137,7 @@ void theora_decoder::reset()
         if (!THEORAPLAY_isDecoding(_decoder)) {
             stream().seek(0, io::seek_dir::Begin); // FIXME: store position
             THEORAPLAY_stopDecode(_decoder);
-            _decoder = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA);
+            _decoder = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA, nullptr, MULTI_THREADED);
             while (!THEORAPLAY_isInitialized(_decoder)) {
                 std::this_thread::yield();
             }
