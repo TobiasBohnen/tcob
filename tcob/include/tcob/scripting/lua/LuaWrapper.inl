@@ -347,16 +347,14 @@ inline void wrapper<T>::index(T* b, string const& arg)
 template <typename T>
 inline void wrapper<T>::newindex(T* b, i32 arg)
 {
-    _view.remove(2);
+    _view.remove(2); // remove arg
     if constexpr (detail::IntIndexable<T>) {
         typename T::value_type val {};
-        _view.pull_convert_idx(2, val);
+        _view.pull_convert_idx(-1, val);
+        _view.pop(_view.get_top());
         if constexpr (Container<T>) {
             if (arg == std::ssize(*b) + 1) { // add to vector if index is size + 1
                 b->push_back(val);
-    #if defined(TCOB_USE_LUAJIT)
-                _view.push_convert(b);
-    #endif
                 return;
             }
         }
@@ -365,17 +363,14 @@ inline void wrapper<T>::newindex(T* b, i32 arg)
     } else {
         _view.error("unknown set: " + std::to_string(arg));
     }
-    #if defined(TCOB_USE_LUAJIT)
-    _view.push_convert(b);
-    #endif
 }
 
 template <typename T>
 inline void wrapper<T>::newindex(T* b, string const& arg)
 {
-    _view.remove(2);
+    _view.remove(2); // remove arg
     if constexpr (detail::StringIndexable<T>) {
-        _view.pull_convert_idx(2, (*b)[arg]);
+        _view.pull_convert_idx(-1, (*b)[arg]);
     } else if (auto sit {_setters.find(arg)}; sit != _setters.end()) {
         (*sit->second)(_view);
     } else {
@@ -383,9 +378,7 @@ inline void wrapper<T>::newindex(T* b, string const& arg)
         UnknownSet(ev);
         if (!ev.Handled) { _view.error("unknown set: " + arg); }
     }
-    #if defined(TCOB_USE_LUAJIT)
-    _view.push_convert(b);
-    #endif
+    _view.pop(_view.get_top());
 }
 
 template <typename T>

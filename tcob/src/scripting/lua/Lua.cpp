@@ -506,7 +506,7 @@ auto state_view::status() const -> i32
 auto state_view::close_thread() const -> bool
 {
     #if defined(TCOB_USE_LUAJIT)
-    return false; // TODO
+    return true; // TODO
     #else
     return lua_closethread(_state, nullptr) == LUA_OK;
     #endif
@@ -556,25 +556,25 @@ void state_view::requiref(string const& modname, lua_CFunction openf, bool glb) 
     #if defined(TCOB_USE_LUAJIT)
     lua_getfield(_state, LUA_REGISTRYINDEX, "_LOADED");
     if (lua_type(_state, -1) != LUA_TTABLE) {
-        lua_pop(_state, 1);                                 /* remove previous result */
+        lua_pop(_state, 1);
         lua_newtable(_state);
-        lua_pushvalue(_state, -1);                          /* copy to be left at top */
-        lua_setfield(_state, LUA_REGISTRYINDEX, "_LOADED"); /* assign new table to field */
+        lua_pushvalue(_state, -1);
+        lua_setfield(_state, LUA_REGISTRYINDEX, "_LOADED");
     }
 
-    lua_getfield(_state, -1, modname.c_str());              /* LOADED[modname] */
-    if (!lua_toboolean(_state, -1)) {                       /* package not already loaded? */
-        lua_pop(_state, 1);                                 /* remove field */
+    lua_getfield(_state, -1, modname.c_str());
+    if (!lua_toboolean(_state, -1)) {
+        lua_pop(_state, 1);
         lua_pushcfunction(_state, openf);
-        lua_pushstring(_state, modname.c_str());            /* argument to open function */
-        lua_call(_state, 1, 1);                             /* call 'openf' to open module */
-        lua_pushvalue(_state, -1);                          /* make copy of module (call result) */
-        lua_setfield(_state, -3, modname.c_str());          /* LOADED[modname] = module */
+        lua_pushstring(_state, modname.c_str());
+        lua_call(_state, 1, 1);
+        lua_pushvalue(_state, -1);
+        lua_setfield(_state, -3, modname.c_str());
     }
-    lua_remove(_state, -2);                                 /* remove LOADED table */
+    lua_remove(_state, -2);
     if (glb) {
-        lua_pushvalue(_state, -1);                          /* copy of module */
-        lua_setglobal(_state, modname.c_str());             /* _G[modname] = module */
+        lua_pushvalue(_state, -1);
+        lua_setglobal(_state, modname.c_str());
     }
     #else
     luaL_requiref(_state, modname.c_str(), openf, static_cast<i32>(glb));
@@ -593,6 +593,7 @@ void state_view::require_library(library lib) const
         {library::Debug, {LUA_DBLIBNAME, luaopen_debug}},
         {library::Package, {LUA_LOADLIBNAME, luaopen_package}},
     #if defined(TCOB_USE_LUAJIT)
+        //{library::Coroutine, {LUA_COLIBNAME, luaopen_base}},
         {library::JIT, {LUA_JITLIBNAME, luaopen_jit}},
     #else
         {library::Coroutine, {LUA_COLIBNAME, luaopen_coroutine}},

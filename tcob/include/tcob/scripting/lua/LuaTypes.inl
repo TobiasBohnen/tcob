@@ -273,6 +273,10 @@ inline auto function<R>::Acquire(state_view view, i32 idx) -> function<R>
 template <typename R>
 inline auto coroutine::resume(auto&&... params) -> result<R>
 {
+    if (_status == coroutine_status::Dead) {
+        return result<R> {error_code::Error};
+    }
+
     state_view const thread {get_thread()};
     auto const       guard {thread.create_stack_guard()};
 
