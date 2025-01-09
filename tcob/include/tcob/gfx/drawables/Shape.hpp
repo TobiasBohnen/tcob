@@ -44,7 +44,8 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    auto virtual geometry() -> geometry_data                           = 0;
+    auto virtual geometry() -> geometry_data = 0;
+
     auto virtual intersect(ray const& ray) -> std::vector<ray::result> = 0;
 
     auto is_dirty() const -> bool;
@@ -77,6 +78,7 @@ public:
     prop<i32>     Segments {90};
 
     auto geometry() -> geometry_data override;
+
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
 protected:
@@ -103,6 +105,7 @@ public:
     prop<point_f> TextureScroll;
 
     auto geometry() -> geometry_data override;
+
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
     auto aabb() const -> rect_f;
@@ -132,6 +135,7 @@ public:
     prop<std::vector<polygon>> Polygons;
 
     auto geometry() -> geometry_data override;
+
     auto intersect(ray const& ray) -> std::vector<ray::result> override;
 
     void clip(poly_shape const& other, clip_mode mode);
