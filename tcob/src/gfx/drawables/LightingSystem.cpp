@@ -191,7 +191,7 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
                 nearestPoint.Source   = &light;
 
                 for (auto const& cp : casterPoints) {
-                    ray const  ray {{.Origin = lightPosition, .Direction = degree_d {angle}}};
+                    ray const  ray {lightPosition, degree_d {angle}};
                     auto const result {ray.intersect_polyline(cp.Points)};
                     for (auto const& [point, distance] : result) {
                         if (point == lightPosition) { continue; }

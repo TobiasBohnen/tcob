@@ -9,9 +9,10 @@ namespace tcob::gfx {
 
 f32 constexpr epsilon {std::numeric_limits<f32>::epsilon()};
 
-ray::ray(init init)
-    : _init {init}
-    , _direction {point_d::FromDirection(init.Direction)}
+ray::ray(point_f origin, degree_f direction, f64 maxDistance)
+    : _origin {origin}
+    , _maxDistance {maxDistance}
+    , _direction {point_d::FromDirection(direction)}
 {
 }
 
@@ -22,7 +23,7 @@ auto ray::direction_vector() const -> point_d
 
 auto ray::get_point(f64 distance) const -> point_f
 {
-    return _init.Origin + (_direction * distance);
+    return _origin + (_direction * distance);
 }
 
 auto ray::intersect_line(point_f a, point_f b) const -> std::optional<result>
@@ -54,8 +55,8 @@ auto ray::intersect_rect(rect_f const& rect, transform const& xform) const -> st
 
 auto ray::intersect_circle(point_f const& center, f32 radius) const -> std::vector<result>
 {
-    f64 const b {2.0 * ((_init.Origin.X - center.X) * _direction.X + (_init.Origin.Y - center.Y) * _direction.Y)};
-    f64 const c {((_init.Origin.X - center.X) * (_init.Origin.X - center.X)) + ((_init.Origin.Y - center.Y) * (_init.Origin.Y - center.Y)) - (radius * radius)};
+    f64 const b {2.0 * ((_origin.X - center.X) * _direction.X + (_origin.Y - center.Y) * _direction.Y)};
+    f64 const c {((_origin.X - center.X) * (_origin.X - center.X)) + ((_origin.Y - center.Y) * (_origin.Y - center.Y)) - (radius * radius)};
 
     f64 const discr {(b * b) - (4 * c)};
     if (discr < 0) { return {}; }
@@ -65,8 +66,8 @@ auto ray::intersect_circle(point_f const& center, f32 radius) const -> std::vect
     f64 const s2 {(-b + sqrtDiscr) / 2};
 
     std::vector<result> retValue;
-    if (s1 >= 0 && s1 <= _init.MaxDistance) { retValue.emplace_back(get_result(s1)); }
-    if (s2 >= 0 && s2 != s1 && s2 <= _init.MaxDistance) { retValue.emplace_back(get_result(s2)); }
+    if (s1 >= 0 && s1 <= _maxDistance) { retValue.emplace_back(get_result(s1)); }
+    if (s2 >= 0 && s2 != s1 && s2 <= _maxDistance) { retValue.emplace_back(get_result(s2)); }
     return retValue;
 }
 
@@ -114,7 +115,7 @@ auto ray::intersect_polyline(polyline_span polygon, transform const& xform) cons
 
 auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const& p1) const -> std::optional<f64>
 {
-    point_d const ro {_init.Origin};
+    point_d const ro {_origin};
     point_d const seg {p1 - p0};
     point_d const segPerp {seg.perpendicular()};
 
@@ -123,7 +124,7 @@ auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const&
 
     point_d const d {p0 - ro};
     f64 const     distance {segPerp.dot(d) / denom};
-    if (distance < 0.0 || distance > _init.MaxDistance) { return std::nullopt; }
+    if (distance < 0.0 || distance > _maxDistance) { return std::nullopt; }
 
     f64 const s {rd.perpendicular().dot(d) / denom};
     if (s >= 0.0 && s <= 1.0) { return distance; }

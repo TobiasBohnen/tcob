@@ -28,18 +28,12 @@ public:
 
         auto operator==(result const&) const -> bool = default;
     };
-    struct init {
-        point_f  Origin {};
-        degree_d Direction {0};
-        f64      MaxDistance {std::numeric_limits<f64>::max()};
 
-        auto operator==(init const&) const -> bool = default;
-    };
     using func = std::function<point_f(f64)>;
 
     ////////////////////////////////////////////////////////////
 
-    ray(init init);
+    ray(point_f origin, degree_f direction, f64 maxDistance = std::numeric_limits<f64>::max());
 
     auto direction_vector() const -> point_d;
 
@@ -62,7 +56,8 @@ private:
 
     auto get_result(f64 distance) const -> result;
 
-    init    _init;
+    point_f _origin;
+    f64     _maxDistance;
     point_d _direction;
 };
 
