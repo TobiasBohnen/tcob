@@ -46,9 +46,12 @@ public:
     auto get_point(f64 distance) const -> point_f;
 
     auto intersect_line(point_f a, point_f b) const -> std::optional<result>;
+
     auto intersect_rect(point_f topLeft, point_f topRight, point_f bottomLeft, point_f bottomRight) const -> std::vector<result>;
     auto intersect_rect(rect_f const& rect, transform const& xform = transform::Identity) const -> std::vector<result>;
+
     auto intersect_circle(point_f const& center, f32 radius) const -> std::vector<result>;
+
     auto intersect_function(func const& func, f64 tolerance = 0.01) const -> std::vector<result>;
 
     auto intersect_polyline(polyline_span polygon) const -> std::vector<result>;

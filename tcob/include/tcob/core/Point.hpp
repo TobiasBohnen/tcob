@@ -31,6 +31,7 @@ public:
 
     auto constexpr dot(point<T> const& p) const -> float_type;
     auto constexpr cross(point<T> const& p) const -> float_type;
+    auto constexpr perpendicular() const -> point<T>;
 
     auto length() const -> float_type;
     auto distance_to(point<T> const& p) const -> float_type;

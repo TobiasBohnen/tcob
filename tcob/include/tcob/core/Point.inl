@@ -44,6 +44,12 @@ auto constexpr point<T>::cross(point<T> const& p) const -> float_type
 }
 
 template <Arithmetic T>
+auto constexpr point<T>::perpendicular() const -> point<T>
+{
+    return {-Y, X};
+}
+
+template <Arithmetic T>
 inline auto point<T>::length() const -> float_type
 {
     return static_cast<float_type>(std::sqrt((X * X) + (Y * Y)));

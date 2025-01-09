@@ -100,6 +100,8 @@ private:
     bool _isRunning {false};
 };
 
+////////////////////////////////////////////////////////////
+
 template <typename T>
 using min_max = std::pair<T, T>;
 

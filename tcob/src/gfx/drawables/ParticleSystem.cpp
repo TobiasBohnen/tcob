@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 void static calc_velocity(auto&& particle, point_f pos, f32 seconds)
 {
     point_f const radial {pos * particle.RadialAcceleration};
-    point_f const tangential {point_f {-pos.Y, pos.X} * particle.TangentialAcceleration};
+    point_f const tangential {pos.perpendicular() * particle.TangentialAcceleration};
     particle.Velocity += (radial + tangential + particle.LinearAcceleration + particle.Gravity) * seconds;
     particle.Velocity *= 1.0f / (1.0f + (particle.LinearDamping * seconds));
 }
