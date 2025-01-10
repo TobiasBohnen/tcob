@@ -9,7 +9,23 @@
 namespace tcob {
 
 template <typename EvArgs>
-inline void signal<EvArgs>::operator()(EvArgs& args) const
+inline void signal<EvArgs>::operator()() const
+    requires(IsVoid)
+{
+    for (auto it {_slots.begin()}; it != _slots.end();) {
+        if (it->second) {
+            it->second();
+            ++it;
+        } else {
+            it = _slots.erase(it);
+        }
+    }
+}
+
+template <typename EvArgs>
+template <typename S>
+inline void signal<EvArgs>::operator()(S&& args) const
+    requires(!IsVoid)
 {
     for (auto it {_slots.begin()}; it != _slots.end();) {
         if (it->second) {
@@ -33,7 +49,11 @@ inline auto signal<EvArgs>::connect(Func func) const -> connection
         _slots.emplace_back(id, func);
         return connection {this, id};
     } else {
-        return connect([=](EvArgs&) { func(); });
+        if constexpr (IsVoid) {
+            return connect([=]() { func(); });
+        } else {
+            return connect([=](EvArgs&) { func(); });
+        }
     }
 }
 
@@ -41,7 +61,11 @@ template <typename EvArgs>
 template <auto Func, typename T>
 inline auto signal<EvArgs>::connect(T* inst) const -> connection
 {
-    return connect([=](EvArgs& args) { (inst->*Func)(args); });
+    if constexpr (IsVoid) {
+        return connect([=]() { (inst->*Func)(); });
+    } else {
+        return connect([=](EvArgs& args) { (inst->*Func)(args); });
+    }
 }
 
 template <typename EvArgs>
@@ -68,56 +92,6 @@ inline auto signal<EvArgs>::slot_count() const -> isize
 }
 
 ////////////////////////////////////////////////////////////
-
-inline void signal<void>::operator()() const
-{
-    for (auto it {_slots.begin()}; it != _slots.end();) {
-        if (it->second) {
-            it->second();
-            ++it;
-        } else {
-            it = _slots.erase(it);
-        }
-    }
-}
-
-template <typename Func>
-inline auto signal<void>::connect(Func func) const -> connection
-{
-    if constexpr (std::is_convertible_v<Func, slot_func>) {
-        uid const id {next_id()};
-        _slots.emplace_back(id, func);
-        return connection {this, id};
-    } else {
-        return connect([=]() { func(); });
-    }
-}
-
-template <auto Func, typename T>
-inline auto signal<void>::connect(T* inst) const -> connection
-{
-    return connect([=]() { (inst->*Func)(); });
-}
-
-inline void signal<void>::disconnect(uid id) const
-{
-    for (auto it {_slots.begin()}; it != _slots.end(); ++it) {
-        if (it->first == id) {
-            _slots.erase(it);
-            return;
-        }
-    }
-}
-
-inline void signal<void>::disconnect_all() const
-{
-    _slots.clear();
-}
-
-inline auto signal<void>::slot_count() const -> isize
-{
-    return std::ssize(_slots);
-}
 
 ////////////////////////////////////////////////////////////
 namespace detail {

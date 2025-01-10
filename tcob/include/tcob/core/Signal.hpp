@@ -23,16 +23,7 @@ struct event_base {
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-    class TCOB_API signal_base : public non_copyable {
-    public:
-        signal_base() = default;
-        virtual ~signal_base();
-
-        void virtual disconnect(uid id) const = 0;
-
-    protected:
-        auto next_id() const -> uid;
-    };
+    class signal_base;
 }
 
 ////////////////////////////////////////////////////////////
@@ -66,35 +57,48 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+namespace detail {
+    class TCOB_API signal_base : public non_copyable {
+    public:
+        signal_base() = default;
+        virtual ~signal_base();
+
+        void virtual disconnect(uid id) const = 0;
+
+    protected:
+        auto next_id() const -> uid;
+    };
+}
+
+////////////////////////////////////////////////////////////
+
 template <typename EvArgs = void>
 class signal final : public detail::signal_base {
-    using slot_func = std::function<void(EvArgs&)>;
+    constexpr static bool IsVoid {std::is_void_v<std::remove_cvref_t<EvArgs>>};
+
+    template <typename T, bool IsVoid>
+    struct slot_func_type;
+
+    template <typename T>
+    struct slot_func_type<T, false> {
+        using type = std::function<void(T&)>;
+    };
+
+    template <typename T>
+    struct slot_func_type<T, true> {
+        using type = std::function<void()>;
+    };
+
+    using slot_func = typename slot_func_type<EvArgs, IsVoid>::type;
     using slots     = std::vector<std::pair<uid, slot_func>>;
 
 public:
-    void operator()(EvArgs& args) const;
+    void operator()() const
+        requires(IsVoid);
 
-    template <typename Func>
-    auto connect(Func func) const -> connection;
-    template <auto Func, typename T>
-    auto connect(T* inst) const -> connection;
-
-    void disconnect(uid id) const override;
-    void disconnect_all() const;
-
-    auto slot_count() const -> isize;
-
-private:
-    mutable slots _slots;
-};
-
-template <>
-class signal<void> final : public detail::signal_base {
-    using slot_func = std::function<void()>;
-    using slots     = std::vector<std::pair<uid, slot_func>>;
-
-public:
-    void operator()() const;
+    template <typename S = EvArgs>
+    void operator()(S&& args) const
+        requires(!IsVoid);
 
     template <typename Func>
     auto connect(Func func) const -> connection;
