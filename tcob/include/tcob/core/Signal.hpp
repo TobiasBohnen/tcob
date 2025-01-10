@@ -82,7 +82,7 @@ public:
     void disconnect(uid id) const override;
     void disconnect_all() const;
 
-    auto used_slots() const -> isize;
+    auto slot_count() const -> isize;
 
 private:
     mutable slots _slots;
@@ -104,7 +104,7 @@ public:
     void disconnect(uid id) const override;
     void disconnect_all() const;
 
-    auto used_slots() const -> isize;
+    auto slot_count() const -> isize;
 
 private:
     mutable slots _slots;

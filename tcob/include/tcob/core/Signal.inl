@@ -62,7 +62,7 @@ inline void signal<EvArgs>::disconnect_all() const
 }
 
 template <typename EvArgs>
-inline auto signal<EvArgs>::used_slots() const -> isize
+inline auto signal<EvArgs>::slot_count() const -> isize
 {
     return std::ssize(_slots);
 }
@@ -114,7 +114,7 @@ inline void signal<void>::disconnect_all() const
     _slots.clear();
 }
 
-inline auto signal<void>::used_slots() const -> isize
+inline auto signal<void>::slot_count() const -> isize
 {
     return std::ssize(_slots);
 }

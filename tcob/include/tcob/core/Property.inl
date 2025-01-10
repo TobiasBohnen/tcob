@@ -182,7 +182,7 @@ inline void prop_base<T, Source>::operator()(T const& value)
 template <typename T, typename Source>
 inline void prop_base<T, Source>::set(T const& value, bool force)
 {
-    if (_source.set(value, force) && Changed.used_slots() > 0) {
+    if (_source.set(value, force) && Changed.slot_count() > 0) {
         Changed(_source.get());
     }
 }
