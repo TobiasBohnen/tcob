@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/assets/AssetGroup.hpp"
 #include "tcob/core/assets/Assets.hpp"
 
 namespace tcob::assets {

@@ -7,8 +7,6 @@
 
 #include <algorithm>
 
-#include "tcob/core/assets/AssetGroup.hpp"
-
 namespace tcob::assets {
 
 library::library() = default;
