@@ -17,7 +17,8 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/assets/Asset.hpp"
-#include "tcob/core/assets/AssetLibrary.hpp"
+#include "tcob/core/assets/AssetGroup.hpp"
+#include "tcob/core/assets/AssetLoader.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
@@ -35,8 +36,6 @@ namespace tcob::detail {
 class cfg_frame_animation_loader final : public assets::loader<gfx::frame_animation> {
 public:
     cfg_frame_animation_loader(assets::group& group, data::config::object& object);
-
-    void unload_asset(assets::asset<gfx::frame_animation>& asset, bool greedy) override;
 
     void declare() override;
     void prepare() override;
@@ -56,9 +55,6 @@ class cfg_music_loader final : public assets::loader<audio::music> {
 public:
     cfg_music_loader(assets::group& group, data::config::object& object);
 
-    void unload_asset(assets::asset<audio::music>& asset, bool greedy) override;
-    auto reload_asset(assets::asset<audio::music>& asset) -> bool override;
-
     void declare() override;
     void prepare() override;
 
@@ -77,9 +73,6 @@ private:
 class cfg_sound_loader final : public assets::loader<audio::sound> {
 public:
     cfg_sound_loader(assets::group& group, data::config::object& object);
-
-    void unload_asset(assets::asset<audio::sound>& asset, bool greedy) override;
-    auto reload_asset(assets::asset<audio::sound>& asset) -> bool override;
 
     void declare() override;
     void prepare() override;
@@ -103,9 +96,6 @@ class cfg_sound_font_loader final : public assets::loader<audio::sound_font> {
 public:
     cfg_sound_font_loader(assets::group& group, data::config::object& object);
 
-    void unload_asset(assets::asset<audio::sound_font>& asset, bool greedy) override;
-    auto reload_asset(assets::asset<audio::sound_font>& asset) -> bool override;
-
     void declare() override;
     void prepare() override;
 
@@ -128,8 +118,6 @@ class cfg_cursor_loader final : public assets::loader<gfx::cursor> {
 public:
     cfg_cursor_loader(assets::group& group, data::config::object& object);
 
-    void unload_asset(assets::asset<gfx::cursor>& asset, bool greedy) override;
-
     void declare() override;
     void prepare() override;
 
@@ -148,9 +136,6 @@ private:
 class cfg_font_loader final : public assets::loader<gfx::font> {
 public:
     cfg_font_loader(assets::group& group, data::config::object& object);
-
-    void unload_asset(assets::asset<gfx::font>& asset, bool greedy) override;
-    auto reload_asset(assets::asset<gfx::font>& asset) -> bool override;
 
     void declare() override;
     void prepare() override;
@@ -173,8 +158,6 @@ class cfg_font_family_loader final : public assets::loader<gfx::font_family> {
 public:
     cfg_font_family_loader(assets::group& group, data::config::object& object);
 
-    void unload_asset(assets::asset<gfx::font_family>& asset, bool greedy) override;
-
     void declare() override;
     void prepare() override;
 
@@ -193,8 +176,6 @@ private:
 class cfg_material_loader final : public assets::loader<gfx::material> {
 public:
     cfg_material_loader(assets::group& group, data::config::object& object);
-
-    void unload_asset(assets::asset<gfx::material>& asset, bool greedy) override;
 
     void declare() override;
     void prepare() override;
@@ -215,9 +196,6 @@ private:
 class cfg_shader_loader final : public assets::loader<gfx::shader> {
 public:
     cfg_shader_loader(assets::group& group, data::config::object& object);
-
-    void unload_asset(assets::asset<gfx::shader>& asset, bool greedy) override;
-    auto reload_asset(assets::asset<gfx::shader>& asset) -> bool override;
 
     void declare() override;
     void prepare() override;
@@ -240,9 +218,6 @@ class cfg_texture_loader final : public assets::loader<gfx::texture> {
 public:
     cfg_texture_loader(assets::group& group, data::config::object& object);
 
-    void unload_asset(assets::asset<gfx::texture>& asset, bool greedy) override;
-    auto reload_asset(assets::asset<gfx::texture>& asset) -> bool override;
-
     void declare() override;
     void prepare() override;
 
@@ -250,10 +225,6 @@ private:
     void check_async_load(def_task& ctx);
 
     // texture
-    struct reload_info {
-        u32  Depth {};
-        path Path {};
-    };
     struct image_ftr {
         u32                      Depth {};
         path                     Path {};
@@ -270,7 +241,6 @@ private:
 
         std::vector<image_ftr> images;
     };
-    std::unordered_map<string, std::vector<reload_info>> _reloadInfoTex;
 
     std::vector<std::unique_ptr<tex_asset_def>> _cacheTex;
 
@@ -294,7 +264,7 @@ class cfg_asset_loader_manager final : public assets::loader_manager {
 public:
     explicit cfg_asset_loader_manager(assets::group& group);
 
-    void load(path const& file) override;
+    void load_script(path const& file) override;
 
 private:
     data::config::object _object;

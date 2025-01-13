@@ -101,10 +101,10 @@ namespace AnimatedTexture {
 namespace tcob::detail {
 
 template <typename T, typename TDef>
-auto default_new(string const& name, auto&& loader, auto&& bucket, auto&& cache) -> TDef*
+auto default_new(string const& name, auto&& bucket, auto&& cache) -> TDef*
 {
     auto def {std::make_unique<TDef>()};
-    def->assetPtr = bucket->template create_or_get<T>(name, loader);
+    def->assetPtr = bucket->template create_or_get<T>(name);
 
     auto const retValue {def.get()};
     cache.push_back(std::move(def));
@@ -178,13 +178,13 @@ cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
 #endif
 }
 
-void cfg_asset_loader_manager::load(path const& file)
+void cfg_asset_loader_manager::load_script(path const& file)
 {
     object load;
     if (load.load(file) == load_status::Ok) {
         _object.merge(load, true);
     } else {
-        logger::Error("AssetLoader '{}': loading failed.", file);
+        logger::Error("AssetLoader '{}': script loading failed.", file);
     }
 }
 
@@ -196,11 +196,6 @@ cfg_frame_animation_loader::cfg_frame_animation_loader(assets::group& group, dat
 {
 }
 
-void cfg_frame_animation_loader::unload_asset(asset<gfx::frame_animation>& asset, bool)
-{
-    _object[API::Animation::Name][asset.name()] = nullptr;
-}
-
 void cfg_frame_animation_loader::declare()
 {
     object obj;
@@ -208,7 +203,7 @@ void cfg_frame_animation_loader::declare()
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
-            auto* asset {default_new<frame_animation, asset_def>(k, this, bucket(), _cache)};
+            auto* asset {default_new<frame_animation, asset_def>(k, bucket(), _cache)};
             if (std::vector<frame> frames; assetSection.try_get(frames, API::Animation::frames)) {
                 asset->assetPtr->Frames = frames;
             }
@@ -232,26 +227,13 @@ cfg_music_loader::cfg_music_loader(assets::group& group, data::config::object& o
 {
 }
 
-void cfg_music_loader::unload_asset(asset<music>& asset, bool)
-{
-    _object[API::Music::Name][asset.name()] = nullptr;
-}
-
-auto cfg_music_loader::reload_asset(asset<music>& asset) -> bool
-{
-    if (!_object[API::Music::Name].as<object>().has(asset.name())) { return false; }
-
-    string const& source {_object[API::Music::Name][asset.name()][API::Music::source].as<string>()};
-    return asset->open(group().mount_point() + source) == load_status::Ok;
-}
-
 void cfg_music_loader::declare()
 {
     object obj;
     if (!_object.try_get(obj, API::Music::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
-        auto* asset {default_new<music, asset_def>(k, this, bucket(), _cache)};
+        auto* asset {default_new<music, asset_def>(k, bucket(), _cache)};
         if (object assetSection; v.try_get(assetSection)) {
             if (string source; assetSection.try_get(source, API::Music::source)) {
                 asset->source = source;
@@ -283,26 +265,13 @@ cfg_sound_loader::cfg_sound_loader(assets::group& group, data::config::object& o
 {
 }
 
-void cfg_sound_loader::unload_asset(asset<sound>& asset, bool)
-{
-    _object[API::Sound::Name][asset.name()] = nullptr;
-}
-
-auto cfg_sound_loader::reload_asset(asset<sound>& asset) -> bool
-{
-    if (!_object[API::Sound::Name].as<object>().has(asset.name())) { return false; }
-
-    string const& source {_object[API::Sound::Name][asset.name()][API::Sound::source].as<string>()};
-    return asset->load(group().mount_point() + source) == load_status::Ok;
-}
-
 void cfg_sound_loader::declare()
 {
     object obj;
     if (!_object.try_get(obj, API::Sound::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
-        auto* asset {default_new<sound, asset_def>(k, this, bucket(), _cache)};
+        auto* asset {default_new<sound, asset_def>(k, bucket(), _cache)};
 
         if (object assetSection; v.try_get(assetSection)) {
             if (string source; assetSection.try_get(source, API::Sound::source)) {
@@ -336,26 +305,13 @@ cfg_sound_font_loader::cfg_sound_font_loader(assets::group& group, data::config:
 {
 }
 
-void cfg_sound_font_loader::unload_asset(asset<sound_font>& asset, bool)
-{
-    _object[API::SoundFont::Name][asset.name()] = nullptr;
-}
-
-auto cfg_sound_font_loader::reload_asset(asset<sound_font>& asset) -> bool
-{
-    if (!_object[API::SoundFont::Name].as<object>().has(asset.name())) { return false; }
-
-    string const& source {_object[API::SoundFont::Name][asset.name()][API::SoundFont::source].as<string>()};
-    return asset->load(group().mount_point() + source) == load_status::Ok;
-}
-
 void cfg_sound_font_loader::declare()
 {
     object obj;
     if (!_object.try_get(obj, API::SoundFont::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
-        auto* asset {default_new<sound_font, asset_def>(k, this, bucket(), _cache)};
+        auto* asset {default_new<sound_font, asset_def>(k, bucket(), _cache)};
 
         if (object assetSection; v.try_get(assetSection)) {
             if (string source; assetSection.try_get(source, API::SoundFont::source)) {
@@ -389,14 +345,6 @@ cfg_cursor_loader::cfg_cursor_loader(assets::group& group, data::config::object&
 {
 }
 
-void cfg_cursor_loader::unload_asset(asset<cursor>& asset, bool greedy)
-{
-    _object[API::Cursor::Name][asset.name()] = nullptr;
-    if (greedy) {
-        asset->Material().get()->unload(true);
-    }
-}
-
 void cfg_cursor_loader::declare()
 {
     object obj;
@@ -404,7 +352,7 @@ void cfg_cursor_loader::declare()
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
-            auto* asset {default_new<cursor, asset_def>(k, this, bucket(), _cache)};
+            auto* asset {default_new<cursor, asset_def>(k, bucket(), _cache)};
             if (string material; assetSection.try_get(material, API::Cursor::material)) {
                 asset->material = material;
             }
@@ -437,38 +385,12 @@ cfg_font_loader::cfg_font_loader(assets::group& group, data::config::object& obj
 {
 }
 
-void cfg_font_loader::unload_asset(asset<font>& asset, bool)
-{
-    auto const& name {asset.name()};
-    if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
-        _object[API::TrueTypeFont::Name][name] = nullptr;
-    }
-}
-
-auto cfg_font_loader::reload_asset(asset<font>& asset) -> bool
-{
-    auto const& name {asset.name()};
-    auto const  mp {group().mount_point()};
-    if (_object[API::TrueTypeFont::Name].as<object>().has(name)) {
-        auto  info {_object[API::TrueTypeFont::Name][name]};
-        auto* ttf {dynamic_cast<font*>(asset.get())};
-        if (ttf->load(mp + info[API::TrueTypeFont::source].as<path>(), info[API::TrueTypeFont::size].as<u32>()) != load_status::Ok) {
-            logger::Error("font asset: Error reloading file: {}", info[API::TrueTypeFont::source].as<path>());
-            return false;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
 void cfg_font_loader::declare()
 {
     if (object fontSection; _object.try_get(fontSection, API::TrueTypeFont::Name)) {
         for (auto const& [k, v] : fontSection) {
             if (object assetSection; v.try_get(assetSection)) {
-                auto* asset {default_new<font, asset_def>(k, this, bucket(), _cache)};
+                auto* asset {default_new<font, asset_def>(k, bucket(), _cache)};
                 if (string source; assetSection.try_get(source, API::TrueTypeFont::source)) {
                     asset->source = source;
                 }
@@ -504,11 +426,6 @@ cfg_font_family_loader::cfg_font_family_loader(assets::group& group, data::confi
 {
 }
 
-void cfg_font_family_loader::unload_asset(asset<gfx::font_family>& asset, bool)
-{
-    _object[API::FontFamily::Name][asset->name()] = nullptr;
-}
-
 void cfg_font_family_loader::declare()
 {
     object obj;
@@ -516,7 +433,7 @@ void cfg_font_family_loader::declare()
 
     for (auto const& [k, v] : obj) {
         auto asset {std::make_unique<asset_def>()};
-        asset->assetPtr = bucket()->template create_or_get<font_family>(k, this, k);
+        asset->assetPtr = bucket()->template create_or_get<font_family>(k, k);
 
         if (object assetSection; v.try_get(assetSection)) {
             if (string fontSource; assetSection.try_get(fontSource, API::FontFamily::source)) {
@@ -550,16 +467,6 @@ cfg_material_loader::cfg_material_loader(assets::group& group, data::config::obj
 {
 }
 
-void cfg_material_loader::unload_asset(asset<material>& asset, bool greedy)
-{
-    _object[API::Material::Name][asset.name()] = nullptr;
-
-    if (greedy) {
-        asset->Shader.get()->unload(true);
-        asset->Texture.get()->unload(true);
-    }
-}
-
 void cfg_material_loader::declare()
 {
     object obj;
@@ -567,7 +474,7 @@ void cfg_material_loader::declare()
 
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
-            auto* asset {default_new<material, asset_def>(k, this, bucket(), _cache)};
+            auto* asset {default_new<material, asset_def>(k, bucket(), _cache)};
             if (string texture; assetSection.try_get(texture, API::Material::texture)) {
                 asset->texture = texture;
             }
@@ -640,23 +547,6 @@ cfg_shader_loader::cfg_shader_loader(assets::group& group, data::config::object&
 {
 }
 
-void cfg_shader_loader::unload_asset(asset<shader>& asset, bool)
-{
-    _object[API::Shader::Name][asset.name()] = nullptr;
-}
-
-auto cfg_shader_loader::reload_asset(asset<shader>& asset) -> bool
-{
-    auto const& name {asset.name()};
-    object      obj;
-    if (!_object.try_get(obj, API::Shader::Name, name)) { return false; }
-    obj.try_get(obj, locate_service<render_system>().name());
-
-    auto const vertSource {io::read_as_string(group().mount_point() + obj[API::Shader::vertex].as<string>())};
-    auto const fragSource {io::read_as_string(group().mount_point() + obj[API::Shader::fragment].as<string>())};
-    return asset->create(vertSource, fragSource);
-}
-
 void cfg_shader_loader::declare()
 {
     object obj;
@@ -667,7 +557,7 @@ void cfg_shader_loader::declare()
             // try getting render system specific shader
             assetSection.try_get(assetSection, locate_service<render_system>().name());
 
-            auto* asset {default_new<shader, asset_def>(k, this, bucket(), _cache)};
+            auto* asset {default_new<shader, asset_def>(k, bucket(), _cache)};
             if (string vertex; assetSection.try_get(vertex, API::Shader::vertex)) {
                 asset->vertex = vertex;
             }
@@ -711,50 +601,13 @@ cfg_texture_loader::cfg_texture_loader(assets::group& group, data::config::objec
 {
 }
 
-void cfg_texture_loader::unload_asset(asset<texture>& asset, bool)
-{
-    auto const& name {asset.name()};
-    if (_object[API::Texture::Name].as<object>().has(name)) {
-        _object[API::Texture::Name][name] = nullptr;
-    }
-    if (_object[API::AnimatedTexture::Name].as<object>().has(name)) {
-        _object[API::AnimatedTexture::Name][name] = nullptr;
-    }
-}
-
-auto cfg_texture_loader::reload_asset(asset<texture>& asset) -> bool
-{
-    auto const& name {asset.name()};
-    if (_reloadInfoTex.contains(name)) {
-        auto& info {_reloadInfoTex[name]};
-        for (auto& img : info) {
-            auto const  image {*image::Load(img.Path)};
-            auto const& imgInfo {image.info()};
-            if (imgInfo.bytes_per_pixel() == 4) {
-                asset->update_data(image.buffer(), img.Depth, 0, 4);
-            } else {
-                asset->update_data(image.buffer(), img.Depth, 0, 1);
-            }
-        }
-        return true;
-    }
-
-    if (_object[API::AnimatedTexture::Name].as<object>().has(name)) {
-        auto  info {_object[API::AnimatedTexture::Name][name]};
-        auto* ani {dynamic_cast<animated_texture*>(asset.get())};
-        return ani->load(group().mount_point() + info[API::AnimatedTexture::source].as<string>()) == load_status::Ok;
-    }
-
-    return false;
-}
-
 void cfg_texture_loader::declare()
 {
     path const mp {group().mount_point()};
 
     if (object textureSection; _object.try_get(textureSection, API::Texture::Name)) {
         for (auto const& [k, v] : textureSection) {
-            auto* asset {default_new<texture, tex_asset_def>(k, this, bucket(), _cacheTex)};
+            auto* asset {default_new<texture, tex_asset_def>(k, bucket(), _cacheTex)};
             asset->assetPtr->add_region("default", {{0.0f, 0.0f, 1.0f, 1.0f}, 0});
 
             // texture objects
@@ -830,7 +683,7 @@ void cfg_texture_loader::declare()
 
     if (object textureSection; _object.try_get(textureSection, API::AnimatedTexture::Name)) {
         for (auto const& [k, v] : textureSection) {
-            auto* asset {default_new<animated_texture, ani_asset_def>(k, this, bucket(), _cacheAni)};
+            auto* asset {default_new<animated_texture, ani_asset_def>(k, bucket(), _cacheAni)};
             asset->assetPtr->add_region("default", {{0.0f, 0.0f, 1.0f, 1.0f}, 0});
 
             if (object assetSection; v.try_get(assetSection)) {
@@ -903,9 +756,6 @@ void cfg_texture_loader::prepare()
         // load images
         for (auto& img : def->images) {
             img.Future = img.Image.load_async(img.Path);
-
-            auto& rel {_reloadInfoTex[def->assetPtr.get()->name()]};
-            rel.push_back({.Depth = img.Depth, .Path = img.Path});
         }
 
         set_asset_status(def->assetPtr, asset_status::Loading);

@@ -7,9 +7,9 @@
 
 namespace tcob::gfx {
 
-auto material::Empty() -> assets::manual_asset_ptr<material>
+auto material::Empty() -> assets::owning_asset_ptr<material>
 {
-    static assets::manual_asset_ptr<material> instance;
+    static assets::owning_asset_ptr<material> instance;
     return instance;
 }
 

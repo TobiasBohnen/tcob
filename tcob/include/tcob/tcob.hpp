@@ -41,7 +41,10 @@
 #include <tcob/core/Timer.hpp>
 #include <tcob/core/TypeFactory.hpp>
 #include <tcob/core/assets/Asset.hpp>
+#include <tcob/core/assets/AssetGroup.hpp>
 #include <tcob/core/assets/AssetLibrary.hpp>
+#include <tcob/core/assets/AssetLoader.hpp>
+#include <tcob/core/assets/Assets.hpp>
 #include <tcob/core/easing/Easing.hpp>
 #include <tcob/core/input/Input.hpp>
 #include <tcob/core/io/FileStream.hpp>

@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "AssetLibrary.hpp"
+#include "AssetGroup.hpp"
 
 #include "tcob/core/Logger.hpp"
 
@@ -19,17 +19,15 @@ inline bucket<T>::bucket(group& parent)
 
 template <typename T>
 template <typename R, typename... Args>
-inline auto bucket<T>::create_or_get(string const& name, loader<T>* loader, Args&&... args) -> assets::asset_ptr<T>
+inline auto bucket<T>::create_or_get(string const& name, Args&&... args) -> assets::asset_ptr<T>
 {
     if (!_objects.contains(name)) {
         auto obj {std::make_shared<R>(std::forward<Args>(args)...)};
-        _objects[name] = {obj, assets::asset_ptr<T> {std::make_shared<asset<T>>(name, obj, loader)}};
+        _objects[name] = {obj, assets::asset_ptr<T> {std::make_shared<asset<T>>(name, obj)}};
     } else {
         auto& assetEntry {_objects[name]};
-        if (!assetEntry.first) {
-            assetEntry.first.reset(new R {std::forward<Args>(args)...});
-            assetEntry.second.get()->reset(assetEntry.first);
-        }
+        assetEntry.first.reset(new R {std::forward<Args>(args)...});
+        assetEntry.second.get()->reset(assetEntry.first);
     }
 
     return _objects[name].second;
@@ -132,62 +130,6 @@ inline auto group::has(string const& assetName) const -> bool
     if (it == _buckets.end()) { return false; }
 
     return dynamic_cast<assets::bucket<T>*>(it->second.get())->has(assetName);
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-inline loader<T>::loader(assets::group& group)
-    : _group {group}
-{
-}
-
-template <typename T>
-inline void loader<T>::unload(asset<T>& asset, bool greedy)
-{
-    unload_asset(asset, greedy);
-    bucket()->unload(asset.name());
-}
-
-template <typename T>
-inline auto loader<T>::reload(asset<T>& asset) -> bool
-{
-    return reload_asset(asset);
-}
-
-template <typename T>
-inline auto loader<T>::reload_asset(asset<T>& /*asset*/) -> bool { return false; };
-
-template <typename T>
-inline auto loader<T>::group() -> assets::group&
-{
-    return _group;
-}
-
-template <typename T>
-inline auto loader<T>::bucket() -> assets::bucket<T>*
-{
-    return _group.bucket<T>();
-}
-
-template <typename T>
-inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
-{
-    asset.get()->set_status(status);
-
-    switch (status) {
-    case asset_status::Unloaded: break;
-    case asset_status::Created: break;
-    case asset_status::Loading: break;
-    case asset_status::Loaded:
-        logger::Info("AssetLoader: group '{}' type '{}' -> asset '{}' successfully loaded",
-                     group().name(), bucket()->name(), asset.get()->name());
-        break;
-    case asset_status::Error:
-        logger::Error("AssetLoader: group '{}' type '{}' -> asset '{}' loading failed",
-                      group().name(), bucket()->name(), asset.get()->name());
-        break;
-    }
 }
 
 }

@@ -27,7 +27,7 @@ public:
 
     static inline char const* asset_name {"material"};
 
-    auto static Empty() -> assets::manual_asset_ptr<material>;
+    auto static Empty() -> assets::owning_asset_ptr<material>;
 
     auto operator==(material const& other) const -> bool = default;
 };

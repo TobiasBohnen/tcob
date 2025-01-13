@@ -14,7 +14,7 @@
 
 namespace tcob::gfx {
 
-window::window(std::unique_ptr<render_backend::window_base> window, assets::manual_asset_ptr<texture> const& texture)
+window::window(std::unique_ptr<render_backend::window_base> window, assets::owning_asset_ptr<texture> const& texture)
     : render_target {texture.ptr()}
     , FullScreen {{[&]() { return get_fullscreen(); },
                    [&](auto const& value) { set_fullscreen(value); }}}

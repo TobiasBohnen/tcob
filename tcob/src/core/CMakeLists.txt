@@ -2,7 +2,9 @@
 list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/../tcob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../tcob_config.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetGroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetLibrary.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetLoader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/input/Input.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/input/InputEnums.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileStream.cpp
@@ -32,8 +34,12 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/tcob.hpp
     ${TCOB_INC_DIR}/tcob/core/assets/Asset.hpp
     ${TCOB_INC_DIR}/tcob/core/assets/Asset.inl
+    ${TCOB_INC_DIR}/tcob/core/assets/AssetGroup.hpp
+    ${TCOB_INC_DIR}/tcob/core/assets/AssetGroup.inl
     ${TCOB_INC_DIR}/tcob/core/assets/AssetLibrary.hpp
-    ${TCOB_INC_DIR}/tcob/core/assets/AssetLibrary.inl
+    ${TCOB_INC_DIR}/tcob/core/assets/AssetLoader.hpp
+    ${TCOB_INC_DIR}/tcob/core/assets/AssetLoader.inl
+    ${TCOB_INC_DIR}/tcob/core/assets/Assets.hpp
     ${TCOB_INC_DIR}/tcob/core/input/Input_Codes.hpp
     ${TCOB_INC_DIR}/tcob/core/input/Input.hpp
     ${TCOB_INC_DIR}/tcob/core/io/FileStream.hpp

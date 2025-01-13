@@ -114,7 +114,7 @@ private:
 
     std::unique_ptr<truetype_font_engine> _engine;
 
-    assets::manual_asset_ptr<gfx::texture> _texture {};
+    assets::owning_asset_ptr<gfx::texture> _texture {};
 };
 
 void Serialize(font::style const& v, auto&& s)

@@ -10,38 +10,9 @@
 #include <memory>
 
 #include "tcob/core/Concepts.hpp"
+#include "tcob/core/assets/Assets.hpp"
 
 namespace tcob::assets {
-////////////////////////////////////////////////////////////
-
-template <typename T>
-class asset;
-
-template <typename T>
-class asset_ptr;
-
-template <typename T>
-class bucket;
-
-class group;
-
-class library;
-
-template <typename T>
-class loader;
-
-class loader_manager;
-
-////////////////////////////////////////////////////////////
-
-enum class asset_status : u8 {
-    Unloaded,
-    Created,
-    Loading,
-    Loaded,
-    Error
-};
-
 ////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -54,7 +25,7 @@ class asset {
 public:
     using type = T;
 
-    asset(string name, std::weak_ptr<T> ptr, loader<T>* loader);
+    asset(string name, std::weak_ptr<T> ptr, asset_status status = asset_status::Created);
     template <BaseOfOrDerivedFrom<T> U>
     asset(asset<U> const& other) noexcept;
 
@@ -69,21 +40,18 @@ public:
 
     auto get() const -> type*;
 
-    auto reset(std::weak_ptr<T> ptr);
-
-    void unload(bool greedy = false);
-    auto reload() -> bool;
+    void reset(std::weak_ptr<T> ptr);
 
     explicit operator bool() const;
     auto     is_expired() const -> bool;
     auto     is_ready() const -> bool;
 
-private:
+protected:
     void set_status(asset_status status);
 
+private:
     string           _name {};
     std::weak_ptr<T> _object {};
-    loader<T>*       _loader {nullptr};
     asset_status     _status {asset_status::Error};
 };
 
@@ -130,20 +98,19 @@ inline auto operator==(asset_ptr<T> const& left, asset_ptr<T> const& right) -> b
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class manual_asset_ptr {
+class owning_asset_ptr {
 public:
     using type = T;
 
-    manual_asset_ptr(string const& name = "", auto&&... args);
+    owning_asset_ptr(string const& name = "", auto&&... args);
 
     auto operator->() const -> type*;
     auto operator*() const -> type&;
+
     template <BaseOfOrDerivedFrom<T> U>
     operator asset_ptr<U>() const;
 
     auto ptr() const -> type*;
-
-    void reset();
 
 private:
     std::shared_ptr<T> _object;

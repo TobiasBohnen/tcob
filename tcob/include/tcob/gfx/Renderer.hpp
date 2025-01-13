@@ -175,7 +175,7 @@ protected:
 
     std::unique_ptr<vertex_array>      _vertexArray;
     canvas&                            _canvas;
-    assets::manual_asset_ptr<material> _material {};
+    assets::owning_asset_ptr<material> _material {};
 };
 
 }

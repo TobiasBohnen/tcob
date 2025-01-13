@@ -10,6 +10,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/assets/AssetGroup.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/html/HtmlElementPainter.hpp"
 

@@ -64,7 +64,7 @@ private:
     std::vector<quad> _quads {};
 
     quad_renderer                      _renderer {buffer_usage_hint::DynamicDraw};
-    assets::manual_asset_ptr<material> _material {};
+    assets::owning_asset_ptr<material> _material {};
 
     assets::asset_ptr<font> _font;
 };

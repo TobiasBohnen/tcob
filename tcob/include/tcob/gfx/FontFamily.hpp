@@ -39,7 +39,7 @@ private:
 
     std::unordered_map<font::style, path>                                                    _fontSources;
     std::unordered_map<font::style, std::vector<ubyte>>                                      _fontData;
-    std::unordered_map<font::style, std::unordered_map<u32, assets::manual_asset_ptr<font>>> _fontAssets;
+    std::unordered_map<font::style, std::unordered_map<u32, assets::owning_asset_ptr<font>>> _fontAssets;
 };
 
 ////////////////////////////////////////////////////////////
