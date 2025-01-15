@@ -16,10 +16,10 @@
 #include <tcob/audio/Music.hpp>
 #include <tcob/audio/Playlist.hpp>
 #include <tcob/audio/Sound.hpp>
-#include <tcob/audio/SoundFont.hpp>
-#include <tcob/audio/SoundGenerator.hpp>
 #include <tcob/audio/Source.hpp>
-#include <tcob/audio/SpeechGenerator.hpp>
+#include <tcob/audio/synth/SoundFont.hpp>
+#include <tcob/audio/synth/SoundGenerator.hpp>
+#include <tcob/audio/synth/SpeechGenerator.hpp>
 
 #include <tcob/core/AngleUnits.hpp>
 #include <tcob/core/Color.hpp>

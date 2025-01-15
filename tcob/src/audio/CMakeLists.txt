@@ -7,9 +7,9 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Music.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Playlist.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sound.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SoundGenerator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SoundGenerator_types.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/SpeechGenerator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator_types.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/synth/SpeechGenerator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_bsa.cpp
 )
 
@@ -21,8 +21,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/audio/Music.hpp
     ${TCOB_INC_DIR}/tcob/audio/Playlist.hpp
     ${TCOB_INC_DIR}/tcob/audio/Sound.hpp
-    ${TCOB_INC_DIR}/tcob/audio/SoundGenerator.hpp
-    ${TCOB_INC_DIR}/tcob/audio/SpeechGenerator.hpp
+    ${TCOB_INC_DIR}/tcob/audio/synth/SoundGenerator.hpp
+    ${TCOB_INC_DIR}/tcob/audio/synth/SpeechGenerator.hpp
 )
 
 if(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
@@ -55,11 +55,11 @@ endif()
 if(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
     list(APPEND SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_mid.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/SoundFont.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundFont.cpp
     )
     list(APPEND HDR
-        ${TCOB_INC_DIR}/tcob/audio/SoundFont.hpp
-        ${TCOB_INC_DIR}/tcob/audio/SoundFont.inl
+        ${TCOB_INC_DIR}/tcob/audio/synth/SoundFont.hpp
+        ${TCOB_INC_DIR}/tcob/audio/synth/SoundFont.inl
     )
 endif()
 

@@ -5,7 +5,7 @@
 
 // based on: sfxr and rFXGen
 
-#include "tcob/audio/SoundGenerator.hpp"
+#include "tcob/audio/synth/SoundGenerator.hpp"
 
 #include <algorithm>
 

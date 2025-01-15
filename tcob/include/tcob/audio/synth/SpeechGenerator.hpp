@@ -6,8 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/audio/Buffer.hpp"
-#include "tcob/audio/Sound.hpp"
+#if defined(TCOB_ENABLE_ADDON_AUDIO_SPEECH)
+
+    #include "tcob/audio/Buffer.hpp"
+    #include "tcob/audio/Sound.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
@@ -22,3 +24,5 @@ public:
 private:
 };
 }
+
+#endif

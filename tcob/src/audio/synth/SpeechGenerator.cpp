@@ -3,9 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/audio/SpeechGenerator.hpp"
+#include "tcob/audio/synth/SpeechGenerator.hpp"
 
-#include <speech/speech.h>
+#if defined(TCOB_ENABLE_ADDON_AUDIO_SPEECH)
+
+    #include <speech/speech.h>
 
 namespace tcob::audio {
 
@@ -33,3 +35,5 @@ auto speech_generator::create_sound [[nodiscard]] (std::string const& text) -> s
 ////////////////////////////////////////////////////////////
 
 }
+
+#endif

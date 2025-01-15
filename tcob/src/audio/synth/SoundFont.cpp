@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/audio/SoundFont.hpp"
+#include "tcob/audio/synth/SoundFont.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 

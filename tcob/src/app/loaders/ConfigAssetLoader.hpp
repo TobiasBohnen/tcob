@@ -12,7 +12,7 @@
 
 #include "tcob/audio/Music.hpp"
 #include "tcob/audio/Sound.hpp"
-#include "tcob/audio/SoundFont.hpp"
+#include "tcob/audio/synth/SoundFont.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"

@@ -9,7 +9,7 @@
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 
     #include "tcob/audio/Buffer.hpp"
-    #include "tcob/audio/SoundFont.hpp"
+    #include "tcob/audio/synth/SoundFont.hpp"
     #include "tcob/core/assets/Asset.hpp"
 
 namespace tcob::audio::detail {
