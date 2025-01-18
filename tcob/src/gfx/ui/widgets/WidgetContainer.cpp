@@ -6,7 +6,6 @@
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 #include <algorithm>
-#include <ranges>
 
 #include "tcob/gfx/ui/Form.hpp"
 
@@ -28,44 +27,42 @@ void widget_container::update(milliseconds deltaTime)
 
 auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
-    for (auto const& w : widgets_by_zorder() | std::views::reverse) {
-        if (w->hit_test(pos)) {
-            if (auto retValue {w->find_child_at(pos)}) {
+    for (auto const& widget : widgets_by_zorder(true)) {
+        if (!widget->hit_test(pos)) { continue; }
+        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+            if (auto retValue {container->find_child_at(pos)}) {
                 return retValue;
             }
-            return w;
         }
+        return widget;
     }
     return nullptr;
 }
 
 auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr<widget>
 {
-    for (auto const& w : widgets()) {
-        if (w->name() == name) {
-            return w;
-        }
-        if (auto retValue {w->find_child_by_name(name)}) {
-            return retValue;
+    for (auto const& widget : widgets()) {
+        if (widget->name() == name) { return widget; }
+        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+            if (auto retValue {container->find_child_by_name(name)}) {
+                return retValue;
+            }
         }
     }
 
     return nullptr;
 }
 
-auto widget_container::widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
+auto widget_container::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
 {
     auto retValue {widgets()};
-    std::ranges::sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
-    return retValue;
-}
-
-void widget_container::collect_widgets(std::vector<widget*>& vec)
-{
-    vec.push_back(this);
-    for (auto const& w : widgets()) {
-        w->collect_widgets(vec);
+    if (reverse) {
+        std::ranges::sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+    } else {
+        std::ranges::sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
     }
+
+    return retValue;
 }
 
 void widget_container::update_style()

@@ -57,17 +57,19 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
 
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
-    if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
-        auto& activeTab {_tabs[ActiveTabIndex()]};
-        if (activeTab->hit_test(pos)) {
-            if (auto retValue {activeTab->find_child_at(pos)}) {
-                return retValue;
-            }
-            return activeTab;
-        }
+    if (ActiveTabIndex < 0 || ActiveTabIndex >= std::ssize(_tabs)) {
+        return nullptr;
     }
 
-    return nullptr;
+    auto& activeTab {_tabs[ActiveTabIndex()]};
+    if (!activeTab->hit_test(pos)) { return nullptr; }
+
+    if (auto container {std::dynamic_pointer_cast<widget_container>(activeTab)}) {
+        if (auto retValue {container->find_child_at(pos)}) {
+            return retValue;
+        }
+    }
+    return activeTab;
 }
 
 auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> const&
@@ -146,15 +148,14 @@ void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 
     widget_container::on_mouse_hover(ev);
 
-    auto const mp {global_to_parent_local(ev.Position)};
+    auto const mp {global_to_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_tabRects); ++i) {
-        if (_tabRects[i].contains(mp)) {
-            HoveredTabIndex = i;
-            break;
-        }
-    }
+        if (!_tabRects[i].contains(mp)) { continue; }
 
-    ev.Handled = true;
+        HoveredTabIndex = i;
+        ev.Handled      = true;
+        break;
+    }
 }
 
 void tab_container::on_mouse_down(input::mouse::button_event const& ev)

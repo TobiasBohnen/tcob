@@ -80,8 +80,8 @@ public:
     template <std::derived_from<style_base> T>
     auto current_style() const -> T*;
 
+    auto global_to_content(point_i p) const -> point_f;
     auto global_to_local(point_i p) const -> point_f;
-    auto global_to_parent_local(point_i p) const -> point_f;
 
     void update(milliseconds deltaTime) override;
     void virtual update_style();
@@ -91,9 +91,6 @@ public:
     void virtual force_redraw(string const& reason);
 
     auto hit_test(point_f pos) const -> bool;
-
-    auto virtual find_child_at(point_f pos) -> std::shared_ptr<widget>;
-    auto virtual find_child_by_name(string const& name) -> std::shared_ptr<widget>;
 
 protected:
     struct init {
@@ -105,8 +102,6 @@ protected:
     explicit widget(init const& wi);
 
     void virtual offset_content(rect_f& bounds, bool isHitTest) const;
-
-    void virtual collect_widgets(std::vector<widget*>& vec);
 
     void virtual on_styles_changed();
 

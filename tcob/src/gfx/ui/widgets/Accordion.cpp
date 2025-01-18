@@ -59,17 +59,19 @@ void accordion::change_section_label(widget* tab, utf8_string const& label)
 
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
-    if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
-        auto& activeSection {_sections[ActiveSectionIndex()]};
-        if (activeSection->hit_test(pos)) {
-            if (auto retValue {activeSection->find_child_at(pos)}) {
-                return retValue;
-            }
-            return activeSection;
-        }
+    if (ActiveSectionIndex < 0 || ActiveSectionIndex >= std::ssize(_sections)) {
+        return nullptr;
     }
 
-    return nullptr;
+    auto& activeSection {_sections[ActiveSectionIndex()]};
+    if (!activeSection->hit_test(pos)) { return nullptr; }
+
+    if (auto container {std::dynamic_pointer_cast<widget_container>(activeSection)}) {
+        if (auto retValue {container->find_child_at(pos)}) {
+            return retValue;
+        }
+    }
+    return activeSection;
 }
 
 auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
@@ -138,18 +140,18 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 
     widget_container::on_mouse_hover(ev);
 
-    auto const mp {global_to_parent_local(ev.Position)};
+    auto const mp {global_to_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
-        if (_sectionRects[i].contains(mp)) {
-            if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
-                HoveredSectionIndex = ActiveSectionIndex();
-            } else {
-                HoveredSectionIndex = i;
-            }
+        if (!_sectionRects[i].contains(mp)) { continue; }
 
-            ev.Handled = true;
-            break;
+        if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
+            HoveredSectionIndex = ActiveSectionIndex();
+        } else {
+            HoveredSectionIndex = i;
         }
+
+        ev.Handled = true;
+        break;
     }
 }
 

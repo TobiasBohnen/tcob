@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/ui/Form.hpp"
 
-#include <ranges>
 #include <utility>
 
 #include "tcob/core/Logger.hpp"
@@ -61,25 +60,26 @@ auto form::top_widget() const -> widget*
 
 auto form::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 {
-    for (auto& container : widgets_by_zorder() | std::views::reverse) {
-        if (container->hit_test(pos)) {
+    for (auto const& widget : widgets_by_zorder(true)) {
+        if (!widget->hit_test(pos)) { continue; }
+        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
             if (auto retValue {container->find_child_at(pos)}) {
                 return retValue;
             }
-            return container;
         }
+        return widget;
     }
     return nullptr;
 }
 
 auto form::find_widget_by_name(string const& name) const -> std::shared_ptr<widget>
 {
-    for (auto const& container : containers()) {
-        if (container->name() == name) {
-            return container;
-        }
-        if (auto retValue {container->find_child_by_name(name)}) {
-            return retValue;
+    for (auto const& widget : containers()) {
+        if (widget->name() == name) { return widget; }
+        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+            if (auto retValue {container->find_child_by_name(name)}) {
+                return retValue;
+            }
         }
     }
     return nullptr;
@@ -92,9 +92,21 @@ auto form::containers() const -> std::vector<std::shared_ptr<widget>> const&
 
 auto form::all_widgets() const -> std::vector<widget*>
 {
+    auto const collectWidgets {[](std::vector<widget*>& vec, std::shared_ptr<widget_container> const& widget, auto&& collect) -> void {
+        for (auto const& widget : widget->widgets()) {
+            vec.push_back(widget.get());
+            if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+                collect(vec, container, collect);
+            }
+        }
+    }};
+
     std::vector<widget*> retValue;
-    for (auto const& container : containers()) {
-        container->collect_widgets(retValue);
+    for (auto const& widget : containers()) {
+        retValue.push_back(widget.get());
+        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+            collectWidgets(retValue, container, collectWidgets);
+        }
     }
     return retValue;
 }
@@ -295,7 +307,7 @@ void form::find_top_widget(input::mouse::motion_event const& ev)
         _injector.on_mouse_leave(_topWidget);
         _topWidget = newTop;
         _injector.on_mouse_enter(_topWidget);
-    } else if (_topWidget) {
+    } else {
         _injector.on_mouse_hover(_topWidget, ev);
     }
 }
@@ -444,10 +456,14 @@ void form::on_visiblity_changed()
     // TODO: else inject mouse_motion
 }
 
-auto form::widgets_by_zorder() const -> std::vector<std::shared_ptr<widget>>
+auto form::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
 {
     auto retValue {containers()};
-    std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
+    if (reverse) {
+        std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+    } else {
+        std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
+    }
     return retValue;
 }
 

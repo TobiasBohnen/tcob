@@ -69,13 +69,13 @@ inline auto scrollbar<Parent>::inject_mouse_hover(point_i mp) -> bool
 
     if (!Visible) { return false; }
 
-    if (_paintResult.Thumb.contains(_parent.global_to_parent_local(mp))) {
+    if (_paintResult.Thumb.contains(_parent.global_to_local(mp))) {
         _overThumb = true;
         return true;
     }
 
     // over bar
-    if (_paintResult.Bar.contains(_parent.global_to_parent_local(mp))) {
+    if (_paintResult.Bar.contains(_parent.global_to_local(mp))) {
         _overBar = true;
         return true;
     }
@@ -87,7 +87,7 @@ template <typename Parent>
 inline auto scrollbar<Parent>::inject_mouse_drag(point_i mp) -> bool
 {
     if (_isDragging || is_mouse_over()) {
-        calculate_value(_parent.global_to_local(mp));
+        calculate_value(_parent.global_to_content(mp));
         _isDragging = true;
         return true;
     }
@@ -101,8 +101,8 @@ inline void scrollbar<Parent>::inject_mouse_up(point_i mp)
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
-    _overThumb = _paintResult.Thumb.contains(_parent.global_to_parent_local(mp));
-    _overBar   = _paintResult.Bar.contains(_parent.global_to_parent_local(mp));
+    _overThumb = _paintResult.Thumb.contains(_parent.global_to_local(mp));
+    _overBar   = _paintResult.Bar.contains(_parent.global_to_local(mp));
 }
 
 template <typename Parent>
@@ -112,9 +112,9 @@ inline void scrollbar<Parent>::inject_mouse_down(point_i mp)
 
     if (is_mouse_over()) {
         if (!_overThumb) {
-            calculate_value(_parent.global_to_local(mp));
+            calculate_value(_parent.global_to_content(mp));
         } else {
-            _dragOffset = point_i {_parent.global_to_parent_local(mp) - _paintResult.Thumb.center()};
+            _dragOffset = point_i {_parent.global_to_local(mp) - _paintResult.Thumb.center()};
             _isDragging = true;
         }
     }

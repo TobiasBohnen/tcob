@@ -174,12 +174,12 @@ auto widget::content_bounds() const -> rect_f
     return retValue;
 }
 
-auto widget::global_to_local(point_i p) const -> point_f
+auto widget::global_to_content(point_i p) const -> point_f
 {
     return point_f {p} - global_content_bounds().Position;
 }
 
-auto widget::global_to_parent_local(point_i p) const -> point_f
+auto widget::global_to_local(point_i p) const -> point_f
 {
     point_f retValue {p};
     if (_parent) {
@@ -216,16 +216,6 @@ void widget::update_style()
 auto widget::can_tab_stop() const -> bool
 {
     return TabStop->Enabled && is_enabled() && is_visible() && !_inert;
-}
-
-auto widget::find_child_at(point_f /* pos */) -> std::shared_ptr<widget>
-{
-    return nullptr;
-}
-
-auto widget::find_child_by_name(string const& /* name */) -> std::shared_ptr<widget>
-{
-    return nullptr;
 }
 
 void widget::force_redraw(string const& reason)
@@ -510,11 +500,6 @@ void widget::deactivate()
         _flags.Active = false;
         force_redraw(_name + ": Active changed");
     }
-}
-
-void widget::collect_widgets(std::vector<widget*>& vec)
-{
-    vec.push_back(this);
 }
 
 void widget::on_styles_changed()
