@@ -617,9 +617,10 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
             },
             [&](linear_gradient const& arg) -> canvas_paint {
                 degree_f const angle {arg.Angle + degree_f {90}};
-                point_f const  p0 {rect.find_edge(angle)};
-                point_f const  p1 {rect.find_edge(angle - degree_f {180})};
-                return _canvas.create_linear_gradient(p0, p1, arg.Colors);
+                return _canvas.create_linear_gradient(
+                    rect.find_edge(angle),
+                    rect.find_edge(angle - degree_f {180}),
+                    arg.Colors);
             },
             [&](radial_gradient const& arg) -> canvas_paint {
                 return _canvas.create_radial_gradient(
@@ -631,12 +632,6 @@ auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_
                 return _canvas.create_box_gradient(
                     rect,
                     arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
-            },
-            [&](image_pattern const& arg) -> canvas_paint {
-                return _canvas.create_image_pattern(
-                    rect.top_left(),
-                    arg.Stretch ? rect.Size : size_f {arg.Texture->info().Size},
-                    degree_f {0}, arg.Texture.ptr(), 1.0f);
             },
             [&](nine_patch const&) -> canvas_paint {
                 return {};

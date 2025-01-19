@@ -237,24 +237,16 @@ void slider::handle_dir_input(direction dir)
     switch (current_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
-        case direction::Left:
-            Value -= Step();
-            break;
-        case direction::Right:
-            Value += Step();
-            break;
+        case direction::Left: Value -= Step(); break;
+        case direction::Right: Value += Step(); break;
         default:
             break;
         }
         break;
     case orientation::Vertical:
         switch (dir) {
-        case direction::Down:
-            Value -= Step();
-            break;
-        case direction::Up:
-            Value += Step();
-            break;
+        case direction::Down: Value -= Step(); break;
+        case direction::Up: Value += Step(); break;
         default:
             break;
         }

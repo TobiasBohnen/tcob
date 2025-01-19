@@ -231,12 +231,17 @@ struct box_gradient {
 
 ////////////////////////////////////////////////////////////
 
-struct image_pattern {
+struct nine_patch {
     assets::asset_ptr<texture> Texture;
-    bool                       Stretch {false};
+    string                     Region {"default"};
+    rect_f                     UV;
 
-    auto operator==(image_pattern const& other) const -> bool = default;
+    auto operator==(nine_patch const& other) const -> bool = default;
 };
+
+////////////////////////////////////////////////////////////
+
+using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradient, nine_patch>;
 
 ////////////////////////////////////////////////////////////
 
@@ -248,20 +253,6 @@ public:
     image_def() = default;
     image_def(assets::asset_ptr<texture> texture, string region = "default");
 };
-
-////////////////////////////////////////////////////////////
-
-struct nine_patch {
-    assets::asset_ptr<texture> Texture;
-    string                     Region {"default"};
-    rect_f                     UV;
-
-    auto operator==(nine_patch const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradient, image_pattern, nine_patch>;
 
 ////////////////////////////////////////////////////////////
 

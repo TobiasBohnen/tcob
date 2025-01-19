@@ -59,12 +59,8 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
 auto panel::get_scroll_style(orientation orien) const -> element::scrollbar*
 {
     if (auto* style {current_style<panel::style>()}) {
-        if (orien == orientation::Horizontal) {
-            return &style->HScrollBar;
-        }
-        if (orien == orientation::Vertical) {
-            return &style->VScrollBar;
-        }
+        if (orien == orientation::Horizontal) { return &style->HScrollBar; }
+        if (orien == orientation::Vertical) { return &style->VScrollBar; }
     }
 
     return nullptr;
