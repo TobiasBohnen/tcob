@@ -41,6 +41,8 @@ public:
 
     explicit terminal(init const& wi);
 
+    signal<widget_event const> Submit;
+
     prop<size_i>  Size;
     prop<point_i> HoveredCell;
 
@@ -60,6 +62,9 @@ public:
     void ins_str(utf8_string_view string);
     void ins_str(point_i pos, utf8_string_view string);
     void ins_str(point_i pos, utf8_string_view string, color foreground, color background = colors::Transparent);
+
+    auto get_str() -> utf8_string;
+    auto get_str(point_i pos) -> utf8_string;
 
     void insert_ln();
     void delete_ln();
@@ -102,6 +107,12 @@ private:
         std::pair<color, color> Colors {DEFAULT_COLORS};
     };
 
+    enum class echo_mode : u8 {
+        NoEcho,
+        Echo,
+        InsertEcho
+    };
+
     void insert_buffer_at(i32 offset, i32 width);
     void erase_buffer_at(i32 offset, i32 width);
 
@@ -115,17 +126,19 @@ private:
     void set(utf8_string_view text, bool insert);
     void cursor_line_break();
 
+    void start_blinking();
+    void stop_blinking();
+
     void parse_esc(char code, std::vector<string> const& seq);
 
     point_i                 _currentCursor {point_u::Zero};
     std::pair<color, color> _currentColors {DEFAULT_COLORS};
 
-    bool _cursorVisible {false};
-    bool _showCursor {false};
-    bool _useMouse {false};
-    bool _echoKeys {false};
-    bool _echoInsertMode {false};
-    bool _backbufferDirty {false};
+    bool      _cursorVisible {false};
+    bool      _showCursor {false};
+    bool      _useMouse {false};
+    echo_mode _echoKeys {echo_mode::NoEcho};
+    bool      _backbufferDirty {false};
 
     std::array<std::vector<cell>, 2> _buffers {};
     i32                              _bufferSize {0};

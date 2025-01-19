@@ -51,7 +51,9 @@ void terminal::curs_set(bool visible)
         force_redraw(this->name() + ": cursor visibility changed");
 
         if (!visible) {
-            _cursorTween = nullptr;
+            stop_blinking();
+        } else {
+            start_blinking();
         }
     }
 }
@@ -100,12 +102,35 @@ void terminal::ins_str(point_i pos, utf8_string_view string, color foreground, c
     ins_str(pos, string);
 }
 
+auto terminal::get_str() -> utf8_string
+{
+    utf8_string retValue;
+    auto const  buffer {get_back_buffer()};
+
+    auto pos {get_xy()};
+    for (i32 offset {get_offset(pos)}; offset >= 0 && offset < _bufferSize; offset++) {
+        auto const& cell {buffer[offset]};
+        if (cell.Text == "\n" || cell.Text.empty()) { break; }
+        retValue += cell.Text;
+
+        pos.X++;
+        if (pos.X >= Size->Width) { break; }
+    }
+
+    move(pos);
+    return retValue;
+}
+
+auto terminal::get_str(point_i pos) -> utf8_string
+{
+    move(pos);
+    return get_str();
+}
+
 void terminal::insert_ln()
 {
-    i32 const offset {get_offset({0, _currentCursor.Y})};
-    if (offset >= _bufferSize) {
-        return;
-    }
+    i32 const offset {get_offset({0, get_xy().Y})};
+    if (offset >= _bufferSize) { return; }
 
     insert_buffer_at(offset, Size->Width);
 
@@ -114,10 +139,8 @@ void terminal::insert_ln()
 
 void terminal::delete_ln()
 {
-    i32 const offset {get_offset({0, _currentCursor.Y})};
-    if (offset >= _bufferSize) {
-        return;
-    }
+    i32 const offset {get_offset({0, get_xy().Y})};
+    if (offset >= _bufferSize) { return; }
 
     erase_buffer_at(offset, Size->Width);
 
@@ -126,13 +149,12 @@ void terminal::delete_ln()
 
 void terminal::echo(bool insertMode)
 {
-    _echoInsertMode = insertMode;
-    _echoKeys       = true;
+    _echoKeys = insertMode ? echo_mode::InsertEcho : echo_mode::Echo;
 }
 
 void terminal::noecho()
 {
-    _echoKeys = false;
+    _echoKeys = echo_mode::NoEcho;
 }
 
 void terminal::flash()
@@ -169,8 +191,7 @@ void terminal::rectangle(rect_i const& rect, border const& b)
 
 void terminal::vline(utf8_string_view ch, i32 size)
 {
-    i32 const x {_currentCursor.X};
-    i32 const y {_currentCursor.Y};
+    auto const [x, y] {get_xy()};
     for (i32 i {0}; i < size; ++i) {
         add_str({x, y + i}, ch);
     }
@@ -323,33 +344,35 @@ void terminal::on_key_down(input::keyboard::event const& ev)
     }
 
     auto const& controls {parent_form()->Controls};
+    auto const [x, y] {get_xy()};
+
     if (ev.KeyCode == controls->NavLeftKey) {
-        if (_currentCursor.X > 0) {
-            move({_currentCursor.X - 1, _currentCursor.Y});
-        } else if (_currentCursor.Y > 0) {
-            move({Size->Width - 1, _currentCursor.Y - 1});
+        if (x > 0) {
+            move({x - 1, y});
+        } else if (y > 0) {
+            move({Size->Width - 1, y - 1});
         }
     } else if (ev.KeyCode == controls->NavRightKey) {
-        if (_currentCursor.X < Size->Width - 1) {
-            move({_currentCursor.X + 1, _currentCursor.Y});
+        if (x < Size->Width - 1) {
+            move({x + 1, y});
         } else {
             cursor_line_break();
         }
     } else if (ev.KeyCode == controls->NavUpKey) {
-        if (_currentCursor.Y > 0) {
-            move({_currentCursor.X, _currentCursor.Y - 1});
+        if (y > 0) {
+            move({x, y - 1});
         }
     } else if (ev.KeyCode == controls->NavDownKey) {
-        if (_currentCursor.Y < Size->Height - 1) {
-            move({_currentCursor.X, _currentCursor.Y + 1});
+        if (y < Size->Height - 1) {
+            move({x, y + 1});
         }
     }
 
-    if (_echoKeys) {
+    if (_echoKeys != echo_mode::NoEcho) {
         if (ev.KeyCode == controls->ForwardDeleteKey) {
-            i32 const offset {get_offset(_currentCursor)};
+            i32 const offset {get_offset(get_xy())};
             if (offset >= 0 && offset < _bufferSize) {
-                if (_echoInsertMode) {
+                if (_echoKeys == echo_mode::InsertEcho) {
                     erase_buffer_at(offset, 1);
                 } else {
                     get_back_buffer()[offset] = {};
@@ -357,27 +380,31 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 force_redraw(this->name() + ": delete");
             }
         } else if (ev.KeyCode == controls->BackwardDeleteKey) {
-            i32 const offset {get_offset(_currentCursor) - 1};
+            i32 const offset {get_offset(get_xy()) - 1};
             if (offset >= 0 && offset < _bufferSize) {
-                if (_echoInsertMode) {
+                if (_echoKeys == echo_mode::InsertEcho) {
                     erase_buffer_at(offset, 1);
                 } else {
                     get_back_buffer()[offset] = {};
                 }
-                if (_currentCursor.X > 0) {
-                    move({_currentCursor.X - 1, _currentCursor.Y});
-                } else if (_currentCursor.Y > 0) {
-                    move({Size->Width - 1, _currentCursor.Y - 1});
+                if (x > 0) {
+                    move({x - 1, y});
+                } else if (y > 0) {
+                    move({Size->Width - 1, y - 1});
                 }
                 force_redraw(this->name() + ": backspace");
             }
         } else if (ev.KeyCode == controls->SubmitKey) {
-            if (_echoInsertMode) {
+            if (_echoKeys == echo_mode::InsertEcho) {
                 ins_str("\n");
             } else {
                 add_str("\n");
             }
         }
+    }
+
+    if (ev.KeyCode == controls->SubmitKey) {
+        Submit({this});
     }
 
     ev.Handled = true;
@@ -393,11 +420,9 @@ void terminal::on_key_up(input::keyboard::event const& ev)
 
 void terminal::on_text_input(input::keyboard::text_input_event const& ev)
 {
-    if (!_echoKeys) {
-        return;
-    }
+    if (_echoKeys == echo_mode::NoEcho) { return; }
 
-    if (_echoInsertMode) {
+    if (_echoKeys == echo_mode::InsertEcho) {
         ins_str(ev.Text);
     } else {
         add_str(ev.Text);
@@ -417,18 +442,18 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
 
     if (auto const* style {current_style<terminal::style>()}) {
         rect_f const rect {global_content_bounds()};
-        if (rect.contains(ev.Position)) {
-            u32 const   fontSize {style->Text.calc_font_size(rect)};
-            auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
-            f32 const   fontWidth {get_font_width(font)};
-            f32 const   fontHeight {font->info().LineHeight};
+        if (!rect.contains(ev.Position)) { return; }
 
-            i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
-            i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
-            HoveredCell = {x, y};
+        u32 const   fontSize {style->Text.calc_font_size(rect)};
+        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
+        f32 const   fontWidth {get_font_width(font)};
+        f32 const   fontHeight {font->info().LineHeight};
 
-            ev.Handled = true;
-        }
+        i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
+        i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
+        HoveredCell = {x, y};
+
+        ev.Handled = true;
     }
 }
 
@@ -448,22 +473,12 @@ void terminal::on_focus_gained()
 {
     if (!_showCursor) { return; }
 
-    if (auto const* style {current_style<terminal::style>()}) {
-        _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);
-        _cursorTween->Value.Changed.connect([&](auto val) {
-            _cursorVisible = val;
-            force_redraw(this->name() + ": cursor blink");
-        });
-        _cursorTween->start(playback_mode::Looped);
-    }
+    start_blinking();
 }
 
 void terminal::on_focus_lost()
 {
-    if (!_showCursor) { return; }
-
-    _cursorTween   = nullptr;
-    _cursorVisible = false;
+    stop_blinking();
 }
 
 void terminal::insert_buffer_at(i32 offset, i32 width)
@@ -557,6 +572,8 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
         return ec == std::errc {} && p == val.data() + val.size();
     }};
 
+    auto const [x, y] {get_xy()};
+
     switch (code) {
         // Color
     case 'm': {
@@ -618,43 +635,43 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
     case 'A': {
         i32 line {0};
         if (seq.size() == 1 && toInt(line, seq[0])) {
-            move({_currentCursor.X, _currentCursor.Y - line});
+            move({x, y - line});
         }
     } break;
     case 'B': {
         i32 line {0};
         if (seq.size() == 1 && toInt(line, seq[0])) {
-            move({_currentCursor.X, _currentCursor.Y + line});
+            move({x, y + line});
         }
     } break;
     case 'C': {
         i32 col {0};
         if (seq.size() == 1 && toInt(col, seq[0])) {
-            move({_currentCursor.X - col, _currentCursor.Y});
+            move({x - col, y});
         }
     } break;
     case 'D': {
         i32 col {0};
         if (seq.size() == 1 && toInt(col, seq[0])) {
-            move({_currentCursor.X + col, _currentCursor.Y});
+            move({x + col, y});
         }
     } break;
     case 'E': {
         i32 line {0};
         if (seq.size() == 1 && toInt(line, seq[0])) {
-            move({0, _currentCursor.Y + line});
+            move({0, y + line});
         }
     } break;
     case 'F': {
         i32 line {0};
         if (seq.size() == 1 && toInt(line, seq[0])) {
-            move({0, _currentCursor.Y - line});
+            move({0, y - line});
         }
     } break;
     case 'G': {
         i32 col {0};
         if (seq.size() == 1 && toInt(col, seq[0])) {
-            move({col, _currentCursor.Y});
+            move({col, y});
         }
     } break;
     case 'H':
@@ -673,12 +690,12 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
         auto const mode {seq.empty() ? "0" : seq[0]};
         auto&      buffer {get_back_buffer()};
         if (mode == "0") {
-            i32 offset {std::max(0, get_offset(_currentCursor))};
+            i32 offset {std::max(0, get_offset(get_xy()))};
             while (offset < _bufferSize) {
                 buffer[offset++] = {};
             }
         } else if (mode == "1") {
-            i32 offset {std::max(0, get_offset(_currentCursor))};
+            i32 offset {std::max(0, get_offset(get_xy()))};
             while (offset >= 0) {
                 buffer[offset--] = {};
             }
@@ -691,20 +708,20 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
         auto const mode {seq.empty() ? "0" : seq[0]};
         auto&      buffer {get_back_buffer()};
         if (mode == "0") {
-            i32       start {std::max(0, get_offset(_currentCursor))};
-            i32 const end {std::max(0, get_offset({0, _currentCursor.Y + 1}))};
+            i32       start {std::max(0, get_offset({x, y}))};
+            i32 const end {std::max(0, get_offset({0, y + 1}))};
             while (start < end) {
                 buffer[start++] = {};
             }
         } else if (mode == "1") {
-            i32       start {std::max(0, get_offset({0, _currentCursor.Y}))};
-            i32 const end {std::max(0, get_offset(_currentCursor))};
+            i32       start {std::max(0, get_offset({0, y}))};
+            i32 const end {std::max(0, get_offset({x, y}))};
             while (start < end) {
                 buffer[start++] = {};
             }
         } else if (mode == "2") {
-            i32       start {std::max(0, get_offset({0, _currentCursor.Y}))};
-            i32 const end {std::max(0, get_offset({0, _currentCursor.Y + 1}))};
+            i32       start {std::max(0, get_offset({0, y}))};
+            i32 const end {std::max(0, get_offset({0, y + 1}))};
             while (start < end) {
                 buffer[start++] = {};
             }
@@ -719,33 +736,32 @@ void terminal::set(utf8_string_view text, bool insert)
     i32 const len {static_cast<i32>(utf8::length(text))};
 
     for (i32 i {0}; i < len; ++i) {
-        i32 const offset {get_offset(_currentCursor)};
+        i32 const offset {get_offset(get_xy())};
+        if (offset < 0 || offset >= _bufferSize) { return; }
 
-        if (offset >= 0 && offset < _bufferSize) {
-            auto const cellText {utf8::substr(text, i)};
-            if (cellText == "\033") {
-                auto const seq {GetESC(text, i, len)};
-                parse_esc(seq.Code, seq.Values);
-            } else if (cellText == "\n") {
-                if (insert) {
-                    insert_buffer_at(offset, Size->Width);
-                    if (_currentCursor.Y < Size->Height - 1) {
-                        _currentCursor.Y++;
-                    }
-                } else {
-                    cursor_line_break();
+        auto const cellText {utf8::substr(text, i)};
+        if (cellText == "\033") {
+            auto const seq {GetESC(text, i, len)};
+            parse_esc(seq.Code, seq.Values);
+        } else if (cellText == "\n") {
+            if (insert) {
+                insert_buffer_at(offset, Size->Width);
+                if (_currentCursor.Y < Size->Height - 1) {
+                    _currentCursor.Y++;
                 }
             } else {
-                if (insert) {
-                    insert_buffer_at(offset, 1);
-                }
-                auto& cell {get_back_buffer()[offset]};
-                cell.Text   = cellText;
-                cell.Colors = _currentColors;
-                _currentCursor.X++;
-                if (_currentCursor.X >= Size->Width) {
-                    cursor_line_break();
-                }
+                cursor_line_break();
+            }
+        } else {
+            if (insert) {
+                insert_buffer_at(offset, 1);
+            }
+            auto& cell {get_back_buffer()[offset]};
+            cell.Text   = cellText;
+            cell.Colors = _currentColors;
+            _currentCursor.X++;
+            if (_currentCursor.X >= Size->Width) {
+                cursor_line_break();
             }
         }
     }
@@ -761,6 +777,24 @@ void terminal::cursor_line_break()
     } else {
         _currentCursor.X = Size->Width - 1;
     }
+}
+
+void terminal::start_blinking()
+{
+    if (auto const* style {current_style<terminal::style>()}) {
+        _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);
+        _cursorTween->Value.Changed.connect([&](auto val) {
+            _cursorVisible = val;
+            force_redraw(this->name() + ": cursor blink");
+        });
+        _cursorTween->start(playback_mode::Looped);
+    }
+}
+
+void terminal::stop_blinking()
+{
+    _cursorTween   = nullptr;
+    _cursorVisible = false;
 }
 
 auto terminal::get_offset(point_i p) const -> i32
