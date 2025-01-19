@@ -30,6 +30,8 @@ public:
         isize       VisibleItemCount {5};
 
         element::scrollbar VScrollBar;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit drop_down_list(init const& wi);

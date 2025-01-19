@@ -21,6 +21,8 @@ public:
     class TCOB_API style : public background_style {
     public:
         element::scrollbar VScrollBar;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit vscroll_widget(init const& wi);

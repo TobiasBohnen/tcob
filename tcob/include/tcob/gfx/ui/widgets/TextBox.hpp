@@ -19,6 +19,8 @@ public:
     public:
         element::text  Text;
         element::caret Caret;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit text_box(init const& wi);

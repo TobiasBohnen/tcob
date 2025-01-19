@@ -27,11 +27,15 @@ public:
 
         std::unordered_map<u16, color> Colors;
         type                           Type {type::Disc};
+
+        auto operator==(dot const& other) const -> bool = default;
     };
 
     class TCOB_API style : public background_style {
     public:
         dot Dot;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit dot_matrix_display(init const& wi);

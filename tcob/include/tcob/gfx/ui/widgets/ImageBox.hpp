@@ -25,6 +25,8 @@ public:
     public:
         fit_mode   Fit {fit_mode::Fill};
         alignments Alignment {horizontal_alignment::Left, vertical_alignment::Top};
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit image_box(init const& wi);

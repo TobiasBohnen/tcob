@@ -24,6 +24,8 @@ struct text_decoration {
         bool Underline {false};
         bool Overline {false};
         bool LineThrough {false};
+
+        auto operator==(line const& other) const -> bool = default;
     };
 
     enum class style : u8 {
@@ -38,6 +40,8 @@ struct text_decoration {
     style  Style {style::Solid};
     color  Color {colors::Transparent};
     length Size {};
+
+    auto operator==(text_decoration const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
@@ -51,6 +55,8 @@ namespace element {
         color        Color {colors::Transparent};
         length       Width {3, length::type::Absolute};
         milliseconds BlinkRate {500};
+
+        auto operator==(caret const& other) const -> bool = default;
     };
 
     class TCOB_API shadow {
@@ -58,6 +64,8 @@ namespace element {
         color  Color {colors::Transparent};
         length OffsetX {};
         length OffsetY {};
+
+        auto operator==(shadow const& other) const -> bool = default;
     };
 
     class TCOB_API text {
@@ -86,6 +94,8 @@ namespace element {
         auto_size_mode                 AutoSize {auto_size_mode::Never};
 
         auto calc_font_size(rect_f const& rect) const -> u32;
+
+        auto operator==(text const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -110,6 +120,8 @@ namespace element {
         length   Size {};
 
         auto thickness() const -> thickness;
+
+        auto operator==(border const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -134,6 +146,8 @@ namespace element {
         border   Border {};
 
         auto calc(rect_f const& rect, context const& ctx) const -> rect_f;
+
+        auto operator==(thumb const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -153,6 +167,8 @@ namespace element {
         type     Type {type::Checkmark};
         ui_paint Foreground {colors::White};
         length   Size {};
+
+        auto operator==(tick const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -186,6 +202,8 @@ namespace element {
         milliseconds Delay {0};
 
         auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
+
+        auto operator==(bar const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -199,6 +217,8 @@ namespace element {
             rect_f Bar;
             rect_f Thumb;
         };
+
+        auto operator==(scrollbar const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -219,6 +239,8 @@ namespace element {
         thickness  Padding {};
 
         auto calc(rect_f const& rect) const -> rect_f;
+
+        auto operator==(nav_arrow const& other) const -> bool = default;
     };
 
     ////////////////////////////////////////////////////////////
@@ -229,6 +251,8 @@ namespace element {
         ui_paint  Background {colors::White};
         border    Border {};
         thickness Padding {};
+
+        auto operator==(item const& other) const -> bool = default;
     };
 
 }
@@ -246,6 +270,8 @@ public:
     virtual ~style_base()                                           = default;
 
     void virtual offset_content(rect_f& /* bounds */, bool /* isHitTest*/) const { }
+
+    auto operator==(style_base const& other) const -> bool = default;
 };
 
 class TCOB_API style : public style_base {
@@ -256,6 +282,8 @@ public:
     string Cursor {"default"};
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
+
+    auto operator==(style const& other) const -> bool = default;
 };
 
 class TCOB_API background_style : public style {
@@ -265,21 +293,29 @@ public:
     element::border Border;
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
+
+    auto operator==(background_style const& other) const -> bool = default;
 };
 
 class TCOB_API thumb_style : public style_base {
 public:
     element::thumb Thumb;
+
+    auto operator==(thumb_style const& other) const -> bool = default;
 };
 
 class TCOB_API nav_arrows_style : public style_base {
 public:
     element::nav_arrow NavArrow;
+
+    auto operator==(nav_arrows_style const& other) const -> bool = default;
 };
 
 class TCOB_API item_style : public style_base {
 public:
     element::item Item;
+
+    auto operator==(item_style const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////

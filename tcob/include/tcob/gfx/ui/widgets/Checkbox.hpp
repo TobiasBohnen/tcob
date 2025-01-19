@@ -16,6 +16,8 @@ public:
     class TCOB_API style : public background_style {
     public:
         element::tick Tick;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit checkbox(init const& wi);

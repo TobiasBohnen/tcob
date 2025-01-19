@@ -20,6 +20,8 @@ public:
     public:
         element::scrollbar HScrollBar;
         element::scrollbar VScrollBar;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit panel(init const& wi);

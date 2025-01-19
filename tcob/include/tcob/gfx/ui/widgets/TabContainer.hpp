@@ -28,6 +28,8 @@ public:
         position TabBarPosition {position::Top};
         length   TabBarHeight;
         isize    MaxTabsPerRow {-1};
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit tab_container(init const& wi);

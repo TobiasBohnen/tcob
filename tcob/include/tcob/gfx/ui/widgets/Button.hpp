@@ -23,6 +23,8 @@ public:
     public:
         display_mode  Display {display_mode::TextAndIcon};
         element::text Text;
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit button(init const& wi);

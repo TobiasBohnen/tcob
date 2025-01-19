@@ -24,7 +24,10 @@ public:
         element::text  Text;
         element::caret Caret;
         milliseconds   FlashDuration {500};
+
+        auto operator==(style const& other) const -> bool = default;
     };
+
     struct border {
         utf8_string LeftSide {"│"};
         utf8_string RightSide {"│"};

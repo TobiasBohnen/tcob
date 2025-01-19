@@ -23,6 +23,8 @@ public:
         string HeaderClass {"header_items"};
         string RowClass {"row_items"};
         length RowHeight {};
+
+        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit grid_view(init const& wi);

@@ -122,7 +122,7 @@ void form::force_redraw(string const& reason)
     if (!_redrawWidgets) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
     }
-    _updateWidgets = true;
+    _updateWidgetStyle = true;
     _layout.mark_dirty();
 }
 
@@ -177,13 +177,13 @@ void form::on_fixed_update(milliseconds deltaTime)
     }
 
     // update styles
-    if (_updateWidgets) {
+    if (_updateWidgetStyle) {
         for (auto const& container : widgets) {
             container->update_style();
         }
 
-        _updateWidgets = false;
-        _redrawWidgets = true;
+        _updateWidgetStyle = false;
+        _redrawWidgets     = true;
     }
 
     // layout
@@ -197,7 +197,7 @@ void form::on_fixed_update(milliseconds deltaTime)
 
 void form::on_styles_changed()
 {
-    _updateWidgets = true;
+    _updateWidgetStyle = true;
     for (auto const& container : containers()) {
         container->on_styles_changed();
     }

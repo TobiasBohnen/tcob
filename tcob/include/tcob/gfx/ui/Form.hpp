@@ -111,7 +111,7 @@ private:
     detail::input_injector _injector;
 
     bool _redrawWidgets {true};
-    bool _updateWidgets {true};
+    bool _updateWidgetStyle {true};
 
     bool         _isLButtonDown {false};
     bool         _isRButtonDown {false};
