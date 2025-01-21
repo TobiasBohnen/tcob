@@ -44,8 +44,9 @@ private:
 
     std::unordered_map<string, cursor_mode> _modes {};
     cursor_mode                             _currentMode {};
-    vertex                                  _vertex {};
-    point_renderer                          _renderer {buffer_usage_hint::StreamDraw};
-    i32                                     _size {0};
+
+    size_i        _size {};
+    quad          _quad {};
+    quad_renderer _renderer {buffer_usage_hint::StreamDraw};
 };
 }

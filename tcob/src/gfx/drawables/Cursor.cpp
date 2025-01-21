@@ -25,19 +25,13 @@ cursor::cursor()
 
         auto const  tex {Material->Texture};
         auto const& region {tex->get_region(name)};
-        _vertex.TexCoords   = {region.UVRect.left(), region.UVRect.top(), static_cast<f32>(region.Level)};
-        _size               = tex->info().Size.Width;
-        Material->PointSize = static_cast<f32>(_size);
+        geometry::set_texcoords(_quad, region);
+        _size = tex->info().Size;
 
         _renderer.set_material(Material().ptr());
     });
 
-    Material.Changed.connect([&](auto const&) {
-        Material->PointSize = static_cast<f32>(_size);
-    });
-
-    _vertex.Color = {255, 255, 255, 255};
-    _renderer.set_geometry(_vertex);
+    geometry::set_color(_quad, colors::White);
 }
 
 void cursor::add_mode(string const& name, point_i hotspot)
@@ -47,13 +41,12 @@ void cursor::add_mode(string const& name, point_i hotspot)
 
 auto cursor::bounds() const -> rect_i
 {
-    return rect_i {{Position() - _currentMode.Hotspot}, {_size, _size}};
+    return rect_i {{Position() - _currentMode.Hotspot}, _size};
 }
 
 void cursor::on_update(milliseconds /* deltaTime */)
 {
-    point_f const pos {bounds().center()};
-    _vertex.Position = {pos.X, pos.Y};
+    geometry::set_position(_quad, rect_f {bounds()});
 }
 
 auto cursor::can_draw() const -> bool
@@ -63,7 +56,7 @@ auto cursor::can_draw() const -> bool
 
 void cursor::on_draw_to(render_target& target)
 {
-    _renderer.set_geometry(_vertex);
+    _renderer.set_geometry(_quad);
     _renderer.render_to_target(target);
 }
 }

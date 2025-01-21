@@ -179,8 +179,8 @@ void game::step()
             window.swap_buffer();
 
             if (window.Cursor()) {
-                window.Cursor->ActiveMode = "default"; // set cursor to default mode if available
                 window.Cursor->update(deltaUpdate);
+                window.Cursor->ActiveMode = "default"; // set cursor to default mode if available
             }
 
             rs.stats().update(deltaUpdate);
