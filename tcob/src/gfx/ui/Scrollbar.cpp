@@ -54,7 +54,7 @@ auto scrollbar::is_mouse_over() const -> bool
     return Visible && (_overBar || _overThumb);
 }
 
-auto scrollbar::inject_mouse_hover(point_i mp) -> bool
+auto scrollbar::mouse_hover(point_i mp) -> bool
 {
     if (_isDragging) { return false; }
 
@@ -77,7 +77,7 @@ auto scrollbar::inject_mouse_hover(point_i mp) -> bool
     return false;
 }
 
-auto scrollbar::inject_mouse_drag(point_i mp) -> bool
+auto scrollbar::mouse_drag(point_i mp) -> bool
 {
     if (_isDragging || is_mouse_over()) {
         calculate_value(_parent.global_to_content(mp));
@@ -88,7 +88,7 @@ auto scrollbar::inject_mouse_drag(point_i mp) -> bool
     return false;
 }
 
-void scrollbar::inject_mouse_up(point_i mp)
+void scrollbar::mouse_up(point_i mp)
 {
     _dragOffset = point_i::Zero;
     _isDragging = false;
@@ -97,7 +97,7 @@ void scrollbar::inject_mouse_up(point_i mp)
     _overBar   = _paintResult.Bar.contains(_parent.global_to_local(mp));
 }
 
-void scrollbar::inject_mouse_down(point_i mp)
+void scrollbar::mouse_down(point_i mp)
 {
     _isDragging = false;
 
@@ -121,7 +121,7 @@ auto scrollbar::target_value() const -> f32
     return _tween.target_value();
 }
 
-void scrollbar::set_target_value(f32 val, milliseconds delay)
+void scrollbar::start_scroll(f32 val, milliseconds delay)
 {
     if (!Visible) {
         _tween.reset(val);
@@ -157,7 +157,7 @@ void scrollbar::calculate_value(point_f mp)
     } break;
     }
 
-    set_target_value(Min + ((Max - Min) * frac), delay);
+    start_scroll(Min + ((Max - Min) * frac), delay);
 
     _overThumb = true;
 }

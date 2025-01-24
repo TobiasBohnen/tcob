@@ -27,13 +27,13 @@ public:
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;
-    void set_target_value(f32 val, milliseconds delay);
+    void start_scroll(f32 val, milliseconds delay);
 
     auto is_mouse_over() const -> bool;
-    auto inject_mouse_hover(point_i mp) -> bool;
-    auto inject_mouse_drag(point_i mp) -> bool;
-    void inject_mouse_down(point_i mp);
-    void inject_mouse_up(point_i mp);
+    auto mouse_hover(point_i mp) -> bool;
+    auto mouse_drag(point_i mp) -> bool;
+    void mouse_down(point_i mp);
+    void mouse_up(point_i mp);
 
 private:
     void calculate_value(point_f mp);

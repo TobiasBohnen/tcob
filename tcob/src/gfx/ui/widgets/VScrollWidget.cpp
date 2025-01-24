@@ -70,7 +70,7 @@ void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     widget::on_mouse_hover(ev);
 
-    if (_vScrollbar.inject_mouse_hover(ev.Position)) {
+    if (_vScrollbar.mouse_hover(ev.Position)) {
         force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
     }
@@ -81,7 +81,7 @@ void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
     widget::on_mouse_down(ev);
 
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        _vScrollbar.inject_mouse_down(ev.Position);
+        _vScrollbar.mouse_down(ev.Position);
         force_redraw(this->name() + ": mouse down");
         ev.Handled = true;
     }
@@ -91,7 +91,7 @@ void vscroll_widget::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     widget::on_mouse_drag(ev);
 
-    if (_vScrollbar.inject_mouse_drag(ev.Position)) {
+    if (_vScrollbar.mouse_drag(ev.Position)) {
         force_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
@@ -102,7 +102,7 @@ void vscroll_widget::on_mouse_up(input::mouse::button_event const& ev)
     widget::on_mouse_up(ev);
 
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        _vScrollbar.inject_mouse_up(ev.Position);
+        _vScrollbar.mouse_up(ev.Position);
         force_redraw(this->name() + ": mouse up");
         ev.Handled = true;
     }
@@ -127,7 +127,7 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
         f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
         if (orien == orientation::Vertical) {
-            _vScrollbar.set_target_value(_vScrollbar.target_value() + diff, delay);
+            _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
         }
         ev.Handled = true;
     }
@@ -158,7 +158,7 @@ auto vscroll_widget::get_scrollbar_value() const -> f32
 
 void vscroll_widget::set_scrollbar_value(f32 value)
 {
-    _vScrollbar.set_target_value(value, milliseconds {0});
+    _vScrollbar.start_scroll(value, milliseconds {0});
 }
 
 } // namespace ui

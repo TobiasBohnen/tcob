@@ -74,8 +74,8 @@ void panel::on_styles_changed()
         _vScrollbar.Style = nullptr;
     }
 
-    _vScrollbar.set_target_value(0, milliseconds {0});
-    _hScrollbar.set_target_value(0, milliseconds {0});
+    _vScrollbar.start_scroll(0, milliseconds {0});
+    _hScrollbar.start_scroll(0, milliseconds {0});
 }
 
 void panel::prepare_redraw()
@@ -159,12 +159,12 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
     widget_container::on_mouse_hover(ev);
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (_vScrollbar.inject_mouse_hover(ev.Position)) {
+        if (_vScrollbar.mouse_hover(ev.Position)) {
             force_redraw(this->name() + ": vertical scrollbar hover");
             ev.Handled = true;
         }
 
-        if (_hScrollbar.inject_mouse_hover(ev.Position)) {
+        if (_hScrollbar.mouse_hover(ev.Position)) {
             force_redraw(this->name() + ": horizontal scrollbar hover");
             ev.Handled = true;
         }
@@ -176,12 +176,12 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     widget_container::on_mouse_drag(ev);
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (_vScrollbar.inject_mouse_drag(ev.Position)) {
+        if (_vScrollbar.mouse_drag(ev.Position)) {
             force_redraw(this->name() + ": vertical scrollbar dragged");
             ev.Handled = true;
         }
 
-        if (_hScrollbar.inject_mouse_drag(ev.Position)) {
+        if (_hScrollbar.mouse_drag(ev.Position)) {
             force_redraw(this->name() + ": horizontal scrollbar dragged");
             ev.Handled = true;
         }
@@ -194,8 +194,8 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-            _vScrollbar.inject_mouse_down(ev.Position);
-            _hScrollbar.inject_mouse_down(ev.Position);
+            _vScrollbar.mouse_down(ev.Position);
+            _hScrollbar.mouse_down(ev.Position);
             force_redraw(this->name() + ": mouse down");
             ev.Handled = true;
         }
@@ -208,8 +208,8 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-            _vScrollbar.inject_mouse_up(ev.Position);
-            _hScrollbar.inject_mouse_up(ev.Position);
+            _vScrollbar.mouse_up(ev.Position);
+            _hScrollbar.mouse_up(ev.Position);
             force_redraw(this->name() + ": mouse up");
             ev.Handled = true;
         }
@@ -240,9 +240,9 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
             f32 const max {get_scroll_max_value(orien)};
             f32 const diff {(max - min) / (invert ? -5 : 5)};
             if (orien == orientation::Vertical) {
-                _vScrollbar.set_target_value(_vScrollbar.target_value() + diff, delay);
+                _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
             } else if (orien == orientation::Horizontal) {
-                _hScrollbar.set_target_value(_hScrollbar.target_value() + diff, delay);
+                _hScrollbar.start_scroll(_hScrollbar.target_value() + diff, delay);
             }
 
             ev.Handled = true;
@@ -278,8 +278,8 @@ auto panel::scroll_offset() const -> point_f
 
 void panel::set_scroll_offset(point_f off)
 {
-    _hScrollbar.set_target_value(off.X, milliseconds {0});
-    _vScrollbar.set_target_value(off.Y, milliseconds {0});
+    _hScrollbar.start_scroll(off.X, milliseconds {0});
+    _vScrollbar.start_scroll(off.Y, milliseconds {0});
     force_redraw(this->name() + ": set_scroll_offset");
 }
 
