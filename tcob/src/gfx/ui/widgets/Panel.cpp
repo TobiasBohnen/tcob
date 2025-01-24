@@ -56,6 +56,16 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
     return retValue * 1.05f;
 }
 
+void panel::prepare_redraw()
+{
+    widget_container::prepare_redraw();
+
+    _vScrollbar.Min = get_scroll_min_value(orientation::Vertical);
+    _hScrollbar.Min = get_scroll_min_value(orientation::Horizontal);
+    _vScrollbar.Max = get_scroll_max_value(orientation::Vertical);
+    _hScrollbar.Max = get_scroll_max_value(orientation::Horizontal);
+}
+
 void panel::force_redraw(string const& reason)
 {
     widget_container::force_redraw(reason);
@@ -76,16 +86,6 @@ void panel::on_styles_changed()
 
     _vScrollbar.start_scroll(0, milliseconds {0});
     _hScrollbar.start_scroll(0, milliseconds {0});
-}
-
-void panel::prepare_redraw()
-{
-    widget_container::prepare_redraw();
-
-    _vScrollbar.Min = get_scroll_min_value(orientation::Vertical);
-    _hScrollbar.Min = get_scroll_min_value(orientation::Horizontal);
-    _vScrollbar.Max = get_scroll_max_value(orientation::Vertical);
-    _hScrollbar.Max = get_scroll_max_value(orientation::Horizontal);
 }
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool

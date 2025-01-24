@@ -203,6 +203,11 @@ auto widget::scroll_offset() const -> point_f
     return point_f::Zero;
 }
 
+auto widget::can_tab_stop() const -> bool
+{
+    return TabStop->Enabled && is_enabled() && is_visible() && !_inert;
+}
+
 void widget::prepare_redraw()
 {
     // TODO: only update if any attribute or form::Styles changes
@@ -212,11 +217,6 @@ void widget::prepare_redraw()
     if (Tooltip) {
         Tooltip->prepare_redraw();
     }
-}
-
-auto widget::can_tab_stop() const -> bool
-{
-    return TabStop->Enabled && is_enabled() && is_visible() && !_inert;
 }
 
 void widget::force_redraw(string const& reason)

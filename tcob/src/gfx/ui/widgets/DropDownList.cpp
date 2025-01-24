@@ -258,6 +258,8 @@ void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 
 void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
+    widget::on_mouse_wheel(ev);
+
     if (!_vScrollbar.Visible) { return; }
 
     if (auto const* style {current_style<drop_down_list::style>()}) {

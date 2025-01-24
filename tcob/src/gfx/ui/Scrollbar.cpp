@@ -121,18 +121,18 @@ auto scrollbar::target_value() const -> f32
     return _tween.target_value();
 }
 
-void scrollbar::start_scroll(f32 val, milliseconds delay)
+void scrollbar::start_scroll(f32 target, milliseconds delay)
 {
     if (!Visible) {
-        _tween.reset(val);
+        _tween.reset(target);
         return;
     }
 
-    f32 const newVal {std::clamp(val, Min, Max)};
+    f32 const actTarget {std::clamp(target, Min, Max)};
     if (!_isDragging) {
-        _tween.start(newVal, delay);
+        _tween.start(actTarget, delay);
     } else {
-        _tween.reset(newVal);
+        _tween.reset(actTarget);
     }
 }
 
@@ -164,11 +164,8 @@ void scrollbar::calculate_value(point_f mp)
 
 auto scrollbar::get_thumb_style(widget_flags flags) -> thumb_style*
 {
-    if (Style) {
-        return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(Style->ThumbClass, flags, {}));
-    }
-
-    return nullptr;
+    assert(Style);
+    return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(Style->ThumbClass, flags, {}));
 }
 
 } // namespace ui

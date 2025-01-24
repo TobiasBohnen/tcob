@@ -84,10 +84,10 @@ public:
     auto global_to_local(point_i p) const -> point_f;
 
     void update(milliseconds deltaTime) override;
-    void virtual prepare_redraw();
 
     void paint(widget_painter& painter);
 
+    void virtual prepare_redraw();
     void virtual force_redraw(string const& reason);
 
     auto hit_test(point_f pos) const -> bool;

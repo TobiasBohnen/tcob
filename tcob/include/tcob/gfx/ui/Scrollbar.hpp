@@ -27,7 +27,7 @@ public:
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;
-    void start_scroll(f32 val, milliseconds delay);
+    void start_scroll(f32 target, milliseconds delay);
 
     auto is_mouse_over() const -> bool;
     auto mouse_hover(point_i mp) -> bool;
