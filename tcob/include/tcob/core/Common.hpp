@@ -141,6 +141,31 @@ namespace detail {
 
     template <typename... Ts>
     using last_element_t = typename last_element<Ts...>::type;
+
+    template <auto... MemberPointers>
+    class member_ptr {
+    public:
+        void set(auto&& instance, auto const& value) const
+        {
+            get(instance) = value;
+        }
+
+        auto get(auto&& instance) const -> auto&
+        {
+            return Get(instance, MemberPointers...);
+        }
+
+    private:
+        template <typename... Rest>
+        auto static Get(auto&& parent, auto&& child, Rest... rest) -> auto&
+        {
+            if constexpr (sizeof...(Rest) == 0) {
+                return parent.*child;
+            } else {
+                return Get(parent.*child, rest...);
+            }
+        }
+    };
 }
 
 ////////////////////////////////////////////////////////////
