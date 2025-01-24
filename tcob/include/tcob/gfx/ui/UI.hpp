@@ -134,6 +134,8 @@ public:
 
     auto operator==(length const& other) const -> bool = default;
     auto operator-() const -> length;
+
+    auto static Lerp(length const& left, length const& right, f64 step) -> length;
 };
 
 auto operator/(length const& left, f32 right) -> length;
@@ -153,6 +155,8 @@ public:
     length Bottom {};
 
     auto operator==(thickness const& other) const -> bool = default;
+
+    auto static Lerp(thickness const& left, thickness const& right, f64 step) -> thickness;
 };
 
 auto operator-(rect_f const& left, thickness const& right) -> rect_f;
@@ -160,11 +164,14 @@ auto operator-=(rect_f& left, thickness const& right) -> rect_f&;
 
 ////////////////////////////////////////////////////////////
 
-struct dimensions {
+class TCOB_API dimensions final {
+public:
     length Width {1, length::type::Relative};
     length Height {1, length::type::Relative};
 
     auto operator==(dimensions const& other) const -> bool = default;
+
+    auto static Lerp(dimensions const& left, dimensions const& right, f64 step) -> dimensions;
 };
 
 ////////////////////////////////////////////////////////////

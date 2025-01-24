@@ -168,4 +168,32 @@ namespace detail {
 
 }
 
+////////////////////////////////////////////////////////////
+auto length::Lerp(length const& left, length const& right, f64 step) -> length
+{
+    assert(left.Type == right.Type);
+    length retValue;
+    retValue.Type  = left.Type;
+    retValue.Value = left.Value + (right.Value - left.Value) * step;
+    return retValue;
+}
+
+auto thickness::Lerp(thickness const& left, thickness const& right, f64 step) -> thickness
+{
+    thickness retValue;
+    retValue.Bottom = length::Lerp(left.Bottom, right.Bottom, step);
+    retValue.Top    = length::Lerp(left.Top, right.Top, step);
+    retValue.Left   = length::Lerp(left.Left, right.Left, step);
+    retValue.Right  = length::Lerp(left.Right, right.Right, step);
+    return retValue;
+}
+
+auto dimensions::Lerp(dimensions const& left, dimensions const& right, f64 step) -> dimensions
+{
+    dimensions retValue;
+    retValue.Width  = length::Lerp(left.Width, right.Width, step);
+    retValue.Height = length::Lerp(left.Height, right.Height, step);
+    return retValue;
+}
+
 } // namespace ui
