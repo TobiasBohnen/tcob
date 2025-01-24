@@ -16,8 +16,6 @@ namespace tcob::gfx::ui {
 
 // TODO: datasource
 class TCOB_API drop_down_list : public widget {
-    friend class scrollbar<drop_down_list>;
-
 public:
     class TCOB_API style : public background_style {
     public:
@@ -30,14 +28,14 @@ public:
         isize       VisibleItemCount {5};
 
         element::scrollbar VScrollBar;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit drop_down_list(init const& wi);
 
     prop_val<isize> SelectedItemIndex;
     prop_val<isize> HoveredItemIndex;
+
+    void prepare_redraw() override;
 
     void add_item(utf8_string const& item);
     void add_item(list_item const& item);
@@ -72,10 +70,8 @@ protected:
 private:
     auto get_item_height() const -> f32;
 
-    auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
-    auto get_scroll_min_value(orientation orien) const -> f32;
-    auto get_scroll_max_value(orientation orien) const -> f32;
-    auto get_scroll_style(orientation orien) const -> element::scrollbar*;
+    auto requires_scroll() const -> bool;
+    auto get_scroll_max_value() const -> f32;
 
     void set_extended(bool v);
 
@@ -88,6 +84,6 @@ private:
     bool                   _isExtended {false};
     bool                   _mouseOverBox {false};
 
-    scrollbar<drop_down_list> _vScrollbar;
+    scrollbar _vScrollbar;
 };
 }

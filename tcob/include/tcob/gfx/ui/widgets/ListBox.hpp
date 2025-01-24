@@ -21,8 +21,6 @@ public:
     public:
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit list_box(init const& wi);

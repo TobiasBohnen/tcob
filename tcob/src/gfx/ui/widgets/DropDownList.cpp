@@ -71,7 +71,22 @@ auto drop_down_list::item_count() const -> isize
 void drop_down_list::on_styles_changed()
 {
     widget::on_styles_changed();
+
+    if (auto* style {current_style<drop_down_list::style>()}) {
+        _vScrollbar.Style = &style->VScrollBar;
+    } else {
+        _vScrollbar.Style = nullptr;
+    }
+
     _vScrollbar.set_target_value(0, milliseconds {0});
+}
+
+void drop_down_list::prepare_redraw()
+{
+    widget::prepare_redraw();
+
+    _vScrollbar.Min = 0;
+    _vScrollbar.Max = get_scroll_max_value();
 }
 
 void drop_down_list::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i)
@@ -127,6 +142,7 @@ void drop_down_list::on_paint(widget_painter& painter)
             painter.draw_background_and_border(*style, listRect, false);
 
             // scrollbar
+            _vScrollbar.Visible = requires_scroll();
             _vScrollbar.paint(painter, style->VScrollBar, listRect, fls.Active);
 
             scissor_guard const guard {painter, this};
@@ -333,11 +349,8 @@ auto drop_down_list::get_item_height() const -> f32
     return 0;
 }
 
-auto drop_down_list::requires_scroll(orientation orien, rect_f const& /* rect */) const -> bool
+auto drop_down_list::requires_scroll() const -> bool
 {
-    if (orien == orientation::Horizontal) {
-        return false;
-    }
     if (auto const* style {current_style<drop_down_list::style>()}) {
         return std::ssize(_items) > style->VisibleItemCount;
     }
@@ -345,30 +358,10 @@ auto drop_down_list::requires_scroll(orientation orien, rect_f const& /* rect */
     return false;
 }
 
-auto drop_down_list::get_scroll_min_value(orientation /* orien */) const -> f32
+auto drop_down_list::get_scroll_max_value() const -> f32
 {
-    return 0;
-}
-
-auto drop_down_list::get_scroll_max_value(orientation orien) const -> f32
-{
-    if (orien == orientation::Horizontal) {
-        return 0;
-    }
-
     f32 const itemHeight {get_item_height()};
     return std::max(0.0f, (itemHeight * std::ssize(_items)) - content_bounds().height());
-}
-
-auto drop_down_list::get_scroll_style(orientation orien) const -> element::scrollbar*
-{
-    if (auto* style {current_style<drop_down_list::style>()}) {
-        if (orien == orientation::Vertical) {
-            return &style->VScrollBar;
-        }
-    }
-
-    return nullptr;
 }
 
 void drop_down_list::set_extended(bool v)

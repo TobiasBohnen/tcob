@@ -34,8 +34,6 @@ public:
     class TCOB_API style : public background_style {
     public:
         dot Dot;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit dot_matrix_display(init const& wi);

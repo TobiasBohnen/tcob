@@ -20,8 +20,6 @@ public:
     public:
         milliseconds Delay {0};
         milliseconds FadeIn {0};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     signal<tooltip_event const> Popup;

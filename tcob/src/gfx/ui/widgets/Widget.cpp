@@ -203,17 +203,14 @@ auto widget::scroll_offset() const -> point_f
     return point_f::Zero;
 }
 
-void widget::update_style()
+void widget::prepare_redraw()
 {
     // TODO: only update if any attribute or form::Styles changes
     auto* newStyle {_form->Styles->get(Class(), flags(), attributes())};
-    if (*_style != *newStyle) {
-
-        _style = newStyle;
-    }
+    _style = newStyle;
 
     if (Tooltip) {
-        Tooltip->update_style();
+        Tooltip->prepare_redraw();
     }
 }
 

@@ -16,44 +16,35 @@ vscroll_widget::vscroll_widget(init const& wi)
 {
 }
 
-auto vscroll_widget::requires_scroll(orientation orien, rect_f const& rect) const -> bool
+void vscroll_widget::prepare_redraw()
 {
-    if (orien == orientation::Horizontal) {
-        return false;
-    }
+    widget::prepare_redraw();
 
+    _vScrollbar.Min = 0;
+    _vScrollbar.Max = get_scroll_max_value();
+}
+
+auto vscroll_widget::requires_scroll(rect_f const& rect) const -> bool
+{
     return get_scroll_content_height() - 1 > rect.height();
 }
 
-auto vscroll_widget::get_scroll_min_value(orientation /* orien */) const -> f32
+auto vscroll_widget::get_scroll_max_value() const -> f32
 {
-    return 0;
-}
-
-auto vscroll_widget::get_scroll_max_value(orientation orien) const -> f32
-{
-    if (orien == orientation::Horizontal) {
-        return 0;
-    }
-
     return std::max(0.0f, get_scroll_content_height() - content_bounds().height());
-}
-
-auto vscroll_widget::get_scroll_style(orientation orien) const -> element::scrollbar*
-{
-    if (auto* style {current_style<vscroll_widget::style>()}) {
-        if (orien == orientation::Vertical) {
-            return &style->VScrollBar;
-        }
-    }
-
-    return nullptr;
 }
 
 void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
-    f32 const max {get_scroll_max_value(orientation::Vertical)};
+
+    if (auto* style {current_style<vscroll_widget::style>()}) {
+        _vScrollbar.Style = &style->VScrollBar;
+    } else {
+        _vScrollbar.Style = nullptr;
+    }
+
+    auto const max {get_scroll_max_value()};
     if (get_scrollbar_value() > max) { set_scrollbar_value(max); }
 }
 
@@ -66,6 +57,7 @@ void vscroll_widget::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // scrollbar
+        _vScrollbar.Visible = requires_scroll(rect);
         _vScrollbar.paint(painter, style->VScrollBar, rect, flags().Active);
 
         // content

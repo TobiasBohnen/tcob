@@ -56,16 +56,6 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
     return retValue * 1.05f;
 }
 
-auto panel::get_scroll_style(orientation orien) const -> element::scrollbar*
-{
-    if (auto* style {current_style<panel::style>()}) {
-        if (orien == orientation::Horizontal) { return &style->HScrollBar; }
-        if (orien == orientation::Vertical) { return &style->VScrollBar; }
-    }
-
-    return nullptr;
-}
-
 void panel::force_redraw(string const& reason)
 {
     widget_container::force_redraw(reason);
@@ -76,8 +66,26 @@ void panel::on_styles_changed()
 {
     widget_container::on_styles_changed();
     _layout->mark_dirty();
+    if (auto* style {current_style<panel::style>()}) {
+        _hScrollbar.Style = &style->HScrollBar;
+        _vScrollbar.Style = &style->VScrollBar;
+    } else {
+        _hScrollbar.Style = nullptr;
+        _vScrollbar.Style = nullptr;
+    }
+
     _vScrollbar.set_target_value(0, milliseconds {0});
     _hScrollbar.set_target_value(0, milliseconds {0});
+}
+
+void panel::prepare_redraw()
+{
+    widget_container::prepare_redraw();
+
+    _vScrollbar.Min = get_scroll_min_value(orientation::Vertical);
+    _hScrollbar.Min = get_scroll_min_value(orientation::Horizontal);
+    _vScrollbar.Max = get_scroll_max_value(orientation::Vertical);
+    _hScrollbar.Max = get_scroll_max_value(orientation::Horizontal);
 }
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
@@ -118,7 +126,9 @@ void panel::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // scrollbar
+        _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
         _vScrollbar.paint(painter, style->VScrollBar, rect, flags().Active);
+        _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
         _hScrollbar.paint(painter, style->HScrollBar, rect, flags().Active);
 
         // content

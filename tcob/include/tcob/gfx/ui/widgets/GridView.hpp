@@ -23,8 +23,6 @@ public:
         utf8_string HeaderClass {"header_items"};
         utf8_string RowClass {"row_items"};
         length      RowHeight {};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit grid_view(init const& wi);

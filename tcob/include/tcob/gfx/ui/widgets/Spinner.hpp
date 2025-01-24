@@ -18,8 +18,6 @@ public:
     public:
         element::text Text;
         utf8_string   NavArrowClass {"nav_arrows"};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit spinner(init const& wi);

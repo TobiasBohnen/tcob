@@ -270,8 +270,6 @@ public:
     virtual ~style_base()                                           = default;
 
     void virtual offset_content(rect_f& /* bounds */, bool /* isHitTest*/) const { }
-
-    auto operator==(style_base const& other) const -> bool = default;
 };
 
 class TCOB_API style : public style_base {
@@ -282,8 +280,6 @@ public:
     string Cursor {"default"};
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
-
-    auto operator==(style const& other) const -> bool = default;
 };
 
 class TCOB_API background_style : public style {
@@ -293,29 +289,21 @@ public:
     element::border Border;
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
-
-    auto operator==(background_style const& other) const -> bool = default;
 };
 
 class TCOB_API thumb_style : public style_base {
 public:
     element::thumb Thumb;
-
-    auto operator==(thumb_style const& other) const -> bool = default;
 };
 
 class TCOB_API nav_arrows_style : public style_base {
 public:
     element::nav_arrow NavArrow;
-
-    auto operator==(nav_arrows_style const& other) const -> bool = default;
 };
 
 class TCOB_API item_style : public style_base {
 public:
     element::item Item;
-
-    auto operator==(item_style const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////

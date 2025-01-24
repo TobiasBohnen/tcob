@@ -13,15 +13,11 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API panel : public widget_container {
-    friend class scrollbar<panel>;
-
 public:
     class TCOB_API style : public background_style {
     public:
         element::scrollbar HScrollBar;
         element::scrollbar VScrollBar;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit panel(init const& wi);
@@ -34,6 +30,7 @@ public:
     auto get_layout() -> std::shared_ptr<T>;
 
     void force_redraw(string const& reason) override;
+    void prepare_redraw() override;
 
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
@@ -63,11 +60,10 @@ private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
     auto get_scroll_min_value(orientation orien) const -> f32;
     auto get_scroll_max_value(orientation orien) const -> f32;
-    auto get_scroll_style(orientation orien) const -> element::scrollbar*;
 
     std::shared_ptr<layout> _layout;
-    scrollbar<panel>        _vScrollbar;
-    scrollbar<panel>        _hScrollbar;
+    scrollbar               _vScrollbar;
+    scrollbar               _hScrollbar;
 };
 
 ////////////////////////////////////////////////////////////

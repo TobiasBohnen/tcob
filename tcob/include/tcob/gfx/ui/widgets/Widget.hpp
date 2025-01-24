@@ -84,7 +84,7 @@ public:
     auto global_to_local(point_i p) const -> point_f;
 
     void update(milliseconds deltaTime) override;
-    void virtual update_style();
+    void virtual prepare_redraw();
 
     void paint(widget_painter& painter);
 

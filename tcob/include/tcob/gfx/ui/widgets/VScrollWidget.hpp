@@ -15,17 +15,15 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API vscroll_widget : public widget {
-    friend class scrollbar<vscroll_widget>;
-
 public:
     class TCOB_API style : public background_style {
     public:
         element::scrollbar VScrollBar;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit vscroll_widget(init const& wi);
+
+    void prepare_redraw() override;
 
 protected:
     void on_styles_changed() override;
@@ -43,10 +41,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
-    auto get_scroll_min_value(orientation orien) const -> f32;
-    auto get_scroll_max_value(orientation orien) const -> f32;
-    auto get_scroll_style(orientation orien) const -> element::scrollbar*;
+    auto requires_scroll(rect_f const& rect) const -> bool;
+    auto get_scroll_max_value() const -> f32;
 
     auto virtual get_scroll_content_height() const -> f32 = 0;
     auto virtual get_scroll_item_count() const -> isize   = 0;
@@ -54,6 +50,6 @@ protected:
     void set_scrollbar_value(f32 value);
 
 private:
-    scrollbar<vscroll_widget> _vScrollbar;
+    scrollbar _vScrollbar;
 };
 }

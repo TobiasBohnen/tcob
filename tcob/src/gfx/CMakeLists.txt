@@ -73,6 +73,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/WidgetContainer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Form.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Layout.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/Scrollbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Style.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/UI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/WidgetPainter.cpp
@@ -164,7 +165,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Scrollbar.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/ui/Scrollbar.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.hpp

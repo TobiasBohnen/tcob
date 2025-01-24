@@ -19,8 +19,6 @@ public:
     public:
         element::bar Bar;
         utf8_string  ThumbClass {"slider_thumb"};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit slider(init const& wi);

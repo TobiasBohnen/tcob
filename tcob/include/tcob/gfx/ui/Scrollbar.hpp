@@ -13,12 +13,14 @@
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
-template <typename Parent>
-class scrollbar {
+class TCOB_API scrollbar {
 public:
-    scrollbar(Parent& parent, orientation orien);
+    scrollbar(widget& parent, orientation orien);
 
-    bool Visible {false};
+    bool                Visible {false};
+    element::scrollbar* Style {nullptr};
+    f32                 Min {0.0f};
+    f32                 Max {0.0f};
 
     void update(milliseconds deltaTime);
     void paint(widget_painter& painter, element::scrollbar const& style, rect_f& rect, bool isActive);
@@ -34,9 +36,6 @@ public:
     void inject_mouse_up(point_i mp);
 
 private:
-    auto get_min_value() const -> f32;
-    auto get_max_value() const -> f32;
-    auto requires_scroll(rect_f const& rect) const -> bool;
     void calculate_value(point_f mp);
 
     auto get_thumb_style(widget_flags flags) -> thumb_style*;
@@ -47,11 +46,9 @@ private:
     point_i _dragOffset {point_i::Zero};
 
     orientation               _orien;
-    Parent&                   _parent;
+    widget&                   _parent;
     widget_tweener            _tween;
     element::scrollbar::rects _paintResult;
 };
 
 }
-
-#include "Scrollbar.inl"

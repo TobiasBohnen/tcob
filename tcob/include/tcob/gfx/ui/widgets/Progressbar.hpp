@@ -17,8 +17,6 @@ public:
     class TCOB_API style : public background_style {
     public:
         element::bar Bar;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit progress_bar(init const& wi);

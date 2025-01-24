@@ -179,7 +179,7 @@ void form::on_fixed_update(milliseconds deltaTime)
     // update styles
     if (_updateWidgetStyle) {
         for (auto const& container : widgets) {
-            container->update_style();
+            container->prepare_redraw();
         }
 
         _updateWidgetStyle = false;

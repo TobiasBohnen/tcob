@@ -18,8 +18,6 @@ public:
     public:
         milliseconds  Delay {0};
         element::tick Tick;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit toggle(init const& wi);

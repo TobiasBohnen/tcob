@@ -16,8 +16,6 @@ public:
     class TCOB_API style : public background_style {
     public:
         element::text Text;
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit label(init const& wi);

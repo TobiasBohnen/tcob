@@ -24,8 +24,6 @@ public:
         element::text  Text;
         element::caret Caret;
         milliseconds   FlashDuration {500};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     struct border {

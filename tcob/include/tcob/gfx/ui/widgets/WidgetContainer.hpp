@@ -18,7 +18,7 @@ public:
     explicit widget_container(init const& wi);
 
     void update(milliseconds deltaTime) final;
-    void update_style() final;
+    void prepare_redraw() override;
 
     auto virtual find_child_at(point_f pos) -> std::shared_ptr<widget>;
     auto virtual find_child_by_name(string const& name) -> std::shared_ptr<widget>;

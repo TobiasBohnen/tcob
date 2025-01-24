@@ -19,8 +19,6 @@ public:
     public:
         length      SectionBarHeight;
         utf8_string SectionItemClass {"section_items"};
-
-        auto operator==(style const& other) const -> bool = default;
     };
 
     explicit accordion(init const& wi);

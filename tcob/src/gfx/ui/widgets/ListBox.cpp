@@ -86,7 +86,7 @@ void list_box::scroll_to_selected()
     if (auto const* style {current_style<list_box::style>()}) {
         rect_f const listRect {content_bounds()};
         f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
-        auto const   scrollMax {get_scroll_max_value(orientation::Vertical)};
+        auto const   scrollMax {get_scroll_max_value()};
 
         for (i32 i {0}; i < SelectedItemIndex; ++i) {
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};

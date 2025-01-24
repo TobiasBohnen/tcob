@@ -65,12 +65,12 @@ auto widget_container::widgets_by_zorder(bool reverse) const -> std::vector<std:
     return retValue;
 }
 
-void widget_container::update_style()
+void widget_container::prepare_redraw()
 {
-    widget::update_style();
+    widget::prepare_redraw();
 
     for (auto const& w : widgets()) {
-        w->update_style();
+        w->prepare_redraw();
     }
 }
 
