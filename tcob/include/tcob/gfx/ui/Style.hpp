@@ -210,8 +210,8 @@ namespace element {
 
     class TCOB_API scrollbar {
     public:
-        bar    Bar;
-        string ThumbClass {"scrollbar_thumb"};
+        bar         Bar;
+        utf8_string ThumbClass {"scrollbar_thumb"};
 
         struct rects {
             rect_f Bar;

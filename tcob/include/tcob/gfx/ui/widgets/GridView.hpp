@@ -19,10 +19,10 @@ class TCOB_API grid_view : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
     public:
-        bool   AutoSizeColumns {true};
-        string HeaderClass {"header_items"};
-        string RowClass {"row_items"};
-        length RowHeight {};
+        bool        AutoSizeColumns {true};
+        utf8_string HeaderClass {"header_items"};
+        utf8_string RowClass {"row_items"};
+        length      RowHeight {};
 
         auto operator==(style const& other) const -> bool = default;
     };

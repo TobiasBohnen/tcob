@@ -23,7 +23,7 @@ public:
     public:
         element::text Text;
 
-        utf8_string ArrowClass {"nav_arrows"};
+        utf8_string NavArrowClass {"nav_arrows"};
 
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};

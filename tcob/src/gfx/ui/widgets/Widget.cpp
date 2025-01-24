@@ -207,9 +207,10 @@ void widget::update_style()
 {
     // TODO: only update if any attribute or form::Styles changes
     auto* newStyle {_form->Styles->get(Class(), flags(), attributes())};
-    if (*_style == *newStyle) {
+    if (*_style != *newStyle) {
+
+        _style = newStyle;
     }
-    _style = newStyle;
 
     if (Tooltip) {
         Tooltip->update_style();

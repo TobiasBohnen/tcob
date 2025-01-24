@@ -18,7 +18,7 @@ public:
     class TCOB_API style : public ui::style {
     public:
         element::bar Bar;
-        string       ThumbClass {"slider_thumb"};
+        utf8_string  ThumbClass {"slider_thumb"};
 
         auto operator==(style const& other) const -> bool = default;
     };

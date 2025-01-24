@@ -93,9 +93,9 @@ void drop_down_list::on_paint(widget_painter& painter)
 
         // arrow
         auto const& fls {flags()};
-        auto*       normalArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {})};
-        auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Hover = true})};
-        auto*       activeArrow {get_sub_style<nav_arrows_style>(style->ArrowClass, {.Active = true})};
+        auto*       normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
+        auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
+        auto*       activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
         assert(normalArrow && hoverArrow && activeArrow);
 
         element::nav_arrow arrowStyle;

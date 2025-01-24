@@ -24,10 +24,10 @@ public:
 
     class TCOB_API style : public background_style {
     public:
-        string   TabItemClass {"tab_items"};
-        position TabBarPosition {position::Top};
-        length   TabBarHeight;
-        isize    MaxTabsPerRow {-1};
+        utf8_string TabItemClass {"tab_items"};
+        position    TabBarPosition {position::Top};
+        length      TabBarHeight;
+        isize       MaxTabsPerRow {-1};
 
         auto operator==(style const& other) const -> bool = default;
     };

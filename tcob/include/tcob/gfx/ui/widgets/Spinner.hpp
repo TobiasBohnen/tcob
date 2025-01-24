@@ -17,7 +17,7 @@ public:
     class TCOB_API style : public background_style {
     public:
         element::text Text;
-        string        NavArrowClass {"nav_arrows"};
+        utf8_string   NavArrowClass {"nav_arrows"};
 
         auto operator==(style const& other) const -> bool = default;
     };

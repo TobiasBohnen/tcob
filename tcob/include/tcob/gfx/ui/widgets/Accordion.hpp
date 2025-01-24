@@ -17,8 +17,8 @@ class TCOB_API accordion : public widget_container {
 public:
     class TCOB_API style : public background_style {
     public:
-        length SectionBarHeight;
-        string SectionItemClass {"section_items"};
+        length      SectionBarHeight;
+        utf8_string SectionItemClass {"section_items"};
 
         auto operator==(style const& other) const -> bool = default;
     };
