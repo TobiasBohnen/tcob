@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Tobias Bohnen
+// Copyright (c) 2025 Tobias Bohnen
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
@@ -212,6 +212,9 @@ void widget::prepare_redraw()
 {
     // TODO: only update if any attribute or form::Styles changes
     auto* newStyle {_form->Styles->get(Class(), flags(), attributes())};
+    if (newStyle == _style) {
+        // logger::Error("möp");
+    }
     _style = newStyle;
 
     if (Tooltip) {

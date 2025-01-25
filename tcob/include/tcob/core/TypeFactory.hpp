@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Tobias Bohnen
+// Copyright (c) 2025 Tobias Bohnen
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
