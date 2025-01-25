@@ -12,13 +12,13 @@ namespace tcob::gfx::ui {
 
 drop_down_list::drop_down_list(init const& wi)
     : widget {wi}
-    , SelectedItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
-    , HoveredItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
+    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
-    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(-1);
-    HoveredItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(-1);
 
     Class("drop_down_list");

@@ -101,17 +101,17 @@ void scene::attach_events()
 
     auto const& input {locate_service<input::system>()};
 
-    _connections.connect(input.KeyUp, [&](auto&& event) { handle_input_event(event, &input::receiver::on_key_up); });
-    _connections.connect(input.KeyDown, [&](auto&& event) { handle_input_event(event, &input::receiver::on_key_down); });
-    _connections.connect(input.TextInput, [&](auto&& event) { handle_input_event(event, &input::receiver::on_text_input); });
-    _connections.connect(input.TextEditing, [&](auto&& event) { handle_input_event(event, &input::receiver::on_text_editing); });
-    _connections.connect(input.MouseMotion, [&](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_motion); });
-    _connections.connect(input.MouseButtonDown, [&](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_button_down); });
-    _connections.connect(input.MouseButtonUp, [&](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_button_up); });
-    _connections.connect(input.MouseWheel, [&](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_wheel); });
-    _connections.connect(input.ControllerAxisMotion, [&](auto&& event) { handle_input_event(event, &input::receiver::on_controller_axis_motion); });
-    _connections.connect(input.ControllerButtonDown, [&](auto&& event) { handle_input_event(event, &input::receiver::on_controller_button_down); });
-    _connections.connect(input.ControllerButtonUp, [&](auto&& event) { handle_input_event(event, &input::receiver::on_controller_button_up); });
+    _connections.connect(input.KeyUp, [this](auto&& event) { handle_input_event(event, &input::receiver::on_key_up); });
+    _connections.connect(input.KeyDown, [this](auto&& event) { handle_input_event(event, &input::receiver::on_key_down); });
+    _connections.connect(input.TextInput, [this](auto&& event) { handle_input_event(event, &input::receiver::on_text_input); });
+    _connections.connect(input.TextEditing, [this](auto&& event) { handle_input_event(event, &input::receiver::on_text_editing); });
+    _connections.connect(input.MouseMotion, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_motion); });
+    _connections.connect(input.MouseButtonDown, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_button_down); });
+    _connections.connect(input.MouseButtonUp, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_button_up); });
+    _connections.connect(input.MouseWheel, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_wheel); });
+    _connections.connect(input.ControllerAxisMotion, [this](auto&& event) { handle_input_event(event, &input::receiver::on_controller_axis_motion); });
+    _connections.connect(input.ControllerButtonDown, [this](auto&& event) { handle_input_event(event, &input::receiver::on_controller_button_down); });
+    _connections.connect(input.ControllerButtonUp, [this](auto&& event) { handle_input_event(event, &input::receiver::on_controller_button_up); });
 }
 
 void scene::detach_events()

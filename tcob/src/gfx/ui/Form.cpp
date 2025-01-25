@@ -32,10 +32,10 @@ form::form(string name, window* window, rect_f const& bounds)
     , _painter {std::make_unique<widget_painter>(_canvas)}
     , _name {std::move(name)}
 {
-    Bounds.Changed.connect([&](auto const&) { on_bounds_changed(); });
+    Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
     on_bounds_changed();
 
-    Styles.Changed.connect([&](auto const&) { on_styles_changed(); });
+    Styles.Changed.connect([this](auto const&) { on_styles_changed(); });
 }
 
 form::~form()

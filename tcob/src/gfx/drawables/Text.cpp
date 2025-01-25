@@ -14,14 +14,14 @@ namespace tcob::gfx {
 text::text(assets::asset_ptr<font> font)
     : _font {std::move(font)}
 {
-    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
-    Pivot.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
+    Pivot.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     _material->Texture = _font->texture();
     _renderer.set_material(_material.ptr());
-    Shader.Changed.connect([&](auto const& value) { _material->Shader = value; });
-    Text.Changed.connect([&](auto const&) { _needsReshape = true; });
-    Style.Changed.connect([&](auto const&) { _needsReshape = true; });
+    Shader.Changed.connect([this](auto const& value) { _material->Shader = value; });
+    Text.Changed.connect([this](auto const&) { _needsReshape = true; });
+    Style.Changed.connect([this](auto const&) { _needsReshape = true; });
 }
 
 void text::on_update(milliseconds deltaTime)

@@ -16,7 +16,7 @@ namespace tcob::gfx::ui {
 text_box::text_box(init const& wi)
     : widget {wi}
 {
-    Text.Changed.connect([&](auto const& val) {
+    Text.Changed.connect([this](auto const& val) {
         _textLength = utf8::length(val);
         _textDirty  = true;
         _caretPos   = std::min(_caretPos, _textLength);
@@ -120,7 +120,7 @@ void text_box::on_focus_gained()
 {
     if (auto const* style {current_style<text_box::style>()}) {
         _caretTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate, 1.0f, 0.0f);
-        _caretTween->Value.Changed.connect([&](auto val) {
+        _caretTween->Value.Changed.connect([this](auto val) {
             _caretVisible = val;
             force_redraw(this->name() + ": Caret blink");
         });

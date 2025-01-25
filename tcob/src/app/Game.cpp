@@ -36,7 +36,7 @@ game::game(init const& gameInit)
     auto plt {register_service<platform>(std::make_shared<platform>(false, i))};
 
     // properties
-    FrameLimit.Changed.connect([&](i32 value) {
+    FrameLimit.Changed.connect([this, plt](i32 value) {
         plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
         _frameLimit                                              = milliseconds {1000.f / value};
     });
@@ -104,7 +104,7 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        locate_service<task_manager>().run_deferred({[&](def_task& ctx) {
+        locate_service<task_manager>().run_deferred({[this](def_task& ctx) {
             pop_scene();
             ctx.Finished = true;
         }});

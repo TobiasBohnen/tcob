@@ -128,20 +128,21 @@ void shape_batch::on_draw_to(render_target& target)
 ////////////////////////////////////////////////////////////
 
 shape::shape()
-    : Transparency {{[&]() -> f32 { return static_cast<f32>(Color->A) / 255.0f; }, [&](f32 value) {
+    : Transparency {{[this]() -> f32 { return static_cast<f32>(Color->A) / 255.0f; },
+                     [this](f32 value) {
                          color c {Color()};
                          c.A   = 255 - static_cast<u8>(255 * std::clamp(value, 0.0f, 1.0f));
                          Color = c; }}}
 
 {
-    Pivot.Changed.connect([&](auto const&) { mark_dirty(); });
+    Pivot.Changed.connect([this](auto const&) { mark_dirty(); });
 
-    Material.Changed.connect([&](auto const&) { TextureRegion("default"); });
-    TextureRegion.Changed.connect([&](string const& texRegion) {
+    Material.Changed.connect([this](auto const&) { TextureRegion("default"); });
+    TextureRegion.Changed.connect([this](string const& texRegion) {
         on_texture_region_changed(texRegion);
         mark_dirty();
     });
-    Color.Changed.connect([&](auto const& color) {
+    Color.Changed.connect([this](auto const& color) {
         on_color_changed(color);
         mark_dirty();
     });
@@ -195,9 +196,9 @@ auto shape::pivot() const -> point_f
 
 circle_shape::circle_shape()
 {
-    Center.Changed.connect([&](auto const&) { mark_transform_dirty(); });
-    Radius.Changed.connect([&](auto const&) { mark_dirty(); });
-    Segments.Changed.connect([&](auto const&) { mark_dirty(); });
+    Center.Changed.connect([this](auto const&) { mark_transform_dirty(); });
+    Radius.Changed.connect([this](auto const&) { mark_dirty(); });
+    Segments.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
 auto circle_shape::geometry() -> geometry_data
@@ -293,7 +294,7 @@ auto circle_shape::center() const -> point_f
 
 rect_shape::rect_shape()
 {
-    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
@@ -375,7 +376,7 @@ auto rect_shape::center() const -> point_f
 
 poly_shape::poly_shape()
 {
-    Polygons.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Polygons.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
 auto poly_shape::geometry() -> geometry_data

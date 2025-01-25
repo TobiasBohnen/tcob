@@ -166,7 +166,7 @@ void widget_style::offset_content(rect_f& bounds, bool isHitTest) const
 
 void background_style::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    style::offset_content(bounds, isHitTest);
+    widget_style::offset_content(bounds, isHitTest);
     if (!isHitTest) {
         bounds -= Border.thickness();
     }

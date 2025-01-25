@@ -27,7 +27,7 @@ document::document(config c)
     , _painter {std::make_unique<element_painter>(_canvas)}
     , _container {std::make_shared<detail::container>(*this, _config, _canvas, *_painter)}
 {
-    Bounds.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {render_texture::GetTexcoords(), 0});

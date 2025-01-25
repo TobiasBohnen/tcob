@@ -14,20 +14,20 @@ namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
 shape::shape(body& body, std::unique_ptr<detail::b2d_shape> impl)
-    : Friction {{[&]() -> f32 { return _impl->get_friction(); },
-                 [&](auto const& value) { _impl->set_friction(value); }}}
-    , Restitution {{[&]() -> f32 { return _impl->get_restitution(); },
-                    [&](auto const& value) { _impl->set_restitution(value); }}}
-    , Density {{[&]() -> f32 { return _impl->get_density(); },
-                [&](auto const& value) { _impl->set_density(value); }}}
-    , EnableSensorEvents {{[&]() -> bool { return _impl->are_sensor_events_enabled(); },
-                           [&](auto const& value) { _impl->enable_sensor_events(value); }}}
-    , EnableContactEvents {{[&]() -> bool { return _impl->are_contact_events_enabled(); },
-                            [&](auto const& value) { _impl->enable_contact_events(value); }}}
-    , EnableHitEvents {{[&]() -> bool { return _impl->are_hit_events_enabled(); },
-                        [&](auto const& value) { _impl->enable_hit_events(value); }}}
-    , EnablePreSolveEvents {{[&]() -> bool { return _impl->are_pre_solve_events_enabled(); },
-                             [&](auto const& value) { _impl->enable_pre_solve_events(value); }}}
+    : Friction {{[this]() -> f32 { return _impl->get_friction(); },
+                 [this](auto const& value) { _impl->set_friction(value); }}}
+    , Restitution {{[this]() -> f32 { return _impl->get_restitution(); },
+                    [this](auto const& value) { _impl->set_restitution(value); }}}
+    , Density {{[this]() -> f32 { return _impl->get_density(); },
+                [this](auto const& value) { _impl->set_density(value); }}}
+    , EnableSensorEvents {{[this]() -> bool { return _impl->are_sensor_events_enabled(); },
+                           [this](auto const& value) { _impl->enable_sensor_events(value); }}}
+    , EnableContactEvents {{[this]() -> bool { return _impl->are_contact_events_enabled(); },
+                            [this](auto const& value) { _impl->enable_contact_events(value); }}}
+    , EnableHitEvents {{[this]() -> bool { return _impl->are_hit_events_enabled(); },
+                        [this](auto const& value) { _impl->enable_hit_events(value); }}}
+    , EnablePreSolveEvents {{[this]() -> bool { return _impl->are_pre_solve_events_enabled(); },
+                             [this](auto const& value) { _impl->enable_pre_solve_events(value); }}}
     , _impl {std::move(impl)}
     , _body {body}
 {

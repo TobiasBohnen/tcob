@@ -290,8 +290,8 @@ void cfg_sound_loader::prepare()
         set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
-    locate_service<task_manager>().run_deferred([&](def_task& ctx) {
-        return default_check_async_load(ctx, _cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+    locate_service<task_manager>().run_deferred([this](def_task& ctx) {
+        return default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
@@ -330,8 +330,8 @@ void cfg_sound_font_loader::prepare()
         set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
-    locate_service<task_manager>().run_deferred([&](def_task& ctx) {
-        return default_check_async_load(ctx, _cache, [&](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+    locate_service<task_manager>().run_deferred([this](def_task& ctx) {
+        return default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
@@ -773,7 +773,7 @@ void cfg_texture_loader::prepare()
     }
     _cacheAni.clear();
 
-    locate_service<task_manager>().run_deferred([&](def_task& ctx) { return check_async_load(ctx); });
+    locate_service<task_manager>().run_deferred([this](def_task& ctx) { return check_async_load(ctx); });
 }
 
 void cfg_texture_loader::check_async_load(def_task& ctx)

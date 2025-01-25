@@ -18,7 +18,7 @@ panel::panel(init const& wi)
     , _vScrollbar {*this, orientation::Vertical}
     , _hScrollbar {*this, orientation::Horizontal}
 {
-    ScrollEnabled.Changed.connect([&](auto const&) { force_redraw(this->name() + ": ScrollEnabled changed"); });
+    ScrollEnabled.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ScrollEnabled changed"); });
     ScrollEnabled(false);
 
     Class("panel");

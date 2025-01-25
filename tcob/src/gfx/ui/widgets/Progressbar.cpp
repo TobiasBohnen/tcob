@@ -11,16 +11,16 @@ namespace tcob::gfx::ui {
 
 progress_bar::progress_bar(init const& wi)
     : widget {wi}
-    , Min {{[&](i32 val) -> i32 { return std::min(val, Max()); }}}
-    , Max {{[&](i32 val) -> i32 { return std::max(val, Min()); }}}
-    , Value {{[&](i32 val) -> i32 { return std::clamp(val, Min(), Max()); }}}
+    , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
+    , Max {{[this](i32 val) -> i32 { return std::max(val, Min()); }}}
+    , Value {{[this](i32 val) -> i32 { return std::clamp(val, Min(), Max()); }}}
     , _tween {*this}
 {
-    Min.Changed.connect([&](auto val) { Value = std::min(val, Value()); });
+    Min.Changed.connect([this](auto val) { Value = std::min(val, Value()); });
     Min(0);
-    Max.Changed.connect([&](auto val) { Value = std::max(val, Value()); });
+    Max.Changed.connect([this](auto val) { Value = std::max(val, Value()); });
     Max(100);
-    Value.Changed.connect([&](auto val) { on_value_changed(val); });
+    Value.Changed.connect([this](auto val) { on_value_changed(val); });
     Value(Min());
 
     Class("progress_bar");

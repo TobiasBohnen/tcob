@@ -12,7 +12,7 @@ namespace tcob::gfx::ui {
 checkbox::checkbox(init const& wi)
     : widget {wi}
 {
-    Checked.Changed.connect([&](auto const&) { on_checked_changed(); });
+    Checked.Changed.connect([this](auto const&) { on_checked_changed(); });
 
     Class("checkbox");
 }

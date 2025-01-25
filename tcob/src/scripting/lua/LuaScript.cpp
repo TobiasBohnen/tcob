@@ -106,13 +106,13 @@ void script::register_searcher()
 
     table searchers {_globalTable["package"]["searchers"].as<table>()};
 
-    _loader = [&](string const& name) -> table {
+    _loader = [this](string const& name) -> table {
         require_event ev {.Name = name, .Table = std::nullopt};
         Require(ev);
         return ev.Table.has_value() ? *ev.Table : run_file<table>(name + ".lua").value();
     };
 
-    _searcher = [&](string const&) -> LoaderFunc* { return &_loader; };
+    _searcher = [this](string const&) -> LoaderFunc* { return &_loader; };
 
     searchers[searchers.raw_length() + 1] = &_searcher;
 }

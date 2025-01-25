@@ -194,7 +194,7 @@ inline void wrapper<T>::create_metatable(string const& name, bool gc)
 
     // index metamethod
     push_metamethod("__index",
-                    std::function {[&](T* instance, std::variant<i32, string>& arg) {
+                    std::function {[this](T* instance, std::variant<i32, string>& arg) {
                         if (auto* arg0 {std::get_if<i32>(&arg)}) {
                             this->index(instance, *arg0);
                         } else if (auto* arg1 {std::get_if<string>(&arg)}) {
@@ -205,7 +205,7 @@ inline void wrapper<T>::create_metatable(string const& name, bool gc)
 
     // newindex metamethod
     push_metamethod("__newindex",
-                    std::function {[&](T* instance, std::variant<i32, string>& arg) {
+                    std::function {[this](T* instance, std::variant<i32, string>& arg) {
                         if (auto* arg0 {std::get_if<i32>(&arg)}) {
                             this->newindex(instance, *arg0);
                         } else if (auto* arg1 {std::get_if<string>(&arg)}) {

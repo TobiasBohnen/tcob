@@ -12,12 +12,12 @@ namespace tcob::gfx::ui {
 
 tab_container::tab_container(init const& wi)
     : widget_container {wi}
-    , ActiveTabIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
-    , HoveredTabIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
+    , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
+    , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
 {
-    ActiveTabIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": ActiveTab changed"); });
+    ActiveTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveTab changed"); });
     ActiveTabIndex(-1);
-    HoveredTabIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
+    HoveredTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
     HoveredTabIndex(-1);
 
     Class("tab_container");

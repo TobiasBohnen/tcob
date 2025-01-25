@@ -12,11 +12,11 @@ namespace tcob::gfx::ui {
 dot_matrix_display::dot_matrix_display(init const& wi)
     : widget {wi}
 {
-    Size.Changed.connect([&](auto const&) {
+    Size.Changed.connect([this](auto const&) {
         _isDirty = true;
         force_redraw(this->name() + ": Size changed");
     });
-    Dots.Changed.connect([&](auto const&) {
+    Dots.Changed.connect([this](auto const&) {
         _isDirty = true;
         force_redraw(this->name() + ": Dots changed");
     });
@@ -87,7 +87,7 @@ void dot_matrix_display::on_update(milliseconds /* deltaTime */)
 seven_segment_display::seven_segment_display(init const& wi)
     : widget {wi}
 {
-    Text.Changed.connect([&](auto const&) { force_redraw(this->name() + ": text changed"); });
+    Text.Changed.connect([this](auto const&) { force_redraw(this->name() + ": text changed"); });
 
     Class("seven_segment_display");
 }
@@ -288,7 +288,7 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
-    BaseHue.Changed.connect([&](auto const&) { force_redraw(this->name() + ": BaseHue changed"); });
+    BaseHue.Changed.connect([this](auto const&) { force_redraw(this->name() + ": BaseHue changed"); });
 
     Class("color_picker");
 }

@@ -19,7 +19,7 @@ namespace tcob::gfx::ui {
 terminal::terminal(init const& wi)
     : widget {wi}
 {
-    Size.Changed.connect([&](auto const&) { clear_buffer(); });
+    Size.Changed.connect([this](auto const&) { clear_buffer(); });
 
     Class("terminal");
 }
@@ -161,7 +161,7 @@ void terminal::flash()
 {
     if (auto const* style {current_style<terminal::style>()}) {
         _flashTween = make_unique_tween<square_wave_tween<bool>>(style->FlashDuration, 1.0f, 0.0f);
-        _flashTween->Value.Changed.connect([&](auto) {
+        _flashTween->Value.Changed.connect([this](auto) {
             for (auto& cell : get_back_buffer()) {
                 cell.Colors = {cell.Colors.second, cell.Colors.first};
             }
@@ -783,7 +783,7 @@ void terminal::start_blinking()
 {
     if (auto const* style {current_style<terminal::style>()}) {
         _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);
-        _cursorTween->Value.Changed.connect([&](auto val) {
+        _cursorTween->Value.Changed.connect([this](auto val) {
             _cursorVisible = val;
             force_redraw(this->name() + ": cursor blink");
         });

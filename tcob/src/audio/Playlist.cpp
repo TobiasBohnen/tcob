@@ -12,7 +12,7 @@ namespace tcob::audio {
 
 playlist::playlist()
 {
-    Volume.Changed.connect([&](auto const val) {
+    Volume.Changed.connect([this](auto const val) {
         for (auto* source : _playing) {
             source->Volume = val;
         }
@@ -52,7 +52,7 @@ void playlist::clear_queue()
 void playlist::launch_task()
 {
     if (_deferred == INVALID_ID) {
-        _deferred = locate_service<task_manager>().run_deferred([&](def_task& ctx) { update(ctx); });
+        _deferred = locate_service<task_manager>().run_deferred([this](def_task& ctx) { update(ctx); });
     }
 }
 

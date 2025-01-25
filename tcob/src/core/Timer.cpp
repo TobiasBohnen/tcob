@@ -23,7 +23,7 @@ void timer::start(milliseconds interval, mode mode, bool looping)
     stop();
 
     _isRunning = true;
-    locate_service<task_manager>().run_async<void>([&]() {
+    locate_service<task_manager>().run_async<void>([=, this]() {
         stopwatch sw;
         while (!_stopRequested) {
             sw.start();

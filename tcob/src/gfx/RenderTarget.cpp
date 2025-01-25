@@ -14,8 +14,8 @@
 namespace tcob::gfx {
 
 render_target::render_target(texture* tex)
-    : Size {{[&]() { return get_size(); },
-             [&](auto const& value) { set_size(value); }}}
+    : Size {{[this]() { return get_size(); },
+             [this](auto const& value) { set_size(value); }}}
     , _impl {locate_service<render_system>().create_render_target(tex)}
     , _camera {*this}
 {
@@ -101,7 +101,7 @@ default_render_target::default_render_target(window* win)
 {
 }
 
-auto default_render_target::get_size() const -> size_i { return _window->Size(); }
+auto default_render_target::get_size() const -> size_i { return _window ? _window->Size() : size_i::Zero; }
 
 void default_render_target::set_size(size_i /* newsize */)
 {

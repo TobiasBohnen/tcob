@@ -13,15 +13,15 @@ namespace tcob::gfx::ui {
 
 list_box::list_box(init const& wi)
     : vscroll_widget {wi}
-    , SelectedItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
-    , HoveredItemIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
+    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(-1);
-    HoveredItemIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(-1);
 
-    Filter.Changed.connect([&](auto const& val) {
+    Filter.Changed.connect([this](auto const& val) {
         HoveredItemIndex  = -1;
         SelectedItemIndex = -1;
         set_scrollbar_value(0);

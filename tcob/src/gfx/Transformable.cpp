@@ -9,11 +9,11 @@ namespace tcob::gfx {
 
 transformable::transformable()
 {
-    Translation.Changed.connect([&](auto const&) { mark_transform_dirty(); });
-    Rotation.Changed.connect([&](auto const&) { mark_transform_dirty(); });
-    Scale.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Translation.Changed.connect([this](auto const&) { mark_transform_dirty(); });
+    Rotation.Changed.connect([this](auto const&) { mark_transform_dirty(); });
+    Scale.Changed.connect([this](auto const&) { mark_transform_dirty(); });
     Scale(size_f::One);
-    Skew.Changed.connect([&](auto const&) { mark_transform_dirty(); });
+    Skew.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
 auto transformable::transform() -> gfx::transform const&

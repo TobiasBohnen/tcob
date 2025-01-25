@@ -54,14 +54,14 @@ template <typename Object, typename... Keys>
 template <typename T>
 inline auto proxy<Object, Keys...>::get() const
 {
-    return std::apply([&](auto&&... args) { return _object.template get<T>(args...); }, _keys);
+    return std::apply([this](auto&&... args) { return _object.template get<T>(args...); }, _keys);
 }
 
 template <typename Object, typename... Keys>
 template <typename T>
 inline auto proxy<Object, Keys...>::is() const -> bool
 {
-    return std::apply([&](auto&&... args) { return _object.template is<T>(args...); }, _keys);
+    return std::apply([this](auto&&... args) { return _object.template is<T>(args...); }, _keys);
 }
 
 template <typename Object, typename... Keys>

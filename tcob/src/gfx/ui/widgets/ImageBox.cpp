@@ -12,7 +12,7 @@ namespace tcob::gfx::ui {
 image_box::image_box(init const& wi)
     : widget {wi}
 {
-    Image.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Image changed"); });
+    Image.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Image changed"); });
 
     Class("image_box");
 }

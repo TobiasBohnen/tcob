@@ -21,7 +21,7 @@ lighting_system::lighting_system(bool multiThreaded)
     , _shadowCasters {}
     , _multiThreaded {multiThreaded}
 {
-    Bounds.Changed.connect([&](auto const&) {
+    Bounds.Changed.connect([this](auto const&) {
         rebuild_quadtree();
         _isDirty = true;
     });
@@ -376,12 +376,12 @@ auto light_source::is_angle_limited() const -> bool
 light_source::light_source(lighting_system* parent)
     : _parent {parent}
 {
-    Color.Changed.connect([&](auto const&) { notify_parent(); });
-    Position.Changed.connect([&](auto const&) { notify_parent(); });
-    Range.Changed.connect([&](auto const&) { notify_parent(); });
-    Falloff.Changed.connect([&](auto const&) { notify_parent(); });
-    StartAngle.Changed.connect([&](auto const&) { notify_parent(); });
-    EndAngle.Changed.connect([&](auto const&) { notify_parent(); });
+    Color.Changed.connect([this](auto const&) { notify_parent(); });
+    Position.Changed.connect([this](auto const&) { notify_parent(); });
+    Range.Changed.connect([this](auto const&) { notify_parent(); });
+    Falloff.Changed.connect([this](auto const&) { notify_parent(); });
+    StartAngle.Changed.connect([this](auto const&) { notify_parent(); });
+    EndAngle.Changed.connect([this](auto const&) { notify_parent(); });
 }
 
 void light_source::notify_parent()
@@ -395,7 +395,7 @@ void light_source::notify_parent()
 shadow_caster::shadow_caster(lighting_system* parent)
     : _parent {parent}
 {
-    Polygon.Changed.connect([&](auto const&) { notify_parent(); });
+    Polygon.Changed.connect([this](auto const&) { notify_parent(); });
 }
 
 void shadow_caster::notify_parent()

@@ -14,7 +14,7 @@ template <typename G>
 inline tilemap<G>::tilemap(set_type set)
     : _tileSet {std::move(set)}
 {
-    Grid.Changed.connect([&](auto const&) { mark_dirty(); });
+    Grid.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
 template <typename G>

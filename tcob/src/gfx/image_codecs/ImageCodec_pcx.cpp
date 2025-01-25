@@ -154,7 +154,7 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
             } else if (_header.BitsPerPixel == 1 && _header.ColorPlanesCount == 4) {
                 for (i32 y {0}; y < height; ++y) {
                     for (i32 x {0}; x < width;) {
-                        auto getColor {[&]() -> std::optional<color> {
+                        auto const getColor {[&]() -> std::optional<color> {
                             if (x >= width) { return std::nullopt; }
 
                             u32 c1 {0};

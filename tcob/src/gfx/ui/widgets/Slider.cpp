@@ -13,9 +13,9 @@ namespace tcob::gfx::ui {
 
 slider::slider(init const& wi)
     : widget {wi}
-    , Min {{[&](i32 val) -> i32 { return std::min(val, Max()); }}}
-    , Max {{[&](i32 val) -> i32 { return std::max(val, Min()); }}}
-    , Value {{[&](i32 val) -> i32 {
+    , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
+    , Max {{[this](i32 val) -> i32 { return std::max(val, Min()); }}}
+    , Value {{[this](i32 val) -> i32 {
         if (IncrementalChange && std::abs(Value() - val) > Step) {
             return Value();
         }
@@ -24,21 +24,21 @@ slider::slider(init const& wi)
     }}}
     , _tween {*this}
 {
-    Min.Changed.connect([&](auto val) {
+    Min.Changed.connect([this](auto val) {
         Value = std::max(val, Value());
         on_value_changed(Value());
         force_redraw(this->name() + ": Min changed");
     });
     Min(0);
-    Max.Changed.connect([&](auto val) {
+    Max.Changed.connect([this](auto val) {
         Value = std::min(val, Value());
         on_value_changed(Value());
         force_redraw(this->name() + ": Max changed");
     });
     Max(100);
-    Step.Changed.connect([&](auto) { force_redraw(this->name() + ": Step changed"); });
+    Step.Changed.connect([this](auto) { force_redraw(this->name() + ": Step changed"); });
     Step(1);
-    Value.Changed.connect([&](auto val) { on_value_changed(val); });
+    Value.Changed.connect([this](auto val) { on_value_changed(val); });
     Value(Min());
 
     Class("slider");

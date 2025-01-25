@@ -20,7 +20,7 @@ template <typename Emitter>
 particle_system<Emitter>::particle_system(bool multiThreaded, isize reservedParticleCount)
     : _multiThreaded {multiThreaded}
 {
-    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
+    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
     if (reservedParticleCount > 0) {
         _particles.reserve(reservedParticleCount);
     }

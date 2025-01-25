@@ -18,10 +18,10 @@ using namespace std::chrono_literals;
 ////////////////////////////////////////////////////////////
 
 texture::texture()
-    : Filtering {{[&]() { return _impl->get_filtering(); },
-                  [&](filtering value) { _impl->set_filtering(value); }}}
-    , Wrapping {{[&]() { return _impl->get_wrapping(); },
-                 [&](wrapping value) { _impl->set_wrapping(value); }}}
+    : Filtering {{[this]() { return _impl->get_filtering(); },
+                  [this](filtering value) { _impl->set_filtering(value); }}}
+    , Wrapping {{[this]() { return _impl->get_wrapping(); },
+                 [this](wrapping value) { _impl->set_wrapping(value); }}}
     , _impl {locate_service<render_system>().create_texture()}
 {
 }

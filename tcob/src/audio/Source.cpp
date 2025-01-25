@@ -10,8 +10,8 @@
 namespace tcob::audio {
 
 source::source()
-    : Volume {{[&]() { return _source->get_gain(); },
-               [&](auto const& value) { _source->set_gain(value); }}}
+    : Volume {{[this]() { return _source->get_gain(); },
+               [this](auto const& value) { _source->set_gain(value); }}}
     , _source {std::make_unique<audio::al::al_source>()}
 {
     Volume(1.0f);

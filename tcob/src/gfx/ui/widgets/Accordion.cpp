@@ -12,14 +12,14 @@ namespace tcob::gfx::ui {
 
 accordion::accordion(init const& wi)
     : widget_container {wi}
-    , ActiveSectionIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
-    , HoveredSectionIndex {{[&](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
+    , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
+    , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
 {
-    ActiveSectionIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": ActiveSection changed"); });
+    ActiveSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveSection changed"); });
     ActiveSectionIndex(-1);
-    HoveredSectionIndex.Changed.connect([&](auto const&) { force_redraw(this->name() + ": HoveredSection changed"); });
+    HoveredSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredSection changed"); });
     HoveredSectionIndex(-1);
-    MaximizeActiveSection.Changed.connect([&](auto const&) { force_redraw(this->name() + ": MaximizeActiveSection changed"); });
+    MaximizeActiveSection.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaximizeActiveSection changed"); });
     MaximizeActiveSection(false);
 
     Class("accordion");

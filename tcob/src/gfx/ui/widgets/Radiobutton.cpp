@@ -13,7 +13,7 @@ namespace tcob::gfx::ui {
 radio_button::radio_button(init const& wi)
     : widget {wi}
 {
-    Checked.Changed.connect([&](auto const&) { on_checked_changed(); });
+    Checked.Changed.connect([this](auto const&) { on_checked_changed(); });
 
     Class("radio_button");
 }

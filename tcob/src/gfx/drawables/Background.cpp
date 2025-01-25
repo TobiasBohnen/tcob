@@ -11,7 +11,7 @@ namespace tcob::gfx {
 
 background::background()
 {
-    Material.Changed.connect([&](auto const& value) {
+    Material.Changed.connect([this](auto const& value) {
         _renderer.set_material(value.ptr());
         TextureRegion("default");
     });
@@ -43,7 +43,7 @@ void background::on_draw_to(render_target& target)
 
 parallax_background::parallax_background()
 {
-    Material.Changed.connect([&](auto const& value) { _renderer.set_material(value.ptr()); });
+    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
 }
 
 auto parallax_background::add_layer(parallax_background_layer const& layer) -> uid

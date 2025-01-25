@@ -13,22 +13,22 @@
 namespace tcob::gfx::ui {
 
 widget::widget(init const& wi)
-    : Alpha {{[&]() {
+    : Alpha {{[this]() {
                   f32 retValue {_alpha};
                   if (auto* wparent {parent()}) { retValue *= wparent->Alpha(); }
                   return retValue;
               },
-              [&](auto const& value) { _alpha = value; }}}
+              [this](auto const& value) { _alpha = value; }}}
     , _form {wi.Form}
     , _parent {wi.Parent}
     , _name {wi.Name}
 {
-    Class.Changed.connect([&](auto const&) { force_redraw(_name + ": Class changed"); });
-    Bounds.Changed.connect([&](auto const&) { on_bounds_changed(); });
+    Class.Changed.connect([this](auto const&) { force_redraw(_name + ": Class changed"); });
+    Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
 
-    Flex.Changed.connect([&](auto const&) { force_redraw(_name + ": Flex changed"); });
+    Flex.Changed.connect([this](auto const&) { force_redraw(_name + ": Flex changed"); });
 
-    ZOrder.Changed.connect([&](auto const&) { force_redraw(_name + ": ZOrder changed"); });
+    ZOrder.Changed.connect([this](auto const&) { force_redraw(_name + ": ZOrder changed"); });
 
     static i32 tabIndex {0};
     (*TabStop).Index = tabIndex++;

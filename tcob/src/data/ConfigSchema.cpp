@@ -12,8 +12,8 @@ namespace tcob::data::config {
 
 auto schema::validate(object const& obj) const -> result
 {
-    result retValue {};
-    auto   valid {[&](auto&& arg) { return validate_property(obj, arg); }};
+    result     retValue {};
+    auto const valid {[&](auto&& arg) { return validate_property(obj, arg); }};
 
     if (!AllOf.empty()) {
         for (auto const& e : AllOf) {

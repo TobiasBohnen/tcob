@@ -21,21 +21,21 @@ world::world()
 }
 
 world::world(settings const& settings)
-    : Gravity {{[&]() -> point_f { return _impl->get_gravity(); },
-                [&](auto const& value) { _impl->set_gravity(value); }}}
+    : Gravity {{[this]() -> point_f { return _impl->get_gravity(); },
+                [this](auto const& value) { _impl->set_gravity(value); }}}
     , _impl {std::make_unique<detail::b2d_world>(settings)}
 {
     EnableSleeping(settings.EnableSleeping);
-    EnableSleeping.Changed.connect([&](bool value) { _impl->set_enable_sleeping(value); });
+    EnableSleeping.Changed.connect([this](bool value) { _impl->set_enable_sleeping(value); });
 
     EnableContinuous(settings.EnableContinuous);
-    EnableContinuous.Changed.connect([&](bool value) { _impl->set_enable_continuous(value); });
+    EnableContinuous.Changed.connect([this](bool value) { _impl->set_enable_continuous(value); });
 
     RestitutionThreshold(settings.RestitutionThreshold);
-    RestitutionThreshold.Changed.connect([&](bool value) { _impl->set_restitution_threshold(value); });
+    RestitutionThreshold.Changed.connect([this](bool value) { _impl->set_restitution_threshold(value); });
 
     HitEventThreshold(settings.HitEventThreshold);
-    HitEventThreshold.Changed.connect([&](bool value) { _impl->set_hit_event_threshold(value); });
+    HitEventThreshold.Changed.connect([this](bool value) { _impl->set_hit_event_threshold(value); });
 }
 
 world::~world() = default;

@@ -11,23 +11,23 @@ namespace tcob::gfx::ui {
 
 spinner::spinner(init const& wi)
     : widget {wi}
-    , Min {{[&](i32 val) -> i32 { return std::min(val, Max()); }}}
-    , Max {{[&](i32 val) -> i32 { return std::max(val, Min()); }}}
-    , Value {{[&](i32 val) -> i32 { return std::clamp(val, Min(), Max()); }}}
+    , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
+    , Max {{[this](i32 val) -> i32 { return std::max(val, Min()); }}}
+    , Value {{[this](i32 val) -> i32 { return std::clamp(val, Min(), Max()); }}}
 {
-    Min.Changed.connect([&](auto const& val) {
+    Min.Changed.connect([this](auto const& val) {
         Value = std::min(val, Value());
         force_redraw(this->name() + ": Min changed");
     });
     Min(0);
-    Max.Changed.connect([&](auto const& val) {
+    Max.Changed.connect([this](auto const& val) {
         Value = std::max(val, Value());
         force_redraw(this->name() + ": Max changed");
     });
     Max(100);
-    Step.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Step changed"); });
+    Step.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Step changed"); });
     Step(5);
-    Value.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Value changed"); });
+    Value.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Value changed"); });
     Value(0);
 
     Class("spinner");

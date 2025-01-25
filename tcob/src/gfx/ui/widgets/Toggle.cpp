@@ -13,7 +13,7 @@ toggle::toggle(init const& wi)
     : widget {wi}
     , _tween {*this}
 {
-    Checked.Changed.connect([&](auto const&) { on_checked_changed(); });
+    Checked.Changed.connect([this](auto const&) { on_checked_changed(); });
 
     Class("toggle");
 }

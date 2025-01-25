@@ -12,11 +12,11 @@ namespace tcob::gfx::ui {
 button::button(init const& wi)
     : widget {wi}
 {
-    Label.Changed.connect([&](auto const&) {
+    Label.Changed.connect([this](auto const&) {
         // TODO: translation hook
         force_redraw(this->name() + ": Label changed");
     });
-    Icon.Changed.connect([&](auto const&) { force_redraw(this->name() + ": Icon changed"); });
+    Icon.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Icon changed"); });
 
     Class("button");
 }
