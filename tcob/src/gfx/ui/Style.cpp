@@ -45,19 +45,19 @@ auto style_flags::score(widget_flags other) const -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto style_collection::get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style*
+auto style_collection::get(widget_style_selectors const& select) const -> style*
 {
     style* bestCandidate {nullptr};
     i32    bestScore {std::numeric_limits<i32>::min()};
 
     for (auto const& [styleName, styleFlags, styleAttribs, style] : _styles) {
-        if (styleName != name) { continue; }
+        if (styleName != select.Class) { continue; }
 
         // check attributes
-        if (!styleAttribs.check(attribs)) { continue; }
+        if (!styleAttribs.check(select.Attributes)) { continue; }
 
         // check flags
-        i32 const score {styleFlags.score(flags)};
+        i32 const score {styleFlags.score(select.Flags)};
         if (score == bestScore) {
             bestCandidate = style.get();
         } else if (score > bestScore) {

@@ -165,7 +165,12 @@ void scrollbar::calculate_value(point_f mp)
 auto scrollbar::get_thumb_style(widget_flags flags) -> thumb_style*
 {
     assert(Style);
-    return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(Style->ThumbClass, flags, {}));
+    widget_style_selectors const selectors {
+        .Class      = Style->ThumbClass,
+        .Flags      = flags,
+        .Attributes = {},
+    };
+    return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(selectors));
 }
 
 } // namespace ui

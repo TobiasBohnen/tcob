@@ -17,7 +17,12 @@ inline auto widget::current_style() const -> T*
 template <std::derived_from<style> T>
 inline auto widget::get_sub_style(string const& styleClass, widget_flags flags) const -> T*
 {
-    return static_cast<T*>(styles().get(styleClass, flags, attributes()));
+    widget_style_selectors const selectors {
+        .Class      = styleClass,
+        .Flags      = flags,
+        .Attributes = attributes(),
+    };
+    return static_cast<T*>(styles().get(selectors));
 }
 
 }

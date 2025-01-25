@@ -198,7 +198,8 @@ concept SubmitTarget = requires(Target target, string const& name, widget_attrib
 
 ////////////////////////////////////////////////////////////
 
-struct widget_flags {
+class TCOB_API widget_flags {
+public:
     bool Focus {false};
     bool Active {false};
     bool Hover {false};
@@ -210,7 +211,19 @@ struct widget_flags {
 
 ////////////////////////////////////////////////////////////
 
-struct linear_gradient {
+class TCOB_API widget_style_selectors {
+public:
+    string            Class;
+    widget_flags      Flags;
+    widget_attributes Attributes;
+
+    auto operator==(widget_style_selectors const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API linear_gradient {
+public:
     degree_f       Angle {0};
     color_gradient Colors;
 
@@ -219,7 +232,8 @@ struct linear_gradient {
 
 ////////////////////////////////////////////////////////////
 
-struct radial_gradient {
+class TCOB_API radial_gradient {
+public:
     length         InnerRadius {0.0f, length::type::Relative};
     length         OuterRadius {1.0f, length::type::Relative};
     size_f         Scale {size_f::One};
@@ -230,7 +244,8 @@ struct radial_gradient {
 
 ////////////////////////////////////////////////////////////
 
-struct box_gradient {
+class TCOB_API box_gradient {
+public:
     length         Radius {0.25f, length::type::Relative};
     length         Feather {0.50f, length::type::Relative};
     color_gradient Colors;
@@ -240,7 +255,8 @@ struct box_gradient {
 
 ////////////////////////////////////////////////////////////
 
-struct nine_patch {
+class TCOB_API nine_patch {
+public:
     assets::asset_ptr<texture> Texture;
     string                     Region {"default"};
     rect_f                     UV;

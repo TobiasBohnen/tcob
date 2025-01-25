@@ -208,14 +208,39 @@ auto widget::can_tab_stop() const -> bool
     return TabStop->Enabled && is_enabled() && is_visible() && !_inert;
 }
 
+void widget::on_styles_changed()
+{
+    widget_style_selectors const newSelectors {
+        .Class      = Class(),
+        .Flags      = flags(),
+        .Attributes = attributes(),
+    };
+
+    _style         = _form->Styles->get(newSelectors);
+    _lastSelectors = newSelectors;
+
+    if (Tooltip) {
+        widget_style_selectors const ttNewSelectors {
+            .Class      = Tooltip->Class(),
+            .Flags      = Tooltip->flags(),
+            .Attributes = Tooltip->attributes(),
+        };
+        Tooltip->_style = _form->Styles->get(ttNewSelectors);
+    }
+}
+
 void widget::prepare_redraw()
 {
-    // TODO: only update if any attribute or form::Styles changes
-    auto* newStyle {_form->Styles->get(Class(), flags(), attributes())};
-    if (newStyle == _style) {
-        // logger::Error("möp");
+    widget_style_selectors const newSelectors {
+        .Class      = Class(),
+        .Flags      = flags(),
+        .Attributes = attributes(),
+    };
+
+    if (_lastSelectors != newSelectors) {
+        _style         = _form->Styles->get(newSelectors);
+        _lastSelectors = newSelectors;
     }
-    _style = newStyle;
 
     if (Tooltip) {
         Tooltip->prepare_redraw();
@@ -503,14 +528,6 @@ void widget::deactivate()
     if (_flags.Active) {
         _flags.Active = false;
         force_redraw(_name + ": Active changed");
-    }
-}
-
-void widget::on_styles_changed()
-{
-    _style = _form->Styles->get(Class(), flags(), attributes());
-    if (Tooltip) {
-        Tooltip->_style = _form->Styles->get(Tooltip->Class(), Tooltip->flags(), Tooltip->attributes());
     }
 }
 

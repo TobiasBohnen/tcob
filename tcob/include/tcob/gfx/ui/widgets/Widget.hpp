@@ -179,7 +179,10 @@ private:
     form*        _form {nullptr};
     widget*      _parent {nullptr};
     style*       _style {nullptr};
-    string       _name;
+
+    widget_style_selectors _lastSelectors;
+
+    string _name;
 };
 
 ////////////////////////////////////////////////////////////

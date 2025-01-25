@@ -315,6 +315,8 @@ public:
 
     auto check(widget_attributes const& widgetAttribs) const -> bool;
 
+    auto operator==(style_attributes const& other) const -> bool = default;
+
 private:
     std::unordered_map<string, std::set<widget_attribute_types>> _values;
 };
@@ -334,6 +336,8 @@ public:
     auto operator==(style_flags const& other) const -> bool = default;
 };
 
+////////////////////////////////////////////////////////////
+
 class TCOB_API style_collection final {
 public:
     template <std::derived_from<style> T>
@@ -342,7 +346,7 @@ public:
     template <std::derived_from<widget> T>
     auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<typename T::style>;
 
-    auto get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style*;
+    auto get(widget_style_selectors const& select) const -> style*;
 
     void clear();
 
