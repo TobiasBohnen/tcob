@@ -18,58 +18,51 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-concept TweenFunction =
-    requires(T& t, f32 time) {
-        typename T::type;
+namespace detail {
 
-        { t.operator()(time) } -> std::same_as<typename T::type>;
+    class TCOB_API tween_base : public updatable {
+    public:
+        explicit tween_base(milliseconds duration);
+        tween_base(tween_base const& other) noexcept                    = delete;
+        auto operator=(tween_base const& other) noexcept -> tween_base& = delete;
+        tween_base(tween_base&& other) noexcept                         = delete;
+        auto operator=(tween_base&& other) noexcept -> tween_base&      = delete;
+        ~tween_base() override;
+
+        signal<> Finished;
+
+        std::optional<milliseconds> Interval {};
+
+        auto progress() const -> f64;
+        auto status() const -> playback_status;
+        auto is_looping() const -> bool;
+
+        void start(playback_mode mode = playback_mode::Normal);
+        void stop();
+        void restart();
+
+        void pause();
+        void resume();
+        void toggle_pause();
+
+    private:
+        void on_update(milliseconds deltaTime) final;
+
+        void virtual update_values() = 0;
+
+        milliseconds _duration {0};
+        milliseconds _elapsedTime {0};
+        milliseconds _currentInterval {0};
+
+        playback_status _status {playback_status::Stopped};
+        playback_mode   _mode {};
     };
+}
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API tween_base : public updatable {
-public:
-    explicit tween_base(milliseconds duration);
-    tween_base(tween_base const& other) noexcept                    = delete;
-    auto operator=(tween_base const& other) noexcept -> tween_base& = delete;
-    tween_base(tween_base&& other) noexcept                         = delete;
-    auto operator=(tween_base&& other) noexcept -> tween_base&      = delete;
-    ~tween_base() override;
-
-    signal<> Finished;
-
-    std::optional<milliseconds> Interval {};
-
-    auto progress() const -> f64;
-    auto status() const -> playback_status;
-    auto is_looping() const -> bool;
-
-    void start(playback_mode mode = playback_mode::Normal);
-    void stop();
-    void restart();
-
-    void pause();
-    void resume();
-    void toggle_pause();
-
-private:
-    void on_update(milliseconds deltaTime) final;
-
-    void virtual update_values() = 0;
-
-    milliseconds _duration {0};
-    milliseconds _elapsedTime {0};
-    milliseconds _currentInterval {0};
-
-    playback_status _status {playback_status::Stopped};
-    playback_mode   _mode {};
-};
-
-////////////////////////////////////////////////////////////
-
-template <TweenFunction Func>
-class tween final : public tween_base {
+template <easing::Function Func>
+class tween final : public detail::tween_base {
 public:
     using func_type  = Func;
     using value_type = typename Func::type;
@@ -101,10 +94,10 @@ public:
 private:
     void on_update(milliseconds deltaTime) override;
 
-    std::queue<std::shared_ptr<tween_base>> _queue {};
-    bool                                    _isRunning {false};
-    bool                                    _isLooping {false};
-    playback_mode                           _mode {};
+    std::queue<std::shared_ptr<detail::tween_base>> _queue {};
+    bool                                            _isRunning {false};
+    bool                                            _isLooping {false};
+    playback_mode                                   _mode {};
 };
 
 template <typename T>

@@ -11,7 +11,7 @@
 namespace tcob::random {
 ////////////////////////////////////////////////////////////
 
-class uniform_distribution_base {
+class core_uniform_distribution {
 public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;

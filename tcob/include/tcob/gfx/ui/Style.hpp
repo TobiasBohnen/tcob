@@ -260,19 +260,19 @@ namespace element {
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-class TCOB_API style_base {
+class TCOB_API style {
 public:
-    style_base()                                                    = default;
-    style_base(style_base const& other) noexcept                    = default;
-    auto operator=(style_base const& other) noexcept -> style_base& = default;
-    style_base(style_base&& other) noexcept                         = default;
-    auto operator=(style_base&& other) noexcept -> style_base&      = default;
-    virtual ~style_base()                                           = default;
+    style()                                               = default;
+    style(style const& other) noexcept                    = default;
+    auto operator=(style const& other) noexcept -> style& = default;
+    style(style&& other) noexcept                         = default;
+    auto operator=(style&& other) noexcept -> style&      = default;
+    virtual ~style()                                      = default;
 
     void virtual offset_content(rect_f& /* bounds */, bool /* isHitTest*/) const { }
 };
 
-class TCOB_API style : public style_base {
+class TCOB_API widget_style : public style {
 public:
     thickness Padding {};
     thickness Margin {};
@@ -282,7 +282,7 @@ public:
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 };
 
-class TCOB_API background_style : public style {
+class TCOB_API background_style : public widget_style {
 public:
     ui_paint        Background {colors::Transparent};
     element::shadow DropShadow {colors::Transparent, length {5, length::type::Absolute}, length {5, length::type::Absolute}};
@@ -291,17 +291,17 @@ public:
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 };
 
-class TCOB_API thumb_style : public style_base {
+class TCOB_API thumb_style : public style {
 public:
     element::thumb Thumb;
 };
 
-class TCOB_API nav_arrows_style : public style_base {
+class TCOB_API nav_arrows_style : public style {
 public:
     element::nav_arrow NavArrow;
 };
 
-class TCOB_API item_style : public style_base {
+class TCOB_API item_style : public style {
 public:
     element::item Item;
 };
@@ -336,18 +336,18 @@ public:
 
 class TCOB_API style_collection final {
 public:
-    template <std::derived_from<style_base> T>
+    template <std::derived_from<style> T>
     auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<T>;
 
     template <std::derived_from<widget> T>
     auto create(string const& name, style_flags flags, style_attributes const& attribs = {}) -> std::shared_ptr<typename T::style>;
 
-    auto get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style_base*;
+    auto get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style*;
 
     void clear();
 
 private:
-    std::vector<std::tuple<string, style_flags, style_attributes, std::shared_ptr<style_base>>> _styles;
+    std::vector<std::tuple<string, style_flags, style_attributes, std::shared_ptr<style>>> _styles;
 };
 
 }

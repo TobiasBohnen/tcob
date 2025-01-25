@@ -45,10 +45,10 @@ auto style_flags::score(widget_flags other) const -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto style_collection::get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style_base*
+auto style_collection::get(string const& name, widget_flags flags, widget_attributes const& attribs) const -> style*
 {
-    style_base* bestCandidate {nullptr};
-    i32         bestScore {std::numeric_limits<i32>::min()};
+    style* bestCandidate {nullptr};
+    i32    bestScore {std::numeric_limits<i32>::min()};
 
     for (auto const& [styleName, styleFlags, styleAttribs, style] : _styles) {
         if (styleName != name) { continue; }
@@ -156,7 +156,7 @@ namespace element {
     }
 }
 
-void style::offset_content(rect_f& bounds, bool isHitTest) const
+void widget_style::offset_content(rect_f& bounds, bool isHitTest) const
 {
     bounds -= Margin;
     if (!isHitTest) {

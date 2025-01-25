@@ -212,7 +212,7 @@ void form::on_draw_to(render_target& target)
 {
     // set cursor
     if (_window && _window->Cursor() && _topWidget && _topWidget->_style) {
-        _window->Cursor->ActiveMode = _topWidget->current_style<style>()->Cursor;
+        _window->Cursor->ActiveMode = _topWidget->current_style<widget_style>()->Cursor;
     }
 
     size_i const bounds {size_i {Bounds->Size}};

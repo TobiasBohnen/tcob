@@ -15,6 +15,15 @@
 #include "tcob/core/Point.hpp"
 
 namespace tcob::easing {
+////////////////////////////////////////////////////////////
+
+template <typename T>
+concept Function =
+    requires(T& t, f32 time) {
+        typename T::type;
+
+        { t.operator()(time) } -> std::same_as<typename T::type>;
+    };
 
 ////////////////////////////////////////////////////////////
 

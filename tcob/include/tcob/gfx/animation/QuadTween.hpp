@@ -29,27 +29,30 @@ concept QuadTweenFunction =
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_tween_base : public tween_base {
-public:
-    quad_tween_base(milliseconds duration);
+namespace detail {
+    class TCOB_API quad_tween_base : public tween_base {
+    public:
+        quad_tween_base(milliseconds duration);
 
-    void add_quad(std::reference_wrapper<quad> q);
+        void add_quad(std::reference_wrapper<quad> q);
 
-    void clear_quads();
+        void clear_quads();
 
-protected:
-    auto source_quads() const -> std::vector<quad> const&;
-    void copy_to_dest(std::span<quad> quads);
+    protected:
+        auto source_quads() const -> std::vector<quad> const&;
+        void copy_to_dest(std::span<quad> quads);
 
-private:
-    std::vector<std::reference_wrapper<quad>> _dstQuads {};
-    std::vector<quad>                         _srcQuads {};
-};
+    private:
+        std::vector<std::reference_wrapper<quad>> _dstQuads {};
+        std::vector<quad>                         _srcQuads {};
+    };
+
+}
 
 ////////////////////////////////////////////////////////////
 
 template <QuadTweenFunction... Funcs>
-class quad_tween : public quad_tween_base {
+class quad_tween : public detail::quad_tween_base {
 public:
     quad_tween(milliseconds duration, Funcs&&... ptr);
 
@@ -78,7 +81,7 @@ public:
 private:
     void on_update(milliseconds deltaTime) override;
 
-    std::unordered_map<u8, std::shared_ptr<quad_tween_base>> _effects {};
+    std::unordered_map<u8, std::shared_ptr<detail::quad_tween_base>> _effects {};
 };
 
 ////////////////////////////////////////////////////////////

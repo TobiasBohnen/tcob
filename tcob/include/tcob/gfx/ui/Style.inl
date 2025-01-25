@@ -8,7 +8,7 @@
 
 namespace tcob::gfx::ui {
 
-template <std::derived_from<style_base> T>
+template <std::derived_from<style> T>
 inline auto style_collection::create(string const& name, style_flags flags, style_attributes const& attribs) -> std::shared_ptr<T>
 {
     std::shared_ptr<T> retValue {std::make_shared<T>()};

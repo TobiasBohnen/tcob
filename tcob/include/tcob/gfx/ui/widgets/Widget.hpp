@@ -77,7 +77,7 @@ public:
     auto hit_test_bounds() const -> rect_f;
     auto virtual scroll_offset() const -> point_f;
 
-    template <std::derived_from<style_base> T>
+    template <std::derived_from<style> T>
     auto current_style() const -> T*;
 
     auto global_to_content(point_i p) const -> point_f;
@@ -107,7 +107,7 @@ protected:
 
     auto styles() const -> style_collection const&;
 
-    template <std::derived_from<style_base> T>
+    template <std::derived_from<style> T>
     auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;
 
     void virtual on_paint(widget_painter& painter) = 0;
@@ -178,7 +178,7 @@ private:
     f32          _alpha {1.0f};
     form*        _form {nullptr};
     widget*      _parent {nullptr};
-    style_base*  _style {nullptr};
+    style*       _style {nullptr};
     string       _name;
 };
 

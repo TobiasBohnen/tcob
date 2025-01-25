@@ -15,7 +15,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API slider : public widget {
 public:
-    class TCOB_API style : public ui::style {
+    class TCOB_API style : public widget_style {
     public:
         element::bar Bar;
         utf8_string  ThumbClass {"slider_thumb"};

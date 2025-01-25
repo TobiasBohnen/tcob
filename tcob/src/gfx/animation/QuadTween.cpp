@@ -12,32 +12,34 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-quad_tween_base::quad_tween_base(milliseconds duration)
-    : tween_base {duration}
-{
-}
+namespace detail {
+    quad_tween_base::quad_tween_base(milliseconds duration)
+        : tween_base {duration}
+    {
+    }
 
-void quad_tween_base::add_quad(std::reference_wrapper<quad> q)
-{
-    _dstQuads.emplace_back(q);
-    _srcQuads.push_back(q);
-}
+    void quad_tween_base::add_quad(std::reference_wrapper<quad> q)
+    {
+        _dstQuads.emplace_back(q);
+        _srcQuads.push_back(q);
+    }
 
-void quad_tween_base::clear_quads()
-{
-    _dstQuads.clear();
-    _srcQuads.clear();
-}
+    void quad_tween_base::clear_quads()
+    {
+        _dstQuads.clear();
+        _srcQuads.clear();
+    }
 
-auto quad_tween_base::source_quads() const -> std::vector<quad> const&
-{
-    return _srcQuads;
-}
+    auto quad_tween_base::source_quads() const -> std::vector<quad> const&
+    {
+        return _srcQuads;
+    }
 
-void quad_tween_base::copy_to_dest(std::span<quad> quads)
-{
-    for (usize i {0}; i < quads.size(); ++i) {
-        _dstQuads[i].get() = quads[i];
+    void quad_tween_base::copy_to_dest(std::span<quad> quads)
+    {
+        for (usize i {0}; i < quads.size(); ++i) {
+            _dstQuads[i].get() = quads[i];
+        }
     }
 }
 

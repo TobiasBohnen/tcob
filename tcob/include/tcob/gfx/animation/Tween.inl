@@ -10,26 +10,26 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-template <TweenFunction Func>
+template <easing::Function Func>
 inline tween<Func>::tween(milliseconds duration)
     : tween_base {duration}
 {
 }
 
-template <TweenFunction Func>
+template <easing::Function Func>
 inline tween<Func>::tween(milliseconds duration, func_type&& func)
     : tween_base {duration}
     , Function {std::move(func)}
 {
 }
 
-template <TweenFunction Func>
+template <easing::Function Func>
 inline auto tween<Func>::add_output(value_type* dest) -> connection
 {
     return Value.Changed.connect([dest](value_type const& val) { *dest = val; });
 }
 
-template <TweenFunction Func>
+template <easing::Function Func>
 inline void tween<Func>::update_values()
 {
     Value = Function(progress());

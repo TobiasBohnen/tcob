@@ -19,7 +19,7 @@ class TCOB_API terminal : public widget {
     static constexpr std::pair<color, color> DEFAULT_COLORS {std::pair {colors::White, colors::Black}};
 
 public:
-    class TCOB_API style : public ui::style {
+    class TCOB_API style : public widget_style {
     public:
         element::text  Text;
         element::caret Caret;
