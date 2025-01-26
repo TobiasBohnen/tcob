@@ -114,12 +114,12 @@ auto form::all_widgets() const -> std::vector<widget*>
 void form::clear()
 {
     _layout.clear();
-    force_redraw("clearing");
+    force_redraw(this->name() + "clearing");
 }
 
 void form::force_redraw(string const& reason)
 {
-    if (!_redrawWidgets) {
+    if (!_updateWidgetStyle) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
     }
     _updateWidgetStyle = true;
@@ -128,24 +128,14 @@ void form::force_redraw(string const& reason)
 
 auto form::focus_nav_target(string const& widget, direction dir) -> bool
 {
-    if (!NavMap->contains(widget)) {
-        return false;
-    }
+    if (!NavMap->contains(widget)) { return false; }
 
     string navTarget;
     switch (dir) {
-    case direction::Left:
-        navTarget = (*NavMap)[widget].Left;
-        break;
-    case direction::Right:
-        navTarget = (*NavMap)[widget].Right;
-        break;
-    case direction::Up:
-        navTarget = (*NavMap)[widget].Up;
-        break;
-    case direction::Down:
-        navTarget = (*NavMap)[widget].Down;
-        break;
+    case direction::Left: navTarget = (*NavMap)[widget].Left; break;
+    case direction::Right: navTarget = (*NavMap)[widget].Right; break;
+    case direction::Up: navTarget = (*NavMap)[widget].Up; break;
+    case direction::Down: navTarget = (*NavMap)[widget].Down; break;
     case direction::None: break;
     }
 
@@ -437,7 +427,7 @@ void form::on_bounds_changed()
 {
     _renderer.set_bounds(Bounds());
 
-    force_redraw("bounds changed");
+    force_redraw(this->name() + "bounds changed");
     on_styles_changed();
 }
 

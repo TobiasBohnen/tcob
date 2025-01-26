@@ -58,7 +58,6 @@ protected:
 
 private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
-    auto get_scroll_min_value(orientation orien) const -> f32;
     auto get_scroll_max_value(orientation orien) const -> f32;
 
     std::shared_ptr<layout> _layout;

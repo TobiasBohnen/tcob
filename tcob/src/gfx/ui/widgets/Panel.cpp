@@ -24,35 +24,14 @@ panel::panel(init const& wi)
     Class("panel");
 }
 
-auto panel::get_scroll_min_value(orientation orien) const -> f32
-{
-    f32 retValue {std::numeric_limits<f32>::max()};
-    for (auto const& w : widgets()) {
-        auto const& bounds {w->Bounds()};
-        if (orien == orientation::Horizontal) {
-            retValue = std::min(retValue, bounds.left());
-        } else if (orien == orientation::Vertical) {
-            retValue = std::min(retValue, bounds.top());
-        }
-    }
-    retValue = std::min<f32>(retValue, 0);
-
-    return retValue * 1.05f;
-}
-
 auto panel::get_scroll_max_value(orientation orien) const -> f32
 {
-    f32 retValue {0.0f};
+    f32         retValue {0.0f};
+    auto const& content {content_bounds()};
     for (auto const& w : widgets()) {
         auto const& bounds {w->Bounds()};
-        auto const  content {content_bounds()};
-        if (orien == orientation::Horizontal) {
-            retValue = std::max(retValue, bounds.right() - content.width());
-        } else if (orien == orientation::Vertical) {
-            retValue = std::max(retValue, bounds.bottom() - content.height());
-        }
+        retValue = std::max(retValue, orien == orientation::Horizontal ? bounds.right() - content.width() : bounds.bottom() - content.height());
     }
-
     return retValue * 1.05f;
 }
 
@@ -60,8 +39,8 @@ void panel::prepare_redraw()
 {
     widget_container::prepare_redraw();
 
-    _vScrollbar.Min = get_scroll_min_value(orientation::Vertical);
-    _hScrollbar.Min = get_scroll_min_value(orientation::Horizontal);
+    _vScrollbar.Min = 0;
+    _hScrollbar.Min = 0;
     _vScrollbar.Max = get_scroll_max_value(orientation::Vertical);
     _hScrollbar.Max = get_scroll_max_value(orientation::Horizontal);
 }
@@ -158,16 +137,14 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     widget_container::on_mouse_hover(ev);
 
-    if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (_vScrollbar.mouse_hover(ev.Position)) {
-            force_redraw(this->name() + ": vertical scrollbar hover");
-            ev.Handled = true;
-        }
+    if (_vScrollbar.mouse_hover(ev.Position)) {
+        force_redraw(this->name() + ": vertical scrollbar hover");
+        ev.Handled = true;
+    }
 
-        if (_hScrollbar.mouse_hover(ev.Position)) {
-            force_redraw(this->name() + ": horizontal scrollbar hover");
-            ev.Handled = true;
-        }
+    if (_hScrollbar.mouse_hover(ev.Position)) {
+        force_redraw(this->name() + ": horizontal scrollbar hover");
+        ev.Handled = true;
     }
 }
 
@@ -175,16 +152,14 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     widget_container::on_mouse_drag(ev);
 
-    if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (_vScrollbar.mouse_drag(ev.Position)) {
-            force_redraw(this->name() + ": vertical scrollbar dragged");
-            ev.Handled = true;
-        }
+    if (_vScrollbar.mouse_drag(ev.Position)) {
+        force_redraw(this->name() + ": vertical scrollbar dragged");
+        ev.Handled = true;
+    }
 
-        if (_hScrollbar.mouse_drag(ev.Position)) {
-            force_redraw(this->name() + ": horizontal scrollbar dragged");
-            ev.Handled = true;
-        }
+    if (_hScrollbar.mouse_drag(ev.Position)) {
+        force_redraw(this->name() + ": horizontal scrollbar dragged");
+        ev.Handled = true;
     }
 }
 
@@ -223,7 +198,7 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (auto const* style {current_style<panel::style>()}) {
             orientation  orien {};
-            bool         invert {false};
+            bool         invert {};
             milliseconds delay {};
 
             if (ev.Scroll.Y != 0) {
@@ -236,7 +211,7 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
                 delay  = style->HScrollBar.Bar.Delay;
             }
 
-            f32 const min {get_scroll_min_value(orien)};
+            f32 const min {0};
             f32 const max {get_scroll_max_value(orien)};
             f32 const diff {(max - min) / (invert ? -5 : 5)};
             if (orien == orientation::Vertical) {
