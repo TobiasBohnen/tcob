@@ -181,7 +181,7 @@ void polygons::clip(std::vector<polygon>& polygons, std::span<polygon const> oth
 
     polygons.clear();
 
-    ClipType type {ClipType::None};
+    ClipType type {ClipType::NoClip};
     switch (mode) {
     case clip_mode::Intersection: type = ClipType::Intersection; break;
     case clip_mode::Union: type = ClipType::Union; break;
