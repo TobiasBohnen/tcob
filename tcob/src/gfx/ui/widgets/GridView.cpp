@@ -40,14 +40,9 @@ void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
     force_redraw(this->name() + ": column headers set");
 }
 
-void grid_view::change_column(isize idx, utf8_string const& col)
+auto grid_view::column_size() const -> isize
 {
-    if (idx < 0 || idx >= std::ssize(_columnHeaders)) { return; }
-
-    _columnHeaders[idx] = col;
-    _columnSizes[idx]   = std::ssize(col);
-
-    force_redraw(this->name() + ": column header changed");
+    return std::ssize(_columnHeaders);
 }
 
 void grid_view::add_row(std::vector<utf8_string> const& row)

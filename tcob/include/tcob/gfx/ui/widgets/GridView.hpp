@@ -39,7 +39,7 @@ public:
     prop<bool>    HeaderSelectable;
 
     void set_columns(std::vector<utf8_string> const& col, bool clearRows = true);
-    void change_column(isize idx, utf8_string const& col);
+    auto column_size() const -> isize;
 
     void add_row(std::vector<utf8_string> const& row);
     void clear_rows();
