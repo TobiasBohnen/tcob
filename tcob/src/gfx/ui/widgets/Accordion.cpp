@@ -10,15 +10,17 @@
 
 namespace tcob::gfx::ui {
 
+static constexpr isize INVALID {-1};
+
 accordion::accordion(init const& wi)
     : widget_container {wi}
-    , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
-    , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_sections) - 1); }}}
+    , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_sections) - 1); }}}
+    , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_sections) - 1); }}}
 {
     ActiveSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveSection changed"); });
-    ActiveSectionIndex(-1);
+    ActiveSectionIndex(INVALID);
     HoveredSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredSection changed"); });
-    HoveredSectionIndex(-1);
+    HoveredSectionIndex(INVALID);
     MaximizeActiveSection.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaximizeActiveSection changed"); });
     MaximizeActiveSection(false);
 
@@ -89,20 +91,20 @@ void accordion::on_paint(widget_painter& painter)
 
         // sections
         f32 const sectionHeight {style->SectionBarHeight.calc(rect.height())};
-        _sectionRects.clear();
+        _sectionRectCache.clear();
         if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
             isize const i {ActiveSectionIndex()};
             if (auto const* sectionStyle {get_section_style(i)}) {
                 rect_f const sectionRect {get_section_rect(*sectionStyle, 0, sectionHeight, rect)};
                 painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
-                _sectionRects.push_back(sectionRect);
+                _sectionRectCache.push_back(sectionRect);
             }
         } else {
             for (isize i {0}; i < std::ssize(_sections); ++i) {
                 if (auto const* sectionStyle {get_section_style(i)}) {
                     rect_f const sectionRect {get_section_rect(*sectionStyle, i, sectionHeight, rect)};
                     painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
-                    _sectionRects.push_back(sectionRect);
+                    _sectionRectCache.push_back(sectionRect);
                 }
             }
         }
@@ -129,20 +131,20 @@ void accordion::on_paint(widget_painter& painter)
 
 void accordion::on_mouse_leave()
 {
-    widget::on_mouse_leave();
+    HoveredSectionIndex = INVALID;
 
-    HoveredSectionIndex = -1;
+    widget::on_mouse_leave();
 }
 
 void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredSectionIndex = -1;
+    HoveredSectionIndex = INVALID;
 
     widget_container::on_mouse_hover(ev);
 
     auto const mp {global_to_local(ev.Position)};
-    for (i32 i {0}; i < std::ssize(_sectionRects); ++i) {
-        if (!_sectionRects[i].contains(mp)) { continue; }
+    for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
+        if (!_sectionRectCache[i].contains(mp)) { continue; }
 
         if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
             HoveredSectionIndex = ActiveSectionIndex();
@@ -164,7 +166,7 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
 
         if (HoveredSectionIndex >= 0) {
             if (ActiveSectionIndex == HoveredSectionIndex) {
-                ActiveSectionIndex = -1;
+                ActiveSectionIndex = INVALID;
                 if (MaximizeActiveSection()) { HoveredSectionIndex = 0; }
             } else {
                 ActiveSectionIndex = HoveredSectionIndex();

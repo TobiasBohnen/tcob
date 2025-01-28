@@ -9,12 +9,14 @@
 
 namespace tcob::gfx::ui {
 
+static constexpr isize INVALID {-1};
+
 cycle_button::cycle_button(init const& wi)
     : widget {wi}
-    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_items) - 1); }}}
 {
     SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
-    SelectedItemIndex(-1);
+    SelectedItemIndex(INVALID);
 
     Class("cycle_button");
 }

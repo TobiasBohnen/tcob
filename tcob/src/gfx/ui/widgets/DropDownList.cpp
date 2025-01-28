@@ -10,16 +10,18 @@
 
 namespace tcob::gfx::ui {
 
+static constexpr isize INVALID {-1};
+
 drop_down_list::drop_down_list(init const& wi)
     : widget {wi}
-    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
-    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_items) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_items) - 1); }}}
+    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_items) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
     SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
-    SelectedItemIndex(-1);
+    SelectedItemIndex(INVALID);
     HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
-    HoveredItemIndex(-1);
+    HoveredItemIndex(INVALID);
 
     Class("drop_down_list");
 }
@@ -166,9 +168,10 @@ void drop_down_list::on_paint(widget_painter& painter)
 
 void drop_down_list::on_mouse_leave()
 {
+    HoveredItemIndex = INVALID;
+
     widget::on_mouse_leave();
 
-    HoveredItemIndex = -1;
     if (_mouseOverBox) {
         _mouseOverBox = false;
         force_redraw(this->name() + ": mouse left");
@@ -177,7 +180,8 @@ void drop_down_list::on_mouse_leave()
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredItemIndex = -1;
+    HoveredItemIndex = INVALID;
+
     bool const wasMouseOverBox {_mouseOverBox};
     _mouseOverBox = false;
 
@@ -223,7 +227,7 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         _vScrollbar.mouse_down(ev.Position);
         if (_mouseOverBox) {
             set_extended(!_isExtended);
-        } else if (HoveredItemIndex != -1) {
+        } else if (HoveredItemIndex != INVALID) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
                 set_extended(false); // close on select

@@ -11,19 +11,21 @@
 
 namespace tcob::gfx::ui {
 
+static constexpr isize INVALID {-1};
+
 list_box::list_box(init const& wi)
     : vscroll_widget {wi}
-    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
-    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(get_items()) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(get_items()) - 1); }}}
+    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(get_items()) - 1); }}}
 {
     SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
-    SelectedItemIndex(-1);
+    SelectedItemIndex(INVALID);
     HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
-    HoveredItemIndex(-1);
+    HoveredItemIndex(INVALID);
 
     Filter.Changed.connect([this](auto const& val) {
-        HoveredItemIndex  = -1;
-        SelectedItemIndex = -1;
+        HoveredItemIndex  = INVALID;
+        SelectedItemIndex = INVALID;
         set_scrollbar_value(0);
 
         _filteredItems.clear();
@@ -60,8 +62,8 @@ void list_box::clear_items()
 {
     _items.clear();
     _filteredItems.clear();
-    SelectedItemIndex = -1;
-    HoveredItemIndex  = -1;
+    SelectedItemIndex = INVALID;
+    HoveredItemIndex  = INVALID;
     force_redraw(this->name() + ": items cleared");
 }
 
@@ -177,29 +179,28 @@ void list_box::on_key_down(input::keyboard::event const& ev)
 
 void list_box::on_mouse_leave()
 {
-    vscroll_widget::on_mouse_leave();
+    HoveredItemIndex = INVALID;
 
-    HoveredItemIndex = -1;
+    vscroll_widget::on_mouse_leave();
 }
 
 void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredItemIndex = -1;
+    HoveredItemIndex = INVALID;
 
     vscroll_widget::on_mouse_hover(ev);
 
     if (auto const* style {current_style<list_box::style>()}) {
         rect_f const listRect {global_content_bounds()};
-        if (listRect.contains(ev.Position)) {
-            // over list
-            f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
-            for (i32 i {0}; i < item_count(); ++i) {
-                rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-                if (itemRect.contains(ev.Position)) {
-                    HoveredItemIndex = i;
-                    ev.Handled       = true;
-                    return;
-                }
+        if (!listRect.contains(ev.Position)) { return; }
+        // over list
+        f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
+        for (i32 i {0}; i < item_count(); ++i) {
+            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+            if (itemRect.contains(ev.Position)) {
+                HoveredItemIndex = i;
+                ev.Handled       = true;
+                return;
             }
         }
     }
@@ -210,7 +211,7 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
     vscroll_widget::on_mouse_down(ev);
 
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        if (HoveredItemIndex != -1) {
+        if (HoveredItemIndex != INVALID) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
                 ev.Handled        = true;

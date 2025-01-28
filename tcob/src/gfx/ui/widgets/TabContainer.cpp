@@ -10,15 +10,17 @@
 
 namespace tcob::gfx::ui {
 
+static constexpr isize INVALID {-1};
+
 tab_container::tab_container(init const& wi)
     : widget_container {wi}
-    , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
-    , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, -1, std::ssize(_tabs) - 1); }}}
+    , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_tabs) - 1); }}}
+    , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_tabs) - 1); }}}
 {
     ActiveTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveTab changed"); });
-    ActiveTabIndex(-1);
+    ActiveTabIndex(INVALID);
     HoveredTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
-    HoveredTabIndex(-1);
+    HoveredTabIndex(INVALID);
 
     Class("tab_container");
 }
@@ -98,7 +100,7 @@ void tab_container::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // tabs
-        _tabRects.clear();
+        _tabRectCache.clear();
         if (style->TabBarPosition != position::Hidden) {
             rect_f tabBarRowRect {rect};
             tabBarRowRect.Size.Height = style->TabBarHeight.calc(tabBarRowRect.height());
@@ -111,7 +113,7 @@ void tab_container::on_paint(widget_painter& painter)
                 if (auto const* tabStyle {get_tab_style(i)}) {
                     rect_f const tabRect {get_tab_rect(*style, *tabStyle, i, tabBarRowRect)};
                     painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
-                    _tabRects.push_back(tabRect);
+                    _tabRectCache.push_back(tabRect);
                 }
             }
         }
@@ -137,20 +139,20 @@ void tab_container::on_paint(widget_painter& painter)
 
 void tab_container::on_mouse_leave()
 {
-    widget::on_mouse_leave();
+    HoveredTabIndex = INVALID;
 
-    HoveredTabIndex = -1;
+    widget::on_mouse_leave();
 }
 
 void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredTabIndex = -1;
+    HoveredTabIndex = INVALID;
 
     widget_container::on_mouse_hover(ev);
 
     auto const mp {global_to_local(ev.Position)};
-    for (i32 i {0}; i < std::ssize(_tabRects); ++i) {
-        if (!_tabRects[i].contains(mp)) { continue; }
+    for (i32 i {0}; i < std::ssize(_tabRectCache); ++i) {
+        if (!_tabRectCache[i].contains(mp)) { continue; }
 
         HoveredTabIndex = i;
         ev.Handled      = true;
@@ -165,7 +167,7 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         force_redraw(this->name() + ": mouse down");
 
-        if (HoveredTabIndex != -1) {
+        if (HoveredTabIndex != INVALID) {
             ActiveTabIndex = HoveredTabIndex();
         }
 

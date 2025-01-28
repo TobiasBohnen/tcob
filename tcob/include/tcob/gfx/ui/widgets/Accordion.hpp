@@ -62,7 +62,7 @@ private:
 
     std::vector<std::shared_ptr<widget>> _sections;
     std::vector<utf8_string>             _sectionLabels;
-    std::vector<rect_f>                  _sectionRects;
+    std::vector<rect_f>                  _sectionRectCache;
 };
 
 }

@@ -74,7 +74,7 @@ private:
 
     std::vector<std::shared_ptr<widget>> _tabs;
     std::vector<utf8_string>             _tabLabels;
-    std::vector<rect_f>                  _tabRects;
+    std::vector<rect_f>                  _tabRectCache;
     bool                                 _isDirty {true};
 };
 
