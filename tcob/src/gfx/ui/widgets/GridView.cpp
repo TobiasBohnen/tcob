@@ -7,13 +7,23 @@
 
 #include <numeric>
 
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 
 namespace tcob::gfx::ui {
 
+static constexpr point_i INVALID {-1, -1};
+
 grid_view::grid_view(init const& wi)
     : vscroll_widget {wi}
 {
+    SelectedCellIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedCell changed"); });
+    SelectedCellIndex(INVALID);
+    HoveredCellIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredCell changed"); });
+    HoveredCellIndex(INVALID);
+
+    HeaderSelectable(false);
+
     Class("grid_view");
 }
 
@@ -61,7 +71,22 @@ void grid_view::clear_rows()
     _columnSizes.clear();
     _columnSizes.resize(_columnHeaders.size());
     set_scrollbar_value(0);
+    SelectedCellIndex = INVALID;
+    HoveredCellIndex  = INVALID;
+
     force_redraw(this->name() + ": rows cleared");
+}
+
+auto grid_view::get_cell(point_i idx) const -> utf8_string
+{
+    if (idx.Y == 0) {
+        if (idx.X >= std::ssize(_columnHeaders)) { return ""; }
+        return _columnHeaders[idx.X];
+    }
+
+    if (idx.Y > std::ssize(_rows)) { return ""; }
+    if (idx.X >= std::ssize(_rows[idx.Y - 1])) { return ""; }
+    return _rows[idx.Y - 1][idx.X];
 }
 
 void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
@@ -77,6 +102,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
         std::vector<f32> colWidths(_columnHeaders.size());
 
         // rows
+        _rowRectCache.clear();
         for (i32 y {0}; y < std::ssize(_rows); ++y) {
             auto const& row {_rows[y]};
             f32         offsetX {0.f};
@@ -86,24 +112,77 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 
                 rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
                 if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                    auto const& cellStyle {get_cell_style({x, y + 1}, style->RowClass)->Item};
+                    auto const& cellStyle {get_cell_style({x, y + 1}, style->RowClass, style->SelectMode)->Item};
                     painter.draw_item(cellStyle, cellRect, row[x]);
+                    _rowRectCache[{x, y + 1}] = cellRect;
                 }
                 offsetX += colWidth;
             }
         }
         f32 offsetX {0.f};
+        // headers
+        _headerRectCache.clear();
         for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-            // headers
-            f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.width())};
+            f32 const colWidth {colWidths[x]};
 
             rect_f const cellRect {get_cell_rect({x, 0}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
             if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                auto const& cellStyle {get_cell_style({x, 0}, style->HeaderClass)->Item};
+                auto const& cellStyle {get_cell_style({x, 0}, style->HeaderClass, style->SelectMode)->Item};
                 painter.draw_item(cellStyle, cellRect, _columnHeaders[x]);
+                _headerRectCache[{x, 0}] = cellRect;
             }
             offsetX += colWidth;
         }
+    }
+}
+
+void grid_view::on_mouse_leave()
+{
+    vscroll_widget::on_mouse_leave();
+
+    HoveredCellIndex = INVALID;
+}
+
+void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
+{
+    HoveredCellIndex = INVALID;
+
+    vscroll_widget::on_mouse_hover(ev);
+
+    if (auto const* style {current_style<grid_view::style>()}) {
+        auto const mp {global_to_local(ev.Position)};
+
+        for (auto const& kvp : _headerRectCache) {
+            if (!kvp.second.contains(mp)) { continue; }
+            if (HeaderSelectable) {
+                HoveredCellIndex = kvp.first;
+                ev.Handled       = true;
+            }
+            return;
+        }
+        for (auto const& kvp : _rowRectCache) {
+            if (!kvp.second.contains(mp)) { continue; }
+            HoveredCellIndex = kvp.first;
+            ev.Handled       = true;
+            return;
+        }
+    }
+}
+
+void grid_view::on_mouse_down(input::mouse::button_event const& ev)
+{
+    vscroll_widget::on_mouse_down(ev);
+
+    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+        force_redraw(this->name() + ": mouse down");
+
+        if (HoveredCellIndex != INVALID) {
+            if (HeaderSelectable || HoveredCellIndex->Y != 0) {
+                SelectedCellIndex = HoveredCellIndex();
+            }
+        }
+
+        ev.Handled = true;
     }
 }
 
@@ -119,10 +198,24 @@ auto grid_view::get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX
     return retValue;
 }
 
-auto grid_view::get_cell_style(point_i /* idx */, string const& className) const -> item_style*
+auto grid_view::get_cell_style(point_i idx, string const& className, select_mode mode) const -> item_style*
 {
-    // TODO: implement Hover and Active cell
-    return get_sub_style<item_style>(className, {});
+    switch (mode) {
+    case select_mode::Cell:
+        return idx == SelectedCellIndex ? get_sub_style<item_style>(className, {.Active = true})
+            : idx == HoveredCellIndex   ? get_sub_style<item_style>(className, {.Hover = true})
+                                        : get_sub_style<item_style>(className, {});
+    case select_mode::Row:
+        return idx.Y == SelectedCellIndex->Y ? get_sub_style<item_style>(className, {.Active = true})
+            : idx.Y == HoveredCellIndex->Y   ? get_sub_style<item_style>(className, {.Hover = true})
+                                             : get_sub_style<item_style>(className, {});
+    case select_mode::Column:
+        return idx.X == SelectedCellIndex->X ? get_sub_style<item_style>(className, {.Active = true})
+            : idx.X == HoveredCellIndex->X   ? get_sub_style<item_style>(className, {.Hover = true})
+                                             : get_sub_style<item_style>(className, {});
+    }
+
+    return nullptr;
 }
 
 auto grid_view::get_column_width(grid_view::style const* style, i32 col, f32 width) const -> f32
