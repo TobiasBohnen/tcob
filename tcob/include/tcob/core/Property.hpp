@@ -93,7 +93,7 @@ public:
     using return_type       = typename Source::return_type;
     using const_return_type = typename Source::const_return_type;
 
-    prop_base() = default;
+    prop_base();
     explicit prop_base(Source source);
     explicit prop_base(T val);
 
@@ -113,6 +113,38 @@ public:
 
 private:
     void set(T const& value, bool force);
+
+    Source _source;
+};
+
+template <Container T, typename Source>
+class prop_base<T, Source> final : public non_copyable {
+public:
+    using container_type    = T;
+    using value_type        = typename container_type::value_type;
+    using return_type       = typename Source::return_type;
+    using const_return_type = typename Source::const_return_type;
+
+    prop_base();
+    explicit prop_base(Source source);
+    explicit prop_base(container_type val);
+
+    operator container_type() const;
+
+    auto operator=(container_type const& value) -> prop_base&;
+
+    auto operator->() const;
+    auto operator*() -> return_type;
+    auto operator*() const -> const_return_type;
+    auto operator()() const -> const_return_type;
+
+    signal<container_type const&> Changed;
+
+    void add(value_type const& element);
+    void set(usize index, value_type const& newValue);
+
+private:
+    void set(container_type const& value, bool force);
 
     Source _source;
 };

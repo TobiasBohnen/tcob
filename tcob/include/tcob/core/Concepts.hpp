@@ -101,6 +101,12 @@ concept Set =
     || std::same_as<T, std::unordered_set<typename T::key_type, typename T::hasher, typename T::key_equal, typename T::allocator_type>>;
 
 template <typename T>
+concept StringLike = std::is_convertible_v<T, string_view>;
+
+template <typename T>
+concept NotStringLikePOD = POD<T> && !StringLike<T> && !std::is_same_v<T, std::span<std::remove_const_t<T>>>;
+
+template <typename T>
 concept Container =
     requires(T& container, typename T::value_type& value) {
         typename T::value_type;
@@ -109,12 +115,6 @@ concept Container =
         { container.resize(usize {}) };
         { container.size() } -> std::same_as<usize>;
         { container.operator[](usize {}) };
-    };
-
-template <typename T>
-concept StringLike = std::is_convertible_v<T, string_view>;
-
-template <typename T>
-concept NotStringLikePOD = POD<T> && !StringLike<T> && !std::is_same_v<T, std::span<std::remove_const_t<T>>>;
+    } && !StringLike<T>;
 
 }
