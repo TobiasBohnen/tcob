@@ -85,6 +85,7 @@ namespace detail {
 
 }
 
+// FIXME: https://developercommunity.visualstudio.com/t/Out-of-line-definition-of-a-constrained-/1306502
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename Source>
@@ -93,26 +94,65 @@ public:
     using return_type       = typename Source::return_type;
     using const_return_type = typename Source::const_return_type;
 
-    prop_base();
-    explicit prop_base(Source source);
-    explicit prop_base(T val);
+    prop_base() = default;
+    explicit prop_base(Source source)
+        : _source {std::move(source)}
+    {
+    }
+    explicit prop_base(T val)
+        : _source {val}
+    {
+    }
 
-    operator T() const;
+    operator T() const
+    {
+        return _source.get();
+    }
 
-    auto operator=(T const& value) -> prop_base&;
-    void operator()(T const& value);
+    auto operator=(T const& value) -> prop_base&
+    {
+        set(value, false);
+        return *this;
+    }
 
-    auto operator->() const;
+    void operator()(T const& value)
+    {
+        set(value, true);
+    }
 
-    auto operator*() -> return_type;
-    auto operator*() const -> const_return_type;
+    auto operator->() const
+    {
+        if constexpr (OverloadsArrowOp<T>) {
+            return _source.get();
+        } else {
+            static_assert(std::is_reference_v<return_type>);
+            return &_source.get();
+        }
+    }
 
-    auto operator()() const -> const_return_type;
+    auto operator*() -> return_type
+    {
+        return _source.get();
+    }
+    auto operator*() const -> const_return_type
+    {
+        return _source.get();
+    }
+
+    auto operator()() const -> const_return_type
+    {
+        return _source.get();
+    }
 
     signal<T const> Changed;
 
 private:
-    void set(T const& value, bool force);
+    void set(T const& value, bool force)
+    {
+        if (_source.set(value, force) && Changed.slot_count() > 0) {
+            Changed(_source.get());
+        }
+    }
 
     Source _source;
 };
@@ -120,31 +160,98 @@ private:
 template <Container T, typename Source>
 class prop_base<T, Source> final : public non_copyable {
 public:
-    using container_type    = T;
-    using value_type        = typename container_type::value_type;
+    using value_type        = typename T::value_type;
     using return_type       = typename Source::return_type;
     using const_return_type = typename Source::const_return_type;
 
-    prop_base();
-    explicit prop_base(Source source);
-    explicit prop_base(container_type val);
+    prop_base() = default;
+    explicit prop_base(Source source)
+        : _source {std::move(source)}
+    {
+    }
+    explicit prop_base(T val)
+        : _source {val}
+    {
+    }
 
-    operator container_type() const;
+    operator T() const
+    {
+        return _source.get();
+    }
 
-    auto operator=(container_type const& value) -> prop_base&;
+    auto operator=(T const& value) -> prop_base&
+    {
+        set(value, false);
+        return *this;
+    }
 
-    auto operator->() const;
-    auto operator*() -> return_type;
-    auto operator*() const -> const_return_type;
-    auto operator()() const -> const_return_type;
+    void operator()(T const& value)
+    {
+        set(value, true);
+    }
 
-    signal<container_type const&> Changed;
+    auto operator->() const
+    {
+        if constexpr (OverloadsArrowOp<T>) {
+            return _source.get();
+        } else {
+            static_assert(std::is_reference_v<return_type>);
+            return &_source.get();
+        }
+    }
 
-    void add(value_type const& element);
-    void set(usize index, value_type const& newValue);
+    auto operator*() -> return_type
+    {
+        return _source.get();
+    }
+    auto operator*() const -> const_return_type
+    {
+        return _source.get();
+    }
+
+    auto operator()() const -> const_return_type
+    {
+        return _source.get();
+    }
+
+    signal<T const&> Changed;
+
+    void add(value_type const& element)
+    {
+        if constexpr (std::is_reference_v<return_type>) {
+            auto& vec {_source.get()};
+            vec.push_back(element);
+            Changed(vec);
+        } else {
+            auto vec {_source.get()};
+            vec.push_back(element);
+            set(vec, true);
+        }
+    }
+    void set(usize index, value_type const& newValue)
+    {
+        if constexpr (std::is_reference_v<return_type>) {
+            auto& vec {_source.get()};
+            if (index < vec.size()) {
+                vec[index] = newValue;
+                Changed(vec);
+            }
+        } else {
+            auto vec {_source.get()};
+            if (index < vec.size()) {
+                vec[index] = newValue;
+                set(vec, true);
+            }
+        }
+    }
 
 private:
-    void set(container_type const& value, bool force);
+    void set(T const& value, bool force)
+    {
+        if (_source.set(value, force) && Changed.slot_count() > 0) {
+            Changed(_source.get());
+        }
+    }
 
     Source _source;
 };
