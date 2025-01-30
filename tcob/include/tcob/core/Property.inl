@@ -114,6 +114,69 @@ namespace detail {
         return true;
     }
 
+    ////////////////////////////////////////////////////////////
+
+    template <typename T, typename Source, typename Derived>
+    inline prop_base<T, Source, Derived>::prop_base(Source source)
+        : _source {std::move(source)}
+    {
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline prop_base<T, Source, Derived>::prop_base(T val)
+        : _source {val}
+    {
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline void prop_base<T, Source, Derived>::operator()(T const& value)
+    {
+        set(value, true);
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline auto prop_base<T, Source, Derived>::operator->() const
+    {
+        if constexpr (OverloadsArrowOp<T>) {
+            return _source.get();
+        } else {
+            static_assert(std::is_reference_v<return_type>);
+            return &_source.get();
+        }
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline prop_base<T, Source, Derived>::operator T() const
+    {
+        return _source.get();
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline auto prop_base<T, Source, Derived>::operator*() -> return_type
+    {
+        return _source.get();
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline auto prop_base<T, Source, Derived>::operator*() const -> const_return_type
+    {
+        return _source.get();
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline auto prop_base<T, Source, Derived>::operator()() const -> const_return_type
+    {
+        return _source.get();
+    }
+
+    template <typename T, typename Source, typename Derived>
+    inline void prop_base<T, Source, Derived>::set(T const& value, bool force)
+    {
+        if (_source.set(value, force) && static_cast<Derived*>(this)->Changed.slot_count() > 0) {
+            static_cast<Derived*>(this)->Changed(_source.get());
+        }
+    }
+
 }
 
 ////////////////////////////////////////////////////////////
