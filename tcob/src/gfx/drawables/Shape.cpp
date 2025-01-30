@@ -479,14 +479,14 @@ void poly_shape::create()
             _inds.push_back(indices[i + 1] + indOffset);
             _inds.push_back(indices[i + 0] + indOffset);
         }
-        indOffset += polygon.Outline.size();
+        indOffset += static_cast<u32>(polygon.Outline.size());
 
         // holes
         for (auto const& hole : polygon.Holes) {
             // push verts
             for (auto const p : hole) { pushVert(p); }
 
-            indOffset += hole.size();
+            indOffset += static_cast<u32>(hole.size());
         }
     }
 }

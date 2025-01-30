@@ -65,11 +65,11 @@ auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
     return id;
 }
 
-auto tilemap_base::get_tile_index(uid layerId, point_i pos) const -> tile_index_t
+auto tilemap_base::get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>
 {
     auto const& layer {*get_layer(layerId)};
     i32 const   idx {layer.get_index(pos)};
-    if (idx >= std::ssize(_tileMap)) { return -1; }
+    if (idx >= std::ssize(_tileMap)) { return std::nullopt; }
     return _tileMap[idx];
 }
 

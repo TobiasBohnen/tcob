@@ -144,23 +144,21 @@ void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
 
     vscroll_widget::on_mouse_hover(ev);
 
-    if (auto const* style {current_style<grid_view::style>()}) {
-        auto const mp {global_to_local(ev.Position)};
+    auto const mp {global_to_local(ev.Position)};
 
-        for (auto const& kvp : _headerRectCache) {
-            if (!kvp.second.contains(mp)) { continue; }
-            if (HeaderSelectable) {
-                HoveredCellIndex = kvp.first;
-                ev.Handled       = true;
-            }
-            return;
-        }
-        for (auto const& kvp : _rowRectCache) {
-            if (!kvp.second.contains(mp)) { continue; }
+    for (auto const& kvp : _headerRectCache) {
+        if (!kvp.second.contains(mp)) { continue; }
+        if (HeaderSelectable) {
             HoveredCellIndex = kvp.first;
             ev.Handled       = true;
-            return;
         }
+        return;
+    }
+    for (auto const& kvp : _rowRectCache) {
+        if (!kvp.second.contains(mp)) { continue; }
+        HoveredCellIndex = kvp.first;
+        ev.Handled       = true;
+        return;
     }
 }
 

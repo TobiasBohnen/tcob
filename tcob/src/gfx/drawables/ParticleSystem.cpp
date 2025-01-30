@@ -138,7 +138,7 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
 
     i32 particleCount {0};
     if (Settings.Explosion) {
-        particleCount = Settings.SpawnRate;
+        particleCount = static_cast<i32>(Settings.SpawnRate);
         _alive        = false;
     } else {
         f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};
@@ -187,7 +187,7 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
 
     i32 particleCount {0};
     if (Settings.Explosion) {
-        particleCount = Settings.SpawnRate;
+        particleCount = static_cast<i32>(Settings.SpawnRate);
         _alive        = false;
     } else {
         f64 const particleAmount {(Settings.SpawnRate * (deltaTime.count() / 1000)) + _emissionDiff};

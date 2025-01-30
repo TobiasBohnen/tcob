@@ -143,7 +143,7 @@ public:
 
     auto add_layer(tilemap_layer const& layer) -> uid;
 
-    auto get_tile_index(uid layerId, point_i pos) const -> tile_index_t;
+    auto get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>;
     void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
 
     auto is_layer_visible(uid id) const -> bool;

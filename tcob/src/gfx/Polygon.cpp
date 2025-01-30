@@ -204,7 +204,7 @@ void polygons::clip(std::vector<polygon>& polygons, std::span<polygon const> oth
                 target = &parentPoly->Holes.emplace_back();
             }
 
-            for (auto const& pt : node->Polygon()) { target->emplace_back(pt.x, pt.y); }
+            for (auto const& pt : node->Polygon()) { target->emplace_back(static_cast<f32>(pt.x), static_cast<f32>(pt.y)); }
             if (!node->IsHole()) {
                 if (polygons::get_winding(*target) == winding::CW) { std::ranges::reverse(*target); }
             } else {
@@ -278,7 +278,7 @@ void polygons::offset(std::vector<polygon>& polygons, f64 delta, offset_join joi
                 target = &parentPoly->Holes.emplace_back();
             }
 
-            for (auto const& pt : node->Polygon()) { target->emplace_back(pt.x, pt.y); }
+            for (auto const& pt : node->Polygon()) { target->emplace_back(static_cast<f32>(pt.x), static_cast<f32>(pt.y)); }
             if (!node->IsHole()) {
                 if (polygons::get_winding(*target) == winding::CW) { std::ranges::reverse(*target); }
             } else {
