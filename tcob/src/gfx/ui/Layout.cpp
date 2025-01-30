@@ -103,11 +103,13 @@ void fixed_layout::do_layout(size_f /* size */)
 
 void flex_size_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     for (auto const& widget : w) {
-        (*widget->Bounds).Size.Width  = widget->Flex->Width.calc(size.Width);
-        (*widget->Bounds).Size.Height = widget->Flex->Height.calc(size.Height);
+        auto bounds {widget->Bounds()};
+        bounds.Size.Width  = widget->Flex->Width.calc(size.Width);
+        bounds.Size.Height = widget->Flex->Height.calc(size.Height);
+        widget->Bounds     = bounds;
     }
 }
 
@@ -115,7 +117,7 @@ void flex_size_layout::do_layout(size_f size)
 
 void dock_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     rect_f layoutRect {point_f::Zero, size};
     for (auto const& widget : w) {
@@ -170,7 +172,7 @@ grid_layout::grid_layout(parent parent, size_i initSize)
 
 void grid_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     f32 const horiSize {size.Width / _grid.Width};
     f32 const vertSize {size.Height / _grid.Height};
@@ -179,10 +181,10 @@ void grid_layout::do_layout(size_f size)
         rect_f bounds {_widgetBounds[widget.get()]};
         bounds.Position.X *= horiSize;
         bounds.Size.Width *= horiSize;
-        bounds.Size.Width = widget->Flex->Width.calc(bounds.width());
+        bounds.Size.Width = widget->Flex->Width.calc(bounds.Size.Width);
         bounds.Position.Y *= vertSize;
         bounds.Size.Height *= vertSize;
-        bounds.Size.Height = widget->Flex->Height.calc(bounds.height());
+        bounds.Size.Height = widget->Flex->Height.calc(bounds.Size.Height);
 
         widget->Bounds = bounds;
     }
@@ -198,13 +200,13 @@ box_layout::box_layout(parent parent, size_i boxSize)
 
 void box_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     f32 const horiSize {size.Width / _box.Width};
     f32 const vertSize {size.Height / _box.Height};
 
     for (i32 i {0}; i < std::ssize(w) && i < _box.Width * _box.Height; ++i) {
-        auto& widget {w[i]};
+        auto const& widget {w[i]};
         widget->Bounds =
             {i % _box.Width * horiSize, i / _box.Width * vertSize,
              widget->Flex->Width.calc(horiSize),
@@ -216,13 +218,13 @@ void box_layout::do_layout(size_f size)
 
 void hbox_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     f32 const horiSize {size.Width / w.size()};
     f32 const vertSize {size.Height};
 
     for (i32 i {0}; i < std::ssize(w); ++i) {
-        auto& widget {w[i]};
+        auto const& widget {w[i]};
         widget->Bounds =
             {i * horiSize, 0,
              widget->Flex->Width.calc(horiSize),
@@ -240,7 +242,7 @@ void vbox_layout::do_layout(size_f size)
     f32 const vertSize {size.Height / w.size()};
 
     for (i32 i {0}; i < std::ssize(w); ++i) {
-        auto& widget {w[i]};
+        auto const& widget {w[i]};
         widget->Bounds =
             {0, i * vertSize,
              widget->Flex->Width.calc(horiSize),

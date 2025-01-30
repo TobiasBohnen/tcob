@@ -37,7 +37,7 @@ public:
     void clear_widgets();
 
     auto scroll_offset() const -> point_f override;
-    void set_scroll_offset(point_f off);
+    void scroll_to(point_f off);
 
 protected:
     void on_styles_changed() override;
@@ -73,6 +73,8 @@ public:
 
 protected:
     void on_paint(widget_painter& painter) override;
+
+    auto is_inert() const -> bool override;
 };
 
 }

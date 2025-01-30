@@ -205,7 +205,7 @@ auto widget::scroll_offset() const -> point_f
 
 auto widget::can_tab_stop() const -> bool
 {
-    return TabStop->Enabled && is_enabled() && is_visible() && !_inert;
+    return TabStop->Enabled && is_enabled() && is_visible() && !is_inert();
 }
 
 void widget::on_styles_changed()
@@ -507,12 +507,7 @@ auto widget::current_orientation() const -> orientation
 
 auto widget::is_inert() const -> bool
 {
-    return _inert;
-}
-
-void widget::set_inert(bool inert)
-{
-    _inert = inert;
+    return false;
 }
 
 void widget::activate()

@@ -251,7 +251,7 @@ auto panel::scroll_offset() const -> point_f
     return {_hScrollbar.current_value(), _vScrollbar.current_value()};
 }
 
-void panel::set_scroll_offset(point_f off)
+void panel::scroll_to(point_f off)
 {
     _hScrollbar.start_scroll(off.X, milliseconds {0});
     _vScrollbar.start_scroll(off.Y, milliseconds {0});
@@ -264,7 +264,6 @@ glass::glass(init const& wi)
     : panel {wi}
 {
     Class("glass");
-    set_inert(true);
 }
 
 void glass::on_paint(widget_painter& painter)
@@ -283,6 +282,11 @@ void glass::on_paint(widget_painter& painter)
         w->paint(painter);
         painter.end();
     }
+}
+
+auto glass::is_inert() const -> bool
+{
+    return true;
 }
 
 } // namespace ui
