@@ -51,9 +51,11 @@ public:
 
     auto add_layer(parallax_background_layer const& layer) -> uid;
 
-    auto is_layer_visible(uid id) const -> bool;
-    void set_layer_visible(uid id, bool visible);
-    void set_layer_texture(uid id, string const& texture);
+    auto is_layer_visible(uid layerId) const -> bool;
+    void show_layer(uid layerId);
+    void hide_layer(uid layerId);
+
+    void set_layer_texture(uid layerId, string const& texture);
 
 protected:
     auto can_draw() const -> bool override;

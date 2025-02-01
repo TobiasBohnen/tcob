@@ -62,19 +62,37 @@ auto parallax_background::add_layer(parallax_background_layer const& layer) -> u
     return id;
 }
 
-auto parallax_background::is_layer_visible(uid id) const -> bool
+auto parallax_background::is_layer_visible(uid layerId) const -> bool
 {
-    return get_layer(id)->Visible;
+    if (auto const* layer {get_layer(layerId)}) {
+        return layer->Visible;
+    }
+    return false;
 }
 
-void parallax_background::set_layer_visible(uid id, bool visible)
+void parallax_background::show_layer(uid layerId)
 {
-    get_layer(id)->Visible = visible;
+    if (auto* layer {get_layer(layerId)}) {
+        if (!layer->Visible) {
+            layer->Visible = true;
+        }
+    }
 }
 
-void parallax_background::set_layer_texture(uid id, string const& texture)
+void parallax_background::hide_layer(uid layerId)
 {
-    get_layer(id)->TextureRegion = texture;
+    if (auto* layer {get_layer(layerId)}) {
+        if (layer->Visible) {
+            layer->Visible = false;
+        }
+    }
+}
+
+void parallax_background::set_layer_texture(uid layerId, string const& texture)
+{
+    if (auto* layer {get_layer(layerId)}) {
+        layer->TextureRegion = texture;
+    }
 }
 
 auto parallax_background::can_draw() const -> bool

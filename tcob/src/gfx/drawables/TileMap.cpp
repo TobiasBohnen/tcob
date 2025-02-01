@@ -95,20 +95,38 @@ void tilemap_base::set_tile_index(uid layerId, point_i pos, tile_index_t setIdx)
     _updateGeometry = true;
 }
 
-auto tilemap_base::is_layer_visible(uid id) const -> bool
+auto tilemap_base::is_layer_visible(uid layerId) const -> bool
 {
-    return get_layer(id)->Visible;
+    if (auto const* layer {get_layer(layerId)}) {
+        return layer->Visible;
+    }
+    return false;
 }
 
-void tilemap_base::set_layer_visible(uid id, bool visible)
+void tilemap_base::show_layer(uid layerId)
 {
-    get_layer(id)->Visible = visible;
-    mark_dirty();
+    if (auto* layer {get_layer(layerId)}) {
+        if (layer->Visible) { return; }
+        layer->Visible = true;
+        mark_dirty();
+    }
 }
 
-auto tilemap_base::get_layer_size(uid id) const -> size_i
+void tilemap_base::hide_layer(uid layerId)
 {
-    return get_layer(id)->Size;
+    if (auto* layer {get_layer(layerId)}) {
+        if (!layer->Visible) { return; }
+        layer->Visible = false;
+        mark_dirty();
+    }
+}
+
+auto tilemap_base::get_layer_size(uid layerId) const -> std::optional<size_i>
+{
+    if (auto const* layer {get_layer(layerId)}) {
+        return layer->Size;
+    }
+    return std::nullopt;
 }
 
 void tilemap_base::clear()

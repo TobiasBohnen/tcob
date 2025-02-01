@@ -146,9 +146,11 @@ public:
     auto get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>;
     void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
 
-    auto is_layer_visible(uid id) const -> bool;
-    void set_layer_visible(uid id, bool visible);
-    auto get_layer_size(uid id) const -> size_i;
+    auto is_layer_visible(uid layerId) const -> bool;
+    void show_layer(uid layerId);
+    void hide_layer(uid layerId);
+
+    auto get_layer_size(uid layerId) const -> std::optional<size_i>;
 
     void clear();
 
