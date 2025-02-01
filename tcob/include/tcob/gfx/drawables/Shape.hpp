@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <any>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -37,6 +38,8 @@ public:
     prop_fn<f32> Transparency;
 
     prop<std::optional<point_f>> Pivot;
+
+    std::any UserData;
 
     u32 RayCastMask {0xFFFFFFFF};
 
