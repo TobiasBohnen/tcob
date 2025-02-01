@@ -139,12 +139,8 @@ auto widget::hit_test_bounds() const -> rect_f
     rect_f retValue {global_position(), Bounds->Size};
     offset_content(retValue, true);
 
-    if (_parent) {
-        retValue = retValue.as_intersection_with(_parent->global_content_bounds());
-    }
-    if (_form) {
-        retValue = retValue.as_intersection_with(_form->Bounds());
-    }
+    if (_parent) { retValue = retValue.as_intersection_with(_parent->global_content_bounds()); }
+    if (_form) { retValue = retValue.as_intersection_with(_form->Bounds()); }
 
     return retValue;
 }
@@ -193,9 +189,7 @@ auto widget::global_to_local(point_i p) const -> point_f
 
 void widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    if (_style) {
-        _style->offset_content(bounds, isHitTest);
-    }
+    if (_style) { _style->offset_content(bounds, isHitTest); }
 }
 
 auto widget::scroll_offset() const -> point_f

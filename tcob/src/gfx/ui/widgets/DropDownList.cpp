@@ -188,7 +188,9 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     widget::on_mouse_hover(ev);
 
     rect_f listRect {global_content_bounds()};
-    if (_vScrollbar.mouse_hover(ev.Position)) {
+
+    _vScrollbar.mouse_hover(ev.Position);
+    if (_vScrollbar.is_mouse_over()) {
         force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
     } else {
@@ -243,7 +245,8 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     widget::on_mouse_drag(ev);
 
-    if (_vScrollbar.mouse_drag(ev.Position)) {
+    _vScrollbar.mouse_hover(ev.Position);
+    if (_vScrollbar.is_mouse_over()) {
         force_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
@@ -303,19 +306,14 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
 
     widget::offset_content(bounds, isHitTest);
 
-    if (_isExtended) {
-        if (auto const* style {current_style<drop_down_list::style>()}) {
-            if (!isHitTest) {
-                bounds.Position.Y += height;
-            }
+    if (!_isExtended) { return; }
+    if (auto const* style {current_style<drop_down_list::style>()}) {
+        if (!isHitTest) { bounds.Position.Y += height; }
 
-            f32 const itemHeight {style->ItemHeight.calc(bounds.height())};
-            bounds.Size.Height = itemHeight * style->VisibleItemCount;
+        f32 const itemHeight {style->ItemHeight.calc(bounds.height())};
+        bounds.Size.Height = itemHeight * style->VisibleItemCount;
 
-            if (isHitTest) {
-                bounds.Size.Height += height;
-            }
-        }
+        if (isHitTest) { bounds.Size.Height += height; }
     }
 }
 

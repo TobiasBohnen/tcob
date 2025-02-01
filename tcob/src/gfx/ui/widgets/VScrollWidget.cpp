@@ -70,7 +70,8 @@ void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     widget::on_mouse_hover(ev);
 
-    if (_vScrollbar.mouse_hover(ev.Position)) {
+    _vScrollbar.mouse_hover(ev.Position);
+    if (_vScrollbar.is_mouse_over()) {
         force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
     }
@@ -91,7 +92,8 @@ void vscroll_widget::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     widget::on_mouse_drag(ev);
 
-    if (_vScrollbar.mouse_drag(ev.Position)) {
+    _vScrollbar.mouse_drag(ev.Position);
+    if (_vScrollbar.is_dragging()) {
         force_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
@@ -125,8 +127,8 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
             delay  = style->VScrollBar.Bar.Delay;
         }
 
-        f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
         if (orien == orientation::Vertical) {
+            f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
             _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
         }
         ev.Handled = true;
@@ -142,12 +144,10 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget::offset_content(bounds, isHitTest);
 
-    if (!isHitTest) {
-        if (auto const* style {current_style<vscroll_widget::style>()}) {
-            if (_vScrollbar.Visible) {
-                bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
-            }
-        }
+    if (isHitTest) { return; }
+    if (!_vScrollbar.Visible) { return; }
+    if (auto const* style {current_style<vscroll_widget::style>()}) {
+        bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
     }
 }
 

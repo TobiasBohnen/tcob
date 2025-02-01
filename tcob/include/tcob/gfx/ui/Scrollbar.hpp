@@ -30,8 +30,9 @@ public:
     void start_scroll(f32 target, milliseconds delay);
 
     auto is_mouse_over() const -> bool;
-    auto mouse_hover(point_i mp) -> bool;
-    auto mouse_drag(point_i mp) -> bool;
+    void mouse_hover(point_i mp);
+    auto is_dragging() const -> bool;
+    void mouse_drag(point_i mp);
     void mouse_down(point_i mp);
     void mouse_up(point_i mp);
 

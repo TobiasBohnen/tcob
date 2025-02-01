@@ -221,10 +221,9 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget::offset_content(bounds, isHitTest);
 
-    if (!isHitTest) {
-        if (auto const* style {current_style<tab_container::style>()}) {
-            offset_tab_content(bounds, *style);
-        }
+    if (isHitTest) { return; }
+    if (auto const* style {current_style<tab_container::style>()}) {
+        offset_tab_content(bounds, *style);
     }
 }
 

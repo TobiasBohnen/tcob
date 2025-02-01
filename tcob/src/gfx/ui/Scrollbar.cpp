@@ -54,38 +54,38 @@ auto scrollbar::is_mouse_over() const -> bool
     return Visible && (_overBar || _overThumb);
 }
 
-auto scrollbar::mouse_hover(point_i mp) -> bool
+void scrollbar::mouse_hover(point_i mp)
 {
-    if (_isDragging) { return false; }
+    if (_isDragging) { return; }
 
     _overThumb = false;
     _overBar   = false;
 
-    if (!Visible) { return false; }
+    if (!Visible) { return; }
 
     if (_paintResult.Thumb.contains(_parent.global_to_local(mp))) {
         _overThumb = true;
-        return true;
+        return;
     }
 
     // over bar
     if (_paintResult.Bar.contains(_parent.global_to_local(mp))) {
         _overBar = true;
-        return true;
+        return;
     }
-
-    return false;
 }
 
-auto scrollbar::mouse_drag(point_i mp) -> bool
+auto scrollbar::is_dragging() const -> bool
+{
+    return _isDragging;
+}
+
+void scrollbar::mouse_drag(point_i mp)
 {
     if (_isDragging || is_mouse_over()) {
         calculate_value(_parent.global_to_content(mp));
         _isDragging = true;
-        return true;
     }
-
-    return false;
 }
 
 void scrollbar::mouse_up(point_i mp)
@@ -101,13 +101,12 @@ void scrollbar::mouse_down(point_i mp)
 {
     _isDragging = false;
 
-    if (is_mouse_over()) {
-        if (!_overThumb) {
-            calculate_value(_parent.global_to_content(mp));
-        } else {
-            _dragOffset = point_i {_parent.global_to_local(mp) - _paintResult.Thumb.center()};
-            _isDragging = true;
-        }
+    if (!is_mouse_over()) { return; }
+    if (!_overThumb) {
+        calculate_value(_parent.global_to_content(mp));
+    } else {
+        _dragOffset = point_i {_parent.global_to_local(mp) - _paintResult.Thumb.center()};
+        _isDragging = true;
     }
 }
 

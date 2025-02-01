@@ -159,17 +159,14 @@ namespace element {
 void widget_style::offset_content(rect_f& bounds, bool isHitTest) const
 {
     bounds -= Margin;
-    if (!isHitTest) {
-        bounds -= Padding;
-    }
+    if (!isHitTest) { bounds -= Padding; }
 }
 
 void background_style::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget_style::offset_content(bounds, isHitTest);
-    if (!isHitTest) {
-        bounds -= Border.thickness();
-    }
+
+    if (!isHitTest) { bounds -= Border.thickness(); }
 }
 
 } // namespace ui
