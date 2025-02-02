@@ -140,15 +140,11 @@ void tab_container::on_paint(widget_painter& painter)
 void tab_container::on_mouse_leave()
 {
     HoveredTabIndex = INVALID;
-
-    widget::on_mouse_leave();
 }
 
 void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredTabIndex = INVALID;
-
-    widget_container::on_mouse_hover(ev);
 
     auto const mp {global_to_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_tabRectCache); ++i) {
@@ -162,8 +158,6 @@ void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 {
-    widget::on_mouse_down(ev);
-
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         force_redraw(this->name() + ": mouse down");
 

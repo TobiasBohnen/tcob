@@ -56,7 +56,7 @@ private:
     bool                      _overThumb {false};
     bool                      _isDragging {false};
     point_i                   _dragOffset {point_i::Zero};
-    element::scrollbar::rects _paintResult {};
+    element::scrollbar::rects _barRectCache {};
 
     widget_tweener _tween;
 };

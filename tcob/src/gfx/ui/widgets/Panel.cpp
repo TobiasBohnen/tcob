@@ -135,8 +135,6 @@ void panel::on_update(milliseconds deltaTime)
 
 void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    widget_container::on_mouse_hover(ev);
-
     auto const scrollHover {[&](auto&& scrollbar) {
         scrollbar.mouse_hover(ev.Position);
         if (scrollbar.is_mouse_over()) {
@@ -151,8 +149,6 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    widget_container::on_mouse_drag(ev);
-
     auto const scrollDrag {[&](auto&& scrollbar) {
         scrollbar.mouse_drag(ev.Position);
         if (scrollbar.is_dragging()) {
@@ -167,8 +163,6 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void panel::on_mouse_down(input::mouse::button_event const& ev)
 {
-    widget_container::on_mouse_down(ev);
-
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
             _vScrollbar.mouse_down(ev.Position);
@@ -181,8 +175,6 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
 
 void panel::on_mouse_up(input::mouse::button_event const& ev)
 {
-    widget_container::on_mouse_up(ev);
-
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
             _vScrollbar.mouse_up(ev.Position);
@@ -195,8 +187,6 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
 
 void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
-    widget_container::on_mouse_wheel(ev);
-
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (auto const* style {current_style<panel::style>()}) {
             orientation  orien {};

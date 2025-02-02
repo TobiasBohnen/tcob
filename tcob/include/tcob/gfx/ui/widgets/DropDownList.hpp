@@ -75,14 +75,14 @@ private:
 
     void set_extended(bool v);
 
-    void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
-
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& listRect) const -> rect_f;
     auto get_item_style(isize index) const -> item_style*;
 
-    std::vector<list_item> _items;
-    bool                   _isExtended {false};
-    bool                   _mouseOverBox {false};
+    std::vector<list_item>            _items;
+    std::unordered_map<isize, rect_f> _itemRectCache;
+
+    bool _isExtended {false};
+    bool _mouseOverBox {false};
 
     scrollbar _vScrollbar;
 };

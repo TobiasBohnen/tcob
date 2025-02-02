@@ -40,12 +40,12 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, 
     auto const   thumbFlags {!_overThumb    ? widget_flags {}
                                  : isActive ? widget_flags {.Active = true}
                                             : widget_flags {.Hover = true}};
-    _paintResult = painter.draw_scrollbar(style, get_thumb_style(thumbFlags)->Thumb, scrRect, barCtx);
+    _barRectCache = painter.draw_scrollbar(style, get_thumb_style(thumbFlags)->Thumb, scrRect, barCtx);
 
     if (_orien == orientation::Vertical) {
-        rect.Size.Width -= _paintResult.Bar.width() + style.Bar.Border.Size.calc(_paintResult.Bar.width());
+        rect.Size.Width -= _barRectCache.Bar.width() + style.Bar.Border.Size.calc(_barRectCache.Bar.width());
     } else if (_orien == orientation::Horizontal) {
-        rect.Size.Height -= _paintResult.Bar.height() + style.Bar.Border.Size.calc(_paintResult.Bar.height());
+        rect.Size.Height -= _barRectCache.Bar.height() + style.Bar.Border.Size.calc(_barRectCache.Bar.height());
     }
 }
 
@@ -63,13 +63,13 @@ void scrollbar::mouse_hover(point_i mp)
 
     if (!Visible) { return; }
 
-    if (_paintResult.Thumb.contains(_parent.global_to_local(mp))) {
+    if (_barRectCache.Thumb.contains(_parent.global_to_local(mp))) {
         _overThumb = true;
         return;
     }
 
     // over bar
-    if (_paintResult.Bar.contains(_parent.global_to_local(mp))) {
+    if (_barRectCache.Bar.contains(_parent.global_to_local(mp))) {
         _overBar = true;
         return;
     }
@@ -93,8 +93,8 @@ void scrollbar::mouse_up(point_i mp)
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
-    _overThumb = _paintResult.Thumb.contains(_parent.global_to_local(mp));
-    _overBar   = _paintResult.Bar.contains(_parent.global_to_local(mp));
+    _overThumb = _barRectCache.Thumb.contains(_parent.global_to_local(mp));
+    _overBar   = _barRectCache.Bar.contains(_parent.global_to_local(mp));
 }
 
 void scrollbar::mouse_down(point_i mp)
@@ -105,7 +105,7 @@ void scrollbar::mouse_down(point_i mp)
     if (!_overThumb) {
         calculate_value(_parent.global_to_content(mp));
     } else {
-        _dragOffset = point_i {_parent.global_to_local(mp) - _paintResult.Thumb.center()};
+        _dragOffset = point_i {_parent.global_to_local(mp) - _barRectCache.Thumb.center()};
         _isDragging = true;
     }
 }
@@ -139,18 +139,18 @@ void scrollbar::calculate_value(point_f mp)
 {
     if (!Style) { return; }
 
-    rect_f const rect {_paintResult.Bar};
+    rect_f const rect {_barRectCache.Bar};
     f32          frac {0.0f};
     milliseconds delay {};
 
     switch (_orien) {
     case orientation::Horizontal: {
-        f32 const tw {_paintResult.Thumb.width()};
+        f32 const tw {_barRectCache.Thumb.width()};
         frac  = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
         delay = Style->Bar.Delay;
     } break;
     case orientation::Vertical: {
-        f32 const th {_paintResult.Thumb.height()};
+        f32 const th {_barRectCache.Thumb.height()};
         frac  = (mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th);
         delay = Style->Bar.Delay;
     } break;

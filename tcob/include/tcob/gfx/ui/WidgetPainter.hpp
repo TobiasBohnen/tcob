@@ -25,20 +25,20 @@ public:
     void push_scissor(rect_f const& globalScissor);
     void pop_scissor();
 
-    void draw_background_and_border(background_style const& style, rect_f& refRect, bool isCircle);
+    void draw_background_and_border(background_style const& style, rect_f& rect, bool isCircle);
 
-    void draw_text(element::text const& style, rect_f const& refRect, utf8_string const& text);
-    void draw_text(element::text const& style, rect_f const& refRect, text_formatter::result const& text);
+    void draw_text(element::text const& style, rect_f const& rect, utf8_string const& text);
+    void draw_text(element::text const& style, rect_f const& rect, text_formatter::result const& text);
 
-    void draw_tick(element::tick const& style, rect_f const& refRect);
-    void draw_nav_arrow(element::nav_arrow const& style, rect_f const& refRect);
-    void draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& refRect);
+    void draw_tick(element::tick const& style, rect_f const& rect);
+    void draw_nav_arrow(element::nav_arrow const& style, rect_f const& rect);
+    void draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& rect);
     void draw_item(element::item const& style, rect_f const& rect, utf8_string const& text);
-    void draw_caret(element::caret const& style, rect_f const& refRect, point_f offset);
-    auto draw_bar(element::bar const& style, rect_f const& refRect, element::bar::context const& barCtx) -> rect_f;
-    auto draw_thumb(element::thumb const& style, rect_f const& refRect, element::thumb::context const& thumbCtx) -> rect_f;
-    auto draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& refRect, element::bar::context const& barCtx) -> element::scrollbar::rects;
-    void draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle);
+    void draw_caret(element::caret const& style, rect_f const& rect, point_f offset);
+
+    auto draw_bar(element::bar const& style, rect_f const& rect, element::bar::context const& barCtx) -> rect_f;
+    auto draw_thumb(element::thumb const& style, rect_f const& rect, element::thumb::context const& thumbCtx) -> rect_f;
+    auto draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& rect, element::bar::context const& barCtx) -> element::scrollbar::rects;
 
     auto canvas() -> gfx::canvas&;
 
@@ -49,6 +49,7 @@ private:
     void draw_bordered_rect(rect_f const& rect, ui_paint const& back, element::border const& borderStyle);
     void draw_bordered_circle(rect_f const& rect, ui_paint const& back, element::border const& borderStyle);
     void draw_border(rect_f const& rect, element::border const& borderStyle, f32 borderSize, f32 borderRadius);
+    void draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle);
 
     auto get_paint(ui_paint const& p, rect_f const& rect) -> canvas_paint;
 

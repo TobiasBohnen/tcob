@@ -118,33 +118,34 @@ auto list_box::item_count() const -> isize
     return std::ssize(get_items());
 }
 
-void list_box::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i)
-{
-    auto const&  itemStyle {get_item_style(i)};
-    rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-    if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-        painter.draw_item(itemStyle->Item, itemRect, get_items()[i].Text);
-    }
-}
-
 void list_box::paint_content(widget_painter& painter, rect_f const& rect)
 {
     if (auto const* style {current_style<list_box::style>()}) {
-        rect_f listRect {rect};
+        _itemRectCache.clear();
 
-        f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
+        rect_f const listRect {rect};
+        f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
+
+        auto const paint_item {[&](isize i) {
+            auto const&  itemStyle {get_item_style(i)};
+            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+            if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
+                painter.draw_item(itemStyle->Item, itemRect, get_items()[i].Text);
+                _itemRectCache[i] = itemRect;
+            }
+        }};
 
         for (i32 i {0}; i < item_count(); ++i) {
             if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
 
-            paint_item(painter, listRect, itemHeight, i);
+            paint_item(i);
         }
 
         if (SelectedItemIndex >= 0) {
-            paint_item(painter, listRect, itemHeight, SelectedItemIndex());
+            paint_item(SelectedItemIndex());
         }
         if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paint_item(painter, listRect, itemHeight, HoveredItemIndex());
+            paint_item(HoveredItemIndex());
         }
     }
 }
@@ -190,19 +191,13 @@ void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
 
     vscroll_widget::on_mouse_hover(ev);
 
-    if (auto const* style {current_style<list_box::style>()}) {
-        rect_f const listRect {global_content_bounds()};
-        if (!listRect.contains(ev.Position)) { return; }
-        // over list
-        f32 const itemHeight {style->ItemHeight.calc(listRect.height())};
-        for (i32 i {0}; i < item_count(); ++i) {
-            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-            if (itemRect.contains(ev.Position)) {
-                HoveredItemIndex = i;
-                ev.Handled       = true;
-                return;
-            }
-        }
+    auto const mp {global_to_local(ev.Position)};
+
+    for (auto const& kvp : _itemRectCache) {
+        if (!kvp.second.contains(mp)) { continue; }
+        HoveredItemIndex = kvp.first;
+        ev.Handled       = true;
+        return;
     }
 }
 
@@ -211,12 +206,11 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
     vscroll_widget::on_mouse_down(ev);
 
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        if (HoveredItemIndex != INVALID) {
-            if (SelectedItemIndex != HoveredItemIndex()) {
-                SelectedItemIndex = HoveredItemIndex();
-                ev.Handled        = true;
-            } // else SelectedItemClicked event?
-        }
+        if (HoveredItemIndex == INVALID) { return; }
+        if (SelectedItemIndex != HoveredItemIndex()) {
+            SelectedItemIndex = HoveredItemIndex();
+            ev.Handled        = true;
+        } // else SelectedItemClicked event?
     }
 }
 

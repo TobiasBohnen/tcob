@@ -49,7 +49,7 @@ private:
     orientation               _orien;
     widget&                   _parent;
     widget_tweener            _tween;
-    element::scrollbar::rects _paintResult;
+    element::scrollbar::rects _barRectCache;
 };
 
 }

@@ -51,24 +51,24 @@ void widget_painter::pop_scissor()
 
 ////////////////////////////////////////////////////////////
 
-void widget_painter::draw_background_and_border(background_style const& style, rect_f& refRect, bool isCircle)
+void widget_painter::draw_background_and_border(background_style const& style, rect_f& rect, bool isCircle)
 {
     // add margin
-    refRect -= style.Margin;
+    rect -= style.Margin;
 
     if (isCircle) {
-        draw_shadow(style.DropShadow, refRect, isCircle, style.Border);
-        draw_bordered_circle(refRect, style.Background, style.Border);
+        draw_shadow(style.DropShadow, rect, isCircle, style.Border);
+        draw_bordered_circle(rect, style.Background, style.Border);
     } else {
-        draw_shadow(style.DropShadow, refRect, isCircle, style.Border);
-        draw_bordered_rect(refRect, style.Background, style.Border);
+        draw_shadow(style.DropShadow, rect, isCircle, style.Border);
+        draw_bordered_rect(rect, style.Background, style.Border);
     }
 
     // add padding
-    refRect -= style.Padding;
+    rect -= style.Padding;
 
     // add border
-    refRect -= style.Border.thickness();
+    rect -= style.Border.thickness();
 }
 
 void widget_painter::draw_bordered_rect(rect_f const& rect, ui_paint const& back, element::border const& borderStyle)
@@ -148,14 +148,14 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
     }
 }
 
-void widget_painter::draw_text(element::text const& style, rect_f const& refRect, utf8_string const& text)
+void widget_painter::draw_text(element::text const& style, rect_f const& rect, utf8_string const& text)
 {
     if (text.empty()) { return; }
 
-    draw_text(style, refRect, format_text(style, refRect, text));
+    draw_text(style, rect, format_text(style, rect, text));
 }
 
-void widget_painter::draw_text(element::text const& style, rect_f const& refRect, text_formatter::result const& text)
+void widget_painter::draw_text(element::text const& style, rect_f const& rect, text_formatter::result const& text)
 {
     auto const guard {_canvas.create_guard()};
 
@@ -165,24 +165,24 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
 
     // shadow
     if (style.Shadow.Color.A != 0) {
-        point_f const dropShadowOffset {style.Shadow.OffsetX.calc(refRect.width()),
-                                        style.Shadow.OffsetY.calc(refRect.height())};
+        point_f const dropShadowOffset {style.Shadow.OffsetX.calc(rect.width()),
+                                        style.Shadow.OffsetY.calc(rect.height())};
 
-        _canvas.set_fill_style(get_paint(style.Shadow.Color, refRect));
-        rect_f shadowRect {refRect};
+        _canvas.set_fill_style(get_paint(style.Shadow.Color, rect));
+        rect_f shadowRect {rect};
         shadowRect.Position.X += dropShadowOffset.X;
         shadowRect.Position.Y += dropShadowOffset.Y;
         _canvas.draw_textbox(shadowRect.Position, text);
     }
 
     // text
-    _canvas.set_fill_style(get_paint(style.Color, refRect));
-    _canvas.draw_textbox(refRect.Position, text);
+    _canvas.set_fill_style(get_paint(style.Color, rect));
+    _canvas.draw_textbox(rect.Position, text);
 
     // deco
     auto const& deco {style.Decoration};
     if ((deco.Line.LineThrough || deco.Line.Overline || deco.Line.Underline) && deco.Color.A > 0) {
-        f32 const strokeWidth {deco.Size.calc(refRect.height())};
+        f32 const strokeWidth {deco.Size.calc(rect.height())};
 
         for (auto const& token : text.Tokens) {
             if (token.Quads.empty()) {
@@ -227,7 +227,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
                     }
                 }};
 
-                point_f offset {refRect.top_left()};
+                point_f offset {rect.top_left()};
 
                 if (deco.Line.Underline) {
                     point_f const p0 {first.bottom_left()};
@@ -275,63 +275,63 @@ void widget_painter::draw_text(element::text const& style, rect_f const& refRect
     }
 }
 
-void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect)
+void widget_painter::draw_tick(element::tick const& style, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};
 
     if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
-        draw_nine_patch(*np, refRect, {});
+        draw_nine_patch(*np, rect, {});
     } else {
         switch (style.Type) {
         case element::tick::type::Checkmark: {
-            f32 const width {style.Size.calc(std::min(refRect.height(), refRect.width())) / 4};
+            f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 4};
             _canvas.set_stroke_width(width);
-            _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
+            _canvas.set_stroke_style(get_paint(style.Foreground, rect));
             _canvas.begin_path();
-            _canvas.move_to({refRect.left(), refRect.center().Y});
-            _canvas.line_to({refRect.center().X, refRect.bottom()});
-            _canvas.line_to(refRect.top_right());
+            _canvas.move_to({rect.left(), rect.center().Y});
+            _canvas.line_to({rect.center().X, rect.bottom()});
+            _canvas.line_to(rect.top_right());
             _canvas.stroke();
         } break;
         case element::tick::type::Cross: {
-            f32 const width {style.Size.calc(std::min(refRect.height(), refRect.width())) / 4};
+            f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 4};
             _canvas.set_stroke_width(width);
-            _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
+            _canvas.set_stroke_style(get_paint(style.Foreground, rect));
             _canvas.begin_path();
-            _canvas.move_to(refRect.top_left());
-            _canvas.line_to(refRect.bottom_right());
-            _canvas.move_to(refRect.top_right());
-            _canvas.line_to(refRect.bottom_left());
+            _canvas.move_to(rect.top_left());
+            _canvas.line_to(rect.bottom_right());
+            _canvas.move_to(rect.top_right());
+            _canvas.line_to(rect.bottom_left());
             _canvas.stroke();
         } break;
         case element::tick::type::Circle: {
-            f32 const width {style.Size.calc(std::min(refRect.height(), refRect.width())) / 3};
+            f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 3};
             _canvas.set_stroke_width(width);
-            _canvas.set_stroke_style(get_paint(style.Foreground, refRect));
+            _canvas.set_stroke_style(get_paint(style.Foreground, rect));
             _canvas.begin_path();
-            _canvas.circle(refRect.center(), width);
+            _canvas.circle(rect.center(), width);
             _canvas.stroke();
         } break;
         case element::tick::type::Disc: {
-            f32 const width {style.Size.calc(std::min(refRect.height(), refRect.width())) / 2};
-            _canvas.set_fill_style(get_paint(style.Foreground, refRect));
+            f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 2};
+            _canvas.set_fill_style(get_paint(style.Foreground, rect));
             _canvas.begin_path();
-            _canvas.circle(refRect.center(), width);
+            _canvas.circle(rect.center(), width);
             _canvas.fill();
         } break;
         case element::tick::type::Rect: {
-            rect_f const newRect {refRect.left() + style.Size.calc(refRect.width()),
-                                  refRect.top() + style.Size.calc(refRect.height()),
-                                  refRect.width() - (style.Size.calc(refRect.width()) + style.Size.calc(refRect.width())),
-                                  refRect.height() - (style.Size.calc(refRect.height()) + style.Size.calc(refRect.height()))};
+            rect_f const newRect {rect.left() + style.Size.calc(rect.width()),
+                                  rect.top() + style.Size.calc(rect.height()),
+                                  rect.width() - (style.Size.calc(rect.width()) + style.Size.calc(rect.width())),
+                                  rect.height() - (style.Size.calc(rect.height()) + style.Size.calc(rect.height()))};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
             _canvas.begin_path();
             _canvas.rect(newRect);
             _canvas.fill();
         } break;
         case element::tick::type::Square: {
-            f32 const    width {style.Size.calc(std::min(refRect.height(), refRect.width()))};
-            rect_f const newRect {refRect.center() - point_f {width, width} / 2, {width, width}};
+            f32 const    width {style.Size.calc(std::min(rect.height(), rect.width()))};
+            rect_f const newRect {rect.center() - point_f {width, width} / 2, {width, width}};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
             _canvas.begin_path();
             _canvas.rect(newRect);
@@ -343,9 +343,9 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& refRect
     }
 }
 
-auto widget_painter::draw_bar(element::bar const& style, rect_f const& refRect, element::bar::context const& barCtx) -> rect_f
+auto widget_painter::draw_bar(element::bar const& style, rect_f const& rect, element::bar::context const& barCtx) -> rect_f
 {
-    rect_f retValue {style.calc(refRect, barCtx.Orientation, barCtx.Position)};
+    rect_f retValue {style.calc(rect, barCtx.Orientation, barCtx.Position)};
     rect_f lowRech {retValue};
 
     if (style.Type == element::bar::type::Continuous) {
@@ -395,9 +395,9 @@ auto widget_painter::draw_bar(element::bar const& style, rect_f const& refRect, 
     return retValue;
 }
 
-auto widget_painter::draw_thumb(element::thumb const& style, rect_f const& refRect, element::thumb::context const& thumbCtx) -> rect_f
+auto widget_painter::draw_thumb(element::thumb const& style, rect_f const& rect, element::thumb::context const& thumbCtx) -> rect_f
 {
-    rect_f retValue {style.calc(refRect, thumbCtx)};
+    rect_f retValue {style.calc(rect, thumbCtx)};
 
     if (style.Type == element::thumb::type::Rect) {
         draw_bordered_rect(retValue, style.Background, style.Border);
@@ -408,31 +408,21 @@ auto widget_painter::draw_thumb(element::thumb const& style, rect_f const& refRe
     return retValue;
 }
 
-void widget_painter::draw_caret(element::caret const& style, rect_f const& refRect, point_f offset)
-{
-    rect_f rect {refRect};
-    rect.Size.Width = style.Width.calc(rect.width());
-    rect.Position.X += offset.X;
-    rect.Position.Y += offset.Y;
-
-    draw_bordered_rect(rect, style.Color, {});
-}
-
-auto widget_painter::draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& refRect, element::bar::context const& barCtx) -> element::scrollbar::rects
+auto widget_painter::draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& rect, element::bar::context const& barCtx) -> element::scrollbar::rects
 {
     element::scrollbar::rects retValue;
 
-    retValue.Bar   = draw_bar(style.Bar, refRect, barCtx);
+    retValue.Bar   = draw_bar(style.Bar, rect, barCtx);
     retValue.Thumb = draw_thumb(thumbStyle, retValue.Bar, {.Orientation = barCtx.Orientation, .Inverted = barCtx.Inverted, .Fraction = barCtx.Fraction});
 
     return retValue;
 }
 
-void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f const& refRect)
+void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};
 
-    rect_f const navRect {style.calc(refRect)};
+    rect_f const navRect {style.calc(rect)};
 
     rect_f decRect {navRect};
     draw_bordered_rect(decRect, style.DecBackground, style.Border);
@@ -452,12 +442,12 @@ void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f cons
     }
 }
 
-void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& refRect)
+void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};
 
     {
-        rect_f const navRect {decStyle.calc(refRect)};
+        rect_f const navRect {decStyle.calc(rect)};
 
         rect_f decRect {navRect};
         decRect.Size.Height /= 2;
@@ -481,7 +471,7 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
     }
 
     {
-        rect_f const navRect {incStyle.calc(refRect)};
+        rect_f const navRect {incStyle.calc(rect)};
 
         rect_f incRect {navRect};
         incRect.Size.Height /= 2;
@@ -516,13 +506,21 @@ void widget_painter::draw_item(element::item const& style, rect_f const& rect, u
     }
 }
 
-void widget_painter::draw_shadow(element::shadow const& style, rect_f const& refRect, bool isCircle, element::border const& borderStyle)
+void widget_painter::draw_caret(element::caret const& style, rect_f const& rect, point_f offset)
+{
+    rect_f r {rect};
+    r.Size.Width = style.Width.calc(rect.Size.Width);
+    r.Position += offset;
+    draw_bordered_rect(r, style.Color, {});
+}
+
+void widget_painter::draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle)
 {
     if (style.Color.A != 0) {
-        point_f const dropShadowOffset {style.OffsetX.calc(refRect.width()),
-                                        style.OffsetY.calc(refRect.height())};
+        point_f const dropShadowOffset {style.OffsetX.calc(rect.width()),
+                                        style.OffsetY.calc(rect.height())};
 
-        rect_f shadowRect {refRect};
+        rect_f shadowRect {rect};
         shadowRect.Position.X += dropShadowOffset.X;
         shadowRect.Position.Y += dropShadowOffset.Y;
 

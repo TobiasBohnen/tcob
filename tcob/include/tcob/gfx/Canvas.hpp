@@ -250,6 +250,7 @@ public:
 
     void draw_textbox(rect_f const& rect, utf8_string_view text);
     void draw_textbox(point_f offset, text_formatter::result const& formatResult);
+
     auto format_text(size_f const& size, utf8_string_view text, f32 scale = 1.0f) -> text_formatter::result;
     auto measure_text(f32 height, utf8_string_view text) -> size_f;
 

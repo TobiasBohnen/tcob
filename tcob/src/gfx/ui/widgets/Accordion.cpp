@@ -132,15 +132,11 @@ void accordion::on_paint(widget_painter& painter)
 void accordion::on_mouse_leave()
 {
     HoveredSectionIndex = INVALID;
-
-    widget::on_mouse_leave();
 }
 
 void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredSectionIndex = INVALID;
-
-    widget_container::on_mouse_hover(ev);
 
     auto const mp {global_to_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
@@ -159,8 +155,6 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void accordion::on_mouse_down(input::mouse::button_event const& ev)
 {
-    widget::on_mouse_down(ev);
-
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         force_redraw(this->name() + ": mouse down");
 

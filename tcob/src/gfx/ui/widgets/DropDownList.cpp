@@ -91,15 +91,6 @@ void drop_down_list::prepare_redraw()
     _vScrollbar.Max = get_scroll_max_value();
 }
 
-void drop_down_list::paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i)
-{
-    auto const&  itemStyle {get_item_style(i)};
-    rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-    if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-        painter.draw_item(itemStyle->Item, itemRect, _items[i].Text);
-    }
-}
-
 void drop_down_list::on_paint(widget_painter& painter)
 {
     if (auto const* style {current_style<drop_down_list::style>()}) {
@@ -149,18 +140,27 @@ void drop_down_list::on_paint(widget_painter& painter)
 
             scissor_guard const guard {painter, this};
 
+            auto const paint_item {[&](isize i) {
+                auto const&  itemStyle {get_item_style(i)};
+                rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+                if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
+                    painter.draw_item(itemStyle->Item, itemRect, _items[i].Text);
+                    _itemRectCache[i] = itemRect;
+                }
+            }};
+
             // content
             for (i32 i {0}; i < std::ssize(_items); ++i) {
                 if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
 
-                paint_item(painter, listRect, itemHeight, i);
+                paint_item(i);
             }
 
             if (SelectedItemIndex >= 0) {
-                paint_item(painter, listRect, itemHeight, SelectedItemIndex());
+                paint_item(SelectedItemIndex());
             }
             if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-                paint_item(painter, listRect, itemHeight, HoveredItemIndex());
+                paint_item(HoveredItemIndex());
             }
         }
     }
@@ -169,8 +169,6 @@ void drop_down_list::on_paint(widget_painter& painter)
 void drop_down_list::on_mouse_leave()
 {
     HoveredItemIndex = INVALID;
-
-    widget::on_mouse_leave();
 
     if (_mouseOverBox) {
         _mouseOverBox = false;
@@ -185,10 +183,6 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     bool const wasMouseOverBox {_mouseOverBox};
     _mouseOverBox = false;
 
-    widget::on_mouse_hover(ev);
-
-    rect_f listRect {global_content_bounds()};
-
     _vScrollbar.mouse_hover(ev.Position);
     if (_vScrollbar.is_mouse_over()) {
         force_redraw(this->name() + ": scrollbar mouse hover");
@@ -200,22 +194,13 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
             ev.Handled    = true;
             if (!wasMouseOverBox) { force_redraw(this->name() + ": mouse enter"); }
         } else if (_isExtended) {
-            // over list
-            f32 const itemHeight {get_item_height()};
-            if (_vScrollbar.Visible) {
-                if (auto const* style {current_style<drop_down_list::style>()}) {
-                    listRect.Size.Width -= style->VScrollBar.Bar.Size.calc(listRect.width());
-                }
-            }
+            auto const mp {global_to_local(ev.Position)};
 
-            for (i32 i {0}; i < std::ssize(_items); ++i) {
-                rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-                if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()
-                    && itemRect.contains(ev.Position)) {
-                    HoveredItemIndex = i;
-                    ev.Handled       = true;
-                    return;
-                }
+            for (auto const& kvp : _itemRectCache) {
+                if (!kvp.second.contains(mp)) { continue; }
+                HoveredItemIndex = kvp.first;
+                ev.Handled       = true;
+                return;
             }
         }
     }
@@ -223,8 +208,6 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
 {
-    widget::on_mouse_down(ev);
-
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.mouse_down(ev.Position);
         if (_mouseOverBox) {
@@ -243,10 +226,8 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
 
 void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    widget::on_mouse_drag(ev);
-
-    _vScrollbar.mouse_hover(ev.Position);
-    if (_vScrollbar.is_mouse_over()) {
+    _vScrollbar.mouse_drag(ev.Position);
+    if (_vScrollbar.is_dragging()) {
         force_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
@@ -254,8 +235,6 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 {
-    widget::on_mouse_up(ev);
-
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         _vScrollbar.mouse_up(ev.Position);
         force_redraw(this->name() + ": mouse up");
@@ -265,8 +244,6 @@ void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 
 void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
-    widget::on_mouse_wheel(ev);
-
     if (!_vScrollbar.Visible) { return; }
 
     if (auto const* style {current_style<drop_down_list::style>()}) {
@@ -290,8 +267,6 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
 void drop_down_list::on_focus_lost()
 {
-    widget::on_focus_lost();
-
     set_extended(false);
 }
 

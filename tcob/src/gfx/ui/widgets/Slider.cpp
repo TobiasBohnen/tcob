@@ -56,7 +56,7 @@ void slider::on_paint(widget_painter& painter)
         auto const pos {element::bar::position::CenterOrMiddle};
 
         // bar
-        _paintResult.Bar = painter.draw_bar(
+        _barRectCache.Bar = painter.draw_bar(
             style->Bar,
             rect,
             {.Orientation = orien,
@@ -69,15 +69,15 @@ void slider::on_paint(widget_painter& painter)
         auto const thumbFlags {!_overThumb          ? widget_flags {}
                                    : flags().Active ? widget_flags {.Active = true}
                                                     : widget_flags {.Hover = true}};
-        _paintResult.Thumb = painter.draw_thumb(
+        _barRectCache.Thumb = painter.draw_thumb(
             get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb,
             rect,
             {.Orientation = orien, .Inverted = false, .Fraction = _tween.current_value()});
 
         if (orien == orientation::Vertical) {
-            _paintResult.Thumb.Size.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.width());
+            _barRectCache.Thumb.Size.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.width());
         } else if (orien == orientation::Horizontal) {
-            _paintResult.Thumb.Size.Height -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_paintResult.Thumb.height());
+            _barRectCache.Thumb.Size.Height -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.height());
         }
     }
 }
@@ -109,7 +109,7 @@ void slider::on_mouse_leave()
 
 void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    bool const overThumb {_paintResult.Thumb.contains(global_to_local(ev.Position))};
+    bool const overThumb {_barRectCache.Thumb.contains(global_to_local(ev.Position))};
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
         force_redraw(this->name() + ": thumb hover change");
@@ -141,7 +141,7 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
         if (!_overThumb) {
             calculate_value(global_to_content(ev.Position));
         } else {
-            _dragOffset = point_i {global_to_local(ev.Position) - _paintResult.Thumb.center()};
+            _dragOffset = point_i {global_to_local(ev.Position) - _barRectCache.Thumb.center()};
             _isDragging = true;
         }
         ev.Handled = true;
@@ -198,16 +198,16 @@ void slider::on_value_changed(i32 newVal)
 
 void slider::calculate_value(point_f mp)
 {
-    rect_f const rect {_paintResult.Bar};
+    rect_f const rect {_barRectCache.Bar};
     f32          frac {0.0f};
 
     switch (current_orientation()) {
     case orientation::Horizontal: {
-        f32 const tw {_paintResult.Thumb.width()};
+        f32 const tw {_barRectCache.Thumb.width()};
         frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
     } break;
     case orientation::Vertical: {
-        f32 const th {_paintResult.Thumb.height()};
+        f32 const th {_barRectCache.Thumb.height()};
         frac = 1.0f - ((mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th));
     } break;
     }

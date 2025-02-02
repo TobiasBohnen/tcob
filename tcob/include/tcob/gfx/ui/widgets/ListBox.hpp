@@ -57,12 +57,11 @@ protected:
 private:
     auto get_items() const -> std::vector<list_item> const&;
 
-    void paint_item(widget_painter& painter, rect_f& listRect, f32 itemHeight, isize i);
-
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f;
     auto get_item_style(isize index) const -> item_style*;
 
-    std::vector<list_item> _items;
-    std::vector<list_item> _filteredItems;
+    std::vector<list_item>            _items;
+    std::vector<list_item>            _filteredItems;
+    std::unordered_map<isize, rect_f> _itemRectCache;
 };
 }
