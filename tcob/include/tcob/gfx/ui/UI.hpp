@@ -63,13 +63,6 @@ class widget_container;
 
 ////////////////////////////////////////////////////////////
 
-struct list_item {
-    utf8_string Text;
-    std::any    UserData;
-};
-
-////////////////////////////////////////////////////////////
-
 struct tab_stop {
     i32  Index {0};
     bool Enabled {true};
@@ -277,6 +270,14 @@ public:
 
     image_def() = default;
     image_def(assets::asset_ptr<texture> texture, string region = "default");
+};
+
+////////////////////////////////////////////////////////////
+
+struct list_item {
+    utf8_string Text;
+    image_def   Icon;
+    std::any    UserData;
 };
 
 ////////////////////////////////////////////////////////////

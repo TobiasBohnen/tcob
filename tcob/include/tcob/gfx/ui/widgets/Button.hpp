@@ -13,15 +13,8 @@ namespace tcob::gfx::ui {
 
 class TCOB_API button : public widget {
 public:
-    enum class display_mode : u8 {
-        TextAndIcon,
-        OnlyIcon,
-        OnlyText
-    };
-
     class TCOB_API style : public background_style {
     public:
-        display_mode  Display {display_mode::TextAndIcon};
         element::text Text;
     };
 

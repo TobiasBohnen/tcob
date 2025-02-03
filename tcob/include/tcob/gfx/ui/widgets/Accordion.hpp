@@ -61,7 +61,7 @@ private:
     void update_section_bounds(rect_f const& bounds);
 
     std::vector<std::shared_ptr<widget>> _sections;
-    std::vector<utf8_string>             _sectionLabels;
+    std::vector<list_item>               _sectionLabels;
     std::vector<rect_f>                  _sectionRectCache;
 };
 

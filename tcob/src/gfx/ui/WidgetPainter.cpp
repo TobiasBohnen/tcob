@@ -484,15 +484,33 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
     }
 }
 
-void widget_painter::draw_item(element::item const& style, rect_f const& rect, utf8_string const& text)
+void widget_painter::draw_item(element::item const& style, rect_f const& rect, list_item const& item)
 {
     rect_f itemRect {rect};
-    draw_bordered_rect(itemRect, style.Background, style.Border);
+    itemRect -= style.Padding;
+    itemRect -= style.Border.thickness();
+    draw_bordered_rect(rect, style.Background, style.Border);
 
-    if (style.Text.Font) {
-        itemRect -= style.Padding;
-        itemRect -= style.Border.thickness();
-        draw_text(style.Text, itemRect, text);
+    bool const drawText {!item.Text.empty() && style.Text.Font};
+    bool const drawIcon {!item.Icon.Texture.is_expired()};
+
+    if (drawText) { // text
+        rect_f textRect {rect};
+        if (drawIcon) {
+            textRect = {rect.center().X, rect.top(), rect.width() / 2, rect.height()};
+            itemRect.Size.Width /= 2;
+        }
+
+        textRect -= style.Padding;
+        textRect -= style.Border.thickness();
+        draw_text(style.Text, textRect, item.Text);
+    }
+    if (drawIcon) { // icon
+        auto const [iconWidth, iconHeight] {item.Icon.Texture->info().Size};
+        f32 const width {itemRect.height() * (iconHeight / static_cast<f32>(iconWidth))};
+        itemRect = {{itemRect.center().X - (width / 2), itemRect.top()}, {width, itemRect.height()}};
+        _canvas.set_fill_style(style.Text.Color);
+        _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, itemRect);
     }
 }
 

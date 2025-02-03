@@ -50,7 +50,7 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
 {
     for (isize i {0}; i < std::ssize(_tabs); ++i) {
         if (_tabs[i].get() == tab) {
-            _tabLabels[i] = label;
+            _tabLabels[i].Text = label;
             break;
         }
     }

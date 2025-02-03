@@ -45,8 +45,7 @@ list_box::list_box(init const& wi)
 
 void list_box::add_item(utf8_string const& item)
 {
-    list_item const litem {.Text = item, .UserData = {}};
-    add_item(litem);
+    add_item({.Text = item, .Icon = {}, .UserData = {}});
 }
 
 void list_box::add_item(list_item const& item)
@@ -130,7 +129,7 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
             auto const&  itemStyle {get_item_style(i)};
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                painter.draw_item(itemStyle->Item, itemRect, get_items()[i].Text);
+                painter.draw_item(itemStyle->Item, itemRect, get_items()[i]);
                 _itemRectCache[i] = itemRect;
             }
         }};

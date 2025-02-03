@@ -31,7 +31,11 @@ void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
 {
     if (clearRows) { clear_rows(); }
 
-    _columnHeaders = col;
+    _columnHeaders.clear();
+    for (auto const& c : col) {
+        _columnHeaders.push_back({.Text = c, .Icon = {}, .UserData = {}});
+    }
+
     _columnSizes.resize(_columnHeaders.size());
     for (usize x {0}; x < _columnSizes.size(); ++x) {
         _columnSizes[x] = std::ssize(col[x]);
@@ -47,14 +51,25 @@ auto grid_view::column_size() const -> isize
 
 void grid_view::add_row(std::vector<utf8_string> const& row)
 {
-    std::vector<utf8_string> r {row};
-    r.resize(_columnHeaders.size());
+    std::vector<list_item> newRow {};
+    newRow.resize(_columnHeaders.size());
 
-    _rows.push_back(r);
-    if (!_rows.empty()) {
-        for (usize x {0}; x < r.size(); ++x) {
-            _columnSizes[x] = std::max(_columnSizes[x], std::ssize(r[x]));
-        }
+    auto const size {std::min(row.size(), _columnHeaders.size())};
+    for (usize i {0}; i < size; ++i) { newRow[i].Text = row[i]; }
+
+    add_row(newRow);
+}
+
+void grid_view::add_row(std::span<list_item const> row)
+{
+    std::vector<list_item>& newRow {_rows.emplace_back()};
+    newRow.resize(_columnHeaders.size());
+
+    auto const size {std::min(row.size(), _columnHeaders.size())};
+    for (usize i {0}; i < size; ++i) { newRow[i] = row[i]; }
+
+    for (usize i {0}; i < size; ++i) {
+        _columnSizes[i] = std::max(_columnSizes[i], std::ssize(row[i].Text));
     }
 
     force_redraw(this->name() + ": row added");
@@ -76,12 +91,12 @@ auto grid_view::get_cell(point_i idx) const -> utf8_string
 {
     if (idx.Y == 0) {
         if (idx.X >= std::ssize(_columnHeaders)) { return ""; }
-        return _columnHeaders[idx.X];
+        return _columnHeaders[idx.X].Text;
     }
 
     if (idx.Y > std::ssize(_rows)) { return ""; }
     if (idx.X >= std::ssize(_rows[idx.Y - 1])) { return ""; }
-    return _rows[idx.Y - 1][idx.X];
+    return _rows[idx.Y - 1][idx.X].Text;
 }
 
 void grid_view::paint_content(widget_painter& painter, rect_f const& rect)

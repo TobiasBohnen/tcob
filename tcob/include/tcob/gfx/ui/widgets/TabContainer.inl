@@ -27,7 +27,7 @@ inline auto tab_container::create_tab(utf8_string const& name, utf8_string const
     auto retValue {std::make_shared<T>(wi)};
     _tabs.push_back(retValue);
     // TODO: translation hook
-    _tabLabels.push_back(label);
+    _tabLabels.push_back({.Text = label, .Icon = {}, .UserData = {}});
     if (ActiveTabIndex == -1) {
         ActiveTabIndex = 0;
     }

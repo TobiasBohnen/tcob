@@ -60,24 +60,14 @@ void image_box::on_paint(widget_painter& painter)
         }
 
         switch (style->Alignment.Horizontal) {
-        case horizontal_alignment::Left:
-            break;
-        case horizontal_alignment::Right:
-            targetRect.Position.X += rect.width() - targetRect.width();
-            break;
-        case horizontal_alignment::Centered:
-            targetRect.Position.X += (rect.width() - targetRect.width()) / 2;
-            break;
+        case horizontal_alignment::Left: break;
+        case horizontal_alignment::Right: targetRect.Position.X += rect.width() - targetRect.width(); break;
+        case horizontal_alignment::Centered: targetRect.Position.X += (rect.width() - targetRect.width()) / 2; break;
         }
         switch (style->Alignment.Vertical) {
-        case vertical_alignment::Top:
-            break;
-        case vertical_alignment::Bottom:
-            targetRect.Position.Y += rect.height() - targetRect.height();
-            break;
-        case vertical_alignment::Middle:
-            targetRect.Position.Y += (rect.height() - targetRect.height()) / 2;
-            break;
+        case vertical_alignment::Top: break;
+        case vertical_alignment::Bottom: targetRect.Position.Y += rect.height() - targetRect.height(); break;
+        case vertical_alignment::Middle: targetRect.Position.Y += (rect.height() - targetRect.height()) / 2; break;
         }
 
         auto& canvas {painter.canvas()};

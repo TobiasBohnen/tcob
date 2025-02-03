@@ -42,6 +42,7 @@ public:
     auto column_size() const -> isize;
 
     void add_row(std::vector<utf8_string> const& row);
+    void add_row(std::span<list_item const> row);
     void clear_rows();
 
     auto get_cell(point_i idx) const -> utf8_string;
@@ -61,9 +62,9 @@ private:
     auto get_cell_style(point_i idx, string const& className, select_mode mode) const -> item_style*;
     auto get_column_width(grid_view::style const* style, i32 col, f32 width) const -> f32;
 
-    std::vector<utf8_string>              _columnHeaders;
-    std::vector<isize>                    _columnSizes;
-    std::vector<std::vector<utf8_string>> _rows;
+    std::vector<list_item>              _columnHeaders;
+    std::vector<isize>                  _columnSizes;
+    std::vector<std::vector<list_item>> _rows;
 
     std::unordered_map<point_i, rect_f> _headerRectCache;
     std::unordered_map<point_i, rect_f> _rowRectCache;

@@ -73,7 +73,7 @@ private:
     void update_tab_bounds();
 
     std::vector<std::shared_ptr<widget>> _tabs;
-    std::vector<utf8_string>             _tabLabels;
+    std::vector<list_item>               _tabLabels;
     std::vector<rect_f>                  _tabRectCache;
     bool                                 _isDirty {true};
 };

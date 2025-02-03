@@ -28,7 +28,7 @@ drop_down_list::drop_down_list(init const& wi)
 
 void drop_down_list::add_item(utf8_string const& item)
 {
-    add_item({.Text = item, .UserData = {}});
+    add_item({.Text = item, .Icon = {}, .UserData = {}});
 }
 
 void drop_down_list::add_item(list_item const& item)
@@ -128,11 +128,11 @@ void drop_down_list::on_paint(widget_painter& painter)
             // list background
             rect_f listRect {Bounds()};
             listRect.Position.Y += listRect.height();
-            f32 const height {itemHeight * style->VisibleItemCount};
-            listRect.Size.Height = height;
-            listRect.Size.Height += style->Margin.Top.calc(height) + style->Margin.Bottom.calc(height);
-            listRect.Size.Height += style->Padding.Top.calc(height) + style->Padding.Bottom.calc(height);
-            listRect.Size.Height += style->Border.Size.calc(height);
+            f32 const listHeight {itemHeight * style->VisibleItemCount};
+            listRect.Size.Height = listHeight;
+            listRect.Size.Height += style->Margin.Top.calc(listHeight) + style->Margin.Bottom.calc(listHeight);
+            listRect.Size.Height += style->Padding.Top.calc(listHeight) + style->Padding.Bottom.calc(listHeight);
+            listRect.Size.Height += style->Border.Size.calc(listHeight);
 
             painter.draw_background_and_border(*style, listRect, false);
 
@@ -146,7 +146,7 @@ void drop_down_list::on_paint(widget_painter& painter)
                 auto const&  itemStyle {get_item_style(i)};
                 rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
                 if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                    painter.draw_item(itemStyle->Item, itemRect, _items[i].Text);
+                    painter.draw_item(itemStyle->Item, itemRect, _items[i]);
                     _itemRectCache[i] = itemRect;
                 }
             }};
@@ -281,18 +281,27 @@ void drop_down_list::on_update(milliseconds deltaTime)
 
 void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    f32 const height {bounds.height()};
+    rect_f    listRect {bounds};
+    f32 const boxHeight {bounds.height()};
 
     widget::offset_content(bounds, isHitTest);
 
     if (!_isExtended) { return; }
     if (auto const* style {current_style<drop_down_list::style>()}) {
-        if (!isHitTest) { bounds.Position.Y += height; }
+        if (!isHitTest) { bounds.Position.Y += listRect.Size.Height; }
+        f32 refListHeight {listRect.Size.Height};
+        refListHeight -= style->Margin.Top.calc(listRect.Size.Height) + style->Margin.Bottom.calc(listRect.Size.Height);
+        refListHeight -= style->Padding.Top.calc(listRect.Size.Height) + style->Padding.Bottom.calc(listRect.Size.Height);
+        refListHeight -= style->Border.Size.calc(listRect.Size.Height);
+        f32 const itemHeight {style->ItemHeight.calc(refListHeight)};
+        f32 const listHeight {itemHeight * style->VisibleItemCount};
+        bounds.Size.Height = listHeight;
 
-        f32 const itemHeight {style->ItemHeight.calc(bounds.height())};
-        bounds.Size.Height = itemHeight * style->VisibleItemCount;
-
-        if (isHitTest) { bounds.Size.Height += height; }
+        if (isHitTest) {
+            bounds.Size.Height += style->Margin.Top.calc(listHeight) + style->Margin.Bottom.calc(listHeight);
+            bounds.Size.Height += style->Border.Size.calc(listHeight);
+            bounds.Size.Height += boxHeight;
+        }
     }
 }
 

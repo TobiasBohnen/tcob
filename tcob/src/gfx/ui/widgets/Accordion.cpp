@@ -52,7 +52,7 @@ void accordion::change_section_label(widget* tab, utf8_string const& label)
 {
     for (isize i {0}; i < std::ssize(_sections); ++i) {
         if (_sections[i].get() == tab) {
-            _sectionLabels[i] = label;
+            _sectionLabels[i].Text = label;
             break;
         }
     }
