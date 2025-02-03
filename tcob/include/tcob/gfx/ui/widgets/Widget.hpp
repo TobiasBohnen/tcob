@@ -77,7 +77,7 @@ public:
     auto hit_test_bounds() const -> rect_f;
     auto virtual scroll_offset() const -> point_f;
 
-    template <std::derived_from<style> T>
+    template <std::derived_from<widget_style> T>
     auto current_style() const -> T*;
 
     auto global_to_content(point_i p) const -> point_f;
@@ -170,13 +170,13 @@ private:
 
     tcob::detail::connection_manager _connections;
 
-    bool         _visible {true};
-    bool         _enabled {true};
-    widget_flags _flags {};
-    f32          _alpha {1.0f};
-    form*        _form {nullptr};
-    widget*      _parent {nullptr};
-    style*       _style {nullptr};
+    bool          _visible {true};
+    bool          _enabled {true};
+    widget_flags  _flags {};
+    f32           _alpha {1.0f};
+    form*         _form {nullptr};
+    widget*       _parent {nullptr};
+    widget_style* _style {nullptr};
 
     widget_style_selectors _lastSelectors;
 

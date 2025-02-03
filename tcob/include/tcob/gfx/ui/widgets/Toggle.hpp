@@ -14,7 +14,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API toggle : public widget {
 public:
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         milliseconds  Delay {0};
         element::tick Tick;

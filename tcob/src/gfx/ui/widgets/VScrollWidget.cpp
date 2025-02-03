@@ -129,6 +129,7 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget::offset_content(bounds, isHitTest);
 
+    // subtract scrollbar from content
     if (isHitTest) { return; }
     if (!_vScrollbar.Visible) { return; }
     if (auto const* style {current_style<vscroll_widget::style>()}) {

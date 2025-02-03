@@ -21,7 +21,7 @@ public:
         FitHeight
     };
 
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         fit_mode   Fit {fit_mode::Fill};
         alignments Alignment {horizontal_alignment::Left, vertical_alignment::Top};

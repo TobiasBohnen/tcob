@@ -263,8 +263,6 @@ public:
     style(style&& other) noexcept                         = default;
     auto operator=(style&& other) noexcept -> style&      = default;
     virtual ~style()                                      = default;
-
-    void virtual offset_content(rect_f& /* bounds */, bool /* isHitTest*/) const { }
 };
 
 class TCOB_API widget_style : public style {
@@ -272,18 +270,11 @@ public:
     thickness Padding {};
     thickness Margin {};
 
-    string Cursor {"default"};
-
-    void offset_content(rect_f& bounds, bool isHitTest) const override;
-};
-
-class TCOB_API background_style : public widget_style {
-public:
     ui_paint        Background {colors::Transparent};
     element::shadow DropShadow {colors::Transparent, length {5, length::type::Absolute}, length {5, length::type::Absolute}};
     element::border Border;
 
-    void offset_content(rect_f& bounds, bool isHitTest) const override;
+    string Cursor {"default"};
 };
 
 class TCOB_API thumb_style : public style {

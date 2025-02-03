@@ -221,6 +221,7 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget::offset_content(bounds, isHitTest);
 
+    // subtract scrollbars from content
     if (isHitTest) { return; }
     if (auto const* style {current_style<panel::style>()}) {
         if (_vScrollbar.Visible) { bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width()); }

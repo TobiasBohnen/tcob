@@ -51,7 +51,7 @@ void widget_painter::pop_scissor()
 
 ////////////////////////////////////////////////////////////
 
-void widget_painter::draw_background_and_border(background_style const& style, rect_f& rect, bool isCircle)
+void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
 {
     // add margin
     rect -= style.Margin;

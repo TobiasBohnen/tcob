@@ -15,7 +15,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API text_box : public widget {
 public:
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         element::text  Text;
         element::caret Caret;

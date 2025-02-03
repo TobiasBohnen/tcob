@@ -14,7 +14,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API panel : public widget_container {
 public:
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         element::scrollbar HScrollBar;
         element::scrollbar VScrollBar;

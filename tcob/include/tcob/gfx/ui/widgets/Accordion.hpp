@@ -15,7 +15,7 @@ namespace tcob::gfx::ui {
 
 class TCOB_API accordion : public widget_container {
 public:
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         length      SectionBarHeight;
         utf8_string SectionItemClass {"section_items"};

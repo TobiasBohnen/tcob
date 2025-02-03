@@ -25,7 +25,7 @@ public:
     void push_scissor(rect_f const& globalScissor);
     void pop_scissor();
 
-    void draw_background_and_border(background_style const& style, rect_f& rect, bool isCircle);
+    void draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle);
 
     void draw_text(element::text const& style, rect_f const& rect, utf8_string const& text);
     void draw_text(element::text const& style, rect_f const& rect, text_formatter::result const& text);

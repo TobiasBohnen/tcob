@@ -17,7 +17,7 @@ namespace tcob::gfx::ui {
 // TODO: datasource
 class TCOB_API drop_down_list : public widget {
 public:
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         element::text Text;
 

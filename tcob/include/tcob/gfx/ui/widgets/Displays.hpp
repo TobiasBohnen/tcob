@@ -31,7 +31,7 @@ public:
         auto operator==(dot const& other) const -> bool = default;
     };
 
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         dot Dot;
     };
@@ -61,7 +61,7 @@ public:
         color  InactiveColor {colors::Transparent};
     };
 
-    struct style : public background_style {
+    struct style : public widget_style {
         segment Segment;
     };
 

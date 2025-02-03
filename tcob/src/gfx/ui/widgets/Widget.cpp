@@ -189,7 +189,13 @@ auto widget::global_to_local(point_i p) const -> point_f
 
 void widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    if (_style) { _style->offset_content(bounds, isHitTest); }
+    if (!_style) { return; }
+
+    bounds -= _style->Margin;
+    if (!isHitTest) {
+        bounds -= _style->Padding;
+        bounds -= _style->Border.thickness();
+    }
 }
 
 auto widget::scroll_offset() const -> point_f
@@ -210,7 +216,7 @@ void widget::on_styles_changed()
         .Attributes = attributes(),
     };
 
-    _style         = _form->Styles->get(newSelectors);
+    _style         = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
     _lastSelectors = newSelectors;
 
     if (Tooltip) {
@@ -219,7 +225,7 @@ void widget::on_styles_changed()
             .Flags      = Tooltip->flags(),
             .Attributes = Tooltip->attributes(),
         };
-        Tooltip->_style = _form->Styles->get(ttNewSelectors);
+        Tooltip->_style = dynamic_cast<widget_style*>(_form->Styles->get(ttNewSelectors));
     }
 }
 
@@ -232,7 +238,7 @@ void widget::prepare_redraw()
     };
 
     if (_lastSelectors != newSelectors) {
-        _style         = _form->Styles->get(newSelectors);
+        _style         = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
         _lastSelectors = newSelectors;
     }
 

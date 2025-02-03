@@ -22,7 +22,7 @@ public:
         Hidden
     };
 
-    class TCOB_API style : public background_style {
+    class TCOB_API style : public widget_style {
     public:
         utf8_string TabItemClass {"tab_items"};
         position    TabBarPosition {position::Top};

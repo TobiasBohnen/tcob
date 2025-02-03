@@ -8,7 +8,7 @@
 
 namespace tcob::gfx::ui {
 
-template <std::derived_from<style> T>
+template <std::derived_from<widget_style> T>
 inline auto widget::current_style() const -> T*
 {
     return static_cast<T*>(_style);
