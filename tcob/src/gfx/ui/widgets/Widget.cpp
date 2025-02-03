@@ -57,14 +57,9 @@ void widget::hide()
 
 auto widget::is_visible() const -> bool
 {
-    if (_visible && Alpha() > 0.01f) {
-        if (_parent) {
-            return _parent->is_visible();
-        }
-
-        return _form->is_visible();
-    }
-    return false;
+    return _visible && Alpha() > 0.01f
+        && (_parent ? _parent->is_visible()
+                    : _form->is_visible());
 }
 
 void widget::focus()
@@ -95,21 +90,12 @@ void widget::disable()
 
 auto widget::is_enabled() const -> bool
 {
-    if (_enabled) {
-        if (_parent) {
-            return _parent->is_enabled();
-        }
-
-        return true;
-    }
-    return false;
+    return _enabled && (_parent ? _parent->is_enabled() : true);
 }
 
 void widget::paint(widget_painter& painter)
 {
-    if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) {
-        return;
-    }
+    if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
     painter.begin(Alpha());
 
@@ -125,13 +111,9 @@ void widget::update(milliseconds deltaTime)
 
 auto widget::hit_test(point_f pos) const -> bool
 {
-    if (is_visible() && is_enabled()) {
-        if (hit_test_bounds().contains(pos)) {
-            return true;
-        }
-    }
-
-    return false;
+    return is_visible()
+        && is_enabled()
+        && hit_test_bounds().contains(pos);
 }
 
 auto widget::hit_test_bounds() const -> rect_f
