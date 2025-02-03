@@ -25,8 +25,8 @@ public:
     class TCOB_API style : public vscroll_widget::style {
     public:
         bool        AutoSizeColumns {true};
-        utf8_string HeaderClass {"header_items"};
-        utf8_string RowClass {"row_items"};
+        utf8_string HeaderItemClass {"header_items"};
+        utf8_string RowItemClass {"row_items"};
         length      RowHeight {};
         select_mode SelectMode {select_mode::Cell};
     };
