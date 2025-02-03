@@ -38,7 +38,6 @@ public:
 
     auto draw_bar(element::bar const& style, rect_f const& rect, element::bar::context const& barCtx) -> rect_f;
     auto draw_thumb(element::thumb const& style, rect_f const& rect, element::thumb::context const& thumbCtx) -> rect_f;
-    auto draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& rect, element::bar::context const& barCtx) -> element::scrollbar::rects;
 
     auto canvas() -> gfx::canvas&;
 

@@ -35,12 +35,17 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, 
         .Position    = element::bar::position::RightOrBottom,
         .BlockCount  = numBlocks,
         .Fraction    = frac};
+    element::thumb::context const thumbCtx {
+        .Orientation = barCtx.Orientation,
+        .Inverted    = barCtx.Inverted,
+        .Fraction    = barCtx.Fraction};
 
     rect_f const scrRect {rect};
     auto const   thumbFlags {!_overThumb    ? widget_flags {}
                                  : isActive ? widget_flags {.Active = true}
                                             : widget_flags {.Hover = true}};
-    _barRectCache = painter.draw_scrollbar(style, get_thumb_style(thumbFlags)->Thumb, scrRect, barCtx);
+    _barRectCache.Bar   = painter.draw_bar(style.Bar, scrRect, barCtx);
+    _barRectCache.Thumb = painter.draw_thumb(get_thumb_style(thumbFlags)->Thumb, _barRectCache.Bar, thumbCtx);
 
     if (_orien == orientation::Vertical) {
         rect.Size.Width -= _barRectCache.Bar.width() + style.Bar.Border.Size.calc(_barRectCache.Bar.width());

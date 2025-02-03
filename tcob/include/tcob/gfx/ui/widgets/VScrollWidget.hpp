@@ -41,11 +41,11 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto requires_scroll(rect_f const& rect) const -> bool;
     auto get_scroll_max_value() const -> f32;
 
     auto virtual get_scroll_content_height() const -> f32 = 0;
     auto virtual get_scroll_item_count() const -> isize   = 0;
+
     auto get_scrollbar_value() const -> f32;
     void set_scrollbar_value(f32 value);
 

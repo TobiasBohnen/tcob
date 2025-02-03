@@ -213,11 +213,6 @@ namespace element {
         bar         Bar;
         utf8_string ThumbClass {"scrollbar_thumb"};
 
-        struct rects {
-            rect_f Bar;
-            rect_f Thumb;
-        };
-
         auto operator==(scrollbar const& other) const -> bool = default;
     };
 

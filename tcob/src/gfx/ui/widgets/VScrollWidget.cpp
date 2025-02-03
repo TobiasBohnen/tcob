@@ -24,11 +24,6 @@ void vscroll_widget::prepare_redraw()
     _vScrollbar.Max = get_scroll_max_value();
 }
 
-auto vscroll_widget::requires_scroll(rect_f const& rect) const -> bool
-{
-    return get_scroll_content_height() - 1 > rect.height();
-}
-
 auto vscroll_widget::get_scroll_max_value() const -> f32
 {
     return std::max(0.0f, get_scroll_content_height() - content_bounds().height());
@@ -57,7 +52,7 @@ void vscroll_widget::on_paint(widget_painter& painter)
         painter.draw_background_and_border(*style, rect, false);
 
         // scrollbar
-        _vScrollbar.Visible = requires_scroll(rect);
+        _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
         _vScrollbar.paint(painter, style->VScrollBar, rect, flags().Active);
 
         // content

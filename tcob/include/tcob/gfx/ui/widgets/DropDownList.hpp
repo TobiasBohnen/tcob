@@ -70,9 +70,6 @@ protected:
 private:
     auto get_item_height() const -> f32;
 
-    auto requires_scroll() const -> bool;
-    auto get_scroll_max_value() const -> f32;
-
     void set_extended(bool v);
 
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& listRect) const -> rect_f;

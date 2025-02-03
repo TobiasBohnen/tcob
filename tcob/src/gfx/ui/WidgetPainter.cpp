@@ -408,16 +408,6 @@ auto widget_painter::draw_thumb(element::thumb const& style, rect_f const& rect,
     return retValue;
 }
 
-auto widget_painter::draw_scrollbar(element::scrollbar const& style, element::thumb const& thumbStyle, rect_f const& rect, element::bar::context const& barCtx) -> element::scrollbar::rects
-{
-    element::scrollbar::rects retValue;
-
-    retValue.Bar   = draw_bar(style.Bar, rect, barCtx);
-    retValue.Thumb = draw_thumb(thumbStyle, retValue.Bar, {.Orientation = barCtx.Orientation, .Inverted = barCtx.Inverted, .Fraction = barCtx.Fraction});
-
-    return retValue;
-}
-
 void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};

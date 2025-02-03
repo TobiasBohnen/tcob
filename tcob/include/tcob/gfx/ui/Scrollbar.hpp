@@ -15,6 +15,11 @@ namespace tcob::gfx::ui {
 
 class TCOB_API scrollbar {
 public:
+    struct rects {
+        rect_f Bar;
+        rect_f Thumb;
+    };
+
     scrollbar(widget& parent, orientation orien);
 
     bool                Visible {false};
@@ -46,10 +51,11 @@ private:
     bool    _overBar {false};
     point_i _dragOffset {point_i::Zero};
 
-    orientation               _orien;
-    widget&                   _parent;
-    widget_tweener            _tween;
-    element::scrollbar::rects _barRectCache;
+    orientation    _orien;
+    widget&        _parent;
+    widget_tweener _tween;
+
+    rects _barRectCache;
 };
 
 }

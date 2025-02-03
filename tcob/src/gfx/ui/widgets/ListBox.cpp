@@ -214,6 +214,13 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
     }
 }
 
+void list_box::on_mouse_wheel(input::mouse::wheel_event const& ev)
+{
+    HoveredItemIndex = INVALID;
+
+    vscroll_widget::on_mouse_wheel(ev);
+}
+
 auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f
 {
     rect_f retValue {rect};

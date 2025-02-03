@@ -88,12 +88,14 @@ void drop_down_list::prepare_redraw()
     widget::prepare_redraw();
 
     _vScrollbar.Min = 0;
-    _vScrollbar.Max = get_scroll_max_value();
+    _vScrollbar.Max = std::max(0.0f, (get_item_height() * std::ssize(_items)) - content_bounds().height());
 }
 
 void drop_down_list::on_paint(widget_painter& painter)
 {
     if (auto const* style {current_style<drop_down_list::style>()}) {
+        _itemRectCache.clear();
+
         rect_f rect {Bounds()};
 
         // background
@@ -135,7 +137,7 @@ void drop_down_list::on_paint(widget_painter& painter)
             painter.draw_background_and_border(*style, listRect, false);
 
             // scrollbar
-            _vScrollbar.Visible = requires_scroll();
+            _vScrollbar.Visible = std::ssize(_items) > style->VisibleItemCount;
             _vScrollbar.paint(painter, style->VScrollBar, listRect, fls.Active);
 
             scissor_guard const guard {painter, this};
@@ -246,6 +248,8 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
 
+    HoveredItemIndex = INVALID;
+
     if (auto const* style {current_style<drop_down_list::style>()}) {
         orientation  orien {};
         bool         invert {false};
@@ -326,21 +330,6 @@ auto drop_down_list::get_item_height() const -> f32
     }
 
     return 0;
-}
-
-auto drop_down_list::requires_scroll() const -> bool
-{
-    if (auto const* style {current_style<drop_down_list::style>()}) {
-        return std::ssize(_items) > style->VisibleItemCount;
-    }
-
-    return false;
-}
-
-auto drop_down_list::get_scroll_max_value() const -> f32
-{
-    f32 const itemHeight {get_item_height()};
-    return std::max(0.0f, (itemHeight * std::ssize(_items)) - content_bounds().height());
 }
 
 void drop_down_list::set_extended(bool v)

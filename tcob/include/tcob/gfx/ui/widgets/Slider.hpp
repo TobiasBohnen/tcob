@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/gfx/ui/Scrollbar.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -53,10 +54,10 @@ private:
 
     void calculate_value(point_f mp);
 
-    bool                      _overThumb {false};
-    bool                      _isDragging {false};
-    point_i                   _dragOffset {point_i::Zero};
-    element::scrollbar::rects _barRectCache {};
+    bool             _overThumb {false};
+    bool             _isDragging {false};
+    point_i          _dragOffset {point_i::Zero};
+    scrollbar::rects _barRectCache {};
 
     widget_tweener _tween;
 };
