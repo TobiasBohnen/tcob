@@ -39,15 +39,13 @@ public:
 
     prop_fn<size_i> Size;
 
-    color ClearColor {colors::DarkGray};
+    color                 ClearColor {colors::DarkGray};
+    std::optional<rect_i> ScissorRect;
 
     auto camera() -> gfx::camera&;
 
     void clear() const;
     void clear(color c) const;
-
-    void enable_scissor(rect_i const& rect) const;
-    void disable_scissor() const;
 
     auto copy_to_image() const -> image;
 

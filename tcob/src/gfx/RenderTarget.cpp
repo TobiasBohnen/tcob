@@ -43,6 +43,12 @@ void render_target::prepare_render(bool debug)
 {
     auto const& stats {locate_service<render_system>().stats()};
 
+    if (ScissorRect) {
+        _impl->enable_scissor(*ScissorRect, get_size().Height);
+    } else {
+        _impl->disable_scissor();
+    }
+
     _impl->prepare_render(
         {.ViewMatrix            = _camera.matrix(),
          .Viewport              = rect_i {_camera.viewport()},
@@ -69,16 +75,6 @@ void render_target::unbind_material() const
 
 void render_target::on_clear(color /*c*/) const
 {
-}
-
-void render_target::enable_scissor(rect_i const& rect) const
-{
-    _impl->enable_scissor(rect, get_size().Height);
-}
-
-void render_target::disable_scissor() const
-{
-    _impl->disable_scissor();
 }
 
 auto render_target::copy_to_image() const -> image

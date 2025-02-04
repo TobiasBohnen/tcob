@@ -25,6 +25,10 @@ public:
     color Color {colors::White};
     f32   PointSize {1};
 
+    stencil_func StencilFunc {stencil_func::Always};
+    stencil_op   StencilOp {stencil_op::Keep};
+    u8           StencilRef {1};
+
     static inline char const* asset_name {"material"};
 
     auto static Empty() -> assets::owning_asset_ptr<material>;

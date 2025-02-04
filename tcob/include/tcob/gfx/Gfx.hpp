@@ -69,6 +69,28 @@ enum class blend_equation : u8 {
     Max
 };
 
+enum class stencil_func : u8 {
+    Never,
+    Less,
+    Equal,
+    LessEqual,
+    Greater,
+    NotEqual,
+    GreaterEqual,
+    Always
+};
+
+enum class stencil_op : u8 {
+    Keep,
+    Zero,
+    Replace,
+    Increase,
+    Decrease,
+    Invert,
+    IncreaseWrap,
+    DecreaseWrap
+};
+
 enum class primitive_type : u8 {
     Points,
     LineStrip,
