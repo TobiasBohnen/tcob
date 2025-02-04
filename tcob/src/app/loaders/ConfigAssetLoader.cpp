@@ -67,11 +67,17 @@ namespace Material {
     static char const* Name {"material"};
     static char const* texture {"texture"};
     static char const* shader {"shader"};
+
     static char const* blend_func {"blend_func"};
     static char const* separate_blend_func {"separate_blend_func"};
     static char const* blend_equation {"blend_equation"};
+
     static char const* point_size {"point_size"};
     static char const* color {"color"};
+
+    static char const* stencil_func {"stencil_func"};
+    static char const* stencil_op {"stencil_op"};
+    static char const* stencil_ref {"stencil_ref"};
 }
 
 namespace Shader {
@@ -204,9 +210,7 @@ void cfg_frame_animation_loader::declare()
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
             auto* asset {default_new<frame_animation, asset_def>(k, bucket(), _cache)};
-            if (std::vector<frame> frames; assetSection.try_get(frames, API::Animation::frames)) {
-                asset->assetPtr->Frames = frames;
-            }
+            assetSection.try_get(asset->assetPtr->Frames, API::Animation::frames);
         }
     }
 }
@@ -235,9 +239,7 @@ void cfg_music_loader::declare()
     for (auto const& [k, v] : obj) {
         auto* asset {default_new<music, asset_def>(k, bucket(), _cache)};
         if (object assetSection; v.try_get(assetSection)) {
-            if (string source; assetSection.try_get(source, API::Music::source)) {
-                asset->source = source;
-            }
+            assetSection.try_get(asset->source, API::Music::source);
         } else if (path assetString; v.try_get(assetString)) {
             asset->source = assetString;
         }
@@ -274,9 +276,7 @@ void cfg_sound_loader::declare()
         auto* asset {default_new<sound, asset_def>(k, bucket(), _cache)};
 
         if (object assetSection; v.try_get(assetSection)) {
-            if (string source; assetSection.try_get(source, API::Sound::source)) {
-                asset->source = source;
-            }
+            assetSection.try_get(asset->source, API::Sound::source);
         } else if (path assetString; v.try_get(assetString)) {
             asset->source = assetString;
         }
@@ -314,9 +314,7 @@ void cfg_sound_font_loader::declare()
         auto* asset {default_new<sound_font, asset_def>(k, bucket(), _cache)};
 
         if (object assetSection; v.try_get(assetSection)) {
-            if (string source; assetSection.try_get(source, API::SoundFont::source)) {
-                asset->source = source;
-            }
+            assetSection.try_get(asset->source, API::SoundFont::source);
         } else if (path assetString; v.try_get(assetString)) {
             asset->source = assetString;
         }
@@ -391,12 +389,8 @@ void cfg_font_loader::declare()
         for (auto const& [k, v] : fontSection) {
             if (object assetSection; v.try_get(assetSection)) {
                 auto* asset {default_new<font, asset_def>(k, bucket(), _cache)};
-                if (string source; assetSection.try_get(source, API::TrueTypeFont::source)) {
-                    asset->source = source;
-                }
-                if (u32 size {0}; assetSection.try_get(size, API::TrueTypeFont::size)) {
-                    asset->size = size;
-                }
+                assetSection.try_get(asset->source, API::TrueTypeFont::source);
+                assetSection.try_get(asset->size, API::TrueTypeFont::size);
             }
         }
     }
@@ -436,9 +430,7 @@ void cfg_font_family_loader::declare()
         asset->assetPtr = bucket()->template create_or_get<font_family>(k, k);
 
         if (object assetSection; v.try_get(assetSection)) {
-            if (string fontSource; assetSection.try_get(fontSource, API::FontFamily::source)) {
-                asset->source = fontSource;
-            }
+            assetSection.try_get(asset->source, API::FontFamily::source);
         } else if (path assetString; v.try_get(assetString)) {
             asset->source = assetString;
         }
@@ -473,38 +465,35 @@ void cfg_material_loader::declare()
     if (!_object.try_get(obj, API::Material::Name)) { return; }
 
     for (auto const& [k, v] : obj) {
-        if (object assetSection; v.try_get(assetSection)) {
-            auto* asset {default_new<material, asset_def>(k, bucket(), _cache)};
-            if (string texture; assetSection.try_get(texture, API::Material::texture)) {
-                asset->texture = texture;
-            }
-            if (string shader; assetSection.try_get(shader, API::Material::shader)) {
-                asset->shader = shader;
-            }
-            if (object blendFunc; assetSection.try_get(blendFunc, API::Material::blend_func)) {
-                blend_func s {blendFunc["source"].as<blend_func>()};
-                asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc = s;
-                asset->assetPtr->BlendFuncs.SourceColorBlendFunc = s;
+        object assetSection;
+        if (!v.try_get(assetSection)) { continue; }
 
-                blend_func d {blendFunc["destination"].as<blend_func>()};
-                asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = d;
-                asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = d;
-            } else if (object separateBlendFunc; assetSection.try_get(separateBlendFunc, API::Material::separate_blend_func)) {
-                asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc      = separateBlendFunc["source_alpha"].as<blend_func>();
-                asset->assetPtr->BlendFuncs.SourceColorBlendFunc      = separateBlendFunc["source_color"].as<blend_func>();
-                asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = separateBlendFunc["destination_alpha"].as<blend_func>();
-                asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = separateBlendFunc["destination_color"].as<blend_func>();
-            }
-            if (blend_equation blendEquation {}; assetSection.try_get(blendEquation, API::Material::blend_equation)) {
-                asset->assetPtr->BlendEquation = blendEquation;
-            }
-            if (color c {colors::White}; assetSection.try_get(c, API::Material::color)) {
-                asset->assetPtr->Color = c;
-            }
-            if (f32 pointSize {0}; assetSection.try_get(pointSize, API::Material::point_size)) {
-                asset->assetPtr->PointSize = pointSize;
-            }
+        auto* asset {default_new<material, asset_def>(k, bucket(), _cache)};
+
+        assetSection.try_get(asset->texture, API::Material::texture);
+        assetSection.try_get(asset->shader, API::Material::shader);
+
+        if (object blendFunc; assetSection.try_get(blendFunc, API::Material::blend_func)) {
+            blend_func s {blendFunc["source"].as<blend_func>()};
+            asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc = s;
+            asset->assetPtr->BlendFuncs.SourceColorBlendFunc = s;
+
+            blend_func d {blendFunc["destination"].as<blend_func>()};
+            asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = d;
+            asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = d;
+        } else if (object separateBlendFunc; assetSection.try_get(separateBlendFunc, API::Material::separate_blend_func)) {
+            asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc      = separateBlendFunc["source_alpha"].as<blend_func>();
+            asset->assetPtr->BlendFuncs.SourceColorBlendFunc      = separateBlendFunc["source_color"].as<blend_func>();
+            asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = separateBlendFunc["destination_alpha"].as<blend_func>();
+            asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = separateBlendFunc["destination_color"].as<blend_func>();
         }
+
+        assetSection.try_get(asset->assetPtr->BlendEquation, API::Material::blend_equation);
+        assetSection.try_get(asset->assetPtr->Color, API::Material::color);
+        assetSection.try_get(asset->assetPtr->PointSize, API::Material::point_size);
+        assetSection.try_get(asset->assetPtr->StencilFunc, API::Material::stencil_func);
+        assetSection.try_get(asset->assetPtr->StencilOp, API::Material::stencil_op);
+        assetSection.try_get(asset->assetPtr->StencilRef, API::Material::stencil_ref);
     }
 }
 
@@ -558,39 +547,35 @@ void cfg_shader_loader::declare()
             assetSection.try_get(assetSection, locate_service<render_system>().name());
 
             auto* asset {default_new<shader, asset_def>(k, bucket(), _cache)};
-            if (string vertex; assetSection.try_get(vertex, API::Shader::vertex)) {
-                asset->vertex = vertex;
-            }
-            if (string fragment; assetSection.try_get(fragment, API::Shader::fragment)) {
-                asset->fragment = fragment;
-            }
+            assetSection.try_get(asset->vertex, API::Shader::vertex);
+            assetSection.try_get(asset->fragment, API::Shader::fragment);
         }
     }
 }
 
 void cfg_shader_loader::prepare()
 {
-    if (!_cache.empty()) {
-        for (auto& def : _cache) {
-            auto const vertSource {io::read_as_string(group().mount_point() + def->vertex)};
-            if (vertSource.empty()) {
-                logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
-                set_asset_status(def->assetPtr, asset_status::Error);
-                continue;
-            }
-            auto const fragSource {io::read_as_string(group().mount_point() + def->fragment)};
-            if (fragSource.empty()) {
-                logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
-                set_asset_status(def->assetPtr, asset_status::Error);
-                continue;
-            }
+    if (_cache.empty()) { return; }
 
-            def->assetPtr->create(vertSource, fragSource);
-            set_asset_status(def->assetPtr, asset_status::Loaded);
+    for (auto& def : _cache) {
+        auto const vertSource {io::read_as_string(group().mount_point() + def->vertex)};
+        if (vertSource.empty()) {
+            logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
+            set_asset_status(def->assetPtr, asset_status::Error);
+            continue;
+        }
+        auto const fragSource {io::read_as_string(group().mount_point() + def->fragment)};
+        if (fragSource.empty()) {
+            logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
+            set_asset_status(def->assetPtr, asset_status::Error);
+            continue;
         }
 
-        _cache.clear();
+        def->assetPtr->create(vertSource, fragSource);
+        set_asset_status(def->assetPtr, asset_status::Loaded);
     }
+
+    _cache.clear();
 }
 
 ////////////////////////////////////////////////////////////
@@ -659,15 +644,9 @@ void cfg_texture_loader::declare()
                         asset->assetPtr->add_region(regk, regv.as<texture_region>());
                     }
                 }
-                if (size_i size; assetSection.try_get(size, API::Texture::size)) {
-                    asset->size = size;
-                }
-                if (texture::wrapping wrapping {}; assetSection.try_get(wrapping, API::Texture::wrapping)) {
-                    asset->wrapping = wrapping;
-                }
-                if (texture::filtering filtering {}; assetSection.try_get(filtering, API::Texture::filtering)) {
-                    asset->filtering = filtering;
-                }
+                assetSection.try_get(asset->size, API::Texture::size);
+                assetSection.try_get(asset->wrapping, API::Texture::wrapping);
+                assetSection.try_get(asset->filtering, API::Texture::filtering);
             }
             // texture strings
             else if (path assetString; v.try_get(assetString)) {
@@ -690,12 +669,8 @@ void cfg_texture_loader::declare()
                 if (path source; assetSection.try_get(source, API::AnimatedTexture::source)) {
                     asset->textureFile = mp + source;
                 }
-                if (texture::wrapping wrapping {}; assetSection.try_get(wrapping, API::AnimatedTexture::wrapping)) {
-                    asset->wrapping = wrapping;
-                }
-                if (texture::filtering filtering {}; assetSection.try_get(filtering, API::AnimatedTexture::filtering)) {
-                    asset->filtering = filtering;
-                }
+                assetSection.try_get(asset->wrapping, API::AnimatedTexture::wrapping);
+                assetSection.try_get(asset->filtering, API::AnimatedTexture::filtering);
             } else if (path assetString; v.try_get(assetString)) {
                 asset->textureFile = mp + assetString;
             }
@@ -838,5 +813,4 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
 
     ctx.Finished = _cacheTex.empty();
 }
-
 }
