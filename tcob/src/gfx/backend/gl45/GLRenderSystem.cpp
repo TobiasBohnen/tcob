@@ -7,13 +7,13 @@
 
 #include <glad/gl45.h>
 
+#include "GLCanvas.hpp"
 #include "GLRenderTarget.hpp"
 #include "GLShaderProgram.hpp"
 #include "GLTexture.hpp"
 #include "GLUniformBuffer.hpp"
 #include "GLVertexArray.hpp"
 #include "GLWindow.hpp"
-#include "nanovg/GLCanvas.hpp"
 
 namespace tcob::gfx::gl45 {
 

@@ -25,9 +25,9 @@
 
 #include <glad/gles20.h>
 
-#include "../GLES20ShaderProgram.hpp"
-#include "../GLES20Texture.hpp"
-#include "../GLES20VertexArray.hpp"
+#include "GLES20ShaderProgram.hpp"
+#include "GLES20Texture.hpp"
+#include "GLES20VertexArray.hpp"
 
 #include "tcob/gfx/Canvas.hpp"
 
@@ -95,9 +95,8 @@ public:
     gl_canvas();
     ~gl_canvas() override;
 
-    void set_size(size_f size) override;
+    void flush(size_f size) override;
     void cancel() override;
-    void flush() override;
     void render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
                      vec4 const& bounds, std::vector<canvas_path> const& paths) override;
     void render_stroke(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
@@ -107,9 +106,6 @@ public:
     void add_gradient(i32 idx, color_gradient const& gradient) override;
 
 private:
-    void set_stencil_mask(GLuint mask);
-    void set_stencil_func(GLenum func, GLint ref, GLuint mask);
-    void set_blendfunc_separate(blend_funcs const& blend);
     void set_uniforms(usize uniformOffset, texture* image = nullptr);
     auto convert_paint(canvas_paint const& paint, canvas_scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
     void fill(nvg_call const& call);
@@ -121,7 +117,6 @@ private:
     auto alloc_frag_uniforms(usize n) -> usize;
 
     gl_shader                       _shader;
-    size_f                          _view {};
     gl_vertex_array                 _vertexArray {buffer_usage_hint::StreamDraw};
     std::unordered_map<string, i32> _uniformLocs;
 
@@ -131,13 +126,6 @@ private:
     std::vector<vertex>            _verts;
     usize                          _nverts {0};
     std::vector<nvg_frag_uniforms> _uniforms;
-
-    // cached state
-    GLuint      _stencilMask {0};
-    GLenum      _stencilFunc {0};
-    GLint       _stencilFuncRef {0};
-    GLuint      _stencilFuncMask {0};
-    blend_funcs _blendFunc {blend_func::Invalid, blend_func::Invalid, blend_func::Invalid, blend_func::Invalid};
 
     gl_texture _gradientTexture;
 };

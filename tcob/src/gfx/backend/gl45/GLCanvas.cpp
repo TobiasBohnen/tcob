@@ -3,23 +3,22 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLES30Canvas.hpp"
+#include "GLCanvas.hpp"
 
 #include <cstring>
 #include <variant>
 
-#include "../GLES30.hpp"
-#include "../GLES30Enum.hpp"
+#include "GLEnum.hpp"
 
 #include "tcob/gfx/ColorGradient.hpp"
 
-namespace tcob::gfx::gles30 {
+namespace tcob::gfx::gl45 {
 
 static char const* fillVertShader {
-#include "nanovg.vert"
+#include "./shaders/nanovg.vert"
 };
 static char const* fillFragShader {
-#include "nanovg.frag"
+#include "./shaders/nanovg.frag"
 };
 
 static u32 const GLNVG_FRAG_BINDING {0};
@@ -29,6 +28,7 @@ gl_canvas::gl_canvas()
     if (!_shader.compile(fillVertShader, fillFragShader)) {
         throw std::runtime_error("failed to compile nanovg shader");
     }
+    _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
 
     // gradient
     _gradientTexture.create({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
@@ -36,46 +36,18 @@ gl_canvas::gl_canvas()
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
     // Create UBOs
-    GLCHECK(glUniformBlockBinding(_shader.ID, glGetUniformBlockIndex(_shader.ID, "Ubo"), GLNVG_FRAG_BINDING));
-    GLCHECK(glGenBuffers(1, &_fragBuf));
+    //  glUniformBlockBinding(_shader.get_id(), 0, GLNVG_FRAG_BINDING);
+    glCreateBuffers(1, &_fragBuf);
 
     i32 align {0};
-    GLCHECK(glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align));
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align);
     _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - (sizeof(nvg_frag_uniforms) % static_cast<u32>(align));
 }
 
 gl_canvas::~gl_canvas()
 {
     if (_fragBuf != 0) {
-        GLCHECK(glDeleteBuffers(1, &_fragBuf));
-    }
-}
-
-void gl_canvas::set_stencil_mask(GLuint mask)
-{
-    if (_stencilMask != mask) {
-        _stencilMask = mask;
-        GLCHECK(glStencilMask(mask));
-    }
-}
-
-void gl_canvas::set_stencil_func(GLenum func, GLint ref, GLuint mask)
-{
-    if ((_stencilFunc != func) || (_stencilFuncRef != ref) || (_stencilFuncMask != mask)) {
-        _stencilFunc     = func;
-        _stencilFuncRef  = ref;
-        _stencilFuncMask = mask;
-        GLCHECK(glStencilFunc(func, ref, mask));
-    }
-}
-void gl_canvas::set_blendfunc_separate(blend_funcs const& blend)
-{
-    if (_blendFunc != blend) {
-        _blendFunc = blend;
-        GLCHECK(glBlendFuncSeparate(convert_enum(blend.SourceColorBlendFunc),
-                                    convert_enum(blend.DestinationColorBlendFunc),
-                                    convert_enum(blend.SourceAlphaBlendFunc),
-                                    convert_enum(blend.DestinationAlphaBlendFunc)));
+        glDeleteBuffers(1, &_fragBuf);
     }
 }
 
@@ -134,61 +106,54 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
 
 void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
 {
-    GLCHECK(glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms)));
+    glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms));
 
-    GLCHECK(glActiveTexture(GL_TEXTURE0));
     if (image) {
-        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, image->get_impl<gl_texture>()->get_id()));
+        glBindTextureUnit(0, image->get_impl<gl_texture>()->get_id());
     } else {
-        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, 0));
+        glBindTextureUnit(0, 0);
     }
 
-    GLCHECK(glActiveTexture(GL_TEXTURE1));
-    GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, _gradientTexture.get_id()));
-}
-
-void gl_canvas::set_size(size_f size)
-{
-    _view = size;
+    glBindTextureUnit(1, _gradientTexture.get_id());
 }
 
 void gl_canvas::fill(nvg_call const& call)
 {
     // Draw shapes
     glEnable(GL_STENCIL_TEST);
-    set_stencil_mask(0xff);
-    set_stencil_func(GL_ALWAYS, 0, 0xff);
-    GLCHECK(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+    glStencilMask(0xff);
+    glStencilFunc(GL_ALWAYS, 0, 0xff);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
     // set bindpoint for solid loc
     set_uniforms(call.UniformOffset);
 
-    GLCHECK(glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP));
-    GLCHECK(glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP));
-    GLCHECK(glDisable(GL_CULL_FACE));
+    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+    glDisable(GL_CULL_FACE);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
     }
-    GLCHECK(glEnable(GL_CULL_FACE));
+    glEnable(GL_CULL_FACE);
 
     // Draw anti-aliased pixels
-    GLCHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     set_uniforms(call.UniformOffset + _fragSize, call.Image);
 
-    set_stencil_func(GL_EQUAL, 0x00, 0xff);
-    GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+    glStencilFunc(GL_EQUAL, 0x00, 0xff);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     // Draw fringes
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
 
     // Draw fill
-    set_stencil_func(GL_NOTEQUAL, 0x0, 0xff);
-    GLCHECK(glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO));
+    glStencilFunc(GL_NOTEQUAL, 0x0, 0xff);
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
     _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(call.TriangleOffset), call.TriangleCount);
 
-    GLCHECK(glDisable(GL_STENCIL_TEST));
+    glDisable(GL_STENCIL_TEST);
 }
 
 void gl_canvas::convex_fill(nvg_call const& call)
@@ -206,12 +171,12 @@ void gl_canvas::convex_fill(nvg_call const& call)
 
 void gl_canvas::stroke(nvg_call const& call)
 {
-    GLCHECK(glEnable(GL_STENCIL_TEST));
-    set_stencil_mask(0xff);
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(0xff);
 
     // Fill the stroke base without overlap
-    set_stencil_func(GL_EQUAL, 0x0, 0xff);
-    GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_INCR));
+    glStencilFunc(GL_EQUAL, 0x0, 0xff);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     set_uniforms(call.UniformOffset + _fragSize, call.Image);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
@@ -219,22 +184,22 @@ void gl_canvas::stroke(nvg_call const& call)
 
     // Draw anti-aliased pixels.
     set_uniforms(call.UniformOffset, call.Image);
-    set_stencil_func(GL_EQUAL, 0x00, 0xff);
-    GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+    glStencilFunc(GL_EQUAL, 0x00, 0xff);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
 
     // Clear stencil buffer.
-    GLCHECK(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-    set_stencil_func(GL_ALWAYS, 0x0, 0xff);
-    GLCHECK(glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO));
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glStencilFunc(GL_ALWAYS, 0x0, 0xff);
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
-    GLCHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    GLCHECK(glDisable(GL_STENCIL_TEST));
+    glDisable(GL_STENCIL_TEST);
 }
 
 void gl_canvas::triangles(nvg_call const& call)
@@ -251,45 +216,40 @@ void gl_canvas::cancel()
     _calls.clear();
 }
 
-void gl_canvas::flush()
+void gl_canvas::flush(size_f size)
 {
     if (!_calls.empty()) {
         // Setup require GL state.
-        GLCHECK(glEnable(GL_CULL_FACE));
-        GLCHECK(glCullFace(GL_BACK));
-        GLCHECK(glFrontFace(GL_CCW));
-        GLCHECK(glEnable(GL_BLEND));
-        GLCHECK(glDisable(GL_DEPTH_TEST));
-        GLCHECK(glDisable(GL_SCISSOR_TEST));
-        GLCHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        GLCHECK(glStencilMask(0xffffffff));
-        GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
-        GLCHECK(glStencilFunc(GL_ALWAYS, 0, 0xffffffff));
-        _stencilMask     = 0xffffffff;
-        _stencilFunc     = GL_ALWAYS;
-        _stencilFuncRef  = 0;
-        _stencilFuncMask = 0xffffffff;
-        _blendFunc       = {.SourceColorBlendFunc      = blend_func::Invalid,
-                            .DestinationColorBlendFunc = blend_func::Invalid,
-                            .SourceAlphaBlendFunc      = blend_func::Invalid,
-                            .DestinationAlphaBlendFunc = blend_func::Invalid};
+        glUseProgram(_shader.get_id());
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
+        glEnable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_SCISSOR_TEST);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glStencilMask(0xffffffff);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilFunc(GL_ALWAYS, 0, 0xffffffff);
 
         // Upload ubo for frag shaders
-        GLCHECK(glBindBuffer(GL_UNIFORM_BUFFER, _fragBuf));
-        GLCHECK(glBufferData(GL_UNIFORM_BUFFER, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW));
+        glNamedBufferData(_fragBuf, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW);
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, _fragBuf);
 
         // Upload vertex data
         _vertexArray.resize(_nverts, 0);
         _vertexArray.update_data({_verts.data(), _nverts}, 0);
 
         // Set view and texture just once per frame.
-        _shader.set_uniform(_shader.get_uniform_location("viewSize"), _view);
-        _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
-
-        GLCHECK(glBindBuffer(GL_UNIFORM_BUFFER, _fragBuf));
+        _shader.set_uniform(_shader.get_uniform_location("viewSize"), size);
 
         for (auto& call : _calls) {
-            set_blendfunc_separate(call.BlendFunc);
+            glBlendFuncSeparate(convert_enum(call.BlendFunc.SourceColorBlendFunc),
+                                convert_enum(call.BlendFunc.DestinationColorBlendFunc),
+                                convert_enum(call.BlendFunc.SourceAlphaBlendFunc),
+                                convert_enum(call.BlendFunc.DestinationAlphaBlendFunc));
+
             switch (call.Type) {
             case nvg_call_type::Fill:
                 fill(call);
@@ -308,9 +268,9 @@ void gl_canvas::flush()
             }
         }
 
-        GLCHECK(glDisable(GL_CULL_FACE));
-        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        GLCHECK(glUseProgram(0));
+        glDisable(GL_CULL_FACE);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glUseProgram(0);
     }
 
     // Reset calls

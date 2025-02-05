@@ -3,81 +3,54 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "GLCanvas.hpp"
+#include "GLES20Canvas.hpp"
 
 #include <cstring>
 #include <variant>
 
-#include "../GLEnum.hpp"
+#include "GLES20.hpp"
+#include "GLES20Enum.hpp"
 
 #include "tcob/gfx/ColorGradient.hpp"
 
-namespace tcob::gfx::gl45 {
+namespace tcob::gfx::gles20 {
 
 static char const* fillVertShader {
-#include "nanovg.vert"
+#include "./shaders/nanovg.vert"
 };
 static char const* fillFragShader {
-#include "nanovg.frag"
+#include "./shaders/nanovg.frag"
 };
-
-static u32 const GLNVG_FRAG_BINDING {0};
 
 gl_canvas::gl_canvas()
 {
     if (!_shader.compile(fillVertShader, fillFragShader)) {
         throw std::runtime_error("failed to compile nanovg shader");
     }
-    _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
 
     // gradient
     _gradientTexture.create({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
     _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
-    // Create UBOs
-    //  glUniformBlockBinding(_shader.get_id(), 0, GLNVG_FRAG_BINDING);
-    glCreateBuffers(1, &_fragBuf);
-
-    i32 align {0};
-    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align);
-    _fragSize = sizeof(nvg_frag_uniforms) + static_cast<u32>(align) - (sizeof(nvg_frag_uniforms) % static_cast<u32>(align));
+    // get uniform locations
+    _uniformLocs["scissorMat"]    = _shader.get_uniform_location("scissorMat");
+    _uniformLocs["paintMat"]      = _shader.get_uniform_location("paintMat");
+    _uniformLocs["scissorExt"]    = _shader.get_uniform_location("scissorExt");
+    _uniformLocs["scissorScale"]  = _shader.get_uniform_location("scissorScale");
+    _uniformLocs["extent"]        = _shader.get_uniform_location("extent");
+    _uniformLocs["radius"]        = _shader.get_uniform_location("radius");
+    _uniformLocs["feather"]       = _shader.get_uniform_location("feather");
+    _uniformLocs["strokeMult"]    = _shader.get_uniform_location("strokeMult");
+    _uniformLocs["strokeThr"]     = _shader.get_uniform_location("strokeThr");
+    _uniformLocs["texType"]       = _shader.get_uniform_location("texType");
+    _uniformLocs["type"]          = _shader.get_uniform_location("type");
+    _uniformLocs["gradientColor"] = _shader.get_uniform_location("gradientColor");
+    _uniformLocs["gradientIndex"] = _shader.get_uniform_location("gradientIndex");
+    _uniformLocs["gradientAlpha"] = _shader.get_uniform_location("gradientAlpha");
 }
 
-gl_canvas::~gl_canvas()
-{
-    if (_fragBuf != 0) {
-        glDeleteBuffers(1, &_fragBuf);
-    }
-}
-
-void gl_canvas::set_stencil_mask(GLuint mask)
-{
-    if (_stencilMask != mask) {
-        _stencilMask = mask;
-        glStencilMask(mask);
-    }
-}
-
-void gl_canvas::set_stencil_func(GLenum func, GLint ref, GLuint mask)
-{
-    if ((_stencilFunc != func) || (_stencilFuncRef != ref) || (_stencilFuncMask != mask)) {
-        _stencilFunc     = func;
-        _stencilFuncRef  = ref;
-        _stencilFuncMask = mask;
-        glStencilFunc(func, ref, mask);
-    }
-}
-void gl_canvas::set_blendfunc_separate(blend_funcs const& blend)
-{
-    if (_blendFunc != blend) {
-        _blendFunc = blend;
-        glBlendFuncSeparate(convert_enum(blend.SourceColorBlendFunc),
-                            convert_enum(blend.DestinationColorBlendFunc),
-                            convert_enum(blend.SourceAlphaBlendFunc),
-                            convert_enum(blend.DestinationAlphaBlendFunc));
-    }
-}
+gl_canvas::~gl_canvas() = default;
 
 auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms
 {
@@ -132,61 +105,72 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
     return retValue;
 }
 
-void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
+void gl_canvas::set_uniforms(usize uniformOffset, texture* image)
 {
-    glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms));
+    auto& frag {_uniforms[uniformOffset]};
+    _shader.set_uniform(_uniformLocs["scissorMat"], frag.ScissorMatrix);
+    _shader.set_uniform(_uniformLocs["paintMat"], frag.PaintMatrix);
+    _shader.set_uniform(_uniformLocs["scissorExt"], frag.ScissorExtent);
+    _shader.set_uniform(_uniformLocs["scissorScale"], frag.ScissorScale);
+    _shader.set_uniform(_uniformLocs["extent"], frag.Extent);
+    _shader.set_uniform(_uniformLocs["radius"], frag.Radius);
+    _shader.set_uniform(_uniformLocs["feather"], frag.Feather);
+    _shader.set_uniform(_uniformLocs["strokeMult"], frag.StrokeMult);
+    _shader.set_uniform(_uniformLocs["strokeThr"], frag.StrokeThr);
+    _shader.set_uniform(_uniformLocs["texType"], frag.TexType);
+    _shader.set_uniform(_uniformLocs["type"], static_cast<i32>(frag.Type));
+    _shader.set_uniform(_uniformLocs["gradientColor"], frag.GradientColor);
+    _shader.set_uniform(_uniformLocs["gradientIndex"], frag.GradientIndex);
+    _shader.set_uniform(_uniformLocs["gradientAlpha"], frag.GradientAlpha);
 
+    GLCHECK(glActiveTexture(GL_TEXTURE0));
     if (image) {
-        glBindTextureUnit(0, image->get_impl<gl_texture>()->get_id());
+        GLCHECK(glBindTexture(GL_TEXTURE_2D, image->get_impl<gl_texture>()->get_id()));
     } else {
-        glBindTextureUnit(0, 0);
+        GLCHECK(glBindTexture(GL_TEXTURE_2D, 0));
     }
 
-    glBindTextureUnit(1, _gradientTexture.get_id());
-}
-
-void gl_canvas::set_size(size_f size)
-{
-    _view = size;
+    GLCHECK(glActiveTexture(GL_TEXTURE1));
+    GLCHECK(glBindTexture(GL_TEXTURE_2D, _gradientTexture.get_id()));
 }
 
 void gl_canvas::fill(nvg_call const& call)
 {
     // Draw shapes
     glEnable(GL_STENCIL_TEST);
-    set_stencil_mask(0xff);
-    set_stencil_func(GL_ALWAYS, 0, 0xff);
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glStencilMask(0xff);
+    glStencilFunc(GL_ALWAYS, 0, 0xff);
+    GLCHECK(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
 
     // set bindpoint for solid loc
     set_uniforms(call.UniformOffset);
 
-    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
-    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
-    glDisable(GL_CULL_FACE);
+    GLCHECK(glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP));
+    GLCHECK(glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP));
+    GLCHECK(glDisable(GL_CULL_FACE));
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
     }
-    glEnable(GL_CULL_FACE);
+    GLCHECK(glEnable(GL_CULL_FACE));
 
     // Draw anti-aliased pixels
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    GLCHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
 
-    set_uniforms(call.UniformOffset + _fragSize, call.Image);
+    set_uniforms(call.UniformOffset + 1, call.Image);
 
-    set_stencil_func(GL_EQUAL, 0x00, 0xff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilFunc(GL_EQUAL, 0x00, 0xff);
+    GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
     // Draw fringes
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
 
     // Draw fill
-    set_stencil_func(GL_NOTEQUAL, 0x0, 0xff);
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    glStencilFunc(GL_NOTEQUAL, 0x0, 0xff);
+    GLCHECK(glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO));
     _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(call.TriangleOffset), call.TriangleCount);
 
-    glDisable(GL_STENCIL_TEST);
+    GLCHECK(glDisable(GL_STENCIL_TEST));
 }
 
 void gl_canvas::convex_fill(nvg_call const& call)
@@ -204,35 +188,35 @@ void gl_canvas::convex_fill(nvg_call const& call)
 
 void gl_canvas::stroke(nvg_call const& call)
 {
-    glEnable(GL_STENCIL_TEST);
-    set_stencil_mask(0xff);
+    GLCHECK(glEnable(GL_STENCIL_TEST));
+    glStencilMask(0xff);
 
     // Fill the stroke base without overlap
-    set_stencil_func(GL_EQUAL, 0x0, 0xff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-    set_uniforms(call.UniformOffset + _fragSize, call.Image);
+    glStencilFunc(GL_EQUAL, 0x0, 0xff);
+    GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_INCR));
+    set_uniforms(call.UniformOffset + 1, call.Image);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
 
     // Draw anti-aliased pixels.
     set_uniforms(call.UniformOffset, call.Image);
-    set_stencil_func(GL_EQUAL, 0x00, 0xff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilFunc(GL_EQUAL, 0x00, 0xff);
+    GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
 
     // Clear stencil buffer.
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    set_stencil_func(GL_ALWAYS, 0x0, 0xff);
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    GLCHECK(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+    glStencilFunc(GL_ALWAYS, 0x0, 0xff);
+    GLCHECK(glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO));
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
     }
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    GLCHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
 
-    glDisable(GL_STENCIL_TEST);
+    GLCHECK(glDisable(GL_STENCIL_TEST));
 }
 
 void gl_canvas::triangles(nvg_call const& call)
@@ -249,44 +233,34 @@ void gl_canvas::cancel()
     _calls.clear();
 }
 
-void gl_canvas::flush()
+void gl_canvas::flush(size_f size)
 {
     if (!_calls.empty()) {
         // Setup require GL state.
-        glUseProgram(_shader.get_id());
-
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-        glEnable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_SCISSOR_TEST);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glStencilMask(0xffffffff);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glStencilFunc(GL_ALWAYS, 0, 0xffffffff);
-        _stencilMask     = 0xffffffff;
-        _stencilFunc     = GL_ALWAYS;
-        _stencilFuncRef  = 0;
-        _stencilFuncMask = 0xffffffff;
-        _blendFunc       = {.SourceColorBlendFunc      = blend_func::Invalid,
-                            .DestinationColorBlendFunc = blend_func::Invalid,
-                            .SourceAlphaBlendFunc      = blend_func::Invalid,
-                            .DestinationAlphaBlendFunc = blend_func::Invalid};
-
-        // Upload ubo for frag shaders
-        glNamedBufferData(_fragBuf, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW);
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, _fragBuf);
+        GLCHECK(glEnable(GL_CULL_FACE));
+        GLCHECK(glCullFace(GL_BACK));
+        GLCHECK(glFrontFace(GL_CCW));
+        GLCHECK(glEnable(GL_BLEND));
+        GLCHECK(glDisable(GL_DEPTH_TEST));
+        GLCHECK(glDisable(GL_SCISSOR_TEST));
+        GLCHECK(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+        GLCHECK(glStencilMask(0xffffffff));
+        GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+        GLCHECK(glStencilFunc(GL_ALWAYS, 0, 0xffffffff));
 
         // Upload vertex data
         _vertexArray.resize(_nverts, 0);
         _vertexArray.update_data({_verts.data(), _nverts}, 0);
 
         // Set view and texture just once per frame.
-        _shader.set_uniform(_shader.get_uniform_location("viewSize"), _view);
+        _shader.set_uniform(_shader.get_uniform_location("viewSize"), size);
+        _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
 
         for (auto& call : _calls) {
-            set_blendfunc_separate(call.BlendFunc);
+            glBlendFuncSeparate(convert_enum(call.BlendFunc.SourceColorBlendFunc),
+                                convert_enum(call.BlendFunc.DestinationColorBlendFunc),
+                                convert_enum(call.BlendFunc.SourceAlphaBlendFunc),
+                                convert_enum(call.BlendFunc.DestinationAlphaBlendFunc));
             switch (call.Type) {
             case nvg_call_type::Fill:
                 fill(call);
@@ -305,9 +279,9 @@ void gl_canvas::flush()
             }
         }
 
-        glDisable(GL_CULL_FACE);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glUseProgram(0);
+        GLCHECK(glDisable(GL_CULL_FACE));
+        GLCHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        GLCHECK(glUseProgram(0));
     }
 
     // Reset calls
@@ -316,7 +290,7 @@ void gl_canvas::flush()
     _paths.clear();
     _calls.clear();
 
-    _nuniforms = 0;
+    _uniforms.clear();
 }
 
 auto gl_canvas::get_max_vertcount(std::vector<canvas_path> const& paths) -> usize
@@ -342,20 +316,9 @@ auto gl_canvas::alloc_verts(usize n) -> usize
 
 auto gl_canvas::alloc_frag_uniforms(usize n) -> usize
 {
-    usize ret {0}, structSize {_fragSize};
-    if ((_nuniforms + n) * structSize > _uniforms.capacity()) {
-        usize cuniforms {std::max<usize>(_nuniforms + n, 128) + (_uniforms.capacity() / structSize / 2)};
-        _uniforms.resize(structSize * cuniforms);
-    }
-    ret = _nuniforms * structSize;
-    _nuniforms += n;
-    return ret;
-}
-
-auto gl_canvas::get_frag_uniformptr(usize i) -> nvg_frag_uniforms*
-{
-    ubyte* data {_uniforms.data()};
-    return reinterpret_cast<nvg_frag_uniforms*>(&data[i]);
+    usize const retValue {_uniforms.size()};
+    _uniforms.resize(_uniforms.size() + n);
+    return retValue;
 }
 
 void gl_canvas::render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
@@ -414,18 +377,18 @@ void gl_canvas::render_fill(canvas_paint const& paint, blend_funcs const& compos
         call.UniformOffset = alloc_frag_uniforms(2);
 
         // Simple shader for stencil
-        auto* frag {get_frag_uniformptr(call.UniformOffset)};
-        *frag           = {};
-        frag->StrokeThr = -1.0f;
-        frag->Type      = nvg_shader_type::StencilFill;
+        auto& frag {_uniforms[call.UniformOffset]};
+        frag           = {};
+        frag.StrokeThr = -1.0f;
+        frag.Type      = nvg_shader_type::StencilFill;
 
         // Fill shader
-        *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, fringe, fringe, -1.0f);
+        _uniforms[call.UniformOffset + 1] = convert_paint(paint, scissor, fringe, fringe, -1.0f);
     } else {
         call.UniformOffset = alloc_frag_uniforms(1);
 
         // Fill shader
-        *get_frag_uniformptr(call.UniformOffset) = convert_paint(paint, scissor, fringe, fringe, -1.0f);
+        _uniforms[call.UniformOffset] = convert_paint(paint, scissor, fringe, fringe, -1.0f);
     }
 }
 
@@ -459,8 +422,8 @@ void gl_canvas::render_stroke(canvas_paint const& paint, blend_funcs const& comp
     // Fill shader
     call.UniformOffset = alloc_frag_uniforms(2);
 
-    *get_frag_uniformptr(call.UniformOffset)             = convert_paint(paint, scissor, strokeWidth, fringe, -1.0f);
-    *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
+    _uniforms[call.UniformOffset]     = convert_paint(paint, scissor, strokeWidth, fringe, -1.0f);
+    _uniforms[call.UniformOffset + 1] = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
 }
 
 void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
@@ -481,9 +444,9 @@ void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& c
     // Fill shader
     call.UniformOffset = alloc_frag_uniforms(1);
 
-    auto* frag {get_frag_uniformptr(call.UniformOffset)};
-    *frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
-    frag->Type = nvg_shader_type::Triangles;
+    auto& frag {_uniforms[call.UniformOffset]};
+    frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
+    frag.Type = nvg_shader_type::Triangles;
 }
 
 void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
@@ -499,5 +462,4 @@ void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
     auto const colors {gradient.colors()};
     _gradientTexture.update({0, idx}, {color_gradient::Size, 1}, colors.data(), 0, color_gradient::Size, 1);
 }
-
 }

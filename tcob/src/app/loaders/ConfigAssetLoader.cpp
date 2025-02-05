@@ -12,6 +12,7 @@
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/data/ConfigConversions.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
 using namespace tcob::gfx;
@@ -131,16 +132,16 @@ void default_check_async_load(def_task& ctx, auto&& cache, auto&& stateSetter)
     for (auto it {cache.begin()}; it != cache.end(); ++it) {
         auto& def {*it};
         auto& ftr {def->future};
-        if (ftr.valid()) {
-            if (ftr.wait_for(0s) == std::future_status::ready) {
-                if (ftr.get() == load_status::Ok) {
-                    stateSetter(def->assetPtr, asset_status::Loaded);
-                } else {
-                    stateSetter(def->assetPtr, asset_status::Error);
-                }
+        if (!ftr.valid()) { continue; }
+
+        if (ftr.wait_for(0s) == std::future_status::ready) {
+            if (ftr.get() == load_status::Ok) {
+                stateSetter(def->assetPtr, asset_status::Loaded);
             } else {
-                loadingDone = false;
+                stateSetter(def->assetPtr, asset_status::Error);
             }
+        } else {
+            loadingDone = false;
         }
     }
 
@@ -351,9 +352,7 @@ void cfg_cursor_loader::declare()
     for (auto const& [k, v] : obj) {
         if (object assetSection; v.try_get(assetSection)) {
             auto* asset {default_new<cursor, asset_def>(k, bucket(), _cache)};
-            if (string material; assetSection.try_get(material, API::Cursor::material)) {
-                asset->material = material;
-            }
+            assetSection.try_get(asset->material, API::Cursor::material);
             if (object modesSection; assetSection.try_get(modesSection, API::Cursor::modes)) {
                 for (auto const& [mk, mv] : modesSection) {
                     if (object modeSection; mv.try_get(modeSection)) {
@@ -399,8 +398,7 @@ void cfg_font_loader::declare()
 void cfg_font_loader::prepare()
 {
     for (auto& def : _cache) {
-        auto* ttf {dynamic_cast<font*>(def->assetPtr.ptr())};
-        if (ttf) {
+        if (auto* ttf {dynamic_cast<font*>(def->assetPtr.ptr())}) {
             if (ttf->load(group().mount_point() + def->source, def->size) == load_status::Ok) {
                 set_asset_status(def->assetPtr, asset_status::Loaded);
             } else {

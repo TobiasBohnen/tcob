@@ -498,13 +498,11 @@ void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt)
     reset();
 
     set_device_pixel_ratio(devicePixelRatio);
-
-    _impl->set_size(size_f {windowSize});
 }
 
 void canvas::end_frame()
 {
-    _impl->flush();
+    _impl->flush(size_f {_windowSize});
     _rtt[_activeRtt]->finalize_render();
 }
 

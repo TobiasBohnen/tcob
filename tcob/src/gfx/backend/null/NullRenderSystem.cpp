@@ -190,15 +190,11 @@ void null_window::set_viewport(rect_i const&)
 {
 }
 
-void null_canvas::set_size(size_f)
-{
-}
-
 void null_canvas::cancel()
 {
 }
 
-void null_canvas::flush()
+void null_canvas::flush(size_f)
 {
 }
 

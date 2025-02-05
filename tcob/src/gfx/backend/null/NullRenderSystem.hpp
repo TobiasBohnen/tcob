@@ -119,9 +119,8 @@ public:
 
 class null_canvas final : public tcob::gfx::render_backend::canvas_base {
 public:
-    void set_size(size_f size) override;
+    void flush(size_f size) override;
     void cancel() override;
-    void flush() override;
     void render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
                      vec4 const& bounds, std::vector<canvas_path> const& paths) override;
     void render_stroke(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,

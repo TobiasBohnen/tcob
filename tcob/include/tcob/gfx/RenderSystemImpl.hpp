@@ -25,10 +25,8 @@ class canvas_base {
 public:
     virtual ~canvas_base() = default;
 
-    void virtual set_size(size_f size) = 0;
-
-    void virtual cancel() = 0;
-    void virtual flush()  = 0;
+    void virtual flush(size_f size) = 0;
+    void virtual cancel()           = 0;
 
     void virtual render_fill(
         canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
