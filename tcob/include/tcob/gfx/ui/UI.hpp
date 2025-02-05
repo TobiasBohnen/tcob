@@ -263,20 +263,16 @@ using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradi
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API image_def final {
-public:
+struct icon {
     assets::asset_ptr<texture> Texture;
-    string                     Region;
-
-    image_def() = default;
-    image_def(assets::asset_ptr<texture> texture, string region = "default");
+    string                     Region {"default"};
 };
 
 ////////////////////////////////////////////////////////////
 
 struct list_item {
     utf8_string Text;
-    image_def   Icon;
+    icon        Icon;
     std::any    UserData;
 };
 

@@ -65,14 +65,6 @@ thickness::thickness(length all)
 
 ////////////////////////////////////////////////////////////
 
-image_def::image_def(assets::asset_ptr<texture> texture, string region)
-    : Texture {std::move(texture)}
-    , Region {std::move(region)}
-{
-}
-
-////////////////////////////////////////////////////////////
-
 namespace detail {
     void input_injector::on_key_down(widget* widget, input::keyboard::event const& ev) const
     {

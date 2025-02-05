@@ -29,7 +29,7 @@ public:
 
     explicit image_box(init const& wi);
 
-    prop<image_def> Image;
+    prop<icon> Image;
 
 protected:
     void on_paint(widget_painter& painter) override;
