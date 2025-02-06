@@ -197,7 +197,7 @@ namespace effect {
         for (usize idx {0}; idx < quads.size(); ++idx) {
             quad& dst {quads[idx]};
 
-            easing::sine_wave<f64> wave {.MinValue = 0, .MaxValue = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
+            easing::sine_wave<f64> wave {.Min = 0, .Max = 1, .Phase = static_cast<f64>(idx) / quads.size() * Amplitude};
             f64 const              val {wave(t) * Height};
 
             for (u32 i {0}; i < 4; ++i) {

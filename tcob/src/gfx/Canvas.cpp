@@ -644,7 +644,7 @@ void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
 
 void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
 {
-    easing::linear<point_f> func {.StartValue = _commandPoint, .EndValue = to};
+    easing::linear<point_f> func {.Start = _commandPoint, .End = to};
     f32 const               inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -654,7 +654,7 @@ void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
 
 void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
 {
-    easing::circular func {.StartAngle = degree_f {0}, .EndAngle = degree_f {360}};
+    easing::circular func {.Start = degree_f {0}, .End = degree_f {360}};
     f32 const        inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -664,7 +664,7 @@ void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
 
 void canvas::dashed_line_to(point_f to, i32 numDashes)
 {
-    easing::linear<point_f> func {.StartValue = _commandPoint, .EndValue = to};
+    easing::linear<point_f> func {.Start = _commandPoint, .End = to};
     f32 const               inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
@@ -675,7 +675,7 @@ void canvas::dashed_line_to(point_f to, i32 numDashes)
 
 void canvas::dashed_circle(point_f center, f32 r, i32 numDashes)
 {
-    easing::circular func {.StartAngle = degree_f {0}, .EndAngle = degree_f {360}};
+    easing::circular func {.Start = degree_f {0}, .End = degree_f {360}};
     f32 const        inc {1.0f / (numDashes * 2)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {

@@ -6,8 +6,8 @@
 #include "tcob/gfx/Path2d.hpp"
 
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/easing/Easing.hpp"
 #include "tcob/gfx/Canvas.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::gfx {
 
@@ -332,10 +332,10 @@ auto path2d::polygonize() -> std::vector<polygon>
         } break;
         case Close: {
             easing::linear<point_f> func;
-            func.StartValue = points[0];
-            func.EndValue   = curPos;
+            func.Start = points[0];
+            func.End   = curPos;
             for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
-            curPos = func.EndValue;
+            curPos = func.End;
             ++idx;
             addPoly();
         } break;

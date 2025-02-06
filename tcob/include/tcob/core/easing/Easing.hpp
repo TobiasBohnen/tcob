@@ -60,8 +60,8 @@ class power final {
 public:
     using type = T;
 
-    type StartValue {};
-    type EndValue {};
+    type Start {};
+    type End {};
     f64  Exponent {1.0};
 
     auto operator()(f64 t) const -> type;
@@ -74,8 +74,8 @@ class inverse_power final {
 public:
     using type = T;
 
-    type StartValue {};
-    type EndValue {};
+    type Start {};
+    type End {};
     f64  Exponent {1.0};
 
     auto operator()(f64 t) const -> type;
@@ -88,8 +88,8 @@ class linear final {
 public:
     using type = T;
 
-    type StartValue {};
-    type EndValue {};
+    type Start {};
+    type End {};
 
     auto operator()(f64 t) const -> type;
 };
@@ -100,8 +100,8 @@ class circular final {
 public:
     using type = point_f;
 
-    degree_f StartAngle {};
-    degree_f EndAngle {};
+    degree_f Start {};
+    degree_f End {};
 
     auto operator()(f64 t) const -> type;
 };
@@ -139,8 +139,8 @@ class sine_wave final {
 public:
     using type = T;
 
-    type MinValue {};
-    type MaxValue {};
+    type Min {};
+    type Max {};
     f64  Frequency {1.0};
     f64  Phase {0.0};
 
@@ -157,8 +157,8 @@ class triange_wave final {
 public:
     using type = T;
 
-    type MinValue {};
-    type MaxValue {};
+    type Min {};
+    type Max {};
     f64  Frequency {1.0};
     f64  Phase {0.0};
 
@@ -175,8 +175,8 @@ class square_wave final {
 public:
     using type = T;
 
-    type MinValue {};
-    type MaxValue {};
+    type Min {};
+    type Max {};
     f64  Frequency {1.0};
     f64  Phase {0.0};
 
@@ -207,8 +207,8 @@ class sawtooth_wave final {
 public:
     using type = T;
 
-    type MinValue {};
-    type MaxValue {};
+    type Min {};
+    type Max {};
     f64  Frequency {1.0};
     f64  Phase {0.0};
 
