@@ -29,9 +29,9 @@ enum point_flags : u8 {
     InnerBevel = 0x08,
 };
 
-auto static constexpr signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
+auto static signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
 
-auto static constexpr cross(f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return (dx1 * dy0) - (dx0 * dy1); }
+auto static cross(f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return (dx1 * dy0) - (dx0 * dy1); }
 
 auto static Normalize(f32& x, f32& y) -> f32
 {
@@ -44,7 +44,7 @@ auto static Normalize(f32& x, f32& y) -> f32
     return d;
 }
 
-auto static constexpr CompositeOperationState(composite_operation op) -> blend_funcs
+auto static CompositeOperationState(composite_operation op) -> blend_funcs
 {
     blend_func sfactor {}, dfactor {};
 
@@ -102,14 +102,14 @@ auto static constexpr CompositeOperationState(composite_operation op) -> blend_f
         .DestinationAlphaBlendFunc = dfactor};
 }
 
-auto static constexpr PointEquals(f32 x1, f32 y1, f32 x2, f32 y2, f32 tol) -> i32
+auto static PointEquals(f32 x1, f32 y1, f32 x2, f32 y2, f32 tol) -> i32
 {
     f32 const dx {x2 - x1};
     f32 const dy {y2 - y1};
     return dx * dx + dy * dy < tol * tol;
 }
 
-auto static constexpr DistancePointSegment(f32 x, f32 y, f32 px, f32 py, f32 qx, f32 qy) -> f32
+auto static DistancePointSegment(f32 x, f32 y, f32 px, f32 py, f32 qx, f32 qy) -> f32
 {
     f32 const pqx {qx - px};
     f32 const pqy {qy - py};
@@ -137,7 +137,7 @@ auto static GetAverageScale(mat3 const& t) -> f32
     return (sx + sy) * 0.5f;
 }
 
-auto static constexpr TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
+auto static TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
 {
     f32 const abx {bx - ax};
     f32 const aby {by - ay};
@@ -146,7 +146,7 @@ auto static constexpr TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -
     return (acx * aby) - (abx * acy);
 }
 
-void static constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
+void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 {
     vtx->Position.X = x;
     vtx->Position.Y = y;
@@ -156,29 +156,11 @@ void static constexpr SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 lev
     vtx->TexCoords.Level = level;
 }
 
-auto static CurveDivs(f32 r, f32 arc, f32 tol) -> i32
+void static PolyReverse(std::span<canvas_point> pts)
 {
-    f32 const da {std::acos(r / (r + tol)) * 2.0f};
-    return std::max(2, static_cast<i32>(std::ceil(arc / da)));
-}
-
-auto static constexpr PolyArea(std::span<detail::canvas_point> pts) -> f32
-{
-    f32 area {0};
-    for (usize i {2}; i < pts.size(); ++i) {
-        detail::canvas_point const a {pts[0]};
-        detail::canvas_point const b {pts[i - 1]};
-        detail::canvas_point const c {pts[i]};
-        area += TriArea2(a.X, a.Y, b.X, b.Y, c.X, c.Y);
-    }
-    return area * 0.5f;
-}
-
-void static constexpr PolyReverse(std::span<detail::canvas_point> pts)
-{
-    detail::canvas_point tmp;
-    usize                i {0};
-    usize                j {pts.size() - 1};
+    canvas_point tmp;
+    usize        i {0};
+    usize        j {pts.size() - 1};
     while (i < j) {
         tmp    = pts[i];
         pts[i] = pts[j];
@@ -188,8 +170,8 @@ void static constexpr PolyReverse(std::span<detail::canvas_point> pts)
     }
 }
 
-void static constexpr ChooseBevel(i32 bevel, detail::canvas_point const& p0, detail::canvas_point const& p1, f32 w,
-                                  f32& x0, f32& y0, f32& x1, f32& y1)
+void static ChooseBevel(i32 bevel, canvas_point const& p0, canvas_point const& p1, f32 w,
+                        f32& x0, f32& y0, f32& x1, f32& y1)
 {
     if (bevel) {
         x0 = p1.X + p0.DY * w;
@@ -204,7 +186,7 @@ void static constexpr ChooseBevel(i32 bevel, detail::canvas_point const& p0, det
     }
 }
 
-auto static RoundJoin(vertex* dst, detail::canvas_point const& p0, detail::canvas_point const& p1,
+auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1,
                       f32 lw, f32 rw, f32 lu, f32 ru, i32 ncap) -> vertex*
 {
     f32 const dlx0 {p0.DY};
@@ -276,7 +258,7 @@ auto static RoundJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
     return dst;
 }
 
-auto static BevelJoin(vertex* dst, detail::canvas_point const& p0, detail::canvas_point const& p1,
+auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1,
                       f32 lw, f32 rw, f32 lu, f32 ru) -> vertex*
 {
     f32 const dlx0 {p0.DY};
@@ -375,7 +357,7 @@ auto static BevelJoin(vertex* dst, detail::canvas_point const& p0, detail::canva
     return dst;
 }
 
-auto static ButtCapStart(vertex* dst, detail::canvas_point const& p,
+auto static ButtCapStart(vertex* dst, canvas_point const& p,
                          f32 dx, f32 dy, f32 w, f32 d,
                          f32 aa, f32 u0, f32 u1) -> vertex*
 {
@@ -394,7 +376,7 @@ auto static ButtCapStart(vertex* dst, detail::canvas_point const& p,
     return dst;
 }
 
-auto static ButtCapEnd(vertex* dst, detail::canvas_point const& p,
+auto static ButtCapEnd(vertex* dst, canvas_point const& p,
                        f32 dx, f32 dy, f32 w, f32 d,
                        f32 aa, f32 u0, f32 u1) -> vertex*
 {
@@ -413,7 +395,7 @@ auto static ButtCapEnd(vertex* dst, detail::canvas_point const& p,
     return dst;
 }
 
-auto static RoundCapStart(vertex* dst, detail::canvas_point const& p,
+auto static RoundCapStart(vertex* dst, canvas_point const& p,
                           f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X};
@@ -436,7 +418,7 @@ auto static RoundCapStart(vertex* dst, detail::canvas_point const& p,
     return dst;
 }
 
-auto static RoundCapEnd(vertex* dst, detail::canvas_point const& p,
+auto static RoundCapEnd(vertex* dst, canvas_point const& p,
                         f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X};
@@ -780,9 +762,11 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 
 void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir)
 {
+    static f32 const rad90 {TAU_F / 4};
+
     i32 const move {!_commands.empty() ? LineTo : MoveTo};
-    f32 const a0 {startAngle.Value};
-    f32 const a1 {endAngle.Value};
+    f32 const a0 {startAngle.Value - rad90};
+    f32 const a1 {endAngle.Value - rad90};
 
     // Clamp angles
     f32 da {a1 - a0};
@@ -849,9 +833,7 @@ void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, windi
 
 void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 {
-    if (_commands.empty()) {
-        return;
-    }
+    if (_commands.empty()) { return; }
 
     winding dir {};
 
@@ -1605,7 +1587,7 @@ void canvas::add_path()
     _cache.paths.push_back(path);
 }
 
-auto canvas::get_last_point() -> detail::canvas_point&
+auto canvas::get_last_point() -> canvas_point&
 {
     return _cache.points.back();
 }
@@ -1622,7 +1604,7 @@ void canvas::add_point(f32 x, f32 y, i32 flags)
         }
     }
 
-    detail::canvas_point pt;
+    canvas_point pt;
     pt.X     = x;
     pt.Y     = y;
     pt.Flags = static_cast<ubyte>(flags);
@@ -1683,9 +1665,7 @@ void canvas::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
 
 void canvas::flatten_paths()
 {
-    if (!_cache.paths.empty()) {
-        return;
-    }
+    if (!_cache.paths.empty()) { return; }
 
     // Flatten
     for (usize i {0}; i < _commands.size();) {
@@ -1727,6 +1707,17 @@ void canvas::flatten_paths()
     _cache.bounds[0] = _cache.bounds[1] = 1e6f;
     _cache.bounds[2] = _cache.bounds[3] = -1e6f;
 
+    auto static PolyArea {[](std::span<canvas_point> pts) {
+        f32 area {0};
+        for (usize i {2}; i < pts.size(); ++i) {
+            canvas_point const a {pts[0]};
+            canvas_point const b {pts[i - 1]};
+            canvas_point const c {pts[i]};
+            area += TriArea2(a.X, a.Y, b.X, b.Y, c.X, c.Y);
+        }
+        return area * 0.5f;
+    }};
+
     // Calculate the direction and length of line segments.
     for (auto& path : _cache.paths) {
         canvas_point* pts {&_cache.points[path.First]};
@@ -1744,12 +1735,8 @@ void canvas::flatten_paths()
         // Enforce winding.
         if (_enforceWinding && path.Count > 2) {
             f32 const area {PolyArea({pts, path.Count})};
-            if (path.Winding == winding::CCW && area < 0.0f) {
-                PolyReverse({pts, path.Count});
-            }
-            if (path.Winding == winding::CW && area > 0.0f) {
-                PolyReverse({pts, path.Count});
-            }
+            if (path.Winding == winding::CCW && area < 0.0f) { PolyReverse({pts, path.Count}); }
+            if (path.Winding == winding::CW && area > 0.0f) { PolyReverse({pts, path.Count}); }
         }
 
         for (usize i {0}; i < path.Count; ++i) {
@@ -1770,11 +1757,7 @@ void canvas::flatten_paths()
 
 void canvas::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
 {
-    f32 iw {0.0f};
-
-    if (w > 0.0f) {
-        iw = 1.0f / w;
-    }
+    f32 const iw {w > 0.0f ? (1.0f / w) : 0.0f};
 
     // Calculate which joins needs extra vertices to append, and gather vertex count.
     for (auto& path : _cache.paths) {
@@ -1836,6 +1819,11 @@ void canvas::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
 
 void canvas::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit)
 {
+    auto static CurveDivs {[](f32 r, f32 arc, f32 tol) {
+        f32 const da {std::acos(r / (r + tol)) * 2.0f};
+        return std::max(2, static_cast<i32>(std::ceil(arc / da)));
+    }};
+
     f32 const aa {fringe};                              // fringeWidth;
     f32 const u0 {aa == 0.0f ? 0.5f : 0.0f};
     f32 const u1 {aa == 0.0f ? 0.5f : 1.0f};
@@ -1864,9 +1852,6 @@ void canvas::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJo
     }
 
     vertex* verts {alloc_temp_verts(cverts)};
-    if (verts == nullptr) {
-        return;
-    }
 
     vertex* dst {nullptr};
     for (auto& path : _cache.paths) {
@@ -1971,9 +1956,6 @@ void canvas::expand_fill(f32 w, line_join lineJoin, f32 miterLimit)
     }
 
     vertex* verts {alloc_temp_verts(cverts)};
-    if (verts == nullptr) {
-        return;
-    }
 
     bool const convex {_cache.paths.size() == 1 && _cache.paths[0].Convex};
 
@@ -2095,5 +2077,4 @@ canvas::state_guard::state_guard::~state_guard()
 }
 
 ////////////////////////////////////////////////////////////
-
 }
