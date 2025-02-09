@@ -289,7 +289,7 @@ auto path2d::polygonize() -> std::vector<polygon>
 {
     std::vector<polygon> retValue;
 
-    f32 constexpr tolerance {0.05f};
+    f32 const            tolerance {0.05f};
     point_f              curPos;
     std::vector<point_f> points;
 

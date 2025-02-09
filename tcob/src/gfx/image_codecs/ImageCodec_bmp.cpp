@@ -132,18 +132,12 @@ auto bmp_decoder::get_palette(io::istream& in) const -> std::vector<color>
 
 void static CheckAlpha(std::vector<u8>& data)
 {
-    bool check {false};
     for (u32 i {3}; i < data.size(); i += 4) {
-        if (data[i] != 0) {
-            check = true;
-            break;
-        }
+        if (data[i] != 0) { return; }
     }
 
-    if (!check) {
-        for (u32 i {3}; i < data.size(); i += 4) {
-            data[i] = 255;
-        }
+    for (u32 i {3}; i < data.size(); i += 4) {
+        data[i] = 255;
     }
 }
 
