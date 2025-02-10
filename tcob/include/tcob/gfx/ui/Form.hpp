@@ -106,9 +106,10 @@ private:
 
     window* _window;
 
-    widget*                _topWidget {nullptr};
-    widget*                _focusWidget {nullptr};
-    detail::input_injector _injector;
+    widget*                             _topWidget {nullptr};
+    widget*                             _focusWidget {nullptr};
+    detail::input_injector              _injector;
+    std::vector<std::weak_ptr<tooltip>> _tooltips;
 
     bool _redrawWidgets {true};
     bool _updateWidgetStyle {true};

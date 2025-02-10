@@ -168,8 +168,14 @@ void form::on_fixed_update(milliseconds deltaTime)
 
     // update styles
     if (_updateWidgetStyle) {
+        // containers
         for (auto const& container : widgets) {
             container->prepare_redraw();
+        }
+        // tooltips
+        std::erase_if(_tooltips, [](auto const& tooltip) { return tooltip.expired(); });
+        for (auto const& tooltip : _tooltips) {
+            tooltip.lock()->prepare_redraw();
         }
 
         _updateWidgetStyle = false;
@@ -190,6 +196,18 @@ void form::on_styles_changed()
     _updateWidgetStyle = true;
     for (auto const& container : containers()) {
         container->on_styles_changed();
+    }
+
+    for (auto const& tt : _tooltips) {
+        if (tt.expired()) { continue; }
+        auto tooltip {tt.lock()};
+
+        widget_style_selectors const ttNewSelectors {
+            .Class      = tooltip->Class(),
+            .Flags      = tooltip->flags(),
+            .Attributes = tooltip->attributes(),
+        };
+        tooltip->_style = dynamic_cast<widget_style*>(Styles->get(ttNewSelectors));
     }
 }
 
@@ -381,8 +399,7 @@ void form::on_mouse_button_up(input::mouse::button_event const& ev)
 
                 if (ev.Clicks == 1) {
                     _clickPos = ev.Position;
-                }
-                if (ev.Clicks == 2 && _clickPos.distance_to(ev.Position) <= 5) {
+                } else if (ev.Clicks == 2 && _clickPos.distance_to(ev.Position) <= 5) {
                     _injector.on_double_click(_focusWidget);
                 }
             }

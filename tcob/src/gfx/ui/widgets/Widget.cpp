@@ -8,7 +8,7 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/widgets/Tooltip.hpp"
+#include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 namespace tcob::gfx::ui {
 
@@ -200,15 +200,6 @@ void widget::on_styles_changed()
 
     _style         = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
     _lastSelectors = newSelectors;
-
-    if (Tooltip) {
-        widget_style_selectors const ttNewSelectors {
-            .Class      = Tooltip->Class(),
-            .Flags      = Tooltip->flags(),
-            .Attributes = Tooltip->attributes(),
-        };
-        Tooltip->_style = dynamic_cast<widget_style*>(_form->Styles->get(ttNewSelectors));
-    }
 }
 
 void widget::prepare_redraw()
@@ -222,10 +213,6 @@ void widget::prepare_redraw()
     if (_lastSelectors != newSelectors) {
         _style         = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
         _lastSelectors = newSelectors;
-    }
-
-    if (Tooltip) {
-        Tooltip->prepare_redraw();
     }
 }
 

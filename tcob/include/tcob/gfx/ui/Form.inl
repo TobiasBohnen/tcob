@@ -22,7 +22,9 @@ inline auto form::create_tooltip(string const& name) -> std::shared_ptr<T>
     wi.Parent = nullptr;
     wi.Name   = name;
 
-    return std::make_shared<T>(wi);
+    auto retValue {std::make_shared<T>(wi)};
+    _tooltips.push_back(retValue);
+    return retValue;
 }
 
 template <SubmitTarget Target>
