@@ -14,6 +14,9 @@ image_box::image_box(init const& wi)
 {
     Image.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Image changed"); });
 
+    Fit.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Fit changed"); });
+    Fit(fit_mode::Contain);
+
     Class("image_box");
 }
 
@@ -35,7 +38,7 @@ void image_box::on_paint(widget_painter& painter)
 
         rect_f targetRect {};
 
-        switch (style->Fit) {
+        switch (Fit) {
         case fit_mode::None:
             targetRect = {rect.Position, texSize};
             break;

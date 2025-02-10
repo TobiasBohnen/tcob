@@ -23,13 +23,13 @@ public:
 
     class TCOB_API style : public widget_style {
     public:
-        fit_mode   Fit {fit_mode::Fill};
         alignments Alignment {horizontal_alignment::Left, vertical_alignment::Top};
     };
 
     explicit image_box(init const& wi);
 
-    prop<icon> Image;
+    prop<icon>     Image;
+    prop<fit_mode> Fit;
 
 protected:
     void on_paint(widget_painter& painter) override;
