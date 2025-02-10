@@ -12,7 +12,7 @@
 
 namespace tcob::gfx::ui {
 
-static constexpr point_i INVALID {-1, -1};
+static constexpr point_i INVALID {INVALID_INDEX, INVALID_INDEX};
 
 grid_view::grid_view(init const& wi)
     : vscroll_widget {wi}

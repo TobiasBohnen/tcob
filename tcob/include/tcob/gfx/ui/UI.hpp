@@ -279,6 +279,10 @@ struct list_item {
 
 ////////////////////////////////////////////////////////////
 
+static constexpr isize INVALID_INDEX {-1};
+
+////////////////////////////////////////////////////////////
+
 class widget_painter;
 class form;
 class layout;
@@ -286,6 +290,8 @@ class layout;
 namespace detail {
     class input_injector;
 }
+
+////////////////////////////////////////////////////////////
 
 struct widget_event {
     widget* Sender {nullptr};

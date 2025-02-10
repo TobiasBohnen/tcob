@@ -10,18 +10,16 @@
 
 namespace tcob::gfx::ui {
 
-static constexpr isize INVALID {-1};
-
 drop_down_list::drop_down_list(init const& wi)
     : widget {wi}
-    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_items) - 1); }}}
-    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_items) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
+    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
     SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
-    SelectedItemIndex(INVALID);
+    SelectedItemIndex(INVALID_INDEX);
     HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
-    HoveredItemIndex(INVALID);
+    HoveredItemIndex(INVALID_INDEX);
 
     Class("drop_down_list");
 }
@@ -170,7 +168,7 @@ void drop_down_list::on_paint(widget_painter& painter)
 
 void drop_down_list::on_mouse_leave()
 {
-    HoveredItemIndex = INVALID;
+    HoveredItemIndex = INVALID_INDEX;
 
     if (_mouseOverBox) {
         _mouseOverBox = false;
@@ -180,7 +178,7 @@ void drop_down_list::on_mouse_leave()
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredItemIndex = INVALID;
+    HoveredItemIndex = INVALID_INDEX;
 
     bool const wasMouseOverBox {_mouseOverBox};
     _mouseOverBox = false;
@@ -214,7 +212,7 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         _vScrollbar.mouse_down(ev.Position);
         if (_mouseOverBox) {
             set_extended(!_isExtended);
-        } else if (HoveredItemIndex != INVALID) {
+        } else if (HoveredItemIndex != INVALID_INDEX) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
                 set_extended(false); // close on select
@@ -248,7 +246,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
 
-    HoveredItemIndex = INVALID;
+    HoveredItemIndex = INVALID_INDEX;
 
     if (auto const* style {current_style<drop_down_list::style>()}) {
         orientation  orien {};

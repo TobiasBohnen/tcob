@@ -10,17 +10,15 @@
 
 namespace tcob::gfx::ui {
 
-static constexpr isize INVALID {-1};
-
 tab_container::tab_container(init const& wi)
     : widget_container {wi}
-    , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_tabs) - 1); }}}
-    , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_tabs) - 1); }}}
+    , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
+    , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
 {
     ActiveTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveTab changed"); });
-    ActiveTabIndex(INVALID);
+    ActiveTabIndex(INVALID_INDEX);
     HoveredTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
-    HoveredTabIndex(INVALID);
+    HoveredTabIndex(INVALID_INDEX);
 
     Class("tab_container");
 }
@@ -139,12 +137,12 @@ void tab_container::on_paint(widget_painter& painter)
 
 void tab_container::on_mouse_leave()
 {
-    HoveredTabIndex = INVALID;
+    HoveredTabIndex = INVALID_INDEX;
 }
 
 void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredTabIndex = INVALID;
+    HoveredTabIndex = INVALID_INDEX;
 
     auto const mp {global_to_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_tabRectCache); ++i) {
@@ -161,7 +159,7 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
         force_redraw(this->name() + ": mouse down");
 
-        if (HoveredTabIndex != INVALID) {
+        if (HoveredTabIndex != INVALID_INDEX) {
             ActiveTabIndex = HoveredTabIndex();
         }
 

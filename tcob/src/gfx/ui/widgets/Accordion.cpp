@@ -10,17 +10,15 @@
 
 namespace tcob::gfx::ui {
 
-static constexpr isize INVALID {-1};
-
 accordion::accordion(init const& wi)
     : widget_container {wi}
-    , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_sections) - 1); }}}
-    , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID, std::ssize(_sections) - 1); }}}
+    , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
+    , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
     ActiveSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveSection changed"); });
-    ActiveSectionIndex(INVALID);
+    ActiveSectionIndex(INVALID_INDEX);
     HoveredSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredSection changed"); });
-    HoveredSectionIndex(INVALID);
+    HoveredSectionIndex(INVALID_INDEX);
     MaximizeActiveSection.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaximizeActiveSection changed"); });
     MaximizeActiveSection(false);
 
@@ -131,12 +129,12 @@ void accordion::on_paint(widget_painter& painter)
 
 void accordion::on_mouse_leave()
 {
-    HoveredSectionIndex = INVALID;
+    HoveredSectionIndex = INVALID_INDEX;
 }
 
 void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredSectionIndex = INVALID;
+    HoveredSectionIndex = INVALID_INDEX;
 
     auto const mp {global_to_local(ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
@@ -160,7 +158,7 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
 
         if (HoveredSectionIndex >= 0) {
             if (ActiveSectionIndex == HoveredSectionIndex) {
-                ActiveSectionIndex = INVALID;
+                ActiveSectionIndex = INVALID_INDEX;
                 if (MaximizeActiveSection()) { HoveredSectionIndex = 0; }
             } else {
                 ActiveSectionIndex = HoveredSectionIndex();
