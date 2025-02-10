@@ -22,6 +22,7 @@ grid_view::grid_view(init const& wi)
     HoveredCellIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredCell changed"); });
     HoveredCellIndex(INVALID);
 
+    SelectMode(select_mode::Cell);
     HeaderSelectable(false);
 
     Class("grid_view");
@@ -122,7 +123,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 
                 rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
                 if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                    auto const& cellStyle {get_cell_style({x, y + 1}, style->RowItemClass, style->SelectMode)->Item};
+                    auto const& cellStyle {get_cell_style({x, y + 1}, style->RowItemClass, SelectMode)->Item};
                     painter.draw_item(cellStyle, cellRect, row[x]);
                     _rowRectCache[{x, y + 1}] = cellRect;
                 }
@@ -137,7 +138,7 @@ void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 
             rect_f const cellRect {get_cell_rect({x, 0}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
             if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                auto const& cellStyle {get_cell_style({x, 0}, style->HeaderItemClass, style->SelectMode)->Item};
+                auto const& cellStyle {get_cell_style({x, 0}, style->HeaderItemClass, SelectMode)->Item};
                 painter.draw_item(cellStyle, cellRect, _columnHeaders[x]);
                 _headerRectCache[{x, 0}] = cellRect;
             }

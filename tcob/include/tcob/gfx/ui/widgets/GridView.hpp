@@ -28,14 +28,14 @@ public:
         utf8_string HeaderItemClass {"header_items"};
         utf8_string RowItemClass {"row_items"};
         length      RowHeight {};
-        select_mode SelectMode {select_mode::Cell};
     };
 
     explicit grid_view(init const& wi);
 
-    prop<point_i> SelectedCellIndex; // TODO: change to prop_val
-    prop<point_i> HoveredCellIndex;  // TODO: change to prop_val
-    prop<bool>    HeaderSelectable;
+    prop<point_i>     SelectedCellIndex; // TODO: change to prop_val
+    prop<point_i>     HoveredCellIndex;  // TODO: change to prop_val
+    prop<select_mode> SelectMode;
+    prop<bool>        HeaderSelectable;
 
     void set_columns(std::vector<utf8_string> const& col, bool clearRows = true);
     auto column_size() const -> isize;

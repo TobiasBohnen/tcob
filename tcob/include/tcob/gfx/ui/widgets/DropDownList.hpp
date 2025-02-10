@@ -25,7 +25,6 @@ public:
 
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};
-        isize       VisibleItemCount {5};
 
         element::scrollbar VScrollBar;
     };
@@ -34,6 +33,7 @@ public:
 
     prop_val<isize> SelectedItemIndex;
     prop_val<isize> HoveredItemIndex;
+    prop<isize>     VisibleItemCount; // TODO: change to prop_val
 
     void prepare_redraw() override;
 

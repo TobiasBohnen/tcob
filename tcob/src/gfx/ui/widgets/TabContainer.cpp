@@ -20,6 +20,9 @@ tab_container::tab_container(init const& wi)
     HoveredTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
     HoveredTabIndex(INVALID_INDEX);
 
+    MaxTabsPerRow.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaxTabsPerRow changed"); });
+    MaxTabsPerRow(std::numeric_limits<isize>::max());
+
     Class("tab_container");
 }
 
@@ -100,16 +103,34 @@ void tab_container::on_paint(widget_painter& painter)
         // tabs
         _tabRectCache.clear();
         if (style->TabBarPosition != position::Hidden) {
+            auto const get_tab_rect {[&](item_style const& itemStyle, isize index, rect_f const& rect) {
+                isize const maxItems {std::min(*MaxTabsPerRow, std::ssize(_tabs))};
+                rect_f      retValue {rect};
+                retValue.Position.X  = rect.left() + (rect.width() / maxItems) * (index % maxItems);
+                retValue.Size.Width  = rect.width() / maxItems;
+                retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
+                retValue.Size.Height = rect.height();
+
+                retValue -= itemStyle.Item.Border.thickness();
+                return retValue;
+            }};
+
+            auto const get_tab_style {[&](isize index) {
+                return index == ActiveTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Active = true})
+                    : index == HoveredTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Hover = true})
+                                               : get_sub_style<item_style>(style->TabItemClass, {});
+            }};
+
             rect_f tabBarRowRect {rect};
             tabBarRowRect.Size.Height = style->TabBarHeight.calc(tabBarRowRect.height());
+
             if (style->TabBarPosition == position::Bottom) {
-                f32 const tabRows {style->MaxTabsPerRow > 0 ? std ::ceil(std::ssize(_tabs) / static_cast<f32>(style->MaxTabsPerRow)) : 1};
-                tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * tabRows);
+                tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * get_tab_row_count());
             }
 
             for (i32 i {0}; i < std::ssize(_tabs); ++i) {
                 if (auto const* tabStyle {get_tab_style(i)}) {
-                    rect_f const tabRect {get_tab_rect(*style, *tabStyle, i, tabBarRowRect)};
+                    rect_f const tabRect {get_tab_rect(*tabStyle, i, tabBarRowRect)};
                     painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
                     _tabRectCache.push_back(tabRect);
                 }
@@ -170,43 +191,33 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 void tab_container::on_update(milliseconds /* deltaTime */)
 {
     if (_isDirty) {
-        update_tab_bounds();
+        // update tab bounds
+        auto const size {content_bounds().Size};
+        for (auto& t : _tabs) {
+            t->Bounds = {point_f::Zero, size};
+        }
+
         _isDirty = false;
     }
 }
 
-auto tab_container::get_tab_rect(style const& style, item_style const& itemStyle, isize index, rect_f const& rect) const -> rect_f
-{
-    isize const maxItems {std::min(style.MaxTabsPerRow, std::ssize(_tabs))};
-    rect_f      retValue {rect};
-    retValue.Position.X  = rect.left() + (rect.width() / maxItems) * (index % maxItems);
-    retValue.Size.Width  = rect.width() / maxItems;
-    retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
-    retValue.Size.Height = rect.height();
-
-    retValue -= itemStyle.Item.Border.thickness();
-    return retValue;
-}
-
-auto tab_container::get_tab_style(isize index) const -> item_style*
-{
-    auto const* style {current_style<tab_container::style>()};
-    return index == ActiveTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Active = true})
-        : index == HoveredTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Hover = true})
-                                   : get_sub_style<item_style>(style->TabItemClass, {});
-}
-
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
 {
-    f32 barHeight {style.TabBarHeight.calc(bounds.height())};
-    if (style.MaxTabsPerRow != -1) {
-        barHeight *= std::ceil(std::ssize(_tabs) / static_cast<f32>(style.MaxTabsPerRow));
-    }
+    f32 const barHeight {style.TabBarHeight.calc(bounds.height()) * get_tab_row_count()};
 
     bounds.Size.Height -= barHeight;
     if (style.TabBarPosition == position::Top) {
         bounds.Position.Y += barHeight;
     }
+}
+
+auto tab_container::get_tab_row_count() const -> isize
+{
+    if (*MaxTabsPerRow > 0) {
+        return static_cast<isize>(std::ceil(std::ssize(_tabs) / static_cast<f32>(*MaxTabsPerRow)));
+    }
+
+    return 1;
 }
 
 void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
@@ -217,14 +228,6 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
     if (isHitTest) { return; }
     if (auto const* style {current_style<tab_container::style>()}) {
         offset_tab_content(bounds, *style);
-    }
-}
-
-void tab_container::update_tab_bounds()
-{
-    auto rect {content_bounds()};
-    for (auto& t : _tabs) {
-        t->Bounds = {point_f::Zero, rect.Size};
     }
 }
 

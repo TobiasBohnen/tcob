@@ -20,7 +20,8 @@ drop_down_list::drop_down_list(init const& wi)
     SelectedItemIndex(INVALID_INDEX);
     HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
-
+    VisibleItemCount.Changed.connect([this](auto const&) { force_redraw(this->name() + ": VisibleItemCount changed"); });
+    VisibleItemCount(5);
     Class("drop_down_list");
 }
 
@@ -126,7 +127,7 @@ void drop_down_list::on_paint(widget_painter& painter)
             // list background
             rect_f listRect {Bounds()};
             listRect.Position.Y += listRect.height();
-            f32 const listHeight {itemHeight * style->VisibleItemCount};
+            f32 const listHeight {itemHeight * VisibleItemCount};
             listRect.Size.Height = listHeight;
             listRect.Size.Height += style->Margin.Top.calc(listHeight) + style->Margin.Bottom.calc(listHeight);
             listRect.Size.Height += style->Padding.Top.calc(listHeight) + style->Padding.Bottom.calc(listHeight);
@@ -135,7 +136,7 @@ void drop_down_list::on_paint(widget_painter& painter)
             painter.draw_background_and_border(*style, listRect, false);
 
             // scrollbar
-            _vScrollbar.Visible = std::ssize(_items) > style->VisibleItemCount;
+            _vScrollbar.Visible = std::ssize(_items) > VisibleItemCount;
             _vScrollbar.paint(painter, style->VScrollBar, listRect, fls.Active);
 
             scissor_guard const guard {painter, this};
@@ -292,7 +293,7 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
         refListHeight -= style->Padding.Top.calc(listRect.Size.Height) + style->Padding.Bottom.calc(listRect.Size.Height);
         refListHeight -= style->Border.Size.calc(listRect.Size.Height);
         f32 const itemHeight {style->ItemHeight.calc(refListHeight)};
-        f32 const listHeight {itemHeight * style->VisibleItemCount};
+        f32 const listHeight {itemHeight * VisibleItemCount};
         bounds.Size.Height = listHeight;
 
         if (isHitTest) {
