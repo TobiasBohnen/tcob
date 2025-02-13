@@ -222,7 +222,7 @@ void widget::prepare_redraw()
 
         _transition.OldStyle     = _transition.TargetStyle;
         _transition.TargetStyle  = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
-        _transition.CurrentStyle = _transition.OldStyle;
+        _transition.CurrentStyle = _transition.TargetStyle;
 
         if (TransitionDuration->count() > 0 && _transition.OldStyle != _transition.TargetStyle) {
             _transition.Tween = make_unique_tween<linear_tween<f64>>(TransitionDuration, 0.0, 1.0);
