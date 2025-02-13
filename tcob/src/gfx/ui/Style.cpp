@@ -11,8 +11,6 @@ namespace tcob::gfx::ui {
 
 void widget_style::Transition(widget_style& target, widget_style const& left, widget_style const& right, f64 step)
 {
-    target = left;
-
     target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
     target.Margin  = thickness::Lerp(left.Margin, right.Margin, step);
     if (auto const* lc {std::get_if<color>(&left.Background)}) {

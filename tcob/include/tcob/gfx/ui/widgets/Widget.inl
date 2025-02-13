@@ -11,13 +11,14 @@ namespace tcob::gfx::ui {
 template <std::derived_from<widget_style> T>
 inline void widget::get_style(T& style)
 {
-    auto& tr {_transition};
-    if (tr.Tween && tr.Tween->status() == playback_status::Running && tr.OldStyle && tr.TargetStyle) {
-        T::Transition(style, *static_cast<T*>(tr.OldStyle), *static_cast<T*>(tr.TargetStyle), tr.Tween->Value);
-    } else if (tr.TargetStyle) {
-        style = *static_cast<T*>(tr.TargetStyle);
+    if (_transition.CurrentStyle) {
+        style = *static_cast<T*>(_transition.CurrentStyle);
     }
-    tr.CurrentStyle = &style;
+
+    if (_transition.is_active()) {
+        T::Transition(style, *static_cast<T*>(_transition.OldStyle), *static_cast<T*>(_transition.TargetStyle), _transition.Tween->Value);
+    }
+    _transition.CurrentStyle = &style;
 }
 
 template <std::derived_from<style> T>

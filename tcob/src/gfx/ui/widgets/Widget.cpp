@@ -518,4 +518,9 @@ auto widget::styles() const -> style_collection const&
     return _form->Styles();
 }
 
+auto widget::transition_def::is_active() const -> bool
+{
+    return Tween && Tween->status() == playback_status::Running && OldStyle && TargetStyle;
+}
+
 }

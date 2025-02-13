@@ -147,11 +147,14 @@ protected:
     auto virtual is_inert() const -> bool;
 
 private:
-    struct transition_def {
+    class TCOB_API transition_def {
+    public:
         std::unique_ptr<linear_tween<f64>> Tween;
         widget_style*                      CurrentStyle {nullptr};
         widget_style*                      TargetStyle {nullptr};
         widget_style*                      OldStyle {nullptr};
+
+        auto is_active() const -> bool;
     };
 
     void do_key_down(input::keyboard::event const& ev);
