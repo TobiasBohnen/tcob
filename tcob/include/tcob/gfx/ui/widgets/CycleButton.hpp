@@ -16,6 +16,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         element::text Text;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit cycle_button(init const& wi);
@@ -42,5 +44,7 @@ protected:
 
 private:
     std::vector<utf8_string> _items;
+
+    cycle_button::style _style;
 };
 }

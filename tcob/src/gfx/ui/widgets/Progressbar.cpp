@@ -9,6 +9,13 @@
 
 namespace tcob::gfx::ui {
 
+void progress_bar::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::bar::Transition(target.Bar, left.Bar, right.Bar, step);
+}
+
 progress_bar::progress_bar(init const& wi)
     : widget {wi}
     , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
@@ -28,26 +35,26 @@ progress_bar::progress_bar(init const& wi)
 
 void progress_bar::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<progress_bar::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        // bar
-        i32 const numBlocks {10};
+    scissor_guard const guard {painter, this};
 
-        (void)painter.draw_bar(
-            style->Bar,
-            rect,
-            {.Orientation = current_orientation(),
-             .Inverted    = false,
-             .Position    = element::bar::position::CenterOrMiddle,
-             .BlockCount  = numBlocks,
-             .Fraction    = _tween.current_value()});
-    }
+    // bar
+    i32 const numBlocks {10};
+
+    (void)painter.draw_bar(
+        _style.Bar,
+        rect,
+        {.Orientation = current_orientation(),
+         .Inverted    = false,
+         .Position    = element::bar::position::CenterOrMiddle,
+         .BlockCount  = numBlocks,
+         .Fraction    = _tween.current_value()});
 }
 
 void progress_bar::on_update(milliseconds deltaTime)
@@ -58,11 +65,7 @@ void progress_bar::on_update(milliseconds deltaTime)
 void progress_bar::on_value_changed(i32 newVal)
 {
     f32 const newFrac {static_cast<f32>(newVal - Min()) / (Max() - Min())};
-    if (auto const* style {current_style<progress_bar::style>()}) {
-        _tween.start(newFrac, style->Bar.Delay);
-    } else {
-        _tween.reset(newFrac);
-    }
+    _tween.start(newFrac, _style.Bar.Delay);
 }
 
 auto progress_bar::attributes() const -> widget_attributes

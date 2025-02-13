@@ -207,7 +207,7 @@ void form::on_styles_changed()
             .Flags      = tooltip->flags(),
             .Attributes = tooltip->attributes(),
         };
-        tooltip->_style = dynamic_cast<widget_style*>(Styles->get(ttNewSelectors));
+        tooltip->_transition.TargetStyle = dynamic_cast<widget_style*>(Styles->get(ttNewSelectors));
     }
 }
 
@@ -219,8 +219,8 @@ auto form::can_draw() const -> bool
 void form::on_draw_to(render_target& target)
 {
     // set cursor
-    if (_window && _window->Cursor() && _topWidget && _topWidget->_style) {
-        _window->Cursor->ActiveMode = _topWidget->current_style<widget_style>()->Cursor;
+    if (_window && _window->Cursor() && _topWidget && _topWidget->_transition.TargetStyle) {
+        _window->Cursor->ActiveMode = _topWidget->_transition.TargetStyle->Cursor;
     }
 
     size_i const bounds {size_i {Bounds->Size}};
@@ -522,9 +522,7 @@ auto form::can_popup_tooltip() const -> bool
         && !_isLButtonDown && !_isRButtonDown
         && locate_service<input::system>().InputMode == input::mode::KeyboardMouse) {
 
-        if (auto* style {_topWidget->Tooltip->current_style<tooltip::style>()}) {
-            return _mouseOverTime > style->Delay;
-        }
+        return _mouseOverTime > _topWidget->Tooltip->Delay;
     }
 
     return false;

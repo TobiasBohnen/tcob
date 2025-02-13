@@ -57,7 +57,11 @@ namespace element {
         milliseconds BlinkRate {500};
 
         auto operator==(caret const& other) const -> bool = default;
+
+        void static Transition(caret& target, caret const& left, caret const& right, f64 step);
     };
+
+    ////////////////////////////////////////////////////////////
 
     class TCOB_API shadow {
     public:
@@ -66,7 +70,11 @@ namespace element {
         length OffsetY {};
 
         auto operator==(shadow const& other) const -> bool = default;
+
+        void static Transition(shadow& target, shadow const& left, shadow const& right, f64 step);
     };
+
+    ////////////////////////////////////////////////////////////
 
     class TCOB_API text {
     public:
@@ -96,6 +104,8 @@ namespace element {
         auto calc_font_size(rect_f const& rect) const -> u32;
 
         auto operator==(text const& other) const -> bool = default;
+
+        void static Transition(text& target, text const& left, text const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -122,6 +132,8 @@ namespace element {
         auto thickness() const -> thickness;
 
         auto operator==(border const& other) const -> bool = default;
+
+        void static Transition(border& target, border const& left, border const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -148,6 +160,8 @@ namespace element {
         auto calc(rect_f const& rect, context const& ctx) const -> rect_f;
 
         auto operator==(thumb const& other) const -> bool = default;
+
+        void static Transition(thumb& target, thumb const& left, thumb const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -169,6 +183,8 @@ namespace element {
         length   Size {};
 
         auto operator==(tick const& other) const -> bool = default;
+
+        void static Transition(tick& target, tick const& left, tick const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -204,6 +220,8 @@ namespace element {
         auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
 
         auto operator==(bar const& other) const -> bool = default;
+
+        void static Transition(bar& target, bar const& left, bar const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -214,6 +232,8 @@ namespace element {
         utf8_string ThumbClass {"scrollbar_thumb"};
 
         auto operator==(scrollbar const& other) const -> bool = default;
+
+        void static Transition(scrollbar& target, scrollbar const& left, scrollbar const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -236,6 +256,8 @@ namespace element {
         auto calc(rect_f const& rect) const -> rect_f;
 
         auto operator==(nav_arrow const& other) const -> bool = default;
+
+        void static Transition(nav_arrow& target, nav_arrow const& left, nav_arrow const& right, f64 step);
     };
 
     ////////////////////////////////////////////////////////////
@@ -248,6 +270,8 @@ namespace element {
         thickness Padding {};
 
         auto operator==(item const& other) const -> bool = default;
+
+        void static Transition(item& target, item const& left, item const& right, f64 step);
     };
 
 }
@@ -275,6 +299,8 @@ public:
     element::border Border;
 
     string Cursor {"default"};
+
+    void static Transition(widget_style& target, widget_style const& left, widget_style const& right, f64 step);
 };
 
 class TCOB_API thumb_style : public style {

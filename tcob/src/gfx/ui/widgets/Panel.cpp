@@ -12,6 +12,15 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 
 namespace tcob::gfx::ui {
+
+void panel::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::scrollbar::Transition(target.HScrollBar, left.HScrollBar, right.HScrollBar, step);
+    element::scrollbar::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+}
+
 panel::panel(init const& wi)
     : widget_container {wi}
     , _layout {std::make_shared<fixed_layout>(this)}
@@ -55,13 +64,10 @@ void panel::on_styles_changed()
 {
     widget_container::on_styles_changed();
     _layout->mark_dirty();
-    if (auto* style {current_style<panel::style>()}) {
-        _hScrollbar.Style = &style->HScrollBar;
-        _vScrollbar.Style = &style->VScrollBar;
-    } else {
-        _hScrollbar.Style = nullptr;
-        _vScrollbar.Style = nullptr;
-    }
+
+    get_style(_style);
+    _vScrollbar.Style = &_style.VScrollBar;
+    _hScrollbar.Style = &_style.HScrollBar;
 
     _vScrollbar.start_scroll(0, milliseconds {0});
     _hScrollbar.start_scroll(0, milliseconds {0});
@@ -98,30 +104,30 @@ void panel::clear_widgets()
 
 void panel::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<panel::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        // scrollbar
-        _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
-        _vScrollbar.paint(painter, style->VScrollBar, rect, flags().Active);
-        _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
-        _hScrollbar.paint(painter, style->HScrollBar, rect, flags().Active);
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        // content
-        scissor_guard const guard {painter, this};
+    // scrollbar
+    _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
+    _vScrollbar.paint(painter, _style.VScrollBar, rect, flags().Active);
+    _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
+    _hScrollbar.paint(painter, _style.HScrollBar, rect, flags().Active);
 
-        auto          xform {transform::Identity};
-        point_f const translate {rect.Position + paint_offset()};
-        xform.translate(translate);
+    // content
+    scissor_guard const guard {painter, this};
 
-        for (auto const& w : widgets_by_zorder()) {
-            painter.begin(Alpha(), xform);
-            w->paint(painter);
-            painter.end();
-        }
+    auto          xform {transform::Identity};
+    point_f const translate {rect.Position + paint_offset()};
+    xform.translate(translate);
+
+    for (auto const& w : widgets_by_zorder()) {
+        painter.begin(Alpha(), xform);
+        w->paint(painter);
+        painter.end();
     }
 }
 
@@ -188,32 +194,30 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
 void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (auto const* style {current_style<panel::style>()}) {
-            orientation  orien {};
-            bool         invert {};
-            milliseconds delay {};
+        orientation  orien {};
+        bool         invert {};
+        milliseconds delay {};
 
-            if (ev.Scroll.Y != 0) {
-                orien  = orientation::Vertical;
-                invert = ev.Scroll.Y > 0;
-                delay  = style->VScrollBar.Bar.Delay;
-            } else if (ev.Scroll.X != 0) {
-                orien  = orientation::Horizontal;
-                invert = ev.Scroll.X < 0;
-                delay  = style->HScrollBar.Bar.Delay;
-            }
-
-            f32 const min {0};
-            f32 const max {get_scroll_max_value(orien)};
-            f32 const diff {(max - min) / (invert ? -5 : 5)};
-            if (orien == orientation::Vertical) {
-                _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
-            } else if (orien == orientation::Horizontal) {
-                _hScrollbar.start_scroll(_hScrollbar.target_value() + diff, delay);
-            }
-
-            ev.Handled = true;
+        if (ev.Scroll.Y != 0) {
+            orien  = orientation::Vertical;
+            invert = ev.Scroll.Y > 0;
+            delay  = _style.VScrollBar.Bar.Delay;
+        } else if (ev.Scroll.X != 0) {
+            orien  = orientation::Horizontal;
+            invert = ev.Scroll.X < 0;
+            delay  = _style.HScrollBar.Bar.Delay;
         }
+
+        f32 const min {0};
+        f32 const max {get_scroll_max_value(orien)};
+        f32 const diff {(max - min) / (invert ? -5 : 5)};
+        if (orien == orientation::Vertical) {
+            _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
+        } else if (orien == orientation::Horizontal) {
+            _hScrollbar.start_scroll(_hScrollbar.target_value() + diff, delay);
+        }
+
+        ev.Handled = true;
     }
 }
 
@@ -223,10 +227,8 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
 
     // subtract scrollbars from content
     if (isHitTest) { return; }
-    if (auto const* style {current_style<panel::style>()}) {
-        if (_vScrollbar.Visible) { bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width()); }
-        if (_hScrollbar.Visible) { bounds.Size.Height -= style->HScrollBar.Bar.Size.calc(bounds.height()); }
-    }
+    if (_vScrollbar.Visible) { bounds.Size.Width -= _style.VScrollBar.Bar.Size.calc(bounds.width()); }
+    if (_hScrollbar.Visible) { bounds.Size.Height -= _style.HScrollBar.Bar.Size.calc(bounds.height()); }
 }
 
 auto panel::get_layout() -> std::shared_ptr<layout>

@@ -21,6 +21,8 @@ public:
     public:
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit list_box(init const& wi);
@@ -41,6 +43,7 @@ public:
     auto item_count() const -> isize;
 
 protected:
+    void on_update(milliseconds deltaTime) override;
     void paint_content(widget_painter& painter, rect_f const& rect) override;
 
     void on_key_down(input::keyboard::event const& ev) override;
@@ -52,6 +55,7 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
+    auto update_style() -> vscroll_widget::style* override;
     auto get_scroll_content_height() const -> f32 override;
     auto get_scroll_item_count() const -> isize override;
 
@@ -64,5 +68,8 @@ private:
     std::vector<list_item>            _items;
     std::vector<list_item>            _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
+    bool                              _scrollToSelected {false};
+
+    list_box::style _style;
 };
 }

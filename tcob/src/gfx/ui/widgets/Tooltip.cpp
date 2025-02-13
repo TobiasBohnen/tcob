@@ -30,14 +30,12 @@ void tooltip::on_update(milliseconds deltaTime)
 
 void tooltip::on_popup(widget* top)
 {
-    if (auto const* style {current_style<tooltip::style>()}) {
-        _fadeInTween = make_unique_tween<linear_tween<f32>>(style->FadeIn, 0.0f, 1.0f);
-        _fadeInTween->Value.Changed.connect([this](auto val) {
-            Alpha = val;
-            force_redraw(this->name() + ": Tooltip fade-in");
-        });
-        _fadeInTween->start();
-    }
+    _fadeInTween = make_unique_tween<linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
+    _fadeInTween->Value.Changed.connect([this](auto val) {
+        Alpha = val;
+        force_redraw(this->name() + ": Tooltip fade-in");
+    });
+    _fadeInTween->start();
 
     Popup({this, top});
 }

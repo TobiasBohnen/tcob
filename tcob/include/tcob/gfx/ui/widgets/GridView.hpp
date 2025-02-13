@@ -28,6 +28,8 @@ public:
         utf8_string HeaderItemClass {"header_items"};
         utf8_string RowItemClass {"row_items"};
         length      RowHeight {};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit grid_view(init const& wi);
@@ -53,13 +55,14 @@ protected:
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_down(input::mouse::button_event const& ev) override;
 
+    auto update_style() -> vscroll_widget::style* override;
     auto get_scroll_content_height() const -> f32 override;
     auto get_scroll_item_count() const -> isize override;
 
 private:
     auto get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX) const -> rect_f;
     auto get_cell_style(point_i idx, string const& className, select_mode mode) const -> item_style*;
-    auto get_column_width(grid_view::style const* style, i32 col, f32 width) const -> f32;
+    auto get_column_width(i32 col, f32 width) const -> f32;
 
     std::vector<list_item>              _columnHeaders;
     std::vector<isize>                  _columnSizes;
@@ -67,5 +70,7 @@ private:
 
     std::unordered_map<point_i, rect_f> _headerRectCache;
     std::unordered_map<point_i, rect_f> _rowRectCache;
+
+    grid_view::style _style;
 };
 }

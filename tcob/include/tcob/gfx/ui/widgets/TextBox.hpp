@@ -19,6 +19,8 @@ public:
     public:
         element::text  Text;
         element::caret Caret;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit text_box(init const& wi);
@@ -57,5 +59,7 @@ private:
     text_formatter::result _formatResult;
     usize                  _textLength {0};
     bool                   _textDirty {false};
+
+    text_box::style _style;
 };
 }

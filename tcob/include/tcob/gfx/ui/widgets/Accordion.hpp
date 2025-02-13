@@ -19,6 +19,8 @@ public:
     public:
         length      SectionBarHeight;
         utf8_string SectionItemClass {"section_items"};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit accordion(init const& wi);
@@ -53,9 +55,6 @@ protected:
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
 private:
-    auto get_section_rect(item_style const& itemStyle, isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f;
-    auto get_section_style(isize index) const -> item_style*;
-
     void offset_section_content(rect_f& bounds, style const& style) const;
 
     void update_section_bounds(rect_f const& bounds);
@@ -63,6 +62,8 @@ private:
     std::vector<std::shared_ptr<widget>> _sections;
     std::vector<list_item>               _sectionLabels;
     std::vector<rect_f>                  _sectionRectCache;
+
+    accordion::style _style;
 };
 
 }

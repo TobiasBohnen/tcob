@@ -30,44 +30,45 @@ void dot_matrix_display::on_paint(widget_painter& painter)
         return;
     }
 
-    if (auto const* style {current_style<dot_matrix_display::style>()}) {
-        rect_f rect {Bounds()};
+    dot_matrix_display::style style;
+    get_style(style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(style, rect, false);
 
-        auto& canvas {painter.canvas()};
-        canvas.save();
+    scissor_guard const guard {painter, this};
 
-        f32 const width {rect.width() / Size->Width};
-        f32 const height {rect.height() / Size->Height};
+    auto& canvas {painter.canvas()};
+    canvas.save();
 
-        for (auto const& [colorIdx, dots] : _sortedDots) {
-            canvas.set_fill_style(style->Dot.Colors.at(colorIdx));
-            canvas.begin_path();
+    f32 const width {rect.width() / Size->Width};
+    f32 const height {rect.height() / Size->Height};
 
-            for (auto const& dot : dots) {
-                rect_f const dotRect {(dot.X * width) + rect.left(),
-                                      (dot.Y * height) + rect.top(),
-                                      width, height};
+    for (auto const& [colorIdx, dots] : _sortedDots) {
+        canvas.set_fill_style(style.Dot.Colors.at(colorIdx));
+        canvas.begin_path();
 
-                switch (style->Dot.Type) {
-                case dot::type::Disc: {
-                    canvas.circle(dotRect.center(), width / 2);
-                } break;
-                case dot::type::Square: {
-                    canvas.rect(dotRect);
-                } break;
-                }
+        for (auto const& dot : dots) {
+            rect_f const dotRect {(dot.X * width) + rect.left(),
+                                  (dot.Y * height) + rect.top(),
+                                  width, height};
+
+            switch (style.Dot.Type) {
+            case dot::type::Disc: {
+                canvas.circle(dotRect.center(), width / 2);
+            } break;
+            case dot::type::Square: {
+                canvas.rect(dotRect);
+            } break;
             }
-
-            canvas.fill();
         }
 
-        canvas.restore();
+        canvas.fill();
     }
+
+    canvas.restore();
 }
 
 void dot_matrix_display::on_update(milliseconds /* deltaTime */)
@@ -166,117 +167,118 @@ auto seven_segment_display::get_segment(char c) -> std::bitset<7>
 
 void seven_segment_display::on_paint(widget_painter& painter)
 {
-    if (auto* const style {current_style<seven_segment_display::style>()}) {
-        rect_f rect {Bounds()};
+    seven_segment_display::style style;
+    get_style(style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(style, rect, false);
 
-        auto& canvas {painter.canvas()};
-        canvas.save();
+    scissor_guard const guard {painter, this};
 
-        f32 const width {style->Segment.Size.calc(rect.width())};
-        f32 const thickness {width / 4};
+    auto& canvas {painter.canvas()};
+    canvas.save();
 
-        point_f       offset {rect.top_left()};
-        point_f const lineOffset {1, 0};
+    f32 const width {style.Segment.Size.calc(rect.width())};
+    f32 const thickness {width / 4};
 
-        std::array<point_f, 18> const points {{
-            {0, 0},                                       // 01
-            {width, 0},                                   // 02
-            {width - thickness, thickness},               // 03
-            {thickness, thickness},                       // 04
+    point_f       offset {rect.top_left()};
+    point_f const lineOffset {1, 0};
 
-            {0, width - (thickness / 2)},                 // 05
-            {thickness, width - (thickness / 2)},         // 06
-            {thickness / 2, width},                       // 07
+    std::array<point_f, 18> const points {{
+        {0, 0},                                       // 01
+        {width, 0},                                   // 02
+        {width - thickness, thickness},               // 03
+        {thickness, thickness},                       // 04
 
-            {0, width + (thickness / 2)},                 // 08
-            {thickness, width + (thickness / 2)},         // 09
-            {0, width * 2},                               // 10
-            {thickness, (width * 2) - thickness},         // 11
+        {0, width - (thickness / 2)},                 // 05
+        {thickness, width - (thickness / 2)},         // 06
+        {thickness / 2, width},                       // 07
 
-            {width - thickness, (width * 2) - thickness}, // 12
-            {width, width * 2},                           // 13
+        {0, width + (thickness / 2)},                 // 08
+        {thickness, width + (thickness / 2)},         // 09
+        {0, width * 2},                               // 10
+        {thickness, (width * 2) - thickness},         // 11
 
-            {width - thickness, width + (thickness / 2)}, // 14
-            {width, width + (thickness / 2)},             // 15
-            {width - (thickness / 2), width},             // 16
+        {width - thickness, (width * 2) - thickness}, // 12
+        {width, width * 2},                           // 13
 
-            {width - thickness, width - (thickness / 2)}, // 17
-            {width, width - (thickness / 2)},             // 18
-        }};
+        {width - thickness, width + (thickness / 2)}, // 14
+        {width, width + (thickness / 2)},             // 15
+        {width - (thickness / 2), width},             // 16
 
-        for (auto const c : Text()) {
-            auto const segments {get_segment(c)};
+        {width - thickness, width - (thickness / 2)}, // 17
+        {width, width - (thickness / 2)},             // 18
+    }};
 
-            for (i32 i {0}; i < 7; i++) {
-                if (segments[6 - i]) {
-                    canvas.set_fill_style(style->Segment.ActiveColor);
-                } else {
-                    if (style->Segment.InactiveColor.A == 0) {
-                        continue;
-                    }
-                    canvas.set_fill_style(style->Segment.InactiveColor);
+    for (auto const c : Text()) {
+        auto const segments {get_segment(c)};
+
+        for (i32 i {0}; i < 7; i++) {
+            if (segments[6 - i]) {
+                canvas.set_fill_style(style.Segment.ActiveColor);
+            } else {
+                if (style.Segment.InactiveColor.A == 0) {
+                    continue;
                 }
-
-                switch (i) {
-                case 0:
-                    canvas.fill_lines({{points[0] + offset + lineOffset,
-                                        points[1] + offset - lineOffset,
-                                        points[2] + offset - lineOffset,
-                                        points[3] + offset + lineOffset}});
-                    break;
-                case 1:
-                    canvas.fill_lines({{points[0] + offset,
-                                        points[3] + offset,
-                                        points[5] + offset,
-                                        points[6] + offset,
-                                        points[4] + offset}});
-                    break;
-                case 2:
-                    canvas.fill_lines({{points[2] + offset,
-                                        points[1] + offset,
-                                        points[17] + offset,
-                                        points[15] + offset,
-                                        points[16] + offset}});
-                    break;
-                case 3:
-                    canvas.fill_lines({{points[6] + offset + lineOffset,
-                                        points[5] + offset + lineOffset,
-                                        points[16] + offset - lineOffset,
-                                        points[15] + offset - lineOffset,
-                                        points[13] + offset - lineOffset,
-                                        points[8] + offset + lineOffset}});
-                    break;
-                case 4:
-                    canvas.fill_lines({{points[6] + offset,
-                                        points[8] + offset,
-                                        points[10] + offset,
-                                        points[9] + offset,
-                                        points[7] + offset}});
-                    break;
-                case 5:
-                    canvas.fill_lines({{points[15] + offset, points[14] + offset,
-                                        points[12] + offset,
-                                        points[11] + offset,
-                                        points[13] + offset}});
-                    break;
-                case 6:
-                    canvas.fill_lines({{points[10] + offset + lineOffset,
-                                        points[11] + offset - lineOffset,
-                                        points[12] + offset - lineOffset,
-                                        points[9] + offset + lineOffset}});
-                    break;
-                }
+                canvas.set_fill_style(style.Segment.InactiveColor);
             }
-            offset.X += width + thickness;
-        }
 
-        canvas.restore();
+            switch (i) {
+            case 0:
+                canvas.fill_lines({{points[0] + offset + lineOffset,
+                                    points[1] + offset - lineOffset,
+                                    points[2] + offset - lineOffset,
+                                    points[3] + offset + lineOffset}});
+                break;
+            case 1:
+                canvas.fill_lines({{points[0] + offset,
+                                    points[3] + offset,
+                                    points[5] + offset,
+                                    points[6] + offset,
+                                    points[4] + offset}});
+                break;
+            case 2:
+                canvas.fill_lines({{points[2] + offset,
+                                    points[1] + offset,
+                                    points[17] + offset,
+                                    points[15] + offset,
+                                    points[16] + offset}});
+                break;
+            case 3:
+                canvas.fill_lines({{points[6] + offset + lineOffset,
+                                    points[5] + offset + lineOffset,
+                                    points[16] + offset - lineOffset,
+                                    points[15] + offset - lineOffset,
+                                    points[13] + offset - lineOffset,
+                                    points[8] + offset + lineOffset}});
+                break;
+            case 4:
+                canvas.fill_lines({{points[6] + offset,
+                                    points[8] + offset,
+                                    points[10] + offset,
+                                    points[9] + offset,
+                                    points[7] + offset}});
+                break;
+            case 5:
+                canvas.fill_lines({{points[15] + offset, points[14] + offset,
+                                    points[12] + offset,
+                                    points[11] + offset,
+                                    points[13] + offset}});
+                break;
+            case 6:
+                canvas.fill_lines({{points[10] + offset + lineOffset,
+                                    points[11] + offset - lineOffset,
+                                    points[12] + offset - lineOffset,
+                                    points[9] + offset + lineOffset}});
+                break;
+            }
+        }
+        offset.X += width + thickness;
     }
+
+    canvas.restore();
 }
 
 void seven_segment_display::on_update(milliseconds /* deltaTime */)

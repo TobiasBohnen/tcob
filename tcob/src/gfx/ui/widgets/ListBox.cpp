@@ -11,6 +11,13 @@
 
 namespace tcob::gfx::ui {
 
+void list_box::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    vscroll_widget::style::Transition(target, left, right, step);
+
+    target.ItemHeight = length::Lerp(left.ItemHeight, right.ItemHeight, step);
+}
+
 list_box::list_box(init const& wi)
     : vscroll_widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
@@ -81,23 +88,7 @@ void list_box::scroll_to_selected()
 {
     if (SelectedItemIndex < 1) { return; }
 
-    f32 value {0.0f};
-    if (auto const* style {current_style<list_box::style>()}) {
-        rect_f const listRect {content_bounds()};
-        f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
-        auto const   scrollMax {get_scroll_max_value()};
-
-        for (i32 i {0}; i < SelectedItemIndex; ++i) {
-            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-            value += itemRect.height();
-            if (value >= scrollMax) {
-                value = scrollMax;
-                break;
-            }
-        }
-    }
-
-    set_scrollbar_value(value);
+    _scrollToSelected = true;
 }
 
 auto list_box::get_item_at(isize index) const -> list_item const&
@@ -115,35 +106,45 @@ auto list_box::item_count() const -> isize
     return std::ssize(get_items());
 }
 
+void list_box::on_update(milliseconds deltaTime)
+{
+    vscroll_widget::on_update(deltaTime);
+
+    if (_scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
+        rect_f const listRect {content_bounds()};
+        f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
+        set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
+        _scrollToSelected = false;
+    }
+}
+
 void list_box::paint_content(widget_painter& painter, rect_f const& rect)
 {
-    if (auto const* style {current_style<list_box::style>()}) {
-        _itemRectCache.clear();
+    _itemRectCache.clear();
 
-        rect_f const listRect {rect};
-        f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
+    rect_f const listRect {rect};
+    f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
 
-        auto const paint_item {[&](isize i) {
-            auto const&  itemStyle {get_item_style(i)};
-            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-            if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                painter.draw_item(itemStyle->Item, itemRect, get_items()[i]);
-                _itemRectCache[i] = itemRect;
-            }
-        }};
-
-        for (i32 i {0}; i < item_count(); ++i) {
-            if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-
-            paint_item(i);
+    auto const paint_item {[&](isize i) {
+        auto const&  itemStyle {get_item_style(i)};
+        rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+        if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
+            painter.draw_item(itemStyle->Item, itemRect, get_items()[i]);
+            _itemRectCache[i] = itemRect;
         }
+    }};
 
-        if (SelectedItemIndex >= 0) {
-            paint_item(SelectedItemIndex());
-        }
-        if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paint_item(HoveredItemIndex());
-        }
+    for (i32 i {0}; i < item_count(); ++i) {
+        if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
+
+        paint_item(i);
+    }
+
+    if (SelectedItemIndex >= 0) {
+        paint_item(SelectedItemIndex());
+    }
+    if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
+        paint_item(HoveredItemIndex());
     }
 }
 
@@ -228,24 +229,21 @@ auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) co
 
 auto list_box::get_item_style(isize index) const -> item_style*
 {
-    auto const* style {current_style<list_box::style>()};
-    return index == SelectedItemIndex ? get_sub_style<item_style>(style->ItemClass, {.Active = true})
-        : index == HoveredItemIndex   ? get_sub_style<item_style>(style->ItemClass, {.Hover = true})
-                                      : get_sub_style<item_style>(style->ItemClass, {});
+    return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
+        : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
+                                      : get_sub_style<item_style>(_style.ItemClass, {});
 }
 
 auto list_box::get_scroll_content_height() const -> f32
 {
     if (_items.empty()) { return 0; }
 
-    f32 retValue {0.0f};
-    if (auto const* style {current_style<list_box::style>()}) {
-        rect_f const listRect {content_bounds()};
-        f32 const    itemHeight {style->ItemHeight.calc(listRect.height())};
-        for (i32 i {0}; i < item_count(); ++i) {
-            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-            retValue += itemRect.height();
-        }
+    f32          retValue {0.0f};
+    rect_f const listRect {content_bounds()};
+    f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
+    for (i32 i {0}; i < item_count(); ++i) {
+        rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+        retValue += itemRect.height();
     }
 
     return retValue;
@@ -268,6 +266,12 @@ auto list_box::attributes() const -> widget_attributes
         retValue["selected"] = selected_item().Text;
     }
     return retValue;
+}
+
+auto list_box::update_style() -> vscroll_widget::style*
+{
+    get_style(_style);
+    return &_style;
 }
 
 } // namespace ui

@@ -14,6 +14,13 @@ namespace tcob::gfx::ui {
 
 static constexpr point_i INVALID {INVALID_INDEX, INVALID_INDEX};
 
+void grid_view::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    vscroll_widget::style::Transition(target, left, right, step);
+
+    target.RowHeight = length::Lerp(left.RowHeight, right.RowHeight, step);
+}
+
 grid_view::grid_view(init const& wi)
     : vscroll_widget {wi}
 {
@@ -102,48 +109,46 @@ auto grid_view::get_cell(point_i idx) const -> utf8_string
 
 void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
 {
-    if (auto const* style {current_style<grid_view::style>()}) {
-        // content
-        scissor_guard const guard {painter, this};
+    // content
+    scissor_guard const guard {painter, this};
 
-        rect_f gridRect {rect};
+    rect_f gridRect {rect};
 
-        f32 const rowHeight {style->RowHeight.calc(gridRect.height())};
+    f32 const rowHeight {_style.RowHeight.calc(gridRect.height())};
 
-        std::vector<f32> colWidths(_columnHeaders.size());
+    std::vector<f32> colWidths(_columnHeaders.size());
 
-        // rows
-        _rowRectCache.clear();
-        for (i32 y {0}; y < std::ssize(_rows); ++y) {
-            auto const& row {_rows[y]};
-            f32         offsetX {0.f};
+    // rows
+    _rowRectCache.clear();
+    for (i32 y {0}; y < std::ssize(_rows); ++y) {
+        auto const& row {_rows[y]};
+        f32         offsetX {0.f};
 
-            for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-                f32 const colWidth {colWidths[x] = get_column_width(style, x, gridRect.width())};
-
-                rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
-                if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                    auto const& cellStyle {get_cell_style({x, y + 1}, style->RowItemClass, SelectMode)->Item};
-                    painter.draw_item(cellStyle, cellRect, row[x]);
-                    _rowRectCache[{x, y + 1}] = cellRect;
-                }
-                offsetX += colWidth;
-            }
-        }
-        f32 offsetX {0.f};
-        // headers
-        _headerRectCache.clear();
         for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-            f32 const colWidth {colWidths[x]};
+            f32 const colWidth {colWidths[x] = get_column_width(x, gridRect.width())};
 
-            rect_f const cellRect {get_cell_rect({x, 0}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
+            rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
             if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                auto const& cellStyle {get_cell_style({x, 0}, style->HeaderItemClass, SelectMode)->Item};
-                painter.draw_item(cellStyle, cellRect, _columnHeaders[x]);
-                _headerRectCache[{x, 0}] = cellRect;
+                auto const& cellStyle {get_cell_style({x, y + 1}, _style.RowItemClass, SelectMode)->Item};
+                painter.draw_item(cellStyle, cellRect, row[x]);
+                _rowRectCache[{x, y + 1}] = cellRect;
             }
             offsetX += colWidth;
         }
+    }
+    f32 offsetX {0.f};
+    // headers
+    _headerRectCache.clear();
+    for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
+        f32 const colWidth {colWidths[x]};
+
+        rect_f const cellRect {get_cell_rect({x, 0}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
+        if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
+            auto const& cellStyle {get_cell_style({x, 0}, _style.HeaderItemClass, SelectMode)->Item};
+            painter.draw_item(cellStyle, cellRect, _columnHeaders[x]);
+            _headerRectCache[{x, 0}] = cellRect;
+        }
+        offsetX += colWidth;
     }
 }
 
@@ -227,9 +232,9 @@ auto grid_view::get_cell_style(point_i idx, string const& className, select_mode
     return nullptr;
 }
 
-auto grid_view::get_column_width(grid_view::style const* style, i32 col, f32 width) const -> f32
+auto grid_view::get_column_width(i32 col, f32 width) const -> f32
 {
-    if (style->AutoSizeColumns) {
+    if (_style.AutoSizeColumns) {
         auto const sum {std::reduce(_columnSizes.begin(), _columnSizes.end())};
         return width * (_columnSizes[col] / static_cast<f32>(sum));
     }
@@ -241,12 +246,10 @@ auto grid_view::get_scroll_content_height() const -> f32
 {
     if (_columnHeaders.empty()) { return 0; }
 
-    f32 retValue {0.0f};
-    if (auto const* style {current_style<grid_view::style>()}) {
-        rect_f const listRect {content_bounds()};
-        f32 const    itemHeight {style->RowHeight.calc(listRect.height())};
-        retValue += itemHeight * (_rows.size() + 1);
-    }
+    f32          retValue {0.0f};
+    rect_f const listRect {content_bounds()};
+    f32 const    itemHeight {_style.RowHeight.calc(listRect.height())};
+    retValue += itemHeight * (_rows.size() + 1);
 
     return retValue;
 }
@@ -254,6 +257,12 @@ auto grid_view::get_scroll_content_height() const -> f32
 auto grid_view::get_scroll_item_count() const -> isize
 {
     return std::ssize(_rows);
+}
+
+auto grid_view::update_style() -> vscroll_widget::style*
+{
+    get_style(_style);
+    return &_style;
 }
 
 } // namespace ui

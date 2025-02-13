@@ -16,15 +16,12 @@ class TCOB_API tooltip : public panel {
     friend class form;
 
 public:
-    class TCOB_API style : public panel::style {
-    public:
-        milliseconds Delay {0};
-        milliseconds FadeIn {0};
-    };
-
     signal<tooltip_event const> Popup;
 
     explicit tooltip(init const& wi);
+
+    milliseconds Delay {1000};
+    milliseconds FadeIn {250};
 
     void force_redraw(string const& reason) override;
 

@@ -9,6 +9,13 @@
 
 namespace tcob::gfx::ui {
 
+void button::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::text::Transition(target.Text, left.Text, right.Text, step);
+}
+
 button::button(init const& wi)
     : widget {wi}
 {
@@ -23,34 +30,35 @@ button::button(init const& wi)
 
 void button::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<button::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        bool const drawText {!Label->empty() && style->Text.Font};
-        bool const drawIcon {Icon->Texture};
+    scissor_guard const guard {painter, this};
 
-        if (drawText) { // text
-            rect_f textRect {rect};
-            if (drawIcon) {
-                textRect = {rect.center().X, rect.top(), rect.width() / 2, rect.height()};
-                rect.Size.Width /= 2;
-            }
+    bool const drawText {!Label->empty() && _style.Text.Font};
+    bool const drawIcon {Icon->Texture};
 
-            painter.draw_text(style->Text, textRect, Label());
+    if (drawText) { // text
+        rect_f textRect {rect};
+        if (drawIcon) {
+            textRect = {rect.center().X, rect.top(), rect.width() / 2, rect.height()};
+            rect.Size.Width /= 2;
         }
-        if (drawIcon) { // icon
-            auto const [iconWidth, iconHeight] {Icon->Texture->info().Size};
-            f32 const width {rect.height() * (iconHeight / static_cast<f32>(iconWidth))};
-            rect = {{rect.center().X - (width / 2), rect.top()}, {width, rect.height()}};
-            auto& canvas {painter.canvas()};
-            canvas.set_fill_style(style->Text.Color);
-            canvas.draw_image(Icon->Texture.ptr(), Icon->Region, rect);
-        }
+
+        painter.draw_text(_style.Text, textRect, Label());
+    }
+    if (drawIcon) { // icon
+        auto const [iconWidth, iconHeight] {Icon->Texture->info().Size};
+        f32 const width {rect.height() * (iconHeight / static_cast<f32>(iconWidth))};
+        rect = {{rect.center().X - (width / 2), rect.top()}, {width, rect.height()}};
+
+        auto& canvas {painter.canvas()};
+        canvas.set_fill_style(_style.Text.Color);
+        canvas.draw_image(Icon->Texture.ptr(), Icon->Region, rect);
     }
 }
 

@@ -9,6 +9,13 @@
 
 namespace tcob::gfx::ui {
 
+void cycle_button::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::text::Transition(target.Text, left.Text, right.Text, step);
+}
+
 cycle_button::cycle_button(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
@@ -60,18 +67,18 @@ auto cycle_button::item_count() const -> isize
 
 void cycle_button::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<cycle_button::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        // text
-        if (style->Text.Font && SelectedItemIndex >= 0) {
-            painter.draw_text(style->Text, rect, selected_item());
-        }
+    scissor_guard const guard {painter, this};
+
+    // text
+    if (_style.Text.Font && SelectedItemIndex >= 0) {
+        painter.draw_text(_style.Text, rect, selected_item());
     }
 }
 

@@ -11,6 +11,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -51,7 +52,8 @@ public:
     prop<tab_stop> TabStop;
     prop<usize>    ZOrder;
 
-    prop<dimensions> Flex;
+    prop<dimensions>   Flex;
+    prop<milliseconds> TransitionDuration;
 
     std::shared_ptr<tooltip> Tooltip;
 
@@ -77,9 +79,6 @@ public:
     auto hit_test_bounds() const -> rect_f;
     auto virtual scroll_offset() const -> point_f;
 
-    template <std::derived_from<widget_style> T>
-    auto current_style() const -> T*;
-
     auto global_to_content(point_i p) const -> point_f;
     auto global_to_local(point_i p) const -> point_f;
 
@@ -91,6 +90,9 @@ public:
     void virtual force_redraw(string const& reason);
 
     auto hit_test(point_f pos) const -> bool;
+
+    template <std::derived_from<widget_style> T>
+    void get_style(T& style);
 
 protected:
     struct init {
@@ -145,6 +147,13 @@ protected:
     auto virtual is_inert() const -> bool;
 
 private:
+    struct transition_def {
+        std::unique_ptr<linear_tween<f64>> Tween;
+        widget_style*                      CurrentStyle {nullptr};
+        widget_style*                      TargetStyle {nullptr};
+        widget_style*                      OldStyle {nullptr};
+    };
+
     void do_key_down(input::keyboard::event const& ev);
     void do_key_up(input::keyboard::event const& ev);
     void do_text_input(input::keyboard::text_input_event const& ev);
@@ -170,13 +179,13 @@ private:
 
     tcob::detail::connection_manager _connections;
 
-    bool          _visible {true};
-    bool          _enabled {true};
-    widget_flags  _flags {};
-    f32           _alpha {1.0f};
-    form*         _form {nullptr};
-    widget*       _parent {nullptr};
-    widget_style* _style {nullptr};
+    bool           _visible {true};
+    bool           _enabled {true};
+    widget_flags   _flags {};
+    f32            _alpha {1.0f};
+    form*          _form {nullptr};
+    widget*        _parent {nullptr};
+    transition_def _transition;
 
     widget_style_selectors _lastSelectors;
 

@@ -27,6 +27,8 @@ public:
         utf8_string TabItemClass {"tab_items"};
         position    TabBarPosition {position::Top};
         length      TabBarHeight;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit tab_container(init const& wi);
@@ -50,11 +52,7 @@ public:
 
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
-    void force_redraw(string const& reason) override;
-
 protected:
-    void on_styles_changed() override;
-
     void on_paint(widget_painter& painter) override;
 
     void on_mouse_leave() override;
@@ -72,7 +70,8 @@ private:
     std::vector<std::shared_ptr<widget>> _tabs;
     std::vector<list_item>               _tabLabels;
     std::vector<rect_f>                  _tabRectCache;
-    bool                                 _isDirty {true};
+
+    tab_container::style _style;
 };
 
 }

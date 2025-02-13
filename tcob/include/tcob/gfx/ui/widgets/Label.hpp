@@ -16,6 +16,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         element::text Text;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit label(init const& wi);
@@ -45,5 +47,7 @@ protected:
 
 private:
     detail::input_injector _injector;
+
+    label::style _style;
 };
 }

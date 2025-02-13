@@ -13,6 +13,14 @@
 
 namespace tcob::gfx::ui {
 
+void text_box::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::text::Transition(target.Text, left.Text, right.Text, step);
+    element::caret::Transition(target.Caret, left.Caret, right.Caret, step);
+}
+
 text_box::text_box(init const& wi)
     : widget {wi}
 {
@@ -30,30 +38,30 @@ text_box::text_box(init const& wi)
 
 void text_box::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<text_box::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        // text
-        if (!Text->empty() && style->Text.Font) {
-            if (_textDirty) {
-                _formatResult = painter.format_text(style->Text, rect, Text());
-                _textDirty    = false;
-            }
-            painter.draw_text(style->Text, rect, _formatResult);
+    scissor_guard const guard {painter, this};
+
+    // text
+    if (!Text->empty() && _style.Text.Font) {
+        if (_textDirty) {
+            _formatResult = painter.format_text(_style.Text, rect, Text());
+            _textDirty    = false;
         }
+        painter.draw_text(_style.Text, rect, _formatResult);
+    }
 
-        if (_caretVisible) {
-            f32 offset {0.0f};
-            if (!_formatResult.Tokens.empty()) {
-                offset = _formatResult.get_quad(_caretPos).Rect.right();
-            }
-            painter.draw_caret(style->Caret, rect, {offset, 0});
+    if (_caretVisible) {
+        f32 offset {0.0f};
+        if (!_formatResult.Tokens.empty()) {
+            offset = _formatResult.get_quad(_caretPos).Rect.right();
         }
+        painter.draw_caret(_style.Caret, rect, {offset, 0});
     }
 }
 
@@ -118,14 +126,12 @@ void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev 
 
 void text_box::on_focus_gained()
 {
-    if (auto const* style {current_style<text_box::style>()}) {
-        _caretTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate, 1.0f, 0.0f);
-        _caretTween->Value.Changed.connect([this](auto val) {
-            _caretVisible = val;
-            force_redraw(this->name() + ": Caret blink");
-        });
-        _caretTween->start(playback_mode::Looped);
-    }
+    _caretTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
+    _caretTween->Value.Changed.connect([this](auto val) {
+        _caretVisible = val;
+        force_redraw(this->name() + ": Caret blink");
+    });
+    _caretTween->start(playback_mode::Looped);
 }
 
 void text_box::on_focus_lost()

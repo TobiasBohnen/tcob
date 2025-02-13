@@ -19,6 +19,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         element::scrollbar VScrollBar;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit vscroll_widget(init const& wi);
@@ -43,6 +45,7 @@ protected:
 
     auto get_scroll_max_value() const -> f32;
 
+    auto virtual update_style() -> vscroll_widget::style* = 0;
     auto virtual get_scroll_content_height() const -> f32 = 0;
     auto virtual get_scroll_item_count() const -> isize   = 0;
 
@@ -51,5 +54,7 @@ protected:
 
 private:
     scrollbar _vScrollbar;
+
+    vscroll_widget::style* _style {nullptr};
 };
 }

@@ -16,8 +16,10 @@ class TCOB_API toggle : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        milliseconds  Delay {0};
         element::tick Tick;
+        milliseconds  Delay {0};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit toggle(init const& wi);
@@ -38,5 +40,7 @@ protected:
 
 private:
     widget_tweener _tween;
+
+    toggle::style _style;
 };
 }

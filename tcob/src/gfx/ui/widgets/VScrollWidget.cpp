@@ -10,6 +10,13 @@
 
 namespace tcob::gfx::ui {
 
+void vscroll_widget::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::scrollbar::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+}
+
 vscroll_widget::vscroll_widget(init const& wi)
     : widget {wi}
     , _vScrollbar {*this, orientation::Vertical}
@@ -33,11 +40,8 @@ void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
 
-    if (auto* style {current_style<vscroll_widget::style>()}) {
-        _vScrollbar.Style = &style->VScrollBar;
-    } else {
-        _vScrollbar.Style = nullptr;
-    }
+    _style            = update_style();
+    _vScrollbar.Style = &_style->VScrollBar;
 
     auto const max {get_scroll_max_value()};
     if (get_scrollbar_value() > max) { set_scrollbar_value(max); }
@@ -45,20 +49,20 @@ void vscroll_widget::on_styles_changed()
 
 void vscroll_widget::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<vscroll_widget::style>()}) {
-        rect_f rect {Bounds()};
+    _style = update_style();
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        // scrollbar
-        _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
-        _vScrollbar.paint(painter, style->VScrollBar, rect, flags().Active);
+    // background
+    painter.draw_background_and_border(*_style, rect, false);
 
-        // content
-        scissor_guard const guard {painter, this};
-        paint_content(painter, rect);
-    }
+    // scrollbar
+    _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
+    _vScrollbar.paint(painter, _style->VScrollBar, rect, flags().Active);
+
+    // content
+    scissor_guard const guard {painter, this};
+    paint_content(painter, rect);
 }
 
 void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -101,23 +105,21 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
 
-    if (auto const* style {current_style<vscroll_widget::style>()}) {
-        orientation  orien {};
-        bool         invert {false};
-        milliseconds delay {};
+    orientation  orien {};
+    bool         invert {false};
+    milliseconds delay {};
 
-        if (ev.Scroll.Y != 0) {
-            orien  = orientation::Vertical;
-            invert = ev.Scroll.Y > 0;
-            delay  = style->VScrollBar.Bar.Delay;
-        }
-
-        if (orien == orientation::Vertical) {
-            f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
-            _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
-        }
-        ev.Handled = true;
+    if (ev.Scroll.Y != 0) {
+        orien  = orientation::Vertical;
+        invert = ev.Scroll.Y > 0;
+        delay  = update_style()->VScrollBar.Bar.Delay;
     }
+
+    if (orien == orientation::Vertical) {
+        f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
+        _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
+    }
+    ev.Handled = true;
 }
 
 void vscroll_widget::on_update(milliseconds deltaTime)
@@ -132,9 +134,8 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     // subtract scrollbar from content
     if (isHitTest) { return; }
     if (!_vScrollbar.Visible) { return; }
-    if (auto const* style {current_style<vscroll_widget::style>()}) {
-        bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
-    }
+
+    bounds.Size.Width -= _style->VScrollBar.Bar.Size.calc(bounds.width());
 }
 
 auto vscroll_widget::get_scrollbar_value() const -> f32

@@ -18,6 +18,8 @@ public:
     public:
         element::text Text;
         utf8_string   NavArrowClass {"nav_arrows"};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit spinner(init const& wi);
@@ -52,5 +54,7 @@ private:
     bool      _mouseDown {false};
     stopwatch _holdTime;
     f32       _holdCount {1};
+
+    spinner::style _style;
 };
 }

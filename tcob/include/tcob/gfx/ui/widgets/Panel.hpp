@@ -18,6 +18,8 @@ public:
     public:
         element::scrollbar HScrollBar;
         element::scrollbar VScrollBar;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit panel(init const& wi);
@@ -63,6 +65,8 @@ private:
     std::shared_ptr<layout> _layout;
     scrollbar               _vScrollbar;
     scrollbar               _hScrollbar;
+
+    panel::style _style;
 };
 
 ////////////////////////////////////////////////////////////

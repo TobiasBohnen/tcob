@@ -10,6 +10,15 @@
 
 namespace tcob::gfx::ui {
 
+void drop_down_list::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::text::Transition(target.Text, left.Text, right.Text, step);
+    target.ItemHeight = length::Lerp(left.ItemHeight, right.ItemHeight, step);
+    element::scrollbar::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+}
+
 drop_down_list::drop_down_list(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
@@ -73,11 +82,8 @@ void drop_down_list::on_styles_changed()
 {
     widget::on_styles_changed();
 
-    if (auto* style {current_style<drop_down_list::style>()}) {
-        _vScrollbar.Style = &style->VScrollBar;
-    } else {
-        _vScrollbar.Style = nullptr;
-    }
+    get_style(_style);
+    _vScrollbar.Style = &_style.VScrollBar;
 
     _vScrollbar.start_scroll(0, milliseconds {0});
 }
@@ -92,77 +98,77 @@ void drop_down_list::prepare_redraw()
 
 void drop_down_list::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<drop_down_list::style>()}) {
-        _itemRectCache.clear();
+    get_style(_style);
 
-        rect_f rect {Bounds()};
+    _itemRectCache.clear();
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        // arrow
-        auto const& fls {flags()};
-        auto*       normalArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {})};
-        auto*       hoverArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Hover = true})};
-        auto*       activeArrow {get_sub_style<nav_arrows_style>(style->NavArrowClass, {.Active = true})};
-        assert(normalArrow && hoverArrow && activeArrow);
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        element::nav_arrow arrowStyle;
-        if (_mouseOverBox) {
-            arrowStyle = fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow;
-        } else {
-            arrowStyle = normalArrow->NavArrow;
+    // arrow
+    auto const& fls {flags()};
+    auto*       normalArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {})};
+    auto*       hoverArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {.Hover = true})};
+    auto*       activeArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {.Active = true})};
+    assert(normalArrow && hoverArrow && activeArrow);
+
+    element::nav_arrow arrowStyle;
+    if (_mouseOverBox) {
+        arrowStyle = fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow;
+    } else {
+        arrowStyle = normalArrow->NavArrow;
+    }
+    painter.draw_nav_arrow(arrowStyle, rect);
+
+    // text
+    if (_style.Text.Font && SelectedItemIndex >= 0) {
+        f32 const arrowWidth {arrowStyle.Size.Width.calc(rect.width())};
+        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, selected_item().Text);
+    }
+
+    if (_isExtended) {
+        f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
+
+        // list background
+        rect_f listRect {Bounds()};
+        listRect.Position.Y += listRect.height();
+        f32 const listHeight {itemHeight * VisibleItemCount};
+        listRect.Size.Height = listHeight;
+        listRect.Size.Height += _style.Margin.Top.calc(listHeight) + _style.Margin.Bottom.calc(listHeight);
+        listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
+        listRect.Size.Height += _style.Border.Size.calc(listHeight);
+
+        painter.draw_background_and_border(_style, listRect, false);
+
+        // scrollbar
+        _vScrollbar.Visible = std::ssize(_items) > VisibleItemCount;
+        _vScrollbar.paint(painter, _style.VScrollBar, listRect, fls.Active);
+
+        scissor_guard const guard {painter, this};
+
+        auto const paint_item {[&](isize i) {
+            auto const*  itemStyle {get_item_style(i)};
+            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+            if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
+                painter.draw_item(itemStyle->Item, itemRect, _items[i]);
+                _itemRectCache[i] = itemRect;
+            }
+        }};
+
+        // content
+        for (i32 i {0}; i < std::ssize(_items); ++i) {
+            if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
+
+            paint_item(i);
         }
-        painter.draw_nav_arrow(arrowStyle, rect);
 
-        // text
-        if (style->Text.Font && SelectedItemIndex >= 0) {
-            f32 const arrowWidth {arrowStyle.Size.Width.calc(rect.width())};
-            painter.draw_text(style->Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, selected_item().Text);
+        if (SelectedItemIndex >= 0) {
+            paint_item(SelectedItemIndex());
         }
-
-        if (_isExtended) {
-            f32 const itemHeight {style->ItemHeight.calc(rect.height())};
-
-            // list background
-            rect_f listRect {Bounds()};
-            listRect.Position.Y += listRect.height();
-            f32 const listHeight {itemHeight * VisibleItemCount};
-            listRect.Size.Height = listHeight;
-            listRect.Size.Height += style->Margin.Top.calc(listHeight) + style->Margin.Bottom.calc(listHeight);
-            listRect.Size.Height += style->Padding.Top.calc(listHeight) + style->Padding.Bottom.calc(listHeight);
-            listRect.Size.Height += style->Border.Size.calc(listHeight);
-
-            painter.draw_background_and_border(*style, listRect, false);
-
-            // scrollbar
-            _vScrollbar.Visible = std::ssize(_items) > VisibleItemCount;
-            _vScrollbar.paint(painter, style->VScrollBar, listRect, fls.Active);
-
-            scissor_guard const guard {painter, this};
-
-            auto const paint_item {[&](isize i) {
-                auto const&  itemStyle {get_item_style(i)};
-                rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-                if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                    painter.draw_item(itemStyle->Item, itemRect, _items[i]);
-                    _itemRectCache[i] = itemRect;
-                }
-            }};
-
-            // content
-            for (i32 i {0}; i < std::ssize(_items); ++i) {
-                if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-
-                paint_item(i);
-            }
-
-            if (SelectedItemIndex >= 0) {
-                paint_item(SelectedItemIndex());
-            }
-            if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-                paint_item(HoveredItemIndex());
-            }
+        if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
+            paint_item(HoveredItemIndex());
         }
     }
 }
@@ -249,23 +255,21 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
     HoveredItemIndex = INVALID_INDEX;
 
-    if (auto const* style {current_style<drop_down_list::style>()}) {
-        orientation  orien {};
-        bool         invert {false};
-        milliseconds delay {};
+    orientation  orien {};
+    bool         invert {false};
+    milliseconds delay {};
 
-        if (ev.Scroll.Y != 0) {
-            orien  = orientation::Vertical;
-            invert = ev.Scroll.Y > 0;
-            delay  = style->VScrollBar.Bar.Delay;
-        }
-
-        f32 const diff {get_item_height() / std::ssize(_items) * (invert ? -5 : 5)};
-        if (orien == orientation::Vertical) {
-            _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
-        }
-        ev.Handled = true;
+    if (ev.Scroll.Y != 0) {
+        orien  = orientation::Vertical;
+        invert = ev.Scroll.Y > 0;
+        delay  = _style.VScrollBar.Bar.Delay;
     }
+
+    f32 const diff {get_item_height() / std::ssize(_items) * (invert ? -5 : 5)};
+    if (orien == orientation::Vertical) {
+        _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
+    }
+    ev.Handled = true;
 }
 
 void drop_down_list::on_focus_lost()
@@ -286,21 +290,19 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (!_isExtended) { return; }
-    if (auto const* style {current_style<drop_down_list::style>()}) {
-        if (!isHitTest) { bounds.Position.Y += listRect.Size.Height; }
-        f32 refListHeight {listRect.Size.Height};
-        refListHeight -= style->Margin.Top.calc(listRect.Size.Height) + style->Margin.Bottom.calc(listRect.Size.Height);
-        refListHeight -= style->Padding.Top.calc(listRect.Size.Height) + style->Padding.Bottom.calc(listRect.Size.Height);
-        refListHeight -= style->Border.Size.calc(listRect.Size.Height);
-        f32 const itemHeight {style->ItemHeight.calc(refListHeight)};
-        f32 const listHeight {itemHeight * VisibleItemCount};
-        bounds.Size.Height = listHeight;
+    if (!isHitTest) { bounds.Position.Y += listRect.Size.Height; }
+    f32 refListHeight {listRect.Size.Height};
+    refListHeight -= _style.Margin.Top.calc(listRect.Size.Height) + _style.Margin.Bottom.calc(listRect.Size.Height);
+    refListHeight -= _style.Padding.Top.calc(listRect.Size.Height) + _style.Padding.Bottom.calc(listRect.Size.Height);
+    refListHeight -= _style.Border.Size.calc(listRect.Size.Height);
+    f32 const itemHeight {_style.ItemHeight.calc(refListHeight)};
+    f32 const listHeight {itemHeight * VisibleItemCount};
+    bounds.Size.Height = listHeight;
 
-        if (isHitTest) {
-            bounds.Size.Height += style->Margin.Top.calc(listHeight) + style->Margin.Bottom.calc(listHeight);
-            bounds.Size.Height += style->Border.Size.calc(listHeight);
-            bounds.Size.Height += boxHeight;
-        }
+    if (isHitTest) {
+        bounds.Size.Height += _style.Margin.Top.calc(listHeight) + _style.Margin.Bottom.calc(listHeight);
+        bounds.Size.Height += _style.Border.Size.calc(listHeight);
+        bounds.Size.Height += boxHeight;
     }
 }
 
@@ -314,10 +316,9 @@ auto drop_down_list::get_item_rect(isize index, f32 itemHeight, rect_f const& li
 
 auto drop_down_list::get_item_style(isize index) const -> item_style*
 {
-    auto const* style {current_style<drop_down_list::style>()};
-    return index == SelectedItemIndex ? get_sub_style<item_style>(style->ItemClass, {.Active = true})
-        : index == HoveredItemIndex   ? get_sub_style<item_style>(style->ItemClass, {.Hover = true})
-                                      : get_sub_style<item_style>(style->ItemClass, {});
+    return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
+        : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
+                                      : get_sub_style<item_style>(_style.ItemClass, {});
 }
 
 auto drop_down_list::attributes() const -> widget_attributes
@@ -331,13 +332,9 @@ auto drop_down_list::attributes() const -> widget_attributes
 
 auto drop_down_list::get_item_height() const -> f32
 {
-    if (auto const* style {current_style<drop_down_list::style>()}) {
-        rect_f bounds {Bounds()};
-        widget::offset_content(bounds, false);
-        return style->ItemHeight.calc(bounds.height());
-    }
-
-    return 0;
+    rect_f bounds {Bounds()};
+    widget::offset_content(bounds, false);
+    return _style.ItemHeight.calc(bounds.height());
 }
 
 void drop_down_list::set_extended(bool v)

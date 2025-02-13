@@ -11,6 +11,13 @@
 
 namespace tcob::gfx::ui {
 
+void slider::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::bar::Transition(target.Bar, left.Bar, right.Bar, step);
+}
+
 slider::slider(init const& wi)
     : widget {wi}
     , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
@@ -47,39 +54,39 @@ slider::slider(init const& wi)
 void slider::on_paint(widget_painter& painter)
 {
     // TODO: draw background
-    if (auto const* style {current_style<slider::style>()}) {
-        rect_f const rect {content_bounds()};
+    get_style(_style);
 
-        scissor_guard const guard {painter, this};
+    rect_f const rect {content_bounds()};
 
-        i32 const  numBlocks {10};
-        auto const orien {current_orientation()};
-        auto const pos {element::bar::position::CenterOrMiddle};
+    scissor_guard const guard {painter, this};
 
-        // bar
-        _barRectCache.Bar = painter.draw_bar(
-            style->Bar,
-            rect,
-            {.Orientation = orien,
-             .Inverted    = false,
-             .Position    = pos,
-             .BlockCount  = numBlocks,
-             .Fraction    = _tween.current_value()});
+    i32 const  numBlocks {10};
+    auto const orien {current_orientation()};
+    auto const pos {element::bar::position::CenterOrMiddle};
 
-        // thumb
-        auto const thumbFlags {!_overThumb          ? widget_flags {}
-                                   : flags().Active ? widget_flags {.Active = true}
-                                                    : widget_flags {.Hover = true}};
-        _barRectCache.Thumb = painter.draw_thumb(
-            get_sub_style<thumb_style>(style->ThumbClass, thumbFlags)->Thumb,
-            rect,
-            {.Orientation = orien, .Inverted = false, .Fraction = _tween.current_value()});
+    // bar
+    _barRectCache.Bar = painter.draw_bar(
+        _style.Bar,
+        rect,
+        {.Orientation = orien,
+         .Inverted    = false,
+         .Position    = pos,
+         .BlockCount  = numBlocks,
+         .Fraction    = _tween.current_value()});
 
-        if (orien == orientation::Vertical) {
-            _barRectCache.Thumb.Size.Width -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.width());
-        } else if (orien == orientation::Horizontal) {
-            _barRectCache.Thumb.Size.Height -= get_sub_style<thumb_style>(style->ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.height());
-        }
+    // thumb
+    auto const thumbFlags {!_overThumb          ? widget_flags {}
+                               : flags().Active ? widget_flags {.Active = true}
+                                                : widget_flags {.Hover = true}};
+    _barRectCache.Thumb = painter.draw_thumb(
+        get_sub_style<thumb_style>(_style.ThumbClass, thumbFlags)->Thumb,
+        rect,
+        {.Orientation = orien, .Inverted = false, .Fraction = _tween.current_value()});
+
+    if (orien == orientation::Vertical) {
+        _barRectCache.Thumb.Size.Width -= get_sub_style<thumb_style>(_style.ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.width());
+    } else if (orien == orientation::Horizontal) {
+        _barRectCache.Thumb.Size.Height -= get_sub_style<thumb_style>(_style.ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.height());
     }
 }
 
@@ -188,13 +195,8 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(i32 newVal)
 {
-    f32 const   newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / (Max() - Min()) : 0.f};
-    auto const* style {current_style<slider::style>()};
-    if (style && !_overThumb && !_isDragging) {
-        _tween.start(newFrac, style->Bar.Delay);
-    } else {
-        _tween.reset(newFrac);
-    }
+    f32 const newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / (Max() - Min()) : 0.f};
+    _tween.start(newFrac, _style.Bar.Delay);
 }
 
 void slider::calculate_value(point_f mp)

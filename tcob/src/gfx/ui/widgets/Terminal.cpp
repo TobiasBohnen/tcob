@@ -16,6 +16,14 @@ namespace tcob::gfx::ui {
 
 ////////////////////////////////////////////////////////////
 
+void terminal::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::text::Transition(target.Text, left.Text, right.Text, step);
+    element::caret::Transition(target.Caret, left.Caret, right.Caret, step);
+}
+
 terminal::terminal(init const& wi)
     : widget {wi}
 {
@@ -159,16 +167,14 @@ void terminal::noecho()
 
 void terminal::flash()
 {
-    if (auto const* style {current_style<terminal::style>()}) {
-        _flashTween = make_unique_tween<square_wave_tween<bool>>(style->FlashDuration, 1.0f, 0.0f);
-        _flashTween->Value.Changed.connect([this](auto) {
-            for (auto& cell : get_back_buffer()) {
-                cell.Colors = {cell.Colors.second, cell.Colors.first};
-            }
-            force_redraw(this->name() + ": flashing");
-        });
-        _flashTween->start(playback_mode::Normal);
-    }
+    _flashTween = make_unique_tween<square_wave_tween<bool>>(_style.FlashDuration, 1.0f, 0.0f);
+    _flashTween->Value.Changed.connect([this](auto) {
+        for (auto& cell : get_back_buffer()) {
+            cell.Colors = {cell.Colors.second, cell.Colors.first};
+        }
+        force_redraw(this->name() + ": flashing");
+    });
+    _flashTween->start(playback_mode::Normal);
 }
 
 void terminal::rectangle(rect_i const& rect)
@@ -268,62 +274,62 @@ void terminal::on_paint(widget_painter& painter)
         return;
     }
 
-    if (auto const* style {current_style<terminal::style>()}) {
-        swap_buffers();
+    get_style(_style);
 
-        rect_f const rect {content_bounds()};
+    swap_buffers();
 
-        scissor_guard const guard {painter, this};
+    rect_f const rect {content_bounds()};
 
-        u32 const   fontSize {style->Text.calc_font_size(rect)};
-        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
-        f32 const   fontHeight {font->info().LineHeight};
-        f32 const   fontWidth {get_font_width(font)};
+    scissor_guard const guard {painter, this};
 
-        auto& canvas {painter.canvas()};
-        canvas.save();
-        canvas.set_shape_antialias(false);
+    u32 const   fontSize {_style.Text.calc_font_size(rect)};
+    auto* const font {_style.Text.Font->get_font(_style.Text.Style, fontSize).ptr()};
+    f32 const   fontHeight {font->info().LineHeight};
+    f32 const   fontWidth {get_font_width(font)};
 
-        // cells
-        canvas.set_fill_style(DEFAULT_COLORS.second);
-        canvas.begin_path();
-        canvas.rect(rect);
-        canvas.fill();
-        auto const& buffer {get_front_buffer()};
-        for (isize i {_bufferSize - 1}; i >= 0; --i) {
-            auto const& cell {buffer[i]};
+    auto& canvas {painter.canvas()};
+    canvas.save();
+    canvas.set_shape_antialias(false);
 
-            rect_f const cellRect {
-                rect.left() + ((i % Size->Width) * fontWidth),
-                rect.top() + ((i / Size->Width) * fontHeight),
-                fontWidth,
-                fontHeight};
+    // cells
+    canvas.set_fill_style(DEFAULT_COLORS.second);
+    canvas.begin_path();
+    canvas.rect(rect);
+    canvas.fill();
+    auto const& buffer {get_front_buffer()};
+    for (isize i {_bufferSize - 1}; i >= 0; --i) {
+        auto const& cell {buffer[i]};
 
-            if (cell.Colors.second != DEFAULT_COLORS.second) {
-                canvas.set_fill_style(cell.Colors.second);
-                canvas.begin_path();
-                canvas.rect(cellRect);
-                canvas.fill();
-            }
+        rect_f const cellRect {
+            rect.left() + ((i % Size->Width) * fontWidth),
+            rect.top() + ((i / Size->Width) * fontHeight),
+            fontWidth,
+            fontHeight};
 
-            if (cell.Text.empty()) { continue; }
-            assert(utf8::length(cell.Text) == 1);
-
-            element::text textStyle {style->Text};
-            textStyle.Color = cell.Colors.first;
-            painter.draw_text(textStyle, cellRect, cell.Text);
+        if (cell.Colors.second != DEFAULT_COLORS.second) {
+            canvas.set_fill_style(cell.Colors.second);
+            canvas.begin_path();
+            canvas.rect(cellRect);
+            canvas.fill();
         }
 
-        // cursor
-        if (_cursorVisible) {
-            rect_f        caretRect {rect};
-            point_f const offset {_currentCursor.X * fontWidth, _currentCursor.Y * fontHeight};
-            caretRect.Size.Height = fontHeight;
-            painter.draw_caret(style->Caret, caretRect, offset);
-        }
+        if (cell.Text.empty()) { continue; }
+        assert(utf8::length(cell.Text) == 1);
 
-        canvas.restore();
+        element::text textStyle {_style.Text};
+        textStyle.Color = cell.Colors.first;
+        painter.draw_text(textStyle, cellRect, cell.Text);
     }
+
+    // cursor
+    if (_cursorVisible) {
+        rect_f        caretRect {rect};
+        point_f const offset {_currentCursor.X * fontWidth, _currentCursor.Y * fontHeight};
+        caretRect.Size.Height = fontHeight;
+        painter.draw_caret(_style.Caret, caretRect, offset);
+    }
+
+    canvas.restore();
 }
 
 void terminal::on_update(milliseconds deltaTime)
@@ -440,21 +446,19 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     if (!_useMouse) { return; }
 
-    if (auto const* style {current_style<terminal::style>()}) {
-        rect_f const rect {global_content_bounds()};
-        if (!rect.contains(ev.Position)) { return; }
+    rect_f const rect {global_content_bounds()};
+    if (!rect.contains(ev.Position)) { return; }
 
-        u32 const   fontSize {style->Text.calc_font_size(rect)};
-        auto* const font {style->Text.Font->get_font(style->Text.Style, fontSize).ptr()};
-        f32 const   fontWidth {get_font_width(font)};
-        f32 const   fontHeight {font->info().LineHeight};
+    u32 const   fontSize {_style.Text.calc_font_size(rect)};
+    auto* const font {_style.Text.Font->get_font(_style.Text.Style, fontSize).ptr()};
+    f32 const   fontWidth {get_font_width(font)};
+    f32 const   fontHeight {font->info().LineHeight};
 
-        i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
-        i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
-        HoveredCell = {x, y};
+    i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
+    i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
+    HoveredCell = {x, y};
 
-        ev.Handled = true;
-    }
+    ev.Handled = true;
 }
 
 void terminal::on_mouse_down(input::mouse::button_event const& ev)
@@ -781,14 +785,12 @@ void terminal::cursor_line_break()
 
 void terminal::start_blinking()
 {
-    if (auto const* style {current_style<terminal::style>()}) {
-        _cursorTween = make_unique_tween<square_wave_tween<bool>>(style->Caret.BlinkRate * 2, 1.0f, 0.0f);
-        _cursorTween->Value.Changed.connect([this](auto val) {
-            _cursorVisible = val;
-            force_redraw(this->name() + ": cursor blink");
-        });
-        _cursorTween->start(playback_mode::Looped);
-    }
+    _cursorTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate * 2, 1.0f, 0.0f);
+    _cursorTween->Value.Changed.connect([this](auto val) {
+        _cursorVisible = val;
+        force_redraw(this->name() + ": cursor blink");
+    });
+    _cursorTween->start(playback_mode::Looped);
 }
 
 void terminal::stop_blinking()

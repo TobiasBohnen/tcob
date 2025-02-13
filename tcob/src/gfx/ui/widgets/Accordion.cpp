@@ -10,6 +10,13 @@
 
 namespace tcob::gfx::ui {
 
+void accordion::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    target.SectionBarHeight = length::Lerp(left.SectionBarHeight, right.SectionBarHeight, step);
+}
+
 accordion::accordion(init const& wi)
     : widget_container {wi}
     , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
@@ -81,49 +88,65 @@ auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 
 void accordion::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<accordion::style>()}) {
-        rect_f rect {Bounds()};
-        // TODO: section chevron
-        //  background
-        painter.draw_background_and_border(*style, rect, false);
+    get_style(_style);
 
-        // sections
-        f32 const sectionHeight {style->SectionBarHeight.calc(rect.height())};
-        _sectionRectCache.clear();
-        if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
-            isize const i {ActiveSectionIndex()};
+    rect_f rect {Bounds()};
+    // TODO: section chevron
+    //  background
+    painter.draw_background_and_border(_style, rect, false);
+
+    auto const get_section_style {[&](isize index) {
+        return index == ActiveSectionIndex ? get_sub_style<item_style>(_style.SectionItemClass, {.Active = true})
+            : index == HoveredSectionIndex ? get_sub_style<item_style>(_style.SectionItemClass, {.Hover = true})
+                                           : get_sub_style<item_style>(_style.SectionItemClass, {});
+    }};
+    auto const get_section_rect {[&](item_style const& itemStyle, isize index, f32 sectionHeight, rect_f const& rect) {
+        rect_f retValue {rect};
+        retValue.Position.Y += sectionHeight * index;
+        retValue.Size.Height = sectionHeight;
+        retValue -= itemStyle.Item.Border.thickness();
+        if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
+            retValue.Position.Y += content_bounds().height();
+        }
+        return retValue;
+    }};
+
+    // sections
+    f32 const sectionHeight {_style.SectionBarHeight.calc(rect.height())};
+    _sectionRectCache.clear();
+    if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
+        isize const i {ActiveSectionIndex()};
+        if (auto const* sectionStyle {get_section_style(i)}) {
+            rect_f const sectionRect {get_section_rect(*sectionStyle, 0, sectionHeight, rect)};
+            painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
+            _sectionRectCache.push_back(sectionRect);
+        }
+    } else {
+        for (isize i {0}; i < std::ssize(_sections); ++i) {
             if (auto const* sectionStyle {get_section_style(i)}) {
-                rect_f const sectionRect {get_section_rect(*sectionStyle, 0, sectionHeight, rect)};
+                rect_f const sectionRect {get_section_rect(*sectionStyle, i, sectionHeight, rect)};
                 painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
                 _sectionRectCache.push_back(sectionRect);
             }
-        } else {
-            for (isize i {0}; i < std::ssize(_sections); ++i) {
-                if (auto const* sectionStyle {get_section_style(i)}) {
-                    rect_f const sectionRect {get_section_rect(*sectionStyle, i, sectionHeight, rect)};
-                    painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
-                    _sectionRectCache.push_back(sectionRect);
-                }
-            }
         }
+    }
 
-        // content
-        scissor_guard const guard {painter, this};
+    // content
+    scissor_guard const guard {painter, this};
 
-        // active section
-        if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
-            offset_section_content(rect, *style);
-            update_section_bounds(rect);
+    // active section
+    if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
+        offset_section_content(rect, _style);
+        update_section_bounds(rect);
 
-            auto          xform {transform::Identity};
-            point_f const translate {rect.Position + paint_offset()};
-            xform.translate(translate);
+        auto          xform {transform::Identity};
+        point_f const translate {rect.Position + paint_offset()};
+        xform.translate(translate);
 
-            auto& tab {_sections[ActiveSectionIndex()]};
-            painter.begin(Alpha(), xform);
-            tab->paint(painter);
-            painter.end();
-        }
+        auto& tab {_sections[ActiveSectionIndex()]};
+        painter.begin(Alpha(), xform);
+        tab->paint(painter);
+        painter.end();
     }
 }
 
@@ -173,26 +196,6 @@ void accordion::on_update(milliseconds /* deltaTime */)
 {
 }
 
-auto accordion::get_section_rect(item_style const& itemStyle, isize index, f32 sectionHeight, rect_f const& rect) const -> rect_f
-{
-    rect_f retValue {rect};
-    retValue.Position.Y += sectionHeight * index;
-    retValue.Size.Height = sectionHeight;
-    retValue -= itemStyle.Item.Border.thickness();
-    if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
-        retValue.Position.Y += content_bounds().height();
-    }
-    return retValue;
-}
-
-auto accordion::get_section_style(isize index) const -> item_style*
-{
-    auto const* style {current_style<accordion::style>()};
-    return index == ActiveSectionIndex ? get_sub_style<item_style>(style->SectionItemClass, {.Active = true})
-        : index == HoveredSectionIndex ? get_sub_style<item_style>(style->SectionItemClass, {.Hover = true})
-                                       : get_sub_style<item_style>(style->SectionItemClass, {});
-}
-
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
@@ -205,9 +208,7 @@ void accordion::offset_content(rect_f& bounds, bool isHitTest) const
     widget::offset_content(bounds, isHitTest);
 
     if (isHitTest) { return; }
-    if (auto const* style {current_style<accordion::style>()}) {
-        offset_section_content(bounds, *style);
-    }
+    offset_section_content(bounds, _style);
 }
 
 void accordion::update_section_bounds(rect_f const& bounds)

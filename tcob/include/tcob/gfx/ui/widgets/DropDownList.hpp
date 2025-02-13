@@ -27,6 +27,8 @@ public:
         length      ItemHeight {};
 
         element::scrollbar VScrollBar;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit drop_down_list(init const& wi);
@@ -83,5 +85,7 @@ private:
     bool _mouseOverBox {false};
 
     scrollbar _vScrollbar;
+
+    drop_down_list::style _style;
 };
 }

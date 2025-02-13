@@ -20,6 +20,8 @@ public:
     public:
         element::bar Bar;
         utf8_string  ThumbClass {"slider_thumb"};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit slider(init const& wi);
@@ -60,5 +62,7 @@ private:
     scrollbar::rects _barRectCache {};
 
     widget_tweener _tween;
+
+    slider::style _style;
 };
 }

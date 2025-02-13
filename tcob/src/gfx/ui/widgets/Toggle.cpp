@@ -9,6 +9,13 @@
 
 namespace tcob::gfx::ui {
 
+void toggle::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::tick::Transition(target.Tick, left.Tick, right.Tick, step);
+}
+
 toggle::toggle(init const& wi)
     : widget {wi}
     , _tween {*this}
@@ -20,21 +27,21 @@ toggle::toggle(init const& wi)
 
 void toggle::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<toggle::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        // tick
-        f32 const tickWidth {rect.width() / 2};
+    scissor_guard const guard {painter, this};
 
-        rect.Size.Width = tickWidth;
-        rect.Position.X += tickWidth * _tween.current_value();
-        painter.draw_tick(style->Tick, rect);
-    }
+    // tick
+    f32 const tickWidth {rect.width() / 2};
+
+    rect.Size.Width = tickWidth;
+    rect.Position.X += tickWidth * _tween.current_value();
+    painter.draw_tick(_style.Tick, rect);
 }
 
 void toggle::on_update(milliseconds deltaTime)
@@ -44,14 +51,10 @@ void toggle::on_update(milliseconds deltaTime)
 
 void toggle::on_checked_changed()
 {
-    if (auto const* style {current_style<toggle::style>()}) {
-        if (Checked()) {
-            _tween.start(1.0f, style->Delay * (1.0f - _tween.current_value()));
-        } else {
-            _tween.start(0.0f, style->Delay * _tween.current_value());
-        }
+    if (Checked()) {
+        _tween.start(1.0f, _style.Delay * (1.0f - _tween.current_value()));
     } else {
-        _tween.reset(Checked() ? 1.0f : 0.0f);
+        _tween.start(0.0f, _style.Delay * _tween.current_value());
     }
 }
 

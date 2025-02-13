@@ -24,6 +24,8 @@ public:
         element::text  Text;
         element::caret Caret;
         milliseconds   FlashDuration {500};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     struct border {
@@ -143,6 +145,8 @@ private:
 
     std::unique_ptr<square_wave_tween<bool>> _cursorTween;
     std::unique_ptr<square_wave_tween<bool>> _flashTween;
+
+    terminal::style _style;
 };
 
 }

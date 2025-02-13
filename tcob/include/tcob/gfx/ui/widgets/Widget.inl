@@ -9,9 +9,15 @@
 namespace tcob::gfx::ui {
 
 template <std::derived_from<widget_style> T>
-inline auto widget::current_style() const -> T*
+inline void widget::get_style(T& style)
 {
-    return static_cast<T*>(_style);
+    auto& tr {_transition};
+    if (tr.Tween && tr.Tween->status() == playback_status::Running && tr.OldStyle && tr.TargetStyle) {
+        T::Transition(style, *static_cast<T*>(tr.OldStyle), *static_cast<T*>(tr.TargetStyle), tr.Tween->Value);
+    } else if (tr.TargetStyle) {
+        style = *static_cast<T*>(tr.TargetStyle);
+    }
+    tr.CurrentStyle = &style;
 }
 
 template <std::derived_from<style> T>

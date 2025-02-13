@@ -17,6 +17,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         element::bar Bar;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit progress_bar(init const& wi);
@@ -36,5 +38,7 @@ protected:
 
 private:
     widget_tweener _tween;
+
+    progress_bar::style _style;
 };
 }

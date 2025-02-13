@@ -10,6 +10,13 @@
 
 namespace tcob::gfx::ui {
 
+void tab_container::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    target.TabBarHeight = length::Lerp(left.TabBarHeight, right.TabBarHeight, step);
+}
+
 tab_container::tab_container(init const& wi)
     : widget_container {wi}
     , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
@@ -80,79 +87,69 @@ auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> cons
     return _tabs;
 }
 
-void tab_container::force_redraw(string const& reason)
-{
-    widget_container::force_redraw(reason);
-    _isDirty = true;
-}
-
-void tab_container::on_styles_changed()
-{
-    widget_container::on_styles_changed();
-    _isDirty = true;
-}
-
 void tab_container::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<tab_container::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        // tabs
-        _tabRectCache.clear();
-        if (style->TabBarPosition != position::Hidden) {
-            auto const get_tab_rect {[&](item_style const& itemStyle, isize index, rect_f const& rect) {
-                isize const maxItems {std::min(*MaxTabsPerRow, std::ssize(_tabs))};
-                rect_f      retValue {rect};
-                retValue.Position.X  = rect.left() + (rect.width() / maxItems) * (index % maxItems);
-                retValue.Size.Width  = rect.width() / maxItems;
-                retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
-                retValue.Size.Height = rect.height();
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-                retValue -= itemStyle.Item.Border.thickness();
-                return retValue;
-            }};
+    // tabs
+    _tabRectCache.clear();
+    if (_style.TabBarPosition != position::Hidden) {
+        auto const get_tab_rect {[&](item_style const& itemStyle, isize index, rect_f const& rect) {
+            isize const maxItems {std::min(*MaxTabsPerRow, std::ssize(_tabs))};
+            rect_f      retValue {rect};
+            retValue.Position.X  = rect.left() + (rect.width() / maxItems) * (index % maxItems);
+            retValue.Size.Width  = rect.width() / maxItems;
+            retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
+            retValue.Size.Height = rect.height();
 
-            auto const get_tab_style {[&](isize index) {
-                return index == ActiveTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Active = true})
-                    : index == HoveredTabIndex ? get_sub_style<item_style>(style->TabItemClass, {.Hover = true})
-                                               : get_sub_style<item_style>(style->TabItemClass, {});
-            }};
+            retValue -= itemStyle.Item.Border.thickness();
+            return retValue;
+        }};
 
-            rect_f tabBarRowRect {rect};
-            tabBarRowRect.Size.Height = style->TabBarHeight.calc(tabBarRowRect.height());
+        auto const get_tab_style {[&](isize index) {
+            return index == ActiveTabIndex ? get_sub_style<item_style>(_style.TabItemClass, {.Active = true})
+                : index == HoveredTabIndex ? get_sub_style<item_style>(_style.TabItemClass, {.Hover = true})
+                                           : get_sub_style<item_style>(_style.TabItemClass, {});
+        }};
 
-            if (style->TabBarPosition == position::Bottom) {
-                tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * get_tab_row_count());
-            }
+        rect_f tabBarRowRect {rect};
+        tabBarRowRect.Size.Height = _style.TabBarHeight.calc(tabBarRowRect.height());
 
-            for (i32 i {0}; i < std::ssize(_tabs); ++i) {
-                if (auto const* tabStyle {get_tab_style(i)}) {
-                    rect_f const tabRect {get_tab_rect(*tabStyle, i, tabBarRowRect)};
-                    painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
-                    _tabRectCache.push_back(tabRect);
-                }
-            }
+        if (_style.TabBarPosition == position::Bottom) {
+            tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * get_tab_row_count());
         }
 
-        // content
-        scissor_guard const guard {painter, this};
-
-        // active tab
-        if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
-            offset_tab_content(rect, *style);
-
-            auto          xform {transform::Identity};
-            point_f const translate {rect.Position + paint_offset()};
-            xform.translate(translate);
-
-            auto& tab {_tabs[ActiveTabIndex()]};
-            painter.begin(Alpha(), xform);
-            tab->paint(painter);
-            painter.end();
+        for (i32 i {0}; i < std::ssize(_tabs); ++i) {
+            if (auto const* tabStyle {get_tab_style(i)}) {
+                rect_f const tabRect {get_tab_rect(*tabStyle, i, tabBarRowRect)};
+                painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
+                _tabRectCache.push_back(tabRect);
+            }
         }
+    }
+
+    // content
+    scissor_guard const guard {painter, this};
+
+    // active tab
+    if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
+        offset_tab_content(rect, _style);
+
+        _tabs[ActiveTabIndex]->Bounds = {point_f::Zero, rect.Size};
+
+        auto          xform {transform::Identity};
+        point_f const translate {rect.Position + paint_offset()};
+        xform.translate(translate);
+
+        auto& tab {_tabs[ActiveTabIndex()]};
+        painter.begin(Alpha(), xform);
+        tab->paint(painter);
+        painter.end();
     }
 }
 
@@ -190,15 +187,6 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 
 void tab_container::on_update(milliseconds /* deltaTime */)
 {
-    if (_isDirty) {
-        // update tab bounds
-        auto const size {content_bounds().Size};
-        for (auto& t : _tabs) {
-            t->Bounds = {point_f::Zero, size};
-        }
-
-        _isDirty = false;
-    }
 }
 
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
@@ -226,9 +214,7 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 
     // subtract tab bar from content
     if (isHitTest) { return; }
-    if (auto const* style {current_style<tab_container::style>()}) {
-        offset_tab_content(bounds, *style);
-    }
+    offset_tab_content(bounds, _style);
 }
 
 } // namespace ui

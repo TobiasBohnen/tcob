@@ -16,6 +16,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         element::tick Tick;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit radio_button(init const& wi);
@@ -33,5 +35,8 @@ protected:
 
     auto attributes() const -> widget_attributes override;
     auto flags() -> widget_flags override;
+
+private:
+    radio_button::style _style;
 };
 }

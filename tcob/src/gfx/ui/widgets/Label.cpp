@@ -9,6 +9,13 @@
 
 namespace tcob::gfx::ui {
 
+void label::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::text::Transition(target.Text, left.Text, right.Text, step);
+}
+
 label::label(init const& wi)
     : widget {wi}
 {
@@ -22,18 +29,18 @@ label::label(init const& wi)
 
 void label::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<label::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, false);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, false);
 
-        // text
-        if (style->Text.Font) {
-            painter.draw_text(style->Text, rect, Label());
-        }
+    scissor_guard const guard {painter, this};
+
+    // text
+    if (_style.Text.Font) {
+        painter.draw_text(_style.Text, rect, Label());
     }
 }
 

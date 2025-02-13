@@ -35,5 +35,8 @@ protected:
     void on_paint(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
+
+private:
+    image_box::style _style;
 };
 }

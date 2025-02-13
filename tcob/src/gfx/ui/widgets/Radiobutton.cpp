@@ -10,6 +10,13 @@
 
 namespace tcob::gfx::ui {
 
+void radio_button::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    element::tick::Transition(target.Tick, left.Tick, right.Tick, step);
+}
+
 radio_button::radio_button(init const& wi)
     : widget {wi}
 {
@@ -20,18 +27,18 @@ radio_button::radio_button(init const& wi)
 
 void radio_button::on_paint(widget_painter& painter)
 {
-    if (auto const* style {current_style<radio_button::style>()}) {
-        rect_f rect {Bounds()};
+    get_style(_style);
 
-        // background
-        painter.draw_background_and_border(*style, rect, true);
+    rect_f rect {Bounds()};
 
-        scissor_guard const guard {painter, this};
+    // background
+    painter.draw_background_and_border(_style, rect, true);
 
-        if (Checked()) {
-            // tick
-            painter.draw_tick(style->Tick, rect);
-        }
+    scissor_guard const guard {painter, this};
+
+    if (Checked()) {
+        // tick
+        painter.draw_tick(_style.Tick, rect);
     }
 }
 

@@ -16,6 +16,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         element::text Text;
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit button(init const& wi);
@@ -29,5 +31,8 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     auto attributes() const -> widget_attributes override;
+
+private:
+    button::style _style;
 };
 }
