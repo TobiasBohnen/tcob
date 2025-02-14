@@ -50,9 +50,7 @@ void widget_tweener::reset(f32 value)
 {
     _val   = value;
     _toval = value;
-    if (_tween) {
-        _tween->stop();
-    }
+    if (_tween) { _tween->stop(); }
     _parent.force_redraw(_parent.name() + ": Tween value changed");
 }
 

@@ -486,31 +486,41 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
 
 void widget_painter::draw_item(element::item const& style, rect_f const& rect, list_item const& item)
 {
-    rect_f itemRect {rect};
-    itemRect -= style.Padding;
-    itemRect -= style.Border.thickness();
     draw_bordered_rect(rect, style.Background, style.Border);
+    rect_f contentRect {rect};
+    contentRect -= style.Padding;
+    contentRect -= style.Border.thickness();
 
     bool const drawText {!item.Text.empty() && style.Text.Font};
     bool const drawIcon {!item.Icon.Texture.is_expired()};
 
-    if (drawText) { // text
-        rect_f textRect {rect};
-        if (drawIcon) {
-            textRect = {rect.center().X, rect.top(), rect.width() / 2, rect.height()};
-            itemRect.Size.Width /= 2;
-        }
+    if (drawText && drawIcon) {
+        rect_f textRect {contentRect};
+        textRect.Size.Width /= 2;
+        textRect.Position.X += textRect.Size.Width;
 
-        textRect -= style.Padding;
-        textRect -= style.Border.thickness();
         draw_text(style.Text, textRect, item.Text);
-    }
-    if (drawIcon) { // icon
+
+        rect_f iconRect {contentRect};
+        iconRect.Size.Width /= 2;
+
         auto const [iconWidth, iconHeight] {item.Icon.Texture->info().Size};
-        f32 const width {itemRect.height() * (iconHeight / static_cast<f32>(iconWidth))};
-        itemRect = {{itemRect.center().X - (width / 2), itemRect.top()}, {width, itemRect.height()}};
+        f32 const factor {iconWidth / static_cast<f32>(iconHeight)};
+        iconRect = {iconRect.Position, {iconRect.width(), iconRect.width() * factor}};
+        iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
+
         _canvas.set_fill_style(style.Text.Color);
-        _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, itemRect);
+        _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, iconRect);
+    } else if (drawText) {
+        draw_text(style.Text, contentRect, item.Text);
+    } else if (drawIcon) {
+        auto const [iconWidth, iconHeight] {item.Icon.Texture->info().Size};
+        f32 const factor {iconHeight / static_cast<f32>(iconWidth)};
+        f32 const scaledWidth {contentRect.height() * factor};
+        contentRect = {{contentRect.center().X - (scaledWidth / 2), contentRect.top()}, {scaledWidth, contentRect.height()}};
+
+        _canvas.set_fill_style(style.Text.Color);
+        _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, contentRect);
     }
 }
 

@@ -301,25 +301,6 @@ void form::focus_widget(widget* newFocus)
     }
 }
 
-void form::find_top_widget(input::mouse::motion_event const& ev)
-{
-    auto* newTop {find_widget_at(point_f {ev.Position}).get()};
-    if (newTop && newTop->is_inert()) {
-        _injector.on_mouse_leave(_topWidget);
-        _topWidget = nullptr;
-        return;
-    }
-
-    if (newTop != _topWidget) {
-        hide_tooltip();
-        _injector.on_mouse_leave(_topWidget);
-        _topWidget = newTop;
-        _injector.on_mouse_enter(_topWidget);
-    } else {
-        _injector.on_mouse_hover(_topWidget, ev);
-    }
-}
-
 void form::on_key_down(input::keyboard::event const& ev)
 {
     hide_tooltip();
@@ -367,7 +348,26 @@ void form::on_mouse_motion(input::mouse::motion_event const& ev)
     if (_isLButtonDown) {
         _injector.on_mouse_drag(_focusWidget, ev);
     } else {
-        find_top_widget(ev);
+        on_mouse_hover(ev);
+    }
+}
+
+void form::on_mouse_hover(input::mouse::motion_event const& ev)
+{
+    auto* newTop {find_widget_at(point_f {ev.Position}).get()};
+    if (newTop && newTop->is_inert()) {
+        _injector.on_mouse_leave(_topWidget);
+        _topWidget = nullptr;
+        return;
+    }
+
+    if (newTop != _topWidget) {
+        hide_tooltip();
+        _injector.on_mouse_leave(_topWidget);
+        _topWidget = newTop;
+        _injector.on_mouse_enter(_topWidget);
+    } else {
+        _injector.on_mouse_hover(_topWidget, ev);
     }
 }
 

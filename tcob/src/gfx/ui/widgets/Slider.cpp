@@ -23,10 +23,7 @@ slider::slider(init const& wi)
     , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
     , Max {{[this](i32 val) -> i32 { return std::max(val, Min()); }}}
     , Value {{[this](i32 val) -> i32 {
-        if (IncrementalChange && std::abs(Value() - val) > Step) {
-            return Value();
-        }
-
+        if (IncrementalChange && std::abs(Value() - val) > Step) { return Value(); }
         return std::clamp(val, Min(), Max());
     }}}
     , _tween {*this}
@@ -127,16 +124,21 @@ void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    calculate_value(global_to_content(ev.Position));
-    ev.Handled = true;
+    if (_isDragging || _overThumb) {
+        calculate_value(global_to_content(ev.Position));
+        _isDragging = true;
+        ev.Handled  = true;
+    }
 }
 
 void slider::on_mouse_up(input::mouse::button_event const& ev)
 {
     _dragOffset = point_i::Zero;
+    _isDragging = false;
+
     if (_overThumb && !hit_test(point_f {ev.Position})) {
         _overThumb = false;
-        force_redraw(this->name() + ": thumb hit");
+        force_redraw(this->name() + ": thumb left");
         ev.Handled = true;
     }
 }
@@ -196,7 +198,11 @@ void slider::on_update(milliseconds deltaTime)
 void slider::on_value_changed(i32 newVal)
 {
     f32 const newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / (Max() - Min()) : 0.f};
-    _tween.start(newFrac, _style.Bar.Delay);
+    if (_isDragging) {
+        _tween.reset(newFrac);
+    } else {
+        _tween.start(newFrac, _style.Bar.Delay);
+    }
 }
 
 void slider::calculate_value(point_f mp)

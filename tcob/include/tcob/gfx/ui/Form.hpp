@@ -90,8 +90,8 @@ protected:
     void on_visiblity_changed() override;
 
 private:
+    void on_mouse_hover(input::mouse::motion_event const& ev);
     auto widgets_by_zorder(bool reverse = false) const -> std::vector<std::shared_ptr<widget>>;
-    void find_top_widget(input::mouse::motion_event const& ev);
 
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
