@@ -217,4 +217,16 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
     offset_tab_content(bounds, _style);
 }
 
+auto tab_container::attributes() const -> widget_attributes
+{
+    auto retValue {widget_container::attributes()};
+    if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
+        retValue["active"] = _tabLabels[ActiveTabIndex].Text;
+    }
+    if (HoveredTabIndex >= 0 && HoveredTabIndex < std::ssize(_tabs)) {
+        retValue["hover"] = _tabLabels[HoveredTabIndex].Text;
+    }
+    return retValue;
+}
+
 } // namespace ui

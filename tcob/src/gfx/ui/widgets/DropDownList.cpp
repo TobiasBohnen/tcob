@@ -21,8 +21,8 @@ void drop_down_list::style::Transition(style& target, style const& left, style c
 
 drop_down_list::drop_down_list(init const& wi)
     : widget {wi}
-    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
-    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
+    , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
     SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
@@ -53,8 +53,9 @@ void drop_down_list::clear_items()
 
 auto drop_down_list::select_item(utf8_string const& item) -> bool
 {
-    for (isize i {0}; i < std::ssize(_items); ++i) {
-        if (_items[i].Text == item) {
+    auto const& items {get_items()};
+    for (isize i {0}; i < std::ssize(items); ++i) {
+        if (items[i].Text == item) {
             SelectedItemIndex = i;
             return true;
         }
@@ -65,17 +66,17 @@ auto drop_down_list::select_item(utf8_string const& item) -> bool
 
 auto drop_down_list::get_item_at(isize index) const -> list_item const&
 {
-    return _items.at(static_cast<usize>(index));
+    return get_items().at(static_cast<usize>(index));
 }
 
 auto drop_down_list::selected_item() const -> list_item const&
 {
-    return _items.at(SelectedItemIndex());
+    return get_items().at(SelectedItemIndex());
 }
 
 auto drop_down_list::item_count() const -> isize
 {
-    return std::ssize(_items);
+    return std::ssize(get_items());
 }
 
 void drop_down_list::on_styles_changed()
@@ -93,7 +94,7 @@ void drop_down_list::prepare_redraw()
     widget::prepare_redraw();
 
     _vScrollbar.Min = 0;
-    _vScrollbar.Max = std::max(0.0f, (get_item_height() * std::ssize(_items)) - content_bounds().height());
+    _vScrollbar.Max = std::max(0.0f, (get_item_height() * std::ssize(get_items())) - content_bounds().height());
 }
 
 void drop_down_list::on_paint(widget_painter& painter)
@@ -131,6 +132,8 @@ void drop_down_list::on_paint(widget_painter& painter)
     if (_isExtended) {
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
 
+        auto const& items {get_items()};
+
         // list background
         rect_f listRect {Bounds()};
         listRect.Position.Y += listRect.height();
@@ -143,7 +146,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         painter.draw_background_and_border(_style, listRect, false);
 
         // scrollbar
-        _vScrollbar.Visible = std::ssize(_items) > VisibleItemCount;
+        _vScrollbar.Visible = std::ssize(items) > VisibleItemCount;
         _vScrollbar.paint(painter, _style.VScrollBar, listRect, fls.Active);
 
         scissor_guard const guard {painter, this};
@@ -152,13 +155,13 @@ void drop_down_list::on_paint(widget_painter& painter)
             auto const*  itemStyle {get_item_style(i)};
             rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                painter.draw_item(itemStyle->Item, itemRect, _items[i]);
+                painter.draw_item(itemStyle->Item, itemRect, items[i]);
                 _itemRectCache[i] = itemRect;
             }
         }};
 
         // content
-        for (i32 i {0}; i < std::ssize(_items); ++i) {
+        for (i32 i {0}; i < std::ssize(items); ++i) {
             if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
 
             paint_item(i);
@@ -265,7 +268,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
         delay  = _style.VScrollBar.Bar.Delay;
     }
 
-    f32 const diff {get_item_height() / std::ssize(_items) * (invert ? -5 : 5)};
+    f32 const diff {get_item_height() / std::ssize(get_items()) * (invert ? -5 : 5)};
     if (orien == orientation::Vertical) {
         _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
     }
@@ -323,11 +326,22 @@ auto drop_down_list::get_item_style(isize index) const -> item_style*
 
 auto drop_down_list::attributes() const -> widget_attributes
 {
-    auto retValue {widget::attributes()};
-    if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
-        retValue["selected"] = selected_item().Text;
+    auto        retValue {widget::attributes()};
+    auto const& items {get_items()};
+    auto const  size {std::ssize(items)};
+
+    if (SelectedItemIndex >= 0 && SelectedItemIndex < size) {
+        retValue["selected"] = items.at(SelectedItemIndex).Text;
+    }
+    if (HoveredItemIndex >= 0 && HoveredItemIndex < size) {
+        retValue["hover"] = items.at(HoveredItemIndex()).Text;
     }
     return retValue;
+}
+
+auto drop_down_list::get_items() const -> std::vector<list_item> const&
+{
+    return _items;
 }
 
 auto drop_down_list::get_item_height() const -> f32

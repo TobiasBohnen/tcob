@@ -13,14 +13,6 @@ namespace tcob::gfx::ui {
 
 class TCOB_API image_box : public widget {
 public:
-    enum class fit_mode : u8 {
-        None,
-        Contain,
-        Fill,
-        FitWidth,
-        FitHeight
-    };
-
     class TCOB_API style : public widget_style {
     public:
         alignments Alignment {horizontal_alignment::Left, vertical_alignment::Top};
@@ -35,6 +27,8 @@ protected:
     void on_paint(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
+
+    auto attributes() const -> widget_attributes override;
 
 private:
     image_box::style _style;

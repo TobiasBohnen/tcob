@@ -83,4 +83,12 @@ void image_box::on_update(milliseconds /*deltaTime*/)
 {
 }
 
+auto image_box::attributes() const -> widget_attributes
+{
+    widget_attributes retValue {{"fit", Fit()}};
+    auto const        base {widget::attributes()};
+    retValue.insert(base.begin(), base.end());
+    return retValue;
+}
+
 } // namespace ui

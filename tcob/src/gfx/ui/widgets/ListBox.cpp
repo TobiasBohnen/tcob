@@ -261,9 +261,15 @@ auto list_box::get_items() const -> std::vector<list_item> const&
 
 auto list_box::attributes() const -> widget_attributes
 {
-    auto retValue {vscroll_widget::attributes()};
-    if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(get_items())) {
-        retValue["selected"] = selected_item().Text;
+    auto        retValue {vscroll_widget::attributes()};
+    auto const& items {get_items()};
+    auto const  size {std::ssize(items)};
+
+    if (SelectedItemIndex >= 0 && SelectedItemIndex < size) {
+        retValue["selected"] = items.at(SelectedItemIndex).Text;
+    }
+    if (HoveredItemIndex >= 0 && HoveredItemIndex < size) {
+        retValue["hover"] = items.at(HoveredItemIndex()).Text;
     }
     return retValue;
 }

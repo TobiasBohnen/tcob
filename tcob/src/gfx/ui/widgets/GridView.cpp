@@ -200,6 +200,18 @@ void grid_view::on_mouse_down(input::mouse::button_event const& ev)
     }
 }
 
+auto grid_view::attributes() const -> widget_attributes
+{
+    auto retValue {vscroll_widget::attributes()};
+    if (SelectedCellIndex() != INVALID) {
+        retValue["selected"] = get_cell(SelectedCellIndex);
+    }
+    if (HoveredCellIndex() != INVALID) {
+        retValue["hover"] = get_cell(HoveredCellIndex);
+    }
+    return retValue;
+}
+
 auto grid_view::get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX) const -> rect_f
 {
     rect_f retValue {point_f::Zero, size};

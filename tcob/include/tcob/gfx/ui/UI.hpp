@@ -180,7 +180,17 @@ enum class dock_style : u8 {
 
 ////////////////////////////////////////////////////////////
 
-using widget_attribute_types = std::variant<i32, bool, string, orientation>;
+enum class fit_mode : u8 {
+    None,
+    Contain,
+    Fill,
+    FitWidth,
+    FitHeight
+};
+
+////////////////////////////////////////////////////////////
+
+using widget_attribute_types = std::variant<i32, bool, string, orientation, fit_mode>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 
 ////////////////////////////////////////////////////////////

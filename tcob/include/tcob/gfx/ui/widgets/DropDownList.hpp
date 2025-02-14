@@ -71,6 +71,8 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
+    auto get_items() const -> std::vector<list_item> const&;
+
     auto get_item_height() const -> f32;
 
     void set_extended(bool v);

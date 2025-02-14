@@ -54,6 +54,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
+    auto attributes() const -> widget_attributes override;
+
 private:
     void offset_section_content(rect_f& bounds, style const& style) const;
 

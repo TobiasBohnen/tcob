@@ -63,6 +63,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
+    auto attributes() const -> widget_attributes override;
+
 private:
     void offset_tab_content(rect_f& bounds, style const& style) const;
     auto get_tab_row_count() const -> isize;
