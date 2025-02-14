@@ -11,11 +11,11 @@ namespace tcob::gfx::ui {
 template <std::derived_from<widget_container> T>
 inline auto tab_container::create_tab(utf8_string const& name) -> std::shared_ptr<T>
 {
-    return create_tab<T>(name, name);
+    return create_tab<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
 }
 
 template <std::derived_from<widget_container> T>
-inline auto tab_container::create_tab(utf8_string const& name, utf8_string const& label) -> std::shared_ptr<T>
+inline auto tab_container::create_tab(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>
 {
     force_redraw(this->name() + ": tab created");
 
@@ -26,8 +26,8 @@ inline auto tab_container::create_tab(utf8_string const& name, utf8_string const
 
     auto retValue {std::make_shared<T>(wi)};
     _tabs.push_back(retValue);
-    // TODO: translation hook
-    _tabLabels.push_back({.Text = label, .Icon = {}, .UserData = {}});
+
+    _tabLabels.push_back(label);
     if (ActiveTabIndex == -1) {
         ActiveTabIndex = 0;
     }

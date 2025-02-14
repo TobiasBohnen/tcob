@@ -32,12 +32,12 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_section(utf8_string const& name) -> std::shared_ptr<T>;
     template <std::derived_from<widget_container> T>
-    auto create_section(utf8_string const& name, utf8_string const& label) -> std::shared_ptr<T>;
+    auto create_section(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>;
 
     void remove_section(widget* sec);
     void clear_sections();
 
-    void change_section_label(widget* tab, utf8_string const& label);
+    void change_section_label(widget* sec, utf8_string const& label);
 
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 

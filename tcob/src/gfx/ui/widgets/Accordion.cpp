@@ -53,10 +53,10 @@ void accordion::clear_sections()
     force_redraw(this->name() + ": sections cleared");
 }
 
-void accordion::change_section_label(widget* tab, utf8_string const& label)
+void accordion::change_section_label(widget* sec, utf8_string const& label)
 {
     for (isize i {0}; i < std::ssize(_sections); ++i) {
-        if (_sections[i].get() == tab) {
+        if (_sections[i].get() == sec) {
             _sectionLabels[i].Text = label;
             break;
         }

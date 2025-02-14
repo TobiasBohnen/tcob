@@ -41,7 +41,7 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
     template <std::derived_from<widget_container> T>
-    auto create_tab(utf8_string const& name, utf8_string const& label) -> std::shared_ptr<T>;
+    auto create_tab(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>;
 
     void remove_tab(widget* tab);
     void clear_tabs();

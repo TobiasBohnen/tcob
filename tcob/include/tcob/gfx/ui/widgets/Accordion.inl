@@ -11,11 +11,11 @@ namespace tcob::gfx::ui {
 template <std::derived_from<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name) -> std::shared_ptr<T>
 {
-    return create_section<T>(name, name);
+    return create_section<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
 }
 
 template <std::derived_from<widget_container> T>
-inline auto accordion::create_section(utf8_string const& name, utf8_string const& label) -> std::shared_ptr<T>
+inline auto accordion::create_section(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>
 {
     force_redraw(this->name() + ": section created");
 
@@ -26,7 +26,7 @@ inline auto accordion::create_section(utf8_string const& name, utf8_string const
 
     auto retValue {std::make_shared<T>(wi)};
     _sections.push_back(retValue);
-    _sectionLabels.push_back({.Text = label, .Icon = {}, .UserData = {}});
+    _sectionLabels.push_back(label);
 
     return retValue;
 }
