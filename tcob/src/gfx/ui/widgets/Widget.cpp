@@ -106,8 +106,7 @@ void widget::paint(widget_painter& painter)
 
 void widget::update(milliseconds deltaTime)
 {
-    _transition.update(deltaTime);
-    if (_transition.is_active()) { force_redraw(this->name() + ": Transition"); }
+    if (_transition.update(deltaTime)) { force_redraw(this->name() + ": Transition"); }
 
     on_update(deltaTime);
 }
@@ -221,7 +220,6 @@ void widget::prepare_redraw()
 
     if (_lastSelectors != newSelectors) {
         _lastSelectors = newSelectors;
-
         _transition.start(dynamic_cast<widget_style*>(_form->Styles->get(newSelectors)), TransitionDuration);
     }
 }

@@ -346,7 +346,7 @@ void widget_painter::draw_tick(element::tick const& style, rect_f const& rect)
 auto widget_painter::draw_bar(element::bar const& style, rect_f const& rect, element::bar::context const& barCtx) -> rect_f
 {
     rect_f retValue {style.calc(rect, barCtx.Orientation, barCtx.Position)};
-    rect_f lowRech {retValue};
+    rect_f lowRect {retValue};
 
     if (style.Type == element::bar::type::Continuous) {
         // Higher
@@ -355,15 +355,15 @@ auto widget_painter::draw_bar(element::bar const& style, rect_f const& rect, ele
             // Lower
             switch (barCtx.Orientation) {
             case orientation::Horizontal:
-                lowRech.Size.Width *= (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction);
+                lowRect.Size.Width *= (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction);
                 break;
             case orientation::Vertical:
-                lowRech.Size.Height *= (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction);
-                lowRech.Position.Y += retValue.height() - lowRech.height();
+                lowRect.Size.Height *= (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction);
+                lowRect.Position.Y += retValue.height() - lowRect.height();
                 break;
             }
-            if (lowRech.height() > 0 && lowRech.width() > 0) {
-                draw_bordered_rect(lowRech, style.LowerBackground, style.Border);
+            if (lowRect.height() > 0 && lowRect.width() > 0) {
+                draw_bordered_rect(lowRect, style.LowerBackground, style.Border);
             }
         }
     } else if (style.Type == element::bar::type::Blocks) {

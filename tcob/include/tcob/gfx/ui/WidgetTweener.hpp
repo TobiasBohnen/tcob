@@ -22,13 +22,15 @@ public:
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;
-    void reset(f32 val);
+    void reset(f32 value);
 
 private:
+    void set_value(f32 value);
+
     widget&                            _parent;
     std::unique_ptr<linear_tween<f32>> _tween;
-    f32                                _val {0.0f};
-    f32                                _toval {0.0f};
+    f32                                _currentValue {0.0f};
+    f32                                _targetValue {0.0f};
 };
 
 }

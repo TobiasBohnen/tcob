@@ -14,17 +14,13 @@ widget_tweener::widget_tweener(widget& parent)
 
 void widget_tweener::start(f32 toValue, milliseconds delay)
 {
-    _toval = toValue;
+    _targetValue = toValue;
 
     if (delay.count() == 0) {
-        _val = toValue;
-        _parent.force_redraw(_parent.name() + ": Tween start");
+        set_value(toValue);
     } else {
-        _tween = make_unique_tween<linear_tween<f32>>(delay, _val, toValue);
-        _tween->Value.Changed.connect([&](auto val) {
-            _val = val;
-            _parent.force_redraw(_parent.name() + ": Tween value changed");
-        });
+        _tween = make_unique_tween<linear_tween<f32>>(delay, _currentValue, toValue);
+        _tween->Value.Changed.connect([&](auto value) { set_value(value); });
         _tween->start();
     }
 }
@@ -38,19 +34,24 @@ void widget_tweener::update(milliseconds deltaTime)
 
 auto widget_tweener::current_value() const -> f32
 {
-    return _val;
+    return _currentValue;
 }
 
 auto widget_tweener::target_value() const -> f32
 {
-    return _toval;
+    return _targetValue;
 }
 
 void widget_tweener::reset(f32 value)
 {
-    _val   = value;
-    _toval = value;
+    set_value(value);
+    _targetValue = value;
     if (_tween) { _tween->stop(); }
+}
+
+void widget_tweener::set_value(f32 value)
+{
+    _currentValue = value;
     _parent.force_redraw(_parent.name() + ": Tween value changed");
 }
 

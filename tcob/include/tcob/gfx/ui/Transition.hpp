@@ -15,15 +15,16 @@ public:
     void start(T* target, milliseconds duration);
     void reset(T* target);
 
-    void update(milliseconds deltaTime);
+    auto update(milliseconds deltaTime) -> bool;
 
-    auto is_active() const -> bool;
     auto current_style() const -> T*;
 
     template <typename S>
     void update_style(S& style);
 
 private:
+    auto is_active() const -> bool;
+
     T* _currentStyle {nullptr};
     T* _targetStyle {nullptr};
     T* _oldStyle {nullptr};

@@ -32,15 +32,17 @@ inline void transition_context<T>::reset(T* target)
 }
 
 template <typename T>
-void transition_context<T>::update(milliseconds deltaTime)
+auto transition_context<T>::update(milliseconds deltaTime) -> bool
 {
+    bool const retValue {is_active()};
     _currentTime += deltaTime;
+    return retValue;
 }
 
 template <typename T>
 auto transition_context<T>::is_active() const -> bool
 {
-    return _currentTime < _duration && _oldStyle && _targetStyle;
+    return _duration.count() > 0 && _currentTime <= _duration && _oldStyle && _targetStyle;
 }
 
 template <typename T>
@@ -59,7 +61,8 @@ inline void transition_context<T>::update_style(S& style)
     }
 
     if (is_active()) {
-        S::Transition(style, *static_cast<S*>(_oldStyle), *static_cast<S*>(_targetStyle), _currentTime.count() / _duration.count());
+        f64 const frac {std::min(1.0, _currentTime.count() / _duration.count())};
+        S::Transition(style, *static_cast<S*>(_oldStyle), *static_cast<S*>(_targetStyle), frac);
     }
     _currentStyle = &style;
 }
