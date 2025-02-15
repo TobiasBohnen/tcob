@@ -30,8 +30,7 @@ public:
 protected:
     void on_styles_changed() override;
 
-    void on_paint(widget_painter& painter) final;
-    void virtual paint_content(widget_painter& painter, rect_f const& rect) = 0;
+    void paint_scrollbar(widget_painter& painter, rect_f& rect);
 
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_down(input::mouse::button_event const& ev) override;
@@ -45,9 +44,8 @@ protected:
 
     auto get_scroll_max_value() const -> f32;
 
-    auto virtual update_style() -> vscroll_widget::style* = 0;
-    auto virtual get_scroll_content_height() const -> f32 = 0;
-    auto virtual get_scroll_item_count() const -> isize   = 0;
+    auto virtual get_style(bool update) -> vscroll_widget::style* = 0;
+    auto virtual get_scroll_content_height() const -> f32         = 0;
 
     auto get_scrollbar_value() const -> f32;
     void set_scrollbar_value(f32 value);

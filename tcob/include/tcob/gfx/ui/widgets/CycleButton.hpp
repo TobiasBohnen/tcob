@@ -36,9 +36,9 @@ public:
 protected:
     void on_paint(widget_painter& painter) override;
 
-    void on_mouse_down(input::mouse::button_event const& ev) override;
-
     void on_update(milliseconds deltaTime) override;
+
+    void on_click() override;
 
     auto attributes() const -> widget_attributes override;
 

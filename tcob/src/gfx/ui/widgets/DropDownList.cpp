@@ -83,10 +83,7 @@ void drop_down_list::on_styles_changed()
 {
     widget::on_styles_changed();
 
-    get_style(_style);
-    _vScrollbar.Style = &_style.VScrollBar;
-
-    _vScrollbar.start_scroll(0, milliseconds {0});
+    _vScrollbar.reset();
 }
 
 void drop_down_list::prepare_redraw()
@@ -99,7 +96,7 @@ void drop_down_list::prepare_redraw()
 
 void drop_down_list::on_paint(widget_painter& painter)
 {
-    get_style(_style);
+    update_style(_style);
 
     _itemRectCache.clear();
 
@@ -255,23 +252,15 @@ void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
+    if (ev.Scroll.Y == 0) { return; }
 
     HoveredItemIndex = INVALID_INDEX;
 
-    orientation  orien {};
-    bool         invert {false};
-    milliseconds delay {};
+    bool const         invert {ev.Scroll.Y > 0};
+    milliseconds const delay {_style.VScrollBar.Bar.Delay};
+    f32 const          diff {_vScrollbar.Max / (invert ? -10 : 10)};
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
 
-    if (ev.Scroll.Y != 0) {
-        orien  = orientation::Vertical;
-        invert = ev.Scroll.Y > 0;
-        delay  = _style.VScrollBar.Bar.Delay;
-    }
-
-    f32 const diff {get_item_height() / std::ssize(get_items()) * (invert ? -5 : 5)};
-    if (orien == orientation::Vertical) {
-        _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
-    }
     ev.Handled = true;
 }
 

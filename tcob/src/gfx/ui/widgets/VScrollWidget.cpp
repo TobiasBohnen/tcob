@@ -27,6 +27,8 @@ void vscroll_widget::prepare_redraw()
 {
     widget::prepare_redraw();
 
+    _style = get_style(true);
+
     _vScrollbar.Min = 0;
     _vScrollbar.Max = get_scroll_max_value();
 }
@@ -40,29 +42,15 @@ void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
 
-    _style            = update_style();
-    _vScrollbar.Style = &_style->VScrollBar;
-
-    auto const max {get_scroll_max_value()};
-    if (get_scrollbar_value() > max) { set_scrollbar_value(max); }
+    _vScrollbar.reset();
 }
 
-void vscroll_widget::on_paint(widget_painter& painter)
+void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
 {
-    _style = update_style();
+    _style = get_style(false);
 
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(*_style, rect, false);
-
-    // scrollbar
     _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
     _vScrollbar.paint(painter, _style->VScrollBar, rect, flags().Active);
-
-    // content
-    scissor_guard const guard {painter, this};
-    paint_content(painter, rect);
 }
 
 void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -104,21 +92,13 @@ void vscroll_widget::on_mouse_up(input::mouse::button_event const& ev)
 void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (!_vScrollbar.Visible) { return; }
+    if (ev.Scroll.Y == 0) { return; }
 
-    orientation  orien {};
-    bool         invert {false};
-    milliseconds delay {};
+    bool const         invert {ev.Scroll.Y > 0};
+    milliseconds const delay {get_style(false)->VScrollBar.Bar.Delay};
+    f32 const          diff {_vScrollbar.Max / (invert ? -10 : 10)};
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
 
-    if (ev.Scroll.Y != 0) {
-        orien  = orientation::Vertical;
-        invert = ev.Scroll.Y > 0;
-        delay  = update_style()->VScrollBar.Bar.Delay;
-    }
-
-    if (orien == orientation::Vertical) {
-        f32 const diff {get_scroll_content_height() / get_scroll_item_count() * (invert ? -5 : 5)};
-        _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
-    }
     ev.Handled = true;
 }
 

@@ -106,20 +106,21 @@ auto list_box::item_count() const -> isize
     return std::ssize(get_items());
 }
 
-void list_box::on_update(milliseconds deltaTime)
+void list_box::on_paint(widget_painter& painter)
 {
-    vscroll_widget::on_update(deltaTime);
+    update_style(_style);
 
-    if (_scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
-        rect_f const listRect {content_bounds()};
-        f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
-        set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
-        _scrollToSelected = false;
-    }
-}
+    rect_f rect {Bounds()};
 
-void list_box::paint_content(widget_painter& painter, rect_f const& rect)
-{
+    // background
+    painter.draw_background_and_border(_style, rect, false);
+
+    // scrollbar
+    paint_scrollbar(painter, rect);
+
+    // content
+    scissor_guard const guard {painter, this};
+
     _itemRectCache.clear();
 
     rect_f const listRect {rect};
@@ -136,7 +137,6 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
 
     for (i32 i {0}; i < item_count(); ++i) {
         if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-
         paint_item(i);
     }
 
@@ -145,6 +145,18 @@ void list_box::paint_content(widget_painter& painter, rect_f const& rect)
     }
     if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
         paint_item(HoveredItemIndex());
+    }
+}
+
+void list_box::on_update(milliseconds deltaTime)
+{
+    vscroll_widget::on_update(deltaTime);
+
+    if (_scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
+        rect_f const listRect {content_bounds()};
+        f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
+        set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
+        _scrollToSelected = false;
     }
 }
 
@@ -249,11 +261,6 @@ auto list_box::get_scroll_content_height() const -> f32
     return retValue;
 }
 
-auto list_box::get_scroll_item_count() const -> isize
-{
-    return item_count();
-}
-
 auto list_box::get_items() const -> std::vector<list_item> const&
 {
     return Filter->empty() ? _items : _filteredItems;
@@ -274,9 +281,9 @@ auto list_box::attributes() const -> widget_attributes
     return retValue;
 }
 
-auto list_box::update_style() -> vscroll_widget::style*
+auto list_box::get_style(bool update) -> vscroll_widget::style*
 {
-    get_style(_style);
+    if (update) { update_style(_style); }
     return &_style;
 }
 

@@ -219,8 +219,8 @@ auto form::can_draw() const -> bool
 void form::on_draw_to(render_target& target)
 {
     // set cursor
-    if (_window && _window->Cursor() && _topWidget && _topWidget->_transition.TargetStyle) {
-        _window->Cursor->ActiveMode = _topWidget->_transition.TargetStyle->Cursor;
+    if (_window && _window->Cursor() && _topWidget && _topWidget->current_style()) {
+        _window->Cursor->ActiveMode = _topWidget->current_style()->Cursor;
     }
 
     size_i const bounds {size_i {Bounds->Size}};
@@ -390,26 +390,26 @@ void form::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
-    if (_focusWidget) {
-        _injector.on_mouse_up(_focusWidget, ev);
+    if (!_focusWidget) { return; }
+    _injector.on_mouse_up(_focusWidget, ev);
+
+    if (ev.Button == Controls->PrimaryMouseButton) {
+        _isLButtonDown = false;
 
         if (_topWidget == _focusWidget) {
-            if (ev.Button == Controls->PrimaryMouseButton) {
-                _injector.on_click(_focusWidget);
+            _injector.on_click(_focusWidget);
 
-                if (ev.Clicks == 1) {
-                    _clickPos = ev.Position;
-                } else if (ev.Clicks == 2 && _clickPos.distance_to(ev.Position) <= 5) {
-                    _injector.on_double_click(_focusWidget);
-                }
+            if (ev.Clicks == 1) {
+                _clickPos = ev.Position;
+            } else if (ev.Clicks == 2 && _clickPos.distance_to(ev.Position) <= 5) {
+                _injector.on_double_click(_focusWidget);
             }
+
+            ev.Handled = true;
         }
 
-        if (ev.Button == Controls->PrimaryMouseButton) {
-            _isLButtonDown = false;
-        } else if (ev.Button == Controls->SecondaryMouseButton) {
-            _isRButtonDown = false;
-        }
+    } else if (ev.Button == Controls->SecondaryMouseButton) {
+        _isRButtonDown = false;
     }
 }
 

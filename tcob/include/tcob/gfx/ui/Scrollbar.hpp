@@ -22,17 +22,18 @@ public:
 
     scrollbar(widget& parent, orientation orien);
 
-    bool                Visible {false};
-    element::scrollbar* Style {nullptr};
-    f32                 Min {0.0f};
-    f32                 Max {0.0f};
+    bool Visible {false};
+    f32  Min {0.0f};
+    f32  Max {0.0f};
 
     void update(milliseconds deltaTime);
     void paint(widget_painter& painter, element::scrollbar const& style, rect_f& rect, bool isActive);
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;
+
     void start_scroll(f32 target, milliseconds delay);
+    void reset();
 
     auto is_mouse_over() const -> bool;
     void mouse_hover(point_i mp);
@@ -44,8 +45,6 @@ public:
 private:
     void calculate_value(point_f mp);
 
-    auto get_thumb_style(widget_flags flags) -> thumb_style*;
-
     bool    _isDragging {false};
     bool    _overThumb {false};
     bool    _overBar {false};
@@ -56,6 +55,8 @@ private:
     widget_tweener _tween;
 
     rects _barRectCache;
+
+    element::scrollbar const* _style {nullptr};
 };
 
 }

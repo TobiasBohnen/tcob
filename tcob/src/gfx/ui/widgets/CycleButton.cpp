@@ -67,7 +67,7 @@ auto cycle_button::item_count() const -> isize
 
 void cycle_button::on_paint(widget_painter& painter)
 {
-    get_style(_style);
+    update_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -82,19 +82,13 @@ void cycle_button::on_paint(widget_painter& painter)
     }
 }
 
-void cycle_button::on_mouse_down(input::mouse::button_event const& ev)
-{
-    if (SelectedItemIndex == item_count() - 1) {
-        SelectedItemIndex = 0;
-    } else {
-        SelectedItemIndex = SelectedItemIndex() + 1;
-    }
-
-    ev.Handled = true;
-}
-
 void cycle_button::on_update(milliseconds /*deltaTime*/)
 {
+}
+
+void cycle_button::on_click()
+{
+    SelectedItemIndex = (SelectedItemIndex() + 1) % item_count();
 }
 
 auto cycle_button::attributes() const -> widget_attributes

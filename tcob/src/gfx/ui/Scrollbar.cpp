@@ -24,6 +24,8 @@ void scrollbar::update(milliseconds deltaTime)
 
 void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, rect_f& rect, bool isActive)
 {
+    _style = &style;
+
     if (!Visible) { return; }
 
     i32 const numBlocks {10};
@@ -44,13 +46,23 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, 
     auto const   thumbFlags {!_overThumb    ? widget_flags {}
                                  : isActive ? widget_flags {.Active = true}
                                             : widget_flags {.Hover = true}};
-    _barRectCache.Bar   = painter.draw_bar(style.Bar, scrRect, barCtx);
+    _barRectCache.Bar = painter.draw_bar(_style->Bar, scrRect, barCtx);
+    auto const get_thumb_style {[&](widget_flags flags) -> thumb_style* {
+        assert(_style);
+        widget_style_selectors const selectors {
+            .Class      = _style->ThumbClass,
+            .Flags      = flags,
+            .Attributes = {},
+        };
+        return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(selectors));
+    }};
+
     _barRectCache.Thumb = painter.draw_thumb(get_thumb_style(thumbFlags)->Thumb, _barRectCache.Bar, thumbCtx);
 
     if (_orien == orientation::Vertical) {
-        rect.Size.Width -= _barRectCache.Bar.width() + style.Bar.Border.Size.calc(_barRectCache.Bar.width());
+        rect.Size.Width -= _barRectCache.Bar.width() + _style->Bar.Border.Size.calc(_barRectCache.Bar.width());
     } else if (_orien == orientation::Horizontal) {
-        rect.Size.Height -= _barRectCache.Bar.height() + style.Bar.Border.Size.calc(_barRectCache.Bar.height());
+        rect.Size.Height -= _barRectCache.Bar.height() + _style->Bar.Border.Size.calc(_barRectCache.Bar.height());
     }
 }
 
@@ -140,41 +152,34 @@ void scrollbar::start_scroll(f32 target, milliseconds delay)
     }
 }
 
+void scrollbar::reset()
+{
+    _tween.reset(Min);
+    _style = nullptr;
+    Min    = 0;
+    Max    = 0;
+}
+
 void scrollbar::calculate_value(point_f mp)
 {
-    if (!Style) { return; }
-
-    rect_f const rect {_barRectCache.Bar};
-    f32          frac {0.0f};
-    milliseconds delay {};
+    rect_f const       rect {_barRectCache.Bar};
+    f32                frac {0.0f};
+    milliseconds const delay {_style ? _style->Bar.Delay : milliseconds {0}};
 
     switch (_orien) {
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
-        frac  = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
-        delay = Style->Bar.Delay;
+        frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
     } break;
     case orientation::Vertical: {
         f32 const th {_barRectCache.Thumb.height()};
-        frac  = (mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th);
-        delay = Style->Bar.Delay;
+        frac = (mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th);
     } break;
     }
 
     start_scroll(Min + ((Max - Min) * frac), delay);
 
     _overThumb = true;
-}
-
-auto scrollbar::get_thumb_style(widget_flags flags) -> thumb_style*
-{
-    assert(Style);
-    widget_style_selectors const selectors {
-        .Class      = Style->ThumbClass,
-        .Flags      = flags,
-        .Attributes = {},
-    };
-    return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(selectors));
 }
 
 } // namespace ui

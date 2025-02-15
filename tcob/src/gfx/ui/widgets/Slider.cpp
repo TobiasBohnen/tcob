@@ -51,7 +51,7 @@ slider::slider(init const& wi)
 void slider::on_paint(widget_painter& painter)
 {
     // TODO: draw background
-    get_style(_style);
+    update_style(_style);
 
     rect_f const rect {content_bounds()};
 

@@ -109,7 +109,7 @@ protected:
     auto styles() const -> style_collection const&;
 
     template <std::derived_from<widget_style> T>
-    void get_style(T& style);
+    void update_style(T& style);
 
     template <std::derived_from<style> T>
     auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;

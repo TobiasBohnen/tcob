@@ -26,7 +26,7 @@ checkbox::checkbox(init const& wi)
 
 void checkbox::on_paint(widget_painter& painter)
 {
-    get_style(_style);
+    update_style(_style);
 
     rect_f rect {Bounds()};
 

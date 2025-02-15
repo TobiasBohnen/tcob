@@ -107,8 +107,18 @@ auto grid_view::get_cell(point_i idx) const -> utf8_string
     return _rows[idx.Y - 1][idx.X].Text;
 }
 
-void grid_view::paint_content(widget_painter& painter, rect_f const& rect)
+void grid_view::on_paint(widget_painter& painter)
 {
+    update_style(_style);
+
+    rect_f rect {Bounds()};
+
+    // background
+    painter.draw_background_and_border(_style, rect, false);
+
+    // scrollbar
+    paint_scrollbar(painter, rect);
+
     // content
     scissor_guard const guard {painter, this};
 
@@ -258,22 +268,14 @@ auto grid_view::get_scroll_content_height() const -> f32
 {
     if (_columnHeaders.empty()) { return 0; }
 
-    f32          retValue {0.0f};
     rect_f const listRect {content_bounds()};
     f32 const    itemHeight {_style.RowHeight.calc(listRect.height())};
-    retValue += itemHeight * (_rows.size() + 1);
-
-    return retValue;
+    return itemHeight * (_rows.size() + 1);
 }
 
-auto grid_view::get_scroll_item_count() const -> isize
+auto grid_view::get_style(bool update) -> vscroll_widget::style*
 {
-    return std::ssize(_rows);
-}
-
-auto grid_view::update_style() -> vscroll_widget::style*
-{
-    get_style(_style);
+    if (update) { update_style(_style); }
     return &_style;
 }
 

@@ -65,12 +65,8 @@ void panel::on_styles_changed()
     widget_container::on_styles_changed();
     _layout->mark_dirty();
 
-    get_style(_style);
-    _vScrollbar.Style = &_style.VScrollBar;
-    _hScrollbar.Style = &_style.HScrollBar;
-
-    _vScrollbar.start_scroll(0, milliseconds {0});
-    _hScrollbar.start_scroll(0, milliseconds {0});
+    _vScrollbar.reset();
+    _hScrollbar.reset();
 }
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
@@ -104,7 +100,7 @@ void panel::clear_widgets()
 
 void panel::on_paint(widget_painter& painter)
 {
-    get_style(_style);
+    update_style(_style);
 
     rect_f rect {Bounds()};
 

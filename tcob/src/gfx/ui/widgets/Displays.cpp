@@ -30,7 +30,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
         return;
     }
 
-    get_style(_style);
+    update_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -166,7 +166,7 @@ auto seven_segment_display::get_segment(char c) -> std::bitset<7>
 
 void seven_segment_display::on_paint(widget_painter& painter)
 {
-    get_style(_style);
+    update_style(_style);
 
     rect_f rect {Bounds()};
 
