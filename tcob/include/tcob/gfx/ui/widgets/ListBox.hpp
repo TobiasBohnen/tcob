@@ -42,6 +42,8 @@ public:
     auto selected_item() const -> list_item const&;
     auto item_count() const -> isize;
 
+    void prepare_redraw() override;
+
 protected:
     void on_paint(widget_painter& painter) override;
 
@@ -56,8 +58,8 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
-    auto get_style(bool update) -> vscroll_widget::style* override;
     auto get_scroll_content_height() const -> f32 override;
+    auto get_scroll_distance() const -> f32 override;
 
 private:
     auto get_items() const -> std::vector<list_item> const&;
@@ -67,7 +69,9 @@ private:
     std::vector<list_item>            _items;
     std::vector<list_item>            _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
-    bool                              _scrollToSelected {false};
+    isize                             _visibleRows {0};
+
+    bool _scrollToSelected {false};
 
     list_box::style _style;
 };

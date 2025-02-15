@@ -207,7 +207,7 @@ void form::on_styles_changed()
             .Flags      = tooltip->flags(),
             .Attributes = tooltip->attributes(),
         };
-        tooltip->_transition.TargetStyle = dynamic_cast<widget_style*>(Styles->get(ttNewSelectors));
+        tooltip->_transition.reset(dynamic_cast<widget_style*>(Styles->get(ttNewSelectors)));
     }
 }
 

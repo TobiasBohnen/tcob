@@ -119,8 +119,10 @@
 #include <tcob/gfx/ui/Layout.hpp>
 #include <tcob/gfx/ui/Scrollbar.hpp>
 #include <tcob/gfx/ui/Style.hpp>
+#include <tcob/gfx/ui/Transition.hpp>
 #include <tcob/gfx/ui/UI.hpp>
 #include <tcob/gfx/ui/WidgetPainter.hpp>
+#include <tcob/gfx/ui/WidgetTweener.hpp>
 #include <tcob/gfx/ui/widgets/Accordion.hpp>
 #include <tcob/gfx/ui/widgets/Button.hpp>
 #include <tcob/gfx/ui/widgets/CanvasWidget.hpp>

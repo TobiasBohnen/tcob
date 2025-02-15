@@ -27,8 +27,6 @@ void vscroll_widget::prepare_redraw()
 {
     widget::prepare_redraw();
 
-    _style = get_style(true);
-
     _vScrollbar.Min = 0;
     _vScrollbar.Max = get_scroll_max_value();
 }
@@ -47,10 +45,8 @@ void vscroll_widget::on_styles_changed()
 
 void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
 {
-    _style = get_style(false);
-
     _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
-    _vScrollbar.paint(painter, _style->VScrollBar, rect, flags().Active);
+    _vScrollbar.paint(painter, dynamic_cast<vscroll_widget::style*>(current_style())->VScrollBar, rect, flags().Active);
 }
 
 void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -97,9 +93,8 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (ev.Scroll.Y == 0) { return; }
 
     bool const         invert {ev.Scroll.Y > 0};
-    milliseconds const delay {get_style(false)->VScrollBar.Bar.Delay};
-    f32 const          diff {_vScrollbar.Max / (invert ? -10 : 10)};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
+    milliseconds const delay {dynamic_cast<vscroll_widget::style*>(current_style())->VScrollBar.Bar.Delay};
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + (invert ? -get_scroll_distance() : get_scroll_distance()), delay);
 
     ev.Handled = true;
 }
@@ -117,7 +112,7 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     if (isHitTest) { return; }
     if (!_vScrollbar.Visible) { return; }
 
-    bounds.Size.Width -= _style->VScrollBar.Bar.Size.calc(bounds.width());
+    bounds.Size.Width -= dynamic_cast<vscroll_widget::style*>(current_style())->VScrollBar.Bar.Size.calc(bounds.width());
 }
 
 auto vscroll_widget::get_scrollbar_value() const -> f32

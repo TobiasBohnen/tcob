@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <unordered_map>
+#include <vector>
+
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
 namespace tcob::gfx::ui {
@@ -48,6 +51,8 @@ public:
 
     auto get_cell(point_i idx) const -> utf8_string;
 
+    void prepare_redraw() override;
+
 protected:
     void on_paint(widget_painter& painter) override;
 
@@ -57,8 +62,8 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
-    auto get_style(bool update) -> vscroll_widget::style* override;
     auto get_scroll_content_height() const -> f32 override;
+    auto get_scroll_distance() const -> f32 override;
 
 private:
     auto get_column_width(i32 col, f32 width) const -> f32;
@@ -69,6 +74,7 @@ private:
 
     std::unordered_map<point_i, rect_f> _headerRectCache;
     std::unordered_map<point_i, rect_f> _rowRectCache;
+    isize                               _visibleRows {0};
 
     grid_view::style _style;
 };

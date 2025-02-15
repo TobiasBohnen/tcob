@@ -11,8 +11,8 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::gfx::ui {
@@ -149,16 +149,6 @@ protected:
     auto virtual is_inert() const -> bool;
 
 private:
-    class TCOB_API transition_def {
-    public:
-        std::unique_ptr<linear_tween<f64>> Tween;
-        widget_style*                      CurrentStyle {nullptr};
-        widget_style*                      TargetStyle {nullptr};
-        widget_style*                      OldStyle {nullptr};
-
-        auto is_active() const -> bool;
-    };
-
     void do_key_down(input::keyboard::event const& ev);
     void do_key_up(input::keyboard::event const& ev);
     void do_text_input(input::keyboard::text_input_event const& ev);
@@ -182,19 +172,16 @@ private:
 
     auto can_tab_stop() const -> bool;
 
-    tcob::detail::connection_manager _connections;
+    bool         _visible {true};
+    bool         _enabled {true};
+    widget_flags _flags {};
+    f32          _alpha {1.0f};
+    form*        _form {nullptr};
+    widget*      _parent {nullptr};
+    string       _name;
 
-    bool           _visible {true};
-    bool           _enabled {true};
-    widget_flags   _flags {};
-    f32            _alpha {1.0f};
-    form*          _form {nullptr};
-    widget*        _parent {nullptr};
-    transition_def _transition;
-
-    widget_style_selectors _lastSelectors;
-
-    string _name;
+    transition_context<widget_style> _transition;
+    widget_style_selectors           _lastSelectors;
 };
 
 ////////////////////////////////////////////////////////////

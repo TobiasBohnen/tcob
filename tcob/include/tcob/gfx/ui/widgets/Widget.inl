@@ -11,15 +11,7 @@ namespace tcob::gfx::ui {
 template <std::derived_from<widget_style> T>
 inline void widget::update_style(T& style)
 {
-    if (_transition.CurrentStyle) {
-        assert(dynamic_cast<T*>(_transition.CurrentStyle));
-        style = *static_cast<T*>(_transition.CurrentStyle);
-    }
-
-    if (_transition.is_active()) {
-        T::Transition(style, *static_cast<T*>(_transition.OldStyle), *static_cast<T*>(_transition.TargetStyle), _transition.Tween->Value);
-    }
-    _transition.CurrentStyle = &style;
+    _transition.update_style(style);
 }
 
 template <std::derived_from<style> T>

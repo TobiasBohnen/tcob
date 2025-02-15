@@ -44,15 +44,13 @@ protected:
 
     auto get_scroll_max_value() const -> f32;
 
-    auto virtual get_style(bool update) -> vscroll_widget::style* = 0;
-    auto virtual get_scroll_content_height() const -> f32         = 0;
+    auto virtual get_scroll_content_height() const -> f32 = 0;
+    auto virtual get_scroll_distance() const -> f32       = 0;
 
     auto get_scrollbar_value() const -> f32;
     void set_scrollbar_value(f32 value);
 
 private:
     scrollbar _vScrollbar;
-
-    vscroll_widget::style* _style {nullptr};
 };
 }

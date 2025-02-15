@@ -106,9 +106,8 @@ void widget::paint(widget_painter& painter)
 
 void widget::update(milliseconds deltaTime)
 {
-    if (_transition.Tween) {
-        _transition.Tween->update(deltaTime);
-    }
+    _transition.update(deltaTime);
+    if (_transition.is_active()) { force_redraw(this->name() + ": Transition"); }
 
     on_update(deltaTime);
 }
@@ -122,7 +121,7 @@ auto widget::hit_test(point_f pos) const -> bool
 
 auto widget::current_style() const -> widget_style*
 {
-    return _transition.CurrentStyle;
+    return _transition.current_style();
 }
 
 auto widget::hit_test_bounds() const -> rect_f
@@ -180,12 +179,13 @@ auto widget::global_to_local(point_i p) const -> point_f
 
 void widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    if (!_transition.CurrentStyle) { return; }
+    auto* currentStyle {_transition.current_style()};
+    if (!currentStyle) { return; }
 
-    bounds -= _transition.CurrentStyle->Margin;
+    bounds -= currentStyle->Margin;
     if (!isHitTest) {
-        bounds -= _transition.CurrentStyle->Padding;
-        bounds -= _transition.CurrentStyle->Border.thickness();
+        bounds -= currentStyle->Padding;
+        bounds -= currentStyle->Border.thickness();
     }
 }
 
@@ -207,11 +207,8 @@ void widget::on_styles_changed()
         .Attributes = attributes(),
     };
 
-    _transition.Tween        = nullptr;
-    _transition.TargetStyle  = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
-    _transition.OldStyle     = _transition.TargetStyle;
-    _transition.CurrentStyle = _transition.TargetStyle;
-    _lastSelectors           = newSelectors;
+    _transition.reset(dynamic_cast<widget_style*>(_form->Styles->get(newSelectors)));
+    _lastSelectors = newSelectors;
 }
 
 void widget::prepare_redraw()
@@ -225,17 +222,7 @@ void widget::prepare_redraw()
     if (_lastSelectors != newSelectors) {
         _lastSelectors = newSelectors;
 
-        _transition.OldStyle     = _transition.TargetStyle;
-        _transition.TargetStyle  = dynamic_cast<widget_style*>(_form->Styles->get(newSelectors));
-        _transition.CurrentStyle = _transition.TargetStyle;
-
-        if (TransitionDuration->count() > 0 && _transition.OldStyle != _transition.TargetStyle) {
-            _transition.Tween = make_unique_tween<linear_tween<f64>>(TransitionDuration, 0.0, 1.0);
-            _transition.Tween->Value.Changed.connect([this](auto const&) {
-                force_redraw(this->name() + ": Transition");
-            });
-            _transition.Tween->start(playback_mode::Normal);
-        }
+        _transition.start(dynamic_cast<widget_style*>(_form->Styles->get(newSelectors)), TransitionDuration);
     }
 }
 
@@ -521,11 +508,6 @@ void widget::deactivate()
 auto widget::styles() const -> style_collection const&
 {
     return _form->Styles();
-}
-
-auto widget::transition_def::is_active() const -> bool
-{
-    return Tween && Tween->status() == playback_status::Running && OldStyle && TargetStyle;
 }
 
 }

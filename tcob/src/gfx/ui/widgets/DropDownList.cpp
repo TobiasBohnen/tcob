@@ -269,7 +269,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
     bool const         invert {ev.Scroll.Y > 0};
     milliseconds const delay {_style.VScrollBar.Bar.Delay};
-    f32 const          diff {_vScrollbar.Max / (invert ? -10 : 10)};
+    f32 const          diff {get_item_height() * std::min(MaxVisibleItems(), std::ssize(_items)) * (invert ? -1 : 1)};
     _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
 
     ev.Handled = true;

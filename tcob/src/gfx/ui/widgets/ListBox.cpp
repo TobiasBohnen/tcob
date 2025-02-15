@@ -86,7 +86,7 @@ auto list_box::select_item(utf8_string const& item) -> bool
 
 void list_box::scroll_to_selected()
 {
-    if (SelectedItemIndex < 1) { return; }
+    if (SelectedItemIndex == INVALID_INDEX) { return; }
 
     _scrollToSelected = true;
 }
@@ -104,6 +104,12 @@ auto list_box::selected_item() const -> list_item const&
 auto list_box::item_count() const -> isize
 {
     return std::ssize(get_items());
+}
+
+void list_box::prepare_redraw()
+{
+    update_style(_style);
+    vscroll_widget::prepare_redraw();
 }
 
 void list_box::on_paint(widget_painter& painter)
@@ -125,6 +131,7 @@ void list_box::on_paint(widget_painter& painter)
 
     rect_f const listRect {rect};
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
+    _visibleRows = listRect.height() / itemHeight;
 
     auto const paint_item {[&](isize i) {
         auto const get_item_style {[this](isize index) {
@@ -144,10 +151,10 @@ void list_box::on_paint(widget_painter& painter)
         paint_item(i);
     }
 
-    if (SelectedItemIndex >= 0) {
+    if (SelectedItemIndex != INVALID_INDEX) {
         paint_item(SelectedItemIndex());
     }
-    if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
+    if (HoveredItemIndex != INVALID_INDEX && SelectedItemIndex != HoveredItemIndex) {
         paint_item(HoveredItemIndex());
     }
 }
@@ -156,9 +163,8 @@ void list_box::on_update(milliseconds deltaTime)
 {
     vscroll_widget::on_update(deltaTime);
 
-    if (_scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
-        rect_f const listRect {content_bounds()};
-        f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
+    if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
+        f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
         set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
         _scrollToSelected = false;
     }
@@ -258,6 +264,11 @@ auto list_box::get_scroll_content_height() const -> f32
     return retValue;
 }
 
+auto list_box::get_scroll_distance() const -> f32
+{
+    return _style.ItemHeight.calc(content_bounds().height()) * _visibleRows;
+}
+
 auto list_box::get_items() const -> std::vector<list_item> const&
 {
     return Filter->empty() ? _items : _filteredItems;
@@ -276,12 +287,6 @@ auto list_box::attributes() const -> widget_attributes
         retValue["hover"] = items.at(HoveredItemIndex()).Text;
     }
     return retValue;
-}
-
-auto list_box::get_style(bool update) -> vscroll_widget::style*
-{
-    if (update) { update_style(_style); }
-    return &_style;
 }
 
 } // namespace ui

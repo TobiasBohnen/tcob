@@ -107,6 +107,12 @@ auto grid_view::get_cell(point_i idx) const -> utf8_string
     return _rows[idx.Y - 1][idx.X].Text;
 }
 
+void grid_view::prepare_redraw()
+{
+    update_style(_style);
+    vscroll_widget::prepare_redraw();
+}
+
 void grid_view::on_paint(widget_painter& painter)
 {
     update_style(_style);
@@ -151,6 +157,7 @@ void grid_view::on_paint(widget_painter& painter)
 
     // rows
     _rowRectCache.clear();
+    _visibleRows = (gridRect.height() / rowHeight) - 1;
     for (i32 y {0}; y < std::ssize(_rows); ++y) {
         auto const& row {_rows[y]};
         f32         offsetX {0.f};
@@ -257,15 +264,13 @@ auto grid_view::get_scroll_content_height() const -> f32
 {
     if (_columnHeaders.empty()) { return 0; }
 
-    rect_f const listRect {content_bounds()};
-    f32 const    itemHeight {_style.RowHeight.calc(listRect.height())};
+    f32 const itemHeight {_style.RowHeight.calc(content_bounds().height())};
     return itemHeight * (_rows.size() + 1);
 }
 
-auto grid_view::get_style(bool update) -> vscroll_widget::style*
+auto grid_view::get_scroll_distance() const -> f32
 {
-    if (update) { update_style(_style); }
-    return &_style;
+    return _style.RowHeight.calc(content_bounds().height()) * _visibleRows;
 }
 
 } // namespace ui
