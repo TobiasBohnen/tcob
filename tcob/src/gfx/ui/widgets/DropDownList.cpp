@@ -149,18 +149,14 @@ void drop_down_list::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         auto const paint_item {[&](isize i) {
-            auto const get_item_rect {[&listRect, &itemHeight, this](isize index) {
-                rect_f retValue {listRect};
-                retValue.Size.Height = itemHeight;
-                retValue.Position.Y  = listRect.top() + (retValue.height() * index) - _vScrollbar.current_value();
-                return retValue;
-            }};
-
             auto const get_item_style {[this](isize index) {
                 return get_sub_style<item_style>(_style.ItemClass, {.Active = index == SelectedItemIndex, .Hover = index == HoveredItemIndex});
             }};
 
-            rect_f const itemRect {get_item_rect(i)};
+            rect_f itemRect {listRect};
+            itemRect.Size.Height = itemHeight;
+            itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - _vScrollbar.current_value();
+
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                 auto const& itemStyle {get_item_style(i)->Item};
                 painter.draw_item(itemStyle, itemRect, items[i]);
@@ -171,7 +167,6 @@ void drop_down_list::on_paint(widget_painter& painter)
         // content
         for (i32 i {0}; i < std::ssize(items); ++i) {
             if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-
             paint_item(i);
         }
 

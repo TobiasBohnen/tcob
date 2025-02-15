@@ -134,13 +134,16 @@ void list_box::on_paint(widget_painter& painter)
     _visibleRows = listRect.height() / itemHeight;
 
     auto const paint_item {[&](isize i) {
-        auto const get_item_style {[this](isize index) {
-            return get_sub_style<item_style>(_style.ItemClass, {.Active = index == SelectedItemIndex, .Hover = index == HoveredItemIndex});
+        auto const get_item_style {[&i, this]() {
+            return get_sub_style<item_style>(_style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
         }};
 
-        rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+        rect_f itemRect {listRect};
+        itemRect.Size.Height = itemHeight;
+        itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
+
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-            auto const& itemStyle {get_item_style(i)->Item};
+            auto const& itemStyle {get_item_style()->Item};
             painter.draw_item(itemStyle, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
         }
@@ -241,14 +244,6 @@ void list_box::on_mouse_wheel(input::mouse::wheel_event const& ev)
     vscroll_widget::on_mouse_wheel(ev);
 }
 
-auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f
-{
-    rect_f retValue {rect};
-    retValue.Size.Height = itemHeight;
-    retValue.Position.Y  = rect.top() + (retValue.height() * index) - get_scrollbar_value();
-    return retValue;
-}
-
 auto list_box::get_scroll_content_height() const -> f32
 {
     if (_items.empty()) { return 0; }
@@ -257,8 +252,7 @@ auto list_box::get_scroll_content_height() const -> f32
     rect_f const listRect {content_bounds()};
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
     for (i32 i {0}; i < item_count(); ++i) {
-        rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
-        retValue += itemRect.height();
+        retValue += itemHeight;
     }
 
     return retValue;

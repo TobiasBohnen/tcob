@@ -64,8 +64,6 @@ protected:
 private:
     auto get_items() const -> std::vector<list_item> const&;
 
-    auto get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f;
-
     std::vector<list_item>            _items;
     std::vector<list_item>            _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
