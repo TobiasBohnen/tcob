@@ -122,10 +122,37 @@ void grid_view::on_paint(widget_painter& painter)
     // content
     scissor_guard const guard {painter, this};
 
-    rect_f gridRect {rect};
+    auto const get_cell_rect {[this](point_i idx, point_f pos, size_f size, f32 offsetX) {
+        rect_f retValue {point_f::Zero, size};
+        retValue.Position.X = pos.X + offsetX;
+        retValue.Position.Y = pos.Y + (size.Height * idx.Y);
+        if (idx.Y > 0) {
+            retValue.Position.Y -= get_scrollbar_value();
+        }
 
-    f32 const rowHeight {_style.RowHeight.calc(gridRect.height())};
+        return retValue;
+    }};
 
+    auto const get_cell_style {[this](point_i idx, string const& className, select_mode mode) {
+        switch (mode) {
+        case select_mode::Cell:
+            return idx == SelectedCellIndex ? get_sub_style<item_style>(className, {.Active = true})
+                : idx == HoveredCellIndex   ? get_sub_style<item_style>(className, {.Hover = true})
+                                            : get_sub_style<item_style>(className, {});
+        case select_mode::Row:
+            return idx.Y == SelectedCellIndex->Y ? get_sub_style<item_style>(className, {.Active = true})
+                : idx.Y == HoveredCellIndex->Y   ? get_sub_style<item_style>(className, {.Hover = true})
+                                                 : get_sub_style<item_style>(className, {});
+        case select_mode::Column:
+        default:
+            return idx.X == SelectedCellIndex->X ? get_sub_style<item_style>(className, {.Active = true})
+                : idx.X == HoveredCellIndex->X   ? get_sub_style<item_style>(className, {.Hover = true})
+                                                 : get_sub_style<item_style>(className, {});
+        }
+    }};
+
+    rect_f           gridRect {rect};
+    f32 const        rowHeight {_style.RowHeight.calc(gridRect.height())};
     std::vector<f32> colWidths(_columnHeaders.size());
 
     // rows
@@ -146,8 +173,8 @@ void grid_view::on_paint(widget_painter& painter)
             offsetX += colWidth;
         }
     }
-    f32 offsetX {0.f};
     // headers
+    f32 offsetX {0.f};
     _headerRectCache.clear();
     for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
         f32 const colWidth {colWidths[x]};
@@ -220,38 +247,6 @@ auto grid_view::attributes() const -> widget_attributes
         retValue["hover"] = get_cell(HoveredCellIndex);
     }
     return retValue;
-}
-
-auto grid_view::get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX) const -> rect_f
-{
-    rect_f retValue {point_f::Zero, size};
-    retValue.Position.X = pos.X + offsetX;
-    retValue.Position.Y = pos.Y + (size.Height * idx.Y);
-    if (idx.Y > 0) {
-        retValue.Position.Y -= get_scrollbar_value();
-    }
-
-    return retValue;
-}
-
-auto grid_view::get_cell_style(point_i idx, string const& className, select_mode mode) const -> item_style*
-{
-    switch (mode) {
-    case select_mode::Cell:
-        return idx == SelectedCellIndex ? get_sub_style<item_style>(className, {.Active = true})
-            : idx == HoveredCellIndex   ? get_sub_style<item_style>(className, {.Hover = true})
-                                        : get_sub_style<item_style>(className, {});
-    case select_mode::Row:
-        return idx.Y == SelectedCellIndex->Y ? get_sub_style<item_style>(className, {.Active = true})
-            : idx.Y == HoveredCellIndex->Y   ? get_sub_style<item_style>(className, {.Hover = true})
-                                             : get_sub_style<item_style>(className, {});
-    case select_mode::Column:
-        return idx.X == SelectedCellIndex->X ? get_sub_style<item_style>(className, {.Active = true})
-            : idx.X == HoveredCellIndex->X   ? get_sub_style<item_style>(className, {.Hover = true})
-                                             : get_sub_style<item_style>(className, {});
-    }
-
-    return nullptr;
 }
 
 auto grid_view::get_column_width(i32 col, f32 width) const -> f32

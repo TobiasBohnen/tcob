@@ -61,8 +61,6 @@ protected:
     auto get_scroll_content_height() const -> f32 override;
 
 private:
-    auto get_cell_rect(point_i idx, point_f pos, size_f size, f32 offsetX) const -> rect_f;
-    auto get_cell_style(point_i idx, string const& className, select_mode mode) const -> item_style*;
     auto get_column_width(i32 col, f32 width) const -> f32;
 
     std::vector<list_item>              _columnHeaders;

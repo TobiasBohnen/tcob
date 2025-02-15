@@ -63,7 +63,6 @@ private:
     auto get_items() const -> std::vector<list_item> const&;
 
     auto get_item_rect(isize index, f32 itemHeight, rect_f const& rect) const -> rect_f;
-    auto get_item_style(isize index) const -> item_style*;
 
     std::vector<list_item>            _items;
     std::vector<list_item>            _filteredItems;

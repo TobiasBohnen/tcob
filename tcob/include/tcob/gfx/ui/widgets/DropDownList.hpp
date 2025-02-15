@@ -77,9 +77,6 @@ private:
 
     void set_extended(bool v);
 
-    auto get_item_rect(isize index, f32 itemHeight, rect_f const& listRect) const -> rect_f;
-    auto get_item_style(isize index) const -> item_style*;
-
     std::vector<list_item>            _items;
     std::unordered_map<isize, rect_f> _itemRectCache;
 

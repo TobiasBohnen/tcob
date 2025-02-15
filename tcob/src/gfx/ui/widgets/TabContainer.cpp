@@ -99,19 +99,7 @@ void tab_container::on_paint(widget_painter& painter)
     // tabs
     _tabRectCache.clear();
     if (_style.TabBarPosition != position::Hidden) {
-        auto const get_tab_rect {[&](item_style const& itemStyle, isize index, rect_f const& rect) {
-            isize const maxItems {std::min(*MaxTabsPerRow, std::ssize(_tabs))};
-            rect_f      retValue {rect};
-            retValue.Position.X  = rect.left() + (rect.width() / maxItems) * (index % maxItems);
-            retValue.Size.Width  = rect.width() / maxItems;
-            retValue.Position.Y  = retValue.top() + (rect.height() * (index / maxItems));
-            retValue.Size.Height = rect.height();
-
-            retValue -= itemStyle.Item.Border.thickness();
-            return retValue;
-        }};
-
-        auto const get_tab_style {[&](isize index) {
+        auto const get_tab_style {[this](isize index) {
             return index == ActiveTabIndex ? get_sub_style<item_style>(_style.TabItemClass, {.Active = true})
                 : index == HoveredTabIndex ? get_sub_style<item_style>(_style.TabItemClass, {.Hover = true})
                                            : get_sub_style<item_style>(_style.TabItemClass, {});
@@ -124,9 +112,21 @@ void tab_container::on_paint(widget_painter& painter)
             tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * get_tab_row_count());
         }
 
+        auto const get_tab_rect {[&tabBarRowRect, this](item_style const& itemStyle, isize index) {
+            isize const maxItems {std::min(*MaxTabsPerRow, std::ssize(_tabs))};
+            rect_f      retValue {tabBarRowRect};
+            retValue.Position.X  = tabBarRowRect.left() + (tabBarRowRect.width() / maxItems) * (index % maxItems);
+            retValue.Size.Width  = tabBarRowRect.width() / maxItems;
+            retValue.Position.Y  = retValue.top() + (tabBarRowRect.height() * (index / maxItems));
+            retValue.Size.Height = tabBarRowRect.height();
+
+            retValue -= itemStyle.Item.Border.thickness();
+            return retValue;
+        }};
+
         for (i32 i {0}; i < std::ssize(_tabs); ++i) {
             if (auto const* tabStyle {get_tab_style(i)}) {
-                rect_f const tabRect {get_tab_rect(*tabStyle, i, tabBarRowRect)};
+                rect_f const tabRect {get_tab_rect(*tabStyle, i)};
                 painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
                 _tabRectCache.push_back(tabRect);
             }

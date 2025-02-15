@@ -149,8 +149,21 @@ void drop_down_list::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         auto const paint_item {[&](isize i) {
+            auto const get_item_rect {[&listRect, &itemHeight, this](isize index) {
+                rect_f retValue {listRect};
+                retValue.Size.Height = itemHeight;
+                retValue.Position.Y  = listRect.top() + (retValue.height() * index) - _vScrollbar.current_value();
+                return retValue;
+            }};
+
+            auto const get_item_style {[this](isize index) {
+                return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
+                    : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
+                                                  : get_sub_style<item_style>(_style.ItemClass, {});
+            }};
+
             auto const*  itemStyle {get_item_style(i)};
-            rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
+            rect_f const itemRect {get_item_rect(i)};
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                 painter.draw_item(itemStyle->Item, itemRect, items[i]);
                 _itemRectCache[i] = itemRect;
@@ -296,21 +309,6 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
         bounds.Size.Height += _style.Border.Size.calc(listHeight);
         bounds.Size.Height += boxHeight;
     }
-}
-
-auto drop_down_list::get_item_rect(isize index, f32 itemHeight, rect_f const& listRect) const -> rect_f
-{
-    rect_f retValue {listRect};
-    retValue.Size.Height = itemHeight;
-    retValue.Position.Y  = listRect.top() + (retValue.height() * index) - _vScrollbar.current_value();
-    return retValue;
-}
-
-auto drop_down_list::get_item_style(isize index) const -> item_style*
-{
-    return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
-        : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
-                                      : get_sub_style<item_style>(_style.ItemClass, {});
 }
 
 auto drop_down_list::attributes() const -> widget_attributes

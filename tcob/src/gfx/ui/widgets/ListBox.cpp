@@ -127,6 +127,12 @@ void list_box::on_paint(widget_painter& painter)
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
 
     auto const paint_item {[&](isize i) {
+        auto const get_item_style {[this](isize index) {
+            return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
+                : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
+                                              : get_sub_style<item_style>(_style.ItemClass, {});
+        }};
+
         auto const&  itemStyle {get_item_style(i)};
         rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
@@ -237,13 +243,6 @@ auto list_box::get_item_rect(isize index, f32 itemHeight, rect_f const& rect) co
     retValue.Size.Height = itemHeight;
     retValue.Position.Y  = rect.top() + (retValue.height() * index) - get_scrollbar_value();
     return retValue;
-}
-
-auto list_box::get_item_style(isize index) const -> item_style*
-{
-    return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
-        : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
-                                      : get_sub_style<item_style>(_style.ItemClass, {});
 }
 
 auto list_box::get_scroll_content_height() const -> f32
