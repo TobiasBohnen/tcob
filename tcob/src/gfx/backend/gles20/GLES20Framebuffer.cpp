@@ -80,7 +80,7 @@ void gl_framebuffer::clear(color c) const
 {
     bind();
     // Replaced glClearBufferfv and glClearBufferfi with glClearColor and glClear
-    vec4 color {c.as_float_array()};
+    vec4 color {c.to_float_array()};
     GLCHECK(glClearColor(color[0], color[1], color[2], color[3]));
     GLCHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }

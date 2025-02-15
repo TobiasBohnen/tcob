@@ -12,6 +12,7 @@ template <std::derived_from<widget_style> T>
 inline void widget::get_style(T& style)
 {
     if (_transition.CurrentStyle) {
+        assert(dynamic_cast<T*>(_transition.CurrentStyle));
         style = *static_cast<T*>(_transition.CurrentStyle);
     }
 

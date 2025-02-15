@@ -47,6 +47,13 @@ auto constexpr size<T>::equals(size<T> const& other, f32 tol) const -> bool
 }
 
 template <Arithmetic T>
+auto constexpr size<T>::as_fitted [[nodiscard]] (size<T> const& s) const -> size<T>
+{
+    f32 const factor {((s.Width / s.Height) > (Width / Height)) ? (Width / s.Width) : (Height / s.Height)};
+    return {s.Width * factor, s.Height * factor};
+}
+
+template <Arithmetic T>
 auto constexpr operator-(size<T> const& right) -> size<T>
 {
     return size<T> {-right.Width, -right.Height};

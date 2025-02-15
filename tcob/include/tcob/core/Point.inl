@@ -26,7 +26,7 @@ constexpr point<T>::point(point<U> const& p)
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::as_array [[nodiscard]] () const -> std::array<T, 2>
+auto constexpr point<T>::to_array [[nodiscard]] () const -> std::array<T, 2>
 {
     return {X, Y};
 }

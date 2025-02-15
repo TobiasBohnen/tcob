@@ -120,6 +120,11 @@ auto widget::hit_test(point_f pos) const -> bool
         && hit_test_bounds().contains(pos);
 }
 
+auto widget::current_style() const -> widget_style*
+{
+    return _transition.CurrentStyle;
+}
+
 auto widget::hit_test_bounds() const -> rect_f
 {
     rect_f retValue {global_position(), Bounds->Size};

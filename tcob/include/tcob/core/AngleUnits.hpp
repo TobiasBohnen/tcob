@@ -38,7 +38,7 @@ public:
     auto tan [[nodiscard]] () const -> ValueType;
     auto atan [[nodiscard]] () const -> ValueType;
 
-    auto constexpr as_normalized [[nodiscard]] (angle_normalize mode = angle_normalize::FullTurnSymmetric) const -> angle_unit<ValueType, OneTurn>;
+    auto constexpr as_normalized(angle_normalize mode = angle_normalize::FullTurnSymmetric) const -> angle_unit<ValueType, OneTurn>;
 
     auto constexpr equals(angle_unit const& other, value_type tol) const -> bool;
 

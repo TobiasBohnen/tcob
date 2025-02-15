@@ -497,16 +497,15 @@ void widget_painter::draw_item(element::item const& style, rect_f const& rect, l
     if (drawText && drawIcon) {
         rect_f textRect {contentRect};
         textRect.Size.Width /= 2;
-        textRect.Position.X += textRect.Size.Width;
+        textRect.Position.X += textRect.width();
 
         draw_text(style.Text, textRect, item.Text);
 
         rect_f iconRect {contentRect};
         iconRect.Size.Width /= 2;
 
-        auto const [iconWidth, iconHeight] {item.Icon.Texture->info().Size};
-        f32 const factor {iconWidth / static_cast<f32>(iconHeight)};
-        iconRect = {iconRect.Position, {iconRect.width(), iconRect.width() * factor}};
+        size_f const iconSize {iconRect.Size.as_fitted(size_f {item.Icon.Texture->info().Size})};
+        iconRect = {iconRect.Position, iconSize};
         iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
 
         _canvas.set_fill_style(style.Text.Color);
@@ -514,10 +513,8 @@ void widget_painter::draw_item(element::item const& style, rect_f const& rect, l
     } else if (drawText) {
         draw_text(style.Text, contentRect, item.Text);
     } else if (drawIcon) {
-        auto const [iconWidth, iconHeight] {item.Icon.Texture->info().Size};
-        f32 const factor {iconHeight / static_cast<f32>(iconWidth)};
-        f32 const scaledWidth {contentRect.height() * factor};
-        contentRect = {{contentRect.center().X - (scaledWidth / 2), contentRect.top()}, {scaledWidth, contentRect.height()}};
+        size_f const iconSize {contentRect.Size.as_fitted(size_f {item.Icon.Texture->info().Size})};
+        contentRect = {{contentRect.center().X - (iconSize.Width / 2), contentRect.top()}, iconSize};
 
         _canvas.set_fill_style(style.Text.Color);
         _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, contentRect);

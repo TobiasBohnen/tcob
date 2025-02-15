@@ -30,13 +30,12 @@ void dot_matrix_display::on_paint(widget_painter& painter)
         return;
     }
 
-    dot_matrix_display::style style;
-    get_style(style);
+    get_style(_style);
 
     rect_f rect {Bounds()};
 
     // background
-    painter.draw_background_and_border(style, rect, false);
+    painter.draw_background_and_border(_style, rect, false);
 
     scissor_guard const guard {painter, this};
 
@@ -47,7 +46,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
     f32 const height {rect.height() / Size->Height};
 
     for (auto const& [colorIdx, dots] : _sortedDots) {
-        canvas.set_fill_style(style.Dot.Colors.at(colorIdx));
+        canvas.set_fill_style(_style.Dot.Colors.at(colorIdx));
         canvas.begin_path();
 
         for (auto const& dot : dots) {
@@ -55,7 +54,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
                                   (dot.Y * height) + rect.top(),
                                   width, height};
 
-            switch (style.Dot.Type) {
+            switch (_style.Dot.Type) {
             case dot::type::Disc: {
                 canvas.circle(dotRect.center(), width / 2);
             } break;
@@ -167,20 +166,19 @@ auto seven_segment_display::get_segment(char c) -> std::bitset<7>
 
 void seven_segment_display::on_paint(widget_painter& painter)
 {
-    seven_segment_display::style style;
-    get_style(style);
+    get_style(_style);
 
     rect_f rect {Bounds()};
 
     // background
-    painter.draw_background_and_border(style, rect, false);
+    painter.draw_background_and_border(_style, rect, false);
 
     scissor_guard const guard {painter, this};
 
     auto& canvas {painter.canvas()};
     canvas.save();
 
-    f32 const width {style.Segment.Size.calc(rect.width())};
+    f32 const width {_style.Segment.Size.calc(rect.width())};
     f32 const thickness {width / 4};
 
     point_f       offset {rect.top_left()};
@@ -217,12 +215,12 @@ void seven_segment_display::on_paint(widget_painter& painter)
 
         for (i32 i {0}; i < 7; i++) {
             if (segments[6 - i]) {
-                canvas.set_fill_style(style.Segment.ActiveColor);
+                canvas.set_fill_style(_style.Segment.ActiveColor);
             } else {
-                if (style.Segment.InactiveColor.A == 0) {
+                if (_style.Segment.InactiveColor.A == 0) {
                     continue;
                 }
-                canvas.set_fill_style(style.Segment.InactiveColor);
+                canvas.set_fill_style(_style.Segment.InactiveColor);
             }
 
             switch (i) {

@@ -27,7 +27,7 @@ public:
     template <typename U>
     explicit constexpr point(point<U> const& p);
 
-    auto constexpr as_array [[nodiscard]] () const -> std::array<T, 2>;
+    auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
 
     auto constexpr dot(point<T> const& p) const -> float_type;
     auto constexpr cross(point<T> const& p) const -> float_type;

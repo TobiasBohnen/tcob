@@ -25,8 +25,8 @@ public:
             Square
         };
 
-        std::unordered_map<u16, color> Colors;
-        type                           Type {type::Disc};
+        std::unordered_map<u8, color> Colors;
+        type                          Type {type::Disc};
 
         auto operator==(dot const& other) const -> bool = default;
     };
@@ -38,8 +38,8 @@ public:
 
     explicit dot_matrix_display(init const& wi);
 
-    prop<size_i>                 Size;
-    prop<std::vector<u16> const> Dots;
+    prop<size_i>                Size;
+    prop<std::vector<u8> const> Dots;
 
 protected:
     void on_paint(widget_painter& painter) override;
@@ -49,6 +49,8 @@ protected:
 private:
     bool                                          _isDirty {false};
     std::unordered_map<u16, std::vector<point_i>> _sortedDots;
+
+    dot_matrix_display::style _style;
 };
 
 ////////////////////////////////////////////////////////////
@@ -76,6 +78,8 @@ protected:
 
 private:
     auto get_segment(char c) -> std::bitset<7>;
+
+    seven_segment_display::style _style;
 };
 
 ////////////////////////////////////////////////////////////

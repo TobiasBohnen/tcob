@@ -101,7 +101,7 @@ auto constexpr rect<T>::find_edge(degree_f angle) const -> point<T>
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect<T>
+auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect
 {
     return {{center.X - Size.Width / 2.0f, center.Y - Size.Height / 2.0f}, Size};
 }
@@ -259,7 +259,7 @@ auto constexpr rect<T>::contains(point<U> const& point) const -> bool
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::equals(rect<T> const& other, f32 tol) const -> bool
+auto constexpr rect<T>::equals(rect const& other, f32 tol) const -> bool
 {
     f32 const dx {static_cast<f32>(other.Position.X) - Position.X};
     f32 const dy {static_cast<f32>(other.Position.Y) - Position.Y};

@@ -150,7 +150,7 @@ void gl_render_target::bind_material(material const* mat) const
     }
 
     usize offset {0};
-    offset += _matUniformBuffer.update(mat->Color.as_float_array(), offset);
+    offset += _matUniformBuffer.update(mat->Color.to_float_array(), offset);
     offset += _matUniformBuffer.update(mat->PointSize, offset);
     _matUniformBuffer.bind_base(1);
 

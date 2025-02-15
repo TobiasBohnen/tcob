@@ -31,6 +31,8 @@ public:
 
     auto constexpr equals(size<T> const& other, f32 tol) const -> bool;
 
+    auto constexpr as_fitted(size<T> const& s) const -> size<T>;
+
     auto static constexpr Lerp(size<T> const& left, size<T> const& right, f64 step) -> size<T>;
 
     T Width {0};

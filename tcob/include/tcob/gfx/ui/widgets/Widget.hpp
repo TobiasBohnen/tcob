@@ -91,8 +91,7 @@ public:
 
     auto hit_test(point_f pos) const -> bool;
 
-    template <std::derived_from<widget_style> T>
-    void get_style(T& style);
+    auto current_style() const -> widget_style*;
 
 protected:
     struct init {
@@ -108,6 +107,9 @@ protected:
     void virtual on_styles_changed();
 
     auto styles() const -> style_collection const&;
+
+    template <std::derived_from<widget_style> T>
+    void get_style(T& style);
 
     template <std::derived_from<style> T>
     auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;
