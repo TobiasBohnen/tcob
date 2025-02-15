@@ -29,8 +29,8 @@ drop_down_list::drop_down_list(init const& wi)
     SelectedItemIndex(INVALID_INDEX);
     HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
-    VisibleItemCount.Changed.connect([this](auto const&) { force_redraw(this->name() + ": VisibleItemCount changed"); });
-    VisibleItemCount(5);
+    MaxVisibleItems.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaxVisibleItems changed"); });
+    MaxVisibleItems(5);
     Class("drop_down_list");
 }
 
@@ -134,7 +134,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         // list background
         rect_f listRect {Bounds()};
         listRect.Position.Y += listRect.height();
-        f32 const listHeight {itemHeight * VisibleItemCount};
+        f32 const listHeight {itemHeight * MaxVisibleItems};
         listRect.Size.Height = listHeight;
         listRect.Size.Height += _style.Margin.Top.calc(listHeight) + _style.Margin.Bottom.calc(listHeight);
         listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
@@ -143,7 +143,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         painter.draw_background_and_border(_style, listRect, false);
 
         // scrollbar
-        _vScrollbar.Visible = std::ssize(items) > VisibleItemCount;
+        _vScrollbar.Visible = std::ssize(items) > MaxVisibleItems;
         _vScrollbar.paint(painter, _style.VScrollBar, listRect, fls.Active);
 
         scissor_guard const guard {painter, this};
@@ -288,7 +288,7 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
     refListHeight -= _style.Padding.Top.calc(listRect.Size.Height) + _style.Padding.Bottom.calc(listRect.Size.Height);
     refListHeight -= _style.Border.Size.calc(listRect.Size.Height);
     f32 const itemHeight {_style.ItemHeight.calc(refListHeight)};
-    f32 const listHeight {itemHeight * VisibleItemCount};
+    f32 const listHeight {itemHeight * MaxVisibleItems};
     bounds.Size.Height = listHeight;
 
     if (isHitTest) {

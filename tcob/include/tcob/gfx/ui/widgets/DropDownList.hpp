@@ -36,7 +36,7 @@ public:
     prop_val<isize> SelectedItemIndex;
     prop_val<isize> HoveredItemIndex;
 
-    prop<isize> VisibleItemCount; // TODO: change to prop_val
+    prop<isize> MaxVisibleItems; // TODO: change to prop_val
 
     void prepare_redraw() override;
 

@@ -65,9 +65,11 @@ void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
 void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        _vScrollbar.mouse_down(ev.Position);
-        force_redraw(this->name() + ": mouse down");
-        ev.Handled = true;
+        if (_vScrollbar.is_mouse_over()) {
+            _vScrollbar.mouse_down(ev.Position);
+            force_redraw(this->name() + ": mouse down");
+            ev.Handled = true;
+        }
     }
 }
 

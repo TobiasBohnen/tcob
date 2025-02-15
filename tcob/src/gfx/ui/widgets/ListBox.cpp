@@ -200,9 +200,9 @@ void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
     HoveredItemIndex = INVALID_INDEX;
 
     vscroll_widget::on_mouse_hover(ev);
+    if (ev.Handled) { return; }
 
     auto const mp {global_to_local(ev.Position)};
-
     for (auto const& kvp : _itemRectCache) {
         if (!kvp.second.contains(mp)) { continue; }
         HoveredItemIndex = kvp.first;
