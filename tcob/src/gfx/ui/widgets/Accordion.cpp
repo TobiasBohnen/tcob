@@ -96,9 +96,7 @@ void accordion::on_paint(widget_painter& painter)
     painter.draw_background_and_border(_style, rect, false);
 
     auto const get_section_style {[this](isize index) {
-        return index == ActiveSectionIndex ? get_sub_style<item_style>(_style.SectionItemClass, {.Active = true})
-            : index == HoveredSectionIndex ? get_sub_style<item_style>(_style.SectionItemClass, {.Hover = true})
-                                           : get_sub_style<item_style>(_style.SectionItemClass, {});
+        return get_sub_style<item_style>(_style.SectionItemClass, {.Active = index == ActiveSectionIndex, .Hover = index == HoveredSectionIndex});
     }};
 
     // sections

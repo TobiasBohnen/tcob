@@ -128,15 +128,13 @@ void list_box::on_paint(widget_painter& painter)
 
     auto const paint_item {[&](isize i) {
         auto const get_item_style {[this](isize index) {
-            return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
-                : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
-                                              : get_sub_style<item_style>(_style.ItemClass, {});
+            return get_sub_style<item_style>(_style.ItemClass, {.Active = index == SelectedItemIndex, .Hover = index == HoveredItemIndex});
         }};
 
-        auto const&  itemStyle {get_item_style(i)};
         rect_f const itemRect {get_item_rect(i, itemHeight, listRect)};
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-            painter.draw_item(itemStyle->Item, itemRect, get_items()[i]);
+            auto const& itemStyle {get_item_style(i)->Item};
+            painter.draw_item(itemStyle, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
         }
     }};

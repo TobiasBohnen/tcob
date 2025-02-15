@@ -136,18 +136,12 @@ void grid_view::on_paint(widget_painter& painter)
     auto const get_cell_style {[this](point_i idx, string const& className, select_mode mode) {
         switch (mode) {
         case select_mode::Cell:
-            return idx == SelectedCellIndex ? get_sub_style<item_style>(className, {.Active = true})
-                : idx == HoveredCellIndex   ? get_sub_style<item_style>(className, {.Hover = true})
-                                            : get_sub_style<item_style>(className, {});
+            return get_sub_style<item_style>(className, {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex});
         case select_mode::Row:
-            return idx.Y == SelectedCellIndex->Y ? get_sub_style<item_style>(className, {.Active = true})
-                : idx.Y == HoveredCellIndex->Y   ? get_sub_style<item_style>(className, {.Hover = true})
-                                                 : get_sub_style<item_style>(className, {});
+            return get_sub_style<item_style>(className, {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y});
         case select_mode::Column:
         default:
-            return idx.X == SelectedCellIndex->X ? get_sub_style<item_style>(className, {.Active = true})
-                : idx.X == HoveredCellIndex->X   ? get_sub_style<item_style>(className, {.Hover = true})
-                                                 : get_sub_style<item_style>(className, {});
+            return get_sub_style<item_style>(className, {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X});
         }
     }};
 

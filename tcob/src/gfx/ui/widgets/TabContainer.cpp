@@ -100,9 +100,7 @@ void tab_container::on_paint(widget_painter& painter)
     _tabRectCache.clear();
     if (_style.TabBarPosition != position::Hidden) {
         auto const get_tab_style {[this](isize index) {
-            return index == ActiveTabIndex ? get_sub_style<item_style>(_style.TabItemClass, {.Active = true})
-                : index == HoveredTabIndex ? get_sub_style<item_style>(_style.TabItemClass, {.Hover = true})
-                                           : get_sub_style<item_style>(_style.TabItemClass, {});
+            return get_sub_style<item_style>(_style.TabItemClass, {.Active = index == ActiveTabIndex, .Hover = index == HoveredTabIndex});
         }};
 
         rect_f tabBarRowRect {rect};

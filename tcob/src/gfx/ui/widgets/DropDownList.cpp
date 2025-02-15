@@ -157,15 +157,13 @@ void drop_down_list::on_paint(widget_painter& painter)
             }};
 
             auto const get_item_style {[this](isize index) {
-                return index == SelectedItemIndex ? get_sub_style<item_style>(_style.ItemClass, {.Active = true})
-                    : index == HoveredItemIndex   ? get_sub_style<item_style>(_style.ItemClass, {.Hover = true})
-                                                  : get_sub_style<item_style>(_style.ItemClass, {});
+                return get_sub_style<item_style>(_style.ItemClass, {.Active = index == SelectedItemIndex, .Hover = index == HoveredItemIndex});
             }};
 
-            auto const*  itemStyle {get_item_style(i)};
             rect_f const itemRect {get_item_rect(i)};
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                painter.draw_item(itemStyle->Item, itemRect, items[i]);
+                auto const& itemStyle {get_item_style(i)->Item};
+                painter.draw_item(itemStyle, itemRect, items[i]);
                 _itemRectCache[i] = itemRect;
             }
         }};
