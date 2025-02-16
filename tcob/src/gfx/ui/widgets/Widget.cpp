@@ -179,7 +179,7 @@ auto widget::global_to_local(point_i p) const -> point_f
 
 void widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    auto* currentStyle {_transition.current_style()};
+    auto const* currentStyle {_transition.current_style()};
     if (!currentStyle) { return; }
 
     bounds -= currentStyle->Margin;

@@ -298,8 +298,6 @@ public:
     element::shadow DropShadow {colors::Transparent, length {5, length::type::Absolute}, length {5, length::type::Absolute}};
     element::border Border;
 
-    string Cursor {"default"};
-
     void static Transition(widget_style& target, widget_style const& left, widget_style const& right, f64 step);
 };
 

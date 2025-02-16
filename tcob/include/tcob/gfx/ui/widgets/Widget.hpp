@@ -55,6 +55,8 @@ public:
     prop<dimensions>   Flex;
     prop<milliseconds> TransitionDuration;
 
+    string Cursor {"default"};
+
     std::shared_ptr<tooltip> Tooltip;
 
     void focus();

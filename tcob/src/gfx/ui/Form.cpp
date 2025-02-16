@@ -219,8 +219,8 @@ auto form::can_draw() const -> bool
 void form::on_draw_to(render_target& target)
 {
     // set cursor
-    if (_window && _window->Cursor() && _topWidget && _topWidget->current_style()) {
-        _window->Cursor->ActiveMode = _topWidget->current_style()->Cursor;
+    if (_window && _window->Cursor() && _topWidget) {
+        _window->Cursor->ActiveMode = _topWidget->Cursor;
     }
 
     size_i const bounds {size_i {Bounds->Size}};
