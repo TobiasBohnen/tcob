@@ -114,6 +114,12 @@ void grid_view::prepare_redraw()
     vscroll_widget::prepare_redraw();
 }
 
+void grid_view::on_styles_changed()
+{
+    vscroll_widget::on_styles_changed();
+    _itemTransitions.clear();
+}
+
 void grid_view::on_paint(widget_painter& painter)
 {
     update_style(_style);

@@ -113,6 +113,12 @@ void list_box::prepare_redraw()
     vscroll_widget::prepare_redraw();
 }
 
+void list_box::on_styles_changed()
+{
+    vscroll_widget::on_styles_changed();
+    _itemTransitions.clear();
+}
+
 void list_box::on_paint(widget_painter& painter)
 {
     update_style(_style);

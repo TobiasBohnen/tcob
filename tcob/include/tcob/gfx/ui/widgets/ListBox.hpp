@@ -47,6 +47,8 @@ public:
     void prepare_redraw() override;
 
 protected:
+    void on_styles_changed() override;
+
     void on_paint(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
