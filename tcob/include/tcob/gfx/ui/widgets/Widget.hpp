@@ -91,7 +91,7 @@ public:
 
     auto hit_test(point_f pos) const -> bool;
 
-    auto current_style() const -> widget_style*;
+    auto current_style() const -> widget_style const*;
 
 protected:
     struct init {
@@ -180,8 +180,8 @@ private:
     widget*      _parent {nullptr};
     string       _name;
 
-    transition_context<widget_style> _transition;
-    widget_style_selectors           _lastSelectors;
+    transition<widget_style> _transition;
+    widget_style_selectors   _lastSelectors;
 };
 
 ////////////////////////////////////////////////////////////

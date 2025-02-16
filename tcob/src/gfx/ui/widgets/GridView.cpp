@@ -88,6 +88,7 @@ void grid_view::clear_rows()
     _rows.clear();
     _columnSizes.clear();
     _columnSizes.resize(_columnHeaders.size());
+    _itemTransitions.clear();
     set_scrollbar_value(0);
     SelectedCellIndex = INVALID;
     HoveredCellIndex  = INVALID;
@@ -152,41 +153,63 @@ void grid_view::on_paint(widget_painter& painter)
     }};
 
     rect_f           gridRect {rect};
-    f32 const        rowHeight {_style.RowHeight.calc(gridRect.height())};
+    f32 const        rowHeight = _style.RowHeight.calc(gridRect.height());
     std::vector<f32> colWidths(_columnHeaders.size());
 
-    // rows
+    for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
+        colWidths[x] = get_column_width(x, gridRect.width());
+    }
+
     _rowRectCache.clear();
+    _headerRectCache.clear();
     _visibleRows = (gridRect.height() / rowHeight) - 1;
+
+    auto const paint_cell {[&](point_i idx, f32 offsetX, list_item const& item, string const& className, rect_f& cell) {
+        rect_f const cellRect {get_cell_rect(idx, gridRect.Position, {colWidths[idx.X], rowHeight}, offsetX)};
+        auto&        transition {_itemTransitions[idx]};
+        auto const*  cellStyle {get_cell_style(idx, className, SelectMode)};
+
+        if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
+            transition.start(cellStyle, TransitionDuration);
+            item_style newStyle {*cellStyle};
+            transition.update_style(newStyle);
+
+            painter.draw_item(newStyle.Item, cellRect, item);
+            cell = cellRect;
+            return;
+        }
+
+        transition.reset(cellStyle);
+    }};
+
+    // Draw rows
     for (i32 y {0}; y < std::ssize(_rows); ++y) {
-        auto const& row {_rows[y]};
-        f32         offsetX {0.f};
+        f32 offsetX {0.f};
 
         for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-            f32 const colWidth {colWidths[x] = get_column_width(x, gridRect.width())};
-
-            rect_f const cellRect {get_cell_rect({x, y + 1}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
-            if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-                auto const& cellStyle {get_cell_style({x, y + 1}, _style.RowItemClass, SelectMode)->Item};
-                painter.draw_item(cellStyle, cellRect, row[x]);
-                _rowRectCache[{x, y + 1}] = cellRect;
-            }
-            offsetX += colWidth;
+            point_i const idx {x, y + 1};
+            paint_cell(idx, offsetX, _rows[y][x], _style.RowItemClass, _rowRectCache[idx]);
+            offsetX += colWidths[x];
         }
     }
-    // headers
-    f32 offsetX {0.f};
-    _headerRectCache.clear();
-    for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-        f32 const colWidth {colWidths[x]};
 
-        rect_f const cellRect {get_cell_rect({x, 0}, gridRect.Position, {colWidth, rowHeight}, offsetX)};
-        if (cellRect.bottom() > 0 && cellRect.top() < gridRect.bottom()) {
-            auto const& cellStyle {get_cell_style({x, 0}, _style.HeaderItemClass, SelectMode)->Item};
-            painter.draw_item(cellStyle, cellRect, _columnHeaders[x]);
-            _headerRectCache[{x, 0}] = cellRect;
-        }
-        offsetX += colWidth;
+    // Draw headers
+    f32 offsetX {0.f};
+    for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
+        point_i const idx {x, 0};
+        paint_cell(idx, offsetX, _columnHeaders[x], _style.HeaderItemClass, _headerRectCache[idx]);
+        offsetX += colWidths[x];
+    }
+}
+
+void grid_view::on_update(milliseconds deltaTime)
+{
+    vscroll_widget::on_update(deltaTime);
+
+    // item transitions
+    for (auto& [_, v] : _itemTransitions) {
+        if (v.is_active()) { force_redraw(this->name() + ": Item transition"); }
+        v.update(deltaTime);
     }
 }
 
@@ -199,8 +222,6 @@ void grid_view::on_mouse_leave()
 
 void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredCellIndex = INVALID;
-
     vscroll_widget::on_mouse_hover(ev);
 
     auto const mp {global_to_local(ev.Position)};
@@ -219,6 +240,8 @@ void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
         ev.Handled       = true;
         return;
     }
+
+    HoveredCellIndex = INVALID;
 }
 
 void grid_view::on_mouse_down(input::mouse::button_event const& ev)

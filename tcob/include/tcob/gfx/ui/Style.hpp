@@ -316,6 +316,8 @@ public:
 class TCOB_API item_style : public style {
 public:
     element::item Item;
+
+    void static Transition(item_style& target, item_style const& left, item_style const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////

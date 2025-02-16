@@ -56,6 +56,8 @@ public:
 protected:
     void on_paint(widget_painter& painter) override;
 
+    void on_update(milliseconds deltaTime) override;
+
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_down(input::mouse::button_event const& ev) override;
@@ -72,9 +74,10 @@ private:
     std::vector<isize>                  _columnSizes;
     std::vector<std::vector<list_item>> _rows;
 
-    std::unordered_map<point_i, rect_f> _headerRectCache;
-    std::unordered_map<point_i, rect_f> _rowRectCache;
-    isize                               _visibleRows {0};
+    std::unordered_map<point_i, rect_f>                 _headerRectCache;
+    std::unordered_map<point_i, rect_f>                 _rowRectCache;
+    std::unordered_map<point_i, transition<item_style>> _itemTransitions;
+    isize                                               _visibleRows {0};
 
     grid_view::style _style;
 };

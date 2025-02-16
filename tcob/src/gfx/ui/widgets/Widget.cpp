@@ -106,7 +106,8 @@ void widget::paint(widget_painter& painter)
 
 void widget::update(milliseconds deltaTime)
 {
-    if (_transition.update(deltaTime)) { force_redraw(this->name() + ": Transition"); }
+    if (_transition.is_active()) { force_redraw(this->name() + ": Transition"); }
+    _transition.update(deltaTime);
 
     on_update(deltaTime);
 }
@@ -118,7 +119,7 @@ auto widget::hit_test(point_f pos) const -> bool
         && hit_test_bounds().contains(pos);
 }
 
-auto widget::current_style() const -> widget_style*
+auto widget::current_style() const -> widget_style const*
 {
     return _transition.current_style();
 }

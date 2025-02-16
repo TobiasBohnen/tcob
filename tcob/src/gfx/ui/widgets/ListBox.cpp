@@ -37,7 +37,7 @@ list_box::list_box(init const& wi)
         if (!val.empty()) {
             _filteredItems.reserve(_items.size());
             for (i32 i {0}; i < std::ssize(_items); ++i) {
-                if (helper::case_insensitive_contains(_items[i].Text, Filter())) {
+                if (helper::case_insensitive_contains(_items[i].Text, val)) {
                     _filteredItems.push_back(_items[i]);
                 }
             }
@@ -66,6 +66,7 @@ void list_box::clear_items()
 {
     _items.clear();
     _filteredItems.clear();
+    _itemTransitions.clear();
     SelectedItemIndex = INVALID_INDEX;
     HoveredItemIndex  = INVALID_INDEX;
     force_redraw(this->name() + ": items cleared");
@@ -134,18 +135,21 @@ void list_box::on_paint(widget_painter& painter)
     _visibleRows = listRect.height() / itemHeight;
 
     auto const paint_item {[&](isize i) {
-        auto const get_item_style {[&i, this]() {
-            return get_sub_style<item_style>(_style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
-        }};
-
         rect_f itemRect {listRect};
         itemRect.Size.Height = itemHeight;
         itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
 
+        auto&       transition {_itemTransitions[i]};
+        auto const* itemStyle {get_sub_style<item_style>(_style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex})};
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-            auto const& itemStyle {get_item_style()->Item};
-            painter.draw_item(itemStyle, itemRect, get_items()[i]);
+            transition.start(itemStyle, TransitionDuration);
+            item_style newStyle {*itemStyle};
+            transition.update_style(newStyle);
+
+            painter.draw_item(newStyle.Item, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
+        } else {
+            transition.reset(itemStyle);
         }
     }};
 
@@ -166,10 +170,17 @@ void list_box::on_update(milliseconds deltaTime)
 {
     vscroll_widget::on_update(deltaTime);
 
+    // scroll to selected
     if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
         set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
         _scrollToSelected = false;
+    }
+
+    // item transitions
+    for (auto& [_, v] : _itemTransitions) {
+        if (v.is_active()) { force_redraw(this->name() + ": Item transition"); }
+        v.update(deltaTime);
     }
 }
 
@@ -177,6 +188,7 @@ void list_box::on_key_down(input::keyboard::event const& ev)
 {
     using namespace tcob::enum_ops;
 
+    // select based on first char
     auto const  kc {static_cast<char>(ev.KeyCode)};
     auto const& items {get_items()};
     if (Filter->empty() && !items.empty() && SelectedItemIndex >= 0 && kc >= 'a' && kc <= 'z') { // TODO: make optional
@@ -210,8 +222,6 @@ void list_box::on_mouse_leave()
 
 void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredItemIndex = INVALID_INDEX;
-
     vscroll_widget::on_mouse_hover(ev);
     if (ev.Handled) { return; }
 
@@ -222,6 +232,8 @@ void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
         ev.Handled       = true;
         return;
     }
+
+    HoveredItemIndex = INVALID_INDEX;
 }
 
 void list_box::on_mouse_down(input::mouse::button_event const& ev)
@@ -233,7 +245,7 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
         if (SelectedItemIndex != HoveredItemIndex()) {
             SelectedItemIndex = HoveredItemIndex();
             ev.Handled        = true;
-        } // else SelectedItemClicked event?
+        }
     }
 }
 
@@ -248,12 +260,9 @@ auto list_box::get_scroll_content_height() const -> f32
 {
     if (_items.empty()) { return 0; }
 
-    f32          retValue {0.0f};
-    rect_f const listRect {content_bounds()};
-    f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
-    for (i32 i {0}; i < item_count(); ++i) {
-        retValue += itemHeight;
-    }
+    f32       retValue {0.0f};
+    f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
+    for (i32 i {0}; i < item_count(); ++i) { retValue += itemHeight; }
 
     return retValue;
 }

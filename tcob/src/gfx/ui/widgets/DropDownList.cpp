@@ -191,8 +191,6 @@ void drop_down_list::on_mouse_leave()
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    HoveredItemIndex = INVALID_INDEX;
-
     bool const wasMouseOverBox {_mouseOverBox};
     _mouseOverBox = false;
 
@@ -200,23 +198,30 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     if (_vScrollbar.is_mouse_over()) {
         force_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
-    } else {
-        rect_f const boxRect {global_position(), Bounds->Size};
-        if (boxRect.contains(ev.Position)) {
-            _mouseOverBox = true;
-            ev.Handled    = true;
-            if (!wasMouseOverBox) { force_redraw(this->name() + ": mouse enter"); }
-        } else if (_isExtended) {
-            auto const mp {global_to_local(ev.Position)};
 
-            for (auto const& kvp : _itemRectCache) {
-                if (!kvp.second.contains(mp)) { continue; }
-                HoveredItemIndex = kvp.first;
-                ev.Handled       = true;
-                return;
-            }
-        }
+        HoveredItemIndex = INVALID_INDEX;
+        return;
     }
+
+    auto const mp {global_to_local(ev.Position)};
+    if (Bounds->contains(mp)) {
+        _mouseOverBox = true;
+        ev.Handled    = true;
+        if (!wasMouseOverBox) { force_redraw(this->name() + ": mouse enter"); }
+
+        HoveredItemIndex = INVALID_INDEX;
+        return;
+    }
+
+    if (!_isExtended) { return; }
+    for (auto const& kvp : _itemRectCache) {
+        if (!kvp.second.contains(mp)) { continue; }
+        HoveredItemIndex = kvp.first;
+        ev.Handled       = true;
+        return;
+    }
+
+    HoveredItemIndex = INVALID_INDEX;
 }
 
 void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)

@@ -10,24 +10,23 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class transition_context {
+class transition {
 public:
-    void start(T* target, milliseconds duration);
-    void reset(T* target);
+    void start(T const* target, milliseconds duration);
+    void reset(T const* target);
 
-    auto update(milliseconds deltaTime) -> bool;
+    void update(milliseconds deltaTime);
+    auto is_active() const -> bool;
 
-    auto current_style() const -> T*;
+    auto current_style() const -> T const*;
 
     template <typename S>
     void update_style(S& style);
 
 private:
-    auto is_active() const -> bool;
-
-    T* _currentStyle {nullptr};
-    T* _targetStyle {nullptr};
-    T* _oldStyle {nullptr};
+    T const* _currentStyle {nullptr};
+    T const* _targetStyle {nullptr};
+    T const* _oldStyle {nullptr};
 
     milliseconds _duration {};
     milliseconds _currentTime {};

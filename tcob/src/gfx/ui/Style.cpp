@@ -279,6 +279,8 @@ namespace element {
 
     void item::Transition(item& target, item const& left, item const& right, f64 step)
     {
+        text::Transition(target.Text, left.Text, right.Text, step);
+
         if (auto const* lc {std::get_if<color>(&left.Background)}) {
             if (auto const* rc {std::get_if<color>(&right.Background)}) {
                 target.Background = color::Lerp(*lc, *rc, step);
@@ -288,6 +290,11 @@ namespace element {
         border::Transition(target.Border, left.Border, right.Border, step);
         target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
     }
+}
+
+void item_style::Transition(item_style& target, item_style const& left, item_style const& right, f64 step)
+{
+    element::item::Transition(target.Item, left.Item, right.Item, step);
 }
 
 ////////////////////////////////////////////////////////////
