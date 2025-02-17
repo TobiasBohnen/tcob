@@ -12,6 +12,7 @@ template <std::derived_from<widget_style> T>
 inline void widget::update_style(T& style)
 {
     _transition.update_style(style);
+    _currentStyle = &style;
 }
 
 template <std::derived_from<style> T>

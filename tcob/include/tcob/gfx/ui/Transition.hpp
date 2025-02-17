@@ -18,15 +18,12 @@ public:
     void update(milliseconds deltaTime);
     auto is_active() const -> bool;
 
-    auto current_style() const -> T const*;
-
     template <typename S>
     void update_style(S& style);
 
 private:
-    T const* _currentStyle {nullptr};
     T const* _targetStyle {nullptr};
-    T const* _oldStyle {nullptr};
+    T const* _sourceStyle {nullptr};
 
     milliseconds _duration {};
     milliseconds _currentTime {};

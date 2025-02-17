@@ -184,6 +184,7 @@ private:
 
     transition<widget_style> _transition;
     widget_style_selectors   _lastSelectors;
+    widget_style*            _currentStyle {nullptr};
 };
 
 ////////////////////////////////////////////////////////////

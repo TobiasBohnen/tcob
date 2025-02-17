@@ -121,7 +121,7 @@ auto widget::hit_test(point_f pos) const -> bool
 
 auto widget::current_style() const -> widget_style const*
 {
-    return _transition.current_style();
+    return _currentStyle;
 }
 
 auto widget::hit_test_bounds() const -> rect_f
@@ -179,13 +179,12 @@ auto widget::global_to_local(point_i p) const -> point_f
 
 void widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
-    auto const* currentStyle {_transition.current_style()};
-    if (!currentStyle) { return; }
+    if (!_currentStyle) { return; }
 
-    bounds -= currentStyle->Margin;
+    bounds -= _currentStyle->Margin;
     if (!isHitTest) {
-        bounds -= currentStyle->Padding;
-        bounds -= currentStyle->Border.thickness();
+        bounds -= _currentStyle->Padding;
+        bounds -= _currentStyle->Border.thickness();
     }
 }
 
@@ -207,7 +206,10 @@ void widget::on_styles_changed()
         .Attributes = attributes(),
     };
 
-    _transition.reset(dynamic_cast<widget_style*>(_form->Styles->get(newSelectors)));
+    auto* style {dynamic_cast<widget_style*>(_form->Styles->get(newSelectors))};
+    _transition.reset(style);
+    _currentStyle = style;
+
     _lastSelectors = newSelectors;
 }
 
@@ -220,8 +222,11 @@ void widget::prepare_redraw()
     };
 
     if (_lastSelectors != newSelectors) {
+        auto* style {dynamic_cast<widget_style*>(_form->Styles->get(newSelectors))};
+        _transition.start(style, TransitionDuration);
+        _currentStyle = style;
+
         _lastSelectors = newSelectors;
-        _transition.start(dynamic_cast<widget_style*>(_form->Styles->get(newSelectors)), TransitionDuration);
     }
 }
 
