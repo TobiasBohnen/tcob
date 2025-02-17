@@ -10,7 +10,7 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void transition<T>::start(T const* target, milliseconds duration)
+inline void transition<T>::try_start(T const* target, milliseconds duration)
 {
     if (target == _targetStyle) { return; }
 
@@ -45,7 +45,7 @@ auto transition<T>::is_active() const -> bool
 
 template <typename T>
 template <typename S>
-inline void transition<T>::update_style(S& style)
+inline void transition<T>::apply(S& style)
 {
     if (_targetStyle) {
         assert(dynamic_cast<S const*>(_targetStyle));

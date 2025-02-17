@@ -66,7 +66,8 @@ void list_box::clear_items()
 {
     _items.clear();
     _filteredItems.clear();
-    _itemTransitions.clear();
+    clear_sub_styles();
+
     SelectedItemIndex = INVALID_INDEX;
     HoveredItemIndex  = INVALID_INDEX;
     force_redraw(this->name() + ": items cleared");
@@ -113,12 +114,6 @@ void list_box::prepare_redraw()
     vscroll_widget::prepare_redraw();
 }
 
-void list_box::on_styles_changed()
-{
-    vscroll_widget::on_styles_changed();
-    _itemTransitions.clear();
-}
-
 void list_box::on_paint(widget_painter& painter)
 {
     update_style(_style);
@@ -145,17 +140,14 @@ void list_box::on_paint(widget_painter& painter)
         itemRect.Size.Height = itemHeight;
         itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
 
-        auto&       transition {_itemTransitions[i]};
-        auto const* itemStyle {get_sub_style<item_style>(_style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex})};
-        if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-            transition.start(itemStyle, TransitionDuration);
-            item_style newStyle {*itemStyle};
-            transition.update_style(newStyle);
+        item_style newStyle {};
+        update_sub_style(newStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
 
+        if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
             painter.draw_item(newStyle.Item, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
         } else {
-            transition.reset(itemStyle);
+            reset_sub_style(i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
         }
     }};
 
@@ -181,12 +173,6 @@ void list_box::on_update(milliseconds deltaTime)
         f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
         set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
         _scrollToSelected = false;
-    }
-
-    // item transitions
-    for (auto& [_, v] : _itemTransitions) {
-        if (v.is_active()) { force_redraw(this->name() + ": Item transition"); }
-        v.update(deltaTime);
     }
 }
 

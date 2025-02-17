@@ -12,14 +12,14 @@ namespace tcob::gfx::ui {
 template <typename T>
 class transition {
 public:
-    void start(T const* target, milliseconds duration);
+    void try_start(T const* target, milliseconds duration);
     void reset(T const* target);
 
     void update(milliseconds deltaTime);
     auto is_active() const -> bool;
 
     template <typename S>
-    void update_style(S& style);
+    void apply(S& style);
 
 private:
     T const* _targetStyle {nullptr};

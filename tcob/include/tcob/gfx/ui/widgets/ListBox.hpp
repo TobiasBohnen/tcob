@@ -8,6 +8,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <unordered_map>
+#include <vector>
 
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
@@ -47,8 +48,6 @@ public:
     void prepare_redraw() override;
 
 protected:
-    void on_styles_changed() override;
-
     void on_paint(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
@@ -68,11 +67,10 @@ protected:
 private:
     auto get_items() const -> std::vector<list_item> const&;
 
-    std::vector<list_item>                            _items;
-    std::vector<list_item>                            _filteredItems;
-    std::unordered_map<isize, rect_f>                 _itemRectCache;
-    std::unordered_map<isize, transition<item_style>> _itemTransitions;
-    isize                                             _visibleRows {0};
+    std::vector<list_item>            _items;
+    std::vector<list_item>            _filteredItems;
+    std::unordered_map<isize, rect_f> _itemRectCache;
+    isize                             _visibleRows {0};
 
     bool _scrollToSelected {false};
 

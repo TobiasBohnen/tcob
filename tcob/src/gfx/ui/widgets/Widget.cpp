@@ -109,6 +109,12 @@ void widget::update(milliseconds deltaTime)
     if (_transition.is_active()) { force_redraw(this->name() + ": Transition"); }
     _transition.update(deltaTime);
 
+    // item transitions
+    for (auto& [_, v] : _subStyleTransitions) {
+        if (v.is_active()) { force_redraw(this->name() + ": Item transition"); }
+        v.update(deltaTime);
+    }
+
     on_update(deltaTime);
 }
 
@@ -211,6 +217,8 @@ void widget::on_styles_changed()
     _currentStyle = style;
 
     _lastSelectors = newSelectors;
+
+    _subStyleTransitions.clear();
 }
 
 void widget::prepare_redraw()
@@ -223,7 +231,7 @@ void widget::prepare_redraw()
 
     if (_lastSelectors != newSelectors) {
         auto* style {dynamic_cast<widget_style*>(_form->Styles->get(newSelectors))};
-        _transition.start(style, TransitionDuration);
+        _transition.try_start(style, TransitionDuration);
         _currentStyle = style;
 
         _lastSelectors = newSelectors;
@@ -512,6 +520,22 @@ void widget::deactivate()
 auto widget::styles() const -> style_collection const&
 {
     return _form->Styles();
+}
+
+void widget::reset_sub_style(isize idx, string const& styleClass, widget_flags flags)
+{
+    widget_style_selectors const selectors {
+        .Class      = styleClass,
+        .Flags      = flags,
+        .Attributes = attributes(),
+    };
+    auto* subStyle {styles().get(selectors)};
+    _subStyleTransitions[idx].reset(subStyle);
+}
+
+void widget::clear_sub_styles()
+{
+    _subStyleTransitions.clear();
 }
 
 }

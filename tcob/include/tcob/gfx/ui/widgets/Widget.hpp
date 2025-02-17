@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <unordered_map>
 
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
@@ -114,6 +115,11 @@ protected:
     void update_style(T& style);
 
     template <std::derived_from<style> T>
+    void update_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags);
+    void reset_sub_style(isize idx, string const& styleClass, widget_flags flags);
+    void clear_sub_styles();
+
+    template <std::derived_from<style> T>
     auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;
 
     void virtual on_paint(widget_painter& painter) = 0;
@@ -182,9 +188,11 @@ private:
     widget*      _parent {nullptr};
     string       _name;
 
-    transition<widget_style> _transition;
-    widget_style_selectors   _lastSelectors;
-    widget_style*            _currentStyle {nullptr};
+    widget_style_selectors _lastSelectors;
+    widget_style*          _currentStyle {nullptr};
+
+    transition<widget_style>                     _transition;
+    std::unordered_map<isize, transition<style>> _subStyleTransitions;
 };
 
 ////////////////////////////////////////////////////////////

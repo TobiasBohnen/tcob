@@ -88,7 +88,8 @@ void grid_view::clear_rows()
     _rows.clear();
     _columnSizes.clear();
     _columnSizes.resize(_columnHeaders.size());
-    _itemTransitions.clear();
+    clear_sub_styles();
+
     set_scrollbar_value(0);
     SelectedCellIndex = INVALID;
     HoveredCellIndex  = INVALID;
@@ -112,12 +113,6 @@ void grid_view::prepare_redraw()
 {
     update_style(_style);
     vscroll_widget::prepare_redraw();
-}
-
-void grid_view::on_styles_changed()
-{
-    vscroll_widget::on_styles_changed();
-    _itemTransitions.clear();
 }
 
 void grid_view::on_paint(widget_painter& painter)
@@ -146,15 +141,15 @@ void grid_view::on_paint(widget_painter& painter)
         return retValue;
     }};
 
-    auto const get_cell_style {[this](point_i idx, string const& className, select_mode mode) {
+    auto const get_cell_flags {[this](point_i idx, select_mode mode) -> widget_flags {
         switch (mode) {
         case select_mode::Cell:
-            return get_sub_style<item_style>(className, {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex});
+            return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
         case select_mode::Row:
-            return get_sub_style<item_style>(className, {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y});
+            return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
         case select_mode::Column:
         default:
-            return get_sub_style<item_style>(className, {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X});
+            return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
         }
     }};
 
@@ -172,20 +167,17 @@ void grid_view::on_paint(widget_painter& painter)
 
     auto const paint_cell {[&](point_i idx, f32 offsetX, list_item const& item, string const& className, rect_f& cell) {
         rect_f const cellRect {get_cell_rect(idx, gridRect.Position, {colWidths[idx.X], rowHeight}, offsetX)};
-        auto&        transition {_itemTransitions[idx]};
-        auto const*  cellStyle {get_cell_style(idx, className, SelectMode)};
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
-            transition.start(cellStyle, TransitionDuration);
-            item_style newStyle {*cellStyle};
-            transition.update_style(newStyle);
+            item_style newStyle {};
+            update_sub_style(newStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, get_cell_flags(idx, SelectMode));
 
             painter.draw_item(newStyle.Item, cellRect, item);
             cell = cellRect;
             return;
         }
 
-        transition.reset(cellStyle);
+        reset_sub_style(idx.X + idx.Y * std::ssize(_columnHeaders), className, get_cell_flags(idx, SelectMode));
     }};
 
     // Draw rows
@@ -205,17 +197,6 @@ void grid_view::on_paint(widget_painter& painter)
         point_i const idx {x, 0};
         paint_cell(idx, offsetX, _columnHeaders[x], _style.HeaderItemClass, _headerRectCache[idx]);
         offsetX += colWidths[x];
-    }
-}
-
-void grid_view::on_update(milliseconds deltaTime)
-{
-    vscroll_widget::on_update(deltaTime);
-
-    // item transitions
-    for (auto& [_, v] : _itemTransitions) {
-        if (v.is_active()) { force_redraw(this->name() + ": Item transition"); }
-        v.update(deltaTime);
     }
 }
 
