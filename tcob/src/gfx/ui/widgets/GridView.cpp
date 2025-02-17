@@ -169,10 +169,10 @@ void grid_view::on_paint(widget_painter& painter)
         rect_f const cellRect {get_cell_rect(idx, gridRect.Position, {colWidths[idx.X], rowHeight}, offsetX)};
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
-            item_style newStyle {};
-            update_sub_style(newStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, get_cell_flags(idx, SelectMode));
+            item_style cellStyle {};
+            update_sub_style(cellStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, get_cell_flags(idx, SelectMode));
 
-            painter.draw_item(newStyle.Item, cellRect, item);
+            painter.draw_item(cellStyle.Item, cellRect, item);
             cell = cellRect;
             return;
         }

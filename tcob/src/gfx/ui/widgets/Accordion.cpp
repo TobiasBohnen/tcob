@@ -38,6 +38,7 @@ void accordion::remove_section(widget* sec)
         if (_sections[i].get() == sec) {
             _sections.erase(_sections.begin() + i);
             _sectionLabels.erase(_sectionLabels.begin() + i);
+            clear_sub_styles();
             break;
         }
     }
@@ -49,6 +50,8 @@ void accordion::clear_sections()
 {
     _sections.clear();
     _sectionLabels.clear();
+    clear_sub_styles();
+
     ActiveSectionIndex = 0;
     force_redraw(this->name() + ": sections cleared");
 }
@@ -95,10 +98,6 @@ void accordion::on_paint(widget_painter& painter)
     //  background
     painter.draw_background_and_border(_style, rect, false);
 
-    auto const get_section_style {[this](isize index) {
-        return get_sub_style<item_style>(_style.SectionItemClass, {.Active = index == ActiveSectionIndex, .Hover = index == HoveredSectionIndex});
-    }};
-
     // sections
     f32 const  sectionHeight {_style.SectionBarHeight.calc(rect.height())};
     auto const get_section_rect {[&](item_style const& itemStyle, isize index) {
@@ -113,20 +112,20 @@ void accordion::on_paint(widget_painter& painter)
     }};
 
     _sectionRectCache.clear();
+    auto paint_section = [&](isize i, isize rectIndex) {
+        item_style sectionStyle {};
+        update_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
+
+        rect_f const sectionRect {get_section_rect(sectionStyle, rectIndex)};
+        painter.draw_item(sectionStyle.Item, sectionRect, _sectionLabels[i]);
+        _sectionRectCache.push_back(sectionRect);
+    };
+
     if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
-        isize const i {ActiveSectionIndex()};
-        if (auto const* sectionStyle {get_section_style(i)}) {
-            rect_f const sectionRect {get_section_rect(*sectionStyle, 0)};
-            painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
-            _sectionRectCache.push_back(sectionRect);
-        }
+        paint_section(ActiveSectionIndex(), 0);
     } else {
         for (isize i {0}; i < std::ssize(_sections); ++i) {
-            if (auto const* sectionStyle {get_section_style(i)}) {
-                rect_f const sectionRect {get_section_rect(*sectionStyle, i)};
-                painter.draw_item(sectionStyle->Item, sectionRect, _sectionLabels[i]);
-                _sectionRectCache.push_back(sectionRect);
-            }
+            paint_section(i, i);
         }
     }
 

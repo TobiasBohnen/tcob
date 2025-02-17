@@ -48,6 +48,7 @@ void drop_down_list::add_item(list_item const& item)
 void drop_down_list::clear_items()
 {
     _items.clear();
+    clear_sub_styles();
     force_redraw(this->name() + ": items cleared");
 }
 
@@ -149,17 +150,15 @@ void drop_down_list::on_paint(widget_painter& painter)
         scissor_guard const guard {painter, this};
 
         auto const paint_item {[&](isize i) {
-            auto const get_item_style {[this](isize index) {
-                return get_sub_style<item_style>(_style.ItemClass, {.Active = index == SelectedItemIndex, .Hover = index == HoveredItemIndex});
-            }};
-
             rect_f itemRect {listRect};
             itemRect.Size.Height = itemHeight;
             itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - _vScrollbar.current_value();
 
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                auto const& itemStyle {get_item_style(i)->Item};
-                painter.draw_item(itemStyle, itemRect, items[i]);
+                item_style itemStyle {};
+                update_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+
+                painter.draw_item(itemStyle.Item, itemRect, items[i]);
                 _itemRectCache[i] = itemRect;
             }
         }};
@@ -233,7 +232,13 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         } else if (HoveredItemIndex != INVALID_INDEX) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
-                set_extended(false); // close on select
+
+                // close-on-select requires setting style here:
+                // item_style itemStyle {};
+                // if (SelectedItemIndex != INVALID_INDEX) { update_sub_style(itemStyle, SelectedItemIndex, _style.ItemClass, {.Active = false}); }
+                // SelectedItemIndex = HoveredItemIndex();
+                // update_sub_style(itemStyle, SelectedItemIndex, _style.ItemClass, {.Active = true});
+                // set_extended(false);
             }
         }
 

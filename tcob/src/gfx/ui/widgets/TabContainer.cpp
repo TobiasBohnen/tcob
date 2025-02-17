@@ -39,6 +39,7 @@ void tab_container::remove_tab(widget* tab)
         if (_tabs[i].get() == tab) {
             _tabs.erase(_tabs.begin() + i);
             _tabLabels.erase(_tabLabels.begin() + i);
+            clear_sub_styles();
             break;
         }
     }
@@ -50,6 +51,8 @@ void tab_container::clear_tabs()
 {
     _tabs.clear();
     _tabLabels.clear();
+    clear_sub_styles();
+
     ActiveTabIndex = 0;
     force_redraw(this->name() + ": tabs cleared");
 }
@@ -99,9 +102,6 @@ void tab_container::on_paint(widget_painter& painter)
     // tabs
     _tabRectCache.clear();
     if (_style.TabBarPosition != position::Hidden) {
-        auto const get_tab_style {[this](isize index) {
-            return get_sub_style<item_style>(_style.TabItemClass, {.Active = index == ActiveTabIndex, .Hover = index == HoveredTabIndex});
-        }};
 
         rect_f tabBarRowRect {rect};
         tabBarRowRect.Size.Height = _style.TabBarHeight.calc(tabBarRowRect.height());
@@ -123,11 +123,12 @@ void tab_container::on_paint(widget_painter& painter)
         }};
 
         for (i32 i {0}; i < std::ssize(_tabs); ++i) {
-            if (auto const* tabStyle {get_tab_style(i)}) {
-                rect_f const tabRect {get_tab_rect(*tabStyle, i)};
-                painter.draw_item(tabStyle->Item, tabRect, _tabLabels[i]);
-                _tabRectCache.push_back(tabRect);
-            }
+            item_style tabStyle {};
+            update_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
+
+            rect_f const tabRect {get_tab_rect(tabStyle, i)};
+            painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
+            _tabRectCache.push_back(tabRect);
         }
     }
 

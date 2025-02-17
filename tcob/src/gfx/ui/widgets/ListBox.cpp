@@ -140,11 +140,11 @@ void list_box::on_paint(widget_painter& painter)
         itemRect.Size.Height = itemHeight;
         itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
 
-        item_style newStyle {};
-        update_sub_style(newStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+        item_style itemStyle {};
+        update_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
 
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-            painter.draw_item(newStyle.Item, itemRect, get_items()[i]);
+            painter.draw_item(itemStyle.Item, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
         } else {
             reset_sub_style(i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
