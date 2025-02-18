@@ -105,6 +105,15 @@ void scrollbar::mouse_up(point_i mp)
     _overBar   = _barRectCache.Bar.contains(_parent.global_to_local(mp));
 }
 
+void scrollbar::mouse_leave()
+{
+    _dragOffset = point_i::Zero;
+    _isDragging = false;
+
+    _overThumb = false;
+    _overBar   = false;
+}
+
 void scrollbar::mouse_down(point_i mp)
 {
     _isDragging = false;

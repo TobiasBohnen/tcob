@@ -98,6 +98,14 @@ void panel::clear_widgets()
     force_redraw(this->name() + ": clearing");
 }
 
+void panel::on_update(milliseconds deltaTime)
+{
+    _layout->update();
+
+    _vScrollbar.update(deltaTime);
+    _hScrollbar.update(deltaTime);
+}
+
 void panel::on_paint(widget_painter& painter)
 {
     update_style(_style);
@@ -141,12 +149,10 @@ void panel::on_paint(widget_painter& painter)
     }
 }
 
-void panel::on_update(milliseconds deltaTime)
+void panel::on_mouse_leave()
 {
-    _layout->update();
-
-    _vScrollbar.update(deltaTime);
-    _hScrollbar.update(deltaTime);
+    _vScrollbar.mouse_leave();
+    _hScrollbar.mouse_leave();
 }
 
 void panel::on_mouse_hover(input::mouse::motion_event const& ev)

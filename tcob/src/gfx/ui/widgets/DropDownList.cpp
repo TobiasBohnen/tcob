@@ -184,6 +184,7 @@ void drop_down_list::on_mouse_leave()
         _mouseOverBox = false;
         force_redraw(this->name() + ": mouse left");
     }
+    _vScrollbar.mouse_leave();
 }
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)

@@ -56,6 +56,11 @@ void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
     _vScrollbar.paint(painter, style->VScrollBar, thumbStyle.Thumb, rect);
 }
 
+void vscroll_widget::on_mouse_leave()
+{
+    _vScrollbar.mouse_leave();
+}
+
 void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     _vScrollbar.mouse_hover(ev.Position);

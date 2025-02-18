@@ -45,6 +45,8 @@ public:
     void mouse_down(point_i mp);
     void mouse_up(point_i mp);
 
+    void mouse_leave();
+
 private:
     void calculate_value(point_f mp);
 
