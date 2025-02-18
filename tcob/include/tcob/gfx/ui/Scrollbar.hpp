@@ -14,8 +14,6 @@ namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API scrollbar {
-    using func = std::function<thumb_style(widget_flags)>;
-
 public:
     struct rects {
         rect_f Bar;
@@ -29,7 +27,7 @@ public:
     f32  Max {0.0f};
 
     void update(milliseconds deltaTime);
-    void paint(widget_painter& painter, element::scrollbar const& style, func const& thumbStyleFunc, rect_f& rect, bool isActive);
+    void paint(widget_painter& painter, element::scrollbar const& scrollbar, element::thumb const& thumb, rect_f& rect);
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;
@@ -38,9 +36,12 @@ public:
     void reset();
 
     auto is_mouse_over() const -> bool;
+    auto is_mouse_over_thumb() const -> bool;
     void mouse_hover(point_i mp);
+
     auto is_dragging() const -> bool;
     void mouse_drag(point_i mp);
+
     void mouse_down(point_i mp);
     void mouse_up(point_i mp);
 
@@ -58,7 +59,7 @@ private:
 
     rects _barRectCache;
 
-    element::scrollbar const* _style {nullptr};
+    milliseconds _delay {0};
 };
 
 }

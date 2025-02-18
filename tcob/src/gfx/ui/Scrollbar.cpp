@@ -21,9 +21,9 @@ void scrollbar::update(milliseconds deltaTime)
     _tween.update(deltaTime);
 }
 
-void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, func const& thumbStyleFunc, rect_f& rect, bool isActive)
+void scrollbar::paint(widget_painter& painter, element::scrollbar const& scrollbar, element::thumb const& thumb, rect_f& rect)
 {
-    _style = &style;
+    _delay = scrollbar.Bar.Delay;
 
     if (!Visible) { return; }
 
@@ -42,24 +42,24 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, 
         .Fraction    = barCtx.Fraction};
 
     rect_f const scrRect {rect};
-    _barRectCache.Bar = painter.draw_bar(_style->Bar, scrRect, barCtx);
-
-    auto const thumbFlags {!_overThumb    ? widget_flags {}
-                               : isActive ? widget_flags {.Active = true}
-                                          : widget_flags {.Hover = true}};
-    auto       thumbStyle {thumbStyleFunc(thumbFlags)};
-    _barRectCache.Thumb = painter.draw_thumb(thumbStyle.Thumb, _barRectCache.Bar, thumbCtx);
+    _barRectCache.Bar   = painter.draw_bar(scrollbar.Bar, scrRect, barCtx);
+    _barRectCache.Thumb = painter.draw_thumb(thumb, _barRectCache.Bar, thumbCtx);
 
     if (_orien == orientation::Vertical) {
-        rect.Size.Width -= _barRectCache.Bar.width() + _style->Bar.Border.Size.calc(_barRectCache.Bar.width());
+        rect.Size.Width -= _barRectCache.Bar.width() + scrollbar.Bar.Border.Size.calc(_barRectCache.Bar.width());
     } else if (_orien == orientation::Horizontal) {
-        rect.Size.Height -= _barRectCache.Bar.height() + _style->Bar.Border.Size.calc(_barRectCache.Bar.height());
+        rect.Size.Height -= _barRectCache.Bar.height() + scrollbar.Bar.Border.Size.calc(_barRectCache.Bar.height());
     }
 }
 
 auto scrollbar::is_mouse_over() const -> bool
 {
     return Visible && (_overBar || _overThumb);
+}
+
+auto scrollbar::is_mouse_over_thumb() const -> bool
+{
+    return Visible && _overThumb;
 }
 
 void scrollbar::mouse_hover(point_i mp)
@@ -146,16 +146,15 @@ void scrollbar::start_scroll(f32 target, milliseconds delay)
 void scrollbar::reset()
 {
     _tween.reset(Min);
-    _style = nullptr;
+    _delay = milliseconds {0};
     Min    = 0;
     Max    = 0;
 }
 
 void scrollbar::calculate_value(point_f mp)
 {
-    rect_f const       rect {_barRectCache.Bar};
-    f32                frac {0.0f};
-    milliseconds const delay {_style ? _style->Bar.Delay : milliseconds {0}};
+    rect_f const rect {_barRectCache.Bar};
+    f32          frac {0.0f};
 
     switch (_orien) {
     case orientation::Horizontal: {
@@ -168,7 +167,7 @@ void scrollbar::calculate_value(point_f mp)
     } break;
     }
 
-    start_scroll(Min + ((Max - Min) * frac), delay);
+    start_scroll(Min + ((Max - Min) * frac), _delay);
 
     _overThumb = true;
 }

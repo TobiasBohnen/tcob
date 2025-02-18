@@ -138,14 +138,12 @@ void drop_down_list::on_paint(widget_painter& painter)
         // scrollbar
         _vScrollbar.Visible = std::ssize(items) > MaxVisibleItems;
 
-        _vScrollbar.paint(
-            painter, _style.VScrollBar,
-            [&](widget_flags flags) {
-                thumb_style thumbStyle;
-                update_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, flags);
-                return thumbStyle;
-            },
-            listRect, fls.Active);
+        auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
+                                    : fls.Active                   ? widget_flags {.Active = true}
+                                                                   : widget_flags {.Hover = true}};
+        thumb_style thumbStyle;
+        update_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
+        _vScrollbar.paint(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
         scissor_guard const guard {painter, this};
 

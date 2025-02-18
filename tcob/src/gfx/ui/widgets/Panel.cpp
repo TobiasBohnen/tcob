@@ -107,25 +107,25 @@ void panel::on_paint(widget_painter& painter)
     // background
     painter.draw_background_and_border(_style, rect, false);
 
-    // scrollbar
-    _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
-    _vScrollbar.paint(
-        painter, _style.VScrollBar,
-        [&](widget_flags flags) {
-            thumb_style thumbStyle;
-            update_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, flags);
-            return thumbStyle;
-        },
-        rect, flags().Active);
-    _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
-    _hScrollbar.paint(
-        painter, _style.HScrollBar,
-        [&](widget_flags flags) {
-            thumb_style thumbStyle;
-            update_sub_style(thumbStyle, -3, _style.HScrollBar.ThumbClass, flags);
-            return thumbStyle;
-        },
-        rect, flags().Active);
+    // scrollbars
+    {
+        _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
+        auto const  vThumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
+                                     : flags().Active               ? widget_flags {.Active = true}
+                                                                    : widget_flags {.Hover = true}};
+        thumb_style vThumbStyle;
+        update_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
+        _vScrollbar.paint(painter, _style.VScrollBar, vThumbStyle.Thumb, rect);
+    }
+    {
+        _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
+        auto const  hThumbFlags {!_hScrollbar.is_mouse_over_thumb() ? widget_flags {}
+                                     : flags().Active               ? widget_flags {.Active = true}
+                                                                    : widget_flags {.Hover = true}};
+        thumb_style hThumbStyle;
+        update_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
+        _hScrollbar.paint(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
+    }
 
     // content
     scissor_guard const guard {painter, this};
