@@ -275,6 +275,40 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
     }
 }
 
+void widget_painter::draw_text_and_icon(element::text const& style, rect_f const& rect, utf8_string const& text, icon const& icon)
+{
+    rect_f contentRect {rect};
+
+    bool const drawText {!text.empty() && style.Font};
+    bool const drawIcon {icon.Texture};
+
+    if (drawText && drawIcon) {
+        rect_f textRect {contentRect};
+        textRect.Size.Width /= 2;
+        textRect.Position.X += textRect.width();
+
+        draw_text(style, textRect, text);
+
+        rect_f iconRect {contentRect};
+        iconRect.Size.Width /= 2;
+
+        size_f const iconSize {iconRect.Size.as_fitted(size_f {icon.Texture->info().Size})};
+        iconRect = {iconRect.Position, iconSize};
+        iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
+
+        _canvas.set_fill_style(style.Color);
+        _canvas.draw_image(icon.Texture.ptr(), icon.Region, iconRect);
+    } else if (drawText) {
+        draw_text(style, contentRect, text);
+    } else if (drawIcon) {
+        size_f const iconSize {contentRect.Size.as_fitted(size_f {icon.Texture->info().Size})};
+        contentRect = {{contentRect.center().X - (iconSize.Width / 2), contentRect.top()}, iconSize};
+
+        _canvas.set_fill_style(style.Color);
+        _canvas.draw_image(icon.Texture.ptr(), icon.Region, contentRect);
+    }
+}
+
 void widget_painter::draw_tick(element::tick const& style, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};
@@ -495,38 +529,11 @@ auto widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
 void widget_painter::draw_item(element::item const& style, rect_f const& rect, list_item const& item)
 {
     draw_bordered_rect(rect, style.Background, style.Border);
+
     rect_f contentRect {rect};
     contentRect -= style.Padding;
     contentRect -= style.Border.thickness();
-
-    bool const drawText {!item.Text.empty() && style.Text.Font};
-    bool const drawIcon {!item.Icon.Texture.is_expired()};
-
-    if (drawText && drawIcon) {
-        rect_f textRect {contentRect};
-        textRect.Size.Width /= 2;
-        textRect.Position.X += textRect.width();
-
-        draw_text(style.Text, textRect, item.Text);
-
-        rect_f iconRect {contentRect};
-        iconRect.Size.Width /= 2;
-
-        size_f const iconSize {iconRect.Size.as_fitted(size_f {item.Icon.Texture->info().Size})};
-        iconRect = {iconRect.Position, iconSize};
-        iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
-
-        _canvas.set_fill_style(style.Text.Color);
-        _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, iconRect);
-    } else if (drawText) {
-        draw_text(style.Text, contentRect, item.Text);
-    } else if (drawIcon) {
-        size_f const iconSize {contentRect.Size.as_fitted(size_f {item.Icon.Texture->info().Size})};
-        contentRect = {{contentRect.center().X - (iconSize.Width / 2), contentRect.top()}, iconSize};
-
-        _canvas.set_fill_style(style.Text.Color);
-        _canvas.draw_image(item.Icon.Texture.ptr(), item.Icon.Region, contentRect);
-    }
+    draw_text_and_icon(style.Text, contentRect, item.Text, item.Icon);
 }
 
 void widget_painter::draw_caret(element::caret const& style, rect_f const& rect, point_f offset)

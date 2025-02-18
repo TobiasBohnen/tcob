@@ -39,27 +39,7 @@ void button::on_paint(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    bool const drawText {!Label->empty() && _style.Text.Font};
-    bool const drawIcon {Icon->Texture};
-
-    if (drawText) { // text
-        rect_f textRect {rect};
-        if (drawIcon) {
-            textRect = {rect.center().X, rect.top(), rect.width() / 2, rect.height()};
-            rect.Size.Width /= 2;
-        }
-
-        painter.draw_text(_style.Text, textRect, Label());
-    }
-    if (drawIcon) { // icon
-        auto const [iconWidth, iconHeight] {Icon->Texture->info().Size};
-        f32 const width {rect.height() * (iconHeight / static_cast<f32>(iconWidth))};
-        rect = {{rect.center().X - (width / 2), rect.top()}, {width, rect.height()}};
-
-        auto& canvas {painter.canvas()};
-        canvas.set_fill_style(_style.Text.Color);
-        canvas.draw_image(Icon->Texture.ptr(), Icon->Region, rect);
-    }
+    painter.draw_text_and_icon(_style.Text, rect, Label(), Icon());
 }
 
 void button::on_update(milliseconds /*deltaTime*/)

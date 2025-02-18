@@ -29,6 +29,7 @@ public:
 
     void draw_text(element::text const& style, rect_f const& rect, utf8_string const& text);
     void draw_text(element::text const& style, rect_f const& rect, text_formatter::result const& text);
+    void draw_text_and_icon(element::text const& style, rect_f const& rect, utf8_string const& text, icon const& icon);
 
     void draw_tick(element::tick const& style, rect_f const& rect);
     void draw_nav_arrow(element::nav_arrow const& style, rect_f const& rect);
