@@ -203,10 +203,8 @@ auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
             a1 -= TAU_F;
         }
 
-        SetVertex(dst, lx0, ly0, lu, 1);
-        dst++;
-        SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
-        dst++;
+        SetVertex(dst++, lx0, ly0, lu, 1);
+        SetVertex(dst++, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
 
         i32 const n {std::clamp(static_cast<i32>(ceilf(((a0 - a1) / (TAU_F / 2)) * ncap)), 2, ncap)};
         for (i32 i {0}; i < n; ++i) {
@@ -214,16 +212,12 @@ auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
             f32 const a {a0 + (u * (a1 - a0))};
             f32 const rx {p1.X + (std::cos(a) * rw)};
             f32 const ry {p1.Y + (std::sin(a) * rw)};
-            SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
-            dst++;
-            SetVertex(dst, rx, ry, ru, 1);
-            dst++;
+            SetVertex(dst++, p1.X, p1.Y, 0.5f, 1);
+            SetVertex(dst++, rx, ry, ru, 1);
         }
 
-        SetVertex(dst, lx1, ly1, lu, 1);
-        dst++;
-        SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
-        dst++;
+        SetVertex(dst++, lx1, ly1, lu, 1);
+        SetVertex(dst++, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
     } else {
         f32 rx0 {0}, ry0 {0}, rx1 {0}, ry1 {0}, a0 {0}, a1 {0};
         ChooseBevel(p1.Flags & InnerBevel, p0, p1, -rw, rx0, ry0, rx1, ry1);
@@ -233,10 +227,8 @@ auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
             a1 += TAU_F;
         }
 
-        SetVertex(dst, p1.X + (dlx0 * rw), p1.Y + (dly0 * rw), lu, 1);
-        dst++;
-        SetVertex(dst, rx0, ry0, ru, 1);
-        dst++;
+        SetVertex(dst++, p1.X + (dlx0 * rw), p1.Y + (dly0 * rw), lu, 1);
+        SetVertex(dst++, rx0, ry0, ru, 1);
 
         i32 const n {std::clamp(static_cast<i32>(std::ceil(((a1 - a0) / (TAU_F / 2)) * ncap)), 2, ncap)};
         for (i32 i {0}; i < n; ++i) {
@@ -244,16 +236,12 @@ auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
             f32 const a {a0 + (u * (a1 - a0))};
             f32 const lx {p1.X + (std::cos(a) * lw)};
             f32 const ly {p1.Y + (std::sin(a) * lw)};
-            SetVertex(dst, lx, ly, lu, 1);
-            dst++;
-            SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
-            dst++;
+            SetVertex(dst++, lx, ly, lu, 1);
+            SetVertex(dst++, p1.X, p1.Y, 0.5f, 1);
         }
 
-        SetVertex(dst, p1.X + (dlx1 * rw), p1.Y + (dly1 * rw), lu, 1);
-        dst++;
-        SetVertex(dst, rx1, ry1, ru, 1);
-        dst++;
+        SetVertex(dst++, p1.X + (dlx1 * rw), p1.Y + (dly1 * rw), lu, 1);
+        SetVertex(dst++, rx1, ry1, ru, 1);
     }
     return dst;
 }
@@ -270,88 +258,60 @@ auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
         f32 lx0 {0}, ly0 {0}, lx1 {0}, ly1 {0};
         ChooseBevel(p1.Flags & InnerBevel, p0, p1, lw, lx0, ly0, lx1, ly1);
 
-        SetVertex(dst, lx0, ly0, lu, 1);
-        dst++;
-        SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
-        dst++;
+        SetVertex(dst++, lx0, ly0, lu, 1);
+        SetVertex(dst++, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
 
         if (p1.Flags & Bevel) {
-            SetVertex(dst, lx0, ly0, lu, 1);
-            dst++;
-            SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
-            dst++;
+            SetVertex(dst++, lx0, ly0, lu, 1);
+            SetVertex(dst++, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
 
-            SetVertex(dst, lx1, ly1, lu, 1);
-            dst++;
-            SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
-            dst++;
+            SetVertex(dst++, lx1, ly1, lu, 1);
+            SetVertex(dst++, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
         } else {
             f32 const rx0 {p1.X - (p1.DMX * rw)};
             f32 const ry0 {p1.Y - (p1.DMY * rw)};
 
-            SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
-            dst++;
-            SetVertex(dst, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
-            dst++;
+            SetVertex(dst++, p1.X, p1.Y, 0.5f, 1);
+            SetVertex(dst++, p1.X - (dlx0 * rw), p1.Y - (dly0 * rw), ru, 1);
 
-            SetVertex(dst, rx0, ry0, ru, 1);
-            dst++;
-            SetVertex(dst, rx0, ry0, ru, 1);
-            dst++;
+            SetVertex(dst++, rx0, ry0, ru, 1);
+            SetVertex(dst++, rx0, ry0, ru, 1);
 
-            SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
-            dst++;
-            SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
-            dst++;
+            SetVertex(dst++, p1.X, p1.Y, 0.5f, 1);
+            SetVertex(dst++, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
         }
 
-        SetVertex(dst, lx1, ly1, lu, 1);
-        dst++;
-        SetVertex(dst, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
-        dst++;
+        SetVertex(dst++, lx1, ly1, lu, 1);
+        SetVertex(dst++, p1.X - (dlx1 * rw), p1.Y - (dly1 * rw), ru, 1);
     } else {
         f32 rx0 {0}, ry0 {0}, rx1 {0}, ry1 {0};
         ChooseBevel(p1.Flags & InnerBevel, p0, p1, -rw, rx0, ry0, rx1, ry1);
 
-        SetVertex(dst, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
-        dst++;
-        SetVertex(dst, rx0, ry0, ru, 1);
-        dst++;
+        SetVertex(dst++, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
+        SetVertex(dst++, rx0, ry0, ru, 1);
 
         if (p1.Flags & Bevel) {
-            SetVertex(dst, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
-            dst++;
-            SetVertex(dst, rx0, ry0, ru, 1);
-            dst++;
+            SetVertex(dst++, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
+            SetVertex(dst++, rx0, ry0, ru, 1);
 
-            SetVertex(dst, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
-            dst++;
-            SetVertex(dst, rx1, ry1, ru, 1);
-            dst++;
+            SetVertex(dst++, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
+            SetVertex(dst++, rx1, ry1, ru, 1);
         } else {
             f32 const lx0 {p1.X + (p1.DMX * lw)};
             f32 const ly0 {p1.Y + (p1.DMY * lw)};
 
-            SetVertex(dst, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
-            dst++;
-            SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
-            dst++;
+            SetVertex(dst++, p1.X + (dlx0 * lw), p1.Y + (dly0 * lw), lu, 1);
+            SetVertex(dst++, p1.X, p1.Y, 0.5f, 1);
 
-            SetVertex(dst, lx0, ly0, lu, 1);
-            dst++;
-            SetVertex(dst, lx0, ly0, lu, 1);
-            dst++;
+            SetVertex(dst++, lx0, ly0, lu, 1);
+            SetVertex(dst++, lx0, ly0, lu, 1);
 
-            SetVertex(dst, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
-            dst++;
-            SetVertex(dst, p1.X, p1.Y, 0.5f, 1);
-            dst++;
+            SetVertex(dst++, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
+            SetVertex(dst++, p1.X, p1.Y, 0.5f, 1);
         }
 
-        SetVertex(dst, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
-        dst++;
-        SetVertex(dst, rx1, ry1, ru, 1);
-        dst++;
+        SetVertex(dst++, p1.X + (dlx1 * lw), p1.Y + (dly1 * lw), lu, 1);
+        SetVertex(dst++, rx1, ry1, ru, 1);
     }
 
     return dst;
@@ -365,14 +325,10 @@ auto static ButtCapStart(vertex* dst, canvas_point const& p,
     f32 const py {p.Y - (dy * d)};
     f32 const dlx {dy};
     f32 const dly {-dx};
-    SetVertex(dst, px + (dlx * w) - (dx * aa), py + (dly * w) - (dy * aa), u0, 0);
-    dst++;
-    SetVertex(dst, px - (dlx * w) - (dx * aa), py - (dly * w) - (dy * aa), u1, 0);
-    dst++;
-    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
-    dst++;
-    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
-    dst++;
+    SetVertex(dst++, px + (dlx * w) - (dx * aa), py + (dly * w) - (dy * aa), u0, 0);
+    SetVertex(dst++, px - (dlx * w) - (dx * aa), py - (dly * w) - (dy * aa), u1, 0);
+    SetVertex(dst++, px + (dlx * w), py + (dly * w), u0, 1);
+    SetVertex(dst++, px - (dlx * w), py - (dly * w), u1, 1);
     return dst;
 }
 
@@ -384,14 +340,10 @@ auto static ButtCapEnd(vertex* dst, canvas_point const& p,
     f32 const py {p.Y + (dy * d)};
     f32 const dlx {dy};
     f32 const dly {-dx};
-    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
-    dst++;
-    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
-    dst++;
-    SetVertex(dst, px + (dlx * w) + (dx * aa), py + (dly * w) + (dy * aa), u0, 0);
-    dst++;
-    SetVertex(dst, px - (dlx * w) + (dx * aa), py - (dly * w) + (dy * aa), u1, 0);
-    dst++;
+    SetVertex(dst++, px + (dlx * w), py + (dly * w), u0, 1);
+    SetVertex(dst++, px - (dlx * w), py - (dly * w), u1, 1);
+    SetVertex(dst++, px + (dlx * w) + (dx * aa), py + (dly * w) + (dy * aa), u0, 0);
+    SetVertex(dst++, px - (dlx * w) + (dx * aa), py - (dly * w) + (dy * aa), u1, 0);
     return dst;
 }
 
@@ -406,15 +358,11 @@ auto static RoundCapStart(vertex* dst, canvas_point const& p,
     for (i32 i {0}; i < ncap; ++i) {
         f32 const a {i / static_cast<f32>(ncap - 1) * (TAU_F / 2)};
         f32 const ax {std::cos(a) * w}, ay {std::sin(a) * w};
-        SetVertex(dst, px - (dlx * ax) - (dx * ay), py - (dly * ax) - (dy * ay), u0, 1);
-        dst++;
-        SetVertex(dst, px, py, 0.5f, 1);
-        dst++;
+        SetVertex(dst++, px - (dlx * ax) - (dx * ay), py - (dly * ax) - (dy * ay), u0, 1);
+        SetVertex(dst++, px, py, 0.5f, 1);
     }
-    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
-    dst++;
-    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
-    dst++;
+    SetVertex(dst++, px + (dlx * w), py + (dly * w), u0, 1);
+    SetVertex(dst++, px - (dlx * w), py - (dly * w), u1, 1);
     return dst;
 }
 
@@ -426,17 +374,13 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
     f32 const dlx {dy};
     f32 const dly {-dx};
 
-    SetVertex(dst, px + (dlx * w), py + (dly * w), u0, 1);
-    dst++;
-    SetVertex(dst, px - (dlx * w), py - (dly * w), u1, 1);
-    dst++;
+    SetVertex(dst++, px + (dlx * w), py + (dly * w), u0, 1);
+    SetVertex(dst++, px - (dlx * w), py - (dly * w), u1, 1);
     for (i32 i {0}; i < ncap; ++i) {
         f32 const a {i / static_cast<f32>(ncap - 1) * (TAU_F / 2)};
         f32 const ax {std::cos(a) * w}, ay {std::sin(a) * w};
-        SetVertex(dst, px, py, 0.5f, 1);
-        dst++;
-        SetVertex(dst, px - (dlx * ax) + (dx * ay), py - (dly * ax) + (dy * ay), u0, 1);
-        dst++;
+        SetVertex(dst++, px, py, 0.5f, 1);
+        SetVertex(dst++, px - (dlx * ax) + (dx * ay), py - (dly * ax) + (dy * ay), u0, 1);
     }
     return dst;
 }
@@ -1903,20 +1847,16 @@ void canvas::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJo
                     dst = BevelJoin(dst, *p0, *p1, w, w, u0, u1);
                 }
             } else {
-                SetVertex(dst, p1->X + (p1->DMX * w), p1->Y + (p1->DMY * w), u0, 1);
-                dst++;
-                SetVertex(dst, p1->X - (p1->DMX * w), p1->Y - (p1->DMY * w), u1, 1);
-                dst++;
+                SetVertex(dst++, p1->X + (p1->DMX * w), p1->Y + (p1->DMY * w), u0, 1);
+                SetVertex(dst++, p1->X - (p1->DMX * w), p1->Y - (p1->DMY * w), u1, 1);
             }
             p0 = p1++;
         }
 
         if (path.Closed) {
             // Loop it
-            SetVertex(dst, verts[0].Position.X, verts[0].Position.Y, u0, 1);
-            dst++;
-            SetVertex(dst, verts[1].Position.X, verts[1].Position.Y, u1, 1);
-            dst++;
+            SetVertex(dst++, verts[0].Position.X, verts[0].Position.Y, u0, 1);
+            SetVertex(dst++, verts[1].Position.X, verts[1].Position.Y, u1, 1);
         } else {
             // Add cap
             f32 dx {p1->X - p0->X};
@@ -1981,28 +1921,23 @@ void canvas::expand_fill(f32 w, line_join lineJoin, f32 miterLimit)
                     if (p1->Flags & Left) {
                         f32 const lx {p1->X + (p1->DMX * woff)};
                         f32 const ly {p1->Y + (p1->DMY * woff)};
-                        SetVertex(dst, lx, ly, 0.5f, 1);
-                        dst++;
+                        SetVertex(dst++, lx, ly, 0.5f, 1);
                     } else {
                         f32 const lx0 {p1->X + (dlx0 * woff)};
                         f32 const ly0 {p1->Y + (dly0 * woff)};
                         f32 const lx1 {p1->X + (dlx1 * woff)};
                         f32 const ly1 {p1->Y + (dly1 * woff)};
-                        SetVertex(dst, lx0, ly0, 0.5f, 1);
-                        dst++;
-                        SetVertex(dst, lx1, ly1, 0.5f, 1);
-                        dst++;
+                        SetVertex(dst++, lx0, ly0, 0.5f, 1);
+                        SetVertex(dst++, lx1, ly1, 0.5f, 1);
                     }
                 } else {
-                    SetVertex(dst, p1->X + (p1->DMX * woff), p1->Y + (p1->DMY * woff), 0.5f, 1);
-                    dst++;
+                    SetVertex(dst++, p1->X + (p1->DMX * woff), p1->Y + (p1->DMY * woff), 0.5f, 1);
                 }
                 p0 = p1++;
             }
         } else {
             for (u32 j {0}; j < path.Count; ++j) {
-                SetVertex(dst, pts[j].X, pts[j].Y, 0.5f, 1);
-                dst++;
+                SetVertex(dst++, pts[j].X, pts[j].Y, 0.5f, 1);
             }
         }
 
@@ -2026,19 +1961,15 @@ void canvas::expand_fill(f32 w, line_join lineJoin, f32 miterLimit)
                 if ((p1->Flags & (Bevel | InnerBevel)) != 0) {
                     dst = BevelJoin(dst, *p0, *p1, lw, rw, lu, ru);
                 } else {
-                    SetVertex(dst, p1->X + (p1->DMX * lw), p1->Y + (p1->DMY * lw), lu, 1);
-                    dst++;
-                    SetVertex(dst, p1->X - (p1->DMX * rw), p1->Y - (p1->DMY * rw), ru, 1);
-                    dst++;
+                    SetVertex(dst++, p1->X + (p1->DMX * lw), p1->Y + (p1->DMY * lw), lu, 1);
+                    SetVertex(dst++, p1->X - (p1->DMX * rw), p1->Y - (p1->DMY * rw), ru, 1);
                 }
                 p0 = p1++;
             }
 
             // Loop it
-            SetVertex(dst, verts[0].Position.X, verts[0].Position.Y, lu, 1);
-            dst++;
-            SetVertex(dst, verts[1].Position.X, verts[1].Position.Y, ru, 1);
-            dst++;
+            SetVertex(dst++, verts[0].Position.X, verts[0].Position.Y, lu, 1);
+            SetVertex(dst++, verts[1].Position.X, verts[1].Position.Y, ru, 1);
 
             path.StrokeCount = dst - verts;
             verts            = dst;
