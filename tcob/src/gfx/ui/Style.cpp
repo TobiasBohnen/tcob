@@ -292,6 +292,16 @@ namespace element {
     }
 }
 
+void thumb_style::Transition(thumb_style& target, thumb_style const& left, thumb_style const& right, f64 step)
+{
+    element::thumb::Transition(target.Thumb, left.Thumb, right.Thumb, step);
+}
+
+void nav_arrows_style::Transition(nav_arrows_style& target, nav_arrows_style const& left, nav_arrows_style const& right, f64 step)
+{
+    element::nav_arrow::Transition(target.NavArrow, left.NavArrow, right.NavArrow, step);
+}
+
 void item_style::Transition(item_style& target, item_style const& left, item_style const& right, f64 step)
 {
     element::item::Transition(target.Item, left.Item, right.Item, step);

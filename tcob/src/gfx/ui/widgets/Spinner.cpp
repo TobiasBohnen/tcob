@@ -52,22 +52,16 @@ void spinner::on_paint(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     // arrows
-    auto const& fls {flags()};
-    auto const* normalArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {})};
-    auto const* hoverArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {.Hover = true})};
-    auto const* activeArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {.Active = true})};
-    f32 const   arrowWidth {normalArrow->NavArrow.Size.Width.calc(rect.width())}; // FIXME: max arrow style width
-    if (_hoverArrow == arrow::None) {
-        painter.draw_nav_arrows(normalArrow->NavArrow, normalArrow->NavArrow, rect);
-    } else if (_hoverArrow == arrow::Increase) {
-        painter.draw_nav_arrows(fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, normalArrow->NavArrow, rect);
-    } else if (_hoverArrow == arrow::Decrease) {
-        painter.draw_nav_arrows(normalArrow->NavArrow, fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow, rect);
-    }
+    auto const&      fls {flags()};
+    nav_arrows_style incArrowStyle {};
+    update_sub_style(incArrowStyle, 0, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Increase, .Hover = !fls.Active && _hoverArrow == arrow::Increase});
+    nav_arrows_style decArrowStyle {};
+    update_sub_style(decArrowStyle, 1, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Decrease, .Hover = !fls.Active && _hoverArrow == arrow::Decrease});
+    _rectCache = painter.draw_nav_arrows(incArrowStyle.NavArrow, decArrowStyle.NavArrow, rect);
 
     // text
     if (_style.Text.Font) {
-        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, std::to_string(Value()));
+        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()}, std::to_string(Value()));
     }
 }
 
@@ -79,31 +73,23 @@ void spinner::on_mouse_leave()
 
 void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    ev.Handled = true;
-
-    rect_f const rect {global_content_bounds()};
-    auto const*  normalArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {})};
-    rect_f const navRect {normalArrow->NavArrow.calc(rect)};
-    if (navRect.contains(ev.Position)) {
-        if (ev.Position.Y <= navRect.center().Y) {
-            if (_hoverArrow != arrow::Increase) {
-                _hoverArrow = arrow::Increase;
-                force_redraw(this->name() + ": arrow hover changed");
-            }
-        } else {
-            if (_hoverArrow != arrow::Decrease) {
-                _hoverArrow = arrow::Decrease;
-                force_redraw(this->name() + ": arrow hover changed");
-            }
+    auto const mp {global_to_local(ev.Position)};
+    if (_rectCache.first.contains(mp)) {
+        if (_hoverArrow != arrow::Increase) {
+            _hoverArrow = arrow::Increase;
+            force_redraw(this->name() + ": arrow hover changed");
         }
-
-        return;
-    }
-
-    if (_hoverArrow != arrow::None) {
+    } else if (_rectCache.second.contains(mp)) {
+        if (_hoverArrow != arrow::Decrease) {
+            _hoverArrow = arrow::Decrease;
+            force_redraw(this->name() + ": arrow hover changed");
+        }
+    } else if (_hoverArrow != arrow::None) {
         _hoverArrow = arrow::None;
         force_redraw(this->name() + ": arrow hover changed");
     }
+
+    ev.Handled = true;
 }
 
 void spinner::on_mouse_down(input::mouse::button_event const& ev)

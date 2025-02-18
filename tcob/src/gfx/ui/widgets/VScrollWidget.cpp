@@ -45,8 +45,17 @@ void vscroll_widget::on_styles_changed()
 
 void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
 {
+    auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
+
     _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
-    _vScrollbar.paint(painter, dynamic_cast<vscroll_widget::style const*>(current_style())->VScrollBar, rect, flags().Active);
+    _vScrollbar.paint(
+        painter, style->VScrollBar,
+        [&](widget_flags flags) {
+            thumb_style thumbStyle;
+            update_sub_style(thumbStyle, -2, style->VScrollBar.ThumbClass, flags);
+            return thumbStyle;
+        },
+        rect, flags().Active);
 }
 
 void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)

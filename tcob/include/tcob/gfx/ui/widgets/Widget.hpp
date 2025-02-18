@@ -119,9 +119,6 @@ protected:
     void reset_sub_style(isize idx, string const& styleClass, widget_flags flags);
     void clear_sub_styles();
 
-    template <std::derived_from<style> T>
-    auto get_sub_style(string const& styleClass, widget_flags flags) const -> T*;
-
     void virtual on_paint(widget_painter& painter) = 0;
 
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }

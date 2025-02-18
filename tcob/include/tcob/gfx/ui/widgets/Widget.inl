@@ -28,15 +28,4 @@ inline void widget::update_sub_style(T& style, isize idx, string const& styleCla
     _subStyleTransitions[idx].apply(style);
 }
 
-template <std::derived_from<style> T>
-inline auto widget::get_sub_style(string const& styleClass, widget_flags flags) const -> T*
-{
-    widget_style_selectors const selectors {
-        .Class      = styleClass,
-        .Flags      = flags,
-        .Attributes = attributes(),
-    };
-    return static_cast<T*>(styles().get(selectors));
-}
-
 }

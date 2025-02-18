@@ -432,8 +432,10 @@ void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f cons
     }
 }
 
-void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& rect)
+auto widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& rect) -> std::pair<rect_f, rect_f>
 {
+    std::pair<rect_f, rect_f> retValue;
+
     auto const guard {_canvas.create_guard()};
 
     {
@@ -458,6 +460,8 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
         case element::nav_arrow::type::None:
             break;
         }
+
+        retValue.second = decRect;
     }
 
     {
@@ -481,7 +485,11 @@ void widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
         case element::nav_arrow::type::None:
             break;
         }
+
+        retValue.first = incRect;
     }
+
+    return retValue;
 }
 
 void widget_painter::draw_item(element::item const& style, rect_f const& rect, list_item const& item)

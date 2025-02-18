@@ -32,12 +32,12 @@ public:
 
     void draw_tick(element::tick const& style, rect_f const& rect);
     void draw_nav_arrow(element::nav_arrow const& style, rect_f const& rect);
-    void draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& rect);
     void draw_item(element::item const& style, rect_f const& rect, list_item const& item);
     void draw_caret(element::caret const& style, rect_f const& rect, point_f offset);
 
     auto draw_bar(element::bar const& style, rect_f const& rect, element::bar::context const& barCtx) -> rect_f;
     auto draw_thumb(element::thumb const& style, rect_f const& rect, element::thumb::context const& thumbCtx) -> rect_f;
+    auto draw_nav_arrows(element::nav_arrow const& incStyle, element::nav_arrow const& decStyle, rect_f const& rect) -> std::pair<rect_f, rect_f>;
 
     auto canvas() -> gfx::canvas&;
 

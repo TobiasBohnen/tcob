@@ -109,9 +109,23 @@ void panel::on_paint(widget_painter& painter)
 
     // scrollbar
     _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
-    _vScrollbar.paint(painter, _style.VScrollBar, rect, flags().Active);
+    _vScrollbar.paint(
+        painter, _style.VScrollBar,
+        [&](widget_flags flags) {
+            thumb_style thumbStyle;
+            update_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, flags);
+            return thumbStyle;
+        },
+        rect, flags().Active);
     _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
-    _hScrollbar.paint(painter, _style.HScrollBar, rect, flags().Active);
+    _hScrollbar.paint(
+        painter, _style.HScrollBar,
+        [&](widget_flags flags) {
+            thumb_style thumbStyle;
+            update_sub_style(thumbStyle, -3, _style.HScrollBar.ThumbClass, flags);
+            return thumbStyle;
+        },
+        rect, flags().Active);
 
     // content
     scissor_guard const guard {painter, this};

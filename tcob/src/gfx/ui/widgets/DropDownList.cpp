@@ -108,22 +108,14 @@ void drop_down_list::on_paint(widget_painter& painter)
 
     // arrow
     auto const& fls {flags()};
-    auto*       normalArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {})};
-    auto*       hoverArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {.Hover = true})};
-    auto*       activeArrow {get_sub_style<nav_arrows_style>(_style.NavArrowClass, {.Active = true})};
-    assert(normalArrow && hoverArrow && activeArrow);
 
-    element::nav_arrow arrowStyle;
-    if (_mouseOverBox) {
-        arrowStyle = fls.Active ? activeArrow->NavArrow : hoverArrow->NavArrow;
-    } else {
-        arrowStyle = normalArrow->NavArrow;
-    }
-    painter.draw_nav_arrow(arrowStyle, rect);
+    nav_arrows_style arrowStyle {};
+    update_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverBox, .Hover = !fls.Active && _mouseOverBox});
+    painter.draw_nav_arrow(arrowStyle.NavArrow, rect);
 
     // text
     if (_style.Text.Font && SelectedItemIndex >= 0) {
-        f32 const arrowWidth {arrowStyle.Size.Width.calc(rect.width())};
+        f32 const arrowWidth {arrowStyle.NavArrow.Size.Width.calc(rect.width())};
         painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - arrowWidth, rect.height()}, selected_item().Text);
     }
 
@@ -145,7 +137,15 @@ void drop_down_list::on_paint(widget_painter& painter)
 
         // scrollbar
         _vScrollbar.Visible = std::ssize(items) > MaxVisibleItems;
-        _vScrollbar.paint(painter, _style.VScrollBar, listRect, fls.Active);
+
+        _vScrollbar.paint(
+            painter, _style.VScrollBar,
+            [&](widget_flags flags) {
+                thumb_style thumbStyle;
+                update_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, flags);
+                return thumbStyle;
+            },
+            listRect, fls.Active);
 
         scissor_guard const guard {painter, this};
 

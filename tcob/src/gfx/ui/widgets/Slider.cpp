@@ -72,18 +72,21 @@ void slider::on_paint(widget_painter& painter)
          .Fraction    = _tween.current_value()});
 
     // thumb
-    auto const thumbFlags {!_overThumb          ? widget_flags {}
-                               : flags().Active ? widget_flags {.Active = true}
-                                                : widget_flags {.Hover = true}};
+    auto const  thumbFlags {!_overThumb          ? widget_flags {}
+                                : flags().Active ? widget_flags {.Active = true}
+                                                 : widget_flags {.Hover = true}};
+    thumb_style thumbStyle {};
+    update_sub_style(thumbStyle, 0, _style.ThumbClass, thumbFlags);
+
     _barRectCache.Thumb = painter.draw_thumb(
-        get_sub_style<thumb_style>(_style.ThumbClass, thumbFlags)->Thumb,
+        thumbStyle.Thumb,
         rect,
         {.Orientation = orien, .Inverted = false, .Fraction = _tween.current_value()});
 
     if (orien == orientation::Vertical) {
-        _barRectCache.Thumb.Size.Width -= get_sub_style<thumb_style>(_style.ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.width());
+        _barRectCache.Thumb.Size.Width -= thumbStyle.Thumb.Border.Size.calc(_barRectCache.Thumb.width());
     } else if (orien == orientation::Horizontal) {
-        _barRectCache.Thumb.Size.Height -= get_sub_style<thumb_style>(_style.ThumbClass, {})->Thumb.Border.Size.calc(_barRectCache.Thumb.height());
+        _barRectCache.Thumb.Size.Height -= thumbStyle.Thumb.Border.Size.calc(_barRectCache.Thumb.height());
     }
 }
 

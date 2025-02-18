@@ -304,11 +304,15 @@ public:
 class TCOB_API thumb_style : public style {
 public:
     element::thumb Thumb;
+
+    void static Transition(thumb_style& target, thumb_style const& left, thumb_style const& right, f64 step);
 };
 
 class TCOB_API nav_arrows_style : public style {
 public:
     element::nav_arrow NavArrow;
+
+    void static Transition(nav_arrows_style& target, nav_arrows_style const& left, nav_arrows_style const& right, f64 step);
 };
 
 class TCOB_API item_style : public style {

@@ -55,6 +55,8 @@ private:
     stopwatch _holdTime;
     f32       _holdCount {1};
 
+    std::pair<rect_f, rect_f> _rectCache;
+
     spinner::style _style;
 };
 }

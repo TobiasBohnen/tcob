@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/ui/Scrollbar.hpp"
 
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
@@ -22,7 +21,7 @@ void scrollbar::update(milliseconds deltaTime)
     _tween.update(deltaTime);
 }
 
-void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, rect_f& rect, bool isActive)
+void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, func const& thumbStyleFunc, rect_f& rect, bool isActive)
 {
     _style = &style;
 
@@ -43,21 +42,13 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& style, 
         .Fraction    = barCtx.Fraction};
 
     rect_f const scrRect {rect};
-    auto const   thumbFlags {!_overThumb    ? widget_flags {}
-                                 : isActive ? widget_flags {.Active = true}
-                                            : widget_flags {.Hover = true}};
     _barRectCache.Bar = painter.draw_bar(_style->Bar, scrRect, barCtx);
-    auto const get_thumb_style {[&](widget_flags flags) -> thumb_style* {
-        assert(_style);
-        widget_style_selectors const selectors {
-            .Class      = _style->ThumbClass,
-            .Flags      = flags,
-            .Attributes = {},
-        };
-        return dynamic_cast<thumb_style*>(_parent.parent_form()->Styles->get(selectors));
-    }};
 
-    _barRectCache.Thumb = painter.draw_thumb(get_thumb_style(thumbFlags)->Thumb, _barRectCache.Bar, thumbCtx);
+    auto const thumbFlags {!_overThumb    ? widget_flags {}
+                               : isActive ? widget_flags {.Active = true}
+                                          : widget_flags {.Hover = true}};
+    auto       thumbStyle {thumbStyleFunc(thumbFlags)};
+    _barRectCache.Thumb = painter.draw_thumb(thumbStyle.Thumb, _barRectCache.Bar, thumbCtx);
 
     if (_orien == orientation::Vertical) {
         rect.Size.Width -= _barRectCache.Bar.width() + _style->Bar.Border.Size.calc(_barRectCache.Bar.width());
