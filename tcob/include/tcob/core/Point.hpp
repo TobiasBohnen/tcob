@@ -31,13 +31,13 @@ public:
 
     auto constexpr dot(point<T> const& p) const -> float_type;
     auto constexpr cross(point<T> const& p) const -> float_type;
-    auto constexpr perpendicular() const -> point<T>;
 
     auto length() const -> float_type;
     auto distance_to(point<T> const& p) const -> float_type;
 
     auto angle_to(point<T> const& p) const -> degree<float_type>;
 
+    auto constexpr as_perpendicular() const -> point<T>;
     auto as_normalized() const -> point<float_type>;
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;

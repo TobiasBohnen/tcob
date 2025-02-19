@@ -804,8 +804,9 @@ void canvas::dashed_line_to(point_f to)
     bool      drawing {true};
 
     state& s {get_state()};
-    while (currentLength < totalLength) {
+    for (;;) {
         f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
+        if (currentLength + dashLength > totalLength) { break; }
 
         if (drawing) {
             f32 const tStart {currentLength / totalLength};
@@ -864,8 +865,9 @@ void canvas::dashed_ellipse(point_f const c, f32 const rx, f32 const ry)
     bool  drawing {true};
 
     state const& s {get_state()};
-    while (currentLength < totalLength) {
+    for (;;) {
         f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
+        if (currentLength + dashLength > totalLength) { break; }
 
         if (drawing) {
             f32 const tStart {arc_length(currentLength / totalLength)};
@@ -893,8 +895,9 @@ void canvas::dashed_circle(point_f center, f32 r)
     bool      drawing {true};
 
     state& s {get_state()};
-    while (currentLength < totalLength) {
+    for (;;) {
         f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
+        if (currentLength + dashLength > totalLength) { break; }
 
         if (drawing) {
             f32 const tStart {currentLength / totalLength};
@@ -949,8 +952,9 @@ auto canvas::dashed_bezier_to(auto&& func)
     bool  drawing {true};
 
     state& s {get_state()};
-    while (currentLength < totalLength) {
+    for (;;) {
         f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
+        if (currentLength + dashLength > totalLength) { break; }
 
         if (drawing) {
             f32 const tStart {interpolate_arc(currentLength)};
@@ -1337,54 +1341,69 @@ void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
 
 void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 {
-    auto const from {_commandPoint};
-    f32 const  xMin {std::min(from.X, to.X)};
-    f32 const  xDiff {std::abs(from.X - to.X)};
+    // TODO: dash
+    point_f const from {_commandPoint};
 
-    for (f32 f {0}; f < xDiff; ++f) {
-        f32 const x {f + xMin};
-        f32 const y {(amp * std::sin((freq * x) + phase)) + (from.Y + (to.Y - from.Y) * (x - from.X) / (to.X - from.X))};
-        if (f == 0) {
-            move_to({x, y});
-        } else {
-            line_to({x, y});
-        }
+    point_f const d {to - from};
+    f32 const     l {static_cast<f32>(d.length())};
+    if (l < 1e-6f) { return; }
+
+    point_f const unit {d.as_normalized()};
+    point_f const perp {unit.as_perpendicular()};
+
+    i32 const segCount {std::max(2, static_cast<i32>(l))};
+    f32 const step {l / static_cast<f32>(segCount)};
+
+    append_commands(path2d::CommandsMoveTo(from));
+
+    for (i32 i {1}; i <= segCount; ++i) {
+        f32 const s {i * step}; // Arc length along the line.
+        f32 const t {s / l};    // Normalized parameter [0,1].
+
+        point_f const base {from.X + d.X * t, from.Y + d.Y * t};
+        f32 const     offset {amp * std::sin(freq * s + phase)};
+        point_f const finalPt {base.X + offset * perp.X, base.Y + offset * perp.Y};
+
+        append_commands(path2d::CommandsLineTo(finalPt));
     }
 }
 
 void canvas::regular_polygon(point_f pos, size_f size, i32 n)
 {
+    // TODO: dash
     auto const [x, y] {pos};
-    move_to({x, y - size.Height});
+    append_commands(path2d::CommandsMoveTo({x, y - size.Height}));
     for (i32 i {1}; i < n; ++i) {
         f32 const angle {TAU_F / n * i};
         f32 const dx {std::sin(angle) * size.Width};
         f32 const dy {-std::cos(angle) * size.Height};
-        line_to({x + dx, y + dy});
+        append_commands(path2d::CommandsLineTo({x + dx, y + dy}));
     }
-    line_to({x, y - size.Height});
+    append_commands(path2d::CommandsLineTo({x, y - size.Height}));
 }
 
 void canvas::star(point_f pos, f32 outerR, f32 innerR, i32 n)
 {
+    // TODO: dash
     auto const [x, y] {pos};
-    move_to({x, y - outerR});
+    append_commands(path2d::CommandsMoveTo({x, y - outerR}));
     for (i32 i {1}; i < n * 2; ++i) {
         f32 const angle {(TAU_F / 2) / n * i};
         f32 const r {(i % 2 == 0) ? outerR : innerR};
         f32 const dx {std::sin(angle) * r};
         f32 const dy {-std::cos(angle) * r};
-        line_to({x + dx, y + dy});
+        append_commands(path2d::CommandsLineTo({x + dx, y + dy}));
     }
-    line_to({x, y - outerR});
+    append_commands(path2d::CommandsLineTo({x, y - outerR}));
 }
 
 void canvas::triangle(point_f a, point_f b, point_f c)
 {
-    move_to(a);
-    line_to(b);
-    line_to(c);
-    line_to(a);
+    // TODO: dash
+    append_commands(path2d::CommandsMoveTo(a));
+    append_commands(path2d::CommandsLineTo(b));
+    append_commands(path2d::CommandsLineTo(c));
+    append_commands(path2d::CommandsLineTo(a));
 }
 
 auto canvas::path_2d(path2d const& path) -> void

@@ -117,7 +117,7 @@ auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const&
 {
     point_d const ro {_origin};
     point_d const seg {p1 - p0};
-    point_d const segPerp {seg.perpendicular()};
+    point_d const segPerp {seg.as_perpendicular()};
 
     f64 const denom {segPerp.dot(rd)};
     if (std::abs(denom) < epsilon) { return std::nullopt; }
@@ -126,7 +126,7 @@ auto ray::intersect_segment(point_d const& rd, point_d const& p0, point_d const&
     f64 const     distance {segPerp.dot(d) / denom};
     if (distance < 0.0 || distance > _maxDistance) { return std::nullopt; }
 
-    f64 const s {rd.perpendicular().dot(d) / denom};
+    f64 const s {rd.as_perpendicular().dot(d) / denom};
     if (s >= 0.0 && s <= 1.0) { return distance; }
 
     return std::nullopt;

@@ -44,12 +44,6 @@ auto constexpr point<T>::cross(point<T> const& p) const -> float_type
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::perpendicular() const -> point<T>
-{
-    return {-Y, X};
-}
-
-template <Arithmetic T>
 inline auto point<T>::length() const -> float_type
 {
     return static_cast<float_type>(std::sqrt((X * X) + (Y * Y)));
@@ -68,6 +62,12 @@ inline auto point<T>::angle_to(point<T> const& p) const -> degree<float_type>
     retValue += degree<float_type> {90};
     if (retValue.Value < 0) { retValue += degree<float_type> {360}; }
     return retValue;
+}
+
+template <Arithmetic T>
+auto constexpr point<T>::as_perpendicular() const -> point<T>
+{
+    return {-Y, X};
 }
 
 template <Arithmetic T>
