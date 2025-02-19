@@ -184,6 +184,7 @@ public:
     void close_path();
     void set_path_winding(winding dir);
     void set_path_winding(solidity s);
+    void set_line_dash(std::span<f32 const> dashPatternRel);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
@@ -202,13 +203,6 @@ public:
     void dotted_quad_bezier_to(point_f cp, point_f end, f32 dotR, i32 numDots);
     void dotted_rounded_rect(rect_f const& rect, f32 r, f32 dotR, i32 numDots);
     void dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, f32 dotR, i32 numDots);
-
-    void dashed_line_to(point_f to, i32 numDashes);
-    void dashed_circle(point_f center, f32 r, i32 numDashes);
-    void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, i32 numDashes);
-    void dashed_quad_bezier_to(point_f cp, point_f end, i32 numDashes);
-    void dashed_rounded_rect(rect_f const& rect, f32 r, i32 numDashes);
-    void dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, i32 numDashes);
 
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
     void regular_polygon(point_f pos, size_f size, i32 n);
@@ -269,19 +263,20 @@ public:
 
 private:
     struct state {
-        blend_funcs    CompositeOperation {};
-        bool           ShapeAntiAlias {true};
-        canvas_paint   Fill {};
-        canvas_paint   Stroke {};
-        f32            StrokeWidth {1};
-        f32            MiterLimit {10.0f};
-        line_join      LineJoin {line_join::Miter};
-        line_cap       LineCap {line_cap::Butt};
-        f32            Alpha {1};
-        transform      XForm {transform::Identity};
-        canvas_scissor Scissor {};
-        alignments     TextAlign {};
-        font*          Font {nullptr};
+        blend_funcs      CompositeOperation {};
+        bool             ShapeAntiAlias {true};
+        canvas_paint     Fill {};
+        canvas_paint     Stroke {};
+        f32              StrokeWidth {1};
+        f32              MiterLimit {10.0f};
+        line_join        LineJoin {line_join::Miter};
+        line_cap         LineCap {line_cap::Butt};
+        f32              Alpha {1};
+        transform        XForm {transform::Identity};
+        canvas_scissor   Scissor {};
+        alignments       TextAlign {};
+        font*            Font {nullptr};
+        std::vector<f32> Dash;
     };
 
     struct path_cache {
@@ -291,6 +286,15 @@ private:
 
         vec4 bounds;
     };
+
+    void dashed_line_to(point_f to);
+    void dashed_ellipse(point_f c, f32 rx, f32 ry);
+    void dashed_circle(point_f c, f32 r);
+    auto dashed_bezier_to(auto&& func);
+    void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
+    void dashed_quad_bezier_to(point_f cp, point_f end);
+    void dashed_rounded_rect(rect_f const& rect, f32 r);
+    void dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
 
     void set_device_pixel_ratio(f32 ratio);
     auto get_state() -> state&;

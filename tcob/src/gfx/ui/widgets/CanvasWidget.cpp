@@ -110,6 +110,11 @@ void canvas_widget::set_path_winding(winding dir)
     _commands.emplace_back([=](canvas& canvas) { canvas.set_path_winding(dir); });
 }
 
+void canvas_widget::set_line_dash(std::vector<f32> const& dashPatternRel)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.set_line_dash(dashPatternRel); });
+}
+
 void canvas_widget::move_to(point_f pos)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.move_to(pos); });
@@ -165,16 +170,6 @@ void canvas_widget::circle(point_f c, f32 r)
     _commands.emplace_back([=](canvas& canvas) { canvas.circle(c, r); });
 }
 
-void canvas_widget::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
-{
-    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_cubic_bezier_to(cp0, cp1, end, r, numDots); });
-}
-
-void canvas_widget::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
-{
-    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_quad_bezier_to(cp, end, r, numDots); });
-}
-
 void canvas_widget::dotted_line_to(point_f to, f32 r, i32 numDots)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.dotted_line_to(to, r, numDots); });
@@ -183,6 +178,16 @@ void canvas_widget::dotted_line_to(point_f to, f32 r, i32 numDots)
 void canvas_widget::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.dotted_circle(center, rcircle, rdots, numDots); });
+}
+
+void canvas_widget::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_cubic_bezier_to(cp0, cp1, end, r, numDots); });
+}
+
+void canvas_widget::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
+{
+    _commands.emplace_back([=](canvas& canvas) { canvas.dotted_quad_bezier_to(cp, end, r, numDots); });
 }
 
 void canvas_widget::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
