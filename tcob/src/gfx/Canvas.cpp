@@ -545,8 +545,7 @@ void canvas::move_to(point_f pos)
 
 void canvas::line_to(point_f pos)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_line_to(pos);
         return;
     }
@@ -558,8 +557,7 @@ void canvas::line_to(point_f pos)
 
 void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_cubic_bezier_to(cp0, cp1, end);
         return;
     }
@@ -569,8 +567,7 @@ void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 
 void canvas::quad_bezier_to(point_f cp, point_f end)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_quad_bezier_to(cp, end);
         return;
     }
@@ -580,9 +577,16 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir)
+void canvas::arc(point_f const  c,
+                 f32 const      r,
+                 radian_f const startAngle,
+                 radian_f const endAngle,
+                 winding const  dir)
 {
-    // TODO: dashed
+    if (!get_state().Dash.empty()) {
+        dashed_arc(c, r, startAngle, endAngle, dir);
+        return;
+    }
 
     static f32 const rad90 {TAU_F / 4};
 
@@ -590,44 +594,36 @@ void canvas::arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, windi
     f32 const a0 {startAngle.Value - rad90};
     f32 const a1 {endAngle.Value - rad90};
 
-    // Clamp angles
+    // Normalize angles.
     f32 da {a1 - a0};
     if (dir == winding::CW) {
         if (std::abs(da) >= TAU_F) {
             da = TAU_F;
         } else {
-            while (da < 0.0f) {
-                da += TAU_F;
-            }
+            while (da < 0.0f) { da += TAU_F; }
         }
-    } else {
+    } else { // CCW
         if (std::abs(da) >= TAU_F) {
             da = -TAU_F;
         } else {
-            while (da > 0.0f) {
-                da -= TAU_F;
-            }
+            while (da > 0.0f) { da -= TAU_F; }
         }
     }
 
-    // Split arc into max 90 degree segments.
+    std::vector<f32> vals;
+    vals.reserve(138);
     i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
     f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
     f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
-    if (dir == winding::CCW) {
-        kappa = -kappa;
-    }
+    if (dir == winding::CCW) { kappa = -kappa; }
 
-    f32 px {0}, py {0}, ptanx {0}, ptany {0};
-
-    std::vector<f32> vals;
-    vals.reserve(138);
+    f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
     for (i32 i {0}; i <= ndivs; ++i) {
         f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
         f32 const dx {std::cos(a)};
         f32 const dy {std::sin(a)};
-        f32 const x {c.X + (dx * r)};
-        f32 const y {c.Y + (dy * r)};
+        f32 const x {c.X + dx * r};
+        f32 const y {c.Y + dy * r};
         f32 const tanx {-dy * r * kappa};
         f32 const tany {dx * r * kappa};
 
@@ -709,8 +705,7 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 
 void canvas::rect(rect_f const& rect)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_rounded_rect(rect, 0);
         return;
     }
@@ -732,8 +727,7 @@ void canvas::rounded_rect(rect_f const& r, f32 rad)
 
 void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_rounded_rect_varying(rect, radTL, radTR, radBR, radBL);
         return;
     }
@@ -768,8 +762,7 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
 
 void canvas::ellipse(point_f c, f32 rx, f32 ry)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_ellipse(c, rx, ry);
         return;
     }
@@ -786,8 +779,7 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
 
 void canvas::circle(point_f c, f32 r)
 {
-    state& s {get_state()};
-    if (!s.Dash.empty()) {
+    if (!get_state().Dash.empty()) {
         dashed_circle(c, r);
         return;
     }
@@ -983,6 +975,120 @@ void canvas::dashed_quad_bezier_to(point_f cp, point_f end)
 {
     easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
     dashed_bezier_to(func);
+}
+
+void canvas::dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir)
+{
+    state const& s {get_state()};
+
+    static f32 const rad90 {TAU_F / 4};
+
+    f32 const a0 {startAngle.Value - rad90};
+    f32 const a1 {endAngle.Value - rad90};
+
+    // Normalize angles.
+    f32 da {a1 - a0};
+    if (dir == winding::CW) {
+        if (std::abs(da) >= TAU_F) {
+            da = TAU_F;
+        } else {
+            while (da < 0.0f) { da += TAU_F; }
+        }
+    } else { // CCW
+        if (std::abs(da) >= TAU_F) {
+            da = -TAU_F;
+        } else {
+            while (da > 0.0f) { da -= TAU_F; }
+        }
+    }
+
+    // Total arc length.
+    f32 const            totalLength {r * std::abs(da)};
+    // Determine the number of samples for a polyline approximation.
+    // We use at least 10 points, scaling up to ~50 samples for a full circle.
+    i32 const            nSamples {std::max(10, static_cast<i32>(std::ceil(50.0f * (std::abs(da) / TAU_F))))};
+    std::vector<point_f> polyline;
+    polyline.reserve(static_cast<usize>(nSamples) + 1);
+    for (i32 i {0}; i <= nSamples; ++i) {
+        f32 const t {static_cast<f32>(i) / nSamples};
+        f32 const angle {a0 + da * t};
+        polyline.emplace_back(c.X + std::cos(angle) * r,
+                              c.Y + std::sin(angle) * r);
+    }
+
+    std::vector<f32> vals;
+    vals.reserve(159);
+
+    // Begin the path at the first point.
+    vals.push_back(static_cast<f32>(MoveTo));
+    vals.push_back(polyline.front().X);
+    vals.push_back(polyline.front().Y);
+
+    // Dash drawing variables.
+    f32           accumulated {0.0f}; // Accumulated distance in the current dash segment.
+    usize         dashIndex {0};
+    bool          drawing {true};
+    constexpr f32 epsilon {1e-6f};
+
+    // Iterate over the polyline segments.
+    point_f current {polyline.front()};
+    for (usize i {1}; i < polyline.size(); ++i) {
+        point_f const next {polyline[i]};
+        f32           segLength {static_cast<f32>(current.distance_to(next))};
+        // Walk along the current segment.
+        while (segLength > epsilon) {
+            // Current dash length (in absolute units).
+            f32 const dashFrac {s.Dash[dashIndex % s.Dash.size()]};
+            if (dashFrac < epsilon) {
+                ++dashIndex;
+                continue;
+            }
+            f32 const dashAbs {dashFrac * totalLength};
+            // How much is left in the current dash segment.
+            f32 const remain {dashAbs - accumulated};
+            if (remain < epsilon) {
+                // Dash segment finished; toggle drawing and reset accumulation.
+                drawing = !drawing;
+                ++dashIndex;
+                accumulated = 0.0f;
+                continue;
+            }
+            if (segLength <= remain) {
+                // Consume the entire segment.
+                if (drawing) {
+                    vals.push_back(LineTo);
+                    vals.push_back(next.X);
+                    vals.push_back(next.Y);
+                }
+                accumulated += segLength;
+                segLength = 0.0f;
+                current   = next;
+            } else {
+                // Split the segment: interpolate a point at the required fraction.
+                f32 const     fraction {remain / segLength};
+                point_f const mid {current.X + (next.X - current.X) * fraction,
+                                   current.Y + (next.Y - current.Y) * fraction};
+                if (drawing) {
+                    vals.push_back(LineTo);
+                    vals.push_back(mid.X);
+                    vals.push_back(mid.Y);
+                } else {
+                    vals.push_back(MoveTo);
+                    vals.push_back(mid.X);
+                    vals.push_back(mid.Y);
+                }
+                // Update for the remaining part of the segment.
+                accumulated = 0.0f;
+                segLength -= remain;
+                current = mid;
+                drawing = !drawing;
+                ++dashIndex;
+            }
+        }
+        // Prepare for next polyline segment.
+        current = next;
+    }
+    append_commands(vals);
 }
 
 void canvas::dashed_rounded_rect(rect_f const& rect, f32 r)

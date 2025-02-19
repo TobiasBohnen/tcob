@@ -291,6 +291,7 @@ private:
     auto dashed_bezier_to(auto&& func);
     void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
     void dashed_quad_bezier_to(point_f cp, point_f end);
+    void dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir);
     void dashed_rounded_rect(rect_f const& rect, f32 r);
     void dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
 
