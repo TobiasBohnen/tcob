@@ -390,6 +390,129 @@ auto static Quantize(f32 a, f32 d) -> f32
     return (static_cast<i32>((a / d) + 0.5f)) * d;
 }
 
+auto static RoundedRectFunc(f64 t, rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL) -> point_f
+{
+    auto static quad_bezier {[](point_f p0, point_f p1, point_f p2, f32 t) -> point_f {
+        f32 oneMinusT = 1.0f - t;
+        f32 exp0      = oneMinusT * oneMinusT;
+        f32 exp1      = 2.0f * t * oneMinusT;
+        f32 exp2      = t * t;
+
+        return {
+            exp0 * p0.X + exp1 * p1.X + exp2 * p2.X,
+            exp0 * p0.Y + exp1 * p1.Y + exp2 * p2.Y};
+    }};
+
+    auto const [x, y] {rect.Position};
+    auto const [w, h] {rect.Size};
+
+    if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) {
+        f32 const perimeter {2 * (w + h)};
+        f32       distAlongPerimeter {static_cast<f32>(t * perimeter)};
+
+        // Top edge
+        if (distAlongPerimeter < w) { return {x + distAlongPerimeter, y}; }
+        distAlongPerimeter -= w;
+
+        // Right edge
+        if (distAlongPerimeter < h) { return {x + w, y + distAlongPerimeter}; }
+        distAlongPerimeter -= h;
+
+        // Bottom edge
+        if (distAlongPerimeter < w) { return {x + w - distAlongPerimeter, y + h}; }
+        distAlongPerimeter -= w;
+
+        // Left edge
+        return {x, y + h - distAlongPerimeter};
+    }
+
+    f32 const halfw {std::abs(w) * 0.5f};
+    f32 const halfh {std::abs(h) * 0.5f};
+    f32 const rxBL {std::min(radBL, halfw) * signf(w)};
+    f32 const ryBL {std::min(radBL, halfh) * signf(h)};
+    f32 const rxBR {std::min(radBR, halfw) * signf(w)};
+    f32 const ryBR {std::min(radBR, halfh) * signf(h)};
+    f32 const rxTR {std::min(radTR, halfw) * signf(w)};
+    f32 const ryTR {std::min(radTR, halfh) * signf(h)};
+    f32 const rxTL {std::min(radTL, halfw) * signf(w)};
+    f32 const ryTL {std::min(radTL, halfh) * signf(h)};
+
+    // Perimeter segments (linear parts + arcs)
+    f32 const perim_top {w - (rxTL + rxTR)};
+    f32 const perim_right {h - (ryTR + ryBR)};
+    f32 const perim_bottom {w - (rxBL + rxBR)};
+    f32 const perim_left {h - (ryBL + ryTL)};
+    f32 const arc_topRight {NVG_KAPPA90 * (rxTR + ryTR)};
+    f32 const arc_bottomRight {NVG_KAPPA90 * (rxBR + ryBR)};
+    f32 const arc_bottomLeft {NVG_KAPPA90 * (rxBL + ryBL)};
+    f32 const arc_topLeft {NVG_KAPPA90 * (rxTL + ryTL)};
+
+    f32 const total_perimeter {perim_top + perim_right + perim_bottom + perim_left + arc_topRight + arc_bottomRight + arc_bottomLeft + arc_topLeft};
+
+    f64 scaledT {t * total_perimeter};
+
+    // Top edge
+    if (scaledT < perim_top) {
+        return {x + rxTL + static_cast<f32>(scaledT), y};
+    }
+    scaledT -= perim_top;
+
+    // Top-right arc (Quadratic Bézier)
+    if (scaledT < arc_topRight) {
+        return quad_bezier(
+            {x + w - rxTR, y},
+            {x + w, y},
+            {x + w, y + ryTR},
+            static_cast<f32>(scaledT / arc_topRight));
+    }
+    scaledT -= arc_topRight;
+
+    // Right edge
+    if (scaledT < perim_right) {
+        return {x + w, y + ryTR + static_cast<f32>(scaledT)};
+    }
+    scaledT -= perim_right;
+
+    // Bottom-right arc
+    if (scaledT < arc_bottomRight) {
+        return quad_bezier(
+            {x + w, y + h - ryBR},
+            {x + w, y + h},
+            {x + w - rxBR, y + h},
+            static_cast<f32>(scaledT / arc_bottomRight));
+    }
+    scaledT -= arc_bottomRight;
+
+    // Bottom edge
+    if (scaledT < perim_bottom) {
+        return {x + w - rxBR - static_cast<f32>(scaledT), y + h};
+    }
+    scaledT -= perim_bottom;
+
+    // Bottom-left arc
+    if (scaledT < arc_bottomLeft) {
+        return quad_bezier(
+            {x + rxBL, y + h},
+            {x, y + h},
+            {x, y + h - ryBL},
+            static_cast<f32>(scaledT / arc_bottomLeft));
+    }
+    scaledT -= arc_bottomLeft;
+
+    // Left edge
+    if (scaledT < perim_left) {
+        return {x, y + h - ryBL - static_cast<f32>(scaledT)};
+    }
+    scaledT -= perim_left;
+
+    // Top-left arc
+    return quad_bezier(
+        {x, y + ryTL},
+        {x, y},
+        {x + rxTL, y},
+        static_cast<f32>(scaledT / arc_topLeft));
+}
+
 ////////////////////////////////////////////////////////////
 
 canvas::canvas()
@@ -548,26 +671,6 @@ void canvas::stroke_lines(std::span<point_f const> points)
     stroke();
 }
 
-void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots)
-{
-    easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
-    f32 const                  inc {1.0f / numDots};
-
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t), r);
-    }
-}
-
-void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots)
-{
-    easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
-    f32 const                 inc {1.0f / numDots};
-
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t), r);
-    }
-}
-
 void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
 {
     easing::linear<point_f> func {.Start = _commandPoint, .End = to};
@@ -578,24 +681,57 @@ void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
     }
 }
 
-void canvas::dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots)
+void canvas::dotted_circle(point_f center, f32 circleR, f32 dotR, i32 numDots)
 {
     easing::circular func {.Start = degree_f {0}, .End = degree_f {360}};
     f32 const        inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t) * rcircle + center, rdots);
+        circle(func(t) * circleR + center, dotR);
+    }
+}
+
+void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 dotR, i32 numDots)
+{
+    easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
+    f32 const                  inc {1.0f / numDots};
+
+    for (f32 t {0}; t <= 1.0f; t += inc) {
+        circle(func(t), dotR);
+    }
+}
+
+void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 dotR, i32 numDots)
+{
+    easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
+    f32 const                 inc {1.0f / numDots};
+
+    for (f32 t {0}; t <= 1.0f; t += inc) {
+        circle(func(t), dotR);
+    }
+}
+
+void canvas::dotted_rounded_rect(rect_f const& rect, f32 r, f32 dotR, i32 numDots)
+{
+    dotted_rounded_rect_varying(rect, r, r, r, r, dotR, numDots);
+}
+
+void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, f32 dotR, i32 numDots)
+{
+    f32 const inc {1.0f / numDots};
+    for (f32 t {0}; t <= 1.0f; t += inc * 2) {
+        circle(RoundedRectFunc(t, rect, radTL, radTR, radBR, radBL), dotR);
     }
 }
 
 void canvas::dashed_line_to(point_f to, i32 numDashes)
 {
     easing::linear<point_f> func {.Start = _commandPoint, .End = to};
-    f32 const               inc {1.0f / (numDashes * 2)};
+    f32 const               inc {1.0f / (numDashes * 4)};
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t));
-        line_to(func(t + inc));
+        line_to(func(std::min(1.0f, t + inc)));
     }
 }
 
@@ -606,7 +742,7 @@ void canvas::dashed_circle(point_f center, f32 r, i32 numDashes)
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t) * r + center);
-        line_to(func(t + inc) * r + center);
+        line_to(func(std::min(1.0f, t + inc)) * r + center);
     }
 }
 
@@ -628,7 +764,21 @@ void canvas::dashed_quad_bezier_to(point_f cp, point_f end, i32 numDashes)
 
     for (f32 t {0}; t <= 1.0f; t += inc * 2) {
         move_to(func(t));
-        line_to(func(t + inc));
+        line_to(func(std::min(1.0f, t + inc)));
+    }
+}
+
+void canvas::dashed_rounded_rect(rect_f const& rect, f32 r, i32 numDashes)
+{
+    dashed_rounded_rect_varying(rect, r, r, r, r, numDashes);
+}
+
+void canvas::dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, i32 numDashes)
+{
+    f32 const inc {1.0f / (numDashes * 2)};
+    for (f32 t {0}; t <= 1.0f; t += inc * 2) {
+        move_to(RoundedRectFunc(t, rect, radTL, radTR, radBR, radBL));
+        line_to(RoundedRectFunc(std::min(1.0f, t + inc), rect, radTL, radTR, radBR, radBL));
     }
 }
 
@@ -843,12 +993,12 @@ void canvas::rounded_rect(rect_f const& r, f32 rad)
     rounded_rect_varying(r, rad, rad, rad, rad);
 }
 
-void canvas::rounded_rect_varying(rect_f const& rec, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
+void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
 {
-    auto const [x, y] {rec.Position};
-    auto const [w, h] {rec.Size};
+    auto const [x, y] {rect.Position};
+    auto const [w, h] {rect.Size};
     if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) {
-        rect(rec);
+        this->rect(rect);
         return;
     }
 
@@ -1517,10 +1667,7 @@ void canvas::clear_path_cache()
 
 auto canvas::get_last_path() -> canvas_path&
 {
-    if (_cache.paths.empty()) {
-        _cache.paths.emplace_back();
-    }
-
+    assert(!_cache.paths.empty());
     return _cache.paths.back();
 }
 
@@ -1533,6 +1680,7 @@ void canvas::add_path()
 
 auto canvas::get_last_point() -> canvas_point&
 {
+    assert(!_cache.points.empty());
     return _cache.points.back();
 }
 
@@ -1576,9 +1724,7 @@ void canvas::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
                               f32 x3, f32 y3, f32 x4, f32 y4,
                               i32 level, i32 type)
 {
-    if (level > 10) {
-        return;
-    }
+    if (level > 10) { return; }
 
     f32 const dx {x4 - x1};
     f32 const dy {y4 - y1};

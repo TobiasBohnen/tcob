@@ -196,15 +196,19 @@ public:
     void ellipse(point_f c, f32 rx, f32 ry);
     void circle(point_f c, f32 r);
 
-    void dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots);
-    void dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots);
-    void dotted_line_to(point_f to, f32 r, i32 numDots);
-    void dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
+    void dotted_line_to(point_f to, f32 dotR, i32 numDots);
+    void dotted_circle(point_f center, f32 circleR, f32 dotR, i32 numDots);
+    void dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 dotR, i32 numDots);
+    void dotted_quad_bezier_to(point_f cp, point_f end, f32 dotR, i32 numDots);
+    void dotted_rounded_rect(rect_f const& rect, f32 r, f32 dotR, i32 numDots);
+    void dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, f32 dotR, i32 numDots);
 
     void dashed_line_to(point_f to, i32 numDashes);
     void dashed_circle(point_f center, f32 r, i32 numDashes);
     void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, i32 numDashes);
     void dashed_quad_bezier_to(point_f cp, point_f end, i32 numDashes);
+    void dashed_rounded_rect(rect_f const& rect, f32 r, i32 numDashes);
+    void dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, i32 numDashes);
 
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
     void regular_polygon(point_f pos, size_f size, i32 n);
