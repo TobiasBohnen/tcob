@@ -695,7 +695,7 @@ void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
     }};
 
     f32 const inc {1.0f / numDots};
-    for (f32 t {0}; t <= 1.0f; t += inc * 2) {
+    for (f32 t {0}; t <= 1.0f; t += inc) {
         circle(func(t), dotR);
     }
 }

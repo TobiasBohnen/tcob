@@ -256,14 +256,14 @@ namespace element {
 
     void nav_arrow::Transition(nav_arrow& target, nav_arrow const& left, nav_arrow const& right, f64 step)
     {
-        if (auto const* lc {std::get_if<color>(&left.IncBackground)}) {
-            if (auto const* rc {std::get_if<color>(&right.IncBackground)}) {
-                target.IncBackground = color::Lerp(*lc, *rc, step);
+        if (auto const* lc {std::get_if<color>(&left.UpBackground)}) {
+            if (auto const* rc {std::get_if<color>(&right.UpBackground)}) {
+                target.UpBackground = color::Lerp(*lc, *rc, step);
             }
         }
-        if (auto const* lc {std::get_if<color>(&left.DecBackground)}) {
-            if (auto const* rc {std::get_if<color>(&right.DecBackground)}) {
-                target.DecBackground = color::Lerp(*lc, *rc, step);
+        if (auto const* lc {std::get_if<color>(&left.DownBackground)}) {
+            if (auto const* rc {std::get_if<color>(&right.DownBackground)}) {
+                target.DownBackground = color::Lerp(*lc, *rc, step);
             }
         }
         if (auto const* lc {std::get_if<color>(&left.Foreground)}) {

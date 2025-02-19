@@ -121,30 +121,48 @@ void widget_painter::draw_nine_patch(nine_patch const& np, rect_f const& rect, e
 
 void widget_painter::draw_border(rect_f const& rect, element::border const& borderStyle, f32 borderSize, f32 borderRadius)
 {
-    if (borderSize <= 0.0f) {
-        return;
-    }
+    if (borderSize <= 0.0f) { return; }
 
-    switch (borderStyle.Type) {
-    case element::border::type::Solid: {
-        _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-        _canvas.set_stroke_width(borderSize);
-        _canvas.begin_path();
-        _canvas.rounded_rect(rect, borderRadius);
-        _canvas.stroke();
-    } break;
-    case element::border::type::Double: {
-        _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-        f32 const dborderSize {borderSize / 3};
-        _canvas.set_stroke_width(dborderSize);
-        _canvas.begin_path();
-        _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
-        _canvas.rounded_rect(rect, borderRadius);
-        _canvas.stroke();
+    if (auto const* np {std::get_if<nine_patch>(&borderStyle.Background)}) {
+        draw_nine_patch(*np, rect, borderStyle);
+    } else {
+        switch (borderStyle.Type) {
+        case element::border::type::Solid: {
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_width(borderSize);
+            _canvas.begin_path();
+            _canvas.rounded_rect(rect, borderRadius);
+            _canvas.stroke();
+        } break;
+        case element::border::type::Double: {
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            f32 const dborderSize {borderSize / 3};
+            _canvas.set_stroke_width(dborderSize);
+            _canvas.begin_path();
+            _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
+            _canvas.rounded_rect(rect, borderRadius);
+            _canvas.stroke();
 
-    } break;
-    case element::border::type::Hidden:
-        break;
+        } break;
+        case element::border::type::Dashed: {
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_width(borderSize);
+            _canvas.set_line_dash(std::array {0.025f, 0.025f});
+            _canvas.begin_path();
+            _canvas.rounded_rect(rect, borderRadius);
+            _canvas.stroke();
+            _canvas.set_line_dash({});
+        } break;
+        case element::border::type::Dotted: {
+            _canvas.set_fill_style(get_paint(borderStyle.Background, rect));
+            _canvas.begin_path();
+            f32 const num {(rect.width() * 2 + rect.height() * 2) / (borderSize * 2)};
+            _canvas.dotted_rounded_rect(rect, borderRadius, borderSize / 2, num);
+            _canvas.fill();
+        } break;
+        case element::border::type::Hidden:
+            break;
+        }
     }
 }
 
@@ -168,7 +186,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
         point_f const dropShadowOffset {style.Shadow.OffsetX.calc(rect.width()),
                                         style.Shadow.OffsetY.calc(rect.height())};
 
-        _canvas.set_fill_style(get_paint(style.Shadow.Color, rect));
+        _canvas.set_fill_style(style.Shadow.Color);
         rect_f shadowRect {rect};
         shadowRect.Position.X += dropShadowOffset.X;
         shadowRect.Position.Y += dropShadowOffset.Y;
@@ -176,7 +194,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
     }
 
     // text
-    _canvas.set_fill_style(get_paint(style.Color, rect));
+    _canvas.set_fill_style(style.Color);
     _canvas.draw_textbox(rect.Position, text);
 
     // deco
@@ -216,6 +234,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                         _canvas.set_line_dash(std::array {0.025f, 0.025f});
                         _canvas.line_to(p1 + offset);
                         _canvas.stroke();
+                        _canvas.set_line_dash({});
                         break;
                     case text_decoration::style::Wavy:
                         _canvas.set_stroke_width(strokeWidth);
@@ -450,7 +469,7 @@ void widget_painter::draw_nav_arrow(element::nav_arrow const& style, rect_f cons
     rect_f const navRect {style.calc(rect)};
 
     rect_f decRect {navRect};
-    draw_bordered_rect(decRect, style.DecBackground, style.Border);
+    draw_bordered_rect(decRect, style.DownBackground, style.Border);
 
     switch (style.Type) {
     case element::nav_arrow::type::Triangle: {
@@ -479,24 +498,28 @@ auto widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
         rect_f decRect {navRect};
         decRect.Size.Height /= 2;
         decRect.Position.Y += decRect.height();
-        draw_bordered_rect(decRect, decStyle.DecBackground, decStyle.Border);
+        draw_bordered_rect(decRect, decStyle.DownBackground, decStyle.Border);
 
-        switch (decStyle.Type) {
-        case element::nav_arrow::type::Triangle: {
-            point_f const center {navRect.center()};
-            _canvas.set_fill_style(get_paint(decStyle.Foreground, navRect));
-            _canvas.begin_path();
-            _canvas.triangle(
-                {navRect.left() + 2, center.Y + 4},
-                {center.X, navRect.bottom() - 4},
-                {navRect.right() - 2, center.Y + 4});
-            _canvas.fill();
-        } break;
-        case element::nav_arrow::type::None:
-            break;
+        if (auto const* np {std::get_if<nine_patch>(&decStyle.Foreground)}) {
+            draw_nine_patch(*np, decRect, decStyle.Border);
+        } else {
+            switch (decStyle.Type) {
+            case element::nav_arrow::type::Triangle: {
+                point_f const center {navRect.center()};
+                _canvas.set_fill_style(get_paint(decStyle.Foreground, decRect));
+                _canvas.begin_path();
+                _canvas.triangle(
+                    {navRect.left() + 2, center.Y + 4},
+                    {center.X, navRect.bottom() - 4},
+                    {navRect.right() - 2, center.Y + 4});
+                _canvas.fill();
+            } break;
+            case element::nav_arrow::type::None:
+                break;
+            }
+
+            retValue.second = decRect;
         }
-
-        retValue.second = decRect;
     }
 
     {
@@ -504,21 +527,25 @@ auto widget_painter::draw_nav_arrows(element::nav_arrow const& incStyle, element
 
         rect_f incRect {navRect};
         incRect.Size.Height /= 2;
-        draw_bordered_rect(incRect, incStyle.IncBackground, incStyle.Border);
+        draw_bordered_rect(incRect, incStyle.UpBackground, incStyle.Border);
 
-        switch (incStyle.Type) {
-        case element::nav_arrow::type::Triangle: {
-            point_f const center {navRect.center()};
-            _canvas.set_fill_style(get_paint(incStyle.Foreground, navRect));
-            _canvas.begin_path();
-            _canvas.triangle(
-                {navRect.left() + 2, center.Y - 4},
-                {center.X, navRect.top() + 4},
-                {navRect.right() - 2, center.Y - 4});
-            _canvas.fill();
-        } break;
-        case element::nav_arrow::type::None:
-            break;
+        if (auto const* np {std::get_if<nine_patch>(&incStyle.Foreground)}) {
+            draw_nine_patch(*np, incRect, incStyle.Border);
+        } else {
+            switch (incStyle.Type) {
+            case element::nav_arrow::type::Triangle: {
+                point_f const center {navRect.center()};
+                _canvas.set_fill_style(get_paint(incStyle.Foreground, incRect));
+                _canvas.begin_path();
+                _canvas.triangle(
+                    {navRect.left() + 2, center.Y - 4},
+                    {center.X, navRect.top() + 4},
+                    {navRect.right() - 2, center.Y - 4});
+                _canvas.fill();
+            } break;
+            case element::nav_arrow::type::None:
+                break;
+            }
         }
 
         retValue.first = incRect;

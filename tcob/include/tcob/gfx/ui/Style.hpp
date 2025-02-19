@@ -115,9 +115,8 @@ namespace element {
         enum class type : u8 {
             Solid,
             Double,
-            // Dotted,
-            // Dashed,
-            // LongDashed,
+            Dotted,
+            Dashed,
             // Cornered,
             // Centered,
             // Inset,
@@ -249,8 +248,8 @@ namespace element {
         };
 
         type       Type {type::Triangle};
-        ui_paint   IncBackground {colors::Transparent};
-        ui_paint   DecBackground {colors::Transparent};
+        ui_paint   UpBackground {colors::Transparent};
+        ui_paint   DownBackground {colors::Transparent};
         ui_paint   Foreground {colors::Transparent};
         dimensions Size {};
         border     Border {};
