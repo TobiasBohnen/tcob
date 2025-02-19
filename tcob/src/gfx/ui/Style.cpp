@@ -205,6 +205,12 @@ namespace element {
 
         target.Radius = length::Lerp(left.Radius, right.Radius, step);
         target.Size   = length::Lerp(left.Size, right.Size, step);
+        if (left.Dash.size() == right.Dash.size()) {
+            target.Dash.resize(left.Dash.size());
+            for (usize i {0}; i < left.Dash.size(); ++i) {
+                target.Dash[i] = static_cast<f32>(left.Dash[i] + (right.Dash[i] - left.Dash[i]) * step);
+            }
+        }
     }
 
     void thumb::Transition(thumb& target, thumb const& left, thumb const& right, f64 step)

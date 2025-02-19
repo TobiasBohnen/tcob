@@ -126,10 +126,11 @@ namespace element {
             Hidden
         };
 
-        type     Type {type::Solid};
-        ui_paint Background {colors::Transparent};
-        length   Radius {};
-        length   Size {};
+        type             Type {type::Solid};
+        ui_paint         Background {colors::Transparent};
+        length           Radius {};
+        length           Size {};
+        std::vector<f32> Dash {0.025f, 0.025f};
 
         auto thickness() const -> thickness;
 

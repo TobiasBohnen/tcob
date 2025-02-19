@@ -147,7 +147,7 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
         case element::border::type::Dashed: {
             _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
             _canvas.set_stroke_width(borderSize);
-            _canvas.set_line_dash(std::array {0.025f, 0.025f});
+            _canvas.set_line_dash(borderStyle.Dash);
             _canvas.begin_path();
             _canvas.rounded_rect(rect, borderRadius);
             _canvas.stroke();
