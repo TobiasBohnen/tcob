@@ -205,11 +205,14 @@ namespace element {
 
         target.Radius = length::Lerp(left.Radius, right.Radius, step);
         target.Size   = length::Lerp(left.Size, right.Size, step);
-        if (left.Dash.size() == right.Dash.size()) {
-            target.Dash.resize(left.Dash.size());
-            for (usize i {0}; i < left.Dash.size(); ++i) {
-                target.Dash[i] = static_cast<f32>(left.Dash[i] + (right.Dash[i] - left.Dash[i]) * step);
-            }
+
+        usize const ldashSize {left.Dash.size()};
+        usize const rdashSize {right.Dash.size()};
+        target.Dash.resize(std::max(ldashSize, rdashSize));
+        for (usize i {0}; i < target.Dash.size(); ++i) {
+            f32 const ldash {i < ldashSize ? left.Dash[i] : 0};
+            f32 const rdash {i < rdashSize ? right.Dash[i] : 0};
+            target.Dash[i] = static_cast<f32>(ldash + (rdash - ldash) * step);
         }
     }
 
