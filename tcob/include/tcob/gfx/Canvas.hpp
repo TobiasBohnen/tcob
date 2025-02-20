@@ -291,14 +291,6 @@ private:
 
     void dashed_bezier_path(auto&& func);
 
-    void dashed_line_to(point_f to);
-    void dashed_ellipse(point_f c, f32 rx, f32 ry);
-    void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
-    void dashed_quad_bezier_to(point_f cp, point_f end);
-    void dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir);
-    void dashed_rounded_rect(rect_f const& rect, f32 r);
-    void dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
-
     void set_device_pixel_ratio(f32 ratio);
     auto get_state() -> state&;
     auto get_state() const -> state const&;

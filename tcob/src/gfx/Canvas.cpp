@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 #include <vector>
 
 #include "tcob/core/ServiceLocator.hpp"
@@ -20,7 +21,8 @@
 namespace tcob::gfx {
 using namespace detail;
 
-auto constexpr NVG_KAPPA90 = 0.5522847493f; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
+auto constexpr NVG_KAPPA90 {0.5522847493f}; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
+auto constexpr EPSILON {1e-6f};
 
 enum point_flags : u8 {
     Corner     = 0x01,
@@ -34,7 +36,7 @@ auto static signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
 auto static Normalize(f32& x, f32& y) -> f32
 {
     f32 const d {std::sqrt((x * x) + (y * y))};
-    if (d > 1e-6f) {
+    if (d > EPSILON) {
         f32 const id {1.0f / d};
         x *= id;
         y *= id;
@@ -386,22 +388,22 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
 auto static Rect(f32 x, f32 y, f32 w, f32 h, f32 t) -> point_f
 {
     f32 const perimeter {2 * (w + h)};
-    f32       distAlongPerimeter {static_cast<f32>(t * perimeter)};
+    f32       dist {t * perimeter};
 
     // Top edge
-    if (distAlongPerimeter < w) { return {x + distAlongPerimeter, y}; }
-    distAlongPerimeter -= w;
+    if (dist < w) { return {x + dist, y}; }
+    dist -= w;
 
     // Right edge
-    if (distAlongPerimeter < h) { return {x + w, y + distAlongPerimeter}; }
-    distAlongPerimeter -= h;
+    if (dist < h) { return {x + w, y + dist}; }
+    dist -= h;
 
     // Bottom edge
-    if (distAlongPerimeter < w) { return {x + w - distAlongPerimeter, y + h}; }
-    distAlongPerimeter -= w;
+    if (dist < w) { return {x + w - dist, y + h}; }
+    dist -= w;
 
     // Left edge
-    return {x, y + h - distAlongPerimeter};
+    return {x, y + h - dist};
 }
 
 auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
@@ -548,45 +550,66 @@ void canvas::move_to(point_f pos)
 
 void canvas::line_to(point_f pos)
 {
-    if (do_dash()) {
-        dashed_line_to(pos);
+    if (!do_dash()) {
+        append_commands(path2d::CommandsLineTo(pos));
         return;
     }
 
-    append_commands(path2d::CommandsLineTo(pos));
+    easing::linear<point_f> func {.Start = _commandPoint, .End = pos};
+
+    f32 const totalLength {static_cast<f32>((pos - _commandPoint).length())};
+    f32       currentLength {0.0f};
+    usize     dashIndex {0};
+    bool      drawing {true};
+
+    state&                 s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
+    for (;;) {
+        f32 const dashLength {dashPattern[dashIndex++ % s.Dash.size()]};
+        if (currentLength + dashLength > totalLength) { break; }
+
+        if (drawing) {
+            f32 const start {currentLength / totalLength};
+            f32 const end {(currentLength + dashLength) / totalLength};
+
+            append_commands(path2d::CommandsMoveTo(func(start)));
+            append_commands(path2d::CommandsLineTo(func(end)));
+        }
+
+        currentLength += dashLength;
+        drawing = !drawing;
+    }
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
-    if (do_dash()) {
-        dashed_cubic_bezier_to(cp0, cp1, end);
+    if (!do_dash()) {
+        append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
         return;
     }
 
-    append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
+    easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
+    dashed_bezier_path(func);
 }
 
 void canvas::quad_bezier_to(point_f cp, point_f end)
 {
-    if (do_dash()) {
-        dashed_quad_bezier_to(cp, end);
+    if (!do_dash()) {
+        append_commands(path2d::CommandsQuadTo(_commandPoint, cp, end));
         return;
     }
 
-    append_commands(path2d::CommandsQuadTo(_commandPoint, cp, end));
+    easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
+    dashed_bezier_path(func);
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
 {
-    if (do_dash()) {
-        dashed_arc(c, r, startAngle, endAngle, dir);
-        return;
-    }
-
     static f32 const rad90 {TAU_F / 4};
 
     i32 const move {!_commands.empty() ? LineTo : MoveTo};
@@ -609,43 +632,53 @@ void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian
         }
     }
 
-    std::vector<f32> vals;
-    vals.reserve(138);
-    i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
-    f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
-    f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
-    if (dir == winding::CCW) { kappa = -kappa; }
+    if (!do_dash()) {
+        std::vector<f32> vals;
+        vals.reserve(138);
+        i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
+        f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
+        f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
+        if (dir == winding::CCW) { kappa = -kappa; }
 
-    f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
-    for (i32 i {0}; i <= ndivs; ++i) {
-        f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
-        f32 const dx {std::cos(a)};
-        f32 const dy {std::sin(a)};
-        f32 const x {c.X + dx * r};
-        f32 const y {c.Y + dy * r};
-        f32 const tanx {-dy * r * kappa};
-        f32 const tany {dx * r * kappa};
+        f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
+        for (i32 i {0}; i <= ndivs; ++i) {
+            f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
+            f32 const dx {std::cos(a)};
+            f32 const dy {std::sin(a)};
+            f32 const x {c.X + dx * r};
+            f32 const y {c.Y + dy * r};
+            f32 const tanx {-dy * r * kappa};
+            f32 const tany {dx * r * kappa};
 
-        if (i == 0) {
-            vals.push_back(static_cast<f32>(move));
-            vals.push_back(x);
-            vals.push_back(y);
-        } else {
-            vals.push_back(BezierTo);
-            vals.push_back(px + ptanx);
-            vals.push_back(py + ptany);
-            vals.push_back(x - tanx);
-            vals.push_back(y - tany);
-            vals.push_back(x);
-            vals.push_back(y);
+            if (i == 0) {
+                vals.push_back(static_cast<f32>(move));
+                vals.push_back(x);
+                vals.push_back(y);
+            } else {
+                vals.push_back(BezierTo);
+                vals.push_back(px + ptanx);
+                vals.push_back(py + ptany);
+                vals.push_back(x - tanx);
+                vals.push_back(y - tany);
+                vals.push_back(x);
+                vals.push_back(y);
+            }
+            px    = x;
+            py    = y;
+            ptanx = tanx;
+            ptany = tany;
         }
-        px    = x;
-        py    = y;
-        ptanx = tanx;
-        ptany = tany;
+
+        append_commands(vals);
+        return;
     }
 
-    append_commands(vals);
+    auto const arc_func {[=](f32 t) -> point_f {
+        f32 const angle {a0 + da * t};
+        return point_f {c.X + r * std::cos(angle), c.Y + r * std::sin(angle)};
+    }};
+
+    dashed_bezier_path(arc_func);
 }
 
 void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
@@ -704,19 +737,80 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 
 void canvas::rect(rect_f const& rect)
 {
-    if (do_dash()) {
-        dashed_rounded_rect(rect, 0);
+    auto const [x, y] {rect.Position};
+    auto const [w, h] {rect.Size};
+
+    if (!do_dash()) {
+        append_commands(std::vector<f32> {
+            MoveTo, x, y,
+            LineTo, x, y + h,
+            LineTo, x + w, y + h,
+            LineTo, x + w, y,
+            Close});
         return;
     }
 
-    auto const [x, y] {rect.Position};
-    auto const [w, h] {rect.Size};
-    append_commands(std::vector<f32> {
-        MoveTo, x, y,
-        LineTo, x, y + h,
-        LineTo, x + w, y + h,
-        LineTo, x + w, y,
-        Close});
+    f32 const              totalLength {2 * (w + h)};
+    state&                 s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
+    std::array<f32, 4> const     cornerPositions {{0.0f, w, w + h, 2 * w + h}};
+    std::array<point_f, 4> const corners {{rect.top_left(),
+                                           rect.top_right(),
+                                           rect.bottom_right(),
+                                           rect.bottom_left()}};
+
+    std::vector<f32> cmds {};
+    cmds.reserve(64);
+
+    point_f prevPoint {corners[0]};
+    cmds.push_back(static_cast<f32>(MoveTo));
+    cmds.push_back(prevPoint.X);
+    cmds.push_back(prevPoint.Y);
+
+    f32   prevLength {0.0f};
+    f32   currentLength {0.0f};
+    usize dashIndex {0};
+    bool  drawing {true};
+
+    while (currentLength < totalLength) {
+        f32 const dashLength {dashPattern[dashIndex++ % s.Dash.size()]};
+
+        f32 segEnd {prevLength + dashLength};
+        if (segEnd > totalLength) { segEnd = totalLength; }
+
+        if (drawing) {
+            for (f32 cp : cornerPositions) {
+                if (cp > prevLength && cp < segEnd) {
+                    point_f const cornerPt {corners[std::distance(cornerPositions.begin(), std::find(cornerPositions.begin(), cornerPositions.end(), cp))]};
+                    cmds.push_back(static_cast<f32>(LineTo));
+                    cmds.push_back(cornerPt.X);
+                    cmds.push_back(cornerPt.Y);
+                    prevPoint = cornerPt;
+                }
+            }
+
+            point_f const dashEndPt {Rect(x, y, w, h, segEnd / totalLength)};
+            if (std::abs(dashEndPt.X - prevPoint.X) > EPSILON || std::abs(dashEndPt.Y - prevPoint.Y) > EPSILON) {
+                cmds.push_back(static_cast<f32>(LineTo));
+                cmds.push_back(dashEndPt.X);
+                cmds.push_back(dashEndPt.Y);
+                prevPoint = dashEndPt;
+            }
+        } else {
+            point_f const gapEndPt {Rect(x, y, w, h, segEnd / totalLength)};
+            cmds.push_back(static_cast<f32>(MoveTo));
+            cmds.push_back(gapEndPt.X);
+            cmds.push_back(gapEndPt.Y);
+            prevPoint = gapEndPt;
+        }
+
+        prevLength    = segEnd;
+        currentLength = segEnd;
+        drawing       = !drawing;
+    }
+
+    append_commands(cmds);
 }
 
 void canvas::rounded_rect(rect_f const& r, f32 rad)
@@ -726,17 +820,13 @@ void canvas::rounded_rect(rect_f const& r, f32 rad)
 
 void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
 {
-    if (do_dash()) {
-        dashed_rounded_rect_varying(rect, radTL, radTR, radBR, radBL);
+    if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) {
+        this->rect(rect);
         return;
     }
 
     auto const [x, y] {rect.Position};
     auto const [w, h] {rect.Size};
-    if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) {
-        this->rect(rect);
-        return;
-    }
 
     f32 const halfw {std::abs(w) * 0.5f};
     f32 const halfh {std::abs(h) * 0.5f};
@@ -744,36 +834,96 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
     f32 const rxBR {std::min(radBR, halfw) * signf(w)}, ryBR {std::min(radBR, halfh) * signf(h)};
     f32 const rxTR {std::min(radTR, halfw) * signf(w)}, ryTR {std::min(radTR, halfh) * signf(h)};
     f32 const rxTL {std::min(radTL, halfw) * signf(w)}, ryTL {std::min(radTL, halfh) * signf(h)};
-    append_commands(std::vector<f32> {
-        MoveTo, x, y + ryTL,
-        LineTo, x, y + h - ryBL,
-        BezierTo, x, y + h - (ryBL * (1 - NVG_KAPPA90)), x + (rxBL * (1 - NVG_KAPPA90)), y + h, x + rxBL, y + h,
-        LineTo, x + w - rxBR, y + h,
-        BezierTo, x + w - (rxBR * (1 - NVG_KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - NVG_KAPPA90)), x + w, y + h - ryBR,
-        LineTo, x + w, y + ryTR,
-        BezierTo, x + w, y + (ryTR * (1 - NVG_KAPPA90)), x + w - (rxTR * (1 - NVG_KAPPA90)), y, x + w - rxTR, y,
-        LineTo, x + rxTL, y,
-        BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
-        Close});
+
+    if (!do_dash()) {
+        append_commands(std::vector<f32> {
+            MoveTo, x, y + ryTL,
+            LineTo, x, y + h - ryBL,
+            BezierTo, x, y + h - (ryBL * (1 - NVG_KAPPA90)), x + (rxBL * (1 - NVG_KAPPA90)), y + h, x + rxBL, y + h,
+            LineTo, x + w - rxBR, y + h,
+            BezierTo, x + w - (rxBR * (1 - NVG_KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - NVG_KAPPA90)), x + w, y + h - ryBR,
+            LineTo, x + w, y + ryTR,
+            BezierTo, x + w, y + (ryTR * (1 - NVG_KAPPA90)), x + w - (rxTR * (1 - NVG_KAPPA90)), y, x + w - rxTR, y,
+            LineTo, x + rxTL, y,
+            BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
+            Close});
+        return;
+    }
+
+    f32 const perimTop {w - (rxTL + rxTR)};
+    f32 const perimRight {h - (ryTR + ryBR)};
+    f32 const perimBottom {w - (rxBL + rxBR)};
+    f32 const perimLeft {h - (ryBL + ryTL)};
+
+    auto static quad_bezier {[](point_f p0, point_f p1, point_f p2, f32 t) -> point_f {
+        f32 const oneMinusT {1.0f - t};
+        f32 const exp0 {oneMinusT * oneMinusT};
+        f32 const exp1 {2.0f * t * oneMinusT};
+        f32 const exp2 {t * t};
+        return {exp0 * p0.X + exp1 * p1.X + exp2 * p2.X, exp0 * p0.Y + exp1 * p1.Y + exp2 * p2.Y};
+    }};
+
+    f32 const arcTopRightLen {QuadBezierLength({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR})};
+    f32 const arcBottomRightLen {QuadBezierLength({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h})};
+    f32 const arcBottomLeftLen {QuadBezierLength({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL})};
+    f32 const arcTopLeftLen {QuadBezierLength({x, y + ryTL}, {x, y}, {x + rxTL, y})};
+    f32 const totalLength {perimTop + perimRight + perimBottom + perimLeft + arcTopRightLen + arcBottomRightLen + arcBottomLeftLen + arcTopLeftLen};
+
+    auto const func {[&](f64 t) -> point_f {
+        f64 scaledT {t * totalLength};
+
+        if (scaledT < perimTop) { return {x + rxTL + static_cast<f32>(scaledT), y}; }
+        scaledT -= perimTop;
+
+        if (scaledT < arcTopRightLen) { return quad_bezier({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR}, static_cast<f32>(scaledT / arcTopRightLen)); }
+        scaledT -= arcTopRightLen;
+
+        if (scaledT < perimRight) { return {x + w, y + ryTR + static_cast<f32>(scaledT)}; }
+        scaledT -= perimRight;
+
+        if (scaledT < arcBottomRightLen) { return quad_bezier({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h}, static_cast<f32>(scaledT / arcBottomRightLen)); }
+        scaledT -= arcBottomRightLen;
+
+        if (scaledT < perimBottom) { return {x + w - rxBR - static_cast<f32>(scaledT), y + h}; }
+        scaledT -= perimBottom;
+
+        if (scaledT < arcBottomLeftLen) { return quad_bezier({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL}, static_cast<f32>(scaledT / arcBottomLeftLen)); }
+        scaledT -= arcBottomLeftLen;
+
+        if (scaledT < perimLeft) { return {x, y + h - ryBL - static_cast<f32>(scaledT)}; }
+        scaledT -= perimLeft;
+
+        return quad_bezier({x, y + ryTL}, {x, y}, {x + rxTL, y}, static_cast<f32>(scaledT / arcTopLeftLen));
+    }};
+
+    dashed_bezier_path(func);
+    close_path();
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::ellipse(point_f c, f32 rx, f32 ry)
 {
-    if (do_dash()) {
-        dashed_ellipse(c, rx, ry);
+    auto const [cx, cy] {c};
+
+    if (!do_dash()) {
+        append_commands(std::vector<f32> {
+            MoveTo, cx - rx, cy,
+            BezierTo, cx - rx, cy + (ry * NVG_KAPPA90), cx - (rx * NVG_KAPPA90), cy + ry, cx, cy + ry,
+            BezierTo, cx + (rx * NVG_KAPPA90), cy + ry, cx + rx, cy + (ry * NVG_KAPPA90), cx + rx, cy,
+            BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
+            BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
+            Close});
         return;
     }
 
-    auto const [cx, cy] {c};
-    append_commands(std::vector<f32> {
-        MoveTo, cx - rx, cy,
-        BezierTo, cx - rx, cy + (ry * NVG_KAPPA90), cx - (rx * NVG_KAPPA90), cy + ry, cx, cy + ry,
-        BezierTo, cx + (rx * NVG_KAPPA90), cy + ry, cx + rx, cy + (ry * NVG_KAPPA90), cx + rx, cy,
-        BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
-        BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
-        Close});
+    auto const ellipse_func {[=](f32 t) -> point_f {
+        f32 const angle {(TAU_F * t) - (TAU_F / 4)};
+        return point_f {cx + rx * std::cos(angle), cy + ry * std::sin(angle)};
+    }};
+
+    dashed_bezier_path(ellipse_func);
+    close_path();
 }
 
 void canvas::circle(point_f c, f32 r)
@@ -811,6 +961,11 @@ auto canvas::get_dash_pattern(state const& s, f32 total) const -> std::vector<f3
     } else {         // absolute
         for (f32 val : s.Dash) { dashPattern.push_back(std::max(1.0f, val)); }
     }
+
+    f32 const   sumDash {std::accumulate(dashPattern.begin(), dashPattern.end(), 0.0f)};
+    usize const reps {std::max(usize {1}, static_cast<usize>(std::round(total / sumDash)))};
+    f32 const   scale {total / (reps * sumDash)};
+    for (f32& d : dashPattern) { d *= scale; }
 
     return dashPattern;
 }
@@ -879,161 +1034,6 @@ void canvas::dashed_bezier_path(auto&& func)
     }
 
     append_commands(path2d::CommandsMoveTo(func(1.0f)));
-}
-
-void canvas::dashed_line_to(point_f to)
-{
-    easing::linear<point_f> func {.Start = _commandPoint, .End = to};
-
-    f32 const totalLength {static_cast<f32>((to - _commandPoint).length())};
-    f32       currentLength {0.0f};
-    usize     dashIndex {0};
-    bool      drawing {true};
-
-    state&                 s {get_state()};
-    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
-
-    for (;;) {
-        f32 const dashLength {dashPattern[dashIndex++ % s.Dash.size()]};
-        if (currentLength + dashLength > totalLength) { break; }
-
-        if (drawing) {
-            f32 const start {currentLength / totalLength};
-            f32 const end {(currentLength + dashLength) / totalLength};
-
-            append_commands(path2d::CommandsMoveTo(func(start)));
-            append_commands(path2d::CommandsLineTo(func(end)));
-        }
-
-        currentLength += dashLength;
-        drawing = !drawing;
-    }
-}
-
-void canvas::dashed_ellipse(point_f const c, f32 const rx, f32 const ry)
-{
-    // Lambda that maps t in [0,1] to a point on the ellipse.
-    auto const ellipse_func {[=](f32 t) -> point_f {
-        f32 const angle {(TAU_F * t) - (TAU_F / 4)};
-        return point_f {c.X + rx * std::cos(angle), c.Y + ry * std::sin(angle)};
-    }};
-
-    dashed_bezier_path(ellipse_func);
-
-    close_path();
-}
-
-void canvas::dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
-{
-    easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
-    dashed_bezier_path(func);
-}
-
-void canvas::dashed_quad_bezier_to(point_f cp, point_f end)
-{
-    easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
-    dashed_bezier_path(func);
-}
-
-void canvas::dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir)
-{
-    static f32 const rad90 {TAU_F / 4};
-
-    f32 const a0 {startAngle.Value - rad90};
-    f32 const a1 {endAngle.Value - rad90};
-
-    // Normalize angles.
-    f32 da {a1 - a0};
-    if (dir == winding::CW) {
-        if (std::abs(da) >= TAU_F) {
-            da = TAU_F;
-        } else {
-            while (da < 0.0f) { da += TAU_F; }
-        }
-    } else { // CCW
-        if (std::abs(da) >= TAU_F) {
-            da = -TAU_F;
-        } else {
-            while (da > 0.0f) { da -= TAU_F; }
-        }
-    }
-
-    // Lambda that maps t in [0,1] to a point on the arc.
-    auto const arc_func {[=](f32 t) -> point_f {
-        f32 const angle {a0 + da * t};
-        return point_f {c.X + r * std::cos(angle), c.Y + r * std::sin(angle)};
-    }};
-
-    dashed_bezier_path(arc_func);
-}
-
-void canvas::dashed_rounded_rect(rect_f const& rect, f32 r)
-{
-    dashed_rounded_rect_varying(rect, r, r, r, r);
-}
-
-void canvas::dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
-{
-    auto const [x, y] {rect.Position};
-    auto const [w, h] {rect.Size};
-
-    f32 const halfw {std::abs(w) * 0.5f};
-    f32 const halfh {std::abs(h) * 0.5f};
-    f32 const rxBL {std::min(radBL, halfw) * signf(w)}, ryBL {std::min(radBL, halfh) * signf(h)};
-    f32 const rxBR {std::min(radBR, halfw) * signf(w)}, ryBR {std::min(radBR, halfh) * signf(h)};
-    f32 const rxTR {std::min(radTR, halfw) * signf(w)}, ryTR {std::min(radTR, halfh) * signf(h)};
-    f32 const rxTL {std::min(radTL, halfw) * signf(w)}, ryTL {std::min(radTL, halfh) * signf(h)};
-
-    f32 const perimTop {w - (rxTL + rxTR)};
-    f32 const perimRight {h - (ryTR + ryBR)};
-    f32 const perimBottom {w - (rxBL + rxBR)};
-    f32 const perimLeft {h - (ryBL + ryTL)};
-
-    auto static quad_bezier {[](point_f p0, point_f p1, point_f p2, f32 t) -> point_f {
-        f32 const oneMinusT {1.0f - t};
-        f32 const exp0 {oneMinusT * oneMinusT};
-        f32 const exp1 {2.0f * t * oneMinusT};
-        f32 const exp2 {t * t};
-        return {exp0 * p0.X + exp1 * p1.X + exp2 * p2.X, exp0 * p0.Y + exp1 * p1.Y + exp2 * p2.Y};
-    }};
-
-    f32 const arcTopRightLen {QuadBezierLength({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR})};
-    f32 const arcBottomRightLen {QuadBezierLength({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h})};
-    f32 const arcBottomLeftLen {QuadBezierLength({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL})};
-    f32 const arcTopLeftLen {QuadBezierLength({x, y + ryTL}, {x, y}, {x + rxTL, y})};
-    f32 const totalLength {perimTop + perimRight + perimBottom + perimLeft + arcTopRightLen + arcBottomRightLen + arcBottomLeftLen + arcTopLeftLen};
-
-    auto const func {[&](f64 t) -> point_f {
-        if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) { return Rect(x, y, w, h, t); }
-
-        f64 scaledT {t * totalLength};
-
-        if (scaledT < perimTop) { return {x + rxTL + static_cast<f32>(scaledT), y}; }
-        scaledT -= perimTop;
-
-        if (scaledT < arcTopRightLen) { return quad_bezier({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR}, static_cast<f32>(scaledT / arcTopRightLen)); }
-        scaledT -= arcTopRightLen;
-
-        if (scaledT < perimRight) { return {x + w, y + ryTR + static_cast<f32>(scaledT)}; }
-        scaledT -= perimRight;
-
-        if (scaledT < arcBottomRightLen) { return quad_bezier({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h}, static_cast<f32>(scaledT / arcBottomRightLen)); }
-        scaledT -= arcBottomRightLen;
-
-        if (scaledT < perimBottom) { return {x + w - rxBR - static_cast<f32>(scaledT), y + h}; }
-        scaledT -= perimBottom;
-
-        if (scaledT < arcBottomLeftLen) { return quad_bezier({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL}, static_cast<f32>(scaledT / arcBottomLeftLen)); }
-        scaledT -= arcBottomLeftLen;
-
-        if (scaledT < perimLeft) { return {x, y + h - ryBL - static_cast<f32>(scaledT)}; }
-        scaledT -= perimLeft;
-
-        return quad_bezier({x, y + ryTL}, {x, y}, {x + rxTL, y}, static_cast<f32>(scaledT / arcTopLeftLen));
-    }};
-
-    dashed_bezier_path(func);
-    close_path();
 }
 
 ////////////////////////////////////////////////////////////
@@ -1191,7 +1191,7 @@ void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 
     point_f const d {to - from};
     f32 const     l {static_cast<f32>(d.length())};
-    if (l < 1e-6f) { return; }
+    if (l < EPSILON) { return; }
 
     point_f const unit {d.as_normalized()};
     point_f const perp {unit.as_perpendicular()};
