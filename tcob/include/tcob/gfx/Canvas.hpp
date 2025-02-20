@@ -91,7 +91,7 @@ enum commands : u8 {
 ////////////////////////////////////////////////////////////
 using paint_gradient = std::pair<f32, i32>;
 using paint_color    = std::variant<color, paint_gradient>;
-using dash_pattern   = std::variant<std::span<i32 const>, std::span<f32 const>>;
+using dash_pattern   = std::variant<std::vector<i32>, std::vector<f32>>;
 
 struct canvas_paint {
     transform   XForm {transform::Identity};
@@ -185,7 +185,7 @@ public:
     void close_path();
     void set_path_winding(winding dir);
     void set_path_winding(solidity s);
-    void set_line_dash(dash_pattern dashPattern);
+    void set_line_dash(dash_pattern const& dashPattern);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
@@ -287,6 +287,7 @@ private:
         vec4 bounds;
     };
 
+    auto do_dash() const -> bool;
     void dashed_line_to(point_f to);
     void dashed_ellipse(point_f c, f32 rx, f32 ry);
     auto dashed_bezier_to(auto&& func);

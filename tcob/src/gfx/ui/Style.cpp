@@ -206,13 +206,32 @@ namespace element {
         target.Radius = length::Lerp(left.Radius, right.Radius, step);
         target.Size   = length::Lerp(left.Size, right.Size, step);
 
-        usize const ldashSize {left.Dash.size()};
-        usize const rdashSize {right.Dash.size()};
-        target.Dash.resize(std::max(ldashSize, rdashSize));
-        for (usize i {0}; i < target.Dash.size(); ++i) {
-            f32 const ldash {i < ldashSize ? left.Dash[i] : 0};
-            f32 const rdash {i < rdashSize ? right.Dash[i] : 0};
-            target.Dash[i] = static_cast<f32>(ldash + (rdash - ldash) * step);
+        if (auto const* leftDashI {std::get_if<std::vector<i32>>(&left.Dash)}) {
+            if (auto const* rightDashI {std::get_if<std::vector<i32>>(&right.Dash)}) {
+                usize const      ldashSize {leftDashI->size()};
+                usize const      rdashSize {rightDashI->size()};
+                std::vector<i32> targetDash;
+                targetDash.resize(std::max(ldashSize, rdashSize));
+                for (usize i {0}; i < targetDash.size(); ++i) {
+                    i32 const ldash {i < ldashSize ? (*leftDashI)[i] : 0};
+                    i32 const rdash {i < rdashSize ? (*rightDashI)[i] : 0};
+                    targetDash[i] = static_cast<i32>(ldash + (rdash - ldash) * step);
+                }
+                target.Dash = targetDash;
+            }
+        } else if (auto const* leftDashF {std::get_if<std::vector<f32>>(&left.Dash)}) {
+            if (auto const* rightDashF {std::get_if<std::vector<f32>>(&right.Dash)}) {
+                usize const      ldashSize {leftDashF->size()};
+                usize const      rdashSize {rightDashF->size()};
+                std::vector<f32> targetDash;
+                targetDash.resize(std::max(ldashSize, rdashSize));
+                for (usize i {0}; i < targetDash.size(); ++i) {
+                    f32 const ldash {i < ldashSize ? (*leftDashF)[i] : 0};
+                    f32 const rdash {i < rdashSize ? (*rightDashF)[i] : 0};
+                    targetDash[i] = static_cast<f32>(ldash + (rdash - ldash) * step);
+                }
+                target.Dash = targetDash;
+            }
         }
     }
 

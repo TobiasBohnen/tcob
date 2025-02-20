@@ -548,7 +548,7 @@ void canvas::move_to(point_f pos)
 
 void canvas::line_to(point_f pos)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_line_to(pos);
         return;
     }
@@ -560,7 +560,7 @@ void canvas::line_to(point_f pos)
 
 void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_cubic_bezier_to(cp0, cp1, end);
         return;
     }
@@ -570,7 +570,7 @@ void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 
 void canvas::quad_bezier_to(point_f cp, point_f end)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_quad_bezier_to(cp, end);
         return;
     }
@@ -582,7 +582,7 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 
 void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_arc(c, r, startAngle, endAngle, dir);
         return;
     }
@@ -704,7 +704,7 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 
 void canvas::rect(rect_f const& rect)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_rounded_rect(rect, 0);
         return;
     }
@@ -726,7 +726,7 @@ void canvas::rounded_rect(rect_f const& r, f32 rad)
 
 void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_rounded_rect_varying(rect, radTL, radTR, radBR, radBL);
         return;
     }
@@ -761,7 +761,7 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
 
 void canvas::ellipse(point_f c, f32 rx, f32 ry)
 {
-    if (!get_state().Dash.empty()) {
+    if (do_dash()) {
         dashed_ellipse(c, rx, ry);
         return;
     }
@@ -783,21 +783,39 @@ void canvas::circle(point_f c, f32 r)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::set_line_dash(dash_pattern dashPattern)
+void canvas::set_line_dash(dash_pattern const& dashPattern)
 {
     state& s {get_state()};
-    if (auto const* arg0 {std::get_if<std::span<i32 const>>(&dashPattern)}) {
+    if (auto const* arg0 {std::get_if<std::vector<i32>>(&dashPattern)}) {
         s.Dash.clear();
         s.Dash.reserve(arg0->size());
         for (i32 i : *arg0) { s.Dash.push_back(i); }
         s.DashRel = false;
-    } else if (auto const* arg1 {std::get_if<std::span<f32 const>>(&dashPattern)}) {
+    } else if (auto const* arg1 {std::get_if<std::vector<f32>>(&dashPattern)}) {
         s.Dash    = {arg1->begin(), arg1->end()};
         s.DashRel = true;
     }
 }
 
 constexpr i32 DashSegments {8};
+
+auto canvas::do_dash() const -> bool
+{
+    return !get_state().Dash.empty();
+}
+
+auto canvas::get_dash_pattern(state const& s, f32 total) const -> std::vector<f32>
+{
+    std::vector<f32> dashPattern;
+    dashPattern.reserve(s.Dash.size());
+    if (s.DashRel) { // relative
+        for (f32 rel : s.Dash) { dashPattern.push_back(std::max(1.0f, rel * total)); }
+    } else {         // absolute
+        for (f32 val : s.Dash) { dashPattern.push_back(std::max(1.0f, val)); }
+    }
+
+    return dashPattern;
+}
 
 void canvas::dashed_line_to(point_f to)
 {
@@ -1597,16 +1615,6 @@ auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
     _gradients.push_back(gradient);
     _impl->add_gradient(retValue, gradient);
     return paint_gradient {1.0f, retValue};
-}
-
-auto canvas::get_dash_pattern(state const& s, f32 total) const -> std::vector<f32>
-{
-    if (!s.DashRel) { return s.Dash; }
-
-    std::vector<f32> dashPattern;
-    dashPattern.reserve(s.Dash.size());
-    for (f32 rel : s.Dash) { dashPattern.push_back(rel * total); }
-    return dashPattern;
 }
 
 auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> canvas_paint

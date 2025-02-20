@@ -13,6 +13,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -126,11 +127,11 @@ namespace element {
             Hidden
         };
 
-        type             Type {type::Solid};
-        ui_paint         Background {colors::Transparent};
-        length           Radius {};
-        length           Size {};
-        std::vector<f32> Dash {0.025f, 0.025f};
+        type         Type {type::Solid};
+        ui_paint     Background {colors::Transparent};
+        length       Radius {};
+        length       Size {};
+        dash_pattern Dash {};
 
         auto thickness() const -> thickness;
 

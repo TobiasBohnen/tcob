@@ -231,7 +231,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                         _canvas.set_stroke_style(deco.Color);
                         _canvas.begin_path();
                         _canvas.move_to(p0 + offset);
-                        _canvas.set_line_dash(std::array {0.025f, 0.025f});
+                        _canvas.set_line_dash(std::vector {0.025f, 0.025f});
                         _canvas.line_to(p1 + offset);
                         _canvas.stroke();
                         _canvas.set_line_dash({});
