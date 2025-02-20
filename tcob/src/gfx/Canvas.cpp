@@ -797,8 +797,6 @@ void canvas::set_line_dash(dash_pattern const& dashPattern)
     }
 }
 
-constexpr i32 DashSegments {8};
-
 auto canvas::do_dash() const -> bool
 {
     return !get_state().Dash.empty();
@@ -815,6 +813,72 @@ auto canvas::get_dash_pattern(state const& s, f32 total) const -> std::vector<f3
     }
 
     return dashPattern;
+}
+
+void canvas::dashed_bezier_path(auto&& func)
+{
+    constexpr i32                   numSamples {50};
+    std::array<f32, numSamples + 1> arcLengths {};
+    std::array<f32, numSamples + 1> tValues {};
+    point_f                         prevPoint {func(0.0f)};
+
+    // Build an arc–length lookup table by sampling the curve.
+    for (i32 i {1}; i <= numSamples; ++i) {
+        f32 const     t {static_cast<f32>(i) / numSamples};
+        point_f const currentPoint {func(t)};
+        f32 const     segmentLength {std::hypot(currentPoint.X - prevPoint.X, currentPoint.Y - prevPoint.Y)};
+        arcLengths[i] = arcLengths[i - 1] + segmentLength;
+        tValues[i]    = t;
+        prevPoint     = currentPoint;
+    }
+
+    f32 const totalLength {arcLengths.back()};
+
+    state const&           s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
+    f32   currentLength {0.0f};
+    usize dashIndex {0};
+    bool  drawing {true};
+    f32   t {0.0f};
+
+    // Lambda to convert a target arc length into the corresponding t parameter.
+    auto const interpolate_arc {[&](f32 targetLength) -> f32 {
+        auto it {std::lower_bound(arcLengths.begin(), arcLengths.end(), targetLength)};
+        if (it == arcLengths.end()) { return 1.0f; }
+        if (it == arcLengths.begin()) { return 0.0f; }
+        isize const idx {std::distance(arcLengths.begin(), it)};
+        f32 const   t1 {tValues[idx - 1]};
+        f32 const   t2 {tValues[idx]};
+        f32 const   s1 {arcLengths[idx - 1]};
+        f32 const   s2 {arcLengths[idx]};
+        f32 const   fraction {(targetLength - s1) / (s2 - s1)};
+        return t1 + fraction * (t2 - t1);
+    }};
+
+    // Walk along the curve, incrementing by dashPattern lengths.
+    for (;;) {
+        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
+        if (currentLength > totalLength) { break; }
+
+        f32 const nextT {interpolate_arc(currentLength)};
+
+        if (drawing) {
+            point_f const start {func(t)};
+            point_f const end {func(nextT)};
+            f32 const     dt {nextT - t};
+            point_f const cp0 {func(t + dt / 3.0f)};
+            point_f const cp1 {func(nextT - dt / 3.0f)};
+
+            append_commands(path2d::CommandsMoveTo(start));
+            append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
+        }
+
+        t       = nextT;
+        drawing = !drawing;
+    }
+
+    append_commands(path2d::CommandsMoveTo(func(1.0f)));
 }
 
 void canvas::dashed_line_to(point_f to)
@@ -834,11 +898,11 @@ void canvas::dashed_line_to(point_f to)
         if (currentLength + dashLength > totalLength) { break; }
 
         if (drawing) {
-            f32 const tStart {currentLength / totalLength};
-            f32 const tEnd {(currentLength + dashLength) / totalLength};
+            f32 const start {currentLength / totalLength};
+            f32 const end {(currentLength + dashLength) / totalLength};
 
-            append_commands(path2d::CommandsMoveTo(func(tStart)));
-            append_commands(path2d::CommandsLineTo(func(tEnd)));
+            append_commands(path2d::CommandsMoveTo(func(start)));
+            append_commands(path2d::CommandsLineTo(func(end)));
         }
 
         currentLength += dashLength;
@@ -848,149 +912,31 @@ void canvas::dashed_line_to(point_f to)
 
 void canvas::dashed_ellipse(point_f const c, f32 const rx, f32 const ry)
 {
-    easing::circular const func {.Start = degree_f {0}, .End = degree_f {360}};
-
-    constexpr usize            steps {500};
-    std::array<f32, steps + 1> arcTable {};
-    arcTable[0] = 0.0f;
-
-    f32     totalLength {0.0f};
-    point_f prev {func(0) * point_f {rx, ry}};
-
-    for (usize i {1}; i <= steps; ++i) {
-        f32 const     tNext {static_cast<f32>(i) / steps};
-        point_f const next {func(tNext) * point_f {rx, ry}};
-        totalLength += prev.distance_to(next);
-        arcTable[i] = totalLength;
-        prev        = next;
-    }
-
-    auto const arc_length {[&](f32 const ratio) {
-        f32 const targetLength {ratio * totalLength};
-
-        usize low {0}, high {steps};
-        while (low < high) {
-            usize const mid {(low + high) / 2};
-            if (arcTable[mid] < targetLength) {
-                low = mid + 1;
-            } else {
-                high = mid;
-            }
-        }
-
-        return static_cast<f32>(low) / steps;
+    // Lambda that maps t in [0,1] to a point on the ellipse.
+    auto const ellipse_func {[=](f32 t) -> point_f {
+        f32 const angle {(TAU_F * t) - (TAU_F / 4)};
+        return point_f {c.X + rx * std::cos(angle), c.Y + ry * std::sin(angle)};
     }};
 
-    f32   currentLength {0.0f};
-    usize dashIndex {0};
-    bool  drawing {true};
+    dashed_bezier_path(ellipse_func);
 
-    state const&           s {get_state()};
-    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
-
-    f32 t {0};
-    for (;;) {
-        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
-        if (currentLength > totalLength) { break; }
-
-        f32 const nextT {arc_length(currentLength / totalLength)};
-
-        if (drawing) {
-            append_commands(path2d::CommandsMoveTo(func(t) * point_f {rx, ry} + c));
-
-            f64 const inc {(nextT - t) / DashSegments};
-            for (i32 i {1}; i <= DashSegments; ++i) {
-                append_commands(path2d::CommandsLineTo(func(t + inc * i) * point_f {rx, ry} + c));
-            }
-        }
-
-        t       = nextT;
-        drawing = !drawing;
-    }
-
-    append_commands(path2d::CommandsMoveTo(func(1)));
     close_path();
-}
-
-auto canvas::dashed_bezier_to(auto&& func)
-{
-    constexpr i32    numSamples {50};
-    std::vector<f32> arcLengths(numSamples + 1, 0.0f);
-    std::vector<f32> tValues(numSamples + 1, 0.0f);
-    point_f          prevPoint {func(0.0f)};
-
-    for (i32 i {1}; i <= numSamples; ++i) {
-        f32 const     t {static_cast<f32>(i) / numSamples};
-        point_f const currentPoint {func(t)};
-
-        f32 const segmentLength {std::hypot(currentPoint.X - prevPoint.X, currentPoint.Y - prevPoint.Y)};
-        arcLengths[i] = {arcLengths[i - 1] + segmentLength};
-        tValues[i]    = {t};
-
-        prevPoint = currentPoint;
-    }
-
-    auto const interpolate_arc {[&](f32 targetLength) -> f32 {
-        auto it {std::lower_bound(arcLengths.begin(), arcLengths.end(), targetLength)};
-        if (it == arcLengths.end()) { return 1.0f; }
-        if (it == arcLengths.begin()) { return 0.0f; }
-
-        isize const idx {std::distance(arcLengths.begin(), it)};
-        f32 const   t1 {tValues[idx - 1]};
-        f32 const   t2 {tValues[idx]};
-        f32 const   s1 {arcLengths[idx - 1]};
-        f32 const   s2 {arcLengths[idx]};
-
-        f32 const fraction {(targetLength - s1) / (s2 - s1)};
-        return t1 + fraction * (t2 - t1);
-    }};
-
-    f32 const totalLength {arcLengths.back()};
-
-    f32   currentLength {0.0f};
-    usize dashIndex {0};
-    bool  drawing {true};
-
-    state const&           s {get_state()};
-    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
-
-    f32 t {0};
-    for (;;) {
-        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
-        if (currentLength > totalLength) { break; }
-
-        f32 const nextT {interpolate_arc(std::min(currentLength, totalLength))};
-
-        if (drawing) {
-            append_commands(path2d::CommandsMoveTo(func(t)));
-
-            f64 const inc {(nextT - t) / DashSegments};
-            for (i32 i {1}; i <= DashSegments; ++i) {
-                append_commands(path2d::CommandsLineTo(func(t + inc * i)));
-            }
-        }
-
-        t       = nextT;
-        drawing = !drawing;
-    }
 }
 
 void canvas::dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
     easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
-    dashed_bezier_to(func);
+    dashed_bezier_path(func);
 }
 
 void canvas::dashed_quad_bezier_to(point_f cp, point_f end)
 {
     easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
-    dashed_bezier_to(func);
+    dashed_bezier_path(func);
 }
 
 void canvas::dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir)
 {
-    state const& s {get_state()};
-
     static f32 const rad90 {TAU_F / 4};
 
     f32 const a0 {startAngle.Value - rad90};
@@ -1012,95 +958,13 @@ void canvas::dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle
         }
     }
 
-    // Total arc length.
-    f32 const            totalLength {r * std::abs(da)};
-    // Determine the number of samples for a polyline approximation.
-    // We use at least 10 points, scaling up to ~50 samples for a full circle.
-    i32 const            nSamples {std::max(10, static_cast<i32>(std::ceil(50.0f * (std::abs(da) / TAU_F))))};
-    std::vector<point_f> polyline;
-    polyline.reserve(static_cast<usize>(nSamples) + 1);
-    for (i32 i {0}; i <= nSamples; ++i) {
-        f32 const t {static_cast<f32>(i) / nSamples};
+    // Lambda that maps t in [0,1] to a point on the arc.
+    auto const arc_func {[=](f32 t) -> point_f {
         f32 const angle {a0 + da * t};
-        polyline.emplace_back(c.X + std::cos(angle) * r,
-                              c.Y + std::sin(angle) * r);
-    }
+        return point_f {c.X + r * std::cos(angle), c.Y + r * std::sin(angle)};
+    }};
 
-    std::vector<f32> vals;
-    vals.reserve(159);
-
-    // Begin the path at the first point.
-    vals.push_back(static_cast<f32>(MoveTo));
-    vals.push_back(polyline.front().X);
-    vals.push_back(polyline.front().Y);
-
-    // Dash drawing variables.
-    f32           accumulated {0.0f}; // Accumulated distance in the current dash segment.
-    usize         dashIndex {0};
-    bool          drawing {true};
-    constexpr f32 epsilon {1e-6f};
-
-    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
-
-    // Iterate over the polyline segments.
-    point_f current {polyline.front()};
-    for (usize i {1}; i < polyline.size(); ++i) {
-        point_f const next {polyline[i]};
-        f32           segLength {static_cast<f32>(current.distance_to(next))};
-        // Walk along the current segment.
-        while (segLength > epsilon) {
-            // Current dash length (in absolute units).
-            f32 const dashAbs {dashPattern[dashIndex % s.Dash.size()]};
-            if (dashAbs < epsilon) {
-                ++dashIndex;
-                continue;
-            }
-
-            // How much is left in the current dash segment.
-            f32 const remain {dashAbs - accumulated};
-            if (remain < epsilon) {
-                // Dash segment finished; toggle drawing and reset accumulation.
-                drawing = !drawing;
-                ++dashIndex;
-                accumulated = 0.0f;
-                continue;
-            }
-            if (segLength <= remain) {
-                // Consume the entire segment.
-                if (drawing) {
-                    vals.push_back(LineTo);
-                    vals.push_back(next.X);
-                    vals.push_back(next.Y);
-                }
-                accumulated += segLength;
-                segLength = 0.0f;
-                current   = next;
-            } else {
-                // Split the segment: interpolate a point at the required fraction.
-                f32 const     fraction {remain / segLength};
-                point_f const mid {current.X + (next.X - current.X) * fraction,
-                                   current.Y + (next.Y - current.Y) * fraction};
-                if (drawing) {
-                    vals.push_back(LineTo);
-                    vals.push_back(mid.X);
-                    vals.push_back(mid.Y);
-                } else {
-                    vals.push_back(MoveTo);
-                    vals.push_back(mid.X);
-                    vals.push_back(mid.Y);
-                }
-                // Update for the remaining part of the segment.
-                accumulated = 0.0f;
-                segLength -= remain;
-                current = mid;
-                drawing = !drawing;
-                ++dashIndex;
-            }
-        }
-        // Prepare for next polyline segment.
-        current = next;
-    }
-    append_commands(vals);
+    dashed_bezier_path(arc_func);
 }
 
 void canvas::dashed_rounded_rect(rect_f const& rect, f32 r)
@@ -1168,34 +1032,7 @@ void canvas::dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
         return quad_bezier({x, y + ryTL}, {x, y}, {x + rxTL, y}, static_cast<f32>(scaledT / arcTopLeftLen));
     }};
 
-    state const&           s {get_state()};
-    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
-
-    f32   currentLength {0.0f};
-    usize dashIndex {0};
-    bool  drawing {true};
-
-    f32 t {0};
-    for (;;) {
-        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
-        if (currentLength > totalLength) { break; }
-
-        f32 const nextT {std::min(1.0f, currentLength / totalLength)};
-
-        if (drawing) {
-            append_commands(path2d::CommandsMoveTo(func(t)));
-
-            f64 const inc {(nextT - t) / DashSegments};
-            for (i32 i {1}; i <= DashSegments; ++i) {
-                append_commands(path2d::CommandsLineTo(func(t + inc * i)));
-            }
-        }
-
-        t       = nextT;
-        drawing = !drawing;
-    }
-
-    append_commands(path2d::CommandsMoveTo(func(1)));
+    dashed_bezier_path(func);
     close_path();
 }
 

@@ -288,9 +288,11 @@ private:
     };
 
     auto do_dash() const -> bool;
+
+    void dashed_bezier_path(auto&& func);
+
     void dashed_line_to(point_f to);
     void dashed_ellipse(point_f c, f32 rx, f32 ry);
-    auto dashed_bezier_to(auto&& func);
     void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
     void dashed_quad_bezier_to(point_f cp, point_f end);
     void dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir);
