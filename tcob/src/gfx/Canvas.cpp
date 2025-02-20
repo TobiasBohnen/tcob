@@ -506,6 +506,8 @@ void canvas::reset()
 
     s.TextAlign = {};
     s.Dash      = {};
+
+    s.Font = nullptr;
 }
 
 auto canvas::create_guard() -> state_guard
@@ -518,7 +520,8 @@ auto canvas::create_guard() -> state_guard
 void canvas::begin_path()
 {
     _commands.clear();
-    clear_path_cache();
+    _cache.points.clear();
+    _cache.paths.clear();
 }
 
 void canvas::close_path()
@@ -577,11 +580,7 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::arc(point_f const  c,
-                 f32 const      r,
-                 radian_f const startAngle,
-                 radian_f const endAngle,
-                 winding const  dir)
+void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
 {
     if (!get_state().Dash.empty()) {
         dashed_arc(c, r, startAngle, endAngle, dir);
@@ -779,20 +778,26 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
 
 void canvas::circle(point_f c, f32 r)
 {
-    if (!get_state().Dash.empty()) {
-        dashed_circle(c, r);
-        return;
-    }
-
     ellipse(c, r, r);
 }
 
 ////////////////////////////////////////////////////////////
 
-void canvas::set_line_dash(std::span<f32 const> dashPatternRel)
+void canvas::set_line_dash(dash_pattern dashPattern)
 {
-    get_state().Dash = {dashPatternRel.begin(), dashPatternRel.end()};
+    state& s {get_state()};
+    if (auto const* arg0 {std::get_if<std::span<i32 const>>(&dashPattern)}) {
+        s.Dash.clear();
+        s.Dash.reserve(arg0->size());
+        for (i32 i : *arg0) { s.Dash.push_back(i); }
+        s.DashRel = false;
+    } else if (auto const* arg1 {std::get_if<std::span<f32 const>>(&dashPattern)}) {
+        s.Dash    = {arg1->begin(), arg1->end()};
+        s.DashRel = true;
+    }
 }
+
+constexpr i32 DashSegments {8};
 
 void canvas::dashed_line_to(point_f to)
 {
@@ -803,9 +808,11 @@ void canvas::dashed_line_to(point_f to)
     usize     dashIndex {0};
     bool      drawing {true};
 
-    state& s {get_state()};
+    state&                 s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
     for (;;) {
-        f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
+        f32 const dashLength {dashPattern[dashIndex++ % s.Dash.size()]};
         if (currentLength + dashLength > totalLength) { break; }
 
         if (drawing) {
@@ -825,27 +832,23 @@ void canvas::dashed_ellipse(point_f const c, f32 const rx, f32 const ry)
 {
     easing::circular const func {.Start = degree_f {0}, .End = degree_f {360}};
 
-    f32 const a {rx}, b {ry};
-    f32 const h {(a - b) * (a - b) / ((a + b) * (a + b))};
-    f32 const totalLength {TAU_F * (a + b) * (1.0f + 3.0f * h / (10.0f + std::sqrt(4.0f - 3.0f * h)))};
-
     constexpr usize            steps {500};
     std::array<f32, steps + 1> arcTable {};
     arcTable[0] = 0.0f;
 
-    f32     totalArc {0.0f};
+    f32     totalLength {0.0f};
     point_f prev {func(0) * point_f {rx, ry}};
 
     for (usize i {1}; i <= steps; ++i) {
         f32 const     tNext {static_cast<f32>(i) / steps};
         point_f const next {func(tNext) * point_f {rx, ry}};
-        totalArc += prev.distance_to(next);
-        arcTable[i] = totalArc;
+        totalLength += prev.distance_to(next);
+        arcTable[i] = totalLength;
         prev        = next;
     }
 
     auto const arc_length {[&](f32 const ratio) {
-        f32 const targetLength {ratio * totalArc};
+        f32 const targetLength {ratio * totalLength};
 
         usize low {0}, high {steps};
         while (low < high) {
@@ -864,52 +867,31 @@ void canvas::dashed_ellipse(point_f const c, f32 const rx, f32 const ry)
     usize dashIndex {0};
     bool  drawing {true};
 
-    state const& s {get_state()};
+    state const&           s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
+    f32 t {0};
     for (;;) {
-        f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
-        if (currentLength + dashLength > totalLength) { break; }
+        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
+        if (currentLength > totalLength) { break; }
+
+        f32 const nextT {arc_length(currentLength / totalLength)};
 
         if (drawing) {
-            f32 const tStart {arc_length(currentLength / totalLength)};
-            f32 const tEnd {arc_length((currentLength + dashLength) / totalLength)};
+            append_commands(path2d::CommandsMoveTo(func(t) * point_f {rx, ry} + c));
 
-            point_f const start {func(tStart) * point_f {rx, ry} + c};
-            point_f const end {func(tEnd) * point_f {rx, ry} + c};
-
-            append_commands(path2d::CommandsMoveTo(start));
-            append_commands(path2d::CommandsLineTo(end));
+            f64 const inc {(nextT - t) / DashSegments};
+            for (i32 i {1}; i <= DashSegments; ++i) {
+                append_commands(path2d::CommandsLineTo(func(t + inc * i) * point_f {rx, ry} + c));
+            }
         }
 
-        currentLength += dashLength;
+        t       = nextT;
         drawing = !drawing;
     }
-}
 
-void canvas::dashed_circle(point_f center, f32 r)
-{
-    easing::circular func {.Start = degree_f {0}, .End = degree_f {360}};
-
-    f32 const totalLength {TAU_F * r};
-    f32       currentLength {0.0f};
-    usize     dashIndex {0};
-    bool      drawing {true};
-
-    state& s {get_state()};
-    for (;;) {
-        f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
-        if (currentLength + dashLength > totalLength) { break; }
-
-        if (drawing) {
-            f32 const tStart {currentLength / totalLength};
-            f32 const tEnd {(currentLength + dashLength) / totalLength};
-
-            append_commands(path2d::CommandsMoveTo(func(tStart) * r + center));
-            append_commands(path2d::CommandsLineTo(func(tEnd) * r + center));
-        }
-
-        currentLength += dashLength;
-        drawing = !drawing;
-    }
+    append_commands(path2d::CommandsMoveTo(func(1)));
+    close_path();
 }
 
 auto canvas::dashed_bezier_to(auto&& func)
@@ -951,20 +933,26 @@ auto canvas::dashed_bezier_to(auto&& func)
     usize dashIndex {0};
     bool  drawing {true};
 
-    state& s {get_state()};
+    state const&           s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
+    f32 t {0};
     for (;;) {
-        f32 const dashLength {s.Dash[dashIndex++ % s.Dash.size()] * totalLength};
-        if (currentLength + dashLength > totalLength) { break; }
+        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
+        if (currentLength > totalLength) { break; }
+
+        f32 const nextT {interpolate_arc(std::min(currentLength, totalLength))};
 
         if (drawing) {
-            f32 const tStart {interpolate_arc(currentLength)};
-            f32 const tEnd {interpolate_arc(std::min(currentLength + dashLength, totalLength))};
+            append_commands(path2d::CommandsMoveTo(func(t)));
 
-            append_commands(path2d::CommandsMoveTo(func(tStart)));
-            append_commands(path2d::CommandsLineTo(func(tEnd)));
+            f64 const inc {(nextT - t) / DashSegments};
+            for (i32 i {1}; i <= DashSegments; ++i) {
+                append_commands(path2d::CommandsLineTo(func(t + inc * i)));
+            }
         }
 
-        currentLength += dashLength;
+        t       = nextT;
         drawing = !drawing;
     }
 }
@@ -1034,6 +1022,8 @@ void canvas::dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle
     bool          drawing {true};
     constexpr f32 epsilon {1e-6f};
 
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
+
     // Iterate over the polyline segments.
     point_f current {polyline.front()};
     for (usize i {1}; i < polyline.size(); ++i) {
@@ -1042,12 +1032,12 @@ void canvas::dashed_arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle
         // Walk along the current segment.
         while (segLength > epsilon) {
             // Current dash length (in absolute units).
-            f32 const dashFrac {s.Dash[dashIndex % s.Dash.size()]};
-            if (dashFrac < epsilon) {
+            f32 const dashAbs {dashPattern[dashIndex % s.Dash.size()]};
+            if (dashAbs < epsilon) {
                 ++dashIndex;
                 continue;
             }
-            f32 const dashAbs {dashFrac * totalLength};
+
             // How much is left in the current dash segment.
             f32 const remain {dashAbs - accumulated};
             if (remain < epsilon) {
@@ -1129,12 +1119,12 @@ void canvas::dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
     f32 const arcBottomRightLen {QuadBezierLength({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h})};
     f32 const arcBottomLeftLen {QuadBezierLength({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL})};
     f32 const arcTopLeftLen {QuadBezierLength({x, y + ryTL}, {x, y}, {x + rxTL, y})};
-    f32 const totalPerimeter {perimTop + perimRight + perimBottom + perimLeft + arcTopRightLen + arcBottomRightLen + arcBottomLeftLen + arcTopLeftLen};
+    f32 const totalLength {perimTop + perimRight + perimBottom + perimLeft + arcTopRightLen + arcBottomRightLen + arcBottomLeftLen + arcTopLeftLen};
 
     auto const func {[&](f64 t) -> point_f {
         if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) { return Rect(x, y, w, h, t); }
 
-        f64 scaledT {t * totalPerimeter};
+        f64 scaledT {t * totalLength};
 
         if (scaledT < perimTop) { return {x + rxTL + static_cast<f32>(scaledT), y}; }
         scaledT -= perimTop;
@@ -1160,28 +1150,25 @@ void canvas::dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
         return quad_bezier({x, y + ryTL}, {x, y}, {x + rxTL, y}, static_cast<f32>(scaledT / arcTopLeftLen));
     }};
 
-    std::vector<f32> dashPattern;
-    state&           s {get_state()};
-    dashPattern.reserve(s.Dash.size());
-    for (f32 rel : s.Dash) { dashPattern.push_back(rel * totalPerimeter); }
+    state const&           s {get_state()};
+    std::vector<f32> const dashPattern {get_dash_pattern(s, totalLength)};
 
-    f32   distance {0.0f};
-    usize patternIndex {0};
+    f32   currentLength {0.0f};
+    usize dashIndex {0};
     bool  drawing {true};
 
     f32 t {0};
     for (;;) {
-        distance += dashPattern[patternIndex++ % dashPattern.size()];
-        if (distance > totalPerimeter) { break; }
+        currentLength += dashPattern[dashIndex++ % dashPattern.size()];
+        if (currentLength > totalLength) { break; }
 
-        f32 const nextT {std::min(1.0f, distance / totalPerimeter)};
+        f32 const nextT {std::min(1.0f, currentLength / totalLength)};
 
         if (drawing) {
             append_commands(path2d::CommandsMoveTo(func(t)));
 
-            constexpr i32 Segments {5};
-            f32 const     inc {(nextT - t) / Segments};
-            for (i32 i {0}; i < Segments; ++i) {
+            f64 const inc {(nextT - t) / DashSegments};
+            for (i32 i {1}; i <= DashSegments; ++i) {
                 append_commands(path2d::CommandsLineTo(func(t + inc * i)));
             }
         }
@@ -1189,6 +1176,9 @@ void canvas::dashed_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
         t       = nextT;
         drawing = !drawing;
     }
+
+    append_commands(path2d::CommandsMoveTo(func(1)));
+    close_path();
 }
 
 ////////////////////////////////////////////////////////////
@@ -1609,6 +1599,16 @@ auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
     return paint_gradient {1.0f, retValue};
 }
 
+auto canvas::get_dash_pattern(state const& s, f32 total) const -> std::vector<f32>
+{
+    if (!s.DashRel) { return s.Dash; }
+
+    std::vector<f32> dashPattern;
+    dashPattern.reserve(s.Dash.size());
+    for (f32 rel : s.Dash) { dashPattern.push_back(rel * total); }
+    return dashPattern;
+}
+
 auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> canvas_paint
 {
     canvas_paint p {.Extent = {e.Width, e.Height},
@@ -1967,6 +1967,11 @@ auto canvas::get_state() -> state&
     return _states.top();
 }
 
+auto canvas::get_state() const -> state const&
+{
+    return _states.top();
+}
+
 void canvas::set_paint_color(canvas_paint& p, color c)
 {
     p.XForm   = transform::Identity;
@@ -2031,12 +2036,6 @@ void canvas::append_commands(std::span<f32 const> vals)
     }
 }
 
-void canvas::clear_path_cache()
-{
-    _cache.points.clear();
-    _cache.paths.clear();
-}
-
 auto canvas::get_last_path() -> canvas_path&
 {
     assert(!_cache.paths.empty());
@@ -2079,8 +2078,7 @@ void canvas::add_point(f32 x, f32 y, i32 flags)
 
 void canvas::close_last_path()
 {
-    canvas_path& path {get_last_path()};
-    path.Closed = true;
+    get_last_path().Closed = true;
 }
 
 auto canvas::alloc_temp_verts(usize nverts) -> vertex*

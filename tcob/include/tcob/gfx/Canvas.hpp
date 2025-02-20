@@ -91,6 +91,7 @@ enum commands : u8 {
 ////////////////////////////////////////////////////////////
 using paint_gradient = std::pair<f32, i32>;
 using paint_color    = std::variant<color, paint_gradient>;
+using dash_pattern   = std::variant<std::span<i32 const>, std::span<f32 const>>;
 
 struct canvas_paint {
     transform   XForm {transform::Identity};
@@ -184,7 +185,7 @@ public:
     void close_path();
     void set_path_winding(winding dir);
     void set_path_winding(solidity s);
-    void set_line_dash(std::span<f32 const> dashPatternRel);
+    void set_line_dash(dash_pattern dashPattern);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
@@ -275,6 +276,7 @@ private:
         alignments       TextAlign {};
         font*            Font {nullptr};
         std::vector<f32> Dash;
+        bool             DashRel {false};
     };
 
     struct path_cache {
@@ -287,7 +289,6 @@ private:
 
     void dashed_line_to(point_f to);
     void dashed_ellipse(point_f c, f32 rx, f32 ry);
-    void dashed_circle(point_f c, f32 r);
     auto dashed_bezier_to(auto&& func);
     void dashed_cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
     void dashed_quad_bezier_to(point_f cp, point_f end);
@@ -297,10 +298,10 @@ private:
 
     void set_device_pixel_ratio(f32 ratio);
     auto get_state() -> state&;
+    auto get_state() const -> state const&;
     void set_paint_color(canvas_paint& p, color c);
     auto get_font_scale() -> f32;
     void append_commands(std::span<f32 const> vals);
-    void clear_path_cache();
     auto get_last_path() -> canvas_path&;
     void add_path();
     auto get_last_point() -> detail::canvas_point&;
@@ -314,6 +315,8 @@ private:
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit);
     void render_text(font* font, std::span<vertex const> verts);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
+
+    auto get_dash_pattern(state const& s, f32 total) const -> std::vector<f32>;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
     std::vector<f32>                             _commands {};
