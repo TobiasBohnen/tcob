@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <numeric>
 #include <vector>
 
 #include "tcob/core/ServiceLocator.hpp"
@@ -954,17 +953,20 @@ auto canvas::do_dash() const -> bool
 
 auto canvas::get_dash_pattern(state const& s, f32 total) const -> std::vector<f32>
 {
-    std::vector<f32> dashPattern;
-    dashPattern.reserve(s.Dash.size());
-    if (s.DashRel) { // relative
-        for (f32 rel : s.Dash) { dashPattern.push_back(std::max(1.0f, rel * total)); }
-    } else {         // absolute
-        for (f32 val : s.Dash) { dashPattern.push_back(std::max(1.0f, val)); }
+    auto const       size {s.Dash.size()};
+    std::vector<f32> dashPattern(size);
+    f32              sumDash {0.0f};
+
+    for (usize i {0}; i < size; ++i) {
+        f32 const computed {s.DashRel ? std::max(1.0f, s.Dash[i] * total)
+                                      : std::max(1.0f, s.Dash[i])};
+        dashPattern[i] = computed;
+        sumDash += computed;
     }
 
-    f32 const   sumDash {std::accumulate(dashPattern.begin(), dashPattern.end(), 0.0f)};
     usize const reps {std::max(usize {1}, static_cast<usize>(std::round(total / sumDash)))};
     f32 const   scale {total / (reps * sumDash)};
+
     for (f32& d : dashPattern) { d *= scale; }
 
     return dashPattern;
