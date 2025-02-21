@@ -772,7 +772,7 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
     }};
 
     if (dashed_bezier_path(func)) {
-        close_path();
+        append_commands(std::vector<f32> {Close});
     }
 }
 
@@ -799,7 +799,7 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
     }};
 
     if (dashed_bezier_path(ellipse_func)) {
-        close_path();
+        append_commands(std::vector<f32> {Close});
     }
 }
 
@@ -1560,7 +1560,7 @@ void canvas::skew_at(degree_f angleX, degree_f angleY, point_f p)
     translate(-p);
 }
 
-void canvas::set_transform(transform xform)
+void canvas::set_transform(transform const& xform)
 {
     get_state().XForm = xform;
 }
@@ -1857,18 +1857,18 @@ auto canvas::get_font_scale() -> f32
 
 void canvas::append_commands(std::span<f32 const> vals)
 {
-    state&      s {get_state()};
-    usize const nvals {vals.size()};
+    state const& s {get_state()};
+    usize const  size {vals.size()};
 
     if (static_cast<i32>(vals[0]) != Close && static_cast<i32>(vals[0]) != Winding) {
-        _commandPoint = {vals[nvals - 2], vals[nvals - 1]};
+        _commandPoint = {vals[size - 2], vals[size - 1]};
     }
-    _commands.reserve(_commands.size() + nvals);
+    _commands.reserve(_commands.size() + size);
 
     // transform commands
     usize   i {0};
     point_f p;
-    while (i < nvals) {
+    while (i < size) {
         i32 cmd {static_cast<i32>(vals[i])};
         _commands.push_back(static_cast<f32>(cmd));
         switch (cmd) {
@@ -1944,11 +1944,6 @@ void canvas::add_point(f32 x, f32 y, i32 flags)
     path.Count++;
 }
 
-void canvas::close_last_path()
-{
-    get_last_path().Closed = true;
-}
-
 auto canvas::alloc_temp_verts(usize nverts) -> vertex*
 {
     if (nverts > _cache.verts.capacity()) {
@@ -2019,12 +2014,11 @@ void canvas::flatten_paths()
             i += 7;
         } break;
         case Close: {
-            close_last_path();
+            get_last_path().Closed = true;
             ++i;
         } break;
         case Winding: {
-            canvas_path& path {get_last_path()};
-            path.Winding = static_cast<winding>(_commands[i + 1]);
+            get_last_path().Winding = static_cast<winding>(_commands[i + 1]);
             i += 2;
         } break;
         default:

@@ -239,7 +239,7 @@ public:
     void scale_at(size_f scale, point_f p);
     void skew(degree_f angleX, degree_f angleY);
     void skew_at(degree_f angleX, degree_f angleY, point_f p);
-    void set_transform(transform xform);
+    void set_transform(transform const& xform);
     void reset_transform();
 
     // Scissoring
@@ -299,7 +299,6 @@ private:
     void add_path();
     auto get_last_point() -> detail::canvas_point&;
     void add_point(f32 x, f32 y, i32 flags);
-    void close_last_path();
     auto alloc_temp_verts(usize nverts) -> vertex*;
     void tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type);
     void flatten_paths();
