@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <optional>
 
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
@@ -421,23 +420,23 @@ auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
     return length;
 }
 
-static auto DashPattern(std::vector<f32> const& dash, f32 total) -> std::optional<std::vector<f32>>
+static auto DashPattern(std::vector<f32> const& src, std::vector<f32>& dst, f32 total) -> bool
 {
-    auto const       size {dash.size()};
-    std::vector<f32> dashPattern(size);
-    f32              sumDash {0.0f};
+    auto const size {src.size()};
+    dst.resize(size);
+    f32 sumDash {0.0f};
 
     for (usize i {0}; i < size; ++i) {
-        sumDash += dashPattern[i] = std::max(0.0f, dash[i]);
+        sumDash += dst[i] = std::max(0.0f, src[i]);
     }
 
-    if (sumDash <= EPSILON) { return std::nullopt; }
+    if (sumDash <= EPSILON) { return false; }
 
     usize const reps {std::max(usize {1}, static_cast<usize>(std::round(total / sumDash)))};
     f32 const   scale {total / (reps * sumDash)};
-    for (f32& d : dashPattern) { d *= scale; }
+    for (f32& d : dst) { d *= scale; }
 
-    return dashPattern;
+    return true;
 }
 
 auto static Quantize(f32 a, f32 d) -> f32
@@ -579,10 +578,9 @@ void canvas::line_to(point_f pos)
     f32       currentLength {0.0f};
     bool      drawing {true};
 
-    state&     s {get_state()};
-    auto const dp {DashPattern(s.Dash, totalLength)};
-    if (!dp) { return; };
-    auto const& dashPattern {*dp};
+    state&           s {get_state()};
+    std::vector<f32> dashPattern;
+    if (!DashPattern(s.Dash, dashPattern, totalLength)) { return; }
 
     for (usize dashIndex {0};; ++dashIndex) {
         f32 const dashLength {dashPattern[dashIndex % dashPattern.size()]};
@@ -608,157 +606,6 @@ void canvas::line_to(point_f pos)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
-{
-    if (!do_dash()) {
-        append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
-        return;
-    }
-
-    easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
-    dashed_bezier_path(func);
-}
-
-void canvas::quad_bezier_to(point_f cp, point_f end)
-{
-    if (!do_dash()) {
-        append_commands(path2d::CommandsQuadTo(_commandPoint, cp, end));
-        return;
-    }
-
-    easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
-    dashed_bezier_path(func);
-}
-
-////////////////////////////////////////////////////////////
-
-void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
-{
-    static f32 const rad90 {TAU_F / 4};
-
-    i32 const move {!_commands.empty() ? LineTo : MoveTo};
-    f32 const a0 {startAngle.Value - rad90};
-    f32 const a1 {endAngle.Value - rad90};
-
-    // Normalize angles.
-    f32 da {a1 - a0};
-    if (dir == winding::CW) {
-        if (std::abs(da) >= TAU_F) {
-            da = TAU_F;
-        } else {
-            while (da < 0.0f) { da += TAU_F; }
-        }
-    } else { // CCW
-        if (std::abs(da) >= TAU_F) {
-            da = -TAU_F;
-        } else {
-            while (da > 0.0f) { da -= TAU_F; }
-        }
-    }
-
-    if (!do_dash()) {
-        std::vector<f32> vals;
-        vals.reserve(138);
-        i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
-        f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
-        f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
-        if (dir == winding::CCW) { kappa = -kappa; }
-
-        f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
-        for (i32 i {0}; i <= ndivs; ++i) {
-            f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
-            f32 const dx {std::cos(a)};
-            f32 const dy {std::sin(a)};
-            f32 const x {c.X + dx * r};
-            f32 const y {c.Y + dy * r};
-            f32 const tanx {-dy * r * kappa};
-            f32 const tany {dx * r * kappa};
-
-            if (i == 0) {
-                vals.push_back(static_cast<f32>(move));
-                vals.push_back(x);
-                vals.push_back(y);
-            } else {
-                vals.push_back(BezierTo);
-                vals.push_back(px + ptanx);
-                vals.push_back(py + ptany);
-                vals.push_back(x - tanx);
-                vals.push_back(y - tany);
-                vals.push_back(x);
-                vals.push_back(y);
-            }
-            px    = x;
-            py    = y;
-            ptanx = tanx;
-            ptany = tany;
-        }
-
-        append_commands(vals);
-        return;
-    }
-
-    auto const arc_func {[=](f32 t) -> point_f {
-        f32 const angle {a0 + da * t};
-        return point_f {c.X + r * std::cos(angle), c.Y + r * std::sin(angle)};
-    }};
-
-    dashed_bezier_path(arc_func);
-}
-
-void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
-{
-    if (_commands.empty()) { return; }
-
-    winding dir {};
-
-    // Handle degenerate cases.
-    if (_commandPoint.equals(pos1, _distTol)
-        || pos1.equals(pos2, _distTol)
-        || DistancePointSegment(pos1.X, pos1.Y, _commandPoint.X, _commandPoint.Y, pos2.X, pos2.Y) < _distTol * _distTol
-        || radius < _distTol) {
-        line_to(pos1);
-        return;
-    }
-
-    // Calculate tangential circle to lines (x0,y0)-(x1,y1) and (x1,y1)-(x2,y2).
-    f32 dx0 {_commandPoint.X - pos1.X};
-    f32 dy0 {_commandPoint.Y - pos1.Y};
-    f32 dx1 {pos2.X - pos1.X};
-    f32 dy1 {pos2.Y - pos1.Y};
-    Normalize(dx0, dy0);
-    Normalize(dx1, dy1);
-    f32 const a {std::acos((dx0 * dx1) + (dy0 * dy1))};
-    f32 const d {radius / std::tan(a / 2.0f)};
-
-    if (d > 10000.0f) {
-        line_to(pos1);
-        return;
-    }
-
-    f32      cx {0}, cy {0};
-    radian_f a0 {0}, a1 {0};
-
-    auto static cross {[](f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return (dx1 * dy0) - (dx0 * dy1); }};
-
-    if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
-        cx  = pos1.X + dx0 * d + dy0 * radius;
-        cy  = pos1.Y + dy0 * d + -dx0 * radius;
-        a0  = radian_f {std::atan2(dx0, -dy0)};
-        a1  = radian_f {std::atan2(-dx1, dy1)};
-        dir = winding::CW;
-    } else {
-        cx  = pos1.X + dx0 * d + -dy0 * radius;
-        cy  = pos1.Y + dy0 * d + dx0 * radius;
-        a0  = radian_f {std::atan2(-dx0, dy0)};
-        a1  = radian_f {std::atan2(dx1, -dy1)};
-        dir = winding::CCW;
-    }
-
-    arc({cx, cy}, radius, a0, a1, dir);
-}
-
-////////////////////////////////////////////////////////////
-
 void canvas::rect(rect_f const& rect)
 {
     auto const [x, y] {rect.Position};
@@ -774,11 +621,11 @@ void canvas::rect(rect_f const& rect)
         return;
     }
 
-    f32 const  totalLength {2 * (w + h)};
-    state&     s {get_state()};
-    auto const dp {DashPattern(s.Dash, totalLength)};
-    if (!dp) { return; };
-    auto const& dashPattern {*dp};
+    f32 const totalLength {2 * (w + h)};
+
+    state&           s {get_state()};
+    std::vector<f32> dashPattern;
+    if (!DashPattern(s.Dash, dashPattern, totalLength)) { return; }
 
     std::array<f32, 4> const     cornerPositions {{0.0f, w, w + h, 2 * w + h}};
     std::array<point_f, 4> const corners {{rect.top_left(),
@@ -963,6 +810,157 @@ void canvas::circle(point_f c, f32 r)
 
 ////////////////////////////////////////////////////////////
 
+void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
+{
+    if (!do_dash()) {
+        append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
+        return;
+    }
+
+    easing::cubic_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
+    dashed_bezier_path(func);
+}
+
+void canvas::quad_bezier_to(point_f cp, point_f end)
+{
+    if (!do_dash()) {
+        append_commands(path2d::CommandsQuadTo(_commandPoint, cp, end));
+        return;
+    }
+
+    easing::quad_bezier_curve func {.StartPoint = _commandPoint, .ControlPoint = cp, .EndPoint = end};
+    dashed_bezier_path(func);
+}
+
+////////////////////////////////////////////////////////////
+
+void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
+{
+    static f32 const rad90 {TAU_F / 4};
+
+    i32 const move {!_commands.empty() ? LineTo : MoveTo};
+    f32 const a0 {startAngle.Value - rad90};
+    f32 const a1 {endAngle.Value - rad90};
+
+    // Normalize angles.
+    f32 da {a1 - a0};
+    if (dir == winding::CW) {
+        if (std::abs(da) >= TAU_F) {
+            da = TAU_F;
+        } else {
+            while (da < 0.0f) { da += TAU_F; }
+        }
+    } else { // CCW
+        if (std::abs(da) >= TAU_F) {
+            da = -TAU_F;
+        } else {
+            while (da > 0.0f) { da -= TAU_F; }
+        }
+    }
+
+    if (!do_dash()) {
+        std::vector<f32> vals;
+        vals.reserve(138);
+        i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
+        f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
+        f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
+        if (dir == winding::CCW) { kappa = -kappa; }
+
+        f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
+        for (i32 i {0}; i <= ndivs; ++i) {
+            f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
+            f32 const dx {std::cos(a)};
+            f32 const dy {std::sin(a)};
+            f32 const x {c.X + dx * r};
+            f32 const y {c.Y + dy * r};
+            f32 const tanx {-dy * r * kappa};
+            f32 const tany {dx * r * kappa};
+
+            if (i == 0) {
+                vals.push_back(static_cast<f32>(move));
+                vals.push_back(x);
+                vals.push_back(y);
+            } else {
+                vals.push_back(BezierTo);
+                vals.push_back(px + ptanx);
+                vals.push_back(py + ptany);
+                vals.push_back(x - tanx);
+                vals.push_back(y - tany);
+                vals.push_back(x);
+                vals.push_back(y);
+            }
+            px    = x;
+            py    = y;
+            ptanx = tanx;
+            ptany = tany;
+        }
+
+        append_commands(vals);
+        return;
+    }
+
+    auto const arc_func {[=](f32 t) -> point_f {
+        f32 const angle {a0 + da * t};
+        return point_f {c.X + r * std::cos(angle), c.Y + r * std::sin(angle)};
+    }};
+
+    dashed_bezier_path(arc_func);
+}
+
+void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
+{
+    if (_commands.empty()) { return; }
+
+    winding dir {};
+
+    // Handle degenerate cases.
+    if (_commandPoint.equals(pos1, _distTol)
+        || pos1.equals(pos2, _distTol)
+        || DistancePointSegment(pos1.X, pos1.Y, _commandPoint.X, _commandPoint.Y, pos2.X, pos2.Y) < _distTol * _distTol
+        || radius < _distTol) {
+        line_to(pos1);
+        return;
+    }
+
+    // Calculate tangential circle to lines (x0,y0)-(x1,y1) and (x1,y1)-(x2,y2).
+    f32 dx0 {_commandPoint.X - pos1.X};
+    f32 dy0 {_commandPoint.Y - pos1.Y};
+    f32 dx1 {pos2.X - pos1.X};
+    f32 dy1 {pos2.Y - pos1.Y};
+    Normalize(dx0, dy0);
+    Normalize(dx1, dy1);
+    f32 const a {std::acos((dx0 * dx1) + (dy0 * dy1))};
+    f32 const d {radius / std::tan(a / 2.0f)};
+
+    if (d > 10000.0f) {
+        line_to(pos1);
+        return;
+    }
+
+    f32      cx {0}, cy {0};
+    radian_f a0 {0}, a1 {0};
+
+    auto static cross {[](f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return (dx1 * dy0) - (dx0 * dy1); }};
+
+    if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
+        cx  = pos1.X + dx0 * d + dy0 * radius;
+        cy  = pos1.Y + dy0 * d + -dx0 * radius;
+        a0  = radian_f {std::atan2(dx0, -dy0)};
+        a1  = radian_f {std::atan2(-dx1, dy1)};
+        dir = winding::CW;
+    } else {
+        cx  = pos1.X + dx0 * d + -dy0 * radius;
+        cy  = pos1.Y + dy0 * d + dx0 * radius;
+        a0  = radian_f {std::atan2(-dx0, dy0)};
+        a1  = radian_f {std::atan2(dx1, -dy1)};
+        dir = winding::CCW;
+    }
+
+    arc({cx, cy}, radius, a0, a1, dir);
+}
+
+////////////////////////////////////////////////////////////
+
 void canvas::set_line_dash(std::span<f32 const> dashPattern)
 {
     get_state().Dash = {dashPattern.begin(), dashPattern.end()};
@@ -991,9 +989,9 @@ auto canvas::dashed_bezier_path(auto&& func) -> bool
     f32 const totalLength {arcLengths.back()};
 
     state const& s {get_state()};
-    auto const   dp {DashPattern(s.Dash, totalLength)};
-    if (!dp) { return false; }
-    auto const& dashPattern {*dp};
+
+    std::vector<f32> dashPattern;
+    if (!DashPattern(s.Dash, dashPattern, totalLength)) { return false; }
 
     auto const interpolate_arc = [&](f32 targetLength) -> f32 {
         auto it {std::lower_bound(arcLengths.begin(), arcLengths.end(), targetLength)};
