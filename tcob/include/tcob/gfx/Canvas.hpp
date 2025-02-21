@@ -80,14 +80,6 @@ enum class composite_operation : u8 {
     Xor,
 };
 
-enum commands : u8 {
-    MoveTo   = 0,
-    LineTo   = 1,
-    BezierTo = 2,
-    Close    = 3,
-    Winding  = 4,
-};
-
 ////////////////////////////////////////////////////////////
 using paint_gradient = std::pair<f32, i32>;
 using paint_color    = std::variant<color, paint_gradient>;
@@ -119,15 +111,7 @@ struct canvas_path {
     bool    Closed {false};
 };
 
-namespace detail {
-    struct canvas_point {
-        f32   X {0}, Y {0};
-        f32   DX {0}, DY {0};
-        f32   Length {0};
-        f32   DMX {0}, DMY {0};
-        ubyte Flags {0};
-    };
-}
+class path_cache;
 
 ////////////////////////////////////////////////////////////
 
@@ -277,14 +261,6 @@ private:
         std::vector<f32> Dash;
     };
 
-    struct path_cache {
-        std::vector<detail::canvas_point> points;
-        std::vector<canvas_path>          paths;
-        std::vector<vertex>               verts;
-
-        vec4 bounds;
-    };
-
     auto do_dash() const -> bool;
 
     auto dashed_bezier_path(auto&& func) -> bool;
@@ -294,26 +270,14 @@ private:
     auto get_state() const -> state const&;
     void set_paint_color(canvas_paint& p, color c);
     auto get_font_scale() -> f32;
-    void append_commands(std::span<f32 const> vals);
-    auto get_last_path() -> canvas_path&;
-    void add_path();
-    auto get_last_point() -> detail::canvas_point&;
-    void add_point(f32 x, f32 y, i32 flags);
-    auto alloc_temp_verts(usize nverts) -> vertex*;
-    void tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type);
-    void flatten_paths();
-    void calculate_joins(f32 w, line_join lineJoin, f32 miterLimit);
-    void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
-    void expand_fill(f32 w, line_join lineJoin, f32 miterLimit);
     void render_text(font* font, std::span<vertex const> verts);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
-    std::vector<f32>                             _commands {};
-    point_f                                      _commandPoint {point_f::Zero};
-    std::stack<state>                            _states {};
-    path_cache                                   _cache {};
-    std::vector<color_gradient>                  _gradients;
+
+    std::stack<state>           _states {};
+    std::unique_ptr<path_cache> _cache {};
+    std::vector<color_gradient> _gradients;
 
     f32    _tessTol {0};
     f32    _distTol {0};

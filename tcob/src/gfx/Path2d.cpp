@@ -7,7 +7,8 @@
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/easing/Easing.hpp"
-#include "tcob/gfx/Canvas.hpp"
+
+#include "Canvas_types.hpp"
 
 namespace tcob::gfx {
 

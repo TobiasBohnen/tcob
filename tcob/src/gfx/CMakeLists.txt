@@ -1,6 +1,7 @@
 # gfx
 list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Canvas.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Canvas_types.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorGradient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
