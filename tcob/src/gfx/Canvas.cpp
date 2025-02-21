@@ -182,6 +182,15 @@ auto static Quantize(f32 a, f32 d) -> f32
     return (static_cast<i32>((a / d) + 0.5f)) * d;
 }
 
+void static MultiplyAlphaPaint(paint_color& c, f32 alpha)
+{
+    if (auto* arg0 {std::get_if<color>(&c)}) {
+        arg0->A = static_cast<u8>(arg0->A * alpha);
+    } else if (auto* arg1 {std::get_if<paint_gradient>(&c)}) {
+        arg1->first *= alpha;
+    }
+}
+
 ////////////////////////////////////////////////////////////
 
 canvas::canvas()
@@ -1086,15 +1095,6 @@ void canvas::set_global_alpha(f32 alpha)
     get_state().Alpha = alpha;
 }
 
-void static multiply_alpha_paint(paint_color& c, f32 alpha)
-{
-    if (auto* arg0 {std::get_if<color>(&c)}) {
-        arg0->A = static_cast<u8>(arg0->A * alpha);
-    } else if (auto* arg1 {std::get_if<paint_gradient>(&c)}) {
-        arg1->first *= alpha;
-    }
-}
-
 void canvas::fill()
 {
     state&       s {get_state()};
@@ -1108,7 +1108,7 @@ void canvas::fill()
     }
 
     // Apply global alpha
-    multiply_alpha_paint(fillPaint.Color, s.Alpha);
+    MultiplyAlphaPaint(fillPaint.Color, s.Alpha);
 
     _impl->render_fill(fillPaint, s.CompositeOperation, s.Scissor, _fringeWidth, _cache->Bounds, _cache->Paths);
 }
@@ -1125,12 +1125,12 @@ void canvas::stroke()
         // Since coverage is area, scale by alpha*alpha.
         f32 const alpha {std::clamp(strokeWidth / _fringeWidth, 0.0f, 1.0f)};
 
-        multiply_alpha_paint(strokePaint.Color, alpha * alpha);
+        MultiplyAlphaPaint(strokePaint.Color, alpha * alpha);
         strokeWidth = _fringeWidth;
     }
 
     // Apply global alpha
-    multiply_alpha_paint(strokePaint.Color, s.Alpha);
+    MultiplyAlphaPaint(strokePaint.Color, s.Alpha);
 
     _cache->flatten_paths(_distTol, _tessTol, _enforceWinding);
 
@@ -1248,13 +1248,10 @@ void canvas::set_global_composite_blendfunc(blend_func sfactor, blend_func dfact
 
 void canvas::set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha)
 {
-    blend_funcs op {
-        .SourceColorBlendFunc      = srcRGB,
-        .DestinationColorBlendFunc = dstRGB,
-        .SourceAlphaBlendFunc      = srcAlpha,
-        .DestinationAlphaBlendFunc = dstAlpha};
-
-    get_state().CompositeOperation = op;
+    get_state().CompositeOperation = {.SourceColorBlendFunc      = srcRGB,
+                                      .DestinationColorBlendFunc = dstRGB,
+                                      .SourceAlphaBlendFunc      = srcAlpha,
+                                      .DestinationAlphaBlendFunc = dstAlpha};
 }
 
 void canvas::set_global_enforce_path_winding(bool force)
@@ -1345,8 +1342,7 @@ void canvas::reset_scissor()
 
 void canvas::set_font(font* font)
 {
-    state& s {get_state()};
-    s.Font = font;
+    get_state().Font = font;
 }
 
 ////////////////////////////////////////////////////////////
@@ -1456,7 +1452,7 @@ void canvas::draw_image(texture* image, string const& region, rect_f const& rect
     paint.Image = image;
 
     // Apply global alpha
-    multiply_alpha_paint(paint.Color, s.Alpha);
+    MultiplyAlphaPaint(paint.Color, s.Alpha);
 
     texture_region texRegion {paint.Image->get_region(region)};
 
@@ -1496,7 +1492,7 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
     paint.Image = image;
 
     // Apply global alpha
-    multiply_alpha_paint(paint.Color, s.Alpha);
+    MultiplyAlphaPaint(paint.Color, s.Alpha);
 
     f32 const left {rect.left()};
     f32 const leftCenter {center.left()};
@@ -1609,7 +1605,7 @@ void canvas::render_text(font* font, std::span<vertex const> verts)
     paint.Image = font->texture().ptr();
 
     // Apply global alpha
-    multiply_alpha_paint(paint.Color, s.Alpha);
+    MultiplyAlphaPaint(paint.Color, s.Alpha);
 
     _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
 }

@@ -72,7 +72,6 @@ public:
 
     void flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding);
 
-    void calculate_joins(f32 w, line_join lineJoin, f32 miterLimit);
     void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit, f32 tessTol);
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
 
@@ -84,6 +83,7 @@ private:
     void add_point(f32 x, f32 y, i32 flags, f32 distTol);
     auto get_last_point() -> canvas_point&;
     void tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type, f32 distTol, f32 tessTol);
+    void calculate_joins(f32 w, line_join lineJoin, f32 miterLimit);
 
     std::vector<vertex>       _verts;
     std::vector<canvas_point> _points;
