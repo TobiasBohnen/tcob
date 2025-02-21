@@ -989,67 +989,79 @@ auto canvas::dashed_bezier_path(auto&& func) -> bool
     std::array<f32, numSamples + 1> tValues {};
     point_f                         prevPoint {func(0.0f)};
 
-    // Build an arc–length lookup table by sampling the curve.
     for (i32 i {1}; i <= numSamples; ++i) {
-        f32 const     t {static_cast<f32>(i) / numSamples};
-        point_f const currentPoint {func(t)};
-        f32 const     segmentLength {std::hypot(currentPoint.X - prevPoint.X, currentPoint.Y - prevPoint.Y)};
+        f32 const  t {static_cast<f32>(i) / numSamples};
+        auto const currentPoint {func(t)};
+        f32 const  segmentLength {std::hypot(currentPoint.X - prevPoint.X, currentPoint.Y - prevPoint.Y)};
         arcLengths[i] = arcLengths[i - 1] + segmentLength;
         tValues[i]    = t;
         prevPoint     = currentPoint;
     }
-
     f32 const totalLength {arcLengths.back()};
 
     state const& s {get_state()};
-
-    auto const dp {DashPattern(s.Dash, s.DashRel, totalLength)};
-    if (!dp) { return false; };
+    auto const   dp {DashPattern(s.Dash, s.DashRel, totalLength)};
+    if (!dp) { return false; }
     auto const& dashPattern {*dp};
 
-    // Lambda to convert a target arc length into the corresponding t parameter.
-    auto const interpolate_arc {[&](f32 targetLength) -> f32 {
+    auto const interpolate_arc = [&](f32 targetLength) -> f32 {
         auto it {std::lower_bound(arcLengths.begin(), arcLengths.end(), targetLength)};
         if (it == arcLengths.end()) { return 1.0f; }
         if (it == arcLengths.begin()) { return 0.0f; }
-        isize const idx {std::distance(arcLengths.begin(), it)};
-        f32 const   t1 {tValues[idx - 1]};
-        f32 const   t2 {tValues[idx]};
-        f32 const   s1 {arcLengths[idx - 1]};
-        f32 const   s2 {arcLengths[idx]};
-        f32 const   fraction {(targetLength - s1) / (s2 - s1)};
+        auto const idx {std::distance(arcLengths.begin(), it)};
+        f32 const  t1 {tValues[idx - 1]};
+        f32 const  t2 {tValues[idx]};
+        f32 const  s1 {arcLengths[idx - 1]};
+        f32 const  s2 {arcLengths[idx]};
+        f32 const  fraction {(targetLength - s1) / (s2 - s1)};
         return t1 + fraction * (t2 - t1);
-    }};
+    };
 
     f32  currentLength {0.0f};
     bool drawing {true};
-    f32  t {0.0f};
+    f32  t0 {0.0f};
 
-    // Walk along the curve, incrementing by dashPattern lengths.
     for (usize dashIndex {0};; ++dashIndex) {
         f32 const dashLength {dashPattern[dashIndex % dashPattern.size()]};
         currentLength += dashLength;
         if (currentLength > totalLength) { break; }
-
         if (dashLength <= EPSILON) {
             drawing = !drawing;
             continue;
         }
 
-        f32 const nextT {interpolate_arc(currentLength)};
-
+        f32 const t1 {interpolate_arc(currentLength)};
         if (drawing) {
-            point_f const start {func(t)};
-            point_f const end {func(nextT)};
-            f32 const     dt {nextT - t};
-            point_f const cp0 {func(t + dt / 3.0f)};
-            point_f const cp1 {func(nextT - dt / 3.0f)};
+            f32 const     deltaT {t1 - t0};
+            constexpr f32 subdivThreshold {0.2f};
+            if (deltaT > subdivThreshold) {
+                constexpr i32 subSegments {20};
+                f32 const     frac {deltaT / subSegments};
+                for (i32 j {0}; j < subSegments; ++j) {
+                    f32 const subT0 {t0 + j * frac};
+                    if (j == 0) {
+                        auto const start {func(subT0)};
+                        append_commands(path2d::CommandsMoveTo(start));
+                    }
 
-            append_commands(path2d::CommandsMoveTo(start));
-            append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
+                    f32 const  subT1 {t0 + (j + 1) * frac};
+                    auto const end {func(subT1)};
+
+                    f32 const  subDeltaT {subT1 - subT0};
+                    auto const cp0 {func(subT0 + (subDeltaT / 3.0f))};
+                    auto const cp1 {func(subT1 - (subDeltaT / 3.0f))};
+                    append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
+                }
+            } else {
+                auto const start {func(t0)};
+                auto const end {func(t1)};
+                auto const cp0 {func(t0 + (deltaT / 3.0f))};
+                auto const cp1 {func(t1 - (deltaT / 3.0f))};
+                append_commands(path2d::CommandsMoveTo(start));
+                append_commands(path2d::CommandsCubicTo(cp0, cp1, end));
+            }
         }
-
-        t       = nextT;
+        t0      = t1;
         drawing = !drawing;
     }
 
