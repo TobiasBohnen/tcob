@@ -289,7 +289,7 @@ private:
 
     auto do_dash() const -> bool;
 
-    void dashed_bezier_path(auto&& func);
+    auto dashed_bezier_path(auto&& func) -> bool;
 
     void set_device_pixel_ratio(f32 ratio);
     auto get_state() -> state&;
@@ -310,8 +310,6 @@ private:
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit);
     void render_text(font* font, std::span<vertex const> verts);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
-
-    auto get_dash_pattern(state const& s, f32 total) const -> std::vector<f32>;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
     std::vector<f32>                             _commands {};
