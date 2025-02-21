@@ -206,33 +206,16 @@ namespace element {
         target.Radius = length::Lerp(left.Radius, right.Radius, step);
         target.Size   = length::Lerp(left.Size, right.Size, step);
 
-        if (auto const* leftDashI {std::get_if<std::vector<i32>>(&left.Dash)}) {
-            if (auto const* rightDashI {std::get_if<std::vector<i32>>(&right.Dash)}) {
-                usize const      ldashSize {leftDashI->size()};
-                usize const      rdashSize {rightDashI->size()};
-                std::vector<i32> targetDash;
-                targetDash.resize(std::max(ldashSize, rdashSize));
-                for (usize i {0}; i < targetDash.size(); ++i) {
-                    i32 const ldash {i < ldashSize ? (*leftDashI)[i] : 0};
-                    i32 const rdash {i < rdashSize ? (*rightDashI)[i] : 0};
-                    targetDash[i] = static_cast<i32>(ldash + (rdash - ldash) * step);
-                }
-                target.Dash = targetDash;
-            }
-        } else if (auto const* leftDashF {std::get_if<std::vector<f32>>(&left.Dash)}) {
-            if (auto const* rightDashF {std::get_if<std::vector<f32>>(&right.Dash)}) {
-                usize const      ldashSize {leftDashF->size()};
-                usize const      rdashSize {rightDashF->size()};
-                std::vector<f32> targetDash;
-                targetDash.resize(std::max(ldashSize, rdashSize));
-                for (usize i {0}; i < targetDash.size(); ++i) {
-                    f32 const ldash {i < ldashSize ? (*leftDashF)[i] : 0};
-                    f32 const rdash {i < rdashSize ? (*rightDashF)[i] : 0};
-                    targetDash[i] = static_cast<f32>(ldash + (rdash - ldash) * step);
-                }
-                target.Dash = targetDash;
-            }
+        usize const         ldashSize {left.Dash.size()};
+        usize const         rdashSize {right.Dash.size()};
+        std::vector<length> targetDash;
+        targetDash.resize(std::max(ldashSize, rdashSize));
+        for (usize i {0}; i < targetDash.size(); ++i) {
+            auto const ldash {i < ldashSize ? left.Dash[i] : length {0, i < rdashSize ? right.Dash[i].Type : length::type::Absolute}};
+            auto const rdash {i < rdashSize ? right.Dash[i] : length {0, i < ldashSize ? left.Dash[i].Type : length::type::Absolute}};
+            targetDash[i] = length::Lerp(ldash, rdash, step);
         }
+        target.Dash = targetDash;
     }
 
     void thumb::Transition(thumb& target, thumb const& left, thumb const& right, f64 step)

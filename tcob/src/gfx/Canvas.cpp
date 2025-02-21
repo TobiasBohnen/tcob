@@ -421,14 +421,14 @@ auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
     return length;
 }
 
-static auto DashPattern(std::vector<f32> const& dash, bool dashRel, f32 total) -> std::optional<std::vector<f32>>
+static auto DashPattern(std::vector<f32> const& dash, f32 total) -> std::optional<std::vector<f32>>
 {
     auto const       size {dash.size()};
     std::vector<f32> dashPattern(size);
     f32              sumDash {0.0f};
 
     for (usize i {0}; i < size; ++i) {
-        sumDash += dashPattern[i] = std::max(0.0f, dashRel ? dash[i] * total : dash[i]);
+        sumDash += dashPattern[i] = std::max(0.0f, dash[i]);
     }
 
     if (sumDash <= EPSILON) { return std::nullopt; }
@@ -580,7 +580,7 @@ void canvas::line_to(point_f pos)
     bool      drawing {true};
 
     state&     s {get_state()};
-    auto const dp {DashPattern(s.Dash, s.DashRel, totalLength)};
+    auto const dp {DashPattern(s.Dash, totalLength)};
     if (!dp) { return; };
     auto const& dashPattern {*dp};
 
@@ -776,7 +776,7 @@ void canvas::rect(rect_f const& rect)
 
     f32 const  totalLength {2 * (w + h)};
     state&     s {get_state()};
-    auto const dp {DashPattern(s.Dash, s.DashRel, totalLength)};
+    auto const dp {DashPattern(s.Dash, totalLength)};
     if (!dp) { return; };
     auto const& dashPattern {*dp};
 
@@ -963,18 +963,9 @@ void canvas::circle(point_f c, f32 r)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::set_line_dash(dash_pattern const& dashPattern)
+void canvas::set_line_dash(std::span<f32 const> dashPattern)
 {
-    state& s {get_state()};
-    if (auto const* arg0 {std::get_if<std::vector<i32>>(&dashPattern)}) {
-        s.Dash.clear();
-        s.Dash.reserve(arg0->size());
-        for (i32 i : *arg0) { s.Dash.push_back(i); }
-        s.DashRel = false;
-    } else if (auto const* arg1 {std::get_if<std::vector<f32>>(&dashPattern)}) {
-        s.Dash    = {arg1->begin(), arg1->end()};
-        s.DashRel = true;
-    }
+    get_state().Dash = {dashPattern.begin(), dashPattern.end()};
 }
 
 auto canvas::do_dash() const -> bool
@@ -1000,7 +991,7 @@ auto canvas::dashed_bezier_path(auto&& func) -> bool
     f32 const totalLength {arcLengths.back()};
 
     state const& s {get_state()};
-    auto const   dp {DashPattern(s.Dash, s.DashRel, totalLength)};
+    auto const   dp {DashPattern(s.Dash, totalLength)};
     if (!dp) { return false; }
     auto const& dashPattern {*dp};
 
