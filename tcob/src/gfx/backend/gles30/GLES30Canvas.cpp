@@ -51,7 +51,7 @@ gl_canvas::~gl_canvas()
     }
 }
 
-auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms
+auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms
 {
     nvg_frag_uniforms retValue {};
 
@@ -66,22 +66,21 @@ auto gl_canvas::convert_paint(canvas_paint const& paint, canvas_scissor const& s
         retValue.GradientColor = {1, 1, 1, 1};
     }
 
-    if (scissor.Extent[0] < -0.5f || scissor.Extent[1] < -0.5f) {
+    if (scissor.Extent.Width < -0.5f || scissor.Extent.Height < -0.5f) {
         retValue.ScissorMatrix.fill(0);
         retValue.ScissorExtent[0] = 1.0f;
         retValue.ScissorExtent[1] = 1.0f;
         retValue.ScissorScale[0]  = 1.0f;
         retValue.ScissorScale[1]  = 1.0f;
     } else {
-        retValue.ScissorMatrix    = scissor.XForm.as_inverted().as_matrix4();
-        retValue.ScissorExtent[0] = scissor.Extent[0];
-        retValue.ScissorExtent[1] = scissor.Extent[1];
+        retValue.ScissorMatrix = scissor.XForm.as_inverted().as_matrix4();
+        retValue.ScissorExtent = scissor.Extent.to_array();
         auto const& mat {scissor.XForm.Matrix};
         retValue.ScissorScale[0] = std::sqrt((mat[0] * mat[0]) + (mat[3] * mat[3])) / fringe;
         retValue.ScissorScale[1] = std::sqrt((mat[1] * mat[1]) + (mat[4] * mat[4])) / fringe;
     }
 
-    retValue.Extent     = paint.Extent;
+    retValue.Extent     = paint.Extent.to_array();
     retValue.StrokeMult = (width * 0.5f + fringe * 0.5f) / fringe;
     retValue.StrokeThr  = strokeThr;
 
@@ -284,7 +283,7 @@ void gl_canvas::flush(size_f size)
     _nuniforms = 0;
 }
 
-auto gl_canvas::get_max_vertcount(std::vector<canvas_path> const& paths) -> usize
+auto gl_canvas::get_max_vertcount(std::vector<canvas::path> const& paths) -> usize
 {
     usize count {0};
     for (auto const& path : paths) {
@@ -323,8 +322,8 @@ auto gl_canvas::get_frag_uniformptr(usize i) -> nvg_frag_uniforms*
     return reinterpret_cast<nvg_frag_uniforms*>(&data[i]);
 }
 
-void gl_canvas::render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
-                            vec4 const& bounds, std::vector<canvas_path> const& paths)
+void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                            vec4 const& bounds, std::vector<canvas::path> const& paths)
 {
     auto& call {_calls.emplace_back()};
     usize pathCount {paths.size()};
@@ -394,8 +393,8 @@ void gl_canvas::render_fill(canvas_paint const& paint, blend_funcs const& compos
     }
 }
 
-void gl_canvas::render_stroke(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
-                              f32 strokeWidth, std::vector<canvas_path> const& paths)
+void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                              f32 strokeWidth, std::vector<canvas::path> const& paths)
 {
     auto& call {_calls.emplace_back()};
 
@@ -428,7 +427,7 @@ void gl_canvas::render_stroke(canvas_paint const& paint, blend_funcs const& comp
     *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
 }
 
-void gl_canvas::render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
+void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
                                  std::span<vertex const> verts, f32 fringe)
 {
     auto& call {_calls.emplace_back()};

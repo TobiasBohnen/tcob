@@ -14,6 +14,7 @@
 #include "tcob/core/easing/Easing.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 
 #include "Canvas_types.hpp"
@@ -185,6 +186,7 @@ void static MultiplyAlphaPaint(paint_color& c, f32 alpha)
 
 canvas::canvas()
     : _impl {locate_service<render_system>().create_canvas()}
+    , _states {std::make_unique<states>()}
     , _cache {std::make_unique<path_cache>()}
 {
     save();
@@ -210,7 +212,7 @@ void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt)
     artt->prepare_render();
     artt->clear({0, 0, 0, 0});
 
-    _states = {};
+    _states->reset();
 
     save();
     reset();
@@ -231,21 +233,17 @@ void canvas::cancel_frame()
 
 void canvas::save()
 {
-    if (_states.empty()) {
-        _states.emplace();
-    } else {
-        _states.push(_states.top());
-    }
+    _states->save();
 }
 
 void canvas::restore()
 {
-    _states.pop();
+    _states->restore();
 }
 
 void canvas::reset()
 {
-    state& s {get_state()};
+    state& s {_states->get()};
 
     set_paint_color(s.Fill, colors::White);
     set_paint_color(s.Stroke, colors::Black);
@@ -258,8 +256,7 @@ void canvas::reset()
     s.Alpha              = 1.0f;
     s.XForm              = transform::Identity;
 
-    s.Scissor.Extent[0] = -1.0f;
-    s.Scissor.Extent[1] = -1.0f;
+    s.Scissor.Extent = {-1.0f, -1.0f};
 
     s.TextAlign = {};
     s.Dash      = {};
@@ -281,30 +278,30 @@ void canvas::begin_path()
 
 void canvas::close_path()
 {
-    _cache->append_commands(std::vector<f32> {Close}, get_state().XForm);
+    _cache->append_commands(std::vector<f32> {Close}, _states->get().XForm);
 }
 
 void canvas::set_path_winding(winding dir)
 {
-    _cache->append_commands(std::vector<f32> {Winding, static_cast<f32>(dir)}, get_state().XForm);
+    _cache->append_commands(std::vector<f32> {Winding, static_cast<f32>(dir)}, _states->get().XForm);
 }
 
 void canvas::set_path_winding(solidity s)
 {
-    _cache->append_commands(std::vector<f32> {Winding, static_cast<f32>(s)}, get_state().XForm);
+    _cache->append_commands(std::vector<f32> {Winding, static_cast<f32>(s)}, _states->get().XForm);
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::move_to(point_f pos)
 {
-    _cache->append_commands(path2d::CommandsMoveTo(pos), get_state().XForm);
+    _cache->append_commands(path2d::CommandsMoveTo(pos), _states->get().XForm);
 }
 
 void canvas::line_to(point_f pos)
 {
     if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsLineTo(pos), get_state().XForm);
+        _cache->append_commands(path2d::CommandsLineTo(pos), _states->get().XForm);
         return;
     }
 
@@ -314,7 +311,7 @@ void canvas::line_to(point_f pos)
     f32       currentLength {0.0f};
     bool      drawing {true};
 
-    state&           s {get_state()};
+    state&           s {_states->get()};
     std::vector<f32> dashPattern;
     if (!DashPattern(s.Dash, dashPattern, totalLength)) { return; }
 
@@ -347,7 +344,7 @@ void canvas::rect(rect_f const& rect)
     auto const [x, y] {rect.Position};
     auto const [w, h] {rect.Size};
 
-    state& s {get_state()};
+    state& s {_states->get()};
 
     if (!do_dash()) {
         _cache->append_commands(std::vector<f32> {
@@ -460,7 +457,7 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
                                     LineTo, x + rxTL, y,
                                     BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
                                     Close},
-                                get_state().XForm);
+                                _states->get().XForm);
         return;
     }
 
@@ -527,7 +524,7 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
                                     BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
                                     BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
                                     Close},
-                                get_state().XForm);
+                                _states->get().XForm);
         return;
     }
 
@@ -549,7 +546,7 @@ void canvas::circle(point_f c, f32 r)
 void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
     if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsCubicTo(cp0, cp1, end), get_state().XForm);
+        _cache->append_commands(path2d::CommandsCubicTo(cp0, cp1, end), _states->get().XForm);
         return;
     }
 
@@ -560,7 +557,7 @@ void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 void canvas::quad_bezier_to(point_f cp, point_f end)
 {
     if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsQuadTo(_cache->CommandPoint, cp, end), get_state().XForm);
+        _cache->append_commands(path2d::CommandsQuadTo(_cache->CommandPoint, cp, end), _states->get().XForm);
         return;
     }
 
@@ -631,7 +628,7 @@ void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian
             ptany = tany;
         }
 
-        _cache->append_commands(vals, get_state().XForm);
+        _cache->append_commands(vals, _states->get().XForm);
         return;
     }
 
@@ -699,12 +696,12 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 
 void canvas::set_line_dash(std::span<f32 const> dashPattern)
 {
-    get_state().Dash = {dashPattern.begin(), dashPattern.end()};
+    _states->get().Dash = {dashPattern.begin(), dashPattern.end()};
 }
 
 auto canvas::do_dash() const -> bool
 {
-    return !get_state().Dash.empty();
+    return !_states->get().Dash.empty();
 }
 
 auto canvas::dashed_bezier_path(auto&& func) -> bool
@@ -724,7 +721,7 @@ auto canvas::dashed_bezier_path(auto&& func) -> bool
     }
     f32 const totalLength {arcLengths.back()};
 
-    state const& s {get_state()};
+    state const& s {_states->get()};
 
     std::vector<f32> dashPattern;
     if (!DashPattern(s.Dash, dashPattern, totalLength)) { return false; }
@@ -802,7 +799,7 @@ void canvas::fill_lines(std::span<point_f const> points)
 
     move_to(points[0]);
     for (u32 i {1}; i < points.size(); ++i) {
-        _cache->append_commands(path2d::CommandsLineTo(points[i]), get_state().XForm);
+        _cache->append_commands(path2d::CommandsLineTo(points[i]), _states->get().XForm);
     }
 
     fill();
@@ -946,7 +943,7 @@ void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
 void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 {
     // TODO: dash
-    state const& s {get_state()};
+    state const& s {_states->get()};
 
     point_f const from {_cache->CommandPoint};
 
@@ -977,7 +974,7 @@ void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 void canvas::regular_polygon(point_f pos, size_f size, i32 n)
 {
     // TODO: dash
-    state const& s {get_state()};
+    state const& s {_states->get()};
 
     auto const [x, y] {pos};
     _cache->append_commands(path2d::CommandsMoveTo({x, y - size.Height}), s.XForm);
@@ -993,7 +990,7 @@ void canvas::regular_polygon(point_f pos, size_f size, i32 n)
 void canvas::star(point_f pos, f32 outerR, f32 innerR, i32 n)
 {
     // TODO: dash
-    state const& s {get_state()};
+    state const& s {_states->get()};
 
     auto const [x, y] {pos};
     _cache->append_commands(path2d::CommandsMoveTo({x, y - outerR}), s.XForm);
@@ -1010,7 +1007,7 @@ void canvas::star(point_f pos, f32 outerR, f32 innerR, i32 n)
 void canvas::triangle(point_f a, point_f b, point_f c)
 {
     // TODO: dash
-    state const& s {get_state()};
+    state const& s {_states->get()};
 
     _cache->append_commands(path2d::CommandsMoveTo(a), s.XForm);
     _cache->append_commands(path2d::CommandsLineTo(b), s.XForm);
@@ -1021,48 +1018,48 @@ void canvas::triangle(point_f a, point_f b, point_f c)
 auto canvas::path_2d(path2d const& path) -> void
 {
     begin_path();
-    _cache->append_commands(path.Commands, get_state().XForm);
+    _cache->append_commands(path.Commands, _states->get().XForm);
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::set_fill_style(color c)
 {
-    set_paint_color(get_state().Fill, c);
+    set_paint_color(_states->get().Fill, c);
 }
 
-void canvas::set_fill_style(canvas_paint const& paint)
+void canvas::set_fill_style(paint const& paint)
 {
-    state& s {get_state()};
+    state& s {_states->get()};
     s.Fill       = paint;
     s.Fill.XForm = s.XForm * s.Fill.XForm;
 }
 
 void canvas::set_stroke_style(color c)
 {
-    set_paint_color(get_state().Stroke, c);
+    set_paint_color(_states->get().Stroke, c);
 }
 
-void canvas::set_stroke_style(canvas_paint const& paint)
+void canvas::set_stroke_style(paint const& paint)
 {
-    state& s {get_state()};
+    state& s {_states->get()};
     s.Stroke       = paint;
     s.Stroke.XForm = s.XForm * s.Stroke.XForm;
 }
 
 void canvas::set_shape_antialias(bool enabled)
 {
-    get_state().ShapeAntiAlias = enabled;
+    _states->get().ShapeAntiAlias = enabled;
 }
 
 void canvas::set_miter_limit(f32 limit)
 {
-    get_state().MiterLimit = limit;
+    _states->get().MiterLimit = limit;
 }
 
 void canvas::set_stroke_width(f32 size)
 {
-    get_state().StrokeWidth = size;
+    _states->get().StrokeWidth = size;
 }
 
 void canvas::set_edge_antialias(bool enabled)
@@ -1072,23 +1069,23 @@ void canvas::set_edge_antialias(bool enabled)
 
 void canvas::set_line_cap(line_cap cap)
 {
-    get_state().LineCap = cap;
+    _states->get().LineCap = cap;
 }
 
 void canvas::set_line_join(line_join join)
 {
-    get_state().LineJoin = join;
+    _states->get().LineJoin = join;
 }
 
 void canvas::set_global_alpha(f32 alpha)
 {
-    get_state().Alpha = alpha;
+    _states->get().Alpha = alpha;
 }
 
 void canvas::fill()
 {
-    state&       s {get_state()};
-    canvas_paint fillPaint {s.Fill};
+    state const& s {_states->get()};
+    paint        fillPaint {s.Fill}; // copy
 
     _cache->flatten_paths(_distTol, _tessTol, _enforceWinding);
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
@@ -1105,10 +1102,10 @@ void canvas::fill()
 
 void canvas::stroke()
 {
-    state&       s {get_state()};
+    state const& s {_states->get()};
     f32 const    scale {GetAverageScale(s.XForm.Matrix)};
     f32          strokeWidth {std::clamp(s.StrokeWidth * scale, 0.0f, 200.0f)};
-    canvas_paint strokePaint {s.Stroke};
+    paint        strokePaint {s.Stroke}; // copy
 
     if (strokeWidth < _fringeWidth) {
         // If the stroke width is less than pixel size, use alpha to emulate coverage.
@@ -1135,7 +1132,7 @@ void canvas::stroke()
 
 ////////////////////////////////////////////////////////////
 
-auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& gradient) -> canvas_paint
+auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& gradient) -> paint
 {
     f32 const large {1e5};
 
@@ -1161,7 +1158,7 @@ auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& 
         .Color   = create_gradient(gradient)};
 }
 
-auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> canvas_paint
+auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> paint
 {
     auto const& c {rect.center()};
     return {
@@ -1174,12 +1171,12 @@ auto canvas::create_box_gradient(rect_f const& rect, f32 r, f32 f, color_gradien
         .Color   = create_gradient(gradient)};
 }
 
-auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, color_gradient const& gradient) -> canvas_paint
+auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, color_gradient const& gradient) -> paint
 {
     return create_radial_gradient(c, inr, outr, size_f::One, gradient);
 }
 
-auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, color_gradient const& gradient) -> canvas_paint
+auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, color_gradient const& gradient) -> paint
 {
     f32 const r {(inr + outr) * 0.5f};
     f32 const f {(outr - inr)};
@@ -1212,11 +1209,11 @@ auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
     return paint_gradient {1.0f, retValue};
 }
 
-auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> canvas_paint
+auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> paint
 {
-    canvas_paint p {.Extent = {e.Width, e.Height},
-                    .Color  = color {255, 255, 255, static_cast<u8>(255 * alpha)},
-                    .Image  = image};
+    paint p {.Extent = {e.Width, e.Height},
+             .Color  = color {255, 255, 255, static_cast<u8>(255 * alpha)},
+             .Image  = image};
 
     p.XForm.rotate(angle);
     p.XForm.translate(c);
@@ -1228,7 +1225,7 @@ auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* 
 
 void canvas::set_global_composite_operation(composite_operation op)
 {
-    get_state().CompositeOperation = CompositeOperationState(op);
+    _states->get().CompositeOperation = CompositeOperationState(op);
 }
 
 void canvas::set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor)
@@ -1238,10 +1235,10 @@ void canvas::set_global_composite_blendfunc(blend_func sfactor, blend_func dfact
 
 void canvas::set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha)
 {
-    get_state().CompositeOperation = {.SourceColorBlendFunc      = srcRGB,
-                                      .DestinationColorBlendFunc = dstRGB,
-                                      .SourceAlphaBlendFunc      = srcAlpha,
-                                      .DestinationAlphaBlendFunc = dstAlpha};
+    _states->get().CompositeOperation = {.SourceColorBlendFunc      = srcRGB,
+                                         .DestinationColorBlendFunc = dstRGB,
+                                         .SourceAlphaBlendFunc      = srcAlpha,
+                                         .DestinationAlphaBlendFunc = dstAlpha};
 }
 
 void canvas::set_global_enforce_path_winding(bool force)
@@ -1253,12 +1250,12 @@ void canvas::set_global_enforce_path_winding(bool force)
 
 void canvas::translate(point_f c)
 {
-    get_state().XForm.translate(c);
+    _states->get().XForm.translate(c);
 }
 
 void canvas::rotate(degree_f angle)
 {
-    get_state().XForm.rotate(angle);
+    _states->get().XForm.rotate(angle);
 }
 
 void canvas::rotate_at(degree_f angle, point_f p)
@@ -1270,7 +1267,7 @@ void canvas::rotate_at(degree_f angle, point_f p)
 
 void canvas::scale(size_f scale)
 {
-    get_state().XForm.scale(scale);
+    _states->get().XForm.scale(scale);
 }
 
 void canvas::scale_at(size_f sc, point_f p)
@@ -1282,7 +1279,7 @@ void canvas::scale_at(size_f sc, point_f p)
 
 void canvas::skew(degree_f angleX, degree_f angleY)
 {
-    get_state().XForm.skew({angleX, angleY});
+    _states->get().XForm.skew({angleX, angleY});
 }
 
 void canvas::skew_at(degree_f angleX, degree_f angleY, point_f p)
@@ -1294,19 +1291,19 @@ void canvas::skew_at(degree_f angleX, degree_f angleY, point_f p)
 
 void canvas::set_transform(transform const& xform)
 {
-    get_state().XForm = xform;
+    _states->get().XForm = xform;
 }
 
 void canvas::reset_transform()
 {
-    get_state().XForm = transform::Identity;
+    _states->get().XForm = transform::Identity;
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::set_scissor(rect_f const& rect, bool transform)
 {
-    state& s {get_state()};
+    state& s {_states->get()};
 
     auto [x, y] {rect.Position};
     auto [w, h] {rect.Size};
@@ -1318,21 +1315,19 @@ void canvas::set_scissor(rect_f const& rect, bool transform)
     s.Scissor.XForm.translate({x + (w * 0.5f), y + (h * 0.5f)});
     if (transform) { s.Scissor.XForm = s.XForm * s.Scissor.XForm; }
 
-    s.Scissor.Extent[0] = w * 0.5f;
-    s.Scissor.Extent[1] = h * 0.5f;
+    s.Scissor.Extent = {w * 0.5f, h * 0.5f};
 }
 
 void canvas::reset_scissor()
 {
-    state& s {get_state()};
-    s.Scissor.XForm     = transform {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    s.Scissor.Extent[0] = -1.0f;
-    s.Scissor.Extent[1] = -1.0f;
+    state& s {_states->get()};
+    s.Scissor.XForm  = transform {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    s.Scissor.Extent = {-1.0f, -1.0f};
 }
 
 void canvas::set_font(font* font)
 {
-    get_state().Font = font;
+    _states->get().Font = font;
 }
 
 ////////////////////////////////////////////////////////////
@@ -1344,7 +1339,7 @@ void canvas::draw_textbox(rect_f const& rect, utf8_string_view text)
 
 void canvas::draw_textbox(point_f offset, text_formatter::result const& formatResult)
 {
-    state& s {get_state()};
+    state const& s {_states->get()};
     if (!s.Font) { return; }
 
     f32 const scale {get_font_scale() * _devicePxRatio};
@@ -1409,34 +1404,34 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
 
 auto canvas::format_text(size_f const& size, utf8_string_view text, f32 scale) -> text_formatter::result
 {
-    state& s {get_state()};
+    state const& s {_states->get()};
     if (!s.Font) { return {}; }
     return text_formatter::format(text, *s.Font, s.TextAlign, size, scale, true);
 }
 
 auto canvas::measure_text(f32 height, utf8_string_view text) -> size_f
 {
-    state& s {get_state()};
+    state const& s {_states->get()};
     if (!s.Font) { return {}; }
     return text_formatter::measure(text, *s.Font, height, true);
 }
 
 void canvas::set_text_halign(horizontal_alignment align)
 {
-    get_state().TextAlign.Horizontal = align;
+    _states->get().TextAlign.Horizontal = align;
 }
 
 void canvas::set_text_valign(vertical_alignment align)
 {
-    get_state().TextAlign.Vertical = align;
+    _states->get().TextAlign.Vertical = align;
 }
 
 ////////////////////////////////////////////////////////////
 
 void canvas::draw_image(texture* image, string const& region, rect_f const& rect)
 {
-    state&       s {get_state()};
-    canvas_paint paint {s.Fill};
+    state const& s {_states->get()};
+    paint        paint {s.Fill}; // copy
 
     // Render triangles.
     paint.Image = image;
@@ -1475,8 +1470,8 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
 
 void canvas::draw_nine_patch(texture* image, string const& region, rect_f const& rect, rect_f const& center, rect_f const& localCenterUV)
 {
-    state&       s {get_state()};
-    canvas_paint paint {s.Fill};
+    state const& s {_states->get()};
+    auto         paint {s.Fill}; // copy
 
     // Render triangles.
     paint.Image = image;
@@ -1561,17 +1556,7 @@ void canvas::set_device_pixel_ratio(f32 ratio)
 
 ////////////////////////////////////////////////////////////
 
-auto canvas::get_state() -> state&
-{
-    return _states.top();
-}
-
-auto canvas::get_state() const -> state const&
-{
-    return _states.top();
-}
-
-void canvas::set_paint_color(canvas_paint& p, color c)
+void canvas::set_paint_color(paint& p, color c)
 {
     p.XForm   = transform::Identity;
     p.Extent  = {};
@@ -1583,13 +1568,13 @@ void canvas::set_paint_color(canvas_paint& p, color c)
 
 auto canvas::get_font_scale() -> f32
 {
-    return std::min(Quantize(GetAverageScale(get_state().XForm.Matrix), 0.01f), 4.0f);
+    return std::min(Quantize(GetAverageScale(_states->get().XForm.Matrix), 0.01f), 4.0f);
 }
 
 void canvas::render_text(font* font, std::span<vertex const> verts)
 {
-    state&       s {get_state()};
-    canvas_paint paint {s.Fill};
+    state const& s {_states->get()};
+    paint        paint {s.Fill};
 
     // Render triangles
     paint.Image = font->texture().ptr();

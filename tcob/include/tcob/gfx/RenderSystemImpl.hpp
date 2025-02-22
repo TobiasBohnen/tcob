@@ -10,6 +10,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -29,13 +30,13 @@ public:
     void virtual cancel()           = 0;
 
     void virtual render_fill(
-        canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
-        f32 fringe, vec4 const& bounds, std::vector<canvas_path> const& paths) = 0;
+        canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
+        f32 fringe, vec4 const& bounds, std::vector<canvas::path> const& paths) = 0;
     void virtual render_stroke(
-        canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
-        f32 fringe, f32 strokeWidth, std::vector<canvas_path> const& paths) = 0;
+        canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
+        f32 fringe, f32 strokeWidth, std::vector<canvas::path> const& paths) = 0;
     void virtual render_triangles(
-        canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
+        canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
         std::span<vertex const> verts, f32 fringe)                     = 0;
     void virtual add_gradient(i32 idx, color_gradient const& gradient) = 0;
 };

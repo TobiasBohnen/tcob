@@ -110,7 +110,7 @@ struct solid_draw_context : public base_draw_context {
 };
 
 struct gradient_draw_context : public base_draw_context {
-    canvas_paint Gradient {};
+    canvas::paint Gradient {};
 };
 
 struct text_draw_context {

@@ -45,7 +45,7 @@ void canvas_widget::set_fill_style(color c)
     _commands.emplace_back([=](canvas& canvas) { canvas.set_fill_style(c); });
 }
 
-void canvas_widget::set_fill_style(canvas_paint const& paint)
+void canvas_widget::set_fill_style(canvas::paint const& paint)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.set_fill_style(paint); });
 }
@@ -55,7 +55,7 @@ void canvas_widget::set_stroke_style(color c)
     _commands.emplace_back([=](canvas& canvas) { canvas.set_stroke_style(c); });
 }
 
-void canvas_widget::set_stroke_style(canvas_paint const& paint)
+void canvas_widget::set_stroke_style(canvas::paint const& paint)
 {
     _commands.emplace_back([=](canvas& canvas) { canvas.set_stroke_style(paint); });
 }

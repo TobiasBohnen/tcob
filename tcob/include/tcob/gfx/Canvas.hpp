@@ -25,7 +25,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <span>
-#include <stack>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -84,39 +83,44 @@ enum class composite_operation : u8 {
 using paint_gradient = std::pair<f32, i32>;
 using paint_color    = std::variant<color, paint_gradient>;
 
-struct canvas_paint {
-    transform   XForm {transform::Identity};
-    vec2        Extent {0, 0};
-    f32         Radius {0};
-    f32         Feather {0};
-    paint_color Color {colors::White};
-    texture*    Image {nullptr};
-};
-
-struct canvas_scissor {
-    transform XForm {transform::Identity};
-    vec2      Extent {};
-};
-
-struct canvas_path {
-    i32     First {0};
-    usize   Count {0};
-    usize   BevelCount {0};
-    vertex* Fill {nullptr};
-    usize   FillCount {0};
-    vertex* Stroke {nullptr};
-    usize   StrokeCount {0};
-    winding Winding {winding::CCW};
-    bool    Convex {false};
-    bool    Closed {false};
-};
+////////////////////////////////////////////////////////////
 
 class path_cache;
+class states;
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API canvas final : public non_copyable {
 public:
+    ////////////////////////////////////////////////////////////
+
+    struct paint {
+        transform   XForm {transform::Identity};
+        size_f      Extent {size_f::Zero};
+        f32         Radius {0};
+        f32         Feather {0};
+        paint_color Color {colors::White};
+        texture*    Image {nullptr};
+    };
+
+    struct scissor {
+        transform XForm {transform::Identity};
+        size_f    Extent {size_f::Zero};
+    };
+
+    struct path {
+        i32     First {0};
+        usize   Count {0};
+        usize   BevelCount {0};
+        vertex* Fill {nullptr};
+        usize   FillCount {0};
+        vertex* Stroke {nullptr};
+        usize   StrokeCount {0};
+        winding Winding {winding::CCW};
+        bool    Convex {false};
+        bool    Closed {false};
+    };
+
     ////////////////////////////////////////////////////////////
 
     class TCOB_API state_guard final : public non_copyable {
@@ -152,9 +156,9 @@ public:
 
     // Render styles
     void set_fill_style(color c);
-    void set_fill_style(canvas_paint const& paint);
+    void set_fill_style(paint const& paint);
     void set_stroke_style(color c);
-    void set_stroke_style(canvas_paint const& paint);
+    void set_stroke_style(paint const& paint);
     void set_stroke_width(f32 size);
     void set_edge_antialias(bool enabled);
     void set_shape_antialias(bool enabled);
@@ -204,11 +208,11 @@ public:
     void stroke_lines(std::span<point_f const> points);
 
     // Paints
-    auto create_linear_gradient [[nodiscard]] (point_f s, point_f e, color_gradient const& gradient) -> canvas_paint;
-    auto create_box_gradient [[nodiscard]] (rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> canvas_paint;
-    auto create_radial_gradient [[nodiscard]] (point_f c, f32 inr, f32 outr, color_gradient const& gradient) -> canvas_paint;
-    auto create_radial_gradient [[nodiscard]] (point_f c, f32 inr, f32 outr, size_f scale, color_gradient const& gradient) -> canvas_paint;
-    auto create_image_pattern [[nodiscard]] (point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> canvas_paint;
+    auto create_linear_gradient [[nodiscard]] (point_f s, point_f e, color_gradient const& gradient) -> paint;
+    auto create_box_gradient [[nodiscard]] (rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> paint;
+    auto create_radial_gradient [[nodiscard]] (point_f c, f32 inr, f32 outr, color_gradient const& gradient) -> paint;
+    auto create_radial_gradient [[nodiscard]] (point_f c, f32 inr, f32 outr, size_f scale, color_gradient const& gradient) -> paint;
+    auto create_image_pattern [[nodiscard]] (point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> paint;
 
     // Image
     void draw_image(texture* image, string const& region, rect_f const& rect);
@@ -244,38 +248,21 @@ public:
     auto get_impl() const -> render_backend::canvas_base*;
 
 private:
-    struct state {
-        blend_funcs      CompositeOperation {};
-        bool             ShapeAntiAlias {true};
-        canvas_paint     Fill {};
-        canvas_paint     Stroke {};
-        f32              StrokeWidth {1};
-        f32              MiterLimit {10.0f};
-        line_join        LineJoin {line_join::Miter};
-        line_cap         LineCap {line_cap::Butt};
-        f32              Alpha {1};
-        transform        XForm {transform::Identity};
-        canvas_scissor   Scissor {};
-        alignments       TextAlign {};
-        font*            Font {nullptr};
-        std::vector<f32> Dash;
-    };
-
     auto do_dash() const -> bool;
 
     auto dashed_bezier_path(auto&& func) -> bool;
 
     void set_device_pixel_ratio(f32 ratio);
-    auto get_state() -> state&;
-    auto get_state() const -> state const&;
-    void set_paint_color(canvas_paint& p, color c);
+
+    void set_paint_color(paint& p, color c);
     auto get_font_scale() -> f32;
     void render_text(font* font, std::span<vertex const> verts);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
 
-    std::stack<state>           _states {};
+    std::unique_ptr<states> _states {};
+
     std::unique_ptr<path_cache> _cache {};
     std::vector<color_gradient> _gradients;
 

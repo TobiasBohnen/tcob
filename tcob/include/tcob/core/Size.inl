@@ -24,6 +24,12 @@ constexpr size<T>::size(size<U> const& p)
 }
 
 template <Arithmetic T>
+auto constexpr size<T>::to_array [[nodiscard]] () const -> std::array<T, 2>
+{
+    return {Width, Height};
+}
+
+template <Arithmetic T>
 auto constexpr size<T>::Lerp(size<T> const& left, size<T> const& right, f64 step) -> size<T>
 {
     T const w {static_cast<T>(left.Width + ((right.Width - left.Width) * step))};
@@ -166,5 +172,4 @@ inline auto operator<<(std::ostream& os, size<T> const& m) -> std::ostream&
 {
     return os << "width:" << m.Width << "|height:" << m.Height;
 }
-
 }

@@ -31,9 +31,9 @@ public:
 
     // Render styles
     void set_fill_style(color c);
-    void set_fill_style(canvas_paint const& paint);
+    void set_fill_style(canvas::paint const& paint);
     void set_stroke_style(color c);
-    void set_stroke_style(canvas_paint const& paint);
+    void set_stroke_style(canvas::paint const& paint);
     void set_stroke_width(f32 size);
     void set_edge_antialias(bool enabled);
     void set_shape_antialias(bool enabled);

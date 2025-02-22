@@ -24,6 +24,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <stack>
+#include <vector>
+
 #include "tcob/gfx/Canvas.hpp"
 
 namespace tcob::gfx {
@@ -58,10 +61,45 @@ struct canvas_point {
 
 ////////////////////////////////////////////////////////////
 
+struct state {
+    blend_funcs      CompositeOperation {};
+    bool             ShapeAntiAlias {true};
+    canvas::paint    Fill {};
+    canvas::paint    Stroke {};
+    f32              StrokeWidth {1};
+    f32              MiterLimit {10.0f};
+    line_join        LineJoin {line_join::Miter};
+    line_cap         LineCap {line_cap::Butt};
+    f32              Alpha {1};
+    transform        XForm {transform::Identity};
+    canvas::scissor  Scissor {};
+    alignments       TextAlign {};
+    font*            Font {nullptr};
+    std::vector<f32> Dash;
+};
+
+////////////////////////////////////////////////////////////
+
+class states {
+public:
+    auto get() -> state&;
+    auto get() const -> state const&;
+
+    void save();
+    void restore();
+
+    void reset();
+
+private:
+    std::stack<state> _states {};
+};
+
+////////////////////////////////////////////////////////////
+
 class path_cache {
 public:
-    std::vector<canvas_path> Paths;
-    std::vector<f32>         Commands;
+    std::vector<canvas::path> Paths;
+    std::vector<f32>          Commands;
 
     point_f CommandPoint;
     vec4    Bounds {};
@@ -79,7 +117,7 @@ public:
 
 private:
     void add_path();
-    auto get_last_path() -> canvas_path&;
+    auto get_last_path() -> canvas::path&;
     void add_point(f32 x, f32 y, i32 flags, f32 distTol);
     auto get_last_point() -> canvas_point&;
     void tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type, f32 distTol, f32 tessTol);

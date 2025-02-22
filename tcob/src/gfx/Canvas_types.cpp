@@ -14,6 +14,37 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
+auto states::get() -> state&
+{
+    return _states.top();
+}
+
+auto states::get() const -> state const&
+{
+    return _states.top();
+}
+
+void states::save()
+{
+    if (_states.empty()) {
+        _states.emplace();
+    } else {
+        _states.push(_states.top());
+    }
+}
+
+void states::restore()
+{
+    _states.pop();
+}
+
+void states::reset()
+{
+    _states = {};
+}
+
+////////////////////////////////////////////////////////////
+
 void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 {
     vtx->Position.X = x;
@@ -664,12 +695,12 @@ auto path_cache::alloc_temp_verts(usize nverts) -> vertex*
 
 void path_cache::add_path()
 {
-    canvas_path path;
+    canvas::path path;
     path.First = static_cast<i32>(_points.size());
     Paths.push_back(path);
 }
 
-auto path_cache::get_last_path() -> canvas_path&
+auto path_cache::get_last_path() -> canvas::path&
 {
     assert(!Paths.empty());
     return Paths.back();
@@ -677,7 +708,7 @@ auto path_cache::get_last_path() -> canvas_path&
 
 void path_cache::add_point(f32 x, f32 y, i32 flags, f32 distTol)
 {
-    canvas_path& path {get_last_path()};
+    canvas::path& path {get_last_path()};
 
     if (path.Count > 0 && !_points.empty()) {
         auto& pt {get_last_point()};

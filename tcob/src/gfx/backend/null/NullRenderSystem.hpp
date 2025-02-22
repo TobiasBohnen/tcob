@@ -121,11 +121,11 @@ class null_canvas final : public tcob::gfx::render_backend::canvas_base {
 public:
     void flush(size_f size) override;
     void cancel() override;
-    void render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
-                     vec4 const& bounds, std::vector<canvas_path> const& paths) override;
-    void render_stroke(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
-                       f32 strokeWidth, std::vector<canvas_path> const& paths) override;
-    void render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
+    void render_fill(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                     vec4 const& bounds, std::vector<canvas::path> const& paths) override;
+    void render_stroke(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                       f32 strokeWidth, std::vector<canvas::path> const& paths) override;
+    void render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
                           std::span<vertex const> verts, f32 fringe) override;
     void add_gradient(i32 idx, color_gradient const& gradient) override;
 };

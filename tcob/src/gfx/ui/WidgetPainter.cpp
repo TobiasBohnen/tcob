@@ -668,35 +668,35 @@ auto widget_painter::transform_text(element::text::transform xform, utf8_string_
     return retValue;
 }
 
-auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas_paint
+auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas::paint
 {
     return std::visit(
         overloaded {
-            [&](color const& arg) -> canvas_paint {
-                return canvas_paint {
+            [&](color const& arg) -> canvas::paint {
+                return canvas::paint {
                     .Feather = 1.0f,
                     .Color   = arg,
                 };
             },
-            [&](linear_gradient const& arg) -> canvas_paint {
+            [&](linear_gradient const& arg) -> canvas::paint {
                 degree_f const angle {arg.Angle + degree_f {90}};
                 return _canvas.create_linear_gradient(
                     rect.find_edge(angle),
                     rect.find_edge(angle - degree_f {180}),
                     arg.Colors);
             },
-            [&](radial_gradient const& arg) -> canvas_paint {
+            [&](radial_gradient const& arg) -> canvas::paint {
                 return _canvas.create_radial_gradient(
                     rect.center(),
                     arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
                     arg.Scale, arg.Colors);
             },
-            [&](box_gradient const& arg) -> canvas_paint {
+            [&](box_gradient const& arg) -> canvas::paint {
                 return _canvas.create_box_gradient(
                     rect,
                     arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
             },
-            [&](nine_patch const&) -> canvas_paint {
+            [&](nine_patch const&) -> canvas::paint {
                 return {};
             },
         },

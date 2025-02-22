@@ -26,6 +26,8 @@ public:
     template <typename U>
     explicit constexpr size(size<U> const& p);
 
+    auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
+
     template <Arithmetic U>
     auto constexpr contains(point<U> const& point) const -> bool;
 

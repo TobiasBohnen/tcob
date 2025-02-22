@@ -97,22 +97,22 @@ public:
 
     void flush(size_f size) override;
     void cancel() override;
-    void render_fill(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
-                     vec4 const& bounds, std::vector<canvas_path> const& paths) override;
-    void render_stroke(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor, f32 fringe,
-                       f32 strokeWidth, std::vector<canvas_path> const& paths) override;
-    void render_triangles(canvas_paint const& paint, blend_funcs const& compositeOperation, canvas_scissor const& scissor,
+    void render_fill(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                     vec4 const& bounds, std::vector<canvas::path> const& paths) override;
+    void render_stroke(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                       f32 strokeWidth, std::vector<canvas::path> const& paths) override;
+    void render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
                           std::span<vertex const> verts, f32 fringe) override;
     void add_gradient(i32 idx, color_gradient const& gradient) override;
 
 private:
     void set_uniforms(usize uniformOffset, texture* image = nullptr);
-    auto convert_paint(canvas_paint const& paint, canvas_scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
+    auto convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
     void fill(nvg_call const& call);
     void convex_fill(nvg_call const& call);
     void stroke(nvg_call const& call);
     void triangles(nvg_call const& call);
-    auto get_max_vertcount(std::vector<canvas_path> const& paths) -> usize;
+    auto get_max_vertcount(std::vector<canvas::path> const& paths) -> usize;
     auto alloc_verts(usize n) -> usize;
     auto alloc_frag_uniforms(usize n) -> usize;
 

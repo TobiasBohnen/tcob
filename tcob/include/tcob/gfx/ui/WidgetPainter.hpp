@@ -51,7 +51,7 @@ private:
     void draw_border(rect_f const& rect, element::border const& borderStyle, f32 borderSize, f32 borderRadius);
     void draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle);
 
-    auto get_paint(ui_paint const& p, rect_f const& rect) -> canvas_paint;
+    auto get_paint(ui_paint const& p, rect_f const& rect) -> canvas::paint;
 
     auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> text_formatter::result;
     auto transform_text(element::text::transform xform, utf8_string_view text) const -> utf8_string;
