@@ -124,8 +124,10 @@ auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
     return length;
 }
 
-static auto DashPattern(std::vector<f32> const& src, std::vector<f32>& dst, f32 total) -> bool
+static auto DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
 {
+    if (total <= EPSILON) { return false; }
+
     auto const size {src.size()};
     dst.resize(size);
     f32 sumDash {0.0f};
@@ -283,7 +285,7 @@ void canvas::line_to(point_f pos)
 
     state&           s {_states->get()};
     std::vector<f32> dashPattern;
-    if (!DashPattern(s.Dash, dashPattern, totalLength)) { return; }
+    if (!DashPattern(dashPattern, s.Dash, totalLength)) { return; }
 
     for (usize dashIndex {0};; ++dashIndex) {
         f32 const dashLength {dashPattern[dashIndex % dashPattern.size()]};
@@ -330,7 +332,7 @@ void canvas::rect(rect_f const& rect)
     f32 const totalLength {2 * (w + h)};
 
     std::vector<f32> dashPattern;
-    if (!DashPattern(s.Dash, dashPattern, totalLength)) { return; }
+    if (!DashPattern(dashPattern, s.Dash, totalLength)) { return; }
 
     std::array<f32, 4> const     cornerPositions {{0.0f, w, w + h, 2 * w + h}};
     std::array<point_f, 4> const corners {{rect.top_left(),
@@ -691,7 +693,7 @@ auto canvas::dashed_bezier_path(auto&& func) -> bool
     state const& s {_states->get()};
 
     std::vector<f32> dashPattern;
-    if (!DashPattern(s.Dash, dashPattern, totalLength)) { return false; }
+    if (!DashPattern(dashPattern, s.Dash, totalLength)) { return false; }
 
     auto const interpolate_arc = [&](f32 targetLength) -> f32 {
         auto it {std::lower_bound(arcLengths.begin(), arcLengths.end(), targetLength)};
@@ -1165,9 +1167,7 @@ auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
     }
 
     for (usize i {0}; i < _gradients.size(); ++i) {
-        if (_gradients[i] == gradient) {
-            return paint_gradient {1.0f, static_cast<i32>(i)};
-        }
+        if (_gradients[i] == gradient) { return paint_gradient {1.0f, static_cast<i32>(i)}; }
     }
 
     i32 const retValue {static_cast<i32>(_gradients.size())};
