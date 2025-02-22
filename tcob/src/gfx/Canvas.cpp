@@ -1299,12 +1299,12 @@ void canvas::set_font(font* font)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::fill_text(rect_f const& rect, utf8_string_view text)
+void canvas::draw_text(rect_f const& rect, utf8_string_view text)
 {
-    fill_text(rect.Position, format_text(rect.Size, text));
+    draw_text(rect.Position, format_text(rect.Size, text));
 }
 
-void canvas::fill_text(point_f offset, text_formatter::result const& formatResult)
+void canvas::draw_text(point_f offset, text_formatter::result const& formatResult)
 {
     state const& s {_states->get()};
     if (!s.Font) { return; }
@@ -1367,6 +1367,36 @@ void canvas::fill_text(point_f offset, text_formatter::result const& formatResul
     }
 
     render_text(s.Font, {verts, nverts});
+}
+
+void canvas::fill_text(utf8_string_view text, point_f offset)
+{
+    bool const oldValue {_enforceWinding};
+    _enforceWinding = false;
+    decompose_text(text, offset);
+    fill();
+    _enforceWinding = oldValue;
+}
+
+void canvas::stroke_text(utf8_string_view text, point_f offset)
+{
+    decompose_text(text, offset);
+    stroke();
+}
+
+void canvas::decompose_text(utf8_string_view text, point_f offset)
+{
+    state const& s {_states->get()};
+    if (!s.Font) { return; }
+
+    decompose_callbacks cb {};
+    cb.MoveTo  = [&](point_f p) { move_to(p + cb.Offset); };
+    cb.LineTo  = [&](point_f p) { line_to(p + cb.Offset); };
+    cb.ConicTo = [&](point_f p0, point_f p1) { quad_bezier_to(p0 + cb.Offset, p1 + cb.Offset); };
+    cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) { cubic_bezier_to(p0 + cb.Offset, p1 + cb.Offset, p2 + cb.Offset); };
+    cb.Offset  = offset;
+
+    s.Font->decompose_text(text, true, cb);
 }
 
 auto canvas::format_text(size_f const& size, utf8_string_view text, f32 scale) -> text_formatter::result

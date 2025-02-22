@@ -97,7 +97,7 @@ public:
     void set_text_halign(horizontal_alignment align);
     void set_text_valign(vertical_alignment align);
 
-    void fill_text(rect_f const& rect, utf8_string_view text);
+    void draw_text(rect_f const& rect, utf8_string_view text);
 
 protected:
     void on_paint(widget_painter& painter) override;

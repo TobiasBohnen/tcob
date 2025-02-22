@@ -239,8 +239,11 @@ public:
     void set_text_halign(horizontal_alignment align);
     void set_text_valign(vertical_alignment align);
 
-    void fill_text(rect_f const& rect, utf8_string_view text);
-    void fill_text(point_f offset, text_formatter::result const& formatResult);
+    void draw_text(rect_f const& rect, utf8_string_view text);
+    void draw_text(point_f offset, text_formatter::result const& formatResult);
+
+    void fill_text(utf8_string_view text, point_f offset);
+    void stroke_text(utf8_string_view text, point_f offset);
 
     auto format_text(size_f const& size, utf8_string_view text, f32 scale = 1.0f) -> text_formatter::result;
     auto measure_text(f32 height, utf8_string_view text) -> size_f;
@@ -257,6 +260,7 @@ private:
     void set_paint_color(paint& p, color c);
     auto get_font_scale() -> f32;
     void render_text(font* font, std::span<vertex const> verts);
+    void decompose_text(utf8_string_view text, point_f offset);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
 
     std::unique_ptr<render_backend::canvas_base> _impl {};
