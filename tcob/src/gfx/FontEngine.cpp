@@ -78,13 +78,15 @@ auto truetype_font_engine::get_kerning(u32 cp0, u32 cp1) -> f32
 {
     assert(_face);
     assert(library);
-    if (!FT_HAS_KERNING(_face)) {
-        return 0;
+    if (!FT_HAS_KERNING(_face)) { return 0; }
+
+    if (!_kerningCache.contains(cp0) || !_kerningCache[cp0].contains(cp1)) {
+        FT_Vector kerning;
+        FT_Get_Kerning(_face, codepoint_to_glyphindex(cp0), codepoint_to_glyphindex(cp1), FT_KERNING_DEFAULT, &kerning);
+        _kerningCache[cp0][cp1] = kerning.x / 64.0f;
     }
 
-    FT_Vector kerning;
-    FT_Get_Kerning(_face, codepoint_to_glyphindex(cp0), codepoint_to_glyphindex(cp1), FT_KERNING_DEFAULT, &kerning);
-    return kerning.x / 64.0f;
+    return _kerningCache[cp0][cp1];
 }
 
 auto truetype_font_engine::render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>

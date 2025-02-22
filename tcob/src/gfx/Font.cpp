@@ -103,7 +103,8 @@ auto font::load(std::span<ubyte const> fontData, u32 size) noexcept -> load_stat
 {
     if (auto info {_engine->load_data(fontData, size)}) {
         _info = *info;
-        _renderGlyphCache.clear();
+        _glyphCache.clear();
+        _decomposeCache.clear();
         _textureNeedsSetup = true;
         return load_status::Ok;
     }
@@ -123,36 +124,26 @@ void font::setup_texture()
     _textureNeedsSetup = false;
 }
 
-auto font::render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>
+auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>
 {
-    if (_textureNeedsSetup && !readOnlyCache) {
-        setup_texture();
-    }
+    if (_textureNeedsSetup) { setup_texture(); }
 
     auto const  utf32text {convert_UTF8_to_UTF32(text)};
     usize const len {utf32text.size()};
 
-    std::vector<rendered_glyph> retValue;
+    std::vector<glyph> retValue;
     retValue.reserve(len);
 
     for (u32 i {0}; i < len; ++i) {
         u32 const cp0 {utf32text[i]};
-        if (!readOnlyCache) {
-            if (!cache_render_glyph(cp0)) {
-                logger::Error("TrueTypeFont: shaping of text \"{}\" failed.", text);
-                return {};
-            }
+        if (!cache_render_glyph(cp0)) {
+            logger::Error("TrueTypeFont: shaping of text \"{}\" failed.", text);
+            return {};
+        }
 
-            auto& glyph {retValue.emplace_back(_renderGlyphCache[cp0])};
-            if (kerning && i < len - 1) {
-                glyph.AdvanceX += _engine->get_kerning(cp0, utf32text[i + 1]);
-            }
-        } else {
-            if (_renderGlyphCache.contains(cp0)) {
-                retValue.push_back(_renderGlyphCache[cp0]);
-            } else {
-                retValue.push_back({_engine->load_glyph(cp0)});
-            }
+        auto& glyph {retValue.emplace_back(_glyphCache[cp0])};
+        if (kerning && i < len - 1) {
+            glyph.AdvanceX += _engine->get_kerning(cp0, utf32text[i + 1]);
         }
     }
 
@@ -183,30 +174,27 @@ auto font::polygonize_text(utf8_string_view text, bool kerning) -> std::vector<p
 
     decompose_callbacks cb {};
     cb.MoveTo = [&](point_f p) {
-        curPos = p;
+        curPos = p + cb.Offset;
         addPoly();
     };
     cb.LineTo = [&](point_f p) {
         points.push_back(curPos);
-        points.push_back(p);
-        curPos = p;
+        curPos = points.emplace_back(p + cb.Offset);
     };
     cb.ConicTo = [&](point_f p0, point_f p1) {
         easing::quad_bezier_curve func;
         func.StartPoint   = curPos;
-        func.ControlPoint = p0;
-        func.EndPoint     = p1;
+        func.ControlPoint = p0 + cb.Offset;
+        curPos = func.EndPoint = p1 + cb.Offset;
         for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
-        curPos = p1;
     };
     cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) {
         easing::cubic_bezier_curve func;
         func.StartPoint    = curPos;
-        func.ControlPoint0 = p0;
-        func.ControlPoint1 = p1;
-        func.EndPoint      = p2;
+        func.ControlPoint0 = p0 + cb.Offset;
+        func.ControlPoint1 = p1 + cb.Offset;
+        curPos = func.EndPoint = p2 + cb.Offset;
         for (f32 i {0}; i <= 1.0f; i += tolerance) { points.push_back(func(i)); }
-        curPos = p2;
     };
 
     decompose_text(text, kerning, cb);
@@ -219,15 +207,69 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
     auto const  utf32text {convert_UTF8_to_UTF32(text)};
     usize const len {utf32text.size()};
 
-    funcs.Offset.Y += _info.Ascender;
-    for (u32 i {0}; i < len; ++i) {
-        u32 const  cp0 {utf32text[i]};
-        auto const gl {_engine->decompose_glyph(cp0, funcs)};
-        funcs.Offset.X += static_cast<i32>(gl.AdvanceX);
-        if (kerning && i < len - 1) {
-            funcs.Offset.X += static_cast<i32>(_engine->get_kerning(cp0, utf32text[i + 1]));
+    std::vector<decompose_result*> results;
+
+    {
+        std::vector<decompose_commands> cbCommands;
+        decompose_callbacks             cb {};
+        cb.MoveTo  = [&](point_f p) { cbCommands.emplace_back(decompose_move {p}); };
+        cb.LineTo  = [&](point_f p) { cbCommands.emplace_back(decompose_line {p}); };
+        cb.ConicTo = [&](point_f p0, point_f p1) { cbCommands.emplace_back(decompose_conic {p0, p1}); };
+        cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) { cbCommands.emplace_back(decompose_cubic {p0, p1, p2}); };
+
+        for (auto const cp0 : utf32text) {
+            if (!_decomposeCache.contains(cp0)) {
+                cbCommands.clear();
+                auto const gl {_engine->decompose_glyph(cp0, cb)};
+                _glyphCache[cp0]     = gl;
+                _decomposeCache[cp0] = {cp0, cbCommands};
+            }
+            results.push_back(&_decomposeCache[cp0]);
         }
     }
+
+    funcs.Offset.Y += _info.Ascender;
+    for (usize i {0}; i < results.size(); ++i) {
+        auto const& result {results[i]};
+
+        for (auto const& command : result->Commands) {
+            std::visit(
+                overloaded {[&](decompose_move const& cmd) { funcs.MoveTo(cmd.Point); },
+                            [&](decompose_line const& cmd) { funcs.LineTo(cmd.Point); },
+                            [&](decompose_conic const& cmd) { funcs.ConicTo(cmd.Point0, cmd.Point1); },
+                            [&](decompose_cubic const& cmd) { funcs.CubicTo(cmd.Point0, cmd.Point1, cmd.Point2); }},
+                command);
+        }
+
+        funcs.Offset.X += static_cast<i32>(_glyphCache[result->CodePoint].AdvanceX);
+        if (kerning && i < len - 1) {
+            funcs.Offset.X += static_cast<i32>(_engine->get_kerning(result->CodePoint, utf32text[i + 1]));
+        }
+    }
+}
+
+auto font::get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>
+{
+    auto const  utf32text {convert_UTF8_to_UTF32(text)};
+    usize const len {utf32text.size()};
+
+    std::vector<glyph> retValue;
+    retValue.reserve(len);
+
+    for (u32 i {0}; i < len; ++i) {
+        u32 const cp0 {utf32text[i]};
+        if (_glyphCache.contains(cp0)) {
+            retValue.push_back(_glyphCache[cp0]);
+        } else {
+            retValue.push_back(_engine->load_glyph(cp0));
+        }
+
+        if (kerning && i < len - 1) {
+            retValue.back().AdvanceX += _engine->get_kerning(cp0, utf32text[i + 1]);
+        }
+    }
+
+    return retValue;
 }
 
 auto font::Init() -> bool
@@ -247,12 +289,10 @@ auto font::info() const -> font::information const&
 
 auto font::cache_render_glyph(u32 cp) -> bool
 {
-    if (!_renderGlyphCache.contains(cp)) {
+    if (!_glyphCache.contains(cp) || !_glyphCache[cp].TextureRegion) {
         auto       gb {_engine->render_glyph(cp)};
         auto const bitmapSize {gb.second.BitmapSize};
-        if (bitmapSize.Width < 0 || bitmapSize.Height < 0) {
-            return false;
-        }
+        if (bitmapSize.Width < 0 || bitmapSize.Height < 0) { return false; }
 
         // check font texture space
         if (_fontTextureCursor.X + bitmapSize.Width >= FONT_TEXTURE_SIZE) { // new line
@@ -277,12 +317,10 @@ auto font::cache_render_glyph(u32 cp) -> bool
         _texture->update_data(_fontTextureCursor, bitmapSize, gb.second.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
 
         // create glyph
-        rendered_glyph gl {gb.first};
-        gl.TextureRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
-                                       bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
-                            .Level  = _fontTextureLayer};
-
-        _renderGlyphCache[cp] = gl;
+        gb.first.TextureRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
+                                             bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
+                                  .Level  = _fontTextureLayer};
+        _glyphCache[cp]        = gb.first;
 
         // advance cursor
         _fontTextureCursor.X += bitmapSize.Width + GLYPH_PADDING;

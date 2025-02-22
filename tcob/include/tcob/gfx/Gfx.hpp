@@ -113,9 +113,12 @@ struct uv {
 
 ////////////////////////////////////////////////////////////
 
-struct texture_region final {
+class TCOB_API texture_region final {
+public:
     rect_f UVRect {rect_f::Zero};
     u32    Level {0};
+
+    auto operator==(texture_region const& other) const -> bool = default;
 };
 
 void Serialize(texture_region const& v, auto&& s)

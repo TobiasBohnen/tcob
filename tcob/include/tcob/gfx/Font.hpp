@@ -6,12 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Polygon.hpp"
@@ -22,17 +23,18 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-struct glyph {
+class TCOB_API glyph {
+public:
     size_i  Size {size_i::Zero};
     point_f Offset {point_f::Zero};
     f32     AdvanceX {0.0f};
 
+    std::optional<texture_region> TextureRegion;
+
     auto operator==(glyph const& other) const -> bool = default;
 };
 
-struct rendered_glyph : glyph {
-    texture_region TextureRegion {rect_f::Zero, 0};
-};
+////////////////////////////////////////////////////////////
 
 struct decompose_callbacks {
     std::function<void(point_f)>                   MoveTo;
@@ -42,7 +44,29 @@ struct decompose_callbacks {
     point_f                                        Offset {};
 };
 
-////////////////////////////////////////////////////////////
+struct decompose_move {
+    point_f Point;
+};
+struct decompose_line {
+    point_f Point;
+};
+struct decompose_conic {
+    point_f Point0;
+    point_f Point1;
+};
+struct decompose_cubic {
+    point_f Point0;
+    point_f Point1;
+    point_f Point2;
+};
+
+using decompose_commands = std::variant<decompose_move, decompose_line, decompose_conic, decompose_cubic>;
+
+struct decompose_result {
+    u32                             CodePoint;
+    std::vector<decompose_commands> Commands;
+};
+
 ////////////////////////////////////////////////////////////
 class truetype_font_engine;
 
@@ -90,9 +114,11 @@ public:
     auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> load_status;
     auto load [[nodiscard]] (std::span<ubyte const> fontData, u32 size) noexcept -> load_status;
 
-    auto render_text(utf8_string_view text, bool kerning, bool readOnlyCache) -> std::vector<rendered_glyph>;
+    auto render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>;
     auto polygonize_text(utf8_string_view text, bool kerning) -> std::vector<polygon>;
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
+
+    auto get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>;
 
     static inline char const* asset_name {"font"};
 
@@ -104,10 +130,12 @@ private:
 
     auto cache_render_glyph(u32 cp) -> bool;
 
-    std::unordered_map<u32, rendered_glyph> _renderGlyphCache {};
-    point_i                                 _fontTextureCursor {point_i::Zero};
-    u32                                     _fontTextureLayer {0};
-    bool                                    _textureNeedsSetup {false};
+    std::unordered_map<u32, glyph>            _glyphCache {};
+    std::unordered_map<u32, decompose_result> _decomposeCache {};
+
+    point_i _fontTextureCursor {point_i::Zero};
+    u32     _fontTextureLayer {0};
+    bool    _textureNeedsSetup {false};
 
     information        _info;
     std::vector<ubyte> _fontData {};

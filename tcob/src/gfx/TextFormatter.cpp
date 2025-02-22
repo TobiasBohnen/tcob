@@ -18,11 +18,11 @@ enum class token_type : u8 {
 };
 
 struct token {
-    token_type                  Type {token_type::None}; // shape
-    string                      Text {};                 // shape
-    command_definition          Command {};              // shape
-    f32                         Width {0};               // shape
-    std::vector<rendered_glyph> Glyphs {};               // shape
+    token_type         Type {token_type::None}; // shape
+    string             Text {};                 // shape
+    command_definition Command {};              // shape
+    f32                Width {0};               // shape
+    std::vector<glyph> Glyphs {};               // shape
 };
 
 struct line_definition {
@@ -142,7 +142,7 @@ auto static Tokenize(utf8_string_view text) -> std::vector<token>
     return retValue;
 }
 
-auto static Shape(utf8_string_view text, font& font, bool kerning, bool readOnlyCache) -> std::vector<token>
+auto static Shape(utf8_string_view text, font& font, bool kerning, bool measure) -> std::vector<token>
 {
     auto retValue {Tokenize(text)};
 
@@ -150,10 +150,13 @@ auto static Shape(utf8_string_view text, font& font, bool kerning, bool readOnly
         switch (token.Type) {
         case token_type::Text:
         case token_type::Whitespace:
-            token.Glyphs = font.render_text(token.Text, kerning, readOnlyCache);
-            for (auto const& glyph : token.Glyphs) {
-                token.Width += glyph.AdvanceX;
+            if (measure) {
+                token.Glyphs = font.get_glyphs(token.Text, kerning);
+            } else {
+                token.Glyphs = font.render_text(token.Text, kerning);
             }
+
+            for (auto const& glyph : token.Glyphs) { token.Width += glyph.AdvanceX; }
             break;
         default:
             break;
@@ -228,15 +231,9 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
 
     for (auto const& line : lines) {
         switch (align.Horizontal) {
-        case horizontal_alignment::Left:
-            x = 0;
-            break;
-        case horizontal_alignment::Right:
-            x = line.RemainingWidth;
-            break;
-        case horizontal_alignment::Centered:
-            x = line.RemainingWidth / 2;
-            break;
+        case horizontal_alignment::Left: x = 0; break;
+        case horizontal_alignment::Right: x = line.RemainingWidth; break;
+        case horizontal_alignment::Centered: x = line.RemainingWidth / 2; break;
         }
 
         for (auto const* shapeToken : line.Tokens) {
@@ -252,7 +249,7 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
                 } else {
                     quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.Size} * scale};
                 }
-                quadDef.TextureRegion = glyph.TextureRegion;
+                quadDef.TextureRegion = *glyph.TextureRegion;
 
                 retValue.QuadCount++;
                 x += glyph.AdvanceX * scale;
@@ -262,9 +259,7 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
         y += fontInfo.LineHeight * scale;
         retValue.UsedSize.Width = std::max(x, retValue.UsedSize.Width);
 
-        if (y + fontInfo.LineHeight * scale > availableHeight) {
-            break;
-        }
+        if (y + fontInfo.LineHeight * scale > availableHeight) { break; }
     }
 
     retValue.UsedSize.Height = y;
@@ -308,9 +303,7 @@ auto result::get_quad(usize idx) -> quad_definition
     for (auto const& token : Tokens) {
         for (auto const& quad : token.Quads) {
             --idx;
-            if (idx == 0) {
-                return quad;
-            }
+            if (idx == 0) { return quad; }
         }
     }
 

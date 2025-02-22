@@ -38,9 +38,10 @@ private:
 
     FT_Face _face {nullptr};
 
-    u32                          _fontSize {0};
-    std::unordered_map<u32, u32> _glyphIndices {};
-    font::information            _info {};
+    u32                                                   _fontSize {0};
+    std::unordered_map<u32, u32>                          _glyphIndices {};
+    std::unordered_map<u32, std::unordered_map<u32, f32>> _kerningCache;
+    font::information                                     _info {};
 };
 
 }

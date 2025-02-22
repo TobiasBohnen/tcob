@@ -89,7 +89,7 @@ auto container::create_font(char const* faceName, i32 size, i32 weight, litehtml
     fm->ascent      = static_cast<i32>(fontInfo.Ascender);
     fm->descent     = -static_cast<i32>(fontInfo.Descender);
     fm->height      = fm->ascent + fm->descent;
-    fm->x_height    = font->render_text("x", false, true)[0].Size.Height;
+    fm->x_height    = font->get_glyphs("x", false)[0].Size.Height;
     fm->draw_spaces = true;
     _fonts.push_back(font.ptr());
     usize const retValue {_fonts.size() - 1};

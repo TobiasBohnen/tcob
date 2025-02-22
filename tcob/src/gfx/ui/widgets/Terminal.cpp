@@ -262,7 +262,7 @@ void terminal::dump(io::ostream& stream) const
 
 auto static get_font_width(font* font) -> f32
 {
-    auto qs {font->render_text(" ", false, true)};
+    auto qs {font->get_glyphs(" ", false)};
     if (qs.empty()) { return 0; }
 
     return qs[0].AdvanceX;
