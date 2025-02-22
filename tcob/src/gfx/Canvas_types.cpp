@@ -314,11 +314,17 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
 
 ////////////////////////////////////////////////////////////
 
+void path_cache::set_tolerances(f32 dist, f32 tess)
+{
+    _distTolerance = dist;
+    _tessTolerance = tess;
+}
+
 void path_cache::clear()
 {
-    Commands.clear();
+    _commands.clear();
     _points.clear();
-    Paths.clear();
+    _paths.clear();
 }
 
 void path_cache::append_commands(std::span<f32 const> vals, transform const& xform)
@@ -326,41 +332,41 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     usize const size {vals.size()};
 
     if (static_cast<i32>(vals[0]) != Close && static_cast<i32>(vals[0]) != Winding) {
-        CommandPoint = {vals[size - 2], vals[size - 1]};
+        _commandPoint = {vals[size - 2], vals[size - 1]};
     }
-    Commands.reserve(Commands.size() + size);
+    _commands.reserve(_commands.size() + size);
 
-    // transform commands
+    // transform _commands
     usize   i {0};
     point_f p;
     while (i < size) {
         i32 cmd {static_cast<i32>(vals[i])};
-        Commands.push_back(static_cast<f32>(cmd));
+        _commands.push_back(static_cast<f32>(cmd));
         switch (cmd) {
         case MoveTo:
         case LineTo:
             p = xform * point_f {vals[i + 1], vals[i + 2]};
-            Commands.push_back(p.X);
-            Commands.push_back(p.Y);
+            _commands.push_back(p.X);
+            _commands.push_back(p.Y);
             i += 3;
             break;
         case BezierTo:
             p = xform * point_f {vals[i + 1], vals[i + 2]};
-            Commands.push_back(p.X);
-            Commands.push_back(p.Y);
+            _commands.push_back(p.X);
+            _commands.push_back(p.Y);
             p = xform * point_f {vals[i + 3], vals[i + 4]};
-            Commands.push_back(p.X);
-            Commands.push_back(p.Y);
+            _commands.push_back(p.X);
+            _commands.push_back(p.Y);
             p = xform * point_f {vals[i + 5], vals[i + 6]};
-            Commands.push_back(p.X);
-            Commands.push_back(p.Y);
+            _commands.push_back(p.X);
+            _commands.push_back(p.Y);
             i += 7;
             break;
         case Close:
             ++i;
             break;
         case Winding:
-            Commands.push_back(vals[i + 1]);
+            _commands.push_back(vals[i + 1]);
             i += 2;
             break;
         default:
@@ -369,44 +375,44 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     }
 }
 
-void path_cache::flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding)
+void path_cache::flatten_paths(bool enforceWinding)
 {
-    if (!Paths.empty()) { return; }
+    if (!_paths.empty()) { return; }
 
     // Flatten
-    for (usize i {0}; i < Commands.size();) {
-        i32 const cmd {static_cast<i32>(Commands[i])};
+    for (usize i {0}; i < _commands.size();) {
+        i32 const cmd {static_cast<i32>(_commands[i])};
         switch (cmd) {
         case MoveTo: {
             add_path();
-            f32 const* p {&Commands[i + 1]};
-            add_point(p[0], p[1], Corner, distTol);
+            f32 const* p {&_commands[i + 1]};
+            add_point(p[0], p[1], Corner);
             i += 3;
         } break;
         case LineTo: {
-            f32 const* p {&Commands[i + 1]};
-            add_point(p[0], p[1], Corner, distTol);
+            f32 const* p {&_commands[i + 1]};
+            add_point(p[0], p[1], Corner);
             i += 3;
         } break;
         case BezierTo: {
             auto const& last {get_last_point()};
-            f32 const*  cp1 {&Commands[i + 1]};
-            f32 const*  cp2 {&Commands[i + 3]};
-            f32 const*  p {&Commands[i + 5]};
-            tesselate_bezier(last.X, last.Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0, Corner, distTol, tessTol);
+            f32 const*  cp1 {&_commands[i + 1]};
+            f32 const*  cp2 {&_commands[i + 3]};
+            f32 const*  p {&_commands[i + 5]};
+            tesselate_bezier(last.X, last.Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0, Corner);
             i += 7;
         } break;
         case Close: {
             auto& path {get_last_path()};
             if (path.First < std::ssize(_points)) {
                 auto const& pt {_points[path.First]};
-                add_point(pt.X, pt.Y, Corner, distTol); // loop
+                add_point(pt.X, pt.Y, Corner); // loop
                 path.Closed = true;
             }
             ++i;
         } break;
         case Winding: {
-            get_last_path().Winding = static_cast<winding>(Commands[i + 1]);
+            get_last_path().Winding = static_cast<winding>(_commands[i + 1]);
             i += 2;
         } break;
         default:
@@ -414,8 +420,8 @@ void path_cache::flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding)
         }
     }
 
-    Bounds[0] = Bounds[1] = 1e6f;
-    Bounds[2] = Bounds[3] = -1e6f;
+    _bounds[0] = _bounds[1] = 1e6f;
+    _bounds[2] = _bounds[3] = -1e6f;
 
     auto static PolyArea {[](std::span<canvas_point> pts) {
         f32 area {0};
@@ -429,14 +435,14 @@ void path_cache::flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding)
     }};
 
     // Calculate the direction and length of line segments.
-    for (auto& path : Paths) {
+    for (auto& path : _paths) {
         canvas_point* pts {&_points[path.First]};
 
         // If the first and last points are the same, remove the last, mark as closed path.
         canvas_point* p0 {&pts[path.Count - 1]};
         canvas_point* p1 {&pts[0]};
 
-        if (PointEquals(p0->X, p0->Y, p1->X, p1->Y, distTol)) {
+        if (PointEquals(p0->X, p0->Y, p1->X, p1->Y, _distTolerance)) {
             path.Count--;
             p0          = &pts[path.Count - 1];
             path.Closed = true;
@@ -454,28 +460,28 @@ void path_cache::flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding)
             p0->DX     = p1->X - p0->X;
             p0->DY     = p1->Y - p0->Y;
             p0->Length = Normalize(p0->DX, p0->DY);
-            // Update bounds
-            Bounds[0]  = std::min(Bounds[0], p0->X);
-            Bounds[1]  = std::min(Bounds[1], p0->Y);
-            Bounds[2]  = std::max(Bounds[2], p0->X);
-            Bounds[3]  = std::max(Bounds[3], p0->Y);
+            // Update _bounds
+            _bounds[0] = std::min(_bounds[0], p0->X);
+            _bounds[1] = std::min(_bounds[1], p0->Y);
+            _bounds[2] = std::max(_bounds[2], p0->X);
+            _bounds[3] = std::max(_bounds[3], p0->Y);
             // Advance
             p0         = p1++;
         }
     }
 }
 
-void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit, f32 tessTol)
+void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit)
 {
     auto static CurveDivs {[](f32 r, f32 arc, f32 tol) {
         f32 const da {std::acos(r / (r + tol)) * 2.0f};
         return std::max(2, static_cast<i32>(std::ceil(arc / da)));
     }};
 
-    f32 const aa {fringe};                             // fringeWidth;
+    f32 const aa {fringe};                                    // fringeWidth;
     f32 const u0 {aa == 0.0f ? 0.5f : 0.0f};
     f32 const u1 {aa == 0.0f ? 0.5f : 1.0f};
-    i32 const ncap {CurveDivs(w, TAU_F / 2, tessTol)}; // Calculate divisions per half circle.
+    i32 const ncap {CurveDivs(w, TAU_F / 2, _tessTolerance)}; // Calculate divisions per half circle.
 
     w += aa * 0.5f;
 
@@ -483,7 +489,7 @@ void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join li
 
     // Calculate max vertex usage.
     usize cverts {0};
-    for (auto& path : Paths) {
+    for (auto& path : _paths) {
         if (lineJoin == line_join::Round) {
             cverts += (path.Count + path.BevelCount * (ncap + 2) + 1) * 2; // plus one for loop}
         } else {
@@ -502,7 +508,7 @@ void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join li
     vertex* verts {alloc_temp_verts(cverts)};
 
     vertex* dst {nullptr};
-    for (auto& path : Paths) {
+    for (auto& path : _paths) {
         canvas_point* pts {&_points[path.First]};
         canvas_point* p0 {nullptr};
         canvas_point* p1 {nullptr};
@@ -592,7 +598,7 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
 
     // Calculate max vertex usage.
     usize cverts {0};
-    for (auto& path : Paths) {
+    for (auto& path : _paths) {
         cverts += path.Count + path.BevelCount + 1;
         if (fringe) {
             cverts += (path.Count + path.BevelCount * 5 + 1) * 2; // plus one for loop
@@ -601,9 +607,9 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
 
     vertex* verts {alloc_temp_verts(cverts)};
 
-    bool const convex {Paths.size() == 1 && Paths[0].Convex};
+    bool const convex {_paths.size() == 1 && _paths[0].Convex};
 
-    for (auto& path : Paths) {
+    for (auto& path : _paths) {
         canvas_point* pts {&_points[path.First]};
         canvas_point* p0 {nullptr};
         canvas_point* p1 {nullptr};
@@ -693,26 +699,68 @@ auto path_cache::alloc_temp_verts(usize nverts) -> vertex*
     return _verts.data();
 }
 
+auto path_cache::paths() const -> std::vector<canvas::path> const&
+{
+    return _paths;
+}
+
+auto path_cache::has_commands() const -> bool
+{
+    return !_commands.empty();
+}
+
+auto path_cache::command_point() const -> point_f const&
+{
+    return _commandPoint;
+}
+
+auto path_cache::bounds() const -> vec4 const&
+{
+    return _bounds;
+}
+
+auto path_cache::is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const -> bool
+{
+    auto static DistancePointSegment {[](point_f r, point_f p, point_f q) -> f32 {
+        f32 const pqx {q.X - p.X};
+        f32 const pqy {q.Y - p.Y};
+        f32       dx {r.X - p.X};
+        f32       dy {r.Y - p.Y};
+        f32 const d {(pqx * pqx) + (pqy * pqy)};
+        f32       t {(pqx * dx) + (pqy * dy)};
+        if (d > 0) { t /= d; }
+        t  = std::clamp(t, 0.0f, 1.0f);
+        dx = p.X + t * pqx - r.X;
+        dy = p.Y + t * pqy - r.Y;
+        return (dx * dx) + (dy * dy);
+    }};
+
+    return _commandPoint.equals(pos1, _distTolerance)
+        || pos1.equals(pos2, _distTolerance)
+        || DistancePointSegment(pos1, command_point(), pos2) < _distTolerance * _distTolerance
+        || radius < _distTolerance;
+}
+
 void path_cache::add_path()
 {
     canvas::path path;
     path.First = static_cast<i32>(_points.size());
-    Paths.push_back(path);
+    _paths.push_back(path);
 }
 
 auto path_cache::get_last_path() -> canvas::path&
 {
-    assert(!Paths.empty());
-    return Paths.back();
+    assert(!_paths.empty());
+    return _paths.back();
 }
 
-void path_cache::add_point(f32 x, f32 y, i32 flags, f32 distTol)
+void path_cache::add_point(f32 x, f32 y, i32 flags)
 {
     canvas::path& path {get_last_path()};
 
     if (path.Count > 0 && !_points.empty()) {
         auto& pt {get_last_point()};
-        if (PointEquals(pt.X, pt.Y, x, y, distTol)) {
+        if (PointEquals(pt.X, pt.Y, x, y, _distTolerance)) {
             pt.Flags |= flags;
             return;
         }
@@ -736,7 +784,7 @@ auto path_cache::get_last_point() -> canvas_point&
 
 void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
                                   f32 x3, f32 y3, f32 x4, f32 y4,
-                                  i32 level, i32 type, f32 distTol, f32 tessTol)
+                                  i32 level, i32 type)
 {
     if (level > 10) { return; }
 
@@ -745,8 +793,8 @@ void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
     f32 const d2 {std::abs((((x2 - x4) * dy) - ((y2 - y4) * dx)))};
     f32 const d3 {std::abs((((x3 - x4) * dy) - ((y3 - y4) * dx)))};
 
-    if ((d2 + d3) * (d2 + d3) < tessTol * (dx * dx + dy * dy)) {
-        add_point(x4, y4, type, distTol);
+    if ((d2 + d3) * (d2 + d3) < _tessTolerance * (dx * dx + dy * dy)) {
+        add_point(x4, y4, type);
         return;
     }
 
@@ -763,8 +811,8 @@ void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
     f32 const x1234 {(x123 + x234) * 0.5f};
     f32 const y1234 {(y123 + y234) * 0.5f};
 
-    tesselate_bezier(x1, y1, x12, y12, x123, y123, x1234, y1234, level + 1, 0, distTol, tessTol);
-    tesselate_bezier(x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1, type, distTol, tessTol);
+    tesselate_bezier(x1, y1, x12, y12, x123, y123, x1234, y1234, level + 1, 0);
+    tesselate_bezier(x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1, type);
 }
 
 void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
@@ -772,7 +820,7 @@ void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
     f32 const iw {w > 0.0f ? (1.0f / w) : 0.0f};
 
     // Calculate which joins needs extra vertices to append, and gather vertex count.
-    for (auto& path : Paths) {
+    for (auto& path : _paths) {
         canvas_point* pts {&_points[path.First]};
         canvas_point* p0 {&pts[path.Count - 1]};
         canvas_point* p1 {&pts[0]};

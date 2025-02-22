@@ -113,7 +113,7 @@ void element_painter::draw_text(text_draw_context const& ctx)
 
     _canvas.set_fill_style(ctx.TextColor);
     _canvas.set_font(ctx.Font);
-    _canvas.draw_textbox(ctx.TextBox, ctx.Text);
+    _canvas.fill_text(ctx.TextBox, ctx.Text);
 
     if (ctx.FontDecorations != font_decorations::None) {
         _canvas.set_stroke_style(ctx.TextColor);

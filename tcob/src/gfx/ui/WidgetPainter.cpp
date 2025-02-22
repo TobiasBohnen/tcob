@@ -197,12 +197,12 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
         rect_f shadowRect {rect};
         shadowRect.Position.X += dropShadowOffset.X;
         shadowRect.Position.Y += dropShadowOffset.Y;
-        _canvas.draw_textbox(shadowRect.Position, text);
+        _canvas.fill_text(shadowRect.Position, text);
     }
 
     // text
     _canvas.set_fill_style(style.Color);
-    _canvas.draw_textbox(rect.Position, text);
+    _canvas.fill_text(rect.Position, text);
 
     // deco
     auto const& deco {style.Decoration};

@@ -239,8 +239,8 @@ public:
     void set_text_halign(horizontal_alignment align);
     void set_text_valign(vertical_alignment align);
 
-    void draw_textbox(rect_f const& rect, utf8_string_view text);
-    void draw_textbox(point_f offset, text_formatter::result const& formatResult);
+    void fill_text(rect_f const& rect, utf8_string_view text);
+    void fill_text(point_f offset, text_formatter::result const& formatResult);
 
     auto format_text(size_f const& size, utf8_string_view text, f32 scale = 1.0f) -> text_formatter::result;
     auto measure_text(f32 height, utf8_string_view text) -> size_f;
@@ -266,8 +266,6 @@ private:
     std::unique_ptr<path_cache> _cache {};
     std::vector<color_gradient> _gradients;
 
-    f32 _tessTol {0};
-    f32 _distTol {0};
     f32 _fringeWidth {0};
 
     f32    _devicePxRatio {0};

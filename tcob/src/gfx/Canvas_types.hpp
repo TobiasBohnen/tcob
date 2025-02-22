@@ -98,33 +98,46 @@ private:
 
 class path_cache {
 public:
-    std::vector<canvas::path> Paths;
-    std::vector<f32>          Commands;
-
-    point_f CommandPoint;
-    vec4    Bounds {};
+    void set_tolerances(f32 dist, f32 tess);
 
     void clear();
 
     void append_commands(std::span<f32 const> vals, transform const& xform);
 
-    void flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding);
+    void flatten_paths(bool enforceWinding);
 
-    void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit, f32 tessTol);
+    void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
 
     auto alloc_temp_verts(usize nverts) -> vertex*;
 
+    auto paths() const -> std::vector<canvas::path> const&;
+    auto has_commands() const -> bool;
+
+    auto command_point() const -> point_f const&;
+    auto bounds() const -> vec4 const&;
+
+    auto is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const -> bool;
+
 private:
     void add_path();
     auto get_last_path() -> canvas::path&;
-    void add_point(f32 x, f32 y, i32 flags, f32 distTol);
+    void add_point(f32 x, f32 y, i32 flags);
     auto get_last_point() -> canvas_point&;
-    void tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type, f32 distTol, f32 tessTol);
+    void tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type);
     void calculate_joins(f32 w, line_join lineJoin, f32 miterLimit);
 
     std::vector<vertex>       _verts;
     std::vector<canvas_point> _points;
+
+    std::vector<canvas::path> _paths;
+    std::vector<f32>          _commands;
+
+    point_f _commandPoint;
+    vec4    _bounds {};
+
+    f32 _distTolerance {0};
+    f32 _tessTolerance {0};
 };
 
 }

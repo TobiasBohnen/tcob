@@ -84,27 +84,6 @@ auto static CompositeOperationState(composite_operation op) -> blend_funcs
         .DestinationAlphaBlendFunc = dfactor};
 }
 
-auto static DistancePointSegment(f32 x, f32 y, f32 px, f32 py, f32 qx, f32 qy) -> f32
-{
-    f32 const pqx {qx - px};
-    f32 const pqy {qy - py};
-    f32       dx {x - px};
-    f32       dy {y - py};
-    f32 const d {(pqx * pqx) + (pqy * pqy)};
-    f32       t {(pqx * dx) + (pqy * dy)};
-    if (d > 0) {
-        t /= d;
-    }
-    if (t < 0) {
-        t = 0;
-    } else if (t > 1) {
-        t = 1;
-    }
-    dx = px + t * pqx - x;
-    dy = py + t * pqy - y;
-    return (dx * dx) + (dy * dy);
-}
-
 auto static GetAverageScale(mat3 const& t) -> f32
 {
     f32 const sx {std::sqrt((t[0] * t[0]) + (t[3] * t[3]))};
@@ -117,20 +96,16 @@ auto static Rect(f32 x, f32 y, f32 w, f32 h, f32 t) -> point_f
     f32 const perimeter {2 * (w + h)};
     f32       dist {t * perimeter};
 
-    // Top edge
-    if (dist < w) { return {x + dist, y}; }
+    if (dist < w) { return {x + dist, y}; }         // Top edge
     dist -= w;
 
-    // Right edge
-    if (dist < h) { return {x + w, y + dist}; }
+    if (dist < h) { return {x + w, y + dist}; }     // Right edge
     dist -= h;
 
-    // Bottom edge
-    if (dist < w) { return {x + w - dist, y + h}; }
+    if (dist < w) { return {x + w - dist, y + h}; } // Bottom edge
     dist -= w;
 
-    // Left edge
-    return {x, y + h - dist};
+    return {x, y + h - dist};                       // Left edge
 }
 
 auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
@@ -166,11 +141,6 @@ static auto DashPattern(std::vector<f32> const& src, std::vector<f32>& dst, f32 
     for (f32& d : dst) { d *= scale; }
 
     return true;
-}
-
-auto static Quantize(f32 a, f32 d) -> f32
-{
-    return (static_cast<i32>((a / d) + 0.5f)) * d;
 }
 
 void static MultiplyAlphaPaint(paint_color& c, f32 alpha)
@@ -305,9 +275,9 @@ void canvas::line_to(point_f pos)
         return;
     }
 
-    easing::linear<point_f> func {.Start = _cache->CommandPoint, .End = pos};
+    easing::linear<point_f> func {.Start = _cache->command_point(), .End = pos};
 
-    f32 const totalLength {static_cast<f32>((pos - _cache->CommandPoint).length())};
+    f32 const totalLength {static_cast<f32>((pos - _cache->command_point()).length())};
     f32       currentLength {0.0f};
     bool      drawing {true};
 
@@ -550,18 +520,18 @@ void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
         return;
     }
 
-    easing::cubic_bezier_curve func {.StartPoint = _cache->CommandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
+    easing::cubic_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
     dashed_bezier_path(func);
 }
 
 void canvas::quad_bezier_to(point_f cp, point_f end)
 {
     if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsQuadTo(_cache->CommandPoint, cp, end), _states->get().XForm);
+        _cache->append_commands(path2d::CommandsQuadTo(_cache->command_point(), cp, end), _states->get().XForm);
         return;
     }
 
-    easing::quad_bezier_curve func {.StartPoint = _cache->CommandPoint, .ControlPoint = cp, .EndPoint = end};
+    easing::quad_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint = cp, .EndPoint = end};
     dashed_bezier_path(func);
 }
 
@@ -571,7 +541,7 @@ void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian
 {
     static f32 const rad90 {TAU_F / 4};
 
-    i32 const move {!_cache->Commands.empty() ? LineTo : MoveTo};
+    i32 const move {_cache->has_commands() ? LineTo : MoveTo};
     f32 const a0 {startAngle.Value - rad90};
     f32 const a1 {endAngle.Value - rad90};
 
@@ -642,22 +612,19 @@ void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian
 
 void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 {
-    if (_cache->Commands.empty()) { return; }
+    if (!_cache->has_commands()) { return; }
 
     winding dir {};
 
     // Handle degenerate cases.
-    if (_cache->CommandPoint.equals(pos1, _distTol)
-        || pos1.equals(pos2, _distTol)
-        || DistancePointSegment(pos1.X, pos1.Y, _cache->CommandPoint.X, _cache->CommandPoint.Y, pos2.X, pos2.Y) < _distTol * _distTol
-        || radius < _distTol) {
+    if (_cache->is_degenerate_arc(pos1, pos2, radius)) {
         line_to(pos1);
         return;
     }
 
     // Calculate tangential circle to lines (x0,y0)-(x1,y1) and (x1,y1)-(x2,y2).
-    f32 dx0 {_cache->CommandPoint.X - pos1.X};
-    f32 dy0 {_cache->CommandPoint.Y - pos1.Y};
+    f32 dx0 {_cache->command_point().X - pos1.X};
+    f32 dy0 {_cache->command_point().Y - pos1.Y};
     f32 dx1 {pos2.X - pos1.X};
     f32 dy1 {pos2.Y - pos1.Y};
     Normalize(dx0, dy0);
@@ -831,7 +798,7 @@ void canvas::stroke_lines(std::span<point_f const> points)
 
 void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
 {
-    easing::linear<point_f> func {.Start = _cache->CommandPoint, .End = to};
+    easing::linear<point_f> func {.Start = _cache->command_point(), .End = to};
     f32 const               inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -851,7 +818,7 @@ void canvas::dotted_circle(point_f center, f32 circleR, f32 dotR, i32 numDots)
 
 void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 dotR, i32 numDots)
 {
-    easing::cubic_bezier_curve func {.StartPoint = _cache->CommandPoint, .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
+    easing::cubic_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
     f32 const                  inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -861,7 +828,7 @@ void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 d
 
 void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 dotR, i32 numDots)
 {
-    easing::quad_bezier_curve func {.StartPoint = _cache->CommandPoint, .ControlPoint = cp, .EndPoint = end};
+    easing::quad_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint = cp, .EndPoint = end};
     f32 const                 inc {1.0f / numDots};
 
     for (f32 t {0}; t <= 1.0f; t += inc) {
@@ -899,9 +866,9 @@ void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
 
     auto const func {[&](f64 t) -> point_f {
         auto static quad_bezier {[](point_f p0, point_f p1, point_f p2, f32 t) -> point_f {
-            f32 const oneMinusT {1.f - t};
+            f32 const oneMinusT {1.0f - t};
             f32 const exp0 {oneMinusT * oneMinusT};
-            f32 const exp1 {2.f * t * oneMinusT};
+            f32 const exp1 {2.0f * t * oneMinusT};
             f32 const exp2 {t * t};
             return {exp0 * p0.X + exp1 * p1.X + exp2 * p2.X, exp0 * p0.Y + exp1 * p1.Y + exp2 * p2.Y};
         }};
@@ -945,7 +912,7 @@ void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
     // TODO: dash
     state const& s {_states->get()};
 
-    point_f const from {_cache->CommandPoint};
+    point_f const from {_cache->command_point()};
 
     point_f const d {to - from};
     f32 const     l {static_cast<f32>(d.length())};
@@ -1087,7 +1054,7 @@ void canvas::fill()
     state const& s {_states->get()};
     paint        fillPaint {s.Fill}; // copy
 
-    _cache->flatten_paths(_distTol, _tessTol, _enforceWinding);
+    _cache->flatten_paths(_enforceWinding);
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
         _cache->expand_fill(_fringeWidth, line_join::Miter, 2.4f, _fringeWidth);
     } else {
@@ -1097,7 +1064,7 @@ void canvas::fill()
     // Apply global alpha
     MultiplyAlphaPaint(fillPaint.Color, s.Alpha);
 
-    _impl->render_fill(fillPaint, s.CompositeOperation, s.Scissor, _fringeWidth, _cache->Bounds, _cache->Paths);
+    _impl->render_fill(fillPaint, s.CompositeOperation, s.Scissor, _fringeWidth, _cache->bounds(), _cache->paths());
 }
 
 void canvas::stroke()
@@ -1119,15 +1086,15 @@ void canvas::stroke()
     // Apply global alpha
     MultiplyAlphaPaint(strokePaint.Color, s.Alpha);
 
-    _cache->flatten_paths(_distTol, _tessTol, _enforceWinding);
+    _cache->flatten_paths(_enforceWinding);
 
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
-        _cache->expand_stroke(strokeWidth * 0.5f, _fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit, _tessTol);
+        _cache->expand_stroke(strokeWidth * 0.5f, _fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit);
     } else {
-        _cache->expand_stroke(strokeWidth * 0.5f, 0.0f, s.LineCap, s.LineJoin, s.MiterLimit, _tessTol);
+        _cache->expand_stroke(strokeWidth * 0.5f, 0.0f, s.LineCap, s.LineJoin, s.MiterLimit);
     }
 
-    _impl->render_stroke(strokePaint, s.CompositeOperation, s.Scissor, _fringeWidth, strokeWidth, _cache->Paths);
+    _impl->render_stroke(strokePaint, s.CompositeOperation, s.Scissor, _fringeWidth, strokeWidth, _cache->paths());
 }
 
 ////////////////////////////////////////////////////////////
@@ -1332,12 +1299,12 @@ void canvas::set_font(font* font)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::draw_textbox(rect_f const& rect, utf8_string_view text)
+void canvas::fill_text(rect_f const& rect, utf8_string_view text)
 {
-    draw_textbox(rect.Position, format_text(rect.Size, text));
+    fill_text(rect.Position, format_text(rect.Size, text));
 }
 
-void canvas::draw_textbox(point_f offset, text_formatter::result const& formatResult)
+void canvas::fill_text(point_f offset, text_formatter::result const& formatResult)
 {
     state const& s {_states->get()};
     if (!s.Font) { return; }
@@ -1548,8 +1515,8 @@ auto canvas::get_impl() const -> render_backend::canvas_base*
 
 void canvas::set_device_pixel_ratio(f32 ratio)
 {
-    _tessTol       = 0.25f / ratio;
-    _distTol       = 0.01f / ratio;
+    _cache->set_tolerances(0.01f / ratio, 0.25f / ratio);
+
     _fringeWidth   = 1.0f / ratio;
     _devicePxRatio = ratio;
 }
@@ -1568,6 +1535,10 @@ void canvas::set_paint_color(paint& p, color c)
 
 auto canvas::get_font_scale() -> f32
 {
+    auto static Quantize {[](f32 a, f32 d) -> f32 {
+        return (static_cast<i32>((a / d) + 0.5f)) * d;
+    }};
+
     return std::min(Quantize(GetAverageScale(_states->get().XForm.Matrix), 0.01f), 4.0f);
 }
 
