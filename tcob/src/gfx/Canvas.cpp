@@ -343,13 +343,13 @@ void canvas::quad_bezier_to(point_f cp, point_f end)
 
 ////////////////////////////////////////////////////////////
 
+constexpr f32 RAD90 {TAU_F / 4};
+
 void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian_f const endAngle, winding const dir)
 {
-    static f32 const rad90 {TAU_F / 4};
-
     i32 const move {_cache->has_commands() ? LineTo : MoveTo};
-    f32 const a0 {startAngle.Value - rad90};
-    f32 const a1 {endAngle.Value - rad90};
+    f32 const a0 {startAngle.Value - RAD90};
+    f32 const a1 {endAngle.Value - RAD90};
 
     // Normalize angles.
     f32 da {a1 - a0};
@@ -441,14 +441,14 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
         cx  = pos1.X + dx0 * d + dy0 * radius;
         cy  = pos1.Y + dy0 * d + -dx0 * radius;
-        a0  = radian_f {std::atan2(dx0, -dy0)};
-        a1  = radian_f {std::atan2(-dx1, dy1)};
+        a0  = radian_f {std::atan2(dx0, -dy0) + RAD90};
+        a1  = radian_f {std::atan2(-dx1, dy1) + RAD90};
         dir = winding::CW;
     } else {
         cx  = pos1.X + dx0 * d + -dy0 * radius;
         cy  = pos1.Y + dy0 * d + dx0 * radius;
-        a0  = radian_f {std::atan2(-dx0, dy0)};
-        a1  = radian_f {std::atan2(dx1, -dy1)};
+        a0  = radian_f {std::atan2(-dx0, dy0) + RAD90};
+        a1  = radian_f {std::atan2(dx1, -dy1) + RAD90};
         dir = winding::CCW;
     }
 
@@ -613,7 +613,6 @@ void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radT
 
 void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 {
-    // TODO: dash
     state const& s {_states->get()};
 
     point_f const from {_cache->command_point()};
@@ -644,7 +643,6 @@ void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
 
 void canvas::regular_polygon(point_f pos, size_f size, i32 n)
 {
-    // TODO: dash
     state const& s {_states->get()};
 
     auto const [x, y] {pos};
@@ -660,7 +658,6 @@ void canvas::regular_polygon(point_f pos, size_f size, i32 n)
 
 void canvas::star(point_f pos, f32 outerR, f32 innerR, i32 n)
 {
-    // TODO: dash
     state const& s {_states->get()};
 
     auto const [x, y] {pos};
@@ -677,7 +674,6 @@ void canvas::star(point_f pos, f32 outerR, f32 innerR, i32 n)
 
 void canvas::triangle(point_f a, point_f b, point_f c)
 {
-    // TODO: dash
     state const& s {_states->get()};
 
     _cache->append_commands(path2d::CommandsMoveTo(a), s.XForm);
