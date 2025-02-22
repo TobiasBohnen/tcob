@@ -124,27 +124,6 @@ auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
     return length;
 }
 
-static auto DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
-{
-    if (total <= EPSILON) { return false; }
-
-    auto const size {src.size()};
-    dst.resize(size);
-    f32 sumDash {0.0f};
-
-    for (usize i {0}; i < size; ++i) {
-        sumDash += dst[i] = std::max(0.0f, src[i]);
-    }
-
-    if (sumDash <= EPSILON) { return false; }
-
-    usize const reps {std::max(usize {1}, static_cast<usize>(std::round(total / sumDash)))};
-    f32 const   scale {total / (reps * sumDash)};
-    for (f32& d : dst) { d *= scale; }
-
-    return true;
-}
-
 void static MultiplyAlphaPaint(paint_color& c, f32 alpha)
 {
     if (auto* arg0 {std::get_if<color>(&c)}) {
@@ -272,41 +251,7 @@ void canvas::move_to(point_f pos)
 
 void canvas::line_to(point_f pos)
 {
-    if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsLineTo(pos), _states->get().XForm);
-        return;
-    }
-
-    easing::linear<point_f> func {.Start = _cache->command_point(), .End = pos};
-
-    f32 const totalLength {static_cast<f32>((pos - _cache->command_point()).length())};
-    f32       currentLength {0.0f};
-    bool      drawing {true};
-
-    state&           s {_states->get()};
-    std::vector<f32> dashPattern;
-    if (!DashPattern(dashPattern, s.Dash, totalLength)) { return; }
-
-    for (usize dashIndex {0};; ++dashIndex) {
-        f32 const dashLength {dashPattern[dashIndex % dashPattern.size()]};
-        if (currentLength + dashLength > totalLength) { break; }
-
-        if (dashLength <= EPSILON) {
-            drawing = !drawing;
-            continue;
-        }
-
-        if (drawing) {
-            f32 const start {currentLength / totalLength};
-            f32 const end {(currentLength + dashLength) / totalLength};
-
-            _cache->append_commands(path2d::CommandsMoveTo(func(start)), s.XForm);
-            _cache->append_commands(path2d::CommandsLineTo(func(end)), s.XForm);
-        }
-
-        drawing = !drawing;
-        currentLength += dashLength;
-    }
+    _cache->append_commands(path2d::CommandsLineTo(pos), _states->get().XForm);
 }
 
 ////////////////////////////////////////////////////////////
@@ -318,81 +263,13 @@ void canvas::rect(rect_f const& rect)
 
     state& s {_states->get()};
 
-    if (!do_dash()) {
-        _cache->append_commands(std::vector<f32> {
-                                    MoveTo, x, y,
-                                    LineTo, x, y + h,
-                                    LineTo, x + w, y + h,
-                                    LineTo, x + w, y,
-                                    Close},
-                                s.XForm);
-        return;
-    }
-
-    f32 const totalLength {2 * (w + h)};
-
-    std::vector<f32> dashPattern;
-    if (!DashPattern(dashPattern, s.Dash, totalLength)) { return; }
-
-    std::array<f32, 4> const     cornerPositions {{0.0f, w, w + h, 2 * w + h}};
-    std::array<point_f, 4> const corners {{rect.top_left(),
-                                           rect.top_right(),
-                                           rect.bottom_right(),
-                                           rect.bottom_left()}};
-
-    std::vector<f32> cmds {};
-    cmds.reserve(64);
-
-    point_f prevPoint {corners[0]};
-    cmds.push_back(static_cast<f32>(MoveTo));
-    cmds.push_back(prevPoint.X);
-    cmds.push_back(prevPoint.Y);
-
-    f32  currentLength {0.0f};
-    bool drawing {true};
-
-    for (usize dashIndex {0};; ++dashIndex) {
-        f32 const dashLength {dashPattern[dashIndex % s.Dash.size()]};
-
-        if (dashLength <= EPSILON) {
-            drawing = !drawing;
-            continue;
-        }
-
-        f32 const segEnd {std::min(totalLength, currentLength + dashLength)};
-        if (segEnd >= totalLength) { break; }
-
-        if (drawing) {
-            for (f32 cp : cornerPositions) {
-                if (cp > currentLength && cp < segEnd) {
-                    point_f const cornerPt {corners[std::distance(cornerPositions.begin(), std::find(cornerPositions.begin(), cornerPositions.end(), cp))]};
-                    cmds.push_back(static_cast<f32>(LineTo));
-                    cmds.push_back(cornerPt.X);
-                    cmds.push_back(cornerPt.Y);
-                    prevPoint = cornerPt;
-                }
-            }
-
-            point_f const dashEndPt {Rect(x, y, w, h, segEnd / totalLength)};
-            if (!prevPoint.equals(dashEndPt, EPSILON)) {
-                cmds.push_back(static_cast<f32>(LineTo));
-                cmds.push_back(dashEndPt.X);
-                cmds.push_back(dashEndPt.Y);
-                prevPoint = dashEndPt;
-            }
-        } else {
-            point_f const gapEndPt {Rect(x, y, w, h, segEnd / totalLength)};
-            cmds.push_back(static_cast<f32>(MoveTo));
-            cmds.push_back(gapEndPt.X);
-            cmds.push_back(gapEndPt.Y);
-            prevPoint = gapEndPt;
-        }
-
-        currentLength = segEnd;
-        drawing       = !drawing;
-    }
-
-    _cache->append_commands(cmds, s.XForm);
+    _cache->append_commands(std::vector<f32> {
+                                MoveTo, x, y,
+                                LineTo, x, y + h,
+                                LineTo, x + w, y + h,
+                                LineTo, x + w, y,
+                                Close},
+                            s.XForm);
 }
 
 void canvas::rounded_rect(rect_f const& r, f32 rad)
@@ -417,69 +294,18 @@ void canvas::rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 
     f32 const rxTR {std::min(radTR, halfw) * signf(w)}, ryTR {std::min(radTR, halfh) * signf(h)};
     f32 const rxTL {std::min(radTL, halfw) * signf(w)}, ryTL {std::min(radTL, halfh) * signf(h)};
 
-    if (!do_dash()) {
-        _cache->append_commands(std::vector<f32> {
-                                    MoveTo, x, y + ryTL,
-                                    LineTo, x, y + h - ryBL,
-                                    BezierTo, x, y + h - (ryBL * (1 - NVG_KAPPA90)), x + (rxBL * (1 - NVG_KAPPA90)), y + h, x + rxBL, y + h,
-                                    LineTo, x + w - rxBR, y + h,
-                                    BezierTo, x + w - (rxBR * (1 - NVG_KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - NVG_KAPPA90)), x + w, y + h - ryBR,
-                                    LineTo, x + w, y + ryTR,
-                                    BezierTo, x + w, y + (ryTR * (1 - NVG_KAPPA90)), x + w - (rxTR * (1 - NVG_KAPPA90)), y, x + w - rxTR, y,
-                                    LineTo, x + rxTL, y,
-                                    BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
-                                    Close},
-                                _states->get().XForm);
-        return;
-    }
-
-    f32 const perimTop {w - (rxTL + rxTR)};
-    f32 const perimRight {h - (ryTR + ryBR)};
-    f32 const perimBottom {w - (rxBL + rxBR)};
-    f32 const perimLeft {h - (ryBL + ryTL)};
-
-    f32 const arcTopRightLen {QuadBezierLength({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR})};
-    f32 const arcBottomRightLen {QuadBezierLength({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h})};
-    f32 const arcBottomLeftLen {QuadBezierLength({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL})};
-    f32 const arcTopLeftLen {QuadBezierLength({x, y + ryTL}, {x, y}, {x + rxTL, y})};
-    f32 const totalLength {perimTop + perimRight + perimBottom + perimLeft + arcTopRightLen + arcBottomRightLen + arcBottomLeftLen + arcTopLeftLen};
-
-    auto const func {[&](f64 t) -> point_f {
-        auto static quad_bezier {[](point_f p0, point_f p1, point_f p2, f32 t) -> point_f {
-            f32 const oneMinusT {1.0f - t};
-            f32 const exp0 {oneMinusT * oneMinusT};
-            f32 const exp1 {2.0f * t * oneMinusT};
-            f32 const exp2 {t * t};
-            return {exp0 * p0.X + exp1 * p1.X + exp2 * p2.X, exp0 * p0.Y + exp1 * p1.Y + exp2 * p2.Y};
-        }};
-
-        f64 scaledT {t * totalLength};
-
-        if (scaledT < perimTop) { return {x + rxTL + static_cast<f32>(scaledT), y}; }
-        scaledT -= perimTop;
-
-        if (scaledT < arcTopRightLen) { return quad_bezier({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR}, static_cast<f32>(scaledT / arcTopRightLen)); }
-        scaledT -= arcTopRightLen;
-
-        if (scaledT < perimRight) { return {x + w, y + ryTR + static_cast<f32>(scaledT)}; }
-        scaledT -= perimRight;
-
-        if (scaledT < arcBottomRightLen) { return quad_bezier({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h}, static_cast<f32>(scaledT / arcBottomRightLen)); }
-        scaledT -= arcBottomRightLen;
-
-        if (scaledT < perimBottom) { return {x + w - rxBR - static_cast<f32>(scaledT), y + h}; }
-        scaledT -= perimBottom;
-
-        if (scaledT < arcBottomLeftLen) { return quad_bezier({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL}, static_cast<f32>(scaledT / arcBottomLeftLen)); }
-        scaledT -= arcBottomLeftLen;
-
-        if (scaledT < perimLeft) { return {x, y + h - ryBL - static_cast<f32>(scaledT)}; }
-        scaledT -= perimLeft;
-
-        return quad_bezier({x, y + ryTL}, {x, y}, {x + rxTL, y}, static_cast<f32>(scaledT / arcTopLeftLen));
-    }};
-
-    dashed_bezier_path(func);
+    _cache->append_commands(std::vector<f32> {
+                                MoveTo, x, y + ryTL,
+                                LineTo, x, y + h - ryBL,
+                                BezierTo, x, y + h - (ryBL * (1 - NVG_KAPPA90)), x + (rxBL * (1 - NVG_KAPPA90)), y + h, x + rxBL, y + h,
+                                LineTo, x + w - rxBR, y + h,
+                                BezierTo, x + w - (rxBR * (1 - NVG_KAPPA90)), y + h, x + w, y + h - (ryBR * (1 - NVG_KAPPA90)), x + w, y + h - ryBR,
+                                LineTo, x + w, y + ryTR,
+                                BezierTo, x + w, y + (ryTR * (1 - NVG_KAPPA90)), x + w - (rxTR * (1 - NVG_KAPPA90)), y, x + w - rxTR, y,
+                                LineTo, x + rxTL, y,
+                                BezierTo, x + (rxTL * (1 - NVG_KAPPA90)), y, x, y + (ryTL * (1 - NVG_KAPPA90)), x, y + ryTL,
+                                Close},
+                            _states->get().XForm);
 }
 
 ////////////////////////////////////////////////////////////
@@ -488,24 +314,14 @@ void canvas::ellipse(point_f c, f32 rx, f32 ry)
 {
     auto const [cx, cy] {c};
 
-    if (!do_dash()) {
-        _cache->append_commands(std::vector<f32> {
-                                    MoveTo, cx - rx, cy,
-                                    BezierTo, cx - rx, cy + (ry * NVG_KAPPA90), cx - (rx * NVG_KAPPA90), cy + ry, cx, cy + ry,
-                                    BezierTo, cx + (rx * NVG_KAPPA90), cy + ry, cx + rx, cy + (ry * NVG_KAPPA90), cx + rx, cy,
-                                    BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
-                                    BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
-                                    Close},
-                                _states->get().XForm);
-        return;
-    }
-
-    auto const ellipse_func {[=](f32 t) -> point_f {
-        f32 const angle {(TAU_F * t) - (TAU_F / 4)};
-        return point_f {cx + rx * std::cos(angle), cy + ry * std::sin(angle)};
-    }};
-
-    dashed_bezier_path(ellipse_func);
+    _cache->append_commands(std::vector<f32> {
+                                MoveTo, cx - rx, cy,
+                                BezierTo, cx - rx, cy + (ry * NVG_KAPPA90), cx - (rx * NVG_KAPPA90), cy + ry, cx, cy + ry,
+                                BezierTo, cx + (rx * NVG_KAPPA90), cy + ry, cx + rx, cy + (ry * NVG_KAPPA90), cx + rx, cy,
+                                BezierTo, cx + rx, cy - (ry * NVG_KAPPA90), cx + (rx * NVG_KAPPA90), cy - ry, cx, cy - ry,
+                                BezierTo, cx - (rx * NVG_KAPPA90), cy - ry, cx - rx, cy - (ry * NVG_KAPPA90), cx - rx, cy,
+                                Close},
+                            _states->get().XForm);
 }
 
 void canvas::circle(point_f c, f32 r)
@@ -517,24 +333,12 @@ void canvas::circle(point_f c, f32 r)
 
 void canvas::cubic_bezier_to(point_f cp0, point_f cp1, point_f end)
 {
-    if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsCubicTo(cp0, cp1, end), _states->get().XForm);
-        return;
-    }
-
-    easing::cubic_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
-    dashed_bezier_path(func);
+    _cache->append_commands(path2d::CommandsCubicTo(cp0, cp1, end), _states->get().XForm);
 }
 
 void canvas::quad_bezier_to(point_f cp, point_f end)
 {
-    if (!do_dash()) {
-        _cache->append_commands(path2d::CommandsQuadTo(_cache->command_point(), cp, end), _states->get().XForm);
-        return;
-    }
-
-    easing::quad_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint = cp, .EndPoint = end};
-    dashed_bezier_path(func);
+    _cache->append_commands(path2d::CommandsQuadTo(_cache->command_point(), cp, end), _states->get().XForm);
 }
 
 ////////////////////////////////////////////////////////////
@@ -563,53 +367,43 @@ void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian
         }
     }
 
-    if (!do_dash()) {
-        std::vector<f32> vals;
-        vals.reserve(138);
-        i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
-        f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
-        f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
-        if (dir == winding::CCW) { kappa = -kappa; }
+    std::vector<f32> vals;
+    vals.reserve(138);
+    i32 const ndivs {std::max(1, std::min(static_cast<i32>((std::abs(da) / (TAU_F * 0.25f)) + 0.5f), 5))};
+    f32 const hda {(da / static_cast<f32>(ndivs)) / 2.0f};
+    f32       kappa {std::abs(4.0f / 3.0f * (1.0f - std::cos(hda)) / std::sin(hda))};
+    if (dir == winding::CCW) { kappa = -kappa; }
 
-        f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
-        for (i32 i {0}; i <= ndivs; ++i) {
-            f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
-            f32 const dx {std::cos(a)};
-            f32 const dy {std::sin(a)};
-            f32 const x {c.X + dx * r};
-            f32 const y {c.Y + dy * r};
-            f32 const tanx {-dy * r * kappa};
-            f32 const tany {dx * r * kappa};
+    f32 px {0.0f}, py {0.0f}, ptanx {0.0f}, ptany {0.0f};
+    for (i32 i {0}; i <= ndivs; ++i) {
+        f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
+        f32 const dx {std::cos(a)};
+        f32 const dy {std::sin(a)};
+        f32 const x {c.X + dx * r};
+        f32 const y {c.Y + dy * r};
+        f32 const tanx {-dy * r * kappa};
+        f32 const tany {dx * r * kappa};
 
-            if (i == 0) {
-                vals.push_back(static_cast<f32>(move));
-                vals.push_back(x);
-                vals.push_back(y);
-            } else {
-                vals.push_back(BezierTo);
-                vals.push_back(px + ptanx);
-                vals.push_back(py + ptany);
-                vals.push_back(x - tanx);
-                vals.push_back(y - tany);
-                vals.push_back(x);
-                vals.push_back(y);
-            }
-            px    = x;
-            py    = y;
-            ptanx = tanx;
-            ptany = tany;
+        if (i == 0) {
+            vals.push_back(static_cast<f32>(move));
+            vals.push_back(x);
+            vals.push_back(y);
+        } else {
+            vals.push_back(BezierTo);
+            vals.push_back(px + ptanx);
+            vals.push_back(py + ptany);
+            vals.push_back(x - tanx);
+            vals.push_back(y - tany);
+            vals.push_back(x);
+            vals.push_back(y);
         }
-
-        _cache->append_commands(vals, _states->get().XForm);
-        return;
+        px    = x;
+        py    = y;
+        ptanx = tanx;
+        ptany = tany;
     }
 
-    auto const arc_func {[=](f32 t) -> point_f {
-        f32 const angle {a0 + da * t};
-        return point_f {c.X + r * std::cos(angle), c.Y + r * std::sin(angle)};
-    }};
-
-    dashed_bezier_path(arc_func);
+    _cache->append_commands(vals, _states->get().XForm);
 }
 
 void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
@@ -666,98 +460,6 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
 void canvas::set_line_dash(std::span<f32 const> dashPattern)
 {
     _states->get().Dash = {dashPattern.begin(), dashPattern.end()};
-}
-
-auto canvas::do_dash() const -> bool
-{
-    return !_states->get().Dash.empty();
-}
-
-auto canvas::dashed_bezier_path(auto&& func) -> bool
-{
-    constexpr i32                   numSamples {50};
-    std::array<f32, numSamples + 1> arcLengths {};
-    std::array<f32, numSamples + 1> tValues {};
-    point_f                         prevPoint {func(0.0f)};
-
-    for (i32 i {1}; i <= numSamples; ++i) {
-        f32 const  t {static_cast<f32>(i) / numSamples};
-        auto const currentPoint {func(t)};
-        f32 const  segmentLength {std::hypot(currentPoint.X - prevPoint.X, currentPoint.Y - prevPoint.Y)};
-        arcLengths[i] = arcLengths[i - 1] + segmentLength;
-        tValues[i]    = t;
-        prevPoint     = currentPoint;
-    }
-    f32 const totalLength {arcLengths.back()};
-
-    state const& s {_states->get()};
-
-    std::vector<f32> dashPattern;
-    if (!DashPattern(dashPattern, s.Dash, totalLength)) { return false; }
-
-    auto const interpolate_arc = [&](f32 targetLength) -> f32 {
-        auto it {std::lower_bound(arcLengths.begin(), arcLengths.end(), targetLength)};
-        if (it == arcLengths.end()) { return 1.0f; }
-        if (it == arcLengths.begin()) { return 0.0f; }
-        auto const idx {std::distance(arcLengths.begin(), it)};
-        f32 const  t1 {tValues[idx - 1]};
-        f32 const  t2 {tValues[idx]};
-        f32 const  s1 {arcLengths[idx - 1]};
-        f32 const  s2 {arcLengths[idx]};
-        f32 const  fraction {(targetLength - s1) / (s2 - s1)};
-        return t1 + fraction * (t2 - t1);
-    };
-
-    f32  currentLength {0.0f};
-    bool drawing {true};
-    f32  t0 {0.0f};
-
-    for (usize dashIndex {0};; ++dashIndex) {
-        f32 const dashLength {dashPattern[dashIndex % dashPattern.size()]};
-        currentLength += dashLength;
-        if (currentLength > totalLength) { break; }
-        if (dashLength <= EPSILON) {
-            drawing = !drawing;
-            continue;
-        }
-
-        f32 const t1 {interpolate_arc(currentLength)};
-        if (drawing) {
-            f32 const     deltaT {t1 - t0};
-            constexpr f32 subdivThreshold {0.2f};
-            if (deltaT > subdivThreshold) {
-                constexpr i32 subSegments {20};
-                f32 const     frac {deltaT / subSegments};
-                for (i32 j {0}; j < subSegments; ++j) {
-                    f32 const subT0 {t0 + j * frac};
-                    if (j == 0) {
-                        auto const start {func(subT0)};
-                        _cache->append_commands(path2d::CommandsMoveTo(start), s.XForm);
-                    }
-
-                    f32 const  subT1 {t0 + (j + 1) * frac};
-                    auto const end {func(subT1)};
-
-                    f32 const  subDeltaT {subT1 - subT0};
-                    auto const cp0 {func(subT0 + (subDeltaT / 3.0f))};
-                    auto const cp1 {func(subT1 - (subDeltaT / 3.0f))};
-                    _cache->append_commands(path2d::CommandsCubicTo(cp0, cp1, end), s.XForm);
-                }
-            } else {
-                auto const start {func(t0)};
-                auto const end {func(t1)};
-                auto const cp0 {func(t0 + (deltaT / 3.0f))};
-                auto const cp1 {func(t1 - (deltaT / 3.0f))};
-                _cache->append_commands(path2d::CommandsMoveTo(start), s.XForm);
-                _cache->append_commands(path2d::CommandsCubicTo(cp0, cp1, end), s.XForm);
-            }
-        }
-        t0      = t1;
-        drawing = !drawing;
-    }
-
-    _cache->append_commands(path2d::CommandsMoveTo(func(1.0f)), s.XForm);
-    return true;
 }
 
 ////////////////////////////////////////////////////////////
@@ -1056,7 +758,7 @@ void canvas::fill()
     state const& s {_states->get()};
     paint        fillPaint {s.Fill}; // copy
 
-    _cache->flatten_paths(_enforceWinding);
+    _cache->flatten_paths(_enforceWinding, {});
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
         _cache->expand_fill(_fringeWidth, line_join::Miter, 2.4f, _fringeWidth);
     } else {
@@ -1088,7 +790,7 @@ void canvas::stroke()
     // Apply global alpha
     MultiplyAlphaPaint(strokePaint.Color, s.Alpha);
 
-    _cache->flatten_paths(_enforceWinding);
+    _cache->flatten_paths(_enforceWinding, s.Dash);
 
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
         _cache->expand_stroke(strokeWidth * 0.5f, _fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit);

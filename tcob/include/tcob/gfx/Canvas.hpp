@@ -251,10 +251,6 @@ public:
     auto get_impl() const -> render_backend::canvas_base*;
 
 private:
-    auto do_dash() const -> bool;
-
-    auto dashed_bezier_path(auto&& func) -> bool;
-
     void set_device_pixel_ratio(f32 ratio);
 
     void set_paint_color(paint& p, color c);

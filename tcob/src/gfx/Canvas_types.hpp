@@ -102,7 +102,7 @@ public:
 
     void append_commands(std::span<f32 const> vals, transform const& xform);
 
-    void flatten_paths(bool enforceWinding);
+    void flatten_paths(bool enforceWinding, std::span<f32 const> dash);
 
     void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
