@@ -314,12 +314,6 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
 
 ////////////////////////////////////////////////////////////
 
-void path_cache::set_tolerances(f32 dist, f32 tess)
-{
-    _distTolerance = dist;
-    _tessTolerance = tess;
-}
-
 void path_cache::clear()
 {
     _commands.clear();
@@ -717,6 +711,12 @@ auto path_cache::command_point() const -> point_f const&
 auto path_cache::bounds() const -> vec4 const&
 {
     return _bounds;
+}
+
+void path_cache::set_tolerances(f32 dist, f32 tess)
+{
+    _distTolerance = dist;
+    _tessTolerance = tess;
 }
 
 auto path_cache::is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const -> bool

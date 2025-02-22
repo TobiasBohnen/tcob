@@ -98,8 +98,6 @@ private:
 
 class path_cache {
 public:
-    void set_tolerances(f32 dist, f32 tess);
-
     void clear();
 
     void append_commands(std::span<f32 const> vals, transform const& xform);
@@ -117,6 +115,7 @@ public:
     auto command_point() const -> point_f const&;
     auto bounds() const -> vec4 const&;
 
+    void set_tolerances(f32 dist, f32 tess);
     auto is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const -> bool;
 
 private:
