@@ -111,16 +111,6 @@ auto static GetAverageScale(mat3 const& t) -> f32
     return (sx + sy) * 0.5f;
 }
 
-void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
-{
-    vtx->Position.X = x;
-    vtx->Position.Y = y;
-
-    vtx->TexCoords.U     = u;
-    vtx->TexCoords.V     = v;
-    vtx->TexCoords.Level = level;
-}
-
 auto static Rect(f32 x, f32 y, f32 w, f32 h, f32 t) -> point_f
 {
     f32 const perimeter {2 * (w + h)};
@@ -1405,12 +1395,12 @@ void canvas::draw_textbox(point_f offset, text_formatter::result const& formatRe
                 bottomLeft.Y  = std::floor(bottomLeft.Y + 0.5f);
             }
 
-            SetVertex(&verts[nverts++], topLeft.X, topLeft.Y, uvLeft, uvTop, level);
-            SetVertex(&verts[nverts++], bottomRight.X, bottomRight.Y, uvRight, uvBottom, level);
-            SetVertex(&verts[nverts++], topRight.X, topRight.Y, uvRight, uvTop, level);
-            SetVertex(&verts[nverts++], topLeft.X, topLeft.Y, uvLeft, uvTop, level);
-            SetVertex(&verts[nverts++], bottomLeft.X, bottomLeft.Y, uvLeft, uvBottom, level);
-            SetVertex(&verts[nverts++], bottomRight.X, bottomRight.Y, uvRight, uvBottom, level);
+            verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {uvLeft, uvTop, level}};
+            verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {uvRight, uvBottom, level}};
+            verts[nverts++] = vertex {.Position = topRight, .TexCoords = {uvRight, uvTop, level}};
+            verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {uvLeft, uvTop, level}};
+            verts[nverts++] = vertex {.Position = bottomLeft, .TexCoords = {uvLeft, uvBottom, level}};
+            verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {uvRight, uvBottom, level}};
         }
     }
 

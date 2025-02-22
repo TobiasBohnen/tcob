@@ -12,6 +12,8 @@
 
 namespace tcob::gfx {
 
+////////////////////////////////////////////////////////////
+
 void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 {
     vtx->Position.X = x;
@@ -279,6 +281,8 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
     return dst;
 }
 
+////////////////////////////////////////////////////////////
+
 void path_cache::clear()
 {
     Commands.clear();
@@ -334,65 +338,99 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     }
 }
 
-void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
+void path_cache::flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding)
 {
-    f32 const iw {w > 0.0f ? (1.0f / w) : 0.0f};
+    if (!Paths.empty()) { return; }
 
-    // Calculate which joins needs extra vertices to append, and gather vertex count.
+    // Flatten
+    for (usize i {0}; i < Commands.size();) {
+        i32 const cmd {static_cast<i32>(Commands[i])};
+        switch (cmd) {
+        case MoveTo: {
+            add_path();
+            f32 const* p {&Commands[i + 1]};
+            add_point(p[0], p[1], Corner, distTol);
+            i += 3;
+        } break;
+        case LineTo: {
+            f32 const* p {&Commands[i + 1]};
+            add_point(p[0], p[1], Corner, distTol);
+            i += 3;
+        } break;
+        case BezierTo: {
+            auto const& last {get_last_point()};
+            f32 const*  cp1 {&Commands[i + 1]};
+            f32 const*  cp2 {&Commands[i + 3]};
+            f32 const*  p {&Commands[i + 5]};
+            tesselate_bezier(last.X, last.Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0, Corner, distTol, tessTol);
+            i += 7;
+        } break;
+        case Close: {
+            auto& path {get_last_path()};
+            if (path.First < std::ssize(_points)) {
+                auto const& pt {_points[path.First]};
+                add_point(pt.X, pt.Y, Corner, distTol); // loop
+                path.Closed = true;
+            }
+            ++i;
+        } break;
+        case Winding: {
+            get_last_path().Winding = static_cast<winding>(Commands[i + 1]);
+            i += 2;
+        } break;
+        default:
+            ++i;
+        }
+    }
+
+    Bounds[0] = Bounds[1] = 1e6f;
+    Bounds[2] = Bounds[3] = -1e6f;
+
+    auto static PolyArea {[](std::span<canvas_point> pts) {
+        f32 area {0};
+        for (usize i {2}; i < pts.size(); ++i) {
+            canvas_point const a {pts[0]};
+            canvas_point const b {pts[i - 1]};
+            canvas_point const c {pts[i]};
+            area += TriArea2(a.X, a.Y, b.X, b.Y, c.X, c.Y);
+        }
+        return area * 0.5f;
+    }};
+
+    // Calculate the direction and length of line segments.
     for (auto& path : Paths) {
         canvas_point* pts {&_points[path.First]};
+
+        // If the first and last points are the same, remove the last, mark as closed path.
         canvas_point* p0 {&pts[path.Count - 1]};
         canvas_point* p1 {&pts[0]};
-        usize         nleft {0};
 
-        path.BevelCount = 0;
-
-        for (usize j {0}; j < path.Count; j++) {
-            f32 const dlx0 {p0->DY};
-            f32 const dly0 {-p0->DX};
-            f32 const dlx1 {p1->DY};
-            f32 const dly1 {-p1->DX};
-            // Calculate extrusions
-            p1->DMX = (dlx0 + dlx1) * 0.5f;
-            p1->DMY = (dly0 + dly1) * 0.5f;
-            f32 const dmr2 {(p1->DMX * p1->DMX) + (p1->DMY * p1->DMY)};
-            if (dmr2 > 0.000001f) {
-                f32 const scale {std::min(1.0f / dmr2, 600.0f)};
-                p1->DMX *= scale;
-                p1->DMY *= scale;
-            }
-
-            // Clear flags, but keep the corner.
-            p1->Flags = (p1->Flags & Corner) ? Corner : 0;
-
-            // Keep track of left turns.
-            f32 const cross {(p1->DX * p0->DY) - (p0->DX * p1->DY)};
-            if (cross > 0.0f) {
-                nleft++;
-                p1->Flags |= Left;
-            }
-
-            // Calculate if we should use bevel or miter for inner join.
-            f32 const limit {std::max(1.01f, std::min(p0->Length, p1->Length) * iw)};
-            if ((dmr2 * limit * limit) < 1.0f) {
-                p1->Flags |= InnerBevel;
-            }
-
-            // Check to see if the corner needs to be beveled.
-            if (p1->Flags & Corner) {
-                if ((dmr2 * miterLimit * miterLimit) < 1.0f || lineJoin == line_join::Bevel || lineJoin == line_join::Round) {
-                    p1->Flags |= Bevel;
-                }
-            }
-
-            if ((p1->Flags & (Bevel | InnerBevel)) != 0) {
-                path.BevelCount++;
-            }
-
-            p0 = p1++;
+        if (PointEquals(p0->X, p0->Y, p1->X, p1->Y, distTol)) {
+            path.Count--;
+            p0          = &pts[path.Count - 1];
+            path.Closed = true;
         }
 
-        path.Convex = (nleft == path.Count);
+        // Enforce winding.
+        if (enforceWinding && path.Count > 2) {
+            f32 const area {PolyArea({pts, path.Count})};
+            if (path.Winding == winding::CCW && area < 0.0f) { PolyReverse({pts, path.Count}); }
+            if (path.Winding == winding::CW && area > 0.0f) { PolyReverse({pts, path.Count}); }
+        }
+
+        for (usize i {0}; i < path.Count; ++i) {
+            // Calculate segment direction and length
+            p0->DX     = p1->X - p0->X;
+            p0->DY     = p1->Y - p0->Y;
+            p0->Length = Normalize(p0->DX, p0->DY);
+            // Update bounds
+            Bounds[0]  = std::min(Bounds[0], p0->X);
+            Bounds[1]  = std::min(Bounds[1], p0->Y);
+            Bounds[2]  = std::max(Bounds[2], p0->X);
+            Bounds[3]  = std::max(Bounds[3], p0->Y);
+            // Advance
+            p0         = p1++;
+        }
     }
 }
 
@@ -624,12 +662,6 @@ auto path_cache::alloc_temp_verts(usize nverts) -> vertex*
     return _verts.data();
 }
 
-auto path_cache::get_last_path() -> canvas_path&
-{
-    assert(!Paths.empty());
-    return Paths.back();
-}
-
 void path_cache::add_path()
 {
     canvas_path path;
@@ -637,10 +669,10 @@ void path_cache::add_path()
     Paths.push_back(path);
 }
 
-auto path_cache::get_last_point() -> canvas_point&
+auto path_cache::get_last_path() -> canvas_path&
 {
-    assert(!_points.empty());
-    return _points.back();
+    assert(!Paths.empty());
+    return Paths.back();
 }
 
 void path_cache::add_point(f32 x, f32 y, i32 flags, f32 distTol)
@@ -663,6 +695,12 @@ void path_cache::add_point(f32 x, f32 y, i32 flags, f32 distTol)
     _points.push_back(pt);
     path.Count++;
     path.Closed = false;
+}
+
+auto path_cache::get_last_point() -> canvas_point&
+{
+    assert(!_points.empty());
+    return _points.back();
 }
 
 void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
@@ -698,99 +736,65 @@ void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
     tesselate_bezier(x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1, type, distTol, tessTol);
 }
 
-void path_cache::flatten_paths(f32 distTol, f32 tessTol, bool enforceWinding)
+void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
 {
-    if (!Paths.empty()) { return; }
+    f32 const iw {w > 0.0f ? (1.0f / w) : 0.0f};
 
-    // Flatten
-    for (usize i {0}; i < Commands.size();) {
-        i32 const cmd {static_cast<i32>(Commands[i])};
-        switch (cmd) {
-        case MoveTo: {
-            add_path();
-            f32 const* p {&Commands[i + 1]};
-            add_point(p[0], p[1], Corner, distTol);
-            i += 3;
-        } break;
-        case LineTo: {
-            f32 const* p {&Commands[i + 1]};
-            add_point(p[0], p[1], Corner, distTol);
-            i += 3;
-        } break;
-        case BezierTo: {
-            auto const& last {get_last_point()};
-            f32 const*  cp1 {&Commands[i + 1]};
-            f32 const*  cp2 {&Commands[i + 3]};
-            f32 const*  p {&Commands[i + 5]};
-            tesselate_bezier(last.X, last.Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0, Corner, distTol, tessTol);
-            i += 7;
-        } break;
-        case Close: {
-            auto& path {get_last_path()};
-            if (path.First < std::ssize(_points)) {
-                auto const& pt {_points[path.First]};
-                add_point(pt.X, pt.Y, Corner, distTol); // loop
-                path.Closed = true;
-            }
-            ++i;
-        } break;
-        case Winding: {
-            get_last_path().Winding = static_cast<winding>(Commands[i + 1]);
-            i += 2;
-        } break;
-        default:
-            ++i;
-        }
-    }
-
-    Bounds[0] = Bounds[1] = 1e6f;
-    Bounds[2] = Bounds[3] = -1e6f;
-
-    auto static PolyArea {[](std::span<canvas_point> pts) {
-        f32 area {0};
-        for (usize i {2}; i < pts.size(); ++i) {
-            canvas_point const a {pts[0]};
-            canvas_point const b {pts[i - 1]};
-            canvas_point const c {pts[i]};
-            area += TriArea2(a.X, a.Y, b.X, b.Y, c.X, c.Y);
-        }
-        return area * 0.5f;
-    }};
-
-    // Calculate the direction and length of line segments.
+    // Calculate which joins needs extra vertices to append, and gather vertex count.
     for (auto& path : Paths) {
         canvas_point* pts {&_points[path.First]};
-
-        // If the first and last points are the same, remove the last, mark as closed path.
         canvas_point* p0 {&pts[path.Count - 1]};
         canvas_point* p1 {&pts[0]};
+        usize         nleft {0};
 
-        if (PointEquals(p0->X, p0->Y, p1->X, p1->Y, distTol)) {
-            path.Count--;
-            p0          = &pts[path.Count - 1];
-            path.Closed = true;
+        path.BevelCount = 0;
+
+        for (usize j {0}; j < path.Count; j++) {
+            f32 const dlx0 {p0->DY};
+            f32 const dly0 {-p0->DX};
+            f32 const dlx1 {p1->DY};
+            f32 const dly1 {-p1->DX};
+            // Calculate extrusions
+            p1->DMX = (dlx0 + dlx1) * 0.5f;
+            p1->DMY = (dly0 + dly1) * 0.5f;
+            f32 const dmr2 {(p1->DMX * p1->DMX) + (p1->DMY * p1->DMY)};
+            if (dmr2 > 0.000001f) {
+                f32 const scale {std::min(1.0f / dmr2, 600.0f)};
+                p1->DMX *= scale;
+                p1->DMY *= scale;
+            }
+
+            // Clear flags, but keep the corner.
+            p1->Flags = (p1->Flags & Corner) ? Corner : 0;
+
+            // Keep track of left turns.
+            f32 const cross {(p1->DX * p0->DY) - (p0->DX * p1->DY)};
+            if (cross > 0.0f) {
+                nleft++;
+                p1->Flags |= Left;
+            }
+
+            // Calculate if we should use bevel or miter for inner join.
+            f32 const limit {std::max(1.01f, std::min(p0->Length, p1->Length) * iw)};
+            if ((dmr2 * limit * limit) < 1.0f) {
+                p1->Flags |= InnerBevel;
+            }
+
+            // Check to see if the corner needs to be beveled.
+            if (p1->Flags & Corner) {
+                if ((dmr2 * miterLimit * miterLimit) < 1.0f || lineJoin == line_join::Bevel || lineJoin == line_join::Round) {
+                    p1->Flags |= Bevel;
+                }
+            }
+
+            if ((p1->Flags & (Bevel | InnerBevel)) != 0) {
+                path.BevelCount++;
+            }
+
+            p0 = p1++;
         }
 
-        // Enforce winding.
-        if (enforceWinding && path.Count > 2) {
-            f32 const area {PolyArea({pts, path.Count})};
-            if (path.Winding == winding::CCW && area < 0.0f) { PolyReverse({pts, path.Count}); }
-            if (path.Winding == winding::CW && area > 0.0f) { PolyReverse({pts, path.Count}); }
-        }
-
-        for (usize i {0}; i < path.Count; ++i) {
-            // Calculate segment direction and length
-            p0->DX     = p1->X - p0->X;
-            p0->DY     = p1->Y - p0->Y;
-            p0->Length = Normalize(p0->DX, p0->DY);
-            // Update bounds
-            Bounds[0]  = std::min(Bounds[0], p0->X);
-            Bounds[1]  = std::min(Bounds[1], p0->Y);
-            Bounds[2]  = std::max(Bounds[2], p0->X);
-            Bounds[3]  = std::max(Bounds[3], p0->Y);
-            // Advance
-            p0         = p1++;
-        }
+        path.Convex = (nleft == path.Count);
     }
 }
 

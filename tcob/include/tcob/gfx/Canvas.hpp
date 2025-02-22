@@ -279,9 +279,10 @@ private:
     std::unique_ptr<path_cache> _cache {};
     std::vector<color_gradient> _gradients;
 
-    f32    _tessTol {0};
-    f32    _distTol {0};
-    f32    _fringeWidth {0};
+    f32 _tessTol {0};
+    f32 _distTol {0};
+    f32 _fringeWidth {0};
+
     f32    _devicePxRatio {0};
     size_i _windowSize;
 
