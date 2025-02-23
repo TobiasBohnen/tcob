@@ -173,6 +173,7 @@ public:
     void set_path_winding(winding dir);
     void set_path_winding(solidity s);
     void set_line_dash(std::span<f32 const> dashPattern);
+    void set_dash_offset(f32 offset);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);

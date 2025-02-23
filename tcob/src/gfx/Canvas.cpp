@@ -462,6 +462,11 @@ void canvas::set_line_dash(std::span<f32 const> dashPattern)
     _states->get().Dash = {dashPattern.begin(), dashPattern.end()};
 }
 
+void canvas::set_dash_offset(f32 offset)
+{
+    _states->get().DashOffset = offset;
+}
+
 ////////////////////////////////////////////////////////////
 
 void canvas::fill_lines(std::span<point_f const> points)
@@ -754,7 +759,7 @@ void canvas::fill()
     state const& s {_states->get()};
     paint        fillPaint {s.Fill}; // copy
 
-    _cache->flatten_paths(_enforceWinding, {});
+    _cache->flatten_paths(_enforceWinding, {}, 0);
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
         _cache->expand_fill(_fringeWidth, line_join::Miter, 2.4f, _fringeWidth);
     } else {
@@ -786,7 +791,7 @@ void canvas::stroke()
     // Apply global alpha
     MultiplyAlphaPaint(strokePaint.Color, s.Alpha);
 
-    _cache->flatten_paths(_enforceWinding, s.Dash);
+    _cache->flatten_paths(_enforceWinding, s.Dash, s.DashOffset);
 
     if (_edgeAntiAlias && s.ShapeAntiAlias) {
         _cache->expand_stroke(strokeWidth * 0.5f, _fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit);

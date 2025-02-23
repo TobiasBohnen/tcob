@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -313,7 +314,12 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
     return dst;
 }
 
-static auto DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
+auto static hypot(f32 x, f32 y) -> f32
+{
+    return std::sqrt((x * x) + (y * y));
+}
+
+auto static DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
 {
     if (total <= EPSILON) { return false; }
 
@@ -334,18 +340,18 @@ static auto DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 tot
     return true;
 }
 
-auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std::span<f32 const> dashPattern) -> std::vector<std::vector<canvas_point>>
+auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std::span<f32 const> dashPattern, f32 dashOffset) -> std::vector<std::vector<canvas_point>>
 {
     std::vector<f32> accumLengths {};
     accumLengths.reserve(pts.size());
     accumLengths.push_back(0.0f);
 
     for (usize i {1}; i < pts.size(); ++i) {
-        f32 const segLen {std::hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y)};
+        f32 const segLen {hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y)};
         accumLengths.push_back(accumLengths.back() + segLen);
     }
 
-    auto const func {[&](f32 d) -> canvas_point {
+    auto const func = [&](f32 d) -> canvas_point {
         auto it {std::lower_bound(accumLengths.begin(), accumLengths.end(), d)};
         if (it == accumLengths.end()) { return pts.back(); }
         if (it == accumLengths.begin()) { return pts.front(); }
@@ -357,43 +363,55 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
         pt.X = pts[idx - 1].X + ratio * (pts[idx].X - pts[idx - 1].X);
         pt.Y = pts[idx - 1].Y + ratio * (pts[idx].Y - pts[idx - 1].Y);
         return pt;
-    }};
+    };
 
-    std::vector<std::vector<canvas_point>> dashedPaths {};
+    // Compute total dash pattern period.
+    f32 const period {std::accumulate(dashPattern.begin(), dashPattern.end(), 0.0f)};
 
-    f32   currentDistance {0.0f};
+    // Compute effective dash offset.
+    f32 effectiveOffset {std::fmod(dashOffset, period)};
+    if (effectiveOffset < 0.0f) { effectiveOffset += period; }
+
+    // Start at a negative distance so that our first segment starts at the effective offset.
+    f32   currentDistance {-effectiveOffset};
     bool  drawing {true};
     usize dashIndex {0};
 
+    std::vector<std::vector<canvas_point>> dashedPaths {};
     while (currentDistance < totalLength) {
-        f32 const segDash {dashPattern[dashIndex % dashPattern.size()]};
+        f32 const segDash {dashPattern[dashIndex++ % dashPattern.size()]};
         f32 const nextDistance {std::min(totalLength, currentDistance + segDash)};
 
         if (drawing) {
-            std::vector<canvas_point> dashSegment {};
-            dashSegment.reserve(pts.size()); // may accumulate several points
+            // Clamp the start of the dash segment to 0 if necessary.
+            f32 const drawStart {currentDistance < 0.0f ? 0.0f : currentDistance};
+            f32 const drawEnd {nextDistance};
 
-            // Insert the starting point of the dash segment.
-            dashSegment.push_back(func(currentDistance));
+            if (drawEnd > drawStart) {
+                std::vector<canvas_point> dashSegment {};
+                dashSegment.reserve(pts.size()); // may accumulate several points
 
-            // Insert any polyline points whose cumulative distance lies within this dash.
-            for (usize i {1}; i < accumLengths.size(); ++i) {
-                if (accumLengths[i] > currentDistance && accumLengths[i] < nextDistance) {
-                    dashSegment.push_back(pts[i]);
+                // Insert the starting point.
+                dashSegment.push_back(func(drawStart));
+
+                // Insert any polyline points between drawStart and drawEnd.
+                for (usize i {1}; i < accumLengths.size(); ++i) {
+                    if (accumLengths[i] > drawStart && accumLengths[i] < drawEnd) {
+                        dashSegment.push_back(pts[i]);
+                    }
                 }
+
+                // Insert the endpoint.
+                dashSegment.push_back(func(drawEnd));
+                dashSegment.front().Flags = Corner;
+                dashSegment.back().Flags  = Corner;
+
+                dashedPaths.push_back(dashSegment);
             }
-
-            // Insert the endpoint of the dash segment.
-            dashSegment.push_back(func(nextDistance));
-            dashSegment[0].Flags                      = Corner;
-            dashSegment[dashSegment.size() - 1].Flags = Corner;
-
-            dashedPaths.push_back(dashSegment);
         }
 
         currentDistance = nextDistance;
         drawing         = !drawing;
-        ++dashIndex;
     }
 
     return dashedPaths;
@@ -415,7 +433,7 @@ auto static PolylineLength(std::span<canvas_point const> pts) -> f32
 {
     f32 length {0.0f};
     for (usize i {1}; i < pts.size(); ++i) {
-        length += std::hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y);
+        length += hypot(pts[i].X - pts[i - 1].X, pts[i].Y - pts[i - 1].Y);
     }
     return length;
 }
@@ -477,7 +495,7 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     }
 }
 
-void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash)
+void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset)
 {
     if (!dash.empty()) {
         _paths.clear();
@@ -539,7 +557,7 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash)
             std::vector<f32>              dashPattern;
             if (!DashPattern(dashPattern, dash, totalLen)) { continue; }
 
-            auto const dashedPaths {DashPolyline(polyline, totalLen, dashPattern)};
+            auto const dashedPaths {DashPolyline(polyline, totalLen, dashPattern, dashOffset)};
             for (auto const& dp : dashedPaths) {
                 canvas::path dashedPath {};
                 dashedPath.First = newPoints.size();
