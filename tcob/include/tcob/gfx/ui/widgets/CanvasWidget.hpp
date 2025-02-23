@@ -47,6 +47,7 @@ public:
     void close_path();
     void set_path_winding(winding dir);
     void set_line_dash(std::vector<f32> const& dashPatternRel);
+    void set_dash_offset(f32 offset);
     void move_to(point_f pos);
     void line_to(point_f pos);
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
@@ -58,11 +59,6 @@ public:
     void rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
     void ellipse(point_f c, f32 rx, f32 ry);
     void circle(point_f c, f32 r);
-
-    void dotted_line_to(point_f to, f32 r, i32 numDots);
-    void dotted_circle(point_f center, f32 rcircle, f32 rdots, i32 numDots);
-    void dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 r, i32 numDots);
-    void dotted_quad_bezier_to(point_f cp, point_f end, f32 r, i32 numDots);
 
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase);
     void regular_polygon(point_f pos, size_f size, i32 n);

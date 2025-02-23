@@ -154,18 +154,24 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
                 dash.push_back(l.calc(rect.width()));
             }
             _canvas.set_line_dash(dash);
-
+            _canvas.set_dash_offset(borderStyle.DashOffset);
             _canvas.begin_path();
             _canvas.rounded_rect(rect, borderRadius);
             _canvas.stroke();
             _canvas.set_line_dash({});
         } break;
         case element::border::type::Dotted: {
-            _canvas.set_fill_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_width(borderSize);
+
+            _canvas.set_line_dash(std::array {borderSize / 2, borderSize * 2});
+            _canvas.set_line_cap(line_cap::Round);
+            _canvas.set_dash_offset(borderStyle.DashOffset);
             _canvas.begin_path();
-            f32 const num {(rect.width() * 2 + rect.height() * 2) / (borderSize * 2)};
-            _canvas.dotted_rounded_rect(rect, borderRadius, borderSize / 2, num);
-            _canvas.fill();
+            _canvas.rounded_rect(rect, borderRadius);
+            _canvas.stroke();
+            _canvas.set_line_dash({});
+            _canvas.set_line_cap(line_cap::Butt);
         } break;
         case element::border::type::Hidden:
             break;
@@ -230,8 +236,11 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                         _canvas.set_fill_style(deco.Color);
                         _canvas.begin_path();
                         _canvas.move_to(p0 + offset);
-                        _canvas.dotted_line_to(p1 + offset, strokeWidth, std::max(1, static_cast<i32>((p1.X - p0.X) / (strokeWidth * 2.5f))));
+                        _canvas.set_line_dash(std::array {strokeWidth / 4, strokeWidth * 2});
+                        _canvas.set_line_cap(line_cap::Round);
+                        _canvas.line_to(p1 + offset);
                         _canvas.fill();
+                        _canvas.set_line_dash({});
                         break;
                     case text_decoration::style::Dashed:
                         _canvas.set_stroke_width(strokeWidth);

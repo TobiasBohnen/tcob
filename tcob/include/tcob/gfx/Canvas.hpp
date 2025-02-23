@@ -190,13 +190,6 @@ public:
     void stroke();
 
     // Extras
-    void dotted_line_to(point_f to, f32 dotR, i32 numDots);
-    void dotted_circle(point_f center, f32 circleR, f32 dotR, i32 numDots);
-    void dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 dotR, i32 numDots);
-    void dotted_quad_bezier_to(point_f cp, point_f end, f32 dotR, i32 numDots);
-    void dotted_rounded_rect(rect_f const& rect, f32 r, f32 dotR, i32 numDots);
-    void dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, f32 dotR, i32 numDots);
-
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
     void regular_polygon(point_f pos, size_f size, i32 n);
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);

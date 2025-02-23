@@ -11,7 +11,6 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
-#include "tcob/core/easing/Easing.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
@@ -89,39 +88,6 @@ auto static GetAverageScale(mat3 const& t) -> f32
     f32 const sx {std::sqrt((t[0] * t[0]) + (t[3] * t[3]))};
     f32 const sy {std::sqrt((t[1] * t[1]) + (t[4] * t[4]))};
     return (sx + sy) * 0.5f;
-}
-
-auto static Rect(f32 x, f32 y, f32 w, f32 h, f32 t) -> point_f
-{
-    f32 const perimeter {2 * (w + h)};
-    f32       dist {t * perimeter};
-
-    if (dist < w) { return {x + dist, y}; }         // Top edge
-    dist -= w;
-
-    if (dist < h) { return {x + w, y + dist}; }     // Right edge
-    dist -= h;
-
-    if (dist < w) { return {x + w - dist, y + h}; } // Bottom edge
-    dist -= w;
-
-    return {x, y + h - dist};                       // Left edge
-}
-
-auto static QuadBezierLength(point_f p0, point_f p1, point_f p2) -> f32
-{
-    constexpr i32 numSamples {10};
-    f32           length {0.0f};
-    point_f       prev {p0};
-
-    for (i32 i {1}; i <= numSamples; ++i) {
-        f32 const     sampleT {static_cast<f32>(i) / numSamples};
-        point_f const current {(1 - sampleT) * (1 - sampleT) * p0.X + 2 * (1 - sampleT) * sampleT * p1.X + sampleT * sampleT * p2.X,
-                               (1 - sampleT) * (1 - sampleT) * p0.Y + 2 * (1 - sampleT) * sampleT * p1.Y + sampleT * sampleT * p2.Y};
-        length += std::hypot(current.X - prev.X, current.Y - prev.Y);
-        prev = current;
-    }
-    return length;
 }
 
 void static MultiplyAlphaPaint(paint_color& c, f32 alpha)
@@ -503,117 +469,6 @@ void canvas::stroke_lines(std::span<point_f const> points)
     }
 
     stroke();
-}
-
-void canvas::dotted_line_to(point_f to, f32 r, i32 numDots)
-{
-    easing::linear<point_f> func {.Start = _cache->command_point(), .End = to};
-    f32 const               inc {1.0f / numDots};
-
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t), r);
-    }
-}
-
-void canvas::dotted_circle(point_f center, f32 circleR, f32 dotR, i32 numDots)
-{
-    easing::circular func {.Start = degree_f {0}, .End = degree_f {360}};
-    f32 const        inc {1.0f / numDots};
-
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t) * circleR + center, dotR);
-    }
-}
-
-void canvas::dotted_cubic_bezier_to(point_f cp0, point_f cp1, point_f end, f32 dotR, i32 numDots)
-{
-    easing::cubic_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint0 = cp0, .ControlPoint1 = cp1, .EndPoint = end};
-    f32 const                  inc {1.0f / numDots};
-
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t), dotR);
-    }
-}
-
-void canvas::dotted_quad_bezier_to(point_f cp, point_f end, f32 dotR, i32 numDots)
-{
-    easing::quad_bezier_curve func {.StartPoint = _cache->command_point(), .ControlPoint = cp, .EndPoint = end};
-    f32 const                 inc {1.0f / numDots};
-
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t), dotR);
-    }
-}
-
-void canvas::dotted_rounded_rect(rect_f const& rect, f32 r, f32 dotR, i32 numDots)
-{
-    dotted_rounded_rect_varying(rect, r, r, r, r, dotR, numDots);
-}
-
-void canvas::dotted_rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL, f32 dotR, i32 numDots)
-{
-    auto const [x, y] {rect.Position};
-    auto const [w, h] {rect.Size};
-
-    f32 const halfw {std::abs(w) * 0.5f};
-    f32 const halfh {std::abs(h) * 0.5f};
-    f32 const rxBL {std::min(radBL, halfw) * signf(w)}, ryBL {std::min(radBL, halfh) * signf(h)};
-    f32 const rxBR {std::min(radBR, halfw) * signf(w)}, ryBR {std::min(radBR, halfh) * signf(h)};
-    f32 const rxTR {std::min(radTR, halfw) * signf(w)}, ryTR {std::min(radTR, halfh) * signf(h)};
-    f32 const rxTL {std::min(radTL, halfw) * signf(w)}, ryTL {std::min(radTL, halfh) * signf(h)};
-
-    f32 const perimTop {w - (rxTL + rxTR)};
-    f32 const perimRight {h - (ryTR + ryBR)};
-    f32 const perimBottom {w - (rxBL + rxBR)};
-    f32 const perimLeft {h - (ryBL + ryTL)};
-
-    f32 const arcTopRightLen {QuadBezierLength({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR})};
-    f32 const arcBottomRightLen {QuadBezierLength({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h})};
-    f32 const arcBottomLeftLen {QuadBezierLength({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL})};
-    f32 const arcTopLeftLen {QuadBezierLength({x, y + ryTL}, {x, y}, {x + rxTL, y})};
-    f32 const totalPerimeter {perimTop + perimRight + perimBottom + perimLeft + arcTopRightLen + arcBottomRightLen + arcBottomLeftLen + arcTopLeftLen};
-
-    auto const func {[&](f64 t) -> point_f {
-        auto static quad_bezier {[](point_f p0, point_f p1, point_f p2, f32 t) -> point_f {
-            f32 const oneMinusT {1.0f - t};
-            f32 const exp0 {oneMinusT * oneMinusT};
-            f32 const exp1 {2.0f * t * oneMinusT};
-            f32 const exp2 {t * t};
-            return {exp0 * p0.X + exp1 * p1.X + exp2 * p2.X, exp0 * p0.Y + exp1 * p1.Y + exp2 * p2.Y};
-        }};
-
-        if (radTL < 0.1f && radTR < 0.1f && radBR < 0.1f && radBL < 0.1f) { return Rect(x, y, w, h, t); }
-
-        f64 scaledT {t * totalPerimeter};
-
-        if (scaledT < perimTop) { return {x + rxTL + static_cast<f32>(scaledT), y}; }
-        scaledT -= perimTop;
-
-        if (scaledT < arcTopRightLen) { return quad_bezier({x + w - rxTR, y}, {x + w, y}, {x + w, y + ryTR}, static_cast<f32>(scaledT / arcTopRightLen)); }
-        scaledT -= arcTopRightLen;
-
-        if (scaledT < perimRight) { return {x + w, y + ryTR + static_cast<f32>(scaledT)}; }
-        scaledT -= perimRight;
-
-        if (scaledT < arcBottomRightLen) { return quad_bezier({x + w, y + h - ryBR}, {x + w, y + h}, {x + w - rxBR, y + h}, static_cast<f32>(scaledT / arcBottomRightLen)); }
-        scaledT -= arcBottomRightLen;
-
-        if (scaledT < perimBottom) { return {x + w - rxBR - static_cast<f32>(scaledT), y + h}; }
-        scaledT -= perimBottom;
-
-        if (scaledT < arcBottomLeftLen) { return quad_bezier({x + rxBL, y + h}, {x, y + h}, {x, y + h - ryBL}, static_cast<f32>(scaledT / arcBottomLeftLen)); }
-        scaledT -= arcBottomLeftLen;
-
-        if (scaledT < perimLeft) { return {x, y + h - ryBL - static_cast<f32>(scaledT)}; }
-        scaledT -= perimLeft;
-
-        return quad_bezier({x, y + ryTL}, {x, y}, {x + rxTL, y}, static_cast<f32>(scaledT / arcTopLeftLen));
-    }};
-
-    f32 const inc {1.0f / numDots};
-    for (f32 t {0}; t <= 1.0f; t += inc) {
-        circle(func(t), dotR);
-    }
 }
 
 void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)

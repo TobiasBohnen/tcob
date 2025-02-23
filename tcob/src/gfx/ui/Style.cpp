@@ -216,6 +216,8 @@ namespace element {
             targetDash[i] = length::Lerp(ldash, rdash, step);
         }
         target.Dash = targetDash;
+
+        target.DashOffset = static_cast<f32>(left.DashOffset + (right.DashOffset - left.DashOffset) * step);
     }
 
     void thumb::Transition(thumb& target, thumb const& left, thumb const& right, f64 step)

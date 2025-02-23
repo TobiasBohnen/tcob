@@ -131,6 +131,7 @@ namespace element {
         length              Radius {};
         length              Size {};
         std::vector<length> Dash {};
+        f32                 DashOffset {0};
 
         auto thickness() const -> thickness;
 
