@@ -81,7 +81,6 @@
 #include <tcob/gfx/Image.hpp>
 #include <tcob/gfx/ImageFilters.hpp>
 #include <tcob/gfx/Material.hpp>
-#include <tcob/gfx/Noise.hpp>
 #include <tcob/gfx/Path2d.hpp>
 #include <tcob/gfx/Polygon.hpp>
 #include <tcob/gfx/Quadtree.hpp>
@@ -108,6 +107,8 @@
 #include <tcob/gfx/drawables/Shape.hpp>
 #include <tcob/gfx/drawables/Text.hpp>
 #include <tcob/gfx/drawables/TileMap.hpp>
+#include <tcob/gfx/procgen/LSystem.hpp>
+#include <tcob/gfx/procgen/Noise.hpp>
 
 #include <tcob/gfx/html/HtmlDocument.hpp>
 

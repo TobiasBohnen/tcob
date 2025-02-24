@@ -11,7 +11,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ImageFilters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Material.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Path2d.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Polygon.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ray.cpp
@@ -48,6 +47,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/Tween.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CanvasWidget.cpp
@@ -93,7 +94,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ImageFilters.inl
     ${TCOB_INC_DIR}/tcob/gfx/Material.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/Noise.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Path2d.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Polygon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Quadtree.hpp
@@ -132,6 +132,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Shape.inl
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Text.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/procgen/LSystem.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/procgen/Noise.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Button.hpp

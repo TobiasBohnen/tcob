@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/Noise.hpp"
+#include "tcob/gfx/procgen/Noise.hpp"
 
 #include <cmath>
 #include <limits>
