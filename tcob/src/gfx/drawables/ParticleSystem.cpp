@@ -154,11 +154,11 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
 
         particle.Region = texRegion;
 
-        setup_particle(particle, tmpl, _randomGen);
+        setup_particle(particle, tmpl, _rng);
 
         // calculate random postion
-        f32 const x {_randomGen(Settings.SpawnArea.left(), Settings.SpawnArea.right())};
-        f32 const y {_randomGen(Settings.SpawnArea.top(), Settings.SpawnArea.bottom())};
+        f32 const x {_rng(Settings.SpawnArea.left(), Settings.SpawnArea.right())};
+        f32 const y {_rng(Settings.SpawnArea.top(), Settings.SpawnArea.bottom())};
 
         // set position
         particle.Position = {x, y};

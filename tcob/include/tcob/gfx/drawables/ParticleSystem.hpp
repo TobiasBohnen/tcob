@@ -258,7 +258,7 @@ public:
     void emit(particle_system<point_particle_emitter>& system, milliseconds deltaTime);
 
 private:
-    rng          _randomGen;
+    rng          _rng;
     milliseconds _remainingLife {1000};
     f64          _emissionDiff {0};
     bool         _alive {true};
