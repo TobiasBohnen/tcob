@@ -43,11 +43,12 @@ public:
     prop<bool>        HeaderSelectable;
 
     void set_columns(std::vector<utf8_string> const& col, bool clearRows = true);
-    auto column_size() const -> isize;
+    auto column_count() const -> isize;
 
     void add_row(std::vector<utf8_string> const& row);
     void add_row(std::span<list_item const> row);
     void clear_rows();
+    auto row_count() const -> isize;
 
     auto get_cell(point_i idx) const -> utf8_string;
 

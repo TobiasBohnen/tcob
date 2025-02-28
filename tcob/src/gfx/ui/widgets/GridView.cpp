@@ -52,7 +52,7 @@ void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
     force_redraw(this->name() + ": column headers set");
 }
 
-auto grid_view::column_size() const -> isize
+auto grid_view::column_count() const -> isize
 {
     return std::ssize(_columnHeaders);
 }
@@ -95,6 +95,11 @@ void grid_view::clear_rows()
     HoveredCellIndex  = INVALID;
 
     force_redraw(this->name() + ": rows cleared");
+}
+
+auto grid_view::row_count() const -> isize
+{
+    return std::ssize(_rows);
 }
 
 auto grid_view::get_cell(point_i idx) const -> utf8_string
