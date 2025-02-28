@@ -54,12 +54,18 @@ void text_box::on_paint(widget_painter& painter)
             _textDirty    = false;
         }
         painter.draw_text(_style.Text, rect, _formatResult);
+    } else {
+        _formatResult = {};
     }
 
     if (_caretVisible) {
         f32 offset {0.0f};
         if (!_formatResult.Tokens.empty()) {
-            offset = _formatResult.get_quad(_caretPos).Rect.right();
+            if (_caretPos == 0) {
+                offset = _formatResult.get_quad(_caretPos).Rect.left();
+            } else {
+                offset = _formatResult.get_quad(_caretPos - 1).Rect.right();
+            }
         }
         painter.draw_caret(_style.Caret, rect, {offset, 0});
     }

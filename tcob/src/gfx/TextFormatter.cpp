@@ -302,8 +302,8 @@ auto result::get_quad(usize idx) -> quad_definition
 {
     for (auto const& token : Tokens) {
         for (auto const& quad : token.Quads) {
-            --idx;
             if (idx == 0) { return quad; }
+            --idx;
         }
     }
 
