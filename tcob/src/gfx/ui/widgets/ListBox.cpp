@@ -157,10 +157,10 @@ void list_box::on_paint(widget_painter& painter)
     }
 
     if (SelectedItemIndex != INVALID_INDEX) {
-        paint_item(SelectedItemIndex());
+        paint_item(SelectedItemIndex);
     }
     if (HoveredItemIndex != INVALID_INDEX && SelectedItemIndex != HoveredItemIndex) {
-        paint_item(HoveredItemIndex());
+        paint_item(HoveredItemIndex);
     }
 }
 

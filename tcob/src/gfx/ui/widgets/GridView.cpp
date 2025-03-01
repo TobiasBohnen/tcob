@@ -83,6 +83,20 @@ void grid_view::add_row(std::span<list_item const> row)
     force_redraw(this->name() + ": row added");
 }
 
+void grid_view::remove_row(isize idx)
+{
+    _rows.erase(_rows.begin() + idx);
+    // TODO: update _columnSizes
+
+    clear_sub_styles();
+
+    set_scrollbar_value(0);
+    SelectedCellIndex = INVALID;
+    HoveredCellIndex  = INVALID;
+
+    force_redraw(this->name() + ": row removed");
+}
+
 void grid_view::clear_rows()
 {
     _rows.clear();
@@ -135,73 +149,81 @@ void grid_view::on_paint(widget_painter& painter)
     // content
     scissor_guard const guard {painter, this};
 
-    auto const get_cell_rect {[this](point_i idx, point_f pos, size_f size, f32 offsetX) {
-        rect_f retValue {point_f::Zero, size};
-        retValue.Position.X = pos.X + offsetX;
-        retValue.Position.Y = pos.Y + (size.Height * idx.Y);
-        if (idx.Y > 0) {
-            retValue.Position.Y -= get_scrollbar_value();
-        }
+    rect_f    gridRect {rect};
+    f32 const rowHeight {_style.RowHeight.calc(gridRect.height())};
 
-        return retValue;
-    }};
-
-    auto const get_cell_flags {[this](point_i idx, select_mode mode) -> widget_flags {
-        switch (mode) {
-        case select_mode::Cell:
-            return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
-        case select_mode::Row:
-            return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
-        case select_mode::Column:
-        default:
-            return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
-        }
-    }};
-
-    rect_f           gridRect {rect};
-    f32 const        rowHeight = _style.RowHeight.calc(gridRect.height());
-    std::vector<f32> colWidths(_columnHeaders.size());
+    std::vector<f32> columnWidths(_columnHeaders.size());
+    std::vector<f32> columnOffsets(_columnHeaders.size());
 
     for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
-        colWidths[x] = get_column_width(x, gridRect.width());
+        columnWidths[x] = get_column_width(x, gridRect.width());
+        if (x > 0) {
+            columnOffsets[x] = columnOffsets[x - 1] + columnWidths[x - 1];
+        }
     }
 
     _rowRectCache.clear();
     _headerRectCache.clear();
     _visibleRows = (gridRect.height() / rowHeight) - 1;
 
-    auto const paint_cell {[&](point_i idx, f32 offsetX, list_item const& item, string const& className, rect_f& cell) {
-        rect_f const cellRect {get_cell_rect(idx, gridRect.Position, {colWidths[idx.X], rowHeight}, offsetX)};
+    auto const paint_cell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
+        rect_f cellRect {point_f::Zero, {columnWidths[idx.X], rowHeight}};
+        cellRect.Position.X = gridRect.Position.X + columnOffsets[idx.X];
+        cellRect.Position.Y = gridRect.Position.Y + (rowHeight * idx.Y);
+        if (idx.Y > 0) { cellRect.Position.Y -= get_scrollbar_value(); }
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
             item_style cellStyle {};
-            update_sub_style(cellStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, get_cell_flags(idx, SelectMode));
-
+            update_sub_style(cellStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
             painter.draw_item(cellStyle.Item, cellRect, item);
             cell = cellRect;
             return;
         }
 
-        reset_sub_style(idx.X + idx.Y * std::ssize(_columnHeaders), className, get_cell_flags(idx, SelectMode));
+        reset_sub_style(idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
+    }};
+
+    auto const get_cell_flags {[this](point_i idx, select_mode mode) -> widget_flags {
+        switch (mode) {
+        case select_mode::Cell: return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
+        case select_mode::Row: return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
+        case select_mode::Column: return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
+        }
+        return {};
     }};
 
     // Draw rows
+    std::vector<point_i> selectedCells;
+    std::vector<point_i> hoveredCells;
     for (i32 y {0}; y < std::ssize(_rows); ++y) {
-        f32 offsetX {0.f};
-
         for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
             point_i const idx {x, y + 1};
-            paint_cell(idx, offsetX, _rows[y][x], _style.RowItemClass, _rowRectCache[idx]);
-            offsetX += colWidths[x];
+            auto const    cellFlags {get_cell_flags(idx, SelectMode)};
+            // skip selected/hover
+            if (cellFlags.Active) {
+                selectedCells.push_back(idx);
+                continue;
+            }
+            if (cellFlags.Hover) {
+                hoveredCells.push_back(idx);
+                continue;
+            }
+
+            paint_cell(idx, _rows[y][x], _style.RowItemClass, cellFlags, _rowRectCache[idx]);
         }
     }
 
+    for (auto const& idx : selectedCells) {
+        paint_cell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Active = true}, _rowRectCache[idx]);
+    }
+    for (auto const& idx : hoveredCells) {
+        paint_cell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Hover = true}, _rowRectCache[idx]);
+    }
+
     // Draw headers
-    f32 offsetX {0.f};
     for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
         point_i const idx {x, 0};
-        paint_cell(idx, offsetX, _columnHeaders[x], _style.HeaderItemClass, _headerRectCache[idx]);
-        offsetX += colWidths[x];
+        paint_cell(idx, _columnHeaders[x], _style.HeaderItemClass, get_cell_flags(idx, SelectMode), _headerRectCache[idx]);
     }
 }
 
@@ -223,6 +245,8 @@ void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
         if (HeaderSelectable) {
             HoveredCellIndex = kvp.first;
             ev.Handled       = true;
+        } else {
+            HoveredCellIndex = INVALID;
         }
         return;
     }

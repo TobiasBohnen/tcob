@@ -47,6 +47,7 @@ public:
 
     void add_row(std::vector<utf8_string> const& row);
     void add_row(std::span<list_item const> row);
+    void remove_row(isize idx);
     void clear_rows();
     auto row_count() const -> isize;
 
