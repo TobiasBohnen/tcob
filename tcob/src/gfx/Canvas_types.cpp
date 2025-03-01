@@ -573,6 +573,8 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
 
     // Update bounds and segment data.
     for (auto& path : _paths) {
+        if (path.Count == 0) { continue; }
+
         canvas_point* pts {&_points[path.First]};
 
         // If the first and last points coincide, remove the duplicate.
@@ -603,6 +605,8 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
             p0         = p1++;
         }
     }
+
+    std::erase_if(_paths, [](auto const& path) { return path.Count == 0; });
 }
 
 void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit)

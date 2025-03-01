@@ -139,7 +139,7 @@ public:
 
     auto get_texture(i32 level = 0) -> assets::asset_ptr<texture>;
 
-    void begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt = 0);
+    void begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt = 0, bool clear = true);
     void end_frame();
     void cancel_frame();
 

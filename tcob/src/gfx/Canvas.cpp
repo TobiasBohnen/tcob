@@ -119,7 +119,7 @@ auto canvas::get_texture(i32 level) -> assets::asset_ptr<texture>
     return _rtt[level];
 }
 
-void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt)
+void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt, bool clear)
 {
     _activeRtt  = rtt;
     _windowSize = windowSize;
@@ -127,7 +127,9 @@ void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt)
     auto& artt {_rtt[_activeRtt]};
     artt->Size = windowSize;
     artt->prepare_render();
-    artt->clear({0, 0, 0, 0});
+    if (clear) {
+        artt->clear({0, 0, 0, 0});
+    }
 
     _states->reset();
 
