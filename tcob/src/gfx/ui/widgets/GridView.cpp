@@ -128,6 +128,11 @@ auto grid_view::get_cell(point_i idx) const -> utf8_string
     return _rows[idx.Y - 1][idx.X].Text;
 }
 
+auto grid_view::get_row(isize idx) const -> std::vector<list_item> const&
+{
+    return _rows[idx];
+}
+
 void grid_view::prepare_redraw()
 {
     update_style(_style);

@@ -52,6 +52,7 @@ public:
     auto row_count() const -> isize;
 
     auto get_cell(point_i idx) const -> utf8_string;
+    auto get_row(isize idx) const -> std::vector<list_item> const&;
 
     void prepare_redraw() override;
 

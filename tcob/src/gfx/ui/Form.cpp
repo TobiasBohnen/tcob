@@ -521,7 +521,6 @@ auto form::can_popup_tooltip() const -> bool
         && _focusWidget != _topWidget
         && !_isLButtonDown && !_isRButtonDown
         && locate_service<input::system>().InputMode == input::mode::KeyboardMouse) {
-
         return _mouseOverTime > _topWidget->Tooltip->Delay;
     }
 

@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Common.hpp"
@@ -34,9 +33,9 @@ public:
 
     prop<rect_f> Bounds;
 
-    prop<style_collection>                          Styles;
-    prop<control_map>                               Controls;
-    prop<std::unordered_map<string, nav_map_entry>> NavMap;
+    prop<style_collection> Styles;
+    prop<control_map>      Controls;
+    prop<nav_map>          NavMap;
 
     auto name() const -> string const&;
 

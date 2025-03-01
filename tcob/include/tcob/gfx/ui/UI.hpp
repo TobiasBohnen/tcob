@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <unordered_map>
 #include <variant>
 
 #include "tcob/core/Rect.hpp"
@@ -77,6 +78,8 @@ struct nav_map_entry {
     string Right;
     string Down;
 };
+
+using nav_map = std::unordered_map<string, nav_map_entry>;
 
 ////////////////////////////////////////////////////////////
 
