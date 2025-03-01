@@ -67,8 +67,9 @@ void spinner::on_paint(widget_painter& painter)
 
 void spinner::on_mouse_leave()
 {
-    _mouseDown = false;
-    _holdCount = 1;
+    _mouseDown  = false;
+    _holdCount  = 1;
+    _hoverArrow = arrow::None;
 }
 
 void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -115,6 +116,8 @@ void spinner::on_mouse_up(input::mouse::button_event const& /* ev */)
 
 void spinner::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
+    if (!is_focused()) { return; }
+
     if (ev.Scroll.Y > 0) {
         Value += Step();
     } else if (ev.Scroll.Y < 0) {

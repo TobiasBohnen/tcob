@@ -163,6 +163,8 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
 
 void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
+    if (!is_focused()) { return; }
+
     if (ev.Scroll.Y > 0) {
         Value += Step();
     } else if (ev.Scroll.Y < 0) {
