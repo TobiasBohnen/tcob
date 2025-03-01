@@ -40,6 +40,7 @@
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Path2d.hpp"
+#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Texture.hpp"
@@ -197,9 +198,9 @@ public:
 
     void path_2d(path2d const& path);
 
-    void fill_lines(std::span<point_f const> points);
+    void fill_polyline(polyline_span points);
+    void stoke_polyline(polyline_span points);
     void stroke_line(point_f from, point_f to);
-    void stroke_lines(std::span<point_f const> points);
 
     // Paints
     auto create_linear_gradient [[nodiscard]] (point_f s, point_f e, color_gradient const& gradient) -> paint;

@@ -225,51 +225,51 @@ void seven_segment_display::on_paint(widget_painter& painter)
 
             switch (i) {
             case 0:
-                canvas.fill_lines({{points[0] + offset + lineOffset,
-                                    points[1] + offset - lineOffset,
-                                    points[2] + offset - lineOffset,
-                                    points[3] + offset + lineOffset}});
+                canvas.fill_polyline({{points[0] + offset + lineOffset,
+                                       points[1] + offset - lineOffset,
+                                       points[2] + offset - lineOffset,
+                                       points[3] + offset + lineOffset}});
                 break;
             case 1:
-                canvas.fill_lines({{points[0] + offset,
-                                    points[3] + offset,
-                                    points[5] + offset,
-                                    points[6] + offset,
-                                    points[4] + offset}});
+                canvas.fill_polyline({{points[0] + offset,
+                                       points[3] + offset,
+                                       points[5] + offset,
+                                       points[6] + offset,
+                                       points[4] + offset}});
                 break;
             case 2:
-                canvas.fill_lines({{points[2] + offset,
-                                    points[1] + offset,
-                                    points[17] + offset,
-                                    points[15] + offset,
-                                    points[16] + offset}});
+                canvas.fill_polyline({{points[2] + offset,
+                                       points[1] + offset,
+                                       points[17] + offset,
+                                       points[15] + offset,
+                                       points[16] + offset}});
                 break;
             case 3:
-                canvas.fill_lines({{points[6] + offset + lineOffset,
-                                    points[5] + offset + lineOffset,
-                                    points[16] + offset - lineOffset,
-                                    points[15] + offset - lineOffset,
-                                    points[13] + offset - lineOffset,
-                                    points[8] + offset + lineOffset}});
+                canvas.fill_polyline({{points[6] + offset + lineOffset,
+                                       points[5] + offset + lineOffset,
+                                       points[16] + offset - lineOffset,
+                                       points[15] + offset - lineOffset,
+                                       points[13] + offset - lineOffset,
+                                       points[8] + offset + lineOffset}});
                 break;
             case 4:
-                canvas.fill_lines({{points[6] + offset,
-                                    points[8] + offset,
-                                    points[10] + offset,
-                                    points[9] + offset,
-                                    points[7] + offset}});
+                canvas.fill_polyline({{points[6] + offset,
+                                       points[8] + offset,
+                                       points[10] + offset,
+                                       points[9] + offset,
+                                       points[7] + offset}});
                 break;
             case 5:
-                canvas.fill_lines({{points[15] + offset, points[14] + offset,
-                                    points[12] + offset,
-                                    points[11] + offset,
-                                    points[13] + offset}});
+                canvas.fill_polyline({{points[15] + offset, points[14] + offset,
+                                       points[12] + offset,
+                                       points[11] + offset,
+                                       points[13] + offset}});
                 break;
             case 6:
-                canvas.fill_lines({{points[10] + offset + lineOffset,
-                                    points[11] + offset - lineOffset,
-                                    points[12] + offset - lineOffset,
-                                    points[9] + offset + lineOffset}});
+                canvas.fill_polyline({{points[10] + offset + lineOffset,
+                                       points[11] + offset - lineOffset,
+                                       points[12] + offset - lineOffset,
+                                       points[9] + offset + lineOffset}});
                 break;
             }
         }

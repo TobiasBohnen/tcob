@@ -437,7 +437,7 @@ void canvas::set_dash_offset(f32 offset)
 
 ////////////////////////////////////////////////////////////
 
-void canvas::fill_lines(std::span<point_f const> points)
+void canvas::fill_polyline(polyline_span points)
 {
     begin_path();
 
@@ -449,17 +449,7 @@ void canvas::fill_lines(std::span<point_f const> points)
     fill();
 }
 
-void canvas::stroke_line(point_f from, point_f to)
-{
-    begin_path();
-
-    move_to(from);
-    line_to(to);
-
-    stroke();
-}
-
-void canvas::stroke_lines(std::span<point_f const> points)
+void canvas::stoke_polyline(polyline_span points)
 {
     if (points.size() == 1) { return; }
 
@@ -469,6 +459,16 @@ void canvas::stroke_lines(std::span<point_f const> points)
     for (u32 i {1}; i < points.size(); ++i) {
         line_to(points[i]);
     }
+
+    stroke();
+}
+
+void canvas::stroke_line(point_f from, point_f to)
+{
+    begin_path();
+
+    move_to(from);
+    line_to(to);
 
     stroke();
 }
