@@ -29,7 +29,7 @@ auto l_system::generate(string axiom, i32 iterations) -> string
     string current {std::move(axiom)};
     for (i32 i {0}; i < iterations; ++i) {
         string next;
-        for (size_t pos = 0; pos < current.size(); ++pos) {
+        for (usize pos {0}; pos < current.size(); ++pos) {
             next += get_replacement(current[pos], current, pos);
         }
         current = next;
