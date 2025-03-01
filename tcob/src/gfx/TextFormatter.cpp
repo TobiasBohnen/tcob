@@ -298,7 +298,7 @@ auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kernin
 
 ////////////////////////////////////////////////////////////
 
-auto result::get_quad(usize idx) -> quad_definition
+auto result::get_quad(usize idx) const -> quad_definition
 {
     for (auto const& token : Tokens) {
         for (auto const& quad : token.Quads) {

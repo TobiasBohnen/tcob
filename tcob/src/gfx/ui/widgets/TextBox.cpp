@@ -130,10 +130,19 @@ void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev 
 {
 }
 
+void text_box::on_mouse_down(input::mouse::button_event const& ev)
+{
+    auto const  mp {global_to_content(ev.Position)};
+    usize const target {calc_caret_pos(mp)};
+    if (_caretPos != target) {
+        _caretPos = target;
+        force_redraw(this->name() + ": Caret moved");
+    }
+    ev.Handled = true;
+}
+
 void text_box::on_focus_gained()
 {
-    _caretPos = _textLength;
-
     _caretTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
     _caretTween->Value.Changed.connect([this](auto val) {
         _caretVisible = val;
@@ -171,6 +180,27 @@ void text_box::on_styles_changed()
 {
     widget::on_styles_changed();
     _textDirty = true;
+}
+
+auto text_box::calc_caret_pos(point_f mp) const -> usize
+{
+    if (_formatResult.QuadCount == 0) { return 0; }
+
+    // before first
+    auto const& firstRect {_formatResult.get_quad(0).Rect};
+    if (mp.X <= firstRect.center().X) { return 0; }
+    // after last
+    auto const& lastRect {_formatResult.get_quad(_formatResult.QuadCount - 1).Rect};
+    if (mp.X >= lastRect.center().X) { return _textLength; }
+
+    // center check
+    for (usize i {0}; i < _formatResult.QuadCount; ++i) {
+        auto const rect {_formatResult.get_quad(i).Rect};
+        f32 const  mid {rect.center().X};
+        if (mp.X < mid) { return i; }
+    }
+
+    return _textLength;
 }
 
 } // namespace ui

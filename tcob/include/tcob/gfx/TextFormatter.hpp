@@ -50,7 +50,7 @@ public:
     size_f                    UsedSize {size_f::Zero};
     font*                     Font {nullptr};
 
-    auto get_quad(usize idx) -> quad_definition;
+    auto get_quad(usize idx) const -> quad_definition;
 };
 
 ////////////////////////////////////////////////////////////

@@ -42,6 +42,8 @@ protected:
     void on_text_input(input::keyboard::text_input_event const& ev) override;
     void on_text_editing(input::keyboard::text_editing_event const& ev) override;
 
+    void on_mouse_down(input::mouse::button_event const& ev) override;
+
     void on_focus_gained() override;
     void on_focus_lost() override;
 
@@ -52,6 +54,8 @@ protected:
     void on_styles_changed() override;
 
 private:
+    auto calc_caret_pos(point_f mp) const -> usize;
+
     std::unique_ptr<square_wave_tween<bool>> _caretTween;
     usize                                    _caretPos {0};
     bool                                     _caretVisible {false};
