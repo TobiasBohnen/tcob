@@ -92,7 +92,7 @@ void text_box::on_key_down(input::keyboard::event const& ev)
             force_redraw(this->name() + ": Caret moved");
         }
     } else if (ev.KeyCode == controls->NavRightKey) {
-        if (_caretPos < _formatResult.QuadCount) {
+        if (_caretPos < _textLength) {
             ++_caretPos;
             force_redraw(this->name() + ": Caret moved");
         }
@@ -132,6 +132,8 @@ void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev 
 
 void text_box::on_focus_gained()
 {
+    _caretPos = _textLength;
+
     _caretTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
     _caretTween->Value.Changed.connect([this](auto val) {
         _caretVisible = val;
