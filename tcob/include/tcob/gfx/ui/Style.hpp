@@ -92,6 +92,7 @@ namespace element {
 
         assets::asset_ptr<font_family> Font;
         color                          Color {colors::White};
+        color                          SelectColor {colors::Blue};
         shadow                         Shadow {colors::Transparent, length {1, length::type::Absolute}, length {1, length::type::Absolute}};
         text_decoration                Decoration {};
         font::style                    Style {};

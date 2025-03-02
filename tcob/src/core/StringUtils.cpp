@@ -185,9 +185,9 @@ auto random_string(usize length) -> string
 
 namespace tcob::utf8 {
 
-auto length(utf8_string_view str) -> usize
+auto length(utf8_string_view str) -> isize
 {
-    return static_cast<usize>(::utf8::unchecked::distance(str.begin(), str.end()));
+    return static_cast<isize>(::utf8::unchecked::distance(str.begin(), str.end()));
 }
 
 auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string

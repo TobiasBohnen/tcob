@@ -29,7 +29,8 @@ public:
     signal<text_event const> Submit;
 
     prop<utf8_string> Text;
-    prop<usize>       MaxLength;
+    prop<isize>       MaxLength;
+    prop<bool>        Selectable;
 
 protected:
     void on_paint(widget_painter& painter) override;
@@ -42,27 +43,34 @@ protected:
     void on_text_input(input::keyboard::text_input_event const& ev) override;
     void on_text_editing(input::keyboard::text_editing_event const& ev) override;
 
+    void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_down(input::mouse::button_event const& ev) override;
+    void on_mouse_up(input::mouse::button_event const& ev) override;
 
     void on_focus_gained() override;
     void on_focus_lost() override;
 
     auto attributes() const -> widget_attributes override;
 
-    void insert_text(utf8_string const& newText);
-
     void on_styles_changed() override;
 
 private:
-    auto calc_caret_pos(point_f mp) const -> usize;
+    auto remove_selected_text() -> bool;
+    void insert_text(utf8_string const& newText);
+
+    void select_text(isize first, isize last);
+    auto is_text_selected() const -> bool;
+    auto calc_caret_pos(point_f mp) const -> isize;
 
     std::unique_ptr<square_wave_tween<bool>> _caretTween;
-    usize                                    _caretPos {0};
+    isize                                    _caretPos {0};
+    isize                                    _dragCaretPos {INVALID_INDEX};
     bool                                     _caretVisible {false};
 
-    text_formatter::result _formatResult;
-    usize                  _textLength {0};
-    bool                   _textDirty {false};
+    text_formatter::result  _formatResult;
+    isize                   _textLength {0};
+    bool                    _textDirty {false};
+    std::pair<isize, isize> _selectedText {INVALID_INDEX, INVALID_INDEX};
 
     text_box::style _style;
 };

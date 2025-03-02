@@ -50,7 +50,7 @@ TCOB_API auto random_string(usize length) -> string;
 
 namespace tcob::utf8 {
 
-TCOB_API auto length(utf8_string_view str) -> usize;
+TCOB_API auto length(utf8_string_view str) -> isize;
 TCOB_API auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string;
 TCOB_API auto remove(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;
 TCOB_API auto substr(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;

@@ -46,11 +46,11 @@ struct format_token {
 class TCOB_API result {
 public:
     std::vector<format_token> Tokens {};
-    usize                     QuadCount {0};
+    isize                     QuadCount {0};
     size_f                    UsedSize {size_f::Zero};
     font*                     Font {nullptr};
 
-    auto get_quad(usize idx) const -> quad_definition;
+    auto get_quad(isize idx) const -> quad_definition;
 };
 
 ////////////////////////////////////////////////////////////

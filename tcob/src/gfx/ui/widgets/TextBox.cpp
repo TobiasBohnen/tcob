@@ -7,6 +7,7 @@
 
 #include "tcob/gfx/ui/widgets/TextBox.hpp"
 
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -31,9 +32,36 @@ text_box::text_box(init const& wi)
         force_redraw(this->name() + ": Text changed");
     });
 
-    MaxLength(std::numeric_limits<usize>::max());
+    MaxLength.Changed.connect([this](auto const& val) {
+        if (_textLength > val) {
+            Text = utf8::substr(Text(), 0, val);
+            force_redraw(this->name() + ": MaxLength changed");
+        }
+    });
+    MaxLength(std::numeric_limits<isize>::max());
+
+    Selectable.Changed.connect([this](auto const& val) {
+        if (!val) {
+            _selectedText = {INVALID_INDEX, INVALID_INDEX};
+            force_redraw(this->name() + ": Selectable changed");
+        }
+    });
+    Selectable(false);
 
     Class("text_box");
+}
+
+void text_box::select_text(isize first, isize last)
+{
+    _selectedText.first  = std::min(first, last);
+    _selectedText.second = std::max(first, last);
+
+    force_redraw(this->name() + ": SelectedText changed");
+}
+
+auto text_box::is_text_selected() const -> bool
+{
+    return _selectedText.first != INVALID_INDEX && _selectedText.second != INVALID_INDEX;
 }
 
 void text_box::on_paint(widget_painter& painter)
@@ -53,6 +81,32 @@ void text_box::on_paint(widget_painter& painter)
             _formatResult = painter.format_text(_style.Text, rect, Text());
             _textDirty    = false;
         }
+
+        if (_selectedText.first >= _formatResult.QuadCount || _selectedText.second >= _formatResult.QuadCount) {
+            _selectedText = {INVALID_INDEX, INVALID_INDEX};
+        }
+        if (is_text_selected()) {
+            size_f size {};
+            f32    y {std::numeric_limits<f32>::max()};
+            for (isize i {0}; i < _formatResult.QuadCount; ++i) {
+                auto const& rect {_formatResult.get_quad(i).Rect};
+                size.Height = std::max(size.Height, rect.height());
+                y           = std::min(y, rect.top());
+            }
+            auto const& first {_formatResult.get_quad(_selectedText.first).Rect};
+            size.Width = _formatResult.get_quad(_selectedText.second).Rect.right() - first.left();
+
+            rect_f backGround {};
+            backGround.Position = point_f {first.left(), y} + rect.Position;
+            backGround.Size     = size;
+
+            auto& canvas {painter.canvas()};
+            canvas.set_fill_style(_style.Text.SelectColor);
+            canvas.begin_path();
+            canvas.rect(backGround);
+            canvas.fill();
+        }
+
         painter.draw_text(_style.Text, rect, _formatResult);
     } else {
         _formatResult = {};
@@ -80,6 +134,8 @@ void text_box::on_update(milliseconds deltaTime)
 
 void text_box::on_key_down(input::keyboard::event const& ev)
 {
+    using namespace tcob::enum_ops;
+
     if (_caretTween) {
         _caretTween->pause();
         _caretVisible = true;
@@ -97,16 +153,29 @@ void text_box::on_key_down(input::keyboard::event const& ev)
             force_redraw(this->name() + ": Caret moved");
         }
     } else if (ev.KeyCode == controls->ForwardDeleteKey) {
-        if (_textLength > 0 && _caretPos < _textLength) {
-            Text = utf8::remove(Text(), _caretPos);
+        if (!remove_selected_text()) {
+            if (_textLength > 0 && _caretPos < _textLength) {
+                Text = utf8::remove(Text(), _caretPos);
+            }
         }
     } else if (ev.KeyCode == controls->BackwardDeleteKey) {
-        if (_textLength > 0 && _caretPos > 0) {
-            --_caretPos;
-            Text = utf8::remove(Text(), _caretPos);
+        if (!remove_selected_text()) {
+            if (_textLength > 0 && _caretPos > 0) {
+                --_caretPos;
+                Text = utf8::remove(Text(), _caretPos);
+            }
         }
     } else if (ev.KeyCode == controls->SubmitKey) {
         Submit({this, Text()});
+    } else if ((ev.KeyMods & controls->CutCopyPasteMod) == controls->CutCopyPasteMod) {
+        if (is_text_selected()) {
+            if (ev.KeyCode == controls->CopyKey) {
+                locate_service<input::system>().clipboard().set_text(utf8::substr(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1));
+            } else if (ev.KeyCode == controls->CutKey) {
+                locate_service<input::system>().clipboard().set_text(utf8::substr(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1));
+                remove_selected_text();
+            }
+        }
     }
 
     ev.Handled = true;
@@ -130,15 +199,40 @@ void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev 
 {
 }
 
+void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
+{
+    isize const target {calc_caret_pos(global_to_content(ev.Position))};
+    if (_caretPos != target) {
+        if (target < _dragCaretPos) {
+            select_text(_dragCaretPos - 1, target);
+        } else if (target > _dragCaretPos) {
+            select_text(_dragCaretPos, target - 1);
+        } else {
+            select_text(INVALID_INDEX, INVALID_INDEX);
+        }
+        _caretPos = target;
+
+        force_redraw(this->name() + ": Caret moved");
+        ev.Handled = true;
+    }
+}
+
 void text_box::on_mouse_down(input::mouse::button_event const& ev)
 {
-    auto const  mp {global_to_content(ev.Position)};
-    usize const target {calc_caret_pos(mp)};
+    isize const target {calc_caret_pos(global_to_content(ev.Position))};
     if (_caretPos != target) {
+        select_text(INVALID_INDEX, INVALID_INDEX);
         _caretPos = target;
         force_redraw(this->name() + ": Caret moved");
     }
-    ev.Handled = true;
+    _dragCaretPos = target;
+    ev.Handled    = true;
+}
+
+void text_box::on_mouse_up(input::mouse::button_event const& ev)
+{
+    _dragCaretPos = -1;
+    ev.Handled    = true;
 }
 
 void text_box::on_focus_gained()
@@ -167,9 +261,11 @@ auto text_box::attributes() const -> widget_attributes
 
 void text_box::insert_text(utf8_string const& newText)
 {
+    remove_selected_text();
+
     text_event ev {this, newText};
     BeforeTextInserted(ev);
-    usize const newTextLength {utf8::length(ev.Text)};
+    isize const newTextLength {utf8::length(ev.Text)};
     if (newTextLength > 0 && _textLength + newTextLength <= MaxLength) {
         Text = utf8::insert(Text(), ev.Text, _caretPos);
         _caretPos += newTextLength;
@@ -182,7 +278,19 @@ void text_box::on_styles_changed()
     _textDirty = true;
 }
 
-auto text_box::calc_caret_pos(point_f mp) const -> usize
+auto text_box::remove_selected_text() -> bool
+{
+    if (is_text_selected()) {
+        Text          = utf8::remove(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1);
+        _caretPos     = _selectedText.first;
+        _selectedText = {INVALID_INDEX, INVALID_INDEX};
+        return true;
+    }
+
+    return false;
+}
+
+auto text_box::calc_caret_pos(point_f mp) const -> isize
 {
     if (_formatResult.QuadCount == 0) { return 0; }
 
@@ -194,7 +302,7 @@ auto text_box::calc_caret_pos(point_f mp) const -> usize
     if (mp.X >= lastRect.center().X) { return _textLength; }
 
     // center check
-    for (usize i {0}; i < _formatResult.QuadCount; ++i) {
+    for (isize i {0}; i < _formatResult.QuadCount; ++i) {
         auto const rect {_formatResult.get_quad(i).Rect};
         f32 const  mid {rect.center().X};
         if (mp.X < mid) { return i; }

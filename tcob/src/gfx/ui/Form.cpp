@@ -327,11 +327,9 @@ void form::on_key_down(input::keyboard::event const& ev)
             }
             focus_widget(nextWidget);
         }
-    } else if ((ev.KeyMods & Controls->CutCopyPasteMod) == Controls->CutCopyPasteMod) {
-        if (ev.KeyCode == Controls->PasteKey) {
-            input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
-            _injector.on_text_input(_focusWidget, tev);
-        }
+    } else if ((ev.KeyMods & Controls->CutCopyPasteMod) == Controls->CutCopyPasteMod && ev.KeyCode == Controls->PasteKey) {
+        input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
+        _injector.on_text_input(_focusWidget, tev);
     } else {
         _injector.on_key_down(_focusWidget, ev);
     }
