@@ -33,6 +33,12 @@ tab_container::tab_container(init const& wi)
     Class("tab_container");
 }
 
+void tab_container::prepare_redraw()
+{
+    widget_container::prepare_redraw();
+    _updateTabs = true;
+}
+
 void tab_container::remove_tab(widget* tab)
 {
     for (isize i {0}; i < std::ssize(_tabs); ++i) {
@@ -138,9 +144,6 @@ void tab_container::on_paint(widget_painter& painter)
     // active tab
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
         offset_tab_content(rect, _style);
-        for (auto& t : _tabs) {
-            t->Bounds = {point_f::Zero, rect.Size};
-        }
 
         auto          xform {transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
@@ -187,6 +190,15 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 
 void tab_container::on_update(milliseconds /* deltaTime */)
 {
+    if (_updateTabs) {
+        update_style(_style);
+
+        auto const rect {content_bounds()};
+        for (auto& t : _tabs) {
+            t->Bounds = {point_f::Zero, rect.Size};
+        }
+        _updateTabs = false;
+    }
 }
 
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
@@ -194,9 +206,7 @@ void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
     f32 const barHeight {style.TabBarHeight.calc(bounds.height()) * get_tab_row_count()};
 
     bounds.Size.Height -= barHeight;
-    if (style.TabBarPosition == position::Top) {
-        bounds.Position.Y += barHeight;
-    }
+    if (style.TabBarPosition == position::Top) { bounds.Position.Y += barHeight; }
 }
 
 auto tab_container::get_tab_row_count() const -> isize

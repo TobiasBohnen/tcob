@@ -34,6 +34,8 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_section(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>;
 
+    void prepare_redraw() override;
+
     void remove_section(widget* sec);
     void clear_sections();
 
@@ -64,6 +66,7 @@ private:
     std::vector<rect_f>                  _sectionRectCache;
 
     accordion::style _style;
+    bool             _updateSections {false};
 };
 
 }

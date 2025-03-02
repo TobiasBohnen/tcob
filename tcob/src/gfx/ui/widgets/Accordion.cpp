@@ -32,6 +32,12 @@ accordion::accordion(init const& wi)
     Class("accordion");
 }
 
+void accordion::prepare_redraw()
+{
+    widget_container::prepare_redraw();
+    _updateSections = true;
+}
+
 void accordion::remove_section(widget* sec)
 {
     for (isize i {0}; i < std::ssize(_sections); ++i) {
@@ -135,9 +141,6 @@ void accordion::on_paint(widget_painter& painter)
     // active section
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
         offset_section_content(rect, _style);
-        for (auto& t : _sections) {
-            t->Bounds = {point_f::Zero, rect.Size};
-        }
 
         auto          xform {transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
@@ -194,6 +197,15 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
 
 void accordion::on_update(milliseconds /* deltaTime */)
 {
+    if (_updateSections) {
+        update_style(_style);
+
+        auto const rect {content_bounds()};
+        for (auto& t : _sections) {
+            t->Bounds = {point_f::Zero, rect.Size};
+        }
+        _updateSections = false;
+    }
 }
 
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
