@@ -378,6 +378,10 @@ namespace detail {
     private:
         auto check(widget* widget) const -> bool;
     };
+
+    ////////////////////////////////////////////////////////////
+
+    auto widgets_by_zorder(auto&& container, bool reverse) -> std::vector<std::shared_ptr<widget>>;
 }
 
 }

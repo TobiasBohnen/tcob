@@ -24,7 +24,7 @@ public:
     auto virtual find_child_by_name(string const& name) -> std::shared_ptr<widget>;
 
     auto virtual widgets() const -> std::vector<std::shared_ptr<widget>> const& = 0;
-    auto widgets_by_zorder(bool reverse = false) const -> std::vector<std::shared_ptr<widget>>;
+    auto widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>;
 
     template <SubmitTarget Target>
     void submit(Target& target);

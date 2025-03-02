@@ -119,10 +119,10 @@ void form::clear()
 
 void form::force_redraw(string const& reason)
 {
-    if (!_updateWidgetStyle) {
+    if (!_prepareWidgets) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
     }
-    _updateWidgetStyle = true;
+    _prepareWidgets = true;
     _layout.mark_dirty();
 }
 
@@ -167,7 +167,7 @@ void form::on_fixed_update(milliseconds deltaTime)
     }
 
     // update styles
-    if (_updateWidgetStyle) {
+    if (_prepareWidgets) {
         // containers
         for (auto const& container : widgets) {
             container->prepare_redraw();
@@ -178,8 +178,8 @@ void form::on_fixed_update(milliseconds deltaTime)
             tooltip.lock()->prepare_redraw();
         }
 
-        _updateWidgetStyle = false;
-        _redrawWidgets     = true;
+        _prepareWidgets = false;
+        _redrawWidgets  = true;
     }
 
     // layout
@@ -188,26 +188,6 @@ void form::on_fixed_update(milliseconds deltaTime)
     // update widgets
     for (auto const& container : widgets) {
         container->update(deltaTime);
-    }
-}
-
-void form::on_styles_changed()
-{
-    _updateWidgetStyle = true;
-    for (auto const& container : containers()) {
-        container->on_styles_changed();
-    }
-
-    for (auto const& tt : _tooltips) {
-        if (tt.expired()) { continue; }
-        auto tooltip {tt.lock()};
-
-        widget_style_selectors const ttNewSelectors {
-            .Class      = tooltip->Class(),
-            .Flags      = tooltip->flags(),
-            .Attributes = tooltip->attributes(),
-        };
-        tooltip->_transition.reset(dynamic_cast<widget_style*>(Styles->get(ttNewSelectors)));
     }
 }
 
@@ -231,7 +211,7 @@ void form::on_draw_to(render_target& target)
     if (_redrawWidgets) {
         _canvas.begin_frame(bounds, 1.0f, 0);
 
-        for (auto const& container : widgets_by_zorder()) {
+        for (auto const& container : widgets_by_zorder(false)) {
             _canvas.reset();
             container->paint(*_painter);
         }
@@ -459,13 +439,7 @@ void form::on_visiblity_changed()
 
 auto form::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
 {
-    auto retValue {containers()};
-    if (reverse) {
-        std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
-    } else {
-        std::stable_sort(retValue.begin(), retValue.end(), [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
-    }
-    return retValue;
+    return detail::widgets_by_zorder(containers(), reverse);
 }
 
 void form::on_text_input(input::keyboard::text_input_event const& ev)
@@ -502,6 +476,26 @@ auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget
         }
     }
     return retValue;
+}
+
+void form::on_styles_changed()
+{
+    _prepareWidgets = true;
+    for (auto const& container : containers()) {
+        container->on_styles_changed();
+    }
+
+    for (auto const& tt : _tooltips) {
+        if (tt.expired()) { continue; }
+        auto tooltip {tt.lock()};
+
+        widget_style_selectors const ttNewSelectors {
+            .Class      = tooltip->Class(),
+            .Flags      = tooltip->flags(),
+            .Attributes = tooltip->attributes(),
+        };
+        tooltip->_transition.reset(dynamic_cast<widget_style*>(Styles->get(ttNewSelectors)));
+    }
 }
 
 auto form::can_popup_tooltip() const -> bool

@@ -90,7 +90,7 @@ protected:
 
 private:
     void on_mouse_hover(input::mouse::motion_event const& ev);
-    auto widgets_by_zorder(bool reverse = false) const -> std::vector<std::shared_ptr<widget>>;
+    auto widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>;
 
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
@@ -111,7 +111,7 @@ private:
     std::vector<std::weak_ptr<tooltip>> _tooltips;
 
     bool _redrawWidgets {true};
-    bool _updateWidgetStyle {true};
+    bool _prepareWidgets {true};
 
     bool         _isLButtonDown {false};
     bool         _isRButtonDown {false};

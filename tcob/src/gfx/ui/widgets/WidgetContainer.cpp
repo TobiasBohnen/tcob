@@ -5,8 +5,6 @@
 
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-#include <algorithm>
-
 #include "tcob/gfx/ui/Form.hpp"
 
 namespace tcob::gfx::ui {
@@ -55,14 +53,7 @@ auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr
 
 auto widget_container::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
 {
-    auto retValue {widgets()};
-    if (reverse) {
-        std::ranges::sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
-    } else {
-        std::ranges::sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
-    }
-
-    return retValue;
+    return detail::widgets_by_zorder(widgets(), reverse);
 }
 
 void widget_container::prepare_redraw()
