@@ -38,7 +38,6 @@ public:
     void clear_widgets();
 
     auto scroll_offset() const -> point_f override;
-    void scroll_to(point_f off);
 
 protected:
     void on_styles_changed() override;

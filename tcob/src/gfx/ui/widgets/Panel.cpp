@@ -246,13 +246,6 @@ auto panel::scroll_offset() const -> point_f
     return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal), _vScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal)};
 }
 
-void panel::scroll_to(point_f off)
-{
-    _hScrollbar.start_scroll(off.X, milliseconds {0});
-    _vScrollbar.start_scroll(off.Y, milliseconds {0});
-    force_redraw(this->name() + ": set_scroll_offset");
-}
-
 ////////////////////////////////////////////////////////////
 
 glass::glass(init const& wi)
