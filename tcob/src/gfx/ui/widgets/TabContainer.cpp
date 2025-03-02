@@ -138,8 +138,9 @@ void tab_container::on_paint(widget_painter& painter)
     // active tab
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
         offset_tab_content(rect, _style);
-
-        _tabs[ActiveTabIndex]->Bounds = {point_f::Zero, rect.Size};
+        for (auto& t : _tabs) {
+            t->Bounds = {point_f::Zero, rect.Size};
+        }
 
         auto          xform {transform::Identity};
         point_f const translate {rect.Position + paint_offset()};

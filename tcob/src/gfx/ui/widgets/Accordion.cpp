@@ -135,7 +135,9 @@ void accordion::on_paint(widget_painter& painter)
     // active section
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
         offset_section_content(rect, _style);
-        update_section_bounds(rect);
+        for (auto& t : _sections) {
+            t->Bounds = {point_f::Zero, rect.Size};
+        }
 
         auto          xform {transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
@@ -207,13 +209,6 @@ void accordion::offset_content(rect_f& bounds, bool isHitTest) const
 
     if (isHitTest) { return; }
     offset_section_content(bounds, _style);
-}
-
-void accordion::update_section_bounds(rect_f const& bounds)
-{
-    for (auto& t : _sections) {
-        t->Bounds = {point_f::Zero, bounds.Size};
-    }
 }
 
 auto accordion::attributes() const -> widget_attributes
