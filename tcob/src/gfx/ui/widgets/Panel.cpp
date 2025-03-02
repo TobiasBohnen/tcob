@@ -33,9 +33,9 @@ panel::panel(init const& wi)
     Class("panel");
 }
 
-void panel::force_redraw(string const& reason)
+void panel::prepare_redraw()
 {
-    widget_container::force_redraw(reason);
+    widget_container::prepare_redraw();
     _layout->mark_dirty();
 }
 

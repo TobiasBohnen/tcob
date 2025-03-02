@@ -31,7 +31,7 @@ public:
     template <std::derived_from<layout> T>
     auto get_layout() -> std::shared_ptr<T>;
 
-    void force_redraw(string const& reason) override;
+    void prepare_redraw() override;
 
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 

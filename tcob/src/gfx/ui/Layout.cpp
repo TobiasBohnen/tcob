@@ -19,20 +19,19 @@ layout::layout(parent parent)
 
 void layout::update()
 {
-    if (_isDirty) {
-        std::stable_sort(_widgets.begin(), _widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+    if (!_isDirty) { return; }
+    std::stable_sort(_widgets.begin(), _widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
 
-        std::visit(
-            overloaded {
-                [&](widget_container* parent) {
-                    do_layout(parent->content_bounds().Size);
-                },
-                [&](form* parent) {
-                    do_layout(parent->Bounds().Size);
-                }},
-            _parent);
-        _isDirty = false;
-    }
+    std::visit(
+        overloaded {
+            [&](widget_container* parent) {
+                do_layout(parent->content_bounds().Size);
+            },
+            [&](form* parent) {
+                do_layout(parent->Bounds().Size);
+            }},
+        _parent);
+    _isDirty = false;
 }
 
 void layout::mark_dirty()

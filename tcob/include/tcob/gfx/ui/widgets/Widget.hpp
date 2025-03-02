@@ -175,7 +175,7 @@ private:
     void activate();
     void deactivate();
 
-    auto can_tab_stop() const -> bool;
+    auto can_tab_stop(i32 high, i32 low) const -> bool;
 
     bool         _visible {true};
     bool         _enabled {true};

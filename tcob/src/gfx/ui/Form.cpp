@@ -218,8 +218,10 @@ auto form::can_draw() const -> bool
 
 void form::on_draw_to(render_target& target)
 {
+    bool const hasCursor {_window && _window->Cursor()};
+
     // set cursor
-    if (_window && _window->Cursor() && _topWidget) {
+    if (hasCursor && _topWidget) {
         _window->Cursor->ActiveMode = _topWidget->Cursor;
     }
 
@@ -240,9 +242,7 @@ void form::on_draw_to(render_target& target)
 
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
-        point_i const pos {(_window && _window->Cursor()
-                                ? _window->Cursor->bounds().bottom_right()
-                                : locate_service<input::system>().mouse().get_position())
+        point_i const pos {(hasCursor ? _window->Cursor->bounds().bottom_right() : locate_service<input::system>().mouse().get_position())
                            - static_cast<point_i>(Bounds->Position)};
 
         auto& ttBounds {*_topWidget->Tooltip->Bounds};
@@ -250,15 +250,11 @@ void form::on_draw_to(render_target& target)
         ttBounds.Position.Y = static_cast<f32>(pos.Y);
         if (ttBounds.right() > Bounds->right()) {
             ttBounds.Position.X -= ttBounds.width();
-            if (_window && _window->Cursor()) {
-                ttBounds.Position.X -= _window->Cursor->bounds().width();
-            }
+            if (hasCursor) { ttBounds.Position.X -= _window->Cursor->bounds().width(); }
         }
         if (ttBounds.bottom() > Bounds->bottom()) {
             ttBounds.Position.Y -= ttBounds.height();
-            if (_window && _window->Cursor()) {
-                ttBounds.Position.Y -= _window->Cursor->bounds().height();
-            }
+            if (hasCursor) { ttBounds.Position.Y -= _window->Cursor->bounds().height(); }
         }
 
         _canvas.begin_frame(bounds, 1.0f, 1);
@@ -487,9 +483,7 @@ auto form::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget
     widget* retValue {nullptr};
     i32     lowestHigherValue {std::numeric_limits<i32>::max()};
     for (auto* widget : vec) {
-        if (widget->can_tab_stop()
-            && widget->TabStop->Index > _currentTabIndex
-            && widget->TabStop->Index < lowestHigherValue) {
+        if (widget->can_tab_stop(lowestHigherValue, _currentTabIndex)) {
             lowestHigherValue = widget->TabStop->Index;
             retValue          = widget;
         }
@@ -502,9 +496,7 @@ auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget
     widget* retValue {nullptr};
     i32     highestLowerValue {std::numeric_limits<i32>::min()};
     for (auto* widget : vec) {
-        if (widget->can_tab_stop()
-            && widget->TabStop->Index < _currentTabIndex
-            && widget->TabStop->Index > highestLowerValue) {
+        if (widget->can_tab_stop(_currentTabIndex, highestLowerValue)) {
             highestLowerValue = widget->TabStop->Index;
             retValue          = widget;
         }
@@ -514,11 +506,14 @@ auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget
 
 auto form::can_popup_tooltip() const -> bool
 {
-    if (!_isTooltipVisible
-        && _topWidget && _topWidget->Tooltip
-        && _focusWidget != _topWidget
-        && !_isLButtonDown && !_isRButtonDown
-        && locate_service<input::system>().InputMode == input::mode::KeyboardMouse) {
+    if (_isTooltipVisible) { return false; }
+    if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
+
+    bool const hasTooltip {_topWidget && _topWidget->Tooltip};
+    bool const isTopFocused {_topWidget && _topWidget->is_focused()};
+    bool const isMouseButtonDown {_isLButtonDown || _isRButtonDown};
+
+    if (hasTooltip && !isTopFocused && !isMouseButtonDown) {
         return _mouseOverTime > _topWidget->Tooltip->Delay;
     }
 
