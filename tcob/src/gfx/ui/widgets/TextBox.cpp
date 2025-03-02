@@ -42,13 +42,18 @@ text_box::text_box(init const& wi)
 
     Selectable.Changed.connect([this](auto const& val) {
         if (!val) {
-            _selectedText = {INVALID_INDEX, INVALID_INDEX};
-            force_redraw(this->name() + ": Selectable changed");
+            select_text(INVALID_INDEX, INVALID_INDEX);
         }
     });
     Selectable(false);
 
     Class("text_box");
+}
+
+auto text_box::selected_text() const -> utf8_string
+{
+    if (!is_text_selected()) { return ""; }
+    return utf8::substr(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1);
 }
 
 void text_box::select_text(isize first, isize last)
@@ -86,24 +91,20 @@ void text_box::on_paint(widget_painter& painter)
             _selectedText = {INVALID_INDEX, INVALID_INDEX};
         }
         if (is_text_selected()) {
-            size_f size {};
-            f32    y {std::numeric_limits<f32>::max()};
-            for (isize i {0}; i < _formatResult.QuadCount; ++i) {
-                auto const& rect {_formatResult.get_quad(i).Rect};
-                size.Height = std::max(size.Height, rect.height());
-                y           = std::min(y, rect.top());
-            }
-            auto const& first {_formatResult.get_quad(_selectedText.first).Rect};
-            size.Width = _formatResult.get_quad(_selectedText.second).Rect.right() - first.left();
-
-            rect_f backGround {};
-            backGround.Position = point_f {first.left(), y} + rect.Position;
-            backGround.Size     = size;
-
             auto& canvas {painter.canvas()};
             canvas.set_fill_style(_style.Text.SelectColor);
             canvas.begin_path();
-            canvas.rect(backGround);
+
+            auto const& first {_formatResult.get_quad(_selectedText.first).Rect};
+
+            size_f size {};
+            size.Width  = _formatResult.get_quad(_selectedText.second).Rect.right() - first.left();
+            size.Height = rect.height() * 0.9f;
+            point_f pos {};
+            pos.X = first.left();
+            pos.Y = (rect.height() - size.Height) / 2;
+
+            canvas.rect({pos + rect.Position, size});
             canvas.fill();
         }
 
@@ -170,9 +171,9 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     } else if ((ev.KeyMods & controls->CutCopyPasteMod) == controls->CutCopyPasteMod) {
         if (is_text_selected()) {
             if (ev.KeyCode == controls->CopyKey) {
-                locate_service<input::system>().clipboard().set_text(utf8::substr(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1));
+                locate_service<input::system>().clipboard().set_text(selected_text());
             } else if (ev.KeyCode == controls->CutKey) {
-                locate_service<input::system>().clipboard().set_text(utf8::substr(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1));
+                locate_service<input::system>().clipboard().set_text(selected_text());
                 remove_selected_text();
             }
         }
@@ -281,9 +282,9 @@ void text_box::on_styles_changed()
 auto text_box::remove_selected_text() -> bool
 {
     if (is_text_selected()) {
-        Text          = utf8::remove(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1);
-        _caretPos     = _selectedText.first;
-        _selectedText = {INVALID_INDEX, INVALID_INDEX};
+        Text      = utf8::remove(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1);
+        _caretPos = _selectedText.first;
+        select_text(INVALID_INDEX, INVALID_INDEX);
         return true;
     }
 

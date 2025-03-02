@@ -32,6 +32,8 @@ public:
     prop<isize>       MaxLength;
     prop<bool>        Selectable;
 
+    auto selected_text() const -> utf8_string;
+
 protected:
     void on_paint(widget_painter& painter) override;
 
