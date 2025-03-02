@@ -315,16 +315,20 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
 
 auto drop_down_list::attributes() const -> widget_attributes
 {
-    auto        retValue {widget::attributes()};
+    auto retValue {widget::attributes()};
+
     auto const& items {get_items()};
     auto const  size {std::ssize(items)};
 
+    retValue["selected_index"] = SelectedItemIndex();
     if (SelectedItemIndex >= 0 && SelectedItemIndex < size) {
         retValue["selected"] = items.at(SelectedItemIndex).Text;
     }
+    retValue["hover_index"] = HoveredItemIndex();
     if (HoveredItemIndex >= 0 && HoveredItemIndex < size) {
         retValue["hover"] = items.at(HoveredItemIndex()).Text;
     }
+
     return retValue;
 }
 

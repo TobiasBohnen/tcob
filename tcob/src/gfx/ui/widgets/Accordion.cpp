@@ -219,12 +219,16 @@ void accordion::update_section_bounds(rect_f const& bounds)
 auto accordion::attributes() const -> widget_attributes
 {
     auto retValue {widget_container::attributes()};
+
+    retValue["active_index"] = ActiveSectionIndex();
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
         retValue["active"] = _sectionLabels[ActiveSectionIndex].Text;
     }
+    retValue["hover_index"] = HoveredSectionIndex();
     if (HoveredSectionIndex >= 0 && HoveredSectionIndex < std::ssize(_sections)) {
         retValue["hover"] = _sectionLabels[HoveredSectionIndex].Text;
     }
+
     return retValue;
 }
 

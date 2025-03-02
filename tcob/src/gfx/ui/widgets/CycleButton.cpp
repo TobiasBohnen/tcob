@@ -94,9 +94,12 @@ void cycle_button::on_click()
 auto cycle_button::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
+
+    retValue["selected_index"] = SelectedItemIndex();
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
         retValue["selected"] = selected_item();
     }
+
     return retValue;
 }
 

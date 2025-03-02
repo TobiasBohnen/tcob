@@ -127,9 +127,10 @@ void label::on_update(milliseconds /*deltaTime*/)
 
 auto label::attributes() const -> widget_attributes
 {
-    widget_attributes retValue {{"label", Label()}};
-    auto const        base {widget::attributes()};
-    retValue.insert(base.begin(), base.end());
+    auto retValue {widget::attributes()};
+
+    retValue["label"] = Label();
+
     return retValue;
 }
 

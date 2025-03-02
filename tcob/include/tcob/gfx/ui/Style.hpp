@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -338,7 +339,7 @@ public:
     auto operator==(style_attributes const& other) const -> bool = default;
 
 private:
-    std::unordered_map<string, std::set<widget_attribute_types>> _values;
+    std::unordered_map<string, std::unordered_set<widget_attribute_types>> _values;
 };
 
 ////////////////////////////////////////////////////////////

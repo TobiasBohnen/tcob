@@ -219,9 +219,11 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 auto tab_container::attributes() const -> widget_attributes
 {
     auto retValue {widget_container::attributes()};
+    retValue["active_index"] = ActiveTabIndex();
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
         retValue["active"] = _tabLabels[ActiveTabIndex].Text;
     }
+    retValue["hover_index"] = HoveredTabIndex();
     if (HoveredTabIndex >= 0 && HoveredTabIndex < std::ssize(_tabs)) {
         retValue["hover"] = _tabLabels[HoveredTabIndex].Text;
     }

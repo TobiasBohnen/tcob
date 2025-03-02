@@ -140,12 +140,13 @@ void spinner::on_update(milliseconds /*deltaTime*/)
 
 auto spinner::attributes() const -> widget_attributes
 {
-    widget_attributes retValue {{"min", Min()},
-                                {"max", Max()},
-                                {"step", Step()},
-                                {"value", Value()}};
-    auto const        base {widget::attributes()};
-    retValue.insert(base.begin(), base.end());
+    auto retValue {widget::attributes()};
+
+    retValue["min"]   = Min();
+    retValue["max"]   = Max();
+    retValue["value"] = Value();
+    retValue["step"]  = Step();
+
     return retValue;
 }
 

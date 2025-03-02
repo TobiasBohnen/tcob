@@ -81,9 +81,10 @@ void image_box::on_update(milliseconds /*deltaTime*/)
 
 auto image_box::attributes() const -> widget_attributes
 {
-    widget_attributes retValue {{"fit", Fit()}};
-    auto const        base {widget::attributes()};
-    retValue.insert(base.begin(), base.end());
+    auto retValue {widget::attributes()};
+
+    retValue["fit"] = Fit();
+
     return retValue;
 }
 

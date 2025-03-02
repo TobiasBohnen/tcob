@@ -193,7 +193,7 @@ enum class fit_mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
-using widget_attribute_types = std::variant<i32, bool, string, orientation, fit_mode>;
+using widget_attribute_types = std::variant<isize, bool, string, orientation, fit_mode, point_i>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 
 ////////////////////////////////////////////////////////////
