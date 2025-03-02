@@ -52,6 +52,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+// fixed_layout: No automatic re-layout; widgets maintain manually set bounds.
 class TCOB_API fixed_layout : public layout {
 public:
     using layout::layout;
@@ -65,6 +66,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
+// flex_size_layout: Dynamically adjusts each widget's size using its flex values.
 class TCOB_API flex_size_layout : public layout {
 public:
     using layout::layout;
@@ -78,6 +80,7 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
+// dock_layout: Positions widgets at container edges based on dock style and shrinks available space.
 class TCOB_API dock_layout : public layout {
 public:
     using layout::layout;
@@ -94,6 +97,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+// grid_layout: Divides the container into a grid and scales each widget's bounds within its grid cell.
 class TCOB_API grid_layout final : public layout {
 public:
     using layout::layout;
@@ -112,6 +116,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+// box_layout: Arranges widgets in a fixed grid defined by box dimensions, positioning each widget in its cell.
 class TCOB_API box_layout final : public layout {
 public:
     using layout::layout;
@@ -129,7 +134,8 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API hbox_layout final : public layout {
+// horizontal_layout: Evenly distributes widgets horizontally across the container.
+class TCOB_API horizontal_layout final : public layout {
 public:
     using layout::layout;
 
@@ -142,7 +148,22 @@ protected:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API vbox_layout final : public layout {
+// vertical_layout: Evenly distributes widgets vertically down the container.
+class TCOB_API vertical_layout final : public layout {
+public:
+    using layout::layout;
+
+    template <std::derived_from<widget> T>
+    auto create_widget(string const& name) -> std::shared_ptr<T>;
+
+protected:
+    void do_layout(size_f size) override;
+};
+
+////////////////////////////////////////////////////////////
+
+// flow_layout: Lays out widgets left-to-right and wraps to a new row when exceeding container width.
+class TCOB_API flow_layout final : public layout {
 public:
     using layout::layout;
 

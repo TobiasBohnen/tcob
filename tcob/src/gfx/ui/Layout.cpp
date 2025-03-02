@@ -215,7 +215,7 @@ void box_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-void hbox_layout::do_layout(size_f size)
+void horizontal_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
 
@@ -233,7 +233,7 @@ void hbox_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-void vbox_layout::do_layout(size_f size)
+void vertical_layout::do_layout(size_f size)
 {
     auto& w {widgets()};
 
@@ -246,6 +246,34 @@ void vbox_layout::do_layout(size_f size)
             {0, i * vertSize,
              widget->Flex->Width.calc(horiSize),
              widget->Flex->Height.calc(vertSize)};
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+void flow_layout::do_layout(size_f size)
+{
+    auto& w {widgets()};
+
+    f32 const availableWidth {size.Width};
+    f32       x {0.0f};
+    f32       y {0.0f};
+    f32       rowHeight {0.0f};
+
+    for (auto const& widget : w) {
+        f32 const widgetWidth {widget->Flex->Width.calc(availableWidth)};
+        f32 const widgetHeight {widget->Flex->Height.calc(size.Height)};
+
+        if (x + widgetWidth > availableWidth) {
+            x = 0.0f;
+            y += rowHeight;
+            rowHeight = 0.0f;
+        }
+
+        widget->Bounds = {x, y, widgetWidth, widgetHeight};
+
+        x += widgetWidth;
+        rowHeight = std::max(rowHeight, widgetHeight);
     }
 }
 

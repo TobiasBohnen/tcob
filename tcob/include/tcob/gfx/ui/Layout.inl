@@ -77,7 +77,7 @@ inline auto box_layout::create_widget(string const& name) -> std::shared_ptr<T>
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto hbox_layout::create_widget(string const& name) -> std::shared_ptr<T>
+inline auto horizontal_layout::create_widget(string const& name) -> std::shared_ptr<T>
 {
     return add_widget<T>(name);
 }
@@ -85,7 +85,15 @@ inline auto hbox_layout::create_widget(string const& name) -> std::shared_ptr<T>
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto vbox_layout::create_widget(string const& name) -> std::shared_ptr<T>
+inline auto vertical_layout::create_widget(string const& name) -> std::shared_ptr<T>
+{
+    return add_widget<T>(name);
+}
+
+////////////////////////////////////////////////////////////
+
+template <std::derived_from<widget> T>
+inline auto flow_layout::create_widget(string const& name) -> std::shared_ptr<T>
 {
     return add_widget<T>(name);
 }
