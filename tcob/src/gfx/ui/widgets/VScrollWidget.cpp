@@ -23,19 +23,6 @@ vscroll_widget::vscroll_widget(init const& wi)
 {
 }
 
-void vscroll_widget::prepare_redraw()
-{
-    widget::prepare_redraw();
-
-    _vScrollbar.Min = 0;
-    _vScrollbar.Max = get_scroll_max_value();
-}
-
-auto vscroll_widget::get_scroll_max_value() const -> f32
-{
-    return std::max(0.0f, get_scroll_content_height() - content_bounds().height());
-}
-
 void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
@@ -108,7 +95,7 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
     bool const         invert {ev.Scroll.Y > 0};
     milliseconds const delay {dynamic_cast<vscroll_widget::style const*>(current_style())->VScrollBar.Bar.Delay};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + (invert ? -get_scroll_distance() : get_scroll_distance()), delay);
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + ((invert ? -get_scroll_distance() : get_scroll_distance())), delay);
 
     ev.Handled = true;
 }
@@ -129,14 +116,19 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     bounds.Size.Width -= dynamic_cast<vscroll_widget::style const*>(current_style())->VScrollBar.Bar.Size.calc(bounds.width());
 }
 
+auto vscroll_widget::get_scroll_max() const -> f32
+{
+    return std::max(0.0f, get_scroll_content_height() - content_bounds().height());
+}
+
 auto vscroll_widget::get_scrollbar_value() const -> f32
 {
-    return _vScrollbar.current_value();
+    return _vScrollbar.current_value() * get_scroll_max();
 }
 
 void vscroll_widget::set_scrollbar_value(f32 value)
 {
-    _vScrollbar.start_scroll(value, milliseconds {0});
+    _vScrollbar.start_scroll(value / get_scroll_max(), milliseconds {0});
 }
 
 } // namespace ui

@@ -33,27 +33,6 @@ panel::panel(init const& wi)
     Class("panel");
 }
 
-auto panel::get_scroll_max_value(orientation orien) const -> f32
-{
-    f32         retValue {0.0f};
-    auto const& content {content_bounds()};
-    for (auto const& w : widgets()) {
-        auto const& bounds {w->Bounds()};
-        retValue = std::max(retValue, orien == orientation::Horizontal ? bounds.right() - content.width() : bounds.bottom() - content.height());
-    }
-    return retValue * 1.05f;
-}
-
-void panel::prepare_redraw()
-{
-    widget_container::prepare_redraw();
-
-    _vScrollbar.Min = 0;
-    _hScrollbar.Min = 0;
-    _vScrollbar.Max = get_scroll_max_value(orientation::Vertical);
-    _hScrollbar.Max = get_scroll_max_value(orientation::Horizontal);
-}
-
 void panel::force_redraw(string const& reason)
 {
     widget_container::force_redraw(reason);
@@ -224,9 +203,7 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
             delay  = _style.HScrollBar.Bar.Delay;
         }
 
-        f32 const min {0};
-        f32 const max {get_scroll_max_value(orien)};
-        f32 const diff {(max - min) / (invert ? -5 : 5)};
+        f32 const diff {invert ? -0.2f : 0.2f};
         if (orien == orientation::Vertical) {
             _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
         } else if (orien == orientation::Horizontal) {
@@ -252,9 +229,21 @@ auto panel::get_layout() -> std::shared_ptr<layout>
     return _layout;
 }
 
+auto panel::get_scroll_max_value(orientation orien) const -> f32
+{
+    f32         retValue {0.0f};
+    auto const& content {content_bounds()};
+    for (auto const& w : widgets()) {
+        auto const& bounds {w->Bounds()};
+        retValue = std::max(retValue, orien == orientation::Horizontal ? bounds.right() - content.width() : bounds.bottom() - content.height());
+    }
+    return retValue * 1.05f;
+}
+
 auto panel::scroll_offset() const -> point_f
 {
-    return {_hScrollbar.current_value(), _vScrollbar.current_value()};
+    if (!ScrollEnabled) { return point_f::Zero; }
+    return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal), _vScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal)};
 }
 
 void panel::scroll_to(point_f off)

@@ -133,7 +133,7 @@ void list_box::on_paint(widget_painter& painter)
 
     rect_f const listRect {rect};
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
-    _visibleRows = listRect.height() / itemHeight;
+    _visibleItems = listRect.height() / itemHeight;
 
     auto const paint_item {[&](isize i) {
         rect_f itemRect {listRect};
@@ -171,7 +171,7 @@ void list_box::on_update(milliseconds deltaTime)
     // scroll to selected
     if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
-        set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max_value()));
+        set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max()));
         _scrollToSelected = false;
     }
 }
@@ -248,22 +248,6 @@ void list_box::on_mouse_wheel(input::mouse::wheel_event const& ev)
     vscroll_widget::on_mouse_wheel(ev);
 }
 
-auto list_box::get_scroll_content_height() const -> f32
-{
-    if (_items.empty()) { return 0; }
-
-    f32       retValue {0.0f};
-    f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
-    for (i32 i {0}; i < item_count(); ++i) { retValue += itemHeight; }
-
-    return retValue;
-}
-
-auto list_box::get_scroll_distance() const -> f32
-{
-    return _style.ItemHeight.calc(content_bounds().height()) * _visibleRows;
-}
-
 auto list_box::get_items() const -> std::vector<list_item> const&
 {
     return Filter->empty() ? _items : _filteredItems;
@@ -286,6 +270,22 @@ auto list_box::attributes() const -> widget_attributes
     }
 
     return retValue;
+}
+
+auto list_box::get_scroll_content_height() const -> f32
+{
+    if (_items.empty()) { return 0; }
+
+    f32       retValue {0.0f};
+    f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
+    for (i32 i {0}; i < item_count(); ++i) { retValue += itemHeight; }
+
+    return retValue;
+}
+
+auto list_box::get_scroll_distance() const -> f32
+{
+    return _style.ItemHeight.calc(content_bounds().height()) * _visibleItems / get_scroll_max();
 }
 
 } // namespace ui

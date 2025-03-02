@@ -38,8 +38,6 @@ public:
 
     prop<isize> MaxVisibleItems; // TODO: change to prop_val
 
-    void prepare_redraw() override;
-
     void add_item(utf8_string const& item);
     void add_item(list_item const& item);
     void clear_items();
@@ -77,8 +75,14 @@ private:
 
     void set_extended(bool v);
 
+    auto get_scroll_distance() const -> f32;
+    auto get_scroll_max() const -> f32;
+
+    auto get_scrollbar_value() const -> f32;
+
     std::vector<list_item>            _items;
     std::unordered_map<isize, rect_f> _itemRectCache;
+    isize                             _visibleItems {0};
 
     bool _isExtended {false};
     bool _mouseOverBox {false};

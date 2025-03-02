@@ -25,8 +25,6 @@ public:
 
     explicit vscroll_widget(init const& wi);
 
-    void prepare_redraw() override;
-
 protected:
     void on_styles_changed() override;
 
@@ -43,10 +41,9 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto get_scroll_max_value() const -> f32;
-
     auto virtual get_scroll_content_height() const -> f32 = 0;
     auto virtual get_scroll_distance() const -> f32       = 0;
+    auto get_scroll_max() const -> f32;
 
     auto get_scrollbar_value() const -> f32;
     void set_scrollbar_value(f32 value);

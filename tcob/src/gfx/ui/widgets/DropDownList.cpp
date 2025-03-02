@@ -87,14 +87,6 @@ void drop_down_list::on_styles_changed()
     _vScrollbar.reset();
 }
 
-void drop_down_list::prepare_redraw()
-{
-    widget::prepare_redraw();
-
-    _vScrollbar.Min = 0;
-    _vScrollbar.Max = std::max(0.0f, (get_item_height() * std::ssize(get_items())) - content_bounds().height());
-}
-
 void drop_down_list::on_paint(widget_painter& painter)
 {
     update_style(_style);
@@ -133,6 +125,8 @@ void drop_down_list::on_paint(widget_painter& painter)
         listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
         listRect.Size.Height += _style.Border.Size.calc(listHeight);
 
+        _visibleItems = listRect.height() / itemHeight;
+
         painter.draw_background_and_border(_style, listRect, false);
 
         // scrollbar
@@ -150,7 +144,7 @@ void drop_down_list::on_paint(widget_painter& painter)
         auto const paint_item {[&](isize i) {
             rect_f itemRect {listRect};
             itemRect.Size.Height = itemHeight;
-            itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - _vScrollbar.current_value();
+            itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
 
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                 item_style itemStyle {};
@@ -173,6 +167,8 @@ void drop_down_list::on_paint(widget_painter& painter)
         if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
             paint_item(HoveredItemIndex());
         }
+    } else {
+        _visibleItems = 0;
     }
 }
 
@@ -231,13 +227,6 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         } else if (HoveredItemIndex != INVALID_INDEX) {
             if (SelectedItemIndex != HoveredItemIndex()) {
                 SelectedItemIndex = HoveredItemIndex();
-
-                // close-on-select requires setting style here:
-                // item_style itemStyle {};
-                // if (SelectedItemIndex != INVALID_INDEX) { update_sub_style(itemStyle, SelectedItemIndex, _style.ItemClass, {.Active = false}); }
-                // SelectedItemIndex = HoveredItemIndex();
-                // update_sub_style(itemStyle, SelectedItemIndex, _style.ItemClass, {.Active = true});
-                // set_extended(false);
             }
         }
 
@@ -273,8 +262,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
     bool const         invert {ev.Scroll.Y > 0};
     milliseconds const delay {_style.VScrollBar.Bar.Delay};
-    f32 const          diff {get_item_height() * std::min(MaxVisibleItems(), std::ssize(_items)) * (invert ? -1 : 1)};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + (invert ? -get_scroll_distance() : get_scroll_distance()), delay);
 
     ev.Handled = true;
 }
@@ -350,6 +338,21 @@ void drop_down_list::set_extended(bool v)
         _isExtended = v;
         force_redraw(this->name() + ": extended change");
     }
+}
+
+auto drop_down_list::get_scroll_distance() const -> f32
+{
+    return get_item_height() * _visibleItems / get_scroll_max();
+}
+
+auto drop_down_list::get_scroll_max() const -> f32
+{
+    return std::max(0.0f, (get_item_height() * std::max(std::ssize(get_items()), MaxVisibleItems())) - content_bounds().height());
+}
+
+auto drop_down_list::get_scrollbar_value() const -> f32
+{
+    return _vScrollbar.current_value() * get_scroll_max();
 }
 
 } // namespace ui

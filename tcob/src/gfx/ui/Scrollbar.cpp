@@ -28,7 +28,7 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& scrollb
     if (!Visible) { return; }
 
     i32 const numBlocks {10};
-    f32 const frac {(current_value() - Min) / ((Max - Min))};
+    f32 const frac {current_value()};
 
     element::bar::context const barCtx {
         .Orientation = _orien,
@@ -144,7 +144,7 @@ void scrollbar::start_scroll(f32 target, milliseconds delay)
         return;
     }
 
-    f32 const actTarget {std::clamp(target, Min, Max)};
+    f32 const actTarget {std::clamp(target, 0.0f, 1.0f)};
     if (!_isDragging) {
         _tween.start(actTarget, delay);
     } else {
@@ -154,10 +154,8 @@ void scrollbar::start_scroll(f32 target, milliseconds delay)
 
 void scrollbar::reset()
 {
-    _tween.reset(Min);
+    _tween.reset(0);
     _delay = milliseconds {0};
-    Min    = 0;
-    Max    = 0;
 }
 
 void scrollbar::calculate_value(point_f mp)
@@ -176,7 +174,7 @@ void scrollbar::calculate_value(point_f mp)
     } break;
     }
 
-    start_scroll(Min + ((Max - Min) * frac), _delay);
+    start_scroll(frac, _delay);
 
     _overThumb = true;
 }

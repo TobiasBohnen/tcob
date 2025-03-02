@@ -70,7 +70,7 @@ private:
     std::vector<list_item>            _items;
     std::vector<list_item>            _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
-    isize                             _visibleRows {0};
+    isize                             _visibleItems {0};
 
     bool _scrollToSelected {false};
 

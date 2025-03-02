@@ -319,7 +319,7 @@ auto grid_view::get_scroll_content_height() const -> f32
 
 auto grid_view::get_scroll_distance() const -> f32
 {
-    return _style.RowHeight.calc(content_bounds().height()) * _visibleRows;
+    return _style.RowHeight.calc(content_bounds().height()) * _visibleRows / get_scroll_max();
 }
 
 } // namespace ui

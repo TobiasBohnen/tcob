@@ -23,8 +23,6 @@ public:
     scrollbar(widget& parent, orientation orien);
 
     bool Visible {false};
-    f32  Min {0.0f};
-    f32  Max {0.0f};
 
     void update(milliseconds deltaTime);
     void paint(widget_painter& painter, element::scrollbar const& scrollbar, element::thumb const& thumb, rect_f& rect);
