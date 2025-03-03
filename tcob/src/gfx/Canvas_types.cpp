@@ -341,6 +341,7 @@ auto static DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 tot
 
 auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std::span<f32 const> dashPattern, f32 dashOffset) -> std::vector<std::vector<canvas_point>>
 {
+    // Precompute cumulative distances along the polyline.
     std::vector<f32> accumLengths {};
     accumLengths.reserve(pts.size());
     accumLengths.push_back(0.0f);
@@ -350,20 +351,13 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
         accumLengths.push_back(accumLengths.back() + segLen);
     }
 
+    usize      left {0};
     auto const func {[&](f32 d) -> canvas_point {
         if (d <= accumLengths.front()) { return pts.front(); }
         if (d >= accumLengths.back()) { return pts.back(); }
 
-        usize left {0};
-        usize right {accumLengths.size() - 1};
-        while (left < right - 1) {
-            usize const mid {(left + right) / 2};
-            if (accumLengths[mid] <= d) {
-                left = mid;
-            } else {
-                right = mid;
-            }
-        }
+        while (left + 1 < accumLengths.size() && accumLengths[left + 1] <= d) { ++left; }
+        usize const right {left + 1};
 
         f32 const d0 {accumLengths[left]};
         f32 const d1 {accumLengths[right]};
@@ -386,6 +380,9 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
     usize dashIndex {0};
 
     std::vector<std::vector<canvas_point>> dashedPaths {};
+    dashedPaths.reserve(16);
+
+    usize polyIdx {1};
     while (currentDistance < totalLength) {
         f32 const segDash {dashPattern[dashIndex++ % dashPattern.size()]};
         f32 const nextDistance {std::min(totalLength, currentDistance + segDash)};
@@ -397,24 +394,35 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
 
             if (drawEnd > drawStart) {
                 std::vector<canvas_point> dashSegment {};
-                dashSegment.reserve(pts.size()); // may accumulate several points
+                dashSegment.reserve(16);
 
                 // Insert the starting point.
                 dashSegment.push_back(func(drawStart));
 
-                // Insert any polyline points between drawStart and drawEnd.
-                for (usize i {1}; i < accumLengths.size(); ++i) {
-                    if (accumLengths[i] > drawStart && accumLengths[i] < drawEnd) {
-                        dashSegment.push_back(pts[i]);
-                    }
+                // Advance polyIdx: skip any points before the segment.
+                while (polyIdx < accumLengths.size() && accumLengths[polyIdx] < drawStart) {
+                    ++polyIdx;
                 }
+
+                // Insert all intermediate polyline points in [drawStart, drawEnd).
+                usize tempIdx {polyIdx};
+                while (tempIdx < accumLengths.size() && accumLengths[tempIdx] < drawEnd) {
+                    dashSegment.push_back(pts[tempIdx]);
+                    ++tempIdx;
+                }
+                polyIdx = tempIdx;
 
                 // Insert the endpoint.
                 dashSegment.push_back(func(drawEnd));
                 dashSegment.front().Flags = Corner;
                 dashSegment.back().Flags  = Corner;
 
-                dashedPaths.push_back(dashSegment);
+                dashedPaths.push_back(std::move(dashSegment));
+            }
+        } else {
+            // Even in non-drawing segments, move polyIdx forward.
+            while (polyIdx < accumLengths.size() && accumLengths[polyIdx] < nextDistance) {
+                ++polyIdx;
             }
         }
 
