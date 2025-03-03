@@ -47,14 +47,18 @@ void states::reset()
 
 ////////////////////////////////////////////////////////////
 
-void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
+auto static hypot(f32 x, f32 y) -> f32
+{
+    return std::sqrt((x * x) + (y * y));
+}
+
+void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v)
 {
     vtx->Position.X = x;
     vtx->Position.Y = y;
 
-    vtx->TexCoords.U     = u;
-    vtx->TexCoords.V     = v;
-    vtx->TexCoords.Level = level;
+    vtx->TexCoords.U = u;
+    vtx->TexCoords.V = v;
 }
 
 auto Normalize(f32& x, f32& y) -> f32
@@ -98,8 +102,7 @@ auto static TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
     return (acx * aby) - (abx * acy);
 }
 
-void static ChooseBevel(i32 bevel, canvas_point const& p0, canvas_point const& p1, f32 w,
-                        f32& x0, f32& y0, f32& x1, f32& y1)
+void static ChooseBevel(bool bevel, canvas_point const& p0, canvas_point const& p1, f32 w, f32& x0, f32& y0, f32& x1, f32& y1)
 {
     if (bevel) {
         x0 = p1.X + p0.DY * w;
@@ -114,8 +117,7 @@ void static ChooseBevel(i32 bevel, canvas_point const& p0, canvas_point const& p
     }
 }
 
-auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1,
-                      f32 lw, f32 rw, f32 lu, f32 ru, i32 ncap) -> vertex*
+auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1, f32 lw, f32 rw, f32 lu, f32 ru, i32 ncap) -> vertex*
 {
     f32 const dlx0 {p0.DY};
     f32 const dly0 {-p0.DX};
@@ -174,8 +176,7 @@ auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
     return dst;
 }
 
-auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1,
-                      f32 lw, f32 rw, f32 lu, f32 ru) -> vertex*
+auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1, f32 lw, f32 rw, f32 lu, f32 ru) -> vertex*
 {
     f32 const dlx0 {p0.DY};
     f32 const dly0 {-p0.DX};
@@ -245,9 +246,7 @@ auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
     return dst;
 }
 
-auto static ButtCapStart(vertex* dst, canvas_point const& p,
-                         f32 dx, f32 dy, f32 w, f32 d,
-                         f32 aa, f32 u0, f32 u1) -> vertex*
+auto static ButtCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, f32 d, f32 aa, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X - (dx * d)};
     f32 const py {p.Y - (dy * d)};
@@ -260,9 +259,7 @@ auto static ButtCapStart(vertex* dst, canvas_point const& p,
     return dst;
 }
 
-auto static ButtCapEnd(vertex* dst, canvas_point const& p,
-                       f32 dx, f32 dy, f32 w, f32 d,
-                       f32 aa, f32 u0, f32 u1) -> vertex*
+auto static ButtCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, f32 d, f32 aa, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X + (dx * d)};
     f32 const py {p.Y + (dy * d)};
@@ -275,8 +272,7 @@ auto static ButtCapEnd(vertex* dst, canvas_point const& p,
     return dst;
 }
 
-auto static RoundCapStart(vertex* dst, canvas_point const& p,
-                          f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
+auto static RoundCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X};
     f32 const py {p.Y};
@@ -294,8 +290,7 @@ auto static RoundCapStart(vertex* dst, canvas_point const& p,
     return dst;
 }
 
-auto static RoundCapEnd(vertex* dst, canvas_point const& p,
-                        f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
+auto static RoundCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X};
     f32 const py {p.Y};
@@ -311,11 +306,6 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p,
         SetVertex(dst++, px - (dlx * ax) + (dx * ay), py - (dly * ax) + (dy * ay), u0, 1);
     }
     return dst;
-}
-
-auto static hypot(f32 x, f32 y) -> f32
-{
-    return std::sqrt((x * x) + (y * y));
 }
 
 auto static DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
@@ -551,21 +541,26 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
         switch (cmd) {
         case MoveTo: {
             add_path();
-            f32 const* p {&_commands[i + 1]};
-            add_point(p[0], p[1], Corner);
+            f32 const p0 {_commands[i + 1]};
+            f32 const p1 {_commands[i + 2]};
+            add_point(p0, p1, Corner);
             i += 3;
         } break;
         case LineTo: {
-            f32 const* p {&_commands[i + 1]};
-            add_point(p[0], p[1], Corner);
+            f32 const p0 {_commands[i + 1]};
+            f32 const p1 {_commands[i + 2]};
+            add_point(p0, p1, Corner);
             i += 3;
         } break;
         case BezierTo: {
             auto const& last {get_last_point()};
-            f32 const*  cp1 {&_commands[i + 1]};
-            f32 const*  cp2 {&_commands[i + 3]};
-            f32 const*  p {&_commands[i + 5]};
-            tesselate_bezier(last.X, last.Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0, Corner);
+            f32 const   cp10 {_commands[i + 1]};
+            f32 const   cp11 {_commands[i + 2]};
+            f32 const   cp20 {_commands[i + 3]};
+            f32 const   cp21 {_commands[i + 4]};
+            f32 const   p0 {_commands[i + 5]};
+            f32 const   p1 {_commands[i + 6]};
+            tesselate_bezier(last.X, last.Y, cp10, cp11, cp20, cp21, p0, p1, 0, Corner);
             i += 7;
         } break;
         case Close: {
@@ -618,34 +613,38 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
     for (auto& path : _paths) {
         if (path.Count == 0) { continue; }
 
-        canvas_point* pts {&_points[path.First]};
+        auto start {_points.begin() + path.First};
 
         // If the first and last points coincide, remove the duplicate.
-        canvas_point* p0 {&pts[path.Count - 1]};
-        canvas_point* p1 {&pts[0]};
-        if (PointEquals(p0->X, p0->Y, p1->X, p1->Y, _distTolerance)) {
-            path.Count--;
-            p0          = &pts[path.Count - 1];
+        auto p0It {start + path.Count - 1};
+        auto p1It {start};
+
+        if (PointEquals(p0It->X, p0It->Y, p1It->X, p1It->Y, _distTolerance)) {
+            --path.Count;
+            p0It        = start + path.Count - 1;
             path.Closed = true;
         }
 
         // Enforce winding if requested.
         if (enforceWinding && path.Count > 2) {
-            f32 const area {PolyArea({pts, path.Count})};
-            if (path.Winding == winding::CCW && area < 0.0f) { PolyReverse({pts, path.Count}); }
-            if (path.Winding == winding::CW && area > 0.0f) { PolyReverse({pts, path.Count}); }
+            f32 const area {PolyArea({start, path.Count})};
+            if (path.Winding == winding::CCW && area < 0.0f) { PolyReverse({start, path.Count}); }
+            if (path.Winding == winding::CW && area > 0.0f) { PolyReverse({start, path.Count}); }
         }
 
         // Calculate segment direction, length, and update _bounds.
         for (usize i {0}; i < path.Count; ++i) {
-            p0->DX     = p1->X - p0->X;
-            p0->DY     = p1->Y - p0->Y;
-            p0->Length = Normalize(p0->DX, p0->DY);
-            _bounds[0] = std::min(_bounds[0], p0->X);
-            _bounds[1] = std::min(_bounds[1], p0->Y);
-            _bounds[2] = std::max(_bounds[2], p0->X);
-            _bounds[3] = std::max(_bounds[3], p0->Y);
-            p0         = p1++;
+            auto&       p0 {*p0It};
+            auto const& p1 {*p1It};
+
+            p0.DX      = p1.X - p0.X;
+            p0.DY      = p1.Y - p0.Y;
+            p0.Length  = Normalize(p0.DX, p0.DY);
+            _bounds[0] = std::min(_bounds[0], p0.X);
+            _bounds[1] = std::min(_bounds[1], p0.Y);
+            _bounds[2] = std::max(_bounds[2], p0.X);
+            _bounds[3] = std::max(_bounds[3], p0.Y);
+            p0It       = p1It++;
         }
     }
 
@@ -670,7 +669,7 @@ void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join li
 
     // Calculate max vertex usage.
     usize cverts {0};
-    for (auto& path : _paths) {
+    for (auto const& path : _paths) {
         if (lineJoin == line_join::Round) {
             cverts += (path.Count + path.BevelCount * (ncap + 2) + 1) * 2; // plus one for loop}
         } else {
@@ -779,7 +778,7 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
 
     // Calculate max vertex usage.
     usize cverts {0};
-    for (auto& path : _paths) {
+    for (auto const& path : _paths) {
         cverts += path.Count + path.BevelCount + 1;
         if (fringe) {
             cverts += (path.Count + path.BevelCount * 5 + 1) * 2; // plus one for loop
@@ -950,13 +949,12 @@ void path_cache::add_point(f32 x, f32 y, i32 flags)
         }
     }
 
-    canvas_point pt;
+    canvas_point& pt {_points.emplace_back()};
     pt.X     = x;
     pt.Y     = y;
     pt.Flags = static_cast<ubyte>(flags);
 
-    _points.push_back(pt);
-    path.Count++;
+    ++path.Count;
     path.Closed = false;
 }
 
@@ -966,9 +964,7 @@ auto path_cache::get_last_point() -> canvas_point&
     return _points.back();
 }
 
-void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2,
-                                  f32 x3, f32 y3, f32 x4, f32 y4,
-                                  i32 level, i32 type)
+void path_cache::tesselate_bezier(f32 x1, f32 y1, f32 x2, f32 y2, f32 x3, f32 y3, f32 x4, f32 y4, i32 level, i32 type)
 {
     if (level > 10) { return; }
 
@@ -1005,56 +1001,59 @@ void path_cache::calculate_joins(f32 w, line_join lineJoin, f32 miterLimit)
 
     // Calculate which joins needs extra vertices to append, and gather vertex count.
     for (auto& path : _paths) {
-        canvas_point* pts {&_points[path.First]};
-        canvas_point* p0 {&pts[path.Count - 1]};
-        canvas_point* p1 {&pts[0]};
-        usize         nleft {0};
+        auto  start {_points.begin() + path.First};
+        auto  p0It {start + path.Count - 1};
+        auto  p1It {start};
+        usize nleft {0};
 
         path.BevelCount = 0;
 
         for (usize j {0}; j < path.Count; j++) {
-            f32 const dlx0 {p0->DY};
-            f32 const dly0 {-p0->DX};
-            f32 const dlx1 {p1->DY};
-            f32 const dly1 {-p1->DX};
+            auto const& p0 {*p0It};
+            auto&       p1 {*p1It};
+
+            f32 const dlx0 {p0.DY};
+            f32 const dly0 {-p0.DX};
+            f32 const dlx1 {p1.DY};
+            f32 const dly1 {-p1.DX};
             // Calculate extrusions
-            p1->DMX = (dlx0 + dlx1) * 0.5f;
-            p1->DMY = (dly0 + dly1) * 0.5f;
-            f32 const dmr2 {(p1->DMX * p1->DMX) + (p1->DMY * p1->DMY)};
+            p1.DMX = (dlx0 + dlx1) * 0.5f;
+            p1.DMY = (dly0 + dly1) * 0.5f;
+            f32 const dmr2 {(p1.DMX * p1.DMX) + (p1.DMY * p1.DMY)};
             if (dmr2 > 0.000001f) {
                 f32 const scale {std::min(1.0f / dmr2, 600.0f)};
-                p1->DMX *= scale;
-                p1->DMY *= scale;
+                p1.DMX *= scale;
+                p1.DMY *= scale;
             }
 
             // Clear flags, but keep the corner.
-            p1->Flags = (p1->Flags & Corner) ? Corner : 0;
+            p1.Flags = (p1.Flags & Corner) ? Corner : 0;
 
             // Keep track of left turns.
-            f32 const cross {(p1->DX * p0->DY) - (p0->DX * p1->DY)};
+            f32 const cross {(p1.DX * p0.DY) - (p0.DX * p1.DY)};
             if (cross > 0.0f) {
-                nleft++;
-                p1->Flags |= Left;
+                ++nleft;
+                p1.Flags |= Left;
             }
 
             // Calculate if we should use bevel or miter for inner join.
-            f32 const limit {std::max(1.01f, std::min(p0->Length, p1->Length) * iw)};
+            f32 const limit {std::max(1.01f, std::min(p0.Length, p1.Length) * iw)};
             if ((dmr2 * limit * limit) < 1.0f) {
-                p1->Flags |= InnerBevel;
+                p1.Flags |= InnerBevel;
             }
 
             // Check to see if the corner needs to be beveled.
-            if (p1->Flags & Corner) {
+            if (p1.Flags & Corner) {
                 if ((dmr2 * miterLimit * miterLimit) < 1.0f || lineJoin == line_join::Bevel || lineJoin == line_join::Round) {
-                    p1->Flags |= Bevel;
+                    p1.Flags |= Bevel;
                 }
             }
 
-            if ((p1->Flags & (Bevel | InnerBevel)) != 0) {
-                path.BevelCount++;
+            if ((p1.Flags & (Bevel | InnerBevel)) != 0) {
+                ++path.BevelCount;
             }
 
-            p0 = p1++;
+            p0It = p1It++;
         }
 
         path.Convex = (nleft == path.Count);
