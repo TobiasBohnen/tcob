@@ -346,15 +346,22 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
         if (d <= accumLengths.front()) { return pts.front(); }
         if (d >= accumLengths.back()) { return pts.back(); }
 
+        if (accumLengths.size() == 2) {
+            f32 const d0 {accumLengths[0]};
+            f32 const d1 {accumLengths[1]};
+            f32 const ratio {(d - d0) / (d1 - d0)};
+            return {pts[0].X + ratio * (pts[1].X - pts[0].X),
+                    pts[0].Y + ratio * (pts[1].Y - pts[0].Y)};
+        }
+
         while (left + 1 < accumLengths.size() && accumLengths[left + 1] <= d) { ++left; }
         usize const right {left + 1};
 
         f32 const d0 {accumLengths[left]};
         f32 const d1 {accumLengths[right]};
         f32 const ratio {(d - d0) / (d1 - d0)};
-        return {
-            pts[left].X + ratio * (pts[right].X - pts[left].X),
-            pts[left].Y + ratio * (pts[right].Y - pts[left].Y)};
+        return {pts[left].X + ratio * (pts[right].X - pts[left].X),
+                pts[left].Y + ratio * (pts[right].Y - pts[left].Y)};
     }};
 
     // Compute total dash pattern period.
@@ -383,7 +390,7 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
             f32 const drawEnd {nextDistance};
 
             if (drawEnd > drawStart) {
-                std::vector<canvas_point> dashSegment {};
+                std::vector<canvas_point>& dashSegment {dashedPaths.emplace_back()};
                 dashSegment.reserve(16);
 
                 // Insert the starting point.
@@ -397,8 +404,7 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
                 // Insert all intermediate polyline points in [drawStart, drawEnd).
                 usize tempIdx {polyIdx};
                 while (tempIdx < accumLengths.size() && accumLengths[tempIdx] < drawEnd) {
-                    dashSegment.push_back(pts[tempIdx]);
-                    ++tempIdx;
+                    dashSegment.push_back(pts[tempIdx++]);
                 }
                 polyIdx = tempIdx;
 
@@ -406,8 +412,6 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
                 dashSegment.push_back(func(drawEnd));
                 dashSegment.front().Flags = Corner;
                 dashSegment.back().Flags  = Corner;
-
-                dashedPaths.push_back(std::move(dashSegment));
             }
         } else {
             // Even in non-drawing segments, move polyIdx forward.
@@ -462,21 +466,20 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     }
     _commands.reserve(_commands.size() + size);
 
-    // transform _commands
-    usize   i {0};
+    // transform commands
     point_f p;
-    while (i < size) {
-        i32 cmd {static_cast<i32>(vals[i])};
+    for (usize i {0}; i < size;) {
+        i32 const cmd {static_cast<i32>(vals[i])};
         _commands.push_back(static_cast<f32>(cmd));
         switch (cmd) {
         case MoveTo:
-        case LineTo:
+        case LineTo: {
             p = xform * point_f {vals[i + 1], vals[i + 2]};
             _commands.push_back(p.X);
             _commands.push_back(p.Y);
             i += 3;
-            break;
-        case BezierTo:
+        } break;
+        case BezierTo: {
             p = xform * point_f {vals[i + 1], vals[i + 2]};
             _commands.push_back(p.X);
             _commands.push_back(p.Y);
@@ -487,14 +490,14 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
             _commands.push_back(p.X);
             _commands.push_back(p.Y);
             i += 7;
-            break;
-        case Close:
+        } break;
+        case Close: {
             ++i;
-            break;
-        case Winding:
+        } break;
+        case Winding: {
             _commands.push_back(vals[i + 1]);
             i += 2;
-            break;
+        } break;
         default:
             ++i;
         }
@@ -537,30 +540,22 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
 {
     // --- Flatten commands into paths and points (solid geometry) ---
     for (usize i {0}; i < _commands.size();) {
-        i32 const cmd {static_cast<i32>(_commands[i])};
+        auto const* p {_commands.data() + i};
+        i32 const   cmd {static_cast<i32>(p[0])};
+
         switch (cmd) {
         case MoveTo: {
             add_path();
-            f32 const p0 {_commands[i + 1]};
-            f32 const p1 {_commands[i + 2]};
-            add_point(p0, p1, Corner);
+            add_point(p[1], p[2], Corner);
             i += 3;
         } break;
         case LineTo: {
-            f32 const p0 {_commands[i + 1]};
-            f32 const p1 {_commands[i + 2]};
-            add_point(p0, p1, Corner);
+            add_point(p[1], p[2], Corner);
             i += 3;
         } break;
         case BezierTo: {
             auto const& last {get_last_point()};
-            f32 const   cp10 {_commands[i + 1]};
-            f32 const   cp11 {_commands[i + 2]};
-            f32 const   cp20 {_commands[i + 3]};
-            f32 const   cp21 {_commands[i + 4]};
-            f32 const   p0 {_commands[i + 5]};
-            f32 const   p1 {_commands[i + 6]};
-            tesselate_bezier(last.X, last.Y, cp10, cp11, cp20, cp21, p0, p1, 0, Corner);
+            tesselate_bezier(last.X, last.Y, p[1], p[2], p[3], p[4], p[5], p[6], 0, Corner);
             i += 7;
         } break;
         case Close: {
