@@ -103,12 +103,8 @@ public:
 
     void append_commands(std::span<f32 const> vals, transform const& xform);
 
-    void flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset);
-
-    void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
-    void expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
-
-    auto alloc_temp_verts(usize nverts) -> vertex*;
+    void fill(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 fringeWidth);
+    void stroke(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 strokeWidth, f32 fringeWidth);
 
     auto paths() const -> std::vector<canvas::path> const&;
     auto has_commands() const -> bool;
@@ -120,6 +116,13 @@ public:
     auto is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const -> bool;
 
 private:
+    void flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset);
+
+    void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
+    void expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
+
+    auto alloc_temp_verts(usize nverts) -> vertex*;
+
     void add_path();
     auto get_last_path() -> canvas::path&;
     void add_point(f32 x, f32 y, i32 flags);

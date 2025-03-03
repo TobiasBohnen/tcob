@@ -616,12 +616,7 @@ void canvas::fill()
     state const& s {_states->get()};
     paint        fillPaint {s.Fill}; // copy
 
-    _cache->flatten_paths(_enforceWinding, {}, 0);
-    if (_edgeAntiAlias && s.ShapeAntiAlias) {
-        _cache->expand_fill(_fringeWidth, line_join::Miter, 2.4f, _fringeWidth);
-    } else {
-        _cache->expand_fill(0.0f, line_join::Miter, 2.4f, _fringeWidth);
-    }
+    _cache->fill(s, _enforceWinding, _edgeAntiAlias, _fringeWidth);
 
     // Apply global alpha
     MultiplyAlphaPaint(fillPaint.Color, s.Alpha);
@@ -645,16 +640,10 @@ void canvas::stroke()
         strokeWidth = _fringeWidth;
     }
 
+    _cache->stroke(s, _enforceWinding, _edgeAntiAlias, strokeWidth, _fringeWidth);
+
     // Apply global alpha
     MultiplyAlphaPaint(strokePaint.Color, s.Alpha);
-
-    _cache->flatten_paths(_enforceWinding, s.Dash, s.DashOffset);
-
-    if (_edgeAntiAlias && s.ShapeAntiAlias) {
-        _cache->expand_stroke(strokeWidth * 0.5f, _fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit);
-    } else {
-        _cache->expand_stroke(strokeWidth * 0.5f, 0.0f, s.LineCap, s.LineJoin, s.MiterLimit);
-    }
 
     _impl->render_stroke(strokePaint, s.CompositeOperation, s.Scissor, _fringeWidth, strokeWidth, _cache->paths());
 }
@@ -869,10 +858,10 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
     state const& s {_states->get()};
     if (!s.Font) { return; }
 
-    f32 const scale {get_font_scale() * _devicePxRatio};
-    f32 const invscale {1.0f / scale};
-    auto*     verts {_cache->alloc_temp_verts(formatResult.QuadCount * 6)};
-    usize     nverts {0};
+    f32 const           scale {get_font_scale() * _devicePxRatio};
+    f32 const           invscale {1.0f / scale};
+    std::vector<vertex> verts(formatResult.QuadCount * 6);
+    usize               nverts {0};
 
     f32 const x {std::floor(offset.X + 0.5f)};
     f32 const y {std::floor(offset.Y + 0.5f)};
@@ -926,7 +915,7 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
         }
     }
 
-    render_text(s.Font, {verts, nverts});
+    render_text(s.Font, {verts.data(), nverts});
 }
 
 void canvas::fill_text(utf8_string_view text, point_f offset)

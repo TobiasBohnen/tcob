@@ -59,7 +59,6 @@ void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v, f32 level = 0)
 
 auto Normalize(f32& x, f32& y) -> f32
 {
-
     f32 const d {std::sqrt((x * x) + (y * y))};
     if (d > EPSILON) {
         f32 const id {1.0f / d};
@@ -351,19 +350,28 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
         accumLengths.push_back(accumLengths.back() + segLen);
     }
 
-    auto const func = [&](f32 d) -> canvas_point {
-        auto it {std::lower_bound(accumLengths.begin(), accumLengths.end(), d)};
-        if (it == accumLengths.end()) { return pts.back(); }
-        if (it == accumLengths.begin()) { return pts.front(); }
-        usize const  idx {static_cast<usize>(std::distance(accumLengths.begin(), it))};
-        f32 const    d0 {accumLengths[idx - 1]};
-        f32 const    d1 {accumLengths[idx]};
-        f32 const    ratio {(d - d0) / (d1 - d0)};
-        canvas_point pt {};
-        pt.X = pts[idx - 1].X + ratio * (pts[idx].X - pts[idx - 1].X);
-        pt.Y = pts[idx - 1].Y + ratio * (pts[idx].Y - pts[idx - 1].Y);
-        return pt;
-    };
+    auto const func {[&](f32 d) -> canvas_point {
+        if (d <= accumLengths.front()) { return pts.front(); }
+        if (d >= accumLengths.back()) { return pts.back(); }
+
+        usize left {0};
+        usize right {accumLengths.size() - 1};
+        while (left < right - 1) {
+            usize const mid {(left + right) / 2};
+            if (accumLengths[mid] <= d) {
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+
+        f32 const d0 {accumLengths[left]};
+        f32 const d1 {accumLengths[right]};
+        f32 const ratio {(d - d0) / (d1 - d0)};
+        return {
+            pts[left].X + ratio * (pts[right].X - pts[left].X),
+            pts[left].Y + ratio * (pts[right].Y - pts[left].Y)};
+    }};
 
     // Compute total dash pattern period.
     f32 const period {std::accumulate(dashPattern.begin(), dashPattern.end(), 0.0f)};
@@ -495,13 +503,40 @@ void path_cache::append_commands(std::span<f32 const> vals, transform const& xfo
     }
 }
 
-void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset)
+void path_cache::fill(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 fringeWidth)
 {
-    if (!dash.empty()) {
+    _paths.clear();
+    _points.clear();
+
+    flatten_paths(enforceWinding, {}, 0);
+
+    if (edgeAntiAlias && s.ShapeAntiAlias) {
+        expand_fill(fringeWidth, line_join::Miter, 2.4f, fringeWidth);
+    } else {
+        expand_fill(0.0f, line_join::Miter, 2.4f, fringeWidth);
+    }
+}
+
+void path_cache::stroke(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 strokeWidth, f32 fringeWidth)
+{
+    if (!s.Dash.empty()) {
         _paths.clear();
         _points.clear();
     }
 
+    if (_paths.empty()) {
+        flatten_paths(enforceWinding, s.Dash, s.DashOffset);
+    }
+
+    if (edgeAntiAlias && s.ShapeAntiAlias) {
+        expand_stroke(strokeWidth * 0.5f, fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit);
+    } else {
+        expand_stroke(strokeWidth * 0.5f, 0.0f, s.LineCap, s.LineJoin, s.MiterLimit);
+    }
+}
+
+void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset)
+{
     // --- Flatten commands into paths and points (solid geometry) ---
     for (usize i {0}; i < _commands.size();) {
         i32 const cmd {static_cast<i32>(_commands[i])};
@@ -830,10 +865,7 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
 
 auto path_cache::alloc_temp_verts(usize nverts) -> vertex*
 {
-    if (nverts > _verts.capacity()) {
-        _verts.reserve((nverts + 0xff) & ~0xff);
-    }
-
+    if (nverts > _verts.capacity()) { _verts.reserve((nverts + 0xff) & ~0xff); }
     return _verts.data();
 }
 

@@ -79,6 +79,7 @@ void panel::clear_widgets()
 
 void panel::on_update(milliseconds deltaTime)
 {
+    // TODO: update style here
     _layout->update();
 
     _vScrollbar.update(deltaTime);
