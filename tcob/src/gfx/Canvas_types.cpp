@@ -610,8 +610,8 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
             }
         }
 
-        _points = newPoints;
-        _paths  = newPaths;
+        _points = std::move(newPoints);
+        _paths  = std::move(newPaths);
     }
 
     // Update bounds and segment data.
