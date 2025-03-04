@@ -539,8 +539,9 @@ void path_cache::stroke(state const& s, bool enforceWinding, bool edgeAntiAlias,
 void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset)
 {
     // --- Flatten commands into paths and points (solid geometry) ---
+    auto const* ptr {_commands.data()};
     for (usize i {0}; i < _commands.size();) {
-        auto const* p {_commands.data() + i};
+        auto const* p {ptr + i};
         i32 const   cmd {static_cast<i32>(p[0])};
 
         switch (cmd) {
