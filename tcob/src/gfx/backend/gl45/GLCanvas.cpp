@@ -36,7 +36,6 @@ gl_canvas::gl_canvas()
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
     // Create UBOs
-    //  glUniformBlockBinding(_shader.get_id(), 0, GLNVG_FRAG_BINDING);
     glCreateBuffers(1, &_fragBuf);
 
     i32 align {0};
@@ -55,7 +54,7 @@ void gl_canvas::flush(size_f size)
 {
     if (!_calls.empty()) {
         // Setup require GL state.
-        glUseProgram(_shader.get_id());
+        glUseProgram(_shader.ID);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -263,12 +262,12 @@ void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
     glBindBufferRange(GL_UNIFORM_BUFFER, GLNVG_FRAG_BINDING, _fragBuf, uniformOffset, sizeof(nvg_frag_uniforms));
 
     if (image) {
-        glBindTextureUnit(0, image->get_impl<gl_texture>()->get_id());
+        glBindTextureUnit(0, image->get_impl<gl_texture>()->ID);
     } else {
         glBindTextureUnit(0, 0);
     }
 
-    glBindTextureUnit(1, _gradientTexture.get_id());
+    glBindTextureUnit(1, _gradientTexture.ID);
 }
 
 auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms
@@ -325,6 +324,8 @@ auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const&
 
 void gl_canvas::fill(nvg_call const& call)
 {
+    glBindVertexArray(_vertexArray.ID);
+
     // Draw shapes
     glEnable(GL_STENCIL_TEST);
     glStencilMask(0xff);
@@ -337,9 +338,17 @@ void gl_canvas::fill(nvg_call const& call)
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
     glDisable(GL_CULL_FACE);
+
+    // Batch draw all fill paths with a single multi-draw.
+    std::vector<GLint> fillFirsts, fillCounts;
+    fillFirsts.reserve(call.PathCount);
+    fillCounts.reserve(call.PathCount);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
+        fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+        fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
     }
+    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(), static_cast<GLsizei>(fillFirsts.size()));
+
     glEnable(GL_CULL_FACE);
 
     // Draw anti-aliased pixels
@@ -349,63 +358,96 @@ void gl_canvas::fill(nvg_call const& call)
 
     glStencilFunc(GL_EQUAL, 0x00, 0xff);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    // Draw fringes
+
+    std::vector<GLint> strokeFirsts, strokeCounts;
+    strokeFirsts.reserve(call.PathCount);
+    strokeCounts.reserve(call.PathCount);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
+        strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+        strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
     }
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
 
     // Draw fill
     glStencilFunc(GL_NOTEQUAL, 0x0, 0xff);
     glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(call.TriangleOffset), call.TriangleCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, static_cast<GLint>(call.TriangleOffset), call.TriangleCount);
 
     glDisable(GL_STENCIL_TEST);
+
+    glBindVertexArray(0);
 }
 
 void gl_canvas::convex_fill(nvg_call const& call)
 {
+    glBindVertexArray(_vertexArray.ID);
+
     set_uniforms(call.UniformOffset, call.Image);
 
+    // Batch draw all convex fill paths.
+    std::vector<GLint> fillFirsts, fillCounts;
+    fillFirsts.reserve(call.PathCount);
+    fillCounts.reserve(call.PathCount);
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
-        // Draw fringes
+        fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+        fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+    }
+    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(), static_cast<GLsizei>(fillFirsts.size()));
+
+    // Draw fringes
+    std::vector<GLint> strokeFirsts, strokeCounts;
+    strokeFirsts.reserve(call.PathCount);
+    strokeCounts.reserve(call.PathCount);
+    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         if (_paths[i].StrokeCount > 0) {
-            _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
+            strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+            strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
         }
     }
+    if (!strokeFirsts.empty()) {
+        glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
+    }
+
+    glBindVertexArray(0);
 }
 
 void gl_canvas::stroke(nvg_call const& call)
 {
+    glBindVertexArray(_vertexArray.ID);
+
     glEnable(GL_STENCIL_TEST);
     glStencilMask(0xff);
+
+    // Prepare stroke geometry.
+    std::vector<GLint> strokeFirsts, strokeCounts;
+    strokeFirsts.reserve(call.PathCount);
+    strokeCounts.reserve(call.PathCount);
+    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+        strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+        strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+    }
 
     // Fill the stroke base without overlap
     glStencilFunc(GL_EQUAL, 0x0, 0xff);
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     set_uniforms(call.UniformOffset + _fragSize, call.Image);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
-    }
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
 
     // Draw anti-aliased pixels.
     set_uniforms(call.UniformOffset, call.Image);
     glStencilFunc(GL_EQUAL, 0x00, 0xff);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
-    }
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
 
     // Clear stencil buffer.
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
     glStencilFunc(GL_ALWAYS, 0x0, 0xff);
     glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        _vertexArray.draw_arrays(primitive_type::TriangleStrip, static_cast<i32>(_paths[i].StrokeOffset), _paths[i].StrokeCount);
-    }
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     glDisable(GL_STENCIL_TEST);
+    glBindVertexArray(0);
 }
 
 void gl_canvas::triangles(nvg_call const& call)
