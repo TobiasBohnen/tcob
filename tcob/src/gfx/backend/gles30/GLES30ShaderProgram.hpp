@@ -47,7 +47,6 @@ public:
     void set_uniform(i32 loc, mat4 const& x) const;
 
     auto is_valid() const -> bool override;
-    auto get_id() const -> u32;
 
 protected:
     void do_destroy() override;

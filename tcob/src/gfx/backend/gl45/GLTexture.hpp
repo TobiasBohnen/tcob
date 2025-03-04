@@ -31,7 +31,6 @@ public:
     auto is_valid() const -> bool override;
 
     auto get_size() const -> size_i;
-    auto get_id() const -> u32;
 
 protected:
     void create(i32 type);

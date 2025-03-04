@@ -127,13 +127,13 @@ void gl_render_target::bind_material(material const* mat) const
 
     if (mat->Texture.is_ready()) {
         GLCHECK(glActiveTexture(GL_TEXTURE0));
-        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, mat->Texture->get_impl<gl_texture>()->get_id()));
+        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, mat->Texture->get_impl<gl_texture>()->ID));
     }
 
     if (mat->Shader.is_ready()) {
         auto* shader {mat->Shader->get_impl<gl_shader>()};
-        glUseProgram(shader->get_id());
-        GLCHECK(glUniformBlockBinding(shader->get_id(), glGetUniformBlockIndex(shader->get_id(), "Material"), 1));
+        glUseProgram(shader->ID);
+        GLCHECK(glUniformBlockBinding(shader->ID, glGetUniformBlockIndex(shader->ID, "Material"), 1));
     } else {
         if (mat->Texture.is_ready()) {
             if (mat->Texture->info().Format == texture::format::R8) {

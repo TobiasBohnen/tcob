@@ -47,7 +47,7 @@ void gl_framebuffer::attach_texture(gl_texture const* tex, u32 /*depth*/)
     bind();
 
     auto const size {tex->get_size()};
-    _texID = tex->get_id();
+    _texID = tex->ID;
     // Replaced glFramebufferTextureLayer with glFramebufferTexture2D
     GLCHECK(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texID, 0));
 

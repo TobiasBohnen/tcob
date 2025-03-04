@@ -151,11 +151,6 @@ auto gl_texture::get_size() const -> size_i
     return _size;
 }
 
-auto gl_texture::get_id() const -> u32
-{
-    return ID;
-}
-
 void gl_texture::do_destroy()
 {
     glDeleteTextures(1, &ID);

@@ -265,13 +265,13 @@ void gl_canvas::set_uniforms(usize uniformOffset, texture* image) const
 
     GLCHECK(glActiveTexture(GL_TEXTURE0));
     if (image) {
-        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, image->get_impl<gl_texture>()->get_id()));
+        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, image->get_impl<gl_texture>()->ID));
     } else {
         GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, 0));
     }
 
     GLCHECK(glActiveTexture(GL_TEXTURE1));
-    GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, _gradientTexture.get_id()));
+    GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, _gradientTexture.ID));
 }
 
 auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms

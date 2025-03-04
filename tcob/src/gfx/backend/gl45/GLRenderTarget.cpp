@@ -129,11 +129,11 @@ void gl_render_target::bind_material(material const* mat) const
     if (!mat) { return; }
 
     if (mat->Texture.is_ready()) {
-        glBindTextureUnit(0, mat->Texture->get_impl<gl_texture>()->get_id());
+        glBindTextureUnit(0, mat->Texture->get_impl<gl_texture>()->ID);
     }
 
     if (mat->Shader.is_ready()) {
-        glUseProgram(mat->Shader->get_impl<gl_shader>()->get_id());
+        glUseProgram(mat->Shader->get_impl<gl_shader>()->ID);
     } else {
         if (mat->Texture.is_ready()) {
             if (mat->Texture->info().Format == texture::format::R8) {

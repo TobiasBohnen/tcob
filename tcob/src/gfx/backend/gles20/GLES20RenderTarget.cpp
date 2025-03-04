@@ -98,14 +98,14 @@ void gl_render_target::bind_material(material const* mat) const
 
     if (mat->Texture.is_ready()) {
         GLCHECK(glActiveTexture(GL_TEXTURE0));
-        GLCHECK(glBindTexture(GL_TEXTURE_2D, mat->Texture->get_impl<gl_texture>()->get_id()));
+        GLCHECK(glBindTexture(GL_TEXTURE_2D, mat->Texture->get_impl<gl_texture>()->ID));
     }
 
     u32 shaderId {};
 
     if (mat->Shader.is_ready()) {
         auto* shader {mat->Shader->get_impl<gl_shader>()};
-        shaderId = shader->get_id();
+        shaderId = shader->ID;
     } else {
         if (mat->Texture.is_ready()) {
             if (mat->Texture->info().Format == texture::format::R8) {

@@ -45,7 +45,7 @@ void gl_framebuffer::attach_texture(texture const* tex)
     assert(ID);
 
     auto const size {tex->info().Size};
-    _texID = tex->get_impl<gl_texture>()->get_id();
+    _texID = tex->get_impl<gl_texture>()->ID;
     glNamedFramebufferTextureLayer(ID, GL_COLOR_ATTACHMENT0, _texID, 0, 0);
 
     glNamedFramebufferRenderbuffer(ID, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rbo);

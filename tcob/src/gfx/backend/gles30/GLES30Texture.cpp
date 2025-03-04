@@ -161,11 +161,6 @@ auto gl_texture::is_valid() const -> bool
     return ID != 0;
 }
 
-auto gl_texture::get_id() const -> u32
-{
-    return ID;
-}
-
 auto gl_texture::get_size() const -> size_i
 {
     return _size;

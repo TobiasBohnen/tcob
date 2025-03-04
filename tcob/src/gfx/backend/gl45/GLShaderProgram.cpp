@@ -213,11 +213,6 @@ auto gl_shader::is_valid() const -> bool
     return ID != 0;
 }
 
-auto gl_shader::get_id() const -> u32
-{
-    return ID;
-}
-
 auto gl_shader::get_uniform_location(string const& name) const -> i32
 {
     assert(ID);
