@@ -54,8 +54,6 @@ void gl_canvas::flush(size_f size)
 {
     if (!_calls.empty()) {
         // Setup require GL state.
-        glUseProgram(_shader.ID);
-
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
@@ -66,6 +64,10 @@ void gl_canvas::flush(size_f size)
         glStencilMask(0xffffffff);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glStencilFunc(GL_ALWAYS, 0, 0xffffffff);
+
+        glBindVertexArray(_vertexArray.ID);
+
+        glUseProgram(_shader.ID);
 
         // Upload ubo for frag shaders
         glNamedBufferData(_fragBuf, _nuniforms * _fragSize, _uniforms.data(), GL_STREAM_DRAW);
@@ -94,6 +96,7 @@ void gl_canvas::flush(size_f size)
             }
         }
 
+        glBindVertexArray(0);
         glDisable(GL_CULL_FACE);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glUseProgram(0);
@@ -324,8 +327,6 @@ auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const&
 
 void gl_canvas::fill(nvg_call const& call)
 {
-    glBindVertexArray(_vertexArray.ID);
-
     // Draw shapes
     glEnable(GL_STENCIL_TEST);
     glStencilMask(0xff);
@@ -374,14 +375,10 @@ void gl_canvas::fill(nvg_call const& call)
     glDrawArrays(GL_TRIANGLE_STRIP, static_cast<GLint>(call.TriangleOffset), call.TriangleCount);
 
     glDisable(GL_STENCIL_TEST);
-
-    glBindVertexArray(0);
 }
 
 void gl_canvas::convex_fill(nvg_call const& call)
 {
-    glBindVertexArray(_vertexArray.ID);
-
     set_uniforms(call.UniformOffset, call.Image);
 
     // Batch draw all convex fill paths.
@@ -407,14 +404,10 @@ void gl_canvas::convex_fill(nvg_call const& call)
     if (!strokeFirsts.empty()) {
         glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
     }
-
-    glBindVertexArray(0);
 }
 
 void gl_canvas::stroke(nvg_call const& call)
 {
-    glBindVertexArray(_vertexArray.ID);
-
     glEnable(GL_STENCIL_TEST);
     glStencilMask(0xff);
 
@@ -434,9 +427,9 @@ void gl_canvas::stroke(nvg_call const& call)
     glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
 
     // Draw anti-aliased pixels.
-    set_uniforms(call.UniformOffset, call.Image);
     glStencilFunc(GL_EQUAL, 0x00, 0xff);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    set_uniforms(call.UniformOffset, call.Image);
     glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(), static_cast<GLsizei>(strokeFirsts.size()));
 
     // Clear stencil buffer.
@@ -447,7 +440,6 @@ void gl_canvas::stroke(nvg_call const& call)
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     glDisable(GL_STENCIL_TEST);
-    glBindVertexArray(0);
 }
 
 void gl_canvas::triangles(nvg_call const& call)
