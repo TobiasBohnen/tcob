@@ -210,6 +210,10 @@ void null_canvas::render_triangles(canvas::paint const&, blend_funcs const&, can
 {
 }
 
+void null_canvas::render_clip(canvas::scissor const&, f32, std::vector<canvas::path> const&)
+{
+}
+
 void null_canvas::add_gradient(i32, color_gradient const&)
 {
 }

@@ -648,6 +648,14 @@ void canvas::stroke()
     _impl->render_stroke(strokePaint, s.CompositeOperation, s.Scissor, _fringeWidth, strokeWidth, _cache->paths());
 }
 
+void canvas::clip()
+{
+    state const& s {_states->get()};
+    _cache->fill(s, true, false, _fringeWidth);
+
+    _impl->render_clip(s.Scissor, _fringeWidth, _cache->paths());
+}
+
 ////////////////////////////////////////////////////////////
 
 auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& gradient) -> paint
@@ -863,10 +871,8 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
     std::vector<vertex> verts(formatResult.QuadCount * 6);
     usize               nverts {0};
 
-    f32 const x {std::floor(offset.X + 0.5f)};
-    f32 const y {std::floor(offset.Y + 0.5f)};
-
-    bool const isTranslation {s.XForm.is_translate_only()};
+    f32 const x {offset.X};
+    f32 const y {offset.Y};
 
     for (auto const& token : formatResult.Tokens) {
         for (usize i {0}; i < token.Quads.size(); ++i) {
@@ -883,28 +889,10 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
 
             point_f topLeft {}, topRight {}, bottomLeft {}, bottomRight {};
 
-            if (isTranslation) {
-                auto const tl {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
-                auto const br {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
-
-                topLeft.X = bottomLeft.X = std::floor(tl.X + 0.5f);
-                topRight.X = bottomRight.X = std::floor(br.X + 0.5f);
-                topLeft.Y = topRight.Y = std::floor(tl.Y + 0.5f);
-                bottomLeft.Y = bottomRight.Y = std::floor(br.Y + 0.5f);
-            } else {
-                topLeft       = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
-                topLeft.X     = std::floor(topLeft.X + 0.5f);
-                topLeft.Y     = std::floor(topLeft.Y + 0.5f);
-                topRight      = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.top() * invscale) + y}};
-                topRight.X    = std::floor(topRight.X + 0.5f);
-                topRight.Y    = std::floor(topRight.Y + 0.5f);
-                bottomRight   = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
-                bottomRight.X = std::floor(bottomRight.X + 0.5f);
-                bottomRight.Y = std::floor(bottomRight.Y + 0.5f);
-                bottomLeft    = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.bottom() * invscale) + y}};
-                bottomLeft.X  = std::floor(bottomLeft.X + 0.5f);
-                bottomLeft.Y  = std::floor(bottomLeft.Y + 0.5f);
-            }
+            topLeft     = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
+            topRight    = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.top() * invscale) + y}};
+            bottomRight = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
+            bottomLeft  = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.bottom() * invscale) + y}};
 
             verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {uvLeft, uvTop, level}};
             verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {uvRight, uvBottom, level}};
@@ -920,11 +908,13 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
 
 void canvas::fill_text(utf8_string_view text, point_f offset)
 {
-    bool const oldValue {_enforceWinding};
+    bool const oldWinding {_enforceWinding};
     _enforceWinding = false;
+
     decompose_text(text, offset);
     fill();
-    _enforceWinding = oldValue;
+
+    _enforceWinding = oldWinding;
 }
 
 void canvas::stroke_text(utf8_string_view text, point_f offset)

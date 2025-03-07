@@ -37,8 +37,10 @@ public:
         f32 fringe, f32 strokeWidth, std::vector<canvas::path> const& paths) = 0;
     void virtual render_triangles(
         canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
-        std::span<vertex const> verts, f32 fringe)                     = 0;
-    void virtual add_gradient(i32 idx, color_gradient const& gradient) = 0;
+        std::span<vertex const> verts, f32 fringe) = 0;
+    void virtual render_clip(
+        canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths) = 0;
+    void virtual add_gradient(i32 idx, color_gradient const& gradient)                      = 0;
 };
 
 ////////////////////////////////////////////////////////////

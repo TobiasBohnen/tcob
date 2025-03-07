@@ -25,11 +25,14 @@
 
 #include <glad/gl45.h>
 
+#include <vector>
+
 #include "GLShaderProgram.hpp"
 #include "GLTexture.hpp"
 #include "GLVertexArray.hpp"
 
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
 
 namespace tcob::gfx::gl45 {
 
@@ -46,6 +49,7 @@ enum class nvg_call_type : u8 {
     ConvexFill,
     Stroke,
     Triangles,
+    Clip
 };
 
 struct nvg_call {
@@ -103,15 +107,19 @@ public:
                        f32 strokeWidth, std::vector<canvas::path> const& paths) override;
     void render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
                           std::span<vertex const> verts, f32 fringe) override;
+    void render_clip(canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths) override;
     void add_gradient(i32 idx, color_gradient const& gradient) override;
 
 private:
     void set_uniforms(usize uniformOffset, texture* image = nullptr) const;
     auto convert_paint(canvas::paint const& paint, canvas::scissor const& scissor, f32 width, f32 fringe, f32 strokeThr) -> nvg_frag_uniforms;
+
     void fill(nvg_call const& call);
     void convex_fill(nvg_call const& call);
     void stroke(nvg_call const& call);
     void triangles(nvg_call const& call);
+    void clip(nvg_call const& call);
+
     auto get_max_vertcount(std::vector<canvas::path> const& paths) -> usize;
     auto alloc_verts(usize n) -> usize;
     auto alloc_frag_uniforms(usize n) -> usize;

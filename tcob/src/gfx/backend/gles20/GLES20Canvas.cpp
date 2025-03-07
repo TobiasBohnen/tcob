@@ -118,17 +118,17 @@ void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& compo
     auto& call {_calls.emplace_back()};
     usize pathCount {paths.size()};
 
-    call.Type          = nvg_call_type::Fill;
-    call.TriangleCount = 4;
-    call.PathOffset    = _paths.size();
-
-    call.PathCount = pathCount;
-    call.Image     = paint.Image;
-    call.BlendFunc = compositeOperation;
+    call.PathOffset = _paths.size();
+    call.PathCount  = pathCount;
+    call.Image      = paint.Image;
+    call.BlendFunc  = compositeOperation;
 
     if (pathCount == 1 && paths[0].Convex) {
         call.Type          = nvg_call_type::ConvexFill;
         call.TriangleCount = 0; // Bounding box fill quad not needed for convex fill
+    } else {
+        call.Type          = nvg_call_type::Fill;
+        call.TriangleCount = 4;
     }
 
     // Allocate vertices for all the paths.
@@ -238,6 +238,11 @@ void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& 
     auto& frag {_uniforms[call.UniformOffset]};
     frag      = convert_paint(paint, scissor, 1.0f, fringe, -1.0f);
     frag.Type = nvg_shader_type::Triangles;
+}
+
+void gl_canvas::render_clip(canvas::scissor const& /* scissor */, f32 /* fringe */, std::vector<canvas::path> const& /* paths */)
+{
+    // TODO
 }
 
 void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)

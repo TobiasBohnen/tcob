@@ -189,6 +189,7 @@ public:
 
     void fill();
     void stroke();
+    void clip();
 
     // Extras
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
