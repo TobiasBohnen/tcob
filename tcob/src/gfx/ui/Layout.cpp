@@ -105,11 +105,21 @@ auto layout::create_init(string const& name) const -> widget::init
 
 ////////////////////////////////////////////////////////////
 
+fixed_layout::fixed_layout(parent parent)
+    : layout {parent}
+{
+}
+
 void fixed_layout::do_layout(size_f /* size */)
 {
 }
 
 ////////////////////////////////////////////////////////////
+
+flex_size_layout::flex_size_layout(parent parent)
+    : layout {parent}
+{
+}
 
 void flex_size_layout::do_layout(size_f size)
 {
@@ -124,6 +134,11 @@ void flex_size_layout::do_layout(size_f size)
 }
 
 ////////////////////////////////////////////////////////////
+
+dock_layout::dock_layout(parent parent)
+    : layout {parent}
+{
+}
 
 void dock_layout::do_layout(size_f size)
 {
@@ -215,15 +230,24 @@ void box_layout::do_layout(size_f size)
     f32 const horiSize {size.Width / _box.Width};
     f32 const vertSize {size.Height / _box.Height};
 
-    for (i32 i {0}; i < std::ssize(w) && i < _box.Width * _box.Height; ++i) {
+    for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
-        widget->Bounds = {i % _box.Width * horiSize, i / _box.Width * vertSize,
-                          widget->Flex->Width.calc(horiSize),
-                          widget->Flex->Height.calc(vertSize)};
+        if (i < _box.Width * _box.Height) {
+            widget->Bounds = {i % _box.Width * horiSize, i / _box.Width * vertSize,
+                              widget->Flex->Width.calc(horiSize),
+                              widget->Flex->Height.calc(vertSize)};
+        } else {
+            widget->Bounds = rect_f::Zero;
+        }
     }
 }
 
 ////////////////////////////////////////////////////////////
+
+horizontal_layout::horizontal_layout(parent parent)
+    : layout {parent}
+{
+}
 
 void horizontal_layout::do_layout(size_f size)
 {
@@ -242,6 +266,11 @@ void horizontal_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
+vertical_layout::vertical_layout(parent parent)
+    : layout {parent}
+{
+}
+
 void vertical_layout::do_layout(size_f size)
 {
     auto& w {widgets()};
@@ -258,6 +287,11 @@ void vertical_layout::do_layout(size_f size)
 }
 
 ////////////////////////////////////////////////////////////
+
+flow_layout::flow_layout(parent parent)
+    : layout {parent}
+{
+}
 
 void flow_layout::do_layout(size_f size)
 {
@@ -282,6 +316,46 @@ void flow_layout::do_layout(size_f size)
 
         x += widgetWidth;
         rowHeight = std::max(rowHeight, widgetHeight);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+masonry_layout::masonry_layout(parent parent, i32 columns)
+    : layout {parent}
+    , _columns {columns} // _columns is a member variable
+{
+}
+
+void masonry_layout::do_layout(size_f size)
+{
+    auto const&      w {widgets()};
+    f32 const        colWidth {size.Width / _columns};
+    std::vector<f32> colHeights(_columns, 0.0f);
+
+    for (auto const& widget : w) {
+        f32 const widgetWidth {widget->Flex->Width.calc(colWidth)};
+        f32 const widgetHeight {widget->Flex->Height.calc(size.Height)};
+
+        // Find the shortest column that can fit the widget
+        i32 colIndex {-1};
+        for (i32 i {0}; i < _columns; ++i) {
+            if (colHeights[i] + widgetHeight <= size.Height && (colIndex == -1 || colHeights[i] < colHeights[colIndex])) {
+                colIndex = i;
+            }
+        }
+
+        // If no column can fit the widget, skip it
+        if (colIndex == -1) {
+            widget->Bounds = rect_f::Zero;
+            continue;
+        }
+
+        // Place the widget in the selected column
+        f32 const x {colIndex * colWidth};
+        f32 const y {colHeights[colIndex]};
+        widget->Bounds = {x, y, widgetWidth, widgetHeight};
+        colHeights[colIndex] += widgetHeight;
     }
 }
 

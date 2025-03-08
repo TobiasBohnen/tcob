@@ -26,7 +26,6 @@ class TCOB_API layout : public non_copyable {
 public:
     using parent = std::variant<widget_container*, form*>;
 
-    explicit layout(parent parent);
     virtual ~layout() = default;
 
     void update();
@@ -40,6 +39,8 @@ public:
     auto widgets() -> std::vector<std::shared_ptr<widget>>&;
 
 protected:
+    explicit layout(parent parent);
+
     template <std::derived_from<widget> T>
     auto add_widget(string const& name) -> std::shared_ptr<T>;
 
@@ -58,7 +59,7 @@ private:
 // fixed_layout: No automatic re-layout; widgets maintain manually set bounds.
 class TCOB_API fixed_layout : public layout {
 public:
-    using layout::layout;
+    explicit fixed_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
@@ -72,7 +73,7 @@ protected:
 // flex_size_layout: Dynamically adjusts each widget's size using its flex values.
 class TCOB_API flex_size_layout : public layout {
 public:
-    using layout::layout;
+    explicit flex_size_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(point_f pos, string const& name) -> std::shared_ptr<T>;
@@ -86,7 +87,7 @@ protected:
 // dock_layout: Positions widgets at container edges based on dock style and shrinks available space.
 class TCOB_API dock_layout : public layout {
 public:
-    using layout::layout;
+    explicit dock_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(dock_style dock, string const& name) -> std::shared_ptr<T>;
@@ -103,8 +104,7 @@ private:
 // grid_layout: Divides the container into a grid and scales each widget's bounds within its grid cell.
 class TCOB_API grid_layout final : public layout {
 public:
-    using layout::layout;
-    explicit grid_layout(parent parent, size_i initSize);
+    grid_layout(parent parent, size_i initSize);
 
     template <std::derived_from<widget> T>
     auto create_widget(rect_i const& bounds, string const& name, bool growGrid = false) -> std::shared_ptr<T>;
@@ -122,8 +122,7 @@ private:
 // box_layout: Arranges widgets in a fixed grid defined by box dimensions, positioning each widget in its cell.
 class TCOB_API box_layout final : public layout {
 public:
-    using layout::layout;
-    explicit box_layout(parent parent, size_i boxSize);
+    box_layout(parent parent, size_i boxSize);
 
     template <std::derived_from<widget> T>
     auto create_widget(string const& name) -> std::shared_ptr<T>;
@@ -140,7 +139,7 @@ private:
 // horizontal_layout: Evenly distributes widgets horizontally across the container.
 class TCOB_API horizontal_layout final : public layout {
 public:
-    using layout::layout;
+    explicit horizontal_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(string const& name) -> std::shared_ptr<T>;
@@ -154,7 +153,7 @@ protected:
 // vertical_layout: Evenly distributes widgets vertically down the container.
 class TCOB_API vertical_layout final : public layout {
 public:
-    using layout::layout;
+    explicit vertical_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(string const& name) -> std::shared_ptr<T>;
@@ -168,13 +167,30 @@ protected:
 // flow_layout: Lays out widgets left-to-right and wraps to a new row when exceeding container width.
 class TCOB_API flow_layout final : public layout {
 public:
-    using layout::layout;
+    explicit flow_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
+};
+
+////////////////////////////////////////////////////////////
+
+// masonry_layout: distributes widgets across a fixed number of columns
+class TCOB_API masonry_layout final : public layout {
+public:
+    masonry_layout(parent parent, i32 columns);
+
+    template <std::derived_from<widget> T>
+    auto create_widget(string const& name) -> std::shared_ptr<T>;
+
+protected:
+    void do_layout(size_f size) override;
+
+private:
+    i32 _columns;
 };
 
 }

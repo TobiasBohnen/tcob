@@ -107,4 +107,12 @@ inline auto flow_layout::create_widget(string const& name) -> std::shared_ptr<T>
     return add_widget<T>(name);
 }
 
+////////////////////////////////////////////////////////////
+
+template <std::derived_from<widget> T>
+inline auto masonry_layout::create_widget(string const& name) -> std::shared_ptr<T>
+{
+    return add_widget<T>(name);
+}
+
 }
