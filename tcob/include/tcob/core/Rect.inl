@@ -7,6 +7,14 @@
 #include "Rect.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <numbers>
+#include <ostream>
+#include <utility>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob {
 

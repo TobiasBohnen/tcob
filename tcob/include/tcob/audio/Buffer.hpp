@@ -8,7 +8,10 @@
 
 #include <any>
 #include <future>
+#include <memory>
+#include <optional>
 #include <span>
+#include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"

@@ -8,9 +8,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 
+    #include <future>
+    #include <memory>
+    #include <utility>
     #include <vector>
 
+    #include "tcob/audio/Buffer.hpp"
     #include "tcob/audio/Sound.hpp"
+    #include "tcob/core/Common.hpp"
     #include "tcob/core/Interfaces.hpp"
 
 struct tsf;

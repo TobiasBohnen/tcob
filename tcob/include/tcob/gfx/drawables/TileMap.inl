@@ -4,9 +4,15 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+#include "TileMap.hpp"
+
+#include <initializer_list>
+#include <unordered_map>
 #include <utility>
 
-#include "TileMap.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Geometry.hpp"
 
 namespace tcob::gfx {
 

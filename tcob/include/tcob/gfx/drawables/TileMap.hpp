@@ -6,10 +6,15 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <initializer_list>
+#include <optional>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Grid.hpp"
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
@@ -17,6 +22,7 @@
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 

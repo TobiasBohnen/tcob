@@ -8,7 +8,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <functional>
+    #include <memory>
+
     #include "tcob/scripting/Script.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
     #include "tcob/scripting/squirrel/SquirrelConversions.hpp"
     #include "tcob/scripting/squirrel/SquirrelTypes.hpp"

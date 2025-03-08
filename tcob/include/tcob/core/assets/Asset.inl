@@ -6,6 +6,12 @@
 #pragma once
 #include "Asset.hpp"
 
+#include <cstddef>
+#include <memory>
+#include <utility>
+
+#include "tcob/core/assets/Assets.hpp"
+
 namespace tcob::assets {
 
 template <typename T>

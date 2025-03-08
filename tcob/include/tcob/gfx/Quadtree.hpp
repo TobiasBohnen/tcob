@@ -10,6 +10,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <memory>
 #include <utility>
 #include <vector>

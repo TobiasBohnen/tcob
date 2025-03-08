@@ -8,7 +8,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <memory>
+
     #include "tcob/core/io/FileStream.hpp"
+    #include "tcob/core/io/Stream.hpp"
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/lua/Lua.hpp"
+    #include "tcob/scripting/lua/LuaTypes.hpp"
+    #include "tcob/scripting/lua/LuaWrapper.hpp"
 
 namespace tcob::scripting::lua {
 

@@ -8,17 +8,22 @@
 
 #include <any>
 #include <memory>
+#include <optional>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Ray.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/Transformable.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"

@@ -8,10 +8,14 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
+#include <chrono>
 #include <filesystem>
 #include <optional>
-
+#include <span>
+#include <string>
 #include <tuple>
+#include <utility>
 #include <variant>
 
 #include "tcob/core/AngleUnits.hpp"

@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
+#include <initializer_list>
 #include <map>
 #include <span>
 

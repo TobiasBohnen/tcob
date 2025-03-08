@@ -6,7 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+#include <vector>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
+
 
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////

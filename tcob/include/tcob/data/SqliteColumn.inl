@@ -12,6 +12,8 @@
     #include <unordered_set>
 
     #include "tcob/core/StringUtils.hpp"
+    #include "tcob/data/Sqlite.hpp"
+
 
 namespace tcob::data::sqlite {
 

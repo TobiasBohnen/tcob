@@ -7,6 +7,7 @@
 #include "Result.hpp"
 
 #include <cassert>
+#include <type_traits>
 
 namespace tcob {
 

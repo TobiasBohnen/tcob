@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <type_traits>
     #include <vector>
 
     #include "tcob/core/Interfaces.hpp"

@@ -10,6 +10,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <array>
+    #include <cassert>
+    #include <cmath>
+    #include <cstddef>
     #include <filesystem>
     #include <functional>
     #include <optional>
@@ -22,6 +26,8 @@
 
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
+    #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
     #include "tcob/scripting/lua/LuaClosure.hpp"
     #include "tcob/scripting/lua/LuaTypes.hpp"

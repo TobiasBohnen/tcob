@@ -6,6 +6,11 @@
 #pragma once
 #include "Transform.hpp"
 
+#include <ostream>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+
 namespace tcob::gfx {
 
 auto constexpr operator==(transform const& left, transform const& right) -> bool

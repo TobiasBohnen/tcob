@@ -6,8 +6,12 @@
 #pragma once
 #include "ImageFilters.hpp"
 
+#include <algorithm>
+
+#include "tcob/core/Point.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx {
 

@@ -9,6 +9,12 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <format>
+    #include <optional>
+    #include <tuple>
+    #include <type_traits>
+    #include <vector>
+
+    #include "tcob/data/Sqlite.hpp"
 
 namespace tcob::data::sqlite {
 

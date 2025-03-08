@@ -7,7 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <future>
+#include <memory>
 #include <optional>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Color.hpp"

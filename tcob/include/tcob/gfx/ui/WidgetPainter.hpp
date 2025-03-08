@@ -7,8 +7,13 @@
 #include "tcob/tcob_config.hpp"
 
 #include <stack>
+#include <utility>
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/TextFormatter.hpp"
+#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 

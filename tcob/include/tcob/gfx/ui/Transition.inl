@@ -6,6 +6,9 @@
 #pragma once
 #include "Transition.hpp"
 
+#include <algorithm>
+#include <cassert>
+
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 

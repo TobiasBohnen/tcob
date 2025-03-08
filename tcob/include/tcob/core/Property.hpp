@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <compare>
 #include <functional>
 #include <type_traits>
 

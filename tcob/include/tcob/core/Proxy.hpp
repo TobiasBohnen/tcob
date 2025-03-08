@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <tuple>
+
 #include "tcob/core/Concepts.hpp"
 
 namespace tcob {

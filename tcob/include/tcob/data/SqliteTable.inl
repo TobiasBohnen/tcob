@@ -8,8 +8,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <cassert>
+    #include <vector>
+
     #include "tcob/core/StringUtils.hpp"
+    #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteColumn.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
+
 
 namespace tcob::data::sqlite {
 

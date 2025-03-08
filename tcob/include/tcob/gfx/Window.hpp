@@ -6,13 +6,19 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
+#include "tcob/gfx/ShaderProgram.hpp"
+#include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/drawables/Cursor.hpp"
 
 ////////////////////////////////////////////////////////////

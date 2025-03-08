@@ -10,7 +10,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {

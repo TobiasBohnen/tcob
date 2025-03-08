@@ -10,13 +10,20 @@
 
     #include <memory>
 
+    #include "tcob/core/Common.hpp"
+    #include "tcob/core/Point.hpp"
+    #include "tcob/core/Property.hpp"
+    #include "tcob/core/Rect.hpp"
     #include "tcob/core/Signal.hpp"
-    #include "tcob/core/assets/AssetLibrary.hpp"
+    #include "tcob/core/assets/Asset.hpp"
+    #include "tcob/core/assets/Assets.hpp"
     #include "tcob/core/input/Input.hpp"
     #include "tcob/gfx/Canvas.hpp"
     #include "tcob/gfx/FontFamily.hpp"
     #include "tcob/gfx/Geometry.hpp"
+    #include "tcob/gfx/Gfx.hpp"
     #include "tcob/gfx/Material.hpp"
+    #include "tcob/gfx/RenderTarget.hpp"
     #include "tcob/gfx/Renderer.hpp"
     #include "tcob/gfx/Transformable.hpp"
     #include "tcob/gfx/Window.hpp"

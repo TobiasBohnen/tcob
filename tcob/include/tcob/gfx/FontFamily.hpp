@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
+#include <span>
 #include <unordered_map>
 #include <vector>
 

@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+#include <optional>
+
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"

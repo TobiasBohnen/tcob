@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <span>
+#include <vector>
 
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/random/Distribution.hpp"

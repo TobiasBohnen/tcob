@@ -7,8 +7,10 @@
 #include "tcob/tcob_config.hpp"
 
 #include <future>
+#include <memory>
 #include <optional>
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"

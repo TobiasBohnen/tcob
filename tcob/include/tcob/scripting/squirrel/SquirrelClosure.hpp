@@ -8,6 +8,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <functional>
+    #include <memory>
+    #include <tuple>
+
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
 

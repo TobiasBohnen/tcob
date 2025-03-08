@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <ostream>
+#include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"

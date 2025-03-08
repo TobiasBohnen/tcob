@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Gfx.hpp"
 

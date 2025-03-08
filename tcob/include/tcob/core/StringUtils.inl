@@ -7,6 +7,8 @@
 #include "StringUtils.hpp"
 
 #include <charconv>
+#include <optional>
+#include <system_error>
 
 namespace tcob::helper {
 

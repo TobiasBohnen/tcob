@@ -4,12 +4,19 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-
 #include "tcob/tcob_config.hpp"
 
+#include <unordered_map>
+#include <vector>
+
+#include "tcob/core/Property.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Scrollbar.hpp"
+#include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
+
 
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////

@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 

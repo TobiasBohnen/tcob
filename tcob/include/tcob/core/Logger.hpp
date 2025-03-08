@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <format>
+#include <memory>
 #include <source_location>
 
 #include "tcob/core/Interfaces.hpp"

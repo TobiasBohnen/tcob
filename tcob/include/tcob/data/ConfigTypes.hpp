@@ -6,9 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
 #include <future>
+#include <initializer_list>
 #include <memory>
 #include <optional>
+#include <span>
+#include <utility>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Proxy.hpp"

@@ -6,11 +6,18 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
 #include <vector>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"

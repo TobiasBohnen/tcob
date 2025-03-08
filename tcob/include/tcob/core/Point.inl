@@ -6,7 +6,11 @@
 #pragma once
 #include "Point.hpp"
 
+#include <array>
 #include <cmath>
+#include <ostream>
+
+#include "tcob/core/AngleUnits.hpp"
 
 namespace tcob {
 

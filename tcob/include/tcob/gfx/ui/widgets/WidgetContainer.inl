@@ -6,6 +6,8 @@
 #pragma once
 #include "WidgetContainer.hpp"
 
+#include "tcob/gfx/ui/UI.hpp"
+
 namespace tcob::gfx::ui {
 
 template <SubmitTarget Target>

@@ -6,6 +6,15 @@
 #pragma once
 #include "Layout.hpp"
 
+#include <algorithm>
+#include <memory>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
+
 namespace tcob::gfx::ui {
 
 template <std::derived_from<widget> T>

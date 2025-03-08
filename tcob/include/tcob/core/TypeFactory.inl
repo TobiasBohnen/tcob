@@ -7,6 +7,7 @@
 #include "TypeFactory.hpp"
 
 #include <algorithm>
+#include <vector>
 
 #include "tcob/core/io/Magic.hpp"
 

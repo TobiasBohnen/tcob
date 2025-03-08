@@ -6,6 +6,8 @@
 #pragma once
 #include "Proxy.hpp"
 
+#include <tuple>
+
 namespace tcob {
 
 template <typename Object, typename... Keys>

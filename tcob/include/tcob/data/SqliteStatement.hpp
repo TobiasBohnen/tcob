@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <optional>
+    #include <vector>
 
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/data/Sqlite.hpp"

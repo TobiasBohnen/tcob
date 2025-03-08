@@ -5,7 +5,13 @@
 
 #include "tcob/app/Platform.hpp"
 
+#include <any>
+#include <memory>
+#include <optional>
+#include <stdexcept>
+#include <thread>
 #include <utility>
+#include <vector>
 
 #include <SDL.h>
 
@@ -15,17 +21,25 @@
 
 #include "loaders/ConfigAssetLoader.hpp"
 
+#include "tcob/app/Game.hpp"
 #include "tcob/audio/AudioSystem.hpp"
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/core/assets/AssetGroup.hpp"
+#include "tcob/core/assets/AssetLoader.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Magic.hpp"
+#include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)

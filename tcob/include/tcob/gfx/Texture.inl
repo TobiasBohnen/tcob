@@ -6,6 +6,8 @@
 #pragma once
 #include "Texture.hpp"
 
+#include "tcob/gfx/Gfx.hpp"
+
 namespace tcob::gfx {
 
 template <std::derived_from<render_backend::texture_base> T>

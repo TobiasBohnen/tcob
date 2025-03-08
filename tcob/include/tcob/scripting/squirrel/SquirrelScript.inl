@@ -8,6 +8,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <memory>
+
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/squirrel/SquirrelWrapper.hpp"
+
 namespace tcob::scripting::squirrel {
 
 template <typename... Args>

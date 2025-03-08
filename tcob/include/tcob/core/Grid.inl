@@ -6,6 +6,8 @@
 #pragma once
 #include "Grid.hpp"
 
+#include <cassert>
+
 namespace tcob {
 
 template <typename T>

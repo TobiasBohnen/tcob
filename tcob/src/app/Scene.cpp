@@ -6,10 +6,16 @@
 #include "tcob/app/Scene.hpp"
 
 #include <algorithm>
+#include <iterator>
+#include <memory>
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/assets/AssetLibrary.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Window.hpp"
 
 namespace tcob {
 scene::scene(game& parent)

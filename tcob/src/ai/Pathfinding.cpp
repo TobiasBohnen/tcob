@@ -6,9 +6,17 @@
 #include "tcob/ai/Pathfinding.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <functional>
+#include <limits>
 #include <queue>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
+
+#include "tcob/core/Grid.hpp"
+#include "tcob/core/Point.hpp"
 
 namespace tcob::ai {
 

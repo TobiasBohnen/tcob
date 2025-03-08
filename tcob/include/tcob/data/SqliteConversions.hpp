@@ -10,8 +10,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <cstddef>
     #include <optional>
     #include <tuple>
+    #include <type_traits>
 
     #include "tcob/core/Color.hpp"
     #include "tcob/core/Concepts.hpp"

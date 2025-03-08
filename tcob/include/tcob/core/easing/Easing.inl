@@ -6,6 +6,15 @@
 #pragma once
 #include "Easing.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <span>
+#include <vector>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Point.hpp"
+
 namespace tcob::easing {
 
 template <typename T>

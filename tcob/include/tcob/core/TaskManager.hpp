@@ -7,11 +7,15 @@
 #include "tcob/tcob_config.hpp"
 
 #include <condition_variable>
+#include <deque>
 #include <functional>
 #include <future>
 #include <mutex>
 #include <queue>
+#include <stop_token>
 #include <thread>
+#include <utility>
+#include <vector>
 
 namespace tcob {
 ////////////////////////////////////////////////////////////

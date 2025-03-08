@@ -6,10 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/assets/Assets.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Window.hpp"

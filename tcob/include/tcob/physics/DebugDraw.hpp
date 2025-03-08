@@ -8,6 +8,8 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <memory>
+    #include <optional>
     #include <span>
 
     #include "tcob/core/Color.hpp"

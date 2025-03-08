@@ -9,6 +9,9 @@
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
     #include <any>
+    #include <memory>
+    #include <span>
+    #include <vector>
 
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Point.hpp"

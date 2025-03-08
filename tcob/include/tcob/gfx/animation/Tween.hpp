@@ -7,6 +7,8 @@
 #include "tcob/tcob_config.hpp"
 
 #include <concepts>
+#include <memory>
+#include <optional>
 #include <queue>
 
 #include "tcob/core/Common.hpp"

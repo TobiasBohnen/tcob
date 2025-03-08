@@ -7,13 +7,21 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <memory>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::ui {

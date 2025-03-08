@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx {

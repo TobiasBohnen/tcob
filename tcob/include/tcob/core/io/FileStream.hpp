@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <ios>
+#include <optional>
+
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/io/Stream.hpp"
 

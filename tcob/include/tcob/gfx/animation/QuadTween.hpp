@@ -6,15 +6,21 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <concepts>
 #include <functional>
+#include <memory>
 #include <span>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::gfx {

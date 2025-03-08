@@ -7,8 +7,11 @@
 #include "tcob/tcob_config.hpp"
 
 #include <span>
+#include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ColorGradient.hpp"

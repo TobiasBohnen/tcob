@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <unordered_map>
 
 #include "tcob/core/Interfaces.hpp"

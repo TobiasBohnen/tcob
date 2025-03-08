@@ -6,6 +6,11 @@
 #pragma once
 #include "Size.hpp"
 
+#include <array>
+#include <ostream>
+
+#include "tcob/core/Point.hpp"
+
 namespace tcob {
 
 template <Arithmetic T>

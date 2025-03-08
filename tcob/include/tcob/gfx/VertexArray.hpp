@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <span>
 
 #include "tcob/gfx/Geometry.hpp"

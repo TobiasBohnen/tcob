@@ -9,6 +9,8 @@
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
     #include <concepts>
+    #include <cstddef>
+    #include <type_traits>
 
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/scripting/Scripting.hpp"

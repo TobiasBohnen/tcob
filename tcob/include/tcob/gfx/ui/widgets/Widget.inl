@@ -6,6 +6,9 @@
 #pragma once
 #include "Widget.hpp"
 
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
+
 namespace tcob::gfx::ui {
 
 template <std::derived_from<widget_style> T>

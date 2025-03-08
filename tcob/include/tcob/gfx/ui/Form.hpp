@@ -6,14 +6,17 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"

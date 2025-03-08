@@ -6,6 +6,8 @@
 #pragma once
 #include "RenderTarget.hpp"
 
+#include "tcob/gfx/Gfx.hpp"
+
 namespace tcob::gfx {
 
 template <std::derived_from<render_backend::render_target_base> T>

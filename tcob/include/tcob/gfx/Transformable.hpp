@@ -6,9 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <utility>
+
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx {

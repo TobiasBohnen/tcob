@@ -7,10 +7,16 @@
 #include "ParticleSystem.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <set>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
 

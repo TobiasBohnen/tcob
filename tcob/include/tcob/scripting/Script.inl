@@ -7,6 +7,7 @@
 #include "Script.hpp"
 
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting {
 

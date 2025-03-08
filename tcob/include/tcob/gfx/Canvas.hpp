@@ -24,8 +24,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <span>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -34,6 +36,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Font.hpp"

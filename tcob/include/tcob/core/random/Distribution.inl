@@ -6,8 +6,15 @@
 #pragma once
 #include "Distribution.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <iterator>
+#include <limits>
 #include <numeric>
+#include <span>
+#include <type_traits>
+#include <vector>
 
 namespace tcob::random {
 

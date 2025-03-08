@@ -7,6 +7,8 @@
 #include "AngleUnits.hpp"
 
 #include <cmath>
+#include <compare>
+#include <ostream>
 
 namespace tcob {
 

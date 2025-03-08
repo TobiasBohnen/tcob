@@ -6,6 +6,11 @@
 #pragma once
 #include "Random.hpp"
 
+#include <span>
+#include <vector>
+
+#include "tcob/core/random/Engine.hpp"
+
 namespace tcob::random {
 
 ////////////////////////////////////////////////////////////

@@ -6,6 +6,13 @@
 #pragma once
 #include "Stream.hpp"
 
+#include <array>
+#include <bit>
+#include <cstddef>
+#include <ios>
+#include <span>
+#include <vector>
+
 #include "tcob/core/Common.hpp"
 
 namespace tcob::io {

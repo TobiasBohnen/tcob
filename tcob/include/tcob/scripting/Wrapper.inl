@@ -6,6 +6,11 @@
 #pragma once
 #include "Wrapper.hpp"
 
+#include <functional>
+#include <utility>
+
+#include "tcob/core/Property.hpp"
+
 namespace tcob::scripting {
 
 ////////////////////////////////////////////////////////////

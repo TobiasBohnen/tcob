@@ -10,16 +10,23 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <array>
+    #include <cmath>
+    #include <cstddef>
     #include <filesystem>
     #include <functional>
     #include <optional>
     #include <span>
+    #include <string>
     #include <type_traits>
+    #include <unordered_set>
     #include <utility>
     #include <variant>
 
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
+    #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
     #include "tcob/scripting/squirrel/SquirrelClosure.hpp"
     #include "tcob/scripting/squirrel/SquirrelTypes.hpp"

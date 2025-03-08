@@ -6,6 +6,13 @@
 #pragma once
 #include "Color.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <ostream>
+
+#include "tcob/core/AngleUnits.hpp"
+
 namespace tcob {
 
 constexpr color::color(u8 r, u8 g, u8 b, u8 a)

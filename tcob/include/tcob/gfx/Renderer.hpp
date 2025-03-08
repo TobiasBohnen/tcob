@@ -6,9 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"

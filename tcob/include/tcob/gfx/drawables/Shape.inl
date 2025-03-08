@@ -6,6 +6,8 @@
 #pragma once
 #include "Shape.hpp"
 
+#include <memory>
+
 namespace tcob::gfx {
 
 template <std::derived_from<shape> T>

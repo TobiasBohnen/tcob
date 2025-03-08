@@ -2,8 +2,12 @@
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
+
 #pragma once
 #include "tcob/tcob_config.hpp"
+
+#include <optional>
+#include <vector>
 
 namespace tcob::io::magic {
 

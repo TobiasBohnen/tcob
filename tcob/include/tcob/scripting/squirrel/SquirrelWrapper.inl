@@ -4,10 +4,21 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-
 #include "SquirrelWrapper.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
+
+    #include <functional>
+    #include <string>
+    #include <type_traits>
+    #include <unordered_set>
+    #include <utility>
+
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/Wrapper.hpp"
+    #include "tcob/scripting/squirrel/Squirrel.hpp"
+    #include "tcob/scripting/squirrel/SquirrelClosure.hpp"
+    #include "tcob/scripting/squirrel/SquirrelTypes.hpp"
 
 namespace tcob::scripting::squirrel {
 

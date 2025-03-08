@@ -24,6 +24,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
 #include <variant>
 #include <vector>
 

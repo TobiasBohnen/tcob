@@ -4,7 +4,6 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-
 #include "tcob/tcob_config.hpp"
 
 #include <queue>
@@ -12,6 +11,7 @@
 #include <vector>
 
 #include "tcob/audio/Audio.hpp"
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/TaskManager.hpp"
 

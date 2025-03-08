@@ -16,11 +16,13 @@
     #include "tcob/core/Common.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Signal.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/Wrapper.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
     #include "tcob/scripting/lua/LuaClosure.hpp"
     #include "tcob/scripting/lua/LuaConversions.hpp"
     #include "tcob/scripting/lua/LuaTypes.hpp"
+
 
 namespace tcob::scripting::lua {
 ////////////////////////////////////////////////////////////

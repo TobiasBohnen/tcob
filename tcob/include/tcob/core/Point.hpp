@@ -6,6 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
+#include <cstddef>
+#include <format>
+#include <functional>
 #include <ostream>
 
 #include "tcob/core/AngleUnits.hpp"

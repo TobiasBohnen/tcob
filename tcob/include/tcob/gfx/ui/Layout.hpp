@@ -6,12 +6,15 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 

@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <compare>
+#include <ostream>
+
 #include "tcob/core/Concepts.hpp"
 
 namespace tcob {

@@ -8,10 +8,13 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <functional>
+    #include <memory>
     #include <optional>
 
     #include "tcob/core/Signal.hpp"
     #include "tcob/scripting/Script.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
     #include "tcob/scripting/lua/LuaConversions.hpp"
     #include "tcob/scripting/lua/LuaTypes.hpp"

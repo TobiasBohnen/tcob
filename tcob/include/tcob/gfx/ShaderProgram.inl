@@ -6,6 +6,8 @@
 #pragma once
 #include "ShaderProgram.hpp"
 
+#include "tcob/gfx/Gfx.hpp"
+
 namespace tcob::gfx {
 
 template <std::derived_from<render_backend::shader_base> T>

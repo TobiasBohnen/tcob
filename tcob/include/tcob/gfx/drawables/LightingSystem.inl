@@ -6,6 +6,8 @@
 #pragma once
 #include "LightingSystem.hpp"
 
+#include <memory>
+
 namespace tcob::gfx {
 
 template <typename T>

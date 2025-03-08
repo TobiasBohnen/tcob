@@ -7,18 +7,26 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <memory>
 #include <mutex>
+#include <optional>
 #include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/random/Random.hpp"
+#include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Renderer.hpp"
+#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {

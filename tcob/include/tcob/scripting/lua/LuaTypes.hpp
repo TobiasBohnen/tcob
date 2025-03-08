@@ -12,6 +12,7 @@
     #include <vector>
 
     #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
 
 namespace tcob::scripting::lua {

@@ -10,12 +10,19 @@
 #endif
 
 #include <memory>
+#include <thread>
+#include <utility>
 
 #include "tcob/app/Platform.hpp"
+#include "tcob/app/Scene.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stats.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/core/assets/AssetLibrary.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/data/ConfigConversions.hpp"
+#include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 

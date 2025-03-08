@@ -6,8 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <atomic>
+#include <memory>
+#include <optional>
+#include <vector>
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"

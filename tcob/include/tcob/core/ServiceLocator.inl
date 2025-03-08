@@ -6,6 +6,8 @@
 #pragma once
 #include "ServiceLocator.hpp"
 
+#include <memory>
+
 namespace tcob {
 
 template <typename T>

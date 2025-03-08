@@ -6,8 +6,16 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+#include <span>
+#include <unordered_map>
+
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
 

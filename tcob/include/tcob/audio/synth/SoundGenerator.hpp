@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Sound.hpp"
 #include "tcob/core/random/Random.hpp"

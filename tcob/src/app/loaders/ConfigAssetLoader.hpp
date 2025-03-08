@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <future>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 

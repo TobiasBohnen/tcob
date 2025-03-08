@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <type_traits>
+
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
 struct sqlite3;

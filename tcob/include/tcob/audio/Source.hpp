@@ -7,9 +7,11 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <memory>
 
 #include "tcob/audio/Audio.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 
 namespace tcob::audio {

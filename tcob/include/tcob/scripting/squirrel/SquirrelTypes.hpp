@@ -8,9 +8,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <memory>
     #include <vector>
 
     #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
 
 namespace tcob::scripting::squirrel {

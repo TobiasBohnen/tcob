@@ -6,7 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

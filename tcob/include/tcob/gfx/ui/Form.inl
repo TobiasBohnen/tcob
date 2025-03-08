@@ -6,6 +6,11 @@
 #pragma once
 #include "Form.hpp"
 
+#include <memory>
+
+#include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
+
 namespace tcob::gfx::ui {
 
 template <std::derived_from<widget_container> T>

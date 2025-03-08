@@ -12,6 +12,8 @@
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/gfx/Canvas.hpp"
+    #include "tcob/gfx/Font.hpp"
+    #include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::html {
 

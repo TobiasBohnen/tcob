@@ -7,6 +7,12 @@
 #include "Quadtree.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <utility>
+#include <vector>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

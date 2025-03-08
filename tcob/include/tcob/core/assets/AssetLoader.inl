@@ -7,6 +7,9 @@
 #include "AssetLoader.hpp"
 
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/core/assets/AssetGroup.hpp"
+#include "tcob/core/assets/Assets.hpp"
 
 namespace tcob::assets {
 

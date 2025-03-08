@@ -7,6 +7,10 @@
 #include "UI.hpp"
 
 #include <algorithm>
+#include <memory>
+#include <vector>
+
+#include "tcob/core/Rect.hpp"
 
 namespace tcob::gfx::ui {
 

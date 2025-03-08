@@ -6,6 +6,8 @@
 #pragma once
 #include "Property.hpp"
 
+#include <compare>
+
 namespace tcob {
 
 namespace detail {

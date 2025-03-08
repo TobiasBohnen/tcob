@@ -4,7 +4,7 @@ InlayHints:
     DeducedTypes: No
 Diagnostics:
     UnusedIncludes: Strict
-    MissingIncludes: None
+    MissingIncludes: Strict
     Includes:
         IgnoreHeader: 
             - tcob_config.hpp
@@ -13,6 +13,20 @@ Diagnostics:
             - concepts
             - .inl
             - Windows.h
+            - libloaderapi.h
+            - SDL_events.h
+            - SDL_stdinc.h
+            - SDL_main.h
+            - SDL_locale.h
+            - SDL_system.h
+            - SDL_version.h
+            - winuser.h
+            - winnt.h
+            - minwindef.h
+            - synchapi.h
+            - errhandlingapi.h
+            - handleapi.h
+            - winerror.h
     ClangTidy:
         Add:
             - "cppcoreguidelines-*"

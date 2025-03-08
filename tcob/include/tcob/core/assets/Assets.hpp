@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <unordered_map>
+
 namespace tcob::assets {
 ////////////////////////////////////////////////////////////
 

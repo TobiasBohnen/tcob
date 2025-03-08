@@ -8,12 +8,26 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <functional>
+    #include <optional>
+    #include <string>
+    #include <unordered_set>
+    #include <utility>
+    #include <variant>
+
+    #include "tcob/core/Common.hpp"
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/Wrapper.hpp"
+    #include "tcob/scripting/lua/Lua.hpp"
+    #include "tcob/scripting/lua/LuaClosure.hpp"
+    #include "tcob/scripting/lua/LuaTypes.hpp"
+
 namespace tcob::scripting::lua {
 
 namespace detail {
 
     ////////////////////////////////////////////////////////////
-    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> std::string
+    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> string
     {
         switch (m) {
         case metamethod::Length: return "__len";

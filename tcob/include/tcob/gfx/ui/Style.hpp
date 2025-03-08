@@ -7,14 +7,20 @@
 #include "tcob/tcob_config.hpp"
 
 #include <initializer_list>
+#include <memory>
+#include <optional>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::gfx::ui {

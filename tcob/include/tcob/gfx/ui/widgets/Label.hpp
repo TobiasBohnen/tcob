@@ -6,6 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+
+#include "tcob/core/Property.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {

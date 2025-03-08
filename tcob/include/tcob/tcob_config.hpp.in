@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <numbers>
+#include <ratio>
 #include <string>
 #include <string_view>
 

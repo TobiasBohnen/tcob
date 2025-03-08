@@ -8,6 +8,12 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <functional>
+    #include <tuple>
+    #include <type_traits>
+
+    #include "tcob/scripting/lua/Lua.hpp"
+
 namespace tcob::scripting::lua::detail {
 
 template <typename R, typename... Args>

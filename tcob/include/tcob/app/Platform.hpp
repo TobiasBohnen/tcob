@@ -7,6 +7,8 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <memory>
+#include <vector>
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Interfaces.hpp"

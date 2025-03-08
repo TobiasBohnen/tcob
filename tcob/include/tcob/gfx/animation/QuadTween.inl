@@ -6,6 +6,8 @@
 #pragma once
 #include "QuadTween.hpp"
 
+#include <memory>
+
 namespace tcob::gfx {
 
 template <QuadTweenFunction... Funcs>

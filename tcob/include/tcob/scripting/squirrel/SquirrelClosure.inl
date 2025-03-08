@@ -8,7 +8,13 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <algorithm>
+    #include <functional>
+    #include <tuple>
+    #include <type_traits>
+
     #include "tcob/core/Common.hpp"
+    #include "tcob/scripting/squirrel/Squirrel.hpp"
     #include "tcob/scripting/squirrel/SquirrelTypes.hpp"
 
 namespace tcob::scripting::squirrel {

@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <functional>
+#include <tuple>
+
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 
@@ -134,13 +137,13 @@ protected:
     template <typename R, typename S>
     auto wrap_property_helper(void (S::*prop)(R const));
     template <typename R, typename S>
-    auto wrap_property_helper_field_getter(R S::* field);
+    auto wrap_property_helper_field_getter(R S::*field);
     template <typename R, typename S>
-    auto wrap_property_helper_field_setter(R S::* field);
+    auto wrap_property_helper_field_setter(R S::*field);
     template <typename R, typename S>
-    auto wrap_property_helper_field_getter(prop<R> S::* prop);
+    auto wrap_property_helper_field_getter(prop<R> S::*prop);
     template <typename R, typename S>
-    auto wrap_property_helper_field_setter(prop<R> S::* prop);
+    auto wrap_property_helper_field_setter(prop<R> S::*prop);
 
 private:
     auto get_impl() -> WrapperImpl*;

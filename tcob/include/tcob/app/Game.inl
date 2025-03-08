@@ -6,6 +6,8 @@
 #pragma once
 #include "Game.hpp"
 
+#include "tcob/app/Scene.hpp"
+
 namespace tcob {
 
 template <std::derived_from<scene> T>

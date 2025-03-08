@@ -4,12 +4,14 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-
 #include "tcob/tcob_config.hpp"
 
+#include <limits>
+#include <unordered_map>
 #include <vector>
 
 #include "tcob/core/Grid.hpp"
+#include "tcob/core/Point.hpp"
 
 namespace tcob::ai {
 ////////////////////////////////////////////////////////////

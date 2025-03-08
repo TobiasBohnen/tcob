@@ -8,6 +8,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <format>
+    #include <optional>
+    #include <vector>
+
+    #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
+    #include "tcob/data/SqliteTable.hpp"
+
 namespace tcob::data::sqlite {
 
 inline auto database::create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>

@@ -8,6 +8,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <functional>
+    #include <memory>
+    #include <tuple>
+
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
 

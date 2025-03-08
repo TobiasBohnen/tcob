@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+
 #include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 

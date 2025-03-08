@@ -6,6 +6,10 @@
 #pragma once
 #include "Style.hpp"
 
+#include <memory>
+
+#include "tcob/gfx/ui/UI.hpp"
+
 namespace tcob::gfx::ui {
 
 template <std::derived_from<style> T>

@@ -6,15 +6,24 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <cstddef>
+#include <format>
+#include <functional>
+#include <memory>
 #include <optional>
+#include <span>
+#include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Texture.hpp"
 
