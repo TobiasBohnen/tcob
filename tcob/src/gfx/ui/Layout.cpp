@@ -35,10 +35,10 @@ void layout::update()
 
     std::visit(
         overloaded {
-            [&](widget_container* parent) {
+            [this](widget_container* parent) {
                 do_layout(parent->content_bounds().Size);
             },
-            [&](form* parent) {
+            [this](form* parent) {
                 do_layout(parent->Bounds().Size);
             }},
         _parent);
@@ -52,7 +52,7 @@ void layout::mark_dirty()
 
 void layout::remove_widget(widget* widget)
 {
-    for (isize i {0}; i < std::ssize(_widgets); ++i) {
+    for (usize i {0}; i < _widgets.size(); ++i) {
         if (_widgets[i].get() == widget) {
             _widgets.erase(_widgets.begin() + i);
             break;
@@ -88,12 +88,12 @@ auto layout::create_init(string const& name) const -> widget::init
 
     std::visit(
         overloaded {
-            [&](widget_container* parent) {
+            [&retValue, &name](widget_container* parent) {
                 retValue.Form   = parent->parent_form();
                 retValue.Parent = parent;
                 parent->force_redraw(name + ": created");
             },
-            [&](form* parent) {
+            [&retValue, &name](form* parent) {
                 retValue.Form   = parent;
                 retValue.Parent = nullptr;
                 parent->force_redraw(name + ": created");
@@ -217,10 +217,9 @@ void box_layout::do_layout(size_f size)
 
     for (i32 i {0}; i < std::ssize(w) && i < _box.Width * _box.Height; ++i) {
         auto const& widget {w[i]};
-        widget->Bounds =
-            {i % _box.Width * horiSize, i / _box.Width * vertSize,
-             widget->Flex->Width.calc(horiSize),
-             widget->Flex->Height.calc(vertSize)};
+        widget->Bounds = {i % _box.Width * horiSize, i / _box.Width * vertSize,
+                          widget->Flex->Width.calc(horiSize),
+                          widget->Flex->Height.calc(vertSize)};
     }
 }
 
@@ -235,10 +234,9 @@ void horizontal_layout::do_layout(size_f size)
 
     for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
-        widget->Bounds =
-            {i * horiSize, 0,
-             widget->Flex->Width.calc(horiSize),
-             widget->Flex->Height.calc(vertSize)};
+        widget->Bounds = {i * horiSize, 0,
+                          widget->Flex->Width.calc(horiSize),
+                          widget->Flex->Height.calc(vertSize)};
     }
 }
 
@@ -253,10 +251,9 @@ void vertical_layout::do_layout(size_f size)
 
     for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
-        widget->Bounds =
-            {0, i * vertSize,
-             widget->Flex->Width.calc(horiSize),
-             widget->Flex->Height.calc(vertSize)};
+        widget->Bounds = {0, i * vertSize,
+                          widget->Flex->Width.calc(horiSize),
+                          widget->Flex->Height.calc(vertSize)};
     }
 }
 

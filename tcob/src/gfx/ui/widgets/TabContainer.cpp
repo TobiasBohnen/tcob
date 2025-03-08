@@ -56,7 +56,7 @@ void tab_container::prepare_redraw()
 
 void tab_container::remove_tab(widget* tab)
 {
-    for (isize i {0}; i < std::ssize(_tabs); ++i) {
+    for (usize i {0}; i < _tabs.size(); ++i) {
         if (_tabs[i].get() == tab) {
             _tabs.erase(_tabs.begin() + i);
             _tabLabels.erase(_tabLabels.begin() + i);

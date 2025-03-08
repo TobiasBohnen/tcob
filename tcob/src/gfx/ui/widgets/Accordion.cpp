@@ -53,7 +53,7 @@ void accordion::prepare_redraw()
 
 void accordion::remove_section(widget* sec)
 {
-    for (isize i {0}; i < std::ssize(_sections); ++i) {
+    for (usize i {0}; i < _sections.size(); ++i) {
         if (_sections[i].get() == sec) {
             _sections.erase(_sections.begin() + i);
             _sectionLabels.erase(_sectionLabels.begin() + i);
@@ -77,7 +77,7 @@ void accordion::clear_sections()
 
 void accordion::change_section_label(widget* sec, utf8_string const& label)
 {
-    for (isize i {0}; i < std::ssize(_sections); ++i) {
+    for (usize i {0}; i < _sections.size(); ++i) {
         if (_sections[i].get() == sec) {
             _sectionLabels[i].Text = label;
             break;
