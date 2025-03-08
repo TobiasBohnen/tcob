@@ -6,6 +6,7 @@
 #pragma once
 #include "Panel.hpp"
 
+#include <cassert>
 #include <memory>
 
 #include "tcob/gfx/ui/UI.hpp"
@@ -23,6 +24,12 @@ inline auto panel::create_layout(auto&&... args) -> std::shared_ptr<T>
 template <std::derived_from<layout> T>
 inline auto panel::get_layout() -> std::shared_ptr<T>
 {
+#if defined(TCOB_DEBUG)
+    auto dp {std::dynamic_pointer_cast<T>(_layout)};
+    assert(dp);
+    return dp;
+#else
     return std::static_pointer_cast<T>(_layout);
+#endif
 }
 }

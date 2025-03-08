@@ -131,7 +131,6 @@ auto form::all_widgets() const -> std::vector<widget*>
 void form::clear()
 {
     _layout.clear();
-    force_redraw(this->name() + "clearing");
 }
 
 void form::force_redraw(string const& reason)
@@ -140,7 +139,6 @@ void form::force_redraw(string const& reason)
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
     }
     _prepareWidgets = true;
-    _layout.mark_dirty();
 }
 
 auto form::focus_nav_target(string const& widget, direction dir) -> bool
@@ -195,12 +193,12 @@ void form::on_fixed_update(milliseconds deltaTime)
             tooltip.lock()->prepare_redraw();
         }
 
+        // layout
+        _layout.apply();
+
         _prepareWidgets = false;
         _redrawWidgets  = true;
     }
-
-    // layout
-    _layout.update();
 
     // update widgets
     for (auto const& container : widgets) {

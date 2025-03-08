@@ -47,13 +47,15 @@ panel::panel(init const& wi)
 void panel::prepare_redraw()
 {
     widget_container::prepare_redraw();
-    _layout->mark_dirty();
+
+    _layout->apply();
 }
 
 void panel::on_styles_changed()
 {
     widget_container::on_styles_changed();
-    _layout->mark_dirty();
+
+    _layout->apply();
 
     _vScrollbar.reset();
     _hScrollbar.reset();
@@ -82,17 +84,14 @@ auto panel::widgets() const -> std::vector<std::shared_ptr<widget>> const&
     return _layout->widgets();
 }
 
-void panel::clear_widgets()
+void panel::clear()
 {
     _layout->clear();
-    force_redraw(this->name() + ": clearing");
 }
 
 void panel::on_update(milliseconds deltaTime)
 {
     // TODO: update style here
-    _layout->update();
-
     _vScrollbar.update(deltaTime);
     _hScrollbar.update(deltaTime);
 }
@@ -236,7 +235,7 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     if (_hScrollbar.Visible) { bounds.Size.Height -= _style.HScrollBar.Bar.Size.calc(bounds.height()); }
 }
 
-auto panel::get_layout() -> std::shared_ptr<layout>
+auto panel::current_layout() -> std::shared_ptr<layout>
 {
     return _layout;
 }

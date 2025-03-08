@@ -28,9 +28,7 @@ public:
 
     virtual ~layout() = default;
 
-    void update();
-
-    void mark_dirty();
+    void apply();
 
     void remove_widget(widget* widget);
     void clear();
@@ -47,11 +45,11 @@ protected:
     void virtual do_layout(size_f size) = 0;
 
 private:
+    void notify_parent(); // TODO: replace with signal
     auto create_init(string const& name) const -> widget::init;
 
     parent                               _parent;
     std::vector<std::shared_ptr<widget>> _widgets {};
-    bool                                 _isDirty {false};
 };
 
 ////////////////////////////////////////////////////////////

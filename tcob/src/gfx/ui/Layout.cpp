@@ -28,9 +28,8 @@ layout::layout(parent parent)
 {
 }
 
-void layout::update()
+void layout::apply()
 {
-    if (!_isDirty) { return; }
     std::stable_sort(_widgets.begin(), _widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
 
     std::visit(
@@ -42,12 +41,6 @@ void layout::update()
                 do_layout(parent->Bounds().Size);
             }},
         _parent);
-    _isDirty = false;
-}
-
-void layout::mark_dirty()
-{
-    _isDirty = true;
 }
 
 void layout::remove_widget(widget* widget)
@@ -55,16 +48,16 @@ void layout::remove_widget(widget* widget)
     for (usize i {0}; i < _widgets.size(); ++i) {
         if (_widgets[i].get() == widget) {
             _widgets.erase(_widgets.begin() + i);
-            break;
+            notify_parent();
+            return;
         }
     }
-    _isDirty = true;
 }
 
 void layout::clear()
 {
     _widgets.clear();
-    mark_dirty();
+    notify_parent();
 }
 
 auto layout::widgets() const -> std::vector<std::shared_ptr<widget>> const&
@@ -75,6 +68,19 @@ auto layout::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
 {
     return _widgets;
+}
+
+void layout::notify_parent()
+{
+    std::visit(
+        overloaded {
+            [](widget_container* parent) {
+                parent->force_redraw("layout updated");
+            },
+            [](form* parent) {
+                parent->force_redraw("layout updated");
+            }},
+        _parent);
 }
 
 auto layout::create_init(string const& name) const -> widget::init

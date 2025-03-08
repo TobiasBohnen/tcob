@@ -23,9 +23,7 @@ inline auto layout::add_widget(string const& name) -> std::shared_ptr<T>
     auto const wi {create_init(name)};
 
     auto retValue {std::make_shared<T>(wi)};
-    _isDirty = true;
     _widgets.push_back(retValue);
-
     return retValue;
 }
 

@@ -80,6 +80,7 @@ public:
 
     void fill();
     void stroke();
+    void clip();
 
     // Image
     void draw_image(texture* image, string const& region, rect_f const& rect);

@@ -51,8 +51,13 @@ template <typename S>
 inline void transition<T>::apply(S& style)
 {
     if (_targetStyle) {
-        assert(dynamic_cast<S const*>(_targetStyle));
+#if defined(TCOB_DEBUG)
+        auto dp {dynamic_cast<S const*>(_targetStyle)};
+        assert(dp);
+        style = *dp;
+#else
         style = *static_cast<S const*>(_targetStyle);
+#endif
     }
 
     if (is_active()) {
