@@ -20,11 +20,9 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
-#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 #include "tcob/core/ext/magic_enum_reduced.hpp"
@@ -114,8 +112,6 @@ public:
     font();
     virtual ~font();
 
-    signal<std::span<ubyte>> Render;
-
     auto info() const -> information const&;
     auto texture() const -> assets::asset_ptr<gfx::texture>;
 
@@ -124,7 +120,6 @@ public:
     auto load [[nodiscard]] (std::span<ubyte const> fontData, u32 size) noexcept -> load_status;
 
     auto render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>;
-    auto polygonize_text(utf8_string_view text, bool kerning) -> std::vector<polygon>;
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
 
     auto get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>;

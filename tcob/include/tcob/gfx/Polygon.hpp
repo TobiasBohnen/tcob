@@ -75,6 +75,8 @@ namespace polygons {
     TCOB_API void offset(std::vector<polygon>& polygons, f64 delta, offset_join join);
 };
 
+TCOB_API auto polygonize_text(font& font, utf8_string_view text, bool kerning) -> std::vector<polygon>;
+
 ////////////////////////////////////////////////////////////
 
 }

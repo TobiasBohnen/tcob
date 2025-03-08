@@ -33,15 +33,12 @@ public:
         struct point_size {
             std::pair<f32, f32> Range;
             f32                 Granularity {};
-        };
-        point_size PointSize;
+        } PointSize;
 
         struct texture {
             i32 MaxSize {};
             i32 MaxLayers {};
-        };
-
-        texture Texture;
+        } Texture;
     };
 
     render_system();

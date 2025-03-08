@@ -221,6 +221,7 @@ namespace tcob {
 namespace gfx {
     class background;
     class canvas;
+    class font;
     class material;
     class render_system;
     class render_target;
