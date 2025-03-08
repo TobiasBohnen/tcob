@@ -6,11 +6,22 @@
 #include "tcob/data/ConfigTypes.hpp"
 
 #include <algorithm>
+#include <cstddef>
+#include <initializer_list>
+#include <memory>
+#include <optional>
+#include <tuple>
+#include <utility>
 
 #include "config_parsers/ConfigParser_ini.hpp"
 
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Proxy.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/MemoryStream.hpp"
+#include "tcob/core/io/Stream.hpp"
+#include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigConversions.hpp"
 
 namespace tcob::data::config {

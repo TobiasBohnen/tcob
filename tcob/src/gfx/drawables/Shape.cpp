@@ -6,8 +6,24 @@
 #include "tcob/gfx/drawables/Shape.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cmath>
+#include <iterator>
+#include <memory>
+#include <span>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Polygon.hpp"
+#include "tcob/gfx/Ray.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 
 namespace tcob::gfx {

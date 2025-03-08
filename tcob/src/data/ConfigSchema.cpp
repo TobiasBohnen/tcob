@@ -5,8 +5,16 @@
 
 #include "tcob/data/ConfigSchema.hpp"
 
+#include <memory>
+#include <optional>
+#include <unordered_map>
+#include <variant>
+#include <vector>
+
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigConversions.hpp"
+#include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config {
 

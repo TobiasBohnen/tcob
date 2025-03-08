@@ -7,6 +7,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <utf8/unchecked.h>
 

@@ -5,7 +5,16 @@
 
 #include "ImageCodec_bmp.hpp"
 
+#include <cmath>
+#include <ios>
+#include <optional>
+#include <span>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

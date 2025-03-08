@@ -5,6 +5,8 @@
 
 #include "tcob/core/Timer.hpp"
 
+#include <thread>
+
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Stopwatch.hpp"
 #include "tcob/core/TaskManager.hpp"

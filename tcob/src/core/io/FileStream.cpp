@@ -6,11 +6,15 @@
 #include "tcob/core/io/FileStream.hpp"
 
 #include <cassert>
+#include <ios>
+#include <optional>
+#include <utility>
 
 #include <physfs.h>
 
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::io {
 

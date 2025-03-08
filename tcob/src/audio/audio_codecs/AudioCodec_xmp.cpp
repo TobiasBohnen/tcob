@@ -7,6 +7,15 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
 
+    #include <iterator>
+    #include <limits>
+    #include <optional>
+    #include <span>
+    #include <vector>
+
+    #include <xmp.h>
+
+    #include "tcob/audio/Buffer.hpp"
     #include "tcob/core/io/Stream.hpp"
 
 ////////////////////////////////////////////////////////////

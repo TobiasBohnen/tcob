@@ -5,13 +5,16 @@
 
 #include "GLES30Context.hpp"
 
+#include <memory>
+#include <stdexcept>
+
 #include <SDL.h>
 #include <glad/gles30.h>
 
-#include "tcob/core/Logger.hpp"
-
 #include "GLES30Object.hpp"
 #include "GLES30ShaderProgram.hpp"
+
+#include "tcob/core/Logger.hpp"
 
 namespace tcob::gfx::gles30 {
 

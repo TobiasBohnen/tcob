@@ -5,6 +5,12 @@
 
 #include "tcob/gfx/ImageFilters.hpp"
 
+#include <array>
+
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/TaskManager.hpp"
+#include "tcob/gfx/Image.hpp"
+
 namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////

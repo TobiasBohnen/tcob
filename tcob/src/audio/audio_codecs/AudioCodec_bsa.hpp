@@ -6,6 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
+#include <span>
+
 #include "tcob/audio/Buffer.hpp"
 
 namespace tcob::audio::detail {

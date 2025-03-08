@@ -5,7 +5,14 @@
 
 #include "tcob/gfx/ui/widgets/CycleButton.hpp"
 
+#include <algorithm>
+#include <iterator>
+
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 

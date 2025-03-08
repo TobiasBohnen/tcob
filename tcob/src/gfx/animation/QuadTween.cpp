@@ -6,6 +6,20 @@
 #include "tcob/gfx/animation/QuadTween.hpp"
 
 #include <algorithm>
+#include <functional>
+#include <span>
+#include <vector>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/easing/Easing.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Transform.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::gfx {
 using namespace std::chrono_literals;

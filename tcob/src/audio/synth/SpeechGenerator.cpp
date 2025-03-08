@@ -7,7 +7,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_SPEECH)
 
+    #include <memory>
+    #include <string>
+    #include <vector>
+
     #include <speech/speech.h>
+
+    #include "tcob/audio/Buffer.hpp"
+    #include "tcob/audio/Sound.hpp"
 
 namespace tcob::audio {
 

@@ -5,22 +5,39 @@
 
 #include "HtmlContainer.hpp"
 
-#include <memory>
-#include <vector>
-
-#include "tcob/core/Color.hpp"
-#include "tcob/core/Rect.hpp"
-#include "tcob/core/assets/AssetGroup.hpp"
-#include "tcob/gfx/Canvas.hpp"
-#include "tcob/gfx/html/HtmlElementPainter.hpp"
-
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
 
+    #include <cctype>
+    #include <memory>
+    #include <string>
+    #include <vector>
+
+    #include <litehtml/background.h>
+    #include <litehtml/borders.h>
     #include <litehtml/css_length.h>
+    #include <litehtml/document.h>
+    #include <litehtml/document_container.h>
     #include <litehtml/el_space.h>
     #include <litehtml/el_text.h>
     #include <litehtml/html.h>
     #include <litehtml/render_item.h>
+    #include <litehtml/string_id.h>
+    #include <litehtml/types.h>
+    #include <litehtml/web_color.h>
+
+    #include "tcob/core/Color.hpp"
+    #include "tcob/core/Point.hpp"
+    #include "tcob/core/Rect.hpp"
+    #include "tcob/core/Size.hpp"
+    #include "tcob/core/assets/AssetGroup.hpp"
+    #include "tcob/core/io/FileSystem.hpp"
+    #include "tcob/gfx/Canvas.hpp"
+    #include "tcob/gfx/ColorGradient.hpp"
+    #include "tcob/gfx/Font.hpp"
+    #include "tcob/gfx/TextFormatter.hpp"
+    #include "tcob/gfx/Texture.hpp"
+    #include "tcob/gfx/html/HtmlDocument.hpp"
+    #include "tcob/gfx/html/HtmlElementPainter.hpp"
 
 namespace tcob::gfx::html::detail {
 

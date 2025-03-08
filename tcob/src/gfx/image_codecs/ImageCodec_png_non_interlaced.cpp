@@ -5,6 +5,10 @@
 
 #include "ImageCodec_png.hpp"
 
+#include <algorithm>
+
+#include "tcob/core/Common.hpp"
+
 namespace tcob::gfx::detail {
 
 void png_decoder::non_interlaced_G1()

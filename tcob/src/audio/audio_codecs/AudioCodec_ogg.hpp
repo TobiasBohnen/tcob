@@ -9,7 +9,11 @@
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
 
     #include <optional>
+    #include <span>
 
+    #include <ogg/ogg.h>
+
+    #include <vorbis/codec.h>
     #include <vorbis/vorbisenc.h>
     #include <vorbis/vorbisfile.h>
 

@@ -5,8 +5,13 @@
 
 #include "ConfigParser_json.hpp"
 
+#include <optional>
+#include <string>
+
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigConversions.hpp"
+#include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
 

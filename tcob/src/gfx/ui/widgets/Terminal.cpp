@@ -5,12 +5,29 @@
 
 #include "tcob/gfx/ui/widgets/Terminal.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cctype>
 #include <charconv>
+#include <cmath>
+#include <iterator>
+#include <system_error>
+#include <vector>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 

@@ -5,9 +5,19 @@
 
 #include "tcob/gfx/ui/widgets/ListBox.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <iterator>
+#include <vector>
+
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
 namespace tcob::gfx::ui {
 

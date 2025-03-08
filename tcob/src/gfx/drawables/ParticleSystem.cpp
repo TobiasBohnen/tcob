@@ -5,6 +5,14 @@
 
 #include "tcob/gfx/drawables/ParticleSystem.hpp"
 
+#include <chrono>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Geometry.hpp"
+
 namespace tcob::gfx {
 
 using namespace std::chrono_literals;

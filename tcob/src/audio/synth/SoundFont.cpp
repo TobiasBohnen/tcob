@@ -11,14 +11,24 @@
         #pragma warning(disable : 4201)
     #endif
 
+    #include <cassert>
+    #include <future>
+    #include <iterator>
+    #include <memory>
+    #include <utility>
+    #include <vector>
+
+    #include "tcob/audio/Buffer.hpp"
+    #include "tcob/audio/Sound.hpp"
+    #include "tcob/core/Common.hpp"
     #include "tcob/core/ServiceLocator.hpp"
     #include "tcob/core/TaskManager.hpp"
     #include "tcob/core/io/FileStream.hpp"
+    #include "tcob/core/io/Stream.hpp"
+
 
     #include <TinySoundFont/tml.h>
     #include <TinySoundFont/tsf.h>
-
-    #include <utility>
 
 namespace tcob::audio {
 

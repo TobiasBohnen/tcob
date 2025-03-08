@@ -5,14 +5,28 @@
 
 #include "tcob/gfx/Font.hpp"
 
+#include <algorithm>
+#include <array>
+#include <memory>
 #include <optional>
+#include <span>
+#include <string>
 #include <utility>
-
-#include "tcob/core/Logger.hpp"
-#include "tcob/core/easing/Easing.hpp"
-#include "tcob/core/io/FileStream.hpp"
+#include <variant>
+#include <vector>
 
 #include "FontEngine.hpp"
+
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/core/easing/Easing.hpp"
+#include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Polygon.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 using namespace std::chrono_literals;
 

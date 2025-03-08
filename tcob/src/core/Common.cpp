@@ -5,6 +5,8 @@
 
 #include "tcob/core/Common.hpp"
 
+#include <cstdlib>
+
 #if defined(_MSC_VER) and !defined(__llvm__)
     #include <intrin.h>
     #define bswap16 _byteswap_ushort

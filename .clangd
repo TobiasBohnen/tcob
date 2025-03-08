@@ -9,17 +9,25 @@ Diagnostics:
         IgnoreHeader: 
             - tcob_config.hpp
             - __msvc_chrono.hpp
+            - __msvc_string_view.hpp
             - Concepts.hpp
             - concepts
             - .inl
             - Windows.h
             - libloaderapi.h
+            - SDL_gamecontroller.h
             - SDL_events.h
             - SDL_stdinc.h
             - SDL_main.h
             - SDL_locale.h
             - SDL_system.h
             - SDL_version.h
+            - SDL_keyboard.h
+            - SDL_keycode.h
+            - SDL_mouse.h     
+            - SDL_clipboard.h
+            - SDL_video.h
+            - SDL_surface.h
             - winuser.h
             - winnt.h
             - minwindef.h
@@ -27,6 +35,12 @@ Diagnostics:
             - errhandlingapi.h
             - handleapi.h
             - winerror.h
+            - consoleapi2.h
+            - winnls.h
+            - yvals_core.h
+            - freetype/config/ftheader.h
+            - freetype/fttypes.h
+            - freetype/ftimage.h
     ClangTidy:
         Add:
             - "cppcoreguidelines-*"

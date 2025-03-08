@@ -23,14 +23,22 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <span>
+#include <vector>
+
 #include <glad/gles30.h>
 
 #include "GLES30ShaderProgram.hpp"
 #include "GLES30Texture.hpp"
 #include "GLES30VertexArray.hpp"
 
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 

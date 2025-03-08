@@ -7,6 +7,9 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <iterator>
+    #include <vector>
+
     #include <squirrel.h>
 
     #include <sqstdaux.h>
@@ -15,6 +18,8 @@
     #include <sqstdmath.h>
     #include <sqstdstring.h>
     #include <sqstdsystem.h>
+
+    #include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting::squirrel {
 

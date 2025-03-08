@@ -5,6 +5,21 @@
 
 #include "tcob/gfx/ui/Style.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <initializer_list>
+#include <limits>
+#include <optional>
+#include <utility>
+#include <variant>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/ui/UI.hpp"
+
 namespace tcob::gfx::ui {
 
 ////////////////////////////////////////////////////////////

@@ -5,6 +5,9 @@
 
 #include "InputEnums.hpp"
 
+#include "tcob/core/input/Input.hpp"
+#include "tcob/core/input/Input_Codes.hpp"
+
 namespace tcob::input {
 
 auto convert_mouse_button(i32 button) -> mouse::button

@@ -5,6 +5,13 @@
 
 #include "tcob/gfx/ColorGradient.hpp"
 
+#include <algorithm>
+#include <array>
+#include <initializer_list>
+#include <span>
+
+#include "tcob/core/Color.hpp"
+
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 

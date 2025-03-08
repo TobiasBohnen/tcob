@@ -7,10 +7,13 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <cassert>
+
     #include <sqlite3/sqlite3.h>
 
     #include "tcob/core/io/FileStream.hpp"
     #include "tcob/core/io/FileSystem.hpp"
+    #include "tcob/core/io/Stream.hpp"
 
 namespace tcob::data::sqlite::detail {
 

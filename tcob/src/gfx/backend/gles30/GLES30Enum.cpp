@@ -7,6 +7,8 @@
 
 #include <glad/gles30.h>
 
+#include "tcob/gfx/Gfx.hpp"
+
 namespace tcob::gfx::gles30 {
 
 auto convert_enum(buffer_usage_hint usage) -> u32

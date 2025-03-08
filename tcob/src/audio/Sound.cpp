@@ -11,7 +11,12 @@
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
+#include <chrono>
+#include <future>
+#include <memory>
+#include <optional>
 #include <utility>
 
 #include "ALObjects.hpp"

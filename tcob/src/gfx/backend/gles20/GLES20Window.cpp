@@ -5,13 +5,19 @@
 
 #include "GLES20Window.hpp"
 
+#include <memory>
+#include <stdexcept>
+
 #include <SDL.h>
 #include <glad/gles20.h>
 
-#include "tcob/core/Logger.hpp"
-
 #include "GLES20.hpp"
 #include "GLES20Context.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::gfx::gles20 {
 

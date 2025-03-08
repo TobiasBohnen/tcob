@@ -8,7 +8,10 @@
 
 // based on: sfxr and rFXGen
 
+#include <array>
+
 #include "tcob/audio/synth/SoundGenerator.hpp"
+#include "tcob/core/random/Random.hpp"
 
 namespace tcob::audio {
 

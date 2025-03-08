@@ -6,10 +6,16 @@
 #include "GLTexture.hpp"
 
 #include <cassert>
+#include <utility>
+#include <vector>
 
 #include <glad/gl45.h>
 
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>

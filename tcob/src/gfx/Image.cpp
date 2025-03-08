@@ -6,15 +6,26 @@
 #include "tcob/gfx/Image.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <future>
+#include <memory>
 #include <optional>
+#include <span>
+#include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::gfx {
 

@@ -5,10 +5,18 @@
 
 #include "GLFramebuffer.hpp"
 
+#include <array>
 #include <cassert>
+#include <span>
+
 #include <glad/gl45.h>
 
 #include "GLTexture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 gl_framebuffer::gl_framebuffer()

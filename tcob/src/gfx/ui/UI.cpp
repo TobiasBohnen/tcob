@@ -5,6 +5,10 @@
 
 #include "tcob/gfx/ui/UI.hpp"
 
+#include <algorithm>
+#include <cassert>
+
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {

@@ -7,6 +7,8 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <memory>
+
     #include "B2D.hpp"
 
 namespace tcob::physics {

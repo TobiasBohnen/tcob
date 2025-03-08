@@ -7,6 +7,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <utility>
+
+    #include "tcob/data/Sqlite.hpp"
+
 namespace tcob::data::sqlite {
 
 savepoint::savepoint(database_view db, utf8_string name)

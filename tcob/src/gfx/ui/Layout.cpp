@@ -5,9 +5,20 @@
 
 #include "tcob/gfx/ui/Layout.hpp"
 
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <variant>
+#include <vector>
+
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 namespace tcob::gfx::ui {

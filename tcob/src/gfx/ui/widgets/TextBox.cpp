@@ -3,14 +3,24 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <algorithm>
-
 #include "tcob/gfx/ui/widgets/TextBox.hpp"
 
+#include <algorithm>
+#include <limits>
+
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 

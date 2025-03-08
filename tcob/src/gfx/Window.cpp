@@ -5,12 +5,21 @@
 
 #include "tcob/gfx/Window.hpp"
 
-#include <SDL.h>
-
+#include <memory>
 #include <utility>
 
+#include <SDL.h>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx {
 

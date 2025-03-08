@@ -6,11 +6,15 @@
 #include "tcob/gfx/FontFamily.hpp"
 
 #include <optional>
+#include <span>
 #include <utility>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/gfx/Font.hpp"
 
 namespace tcob::gfx {
 

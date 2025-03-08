@@ -5,13 +5,16 @@
 
 #include "GLContext.hpp"
 
+#include <memory>
+#include <stdexcept>
+
+#include "GLObject.hpp"
+#include "GLShaderProgram.hpp"
+
 #include <SDL.h>
 #include <glad/gl45.h>
 
 #include "tcob/core/Logger.hpp"
-
-#include "GLObject.hpp"
-#include "GLShaderProgram.hpp"
 
 namespace tcob::gfx::gl45 {
 

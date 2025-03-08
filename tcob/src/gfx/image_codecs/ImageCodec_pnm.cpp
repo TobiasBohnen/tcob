@@ -6,8 +6,16 @@
 #include "ImageCodec_pnm.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cassert>
+#include <cctype>
+#include <cstdlib>
+#include <optional>
+#include <span>
+#include <vector>
 
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

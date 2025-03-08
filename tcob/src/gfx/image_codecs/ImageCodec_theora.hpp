@@ -10,8 +10,11 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
 
+    #include <optional>
+
     #include <theoraplay.h>
 
+    #include "tcob/core/Size.hpp"
     #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {

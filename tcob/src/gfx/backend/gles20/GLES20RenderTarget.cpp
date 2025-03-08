@@ -6,11 +6,24 @@
 #include "GLES20RenderTarget.hpp"
 
 #include <glad/gles20.h>
+#include <memory>
+#include <vector>
 
 #include "GLES20.hpp"
 #include "GLES20Context.hpp"
 #include "GLES20Enum.hpp"
+#include "GLES20Framebuffer.hpp"
 #include "GLES20ShaderProgram.hpp"
+#include "GLES20Texture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles20 {
 

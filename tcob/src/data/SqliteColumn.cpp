@@ -10,6 +10,8 @@
     #include <format>
     #include <utility>
 
+    #include "tcob/data/Sqlite.hpp"
+
 namespace tcob::data::sqlite {
 
 auto no_constraint::str() const -> utf8_string

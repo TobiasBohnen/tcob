@@ -5,12 +5,18 @@
 
 #include "GLWindow.hpp"
 
+#include <memory>
+#include <stdexcept>
+
 #include <SDL.h>
 #include <glad/gl45.h>
 
-#include "tcob/core/Logger.hpp"
-
 #include "GLContext.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::gfx::gl45 {
 

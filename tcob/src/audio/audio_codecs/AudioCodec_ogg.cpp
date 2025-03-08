@@ -7,8 +7,23 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
 
+    #include <algorithm>
+    #include <cassert>
+    #include <cstddef>
+    #include <iterator>
+    #include <optional>
+    #include <span>
+
+    #include "tcob/audio/Buffer.hpp"
     #include "tcob/core/io/Stream.hpp"
     #include "tcob/core/random/Random.hpp"
+
+    #include <ogg/ogg.h>
+    #include <ogg/os_types.h>
+
+    #include <vorbis/codec.h>
+    #include <vorbis/vorbisenc.h>
+    #include <vorbis/vorbisfile.h>
 
 ////////////////////////////////////////////////////////////
 

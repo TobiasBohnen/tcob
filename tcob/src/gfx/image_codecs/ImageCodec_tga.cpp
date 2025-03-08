@@ -6,8 +6,19 @@
 #include "ImageCodec_tga.hpp"
 
 #include <algorithm>
+#include <array>
+#include <bit>
+#include <cmath>
+#include <ios>
+#include <iterator>
+#include <optional>
+#include <vector>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

@@ -6,15 +6,22 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <span>
+
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include "tcob/core/AngleUnits.hpp"
+    #include "tcob/core/Color.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/physics/Body.hpp"
     #include "tcob/physics/Joint.hpp"
     #include "tcob/physics/Physics.hpp" // IWYU pragma: keep
+    #include "tcob/physics/Shape.hpp"
     #include "tcob/physics/World.hpp"
 
     #include <box2d/box2d.h>
+    #include <box2d/id.h>
+    #include <box2d/types.h>
 
 namespace tcob::physics::detail {
 

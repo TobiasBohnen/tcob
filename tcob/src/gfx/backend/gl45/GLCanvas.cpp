@@ -5,14 +5,25 @@
 
 #include "GLCanvas.hpp"
 
-#include "GLEnum.hpp"
-
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <span>
+#include <stdexcept>
 #include <variant>
+#include <vector>
 
+#include "GLEnum.hpp"
+#include "GLTexture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 

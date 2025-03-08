@@ -5,12 +5,29 @@
 
 #include "tcob/gfx/ui/Form.hpp"
 
+#include <chrono>
+#include <limits>
+#include <memory>
 #include <utility>
+#include <vector>
 
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Window.hpp"
+#include "tcob/gfx/drawables/Drawable.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
+#include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 namespace tcob::gfx::ui {
 

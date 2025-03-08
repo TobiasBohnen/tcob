@@ -5,7 +5,18 @@
 
 #include "tcob/gfx/TextFormatter.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <cstdlib>
+#include <limits>
 #include <locale>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx::text_formatter {
 

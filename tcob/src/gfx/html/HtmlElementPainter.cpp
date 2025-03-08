@@ -5,9 +5,14 @@
 
 #include "tcob/gfx/html/HtmlElementPainter.hpp"
 
-#include "tcob/core/Point.hpp"
-
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+
+    #include <algorithm>
+
+    #include "tcob/core/AngleUnits.hpp"
+    #include "tcob/core/Point.hpp"
+    #include "tcob/core/Size.hpp"
+    #include "tcob/gfx/Canvas.hpp"
 
 namespace tcob::gfx::html {
 

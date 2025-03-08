@@ -5,14 +5,26 @@
 
 #include "GLRenderTarget.hpp"
 
+#include <memory>
+#include <vector>
+
 #include <glad/gl45.h>
 
 #include "GLContext.hpp"
 #include "GLEnum.hpp"
+#include "GLFramebuffer.hpp"
 #include "GLShaderProgram.hpp"
 #include "GLTexture.hpp"
+#include "GLUniformBuffer.hpp"
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 

@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Common.hpp"

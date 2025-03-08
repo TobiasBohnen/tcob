@@ -6,11 +6,19 @@
 #include "GLES20Texture.hpp"
 
 #include <cassert>
+#include <utility>
+#include <vector>
 
 #include <glad/gles20.h>
 
 #include "GLES20.hpp"
 #include "GLES20Framebuffer.hpp"
+
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles20 {
 

@@ -6,6 +6,9 @@
 #include "tcob/core/io/Magic.hpp"
 
 #include <algorithm>
+#include <ios>
+#include <optional>
+#include <span>
 #include <vector>
 
 #include "tcob/core/io/Stream.hpp"

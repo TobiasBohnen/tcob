@@ -5,6 +5,12 @@
 
 #include "SoundGenerator_types.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+
+#include "tcob/audio/synth/SoundGenerator.hpp"
+
 namespace tcob::audio {
 
 filter::filter(sound_wave const& wave)

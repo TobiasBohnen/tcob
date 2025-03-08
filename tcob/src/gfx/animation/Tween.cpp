@@ -5,6 +5,14 @@
 
 #include "tcob/gfx/animation/Tween.hpp"
 
+#include <chrono>
+#include <cmath>
+#include <memory>
+#include <queue>
+#include <utility>
+
+#include "tcob/core/Common.hpp"
+
 namespace tcob::gfx {
 using namespace std::chrono_literals;
 

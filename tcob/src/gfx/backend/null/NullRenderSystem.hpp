@@ -6,7 +6,24 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+#include <span>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::null {
 ////////////////////////////////////////////////////////////

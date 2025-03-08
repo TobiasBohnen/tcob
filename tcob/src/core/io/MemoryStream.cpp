@@ -5,7 +5,12 @@
 
 #include <tcob/core/io/MemoryStream.hpp>
 
+#include <algorithm>
 #include <cstring>
+#include <ios>
+#include <iterator>
+
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::io {
 

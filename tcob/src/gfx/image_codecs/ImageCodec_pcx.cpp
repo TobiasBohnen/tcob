@@ -5,7 +5,17 @@
 
 #include "ImageCodec_pcx.hpp"
 
+#include <bit>
+#include <cassert>
+#include <iterator>
+#include <optional>
+#include <span>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 
 /*
 supported formats:

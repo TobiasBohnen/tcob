@@ -5,7 +5,11 @@
 
 #include "tcob/audio/Source.hpp"
 
+#include <memory>
+
 #include "ALObjects.hpp"
+
+#include "tcob/core/Common.hpp"
 
 namespace tcob::audio {
 

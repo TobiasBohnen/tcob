@@ -5,6 +5,9 @@
 
 #include "tcob/core/Stopwatch.hpp"
 
+#include <chrono>
+#include <ratio>
+
 namespace tcob {
 
 auto stopwatch::elapsed() const -> duration

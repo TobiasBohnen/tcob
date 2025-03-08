@@ -13,7 +13,13 @@
     #include <TinySoundFont/tsf.h>
 
     #include <algorithm>
+    #include <any>
+    #include <optional>
+    #include <span>
 
+    #include "tcob/audio/Buffer.hpp"
+    #include "tcob/audio/synth/SoundFont.hpp"
+    #include "tcob/core/assets/Asset.hpp"
     #include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio::detail {

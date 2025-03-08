@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Image.hpp"
 

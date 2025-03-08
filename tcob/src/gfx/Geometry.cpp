@@ -5,6 +5,15 @@
 
 #include "tcob/gfx/Geometry.hpp"
 
+#include <span>
+#include <utility>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Transform.hpp"
+
 namespace tcob::gfx::geometry {
 
 void set_position(quad& q, rect_f const& rect, transform const& xform)

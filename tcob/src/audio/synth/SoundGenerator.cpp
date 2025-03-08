@@ -8,8 +8,17 @@
 #include "tcob/audio/synth/SoundGenerator.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <iterator>
+#include <memory>
+#include <vector>
 
 #include "SoundGenerator_types.hpp"
+
+#include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/Sound.hpp"
+#include "tcob/core/random/Random.hpp"
 
 namespace tcob::audio {
 

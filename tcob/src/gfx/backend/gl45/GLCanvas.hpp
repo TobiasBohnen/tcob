@@ -20,19 +20,26 @@
 //    misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 //
+
 #pragma once
 #include "tcob/tcob_config.hpp"
 
 #include <glad/gl45.h>
 
+#include <span>
 #include <vector>
 
 #include "GLShaderProgram.hpp"
 #include "GLTexture.hpp"
 #include "GLVertexArray.hpp"
 
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 

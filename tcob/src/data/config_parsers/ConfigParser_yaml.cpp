@@ -5,11 +5,17 @@
 
 #include "ConfigParser_yaml.hpp"
 
+#include <cctype>
+#include <optional>
+#include <vector>
+
 #include "ConfigParser_json.hpp"
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigConversions.hpp"
+#include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
 

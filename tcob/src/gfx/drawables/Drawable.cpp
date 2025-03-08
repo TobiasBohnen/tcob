@@ -5,6 +5,9 @@
 
 #include "tcob/gfx/drawables/Drawable.hpp"
 
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+
 namespace tcob::gfx {
 
 auto drawable::is_visible() const -> bool

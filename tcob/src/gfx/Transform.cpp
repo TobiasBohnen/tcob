@@ -5,6 +5,11 @@
 
 #include "tcob/gfx/Transform.hpp"
 
+#include <utility>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Point.hpp"
+
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 transform const transform::Identity;

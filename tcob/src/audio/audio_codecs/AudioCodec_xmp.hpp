@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
 
     #include <optional>
+    #include <span>
 
     #include <xmp.h>
 

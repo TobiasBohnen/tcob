@@ -6,11 +6,23 @@
 #include "ImageCodec_png.hpp"
 
 #include <algorithm>
+#include <array>
+#include <bit>
+#include <cassert>
+#include <cstring>
+#include <iterator>
+#include <optional>
+#include <span>
+#include <vector>
 
 #include <miniz/miniz.h>
 
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/io/Filter.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/ImageFilters.hpp"
 
 namespace tcob::gfx::detail {

@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
 
     #include <optional>
+    #include <span>
 
     #include <opusenc.h>
     #include <opusfile.h>

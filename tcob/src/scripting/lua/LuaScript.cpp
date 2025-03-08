@@ -7,7 +7,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <memory>
+    #include <optional>
+    #include <utility>
+
     #include "tcob/core/Logger.hpp"
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/lua/Lua.hpp"
+    #include "tcob/scripting/lua/LuaTypes.hpp"
 
 namespace tcob::scripting::lua {
 

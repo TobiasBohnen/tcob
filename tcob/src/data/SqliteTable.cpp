@@ -7,6 +7,12 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <set>
+    #include <utility>
+
+    #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
+
 namespace tcob::data::sqlite {
 
 table::table(database_view db, utf8_string name)

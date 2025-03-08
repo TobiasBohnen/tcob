@@ -8,11 +8,12 @@
 
 #include <span>
 
+#include "GLObject.hpp"
+
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Texture.hpp"
-
-#include "GLObject.hpp"
 
 namespace tcob::gfx::gl45 {
 ////////////////////////////////////////////////////////////

@@ -5,7 +5,13 @@
 
 #include <tcob/core/io/SpanStream.hpp>
 
+#include <algorithm>
 #include <cstring>
+#include <ios>
+#include <iterator>
+#include <span>
+
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::io {
 

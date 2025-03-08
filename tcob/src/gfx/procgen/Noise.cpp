@@ -8,6 +8,9 @@
 #include <cmath>
 #include <limits>
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/random/Random.hpp"
+
 namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////

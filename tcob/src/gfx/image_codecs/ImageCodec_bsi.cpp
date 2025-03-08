@@ -5,8 +5,14 @@
 
 #include "ImageCodec_bsi.hpp"
 
+#include <array>
+#include <bit>
+#include <iterator>
+#include <optional>
+
 #include "tcob/core/io/Filter.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

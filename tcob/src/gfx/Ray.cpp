@@ -5,6 +5,18 @@
 
 #include "tcob/gfx/Ray.hpp"
 
+#include <cmath>
+#include <cstdlib>
+#include <limits>
+#include <optional>
+#include <vector>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Polygon.hpp"
+#include "tcob/gfx/Transform.hpp"
+
 namespace tcob::gfx {
 
 f32 constexpr epsilon {std::numeric_limits<f32>::epsilon()};

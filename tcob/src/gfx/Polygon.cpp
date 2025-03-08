@@ -5,10 +5,25 @@
 
 #include "tcob/gfx/Polygon.hpp"
 
-#include "tcob/gfx/Gfx.hpp"
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <limits>
+#include <span>
+#include <vector>
+
+#include <clipper2/clipper.core.h>
+#include <clipper2/clipper.engine.h>
+#include <clipper2/clipper.h>
+#include <clipper2/clipper.offset.h>
+#include <earcut.hpp>
 
 #include "EarcutHelper.hpp"
-#include <clipper2/clipper.h>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx {
 

@@ -5,6 +5,12 @@
 
 #include "tcob/gfx/drawables/PointCloud.hpp"
 
+#include <iterator>
+#include <span>
+
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+
 namespace tcob::gfx {
 
 static_point_cloud::static_point_cloud(std::span<vertex> points)

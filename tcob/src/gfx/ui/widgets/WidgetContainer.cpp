@@ -5,7 +5,12 @@
 
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
+#include <memory>
+#include <vector>
+
+#include "tcob/core/Point.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 

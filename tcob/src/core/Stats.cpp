@@ -5,6 +5,8 @@
 
 #include "tcob/core/Stats.hpp"
 
+#include <algorithm>
+#include <limits>
 #include <numeric>
 
 namespace tcob {

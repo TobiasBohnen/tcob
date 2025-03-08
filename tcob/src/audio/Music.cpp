@@ -6,12 +6,21 @@
 #include "tcob/audio/Music.hpp"
 
 #include <cassert>
+#include <chrono>
+#include <iterator>
+#include <memory>
+#include <optional>
 #include <thread>
+#include <utility>
+#include <vector>
 
+#include "tcob/audio/Buffer.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 #include "ALObjects.hpp"
 

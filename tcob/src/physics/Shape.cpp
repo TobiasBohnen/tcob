@@ -7,7 +7,14 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <memory>
+    #include <utility>
+
     #include "B2D.hpp"
+
+    #include "tcob/core/Point.hpp"
+    #include "tcob/physics/Body.hpp"
+    #include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {
 

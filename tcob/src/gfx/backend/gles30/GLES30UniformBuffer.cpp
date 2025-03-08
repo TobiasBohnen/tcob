@@ -11,6 +11,8 @@
 
 #include "GLES30.hpp"
 
+#include "tcob/core/Logger.hpp"
+
 namespace tcob::gfx::gles30 {
 gl_uniform_buffer::gl_uniform_buffer(usize size)
 {

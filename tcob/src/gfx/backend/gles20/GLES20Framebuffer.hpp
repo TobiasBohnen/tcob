@@ -10,12 +10,13 @@
 
 #include <glad/gles20.h>
 
-#include "tcob/core/Color.hpp"
-#include "tcob/core/Point.hpp"
-#include "tcob/gfx/Texture.hpp"
-
 #include "GLES20Object.hpp"
 #include "GLES20Texture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles20 {
 ////////////////////////////////////////////////////////////

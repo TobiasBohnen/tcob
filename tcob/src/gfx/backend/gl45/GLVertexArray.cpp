@@ -5,10 +5,15 @@
 
 #include "GLVertexArray.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <span>
 
 #include "GLEnum.hpp"
+
 #include "tcob/core/Logger.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx::gl45 {
 

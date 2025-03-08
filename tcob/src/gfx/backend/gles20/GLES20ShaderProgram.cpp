@@ -5,12 +5,16 @@
 
 #include "GLES20ShaderProgram.hpp"
 
+#include <array>
 #include <cassert>
 
 #include <glad/gles20.h>
 
 #include "GLES20.hpp"
+
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::gfx::gles20 {
 gl_shader::gl_shader()

@@ -5,12 +5,16 @@
 
 #include "GLES30ShaderProgram.hpp"
 
+#include <array>
 #include <cassert>
 
 #include <glad/gles30.h>
 
 #include "GLES30.hpp"
+
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::gfx::gles30 {
 gl_shader::gl_shader()

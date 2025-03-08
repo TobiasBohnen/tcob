@@ -5,6 +5,9 @@
 
 #include "tcob/core/Color.hpp"
 
+#include <ios>
+#include <sstream>
+#include <string>
 #include <unordered_map>
 
 #include "tcob/core/StringUtils.hpp"

@@ -7,8 +7,13 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <format>
+    #include <utility>
+    #include <vector>
+
     #include "tcob/core/Logger.hpp"
     #include "tcob/core/StringUtils.hpp"
+    #include "tcob/data/Sqlite.hpp"
 
 namespace tcob::data::sqlite {
 

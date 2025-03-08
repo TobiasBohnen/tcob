@@ -10,9 +10,15 @@
     #include <squirrel.h>
 
     #include <cstdarg>
+    #include <cstdio>
     #include <iostream>
+    #include <memory>
+    #include <utility>
 
     #include "tcob/core/Logger.hpp"
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/squirrel/Squirrel.hpp"
+    #include "tcob/scripting/squirrel/SquirrelTypes.hpp"
 
 namespace tcob::scripting::squirrel {
 

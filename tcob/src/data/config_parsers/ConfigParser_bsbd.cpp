@@ -6,8 +6,15 @@
 #include "ConfigParser_bsbd.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cmath>
+#include <ios>
+#include <limits>
+#include <optional>
 
+#include "tcob/core/io/Stream.hpp"
 #include "tcob/data/ConfigConversions.hpp"
+#include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
 

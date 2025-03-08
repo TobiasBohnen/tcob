@@ -5,6 +5,9 @@
 
 #include "GLES20Object.hpp"
 
+#include <utility>
+#include <vector>
+
 namespace tcob::gfx::gles20 {
 
 void gl_object_registry::destroy_all_objects()

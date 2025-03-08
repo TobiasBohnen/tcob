@@ -6,10 +6,11 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "GLES20Object.hpp"
+
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
-
-#include "GLES20Object.hpp"
 
 namespace tcob::gfx::gles20 {
 ////////////////////////////////////////////////////////////

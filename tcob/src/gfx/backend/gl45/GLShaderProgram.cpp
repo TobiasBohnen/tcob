@@ -5,11 +5,14 @@
 
 #include "GLShaderProgram.hpp"
 
+#include <array>
 #include <cassert>
 
 #include <glad/gl45.h>
 
 #include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 
 namespace tcob::gfx::gl45 {
 gl_shader::gl_shader()

@@ -5,10 +5,20 @@
 
 #include "tcob/gfx/ui/widgets/GridView.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <numeric>
+#include <span>
+#include <vector>
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
 namespace tcob::gfx::ui {
 

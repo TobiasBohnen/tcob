@@ -5,6 +5,16 @@
 
 #include "AudioCodec_bsa.hpp"
 
+#include <array>
+#include <bit>
+#include <ios>
+#include <iterator>
+#include <limits>
+#include <optional>
+#include <span>
+#include <vector>
+
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/io/Stream.hpp"
 
 ////////////////////////////////////////////////////////////

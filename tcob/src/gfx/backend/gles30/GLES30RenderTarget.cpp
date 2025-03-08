@@ -6,13 +6,25 @@
 #include "GLES30RenderTarget.hpp"
 
 #include <glad/gles30.h>
+#include <memory>
+#include <vector>
 
 #include "GLES30.hpp"
 #include "GLES30Context.hpp"
 #include "GLES30Enum.hpp"
+#include "GLES30Framebuffer.hpp"
 #include "GLES30ShaderProgram.hpp"
+#include "GLES30Texture.hpp"
+#include "GLES30UniformBuffer.hpp"
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 

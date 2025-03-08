@@ -5,12 +5,20 @@
 
 #include "GLES20RenderSystem.hpp"
 
+#include <memory>
+
 #include "GLES20Canvas.hpp"
 #include "GLES20RenderTarget.hpp"
 #include "GLES20ShaderProgram.hpp"
 #include "GLES20Texture.hpp"
 #include "GLES20VertexArray.hpp"
 #include "GLES20Window.hpp"
+
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles20 {
 

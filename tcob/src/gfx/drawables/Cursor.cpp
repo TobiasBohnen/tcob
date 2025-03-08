@@ -5,8 +5,11 @@
 
 #include "tcob/gfx/drawables/Cursor.hpp"
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {

@@ -5,7 +5,11 @@
 
 #include "tcob/gfx/VertexArray.hpp"
 
+#include <span>
+
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 

@@ -6,6 +6,14 @@
 #include "tcob/gfx/RenderSystem.hpp"
 
 #include <SDL.h>
+#include <map>
+#include <memory>
+
+#include "tcob/core/Size.hpp"
+#include "tcob/core/Stats.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Window.hpp"
 
 namespace tcob::gfx {
 

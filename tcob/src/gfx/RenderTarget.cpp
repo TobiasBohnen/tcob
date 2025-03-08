@@ -5,11 +5,22 @@
 
 #include "tcob/gfx/RenderTarget.hpp"
 
+#include <cassert>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/Stats.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Camera.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/Window.hpp"
 
 namespace tcob::gfx {
 

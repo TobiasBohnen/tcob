@@ -5,9 +5,15 @@
 
 #include "ImageCodec_theora.hpp"
 
-#if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
+#if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
+
+    #include <optional>
+    #include <thread>
+
+    #include <theoraplay.h>
 
     #include "tcob/core/io/Stream.hpp"
+    #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

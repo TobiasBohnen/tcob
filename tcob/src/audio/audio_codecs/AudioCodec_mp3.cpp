@@ -7,6 +7,10 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
+    #include <optional>
+    #include <span>
+
+    #include "tcob/audio/Buffer.hpp"
     #include "tcob/core/io/Stream.hpp"
 
 ////////////////////////////////////////////////////////////

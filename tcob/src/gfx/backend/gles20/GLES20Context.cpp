@@ -7,6 +7,8 @@
 
 #include <SDL.h>
 #include <glad/gles20.h>
+#include <memory>
+#include <stdexcept>
 
 #include "tcob/core/Logger.hpp"
 

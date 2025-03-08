@@ -8,8 +8,18 @@
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
 
     #include <algorithm>
+    #include <optional>
+    #include <span>
+
+    #include <webp/decode.h>
+    #include <webp/demux.h>
+    #include <webp/encode.h>
+    #include <webp/mux.h>
+    #include <webp/mux_types.h>
+    #include <webp/types.h>
 
     #include "tcob/core/io/Stream.hpp"
+    #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

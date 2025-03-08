@@ -5,10 +5,17 @@
 
 #include "GLES30Framebuffer.hpp"
 
+#include <array>
 #include <cassert>
+#include <span>
 
 #include "GLES30.hpp"
 #include "GLES30Texture.hpp"
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 gl_framebuffer::gl_framebuffer()

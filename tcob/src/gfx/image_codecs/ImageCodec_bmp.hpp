@@ -6,8 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <optional>
+#include <span>
+#include <vector>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {

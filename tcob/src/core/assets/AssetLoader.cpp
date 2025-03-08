@@ -5,6 +5,9 @@
 
 #include "tcob/core/assets/AssetLoader.hpp"
 
+#include <memory>
+#include <utility>
+
 namespace tcob::assets {
 
 ////////////////////////////////////////////////////////////

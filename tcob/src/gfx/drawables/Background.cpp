@@ -5,7 +5,11 @@
 
 #include "tcob/gfx/drawables/Background.hpp"
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/random/Random.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
 

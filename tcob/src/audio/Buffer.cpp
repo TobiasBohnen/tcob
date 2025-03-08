@@ -5,10 +5,21 @@
 
 #include "tcob/audio/Buffer.hpp"
 
+#include <any>
+#include <future>
+#include <memory>
+#include <optional>
+#include <span>
+#include <thread>
+#include <utility>
+#include <vector>
+
+#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio {
 

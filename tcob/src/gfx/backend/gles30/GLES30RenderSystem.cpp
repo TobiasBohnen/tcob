@@ -5,6 +5,8 @@
 
 #include "GLES30RenderSystem.hpp"
 
+#include <memory>
+
 #include "GLES30Canvas.hpp"
 #include "GLES30RenderTarget.hpp"
 #include "GLES30ShaderProgram.hpp"
@@ -12,6 +14,12 @@
 #include "GLES30UniformBuffer.hpp"
 #include "GLES30VertexArray.hpp"
 #include "GLES30Window.hpp"
+
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 

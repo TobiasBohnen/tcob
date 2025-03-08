@@ -5,11 +5,16 @@
 
 #include "GLES30VertexArray.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <span>
 
 #include "GLES30.hpp"
 #include "GLES30Enum.hpp"
+
 #include "tcob/core/Logger.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx::gles30 {
 gl_vertex_array::gl_vertex_array(buffer_usage_hint usage)

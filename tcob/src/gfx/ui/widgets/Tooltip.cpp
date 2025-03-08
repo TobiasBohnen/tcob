@@ -5,6 +5,10 @@
 
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
+#include "tcob/gfx/animation/Tween.hpp"
+#include "tcob/gfx/ui/widgets/Panel.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
+
 namespace tcob::gfx::ui {
 
 tooltip::tooltip(init const& wi)

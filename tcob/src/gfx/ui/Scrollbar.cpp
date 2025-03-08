@@ -5,6 +5,13 @@
 
 #include "tcob/gfx/ui/Scrollbar.hpp"
 
+#include <algorithm>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {

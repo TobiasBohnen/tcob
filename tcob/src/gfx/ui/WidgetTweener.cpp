@@ -5,6 +5,9 @@
 
 #include "tcob/gfx/ui/WidgetTweener.hpp"
 
+#include "tcob/gfx/animation/Tween.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
+
 namespace tcob::gfx::ui {
 
 widget_tweener::widget_tweener(widget& parent)

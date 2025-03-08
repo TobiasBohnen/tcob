@@ -5,8 +5,11 @@
 
 #include "tcob/core/assets/AssetGroup.hpp"
 
+#include <utility>
+
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/assets/AssetLoader.hpp"
+#include "tcob/core/assets/Assets.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 
 namespace tcob::assets {

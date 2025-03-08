@@ -7,8 +7,29 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <cstdint>
+    #include <span>
+    #include <vector>
+
+    #include <box2d/box2d.h>
+    #include <box2d/collision.h>
+    #include <box2d/id.h>
+    #include <box2d/math_functions.h>
+    #include <box2d/types.h>
+
+    #include "tcob/core/AngleUnits.hpp"
+    #include "tcob/core/Color.hpp"
+    #include "tcob/core/Point.hpp"
     #include "tcob/core/ServiceLocator.hpp"
     #include "tcob/core/TaskManager.hpp"
+    #include "tcob/physics/Body.hpp"
+    #include "tcob/physics/DebugDraw.hpp"
+    #include "tcob/physics/Joint.hpp"
+    #include "tcob/physics/Physics.hpp"
+    #include "tcob/physics/Shape.hpp"
+    #include "tcob/physics/World.hpp"
+    #include <box2d/base.h>
+
 
 B2_API auto b2RevoluteJoint_IsSpringEnabled(b2JointId jointId) -> bool;
 

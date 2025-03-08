@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
     #include <optional>
+    #include <span>
 
     #define DR_FLAC_NO_STDIO
     #include <dr_libs/dr_flac.h>

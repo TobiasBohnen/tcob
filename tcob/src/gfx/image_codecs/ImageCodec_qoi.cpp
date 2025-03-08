@@ -7,7 +7,14 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
 
+    #include <array>
+    #include <bit>
+    #include <cstdlib>
+    #include <optional>
+    #include <vector>
+
     #include "tcob/core/io/Stream.hpp"
+    #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

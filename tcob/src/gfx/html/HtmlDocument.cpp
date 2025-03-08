@@ -5,18 +5,30 @@
 
 #include "tcob/gfx/html/HtmlDocument.hpp"
 
-#include <memory>
-
-#include "tcob/core/io/FileStream.hpp"
-#include "tcob/core/io/FileSystem.hpp"
-
-#include "HtmlContainer.hpp"
-
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
+
+    #include <memory>
+    #include <types.h>
+    #include <utility>
 
     #include <litehtml.h>
     #include <litehtml/el_space.h>
     #include <litehtml/el_text.h>
+    #include <litehtml/master_css.h>
+
+    #include "HtmlContainer.hpp"
+
+    #include "tcob/core/Common.hpp"
+    #include "tcob/core/Point.hpp"
+    #include "tcob/core/Rect.hpp"
+    #include "tcob/core/Size.hpp"
+    #include "tcob/core/input/Input.hpp"
+    #include "tcob/core/io/FileStream.hpp"
+    #include "tcob/core/io/FileSystem.hpp"
+    #include "tcob/gfx/Geometry.hpp"
+    #include "tcob/gfx/RenderTarget.hpp"
+    #include "tcob/gfx/RenderTexture.hpp"
+    #include "tcob/gfx/html/HtmlElementPainter.hpp"
 
 namespace tcob::gfx::html {
 

@@ -11,13 +11,16 @@
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
 
     #include <optional>
+    #include <span>
     #include <vector>
 
     #include <webp/decode.h>
     #include <webp/demux.h>
     #include <webp/encode.h>
     #include <webp/mux.h>
+    #include <webp/mux_types.h>
 
+    #include "tcob/core/Size.hpp"
     #include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {

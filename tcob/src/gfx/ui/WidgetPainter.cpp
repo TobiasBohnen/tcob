@@ -5,8 +5,27 @@
 
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <cmath>
+#include <utility>
+#include <variant>
+#include <vector>
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/TextFormatter.hpp"
+#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {

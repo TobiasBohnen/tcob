@@ -16,8 +16,10 @@
     #endif
 
     #include <unordered_map>
+    #include <utility>
 
     #include "tcob/core/Logger.hpp"
+    #include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting::lua {
 

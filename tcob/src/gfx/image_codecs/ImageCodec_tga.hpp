@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <ios>
 #include <optional>
 #include <vector>
 

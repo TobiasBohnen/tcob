@@ -6,10 +6,11 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "GLObject.hpp"
+
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
-
-#include "GLObject.hpp"
 
 namespace tcob::gfx::gl45 {
 ////////////////////////////////////////////////////////////

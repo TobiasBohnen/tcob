@@ -10,7 +10,12 @@
     #include <squirrel.h>
 
     #include <cassert>
+    #include <memory>
+    #include <tuple>
+    #include <utility>
 
+    #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
 
 namespace tcob::scripting::squirrel {

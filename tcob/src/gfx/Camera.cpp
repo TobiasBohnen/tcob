@@ -5,8 +5,11 @@
 
 #include "tcob/gfx/Camera.hpp"
 
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx {
 

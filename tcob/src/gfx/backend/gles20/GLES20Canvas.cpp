@@ -5,13 +5,26 @@
 
 #include "GLES20Canvas.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
+#include <span>
+#include <stdexcept>
 #include <variant>
+#include <vector>
 
 #include "GLES20.hpp"
 #include "GLES20Enum.hpp"
+#include "GLES20Texture.hpp"
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles20 {
 

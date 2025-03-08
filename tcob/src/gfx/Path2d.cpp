@@ -5,10 +5,23 @@
 
 #include "tcob/gfx/Path2d.hpp"
 
-#include "tcob/core/StringUtils.hpp"
-#include "tcob/core/easing/Easing.hpp"
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <cmath>
+#include <cstdlib>
+#include <optional>
+#include <variant>
+#include <vector>
 
 #include "Canvas_types.hpp"
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/core/easing/Easing.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Polygon.hpp"
 
 namespace tcob::gfx {
 

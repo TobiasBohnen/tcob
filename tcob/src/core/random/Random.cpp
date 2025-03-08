@@ -5,6 +5,8 @@
 
 #include "tcob/core/random/Random.hpp"
 
+#include <limits>
+
 namespace tcob {
 
 auto GetRandomID() -> uid

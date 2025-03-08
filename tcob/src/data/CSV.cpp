@@ -5,7 +5,11 @@
 
 #include "tcob/data/CSV.hpp"
 
+#include <vector>
+
+#include "tcob/core/Common.hpp"
 #include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::data::csv {
 

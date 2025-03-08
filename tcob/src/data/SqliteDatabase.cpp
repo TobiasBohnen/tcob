@@ -8,8 +8,16 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <format>
+    #include <functional>
+    #include <optional>
+    #include <set>
+    #include <utility>
 
     #include "tcob/core/io/FileSystem.hpp"
+    #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteSavepoint.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
+    #include "tcob/data/SqliteTable.hpp"
 
 namespace tcob::data::sqlite {
 

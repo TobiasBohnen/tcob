@@ -8,8 +8,15 @@
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
     #include <cassert>
+    #include <memory>
+    #include <utility>
 
     #include "B2D.hpp"
+
+    #include "tcob/core/AngleUnits.hpp"
+    #include "tcob/core/Point.hpp"
+    #include "tcob/physics/Body.hpp"
+    #include "tcob/physics/World.hpp"
 
 namespace tcob::physics {
 

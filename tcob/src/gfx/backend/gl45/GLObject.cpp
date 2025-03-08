@@ -5,6 +5,9 @@
 
 #include "GLObject.hpp"
 
+#include <utility>
+#include <vector>
+
 namespace tcob::gfx::gl45 {
 
 void gl_object_registry::destroy_all_objects()

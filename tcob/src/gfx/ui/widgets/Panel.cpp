@@ -3,13 +3,24 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <algorithm>
-
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 
+#include <algorithm>
+#include <memory>
+#include <vector>
+
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
+#include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 namespace tcob::gfx::ui {
 

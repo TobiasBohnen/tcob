@@ -5,7 +5,15 @@
 
 #include "ALObjects.hpp"
 
+#include <AL/al.h>
+
+#include <algorithm>
+#include <array>
 #include <cassert>
+#include <span>
+#include <vector>
+
+#include "tcob/core/Common.hpp"
 
 namespace tcob::audio::al {
 al_buffer::al_buffer()

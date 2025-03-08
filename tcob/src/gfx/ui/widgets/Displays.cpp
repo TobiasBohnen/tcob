@@ -5,7 +5,18 @@
 
 #include "tcob/gfx/ui/widgets/Displays.hpp"
 
+#include <array>
+#include <bitset>
+#include <iterator>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 

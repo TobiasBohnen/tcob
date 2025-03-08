@@ -7,9 +7,15 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <algorithm>
     #include <cassert>
+    #include <unordered_set>
+    #include <utility>
+    #include <variant>
+    #include <vector>
 
     #include "tcob/core/io/Stream.hpp"
+    #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
 
 namespace tcob::scripting::lua {

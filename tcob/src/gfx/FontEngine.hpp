@@ -6,7 +6,14 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
+#include <span>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Font.hpp"
 
 using FT_Face = struct FT_FaceRec_*;

@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {

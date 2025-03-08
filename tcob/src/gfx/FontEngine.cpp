@@ -5,9 +5,17 @@
 
 #include "FontEngine.hpp"
 
+#include <cassert>
+#include <optional>
+#include <span>
+#include <utility>
+#include <vector>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <freetype/ftoutln.h>
+
+#include "tcob/gfx/Font.hpp"
 
 namespace tcob::gfx {
 

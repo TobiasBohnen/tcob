@@ -5,8 +5,11 @@
 
 #include "tcob/gfx/RenderTexture.hpp"
 
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx {

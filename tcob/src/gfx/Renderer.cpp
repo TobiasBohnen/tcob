@@ -5,9 +5,20 @@
 
 #include "tcob/gfx/Renderer.hpp"
 
+#include <algorithm>
+#include <array>
+#include <memory>
+#include <span>
+#include <vector>
+
+#include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
+#include "tcob/gfx/VertexArray.hpp"
 
 namespace tcob::gfx {
 

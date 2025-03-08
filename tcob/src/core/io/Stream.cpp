@@ -5,6 +5,8 @@
 
 #include <tcob/core/io/Stream.hpp>
 
+#include <ios>
+
 namespace tcob::io {
 
 auto istream::read_string(std::streamsize length) -> string

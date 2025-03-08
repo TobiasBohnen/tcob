@@ -24,10 +24,16 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <span>
 #include <stack>
 #include <vector>
 
+#include "tcob/core/Point.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

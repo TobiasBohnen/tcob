@@ -5,7 +5,12 @@
 
 #include "tcob/core/io/FileSystem.hpp"
 
+#include <array>
+#include <cstddef>
 #include <filesystem>
+#include <ios>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <miniz/miniz.h>
@@ -15,6 +20,7 @@
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"
+#include "tcob/core/io/Stream.hpp"
 
 namespace tcob::io {
 

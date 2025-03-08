@@ -5,7 +5,15 @@
 
 #include "ImageCodec_gif.hpp"
 
+#include <array>
+#include <bit>
+#include <cassert>
+#include <optional>
+#include <vector>
+
+#include "tcob/core/Color.hpp"
 #include "tcob/core/io/Stream.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 

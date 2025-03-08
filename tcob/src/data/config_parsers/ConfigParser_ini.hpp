@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {

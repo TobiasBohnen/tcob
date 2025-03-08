@@ -6,11 +6,19 @@
 #include "GLES30Texture.hpp"
 
 #include <cassert>
+#include <utility>
+#include <vector>
 
 #include <glad/gles30.h>
 
 #include "GLES30.hpp"
 #include "GLES30Framebuffer.hpp"
+
+#include "tcob/core/Logger.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles30 {
 auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>

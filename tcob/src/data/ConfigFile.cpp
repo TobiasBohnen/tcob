@@ -5,8 +5,12 @@
 
 #include "tcob/data/ConfigFile.hpp"
 
+#include <utility>
+
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/io/FileSystem.hpp"
+#include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data {
 

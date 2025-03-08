@@ -6,7 +6,13 @@
 #include "tcob/core/io/Filter.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <cctype>
+#include <cstring>
+#include <span>
+#include <string_view>
+#include <vector>
 
 #include <miniz.h>
 

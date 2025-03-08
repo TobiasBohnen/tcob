@@ -7,6 +7,11 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cassert>
+#include <mutex>
+#include <stop_token>
+#include <thread>
+#include <utility>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/random/Random.hpp"

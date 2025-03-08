@@ -6,12 +6,20 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
+
 #include "GLFramebuffer.hpp"
 #include "GLUniformBuffer.hpp"
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Texture.hpp"
+
 
 namespace tcob::gfx::gl45 {
 ////////////////////////////////////////////////////////////

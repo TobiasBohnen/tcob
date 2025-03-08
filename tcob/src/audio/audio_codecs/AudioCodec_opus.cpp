@@ -7,7 +7,18 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
 
+    #include <algorithm>
+    #include <iterator>
+    #include <optional>
+    #include <span>
+
+    #include <opus_types.h>
+    #include <opusenc.h>
+    #include <opusfile.h>
+
+    #include "tcob/audio/Buffer.hpp"
     #include "tcob/core/io/Stream.hpp"
+
 
 ////////////////////////////////////////////////////////////
 

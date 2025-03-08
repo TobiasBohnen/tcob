@@ -5,6 +5,8 @@
 
 #include "tcob/gfx/Material.hpp"
 
+#include "tcob/core/assets/Asset.hpp"
+
 namespace tcob::gfx {
 
 auto material::Empty() -> assets::owning_asset_ptr<material>

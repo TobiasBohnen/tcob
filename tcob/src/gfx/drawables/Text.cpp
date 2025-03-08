@@ -5,8 +5,15 @@
 
 #include "tcob/gfx/drawables/Text.hpp"
 
+#include <utility>
+
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 
 namespace tcob::gfx {

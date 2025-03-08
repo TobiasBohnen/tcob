@@ -5,6 +5,9 @@
 
 #include "GLRenderSystem.hpp"
 
+#include <array>
+#include <memory>
+
 #include <glad/gl45.h>
 
 #include "GLCanvas.hpp"
@@ -14,6 +17,12 @@
 #include "GLUniformBuffer.hpp"
 #include "GLVertexArray.hpp"
 #include "GLWindow.hpp"
+
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gl45 {
 

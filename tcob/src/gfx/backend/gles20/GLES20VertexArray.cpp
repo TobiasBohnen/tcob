@@ -5,11 +5,16 @@
 
 #include "GLES20VertexArray.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <span>
 
 #include "GLES20.hpp"
 #include "GLES20Enum.hpp"
+
 #include "tcob/core/Logger.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob::gfx::gles20 {
 

@@ -7,6 +7,8 @@
 
 #include <glad/gl45.h>
 
+#include "tcob/gfx/Gfx.hpp"
+
 namespace tcob::gfx::gl45 {
 
 auto convert_enum(buffer_usage_hint usage) -> u32

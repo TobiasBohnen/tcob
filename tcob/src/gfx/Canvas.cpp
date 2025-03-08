@@ -6,17 +6,34 @@
 #include "tcob/gfx/Canvas.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <memory>
+#include <span>
+#include <variant>
+#include <vector>
 
+#include "Canvas_types.hpp"
+
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Path2d.hpp"
+#include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
-
-#include "Canvas_types.hpp"
+#include "tcob/gfx/Texture.hpp"
+#include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx {
 using namespace detail;

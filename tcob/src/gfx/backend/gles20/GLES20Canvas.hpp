@@ -24,13 +24,21 @@
 #include "tcob/tcob_config.hpp"
 
 #include <glad/gles20.h>
+#include <span>
+#include <unordered_map>
+#include <vector>
 
 #include "GLES20ShaderProgram.hpp"
 #include "GLES20Texture.hpp"
 #include "GLES20VertexArray.hpp"
 
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx::gles20 {
 
