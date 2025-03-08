@@ -5,8 +5,6 @@
 
 #include "tcob/gfx/RenderSystem.hpp"
 
-#include <SDL.h>
-#include <map>
 #include <memory>
 
 #include "tcob/core/Size.hpp"
@@ -25,9 +23,9 @@ render_system::~render_system()
     _defaultTarget = nullptr;
 }
 
-auto render_system::init_window(video_config const& config, string const& windowTitle) -> gfx::window&
+auto render_system::init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> gfx::window&
 {
-    size_i const resolution {config.UseDesktopResolution ? get_desktop_size(0) : config.Resolution};
+    size_i const resolution {config.UseDesktopResolution ? desktopResolution : config.Resolution};
 
     _window = std::unique_ptr<gfx::window> {new gfx::window(create_window(resolution))};
 
@@ -48,35 +46,6 @@ auto render_system::init_window(video_config const& config, string const& window
 auto render_system::stats() -> statistics&
 {
     return _stats;
-}
-
-auto render_system::displays() const -> std::map<i32, display>
-{
-    std::map<i32, display> retValue;
-
-    SDL_DisplayMode mode {};
-    i32 const       numDisplays {SDL_GetNumVideoDisplays()};
-    for (i32 i {0}; i < numDisplays; ++i) {
-        i32 const numModes {SDL_GetNumDisplayModes(i)};
-        for (i32 j {0}; j < numModes; ++j) {
-            SDL_GetDisplayMode(i, j, &mode);
-            retValue[i].Modes.push_back({.Size        = {mode.w, mode.h},
-                                         .RefreshRate = mode.refresh_rate});
-        }
-
-        SDL_GetDesktopDisplayMode(i, &mode);
-        retValue[i].DesktopMode = {.Size        = {mode.w, mode.h},
-                                   .RefreshRate = mode.refresh_rate};
-    }
-
-    return retValue;
-}
-
-auto render_system::get_desktop_size(i32 display) const -> size_i
-{
-    SDL_DisplayMode mode;
-    SDL_GetDesktopDisplayMode(display, &mode);
-    return {mode.w, mode.h};
 }
 
 auto render_system::window() const -> gfx::window&

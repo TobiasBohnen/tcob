@@ -6,10 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <map>
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
@@ -23,18 +21,6 @@
 #include "tcob/gfx/Window.hpp"
 
 namespace tcob::gfx {
-////////////////////////////////////////////////////////////
-
-struct display_mode {
-    size_i Size {size_i::Zero};
-    i32    RefreshRate {0};
-};
-
-struct display {
-    std::vector<display_mode> Modes;
-    display_mode              DesktopMode;
-};
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API render_system : public non_copyable {
@@ -61,7 +47,7 @@ public:
     render_system();
     virtual ~render_system();
 
-    auto init_window(video_config const& config, string const& windowTitle) -> gfx::window&;
+    auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> gfx::window&;
 
     auto virtual name() const -> string        = 0;
     auto virtual device_name() const -> string = 0;
@@ -69,9 +55,6 @@ public:
     auto virtual rtt_coords() const -> rect_f  = 0;
 
     auto stats() -> statistics&;
-
-    auto displays() const -> std::map<i32, display>;
-    auto get_desktop_size(i32 display) const -> size_i;
 
     auto window() const -> window&;
     auto default_target() const -> default_render_target&;

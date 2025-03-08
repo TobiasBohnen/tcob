@@ -7,12 +7,14 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <map>
 #include <memory>
 #include <vector>
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigFile.hpp"
 
@@ -22,6 +24,18 @@ namespace tcob {
 struct locale {
     string Language;
     string Country;
+};
+
+////////////////////////////////////////////////////////////
+
+struct display_mode {
+    size_i Size {size_i::Zero};
+    i32    RefreshRate {0};
+};
+
+struct display {
+    std::vector<display_mode> Modes;
+    display_mode              DesktopMode;
 };
 
 ////////////////////////////////////////////////////////////
@@ -36,6 +50,9 @@ public:
     auto config() const -> data::config_file&;
 
     auto preferred_locales() const -> std::vector<locale> const&;
+
+    auto displays() const -> std::map<i32, display>;
+    auto get_desktop_size(i32 display) const -> size_i;
 
     auto was_paused() const -> bool; // WINDOWS: true if window was dragged
 

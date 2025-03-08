@@ -6,6 +6,7 @@
 #include "tcob/app/Platform.hpp"
 
 #include <any>
+#include <map>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -246,6 +247,35 @@ auto platform::preferred_locales() const -> std::vector<locale> const&
     return _locales;
 }
 
+auto platform::displays() const -> std::map<i32, display>
+{
+    std::map<i32, display> retValue;
+
+    SDL_DisplayMode mode {};
+    i32 const       numDisplays {SDL_GetNumVideoDisplays()};
+    for (i32 i {0}; i < numDisplays; ++i) {
+        i32 const numModes {SDL_GetNumDisplayModes(i)};
+        for (i32 j {0}; j < numModes; ++j) {
+            SDL_GetDisplayMode(i, j, &mode);
+            retValue[i].Modes.push_back({.Size        = {mode.w, mode.h},
+                                         .RefreshRate = mode.refresh_rate});
+        }
+
+        SDL_GetDesktopDisplayMode(i, &mode);
+        retValue[i].DesktopMode = {.Size        = {mode.w, mode.h},
+                                   .RefreshRate = mode.refresh_rate};
+    }
+
+    return retValue;
+}
+
+auto platform::get_desktop_size(i32 display) const -> size_i
+{
+    SDL_DisplayMode mode;
+    SDL_GetDesktopDisplayMode(display, &mode);
+    return {mode.w, mode.h};
+}
+
 auto platform::was_paused() const -> bool
 {
     return _wasPaused;
@@ -303,7 +333,7 @@ void platform::init_render_system(string const& windowTitle)
     if (!renderSystem) { throw std::runtime_error("Render system creation failed!"); }
 
     register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window(video, windowTitle)};
+    auto& window {renderSystem->init_window(video, windowTitle, get_desktop_size(0))};
     window.FullScreen.Changed.connect([this](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
@@ -311,7 +341,7 @@ void platform::init_render_system(string const& windowTitle)
         (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
     window.Size.Changed.connect([this](size_i value) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == locate_service<gfx::render_system>().get_desktop_size(0);
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == get_desktop_size(0);
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
