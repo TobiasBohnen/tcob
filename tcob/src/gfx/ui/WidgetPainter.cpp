@@ -235,12 +235,11 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
         f32 const strokeWidth {deco.Size.calc(rect.height())};
 
         for (auto const& token : text.Tokens) {
-            if (token.Quads.empty()) {
-                continue;
-            }
+            if (token.Quads.empty()) { continue; }
 
-            rect_f first {token.Quads[0].Rect};
-            rect_f last {};
+            rect_f first {token.Quads.front().Rect};
+            rect_f last {token.Quads.back().Rect};
+            // FIXME: multiline
 
             auto const drawDeco {[&]() {
                 auto const drawLine {[&](point_f p0, point_f p1, point_f offset) {
@@ -251,26 +250,30 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                         _canvas.set_stroke_style(deco.Color);
                         _canvas.stroke_line(p0 + offset, p1 + offset);
                         break;
-                    case text_decoration::style::Dotted:
-                        _canvas.set_fill_style(deco.Color);
-                        _canvas.begin_path();
-                        _canvas.move_to(p0 + offset);
-                        _canvas.set_line_dash(std::array {strokeWidth / 4, strokeWidth * 2});
-                        _canvas.set_line_cap(line_cap::Round);
-                        _canvas.line_to(p1 + offset);
-                        _canvas.fill();
-                        _canvas.set_line_dash({});
-                        break;
-                    case text_decoration::style::Dashed:
+                    case text_decoration::style::Dotted: {
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
+                        f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 20))};
+                        _canvas.set_line_dash(std::array {dash, dash * 2});
                         _canvas.begin_path();
                         _canvas.move_to(p0 + offset);
-                        _canvas.set_line_dash(std::vector {0.025f, 0.025f});
                         _canvas.line_to(p1 + offset);
                         _canvas.stroke();
                         _canvas.set_line_dash({});
-                        break;
+                    } break;
+                    case text_decoration::style::Dashed: {
+                        _canvas.set_stroke_width(strokeWidth);
+                        _canvas.set_stroke_style(deco.Color);
+                        f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 7))};
+                        _canvas.set_line_dash(std::array {dash, dash});
+                        _canvas.set_dash_offset(dash / 2);
+                        _canvas.begin_path();
+                        _canvas.move_to(p0 + offset);
+                        _canvas.line_to(p1 + offset);
+                        _canvas.stroke();
+                        _canvas.set_line_dash({});
+                        _canvas.set_dash_offset(0);
+                    } break;
                     case text_decoration::style::Wavy:
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
@@ -315,15 +318,6 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                     }
                 }
             }};
-
-            for (auto const& quad : token.Quads) {
-                if (first.bottom() != quad.Rect.bottom()) {
-                    drawDeco();
-                    first = quad.Rect;
-                    continue;
-                }
-                last = quad.Rect;
-            }
 
             drawDeco();
         }
