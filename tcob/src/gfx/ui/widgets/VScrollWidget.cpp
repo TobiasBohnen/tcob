@@ -22,7 +22,7 @@ void vscroll_widget::style::Transition(style& target, style const& left, style c
 {
     widget_style::Transition(target, left, right, step);
 
-    element::scrollbar::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+    element::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
 }
 
 vscroll_widget::vscroll_widget(init const& wi)

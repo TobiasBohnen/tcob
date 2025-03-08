@@ -26,7 +26,7 @@ void slider::style::Transition(style& target, style const& left, style const& ri
 {
     widget_style::Transition(target, left, right, step);
 
-    element::bar::Transition(target.Bar, left.Bar, right.Bar, step);
+    element::Transition(target.Bar, left.Bar, right.Bar, step);
 }
 
 slider::slider(init const& wi)

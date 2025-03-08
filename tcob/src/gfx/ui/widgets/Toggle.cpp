@@ -17,7 +17,7 @@ void toggle::style::Transition(style& target, style const& left, style const& ri
 {
     widget_style::Transition(target, left, right, step);
 
-    element::tick::Transition(target.Tick, left.Tick, right.Tick, step);
+    element::Transition(target.Tick, left.Tick, right.Tick, step);
 }
 
 toggle::toggle(init const& wi)

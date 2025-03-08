@@ -17,7 +17,7 @@ void button::style::Transition(style& target, style const& left, style const& ri
 {
     widget_style::Transition(target, left, right, step);
 
-    element::text::Transition(target.Text, left.Text, right.Text, step);
+    element::Transition(target.Text, left.Text, right.Text, step);
 }
 
 button::button(init const& wi)

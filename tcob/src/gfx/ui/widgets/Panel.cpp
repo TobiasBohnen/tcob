@@ -28,8 +28,8 @@ void panel::style::Transition(style& target, style const& left, style const& rig
 {
     widget_style::Transition(target, left, right, step);
 
-    element::scrollbar::Transition(target.HScrollBar, left.HScrollBar, right.HScrollBar, step);
-    element::scrollbar::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+    element::Transition(target.HScrollBar, left.HScrollBar, right.HScrollBar, step);
+    element::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
 }
 
 panel::panel(init const& wi)
@@ -255,7 +255,7 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
 auto panel::scroll_offset() const -> point_f
 {
     if (!ScrollEnabled) { return point_f::Zero; }
-    return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal), _vScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal)};
+    return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal), _vScrollbar.current_value() * get_scroll_max_value(orientation::Vertical)};
 }
 
 ////////////////////////////////////////////////////////////

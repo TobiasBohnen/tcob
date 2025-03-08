@@ -19,7 +19,7 @@ void progress_bar::style::Transition(style& target, style const& left, style con
 {
     widget_style::Transition(target, left, right, step);
 
-    element::bar::Transition(target.Bar, left.Bar, right.Bar, step);
+    element::Transition(target.Bar, left.Bar, right.Bar, step);
 }
 
 progress_bar::progress_bar(init const& wi)

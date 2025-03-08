@@ -34,8 +34,8 @@ void widget_style::Transition(widget_style& target, widget_style const& left, wi
         }
     }
 
-    element::shadow::Transition(target.DropShadow, left.DropShadow, right.DropShadow, step);
-    element::border::Transition(target.Border, left.Border, right.Border, step);
+    element::Transition(target.DropShadow, left.DropShadow, right.DropShadow, step);
+    element::Transition(target.Border, left.Border, right.Border, step);
 }
 
 ////////////////////////////////////////////////////////////
@@ -189,28 +189,30 @@ namespace element {
 
     ////////////////////////////////////////////////////////////
 
-    void caret::Transition(caret& target, caret const& left, caret const& right, f64 step)
+    void Transition(caret& target, caret const& left, caret const& right, f64 step)
     {
         target.Color = color::Lerp(left.Color, right.Color, step);
         target.Width = length::Lerp(left.Width, right.Width, step);
         //  target.BlinkRate = milliseconds {lerp(left.BlinkRate.count(), right.BlinkRate.count(), step)};
     }
 
-    void shadow::Transition(shadow& target, shadow const& left, shadow const& right, f64 step)
+    void Transition(shadow& target, shadow const& left, shadow const& right, f64 step)
     {
         target.Color   = color::Lerp(left.Color, right.Color, step);
         target.OffsetX = length::Lerp(left.OffsetX, right.OffsetX, step);
         target.OffsetY = length::Lerp(left.OffsetY, right.OffsetY, step);
     }
 
-    void text::Transition(text& target, text const& left, text const& right, f64 step)
+    void Transition(text& target, text const& left, text const& right, f64 step)
     {
-        target.Color = color::Lerp(left.Color, right.Color, step);
-        target.Size  = length::Lerp(left.Size, right.Size, step);
-        shadow::Transition(target.Shadow, left.Shadow, right.Shadow, step);
+        target.Color            = color::Lerp(left.Color, right.Color, step);
+        target.Size             = length::Lerp(left.Size, right.Size, step);
+        target.Decoration.Size  = length::Lerp(left.Decoration.Size, right.Decoration.Size, step);
+        target.Decoration.Color = color::Lerp(left.Decoration.Color, right.Decoration.Color, step);
+        Transition(target.Shadow, left.Shadow, right.Shadow, step);
     }
 
-    void border::Transition(border& target, border const& left, border const& right, f64 step)
+    void Transition(border& target, border const& left, border const& right, f64 step)
     {
         if (auto const* lc {std::get_if<color>(&left.Background)}) {
             if (auto const* rc {std::get_if<color>(&right.Background)}) {
@@ -235,7 +237,7 @@ namespace element {
         target.DashOffset = static_cast<f32>(left.DashOffset + (right.DashOffset - left.DashOffset) * step);
     }
 
-    void thumb::Transition(thumb& target, thumb const& left, thumb const& right, f64 step)
+    void Transition(thumb& target, thumb const& left, thumb const& right, f64 step)
     {
         if (auto const* lc {std::get_if<color>(&left.Background)}) {
             if (auto const* rc {std::get_if<color>(&right.Background)}) {
@@ -245,10 +247,10 @@ namespace element {
 
         target.LongSide  = length::Lerp(left.LongSide, right.LongSide, step);
         target.ShortSide = length::Lerp(left.ShortSide, right.ShortSide, step);
-        border::Transition(target.Border, left.Border, right.Border, step);
+        Transition(target.Border, left.Border, right.Border, step);
     }
 
-    void tick::Transition(tick& target, tick const& left, tick const& right, f64 step)
+    void Transition(tick& target, tick const& left, tick const& right, f64 step)
     {
         if (auto const* lc {std::get_if<color>(&left.Foreground)}) {
             if (auto const* rc {std::get_if<color>(&right.Foreground)}) {
@@ -259,7 +261,7 @@ namespace element {
         target.Size = length::Lerp(left.Size, right.Size, step);
     }
 
-    void bar::Transition(bar& target, bar const& left, bar const& right, f64 step)
+    void Transition(bar& target, bar const& left, bar const& right, f64 step)
     {
         if (auto const* lc {std::get_if<color>(&left.LowerBackground)}) {
             if (auto const* rc {std::get_if<color>(&right.LowerBackground)}) {
@@ -273,16 +275,16 @@ namespace element {
         }
 
         target.Size = length::Lerp(left.Size, right.Size, step);
-        border::Transition(target.Border, left.Border, right.Border, step);
+        Transition(target.Border, left.Border, right.Border, step);
         //     target.Delay = milliseconds {lerp(left.Delay.count(), right.Delay.count(), step)};
     }
 
-    void scrollbar::Transition(scrollbar& target, scrollbar const& left, scrollbar const& right, f64 step)
+    void Transition(scrollbar& target, scrollbar const& left, scrollbar const& right, f64 step)
     {
-        bar::Transition(target.Bar, left.Bar, right.Bar, step);
+        Transition(target.Bar, left.Bar, right.Bar, step);
     }
 
-    void nav_arrow::Transition(nav_arrow& target, nav_arrow const& left, nav_arrow const& right, f64 step)
+    void Transition(nav_arrow& target, nav_arrow const& left, nav_arrow const& right, f64 step)
     {
         if (auto const* lc {std::get_if<color>(&left.UpBackground)}) {
             if (auto const* rc {std::get_if<color>(&right.UpBackground)}) {
@@ -301,13 +303,13 @@ namespace element {
         }
 
         target.Size = dimensions::Lerp(left.Size, right.Size, step);
-        border::Transition(target.Border, left.Border, right.Border, step);
+        Transition(target.Border, left.Border, right.Border, step);
         target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
     }
 
-    void item::Transition(item& target, item const& left, item const& right, f64 step)
+    void Transition(item& target, item const& left, item const& right, f64 step)
     {
-        text::Transition(target.Text, left.Text, right.Text, step);
+        Transition(target.Text, left.Text, right.Text, step);
 
         if (auto const* lc {std::get_if<color>(&left.Background)}) {
             if (auto const* rc {std::get_if<color>(&right.Background)}) {
@@ -315,24 +317,24 @@ namespace element {
             }
         }
 
-        border::Transition(target.Border, left.Border, right.Border, step);
+        Transition(target.Border, left.Border, right.Border, step);
         target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
     }
 }
 
 void thumb_style::Transition(thumb_style& target, thumb_style const& left, thumb_style const& right, f64 step)
 {
-    element::thumb::Transition(target.Thumb, left.Thumb, right.Thumb, step);
+    element::Transition(target.Thumb, left.Thumb, right.Thumb, step);
 }
 
 void nav_arrows_style::Transition(nav_arrows_style& target, nav_arrows_style const& left, nav_arrows_style const& right, f64 step)
 {
-    element::nav_arrow::Transition(target.NavArrow, left.NavArrow, right.NavArrow, step);
+    element::Transition(target.NavArrow, left.NavArrow, right.NavArrow, step);
 }
 
 void item_style::Transition(item_style& target, item_style const& left, item_style const& right, f64 step)
 {
-    element::item::Transition(target.Item, left.Item, right.Item, step);
+    element::Transition(target.Item, left.Item, right.Item, step);
 }
 
 ////////////////////////////////////////////////////////////

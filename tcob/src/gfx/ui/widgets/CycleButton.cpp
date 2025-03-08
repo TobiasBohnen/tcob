@@ -20,7 +20,7 @@ void cycle_button::style::Transition(style& target, style const& left, style con
 {
     widget_style::Transition(target, left, right, step);
 
-    element::text::Transition(target.Text, left.Text, right.Text, step);
+    element::Transition(target.Text, left.Text, right.Text, step);
 }
 
 cycle_button::cycle_button(init const& wi)
