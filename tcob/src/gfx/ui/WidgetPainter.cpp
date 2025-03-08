@@ -30,6 +30,8 @@
 
 namespace tcob::gfx::ui {
 
+using namespace element;
+
 widget_painter::widget_painter(gfx::canvas& canvas)
     : _canvas {canvas}
 {
@@ -244,13 +246,13 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
             auto const drawDeco {[&]() {
                 auto const drawLine {[&](point_f p0, point_f p1, point_f offset) {
                     switch (deco.Style) {
-                    case text_decoration::style::Solid:
-                    case text_decoration::style::Double:
+                    case deco::style::Solid:
+                    case deco::style::Double:
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
                         _canvas.stroke_line(p0 + offset, p1 + offset);
                         break;
-                    case text_decoration::style::Dotted: {
+                    case deco::style::Dotted: {
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
                         f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 20))};
@@ -261,7 +263,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                         _canvas.stroke();
                         _canvas.set_line_dash({});
                     } break;
-                    case text_decoration::style::Dashed: {
+                    case deco::style::Dashed: {
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
                         f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 7))};
@@ -274,7 +276,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                         _canvas.set_line_dash({});
                         _canvas.set_dash_offset(0);
                     } break;
-                    case text_decoration::style::Wavy:
+                    case deco::style::Wavy:
                         _canvas.set_stroke_width(strokeWidth);
                         _canvas.set_stroke_style(deco.Color);
                         _canvas.begin_path();
@@ -292,7 +294,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                     point_f const p1 {last.bottom_right()};
                     offset += point_f {0, strokeWidth / 2};
                     drawLine(p0, p1, offset);
-                    if (deco.Style == text_decoration::style::Double) {
+                    if (deco.Style == deco::style::Double) {
                         offset += point_f {0, strokeWidth * 2};
                         drawLine(p0, p1, offset);
                     }
@@ -302,7 +304,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                     point_f const p1 {last.top_right()};
                     offset -= point_f {0, strokeWidth / 2};
                     drawLine(p0, p1, offset);
-                    if (deco.Style == text_decoration::style::Double) {
+                    if (deco.Style == deco::style::Double) {
                         offset -= point_f {0, strokeWidth * 2};
                         drawLine(p0, p1, offset);
                     }
@@ -312,7 +314,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                     point_f const p1 {last.top_right()};
                     offset += point_f {0, (first.height() + last.height()) / 4};
                     drawLine(p0, p1, offset);
-                    if (deco.Style == text_decoration::style::Double) {
+                    if (deco.Style == deco::style::Double) {
                         offset -= point_f {0, strokeWidth * 2};
                         drawLine(p0, p1, offset);
                     }

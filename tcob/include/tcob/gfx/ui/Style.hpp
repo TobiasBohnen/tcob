@@ -24,34 +24,6 @@
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::gfx::ui {
-////////////////////////////////////////////////////////////
-
-struct text_decoration {
-    struct line {
-        bool Underline {false};
-        bool Overline {false};
-        bool LineThrough {false};
-
-        auto operator==(line const& other) const -> bool = default;
-    };
-
-    enum class style : u8 {
-        Solid,
-        Double,
-        Dotted,
-        Dashed,
-        Wavy
-    };
-
-    line   Line {};
-    style  Style {style::Solid};
-    color  Color {colors::Transparent};
-    length Size {};
-
-    auto operator==(text_decoration const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
 
 namespace element {
     ////////////////////////////////////////////////////////////
@@ -78,6 +50,35 @@ namespace element {
 
     ////////////////////////////////////////////////////////////
 
+    class TCOB_API deco {
+    public:
+        class TCOB_API line {
+        public:
+            bool Underline {false};
+            bool Overline {false};
+            bool LineThrough {false};
+
+            auto operator==(line const& other) const -> bool = default;
+        };
+
+        enum class style : u8 {
+            Solid,
+            Double,
+            Dotted,
+            Dashed,
+            Wavy
+        };
+
+        line   Line {};
+        style  Style {style::Solid};
+        color  Color {colors::Transparent};
+        length Size {};
+
+        auto operator==(deco const& other) const -> bool = default;
+    };
+
+    ////////////////////////////////////////////////////////////
+
     class TCOB_API text {
     public:
         enum class transform : u8 {
@@ -97,7 +98,7 @@ namespace element {
         color                          Color {colors::White};
         color                          SelectColor {colors::Blue};
         shadow                         Shadow {colors::Transparent, length {1, length::type::Absolute}, length {1, length::type::Absolute}};
-        text_decoration                Decoration {};
+        deco                           Decoration {};
         font::style                    Style {};
         length                         Size {16, length::type::Absolute};
         alignments                     Alignment {horizontal_alignment::Centered, vertical_alignment::Middle};
@@ -269,6 +270,7 @@ namespace element {
 
     TCOB_API void Transition(caret& target, caret const& left, caret const& right, f64 step);
     TCOB_API void Transition(shadow& target, shadow const& left, shadow const& right, f64 step);
+    TCOB_API void Transition(deco& target, deco const& left, deco const& right, f64 step);
     TCOB_API void Transition(text& target, text const& left, text const& right, f64 step);
     TCOB_API void Transition(border& target, border const& left, border const& right, f64 step);
     TCOB_API void Transition(thumb& target, thumb const& left, thumb const& right, f64 step);

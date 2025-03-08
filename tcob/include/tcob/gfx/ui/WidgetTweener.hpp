@@ -8,13 +8,14 @@
 
 #include <memory>
 
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::gfx::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API widget_tweener { // TODO: improve or remove
+class TCOB_API widget_tweener : public non_copyable { // TODO: improve or remove
 public:
     explicit widget_tweener(widget& parent);
 

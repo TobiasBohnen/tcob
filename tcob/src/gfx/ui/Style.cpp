@@ -203,12 +203,17 @@ namespace element {
         target.OffsetY = length::Lerp(left.OffsetY, right.OffsetY, step);
     }
 
+    void Transition(deco& target, deco const& left, deco const& right, f64 step)
+    {
+        target.Color = color::Lerp(left.Color, right.Color, step);
+        target.Size  = length::Lerp(left.Size, right.Size, step);
+    }
+
     void Transition(text& target, text const& left, text const& right, f64 step)
     {
-        target.Color            = color::Lerp(left.Color, right.Color, step);
-        target.Size             = length::Lerp(left.Size, right.Size, step);
-        target.Decoration.Size  = length::Lerp(left.Decoration.Size, right.Decoration.Size, step);
-        target.Decoration.Color = color::Lerp(left.Decoration.Color, right.Decoration.Color, step);
+        target.Color = color::Lerp(left.Color, right.Color, step);
+        target.Size  = length::Lerp(left.Size, right.Size, step);
+        Transition(target.Decoration, left.Decoration, right.Decoration, step);
         Transition(target.Shadow, left.Shadow, right.Shadow, step);
     }
 
