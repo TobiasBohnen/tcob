@@ -265,6 +265,10 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
                 retValue.QuadCount++;
                 x += glyph.AdvanceX * scale;
             }
+
+            if (shapeToken == line.Tokens.back()) {
+                formatToken.IsLastInLine = true;
+            }
         }
 
         y += fontInfo.LineHeight * scale;

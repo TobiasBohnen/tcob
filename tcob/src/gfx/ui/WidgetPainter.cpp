@@ -310,7 +310,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, t
                 if (deco.Line.LineThrough) {
                     point_f const p0 {first.top_left()};
                     point_f const p1 {last.top_right()};
-                    offset += point_f {0, first.height() / 3 * 2};
+                    offset += point_f {0, (first.height() + last.height()) / 4};
                     drawLine(p0, p1, offset);
                     if (deco.Style == text_decoration::style::Double) {
                         offset -= point_f {0, strokeWidth * 2};
