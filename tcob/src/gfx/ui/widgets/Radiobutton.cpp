@@ -20,7 +20,7 @@ void radio_button::style::Transition(style& target, style const& left, style con
 {
     widget_style::Transition(target, left, right, step);
 
-    target.Tick = tick_element::Lerp(left.Tick, right.Tick, step);
+    tick_element::Transition(target.Tick, left.Tick, right.Tick, step);
 }
 
 radio_button::radio_button(init const& wi)

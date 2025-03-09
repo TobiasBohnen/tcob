@@ -24,6 +24,76 @@
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
+
+////////////////////////////////////////////////////////////
+
+enum class line_type : u8 {
+    Solid,
+    Double,
+    Dotted,
+    Dashed,
+    // Cornered,
+    // Centered,
+    // Inset,
+    // Outset,
+    // Groove,
+    // Ridge
+    Wavy,
+    Hidden
+};
+
+////////////////////////////////////////////////////////////
+
+enum class text_transform : u8 {
+    None,
+    Capitalize,
+    Uppercase,
+    Lowercase
+};
+
+////////////////////////////////////////////////////////////
+
+enum class auto_size_mode : u8 {
+    Never,
+    Always,
+    OnlyGrow,
+    OnlyShrink
+};
+
+////////////////////////////////////////////////////////////
+
+enum class thumb_type : u8 {
+    Rect,
+    Disc
+};
+
+////////////////////////////////////////////////////////////
+
+enum class tick_type : u8 {
+    None,
+    Checkmark,
+    Cross,
+    Disc,
+    Circle,
+    Rect,
+    Square
+};
+
+////////////////////////////////////////////////////////////
+
+enum class bar_type : u8 {
+    Continuous,
+    Blocks
+};
+
+////////////////////////////////////////////////////////////
+
+enum class nav_arrow_type : u8 {
+    None,
+    Triangle
+};
+
+////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API caret_element {
@@ -34,7 +104,7 @@ public:
 
     auto operator==(caret_element const& other) const -> bool = default;
 
-    auto static Lerp(caret_element const& left, caret_element const& right, f64 step) -> caret_element;
+    void static Transition(caret_element& target, caret_element const& left, caret_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
@@ -47,7 +117,7 @@ public:
 
     auto operator==(shadow_element const& other) const -> bool = default;
 
-    auto static Lerp(shadow_element const& left, shadow_element const& right, f64 step) -> shadow_element;
+    void static Transition(shadow_element& target, shadow_element const& left, shadow_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
@@ -63,41 +133,20 @@ public:
         auto operator==(line const& other) const -> bool = default;
     };
 
-    enum class style : u8 {
-        Solid,
-        Double,
-        Dotted,
-        Dashed,
-        Wavy
-    };
-
-    line   Line {};
-    style  Style {style::Solid};
-    color  Color {colors::Transparent};
-    length Size {};
+    line      Line {};
+    line_type Style {line_type::Solid};
+    color     Color {colors::Transparent};
+    length    Size {};
 
     auto operator==(deco_element const& other) const -> bool = default;
 
-    auto static Lerp(deco_element const& left, deco_element const& right, f64 step) -> deco_element;
+    void static Transition(deco_element& target, deco_element const& left, deco_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API text_element {
 public:
-    enum class transform : u8 {
-        None,
-        Capitalize,
-        Uppercase,
-        Lowercase
-    };
-    enum class auto_size_mode : u8 {
-        Never,
-        Always,
-        OnlyGrow,
-        OnlyShrink
-    };
-
     assets::asset_ptr<gfx::font_family> Font;
     color                               Color {colors::White};
     color                               SelectColor {colors::Blue};
@@ -106,35 +155,21 @@ public:
     gfx::font::style                    Style {};
     length                              Size {16, length::type::Absolute};
     gfx::alignments                     Alignment {gfx::horizontal_alignment::Centered, gfx::vertical_alignment::Middle};
-    transform                           Transform {transform::None};
+    text_transform                      Transform {text_transform::None};
     auto_size_mode                      AutoSize {auto_size_mode::Never};
 
     auto calc_font_size(rect_f const& rect) const -> u32;
 
     auto operator==(text_element const& other) const -> bool = default;
 
-    auto static Lerp(text_element const& left, text_element const& right, f64 step) -> text_element;
+    void static Transition(text_element& target, text_element const& left, text_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API border_element {
 public:
-    enum class type : u8 {
-        Solid,
-        Double,
-        Dotted,
-        Dashed,
-        // Cornered,
-        // Centered,
-        // Inset,
-        // Outset,
-        // Groove,
-        // Ridge
-        Hidden
-    };
-
-    type                Type {type::Solid};
+    line_type           Type {line_type::Solid};
     ui_paint            Background {colors::Transparent};
     length              Radius {};
     length              Size {};
@@ -145,25 +180,20 @@ public:
 
     auto operator==(border_element const& other) const -> bool = default;
 
-    auto static Lerp(border_element const& left, border_element const& right, f64 step) -> border_element;
+    void static Transition(border_element& target, border_element const& left, border_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API thumb_element {
 public:
-    enum class type : u8 {
-        Rect,
-        Disc
-    };
-
     struct context {
         orientation Orientation {orientation::Horizontal};
         bool        Inverted {false};
         f32         Fraction {0.0f};
     };
 
-    type           Type {type::Rect};
+    thumb_type     Type {thumb_type::Rect};
     ui_paint       Background {colors::White};
     length         LongSide {};
     length         ShortSide {};
@@ -173,30 +203,20 @@ public:
 
     auto operator==(thumb_element const& other) const -> bool = default;
 
-    auto static Lerp(thumb_element const& left, thumb_element const& right, f64 step) -> thumb_element;
+    void static Transition(thumb_element& target, thumb_element const& left, thumb_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API tick_element {
 public:
-    enum class type : u8 {
-        None,
-        Checkmark,
-        Cross,
-        Disc,
-        Circle,
-        Rect,
-        Square
-    };
-
-    type     Type {type::Checkmark};
-    ui_paint Foreground {colors::White};
-    length   Size {};
+    tick_type Type {tick_type::Checkmark};
+    ui_paint  Foreground {colors::White};
+    length    Size {};
 
     auto operator==(tick_element const& other) const -> bool = default;
 
-    auto static Lerp(tick_element const& left, tick_element const& right, f64 step) -> tick_element;
+    void static Transition(tick_element& target, tick_element const& left, tick_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
@@ -209,11 +229,6 @@ public:
         CenterOrMiddle
     };
 
-    enum class type : u8 {
-        Continuous,
-        Blocks
-    };
-
     struct context {
         orientation Orientation {orientation::Horizontal};
         bool        Inverted {false};
@@ -222,7 +237,7 @@ public:
         f32         Fraction {0};
     };
 
-    type           Type {type::Continuous};
+    bar_type       Type {bar_type::Continuous};
     ui_paint       LowerBackground {colors::White};
     ui_paint       HigherBackground {colors::White};
     length         Size {1, length::type::Relative};
@@ -233,7 +248,7 @@ public:
 
     auto operator==(bar_element const& other) const -> bool = default;
 
-    auto static Lerp(bar_element const& left, bar_element const& right, f64 step) -> bar_element;
+    void static Transition(bar_element& target, bar_element const& left, bar_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
@@ -245,19 +260,14 @@ public:
 
     auto operator==(scrollbar_element const& other) const -> bool = default;
 
-    auto static Lerp(scrollbar_element const& left, scrollbar_element const& right, f64 step) -> scrollbar_element;
+    void static Transition(scrollbar_element& target, scrollbar_element const& left, scrollbar_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API nav_arrow_element {
 public:
-    enum class type : u8 {
-        None,
-        Triangle
-    };
-
-    type           Type {type::Triangle};
+    nav_arrow_type Type {nav_arrow_type::Triangle};
     ui_paint       UpBackground {colors::Transparent};
     ui_paint       DownBackground {colors::Transparent};
     ui_paint       Foreground {colors::Transparent};
@@ -269,7 +279,7 @@ public:
 
     auto operator==(nav_arrow_element const& other) const -> bool = default;
 
-    auto static Lerp(nav_arrow_element const& left, nav_arrow_element const& right, f64 step) -> nav_arrow_element;
+    void static Transition(nav_arrow_element& target, nav_arrow_element const& left, nav_arrow_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////
@@ -283,7 +293,7 @@ public:
 
     auto operator==(item_element const& other) const -> bool = default;
 
-    auto static Lerp(item_element const& left, item_element const& right, f64 step) -> item_element;
+    void static Transition(item_element& target, item_element const& left, item_element const& right, f64 step);
 };
 
 ////////////////////////////////////////////////////////////

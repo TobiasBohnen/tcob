@@ -59,7 +59,7 @@ private:
     auto get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint;
 
     auto format_text(text_element const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
-    auto transform_text(text_element::transform xform, utf8_string_view text) const -> utf8_string;
+    auto transform_text(text_transform xform, utf8_string_view text) const -> utf8_string;
 
     gfx::canvas&       _canvas;
     std::stack<rect_f> _scissorStack;
