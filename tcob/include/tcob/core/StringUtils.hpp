@@ -55,6 +55,8 @@ TCOB_API auto remove(utf8_string_view str, usize pos, usize count = 1) -> utf8_s
 TCOB_API auto substr(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;
 TCOB_API auto to_lower(utf8_string_view str) -> utf8_string;
 TCOB_API auto to_upper(utf8_string_view str) -> utf8_string;
+TCOB_API auto capitalize(utf8_string_view str) -> utf8_string;
+
 }
 
 #include "StringUtils.inl"

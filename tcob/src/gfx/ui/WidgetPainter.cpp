@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cctype>
 #include <cmath>
 #include <utility>
 #include <variant>
@@ -19,6 +18,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
@@ -231,98 +231,96 @@ void widget_painter::draw_text(text_element const& style, rect_f const& rect, gf
 
     // deco
     auto const& deco {style.Decoration};
-    if (deco.Style != line_type::Hidden && (deco.Line.LineThrough || deco.Line.Overline || deco.Line.Underline) && deco.Color.A > 0) {
+    if (deco.Style != line_type::Hidden && (deco.Line.LineThrough || deco.Line.Overline || deco.Line.Underline) && deco.Color.A > 0 && text.QuadCount > 0) {
         f32 const strokeWidth {deco.Size.calc(rect.height())};
 
-        for (auto const& token : text.Tokens) {
-            if (token.Quads.empty()) { continue; }
+        // FIXME: multiline
+        rect_f first {text.get_quad(0).Rect};
+        rect_f last {text.get_quad(text.QuadCount - 1).Rect};
 
-            rect_f first {token.Quads.front().Rect};
-            rect_f last {token.Quads.back().Rect};
-            // FIXME: multiline
-
-            auto const drawDeco {[&]() {
-                auto const drawLine {[&](point_f p0, point_f p1, point_f offset) {
-                    switch (deco.Style) {
-                    case line_type::Solid:
-                    case line_type::Double:
-                        _canvas.set_stroke_width(strokeWidth);
-                        _canvas.set_stroke_style(deco.Color);
-                        _canvas.stroke_line(p0 + offset, p1 + offset);
-                        break;
-                    case line_type::Dotted: {
-                        _canvas.set_stroke_width(strokeWidth);
-                        _canvas.set_stroke_style(deco.Color);
-                        f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 20))};
-                        _canvas.set_line_dash(std::array {dash, dash * 2});
-                        _canvas.begin_path();
-                        _canvas.move_to(p0 + offset);
-                        _canvas.line_to(p1 + offset);
-                        _canvas.stroke();
-                        _canvas.set_line_dash({});
-                    } break;
-                    case line_type::Dashed: {
-                        _canvas.set_stroke_width(strokeWidth);
-                        _canvas.set_stroke_style(deco.Color);
-                        f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 7))};
-                        _canvas.set_line_dash(std::array {dash, dash});
-                        _canvas.set_dash_offset(dash / 2);
-                        _canvas.begin_path();
-                        _canvas.move_to(p0 + offset);
-                        _canvas.line_to(p1 + offset);
-                        _canvas.stroke();
-                        _canvas.set_line_dash({});
-                        _canvas.set_dash_offset(0);
-                    } break;
-                    case line_type::Wavy:
-                        _canvas.set_stroke_width(strokeWidth);
-                        _canvas.set_stroke_style(deco.Color);
-                        _canvas.begin_path();
-                        _canvas.move_to(p0 + offset);
-                        _canvas.wavy_line_to(p1 + offset, strokeWidth * 1.25f, 0.5f);
-                        _canvas.stroke();
-                        break;
-                    case line_type::Hidden:
-                        break;
-                    }
-                }};
-
-                point_f offset {rect.top_left()};
-
-                if (deco.Line.Underline) {
-                    point_f const p0 {first.bottom_left()};
-                    point_f const p1 {last.bottom_right()};
-                    offset += point_f {0, strokeWidth / 2};
-                    drawLine(p0, p1, offset);
-                    if (deco.Style == line_type::Double) {
-                        offset += point_f {0, strokeWidth * 2};
-                        drawLine(p0, p1, offset);
-                    }
-                }
-                if (deco.Line.Overline) {
-                    point_f const p0 {first.top_left()};
-                    point_f const p1 {last.top_right()};
-                    offset -= point_f {0, strokeWidth / 2};
-                    drawLine(p0, p1, offset);
-                    if (deco.Style == line_type::Double) {
-                        offset -= point_f {0, strokeWidth * 2};
-                        drawLine(p0, p1, offset);
-                    }
-                }
-                if (deco.Line.LineThrough) {
-                    point_f const p0 {first.top_left()};
-                    point_f const p1 {last.top_right()};
-                    offset += point_f {0, (first.height() + last.height()) / 4};
-                    drawLine(p0, p1, offset);
-                    if (deco.Style == line_type::Double) {
-                        offset -= point_f {0, strokeWidth * 2};
-                        drawLine(p0, p1, offset);
-                    }
+        auto const drawDeco {[&]() {
+            auto const drawLine {[&](point_f p0, point_f p1, point_f offset) {
+                switch (deco.Style) {
+                case line_type::Solid:
+                case line_type::Double:
+                    _canvas.set_stroke_width(strokeWidth);
+                    _canvas.set_stroke_style(deco.Color);
+                    _canvas.stroke_line(p0 + offset, p1 + offset);
+                    break;
+                case line_type::Dotted: {
+                    _canvas.set_stroke_width(strokeWidth);
+                    _canvas.set_stroke_style(deco.Color);
+                    f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 20))};
+                    _canvas.set_line_dash(std::array {dash, dash * 2});
+                    _canvas.begin_path();
+                    _canvas.move_to(p0 + offset);
+                    _canvas.line_to(p1 + offset);
+                    _canvas.stroke();
+                    _canvas.set_line_dash({});
+                } break;
+                case line_type::Dashed: {
+                    _canvas.set_stroke_width(strokeWidth);
+                    _canvas.set_stroke_style(deco.Color);
+                    f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 7))};
+                    _canvas.set_line_dash(std::array {dash, dash});
+                    _canvas.set_dash_offset(dash / 2);
+                    _canvas.begin_path();
+                    _canvas.move_to(p0 + offset);
+                    _canvas.line_to(p1 + offset);
+                    _canvas.stroke();
+                    _canvas.set_line_dash({});
+                    _canvas.set_dash_offset(0);
+                } break;
+                case line_type::Wavy:
+                    _canvas.set_stroke_width(strokeWidth);
+                    _canvas.set_stroke_style(deco.Color);
+                    _canvas.begin_path();
+                    _canvas.move_to(p0 + offset);
+                    _canvas.wavy_line_to(p1 + offset, strokeWidth * 1.25f, 0.5f);
+                    _canvas.stroke();
+                    break;
+                case line_type::Hidden:
+                    break;
                 }
             }};
 
-            drawDeco();
-        }
+            point_f offset {rect.top_left()};
+
+            if (deco.Line.Underline) {
+                point_f p0 {first.bottom_left()};
+                point_f p1 {last.bottom_right()};
+                p0.Y = p1.Y = std::max(p0.Y, p1.Y);
+                offset += point_f {0, strokeWidth / 2};
+                drawLine(p0, p1, offset);
+                if (deco.Style == line_type::Double) {
+                    offset += point_f {0, strokeWidth * 1.5f};
+                    drawLine(p0, p1, offset);
+                }
+            }
+            if (deco.Line.Overline) {
+                point_f p0 {first.top_left()};
+                point_f p1 {last.top_right()};
+                p0.Y = p1.Y = std::min(p0.Y, p1.Y);
+                offset -= point_f {0, strokeWidth / 2};
+                drawLine(p0, p1, offset);
+                if (deco.Style == line_type::Double) {
+                    offset -= point_f {0, strokeWidth * 1.5f};
+                    drawLine(p0, p1, offset);
+                }
+            }
+            if (deco.Line.LineThrough) {
+                point_f p0 {first.top_left()};
+                point_f p1 {last.top_right()};
+                p0.Y = p1.Y = (first.center().Y + last.center().Y) / 2;
+                drawLine(p0, p1, offset);
+                if (deco.Style == line_type::Double) {
+                    offset -= point_f {0, strokeWidth * 1.5f};
+                    drawLine(p0, p1, offset);
+                }
+            }
+        }};
+
+        drawDeco();
     }
 }
 
@@ -681,23 +679,9 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
 {
     utf8_string retValue {text};
     switch (xform) {
-    case text_transform::Capitalize: {
-        bool newWord {true};
-        for (auto& c : retValue) {
-            if (std::isspace(c)) {
-                newWord = true;
-            } else if (newWord) {
-                c       = static_cast<char>(std::toupper(c));
-                newWord = false;
-            }
-        }
-    } break;
-    case text_transform::Lowercase:
-        for (auto& c : retValue) { c = static_cast<char>(std::tolower(c)); }
-        break;
-    case text_transform::Uppercase:
-        for (auto& c : retValue) { c = static_cast<char>(std::toupper(c)); }
-        break;
+    case text_transform::Capitalize: retValue = utf8::capitalize(text); break;
+    case text_transform::Lowercase: retValue = utf8::to_lower(text); break;
+    case text_transform::Uppercase: retValue = utf8::to_upper(text); break;
     default:
         break;
     }

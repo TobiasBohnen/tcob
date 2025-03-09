@@ -234,6 +234,30 @@ auto to_upper(utf8_string_view str) -> utf8_string
     return ::utf8::toupper({str.data(), str.size()});
 }
 
+auto capitalize(utf8_string_view str) -> utf8_string
+{
+    utf8_string retValue;
+
+    usize const len {::utf8::length(str)};
+    auto        it {str.begin()};
+    bool        newWord {true};
+
+    for (usize i {0}; i < len; ++i) {
+        if (::utf8::isspace(*it)) {
+            newWord = true;
+            retValue += utf8::substr(str, i, 1);
+        } else if (newWord) {
+            newWord = false;
+            retValue += utf8::to_upper(utf8::substr(str, i, 1));
+        } else {
+            retValue += utf8::to_lower(utf8::substr(str, i, 1));
+        }
+        ::utf8::next(it, str.end());
+    }
+
+    return retValue;
+}
+
 }
 
 ////////////////////////////////////////////////////////////

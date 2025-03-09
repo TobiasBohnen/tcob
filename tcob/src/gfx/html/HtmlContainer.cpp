@@ -7,7 +7,6 @@
 
 #if defined(TCOB_ENABLE_ADDON_GFX_LITEHTML)
 
-    #include <cctype>
     #include <memory>
     #include <string>
     #include <vector>
@@ -29,6 +28,7 @@
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/core/Size.hpp"
+    #include "tcob/core/StringUtils.hpp"
     #include "tcob/core/assets/AssetGroup.hpp"
     #include "tcob/core/io/FileSystem.hpp"
     #include "tcob/gfx/Canvas.hpp"
@@ -211,21 +211,10 @@ void container::set_cursor(char const* cursor)
 void container::transform_text(string& text, litehtml::text_transform tt)
 {
     switch (tt) {
-    case litehtml::text_transform::text_transform_capitalize:
-        text[0] = static_cast<char>(std::toupper(text[0]));
-        break;
-    case litehtml::text_transform::text_transform_lowercase:
-        for (auto& c : text) {
-            c = static_cast<char>(std::tolower(c));
-        }
-        break;
-    case litehtml::text_transform::text_transform_uppercase:
-        for (auto& c : text) {
-            c = static_cast<char>(std::toupper(c));
-        }
-        break;
-    default:
-        break;
+    case litehtml::text_transform::text_transform_capitalize: text = utf8::capitalize(text); break;
+    case litehtml::text_transform::text_transform_lowercase: text = utf8::to_lower(text); break;
+    case litehtml::text_transform::text_transform_uppercase: text = utf8::to_upper(text); break;
+    default: break;
     }
 }
 
