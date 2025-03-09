@@ -112,7 +112,7 @@ void drop_down_list::on_paint(widget_painter& painter)
 
     nav_arrows_style arrowStyle {};
     update_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverBox, .Hover = !fls.Active && _mouseOverBox});
-    painter.draw_nav_arrow(arrowStyle.NavArrow, rect);
+    painter.draw_chevron(arrowStyle.NavArrow, rect);
 
     // text
     if (_style.Text.Font && SelectedItemIndex >= 0) {

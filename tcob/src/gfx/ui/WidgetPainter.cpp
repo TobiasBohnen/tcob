@@ -405,10 +405,12 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
             _canvas.fill();
         } break;
         case tick_type::Rect: {
-            rect_f const newRect {rect.left() + style.Size.calc(rect.width()),
-                                  rect.top() + style.Size.calc(rect.height()),
-                                  rect.width() - (style.Size.calc(rect.width()) + style.Size.calc(rect.width())),
-                                  rect.height() - (style.Size.calc(rect.height()) + style.Size.calc(rect.height()))};
+            f32 const    width {style.Size.calc(rect.width())};
+            f32 const    height {style.Size.calc(rect.height())};
+            rect_f const newRect {rect.left() + ((rect.width() - width) / 2),
+                                  rect.top() + ((rect.height() - height) / 2),
+                                  width,
+                                  height};
             _canvas.set_fill_style(get_paint(style.Foreground, newRect));
             _canvas.begin_path();
             _canvas.rect(newRect);
@@ -422,8 +424,21 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
             _canvas.rect(newRect);
             _canvas.fill();
         } break;
-        case tick_type::None:
-            break;
+        case tick_type::Triangle: {
+            f32 const    width {style.Size.calc(rect.width())};
+            f32 const    height {style.Size.calc(rect.height())};
+            rect_f const newRect {rect.left() + ((rect.width() - width) / 2),
+                                  rect.top() + ((rect.height() - height) / 2),
+                                  width,
+                                  height};
+            _canvas.set_fill_style(get_paint(style.Foreground, newRect));
+            _canvas.begin_path();
+            _canvas.triangle(
+                {newRect.left() + 2, newRect.top() + 4},
+                {newRect.center().X, newRect.bottom() - 4},
+                {newRect.right() - 2, newRect.top() + 4});
+            _canvas.fill();
+        } break;
         }
     }
 }
@@ -484,16 +499,15 @@ auto widget_painter::draw_thumb(thumb_element const& style, rect_f const& rect, 
 {
     rect_f retValue {style.calc(rect, thumbCtx)};
 
-    if (style.Type == thumb_type::Rect) {
-        draw_bordered_rect(retValue, style.Background, style.Border);
-    } else if (style.Type == thumb_type::Disc) {
-        draw_bordered_circle(retValue, style.Background, style.Border);
+    switch (style.Type) {
+    case thumb_type::Rect: draw_bordered_rect(retValue, style.Background, style.Border); break;
+    case thumb_type::Disc: draw_bordered_circle(retValue, style.Background, style.Border); break;
     }
 
     return retValue;
 }
 
-void widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect)
+void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};
 
@@ -502,18 +516,20 @@ void widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
     rect_f decRect {navRect};
     draw_bordered_rect(decRect, style.DownBackground, style.Border);
 
-    switch (style.Type) {
-    case nav_arrow_type::Triangle: {
-        _canvas.set_fill_style(get_paint(style.Foreground, navRect));
-        _canvas.begin_path();
-        _canvas.triangle(
-            {navRect.left() + 2, navRect.top() + 4},
-            {navRect.center().X, navRect.bottom() - 4},
-            {navRect.right() - 2, navRect.top() + 4});
-        _canvas.fill();
-    } break;
-    case nav_arrow_type::None:
-        break;
+    if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
+        draw_nine_patch(*np, decRect, style.Border);
+    } else {
+        switch (style.Type) {
+        case nav_arrow_type::Triangle: {
+            _canvas.set_fill_style(get_paint(style.Foreground, navRect));
+            _canvas.begin_path();
+            _canvas.triangle(
+                {navRect.left() + 2, navRect.top() + 4},
+                {navRect.center().X, navRect.bottom() - 4},
+                {navRect.right() - 2, navRect.top() + 4});
+            _canvas.fill();
+        } break;
+        }
     }
 }
 
@@ -545,8 +561,6 @@ auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arro
                     {navRect.right() - 2, center.Y + 4});
                 _canvas.fill();
             } break;
-            case nav_arrow_type::None:
-                break;
             }
 
             retValue.second = decRect;
@@ -574,8 +588,6 @@ auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arro
                     {navRect.right() - 2, center.Y - 4});
                 _canvas.fill();
             } break;
-            case nav_arrow_type::None:
-                break;
             }
         }
 

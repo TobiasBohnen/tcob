@@ -37,7 +37,7 @@ public:
     void draw_text_and_icon(text_element const& style, rect_f const& rect, utf8_string const& text, icon const& icon);
 
     void draw_tick(tick_element const& style, rect_f const& rect);
-    void draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect);
+    void draw_chevron(nav_arrow_element const& style, rect_f const& rect);
     void draw_item(item_element const& style, rect_f const& rect, list_item const& item);
     void draw_caret(caret_element const& style, rect_f const& rect, point_f offset);
 

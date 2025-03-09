@@ -70,13 +70,13 @@ enum class thumb_type : u8 {
 ////////////////////////////////////////////////////////////
 
 enum class tick_type : u8 {
-    None,
     Checkmark,
     Cross,
     Disc,
     Circle,
     Rect,
-    Square
+    Square,
+    Triangle
 };
 
 ////////////////////////////////////////////////////////////
@@ -89,7 +89,6 @@ enum class bar_type : u8 {
 ////////////////////////////////////////////////////////////
 
 enum class nav_arrow_type : u8 {
-    None,
     Triangle
 };
 
