@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include <utf8/unchecked.h>
+#include <utf8/utf8.h>
 
 #include "tcob/core/random/Random.hpp"
 
@@ -175,7 +175,7 @@ namespace tcob::utf8 {
 
 auto length(utf8_string_view str) -> isize
 {
-    return static_cast<isize>(::utf8::unchecked::distance(str.begin(), str.end()));
+    return static_cast<isize>(::utf8::length(str));
 }
 
 auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string
@@ -183,7 +183,9 @@ auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_stri
     string retValue {str};
 
     auto it {retValue.begin()};
-    ::utf8::unchecked::advance(it, pos);
+    for (usize i {0}; i < pos; ++i) {
+        ::utf8::next(it, retValue.end());
+    }
 
     retValue.insert(it, what.begin(), what.end());
 
@@ -195,10 +197,13 @@ auto remove(utf8_string_view str, usize pos, usize count) -> utf8_string
     string retValue {str};
 
     auto start {retValue.begin()};
-    ::utf8::unchecked::advance(start, pos);
-
+    for (usize i {0}; i < pos; ++i) {
+        ::utf8::next(start, retValue.end());
+    }
     auto end {start};
-    ::utf8::unchecked::advance(end, count);
+    for (usize i {0}; i < count; ++i) {
+        ::utf8::next(end, retValue.end());
+    }
 
     retValue.erase(start, end);
 
@@ -208,12 +213,25 @@ auto remove(utf8_string_view str, usize pos, usize count) -> utf8_string
 auto substr(utf8_string_view str, usize pos, usize count) -> utf8_string
 {
     auto start {str.begin()};
-    ::utf8::unchecked::advance(start, pos);
-
+    for (usize i {0}; i < pos; ++i) {
+        ::utf8::next(start, str.end());
+    }
     auto end {start};
-    ::utf8::unchecked::advance(end, count);
+    for (usize i {0}; i < count; ++i) {
+        ::utf8::next(end, str.end());
+    }
 
     return {start, end};
+}
+
+auto to_lower(utf8_string_view str) -> utf8_string
+{
+    return ::utf8::tolower({str.data(), str.size()});
+}
+
+auto to_upper(utf8_string_view str) -> utf8_string
+{
+    return ::utf8::toupper({str.data(), str.size()});
 }
 
 }

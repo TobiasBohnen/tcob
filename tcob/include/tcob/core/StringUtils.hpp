@@ -53,7 +53,8 @@ TCOB_API auto length(utf8_string_view str) -> isize;
 TCOB_API auto insert(utf8_string_view str, utf8_string_view what, usize pos) -> utf8_string;
 TCOB_API auto remove(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;
 TCOB_API auto substr(utf8_string_view str, usize pos, usize count = 1) -> utf8_string;
-
+TCOB_API auto to_lower(utf8_string_view str) -> utf8_string;
+TCOB_API auto to_upper(utf8_string_view str) -> utf8_string;
 }
 
 #include "StringUtils.inl"
