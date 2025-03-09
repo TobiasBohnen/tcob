@@ -21,7 +21,7 @@ void spinner::style::Transition(style& target, style const& left, style const& r
 {
     widget_style::Transition(target, left, right, step);
 
-    element::Transition(target.Text, left.Text, right.Text, step);
+    target.Text = text_element::Lerp(left.Text, right.Text, step);
 }
 
 spinner::spinner(init const& wi)

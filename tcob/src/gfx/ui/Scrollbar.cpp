@@ -28,7 +28,7 @@ void scrollbar::update(milliseconds deltaTime)
     _tween.update(deltaTime);
 }
 
-void scrollbar::paint(widget_painter& painter, element::scrollbar const& scrollbar, element::thumb const& thumb, rect_f& rect)
+void scrollbar::paint(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect)
 {
     _delay = scrollbar.Bar.Delay;
 
@@ -37,13 +37,13 @@ void scrollbar::paint(widget_painter& painter, element::scrollbar const& scrollb
     i32 const numBlocks {10};
     f32 const frac {current_value()};
 
-    element::bar::context const barCtx {
+    bar_element::context const barCtx {
         .Orientation = _orien,
         .Inverted    = _orien == orientation::Vertical,
-        .Position    = element::bar::position::RightOrBottom,
+        .Position    = bar_element::position::RightOrBottom,
         .BlockCount  = numBlocks,
         .Fraction    = frac};
-    element::thumb::context const thumbCtx {
+    thumb_element::context const thumbCtx {
         .Orientation = barCtx.Orientation,
         .Inverted    = barCtx.Inverted,
         .Fraction    = barCtx.Fraction};

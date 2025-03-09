@@ -25,7 +25,7 @@ void slider::style::Transition(style& target, style const& left, style const& ri
 {
     widget_style::Transition(target, left, right, step);
 
-    element::Transition(target.Bar, left.Bar, right.Bar, step);
+    target.Bar = bar_element::Lerp(left.Bar, right.Bar, step);
 }
 
 slider::slider(init const& wi)
@@ -69,7 +69,7 @@ void slider::on_paint(widget_painter& painter)
 
     i32 const  numBlocks {10};
     auto const orien {current_orientation()};
-    auto const pos {element::bar::position::CenterOrMiddle};
+    auto const pos {bar_element::position::CenterOrMiddle};
 
     // bar
     _barRectCache.Bar = painter.draw_bar(

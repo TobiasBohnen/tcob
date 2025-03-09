@@ -19,8 +19,8 @@ class TCOB_API toggle : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::tick Tick;
-        milliseconds  Delay {0};
+        tick_element Tick;
+        milliseconds Delay {0};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

@@ -21,7 +21,7 @@ class TCOB_API label : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::text Text;
+        text_element Text;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

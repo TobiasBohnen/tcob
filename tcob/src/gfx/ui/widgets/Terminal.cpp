@@ -37,8 +37,8 @@ void terminal::style::Transition(style& target, style const& left, style const& 
 {
     widget_style::Transition(target, left, right, step);
 
-    element::Transition(target.Text, left.Text, right.Text, step);
-    element::Transition(target.Caret, left.Caret, right.Caret, step);
+    target.Text  = text_element::Lerp(left.Text, right.Text, step);
+    target.Caret = caret_element::Lerp(left.Caret, right.Caret, step);
 }
 
 terminal::terminal(init const& wi)
@@ -333,7 +333,7 @@ void terminal::on_paint(widget_painter& painter)
         if (cell.Text.empty()) { continue; }
         assert(utf8::length(cell.Text) == 1);
 
-        element::text textStyle {_style.Text};
+        auto textStyle {_style.Text};
         textStyle.Color = cell.Colors.first;
         painter.draw_text(textStyle, cellRect, cell.Text);
     }

@@ -19,7 +19,7 @@ void progress_bar::style::Transition(style& target, style const& left, style con
 {
     widget_style::Transition(target, left, right, step);
 
-    element::Transition(target.Bar, left.Bar, right.Bar, step);
+    target.Bar = bar_element::Lerp(left.Bar, right.Bar, step);
 }
 
 progress_bar::progress_bar(init const& wi)
@@ -66,7 +66,7 @@ void progress_bar::on_paint(widget_painter& painter)
         rect,
         {.Orientation = current_orientation(),
          .Inverted    = false,
-         .Position    = element::bar::position::CenterOrMiddle,
+         .Position    = bar_element::position::CenterOrMiddle,
          .BlockCount  = numBlocks,
          .Fraction    = _tween.current_value()});
 }

@@ -25,14 +25,14 @@ class TCOB_API drop_down_list : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::text Text;
+        text_element Text;
 
         utf8_string NavArrowClass {"nav_arrows"};
 
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};
 
-        element::scrollbar VScrollBar;
+        scrollbar_element VScrollBar;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

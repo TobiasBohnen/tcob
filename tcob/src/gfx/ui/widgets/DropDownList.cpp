@@ -23,9 +23,9 @@ void drop_down_list::style::Transition(style& target, style const& left, style c
 {
     widget_style::Transition(target, left, right, step);
 
-    element::Transition(target.Text, left.Text, right.Text, step);
+    target.Text       = text_element::Lerp(left.Text, right.Text, step);
     target.ItemHeight = length::Lerp(left.ItemHeight, right.ItemHeight, step);
-    element::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+    target.VScrollBar = scrollbar_element::Lerp(left.VScrollBar, right.VScrollBar, step);
 }
 
 drop_down_list::drop_down_list(init const& wi)

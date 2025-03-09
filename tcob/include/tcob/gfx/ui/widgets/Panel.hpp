@@ -27,8 +27,8 @@ class TCOB_API panel : public widget_container {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::scrollbar HScrollBar;
-        element::scrollbar VScrollBar;
+        scrollbar_element HScrollBar;
+        scrollbar_element VScrollBar;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

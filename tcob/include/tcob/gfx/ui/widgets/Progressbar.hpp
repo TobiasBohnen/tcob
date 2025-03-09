@@ -19,7 +19,7 @@ class TCOB_API progress_bar : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::bar Bar;
+        bar_element Bar;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

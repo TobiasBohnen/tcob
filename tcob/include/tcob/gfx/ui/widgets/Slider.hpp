@@ -24,8 +24,8 @@ class TCOB_API slider : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::bar Bar;
-        utf8_string  ThumbClass {"slider_thumb"};
+        bar_element Bar;
+        utf8_string ThumbClass {"slider_thumb"};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

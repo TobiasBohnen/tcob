@@ -20,7 +20,7 @@ class TCOB_API vscroll_widget : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::scrollbar VScrollBar;
+        scrollbar_element VScrollBar;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

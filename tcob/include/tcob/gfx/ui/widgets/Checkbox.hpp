@@ -18,7 +18,7 @@ class TCOB_API checkbox : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::tick Tick;
+        tick_element Tick;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

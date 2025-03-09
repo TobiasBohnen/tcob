@@ -23,8 +23,8 @@ class TCOB_API spinner : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::text Text;
-        utf8_string   NavArrowClass {"nav_arrows"};
+        text_element Text;
+        utf8_string  NavArrowClass {"nav_arrows"};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

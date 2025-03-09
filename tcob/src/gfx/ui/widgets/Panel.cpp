@@ -27,8 +27,8 @@ void panel::style::Transition(style& target, style const& left, style const& rig
 {
     widget_style::Transition(target, left, right, step);
 
-    element::Transition(target.HScrollBar, left.HScrollBar, right.HScrollBar, step);
-    element::Transition(target.VScrollBar, left.VScrollBar, right.VScrollBar, step);
+    target.HScrollBar = scrollbar_element::Lerp(left.HScrollBar, right.HScrollBar, step);
+    target.VScrollBar = scrollbar_element::Lerp(left.VScrollBar, right.VScrollBar, step);
 }
 
 panel::panel(init const& wi)

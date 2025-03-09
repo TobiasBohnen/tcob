@@ -26,8 +26,8 @@ class TCOB_API text_box : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::text  Text;
-        element::caret Caret;
+        text_element  Text;
+        caret_element Caret;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

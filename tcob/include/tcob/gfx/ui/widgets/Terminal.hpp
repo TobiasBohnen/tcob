@@ -32,9 +32,9 @@ class TCOB_API terminal : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        element::text  Text;
-        element::caret Caret;
-        milliseconds   FlashDuration {500};
+        text_element  Text;
+        caret_element Caret;
+        milliseconds  FlashDuration {500};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };
