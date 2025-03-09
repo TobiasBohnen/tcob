@@ -14,7 +14,7 @@
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API tooltip : public panel {
@@ -36,6 +36,6 @@ protected:
     void virtual on_popup(widget* top);
 
 private:
-    std::unique_ptr<linear_tween<f32>> _fadeInTween;
+    std::unique_ptr<gfx::linear_tween<f32>> _fadeInTween;
 };
 }

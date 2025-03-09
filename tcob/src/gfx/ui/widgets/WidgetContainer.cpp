@@ -12,7 +12,7 @@
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 widget_container::widget_container(init const& wi)
     : widget {wi}

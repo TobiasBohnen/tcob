@@ -6,7 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 template <typename T>

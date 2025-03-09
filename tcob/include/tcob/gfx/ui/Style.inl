@@ -10,7 +10,7 @@
 
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 template <std::derived_from<style> T>
 inline auto style_collection::create(string const& name, style_flags flags, style_attributes const& attribs) -> std::shared_ptr<T>

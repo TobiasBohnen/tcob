@@ -18,7 +18,7 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 // TODO: horizontal scrolling

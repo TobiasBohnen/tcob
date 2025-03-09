@@ -23,7 +23,7 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API canvas_widget : public widget {
@@ -32,9 +32,9 @@ public:
 
     void clear();
 
-    void set_global_composite_operation(composite_operation op);
-    void set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor);
-    void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
+    void set_global_composite_operation(gfx::composite_operation op);
+    void set_global_composite_blendfunc(gfx::blend_func sfactor, gfx::blend_func dfactor);
+    void set_global_composite_blendfunc_separate(gfx::blend_func srcRGB, gfx::blend_func dstRGB, gfx::blend_func srcAlpha, gfx::blend_func dstAlpha);
 
     // State handling
     void save();
@@ -42,21 +42,21 @@ public:
 
     // Render styles
     void set_fill_style(color c);
-    void set_fill_style(canvas::paint const& paint);
+    void set_fill_style(gfx::canvas::paint const& paint);
     void set_stroke_style(color c);
-    void set_stroke_style(canvas::paint const& paint);
+    void set_stroke_style(gfx::canvas::paint const& paint);
     void set_stroke_width(f32 size);
     void set_edge_antialias(bool enabled);
     void set_shape_antialias(bool enabled);
     void set_miter_limit(f32 limit);
-    void set_line_cap(line_cap cap);
-    void set_line_join(line_join join);
+    void set_line_cap(gfx::line_cap cap);
+    void set_line_join(gfx::line_join join);
     void set_global_alpha(f32 alpha);
 
     // Paths
     void begin_path();
     void close_path();
-    void set_path_winding(winding dir);
+    void set_path_winding(gfx::winding dir);
     void set_line_dash(std::vector<f32> const& dashPatternRel);
     void set_dash_offset(f32 offset);
     void move_to(point_f pos);
@@ -64,7 +64,7 @@ public:
     void cubic_bezier_to(point_f cp0, point_f cp1, point_f end);
     void quad_bezier_to(point_f cp, point_f end);
     void arc_to(point_f pos1, point_f pos2, f32 radius);
-    void arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, winding dir);
+    void arc(point_f c, f32 r, radian_f startAngle, radian_f endAngle, gfx::winding dir);
     void rect(rect_f const& rect);
     void rounded_rect(rect_f const& rect, f32 r);
     void rounded_rect_varying(rect_f const& rect, f32 radTL, f32 radTR, f32 radBR, f32 radBL);
@@ -76,14 +76,14 @@ public:
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);
 
-    void path_2d(path2d const& path);
+    void path_2d(gfx::path2d const& path);
 
     void fill();
     void stroke();
     void clip();
 
     // Image
-    void draw_image(texture* image, string const& region, rect_f const& rect);
+    void draw_image(gfx::texture* image, string const& region, rect_f const& rect);
 
     // Transforms
     void translate(point_f c);
@@ -93,7 +93,7 @@ public:
     void scale_at(size_f scale, point_f p);
     void skew(degree_f angleX, degree_f angleY);
     void skew_at(degree_f angleX, degree_f angleY, point_f p);
-    void set_transform(transform xform);
+    void set_transform(gfx::transform xform);
     void reset_transform();
 
     // Scissoring
@@ -101,9 +101,9 @@ public:
     void reset_scissor();
 
     // Font
-    void set_font(font* font);
-    void set_text_halign(horizontal_alignment align);
-    void set_text_valign(vertical_alignment align);
+    void set_font(gfx::font* font);
+    void set_text_halign(gfx::horizontal_alignment align);
+    void set_text_valign(gfx::vertical_alignment align);
 
     void draw_text(rect_f const& rect, utf8_string_view text);
 
@@ -113,7 +113,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    std::vector<std::function<void(canvas&)>> _commands;
+    std::vector<std::function<void(gfx::canvas&)>> _commands;
 };
 
 }

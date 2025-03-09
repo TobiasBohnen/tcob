@@ -17,10 +17,9 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 ////////////////////////////////////////////////////////////
 
@@ -177,7 +176,7 @@ namespace element {
         return retValue - Border.thickness();
     }
 
-    auto border::thickness() const -> gfx::ui::thickness
+    auto border::thickness() const -> ui::thickness
     {
         return {Size / 2};
     }

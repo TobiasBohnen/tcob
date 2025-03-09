@@ -18,7 +18,7 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 // TODO: scrollable tab bar

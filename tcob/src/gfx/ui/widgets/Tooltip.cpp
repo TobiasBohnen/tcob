@@ -9,7 +9,7 @@
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 tooltip::tooltip(init const& wi)
     : panel {wi}
@@ -31,7 +31,7 @@ void tooltip::on_update(milliseconds deltaTime)
 
 void tooltip::on_popup(widget* top)
 {
-    _fadeInTween = make_unique_tween<linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
+    _fadeInTween = gfx::make_unique_tween<gfx::linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
     _fadeInTween->Value.Changed.connect([this](auto val) {
         Alpha = val;
         force_redraw(this->name() + ": Tooltip fade-in");

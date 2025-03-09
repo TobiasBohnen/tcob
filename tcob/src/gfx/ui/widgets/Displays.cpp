@@ -18,7 +18,7 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 dot_matrix_display::dot_matrix_display(init const& wi)
     : widget {wi}
@@ -361,10 +361,10 @@ void color_picker::on_update(milliseconds /* deltaTime */)
 {
 }
 
-auto color_picker::GetGradient() -> color_gradient const&
+auto color_picker::GetGradient() -> gfx::color_gradient const&
 {
-    static std::array<color_stop, 7> colorStops {{{0.f, colors::Red}, {1 / 6.f, colors::Orange}, {2 / 6.f, colors::Yellow}, {3 / 6.f, colors::Green}, {4 / 6.f, colors::Blue}, {5 / 6.f, colors::Indigo}, {1.f, colors::Violet}}};
-    static color_gradient            grad {colorStops};
+    static std::array<gfx::color_stop, 7> colorStops {{{0.f, colors::Red}, {1 / 6.f, colors::Orange}, {2 / 6.f, colors::Yellow}, {3 / 6.f, colors::Green}, {4 / 6.f, colors::Blue}, {5 / 6.f, colors::Indigo}, {1.f, colors::Violet}}};
+    static gfx::color_gradient            grad {colorStops};
     return grad;
 }
 

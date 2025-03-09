@@ -12,7 +12,7 @@
 #include "tcob/gfx/ui/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API progress_bar : public widget {

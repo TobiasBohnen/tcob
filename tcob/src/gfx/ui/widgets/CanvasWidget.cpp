@@ -21,7 +21,9 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
+
+using namespace gfx;
 
 canvas_widget::canvas_widget(init const& wi)
     : widget {wi}

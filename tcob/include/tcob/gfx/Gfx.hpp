@@ -134,11 +134,6 @@ auto Deserialize(texture_region& v, auto&& s) -> bool
 
 ////////////////////////////////////////////////////////////
 
-enum class orientation : u8 {
-    Horizontal,
-    Vertical
-};
-
 enum class horizontal_alignment : u8 {
     Left,
     Right,

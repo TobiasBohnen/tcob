@@ -17,7 +17,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API widget_painter {
@@ -25,7 +25,7 @@ public:
     explicit widget_painter(gfx::canvas& canvas);
 
     void begin(f32 alpha);
-    void begin(f32 alpha, transform const& xform);
+    void begin(f32 alpha, gfx::transform const& xform);
     void end();
     void push_scissor(rect_f const& globalScissor);
     void pop_scissor();
@@ -33,7 +33,7 @@ public:
     void draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle);
 
     void draw_text(element::text const& style, rect_f const& rect, utf8_string const& text);
-    void draw_text(element::text const& style, rect_f const& rect, text_formatter::result const& text);
+    void draw_text(element::text const& style, rect_f const& rect, gfx::text_formatter::result const& text);
     void draw_text_and_icon(element::text const& style, rect_f const& rect, utf8_string const& text, icon const& icon);
 
     void draw_tick(element::tick const& style, rect_f const& rect);
@@ -47,7 +47,7 @@ public:
 
     auto canvas() -> gfx::canvas&;
 
-    auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text) -> text_formatter::result;
+    auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result;
 
 private:
     void draw_nine_patch(nine_patch const& np, rect_f const& rect, element::border const& borderStyle);
@@ -56,9 +56,9 @@ private:
     void draw_border(rect_f const& rect, element::border const& borderStyle, f32 borderSize, f32 borderRadius);
     void draw_shadow(element::shadow const& style, rect_f const& rect, bool isCircle, element::border const& borderStyle);
 
-    auto get_paint(ui_paint const& p, rect_f const& rect) -> canvas::paint;
+    auto get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint;
 
-    auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> text_formatter::result;
+    auto format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
     auto transform_text(element::text::transform xform, utf8_string_view text) const -> utf8_string;
 
     gfx::canvas&       _canvas;

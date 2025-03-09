@@ -25,13 +25,13 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API form : public entity {
+class TCOB_API form : public gfx::entity {
 public:
-    form(string name, window* window);
-    form(string name, window* window, rect_f const& bounds);
+    form(string name, gfx::window* window);
+    form(string name, gfx::window* window, rect_f const& bounds);
     ~form() override;
 
     prop<rect_f> Bounds;
@@ -71,7 +71,7 @@ protected:
     void on_fixed_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) override;
+    void on_draw_to(gfx::render_target& target) override;
 
     void on_key_down(input::keyboard::event const& ev) override;
     void on_key_up(input::keyboard::event const& ev) override;
@@ -103,10 +103,10 @@ private:
     auto can_popup_tooltip() const -> bool;
     void hide_tooltip();
 
-    canvas          _canvas {};
-    canvas_renderer _renderer;
+    gfx::canvas          _canvas {};
+    gfx::canvas_renderer _renderer;
 
-    window* _window;
+    gfx::window* _window;
 
     widget*                             _topWidget {nullptr};
     widget*                             _focusWidget {nullptr};

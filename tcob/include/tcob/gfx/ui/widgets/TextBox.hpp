@@ -19,8 +19,7 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API text_box : public widget {
@@ -74,15 +73,15 @@ private:
     auto is_text_selected() const -> bool;
     auto calc_caret_pos(point_f mp) const -> isize;
 
-    std::unique_ptr<square_wave_tween<bool>> _caretTween;
-    isize                                    _caretPos {0};
-    isize                                    _dragCaretPos {INVALID_INDEX};
-    bool                                     _caretVisible {false};
+    std::unique_ptr<gfx::square_wave_tween<bool>> _caretTween;
+    isize                                         _caretPos {0};
+    isize                                         _dragCaretPos {INVALID_INDEX};
+    bool                                          _caretVisible {false};
 
-    text_formatter::result  _formatResult;
-    isize                   _textLength {0};
-    bool                    _textDirty {false};
-    std::pair<isize, isize> _selectedText {INVALID_INDEX, INVALID_INDEX};
+    gfx::text_formatter::result _formatResult;
+    isize                       _textLength {0};
+    bool                        _textDirty {false};
+    std::pair<isize, isize>     _selectedText {INVALID_INDEX, INVALID_INDEX};
 
     text_box::style _style;
 };

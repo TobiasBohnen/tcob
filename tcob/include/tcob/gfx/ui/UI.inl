@@ -12,7 +12,7 @@
 
 #include "tcob/core/Rect.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 inline auto operator/(length const& left, f32 right) -> length
 {

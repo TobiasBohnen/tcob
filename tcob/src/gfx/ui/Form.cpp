@@ -29,18 +29,18 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-form::form(string name, window* window)
+form::form(string name, gfx::window* window)
     : form {std::move(name), window, rect_f {point_f::Zero, window ? size_f {window->Size()} : size_f::Zero}}
 {
 }
 
-form::form(string name, window* window, rect_f const& bounds)
+form::form(string name, gfx::window* window, rect_f const& bounds)
     : entity {update_mode::Fixed}
     , Bounds {bounds}
     , _renderer {_canvas}
@@ -211,7 +211,7 @@ auto form::can_draw() const -> bool
     return true;
 }
 
-void form::on_draw_to(render_target& target)
+void form::on_draw_to(gfx::render_target& target)
 {
     bool const hasCursor {_window && _window->Cursor()};
 

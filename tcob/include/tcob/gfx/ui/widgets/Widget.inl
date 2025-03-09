@@ -9,7 +9,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 template <std::derived_from<widget_style> T>
 inline void widget::update_style(T& style)

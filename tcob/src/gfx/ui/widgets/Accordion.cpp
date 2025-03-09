@@ -21,7 +21,7 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 void accordion::style::Transition(style& target, style const& left, style const& right, f64 step)
 {
@@ -155,7 +155,7 @@ void accordion::on_paint(widget_painter& painter)
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
         offset_section_content(rect, _style);
 
-        auto          xform {transform::Identity};
+        auto          xform {gfx::transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
         xform.translate(translate);
 

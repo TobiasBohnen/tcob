@@ -23,7 +23,7 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 void tab_container::style::Transition(style& target, style const& left, style const& right, f64 step)
 {
@@ -160,7 +160,7 @@ void tab_container::on_paint(widget_painter& painter)
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
         offset_tab_content(rect, _style);
 
-        auto          xform {transform::Identity};
+        auto          xform {gfx::transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
         xform.translate(translate);
 

@@ -11,7 +11,7 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 template <std::derived_from<widget_container> T>
 inline auto form::create_container(dock_style dock, string const& name) -> std::shared_ptr<T>

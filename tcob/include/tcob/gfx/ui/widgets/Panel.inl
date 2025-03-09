@@ -11,7 +11,7 @@
 
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 template <std::derived_from<layout> T>
 inline auto panel::create_layout(auto&&... args) -> std::shared_ptr<T>

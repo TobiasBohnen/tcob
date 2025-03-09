@@ -22,7 +22,7 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 void text_box::style::Transition(style& target, style const& left, style const& right, f64 step)
 {
@@ -248,7 +248,7 @@ void text_box::on_mouse_up(input::mouse::button_event const& ev)
 
 void text_box::on_focus_gained()
 {
-    _caretTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
+    _caretTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
     _caretTween->Value.Changed.connect([this](auto val) {
         _caretVisible = val;
         force_redraw(this->name() + ": Caret blink");

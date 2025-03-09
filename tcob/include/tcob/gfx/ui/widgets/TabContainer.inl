@@ -12,7 +12,7 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 template <std::derived_from<widget_container> T>
 inline auto tab_container::create_tab(utf8_string const& name) -> std::shared_ptr<T>

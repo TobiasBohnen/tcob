@@ -12,7 +12,6 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
@@ -22,7 +21,7 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 void panel::style::Transition(style& target, style const& left, style const& right, f64 step)
 {
@@ -128,7 +127,7 @@ void panel::on_paint(widget_painter& painter)
     // content
     scissor_guard const guard {painter, this};
 
-    auto          xform {transform::Identity};
+    auto          xform {gfx::transform::Identity};
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
@@ -272,7 +271,7 @@ void glass::on_paint(widget_painter& painter)
     // content
     scissor_guard const guard {painter, this};
 
-    auto          xform {transform::Identity};
+    auto          xform {gfx::transform::Identity};
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 

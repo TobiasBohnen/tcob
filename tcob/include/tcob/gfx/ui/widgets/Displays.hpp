@@ -21,7 +21,7 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 ////////////////////////////////////////////////////////////
 
@@ -107,7 +107,7 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    auto static GetGradient() -> color_gradient const&;
+    auto static GetGradient() -> gfx::color_gradient const&;
 };
 
 }

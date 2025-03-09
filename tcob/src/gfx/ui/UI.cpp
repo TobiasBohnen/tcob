@@ -11,7 +11,7 @@
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 ////////////////////////////////////////////////////////////
 

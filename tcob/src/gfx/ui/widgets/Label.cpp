@@ -12,7 +12,7 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 void label::style::Transition(style& target, style const& left, style const& right, f64 step)
 {

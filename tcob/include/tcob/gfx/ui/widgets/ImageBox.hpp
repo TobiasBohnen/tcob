@@ -12,14 +12,14 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API image_box : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        alignments Alignment {horizontal_alignment::Left, vertical_alignment::Top};
+        gfx::alignments Alignment {gfx::horizontal_alignment::Left, gfx::vertical_alignment::Top};
     };
 
     explicit image_box(init const& wi);

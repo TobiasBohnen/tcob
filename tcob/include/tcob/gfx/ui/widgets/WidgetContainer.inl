@@ -8,7 +8,7 @@
 
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 template <SubmitTarget Target>
 inline void widget_container::submit(Target& target)

@@ -21,10 +21,9 @@
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
-#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Texture.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 class form;
 
@@ -201,6 +200,13 @@ enum class fit_mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
+enum class orientation : u8 {
+    Horizontal,
+    Vertical
+};
+
+////////////////////////////////////////////////////////////
+
 using widget_attribute_types = std::variant<isize, bool, string, orientation, fit_mode, point_i>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 
@@ -239,8 +245,8 @@ public:
 
 class TCOB_API linear_gradient {
 public:
-    degree_f       Angle {0};
-    color_gradient Colors;
+    degree_f            Angle {0};
+    gfx::color_gradient Colors;
 
     auto operator==(linear_gradient const& other) const -> bool = default;
 };
@@ -249,10 +255,10 @@ public:
 
 class TCOB_API radial_gradient {
 public:
-    length         InnerRadius {0.0f, length::type::Relative};
-    length         OuterRadius {1.0f, length::type::Relative};
-    size_f         Scale {size_f::One};
-    color_gradient Colors;
+    length              InnerRadius {0.0f, length::type::Relative};
+    length              OuterRadius {1.0f, length::type::Relative};
+    size_f              Scale {size_f::One};
+    gfx::color_gradient Colors;
 
     auto operator==(radial_gradient const& other) const -> bool = default;
 };
@@ -261,9 +267,9 @@ public:
 
 class TCOB_API box_gradient {
 public:
-    length         Radius {0.25f, length::type::Relative};
-    length         Feather {0.50f, length::type::Relative};
-    color_gradient Colors;
+    length              Radius {0.25f, length::type::Relative};
+    length              Feather {0.50f, length::type::Relative};
+    gfx::color_gradient Colors;
 
     auto operator==(box_gradient const& other) const -> bool = default;
 };
@@ -272,9 +278,9 @@ public:
 
 class TCOB_API nine_patch {
 public:
-    assets::asset_ptr<texture> Texture;
-    string                     Region {"default"};
-    rect_f                     UV;
+    assets::asset_ptr<gfx::texture> Texture;
+    string                          Region {"default"};
+    rect_f                          UV;
 
     auto operator==(nine_patch const& other) const -> bool = default;
 };
@@ -286,8 +292,8 @@ using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradi
 ////////////////////////////////////////////////////////////
 
 struct icon {
-    assets::asset_ptr<texture> Texture;
-    string                     Region {"default"};
+    assets::asset_ptr<gfx::texture> Texture;
+    string                          Region {"default"};
 };
 
 ////////////////////////////////////////////////////////////
@@ -395,17 +401,17 @@ namespace detail {
 }
 
 namespace tcob::literals {
-inline auto operator""_pct(long double val) -> gfx::ui::length
+inline auto operator""_pct(long double val) -> ui::length
 {
-    return gfx::ui::length {static_cast<f32>(val / 100.0), gfx::ui::length::type::Relative};
+    return ui::length {static_cast<f32>(val / 100.0), ui::length::type::Relative};
 }
-inline auto operator""_pct(unsigned long long int val) -> gfx::ui::length
+inline auto operator""_pct(unsigned long long int val) -> ui::length
 {
-    return gfx::ui::length {static_cast<f32>(val) / 100.0f, gfx::ui::length::type::Relative};
+    return ui::length {static_cast<f32>(val) / 100.0f, ui::length::type::Relative};
 }
-inline auto operator""_px(unsigned long long int val) -> gfx::ui::length
+inline auto operator""_px(unsigned long long int val) -> ui::length
 {
-    return gfx::ui::length {static_cast<f32>(val), gfx::ui::length::type::Absolute};
+    return ui::length {static_cast<f32>(val), ui::length::type::Absolute};
 }
 }
 

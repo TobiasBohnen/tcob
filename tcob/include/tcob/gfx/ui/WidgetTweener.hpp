@@ -12,7 +12,7 @@
 #include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API widget_tweener : public non_copyable { // TODO: improve or remove
@@ -30,10 +30,10 @@ public:
 private:
     void set_value(f32 value);
 
-    widget&                            _parent;
-    std::unique_ptr<linear_tween<f32>> _tween;
-    f32                                _currentValue {0.0f};
-    f32                                _targetValue {0.0f};
+    widget&                                 _parent;
+    std::unique_ptr<gfx::linear_tween<f32>> _tween;
+    f32                                     _currentValue {0.0f};
+    f32                                     _targetValue {0.0f};
 };
 
 }

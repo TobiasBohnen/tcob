@@ -23,7 +23,7 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 namespace element {
     ////////////////////////////////////////////////////////////
@@ -94,16 +94,16 @@ namespace element {
             OnlyShrink
         };
 
-        assets::asset_ptr<font_family> Font;
-        color                          Color {colors::White};
-        color                          SelectColor {colors::Blue};
-        shadow                         Shadow {colors::Transparent, length {1, length::type::Absolute}, length {1, length::type::Absolute}};
-        deco                           Decoration {};
-        font::style                    Style {};
-        length                         Size {16, length::type::Absolute};
-        alignments                     Alignment {horizontal_alignment::Centered, vertical_alignment::Middle};
-        transform                      Transform {transform::None};
-        auto_size_mode                 AutoSize {auto_size_mode::Never};
+        assets::asset_ptr<gfx::font_family> Font;
+        color                               Color {colors::White};
+        color                               SelectColor {colors::Blue};
+        shadow                              Shadow {colors::Transparent, length {1, length::type::Absolute}, length {1, length::type::Absolute}};
+        deco                                Decoration {};
+        gfx::font::style                    Style {};
+        length                              Size {16, length::type::Absolute};
+        gfx::alignments                     Alignment {gfx::horizontal_alignment::Centered, gfx::vertical_alignment::Middle};
+        transform                           Transform {transform::None};
+        auto_size_mode                      AutoSize {auto_size_mode::Never};
 
         auto calc_font_size(rect_f const& rect) const -> u32;
 

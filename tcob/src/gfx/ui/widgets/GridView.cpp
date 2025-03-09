@@ -20,7 +20,7 @@
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 static constexpr point_i INVALID {INVALID_INDEX, INVALID_INDEX};
 

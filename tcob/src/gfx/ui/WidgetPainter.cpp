@@ -28,7 +28,7 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 
 using namespace element;
 
@@ -43,7 +43,7 @@ void widget_painter::begin(f32 alpha)
     _canvas.set_global_alpha(alpha);
 }
 
-void widget_painter::begin(f32 alpha, transform const& xform)
+void widget_painter::begin(f32 alpha, gfx::transform const& xform)
 {
     begin(alpha);
     _canvas.set_transform(xform);
@@ -186,13 +186,13 @@ void widget_painter::draw_border(rect_f const& rect, element::border const& bord
             _canvas.set_stroke_width(borderSize);
 
             _canvas.set_line_dash(std::array {borderSize / 2, borderSize * 2});
-            _canvas.set_line_cap(line_cap::Round);
+            _canvas.set_line_cap(gfx::line_cap::Round);
             _canvas.set_dash_offset(borderStyle.DashOffset);
             _canvas.begin_path();
             _canvas.rounded_rect(rect, borderRadius);
             _canvas.stroke();
             _canvas.set_line_dash({});
-            _canvas.set_line_cap(line_cap::Butt);
+            _canvas.set_line_cap(gfx::line_cap::Butt);
         } break;
         case element::border::type::Hidden:
             break;
@@ -207,7 +207,7 @@ void widget_painter::draw_text(element::text const& style, rect_f const& rect, u
     draw_text(style, rect, format_text(style, rect, text));
 }
 
-void widget_painter::draw_text(element::text const& style, rect_f const& rect, text_formatter::result const& text)
+void widget_painter::draw_text(element::text const& style, rect_f const& rect, gfx::text_formatter::result const& text)
 {
     auto const guard {_canvas.create_guard()};
 
@@ -626,7 +626,7 @@ auto widget_painter::canvas() -> gfx::canvas&
     return _canvas;
 }
 
-auto widget_painter::format_text(element::text const& style, rect_f const& rect, utf8_string_view text) -> text_formatter::result
+auto widget_painter::format_text(element::text const& style, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result
 {
     auto const tt {transform_text(style.Transform, text)};
     return format_text(style, rect, tt, style.calc_font_size(rect), true);
@@ -634,7 +634,7 @@ auto widget_painter::format_text(element::text const& style, rect_f const& rect,
 
 ////////////////////////////////////////////////////////////
 
-auto widget_painter::format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> text_formatter::result
+auto widget_painter::format_text(element::text const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
 {
     auto const guard {_canvas.create_guard()};
 
@@ -692,35 +692,35 @@ auto widget_painter::transform_text(element::text::transform xform, utf8_string_
     return retValue;
 }
 
-auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> canvas::paint
+auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint
 {
     return std::visit(
         overloaded {
-            [&](color const& arg) -> canvas::paint {
-                return canvas::paint {
+            [&](color const& arg) {
+                return gfx::canvas::paint {
                     .Feather = 1.0f,
                     .Color   = arg,
                 };
             },
-            [&](linear_gradient const& arg) -> canvas::paint {
+            [&](linear_gradient const& arg) {
                 degree_f const angle {arg.Angle + degree_f {90}};
                 return _canvas.create_linear_gradient(
                     rect.find_edge(angle),
                     rect.find_edge(angle - degree_f {180}),
                     arg.Colors);
             },
-            [&](radial_gradient const& arg) -> canvas::paint {
+            [&](radial_gradient const& arg) {
                 return _canvas.create_radial_gradient(
                     rect.center(),
                     arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
                     arg.Scale, arg.Colors);
             },
-            [&](box_gradient const& arg) -> canvas::paint {
+            [&](box_gradient const& arg) {
                 return _canvas.create_box_gradient(
                     rect,
                     arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
             },
-            [&](nine_patch const&) -> canvas::paint {
+            [&](nine_patch const&) -> gfx::canvas::paint {
                 return {};
             },
         },

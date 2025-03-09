@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace tcob::gfx::ui {
+namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
