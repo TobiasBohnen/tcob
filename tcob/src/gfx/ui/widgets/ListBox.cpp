@@ -21,6 +21,15 @@
 
 namespace tcob::ui {
 
+auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
+{
+    return std::search( // NOLINT(modernize-use-ranges)
+               lhs.begin(), lhs.end(),
+               rhs.begin(), rhs.end(),
+               [](char a, char b) { return std::toupper(a) == std::toupper(b); })
+        != lhs.end();
+}
+
 void list_box::style::Transition(style& target, style const& left, style const& right, f64 step)
 {
     vscroll_widget::style::Transition(target, left, right, step);
@@ -47,7 +56,7 @@ list_box::list_box(init const& wi)
         if (!val.empty()) {
             _filteredItems.reserve(_items.size());
             for (i32 i {0}; i < std::ssize(_items); ++i) {
-                if (helper::case_insensitive_contains(_items[i].Text, val)) {
+                if (case_insensitive_contains(_items[i].Text, val)) {
                     _filteredItems.push_back(_items[i]);
                 }
             }
@@ -66,7 +75,7 @@ void list_box::add_item(utf8_string const& item)
 void list_box::add_item(list_item const& item)
 {
     _items.push_back(item);
-    if (!Filter->empty() && helper::case_insensitive_contains(item.Text, Filter())) {
+    if (!Filter->empty() && case_insensitive_contains(item.Text, Filter())) {
         _filteredItems.push_back(item);
     }
     force_redraw(this->name() + ": item added");
