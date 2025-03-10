@@ -15,6 +15,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -36,6 +37,9 @@ public:
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const&;
     auto widgets() -> std::vector<std::shared_ptr<widget>>&;
 
+    auto virtual resize_allowed() const -> bool;
+    auto virtual move_allowed() const -> bool;
+
 protected:
     explicit layout(parent parent);
 
@@ -54,13 +58,16 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-// fixed_layout: No automatic re-layout; widgets maintain manually set bounds.
-class TCOB_API fixed_layout : public layout {
+// static_layout: No automatic re-layout; widgets maintain manually set bounds.
+class TCOB_API static_layout : public layout {
 public:
-    explicit fixed_layout(parent parent);
+    explicit static_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
+
+    auto resize_allowed() const -> bool override;
+    auto move_allowed() const -> bool override;
 
 protected:
     void do_layout(size_f size) override;
@@ -75,6 +82,8 @@ public:
 
     template <std::derived_from<widget> T>
     auto create_widget(point_f pos, string const& name) -> std::shared_ptr<T>;
+
+    auto move_allowed() const -> bool override;
 
 protected:
     void do_layout(size_f size) override;
@@ -137,13 +146,16 @@ private:
 // horizontal_layout: Evenly distributes widgets horizontally across the container.
 class TCOB_API horizontal_layout final : public layout {
 public:
-    explicit horizontal_layout(parent parent);
+    explicit horizontal_layout(parent parent, gfx::vertical_alignment alignment = gfx::vertical_alignment::Top);
 
     template <std::derived_from<widget> T>
     auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
+
+private:
+    gfx::vertical_alignment _alignment;
 };
 
 ////////////////////////////////////////////////////////////
@@ -151,13 +163,16 @@ protected:
 // vertical_layout: Evenly distributes widgets vertically down the container.
 class TCOB_API vertical_layout final : public layout {
 public:
-    explicit vertical_layout(parent parent);
+    explicit vertical_layout(parent parent, gfx::horizontal_alignment alignment = gfx::horizontal_alignment::Left);
 
     template <std::derived_from<widget> T>
     auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
+
+private:
+    gfx::horizontal_alignment _alignment;
 };
 
 ////////////////////////////////////////////////////////////

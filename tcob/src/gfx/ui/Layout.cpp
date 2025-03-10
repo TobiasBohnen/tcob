@@ -16,6 +16,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -70,6 +71,16 @@ auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
     return _widgets;
 }
 
+auto layout::resize_allowed() const -> bool
+{
+    return false;
+}
+
+auto layout::move_allowed() const -> bool
+{
+    return false;
+}
+
 void layout::notify_parent()
 {
     std::visit(
@@ -111,12 +122,22 @@ auto layout::create_init(string const& name) const -> widget::init
 
 ////////////////////////////////////////////////////////////
 
-fixed_layout::fixed_layout(parent parent)
+static_layout::static_layout(parent parent)
     : layout {parent}
 {
 }
 
-void fixed_layout::do_layout(size_f /* size */)
+auto static_layout::resize_allowed() const -> bool
+{
+    return true;
+}
+
+auto static_layout::move_allowed() const -> bool
+{
+    return true;
+}
+
+void static_layout::do_layout(size_f /* size */)
 {
 }
 
@@ -125,6 +146,11 @@ void fixed_layout::do_layout(size_f /* size */)
 flex_size_layout::flex_size_layout(parent parent)
     : layout {parent}
 {
+}
+
+auto flex_size_layout::move_allowed() const -> bool
+{
+    return true;
 }
 
 void flex_size_layout::do_layout(size_f size)
@@ -157,8 +183,8 @@ void dock_layout::do_layout(size_f size)
             continue;
         }
 
-        f32 const width {std::min(layoutRect.width(), widget->Flex->Width.calc(size.Width))};     // TODO: replace with preferred size
-        f32 const height {std::min(layoutRect.height(), widget->Flex->Height.calc(size.Height))}; // TODO: replace with preferred size
+        f32 const width {std::min(layoutRect.width(), widget->Flex->Width.calc(size.Width))};
+        f32 const height {std::min(layoutRect.height(), widget->Flex->Height.calc(size.Height))};
 
         rect_f widgetBounds {layoutRect};
 
@@ -250,8 +276,9 @@ void box_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-horizontal_layout::horizontal_layout(parent parent)
+horizontal_layout::horizontal_layout(parent parent, gfx::vertical_alignment alignment)
     : layout {parent}
+    , _alignment {alignment}
 {
 }
 
@@ -264,16 +291,23 @@ void horizontal_layout::do_layout(size_f size)
 
     for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
-        widget->Bounds = {i * horiSize, 0,
-                          widget->Flex->Width.calc(horiSize),
-                          widget->Flex->Height.calc(vertSize)};
+        f32 const   width {widget->Flex->Width.calc(horiSize)};
+        f32 const   height {widget->Flex->Height.calc(vertSize)};
+        f32 const   x {i * horiSize};
+
+        switch (_alignment) {
+        case gfx::vertical_alignment::Top: widget->Bounds = {x, 0, width, height}; break;
+        case gfx::vertical_alignment::Bottom: widget->Bounds = {x, vertSize - height, width, height}; break;
+        case gfx::vertical_alignment::Middle: widget->Bounds = {x, (vertSize - height) / 2, width, height}; break;
+        }
     }
 }
 
 ////////////////////////////////////////////////////////////
 
-vertical_layout::vertical_layout(parent parent)
+vertical_layout::vertical_layout(parent parent, gfx::horizontal_alignment alignment)
     : layout {parent}
+    , _alignment {alignment}
 {
 }
 
@@ -286,9 +320,15 @@ void vertical_layout::do_layout(size_f size)
 
     for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
-        widget->Bounds = {0, i * vertSize,
-                          widget->Flex->Width.calc(horiSize),
-                          widget->Flex->Height.calc(vertSize)};
+        f32 const   width {widget->Flex->Width.calc(horiSize)};
+        f32 const   height {widget->Flex->Height.calc(vertSize)};
+        f32 const   y {i * vertSize};
+
+        switch (_alignment) {
+        case gfx::horizontal_alignment::Left: widget->Bounds = {0, y, width, height}; break;
+        case gfx::horizontal_alignment::Right: widget->Bounds = {horiSize - width, y, width, height}; break;
+        case gfx::horizontal_alignment::Centered: widget->Bounds = {(horiSize - width) / 2, y, width, height}; break;
+        }
     }
 }
 

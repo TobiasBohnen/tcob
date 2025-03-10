@@ -17,6 +17,8 @@
 
 namespace tcob::ui {
 
+////////////////////////////////////////////////////////////
+
 template <std::derived_from<widget> T>
 inline auto layout::add_widget(string const& name) -> std::shared_ptr<T>
 {
@@ -30,7 +32,7 @@ inline auto layout::add_widget(string const& name) -> std::shared_ptr<T>
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto fixed_layout::create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>
+inline auto static_layout::create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>
 {
     auto retValue {add_widget<T>(name)};
     retValue->Bounds = rect;

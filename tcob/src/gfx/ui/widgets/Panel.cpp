@@ -33,7 +33,7 @@ void panel::style::Transition(style& target, style const& left, style const& rig
 
 panel::panel(init const& wi)
     : widget_container {wi}
-    , _layout {std::make_shared<fixed_layout>(this)}
+    , _layout {std::make_shared<static_layout>(this)}
     , _vScrollbar {*this, orientation::Vertical}
     , _hScrollbar {*this, orientation::Horizontal}
 {
