@@ -7,20 +7,68 @@
 #include "Form.hpp"
 
 #include <memory>
+#include <utility>
+#include <vector>
 
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
+#include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 
-template <std::derived_from<widget_container> T>
-inline auto form::create_container(dock_style dock, string const& name) -> std::shared_ptr<T>
+////////////////////////////////////////////////////////////
+
+template <std::derived_from<layout> Layout>
+inline form<Layout>::form(string name, gfx::window* window)
+    : form {std::move(name), window, rect_f {point_f::Zero, window ? size_f {window->Size()} : size_f::Zero}}
 {
-    return _layout.create_widget<T>(dock, name);
 }
 
+template <std::derived_from<layout> Layout>
+inline form<Layout>::form(string name, gfx::window* window, rect_f const& bounds)
+    : form_base {std::move(name), window, bounds}
+    , _layout {this}
+{
+}
+
+template <std::derived_from<layout> Layout>
+template <std::derived_from<widget_container> T>
+inline auto form<Layout>::create_container(auto&&... args) -> std::shared_ptr<T>
+{
+    return _layout.template create_widget<T>(args...);
+}
+
+template <std::derived_from<layout> Layout>
+inline auto form<Layout>::containers() const -> std::vector<std::shared_ptr<widget>> const&
+{
+    return _layout.widgets();
+}
+
+template <std::derived_from<layout> Layout>
+inline void form<Layout>::remove_container(widget* wc)
+{
+    _layout.remove_widget(wc);
+}
+
+template <std::derived_from<layout> Layout>
+inline void form<Layout>::clear_containers()
+{
+    _layout.clear();
+}
+
+template <std::derived_from<layout> Layout>
+inline void form<Layout>::apply_layout()
+{
+    _layout.apply();
+}
+
+////////////////////////////////////////////////////////////
+
 template <std::derived_from<tooltip> T>
-inline auto form::create_tooltip(string const& name) -> std::shared_ptr<T>
+inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
 {
     widget::init wi {};
     wi.Form   = this;
@@ -33,7 +81,7 @@ inline auto form::create_tooltip(string const& name) -> std::shared_ptr<T>
 }
 
 template <SubmitTarget Target>
-inline void form::submit(Target& target)
+inline void form_base::submit(Target& target)
 {
     auto widgets {all_widgets()};
     for (auto* widget : widgets) {

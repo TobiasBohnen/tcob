@@ -28,11 +28,9 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API form : public gfx::entity {
+class TCOB_API form_base : public gfx::entity {
 public:
-    form(string name, gfx::window* window);
-    form(string name, gfx::window* window, rect_f const& bounds);
-    ~form() override;
+    ~form_base() override;
 
     prop<rect_f> Bounds;
 
@@ -42,23 +40,20 @@ public:
 
     auto name() const -> string const&;
 
-    template <std::derived_from<widget_container> T>
-    auto create_container(dock_style dock, string const& name) -> std::shared_ptr<T>;
     template <std::derived_from<tooltip> T>
     auto create_tooltip(string const& name) -> std::shared_ptr<T>;
-
-    void remove_container(widget* wc);
 
     auto find_widget_at(point_f pos) const -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
     auto top_widget() const -> widget*;
-    auto containers() const -> std::vector<std::shared_ptr<widget>> const&;
     auto all_widgets() const -> std::vector<widget*>;
 
     auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
-    void clear();
+    auto virtual containers() const -> std::vector<std::shared_ptr<widget>> const& = 0;
+    void virtual remove_container(widget* wc)                                      = 0;
+    void virtual clear_containers()                                                = 0;
 
     void force_redraw(string const& reason);
 
@@ -68,6 +63,8 @@ public:
     void submit(Target& target);
 
 protected:
+    form_base(string name, gfx::window* window, rect_f const& bounds);
+
     void on_fixed_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
@@ -90,6 +87,8 @@ protected:
 
     void virtual on_bounds_changed();
     void on_visiblity_changed() override;
+
+    void virtual apply_layout() = 0;
 
 private:
     void on_mouse_hover(input::mouse::motion_event const& ev);
@@ -124,11 +123,34 @@ private:
     milliseconds _mouseOverTime {0};
 
     tcob::detail::connection_manager _connections {};
-    dock_layout                      _layout;
 
     std::unique_ptr<widget_painter> _painter {};
 
     string _name;
+};
+
+////////////////////////////////////////////////////////////
+
+template <std::derived_from<layout> Layout = dock_layout>
+class form : public form_base {
+public:
+    form(string name, gfx::window* window);
+    form(string name, gfx::window* window, rect_f const& bounds);
+
+    template <std::derived_from<widget_container> T>
+    auto create_container(auto&&... args) -> std::shared_ptr<T>;
+
+    auto containers() const -> std::vector<std::shared_ptr<widget>> const& override;
+
+    void remove_container(widget* wc) override;
+
+    void clear_containers() override;
+
+protected:
+    void apply_layout() override;
+
+private:
+    Layout _layout;
 };
 
 }

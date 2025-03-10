@@ -35,47 +35,36 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-form::form(string name, gfx::window* window)
-    : form {std::move(name), window, rect_f {point_f::Zero, window ? size_f {window->Size()} : size_f::Zero}}
-{
-}
-
-form::form(string name, gfx::window* window, rect_f const& bounds)
+form_base::form_base(string name, gfx::window* window, rect_f const& bounds)
     : entity {update_mode::Fixed}
     , Bounds {bounds}
     , _renderer {_canvas}
     , _window {window}
-    , _layout {this}
     , _painter {std::make_unique<widget_painter>(_canvas)}
     , _name {std::move(name)}
 {
     Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
-    on_bounds_changed();
+    _renderer.set_bounds(Bounds());
 
     Styles.Changed.connect([this](auto const&) { on_styles_changed(); });
 }
 
-form::~form()
+form_base::~form_base()
 {
     // TODO: disconnect ALL events
 }
 
-auto form::name() const -> string const&
+auto form_base::name() const -> string const&
 {
     return _name;
 }
 
-void form::remove_container(widget* wc)
-{
-    _layout.remove_widget(wc);
-}
-
-auto form::top_widget() const -> widget*
+auto form_base::top_widget() const -> widget*
 {
     return _topWidget;
 }
 
-auto form::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
+auto form_base::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 {
     for (auto const& widget : widgets_by_zorder(true)) {
         if (!widget->hit_test(pos)) { continue; }
@@ -89,7 +78,7 @@ auto form::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
     return nullptr;
 }
 
-auto form::find_widget_by_name(string const& name) const -> std::shared_ptr<widget>
+auto form_base::find_widget_by_name(string const& name) const -> std::shared_ptr<widget>
 {
     for (auto const& widget : containers()) {
         if (widget->name() == name) { return widget; }
@@ -102,12 +91,7 @@ auto form::find_widget_by_name(string const& name) const -> std::shared_ptr<widg
     return nullptr;
 }
 
-auto form::containers() const -> std::vector<std::shared_ptr<widget>> const&
-{
-    return _layout.widgets();
-}
-
-auto form::all_widgets() const -> std::vector<widget*>
+auto form_base::all_widgets() const -> std::vector<widget*>
 {
     auto const collectWidgets {[](std::vector<widget*>& vec, std::shared_ptr<widget_container> const& container, auto&& collect) -> void {
         for (auto const& widget : container->widgets()) {
@@ -128,12 +112,7 @@ auto form::all_widgets() const -> std::vector<widget*>
     return retValue;
 }
 
-void form::clear()
-{
-    _layout.clear();
-}
-
-void form::force_redraw(string const& reason)
+void form_base::force_redraw(string const& reason)
 {
     if (!_prepareWidgets) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
@@ -141,7 +120,7 @@ void form::force_redraw(string const& reason)
     _prepareWidgets = true;
 }
 
-auto form::focus_nav_target(string const& widget, direction dir) -> bool
+auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
 {
     if (!NavMap->contains(widget)) { return false; }
 
@@ -164,7 +143,7 @@ auto form::focus_nav_target(string const& widget, direction dir) -> bool
     return false;
 }
 
-void form::on_fixed_update(milliseconds deltaTime)
+void form_base::on_fixed_update(milliseconds deltaTime)
 {
     auto const& widgets {containers()};
 
@@ -194,7 +173,7 @@ void form::on_fixed_update(milliseconds deltaTime)
         }
 
         // layout
-        _layout.apply();
+        apply_layout();
 
         _prepareWidgets = false;
         _redrawWidgets  = true;
@@ -206,12 +185,12 @@ void form::on_fixed_update(milliseconds deltaTime)
     }
 }
 
-auto form::can_draw() const -> bool
+auto form_base::can_draw() const -> bool
 {
     return true;
 }
 
-void form::on_draw_to(gfx::render_target& target)
+void form_base::on_draw_to(gfx::render_target& target)
 {
     bool const hasCursor {_window && _window->Cursor()};
 
@@ -267,12 +246,12 @@ void form::on_draw_to(gfx::render_target& target)
     }
 }
 
-auto form::focused_widget() const -> widget*
+auto form_base::focused_widget() const -> widget*
 {
     return _focusWidget;
 }
 
-void form::focus_widget(widget* newFocus)
+void form_base::focus_widget(widget* newFocus)
 {
     if (newFocus != _focusWidget) {
         _currentTabIndex = -1;
@@ -292,7 +271,7 @@ void form::focus_widget(widget* newFocus)
     }
 }
 
-void form::on_key_down(input::keyboard::event const& ev)
+void form_base::on_key_down(input::keyboard::event const& ev)
 {
     hide_tooltip();
 
@@ -326,13 +305,13 @@ void form::on_key_down(input::keyboard::event const& ev)
     }
 }
 
-void form::on_key_up(input::keyboard::event const& ev)
+void form_base::on_key_up(input::keyboard::event const& ev)
 {
     hide_tooltip();
     _injector.on_key_up(_focusWidget, ev);
 }
 
-void form::on_mouse_motion(input::mouse::motion_event const& ev)
+void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 {
     if (_isLButtonDown) { // FIXME: restict (widget::can_drag?)
         _injector.on_mouse_drag(_focusWidget, ev);
@@ -341,7 +320,7 @@ void form::on_mouse_motion(input::mouse::motion_event const& ev)
     }
 }
 
-void form::on_mouse_hover(input::mouse::motion_event const& ev)
+void form_base::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     auto* newTop {find_widget_at(point_f {ev.Position}).get()};
     if (newTop && newTop->is_inert()) {
@@ -360,7 +339,7 @@ void form::on_mouse_hover(input::mouse::motion_event const& ev)
     }
 }
 
-void form::on_mouse_button_down(input::mouse::button_event const& ev)
+void form_base::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
@@ -375,7 +354,7 @@ void form::on_mouse_button_down(input::mouse::button_event const& ev)
     }
 }
 
-void form::on_mouse_button_up(input::mouse::button_event const& ev)
+void form_base::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     hide_tooltip();
 
@@ -402,7 +381,7 @@ void form::on_mouse_button_up(input::mouse::button_event const& ev)
     }
 }
 
-void form::on_mouse_wheel(input::mouse::wheel_event const& ev)
+void form_base::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     hide_tooltip();
 
@@ -413,23 +392,23 @@ void form::on_mouse_wheel(input::mouse::wheel_event const& ev)
     }
 }
 
-void form::on_controller_axis_motion(input::controller::axis_event const& /*ev*/)
+void form_base::on_controller_axis_motion(input::controller::axis_event const& /*ev*/)
 {
 }
 
-void form::on_controller_button_down(input::controller::button_event const& ev)
+void form_base::on_controller_button_down(input::controller::button_event const& ev)
 {
     hide_tooltip();
     _injector.on_controller_button_down(_focusWidget, ev);
 }
 
-void form::on_controller_button_up(input::controller::button_event const& ev)
+void form_base::on_controller_button_up(input::controller::button_event const& ev)
 {
     hide_tooltip();
     _injector.on_controller_button_up(_focusWidget, ev);
 }
 
-void form::on_bounds_changed()
+void form_base::on_bounds_changed()
 {
     _renderer.set_bounds(Bounds());
 
@@ -437,7 +416,7 @@ void form::on_bounds_changed()
     on_styles_changed();
 }
 
-void form::on_visiblity_changed()
+void form_base::on_visiblity_changed()
 {
     _isLButtonDown = false;
     _isRButtonDown = false;
@@ -452,22 +431,22 @@ void form::on_visiblity_changed()
     // TODO: else inject mouse_motion
 }
 
-auto form::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
+auto form_base::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
 {
     return detail::widgets_by_zorder(containers(), reverse);
 }
 
-void form::on_text_input(input::keyboard::text_input_event const& ev)
+void form_base::on_text_input(input::keyboard::text_input_event const& ev)
 {
     _injector.on_text_input(_focusWidget, ev);
 }
 
-void form::on_text_editing(input::keyboard::text_editing_event const& ev)
+void form_base::on_text_editing(input::keyboard::text_editing_event const& ev)
 {
     _injector.on_text_editing(_focusWidget, ev);
 }
 
-auto form::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*
+auto form_base::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*
 {
     widget* retValue {nullptr};
     i32     lowestHigherValue {std::numeric_limits<i32>::max()};
@@ -480,7 +459,7 @@ auto form::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget
     return retValue;
 }
 
-auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*
+auto form_base::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*
 {
     widget* retValue {nullptr};
     i32     highestLowerValue {std::numeric_limits<i32>::min()};
@@ -493,7 +472,7 @@ auto form::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget
     return retValue;
 }
 
-void form::on_styles_changed()
+void form_base::on_styles_changed()
 {
     _prepareWidgets = true;
     for (auto const& container : containers()) {
@@ -513,7 +492,7 @@ void form::on_styles_changed()
     }
 }
 
-auto form::can_popup_tooltip() const -> bool
+auto form_base::can_popup_tooltip() const -> bool
 {
     if (_isTooltipVisible) { return false; }
     if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
@@ -529,7 +508,7 @@ auto form::can_popup_tooltip() const -> bool
     return false;
 }
 
-void form::hide_tooltip()
+void form_base::hide_tooltip()
 {
     _mouseOverTime    = 0ms;
     _isTooltipVisible = false;

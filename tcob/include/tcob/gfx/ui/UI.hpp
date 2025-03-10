@@ -25,8 +25,6 @@
 
 namespace tcob::ui {
 
-class form;
-
 // widgets
 class button;
 class canvas_widget;
@@ -311,7 +309,7 @@ static constexpr isize INVALID_INDEX {-1};
 ////////////////////////////////////////////////////////////
 
 class widget_painter;
-class form;
+class form_base;
 class layout;
 
 namespace detail {

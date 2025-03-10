@@ -24,7 +24,7 @@ namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API widget : public updatable {
-    friend class form;
+    friend class form_base;
     friend class widget_container;
     friend class layout;
     friend class detail::input_injector;
@@ -76,7 +76,7 @@ public:
     auto is_enabled() const -> bool;
 
     auto parent() const -> widget_container*;
-    auto parent_form() const -> form*;
+    auto parent_form() const -> form_base*;
 
     auto name() const -> string const&;
 
@@ -102,7 +102,7 @@ public:
 
 protected:
     struct init {
-        form*             Form {nullptr};
+        form_base*        Form {nullptr};
         widget_container* Parent {nullptr};
         string            Name {};
     };
@@ -185,7 +185,7 @@ private:
     bool         _enabled {true};
     widget_flags _flags {};
     f32          _alpha {1.0f};
-    form*        _form {nullptr};
+    form_base*   _form {nullptr};
     widget*      _parent {nullptr};
     string       _name;
 

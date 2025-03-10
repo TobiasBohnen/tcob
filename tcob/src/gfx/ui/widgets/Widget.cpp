@@ -259,7 +259,7 @@ auto widget::parent() const -> widget_container*
     return dynamic_cast<widget_container*>(_parent);
 }
 
-auto widget::parent_form() const -> form*
+auto widget::parent_form() const -> form_base*
 {
     return _form;
 }

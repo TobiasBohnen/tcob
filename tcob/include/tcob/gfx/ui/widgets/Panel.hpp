@@ -23,7 +23,7 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API panel : public widget_container {
+class TCOB_API panel : public widget_container { // TODO: convert to template
 public:
     class TCOB_API style : public widget_style {
     public:
@@ -65,8 +65,6 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
-
-    auto current_layout() -> std::shared_ptr<layout>;
 
 private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;

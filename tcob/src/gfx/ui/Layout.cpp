@@ -38,7 +38,7 @@ void layout::apply()
             [this](widget_container* parent) {
                 do_layout(parent->content_bounds().Size);
             },
-            [this](form* parent) {
+            [this](form_base* parent) {
                 do_layout(parent->Bounds().Size);
             }},
         _parent);
@@ -88,7 +88,7 @@ void layout::notify_parent()
             [](widget_container* parent) {
                 parent->force_redraw("layout updated");
             },
-            [](form* parent) {
+            [](form_base* parent) {
                 parent->force_redraw("layout updated");
             }},
         _parent);
@@ -110,7 +110,7 @@ auto layout::create_init(string const& name) const -> widget::init
                 retValue.Parent = parent;
                 parent->force_redraw(name + ": created");
             },
-            [&retValue, &name](form* parent) {
+            [&retValue, &name](form_base* parent) {
                 retValue.Form   = parent;
                 retValue.Parent = nullptr;
                 parent->force_redraw(name + ": created");

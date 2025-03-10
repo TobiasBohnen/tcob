@@ -25,7 +25,7 @@ namespace tcob::ui {
 
 class TCOB_API layout : public non_copyable {
 public:
-    using parent = std::variant<widget_container*, form*>;
+    using parent = std::variant<widget_container*, form_base*>;
 
     virtual ~layout() = default;
 

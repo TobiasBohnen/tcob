@@ -17,7 +17,7 @@ namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API widget_container : public widget {
-    friend class form;
+    friend class form_base;
 
 public:
     explicit widget_container(init const& wi);
