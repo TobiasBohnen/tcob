@@ -10,6 +10,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Property.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
@@ -67,6 +68,8 @@ public:
     prop<bool>                      SystemCursorEnabled;
 
     prop_fn<assets::asset_ptr<shader>> Shader;
+
+    auto bounds() const -> rect_i;
 
     void load_icon(path const& file);
 

@@ -12,6 +12,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
@@ -47,6 +48,11 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::owni
 }
 
 window::~window() = default;
+
+auto window::bounds() const -> rect_i
+{
+    return {point_i::Zero, Size()};
+}
 
 void window::load_icon(path const& file)
 {
