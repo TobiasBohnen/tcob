@@ -135,7 +135,12 @@ auto vscroll_widget::get_scrollbar_value() const -> f32
 
 void vscroll_widget::set_scrollbar_value(f32 value)
 {
-    _vScrollbar.start_scroll(value / get_scroll_max(), milliseconds {0});
+    auto const max {get_scroll_max()};
+    if (max == 0) {
+        _vScrollbar.start_scroll(0, milliseconds {0});
+    } else {
+        _vScrollbar.start_scroll(value / max, milliseconds {0});
+    }
 }
 
 } // namespace ui
