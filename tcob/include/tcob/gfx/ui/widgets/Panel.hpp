@@ -66,6 +66,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
+    auto current_layout() const -> layout*;
+
 private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
     auto get_scroll_max_value(orientation orien) const -> f32;

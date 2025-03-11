@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
 #include "tcob/gfx/animation/Tween.hpp"
+#include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -25,6 +26,7 @@ void tooltip::on_update(milliseconds deltaTime)
 {
     panel::on_update(deltaTime);
     if (_fadeInTween) {
+        current_layout()->apply();
         _fadeInTween->update(deltaTime);
     }
 }

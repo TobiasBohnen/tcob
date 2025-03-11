@@ -234,6 +234,11 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     if (_hScrollbar.Visible) { bounds.Size.Height -= _style.HScrollBar.Bar.Size.calc(bounds.height()); }
 }
 
+auto panel::current_layout() const -> layout*
+{
+    return _layout.get();
+}
+
 auto panel::get_scroll_max_value(orientation orien) const -> f32
 {
     f32         retValue {0.0f};
