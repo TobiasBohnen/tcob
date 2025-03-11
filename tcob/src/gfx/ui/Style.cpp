@@ -65,9 +65,7 @@ auto style_flags::score(widget_flags other) const -> i32
 
     for (usize i {0}; i < flagSet.size(); ++i) {
         if (flagSet[i]) {
-            if (*flagSet[i] != otherFlagSet[i]) {
-                return std::numeric_limits<i32>::min();
-            }
+            if (*flagSet[i] != otherFlagSet[i]) { return std::numeric_limits<i32>::min(); }
             ++retValue;
         }
     }
@@ -78,22 +76,23 @@ auto style_flags::score(widget_flags other) const -> i32
 
 auto style_collection::get(widget_style_selectors const& select) const -> style*
 {
+    auto const range {_styles.equal_range(select.Class)};
+    if (range.first == range.second) { return nullptr; } // No match found
+
     style* bestCandidate {nullptr};
     i32    bestScore {std::numeric_limits<i32>::min()};
 
-    for (auto const& [styleName, styleFlags, styleAttribs, style] : _styles) {
-        if (styleName != select.Class) { continue; }
+    for (auto it {range.first}; it != range.second; ++it) {
+        auto const& [styleFlags, styleAttribs, stylePtr] {it->second};
 
         // check attributes
         if (!styleAttribs.check(select.Attributes)) { continue; }
 
         // check flags
         i32 const score {styleFlags.score(select.Flags)};
-        if (score == bestScore) {
-            bestCandidate = style.get();
-        } else if (score > bestScore) {
+        if (score >= bestScore) {
             bestScore     = score;
-            bestCandidate = style.get();
+            bestCandidate = stylePtr.get();
         }
     }
 
@@ -104,6 +103,8 @@ void style_collection::clear()
 {
     _styles.clear();
 }
+
+////////////////////////////////////////////////////////////
 
 auto thumb_element::calc(rect_f const& rect, context const& ctx) const -> rect_f
 {
