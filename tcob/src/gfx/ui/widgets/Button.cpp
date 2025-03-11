@@ -34,7 +34,7 @@ button::button(init const& wi)
 
 void button::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 

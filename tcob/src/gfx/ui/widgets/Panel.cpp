@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <ranges>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -97,7 +98,7 @@ void panel::on_update(milliseconds deltaTime)
 
 void panel::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -111,7 +112,7 @@ void panel::on_paint(widget_painter& painter)
                                      : flags().Active               ? widget_flags {.Active = true}
                                                                     : widget_flags {.Hover = true}};
         thumb_style vThumbStyle;
-        update_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
+        apply_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
         _vScrollbar.paint(painter, _style.VScrollBar, vThumbStyle.Thumb, rect);
     }
     {
@@ -120,7 +121,7 @@ void panel::on_paint(widget_painter& painter)
                                      : flags().Active               ? widget_flags {.Active = true}
                                                                     : widget_flags {.Hover = true}};
         thumb_style hThumbStyle;
-        update_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
+        apply_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
         _hScrollbar.paint(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
     }
 
@@ -131,7 +132,8 @@ void panel::on_paint(widget_painter& painter)
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
-    for (auto const& w : widgets_by_zorder(false)) {
+    auto widgets {this->widgets() | std::views::reverse}; // ZORDER
+    for (auto const& w : widgets) {
         painter.begin(Alpha(), xform);
         w->paint(painter);
         painter.end();
@@ -170,6 +172,13 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     }};
 
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
+    if (ev.Handled) { return; }
+
+    if (is_movable()) {
+        Bounds     = {Bounds->Position + ev.RelativeMotion, Bounds->Size};
+        ev.Handled = true;
+        return;
+    }
 }
 
 void panel::on_mouse_down(input::mouse::button_event const& ev)
@@ -180,6 +189,7 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
             _hScrollbar.mouse_down(ev.Position);
             force_redraw(this->name() + ": mouse down");
             ev.Handled = true;
+            return;
         }
     }
 }
@@ -192,6 +202,7 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
             _hScrollbar.mouse_up(ev.Position);
             force_redraw(this->name() + ": mouse up");
             ev.Handled = true;
+            return;
         }
     }
 }
@@ -239,6 +250,11 @@ auto panel::current_layout() const -> layout*
     return _layout.get();
 }
 
+auto panel::is_movable() const -> bool
+{
+    return Movable() && is_top_level() && parent_form()->current_layout()->is_move_allowed();
+}
+
 auto panel::get_scroll_max_value(orientation orien) const -> f32
 {
     f32         retValue {0.0f};
@@ -275,7 +291,8 @@ void glass::on_paint(widget_painter& painter)
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
-    for (auto const& w : widgets_by_zorder(false)) {
+    auto widgets {this->widgets() | std::views::reverse}; // ZORDER
+    for (auto const& w : widgets) {
         painter.begin(Alpha(), xform);
         w->paint(painter);
         painter.end();

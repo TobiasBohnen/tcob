@@ -291,7 +291,7 @@ void terminal::on_paint(widget_painter& painter)
         return;
     }
 
-    update_style(_style);
+    apply_style(_style);
 
     swap_buffers();
 

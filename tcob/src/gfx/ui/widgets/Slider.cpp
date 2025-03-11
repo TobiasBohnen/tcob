@@ -61,7 +61,7 @@ slider::slider(init const& wi)
 void slider::on_paint(widget_painter& painter)
 {
     // TODO: draw background
-    update_style(_style);
+    apply_style(_style);
 
     rect_f const rect {content_bounds()};
 
@@ -86,7 +86,7 @@ void slider::on_paint(widget_painter& painter)
                                 : flags().Active ? widget_flags {.Active = true}
                                                  : widget_flags {.Hover = true}};
     thumb_style thumbStyle {};
-    update_sub_style(thumbStyle, 0, _style.ThumbClass, thumbFlags);
+    apply_sub_style(thumbStyle, 0, _style.ThumbClass, thumbFlags);
 
     _barRectCache.Thumb = painter.draw_thumb(
         thumbStyle.Thumb,

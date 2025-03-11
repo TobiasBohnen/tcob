@@ -8,6 +8,7 @@
 #include <chrono>
 #include <limits>
 #include <memory>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -65,7 +66,7 @@ auto form_base::top_widget() const -> widget*
 
 auto form_base::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 {
-    for (auto const& widget : widgets_by_zorder(true)) {
+    for (auto const& widget : current_layout()->widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
             if (auto retValue {container->find_child_at(pos)}) {
@@ -202,7 +203,8 @@ void form_base::on_draw_to(gfx::render_target& target)
     if (_redrawWidgets) {
         _canvas.begin_frame(bounds, 1.0f, 0);
 
-        for (auto const& container : widgets_by_zorder(false)) {
+        auto widgets {current_layout()->widgets() | std::views::reverse}; // ZORDER
+        for (auto const& container : widgets) {
             _canvas.reset();
             container->paint(*_painter);
         }
@@ -252,6 +254,11 @@ void form_base::focus_widget(widget* newFocus)
             if (_focusWidget->is_inert()) {
                 _focusWidget = nullptr;
                 return;
+            }
+
+            auto* layout {current_layout()};
+            if (layout->is_move_allowed()) {
+                layout->bring_to_front(_focusWidget->top_level_widget());
             }
 
             _currentTabIndex = _focusWidget->TabStop->Index;
@@ -418,11 +425,6 @@ void form_base::on_visiblity_changed()
         }
     }
     // TODO: else inject mouse_motion
-}
-
-auto form_base::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
-{
-    return detail::widgets_by_zorder(containers(), reverse);
 }
 
 void form_base::on_text_input(input::keyboard::text_input_event const& ev)

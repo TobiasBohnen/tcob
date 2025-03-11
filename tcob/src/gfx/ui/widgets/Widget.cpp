@@ -264,6 +264,17 @@ auto widget::parent_form() const -> form_base*
     return _form;
 }
 
+auto widget::is_top_level() const -> bool
+{
+    return _parent == nullptr;
+}
+
+auto widget::top_level_widget() -> widget*
+{
+    if (_parent == nullptr) { return this; }
+    return _parent->top_level_widget();
+}
+
 auto widget::name() const -> string const&
 {
     return _name;

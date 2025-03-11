@@ -113,7 +113,7 @@ auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> cons
 
 void tab_container::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -145,7 +145,7 @@ void tab_container::on_paint(widget_painter& painter)
 
         for (i32 i {0}; i < std::ssize(_tabs); ++i) {
             item_style tabStyle {};
-            update_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
+            apply_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
 
             rect_f const tabRect {get_tab_rect(tabStyle, i)};
             painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
@@ -206,7 +206,7 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 void tab_container::on_update(milliseconds /* deltaTime */)
 {
     if (_updateTabs) {
-        update_style(_style);
+        apply_style(_style);
 
         auto const rect {content_bounds()};
         for (auto& t : _tabs) {

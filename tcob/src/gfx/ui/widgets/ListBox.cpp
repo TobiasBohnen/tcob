@@ -129,13 +129,13 @@ auto list_box::item_count() const -> isize
 
 void list_box::prepare_redraw()
 {
-    update_style(_style);
+    apply_style(_style);
     vscroll_widget::prepare_redraw();
 }
 
 void list_box::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -159,10 +159,9 @@ void list_box::on_paint(widget_painter& painter)
         itemRect.Size.Height = itemHeight;
         itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
 
-        item_style itemStyle {};
-        update_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
-
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
+            item_style itemStyle {};
+            apply_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
             painter.draw_item(itemStyle.Item, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
         } else {
@@ -170,7 +169,8 @@ void list_box::on_paint(widget_painter& painter)
         }
     }};
 
-    for (i32 i {0}; i < item_count(); ++i) {
+    isize const size {item_count()};
+    for (i32 i {0}; i < size; ++i) {
         if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
         paint_item(i);
     }

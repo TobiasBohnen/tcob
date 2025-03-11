@@ -48,7 +48,7 @@ void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
                                 : flags().Active               ? widget_flags {.Active = true}
                                                                : widget_flags {.Hover = true}};
     thumb_style thumbStyle;
-    update_sub_style(thumbStyle, -2, style->VScrollBar.ThumbClass, thumbFlags);
+    apply_sub_style(thumbStyle, -2, style->VScrollBar.ThumbClass, thumbFlags);
     _vScrollbar.paint(painter, style->VScrollBar, thumbStyle.Thumb, rect);
 }
 

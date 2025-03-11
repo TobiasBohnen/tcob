@@ -36,6 +36,7 @@ public:
     explicit panel(init const& wi);
 
     prop<bool> ScrollEnabled;
+    prop<bool> Movable;
 
     template <std::derived_from<layout> T>
     auto create_layout(auto&&... args) -> T&;
@@ -67,6 +68,8 @@ protected:
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
     auto current_layout() const -> layout*;
+
+    auto is_movable() const -> bool;
 
 private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;

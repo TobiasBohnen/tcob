@@ -6,7 +6,6 @@
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 #include <memory>
-#include <vector>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -30,7 +29,7 @@ void widget_container::update(milliseconds deltaTime)
 
 auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
-    for (auto const& widget : widgets_by_zorder(true)) {
+    for (auto const& widget : widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
             if (auto retValue {container->find_child_at(pos)}) {
@@ -54,11 +53,6 @@ auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr
     }
 
     return nullptr;
-}
-
-auto widget_container::widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>
-{
-    return detail::widgets_by_zorder(widgets(), reverse);
 }
 
 void widget_container::prepare_redraw()

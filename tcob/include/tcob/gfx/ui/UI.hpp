@@ -7,10 +7,8 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
-#include <memory>
 #include <unordered_map>
 #include <variant>
-#include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
@@ -391,9 +389,6 @@ namespace detail {
         auto check(widget* widget) const -> bool;
     };
 
-    ////////////////////////////////////////////////////////////
-
-    auto widgets_by_zorder(auto&& container, bool reverse) -> std::vector<std::shared_ptr<widget>>;
 }
 
 }

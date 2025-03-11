@@ -34,7 +34,7 @@ label::label(init const& wi)
 
 void label::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 

@@ -55,7 +55,7 @@ public:
     prop<string>   Class;
     prop_fn<f32>   Alpha;
     prop<tab_stop> TabStop;
-    prop<usize>    ZOrder;
+    prop<isize>    ZOrder;
 
     prop<dimensions>   Flex;
     prop<milliseconds> TransitionDuration;
@@ -77,6 +77,8 @@ public:
 
     auto parent() const -> widget_container*;
     auto parent_form() const -> form_base*;
+    auto is_top_level() const -> bool;
+    auto top_level_widget() -> widget*;
 
     auto name() const -> string const&;
 
@@ -116,10 +118,10 @@ protected:
     auto styles() const -> style_collection const&;
 
     template <std::derived_from<widget_style> T>
-    void update_style(T& style);
+    void apply_style(T& style);
 
     template <std::derived_from<style> T>
-    void update_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags);
+    void apply_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags);
     void reset_sub_style(isize idx, string const& styleClass, widget_flags flags);
     void clear_sub_styles();
 

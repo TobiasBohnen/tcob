@@ -145,13 +145,13 @@ auto grid_view::get_row(isize idx) const -> std::vector<list_item> const&
 
 void grid_view::prepare_redraw()
 {
-    update_style(_style);
+    apply_style(_style);
     vscroll_widget::prepare_redraw();
 }
 
 void grid_view::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -189,13 +189,12 @@ void grid_view::on_paint(widget_painter& painter)
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
             item_style cellStyle {};
-            update_sub_style(cellStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
+            apply_sub_style(cellStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
             painter.draw_item(cellStyle.Item, cellRect, item);
             cell = cellRect;
-            return;
+        } else {
+            reset_sub_style(idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
         }
-
-        reset_sub_style(idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
     }};
 
     auto const get_cell_flags {[this](point_i idx, select_mode mode) -> widget_flags {

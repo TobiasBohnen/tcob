@@ -6,10 +6,6 @@
 #pragma once
 #include "UI.hpp"
 
-#include <algorithm>
-#include <memory>
-#include <vector>
-
 #include "tcob/core/Rect.hpp"
 
 namespace tcob::ui {
@@ -35,20 +31,6 @@ inline auto operator-=(rect_f& left, thickness const& right) -> rect_f&
     left.Size.Height -= right.Top.calc(left.width()) + right.Bottom.calc(left.width());
 
     return left;
-}
-
-namespace detail {
-    auto widgets_by_zorder(auto&& container, bool reverse) -> std::vector<std::shared_ptr<widget>>
-    {
-        auto retValue {container};
-        if (reverse) {
-            std::ranges::stable_sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
-        } else {
-            std::ranges::stable_sort(retValue, [](auto const& a, auto const& b) { return a->ZOrder() < b->ZOrder(); });
-        }
-
-        return retValue;
-    }
 }
 
 }

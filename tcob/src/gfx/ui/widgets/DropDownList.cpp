@@ -98,7 +98,7 @@ void drop_down_list::on_styles_changed()
 
 void drop_down_list::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     _itemRectCache.clear();
 
@@ -111,7 +111,7 @@ void drop_down_list::on_paint(widget_painter& painter)
     auto const& fls {flags()};
 
     nav_arrows_style arrowStyle {};
-    update_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverBox, .Hover = !fls.Active && _mouseOverBox});
+    apply_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverBox, .Hover = !fls.Active && _mouseOverBox});
     painter.draw_chevron(arrowStyle.NavArrow, rect);
 
     // text
@@ -145,7 +145,7 @@ void drop_down_list::on_paint(widget_painter& painter)
                                     : fls.Active                   ? widget_flags {.Active = true}
                                                                    : widget_flags {.Hover = true}};
         thumb_style thumbStyle;
-        update_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
+        apply_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
         _vScrollbar.paint(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
         scissor_guard const guard {painter, this};
@@ -157,7 +157,7 @@ void drop_down_list::on_paint(widget_painter& painter)
 
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                 item_style itemStyle {};
-                update_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+                apply_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
 
                 painter.draw_item(itemStyle.Item, itemRect, items[i]);
                 _itemRectCache[i] = itemRect;

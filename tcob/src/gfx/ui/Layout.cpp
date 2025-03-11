@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <variant>
 #include <vector>
@@ -31,7 +32,7 @@ layout::layout(parent parent)
 
 void layout::apply()
 {
-    std::stable_sort(_widgets.begin(), _widgets.end(), [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+    ensure_zorder();
 
     std::visit(
         overloaded {
@@ -71,12 +72,38 @@ auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
     return _widgets;
 }
 
-auto layout::resize_allowed() const -> bool
+void layout::bring_to_front(widget* widget)
+{
+    if (!widget) { return; }
+
+    isize maxZ {std::numeric_limits<isize>::min()};
+    for (auto const& w : _widgets) {
+        maxZ = std::max(maxZ, w->ZOrder());
+    }
+    widget->ZOrder = maxZ + 1;
+
+    ensure_zorder();
+}
+
+void layout::send_to_back(widget* widget)
+{
+    if (!widget) { return; }
+
+    isize minZ {std::numeric_limits<isize>::max()};
+    for (auto const& w : _widgets) {
+        minZ = std::min(minZ, w->ZOrder());
+    }
+    widget->ZOrder = minZ - 1;
+
+    ensure_zorder();
+}
+
+auto layout::is_resize_allowed() const -> bool
 {
     return false;
 }
 
-auto layout::move_allowed() const -> bool
+auto layout::is_move_allowed() const -> bool
 {
     return false;
 }
@@ -120,6 +147,11 @@ auto layout::create_init(string const& name) const -> widget::init
     return retValue;
 }
 
+void layout::ensure_zorder()
+{
+    std::ranges::stable_sort(_widgets, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+}
+
 ////////////////////////////////////////////////////////////
 
 static_layout::static_layout(parent parent)
@@ -127,12 +159,12 @@ static_layout::static_layout(parent parent)
 {
 }
 
-auto static_layout::resize_allowed() const -> bool
+auto static_layout::is_resize_allowed() const -> bool
 {
     return true;
 }
 
-auto static_layout::move_allowed() const -> bool
+auto static_layout::is_move_allowed() const -> bool
 {
     return true;
 }
@@ -148,7 +180,7 @@ flex_size_layout::flex_size_layout(parent parent)
 {
 }
 
-auto flex_size_layout::move_allowed() const -> bool
+auto flex_size_layout::is_move_allowed() const -> bool
 {
     return true;
 }

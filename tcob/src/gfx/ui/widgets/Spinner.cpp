@@ -50,7 +50,7 @@ spinner::spinner(init const& wi)
 
 void spinner::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 
@@ -62,9 +62,9 @@ void spinner::on_paint(widget_painter& painter)
     // arrows
     auto const&      fls {flags()};
     nav_arrows_style incArrowStyle {};
-    update_sub_style(incArrowStyle, 0, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Increase, .Hover = !fls.Active && _hoverArrow == arrow::Increase});
+    apply_sub_style(incArrowStyle, 0, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Increase, .Hover = !fls.Active && _hoverArrow == arrow::Increase});
     nav_arrows_style decArrowStyle {};
-    update_sub_style(decArrowStyle, 1, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Decrease, .Hover = !fls.Active && _hoverArrow == arrow::Decrease});
+    apply_sub_style(decArrowStyle, 1, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Decrease, .Hover = !fls.Active && _hoverArrow == arrow::Decrease});
     _rectCache = painter.draw_nav_arrows(incArrowStyle.NavArrow, decArrowStyle.NavArrow, rect);
 
     // text

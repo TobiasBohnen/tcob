@@ -54,7 +54,7 @@ public:
     void focus_widget(widget* newFocus);
 
     auto virtual containers() const -> std::vector<std::shared_ptr<widget>> const& = 0;
-    void virtual remove_container(widget* wc)                                      = 0;
+    void virtual remove_container(widget* widget)                                  = 0;
     void virtual clear_containers()                                                = 0;
 
     void force_redraw(string const& reason);
@@ -63,6 +63,9 @@ public:
 
     template <SubmitTarget Target>
     void submit(Target& target);
+
+    auto virtual current_layout() -> layout*             = 0;
+    auto virtual current_layout() const -> layout const* = 0;
 
 protected:
     form_base(string name, rect_f const& bounds);
@@ -94,7 +97,6 @@ protected:
 
 private:
     void on_mouse_hover(input::mouse::motion_event const& ev);
-    auto widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>;
 
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
@@ -146,9 +148,12 @@ public:
 
     auto containers() const -> std::vector<std::shared_ptr<widget>> const& override;
 
-    void remove_container(widget* wc) override;
+    void remove_container(widget* widget) override;
 
     void clear_containers() override;
+
+    auto current_layout() -> layout* override;
+    auto current_layout() const -> layout const* override;
 
 protected:
     void apply_layout() override;

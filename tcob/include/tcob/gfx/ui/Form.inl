@@ -38,9 +38,9 @@ inline auto form<Layout>::containers() const -> std::vector<std::shared_ptr<widg
 }
 
 template <std::derived_from<layout> Layout>
-inline void form<Layout>::remove_container(widget* wc)
+inline void form<Layout>::remove_container(widget* widget)
 {
-    _layout.remove_widget(wc);
+    _layout.remove_widget(widget);
 }
 
 template <std::derived_from<layout> Layout>
@@ -53,6 +53,18 @@ template <std::derived_from<layout> Layout>
 inline void form<Layout>::apply_layout()
 {
     _layout.apply();
+}
+
+template <std::derived_from<layout> Layout>
+inline auto form<Layout>::current_layout() -> layout*
+{
+    return &_layout;
+}
+
+template <std::derived_from<layout> Layout>
+inline auto form<Layout>::current_layout() const -> layout const*
+{
+    return &_layout;
 }
 
 ////////////////////////////////////////////////////////////

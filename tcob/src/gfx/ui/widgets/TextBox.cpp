@@ -81,7 +81,7 @@ auto text_box::is_text_selected() const -> bool
 
 void text_box::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 

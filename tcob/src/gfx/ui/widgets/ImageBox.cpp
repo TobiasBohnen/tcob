@@ -27,7 +27,7 @@ image_box::image_box(init const& wi)
 
 void image_box::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
 

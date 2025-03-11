@@ -110,7 +110,7 @@ auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 
 void accordion::on_paint(widget_painter& painter)
 {
-    update_style(_style);
+    apply_style(_style);
 
     rect_f rect {Bounds()};
     // TODO: section chevron
@@ -133,7 +133,7 @@ void accordion::on_paint(widget_painter& painter)
     _sectionRectCache.clear();
     auto paint_section = [&](isize i, isize rectIndex) {
         item_style sectionStyle {};
-        update_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
+        apply_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
 
         rect_f const sectionRect {get_section_rect(sectionStyle, rectIndex)};
         painter.draw_item(sectionStyle.Item, sectionRect, _sectionLabels[i]);
@@ -211,7 +211,7 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
 void accordion::on_update(milliseconds /* deltaTime */)
 {
     if (_updateSections) {
-        update_style(_style);
+        apply_style(_style);
 
         auto const rect {content_bounds()};
         for (auto& t : _sections) {
