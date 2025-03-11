@@ -7,13 +7,9 @@
 #include "Form.hpp"
 
 #include <memory>
-#include <utility>
 #include <vector>
 
-#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Size.hpp"
-#include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -22,15 +18,9 @@ namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<layout> Layout>
-inline form<Layout>::form(string name, gfx::window* window)
-    : form {std::move(name), window, rect_f {point_f::Zero, window ? size_f {window->Size()} : size_f::Zero}}
-{
-}
-
-template <std::derived_from<layout> Layout>
-inline form<Layout>::form(string name, gfx::window* window, rect_f const& bounds)
-    : form_base {std::move(name), window, bounds}
-    , _layout {this}
+inline form<Layout>::form(form_init const& init, auto&&... layoutArgs)
+    : form_base {init.Name, rect_f {init.Bounds}}
+    , _layout {this, layoutArgs...}
 {
 }
 

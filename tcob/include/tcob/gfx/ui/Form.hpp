@@ -18,7 +18,6 @@
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
-#include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -37,6 +36,9 @@ public:
     prop<style_collection> Styles;
     prop<control_map>      Controls;
     prop<nav_map>          NavMap;
+
+    signal<string const> CursorChanged;
+    point_f              TooltipOffset {point_f::Zero};
 
     auto name() const -> string const&;
 
@@ -63,7 +65,7 @@ public:
     void submit(Target& target);
 
 protected:
-    form_base(string name, gfx::window* window, rect_f const& bounds);
+    form_base(string name, rect_f const& bounds);
 
     void on_fixed_update(milliseconds deltaTime) override;
 
@@ -97,15 +99,13 @@ private:
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
 
-    void on_styles_changed(); // TODO: rename
+    void on_styles_changed();
 
     auto can_popup_tooltip() const -> bool;
     void hide_tooltip();
 
     gfx::canvas          _canvas {};
     gfx::canvas_renderer _renderer;
-
-    gfx::window* _window;
 
     widget*                             _topWidget {nullptr};
     widget*                             _focusWidget {nullptr};
@@ -131,11 +131,15 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+struct form_init {
+    string Name;
+    rect_i Bounds;
+};
+
 template <std::derived_from<layout> Layout = dock_layout>
 class form : public form_base {
 public:
-    form(string name, gfx::window* window);
-    form(string name, gfx::window* window, rect_f const& bounds);
+    form(form_init const& init, auto&&... layoutArgs);
 
     template <std::derived_from<widget_container> T>
     auto create_container(auto&&... args) -> std::shared_ptr<T>;

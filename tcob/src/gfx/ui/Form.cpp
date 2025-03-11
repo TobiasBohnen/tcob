@@ -15,12 +15,12 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
-#include "tcob/gfx/Window.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -35,11 +35,10 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-form_base::form_base(string name, gfx::window* window, rect_f const& bounds)
+form_base::form_base(string name, rect_f const& bounds)
     : entity {update_mode::Fixed}
     , Bounds {bounds}
     , _renderer {_canvas}
-    , _window {window}
     , _painter {std::make_unique<widget_painter>(_canvas)}
     , _name {std::move(name)}
 {
@@ -192,11 +191,9 @@ auto form_base::can_draw() const -> bool
 
 void form_base::on_draw_to(gfx::render_target& target)
 {
-    bool const hasCursor {_window && _window->Cursor()};
-
     // set cursor
-    if (hasCursor && _topWidget) {
-        _window->Cursor->ActiveMode = _topWidget->Cursor;
+    if (_topWidget) {
+        CursorChanged(_topWidget->Cursor);
     }
 
     size_i const bounds {size_i {Bounds->Size}};
@@ -214,33 +211,25 @@ void form_base::on_draw_to(gfx::render_target& target)
         _redrawWidgets = false;
     }
 
+    // render
+    _renderer.set_layer(0);
+    _renderer.render_to_target(target);
+
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
-        point_i const pos {(hasCursor ? _window->Cursor->bounds().bottom_right() : locate_service<input::system>().mouse().get_position())
-                           - static_cast<point_i>(Bounds->Position)};
-
         auto& ttBounds {*_topWidget->Tooltip->Bounds};
-        ttBounds.Position.X = static_cast<f32>(pos.X);
-        ttBounds.Position.Y = static_cast<f32>(pos.Y);
+        ttBounds.Position = point_f {locate_service<input::system>().mouse().get_position()} - Bounds->Position + TooltipOffset;
         if (ttBounds.right() > Bounds->right()) {
-            ttBounds.Position.X -= ttBounds.width();
-            if (hasCursor) { ttBounds.Position.X -= _window->Cursor->bounds().width(); }
+            ttBounds.Position.X -= ttBounds.width() + TooltipOffset.X;
         }
         if (ttBounds.bottom() > Bounds->bottom()) {
-            ttBounds.Position.Y -= ttBounds.height();
-            if (hasCursor) { ttBounds.Position.Y -= _window->Cursor->bounds().height(); }
+            ttBounds.Position.Y -= ttBounds.height() + TooltipOffset.Y;
         }
 
         _canvas.begin_frame(bounds, 1.0f, 1);
         _topWidget->Tooltip->paint(*_painter);
         _canvas.end_frame();
-    }
 
-    // render
-    _renderer.set_layer(0);
-    _renderer.render_to_target(target);
-
-    if (_isTooltipVisible) {
         _renderer.set_layer(1);
         _renderer.render_to_target(target);
     }
