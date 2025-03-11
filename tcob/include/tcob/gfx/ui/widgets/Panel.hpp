@@ -38,9 +38,9 @@ public:
     prop<bool> ScrollEnabled;
 
     template <std::derived_from<layout> T>
-    auto create_layout(auto&&... args) -> std::shared_ptr<T>;
+    auto create_layout(auto&&... args) -> T&;
     template <std::derived_from<layout> T>
-    auto get_layout() -> std::shared_ptr<T>;
+    auto get_layout() -> T&;
 
     void prepare_redraw() override;
 
@@ -72,7 +72,7 @@ private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
     auto get_scroll_max_value(orientation orien) const -> f32;
 
-    std::shared_ptr<layout> _layout;
+    std::unique_ptr<layout> _layout;
     scrollbar               _vScrollbar;
     scrollbar               _hScrollbar;
 

@@ -14,22 +14,22 @@
 namespace tcob::ui {
 
 template <std::derived_from<layout> T>
-inline auto panel::create_layout(auto&&... args) -> std::shared_ptr<T>
+inline auto panel::create_layout(auto&&... args) -> T&
 {
     force_redraw(this->name() + ": layout created");
-    _layout = std::make_shared<T>(this, std::move(args)...);
-    return std::static_pointer_cast<T>(_layout);
+    _layout = std::make_unique<T>(this, std::move(args)...);
+    return *static_cast<T*>(_layout.get());
 }
 
 template <std::derived_from<layout> T>
-inline auto panel::get_layout() -> std::shared_ptr<T>
+inline auto panel::get_layout() -> T&
 {
 #if defined(TCOB_DEBUG)
-    auto dp {std::dynamic_pointer_cast<T>(_layout)};
+    auto dp {dynamic_cast<T*>(_layout.get())};
     assert(dp);
-    return dp;
+    return *dp;
 #else
-    return std::static_pointer_cast<T>(_layout);
+    return *static_cast<T*>(_layout.get());
 #endif
 }
 }
