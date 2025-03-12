@@ -46,13 +46,17 @@ style_attributes::style_attributes(std::initializer_list<std::pair<string, widge
     }
 }
 
-auto style_attributes::check(widget_attributes const& widgetAttribs) const -> bool
+auto style_attributes::score(widget_attributes const& widgetAttribs) const -> i32
 {
-    if (_values.empty()) { return true; }
+    if (_values.empty()) { return 0; }
 
-    return std::all_of(_values.begin(), _values.end(), [&](auto const& kv) {
-        return widgetAttribs.contains(kv.first) && kv.second.contains(widgetAttribs.at(kv.first));
-    });
+    i32 retValue {0};
+    for (auto const& [key, requiredValues] : _values) {
+        if (!widgetAttribs.contains(key)) { return std::numeric_limits<i32>::min(); }                    // widget doesn't have attribute
+        if (!requiredValues.contains(widgetAttribs.at(key))) { return std::numeric_limits<i32>::min(); } // attribute values don't match
+        ++retValue;
+    }
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
@@ -65,7 +69,7 @@ auto style_flags::score(widget_flags other) const -> i32
 
     for (usize i {0}; i < flagSet.size(); ++i) {
         if (flagSet[i]) {
-            if (*flagSet[i] != otherFlagSet[i]) {
+            if (*flagSet[i] != otherFlagSet[i]) { // flags don't match
                 return std::numeric_limits<i32>::min();
             }
             ++retValue;
@@ -85,9 +89,12 @@ auto style_collection::get(widget_style_selectors const& select) const -> style*
     i32    bestScore {std::numeric_limits<i32>::min()};
 
     for (auto const& [flags, attribs, stylePtr] : it->second) {
-        if (!attribs.check(select.Attributes)) { continue; } // TODO: increase score if attributes match
+        i32 const attibScore {attribs.score(select.Attributes)};
+        if (attibScore == std::numeric_limits<i32>::min()) { continue; }
+        i32 const flagScore {flags.score(select.Flags)};
+        if (flagScore == std::numeric_limits<i32>::min()) { continue; }
+        i32 const score {(flagScore * 10000) + attibScore};
 
-        i32 const score {flags.score(select.Flags)};
         if (score >= bestScore) {
             bestScore     = score;
             bestCandidate = stylePtr.get();

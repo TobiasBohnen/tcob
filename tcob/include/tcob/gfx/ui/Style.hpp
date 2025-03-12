@@ -348,7 +348,7 @@ public:
     style_attributes() = default;
     style_attributes(std::initializer_list<std::pair<string, widget_attribute_types> const> values);
 
-    auto check(widget_attributes const& widgetAttribs) const -> bool;
+    auto score(widget_attributes const& widgetAttribs) const -> i32;
 
     auto operator==(style_attributes const& other) const -> bool = default;
 
