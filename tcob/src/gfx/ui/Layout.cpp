@@ -25,8 +25,10 @@
 
 namespace tcob::ui {
 
-layout::layout(parent parent)
+layout::layout(parent parent, bool resizeAllowed, bool moveAllowed)
     : _parent {parent}
+    , _resizeAllowed {resizeAllowed}
+    , _moveAllowed {moveAllowed}
 {
 }
 
@@ -100,12 +102,12 @@ void layout::send_to_back(widget* widget)
 
 auto layout::is_resize_allowed() const -> bool
 {
-    return false;
+    return _resizeAllowed;
 }
 
 auto layout::is_move_allowed() const -> bool
 {
-    return false;
+    return _moveAllowed;
 }
 
 void layout::notify_parent()
@@ -155,18 +157,8 @@ void layout::ensure_zorder()
 ////////////////////////////////////////////////////////////
 
 static_layout::static_layout(parent parent)
-    : layout {parent}
+    : layout {parent, true, true}
 {
-}
-
-auto static_layout::is_resize_allowed() const -> bool
-{
-    return true;
-}
-
-auto static_layout::is_move_allowed() const -> bool
-{
-    return true;
 }
 
 void static_layout::do_layout(size_f /* size */)
@@ -176,13 +168,8 @@ void static_layout::do_layout(size_f /* size */)
 ////////////////////////////////////////////////////////////
 
 flex_size_layout::flex_size_layout(parent parent)
-    : layout {parent}
+    : layout {parent, false, true}
 {
-}
-
-auto flex_size_layout::is_move_allowed() const -> bool
-{
-    return true;
 }
 
 void flex_size_layout::do_layout(size_f size)

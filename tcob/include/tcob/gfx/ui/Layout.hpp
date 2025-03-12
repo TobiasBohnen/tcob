@@ -40,11 +40,11 @@ public:
     void bring_to_front(widget* widget);
     void send_to_back(widget* widget);
 
-    auto virtual is_resize_allowed() const -> bool;
-    auto virtual is_move_allowed() const -> bool;
+    auto is_resize_allowed() const -> bool;
+    auto is_move_allowed() const -> bool;
 
 protected:
-    explicit layout(parent parent);
+    explicit layout(parent parent, bool resizeAllowed = false, bool moveAllowed = false);
 
     template <std::derived_from<widget> T>
     auto add_widget(string const& name) -> std::shared_ptr<T>;
@@ -58,6 +58,9 @@ private:
 
     parent                               _parent;
     std::vector<std::shared_ptr<widget>> _widgets {};
+
+    bool _resizeAllowed;
+    bool _moveAllowed;
 };
 
 ////////////////////////////////////////////////////////////
@@ -69,9 +72,6 @@ public:
 
     template <std::derived_from<widget> T>
     auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
-
-    auto is_resize_allowed() const -> bool override;
-    auto is_move_allowed() const -> bool override;
 
 protected:
     void do_layout(size_f size) override;
@@ -86,8 +86,6 @@ public:
 
     template <std::derived_from<widget> T>
     auto create_widget(point_f pos, string const& name) -> std::shared_ptr<T>;
-
-    auto is_move_allowed() const -> bool override;
 
 protected:
     void do_layout(size_f size) override;
