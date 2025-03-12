@@ -78,22 +78,19 @@ auto style_flags::score(widget_flags other) const -> i32
 
 auto style_collection::get(widget_style_selectors const& select) const -> style*
 {
+    auto it {_styles.find(select.Class)};
+    if (it == _styles.end()) { return nullptr; }
+
     style* bestCandidate {nullptr};
     i32    bestScore {std::numeric_limits<i32>::min()};
 
-    for (auto const& [styleName, styleFlags, styleAttribs, style] : _styles) {
-        if (styleName != select.Class) { continue; }
+    for (auto const& [flags, attribs, stylePtr] : it->second) {
+        if (!attribs.check(select.Attributes)) { continue; } // TODO: increase score if attributes match
 
-        // check attributes
-        if (!styleAttribs.check(select.Attributes)) { continue; }
-
-        // check flags
-        i32 const score {styleFlags.score(select.Flags)};
-        if (score == bestScore) {
-            bestCandidate = style.get();
-        } else if (score > bestScore) {
+        i32 const score {flags.score(select.Flags)};
+        if (score >= bestScore) {
             bestScore     = score;
-            bestCandidate = style.get();
+            bestCandidate = stylePtr.get();
         }
     }
 

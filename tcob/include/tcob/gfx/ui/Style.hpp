@@ -386,7 +386,7 @@ public:
     void clear();
 
 private:
-    std::vector<std::tuple<string, style_flags, style_attributes, std::shared_ptr<style>>> _styles;
+    std::unordered_map<string, std::vector<std::tuple<style_flags, style_attributes, std::shared_ptr<style>>>> _styles;
 };
 
 }
