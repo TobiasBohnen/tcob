@@ -5,9 +5,13 @@
 
 #include "tcob/gfx/ui/widgets/Displays.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bitset>
 #include <iterator>
+#include <span>
+#include <utility>
+#include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
@@ -15,10 +19,24 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
+#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
+
+void dot_matrix_display::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    if (left.Colors.size() != right.Colors.size()) { return; }
+    for (auto const& [k, v] : left.Colors) {
+        if (right.Colors.contains(k)) {
+            target.Colors[k] = color::Lerp(v, right.Colors.at(k), step);
+        }
+    }
+}
 
 dot_matrix_display::dot_matrix_display(init const& wi)
     : widget {wi}
@@ -37,9 +55,7 @@ dot_matrix_display::dot_matrix_display(init const& wi)
 
 void dot_matrix_display::on_paint(widget_painter& painter)
 {
-    if (Size->Width <= 0 || Size->Height <= 0) {
-        return;
-    }
+    if (Size->Width <= 0 || Size->Height <= 0) { return; }
 
     apply_style(_style);
 
@@ -57,7 +73,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
     f32 const height {rect.height() / Size->Height};
 
     for (auto const& [colorIdx, dots] : _sortedDots) {
-        canvas.set_fill_style(_style.Dot.Colors.at(colorIdx));
+        canvas.set_fill_style(_style.Colors.at(colorIdx));
         canvas.begin_path();
 
         for (auto const& dot : dots) {
@@ -65,13 +81,9 @@ void dot_matrix_display::on_paint(widget_painter& painter)
                                   (dot.Y * height) + rect.top(),
                                   width, height};
 
-            switch (_style.Dot.Type) {
-            case dot::type::Disc: {
-                canvas.circle(dotRect.center(), width / 2);
-            } break;
-            case dot::type::Square: {
-                canvas.rect(dotRect);
-            } break;
+            switch (_style.Type) {
+            case dot_type::Disc: canvas.circle(dotRect.center(), width / 2); break;
+            case dot_type::Square: canvas.rect(dotRect); break;
             }
         }
 
@@ -83,24 +95,46 @@ void dot_matrix_display::on_paint(widget_painter& painter)
 
 void dot_matrix_display::on_update(milliseconds /* deltaTime */)
 {
-    if (_isDirty) {
-        _sortedDots.clear();
-        for (i32 idx {0}; idx < std::ssize(*Dots); ++idx) {
-            point_i const dotPoint {idx % Size->Width, idx / Size->Width};
-            _sortedDots[(*Dots)[idx]].push_back(dotPoint);
-        }
-        _isDirty = false;
+    if (!_isDirty) { return; }
+    _isDirty = false;
+
+    _sortedDots.clear();
+    for (i32 idx {0}; idx < std::ssize(*Dots); ++idx) {
+        _sortedDots[(*Dots)[idx]].emplace_back(idx % Size->Width, idx / Size->Width);
     }
 }
 
 ////////////////////////////////////////////////////////////
 
+void seven_segment_display::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    target.Size          = length::Lerp(left.Size, right.Size, step);
+    target.ActiveColor   = color::Lerp(left.ActiveColor, right.ActiveColor, step);
+    target.InactiveColor = color::Lerp(left.InactiveColor, right.InactiveColor, step);
+}
+
 seven_segment_display::seven_segment_display(init const& wi)
     : widget {wi}
 {
-    Text.Changed.connect([this](auto const&) { force_redraw(this->name() + ": text changed"); });
-
     Class("seven_segment_display");
+}
+
+void seven_segment_display::draw_text(string const& text)
+{
+    _segments.resize(text.size());
+    std::ranges::transform(text, _segments.begin(), [this](char const c) { return get_segment(c); });
+
+    force_redraw(this->name() + ": segments changed");
+}
+
+void seven_segment_display::draw_segments(std::span<segment const> segments)
+{
+    _segments.resize(segments.size());
+    std::ranges::transform(segments, _segments.begin(), [this](segment const& seg) { return get_segment(seg); });
+
+    force_redraw(this->name() + ": segments changed");
 }
 
 auto seven_segment_display::get_segment(char c) -> std::bitset<7>
@@ -166,13 +200,17 @@ auto seven_segment_display::get_segment(char c) -> std::bitset<7>
     default:
         return {0b0000000};
     }
-    /*
-    000 AAA
-    1 2 F B
-    333 GGG
-    4 5 E C
-    666 DDD
-    */
+}
+
+auto seven_segment_display::get_segment(segment segment) -> std::bitset<7>
+{
+    return {(static_cast<u32>(segment.A) << 6)
+            | (static_cast<u32>(segment.F) << 5)
+            | (static_cast<u32>(segment.B) << 4)
+            | (static_cast<u32>(segment.G) << 3)
+            | (static_cast<u32>(segment.E) << 2)
+            | (static_cast<u32>(segment.C) << 1)
+            | (static_cast<u32>(segment.D))};
 }
 
 void seven_segment_display::on_paint(widget_painter& painter)
@@ -189,7 +227,7 @@ void seven_segment_display::on_paint(widget_painter& painter)
     auto& canvas {painter.canvas()};
     canvas.save();
 
-    f32 const width {_style.Segment.Size.calc(rect.width())};
+    f32 const width {_style.Size.calc(rect.width())};
     f32 const thickness {width / 4};
 
     point_f       offset {rect.top_left()};
@@ -221,68 +259,47 @@ void seven_segment_display::on_paint(widget_painter& painter)
         {width, width - (thickness / 2)},             // 18
     }};
 
-    for (auto const c : Text()) {
-        auto const segments {get_segment(c)};
+    enum class OffsetType {
+        None,
+        Plus,
+        Minus
+    };
 
-        for (i32 i {0}; i < 7; i++) {
-            if (segments[6 - i]) {
-                canvas.set_fill_style(_style.Segment.ActiveColor);
-            } else {
-                if (_style.Segment.InactiveColor.A == 0) {
-                    continue;
+    static std::array<std::vector<std::pair<usize, OffsetType>>, 7> const segmentDefs {{
+        // top horizontal
+        {{{0, OffsetType::Plus}, {1, OffsetType::Minus}, {2, OffsetType::Minus}, {3, OffsetType::Plus}}},
+        // top left vertical
+        {{{0, OffsetType::None}, {3, OffsetType::None}, {5, OffsetType::None}, {6, OffsetType::None}, {4, OffsetType::None}}},
+        // top right vertical
+        {{{2, OffsetType::None}, {1, OffsetType::None}, {17, OffsetType::None}, {15, OffsetType::None}, {16, OffsetType::None}}},
+        // middle horizontal
+        {{{6, OffsetType::Plus}, {5, OffsetType::Plus}, {16, OffsetType::Minus}, {15, OffsetType::Minus}, {13, OffsetType::Minus}, {8, OffsetType::Plus}}},
+        // bottom left vertical
+        {{{6, OffsetType::None}, {8, OffsetType::None}, {10, OffsetType::None}, {9, OffsetType::None}, {7, OffsetType::None}}},
+        // bottom right vertical
+        {{{15, OffsetType::None}, {14, OffsetType::None}, {12, OffsetType::None}, {11, OffsetType::None}, {13, OffsetType::None}}},
+        // bottom horizontal
+        {{{10, OffsetType::Plus}, {11, OffsetType::Minus}, {12, OffsetType::Minus}, {9, OffsetType::Plus}}},
+    }};
+
+    for (auto const segments : _segments) {
+        for (usize i {0}; i < 7; i++) {
+            bool const active {segments[6 - i]};
+            if (!active && _style.InactiveColor.A == 0) { continue; }
+            canvas.set_fill_style(active ? _style.ActiveColor : _style.InactiveColor);
+
+            std::vector<point_f> polyline;
+            polyline.reserve(segmentDefs[i].size());
+            for (auto const& [idx, offType] : segmentDefs[i]) {
+                point_f pt {points[idx] + offset};
+                if (offType == OffsetType::Plus) {
+                    pt = pt + lineOffset;
+                } else if (offType == OffsetType::Minus) {
+                    pt = pt - lineOffset;
                 }
-                canvas.set_fill_style(_style.Segment.InactiveColor);
+                polyline.push_back(pt);
             }
-
-            switch (i) {
-            case 0:
-                canvas.fill_polyline({{points[0] + offset + lineOffset,
-                                       points[1] + offset - lineOffset,
-                                       points[2] + offset - lineOffset,
-                                       points[3] + offset + lineOffset}});
-                break;
-            case 1:
-                canvas.fill_polyline({{points[0] + offset,
-                                       points[3] + offset,
-                                       points[5] + offset,
-                                       points[6] + offset,
-                                       points[4] + offset}});
-                break;
-            case 2:
-                canvas.fill_polyline({{points[2] + offset,
-                                       points[1] + offset,
-                                       points[17] + offset,
-                                       points[15] + offset,
-                                       points[16] + offset}});
-                break;
-            case 3:
-                canvas.fill_polyline({{points[6] + offset + lineOffset,
-                                       points[5] + offset + lineOffset,
-                                       points[16] + offset - lineOffset,
-                                       points[15] + offset - lineOffset,
-                                       points[13] + offset - lineOffset,
-                                       points[8] + offset + lineOffset}});
-                break;
-            case 4:
-                canvas.fill_polyline({{points[6] + offset,
-                                       points[8] + offset,
-                                       points[10] + offset,
-                                       points[9] + offset,
-                                       points[7] + offset}});
-                break;
-            case 5:
-                canvas.fill_polyline({{points[15] + offset, points[14] + offset,
-                                       points[12] + offset,
-                                       points[11] + offset,
-                                       points[13] + offset}});
-                break;
-            case 6:
-                canvas.fill_polyline({{points[10] + offset + lineOffset,
-                                       points[11] + offset - lineOffset,
-                                       points[12] + offset - lineOffset,
-                                       points[9] + offset + lineOffset}});
-                break;
-            }
+            canvas.fill_polyline(polyline);
         }
         offset.X += width + thickness;
     }

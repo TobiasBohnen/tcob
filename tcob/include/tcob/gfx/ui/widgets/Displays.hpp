@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <bitset>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -27,21 +28,17 @@ namespace tcob::ui {
 
 class TCOB_API dot_matrix_display : public widget {
 public:
-    struct dot {
-        enum class type : u8 {
-            Disc,
-            Square
-        };
-
-        std::unordered_map<u8, color> Colors;
-        type                          Type {type::Disc};
-
-        auto operator==(dot const& other) const -> bool = default;
+    enum class dot_type : u8 {
+        Disc,
+        Square
     };
 
     class TCOB_API style : public widget_style {
     public:
-        dot Dot;
+        std::unordered_map<u8, color> Colors;
+        dot_type                      Type {dot_type::Disc};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit dot_matrix_display(init const& wi);
@@ -66,18 +63,27 @@ private:
 class TCOB_API seven_segment_display : public widget {
 public:
     struct segment {
-        length Size;
-        color  ActiveColor {colors::Black};
-        color  InactiveColor {colors::Transparent};
+        bool A {false};
+        bool B {false};
+        bool C {false};
+        bool D {false};
+        bool E {false};
+        bool F {false};
+        bool G {false};
     };
 
     struct style : public widget_style {
-        segment Segment;
+        length Size;
+        color  ActiveColor {colors::Black};
+        color  InactiveColor {colors::Transparent};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
     explicit seven_segment_display(init const& wi);
 
-    prop<string> Text;
+    void draw_text(string const& text);
+    void draw_segments(std::span<segment const> segments);
 
 protected:
     void on_paint(widget_painter& painter) override;
@@ -86,8 +92,10 @@ protected:
 
 private:
     auto get_segment(char c) -> std::bitset<7>;
+    auto get_segment(segment segments) -> std::bitset<7>;
 
     seven_segment_display::style _style;
+    std::vector<std::bitset<7>>  _segments;
 };
 
 ////////////////////////////////////////////////////////////
