@@ -16,7 +16,7 @@ template <std::derived_from<style> T>
 inline auto style_collection::create(string const& name, style_flags flags, style_attributes const& attribs) -> std::shared_ptr<T>
 {
     std::shared_ptr<T> retValue {std::make_shared<T>()};
-    _styles.emplace(name, std::make_tuple(flags, attribs, retValue));
+    _styles.emplace_back(name, flags, attribs, retValue);
     return retValue;
 }
 
