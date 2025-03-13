@@ -79,6 +79,13 @@ auto text_box::is_text_selected() const -> bool
     return _selectedText.first != INVALID_INDEX && _selectedText.second != INVALID_INDEX;
 }
 
+void text_box::set_caret_pos(isize pos)
+{
+    if (_caretPos == pos) { return; }
+    _caretPos = pos;
+    force_redraw(this->name() + ": Caret moved");
+}
+
 void text_box::on_paint(widget_painter& painter)
 {
     apply_style(_style);
@@ -155,13 +162,11 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     auto const& controls {parent_form()->Controls};
     if (ev.KeyCode == controls->NavLeftKey) {
         if (_caretPos > 0) {
-            --_caretPos;
-            force_redraw(this->name() + ": Caret moved");
+            set_caret_pos(_caretPos - 1);
         }
     } else if (ev.KeyCode == controls->NavRightKey) {
         if (_caretPos < _textLength) {
-            ++_caretPos;
-            force_redraw(this->name() + ": Caret moved");
+            set_caret_pos(_caretPos + 1);
         }
     } else if (ev.KeyCode == controls->ForwardDeleteKey) {
         if (!remove_selected_text()) {
@@ -221,9 +226,8 @@ void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
         } else {
             select_text(INVALID_INDEX, INVALID_INDEX);
         }
-        _caretPos = target;
 
-        force_redraw(this->name() + ": Caret moved");
+        set_caret_pos(target);
         ev.Handled = true;
     }
 }
@@ -233,8 +237,7 @@ void text_box::on_mouse_down(input::mouse::button_event const& ev)
     isize const target {calc_caret_pos(global_to_content(ev.Position))};
     if (_caretPos != target) {
         select_text(INVALID_INDEX, INVALID_INDEX);
-        _caretPos = target;
-        force_redraw(this->name() + ": Caret moved");
+        set_caret_pos(target);
     }
     _dragCaretPos = target;
     ev.Handled    = true;

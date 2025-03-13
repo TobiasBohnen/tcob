@@ -34,10 +34,7 @@ void tooltip::on_update(milliseconds deltaTime)
 void tooltip::on_popup(widget* top)
 {
     _fadeInTween = gfx::make_unique_tween<gfx::linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
-    _fadeInTween->Value.Changed.connect([this](auto val) {
-        Alpha = val;
-        force_redraw(this->name() + ": Tooltip fade-in");
-    });
+    _fadeInTween->Value.Changed.connect([this](auto val) { Alpha = val; });
     _fadeInTween->start();
 
     Popup({this, top});

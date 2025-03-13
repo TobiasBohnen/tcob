@@ -71,6 +71,7 @@ private:
 
     void select_text(isize first, isize last);
     auto is_text_selected() const -> bool;
+    void set_caret_pos(isize pos);
     auto calc_caret_pos(point_f mp) const -> isize;
 
     std::unique_ptr<gfx::square_wave_tween<bool>> _caretTween;

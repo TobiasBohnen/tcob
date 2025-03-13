@@ -177,7 +177,7 @@ auto widget::global_to_content(point_i p) const -> point_f
     return point_f {p} - global_content_bounds().Position;
 }
 
-auto widget::global_to_local(point_i p) const -> point_f
+auto widget::global_to_parent(point_i p) const -> point_f
 {
     point_f retValue {p};
     if (_parent) {

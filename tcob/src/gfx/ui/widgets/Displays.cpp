@@ -332,44 +332,65 @@ void color_picker::on_paint(widget_painter& painter)
     canvas.translate(bounds.Position);
 
     // color gradient
-    size_f const rect0 {bounds.width() * 0.9f, bounds.height()};
+    size_f const sizeColor {bounds.width() * 0.9f, bounds.height()};
 
     canvas.begin_path();
-    canvas.rect({point_f::Zero, rect0});
+    canvas.rect({point_f::Zero, sizeColor});
 
     canvas.set_fill_style(colors::White);
     canvas.fill();
 
     color const baseColor {color::FromHSVA({BaseHue(), 1.0, 1.0f})};
     canvas.set_fill_style(canvas.create_linear_gradient(
-        {0, 0}, {rect0.Width, 0},
+        {0, 0}, {sizeColor.Width, 0},
         {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
     canvas.fill();
     canvas.set_fill_style(canvas.create_linear_gradient(
-        {0, 0}, {0, rect0.Height},
+        {0, 0}, {0, sizeColor.Height},
         {color {0, 0, 0, 0}, color {0, 0, 0, 255}}));
     canvas.fill();
 
     // hue gradient
-    size_f const rect1 {bounds.width() * 0.1f, bounds.height()};
+    size_f const sizeHue {bounds.width() * 0.1f, bounds.height()};
 
     canvas.begin_path();
-    canvas.rect({{rect0.Width, 0}, rect1});
-    canvas.set_fill_style(canvas.create_linear_gradient({0, 0}, {0, rect1.Height}, GetGradient()));
+    canvas.rect({{sizeColor.Width, 0}, sizeHue});
+    canvas.set_fill_style(canvas.create_linear_gradient({0, 0}, {0, sizeHue.Height}, GetGradient()));
     canvas.fill();
+
+    if (_selectedColorPos.X > -1) {
+        canvas.begin_path();
+        canvas.circle(_selectedColorPos, 5);
+        canvas.set_stroke_style(colors::White);
+        canvas.set_stroke_width(2);
+        canvas.stroke();
+    }
+
+    if (_selectedHuePos > -1) {
+        canvas.begin_path();
+        canvas.move_to({sizeColor.Width, _selectedHuePos});
+        canvas.line_to({sizeColor.Width + sizeHue.Width, _selectedHuePos});
+        canvas.set_stroke_style(colors::White);
+        canvas.set_stroke_width(2);
+        canvas.stroke();
+    }
 }
 
 void color_picker::on_mouse_down(input::mouse::button_event const& ev)
 {
-    rect_f const rect {global_content_bounds()};
-    if (rect.contains(ev.Position)) {
-        f32 const s {(ev.Position.X - rect.left()) / (rect.width() * 0.9f)};
-        f32 const v {(ev.Position.Y - rect.top()) / rect.height()};
+    auto const mp {global_to_parent(ev.Position)};
+    if (Bounds->contains(mp)) {
+        f32 const s {(mp.X - Bounds->left()) / (Bounds->width() * 0.9f)};
+        f32 const v {(mp.Y - Bounds->top()) / Bounds->height()};
         if (s > 1.0f) {
             auto const col {GetGradient().colors().at(static_cast<i32>(255 * v))};
-            BaseHue = col.to_hsv().Hue;
+            BaseHue           = col.to_hsv().Hue;
+            _selectedHuePos   = mp.Y - Bounds->Position.Y;
+            _selectedColorPos = {-1, -1};
         } else {
-            SelectedColor = color::FromHSVA({BaseHue(), s, 1 - v});
+            SelectedColor     = color::FromHSVA({BaseHue(), s, 1 - v});
+            _selectedColorPos = mp - Bounds->Position;
+            force_redraw(this->name() + ": SelectedColor changed");
         }
     }
 }

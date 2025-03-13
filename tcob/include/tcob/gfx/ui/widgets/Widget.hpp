@@ -88,9 +88,6 @@ public:
     auto hit_test_bounds() const -> rect_f;
     auto virtual scroll_offset() const -> point_f;
 
-    auto global_to_content(point_i p) const -> point_f;
-    auto global_to_local(point_i p) const -> point_f;
-
     void update(milliseconds deltaTime) override;
 
     void paint(widget_painter& painter);
@@ -101,6 +98,9 @@ public:
     auto hit_test(point_f pos) const -> bool;
 
     auto current_style() const -> widget_style const*;
+
+    auto global_to_content(point_i p) const -> point_f;
+    auto global_to_parent(point_i p) const -> point_f;
 
 protected:
     struct init {

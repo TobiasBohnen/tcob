@@ -116,6 +116,9 @@ protected:
 
 private:
     auto static GetGradient() -> gfx::color_gradient const&;
+
+    point_f _selectedColorPos {point_f {-1, -1}};
+    f32     _selectedHuePos {-1};
 };
 
 }

@@ -127,7 +127,7 @@ void slider::on_mouse_leave()
 
 void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    bool const overThumb {_barRectCache.Thumb.contains(global_to_local(ev.Position))};
+    bool const overThumb {_barRectCache.Thumb.contains(global_to_parent(ev.Position))};
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
         force_redraw(this->name() + ": thumb hover change");
@@ -164,7 +164,7 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
         if (!_overThumb) {
             calculate_value(global_to_content(ev.Position));
         } else {
-            _dragOffset = point_i {global_to_local(ev.Position) - _barRectCache.Thumb.center()};
+            _dragOffset = point_i {global_to_parent(ev.Position) - _barRectCache.Thumb.center()};
             _isDragging = true;
         }
         ev.Handled = true;
