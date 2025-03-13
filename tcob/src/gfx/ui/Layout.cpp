@@ -32,27 +32,18 @@ layout::layout(parent parent, bool resizeAllowed, bool moveAllowed)
 {
 }
 
-void layout::apply()
+void layout::apply(size_f size)
 {
     ensure_zorder();
-
-    std::visit(
-        overloaded {
-            [this](widget_container* parent) {
-                do_layout(parent->content_bounds().Size);
-            },
-            [this](form_base* parent) {
-                do_layout(parent->Bounds().Size);
-            }},
-        _parent);
+    do_layout(size);
 }
 
-void layout::remove_widget(widget* widget)
+void layout::remove(widget* widget)
 {
     for (usize i {0}; i < _widgets.size(); ++i) {
         if (_widgets[i].get() == widget) {
             _widgets.erase(_widgets.begin() + i);
-            notify_parent();
+            Changed();
             return;
         }
     }
@@ -61,7 +52,7 @@ void layout::remove_widget(widget* widget)
 void layout::clear()
 {
     _widgets.clear();
-    notify_parent();
+    Changed();
 }
 
 auto layout::widgets() const -> std::vector<std::shared_ptr<widget>> const&
@@ -110,19 +101,6 @@ auto layout::is_move_allowed() const -> bool
     return _moveAllowed;
 }
 
-void layout::notify_parent()
-{
-    std::visit(
-        overloaded {
-            [](widget_container* parent) {
-                parent->force_redraw("layout updated");
-            },
-            [](form_base* parent) {
-                parent->force_redraw("layout updated");
-            }},
-        _parent);
-}
-
 auto layout::create_init(string const& name) const -> widget::init
 {
     widget::init retValue {};
@@ -134,15 +112,15 @@ auto layout::create_init(string const& name) const -> widget::init
 
     std::visit(
         overloaded {
-            [&retValue, &name](widget_container* parent) {
+            [this, &retValue](widget_container* parent) {
                 retValue.Form   = parent->parent_form();
                 retValue.Parent = parent;
-                parent->force_redraw(name + ": created");
+                Changed();
             },
-            [&retValue, &name](form_base* parent) {
+            [this, &retValue](form_base* parent) {
                 retValue.Form   = parent;
                 retValue.Parent = nullptr;
-                parent->force_redraw(name + ": created");
+                Changed();
             }},
         _parent);
 

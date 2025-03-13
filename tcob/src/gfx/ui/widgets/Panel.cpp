@@ -38,6 +38,8 @@ panel::panel(init const& wi)
     , _vScrollbar {*this, orientation::Vertical}
     , _hScrollbar {*this, orientation::Horizontal}
 {
+    _layout->Changed.connect([&]() { force_redraw("Layout changed"); });
+
     ScrollEnabled.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ScrollEnabled changed"); });
     ScrollEnabled(false);
 
@@ -46,13 +48,13 @@ panel::panel(init const& wi)
 
 void panel::prepare_redraw()
 {
-    _layout->apply();
+    _layout->apply(content_bounds().Size);
     widget_container::prepare_redraw();
 }
 
 void panel::on_styles_changed()
 {
-    _layout->apply();
+    _layout->apply(content_bounds().Size);
     widget_container::on_styles_changed();
 
     _vScrollbar.reset();

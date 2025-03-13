@@ -9,6 +9,7 @@
 #include <cassert>
 #include <memory>
 
+#include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
@@ -18,6 +19,7 @@ inline auto panel::create_layout(auto&&... args) -> T&
 {
     force_redraw(this->name() + ": layout created");
     _layout = std::make_unique<T>(this, std::move(args)...);
+    _layout->Changed.connect([&]() { force_redraw("Layout changed"); });
     return *static_cast<T*>(_layout.get());
 }
 

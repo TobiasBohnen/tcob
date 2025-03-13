@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+#include "tcob/core/Signal.hpp"
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
@@ -29,9 +30,11 @@ public:
 
     virtual ~layout() = default;
 
-    void apply();
+    signal<> Changed;
 
-    void remove_widget(widget* widget);
+    void apply(size_f size);
+
+    void remove(widget* widget);
     void clear();
 
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const&;
@@ -52,7 +55,6 @@ protected:
     void virtual do_layout(size_f size) = 0;
 
 private:
-    void notify_parent(); // TODO: replace with signal
     auto create_init(string const& name) const -> widget::init;
     void ensure_zorder();
 
