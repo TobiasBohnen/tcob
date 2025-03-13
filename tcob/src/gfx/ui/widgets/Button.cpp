@@ -23,10 +23,7 @@ void button::style::Transition(style& target, style const& left, style const& ri
 button::button(init const& wi)
     : widget {wi}
 {
-    Label.Changed.connect([this](auto const&) {
-        // TODO: translation hook
-        force_redraw(this->name() + ": Label changed");
-    });
+    Label.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Label changed"); });
     Icon.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Icon changed"); });
 
     Class("button");
