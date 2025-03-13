@@ -46,16 +46,14 @@ panel::panel(init const& wi)
 
 void panel::prepare_redraw()
 {
-    widget_container::prepare_redraw();
-
     _layout->apply();
+    widget_container::prepare_redraw();
 }
 
 void panel::on_styles_changed()
 {
-    widget_container::on_styles_changed();
-
     _layout->apply();
+    widget_container::on_styles_changed();
 
     _vScrollbar.reset();
     _hScrollbar.reset();

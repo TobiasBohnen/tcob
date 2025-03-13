@@ -24,11 +24,11 @@ void tooltip::force_redraw(string const& /* reason */)
 
 void tooltip::on_update(milliseconds deltaTime)
 {
-    panel::on_update(deltaTime);
     if (_fadeInTween) {
         current_layout()->apply();
         _fadeInTween->update(deltaTime);
     }
+    panel::on_update(deltaTime);
 }
 
 void tooltip::on_popup(widget* top)

@@ -162,6 +162,9 @@ void form_base::on_fixed_update(milliseconds deltaTime)
 
     // update styles
     if (_prepareWidgets) {
+        // layout
+        apply_layout();
+
         // containers
         for (auto const& container : widgets) {
             container->prepare_redraw();
@@ -171,9 +174,6 @@ void form_base::on_fixed_update(milliseconds deltaTime)
         for (auto const& tooltip : _tooltips) {
             tooltip.lock()->prepare_redraw();
         }
-
-        // layout
-        apply_layout();
 
         _prepareWidgets = false;
         _redrawWidgets  = true;
