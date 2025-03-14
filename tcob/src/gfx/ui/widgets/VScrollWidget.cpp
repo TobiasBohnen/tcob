@@ -27,6 +27,7 @@ vscroll_widget::vscroll_widget(init const& wi)
     : widget {wi}
     , _vScrollbar {*this, orientation::Vertical}
 {
+    _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
 }
 
 void vscroll_widget::on_styles_changed()

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "tcob/core/Property.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -43,11 +44,14 @@ protected:
 
     void on_update(milliseconds deltaTime) override;
 
+    void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
     void on_click() override;
 
     auto attributes() const -> widget_attributes override;
 
 private:
+    void select_next();
+
     std::vector<utf8_string> _items;
 
     cycle_button::style _style;

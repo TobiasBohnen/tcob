@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/Form.hpp"
 
 #include <chrono>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <ranges>
@@ -127,6 +128,19 @@ void form_base::notify_redraw(string const& reason)
     if (!_prepareWidgets) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
     }
+
+    // check overlap //FIXME: hack
+    auto const& conts {containers()};
+    for (auto it {conts.begin()}; it != conts.end(); ++it) {
+        for (auto jt {std::next(it)}; jt != conts.end(); ++jt) {
+            if ((*it)->Bounds->intersects((*jt)->Bounds())) {
+                (*it)->mark_redraw();
+                (*jt)->mark_redraw();
+                _clearRedraw = true;
+            }
+        }
+    }
+
     _prepareWidgets = true;
 }
 

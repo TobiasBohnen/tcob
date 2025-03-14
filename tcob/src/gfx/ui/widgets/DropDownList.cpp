@@ -33,6 +33,7 @@ drop_down_list::drop_down_list(init const& wi)
     , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
+    _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
     SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
     HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
@@ -193,6 +194,7 @@ void drop_down_list::on_mouse_leave()
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
+    // over scrollbar
     _vScrollbar.mouse_hover(ev.Position);
     if (_vScrollbar.is_mouse_over()) {
         _mouseOverBox    = false;
@@ -201,16 +203,21 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
         return;
     }
 
+    // over box
     auto const mp {global_to_parent(*this, ev.Position)};
-    if (Bounds->contains(mp) && !_mouseOverBox) {
-        _mouseOverBox    = true;
-        HoveredItemIndex = INVALID_INDEX;
-        ev.Handled       = true;
+    if (Bounds->contains(mp)) {
+        if (!_mouseOverBox) {
+            _mouseOverBox    = true;
+            HoveredItemIndex = INVALID_INDEX;
+            ev.Handled       = true;
+        }
         return;
     }
 
     _mouseOverBox = false;
     if (!_isExtended) { return; }
+
+    // over list
     for (auto const& kvp : _itemRectCache) {
         if (!kvp.second.contains(mp)) { continue; }
         HoveredItemIndex = kvp.first;

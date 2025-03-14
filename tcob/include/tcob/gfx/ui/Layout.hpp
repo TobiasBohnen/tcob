@@ -56,7 +56,7 @@ protected:
 
 private:
     auto create_init(string const& name) const -> widget::init;
-    void ensure_zorder();
+    void normalize_zorder();
 
     parent                               _parent;
     std::vector<std::shared_ptr<widget>> _widgets {};

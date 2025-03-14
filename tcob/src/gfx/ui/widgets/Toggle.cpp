@@ -22,8 +22,11 @@ void toggle::style::Transition(style& target, style const& left, style const& ri
 
 toggle::toggle(init const& wi)
     : widget {wi}
-    , _tween {*this}
 {
+    _tween.Changed.connect([this]() {
+        request_redraw(this->name() + ": Tween value changed");
+    });
+
     Checked.Changed.connect([this](auto const&) { on_checked_changed(); });
 
     Class("toggle");

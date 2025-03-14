@@ -6,14 +6,10 @@
 #include "tcob/gfx/ui/WidgetTweener.hpp"
 
 #include "tcob/gfx/animation/Tween.hpp"
-#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 
-widget_tweener::widget_tweener(widget& parent)
-    : _parent {parent}
-{
-}
+widget_tweener::widget_tweener() = default;
 
 void widget_tweener::start(f32 toValue, milliseconds delay)
 {
@@ -55,7 +51,7 @@ void widget_tweener::reset(f32 value)
 void widget_tweener::set_value(f32 value)
 {
     _currentValue = value;
-    _parent.request_redraw(_parent.name() + ": Tween value changed");
+    Changed();
 }
 
 } // namespace ui

@@ -9,6 +9,7 @@
 #include <iterator>
 
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -93,9 +94,14 @@ void cycle_button::on_update(milliseconds /*deltaTime*/)
 {
 }
 
+void cycle_button::on_mouse_wheel(input::mouse::wheel_event const& /* ev */)
+{
+    select_next();
+}
+
 void cycle_button::on_click()
 {
-    SelectedItemIndex = (SelectedItemIndex() + 1) % item_count();
+    select_next();
 }
 
 auto cycle_button::attributes() const -> widget_attributes
@@ -108,6 +114,12 @@ auto cycle_button::attributes() const -> widget_attributes
     }
 
     return retValue;
+}
+
+void cycle_button::select_next()
+{
+    if (_items.empty()) { return; }
+    SelectedItemIndex = (SelectedItemIndex() + 1) % item_count();
 }
 
 } // namespace ui

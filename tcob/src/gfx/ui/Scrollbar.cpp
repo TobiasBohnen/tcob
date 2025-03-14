@@ -19,8 +19,10 @@ namespace tcob::ui {
 scrollbar::scrollbar(widget& parent, orientation orien)
     : _orien {orien}
     , _parent {parent}
-    , _tween {parent}
 {
+    _tween.Changed.connect([this]() {
+        Changed();
+    });
 }
 
 void scrollbar::update(milliseconds deltaTime)

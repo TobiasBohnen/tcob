@@ -9,15 +9,17 @@
 #include <memory>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/gfx/animation/Tween.hpp"
-#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API widget_tweener : public non_copyable { // TODO: improve or remove
 public:
-    explicit widget_tweener(widget& parent);
+    widget_tweener();
+
+    signal<> Changed;
 
     void start(f32 toValue, milliseconds delay);
 
@@ -30,7 +32,6 @@ public:
 private:
     void set_value(f32 value);
 
-    widget&                                 _parent;
     std::unique_ptr<gfx::linear_tween<f32>> _tween;
     f32                                     _currentValue {0.0f};
     f32                                     _targetValue {0.0f};

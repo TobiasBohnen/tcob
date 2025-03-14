@@ -38,6 +38,9 @@ panel::panel(init const& wi)
     , _vScrollbar {*this, orientation::Vertical}
     , _hScrollbar {*this, orientation::Horizontal}
 {
+    _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
+    _hScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
+
     _layout->Changed.connect([&]() { request_redraw("Layout changed"); });
 
     ScrollEnabled.Changed.connect([this](auto const&) { request_redraw(this->name() + ": ScrollEnabled changed"); });

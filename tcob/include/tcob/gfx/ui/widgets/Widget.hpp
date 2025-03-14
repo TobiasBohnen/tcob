@@ -91,8 +91,6 @@ public:
     void update(milliseconds deltaTime) override;
 
     void virtual draw(widget_painter& painter);
-    void virtual prepare_redraw();
-    void virtual request_redraw(string const& reason);
 
     auto hit_test(point_f pos) const -> bool;
 
@@ -124,6 +122,8 @@ protected:
     auto controls() const -> control_map const&;
 
     void virtual on_draw(widget_painter& painter) = 0;
+    void virtual prepare_redraw();
+    void virtual request_redraw(string const& reason);
     void virtual mark_redraw();
 
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }

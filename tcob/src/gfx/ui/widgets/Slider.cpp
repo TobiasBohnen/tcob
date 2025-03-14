@@ -36,8 +36,10 @@ slider::slider(init const& wi)
         if (IncrementalChange && std::abs(Value() - val) > Step) { return Value(); }
         return std::clamp(val, Min(), Max());
     }}}
-    , _tween {*this}
 {
+    _tween.Changed.connect([this]() {
+        request_redraw(this->name() + ": Tween value changed");
+    });
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, Value());
         on_value_changed(Value());

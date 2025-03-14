@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <limits>
 #include <memory>
 #include <variant>
 #include <vector>
@@ -34,7 +33,7 @@ layout::layout(parent parent, bool resizeAllowed, bool moveAllowed)
 
 void layout::apply(size_f size)
 {
-    ensure_zorder();
+    normalize_zorder();
     do_layout(size);
 }
 
@@ -68,29 +67,23 @@ auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
 void layout::bring_to_front(widget* target)
 {
     if (!target || _widgets.empty()) { return; }
-
-    isize maxZ {std::numeric_limits<isize>::min()};
-    for (auto const& w : _widgets) {
-        maxZ = std::max(maxZ, w->ZOrder());
-    }
-    if (target->ZOrder < maxZ) {
-        target->ZOrder = maxZ + 1;
-        ensure_zorder();
-    }
+    target->ZOrder = _widgets.size() + 1;
+    normalize_zorder();
 }
 
 void layout::send_to_back(widget* target)
 {
     if (!target || _widgets.empty()) { return; }
+    target->ZOrder = 0;
+    normalize_zorder();
+}
 
-    isize minZ {std::numeric_limits<isize>::max()};
-    for (auto const& w : _widgets) {
-        minZ = std::min(minZ, w->ZOrder());
-    }
-    if (target->ZOrder > minZ) {
-        target->ZOrder = minZ - 1;
-        ensure_zorder();
-    }
+void layout::normalize_zorder()
+{
+    std::ranges::stable_sort(_widgets, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+
+    auto newZ {static_cast<isize>(_widgets.size())};
+    for (auto& w : _widgets) { w->ZOrder = newZ--; }
 }
 
 auto layout::is_resize_allowed() const -> bool
@@ -127,11 +120,6 @@ auto layout::create_init(string const& name) const -> widget::init
         _parent);
 
     return retValue;
-}
-
-void layout::ensure_zorder()
-{
-    std::ranges::stable_sort(_widgets, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
 }
 
 ////////////////////////////////////////////////////////////
