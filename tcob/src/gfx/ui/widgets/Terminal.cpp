@@ -58,9 +58,7 @@ void terminal::move(point_i pos)
 {
     if (_currentCursor != pos) {
         _currentCursor = pos;
-        if (_cursorVisible) {
-            request_redraw(this->name() + ": cursor moved");
-        }
+        if (_cursorVisible) { redraw(); }
     }
 }
 
@@ -73,7 +71,7 @@ void terminal::curs_set(bool visible)
 {
     if (_showCursor != visible) {
         _showCursor = visible;
-        request_redraw(this->name() + ": cursor visibility changed");
+        redraw();
 
         if (!visible) {
             stop_blinking();
@@ -159,7 +157,7 @@ void terminal::insert_ln()
 
     insert_buffer_at(offset, Size->Width);
 
-    request_redraw(this->name() + ": line inserted");
+    redraw();
 }
 
 void terminal::delete_ln()
@@ -169,7 +167,7 @@ void terminal::delete_ln()
 
     erase_buffer_at(offset, Size->Width);
 
-    request_redraw(this->name() + ": line deleted");
+    redraw();
 }
 
 void terminal::echo(bool insertMode)
@@ -189,7 +187,7 @@ void terminal::flash()
         for (auto& cell : get_back_buffer()) {
             cell.Colors = {cell.Colors.second, cell.Colors.first};
         }
-        request_redraw(this->name() + ": flashing");
+        redraw();
     });
     _flashTween->start(playback_mode::Normal);
 }
@@ -287,10 +285,8 @@ auto static get_font_width(gfx::font* font) -> f32
 
 void terminal::on_draw(widget_painter& painter)
 {
+    if (Size->Width <= 0 || Size->Height <= 0) { return; }
 
-    if (Size->Width <= 0 || Size->Height <= 0) {
-        return;
-    }
     apply_style(_style);
 
     swap_buffers();
@@ -400,7 +396,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 } else {
                     get_back_buffer()[offset] = {};
                 }
-                request_redraw(this->name() + ": delete");
+                redraw();
             }
         } else if (ev.KeyCode == controls->BackwardDeleteKey) {
             i32 const offset {get_offset(get_xy()) - 1};
@@ -415,7 +411,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 } else if (y > 0) {
                     move({Size->Width - 1, y - 1});
                 }
-                request_redraw(this->name() + ": backspace");
+                redraw();
             }
         } else if (ev.KeyCode == controls->SubmitKey) {
             if (_echoKeys == echo_mode::InsertEcho) {
@@ -555,7 +551,7 @@ void terminal::clear_buffer()
     _buffers[0].resize(_bufferSize);
     _buffers[1].clear();
     _buffers[1].resize(_bufferSize);
-    request_redraw(this->name() + ": text buffer cleared");
+    redraw();
 }
 
 struct esc_seq {
@@ -712,14 +708,10 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
         auto&      buffer {get_back_buffer()};
         if (mode == "0") {
             i32 offset {std::max(0, get_offset(get_xy()))};
-            while (offset < _bufferSize) {
-                buffer[offset++] = {};
-            }
+            while (offset < _bufferSize) { buffer[offset++] = {}; }
         } else if (mode == "1") {
             i32 offset {std::max(0, get_offset(get_xy()))};
-            while (offset >= 0) {
-                buffer[offset--] = {};
-            }
+            while (offset >= 0) { buffer[offset--] = {}; }
         } else if (mode == "2") {
             clear_buffer();
         }
@@ -731,25 +723,24 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
         if (mode == "0") {
             i32       start {std::max(0, get_offset({x, y}))};
             i32 const end {std::max(0, get_offset({0, y + 1}))};
-            while (start < end) {
-                buffer[start++] = {};
-            }
+            while (start < end) { buffer[start++] = {}; }
         } else if (mode == "1") {
             i32       start {std::max(0, get_offset({0, y}))};
             i32 const end {std::max(0, get_offset({x, y}))};
-            while (start < end) {
-                buffer[start++] = {};
-            }
+            while (start < end) { buffer[start++] = {}; }
         } else if (mode == "2") {
             i32       start {std::max(0, get_offset({0, y}))};
             i32 const end {std::max(0, get_offset({0, y + 1}))};
-            while (start < end) {
-                buffer[start++] = {};
-            }
+            while (start < end) { buffer[start++] = {}; }
         }
         break;
     }
     }
+}
+
+void terminal::redraw()
+{
+    request_redraw(this->name() + ": redraw");
 }
 
 void terminal::set(utf8_string_view text, bool insert)
@@ -787,7 +778,7 @@ void terminal::set(utf8_string_view text, bool insert)
         }
     }
 
-    request_redraw(this->name() + ": text set");
+    redraw();
 }
 
 void terminal::cursor_line_break()
@@ -805,7 +796,7 @@ void terminal::start_blinking()
     _cursorTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.Caret.BlinkRate * 2, 1.0f, 0.0f);
     _cursorTween->Value.Changed.connect([this](auto val) {
         _cursorVisible = val;
-        request_redraw(this->name() + ": cursor blink");
+        redraw();
     });
     _cursorTween->start(playback_mode::Looped);
 }

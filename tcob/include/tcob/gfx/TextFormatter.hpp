@@ -58,6 +58,6 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-TCOB_API auto format(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning) -> result;
+TCOB_API auto format(utf8_string_view text, font& font, alignments align, size_f availableSize, f32 scale, bool kerning, bool parseCommands) -> result;
 TCOB_API auto measure(utf8_string_view text, font& font, f32 availableHeight, bool kerning) -> size_f;
 }

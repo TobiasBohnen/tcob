@@ -63,18 +63,21 @@ void tab_container::remove_tab(widget* tab)
             break;
         }
     }
-    ActiveTabIndex = 0;
+
+    if (_tabs.empty()) {
+        ActiveTabIndex = INVALID_INDEX;
+    } else {
+        ActiveTabIndex = 0;
+    }
+
     request_redraw(this->name() + ": tab removed");
 }
 
 void tab_container::clear_tabs()
 {
-    _tabs.clear();
-    _tabLabels.clear();
-    clear_sub_styles();
-
-    ActiveTabIndex = 0;
-    request_redraw(this->name() + ": tabs cleared");
+    while (!_tabs.empty()) {
+        remove_tab(_tabs.front().get());
+    }
 }
 
 void tab_container::change_tab_label(widget* tab, utf8_string const& label)

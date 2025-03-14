@@ -142,6 +142,8 @@ private:
 
     void parse_esc(char code, std::vector<string> const& seq);
 
+    void redraw();
+
     point_i                 _currentCursor {point_u::Zero};
     std::pair<color, color> _currentColors {DEFAULT_COLORS};
 

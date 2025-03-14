@@ -60,18 +60,21 @@ void accordion::remove_section(widget* sec)
             break;
         }
     }
-    ActiveSectionIndex = 0;
+
+    if (_sections.empty()) {
+        ActiveSectionIndex = INVALID_INDEX;
+    } else {
+        ActiveSectionIndex = 0;
+    }
+
     request_redraw(this->name() + ": section removed");
 }
 
 void accordion::clear_sections()
 {
-    _sections.clear();
-    _sectionLabels.clear();
-    clear_sub_styles();
-
-    ActiveSectionIndex = 0;
-    request_redraw(this->name() + ": sections cleared");
+    while (!_sections.empty()) {
+        remove_section(_sections.front().get());
+    }
 }
 
 void accordion::change_section_label(widget* sec, utf8_string const& label)

@@ -444,19 +444,19 @@ void widget::do_controller_button_down(input::controller::button_event const& ev
     on_controller_button_down(ev);
 
     if (!ev.Handled) {
-        auto const& controls {_form->Controls};
+        auto const& ctrls {controls()};
 
-        if (ev.Button == controls->ActivateButton) {
+        if (ev.Button == ctrls.ActivateButton) {
             activate();
             ev.Handled = true;
-        } else if (!ev.Controller->is_button_pressed(controls->ActivateButton)) {
-            if (ev.Button == controls->NavLeftButton) {
+        } else if (!ev.Controller->is_button_pressed(ctrls.ActivateButton)) {
+            if (ev.Button == ctrls.NavLeftButton) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Left);
-            } else if (ev.Button == controls->NavRightButton) {
+            } else if (ev.Button == ctrls.NavRightButton) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Right);
-            } else if (ev.Button == controls->NavDownButton) {
+            } else if (ev.Button == ctrls.NavDownButton) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Down);
-            } else if (ev.Button == controls->NavUpButton) {
+            } else if (ev.Button == ctrls.NavUpButton) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Up);
             }
         }

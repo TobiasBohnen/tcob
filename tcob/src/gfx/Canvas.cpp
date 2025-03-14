@@ -964,7 +964,7 @@ auto canvas::format_text(size_f const& size, utf8_string_view text, f32 scale) -
 {
     state const& s {_states->get()};
     if (!s.Font) { return {}; }
-    return text_formatter::format(text, *s.Font, s.TextAlign, size, scale, true);
+    return text_formatter::format(text, *s.Font, s.TextAlign, size, scale, true, false);
 }
 
 auto canvas::measure_text(f32 height, utf8_string_view text) -> size_f
