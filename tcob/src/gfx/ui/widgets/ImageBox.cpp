@@ -17,15 +17,15 @@ namespace tcob::ui {
 image_box::image_box(init const& wi)
     : widget {wi}
 {
-    Image.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Image changed"); });
+    Image.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Image changed"); });
 
-    Fit.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Fit changed"); });
+    Fit.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Fit changed"); });
     Fit(fit_mode::Contain);
 
     Class("image_box");
 }
 
-void image_box::on_paint(widget_painter& painter)
+void image_box::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 

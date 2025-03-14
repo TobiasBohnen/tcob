@@ -47,7 +47,7 @@ public:
     prop<std::vector<u8> const> Dots;
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 
@@ -86,7 +86,7 @@ public:
     void draw_segments(std::span<segment const> segments);
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 
@@ -108,7 +108,7 @@ public:
     prop<degree_f> BaseHue {degree_f {0}};
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_mouse_down(input::mouse::button_event const& ev) override;
 

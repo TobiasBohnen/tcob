@@ -26,13 +26,13 @@ label::label(init const& wi)
 {
     Label.Changed.connect([this](auto const&) {
         // TODO: translation hook
-        force_redraw(this->name() + ": Label changed");
+        request_redraw(this->name() + ": Label changed");
     });
 
     Class("label");
 }
 
-void label::on_paint(widget_painter& painter)
+void label::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 

@@ -315,11 +315,11 @@ void canvas_widget::clear()
 {
     if (!_commands.empty()) {
         _commands.clear();
-        force_redraw(this->name() + ": commands cleared.");
+        request_redraw(this->name() + ": commands cleared.");
     }
 }
 
-void canvas_widget::on_paint(widget_painter& painter)
+void canvas_widget::on_draw(widget_painter& painter)
 {
     auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};

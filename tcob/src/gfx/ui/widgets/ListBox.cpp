@@ -13,7 +13,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -42,9 +41,9 @@ list_box::list_box(init const& wi)
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
-    HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
 
     Filter.Changed.connect([this](auto const& val) {
@@ -61,7 +60,7 @@ list_box::list_box(init const& wi)
                 }
             }
         }
-        force_redraw(this->name() + ": Filter changed");
+        request_redraw(this->name() + ": Filter changed");
     });
 
     Class("list_box");
@@ -78,7 +77,7 @@ void list_box::add_item(list_item const& item)
     if (!Filter->empty() && case_insensitive_contains(item.Text, Filter())) {
         _filteredItems.push_back(item);
     }
-    force_redraw(this->name() + ": item added");
+    request_redraw(this->name() + ": item added");
 }
 
 void list_box::clear_items()
@@ -89,7 +88,7 @@ void list_box::clear_items()
 
     SelectedItemIndex = INVALID_INDEX;
     HoveredItemIndex  = INVALID_INDEX;
-    force_redraw(this->name() + ": items cleared");
+    request_redraw(this->name() + ": items cleared");
 }
 
 auto list_box::select_item(utf8_string const& item) -> bool
@@ -133,7 +132,7 @@ void list_box::prepare_redraw()
     vscroll_widget::prepare_redraw();
 }
 
-void list_box::on_paint(widget_painter& painter)
+void list_box::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -251,7 +250,7 @@ void list_box::on_mouse_down(input::mouse::button_event const& ev)
 {
     vscroll_widget::on_mouse_down(ev);
 
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredItemIndex == INVALID_INDEX) { return; }
         if (SelectedItemIndex != HoveredItemIndex()) {
             SelectedItemIndex = HoveredItemIndex();

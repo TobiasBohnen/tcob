@@ -22,7 +22,7 @@ inline auto accordion::create_section(utf8_string const& name) -> std::shared_pt
 template <std::derived_from<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>
 {
-    force_redraw(this->name() + ": section created");
+    request_redraw(this->name() + ": section created");
 
     widget::init wi {};
     wi.Form   = parent_form();

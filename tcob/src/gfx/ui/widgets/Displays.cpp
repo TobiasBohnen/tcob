@@ -43,20 +43,20 @@ dot_matrix_display::dot_matrix_display(init const& wi)
 {
     Size.Changed.connect([this](auto const&) {
         _isDirty = true;
-        force_redraw(this->name() + ": Size changed");
+        request_redraw(this->name() + ": Size changed");
     });
     Dots.Changed.connect([this](auto const&) {
         _isDirty = true;
-        force_redraw(this->name() + ": Dots changed");
+        request_redraw(this->name() + ": Dots changed");
     });
 
     Class("dot_matrix_display");
 }
 
-void dot_matrix_display::on_paint(widget_painter& painter)
+void dot_matrix_display::on_draw(widget_painter& painter)
 {
-    if (Size->Width <= 0 || Size->Height <= 0) { return; }
 
+    if (Size->Width <= 0 || Size->Height <= 0) { return; }
     apply_style(_style);
 
     rect_f rect {Bounds()};
@@ -82,7 +82,7 @@ void dot_matrix_display::on_paint(widget_painter& painter)
                                   width, height};
 
             switch (_style.Type) {
-            case dot_type::Disc: canvas.circle(dotRect.center(), width / 2); break;
+            case dot_type::Disc: canvas.ellipse(dotRect.center(), width / 2, height / 2); break;
             case dot_type::Square: canvas.rect(dotRect); break;
             }
         }
@@ -126,7 +126,7 @@ void seven_segment_display::draw_text(string const& text)
     _segments.resize(text.size());
     std::ranges::transform(text, _segments.begin(), [this](char const c) { return get_segment(c); });
 
-    force_redraw(this->name() + ": segments changed");
+    request_redraw(this->name() + ": segments changed");
 }
 
 void seven_segment_display::draw_segments(std::span<segment const> segments)
@@ -134,7 +134,7 @@ void seven_segment_display::draw_segments(std::span<segment const> segments)
     _segments.resize(segments.size());
     std::ranges::transform(segments, _segments.begin(), [this](segment const& seg) { return get_segment(seg); });
 
-    force_redraw(this->name() + ": segments changed");
+    request_redraw(this->name() + ": segments changed");
 }
 
 auto seven_segment_display::get_segment(char c) -> std::bitset<7>
@@ -213,7 +213,7 @@ auto seven_segment_display::get_segment(segment segment) -> std::bitset<7>
             | (static_cast<u32>(segment.D))};
 }
 
-void seven_segment_display::on_paint(widget_painter& painter)
+void seven_segment_display::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -316,13 +316,14 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
-    BaseHue.Changed.connect([this](auto const&) { force_redraw(this->name() + ": BaseHue changed"); });
+    BaseHue.Changed.connect([this](auto const&) { request_redraw(this->name() + ": BaseHue changed"); });
 
     Class("color_picker");
 }
 
-void color_picker::on_paint(widget_painter& painter)
+void color_picker::on_draw(widget_painter& painter)
 {
+
     auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
@@ -390,7 +391,7 @@ void color_picker::on_mouse_down(input::mouse::button_event const& ev)
         } else {
             SelectedColor     = color::FromHSVA({BaseHue(), s, 1 - v});
             _selectedColorPos = mp - Bounds->Position;
-            force_redraw(this->name() + ": SelectedColor changed");
+            request_redraw(this->name() + ": SelectedColor changed");
         }
     }
 }

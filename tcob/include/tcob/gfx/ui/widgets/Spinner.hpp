@@ -37,7 +37,7 @@ public:
     prop_val<i32> Value;
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;

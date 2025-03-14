@@ -41,16 +41,16 @@ slider::slider(init const& wi)
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, Value());
         on_value_changed(Value());
-        force_redraw(this->name() + ": Min changed");
+        request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
         Value = std::min(val, Value());
         on_value_changed(Value());
-        force_redraw(this->name() + ": Max changed");
+        request_redraw(this->name() + ": Max changed");
     });
     Max(100);
-    Step.Changed.connect([this](auto) { force_redraw(this->name() + ": Step changed"); });
+    Step.Changed.connect([this](auto) { request_redraw(this->name() + ": Step changed"); });
     Step(1);
     Value.Changed.connect([this](auto val) { on_value_changed(val); });
     Value(Min());
@@ -58,7 +58,7 @@ slider::slider(init const& wi)
     Class("slider");
 }
 
-void slider::on_paint(widget_painter& painter)
+void slider::on_draw(widget_painter& painter)
 {
     // TODO: draw background
     apply_style(_style);
@@ -121,7 +121,7 @@ void slider::on_mouse_leave()
 {
     if (_overThumb) {
         _overThumb = false;
-        force_redraw(this->name() + ": mouse left");
+        request_redraw(this->name() + ": mouse left");
     }
 }
 
@@ -130,7 +130,7 @@ void slider::on_mouse_hover(input::mouse::motion_event const& ev)
     bool const overThumb {_barRectCache.Thumb.contains(global_to_parent(ev.Position))};
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
-        force_redraw(this->name() + ": thumb hover change");
+        request_redraw(this->name() + ": thumb hover change");
         ev.Handled = true;
     }
 }
@@ -151,7 +151,7 @@ void slider::on_mouse_up(input::mouse::button_event const& ev)
 
     if (_overThumb && !hit_test(point_f {ev.Position})) {
         _overThumb = false;
-        force_redraw(this->name() + ": thumb left");
+        request_redraw(this->name() + ": thumb left");
         ev.Handled = true;
     }
 }
@@ -160,7 +160,7 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
 {
     _isDragging = false;
 
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         if (!_overThumb) {
             calculate_value(global_to_content(ev.Position));
         } else {
@@ -241,7 +241,7 @@ void slider::calculate_value(point_f mp)
 
     if (!_overThumb) {
         _overThumb = true;
-        force_redraw(this->name() + ": thumb move after value change");
+        request_redraw(this->name() + ": thumb move after value change");
     }
 }
 

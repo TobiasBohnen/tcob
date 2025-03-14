@@ -23,13 +23,13 @@ void button::style::Transition(style& target, style const& left, style const& ri
 button::button(init const& wi)
     : widget {wi}
 {
-    Label.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Label changed"); });
-    Icon.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Icon changed"); });
+    Label.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Label changed"); });
+    Icon.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Icon changed"); });
 
     Class("button");
 }
 
-void button::on_paint(widget_painter& painter)
+void button::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 

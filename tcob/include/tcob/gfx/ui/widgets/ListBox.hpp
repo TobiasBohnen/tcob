@@ -50,7 +50,7 @@ public:
     void prepare_redraw() override;
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 

@@ -13,6 +13,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
@@ -38,9 +39,9 @@ panel::panel(init const& wi)
     , _vScrollbar {*this, orientation::Vertical}
     , _hScrollbar {*this, orientation::Horizontal}
 {
-    _layout->Changed.connect([&]() { force_redraw("Layout changed"); });
+    _layout->Changed.connect([&]() { request_redraw("Layout changed"); });
 
-    ScrollEnabled.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ScrollEnabled changed"); });
+    ScrollEnabled.Changed.connect([this](auto const&) { request_redraw(this->name() + ": ScrollEnabled changed"); });
     ScrollEnabled(false);
 
     Class("panel");
@@ -96,7 +97,7 @@ void panel::on_update(milliseconds deltaTime)
     _hScrollbar.update(deltaTime);
 }
 
-void panel::on_paint(widget_painter& painter)
+void panel::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -124,6 +125,13 @@ void panel::on_paint(widget_painter& painter)
         apply_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
         _hScrollbar.paint(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
     }
+}
+
+void panel::on_draw_children(widget_painter& painter)
+{
+    apply_style(_style);
+
+    rect_f rect {content_bounds()};
 
     // content
     scissor_guard const guard {painter, this};
@@ -135,7 +143,7 @@ void panel::on_paint(widget_painter& painter)
     auto widgets {this->widgets() | std::views::reverse}; // ZORDER
     for (auto const& w : widgets) {
         painter.begin(Alpha(), xform);
-        w->paint(painter);
+        w->draw(painter);
         painter.end();
     }
 }
@@ -151,7 +159,7 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
     auto const scrollHover {[&](auto&& scrollbar) {
         scrollbar.mouse_hover(ev.Position);
         if (scrollbar.is_mouse_over()) {
-            force_redraw(this->name() + ": scrollbar hover");
+            request_redraw(this->name() + ": scrollbar hover");
             return true;
         }
         return false;
@@ -165,7 +173,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     auto const scrollDrag {[&](auto&& scrollbar) {
         scrollbar.mouse_drag(ev.Position);
         if (scrollbar.is_dragging()) {
-            force_redraw(this->name() + ": scrollbar dragged");
+            request_redraw(this->name() + ": scrollbar dragged");
             return true;
         }
         return false;
@@ -184,10 +192,10 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 void panel::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+        if (ev.Button == controls().PrimaryMouseButton) {
             _vScrollbar.mouse_down(ev.Position);
             _hScrollbar.mouse_down(ev.Position);
-            force_redraw(this->name() + ": mouse down");
+            request_redraw(this->name() + ": mouse down");
             ev.Handled = true;
             return;
         }
@@ -197,10 +205,10 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
 void panel::on_mouse_up(input::mouse::button_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+        if (ev.Button == controls().PrimaryMouseButton) {
             _vScrollbar.mouse_up(ev.Position);
             _hScrollbar.mouse_up(ev.Position);
-            force_redraw(this->name() + ": mouse up");
+            request_redraw(this->name() + ": mouse up");
             ev.Handled = true;
             return;
         }
@@ -280,9 +288,17 @@ glass::glass(init const& wi)
     Class("glass");
 }
 
-void glass::on_paint(widget_painter& painter)
+void glass::on_draw(widget_painter& painter)
 {
-    rect_f rect {Bounds()};
+    if (is_top_level()) {
+        scissor_guard const guard {painter, this};
+        painter.canvas().clear();
+    }
+}
+
+void glass::on_draw_children(widget_painter& painter)
+{
+    rect_f rect {content_bounds()};
 
     // content
     scissor_guard const guard {painter, this};
@@ -294,7 +310,7 @@ void glass::on_paint(widget_painter& painter)
     auto widgets {this->widgets() | std::views::reverse}; // ZORDER
     for (auto const& w : widgets) {
         painter.begin(Alpha(), xform);
-        w->paint(painter);
+        w->draw(painter);
         painter.end();
     }
 }

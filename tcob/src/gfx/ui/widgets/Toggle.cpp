@@ -29,7 +29,7 @@ toggle::toggle(init const& wi)
     Class("toggle");
 }
 
-void toggle::on_paint(widget_painter& painter)
+void toggle::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 

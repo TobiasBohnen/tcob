@@ -57,7 +57,8 @@ public:
     void virtual remove_container(widget* widget)                                  = 0;
     void virtual clear_containers()                                                = 0;
 
-    void force_redraw(string const& reason);
+    void request_redraw(string const& reason);
+    void notify_redraw(string const& reason);
 
     auto focus_nav_target(string const& widget, direction dir) -> bool;
 
@@ -115,6 +116,7 @@ private:
     std::vector<std::weak_ptr<tooltip>> _tooltips;
 
     bool _redrawWidgets {true};
+    bool _clearRedraw {true};
     bool _prepareWidgets {true};
 
     bool         _isLButtonDown {false};

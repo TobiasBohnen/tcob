@@ -32,23 +32,23 @@ spinner::spinner(init const& wi)
 {
     Min.Changed.connect([this](auto const& val) {
         Value = std::min(val, Value());
-        force_redraw(this->name() + ": Min changed");
+        request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto const& val) {
         Value = std::max(val, Value());
-        force_redraw(this->name() + ": Max changed");
+        request_redraw(this->name() + ": Max changed");
     });
     Max(100);
-    Step.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Step changed"); });
+    Step.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Step changed"); });
     Step(5);
-    Value.Changed.connect([this](auto const&) { force_redraw(this->name() + ": Value changed"); });
+    Value.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Value changed"); });
     Value(0);
 
     Class("spinner");
 }
 
-void spinner::on_paint(widget_painter& painter)
+void spinner::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -86,16 +86,16 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
     if (_rectCache.first.contains(mp)) {
         if (_hoverArrow != arrow::Increase) {
             _hoverArrow = arrow::Increase;
-            force_redraw(this->name() + ": arrow hover changed");
+            request_redraw(this->name() + ": arrow hover changed");
         }
     } else if (_rectCache.second.contains(mp)) {
         if (_hoverArrow != arrow::Decrease) {
             _hoverArrow = arrow::Decrease;
-            force_redraw(this->name() + ": arrow hover changed");
+            request_redraw(this->name() + ": arrow hover changed");
         }
     } else if (_hoverArrow != arrow::None) {
         _hoverArrow = arrow::None;
-        force_redraw(this->name() + ": arrow hover changed");
+        request_redraw(this->name() + ": arrow hover changed");
     }
 
     ev.Handled = true;

@@ -33,7 +33,7 @@ public:
     std::shared_ptr<widget> For;
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_key_down(input::keyboard::event const& ev) override;
     void on_key_up(input::keyboard::event const& ev) override;

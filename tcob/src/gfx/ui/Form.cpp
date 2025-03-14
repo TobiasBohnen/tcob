@@ -112,7 +112,17 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     return retValue;
 }
 
-void form_base::force_redraw(string const& reason)
+void form_base::request_redraw(string const& reason)
+{
+    for (auto const& widget : containers()) {
+        widget->mark_redraw();
+    }
+    notify_redraw(reason);
+
+    _clearRedraw = true;
+}
+
+void form_base::notify_redraw(string const& reason)
 {
     if (!_prepareWidgets) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
@@ -201,16 +211,17 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     // redraw
     if (_redrawWidgets) {
-        _canvas.begin_frame(bounds, 1.0f, 0);
+        _canvas.begin_frame(bounds, 1.0f, 0, _clearRedraw);
 
         auto widgets {current_layout()->widgets() | std::views::reverse}; // ZORDER
         for (auto const& container : widgets) {
             _canvas.reset();
-            container->paint(*_painter);
+            container->draw(*_painter);
         }
 
         _canvas.end_frame();
         _redrawWidgets = false;
+        _clearRedraw   = false;
     }
 
     // render
@@ -229,7 +240,8 @@ void form_base::on_draw_to(gfx::render_target& target)
         }
 
         _canvas.begin_frame(bounds, 1.0f, 1);
-        _topWidget->Tooltip->paint(*_painter);
+        _topWidget->Tooltip->mark_redraw();
+        _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
 
         _renderer.set_layer(1);
@@ -244,26 +256,26 @@ auto form_base::focused_widget() const -> widget*
 
 void form_base::focus_widget(widget* newFocus)
 {
-    if (newFocus != _focusWidget) {
-        _currentTabIndex = -1;
-        _injector.on_focus_lost(_focusWidget);
+    if (newFocus == _focusWidget) { return; }
 
-        _focusWidget = newFocus;
+    _currentTabIndex = -1;
+    _injector.on_focus_lost(_focusWidget);
 
-        if (_focusWidget) {
-            if (_focusWidget->is_inert()) {
-                _focusWidget = nullptr;
-                return;
-            }
+    _focusWidget = newFocus;
 
-            auto* layout {current_layout()};
-            if (layout->is_move_allowed()) {
-                layout->bring_to_front(_focusWidget->top_level_widget());
-            }
-
-            _currentTabIndex = _focusWidget->TabStop->Index;
-            _injector.on_focus_gained(_focusWidget);
+    if (_focusWidget) {
+        if (_focusWidget->is_inert()) {
+            _focusWidget = nullptr;
+            return;
         }
+
+        auto* layout {current_layout()};
+        if (layout->is_move_allowed()) {
+            layout->bring_to_front(_focusWidget->top_level_widget());
+        }
+
+        _currentTabIndex = _focusWidget->TabStop->Index;
+        _injector.on_focus_gained(_focusWidget);
     }
 }
 
@@ -408,7 +420,7 @@ void form_base::on_bounds_changed()
 {
     _renderer.set_bounds(Bounds());
 
-    force_redraw(this->name() + "bounds changed");
+    request_redraw(this->name() + "bounds changed");
     on_styles_changed();
 }
 

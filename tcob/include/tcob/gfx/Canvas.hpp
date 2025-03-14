@@ -152,6 +152,8 @@ public:
     void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
     void set_global_enforce_path_winding(bool force);
 
+    void clear();
+
     // State handling
     void save();
     void restore();

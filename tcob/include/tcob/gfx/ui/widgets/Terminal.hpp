@@ -96,7 +96,7 @@ public:
     void dump(io::ostream& stream) const;
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 

@@ -40,7 +40,7 @@ public:
     bool IncrementalChange {false};
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_key_down(input::keyboard::event const& ev) override;
     void on_mouse_leave() override;

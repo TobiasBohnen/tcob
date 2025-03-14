@@ -22,7 +22,7 @@ inline form<Layout>::form(form_init const& init, auto&&... layoutArgs)
     : form_base {init.Name, rect_f {init.Bounds}}
     , _layout {this, layoutArgs...}
 {
-    _layout.Changed.connect([&]() { force_redraw("Layout changed"); });
+    _layout.Changed.connect([&]() { request_redraw("Layout changed"); });
 }
 
 template <std::derived_from<layout> Layout>

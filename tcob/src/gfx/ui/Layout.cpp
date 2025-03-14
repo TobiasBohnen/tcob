@@ -38,10 +38,10 @@ void layout::apply(size_f size)
     do_layout(size);
 }
 
-void layout::remove(widget* widget)
+void layout::remove(widget* target)
 {
     for (usize i {0}; i < _widgets.size(); ++i) {
-        if (_widgets[i].get() == widget) {
+        if (_widgets[i].get() == target) {
             _widgets.erase(_widgets.begin() + i);
             Changed();
             return;
@@ -65,30 +65,32 @@ auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
     return _widgets;
 }
 
-void layout::bring_to_front(widget* widget)
+void layout::bring_to_front(widget* target)
 {
-    if (!widget) { return; }
+    if (!target || _widgets.empty()) { return; }
 
     isize maxZ {std::numeric_limits<isize>::min()};
     for (auto const& w : _widgets) {
         maxZ = std::max(maxZ, w->ZOrder());
     }
-    widget->ZOrder = maxZ + 1;
-
-    ensure_zorder();
+    if (target->ZOrder < maxZ) {
+        target->ZOrder = maxZ + 1;
+        ensure_zorder();
+    }
 }
 
-void layout::send_to_back(widget* widget)
+void layout::send_to_back(widget* target)
 {
-    if (!widget) { return; }
+    if (!target || _widgets.empty()) { return; }
 
     isize minZ {std::numeric_limits<isize>::max()};
     for (auto const& w : _widgets) {
         minZ = std::min(minZ, w->ZOrder());
     }
-    widget->ZOrder = minZ - 1;
-
-    ensure_zorder();
+    if (target->ZOrder > minZ) {
+        target->ZOrder = minZ - 1;
+        ensure_zorder();
+    }
 }
 
 auto layout::is_resize_allowed() const -> bool

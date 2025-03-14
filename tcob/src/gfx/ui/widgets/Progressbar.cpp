@@ -32,13 +32,13 @@ progress_bar::progress_bar(init const& wi)
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, Value());
         on_value_changed(Value());
-        force_redraw(this->name() + ": Min changed");
+        request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
         Value = std::min(val, Value());
         on_value_changed(Value());
-        force_redraw(this->name() + ": Max changed");
+        request_redraw(this->name() + ": Max changed");
     });
     Max(100);
     Value.Changed.connect([this](auto val) { on_value_changed(val); });
@@ -47,7 +47,7 @@ progress_bar::progress_bar(init const& wi)
     Class("progress_bar");
 }
 
-void progress_bar::on_paint(widget_painter& painter)
+void progress_bar::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 

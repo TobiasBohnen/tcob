@@ -28,7 +28,7 @@ public:
     milliseconds Delay {1000};
     milliseconds FadeIn {250};
 
-    void force_redraw(string const& reason) override;
+    void request_redraw(string const& reason) override;
 
 protected:
     void on_update(milliseconds deltaTime) override;

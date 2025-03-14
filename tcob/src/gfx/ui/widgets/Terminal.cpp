@@ -59,7 +59,7 @@ void terminal::move(point_i pos)
     if (_currentCursor != pos) {
         _currentCursor = pos;
         if (_cursorVisible) {
-            force_redraw(this->name() + ": cursor moved");
+            request_redraw(this->name() + ": cursor moved");
         }
     }
 }
@@ -73,7 +73,7 @@ void terminal::curs_set(bool visible)
 {
     if (_showCursor != visible) {
         _showCursor = visible;
-        force_redraw(this->name() + ": cursor visibility changed");
+        request_redraw(this->name() + ": cursor visibility changed");
 
         if (!visible) {
             stop_blinking();
@@ -159,7 +159,7 @@ void terminal::insert_ln()
 
     insert_buffer_at(offset, Size->Width);
 
-    force_redraw(this->name() + ": line inserted");
+    request_redraw(this->name() + ": line inserted");
 }
 
 void terminal::delete_ln()
@@ -169,7 +169,7 @@ void terminal::delete_ln()
 
     erase_buffer_at(offset, Size->Width);
 
-    force_redraw(this->name() + ": line deleted");
+    request_redraw(this->name() + ": line deleted");
 }
 
 void terminal::echo(bool insertMode)
@@ -189,7 +189,7 @@ void terminal::flash()
         for (auto& cell : get_back_buffer()) {
             cell.Colors = {cell.Colors.second, cell.Colors.first};
         }
-        force_redraw(this->name() + ": flashing");
+        request_redraw(this->name() + ": flashing");
     });
     _flashTween->start(playback_mode::Normal);
 }
@@ -285,12 +285,12 @@ auto static get_font_width(gfx::font* font) -> f32
     return qs[0].AdvanceX;
 }
 
-void terminal::on_paint(widget_painter& painter)
+void terminal::on_draw(widget_painter& painter)
 {
+
     if (Size->Width <= 0 || Size->Height <= 0) {
         return;
     }
-
     apply_style(_style);
 
     swap_buffers();
@@ -400,7 +400,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 } else {
                     get_back_buffer()[offset] = {};
                 }
-                force_redraw(this->name() + ": delete");
+                request_redraw(this->name() + ": delete");
             }
         } else if (ev.KeyCode == controls->BackwardDeleteKey) {
             i32 const offset {get_offset(get_xy()) - 1};
@@ -415,7 +415,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                 } else if (y > 0) {
                     move({Size->Width - 1, y - 1});
                 }
-                force_redraw(this->name() + ": backspace");
+                request_redraw(this->name() + ": backspace");
             }
         } else if (ev.KeyCode == controls->SubmitKey) {
             if (_echoKeys == echo_mode::InsertEcho) {
@@ -482,7 +482,7 @@ void terminal::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (!_useMouse) { return; }
 
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredCell->X >= 0 && HoveredCell->Y >= 0) {
             move(HoveredCell());
             ev.Handled = true;
@@ -555,7 +555,7 @@ void terminal::clear_buffer()
     _buffers[0].resize(_bufferSize);
     _buffers[1].clear();
     _buffers[1].resize(_bufferSize);
-    force_redraw(this->name() + ": text buffer cleared");
+    request_redraw(this->name() + ": text buffer cleared");
 }
 
 struct esc_seq {
@@ -787,7 +787,7 @@ void terminal::set(utf8_string_view text, bool insert)
         }
     }
 
-    force_redraw(this->name() + ": text set");
+    request_redraw(this->name() + ": text set");
 }
 
 void terminal::cursor_line_break()
@@ -805,7 +805,7 @@ void terminal::start_blinking()
     _cursorTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.Caret.BlinkRate * 2, 1.0f, 0.0f);
     _cursorTween->Value.Changed.connect([this](auto val) {
         _cursorVisible = val;
-        force_redraw(this->name() + ": cursor blink");
+        request_redraw(this->name() + ": cursor blink");
     });
     _cursorTween->start(playback_mode::Looped);
 }

@@ -54,7 +54,8 @@ public:
 protected:
     void on_styles_changed() override;
 
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
+    void on_draw_children(widget_painter& painter) override;
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
@@ -89,7 +90,8 @@ public:
     explicit glass(init const& wi);
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
+    void on_draw_children(widget_painter& painter) override;
 
     auto is_inert() const -> bool override;
 };

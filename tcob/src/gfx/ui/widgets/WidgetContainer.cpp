@@ -9,6 +9,7 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -25,6 +26,20 @@ void widget_container::update(milliseconds deltaTime)
     for (auto const& w : widgets()) {
         w->update(deltaTime);
     }
+}
+
+void widget_container::draw(widget_painter& painter)
+{
+    if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
+
+    painter.begin(Alpha());
+    if (_redraw) {
+        on_draw(painter);
+    }
+    on_draw_children(painter);
+    painter.end();
+
+    _redraw = false;
 }
 
 auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -72,6 +87,14 @@ void widget_container::on_styles_changed()
     }
 }
 
+void widget_container::mark_redraw()
+{
+    _redraw = true;
+    for (auto const& w : widgets()) {
+        w->mark_redraw();
+    }
+}
+
 auto widget_container::paint_offset() const -> point_f
 {
     point_f retValue {point_f::Zero};
@@ -79,9 +102,7 @@ auto widget_container::paint_offset() const -> point_f
     if (auto const* wparent {parent()}) {
         retValue += wparent->global_content_bounds().Position;
         retValue -= wparent->scroll_offset();
-        if (auto const* form {parent_form()}) {
-            retValue -= form->Bounds->Position;
-        }
+        retValue -= parent_form()->Bounds->Position;
     }
 
     retValue -= scroll_offset();

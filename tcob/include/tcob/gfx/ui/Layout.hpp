@@ -34,14 +34,14 @@ public:
 
     void apply(size_f size);
 
-    void remove(widget* widget);
+    void remove(widget* target);
     void clear();
 
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const&;
     auto widgets() -> std::vector<std::shared_ptr<widget>>&;
 
-    void bring_to_front(widget* widget);
-    void send_to_back(widget* widget);
+    void bring_to_front(widget* target);
+    void send_to_back(widget* target);
 
     auto is_resize_allowed() const -> bool;
     auto is_move_allowed() const -> bool;

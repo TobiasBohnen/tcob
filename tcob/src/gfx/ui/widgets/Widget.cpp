@@ -5,6 +5,8 @@
 
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
+#include <cassert>
+
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -29,12 +31,14 @@ widget::widget(init const& wi)
     , _parent {wi.Parent}
     , _name {wi.Name}
 {
-    Class.Changed.connect([this](auto const&) { force_redraw(_name + ": Class changed"); });
+    assert(_form);
+
+    Class.Changed.connect([this](auto const&) { request_redraw(_name + ": Class changed"); });
     Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
 
-    Flex.Changed.connect([this](auto const&) { force_redraw(_name + ": Flex changed"); });
+    Flex.Changed.connect([this](auto const&) { request_redraw(_name + ": Flex changed"); });
 
-    ZOrder.Changed.connect([this](auto const&) { force_redraw(_name + ": ZOrder changed"); });
+    ZOrder.Changed.connect([this](auto const&) { request_redraw(_name + ": ZOrder changed"); });
 
     static i32 tabIndex {0};
     (*TabStop).Index = tabIndex++;
@@ -42,14 +46,14 @@ widget::widget(init const& wi)
 
 void widget::on_bounds_changed()
 {
-    force_redraw(_name + ": Bounds changed");
+    request_redraw(_name + ": Bounds changed");
 }
 
 void widget::show()
 {
     if (!_visible) {
         _visible = true;
-        force_redraw(_name + ": Visibility changed");
+        request_redraw(_name + ": Visibility changed");
     }
 }
 
@@ -57,7 +61,7 @@ void widget::hide()
 {
     if (_visible) {
         _visible = false;
-        force_redraw(_name + ": Visibility changed");
+        request_redraw(_name + ": Visibility changed");
     }
 }
 
@@ -82,7 +86,7 @@ void widget::enable()
 {
     if (!_enabled) {
         _enabled = true;
-        force_redraw(_name + ": Enable changed");
+        request_redraw(_name + ": Enable changed");
     }
 }
 
@@ -90,7 +94,7 @@ void widget::disable()
 {
     if (_enabled) {
         _enabled = false;
-        force_redraw(_name + ": Enable changed");
+        request_redraw(_name + ": Enable changed");
     }
 }
 
@@ -99,25 +103,28 @@ auto widget::is_enabled() const -> bool
     return _enabled && (_parent ? _parent->is_enabled() : true);
 }
 
-void widget::paint(widget_painter& painter)
+void widget::draw(widget_painter& painter)
 {
+    if (!_redraw) { return; }
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
     painter.begin(Alpha());
 
-    on_paint(painter);
+    on_draw(painter);
 
     painter.end();
+
+    _redraw = false;
 }
 
 void widget::update(milliseconds deltaTime)
 {
-    if (_transition.is_active()) { force_redraw(this->name() + ": Transition"); }
+    if (_transition.is_active()) { request_redraw(this->name() + ": Transition"); }
     _transition.update(deltaTime);
 
     // item transitions
     for (auto& [_, v] : _subStyleTransitions) {
-        if (v.is_active()) { force_redraw(this->name() + ": Item transition"); }
+        if (v.is_active()) { request_redraw(this->name() + ": Item transition"); }
         v.update(deltaTime);
     }
 
@@ -142,7 +149,7 @@ auto widget::hit_test_bounds() const -> rect_f
     offset_content(retValue, true);
 
     if (_parent) { retValue = retValue.as_intersection_with(_parent->global_content_bounds()); }
-    if (_form) { retValue = retValue.as_intersection_with(_form->Bounds()); }
+    retValue = retValue.as_intersection_with(_form->Bounds());
 
     return retValue;
 }
@@ -152,7 +159,7 @@ auto widget::global_position() const -> point_f
     auto retValue {Bounds->Position};
     if (_parent) {
         retValue += _parent->global_content_bounds().Position - _parent->scroll_offset();
-    } else if (_form) {
+    } else {
         retValue += _form->Bounds->Position;
     }
     return retValue;
@@ -182,7 +189,7 @@ auto widget::global_to_parent(point_i p) const -> point_f
     point_f retValue {p};
     if (_parent) {
         retValue -= (_parent->global_content_bounds().Position - _parent->scroll_offset());
-    } else if (_form) {
+    } else {
         retValue -= point_f {_form->Bounds->Position};
     }
 
@@ -244,14 +251,20 @@ void widget::prepare_redraw()
     }
 }
 
-void widget::force_redraw(string const& reason)
+void widget::request_redraw(string const& reason)
 {
-    // TODO: limit redraw to affected widgets
     if (_parent) {
-        _parent->force_redraw(reason);
+        _parent->mark_redraw();
     } else {
-        _form->force_redraw(reason);
+        _form->request_redraw(reason);
     }
+
+    _form->notify_redraw(reason);
+}
+
+void widget::mark_redraw()
+{
+    _redraw = true;
 }
 
 auto widget::parent() const -> widget_container*
@@ -285,18 +298,18 @@ void widget::do_key_down(input::keyboard::event const& ev)
     on_key_down(ev);
 
     if (!ev.Handled) {
-        auto const& controls {_form->Controls};
-        if (!locate_service<input::system>().keyboard().is_key_down(controls->ActivateKey)) {
-            if (ev.KeyCode == controls->NavLeftKey) {
+        auto const& ctrls {controls()};
+        if (!locate_service<input::system>().keyboard().is_key_down(ctrls.ActivateKey)) {
+            if (ev.KeyCode == ctrls.NavLeftKey) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Left);
-            } else if (ev.KeyCode == controls->NavRightKey) {
+            } else if (ev.KeyCode == ctrls.NavRightKey) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Right);
-            } else if (ev.KeyCode == controls->NavDownKey) {
+            } else if (ev.KeyCode == ctrls.NavDownKey) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Down);
-            } else if (ev.KeyCode == controls->NavUpKey) {
+            } else if (ev.KeyCode == ctrls.NavUpKey) {
                 ev.Handled = _form->focus_nav_target(_name, direction::Up);
             }
-        } else if (ev.KeyCode == controls->ActivateKey) {
+        } else if (ev.KeyCode == ctrls.ActivateKey) {
             activate();
             ev.Handled = true;
         }
@@ -309,7 +322,7 @@ void widget::do_key_up(input::keyboard::event const& ev)
 {
     on_key_up(ev);
 
-    if (ev.KeyCode == _form->Controls->ActivateKey) {
+    if (ev.KeyCode == controls().ActivateKey) {
         deactivate();
         do_click();
         ev.Handled = true;
@@ -339,7 +352,7 @@ void widget::do_mouse_enter()
         parent               = parent->_parent;
     }
 
-    force_redraw(_name + ": MouseEnter");
+    request_redraw(_name + ": MouseEnter");
 
     on_mouse_enter();
     MouseEnter({this});
@@ -356,7 +369,7 @@ void widget::do_mouse_leave()
         parent               = parent->_parent;
     }
 
-    force_redraw(_name + ": MouseLeave");
+    request_redraw(_name + ": MouseLeave");
 
     on_mouse_leave();
     MouseLeave({this});
@@ -384,7 +397,7 @@ void widget::do_mouse_down(input::mouse::button_event const& ev)
 {
     on_mouse_down(ev);
 
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         activate();
         ev.Handled = true;
     }
@@ -398,7 +411,7 @@ void widget::do_mouse_up(input::mouse::button_event const& ev)
 {
     on_mouse_up(ev);
 
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         deactivate();
         ev.Handled = true;
     }
@@ -447,7 +460,7 @@ void widget::do_controller_button_up(input::controller::button_event const& ev)
     on_controller_button_up(ev);
 
     if (!ev.Handled) {
-        if (ev.Button == _form->Controls->ActivateButton) {
+        if (ev.Button == controls().ActivateButton) {
             deactivate();
             do_click();
             ev.Handled = true;
@@ -474,7 +487,7 @@ void widget::do_double_click()
 void widget::do_focus_gained()
 {
     _flags.Focus = true;
-    force_redraw(_name + ": FocusGained");
+    request_redraw(_name + ": FocusGained");
 
     on_focus_gained();
 
@@ -484,7 +497,7 @@ void widget::do_focus_gained()
 void widget::do_focus_lost()
 {
     _flags.Focus = false;
-    force_redraw(_name + ": FocusLost");
+    request_redraw(_name + ": FocusLost");
 
     on_focus_lost();
 
@@ -522,7 +535,7 @@ void widget::activate()
 {
     if (!_flags.Active) {
         _flags.Active = true;
-        force_redraw(_name + ": Active changed");
+        request_redraw(_name + ": Active changed");
     }
 }
 
@@ -530,7 +543,7 @@ void widget::deactivate()
 {
     if (_flags.Active) {
         _flags.Active = false;
-        force_redraw(_name + ": Active changed");
+        request_redraw(_name + ": Active changed");
     }
 }
 
@@ -553,6 +566,11 @@ void widget::reset_sub_style(isize idx, string const& styleClass, widget_flags f
 void widget::clear_sub_styles()
 {
     _subStyleTransitions.clear();
+}
+
+auto widget::controls() const -> control_map const&
+{
+    return _form->Controls();
 }
 
 }

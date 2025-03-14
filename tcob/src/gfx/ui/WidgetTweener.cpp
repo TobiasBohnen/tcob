@@ -55,7 +55,7 @@ void widget_tweener::reset(f32 value)
 void widget_tweener::set_value(f32 value)
 {
     _currentValue = value;
-    _parent.force_redraw(_parent.name() + ": Tween value changed");
+    _parent.request_redraw(_parent.name() + ": Tween value changed");
 }
 
 } // namespace ui

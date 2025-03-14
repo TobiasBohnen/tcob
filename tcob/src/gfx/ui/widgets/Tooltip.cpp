@@ -18,7 +18,7 @@ tooltip::tooltip(init const& wi)
     Class("tooltip");
 }
 
-void tooltip::force_redraw(string const& /* reason */)
+void tooltip::request_redraw(string const& /* reason */)
 {
 }
 

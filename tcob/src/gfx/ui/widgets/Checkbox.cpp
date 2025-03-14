@@ -28,7 +28,7 @@ checkbox::checkbox(init const& wi)
     Class("checkbox");
 }
 
-void checkbox::on_paint(widget_painter& painter)
+void checkbox::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -51,7 +51,7 @@ void checkbox::on_update(milliseconds /*deltaTime*/)
 
 void checkbox::on_checked_changed()
 {
-    force_redraw(this->name() + ": Checked changed");
+    request_redraw(this->name() + ": Checked changed");
 }
 
 void checkbox::on_click()

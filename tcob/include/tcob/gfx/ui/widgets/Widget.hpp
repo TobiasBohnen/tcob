@@ -90,10 +90,9 @@ public:
 
     void update(milliseconds deltaTime) override;
 
-    void paint(widget_painter& painter);
-
+    void virtual draw(widget_painter& painter);
     void virtual prepare_redraw();
-    void virtual force_redraw(string const& reason);
+    void virtual request_redraw(string const& reason);
 
     auto hit_test(point_f pos) const -> bool;
 
@@ -125,7 +124,10 @@ protected:
     void reset_sub_style(isize idx, string const& styleClass, widget_flags flags);
     void clear_sub_styles();
 
-    void virtual on_paint(widget_painter& painter) = 0;
+    auto controls() const -> control_map const&;
+
+    void virtual on_draw(widget_painter& painter) = 0;
+    void virtual mark_redraw();
 
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }
     void virtual on_key_up(input::keyboard::event const& /* ev */) { }
@@ -182,6 +184,8 @@ private:
     void deactivate();
 
     auto can_tab_stop(i32 high, i32 low) const -> bool;
+
+    bool _redraw {true};
 
     bool         _visible {true};
     bool         _enabled {true};

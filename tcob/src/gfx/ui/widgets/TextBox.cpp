@@ -39,13 +39,13 @@ text_box::text_box(init const& wi)
         _textLength = utf8::length(val);
         _textDirty  = true;
         _caretPos   = std::min(_caretPos, _textLength);
-        force_redraw(this->name() + ": Text changed");
+        request_redraw(this->name() + ": Text changed");
     });
 
     MaxLength.Changed.connect([this](auto const& val) {
         if (_textLength > val) {
             Text = utf8::substr(Text(), 0, val);
-            force_redraw(this->name() + ": MaxLength changed");
+            request_redraw(this->name() + ": MaxLength changed");
         }
     });
     MaxLength(std::numeric_limits<isize>::max());
@@ -71,7 +71,7 @@ void text_box::select_text(isize first, isize last)
     _selectedText.first  = std::min(first, last);
     _selectedText.second = std::max(first, last);
 
-    force_redraw(this->name() + ": SelectedText changed");
+    request_redraw(this->name() + ": SelectedText changed");
 }
 
 auto text_box::is_text_selected() const -> bool
@@ -83,10 +83,10 @@ void text_box::set_caret_pos(isize pos)
 {
     if (_caretPos == pos) { return; }
     _caretPos = pos;
-    force_redraw(this->name() + ": Caret moved");
+    request_redraw(this->name() + ": Caret moved");
 }
 
-void text_box::on_paint(widget_painter& painter)
+void text_box::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -254,7 +254,7 @@ void text_box::on_focus_gained()
     _caretTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
     _caretTween->Value.Changed.connect([this](auto val) {
         _caretVisible = val;
-        force_redraw(this->name() + ": Caret blink");
+        request_redraw(this->name() + ": Caret blink");
     });
     _caretTween->start(playback_mode::Looped);
 }

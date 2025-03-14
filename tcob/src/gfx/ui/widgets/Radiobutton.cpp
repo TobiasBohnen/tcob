@@ -31,7 +31,7 @@ radio_button::radio_button(init const& wi)
     Class("radio_button");
 }
 
-void radio_button::on_paint(widget_painter& painter)
+void radio_button::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -64,7 +64,7 @@ void radio_button::on_checked_changed()
         }
     }
 
-    force_redraw(this->name() + ": Checked changed");
+    request_redraw(this->name() + ": Checked changed");
 }
 
 void radio_button::on_click()

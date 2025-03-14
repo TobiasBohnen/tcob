@@ -787,6 +787,11 @@ void canvas::set_global_enforce_path_winding(bool force)
     _enforceWinding = force;
 }
 
+void canvas::clear()
+{
+    _rtt[_activeRtt]->clear({0, 0, 0, 0});
+}
+
 ////////////////////////////////////////////////////////////
 
 void canvas::translate(point_f c)

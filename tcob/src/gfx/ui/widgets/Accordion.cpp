@@ -14,7 +14,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Transform.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -35,11 +34,11 @@ accordion::accordion(init const& wi)
     , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
     , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
-    ActiveSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveSection changed"); });
+    ActiveSectionIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": ActiveSection changed"); });
     ActiveSectionIndex(INVALID_INDEX);
-    HoveredSectionIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredSection changed"); });
+    HoveredSectionIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredSection changed"); });
     HoveredSectionIndex(INVALID_INDEX);
-    MaximizeActiveSection.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaximizeActiveSection changed"); });
+    MaximizeActiveSection.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaximizeActiveSection changed"); });
     MaximizeActiveSection(false);
 
     Class("accordion");
@@ -62,7 +61,7 @@ void accordion::remove_section(widget* sec)
         }
     }
     ActiveSectionIndex = 0;
-    force_redraw(this->name() + ": section removed");
+    request_redraw(this->name() + ": section removed");
 }
 
 void accordion::clear_sections()
@@ -72,7 +71,7 @@ void accordion::clear_sections()
     clear_sub_styles();
 
     ActiveSectionIndex = 0;
-    force_redraw(this->name() + ": sections cleared");
+    request_redraw(this->name() + ": sections cleared");
 }
 
 void accordion::change_section_label(widget* sec, utf8_string const& label)
@@ -83,7 +82,7 @@ void accordion::change_section_label(widget* sec, utf8_string const& label)
             break;
         }
     }
-    force_redraw(this->name() + ": section renamed");
+    request_redraw(this->name() + ": section renamed");
 }
 
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -108,7 +107,7 @@ auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
     return _sections;
 }
 
-void accordion::on_paint(widget_painter& painter)
+void accordion::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -131,14 +130,14 @@ void accordion::on_paint(widget_painter& painter)
     }};
 
     _sectionRectCache.clear();
-    auto paint_section = [&](isize i, isize rectIndex) {
+    auto const paint_section {[&](isize i, isize rectIndex) {
         item_style sectionStyle {};
         apply_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
 
         rect_f const sectionRect {get_section_rect(sectionStyle, rectIndex)};
         painter.draw_item(sectionStyle.Item, sectionRect, _sectionLabels[i]);
         _sectionRectCache.push_back(sectionRect);
-    };
+    }};
 
     if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
         paint_section(ActiveSectionIndex(), 0);
@@ -147,21 +146,26 @@ void accordion::on_paint(widget_painter& painter)
             paint_section(i, i);
         }
     }
+}
+
+void accordion::on_draw_children(widget_painter& painter)
+{
+    apply_style(_style);
+
+    rect_f rect {content_bounds()};
 
     // content
     scissor_guard const guard {painter, this};
 
     // active section
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
-        offset_section_content(rect, _style);
-
         auto          xform {gfx::transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
         xform.translate(translate);
 
         auto& tab {_sections[ActiveSectionIndex()]};
         painter.begin(Alpha(), xform);
-        tab->paint(painter);
+        tab->draw(painter);
         painter.end();
     }
 }
@@ -192,8 +196,8 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void accordion::on_mouse_down(input::mouse::button_event const& ev)
 {
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        force_redraw(this->name() + ": mouse down");
+    if (ev.Button == controls().PrimaryMouseButton) {
+        request_redraw(this->name() + ": mouse down");
 
         if (HoveredSectionIndex >= 0) {
             if (ActiveSectionIndex == HoveredSectionIndex) {

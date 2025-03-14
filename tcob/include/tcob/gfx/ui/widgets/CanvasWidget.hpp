@@ -108,7 +108,7 @@ public:
     void draw_text(rect_f const& rect, utf8_string_view text);
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 

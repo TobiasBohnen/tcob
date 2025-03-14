@@ -11,7 +11,6 @@
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -34,11 +33,11 @@ drop_down_list::drop_down_list(init const& wi)
     , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , _vScrollbar {*this, orientation::Vertical}
 {
-    SelectedItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
-    HoveredItemIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
-    MaxVisibleItems.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaxVisibleItems changed"); });
+    MaxVisibleItems.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaxVisibleItems changed"); });
     MaxVisibleItems(5);
     Class("drop_down_list");
 }
@@ -51,14 +50,14 @@ void drop_down_list::add_item(utf8_string const& item)
 void drop_down_list::add_item(list_item const& item)
 {
     _items.push_back(item);
-    force_redraw(this->name() + ": item added");
+    request_redraw(this->name() + ": item added");
 }
 
 void drop_down_list::clear_items()
 {
     _items.clear();
     clear_sub_styles();
-    force_redraw(this->name() + ": items cleared");
+    request_redraw(this->name() + ": items cleared");
 }
 
 auto drop_down_list::select_item(utf8_string const& item) -> bool
@@ -96,7 +95,7 @@ void drop_down_list::on_styles_changed()
     _vScrollbar.reset();
 }
 
-void drop_down_list::on_paint(widget_painter& painter)
+void drop_down_list::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -187,7 +186,7 @@ void drop_down_list::on_mouse_leave()
 
     if (_mouseOverBox) {
         _mouseOverBox = false;
-        force_redraw(this->name() + ": mouse left");
+        request_redraw(this->name() + ": mouse left");
     }
     _vScrollbar.mouse_leave();
 }
@@ -199,7 +198,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 
     _vScrollbar.mouse_hover(ev.Position);
     if (_vScrollbar.is_mouse_over()) {
-        force_redraw(this->name() + ": scrollbar mouse hover");
+        request_redraw(this->name() + ": scrollbar mouse hover");
         ev.Handled = true;
 
         HoveredItemIndex = INVALID_INDEX;
@@ -210,7 +209,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     if (Bounds->contains(mp)) {
         _mouseOverBox = true;
         ev.Handled    = true;
-        if (!wasMouseOverBox) { force_redraw(this->name() + ": mouse enter"); }
+        if (!wasMouseOverBox) { request_redraw(this->name() + ": mouse enter"); }
 
         HoveredItemIndex = INVALID_INDEX;
         return;
@@ -229,7 +228,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
 {
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_down(ev.Position);
         if (_mouseOverBox) {
             set_extended(!_isExtended);
@@ -240,7 +239,7 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         }
 
         ev.Handled = true;
-        force_redraw(this->name() + ": mouse down");
+        request_redraw(this->name() + ": mouse down");
     }
 }
 
@@ -248,16 +247,16 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     _vScrollbar.mouse_drag(ev.Position);
     if (_vScrollbar.is_dragging()) {
-        force_redraw(this->name() + ": vertical scrollbar dragged");
+        request_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
 }
 
 void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 {
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
+    if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_up(ev.Position);
-        force_redraw(this->name() + ": mouse up");
+        request_redraw(this->name() + ": mouse up");
         ev.Handled = true;
     }
 }
@@ -345,7 +344,7 @@ void drop_down_list::set_extended(bool v)
 {
     if (_isExtended != v) {
         _isExtended = v;
-        force_redraw(this->name() + ": extended change");
+        request_redraw(this->name() + ": extended change");
     }
 }
 

@@ -37,12 +37,12 @@ tab_container::tab_container(init const& wi)
     , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
     , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
 {
-    ActiveTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": ActiveTab changed"); });
+    ActiveTabIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": ActiveTab changed"); });
     ActiveTabIndex(INVALID_INDEX);
-    HoveredTabIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredTab changed"); });
+    HoveredTabIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredTab changed"); });
     HoveredTabIndex(INVALID_INDEX);
 
-    MaxTabsPerRow.Changed.connect([this](auto const&) { force_redraw(this->name() + ": MaxTabsPerRow changed"); });
+    MaxTabsPerRow.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaxTabsPerRow changed"); });
     MaxTabsPerRow(std::numeric_limits<isize>::max());
 
     Class("tab_container");
@@ -65,7 +65,7 @@ void tab_container::remove_tab(widget* tab)
         }
     }
     ActiveTabIndex = 0;
-    force_redraw(this->name() + ": tab removed");
+    request_redraw(this->name() + ": tab removed");
 }
 
 void tab_container::clear_tabs()
@@ -75,7 +75,7 @@ void tab_container::clear_tabs()
     clear_sub_styles();
 
     ActiveTabIndex = 0;
-    force_redraw(this->name() + ": tabs cleared");
+    request_redraw(this->name() + ": tabs cleared");
 }
 
 void tab_container::change_tab_label(widget* tab, utf8_string const& label)
@@ -86,7 +86,7 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
             break;
         }
     }
-    force_redraw(this->name() + ": tab renamed");
+    request_redraw(this->name() + ": tab renamed");
 }
 
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -111,7 +111,7 @@ auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> cons
     return _tabs;
 }
 
-void tab_container::on_paint(widget_painter& painter)
+void tab_container::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -152,21 +152,26 @@ void tab_container::on_paint(widget_painter& painter)
             _tabRectCache.push_back(tabRect);
         }
     }
+}
+
+void tab_container::on_draw_children(widget_painter& painter)
+{
+    apply_style(_style);
+
+    rect_f rect {content_bounds()};
 
     // content
     scissor_guard const guard {painter, this};
 
     // active tab
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
-        offset_tab_content(rect, _style);
-
         auto          xform {gfx::transform::Identity};
         point_f const translate {rect.Position + paint_offset()};
         xform.translate(translate);
 
         auto& tab {_tabs[ActiveTabIndex()]};
         painter.begin(Alpha(), xform);
-        tab->paint(painter);
+        tab->draw(painter);
         painter.end();
     }
 }
@@ -192,8 +197,8 @@ void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 {
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        force_redraw(this->name() + ": mouse down");
+    if (ev.Button == controls().PrimaryMouseButton) {
+        request_redraw(this->name() + ": mouse down");
 
         if (HoveredTabIndex != INVALID_INDEX) {
             ActiveTabIndex = HoveredTabIndex();

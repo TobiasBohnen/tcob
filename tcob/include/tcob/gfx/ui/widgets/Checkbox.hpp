@@ -28,7 +28,7 @@ public:
     prop<bool> Checked;
 
 protected:
-    void on_paint(widget_painter& painter) override;
+    void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
 

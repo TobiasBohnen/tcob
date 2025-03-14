@@ -57,7 +57,7 @@ public:
 protected:
     void on_styles_changed() override;
 
-    void on_paint(widget_painter& painter) final;
+    void on_draw(widget_painter& painter) final;
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;

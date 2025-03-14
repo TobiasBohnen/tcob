@@ -34,9 +34,9 @@ void grid_view::style::Transition(style& target, style const& left, style const&
 grid_view::grid_view(init const& wi)
     : vscroll_widget {wi}
 {
-    SelectedCellIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": SelectedCell changed"); });
+    SelectedCellIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedCell changed"); });
     SelectedCellIndex(INVALID);
-    HoveredCellIndex.Changed.connect([this](auto const&) { force_redraw(this->name() + ": HoveredCell changed"); });
+    HoveredCellIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredCell changed"); });
     HoveredCellIndex(INVALID);
 
     SelectMode(select_mode::Cell);
@@ -59,7 +59,7 @@ void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
         _columnSizes[x] = std::ssize(col[x]);
     }
 
-    force_redraw(this->name() + ": column headers set");
+    request_redraw(this->name() + ": column headers set");
 }
 
 auto grid_view::column_count() const -> isize
@@ -90,7 +90,7 @@ void grid_view::add_row(std::span<list_item const> row)
         _columnSizes[i] = std::max(_columnSizes[i], std::ssize(row[i].Text));
     }
 
-    force_redraw(this->name() + ": row added");
+    request_redraw(this->name() + ": row added");
 }
 
 void grid_view::remove_row(isize idx)
@@ -104,7 +104,7 @@ void grid_view::remove_row(isize idx)
     SelectedCellIndex = INVALID;
     HoveredCellIndex  = INVALID;
 
-    force_redraw(this->name() + ": row removed");
+    request_redraw(this->name() + ": row removed");
 }
 
 void grid_view::clear_rows()
@@ -118,7 +118,7 @@ void grid_view::clear_rows()
     SelectedCellIndex = INVALID;
     HoveredCellIndex  = INVALID;
 
-    force_redraw(this->name() + ": rows cleared");
+    request_redraw(this->name() + ": rows cleared");
 }
 
 auto grid_view::row_count() const -> isize
@@ -149,7 +149,7 @@ void grid_view::prepare_redraw()
     vscroll_widget::prepare_redraw();
 }
 
-void grid_view::on_paint(widget_painter& painter)
+void grid_view::on_draw(widget_painter& painter)
 {
     apply_style(_style);
 
@@ -278,8 +278,8 @@ void grid_view::on_mouse_down(input::mouse::button_event const& ev)
 {
     vscroll_widget::on_mouse_down(ev);
 
-    if (ev.Button == parent_form()->Controls->PrimaryMouseButton) {
-        force_redraw(this->name() + ": mouse down");
+    if (ev.Button == controls().PrimaryMouseButton) {
+        request_redraw(this->name() + ": mouse down");
 
         if (HoveredCellIndex != INVALID) {
             if (HeaderSelectable || HoveredCellIndex->Y != 0) {

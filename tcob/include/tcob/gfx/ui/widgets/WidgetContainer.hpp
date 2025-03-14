@@ -23,6 +23,8 @@ public:
     explicit widget_container(init const& wi);
 
     void update(milliseconds deltaTime) final;
+
+    void draw(widget_painter& painter) override;
     void prepare_redraw() override;
 
     auto virtual find_child_at(point_f pos) -> std::shared_ptr<widget>;
@@ -35,9 +37,15 @@ public:
     void submit(Target& target);
 
 protected:
+    void virtual on_draw_children(widget_painter& painter) = 0;
+
     void on_styles_changed() override;
+    void mark_redraw() override;
 
     auto paint_offset() const -> point_f;
+
+private:
+    bool _redraw {true};
 };
 
 }
