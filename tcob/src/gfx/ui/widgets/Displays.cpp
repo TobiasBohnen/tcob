@@ -379,7 +379,7 @@ void color_picker::on_draw(widget_painter& painter)
 
 void color_picker::on_mouse_down(input::mouse::button_event const& ev)
 {
-    auto const mp {global_to_parent(ev.Position)};
+    auto const mp {global_to_parent(*this, ev.Position)};
     if (Bounds->contains(mp)) {
         f32 const s {(mp.X - Bounds->left()) / (Bounds->width() * 0.9f)};
         f32 const v {(mp.Y - Bounds->top()) / Bounds->height()};
@@ -391,8 +391,9 @@ void color_picker::on_mouse_down(input::mouse::button_event const& ev)
         } else {
             SelectedColor     = color::FromHSVA({BaseHue(), s, 1 - v});
             _selectedColorPos = mp - Bounds->Position;
-            request_redraw(this->name() + ": SelectedColor changed");
         }
+
+        ev.Handled = true;
     }
 }
 

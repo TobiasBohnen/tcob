@@ -217,7 +217,7 @@ void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev 
 
 void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    isize const target {calc_caret_pos(global_to_content(ev.Position))};
+    isize const target {calc_caret_pos(global_to_content(*this, ev.Position))};
     if (_caretPos != target) {
         if (target < _dragCaretPos) {
             select_text(_dragCaretPos - 1, target);
@@ -234,7 +234,7 @@ void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void text_box::on_mouse_down(input::mouse::button_event const& ev)
 {
-    isize const target {calc_caret_pos(global_to_content(ev.Position))};
+    isize const target {calc_caret_pos(global_to_content(*this, ev.Position))};
     if (_caretPos != target) {
         select_text(INVALID_INDEX, INVALID_INDEX);
         set_caret_pos(target);

@@ -98,9 +98,6 @@ public:
 
     auto current_style() const -> widget_style const*;
 
-    auto global_to_content(point_i p) const -> point_f;
-    auto global_to_parent(point_i p) const -> point_f;
-
 protected:
     struct init {
         form_base*        Form {nullptr};
@@ -157,7 +154,7 @@ protected:
     auto virtual attributes() const -> widget_attributes;
     auto virtual flags() -> widget_flags;
 
-    auto current_orientation() const -> orientation;
+    auto get_orientation() const -> orientation;
 
     auto virtual is_inert() const -> bool;
 

@@ -475,7 +475,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
     i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
     HoveredCell = {x, y};
 
-    ev.Handled = true;
+    // ev.Handled = true;
 }
 
 void terminal::on_mouse_down(input::mouse::button_event const& ev)

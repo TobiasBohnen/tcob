@@ -65,8 +65,8 @@ public:
     template <SubmitTarget Target>
     void submit(Target& target);
 
-    auto virtual current_layout() -> layout*             = 0;
-    auto virtual current_layout() const -> layout const* = 0;
+    auto virtual get_layout() -> layout*             = 0;
+    auto virtual get_layout() const -> layout const* = 0;
 
 protected:
     form_base(string name, rect_f const& bounds);
@@ -154,8 +154,8 @@ public:
 
     void clear_containers() override;
 
-    auto current_layout() -> layout* override;
-    auto current_layout() const -> layout const* override;
+    auto get_layout() -> layout* override;
+    auto get_layout() const -> layout const* override;
 
 protected:
     void apply_layout() override;

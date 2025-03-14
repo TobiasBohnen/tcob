@@ -193,28 +193,23 @@ void drop_down_list::on_mouse_leave()
 
 void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    bool const wasMouseOverBox {_mouseOverBox};
-    _mouseOverBox = false;
-
     _vScrollbar.mouse_hover(ev.Position);
     if (_vScrollbar.is_mouse_over()) {
-        request_redraw(this->name() + ": scrollbar mouse hover");
-        ev.Handled = true;
-
+        _mouseOverBox    = false;
         HoveredItemIndex = INVALID_INDEX;
+        ev.Handled       = true;
         return;
     }
 
-    auto const mp {global_to_parent(ev.Position)};
-    if (Bounds->contains(mp)) {
-        _mouseOverBox = true;
-        ev.Handled    = true;
-        if (!wasMouseOverBox) { request_redraw(this->name() + ": mouse enter"); }
-
+    auto const mp {global_to_parent(*this, ev.Position)};
+    if (Bounds->contains(mp) && !_mouseOverBox) {
+        _mouseOverBox    = true;
         HoveredItemIndex = INVALID_INDEX;
+        ev.Handled       = true;
         return;
     }
 
+    _mouseOverBox = false;
     if (!_isExtended) { return; }
     for (auto const& kvp : _itemRectCache) {
         if (!kvp.second.contains(mp)) { continue; }
@@ -239,7 +234,6 @@ void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
         }
 
         ev.Handled = true;
-        request_redraw(this->name() + ": mouse down");
     }
 }
 
@@ -247,7 +241,6 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     _vScrollbar.mouse_drag(ev.Position);
     if (_vScrollbar.is_dragging()) {
-        request_redraw(this->name() + ": vertical scrollbar dragged");
         ev.Handled = true;
     }
 }
@@ -256,7 +249,6 @@ void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_up(ev.Position);
-        request_redraw(this->name() + ": mouse up");
         ev.Handled = true;
     }
 }

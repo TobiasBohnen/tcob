@@ -78,13 +78,13 @@ void scrollbar::mouse_hover(point_i mp)
 
     if (!Visible) { return; }
 
-    if (_barRectCache.Thumb.contains(_parent.global_to_parent(mp))) {
+    if (_barRectCache.Thumb.contains(global_to_parent(_parent, mp))) {
         _overThumb = true;
         return;
     }
 
     // over bar
-    if (_barRectCache.Bar.contains(_parent.global_to_parent(mp))) {
+    if (_barRectCache.Bar.contains(global_to_parent(_parent, mp))) {
         _overBar = true;
         return;
     }
@@ -98,7 +98,7 @@ auto scrollbar::is_dragging() const -> bool
 void scrollbar::mouse_drag(point_i mp)
 {
     if (_isDragging || is_mouse_over()) {
-        calculate_value(_parent.global_to_content(mp));
+        calculate_value(global_to_content(_parent, mp));
         _isDragging = true;
     }
 }
@@ -108,8 +108,8 @@ void scrollbar::mouse_up(point_i mp)
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
-    _overThumb = _barRectCache.Thumb.contains(_parent.global_to_parent(mp));
-    _overBar   = _barRectCache.Bar.contains(_parent.global_to_parent(mp));
+    _overThumb = _barRectCache.Thumb.contains(global_to_parent(_parent, mp));
+    _overBar   = _barRectCache.Bar.contains(global_to_parent(_parent, mp));
 }
 
 void scrollbar::mouse_leave()
@@ -127,9 +127,9 @@ void scrollbar::mouse_down(point_i mp)
 
     if (!is_mouse_over()) { return; }
     if (!_overThumb) {
-        calculate_value(_parent.global_to_content(mp));
+        calculate_value(global_to_content(_parent, mp));
     } else {
-        _dragOffset = point_i {_parent.global_to_parent(mp) - _barRectCache.Thumb.center()};
+        _dragOffset = point_i {global_to_parent(_parent, mp) - _barRectCache.Thumb.center()};
         _isDragging = true;
     }
 }

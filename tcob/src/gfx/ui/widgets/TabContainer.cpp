@@ -16,7 +16,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Transform.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -185,7 +184,7 @@ void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredTabIndex = INVALID_INDEX;
 
-    auto const mp {global_to_parent(ev.Position)};
+    auto const mp {global_to_parent(*this, ev.Position)};
     for (i32 i {0}; i < std::ssize(_tabRectCache); ++i) {
         if (!_tabRectCache[i].contains(mp)) { continue; }
 
@@ -198,8 +197,6 @@ void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
-        request_redraw(this->name() + ": mouse down");
-
         if (HoveredTabIndex != INVALID_INDEX) {
             ActiveTabIndex = HoveredTabIndex();
         }

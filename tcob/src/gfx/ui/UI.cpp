@@ -8,8 +8,11 @@
 #include <algorithm>
 #include <cassert>
 
+#include "tcob/core/Point.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
+#include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
 namespace tcob::ui {
 
@@ -187,6 +190,23 @@ auto dimensions::Lerp(dimensions const& left, dimensions const& right, f64 step)
     dimensions retValue;
     retValue.Width  = length::Lerp(left.Width, right.Width, step);
     retValue.Height = length::Lerp(left.Height, right.Height, step);
+    return retValue;
+}
+
+auto global_to_content(widget const& widget, point_i p) -> point_f
+{
+    return point_f {p} - widget.global_content_bounds().Position;
+}
+
+auto global_to_parent(widget const& widget, point_i p) -> point_f
+{
+    point_f retValue {p};
+    if (auto* parent {widget.parent()}) {
+        retValue -= (parent->global_content_bounds().Position - parent->scroll_offset());
+    } else {
+        retValue -= point_f {widget.parent_form()->Bounds->Position};
+    }
+
     return retValue;
 }
 

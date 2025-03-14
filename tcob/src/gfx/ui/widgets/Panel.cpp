@@ -13,7 +13,6 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
@@ -158,11 +157,7 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     auto const scrollHover {[&](auto&& scrollbar) {
         scrollbar.mouse_hover(ev.Position);
-        if (scrollbar.is_mouse_over()) {
-            request_redraw(this->name() + ": scrollbar hover");
-            return true;
-        }
-        return false;
+        return scrollbar.is_mouse_over();
     }};
 
     ev.Handled = scrollHover(_vScrollbar) || scrollHover(_hScrollbar);
@@ -172,11 +167,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     auto const scrollDrag {[&](auto&& scrollbar) {
         scrollbar.mouse_drag(ev.Position);
-        if (scrollbar.is_dragging()) {
-            request_redraw(this->name() + ": scrollbar dragged");
-            return true;
-        }
-        return false;
+        return scrollbar.is_dragging();
     }};
 
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
@@ -195,7 +186,6 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
         if (ev.Button == controls().PrimaryMouseButton) {
             _vScrollbar.mouse_down(ev.Position);
             _hScrollbar.mouse_down(ev.Position);
-            request_redraw(this->name() + ": mouse down");
             ev.Handled = true;
             return;
         }
@@ -208,7 +198,6 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
         if (ev.Button == controls().PrimaryMouseButton) {
             _vScrollbar.mouse_up(ev.Position);
             _hScrollbar.mouse_up(ev.Position);
-            request_redraw(this->name() + ": mouse up");
             ev.Handled = true;
             return;
         }
@@ -253,14 +242,14 @@ void panel::offset_content(rect_f& bounds, bool isHitTest) const
     if (_hScrollbar.Visible) { bounds.Size.Height -= _style.HScrollBar.Bar.Size.calc(bounds.height()); }
 }
 
-auto panel::current_layout() const -> layout*
+auto panel::get_layout() const -> layout*
 {
     return _layout.get();
 }
 
 auto panel::is_movable() const -> bool
 {
-    return Movable() && is_top_level() && parent_form()->current_layout()->is_move_allowed();
+    return Movable() && is_top_level() && parent_form()->get_layout()->is_move_allowed();
 }
 
 auto panel::get_scroll_max_value(orientation orien) const -> f32

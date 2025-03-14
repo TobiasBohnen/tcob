@@ -68,7 +68,7 @@ void slider::on_draw(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     i32 const  numBlocks {10};
-    auto const orien {current_orientation()};
+    auto const orien {get_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
     // bar
@@ -106,14 +106,17 @@ void slider::on_key_down(input::keyboard::event const& ev)
     if (locate_service<input::system>().keyboard().is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavLeftKey) {
             handle_dir_input(direction::Left);
+            ev.Handled = true;
         } else if (ev.KeyCode == controls->NavRightKey) {
             handle_dir_input(direction::Right);
+            ev.Handled = true;
         } else if (ev.KeyCode == controls->NavDownKey) {
             handle_dir_input(direction::Down);
+            ev.Handled = true;
         } else if (ev.KeyCode == controls->NavUpKey) {
             handle_dir_input(direction::Up);
+            ev.Handled = true;
         }
-        ev.Handled = true;
     }
 }
 
@@ -127,10 +130,9 @@ void slider::on_mouse_leave()
 
 void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    bool const overThumb {_barRectCache.Thumb.contains(global_to_parent(ev.Position))};
+    bool const overThumb {_barRectCache.Thumb.contains(global_to_parent(*this, ev.Position))};
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
-        request_redraw(this->name() + ": thumb hover change");
         ev.Handled = true;
     }
 }
@@ -138,7 +140,7 @@ void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 void slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (_isDragging || _overThumb) {
-        calculate_value(global_to_content(ev.Position));
+        calculate_value(global_to_content(*this, ev.Position));
         _isDragging = true;
         ev.Handled  = true;
     }
@@ -151,7 +153,6 @@ void slider::on_mouse_up(input::mouse::button_event const& ev)
 
     if (_overThumb && !hit_test(point_f {ev.Position})) {
         _overThumb = false;
-        request_redraw(this->name() + ": thumb left");
         ev.Handled = true;
     }
 }
@@ -162,9 +163,9 @@ void slider::on_mouse_down(input::mouse::button_event const& ev)
 
     if (ev.Button == controls().PrimaryMouseButton) {
         if (!_overThumb) {
-            calculate_value(global_to_content(ev.Position));
+            calculate_value(global_to_content(*this, ev.Position));
         } else {
-            _dragOffset = point_i {global_to_parent(ev.Position) - _barRectCache.Thumb.center()};
+            _dragOffset = point_i {global_to_parent(*this, ev.Position) - _barRectCache.Thumb.center()};
             _isDragging = true;
         }
         ev.Handled = true;
@@ -194,14 +195,17 @@ void slider::on_controller_button_down(input::controller::button_event const& ev
     if (ev.Controller->is_button_pressed(controls->ActivateButton)) {
         if (ev.Button == controls->NavLeftButton) {
             handle_dir_input(direction::Left);
+            ev.Handled = true;
         } else if (ev.Button == controls->NavRightButton) {
             handle_dir_input(direction::Right);
+            ev.Handled = true;
         } else if (ev.Button == controls->NavDownButton) {
             handle_dir_input(direction::Down);
+            ev.Handled = true;
         } else if (ev.Button == controls->NavUpButton) {
             handle_dir_input(direction::Up);
+            ev.Handled = true;
         }
-        ev.Handled = true;
     }
 }
 
@@ -225,7 +229,7 @@ void slider::calculate_value(point_f mp)
     rect_f const rect {_barRectCache.Bar};
     f32          frac {0.0f};
 
-    switch (current_orientation()) {
+    switch (get_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
         frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
@@ -259,7 +263,7 @@ auto slider::attributes() const -> widget_attributes
 
 void slider::handle_dir_input(direction dir)
 {
-    switch (current_orientation()) {
+    switch (get_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
         case direction::Left: Value -= Step(); break;

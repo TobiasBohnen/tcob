@@ -57,13 +57,13 @@ inline void form<Layout>::apply_layout()
 }
 
 template <std::derived_from<layout> Layout>
-inline auto form<Layout>::current_layout() -> layout*
+inline auto form<Layout>::get_layout() -> layout*
 {
     return &_layout;
 }
 
 template <std::derived_from<layout> Layout>
-inline auto form<Layout>::current_layout() const -> layout const*
+inline auto form<Layout>::get_layout() const -> layout const*
 {
     return &_layout;
 }

@@ -68,7 +68,7 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto current_layout() const -> layout*;
+    auto get_layout() const -> layout*;
 
     auto is_movable() const -> bool;
 

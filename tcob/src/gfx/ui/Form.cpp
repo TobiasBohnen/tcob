@@ -66,7 +66,7 @@ auto form_base::top_widget() const -> widget*
 
 auto form_base::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
 {
-    for (auto const& widget : current_layout()->widgets()) { // ZORDER
+    for (auto const& widget : get_layout()->widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
             if (auto retValue {container->find_child_at(pos)}) {
@@ -213,7 +213,7 @@ void form_base::on_draw_to(gfx::render_target& target)
     if (_redrawWidgets) {
         _canvas.begin_frame(bounds, 1.0f, 0, _clearRedraw);
 
-        auto widgets {current_layout()->widgets() | std::views::reverse}; // ZORDER
+        auto widgets {get_layout()->widgets() | std::views::reverse}; // ZORDER
         for (auto const& container : widgets) {
             _canvas.reset();
             container->draw(*_painter);
@@ -269,7 +269,7 @@ void form_base::focus_widget(widget* newFocus)
             return;
         }
 
-        auto* layout {current_layout()};
+        auto* layout {get_layout()};
         if (layout->is_move_allowed()) {
             layout->bring_to_front(_focusWidget->top_level_widget());
         }

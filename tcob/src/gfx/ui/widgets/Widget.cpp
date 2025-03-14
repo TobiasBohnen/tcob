@@ -179,23 +179,6 @@ auto widget::content_bounds() const -> rect_f
     return retValue;
 }
 
-auto widget::global_to_content(point_i p) const -> point_f
-{
-    return point_f {p} - global_content_bounds().Position;
-}
-
-auto widget::global_to_parent(point_i p) const -> point_f
-{
-    point_f retValue {p};
-    if (_parent) {
-        retValue -= (_parent->global_content_bounds().Position - _parent->scroll_offset());
-    } else {
-        retValue -= point_f {_form->Bounds->Position};
-    }
-
-    return retValue;
-}
-
 void widget::offset_content(rect_f& bounds, bool isHitTest) const
 {
     if (!_currentStyle) { return; }
@@ -315,6 +298,10 @@ void widget::do_key_down(input::keyboard::event const& ev)
         }
     }
 
+    if (ev.Handled) {
+        request_redraw(_name + ": KeyDown");
+    }
+
     KeyDown({this, ev});
 }
 
@@ -326,6 +313,10 @@ void widget::do_key_up(input::keyboard::event const& ev)
         deactivate();
         do_click();
         ev.Handled = true;
+    }
+
+    if (ev.Handled) {
+        request_redraw(_name + ": KeyUp");
     }
 
     KeyUp({this, ev});
@@ -379,6 +370,10 @@ void widget::do_mouse_hover(input::mouse::motion_event const& ev)
 {
     on_mouse_hover(ev);
 
+    if (ev.Handled) {
+        request_redraw(_name + ": MouseHover");
+    }
+
     MouseHover({.Sender           = this,
                 .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
                 .Event            = ev});
@@ -387,6 +382,10 @@ void widget::do_mouse_hover(input::mouse::motion_event const& ev)
 void widget::do_mouse_drag(input::mouse::motion_event const& ev)
 {
     on_mouse_drag(ev);
+
+    if (ev.Handled) {
+        request_redraw(_name + ": MouseDrag");
+    }
 
     MouseDrag({.Sender           = this,
                .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
@@ -400,6 +399,10 @@ void widget::do_mouse_down(input::mouse::button_event const& ev)
     if (ev.Button == controls().PrimaryMouseButton) {
         activate();
         ev.Handled = true;
+    }
+
+    if (ev.Handled) {
+        request_redraw(_name + ": MouseDown");
     }
 
     MouseDown({.Sender           = this,
@@ -416,6 +419,10 @@ void widget::do_mouse_up(input::mouse::button_event const& ev)
         ev.Handled = true;
     }
 
+    if (ev.Handled) {
+        request_redraw(_name + ": MouseUp");
+    }
+
     MouseUp({.Sender           = this,
              .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
              .Event            = ev});
@@ -424,6 +431,10 @@ void widget::do_mouse_up(input::mouse::button_event const& ev)
 void widget::do_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     on_mouse_wheel(ev);
+
+    if (ev.Handled) {
+        request_redraw(_name + ": MouseWheel");
+    }
 
     MouseWheel({this, ev});
 }
@@ -437,19 +448,22 @@ void widget::do_controller_button_down(input::controller::button_event const& ev
 
         if (ev.Button == controls->ActivateButton) {
             activate();
+            ev.Handled = true;
         } else if (!ev.Controller->is_button_pressed(controls->ActivateButton)) {
             if (ev.Button == controls->NavLeftButton) {
-                _form->focus_nav_target(_name, direction::Left);
+                ev.Handled = _form->focus_nav_target(_name, direction::Left);
             } else if (ev.Button == controls->NavRightButton) {
-                _form->focus_nav_target(_name, direction::Right);
+                ev.Handled = _form->focus_nav_target(_name, direction::Right);
             } else if (ev.Button == controls->NavDownButton) {
-                _form->focus_nav_target(_name, direction::Down);
+                ev.Handled = _form->focus_nav_target(_name, direction::Down);
             } else if (ev.Button == controls->NavUpButton) {
-                _form->focus_nav_target(_name, direction::Up);
+                ev.Handled = _form->focus_nav_target(_name, direction::Up);
             }
         }
+    }
 
-        ev.Handled = true;
+    if (ev.Handled) {
+        request_redraw(_name + ": ControllerButtonDown");
     }
 
     ControllerButtonDown({this, ev});
@@ -465,6 +479,10 @@ void widget::do_controller_button_up(input::controller::button_event const& ev)
             do_click();
             ev.Handled = true;
         }
+    }
+
+    if (ev.Handled) {
+        request_redraw(_name + ": ControllerButtonUp");
     }
 
     ControllerButtonUp({this, ev});
@@ -506,7 +524,7 @@ void widget::do_focus_lost()
 
 auto widget::attributes() const -> widget_attributes
 {
-    return {{"name", _name}, {"orientation", current_orientation()}};
+    return {{"name", _name}, {"orientation", get_orientation()}};
 }
 
 auto widget::flags() -> widget_flags
@@ -521,7 +539,7 @@ auto widget::flags() -> widget_flags
     return _flags;
 }
 
-auto widget::current_orientation() const -> orientation
+auto widget::get_orientation() const -> orientation
 {
     return Bounds->width() >= Bounds->height() ? orientation::Horizontal : orientation::Vertical;
 }

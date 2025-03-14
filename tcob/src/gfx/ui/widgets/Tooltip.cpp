@@ -25,7 +25,7 @@ void tooltip::request_redraw(string const& /* reason */)
 void tooltip::on_update(milliseconds deltaTime)
 {
     if (_fadeInTween) {
-        current_layout()->apply(content_bounds().Size);
+        get_layout()->apply(content_bounds().Size);
         _fadeInTween->update(deltaTime);
     }
     panel::on_update(deltaTime);

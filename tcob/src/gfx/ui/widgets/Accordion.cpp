@@ -179,7 +179,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredSectionIndex = INVALID_INDEX;
 
-    auto const mp {global_to_parent(ev.Position)};
+    auto const mp {global_to_parent(*this, ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
         if (!_sectionRectCache[i].contains(mp)) { continue; }
 
@@ -197,8 +197,6 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 void accordion::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
-        request_redraw(this->name() + ": mouse down");
-
         if (HoveredSectionIndex >= 0) {
             if (ActiveSectionIndex == HoveredSectionIndex) {
                 ActiveSectionIndex = INVALID_INDEX;

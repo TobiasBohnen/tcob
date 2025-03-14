@@ -82,23 +82,21 @@ void spinner::on_mouse_leave()
 
 void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto const mp {global_to_parent(ev.Position)};
+    auto const mp {global_to_parent(*this, ev.Position)};
     if (_rectCache.first.contains(mp)) {
         if (_hoverArrow != arrow::Increase) {
             _hoverArrow = arrow::Increase;
-            request_redraw(this->name() + ": arrow hover changed");
+            ev.Handled  = true;
         }
     } else if (_rectCache.second.contains(mp)) {
         if (_hoverArrow != arrow::Decrease) {
             _hoverArrow = arrow::Decrease;
-            request_redraw(this->name() + ": arrow hover changed");
+            ev.Handled  = true;
         }
     } else if (_hoverArrow != arrow::None) {
         _hoverArrow = arrow::None;
-        request_redraw(this->name() + ": arrow hover changed");
+        ev.Handled  = true;
     }
-
-    ev.Handled = true;
 }
 
 void spinner::on_mouse_down(input::mouse::button_event const& ev)
@@ -131,6 +129,8 @@ void spinner::on_mouse_wheel(input::mouse::wheel_event const& ev)
     } else if (ev.Scroll.Y < 0) {
         Value -= Step();
     }
+
+    ev.Handled = true;
 }
 
 void spinner::on_update(milliseconds /*deltaTime*/)
