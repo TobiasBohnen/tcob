@@ -18,10 +18,6 @@ tooltip::tooltip(init const& wi)
     Class("tooltip");
 }
 
-void tooltip::request_redraw(string const& /* reason */)
-{
-}
-
 void tooltip::on_update(milliseconds deltaTime)
 {
     if (_fadeInTween) {

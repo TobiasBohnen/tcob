@@ -236,33 +236,27 @@ void widget::prepare_redraw()
 
 void widget::request_redraw(string const& reason)
 {
-    //  if (_redraw) { return; } <- NOPE
+    if (_redraw) { return; }
 
-    if (_parent) {
-        _parent->set_redraw(true);
+    if (is_top_level()) { // is top level widget -> redraw everything
+        _form->request_redraw(reason);
+    } else {
+        auto* tlw {top_level_widget()};
+        assert(tlw);
+        for (auto const& w : _form->containers()) {
+            if (w.get() == tlw) { continue; }
+            if (w->ZOrder < tlw->ZOrder) { continue; }
 
-        auto const checkParentOverlap {[this, &reason](auto&& widgets) { // check if parent overlaps with it's siblings
-            for (auto const& w : widgets) {
-                if (w.get() == _parent) { continue; }
-                if (w->ZOrder < _parent->ZOrder) { continue; }
-
-                if (w->Bounds->intersects(_parent->Bounds())) {
-                    w->request_redraw(reason);
-                }
+            if (w->Bounds->intersects(tlw->Bounds())) { // top level widget overlaps with other widget -> redraw everything
+                _form->request_redraw(reason);
+                return;
             }
-        }};
-
-        if (auto* grandParent {_parent->parent()}) {
-            checkParentOverlap(grandParent->widgets());
-        } else {
-            checkParentOverlap(_form->containers());
         }
 
-    } else {
-        _form->request_redraw(reason);
+        // redraw top level widget
+        tlw->set_redraw(true);
+        _form->notify_redraw(reason);
     }
-
-    _form->notify_redraw(reason);
 }
 
 void widget::set_redraw(bool val)

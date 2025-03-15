@@ -123,7 +123,8 @@ protected:
 
     void virtual on_draw(widget_painter& painter) = 0;
     void virtual prepare_redraw();
-    void virtual request_redraw(string const& reason);
+    void request_redraw(string const& reason);
+
     void virtual set_redraw(bool val);
     auto get_redraw() const -> bool;
 
