@@ -106,6 +106,8 @@ auto widget::is_enabled() const -> bool
 void widget::draw(widget_painter& painter)
 {
     if (!_redraw) { return; }
+    _redraw = false;
+
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
     painter.begin(Alpha());
@@ -113,8 +115,6 @@ void widget::draw(widget_painter& painter)
     on_draw(painter);
 
     painter.end();
-
-    _redraw = false;
 }
 
 void widget::update(milliseconds deltaTime)
@@ -236,8 +236,28 @@ void widget::prepare_redraw()
 
 void widget::request_redraw(string const& reason)
 {
+    //  if (_redraw) { return; } <- NOPE
+
     if (_parent) {
-        _parent->mark_redraw();
+        _parent->set_redraw(true);
+
+        auto const checkParentOverlap {[this, &reason](auto&& widgets) { // check if parent overlaps with it's siblings
+            for (auto const& w : widgets) {
+                if (w.get() == _parent) { continue; }
+                if (w->ZOrder < _parent->ZOrder) { continue; }
+
+                if (w->Bounds->intersects(_parent->Bounds())) {
+                    w->request_redraw(reason);
+                }
+            }
+        }};
+
+        if (auto* grandParent {_parent->parent()}) {
+            checkParentOverlap(grandParent->widgets());
+        } else {
+            checkParentOverlap(_form->containers());
+        }
+
     } else {
         _form->request_redraw(reason);
     }
@@ -245,9 +265,14 @@ void widget::request_redraw(string const& reason)
     _form->notify_redraw(reason);
 }
 
-void widget::mark_redraw()
+void widget::set_redraw(bool val)
 {
-    _redraw = true;
+    _redraw = val;
+}
+
+auto widget::get_redraw() const -> bool
+{
+    return _redraw;
 }
 
 auto widget::parent() const -> widget_container*
@@ -590,5 +615,4 @@ auto widget::controls() const -> control_map const&
 {
     return _form->Controls();
 }
-
 }

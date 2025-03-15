@@ -6,7 +6,6 @@
 #include "tcob/gfx/ui/Form.hpp"
 
 #include <chrono>
-#include <iterator>
 #include <limits>
 #include <memory>
 #include <ranges>
@@ -116,7 +115,7 @@ auto form_base::all_widgets() const -> std::vector<widget*>
 void form_base::request_redraw(string const& reason)
 {
     for (auto const& widget : containers()) {
-        widget->mark_redraw();
+        widget->set_redraw(true);
     }
     notify_redraw(reason);
 
@@ -127,18 +126,6 @@ void form_base::notify_redraw(string const& reason)
 {
     if (!_prepareWidgets) {
         logger::Debug("Form: {} redraw; reason: {}", _name, reason);
-    }
-
-    // check overlap //FIXME: hack
-    auto const& conts {containers()};
-    for (auto it {conts.begin()}; it != conts.end(); ++it) {
-        for (auto jt {std::next(it)}; jt != conts.end(); ++jt) {
-            if ((*it)->Bounds->intersects((*jt)->Bounds())) {
-                (*it)->mark_redraw();
-                (*jt)->mark_redraw();
-                _clearRedraw = true;
-            }
-        }
     }
 
     _prepareWidgets = true;
@@ -193,6 +180,7 @@ void form_base::on_fixed_update(milliseconds deltaTime)
         for (auto const& container : widgets) {
             container->prepare_redraw();
         }
+
         // tooltips
         std::erase_if(_tooltips, [](auto const& tooltip) { return tooltip.expired(); });
         for (auto const& tooltip : _tooltips) {
@@ -227,8 +215,7 @@ void form_base::on_draw_to(gfx::render_target& target)
     if (_redrawWidgets) {
         _canvas.begin_frame(bounds, 1.0f, 0, _clearRedraw);
 
-        auto widgets {get_layout()->widgets() | std::views::reverse}; // ZORDER
-        for (auto const& container : widgets) {
+        for (auto const& container : get_layout()->widgets() | std::views::reverse) { // ZORDER
             _canvas.reset();
             container->draw(*_painter);
         }
@@ -254,7 +241,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         }
 
         _canvas.begin_frame(bounds, 1.0f, 1);
-        _topWidget->Tooltip->mark_redraw();
+        _topWidget->Tooltip->set_redraw(true);
         _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
 

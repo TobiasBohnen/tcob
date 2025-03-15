@@ -51,8 +51,6 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>;
 
-    void prepare_redraw() override;
-
     void remove_tab(widget* tab);
     void clear_tabs();
 
@@ -63,6 +61,8 @@ public:
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
 protected:
+    void on_prepare_redraw() override;
+
     void on_draw(widget_painter& painter) override;
     void on_draw_children(widget_painter& painter) override;
 
@@ -85,8 +85,6 @@ private:
     std::vector<rect_f>                  _tabRectCache;
 
     tab_container::style _style;
-
-    bool _updateTabs {false};
 };
 
 }

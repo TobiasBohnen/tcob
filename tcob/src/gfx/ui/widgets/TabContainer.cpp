@@ -47,10 +47,14 @@ tab_container::tab_container(init const& wi)
     Class("tab_container");
 }
 
-void tab_container::prepare_redraw()
+void tab_container::on_prepare_redraw()
 {
-    widget_container::prepare_redraw();
-    _updateTabs = true;
+    apply_style(_style);
+
+    auto const rect {content_bounds()};
+    for (auto& t : _tabs) {
+        t->Bounds = {point_f::Zero, rect.Size};
+    }
 }
 
 void tab_container::remove_tab(widget* tab)
@@ -210,15 +214,6 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 
 void tab_container::on_update(milliseconds /* deltaTime */)
 {
-    if (_updateTabs) {
-        apply_style(_style);
-
-        auto const rect {content_bounds()};
-        for (auto& t : _tabs) {
-            t->Bounds = {point_f::Zero, rect.Size};
-        }
-        _updateTabs = false;
-    }
 }
 
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const

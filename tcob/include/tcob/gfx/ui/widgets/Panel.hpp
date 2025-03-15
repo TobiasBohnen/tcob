@@ -43,8 +43,6 @@ public:
     template <std::derived_from<layout> T>
     auto get_layout() -> T&;
 
-    void prepare_redraw() override;
-
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 
     void clear();
@@ -52,6 +50,8 @@ public:
     auto scroll_offset() const -> point_f override;
 
 protected:
+    void on_prepare_redraw() override;
+
     void on_styles_changed() override;
 
     void on_draw(widget_painter& painter) override;

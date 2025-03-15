@@ -33,13 +33,11 @@ void widget_container::draw(widget_painter& painter)
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
     painter.begin(Alpha());
-    if (_redraw) {
-        on_draw(painter);
-    }
+    if (get_redraw()) { on_draw(painter); }
     on_draw_children(painter);
     painter.end();
 
-    _redraw = false;
+    set_redraw(false);
 }
 
 auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -74,6 +72,8 @@ void widget_container::prepare_redraw()
 {
     widget::prepare_redraw();
 
+    on_prepare_redraw();
+
     for (auto const& w : widgets()) {
         w->prepare_redraw();
     }
@@ -87,11 +87,11 @@ void widget_container::on_styles_changed()
     }
 }
 
-void widget_container::mark_redraw()
+void widget_container::set_redraw(bool val)
 {
-    _redraw = true;
+    widget::set_redraw(val);
     for (auto const& w : widgets()) {
-        w->mark_redraw();
+        w->set_redraw(val);
     }
 }
 

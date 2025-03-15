@@ -124,7 +124,8 @@ protected:
     void virtual on_draw(widget_painter& painter) = 0;
     void virtual prepare_redraw();
     void virtual request_redraw(string const& reason);
-    void virtual mark_redraw();
+    void virtual set_redraw(bool val);
+    auto get_redraw() const -> bool;
 
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }
     void virtual on_key_up(input::keyboard::event const& /* ev */) { }

@@ -44,10 +44,14 @@ accordion::accordion(init const& wi)
     Class("accordion");
 }
 
-void accordion::prepare_redraw()
+void accordion::on_prepare_redraw()
 {
-    widget_container::prepare_redraw();
-    _updateSections = true;
+    apply_style(_style);
+
+    auto const rect {content_bounds()};
+    for (auto& t : _sections) {
+        t->Bounds = {point_f::Zero, rect.Size};
+    }
 }
 
 void accordion::remove_section(widget* sec)
@@ -215,15 +219,6 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
 
 void accordion::on_update(milliseconds /* deltaTime */)
 {
-    if (_updateSections) {
-        apply_style(_style);
-
-        auto const rect {content_bounds()};
-        for (auto& t : _sections) {
-            t->Bounds = {point_f::Zero, rect.Size};
-        }
-        _updateSections = false;
-    }
 }
 
 void accordion::offset_section_content(rect_f& bounds, style const& style) const

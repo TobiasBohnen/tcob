@@ -49,15 +49,13 @@ panel::panel(init const& wi)
     Class("panel");
 }
 
-void panel::prepare_redraw()
+void panel::on_prepare_redraw()
 {
     _layout->apply(content_bounds().Size);
-    widget_container::prepare_redraw();
 }
 
 void panel::on_styles_changed()
 {
-    _layout->apply(content_bounds().Size);
     widget_container::on_styles_changed();
 
     _vScrollbar.reset();
@@ -142,8 +140,7 @@ void panel::on_draw_children(widget_painter& painter)
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
-    auto widgets {this->widgets() | std::views::reverse}; // ZORDER
-    for (auto const& w : widgets) {
+    for (auto const& w : this->widgets() | std::views::reverse) { // ZORDER
         painter.begin(Alpha(), xform);
         w->draw(painter);
         painter.end();
@@ -299,8 +296,7 @@ void glass::on_draw_children(widget_painter& painter)
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
-    auto widgets {this->widgets() | std::views::reverse}; // ZORDER
-    for (auto const& w : widgets) {
+    for (auto const& w : this->widgets() | std::views::reverse) { // ZORDER
         painter.begin(Alpha(), xform);
         w->draw(painter);
         painter.end();
