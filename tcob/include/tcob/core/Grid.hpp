@@ -22,6 +22,7 @@ class grid {
 public:
     using type = T;
 
+    grid() = default;
     grid(size_type size, T const& defaultValue = T {});
 
     auto operator[](point_type pos) -> T&;
@@ -43,6 +44,8 @@ public:
     auto contains(point_type pos) const -> bool;
 
     auto size() const -> usize;
+    void resize(size_type newSize);
+
     auto data() -> T*;
     auto data() const -> T const*;
 

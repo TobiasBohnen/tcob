@@ -13,9 +13,9 @@
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -43,8 +43,7 @@ public:
 
     explicit dot_matrix_display(init const& wi);
 
-    prop<size_i>                Size;
-    prop<std::vector<u8> const> Dots;
+    prop<grid<u8> const> Dots;
 
 protected:
     void on_draw(widget_painter& painter) override;
@@ -52,8 +51,8 @@ protected:
     void on_update(milliseconds deltaTime) override;
 
 private:
-    bool                                          _isDirty {false};
-    std::unordered_map<u16, std::vector<point_i>> _sortedDots;
+    bool                                         _isDirty {false};
+    std::unordered_map<u8, std::vector<point_i>> _sortedDots;
 
     dot_matrix_display::style _style;
 };

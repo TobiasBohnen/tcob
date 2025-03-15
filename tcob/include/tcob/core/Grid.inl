@@ -104,6 +104,13 @@ inline auto grid<T>::size() const -> usize
 }
 
 template <typename T>
+inline void grid<T>::resize(size_type newSize)
+{
+    _size = newSize;
+    _data.resize(_size.Width * _size.Height);
+}
+
+template <typename T>
 inline auto grid<T>::data() -> T*
 {
     return _data.data();

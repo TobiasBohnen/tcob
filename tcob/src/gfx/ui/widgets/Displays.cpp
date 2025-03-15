@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
-#include <iterator>
 #include <span>
 #include <utility>
 #include <vector>
@@ -41,10 +40,6 @@ void dot_matrix_display::style::Transition(style& target, style const& left, sty
 dot_matrix_display::dot_matrix_display(init const& wi)
     : widget {wi}
 {
-    Size.Changed.connect([this](auto const&) {
-        _isDirty = true;
-        request_redraw(this->name() + ": Size changed");
-    });
     Dots.Changed.connect([this](auto const&) {
         _isDirty = true;
         request_redraw(this->name() + ": Dots changed");
@@ -55,8 +50,7 @@ dot_matrix_display::dot_matrix_display(init const& wi)
 
 void dot_matrix_display::on_draw(widget_painter& painter)
 {
-
-    if (Size->Width <= 0 || Size->Height <= 0) { return; }
+    if (Dots->width() <= 0 || Dots->height() <= 0) { return; }
     apply_style(_style);
 
     rect_f rect {Bounds()};
@@ -69,8 +63,8 @@ void dot_matrix_display::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
     canvas.save();
 
-    f32 const width {rect.width() / Size->Width};
-    f32 const height {rect.height() / Size->Height};
+    f32 const width {rect.width() / Dots->width()};
+    f32 const height {rect.height() / Dots->height()};
 
     for (auto const& [colorIdx, dots] : _sortedDots) {
         canvas.set_fill_style(_style.Colors.at(colorIdx));
@@ -98,9 +92,11 @@ void dot_matrix_display::on_update(milliseconds /* deltaTime */)
     if (!_isDirty) { return; }
     _isDirty = false;
 
+    i32 const   width {Dots->width()};
+    auto const& dots {Dots()};
     _sortedDots.clear();
-    for (i32 idx {0}; idx < std::ssize(*Dots); ++idx) {
-        _sortedDots[(*Dots)[idx]].emplace_back(idx % Size->Width, idx / Size->Width);
+    for (usize idx {0}; idx < dots.size(); ++idx) {
+        _sortedDots[dots[idx]].emplace_back(idx % width, idx / width);
     }
 }
 
