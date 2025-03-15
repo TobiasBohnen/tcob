@@ -20,8 +20,6 @@ namespace tcob::ui {
 void cycle_button::style::Transition(style& target, style const& left, style const& right, f64 step)
 {
     widget_style::Transition(target, left, right, step);
-
-    text_element::Transition(target.Text, left.Text, right.Text, step);
 }
 
 cycle_button::cycle_button(init const& wi)
@@ -36,6 +34,11 @@ cycle_button::cycle_button(init const& wi)
 
 void cycle_button::add_item(utf8_string const& item)
 {
+    add_item({.Text = item, .Icon = {}, .UserData = {}});
+}
+
+void cycle_button::add_item(list_item const& item)
+{
     _items.push_back(item);
     request_redraw(this->name() + ": item added");
 }
@@ -49,7 +52,7 @@ void cycle_button::clear_items()
 auto cycle_button::select_item(utf8_string const& item) -> bool
 {
     for (isize i {0}; i < std::ssize(_items); ++i) {
-        if (_items[i] == item) {
+        if (_items[i].Text == item) {
             SelectedItemIndex = i;
             return true;
         }
@@ -58,12 +61,12 @@ auto cycle_button::select_item(utf8_string const& item) -> bool
     return false;
 }
 
-auto cycle_button::get_item_at(isize index) const -> utf8_string const&
+auto cycle_button::get_item_at(isize index) const -> list_item const&
 {
     return _items.at(static_cast<usize>(index));
 }
 
-auto cycle_button::selected_item() const -> utf8_string const&
+auto cycle_button::selected_item() const -> list_item const&
 {
     return _items.at(SelectedItemIndex());
 }
@@ -84,9 +87,11 @@ void cycle_button::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    // text
-    if (_style.Text.Font && SelectedItemIndex >= 0) {
-        painter.draw_text(_style.Text, rect, selected_item());
+    // text //TODO: hover?
+    if (SelectedItemIndex >= 0) {
+        item_style itemStyle {};
+        apply_sub_style(itemStyle, 0, _style.ItemClass, {});
+        painter.draw_item(itemStyle.Item, rect, selected_item());
     }
 }
 
@@ -110,7 +115,7 @@ auto cycle_button::attributes() const -> widget_attributes
 
     retValue["selected_index"] = SelectedItemIndex();
     if (SelectedItemIndex >= 0 && SelectedItemIndex < std::ssize(_items)) {
-        retValue["selected"] = selected_item();
+        retValue["selected"] = selected_item().Text;
     }
 
     return retValue;

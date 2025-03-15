@@ -21,7 +21,7 @@ class TCOB_API cycle_button : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        text_element Text;
+        utf8_string ItemClass {"items"};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };
@@ -31,12 +31,13 @@ public:
     prop_val<isize> SelectedItemIndex;
 
     void add_item(utf8_string const& item);
+    void add_item(list_item const& item);
     void clear_items();
 
     auto select_item(utf8_string const& item) -> bool;
 
-    auto get_item_at(isize index) const -> utf8_string const&;
-    auto selected_item() const -> utf8_string const&;
+    auto get_item_at(isize index) const -> list_item const&;
+    auto selected_item() const -> list_item const&;
     auto item_count() const -> isize;
 
 protected:
@@ -52,7 +53,7 @@ protected:
 private:
     void select_next();
 
-    std::vector<utf8_string> _items;
+    std::vector<list_item> _items;
 
     cycle_button::style _style;
 };
