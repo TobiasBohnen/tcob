@@ -28,7 +28,7 @@ void tab_container::style::Transition(style& target, style const& left, style co
 {
     widget_style::Transition(target, left, right, step);
 
-    target.TabBarHeight = length::Lerp(left.TabBarHeight, right.TabBarHeight, step);
+    target.TabBarSize = length::Lerp(left.TabBarSize, right.TabBarSize, step);
 }
 
 tab_container::tab_container(init const& wi)
@@ -41,8 +41,8 @@ tab_container::tab_container(init const& wi)
     HoveredTabIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredTab changed"); });
     HoveredTabIndex(INVALID_INDEX);
 
-    MaxTabsPerRow.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaxTabsPerRow changed"); });
-    MaxTabsPerRow(std::numeric_limits<isize>::max());
+    MaxTabsPerLine.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaxTabsPerLine  changed"); });
+    MaxTabsPerLine(std::numeric_limits<isize>::max());
 
     Class("tab_container");
 }
@@ -128,35 +128,61 @@ void tab_container::on_draw(widget_painter& painter)
 
     // tabs
     _tabRectCache.clear();
-    if (_style.TabBarPosition != position::Hidden) {
 
-        rect_f tabBarRowRect {rect};
-        tabBarRowRect.Size.Height = _style.TabBarHeight.calc(tabBarRowRect.height());
+    rect_f tabBarRowRect {rect};
+    switch (_style.TabBarPosition) {
+    case position::Top:
+        tabBarRowRect.Size.Height = _style.TabBarSize.calc(tabBarRowRect.height());
+        break;
+    case position::Bottom:
+        tabBarRowRect.Size.Height = _style.TabBarSize.calc(tabBarRowRect.height());
+        tabBarRowRect.Position.Y  = rect.bottom() - (tabBarRowRect.height() * get_tab_line_count());
+        break;
+    case position::Left:
+        tabBarRowRect.Size.Width = _style.TabBarSize.calc(tabBarRowRect.width());
+        break;
+    case position::Right:
+        tabBarRowRect.Size.Width = _style.TabBarSize.calc(tabBarRowRect.width());
+        tabBarRowRect.Position.X = rect.right() - (tabBarRowRect.width() * get_tab_line_count());
+        break;
 
-        if (_style.TabBarPosition == position::Bottom) {
-            tabBarRowRect.Position.Y = rect.bottom() - (tabBarRowRect.height() * get_tab_row_count());
-        }
+    case position::None: return;
+    }
 
-        auto const get_tab_rect {[&tabBarRowRect, this](item_style const& itemStyle, isize index) {
-            isize const maxItems {std::min(*MaxTabsPerRow, std::ssize(_tabs))};
-            rect_f      retValue {tabBarRowRect};
+    auto const getTabRect {[&tabBarRowRect, this](item_style const& itemStyle, isize index) {
+        isize const maxItems {std::min(*MaxTabsPerLine, std::ssize(_tabs))};
+        rect_f      retValue {};
+
+        switch (_style.TabBarPosition) {
+        case position::Top:
+        case position::Bottom:
             retValue.Position.X  = tabBarRowRect.left() + (tabBarRowRect.width() / maxItems) * (index % maxItems);
             retValue.Size.Width  = tabBarRowRect.width() / maxItems;
-            retValue.Position.Y  = retValue.top() + (tabBarRowRect.height() * (index / maxItems));
+            retValue.Position.Y  = tabBarRowRect.top() + (tabBarRowRect.height() * (index / maxItems));
             retValue.Size.Height = tabBarRowRect.height();
+            break;
+        case position::Left:
+        case position::Right:
+            retValue.Position.X  = tabBarRowRect.left() + (tabBarRowRect.width() * (index / maxItems));
+            retValue.Size.Width  = tabBarRowRect.width();
+            retValue.Position.Y  = tabBarRowRect.top() + (tabBarRowRect.height() / maxItems) * (index % maxItems);
+            retValue.Size.Height = tabBarRowRect.height() / maxItems;
 
-            retValue -= itemStyle.Item.Border.thickness();
-            return retValue;
-        }};
-
-        for (i32 i {0}; i < std::ssize(_tabs); ++i) {
-            item_style tabStyle {};
-            apply_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
-
-            rect_f const tabRect {get_tab_rect(tabStyle, i)};
-            painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
-            _tabRectCache.push_back(tabRect);
+            break;
+        case position::None: break;
         }
+
+        retValue -= itemStyle.Item.Border.thickness();
+        return retValue;
+    }};
+
+    for (i32 i {0}; i < std::ssize(_tabs); ++i) {
+        item_style tabStyle {};
+        apply_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
+
+        rect_f const tabRect {getTabRect(tabStyle, i)};
+        painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
+        _tabRectCache.push_back(tabRect);
     }
 }
 
@@ -218,16 +244,27 @@ void tab_container::on_update(milliseconds /* deltaTime */)
 
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
 {
-    f32 const barHeight {style.TabBarHeight.calc(bounds.height()) * get_tab_row_count()};
-
-    bounds.Size.Height -= barHeight;
-    if (style.TabBarPosition == position::Top) { bounds.Position.Y += barHeight; }
+    switch (style.TabBarPosition) {
+    case position::Top:
+    case position::Bottom: {
+        f32 const size {style.TabBarSize.calc(bounds.height()) * get_tab_line_count()};
+        bounds.Size.Height -= size;
+        if (style.TabBarPosition == position::Top) { bounds.Position.Y += size; }
+    } break;
+    case position::Left:
+    case position::Right: {
+        f32 const size {style.TabBarSize.calc(bounds.width()) * get_tab_line_count()};
+        bounds.Size.Width -= size;
+        if (style.TabBarPosition == position::Left) { bounds.Position.X += size; }
+    } break;
+    case position::None: break;
+    }
 }
 
-auto tab_container::get_tab_row_count() const -> isize
+auto tab_container::get_tab_line_count() const -> isize
 {
-    if (*MaxTabsPerRow > 0) {
-        return static_cast<isize>(std::ceil(std::ssize(_tabs) / static_cast<f32>(*MaxTabsPerRow)));
+    if (*MaxTabsPerLine > 0) {
+        return static_cast<isize>(std::ceil(std::ssize(_tabs) / static_cast<f32>(*MaxTabsPerLine)));
     }
 
     return 1;

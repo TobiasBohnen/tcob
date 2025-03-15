@@ -203,6 +203,16 @@ enum class orientation : u8 {
 
 ////////////////////////////////////////////////////////////
 
+enum class position : u8 {
+    None,
+    Top,
+    Bottom,
+    Left,
+    Right
+};
+
+////////////////////////////////////////////////////////////
+
 using widget_attribute_types = std::variant<isize, bool, string, orientation, fit_mode, point_i>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 

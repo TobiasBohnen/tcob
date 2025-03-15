@@ -21,20 +21,13 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-// TODO: scrollable tab bar
 class TCOB_API tab_container : public widget_container {
 public:
-    enum class position : u8 {
-        Top,
-        Bottom,
-        Hidden
-    };
-
     class TCOB_API style : public widget_style {
     public:
         utf8_string TabItemClass {"tab_items"};
         position    TabBarPosition {position::Top};
-        length      TabBarHeight;
+        length      TabBarSize;
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };
@@ -44,7 +37,7 @@ public:
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
 
-    prop<isize> MaxTabsPerRow; // TODO: change to prop_val
+    prop<isize> MaxTabsPerLine; // TODO: change to prop_val & overflow mode (multiline | scrollable)
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
@@ -78,7 +71,7 @@ protected:
 
 private:
     void offset_tab_content(rect_f& bounds, style const& style) const;
-    auto get_tab_row_count() const -> isize;
+    auto get_tab_line_count() const -> isize;
 
     std::vector<std::shared_ptr<widget>> _tabs;
     std::vector<list_item>               _tabLabels;
