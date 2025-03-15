@@ -125,7 +125,7 @@ void accordion::on_draw(widget_painter& painter)
 
     // sections
     f32 const  sectionHeight {_style.SectionBarHeight.calc(rect.height())};
-    auto const get_section_rect {[&](item_style const& itemStyle, isize index) {
+    auto const getSectionRect {[&](item_style const& itemStyle, isize index) {
         rect_f retValue {rect};
         retValue.Position.Y += sectionHeight * index;
         retValue.Size.Height = sectionHeight;
@@ -137,20 +137,20 @@ void accordion::on_draw(widget_painter& painter)
     }};
 
     _sectionRectCache.clear();
-    auto const paint_section {[&](isize i, isize rectIndex) {
+    auto const paintSection {[&](isize i, isize rectIndex) {
         item_style sectionStyle {};
         apply_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
 
-        rect_f const sectionRect {get_section_rect(sectionStyle, rectIndex)};
+        rect_f const sectionRect {getSectionRect(sectionStyle, rectIndex)};
         painter.draw_item(sectionStyle.Item, sectionRect, _sectionLabels[i]);
         _sectionRectCache.push_back(sectionRect);
     }};
 
     if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
-        paint_section(ActiveSectionIndex(), 0);
+        paintSection(ActiveSectionIndex(), 0);
     } else {
         for (isize i {0}; i < std::ssize(_sections); ++i) {
-            paint_section(i, i);
+            paintSection(i, i);
         }
     }
 }

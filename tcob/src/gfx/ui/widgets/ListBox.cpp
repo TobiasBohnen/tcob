@@ -153,7 +153,7 @@ void list_box::on_draw(widget_painter& painter)
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
     _visibleItems = listRect.height() / itemHeight;
 
-    auto const paint_item {[&](isize i) {
+    auto const paintItem {[&](isize i) {
         rect_f itemRect {listRect};
         itemRect.Size.Height = itemHeight;
         itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
@@ -171,14 +171,14 @@ void list_box::on_draw(widget_painter& painter)
     isize const size {item_count()};
     for (i32 i {0}; i < size; ++i) {
         if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-        paint_item(i);
+        paintItem(i);
     }
 
     if (SelectedItemIndex != INVALID_INDEX) {
-        paint_item(SelectedItemIndex);
+        paintItem(SelectedItemIndex);
     }
     if (HoveredItemIndex != INVALID_INDEX && SelectedItemIndex != HoveredItemIndex) {
-        paint_item(HoveredItemIndex);
+        paintItem(HoveredItemIndex);
     }
 }
 

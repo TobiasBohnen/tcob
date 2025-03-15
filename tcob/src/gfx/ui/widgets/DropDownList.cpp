@@ -150,7 +150,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 
         scissor_guard const guard {painter, this};
 
-        auto const paint_item {[&](isize i) {
+        auto const paintItem {[&](isize i) {
             rect_f itemRect {listRect};
             itemRect.Size.Height = itemHeight;
             itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
@@ -167,14 +167,14 @@ void drop_down_list::on_draw(widget_painter& painter)
         // content
         for (i32 i {0}; i < std::ssize(items); ++i) {
             if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-            paint_item(i);
+            paintItem(i);
         }
 
         if (SelectedItemIndex >= 0) {
-            paint_item(SelectedItemIndex());
+            paintItem(SelectedItemIndex());
         }
         if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paint_item(HoveredItemIndex());
+            paintItem(HoveredItemIndex());
         }
     } else {
         _visibleItems = 0;

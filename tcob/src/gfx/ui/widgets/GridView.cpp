@@ -180,7 +180,7 @@ void grid_view::on_draw(widget_painter& painter)
     _headerRectCache.clear();
     _visibleRows = (gridRect.height() / rowHeight) - 1;
 
-    auto const paint_cell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
+    auto const paintCell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
         rect_f cellRect {point_f::Zero, {columnWidths[idx.X], rowHeight}};
         cellRect.Position.X = gridRect.Position.X + columnOffsets[idx.X];
         cellRect.Position.Y = gridRect.Position.Y + (rowHeight * idx.Y);
@@ -196,7 +196,7 @@ void grid_view::on_draw(widget_painter& painter)
         }
     }};
 
-    auto const get_cell_flags {[this](point_i idx, select_mode mode) -> widget_flags {
+    auto const getCellFlags {[this](point_i idx, select_mode mode) -> widget_flags {
         switch (mode) {
         case select_mode::Cell: return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
         case select_mode::Row: return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
@@ -211,7 +211,7 @@ void grid_view::on_draw(widget_painter& painter)
     for (i32 y {0}; y < std::ssize(_rows); ++y) {
         for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
             point_i const idx {x, y + 1};
-            auto const    cellFlags {get_cell_flags(idx, SelectMode)};
+            auto const    cellFlags {getCellFlags(idx, SelectMode)};
             // skip selected/hover
             if (cellFlags.Active) {
                 selectedCells.push_back(idx);
@@ -222,21 +222,21 @@ void grid_view::on_draw(widget_painter& painter)
                 continue;
             }
 
-            paint_cell(idx, _rows[y][x], _style.RowItemClass, cellFlags, _rowRectCache[idx]);
+            paintCell(idx, _rows[y][x], _style.RowItemClass, cellFlags, _rowRectCache[idx]);
         }
     }
 
     for (auto const& idx : selectedCells) {
-        paint_cell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Active = true}, _rowRectCache[idx]);
+        paintCell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Active = true}, _rowRectCache[idx]);
     }
     for (auto const& idx : hoveredCells) {
-        paint_cell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Hover = true}, _rowRectCache[idx]);
+        paintCell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Hover = true}, _rowRectCache[idx]);
     }
 
     // Draw headers
     for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
         point_i const idx {x, 0};
-        paint_cell(idx, _columnHeaders[x], _style.HeaderItemClass, get_cell_flags(idx, SelectMode), _headerRectCache[idx]);
+        paintCell(idx, _columnHeaders[x], _style.HeaderItemClass, getCellFlags(idx, SelectMode), _headerRectCache[idx]);
     }
 }
 
