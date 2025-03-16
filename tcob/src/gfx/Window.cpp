@@ -32,14 +32,14 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::owni
               [this](auto const& value) { set_title(value); }}}
     , VSync {{[this]() { return _impl->get_vsync(); },
               [this](auto const& value) { _impl->set_vsync(value); }}}
-    , Shader {{[this]() { return _material->Shader; },
-               [this](auto const& value) { _material->Shader = value; }}}
     , _texture {texture}
     , _impl {std::move(window)}
 {
     Cursor.Changed.connect([this](auto const& value) { SystemCursorEnabled = !value.is_ready(); });
     SystemCursorEnabled(true);
     SystemCursorEnabled.Changed.connect([](bool value) { SDL_ShowCursor(value ? SDL_ENABLE : SDL_DISABLE); });
+
+    Shader.Changed.connect([this](auto const& value) { _material->Shader = value; });
 
     _material->Texture = _texture;
     _renderer.set_material(_material.ptr());

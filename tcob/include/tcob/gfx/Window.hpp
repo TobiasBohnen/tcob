@@ -67,7 +67,7 @@ public:
     prop<assets::asset_ptr<cursor>> Cursor;
     prop<bool>                      SystemCursorEnabled;
 
-    prop_fn<assets::asset_ptr<shader>> Shader;
+    prop<assets::asset_ptr<shader>> Shader;
 
     auto bounds() const -> rect_i;
 
