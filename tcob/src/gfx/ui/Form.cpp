@@ -47,6 +47,8 @@ form_base::form_base(string name, rect_f const& bounds)
     _renderer.set_bounds(Bounds());
 
     Styles.Changed.connect([this](auto const&) { on_styles_changed(); });
+
+    Shader.Changed.connect([this](auto const& value) { _renderer.set_shader(value); });
 }
 
 form_base::~form_base()

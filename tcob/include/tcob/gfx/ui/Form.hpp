@@ -14,10 +14,12 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
+#include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -33,9 +35,10 @@ public:
 
     prop<rect_f> Bounds;
 
-    prop<style_collection> Styles;
-    prop<control_map>      Controls;
-    prop<nav_map>          NavMap;
+    prop<style_collection>               Styles;
+    prop<control_map>                    Controls;
+    prop<nav_map>                        NavMap;
+    prop<assets::asset_ptr<gfx::shader>> Shader;
 
     signal<string const> CursorChanged;
     point_f              TooltipOffset {point_f::Zero};

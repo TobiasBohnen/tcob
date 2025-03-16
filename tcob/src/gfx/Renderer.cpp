@@ -9,15 +9,18 @@
 #include <array>
 #include <memory>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/RenderTexture.hpp"
+#include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/VertexArray.hpp"
 
 namespace tcob::gfx {
@@ -392,6 +395,11 @@ void canvas_renderer::set_bounds(rect_f const& bounds)
 void canvas_renderer::set_layer(i32 layer)
 {
     _material->Texture = _canvas.get_texture(layer);
+}
+
+void canvas_renderer::set_shader(assets::asset_ptr<shader> shader)
+{
+    _material->Shader = std::move(shader);
 }
 
 void canvas_renderer::prepare_render(render_target& target, bool debug)

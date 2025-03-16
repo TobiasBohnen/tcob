@@ -17,6 +17,7 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/ShaderProgram.hpp"
 #include "tcob/gfx/VertexArray.hpp"
 
 namespace tcob::gfx {
@@ -169,6 +170,8 @@ public:
 
     void set_bounds(rect_f const& bounds);
     void set_layer(i32 layer);
+
+    void set_shader(assets::asset_ptr<shader> shader);
 
 protected:
     void prepare_render(render_target& target, bool debug) override;
