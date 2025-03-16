@@ -59,6 +59,8 @@ enum class key_mod : u16 {
 class TCOB_API keyboard {
 public:
     struct event : event_base {
+        keyboard* Keyboard {nullptr};
+
         bool      Pressed {false};
         bool      Repeat {false};
         scan_code ScanCode {scan_code::UNKNOWN};
@@ -100,11 +102,15 @@ public:
     };
 
     struct motion_event : event_base {
+        mouse* Mouse {nullptr};
+
         point_i Position {point_i::Zero};
         point_i RelativeMotion {point_i::Zero};
     };
 
     struct button_event : event_base {
+        mouse* Mouse {nullptr};
+
         button  Button {button::None};
         bool    Pressed {false};
         u8      Clicks {0};
@@ -112,6 +118,8 @@ public:
     };
 
     struct wheel_event : event_base {
+        mouse* Mouse {nullptr};
+
         point_i Scroll {point_i::Zero};
         point_f Precise {point_f::Zero};
         point_i Position {point_i::Zero};

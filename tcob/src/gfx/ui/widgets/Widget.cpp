@@ -7,10 +7,8 @@
 
 #include <cassert>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -300,18 +298,7 @@ void widget::do_key_down(input::keyboard::event const& ev)
     on_key_down(ev);
 
     if (!ev.Handled) {
-        auto const& ctrls {controls()};
-        if (!locate_service<input::system>().keyboard().is_key_down(ctrls.ActivateKey)) {
-            if (ev.KeyCode == ctrls.NavLeftKey) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Left);
-            } else if (ev.KeyCode == ctrls.NavRightKey) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Right);
-            } else if (ev.KeyCode == ctrls.NavDownKey) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Down);
-            } else if (ev.KeyCode == ctrls.NavUpKey) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Up);
-            }
-        } else if (ev.KeyCode == ctrls.ActivateKey) {
+        if (ev.KeyCode == controls().ActivateKey) {
             activate();
             ev.Handled = true;
         }
@@ -463,21 +450,9 @@ void widget::do_controller_button_down(input::controller::button_event const& ev
     on_controller_button_down(ev);
 
     if (!ev.Handled) {
-        auto const& ctrls {controls()};
-
-        if (ev.Button == ctrls.ActivateButton) {
+        if (ev.Button == controls().ActivateButton) {
             activate();
             ev.Handled = true;
-        } else if (!ev.Controller->is_button_pressed(ctrls.ActivateButton)) {
-            if (ev.Button == ctrls.NavLeftButton) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Left);
-            } else if (ev.Button == ctrls.NavRightButton) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Right);
-            } else if (ev.Button == ctrls.NavDownButton) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Down);
-            } else if (ev.Button == ctrls.NavUpButton) {
-                ev.Handled = _form->focus_nav_target(_name, direction::Up);
-            }
         }
     }
 

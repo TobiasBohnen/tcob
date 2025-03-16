@@ -11,7 +11,6 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -105,7 +104,7 @@ void slider::on_draw(widget_painter& painter)
 void slider::on_key_down(input::keyboard::event const& ev)
 {
     auto const& controls {parent_form()->Controls};
-    if (locate_service<input::system>().keyboard().is_key_down(controls->ActivateKey)) {
+    if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavLeftKey) {
             handle_dir_input(direction::Left);
             ev.Handled = true;

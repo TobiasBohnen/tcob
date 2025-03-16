@@ -235,9 +235,13 @@ auto system::clipboard() const -> input::clipboard
 
 void system::process_events(SDL_Event* ev)
 {
+    static class keyboard key;
+    static class mouse    mouse;
+
     switch (ev->type) {
     case SDL_KEYDOWN: {
         keyboard::event const event {
+            .Keyboard = &key,
             .Pressed  = ev->key.state == SDL_PRESSED,
             .Repeat   = ev->key.repeat != 0,
             .ScanCode = convert_enum(ev->key.keysym.scancode),
@@ -248,6 +252,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_KEYUP: {
         keyboard::event const event {
+            .Keyboard = &key,
             .Pressed  = ev->key.state == SDL_PRESSED,
             .Repeat   = ev->key.repeat != 0,
             .ScanCode = convert_enum(ev->key.keysym.scancode),
@@ -269,6 +274,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_MOUSEMOTION: {
         mouse::motion_event const event {
+            .Mouse          = &mouse,
             .Position       = {ev->motion.x, ev->motion.y},
             .RelativeMotion = {ev->motion.xrel, ev->motion.yrel}};
         MouseMotion(event);
@@ -276,6 +282,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_MOUSEBUTTONDOWN: {
         mouse::button_event const event {
+            .Mouse    = &mouse,
             .Button   = convert_mouse_button(ev->button.button),
             .Pressed  = ev->button.state == SDL_PRESSED,
             .Clicks   = ev->button.clicks,
@@ -285,6 +292,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_MOUSEBUTTONUP: {
         mouse::button_event const event {
+            .Mouse    = &mouse,
             .Button   = convert_mouse_button(ev->button.button),
             .Pressed  = ev->button.state == SDL_PRESSED,
             .Clicks   = ev->button.clicks,
@@ -294,6 +302,7 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_MOUSEWHEEL: {
         mouse::wheel_event const event {
+            .Mouse    = &mouse,
             .Scroll   = ev->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? point_i {-ev->wheel.x, -ev->wheel.y} : point_i {ev->wheel.x, ev->wheel.y},
             .Precise  = ev->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? point_f {-ev->wheel.preciseX, -ev->wheel.preciseY} : point_f {ev->wheel.preciseX, ev->wheel.preciseY},
             .Position = {ev->wheel.mouseX, ev->wheel.mouseY}};

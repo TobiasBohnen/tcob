@@ -311,6 +311,16 @@ void form_base::on_key_down(input::keyboard::event const& ev)
     } else if ((ev.KeyMods & Controls->CutCopyPasteMod) == Controls->CutCopyPasteMod && ev.KeyCode == Controls->PasteKey) {
         input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
         _injector.on_text_input(_focusWidget, tev);
+    } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
+        if (ev.KeyCode == Controls->NavLeftKey) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Left);
+        } else if (ev.KeyCode == Controls->NavRightKey) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Right);
+        } else if (ev.KeyCode == Controls->NavDownKey) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Down);
+        } else if (ev.KeyCode == Controls->NavUpKey) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
+        }
     } else {
         _injector.on_key_down(_focusWidget, ev);
     }
@@ -410,7 +420,19 @@ void form_base::on_controller_axis_motion(input::controller::axis_event const& /
 void form_base::on_controller_button_down(input::controller::button_event const& ev)
 {
     hide_tooltip();
-    _injector.on_controller_button_down(_focusWidget, ev);
+    if (!ev.Controller->is_button_pressed(Controls->ActivateButton) && _focusWidget) {
+        if (ev.Button == Controls->NavLeftButton) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Left);
+        } else if (ev.Button == Controls->NavRightButton) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Right);
+        } else if (ev.Button == Controls->NavDownButton) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Down);
+        } else if (ev.Button == Controls->NavUpButton) {
+            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
+        }
+    } else {
+        _injector.on_controller_button_down(_focusWidget, ev);
+    }
 }
 
 void form_base::on_controller_button_up(input::controller::button_event const& ev)

@@ -63,8 +63,6 @@ public:
     void request_redraw(string const& reason);
     void notify_redraw(string const& reason);
 
-    auto focus_nav_target(string const& widget, direction dir) -> bool;
-
     template <SubmitTarget Target>
     void submit(Target& target);
 
@@ -100,6 +98,8 @@ protected:
     void virtual apply_layout() = 0;
 
 private:
+    auto focus_nav_target(string const& widget, direction dir) -> bool;
+
     void on_mouse_hover(input::mouse::motion_event const& ev);
 
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
