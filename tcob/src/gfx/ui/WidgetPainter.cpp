@@ -730,12 +730,7 @@ scissor_guard::scissor_guard(widget_painter& painter, widget* w)
     : _painter {painter}
 {
     rect_f bounds {w->global_content_bounds()};
-
-    if (auto const* form {w->parent_form()}) {
-        point_f const off {form->Bounds->Position};
-        bounds.Position.X -= off.X;
-        bounds.Position.Y -= off.Y;
-    }
+    bounds.Position -= w->parent_form()->Bounds->Position;
     painter.push_scissor(bounds);
 }
 
