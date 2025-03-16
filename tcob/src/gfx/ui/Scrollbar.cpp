@@ -173,11 +173,13 @@ void scrollbar::calculate_value(point_f mp)
     switch (_orien) {
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
-        frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
+        f32 const width {rect.width() - tw};
+        if (width > 0) { frac = (mp.X - _dragOffset.X - (tw / 2)) / width; }
     } break;
     case orientation::Vertical: {
         f32 const th {_barRectCache.Thumb.height()};
-        frac = (mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th);
+        f32 const height {rect.height() - th};
+        if (height > 0) { frac = (mp.Y - _dragOffset.Y - (th / 2)) / height; }
     } break;
     }
 

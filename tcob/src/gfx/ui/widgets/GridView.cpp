@@ -174,12 +174,13 @@ void grid_view::on_draw(widget_painter& painter)
     _rowRectCache.clear();
     _headerRectCache.clear();
     _visibleRows = (gridRect.height() / rowHeight) - 1;
+    auto const scrollOffset {scrollbar_offset()};
 
     auto const paintCell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
         rect_f cellRect {point_f::Zero, {columnWidths[idx.X], rowHeight}};
         cellRect.Position.X = gridRect.Position.X + columnOffsets[idx.X];
         cellRect.Position.Y = gridRect.Position.Y + (rowHeight * idx.Y);
-        if (idx.Y > 0) { cellRect.Position.Y -= get_scrollbar_value(); }
+        if (idx.Y > 0) { cellRect.Position.Y -= scrollOffset; }
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
             item_style cellStyle {};

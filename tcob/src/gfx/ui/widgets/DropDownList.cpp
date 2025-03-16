@@ -134,6 +134,7 @@ void drop_down_list::on_draw(widget_painter& painter)
         painter.draw_background_and_border(_style, listRect, false);
 
         // scrollbar
+        auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max()};
         _vScrollbar.Visible = std::ssize(items) > MaxVisibleItems;
 
         auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
@@ -148,7 +149,7 @@ void drop_down_list::on_draw(widget_painter& painter)
         auto const paintItem {[&](isize i) {
             rect_f itemRect {listRect};
             itemRect.Size.Height = itemHeight;
-            itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
+            itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - scrollOffset;
 
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                 item_style itemStyle {};
@@ -260,9 +261,8 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
     HoveredItemIndex = INVALID_INDEX;
 
-    bool const         invert {ev.Scroll.Y > 0};
-    milliseconds const delay {_style.VScrollBar.Bar.Delay};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + (invert ? -get_scroll_distance() : get_scroll_distance()), delay);
+    f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + scrollOffset, _style.VScrollBar.Bar.Delay);
 
     ev.Handled = true;
 }
@@ -347,12 +347,7 @@ auto drop_down_list::get_scroll_distance() const -> f32
 
 auto drop_down_list::get_scroll_max() const -> f32
 {
-    return std::max(0.0f, (get_item_height() * std::max(std::ssize(get_items()), MaxVisibleItems())) - content_bounds().height());
-}
-
-auto drop_down_list::get_scrollbar_value() const -> f32
-{
-    return _vScrollbar.current_value() * get_scroll_max();
+    return std::max(1.0f, (get_item_height() * std::max(std::ssize(get_items()), MaxVisibleItems())) - content_bounds().height());
 }
 
 } // namespace ui

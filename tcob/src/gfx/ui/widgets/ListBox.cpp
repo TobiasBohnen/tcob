@@ -147,11 +147,12 @@ void list_box::on_draw(widget_painter& painter)
     rect_f const listRect {rect};
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
     _visibleItems = listRect.height() / itemHeight;
+    auto const scrollOffset {scrollbar_offset()};
 
     auto const paintItem {[&](isize i) {
         rect_f itemRect {listRect};
         itemRect.Size.Height = itemHeight;
-        itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - get_scrollbar_value();
+        itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - scrollOffset;
 
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
             item_style itemStyle {};

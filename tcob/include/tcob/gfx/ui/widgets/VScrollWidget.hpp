@@ -47,7 +47,7 @@ protected:
     auto virtual get_scroll_distance() const -> f32       = 0;
     auto get_scroll_max() const -> f32;
 
-    auto get_scrollbar_value() const -> f32;
+    auto scrollbar_offset() const -> f32;
     void set_scrollbar_value(f32 value);
 
 private:

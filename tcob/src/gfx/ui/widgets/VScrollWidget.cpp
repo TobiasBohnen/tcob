@@ -94,9 +94,9 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (!_vScrollbar.Visible) { return; }
     if (ev.Scroll.Y == 0) { return; }
 
-    bool const         invert {ev.Scroll.Y > 0};
+    f32 const          scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
     milliseconds const delay {dynamic_cast<vscroll_widget::style const*>(current_style())->VScrollBar.Bar.Delay};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + ((invert ? -get_scroll_distance() : get_scroll_distance())), delay);
+    _vScrollbar.start_scroll(_vScrollbar.target_value() + scrollOffset, delay);
 
     ev.Handled = true;
 }
@@ -122,7 +122,7 @@ auto vscroll_widget::get_scroll_max() const -> f32
     return std::max(0.0f, get_scroll_content_height() - content_bounds().height());
 }
 
-auto vscroll_widget::get_scrollbar_value() const -> f32
+auto vscroll_widget::scrollbar_offset() const -> f32
 {
     return _vScrollbar.current_value() * get_scroll_max();
 }

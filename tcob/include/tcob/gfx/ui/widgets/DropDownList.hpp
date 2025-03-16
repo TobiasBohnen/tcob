@@ -84,8 +84,6 @@ private:
     auto get_scroll_distance() const -> f32;
     auto get_scroll_max() const -> f32;
 
-    auto get_scrollbar_value() const -> f32;
-
     std::vector<list_item>            _items;
     std::unordered_map<isize, rect_f> _itemRectCache;
     isize                             _visibleItems {0};
