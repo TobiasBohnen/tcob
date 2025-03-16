@@ -76,11 +76,10 @@ void widget_painter::draw_background_and_border(widget_style const& style, rect_
     //  add margin
     rect -= style.Margin;
 
+    draw_shadow(style.DropShadow, rect, isCircle, style.Border);
     if (isCircle) {
-        draw_shadow(style.DropShadow, rect, isCircle, style.Border);
         draw_bordered_circle(rect, style.Background, style.Border);
     } else {
-        draw_shadow(style.DropShadow, rect, isCircle, style.Border);
         draw_bordered_rect(rect, style.Background, style.Border);
     }
 

@@ -131,12 +131,7 @@ auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
 
 void accordion::on_draw(widget_painter& painter)
 {
-    apply_style(_style);
-
-    rect_f rect {Bounds()};
-
-    //  background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     // sections
     f32 const  sectionHeight {_style.SectionBarHeight.calc(rect.height())};

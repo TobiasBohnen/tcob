@@ -19,6 +19,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/WidgetPainter.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
@@ -124,6 +125,8 @@ protected:
     void virtual on_draw(widget_painter& painter) = 0;
     void virtual prepare_redraw();
     void request_redraw(string const& reason);
+
+    auto draw_background(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
 
     void virtual set_redraw(bool val);
     auto get_redraw() const -> bool;

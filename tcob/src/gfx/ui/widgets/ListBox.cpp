@@ -134,15 +134,10 @@ void list_box::prepare_redraw()
 
 void list_box::on_draw(widget_painter& painter)
 {
-    apply_style(_style);
-
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     // scrollbar
-    paint_scrollbar(painter, rect);
+    draw_scrollbar(painter, rect);
 
     // content
     scissor_guard const guard {painter, this};

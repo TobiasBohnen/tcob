@@ -30,7 +30,7 @@ public:
 protected:
     void on_styles_changed() override;
 
-    void paint_scrollbar(widget_painter& painter, rect_f& rect);
+    void draw_scrollbar(widget_painter& painter, rect_f& rect);
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;

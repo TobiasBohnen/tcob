@@ -51,12 +51,7 @@ dot_matrix_display::dot_matrix_display(init const& wi)
 void dot_matrix_display::on_draw(widget_painter& painter)
 {
     if (Dots->width() <= 0 || Dots->height() <= 0) { return; }
-    apply_style(_style);
-
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     scissor_guard const guard {painter, this};
 
@@ -211,12 +206,7 @@ auto seven_segment_display::get_segment(segment segment) -> std::bitset<7>
 
 void seven_segment_display::on_draw(widget_painter& painter)
 {
-    apply_style(_style);
-
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     scissor_guard const guard {painter, this};
 

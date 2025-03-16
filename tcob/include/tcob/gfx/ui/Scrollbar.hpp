@@ -32,7 +32,7 @@ public:
     bool Visible {false};
 
     void update(milliseconds deltaTime);
-    void paint(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect);
+    void draw(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect);
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;

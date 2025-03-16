@@ -98,14 +98,9 @@ void drop_down_list::on_styles_changed()
 
 void drop_down_list::on_draw(widget_painter& painter)
 {
-    apply_style(_style);
-
     _itemRectCache.clear();
 
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     // arrow
     auto const& fls {flags()};
@@ -146,7 +141,7 @@ void drop_down_list::on_draw(widget_painter& painter)
                                                                    : widget_flags {.Hover = true}};
         thumb_style thumbStyle;
         apply_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
-        _vScrollbar.paint(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
+        _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
         scissor_guard const guard {painter, this};
 

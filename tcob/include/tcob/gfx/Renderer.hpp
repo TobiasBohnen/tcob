@@ -162,7 +162,6 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
-class canvas;
 
 class TCOB_API canvas_renderer final : public renderer {
 public:

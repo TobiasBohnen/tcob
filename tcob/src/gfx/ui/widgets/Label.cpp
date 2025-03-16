@@ -34,12 +34,7 @@ label::label(init const& wi)
 
 void label::on_draw(widget_painter& painter)
 {
-    apply_style(_style);
-
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     scissor_guard const guard {painter, this};
 

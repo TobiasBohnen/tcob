@@ -99,12 +99,7 @@ void panel::on_update(milliseconds deltaTime)
 
 void panel::on_draw(widget_painter& painter)
 {
-    apply_style(_style);
-
-    rect_f rect {Bounds()};
-
-    // background
-    painter.draw_background_and_border(_style, rect, false);
+    rect_f rect {draw_background(_style, painter)};
 
     // scrollbars
     {
@@ -114,7 +109,7 @@ void panel::on_draw(widget_painter& painter)
                                                                     : widget_flags {.Hover = true}};
         thumb_style vThumbStyle;
         apply_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
-        _vScrollbar.paint(painter, _style.VScrollBar, vThumbStyle.Thumb, rect);
+        _vScrollbar.draw(painter, _style.VScrollBar, vThumbStyle.Thumb, rect);
     }
     {
         _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
@@ -123,7 +118,7 @@ void panel::on_draw(widget_painter& painter)
                                                                     : widget_flags {.Hover = true}};
         thumb_style hThumbStyle;
         apply_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
-        _hScrollbar.paint(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
+        _hScrollbar.draw(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
     }
 }
 

@@ -30,7 +30,7 @@ void scrollbar::update(milliseconds deltaTime)
     _tween.update(deltaTime);
 }
 
-void scrollbar::paint(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect)
+void scrollbar::draw(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect)
 {
     _delay = scrollbar.Bar.Delay;
 

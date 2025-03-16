@@ -37,7 +37,7 @@ void vscroll_widget::on_styles_changed()
     _vScrollbar.reset();
 }
 
-void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
+void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
 {
     auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
 
@@ -49,7 +49,7 @@ void vscroll_widget::paint_scrollbar(widget_painter& painter, rect_f& rect)
                                                                : widget_flags {.Hover = true}};
     thumb_style thumbStyle;
     apply_sub_style(thumbStyle, -2, style->VScrollBar.ThumbClass, thumbFlags);
-    _vScrollbar.paint(painter, style->VScrollBar, thumbStyle.Thumb, rect);
+    _vScrollbar.draw(painter, style->VScrollBar, thumbStyle.Thumb, rect);
 }
 
 void vscroll_widget::on_mouse_leave()
