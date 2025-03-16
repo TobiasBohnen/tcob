@@ -12,17 +12,13 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 
-scrollbar::scrollbar(widget& parent, orientation orien)
+scrollbar::scrollbar(orientation orien)
     : _orien {orien}
-    , _parent {parent}
 {
-    _tween.Changed.connect([this]() {
-        Changed();
-    });
+    _tween.Changed.connect([this]() { Changed(); });
 }
 
 void scrollbar::update(milliseconds deltaTime)
@@ -71,47 +67,62 @@ auto scrollbar::is_mouse_over_thumb() const -> bool
     return Visible && _overThumb;
 }
 
-void scrollbar::mouse_hover(point_i mp)
+auto scrollbar::mouse_hover(widget const& widget, point_i mp) -> bool
 {
-    if (_isDragging) { return; }
+    if (_isDragging) { return is_mouse_over(); }
 
     _overThumb = false;
     _overBar   = false;
 
-    if (!Visible) { return; }
+    if (!Visible) { return false; }
 
-    if (_barRectCache.Thumb.contains(global_to_parent(_parent, mp))) {
+    auto const pos {global_to_parent(widget, mp)};
+
+    if (_barRectCache.Thumb.contains(pos)) {
         _overThumb = true;
-        return;
+        return true;
     }
 
     // over bar
-    if (_barRectCache.Bar.contains(global_to_parent(_parent, mp))) {
+    if (_barRectCache.Bar.contains(pos)) {
         _overBar = true;
-        return;
+        return true;
     }
+
+    return false;
 }
 
-auto scrollbar::is_dragging() const -> bool
+auto scrollbar::mouse_drag(widget const& widget, point_i mp) -> bool
 {
+    if (_isDragging || is_mouse_over()) {
+        calculate_value(global_to_content(widget, mp));
+        _isDragging = true;
+    }
+
     return _isDragging;
 }
 
-void scrollbar::mouse_drag(point_i mp)
+void scrollbar::mouse_down(widget const& widget, point_i mp)
 {
-    if (_isDragging || is_mouse_over()) {
-        calculate_value(global_to_content(_parent, mp));
+    _isDragging = false;
+
+    if (!is_mouse_over()) { return; }
+    if (!_overThumb) {
+        calculate_value(global_to_content(widget, mp));
+    } else {
+        _dragOffset = point_i {global_to_parent(widget, mp) - _barRectCache.Thumb.center()};
         _isDragging = true;
     }
 }
 
-void scrollbar::mouse_up(point_i mp)
+void scrollbar::mouse_up(widget const& widget, point_i mp)
 {
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
-    _overThumb = _barRectCache.Thumb.contains(global_to_parent(_parent, mp));
-    _overBar   = _barRectCache.Bar.contains(global_to_parent(_parent, mp));
+    auto const pos {global_to_parent(widget, mp)};
+    _overThumb = _barRectCache.Thumb.contains(pos);
+    _overBar   = _barRectCache.Bar.contains(pos);
 }
 
 void scrollbar::mouse_leave()
@@ -121,19 +132,6 @@ void scrollbar::mouse_leave()
 
     _overThumb = false;
     _overBar   = false;
-}
-
-void scrollbar::mouse_down(point_i mp)
-{
-    _isDragging = false;
-
-    if (!is_mouse_over()) { return; }
-    if (!_overThumb) {
-        calculate_value(global_to_content(_parent, mp));
-    } else {
-        _dragOffset = point_i {global_to_parent(_parent, mp) - _barRectCache.Thumb.center()};
-        _isDragging = true;
-    }
 }
 
 auto scrollbar::current_value() const -> f32

@@ -25,7 +25,7 @@ void vscroll_widget::style::Transition(style& target, style const& left, style c
 
 vscroll_widget::vscroll_widget(init const& wi)
     : widget {wi}
-    , _vScrollbar {*this, orientation::Vertical}
+    , _vScrollbar {orientation::Vertical}
 {
     _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
 }
@@ -59,8 +59,7 @@ void vscroll_widget::on_mouse_leave()
 
 void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    _vScrollbar.mouse_hover(ev.Position);
-    if (_vScrollbar.is_mouse_over()) {
+    if (_vScrollbar.mouse_hover(*this, ev.Position)) {
         ev.Handled = true;
     }
 }
@@ -69,7 +68,7 @@ void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         if (_vScrollbar.is_mouse_over()) {
-            _vScrollbar.mouse_down(ev.Position);
+            _vScrollbar.mouse_down(*this, ev.Position);
             ev.Handled = true;
         }
     }
@@ -77,8 +76,7 @@ void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
 
 void vscroll_widget::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    _vScrollbar.mouse_drag(ev.Position);
-    if (_vScrollbar.is_dragging()) {
+    if (_vScrollbar.mouse_drag(*this, ev.Position)) {
         ev.Handled = true;
     }
 }
@@ -86,7 +84,7 @@ void vscroll_widget::on_mouse_drag(input::mouse::motion_event const& ev)
 void vscroll_widget::on_mouse_up(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
-        _vScrollbar.mouse_up(ev.Position);
+        _vScrollbar.mouse_up(*this, ev.Position);
         ev.Handled = true;
     }
 }

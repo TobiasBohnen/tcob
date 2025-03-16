@@ -13,7 +13,6 @@
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/WidgetTweener.hpp"
-#include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
@@ -25,7 +24,7 @@ public:
         rect_f Thumb;
     };
 
-    scrollbar(widget& parent, orientation orien);
+    scrollbar(orientation orien);
 
     signal<> Changed;
 
@@ -42,13 +41,12 @@ public:
 
     auto is_mouse_over() const -> bool;
     auto is_mouse_over_thumb() const -> bool;
-    void mouse_hover(point_i mp);
+    auto mouse_hover(widget const& widget, point_i mp) -> bool;
 
-    auto is_dragging() const -> bool;
-    void mouse_drag(point_i mp);
+    auto mouse_drag(widget const& widget, point_i mp) -> bool;
 
-    void mouse_down(point_i mp);
-    void mouse_up(point_i mp);
+    void mouse_down(widget const& widget, point_i mp);
+    void mouse_up(widget const& widget, point_i mp);
 
     void mouse_leave();
 
@@ -61,7 +59,6 @@ private:
     point_i _dragOffset {point_i::Zero};
 
     orientation    _orien;
-    widget&        _parent;
     widget_tweener _tween;
 
     rects _barRectCache;

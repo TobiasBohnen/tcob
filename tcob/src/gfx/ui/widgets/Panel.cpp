@@ -35,8 +35,8 @@ void panel::style::Transition(style& target, style const& left, style const& rig
 panel::panel(init const& wi)
     : widget_container {wi}
     , _layout {std::make_unique<static_layout>(this)}
-    , _vScrollbar {*this, orientation::Vertical}
-    , _hScrollbar {*this, orientation::Horizontal}
+    , _vScrollbar {orientation::Vertical}
+    , _hScrollbar {orientation::Horizontal}
 {
     _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
     _hScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
@@ -151,8 +151,7 @@ void panel::on_mouse_leave()
 void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     auto const scrollHover {[&](auto&& scrollbar) {
-        scrollbar.mouse_hover(ev.Position);
-        return scrollbar.is_mouse_over();
+        return scrollbar.mouse_hover(*this, ev.Position);
     }};
 
     ev.Handled = scrollHover(_vScrollbar) || scrollHover(_hScrollbar);
@@ -160,9 +159,8 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    auto const scrollDrag {[&](auto&& scrollbar) {
-        scrollbar.mouse_drag(ev.Position);
-        return scrollbar.is_dragging();
+    auto const scrollDrag {[this, &ev](auto&& scrollbar) {
+        return scrollbar.mouse_drag(*this, ev.Position);
     }};
 
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
@@ -179,8 +177,8 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
-            _vScrollbar.mouse_down(ev.Position);
-            _hScrollbar.mouse_down(ev.Position);
+            _vScrollbar.mouse_down(*this, ev.Position);
+            _hScrollbar.mouse_down(*this, ev.Position);
             ev.Handled = true;
             return;
         }
@@ -191,8 +189,8 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
-            _vScrollbar.mouse_up(ev.Position);
-            _hScrollbar.mouse_up(ev.Position);
+            _vScrollbar.mouse_up(*this, ev.Position);
+            _hScrollbar.mouse_up(*this, ev.Position);
             ev.Handled = true;
             return;
         }
