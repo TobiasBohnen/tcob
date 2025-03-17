@@ -8,7 +8,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <glad/gles30.h>
 
 #include "GLES30.hpp"
@@ -43,7 +43,9 @@ gl_window::gl_window(size_i size)
 
     // Create window
     logger::Info("GLESWindow: creating window");
-    _window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size.Width, size.Height, flags);
+    _window = SDL_CreateWindow("", size.Width, size.Height, flags);
+    SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
     if (!_window) {
         logger::Error("GLESWindow: Window creation failed!");
         throw std::runtime_error("Window creation failed");
@@ -62,7 +64,9 @@ gl_window::~gl_window()
 
 auto gl_window::get_vsync() const -> bool
 {
-    return SDL_GL_GetSwapInterval() == 1;
+    i32 i {};
+    SDL_GL_GetSwapInterval(&i);
+    return i == 1;
 }
 
 void gl_window::set_vsync(bool value)

@@ -265,10 +265,6 @@ enum class scan_code : u16 {
     AUDIOPLAY    = 261,
     AUDIOMUTE    = 262,
     MEDIASELECT  = 263,
-    WWW          = 264,
-    MAIL         = 265,
-    CALCULATOR   = 266,
-    COMPUTER     = 267,
     AC_SEARCH    = 268,
     AC_HOME      = 269,
     AC_BACK      = 270,
@@ -286,18 +282,8 @@ enum class scan_code : u16 {
      */
     /* @{ */
 
-    BRIGHTNESSDOWN = 275,
-    BRIGHTNESSUP   = 276,
-    DISPLAYSWITCH  = 277, /**< display mirroring/dual display
-                                            switch, video mode switch */
-    KBDILLUMTOGGLE = 278,
-    KBDILLUMDOWN   = 279,
-    KBDILLUMUP     = 280,
-    EJECT          = 281,
-    SLEEP          = 282,
-
-    APP1 = 283,
-    APP2 = 284,
+    EJECT = 281,
+    SLEEP = 282,
 
     /* @} */ /* Walther keys */
 
@@ -330,13 +316,6 @@ enum class scan_code : u16 {
                                        of the display. */
     CALL      = 289, /**< Used for accepting phone calls. */
     ENDCALL   = 290, /**< Used for rejecting phone calls. */
-
-    /* @} */         /* Mobile keys */
-
-    /* Add any other keys here. */
-
-    SDL_NUM_SCANCODES = 512 /**< not a key, just marks the number of scancodes
-                                 for array bounds */
 };
 
 consteval auto scancode_to_keycode(scan_code x) -> i32
@@ -576,10 +555,6 @@ enum class key_code {
     AUDIOPLAY    = scancode_to_keycode(scan_code::AUDIOPLAY),
     AUDIOMUTE    = scancode_to_keycode(scan_code::AUDIOMUTE),
     MEDIASELECT  = scancode_to_keycode(scan_code::MEDIASELECT),
-    WWW          = scancode_to_keycode(scan_code::WWW),
-    MAIL         = scancode_to_keycode(scan_code::MAIL),
-    CALCULATOR   = scancode_to_keycode(scan_code::CALCULATOR),
-    COMPUTER     = scancode_to_keycode(scan_code::COMPUTER),
     AC_SEARCH    = scancode_to_keycode(scan_code::AC_SEARCH),
     AC_HOME      = scancode_to_keycode(scan_code::AC_HOME),
     AC_BACK      = scancode_to_keycode(scan_code::AC_BACK),
@@ -588,16 +563,8 @@ enum class key_code {
     AC_REFRESH   = scancode_to_keycode(scan_code::AC_REFRESH),
     AC_BOOKMARKS = scancode_to_keycode(scan_code::AC_BOOKMARKS),
 
-    BRIGHTNESSDOWN = scancode_to_keycode(scan_code::BRIGHTNESSDOWN),
-    BRIGHTNESSUP   = scancode_to_keycode(scan_code::BRIGHTNESSUP),
-    DISPLAYSWITCH  = scancode_to_keycode(scan_code::DISPLAYSWITCH),
-    KBDILLUMTOGGLE = scancode_to_keycode(scan_code::KBDILLUMTOGGLE),
-    KBDILLUMDOWN   = scancode_to_keycode(scan_code::KBDILLUMDOWN),
-    KBDILLUMUP     = scancode_to_keycode(scan_code::KBDILLUMUP),
-    EJECT          = scancode_to_keycode(scan_code::EJECT),
-    SLEEP          = scancode_to_keycode(scan_code::SLEEP),
-    APP1           = scancode_to_keycode(scan_code::APP1),
-    APP2           = scancode_to_keycode(scan_code::APP2),
+    EJECT = scancode_to_keycode(scan_code::EJECT),
+    SLEEP = scancode_to_keycode(scan_code::SLEEP),
 
     AUDIOREWIND      = scancode_to_keycode(scan_code::AUDIOREWIND),
     AUDIOFASTFORWARD = scancode_to_keycode(scan_code::AUDIOFASTFORWARD),

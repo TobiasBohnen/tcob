@@ -54,93 +54,98 @@ auto convert_joystick_hat(i32 hat) -> joystick::hat
     return joystick::hat::Centered;
 }
 
-auto convert_enum(controller::button button) -> SDL_GameControllerButton
+auto convert_enum(controller::button button) -> SDL_GamepadButton
 {
     switch (button) {
-    case controller::button::Invalid: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_INVALID;
-    case controller::button::A: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_A;
-    case controller::button::B: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_B;
-    case controller::button::X: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X;
-    case controller::button::Y: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_Y;
-    case controller::button::Back: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_BACK;
-    case controller::button::Guide: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_GUIDE;
-    case controller::button::Start: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_START;
-    case controller::button::LeftStick: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSTICK;
-    case controller::button::RightStick: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-    case controller::button::LeftShoulder: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-    case controller::button::RightShoulder: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-    case controller::button::DPadUp: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_UP;
-    case controller::button::DPadDown: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-    case controller::button::DPadLeft: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-    case controller::button::DPadRight: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
-    case controller::button::Misc1: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_MISC1;
-    case controller::button::Paddle1: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE1;
-    case controller::button::Paddle2: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE2;
-    case controller::button::Paddle3: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE3;
-    case controller::button::Paddle4: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE4;
-    case controller::button::Touchpad: return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_TOUCHPAD;
+    case controller::button::Invalid: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_INVALID;
+    case controller::button::A: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_SOUTH;
+    case controller::button::B: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_EAST;
+    case controller::button::X: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_WEST;
+    case controller::button::Y: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_NORTH;
+    case controller::button::Back: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_BACK;
+    case controller::button::Guide: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_GUIDE;
+    case controller::button::Start: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_START;
+    case controller::button::LeftStick: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_STICK;
+    case controller::button::RightStick: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_STICK;
+    case controller::button::LeftShoulder: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_SHOULDER;
+    case controller::button::RightShoulder: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER;
+    case controller::button::DPadUp: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_UP;
+    case controller::button::DPadDown: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_DOWN;
+    case controller::button::DPadLeft: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT;
+    case controller::button::DPadRight: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT;
+    case controller::button::Misc1: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC1;
+    case controller::button::Paddle1: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1;
+    case controller::button::Paddle2: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE1;
+    case controller::button::Paddle3: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2;
+    case controller::button::Paddle4: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE2;
+    case controller::button::Touchpad: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_TOUCHPAD;
     }
 
-    return SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_INVALID;
+    return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_INVALID;
 }
 
-auto convert_enum(SDL_GameControllerButton button) -> controller::button
+auto convert_enum(SDL_GamepadButton button) -> controller::button
 {
     switch (button) {
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_INVALID: return controller::button::Invalid;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_A: return controller::button::A;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_B: return controller::button::B;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_X: return controller::button::X;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_Y: return controller::button::Y;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_BACK: return controller::button::Back;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_GUIDE: return controller::button::Guide;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_START: return controller::button::Start;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSTICK: return controller::button::LeftStick;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSTICK: return controller::button::RightStick;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_LEFTSHOULDER: return controller::button::LeftShoulder;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: return controller::button::RightShoulder;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_UP: return controller::button::DPadUp;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_DOWN: return controller::button::DPadDown;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_LEFT: return controller::button::DPadLeft;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return controller::button::DPadRight;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_MISC1: return controller::button::Misc1;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE1: return controller::button::Paddle1;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE2: return controller::button::Paddle2;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE3: return controller::button::Paddle3;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_PADDLE4: return controller::button::Paddle4;
-    case SDL_GameControllerButton::SDL_CONTROLLER_BUTTON_TOUCHPAD: return controller::button::Touchpad;
-    case SDL_CONTROLLER_BUTTON_MAX: break;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_INVALID: return controller::button::Invalid;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_SOUTH: return controller::button::A;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_EAST: return controller::button::B;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_WEST: return controller::button::X;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_NORTH: return controller::button::Y;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_BACK: return controller::button::Back;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_GUIDE: return controller::button::Guide;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_START: return controller::button::Start;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_STICK: return controller::button::LeftStick;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_STICK: return controller::button::RightStick;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_SHOULDER: return controller::button::LeftShoulder;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER: return controller::button::RightShoulder;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_UP: return controller::button::DPadUp;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_DOWN: return controller::button::DPadDown;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT: return controller::button::DPadLeft;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT: return controller::button::DPadRight;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC1: return controller::button::Misc1;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1: return controller::button::Paddle1;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE1: return controller::button::Paddle2;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2: return controller::button::Paddle3;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE2: return controller::button::Paddle4;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_TOUCHPAD: return controller::button::Touchpad;
+    case SDL_GAMEPAD_BUTTON_MISC2:
+    case SDL_GAMEPAD_BUTTON_MISC3:
+    case SDL_GAMEPAD_BUTTON_MISC4:
+    case SDL_GAMEPAD_BUTTON_MISC5:
+    case SDL_GAMEPAD_BUTTON_MISC6: break;
+    case SDL_GAMEPAD_BUTTON_COUNT: break;
     }
 
     return controller::button::Invalid;
 }
 
-auto convert_enum(controller::axis axis) -> SDL_GameControllerAxis
+auto convert_enum(controller::axis axis) -> SDL_GamepadAxis
 {
     switch (axis) {
-    case controller::axis::Invalid: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_INVALID;
-    case controller::axis::LeftX: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX;
-    case controller::axis::LeftY: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY;
-    case controller::axis::RightX: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTX;
-    case controller::axis::RightY: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTY;
-    case controller::axis::TriggerLeft: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERLEFT;
-    case controller::axis::TriggerRight: return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
+    case controller::axis::Invalid: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_INVALID;
+    case controller::axis::LeftX: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTX;
+    case controller::axis::LeftY: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTY;
+    case controller::axis::RightX: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTX;
+    case controller::axis::RightY: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTY;
+    case controller::axis::TriggerLeft: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFT_TRIGGER;
+    case controller::axis::TriggerRight: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHT_TRIGGER;
     }
 
-    return SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_INVALID;
+    return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_INVALID;
 }
 
-auto convert_enum(SDL_GameControllerAxis axis) -> controller::axis
+auto convert_enum(SDL_GamepadAxis axis) -> controller::axis
 {
     switch (axis) {
-    case SDL_CONTROLLER_AXIS_INVALID: return controller::axis::Invalid;
-    case SDL_CONTROLLER_AXIS_LEFTX: return controller::axis::LeftX;
-    case SDL_CONTROLLER_AXIS_LEFTY: return controller::axis::LeftY;
-    case SDL_CONTROLLER_AXIS_RIGHTX: return controller::axis::RightX;
-    case SDL_CONTROLLER_AXIS_RIGHTY: return controller::axis::RightY;
-    case SDL_CONTROLLER_AXIS_TRIGGERLEFT: return controller::axis::TriggerLeft;
-    case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: return controller::axis::TriggerRight;
-    case SDL_CONTROLLER_AXIS_MAX: return controller::axis::Invalid;
+    case SDL_GAMEPAD_AXIS_INVALID: return controller::axis::Invalid;
+    case SDL_GAMEPAD_AXIS_LEFTX: return controller::axis::LeftX;
+    case SDL_GAMEPAD_AXIS_LEFTY: return controller::axis::LeftY;
+    case SDL_GAMEPAD_AXIS_RIGHTX: return controller::axis::RightX;
+    case SDL_GAMEPAD_AXIS_RIGHTY: return controller::axis::RightY;
+    case SDL_GAMEPAD_AXIS_LEFT_TRIGGER: return controller::axis::TriggerLeft;
+    case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER: return controller::axis::TriggerRight;
+    case SDL_GAMEPAD_AXIS_COUNT: return controller::axis::Invalid;
     }
 
     return controller::axis::Invalid;
@@ -149,48 +154,48 @@ auto convert_enum(SDL_GameControllerAxis axis) -> controller::axis
 auto convert_enum(key_mod mod) -> SDL_Keymod
 {
     switch (mod) {
-    case key_mod::None: return SDL_Keymod::KMOD_NONE;
-    case key_mod::LeftShift: return SDL_Keymod::KMOD_LSHIFT;
-    case key_mod::RightShift: return SDL_Keymod::KMOD_RSHIFT;
-    case key_mod::LeftControl: return SDL_Keymod::KMOD_LCTRL;
-    case key_mod::RightControl: return SDL_Keymod::KMOD_RCTRL;
-    case key_mod::LeftAlt: return SDL_Keymod::KMOD_LALT;
-    case key_mod::RightAlt: return SDL_Keymod::KMOD_RALT;
-    case key_mod::LeftGui: return SDL_Keymod::KMOD_LGUI;
-    case key_mod::RightGui: return SDL_Keymod::KMOD_RGUI;
-    case key_mod::NumLock: return SDL_Keymod::KMOD_NUM;
-    case key_mod::CapsLock: return SDL_Keymod::KMOD_CAPS;
-    case key_mod::Mode: return SDL_Keymod::KMOD_MODE;
-    case key_mod::Control: return SDL_Keymod::KMOD_CTRL;
-    case key_mod::Shift: return SDL_Keymod::KMOD_SHIFT;
-    case key_mod::Alt: return SDL_Keymod::KMOD_ALT;
-    case key_mod::Gui: return SDL_Keymod::KMOD_GUI;
-    case key_mod::Scroll: return SDL_Keymod::KMOD_SCROLL;
+    case key_mod::None: return SDL_KMOD_NONE;
+    case key_mod::LeftShift: return SDL_KMOD_LSHIFT;
+    case key_mod::RightShift: return SDL_KMOD_RSHIFT;
+    case key_mod::LeftControl: return SDL_KMOD_LCTRL;
+    case key_mod::RightControl: return SDL_KMOD_RCTRL;
+    case key_mod::LeftAlt: return SDL_KMOD_LALT;
+    case key_mod::RightAlt: return SDL_KMOD_RALT;
+    case key_mod::LeftGui: return SDL_KMOD_LGUI;
+    case key_mod::RightGui: return SDL_KMOD_RGUI;
+    case key_mod::NumLock: return SDL_KMOD_NUM;
+    case key_mod::CapsLock: return SDL_KMOD_CAPS;
+    case key_mod::Mode: return SDL_KMOD_MODE;
+    case key_mod::Control: return SDL_KMOD_CTRL;
+    case key_mod::Shift: return SDL_KMOD_SHIFT;
+    case key_mod::Alt: return SDL_KMOD_ALT;
+    case key_mod::Gui: return SDL_KMOD_GUI;
+    case key_mod::Scroll: return SDL_KMOD_SCROLL;
     }
 
-    return SDL_Keymod::KMOD_NONE;
+    return SDL_KMOD_NONE;
 }
 
 auto convert_enum(SDL_Keymod mod) -> key_mod
 {
     switch (mod) {
-    case KMOD_NONE: return key_mod::None;
-    case KMOD_LSHIFT: return key_mod::LeftShift;
-    case KMOD_RSHIFT: return key_mod::RightShift;
-    case KMOD_LCTRL: return key_mod::LeftControl;
-    case KMOD_RCTRL: return key_mod::RightControl;
-    case KMOD_LALT: return key_mod::LeftAlt;
-    case KMOD_RALT: return key_mod::RightAlt;
-    case KMOD_LGUI: return key_mod::LeftGui;
-    case KMOD_RGUI: return key_mod::RightGui;
-    case KMOD_NUM: return key_mod::NumLock;
-    case KMOD_CAPS: return key_mod::CapsLock;
-    case KMOD_MODE: return key_mod::Mode;
-    case KMOD_SCROLL: return key_mod::Scroll;
-    case KMOD_CTRL: return key_mod::Control;
-    case KMOD_SHIFT: return key_mod::Shift;
-    case KMOD_ALT: return key_mod::Alt;
-    case KMOD_GUI: return key_mod::Gui;
+    case SDL_KMOD_NONE: return key_mod::None;
+    case SDL_KMOD_LSHIFT: return key_mod::LeftShift;
+    case SDL_KMOD_RSHIFT: return key_mod::RightShift;
+    case SDL_KMOD_LCTRL: return key_mod::LeftControl;
+    case SDL_KMOD_RCTRL: return key_mod::RightControl;
+    case SDL_KMOD_LALT: return key_mod::LeftAlt;
+    case SDL_KMOD_RALT: return key_mod::RightAlt;
+    case SDL_KMOD_LGUI: return key_mod::LeftGui;
+    case SDL_KMOD_RGUI: return key_mod::RightGui;
+    case SDL_KMOD_NUM: return key_mod::NumLock;
+    case SDL_KMOD_CAPS: return key_mod::CapsLock;
+    case SDL_KMOD_MODE: return key_mod::Mode;
+    case SDL_KMOD_SCROLL: return key_mod::Scroll;
+    case SDL_KMOD_CTRL: return key_mod::Control;
+    case SDL_KMOD_SHIFT: return key_mod::Shift;
+    case SDL_KMOD_ALT: return key_mod::Alt;
+    case SDL_KMOD_GUI: return key_mod::Gui;
     }
 
     return static_cast<key_mod>(mod);
@@ -413,16 +418,12 @@ auto convert_enum(scan_code code) -> SDL_Scancode
     case scan_code::RALT: return SDL_SCANCODE_RALT;
     case scan_code::RGUI: return SDL_SCANCODE_RGUI;
     case scan_code::MODE: return SDL_SCANCODE_MODE;
-    case scan_code::AUDIONEXT: return SDL_SCANCODE_AUDIONEXT;
-    case scan_code::AUDIOPREV: return SDL_SCANCODE_AUDIOPREV;
-    case scan_code::AUDIOSTOP: return SDL_SCANCODE_AUDIOSTOP;
-    case scan_code::AUDIOPLAY: return SDL_SCANCODE_AUDIOPLAY;
-    case scan_code::AUDIOMUTE: return SDL_SCANCODE_AUDIOMUTE;
-    case scan_code::MEDIASELECT: return SDL_SCANCODE_MEDIASELECT;
-    case scan_code::WWW: return SDL_SCANCODE_WWW;
-    case scan_code::MAIL: return SDL_SCANCODE_MAIL;
-    case scan_code::CALCULATOR: return SDL_SCANCODE_CALCULATOR;
-    case scan_code::COMPUTER: return SDL_SCANCODE_COMPUTER;
+    case scan_code::AUDIONEXT: return SDL_SCANCODE_MEDIA_NEXT_TRACK;
+    case scan_code::AUDIOPREV: return SDL_SCANCODE_MEDIA_PREVIOUS_TRACK;
+    case scan_code::AUDIOSTOP: return SDL_SCANCODE_MEDIA_STOP;
+    case scan_code::AUDIOPLAY: return SDL_SCANCODE_MEDIA_PLAY;
+    case scan_code::AUDIOMUTE: return SDL_SCANCODE_MUTE;
+    case scan_code::MEDIASELECT: return SDL_SCANCODE_MEDIA_SELECT;
     case scan_code::AC_SEARCH: return SDL_SCANCODE_AC_SEARCH;
     case scan_code::AC_HOME: return SDL_SCANCODE_AC_HOME;
     case scan_code::AC_BACK: return SDL_SCANCODE_AC_BACK;
@@ -430,23 +431,14 @@ auto convert_enum(scan_code code) -> SDL_Scancode
     case scan_code::AC_STOP: return SDL_SCANCODE_AC_STOP;
     case scan_code::AC_REFRESH: return SDL_SCANCODE_AC_REFRESH;
     case scan_code::AC_BOOKMARKS: return SDL_SCANCODE_AC_BOOKMARKS;
-    case scan_code::BRIGHTNESSDOWN: return SDL_SCANCODE_BRIGHTNESSDOWN;
-    case scan_code::BRIGHTNESSUP: return SDL_SCANCODE_BRIGHTNESSUP;
-    case scan_code::DISPLAYSWITCH: return SDL_SCANCODE_DISPLAYSWITCH;
-    case scan_code::KBDILLUMTOGGLE: return SDL_SCANCODE_KBDILLUMTOGGLE;
-    case scan_code::KBDILLUMDOWN: return SDL_SCANCODE_KBDILLUMDOWN;
-    case scan_code::KBDILLUMUP: return SDL_SCANCODE_KBDILLUMUP;
-    case scan_code::EJECT: return SDL_SCANCODE_EJECT;
+    case scan_code::EJECT: return SDL_SCANCODE_MEDIA_EJECT;
     case scan_code::SLEEP: return SDL_SCANCODE_SLEEP;
-    case scan_code::APP1: return SDL_SCANCODE_APP1;
-    case scan_code::APP2: return SDL_SCANCODE_APP2;
-    case scan_code::AUDIOREWIND: return SDL_SCANCODE_AUDIOREWIND;
-    case scan_code::AUDIOFASTFORWARD: return SDL_SCANCODE_AUDIOFASTFORWARD;
+    case scan_code::AUDIOREWIND: return SDL_SCANCODE_MEDIA_REWIND;
+    case scan_code::AUDIOFASTFORWARD: return SDL_SCANCODE_MEDIA_FAST_FORWARD;
     case scan_code::SOFTLEFT: return SDL_SCANCODE_SOFTLEFT;
     case scan_code::SOFTRIGHT: return SDL_SCANCODE_SOFTRIGHT;
     case scan_code::CALL: return SDL_SCANCODE_CALL;
     case scan_code::ENDCALL: return SDL_SCANCODE_ENDCALL;
-    case scan_code::SDL_NUM_SCANCODES: break;
     }
 
     return SDL_SCANCODE_UNKNOWN;
@@ -669,16 +661,11 @@ auto convert_enum(SDL_Scancode code) -> scan_code
     case SDL_SCANCODE_RALT: return scan_code::RALT;
     case SDL_SCANCODE_RGUI: return scan_code::RGUI;
     case SDL_SCANCODE_MODE: return scan_code::MODE;
-    case SDL_SCANCODE_AUDIONEXT: return scan_code::AUDIONEXT;
-    case SDL_SCANCODE_AUDIOPREV: return scan_code::AUDIOPREV;
-    case SDL_SCANCODE_AUDIOSTOP: return scan_code::AUDIOSTOP;
-    case SDL_SCANCODE_AUDIOPLAY: return scan_code::AUDIOPLAY;
-    case SDL_SCANCODE_AUDIOMUTE: return scan_code::AUDIOMUTE;
-    case SDL_SCANCODE_MEDIASELECT: return scan_code::MEDIASELECT;
-    case SDL_SCANCODE_WWW: return scan_code::WWW;
-    case SDL_SCANCODE_MAIL: return scan_code::MAIL;
-    case SDL_SCANCODE_CALCULATOR: return scan_code::CALCULATOR;
-    case SDL_SCANCODE_COMPUTER: return scan_code::COMPUTER;
+    case SDL_SCANCODE_MEDIA_NEXT_TRACK: return scan_code::AUDIONEXT;
+    case SDL_SCANCODE_MEDIA_PREVIOUS_TRACK: return scan_code::AUDIOPREV;
+    case SDL_SCANCODE_MEDIA_STOP: return scan_code::AUDIOSTOP;
+    case SDL_SCANCODE_MEDIA_PLAY: return scan_code::AUDIOPLAY;
+    case SDL_SCANCODE_MEDIA_SELECT: return scan_code::MEDIASELECT;
     case SDL_SCANCODE_AC_SEARCH: return scan_code::AC_SEARCH;
     case SDL_SCANCODE_AC_HOME: return scan_code::AC_HOME;
     case SDL_SCANCODE_AC_BACK: return scan_code::AC_BACK;
@@ -686,23 +673,29 @@ auto convert_enum(SDL_Scancode code) -> scan_code
     case SDL_SCANCODE_AC_STOP: return scan_code::AC_STOP;
     case SDL_SCANCODE_AC_REFRESH: return scan_code::AC_REFRESH;
     case SDL_SCANCODE_AC_BOOKMARKS: return scan_code::AC_BOOKMARKS;
-    case SDL_SCANCODE_BRIGHTNESSDOWN: return scan_code::BRIGHTNESSDOWN;
-    case SDL_SCANCODE_BRIGHTNESSUP: return scan_code::BRIGHTNESSUP;
-    case SDL_SCANCODE_DISPLAYSWITCH: return scan_code::DISPLAYSWITCH;
-    case SDL_SCANCODE_KBDILLUMTOGGLE: return scan_code::KBDILLUMTOGGLE;
-    case SDL_SCANCODE_KBDILLUMDOWN: return scan_code::KBDILLUMDOWN;
-    case SDL_SCANCODE_KBDILLUMUP: return scan_code::KBDILLUMUP;
-    case SDL_SCANCODE_EJECT: return scan_code::EJECT;
+    case SDL_SCANCODE_MEDIA_EJECT: return scan_code::EJECT;
     case SDL_SCANCODE_SLEEP: return scan_code::SLEEP;
-    case SDL_SCANCODE_APP1: return scan_code::APP1;
-    case SDL_SCANCODE_APP2: return scan_code::APP2;
-    case SDL_SCANCODE_AUDIOREWIND: return scan_code::AUDIOREWIND;
-    case SDL_SCANCODE_AUDIOFASTFORWARD: return scan_code::AUDIOFASTFORWARD;
+    case SDL_SCANCODE_MEDIA_REWIND: return scan_code::AUDIOREWIND;
+    case SDL_SCANCODE_MEDIA_FAST_FORWARD: return scan_code::AUDIOFASTFORWARD;
     case SDL_SCANCODE_SOFTLEFT: return scan_code::SOFTLEFT;
     case SDL_SCANCODE_SOFTRIGHT: return scan_code::SOFTRIGHT;
     case SDL_SCANCODE_CALL: return scan_code::CALL;
     case SDL_SCANCODE_ENDCALL: return scan_code::ENDCALL;
-    case SDL_NUM_SCANCODES: break;
+    case SDL_SCANCODE_WAKE:
+    case SDL_SCANCODE_CHANNEL_INCREMENT:
+    case SDL_SCANCODE_CHANNEL_DECREMENT:
+    case SDL_SCANCODE_MEDIA_PAUSE:
+    case SDL_SCANCODE_MEDIA_RECORD:
+    case SDL_SCANCODE_MEDIA_PLAY_PAUSE:
+    case SDL_SCANCODE_AC_NEW:
+    case SDL_SCANCODE_AC_OPEN:
+    case SDL_SCANCODE_AC_CLOSE:
+    case SDL_SCANCODE_AC_EXIT:
+    case SDL_SCANCODE_AC_SAVE:
+    case SDL_SCANCODE_AC_PRINT:
+    case SDL_SCANCODE_AC_PROPERTIES:
+    case SDL_SCANCODE_RESERVED: break;
+    case SDL_SCANCODE_COUNT: break;
     }
     return static_cast<scan_code>(code);
 }
@@ -717,12 +710,12 @@ auto convert_enum(key_code code) -> SDL_Keycode
     case key_code::TAB: return SDLK_TAB;
     case key_code::SPACE: return SDLK_SPACE;
     case key_code::EXCLAIM: return SDLK_EXCLAIM;
-    case key_code::QUOTEDBL: return SDLK_QUOTEDBL;
+    case key_code::QUOTEDBL: return SDLK_DBLAPOSTROPHE;
     case key_code::HASH: return SDLK_HASH;
     case key_code::PERCENT: return SDLK_PERCENT;
     case key_code::DOLLAR: return SDLK_DOLLAR;
     case key_code::AMPERSAND: return SDLK_AMPERSAND;
-    case key_code::QUOTE: return SDLK_QUOTE;
+    case key_code::QUOTE: return SDLK_APOSTROPHE;
     case key_code::LEFTPAREN: return SDLK_LEFTPAREN;
     case key_code::RIGHTPAREN: return SDLK_RIGHTPAREN;
     case key_code::ASTERISK: return SDLK_ASTERISK;
@@ -753,35 +746,35 @@ auto convert_enum(key_code code) -> SDL_Keycode
     case key_code::RIGHTBRACKET: return SDLK_RIGHTBRACKET;
     case key_code::CARET: return SDLK_CARET;
     case key_code::UNDERSCORE: return SDLK_UNDERSCORE;
-    case key_code::BACKQUOTE: return SDLK_BACKQUOTE;
+    case key_code::BACKQUOTE: return SDLK_GRAVE;
 
     // Alphabet keys
-    case key_code::a: return SDLK_a;
-    case key_code::b: return SDLK_b;
-    case key_code::c: return SDLK_c;
-    case key_code::d: return SDLK_d;
-    case key_code::e: return SDLK_e;
-    case key_code::f: return SDLK_f;
-    case key_code::g: return SDLK_g;
-    case key_code::h: return SDLK_h;
-    case key_code::i: return SDLK_i;
-    case key_code::j: return SDLK_j;
-    case key_code::k: return SDLK_k;
-    case key_code::l: return SDLK_l;
-    case key_code::m: return SDLK_m;
-    case key_code::n: return SDLK_n;
-    case key_code::o: return SDLK_o;
-    case key_code::p: return SDLK_p;
-    case key_code::q: return SDLK_q;
-    case key_code::r: return SDLK_r;
-    case key_code::s: return SDLK_s;
-    case key_code::t: return SDLK_t;
-    case key_code::u: return SDLK_u;
-    case key_code::v: return SDLK_v;
-    case key_code::w: return SDLK_w;
-    case key_code::x: return SDLK_x;
-    case key_code::y: return SDLK_y;
-    case key_code::z: return SDLK_z;
+    case key_code::a: return SDLK_A;
+    case key_code::b: return SDLK_B;
+    case key_code::c: return SDLK_C;
+    case key_code::d: return SDLK_D;
+    case key_code::e: return SDLK_E;
+    case key_code::f: return SDLK_F;
+    case key_code::g: return SDLK_G;
+    case key_code::h: return SDLK_H;
+    case key_code::i: return SDLK_I;
+    case key_code::j: return SDLK_J;
+    case key_code::k: return SDLK_K;
+    case key_code::l: return SDLK_L;
+    case key_code::m: return SDLK_M;
+    case key_code::n: return SDLK_N;
+    case key_code::o: return SDLK_O;
+    case key_code::p: return SDLK_P;
+    case key_code::q: return SDLK_Q;
+    case key_code::r: return SDLK_R;
+    case key_code::s: return SDLK_S;
+    case key_code::t: return SDLK_T;
+    case key_code::u: return SDLK_U;
+    case key_code::v: return SDLK_V;
+    case key_code::w: return SDLK_W;
+    case key_code::x: return SDLK_X;
+    case key_code::y: return SDLK_Y;
+    case key_code::z: return SDLK_Z;
 
     // Function keys
     case key_code::CAPSLOCK: return SDLK_CAPSLOCK;
@@ -931,16 +924,12 @@ auto convert_enum(key_code code) -> SDL_Keycode
     case key_code::RALT: return SDLK_RALT;
     case key_code::RGUI: return SDLK_RGUI;
     case key_code::MODE: return SDLK_MODE;
-    case key_code::AUDIONEXT: return SDLK_AUDIONEXT;
-    case key_code::AUDIOPREV: return SDLK_AUDIOPREV;
-    case key_code::AUDIOSTOP: return SDLK_AUDIOSTOP;
-    case key_code::AUDIOPLAY: return SDLK_AUDIOPLAY;
-    case key_code::AUDIOMUTE: return SDLK_AUDIOMUTE;
-    case key_code::MEDIASELECT: return SDLK_MEDIASELECT;
-    case key_code::WWW: return SDLK_WWW;
-    case key_code::MAIL: return SDLK_MAIL;
-    case key_code::CALCULATOR: return SDLK_CALCULATOR;
-    case key_code::COMPUTER: return SDLK_COMPUTER;
+    case key_code::AUDIONEXT: return SDLK_MEDIA_NEXT_TRACK;
+    case key_code::AUDIOPREV: return SDLK_MEDIA_PREVIOUS_TRACK;
+    case key_code::AUDIOSTOP: return SDLK_MEDIA_STOP;
+    case key_code::AUDIOPLAY: return SDLK_MEDIA_PLAY;
+    case key_code::AUDIOMUTE: return SDLK_MUTE;
+    case key_code::MEDIASELECT: return SDLK_MEDIA_SELECT;
     case key_code::AC_SEARCH: return SDLK_AC_SEARCH;
     case key_code::AC_HOME: return SDLK_AC_HOME;
     case key_code::AC_BACK: return SDLK_AC_BACK;
@@ -948,18 +937,10 @@ auto convert_enum(key_code code) -> SDL_Keycode
     case key_code::AC_STOP: return SDLK_AC_STOP;
     case key_code::AC_REFRESH: return SDLK_AC_REFRESH;
     case key_code::AC_BOOKMARKS: return SDLK_AC_BOOKMARKS;
-    case key_code::BRIGHTNESSDOWN: return SDLK_BRIGHTNESSDOWN;
-    case key_code::BRIGHTNESSUP: return SDLK_BRIGHTNESSUP;
-    case key_code::DISPLAYSWITCH: return SDLK_DISPLAYSWITCH;
-    case key_code::KBDILLUMTOGGLE: return SDLK_KBDILLUMTOGGLE;
-    case key_code::KBDILLUMDOWN: return SDLK_KBDILLUMDOWN;
-    case key_code::KBDILLUMUP: return SDLK_KBDILLUMUP;
-    case key_code::EJECT: return SDLK_EJECT;
+    case key_code::EJECT: return SDLK_MEDIA_EJECT;
     case key_code::SLEEP: return SDLK_SLEEP;
-    case key_code::APP1: return SDLK_APP1;
-    case key_code::APP2: return SDLK_APP2;
-    case key_code::AUDIOREWIND: return SDLK_AUDIOREWIND;
-    case key_code::AUDIOFASTFORWARD: return SDLK_AUDIOFASTFORWARD;
+    case key_code::AUDIOREWIND: return SDLK_MEDIA_REWIND;
+    case key_code::AUDIOFASTFORWARD: return SDLK_MEDIA_FAST_FORWARD;
     case key_code::SOFTLEFT: return SDLK_SOFTLEFT;
     case key_code::SOFTRIGHT: return SDLK_SOFTRIGHT;
     case key_code::CALL: return SDLK_CALL;
@@ -979,12 +960,12 @@ auto convert_enum(SDL_Keycode code) -> key_code
     case SDLK_TAB: return key_code::TAB;
     case SDLK_SPACE: return key_code::SPACE;
     case SDLK_EXCLAIM: return key_code::EXCLAIM;
-    case SDLK_QUOTEDBL: return key_code::QUOTEDBL;
+    case SDLK_DBLAPOSTROPHE: return key_code::QUOTEDBL;
     case SDLK_HASH: return key_code::HASH;
     case SDLK_PERCENT: return key_code::PERCENT;
     case SDLK_DOLLAR: return key_code::DOLLAR;
     case SDLK_AMPERSAND: return key_code::AMPERSAND;
-    case SDLK_QUOTE: return key_code::QUOTE;
+    case SDLK_APOSTROPHE: return key_code::QUOTE;
     case SDLK_LEFTPAREN: return key_code::LEFTPAREN;
     case SDLK_RIGHTPAREN: return key_code::RIGHTPAREN;
     case SDLK_ASTERISK: return key_code::ASTERISK;
@@ -1015,35 +996,35 @@ auto convert_enum(SDL_Keycode code) -> key_code
     case SDLK_RIGHTBRACKET: return key_code::RIGHTBRACKET;
     case SDLK_CARET: return key_code::CARET;
     case SDLK_UNDERSCORE: return key_code::UNDERSCORE;
-    case SDLK_BACKQUOTE: return key_code::BACKQUOTE;
+    case SDLK_GRAVE: return key_code::BACKQUOTE;
 
     // Alphabet keys
-    case SDLK_a: return key_code::a;
-    case SDLK_b: return key_code::b;
-    case SDLK_c: return key_code::c;
-    case SDLK_d: return key_code::d;
-    case SDLK_e: return key_code::e;
-    case SDLK_f: return key_code::f;
-    case SDLK_g: return key_code::g;
-    case SDLK_h: return key_code::h;
-    case SDLK_i: return key_code::i;
-    case SDLK_j: return key_code::j;
-    case SDLK_k: return key_code::k;
-    case SDLK_l: return key_code::l;
-    case SDLK_m: return key_code::m;
-    case SDLK_n: return key_code::n;
-    case SDLK_o: return key_code::o;
-    case SDLK_p: return key_code::p;
-    case SDLK_q: return key_code::q;
-    case SDLK_r: return key_code::r;
-    case SDLK_s: return key_code::s;
-    case SDLK_t: return key_code::t;
-    case SDLK_u: return key_code::u;
-    case SDLK_v: return key_code::v;
-    case SDLK_w: return key_code::w;
-    case SDLK_x: return key_code::x;
-    case SDLK_y: return key_code::y;
-    case SDLK_z: return key_code::z;
+    case SDLK_A: return key_code::a;
+    case SDLK_B: return key_code::b;
+    case SDLK_C: return key_code::c;
+    case SDLK_D: return key_code::d;
+    case SDLK_E: return key_code::e;
+    case SDLK_F: return key_code::f;
+    case SDLK_G: return key_code::g;
+    case SDLK_H: return key_code::h;
+    case SDLK_I: return key_code::i;
+    case SDLK_J: return key_code::j;
+    case SDLK_K: return key_code::k;
+    case SDLK_L: return key_code::l;
+    case SDLK_M: return key_code::m;
+    case SDLK_N: return key_code::n;
+    case SDLK_O: return key_code::o;
+    case SDLK_P: return key_code::p;
+    case SDLK_Q: return key_code::q;
+    case SDLK_R: return key_code::r;
+    case SDLK_S: return key_code::s;
+    case SDLK_T: return key_code::t;
+    case SDLK_U: return key_code::u;
+    case SDLK_V: return key_code::v;
+    case SDLK_W: return key_code::w;
+    case SDLK_X: return key_code::x;
+    case SDLK_Y: return key_code::y;
+    case SDLK_Z: return key_code::z;
 
     // Function keys
     case SDLK_CAPSLOCK: return key_code::CAPSLOCK;
@@ -1193,16 +1174,11 @@ auto convert_enum(SDL_Keycode code) -> key_code
     case SDLK_RALT: return key_code::RALT;
     case SDLK_RGUI: return key_code::RGUI;
     case SDLK_MODE: return key_code::MODE;
-    case SDLK_AUDIONEXT: return key_code::AUDIONEXT;
-    case SDLK_AUDIOPREV: return key_code::AUDIOPREV;
-    case SDLK_AUDIOSTOP: return key_code::AUDIOSTOP;
-    case SDLK_AUDIOPLAY: return key_code::AUDIOPLAY;
-    case SDLK_AUDIOMUTE: return key_code::AUDIOMUTE;
-    case SDLK_MEDIASELECT: return key_code::MEDIASELECT;
-    case SDLK_WWW: return key_code::WWW;
-    case SDLK_MAIL: return key_code::MAIL;
-    case SDLK_CALCULATOR: return key_code::CALCULATOR;
-    case SDLK_COMPUTER: return key_code::COMPUTER;
+    case SDLK_MEDIA_NEXT_TRACK: return key_code::AUDIONEXT;
+    case SDLK_MEDIA_PREVIOUS_TRACK: return key_code::AUDIOPREV;
+    case SDLK_MEDIA_STOP: return key_code::AUDIOSTOP;
+    case SDLK_MEDIA_PLAY: return key_code::AUDIOPLAY;
+    case SDLK_MEDIA_SELECT: return key_code::MEDIASELECT;
     case SDLK_AC_SEARCH: return key_code::AC_SEARCH;
     case SDLK_AC_HOME: return key_code::AC_HOME;
     case SDLK_AC_BACK: return key_code::AC_BACK;
@@ -1210,18 +1186,10 @@ auto convert_enum(SDL_Keycode code) -> key_code
     case SDLK_AC_STOP: return key_code::AC_STOP;
     case SDLK_AC_REFRESH: return key_code::AC_REFRESH;
     case SDLK_AC_BOOKMARKS: return key_code::AC_BOOKMARKS;
-    case SDLK_BRIGHTNESSDOWN: return key_code::BRIGHTNESSDOWN;
-    case SDLK_BRIGHTNESSUP: return key_code::BRIGHTNESSUP;
-    case SDLK_DISPLAYSWITCH: return key_code::DISPLAYSWITCH;
-    case SDLK_KBDILLUMTOGGLE: return key_code::KBDILLUMTOGGLE;
-    case SDLK_KBDILLUMDOWN: return key_code::KBDILLUMDOWN;
-    case SDLK_KBDILLUMUP: return key_code::KBDILLUMUP;
-    case SDLK_EJECT: return key_code::EJECT;
+    case SDLK_MEDIA_EJECT: return key_code::EJECT;
     case SDLK_SLEEP: return key_code::SLEEP;
-    case SDLK_APP1: return key_code::APP1;
-    case SDLK_APP2: return key_code::APP2;
-    case SDLK_AUDIOREWIND: return key_code::AUDIOMUTE;
-    case SDLK_AUDIOFASTFORWARD: return key_code::AUDIOFASTFORWARD;
+    case SDLK_MEDIA_REWIND: return key_code::AUDIOMUTE;
+    case SDLK_MEDIA_FAST_FORWARD: return key_code::AUDIOFASTFORWARD;
     case SDLK_SOFTLEFT: return key_code::SOFTLEFT;
     case SDLK_SOFTRIGHT: return key_code::SOFTRIGHT;
     case SDLK_CALL: return key_code::CALL;

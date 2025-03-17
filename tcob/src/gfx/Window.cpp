@@ -8,7 +8,7 @@
 #include <memory>
 #include <utility>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
@@ -37,7 +37,7 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::owni
 {
     Cursor.Changed.connect([this](auto const& value) { SystemCursorEnabled = !value.is_ready(); });
     SystemCursorEnabled(true);
-    SystemCursorEnabled.Changed.connect([](bool value) { SDL_ShowCursor(value ? SDL_ENABLE : SDL_DISABLE); });
+    SystemCursorEnabled.Changed.connect([](bool value) { value ? SDL_ShowCursor() : SDL_HideCursor(); });
 
     Shader.Changed.connect([this](auto const& value) { _material->Shader = value; });
 
@@ -45,6 +45,8 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::owni
     _renderer.set_material(_material.ptr());
 
     set_size(Size());
+
+    SDL_StartTextInput(_impl->get_handle());
 }
 
 window::~window() = default;
@@ -59,13 +61,14 @@ void window::load_icon(path const& file)
     if (auto img {image::Load(file)}) {
         auto const& info {img->info()};
         auto*       surface {
-            SDL_CreateRGBSurfaceFrom(
+            SDL_CreateSurfaceFrom(
+                info.Size.Width, info.Size.Height,
+                SDL_PixelFormat::SDL_PIXELFORMAT_RGBA32,
                 img->buffer().data(),
-                info.Size.Width, info.Size.Height, 32, info.stride(),
-                0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000)};
+                info.stride())};
 
         SDL_SetWindowIcon(_impl->get_handle(), surface);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
     }
 }
 
@@ -77,7 +80,8 @@ auto window::has_focus() const -> bool
 
 void window::grab_input(bool grab)
 {
-    SDL_SetWindowGrab(_impl->get_handle(), grab ? SDL_TRUE : SDL_FALSE);
+    SDL_SetWindowMouseGrab(_impl->get_handle(), grab);
+    SDL_SetWindowKeyboardGrab(_impl->get_handle(), grab);
 }
 
 void window::on_clear(color c) const
@@ -113,26 +117,26 @@ void window::process_events(SDL_Event* sdlEv)
                     .Data1    = sdlEv->window.data1,
                     .Data2    = sdlEv->window.data2};
 
-    switch (sdlEv->window.event) {
-    case SDL_WINDOWEVENT_SHOWN: Shown(ev); break;
-    case SDL_WINDOWEVENT_HIDDEN: Hidden(ev); break;
-    case SDL_WINDOWEVENT_EXPOSED: Exposed(ev); break;
-    case SDL_WINDOWEVENT_MOVED: Moved(ev); break;
-    case SDL_WINDOWEVENT_RESIZED:
+    switch (sdlEv->window.type) {
+    case SDL_EVENT_WINDOW_SHOWN: Shown(ev); break;
+    case SDL_EVENT_WINDOW_HIDDEN: Hidden(ev); break;
+    case SDL_EVENT_WINDOW_EXPOSED: Exposed(ev); break;
+    case SDL_EVENT_WINDOW_MOVED: Moved(ev); break;
+    case SDL_EVENT_WINDOW_RESIZED:
         set_size({ev.Data1, ev.Data2});
         Resized(ev);
         break;
-    case SDL_WINDOWEVENT_SIZE_CHANGED: SizeChanged(ev); break;
-    case SDL_WINDOWEVENT_MINIMIZED: Minimized(ev); break;
-    case SDL_WINDOWEVENT_MAXIMIZED: Maximized(ev); break;
-    case SDL_WINDOWEVENT_RESTORED: Restored(ev); break;
-    case SDL_WINDOWEVENT_ENTER: Enter(ev); break;
-    case SDL_WINDOWEVENT_LEAVE: Leave(ev); break;
-    case SDL_WINDOWEVENT_FOCUS_GAINED: FocusGained(ev); break;
-    case SDL_WINDOWEVENT_FOCUS_LOST: FocusLost(ev); break;
-    case SDL_WINDOWEVENT_CLOSE: Close(ev); break;
-    case SDL_WINDOWEVENT_TAKE_FOCUS: TakeFocus(ev); break;
-    case SDL_WINDOWEVENT_HIT_TEST: HitTest(ev); break;
+    case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: SizeChanged(ev); break;
+    case SDL_EVENT_WINDOW_MINIMIZED: Minimized(ev); break;
+    case SDL_EVENT_WINDOW_MAXIMIZED: Maximized(ev); break;
+    case SDL_EVENT_WINDOW_RESTORED: Restored(ev); break;
+    case SDL_EVENT_WINDOW_MOUSE_ENTER: Enter(ev); break;
+    case SDL_EVENT_WINDOW_MOUSE_LEAVE: Leave(ev); break;
+    case SDL_EVENT_WINDOW_FOCUS_GAINED: FocusGained(ev); break;
+    case SDL_EVENT_WINDOW_FOCUS_LOST: FocusLost(ev); break;
+    case SDL_EVENT_WINDOW_CLOSE_REQUESTED: Close(ev); break;
+    case SDL_EVENT_WINDOW_HIT_TEST: HitTest(ev); break;
+    default: break;
     }
 }
 
@@ -161,7 +165,7 @@ void window::set_fullscreen(bool value)
     auto* window {_impl->get_handle()};
     SDL_SetWindowFullscreen(window, value ? SDL_WINDOW_FULLSCREEN : 0);
     if (!value) {
-        SDL_SetWindowBordered(window, SDL_TRUE);
+        SDL_SetWindowBordered(window, true);
         SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
 }

@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include "../audio/audio_codecs/AudioCodecs.hpp"
 #include "../data/config_parsers/ConfigParsers.hpp"
@@ -206,35 +206,33 @@ auto platform::process_events() const -> bool
     auto&     inputMgr {locate_service<input::system>()};
     while (SDL_PollEvent(&ev)) {
         switch (ev.type) {
-        case SDL_DROPFILE: {
-            string path {ev.drop.file};
-            SDL_free(ev.drop.file);
-            DropFile(path);
+        case SDL_EVENT_DROP_FILE: {
+            DropFile(ev.drop.data);
         } break;
-        case SDL_QUIT: return false;
-        case SDL_KEYDOWN:
-        case SDL_KEYUP:
-        case SDL_TEXTINPUT:
-        case SDL_TEXTEDITING:
-        case SDL_MOUSEMOTION:
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
-        case SDL_MOUSEWHEEL:
-        case SDL_JOYAXISMOTION:
-        case SDL_JOYHATMOTION:
-        case SDL_JOYBUTTONDOWN:
-        case SDL_JOYBUTTONUP:
-        case SDL_JOYDEVICEADDED:
-        case SDL_JOYDEVICEREMOVED:
-        case SDL_CONTROLLERAXISMOTION:
-        case SDL_CONTROLLERBUTTONDOWN:
-        case SDL_CONTROLLERBUTTONUP:
+        case SDL_EVENT_QUIT: return false;
+        case SDL_EVENT_KEY_DOWN:
+        case SDL_EVENT_KEY_UP:
+        case SDL_EVENT_TEXT_INPUT:
+        case SDL_EVENT_TEXT_EDITING:
+        case SDL_EVENT_MOUSE_MOTION:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        case SDL_EVENT_MOUSE_WHEEL:
+        case SDL_EVENT_JOYSTICK_AXIS_MOTION:
+        case SDL_EVENT_JOYSTICK_HAT_MOTION:
+        case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
+        case SDL_EVENT_JOYSTICK_BUTTON_UP:
+        case SDL_EVENT_JOYSTICK_ADDED:
+        case SDL_EVENT_JOYSTICK_REMOVED:
+        case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+        case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+        case SDL_EVENT_GAMEPAD_BUTTON_UP:
             inputMgr.process_events(&ev);
             break;
-        case SDL_WINDOWEVENT:
-            locate_service<gfx::render_system>().window().process_events(&ev);
-            break;
         default:
+            if (ev.type >= SDL_EVENT_WINDOW_FIRST && ev.type <= SDL_EVENT_WINDOW_LAST) {
+                locate_service<gfx::render_system>().window().process_events(&ev);
+            }
             break;
         }
     }
@@ -251,19 +249,21 @@ auto platform::displays() const -> std::map<i32, display>
 {
     std::map<i32, display> retValue;
 
-    SDL_DisplayMode mode {};
-    i32 const       numDisplays {SDL_GetNumVideoDisplays()};
+    i32   numDisplays {};
+    auto* displayID {SDL_GetDisplays(&numDisplays)};
+
     for (i32 i {0}; i < numDisplays; ++i) {
-        i32 const numModes {SDL_GetNumDisplayModes(i)};
+        i32    numModes {};
+        auto** displayModes {SDL_GetFullscreenDisplayModes(displayID[i], &numModes)};
         for (i32 j {0}; j < numModes; ++j) {
-            SDL_GetDisplayMode(i, j, &mode);
-            retValue[i].Modes.push_back({.Size        = {mode.w, mode.h},
-                                         .RefreshRate = mode.refresh_rate});
+            auto* mode {displayModes[j]};
+            retValue[mode->displayID].Modes.push_back({.Size        = {mode->w, mode->h},
+                                                       .RefreshRate = static_cast<i32>(mode->refresh_rate)});
         }
 
-        SDL_GetDesktopDisplayMode(i, &mode);
-        retValue[i].DesktopMode = {.Size        = {mode.w, mode.h},
-                                   .RefreshRate = mode.refresh_rate};
+        auto const* dmode {SDL_GetDesktopDisplayMode(displayID[i])};
+        retValue[dmode->displayID].DesktopMode = {.Size        = {dmode->w, dmode->h},
+                                                  .RefreshRate = static_cast<i32>(dmode->refresh_rate)};
     }
 
     return retValue;
@@ -271,9 +271,8 @@ auto platform::displays() const -> std::map<i32, display>
 
 auto platform::get_desktop_size(i32 display) const -> size_i
 {
-    SDL_DisplayMode mode;
-    SDL_GetDesktopDisplayMode(display, &mode);
-    return {mode.w, mode.h};
+    auto const* mode {SDL_GetDesktopDisplayMode(display)};
+    return {mode->w, mode->h};
 }
 
 auto platform::was_paused() const -> bool
@@ -288,9 +287,11 @@ auto platform::config() const -> data::config_file&
 
 void platform::init_locales()
 {
-    if (auto* sdlLocales {SDL_GetPreferredLocales()}) {
-        for (auto* sdlLocale {sdlLocales}; sdlLocale; ++sdlLocale) {
+    i32 count {};
+    if (auto** sdlLocales {SDL_GetPreferredLocales(&count)}) {
+        for (i32 i {0}; i < count; ++i) {
             locale loc {};
+            auto*  sdlLocale {sdlLocales[i]};
             if (sdlLocale->language) {
                 loc.Language = sdlLocale->language;
                 if (sdlLocale->country) {
@@ -333,7 +334,7 @@ void platform::init_render_system(string const& windowTitle)
     if (!renderSystem) { throw std::runtime_error("Render system creation failed!"); }
 
     register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window(video, windowTitle, get_desktop_size(0))};
+    auto& window {renderSystem->init_window(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
     window.FullScreen.Changed.connect([this](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
@@ -341,16 +342,17 @@ void platform::init_render_system(string const& windowTitle)
         (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
     window.Size.Changed.connect([this](size_i value) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == get_desktop_size(0);
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = value == displays().begin()->second.DesktopMode.Size;
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
     });
 
     logger::Info("Device: {}", renderSystem->device_name());
 
 #if defined(_MSC_VER)
-    SDL_SetWindowsMessageHook([](void* userdata, void* /* hWnd */, unsigned int message, Uint64 /* wParam */, Sint64 /* lParam */) {
+    SDL_SetWindowsMessageHook([](void* userdata, tagMSG* msg) -> bool {
         auto* plt {reinterpret_cast<platform*>(userdata)};
-        plt->_wasPaused = message == WM_NCLBUTTONDOWN; // left click on title bar
+        plt->_wasPaused = msg->message == WM_NCLBUTTONDOWN; // left click on title bar
+        return true;
     },
                               this);
 #endif
@@ -358,14 +360,10 @@ void platform::init_render_system(string const& windowTitle)
 
 void platform::InitSDL()
 {
-    SDL_SetMainReady();
-    SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_EVENTS);
-    SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
-    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+    SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
 
-    SDL_version ver {};
-    SDL_GetVersion(&ver);
-    logger::Info("SDL version: {}.{}.{}", ver.major, ver.minor, ver.patch);
+    i32 const version {SDL_GetVersion()};
+    logger::Info("SDL version: {}.{}.{}", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
 }
 
 void platform::InitSignatures()

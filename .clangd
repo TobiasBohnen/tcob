@@ -15,19 +15,25 @@ Diagnostics:
             - .inl
             - Windows.h
             - libloaderapi.h
-            - SDL_gamecontroller.h
-            - SDL_events.h
-            - SDL_stdinc.h
-            - SDL_main.h
-            - SDL_locale.h
-            - SDL_system.h
-            - SDL_version.h
-            - SDL_keyboard.h
-            - SDL_keycode.h
-            - SDL_mouse.h     
-            - SDL_clipboard.h
-            - SDL_video.h
-            - SDL_surface.h
+            - SDL3/SDL_properties.h
+            - SDL3/SDL_events.h
+            - SDL3/SDL_stdinc.h
+            - SDL3/SDL_main.h
+            - SDL3/SDL_locale.h
+            - SDL3/SDL_system.h
+            - SDL3/SDL_version.h
+            - SDL3/SDL_keyboard.h
+            - SDL3/SDL_keycode.h
+            - SDL3/SDL_scancode.h
+            - SDL3/SDL_mouse.h     
+            - SDL3/SDL_clipboard.h
+            - SDL3/SDL_video.h
+            - SDL3/SDL_surface.h
+            - SDL3/SDL_gamepad.h
+            - SDL3/SDL_joystick.h
+            - SDL3/SDL_pixels.h
+            - SDL3/SDL_init.h
+            - SDL3/*
             - winuser.h
             - winnt.h
             - minwindef.h

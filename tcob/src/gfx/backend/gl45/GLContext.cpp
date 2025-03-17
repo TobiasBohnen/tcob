@@ -11,7 +11,7 @@
 #include "GLObject.hpp"
 #include "GLShaderProgram.hpp"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <glad/gl45.h>
 
 #include "tcob/core/Logger.hpp"
@@ -73,7 +73,7 @@ gl_context::gl_context(SDL_Window* window)
     }
 
     if (!gladLoadGL(&load)) {
-        SDL_GL_DeleteContext(_context);
+        SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
         logger::Error("GLContext: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");
     }
@@ -106,7 +106,7 @@ gl_context::gl_context(SDL_Window* window)
 gl_context::~gl_context()
 {
     gl_object::DestroyAll();
-    SDL_GL_DeleteContext(_context);
+    SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
 }
 
 }

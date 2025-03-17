@@ -7,8 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include "tcob/core/input/Input.hpp"
+#include "tcob/core/input/Input_Codes.hpp"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 namespace tcob::input {
 
@@ -17,11 +18,11 @@ auto convert_enum(mouse::button button) -> i32;
 
 auto convert_joystick_hat(i32 hat) -> joystick::hat;
 
-auto convert_enum(controller::button button) -> SDL_GameControllerButton;
-auto convert_enum(SDL_GameControllerButton button) -> controller::button;
+auto convert_enum(controller::button button) -> SDL_GamepadButton;
+auto convert_enum(SDL_GamepadButton button) -> controller::button;
 
-auto convert_enum(controller::axis axis) -> SDL_GameControllerAxis;
-auto convert_enum(SDL_GameControllerAxis axis) -> controller::axis;
+auto convert_enum(controller::axis axis) -> SDL_GamepadAxis;
+auto convert_enum(SDL_GamepadAxis axis) -> controller::axis;
 
 auto convert_enum(key_mod mod) -> SDL_Keymod;
 auto convert_enum(SDL_Keymod mod) -> key_mod;

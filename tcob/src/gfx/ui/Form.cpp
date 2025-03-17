@@ -320,9 +320,9 @@ void form_base::on_key_down(input::keyboard::event const& ev)
             ev.Handled = focus_nav_target(_focusWidget->name(), direction::Down);
         } else if (ev.KeyCode == Controls->NavUpKey) {
             ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
+        } else {
+            _injector.on_key_down(_focusWidget, ev);
         }
-    } else {
-        _injector.on_key_down(_focusWidget, ev);
     }
 }
 

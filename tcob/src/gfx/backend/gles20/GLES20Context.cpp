@@ -5,7 +5,7 @@
 
 #include "GLES20Context.hpp"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <glad/gles20.h>
 #include <memory>
 #include <stdexcept>
@@ -62,7 +62,7 @@ gl_context::gl_context(SDL_Window* window)
     }
 
     if (!gladLoadGLES20(&load)) {
-        SDL_GL_DeleteContext(_context);
+        SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
         logger::Error("GLESContext: OpenGL loading failed!");
         throw std::runtime_error("OpenGL loading failed");
     }
@@ -84,7 +84,7 @@ gl_context::gl_context(SDL_Window* window)
 gl_context::~gl_context()
 {
     gl_object::DestroyAll();
-    SDL_GL_DeleteContext(_context);
+    SDL_GL_DestroyContext(static_cast<SDL_GLContext>(_context));
 }
 
 }

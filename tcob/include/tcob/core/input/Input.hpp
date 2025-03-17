@@ -18,8 +18,8 @@
 ////////////////////////////////////////////////////////////
 
 extern "C" {
-using SDL_GameController = struct _SDL_GameController;
-using SDL_Event          = union SDL_Event;
+struct SDL_Gamepad;
+using SDL_Event = union SDL_Event;
 }
 
 ////////////////////////////////////////////////////////////
@@ -120,8 +120,7 @@ public:
     struct wheel_event : event_base {
         mouse* Mouse {nullptr};
 
-        point_i Scroll {point_i::Zero};
-        point_f Precise {point_f::Zero};
+        point_f Scroll {point_f::Zero};
         point_i Position {point_i::Zero};
     };
 
@@ -172,21 +171,21 @@ public:
     };
 
     struct button_event : event_base {
-        i32                         ID {0};
+        u32                         ID {0};
         std::shared_ptr<controller> Controller;
         button                      Button {button::Invalid};
         bool                        Pressed {false};
     };
 
     struct axis_event : event_base {
-        i32                         ID {0};
+        u32                         ID {0};
         std::shared_ptr<controller> Controller;
         axis                        Axis {axis::Invalid};
         i16                         Value {0};
         f32                         RelativeValue {0};
     };
 
-    auto id() const -> i32;
+    auto id() const -> u32;
     auto name() const -> string;
 
     auto has_rumble() const -> bool;
@@ -204,10 +203,10 @@ public:
     auto get_axis_name(axis a) const -> string;
 
 private:
-    controller(SDL_GameController* controller, i32 id);
+    controller(SDL_Gamepad* controller, u32 id);
 
-    SDL_GameController* _controller;
-    i32                 _id;
+    SDL_Gamepad* _controller;
+    u32          _id;
 };
 
 ////////////////////////////////////////////////////////////
@@ -229,19 +228,19 @@ public:
     };
 
     struct hat_event : event_base {
-        i32 ID {0};
+        u32 ID {0};
         hat Hat {hat::Centered};
         u8  Value {0};
     };
 
     struct button_event : event_base {
-        i32  ID {0};
+        u32  ID {0};
         u8   Button {0};
         bool Pressed {false};
     };
 
     struct axis_event : event_base {
-        i32 ID {0};
+        u32 ID {0};
         u8  Axis {0};
         i16 Value {0};
     };

@@ -57,7 +57,6 @@ public:
     signal<event const> FocusGained;
     signal<event const> FocusLost;
     signal<event const> Close;
-    signal<event const> TakeFocus;
     signal<event const> HitTest;
 
     prop_fn<bool>   FullScreen;
