@@ -1,7 +1,7 @@
 [submodule "tcob/extlibs"]
 	path = tcob/extlibs
 	url = https://github.com/TobiasBohnen/tcob_extlibs.git
-	branch = master
+	branch = SDL3
 [submodule "extras/tcob.wiki"]
 	path = extras/tcob.wiki
 	url = https://github.com/TobiasBohnen/tcob.wiki.git
