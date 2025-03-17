@@ -381,7 +381,6 @@ namespace detail {
         void on_key_up(widget* widget, input::keyboard::event const& ev) const;
 
         void on_text_input(widget* widget, input::keyboard::text_input_event const& ev) const;
-        void on_text_editing(widget* widget, input::keyboard::text_editing_event const& ev) const;
 
         void on_mouse_enter(widget* widget) const;
         void on_mouse_leave(widget* widget) const;

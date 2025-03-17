@@ -333,11 +333,6 @@ void widget::do_text_input(input::keyboard::text_input_event const& ev)
     on_text_input(ev);
 }
 
-void widget::do_text_editing(input::keyboard::text_editing_event const& ev)
-{
-    on_text_editing(ev);
-}
-
 void widget::do_mouse_enter()
 {
     _flags.Hover = true;

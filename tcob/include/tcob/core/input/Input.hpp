@@ -72,12 +72,6 @@ public:
         utf8_string Text {};
     };
 
-    struct text_editing_event : event_base {
-        utf8_string Text {};
-        i32         Start {0};
-        i32         Length {0};
-    };
-
     auto get_scancode(key_code key) const -> scan_code;
     auto get_keycode(scan_code key) const -> key_code;
 
@@ -262,10 +256,9 @@ public:
     system();
     ~system();
 
-    signal<input::keyboard::event const>              KeyDown;
-    signal<input::keyboard::event const>              KeyUp;
-    signal<input::keyboard::text_input_event const>   TextInput;
-    signal<input::keyboard::text_editing_event const> TextEditing;
+    signal<input::keyboard::event const>            KeyDown;
+    signal<input::keyboard::event const>            KeyUp;
+    signal<input::keyboard::text_input_event const> TextInput;
 
     signal<input::mouse::motion_event const> MouseMotion;
     signal<input::mouse::button_event const> MouseButtonDown;
@@ -312,7 +305,6 @@ public:
     void virtual on_key_down(keyboard::event const& ev)                        = 0;
     void virtual on_key_up(keyboard::event const& ev)                          = 0;
     void virtual on_text_input(keyboard::text_input_event const& ev)           = 0;
-    void virtual on_text_editing(keyboard::text_editing_event const& ev)       = 0;
     void virtual on_mouse_motion(mouse::motion_event const& ev)                = 0;
     void virtual on_mouse_button_down(mouse::button_event const& ev)           = 0;
     void virtual on_mouse_button_up(mouse::button_event const& ev)             = 0;

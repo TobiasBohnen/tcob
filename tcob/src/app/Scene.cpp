@@ -110,7 +110,6 @@ void scene::attach_events()
     _connections.connect(input.KeyUp, [this](auto&& event) { handle_input_event(event, &input::receiver::on_key_up); });
     _connections.connect(input.KeyDown, [this](auto&& event) { handle_input_event(event, &input::receiver::on_key_down); });
     _connections.connect(input.TextInput, [this](auto&& event) { handle_input_event(event, &input::receiver::on_text_input); });
-    _connections.connect(input.TextEditing, [this](auto&& event) { handle_input_event(event, &input::receiver::on_text_editing); });
     _connections.connect(input.MouseMotion, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_motion); });
     _connections.connect(input.MouseButtonDown, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_button_down); });
     _connections.connect(input.MouseButtonUp, [this](auto&& event) { handle_input_event(event, &input::receiver::on_mouse_button_up); });

@@ -469,11 +469,6 @@ void form_base::on_text_input(input::keyboard::text_input_event const& ev)
     _injector.on_text_input(_focusWidget, ev);
 }
 
-void form_base::on_text_editing(input::keyboard::text_editing_event const& ev)
-{
-    _injector.on_text_editing(_focusWidget, ev);
-}
-
 auto form_base::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*
 {
     widget* retValue {nullptr};

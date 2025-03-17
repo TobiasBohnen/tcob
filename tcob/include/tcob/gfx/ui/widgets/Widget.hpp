@@ -135,7 +135,6 @@ protected:
     void virtual on_key_up(input::keyboard::event const& /* ev */) { }
 
     void virtual on_text_input(input::keyboard::text_input_event const& /* ev */) { }
-    void virtual on_text_editing(input::keyboard::text_editing_event const& /* ev */) { }
 
     void virtual on_mouse_enter() { }
     void virtual on_mouse_leave() { }
@@ -167,7 +166,6 @@ private:
     void do_key_down(input::keyboard::event const& ev);
     void do_key_up(input::keyboard::event const& ev);
     void do_text_input(input::keyboard::text_input_event const& ev);
-    void do_text_editing(input::keyboard::text_editing_event const& ev);
     void do_mouse_enter();
     void do_mouse_leave();
     void do_mouse_hover(input::mouse::motion_event const& ev);

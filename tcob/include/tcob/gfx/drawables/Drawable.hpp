@@ -56,7 +56,6 @@ protected:
     void on_key_down(input::keyboard::event const&) override { }
     void on_key_up(input::keyboard::event const&) override { }
     void on_text_input(input::keyboard::text_input_event const&) override { }
-    void on_text_editing(input::keyboard::text_editing_event const&) override { }
     void on_mouse_motion(input::mouse::motion_event const&) override { }
     void on_mouse_button_down(input::mouse::button_event const&) override { }
     void on_mouse_button_up(input::mouse::button_event const&) override { }

@@ -265,13 +265,6 @@ void system::process_events(SDL_Event* ev)
         keyboard::text_input_event const event {.Text = ev->text.text};
         TextInput(event);
     } break;
-    case SDL_EVENT_TEXT_EDITING: {
-        keyboard::text_editing_event const event {
-            .Text   = ev->edit.text,
-            .Start  = ev->edit.start,
-            .Length = ev->edit.length};
-        TextEditing(event);
-    } break;
     case SDL_EVENT_MOUSE_MOTION: {
         mouse::motion_event const event {
             .Mouse          = &mouse,

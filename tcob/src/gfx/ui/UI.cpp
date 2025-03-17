@@ -88,11 +88,6 @@ namespace detail {
         if (check(widget)) { widget->do_text_input(ev); }
     }
 
-    void input_injector::on_text_editing(widget* widget, input::keyboard::text_editing_event const& ev) const
-    {
-        if (check(widget)) { widget->do_text_editing(ev); }
-    }
-
     void input_injector::on_mouse_enter(widget* widget) const
     {
         if (check(widget)) { widget->do_mouse_enter(); }

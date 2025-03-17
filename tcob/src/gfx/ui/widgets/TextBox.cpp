@@ -202,12 +202,9 @@ void text_box::on_key_up(input::keyboard::event const& ev)
 
 void text_box::on_text_input(input::keyboard::text_input_event const& ev)
 {
+    // TODO: active text input on focus
     insert_text(ev.Text);
     ev.Handled = true;
-}
-
-void text_box::on_text_editing(input::keyboard::text_editing_event const& /* ev */)
-{
 }
 
 void text_box::on_mouse_drag(input::mouse::motion_event const& ev)

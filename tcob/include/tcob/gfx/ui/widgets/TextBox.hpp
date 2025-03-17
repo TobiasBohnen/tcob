@@ -52,7 +52,6 @@ protected:
     void on_key_up(input::keyboard::event const& ev) override;
 
     void on_text_input(input::keyboard::text_input_event const& ev) override;
-    void on_text_editing(input::keyboard::text_editing_event const& ev) override;
 
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_down(input::mouse::button_event const& ev) override;
