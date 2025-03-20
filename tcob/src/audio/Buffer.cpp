@@ -38,12 +38,12 @@ auto buffer::data() -> std::span<f32>
     return _buffer;
 }
 
-auto buffer::load(path const& file, std::any& ctx) noexcept -> load_status
+auto buffer::load(path const& file, std::any const& ctx) noexcept -> load_status
 {
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file), ctx);
 }
 
-auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status
+auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> load_status
 {
     _buffer.clear();
     if (!in || !(*in)) { return load_status::Error; }
@@ -108,7 +108,7 @@ using namespace std::chrono_literals;
 decoder::decoder()  = default;
 decoder::~decoder() = default;
 
-auto decoder::open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::information>
+auto decoder::open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>
 {
     _stream = std::move(in);
     _ctx    = ctx;

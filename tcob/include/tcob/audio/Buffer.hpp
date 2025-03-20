@@ -35,8 +35,8 @@ public:
     auto data() const -> std::span<f32 const>;
     auto data() -> std::span<f32>;
 
-    auto load [[nodiscard]] (path const& file, std::any& ctx) noexcept -> load_status;
-    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any& ctx) noexcept -> load_status;
+    auto load [[nodiscard]] (path const& file, std::any const& ctx) noexcept -> load_status;
+    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file, std::any& ctx) noexcept -> std::future<load_status>;
 
     auto save [[nodiscard]] (path const& file) const noexcept -> bool;
@@ -63,7 +63,7 @@ public:
     auto operator=(decoder const& other) noexcept -> decoder& = delete;
     virtual ~decoder();
 
-    auto open(std::shared_ptr<io::istream> in, std::any& ctx) -> std::optional<buffer::information>;
+    auto open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>;
 
     auto decode(isize size) -> std::optional<std::vector<f32>>;
 

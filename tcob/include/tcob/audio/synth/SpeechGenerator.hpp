@@ -8,6 +8,8 @@
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_SPEECH)
 
+    #include <memory>
+
     #include "tcob/audio/Buffer.hpp"
     #include "tcob/audio/Sound.hpp"
 
@@ -18,8 +20,8 @@ class TCOB_API speech_generator final {
 public:
     speech_generator() = default;
 
-    auto create_buffer [[nodiscard]] (std::string const& text) -> buffer;
-    auto create_sound [[nodiscard]] (std::string const& text) -> std::shared_ptr<sound>;
+    auto create_buffer [[nodiscard]] (string const& text) -> buffer;
+    auto create_sound [[nodiscard]] (string const& text) -> std::shared_ptr<sound>;
 
 private:
 };

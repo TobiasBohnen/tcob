@@ -8,7 +8,6 @@
 #if defined(TCOB_ENABLE_ADDON_AUDIO_SPEECH)
 
     #include <memory>
-    #include <string>
     #include <vector>
 
     #include <speech/speech.h>
@@ -21,7 +20,7 @@ namespace tcob::audio {
 constexpr i32 sampleRate {44100};
 constexpr i32 channels {2};
 
-auto speech_generator::create_buffer [[nodiscard]] (std::string const& text) -> buffer
+auto speech_generator::create_buffer [[nodiscard]] (string const& text) -> buffer
 {
     i32   frames {0};
     auto* data {speech_gen(&frames, text.c_str(), nullptr)};
@@ -33,7 +32,7 @@ auto speech_generator::create_buffer [[nodiscard]] (std::string const& text) -> 
     return buffer::Create({.Channels = channels, .SampleRate = sampleRate, .FrameCount = frames}, databuf);
 }
 
-auto speech_generator::create_sound [[nodiscard]] (std::string const& text) -> std::shared_ptr<sound>
+auto speech_generator::create_sound [[nodiscard]] (string const& text) -> std::shared_ptr<sound>
 {
     auto audioData {create_buffer(text)};
     return std::make_shared<sound>(audioData);

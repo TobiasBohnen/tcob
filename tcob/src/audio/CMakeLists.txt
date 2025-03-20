@@ -2,6 +2,7 @@
 list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/AudioSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Buffer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Effect.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Music.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Output.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Playlist.cpp
@@ -17,6 +18,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/audio/Audio.hpp
     ${TCOB_INC_DIR}/tcob/audio/AudioSystem.hpp
     ${TCOB_INC_DIR}/tcob/audio/Buffer.hpp
+    ${TCOB_INC_DIR}/tcob/audio/Effect.hpp
     ${TCOB_INC_DIR}/tcob/audio/Music.hpp
     ${TCOB_INC_DIR}/tcob/audio/Playlist.hpp
     ${TCOB_INC_DIR}/tcob/audio/Sound.hpp
