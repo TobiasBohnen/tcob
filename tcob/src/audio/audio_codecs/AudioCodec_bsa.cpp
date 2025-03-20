@@ -53,7 +53,7 @@ auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
     for (usize i {0}; i < outputSamples.size(); ++i) {
         outputSamples[i] = static_cast<f32>(buffer[i]) / std::numeric_limits<i16>::max();
     }
-    return static_cast<i32>(std::ssize(outputSamples) / _info.Channels);
+    return static_cast<i32>(std::ssize(outputSamples));
 }
 
 ////////////////////////////////////////////////////////////

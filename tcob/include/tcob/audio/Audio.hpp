@@ -11,11 +11,7 @@ namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 // forward declarations
 
-namespace al {
-    class al_buffer;
-    class al_source;
-}
-
 class source;
+class output;
 
 }

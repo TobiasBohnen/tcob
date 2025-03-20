@@ -5,70 +5,94 @@
 
 #include "tcob/audio/Source.hpp"
 
+#include <cassert>
 #include <memory>
 
-#include "ALObjects.hpp"
-
+#include "tcob/audio/AudioSystem.hpp"
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 
 namespace tcob::audio {
 
 source::source()
-    : Volume {{[this]() { return _source->get_gain(); },
-               [this](auto const& value) { _source->set_gain(value); }}}
-    , _source {std::make_unique<audio::al::al_source>()}
 {
+    Volume.Changed.connect([this](f32 val) {
+        if (_output) { _output->set_volume(val); }
+    });
     Volume(1.0f);
 }
 
-source::~source() = default;
+source::~source()
+{
+    if (!_output) { return; }
+    _output->clear();
+    _output->unbind();
+}
 
 auto source::status() const -> playback_status
 {
-    return _source->get_status();
-}
-
-auto source::is_looping() const -> bool
-{
-    return _source->is_looping();
-}
-
-void source::play(bool looping)
-{
-    if (status() == playback_status::Stopped) { // start if stopped
-        if (on_start()) {
-            _source->set_looping(looping);
+    if (!_output) { return playback_status::Stopped; }
+    if (!_output->is_bound()) {
+        if (_output->available_bytes() > 0) {
+            return playback_status::Paused;
         }
-    } else if (status() == playback_status::Paused) { // resume if paused
-        _source->set_looping(looping);
+        return playback_status::Stopped;
+    }
+    if (_output->available_bytes() > 0) {
+        return playback_status::Running;
+    }
+    return playback_status::Stopped;
+}
+
+void source::play()
+{
+    if (!_output) { return; }
+
+    auto const stat {status()};
+    if (stat == playback_status::Stopped) { // start if stopped
+        if (on_start()) {
+            if (!_output->is_bound()) {
+                _output->bind();
+            }
+        }
+    } else if (stat == playback_status::Paused) { // resume if paused
         resume();
     }
 }
 
 void source::stop()
 {
+    if (!_output) { return; }
+
     if (status() != playback_status::Stopped) { // stop if running or paused
-        on_stop();
+        if (on_stop()) {
+            _output->unbind();
+        }
     }
 }
 
 void source::restart()
 {
     stop();
-    play(is_looping());
+    play();
 }
 
 void source::pause()
 {
+    if (!_output) { return; }
+
     if (status() == playback_status::Running) {
-        _source->pause();
+        _output->unbind();
     }
 }
 
 void source::resume()
 {
+    if (!_output) { return; }
+
     if (status() == playback_status::Paused) {
-        _source->play();
+        _output->bind();
     }
 }
 
@@ -77,9 +101,16 @@ void source::toggle_pause()
     status() == playback_status::Paused ? resume() : pause();
 }
 
-auto source::get_impl() const -> audio::al::al_source*
+void source::create_output(buffer::information const& info)
 {
-    return _source.get();
+    _output = locate_service<system>().create_output(info);
+    _output->set_volume(Volume);
+}
+
+auto source::get_output() -> audio::output&
+{
+    assert(_output);
+    return *_output;
 }
 
 }

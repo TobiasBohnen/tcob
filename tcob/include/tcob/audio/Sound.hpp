@@ -21,12 +21,11 @@ namespace tcob::audio {
 class TCOB_API sound final : public source {
 public:
     sound();
-    explicit sound(audio::buffer const& buffer);
+    explicit sound(buffer buffer);
     ~sound() override;
 
     auto info() const -> std::optional<buffer::information>;
     auto duration() const -> milliseconds override;
-    auto playback_position() const -> milliseconds override;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;
@@ -38,9 +37,6 @@ private:
     auto on_start() -> bool override;
     auto on_stop() -> bool override;
 
-    void stop_source();
-
-    buffer::information                   _info;
-    std::unique_ptr<audio::al::al_buffer> _buffer;
+    buffer _buffer;
 };
 }

@@ -35,8 +35,12 @@ auto static write_wav(void* userdata, void const* buffer, usize bytesToWrite) ->
 
 auto static seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> drwav_bool32
 {
-    auto*      stream {static_cast<io::istream*>(userdata)};
-    auto const dir {origin == drwav_seek_origin_current ? io::seek_dir::Current : io::seek_dir::Begin};
+    auto*        stream {static_cast<io::istream*>(userdata)};
+    io::seek_dir dir {};
+    switch (origin) {
+    case drwav_seek_origin_start: dir = io::seek_dir::Begin; break;
+    case drwav_seek_origin_current: dir = io::seek_dir::Current; break;
+    }
     return stream->seek(offset, dir);
 }
 }
@@ -69,7 +73,7 @@ auto wav_decoder::open() -> std::optional<buffer::information>
 auto wav_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
-    return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()));
+    return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()) * _info.Channels);
 }
 
 ////////////////////////////////////////////////////////////

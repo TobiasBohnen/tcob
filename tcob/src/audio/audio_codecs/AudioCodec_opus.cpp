@@ -19,7 +19,6 @@
     #include "tcob/audio/Buffer.hpp"
     #include "tcob/core/io/Stream.hpp"
 
-
 ////////////////////////////////////////////////////////////
 
 namespace tcob::audio::detail {
@@ -98,7 +97,7 @@ auto opus_decoder::decode(std::span<f32> outputSamples) -> i32
         readOffset += read * _info.Channels;
     }
 
-    return readOffset / _info.Channels;
+    return readOffset;
 }
 
 ////////////////////////////////////////////////////////////

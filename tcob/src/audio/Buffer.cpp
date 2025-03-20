@@ -93,7 +93,7 @@ auto buffer::save_async(path const& file) const noexcept -> std::future<bool>
     return retValue;
 }
 
-auto buffer::Create(information const& info, std::span<f32> data) -> buffer
+auto buffer::Create(information const& info, std::span<f32 const> data) -> buffer
 {
     buffer retValue;
     retValue._info   = info;
@@ -121,7 +121,12 @@ auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
     if (!_info || size <= 0) { return std::nullopt; }
 
     std::vector<f32> buffer(static_cast<usize>(size));
-    return decode(buffer) > 0 ? std::optional<std::vector<f32>> {buffer} : std::nullopt;
+    auto const       res {decode(buffer)};
+    if (res > 0) {
+        buffer.resize(res);
+        return buffer;
+    }
+    return std::nullopt;
 }
 
 auto decoder::stream() -> io::istream&

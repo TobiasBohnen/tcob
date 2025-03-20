@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "tcob/audio/Audio.hpp"
+#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
@@ -24,14 +25,12 @@ public:
 
     std::any DecoderContext;
 
-    prop_fn<f32> Volume;
+    prop<f32> Volume;
 
-    auto virtual duration() const -> milliseconds          = 0;
-    auto virtual playback_position() const -> milliseconds = 0;
+    auto virtual duration() const -> milliseconds = 0;
     auto status() const -> playback_status;
-    auto is_looping() const -> bool;
 
-    void play(bool looping = false);
+    void play();
     void stop();
     void restart();
 
@@ -43,10 +42,11 @@ protected:
     auto virtual on_start() -> bool = 0;
     auto virtual on_stop() -> bool  = 0;
 
-    auto get_impl() const -> audio::al::al_source*;
+    void create_output(buffer::information const& info);
+    auto get_output() -> audio::output&;
 
 private:
-    std::unique_ptr<audio::al::al_source> _source;
+    std::unique_ptr<audio::output> _output;
 };
 
 }

@@ -1,6 +1,5 @@
 # audio
 list(APPEND SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/ALObjects.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Source.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AudioSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Buffer.cpp

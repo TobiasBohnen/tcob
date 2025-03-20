@@ -98,7 +98,7 @@ auto xmp_decoder::decode(std::span<f32> outputSamples) -> i32
         outputSamples[i] = static_cast<f32>(buffer[i]) / static_cast<f32>(std::numeric_limits<i16>::max());
     }
 
-    return res == 0 ? static_cast<i32>(std::ssize(outputSamples) / _info.Channels) : 0;
+    return res == 0 ? static_cast<i32>(std::ssize(outputSamples)) : 0;
 }
 
 }

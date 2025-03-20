@@ -106,7 +106,7 @@ auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
         sampleCount += sampleBlock;
     }
 
-    return sampleCount;
+    return sampleCount * _info.Channels;
 }
 
 }

@@ -26,8 +26,13 @@ auto static read_mp3(void* userdata, void* buffer, usize bytesToRead) -> usize
 
 auto static seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32
 {
-    auto*      stream {static_cast<io::istream*>(userdata)};
-    auto const dir {origin == drmp3_seek_origin_current ? io::seek_dir::Current : io::seek_dir::Begin};
+    auto*        stream {static_cast<io::istream*>(userdata)};
+    io::seek_dir dir {};
+    switch (origin) {
+    case drmp3_seek_origin_start: dir = io::seek_dir::Begin; break;
+    case drmp3_seek_origin_current: dir = io::seek_dir::Current; break;
+    case drmp3_seek_origin_end: dir = io::seek_dir::End; break;
+    }
     return stream->seek(offset, dir);
 }
 
@@ -54,7 +59,7 @@ void mp3_decoder::seek_from_start(milliseconds pos)
 
 auto mp3_decoder::open() -> std::optional<buffer::information>
 {
-    if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &tell_mp3, &stream(), nullptr)) {
+    if (drmp3_init(&_mp3, &read_mp3, &seek_mp3, &tell_mp3, nullptr, &stream(), nullptr)) {
         _info.Channels   = static_cast<i32>(_mp3.channels);
         _info.SampleRate = static_cast<i32>(_mp3.sampleRate);
         _info.FrameCount = static_cast<i64>(drmp3_get_pcm_frame_count(&_mp3));
@@ -67,7 +72,7 @@ auto mp3_decoder::open() -> std::optional<buffer::information>
 auto mp3_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
-    return static_cast<i32>(drmp3_read_pcm_frames_f32(&_mp3, wantRead, outputSamples.data()));
+    return static_cast<i32>(drmp3_read_pcm_frames_f32(&_mp3, wantRead, outputSamples.data()) * _info.Channels);
 }
 }
 

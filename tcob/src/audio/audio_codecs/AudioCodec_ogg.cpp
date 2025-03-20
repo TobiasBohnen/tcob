@@ -103,7 +103,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
         wantFrames -= readFrames;
     }
 
-    return offsetSamples / _info.Channels;
+    return offsetSamples;
 }
 
 ////////////////////////////////////////////////////////////

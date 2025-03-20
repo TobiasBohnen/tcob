@@ -6,11 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <array>
 #include <atomic>
 #include <memory>
 #include <optional>
-#include <vector>
+#include <queue>
 
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
@@ -34,7 +33,7 @@ public:
 
     auto info() const -> std::optional<buffer::information>;
     auto duration() const -> milliseconds override;
-    auto playback_position() const -> milliseconds override;
+    auto playback_position() const -> milliseconds;
 
     auto open [[nodiscard]] (path const& file) -> load_status;
     auto open [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) -> load_status;
@@ -47,15 +46,13 @@ private:
 
     void update_stream();
     void stop_stream();
-    void queue_buffers(std::vector<u32> const& bufferIDs);
-    void initialize_buffers();
-
-    using buffer_array = std::array<std::shared_ptr<audio::al::al_buffer>, STREAM_BUFFER_COUNT>;
+    void fill_buffers(audio::output& out);
 
     std::unique_ptr<decoder>           _decoder {};
     i32                                _samplesPlayed {0};
     std::optional<buffer::information> _info;
-    buffer_array                       _buffers {};
+
+    std::queue<buffer> _buffers {};
 
     std::atomic_bool _isRunning {false};
     std::atomic_bool _stopRequested {false};

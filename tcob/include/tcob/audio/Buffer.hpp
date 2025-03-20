@@ -43,7 +43,7 @@ public:
     auto save [[nodiscard]] (io::ostream& out, string const& ext) const noexcept -> bool;
     auto save_async [[nodiscard]] (path const& file) const noexcept -> std::future<bool>;
 
-    auto static Create(information const& info, std::span<f32> data) -> buffer;
+    auto static Create(information const& info, std::span<f32 const> data) -> buffer;
 
 private:
     information      _info;

@@ -7,13 +7,13 @@
 
 #include <cassert>
 #include <chrono>
-#include <iterator>
 #include <memory>
 #include <optional>
 #include <thread>
 #include <utility>
 #include <vector>
 
+#include "tcob/audio/AudioSystem.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -21,8 +21,6 @@
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Stream.hpp"
-
-#include "ALObjects.hpp"
 
 namespace tcob::audio {
 using namespace std::chrono_literals;
@@ -51,7 +49,12 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     _decoder = locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext);
     if (_decoder) {
         _info = _decoder->open(std::move(in), DecoderContext);
-        return _info ? load_status::Ok : load_status::Error;
+        if (_info) {
+            create_output(*_info);
+            return load_status::Ok;
+        }
+
+        return load_status::Error;
     }
 
     return load_status::Error;
@@ -92,35 +95,30 @@ auto music::on_stop() -> bool
 
 void music::update_stream()
 {
-    initialize_buffers();
+    _samplesPlayed = 0;
+    _decoder->seek_from_start(0ms);
 
-    auto* s {get_impl()};
-    s->play();
+    auto& out {get_output()};
+    fill_buffers(out);
 
     for (;;) {
-        if (_stopRequested || status() == playback_status::Stopped) {
-            s->stop();
-            s->set_buffer(0);
+        if (_stopRequested) {
+            out.clear();
+            out.unbind();
             break;
         }
 
-        if (status() == playback_status::Running) {
-            i32 const  processedCount {s->get_buffers_processed()};
-            auto const bufferIDs {s->unqueue_buffers(processedCount)};
-            assert(processedCount == std::ssize(bufferIDs));
-            if (processedCount > 0) {
-                for (u32 bufferID : bufferIDs) {
-                    _samplesPlayed += static_cast<i32>(static_cast<usize>(al::al_buffer::GetSize(bufferID)) / sizeof(f32)); // buffer is float32
-                }
+        std::this_thread::sleep_for(1ms);
 
-                queue_buffers(bufferIDs);
-            }
+        if (out.available_bytes() == 0) {
+            _stopRequested = true;
         }
 
-        std::this_thread::sleep_for(1ms);
+        fill_buffers(out);
     }
 
-    _isRunning = false;
+    _isRunning     = false;
+    _stopRequested = false;
 }
 
 void music::stop_stream()
@@ -132,40 +130,31 @@ void music::stop_stream()
     _stopRequested = false;
 }
 
-void music::queue_buffers(std::vector<u32> const& bufferIDs)
+void music::fill_buffers(audio::output& out)
 {
-    auto* s {get_impl()};
-
-    for (u32 bufferID : bufferIDs) {
-        for (u32 i {0}; i < STREAM_BUFFER_COUNT; ++i) {
-            if (bufferID == _buffers[i]->get_id()) {
-                if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
-                    _buffers[i]->buffer_data(*data, _info->Channels, _info->SampleRate);
-                    s->queue_buffers(&bufferID, 1);
-                } else {
-                    if (s->is_looping()) {
-                        while (s->get_buffers_queued() > 0) { }
-                        s->unqueue_buffers(s->get_buffers_processed());
-                        initialize_buffers();
-                    }
-                    return;
-                }
-
-                break;
-            }
+    bool flush {false};
+    while (_buffers.size() < STREAM_BUFFER_COUNT) {
+        if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
+            buffer::information info;
+            info.Channels   = _info->Channels;
+            info.SampleRate = _info->SampleRate;
+            info.FrameCount = data->size() / info.Channels;
+            _buffers.push(buffer::Create(info, *data));
+            _samplesPlayed += data->size();
+        } else {
+            flush = true;
+            break;
         }
     }
-}
 
-void music::initialize_buffers()
-{
-    _samplesPlayed = 0;
-    _decoder->seek_from_start(0ms);
-    std::vector<u32> bufferIDs {};
-    for (u8 i {0}; i < STREAM_BUFFER_COUNT; ++i) {
-        _buffers[i] = std::make_shared<audio::al::al_buffer>();
-        bufferIDs.push_back(_buffers[i]->get_id());
+    while (out.queued_bytes() / sizeof(f32) < STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1) && !_buffers.empty()) {
+        auto const& buffer {_buffers.front()};
+        out.put(buffer.data());
+        _buffers.pop();
     }
-    queue_buffers(bufferIDs);
+
+    if (flush) {
+        out.flush();
+    }
 }
 }

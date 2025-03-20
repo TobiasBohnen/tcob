@@ -26,8 +26,12 @@ auto static read_flac(void* userdata, void* buffer, usize bytesToRead) -> usize
 
 auto static seek_flac(void* userdata, i32 offset, drflac_seek_origin origin) -> drflac_bool32
 {
-    auto*      stream {static_cast<io::istream*>(userdata)};
-    auto const dir {origin == drflac_seek_origin_current ? io::seek_dir::Current : io::seek_dir::Begin};
+    auto*        stream {static_cast<io::istream*>(userdata)};
+    io::seek_dir dir {};
+    switch (origin) {
+    case drflac_seek_origin_start: dir = io::seek_dir::Begin; break;
+    case drflac_seek_origin_current: dir = io::seek_dir::Current; break;
+    }
     return stream->seek(offset, dir);
 }
 }
@@ -61,7 +65,7 @@ auto flac_decoder::open() -> std::optional<buffer::information>
 auto flac_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
-    return static_cast<i32>(drflac_read_pcm_frames_f32(_flac, wantRead, outputSamples.data()));
+    return static_cast<i32>(drflac_read_pcm_frames_f32(_flac, wantRead, outputSamples.data()) * _info.Channels);
 }
 
 }
