@@ -17,7 +17,7 @@ jobs:
         build_type: ['Release', 'Debug']
         config:
           - name: 'MSVC'
-            os:   'windows-latest'
+            os:   'windows-2025'
             cc:   'cl'
             cxx:  'cl'
           - name: 'GCC-14'
