@@ -93,7 +93,7 @@ auto xmp_decoder::open() -> std::optional<buffer::information>
 auto xmp_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     std::vector<i16> buffer(outputSamples.size());
-    auto const       res {xmp_play_buffer(_context, buffer.data(), static_cast<i32>(buffer.size() * sizeof(i16)), 0)};
+    auto const       res {xmp_play_buffer(_context, buffer.data(), static_cast<i32>(buffer.size() * sizeof(i16)), 1)};
     for (usize i {0}; i < outputSamples.size(); ++i) {
         outputSamples[i] = static_cast<f32>(buffer[i]) / static_cast<f32>(std::numeric_limits<i16>::max());
     }
