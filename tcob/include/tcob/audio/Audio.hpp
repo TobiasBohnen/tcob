@@ -14,7 +14,7 @@ namespace tcob::audio {
 class source;
 
 namespace detail {
-    class output;
+    class audio_stream;
 }
 
 }

@@ -26,7 +26,7 @@ class decoder;
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API music : public source {
+class TCOB_API music final : public source {
 public:
     music() = default;
     ~music() override;
@@ -46,7 +46,7 @@ private:
 
     void update_stream();
     void stop_stream();
-    void fill_buffers(detail::output& out);
+    void fill_buffers(detail::audio_stream& out);
 
     std::unique_ptr<decoder>           _decoder {};
     i32                                _samplesPlayed {0};

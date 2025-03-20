@@ -10,7 +10,7 @@
 #include <optional>
 #include <utility>
 
-#include "Output.hpp"
+#include "AudioStream.hpp"
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"

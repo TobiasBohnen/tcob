@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "Output.hpp"
+#include "AudioStream.hpp"
 
 #include <cassert>
 #include <span>
+#include <vector>
 
 #include <SDL3/SDL.h>
 
@@ -14,7 +15,7 @@
 
 namespace tcob::audio::detail {
 
-output::output(u32 device, buffer::information const& info)
+audio_stream::audio_stream(u32 device, buffer::information const& info)
     : _device {device}
 {
     SDL_AudioSpec srcSpec;
@@ -30,59 +31,66 @@ output::output(u32 device, buffer::information const& info)
     assert(_impl);
 }
 
-output::~output()
+audio_stream::~audio_stream()
 {
     SDL_DestroyAudioStream(_impl);
 }
 
-void output::bind()
+void audio_stream::bind()
 {
     [[maybe_unused]] bool const err {SDL_BindAudioStream(_device, _impl)};
     assert(err);
 }
 
-void output::unbind()
+void audio_stream::unbind()
 {
     SDL_UnbindAudioStream(_impl);
 }
 
-auto output::is_bound() const -> bool
+auto audio_stream::is_bound() const -> bool
 {
     return SDL_GetAudioStreamDevice(_impl) != 0;
 }
 
-auto output::get_volume() const -> f32
+auto audio_stream::get_volume() const -> f32
 {
     return SDL_GetAudioStreamGain(_impl);
 }
 
-void output::set_volume(f32 val)
+void audio_stream::set_volume(f32 val)
 {
     SDL_SetAudioStreamGain(_impl, val);
 }
 
-void output::put(std::span<f32 const> data)
+void audio_stream::put(std::span<f32 const> data)
 {
     [[maybe_unused]] bool const err {SDL_PutAudioStreamData(_impl, data.data(), data.size_bytes())};
     assert(err);
 }
 
-void output::flush()
+void audio_stream::flush()
 {
     SDL_FlushAudioStream(_impl);
 }
 
-void output::clear()
+void audio_stream::clear()
 {
     SDL_ClearAudioStream(_impl);
 }
 
-auto output::available_bytes() const -> i32
+auto audio_stream::get() -> std::vector<f32>
+{
+    std::vector<f32> data(available_bytes());
+    SDL_GetAudioStreamData(_impl, data.data(), data.size());
+    return data;
+}
+
+auto audio_stream::available_bytes() const -> i32
 {
     return SDL_GetAudioStreamAvailable(_impl);
 }
 
-auto output::queued_bytes() const -> i32
+auto audio_stream::queued_bytes() const -> i32
 {
     return SDL_GetAudioStreamQueued(_impl);
 }

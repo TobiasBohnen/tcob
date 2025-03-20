@@ -8,7 +8,7 @@
 #include <cassert>
 #include <memory>
 
-#include "Output.hpp"
+#include "AudioStream.hpp"
 
 #include "tcob/audio/AudioSystem.hpp"
 #include "tcob/audio/Buffer.hpp"
@@ -109,7 +109,7 @@ void source::create_output(buffer::information const& info)
     _output->set_volume(Volume);
 }
 
-auto source::get_output() -> detail::output&
+auto source::get_output() -> detail::audio_stream&
 {
     assert(_output);
     return *_output;

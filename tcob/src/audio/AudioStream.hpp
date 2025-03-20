@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <span>
+#include <vector>
 
 #include "tcob/audio/Buffer.hpp"
 
@@ -15,10 +16,10 @@ struct SDL_AudioStream;
 namespace tcob::audio::detail {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API output final {
+class TCOB_API audio_stream final {
 public:
-    output(u32 device, buffer::information const& info);
-    ~output();
+    audio_stream(u32 device, buffer::information const& info);
+    ~audio_stream();
 
     void bind();
     void unbind();
@@ -30,6 +31,8 @@ public:
     void put(std::span<f32 const> data);
     void flush();
     void clear();
+
+    auto get() -> std::vector<f32>;
 
     auto available_bytes() const -> i32;
     auto queued_bytes() const -> i32;

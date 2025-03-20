@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "Output.hpp"
+#include "AudioStream.hpp"
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
@@ -131,7 +131,7 @@ void music::stop_stream()
     _stopRequested = false;
 }
 
-void music::fill_buffers(detail::output& out)
+void music::fill_buffers(detail::audio_stream& out)
 {
     bool flush {false};
     while (_buffers.size() < STREAM_BUFFER_COUNT) {

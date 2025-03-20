@@ -17,6 +17,8 @@ struct SDL_AudioStream;
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
+constexpr i32 RECORDING_SAMPLE_RATE {44100};
+
 class TCOB_API system final : public non_copyable {
 public:
     system();
@@ -24,10 +26,12 @@ public:
 
     static inline char const* service_name {"audio_system"};
 
-    auto create_output(buffer::information const& info) const -> std::unique_ptr<detail::output>;
+    auto create_output(buffer::information const& info) const -> std::unique_ptr<detail::audio_stream>;
+    auto create_input() const -> std::unique_ptr<detail::audio_stream>;
 
 private:
-    u32 _device;
+    u32 _devicePlayback;
+    u32 _deviceRecording;
 };
 
 }

@@ -8,7 +8,7 @@
 #include <cassert>
 #include <memory>
 
-#include "Output.hpp"
+#include "AudioStream.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -17,19 +17,25 @@
 namespace tcob::audio {
 
 system::system()
-    : _device {SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)}
+    : _devicePlayback {SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)}
+    , _deviceRecording {SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_RECORDING, nullptr)}
 {
-    SDL_ResumeAudioDevice(_device);
 }
 
 system::~system()
 {
-    SDL_CloseAudioDevice(_device);
+    SDL_CloseAudioDevice(_devicePlayback);
+    SDL_CloseAudioDevice(_deviceRecording);
 }
 
-auto system::create_output(buffer::information const& info) const -> std::unique_ptr<detail::output>
+auto system::create_output(buffer::information const& info) const -> std::unique_ptr<detail::audio_stream>
 {
-    return std::make_unique<detail::output>(_device, info);
+    return std::make_unique<detail::audio_stream>(_devicePlayback, info);
+}
+
+auto system::create_input() const -> std::unique_ptr<detail::audio_stream>
+{
+    return std::make_unique<detail::audio_stream>(_deviceRecording, buffer::information {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE});
 }
 
 }
