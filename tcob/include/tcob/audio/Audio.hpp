@@ -12,6 +12,9 @@ namespace tcob::audio {
 // forward declarations
 
 class source;
-class output;
+
+namespace detail {
+    class output;
+}
 
 }

@@ -46,7 +46,7 @@ private:
 
     void update_stream();
     void stop_stream();
-    void fill_buffers(audio::output& out);
+    void fill_buffers(detail::output& out);
 
     std::unique_ptr<decoder>           _decoder {};
     i32                                _samplesPlayed {0};

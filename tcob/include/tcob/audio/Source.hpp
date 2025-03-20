@@ -43,10 +43,10 @@ protected:
     auto virtual on_stop() -> bool  = 0;
 
     void create_output(buffer::information const& info);
-    auto get_output() -> audio::output&;
+    auto get_output() -> detail::output&;
 
 private:
-    std::unique_ptr<audio::output> _output;
+    std::unique_ptr<detail::output> _output;
 };
 
 }

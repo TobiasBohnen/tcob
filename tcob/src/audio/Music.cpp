@@ -13,7 +13,8 @@
 #include <utility>
 #include <vector>
 
-#include "tcob/audio/AudioSystem.hpp"
+#include "Output.hpp"
+
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -130,15 +131,16 @@ void music::stop_stream()
     _stopRequested = false;
 }
 
-void music::fill_buffers(audio::output& out)
+void music::fill_buffers(detail::output& out)
 {
     bool flush {false};
     while (_buffers.size() < STREAM_BUFFER_COUNT) {
         if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
-            buffer::information info;
-            info.Channels   = _info->Channels;
-            info.SampleRate = _info->SampleRate;
-            info.FrameCount = data->size() / info.Channels;
+            buffer::information const info {
+                .Channels   = _info->Channels,
+                .SampleRate = _info->SampleRate,
+                .FrameCount = std::ssize(*data) / info.Channels};
+
             _buffers.push(buffer::Create(info, *data));
             _samplesPlayed += data->size();
         } else {
@@ -153,7 +155,7 @@ void music::fill_buffers(audio::output& out)
         _buffers.pop();
     }
 
-    if (flush) {
+    if (_buffers.empty() && flush) {
         out.flush();
     }
 }

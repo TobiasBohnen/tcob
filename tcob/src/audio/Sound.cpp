@@ -5,7 +5,13 @@
 
 #include "tcob/audio/Sound.hpp"
 
-#include "tcob/audio/AudioSystem.hpp"
+#include <future>
+#include <memory>
+#include <optional>
+#include <utility>
+
+#include "Output.hpp"
+
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -13,11 +19,6 @@
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Stream.hpp"
-
-#include <future>
-#include <memory>
-#include <optional>
-#include <utility>
 
 namespace tcob::audio {
 using namespace std::chrono_literals;
