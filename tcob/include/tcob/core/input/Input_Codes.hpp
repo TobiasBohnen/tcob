@@ -249,73 +249,6 @@ enum class scan_code : u16 {
                    *   by any of the above, but since there's a
                    *   special KMOD_MODE for it I'm adding it here
                    */
-
-    /* @} */      /* Usage page 0x07 */
-
-    /**
-     *  \name Usage page 0x0C
-     *
-     *  These values are mapped from usage page 0x0C (USB consumer page).
-     */
-    /* @{ */
-
-    AUDIONEXT    = 258,
-    AUDIOPREV    = 259,
-    AUDIOSTOP    = 260,
-    AUDIOPLAY    = 261,
-    AUDIOMUTE    = 262,
-    MEDIASELECT  = 263,
-    AC_SEARCH    = 268,
-    AC_HOME      = 269,
-    AC_BACK      = 270,
-    AC_FORWARD   = 271,
-    AC_STOP      = 272,
-    AC_REFRESH   = 273,
-    AC_BOOKMARKS = 274,
-
-    /* @} */ /* Usage page 0x0C */
-
-    /**
-     *  \name Walther keys
-     *
-     *  These are values that Christian Walther added (for mac keyboard?).
-     */
-    /* @{ */
-
-    EJECT = 281,
-    SLEEP = 282,
-
-    /* @} */ /* Walther keys */
-
-    /**
-     *  \name Usage page 0x0C (additional media keys)
-     *
-     *  These values are mapped from usage page 0x0C (USB consumer page).
-     */
-    /* @{ */
-
-    AUDIOREWIND      = 285,
-    AUDIOFASTFORWARD = 286,
-
-    /* @} */ /* Usage page 0x0C (additional media keys) */
-
-    /**
-     *  \name Mobile keys
-     *
-     *  These are values that are often used on mobile phones.
-     */
-    /* @{ */
-
-    SOFTLEFT  = 287, /**< Usually situated below the display on phones and
-                                       used as a multi-function feature key for selecting
-                                       a software defined function shown on the bottom left
-                                       of the display. */
-    SOFTRIGHT = 288, /**< Usually situated below the display on phones and
-                                       used as a multi-function feature key for selecting
-                                       a software defined function shown on the bottom right
-                                       of the display. */
-    CALL      = 289, /**< Used for accepting phone calls. */
-    ENDCALL   = 290, /**< Used for rejecting phone calls. */
 };
 
 consteval auto scancode_to_keycode(scan_code x) -> i32
@@ -548,30 +481,5 @@ enum class key_code {
     RGUI   = scancode_to_keycode(scan_code::RGUI),
 
     MODE = scancode_to_keycode(scan_code::MODE),
-
-    AUDIONEXT    = scancode_to_keycode(scan_code::AUDIONEXT),
-    AUDIOPREV    = scancode_to_keycode(scan_code::AUDIOPREV),
-    AUDIOSTOP    = scancode_to_keycode(scan_code::AUDIOSTOP),
-    AUDIOPLAY    = scancode_to_keycode(scan_code::AUDIOPLAY),
-    AUDIOMUTE    = scancode_to_keycode(scan_code::AUDIOMUTE),
-    MEDIASELECT  = scancode_to_keycode(scan_code::MEDIASELECT),
-    AC_SEARCH    = scancode_to_keycode(scan_code::AC_SEARCH),
-    AC_HOME      = scancode_to_keycode(scan_code::AC_HOME),
-    AC_BACK      = scancode_to_keycode(scan_code::AC_BACK),
-    AC_FORWARD   = scancode_to_keycode(scan_code::AC_FORWARD),
-    AC_STOP      = scancode_to_keycode(scan_code::AC_STOP),
-    AC_REFRESH   = scancode_to_keycode(scan_code::AC_REFRESH),
-    AC_BOOKMARKS = scancode_to_keycode(scan_code::AC_BOOKMARKS),
-
-    EJECT = scancode_to_keycode(scan_code::EJECT),
-    SLEEP = scancode_to_keycode(scan_code::SLEEP),
-
-    AUDIOREWIND      = scancode_to_keycode(scan_code::AUDIOREWIND),
-    AUDIOFASTFORWARD = scancode_to_keycode(scan_code::AUDIOFASTFORWARD),
-
-    SOFTLEFT  = scancode_to_keycode(scan_code::SOFTLEFT),
-    SOFTRIGHT = scancode_to_keycode(scan_code::SOFTRIGHT),
-    CALL      = scancode_to_keycode(scan_code::CALL),
-    ENDCALL   = scancode_to_keycode(scan_code::ENDCALL)
 };
 }
