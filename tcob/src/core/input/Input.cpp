@@ -10,7 +10,6 @@
 #include <SDL3/SDL.h>
 
 #include <cassert>
-#include <iterator>
 #include <limits>
 #include <memory>
 #include <unordered_map>
@@ -203,19 +202,19 @@ system::~system()
     _controllers.clear();
 }
 
+auto system::controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const&
+{
+    return _controllers;
+}
+
+auto system::first_controller() const -> controller&
+{
+    return *_controllers.begin()->second;
+}
+
 auto system::controller_count() const -> isize
 {
     return std::ssize(_controllers);
-}
-
-auto system::get_controller(i32 index) const -> std::shared_ptr<controller>
-{
-    auto it {_controllers.find(index)};
-    if (it == _controllers.end()) {
-        return nullptr;
-    }
-
-    return it->second;
 }
 
 auto system::mouse() const -> input::mouse

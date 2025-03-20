@@ -280,8 +280,9 @@ public:
 
     prop<mode> InputMode;
 
+    auto controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const&;
+    auto first_controller() const -> controller&;
     auto controller_count() const -> isize;
-    auto get_controller(i32 index) const -> std::shared_ptr<controller>;
 
     auto mouse() const -> input::mouse;
     auto keyboard() const -> input::keyboard;
