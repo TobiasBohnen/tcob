@@ -57,10 +57,15 @@ auto convert_enum(controller::button button) -> SDL_GamepadButton
     case controller::button::DPadLeft: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT;
     case controller::button::DPadRight: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT;
     case controller::button::Misc1: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC1;
-    case controller::button::Paddle1: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1;
-    case controller::button::Paddle2: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE1;
-    case controller::button::Paddle3: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2;
-    case controller::button::Paddle4: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE2;
+    case controller::button::Misc2: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC2;
+    case controller::button::Misc3: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC3;
+    case controller::button::Misc4: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC4;
+    case controller::button::Misc5: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC5;
+    case controller::button::Misc6: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC6;
+    case controller::button::RightPaddle1: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1;
+    case controller::button::LeftPaddle1: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE1;
+    case controller::button::RightPaddle2: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2;
+    case controller::button::LeftPaddle2: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE2;
     case controller::button::Touchpad: return SDL_GamepadButton::SDL_GAMEPAD_BUTTON_TOUCHPAD;
     }
 
@@ -87,17 +92,17 @@ auto convert_enum(SDL_GamepadButton button) -> controller::button
     case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_LEFT: return controller::button::DPadLeft;
     case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_DPAD_RIGHT: return controller::button::DPadRight;
     case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC1: return controller::button::Misc1;
-    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1: return controller::button::Paddle1;
-    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE1: return controller::button::Paddle2;
-    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2: return controller::button::Paddle3;
-    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE2: return controller::button::Paddle4;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC2: return controller::button::Misc2;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC3: return controller::button::Misc3;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC4: return controller::button::Misc4;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC5: return controller::button::Misc5;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_MISC6: return controller::button::Misc6;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1: return controller::button::RightPaddle1;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE1: return controller::button::LeftPaddle1;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2: return controller::button::RightPaddle2;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_LEFT_PADDLE2: return controller::button::LeftPaddle2;
     case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_TOUCHPAD: return controller::button::Touchpad;
-    case SDL_GAMEPAD_BUTTON_MISC2:
-    case SDL_GAMEPAD_BUTTON_MISC3:
-    case SDL_GAMEPAD_BUTTON_MISC4:
-    case SDL_GAMEPAD_BUTTON_MISC5:
-    case SDL_GAMEPAD_BUTTON_MISC6: break;
-    case SDL_GAMEPAD_BUTTON_COUNT: break;
+    case SDL_GamepadButton::SDL_GAMEPAD_BUTTON_COUNT: break;
     }
 
     return controller::button::Invalid;
@@ -128,8 +133,8 @@ auto convert_enum(controller::axis axis) -> SDL_GamepadAxis
     case controller::axis::LeftY: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFTY;
     case controller::axis::RightX: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTX;
     case controller::axis::RightY: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHTY;
-    case controller::axis::TriggerLeft: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFT_TRIGGER;
-    case controller::axis::TriggerRight: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHT_TRIGGER;
+    case controller::axis::LeftTrigger: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_LEFT_TRIGGER;
+    case controller::axis::RightTrigger: return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_RIGHT_TRIGGER;
     }
 
     return SDL_GamepadAxis::SDL_GAMEPAD_AXIS_INVALID;
@@ -143,8 +148,8 @@ auto convert_enum(SDL_GamepadAxis axis) -> controller::axis
     case SDL_GAMEPAD_AXIS_LEFTY: return controller::axis::LeftY;
     case SDL_GAMEPAD_AXIS_RIGHTX: return controller::axis::RightX;
     case SDL_GAMEPAD_AXIS_RIGHTY: return controller::axis::RightY;
-    case SDL_GAMEPAD_AXIS_LEFT_TRIGGER: return controller::axis::TriggerLeft;
-    case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER: return controller::axis::TriggerRight;
+    case SDL_GAMEPAD_AXIS_LEFT_TRIGGER: return controller::axis::LeftTrigger;
+    case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER: return controller::axis::RightTrigger;
     case SDL_GAMEPAD_AXIS_COUNT: return controller::axis::Invalid;
     }
 

@@ -147,10 +147,15 @@ public:
         DPadLeft,
         DPadRight,
         Misc1,
-        Paddle1,
-        Paddle2,
-        Paddle3,
-        Paddle4,
+        Misc2,
+        Misc3,
+        Misc4,
+        Misc5,
+        Misc6,
+        RightPaddle1,
+        LeftPaddle1,
+        RightPaddle2,
+        LeftPaddle2,
         Touchpad
     };
 
@@ -172,8 +177,8 @@ public:
         LeftY,
         RightX,
         RightY,
-        TriggerLeft,
-        TriggerRight,
+        LeftTrigger,
+        RightTrigger,
     };
 
     struct button_event : event_base {
