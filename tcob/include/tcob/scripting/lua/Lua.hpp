@@ -31,12 +31,8 @@ namespace tcob::scripting::lua {
 
 ////////////////////////////////////////////////////////////
 
-constexpr i32 NOREF = -2;             //  LUA_NOREF
-    #if defined(TCOB_USE_LUAJIT)
-constexpr i32 REGISTRYINDEX = -10000; //  LUA_REGISTRYINDEX
-    #else
+constexpr i32 NOREF         = -2;       //  LUA_NOREF
 constexpr i32 REGISTRYINDEX = -1001000; //  LUA_REGISTRYINDEX
-    #endif
 
 ////////////////////////////////////////////////////////////
 
@@ -76,13 +72,8 @@ enum class library : u8 {
     OS,
     Debug,
     Package,
-    #if defined(TCOB_USE_LUAJIT)
-    JIT,
-    #else
     Coroutine,
     Utf8,
-    #endif
-
 };
 
 ////////////////////////////////////////////////////////////

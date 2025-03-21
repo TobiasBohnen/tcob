@@ -335,16 +335,7 @@ namespace detail {
 
     auto function_base::set_environment([[maybe_unused]] table const& env) -> bool
     {
-    #if defined(TCOB_USE_LUAJIT)
-        auto const view {get_view()};
-        auto       guard {view.create_stack_guard()};
-
-        push_self();
-        env.push_self();
-        return view.set_uservalue(-2) != 0;
-    #else
         return set_upvalue("_ENV", env);
-    #endif
     }
 
 }
