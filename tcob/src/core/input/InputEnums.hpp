@@ -19,6 +19,8 @@ auto convert_enum(mouse::button button) -> i32;
 auto convert_enum(controller::button button) -> SDL_GamepadButton;
 auto convert_enum(SDL_GamepadButton button) -> controller::button;
 
+auto convert_enum(SDL_GamepadButtonLabel label) -> controller::button_label;
+
 auto convert_enum(controller::axis axis) -> SDL_GamepadAxis;
 auto convert_enum(SDL_GamepadAxis axis) -> controller::axis;
 

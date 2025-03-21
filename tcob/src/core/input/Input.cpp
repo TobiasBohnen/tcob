@@ -28,72 +28,67 @@ controller::controller(SDL_Gamepad* controller, u32 id)
 
 auto controller::has_rumble() const -> bool
 {
-    assert(_controller);
     return SDL_GetBooleanProperty(SDL_GetGamepadProperties(_controller), SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN, false);
 }
 
 auto controller::rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, milliseconds duration) const -> bool
 {
-    assert(_controller);
     return SDL_RumbleGamepad(_controller, lowFrequencyRumble, highFrequencyRumble, static_cast<u32>(duration.count())) == 0;
 }
 
 auto controller::has_rumble_triggers() const -> bool
 {
-    assert(_controller);
     return SDL_GetBooleanProperty(SDL_GetGamepadProperties(_controller), SDL_PROP_GAMEPAD_CAP_TRIGGER_RUMBLE_BOOLEAN, false);
 }
 
 auto controller::rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds duration) const -> bool
 {
-    assert(_controller);
     return SDL_RumbleGamepadTriggers(_controller, leftRumble, rightRumble, static_cast<u32>(duration.count())) == 0;
 }
 
 auto controller::id() const -> u32
 {
-    assert(_controller);
     return _id;
 }
 
 auto controller::name() const -> string
 {
-    assert(_controller);
     return SDL_GetGamepadName(_controller);
 }
 
-auto controller::is_button_pressed(controller::button button) const -> bool
+auto controller::is_button_pressed(button b) const -> bool
 {
-    assert(_controller);
-    return SDL_GetGamepadButton(_controller, convert_enum(button)) == 1;
+    return SDL_GetGamepadButton(_controller, convert_enum(b)) == 1;
 }
 
-auto controller::has_button(controller::button button) const -> bool
+auto controller::has_button(button b) const -> bool
 {
-    assert(_controller);
-    return SDL_GamepadHasButton(_controller, convert_enum(button));
+    return SDL_GamepadHasButton(_controller, convert_enum(b));
 }
 
-auto controller::get_button_name(controller::button button) const -> string
+auto controller::get_button_name(button b) const -> string
 {
-    return SDL_GetGamepadStringForButton(convert_enum(button));
+    return SDL_GetGamepadStringForButton(convert_enum(b));
 }
 
-auto controller::get_axis_value(controller::axis axis) const -> i16
+auto controller::get_button_label(button b) const -> button_label
 {
-    assert(_controller);
-    return SDL_GetGamepadAxis(_controller, convert_enum(axis));
+    return convert_enum(SDL_GetGamepadButtonLabel(_controller, convert_enum(b)));
 }
 
-auto controller::has_axis(controller::axis axis) const -> bool
+auto controller::get_axis_value(axis a) const -> i16
 {
-    assert(_controller);
-    return SDL_GamepadHasAxis(_controller, convert_enum(axis));
+    return SDL_GetGamepadAxis(_controller, convert_enum(a));
 }
 
-auto controller::get_axis_name(controller::axis axis) const -> string
+auto controller::has_axis(axis a) const -> bool
 {
-    return SDL_GetGamepadStringForAxis(convert_enum(axis));
+    return SDL_GamepadHasAxis(_controller, convert_enum(a));
+}
+
+auto controller::get_axis_name(axis a) const -> string
+{
+    return SDL_GetGamepadStringForAxis(convert_enum(a));
 }
 
 ////////////////////////////////////////////////////////////

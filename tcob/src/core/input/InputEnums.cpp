@@ -103,6 +103,23 @@ auto convert_enum(SDL_GamepadButton button) -> controller::button
     return controller::button::Invalid;
 }
 
+auto convert_enum(SDL_GamepadButtonLabel label) -> controller::button_label
+{
+    switch (label) {
+    case SDL_GAMEPAD_BUTTON_LABEL_UNKNOWN: return controller::button_label::Invalid;
+    case SDL_GAMEPAD_BUTTON_LABEL_A: return controller::button_label::A;
+    case SDL_GAMEPAD_BUTTON_LABEL_B: return controller::button_label::B;
+    case SDL_GAMEPAD_BUTTON_LABEL_X: return controller::button_label::X;
+    case SDL_GAMEPAD_BUTTON_LABEL_Y: return controller::button_label::Y;
+    case SDL_GAMEPAD_BUTTON_LABEL_CROSS: return controller::button_label::Cross;
+    case SDL_GAMEPAD_BUTTON_LABEL_CIRCLE: return controller::button_label::Circle;
+    case SDL_GAMEPAD_BUTTON_LABEL_SQUARE: return controller::button_label::Square;
+    case SDL_GAMEPAD_BUTTON_LABEL_TRIANGLE: return controller::button_label::Triangle;
+    }
+
+    return controller::button_label::Invalid;
+}
+
 auto convert_enum(controller::axis axis) -> SDL_GamepadAxis
 {
     switch (axis) {

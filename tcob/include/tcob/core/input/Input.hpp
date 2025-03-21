@@ -154,6 +154,18 @@ public:
         Touchpad
     };
 
+    enum class button_label : i8 {
+        Invalid = -1,
+        A,
+        B,
+        X,
+        Y,
+        Cross,
+        Circle,
+        Square,
+        Triangle
+    };
+
     enum class axis : i8 {
         Invalid = -1,
         LeftX,
@@ -183,14 +195,15 @@ public:
     auto name() const -> string;
 
     auto has_rumble() const -> bool;
-    auto has_rumble_triggers() const -> bool;
-
     auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, milliseconds duration) const -> bool;
+
+    auto has_rumble_triggers() const -> bool;
     auto rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds duration) const -> bool;
 
     auto is_button_pressed(button b) const -> bool;
     auto has_button(button b) const -> bool;
     auto get_button_name(button b) const -> string;
+    auto get_button_label(button b) const -> button_label;
 
     auto get_axis_value(axis a) const -> i16;
     auto has_axis(axis a) const -> bool;
