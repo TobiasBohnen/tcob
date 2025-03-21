@@ -7,7 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 namespace tcob::input {
-// from SDL2:
+// from SDL:
 enum class scan_code : u16 {
     UNKNOWN = 0,
 
