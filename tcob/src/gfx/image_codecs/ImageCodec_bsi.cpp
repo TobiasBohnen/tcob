@@ -58,7 +58,7 @@ auto bsi_encoder::encode(image const& img, io::ostream& out) const -> bool
     out.write<u32, std::endian::little>(info.Size.Height);
     out.write<u8>(static_cast<u8>(info.Format));
 
-    return out.write_filtered<ubyte>(img.buffer(), io::zlib_filter {}) > 0;
+    return out.write_filtered<ubyte>(img.data(), io::zlib_filter {}) > 0;
 }
 
 }

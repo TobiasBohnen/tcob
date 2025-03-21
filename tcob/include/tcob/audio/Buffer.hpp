@@ -32,8 +32,10 @@ public:
 
     auto info() const -> information const&;
 
-    auto data() const -> std::span<f32 const>;
     auto data() -> std::span<f32>;
+    auto data() const -> std::span<f32 const>;
+    auto ptr() -> f32*;
+    auto ptr() const -> f32 const*;
 
     auto load [[nodiscard]] (path const& file, std::any const& ctx) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> load_status;
@@ -44,6 +46,9 @@ public:
     auto save_async [[nodiscard]] (path const& file) const noexcept -> std::future<bool>;
 
     auto static Create(information const& info, std::span<f32 const> data) -> buffer;
+
+    auto static Load(path const& file) -> std::optional<buffer>;                                   // TODO: change to result
+    auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>; // TODO: change to result
 
 private:
     information      _info;

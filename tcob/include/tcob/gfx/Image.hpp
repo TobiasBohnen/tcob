@@ -45,13 +45,15 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    image() = default;
+    image();
 
     auto info() const -> information const&;
 
-    auto buffer() const -> std::span<u8 const>;
-    auto buffer() -> std::span<u8>;
-    auto buffer(rect_i const& bounds) const -> std::vector<u8>;
+    auto data() -> std::span<u8>;
+    auto data() const -> std::span<u8 const>;
+    auto data(rect_i const& bounds) const -> std::vector<u8>;
+    auto ptr() -> u8*;
+    auto ptr() const -> u8 const*;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> load_status;

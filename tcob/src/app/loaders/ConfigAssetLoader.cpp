@@ -814,7 +814,7 @@ void cfg_texture_loader::check_async_load(def_task& ctx)
                     continue;
                 }
 
-                tex.update_data(img.buffer(), imgIt->Depth, 0, imgInfo.bytes_per_pixel() == 4 ? 4 : 1);
+                tex.update_data(img.data(), imgIt->Depth, 0, imgInfo.bytes_per_pixel() == 4 ? 4 : 1);
                 imgIt->Image = {};
             }
         }

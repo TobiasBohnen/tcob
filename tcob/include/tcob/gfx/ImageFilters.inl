@@ -22,7 +22,7 @@ inline auto convolution_filter<Width, Height>::operator()(image const& img) cons
     auto const [imgWidth, imgHeight] {info.Size};
     i32 const bpp {info.bytes_per_pixel()};
 
-    auto const srcBuffer {img.buffer()};
+    auto const srcBuffer {img.data()};
     auto       retValue {image::CreateEmpty(info.Size, info.Format)};
 
     bool const incAlpha {IncludeAlpha && info.Format == image::format::RGBA};

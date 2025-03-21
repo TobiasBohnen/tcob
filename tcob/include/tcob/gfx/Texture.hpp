@@ -67,6 +67,7 @@ public:
 
     void update_data(void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;
     void update_data(std::span<u8 const> data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;
+    void update_data(image const& img, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;
     void update_data(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;
 
     auto copy_to_image(u32 level) const -> image;

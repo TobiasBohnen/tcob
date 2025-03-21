@@ -29,6 +29,8 @@
 
 namespace tcob::gfx {
 
+image::image() = default;
+
 image::image(size_i size, format f)
     : _info {.Size = size, .Format = f}
 {
@@ -41,17 +43,17 @@ image::image(size_i size, format f, std::span<u8 const> data)
     _buffer = {data.begin(), data.end()};
 }
 
-auto image::buffer() const -> std::span<u8 const>
+auto image::data() -> std::span<u8>
 {
     return _buffer;
 }
 
-auto image::buffer() -> std::span<u8>
+auto image::data() const -> std::span<u8 const>
 {
     return _buffer;
 }
 
-auto image::buffer(rect_i const& bounds) const -> std::vector<u8>
+auto image::data(rect_i const& bounds) const -> std::vector<u8>
 {
     i32 const bpp {_info.bytes_per_pixel()};
     i32 const srcStride {_info.stride()};
@@ -68,6 +70,15 @@ auto image::buffer(rect_i const& bounds) const -> std::vector<u8>
     }
 
     return retValue;
+}
+auto image::ptr() -> u8*
+{
+    return _buffer.data();
+}
+
+auto image::ptr() const -> u8 const*
+{
+    return _buffer.data();
 }
 
 auto image::info() const -> information const&

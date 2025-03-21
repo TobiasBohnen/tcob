@@ -51,6 +51,8 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     if (_decoder) {
         _info = _decoder->open(std::move(in), DecoderContext);
         if (_info) {
+            if (_info->Channels == 0) { return load_status::Error; }
+
             create_output(*_info);
             return load_status::Ok;
         }
@@ -131,6 +133,10 @@ void music::stop_stream()
     _stopRequested = false;
 }
 
+constexpr i64 STREAM_BUFFER_SIZE {4096};
+constexpr u8  STREAM_BUFFER_COUNT {4};
+constexpr i64 STREAM_BUFFER_THRESHOLD {STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1)};
+
 void music::fill_buffers(detail::audio_stream& out)
 {
     bool flush {false};
@@ -149,7 +155,7 @@ void music::fill_buffers(detail::audio_stream& out)
         }
     }
 
-    while (out.queued_bytes() / sizeof(f32) < STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1) && !_buffers.empty()) {
+    while (out.queued_bytes() / sizeof(f32) < STREAM_BUFFER_THRESHOLD && !_buffers.empty()) {
         auto const& buffer {_buffers.front()};
         out.put(buffer.data());
         _buffers.pop();

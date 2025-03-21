@@ -101,7 +101,7 @@ auto gif_decoder::open() -> std::optional<image::information>
 
 auto gif_decoder::current_frame() const -> u8 const*
 {
-    return _currentFrame.buffer().data();
+    return _currentFrame.ptr();
 }
 
 auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status

@@ -430,7 +430,7 @@ void tga_encoder::write_image_data(image const& img, io::ostream& out) const
 
     // RGBA -> BGRA
     image      imgCopy {img};
-    auto const data {imgCopy.buffer()};
+    auto const data {imgCopy.data()};
     for (i32 i {0}; i < sizeInBytes; i += bytesPerPixel) {
         u8 buf {data[i]};
         data[i]     = data[i + 2];

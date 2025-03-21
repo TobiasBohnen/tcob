@@ -28,14 +28,48 @@ auto buffer::info() const -> information const&
     return _info;
 }
 
+auto buffer::data() -> std::span<f32>
+{
+    return _buffer;
+}
+
 auto buffer::data() const -> std::span<f32 const>
 {
     return _buffer;
 }
 
-auto buffer::data() -> std::span<f32>
+auto buffer::ptr() -> f32*
 {
-    return _buffer;
+    return _buffer.data();
+}
+
+auto buffer::ptr() const -> f32 const*
+{
+    return _buffer.data();
+}
+
+auto buffer::Create(information const& info, std::span<f32 const> data) -> buffer
+{
+    buffer retValue;
+    retValue._info   = info;
+    retValue._buffer = {data.begin(), data.end()};
+    return retValue;
+}
+
+auto buffer::Load(path const& file) -> std::optional<buffer>
+{
+    buffer retValue;
+    if (retValue.load(file, {}) == load_status::Ok) { return retValue; }
+
+    return std::nullopt;
+}
+
+auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>
+{
+    buffer retValue;
+    if (retValue.load(std::move(in), ext, {}) == load_status::Ok) { return retValue; }
+
+    return std::nullopt;
 }
 
 auto buffer::load(path const& file, std::any const& ctx) noexcept -> load_status
@@ -90,14 +124,6 @@ auto buffer::save_async(path const& file) const noexcept -> std::future<bool>
     std::promise<bool> pro;
     auto               retValue {pro.get_future()};
     std::thread([*this, file](std::promise<bool> p) { p.set_value(save(file)); }, std::move(pro)).detach();
-    return retValue;
-}
-
-auto buffer::Create(information const& info, std::span<f32 const> data) -> buffer
-{
-    buffer retValue;
-    retValue._info   = info;
-    retValue._buffer = {data.begin(), data.end()};
     return retValue;
 }
 

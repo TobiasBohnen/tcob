@@ -99,6 +99,11 @@ void texture::update_data(std::span<u8 const> data, u32 depth, i32 rowLength, i3
     update_data(point_i::Zero, _size, data.data(), depth, rowLength, alignment);
 }
 
+void texture::update_data(image const& img, u32 depth, i32 rowLength, i32 alignment) const
+{
+    update_data(point_i::Zero, img.info().Size, img.data().data(), depth, rowLength, alignment);
+}
+
 void texture::update_data(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const
 {
     _impl->update(origin, size, data, depth, rowLength, alignment);

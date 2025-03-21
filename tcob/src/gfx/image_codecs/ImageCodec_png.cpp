@@ -582,7 +582,7 @@ void png_encoder::write_header(image const& image, io::ostream& out) const
 
 auto static data(image const& image) -> std::vector<u8>
 {
-    auto const  buffer {image.buffer()};
+    auto const  buffer {image.data()};
     auto const& info {image.info()};
 
     std::vector<u8> retValue(static_cast<usize>(info.size_in_bytes() + info.Size.Height));

@@ -64,7 +64,7 @@ void window::load_icon(path const& file)
             SDL_CreateSurfaceFrom(
                 info.Size.Width, info.Size.Height,
                 SDL_PixelFormat::SDL_PIXELFORMAT_RGBA32,
-                img->buffer().data(),
+                img->ptr(),
                 info.stride())};
 
         SDL_SetWindowIcon(_impl->get_handle(), surface);

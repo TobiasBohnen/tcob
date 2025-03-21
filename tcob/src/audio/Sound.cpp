@@ -50,6 +50,8 @@ auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept ->
     stop();
 
     if (_buffer.load(std::move(in), ext, DecoderContext) == load_status::Ok) {
+        if (_buffer.info().Channels == 0) { return load_status::Error; }
+
         create_output(_buffer.info());
         return load_status::Ok;
     }
