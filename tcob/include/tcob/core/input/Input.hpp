@@ -165,18 +165,18 @@ public:
     };
 
     struct button_event : event_base {
-        u32                         ID {0};
-        std::shared_ptr<controller> Controller;
-        button                      Button {button::Invalid};
-        bool                        Pressed {false};
+        u32         ID {0};
+        controller* Controller {nullptr};
+        button      Button {button::Invalid};
+        bool        Pressed {false};
     };
 
     struct axis_event : event_base {
-        u32                         ID {0};
-        std::shared_ptr<controller> Controller;
-        axis                        Axis {axis::Invalid};
-        i16                         Value {0};
-        f32                         RelativeValue {0};
+        u32         ID {0};
+        controller* Controller {nullptr};
+        axis        Axis {axis::Invalid};
+        i16         Value {0};
+        f32         RelativeValue {0};
     };
 
     auto id() const -> u32;
@@ -205,43 +205,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API joystick {
-    friend class system;
-
-public:
-    enum class hat : u8 {
-        Centered  = 0x00,
-        Up        = 0x01,
-        Right     = 0x02,
-        Down      = 0x04,
-        Left      = 0x08,
-        RightUp   = Right | Up,
-        RightDown = Right | Down,
-        LeftUp    = Left | Up,
-        LeftDown  = Left | Down,
-    };
-
-    struct hat_event : event_base {
-        u32 ID {0};
-        hat Hat {hat::Centered};
-        u8  Value {0};
-    };
-
-    struct button_event : event_base {
-        u32  ID {0};
-        u8   Button {0};
-        bool Pressed {false};
-    };
-
-    struct axis_event : event_base {
-        u32 ID {0};
-        u8  Axis {0};
-        i16 Value {0};
-    };
-};
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API clipboard {
 public:
     auto has_text() const -> bool;
@@ -265,13 +228,6 @@ public:
     signal<input::mouse::button_event const> MouseButtonUp;
     signal<input::mouse::wheel_event const>  MouseWheel;
 
-    signal<joystick::axis_event const>   JoystickAxisMotion;
-    signal<joystick::hat_event const>    JoystickHatMotion;
-    signal<joystick::button_event const> JoystickButtonDown;
-    signal<joystick::button_event const> JoystickButtonUp;
-    signal<i32 const>                    JoystickAdded;
-    signal<i32 const>                    JoystickRemoved;
-
     signal<controller::axis_event const>   ControllerAxisMotion;
     signal<controller::button_event const> ControllerButtonDown;
     signal<controller::button_event const> ControllerButtonUp;
@@ -282,7 +238,7 @@ public:
 
     auto controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const&;
     auto first_controller() const -> controller&;
-    auto controller_count() const -> isize;
+    auto has_controller() const -> bool;
 
     auto mouse() const -> input::mouse;
     auto keyboard() const -> input::keyboard;

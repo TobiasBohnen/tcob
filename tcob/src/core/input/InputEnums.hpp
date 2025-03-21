@@ -16,8 +16,6 @@ namespace tcob::input {
 auto convert_mouse_button(i32 button) -> mouse::button;
 auto convert_enum(mouse::button button) -> i32;
 
-auto convert_joystick_hat(i32 hat) -> joystick::hat;
-
 auto convert_enum(controller::button button) -> SDL_GamepadButton;
 auto convert_enum(SDL_GamepadButton button) -> controller::button;
 

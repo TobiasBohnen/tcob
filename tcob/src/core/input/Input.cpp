@@ -212,9 +212,9 @@ auto system::first_controller() const -> controller&
     return *_controllers.begin()->second;
 }
 
-auto system::controller_count() const -> isize
+auto system::has_controller() const -> bool
 {
-    return std::ssize(_controllers);
+    return !_controllers.empty();
 }
 
 auto system::mouse() const -> input::mouse
@@ -300,42 +300,10 @@ void system::process_events(SDL_Event* ev)
         MouseWheel(event);
         InputMode = mode::KeyboardMouse;
     } break;
-    case SDL_EVENT_JOYSTICK_AXIS_MOTION: {
-        joystick::axis_event const event {
-            .ID    = ev->jaxis.which,
-            .Axis  = ev->jaxis.axis,
-            .Value = ev->jaxis.value};
-        JoystickAxisMotion(event);
-        InputMode = mode::Controller;
-    } break;
-    case SDL_EVENT_JOYSTICK_HAT_MOTION: {
-        joystick::hat_event const event {
-            .ID    = ev->jhat.which,
-            .Hat   = convert_joystick_hat(ev->jhat.hat),
-            .Value = ev->jhat.value};
-        JoystickHatMotion(event);
-        InputMode = mode::Controller;
-    } break;
-    case SDL_EVENT_JOYSTICK_BUTTON_DOWN: {
-        joystick::button_event const event {
-            .ID      = ev->jbutton.which,
-            .Button  = ev->jbutton.button,
-            .Pressed = ev->jbutton.down};
-        JoystickButtonDown(event);
-        InputMode = mode::Controller;
-    } break;
-    case SDL_EVENT_JOYSTICK_BUTTON_UP: {
-        joystick::button_event const event {
-            .ID      = ev->jbutton.which,
-            .Button  = ev->jbutton.button,
-            .Pressed = !ev->jbutton.down};
-        JoystickButtonUp(event);
-        InputMode = mode::Controller;
-    } break;
     case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
         controller::axis_event const event {
             .ID            = ev->gaxis.which,
-            .Controller    = _controllers[ev->gaxis.which],
+            .Controller    = _controllers[ev->gaxis.which].get(),
             .Axis          = convert_enum(static_cast<SDL_GamepadAxis>(ev->gaxis.axis)),
             .Value         = ev->gaxis.value,
             .RelativeValue = static_cast<f32>(ev->gaxis.value) / std::numeric_limits<i16>::max()};
@@ -345,7 +313,7 @@ void system::process_events(SDL_Event* ev)
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
         controller::button_event const event {
             .ID         = ev->gbutton.which,
-            .Controller = _controllers[ev->gbutton.which],
+            .Controller = _controllers[ev->gbutton.which].get(),
             .Button     = convert_enum(static_cast<SDL_GamepadButton>(ev->gbutton.button)),
             .Pressed    = ev->gbutton.down};
         ControllerButtonDown(event);
@@ -354,15 +322,25 @@ void system::process_events(SDL_Event* ev)
     case SDL_EVENT_GAMEPAD_BUTTON_UP: {
         controller::button_event const event {
             .ID         = ev->gbutton.which,
-            .Controller = _controllers[ev->gbutton.which],
+            .Controller = _controllers[ev->gbutton.which].get(),
             .Button     = convert_enum(static_cast<SDL_GamepadButton>(ev->gbutton.button)),
             .Pressed    = !ev->gbutton.down};
         ControllerButtonUp(event);
         InputMode = mode::Controller;
     } break;
+    case SDL_EVENT_GAMEPAD_ADDED: {
+        u32 const id {ev->gdevice.which};
+        _controllers[id] = std::shared_ptr<controller>(new controller {SDL_OpenGamepad(id), id});
+        ControllerAdded(id);
+    } break;
+    case SDL_EVENT_GAMEPAD_REMOVED: {
+        u32 const id {ev->gdevice.which};
+        SDL_CloseGamepad(_controllers[id]->_controller);
+        _controllers.erase(id);
+        ControllerRemoved(id);
+    } break;
     case SDL_EVENT_JOYSTICK_ADDED: {
         u32 const id {ev->jdevice.which};
-        JoystickAdded(id);
         if (SDL_IsGamepad(id)) {
             _controllers[id] = std::shared_ptr<controller>(new controller {SDL_OpenGamepad(id), id});
             ControllerAdded(id);
@@ -370,7 +348,6 @@ void system::process_events(SDL_Event* ev)
     } break;
     case SDL_EVENT_JOYSTICK_REMOVED: {
         u32 const id {ev->jdevice.which};
-        JoystickRemoved(id);
         if (_controllers.contains(id)) {
             SDL_CloseGamepad(_controllers[id]->_controller);
             _controllers.erase(id);

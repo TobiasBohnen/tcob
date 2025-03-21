@@ -37,23 +37,6 @@ auto convert_enum(mouse::button button) -> i32
     return 0;
 }
 
-auto convert_joystick_hat(i32 hat) -> joystick::hat
-{
-    switch (hat) {
-    case SDL_HAT_CENTERED: return joystick::hat::Centered;
-    case SDL_HAT_UP: return joystick::hat::Up;
-    case SDL_HAT_RIGHT: return joystick::hat::Right;
-    case SDL_HAT_DOWN: return joystick::hat::Down;
-    case SDL_HAT_LEFT: return joystick::hat::Left;
-    case SDL_HAT_RIGHTUP: return joystick::hat::RightUp;
-    case SDL_HAT_RIGHTDOWN: return joystick::hat::RightDown;
-    case SDL_HAT_LEFTUP: return joystick::hat::LeftUp;
-    case SDL_HAT_LEFTDOWN: return joystick::hat::LeftDown;
-    }
-
-    return joystick::hat::Centered;
-}
-
 auto convert_enum(controller::button button) -> SDL_GamepadButton
 {
     switch (button) {
