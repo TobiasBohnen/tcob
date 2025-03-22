@@ -23,6 +23,9 @@
 
 namespace tcob::ui {
 
+////////////////////////////////////////////////////////////
+// forward declarations
+
 // widgets
 class button;
 class canvas_widget;

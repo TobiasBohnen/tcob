@@ -35,6 +35,8 @@ auto length::calc(f32 refSize) const -> f32
     case type::Relative: return Value * refSize;
     case type::Absolute: return Value;
     }
+
+    return 0.0f;
 }
 
 auto length::operator-() const -> length
