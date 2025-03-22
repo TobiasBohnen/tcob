@@ -64,7 +64,7 @@ void audio_stream::set_volume(f32 val)
 
 void audio_stream::put(std::span<f32 const> data)
 {
-    [[maybe_unused]] bool const err {SDL_PutAudioStreamData(_impl, data.data(), data.size_bytes())};
+    [[maybe_unused]] bool const err {SDL_PutAudioStreamData(_impl, data.data(), static_cast<i32>(data.size_bytes()))};
     assert(err);
 }
 
@@ -81,7 +81,7 @@ void audio_stream::clear()
 auto audio_stream::get() -> std::vector<f32>
 {
     std::vector<f32> data(available_bytes());
-    SDL_GetAudioStreamData(_impl, data.data(), data.size());
+    SDL_GetAudioStreamData(_impl, data.data(), static_cast<i32>(data.size()));
     return data;
 }
 

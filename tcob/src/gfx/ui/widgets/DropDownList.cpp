@@ -129,7 +129,7 @@ void drop_down_list::on_draw(widget_painter& painter)
         listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
         listRect.Size.Height += _style.Border.Size.calc(listHeight);
 
-        _visibleItems = listRect.height() / itemHeight;
+        _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
 
         painter.draw_background_and_border(_style, listRect, false);
 

@@ -603,7 +603,7 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
             auto const dashedPaths {DashPolyline(polyline, totalLen, dashPattern, dashOffset)};
             for (auto const& dp : dashedPaths) {
                 canvas::path dashedPath {};
-                dashedPath.First = newPoints.size();
+                dashedPath.First = static_cast<i32>(newPoints.size());
                 dashedPath.Count = dp.size();
                 newPoints.insert(newPoints.end(), dp.begin(), dp.end());
                 newPaths.push_back(dashedPath);

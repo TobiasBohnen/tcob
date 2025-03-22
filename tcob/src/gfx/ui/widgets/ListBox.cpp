@@ -20,7 +20,7 @@
 
 namespace tcob::ui {
 
-auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
+auto static case_insensitive_contains(string_view lhs, string_view rhs) -> bool
 {
     return std::search( // NOLINT(modernize-use-ranges)
                lhs.begin(), lhs.end(),
@@ -146,7 +146,7 @@ void list_box::on_draw(widget_painter& painter)
 
     rect_f const listRect {rect};
     f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
-    _visibleItems = listRect.height() / itemHeight;
+    _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
     auto const scrollOffset {scrollbar_offset()};
 
     auto const paintItem {[&](isize i) {

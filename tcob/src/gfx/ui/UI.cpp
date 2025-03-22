@@ -32,10 +32,8 @@ auto length::calc(f32 min, f32 refSize) const -> f32
 auto length::calc(f32 refSize) const -> f32
 {
     switch (Type) {
-    case type::Relative:
-        return Value * refSize;
-    case type::Absolute:
-    default: return Value;
+    case type::Relative: return Value * refSize;
+    case type::Absolute: return Value;
     }
 }
 

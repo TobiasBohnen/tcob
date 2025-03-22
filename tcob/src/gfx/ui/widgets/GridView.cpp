@@ -173,7 +173,7 @@ void grid_view::on_draw(widget_painter& painter)
 
     _rowRectCache.clear();
     _headerRectCache.clear();
-    _visibleRows = (gridRect.height() / rowHeight) - 1;
+    _visibleRows = static_cast<isize>((gridRect.height() / rowHeight) - 1);
     auto const scrollOffset {scrollbar_offset()};
 
     auto const paintCell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {

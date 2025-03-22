@@ -98,8 +98,8 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     auto const collectWidgets {[](std::vector<widget*>& vec, std::shared_ptr<widget_container> const& container, auto&& collect) -> void {
         for (auto const& widget : container->widgets()) {
             vec.push_back(widget.get());
-            if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-                collect(vec, container, collect);
+            if (auto widgetContainer {std::dynamic_pointer_cast<widget_container>(widget)}) {
+                collect(vec, widgetContainer, collect);
             }
         }
     }};

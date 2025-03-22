@@ -421,7 +421,7 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     f32      cx {0}, cy {0};
     radian_f a0 {0}, a1 {0};
 
-    auto static cross {[](f32 dx0, f32 dy0, f32 dx1, f32 dy1) -> f32 { return (dx1 * dy0) - (dx0 * dy1); }};
+    auto static cross {[](f32 x0, f32 y0, f32 x1, f32 y1) -> f32 { return (x1 * y0) - (x0 * y1); }};
 
     if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
         cx  = pos1.X + dx0 * d + dy0 * radius;
