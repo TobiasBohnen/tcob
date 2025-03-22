@@ -166,8 +166,7 @@ void tween_queue::stop()
 {
     if (_isRunning) {
         _isRunning = false;
-        std::queue<std::shared_ptr<detail::tween_base>> empty {};
-        _queue.swap(empty);
+        _queue     = {};
     }
 }
 

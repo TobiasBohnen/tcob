@@ -64,7 +64,6 @@ auto file_sink::close() -> bool
 auto file_sink::flush() const -> bool
 {
     if (!is_valid()) { return false; }
-
     return check("flush", PHYSFS_flush(_handle));
 }
 
