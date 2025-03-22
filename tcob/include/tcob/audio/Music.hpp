@@ -39,7 +39,7 @@ private:
 
     void update_stream();
     void stop_stream();
-    void fill_buffers(detail::audio_stream& out);
+    void fill_buffers();
 
     std::unique_ptr<decoder>           _decoder {};
     usize                              _samplesPlayed {0};

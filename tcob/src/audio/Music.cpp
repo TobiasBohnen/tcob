@@ -5,15 +5,12 @@
 
 #include "tcob/audio/Music.hpp"
 
-#include <cassert>
 #include <chrono>
 #include <memory>
 #include <optional>
 #include <thread>
 #include <utility>
 #include <vector>
-
-#include "AudioStream.hpp"
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
@@ -48,19 +45,14 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     stop();
 
     _decoder = locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext);
-    if (_decoder) {
-        _info = _decoder->open(std::move(in), DecoderContext);
-        if (_info) {
-            if (!_info->Specs.is_valid()) { return load_status::Error; }
+    if (!_decoder) { return load_status::Error; }
 
-            create_output(_info->Specs);
-            return load_status::Ok;
-        }
+    _info = _decoder->open(std::move(in), DecoderContext);
+    if (!_info) { return load_status::Error; }
+    if (!_info->Specs.is_valid()) { return load_status::Error; }
 
-        return load_status::Error;
-    }
-
-    return load_status::Error;
+    create_output(_info->Specs);
+    return load_status::Ok;
 }
 
 auto music::duration() const -> milliseconds
@@ -98,26 +90,18 @@ auto music::on_stop() -> bool
 
 void music::update_stream()
 {
-    _samplesPlayed = 0;
     _decoder->seek_from_start(0ms);
 
-    auto& out {get_output()};
-    fill_buffers(out);
+    fill_buffers();
 
     for (;;) {
-        if (_stopRequested) {
-            out.clear();
-            out.unbind();
-            break;
-        }
+        if (_stopRequested) { break; }
+
+        fill_buffers();
 
         std::this_thread::sleep_for(1ms);
 
-        if (out.available_bytes() == 0) {
-            _stopRequested = true;
-        }
-
-        fill_buffers(out);
+        if (queued_bytes() == 0) { _stopRequested = true; }
     }
 
     _isRunning     = false;
@@ -126,6 +110,10 @@ void music::update_stream()
 
 void music::stop_stream()
 {
+    _samplesPlayed = 0;
+
+    _buffers = {};
+
     if (!_isRunning) { return; }
 
     _stopRequested = true;
@@ -133,35 +121,31 @@ void music::stop_stream()
     _stopRequested = false;
 }
 
-constexpr i64 STREAM_BUFFER_SIZE {4096};
+constexpr i64 STREAM_BUFFER_SIZE {8192};
 constexpr u8  STREAM_BUFFER_COUNT {4};
 constexpr i64 STREAM_BUFFER_THRESHOLD {STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1)};
 
-void music::fill_buffers(detail::audio_stream& out)
+void music::fill_buffers()
 {
-    bool flush {false};
     while (_buffers.size() < STREAM_BUFFER_COUNT) {
         if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
             buffer::information const info {
                 .Specs      = _info->Specs,
                 .FrameCount = std::ssize(*data) / info.Specs.Channels};
-
-            _buffers.push(buffer::Create(info, *data));
+            _buffers.push(buffer::Create(info, *data)); // TODO: reuse buffers
             _samplesPlayed += data->size();
         } else {
-            flush = true;
+            flush_output();
             break;
         }
     }
 
-    while (out.queued_bytes() / sizeof(f32) < STREAM_BUFFER_THRESHOLD && !_buffers.empty()) {
-        auto const& buffer {_buffers.front()};
-        out.put(buffer.data());
-        _buffers.pop();
-    }
+    if (_buffers.empty()) { return; }
 
-    if (_buffers.empty() && flush) {
-        out.flush();
+    while (queued_bytes() / sizeof(f32) < STREAM_BUFFER_THRESHOLD) {
+        auto const& buffer {_buffers.front()};
+        write_to_output(buffer.data());
+        _buffers.pop();
     }
 }
 }

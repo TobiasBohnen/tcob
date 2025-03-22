@@ -12,4 +12,9 @@ auto specification::is_valid() const -> bool
     return Channels > 0 && SampleRate > 0;
 }
 
+specification::operator bool() const
+{
+    return is_valid();
+}
+
 } // namespace audio

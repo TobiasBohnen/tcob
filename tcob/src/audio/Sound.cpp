@@ -10,8 +10,6 @@
 #include <optional>
 #include <utility>
 
-#include "AudioStream.hpp"
-
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -49,14 +47,11 @@ auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept ->
 
     stop();
 
-    if (_buffer.load(std::move(in), ext, DecoderContext) == load_status::Ok) {
-        if (!_buffer.info().Specs.is_valid()) { return load_status::Error; }
+    if (_buffer.load(std::move(in), ext, DecoderContext) != load_status::Ok) { return load_status::Error; }
+    if (!_buffer.info().Specs.is_valid()) { return load_status::Error; }
 
-        create_output(_buffer.info().Specs);
-        return load_status::Ok;
-    }
-
-    return load_status::Error;
+    create_output(_buffer.info().Specs);
+    return load_status::Ok;
 }
 
 auto sound::load_async(path const& file) noexcept -> std::future<load_status>
@@ -68,17 +63,14 @@ auto sound::on_start() -> bool
 {
     if (_buffer.data().empty()) { return false; }
 
-    auto& out {get_output()};
-    out.clear();
-    out.put(_buffer.data());
-    out.flush();
+    write_to_output(_buffer.data());
+    flush_output();
 
     return true;
 }
 
 auto sound::on_stop() -> bool
 {
-    get_output().clear();
     return true;
 }
 

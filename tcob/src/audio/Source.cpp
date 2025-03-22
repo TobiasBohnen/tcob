@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <memory>
+#include <span>
 
 #include "AudioStream.hpp"
 
@@ -36,14 +37,10 @@ auto source::status() const -> playback_status
 {
     if (!_output) { return playback_status::Stopped; }
     if (!_output->is_bound()) {
-        if (_output->available_bytes() > 0) {
-            return playback_status::Paused;
-        }
+        if (_output->queued_bytes() > 0) { return playback_status::Paused; }
         return playback_status::Stopped;
     }
-    if (_output->available_bytes() > 0) {
-        return playback_status::Running;
-    }
+    if (_output->queued_bytes() > 0) { return playback_status::Running; }
     return playback_status::Stopped;
 }
 
@@ -53,10 +50,9 @@ void source::play()
 
     auto const stat {status()};
     if (stat == playback_status::Stopped) { // start if stopped
+        _output->clear();
         if (on_start()) {
-            if (!_output->is_bound()) {
-                _output->bind();
-            }
+            if (!_output->is_bound()) { _output->bind(); }
         }
     } else if (stat == playback_status::Paused) { // resume if paused
         resume();
@@ -69,7 +65,9 @@ void source::stop()
 
     if (status() != playback_status::Stopped) { // stop if running or paused
         if (on_stop()) {
+            _output->flush();
             _output->unbind();
+            _output->clear();
         }
     }
 }
@@ -109,10 +107,22 @@ void source::create_output(specification const& info)
     _output->set_volume(Volume);
 }
 
-auto source::get_output() -> detail::audio_stream&
+void source::write_to_output(std::span<f32 const> data)
 {
     assert(_output);
-    return *_output;
+    _output->put(data);
+}
+
+void source::flush_output()
+{
+    assert(_output);
+    _output->flush();
+}
+
+auto source::queued_bytes() const -> i32
+{
+    assert(_output);
+    return _output->queued_bytes();
 }
 
 }
