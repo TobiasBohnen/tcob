@@ -54,16 +54,16 @@ wav_decoder::~wav_decoder()
 
 void wav_decoder::seek_from_start(milliseconds pos)
 {
-    f64 const offset {pos.count() / 1000 * _info.SampleRate / _info.Channels};
+    f64 const offset {pos.count() / 1000 * _info.Specs.SampleRate / _info.Specs.Channels};
     drwav_seek_to_pcm_frame(&_wav, static_cast<u64>(offset));
 }
 
 auto wav_decoder::open() -> std::optional<buffer::information>
 {
     if (drwav_init(&_wav, &read_wav, &seek_wav, &stream(), nullptr)) {
-        _info.Channels   = _wav.channels;
-        _info.SampleRate = static_cast<i32>(_wav.sampleRate);
-        _info.FrameCount = static_cast<i64>(_wav.totalPCMFrameCount);
+        _info.Specs.Channels   = _wav.channels;
+        _info.Specs.SampleRate = static_cast<i32>(_wav.sampleRate);
+        _info.FrameCount       = static_cast<i64>(_wav.totalPCMFrameCount);
         return _info;
     }
 
@@ -72,8 +72,8 @@ auto wav_decoder::open() -> std::optional<buffer::information>
 
 auto wav_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Channels)};
-    return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()) * _info.Channels);
+    u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Specs.Channels)};
+    return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()) * _info.Specs.Channels);
 }
 
 ////////////////////////////////////////////////////////////
@@ -83,8 +83,8 @@ auto wav_encoder::encode(std::span<f32 const> samples, buffer::information const
     drwav_data_format format;
     format.format        = DR_WAVE_FORMAT_PCM;
     format.bitsPerSample = 16;
-    format.sampleRate    = static_cast<u32>(info.SampleRate);
-    format.channels      = static_cast<u32>(info.Channels);
+    format.sampleRate    = static_cast<u32>(info.Specs.SampleRate);
+    format.channels      = static_cast<u32>(info.Specs.Channels);
     format.container     = drwav_container_riff;
 
     std::vector<drwav_int16> pcms(samples.size());

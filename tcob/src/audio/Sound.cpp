@@ -28,7 +28,7 @@ sound::sound() = default;
 sound::sound(buffer buffer)
     : _buffer {std::move(buffer)}
 {
-    create_output(_buffer.info());
+    create_output(_buffer.info().Specs);
 }
 
 sound::~sound() = default;
@@ -50,9 +50,9 @@ auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept ->
     stop();
 
     if (_buffer.load(std::move(in), ext, DecoderContext) == load_status::Ok) {
-        if (_buffer.info().Channels == 0) { return load_status::Error; }
+        if (!_buffer.info().Specs.is_valid()) { return load_status::Error; }
 
-        create_output(_buffer.info());
+        create_output(_buffer.info().Specs);
         return load_status::Ok;
     }
 
@@ -85,7 +85,7 @@ auto sound::on_stop() -> bool
 auto sound::duration() const -> milliseconds
 {
     auto const& info {_buffer.info()};
-    return milliseconds {(static_cast<f32>(info.FrameCount) / static_cast<f32>(info.SampleRate)) * 1000};
+    return milliseconds {(static_cast<f32>(info.FrameCount) / static_cast<f32>(info.Specs.SampleRate)) * 1000};
 }
 
 }

@@ -19,10 +19,6 @@
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class decoder;
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API music final : public source {
 public:
     music() = default;
@@ -46,7 +42,7 @@ private:
     void fill_buffers(detail::audio_stream& out);
 
     std::unique_ptr<decoder>           _decoder {};
-    i32                                _samplesPlayed {0};
+    usize                              _samplesPlayed {0};
     std::optional<buffer::information> _info;
 
     std::queue<buffer> _buffers {};

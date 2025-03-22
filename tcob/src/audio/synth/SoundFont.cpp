@@ -26,7 +26,6 @@
     #include "tcob/core/io/FileStream.hpp"
     #include "tcob/core/io/Stream.hpp"
 
-
     #include <TinySoundFont/tml.h>
     #include <TinySoundFont/tsf.h>
 
@@ -94,7 +93,9 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     // call 'apply' on all commands; then render them
     commands.render(_font, ptr, static_cast<u8>(_channels), _sampleRate);
 
-    return buffer::Create({.Channels = _channels, .SampleRate = _sampleRate, .FrameCount = std::ssize(samples) / _channels}, samples);
+    return buffer::Create({.Specs      = {.Channels = _channels, .SampleRate = _sampleRate},
+                           .FrameCount = std::ssize(samples) / _channels},
+                          samples);
 }
 
 auto sound_font::create_sound(sound_font_commands const& commands) const -> std::shared_ptr<sound>

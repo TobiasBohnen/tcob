@@ -9,7 +9,7 @@
 #include <span>
 #include <vector>
 
-#include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/Audio.hpp"
 
 struct SDL_AudioStream;
 
@@ -18,7 +18,7 @@ namespace tcob::audio::detail {
 
 class TCOB_API audio_stream final {
 public:
-    audio_stream(u32 device, buffer::information const& info);
+    audio_stream(u32 device, specification const& info);
     ~audio_stream();
 
     void bind();

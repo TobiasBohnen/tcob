@@ -67,16 +67,16 @@ void midi_decoder::seek_from_start(milliseconds pos)
 
 auto midi_decoder::open() -> std::optional<buffer::information>
 {
-    _font            = std::any_cast<assets::asset_ptr<sound_font>>(context());
-    _info.SampleRate = _font->info().SampleRate;
-    _info.Channels   = _font->info().Channels;
+    _font                  = std::any_cast<assets::asset_ptr<sound_font>>(context());
+    _info.Specs.SampleRate = _font->info().SampleRate;
+    _info.Specs.Channels   = _font->info().Channels;
 
     auto const buffer {stream().read_all<byte>()};
     _firstMessage   = {tml_load_memory(buffer.data(), static_cast<i32>(buffer.size()))};
     _currentMessage = _firstMessage;
     u32 duration {0};
     tml_get_info(_firstMessage, nullptr, nullptr, nullptr, nullptr, &duration);
-    _info.FrameCount = static_cast<i64>((static_cast<f32>(duration) / 1000.0f) * static_cast<f32>(_info.SampleRate));
+    _info.FrameCount = static_cast<i64>((static_cast<f32>(duration) / 1000.0f) * static_cast<f32>(_info.Specs.SampleRate));
 
     tsf_reset(_font->get_impl());
     return _info;
@@ -84,7 +84,7 @@ auto midi_decoder::open() -> std::optional<buffer::information>
 
 auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
 {
-    i32  samplesRemaining {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Channels))};
+    i32  samplesRemaining {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Specs.Channels))};
     i32  sampleCount {0};
     f32* dataPtr {outputSamples.data()};
     for (i32 sampleBlock {RENDER_EFFECTSAMPLEBLOCK}; samplesRemaining > 0 && _currentMessage; samplesRemaining -= sampleBlock) {
@@ -94,7 +94,7 @@ auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
         sampleBlock = std::min(sampleBlock, samplesRemaining);
 
         // Loop through all MIDI messages which need to be played up until the current playback time
-        for (_currentTime += sampleBlock * (1000.0 / static_cast<f64>(_info.SampleRate));
+        for (_currentTime += sampleBlock * (1000.0 / static_cast<f64>(_info.Specs.SampleRate));
              _currentMessage && _currentTime >= _currentMessage->time;
              _currentMessage = _currentMessage->next) {
             handle_message(_font->get_impl(), _currentMessage);
@@ -102,11 +102,11 @@ auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
 
         // Render the block of audio samples in float format
         tsf_render_float(_font->get_impl(), dataPtr, sampleBlock, 0);
-        dataPtr += sampleBlock * _info.Channels;
+        dataPtr += sampleBlock * _info.Specs.Channels;
         sampleCount += sampleBlock;
     }
 
-    return sampleCount * _info.Channels;
+    return sampleCount * _info.Specs.Channels;
 }
 
 }

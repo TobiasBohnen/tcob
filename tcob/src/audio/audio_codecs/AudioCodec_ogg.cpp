@@ -74,9 +74,9 @@ auto vorbis_decoder::open() -> std::optional<buffer::information>
     i32 const error {ov_open_callbacks(&stream(), &_file, nullptr, 0, vorbisCallbacks)};
     if (error == 0) {
         auto* info {ov_info(&_file, -1)};
-        _info.Channels   = info->channels;
-        _info.SampleRate = info->rate;
-        _info.FrameCount = ov_pcm_total(&_file, -1);
+        _info.Specs.Channels   = info->channels;
+        _info.Specs.SampleRate = info->rate;
+        _info.FrameCount       = ov_pcm_total(&_file, -1);
         return _info;
     }
 
@@ -87,7 +87,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
 {
     f32** pcm {nullptr};
     i32   offsetSamples {0};
-    i32   wantFrames {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Channels))};
+    i32   wantFrames {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Specs.Channels))};
     for (;;) {
         i32 const readFrames {static_cast<i32>(ov_read_float(&_file, &pcm, wantFrames, &_section))};
         if (readFrames <= 0) {
@@ -95,7 +95,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
         }
 
         for (i32 i {0}; i < readFrames; ++i) {
-            for (i32 ch {0}; ch < _info.Channels; ++ch) {
+            for (i32 ch {0}; ch < _info.Specs.Channels; ++ch) {
                 assert(offsetSamples < std::ssize(outputSamples));
                 outputSamples[static_cast<u32>(offsetSamples++)] = pcm[ch][i];
             }
@@ -121,7 +121,7 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::information co
     vorbis_block     vb; /* local working space for packet->PCM decode */
 
     vorbis_info_init(&vi);
-    i32 const ret {vorbis_encode_init_vbr(&vi, info.Channels, info.SampleRate, 0.5f)};
+    i32 const ret {vorbis_encode_init_vbr(&vi, info.Specs.Channels, info.Specs.SampleRate, 0.5f)};
     if (ret != 0) { return false; }
 
     vorbis_comment_init(&vc);
@@ -154,15 +154,15 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::information co
         if (read <= 0) {
             break;
         }
-        i32 const  readFrames {read / info.Channels};
+        i32 const  readFrames {read / info.Specs.Channels};
         f32**      buffer {vorbis_analysis_buffer(&vd, readFrames)};
         auto const readBuffer {samples.subspan(static_cast<u32>(readOffset), static_cast<u32>(read))};
         readOffset += read;
 
         // uninterleave samples
         for (i32 i {0}; i < readFrames; i++) {
-            for (i32 j {0}; j < info.Channels; ++j) {
-                buffer[j][i] = readBuffer[static_cast<u32>((i * info.Channels) + j)];
+            for (i32 j {0}; j < info.Specs.Channels; ++j) {
+                buffer[j][i] = readBuffer[static_cast<u32>((i * info.Specs.Channels) + j)];
             }
         }
 

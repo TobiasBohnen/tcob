@@ -7,10 +7,23 @@
 #include "tcob/tcob_config.hpp"
 
 namespace tcob::audio {
+////////////////////////////////////////////////////////////
+
+class TCOB_API specification {
+public:
+    i32 Channels {0};
+    i32 SampleRate {0};
+
+    auto is_valid() const -> bool;
+
+    auto operator==(specification const& other) const -> bool = default;
+};
 
 ////////////////////////////////////////////////////////////
 // forward declarations
 
+class buffer;
+class decoder;
 class source;
 
 namespace detail {

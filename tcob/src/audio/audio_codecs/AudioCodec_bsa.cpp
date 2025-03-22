@@ -26,7 +26,7 @@ constexpr std::streamsize      OFFSET {sizeof(SIGNATURE) + sizeof(u8) + sizeof(u
 
 void bsa_decoder::seek_from_start(milliseconds pos)
 {
-    f64 const offset {pos.count() / 1000 * _info.SampleRate / _info.Channels};
+    f64 const offset {pos.count() / 1000 * _info.Specs.SampleRate / _info.Specs.Channels};
     stream().seek(static_cast<std::streamoff>(offset + OFFSET), io::seek_dir::Begin);
 }
 
@@ -37,9 +37,9 @@ auto bsa_decoder::open() -> std::optional<buffer::information>
     reader.read_to<ubyte>(sig);
 
     if (sig == SIGNATURE) {
-        _info.Channels   = reader.read<u8>();
-        _info.FrameCount = reader.read<u32, std::endian::little>();
-        _info.SampleRate = static_cast<i32>(reader.read<u32, std::endian::little>());
+        _info.Specs.Channels   = reader.read<u8>();
+        _info.FrameCount       = reader.read<u32, std::endian::little>();
+        _info.Specs.SampleRate = static_cast<i32>(reader.read<u32, std::endian::little>());
         return _info;
     }
 
@@ -61,9 +61,9 @@ auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
 auto bsa_encoder::encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
-    out.write<u8>(static_cast<u8>(info.Channels));
+    out.write<u8>(static_cast<u8>(info.Specs.Channels));
     out.write<u32, std::endian::little>(static_cast<u32>(info.FrameCount));
-    out.write<u32, std::endian::little>(static_cast<u32>(info.SampleRate));
+    out.write<u32, std::endian::little>(static_cast<u32>(info.Specs.SampleRate));
 
     std::vector<i16> buffer(samples.size());
     for (usize i {0}; i < samples.size(); ++i) {

@@ -13,6 +13,7 @@
 #include <span>
 #include <vector>
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/TypeFactory.hpp"
@@ -22,10 +23,10 @@ namespace tcob::audio {
 
 class TCOB_API buffer final {
 public:
-    struct information {
-        i32 Channels {0};
-        i32 SampleRate {0};
-        i64 FrameCount {0};
+    class TCOB_API information {
+    public:
+        specification Specs {};
+        i64           FrameCount {0};
 
         auto operator==(information const& other) const -> bool = default;
     };

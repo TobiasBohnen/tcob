@@ -10,8 +10,8 @@
 
 #include "AudioStream.hpp"
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/AudioSystem.hpp"
-#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 
@@ -103,7 +103,7 @@ void source::toggle_pause()
     status() == playback_status::Paused ? resume() : pause();
 }
 
-void source::create_output(buffer::information const& info)
+void source::create_output(specification const& info)
 {
     _output = locate_service<system>().create_output(info);
     _output->set_volume(Volume);

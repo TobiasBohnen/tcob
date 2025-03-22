@@ -8,11 +8,11 @@
 #include <cassert>
 #include <memory>
 
-#include "AudioStream.hpp"
-
 #include <SDL3/SDL.h>
 
-#include "tcob/audio/Buffer.hpp"
+#include "AudioStream.hpp"
+
+#include "tcob/audio/Audio.hpp"
 
 namespace tcob::audio {
 
@@ -28,14 +28,14 @@ system::~system()
     SDL_CloseAudioDevice(_deviceRecording);
 }
 
-auto system::create_output(buffer::information const& info) const -> std::unique_ptr<detail::audio_stream>
+auto system::create_output(specification const& info) const -> std::unique_ptr<detail::audio_stream>
 {
     return std::make_unique<detail::audio_stream>(_devicePlayback, info);
 }
 
 auto system::create_input() const -> std::unique_ptr<detail::audio_stream>
 {
-    return std::make_unique<detail::audio_stream>(_deviceRecording, buffer::information {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE});
+    return std::make_unique<detail::audio_stream>(_deviceRecording, specification {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE});
 }
 
 }

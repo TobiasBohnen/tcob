@@ -65,7 +65,7 @@ opus_decoder::~opus_decoder()
 
 void opus_decoder::seek_from_start(milliseconds pos)
 {
-    f64 const offset {pos.count() / 1000 * _info.SampleRate / _info.Channels};
+    f64 const offset {pos.count() / 1000 * _info.Specs.SampleRate / _info.Specs.Channels};
     op_pcm_seek(_file, static_cast<i64>(offset));
 }
 
@@ -77,9 +77,9 @@ auto opus_decoder::open() -> std::optional<buffer::information>
         return std::nullopt;
     }
 
-    _info.Channels   = op_channel_count(_file, -1);
-    _info.SampleRate = 48000;
-    _info.FrameCount = op_pcm_total(_file, -1);
+    _info.Specs.Channels   = op_channel_count(_file, -1);
+    _info.Specs.SampleRate = 48000;
+    _info.FrameCount       = op_pcm_total(_file, -1);
     return _info;
 }
 
@@ -94,7 +94,7 @@ auto opus_decoder::decode(std::span<f32> outputSamples) -> i32
 
         auto const readBuffer {outputSamples.subspan(static_cast<u32>(readOffset))};
         auto const read {op_read_float(_file, readBuffer.data(), static_cast<i32>(readBuffer.size()), nullptr)};
-        readOffset += read * _info.Channels;
+        readOffset += read * _info.Specs.Channels;
     }
 
     return readOffset;
@@ -126,7 +126,7 @@ auto opus_encoder::encode(std::span<f32 const> samples, buffer::information cons
     OggOpusComments* comments {ope_comments_create()};
 
     i32   err {0};
-    auto* encoder {ope_encoder_create_callbacks(&opusEncCallbacks, &out, comments, info.SampleRate, info.Channels, 0, &err)};
+    auto* encoder {ope_encoder_create_callbacks(&opusEncCallbacks, &out, comments, info.Specs.SampleRate, info.Specs.Channels, 0, &err)};
     if (!encoder) {
         ope_comments_destroy(comments);
         return false;
@@ -141,7 +141,7 @@ auto opus_encoder::encode(std::span<f32 const> samples, buffer::information cons
 
         auto const readBuffer {samples.subspan(static_cast<u32>(readOffset), static_cast<u32>(read))};
         readOffset += read;
-        ope_encoder_write_float(encoder, readBuffer.data(), static_cast<i32>(readBuffer.size() / static_cast<u32>(info.Channels)));
+        ope_encoder_write_float(encoder, readBuffer.data(), static_cast<i32>(readBuffer.size() / static_cast<u32>(info.Specs.Channels)));
     }
 
     ope_encoder_drain(encoder);

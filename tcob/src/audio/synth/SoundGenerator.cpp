@@ -440,7 +440,9 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
     }
 
     samples.resize(static_cast<usize>(sampleCount));
-    return buffer::Create({.Channels = 1, .SampleRate = wave.SampleRate, .FrameCount = std::ssize(samples)}, samples);
+    return buffer::Create({.Specs      = {.Channels = 1, .SampleRate = wave.SampleRate},
+                           .FrameCount = std::ssize(samples)},
+                          samples);
 }
 
 auto sound_generator::create_sound(sound_wave const& wave) -> std::shared_ptr<sound>

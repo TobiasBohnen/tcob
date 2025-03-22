@@ -75,14 +75,14 @@ auto xmp_decoder::open() -> std::optional<buffer::information>
     if (xmp_load_module_from_callbacks(_context, &stream(), xmpCallbacks) == 0) {
         xmp_module_info info {};
         xmp_get_module_info(_context, &info);
-        _info.Channels   = 2;
-        _info.SampleRate = 44100;
+        _info.Specs.Channels   = 2;
+        _info.Specs.SampleRate = 44100;
 
         xmp_frame_info mi {};
         xmp_get_frame_info(_context, &mi);
-        _info.FrameCount = static_cast<i64>((static_cast<f32>(mi.total_time) / 1000.0f) * static_cast<f32>(_info.SampleRate));
+        _info.FrameCount = static_cast<i64>((static_cast<f32>(mi.total_time) / 1000.0f) * static_cast<f32>(_info.Specs.SampleRate));
 
-        xmp_start_player(_context, _info.SampleRate, 0);
+        xmp_start_player(_context, _info.Specs.SampleRate, 0);
 
         return _info;
     }

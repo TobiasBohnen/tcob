@@ -37,7 +37,9 @@ auto recording::stop() -> buffer
 
     auto const data {_output->get()};
     _output->clear();
-    buffer::information const info {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE, .FrameCount = static_cast<i64>(data.size() / sizeof(f32))};
+    buffer::information const info {
+        .Specs      = {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE},
+        .FrameCount = static_cast<i64>(data.size() / sizeof(f32))};
     return buffer::Create(info, data);
 }
 

@@ -51,9 +51,9 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     if (_decoder) {
         _info = _decoder->open(std::move(in), DecoderContext);
         if (_info) {
-            if (_info->Channels == 0) { return load_status::Error; }
+            if (!_info->Specs.is_valid()) { return load_status::Error; }
 
-            create_output(*_info);
+            create_output(_info->Specs);
             return load_status::Ok;
         }
 
@@ -66,17 +66,17 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
 auto music::duration() const -> milliseconds
 {
     if (!_decoder || !_info) { return 0ms; }
-    if (_info->SampleRate == 0) { return 0ms; }
+    if (!_info->Specs.is_valid()) { return 0ms; }
 
-    return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->SampleRate)) * 1000.0f};
+    return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->Specs.SampleRate)) * 1000.0f};
 }
 
 auto music::playback_position() const -> milliseconds
 {
     if (!_decoder || !_info) { return 0ms; }
-    if (_info->Channels == 0 || _info->SampleRate == 0) { return 0ms; }
+    if (!_info->Specs.is_valid()) { return 0ms; }
 
-    return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->SampleRate) / static_cast<f32>(_info->Channels)) * 1000.0f};
+    return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->Specs.SampleRate) / static_cast<f32>(_info->Specs.Channels)) * 1000.0f};
 }
 
 auto music::on_start() -> bool
@@ -143,9 +143,8 @@ void music::fill_buffers(detail::audio_stream& out)
     while (_buffers.size() < STREAM_BUFFER_COUNT) {
         if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
             buffer::information const info {
-                .Channels   = _info->Channels,
-                .SampleRate = _info->SampleRate,
-                .FrameCount = std::ssize(*data) / info.Channels};
+                .Specs      = _info->Specs,
+                .FrameCount = std::ssize(*data) / info.Specs.Channels};
 
             _buffers.push(buffer::Create(info, *data));
             _samplesPlayed += data->size();

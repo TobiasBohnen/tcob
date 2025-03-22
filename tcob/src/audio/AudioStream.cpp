@@ -11,11 +11,11 @@
 
 #include <SDL3/SDL.h>
 
-#include "tcob/audio/Buffer.hpp"
+#include "tcob/audio/Audio.hpp"
 
 namespace tcob::audio::detail {
 
-audio_stream::audio_stream(u32 device, buffer::information const& info)
+audio_stream::audio_stream(u32 device, specification const& info)
     : _device {device}
 {
     SDL_AudioSpec srcSpec;

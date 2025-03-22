@@ -10,7 +10,6 @@
 #include <memory>
 
 #include "tcob/audio/Audio.hpp"
-#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
@@ -42,7 +41,7 @@ protected:
     auto virtual on_start() -> bool = 0;
     auto virtual on_stop() -> bool  = 0;
 
-    void create_output(buffer::information const& info);
+    void create_output(specification const& info);
     auto get_output() -> detail::audio_stream&;
 
 private:

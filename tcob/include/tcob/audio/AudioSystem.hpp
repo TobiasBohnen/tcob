@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "tcob/audio/Audio.hpp"
-#include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Interfaces.hpp"
 
 struct SDL_AudioStream;
@@ -26,7 +25,7 @@ public:
 
     static inline char const* service_name {"audio_system"};
 
-    auto create_output(buffer::information const& info) const -> std::unique_ptr<detail::audio_stream>;
+    auto create_output(specification const& info) const -> std::unique_ptr<detail::audio_stream>;
     auto create_input() const -> std::unique_ptr<detail::audio_stream>;
 
 private:
