@@ -103,7 +103,7 @@ png::pHYs_chunk::pHYs_chunk(std::span<u8 const> data)
 
     i32 const ppuX {data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3]};
     i32 const ppuY {data[4] << 24 | data[5] << 16 | data[6] << 8 | data[7]};
-    Value = static_cast<f32>(ppuX) / ppuY;
+    Value = static_cast<f32>(ppuX) / static_cast<f32>(ppuY);
 }
 
 constexpr std::array<ubyte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a};
@@ -153,8 +153,8 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
             if (phys && phys->Value != 1.0f) {
                 resize_nearest_neighbor filter;
                 filter.NewSize = phys->Value > 1.0f
-                    ? size_i {size.Width, static_cast<i32>(size.Height * phys->Value)}
-                    : size_i {static_cast<i32>(size.Width / phys->Value), size.Height};
+                    ? size_i {size.Width, static_cast<i32>(static_cast<f32>(size.Height) * phys->Value)}
+                    : size_i {static_cast<i32>(static_cast<f32>(size.Width) / phys->Value), size.Height};
                 if (filter.NewSize != size) { return filter(retValue); }
             }
 

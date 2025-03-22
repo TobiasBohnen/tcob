@@ -179,7 +179,7 @@ void grid_view::on_draw(widget_painter& painter)
     auto const paintCell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
         rect_f cellRect {point_f::Zero, {columnWidths[idx.X], rowHeight}};
         cellRect.Position.X = gridRect.Position.X + columnOffsets[idx.X];
-        cellRect.Position.Y = gridRect.Position.Y + (rowHeight * idx.Y);
+        cellRect.Position.Y = gridRect.Position.Y + (rowHeight * static_cast<f32>(idx.Y));
         if (idx.Y > 0) { cellRect.Position.Y -= scrollOffset; }
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
@@ -305,10 +305,10 @@ auto grid_view::get_column_width(i32 col, f32 width) const -> f32
 {
     if (_style.AutoSizeColumns) {
         auto const sum {std::reduce(_columnSizes.begin(), _columnSizes.end())};
-        return width * (_columnSizes[col] / static_cast<f32>(sum));
+        return width * (static_cast<f32>(_columnSizes[col]) / static_cast<f32>(sum));
     }
 
-    return width / _columnHeaders.size();
+    return width / static_cast<f32>(_columnHeaders.size());
 }
 
 auto grid_view::get_scroll_content_height() const -> f32
@@ -316,12 +316,12 @@ auto grid_view::get_scroll_content_height() const -> f32
     if (_columnHeaders.empty()) { return 0; }
 
     f32 const itemHeight {_style.RowHeight.calc(content_bounds().height())};
-    return itemHeight * (_rows.size() + 1);
+    return itemHeight * static_cast<f32>(_rows.size() + 1);
 }
 
 auto grid_view::get_scroll_distance() const -> f32
 {
-    return _style.RowHeight.calc(content_bounds().height()) * _visibleRows / get_scroll_max();
+    return _style.RowHeight.calc(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max();
 }
 
 } // namespace ui

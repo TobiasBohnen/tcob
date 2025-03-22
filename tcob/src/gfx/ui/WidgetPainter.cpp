@@ -469,18 +469,19 @@ auto widget_painter::draw_bar(bar_element const& style, rect_f const& rect, bar_
             rect_f   blockRect {retValue};
             ui_paint back;
 
+            f32 const frac {static_cast<f32>(i) / static_cast<f32>(barCtx.BlockCount)};
             switch (barCtx.Orientation) {
             case orientation::Horizontal:
-                blockRect.Size.Width /= barCtx.BlockCount;
-                blockRect.Position.X += blockRect.width() * i;
-                back = i / static_cast<f32>(barCtx.BlockCount) < (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction)
+                blockRect.Size.Width /= static_cast<f32>(barCtx.BlockCount);
+                blockRect.Position.X += blockRect.width() * static_cast<f32>(i);
+                back = frac < (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction)
                     ? style.LowerBackground
                     : style.HigherBackground;
                 break;
             case orientation::Vertical:
-                blockRect.Size.Height /= barCtx.BlockCount;
-                blockRect.Position.Y += blockRect.height() * i;
-                back = i / static_cast<f32>(barCtx.BlockCount) < (!barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction)
+                blockRect.Size.Height /= static_cast<f32>(barCtx.BlockCount);
+                blockRect.Position.Y += blockRect.height() * static_cast<f32>(i);
+                back = frac < (!barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction)
                     ? style.HigherBackground
                     : style.LowerBackground;
                 break;

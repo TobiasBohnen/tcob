@@ -152,7 +152,7 @@ void list_box::on_draw(widget_painter& painter)
     auto const paintItem {[&](isize i) {
         rect_f itemRect {listRect};
         itemRect.Size.Height = itemHeight;
-        itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - scrollOffset;
+        itemRect.Position.Y  = listRect.top() + (itemRect.height() * static_cast<f32>(i)) - scrollOffset;
 
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
             item_style itemStyle {};
@@ -185,7 +185,7 @@ void list_box::on_update(milliseconds deltaTime)
     // scroll to selected
     if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
-        set_scrollbar_value(std::min(itemHeight * SelectedItemIndex, get_scroll_max()));
+        set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex()), get_scroll_max()));
         _scrollToSelected = false;
     }
 }
@@ -299,7 +299,7 @@ auto list_box::get_scroll_content_height() const -> f32
 
 auto list_box::get_scroll_distance() const -> f32
 {
-    return _style.ItemHeight.calc(content_bounds().height()) * _visibleItems / get_scroll_max();
+    return _style.ItemHeight.calc(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max();
 }
 
 } // namespace ui

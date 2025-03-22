@@ -131,14 +131,14 @@ void tab_container::on_draw(widget_painter& painter)
         break;
     case position::Bottom:
         tabBarRowRect.Size.Height = _style.TabBarSize.calc(tabBarRowRect.height());
-        tabBarRowRect.Position.Y  = rect.bottom() - (tabBarRowRect.height() * get_tab_line_count());
+        tabBarRowRect.Position.Y  = rect.bottom() - (tabBarRowRect.height() * static_cast<f32>(get_tab_line_count()));
         break;
     case position::Left:
         tabBarRowRect.Size.Width = _style.TabBarSize.calc(tabBarRowRect.width());
         break;
     case position::Right:
         tabBarRowRect.Size.Width = _style.TabBarSize.calc(tabBarRowRect.width());
-        tabBarRowRect.Position.X = rect.right() - (tabBarRowRect.width() * get_tab_line_count());
+        tabBarRowRect.Position.X = rect.right() - (tabBarRowRect.width() * static_cast<f32>(get_tab_line_count()));
         break;
 
     case position::None: return;
@@ -150,20 +150,23 @@ void tab_container::on_draw(widget_painter& painter)
 
         switch (_style.TabBarPosition) {
         case position::Top:
-        case position::Bottom:
-            retValue.Position.X  = tabBarRowRect.left() + (tabBarRowRect.width() / maxItems) * (index % maxItems);
-            retValue.Size.Width  = tabBarRowRect.width() / maxItems;
-            retValue.Position.Y  = tabBarRowRect.top() + (tabBarRowRect.height() * (index / maxItems));
-            retValue.Size.Height = tabBarRowRect.height();
-            break;
+        case position::Bottom: {
+            f32 const itemHeight {tabBarRowRect.height()};
+            f32 const itemWidth {tabBarRowRect.width() / static_cast<f32>(maxItems)};
+            retValue.Position.X  = tabBarRowRect.left() + itemWidth * static_cast<f32>(index % maxItems);
+            retValue.Size.Width  = itemWidth;
+            retValue.Position.Y  = tabBarRowRect.top() + (itemHeight * static_cast<f32>(index / maxItems));
+            retValue.Size.Height = itemHeight;
+        } break;
         case position::Left:
-        case position::Right:
-            retValue.Position.X  = tabBarRowRect.left() + (tabBarRowRect.width() * (index / maxItems));
-            retValue.Size.Width  = tabBarRowRect.width();
-            retValue.Position.Y  = tabBarRowRect.top() + (tabBarRowRect.height() / maxItems) * (index % maxItems);
-            retValue.Size.Height = tabBarRowRect.height() / maxItems;
-
-            break;
+        case position::Right: {
+            f32 const itemHeight {tabBarRowRect.height() / static_cast<f32>(maxItems)};
+            f32 const itemWidth {tabBarRowRect.width()};
+            retValue.Position.X  = tabBarRowRect.left() + (itemWidth * static_cast<f32>(index / maxItems));
+            retValue.Size.Width  = itemWidth;
+            retValue.Position.Y  = tabBarRowRect.top() + itemHeight * static_cast<f32>(index % maxItems);
+            retValue.Size.Height = itemHeight;
+        } break;
         case position::None: break;
         }
 
@@ -259,7 +262,7 @@ void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
 auto tab_container::get_tab_line_count() const -> isize
 {
     if (*MaxTabsPerLine > 0) {
-        return static_cast<isize>(std::ceil(std::ssize(_tabs) / static_cast<f32>(*MaxTabsPerLine)));
+        return static_cast<isize>(std::ceil(static_cast<f32>(std::ssize(_tabs)) / static_cast<f32>(*MaxTabsPerLine)));
     }
 
     return 1;

@@ -149,7 +149,7 @@ void drop_down_list::on_draw(widget_painter& painter)
         auto const paintItem {[&](isize i) {
             rect_f itemRect {listRect};
             itemRect.Size.Height = itemHeight;
-            itemRect.Position.Y  = listRect.top() + (itemRect.height() * i) - scrollOffset;
+            itemRect.Position.Y  = listRect.top() + (itemRect.height() * static_cast<f32>(i)) - scrollOffset;
 
             if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                 item_style itemStyle {};
@@ -342,12 +342,12 @@ void drop_down_list::set_extended(bool v)
 
 auto drop_down_list::get_scroll_distance() const -> f32
 {
-    return get_item_height() * _visibleItems / get_scroll_max();
+    return get_item_height() * static_cast<f32>(_visibleItems) / get_scroll_max();
 }
 
 auto drop_down_list::get_scroll_max() const -> f32
 {
-    return std::max(1.0f, (get_item_height() * std::max(std::ssize(get_items()), MaxVisibleItems())) - content_bounds().height());
+    return std::max(1.0f, (get_item_height() * static_cast<f32>(std::max(std::ssize(get_items()), MaxVisibleItems()))) - content_bounds().height());
 }
 
 } // namespace ui

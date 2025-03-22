@@ -65,7 +65,7 @@ auto static check_supported_format(tga::header const& h) -> bool
 auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 {
     if (bitsPerPixel < 8) {
-        return stride - static_cast<i32>(std::ceil(width * (bitsPerPixel / 8.0f)));
+        return stride - static_cast<i32>(std::ceil(static_cast<f32>(width) * (static_cast<f32>(bitsPerPixel) / 8.0f)));
     }
 
     return stride - (width * (bitsPerPixel / 8));

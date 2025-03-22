@@ -66,8 +66,8 @@ void dot_matrix_display::on_draw(widget_painter& painter)
         canvas.begin_path();
 
         for (auto const& dot : dots) {
-            rect_f const dotRect {(dot.X * width) + rect.left(),
-                                  (dot.Y * height) + rect.top(),
+            rect_f const dotRect {(static_cast<f32>(dot.X) * width) + rect.left(),
+                                  (static_cast<f32>(dot.Y) * height) + rect.top(),
                                   width, height};
 
             switch (_style.Type) {

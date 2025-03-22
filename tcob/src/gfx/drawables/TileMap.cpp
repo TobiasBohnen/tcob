@@ -213,8 +213,8 @@ auto tilemap_base::layer::get_index(point_i pos) const -> i32
 
 auto ortho_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f
 {
-    return {{TileSize.Width * coord.X,
-             TileSize.Height * coord.Y},
+    auto const [x, y] {point_f {coord}};
+    return {{TileSize.Width * x, TileSize.Height * y},
             TileSize * tile.Scale};
 }
 
@@ -222,12 +222,13 @@ auto ortho_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rec
 
 auto iso_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
 {
+    auto const [x, y] {point_f {coord}};
     return Staggered
-        ? rect_f {{TileSize.Width * (coord.X + 0.5f * (coord.Y & 1)),
-                   TileSize.Height * (0.5f * coord.Y)},
+        ? rect_f {{TileSize.Width * (x + 0.5f * (coord.Y & 1)),
+                   TileSize.Height * (0.5f * y)},
                   TileSize}
-        : rect_f {{((TileSize.Width * tile.Center.X) * (coord.X - coord.Y)),
-                   ((TileSize.Height * tile.Center.Y) * (coord.Y + coord.X)) - (TileSize.Height * tile.Height)},
+        : rect_f {{((TileSize.Width * tile.Center.X) * (x - y)),
+                   ((TileSize.Height * tile.Center.Y) * (y + x)) - (TileSize.Height * tile.Height)},
                   TileSize};
 }
 
@@ -235,12 +236,13 @@ auto iso_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
 
 auto hex_grid::layout_tile(hex_tile const& /* tile */, point_i coord) const -> rect_f
 {
+    auto const [x, y] {point_f {coord}};
     return Top == hex_top::Flat
-        ? rect_f {{TileSize.Width * (3.0f / 4.0f * coord.X),
-                   TileSize.Height * (coord.Y + 0.5f * (coord.X & 1))},
+        ? rect_f {{TileSize.Width * (3.0f / 4.0f * x),
+                   TileSize.Height * (y + 0.5f * (coord.X & 1))},
                   TileSize}
-        : rect_f {{TileSize.Width * (coord.X + 0.5f * (coord.Y & 1)),
-                   TileSize.Height * (3.0f / 4.0f * coord.Y)},
+        : rect_f {{TileSize.Width * (x + 0.5f * (coord.Y & 1)),
+                   TileSize.Height * (3.0f / 4.0f * y)},
                   TileSize};
 }
 

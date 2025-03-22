@@ -97,7 +97,7 @@ auto library::loading_progress() const -> f32
     for (auto const& [g, group] : _groups) {
         auto stats {group->asset_stats().Buckets};
         for (auto& [b, bucketStats] : stats) {
-            assets += bucketStats.Assets.size();
+            assets += static_cast<f32>(bucketStats.Assets.size());
             loaded += static_cast<f32>(bucketStats.Statuses[asset_status::Loaded]);
         }
     }

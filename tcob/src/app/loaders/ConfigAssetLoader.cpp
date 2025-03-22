@@ -744,7 +744,7 @@ void cfg_texture_loader::prepare()
         tex.Wrapping  = def->wrapping;
 
         // convert region from pixels to relative
-        auto const [w, h] {texSize};
+        auto const [w, h] {size_f {texSize}};
         for (auto const& [k, v] : def->abs_regions) {
             tex.add_region(k, {.UVRect = {v.UVRect.left() / w, v.UVRect.top() / h, v.UVRect.width() / w, v.UVRect.height() / h}, .Level = v.Level});
         }

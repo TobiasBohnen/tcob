@@ -314,8 +314,8 @@ void terminal::on_draw(widget_painter& painter)
         auto const& cell {buffer[i]};
 
         rect_f const cellRect {
-            rect.left() + ((i % Size->Width) * fontWidth),
-            rect.top() + ((i / Size->Width) * fontHeight),
+            rect.left() + (static_cast<f32>(i % Size->Width) * fontWidth),
+            rect.top() + (static_cast<f32>(i / Size->Width) * fontHeight),
             fontWidth,
             fontHeight};
 
@@ -337,7 +337,7 @@ void terminal::on_draw(widget_painter& painter)
     // cursor
     if (_cursorVisible) {
         rect_f        caretRect {rect};
-        point_f const offset {_currentCursor.X * fontWidth, _currentCursor.Y * fontHeight};
+        point_f const offset {static_cast<f32>(_currentCursor.X) * fontWidth, static_cast<f32>(_currentCursor.Y) * fontHeight};
         caretRect.Size.Height = fontHeight;
         painter.draw_caret(_style.Caret, caretRect, offset);
     }

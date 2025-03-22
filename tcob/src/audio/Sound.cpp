@@ -85,7 +85,7 @@ auto sound::on_stop() -> bool
 auto sound::duration() const -> milliseconds
 {
     auto const& info {_buffer.info()};
-    return milliseconds {(static_cast<f32>(info.FrameCount) / info.SampleRate) * 1000};
+    return milliseconds {(static_cast<f32>(info.FrameCount) / static_cast<f32>(info.SampleRate)) * 1000};
 }
 
 }

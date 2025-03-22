@@ -199,9 +199,9 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
                 command);
         }
 
-        funcs.Offset.X += static_cast<i32>(_glyphCache[result->CodePoint].AdvanceX);
+        funcs.Offset.X += static_cast<f32>(_glyphCache[result->CodePoint].AdvanceX);
         if (kerning && i < len - 1) {
-            funcs.Offset.X += static_cast<i32>(_engine->get_kerning(result->CodePoint, utf32text[i + 1]));
+            funcs.Offset.X += static_cast<f32>(_engine->get_kerning(result->CodePoint, utf32text[i + 1]));
         }
     }
 }
@@ -270,8 +270,10 @@ auto font::cache_render_glyph(u32 cp) -> bool
         _texture->update_data(_fontTextureCursor, bitmapSize, gb.second.Bitmap.data(), _fontTextureLayer, bitmapSize.Width, 1);
 
         // create glyph
-        gb.first.TextureRegion = {.UVRect = {_fontTextureCursor.X / FONT_TEXTURE_SIZE_F, _fontTextureCursor.Y / FONT_TEXTURE_SIZE_F,
-                                             bitmapSize.Width / FONT_TEXTURE_SIZE_F, bitmapSize.Height / FONT_TEXTURE_SIZE_F},
+        gb.first.TextureRegion = {.UVRect = {static_cast<f32>(_fontTextureCursor.X) / FONT_TEXTURE_SIZE_F,
+                                             static_cast<f32>(_fontTextureCursor.Y) / FONT_TEXTURE_SIZE_F,
+                                             static_cast<f32>(bitmapSize.Width) / FONT_TEXTURE_SIZE_F,
+                                             static_cast<f32>(bitmapSize.Height) / FONT_TEXTURE_SIZE_F},
                                   .Level  = _fontTextureLayer};
         _glyphCache[cp]        = gb.first;
 

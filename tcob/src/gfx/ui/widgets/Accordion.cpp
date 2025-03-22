@@ -137,7 +137,7 @@ void accordion::on_draw(widget_painter& painter)
     f32 const  sectionHeight {_style.SectionBarHeight.calc(rect.height())};
     auto const getSectionRect {[&](item_style const& itemStyle, isize index) {
         rect_f retValue {rect};
-        retValue.Position.Y += sectionHeight * index;
+        retValue.Position.Y += sectionHeight * static_cast<f32>(index);
         retValue.Size.Height = sectionHeight;
         retValue -= itemStyle.Item.Border.thickness();
         if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
@@ -240,8 +240,8 @@ void accordion::on_update(milliseconds deltaTime)
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
-    bounds.Size.Height -= barHeight * (MaximizeActiveSection() ? 1 : _sections.size());
-    bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : ActiveSectionIndex() + 1);
+    bounds.Size.Height -= barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(_sections.size()));
+    bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(ActiveSectionIndex() + 1));
     // bounds.Size.Height *= _tween.current_value();
 }
 

@@ -45,7 +45,7 @@ game::game(init const& gameInit)
     // properties
     FrameLimit.Changed.connect([this, plt](i32 value) {
         plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
-        _frameLimit                                              = milliseconds {1000.f / value};
+        _frameLimit                                              = milliseconds {1000.f / static_cast<f32>(value)};
     });
     FrameLimit = plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
 

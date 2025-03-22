@@ -153,7 +153,7 @@ auto mouse::get_position() const -> point_i
 
 void mouse::set_position(point_i pos) const
 {
-    SDL_WarpMouseInWindow(nullptr, pos.X, pos.Y);
+    SDL_WarpMouseInWindow(nullptr, static_cast<f32>(pos.X), static_cast<f32>(pos.Y));
 }
 
 auto mouse::is_button_down(button button) const -> bool

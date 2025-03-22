@@ -1127,7 +1127,7 @@ void canvas::set_paint_color(paint& p, color c)
 auto canvas::get_font_scale() -> f32
 {
     auto static Quantize {[](f32 a, f32 d) -> f32 {
-        return (static_cast<i32>((a / d) + 0.5f)) * d;
+        return (static_cast<f32>(static_cast<i32>((a / d) + 0.5f))) * d;
     }};
 
     return std::min(Quantize(GetAverageScale(_states->get().XForm.Matrix), 0.01f), 4.0f);

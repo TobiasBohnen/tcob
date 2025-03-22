@@ -46,7 +46,7 @@ void statistics::update(milliseconds delta)
         _bestFrames    = std::max(_bestFrames, 1000.0f / *std::min_element(_frameTimes.begin(), _frameTimes.end()));
         _worstFrames   = std::min(_worstFrames, 1000.0f / *std::max_element(_frameTimes.begin(), _frameTimes.end()));
     } else {
-        _averageFrames = 1000.0f / (std::accumulate(_frameTimes.begin(), _frameTimes.end(), 0.0f) / _frameCount);
+        _averageFrames = 1000.0f / (std::accumulate(_frameTimes.begin(), _frameTimes.end(), 0.0f) / static_cast<f32>(_frameCount));
     }
 }
 

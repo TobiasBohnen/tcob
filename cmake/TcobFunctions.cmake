@@ -19,7 +19,6 @@ function(tcob_add_obj_library module sources headers)
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra
         -Wno-sign-conversion # TODO
         -Wno-exit-time-destructors # TODO
-        -Wno-implicit-int-float-conversion # TODO
         -Wno-double-promotion # TODO
         -Wno-float-equal # WONTFIX
         -Wno-switch-default -Wno-switch-enum # WONTFIX

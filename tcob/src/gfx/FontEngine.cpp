@@ -23,31 +23,31 @@ extern "C" {
 auto static move_to(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->MoveTo({(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
+    funcs->MoveTo({(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
 auto static line_to(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->LineTo({(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
+    funcs->LineTo({(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
 auto static conic_to(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->ConicTo({(control->x / 64.0f) + funcs->Offset.X, (control->y / 64.0f) + funcs->Offset.Y},
-                   {(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
+    funcs->ConicTo({(static_cast<f32>(control->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control->y) / 64.0f) + funcs->Offset.Y},
+                   {(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
 auto static cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
-    funcs->CubicTo({(control1->x / 64.0f) + funcs->Offset.X, (control1->y / 64.0f) + funcs->Offset.Y},
-                   {(control2->x / 64.0f) + funcs->Offset.X, (control2->y / 64.0f) + funcs->Offset.Y},
-                   {(to->x / 64.0f) + funcs->Offset.X, (to->y / 64.0f) + funcs->Offset.Y});
+    funcs->CubicTo({(static_cast<f32>(control1->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control1->y) / 64.0f) + funcs->Offset.Y},
+                   {(static_cast<f32>(control2->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control2->y) / 64.0f) + funcs->Offset.Y},
+                   {(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 }
@@ -72,9 +72,9 @@ auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) 
         FT_Set_Pixel_Sizes(_face, _fontSize, _fontSize);
         FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
 
-        _info = {.Ascender   = _face->size->metrics.ascender / 64.0f,
-                 .Descender  = _face->size->metrics.descender / 64.0f,
-                 .LineHeight = _face->size->metrics.height / 64.0f};
+        _info = {.Ascender   = static_cast<f32>(_face->size->metrics.ascender) / 64.0f,
+                 .Descender  = static_cast<f32>(_face->size->metrics.descender) / 64.0f,
+                 .LineHeight = static_cast<f32>(_face->size->metrics.height) / 64.0f};
 
         return _info;
     }
@@ -91,7 +91,7 @@ auto truetype_font_engine::get_kerning(u32 cp0, u32 cp1) -> f32
     if (!_kerningCache.contains(cp0) || !_kerningCache[cp0].contains(cp1)) {
         FT_Vector kerning;
         FT_Get_Kerning(_face, codepoint_to_glyphindex(cp0), codepoint_to_glyphindex(cp1), FT_KERNING_DEFAULT, &kerning);
-        _kerningCache[cp0][cp1] = kerning.x / 64.0f;
+        _kerningCache[cp0][cp1] = static_cast<f32>(kerning.x) / 64.0f;
     }
 
     return _kerningCache[cp0][cp1];
@@ -160,9 +160,9 @@ auto truetype_font_engine::load_glyph(u32 cp) -> glyph
 
     retValue.Size.Width  = _face->glyph->metrics.width / 64;
     retValue.Size.Height = _face->glyph->metrics.height / 64;
-    retValue.Offset.X    = _face->glyph->metrics.horiBearingX / 64.0f;
-    retValue.Offset.Y    = -_face->glyph->metrics.horiBearingY / 64.0f + _info.Ascender;
-    retValue.AdvanceX    = _face->glyph->metrics.horiAdvance / 64.0f;
+    retValue.Offset.X    = static_cast<f32>(_face->glyph->metrics.horiBearingX) / 64.0f;
+    retValue.Offset.Y    = static_cast<f32>(-_face->glyph->metrics.horiBearingY) / 64.0f + _info.Ascender;
+    retValue.AdvanceX    = static_cast<f32>(_face->glyph->metrics.horiAdvance) / 64.0f;
 
     return retValue;
 }

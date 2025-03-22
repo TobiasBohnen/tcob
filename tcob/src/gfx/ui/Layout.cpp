@@ -252,7 +252,8 @@ void box_layout::do_layout(size_f size)
     for (i32 i {0}; i < std::ssize(w); ++i) {
         auto const& widget {w[i]};
         if (i < _box.Width * _box.Height) {
-            widget->Bounds = {i % _box.Width * horiSize, i / _box.Width * vertSize,
+            widget->Bounds = {static_cast<f32>(i % _box.Width) * horiSize,
+                              static_cast<f32>(i / _box.Width) * vertSize,
                               widget->Flex->Width.calc(horiSize),
                               widget->Flex->Height.calc(vertSize)};
         } else {

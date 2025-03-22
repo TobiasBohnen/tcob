@@ -217,7 +217,7 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(i32 newVal)
 {
-    f32 const newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / (Max() - Min()) : 0.f};
+    f32 const newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / static_cast<f32>(Max() - Min()) : 0.f};
     if (_isDragging) {
         _tween.reset(newFrac);
     } else {
@@ -233,11 +233,11 @@ void slider::calculate_value(point_f mp)
     switch (get_orientation()) {
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
-        frac = (mp.X - _dragOffset.X - (tw / 2)) / (rect.width() - tw);
+        frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / (rect.width() - tw);
     } break;
     case orientation::Vertical: {
         f32 const th {_barRectCache.Thumb.height()};
-        frac = 1.0f - ((mp.Y - _dragOffset.Y - (th / 2)) / (rect.height() - th));
+        frac = 1.0f - ((mp.Y - static_cast<f32>(_dragOffset.Y) - (th / 2)) / (rect.height() - th));
     } break;
     }
 

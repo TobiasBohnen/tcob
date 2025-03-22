@@ -338,7 +338,7 @@ auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const&
         retValue.GradientAlpha = 1;
         retValue.GradientColor = {c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f};
     } else if (auto const* arg1 {std::get_if<paint_gradient>(&paint.Color)}) {
-        retValue.GradientIndex = arg1->second / (_gradientTexture.get_size().Height - 1.f);
+        retValue.GradientIndex = static_cast<f32>(arg1->second) / static_cast<f32>(_gradientTexture.get_size().Height - 1);
         retValue.GradientAlpha = arg1->first;
         retValue.GradientColor = {1, 1, 1, 1};
     }
