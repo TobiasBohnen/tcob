@@ -26,6 +26,9 @@ namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 // forward declarations
 
+class style;
+class widget_style;
+
 // widgets
 class button;
 class canvas_widget;

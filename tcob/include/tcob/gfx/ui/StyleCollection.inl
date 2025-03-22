@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "Style.hpp"
+#include "StyleCollection.hpp"
 
 #include <memory>
 
