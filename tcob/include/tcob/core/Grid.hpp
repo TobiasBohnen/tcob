@@ -27,8 +27,8 @@ public:
 
     auto operator[](point_type pos) -> T&;
     auto operator[](point_type pos) const -> T const&;
-    auto operator[](usize idx) -> T&;
-    auto operator[](usize idx) const -> T const&;
+    auto operator[](isize idx) -> T&;
+    auto operator[](isize idx) const -> T const&;
 
     void fill(T const& value);
 
@@ -50,7 +50,7 @@ public:
     auto data() const -> T const*;
 
 private:
-    auto get_index(point_type pos) const -> dimension_type;
+    auto get_index(point_type pos) const -> isize;
 
     size_type      _size;
     std::vector<T> _data;
@@ -76,8 +76,8 @@ public:
 
     auto operator[](point_type pos) -> T&;
     auto operator[](point_type pos) const -> T const&;
-    auto operator[](usize idx) -> T&;
-    auto operator[](usize idx) const -> T const&;
+    auto operator[](isize idx) -> T&;
+    auto operator[](isize idx) const -> T const&;
 
     void fill(T const& value);
 
@@ -97,7 +97,7 @@ public:
     auto data() const -> T const*;
 
 private:
-    auto get_index(point_type pos) const -> dimension_type;
+    auto get_index(point_type pos) const -> isize;
 
     array_type _data;
 };

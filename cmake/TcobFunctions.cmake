@@ -17,11 +17,12 @@ function(tcob_add_obj_library module sources headers)
     target_compile_options(${module} PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>: /W4>
         $<$<CXX_COMPILER_ID:Clang>: -Wall -Wextra
-        -Wno-sign-conversion # TODO
-        -Wno-exit-time-destructors # TODO
-        -Wno-double-promotion # TODO
+
+        -Wno-sign-conversion # TODO (but probably won't)
+        -Wno-double-promotion # WONTFIX
         -Wno-float-equal # WONTFIX
         -Wno-switch-default -Wno-switch-enum # WONTFIX
+        -Wno-exit-time-destructors # WONTFIX
         -Wno-unsafe-buffer-usage # WONTFIX
         -Wno-ctad-maybe-unsupported # WONTFIX
         -Wno-c++98-compat-pedantic -Wno-c++20-compat-pedantic # WONTFIX
