@@ -13,9 +13,12 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-struct frame {
+class TCOB_API frame {
+public:
     string       Name {};
     milliseconds Duration {};
+
+    auto operator==(frame const& other) const -> bool = default;
 };
 
 void Serialize(frame const& v, auto&& s)
@@ -41,6 +44,8 @@ public:
     auto duration() const -> milliseconds;
 
     static inline char const* AssetName {"frame_animation"};
+
+    auto operator==(frame_animation const& other) const -> bool = default;
 };
 
 using frame_animation_tween = callable_tween<frame_animation>;
