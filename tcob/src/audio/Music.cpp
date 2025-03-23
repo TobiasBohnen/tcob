@@ -144,7 +144,7 @@ void music::fill_buffers()
     if (_buffers.empty()) { return; }
 
     while (queued_bytes() / sizeof(f32) < STREAM_BUFFER_THRESHOLD) {
-        auto const& buffer {_buffers.front()};
+        auto& buffer {_buffers.front()};
         write_to_output(buffer.data());
         _buffers.pop();
     }

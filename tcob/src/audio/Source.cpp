@@ -5,9 +5,11 @@
 
 #include "tcob/audio/Source.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <span>
+#include <vector>
 
 #include "AudioStream.hpp"
 
@@ -24,6 +26,8 @@ source::source()
         if (_output) { _output->set_volume(val); }
     });
     Volume(1.0f);
+
+    Panning(0.0f);
 }
 
 source::~source()
@@ -105,11 +109,25 @@ void source::create_output(specification const& info)
 {
     _output = locate_service<system>().create_output(info);
     _output->set_volume(Volume);
+    _canPan = (info.Channels & 1) == 0;
 }
 
 void source::write_to_output(std::span<f32 const> data)
 {
     assert(_output);
+    if (_canPan && Panning != 0.0f) {
+        f32 const        pan {std::clamp(Panning(), -1.0f, 1.0f)};
+        std::vector<f32> buffer {data.begin(), data.end()};
+        for (usize i {0}; i < data.size(); i += 2) {
+            f32 const leftGain {(pan < 0) ? 1.0f : (1.0f - pan)};
+            f32 const rightGain {(pan > 0) ? 1.0f : (1.0f + pan)};
+            buffer[i + 0] = data[i + 0] * leftGain;
+            buffer[i + 1] = data[i + 1] * rightGain;
+        }
+        _output->put(buffer);
+        return;
+    }
+
     _output->put(data);
 }
 

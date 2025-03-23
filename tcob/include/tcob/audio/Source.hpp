@@ -27,6 +27,7 @@ public:
     std::any DecoderContext;
 
     prop<f32> Volume;
+    prop<f32> Panning; // TODO: prop_val
 
     auto virtual info() const -> std::optional<specification> = 0;
     auto virtual duration() const -> milliseconds             = 0;
@@ -51,6 +52,8 @@ protected:
 
 private:
     std::unique_ptr<detail::audio_stream> _output;
+
+    bool _canPan {false};
 };
 
 }
