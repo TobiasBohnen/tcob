@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
@@ -48,11 +49,12 @@ auto buffer::ptr() const -> f32 const*
     return _buffer.data();
 }
 
-auto buffer::Create(information const& info, std::span<f32 const> data) -> buffer
+auto buffer::Create(specification const& info, std::span<f32 const> data) -> buffer
 {
     buffer retValue;
-    retValue._info   = info;
-    retValue._buffer = {data.begin(), data.end()};
+    retValue._info.Specs      = info;
+    retValue._info.FrameCount = std::ssize(data) / info.Channels;
+    retValue._buffer          = {data.begin(), data.end()};
     return retValue;
 }
 

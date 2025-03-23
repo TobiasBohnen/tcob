@@ -27,7 +27,7 @@ sound::sound() = default;
 sound::sound(buffer buffer)
     : _buffer {std::move(buffer)}
 {
-    create_output(_buffer.info().Specs);
+    create_output();
 }
 
 sound::~sound() = default;
@@ -57,7 +57,7 @@ auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept ->
     if (_buffer.load(std::move(in), ext, DecoderContext) != load_status::Ok) { return load_status::Error; }
     if (!_buffer.info().Specs.is_valid()) { return load_status::Error; }
 
-    create_output(_buffer.info().Specs);
+    create_output();
     return load_status::Ok;
 }
 

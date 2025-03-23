@@ -29,9 +29,7 @@ auto speech_generator::create_buffer [[nodiscard]] (string const& text) -> buffe
     for (i32 i {0}; i < frames * channels; ++i) { databuf[static_cast<usize>(i)] = data[i] / 32768.0f; }
     speech_free(data, nullptr);
 
-    return buffer::Create({.Specs      = {.Channels = channels, .SampleRate = sampleRate},
-                           .FrameCount = frames},
-                          databuf);
+    return buffer::Create({.Channels = channels, .SampleRate = sampleRate}, databuf);
 }
 
 auto speech_generator::create_sound [[nodiscard]] (string const& text) -> std::shared_ptr<sound>

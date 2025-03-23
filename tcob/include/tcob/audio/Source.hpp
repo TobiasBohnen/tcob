@@ -45,15 +45,16 @@ protected:
     auto virtual on_start() -> bool = 0;
     auto virtual on_stop() -> bool  = 0;
 
-    void create_output(specification const& info);
+    void create_output();
     void write_to_output(std::span<f32 const> data);
     void flush_output();
     auto queued_bytes() const -> i32;
 
 private:
-    std::unique_ptr<detail::audio_stream> _output;
+    void pan_out(std::span<f32 const> data);
 
-    bool _canPan {false};
+    std::unique_ptr<detail::audio_stream> _output;
+    bool                                  _canPan {false};
 };
 
 }

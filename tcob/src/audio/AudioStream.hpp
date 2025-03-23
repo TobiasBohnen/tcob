@@ -18,7 +18,7 @@ namespace tcob::audio::detail {
 
 class TCOB_API audio_stream final {
 public:
-    audio_stream(u32 device, specification const& info);
+    audio_stream(u32 device, specification const& info, bool input);
     ~audio_stream();
 
     void bind();

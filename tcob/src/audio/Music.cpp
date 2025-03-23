@@ -68,7 +68,7 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     if (!_info) { return load_status::Error; }
     if (!_info->Specs.is_valid()) { return load_status::Error; }
 
-    create_output(_info->Specs);
+    create_output();
     return load_status::Ok;
 }
 
@@ -130,10 +130,7 @@ void music::fill_buffers()
 {
     while (_buffers.size() < STREAM_BUFFER_COUNT) {
         if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
-            buffer::information const info {
-                .Specs      = _info->Specs,
-                .FrameCount = std::ssize(*data) / info.Specs.Channels};
-            _buffers.push(buffer::Create(info, *data)); // TODO: reuse buffers
+            _buffers.push(buffer::Create(_info->Specs, *data)); // TODO: reuse buffers
             _samplesPlayed += data->size();
         } else {
             flush_output();

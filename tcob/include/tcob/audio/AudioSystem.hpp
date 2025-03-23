@@ -16,7 +16,7 @@ struct SDL_AudioStream;
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-constexpr i32 RECORDING_SAMPLE_RATE {44100};
+constexpr i32 RECORDING_SAMPLE_RATE {22050};
 
 class TCOB_API system final : public non_copyable {
 public:

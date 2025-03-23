@@ -48,10 +48,7 @@ auto delay_effect::operator()(buffer const& buf) const -> buffer
         }
     }
 
-    buffer::information const outInfo {
-        .Specs      = info.Specs,
-        .FrameCount = static_cast<i64>(outputFrames)};
-    return buffer::Create(outInfo, outData);
+    return buffer::Create(info.Specs, outData);
 }
 
 ////////////////////////////////////////////////////////////
@@ -85,10 +82,7 @@ auto pitch_shift_effect::operator()(buffer const& buf) const -> buffer
         }
     }
 
-    buffer::information const outInfo {
-        .Specs      = info.Specs,
-        .FrameCount = static_cast<i64>(outputFrames)};
-    return buffer::Create(outInfo, outData);
+    return buffer::Create(info.Specs, outData);
 }
 
 } // namespace audio

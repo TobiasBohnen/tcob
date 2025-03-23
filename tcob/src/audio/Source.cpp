@@ -105,30 +105,39 @@ void source::toggle_pause()
     status() == playback_status::Paused ? resume() : pause();
 }
 
-void source::create_output(specification const& info)
+void source::create_output()
 {
-    _output = locate_service<system>().create_output(info);
+    auto const spec {info()};
+    if (!spec) { return; }
+
+    _output = locate_service<system>().create_output(*spec);
     _output->set_volume(Volume);
-    _canPan = (info.Channels & 1) == 0;
+    _canPan = (spec->Channels & 1) == 0;
 }
 
 void source::write_to_output(std::span<f32 const> data)
 {
     assert(_output);
+
     if (_canPan && Panning != 0.0f) {
-        f32 const        pan {std::clamp(Panning(), -1.0f, 1.0f)};
-        std::vector<f32> buffer {data.begin(), data.end()};
-        for (usize i {0}; i < data.size(); i += 2) {
-            f32 const leftGain {(pan < 0) ? 1.0f : (1.0f - pan)};
-            f32 const rightGain {(pan > 0) ? 1.0f : (1.0f + pan)};
-            buffer[i + 0] = data[i + 0] * leftGain;
-            buffer[i + 1] = data[i + 1] * rightGain;
-        }
-        _output->put(buffer);
+        pan_out(data);
         return;
     }
 
     _output->put(data);
+}
+
+void source::pan_out(std::span<f32 const> data)
+{
+    f32 const        pan {std::clamp(Panning(), -1.0f, 1.0f)};
+    std::vector<f32> buffer {data.begin(), data.end()};
+    for (usize i {0}; i < data.size(); i += 2) {
+        f32 const leftGain {(pan < 0) ? 1.0f : (1.0f - pan)};
+        f32 const rightGain {(pan > 0) ? 1.0f : (1.0f + pan)};
+        buffer[i + 0] = data[i + 0] * leftGain;
+        buffer[i + 1] = data[i + 1] * rightGain;
+    }
+    _output->put(buffer);
 }
 
 void source::flush_output()

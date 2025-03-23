@@ -46,7 +46,7 @@ public:
     auto save [[nodiscard]] (io::ostream& out, string const& ext) const noexcept -> bool;
     auto save_async [[nodiscard]] (path const& file) const noexcept -> std::future<bool>;
 
-    auto static Create(information const& info, std::span<f32 const> data) -> buffer;
+    auto static Create(specification const& info, std::span<f32 const> data) -> buffer;
 
     auto static Load(path const& file) -> std::optional<buffer>;                                   // TODO: change to result
     auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>; // TODO: change to result

@@ -30,12 +30,12 @@ system::~system()
 
 auto system::create_output(specification const& info) const -> std::unique_ptr<detail::audio_stream>
 {
-    return std::make_unique<detail::audio_stream>(_devicePlayback, info);
+    return std::make_unique<detail::audio_stream>(_devicePlayback, info, false);
 }
 
 auto system::create_input() const -> std::unique_ptr<detail::audio_stream>
 {
-    return std::make_unique<detail::audio_stream>(_deviceRecording, specification {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE});
+    return std::make_unique<detail::audio_stream>(_deviceRecording, specification {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE}, true);
 }
 
 }
