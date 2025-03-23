@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <initializer_list>
 #include <span>
 
@@ -95,6 +96,18 @@ auto color_gradient::is_single_color() const -> bool
 auto color_gradient::first_color() const -> color
 {
     return _colorStops.begin()->second;
+}
+
+auto color_gradient::Lerp(color_gradient const& left, color_gradient const& right, f64 step) -> color_gradient
+{
+    assert(left._colorStops.size() == right._colorStops.size());
+    color_gradient retValue;
+    for (auto const& [k, v] : left._colorStops) {
+        assert(right._colorStops.contains(k));
+        retValue._colorStops[k] = color::Lerp(v, right._colorStops.at(k), step);
+    }
+
+    return retValue;
 }
 
 } // namespace gfx

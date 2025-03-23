@@ -54,6 +54,8 @@ public:
 
     auto operator==(color_gradient const& other) const -> bool = default;
 
+    auto static Lerp(color_gradient const& left, color_gradient const& right, f64 step) -> color_gradient;
+
 private:
     bool                 _premulAlpha {true};
     std::map<u32, color> _colorStops;
