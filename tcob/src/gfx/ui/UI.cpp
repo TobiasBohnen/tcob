@@ -7,7 +7,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <variant>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -203,6 +205,16 @@ auto global_to_parent(widget const& widget, point_i p) -> point_f
     }
 
     return retValue;
+}
+
+void ui_paint_transition(ui_paint& target, ui_paint const& left, ui_paint const& right, f64 step)
+{
+    if (auto const* lc {std::get_if<color>(&left)}) {
+        if (auto const* rc {std::get_if<color>(&right)}) {
+            target = color::Lerp(*lc, *rc, step);
+        }
+        return;
+    }
 }
 
 } // namespace ui

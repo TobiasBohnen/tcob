@@ -378,6 +378,8 @@ struct tooltip_event {
 TCOB_API auto global_to_content(widget const& widget, point_i p) -> point_f;
 TCOB_API auto global_to_parent(widget const& widget, point_i p) -> point_f;
 
+TCOB_API void ui_paint_transition(ui_paint& target, ui_paint const& left, ui_paint const& right, f64 step);
+
 ////////////////////////////////////////////////////////////
 
 namespace detail {

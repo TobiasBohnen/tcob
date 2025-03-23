@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <variant>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -22,11 +21,7 @@ void widget_style::Transition(widget_style& target, widget_style const& left, wi
 {
     target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
     target.Margin  = thickness::Lerp(left.Margin, right.Margin, step);
-    if (auto const* lc {std::get_if<color>(&left.Background)}) {
-        if (auto const* rc {std::get_if<color>(&right.Background)}) {
-            target.Background = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.Background, left.Background, right.Background, step);
 
     shadow_element::Transition(target.DropShadow, left.DropShadow, right.DropShadow, step);
     border_element::Transition(target.Border, left.Border, right.Border, step);
@@ -133,11 +128,7 @@ void item_style::Transition(item_style& target, item_style const& left, item_sty
 
 void thumb_element::Transition(thumb_element& target, thumb_element const& left, thumb_element const& right, f64 step)
 {
-    if (auto const* lc {std::get_if<color>(&left.Background)}) {
-        if (auto const* rc {std::get_if<color>(&right.Background)}) {
-            target.Background = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.Background, left.Background, right.Background, step);
 
     target.LongSide  = length::Lerp(left.LongSide, right.LongSide, step);
     target.ShortSide = length::Lerp(left.ShortSide, right.ShortSide, step);
@@ -146,21 +137,9 @@ void thumb_element::Transition(thumb_element& target, thumb_element const& left,
 
 void nav_arrow_element::Transition(nav_arrow_element& target, nav_arrow_element const& left, nav_arrow_element const& right, f64 step)
 {
-    if (auto const* lc {std::get_if<color>(&left.UpBackground)}) {
-        if (auto const* rc {std::get_if<color>(&right.UpBackground)}) {
-            target.UpBackground = color::Lerp(*lc, *rc, step);
-        }
-    }
-    if (auto const* lc {std::get_if<color>(&left.DownBackground)}) {
-        if (auto const* rc {std::get_if<color>(&right.DownBackground)}) {
-            target.DownBackground = color::Lerp(*lc, *rc, step);
-        }
-    }
-    if (auto const* lc {std::get_if<color>(&left.Foreground)}) {
-        if (auto const* rc {std::get_if<color>(&right.Foreground)}) {
-            target.Foreground = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.UpBackground, left.UpBackground, right.UpBackground, step);
+    ui_paint_transition(target.DownBackground, left.DownBackground, right.DownBackground, step);
+    ui_paint_transition(target.Foreground, left.Foreground, right.Foreground, step);
 
     target.Size = dimensions::Lerp(left.Size, right.Size, step);
     border_element::Transition(target.Border, left.Border, right.Border, step);
@@ -169,16 +148,8 @@ void nav_arrow_element::Transition(nav_arrow_element& target, nav_arrow_element 
 
 void bar_element::Transition(bar_element& target, bar_element const& left, bar_element const& right, f64 step)
 {
-    if (auto const* lc {std::get_if<color>(&left.LowerBackground)}) {
-        if (auto const* rc {std::get_if<color>(&right.LowerBackground)}) {
-            target.LowerBackground = color::Lerp(*lc, *rc, step);
-        }
-    }
-    if (auto const* lc {std::get_if<color>(&left.HigherBackground)}) {
-        if (auto const* rc {std::get_if<color>(&right.HigherBackground)}) {
-            target.HigherBackground = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.LowerBackground, left.LowerBackground, right.LowerBackground, step);
+    ui_paint_transition(target.HigherBackground, left.HigherBackground, right.HigherBackground, step);
 
     target.Size = length::Lerp(left.Size, right.Size, step);
     border_element::Transition(target.Border, left.Border, right.Border, step);
@@ -186,11 +157,7 @@ void bar_element::Transition(bar_element& target, bar_element const& left, bar_e
 
 void border_element::Transition(border_element& target, border_element const& left, border_element const& right, f64 step)
 {
-    if (auto const* lc {std::get_if<color>(&left.Background)}) {
-        if (auto const* rc {std::get_if<color>(&right.Background)}) {
-            target.Background = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.Background, left.Background, right.Background, step);
 
     target.Radius = length::Lerp(left.Radius, right.Radius, step);
     target.Size   = length::Lerp(left.Size, right.Size, step);
@@ -238,11 +205,7 @@ void deco_element::Transition(deco_element& target, deco_element const& left, de
 
 void tick_element::Transition(tick_element& target, tick_element const& left, tick_element const& right, f64 step)
 {
-    if (auto const* lc {std::get_if<color>(&left.Foreground)}) {
-        if (auto const* rc {std::get_if<color>(&right.Foreground)}) {
-            target.Foreground = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.Foreground, left.Foreground, right.Foreground, step);
 
     target.Size = length::Lerp(left.Size, right.Size, step);
 }
@@ -256,11 +219,7 @@ void item_element::Transition(item_element& target, item_element const& left, it
 {
     text_element::Transition(target.Text, left.Text, right.Text, step);
 
-    if (auto const* lc {std::get_if<color>(&left.Background)}) {
-        if (auto const* rc {std::get_if<color>(&right.Background)}) {
-            target.Background = color::Lerp(*lc, *rc, step);
-        }
-    }
+    ui_paint_transition(target.Background, left.Background, right.Background, step);
 
     border_element::Transition(target.Border, left.Border, right.Border, step);
     target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
