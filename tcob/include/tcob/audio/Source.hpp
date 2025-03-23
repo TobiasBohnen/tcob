@@ -8,6 +8,7 @@
 
 #include <any>
 #include <memory>
+#include <optional>
 #include <span>
 
 #include "tcob/audio/Audio.hpp"
@@ -27,7 +28,8 @@ public:
 
     prop<f32> Volume;
 
-    auto virtual duration() const -> milliseconds = 0;
+    auto virtual info() const -> std::optional<specification> = 0;
+    auto virtual duration() const -> milliseconds             = 0;
     auto status() const -> playback_status;
 
     void play();

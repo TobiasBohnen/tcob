@@ -24,7 +24,7 @@ public:
     explicit sound(buffer buffer);
     ~sound() override;
 
-    auto info() const -> std::optional<buffer::information>;
+    auto info() const -> std::optional<specification> override;
     auto duration() const -> milliseconds override;
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;

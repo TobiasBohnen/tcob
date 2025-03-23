@@ -24,7 +24,7 @@ public:
     music() = default;
     ~music() override;
 
-    auto info() const -> std::optional<buffer::information>;
+    auto info() const -> std::optional<specification> override;
     auto duration() const -> milliseconds override;
     auto playback_position() const -> milliseconds;
 

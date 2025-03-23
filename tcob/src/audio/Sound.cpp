@@ -10,6 +10,7 @@
 #include <optional>
 #include <utility>
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -31,9 +32,15 @@ sound::sound(buffer buffer)
 
 sound::~sound() = default;
 
-auto sound::info() const -> std::optional<buffer::information>
+auto sound::info() const -> std::optional<specification>
 {
-    return _buffer.info();
+    return _buffer.info().Specs;
+}
+
+auto sound::duration() const -> milliseconds
+{
+    auto const& info {_buffer.info()};
+    return milliseconds {(static_cast<f32>(info.FrameCount) / static_cast<f32>(info.Specs.SampleRate)) * 1000};
 }
 
 auto sound::load(path const& file) noexcept -> load_status
@@ -72,12 +79,6 @@ auto sound::on_start() -> bool
 auto sound::on_stop() -> bool
 {
     return true;
-}
-
-auto sound::duration() const -> milliseconds
-{
-    auto const& info {_buffer.info()};
-    return milliseconds {(static_cast<f32>(info.FrameCount) / static_cast<f32>(info.Specs.SampleRate)) * 1000};
 }
 
 }

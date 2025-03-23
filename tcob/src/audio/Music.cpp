@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -28,9 +29,25 @@ music::~music()
     stop_stream();
 }
 
-auto music::info() const -> std::optional<buffer::information>
+auto music::info() const -> std::optional<specification>
 {
-    return _info;
+    return _info->Specs;
+}
+
+auto music::duration() const -> milliseconds
+{
+    if (!_decoder || !_info) { return 0ms; }
+    if (!_info->Specs.is_valid()) { return 0ms; }
+
+    return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->Specs.SampleRate)) * 1000.0f};
+}
+
+auto music::playback_position() const -> milliseconds
+{
+    if (!_decoder || !_info) { return 0ms; }
+    if (!_info->Specs.is_valid()) { return 0ms; }
+
+    return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->Specs.SampleRate) / static_cast<f32>(_info->Specs.Channels)) * 1000.0f};
 }
 
 auto music::open(path const& file) -> load_status
@@ -53,22 +70,6 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
 
     create_output(_info->Specs);
     return load_status::Ok;
-}
-
-auto music::duration() const -> milliseconds
-{
-    if (!_decoder || !_info) { return 0ms; }
-    if (!_info->Specs.is_valid()) { return 0ms; }
-
-    return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->Specs.SampleRate)) * 1000.0f};
-}
-
-auto music::playback_position() const -> milliseconds
-{
-    if (!_decoder || !_info) { return 0ms; }
-    if (!_info->Specs.is_valid()) { return 0ms; }
-
-    return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->Specs.SampleRate) / static_cast<f32>(_info->Specs.Channels)) * 1000.0f};
 }
 
 auto music::on_start() -> bool
