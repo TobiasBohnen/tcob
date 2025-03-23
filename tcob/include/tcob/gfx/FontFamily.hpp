@@ -32,7 +32,7 @@ public:
     void static FindSources(font_family& fam, path const& source);
     void static SingleFont(font_family& fam, std::span<ubyte const> font);
 
-    static inline char const* asset_name {"font_family"};
+    static inline char const* AssetName {"font_family"};
 
 private:
     void set_source(font::style style, path const& file);

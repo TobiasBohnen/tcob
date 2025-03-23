@@ -36,7 +36,7 @@ public:
 
     auto bounds() const -> rect_i;
 
-    static inline char const* asset_name {"cursor"};
+    static inline char const* AssetName {"cursor"};
 
 protected:
     void on_update(milliseconds deltaTime) override;

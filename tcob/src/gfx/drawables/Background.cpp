@@ -52,7 +52,7 @@ parallax_background::parallax_background()
 
 auto parallax_background::add_layer(parallax_background_layer const& layer) -> uid
 {
-    uid const id {GetRandomID()};
+    uid const id {get_random_ID()};
 
     _layers.push_back({
         .ID            = id,

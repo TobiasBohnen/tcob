@@ -14,7 +14,7 @@ namespace tcob::assets {
 
 template <typename T>
 inline bucket<T>::bucket(group& parent)
-    : detail::bucket_base {T::asset_name}
+    : detail::bucket_base {T::AssetName}
     , _group {parent}
 {
 }
@@ -100,17 +100,17 @@ inline auto bucket<T>::parent() -> group&
 template <typename T>
 inline void group::add_bucket()
 {
-    if (_buckets.contains(T::asset_name)) {
+    if (_buckets.contains(T::AssetName)) {
         return;
     }
 
-    _buckets[T::asset_name] = std::make_unique<assets::bucket<T>>(*this);
+    _buckets[T::AssetName] = std::make_unique<assets::bucket<T>>(*this);
 }
 
 template <typename T>
 inline auto group::bucket() -> assets::bucket<T>*
 {
-    auto it {_buckets.find(T::asset_name)};
+    auto it {_buckets.find(T::AssetName)};
     return it != _buckets.end() ? dynamic_cast<assets::bucket<T>*>(it->second.get()) : nullptr;
 }
 
@@ -122,13 +122,13 @@ inline auto group::get(string const& assetName) const -> assets::asset_ptr<T>
         return assets::asset_ptr<T> {nullptr};
     }
 
-    return dynamic_cast<assets::bucket<T>*>(_buckets.at(T::asset_name).get())->get(assetName);
+    return dynamic_cast<assets::bucket<T>*>(_buckets.at(T::AssetName).get())->get(assetName);
 }
 
 template <typename T>
 inline auto group::has(string const& assetName) const -> bool
 {
-    auto it {_buckets.find(T::asset_name)};
+    auto it {_buckets.find(T::AssetName)};
     if (it == _buckets.end()) { return false; }
 
     return dynamic_cast<assets::bucket<T>*>(it->second.get())->has(assetName);

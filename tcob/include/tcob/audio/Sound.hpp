@@ -31,7 +31,7 @@ public:
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;
     auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<load_status>;
 
-    static inline char const* asset_name {"sound"};
+    static inline char const* AssetName {"sound"};
 
 private:
     auto on_start() -> bool override;

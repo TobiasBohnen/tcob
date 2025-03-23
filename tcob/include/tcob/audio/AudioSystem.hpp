@@ -23,7 +23,7 @@ public:
     system();
     ~system();
 
-    static inline char const* service_name {"audio_system"};
+    static inline char const* ServiceName {"audio_system"};
 
     auto create_output(specification const& info) const -> std::unique_ptr<detail::audio_stream>;
     auto create_input() const -> std::unique_ptr<detail::audio_stream>;

@@ -61,7 +61,7 @@ private:
 class TCOB_API decoder {
 public:
     struct factory : public type_factory<std::unique_ptr<decoder>> {
-        static inline char const* service_name {"audio::decoder::factory"};
+        static inline char const* ServiceName {"audio::decoder::factory"};
     };
 
     decoder();
@@ -93,7 +93,7 @@ private:
 class TCOB_API encoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<encoder>> {
-        static inline char const* service_name {"audio::encoder::factory"};
+        static inline char const* ServiceName {"audio::encoder::factory"};
     };
 
     encoder()          = default;

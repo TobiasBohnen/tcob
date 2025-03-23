@@ -80,7 +80,7 @@ public:
     template <std::derived_from<render_backend::texture_base> T>
     auto get_impl() const -> T*;
 
-    static inline char const* asset_name {"texture"};
+    static inline char const* AssetName {"texture"};
 
 private:
     std::unique_ptr<render_backend::texture_base> _impl;

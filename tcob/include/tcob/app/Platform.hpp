@@ -62,7 +62,7 @@ public:
 
     auto static IsRunningOnWine() -> bool;
 
-    static inline char const* service_name {"platform"};
+    static inline char const* ServiceName {"platform"};
 
 private:
     void init_locales();

@@ -26,7 +26,7 @@ namespace tcob::gfx {
 class TCOB_API render_system : public non_copyable {
 public:
     struct factory : public type_factory<std::shared_ptr<render_system>> {
-        static inline char const* service_name {"gfx::render_system::factory"};
+        static inline char const* ServiceName {"gfx::render_system::factory"};
     };
 
     struct capabilities {
@@ -64,7 +64,7 @@ public:
     auto virtual create_vertex_array [[nodiscard]] (buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> = 0;
     auto virtual create_window [[nodiscard]] (size_i size) -> std::unique_ptr<render_backend::window_base>                         = 0;
 
-    static inline char const* service_name {"render_system"};
+    static inline char const* ServiceName {"render_system"};
 
 private:
     statistics                             _stats;

@@ -31,7 +31,7 @@ public:
     auto open [[nodiscard]] (path const& file) -> load_status;
     auto open [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) -> load_status;
 
-    static inline char const* asset_name {"music"};
+    static inline char const* AssetName {"music"};
 
 private:
     auto on_start() -> bool override;

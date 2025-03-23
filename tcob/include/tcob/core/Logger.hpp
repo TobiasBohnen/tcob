@@ -47,7 +47,7 @@ public:
 
     level MinLevel {level::Debug};
 
-    static inline char const* service_name {"logger"};
+    static inline char const* ServiceName {"logger"};
 
 protected:
     void virtual log(string const& message, level level) const = 0;

@@ -103,7 +103,7 @@ namespace random {
 
 using rng = random::rng_xoroshiro_128_plus_plus;
 
-TCOB_API auto GetRandomID() -> uid;
+TCOB_API auto get_random_ID() -> uid;
 
 }
 

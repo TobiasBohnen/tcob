@@ -25,7 +25,7 @@ public:
     template <std::derived_from<render_backend::shader_base> T>
     auto get_impl() const -> T*;
 
-    static inline char const* asset_name {"shader"};
+    static inline char const* AssetName {"shader"};
 
 private:
     std::unique_ptr<render_backend::shader_base> _impl;

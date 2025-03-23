@@ -40,7 +40,7 @@ public:
     auto get_frame_at(milliseconds time) const -> string;
     auto duration() const -> milliseconds;
 
-    static inline char const* asset_name {"frame_animation"};
+    static inline char const* AssetName {"frame_animation"};
 };
 
 using frame_animation_tween = callable_tween<frame_animation>;

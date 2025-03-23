@@ -55,7 +55,7 @@ public:
 
     auto thread_count() const -> isize;
 
-    static inline char const* service_name {"task_manager"};
+    static inline char const* ServiceName {"task_manager"};
 
 private:
     void add_task(task_func&& func);

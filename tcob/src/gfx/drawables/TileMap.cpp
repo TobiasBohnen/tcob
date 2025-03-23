@@ -56,7 +56,7 @@ tilemap_base::tilemap_base()
 
 auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
 {
-    uid const id {GetRandomID()};
+    uid const id {get_random_ID()};
 
     _layers.push_back({
         .ID           = id,

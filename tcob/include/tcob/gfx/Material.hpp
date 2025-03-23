@@ -30,7 +30,7 @@ public:
     stencil_op   StencilOp {stencil_op::Keep};
     u8           StencilRef {1};
 
-    static inline char const* asset_name {"material"};
+    static inline char const* AssetName {"material"};
 
     auto static Empty() -> assets::owning_asset_ptr<material>;
 

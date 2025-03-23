@@ -58,7 +58,7 @@ public:
 
     auto get_impl() const -> tsf*;
 
-    static inline char const* asset_name {"sound_font"};
+    static inline char const* AssetName {"sound_font"};
 
 private:
     void reset() const;

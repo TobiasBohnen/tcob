@@ -91,7 +91,7 @@ private:
 class TCOB_API image_decoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<image_decoder>> {
-        static inline char const* service_name {"gfx::image_decoder::factory"};
+        static inline char const* ServiceName {"gfx::image_decoder::factory"};
     };
 
     image_decoder()          = default;
@@ -106,7 +106,7 @@ public:
 class TCOB_API image_encoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<image_encoder>> {
-        static inline char const* service_name {"gfx::image_encoder::factory"};
+        static inline char const* ServiceName {"gfx::image_encoder::factory"};
     };
 
     image_encoder()          = default;
@@ -120,7 +120,7 @@ public:
 class TCOB_API animated_image_decoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<animated_image_decoder>> {
-        static inline char const* service_name {"gfx::animated_image_decoder::factory"};
+        static inline char const* ServiceName {"gfx::animated_image_decoder::factory"};
     };
 
     enum class status : u8 {
@@ -153,7 +153,7 @@ private:
 class TCOB_API animated_image_encoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<animated_image_encoder>> {
-        static inline char const* service_name {"gfx::animated_image_encoder::factory"};
+        static inline char const* ServiceName {"gfx::animated_image_encoder::factory"};
     };
 
     animated_image_encoder()          = default;

@@ -49,7 +49,7 @@ private:
 class TCOB_API loader_manager : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<loader_manager>, group&> {
-        static inline char const* service_name {"assets::loader_manager::factory"};
+        static inline char const* ServiceName {"assets::loader_manager::factory"};
     };
 
     loader_manager()          = default;

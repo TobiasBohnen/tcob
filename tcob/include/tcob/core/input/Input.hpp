@@ -264,7 +264,7 @@ public:
 
     void process_events(SDL_Event* ev);
 
-    static inline char const* service_name {"input_system"};
+    static inline char const* ServiceName {"input_system"};
 
 private:
     std::unordered_map<i32, std::shared_ptr<controller>> _controllers;

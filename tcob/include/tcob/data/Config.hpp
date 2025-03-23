@@ -74,7 +74,7 @@ using result = tcob::result<T, error_code>;
 class TCOB_API text_reader : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<text_reader>> {
-        static inline char const* service_name {"data::config::text_reader::factory"};
+        static inline char const* ServiceName {"data::config::text_reader::factory"};
     };
 
     virtual ~text_reader() = default;
@@ -88,7 +88,7 @@ public:
 class TCOB_API text_writer : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<text_writer>> {
-        static inline char const* service_name {"data::config::text_writer::factory"};
+        static inline char const* ServiceName {"data::config::text_writer::factory"};
     };
 
     virtual ~text_writer() = default;
@@ -102,7 +102,7 @@ public:
 class TCOB_API binary_reader : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<binary_reader>> {
-        static inline char const* service_name {"data::config::binary_reader::factory"};
+        static inline char const* ServiceName {"data::config::binary_reader::factory"};
     };
 
     virtual ~binary_reader() = default;
@@ -116,7 +116,7 @@ public:
 class TCOB_API binary_writer : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<binary_writer>> {
-        static inline char const* service_name {"data::config::binary_writer::factory"};
+        static inline char const* ServiceName {"data::config::binary_writer::factory"};
     };
 
     virtual ~binary_writer() = default;

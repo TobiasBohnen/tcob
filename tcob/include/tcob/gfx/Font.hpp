@@ -124,7 +124,7 @@ public:
 
     auto get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>;
 
-    static inline char const* asset_name {"font"};
+    static inline char const* AssetName {"font"};
 
     auto static Init() -> bool;
     void static Done();

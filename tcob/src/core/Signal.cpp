@@ -25,7 +25,7 @@ namespace detail {
 
     auto signal_base::next_id() const -> uid
     {
-        return GetRandomID();
+        return get_random_ID();
     }
 
 }
