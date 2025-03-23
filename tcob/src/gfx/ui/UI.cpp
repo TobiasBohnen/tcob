@@ -242,7 +242,7 @@ void ui_paint_transition(ui_paint& target, ui_paint const& left, ui_paint const&
         if (auto const* rc {std::get_if<box_gradient>(&right)}) {
             box_gradient grad;
             grad.Radius  = length::Lerp(lc->Radius, rc->Radius, step);
-            grad.Feather = length::Lerp(lc->Radius, rc->Radius, step);
+            grad.Feather = length::Lerp(lc->Feather, rc->Feather, step);
             grad.Colors  = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
             target       = grad;
         }
