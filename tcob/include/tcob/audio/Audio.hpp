@@ -6,6 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+// TODO:
+// master volume/pan in audio::system -> signals
+// source position and listener -> volume scaling
+
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
