@@ -6,7 +6,6 @@
 #include "tcob/gfx/ui/widgets/Button.hpp"
 
 #include "tcob/core/Rect.hpp"
-#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -26,7 +25,7 @@ button::button(init const& wi)
 {
     Label.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Label changed"); });
     Icon.Changed.connect([this](auto const& value) {
-        animation_frames(value.Animation ? *value.Animation : gfx::frame_animation {});
+        animation_frames(value.Animation);
         request_redraw(this->name() + ": Icon changed");
     });
 

@@ -8,7 +8,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -19,7 +18,7 @@ image_box::image_box(init const& wi)
     : widget {wi}
 {
     Image.Changed.connect([this](auto const& value) {
-        animation_frames(value.Animation ? *value.Animation : gfx::frame_animation {});
+        animation_frames(value.Animation);
         request_redraw(this->name() + ": Image changed");
     });
 

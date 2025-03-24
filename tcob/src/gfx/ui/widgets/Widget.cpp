@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 #include <cassert>
+#include <optional>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
@@ -555,9 +556,9 @@ void widget::stop_animation()
     _animationTweet.stop();
 }
 
-void widget::animation_frames(gfx::frame_animation const& ani)
+void widget::animation_frames(std::optional<gfx::frame_animation> const& ani)
 {
-    _animationTweet.animation(ani);
+    _animationTweet.animation(ani ? *ani : gfx::frame_animation {});
 }
 
 void widget::on_animation_frame_changed(string const& /* val */)

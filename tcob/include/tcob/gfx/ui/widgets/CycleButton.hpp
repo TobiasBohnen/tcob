@@ -50,7 +50,11 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
+    void on_animation_frame_changed(string const& val) override;
+
 private:
+    auto is_select_valid() const -> bool;
+
     void select_next();
 
     std::vector<list_item> _items;

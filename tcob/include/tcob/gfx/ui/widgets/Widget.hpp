@@ -8,6 +8,7 @@
 
 #include <any>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 #include "tcob/core/Common.hpp"
@@ -168,7 +169,7 @@ protected:
 
     auto virtual is_inert() const -> bool;
 
-    void animation_frames(gfx::frame_animation const& ani);
+    void animation_frames(std::optional<gfx::frame_animation> const& ani);
     void virtual on_animation_frame_changed(string const& val);
 
 private:

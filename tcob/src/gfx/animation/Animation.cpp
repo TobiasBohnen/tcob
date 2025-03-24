@@ -14,6 +14,8 @@ auto frame_animation::operator()(f64 t) const -> string
 
 auto frame_animation::get_frame_at(milliseconds time) const -> string
 {
+    if (Frames.empty()) { return ""; }
+
     for (auto const& frame : Frames) {
         if (time <= frame.Duration) { return frame.Name; }
         time -= frame.Duration;

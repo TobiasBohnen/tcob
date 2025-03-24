@@ -86,10 +86,7 @@ void icon_tweener::update(milliseconds deltaTime)
 void icon_tweener::animation(gfx::frame_animation const& ani)
 {
     _ani = ani;
-    if (_ani.Frames.empty()) {
-        _tween = nullptr;
-        return;
-    }
+    if (_ani.Frames.empty()) { stop(); }
 
     _tween = std::make_unique<gfx::frame_animation_tween>(_ani.duration(), _ani);
     _tween->Value.Changed.connect([this](auto const& str) {
