@@ -277,6 +277,14 @@ void drop_down_list::on_update(milliseconds deltaTime)
     _vScrollbar.update(deltaTime);
 }
 
+void drop_down_list::on_animation_step(string const& val)
+{
+    if (_isExtended && SelectedItemIndex >= 0) {
+        _items[SelectedItemIndex].Icon.Region = val;
+        request_redraw(this->name() + ": Animation Frame changed ");
+    }
+}
+
 void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
 {
     rect_f    listRect {bounds};

@@ -30,9 +30,7 @@ void widget_tweener::start(f32 toValue, milliseconds delay)
 
 void widget_tweener::update(milliseconds deltaTime)
 {
-    if (_tween) {
-        _tween->update(deltaTime);
-    }
+    if (_tween) { _tween->update(deltaTime); }
 }
 
 auto widget_tweener::current_value() const -> f32
@@ -67,25 +65,19 @@ void animation_tweener::start(gfx::frame_animation const& ani, playback_mode mod
     if (ani.Frames.empty()) { stop(); }
 
     _tween = std::make_unique<gfx::frame_animation_tween>(ani.duration(), ani);
-    _tween->Value.Changed.connect([this](auto const& str) {
-        Changed(str);
-    });
+    _tween->Value.Changed.connect([this](auto const& str) { Changed(str); });
 
     _tween->start(mode);
 }
 
 void animation_tweener::stop()
 {
-    if (_tween) {
-        _tween->stop();
-    }
+    if (_tween) { _tween->stop(); }
 }
 
 void animation_tweener::update(milliseconds deltaTime)
 {
-    if (_tween) {
-        _tween->update(deltaTime);
-    }
+    if (_tween) { _tween->update(deltaTime); }
 }
 
 } // namespace ui

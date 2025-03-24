@@ -95,6 +95,17 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
     request_redraw(this->name() + ": tab renamed");
 }
 
+void tab_container::change_tab_label(widget* tab, list_item const& label)
+{
+    for (isize i {0}; i < std::ssize(_tabs); ++i) {
+        if (_tabs[i].get() == tab) {
+            _tabLabels[i] = label;
+            break;
+        }
+    }
+    request_redraw(this->name() + ": tab label changed");
+}
+
 auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveTabIndex < 0 || ActiveTabIndex >= std::ssize(_tabs)) {
@@ -238,6 +249,14 @@ void tab_container::on_mouse_down(input::mouse::button_event const& ev)
 
 void tab_container::on_update(milliseconds /* deltaTime */)
 {
+}
+
+void tab_container::on_animation_step(string const& val)
+{
+    if (ActiveTabIndex >= 0) {
+        _tabLabels[ActiveTabIndex].Icon.Region = val;
+        request_redraw(this->name() + ": Animation Frame changed ");
+    }
 }
 
 void tab_container::offset_tab_content(rect_f& bounds, style const& style) const

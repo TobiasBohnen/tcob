@@ -125,16 +125,26 @@ auto grid_view::row_count() const -> isize
     return std::ssize(_rows);
 }
 
-auto grid_view::get_cell(point_i idx) const -> utf8_string
+auto get_cell_impl(point_i idx, auto&& headers, auto&& rows) -> decltype(&headers[0])
 {
     if (idx.Y == 0) {
-        if (idx.X >= std::ssize(_columnHeaders)) { return ""; }
-        return _columnHeaders[idx.X].Text;
+        if (idx.X >= std::ssize(headers)) { return nullptr; }
+        return &headers[idx.X];
     }
 
-    if (idx.Y > std::ssize(_rows)) { return ""; }
-    if (idx.X >= std::ssize(_rows[idx.Y - 1])) { return ""; }
-    return _rows[idx.Y - 1][idx.X].Text;
+    if (idx.Y > std::ssize(rows)) { return nullptr; }
+    if (idx.X >= std::ssize(rows[idx.Y - 1])) { return nullptr; }
+    return &rows[idx.Y - 1][idx.X];
+}
+
+auto grid_view::get_cell(point_i idx) -> list_item*
+{
+    return get_cell_impl(idx, _columnHeaders, _rows);
+}
+
+auto grid_view::get_cell(point_i idx) const -> list_item const*
+{
+    return get_cell_impl(idx, _columnHeaders, _rows);
 }
 
 auto grid_view::get_row(isize idx) const -> std::vector<list_item> const&
@@ -236,6 +246,14 @@ void grid_view::on_draw(widget_painter& painter)
     }
 }
 
+void grid_view::on_animation_step(string const& val)
+{
+    if (SelectedCellIndex != INVALID) {
+        _rows[SelectedCellIndex->Y - 1][SelectedCellIndex->X].Icon.Region = val;
+        request_redraw(this->name() + ": Animation Frame changed ");
+    }
+}
+
 void grid_view::on_mouse_leave()
 {
     vscroll_widget::on_mouse_leave();
@@ -290,12 +308,12 @@ auto grid_view::attributes() const -> widget_attributes
 
     retValue["selected_index"] = SelectedCellIndex();
     if (SelectedCellIndex() != INVALID) {
-        retValue["selected"] = get_cell(SelectedCellIndex);
+        retValue["selected"] = get_cell(SelectedCellIndex)->Text;
     }
 
     retValue["hover_index"] = HoveredCellIndex();
     if (HoveredCellIndex() != INVALID) {
-        retValue["hover"] = get_cell(HoveredCellIndex);
+        retValue["hover"] = get_cell(HoveredCellIndex)->Text;
     }
 
     return retValue;

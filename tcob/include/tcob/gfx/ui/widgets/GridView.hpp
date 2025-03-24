@@ -58,13 +58,16 @@ public:
     void clear_rows();
     auto row_count() const -> isize;
 
-    auto get_cell(point_i idx) const -> utf8_string;
+    auto get_cell(point_i idx) -> list_item*;
+    auto get_cell(point_i idx) const -> list_item const*;
     auto get_row(isize idx) const -> std::vector<list_item> const&;
 
     void prepare_redraw() override;
 
 protected:
     void on_draw(widget_painter& painter) override;
+
+    void on_animation_step(string const& val) override;
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;

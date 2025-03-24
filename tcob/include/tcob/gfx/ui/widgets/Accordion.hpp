@@ -48,6 +48,7 @@ public:
     void clear_sections();
 
     void change_section_label(widget* sec, utf8_string const& label);
+    void change_section_label(widget* sec, list_item const& label);
 
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
@@ -64,6 +65,7 @@ protected:
     void on_mouse_down(input::mouse::button_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
+    void on_animation_step(string const& val) override;
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 

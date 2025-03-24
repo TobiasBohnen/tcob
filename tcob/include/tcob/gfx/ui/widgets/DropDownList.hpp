@@ -69,6 +69,7 @@ protected:
     void on_focus_lost() override;
 
     void on_update(milliseconds deltaTime) override;
+    void on_animation_step(string const& val) override;
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 

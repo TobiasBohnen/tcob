@@ -107,6 +107,17 @@ void accordion::change_section_label(widget* sec, utf8_string const& label)
     request_redraw(this->name() + ": section renamed");
 }
 
+void accordion::change_section_label(widget* sec, list_item const& label)
+{
+    for (usize i {0}; i < _sections.size(); ++i) {
+        if (_sections[i].get() == sec) {
+            _sectionLabels[i] = label;
+            break;
+        }
+    }
+    request_redraw(this->name() + ": section label changed");
+}
+
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
 {
     if (ActiveSectionIndex < 0 || ActiveSectionIndex >= std::ssize(_sections)) {
@@ -235,6 +246,14 @@ void accordion::on_mouse_down(input::mouse::button_event const& ev)
 void accordion::on_update(milliseconds deltaTime)
 {
     _tween.update(deltaTime);
+}
+
+void accordion::on_animation_step(string const& val)
+{
+    if (ActiveSectionIndex >= 0) {
+        _sectionLabels[ActiveSectionIndex].Icon.Region = val;
+        request_redraw(this->name() + ": Animation Frame changed ");
+    }
 }
 
 void accordion::offset_section_content(rect_f& bounds, style const& style) const

@@ -190,6 +190,14 @@ void list_box::on_update(milliseconds deltaTime)
     }
 }
 
+void list_box::on_animation_step(string const& val)
+{
+    if (SelectedItemIndex >= 0) {
+        (Filter->empty() ? _items : _filteredItems)[SelectedItemIndex].Icon.Region = val;
+        request_redraw(this->name() + ": Animation Frame changed ");
+    }
+}
+
 void list_box::on_key_down(input::keyboard::event const& ev)
 {
     using namespace tcob::enum_ops;
