@@ -249,8 +249,11 @@ void grid_view::on_draw(widget_painter& painter)
 void grid_view::on_animation_step(string const& val)
 {
     if (SelectedCellIndex != INVALID) {
-        _rows[SelectedCellIndex->Y - 1][SelectedCellIndex->X].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
+        auto& cell {_rows[SelectedCellIndex->Y - 1][SelectedCellIndex->X]};
+        cell.Icon.Region = val;
+        if (cell.Icon.Texture) {
+            request_redraw(this->name() + ": Animation Frame changed ");
+        }
     }
 }
 

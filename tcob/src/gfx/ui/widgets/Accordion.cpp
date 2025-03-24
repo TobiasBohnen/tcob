@@ -251,8 +251,11 @@ void accordion::on_update(milliseconds deltaTime)
 void accordion::on_animation_step(string const& val)
 {
     if (ActiveSectionIndex >= 0) {
-        _sectionLabels[ActiveSectionIndex].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
+        auto& sec {_sectionLabels[ActiveSectionIndex]};
+        sec.Icon.Region = val;
+        if (sec.Icon.Texture) {
+            request_redraw(this->name() + ": Animation Frame changed ");
+        }
     }
 }
 

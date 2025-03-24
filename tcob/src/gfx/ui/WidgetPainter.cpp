@@ -329,7 +329,7 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
     rect_f contentRect {rect};
 
     bool const drawText {!text.empty() && style.Font};
-    bool const drawIcon {icon.Texture};
+    bool const drawIcon {icon.Texture && icon.Texture->has_region(icon.Region)};
 
     if (drawText && drawIcon) {
         rect_f textRect {contentRect};

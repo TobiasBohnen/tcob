@@ -254,8 +254,11 @@ void tab_container::on_update(milliseconds /* deltaTime */)
 void tab_container::on_animation_step(string const& val)
 {
     if (ActiveTabIndex >= 0) {
-        _tabLabels[ActiveTabIndex].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
+        auto& tab {_tabLabels[ActiveTabIndex]};
+        tab.Icon.Region = val;
+        if (tab.Icon.Texture) {
+            request_redraw(this->name() + ": Animation Frame changed ");
+        }
     }
 }
 

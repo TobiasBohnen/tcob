@@ -193,8 +193,11 @@ void list_box::on_update(milliseconds deltaTime)
 void list_box::on_animation_step(string const& val)
 {
     if (SelectedItemIndex >= 0) {
-        (Filter->empty() ? _items : _filteredItems)[SelectedItemIndex].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
+        auto& item {(Filter->empty() ? _items : _filteredItems)[SelectedItemIndex]};
+        item.Icon.Region = val;
+        if (item.Icon.Texture) {
+            request_redraw(this->name() + ": Animation Frame changed ");
+        }
     }
 }
 

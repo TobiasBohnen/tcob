@@ -280,8 +280,11 @@ void drop_down_list::on_update(milliseconds deltaTime)
 void drop_down_list::on_animation_step(string const& val)
 {
     if (_isExtended && SelectedItemIndex >= 0) {
-        _items[SelectedItemIndex].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
+        auto& item {_items[SelectedItemIndex]};
+        item.Icon.Region = val;
+        if (item.Icon.Texture) {
+            request_redraw(this->name() + ": Animation Frame changed ");
+        }
     }
 }
 
