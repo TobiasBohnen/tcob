@@ -51,6 +51,7 @@ public:
 
     auto is_single_color() const -> bool;
     auto first_color() const -> color;
+    auto get_color_at(u32 key) const -> color;
 
     auto operator==(color_gradient const& other) const -> bool = default;
 

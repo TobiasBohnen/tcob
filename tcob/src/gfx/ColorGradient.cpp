@@ -9,6 +9,8 @@
 #include <array>
 #include <cassert>
 #include <initializer_list>
+#include <iterator>
+#include <set>
 #include <span>
 
 #include "tcob/core/Color.hpp"
@@ -50,9 +52,7 @@ color_gradient::color_gradient(std::span<color_stop const> colorStops, bool preM
 {
     for (auto const& cs : colorStops) {
         u32 pos {static_cast<u32>(cs.Position * (Size - 1))};
-        if (_colorStops.contains(pos)) {
-            pos++;
-        }
+        if (_colorStops.contains(pos)) { pos++; }
         _colorStops[std::min(pos, Size - 1)] = cs.Value;
     }
 }
@@ -98,13 +98,35 @@ auto color_gradient::first_color() const -> color
     return _colorStops.begin()->second;
 }
 
+auto color_gradient::get_color_at(u32 key) const -> color
+{
+    if (_colorStops.empty()) { return {}; }
+
+    auto it {_colorStops.lower_bound(key)};
+    if (it == _colorStops.begin()) { return it->second; }
+    if (it == _colorStops.end()) { return std::prev(it)->second; }
+
+    auto upper {it};
+    auto lower {std::prev(it)};
+
+    u64 const range {upper->first - lower->first};
+    f64 const t {(key - lower->first) / static_cast<f64>(range)};
+    return color::Lerp(lower->second, upper->second, t);
+}
+
 auto color_gradient::Lerp(color_gradient const& left, color_gradient const& right, f64 step) -> color_gradient
 {
-    assert(left._colorStops.size() == right._colorStops.size());
     color_gradient retValue;
-    for (auto const& [k, v] : left._colorStops) {
-        assert(right._colorStops.contains(k));
-        retValue._colorStops[k] = color::Lerp(v, right._colorStops.at(k), step);
+
+    std::set<u32> allKeys;
+    for (auto const& [k, _] : left._colorStops) { allKeys.insert(k); }
+    for (auto const& [k, _] : right._colorStops) { allKeys.insert(k); }
+
+    for (auto k : allKeys) {
+        color const leftColor {left._colorStops.contains(k) ? left._colorStops.at(k) : left.get_color_at(k)};
+        color const rightColor {right._colorStops.contains(k) ? right._colorStops.at(k) : right.get_color_at(k)};
+
+        retValue._colorStops[k] = color::Lerp(leftColor, rightColor, step);
     }
 
     return retValue;
