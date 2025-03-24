@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/ui/widgets/ImageBox.hpp"
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -19,13 +18,8 @@ namespace tcob::ui {
 image_box::image_box(init const& wi)
     : widget {wi}
 {
-    _imageTween.Changed.connect([this](auto const& str) {
-        (*Image).Region = str;
-        request_redraw(this->name() + ": Icon changed ");
-    });
-
     Image.Changed.connect([this](auto const& value) {
-        _imageTween.animation(value.Animation ? *value.Animation : gfx::frame_animation {});
+        animation_frames(value.Animation ? *value.Animation : gfx::frame_animation {});
         request_redraw(this->name() + ": Image changed");
     });
 
@@ -33,11 +27,6 @@ image_box::image_box(init const& wi)
     Fit(fit_mode::Contain);
 
     Class("image_box");
-}
-
-void image_box::start_animation(playback_mode mode)
-{
-    _imageTween.start(mode);
 }
 
 void image_box::on_draw(widget_painter& painter)
@@ -90,9 +79,14 @@ void image_box::on_draw(widget_painter& painter)
     canvas.draw_image(tex.ptr(), Image->Region, targetRect);
 }
 
-void image_box::on_update(milliseconds deltaTime)
+void image_box::on_update(milliseconds /* deltaTime */)
 {
-    _imageTween.update(deltaTime);
+}
+
+void image_box::on_animation_frame_changed(string const& val)
+{
+    (*Image).Region = val;
+    request_redraw(this->name() + ": Animation Frame changed ");
 }
 
 auto image_box::attributes() const -> widget_attributes

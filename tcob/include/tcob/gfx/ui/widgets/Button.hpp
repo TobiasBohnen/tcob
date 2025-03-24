@@ -6,11 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
-#include "tcob/gfx/ui/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -30,17 +28,15 @@ public:
     prop<utf8_string> Label;
     prop<icon>        Icon;
 
-    void start_animation(playback_mode mode);
-
 protected:
     void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
+    void on_animation_frame_changed(string const& val) override;
 
     auto attributes() const -> widget_attributes override;
 
 private:
     button::style _style;
-    icon_tweener  _iconTween;
 };
 }

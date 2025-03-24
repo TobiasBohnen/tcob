@@ -48,6 +48,7 @@ public:
     signal<string const> Changed;
 
     void start(playback_mode mode);
+    void stop();
 
     void update(milliseconds deltaTime);
 

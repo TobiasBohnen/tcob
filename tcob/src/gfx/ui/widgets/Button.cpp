@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/ui/widgets/Button.hpp"
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -25,23 +24,13 @@ void button::style::Transition(style& target, style const& left, style const& ri
 button::button(init const& wi)
     : widget {wi}
 {
-    _iconTween.Changed.connect([this](auto const& str) {
-        (*Icon).Region = str;
-        request_redraw(this->name() + ": Icon changed ");
-    });
-
     Label.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Label changed"); });
     Icon.Changed.connect([this](auto const& value) {
-        _iconTween.animation(value.Animation ? *value.Animation : gfx::frame_animation {});
+        animation_frames(value.Animation ? *value.Animation : gfx::frame_animation {});
         request_redraw(this->name() + ": Icon changed");
     });
 
     Class("button");
-}
-
-void button::start_animation(playback_mode mode)
-{
-    _iconTween.start(mode);
 }
 
 void button::on_draw(widget_painter& painter)
@@ -53,9 +42,14 @@ void button::on_draw(widget_painter& painter)
     painter.draw_text_and_icon(_style.Text, rect, Label(), Icon());
 }
 
-void button::on_update(milliseconds deltaTime)
+void button::on_update(milliseconds /* deltaTime */)
 {
-    _iconTween.update(deltaTime);
+}
+
+void button::on_animation_frame_changed(string const& val)
+{
+    (*Icon).Region = val;
+    request_redraw(this->name() + ": Animation Frame changed ");
 }
 
 auto button::attributes() const -> widget_attributes

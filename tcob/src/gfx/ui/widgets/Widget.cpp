@@ -7,9 +7,11 @@
 
 #include <cassert>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
@@ -41,6 +43,8 @@ widget::widget(init const& wi)
 
     static i32 tabIndex {0};
     (*TabStop).Index = tabIndex++;
+
+    _animationTweet.Changed.connect([this](auto const& val) { on_animation_frame_changed(val); });
 }
 
 void widget::on_bounds_changed()
@@ -126,6 +130,8 @@ void widget::update(milliseconds deltaTime)
         if (v.is_active()) { request_redraw(this->name() + ": Item transition"); }
         v.update(deltaTime);
     }
+
+    _animationTweet.update(deltaTime);
 
     on_update(deltaTime);
 }
@@ -537,6 +543,25 @@ auto widget::get_orientation() const -> orientation
 auto widget::is_inert() const -> bool
 {
     return false;
+}
+
+void widget::start_animation(playback_mode mode)
+{
+    _animationTweet.start(mode);
+}
+
+void widget::stop_animation()
+{
+    _animationTweet.stop();
+}
+
+void widget::animation_frames(gfx::frame_animation const& ani)
+{
+    _animationTweet.animation(ani);
+}
+
+void widget::on_animation_frame_changed(string const& /* val */)
+{
 }
 
 void widget::activate()

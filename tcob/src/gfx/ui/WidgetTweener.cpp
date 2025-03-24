@@ -69,6 +69,13 @@ void icon_tweener::start(playback_mode mode)
     }
 }
 
+void icon_tweener::stop()
+{
+    if (_tween) {
+        _tween->stop();
+    }
+}
+
 void icon_tweener::update(milliseconds deltaTime)
 {
     if (_tween) {
