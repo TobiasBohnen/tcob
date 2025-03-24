@@ -6,7 +6,6 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 #include <cassert>
-#include <optional>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
@@ -45,7 +44,7 @@ widget::widget(init const& wi)
     static i32 tabIndex {0};
     (*TabStop).Index = tabIndex++;
 
-    _animationTweet.Changed.connect([this](auto const& val) { on_animation_frame_changed(val); });
+    _animationTween.Changed.connect([this](auto const& val) { on_animation_step(val); });
 }
 
 void widget::on_bounds_changed()
@@ -132,7 +131,7 @@ void widget::update(milliseconds deltaTime)
         v.update(deltaTime);
     }
 
-    _animationTweet.update(deltaTime);
+    _animationTween.update(deltaTime);
 
     on_update(deltaTime);
 }
@@ -546,22 +545,17 @@ auto widget::is_inert() const -> bool
     return false;
 }
 
-void widget::start_animation(playback_mode mode)
+void widget::start_animation(gfx::frame_animation const& ani, playback_mode mode)
 {
-    _animationTweet.start(mode);
+    _animationTween.start(ani, mode);
 }
 
 void widget::stop_animation()
 {
-    _animationTweet.stop();
+    _animationTween.stop();
 }
 
-void widget::animation_frames(std::optional<gfx::frame_animation> const& ani)
-{
-    _animationTweet.animation(ani ? *ani : gfx::frame_animation {});
-}
-
-void widget::on_animation_frame_changed(string const& /* val */)
+void widget::on_animation_step(string const& /* val */)
 {
 }
 

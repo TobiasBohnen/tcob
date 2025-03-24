@@ -31,7 +31,7 @@ protected:
     void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
-    void on_animation_frame_changed(string const& val) override;
+    void on_animation_step(string const& val) override;
 
     auto attributes() const -> widget_attributes override;
 

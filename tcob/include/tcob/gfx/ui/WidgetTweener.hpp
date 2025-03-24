@@ -41,21 +41,18 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API icon_tweener {
+class TCOB_API animation_tweener {
 public:
-    icon_tweener();
+    animation_tweener();
 
     signal<string const> Changed;
 
-    void start(playback_mode mode);
+    void start(gfx::frame_animation const& ani, playback_mode mode);
     void stop();
 
     void update(milliseconds deltaTime);
 
-    void animation(gfx::frame_animation const& ani);
-
 private:
-    gfx::frame_animation                        _ani;
     std::unique_ptr<gfx::frame_animation_tween> _tween;
 };
 

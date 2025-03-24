@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <optional>
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -27,10 +26,7 @@ cycle_button::cycle_button(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([this](auto const& val) {
-        animation_frames(val >= 0 ? selected_item().Icon.Animation : std::nullopt);
-        request_redraw(this->name() + ": SelectedItem changed");
-    });
+    SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
 
     Class("cycle_button");
@@ -99,6 +95,14 @@ void cycle_button::on_update(milliseconds /*deltaTime*/)
 {
 }
 
+void cycle_button::on_animation_step(string const& val)
+{
+    if (SelectedItemIndex >= 0) {
+        _items[SelectedItemIndex].Icon.Region = val;
+        request_redraw(this->name() + ": Animation Frame changed ");
+    }
+}
+
 void cycle_button::on_mouse_wheel(input::mouse::wheel_event const& /* ev */)
 {
     select_next();
@@ -119,14 +123,6 @@ auto cycle_button::attributes() const -> widget_attributes
     }
 
     return retValue;
-}
-
-void cycle_button::on_animation_frame_changed(string const& val)
-{
-    if (SelectedItemIndex >= 0) {
-        _items[SelectedItemIndex].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
-    }
 }
 
 void cycle_button::select_next()

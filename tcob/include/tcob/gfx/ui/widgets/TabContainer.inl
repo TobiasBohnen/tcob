@@ -34,9 +34,7 @@ inline auto tab_container::create_tab(utf8_string const& name, list_item const& 
     _tabs.push_back(retValue);
 
     _tabLabels.push_back(label);
-    if (ActiveTabIndex == -1) {
-        ActiveTabIndex = 0;
-    }
+    if (ActiveTabIndex == -1) { ActiveTabIndex = 0; }
     return retValue;
 }
 }

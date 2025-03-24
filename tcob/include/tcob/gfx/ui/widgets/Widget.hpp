@@ -8,7 +8,6 @@
 
 #include <any>
 #include <memory>
-#include <optional>
 #include <unordered_map>
 
 #include "tcob/core/Common.hpp"
@@ -101,7 +100,7 @@ public:
 
     auto current_style() const -> widget_style const*;
 
-    void start_animation(playback_mode mode);
+    void start_animation(gfx::frame_animation const& ani, playback_mode mode);
     void stop_animation();
 
 protected:
@@ -138,6 +137,8 @@ protected:
     void virtual set_redraw(bool val);
     auto get_redraw() const -> bool;
 
+    void virtual on_animation_step(string const& val);
+
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }
     void virtual on_key_up(input::keyboard::event const& /* ev */) { }
 
@@ -168,9 +169,6 @@ protected:
     auto get_orientation() const -> orientation;
 
     auto virtual is_inert() const -> bool;
-
-    void animation_frames(std::optional<gfx::frame_animation> const& ani);
-    void virtual on_animation_frame_changed(string const& val);
 
 private:
     void do_key_down(input::keyboard::event const& ev);
@@ -211,7 +209,7 @@ private:
     transition<widget_style>                     _transition;
     std::unordered_map<isize, transition<style>> _subStyleTransitions;
 
-    icon_tweener _animationTweet;
+    animation_tweener _animationTween;
 };
 
 ////////////////////////////////////////////////////////////

@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
-#include <optional>
 #include <unordered_map>
 #include <variant>
 
@@ -21,7 +20,6 @@
 #include "tcob/core/input/Input_Codes.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/Texture.hpp"
-#include "tcob/gfx/animation/Animation.hpp"
 
 namespace tcob::ui {
 
@@ -305,12 +303,10 @@ using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradi
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API icon {
-public:
-    assets::asset_ptr<gfx::texture>     Texture;
-    string                              Region {"default"};
-    color                               Color {colors::White};
-    std::optional<gfx::frame_animation> Animation {};
+struct icon {
+    assets::asset_ptr<gfx::texture> Texture;
+    string                          Region {"default"};
+    color                           Color {colors::White};
 };
 
 ////////////////////////////////////////////////////////////

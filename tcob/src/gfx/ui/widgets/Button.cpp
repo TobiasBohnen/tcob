@@ -24,10 +24,7 @@ button::button(init const& wi)
     : widget {wi}
 {
     Label.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Label changed"); });
-    Icon.Changed.connect([this](auto const& value) {
-        animation_frames(value.Animation);
-        request_redraw(this->name() + ": Icon changed");
-    });
+    Icon.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Icon changed"); });
 
     Class("button");
 }
@@ -45,7 +42,7 @@ void button::on_update(milliseconds /* deltaTime */)
 {
 }
 
-void button::on_animation_frame_changed(string const& val)
+void button::on_animation_step(string const& val)
 {
     (*Icon).Region = val;
     request_redraw(this->name() + ": Animation Frame changed ");

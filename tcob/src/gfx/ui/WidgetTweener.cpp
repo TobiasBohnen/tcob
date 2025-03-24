@@ -60,38 +60,32 @@ void widget_tweener::set_value(f32 value)
 
 ////////////////////////////////////////////////////////////
 
-icon_tweener::icon_tweener() = default;
+animation_tweener::animation_tweener() = default;
 
-void icon_tweener::start(playback_mode mode)
+void animation_tweener::start(gfx::frame_animation const& ani, playback_mode mode)
 {
-    if (_tween) {
-        _tween->start(mode);
-    }
+    if (ani.Frames.empty()) { stop(); }
+
+    _tween = std::make_unique<gfx::frame_animation_tween>(ani.duration(), ani);
+    _tween->Value.Changed.connect([this](auto const& str) {
+        Changed(str);
+    });
+
+    _tween->start(mode);
 }
 
-void icon_tweener::stop()
+void animation_tweener::stop()
 {
     if (_tween) {
         _tween->stop();
     }
 }
 
-void icon_tweener::update(milliseconds deltaTime)
+void animation_tweener::update(milliseconds deltaTime)
 {
     if (_tween) {
         _tween->update(deltaTime);
     }
-}
-
-void icon_tweener::animation(gfx::frame_animation const& ani)
-{
-    _ani = ani;
-    if (_ani.Frames.empty()) { stop(); }
-
-    _tween = std::make_unique<gfx::frame_animation_tween>(_ani.duration(), _ani);
-    _tween->Value.Changed.connect([this](auto const& str) {
-        Changed(str);
-    });
 }
 
 } // namespace ui
