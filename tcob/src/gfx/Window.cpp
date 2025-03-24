@@ -5,12 +5,15 @@
 
 #include "tcob/gfx/Window.hpp"
 
+#include <cassert>
 #include <memory>
+#include <physfs.h>
 #include <utility>
 
 #include <SDL3/SDL.h>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
@@ -23,6 +26,15 @@
 #include "tcob/gfx/Texture.hpp"
 
 namespace tcob::gfx {
+
+auto static check(string const& msg, bool c) -> bool
+{
+    if (!c) {
+        logger::Error(msg + ": " + SDL_GetError());
+    }
+
+    return c;
+}
 
 window::window(std::unique_ptr<render_backend::window_base> window, assets::owning_asset_ptr<texture> const& texture)
     : render_target {texture.ptr()}
@@ -67,7 +79,7 @@ void window::load_icon(path const& file)
                 img->ptr(),
                 info.stride())};
 
-        SDL_SetWindowIcon(_impl->get_handle(), surface);
+        check("SDL_SetWindowIcon", SDL_SetWindowIcon(_impl->get_handle(), surface));
         SDL_DestroySurface(surface);
     }
 }
@@ -80,8 +92,8 @@ auto window::has_focus() const -> bool
 
 void window::grab_input(bool grab)
 {
-    SDL_SetWindowMouseGrab(_impl->get_handle(), grab);
-    SDL_SetWindowKeyboardGrab(_impl->get_handle(), grab);
+    check("SDL_SetWindowMouseGrab", SDL_SetWindowMouseGrab(_impl->get_handle(), grab));
+    check("SDL_SetWindowKeyboardGrab", SDL_SetWindowKeyboardGrab(_impl->get_handle(), grab));
 }
 
 void window::on_clear(color c) const
@@ -92,7 +104,15 @@ void window::on_clear(color c) const
 void window::set_size(size_i newSize)
 {
     if (newSize != get_size()) {
-        SDL_SetWindowSize(_impl->get_handle(), newSize.Width, newSize.Height);
+        if (get_fullscreen()) {
+            SDL_DisplayMode mode {};
+            check("SDL_GetClosestFullscreenDisplayMode",
+                  SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(_impl->get_handle()), newSize.Width, newSize.Height, 0.0f, true, &mode));
+            check("SDL_SetWindowFullscreenMode", SDL_SetWindowFullscreenMode(_impl->get_handle(), &mode));
+        } else {
+            check("SDL_SetWindowSize",
+                  SDL_SetWindowSize(_impl->get_handle(), newSize.Width, newSize.Height));
+        }
     }
 
     quad q {};
@@ -179,5 +199,4 @@ void window::set_title(string const& value)
 {
     SDL_SetWindowTitle(_impl->get_handle(), value.c_str());
 }
-
 }
