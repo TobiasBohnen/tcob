@@ -8,14 +8,16 @@
 
 #include <memory>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API widget_tweener : public non_copyable { // TODO: improve or remove
+class TCOB_API widget_tweener : public non_copyable {
 public:
     widget_tweener();
 
@@ -35,6 +37,25 @@ private:
     std::unique_ptr<gfx::linear_tween<f32>> _tween;
     f32                                     _currentValue {0.0f};
     f32                                     _targetValue {0.0f};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API icon_tweener {
+public:
+    icon_tweener();
+
+    signal<string const> Changed;
+
+    void start(playback_mode mode);
+
+    void update(milliseconds deltaTime);
+
+    void animation(gfx::frame_animation const& ani);
+
+private:
+    gfx::frame_animation                        _ani;
+    std::unique_ptr<gfx::frame_animation_tween> _tween;
 };
 
 }

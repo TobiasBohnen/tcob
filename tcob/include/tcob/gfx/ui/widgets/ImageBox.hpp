@@ -6,10 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -27,6 +29,8 @@ public:
     prop<icon>     Image;
     prop<fit_mode> Fit;
 
+    void start_animation(playback_mode mode);
+
 protected:
     void on_draw(widget_painter& painter) override;
 
@@ -36,5 +40,6 @@ protected:
 
 private:
     image_box::style _style;
+    icon_tweener     _imageTween;
 };
 }

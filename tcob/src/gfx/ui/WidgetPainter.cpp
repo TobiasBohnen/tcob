@@ -345,7 +345,7 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
         iconRect = {iconRect.Position, iconSize};
         iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
 
-        _canvas.set_fill_style(style.Color);
+        _canvas.set_fill_style(icon.Color);
         _canvas.draw_image(icon.Texture.ptr(), icon.Region, iconRect);
     } else if (drawText) {
         draw_text(style, contentRect, text);
@@ -353,7 +353,7 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
         size_f const iconSize {contentRect.Size.as_fitted(size_f {icon.Texture->info().Size})};
         contentRect = {{contentRect.center().X - (iconSize.Width / 2), contentRect.top()}, iconSize};
 
-        _canvas.set_fill_style(style.Color);
+        _canvas.set_fill_style(icon.Color);
         _canvas.draw_image(icon.Texture.ptr(), icon.Region, contentRect);
     }
 }

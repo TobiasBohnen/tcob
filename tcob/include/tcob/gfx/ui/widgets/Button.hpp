@@ -6,9 +6,11 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -28,6 +30,8 @@ public:
     prop<utf8_string> Label;
     prop<icon>        Icon;
 
+    void start_animation(playback_mode mode);
+
 protected:
     void on_draw(widget_painter& painter) override;
 
@@ -37,5 +41,6 @@ protected:
 
 private:
     button::style _style;
+    icon_tweener  _iconTween;
 };
 }
