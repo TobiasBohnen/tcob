@@ -103,16 +103,20 @@ void window::on_clear(color c) const
 
 void window::set_size(size_i newSize)
 {
+    auto* win {_impl->get_handle()};
     if (newSize != get_size()) {
         if (get_fullscreen()) {
             SDL_DisplayMode mode {};
             check("SDL_GetClosestFullscreenDisplayMode",
-                  SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(_impl->get_handle()), newSize.Width, newSize.Height, 0.0f, true, &mode));
-            check("SDL_SetWindowFullscreenMode", SDL_SetWindowFullscreenMode(_impl->get_handle(), &mode));
+                  SDL_GetClosestFullscreenDisplayMode(SDL_GetDisplayForWindow(win), newSize.Width, newSize.Height, 0.0f, true, &mode));
+            check("SDL_SetWindowFullscreenMode", SDL_SetWindowFullscreenMode(win, &mode));
         } else {
             check("SDL_SetWindowSize",
                   SDL_SetWindowSize(_impl->get_handle(), newSize.Width, newSize.Height));
         }
+
+        SDL_SyncWindow(win);
+        SDL_SetWindowPosition(win, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
 
     quad q {};
@@ -182,11 +186,13 @@ auto window::get_fullscreen() const -> bool
 
 void window::set_fullscreen(bool value)
 {
-    auto* window {_impl->get_handle()};
-    SDL_SetWindowFullscreen(window, value ? SDL_WINDOW_FULLSCREEN : 0);
+    auto* win {_impl->get_handle()};
+    SDL_SetWindowFullscreen(win, value);
+    SDL_SyncWindow(win);
+
     if (!value) {
-        SDL_SetWindowBordered(window, true);
-        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        SDL_SetWindowBordered(win, true);
+        SDL_SetWindowPosition(win, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
 }
 
