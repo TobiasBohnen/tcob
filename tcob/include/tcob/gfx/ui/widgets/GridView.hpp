@@ -53,14 +53,14 @@ public:
     auto column_count() const -> isize;
 
     void add_row(std::vector<utf8_string> const& row);
-    void add_row(std::span<list_item const> row);
+    void add_row(std::span<item const> row);
     void remove_row(isize idx);
     void clear_rows();
     auto row_count() const -> isize;
 
-    auto get_cell(point_i idx) -> list_item*;
-    auto get_cell(point_i idx) const -> list_item const*;
-    auto get_row(isize idx) const -> std::vector<list_item> const&;
+    auto get_cell(point_i idx) -> item&;
+    auto get_cell(point_i idx) const -> item const&;
+    auto get_row(isize idx) const -> std::vector<item> const&;
 
     void prepare_redraw() override;
 
@@ -81,9 +81,9 @@ protected:
 private:
     auto get_column_width(i32 col, f32 width) const -> f32;
 
-    std::vector<list_item>              _columnHeaders;
-    std::vector<isize>                  _columnSizes;
-    std::vector<std::vector<list_item>> _rows;
+    std::vector<item>              _columnHeaders;
+    std::vector<isize>             _columnSizes;
+    std::vector<std::vector<item>> _rows;
 
     std::unordered_map<point_i, rect_f> _headerRectCache;
     std::unordered_map<point_i, rect_f> _rowRectCache;

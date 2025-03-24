@@ -42,13 +42,13 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_section(utf8_string const& name) -> std::shared_ptr<T>;
     template <std::derived_from<widget_container> T>
-    auto create_section(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>;
+    auto create_section(utf8_string const& name, item const& label) -> std::shared_ptr<T>;
 
     void remove_section(widget* sec);
     void clear_sections();
 
     void change_section_label(widget* sec, utf8_string const& label);
-    void change_section_label(widget* sec, list_item const& label);
+    void change_section_label(widget* sec, item const& label);
 
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
@@ -75,7 +75,7 @@ private:
     void offset_section_content(rect_f& bounds, style const& style) const;
 
     std::vector<std::shared_ptr<widget>> _sections;
-    std::vector<list_item>               _sectionLabels;
+    std::vector<item>                    _sectionLabels;
     std::vector<rect_f>                  _sectionRectCache;
 
     accordion::style _style;

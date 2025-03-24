@@ -42,13 +42,13 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
     template <std::derived_from<widget_container> T>
-    auto create_tab(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>;
+    auto create_tab(utf8_string const& name, item const& label) -> std::shared_ptr<T>;
 
     void remove_tab(widget* tab);
     void clear_tabs();
 
     void change_tab_label(widget* tab, utf8_string const& label);
-    void change_tab_label(widget* tab, list_item const& label);
+    void change_tab_label(widget* tab, item const& label);
 
     auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
 
@@ -76,7 +76,7 @@ private:
     auto get_tab_line_count() const -> isize;
 
     std::vector<std::shared_ptr<widget>> _tabs;
-    std::vector<list_item>               _tabLabels;
+    std::vector<item>                    _tabLabels;
     std::vector<rect_f>                  _tabRectCache;
 
     tab_container::style _style;

@@ -95,7 +95,7 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
     request_redraw(this->name() + ": tab renamed");
 }
 
-void tab_container::change_tab_label(widget* tab, list_item const& label)
+void tab_container::change_tab_label(widget* tab, item const& label)
 {
     for (isize i {0}; i < std::ssize(_tabs); ++i) {
         if (_tabs[i].get() == tab) {

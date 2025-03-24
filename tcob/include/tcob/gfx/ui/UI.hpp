@@ -311,7 +311,7 @@ struct icon {
 
 ////////////////////////////////////////////////////////////
 
-struct list_item {
+struct item {
     utf8_string Text;
     icon        Icon;
     std::any    UserData;

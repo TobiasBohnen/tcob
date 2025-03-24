@@ -107,7 +107,7 @@ void accordion::change_section_label(widget* sec, utf8_string const& label)
     request_redraw(this->name() + ": section renamed");
 }
 
-void accordion::change_section_label(widget* sec, list_item const& label)
+void accordion::change_section_label(widget* sec, item const& label)
 {
     for (usize i {0}; i < _sections.size(); ++i) {
         if (_sections[i].get() == sec) {

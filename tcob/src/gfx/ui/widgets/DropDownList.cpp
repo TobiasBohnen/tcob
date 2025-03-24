@@ -48,7 +48,7 @@ void drop_down_list::add_item(utf8_string const& item)
     add_item({.Text = item, .Icon = {}, .UserData = {}});
 }
 
-void drop_down_list::add_item(list_item const& item)
+void drop_down_list::add_item(item const& item)
 {
     _items.push_back(item);
     request_redraw(this->name() + ": item added");
@@ -74,12 +74,12 @@ auto drop_down_list::select_item(utf8_string const& item) -> bool
     return false;
 }
 
-auto drop_down_list::get_item_at(isize index) const -> list_item const&
+auto drop_down_list::get_item_at(isize index) const -> item const&
 {
     return get_items().at(static_cast<usize>(index));
 }
 
-auto drop_down_list::selected_item() const -> list_item const&
+auto drop_down_list::selected_item() const -> item const&
 {
     return get_items().at(SelectedItemIndex());
 }
@@ -331,7 +331,7 @@ auto drop_down_list::attributes() const -> widget_attributes
     return retValue;
 }
 
-auto drop_down_list::get_items() const -> std::vector<list_item> const&
+auto drop_down_list::get_items() const -> std::vector<item> const&
 {
     return _items;
 }

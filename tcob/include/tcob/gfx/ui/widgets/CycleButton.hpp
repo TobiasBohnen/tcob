@@ -31,13 +31,13 @@ public:
     prop_val<isize> SelectedItemIndex;
 
     void add_item(utf8_string const& item);
-    void add_item(list_item const& item);
+    void add_item(item const& item);
     void clear_items();
 
     auto select_item(utf8_string const& item) -> bool;
 
-    auto get_item_at(isize index) const -> list_item const&;
-    auto selected_item() const -> list_item const&;
+    auto get_item_at(isize index) const -> item const&;
+    auto selected_item() const -> item const&;
     auto item_count() const -> isize;
 
 protected:
@@ -56,7 +56,7 @@ private:
 
     void select_next();
 
-    std::vector<list_item> _items;
+    std::vector<item> _items;
 
     cycle_button::style _style;
 };

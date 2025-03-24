@@ -71,7 +71,7 @@ void list_box::add_item(utf8_string const& item)
     add_item({.Text = item, .Icon = {}, .UserData = {}});
 }
 
-void list_box::add_item(list_item const& item)
+void list_box::add_item(item const& item)
 {
     _items.push_back(item);
     if (!Filter->empty() && case_insensitive_contains(item.Text, Filter())) {
@@ -111,12 +111,12 @@ void list_box::scroll_to_selected()
     _scrollToSelected = true;
 }
 
-auto list_box::get_item_at(isize index) const -> list_item const&
+auto list_box::get_item_at(isize index) const -> item const&
 {
     return get_items().at(static_cast<usize>(index));
 }
 
-auto list_box::selected_item() const -> list_item const&
+auto list_box::selected_item() const -> item const&
 {
     return get_items().at(SelectedItemIndex());
 }
@@ -273,7 +273,7 @@ void list_box::on_mouse_wheel(input::mouse::wheel_event const& ev)
     vscroll_widget::on_mouse_wheel(ev);
 }
 
-auto list_box::get_items() const -> std::vector<list_item> const&
+auto list_box::get_items() const -> std::vector<item> const&
 {
     return Filter->empty() ? _items : _filteredItems;
 }

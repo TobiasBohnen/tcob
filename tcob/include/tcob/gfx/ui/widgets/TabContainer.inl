@@ -21,7 +21,7 @@ inline auto tab_container::create_tab(utf8_string const& name) -> std::shared_pt
 }
 
 template <std::derived_from<widget_container> T>
-inline auto tab_container::create_tab(utf8_string const& name, list_item const& label) -> std::shared_ptr<T>
+inline auto tab_container::create_tab(utf8_string const& name, item const& label) -> std::shared_ptr<T>
 {
     request_redraw(this->name() + ": tab created");
 

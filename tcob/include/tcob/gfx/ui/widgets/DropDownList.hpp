@@ -45,13 +45,13 @@ public:
     prop<isize> MaxVisibleItems; // TODO: change to prop_val
 
     void add_item(utf8_string const& item);
-    void add_item(list_item const& item);
+    void add_item(item const& item);
     void clear_items();
 
     auto select_item(utf8_string const& item) -> bool;
 
-    auto get_item_at(isize index) const -> list_item const&;
-    auto selected_item() const -> list_item const&;
+    auto get_item_at(isize index) const -> item const&;
+    auto selected_item() const -> item const&;
     auto item_count() const -> isize;
 
 protected:
@@ -76,7 +76,7 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
-    auto get_items() const -> std::vector<list_item> const&;
+    auto get_items() const -> std::vector<item> const&;
 
     auto get_item_height() const -> f32;
 
@@ -85,7 +85,7 @@ private:
     auto get_scroll_distance() const -> f32;
     auto get_scroll_max() const -> f32;
 
-    std::vector<list_item>            _items;
+    std::vector<item>                 _items;
     std::unordered_map<isize, rect_f> _itemRectCache;
     isize                             _visibleItems {0};
 

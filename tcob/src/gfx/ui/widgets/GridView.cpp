@@ -68,7 +68,7 @@ auto grid_view::column_count() const -> isize
 
 void grid_view::add_row(std::vector<utf8_string> const& row)
 {
-    std::vector<list_item> newRow {};
+    std::vector<item> newRow {};
     newRow.resize(_columnHeaders.size());
 
     auto const size {std::min(row.size(), _columnHeaders.size())};
@@ -77,9 +77,9 @@ void grid_view::add_row(std::vector<utf8_string> const& row)
     add_row(newRow);
 }
 
-void grid_view::add_row(std::span<list_item const> row)
+void grid_view::add_row(std::span<item const> row)
 {
-    std::vector<list_item>& newRow {_rows.emplace_back()};
+    std::vector<item>& newRow {_rows.emplace_back()};
     newRow.resize(_columnHeaders.size());
 
     auto const size {std::min(row.size(), _columnHeaders.size())};
@@ -125,29 +125,19 @@ auto grid_view::row_count() const -> isize
     return std::ssize(_rows);
 }
 
-auto get_cell_impl(point_i idx, auto&& headers, auto&& rows) -> decltype(&headers[0])
+auto grid_view::get_cell(point_i idx) -> item&
 {
-    if (idx.Y == 0) {
-        if (idx.X >= std::ssize(headers)) { return nullptr; }
-        return &headers[idx.X];
-    }
-
-    if (idx.Y > std::ssize(rows)) { return nullptr; }
-    if (idx.X >= std::ssize(rows[idx.Y - 1])) { return nullptr; }
-    return &rows[idx.Y - 1][idx.X];
+    if (idx.Y == 0) { return _columnHeaders.at(idx.X); }
+    return _rows.at(idx.Y - 1).at(idx.X);
 }
 
-auto grid_view::get_cell(point_i idx) -> list_item*
+auto grid_view::get_cell(point_i idx) const -> item const&
 {
-    return get_cell_impl(idx, _columnHeaders, _rows);
+    if (idx.Y == 0) { return _columnHeaders.at(idx.X); }
+    return _rows.at(idx.Y - 1).at(idx.X);
 }
 
-auto grid_view::get_cell(point_i idx) const -> list_item const*
-{
-    return get_cell_impl(idx, _columnHeaders, _rows);
-}
-
-auto grid_view::get_row(isize idx) const -> std::vector<list_item> const&
+auto grid_view::get_row(isize idx) const -> std::vector<item> const&
 {
     return _rows[idx];
 }
@@ -186,7 +176,7 @@ void grid_view::on_draw(widget_painter& painter)
     _visibleRows = static_cast<isize>((gridRect.height() / rowHeight) - 1);
     auto const scrollOffset {scrollbar_offset()};
 
-    auto const paintCell {[&](point_i idx, list_item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
+    auto const paintCell {[&](point_i idx, item const& item, string const& className, widget_flags cellFlags, rect_f& cell) {
         rect_f cellRect {point_f::Zero, {columnWidths[idx.X], rowHeight}};
         cellRect.Position.X = gridRect.Position.X + columnOffsets[idx.X];
         cellRect.Position.Y = gridRect.Position.Y + (rowHeight * static_cast<f32>(idx.Y));
@@ -311,12 +301,12 @@ auto grid_view::attributes() const -> widget_attributes
 
     retValue["selected_index"] = SelectedCellIndex();
     if (SelectedCellIndex() != INVALID) {
-        retValue["selected"] = get_cell(SelectedCellIndex)->Text;
+        retValue["selected"] = get_cell(SelectedCellIndex).Text;
     }
 
     retValue["hover_index"] = HoveredCellIndex();
     if (HoveredCellIndex() != INVALID) {
-        retValue["hover"] = get_cell(HoveredCellIndex)->Text;
+        retValue["hover"] = get_cell(HoveredCellIndex).Text;
     }
 
     return retValue;

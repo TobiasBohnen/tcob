@@ -37,14 +37,14 @@ public:
     prop<utf8_string> Filter;
 
     void add_item(utf8_string const& item);
-    void add_item(list_item const& item);
+    void add_item(item const& item);
     void clear_items();
 
     auto select_item(utf8_string const& item) -> bool;
     void scroll_to_selected();
 
-    auto get_item_at(isize index) const -> list_item const&;
-    auto selected_item() const -> list_item const&;
+    auto get_item_at(isize index) const -> item const&;
+    auto selected_item() const -> item const&;
     auto item_count() const -> isize;
 
     void prepare_redraw() override;
@@ -68,10 +68,10 @@ protected:
     auto get_scroll_distance() const -> f32 override;
 
 private:
-    auto get_items() const -> std::vector<list_item> const&;
+    auto get_items() const -> std::vector<item> const&;
 
-    std::vector<list_item>            _items;
-    std::vector<list_item>            _filteredItems;
+    std::vector<item>                 _items;
+    std::vector<item>                 _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
     isize                             _visibleItems {0};
 

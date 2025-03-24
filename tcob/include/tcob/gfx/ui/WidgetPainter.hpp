@@ -38,7 +38,7 @@ public:
 
     void draw_tick(tick_element const& style, rect_f const& rect);
     void draw_chevron(nav_arrow_element const& style, rect_f const& rect);
-    void draw_item(item_element const& style, rect_f const& rect, list_item const& item);
+    void draw_item(item_element const& style, rect_f const& rect, item const& item);
     void draw_caret(caret_element const& style, rect_f const& rect, point_f offset);
 
     auto draw_bar(bar_element const& style, rect_f const& rect, bar_element::context const& barCtx) -> rect_f;

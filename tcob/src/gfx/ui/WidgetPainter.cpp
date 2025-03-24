@@ -596,7 +596,7 @@ auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arro
     return retValue;
 }
 
-void widget_painter::draw_item(item_element const& style, rect_f const& rect, list_item const& item)
+void widget_painter::draw_item(item_element const& style, rect_f const& rect, item const& item)
 {
     draw_bordered_rect(rect, style.Background, style.Border);
 

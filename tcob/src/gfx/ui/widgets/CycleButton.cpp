@@ -37,7 +37,7 @@ void cycle_button::add_item(utf8_string const& item)
     add_item({.Text = item, .Icon = {}, .UserData = {}});
 }
 
-void cycle_button::add_item(list_item const& item)
+void cycle_button::add_item(item const& item)
 {
     _items.push_back(item);
     request_redraw(this->name() + ": item added");
@@ -62,12 +62,12 @@ auto cycle_button::select_item(utf8_string const& item) -> bool
     return false;
 }
 
-auto cycle_button::get_item_at(isize index) const -> list_item const&
+auto cycle_button::get_item_at(isize index) const -> item const&
 {
     return _items.at(static_cast<usize>(index));
 }
 
-auto cycle_button::selected_item() const -> list_item const&
+auto cycle_button::selected_item() const -> item const&
 {
     return _items.at(SelectedItemIndex());
 }
