@@ -105,6 +105,7 @@ using token_type = yaml_tokenizer::token_type;
 
 auto static IsIgnored(yaml_tokenizer::token const& token) -> bool
 {
+    // List all types we want to ignore
     switch (token.Type) {
     case token_type::None:            // should never happen...
     case token_type::StartOfDocument: // don't care
@@ -112,26 +113,9 @@ auto static IsIgnored(yaml_tokenizer::token const& token) -> bool
     case token_type::Tag:             // not supported
     case token_type::MappingKey:      // gets 'optimized' away
         return true;
-    case token_type::LiteralStyle:
-    case token_type::FoldedStyle:
-    case token_type::FlowSequence:
-    case token_type::FlowMapping:
-    case token_type::Anchor:
-    case token_type::Alias:
-    case token_type::KeyOrScalar:
-    case token_type::Whitespace:
-    case token_type::MappingValue:
-    case token_type::Sequence:
-    case token_type::Comment:
-    case token_type::Newline:
-    case token_type::DoubleQuote:
-    case token_type::SingleQuote:
-    case token_type::EoF:
-    case token_type::Indent:
+    default:
         return false;
     }
-
-    return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -156,28 +140,30 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
 {
     for (usize i {0}; i < line.size(); ++i) {
         char const current {line[i]};
-        char const next {i < line.size() - 1 ? line[i + 1] : '\0'};
+        char const next {(i + 1 < line.size()) ? line[i + 1] : '\0'};
 
-        // StartOfDocument
-        if (line.size() > i + 2 && current == '-' && next == '-' && line[i + 2] == '-') {
-            Tokens.emplace_back(token_type::StartOfDocument, "---");
-            i += 2;
-            continue;
-        }
-        // EndOfDocument
-        if (line.size() > i + 2 && current == '+' && next == '+' && line[i + 2] == '+') {
-            Tokens.emplace_back(token_type::EndOfDocument, "+++");
-            i += 2;
-            continue;
+        // Check for StartOfDocument and EndOfDocument tokens
+        if (line.size() >= i + 3) {
+            if (current == '-' && next == '-' && line[i + 2] == '-') {
+                Tokens.emplace_back(token_type::StartOfDocument, "---");
+                i += 2;
+                continue;
+            }
+            if (current == '+' && next == '+' && line[i + 2] == '+') {
+                Tokens.emplace_back(token_type::EndOfDocument, "+++");
+                i += 2;
+                continue;
+            }
         }
 
-        // Whitespace
+        // Whitespace handling (including indentation)
         if (current == ' ') {
             if (!Tokens.empty()) {
-                if (Tokens.back().Type == token_type::Newline) {
+                auto& last {Tokens.back()};
+                if (last.Type == token_type::Newline) {
                     Tokens.emplace_back(token_type::Indent, " ");
-                } else if (Tokens.back().Type == token_type::Whitespace || Tokens.back().Type == token_type::Indent) {
-                    Tokens.back().Value += " ";
+                } else if (last.Type == token_type::Whitespace || last.Type == token_type::Indent) {
+                    last.Value.push_back(' ');
                 } else {
                     Tokens.emplace_back(token_type::Whitespace, " ");
                 }
@@ -187,109 +173,103 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
             continue;
         }
 
-        // Tag
+        // Tag: Append to previous Tag token if one exists.
         if (!Tokens.empty() && Tokens.back().Type == token_type::Tag) {
-            Tokens.back().Value += current;
+            Tokens.back().Value.push_back(current);
             continue;
         }
         if (current == '!') {
             Tokens.emplace_back(token_type::Tag, "!");
             continue;
         }
-        // MappingKey
+
+        // MappingKey, MappingValue, and Sequence tokens:
         if (current == '?' && next == ' ') {
             Tokens.emplace_back(token_type::MappingKey, "?");
             ++i;
             continue;
         }
-        // MappingValue
         if (current == ':' && (next == ' ' || next == '\n')) {
             Tokens.emplace_back(token_type::MappingValue, ":");
-            if (next == ' ') {
-                ++i;
-            }
+            if (next == ' ') { ++i; }
             continue;
         }
-        // Sequence
         if (current == '-' && (next == ' ' || next == '\n')) {
             Tokens.emplace_back(token_type::Sequence, "-");
-            if (next == ' ') {
-                ++i;
-            }
+            if (next == ' ') { ++i; }
             continue;
         }
-        // Comment
+
+        // Comment handling
         if (current == '#') {
             Tokens.emplace_back(token_type::Comment, "#");
             continue;
         }
-        // Newline
+
+        // Newline handling
         if (current == '\n') {
             if (!Tokens.empty() && Tokens.back().Type == token_type::Newline) {
-                Tokens.back().Value += "\n";
+                Tokens.back().Value.push_back('\n');
             } else {
                 Tokens.emplace_back(token_type::Newline, "\n");
             }
             continue;
         }
-        // LiteralStyle
+
+        // Literal and folded styles
         if (current == '|') {
             Tokens.emplace_back(token_type::LiteralStyle, "|");
             continue;
         }
-        // FoldedStyle
         if (current == '>') {
             Tokens.emplace_back(token_type::FoldedStyle, ">");
             continue;
         }
-        // DoubleQuote
+
+        // Quoted strings
         if (current == '"') {
             Tokens.emplace_back(token_type::DoubleQuote, "\"");
             continue;
         }
-        // SingleQuote
         if (current == '\'') {
             Tokens.emplace_back(token_type::SingleQuote, "'");
             continue;
         }
-        // Anchor
+
+        // Anchor and Alias tokens
         if (current == '&') {
             Tokens.emplace_back(token_type::Anchor, "&");
             continue;
         }
-        // Alias
         if (current == '*') {
             Tokens.emplace_back(token_type::Alias, "*");
             continue;
         }
 
-        // FlowSequence
+        // FlowSequence and FlowMapping tokens are extracted as whole blocks
         if (current == '[') {
             usize const start {i};
-            i = line.find(']');
-            if (i == utf8_string::npos) {
-                return false;
-            }
-
-            Tokens.emplace_back(token_type::FlowSequence, utf8_string {line.substr(start, i - start + 1)});
+            i = line.find(']', i);
+            if (i == utf8_string::npos) { return false; }
+            Tokens.emplace_back(token_type::FlowSequence,
+                                utf8_string {line.substr(start, i - start + 1)});
             continue;
         }
-        // FlowMapping
         if (current == '{') {
             usize const start {i};
-            i = line.find('}');
+            i = line.find('}', i);
             if (i == utf8_string::npos) {
                 return false;
             }
-
-            Tokens.emplace_back(token_type::FlowMapping, utf8_string {line.substr(start, i - start + 1)});
+            Tokens.emplace_back(token_type::FlowMapping,
+                                utf8_string {line.substr(start, i - start + 1)});
             continue;
         }
 
-        // KeyOrScalar
+        // KeyOrScalar: merge adjacent valid characters
         if (!std::iscntrl(current)) {
             if (!Tokens.empty() && Tokens.back().Type == token_type::KeyOrScalar) {
-                Tokens.back().Value += current;
+                Tokens.back().Value.push_back(current);
             } else {
                 Tokens.emplace_back(token_type::KeyOrScalar, utf8_string {current});
             }
@@ -324,25 +304,24 @@ auto yaml_tokenizer::is_eof() const -> bool
 void yaml_tokenizer::optimize()
 {
     for (usize i {0}; i < Tokens.size(); ++i) {
-        if (i + 3 < Tokens.size()) {
-            // MappingKey
-            if (Tokens[i].Type == token_type::MappingKey
-                && Tokens[i + 1].Type == token_type::KeyOrScalar
-                && Tokens[i + 2].Type == token_type::Newline
-                && Tokens[i + 3].Type == token_type::Indent) {
-                Tokens[i].Type  = token_type::KeyOrScalar;
-                Tokens[i].Value = Tokens[i + 1].Value;
-                Tokens.erase(Tokens.begin() + static_cast<isize>(i) + 1, Tokens.begin() + static_cast<isize>(i) + 4);
-            }
+        // Optimize MappingKey followed by KeyOrScalar, Newline, and Indent
+        if (i + 3 < Tokens.size()
+            && Tokens[i].Type == token_type::MappingKey
+            && Tokens[i + 1].Type == token_type::KeyOrScalar
+            && Tokens[i + 2].Type == token_type::Newline
+            && Tokens[i + 3].Type == token_type::Indent) {
+            Tokens[i].Type  = token_type::KeyOrScalar;
+            Tokens[i].Value = Tokens[i + 1].Value;
+            Tokens.erase(Tokens.begin() + i + 1,
+                         Tokens.begin() + i + 4);
         }
-        if (i + 1 < Tokens.size()) {
-            // Tag
-            if (Tokens[i].Type == token_type::Tag) {
-                if (Tokens[i + 1].Type == token_type::Whitespace) {
-                    Tokens.erase(Tokens.begin() + static_cast<isize>(i), Tokens.begin() + static_cast<isize>(i) + 2);
-                } else {
-                    Tokens.erase(Tokens.begin() + static_cast<isize>(i), Tokens.begin() + static_cast<isize>(i) + 1);
-                }
+        // Optimize Tag token: remove Tag and following Whitespace (if any)
+        if (i + 1 < Tokens.size() && Tokens[i].Type == token_type::Tag) {
+            if (Tokens[i + 1].Type == token_type::Whitespace) {
+                Tokens.erase(Tokens.begin() + i,
+                             Tokens.begin() + i + 2);
+            } else {
+                Tokens.erase(Tokens.begin() + i);
             }
         }
     }
