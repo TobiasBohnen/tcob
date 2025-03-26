@@ -38,7 +38,7 @@ private:
     auto read_lines(object& targetObject) -> bool;
     auto read_line(object& targetObject, utf8_string_view line) -> bool;
 
-    auto read_comment(utf8_string_view line) -> bool;
+    auto read_comment(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool;
     auto read_section_header(object& targetObject, utf8_string_view line) -> bool;
     auto read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool;
 

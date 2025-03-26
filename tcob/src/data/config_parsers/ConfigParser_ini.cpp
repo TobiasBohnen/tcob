@@ -100,12 +100,12 @@ auto ini_reader::read_line(object& targetObject, utf8_string_view line) -> bool
 {
     entry currentEntry;
     return line.empty()
-        || read_comment(line)
+        || read_comment(targetObject, currentEntry, line)
         || read_section_header(targetObject, line)
         || read_key_value_pair(targetObject, currentEntry, line);
 }
 
-auto ini_reader::read_comment(utf8_string_view line) -> bool
+auto ini_reader::read_comment(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
 {
     if (_settings.Comment.contains(line[0])) {
         if (line.size() > 1) {
@@ -114,7 +114,17 @@ auto ini_reader::read_comment(utf8_string_view line) -> bool
         }
         return true;
     }
+    if (_settings.Comment.contains(line[line.size() - 1])) {
+        auto const split {helper::split_preserve_brackets(line, line[line.size() - 1])};
+        if (split.size() != 3) { return false; }
 
+        _currentComment.Text += split[1];
+        _currentComment.Text += "\n";
+
+        auto const newline {helper::trim(split[0])};
+        return read_section_header(targetObject, newline)
+            || read_key_value_pair(targetObject, currentEntry, newline);
+    }
     return false;
 }
 
@@ -168,6 +178,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
             }
         }
 
+        _currentComment = {};
         return true;
     }
 
