@@ -98,14 +98,14 @@ auto ini_reader::read_lines(object& targetObject) -> bool
 
 auto ini_reader::read_line(object& targetObject, utf8_string_view line) -> bool
 {
-    entry currentEntry;
+    entry dummy;
     return line.empty()
-        || read_comment(targetObject, currentEntry, line)
+        || read_comment(targetObject, line)
         || read_section_header(targetObject, line)
-        || read_key_value_pair(targetObject, currentEntry, line);
+        || read_key_value_pair(targetObject, dummy, line);
 }
 
-auto ini_reader::read_comment(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
+auto ini_reader::read_comment(object& targetObject, utf8_string_view line) -> bool
 {
     if (_settings.Comment.contains(line[0])) {
         if (line.size() > 1) {
@@ -122,8 +122,9 @@ auto ini_reader::read_comment(object& targetObject, entry& currentEntry, utf8_st
         _currentComment.Text += "\n";
 
         auto const newline {helper::trim(split[0])};
+        entry      dummy;
         return read_section_header(targetObject, newline)
-            || read_key_value_pair(targetObject, currentEntry, newline);
+            || read_key_value_pair(targetObject, dummy, newline);
     }
     return false;
 }
