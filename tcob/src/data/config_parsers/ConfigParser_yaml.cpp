@@ -327,29 +327,31 @@ void yaml_tokenizer::optimize()
 
 auto yaml_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 {
-    if (_tokenizer.tokenize(txt)) {
-        next();
-        auto        obj {parse_map()};
-        auto const& tokens {_tokenizer.Tokens};
-        if (_nextTokenIndex >= tokens.size()
-            || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EoF)) {
-            return obj;
-        }
+    if (!_tokenizer.tokenize(txt)) { return std::nullopt; }
+
+    next();
+    auto        obj {parse_map()};
+    auto const& tokens {_tokenizer.Tokens};
+
+    if (_nextTokenIndex >= tokens.size() || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EoF)) {
+        return obj;
     }
+
     return std::nullopt;
 }
 
 auto yaml_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
 {
-    if (_tokenizer.tokenize(txt)) {
-        next();
-        auto        arr {parse_sequence()};
-        auto const& tokens {_tokenizer.Tokens};
-        if (_nextTokenIndex >= tokens.size()
-            || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EoF)) {
-            return arr;
-        }
+    if (!_tokenizer.tokenize(txt)) { return std::nullopt; }
+
+    next();
+    auto        arr {parse_sequence()};
+    auto const& tokens {_tokenizer.Tokens};
+
+    if (_nextTokenIndex >= tokens.size() || (_nextTokenIndex == tokens.size() - 1 && tokens.back().Type == token_type::EoF)) {
+        return arr;
     }
+
     return std::nullopt;
 }
 
@@ -366,19 +368,15 @@ auto yaml_reader::parse_map() -> std::optional<object>
         if (check_current(token_type::EoF)) { return retValue; }
 
         if (check_current(token_type::Newline)) {
-            if (!check_next(token_type::Indent) && _currentIndent > 0) {
-                return retValue;
-            }
+            if (!check_next(token_type::Indent) && _currentIndent > 0) { return retValue; }
             next();
             continue;
         }
 
-        // check dedent
         if (check_current(token_type::Indent)) {
             usize const newIndent {_currentToken.Value.size()};
             if (newIndent < _currentIndent) { return retValue; }
             if (newIndent > _currentIndent) { break; } // ERROR: unexpected indent
-
             next();
             continue;
         }
@@ -389,33 +387,27 @@ auto yaml_reader::parse_map() -> std::optional<object>
         }
 
         // map entry
-        if (check_current(token_type::KeyOrScalar)
-            && check_next(token_type::MappingValue)) {
+        if (check_current(token_type::KeyOrScalar) && check_next(token_type::MappingValue)) {
             utf8_string const key {_currentToken.Value};
             skip_next();
 
             // flow
-            if (parse_flow_map(currentEntry)) {
-                retValue.set_entry(key, currentEntry);
-                continue;
-            }
-            if (parse_flow_sequence(currentEntry)) {
+            if (parse_flow_map(currentEntry) || parse_flow_sequence(currentEntry)) {
                 retValue.set_entry(key, currentEntry);
                 continue;
             }
 
             // alias/anchor
-            auto const aliasKey {parse_alias()};
-            if (!aliasKey.empty()) {
+            if (auto const aliasKey {parse_alias()}; !aliasKey.empty()) {
                 retValue.set_entry(key, _anchors[aliasKey]);
                 continue;
             }
+
             auto const anchorKey {parse_anchor()};
 
             // block/scalar
-            if (parse_block(currentEntry)
-                || parse_scalar(currentEntry, multiline_style::Normal)) {
-                currentEntry.set_comment(currentComment); // FIXME: trailing comments are assigned to following entry
+            if (parse_block(currentEntry) || parse_scalar(currentEntry, multiline_style::Normal)) {
+                currentEntry.set_comment(currentComment);
                 retValue.set_entry(key, currentEntry);
                 if (!anchorKey.empty()) { _anchors[anchorKey] = currentEntry; }
                 currentComment = {};
@@ -447,9 +439,7 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
         entry currentEntry;
 
         if (check_current(token_type::Newline)) {
-            if (!check_next(token_type::Indent) && _currentIndent > 0) {
-                return retValue;
-            }
+            if (!check_next(token_type::Indent) && _currentIndent > 0) { return retValue; }
             next();
             continue;
         }
@@ -459,7 +449,6 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
             usize const newIndent {_currentToken.Value.size()};
             if (newIndent < _currentIndent) { return retValue; }
             if (newIndent > _currentIndent) { break; } // ERROR: unexpected indent
-
             next();
             continue;
         }
@@ -473,27 +462,21 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
         next();
 
         // flow
-        if (parse_flow_map(currentEntry)) {
-            retValue.add_entry(currentEntry);
-            next();
-            continue;
-        }
-        if (parse_flow_sequence(currentEntry)) {
+        if (parse_flow_map(currentEntry) || parse_flow_sequence(currentEntry)) {
             retValue.add_entry(currentEntry);
             next();
             continue;
         }
 
         // alias/anchor
-        auto const aliasKey {parse_alias()};
-        if (!aliasKey.empty()) {
+        if (auto const aliasKey {parse_alias()}; !aliasKey.empty()) {
             retValue.add_entry(_anchors[aliasKey]);
             continue;
         }
+
         auto const anchorKey {parse_anchor()};
 
-        if (parse_block(currentEntry)
-            || parse_scalar(currentEntry, multiline_style::Normal)) {
+        if (parse_block(currentEntry) || parse_scalar(currentEntry, multiline_style::Normal)) {
             currentEntry.set_comment(currentComment);
             retValue.add_entry(currentEntry);
             currentComment = {};
@@ -506,9 +489,7 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
             continue;
         }
 
-        if (check_current(token_type::EoF)) {
-            return retValue;
-        }
+        if (check_current(token_type::EoF)) { return retValue; }
 
         break;
     }
@@ -519,7 +500,7 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
 auto yaml_reader::parse_flow_map(entry& currentEntry) -> bool
 {
     if (check_current(token_type::FlowMapping)) {
-        auto retValue {json_reader::ReadObject(currentEntry, _currentToken.Value)};
+        auto const retValue {json_reader::ReadObject(currentEntry, _currentToken.Value)};
         next();
         return retValue;
     }
@@ -530,7 +511,7 @@ auto yaml_reader::parse_flow_map(entry& currentEntry) -> bool
 auto yaml_reader::parse_flow_sequence(entry& currentEntry) -> bool
 {
     if (check_current(token_type::FlowSequence)) {
-        auto retValue {json_reader::ReadArray(currentEntry, _currentToken.Value)};
+        auto const retValue {json_reader::ReadArray(currentEntry, _currentToken.Value)};
         next();
         return retValue;
     }
@@ -543,11 +524,12 @@ auto yaml_reader::parse_comment() -> std::optional<comment>
     if (check_current(token_type::Comment)) {
         utf8_string cmt;
         next();
-        while (!check_current(token_type::Newline)
-               && !check_current(token_type::EoF)) {
+
+        while (!check_current(token_type::Newline) && !check_current(token_type::EoF)) {
             cmt += _currentToken.Value;
             next();
         }
+
         return std::make_optional<comment>(cmt);
     }
 
@@ -558,12 +540,11 @@ auto yaml_reader::parse_comment() -> std::optional<comment>
 auto yaml_reader::parse_block(entry& currentEntry) -> bool
 {
     multiline_style style {multiline_style::Normal};
-    if (check_current(token_type::FoldedStyle)
-        && check_next(token_type::Newline)) {
+
+    if (check_current(token_type::FoldedStyle) && check_next(token_type::Newline)) {
         style = multiline_style::Folded;
         next();
-    } else if (check_current(token_type::LiteralStyle)
-               && check_next(token_type::Newline)) {
+    } else if (check_current(token_type::LiteralStyle) && check_next(token_type::Newline)) {
         style = multiline_style::Literal;
         next();
     }
@@ -576,9 +557,7 @@ auto yaml_reader::parse_block(entry& currentEntry) -> bool
 
         if (check_current(token_type::Indent)) {
             newIndent = _currentToken.Value.size();
-            if (oldIndent > newIndent) {
-                return false;
-            }
+            if (oldIndent > newIndent) { return false; }
             next();
         }
 
@@ -595,9 +574,7 @@ auto yaml_reader::parse_block(entry& currentEntry) -> bool
                 return false;
             }
 
-            if (parse_scalar(currentEntry, style)) {
-                return true;
-            }
+            if (parse_scalar(currentEntry, style)) { return true; }
         }
 
         // sequence
@@ -612,6 +589,7 @@ auto yaml_reader::parse_block(entry& currentEntry) -> bool
             return false;
         }
     }
+
     return false;
 }
 
@@ -619,44 +597,36 @@ auto yaml_reader::parse_scalar(entry& currentEntry, multiline_style style) -> bo
 {
     if (check_current(token_type::KeyOrScalar)) {
         utf8_string val {_currentToken.Value};
-
         next();
 
         // multiline check
-        if (check_next(token_type::Indent)
-            && _nextToken.Value.size() > _currentIndent) {
+        if (check_next(token_type::Indent) && _nextToken.Value.size() > _currentIndent) {
             usize multilineIndent {_nextToken.Value.size()};
 
-            while (check_next(token_type::Indent)
-                   && _nextToken.Value.size() == multilineIndent) {
+            while (check_next(token_type::Indent) && _nextToken.Value.size() == multilineIndent) {
                 skip_next();
                 if (check_current(token_type::KeyOrScalar)) {
-                    if (style == multiline_style::Literal) {
-                        val += "\n" + _currentToken.Value;
-                    } else {
-                        val += " " + _currentToken.Value;
-                    }
+                    val += (style == multiline_style::Literal ? "\n" : " ") + _currentToken.Value;
                     next();
                 }
             }
+
             if (style != multiline_style::Normal) {
                 val += "\n";
             }
         }
 
         convert_scalar(currentEntry, val);
-
         return true;
     }
 
-    if (check_current(token_type::SingleQuote)
-        || check_current(token_type::DoubleQuote)) {
-        utf8_string value;
-        token_type  type {_currentToken.Type};
+    if (check_current(token_type::SingleQuote) || check_current(token_type::DoubleQuote)) {
+        utf8_string      value;
+        token_type const type {_currentToken.Type};
         next();
-        while (!check_current(type)) {
-            if (check_current(token_type::EoF)) { return false; } // ERROR: unexpected EOF
 
+        while (!check_current(type)) {
+            if (check_current(token_type::EoF)) { return false; }
             value += _currentToken.Value;
             next();
         }
@@ -671,25 +641,20 @@ auto yaml_reader::parse_scalar(entry& currentEntry, multiline_style style) -> bo
 
 auto yaml_reader::parse_anchor() -> utf8_string
 {
-    utf8_string retValue;
-    if (check_current(token_type::Anchor)
-        && check_next(token_type::KeyOrScalar)) {
-        retValue = _nextToken.Value;
+    if (check_current(token_type::Anchor) && check_next(token_type::KeyOrScalar)) {
+        utf8_string const retValue {_nextToken.Value};
         skip_next();
+        return retValue;
     }
 
-    return retValue;
+    return "";
 }
 
 auto yaml_reader::parse_alias() -> utf8_string
 {
-    // alias
-    if (check_current(token_type::Alias)
-        && check_next(token_type::KeyOrScalar)) {
+    if (check_current(token_type::Alias) && check_next(token_type::KeyOrScalar)) {
         utf8_string aliasKey {_nextToken.Value};
-        if (!_anchors.contains(aliasKey)) {
-            return "";
-        }
+        if (!_anchors.contains(aliasKey)) { return ""; }
 
         skip_next();
         return aliasKey;
@@ -700,12 +665,12 @@ auto yaml_reader::parse_alias() -> utf8_string
 
 auto yaml_reader::convert_scalar(entry& currentEntry, utf8_string const& value) -> bool
 {
-    if (auto intVal {helper::to_number<i64>(value)}) {
+    if (auto const intVal {helper::to_number<i64>(value)}) {
         currentEntry.set_value(*intVal);
         return true;
     }
 
-    if (auto floatVal {helper::to_number<f64>(value)}) {
+    if (auto const floatVal {helper::to_number<f64>(value)}) {
         currentEntry.set_value(*floatVal);
         return true;
     }
