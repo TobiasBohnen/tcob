@@ -258,9 +258,7 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
         if (current == '{') {
             usize const start {i};
             i = line.find('}', i);
-            if (i == utf8_string::npos) {
-                return false;
-            }
+            if (i == utf8_string::npos) { return false; }
             Tokens.emplace_back(token_type::FlowMapping,
                                 utf8_string {line.substr(start, i - start + 1)});
             continue;
@@ -281,9 +279,7 @@ auto yaml_tokenizer::tokenize_line(utf8_string_view line) -> bool
 
 auto yaml_tokenizer::get_next_line() -> utf8_string_view
 {
-    if (is_eof()) {
-        return "";
-    }
+    if (is_eof()) { return ""; }
 
     _yamlBegin = _yamlEnd;
     _yamlEnd   = _yaml.find('\n', _yamlEnd);
@@ -367,9 +363,7 @@ auto yaml_reader::parse_map() -> std::optional<object>
     for (;;) {
         entry currentEntry;
 
-        if (check_current(token_type::EoF)) {
-            return retValue;
-        }
+        if (check_current(token_type::EoF)) { return retValue; }
 
         if (check_current(token_type::Newline)) {
             if (!check_next(token_type::Indent) && _currentIndent > 0) {
@@ -382,12 +376,8 @@ auto yaml_reader::parse_map() -> std::optional<object>
         // check dedent
         if (check_current(token_type::Indent)) {
             usize const newIndent {_currentToken.Value.size()};
-            if (newIndent < _currentIndent) {
-                return retValue;
-            }
-            if (newIndent > _currentIndent) {
-                break; // ERROR: unexpected indent
-            }
+            if (newIndent < _currentIndent) { return retValue; }
+            if (newIndent > _currentIndent) { break; } // ERROR: unexpected indent
 
             next();
             continue;
@@ -427,9 +417,7 @@ auto yaml_reader::parse_map() -> std::optional<object>
                 || parse_scalar(currentEntry, multiline_style::Normal)) {
                 currentEntry.set_comment(currentComment); // FIXME: trailing comments are assigned to following entry
                 retValue.set_entry(key, currentEntry);
-                if (!anchorKey.empty()) {
-                    _anchors[anchorKey] = currentEntry;
-                }
+                if (!anchorKey.empty()) { _anchors[anchorKey] = currentEntry; }
                 currentComment = {};
                 continue;
             }
@@ -469,12 +457,8 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
         // check dedent
         if (check_current(token_type::Indent)) {
             usize const newIndent {_currentToken.Value.size()};
-            if (newIndent < _currentIndent) {
-                return retValue;
-            }
-            if (newIndent > _currentIndent) {
-                break; // ERROR: unexpected indent
-            }
+            if (newIndent < _currentIndent) { return retValue; }
+            if (newIndent > _currentIndent) { break; } // ERROR: unexpected indent
 
             next();
             continue;
@@ -485,9 +469,7 @@ auto yaml_reader::parse_sequence() -> std::optional<array>
             continue;
         }
 
-        if (!check_current(token_type::Sequence)) {
-            return retValue;
-        }
+        if (!check_current(token_type::Sequence)) { return retValue; }
         next();
 
         // flow
@@ -673,9 +655,7 @@ auto yaml_reader::parse_scalar(entry& currentEntry, multiline_style style) -> bo
         token_type  type {_currentToken.Type};
         next();
         while (!check_current(type)) {
-            if (check_current(token_type::EoF)) {
-                return false; // ERROR: unexpected EOF
-            }
+            if (check_current(token_type::EoF)) { return false; } // ERROR: unexpected EOF
 
             value += _currentToken.Value;
             next();
