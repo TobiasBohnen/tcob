@@ -111,16 +111,16 @@ struct converter<string_view> {
 };
 
 template <>
-struct converter<utf8_string> {
+struct converter<string> {
     auto static IsType(cfg_value const& config) -> bool
     {
-        return std::holds_alternative<utf8_string>(config);
+        return std::holds_alternative<string>(config);
     }
 
-    auto static From(cfg_value const& config, utf8_string& value) -> bool
+    auto static From(cfg_value const& config, string& value) -> bool
     {
-        if (std::holds_alternative<utf8_string>(config)) {
-            value = std::get<utf8_string>(config);
+        if (std::holds_alternative<string>(config)) {
+            value = std::get<string>(config);
             return true;
         }
 
@@ -151,7 +151,7 @@ struct converter<utf8_string> {
         return false;
     }
 
-    void static To(cfg_value& config, utf8_string const& value)
+    void static To(cfg_value& config, string const& value)
     {
         config = value;
     }

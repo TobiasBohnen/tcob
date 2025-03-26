@@ -40,15 +40,14 @@ private:
 
     auto read_comment(object& targetObject, utf8_string_view line) -> bool;
     auto read_section_header(object& targetObject, utf8_string_view line) -> bool;
+    auto read_key_value_pair(object& targetObject, utf8_string_view line) -> bool;
     auto read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool;
 
     auto read_ref(entry& currentEntry, utf8_string_view line) -> bool;
-    auto read_value(entry& currentEntry, utf8_string_view line) -> bool;
+    auto read_entry(entry& currentEntry, utf8_string_view line) -> bool;
     auto read_inline_array(entry& currentEntry, utf8_string_view line) -> bool;
     auto read_inline_section(entry& currentEntry, utf8_string_view line) -> bool;
-    auto read_number(entry& currentEntry, utf8_string_view line) const -> bool;
-    auto read_bool(entry& currentEntry, utf8_string_view line) const -> bool;
-    auto read_string(entry& currentEntry, utf8_string_view line) -> bool;
+    auto read_scalar(entry& currentEntry, utf8_string_view line) -> bool;
 
     auto read_settings() -> bool;
 

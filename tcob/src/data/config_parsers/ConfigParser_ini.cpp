@@ -98,11 +98,10 @@ auto ini_reader::read_lines(object& targetObject) -> bool
 
 auto ini_reader::read_line(object& targetObject, utf8_string_view line) -> bool
 {
-    entry dummy;
     return line.empty()
         || read_comment(targetObject, line)
         || read_section_header(targetObject, line)
-        || read_key_value_pair(targetObject, dummy, line);
+        || read_key_value_pair(targetObject, line);
 }
 
 auto ini_reader::read_comment(object& targetObject, utf8_string_view line) -> bool
@@ -122,9 +121,8 @@ auto ini_reader::read_comment(object& targetObject, utf8_string_view line) -> bo
         _currentComment.Text += "\n";
 
         auto const newline {helper::trim(split[0])};
-        entry      dummy;
         return read_section_header(targetObject, newline)
-            || read_key_value_pair(targetObject, dummy, newline);
+            || read_key_value_pair(targetObject, newline);
     }
     return false;
 }
@@ -170,7 +168,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
                     if (!obj.try_get(obj, keys[i])) { return false; }
                 }
             }
-            if (auto* entry {obj.get_entry(keys[keys.size() - 1])}) {
+            if (auto const* entry {obj.get_entry(keys[keys.size() - 1])}) {
                 if (entry->is<object>()) {
                     targetObject.merge(entry->as<object>());
                 } else {
@@ -184,6 +182,12 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
     }
 
     return false;
+}
+
+auto ini_reader::read_key_value_pair(object& targetObject, utf8_string_view line) -> bool
+{
+    entry dummy;
+    return read_key_value_pair(targetObject, dummy, line);
 }
 
 auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
@@ -227,7 +231,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
         if (!read_ref(currentEntry, valueStr.substr(1))) {
             return false; // invalid ref
         }
-    } else if (!read_value(currentEntry, valueStr)) {
+    } else if (!read_entry(currentEntry, valueStr)) {
         return false;     // invalid value
     }
 
@@ -237,14 +241,12 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     return true;
 }
 
-auto ini_reader::read_value(entry& currentEntry, utf8_string_view line) -> bool
+auto ini_reader::read_entry(entry& currentEntry, utf8_string_view line) -> bool
 {
-    return !line.empty()
-        && (read_inline_array(currentEntry, line)
-            || read_inline_section(currentEntry, line)
-            || read_number(currentEntry, line)
-            || read_bool(currentEntry, line)
-            || read_string(currentEntry, line));
+    if (line.empty()) { return false; }
+    return read_inline_array(currentEntry, line)
+        || read_inline_section(currentEntry, line)
+        || read_scalar(currentEntry, line);
 }
 
 auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
@@ -257,7 +259,7 @@ auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
         }
     }
 
-    if (auto* entry {obj.get_entry(keys[keys.size() - 1])}) {
+    if (auto const* entry {obj.get_entry(keys[keys.size() - 1])}) {
         if (entry->is<object>()) {
             currentEntry = entry->as<object>().clone(true);
         } else if (entry->is<array>()) {
@@ -292,7 +294,7 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
                     auto const tokenString {helper::trim(token)};
                     if (tokenString.empty()) { return true; } // allow empty entries
                     entry arrEntry;
-                    if (read_value(arrEntry, tokenString)) {
+                    if (read_entry(arrEntry, tokenString)) {
                         arr.add_entry(arrEntry);
                         return true;
                     }
@@ -338,33 +340,27 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
     return false;
 }
 
-auto ini_reader::read_number(entry& currentEntry, utf8_string_view line) const -> bool
+auto ini_reader::read_scalar(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (auto const intVal {helper::to_number<i64>(line)}) {
-        currentEntry.set_value(*intVal);
-        return true;
-    }
-
-    if (auto const floatVal {helper::to_number<f64>(line)}) {
-        currentEntry.set_value(*floatVal);
-        return true;
-    }
-
-    return false;
-}
-
-auto ini_reader::read_bool(entry& currentEntry, utf8_string_view line) const -> bool
-{
+    // bool
     if (line == "true" || line == "false") {
         currentEntry.set_value(line == "true");
         return true;
     }
 
-    return false;
-}
+    // int
+    if (auto const intVal {helper::to_number<i64>(line)}) {
+        currentEntry.set_value(*intVal);
+        return true;
+    }
 
-auto ini_reader::read_string(entry& currentEntry, utf8_string_view line) -> bool
-{
+    // float
+    if (auto const floatVal {helper::to_number<f64>(line)}) {
+        currentEntry.set_value(*floatVal);
+        return true;
+    }
+
+    // string
     if (!line.empty()) {
         char const first {line[0]};
         if (first == '\'') { // single-quoted (literal multi-line)

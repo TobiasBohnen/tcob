@@ -25,10 +25,8 @@ public:
 private:
     auto static ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string_view line) -> bool;
 
-    auto static ReadValue(entry& currentEntry, utf8_string_view line) -> bool;
-    auto static ReadNumber(entry& currentEntry, utf8_string_view line) -> bool;
-    auto static ReadBool(entry& currentEntry, utf8_string_view line) -> bool;
-    auto static ReadString(entry& currentEntry, utf8_string_view line) -> bool;
+    auto static ReadEntry(entry& currentEntry, utf8_string_view line) -> bool;
+    auto static ReadScalar(entry& currentEntry, utf8_string_view line) -> bool;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -159,10 +159,10 @@ auto object::Parse(string_view config, string const& ext) -> std::optional<objec
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
 }
 
-auto object::get_entry(string_view key) const -> entry*
+auto object::get_entry(string_view key) const -> entry const*
 {
-    for (auto& [k, v] : *values()) {
-        if (k == key) { return &v; }
+    if (auto it {find(key)}; it != values()->end()) {
+        return &it->second;
     }
 
     return nullptr;
@@ -170,11 +170,9 @@ auto object::get_entry(string_view key) const -> entry*
 
 void object::set_entry(string_view key, entry const& entry)
 {
-    for (auto& [k, v] : *values()) {
-        if (k == key) {
-            v = entry;
-            return;
-        }
+    if (auto it {find(key)}; it != values()->end()) {
+        it->second = entry;
+        return;
     }
 
     // new key
@@ -188,12 +186,12 @@ void object::add_entry(string_view key, entry const& entry)
 
 auto object::find(string_view key) -> cfg_object_entries::iterator
 {
-    return std::find_if(begin(), end(), [&key](auto const& p) { return p.first == key; }); // NOLINT(modernize-use-ranges)
+    return std::ranges::find_if(*this, [&key](auto const& p) { return p.first == key; });
 }
 
 auto object::find(string_view key) const -> cfg_object_entries::const_iterator
 {
-    return std::find_if(begin(), end(), [&key](auto const& p) { return p.first == key; }); // NOLINT(modernize-use-ranges)
+    return std::ranges::find_if(*this, [&key](auto const& p) { return p.first == key; });
 }
 
 ////////////////////////////////////////////////////////////
