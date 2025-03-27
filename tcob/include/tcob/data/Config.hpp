@@ -26,7 +26,7 @@ class object;
 
 using cfg_array_entries  = std::vector<entry>;
 using cfg_object_entries = std::vector<std::pair<string, entry>>;
-using cfg_value          = std::variant<i64, f64, bool, utf8_string, array, object>;
+using cfg_value          = std::variant<std::monostate, i64, f64, bool, utf8_string, array, object>;
 
 ////////////////////////////////////////////////////////////
 

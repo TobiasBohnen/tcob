@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <string>
+#include <variant>
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -62,7 +63,6 @@ auto json_reader::ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string
 
     if (keyStr.size() <= 1 || valueStr.empty()) { return false; }                 //  ERROR: empty key or value
     if (keyStr[0] != '\"' || keyStr[keyStr.size() - 1] != '\"') { return false; } //  ERROR: invalid key
-    if (valueStr == "null") { return true; }                                      // ignore nulled keys
 
     // read value string
     if (!ReadEntry(currentEntry, valueStr)) { return false; } // ERROR: invalid value
@@ -101,9 +101,7 @@ auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
                 splitLine, ',',
                 [&arr](utf8_string_view token) {
                     auto const tk {helper::trim(token)};
-                    if (tk == "null") { return true; } // ignore nulled keys
-
-                    entry arrvalue;
+                    entry      arrvalue;
                     if (ReadEntry(arrvalue, tk)) {
                         arr.add_entry(arrvalue);
                         return true;
@@ -153,6 +151,12 @@ auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
 
 auto json_reader::ReadScalar(entry& currentEntry, utf8_string_view line) -> bool
 {
+    // null
+    if (line == "null") {
+        currentEntry.set_value(std::monostate {});
+        return true;
+    }
+
     // bool
     if (line == "true" || line == "false") {
         currentEntry.set_value(line == "true");

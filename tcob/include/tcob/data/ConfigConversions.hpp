@@ -612,6 +612,24 @@ struct converter<std::filesystem::path> {
     }
 };
 
+template <>
+struct converter<std::monostate> {
+    auto static IsType(cfg_value const& config) -> bool
+    {
+        return std::holds_alternative<std::monostate>(config);
+    }
+
+    auto static From(cfg_value const& config, std::monostate& /* value */) -> bool
+    {
+        return std::holds_alternative<std::monostate>(config);
+    }
+
+    void static To(cfg_value& config, std::monostate const& value)
+    {
+        config = value;
+    }
+};
+
 ////tcob//////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
