@@ -14,8 +14,8 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -243,7 +243,7 @@ void text_box::on_mouse_up(input::mouse::button_event const& ev)
 
 void text_box::on_focus_gained()
 {
-    _caretTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
+    _caretTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
     _caretTween->Value.Changed.connect([this](auto val) {
         _caretVisible = val;
         request_redraw(this->name() + ": Caret blink");

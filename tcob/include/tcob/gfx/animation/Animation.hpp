@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "tcob/gfx/animation/Tween.hpp"
+#include "tcob/core/easing/Tween.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////

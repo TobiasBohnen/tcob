@@ -17,8 +17,8 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -156,8 +156,8 @@ private:
     std::array<std::vector<cell>, 2> _buffers {};
     i32                              _bufferSize {0};
 
-    std::unique_ptr<gfx::square_wave_tween<bool>> _cursorTween;
-    std::unique_ptr<gfx::square_wave_tween<bool>> _flashTween;
+    std::unique_ptr<square_wave_tween<bool>> _cursorTween;
+    std::unique_ptr<square_wave_tween<bool>> _flashTween;
 
     terminal::style _style;
 };

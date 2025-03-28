@@ -11,8 +11,8 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/gfx/animation/Animation.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
@@ -34,9 +34,9 @@ public:
 private:
     void set_value(f32 value);
 
-    std::unique_ptr<gfx::linear_tween<f32>> _tween;
-    f32                                     _currentValue {0.0f};
-    f32                                     _targetValue {0.0f};
+    std::unique_ptr<linear_tween<f32>> _tween;
+    f32                                _currentValue {0.0f};
+    f32                                _targetValue {0.0f};
 };
 
 ////////////////////////////////////////////////////////////

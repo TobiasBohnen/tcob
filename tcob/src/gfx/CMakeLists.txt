@@ -46,7 +46,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/animation/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
@@ -121,8 +120,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/animation/Animation.hpp
     ${TCOB_INC_DIR}/tcob/gfx/animation/QuadTween.hpp
     ${TCOB_INC_DIR}/tcob/gfx/animation/QuadTween.inl
-    ${TCOB_INC_DIR}/tcob/gfx/animation/Tween.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/animation/Tween.inl
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Background.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Cursor.hpp
     ${TCOB_INC_DIR}/tcob/gfx/drawables/Drawable.hpp

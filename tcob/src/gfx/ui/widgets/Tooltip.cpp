@@ -5,7 +5,7 @@
 
 #include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
-#include "tcob/gfx/animation/Tween.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -29,7 +29,7 @@ void tooltip::on_update(milliseconds deltaTime)
 
 void tooltip::on_popup(widget* top)
 {
-    _fadeInTween = gfx::make_unique_tween<gfx::linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
+    _fadeInTween = make_unique_tween<linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
     _fadeInTween->Value.Changed.connect([this](auto val) { Alpha = val; });
     _fadeInTween->start();
 

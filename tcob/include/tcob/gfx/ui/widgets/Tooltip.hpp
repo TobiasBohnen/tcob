@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "tcob/core/Signal.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Panel.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -34,6 +34,6 @@ protected:
     void virtual on_popup(widget* top);
 
 private:
-    std::unique_ptr<gfx::linear_tween<f32>> _fadeInTween;
+    std::unique_ptr<linear_tween<f32>> _fadeInTween;
 };
 }

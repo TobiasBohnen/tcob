@@ -12,9 +12,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -73,10 +73,10 @@ private:
     void set_caret_pos(isize pos);
     auto calc_caret_pos(point_f mp) const -> isize;
 
-    std::unique_ptr<gfx::square_wave_tween<bool>> _caretTween;
-    isize                                         _caretPos {0};
-    isize                                         _dragCaretPos {INVALID_INDEX};
-    bool                                          _caretVisible {false};
+    std::unique_ptr<square_wave_tween<bool>> _caretTween;
+    isize                                    _caretPos {0};
+    isize                                    _dragCaretPos {INVALID_INDEX};
+    bool                                     _caretVisible {false};
 
     gfx::text_formatter::result _formatResult;
     isize                       _textLength {0};

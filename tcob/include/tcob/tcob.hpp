@@ -48,6 +48,7 @@
 #include <tcob/core/assets/AssetLoader.hpp>
 #include <tcob/core/assets/Assets.hpp>
 #include <tcob/core/easing/Easing.hpp>
+#include <tcob/core/easing/Tween.hpp>
 #include <tcob/core/input/Input.hpp>
 #include <tcob/core/io/FileStream.hpp>
 #include <tcob/core/io/FileSystem.hpp>
@@ -100,6 +101,8 @@
 #include <tcob/gfx/UniformBuffer.hpp>
 #include <tcob/gfx/VertexArray.hpp>
 #include <tcob/gfx/Window.hpp>
+#include <tcob/gfx/animation/Animation.hpp>
+#include <tcob/gfx/animation/QuadTween.hpp>
 #include <tcob/gfx/drawables/Background.hpp>
 #include <tcob/gfx/drawables/Cursor.hpp>
 #include <tcob/gfx/drawables/Drawable.hpp>
@@ -109,14 +112,9 @@
 #include <tcob/gfx/drawables/Shape.hpp>
 #include <tcob/gfx/drawables/Text.hpp>
 #include <tcob/gfx/drawables/TileMap.hpp>
+#include <tcob/gfx/html/HtmlDocument.hpp>
 #include <tcob/gfx/procgen/LSystem.hpp>
 #include <tcob/gfx/procgen/Noise.hpp>
-
-#include <tcob/gfx/html/HtmlDocument.hpp>
-
-#include <tcob/gfx/animation/Animation.hpp>
-#include <tcob/gfx/animation/QuadTween.hpp>
-#include <tcob/gfx/animation/Tween.hpp>
 
 #include <tcob/gfx/ui/Form.hpp>
 #include <tcob/gfx/ui/Layout.hpp>

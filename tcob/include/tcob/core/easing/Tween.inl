@@ -11,7 +11,7 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/easing/Easing.hpp"
 
-namespace tcob::gfx {
+namespace tcob {
 
 ////////////////////////////////////////////////////////////
 

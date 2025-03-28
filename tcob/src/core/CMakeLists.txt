@@ -5,6 +5,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetGroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetLibrary.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/assets/AssetLoader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/easing/Tween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/input/Input.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/input/InputEnums.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/io/FileStream.cpp
@@ -40,6 +41,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/assets/AssetLoader.hpp
     ${TCOB_INC_DIR}/tcob/core/assets/AssetLoader.inl
     ${TCOB_INC_DIR}/tcob/core/assets/Assets.hpp
+    ${TCOB_INC_DIR}/tcob/core/easing/Tween.hpp
+    ${TCOB_INC_DIR}/tcob/core/easing/Tween.inl
     ${TCOB_INC_DIR}/tcob/core/input/Input_Codes.hpp
     ${TCOB_INC_DIR}/tcob/core/input/Input.hpp
     ${TCOB_INC_DIR}/tcob/core/io/FileStream.hpp

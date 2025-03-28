@@ -20,10 +20,10 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/StringUtils.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Font.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -182,7 +182,7 @@ void terminal::noecho()
 
 void terminal::flash()
 {
-    _flashTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.FlashDuration, 1.0f, 0.0f);
+    _flashTween = make_unique_tween<square_wave_tween<bool>>(_style.FlashDuration, 1.0f, 0.0f);
     _flashTween->Value.Changed.connect([this](auto) {
         for (auto& cell : get_back_buffer()) {
             cell.Colors = {cell.Colors.second, cell.Colors.first};
@@ -793,7 +793,7 @@ void terminal::cursor_line_break()
 
 void terminal::start_blinking()
 {
-    _cursorTween = gfx::make_unique_tween<gfx::square_wave_tween<bool>>(_style.Caret.BlinkRate * 2, 1.0f, 0.0f);
+    _cursorTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate * 2, 1.0f, 0.0f);
     _cursorTween->Value.Changed.connect([this](auto val) {
         _cursorVisible = val;
         redraw();

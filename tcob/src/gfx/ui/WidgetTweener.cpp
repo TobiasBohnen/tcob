@@ -8,8 +8,8 @@
 #include "tcob/gfx/ui/WidgetTweener.hpp"
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/gfx/animation/Animation.hpp"
-#include "tcob/gfx/animation/Tween.hpp"
 
 namespace tcob::ui {
 
@@ -22,7 +22,7 @@ void widget_tweener::start(f32 toValue, milliseconds delay)
     if (delay.count() == 0) {
         reset(toValue);
     } else {
-        _tween = gfx::make_unique_tween<gfx::linear_tween<f32>>(delay, _currentValue, toValue);
+        _tween = make_unique_tween<linear_tween<f32>>(delay, _currentValue, toValue);
         _tween->Value.Changed.connect([&](auto value) { set_value(value); });
         _tween->start();
     }
