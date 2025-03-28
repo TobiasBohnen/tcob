@@ -93,7 +93,7 @@ void drop_down_list::on_styles_changed()
 {
     widget::on_styles_changed();
 
-    _vScrollbar.reset();
+    _vScrollbar.reset(0);
 }
 
 void drop_down_list::on_draw(widget_painter& painter)
@@ -262,7 +262,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
     HoveredItemIndex = INVALID_INDEX;
 
     f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + scrollOffset, _style.VScrollBar.Bar.Delay);
+    _vScrollbar.start(_vScrollbar.target_value() + scrollOffset);
 
     ev.Handled = true;
 }

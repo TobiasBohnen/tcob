@@ -234,7 +234,7 @@ public:
     ui_paint       HigherBackground {colors::White};
     length         Size {1, length::type::Relative};
     border_element Border {};
-    milliseconds   Delay {0};
+    milliseconds   MotionDuration {0};
 
     auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
 

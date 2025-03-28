@@ -24,12 +24,12 @@ public:
     signal<> Changed;
 
     void start(f32 toValue, milliseconds delay);
+    void reset(f32 value);
 
     void update(milliseconds deltaTime);
 
     auto current_value() const -> f32;
     auto target_value() const -> f32;
-    void reset(f32 value);
 
 private:
     void set_value(f32 value);

@@ -28,7 +28,7 @@ public:
     public:
         length       SectionBarHeight;
         utf8_string  SectionItemClass {"section_items"};
-        milliseconds Delay {0};
+        milliseconds ExpandDuration {0};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

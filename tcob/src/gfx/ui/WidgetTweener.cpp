@@ -20,12 +20,19 @@ void widget_tweener::start(f32 toValue, milliseconds delay)
     _targetValue = toValue;
 
     if (delay.count() == 0) {
-        set_value(toValue);
+        reset(toValue);
     } else {
         _tween = gfx::make_unique_tween<gfx::linear_tween<f32>>(delay, _currentValue, toValue);
         _tween->Value.Changed.connect([&](auto value) { set_value(value); });
         _tween->start();
     }
+}
+
+void widget_tweener::reset(f32 value)
+{
+    set_value(value);
+    _targetValue = value;
+    if (_tween) { _tween->stop(); }
 }
 
 void widget_tweener::update(milliseconds deltaTime)
@@ -41,13 +48,6 @@ auto widget_tweener::current_value() const -> f32
 auto widget_tweener::target_value() const -> f32
 {
     return _targetValue;
-}
-
-void widget_tweener::reset(f32 value)
-{
-    set_value(value);
-    _targetValue = value;
-    if (_tween) { _tween->stop(); }
 }
 
 void widget_tweener::set_value(f32 value)

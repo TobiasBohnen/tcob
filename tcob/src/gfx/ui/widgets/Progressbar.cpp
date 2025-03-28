@@ -76,7 +76,7 @@ void progress_bar::on_update(milliseconds deltaTime)
 void progress_bar::on_value_changed(i32 newVal)
 {
     f32 const newFrac {static_cast<f32>(newVal - Min()) / (Max() - Min())};
-    _tween.start(newFrac, _style.Bar.Delay);
+    _tween.start(newFrac, _style.Bar.MotionDuration);
 }
 
 auto progress_bar::attributes() const -> widget_attributes

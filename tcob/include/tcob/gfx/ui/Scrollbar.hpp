@@ -36,8 +36,8 @@ public:
     auto current_value() const -> f32;
     auto target_value() const -> f32;
 
-    void start_scroll(f32 target, milliseconds delay);
-    void reset();
+    void start(f32 target);
+    void reset(f32 target);
 
     auto is_mouse_over() const -> bool;
     auto is_mouse_over_thumb() const -> bool;

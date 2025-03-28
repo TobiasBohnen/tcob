@@ -221,7 +221,7 @@ void slider::on_value_changed(i32 newVal)
     if (_isDragging) {
         _tween.reset(newFrac);
     } else {
-        _tween.start(newFrac, _style.Bar.Delay);
+        _tween.start(newFrac, _style.Bar.MotionDuration);
     }
 }
 

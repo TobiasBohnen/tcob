@@ -44,7 +44,7 @@ accordion::accordion(init const& wi)
             _tween.reset(1);
         } else {
             _tween.reset(0);
-            _tween.start(1, _style.Delay);
+            _tween.start(1, _style.ExpandDuration);
         }
         request_redraw(this->name() + ": ActiveSection changed");
     });

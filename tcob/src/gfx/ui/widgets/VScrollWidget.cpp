@@ -34,7 +34,7 @@ void vscroll_widget::on_styles_changed()
 {
     widget::on_styles_changed();
 
-    _vScrollbar.reset();
+    _vScrollbar.reset(0);
 }
 
 void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
@@ -94,9 +94,8 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (!_vScrollbar.Visible) { return; }
     if (ev.Scroll.Y == 0) { return; }
 
-    f32 const          scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
-    milliseconds const delay {dynamic_cast<vscroll_widget::style const*>(current_style())->VScrollBar.Bar.Delay};
-    _vScrollbar.start_scroll(_vScrollbar.target_value() + scrollOffset, delay);
+    f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
+    _vScrollbar.start(_vScrollbar.target_value() + scrollOffset);
 
     ev.Handled = true;
 }
@@ -131,9 +130,9 @@ void vscroll_widget::set_scrollbar_value(f32 value)
 {
     auto const max {get_scroll_max()};
     if (max == 0) {
-        _vScrollbar.start_scroll(0, milliseconds {0});
+        _vScrollbar.reset(0);
     } else {
-        _vScrollbar.start_scroll(value / max, milliseconds {0});
+        _vScrollbar.reset(value / max);
     }
 }
 

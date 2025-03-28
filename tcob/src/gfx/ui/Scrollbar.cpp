@@ -28,7 +28,7 @@ void scrollbar::update(milliseconds deltaTime)
 
 void scrollbar::draw(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect)
 {
-    _delay = scrollbar.Bar.Delay;
+    _delay = scrollbar.Bar.MotionDuration;
 
     if (!Visible) { return; }
 
@@ -144,7 +144,7 @@ auto scrollbar::target_value() const -> f32
     return _tween.target_value();
 }
 
-void scrollbar::start_scroll(f32 target, milliseconds delay)
+void scrollbar::start(f32 target)
 {
     if (!Visible) {
         _tween.reset(target);
@@ -153,15 +153,15 @@ void scrollbar::start_scroll(f32 target, milliseconds delay)
 
     f32 const actTarget {std::clamp(target, 0.0f, 1.0f)};
     if (!_isDragging) {
-        _tween.start(actTarget, delay);
+        _tween.start(actTarget, _delay);
     } else {
         _tween.reset(actTarget);
     }
 }
 
-void scrollbar::reset()
+void scrollbar::reset(f32 target)
 {
-    _tween.reset(0);
+    _tween.reset(target);
     _delay = milliseconds {0};
 }
 
@@ -183,7 +183,7 @@ void scrollbar::calculate_value(point_f mp)
     } break;
     }
 
-    start_scroll(frac, _delay);
+    start(frac);
 
     _overThumb = true;
 }

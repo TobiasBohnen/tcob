@@ -58,8 +58,8 @@ void panel::on_styles_changed()
 {
     widget_container::on_styles_changed();
 
-    _vScrollbar.reset();
-    _hScrollbar.reset();
+    _vScrollbar.reset(0);
+    _hScrollbar.reset(0);
 }
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
@@ -200,25 +200,22 @@ void panel::on_mouse_up(input::mouse::button_event const& ev)
 void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
-        orientation  orien {};
-        bool         invert {};
-        milliseconds delay {};
+        orientation orien {};
+        bool        invert {};
 
         if (ev.Scroll.Y != 0) {
             orien  = orientation::Vertical;
             invert = ev.Scroll.Y > 0;
-            delay  = _style.VScrollBar.Bar.Delay;
         } else if (ev.Scroll.X != 0) {
             orien  = orientation::Horizontal;
             invert = ev.Scroll.X < 0;
-            delay  = _style.HScrollBar.Bar.Delay;
         }
 
         f32 const diff {invert ? -0.2f : 0.2f};
         if (orien == orientation::Vertical) {
-            _vScrollbar.start_scroll(_vScrollbar.target_value() + diff, delay);
+            _vScrollbar.start(_vScrollbar.target_value() + diff);
         } else if (orien == orientation::Horizontal) {
-            _hScrollbar.start_scroll(_hScrollbar.target_value() + diff, delay);
+            _hScrollbar.start(_hScrollbar.target_value() + diff);
         }
 
         ev.Handled = true;
