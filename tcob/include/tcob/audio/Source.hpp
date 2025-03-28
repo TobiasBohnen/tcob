@@ -51,8 +51,6 @@ protected:
     auto queued_bytes() const -> i32;
 
 private:
-    void pan_out(std::span<f32 const> data);
-
     std::unique_ptr<detail::audio_stream> _output;
     bool                                  _canPan {false};
 };

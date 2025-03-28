@@ -5,6 +5,7 @@
 
 #include "tcob/audio/Music.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <memory>
@@ -126,14 +127,9 @@ void music::fill_buffers()
 {
     while (_bufferQueue.size() < STREAM_BUFFER_COUNT) {
         // find unused buffer
-        stream_buffer* buffer {nullptr};
-        for (auto& b : _buffers) {
-            if (!b.Queued) {
-                buffer = &b;
-                break;
-            }
-        }
-        assert(buffer);
+        auto it {std::ranges::find_if(_buffers, [](auto const& b) { return !b.Queued; })};
+        assert(it != _buffers.end());
+        stream_buffer* buffer {&(*it)};
 
         // decode to buffer
         buffer->Size = _decoder->decode(buffer->Data);
