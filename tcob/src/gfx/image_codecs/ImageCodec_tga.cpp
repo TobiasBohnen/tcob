@@ -73,21 +73,21 @@ auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 
 auto static get_color(u8 one, u8 two) -> color
 {
-    u32 r1 {helper::get_bits(one, 2, 5)};
-    u8  r {static_cast<u8>(r1 << 3)};
+    u32 const r1 {helper::get_bits(one, 2, 5)};
+    u8 const  r {static_cast<u8>(r1 << 3)};
 
-    u32 bit {helper::get_bits(one, 0, 2)};
-    u32 g1 {bit << 6};
+    u32       bit {helper::get_bits(one, 0, 2)};
+    u32 const g1 {bit << 6};
 
     bit = helper::get_bits(two, 5, 3);
-    u32 g2 {bit << 3};
-    u8  g {static_cast<u8>(g1 + g2)};
+    u32 const g2 {bit << 3};
+    u8 const  g {static_cast<u8>(g1 + g2)};
 
-    u32 b1 {helper::get_bits(two, 0, 5)};
-    u8  b {static_cast<u8>(b1 << 3)};
+    u32 const b1 {helper::get_bits(two, 0, 5)};
+    u8 const  b {static_cast<u8>(b1 << 3)};
 
-    u32 a1 {helper::get_bits(one, 7, 1)};
-    u8  a {static_cast<u8>(a1 * 255)};
+    u32 const a1 {helper::get_bits(one, 7, 1)};
+    u8 const  a {static_cast<u8>(a1 * 255)};
 
     return {r, g, b, a};
 }
@@ -106,16 +106,16 @@ auto tga::read_color_map(io::istream& reader, i32 colorMapLength, i32 colorMapEn
             retValue.push_back(get_color(color16[1], color16[0]));
         } break;
         case 24: {
-            u8 b {reader.read<u8>()};
-            u8 g {reader.read<u8>()};
-            u8 r {reader.read<u8>()};
+            u8 const b {reader.read<u8>()};
+            u8 const g {reader.read<u8>()};
+            u8 const r {reader.read<u8>()};
             retValue.emplace_back(r, g, b, 255);
         } break;
         case 32: {
-            u8 b {reader.read<u8>()};
-            u8 g {reader.read<u8>()};
-            u8 r {reader.read<u8>()};
-            u8 a {reader.read<u8>()};
+            u8 const b {reader.read<u8>()};
+            u8 const g {reader.read<u8>()};
+            u8 const r {reader.read<u8>()};
+            u8 const a {reader.read<u8>()};
             retValue.emplace_back(r, g, b, a);
         } break;
         }

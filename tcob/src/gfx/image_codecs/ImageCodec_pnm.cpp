@@ -65,8 +65,8 @@ auto read_int(io::istream& reader) -> T
 {
     std::array<byte, 256> buffer {};
     buffer[0] = read_char(reader);
-    i32    read {read_until_space(reader, buffer, 1) + 1};
-    string str(buffer.begin(), buffer.begin() + read);
+    i32 const    read {read_until_space(reader, buffer, 1) + 1};
+    string const str(buffer.begin(), buffer.begin() + read);
 
     return static_cast<T>(std::strtol(str.data(), nullptr, 10));
 }

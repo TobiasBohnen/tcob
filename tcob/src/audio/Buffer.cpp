@@ -6,6 +6,7 @@
 #include "tcob/audio/Buffer.hpp"
 
 #include <any>
+#include <chrono>
 #include <future>
 #include <memory>
 #include <optional>
@@ -23,6 +24,7 @@
 #include "tcob/core/io/Stream.hpp"
 
 namespace tcob::audio {
+using namespace std::chrono_literals;
 
 auto buffer::info() const -> information const&
 {
@@ -89,7 +91,7 @@ auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any c
 
     if (auto info {decoder->open(std::move(in), ctx)}) {
         _info = *info;
-        decoder->seek_from_start(milliseconds {0});
+        decoder->seek_from_start(0ms);
 
         std::vector<f32> buffer(static_cast<usize>(_info.Specs.Channels * _info.FrameCount));
         auto const       size {decoder->decode(buffer)};
