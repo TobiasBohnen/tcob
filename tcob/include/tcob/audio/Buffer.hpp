@@ -71,13 +71,12 @@ public:
 
     auto open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>;
 
-    auto decode(isize size) -> std::optional<std::vector<f32>>;
+    auto virtual decode(std::span<f32> outputSamples) -> isize = 0;
 
     void virtual seek_from_start(milliseconds pos) = 0;
 
 protected:
     auto virtual open() -> std::optional<buffer::information> = 0;
-    auto virtual decode(std::span<f32> outputSamples) -> i32  = 0;
 
     auto stream() -> io::istream&;
     auto context() -> std::any&;

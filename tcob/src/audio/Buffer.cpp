@@ -90,8 +90,12 @@ auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any c
     if (auto info {decoder->open(std::move(in), ctx)}) {
         _info = *info;
         decoder->seek_from_start(milliseconds {0});
-        if (auto data {decoder->decode(_info.Specs.Channels * _info.FrameCount)}) {
-            _buffer = std::move(*data);
+
+        std::vector<f32> buffer(static_cast<usize>(_info.Specs.Channels * _info.FrameCount));
+        auto const       size {decoder->decode(buffer)};
+        if (size > 0) {
+            buffer.resize(size);
+            _buffer = std::move(buffer);
             return load_status::Ok;
         }
     }
@@ -142,19 +146,6 @@ auto decoder::open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std:
     _ctx    = ctx;
     _info   = open();
     return _info;
-}
-
-auto decoder::decode(isize size) -> std::optional<std::vector<f32>>
-{
-    if (!_info || size <= 0) { return std::nullopt; }
-
-    std::vector<f32> buffer(static_cast<usize>(size));
-    auto const       res {decode(buffer)};
-    if (res > 0) {
-        buffer.resize(res);
-        return buffer;
-    }
-    return std::nullopt;
 }
 
 auto decoder::stream() -> io::istream&

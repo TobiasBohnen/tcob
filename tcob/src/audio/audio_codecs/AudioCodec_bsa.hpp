@@ -18,9 +18,10 @@ class bsa_decoder final : public decoder {
 public:
     void seek_from_start(milliseconds pos) override;
 
+    auto decode(std::span<f32> outputSamples) -> isize override;
+
 protected:
     auto open() -> std::optional<buffer::information> override;
-    auto decode(std::span<f32> outputSamples) -> i32 override;
 
 private:
     buffer::information _info {};

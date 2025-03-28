@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <atomic>
 #include <memory>
 #include <optional>
@@ -20,6 +21,10 @@ namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API music final : public source {
+    constexpr static i64 STREAM_BUFFER_SIZE {8192};
+    constexpr static u8  STREAM_BUFFER_COUNT {4};
+    constexpr static i64 STREAM_BUFFER_THRESHOLD {STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1)};
+
 public:
     music() = default;
     ~music() override;
@@ -41,11 +46,18 @@ private:
     void stop_stream();
     void fill_buffers();
 
-    std::unique_ptr<decoder>           _decoder {};
-    usize                              _samplesPlayed {0};
-    std::optional<buffer::information> _info;
+    std::unique_ptr<decoder>     _decoder {};
+    usize                        _samplesPlayed {0};
+    std::optional<specification> _info;
+    i64                          _totalFrameCount {0};
 
-    std::queue<buffer> _buffers {};
+    struct stream_buffer {
+        std::array<f32, STREAM_BUFFER_SIZE> Data {};
+        isize                               Size {0};
+        bool                                Queued {false};
+    };
+    std::array<stream_buffer, STREAM_BUFFER_COUNT> _buffers;
+    std::queue<stream_buffer*>                     _bufferQueue {};
 
     std::atomic_bool _isRunning {false};
     std::atomic_bool _stopRequested {false};

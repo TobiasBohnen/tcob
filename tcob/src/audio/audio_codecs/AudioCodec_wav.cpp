@@ -70,10 +70,10 @@ auto wav_decoder::open() -> std::optional<buffer::information>
     return std::nullopt;
 }
 
-auto wav_decoder::decode(std::span<f32> outputSamples) -> i32
+auto wav_decoder::decode(std::span<f32> outputSamples) -> isize
 {
     u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Specs.Channels)};
-    return static_cast<i32>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()) * _info.Specs.Channels);
+    return static_cast<isize>(drwav_read_pcm_frames_f32(&_wav, wantRead, outputSamples.data()) * _info.Specs.Channels);
 }
 
 ////////////////////////////////////////////////////////////

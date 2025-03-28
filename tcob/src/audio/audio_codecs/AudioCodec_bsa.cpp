@@ -46,14 +46,14 @@ auto bsa_decoder::open() -> std::optional<buffer::information>
     return std::nullopt;
 }
 
-auto bsa_decoder::decode(std::span<f32> outputSamples) -> i32
+auto bsa_decoder::decode(std::span<f32> outputSamples) -> isize
 {
     std::vector<i16> buffer(outputSamples.size());
     stream().read_to<i16>(buffer);
     for (usize i {0}; i < outputSamples.size(); ++i) {
         outputSamples[i] = static_cast<f32>(buffer[i]) / std::numeric_limits<i16>::max();
     }
-    return static_cast<i32>(std::ssize(outputSamples));
+    return std::ssize(outputSamples);
 }
 
 ////////////////////////////////////////////////////////////

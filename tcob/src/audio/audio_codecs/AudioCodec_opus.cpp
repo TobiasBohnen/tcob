@@ -83,16 +83,16 @@ auto opus_decoder::open() -> std::optional<buffer::information>
     return _info;
 }
 
-auto opus_decoder::decode(std::span<f32> outputSamples) -> i32
+auto opus_decoder::decode(std::span<f32> outputSamples) -> isize
 {
-    i32 readOffset {0};
+    isize readOffset {0};
 
     for (;;) {
         if (std::ssize(outputSamples) - readOffset == 0) {
             break;
         }
 
-        auto const readBuffer {outputSamples.subspan(static_cast<u32>(readOffset))};
+        auto const readBuffer {outputSamples.subspan(static_cast<usize>(readOffset))};
         auto const read {op_read_float(_file, readBuffer.data(), static_cast<i32>(readBuffer.size()), nullptr)};
         readOffset += read * _info.Specs.Channels;
     }

@@ -82,7 +82,7 @@ auto midi_decoder::open() -> std::optional<buffer::information>
     return _info;
 }
 
-auto midi_decoder::decode(std::span<f32> outputSamples) -> i32
+auto midi_decoder::decode(std::span<f32> outputSamples) -> isize
 {
     i32  samplesRemaining {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Specs.Channels))};
     i32  sampleCount {0};

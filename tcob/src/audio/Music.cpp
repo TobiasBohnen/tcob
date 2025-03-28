@@ -5,12 +5,12 @@
 
 #include "tcob/audio/Music.hpp"
 
+#include <cassert>
 #include <chrono>
 #include <memory>
 #include <optional>
 #include <thread>
 #include <utility>
-#include <vector>
 
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
@@ -31,23 +31,23 @@ music::~music()
 
 auto music::info() const -> std::optional<specification>
 {
-    return _info->Specs;
+    return _info;
 }
 
 auto music::duration() const -> milliseconds
 {
     if (!_decoder || !_info) { return 0ms; }
-    if (!_info->Specs.is_valid()) { return 0ms; }
+    if (!_info->is_valid()) { return 0ms; }
 
-    return milliseconds {(static_cast<f32>(_info->FrameCount) / static_cast<f32>(_info->Specs.SampleRate)) * 1000.0f};
+    return milliseconds {(static_cast<f32>(_totalFrameCount) / static_cast<f32>(_info->SampleRate)) * 1000.0f};
 }
 
 auto music::playback_position() const -> milliseconds
 {
     if (!_decoder || !_info) { return 0ms; }
-    if (!_info->Specs.is_valid()) { return 0ms; }
+    if (!_info->is_valid()) { return 0ms; }
 
-    return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->Specs.SampleRate) / static_cast<f32>(_info->Specs.Channels)) * 1000.0f};
+    return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->SampleRate) / static_cast<f32>(_info->Channels)) * 1000.0f};
 }
 
 auto music::open(path const& file) -> load_status
@@ -64,9 +64,12 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
     _decoder = locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext);
     if (!_decoder) { return load_status::Error; }
 
-    _info = _decoder->open(std::move(in), DecoderContext);
+    auto const info {_decoder->open(std::move(in), DecoderContext)};
+    _info            = info->Specs;
+    _totalFrameCount = info->FrameCount;
+
     if (!_info) { return load_status::Error; }
-    if (!_info->Specs.is_valid()) { return load_status::Error; }
+    if (!_info->is_valid()) { return load_status::Error; }
 
     create_output();
     return load_status::Ok;
@@ -93,11 +96,7 @@ void music::update_stream()
 {
     _decoder->seek_from_start(0ms);
 
-    fill_buffers();
-
-    for (;;) {
-        if (_stopRequested) { break; }
-
+    while (!_stopRequested) {
         fill_buffers();
 
         std::this_thread::sleep_for(1ms);
@@ -113,7 +112,8 @@ void music::stop_stream()
 {
     _samplesPlayed = 0;
 
-    _buffers = {};
+    _bufferQueue = {};
+    for (auto& b : _buffers) { b.Queued = false; }
 
     if (!_isRunning) { return; }
 
@@ -122,28 +122,39 @@ void music::stop_stream()
     _stopRequested = false;
 }
 
-constexpr i64 STREAM_BUFFER_SIZE {8192};
-constexpr u8  STREAM_BUFFER_COUNT {4};
-constexpr i64 STREAM_BUFFER_THRESHOLD {STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1)};
-
 void music::fill_buffers()
 {
-    while (_buffers.size() < STREAM_BUFFER_COUNT) {
-        if (auto const data {_decoder->decode(STREAM_BUFFER_SIZE)}) {
-            _buffers.push(buffer::Create(_info->Specs, *data)); // TODO: reuse buffers
-            _samplesPlayed += data->size();
+    while (_bufferQueue.size() < STREAM_BUFFER_COUNT) {
+        // find unused buffer
+        stream_buffer* buffer {nullptr};
+        for (auto& b : _buffers) {
+            if (!b.Queued) {
+                buffer = &b;
+                break;
+            }
+        }
+        assert(buffer);
+
+        // decode to buffer
+        buffer->Size = _decoder->decode(buffer->Data);
+        if (buffer->Size > 0) {
+            buffer->Queued = true;
+            _bufferQueue.push(buffer);
+            _samplesPlayed += buffer->Size;
         } else {
             flush_output();
             break;
         }
     }
 
-    if (_buffers.empty()) { return; }
+    if (_bufferQueue.empty()) { return; }
 
-    while (queued_bytes() / sizeof(f32) < STREAM_BUFFER_THRESHOLD) {
-        auto& buffer {_buffers.front()};
-        write_to_output(buffer.data());
-        _buffers.pop();
+    // send data to output
+    while ((queued_bytes() / sizeof(f32)) < STREAM_BUFFER_THRESHOLD) {
+        auto& buffer {_bufferQueue.front()};
+        write_to_output({buffer->Data.data(), static_cast<usize>(buffer->Size)});
+        buffer->Queued = false;
+        _bufferQueue.pop();
     }
 }
 }

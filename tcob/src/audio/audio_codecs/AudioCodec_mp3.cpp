@@ -69,10 +69,10 @@ auto mp3_decoder::open() -> std::optional<buffer::information>
     return std::nullopt;
 }
 
-auto mp3_decoder::decode(std::span<f32> outputSamples) -> i32
+auto mp3_decoder::decode(std::span<f32> outputSamples) -> isize
 {
     u64 const wantRead {outputSamples.size() / static_cast<u32>(_info.Specs.Channels)};
-    return static_cast<i32>(drmp3_read_pcm_frames_f32(&_mp3, wantRead, outputSamples.data()) * _info.Specs.Channels);
+    return static_cast<isize>(drmp3_read_pcm_frames_f32(&_mp3, wantRead, outputSamples.data()) * _info.Specs.Channels);
 }
 }
 

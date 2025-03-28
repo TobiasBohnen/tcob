@@ -83,10 +83,10 @@ auto vorbis_decoder::open() -> std::optional<buffer::information>
     return std::nullopt;
 }
 
-auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
+auto vorbis_decoder::decode(std::span<f32> outputSamples) -> isize
 {
     f32** pcm {nullptr};
-    i32   offsetSamples {0};
+    isize offsetSamples {0};
     i32   wantFrames {static_cast<i32>(outputSamples.size() / static_cast<u32>(_info.Specs.Channels))};
     for (;;) {
         i32 const readFrames {static_cast<i32>(ov_read_float(&_file, &pcm, wantFrames, &_section))};
@@ -97,7 +97,7 @@ auto vorbis_decoder::decode(std::span<f32> outputSamples) -> i32
         for (i32 i {0}; i < readFrames; ++i) {
             for (i32 ch {0}; ch < _info.Specs.Channels; ++ch) {
                 assert(offsetSamples < std::ssize(outputSamples));
-                outputSamples[static_cast<u32>(offsetSamples++)] = pcm[ch][i];
+                outputSamples[static_cast<usize>(offsetSamples++)] = pcm[ch][i];
             }
         }
         wantFrames -= readFrames;
