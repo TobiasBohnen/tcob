@@ -16,6 +16,8 @@
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Property.hpp"
+#include "tcob/core/easing/Tween.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
@@ -28,6 +30,9 @@ class TCOB_API music final : public source {
 public:
     music() = default;
     ~music() override;
+
+    prop<milliseconds> FadeIn;
+    prop<milliseconds> FadeOut;
 
     auto info() const -> std::optional<specification> override;
     auto duration() const -> milliseconds override;
@@ -58,6 +63,9 @@ private:
     };
     std::array<stream_buffer, STREAM_BUFFER_COUNT> _buffers;
     std::queue<stream_buffer*>                     _bufferQueue {};
+
+    std::unique_ptr<linear_tween<f32>> _fadeTween;
+    uid                                _deferred {INVALID_ID};
 
     std::atomic_bool _isRunning {false};
     std::atomic_bool _stopRequested {false};

@@ -18,6 +18,7 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
+#include "tcob/core/easing/Tween.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -28,6 +29,7 @@ using namespace std::chrono_literals;
 music::~music()
 {
     stop_stream();
+    locate_service<task_manager>().cancel_deferred(_deferred);
 }
 
 auto music::info() const -> std::optional<specification>
@@ -82,13 +84,46 @@ auto music::on_start() -> bool
 
     stop_stream();
     _isRunning = true;
-    locate_service<task_manager>().run_async<void>([this]() { update_stream(); });
+
+    auto& tm {locate_service<task_manager>()};
+    tm.run_async<void>([this]() { update_stream(); });
+
+    if (FadeIn() > 0ms) {
+        tm.cancel_deferred(_deferred);
+        _fadeTween = make_unique_tween<linear_tween<f32>>(FadeIn(), 0.f, Volume());
+        _fadeTween->Value.Changed.connect([this](f32 val) { Volume = val; });
+        _fadeTween->Finished.connect([this]() { _deferred = INVALID_ID; });
+        _fadeTween->start();
+        _deferred = tm.run_deferred([this](def_task& ctx) {
+            _fadeTween->update(ctx.DeltaTime);
+            ctx.Finished = _fadeTween->state() == playback_state::Stopped;
+        });
+    }
 
     return true;
 }
 
 auto music::on_stop() -> bool
 {
+    auto& tm {locate_service<task_manager>()};
+
+    if (FadeOut() > 0ms) {
+        tm.cancel_deferred(_deferred);
+        _fadeTween = make_unique_tween<linear_tween<f32>>(FadeOut(), Volume(), 0.f);
+        _fadeTween->Value.Changed.connect([this](f32 val) { Volume = val; });
+        _fadeTween->Finished.connect([this]() {
+            stop_stream();
+            stop_output();
+            _deferred = INVALID_ID;
+        });
+        _fadeTween->start();
+        _deferred = tm.run_deferred([this](def_task& ctx) {
+            _fadeTween->update(ctx.DeltaTime);
+            ctx.Finished = _fadeTween->state() == playback_state::Stopped;
+        });
+        return false;
+    }
+
     stop_stream();
     return true;
 }
@@ -102,7 +137,7 @@ void music::update_stream()
 
         std::this_thread::sleep_for(1ms);
 
-        if (queued_bytes() == 0) { _stopRequested = true; }
+        if (queued_bytes() == 0) { break; }
     }
 
     _isRunning     = false;
