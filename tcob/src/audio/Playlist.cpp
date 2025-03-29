@@ -61,7 +61,7 @@ void playlist::launch_task()
 auto playlist::update(def_task& ctx) -> void
 {
     for (auto it {_playing.begin()}; it != _playing.end();) {
-        if ((*it)->status() == playback_status::Stopped) {
+        if ((*it)->state() == playback_state::Stopped) {
             it = _playing.erase(it);
         } else {
             ++it;

@@ -34,7 +34,7 @@ public:
     std::optional<milliseconds> Interval {};
 
     auto progress() const -> f64;
-    auto status() const -> playback_status;
+    auto state() const -> playback_state;
     auto is_looping() const -> bool;
 
     void start(playback_mode mode = playback_mode::Normal);
@@ -54,8 +54,8 @@ private:
     milliseconds _elapsedTime {0};
     milliseconds _currentInterval {0};
 
-    playback_status _status {playback_status::Stopped};
-    playback_mode   _mode {};
+    playback_state _state {playback_state::Stopped};
+    playback_mode  _mode {};
 };
 
 ////////////////////////////////////////////////////////////

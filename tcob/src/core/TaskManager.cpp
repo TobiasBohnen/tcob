@@ -70,6 +70,8 @@ auto task_manager::run_deferred(def_func const& func) -> uid
 
 void task_manager::cancel_deferred(uid id)
 {
+    if (id == INVALID_ID) { return; }
+
     std::scoped_lock lock {_deferredMutex};
 
     helper::erase(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; });
@@ -90,7 +92,7 @@ void task_manager::add_task(task_func&& func)
     _taskCondition.notify_one();
 }
 
-auto task_manager::process_queue() -> bool
+auto task_manager::process_queue(milliseconds deltaTime) -> bool
 {
     assert(std::this_thread::get_id() == _mainThreadID);
     if (_deferredQueueFront.empty()) { return true; }
@@ -98,8 +100,11 @@ auto task_manager::process_queue() -> bool
 
     while (!_deferredQueueFront.empty()) {
         def_task ctx;
-        auto&    front {_deferredQueueFront.front()};
+        ctx.DeltaTime = deltaTime;
+
+        auto& front {_deferredQueueFront.front()};
         front.first(ctx);
+
         if (!ctx.Finished) { _deferredQueueBack.emplace_back(front); }
         _deferredQueueFront.pop_front();
     }

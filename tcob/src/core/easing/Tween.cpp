@@ -47,20 +47,20 @@ auto tween_base::progress() const -> f64
     return 0.;
 }
 
-auto tween_base::status() const -> playback_status
+auto tween_base::state() const -> playback_state
 {
-    return _status;
+    return _state;
 }
 
 void tween_base::start(playback_mode mode)
 {
-    if (_status == playback_status::Stopped) { // start if stopped
+    if (_state == playback_state::Stopped) { // start if stopped
         _mode            = mode;
-        _status          = playback_status::Running;
+        _state           = playback_state::Running;
         _elapsedTime     = 0ms;
         _currentInterval = 0ms;
         update(0ms);
-    } else if (_status == playback_status::Paused) { // resume if paused
+    } else if (_state == playback_state::Paused) { // resume if paused
         _mode = mode;
         resume();
     }
@@ -68,8 +68,8 @@ void tween_base::start(playback_mode mode)
 
 void tween_base::stop()
 {
-    if (_status != playback_status::Stopped) { // stop if running or paused
-        _status          = playback_status::Stopped;
+    if (_state != playback_state::Stopped) { // stop if running or paused
+        _state           = playback_state::Stopped;
         _elapsedTime     = 0ms;
         _currentInterval = 0ms;
         Finished();
@@ -84,21 +84,21 @@ void tween_base::restart()
 
 void tween_base::pause()
 {
-    if (_status == playback_status::Running) { // pause if running
-        _status = playback_status::Paused;
+    if (_state == playback_state::Running) { // pause if running
+        _state = playback_state::Paused;
     }
 }
 
 void tween_base::resume()
 {
-    if (_status == playback_status::Paused) { // resume if paused
-        _status = playback_status::Running;
+    if (_state == playback_state::Paused) { // resume if paused
+        _state = playback_state::Running;
     }
 }
 
 void tween_base::toggle_pause()
 {
-    if (_status == playback_status::Paused) {
+    if (_state == playback_state::Paused) {
         resume();
     } else {
         pause();
@@ -114,7 +114,7 @@ auto tween_base::is_looping() const -> bool
 
 void tween_base::on_update(milliseconds deltaTime)
 {
-    if (_status != playback_status::Running) { return; }
+    if (_state != playback_state::Running) { return; }
 
     _elapsedTime += deltaTime;
 
@@ -179,7 +179,7 @@ void tween_queue::on_update(milliseconds deltaTime)
 
     auto* autom {_queue.front().get()};
     autom->update(deltaTime);
-    if (autom->status() != playback_status::Running) {
+    if (autom->state() != playback_state::Running) {
         if (_isLooping) {
             _queue.push(std::move(_queue.front()));
         }

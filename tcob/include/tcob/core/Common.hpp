@@ -99,7 +99,7 @@ enum class playback_mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
-enum class playback_status : u8 {
+enum class playback_state : u8 {
     Running,
     Paused,
     Stopped

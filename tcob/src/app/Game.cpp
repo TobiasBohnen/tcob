@@ -79,7 +79,7 @@ void game::finish()
 {
     // wait for command queue
     auto& tm {locate_service<task_manager>()};
-    while (!tm.process_queue()) { // TODO: abort?
+    while (!tm.process_queue(milliseconds {9999})) { // TODO: abort?
         std::this_thread::yield();
     }
 
@@ -148,10 +148,6 @@ void game::step()
 
     if (!plt.process_events()) { queue_finish(); }
 
-    tm.process_queue();
-
-    if (_scenes.empty()) { queue_finish(); }
-
     if (plt.was_paused()) {
         _lastUpdate      = clock::now().time_since_epoch();
         _nextFixedUpdate = _lastUpdate + FIXED_FRAMES;
@@ -167,6 +163,8 @@ void game::step()
 
     milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
+
+    tm.process_queue(deltaUpdate);
 
     if (deltaUpdate >= _frameLimit) {
         // update
@@ -193,6 +191,8 @@ void game::step()
             rs.stats().update(deltaUpdate);
         }
     }
+
+    if (_scenes.empty()) { queue_finish(); }
 }
 
 auto game::library() -> assets::library&

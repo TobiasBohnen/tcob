@@ -27,7 +27,8 @@ struct par_task {
 };
 
 struct def_task {
-    bool Finished {true};
+    bool         Finished {true};
+    milliseconds DeltaTime {};
 };
 
 ////////////////////////////////////////////////////////////
@@ -60,7 +61,7 @@ public:
 private:
     void add_task(task_func&& func);
 
-    auto process_queue() -> bool;
+    auto process_queue(milliseconds deltaTime) -> bool;
 
     void worker_thread(std::stop_token const& stopToken);
 

@@ -37,56 +37,65 @@ source::~source()
     _output->unbind();
 }
 
-auto source::status() const -> playback_status
+auto source::state() const -> playback_state
 {
-    if (!_output) { return playback_status::Stopped; }
+    if (!_output) { return playback_state::Stopped; }
     if (!_output->is_bound()) {
-        if (_output->queued_bytes() > 0) { return playback_status::Paused; }
-        return playback_status::Stopped;
+        if (_output->queued_bytes() > 0) { return playback_state::Paused; }
+        return playback_state::Stopped;
     }
-    if (_output->queued_bytes() > 0) { return playback_status::Running; }
-    return playback_status::Stopped;
+    if (_output->queued_bytes() > 0) { return playback_state::Running; }
+    return playback_state::Stopped;
 }
 
-void source::play()
+auto source::play() -> bool
 {
-    if (!_output) { return; }
+    if (!_output) { return false; }
 
-    auto const stat {status()};
-    if (stat == playback_status::Stopped) { // start if stopped
-        _output->clear();
+    auto const stat {state()};
+    if (stat == playback_state::Stopped) { // start if stopped
         if (on_start()) {
-            if (!_output->is_bound()) { _output->bind(); }
-        }
-    } else if (stat == playback_status::Paused) { // resume if paused
-        resume();
-    }
-}
-
-void source::stop()
-{
-    if (!_output) { return; }
-
-    if (status() != playback_status::Stopped) { // stop if running or paused
-        if (on_stop()) {
-            _output->flush();
-            _output->unbind();
             _output->clear();
+            if (!_output->is_bound()) { _output->bind(); }
+            return true;
         }
+    } else if (stat == playback_state::Paused) {  // resume if paused
+        resume();
+        return true;
+    } else if (stat == playback_state::Running) { // already playing
+        return true;
     }
+
+    return false;
 }
 
-void source::restart()
+auto source::stop() -> bool
+{
+    if (!_output) { return false; }
+
+    auto const stat {state()};
+    if (stat != playback_state::Stopped) { // stop if running or paused
+        if (on_stop()) {
+            stop_output();
+            return true;
+        }
+        return false;
+    }
+
+    return true; // already stopped
+}
+
+auto source::restart() -> bool
 {
     stop();
-    play();
+    return play();
 }
 
 void source::pause()
 {
     if (!_output) { return; }
 
-    if (status() == playback_status::Running) {
+    if (state() == playback_state::Running) {
         _output->unbind();
     }
 }
@@ -95,14 +104,14 @@ void source::resume()
 {
     if (!_output) { return; }
 
-    if (status() == playback_status::Paused) {
+    if (state() == playback_state::Paused) {
         _output->bind();
     }
 }
 
 void source::toggle_pause()
 {
-    status() == playback_status::Paused ? resume() : pause();
+    state() == playback_state::Paused ? resume() : pause();
 }
 
 void source::create_output()
@@ -139,6 +148,14 @@ void source::flush_output()
 {
     assert(_output);
     _output->flush();
+}
+
+void source::stop_output()
+{
+    assert(_output);
+    flush_output();
+    _output->unbind();
+    _output->clear();
 }
 
 auto source::queued_bytes() const -> i32

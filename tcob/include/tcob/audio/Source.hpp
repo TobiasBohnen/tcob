@@ -31,11 +31,11 @@ public:
 
     auto virtual info() const -> std::optional<specification> = 0;
     auto virtual duration() const -> milliseconds             = 0;
-    auto status() const -> playback_status;
+    auto state() const -> playback_state;
 
-    void play();
-    void stop();
-    void restart();
+    auto play() -> bool;
+    auto stop() -> bool;
+    auto restart() -> bool;
 
     void pause();
     void resume();
@@ -48,6 +48,7 @@ protected:
     void create_output();
     void write_to_output(std::span<f32 const> data);
     void flush_output();
+    void stop_output();
     auto queued_bytes() const -> i32;
 
 private:

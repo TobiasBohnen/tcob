@@ -104,7 +104,7 @@ public:
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;
 
-    auto status() const -> playback_status;
+    auto state() const -> playback_state;
     auto is_looping() const -> bool;
 
     void start(bool looping = false);
@@ -126,8 +126,8 @@ private:
 
     std::unique_ptr<animated_image_decoder> _decoder {};
 
-    playback_status _status {playback_status::Stopped};
-    bool            _isLooping {false};
+    playback_state _state {playback_state::Stopped};
+    bool           _isLooping {false};
 };
 
 }
