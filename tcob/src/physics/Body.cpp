@@ -111,7 +111,7 @@ auto body::shapes() -> std::span<std::shared_ptr<shape>>
 
 void body::remove_shape(shape const& shapePtr)
 {
-    helper::erase(_shapes, [&shapePtr](auto const& val) { return val.get() == &shapePtr; });
+    helper::erase_first(_shapes, [&shapePtr](auto const& val) { return val.get() == &shapePtr; });
 }
 
 void body::wake_up() const

@@ -71,7 +71,7 @@ inline void particle_system<Emitter>::stop()
 template <typename Emitter>
 inline void particle_system<Emitter>::remove_emitter(emitter_type const& emitter)
 {
-    helper::erase(_emitters, [&emitter](auto const& val) { return val.get() == &emitter; });
+    helper::erase_first(_emitters, [&emitter](auto const& val) { return val.get() == &emitter; });
 }
 
 template <typename Emitter>

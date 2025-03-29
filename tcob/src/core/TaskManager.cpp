@@ -74,8 +74,8 @@ void task_manager::cancel_deferred(uid id)
 
     std::scoped_lock lock {_deferredMutex};
 
-    helper::erase(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; });
-    helper::erase(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
+    helper::erase_first(_deferredQueueFront, [id](auto const& ctx) { return ctx.second == id; });
+    helper::erase_first(_deferredQueueBack, [id](auto const& ctx) { return ctx.second == id; });
 }
 
 auto task_manager::thread_count() const -> isize

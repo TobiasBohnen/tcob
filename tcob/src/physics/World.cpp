@@ -63,7 +63,7 @@ auto world::create_body(body_transform const& xform, body::settings const& bodyS
 
 void world::remove_body(body const& body)
 {
-    helper::erase(_bodies, [ptr = &body](auto const& val) { return val.get() == ptr; });
+    helper::erase_first(_bodies, [ptr = &body](auto const& val) { return val.get() == ptr; });
 }
 
 auto world::find_body(shape const& s) -> std::shared_ptr<body>
@@ -81,7 +81,7 @@ auto world::find_body(shape const& s) -> std::shared_ptr<body>
 
 void world::remove_joint(joint const& joint)
 {
-    helper::erase(_joints, [ptr = &joint](auto const& val) { return val.get() == ptr; });
+    helper::erase_first(_joints, [ptr = &joint](auto const& val) { return val.get() == ptr; });
 }
 
 auto world::body_events() const -> physics::body_events

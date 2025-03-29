@@ -49,7 +49,7 @@ lighting_system::lighting_system(bool multiThreaded)
 
 void lighting_system::remove_light_source(light_source const& light)
 {
-    helper::erase(_lightSources, [&light](auto const& val) {
+    helper::erase_first(_lightSources, [&light](auto const& val) {
         if (val.get() == &light) {
             val.get()->_parent = nullptr;
             return true;
@@ -80,7 +80,7 @@ void lighting_system::remove_shadow_caster(shadow_caster const& shadow)
         mark_lights_dirty();
     }
 
-    helper::erase(_shadowCasters, [&shadow](auto const& val) {
+    helper::erase_first(_shadowCasters, [&shadow](auto const& val) {
         if (val.get() == &shadow) {
             val.get()->_parent = nullptr;
             return true;

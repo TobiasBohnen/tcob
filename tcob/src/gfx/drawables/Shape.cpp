@@ -57,7 +57,7 @@ shape_batch::shape_batch()
 
 void shape_batch::remove_shape(shape const& shape)
 {
-    helper::erase(_children, [&shape](auto const& val) { return val.get() == &shape; });
+    helper::erase_first(_children, [&shape](auto const& val) { return val.get() == &shape; });
 }
 
 void shape_batch::clear()

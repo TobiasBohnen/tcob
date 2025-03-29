@@ -43,11 +43,14 @@ namespace helper {
 
     TCOB_API auto hash_combine(usize h1, usize h2) -> usize;
 
-    void erase(auto&& container, auto&& pred)
+    auto erase_first(auto&& container, auto&& pred) -> bool
     {
         if (auto it {std::ranges::find_if(container, pred)}; it != container.end()) {
             container.erase(it);
+            return true;
         }
+
+        return false;
     }
 }
 
