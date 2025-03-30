@@ -94,7 +94,7 @@ void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
     }
 }
 
-void spinner::on_mouse_down(input::mouse::button_event const& ev)
+void spinner::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (_hoverArrow == arrow::None) { return; }
 
@@ -109,7 +109,7 @@ void spinner::on_mouse_down(input::mouse::button_event const& ev)
     _holdTime.restart();
 }
 
-void spinner::on_mouse_up(input::mouse::button_event const& /* ev */)
+void spinner::on_mouse_button_up(input::mouse::button_event const& /* ev */)
 {
     _mouseDown = false;
     _holdCount = 1;

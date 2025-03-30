@@ -41,8 +41,8 @@ protected:
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
-    void on_mouse_down(input::mouse::button_event const& ev) override;
-    void on_mouse_up(input::mouse::button_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
+    void on_mouse_button_up(input::mouse::button_event const& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;

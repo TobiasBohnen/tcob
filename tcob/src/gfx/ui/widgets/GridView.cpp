@@ -280,9 +280,9 @@ void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
     HoveredCellIndex = INVALID;
 }
 
-void grid_view::on_mouse_down(input::mouse::button_event const& ev)
+void grid_view::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    vscroll_widget::on_mouse_down(ev);
+    vscroll_widget::on_mouse_button_down(ev);
 
     if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredCellIndex != INVALID) {

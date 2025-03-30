@@ -147,7 +147,7 @@ void slider::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void slider::on_mouse_up(input::mouse::button_event const& ev)
+void slider::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     _dragOffset = point_i::Zero;
     _isDragging = false;
@@ -158,7 +158,7 @@ void slider::on_mouse_up(input::mouse::button_event const& ev)
     }
 }
 
-void slider::on_mouse_down(input::mouse::button_event const& ev)
+void slider::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     _isDragging = false;
 

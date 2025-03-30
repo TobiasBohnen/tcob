@@ -41,8 +41,8 @@ protected:
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
-    void on_mouse_down(input::mouse::button_event const& ev) override;
-    void on_mouse_up(input::mouse::button_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
+    void on_mouse_button_up(input::mouse::button_event const& ev) override;
     void on_click() override;
     void on_focus_gained() override;
     void on_focus_lost() override;

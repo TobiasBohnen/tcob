@@ -223,7 +223,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     HoveredItemIndex = INVALID_INDEX;
 }
 
-void drop_down_list::on_mouse_down(input::mouse::button_event const& ev)
+void drop_down_list::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_down(*this, ev.Position);
@@ -246,7 +246,7 @@ void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void drop_down_list::on_mouse_up(input::mouse::button_event const& ev)
+void drop_down_list::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_up(*this, ev.Position);

@@ -109,7 +109,7 @@ public:
 protected:
     void on_draw(widget_painter& painter) override;
 
-    void on_mouse_down(input::mouse::button_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
 

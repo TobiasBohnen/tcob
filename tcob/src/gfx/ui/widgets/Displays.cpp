@@ -363,7 +363,7 @@ void color_picker::on_draw(widget_painter& painter)
     }
 }
 
-void color_picker::on_mouse_down(input::mouse::button_event const& ev)
+void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     auto const mp {global_to_parent(*this, ev.Position)};
     if (Bounds->contains(mp)) {

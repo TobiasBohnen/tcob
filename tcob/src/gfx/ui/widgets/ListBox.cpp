@@ -253,9 +253,9 @@ void list_box::on_mouse_hover(input::mouse::motion_event const& ev)
     HoveredItemIndex = INVALID_INDEX;
 }
 
-void list_box::on_mouse_down(input::mouse::button_event const& ev)
+void list_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    vscroll_widget::on_mouse_down(ev);
+    vscroll_widget::on_mouse_button_down(ev);
 
     if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredItemIndex == INVALID_INDEX) { return; }

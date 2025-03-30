@@ -402,7 +402,7 @@ void widget::do_mouse_drag(input::mouse::motion_event const& ev)
 
 void widget::do_mouse_down(input::mouse::button_event const& ev)
 {
-    on_mouse_down(ev);
+    on_mouse_button_down(ev);
 
     if (ev.Button == controls().PrimaryMouseButton) {
         activate();
@@ -420,7 +420,7 @@ void widget::do_mouse_down(input::mouse::button_event const& ev)
 
 void widget::do_mouse_up(input::mouse::button_event const& ev)
 {
-    on_mouse_up(ev);
+    on_mouse_button_up(ev);
 
     if (ev.Button == controls().PrimaryMouseButton) {
         deactivate();

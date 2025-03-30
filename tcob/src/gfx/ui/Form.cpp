@@ -366,7 +366,7 @@ void form_base::on_mouse_button_down(input::mouse::button_event const& ev)
 
     focus_widget(_topWidget);
     if (_topWidget) {
-        _injector.on_mouse_down(_topWidget, ev);
+        _injector.on_mouse_button_down(_topWidget, ev);
         if (ev.Button == Controls->PrimaryMouseButton) {
             _isLButtonDown = true;
         } else if (ev.Button == Controls->SecondaryMouseButton) {
@@ -380,7 +380,7 @@ void form_base::on_mouse_button_up(input::mouse::button_event const& ev)
     hide_tooltip();
 
     if (!_focusWidget) { return; }
-    _injector.on_mouse_up(_focusWidget, ev);
+    _injector.on_mouse_button_up(_focusWidget, ev);
 
     if (ev.Button == Controls->PrimaryMouseButton) {
         _isLButtonDown = false;

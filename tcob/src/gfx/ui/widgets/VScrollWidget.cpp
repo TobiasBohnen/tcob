@@ -64,7 +64,7 @@ void vscroll_widget::on_mouse_hover(input::mouse::motion_event const& ev)
     }
 }
 
-void vscroll_widget::on_mouse_down(input::mouse::button_event const& ev)
+void vscroll_widget::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         if (_vScrollbar.is_mouse_over()) {
@@ -81,7 +81,7 @@ void vscroll_widget::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void vscroll_widget::on_mouse_up(input::mouse::button_event const& ev)
+void vscroll_widget::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_up(*this, ev.Position);

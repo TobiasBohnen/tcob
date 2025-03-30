@@ -148,8 +148,8 @@ protected:
     void virtual on_mouse_leave() { }
     void virtual on_mouse_hover(input::mouse::motion_event const& /* ev */) { }
     void virtual on_mouse_drag(input::mouse::motion_event const& /* ev */) { }
-    void virtual on_mouse_down(input::mouse::button_event const& /* ev */) { }
-    void virtual on_mouse_up(input::mouse::button_event const& /* ev */) { }
+    void virtual on_mouse_button_down(input::mouse::button_event const& /* ev */) { }
+    void virtual on_mouse_button_up(input::mouse::button_event const& /* ev */) { }
     void virtual on_mouse_wheel(input::mouse::wheel_event const& /* ev */) { }
 
     void virtual on_controller_button_down(input::controller::button_event const& /* ev */) { }

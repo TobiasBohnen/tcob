@@ -476,7 +476,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
     // ev.Handled = true;
 }
 
-void terminal::on_mouse_down(input::mouse::button_event const& ev)
+void terminal::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (!_useMouse) { return; }
 

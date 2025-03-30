@@ -103,12 +103,12 @@ namespace detail {
         if (check(widget)) { widget->do_mouse_leave(); }
     }
 
-    void input_injector::on_mouse_down(widget* widget, input::mouse::button_event const& ev) const
+    void input_injector::on_mouse_button_down(widget* widget, input::mouse::button_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_down(ev); }
     }
 
-    void input_injector::on_mouse_up(widget* widget, input::mouse::button_event const& ev) const
+    void input_injector::on_mouse_button_up(widget* widget, input::mouse::button_event const& ev) const
     {
         if (check(widget)) { widget->do_mouse_up(ev); }
     }

@@ -173,7 +173,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void panel::on_mouse_down(input::mouse::button_event const& ev)
+void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
@@ -185,7 +185,7 @@ void panel::on_mouse_down(input::mouse::button_event const& ev)
     }
 }
 
-void panel::on_mouse_up(input::mouse::button_event const& ev)
+void panel::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {

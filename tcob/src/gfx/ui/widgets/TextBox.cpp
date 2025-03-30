@@ -224,7 +224,7 @@ void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void text_box::on_mouse_down(input::mouse::button_event const& ev)
+void text_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     isize const target {calc_caret_pos(global_to_content(*this, ev.Position))};
     if (_caretPos != target) {
@@ -235,7 +235,7 @@ void text_box::on_mouse_down(input::mouse::button_event const& ev)
     ev.Handled    = true;
 }
 
-void text_box::on_mouse_up(input::mouse::button_event const& ev)
+void text_box::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     _dragCaretPos = -1;
     ev.Handled    = true;

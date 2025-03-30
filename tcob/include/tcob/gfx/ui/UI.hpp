@@ -393,8 +393,8 @@ namespace detail {
 
         void on_mouse_enter(widget* widget) const;
         void on_mouse_leave(widget* widget) const;
-        void on_mouse_down(widget* widget, input::mouse::button_event const& ev) const;
-        void on_mouse_up(widget* widget, input::mouse::button_event const& ev) const;
+        void on_mouse_button_down(widget* widget, input::mouse::button_event const& ev) const;
+        void on_mouse_button_up(widget* widget, input::mouse::button_event const& ev) const;
         void on_mouse_hover(widget* widget, input::mouse::motion_event const& ev) const;
         void on_mouse_drag(widget* widget, input::mouse::motion_event const& ev) const;
         void on_mouse_wheel(widget* widget, input::mouse::wheel_event const& ev) const;

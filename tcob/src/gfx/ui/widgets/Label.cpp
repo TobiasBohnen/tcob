@@ -86,17 +86,17 @@ void label::on_mouse_drag(input::mouse::motion_event const& ev)
     }
 }
 
-void label::on_mouse_down(input::mouse::button_event const& ev)
+void label::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (For) {
-        _injector.on_mouse_down(For.get(), ev);
+        _injector.on_mouse_button_down(For.get(), ev);
     }
 }
 
-void label::on_mouse_up(input::mouse::button_event const& ev)
+void label::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (For) {
-        _injector.on_mouse_up(For.get(), ev);
+        _injector.on_mouse_button_up(For.get(), ev);
     }
 }
 
