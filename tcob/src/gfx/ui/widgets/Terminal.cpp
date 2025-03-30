@@ -24,6 +24,7 @@
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/gfx/Font.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -330,8 +331,9 @@ void terminal::on_draw(widget_painter& painter)
         assert(utf8::length(cell.Text) == 1);
 
         auto textStyle {_style.Text};
-        textStyle.Color = cell.Colors.first;
-        painter.draw_text(textStyle, cellRect, cell.Text);
+        textStyle.Color     = cell.Colors.first;
+        textStyle.Alignment = {gfx::horizontal_alignment::Left, gfx::vertical_alignment::Top};
+        painter.draw_text(textStyle, cellRect, painter.format_text(textStyle, {cellRect.Position, rect.Size}, cell.Text));
     }
 
     // cursor
