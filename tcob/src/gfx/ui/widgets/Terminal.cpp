@@ -10,7 +10,6 @@
 #include <cassert>
 #include <cctype>
 #include <charconv>
-#include <cmath>
 #include <iterator>
 #include <system_error>
 #include <vector>
@@ -27,6 +26,7 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -301,6 +301,8 @@ void terminal::on_draw(widget_painter& painter)
     f32 const   fontHeight {font->info().LineHeight};
     f32 const   fontWidth {get_font_width(font)};
 
+    _cellRectCache.clear();
+
     auto& canvas {painter.canvas()};
     canvas.save();
     canvas.set_shape_antialias(false);
@@ -334,6 +336,10 @@ void terminal::on_draw(widget_painter& painter)
         textStyle.Color     = cell.Colors.first;
         textStyle.Alignment = {gfx::horizontal_alignment::Left, gfx::vertical_alignment::Top};
         painter.draw_text(textStyle, cellRect, painter.format_text(textStyle, {cellRect.Position, rect.Size}, cell.Text));
+
+        if (_useMouse) {
+            _cellRectCache.emplace_back(cellRect, point_i {static_cast<i32>(i % Size->Width), static_cast<i32>(i / Size->Width)});
+        }
     }
 
     // cursor
@@ -461,17 +467,13 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     if (!_useMouse) { return; }
 
-    rect_f const rect {global_content_bounds()};
-    if (!rect.contains(ev.Position)) { return; }
-
-    u32 const   fontSize {_style.Text.calc_font_size(rect)};
-    auto* const font {_style.Text.Font->get_font(_style.Text.Style, fontSize).ptr()};
-    f32 const   fontWidth {get_font_width(font)};
-    f32 const   fontHeight {font->info().LineHeight};
-
-    i32 const x {static_cast<i32>(std::floor(((ev.Position.X - rect.left()) / fontWidth) + 0.5f))};
-    i32 const y {static_cast<i32>((ev.Position.Y - rect.top()) / fontHeight)};
-    HoveredCell = {x, y};
+    auto const mp {global_to_parent(*this, ev.Position)};
+    for (auto const& cell : _cellRectCache) {
+        if (cell.first.contains(mp)) {
+            HoveredCell = cell.second;
+            return;
+        }
+    }
 
     // ev.Handled = true;
 }

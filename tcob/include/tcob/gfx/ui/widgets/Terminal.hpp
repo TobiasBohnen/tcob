@@ -159,6 +159,8 @@ private:
     std::unique_ptr<square_wave_tween<bool>> _cursorTween;
     std::unique_ptr<square_wave_tween<bool>> _flashTween;
 
+    std::vector<std::pair<rect_f, point_i>> _cellRectCache;
+
     terminal::style _style;
 };
 
