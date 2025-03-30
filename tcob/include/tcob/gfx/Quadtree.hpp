@@ -44,7 +44,7 @@ namespace detail {
 template <QuadtreeValue T, usize SplitThreshold = 16, usize MaxDepth = 8>
 class quadtree {
 public:
-    quadtree(rect_f const& rect);
+    explicit quadtree(rect_f const& rect);
 
     void add(T const& value);
 
