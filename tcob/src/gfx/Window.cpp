@@ -7,7 +7,6 @@
 
 #include <cassert>
 #include <memory>
-#include <physfs.h>
 #include <utility>
 
 #include <SDL3/SDL.h>
