@@ -23,9 +23,9 @@ namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API music final : public source {
-    constexpr static i64 STREAM_BUFFER_SIZE {4096};
-    constexpr static u8  STREAM_BUFFER_COUNT {4};
-    constexpr static i64 STREAM_BUFFER_THRESHOLD {STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1)};
+    static constexpr i64 STREAM_BUFFER_SIZE {4096};
+    static constexpr u8  STREAM_BUFFER_COUNT {4};
+    static constexpr i64 STREAM_BUFFER_THRESHOLD {STREAM_BUFFER_SIZE * (STREAM_BUFFER_COUNT - 1)};
 
 public:
     music() = default;

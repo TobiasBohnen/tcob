@@ -475,6 +475,8 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
         }
     }
 
+    HoveredCell = {-1, -1};
+
     // ev.Handled = true;
 }
 

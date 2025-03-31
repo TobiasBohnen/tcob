@@ -75,7 +75,7 @@ namespace detail {
 
 template <typename EvArgs = void>
 class signal final : public detail::signal_base {
-    constexpr static bool IsVoid {std::is_void_v<std::remove_cvref_t<EvArgs>>};
+    static constexpr bool IsVoid {std::is_void_v<std::remove_cvref_t<EvArgs>>};
 
     template <typename T, bool IsVoid>
     struct slot_func_type;
