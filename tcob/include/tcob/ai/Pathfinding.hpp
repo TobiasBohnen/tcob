@@ -31,7 +31,8 @@ public:
     auto find_path(AStarGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 
 private:
-    struct node {
+    class TCOB_API node {
+    public:
         point_i pos;
         u64     score {};
 
