@@ -5,6 +5,7 @@ list(APPEND SRC
 
 list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/ai/Pathfinding.hpp
+    ${TCOB_INC_DIR}/tcob/ai/Pathfinding.inl
 )
 
 tcob_add_obj_library(tcob_ai "${SRC}" "${HDR}")
