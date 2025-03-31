@@ -214,11 +214,11 @@ auto substr(utf8_string_view str, usize pos, usize count) -> utf8_string
 {
     auto start {str.begin()};
     for (usize i {0}; i < pos; ++i) {
-        ::utf8::next(start, str.end());
+        ::utf8::next_ex(start, str.end());
     }
     auto end {start};
     for (usize i {0}; i < count; ++i) {
-        ::utf8::next(end, str.end());
+        ::utf8::next_ex(end, str.end());
     }
 
     return {start, end};
@@ -252,7 +252,7 @@ auto capitalize(utf8_string_view str) -> utf8_string
         } else {
             retValue += utf8::to_lower(utf8::substr(str, i, 1));
         }
-        ::utf8::next(it, str.end());
+        ::utf8::next_ex(it, str.end());
     }
 
     return retValue;
