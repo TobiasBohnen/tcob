@@ -426,6 +426,8 @@ void gl_canvas::convex_fill(nvg_call const& call)
     glStencilMask(0x00);
     glStencilFunc(GL_EQUAL, 0x80, 0x80);
 
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
     set_uniforms(call.UniformOffset, call.Image);
 
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
@@ -474,7 +476,6 @@ void gl_canvas::stroke(nvg_call const& call)
 void gl_canvas::triangles(nvg_call const& call)
 {
     set_uniforms(call.UniformOffset, call.Image);
-
     _vertexArray.draw_arrays(primitive_type::Triangles, static_cast<i32>(call.TriangleOffset), call.TriangleCount);
 }
 
@@ -494,6 +495,8 @@ void gl_canvas::clip(nvg_call const& call)
     for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
         _vertexArray.draw_arrays(primitive_type::TriangleFan, static_cast<i32>(_paths[i].FillOffset), _paths[i].FillCount);
     }
+
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     glDisable(GL_STENCIL_TEST);
 }
