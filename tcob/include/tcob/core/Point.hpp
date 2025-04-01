@@ -22,8 +22,7 @@ namespace tcob {
 template <Arithmetic T>
 class [[nodiscard]] point final {
 public:
-    using type       = T;
-    using float_type = f64;
+    using type = T;
 
     constexpr point() = default;
     constexpr point(T x, T y);
@@ -33,21 +32,21 @@ public:
 
     auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
 
-    auto constexpr dot(point<T> const& p) const -> float_type;
-    auto constexpr cross(point<T> const& p) const -> float_type;
+    auto constexpr dot(point<T> const& p) const -> f64;
+    auto constexpr cross(point<T> const& p) const -> f64;
 
-    auto length() const -> float_type;
-    auto distance_to(point<T> const& p) const -> float_type;
+    auto length() const -> f64;
+    auto distance_to(point<T> const& p) const -> f64;
 
-    auto angle_to(point<T> const& p) const -> degree<float_type>;
+    auto angle_to(point<T> const& p) const -> degree<f64>;
 
     auto constexpr as_perpendicular() const -> point<T>;
-    auto as_normalized() const -> point<float_type>;
+    auto as_normalized() const -> point<f64>;
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;
 
     auto static constexpr Lerp(point<T> const& left, point<T> const& right, f64 step) -> point<T>;
-    auto static constexpr FromDirection(degree<float_type> angle) -> point<T>;
+    auto static constexpr FromDirection(degree<f64> angle) -> point<T>;
 
     T X {0};
     T Y {0};
@@ -111,6 +110,15 @@ auto constexpr operator==(point<T> const& left, point<R> const& right) -> bool;
 
 template <Arithmetic T>
 inline auto operator<<(std::ostream& os, point<T> const& m) -> std::ostream&;
+
+template <Arithmetic T>
+auto euclidean_distance(point<T> const& a, point<T> const& b) -> f64;
+
+template <Arithmetic T>
+auto manhattan_distance(point<T> const& a, point<T> const& b) -> T;
+
+template <Arithmetic T>
+auto chebyshev_distance(point<T> const& a, point<T> const& b) -> T;
 
 template <Arithmetic T>
 void Serialize(point<T> const& v, auto&& s)

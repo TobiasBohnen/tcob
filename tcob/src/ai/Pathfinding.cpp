@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <unordered_map>
 #include <vector>
 
@@ -18,7 +17,7 @@ namespace tcob::ai {
 
 auto astar_pathfinding::heuristic(point_i a, point_i b) const -> u64
 {
-    return std::abs(a.X - b.X) + std::abs(a.Y - b.Y);
+    return static_cast<u64>(manhattan_distance(a, b));
 }
 
 auto astar_pathfinding::get_neighbors(size_i gridSize, point_i pos) const -> std::vector<point_i>
