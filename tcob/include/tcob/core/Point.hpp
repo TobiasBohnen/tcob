@@ -53,6 +53,17 @@ public:
 
     static point<T> const Zero;
     static point<T> const One;
+
+    void static Serialize(point<T> const& v, auto&& s)
+    {
+        s["x"] = v.X;
+        s["y"] = v.Y;
+    }
+
+    auto static Deserialize(point<T>& v, auto&& s) -> bool
+    {
+        return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
+    }
 };
 
 template <Arithmetic T>
@@ -119,19 +130,6 @@ auto manhattan_distance(point<T> const& a, point<T> const& b) -> T;
 
 template <Arithmetic T>
 auto chebyshev_distance(point<T> const& a, point<T> const& b) -> T;
-
-template <Arithmetic T>
-void Serialize(point<T> const& v, auto&& s)
-{
-    s["x"] = v.X;
-    s["y"] = v.Y;
-}
-
-template <Arithmetic T>
-auto Deserialize(point<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
-}
 
 }
 

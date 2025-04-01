@@ -55,30 +55,30 @@ public:
     u8 G {0};
     u8 B {0};
     u8 A {0};
+
+    void static Serialize(color v, auto&& s)
+    {
+        s["r"] = v.R;
+        s["g"] = v.G;
+        s["b"] = v.B;
+        s["a"] = v.A;
+    }
+
+    auto static Deserialize(color& v, auto&& s) -> bool
+    {
+        if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
+            if (!s.try_get(v.A, "a")) {
+                v.A = u8 {255};
+            }
+            return true;
+        }
+        return false;
+    }
 };
 
 auto constexpr operator==(color left, color right) -> bool;
 
 inline auto operator<<(std::ostream& os, color m) -> std::ostream&;
-
-void Serialize(color v, auto&& s)
-{
-    s["r"] = v.R;
-    s["g"] = v.G;
-    s["b"] = v.B;
-    s["a"] = v.A;
-}
-
-auto Deserialize(color& v, auto&& s) -> bool
-{
-    if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
-        if (!s.try_get(v.A, "a")) {
-            v.A = u8 {255};
-        }
-        return true;
-    }
-    return false;
-}
 
 }
 

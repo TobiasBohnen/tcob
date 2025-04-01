@@ -46,6 +46,17 @@ public:
 
     static size<T> const Zero;
     static size<T> const One;
+
+    void static Serialize(size<T> const& v, auto&& s)
+    {
+        s["width"]  = v.Width;
+        s["height"] = v.Height;
+    }
+
+    auto static Deserialize(size<T>& v, auto&& s) -> bool
+    {
+        return s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
+    }
 };
 
 template <Arithmetic T>
@@ -106,19 +117,6 @@ auto constexpr operator==(size<T> const& left, size<R> const& right) -> bool;
 
 template <Arithmetic T>
 inline auto operator<<(std::ostream& os, size<T> const& m) -> std::ostream&;
-
-template <Arithmetic T>
-void Serialize(size<T> const& v, auto&& s)
-{
-    s["width"]  = v.Width;
-    s["height"] = v.Height;
-}
-
-template <Arithmetic T>
-auto Deserialize(size<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
-}
 
 }
 

@@ -23,18 +23,18 @@ public:
 
     f32   Position {0};
     color Value {};
+
+    void static Serialize(color_stop const& v, auto&& s)
+    {
+        s["pos"]   = v.Position;
+        s["value"] = v.Value;
+    }
+
+    auto static Deserialize(color_stop& v, auto&& s) -> bool
+    {
+        return s.try_get(v.Position, "pos") && s.try_get(v.Value, "value");
+    }
 };
-
-void Serialize(color_stop const& v, auto&& s)
-{
-    s["pos"]   = v.Position;
-    s["value"] = v.Value;
-}
-
-auto Deserialize(color_stop& v, auto&& s) -> bool
-{
-    return s.try_get(v.Position, "pos") && s.try_get(v.Value, "value");
-}
 
 ////////////////////////////////////////////////////////////
 

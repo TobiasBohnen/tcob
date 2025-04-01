@@ -50,13 +50,30 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-struct ortho_tile {
+void SerializeTile(auto&& v, auto&& s);
+auto DeserializeTile(auto&& v, auto&& s) -> bool;
+
+class TCOB_API ortho_tile {
+public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
     color  Color {colors::White};
 
     size_f Scale {size_f::One};
+
+    void static Serialize(ortho_tile const& v, auto&& s)
+    {
+        SerializeTile(v, s);
+        s["scale"] = v.Scale;
+    }
+
+    auto static Deserialize(ortho_tile& v, auto&& s) -> bool
+    {
+        if (!DeserializeTile(v, s)) { return false; }
+        s.try_get(v.Scale, "scale");
+        return true;
+    }
 };
 
 class TCOB_API ortho_grid {
@@ -72,7 +89,8 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-struct iso_tile {
+class TCOB_API iso_tile {
+public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
@@ -80,6 +98,21 @@ struct iso_tile {
 
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
+
+    void static Serialize(iso_tile const& v, auto&& s)
+    {
+        SerializeTile(v, s);
+        s["center"] = v.Center;
+        s["height"] = v.Height;
+    }
+
+    auto static Deserialize(iso_tile& v, auto&& s) -> bool
+    {
+        if (!DeserializeTile(v, s)) { return false; }
+        s.try_get(v.Center, "center");
+        s.try_get(v.Height, "height");
+        return true;
+    }
 };
 
 class TCOB_API iso_grid {
@@ -96,11 +129,22 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-struct hex_tile {
+class TCOB_API hex_tile {
+public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
     color  Color {colors::White};
+
+    void static Serialize(hex_tile const& v, auto&& s)
+    {
+        SerializeTile(v, s);
+    }
+
+    auto static Deserialize(hex_tile& v, auto&& s) -> bool
+    {
+        return static_cast<bool>(DeserializeTile(v, s));
+    }
 };
 
 enum hex_top {
@@ -240,44 +284,6 @@ auto DeserializeTile(auto&& v, auto&& s) -> bool
     s.try_get(v.FlipVertically, "v_flip");
     s.try_get(v.Color, "color");
     return true;
-}
-
-void Serialize(ortho_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-    s["scale"] = v.Scale;
-}
-
-auto Deserialize(ortho_tile& v, auto&& s) -> bool
-{
-    if (!DeserializeTile(v, s)) { return false; }
-    s.try_get(v.Scale, "scale");
-    return true;
-}
-
-void Serialize(iso_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-    s["center"] = v.Center;
-    s["height"] = v.Height;
-}
-
-auto Deserialize(iso_tile& v, auto&& s) -> bool
-{
-    if (!DeserializeTile(v, s)) { return false; }
-    s.try_get(v.Center, "center");
-    s.try_get(v.Height, "height");
-    return true;
-}
-
-void Serialize(hex_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-}
-
-auto Deserialize(hex_tile& v, auto&& s) -> bool
-{
-    return static_cast<bool>(DeserializeTile(v, s));
 }
 
 }

@@ -19,18 +19,18 @@ public:
     milliseconds Duration {};
 
     auto operator==(frame const& other) const -> bool = default;
+
+    void static Serialize(frame const& v, auto&& s)
+    {
+        s["name"]     = v.Name;
+        s["duration"] = v.Duration;
+    }
+
+    auto static Deserialize(frame& v, auto&& s) -> bool
+    {
+        return s.try_get(v.Name, "name") && s.try_get(v.Duration, "duration");
+    }
 };
-
-void Serialize(frame const& v, auto&& s)
-{
-    s["name"]     = v.Name;
-    s["duration"] = v.Duration;
-}
-
-auto Deserialize(frame& v, auto&& s) -> bool
-{
-    return s.try_get(v.Name, "name") && s.try_get(v.Duration, "duration");
-}
 
 ////////////////////////////////////////////////////////////
 

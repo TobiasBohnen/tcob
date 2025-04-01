@@ -33,6 +33,11 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
+void SerializeParticleSettings(auto&& v, auto&& s);
+auto DeserializeParticleSettings(auto&& v, auto&& s) -> bool;
+
+////////////////////////////////////////////////////////////
+
 template <typename T>
 struct particle_event {
     T&           Particle;
@@ -137,6 +142,16 @@ public:
         min_max<milliseconds> Lifetime;
 
         auto operator==(settings const& other) const -> bool = default;
+
+        void static Serialize(point_particle::settings const& v, auto&& s)
+        {
+            SerializeParticleSettings(v, s);
+        }
+
+        auto static Deserialize(point_particle::settings& v, auto&& s) -> bool
+        {
+            return DeserializeParticleSettings(v, s);
+        }
     };
 
     ////////////////////////////////////////////////////////////
@@ -197,6 +212,24 @@ public:
         min_max<degree_f> Rotation;
 
         auto operator==(settings const& other) const -> bool = default;
+
+        void static Serialize(quad_particle::settings const& v, auto&& s)
+        {
+            SerializeParticleSettings(v, s);
+            s["scale"]    = v.Scale;
+            s["size"]     = v.Size;
+            s["spin"]     = v.Spin;
+            s["rotation"] = v.Rotation;
+        }
+
+        auto static Deserialize(quad_particle::settings& v, auto&& s) -> bool
+        {
+            return DeserializeParticleSettings(v, s)
+                && s.try_get(v.Scale, "scale")
+                && s.try_get(v.Size, "size")
+                && s.try_get(v.Spin, "spin")
+                && s.try_get(v.Rotation, "rotation");
+        }
     };
 
     ////////////////////////////////////////////////////////////
@@ -249,6 +282,23 @@ public:
         std::optional<milliseconds> Lifetime {};
 
         auto operator==(settings const& other) const -> bool = default;
+
+        void static Serialize(point_particle_emitter::settings const& v, auto&& s)
+        {
+            s["template"]   = v.Template;
+            s["spawn_area"] = v.SpawnArea;
+            s["spawn_rate"] = v.SpawnRate;
+            s["explosion"]  = v.Explosion;
+            if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
+        }
+
+        auto static Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool
+        {
+            if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
+            return s.try_get(v.Template, "template")
+                && s.try_get(v.SpawnArea, "spawn_area")
+                && s.try_get(v.SpawnRate, "spawn_rate");
+        }
     };
 
     ////////////////////////////////////////////////////////////
@@ -287,6 +337,23 @@ public:
         std::optional<milliseconds> Lifetime {};
 
         auto operator==(settings const& other) const -> bool = default;
+
+        void static Serialize(quad_particle_emitter::settings const& v, auto&& s)
+        {
+            s["template"]   = v.Template;
+            s["spawn_area"] = v.SpawnArea;
+            s["spawn_rate"] = v.SpawnRate;
+            s["explosion"]  = v.Explosion;
+            if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
+        }
+
+        auto static Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool
+        {
+            if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
+            return s.try_get(v.Template, "template")
+                && s.try_get(v.SpawnArea, "spawn_area")
+                && s.try_get(v.SpawnRate, "spawn_rate");
+        }
     };
 
     ////////////////////////////////////////////////////////////
@@ -356,72 +423,7 @@ auto DeserializeParticleSettings(auto&& v, auto&& s) -> bool
         && s.try_get(v.Lifetime, "lifetime");
 }
 
-void Serialize(point_particle::settings const& v, auto&& s)
-{
-    SerializeParticleSettings(v, s);
-}
-
-auto Deserialize(point_particle::settings& v, auto&& s) -> bool
-{
-    return DeserializeParticleSettings(v, s);
-}
-
-void Serialize(quad_particle::settings const& v, auto&& s)
-{
-    SerializeParticleSettings(v, s);
-    s["scale"]    = v.Scale;
-    s["size"]     = v.Size;
-    s["spin"]     = v.Spin;
-    s["rotation"] = v.Rotation;
-}
-
-auto Deserialize(quad_particle::settings& v, auto&& s) -> bool
-{
-    return DeserializeParticleSettings(v, s)
-        && s.try_get(v.Scale, "scale")
-        && s.try_get(v.Size, "size")
-        && s.try_get(v.Spin, "spin")
-        && s.try_get(v.Rotation, "rotation");
-}
-
 ////////////////////////////////////////////////////////////
-
-void SerializeEmitterSettings(auto&& v, auto&& s)
-{
-    s["template"]   = v.Template;
-    s["spawn_area"] = v.SpawnArea;
-    s["spawn_rate"] = v.SpawnRate;
-    s["explosion"]  = v.Explosion;
-    if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
-}
-
-auto DeserializeEmitterSettings(auto&& v, auto&& s) -> bool
-{
-    if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
-    return s.try_get(v.Template, "template")
-        && s.try_get(v.SpawnArea, "spawn_area")
-        && s.try_get(v.SpawnRate, "spawn_rate");
-}
-
-void Serialize(point_particle_emitter::settings const& v, auto&& s)
-{
-    SerializeEmitterSettings(v, s);
-}
-
-auto Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool
-{
-    return DeserializeEmitterSettings(v, s);
-}
-
-void Serialize(quad_particle_emitter::settings const& v, auto&& s)
-{
-    SerializeEmitterSettings(v, s);
-}
-
-auto Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool
-{
-    return DeserializeEmitterSettings(v, s);
-}
 
 }
 

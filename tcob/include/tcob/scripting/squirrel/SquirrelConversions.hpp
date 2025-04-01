@@ -978,7 +978,7 @@ struct converter<T> {
         if (view.is_table(idx)) {
             table tab {table::Acquire(view, idx)};
             T     t {};
-            return Deserialize(t, tab);
+            return T::Deserialize(t, tab);
         }
 
         return false;
@@ -987,13 +987,13 @@ struct converter<T> {
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         table tab {table::Acquire(view, idx++)};
-        return Deserialize(value, tab);
+        return T::Deserialize(value, tab);
     }
 
     void static To(vm_view view, T const& value)
     {
         table tab {table::PushNew(view)};
-        Serialize(value, tab);
+        T::Serialize(value, tab);
     }
 };
 

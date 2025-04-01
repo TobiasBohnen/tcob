@@ -87,8 +87,8 @@ concept OverloadsArrowOp = requires(T a) { { a.operator->() } -> Pointer; };
 template <typename T, typename S>
 concept Serializable =
     requires(T& t, S& s) {
-        { Serialize(t, s) };
-        { Deserialize(t, s) };
+        { T::Serialize(t, s) };
+        { T::Deserialize(t, s) };
     };
 
 template <typename T>

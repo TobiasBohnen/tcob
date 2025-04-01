@@ -119,18 +119,18 @@ public:
     u32    Level {0};
 
     auto operator==(texture_region const& other) const -> bool = default;
+
+    void static Serialize(texture_region const& v, auto&& s)
+    {
+        s["level"] = v.Level;
+        Serialize(v.UVRect, s);
+    }
+
+    auto static Deserialize(texture_region& v, auto&& s) -> bool
+    {
+        return s.try_get(v.Level, "level") && rect_f::Deserialize(v.UVRect, s);
+    }
 };
-
-void Serialize(texture_region const& v, auto&& s)
-{
-    s["level"] = v.Level;
-    Serialize(v.UVRect, s);
-}
-
-auto Deserialize(texture_region& v, auto&& s) -> bool
-{
-    return s.try_get(v.Level, "level") && Deserialize(v.UVRect, s);
-}
 
 ////////////////////////////////////////////////////////////
 
@@ -148,23 +148,24 @@ enum class vertical_alignment : u8 {
 
 ////////////////////////////////////////////////////////////
 
-struct alignments {
+class TCOB_API alignments {
+public:
     horizontal_alignment Horizontal {horizontal_alignment::Left};
     vertical_alignment   Vertical {vertical_alignment::Top};
 
     auto operator==(alignments const& other) const -> bool = default;
+
+    void static Serialize(alignments const& v, auto&& s)
+    {
+        s["horizontal"] = v.Horizontal;
+        s["vertical"]   = v.Vertical;
+    }
+
+    auto static Deserialize(alignments& v, auto&& s) -> bool
+    {
+        return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
+    }
 };
-
-void Serialize(alignments const& v, auto&& s)
-{
-    s["horizontal"] = v.Horizontal;
-    s["vertical"]   = v.Vertical;
-}
-
-auto Deserialize(alignments& v, auto&& s) -> bool
-{
-    return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
-}
 
 ////////////////////////////////////////////////////////////
 
@@ -185,27 +186,27 @@ struct video_config {
 #else
     string RenderSystem {"OPENGL45"};
 #endif
+
+    void static Serialize(video_config const& v, auto&& s)
+    {
+        s[Cfg::Video::fullscreen]             = v.FullScreen;
+        s[Cfg::Video::use_desktop_resolution] = v.UseDesktopResolution;
+        s[Cfg::Video::resolution]             = v.Resolution;
+        s[Cfg::Video::frame_limit]            = v.FrameLimit;
+        s[Cfg::Video::vsync]                  = v.VSync;
+        s[Cfg::Video::render_system]          = v.RenderSystem;
+    }
+
+    auto static Deserialize(video_config& v, auto&& s) -> bool
+    {
+        return s.try_get(v.FullScreen, Cfg::Video::fullscreen)
+            && s.try_get(v.UseDesktopResolution, Cfg::Video::use_desktop_resolution)
+            && s.try_get(v.Resolution, Cfg::Video::resolution)
+            && s.try_get(v.FrameLimit, Cfg::Video::frame_limit)
+            && s.try_get(v.VSync, Cfg::Video::vsync)
+            && s.try_get(v.RenderSystem, Cfg::Video::render_system);
+    }
 };
-
-void Serialize(video_config const& v, auto&& s)
-{
-    s[Cfg::Video::fullscreen]             = v.FullScreen;
-    s[Cfg::Video::use_desktop_resolution] = v.UseDesktopResolution;
-    s[Cfg::Video::resolution]             = v.Resolution;
-    s[Cfg::Video::frame_limit]            = v.FrameLimit;
-    s[Cfg::Video::vsync]                  = v.VSync;
-    s[Cfg::Video::render_system]          = v.RenderSystem;
-}
-
-auto Deserialize(video_config& v, auto&& s) -> bool
-{
-    return s.try_get(v.FullScreen, Cfg::Video::fullscreen)
-        && s.try_get(v.UseDesktopResolution, Cfg::Video::use_desktop_resolution)
-        && s.try_get(v.Resolution, Cfg::Video::resolution)
-        && s.try_get(v.FrameLimit, Cfg::Video::frame_limit)
-        && s.try_get(v.VSync, Cfg::Video::vsync)
-        && s.try_get(v.RenderSystem, Cfg::Video::render_system);
-}
 
 }
 
