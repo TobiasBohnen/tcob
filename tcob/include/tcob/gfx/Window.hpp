@@ -48,7 +48,6 @@ public:
     signal<event const> Exposed;
     signal<event const> Moved;
     signal<event const> Resized;
-    signal<event const> SizeChanged;
     signal<event const> Minimized;
     signal<event const> Maximized;
     signal<event const> Restored;

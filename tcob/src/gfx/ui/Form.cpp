@@ -512,6 +512,7 @@ void form_base::on_styles_changed()
             .Attributes = tooltip->attributes(),
         };
         tooltip->_transition.reset(dynamic_cast<widget_style*>(Styles->get(ttNewSelectors)));
+        tooltip->on_styles_changed();
     }
 }
 

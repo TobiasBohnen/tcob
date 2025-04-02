@@ -341,9 +341,9 @@ void platform::init_render_system(string const& windowTitle)
     window.VSync.Changed.connect([this](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
     });
-    window.Size.Changed.connect([this](size_i value) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (value == displays().begin()->second.DesktopMode.Size);
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = value;
+    window.Resized.connect([this, &window](auto const&) {
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == displays().begin()->second.DesktopMode.Size);
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = window.Size();
     });
 
     logger::Info("Device: {}", renderSystem->device_name());

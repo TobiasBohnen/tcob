@@ -149,7 +149,6 @@ void window::process_events(SDL_Event* sdlEv)
         set_size({ev.Data1, ev.Data2});
         Resized(ev);
         break;
-    case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: SizeChanged(ev); break;
     case SDL_EVENT_WINDOW_MINIMIZED: Minimized(ev); break;
     case SDL_EVENT_WINDOW_MAXIMIZED: Maximized(ev); break;
     case SDL_EVENT_WINDOW_RESTORED: Restored(ev); break;
