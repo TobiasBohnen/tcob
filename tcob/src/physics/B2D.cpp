@@ -42,17 +42,17 @@ auto static to_b2Vec2(point_f val) -> b2Vec2
 b2d_world::b2d_world(world::settings const& settings)
 {
     b2WorldDef worldDef {b2DefaultWorldDef()};
-    worldDef.gravity               = to_b2Vec2(settings.Gravity);
-    worldDef.restitutionThreshold  = settings.RestitutionThreshold;
-    worldDef.contactDampingRatio   = settings.ContactPushoutVelocity;
-    worldDef.hitEventThreshold     = settings.HitEventThreshold;
-    worldDef.contactHertz          = settings.ContactHertz;
-    worldDef.contactDampingRatio   = settings.ContactDampingRatio;
-    worldDef.jointHertz            = settings.JointHertz;
-    worldDef.jointDampingRatio     = settings.JointDampingRatio;
-    worldDef.maximumLinearVelocity = settings.MaximumLinearVelocity;
-    worldDef.enableSleep           = settings.EnableSleeping;
-    worldDef.enableContinous       = settings.EnableContinuous;
+    worldDef.gravity                = to_b2Vec2(settings.Gravity);
+    worldDef.restitutionThreshold   = settings.RestitutionThreshold;
+    worldDef.contactPushoutVelocity = settings.ContactPushoutVelocity;
+    worldDef.hitEventThreshold      = settings.HitEventThreshold;
+    worldDef.contactHertz           = settings.ContactHertz;
+    worldDef.contactDampingRatio    = settings.ContactDampingRatio;
+    worldDef.jointHertz             = settings.JointHertz;
+    worldDef.jointDampingRatio      = settings.JointDampingRatio;
+    worldDef.maximumLinearVelocity  = settings.MaximumLinearVelocity;
+    worldDef.enableSleep            = settings.EnableSleeping;
+    worldDef.enableContinous        = settings.EnableContinuous;
 
     worldDef.workerCount = static_cast<i32>(locate_service<task_manager>().thread_count());
     worldDef.enqueueTask = [](b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* /* userContext */) -> void* {
