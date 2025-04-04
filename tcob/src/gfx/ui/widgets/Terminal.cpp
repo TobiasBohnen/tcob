@@ -70,8 +70,8 @@ auto terminal::get_xy() const -> point_i
 
 void terminal::curs_set(bool visible)
 {
-    if (_showCursor != visible) {
-        _showCursor = visible;
+    if (_useCursor != visible) {
+        _useCursor = visible;
         redraw();
 
         if (!visible) {
@@ -329,6 +329,10 @@ void terminal::on_draw(widget_painter& painter)
             canvas.fill();
         }
 
+        if (_useMouse) {
+            _cellRectCache.emplace_back(cellRect, point_i {static_cast<i32>(i % Size->Width), static_cast<i32>(i / Size->Width)});
+        }
+
         if (cell.Text.empty()) { continue; }
         assert(utf8::length(cell.Text) == 1);
 
@@ -336,10 +340,6 @@ void terminal::on_draw(widget_painter& painter)
         textStyle.Color     = cell.Colors.first;
         textStyle.Alignment = {gfx::horizontal_alignment::Left, gfx::vertical_alignment::Top};
         painter.draw_text(textStyle, cellRect, painter.format_text(textStyle, {cellRect.Position, rect.Size}, cell.Text));
-
-        if (_useMouse) {
-            _cellRectCache.emplace_back(cellRect, point_i {static_cast<i32>(i % Size->Width), static_cast<i32>(i / Size->Width)});
-        }
     }
 
     // cursor
@@ -365,6 +365,8 @@ void terminal::on_update(milliseconds deltaTime)
 
 void terminal::on_key_down(input::keyboard::event const& ev)
 {
+    if (!_useCursor) { return; }
+
     if (_cursorTween) {
         _cursorTween->pause();
         _cursorVisible = true;
@@ -376,22 +378,28 @@ void terminal::on_key_down(input::keyboard::event const& ev)
     if (ev.KeyCode == controls->NavLeftKey) {
         if (x > 0) {
             move({x - 1, y});
+            ev.Handled = true;
         } else if (y > 0) {
             move({Size->Width - 1, y - 1});
+            ev.Handled = true;
         }
     } else if (ev.KeyCode == controls->NavRightKey) {
         if (x < Size->Width - 1) {
             move({x + 1, y});
+            ev.Handled = true;
         } else {
             cursor_line_break();
+            ev.Handled = true;
         }
     } else if (ev.KeyCode == controls->NavUpKey) {
         if (y > 0) {
             move({x, y - 1});
+            ev.Handled = true;
         }
     } else if (ev.KeyCode == controls->NavDownKey) {
         if (y < Size->Height - 1) {
             move({x, y + 1});
+            ev.Handled = true;
         }
     }
 
@@ -405,6 +413,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                     get_back_buffer()[offset] = {};
                 }
                 redraw();
+                ev.Handled = true;
             }
         } else if (ev.KeyCode == controls->BackwardDeleteKey) {
             i32 const offset {get_offset(get_xy()) - 1};
@@ -420,6 +429,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
                     move({Size->Width - 1, y - 1});
                 }
                 redraw();
+                ev.Handled = true;
             }
         } else if (ev.KeyCode == controls->SubmitKey) {
             if (_echoKeys == echo_mode::InsertEcho) {
@@ -427,18 +437,20 @@ void terminal::on_key_down(input::keyboard::event const& ev)
             } else {
                 add_str("\n");
             }
+            ev.Handled = true;
         }
     }
 
     if (ev.KeyCode == controls->SubmitKey) {
         Submit({this});
+        ev.Handled = true;
     }
-
-    ev.Handled = true;
 }
 
 void terminal::on_key_up(input::keyboard::event const& ev)
 {
+    if (!_useCursor) { return; }
+
     if (_cursorTween) {
         _cursorTween->resume();
         ev.Handled = true;
@@ -494,7 +506,7 @@ void terminal::on_mouse_button_down(input::mouse::button_event const& ev)
 
 void terminal::on_focus_gained()
 {
-    if (!_showCursor) { return; }
+    if (!_useCursor) { return; }
 
     start_blinking();
 }

@@ -184,13 +184,16 @@ auto window::get_fullscreen() const -> bool
 
 void window::set_fullscreen(bool value)
 {
-    auto* win {_impl->get_handle()};
+    auto*        win {_impl->get_handle()};
+    size_i const oldSize {get_size()};
     SDL_SetWindowFullscreen(win, value);
     SDL_SyncWindow(win);
 
     if (!value) {
         SDL_SetWindowBordered(win, true);
         SDL_SetWindowPosition(win, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    } else {
+        set_size(oldSize);
     }
 }
 

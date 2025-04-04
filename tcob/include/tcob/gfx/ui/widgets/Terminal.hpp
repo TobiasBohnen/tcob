@@ -148,7 +148,7 @@ private:
     std::pair<color, color> _currentColors {DEFAULT_COLORS};
 
     bool      _cursorVisible {false};
-    bool      _showCursor {false};
+    bool      _useCursor {false};
     bool      _useMouse {false};
     echo_mode _echoKeys {echo_mode::NoEcho};
     bool      _backbufferDirty {false};
