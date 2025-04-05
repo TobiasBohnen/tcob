@@ -15,26 +15,54 @@
 
 namespace tcob::ai {
 
-auto astar_pathfinding::heuristic(point_i a, point_i b) const -> u64
+astar_pathfinding::astar_pathfinding(bool allowDiagonal, heuristic heuristic)
+    : _allowDiagonal {allowDiagonal}
+    , _heuristic {heuristic}
 {
-    return static_cast<u64>(manhattan_distance(a, b));
 }
 
-auto astar_pathfinding::get_neighbors(size_i gridSize, point_i pos) const -> std::vector<point_i>
+auto astar_pathfinding::distance(point_i a, point_i b) const -> u64
 {
-    static constexpr std::array<point_i, 4> directions {{
+    switch (_heuristic) {
+    case heuristic::Euclidean: return static_cast<u64>(euclidean_distance(a, b));
+    case heuristic::Manhattan: return static_cast<u64>(manhattan_distance(a, b));
+    case heuristic::Chebyshev: return static_cast<u64>(chebyshev_distance(a, b));
+    }
+
+    return 0;
+}
+
+auto astar_pathfinding::neighbors(size_i gridSize, point_i pos) const -> std::vector<point_i>
+{
+    static constexpr std::array<point_i, 4> orthogonalDirections {{
         {0, 1},  // Down
         {1, 0},  // Right
         {0, -1}, // Up
         {-1, 0}, // Left
     }};
 
+    static constexpr std::array<point_i, 4> diagonalDirections {{
+        {1, 1},   // RightDown
+        {-1, -1}, // LeftUp
+        {1, -1},  // RightUp
+        {-1, 1},  // LeftDown
+    }};
+
     std::vector<point_i> retValue;
 
-    for (auto const& dir : directions) {
+    for (auto const& dir : orthogonalDirections) {
         point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
         if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
             retValue.push_back(neighbor);
+        }
+    }
+
+    if (_allowDiagonal) {
+        for (auto const& dir : diagonalDirections) {
+            point_i const neighbor {pos.X + dir.X, pos.Y + dir.Y};
+            if (neighbor.X >= 0 && neighbor.X < gridSize.Width && neighbor.Y >= 0 && neighbor.Y < gridSize.Height) {
+                retValue.push_back(neighbor);
+            }
         }
     }
 

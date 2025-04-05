@@ -30,7 +30,7 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
     grid<u64> fScore {gridExtent, std::numeric_limits<u64>::max()};
 
     gScore[start] = 0;
-    fScore[start] = heuristic(start, finish);
+    fScore[start] = distance(start, finish);
 
     openSet.push({start, fScore[start]});
 
@@ -47,7 +47,7 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
             continue;
         }
 
-        for (auto const& neighbor : get_neighbors(gridExtent, current)) {
+        for (auto const& neighbor : neighbors(gridExtent, current)) {
             if (testGrid.get_cost(neighbor) == IMPASSABLE_COST) {
                 continue;
             }
@@ -57,7 +57,7 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
             if (tentative_gScore < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
                 gScore[neighbor]   = tentative_gScore;
-                fScore[neighbor]   = tentative_gScore + heuristic(neighbor, finish);
+                fScore[neighbor]   = tentative_gScore + distance(neighbor, finish);
                 openSet.push({neighbor, fScore[neighbor]});
             }
         }
