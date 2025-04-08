@@ -86,7 +86,7 @@ inline auto grid<T>::width() const -> dimension_type
 }
 
 template <typename T>
-inline auto grid<T>::extent() const -> size_type
+inline auto grid<T>::size() const -> size_type
 {
     return _size;
 }
@@ -98,7 +98,7 @@ inline auto grid<T>::contains(point_type pos) const -> bool
 }
 
 template <typename T>
-inline auto grid<T>::size() const -> usize
+inline auto grid<T>::count() const -> usize
 {
     return _data.size();
 }
@@ -213,7 +213,7 @@ inline auto static_grid<T, Width, Height>::width() const -> dimension_type
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::extent() const -> size_type
+inline auto static_grid<T, Width, Height>::size() const -> size_type
 {
     return {Width, Height};
 }
@@ -221,11 +221,11 @@ inline auto static_grid<T, Width, Height>::extent() const -> size_type
 template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::contains(point_type pos) const -> bool
 {
-    return extent().contains(pos);
+    return size().contains(pos);
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::size() const -> usize
+inline auto static_grid<T, Width, Height>::count() const -> usize
 {
     return _data.size();
 }

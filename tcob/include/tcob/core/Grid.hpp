@@ -40,10 +40,10 @@ public:
 
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
-    auto extent() const -> size_type;
+    auto size() const -> size_type;
     auto contains(point_type pos) const -> bool;
 
-    auto size() const -> usize;
+    auto count() const -> usize;
     void resize(size_type newSize);
 
     auto data() -> T*;
@@ -89,10 +89,10 @@ public:
 
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
-    auto extent() const -> size_type;
+    auto size() const -> size_type;
     auto contains(point_type pos) const -> bool;
 
-    auto size() const -> usize;
+    auto count() const -> usize;
     auto data() -> T*;
     auto data() const -> T const*;
 

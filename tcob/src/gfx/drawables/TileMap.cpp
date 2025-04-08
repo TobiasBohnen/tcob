@@ -60,7 +60,7 @@ auto tilemap_base::add_layer(tilemap_layer const& layer) -> uid
 
     _layers.push_back({
         .ID           = id,
-        .Size         = layer.Tiles.extent(),
+        .Size         = layer.Tiles.size(),
         .Offset       = layer.Offset,
         .TileMapStart = static_cast<i32>(_tileMap.size()),
         .Visible      = true,
