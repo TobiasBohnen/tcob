@@ -25,7 +25,7 @@ struct l_rule {
 class TCOB_API l_system {
 public:
     l_system();
-    l_system(u64 seed);
+    explicit l_system(u64 seed);
 
     void add_rule(char c, l_rule const& rule);
     auto generate(string axiom, i32 iterations) -> string;

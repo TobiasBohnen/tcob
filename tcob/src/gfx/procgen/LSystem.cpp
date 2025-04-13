@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include "tcob/core/random/Random.hpp"
+
 namespace tcob::gfx {
 
 l_system::l_system()

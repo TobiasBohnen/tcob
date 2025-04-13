@@ -23,7 +23,7 @@ public:
     using type = T;
 
     grid() = default;
-    grid(size_type size, T const& defaultValue = T {});
+    explicit grid(size_type size, T const& defaultValue = T {});
 
     auto operator[](point_type pos) -> T&;
     auto operator[](point_type pos) const -> T const&;
