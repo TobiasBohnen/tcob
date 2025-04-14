@@ -131,6 +131,9 @@ auto manhattan_distance(point<T> const& a, point<T> const& b) -> T;
 template <Arithmetic T>
 auto chebyshev_distance(point<T> const& a, point<T> const& b) -> T;
 
+template <Arithmetic T>
+auto minkowski_distance(point<T> const& a, point<T> const& b, f64 p) -> f64;
+
 }
 
 #include "Point.inl"

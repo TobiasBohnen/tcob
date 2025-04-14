@@ -232,4 +232,10 @@ auto chebyshev_distance(point<T> const& a, point<T> const& b) -> T
     return std::max(std::abs(a.X - b.X), std::abs(a.Y - b.Y));
 }
 
+template <Arithmetic T>
+auto minkowski_distance(point<T> const& a, point<T> const& b, f64 p) -> f64
+{
+    return std::pow(std::pow(std::abs(a.X - b.X), p) + std::pow(std::abs(a.Y - b.Y), p), 1.0 / p);
+}
+
 }
