@@ -539,9 +539,9 @@ void path_cache::stroke(state const& s, bool enforceWinding, bool edgeAntiAlias,
     }
 
     if (edgeAntiAlias && s.ShapeAntiAlias) {
-        expand_stroke(strokeWidth * 0.5f, fringeWidth, s.LineCap, s.LineJoin, s.MiterLimit);
+        expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, fringeWidth);
     } else {
-        expand_stroke(strokeWidth * 0.5f, 0.0f, s.LineCap, s.LineJoin, s.MiterLimit);
+        expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, 0.0f);
     }
 }
 
@@ -656,19 +656,18 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
     std::erase_if(_paths, [](auto const& path) { return path.Count == 0; });
 }
 
-void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit)
+void path_cache::expand_stroke(f32 w, line_cap lineCap, line_join lineJoin, f32 miterLimit, f32 fringeWidth)
 {
     auto static CurveDivs {[](f32 r, f32 arc, f32 tol) {
         f32 const da {std::acos(r / (r + tol)) * 2.0f};
         return std::max(2, static_cast<i32>(std::ceil(arc / da)));
     }};
 
-    f32 const aa {fringe};                                    // fringeWidth;
-    f32 const u0 {aa == 0.0f ? 0.5f : 0.0f};
-    f32 const u1 {aa == 0.0f ? 0.5f : 1.0f};
+    f32 const u0 {fringeWidth == 0.0f ? 0.5f : 0.0f};
+    f32 const u1 {fringeWidth == 0.0f ? 0.5f : 1.0f};
     i32 const ncap {CurveDivs(w, TAU_F / 2, _tessTolerance)}; // Calculate divisions per half circle.
 
-    w += aa * 0.5f;
+    w += fringeWidth * 0.5f;
 
     calculate_joins(w, lineJoin, miterLimit);
 
@@ -726,9 +725,9 @@ void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join li
             f32 dy {p1->Y - p0->Y};
             Normalize(dx, dy);
             if (lineCap == line_cap::Butt) {
-                dst = ButtCapStart(dst, *p0, dx, dy, w, -aa * 0.5f, aa, u0, u1);
+                dst = ButtCapStart(dst, *p0, dx, dy, w, -fringeWidth * 0.5f, fringeWidth, u0, u1);
             } else if (lineCap == line_cap::Square) {
-                dst = ButtCapStart(dst, *p0, dx, dy, w, w - aa, aa, u0, u1);
+                dst = ButtCapStart(dst, *p0, dx, dy, w, w - fringeWidth, fringeWidth, u0, u1);
             } else if (lineCap == line_cap::Round) {
                 dst = RoundCapStart(dst, *p0, dx, dy, w, ncap, u0, u1);
             }
@@ -758,9 +757,9 @@ void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join li
             f32 dy {p1->Y - p0->Y};
             Normalize(dx, dy);
             if (lineCap == line_cap::Butt) {
-                dst = ButtCapEnd(dst, *p1, dx, dy, w, -aa * 0.5f, aa, u0, u1);
+                dst = ButtCapEnd(dst, *p1, dx, dy, w, -fringeWidth * 0.5f, fringeWidth, u0, u1);
             } else if (lineCap == line_cap::Square) {
-                dst = ButtCapEnd(dst, *p1, dx, dy, w, w - aa, aa, u0, u1);
+                dst = ButtCapEnd(dst, *p1, dx, dy, w, w - fringeWidth, fringeWidth, u0, u1);
             } else if (lineCap == line_cap::Round) {
                 dst = RoundCapEnd(dst, *p1, dx, dy, w, ncap, u0, u1);
             }
@@ -775,9 +774,8 @@ void path_cache::expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join li
 void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth)
 {
     vertex*    dst {nullptr};
-    f32 const  aa {fringeWidth};
     bool const fringe {w > 0.0f};
-    f32 const  woff {0.5f * aa};
+    f32 const  woff {0.5f * fringeWidth};
 
     calculate_joins(w, lineJoin, miterLimit);
 

@@ -165,32 +165,27 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
     auto const  utf32text {convert_UTF8_to_UTF32(text)};
     usize const len {utf32text.size()};
 
-    std::vector<decompose_result*> results;
-
-    {
-        std::vector<decompose_commands> cbCommands;
-        decompose_callbacks             cb {};
-        cb.MoveTo  = [&](point_f p) { cbCommands.emplace_back(decompose_move {p}); };
-        cb.LineTo  = [&](point_f p) { cbCommands.emplace_back(decompose_line {p}); };
-        cb.ConicTo = [&](point_f p0, point_f p1) { cbCommands.emplace_back(decompose_conic {p0, p1}); };
-        cb.CubicTo = [&](point_f p0, point_f p1, point_f p2) { cbCommands.emplace_back(decompose_cubic {p0, p1, p2}); };
-
-        for (auto const cp0 : utf32text) {
-            if (!_decomposeCache.contains(cp0)) {
-                cbCommands.clear();
-                auto const gl {_engine->decompose_glyph(cp0, cb)};
-                _glyphCache[cp0]     = gl;
-                _decomposeCache[cp0] = {cp0, cbCommands};
-            }
-            results.push_back(&_decomposeCache[cp0]);
-        }
-    }
-
     funcs.Offset.Y += _info.Ascender;
-    for (usize i {0}; i < results.size(); ++i) {
-        auto const& result {results[i]};
 
-        for (auto const& command : result->Commands) {
+    std::vector<decompose_commands> cbCommands;
+    decompose_callbacks             cb {};
+    cb.MoveTo  = [&cbCommands](point_f p) { cbCommands.emplace_back(decompose_move {p}); };
+    cb.LineTo  = [&cbCommands](point_f p) { cbCommands.emplace_back(decompose_line {p}); };
+    cb.ConicTo = [&cbCommands](point_f p0, point_f p1) { cbCommands.emplace_back(decompose_conic {p0, p1}); };
+    cb.CubicTo = [&cbCommands](point_f p0, point_f p1, point_f p2) { cbCommands.emplace_back(decompose_cubic {p0, p1, p2}); };
+
+    for (usize i {0}; i < len; ++i) {
+        auto const cp0 {utf32text[i]};
+
+        if (!_decomposeCache.contains(cp0)) {
+            cbCommands.clear();
+            auto const gl {_engine->decompose_glyph(cp0, cb)};
+            _glyphCache[cp0]     = gl;
+            _decomposeCache[cp0] = {cp0, cbCommands};
+        }
+
+        auto const& result {_decomposeCache[cp0]};
+        for (auto const& command : result.Commands) {
             std::visit(
                 overloaded {[&](decompose_move const& cmd) { funcs.MoveTo(cmd.Point); },
                             [&](decompose_line const& cmd) { funcs.LineTo(cmd.Point); },
@@ -199,9 +194,9 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
                 command);
         }
 
-        funcs.Offset.X += static_cast<f32>(_glyphCache[result->CodePoint].AdvanceX);
+        funcs.Offset.X += static_cast<f32>(_glyphCache[result.CodePoint].AdvanceX);
         if (kerning && i < len - 1) {
-            funcs.Offset.X += static_cast<f32>(_engine->get_kerning(result->CodePoint, utf32text[i + 1]));
+            funcs.Offset.X += static_cast<f32>(_engine->get_kerning(result.CodePoint, utf32text[i + 1]));
         }
     }
 }

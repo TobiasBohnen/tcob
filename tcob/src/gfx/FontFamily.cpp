@@ -148,7 +148,7 @@ void font_family::FindSources(font_family& fam, path const& source)
     fam._fontData.clear();
     fam._fontAssets.clear();
 
-    auto files {io::enumerate(io::get_parent_folder(source), {source + "*.ttf", true}, false)};
+    auto const files {io::enumerate(io::get_parent_folder(source), {source + "*.ttf", true}, false)};
     for (auto const& file : files) {
         font::style       style;
         string_view const name {string_view {file}.substr(source.size())};

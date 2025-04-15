@@ -124,7 +124,7 @@ public:
 private:
     void flatten_paths(bool enforceWinding, std::span<f32 const> dash, f32 dashOffset);
 
-    void expand_stroke(f32 w, f32 fringe, line_cap lineCap, line_join lineJoin, f32 miterLimit);
+    void expand_stroke(f32 w, line_cap lineCap, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
     void expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 fringeWidth);
 
     auto alloc_temp_verts(usize nverts) -> vertex*;

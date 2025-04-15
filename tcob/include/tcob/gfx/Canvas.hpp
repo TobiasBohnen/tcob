@@ -243,8 +243,8 @@ public:
     void draw_text(rect_f const& rect, utf8_string_view text);
     void draw_text(point_f offset, text_formatter::result const& formatResult);
 
-    void fill_text(utf8_string_view text, point_f offset);
-    void stroke_text(utf8_string_view text, point_f offset);
+    void fill_text(point_f offset, utf8_string_view text);
+    void stroke_text(point_f offset, utf8_string_view text);
 
     auto format_text(size_f const& size, utf8_string_view text, f32 scale = 1.0f) -> text_formatter::result;
     auto measure_text(f32 height, utf8_string_view text) -> size_f;

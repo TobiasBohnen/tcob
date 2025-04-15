@@ -278,7 +278,7 @@ void terminal::dump(io::ostream& stream) const
 
 auto static get_font_width(gfx::font* font) -> f32
 {
-    auto qs {font->get_glyphs(" ", false)};
+    auto qs {font->get_glyphs("m", false)};
     if (qs.empty()) { return 0; }
 
     return qs[0].AdvanceX;
@@ -298,7 +298,7 @@ void terminal::on_draw(widget_painter& painter)
 
     u32 const   fontSize {_style.Text.calc_font_size(rect)};
     auto* const font {_style.Text.Font->get_font(_style.Text.Style, fontSize).ptr()};
-    f32 const   fontHeight {font->info().LineHeight};
+    f32 const   fontHeight {font->info().Ascender - font->info().Descender};
     f32 const   fontWidth {get_font_width(font)};
 
     _cellRectCache.clear();
