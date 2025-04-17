@@ -19,7 +19,7 @@ namespace tcob::ai {
 template <typename T>
 concept AStarGrid =
     requires(T& t, point_i p) {
-        { t.get_cost(p) } -> std::same_as<u64>;
+        { t.get_cost(p, p) } -> std::same_as<u64>;
     };
 
 ////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ public:
 
     explicit astar_pathfinding(bool allowDiagonal = false, heuristic heuristic = heuristic::Manhattan);
 
-    static constexpr u64 IMPASSABLE_COST = std::numeric_limits<u64>::max(); // Define an impassable cost
+    static constexpr u64 IMPASSABLE_COST = std::numeric_limits<u64>::max();
 
     auto find_path(AStarGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>;
 

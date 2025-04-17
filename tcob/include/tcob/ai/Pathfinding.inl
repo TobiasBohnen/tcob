@@ -7,7 +7,6 @@
 #include "Pathfinding.hpp"
 
 #include <functional>
-#include <limits>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -21,13 +20,13 @@ namespace tcob::ai {
 auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, point_i start, point_i finish) -> std::vector<point_i>
 {
     if (start == finish) { return {start}; }
-    if (testGrid.get_cost(start) == IMPASSABLE_COST || testGrid.get_cost(finish) == IMPASSABLE_COST) { return {}; }
+    if (testGrid.get_cost(start, start) == IMPASSABLE_COST || testGrid.get_cost(finish, finish) == IMPASSABLE_COST) { return {}; }
 
     std::priority_queue<node, std::vector<node>, std::greater<>> openSet;
     std::unordered_map<point_i, point_i>                         cameFrom;
 
-    grid<u64> gScore {gridExtent, std::numeric_limits<u64>::max()};
-    grid<u64> fScore {gridExtent, std::numeric_limits<u64>::max()};
+    grid<u64> gScore {gridExtent, IMPASSABLE_COST};
+    grid<u64> fScore {gridExtent, IMPASSABLE_COST};
 
     gScore[start] = 0;
     fScore[start] = distance(start, finish);
@@ -43,16 +42,13 @@ auto astar_pathfinding::find_path(AStarGrid auto&& testGrid, size_i gridExtent, 
         }
 
         // Skip if we already found a better path to this node
-        if (gScore[current] == IMPASSABLE_COST) {
-            continue;
-        }
+        if (gScore[current] == IMPASSABLE_COST) { continue; }
 
         for (auto const& neighbor : neighbors(gridExtent, current)) {
-            if (testGrid.get_cost(neighbor) == IMPASSABLE_COST) {
-                continue;
-            }
+            auto const cost {testGrid.get_cost(current, neighbor)};
+            if (cost == IMPASSABLE_COST) { continue; }
 
-            u64 const tentative_gScore {gScore[current] + testGrid.get_cost(neighbor)};
+            u64 const tentative_gScore {gScore[current] + cost};
 
             if (tentative_gScore < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
