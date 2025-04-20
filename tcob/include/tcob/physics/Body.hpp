@@ -123,8 +123,8 @@ public:
 
     auto operator==(body const& other) const -> bool;
 
-    auto center() const -> point_f;
-    auto local_center() const -> point_f;
+    auto center_of_mass() const -> point_f;
+    auto local_center_of_mass() const -> point_f;
 
     auto parent() -> world&;
 

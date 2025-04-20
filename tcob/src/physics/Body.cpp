@@ -89,12 +89,12 @@ auto body::operator==(body const& other) const -> bool
     return _impl.get() == other._impl.get();
 }
 
-auto body::center() const -> point_f
+auto body::center_of_mass() const -> point_f
 {
     return _impl->get_center();
 }
 
-auto body::local_center() const -> point_f
+auto body::local_center_of_mass() const -> point_f
 {
     return _impl->get_local_center();
 }
