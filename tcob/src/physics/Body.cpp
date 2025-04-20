@@ -16,13 +16,16 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Common.hpp"
     #include "tcob/core/Point.hpp"
+    #include "tcob/physics/Physics.hpp"
     #include "tcob/physics/Shape.hpp"
     #include "tcob/physics/World.hpp"
 
 namespace tcob::physics {
 
 body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings)
-    : Type {{[this]() { return _impl->get_type(); },
+    : Name {{[this]() -> string { return _impl->get_name(); },
+             [this](auto const& value) { _impl->set_name(value); }}}
+    , Type {{[this]() { return _impl->get_type(); },
              [this](auto const& value) { _impl->set_type(value); }}}
     , LinearVelocity {{[this]() -> point_f { return _impl->get_linear_velocity(); },
                        [this](auto const& value) { _impl->set_linear_velocity(value); }}}
@@ -42,10 +45,12 @@ body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xfor
                  [this](auto const& value) { _impl->set_bullet(value); }}}
     , Enabled {{[this]() -> bool { return _impl->get_enabled(); },
                 [this](auto const& value) { _impl->set_enabled(value); }}}
-    , GravityScale {{[this]() { return _impl->get_gravity_scale(); },
+    , GravityScale {{[this]() -> f32 { return _impl->get_gravity_scale(); },
                      [this](auto const& value) { _impl->set_gravity_scale(value); }}}
     , Transform {{[this]() -> body_transform { return _impl->get_transform(); },
                   [this](auto const& value) { _impl->set_transform(value); }}}
+    , MassData {{[this]() -> mass_data { return _impl->get_mass_data(); },
+                 [this](auto const& value) { _impl->set_mass_data(value); }}}
     , _impl {std::make_unique<detail::b2d_body>(b2dWorld, xform, bodySettings)}
     , _world {world}
 {
@@ -99,6 +104,11 @@ auto body::local_center_of_mass() const -> point_f
     return _impl->get_local_center();
 }
 
+auto body::mass() const -> f32
+{
+    return _impl->get_mass();
+}
+
 auto body::parent() -> world&
 {
     return _world;
@@ -128,12 +138,12 @@ void body::sleep() const
 
 auto rotation::x_axis() const -> point_f
 {
-    return detail::get_x_axis(*this);
+    return {Cosine, Sine};
 }
 
 auto rotation::y_axis() const -> point_f
 {
-    return detail::get_y_axis(*this);
+    return {-Sine, Cosine};
 }
 
 auto rotation::FromAngle(radian_f angle) -> rotation

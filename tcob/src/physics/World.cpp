@@ -29,6 +29,8 @@ world::world()
 world::world(settings const& settings)
     : Gravity {{[this]() -> point_f { return _impl->get_gravity(); },
                 [this](auto const& value) { _impl->set_gravity(value); }}}
+    , MaximumLinearSpeed {{[this]() -> f32 { return _impl->get_maximum_linear_speed(); },
+                           [this](auto const& value) { _impl->set_maximum_linear_speed(value); }}}
     , _impl {std::make_unique<detail::b2d_world>(settings)}
 {
     EnableSleeping(settings.EnableSleeping);

@@ -107,6 +107,7 @@ public:
 
     ~body();
 
+    prop_fn<string>         Name;
     prop_fn<body_type>      Type;
     prop_fn<point_f>        LinearVelocity;
     prop_fn<radian_f>       AngularVelocity;
@@ -119,12 +120,15 @@ public:
     prop_fn<bool>           Enabled;
     prop_fn<f32>            GravityScale;
     prop_fn<body_transform> Transform;
-    prop<std::any>          UserData;
+    prop_fn<mass_data>      MassData;
+    std::any                UserData;
 
     auto operator==(body const& other) const -> bool;
 
     auto center_of_mass() const -> point_f;
     auto local_center_of_mass() const -> point_f;
+
+    auto mass() const -> f32;
 
     auto parent() -> world&;
 

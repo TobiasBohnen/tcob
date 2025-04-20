@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <any>
     #include <memory>
     #include <span>
 
@@ -50,6 +51,9 @@ public:
         /// The density, usually in kg/m^2.
         f32 Density {1.0f};
 
+        /// Collision filtering data.
+        filter Filter;
+
         /// A sensor shape generates overlap events but never generates a collision response.
         bool IsSensor {false};
 
@@ -82,12 +86,14 @@ public:
     prop_fn<bool> EnableContactEvents;
     prop_fn<bool> EnableHitEvents;
     prop_fn<bool> EnablePreSolveEvents;
+    std::any      UserData;
 
     auto parent() -> body&;
 
     auto is_sensor() const -> bool;
 
     auto aabb() const -> AABB;
+    auto mass_data() const -> mass_data;
 
     auto test_point(point_f point) const -> bool;
 

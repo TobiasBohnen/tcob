@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <any>
     #include <memory>
 
     #include "tcob/core/AngleUnits.hpp"
@@ -36,9 +37,11 @@ public:
 
     ~joint();
 
-    auto operator==(joint const& other) const -> bool;
+    std::any UserData;
 
     auto get_world() -> world&;
+
+    auto operator==(joint const& other) const -> bool;
 
 protected:
     joint(world& world, std::unique_ptr<detail::b2d_joint> impl);
@@ -178,6 +181,25 @@ public:
 
 private:
     mouse_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API filter_joint final : public joint {
+    friend class world;
+
+public:
+    class TCOB_API settings {
+    public:
+        /// The first attached body.
+        body* BodyA {nullptr};
+
+        /// The second attached body.
+        body* BodyB {nullptr};
+    };
+
+private:
+    filter_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
 };
 
 ////////////////////////////////////////////////////////////

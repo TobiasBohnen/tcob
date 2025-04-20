@@ -11,6 +11,7 @@
     #include <span>
     #include <vector>
 
+    #include <box2d/base.h>
     #include <box2d/box2d.h>
     #include <box2d/collision.h>
     #include <box2d/id.h>
@@ -21,6 +22,7 @@
     #include "tcob/core/Color.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/ServiceLocator.hpp"
+    #include "tcob/core/StringUtils.hpp"
     #include "tcob/core/TaskManager.hpp"
     #include "tcob/physics/Body.hpp"
     #include "tcob/physics/DebugDraw.hpp"
@@ -28,7 +30,6 @@
     #include "tcob/physics/Physics.hpp"
     #include "tcob/physics/Shape.hpp"
     #include "tcob/physics/World.hpp"
-    #include <box2d/base.h>
 
 namespace tcob::physics::detail {
 auto static to_b2Vec2(point_f val) -> b2Vec2
@@ -106,6 +107,16 @@ void b2d_world::set_restitution_threshold(f32 value) const
 void b2d_world::set_hit_event_threshold(f32 value) const
 {
     b2World_SetHitEventThreshold(ID, value);
+}
+
+auto b2d_world::get_maximum_linear_speed() const -> f32
+{
+    return b2World_GetMaximumLinearSpeed(ID);
+}
+
+void b2d_world::set_maximum_linear_speed(f32 value) const
+{
+    b2World_SetMaximumLinearSpeed(ID, value);
 }
 
 void b2d_world::explode(explosion const& explosion) const
@@ -385,6 +396,32 @@ auto b2d_body::get_local_center() const -> point_f
     return {val.x, val.y};
 }
 
+auto b2d_body::get_name() const -> string
+{
+    return helper::to_string(b2Body_GetName(ID));
+}
+
+void b2d_body::set_name(string const& value) const
+{
+    b2Body_SetName(ID, value.c_str());
+}
+
+auto b2d_body::get_mass() const -> f32
+{
+    return b2Body_GetMass(ID);
+}
+
+auto b2d_body::get_mass_data() const -> mass_data
+{
+    auto const md {b2Body_GetMassData(ID)};
+    return {.Mass = md.mass, .Center = {md.center.x, md.center.y}, .RotationalInertia = md.rotationalInertia};
+}
+
+void b2d_body::set_mass_data(mass_data const& value) const
+{
+    b2Body_SetMassData(ID, {.mass = value.Mass, .center = to_b2Vec2(value.Center), .rotationalInertia = value.RotationalInertia});
+}
+
 void b2d_body::apply_force(point_f force, point_f point, bool wake) const
 {
     b2Body_ApplyForce(ID, to_b2Vec2(force), to_b2Vec2(point), wake);
@@ -470,6 +507,15 @@ b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bo
     def.maxForce         = jointSettings.MaxForce;
 
     ID = b2CreateMouseJoint(world->ID, &def);
+}
+
+b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, filter_joint::settings const& /* jointSettings */)
+{
+    auto def {b2DefaultFilterJointDef()};
+    def.bodyIdA = bodyA->ID;
+    def.bodyIdB = bodyB->ID;
+
+    ID = b2CreateFilterJoint(world->ID, &def);
 }
 
 b2d_joint::b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, prismatic_joint::settings const& jointSettings)
@@ -768,24 +814,24 @@ auto b2d_joint::prismatic_joint_is_spring_enabled() const -> bool
     return b2PrismaticJoint_IsSpringEnabled(ID);
 }
 
-void b2d_joint::prismatic_joint_set_spring_hertz(f32 hertz) const
-{
-    b2PrismaticJoint_SetSpringHertz(ID, hertz);
-}
-
 auto b2d_joint::prismatic_joint_get_spring_hertz() const -> f32
 {
     return b2PrismaticJoint_GetSpringHertz(ID);
 }
 
-void b2d_joint::prismatic_joint_set_spring_damping_ratio(f32 dampingRatio) const
+void b2d_joint::prismatic_joint_set_spring_hertz(f32 hertz) const
 {
-    b2PrismaticJoint_SetSpringDampingRatio(ID, dampingRatio);
+    b2PrismaticJoint_SetSpringHertz(ID, hertz);
 }
 
 auto b2d_joint::prismatic_joint_get_spring_damping_ratio() const -> f32
 {
     return b2PrismaticJoint_GetSpringDampingRatio(ID);
+}
+
+void b2d_joint::prismatic_joint_set_spring_damping_ratio(f32 dampingRatio) const
+{
+    b2PrismaticJoint_SetSpringDampingRatio(ID, dampingRatio);
 }
 
 void b2d_joint::prismatic_joint_enable_limit(bool enableLimit) const
@@ -1094,6 +1140,9 @@ auto static GetShapeDef(shape::settings const& shapeSettings)
     shapeDef.material.tangentSpeed      = shapeSettings.Material.TangentSpeed;
     shapeDef.material.customColor       = static_cast<u32>(shapeSettings.Material.CustomColor.R << 16 | shapeSettings.Material.CustomColor.G << 8 | shapeSettings.Material.CustomColor.B);
     shapeDef.density                    = shapeSettings.Density;
+    shapeDef.filter.categoryBits        = shapeSettings.Filter.CategoryBits;
+    shapeDef.filter.maskBits            = shapeSettings.Filter.MaskBits;
+    shapeDef.filter.groupIndex          = shapeSettings.Filter.GroupIndex;
     shapeDef.isSensor                   = shapeSettings.IsSensor;
     shapeDef.enableSensorEvents         = shapeSettings.EnableSensorEvents;
     shapeDef.enableContactEvents        = shapeSettings.EnableContactEvents;
@@ -1162,19 +1211,14 @@ auto b2d_shape::is_sensor() const -> bool
     return b2Shape_IsSensor(ID);
 }
 
-void b2d_shape::set_density(f32 density) const
-{
-    b2Shape_SetDensity(ID, density, true);
-}
-
 auto b2d_shape::get_density() const -> f32
 {
     return b2Shape_GetDensity(ID);
 }
 
-void b2d_shape::set_friction(f32 friction) const
+void b2d_shape::set_density(f32 density) const
 {
-    b2Shape_SetFriction(ID, friction);
+    b2Shape_SetDensity(ID, density, true);
 }
 
 auto b2d_shape::get_friction() const -> f32
@@ -1182,14 +1226,19 @@ auto b2d_shape::get_friction() const -> f32
     return b2Shape_GetFriction(ID);
 }
 
-void b2d_shape::set_restitution(f32 restitution) const
+void b2d_shape::set_friction(f32 friction) const
 {
-    b2Shape_SetRestitution(ID, restitution);
+    b2Shape_SetFriction(ID, friction);
 }
 
 auto b2d_shape::get_restitution() const -> f32
 {
     return b2Shape_GetRestitution(ID);
+}
+
+void b2d_shape::set_restitution(f32 restitution) const
+{
+    b2Shape_SetRestitution(ID, restitution);
 }
 
 void b2d_shape::enable_sensor_events(bool flag) const
@@ -1257,6 +1306,23 @@ void b2d_shape::set_user_data(void* ptr) const
 auto b2d_shape::equal(b2d_shape const* other) const -> bool
 {
     return B2_ID_EQUALS(ID, other->ID);
+}
+
+auto b2d_shape::get_mass_data() const -> mass_data
+{
+    auto const md {b2Shape_GetMassData(ID)};
+    return {.Mass = md.mass, .Center = {md.center.x, md.center.y}, .RotationalInertia = md.rotationalInertia};
+}
+
+auto b2d_shape::get_filter() const -> filter
+{
+    auto const f {b2Shape_GetFilter(ID)};
+    return {.CategoryBits = f.categoryBits, .MaskBits = f.maskBits, .GroupIndex = f.groupIndex};
+}
+
+void b2d_shape::set_filter(filter const& value) const
+{
+    b2Shape_SetFilter(ID, {.categoryBits = value.CategoryBits, .maskBits = value.MaskBits, .groupIndex = value.GroupIndex});
 }
 
 ////////////////////////////////////////////////////////////
@@ -1372,18 +1438,6 @@ auto rot_from_angle(radian_f angle) -> rotation
 {
     auto const rot {b2MakeRot(angle.Value)};
     return {.Cosine = rot.c, .Sine = rot.s};
-}
-
-auto get_x_axis(rotation rot) -> point_f
-{
-    auto const vec {b2Rot_GetXAxis({rot.Cosine, rot.Sine})};
-    return {vec.x, vec.y};
-}
-
-auto get_y_axis(rotation rot) -> point_f
-{
-    auto const vec {b2Rot_GetYAxis({rot.Cosine, rot.Sine})};
-    return {vec.x, vec.y};
 }
 
 }

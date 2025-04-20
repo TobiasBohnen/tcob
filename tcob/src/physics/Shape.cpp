@@ -58,6 +58,11 @@ auto shape::aabb() const -> AABB
     return _impl->get_aabb();
 }
 
+auto shape::mass_data() const -> physics::mass_data
+{
+    return _impl->get_mass_data();
+}
+
 auto shape::is_sensor() const -> bool
 {
     return _impl->is_sensor();

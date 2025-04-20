@@ -121,6 +121,13 @@ mouse_joint::mouse_joint(world& world, detail::b2d_world* b2dWorld, settings con
 
 ////////////////////////////////////////////////////////////
 
+filter_joint::filter_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
+    : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
+{
+}
+
+////////////////////////////////////////////////////////////
+
 prismatic_joint::prismatic_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
     : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , EnableSpring {{[this]() -> bool { return get_impl().prismatic_joint_is_spring_enabled(); },

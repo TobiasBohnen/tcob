@@ -22,6 +22,23 @@ struct AABB {
     point_f UpperBounds;
 };
 
+struct filter {
+    u64 CategoryBits {1};
+    u64 MaskBits {0xffffffffffffffff};
+    i32 GroupIndex {0};
+};
+
+struct mass_data {
+    /// The mass of the shape, usually in kilograms.
+    f32 Mass {0};
+
+    /// The position of the shape's centroid relative to the shape's origin.
+    point_f Center;
+
+    /// The rotational inertia of the shape about the local origin.
+    f32 RotationalInertia {0};
+};
+
 class world;
 class body;
 class shape;

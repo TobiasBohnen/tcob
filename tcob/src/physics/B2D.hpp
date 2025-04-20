@@ -41,6 +41,9 @@ public:
     void set_restitution_threshold(f32 value) const;
     void set_hit_event_threshold(f32 value) const;
 
+    auto get_maximum_linear_speed() const -> f32;
+    void set_maximum_linear_speed(f32 value) const;
+
     void explode(explosion const& explosion) const;
 
     auto get_body_events() const -> body_events;
@@ -96,6 +99,14 @@ public:
     auto get_center() const -> point_f;
     auto get_local_center() const -> point_f;
 
+    auto get_name() const -> string;
+    void set_name(string const& value) const;
+
+    auto get_mass() const -> f32;
+
+    auto get_mass_data() const -> mass_data;
+    void set_mass_data(mass_data const& value) const;
+
     void apply_force(point_f force, point_f point, bool wake) const;
     void apply_force_to_center(point_f force, bool wake) const;
     void apply_linear_impulse(point_f imp, point_f point, bool wake) const;
@@ -115,6 +126,7 @@ public:
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, distance_joint::settings const& jointSettings);
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, motor_joint::settings const& jointSettings);
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, mouse_joint::settings const& jointSettings);
+    b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, filter_joint::settings const& jointSettings);
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, prismatic_joint::settings const& jointSettings);
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, revolute_joint::settings const& jointSettings);
     b2d_joint(b2d_world* world, b2d_body const* bodyA, b2d_body const* bodyB, weld_joint::settings const& jointSettings);
@@ -126,20 +138,20 @@ public:
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
 
-    void distance_joint_set_length(f32 length) const;
     auto distance_joint_get_length() const -> f32;
+    void distance_joint_set_length(f32 length) const;
 
-    void distance_joint_enable_spring(bool enableSpring) const;
     auto distance_joint_is_spring_enabled() const -> bool;
+    void distance_joint_enable_spring(bool enableSpring) const;
 
-    void distance_joint_set_spring_hertz(f32 hertz) const;
     auto distance_joint_get_spring_hertz() const -> f32;
+    void distance_joint_set_spring_hertz(f32 hertz) const;
 
-    void distance_joint_set_spring_damping_ratio(f32 dampingRatio) const;
     auto distance_joint_get_spring_damping_ratio() const -> f32;
+    void distance_joint_set_spring_damping_ratio(f32 dampingRatio) const;
 
-    void distance_joint_enable_limit(bool enableLimit) const;
     auto distance_joint_is_limit_enabled() const -> bool;
+    void distance_joint_enable_limit(bool enableLimit) const;
 
     void distance_joint_set_length_range(f32 minLength, f32 maxLength) const;
 
@@ -148,74 +160,74 @@ public:
 
     auto distance_joint_get_current_length() const -> f32;
 
-    void distance_joint_enable_motor(bool enableMotor) const;
     auto distance_joint_is_motor_enabled() const -> bool;
+    void distance_joint_enable_motor(bool enableMotor) const;
 
-    void distance_joint_set_motor_speed(f32 motorSpeed) const;
     auto distance_joint_get_motor_speed() const -> f32;
+    void distance_joint_set_motor_speed(f32 motorSpeed) const;
 
-    void distance_joint_set_max_motor_force(f32 force) const;
     auto distance_joint_get_max_motor_force() const -> f32;
+    void distance_joint_set_max_motor_force(f32 force) const;
 
     auto distance_joint_get_motor_force() const -> f32;
 
     ////////////////////////////////////////////////////////////
 
-    void motor_joint_set_linear_offset(point_f linearOffset) const;
     auto motor_joint_get_linear_offset() const -> point_f;
+    void motor_joint_set_linear_offset(point_f linearOffset) const;
 
-    void motor_joint_set_angular_offset(f32 angularOffset) const;
     auto motor_joint_get_angular_offset() const -> f32;
+    void motor_joint_set_angular_offset(f32 angularOffset) const;
 
-    void motor_joint_set_max_force(f32 maxForce) const;
     auto motor_joint_get_max_force() const -> f32;
+    void motor_joint_set_max_force(f32 maxForce) const;
 
-    void motor_joint_set_max_torque(f32 maxTorque) const;
     auto motor_joint_get_max_torque() const -> f32;
+    void motor_joint_set_max_torque(f32 maxTorque) const;
 
-    void motor_joint_set_correction_factor(f32 correctionFactor) const;
     auto motor_joint_get_correction_factor() const -> f32;
+    void motor_joint_set_correction_factor(f32 correctionFactor) const;
 
     ////////////////////////////////////////////////////////////
 
-    void mouse_joint_set_target(point_f target) const;
     auto mouse_joint_get_target() const -> point_f;
+    void mouse_joint_set_target(point_f target) const;
 
-    void mouse_joint_set_spring_hertz(f32 hertz) const;
     auto mouse_joint_get_spring_hertz() const -> f32;
+    void mouse_joint_set_spring_hertz(f32 hertz) const;
 
-    void mouse_joint_set_spring_damping_ratio(f32 dampingRatio) const;
     auto mouse_joint_get_spring_damping_ratio() const -> f32;
+    void mouse_joint_set_spring_damping_ratio(f32 dampingRatio) const;
 
-    void mouse_joint_set_max_force(f32 maxForce) const;
     auto mouse_joint_get_max_force() const -> f32;
+    void mouse_joint_set_max_force(f32 maxForce) const;
 
     ////////////////////////////////////////////////////////////
 
-    void prismatic_joint_enable_spring(bool enableSpring) const;
     auto prismatic_joint_is_spring_enabled() const -> bool;
+    void prismatic_joint_enable_spring(bool enableSpring) const;
 
-    void prismatic_joint_set_spring_hertz(f32 hertz) const;
     auto prismatic_joint_get_spring_hertz() const -> f32;
+    void prismatic_joint_set_spring_hertz(f32 hertz) const;
 
-    void prismatic_joint_set_spring_damping_ratio(f32 dampingRatio) const;
     auto prismatic_joint_get_spring_damping_ratio() const -> f32;
+    void prismatic_joint_set_spring_damping_ratio(f32 dampingRatio) const;
 
-    void prismatic_joint_enable_limit(bool enableLimit) const;
     auto prismatic_joint_is_limit_enabled() const -> bool;
+    void prismatic_joint_enable_limit(bool enableLimit) const;
 
     auto prismatic_joint_get_lower_limit() const -> f32;
     auto prismatic_joint_get_upper_limit() const -> f32;
     void prismatic_joint_set_limits(f32 lower, f32 upper) const;
 
-    void prismatic_joint_enable_motor(bool enableMotor) const;
     auto prismatic_joint_is_motor_enabled() const -> bool;
+    void prismatic_joint_enable_motor(bool enableMotor) const;
 
-    void prismatic_joint_set_motor_speed(f32 motorSpeed) const;
     auto prismatic_joint_get_motor_speed() const -> f32;
+    void prismatic_joint_set_motor_speed(f32 motorSpeed) const;
 
-    void prismatic_joint_set_max_motor_force(f32 force) const;
     auto prismatic_joint_get_max_motor_force() const -> f32;
+    void prismatic_joint_set_max_motor_force(f32 force) const;
 
     auto prismatic_joint_get_motor_force() const -> f32;
 
@@ -224,29 +236,29 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    void revolute_joint_enable_spring(bool enableSpring) const;
     auto revolute_joint_is_spring_enabled() const -> bool;
+    void revolute_joint_enable_spring(bool enableSpring) const;
 
-    void revolute_joint_set_spring_hertz(f32 hertz) const;
     auto revolute_joint_get_spring_hertz() const -> f32;
+    void revolute_joint_set_spring_hertz(f32 hertz) const;
 
-    void revolute_joint_set_spring_damping_ratio(f32 dampingRatio) const;
     auto revolute_joint_get_spring_damping_ratio() const -> f32;
+    void revolute_joint_set_spring_damping_ratio(f32 dampingRatio) const;
 
     auto revolute_joint_get_angle() const -> radian_f;
 
-    void revolute_joint_enable_limit(bool enableLimit) const;
     auto revolute_joint_is_limit_enabled() const -> bool;
+    void revolute_joint_enable_limit(bool enableLimit) const;
 
     auto revolute_joint_get_lower_limit() const -> f32;
     auto revolute_joint_get_upper_limit() const -> f32;
     void revolute_joint_set_limits(f32 lower, f32 upper) const;
 
-    void revolute_joint_enable_motor(bool enableMotor) const;
     auto revolute_joint_is_motor_enabled() const -> bool;
+    void revolute_joint_enable_motor(bool enableMotor) const;
 
-    void revolute_joint_set_motor_speed(f32 motorSpeed) const;
     auto revolute_joint_get_motor_speed() const -> f32;
+    void revolute_joint_set_motor_speed(f32 motorSpeed) const;
 
     auto revolute_joint_get_motor_torque() const -> f32;
 
@@ -255,44 +267,44 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    void weld_joint_set_linear_hertz(f32 hertz) const;
     auto weld_joint_get_linear_hertz() const -> f32;
+    void weld_joint_set_linear_hertz(f32 hertz) const;
 
-    void weld_joint_set_linear_damping_ratio(f32 dampingRatio) const;
     auto weld_joint_get_linear_damping_ratio() const -> f32;
+    void weld_joint_set_linear_damping_ratio(f32 dampingRatio) const;
 
-    void weld_joint_set_angular_hertz(f32 hertz) const;
     auto weld_joint_get_angular_hertz() const -> f32;
+    void weld_joint_set_angular_hertz(f32 hertz) const;
 
-    void weld_joint_set_angular_damping_ratio(f32 dampingRatio) const;
     auto weld_joint_get_angular_damping_ratio() const -> f32;
+    void weld_joint_set_angular_damping_ratio(f32 dampingRatio) const;
 
     ////////////////////////////////////////////////////////////
 
-    void wheel_joint_enable_spring(bool enableSpring) const;
     auto wheel_joint_is_spring_enabled() const -> bool;
+    void wheel_joint_enable_spring(bool enableSpring) const;
 
-    void wheel_joint_set_spring_hertz(f32 hertz) const;
     auto wheel_joint_get_spring_hertz() const -> f32;
+    void wheel_joint_set_spring_hertz(f32 hertz) const;
 
-    void wheel_joint_set_spring_damping_ratio(f32 dampingRatio) const;
     auto wheel_joint_get_spring_damping_ratio() const -> f32;
+    void wheel_joint_set_spring_damping_ratio(f32 dampingRatio) const;
 
-    void wheel_joint_enable_limit(bool enableLimit) const;
     auto wheel_joint_is_limit_enabled() const -> bool;
+    void wheel_joint_enable_limit(bool enableLimit) const;
 
     auto wheel_joint_get_lower_limit() const -> f32;
     auto wheel_joint_get_upper_limit() const -> f32;
     void wheel_joint_set_limits(f32 lower, f32 upper) const;
 
-    void wheel_joint_enable_motor(bool enableMotor) const;
     auto wheel_joint_is_motor_enabled() const -> bool;
+    void wheel_joint_enable_motor(bool enableMotor) const;
 
-    void wheel_joint_set_motor_speed(f32 motorSpeed) const;
     auto wheel_joint_get_motor_speed() const -> f32;
+    void wheel_joint_set_motor_speed(f32 motorSpeed) const;
 
-    void wheel_joint_set_max_motor_torque(f32 torque) const;
     auto wheel_joint_get_max_motor_torque() const -> f32;
+    void wheel_joint_set_max_motor_torque(f32 torque) const;
 
     auto wheel_joint_get_motor_torque() const -> f32;
 
@@ -315,14 +327,14 @@ public:
 
     auto is_sensor() const -> bool;
 
-    void set_density(f32 density) const;
     auto get_density() const -> f32;
+    void set_density(f32 density) const;
 
-    void set_friction(f32 friction) const;
     auto get_friction() const -> f32;
+    void set_friction(f32 friction) const;
 
-    void set_restitution(f32 restitution) const;
     auto get_restitution() const -> f32;
+    void set_restitution(f32 restitution) const;
 
     void enable_sensor_events(bool flag) const;
     auto are_sensor_events_enabled() const -> bool;
@@ -346,6 +358,11 @@ public:
 
     auto equal(b2d_shape const* other) const -> bool;
 
+    auto get_mass_data() const -> mass_data;
+
+    auto get_filter() const -> filter;
+    void set_filter(filter const& value) const;
+
     b2ShapeId ID {};
 };
 
@@ -365,36 +382,22 @@ public:
 ////////////////////////////////////////////////////////////
 
 auto rot_from_angle(radian_f angle) -> rotation;
-auto get_x_axis(rotation rot) -> point_f;
-auto get_y_axis(rotation rot) -> point_f;
 
 }
 
 #endif
 
 /* MISSING API:
-b2World_OverlapAABB
-b2World_OverlapShape
-b2World_CastRay
-b2World_CastRayClosest
 b2World_CastShape
 b2World_CastMover
 b2World_CollideMover
-b2World_SetCustomFilterCallback
-b2World_SetPreSolveCallback
 b2World_SetContactTuning
 b2World_SetJointTuning
-b2World_SetMaximumLinearSpeed
-b2World_GetMaximumLinearSpeed
 b2World_EnableWarmStarting
 b2World_IsWarmStartingEnabled
 b2World_GetAwakeBodyCount
 b2World_GetCounters
-b2World_SetFrictionCallback
-b2World_SetRestitutionCallback
 
-b2Body_SetName
-b2Body_GetName
 b2Body_GetPosition
 b2Body_GetRotation
 b2Body_GetLocalPoint
@@ -404,41 +407,55 @@ b2Body_GetWorldVector
 b2Body_SetTargetTransform
 b2Body_GetLocalPointVelocity
 b2Body_GetWorldPointVelocity
-b2Body_GetMass
 b2Body_GetRotationalInertia
-b2Body_SetMassData
-b2Body_GetMassData
 b2Body_ApplyMassFromShapes
 b2Body_SetSleepThreshold
 b2Body_GetSleepThreshold
 b2Body_EnableContactEvents
 b2Body_EnableHitEvents
-b2Body_GetShapeCount
-b2Body_GetShapes
-b2Body_GetJointCount
-b2Body_GetJoints
 b2Body_GetContactCapacity
 b2Body_GetContactData
 b2Body_ComputeAABB
 
 b2Shape_SetMaterial
 b2Shape_GetMaterial
-b2Shape_GetFilter
-b2Shape_SetFilter
-b2Shape_RayCast
 b2Shape_GetContactCapacity
 b2Shape_GetContactData
 b2Shape_GetSensorCapacity
 b2Shape_GetSensorOverlaps
-b2Shape_GetMassData
 
 b2Chain*
-b2Joint*
-b2FilterJoint*
 
-property:
+bool b2Joint_IsValid( b2JointId id );
+b2JointType b2Joint_GetType( b2JointId jointId );
+b2BodyId b2Joint_GetBodyA( b2JointId jointId );
+b2BodyId b2Joint_GetBodyB( b2JointId jointId );
+b2WorldId b2Joint_GetWorld( b2JointId jointId );
+b2Vec2 b2Joint_GetLocalAnchorA( b2JointId jointId );
+b2Vec2 b2Joint_GetLocalAnchorB( b2JointId jointId );
+void b2Joint_SetCollideConnected( b2JointId jointId, bool shouldCollide );
+bool b2Joint_GetCollideConnected( b2JointId jointId );
+void b2Joint_WakeBodies( b2JointId jointId );
+b2Vec2 b2Joint_GetConstraintForce( b2JointId jointId );
+float b2Joint_GetConstraintTorque( b2JointId jointId );
+
+
+nope:
+b2Body_GetShapeCount
+b2Body_GetShapes
+b2Body_GetJointCount
+b2Body_GetJoints
 b2World_IsSleepingEnabled
 b2World_IsContinuousEnabled
 b2World_GetRestitutionThreshold
 b2World_GetHitEventThreshold
+b2World_SetFrictionCallback
+b2World_SetRestitutionCallback
+b2World_SetCustomFilterCallback
+b2World_SetPreSolveCallback
+b2World_OverlapAABB
+b2World_OverlapShape
+b2World_CastRay
+b2World_CastRayClosest
+b2Shape_RayCast
 */

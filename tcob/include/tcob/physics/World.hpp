@@ -146,6 +146,7 @@ public:
     prop<bool>       EnableContinuous;
     prop<f32>        RestitutionThreshold;
     prop<f32>        HitEventThreshold;
+    prop_fn<f32>     MaximumLinearSpeed;
 
     auto bodies() -> std::span<std::shared_ptr<body>>;
 
