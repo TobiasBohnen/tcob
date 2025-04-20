@@ -22,6 +22,17 @@
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
+class TCOB_API rotation {
+public:
+    f32 Cosine {0.0f};
+    f32 Sine {0.0f};
+
+    auto x_axis() const -> point_f;
+    auto y_axis() const -> point_f;
+
+    static auto FromAngle(radian_f angle) -> rotation;
+};
+
 struct body_transform {
     /// The world position of the body. Avoid creating bodies at the origin
     /// since this can lead to many overlapping shapes.
@@ -88,10 +99,6 @@ public:
 
         /// Sleep velocity threshold, default is 0.05 meter per second
         f32 SleepThreshold {0.05f};
-
-        /// Automatically compute mass and related properties on this body from shapes.
-        /// Triggers whenever a shape is add/removed/changed. Default is true.
-        bool AutomaticMass {true};
 
         /// This allows this body to bypass rotational speed limits. Should only be used
         ///	for circular objects, like wheels.

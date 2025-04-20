@@ -30,9 +30,6 @@
     #include "tcob/physics/World.hpp"
     #include <box2d/base.h>
 
-
-B2_API auto b2RevoluteJoint_IsSpringEnabled(b2JointId jointId) -> bool;
-
 namespace tcob::physics::detail {
 auto static to_b2Vec2(point_f val) -> b2Vec2
 {
@@ -42,17 +39,17 @@ auto static to_b2Vec2(point_f val) -> b2Vec2
 b2d_world::b2d_world(world::settings const& settings)
 {
     b2WorldDef worldDef {b2DefaultWorldDef()};
-    worldDef.gravity                = to_b2Vec2(settings.Gravity);
-    worldDef.restitutionThreshold   = settings.RestitutionThreshold;
-    worldDef.contactPushoutVelocity = settings.ContactPushoutVelocity;
-    worldDef.hitEventThreshold      = settings.HitEventThreshold;
-    worldDef.contactHertz           = settings.ContactHertz;
-    worldDef.contactDampingRatio    = settings.ContactDampingRatio;
-    worldDef.jointHertz             = settings.JointHertz;
-    worldDef.jointDampingRatio      = settings.JointDampingRatio;
-    worldDef.maximumLinearVelocity  = settings.MaximumLinearVelocity;
-    worldDef.enableSleep            = settings.EnableSleeping;
-    worldDef.enableContinous        = settings.EnableContinuous;
+    worldDef.gravity              = to_b2Vec2(settings.Gravity);
+    worldDef.restitutionThreshold = settings.RestitutionThreshold;
+    worldDef.hitEventThreshold    = settings.HitEventThreshold;
+    worldDef.contactHertz         = settings.ContactHertz;
+    worldDef.contactDampingRatio  = settings.ContactDampingRatio;
+    worldDef.maxContactPushSpeed  = settings.MaxContactPushSpeed;
+    worldDef.jointHertz           = settings.JointHertz;
+    worldDef.jointDampingRatio    = settings.JointDampingRatio;
+    worldDef.maximumLinearSpeed   = settings.MaximumLinearSpeed;
+    worldDef.enableSleep          = settings.EnableSleeping;
+    worldDef.enableContinuous     = settings.EnableContinuous;
 
     worldDef.workerCount = static_cast<i32>(locate_service<task_manager>().thread_count());
     worldDef.enqueueTask = [](b2TaskCallback* task, int32_t itemCount, int32_t minRange, void* taskContext, void* /* userContext */) -> void* {
@@ -111,9 +108,15 @@ void b2d_world::set_hit_event_threshold(f32 value) const
     b2World_SetHitEventThreshold(ID, value);
 }
 
-void b2d_world::explode(point_f pos, f32 radius, f32 impulse) const
+void b2d_world::explode(explosion const& explosion) const
 {
-    b2World_Explode(ID, to_b2Vec2(pos), radius, impulse);
+    b2ExplosionDef def;
+    def.falloff          = explosion.Falloff;
+    def.impulsePerLength = explosion.ImpulsePerLength;
+    def.maskBits         = explosion.MaskBits;
+    def.position         = to_b2Vec2(explosion.Position);
+    def.radius           = explosion.Radius;
+    b2World_Explode(ID, &def);
 }
 
 void b2d_world::draw(b2d_debug_draw* draw, debug_draw::settings const& settings) const
@@ -225,7 +228,6 @@ b2d_body::b2d_body(b2d_world* world, body_transform const& xform, body::settings
     def.isEnabled         = bodySettings.IsEnabled;
     def.gravityScale      = bodySettings.GravityScale;
     def.sleepThreshold    = bodySettings.SleepThreshold;
-    def.automaticMass     = bodySettings.AutomaticMass;
     def.allowFastRotation = bodySettings.AllowFastRotation;
 
     ID = b2CreateBody(world->ID, &def);
@@ -584,9 +586,9 @@ void b2d_joint::distance_joint_set_spring_hertz(f32 hertz) const
     b2DistanceJoint_SetSpringHertz(ID, hertz);
 }
 
-auto b2d_joint::distance_joint_get_hertz() const -> f32
+auto b2d_joint::distance_joint_get_spring_hertz() const -> f32
 {
-    return b2DistanceJoint_GetHertz(ID);
+    return b2DistanceJoint_GetSpringHertz(ID);
 }
 
 void b2d_joint::distance_joint_set_spring_damping_ratio(f32 dampingRatio) const
@@ -594,9 +596,9 @@ void b2d_joint::distance_joint_set_spring_damping_ratio(f32 dampingRatio) const
     b2DistanceJoint_SetSpringDampingRatio(ID, dampingRatio);
 }
 
-auto b2d_joint::distance_joint_get_damping_ratio() const -> f32
+auto b2d_joint::distance_joint_get_spring_damping_ratio() const -> f32
 {
-    return b2DistanceJoint_GetDampingRatio(ID);
+    return b2DistanceJoint_GetSpringDampingRatio(ID);
 }
 
 void b2d_joint::distance_joint_enable_limit(bool enableLimit) const
@@ -1076,16 +1078,19 @@ auto b2d_joint::wheel_joint_get_motor_torque() const -> f32
 auto static GetShapeDef(shape::settings const& shapeSettings)
 {
     b2ShapeDef shapeDef {b2DefaultShapeDef()};
-    shapeDef.friction             = shapeSettings.Friction;
-    shapeDef.restitution          = shapeSettings.Restitution;
-    shapeDef.density              = shapeSettings.Density;
-    shapeDef.customColor          = static_cast<u32>(shapeSettings.CustomColor.R << 16 | shapeSettings.CustomColor.G << 8 | shapeSettings.CustomColor.B);
-    shapeDef.isSensor             = shapeSettings.IsSensor;
-    shapeDef.enableSensorEvents   = shapeSettings.EnableSensorEvents;
-    shapeDef.enableContactEvents  = shapeSettings.EnableContactEvents;
-    shapeDef.enableHitEvents      = shapeSettings.EnableHitEvents;
-    shapeDef.enablePreSolveEvents = shapeSettings.EnablePreSolveEvents;
-    shapeDef.forceContactCreation = shapeSettings.ForceContactCreation;
+    shapeDef.material.friction          = shapeSettings.Material.Friction;
+    shapeDef.material.restitution       = shapeSettings.Material.Restitution;
+    shapeDef.material.rollingResistance = shapeSettings.Material.RollingResistance;
+    shapeDef.material.tangentSpeed      = shapeSettings.Material.TangentSpeed;
+    shapeDef.material.customColor       = static_cast<u32>(shapeSettings.Material.CustomColor.R << 16 | shapeSettings.Material.CustomColor.G << 8 | shapeSettings.Material.CustomColor.B);
+    shapeDef.density                    = shapeSettings.Density;
+    shapeDef.isSensor                   = shapeSettings.IsSensor;
+    shapeDef.enableSensorEvents         = shapeSettings.EnableSensorEvents;
+    shapeDef.enableContactEvents        = shapeSettings.EnableContactEvents;
+    shapeDef.enableHitEvents            = shapeSettings.EnableHitEvents;
+    shapeDef.enablePreSolveEvents       = shapeSettings.EnablePreSolveEvents;
+    shapeDef.invokeContactCreation      = shapeSettings.InvokeContactCreation;
+    shapeDef.updateBodyMass             = shapeSettings.UpdateBodyMass;
     return shapeDef;
 }
 
@@ -1107,7 +1112,7 @@ b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSetting
 b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings)
 {
     auto const& rect {shapeSettings.Extents};
-    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.top_left()), shapeSettings.Angle.Value)};
+    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.top_left()), b2MakeRot(shapeSettings.Angle.Value))};
 
     b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
@@ -1139,7 +1144,7 @@ b2d_shape::b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSetting
 
 b2d_shape::~b2d_shape()
 {
-    b2DestroyShape(ID);
+    b2DestroyShape(ID, true);
 }
 
 auto b2d_shape::is_sensor() const -> bool
@@ -1149,7 +1154,7 @@ auto b2d_shape::is_sensor() const -> bool
 
 void b2d_shape::set_density(f32 density) const
 {
-    b2Shape_SetDensity(ID, density);
+    b2Shape_SetDensity(ID, density, true);
 }
 
 auto b2d_shape::get_density() const -> f32
@@ -1256,7 +1261,7 @@ void static DrawPolygon(b2Vec2 const* vertices, int vertexCount, b2HexColor colo
     verts.reserve(vertexCount);
     for (auto const& v : span) { verts.emplace_back(v.x, v.y); }
 
-    ddraw->draw_polygon(verts, color::FromRGB(color));
+    ddraw->Impl->draw_polygon(verts, color::FromRGB(color));
 }
 
 void static DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int vertexCount, float radius, b2HexColor color, void* context)
@@ -1268,122 +1273,65 @@ void static DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int 
     verts.reserve(vertexCount);
     for (auto const& v : span) { verts.emplace_back(v.x, v.y); }
 
-    ddraw->draw_solid_polygon({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, verts, radius, color::FromRGB(color));
+    ddraw->Impl->draw_solid_polygon({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, verts, radius, color::FromRGB(color));
 }
 
 void static DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_circle({center.x, center.y}, radius, color::FromRGB(color));
+    ddraw->Impl->draw_circle({center.x, center.y}, radius, color::FromRGB(color));
 }
 
 void static DrawSolidCircle(b2Transform transform, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_solid_circle({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, radius, color::FromRGB(color));
-}
-
-void static DrawCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
-{
-    auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_capsule({p1.x, p1.y}, {p2.x, p2.y}, radius, color::FromRGB(color));
+    ddraw->Impl->draw_solid_circle({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, radius, color::FromRGB(color));
 }
 
 void static DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_solid_capsule({p1.x, p1.y}, {p2.x, p2.y}, radius, color::FromRGB(color));
+    ddraw->Impl->draw_solid_capsule({p1.x, p1.y}, {p2.x, p2.y}, radius, color::FromRGB(color));
 }
 
 void static DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_segment({p1.x, p1.y}, {p2.x, p2.y}, color::FromRGB(color));
+    ddraw->Impl->draw_segment({p1.x, p1.y}, {p2.x, p2.y}, color::FromRGB(color));
 }
 
 void static DrawTransform(b2Transform transform, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_transform({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}});
+    ddraw->Impl->draw_transform({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}});
 }
 
 void static DrawPoint(b2Vec2 p, float size, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_point({p.x, p.y}, size, color::FromRGB(color));
+    ddraw->Impl->draw_point({p.x, p.y}, size, color::FromRGB(color));
 }
 
-void static DrawString(b2Vec2 p, char const* s, void* context)
+void static DrawString(b2Vec2 p, char const* s, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->draw_string({p.x, p.y}, s);
+    ddraw->Impl->draw_string({p.x, p.y}, s, color::FromRGB(color));
 }
 }
 
-b2d_debug_draw::b2d_debug_draw(debug_draw* parent)
-    : _parent {parent}
+b2d_debug_draw::b2d_debug_draw(debug_draw* impl)
+    : Impl {impl}
 {
-    ID.context          = this;
-    ID.DrawPolygon      = &DrawPolygon;
-    ID.DrawSolidPolygon = &DrawSolidPolygon;
-    ID.DrawCircle       = &DrawCircle;
-    ID.DrawSolidCircle  = &DrawSolidCircle;
-    ID.DrawCapsule      = &DrawCapsule;
-    ID.DrawSolidCapsule = &DrawSolidCapsule;
-    ID.DrawSegment      = &DrawSegment;
-    ID.DrawTransform    = &DrawTransform;
-    ID.DrawPoint        = &DrawPoint;
-    ID.DrawString       = &DrawString;
-}
-
-void b2d_debug_draw::draw_polygon(std::span<point_f const> vertices, color color)
-{
-    _parent->draw_polygon(vertices, color);
-}
-
-void b2d_debug_draw::draw_solid_polygon(body_transform xform, std::span<point_f const> vertices, f32 radius, color color)
-{
-    _parent->draw_solid_polygon(xform, vertices, radius, color);
-}
-
-void b2d_debug_draw::draw_circle(point_f center, f32 radius, color color)
-{
-    _parent->draw_circle(center, radius, color);
-}
-
-void b2d_debug_draw::draw_solid_circle(body_transform xform, f32 radius, color color)
-{
-    _parent->draw_solid_circle(xform, radius, color);
-}
-
-void b2d_debug_draw::draw_capsule(point_f p1, point_f p2, f32 radius, color color)
-{
-    _parent->draw_capsule(p1, p2, radius, color);
-}
-
-void b2d_debug_draw::draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color)
-{
-    _parent->draw_solid_capsule(p1, p2, radius, color);
-}
-
-void b2d_debug_draw::draw_segment(point_f p1, point_f p2, color color)
-{
-    _parent->draw_segment(p1, p2, color);
-}
-
-void b2d_debug_draw::draw_transform(body_transform const& xf)
-{
-    _parent->draw_transform(xf);
-}
-
-void b2d_debug_draw::draw_point(point_f p, f32 size, color color)
-{
-    _parent->draw_point(p, size, color);
-}
-
-void b2d_debug_draw::draw_string(point_f p, string const& text)
-{
-    _parent->draw_string(p, text);
+    ID.context             = this;
+    ID.DrawPolygonFcn      = &DrawPolygon;
+    ID.DrawSolidPolygonFcn = &DrawSolidPolygon;
+    ID.DrawCircleFcn       = &DrawCircle;
+    ID.DrawSolidCircleFcn  = &DrawSolidCircle;
+    ID.DrawSolidCapsuleFcn = &DrawSolidCapsule;
+    ID.DrawSegmentFcn      = &DrawSegment;
+    ID.DrawTransformFcn    = &DrawTransform;
+    ID.DrawPointFcn        = &DrawPoint;
+    ID.DrawStringFcn       = &DrawString;
 }
 
 void b2d_debug_draw::apply_settings(debug_draw::settings const& settings)
@@ -1396,13 +1344,38 @@ void b2d_debug_draw::apply_settings(debug_draw::settings const& settings)
     ID.drawShapes           = settings.DrawShapes;
     ID.drawJoints           = settings.DrawJoints;
     ID.drawJointExtras      = settings.DrawJointExtras;
-    ID.drawAABBs            = settings.DrawAABBs;
+    ID.drawBounds           = settings.DrawBounds;
+    ID.drawMass             = settings.DrawMass;
+    ID.drawBodyNames        = settings.DrawBodyNames;
     ID.drawContacts         = settings.DrawContacts;
     ID.drawGraphColors      = settings.DrawGraphColors;
     ID.drawContactNormals   = settings.DrawContactNormals;
     ID.drawContactImpulses  = settings.DrawContactImpulses;
+    ID.drawContactFeatures  = settings.DrawContactFeatures;
     ID.drawFrictionImpulses = settings.DrawFrictionImpulses;
+    ID.drawIslands          = settings.DrawIslands;
 }
+
+////////////////////////////////////////////////////////////
+
+auto rot_from_angle(radian_f angle) -> rotation
+{
+    auto const rot {b2MakeRot(angle.Value)};
+    return {.Cosine = rot.c, .Sine = rot.s};
+}
+
+auto get_x_axis(rotation rot) -> point_f
+{
+    auto const vec {b2Rot_GetXAxis({rot.Cosine, rot.Sine})};
+    return {vec.x, vec.y};
+}
+
+auto get_y_axis(rotation rot) -> point_f
+{
+    auto const vec {b2Rot_GetYAxis({rot.Cosine, rot.Sine})};
+    return {vec.x, vec.y};
+}
+
 }
 
 #endif

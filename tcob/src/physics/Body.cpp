@@ -124,6 +124,23 @@ void body::sleep() const
     _impl->set_awake(false);
 }
 
+////////////////////////////////////////////////////////////
+
+auto rotation::x_axis() const -> point_f
+{
+    return detail::get_x_axis(*this);
+}
+
+auto rotation::y_axis() const -> point_f
+{
+    return detail::get_y_axis(*this);
+}
+
+auto rotation::FromAngle(radian_f angle) -> rotation
+{
+    return detail::rot_from_angle(angle);
+}
+
 }
 
 #endif

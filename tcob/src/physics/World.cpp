@@ -104,9 +104,9 @@ void world::draw(debug_draw const& draw) const
     _impl->draw(draw._impl.get(), draw.Settings);
 }
 
-void world::explode(point_f pos, f32 radius, f32 impulse) const
+void world::explode(explosion const& explosion) const
 {
-    _impl->explode(pos, radius, impulse);
+    _impl->explode(explosion);
 }
 
 void world::on_update(milliseconds deltaTime)

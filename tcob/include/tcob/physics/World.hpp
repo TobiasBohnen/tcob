@@ -76,6 +76,25 @@ struct sensor_events {
 
 ////////////////////////////////////////////////////////////
 
+struct explosion {
+    /// Mask bits to filter shapes
+    u64 MaskBits {0xFFFFFFFFFFFFFFFF};
+
+    /// The center of the explosion in world space
+    point_f Position;
+
+    /// The radius of the explosion
+    f32 Radius {0};
+
+    /// The falloff distance beyond the radius. Impulse is reduced to zero at this distance.
+    f32 Falloff {0};
+
+    /// Impulse per unit length. This applies an impulse according to the shape perimeter that
+    /// is facing the explosion. Explosions only apply to circles, capsules, and polygons. This
+    /// may be negative for implosions.
+    f32 ImpulsePerLength {0};
+};
+
 class TCOB_API world final : public updatable, public non_copyable {
 public:
     class TCOB_API settings {
@@ -87,9 +106,6 @@ public:
         /// speed have restitution applied (will bounce).
         f32 RestitutionThreshold {1.0f};
 
-        /// This parameter controls how fast overlap is resolved and has units of meters per second
-        f32 ContactPushoutVelocity {3.0f};
-
         /// Threshold velocity for hit events. Usually meters per second.
         f32 HitEventThreshold {1.0f};
 
@@ -99,14 +115,19 @@ public:
         /// Contact bounciness. Non-dimensional.
         f32 ContactDampingRatio {10};
 
+        /// This parameter controls how fast overlap is resolved and usually has units of meters per second. This only
+        /// puts a cap on the resolution speed. The resolution speed is increased by increasing the hertz and/or
+        /// decreasing the damping ratio.
+        f32 MaxContactPushSpeed {3.0f};
+
         /// Joint stiffness. Cycles per second.
         f32 JointHertz {60};
 
         /// Joint bounciness. Non-dimensional.
         f32 JointDampingRatio {2.0f};
 
-        /// Maximum linear velocity. Usually meters per second.
-        f32 MaximumLinearVelocity {400.0f};
+        /// Maximum linear speed. Usually meters per second.
+        f32 MaximumLinearSpeed {400.0f};
 
         /// Can bodies go to sleep to improve performance
         bool EnableSleeping {true};
@@ -145,7 +166,7 @@ public:
 
     void draw(debug_draw const& draw) const;
 
-    void explode(point_f pos, f32 radius, f32 impulse) const;
+    void explode(explosion const& explosion) const;
 
 private:
     void on_update(milliseconds deltaTime) override;

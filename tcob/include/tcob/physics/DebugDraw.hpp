@@ -40,10 +40,13 @@ public:
         bool DrawJointExtras {true};
 
         /// Option to draw the bounding boxes for shapes
-        bool DrawAABBs {true};
+        bool DrawBounds {true};
 
         /// Option to draw the mass and center of mass of dynamic bodies
         bool DrawMass {true};
+
+        /// Option to draw body names
+        bool DrawBodyNames {true};
 
         /// Option to draw contact points
         bool DrawContacts {true};
@@ -57,8 +60,14 @@ public:
         /// Option to draw contact normal impulses
         bool DrawContactImpulses {true};
 
+        /// Option to draw contact feature ids
+        bool DrawContactFeatures {true};
+
         /// Option to draw contact friction impulses
         bool DrawFrictionImpulses {true};
+
+        /// Option to draw islands as bounding boxes
+        bool DrawIslands {true};
     };
 
     ////////////////////////////////////////////////////////////
@@ -80,9 +89,6 @@ public:
     /// Draw a solid circle.
     void virtual draw_solid_circle(body_transform xform, f32 radius, color color) = 0;
 
-    /// Draw a capsule.
-    void virtual draw_capsule(point_f p1, point_f p2, f32 radius, color color) = 0;
-
     /// Draw a solid capsule.
     void virtual draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color) = 0;
 
@@ -97,7 +103,7 @@ public:
     void virtual draw_point(point_f p, f32 size, color color) = 0;
 
     /// Draw a string.
-    void virtual draw_string(point_f p, string const& text) = 0;
+    void virtual draw_string(point_f p, string const& text, color color) = 0;
 
 private:
     std::unique_ptr<detail::b2d_debug_draw> _impl;

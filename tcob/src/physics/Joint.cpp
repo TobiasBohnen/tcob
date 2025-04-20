@@ -58,9 +58,9 @@ distance_joint::distance_joint(world& world, detail::b2d_world* b2dWorld, settin
                [this](auto const& value) { get_impl().distance_joint_set_length(value); }}}
     , EnableSpring {{[this]() -> bool { return get_impl().distance_joint_is_spring_enabled(); },
                      [this](auto const& value) { get_impl().distance_joint_enable_spring(value); }}}
-    , Hertz {{[this]() -> f32 { return get_impl().distance_joint_get_hertz(); },
+    , Hertz {{[this]() -> f32 { return get_impl().distance_joint_get_spring_hertz(); },
               [this](auto const& value) { get_impl().distance_joint_set_spring_hertz(value); }}}
-    , DampingRatio {{[this]() -> f32 { return get_impl().distance_joint_get_damping_ratio(); },
+    , DampingRatio {{[this]() -> f32 { return get_impl().distance_joint_get_spring_damping_ratio(); },
                      [this](auto const& value) { get_impl().distance_joint_set_spring_damping_ratio(value); }}}
     , EnableLimit {{[this]() -> bool { return get_impl().distance_joint_is_limit_enabled(); },
                     [this](auto const& value) { get_impl().distance_joint_enable_limit(value); }}}

@@ -6,12 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <span>
-
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
     #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Color.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/physics/Body.hpp"
     #include "tcob/physics/Joint.hpp"
@@ -24,7 +21,6 @@
     #include <box2d/types.h>
 
 namespace tcob::physics::detail {
-
 ////////////////////////////////////////////////////////////
 
 class b2d_world {
@@ -45,7 +41,7 @@ public:
     void set_restitution_threshold(f32 value) const;
     void set_hit_event_threshold(f32 value) const;
 
-    void explode(point_f pos, f32 radius, f32 impulse) const;
+    void explode(explosion const& explosion) const;
 
     auto get_body_events() const -> body_events;
     auto get_contact_events() const -> contact_events;
@@ -137,10 +133,10 @@ public:
     auto distance_joint_is_spring_enabled() const -> bool;
 
     void distance_joint_set_spring_hertz(f32 hertz) const;
-    auto distance_joint_get_hertz() const -> f32;
+    auto distance_joint_get_spring_hertz() const -> f32;
 
     void distance_joint_set_spring_damping_ratio(f32 dampingRatio) const;
-    auto distance_joint_get_damping_ratio() const -> f32;
+    auto distance_joint_get_spring_damping_ratio() const -> f32;
 
     void distance_joint_enable_limit(bool enableLimit) const;
     auto distance_joint_is_limit_enabled() const -> bool;
@@ -354,26 +350,20 @@ public:
 
 class b2d_debug_draw {
 public:
-    b2d_debug_draw(debug_draw* parent);
-
-    void draw_polygon(std::span<point_f const> vertices, color color);
-    void draw_solid_polygon(body_transform xform, std::span<point_f const> vertices, f32 radius, color color);
-    void draw_circle(point_f center, f32 radius, color color);
-    void draw_solid_circle(body_transform xform, f32 radius, color color);
-    void draw_capsule(point_f p1, point_f p2, f32 radius, color color);
-    void draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color);
-    void draw_segment(point_f p1, point_f p2, color color);
-    void draw_transform(body_transform const& xf);
-    void draw_point(point_f p, f32 size, color color);
-    void draw_string(point_f p, string const& text);
+    b2d_debug_draw(debug_draw* impl);
 
     void apply_settings(debug_draw::settings const& settings);
 
     b2DebugDraw ID {};
 
-private:
-    debug_draw* _parent;
+    debug_draw* Impl;
 };
+
+////////////////////////////////////////////////////////////
+
+auto rot_from_angle(radian_f angle) -> rotation;
+auto get_x_axis(rotation rot) -> point_f;
+auto get_y_axis(rotation rot) -> point_f;
 
 }
 

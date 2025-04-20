@@ -24,19 +24,31 @@ namespace tcob::physics {
 
 class TCOB_API shape : public non_copyable {
 public:
-    class TCOB_API settings {
+    class TCOB_API surface_material {
     public:
         /// The Coulomb (dry) friction coefficient, usually in the range [0,1].
         f32 Friction {0.6f};
 
-        /// The restitution (bounce) usually in the range [0,1].
+        /// The coefficient of restitution (bounce) usually in the range [0,1].
         f32 Restitution {0.0f};
 
-        /// The density, usually in kg/m^2.
-        f32 Density {1.0f};
+        /// The rolling resistance usually in the range [0,1].
+        f32 RollingResistance {0.0f};
+
+        /// The tangent speed for conveyor belts
+        f32 TangentSpeed {0.0f};
 
         /// Custom debug draw color.
         color CustomColor;
+    };
+
+    class TCOB_API settings {
+    public:
+        /// The surface material for this shape.
+        surface_material Material;
+
+        /// The density, usually in kg/m^2.
+        f32 Density {1.0f};
 
         /// A sensor shape generates overlap events but never generates a collision response.
         bool IsSensor {false};
@@ -54,10 +66,13 @@ public:
         ///	and must be carefully handled due to threading. Ignored for sensors.
         bool EnablePreSolveEvents {false};
 
-        /// Normally shapes on static bodies don't invoke contact creation when they are added to the world. This overrides
-        ///	that behavior and causes contact creation. This significantly slows down static body creation which can be important
-        ///	when there are many static shapes.
-        bool ForceContactCreation {false};
+        /// When shapes are created they will scan the environment for collision the next time step. This can significantly slow down
+        /// static body creation when there are many static shapes.
+        /// This is flag is ignored for dynamic and kinematic shapes which always invoke contact creation.
+        bool InvokeContactCreation {true};
+
+        /// Should the body update the mass properties when this shape is created. Default is true.
+        bool UpdateBodyMass {true};
     };
 
     prop_fn<f32>  Friction;
