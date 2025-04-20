@@ -848,6 +848,16 @@ auto b2d_joint::prismatic_joint_get_motor_force() const -> f32
     return b2PrismaticJoint_GetMotorForce(ID);
 }
 
+auto b2d_joint::prismatic_joint_get_translation() const -> f32
+{
+    return b2PrismaticJoint_GetTranslation(ID);
+}
+
+auto b2d_joint::prismatic_joint_get_speed() const -> f32
+{
+    return b2PrismaticJoint_GetSpeed(ID);
+}
+
 void b2d_joint::revolute_joint_enable_spring(bool enableSpring) const
 {
     b2RevoluteJoint_EnableSpring(ID, enableSpring);

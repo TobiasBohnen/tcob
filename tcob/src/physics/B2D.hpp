@@ -219,6 +219,9 @@ public:
 
     auto prismatic_joint_get_motor_force() const -> f32;
 
+    auto prismatic_joint_get_translation() const -> f32;
+    auto prismatic_joint_get_speed() const -> f32;
+
     ////////////////////////////////////////////////////////////
 
     void revolute_joint_enable_spring(bool enableSpring) const;
@@ -368,3 +371,74 @@ auto get_y_axis(rotation rot) -> point_f;
 }
 
 #endif
+
+/* MISSING API:
+b2World_OverlapAABB
+b2World_OverlapShape
+b2World_CastRay
+b2World_CastRayClosest
+b2World_CastShape
+b2World_CastMover
+b2World_CollideMover
+b2World_SetCustomFilterCallback
+b2World_SetPreSolveCallback
+b2World_SetContactTuning
+b2World_SetJointTuning
+b2World_SetMaximumLinearSpeed
+b2World_GetMaximumLinearSpeed
+b2World_EnableWarmStarting
+b2World_IsWarmStartingEnabled
+b2World_GetAwakeBodyCount
+b2World_GetCounters
+b2World_SetFrictionCallback
+b2World_SetRestitutionCallback
+
+b2Body_SetName
+b2Body_GetName
+b2Body_GetPosition
+b2Body_GetRotation
+b2Body_GetLocalPoint
+b2Body_GetWorldPoint
+b2Body_GetLocalVector
+b2Body_GetWorldVector
+b2Body_SetTargetTransform
+b2Body_GetLocalPointVelocity
+b2Body_GetWorldPointVelocity
+b2Body_GetMass
+b2Body_GetRotationalInertia
+b2Body_SetMassData
+b2Body_GetMassData
+b2Body_ApplyMassFromShapes
+b2Body_SetSleepThreshold
+b2Body_GetSleepThreshold
+b2Body_EnableContactEvents
+b2Body_EnableHitEvents
+b2Body_GetShapeCount
+b2Body_GetShapes
+b2Body_GetJointCount
+b2Body_GetJoints
+b2Body_GetContactCapacity
+b2Body_GetContactData
+b2Body_ComputeAABB
+
+b2Shape_SetMaterial
+b2Shape_GetMaterial
+b2Shape_GetFilter
+b2Shape_SetFilter
+b2Shape_RayCast
+b2Shape_GetContactCapacity
+b2Shape_GetContactData
+b2Shape_GetSensorCapacity
+b2Shape_GetSensorOverlaps
+b2Shape_GetMassData
+
+b2Chain*
+b2Joint*
+b2FilterJoint*
+
+property:
+b2World_IsSleepingEnabled
+b2World_IsContinuousEnabled
+b2World_GetRestitutionThreshold
+b2World_GetHitEventThreshold
+*/

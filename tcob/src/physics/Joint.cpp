@@ -149,6 +149,16 @@ auto prismatic_joint::motor_force() const -> f32
     return get_impl().prismatic_joint_get_motor_force();
 }
 
+auto prismatic_joint::translation() const -> f32
+{
+    return get_impl().prismatic_joint_get_translation();
+}
+
+auto prismatic_joint::speed() const -> f32
+{
+    return get_impl().prismatic_joint_get_speed();
+}
+
 ////////////////////////////////////////////////////////////
 
 revolute_joint::revolute_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)

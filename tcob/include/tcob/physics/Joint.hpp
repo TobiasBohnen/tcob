@@ -239,6 +239,8 @@ public:
     prop_fn<f32>  MotorSpeed;
 
     auto motor_force() const -> f32;
+    auto translation() const -> f32;
+    auto speed() const -> f32;
 
 private:
     prismatic_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings);
