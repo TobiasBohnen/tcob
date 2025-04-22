@@ -179,7 +179,9 @@ void font_family::FindSources(font_family& fam, path const& source)
             style.Weight = font::weight::Normal;
         }
 
-        fam.set_source(style, file);
+        if (!fam.has_style(style)) {
+            fam.set_source(style, file);
+        }
     }
 
     fam._fontData.reserve(fam._fontSources.size());
