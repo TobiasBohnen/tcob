@@ -9,6 +9,7 @@
 
     #include <memory>
     #include <utility>
+    #include <vector>
 
     #include "B2D.hpp"
 
@@ -66,6 +67,11 @@ auto shape::mass_data() const -> physics::mass_data
 auto shape::is_sensor() const -> bool
 {
     return _impl->is_sensor();
+}
+
+auto shape::sensor_overlaps() const -> std::vector<shape*>
+{
+    return _impl->get_sensor_overlaps();
 }
 
 auto shape::test_point(point_f point) const -> bool

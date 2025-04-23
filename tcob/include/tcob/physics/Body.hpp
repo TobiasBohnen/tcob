@@ -16,6 +16,7 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Property.hpp"
+    #include "tcob/core/Rect.hpp"
     #include "tcob/physics/Physics.hpp"
     #include "tcob/physics/Shape.hpp"
 
@@ -107,28 +108,39 @@ public:
 
     ~body();
 
+    prop_fn<body_type> Type;
+    prop_fn<point_f>   LinearVelocity;
+    prop_fn<radian_f>  AngularVelocity;
+    prop_fn<f32>       LinearDamping;
+    prop_fn<f32>       AngularDamping;
+    prop_fn<bool>      EnableSleep;
+    prop_fn<bool>      IsAwake;
+    prop_fn<bool>      IsFixedRotation;
+    prop_fn<bool>      IsBullet;
+    prop_fn<bool>      Enabled;
+    prop_fn<f32>       GravityScale;
+    prop_fn<f32>       SleepThreshold;
+
     prop_fn<string>         Name;
-    prop_fn<body_type>      Type;
-    prop_fn<point_f>        LinearVelocity;
-    prop_fn<radian_f>       AngularVelocity;
-    prop_fn<f32>            LinearDamping;
-    prop_fn<f32>            AngularDamping;
-    prop_fn<bool>           EnableSleep;
-    prop_fn<bool>           IsAwake;
-    prop_fn<bool>           IsFixedRotation;
-    prop_fn<bool>           IsBullet;
-    prop_fn<bool>           Enabled;
-    prop_fn<f32>            GravityScale;
     prop_fn<body_transform> Transform;
     prop_fn<mass_data>      MassData;
-    std::any                UserData;
+
+    std::any UserData;
 
     auto operator==(body const& other) const -> bool;
 
-    auto center_of_mass() const -> point_f;
+    auto world_center_of_mass() const -> point_f;
     auto local_center_of_mass() const -> point_f;
 
     auto mass() const -> f32;
+
+    auto aabb() const -> rect_f;
+
+    auto position() const -> point_f;
+    auto rotation() const -> radian_f;
+
+    auto world_to_local(point_f pos) const -> point_f;
+    auto local_to_world(point_f pos) const -> point_f;
 
     auto parent() -> world&;
 
@@ -147,6 +159,9 @@ public:
 
     void wake_up() const;
     void sleep() const;
+
+    void enable_contact_events(bool enable) const;
+    void enable_hit_events(bool enable) const;
 
 private:
     body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings);

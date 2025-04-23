@@ -29,21 +29,18 @@ world::world()
 world::world(settings const& settings)
     : Gravity {{[this]() -> point_f { return _impl->get_gravity(); },
                 [this](auto const& value) { _impl->set_gravity(value); }}}
+    , RestitutionThreshold {{[this]() -> f32 { return _impl->get_restitution_threshold(); },
+                             [this](auto const& value) { _impl->set_restitution_threshold(value); }}}
+    , HitEventThreshold {{[this]() -> f32 { return _impl->get_hit_event_threshold(); },
+                          [this](auto const& value) { _impl->set_hit_event_threshold(value); }}}
     , MaximumLinearSpeed {{[this]() -> f32 { return _impl->get_maximum_linear_speed(); },
                            [this](auto const& value) { _impl->set_maximum_linear_speed(value); }}}
+    , EnableSleeping {{[this]() -> bool { return _impl->get_enable_sleeping(); },
+                       [this](auto const& value) { _impl->set_enable_sleeping(value); }}}
+    , EnableContinuous {{[this]() -> bool { return _impl->get_enable_continuous(); },
+                         [this](auto const& value) { _impl->set_enable_continuous(value); }}}
     , _impl {std::make_unique<detail::b2d_world>(settings)}
 {
-    EnableSleeping(settings.EnableSleeping);
-    EnableSleeping.Changed.connect([this](bool value) { _impl->set_enable_sleeping(value); });
-
-    EnableContinuous(settings.EnableContinuous);
-    EnableContinuous.Changed.connect([this](bool value) { _impl->set_enable_continuous(value); });
-
-    RestitutionThreshold(settings.RestitutionThreshold);
-    RestitutionThreshold.Changed.connect([this](bool value) { _impl->set_restitution_threshold(value); });
-
-    HitEventThreshold(settings.HitEventThreshold);
-    HitEventThreshold.Changed.connect([this](bool value) { _impl->set_hit_event_threshold(value); });
 }
 
 world::~world() = default;
@@ -81,6 +78,11 @@ auto world::find_body(shape const& s) -> std::shared_ptr<body>
     return nullptr;
 }
 
+auto world::awake_body_count() const -> i32
+{
+    return _impl->get_awake_body_count();
+}
+
 void world::remove_joint(joint const& joint)
 {
     helper::erase_first(_joints, [ptr = &joint](auto const& val) { return val.get() == ptr; });
@@ -109,6 +111,16 @@ void world::draw(debug_draw const& draw) const
 void world::explode(explosion const& explosion) const
 {
     _impl->explode(explosion);
+}
+
+void world::set_joint_tuning(f32 hertz, f32 damping) const
+{
+    _impl->set_joint_tuning(hertz, damping);
+}
+
+void world::set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const
+{
+    _impl->set_contact_tuning(hertz, damping, pushSpeed);
 }
 
 void world::on_update(milliseconds deltaTime)

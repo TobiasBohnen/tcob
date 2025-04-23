@@ -8,17 +8,20 @@
 
 #if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
 
+    #include <vector>
+
+    #include <box2d/box2d.h>
+    #include <box2d/id.h>
+    #include <box2d/types.h>
+
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Point.hpp"
+    #include "tcob/core/Rect.hpp"
     #include "tcob/physics/Body.hpp"
     #include "tcob/physics/Joint.hpp"
     #include "tcob/physics/Physics.hpp" // IWYU pragma: keep
     #include "tcob/physics/Shape.hpp"
     #include "tcob/physics/World.hpp"
-
-    #include <box2d/box2d.h>
-    #include <box2d/id.h>
-    #include <box2d/types.h>
 
 namespace tcob::physics::detail {
 ////////////////////////////////////////////////////////////
@@ -35,10 +38,16 @@ public:
     auto get_gravity() const -> point_f;
     void set_gravity(point_f value) const;
 
+    auto get_enable_sleeping() const -> bool;
     void set_enable_sleeping(bool value) const;
+
+    auto get_enable_continuous() const -> bool;
     void set_enable_continuous(bool value) const;
 
+    auto get_restitution_threshold() const -> f32;
     void set_restitution_threshold(f32 value) const;
+
+    auto get_hit_event_threshold() const -> f32;
     void set_hit_event_threshold(f32 value) const;
 
     auto get_maximum_linear_speed() const -> f32;
@@ -49,6 +58,11 @@ public:
     auto get_body_events() const -> body_events;
     auto get_contact_events() const -> contact_events;
     auto get_sensor_events() const -> sensor_events;
+
+    void set_joint_tuning(f32 hertz, f32 damping) const;
+    void set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const;
+
+    auto get_awake_body_count() const -> i32;
 
     b2WorldId ID {};
 };
@@ -77,6 +91,9 @@ public:
 
     auto get_enable_sleep() const -> bool;
     void set_enable_sleep(bool value) const;
+
+    auto get_sleep_threshold() const -> f32;
+    void set_sleep_threshold(f32 value) const;
 
     auto get_awake() const -> bool;
     void set_awake(bool value) const;
@@ -116,6 +133,17 @@ public:
 
     void set_user_data(void* ptr) const;
 
+    void enable_contact_events(bool value) const;
+    void enable_hit_events(bool value) const;
+
+    auto compute_aabb() const -> rect_f;
+
+    auto get_position() const -> point_f;
+    auto get_rotation() const -> radian_f;
+
+    auto get_local_point(point_f pos) const -> point_f;
+    auto get_world_point(point_f pos) const -> point_f;
+
     b2BodyId ID {};
 };
 
@@ -134,6 +162,19 @@ public:
     ~b2d_joint();
 
     void set_user_data(void* ptr) const;
+
+    auto get_body_a() const -> body*;
+    auto get_body_b() const -> body*;
+    void wake_bodies() const;
+
+    auto get_local_anchor_a() const -> point_f;
+    auto get_local_anchor_b() const -> point_f;
+
+    auto get_constraint_force() const -> point_f;
+    auto get_constraint_torque() const -> f32;
+
+    auto get_collide_connected() const -> bool;
+    void set_collide_connected(bool value) const;
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -363,6 +404,8 @@ public:
     auto get_filter() const -> filter;
     void set_filter(filter const& value) const;
 
+    auto get_sensor_overlaps() const -> std::vector<shape*>;
+
     b2ShapeId ID {};
 };
 
@@ -387,21 +430,15 @@ auto rot_from_angle(radian_f angle) -> rotation;
 
 #endif
 
-/* MISSING API:
+/*
 b2World_CastShape
 b2World_CastMover
 b2World_CollideMover
-b2World_SetContactTuning
-b2World_SetJointTuning
 b2World_EnableWarmStarting
 b2World_IsWarmStartingEnabled
-b2World_GetAwakeBodyCount
-b2World_GetCounters
 
-b2Body_GetPosition
-b2Body_GetRotation
-b2Body_GetLocalPoint
-b2Body_GetWorldPoint
+b2Chain*
+
 b2Body_GetLocalVector
 b2Body_GetWorldVector
 b2Body_SetTargetTransform
@@ -409,46 +446,22 @@ b2Body_GetLocalPointVelocity
 b2Body_GetWorldPointVelocity
 b2Body_GetRotationalInertia
 b2Body_ApplyMassFromShapes
-b2Body_SetSleepThreshold
-b2Body_GetSleepThreshold
-b2Body_EnableContactEvents
-b2Body_EnableHitEvents
-b2Body_GetContactCapacity
-b2Body_GetContactData
-b2Body_ComputeAABB
 
+MISSING API:
++b2Body_GetContactData
++b2Shape_GetContactData
+
+b2Shape_GetContactCapacity
+b2Shape_GetSensorCapacity
 b2Shape_SetMaterial
 b2Shape_GetMaterial
-b2Shape_GetContactCapacity
-b2Shape_GetContactData
-b2Shape_GetSensorCapacity
-b2Shape_GetSensorOverlaps
-
-b2Chain*
-
-bool b2Joint_IsValid( b2JointId id );
+b2World_GetCounters
 b2JointType b2Joint_GetType( b2JointId jointId );
-b2BodyId b2Joint_GetBodyA( b2JointId jointId );
-b2BodyId b2Joint_GetBodyB( b2JointId jointId );
 b2WorldId b2Joint_GetWorld( b2JointId jointId );
-b2Vec2 b2Joint_GetLocalAnchorA( b2JointId jointId );
-b2Vec2 b2Joint_GetLocalAnchorB( b2JointId jointId );
-void b2Joint_SetCollideConnected( b2JointId jointId, bool shouldCollide );
-bool b2Joint_GetCollideConnected( b2JointId jointId );
-void b2Joint_WakeBodies( b2JointId jointId );
-b2Vec2 b2Joint_GetConstraintForce( b2JointId jointId );
-float b2Joint_GetConstraintTorque( b2JointId jointId );
-
-
-nope:
 b2Body_GetShapeCount
 b2Body_GetShapes
 b2Body_GetJointCount
 b2Body_GetJoints
-b2World_IsSleepingEnabled
-b2World_IsContinuousEnabled
-b2World_GetRestitutionThreshold
-b2World_GetHitEventThreshold
 b2World_SetFrictionCallback
 b2World_SetRestitutionCallback
 b2World_SetCustomFilterCallback
@@ -458,4 +471,5 @@ b2World_OverlapShape
 b2World_CastRay
 b2World_CastRayClosest
 b2Shape_RayCast
+b2Body_GetContactCapacity
 */

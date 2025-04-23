@@ -21,7 +21,9 @@
 namespace tcob::physics {
 
 joint::joint(world& world, std::unique_ptr<detail::b2d_joint> impl)
-    : _impl {std::move(impl)}
+    : IsCollideConnected {{[this]() -> bool { return _impl->get_collide_connected(); },
+                           [this](auto const& value) { _impl->set_collide_connected(value); }}}
+    , _impl {std::move(impl)}
     , _world {world}
 {
     _impl->set_user_data(this);
@@ -34,9 +36,44 @@ auto joint::operator==(joint const& other) const -> bool
     return _impl.get() == other._impl.get();
 }
 
-auto joint::get_world() -> world&
+auto joint::parent() -> world&
 {
     return _world;
+}
+
+auto joint::body_a() const -> body*
+{
+    return _impl->get_body_a();
+}
+
+auto joint::body_b() const -> body*
+{
+    return _impl->get_body_b();
+}
+
+void joint::wake_bodies() const
+{
+    _impl->wake_bodies();
+}
+
+auto joint::local_anchor_a() const -> point_f
+{
+    return _impl->get_local_anchor_a();
+}
+
+auto joint::local_anchor_b() const -> point_f
+{
+    return _impl->get_local_anchor_b();
+}
+
+auto joint::constraint_force() const -> point_f
+{
+    return _impl->get_constraint_force();
+}
+
+auto joint::constraint_torque() const -> f32
+{
+    return _impl->get_constraint_torque();
 }
 
 auto joint::get_body_impl(body* body) const -> detail::b2d_body*

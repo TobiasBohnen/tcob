@@ -16,6 +16,7 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Common.hpp"
     #include "tcob/core/Point.hpp"
+    #include "tcob/core/Rect.hpp"
     #include "tcob/physics/Physics.hpp"
     #include "tcob/physics/Shape.hpp"
     #include "tcob/physics/World.hpp"
@@ -23,9 +24,7 @@
 namespace tcob::physics {
 
 body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings)
-    : Name {{[this]() -> string { return _impl->get_name(); },
-             [this](auto const& value) { _impl->set_name(value); }}}
-    , Type {{[this]() { return _impl->get_type(); },
+    : Type {{[this]() { return _impl->get_type(); },
              [this](auto const& value) { _impl->set_type(value); }}}
     , LinearVelocity {{[this]() -> point_f { return _impl->get_linear_velocity(); },
                        [this](auto const& value) { _impl->set_linear_velocity(value); }}}
@@ -47,6 +46,10 @@ body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xfor
                 [this](auto const& value) { _impl->set_enabled(value); }}}
     , GravityScale {{[this]() -> f32 { return _impl->get_gravity_scale(); },
                      [this](auto const& value) { _impl->set_gravity_scale(value); }}}
+    , SleepThreshold {{[this]() -> f32 { return _impl->get_sleep_threshold(); },
+                       [this](auto const& value) { _impl->set_sleep_threshold(value); }}}
+    , Name {{[this]() -> string { return _impl->get_name(); },
+             [this](auto const& value) { _impl->set_name(value); }}}
     , Transform {{[this]() -> body_transform { return _impl->get_transform(); },
                   [this](auto const& value) { _impl->set_transform(value); }}}
     , MassData {{[this]() -> mass_data { return _impl->get_mass_data(); },
@@ -89,12 +92,32 @@ void body::apply_angular_impulse(f32 impulse, bool wake) const
     _impl->apply_angular_impulse(impulse, wake);
 }
 
+auto body::position() const -> point_f
+{
+    return _impl->get_position();
+}
+
+auto body::rotation() const -> radian_f
+{
+    return _impl->get_rotation();
+}
+
+auto body::world_to_local(point_f pos) const -> point_f
+{
+    return _impl->get_local_point(pos);
+}
+
+auto body::local_to_world(point_f pos) const -> point_f
+{
+    return _impl->get_world_point(pos);
+}
+
 auto body::operator==(body const& other) const -> bool
 {
     return _impl.get() == other._impl.get();
 }
 
-auto body::center_of_mass() const -> point_f
+auto body::world_center_of_mass() const -> point_f
 {
     return _impl->get_center();
 }
@@ -132,6 +155,21 @@ void body::wake_up() const
 void body::sleep() const
 {
     _impl->set_awake(false);
+}
+
+void body::enable_contact_events(bool enable) const
+{
+    _impl->enable_contact_events(enable);
+}
+
+void body::enable_hit_events(bool enable) const
+{
+    _impl->enable_hit_events(enable);
+}
+
+auto body::aabb() const -> rect_f
+{
+    return _impl->compute_aabb();
 }
 
 ////////////////////////////////////////////////////////////

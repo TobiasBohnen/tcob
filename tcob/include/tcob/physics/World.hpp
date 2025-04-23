@@ -140,13 +140,14 @@ public:
     explicit world(settings const& settings);
     ~world() override;
 
-    i32              SubSteps {4};
+    i32 SubSteps {4};
+
     prop_fn<point_f> Gravity;
-    prop<bool>       EnableSleeping;
-    prop<bool>       EnableContinuous;
-    prop<f32>        RestitutionThreshold;
-    prop<f32>        HitEventThreshold;
+    prop_fn<f32>     RestitutionThreshold;
+    prop_fn<f32>     HitEventThreshold;
     prop_fn<f32>     MaximumLinearSpeed;
+    prop_fn<bool>    EnableSleeping;
+    prop_fn<bool>    EnableContinuous;
 
     auto bodies() -> std::span<std::shared_ptr<body>>;
 
@@ -154,6 +155,8 @@ public:
     void remove_body(body const& body);
 
     auto find_body(shape const& s) -> std::shared_ptr<body>;
+
+    auto awake_body_count() const -> i32;
 
     auto joints() -> std::span<std::shared_ptr<joint>>;
 
@@ -168,6 +171,9 @@ public:
     void draw(debug_draw const& draw) const;
 
     void explode(explosion const& explosion) const;
+
+    void set_joint_tuning(f32 hertz, f32 damping) const;
+    void set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const;
 
 private:
     void on_update(milliseconds deltaTime) override;

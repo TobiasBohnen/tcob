@@ -37,9 +37,21 @@ public:
 
     ~joint();
 
+    prop_fn<bool> IsCollideConnected;
+
     std::any UserData;
 
-    auto get_world() -> world&;
+    auto parent() -> world&;
+
+    auto body_a() const -> body*;
+    auto body_b() const -> body*;
+    void wake_bodies() const;
+
+    auto local_anchor_a() const -> point_f;
+    auto local_anchor_b() const -> point_f;
+
+    auto constraint_force() const -> point_f;
+    auto constraint_torque() const -> f32;
 
     auto operator==(joint const& other) const -> bool;
 

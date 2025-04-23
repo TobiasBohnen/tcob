@@ -21,6 +21,7 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Color.hpp"
     #include "tcob/core/Point.hpp"
+    #include "tcob/core/Rect.hpp"
     #include "tcob/core/ServiceLocator.hpp"
     #include "tcob/core/StringUtils.hpp"
     #include "tcob/core/TaskManager.hpp"
@@ -35,6 +36,21 @@ namespace tcob::physics::detail {
 auto static to_b2Vec2(point_f val) -> b2Vec2
 {
     return {val.X, val.Y};
+}
+
+auto static to_point_f(b2Vec2 val) -> point_f
+{
+    return {val.x, val.y};
+}
+
+auto static get_body(b2BodyId id) -> body*
+{
+    return reinterpret_cast<body*>(b2Body_GetUserData(id));
+}
+
+auto static get_shape(b2ShapeId id) -> shape*
+{
+    return reinterpret_cast<shape*>(b2Shape_GetUserData(id));
 }
 
 b2d_world::b2d_world(world::settings const& settings)
@@ -80,8 +96,7 @@ void b2d_world::step(f32 delta, i32 subSteps) const
 
 auto b2d_world::get_gravity() const -> point_f
 {
-    auto const val {b2World_GetGravity(ID)};
-    return {val.x, val.y};
+    return to_point_f(b2World_GetGravity(ID));
 }
 
 void b2d_world::set_gravity(point_f value) const
@@ -89,9 +104,19 @@ void b2d_world::set_gravity(point_f value) const
     b2World_SetGravity(ID, to_b2Vec2(value));
 }
 
+auto b2d_world::get_enable_sleeping() const -> bool
+{
+    return b2World_IsSleepingEnabled(ID);
+}
+
 void b2d_world::set_enable_sleeping(bool value) const
 {
     b2World_EnableSleeping(ID, value);
+}
+
+auto b2d_world::get_enable_continuous() const -> bool
+{
+    return b2World_IsContinuousEnabled(ID);
 }
 
 void b2d_world::set_enable_continuous(bool value) const
@@ -99,9 +124,19 @@ void b2d_world::set_enable_continuous(bool value) const
     b2World_EnableContinuous(ID, value);
 }
 
+auto b2d_world::get_restitution_threshold() const -> f32
+{
+    return b2World_GetRestitutionThreshold(ID);
+}
+
 void b2d_world::set_restitution_threshold(f32 value) const
 {
     b2World_SetRestitutionThreshold(ID, value);
+}
+
+auto b2d_world::get_hit_event_threshold() const -> f32
+{
+    return b2World_GetHitEventThreshold(ID);
 }
 
 void b2d_world::set_hit_event_threshold(f32 value) const
@@ -145,7 +180,7 @@ auto b2d_world::get_body_events() const -> body_events
     std::span<b2BodyMoveEvent> const move {events.moveEvents, static_cast<usize>(events.moveCount)};
     for (auto& event : move) {
         body_move_event ev;
-        ev.Body       = reinterpret_cast<body*>(b2Body_GetUserData(event.bodyId));
+        ev.Body       = get_body(event.bodyId);
         ev.Transform  = {{event.transform.p.x, event.transform.p.y}, radian_f {b2Rot_GetAngle(event.transform.q)}};
         ev.FellAsleep = event.fellAsleep;
         retValue.Move.push_back(ev);
@@ -165,23 +200,23 @@ auto b2d_world::get_contact_events() const -> contact_events
     std::span<b2ContactBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
     for (auto& event : begin) {
         contact_begin_touch_event ev;
-        ev.ShapeA = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdA));
-        ev.ShapeB = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdB));
+        ev.ShapeA = get_shape(event.shapeIdA);
+        ev.ShapeB = get_shape(event.shapeIdB);
         retValue.BeginTouch.push_back(ev);
     }
     std::span<b2ContactEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
     for (auto& event : end) {
         contact_end_touch_event ev;
-        ev.ShapeA = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdA));
-        ev.ShapeB = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdB));
+        ev.ShapeA = get_shape(event.shapeIdA);
+        ev.ShapeB = get_shape(event.shapeIdB);
         retValue.EndTouch.push_back(ev);
     }
 
     std::span<b2ContactHitEvent> const hit {events.hitEvents, static_cast<usize>(events.hitCount)};
     for (auto& event : hit) {
         contact_hit_event ev;
-        ev.ShapeA        = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdA));
-        ev.ShapeB        = reinterpret_cast<shape*>(b2Shape_GetUserData(event.shapeIdB));
+        ev.ShapeA        = get_shape(event.shapeIdA);
+        ev.ShapeB        = get_shape(event.shapeIdB);
         ev.ApproachSpeed = event.approachSpeed;
         ev.Normal        = {event.normal.x, event.normal.y};
         ev.Point         = {event.point.x, event.point.y};
@@ -200,20 +235,28 @@ auto b2d_world::get_sensor_events() const -> sensor_events
 
     std::span<b2SensorBeginTouchEvent> const begin {events.beginEvents, static_cast<usize>(events.beginCount)};
     for (auto& event : begin) {
-        sensor_begin_touch_event ev;
-        ev.Sensor  = reinterpret_cast<shape*>(b2Shape_GetUserData(event.sensorShapeId));
-        ev.Visitor = reinterpret_cast<shape*>(b2Shape_GetUserData(event.visitorShapeId));
-        retValue.BeginTouch.push_back(ev);
+        retValue.BeginTouch.emplace_back(get_shape(event.sensorShapeId), get_shape(event.visitorShapeId));
     }
     std::span<b2SensorEndTouchEvent> const end {events.endEvents, static_cast<usize>(events.endCount)};
     for (auto& event : end) {
-        sensor_end_touch_event ev;
-        ev.Sensor  = reinterpret_cast<shape*>(b2Shape_GetUserData(event.sensorShapeId));
-        ev.Visitor = reinterpret_cast<shape*>(b2Shape_GetUserData(event.visitorShapeId));
-        retValue.EndTouch.push_back(ev);
+        retValue.EndTouch.emplace_back(get_shape(event.sensorShapeId), get_shape(event.visitorShapeId));
     }
-
     return retValue;
+}
+
+void b2d_world::set_joint_tuning(f32 hertz, f32 damping) const
+{
+    b2World_SetJointTuning(ID, hertz, damping);
+}
+
+void b2d_world::set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const
+{
+    b2World_SetContactTuning(ID, hertz, damping, pushSpeed);
+}
+
+auto b2d_world::get_awake_body_count() const -> i32
+{
+    return b2World_GetAwakeBodyCount(ID);
 }
 
 ////////////////////////////////////////////////////////////
@@ -270,8 +313,7 @@ void b2d_body::set_type(body_type type) const
 
 auto b2d_body::get_linear_velocity() const -> point_f
 {
-    auto const val {b2Body_GetLinearVelocity(ID)};
-    return {val.x, val.y};
+    return to_point_f(b2Body_GetLinearVelocity(ID));
 }
 
 void b2d_body::set_linear_velocity(point_f value) const
@@ -317,6 +359,16 @@ auto b2d_body::get_enable_sleep() const -> bool
 void b2d_body::set_enable_sleep(bool value) const
 {
     b2Body_EnableSleep(ID, value);
+}
+
+auto b2d_body::get_sleep_threshold() const -> f32
+{
+    return b2Body_GetSleepThreshold(ID);
+}
+
+void b2d_body::set_sleep_threshold(f32 value) const
+{
+    b2Body_SetSleepThreshold(ID, value);
 }
 
 auto b2d_body::get_awake() const -> bool
@@ -386,14 +438,12 @@ void b2d_body::set_transform(body_transform value) const
 
 auto b2d_body::get_center() const -> point_f
 {
-    auto val {b2Body_GetWorldCenterOfMass(ID)};
-    return {val.x, val.y};
+    return to_point_f(b2Body_GetWorldCenterOfMass(ID));
 }
 
 auto b2d_body::get_local_center() const -> point_f
 {
-    auto val {b2Body_GetLocalCenterOfMass(ID)};
-    return {val.x, val.y};
+    return to_point_f(b2Body_GetLocalCenterOfMass(ID));
 }
 
 auto b2d_body::get_name() const -> string
@@ -455,6 +505,42 @@ void b2d_body::apply_angular_impulse(f32 impulse, bool wake) const
 void b2d_body::set_user_data(void* ptr) const
 {
     b2Body_SetUserData(ID, ptr);
+}
+
+void b2d_body::enable_contact_events(bool value) const
+{
+    b2Body_EnableContactEvents(ID, value);
+}
+
+void b2d_body::enable_hit_events(bool value) const
+{
+    b2Body_EnableHitEvents(ID, value);
+}
+
+auto b2d_body::compute_aabb() const -> rect_f
+{
+    auto const val {b2Body_ComputeAABB(ID)};
+    return {{val.lowerBound.x, val.lowerBound.y}, {val.upperBound.x, val.upperBound.y}};
+}
+
+auto b2d_body::get_position() const -> point_f
+{
+    return to_point_f(b2Body_GetPosition(ID));
+}
+
+auto b2d_body::get_rotation() const -> radian_f
+{
+    return radian_f {b2Rot_GetAngle(b2Body_GetRotation(ID))};
+}
+
+auto b2d_body::get_local_point(point_f pos) const -> point_f
+{
+    return to_point_f(b2Body_GetLocalPoint(ID, to_b2Vec2(pos)));
+}
+
+auto b2d_body::get_world_point(point_f pos) const -> point_f
+{
+    return to_point_f(b2Body_GetWorldPoint(ID, to_b2Vec2(pos)));
 }
 
 ////////////////////////////////////////////////////////////
@@ -607,6 +693,51 @@ void b2d_joint::set_user_data(void* ptr) const
     b2Joint_SetUserData(ID, ptr);
 }
 
+auto b2d_joint::get_body_a() const -> body*
+{
+    return get_body(b2Joint_GetBodyA(ID));
+}
+
+auto b2d_joint::get_body_b() const -> body*
+{
+    return get_body(b2Joint_GetBodyB(ID));
+}
+
+void b2d_joint::wake_bodies() const
+{
+    b2Joint_WakeBodies(ID);
+}
+
+auto b2d_joint::get_local_anchor_a() const -> point_f
+{
+    return to_point_f(b2Joint_GetLocalAnchorA(ID));
+}
+
+auto b2d_joint::get_local_anchor_b() const -> point_f
+{
+    return to_point_f(b2Joint_GetLocalAnchorB(ID));
+}
+
+auto b2d_joint::get_constraint_force() const -> point_f
+{
+    return to_point_f(b2Joint_GetConstraintForce(ID));
+}
+
+auto b2d_joint::get_constraint_torque() const -> f32
+{
+    return b2Joint_GetConstraintTorque(ID);
+}
+
+auto b2d_joint::get_collide_connected() const -> bool
+{
+    return b2Joint_GetCollideConnected(ID);
+}
+
+void b2d_joint::set_collide_connected(bool value) const
+{
+    b2Joint_SetCollideConnected(ID, value);
+}
+
 void b2d_joint::distance_joint_set_length(f32 length) const
 {
     b2DistanceJoint_SetLength(ID, length);
@@ -719,8 +850,7 @@ void b2d_joint::motor_joint_set_linear_offset(point_f linearOffset) const
 
 auto b2d_joint::motor_joint_get_linear_offset() const -> point_f
 {
-    auto const val {b2MotorJoint_GetLinearOffset(ID)};
-    return {val.x, val.y};
+    return to_point_f(b2MotorJoint_GetLinearOffset(ID));
 }
 
 void b2d_joint::motor_joint_set_angular_offset(f32 angularOffset) const
@@ -770,8 +900,7 @@ void b2d_joint::mouse_joint_set_target(point_f target) const
 
 auto b2d_joint::mouse_joint_get_target() const -> point_f
 {
-    auto const val {b2MouseJoint_GetTarget(ID)};
-    return {val.x, val.y};
+    return to_point_f(b2MouseJoint_GetTarget(ID));
 }
 
 void b2d_joint::mouse_joint_set_spring_hertz(f32 hertz) const
@@ -1294,8 +1423,7 @@ auto b2d_shape::get_aabb() const -> AABB
 
 auto b2d_shape::get_closest_point(point_f target) const -> point_f
 {
-    auto const val {b2Shape_GetClosestPoint(ID, to_b2Vec2(target))};
-    return {val.x, val.y};
+    return to_point_f(b2Shape_GetClosestPoint(ID, to_b2Vec2(target)));
 }
 
 void b2d_shape::set_user_data(void* ptr) const
@@ -1323,6 +1451,26 @@ auto b2d_shape::get_filter() const -> filter
 void b2d_shape::set_filter(filter const& value) const
 {
     b2Shape_SetFilter(ID, {.categoryBits = value.CategoryBits, .maskBits = value.MaskBits, .groupIndex = value.GroupIndex});
+}
+
+auto b2d_shape::get_sensor_overlaps() const -> std::vector<shape*>
+{
+    i32 const cap {b2Shape_GetSensorCapacity(ID)};
+    if (cap == 0) { return {}; }
+
+    std::vector<b2ShapeId> shapes(cap);
+    i32 const              ret {b2Shape_GetSensorOverlaps(ID, shapes.data(), static_cast<i32>(shapes.size()))};
+    if (ret == 0) { return {}; }
+
+    std::vector<shape*> retValue;
+    retValue.reserve(ret);
+    for (i32 i {0}; i < ret; ++i) {
+        auto const& id {shapes[i]};
+        if (b2Shape_IsValid(id)) {
+            retValue.push_back(get_shape(id));
+        }
+    }
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
@@ -1439,7 +1587,6 @@ auto rot_from_angle(radian_f angle) -> rotation
     auto const rot {b2MakeRot(angle.Value)};
     return {.Cosine = rot.c, .Sine = rot.s};
 }
-
 }
 
 #endif

@@ -11,9 +11,9 @@
     #include <any>
     #include <memory>
     #include <span>
+    #include <vector>
 
     #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Color.hpp"
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Property.hpp"
@@ -25,24 +25,6 @@ namespace tcob::physics {
 
 class TCOB_API shape : public non_copyable {
 public:
-    class TCOB_API surface_material {
-    public:
-        /// The Coulomb (dry) friction coefficient, usually in the range [0,1].
-        f32 Friction {0.6f};
-
-        /// The coefficient of restitution (bounce) usually in the range [0,1].
-        f32 Restitution {0.0f};
-
-        /// The rolling resistance usually in the range [0,1].
-        f32 RollingResistance {0.0f};
-
-        /// The tangent speed for conveyor belts
-        f32 TangentSpeed {0.0f};
-
-        /// Custom debug draw color.
-        color CustomColor;
-    };
-
     class TCOB_API settings {
     public:
         /// The surface material for this shape.
@@ -86,11 +68,13 @@ public:
     prop_fn<bool> EnableContactEvents;
     prop_fn<bool> EnableHitEvents;
     prop_fn<bool> EnablePreSolveEvents;
-    std::any      UserData;
+
+    std::any UserData;
 
     auto parent() -> body&;
 
     auto is_sensor() const -> bool;
+    auto sensor_overlaps() const -> std::vector<shape*>;
 
     auto aabb() const -> AABB;
     auto mass_data() const -> mass_data;
