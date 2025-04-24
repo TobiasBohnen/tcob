@@ -259,6 +259,16 @@ auto b2d_world::get_awake_body_count() const -> i32
     return b2World_GetAwakeBodyCount(ID);
 }
 
+auto b2d_world::get_enable_warm_starting() const -> bool
+{
+    return b2World_IsWarmStartingEnabled(ID);
+}
+
+void b2d_world::set_enable_warm_starting(bool value) const
+{
+    b2World_EnableWarmStarting(ID, value);
+}
+
 ////////////////////////////////////////////////////////////
 
 b2d_body::b2d_body(b2d_world* world, body_transform const& xform, body::settings const& bodySettings)
@@ -541,6 +551,45 @@ auto b2d_body::get_local_point(point_f pos) const -> point_f
 auto b2d_body::get_world_point(point_f pos) const -> point_f
 {
     return to_point_f(b2Body_GetWorldPoint(ID, to_b2Vec2(pos)));
+}
+
+auto b2d_body::get_local_vector(point_f pos) const -> point_f
+{
+    return to_point_f(b2Body_GetLocalVector(ID, to_b2Vec2(pos)));
+}
+
+auto b2d_body::get_world_vector(point_f pos) const -> point_f
+{
+    return to_point_f(b2Body_GetWorldVector(ID, to_b2Vec2(pos)));
+}
+
+auto b2d_body::get_local_point_velocity(point_f pos) const -> point_f
+{
+    return to_point_f(b2Body_GetLocalPointVelocity(ID, to_b2Vec2(pos)));
+}
+
+auto b2d_body::get_world_point_velocity(point_f pos) const -> point_f
+{
+    return to_point_f(b2Body_GetWorldPointVelocity(ID, to_b2Vec2(pos)));
+}
+
+void b2d_body::set_target_transform(body_transform xform, f32 timeStep) const
+{
+    b2Transform target;
+    target.p = to_b2Vec2(xform.Center);
+    target.q = b2MakeRot(xform.Angle.Value);
+
+    b2Body_SetTargetTransform(ID, target, timeStep);
+}
+
+auto b2d_body::get_rotational_inertia() const -> f32
+{
+    return b2Body_GetRotationalInertia(ID);
+}
+
+void b2d_body::apply_mass_from_shapes() const
+{
+    b2Body_ApplyMassFromShapes(ID);
 }
 
 ////////////////////////////////////////////////////////////
@@ -1282,57 +1331,57 @@ auto static GetShapeDef(shape::settings const& shapeSettings)
     return shapeDef;
 }
 
-b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSettings)
+b2d_shape::b2d_shape(b2d_body* body, polygon_shape::settings const& settings, shape::settings const& shapeSettings)
 {
     std::vector<b2Vec2> v;
-    v.reserve(shapeSettings.Verts.size());
-    for (auto const& vert : shapeSettings.Verts) {
+    v.reserve(settings.Verts.size());
+    for (auto const& vert : settings.Verts) {
         v.emplace_back(vert.X, vert.Y);
     }
 
     b2Hull h {b2ComputeHull(v.data(), static_cast<i32>(v.size()))};
-    auto   poly {b2MakePolygon(&h, shapeSettings.Radius)};
+    auto   poly {b2MakePolygon(&h, settings.Radius)};
 
     b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
-}
-
-b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings)
-{
-    auto const& rect {shapeSettings.Extents};
-    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.top_left()), b2MakeRot(shapeSettings.Angle.Value))};
-
-    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
-    ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
-}
-
-b2d_shape::b2d_shape(b2d_body* body, circle_shape::settings const& shapeSettings)
-{
-    b2Circle poly {to_b2Vec2(shapeSettings.Center), shapeSettings.Radius};
-
-    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
-    ID = b2CreateCircleShape(body->ID, &shapeDef, &poly);
-}
-
-b2d_shape::b2d_shape(b2d_body* body, segment_shape::settings const& shapeSettings)
-{
-    b2Segment poly {to_b2Vec2(shapeSettings.Point0), to_b2Vec2(shapeSettings.Point1)};
-
-    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
-    ID = b2CreateSegmentShape(body->ID, &shapeDef, &poly);
-}
-
-b2d_shape::b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSettings)
-{
-    b2Capsule poly {to_b2Vec2(shapeSettings.Center0), to_b2Vec2(shapeSettings.Center1), shapeSettings.Radius};
-
-    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
-    ID = b2CreateCapsuleShape(body->ID, &shapeDef, &poly);
 }
 
 b2d_shape::~b2d_shape()
 {
     b2DestroyShape(ID, true);
+}
+
+b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& settings, shape::settings const& shapeSettings)
+{
+    auto const& rect {settings.Extents};
+    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.top_left()), b2MakeRot(settings.Angle.Value))};
+
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
+    ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);
+}
+
+b2d_shape::b2d_shape(b2d_body* body, circle_shape::settings const& settings, shape::settings const& shapeSettings)
+{
+    b2Circle poly {to_b2Vec2(settings.Center), settings.Radius};
+
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
+    ID = b2CreateCircleShape(body->ID, &shapeDef, &poly);
+}
+
+b2d_shape::b2d_shape(b2d_body* body, segment_shape::settings const& settings, shape::settings const& shapeSettings)
+{
+    b2Segment poly {to_b2Vec2(settings.Point1), to_b2Vec2(settings.Point2)};
+
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
+    ID = b2CreateSegmentShape(body->ID, &shapeDef, &poly);
+}
+
+b2d_shape::b2d_shape(b2d_body* body, capsule_shape::settings const& settings, shape::settings const& shapeSettings)
+{
+    b2Capsule poly {to_b2Vec2(settings.Center0), to_b2Vec2(settings.Center1), settings.Radius};
+
+    b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
+    ID = b2CreateCapsuleShape(body->ID, &shapeDef, &poly);
 }
 
 auto b2d_shape::is_sensor() const -> bool
@@ -1468,6 +1517,90 @@ auto b2d_shape::get_sensor_overlaps() const -> std::vector<shape*>
         auto const& id {shapes[i]};
         if (b2Shape_IsValid(id)) {
             retValue.push_back(get_shape(id));
+        }
+    }
+    return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
+b2d_chain::b2d_chain(b2d_body* body, chain::settings const& shapeSettings)
+{
+    b2ChainDef shapeDef {b2DefaultChainDef()};
+
+    std::vector<b2Vec2> points;
+    points.reserve(shapeSettings.Points.size());
+    for (auto const p : shapeSettings.Points) {
+        points.push_back(to_b2Vec2(p));
+    }
+    shapeDef.points = points.data();
+    shapeDef.count  = static_cast<i32>(shapeSettings.Points.size());
+
+    std::vector<b2SurfaceMaterial> materials;
+    materials.reserve(shapeSettings.Materials.size());
+    for (auto const mat : shapeSettings.Materials) {
+        auto& v {materials.emplace_back()};
+        v.friction          = mat.Friction;
+        v.restitution       = mat.Restitution;
+        v.rollingResistance = mat.RollingResistance;
+        v.tangentSpeed      = mat.TangentSpeed;
+        v.customColor       = static_cast<u32>(mat.CustomColor.R << 16 | mat.CustomColor.G << 8 | mat.CustomColor.B);
+    }
+    shapeDef.materials     = materials.data();
+    shapeDef.materialCount = static_cast<i32>(shapeSettings.Materials.size());
+
+    shapeDef.filter.categoryBits = shapeSettings.Filter.CategoryBits;
+    shapeDef.filter.maskBits     = shapeSettings.Filter.MaskBits;
+    shapeDef.filter.groupIndex   = shapeSettings.Filter.GroupIndex;
+
+    shapeDef.isLoop             = shapeSettings.IsLoop;
+    shapeDef.enableSensorEvents = shapeSettings.EnableSensorEvents;
+    ID                          = b2CreateChain(body->ID, &shapeDef);
+}
+
+b2d_chain::~b2d_chain()
+{
+    b2DestroyChain(ID);
+}
+
+auto b2d_chain::get_friction() const -> f32
+{
+    return b2Chain_GetFriction(ID);
+}
+
+void b2d_chain::set_friction(f32 value) const
+{
+    b2Chain_SetFriction(ID, value);
+}
+
+auto b2d_chain::get_restitution() const -> f32
+{
+    return b2Chain_GetRestitution(ID);
+}
+
+void b2d_chain::set_restitution(f32 value) const
+{
+    b2Chain_SetRestitution(ID, value);
+}
+
+auto b2d_chain::get_segments() const -> std::vector<chain_segment>
+{
+    auto const             count {b2Chain_GetSegmentCount(ID)};
+    std::vector<b2ShapeId> shapes(count);
+    auto const             ret {b2Chain_GetSegments(ID, shapes.data(), count)};
+    if (ret == 0) { return {}; }
+
+    std::vector<chain_segment> retValue;
+    retValue.reserve(ret);
+    for (i32 i {0}; i < ret; ++i) {
+        auto& id {shapes[i]};
+        if (b2Shape_IsValid(id)) {
+            auto const shape {b2Shape_GetChainSegment(id)};
+            auto&      cs {retValue.emplace_back()};
+            cs.Segment.Point1 = to_point_f(shape.segment.point1);
+            cs.Segment.Point2 = to_point_f(shape.segment.point2);
+            cs.Ghost1         = to_point_f(shape.ghost1);
+            cs.Ghost2         = to_point_f(shape.ghost2);
         }
     }
     return retValue;

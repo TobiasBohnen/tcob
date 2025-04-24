@@ -139,16 +139,28 @@ public:
     auto position() const -> point_f;
     auto rotation() const -> radian_f;
 
-    auto world_to_local(point_f pos) const -> point_f;
-    auto local_to_world(point_f pos) const -> point_f;
+    auto rotational_inertia() const -> f32;
+
+    auto world_to_local_point(point_f pos) const -> point_f;
+    auto local_to_world_point(point_f pos) const -> point_f;
+    auto world_to_local_vector(point_f pos) const -> point_f;
+    auto local_to_world_vector(point_f pos) const -> point_f;
+
+    auto get_local_point_velocity(point_f pos) const -> point_f;
+    auto get_world_point_velocity(point_f pos) const -> point_f;
+
+    void set_target_transform(body_transform xform, f32 timeStep) const;
 
     auto parent() -> world&;
 
     auto shapes() -> std::span<std::shared_ptr<shape>>;
 
     template <typename T>
-    auto create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>;
+    auto create_shape(T::settings const& settings) -> std::shared_ptr<T>;
     void remove_shape(shape const& shapePtr);
+
+    auto create_chain(chain::settings const& chainSettings) -> std::shared_ptr<chain>;
+    void remove_chain(chain const& chainPtr);
 
     void apply_force(point_f force, point_f point, bool wake = true) const;
     void apply_force_to_center(point_f force, bool wake = true) const;
@@ -156,6 +168,8 @@ public:
     void apply_linear_impulse_to_center(point_f imp, bool wake = true) const;
     void apply_torque(f32 torque, bool wake = true) const;
     void apply_angular_impulse(f32 impulse, bool wake = true) const;
+
+    void apply_mass_from_shapes() const;
 
     void wake_up() const;
     void sleep() const;
@@ -169,12 +183,13 @@ private:
     std::unique_ptr<detail::b2d_body>   _impl;
     world&                              _world;
     std::vector<std::shared_ptr<shape>> _shapes;
+    std::vector<std::shared_ptr<chain>> _chains;
 };
 
 template <typename T>
-inline auto body::create_shape(T::settings const& shapeSettings) -> std::shared_ptr<T>
+inline auto body::create_shape(T::settings const& settings) -> std::shared_ptr<T>
 {
-    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {*this, _impl.get(), shapeSettings}}));
+    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {*this, _impl.get(), settings, settings.Shape}}));
 }
 
 }

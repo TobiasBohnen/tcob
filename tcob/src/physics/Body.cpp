@@ -92,6 +92,11 @@ void body::apply_angular_impulse(f32 impulse, bool wake) const
     _impl->apply_angular_impulse(impulse, wake);
 }
 
+void body::apply_mass_from_shapes() const
+{
+    _impl->apply_mass_from_shapes();
+}
+
 auto body::position() const -> point_f
 {
     return _impl->get_position();
@@ -102,14 +107,44 @@ auto body::rotation() const -> radian_f
     return _impl->get_rotation();
 }
 
-auto body::world_to_local(point_f pos) const -> point_f
+auto body::rotational_inertia() const -> f32
+{
+    return _impl->get_rotational_inertia();
+}
+
+auto body::world_to_local_point(point_f pos) const -> point_f
 {
     return _impl->get_local_point(pos);
 }
 
-auto body::local_to_world(point_f pos) const -> point_f
+auto body::local_to_world_point(point_f pos) const -> point_f
 {
     return _impl->get_world_point(pos);
+}
+
+auto body::world_to_local_vector(point_f pos) const -> point_f
+{
+    return _impl->get_local_vector(pos);
+}
+
+auto body::local_to_world_vector(point_f pos) const -> point_f
+{
+    return _impl->get_world_vector(pos);
+}
+
+auto body::get_local_point_velocity(point_f pos) const -> point_f
+{
+    return _impl->get_local_point_velocity(pos);
+}
+
+auto body::get_world_point_velocity(point_f pos) const -> point_f
+{
+    return _impl->get_world_point_velocity(pos);
+}
+
+void body::set_target_transform(body_transform xform, f32 timeStep) const
+{
+    _impl->set_target_transform(xform, timeStep);
 }
 
 auto body::operator==(body const& other) const -> bool
@@ -145,6 +180,16 @@ auto body::shapes() -> std::span<std::shared_ptr<shape>>
 void body::remove_shape(shape const& shapePtr)
 {
     helper::erase_first(_shapes, [&shapePtr](auto const& val) { return val.get() == &shapePtr; });
+}
+
+auto body::create_chain(chain::settings const& chainSettings) -> std::shared_ptr<chain>
+{
+    return _chains.emplace_back(std::shared_ptr<chain> {new chain {*this, _impl.get(), chainSettings}});
+}
+
+void body::remove_chain(chain const& chainPtr)
+{
+    helper::erase_first(_chains, [&chainPtr](auto const& val) { return val.get() == &chainPtr; });
 }
 
 void body::wake_up() const

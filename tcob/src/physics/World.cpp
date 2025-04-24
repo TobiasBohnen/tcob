@@ -39,6 +39,8 @@ world::world(settings const& settings)
                        [this](auto const& value) { _impl->set_enable_sleeping(value); }}}
     , EnableContinuous {{[this]() -> bool { return _impl->get_enable_continuous(); },
                          [this](auto const& value) { _impl->set_enable_continuous(value); }}}
+    , EnableWarmStarting {{[this]() -> bool { return _impl->get_enable_warm_starting(); },
+                           [this](auto const& value) { _impl->set_enable_warm_starting(value); }}}
     , _impl {std::make_unique<detail::b2d_world>(settings)}
 {
 }

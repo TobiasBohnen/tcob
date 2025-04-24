@@ -86,29 +86,53 @@ auto shape::get_closest_point(point_f target) const -> point_f
 
 ////////////////////////////////////////////////////////////
 
-polygon_shape::polygon_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
+polygon_shape::polygon_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, settings, shapeSettings)}
 {
 }
 
-rect_shape::rect_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
+rect_shape::rect_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, settings, shapeSettings)}
 {
 }
 
-circle_shape::circle_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
+circle_shape::circle_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, settings, shapeSettings)}
 {
 }
 
-segment_shape::segment_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
+segment_shape::segment_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, settings, shapeSettings)}
 {
 }
 
-capsule_shape::capsule_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings)
-    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, shapeSettings)}
+capsule_shape::capsule_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings)
+    : shape {body, std::make_unique<detail::b2d_shape>(b2dBody, settings, shapeSettings)}
 {
+}
+
+////////////////////////////////////////////////////////////
+
+chain::chain(body& body, detail::b2d_body* b2dBody, settings const& settings)
+    : Friction {{[this]() -> f32 { return _impl->get_friction(); },
+                 [this](auto const& value) { _impl->set_friction(value); }}}
+    , Restitution {{[this]() -> f32 { return _impl->get_restitution(); },
+                    [this](auto const& value) { _impl->set_restitution(value); }}}
+    , _impl {std::make_unique<detail::b2d_chain>(b2dBody, settings)}
+    , _body {body}
+{
+}
+
+chain::~chain() = default;
+
+auto chain::parent() -> body&
+{
+    return _body;
+}
+
+auto chain::segments() -> std::vector<chain_segment>
+{
+    return _impl->get_segments();
 }
 
 }

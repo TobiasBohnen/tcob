@@ -25,8 +25,7 @@ namespace tcob::physics {
 
 class TCOB_API shape : public non_copyable {
 public:
-    class TCOB_API settings {
-    public:
+    struct settings final {
         /// The surface material for this shape.
         surface_material Material;
 
@@ -61,6 +60,8 @@ public:
         bool UpdateBodyMass {true};
     };
 
+    ~shape();
+
     prop_fn<f32>  Friction;
     prop_fn<f32>  Restitution;
     prop_fn<f32>  Density;
@@ -87,7 +88,6 @@ public:
 
 protected:
     shape(body& body, std::unique_ptr<detail::b2d_shape> impl);
-    ~shape();
 
 private:
     std::unique_ptr<detail::b2d_shape> _impl;
@@ -100,14 +100,15 @@ class TCOB_API polygon_shape final : public shape {
     friend class body;
 
 public:
-    class TCOB_API settings : public shape::settings {
-    public:
+    struct settings {
+        shape::settings Shape;
+
         std::span<point_f const> Verts;
         f32                      Radius {};
     };
 
 private:
-    polygon_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
+    polygon_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -116,14 +117,15 @@ class TCOB_API rect_shape final : public shape {
     friend class body;
 
 public:
-    class TCOB_API settings : public shape::settings {
-    public:
+    struct settings {
+        shape::settings Shape;
+
         rect_f   Extents {};
         radian_f Angle {};
     };
 
 private:
-    rect_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
+    rect_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -132,14 +134,18 @@ class TCOB_API circle_shape final : public shape {
     friend class body;
 
 public:
-    class TCOB_API settings : public shape::settings {
-    public:
-        point_f Center {};
-        f32     Radius {};
+    struct settings {
+        shape::settings Shape;
+
+        /// The local center
+        point_f Center;
+
+        /// The radius
+        f32 Radius {0.0f};
     };
 
 private:
-    circle_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
+    circle_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -148,14 +154,18 @@ class TCOB_API segment_shape final : public shape {
     friend class body;
 
 public:
-    class TCOB_API settings : public shape::settings {
-    public:
-        point_f Point0 {};
-        point_f Point1 {};
+    struct settings {
+        shape::settings Shape;
+
+        /// The first point
+        point_f Point1;
+
+        /// The second point
+        point_f Point2;
     };
 
 private:
-    segment_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
+    segment_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings);
 };
 
 ////////////////////////////////////////////////////////////
@@ -164,15 +174,59 @@ class TCOB_API capsule_shape final : public shape {
     friend class body;
 
 public:
-    class TCOB_API settings : public shape::settings {
-    public:
+    struct settings {
+        shape::settings Shape;
+
         point_f Center0 {};
         point_f Center1 {};
         f32     Radius {0};
     };
 
 private:
-    capsule_shape(body& body, detail::b2d_body* b2dBody, settings const& shapeSettings);
+    capsule_shape(body& body, detail::b2d_body* b2dBody, settings const& settings, shape::settings const& shapeSettings);
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API chain final {
+    friend class body;
+
+public:
+    class TCOB_API settings {
+    public:
+        /// An vector of at least 4 points.
+        std::vector<point_f> Points;
+
+        /// Surface materials for each segment.
+        std::vector<surface_material> Materials;
+
+        /// Contact filtering data.
+        filter Filter;
+
+        /// Indicates a closed chain formed by connecting the first and last points
+        bool IsLoop {false};
+
+        /// Enable sensors to detect this chain. true by default.
+        bool EnableSensorEvents {true};
+    };
+
+    ~chain();
+
+    prop_fn<f32> Friction;
+    prop_fn<f32> Restitution;
+
+    std::any UserData;
+
+    auto parent() -> body&;
+
+    auto segments() -> std::vector<chain_segment>;
+
+protected:
+    chain(body& body, detail::b2d_body* b2dBody, settings const& settings);
+
+private:
+    std::unique_ptr<detail::b2d_chain> _impl;
+    body&                              _body;
 };
 }
 

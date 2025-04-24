@@ -23,6 +23,33 @@ struct AABB {
     point_f UpperBounds;
 };
 
+struct circle {
+    /// The local center
+    point_f Center;
+
+    /// The radius
+    f32 Radius {0.0f};
+};
+
+struct segment {
+    /// The first point
+    point_f Point1;
+
+    /// The second point
+    point_f Point2;
+};
+
+struct chain_segment {
+    /// The tail ghost vertex
+    point_f Ghost1;
+
+    /// The line segment
+    segment Segment;
+
+    /// The head ghost vertex
+    point_f Ghost2;
+};
+
 struct filter {
     u64 CategoryBits {1};
     u64 MaskBits {0xffffffffffffffff};
@@ -66,6 +93,7 @@ class debug_draw;
 namespace detail {
     class b2d_world;
     class b2d_body;
+    class b2d_chain;
     class b2d_shape;
     class b2d_joint;
     class b2d_debug_draw;

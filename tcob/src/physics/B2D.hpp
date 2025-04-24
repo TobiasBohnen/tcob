@@ -64,6 +64,9 @@ public:
 
     auto get_awake_body_count() const -> i32;
 
+    auto get_enable_warm_starting() const -> bool;
+    void set_enable_warm_starting(bool value) const;
+
     b2WorldId ID {};
 };
 
@@ -143,6 +146,18 @@ public:
 
     auto get_local_point(point_f pos) const -> point_f;
     auto get_world_point(point_f pos) const -> point_f;
+
+    auto get_local_vector(point_f pos) const -> point_f;
+    auto get_world_vector(point_f pos) const -> point_f;
+
+    auto get_local_point_velocity(point_f pos) const -> point_f;
+    auto get_world_point_velocity(point_f pos) const -> point_f;
+
+    void set_target_transform(body_transform xform, f32 timeStep) const;
+
+    auto get_rotational_inertia() const -> f32;
+
+    void apply_mass_from_shapes() const;
 
     b2BodyId ID {};
 };
@@ -359,11 +374,11 @@ public:
 
 class b2d_shape {
 public:
-    b2d_shape(b2d_body* body, polygon_shape::settings const& shapeSettings);
-    b2d_shape(b2d_body* body, rect_shape::settings const& shapeSettings);
-    b2d_shape(b2d_body* body, circle_shape::settings const& shapeSettings);
-    b2d_shape(b2d_body* body, segment_shape::settings const& shapeSettings);
-    b2d_shape(b2d_body* body, capsule_shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, polygon_shape::settings const& settings, shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, rect_shape::settings const& settings, shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, circle_shape::settings const& settings, shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, segment_shape::settings const& settings, shape::settings const& shapeSettings);
+    b2d_shape(b2d_body* body, capsule_shape::settings const& settings, shape::settings const& shapeSettings);
     ~b2d_shape();
 
     auto is_sensor() const -> bool;
@@ -411,6 +426,24 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+class b2d_chain {
+public:
+    b2d_chain(b2d_body* body, chain::settings const& shapeSettings);
+    ~b2d_chain();
+
+    auto get_friction() const -> f32;
+    void set_friction(f32 value) const;
+
+    auto get_restitution() const -> f32;
+    void set_restitution(f32 value) const;
+
+    auto get_segments() const -> std::vector<chain_segment>;
+
+    b2ChainId ID {};
+};
+
+////////////////////////////////////////////////////////////
+
 class b2d_debug_draw {
 public:
     b2d_debug_draw(debug_draw* impl);
@@ -431,37 +464,37 @@ auto rot_from_angle(radian_f angle) -> rotation;
 #endif
 
 /*
-b2World_CastShape
-b2World_CastMover
-b2World_CollideMover
-b2World_EnableWarmStarting
-b2World_IsWarmStartingEnabled
-
-b2Chain*
-
-b2Body_GetLocalVector
-b2Body_GetWorldVector
-b2Body_SetTargetTransform
-b2Body_GetLocalPointVelocity
-b2Body_GetWorldPointVelocity
-b2Body_GetRotationalInertia
-b2Body_ApplyMassFromShapes
-
 MISSING API:
 +b2Body_GetContactData
 +b2Shape_GetContactData
 
-b2Shape_GetContactCapacity
-b2Shape_GetSensorCapacity
-b2Shape_SetMaterial
-b2Shape_GetMaterial
+-b2Body_GetShapeCount
+-b2Body_GetShapes
+-b2Body_GetJointCount
+-b2Body_GetJoints
+-b2Body_GetContactCapacity
+
+-b2Chain_SetMaterial
+-b2Chain_GetMaterial
+
+-b2Joint_GetType( b2JointId jointId );
+-b2Joint_GetWorld( b2JointId jointId );
+
+-b2Shape_GetContactCapacity
+-b2Shape_GetSensorCapacity
+-b2Shape_SetMaterial
+-b2Shape_GetMaterial
+-b2Shape_RayCast
+
++b2Shape_GetCircle( b2ShapeId shapeId );
++b2Shape_GetSegment( b2ShapeId shapeId );
++b2Shape_GetChainSegment( b2ShapeId shapeId );
++b2Shape_GetCapsule( b2ShapeId shapeId );
++b2Shape_GetPolygon( b2ShapeId shapeId );
+
+b2World_CastShape
+b2World_CastMover
 b2World_GetCounters
-b2JointType b2Joint_GetType( b2JointId jointId );
-b2WorldId b2Joint_GetWorld( b2JointId jointId );
-b2Body_GetShapeCount
-b2Body_GetShapes
-b2Body_GetJointCount
-b2Body_GetJoints
 b2World_SetFrictionCallback
 b2World_SetRestitutionCallback
 b2World_SetCustomFilterCallback
@@ -470,6 +503,5 @@ b2World_OverlapAABB
 b2World_OverlapShape
 b2World_CastRay
 b2World_CastRayClosest
-b2Shape_RayCast
-b2Body_GetContactCapacity
+b2World_CollideMover
 */
