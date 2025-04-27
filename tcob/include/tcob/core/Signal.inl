@@ -32,7 +32,7 @@ inline void signal<EvArgs>::operator()(S&& args) const
             if constexpr (requires { args.Handled; }) {
                 if (args.Handled) { break; }
             }
-            it->second(args);
+            it->second(std::forward<S>(args));
             ++it;
         } else {
             it = _slots.erase(it);

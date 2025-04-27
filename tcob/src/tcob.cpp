@@ -3,8 +3,6 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/scripting/squirrel/SquirrelWrapper.hpp" // IWYU pragma: keep
-
 /*
 #if defined(_MSC_VER)
 
