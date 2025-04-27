@@ -40,8 +40,8 @@ inline void loader<T>::set_asset_status(asset_ptr<T> asset, asset_status status)
 
     switch (status) {
     case asset_status::Unloaded: break;
-    case asset_status::Created: break;
-    case asset_status::Loading: break;
+    case asset_status::Created:  break;
+    case asset_status::Loading:  break;
     case asset_status::Loaded:
         logger::Info("AssetLoader: group '{}' type '{}' -> asset '{}' successfully loaded",
                      group().name(), bucket()->name(), asset.get()->name());

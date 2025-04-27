@@ -157,21 +157,11 @@ void script::load_library(library lib)
 {
     _rootTable.push_self();
     switch (lib) {
-    case library::IO:
-        _view.register_iolib();
-        break;
-    case library::Blob:
-        _view.register_bloblib();
-        break;
-    case library::Math:
-        _view.register_mathlib();
-        break;
-    case library::System:
-        _view.register_systemlib();
-        break;
-    case library::String:
-        _view.register_stringlib();
-        break;
+    case library::IO:     _view.register_iolib(); break;
+    case library::Blob:   _view.register_bloblib(); break;
+    case library::Math:   _view.register_mathlib(); break;
+    case library::System: _view.register_systemlib(); break;
+    case library::String: _view.register_stringlib(); break;
     }
     _view.poptop();
 }

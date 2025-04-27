@@ -139,11 +139,11 @@ auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
 
     string navTarget;
     switch (dir) {
-    case direction::Left: navTarget = (*NavMap)[widget].Left; break;
+    case direction::Left:  navTarget = (*NavMap)[widget].Left; break;
     case direction::Right: navTarget = (*NavMap)[widget].Right; break;
-    case direction::Up: navTarget = (*NavMap)[widget].Up; break;
-    case direction::Down: navTarget = (*NavMap)[widget].Down; break;
-    case direction::None: break;
+    case direction::Up:    navTarget = (*NavMap)[widget].Up; break;
+    case direction::Down:  navTarget = (*NavMap)[widget].Down; break;
+    case direction::None:  break;
     }
 
     if (!navTarget.empty()) {

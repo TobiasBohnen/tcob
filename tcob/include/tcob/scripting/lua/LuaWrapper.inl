@@ -30,27 +30,27 @@ namespace detail {
     [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> string
     {
         switch (m) {
-        case metamethod::Length: return "__len";
-        case metamethod::ToString: return "__tostring";
-        case metamethod::UnaryMinus: return "__unm";
-        case metamethod::Add: return "__add";
-        case metamethod::Subtract: return "__sub";
-        case metamethod::Divide: return "__div";
-        case metamethod::Multiply: return "__mul";
-        case metamethod::Concat: return "__concat";
-        case metamethod::LessThan: return "__lt";
+        case metamethod::Length:          return "__len";
+        case metamethod::ToString:        return "__tostring";
+        case metamethod::UnaryMinus:      return "__unm";
+        case metamethod::Add:             return "__add";
+        case metamethod::Subtract:        return "__sub";
+        case metamethod::Divide:          return "__div";
+        case metamethod::Multiply:        return "__mul";
+        case metamethod::Concat:          return "__concat";
+        case metamethod::LessThan:        return "__lt";
         case metamethod::LessOrEqualThan: return "__le";
-        case metamethod::Call: return "__call";
-        case metamethod::FloorDivide: return "__idiv";
-        case metamethod::Modulo: return "__mod";
-        case metamethod::PowerOf: return "__pow";
-        case metamethod::BitwiseAnd: return "__band";
-        case metamethod::BitwiseOr: return "__bor";
-        case metamethod::BitwiseXor: return "__bxor";
-        case metamethod::BitwiseNot: return "__bnot";
-        case metamethod::LeftShift: return "__shl";
-        case metamethod::RightShift: return "__shr";
-        case metamethod::Close: return "__close";
+        case metamethod::Call:            return "__call";
+        case metamethod::FloorDivide:     return "__idiv";
+        case metamethod::Modulo:          return "__mod";
+        case metamethod::PowerOf:         return "__pow";
+        case metamethod::BitwiseAnd:      return "__band";
+        case metamethod::BitwiseOr:       return "__bor";
+        case metamethod::BitwiseXor:      return "__bxor";
+        case metamethod::BitwiseNot:      return "__bnot";
+        case metamethod::LeftShift:       return "__shl";
+        case metamethod::RightShift:      return "__shr";
+        case metamethod::Close:           return "__close";
         }
 
         return "";
@@ -77,15 +77,9 @@ template <typename T>
 inline void wrapper<T>::impl_wrap_func(string const& name, wrap_target target, native_closure_unique_ptr func)
 {
     switch (target) {
-    case wrap_target::Getter:
-        _getters[name] = std::move(func);
-        break;
-    case wrap_target::Setter:
-        _setters[name] = std::move(func);
-        break;
-    case wrap_target::Method:
-        _functions[name] = std::move(func);
-        break;
+    case wrap_target::Getter: _getters[name] = std::move(func); break;
+    case wrap_target::Setter: _setters[name] = std::move(func); break;
+    case wrap_target::Method: _functions[name] = std::move(func); break;
     }
 }
 

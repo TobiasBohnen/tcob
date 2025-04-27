@@ -141,24 +141,24 @@ void window::process_events(SDL_Event* sdlEv)
                     .Data2    = sdlEv->window.data2};
 
     switch (sdlEv->window.type) {
-    case SDL_EVENT_WINDOW_SHOWN: Shown(ev); break;
-    case SDL_EVENT_WINDOW_HIDDEN: Hidden(ev); break;
+    case SDL_EVENT_WINDOW_SHOWN:   Shown(ev); break;
+    case SDL_EVENT_WINDOW_HIDDEN:  Hidden(ev); break;
     case SDL_EVENT_WINDOW_EXPOSED: Exposed(ev); break;
-    case SDL_EVENT_WINDOW_MOVED: Moved(ev); break;
+    case SDL_EVENT_WINDOW_MOVED:   Moved(ev); break;
     case SDL_EVENT_WINDOW_RESIZED:
         set_size({ev.Data1, ev.Data2});
         Resized(ev);
         break;
-    case SDL_EVENT_WINDOW_MINIMIZED: Minimized(ev); break;
-    case SDL_EVENT_WINDOW_MAXIMIZED: Maximized(ev); break;
-    case SDL_EVENT_WINDOW_RESTORED: Restored(ev); break;
-    case SDL_EVENT_WINDOW_MOUSE_ENTER: Enter(ev); break;
-    case SDL_EVENT_WINDOW_MOUSE_LEAVE: Leave(ev); break;
-    case SDL_EVENT_WINDOW_FOCUS_GAINED: FocusGained(ev); break;
-    case SDL_EVENT_WINDOW_FOCUS_LOST: FocusLost(ev); break;
+    case SDL_EVENT_WINDOW_MINIMIZED:       Minimized(ev); break;
+    case SDL_EVENT_WINDOW_MAXIMIZED:       Maximized(ev); break;
+    case SDL_EVENT_WINDOW_RESTORED:        Restored(ev); break;
+    case SDL_EVENT_WINDOW_MOUSE_ENTER:     Enter(ev); break;
+    case SDL_EVENT_WINDOW_MOUSE_LEAVE:     Leave(ev); break;
+    case SDL_EVENT_WINDOW_FOCUS_GAINED:    FocusGained(ev); break;
+    case SDL_EVENT_WINDOW_FOCUS_LOST:      FocusLost(ev); break;
     case SDL_EVENT_WINDOW_CLOSE_REQUESTED: Close(ev); break;
-    case SDL_EVENT_WINDOW_HIT_TEST: HitTest(ev); break;
-    default: break;
+    case SDL_EVENT_WINDOW_HIT_TEST:        HitTest(ev); break;
+    default:                               break;
     }
 }
 

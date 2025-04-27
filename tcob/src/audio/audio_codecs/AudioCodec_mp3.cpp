@@ -29,9 +29,9 @@ auto static seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> dr
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
     switch (origin) {
-    case drmp3_seek_origin_start: dir = io::seek_dir::Begin; break;
+    case drmp3_seek_origin_start:   dir = io::seek_dir::Begin; break;
     case drmp3_seek_origin_current: dir = io::seek_dir::Current; break;
-    case drmp3_seek_origin_end: dir = io::seek_dir::End; break;
+    case drmp3_seek_origin_end:     dir = io::seek_dir::End; break;
     }
     return stream->seek(offset, dir);
 }

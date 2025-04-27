@@ -38,7 +38,7 @@ auto static seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> dr
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
     switch (origin) {
-    case drwav_seek_origin_start: dir = io::seek_dir::Begin; break;
+    case drwav_seek_origin_start:   dir = io::seek_dir::Begin; break;
     case drwav_seek_origin_current: dir = io::seek_dir::Current; break;
     }
     return stream->seek(offset, dir);

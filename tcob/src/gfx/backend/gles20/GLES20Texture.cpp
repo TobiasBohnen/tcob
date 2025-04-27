@@ -25,8 +25,8 @@ namespace tcob::gfx::gles20 {
 auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 {
     switch (format) {
-    case texture::format::R8: return {GL_LUMINANCE, GL_LUMINANCE}; // Use LUMINANCE for R8
-    case texture::format::RGB8: return {GL_RGB, GL_RGB};
+    case texture::format::R8:    return {GL_LUMINANCE, GL_LUMINANCE}; // Use LUMINANCE for R8
+    case texture::format::RGB8:  return {GL_RGB, GL_RGB};
     case texture::format::RGBA8: return {GL_RGBA, GL_RGBA};
     }
 
@@ -36,7 +36,7 @@ auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 auto constexpr convert_enum(texture::filtering filtering) -> GLenum
 {
     switch (filtering) {
-    case texture::filtering::Linear: return GL_LINEAR;
+    case texture::filtering::Linear:          return GL_LINEAR;
     case texture::filtering::NearestNeighbor: return GL_NEAREST;
     }
 
@@ -51,7 +51,7 @@ auto constexpr convert_enum(texture::wrapping wrap) -> GLenum
     case texture::wrapping::MirrorClampToEdge: // TODO: not supported
         return GL_CLAMP_TO_EDGE;
     case texture::wrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
-    case texture::wrapping::Repeat: return GL_REPEAT;
+    case texture::wrapping::Repeat:         return GL_REPEAT;
     }
 
     return {};
@@ -78,7 +78,7 @@ auto gl_texture::get_filtering() const -> texture::filtering
     GLCHECK(glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &filtering));
 
     switch (filtering) {
-    case GL_LINEAR: return texture::filtering::Linear;
+    case GL_LINEAR:  return texture::filtering::Linear;
     case GL_NEAREST: return texture::filtering::NearestNeighbor;
     }
 
@@ -105,9 +105,9 @@ auto gl_texture::get_wrapping() const -> texture::wrapping
     auto const convertWrap {
         [](GLint wrap) {
             switch (wrap) {
-            case GL_CLAMP_TO_EDGE: return texture::wrapping::ClampToEdge;
+            case GL_CLAMP_TO_EDGE:   return texture::wrapping::ClampToEdge;
             case GL_MIRRORED_REPEAT: return texture::wrapping::MirroredRepeat;
-            case GL_REPEAT: return texture::wrapping::Repeat;
+            case GL_REPEAT:          return texture::wrapping::Repeat;
             }
             return texture::wrapping::Repeat;
         }};

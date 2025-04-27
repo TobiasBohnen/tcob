@@ -169,3 +169,4 @@
 #include <tcob/scripting/squirrel/SquirrelConversions.hpp>
 #include <tcob/scripting/squirrel/SquirrelScript.hpp>
 #include <tcob/scripting/squirrel/SquirrelTypes.hpp>
+#include <tcob/scripting/squirrel/SquirrelWrapper.hpp>

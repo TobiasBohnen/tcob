@@ -103,11 +103,11 @@ void gl_canvas::flush(size_f size)
                                 convert_enum(call.BlendFunc.DestinationAlphaBlendFunc));
 
             switch (call.Type) {
-            case nvg_call_type::Fill: fill(call); break;
+            case nvg_call_type::Fill:       fill(call); break;
             case nvg_call_type::ConvexFill: convex_fill(call); break;
-            case nvg_call_type::Stroke: stroke(call); break;
-            case nvg_call_type::Triangles: triangles(call); break;
-            case nvg_call_type::Clip: clip(call); break;
+            case nvg_call_type::Stroke:     stroke(call); break;
+            case nvg_call_type::Triangles:  triangles(call); break;
+            case nvg_call_type::Clip:       clip(call); break;
             default:
                 break;
             }

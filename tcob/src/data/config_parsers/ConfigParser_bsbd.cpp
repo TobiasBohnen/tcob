@@ -75,17 +75,17 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
     }
 
     switch (type) {
-    case bsbd::marker_type::Int8: obj.set_entry(name, stream.read<i8>()); break;
-    case bsbd::marker_type::Int16: obj.set_entry(name, stream.read<i16>()); break;
-    case bsbd::marker_type::Int32: obj.set_entry(name, stream.read<i32>()); break;
-    case bsbd::marker_type::UInt8: obj.set_entry(name, stream.read<u8>()); break;
-    case bsbd::marker_type::UInt16: obj.set_entry(name, stream.read<u16>()); break;
-    case bsbd::marker_type::UInt32: obj.set_entry(name, stream.read<u32>()); break;
-    case bsbd::marker_type::Int64: obj.set_entry(name, stream.read<i64>()); break;
-    case bsbd::marker_type::Float32: obj.set_entry(name, stream.read<f32>()); break;
-    case bsbd::marker_type::Float64: obj.set_entry(name, stream.read<f64>()); break;
-    case bsbd::marker_type::BoolTrue: obj.set_entry(name, true); break;
-    case bsbd::marker_type::BoolFalse: obj.set_entry(name, false); break;
+    case bsbd::marker_type::Int8:       obj.set_entry(name, stream.read<i8>()); break;
+    case bsbd::marker_type::Int16:      obj.set_entry(name, stream.read<i16>()); break;
+    case bsbd::marker_type::Int32:      obj.set_entry(name, stream.read<i32>()); break;
+    case bsbd::marker_type::UInt8:      obj.set_entry(name, stream.read<u8>()); break;
+    case bsbd::marker_type::UInt16:     obj.set_entry(name, stream.read<u16>()); break;
+    case bsbd::marker_type::UInt32:     obj.set_entry(name, stream.read<u32>()); break;
+    case bsbd::marker_type::Int64:      obj.set_entry(name, stream.read<i64>()); break;
+    case bsbd::marker_type::Float32:    obj.set_entry(name, stream.read<f32>()); break;
+    case bsbd::marker_type::Float64:    obj.set_entry(name, stream.read<f64>()); break;
+    case bsbd::marker_type::BoolTrue:   obj.set_entry(name, true); break;
+    case bsbd::marker_type::BoolFalse:  obj.set_entry(name, false); break;
 
     case bsbd::marker_type::LongString: {
         obj.set_entry(name, stream.read_string(static_cast<std::streamsize>(stream.read<u64>())));
@@ -140,20 +140,20 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
     }
 
     switch (type) {
-    case bsbd::marker_type::Int8: arr.add_entry(stream.read<i8>()); break;
-    case bsbd::marker_type::Int16: arr.add_entry(stream.read<i16>()); break;
-    case bsbd::marker_type::Int32: arr.add_entry(stream.read<i32>()); break;
-    case bsbd::marker_type::UInt8: arr.add_entry(stream.read<u8>()); break;
-    case bsbd::marker_type::UInt16: arr.add_entry(stream.read<u16>()); break;
-    case bsbd::marker_type::UInt32: arr.add_entry(stream.read<u32>()); break;
-    case bsbd::marker_type::Int64: arr.add_entry(stream.read<i64>()); break;
-    case bsbd::marker_type::Float32: arr.add_entry(stream.read<f32>()); break;
-    case bsbd::marker_type::Float64: arr.add_entry(stream.read<f64>()); break;
-    case bsbd::marker_type::BoolTrue: arr.add_entry(true); break;
-    case bsbd::marker_type::BoolFalse: arr.add_entry(false); break;
+    case bsbd::marker_type::Int8:         arr.add_entry(stream.read<i8>()); break;
+    case bsbd::marker_type::Int16:        arr.add_entry(stream.read<i16>()); break;
+    case bsbd::marker_type::Int32:        arr.add_entry(stream.read<i32>()); break;
+    case bsbd::marker_type::UInt8:        arr.add_entry(stream.read<u8>()); break;
+    case bsbd::marker_type::UInt16:       arr.add_entry(stream.read<u16>()); break;
+    case bsbd::marker_type::UInt32:       arr.add_entry(stream.read<u32>()); break;
+    case bsbd::marker_type::Int64:        arr.add_entry(stream.read<i64>()); break;
+    case bsbd::marker_type::Float32:      arr.add_entry(stream.read<f32>()); break;
+    case bsbd::marker_type::Float64:      arr.add_entry(stream.read<f64>()); break;
+    case bsbd::marker_type::BoolTrue:     arr.add_entry(true); break;
+    case bsbd::marker_type::BoolFalse:    arr.add_entry(false); break;
 
-    case bsbd::marker_type::LongString: arr.add_entry(stream.read_string(static_cast<std::streamsize>(stream.read<u64>()))); break;
-    case bsbd::marker_type::ShortString: arr.add_entry(stream.read_string(stream.read<u8>())); break;
+    case bsbd::marker_type::LongString:   arr.add_entry(stream.read_string(static_cast<std::streamsize>(stream.read<u64>()))); break;
+    case bsbd::marker_type::ShortString:  arr.add_entry(stream.read_string(stream.read<u8>())); break;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
@@ -248,14 +248,14 @@ auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         auto const type {fit_int(val)};
         if (!write_entry_header(stream, type, name)) { return false; }
         switch (type) {
-        case bsbd::marker_type::Int8: stream.write(static_cast<i8>(val)); break;
-        case bsbd::marker_type::Int16: stream.write(static_cast<i16>(val)); break;
-        case bsbd::marker_type::Int32: stream.write(static_cast<i32>(val)); break;
-        case bsbd::marker_type::UInt8: stream.write(static_cast<u8>(val)); break;
+        case bsbd::marker_type::Int8:   stream.write(static_cast<i8>(val)); break;
+        case bsbd::marker_type::Int16:  stream.write(static_cast<i16>(val)); break;
+        case bsbd::marker_type::Int32:  stream.write(static_cast<i32>(val)); break;
+        case bsbd::marker_type::UInt8:  stream.write(static_cast<u8>(val)); break;
         case bsbd::marker_type::UInt16: stream.write(static_cast<u16>(val)); break;
         case bsbd::marker_type::UInt32: stream.write(static_cast<u32>(val)); break;
-        case bsbd::marker_type::Int64: stream.write(val); break;
-        default: break;
+        case bsbd::marker_type::Int64:  stream.write(val); break;
+        default:                        break;
         }
     } else if (ent.is<f64>()) {
         f64 const  val {ent.as<f64>()};
@@ -264,7 +264,7 @@ auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         switch (type) {
         case bsbd::marker_type::Float32: stream.write(static_cast<f32>(val)); break;
         case bsbd::marker_type::Float64: stream.write(val); break;
-        default: break;
+        default:                         break;
         }
     } else if (ent.is<utf8_string>()) {
         auto const str {ent.as<utf8_string>()};

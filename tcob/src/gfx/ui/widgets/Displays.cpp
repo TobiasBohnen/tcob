@@ -71,7 +71,7 @@ void dot_matrix_display::on_draw(widget_painter& painter)
                                   width, height};
 
             switch (_style.Type) {
-            case dot_type::Disc: canvas.ellipse(dotRect.center(), width / 2, height / 2); break;
+            case dot_type::Disc:   canvas.ellipse(dotRect.center(), width / 2, height / 2); break;
             case dot_type::Square: canvas.rect(dotRect); break;
             }
         }

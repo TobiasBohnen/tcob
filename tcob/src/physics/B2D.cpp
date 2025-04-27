@@ -275,8 +275,8 @@ b2d_body::b2d_body(b2d_world* world, body_transform const& xform, body::settings
 {
     b2BodyDef def {b2DefaultBodyDef()};
     switch (bodySettings.Type) {
-    case body_type::Dynamic: def.type = b2_dynamicBody; break;
-    case body_type::Static: def.type = b2_staticBody; break;
+    case body_type::Dynamic:   def.type = b2_dynamicBody; break;
+    case body_type::Static:    def.type = b2_staticBody; break;
     case body_type::Kinematic: def.type = b2_kinematicBody; break;
     }
     def.position          = to_b2Vec2(xform.Center);
@@ -305,18 +305,18 @@ b2d_body::~b2d_body()
 auto b2d_body::get_type() const -> body_type
 {
     switch (b2Body_GetType(ID)) {
-    case b2_staticBody: return body_type::Static;
+    case b2_staticBody:    return body_type::Static;
     case b2_kinematicBody: return body_type::Kinematic;
-    case b2_dynamicBody: return body_type::Dynamic;
-    default: return {};
+    case b2_dynamicBody:   return body_type::Dynamic;
+    default:               return {};
     }
 }
 
 void b2d_body::set_type(body_type type) const
 {
     switch (type) {
-    case body_type::Dynamic: b2Body_SetType(ID, b2_dynamicBody); break;
-    case body_type::Static: b2Body_SetType(ID, b2_staticBody); break;
+    case body_type::Dynamic:   b2Body_SetType(ID, b2_dynamicBody); break;
+    case body_type::Static:    b2Body_SetType(ID, b2_staticBody); break;
     case body_type::Kinematic: b2Body_SetType(ID, b2_kinematicBody); break;
     }
 }

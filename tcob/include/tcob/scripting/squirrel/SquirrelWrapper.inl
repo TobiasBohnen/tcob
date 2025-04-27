@@ -27,17 +27,17 @@ namespace detail {
     [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> std::string
     {
         switch (m) {
-        case metamethod::Add: return "_add";
-        case metamethod::Subtract: return "_sub";
-        case metamethod::Multiply: return "_mul";
-        case metamethod::Divide: return "_div";
-        case metamethod::Modulo: return "_mod";
+        case metamethod::Add:        return "_add";
+        case metamethod::Subtract:   return "_sub";
+        case metamethod::Multiply:   return "_mul";
+        case metamethod::Divide:     return "_div";
+        case metamethod::Modulo:     return "_mod";
         case metamethod::UnaryMinus: return "_unm";
-        case metamethod::TypeOf: return "_typeof";
-        case metamethod::Compare: return "_cmp";
-        case metamethod::Call: return "_call";
-        case metamethod::Cloned: return "_cloned";
-        case metamethod::ToString: return "_tostring";
+        case metamethod::TypeOf:     return "_typeof";
+        case metamethod::Compare:    return "_cmp";
+        case metamethod::Call:       return "_call";
+        case metamethod::Cloned:     return "_cloned";
+        case metamethod::ToString:   return "_tostring";
         }
         return "";
     }

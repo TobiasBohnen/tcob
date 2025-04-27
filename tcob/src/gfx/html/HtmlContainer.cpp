@@ -212,9 +212,9 @@ void container::transform_text(string& text, litehtml::text_transform tt)
 {
     switch (tt) {
     case litehtml::text_transform::text_transform_capitalize: text = utf8::capitalize(text); break;
-    case litehtml::text_transform::text_transform_lowercase: text = utf8::to_lower(text); break;
-    case litehtml::text_transform::text_transform_uppercase: text = utf8::to_upper(text); break;
-    default: break;
+    case litehtml::text_transform::text_transform_lowercase:  text = utf8::to_lower(text); break;
+    case litehtml::text_transform::text_transform_uppercase:  text = utf8::to_upper(text); break;
+    default:                                                  break;
     }
 }
 

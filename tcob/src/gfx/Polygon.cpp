@@ -201,9 +201,9 @@ void polygons::clip(std::vector<polygon>& polygons, std::span<polygon const> oth
     ClipType type {ClipType::NoClip};
     switch (mode) {
     case clip_mode::Intersection: type = ClipType::Intersection; break;
-    case clip_mode::Union: type = ClipType::Union; break;
-    case clip_mode::Difference: type = ClipType::Difference; break;
-    case clip_mode::Xor: type = ClipType::Xor; break;
+    case clip_mode::Union:        type = ClipType::Union; break;
+    case clip_mode::Difference:   type = ClipType::Difference; break;
+    case clip_mode::Xor:          type = ClipType::Xor; break;
     }
 
     PolyPathD                   solution;
@@ -271,9 +271,9 @@ void polygons::offset(std::vector<polygon>& polygons, f64 delta, offset_join joi
     JoinType joinType {JoinType::Round};
     switch (join) {
     case offset_join::Square: joinType = JoinType::Square; break;
-    case offset_join::Bevel: joinType = JoinType::Bevel; break;
-    case offset_join::Round: joinType = JoinType::Round; break;
-    case offset_join::Miter: joinType = JoinType::Miter; break;
+    case offset_join::Bevel:  joinType = JoinType::Bevel; break;
+    case offset_join::Round:  joinType = JoinType::Round; break;
+    case offset_join::Miter:  joinType = JoinType::Miter; break;
     }
 
     ClipperOffset clipper;

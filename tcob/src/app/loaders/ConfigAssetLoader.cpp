@@ -732,8 +732,8 @@ void cfg_texture_loader::prepare()
             texSize = imgInfo->Size;
 
             switch (imgInfo->bytes_per_pixel()) {
-            case 3: texFormat = texture::format::RGB8; break;
-            case 4: texFormat = texture::format::RGBA8; break;
+            case 3:  texFormat = texture::format::RGB8; break;
+            case 4:  texFormat = texture::format::RGBA8; break;
             default: continue;
             }
         }

@@ -116,8 +116,8 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
 
     string modeStr;
     switch (mode) {
-    case Normal: modeStr = ""; break;
-    case Ignore: modeStr = "OR IGNORE"; break;
+    case Normal:  modeStr = ""; break;
+    case Ignore:  modeStr = "OR IGNORE"; break;
     case Replace: modeStr = "OR REPLACE"; break;
     }
 

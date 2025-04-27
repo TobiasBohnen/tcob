@@ -21,7 +21,6 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Transform.hpp"
 
-
 namespace tcob::gfx {
 using namespace std::chrono_literals;
 

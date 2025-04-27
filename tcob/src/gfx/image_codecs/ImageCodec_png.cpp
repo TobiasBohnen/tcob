@@ -355,7 +355,7 @@ void png_decoder::prepare()
         break;
     case png::color_type::TrueColor: // Truecolor
         switch (depth) {
-        case 8: _pixelSize = 3; break;
+        case 8:  _pixelSize = 3; break;
         case 16: _pixelSize = 6; break;
         default: return;
         }
@@ -364,10 +364,10 @@ void png_decoder::prepare()
         break;
     case png::color_type::Indexed: // Indexed-color
         switch (depth) {
-        case 1: lineSize = (_ihdr.Width + 7) / 8; break;
-        case 2: lineSize = (_ihdr.Width + 3) / 4; break;
-        case 4: lineSize = (_ihdr.Width + 1) / 2; break;
-        case 8: lineSize = _ihdr.Width; break;
+        case 1:  lineSize = (_ihdr.Width + 7) / 8; break;
+        case 2:  lineSize = (_ihdr.Width + 3) / 4; break;
+        case 4:  lineSize = (_ihdr.Width + 1) / 2; break;
+        case 8:  lineSize = _ihdr.Width; break;
         default: return;
         }
 
@@ -375,7 +375,7 @@ void png_decoder::prepare()
         break;
     case png::color_type::GrayscaleAlpha: // Grayscale with alpha
         switch (depth) {
-        case 8: _pixelSize = 2; break;
+        case 8:  _pixelSize = 2; break;
         case 16: _pixelSize = 4; break;
         default: return;
         }
@@ -384,7 +384,7 @@ void png_decoder::prepare()
         break;
     case png::color_type::TrueColorAlpha: // Truecolor with alpha
         switch (depth) {
-        case 8: _pixelSize = 4; break;
+        case 8:  _pixelSize = 4; break;
         case 16: _pixelSize = 8; break;
         default: return;
         }

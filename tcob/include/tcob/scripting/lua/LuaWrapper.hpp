@@ -23,7 +23,6 @@
     #include "tcob/scripting/lua/LuaConversions.hpp"
     #include "tcob/scripting/lua/LuaTypes.hpp"
 
-
 namespace tcob::scripting::lua {
 ////////////////////////////////////////////////////////////
 

@@ -284,7 +284,7 @@ void horizontal_layout::do_layout(size_f size)
         f32 const   x {i * horiSize};
 
         switch (_alignment) {
-        case gfx::vertical_alignment::Top: widget->Bounds = {x, 0, width, height}; break;
+        case gfx::vertical_alignment::Top:    widget->Bounds = {x, 0, width, height}; break;
         case gfx::vertical_alignment::Bottom: widget->Bounds = {x, vertSize - height, width, height}; break;
         case gfx::vertical_alignment::Middle: widget->Bounds = {x, (vertSize - height) / 2, width, height}; break;
         }
@@ -313,8 +313,8 @@ void vertical_layout::do_layout(size_f size)
         f32 const   y {i * vertSize};
 
         switch (_alignment) {
-        case gfx::horizontal_alignment::Left: widget->Bounds = {0, y, width, height}; break;
-        case gfx::horizontal_alignment::Right: widget->Bounds = {horiSize - width, y, width, height}; break;
+        case gfx::horizontal_alignment::Left:     widget->Bounds = {0, y, width, height}; break;
+        case gfx::horizontal_alignment::Right:    widget->Bounds = {horiSize - width, y, width, height}; break;
         case gfx::horizontal_alignment::Centered: widget->Bounds = {(horiSize - width) / 2, y, width, height}; break;
         }
     }

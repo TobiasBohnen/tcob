@@ -32,15 +32,9 @@ auto memory_sink::tell() const -> std::streamsize
 auto memory_sink::seek(std::streamoff off, seek_dir way) -> bool
 {
     switch (way) {
-    case seek_dir::Current:
-        _pos += off;
-        break;
-    case seek_dir::Begin:
-        _pos = off;
-        break;
-    case seek_dir::End:
-        _pos = std::ssize(_buf) + off;
-        break;
+    case seek_dir::Current: _pos += off; break;
+    case seek_dir::Begin:   _pos = off; break;
+    case seek_dir::End:     _pos = std::ssize(_buf) + off; break;
     }
 
     if (_pos < 0) {

@@ -163,10 +163,10 @@ auto static xDelete(sqlite3_vfs*, char const* zName, int /* syncDir */) -> int
 auto static xAccess(sqlite3_vfs*, char const* zName, int flags, int* pResOut) -> int
 {
     switch (flags) {
-    case SQLITE_ACCESS_EXISTS: *pResOut = fs::is_file(zName); break;
-    case SQLITE_ACCESS_READ: *pResOut = fs::is_file(zName); break;
+    case SQLITE_ACCESS_EXISTS:    *pResOut = fs::is_file(zName); break;
+    case SQLITE_ACCESS_READ:      *pResOut = fs::is_file(zName); break;
     case SQLITE_ACCESS_READWRITE:
-    default: *pResOut = false; break;
+    default:                      *pResOut = false; break;
     }
 
     return SQLITE_OK;

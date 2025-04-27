@@ -194,8 +194,8 @@ void grid_view::on_draw(widget_painter& painter)
 
     auto const getCellFlags {[this](point_i idx, select_mode mode) -> widget_flags {
         switch (mode) {
-        case select_mode::Cell: return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
-        case select_mode::Row: return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
+        case select_mode::Cell:   return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
+        case select_mode::Row:    return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
         case select_mode::Column: return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
         }
         return {};

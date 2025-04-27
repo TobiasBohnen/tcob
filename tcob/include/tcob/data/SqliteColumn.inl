@@ -14,7 +14,6 @@
     #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
 
-
 namespace tcob::data::sqlite {
 
 template <typename T>
@@ -44,23 +43,12 @@ inline auto column<T>::str() const -> utf8_string
     utf8_string type;
     // type
     switch (Type) {
-    case type::Text:
-        type = "TEXT";
-        break;
-    case type::Numeric:
-        type = "NUMERIC";
-        break;
-    case type::Integer:
-        type = "INTEGER";
-        break;
-    case type::Real:
-        type = "REAL";
-        break;
-    case type::Blob:
-        type = "BLOB";
-        break;
-    case type::Null:
-        break;
+    case type::Text:    type = "TEXT"; break;
+    case type::Numeric: type = "NUMERIC"; break;
+    case type::Integer: type = "INTEGER"; break;
+    case type::Real:    type = "REAL"; break;
+    case type::Blob:    type = "BLOB"; break;
+    case type::Null:    break;
     }
 
     return std::format("{} {} {} {}", quote_string(Name), type, NotNull ? "NOT NULL" : "", Constraint.str());

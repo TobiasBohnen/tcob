@@ -21,8 +21,8 @@ namespace tcob::gfx::gl45 {
 auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 {
     switch (format) {
-    case texture::format::R8: return {GL_R8, GL_RED};
-    case texture::format::RGB8: return {GL_RGB8, GL_RGB};
+    case texture::format::R8:    return {GL_R8, GL_RED};
+    case texture::format::RGB8:  return {GL_RGB8, GL_RGB};
     case texture::format::RGBA8: return {GL_RGBA8, GL_RGBA};
     }
 
@@ -32,7 +32,7 @@ auto constexpr convert_enum(texture::format format) -> std::pair<GLenum, GLenum>
 auto constexpr convert_enum(texture::filtering filtering) -> GLenum
 {
     switch (filtering) {
-    case texture::filtering::Linear: return GL_LINEAR;
+    case texture::filtering::Linear:          return GL_LINEAR;
     case texture::filtering::NearestNeighbor: return GL_NEAREST;
     }
 
@@ -42,10 +42,10 @@ auto constexpr convert_enum(texture::filtering filtering) -> GLenum
 auto constexpr convert_enum(texture::wrapping wrap) -> GLenum
 {
     switch (wrap) {
-    case texture::wrapping::ClampToEdge: return GL_CLAMP_TO_EDGE;
-    case texture::wrapping::ClampToBorder: return GL_CLAMP_TO_BORDER;
-    case texture::wrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
-    case texture::wrapping::Repeat: return GL_REPEAT;
+    case texture::wrapping::ClampToEdge:       return GL_CLAMP_TO_EDGE;
+    case texture::wrapping::ClampToBorder:     return GL_CLAMP_TO_BORDER;
+    case texture::wrapping::MirroredRepeat:    return GL_MIRRORED_REPEAT;
+    case texture::wrapping::Repeat:            return GL_REPEAT;
     case texture::wrapping::MirrorClampToEdge: return GL_MIRROR_CLAMP_TO_EDGE;
     }
 
@@ -67,7 +67,7 @@ auto gl_texture::get_filtering() const -> texture::filtering
     glGetTextureParameterIiv(ID, GL_TEXTURE_MAG_FILTER, &filtering);
 
     switch (filtering) {
-    case GL_LINEAR: return texture::filtering::Linear;
+    case GL_LINEAR:  return texture::filtering::Linear;
     case GL_NEAREST: return texture::filtering::NearestNeighbor;
     }
 
@@ -92,10 +92,10 @@ auto gl_texture::get_wrapping() const -> texture::wrapping
 
     auto const convertWrap {[](GLint wrap) {
         switch (wrap) {
-        case GL_CLAMP_TO_EDGE: return texture::wrapping::ClampToEdge;
-        case GL_CLAMP_TO_BORDER: return texture::wrapping::ClampToBorder;
-        case GL_MIRRORED_REPEAT: return texture::wrapping::MirroredRepeat;
-        case GL_REPEAT: return texture::wrapping::Repeat;
+        case GL_CLAMP_TO_EDGE:        return texture::wrapping::ClampToEdge;
+        case GL_CLAMP_TO_BORDER:      return texture::wrapping::ClampToBorder;
+        case GL_MIRRORED_REPEAT:      return texture::wrapping::MirroredRepeat;
+        case GL_REPEAT:               return texture::wrapping::Repeat;
         case GL_MIRROR_CLAMP_TO_EDGE: return texture::wrapping::MirrorClampToEdge;
         }
         return texture::wrapping::Repeat;

@@ -14,7 +14,7 @@ AllowShortCaseLabelsOnASingleLine: True
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: True
 BinPackArguments: True
-BinPackParameters: True
+BinPackParameters: BinPack
 BreakConstructorInitializers: BeforeComma
 AllowAllArgumentsOnNextLine: True
 BreakBeforeBinaryOperators: NonAssignment
@@ -27,4 +27,8 @@ IndentRequiresClause: True
 RequiresClausePosition: OwnLine
 QualifierAlignment: Right
 ReferenceAlignment: Left
-
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false

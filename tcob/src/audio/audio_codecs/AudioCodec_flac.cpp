@@ -29,7 +29,7 @@ auto static seek_flac(void* userdata, i32 offset, drflac_seek_origin origin) -> 
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
     switch (origin) {
-    case drflac_seek_origin_start: dir = io::seek_dir::Begin; break;
+    case drflac_seek_origin_start:   dir = io::seek_dir::Begin; break;
     case drflac_seek_origin_current: dir = io::seek_dir::Current; break;
     }
     return stream->seek(offset, dir);

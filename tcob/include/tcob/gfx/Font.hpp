@@ -191,15 +191,15 @@ struct std::formatter<tcob::gfx::font::style> {
     {
         std::string weight;
         switch (val.Weight) {
-        case tcob::gfx::font::weight::Thin: weight = "Thin"; break;
+        case tcob::gfx::font::weight::Thin:       weight = "Thin"; break;
         case tcob::gfx::font::weight::ExtraLight: weight = "ExtraLight"; break;
-        case tcob::gfx::font::weight::Light: weight = "Light"; break;
-        case tcob::gfx::font::weight::Normal: weight = "Normal"; break;
-        case tcob::gfx::font::weight::Medium: weight = "Medium"; break;
-        case tcob::gfx::font::weight::SemiBold: weight = "SemiBold"; break;
-        case tcob::gfx::font::weight::Bold: weight = "Bold"; break;
-        case tcob::gfx::font::weight::ExtraBold: weight = "ExtraBold"; break;
-        case tcob::gfx::font::weight::Heavy: weight = "Heavy"; break;
+        case tcob::gfx::font::weight::Light:      weight = "Light"; break;
+        case tcob::gfx::font::weight::Normal:     weight = "Normal"; break;
+        case tcob::gfx::font::weight::Medium:     weight = "Medium"; break;
+        case tcob::gfx::font::weight::SemiBold:   weight = "SemiBold"; break;
+        case tcob::gfx::font::weight::Bold:       weight = "Bold"; break;
+        case tcob::gfx::font::weight::ExtraBold:  weight = "ExtraBold"; break;
+        case tcob::gfx::font::weight::Heavy:      weight = "Heavy"; break;
         }
         return format_to(ctx.out(), "(IsItalic:{},Weight:{})", val.IsItalic, weight);
     }

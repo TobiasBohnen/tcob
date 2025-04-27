@@ -681,8 +681,8 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
     utf8_string retValue {text};
     switch (xform) {
     case text_transform::Capitalize: retValue = utf8::capitalize(text); break;
-    case text_transform::Lowercase: retValue = utf8::to_lower(text); break;
-    case text_transform::Uppercase: retValue = utf8::to_upper(text); break;
+    case text_transform::Lowercase:  retValue = utf8::to_lower(text); break;
+    case text_transform::Uppercase:  retValue = utf8::to_upper(text); break;
     default:
         break;
     }

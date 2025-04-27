@@ -57,15 +57,17 @@ namespace detail {
         auto check(state_view view, i32 top, R (T::*func)(Args...)) -> bool;
         auto check(state_view view, i32 top, auto&& func) -> bool;
         template <typename R, typename... Args>
-        auto check_func(state_view view, i32 top, std::function<R(Args...)> const& func) -> bool;
+        auto check_func(state_view view, i32 top,
+                        std::function<R(Args...)> const& func) -> bool;
 
         template <typename R, typename... Args>
-        auto call_func(state_view view, std::function<R(Args...)> const& func) -> void;
+        auto call_func(state_view view, std::function<R(Args...)> const& func)
+            -> void;
 
         std::tuple<Funcs...> _fns;
     };
 
-}
+} // namespace detail
 
 ////////////////////////////////////////////////////////////
 
@@ -73,15 +75,17 @@ using native_closure_unique_ptr = std::unique_ptr<detail::native_closure_base>;
 using native_closure_shared_ptr = std::shared_ptr<detail::native_closure_base>;
 
 template <typename R, typename... P>
-auto make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr;
+auto make_unique_closure(std::function<R(P...)>&& fn)
+    -> native_closure_unique_ptr;
 template <typename R, typename... P>
-auto make_shared_closure(std::function<R(P...)>&& fn) -> native_closure_shared_ptr;
+auto make_shared_closure(std::function<R(P...)>&& fn)
+    -> native_closure_shared_ptr;
 
 template <typename... Funcs>
 auto make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr;
 template <typename... Funcs>
 auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr;
-}
+} // namespace tcob::scripting::lua
 
     #include "LuaClosure.inl"
 

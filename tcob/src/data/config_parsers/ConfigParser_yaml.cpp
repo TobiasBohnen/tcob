@@ -30,69 +30,27 @@ using token_type = yaml_tokenizer::token_type;
     for (auto& x : tokens) {
         utf8_string type;
         switch (x.Type) {
-        case token_type::None:
-            type = "None";
-            break;
-        case token_type::KeyOrScalar:
-            type = "KeyOrScalar";
-            break;
-        case token_type::Whitespace:
-            type = "Whitespace";
-            break;
-        case token_type::MappingKey:
-            type = "MappingKey";
-            break;
-        case token_type::MappingValue:
-            type = "MappingValue";
-            break;
-        case token_type::Sequence:
-            type = "Sequence";
-            break;
-        case token_type::Comment:
-            type = "Comment";
-            break;
-        case token_type::Newline:
-            type = "Newline";
-            break;
-        case token_type::FlowSequence:
-            type = "FlowSequence";
-            break;
-        case token_type::FlowMapping:
-            type = "FlowMapping";
-            break;
-        case token_type::StartOfDocument:
-            type = "StartOfDocument";
-            break;
-        case token_type::EndOfDocument:
-            type = "EndOfDocument";
-            break;
-        case token_type::LiteralStyle:
-            type = "LiteralStyle";
-            break;
-        case token_type::FoldedStyle:
-            type = "FoldedStyle";
-            break;
-        case token_type::DoubleQuote:
-            type = "DoubleQuote";
-            break;
-        case token_type::SingleQuote:
-            type = "SingleQuote";
-            break;
-        case token_type::Tag:
-            type = "Tag";
-            break;
-        case token_type::Anchor:
-            type = "Anchor";
-            break;
-        case token_type::Alias:
-            type = "Alias";
-            break;
-        case token_type::EoF:
-            type = "EoF";
-            break;
-        case token_type::Indent:
-            type = "Indent";
-            break;
+        case token_type::None:            type = "None"; break;
+        case token_type::KeyOrScalar:     type = "KeyOrScalar"; break;
+        case token_type::Whitespace:      type = "Whitespace"; break;
+        case token_type::MappingKey:      type = "MappingKey"; break;
+        case token_type::MappingValue:    type = "MappingValue"; break;
+        case token_type::Sequence:        type = "Sequence"; break;
+        case token_type::Comment:         type = "Comment"; break;
+        case token_type::Newline:         type = "Newline"; break;
+        case token_type::FlowSequence:    type = "FlowSequence"; break;
+        case token_type::FlowMapping:     type = "FlowMapping"; break;
+        case token_type::StartOfDocument: type = "StartOfDocument"; break;
+        case token_type::EndOfDocument:   type = "EndOfDocument"; break;
+        case token_type::LiteralStyle:    type = "LiteralStyle"; break;
+        case token_type::FoldedStyle:     type = "FoldedStyle"; break;
+        case token_type::DoubleQuote:     type = "DoubleQuote"; break;
+        case token_type::SingleQuote:     type = "SingleQuote"; break;
+        case token_type::Tag:             type = "Tag"; break;
+        case token_type::Anchor:          type = "Anchor"; break;
+        case token_type::Alias:           type = "Alias"; break;
+        case token_type::EoF:             type = "EoF"; break;
+        case token_type::Indent:          type = "Indent"; break;
         }
 
         if (x.Type != token_type::Newline) {

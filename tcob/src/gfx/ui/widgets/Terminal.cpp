@@ -625,32 +625,32 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
                     background = colors::Black;
                     break;
 
-                case 30: foreground = colors::Black; break;
-                case 31: foreground = colors::Red; break;
-                case 32: foreground = colors::Green; break;
-                case 33: foreground = colors::Yellow; break;
-                case 34: foreground = colors::Blue; break;
-                case 35: foreground = colors::Magenta; break;
-                case 36: foreground = colors::Cyan; break;
-                case 37: foreground = colors::White; break;
+                case 30:  foreground = colors::Black; break;
+                case 31:  foreground = colors::Red; break;
+                case 32:  foreground = colors::Green; break;
+                case 33:  foreground = colors::Yellow; break;
+                case 34:  foreground = colors::Blue; break;
+                case 35:  foreground = colors::Magenta; break;
+                case 36:  foreground = colors::Cyan; break;
+                case 37:  foreground = colors::White; break;
 
-                case 40: background = colors::Black; break;
-                case 41: background = colors::Red; break;
-                case 42: background = colors::Green; break;
-                case 43: background = colors::Yellow; break;
-                case 44: background = colors::Blue; break;
-                case 45: background = colors::Magenta; break;
-                case 46: background = colors::Cyan; break;
-                case 47: background = colors::White; break;
+                case 40:  background = colors::Black; break;
+                case 41:  background = colors::Red; break;
+                case 42:  background = colors::Green; break;
+                case 43:  background = colors::Yellow; break;
+                case 44:  background = colors::Blue; break;
+                case 45:  background = colors::Magenta; break;
+                case 46:  background = colors::Cyan; break;
+                case 47:  background = colors::White; break;
 
-                case 90: foreground = colors::Gray; break;         // Bright Black
-                case 91: foreground = colors::Salmon; break;       // Bright Red
-                case 92: foreground = colors::LightGreen; break;   // Bright Green
-                case 93: foreground = colors::LightYellow; break;  // Bright Yellow
-                case 94: foreground = colors::LightBlue; break;    // Bright Blue
-                case 95: foreground = colors::Violet; break;       // Bright Magenta
-                case 96: foreground = colors::LightCyan; break;    // Bright Cyan
-                case 97: foreground = colors::White; break;        // Bright White
+                case 90:  foreground = colors::Gray; break;        // Bright Black
+                case 91:  foreground = colors::Salmon; break;      // Bright Red
+                case 92:  foreground = colors::LightGreen; break;  // Bright Green
+                case 93:  foreground = colors::LightYellow; break; // Bright Yellow
+                case 94:  foreground = colors::LightBlue; break;   // Bright Blue
+                case 95:  foreground = colors::Violet; break;      // Bright Magenta
+                case 96:  foreground = colors::LightCyan; break;   // Bright Cyan
+                case 97:  foreground = colors::White; break;       // Bright White
 
                 case 100: background = colors::Gray; break;        // Bright Black
                 case 101: background = colors::Salmon; break;      // Bright Red

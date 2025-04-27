@@ -155,24 +155,24 @@ void gl_render_target::bind_material(material const* mat) const
 
         GLenum stencilFunc {};
         switch (mat->StencilFunc) {
-        case stencil_func::Never: stencilFunc = GL_NEVER; break;
-        case stencil_func::Less: stencilFunc = GL_LESS; break;
-        case stencil_func::Equal: stencilFunc = GL_EQUAL; break;
-        case stencil_func::LessEqual: stencilFunc = GL_LEQUAL; break;
-        case stencil_func::Greater: stencilFunc = GL_GREATER; break;
-        case stencil_func::NotEqual: stencilFunc = GL_NOTEQUAL; break;
+        case stencil_func::Never:        stencilFunc = GL_NEVER; break;
+        case stencil_func::Less:         stencilFunc = GL_LESS; break;
+        case stencil_func::Equal:        stencilFunc = GL_EQUAL; break;
+        case stencil_func::LessEqual:    stencilFunc = GL_LEQUAL; break;
+        case stencil_func::Greater:      stencilFunc = GL_GREATER; break;
+        case stencil_func::NotEqual:     stencilFunc = GL_NOTEQUAL; break;
         case stencil_func::GreaterEqual: stencilFunc = GL_GEQUAL; break;
-        case stencil_func::Always: stencilFunc = GL_ALWAYS; break;
+        case stencil_func::Always:       stencilFunc = GL_ALWAYS; break;
         }
 
         GLenum stencilOp {};
         switch (mat->StencilOp) {
-        case stencil_op::Keep: stencilOp = GL_KEEP; break;
-        case stencil_op::Zero: stencilOp = GL_ZERO; break;
-        case stencil_op::Replace: stencilOp = GL_REPLACE; break;
-        case stencil_op::Increase: stencilOp = GL_INCR; break;
-        case stencil_op::Decrease: stencilOp = GL_DECR; break;
-        case stencil_op::Invert: stencilOp = GL_INVERT; break;
+        case stencil_op::Keep:         stencilOp = GL_KEEP; break;
+        case stencil_op::Zero:         stencilOp = GL_ZERO; break;
+        case stencil_op::Replace:      stencilOp = GL_REPLACE; break;
+        case stencil_op::Increase:     stencilOp = GL_INCR; break;
+        case stencil_op::Decrease:     stencilOp = GL_DECR; break;
+        case stencil_op::Invert:       stencilOp = GL_INVERT; break;
         case stencil_op::IncreaseWrap: stencilOp = GL_INCR_WRAP; break;
         case stencil_op::DecreaseWrap: stencilOp = GL_DECR_WRAP; break;
         }

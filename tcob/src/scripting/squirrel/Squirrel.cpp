@@ -259,24 +259,24 @@ auto vm_view::get_type(SQInteger idx) const -> type
     auto const objectType {sq_gettype(_vm, idx)};
 
     switch (objectType) {
-    case SQObjectType::OT_NULL: return type::Null;
-    case SQObjectType::OT_INTEGER: return type::Integer;
-    case SQObjectType::OT_FLOAT: return type::Float;
-    case SQObjectType::OT_BOOL: return type::Boolean;
-    case SQObjectType::OT_STRING: return type::String;
-    case SQObjectType::OT_TABLE: return type::Table;
-    case SQObjectType::OT_ARRAY: return type::Array;
-    case SQObjectType::OT_USERDATA: return type::Userdata;
-    case SQObjectType::OT_CLOSURE: return type::Closure;
+    case SQObjectType::OT_NULL:          return type::Null;
+    case SQObjectType::OT_INTEGER:       return type::Integer;
+    case SQObjectType::OT_FLOAT:         return type::Float;
+    case SQObjectType::OT_BOOL:          return type::Boolean;
+    case SQObjectType::OT_STRING:        return type::String;
+    case SQObjectType::OT_TABLE:         return type::Table;
+    case SQObjectType::OT_ARRAY:         return type::Array;
+    case SQObjectType::OT_USERDATA:      return type::Userdata;
+    case SQObjectType::OT_CLOSURE:       return type::Closure;
     case SQObjectType::OT_NATIVECLOSURE: return type::NativeClosure;
-    case SQObjectType::OT_GENERATOR: return type::Generator;
-    case SQObjectType::OT_USERPOINTER: return type::UserPointer;
-    case SQObjectType::OT_THREAD: return type::Thread;
-    case SQObjectType::OT_CLASS: return type::Class;
-    case SQObjectType::OT_INSTANCE: return type::Instance;
-    case SQObjectType::OT_WEAKREF: return type::WeakReference;
+    case SQObjectType::OT_GENERATOR:     return type::Generator;
+    case SQObjectType::OT_USERPOINTER:   return type::UserPointer;
+    case SQObjectType::OT_THREAD:        return type::Thread;
+    case SQObjectType::OT_CLASS:         return type::Class;
+    case SQObjectType::OT_INSTANCE:      return type::Instance;
+    case SQObjectType::OT_WEAKREF:       return type::WeakReference;
     case SQObjectType::OT_FUNCPROTO:
-    case SQObjectType::OT_OUTER: break;
+    case SQObjectType::OT_OUTER:         break;
     }
 
     return type::Null;

@@ -91,16 +91,16 @@ auto stack_guard::get_top() const -> i32
 auto static GetType(i32 i) -> type
 {
     switch (i) {
-    case LUA_TNONE: return type::None;
-    case LUA_TNIL: return type::Nil;
-    case LUA_TBOOLEAN: return type::Boolean;
+    case LUA_TNONE:          return type::None;
+    case LUA_TNIL:           return type::Nil;
+    case LUA_TBOOLEAN:       return type::Boolean;
     case LUA_TLIGHTUSERDATA: return type::LightUserdata;
-    case LUA_TNUMBER: return type::Number;
-    case LUA_TSTRING: return type::String;
-    case LUA_TTABLE: return type::Table;
-    case LUA_TFUNCTION: return type::Function;
-    case LUA_TUSERDATA: return type::Userdata;
-    case LUA_TTHREAD: return type::Thread;
+    case LUA_TNUMBER:        return type::Number;
+    case LUA_TSTRING:        return type::String;
+    case LUA_TTABLE:         return type::Table;
+    case LUA_TFUNCTION:      return type::Function;
+    case LUA_TUSERDATA:      return type::Userdata;
+    case LUA_TTHREAD:        return type::Thread;
     }
 
     return type::None;
