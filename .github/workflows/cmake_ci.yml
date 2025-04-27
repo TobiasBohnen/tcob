@@ -25,12 +25,12 @@ jobs:
             cc:   'gcc-14'
             cxx:  'g++-14'
             install_commands: 'sudo apt-get update; sudo apt-get install -y gcc-14 g++-14'
-          - name: 'Clang-19'
+          - name: 'Clang-20'
             os:   'ubuntu-24.04'
-            cc:   'clang-19'
-            cxx:  'clang++-19'
+            cc:   'clang-20'
+            cxx:  'clang++-20'
             cxxflags: '-stdlib=libc++ -fexperimental-library'
-            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 19; sudo apt-get install libc++-19-dev libc++abi-19-dev'
+            install_commands: 'wget https://apt.llvm.org/llvm.sh; chmod +x llvm.sh; sudo ./llvm.sh 20; sudo apt-get install libc++-20-dev libc++abi-20-dev'
         include:
           - variant:    'minimal'
             definition: '-DTCOB_MINIMAL=ON'
@@ -42,11 +42,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
-
-    - name:  Install SDL2 deps
-      run:   sudo apt-get update; sudo apt-get install -y libsdl2-dev
-      shell: bash
-      if:    matrix.config.os == 'ubuntu-24.04'
 
     - name:  Install compiler
       run:   ${{matrix.config.install_commands}}
