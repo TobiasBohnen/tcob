@@ -48,6 +48,11 @@ jobs:
       shell: bash
       if:    matrix.config.os == 'ubuntu-24.04'
 
+    - name:  Install SDL2 deps
+      run:   sudo apt-get update; sudo apt-get install -y libsdl2-dev
+      shell: bash
+      if:    matrix.config.os == 'ubuntu-24.04'
+      
     - name:  Configure CMake
       run:   cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DTCOB_IS_CI=ON ${{matrix.definition}}
       shell: bash
