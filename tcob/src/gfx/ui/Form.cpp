@@ -291,7 +291,7 @@ void form_base::on_key_down(input::keyboard::event const& ev)
     if (ev.KeyCode == Controls->TabKey) {
         auto const vec {all_widgets()};
 
-        if ((ev.KeyMods & Controls->TabMod) == Controls->TabMod) {
+        if (ev.KeyMods.is_down(Controls->TabMod)) {
             // shift tab
             widget* nextWidget {find_prev_tab_widget(vec)};
             if (!nextWidget) {
@@ -308,7 +308,7 @@ void form_base::on_key_down(input::keyboard::event const& ev)
             }
             focus_widget(nextWidget);
         }
-    } else if ((ev.KeyMods & Controls->CutCopyPasteMod) == Controls->CutCopyPasteMod && ev.KeyCode == Controls->PasteKey) {
+    } else if (ev.KeyMods.is_down(Controls->CutCopyPasteMod) && ev.KeyCode == Controls->PasteKey) {
         input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
         _injector.on_text_input(_focusWidget, tev);
     } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {

@@ -120,26 +120,10 @@ auto keyboard::is_mod_down(key_mod mod) const -> bool
     return state & convert_enum(mod);
 }
 
-auto keyboard::mod_state() const -> std::unordered_map<key_mod, bool>
+auto keyboard::mods() const -> key_mods
 {
     auto const state {SDL_GetModState()};
-    return {
-        {key_mod::LeftShift, state & SDL_KMOD_LSHIFT},
-        {key_mod::RightShift, state & SDL_KMOD_RSHIFT},
-        {key_mod::Shift, state & SDL_KMOD_SHIFT},
-        {key_mod::LeftControl, state & SDL_KMOD_LCTRL},
-        {key_mod::RightControl, state & SDL_KMOD_RCTRL},
-        {key_mod::Control, state & SDL_KMOD_CTRL},
-        {key_mod::LeftAlt, state & SDL_KMOD_LALT},
-        {key_mod::RightAlt, state & SDL_KMOD_RALT},
-        {key_mod::Alt, state & SDL_KMOD_ALT},
-        {key_mod::LeftGui, state & SDL_KMOD_LGUI},
-        {key_mod::RightGui, state & SDL_KMOD_RGUI},
-        {key_mod::Gui, state & SDL_KMOD_GUI},
-        {key_mod::NumLock, state & SDL_KMOD_NUM},
-        {key_mod::CapsLock, state & SDL_KMOD_CAPS},
-        {key_mod::Mode, state & SDL_KMOD_MODE},
-    };
+    return key_mods {convert_enum(state)};
 }
 
 ////////////////////////////////////////////////////////////
@@ -239,7 +223,7 @@ void system::process_events(SDL_Event* ev)
             .Pressed  = !ev->key.down,
             .Repeat   = ev->key.repeat != 0,
             .ScanCode = convert_enum(ev->key.scancode),
-            .KeyMods  = convert_enum(static_cast<SDL_Keymod>(ev->key.mod)),
+            .KeyMods  = key_mods {convert_enum(ev->key.mod)},
             .KeyCode  = convert_enum(ev->key.key)};
         KeyDown(event);
         InputMode = mode::KeyboardMouse;
@@ -250,7 +234,7 @@ void system::process_events(SDL_Event* ev)
             .Pressed  = ev->key.down,
             .Repeat   = ev->key.repeat != 0,
             .ScanCode = convert_enum(ev->key.scancode),
-            .KeyMods  = convert_enum(static_cast<SDL_Keymod>(ev->key.mod)),
+            .KeyMods  = key_mods {convert_enum(ev->key.mod)},
             .KeyCode  = convert_enum(ev->key.key)};
         KeyUp(event);
         InputMode = mode::KeyboardMouse;
@@ -351,4 +335,98 @@ void system::process_events(SDL_Event* ev)
     } break;
     }
 }
+
+////////////////////////////////////////////////////////////
+
+key_mods::key_mods(key_mod mod)
+    : _mod {mod}
+{
+}
+
+auto key_mods::num_lock() const -> bool
+{
+    return is_down(key_mod::NumLock);
+}
+
+auto key_mods::caps_lock() const -> bool
+{
+    return is_down(key_mod::CapsLock);
+}
+
+auto key_mods::mode() const -> bool
+{
+    return is_down(key_mod::Mode);
+}
+
+auto key_mods::scroll() const -> bool
+{
+    return is_down(key_mod::Scroll);
+}
+
+auto key_mods::control() const -> bool
+{
+    return left_control() || right_control();
+}
+
+auto key_mods::left_control() const -> bool
+{
+    return is_down(key_mod::LeftControl);
+}
+
+auto key_mods::right_control() const -> bool
+{
+    return is_down(key_mod::RightControl);
+}
+
+auto key_mods::shift() const -> bool
+{
+    return left_shift() || right_shift();
+}
+
+auto key_mods::left_shift() const -> bool
+{
+    return is_down(key_mod::LeftShift);
+}
+
+auto key_mods::right_shift() const -> bool
+{
+    return is_down(key_mod::RightShift);
+}
+
+auto key_mods::alt() const -> bool
+{
+    return left_alt() || right_alt();
+}
+
+auto key_mods::left_alt() const -> bool
+{
+    return is_down(key_mod::LeftAlt);
+}
+
+auto key_mods::right_alt() const -> bool
+{
+    return is_down(key_mod::RightAlt);
+}
+
+auto key_mods::gui() const -> bool
+{
+    return left_gui() || right_gui();
+}
+
+auto key_mods::left_gui() const -> bool
+{
+    return is_down(key_mod::LeftGui);
+}
+
+auto key_mods::right_gui() const -> bool
+{
+    return is_down(key_mod::RightGui);
+}
+
+auto key_mods::is_down(key_mod mod) const -> bool
+{
+    using namespace tcob::enum_ops;
+    return (_mod & mod) == mod;
+}
+
 }

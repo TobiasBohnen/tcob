@@ -209,7 +209,7 @@ void list_box::on_key_down(input::keyboard::event const& ev)
     auto const  kc {static_cast<char>(ev.KeyCode)};
     auto const& items {get_items()};
     if (Filter->empty() && !items.empty() && SelectedItemIndex >= 0 && kc >= 'a' && kc <= 'z') { // TODO: make optional
-        bool const reverse {(ev.KeyMods & input::key_mod::LeftShift) == input::key_mod::LeftShift};
+        bool const reverse {ev.KeyMods.left_shift()};
 
         isize idx {SelectedItemIndex()};
         do {

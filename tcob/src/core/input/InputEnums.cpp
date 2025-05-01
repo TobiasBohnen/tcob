@@ -183,26 +183,6 @@ auto convert_enum(key_mod mod) -> SDL_Keymod
 
 auto convert_enum(SDL_Keymod mod) -> key_mod
 {
-    switch (mod) {
-    case SDL_KMOD_NONE:   return key_mod::None;
-    case SDL_KMOD_LSHIFT: return key_mod::LeftShift;
-    case SDL_KMOD_RSHIFT: return key_mod::RightShift;
-    case SDL_KMOD_LCTRL:  return key_mod::LeftControl;
-    case SDL_KMOD_RCTRL:  return key_mod::RightControl;
-    case SDL_KMOD_LALT:   return key_mod::LeftAlt;
-    case SDL_KMOD_RALT:   return key_mod::RightAlt;
-    case SDL_KMOD_LGUI:   return key_mod::LeftGui;
-    case SDL_KMOD_RGUI:   return key_mod::RightGui;
-    case SDL_KMOD_NUM:    return key_mod::NumLock;
-    case SDL_KMOD_CAPS:   return key_mod::CapsLock;
-    case SDL_KMOD_MODE:   return key_mod::Mode;
-    case SDL_KMOD_SCROLL: return key_mod::Scroll;
-    case SDL_KMOD_CTRL:   return key_mod::Control;
-    case SDL_KMOD_SHIFT:  return key_mod::Shift;
-    case SDL_KMOD_ALT:    return key_mod::Alt;
-    case SDL_KMOD_GUI:    return key_mod::Gui;
-    }
-
     return static_cast<key_mod>(mod);
 }
 

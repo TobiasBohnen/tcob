@@ -205,7 +205,7 @@ void game::on_key_down(input::keyboard::event const& ev)
     using namespace tcob::enum_ops;
     if (!ev.Repeat) {
         // Alt+Enter -> toggle fullscreen
-        if (ev.ScanCode == input::scan_code::RETURN && (ev.KeyMods & input::key_mod::LeftAlt) == input::key_mod::LeftAlt) {
+        if (ev.ScanCode == input::scan_code::RETURN && ev.KeyMods.left_alt()) {
             auto& window {locate_service<gfx::render_system>().window()};
             window.FullScreen = !window.FullScreen();
         }

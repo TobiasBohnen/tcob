@@ -54,6 +54,37 @@ enum class key_mod : u16 {
     Gui          = LeftGui | RightGui
 };
 
+class TCOB_API key_mods {
+public:
+    explicit key_mods(key_mod mod);
+
+    auto num_lock() const -> bool;
+    auto caps_lock() const -> bool;
+    auto mode() const -> bool;
+    auto scroll() const -> bool;
+
+    auto control() const -> bool;
+    auto left_control() const -> bool;
+    auto right_control() const -> bool;
+
+    auto shift() const -> bool;
+    auto left_shift() const -> bool;
+    auto right_shift() const -> bool;
+
+    auto alt() const -> bool;
+    auto left_alt() const -> bool;
+    auto right_alt() const -> bool;
+
+    auto gui() const -> bool;
+    auto left_gui() const -> bool;
+    auto right_gui() const -> bool;
+
+    auto is_down(key_mod mod) const -> bool;
+
+private:
+    key_mod _mod;
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API keyboard {
@@ -64,7 +95,7 @@ public:
         bool      Pressed {false};
         bool      Repeat {false};
         scan_code ScanCode {scan_code::UNKNOWN};
-        key_mod   KeyMods {key_mod::None};
+        key_mods  KeyMods {key_mod::None};
         key_code  KeyCode {key_code::UNKNOWN};
     };
 
@@ -79,7 +110,7 @@ public:
     auto is_key_down(key_code key) const -> bool;
     auto is_mod_down(key_mod mod) const -> bool;
 
-    auto mod_state() const -> std::unordered_map<key_mod, bool>;
+    auto mods() const -> key_mods;
 };
 
 ////////////////////////////////////////////////////////////
@@ -259,7 +290,9 @@ public:
     auto has_controller() const -> bool;
 
     auto mouse() const -> input::mouse;
+
     auto keyboard() const -> input::keyboard;
+
     auto clipboard() const -> input::clipboard;
 
     void process_events(SDL_Event* ev);
