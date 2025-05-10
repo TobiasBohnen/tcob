@@ -76,6 +76,13 @@ inline auto dice<N, E>::roll_n(usize n) -> std::vector<i32>
 }
 
 template <i32 N, RandomEngine E>
+inline auto dice<N, E>::roll_n_sum(usize n) -> i32
+{
+    auto const rolls {roll_n(n)};
+    return std::accumulate(rolls.begin(), rolls.end(), 0);
+}
+
+template <i32 N, RandomEngine E>
 inline auto dice<N, E>::state() const -> state_type const&
 {
     return _random.state();

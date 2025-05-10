@@ -75,6 +75,7 @@ namespace random {
         auto roll() -> i32;
 
         auto roll_n(usize n) -> std::vector<i32>;
+        auto roll_n_sum(usize n) -> i32;
 
     private:
         random_number_generator<E> _random {};
