@@ -10,6 +10,7 @@
 #include <cmath>
 #include <ios>
 #include <limits>
+#include <map>
 #include <optional>
 
 #include "tcob/core/io/Stream.hpp"
@@ -21,7 +22,8 @@ namespace tcob::data::config::detail {
 constexpr std::array<ubyte, 5> MAGIC {'B', 'S', 'B', 'D', 1};
 constexpr u8                   LitIntVal {static_cast<u8>(bsbd::marker_type::LitInt)};
 
-using pool_element_size = u8;
+using short_string_size = u8;
+using long_string_size  = u32;
 
 auto bsbd_reader::read_as_object(io::istream& stream) -> std::optional<object>
 {
@@ -73,10 +75,18 @@ auto bsbd_reader::read_section(io::istream& stream) const -> std::optional<objec
 
 auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type, object& obj) const -> bool
 {
-    auto const keyIdx {stream.read<pool_size>()};
+    // key
+    u32 keyIdx {0};
+    switch (_stringPoolSize) {
+    case bsbd::marker_type::UInt8:  keyIdx = stream.read<u8>(); break;
+    case bsbd::marker_type::UInt16: keyIdx = stream.read<u16>(); break;
+    case bsbd::marker_type::UInt32: keyIdx = stream.read<u32>(); break;
+    default:                        return false;
+    }
     if (keyIdx >= _stringPool.size()) { return false; }
     auto const& key {_stringPool[keyIdx]};
 
+    // value
     if (u8 val {static_cast<u8>(type)}; val >= LitIntVal) {
         obj.set_entry(key, val - LitIntVal);
         return true;
@@ -96,11 +106,11 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
     case bsbd::marker_type::BoolFalse:  obj.set_entry(key, false); break;
 
     case bsbd::marker_type::LongString: {
-        obj.set_entry(key, stream.read_string(static_cast<std::streamsize>(stream.read<u64>())));
+        obj.set_entry(key, stream.read_string(stream.read<long_string_size>()));
     } break;
 
     case bsbd::marker_type::ShortString: {
-        obj.set_entry(key, stream.read_string(stream.read<u8>()));
+        obj.set_entry(key, stream.read_string(stream.read<short_string_size>()));
     } break;
 
     case bsbd::marker_type::SectionStart: {
@@ -121,7 +131,6 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
     case bsbd::marker_type::ArrayEnd:
     case bsbd::marker_type::SectionEnd:
     case bsbd::marker_type::LitInt:
-    case bsbd::marker_type::StringPool:
         return false;
     }
     return true;
@@ -161,8 +170,8 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
     case bsbd::marker_type::BoolTrue:     arr.add_entry(true); break;
     case bsbd::marker_type::BoolFalse:    arr.add_entry(false); break;
 
-    case bsbd::marker_type::LongString:   arr.add_entry(stream.read_string(static_cast<std::streamsize>(stream.read<u64>()))); break;
-    case bsbd::marker_type::ShortString:  arr.add_entry(stream.read_string(stream.read<u8>())); break;
+    case bsbd::marker_type::LongString:   arr.add_entry(stream.read_string(stream.read<long_string_size>())); break;
+    case bsbd::marker_type::ShortString:  arr.add_entry(stream.read_string(stream.read<short_string_size>())); break;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
@@ -182,25 +191,37 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
     case bsbd::marker_type::ArrayEnd:
     case bsbd::marker_type::SectionEnd:
     case bsbd::marker_type::LitInt:
-    case bsbd::marker_type::StringPool:
         return false;
     }
     return true;
 }
 
-void bsbd_reader::read_string_pool(io::istream& stream)
+auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
 {
-    auto const marker {stream.read<bsbd::marker_type>()};
-    if (marker != bsbd::marker_type::StringPool) {
-        stream.seek(-1, io::seek_dir::Current);
-        return;
+    _stringPoolSize = stream.read<bsbd::marker_type>();
+
+    u64 poolSize {0};
+    switch (_stringPoolSize) {
+    case bsbd::marker_type::UInt8:  poolSize = stream.read<u8>(); break;
+    case bsbd::marker_type::UInt16: poolSize = stream.read<u16>(); break;
+    case bsbd::marker_type::UInt32: poolSize = stream.read<u32>(); break;
+    default:                        return false;
     }
-    auto const poolSize {stream.read<pool_size>()};
+
+    auto const element {stream.read<bsbd::marker_type>()};
     _stringPool.resize(poolSize);
-    for (pool_size i {0}; i < poolSize; ++i) {
-        auto const len {stream.read<pool_element_size>()};
+    for (u64 i {0}; i < poolSize; ++i) {
+        std::streamsize len {0};
+        switch (element) {
+        case bsbd::marker_type::UInt8:  len = stream.read<u8>(); break;
+        case bsbd::marker_type::UInt16: len = stream.read<u16>(); break;
+        case bsbd::marker_type::UInt32: len = stream.read<u32>(); break;
+        default:                        return false;
+        }
         _stringPool[i] = stream.read_string(len);
     }
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -233,47 +254,47 @@ auto static fit_float(f64 value) -> bsbd::marker_type
 auto bsbd_writer::write(io::ostream& stream, object const& obj) -> bool
 {
     stream.write(MAGIC);
+
     collect_strings(obj);
-    return write_string_pool(stream) && write_section(stream, obj, "");
+    if (!write_string_pool(stream)) { return false; }
+
+    write_section(stream, obj, "");
+    return true;
 }
 
 auto bsbd_writer::write(io::ostream& stream, array const& arr) -> bool
 {
     stream.write(MAGIC);
+
     collect_strings(arr);
-    return write_string_pool(stream) && write_array(stream, arr, "");
+    if (!write_string_pool(stream)) { return false; }
+
+    write_array(stream, arr, "");
+    return true;
 }
 
-auto bsbd_writer::write_section(io::ostream& stream, object const& obj, utf8_string const& name) -> bool
+void bsbd_writer::write_section(io::ostream& stream, object const& obj, utf8_string_view name)
 {
-    if (write_key(stream, bsbd::marker_type::SectionStart, name)
-        && std::ranges::all_of(obj, [&](auto const& pair) { return write_entry(stream, pair.second, pair.first); })) {
-        stream.write(bsbd::marker_type::SectionEnd);
-        return true;
-    }
-
-    return false;
+    write_key(stream, bsbd::marker_type::SectionStart, name);
+    for (auto const& pair : obj) { write_entry(stream, pair.second, pair.first); }
+    stream.write(bsbd::marker_type::SectionEnd);
 }
 
-auto bsbd_writer::write_array(io::ostream& stream, array const& arr, utf8_string const& name) -> bool
+void bsbd_writer::write_array(io::ostream& stream, array const& arr, utf8_string_view name)
 {
-    if (write_key(stream, bsbd::marker_type::ArrayStart, name)
-        && std::ranges::all_of(arr, [&](auto const& v) { return write_entry(stream, v, ""); })) {
-        stream.write(bsbd::marker_type::ArrayEnd);
-        return true;
-    }
-
-    return false;
+    write_key(stream, bsbd::marker_type::ArrayStart, name);
+    for (auto const& v : arr) { write_entry(stream, v, ""); }
+    stream.write(bsbd::marker_type::ArrayEnd);
 }
 
-auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string const& name) -> bool
+void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string_view name)
 {
     if (ent.is<bool>()) {
-        if (!write_key(stream, ent.as<bool>() ? bsbd::marker_type::BoolTrue : bsbd::marker_type::BoolFalse, name)) { return false; }
+        write_key(stream, ent.as<bool>() ? bsbd::marker_type::BoolTrue : bsbd::marker_type::BoolFalse, name);
     } else if (ent.is<i64>()) {
         i64 const  val {ent.as<i64>()};
         auto const type {fit_int(val)};
-        if (!write_key(stream, type, name)) { return false; }
+        write_key(stream, type, name);
         switch (type) {
         case bsbd::marker_type::Int8:   stream.write(static_cast<i8>(val)); break;
         case bsbd::marker_type::Int16:  stream.write(static_cast<i16>(val)); break;
@@ -287,7 +308,7 @@ auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
     } else if (ent.is<f64>()) {
         f64 const  val {ent.as<f64>()};
         auto const type {fit_float(val)};
-        if (!write_key(stream, type, name)) { return false; }
+        write_key(stream, type, name);
         switch (type) {
         case bsbd::marker_type::Float32: stream.write(static_cast<f32>(val)); break;
         case bsbd::marker_type::Float64: stream.write(val); break;
@@ -295,40 +316,41 @@ auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         }
     } else if (ent.is<utf8_string>()) {
         auto const str {ent.as<utf8_string>()};
-        if (str.size() <= std::numeric_limits<u8>::max()) {
-            if (!write_key(stream, bsbd::marker_type::ShortString, name)) { return false; }
-            stream.write(static_cast<u8>(str.size()));
+        if (str.size() <= std::numeric_limits<short_string_size>::max()) {
+            write_key(stream, bsbd::marker_type::ShortString, name);
+            stream.write(static_cast<short_string_size>(str.size()));
         } else {
-            if (!write_key(stream, bsbd::marker_type::LongString, name)) { return false; }
-            stream.write(static_cast<u64>(str.size()));
+            // TODO: size check
+            write_key(stream, bsbd::marker_type::LongString, name);
+            stream.write(static_cast<long_string_size>(str.size()));
         }
         stream.write(str);
     } else if (ent.is<array>()) {
-        return write_array(stream, ent.as<array>(), name);
+        write_array(stream, ent.as<array>(), name);
     } else if (ent.is<object>()) {
-        return write_section(stream, ent.as<object>(), name);
+        write_section(stream, ent.as<object>(), name);
     }
-
-    return true;
 }
 
-auto bsbd_writer::write_key(io::ostream& stream, bsbd::marker_type type, utf8_string const& name) -> bool
+void bsbd_writer::write_key(io::ostream& stream, bsbd::marker_type type, utf8_string_view name)
 {
     stream.write(type);
     if (!name.empty()) {
-        stream.write<pool_size>(_stringPool.at(name));
+        auto const val {_stringPool.at(name)};
+        switch (_stringPoolSize) {
+        case bsbd::marker_type::UInt8:  stream.write<u8>(static_cast<u8>(val)); break;
+        case bsbd::marker_type::UInt16: stream.write<u16>(static_cast<u16>(val)); break;
+        case bsbd::marker_type::UInt32: stream.write<u32>(static_cast<u32>(val)); break;
+        default:                        break;
+        }
     }
-
-    return true;
 }
 
 void bsbd_writer::collect_strings(object const& obj)
 {
     for (auto const& [k, v] : obj) {
         if (!_stringPool.contains(k)) {
-            auto const nextIdx {static_cast<pool_size>(_stringPool.size())};
-            _stringPool[k]      = nextIdx;
-            _stringIdx[nextIdx] = k;
+            _stringPool[k] = _stringPool.size();
         }
         if (v.is<object>()) {
             collect_strings(v.as<object>());
@@ -349,16 +371,55 @@ void bsbd_writer::collect_strings(array const& arr)
     }
 }
 
-auto bsbd_writer::write_string_pool(io::ostream& stream) const -> bool
+auto bsbd_writer::write_string_pool(io::ostream& stream) -> bool
 {
-    if (_stringIdx.empty()) { return true; }
+    // pool size
+    auto const poolSize {_stringPool.size()};
+    if (poolSize <= std::numeric_limits<u8>::max()) {
+        _stringPoolSize = bsbd::marker_type::UInt8;
+        stream.write(_stringPoolSize);
+        stream.write<u8>(static_cast<u8>(_stringPool.size()));
+    } else if (poolSize <= std::numeric_limits<u16>::max()) {
+        _stringPoolSize = bsbd::marker_type::UInt16;
+        stream.write(_stringPoolSize);
+        stream.write<u16>(static_cast<u16>(_stringPool.size()));
+    } else if (poolSize <= std::numeric_limits<u32>::max()) {
+        _stringPoolSize = bsbd::marker_type::UInt32;
+        stream.write(_stringPoolSize);
+        stream.write<u32>(static_cast<u32>(_stringPool.size()));
+    } else {
+        return false;
+    }
 
-    stream.write(bsbd::marker_type::StringPool);
-    stream.write<pool_size>(static_cast<pool_size>(_stringIdx.size()));
-    for (auto const& s : _stringIdx) {
-        if (s.second.size() > std::numeric_limits<pool_element_size>::max()) { return false; }
+    // pool elements
+    usize                             maxSize {0};
+    std::map<usize, utf8_string_view> stringIdx;
+    for (auto const& s : _stringPool) {
+        stringIdx[s.second] = s.first;
+        maxSize             = std::max(maxSize, s.first.size());
+    }
 
-        stream.write<pool_element_size>(static_cast<pool_element_size>(s.second.size()));
+    bsbd::marker_type element {};
+    if (maxSize <= std::numeric_limits<u8>::max()) {
+        element = bsbd::marker_type::UInt8;
+        stream.write(element);
+    } else if (maxSize <= std::numeric_limits<u16>::max()) {
+        element = bsbd::marker_type::UInt16;
+        stream.write(element);
+    } else if (maxSize <= std::numeric_limits<u32>::max()) {
+        element = bsbd::marker_type::UInt32;
+        stream.write(element);
+    } else {
+        return false;
+    }
+
+    for (auto const& s : stringIdx) {
+        switch (element) {
+        case bsbd::marker_type::UInt8:  stream.write<u8>(static_cast<u8>(s.second.size())); break;
+        case bsbd::marker_type::UInt16: stream.write<u16>(static_cast<u16>(s.second.size())); break;
+        case bsbd::marker_type::UInt32: stream.write<u32>(static_cast<u32>(s.second.size())); break;
+        default:                        break;
+        }
         stream.write(s.second);
     }
 

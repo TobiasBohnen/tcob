@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <map>
 #include <optional>
 #include <unordered_map>
 #include <vector>
@@ -15,8 +14,6 @@
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
-
-using pool_size = u32;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,12 +34,10 @@ namespace bsbd {
         Float64      = 0x0D,
         BoolTrue     = 0x0E,
         BoolFalse    = 0x0F,
-        LongString   = 0x10,
-        ShortString  = 0x11,
-        StringPool   = 0x12,
+        ShortString  = 0x10,
+        LongString   = 0x11,
         LitInt       = 0x14
     };
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -59,9 +54,10 @@ private:
     auto read_array(io::istream& stream) const -> std::optional<array>;
     auto read_array_entry(io::istream& stream, bsbd::marker_type type, array& arr) const -> bool;
 
-    void read_string_pool(io::istream& stream);
+    auto read_string_pool(io::istream& stream) -> bool;
 
     std::vector<utf8_string> _stringPool;
+    bsbd::marker_type        _stringPoolSize;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -72,17 +68,18 @@ public:
     auto write(io::ostream& stream, array const& arr) -> bool override;
 
 private:
-    auto write_section(io::ostream& stream, object const& obj, utf8_string const& name) -> bool;
-    auto write_array(io::ostream& stream, array const& arr, utf8_string const& name) -> bool;
-    auto write_entry(io::ostream& stream, entry const& ent, utf8_string const& name) -> bool;
+    void write_section(io::ostream& stream, object const& obj, utf8_string_view name);
+    void write_array(io::ostream& stream, array const& arr, utf8_string_view name);
+    void write_entry(io::ostream& stream, entry const& ent, utf8_string_view name);
 
-    auto write_key(io::ostream& stream, bsbd::marker_type type, utf8_string const& name) -> bool;
+    void write_key(io::ostream& stream, bsbd::marker_type type, utf8_string_view name);
+
     void collect_strings(object const& obj);
     void collect_strings(array const& arr);
-    auto write_string_pool(io::ostream& stream) const -> bool;
+    auto write_string_pool(io::ostream& stream) -> bool;
 
-    std::unordered_map<utf8_string, pool_size> _stringPool;
-    std::map<pool_size, utf8_string>           _stringIdx;
+    std::unordered_map<utf8_string_view, usize> _stringPool;
+    bsbd::marker_type                           _stringPoolSize;
 };
 
 }
