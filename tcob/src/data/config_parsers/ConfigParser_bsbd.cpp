@@ -53,16 +53,16 @@ auto bsbd_reader::read_as_array(io::istream& stream) -> std::optional<array>
 
 auto bsbd_reader::read_section(io::istream& stream) const -> std::optional<object>
 {
-    object obj {};
+    object retValue {};
 
     for (;;) {
         if (stream.is_eof()) { return std::nullopt; }
         auto const type {stream.read<bsbd::marker_type>()};
         if (type == bsbd::marker_type::SectionEnd) { break; }
-        if (!read_section_entry(stream, type, obj)) { return std::nullopt; }
+        if (!read_section_entry(stream, type, retValue)) { return std::nullopt; }
     }
 
-    return obj;
+    return retValue;
 }
 
 auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type, object& obj) const -> bool
@@ -120,16 +120,16 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
 
 auto bsbd_reader::read_array(io::istream& stream) const -> std::optional<array>
 {
-    array arr {};
+    array retValue {};
 
     for (;;) {
         if (stream.is_eof()) { return std::nullopt; }
         auto const type {stream.read<bsbd::marker_type>()};
         if (type == bsbd::marker_type::ArrayEnd) { break; }
-        if (!read_array_entry(stream, type, arr)) { return std::nullopt; }
+        if (!read_array_entry(stream, type, retValue)) { return std::nullopt; }
     }
 
-    return arr;
+    return retValue;
 }
 
 auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, array& arr) const -> bool
@@ -277,9 +277,9 @@ auto bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         }
         stream.write(str);
     } else if (ent.is<array>()) {
-        write_array(stream, ent.as<array>(), name);
+        return write_array(stream, ent.as<array>(), name);
     } else if (ent.is<object>()) {
-        write_section(stream, ent.as<object>(), name);
+        return write_section(stream, ent.as<object>(), name);
     }
 
     return true;
