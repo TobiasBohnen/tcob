@@ -11,11 +11,11 @@ namespace tcob::io {
 
 auto istream::read_string(std::streamsize length) -> string
 {
+    if (length <= 0) { return ""; }
+
     string retValue;
-    if (length > 0) {
-        retValue.resize(static_cast<usize>(length));
-        retValue.resize(static_cast<usize>(read_bytes(retValue.data(), length)));
-    }
+    retValue.resize(static_cast<usize>(length));
+    retValue.resize(static_cast<usize>(read_bytes(retValue.data(), length)));
     return retValue;
 }
 

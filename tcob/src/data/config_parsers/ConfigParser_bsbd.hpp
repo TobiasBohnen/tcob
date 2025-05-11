@@ -6,12 +6,18 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <map>
 #include <optional>
+#include <unordered_map>
+#include <vector>
 
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
 namespace tcob::data::config::detail {
+
+using pool_size = u32;
+
 //////////////////////////////////////////////////////////////////////
 
 namespace bsbd {
@@ -33,6 +39,7 @@ namespace bsbd {
         BoolFalse    = 0x0F,
         LongString   = 0x10,
         ShortString  = 0x11,
+        StringPool   = 0x12,
         LitInt       = 0x14
     };
 
@@ -51,6 +58,10 @@ private:
 
     auto read_array(io::istream& stream) const -> std::optional<array>;
     auto read_array_entry(io::istream& stream, bsbd::marker_type type, array& arr) const -> bool;
+
+    void read_string_pool(io::istream& stream);
+
+    std::vector<utf8_string> _stringPool;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -61,11 +72,17 @@ public:
     auto write(io::ostream& stream, array const& arr) -> bool override;
 
 private:
-    auto write_section(io::ostream& stream, object const& obj, utf8_string const& name) const -> bool;
-    auto write_array(io::ostream& stream, array const& arr, utf8_string const& name) const -> bool;
-    auto write_entry(io::ostream& stream, entry const& ent, utf8_string const& name) const -> bool;
+    auto write_section(io::ostream& stream, object const& obj, utf8_string const& name) -> bool;
+    auto write_array(io::ostream& stream, array const& arr, utf8_string const& name) -> bool;
+    auto write_entry(io::ostream& stream, entry const& ent, utf8_string const& name) -> bool;
 
-    auto write_entry_header(io::ostream& stream, bsbd::marker_type type, utf8_string const& name) const -> bool;
+    auto write_key(io::ostream& stream, bsbd::marker_type type, utf8_string const& name) -> bool;
+    void collect_strings(object const& obj);
+    void collect_strings(array const& arr);
+    auto write_string_pool(io::ostream& stream) const -> bool;
+
+    std::unordered_map<utf8_string, pool_size> _stringPool;
+    std::map<pool_size, utf8_string>           _stringIdx;
 };
 
 }
