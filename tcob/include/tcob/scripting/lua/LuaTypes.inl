@@ -5,6 +5,7 @@
 
 #pragma once
 #include "LuaTypes.hpp"
+#include <expected>
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -49,7 +50,7 @@ inline auto table::try_make(T& value, auto&&... keys) const -> bool
 }
 
 template <ConvertibleFrom T>
-inline auto table::get(auto&&... keys) const -> result<T>
+inline auto table::get(auto&&... keys) const -> std::expected<T, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -115,7 +116,7 @@ inline auto table::get_keys() const -> std::vector<T>
 }
 
 template <typename T>
-inline auto table::get(state_view view, auto&& key, auto&&... keys) const -> result<T>
+inline auto table::get(state_view view, auto&& key, auto&&... keys) const -> std::expected<T, error_code>
 {
     push_self();
     view.push_convert(key);
@@ -123,7 +124,7 @@ inline auto table::get(state_view view, auto&& key, auto&&... keys) const -> res
 
     if constexpr (sizeof...(keys) > 0) {
         if (!view.is_table(-1)) {
-            return result<T> {error_code::NonTableIndex};
+            return std::unexpected<error_code> {error_code::NonTableIndex};
         }
         return table {view, -1}.get<T>(view, keys...);
     } else {
@@ -136,7 +137,7 @@ inline auto table::get(state_view view, auto&& key, auto&&... keys) const -> res
             result = view.pull_convert_idx(-1, retValue) ? error_code::Ok : error_code::TypeMismatch;
         }
 
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 }
 
@@ -214,7 +215,7 @@ inline auto function<R>::operator()(auto&&... params) const -> return_type
 }
 
 template <typename R>
-inline auto function<R>::protected_call(auto&&... params) const -> result<return_type>
+inline auto function<R>::protected_call(auto&&... params) const -> std::expected<R, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -229,7 +230,7 @@ inline auto function<R>::protected_call(auto&&... params) const -> result<return
     // call lua function
     auto result {pcall(paramsCount)};
     if constexpr (std::is_void_v<R>) {
-        return make_result(result);
+        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
     } else {
         R retValue {};
         if (result == error_code::Ok) {
@@ -238,12 +239,12 @@ inline auto function<R>::protected_call(auto&&... params) const -> result<return
             }
         }
 
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 }
 
 template <typename R>
-inline auto function<R>::unprotected_call(auto&&... params) const -> result<return_type>
+inline auto function<R>::unprotected_call(auto&&... params) const -> std::expected<R, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -258,14 +259,14 @@ inline auto function<R>::unprotected_call(auto&&... params) const -> result<retu
     // call lua function
     auto result {upcall(paramsCount)};
     if constexpr (std::is_void_v<R>) {
-        return make_result(result);
+        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
     } else {
         R retValue {};
         if (!view.pull_convert_idx(oldTop, retValue)) {
             result = error_code::TypeMismatch;
         }
 
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<return_type, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 }
 
@@ -278,10 +279,10 @@ inline auto function<R>::Acquire(state_view view, i32 idx) -> function<R>
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename R>
-inline auto coroutine::resume(auto&&... params) -> result<R>
+inline auto coroutine::resume(auto&&... params) -> std::expected<R, error_code>
 {
     if (_status == coroutine_status::Dead) {
-        return result<R> {error_code::Error};
+        return std::unexpected<error_code> {error_code::Error};
     }
 
     state_view const thread {get_thread()};
@@ -300,11 +301,11 @@ inline auto coroutine::resume(auto&&... params) -> result<R>
         } else {
             R retValue {};
             return thread.pull_convert_idx(1, retValue)
-                ? result<R> {std::move(retValue)}
-                : result<R> {error_code::TypeMismatch};
+                ? std::expected<R, error_code> {std::move(retValue)}
+                : std::unexpected<error_code> {error_code::TypeMismatch};
         }
     } else {
-        return result<R> {error_code::Error};
+        return std::unexpected<error_code> {error_code::Error};
     }
 }
 

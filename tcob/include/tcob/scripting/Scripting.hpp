@@ -8,8 +8,6 @@
 
 #include <vector>
 
-#include "tcob/core/Result.hpp"
-
 namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
 
@@ -20,9 +18,6 @@ enum class error_code : u8 {
     NonTableIndex,
     Error
 };
-
-template <typename T>
-using result = tcob::result<T, error_code>;
 
 ////////////////////////////////////////////////////////////
 

@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <expected>
     #include <memory>
     #include <vector>
 
@@ -65,7 +66,7 @@ public:
     auto try_make(T& value, auto&&... keys) const -> bool;
 
     template <ConvertibleFrom T>
-    auto get(auto&&... keys) const -> result<T>;
+    auto get(auto&&... keys) const -> std::expected<T, error_code>;
 
     template <ConvertibleFrom T>
     auto try_get(T& value, auto&& key) const -> bool;
@@ -88,7 +89,7 @@ private:
     table(vm_view view, SQInteger idx);
 
     template <typename T>
-    auto get(vm_view view, auto&& key, auto&&... keys) const -> result<T>;
+    auto get(vm_view view, auto&& key, auto&&... keys) const -> std::expected<T, error_code>;
 
     void set(vm_view view, auto&& key, auto&&... keys) const;
 
@@ -116,7 +117,7 @@ public:
     auto size() const -> SQInteger;
 
     template <ConvertibleFrom T>
-    auto get(SQInteger index) const -> result<T>;
+    auto get(SQInteger index) const -> std::expected<T, error_code>;
 
     void set(SQInteger index, auto&& value);
 
@@ -140,7 +141,7 @@ namespace detail {
     class TCOB_API type_ref : public ref {
     public:
         template <ConvertibleFrom T>
-        auto get(auto&& key) const -> result<T>;
+        auto get(auto&& key) const -> std::expected<T, error_code>;
 
         template <ConvertibleFrom T>
         auto try_get(T& value, auto&& key) const -> bool;
@@ -225,7 +226,7 @@ public:
 
     auto operator()(auto&&... params) const -> return_type;
 
-    auto call(auto&&... params) const -> result<return_type>;
+    auto call(auto&&... params) const -> std::expected<R, error_code>;
 
     auto static Acquire(vm_view view, SQInteger idx) -> function<return_type>;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
@@ -239,7 +240,7 @@ protected:
 class TCOB_API generator final : public ref {
 public:
     template <typename R = void>
-    auto resume() const -> result<R>;
+    auto resume() const -> std::expected<R, error_code>;
 
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 };
@@ -249,15 +250,15 @@ public:
 class TCOB_API thread final : public ref {
 public:
     template <typename R>
-    auto call(auto&&... params) const -> result<R>;
+    auto call(auto&&... params) const -> std::expected<R, error_code>;
 
     auto suspend() const -> bool;
 
     template <typename R = void>
-    auto wake_up() const -> result<R>;
+    auto wake_up() const -> std::expected<R, error_code>;
 
     template <typename R = void>
-    auto wake_up(auto&& arg) const -> result<R>;
+    auto wake_up(auto&& arg) const -> std::expected<R, error_code>;
 
     auto status() const -> vm_view::status;
 

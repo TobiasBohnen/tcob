@@ -58,7 +58,7 @@ public:
 
 private:
     template <typename R = void>
-    auto impl_run(string_view script, string const& name) const -> result<R>;
+    auto impl_run(string_view script, string const& name) const -> std::expected<R, error_code>;
     template <typename T>
     auto impl_create_wrapper(string const& name) -> std::shared_ptr<wrapper<T>>;
 

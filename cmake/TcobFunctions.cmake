@@ -36,7 +36,7 @@ function(tcob_add_obj_library module sources headers)
     endif()
 
     set_target_properties(${module} PROPERTIES
-        CXX_STANDARD 20
+        CXX_STANDARD 23
         CXX_STANDARD_REQUIRED TRUE
     )
 

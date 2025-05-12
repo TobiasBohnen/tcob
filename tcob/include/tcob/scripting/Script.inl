@@ -6,6 +6,8 @@
 #pragma once
 #include "Script.hpp"
 
+#include <expected>
+
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/scripting/Scripting.hpp"
 
@@ -25,14 +27,14 @@ inline auto script<ScriptImpl>::get_impl() const -> ScriptImpl const*
 
 template <typename ScriptImpl>
 template <typename R>
-inline auto script<ScriptImpl>::run_file(path const& file) const -> result<R>
+inline auto script<ScriptImpl>::run_file(path const& file) const -> std::expected<R, error_code>
 {
     return run<R>(io::read_as_string(file), file);
 }
 
 template <typename ScriptImpl>
 template <typename R>
-inline auto script<ScriptImpl>::run(string_view script, string const& name) const -> result<R>
+inline auto script<ScriptImpl>::run(string_view script, string const& name) const -> std::expected<R, error_code>
 {
     return get_impl()->template impl_run<R>(script, name);
 }

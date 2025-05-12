@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/Result.hpp"
 #include "tcob/core/TypeFactory.hpp"
 
 namespace tcob::data::config {
@@ -65,9 +64,6 @@ enum class error_code : u8 {
     Undefined,
     TypeMismatch
 };
-
-template <typename T>
-using result = tcob::result<T, error_code>;
 
 ////////////////////////////////////////////////////////////
 

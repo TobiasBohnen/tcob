@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <cstddef>
+#include <expected>
 #include <future>
 #include <initializer_list>
 #include <memory>
@@ -97,11 +98,11 @@ public:
     auto try_make(T& value, auto&&... keys) const -> bool;
 
     template <ConvertibleFrom T>
-    auto get(string_view key) const -> result<T>;
+    auto get(string_view key) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T, typename... Keys>
-    auto get(string_view key, string_view subkey, Keys&&... keys) const -> result<T>;
+    auto get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>;
     template <ConvertibleFrom T>
-    auto get(string_view key, isize index) const -> result<T>;
+    auto get(string_view key, isize index) const -> std::expected<T, error_code>;
 
     template <ConvertibleFrom T>
     auto try_get(T& value, string_view key) const -> bool;
@@ -176,7 +177,7 @@ public:
     auto make(auto&&... indices) const -> T;
 
     template <ConvertibleFrom T>
-    auto get(isize index) const -> result<T>;
+    auto get(isize index) const -> std::expected<T, error_code>;
 
     template <ConvertibleTo T>
     void set(isize index, T&& value);
@@ -225,7 +226,7 @@ public:
     auto as() const -> T;
 
     template <typename T>
-    auto get() const -> result<T>;
+    auto get() const -> std::expected<T, error_code>;
 
     template <typename T>
     auto try_get(T& value) const -> bool;

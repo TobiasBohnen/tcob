@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <expected>
 #include <memory>
 #include <vector>
 
@@ -20,9 +21,9 @@ template <typename ScriptImpl>
 class script : public non_copyable {
 public:
     template <typename R = void>
-    auto run_file(path const& file) const -> result<R>;
+    auto run_file(path const& file) const -> std::expected<R, error_code>;
     template <typename R = void>
-    auto run(string_view script, string const& name = "main") const -> result<R>;
+    auto run(string_view script, string const& name = "main") const -> std::expected<R, error_code>;
 
     template <typename T>
     auto create_wrapper(string const& name);

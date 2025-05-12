@@ -5,6 +5,7 @@
 
 #pragma once
 #include "LuaScript.hpp"
+#include <expected>
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -33,13 +34,13 @@ inline void script::open_libraries(Args... args)
 }
 
 template <typename R>
-inline auto script::impl_run(string_view script, string const& name) const -> result<R>
+inline auto script::impl_run(string_view script, string const& name) const -> std::expected<R, error_code>
 {
     auto const guard {_view.create_stack_guard()};
 
     auto result {call_buffer(script, name)};
     if constexpr (std::is_void_v<R>) {
-        return make_result(result);
+        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
     } else {
         R retValue {};
         if (result == error_code::Ok) {
@@ -48,7 +49,7 @@ inline auto script::impl_run(string_view script, string const& name) const -> re
             }
         }
 
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 }
 

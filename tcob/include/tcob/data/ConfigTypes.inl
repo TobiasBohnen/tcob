@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <expected>
 #include <future>
 #include <memory>
 #include <numeric>
@@ -189,18 +190,18 @@ inline auto object::try_make(T& value, auto&&... keys) const -> bool
 }
 
 template <ConvertibleFrom T>
-inline auto object::get(string_view key) const -> result<T>
+inline auto object::get(string_view key) const -> std::expected<T, error_code>
 {
     if (auto it {find(key)}; it != values()->end()) {
         return it->second.template get<T>();
     }
 
     // If the key was not found, return a default-constructed value and an error code
-    return result<T> {error_code::Undefined};
+    return std::unexpected<error_code> {error_code::Undefined};
 }
 
 template <ConvertibleFrom T, typename... Keys>
-inline auto object::get(string_view key, string_view subkey, Keys&&... keys) const -> result<T>
+inline auto object::get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
@@ -210,11 +211,11 @@ inline auto object::get(string_view key, string_view subkey, Keys&&... keys) con
     }
 
     // If the key was not found, return a default-constructed value and an error code
-    return result<T> {error_code::Undefined};
+    return std::unexpected<error_code> {error_code::Undefined};
 }
 
 template <ConvertibleFrom T>
-inline auto object::get(string_view key, isize index) const -> result<T>
+inline auto object::get(string_view key, isize index) const -> std::expected<T, error_code>
 {
     if (auto it {find(key)}; it != values()->end()) {
         auto const& ent {it->second};
@@ -224,7 +225,7 @@ inline auto object::get(string_view key, isize index) const -> result<T>
     }
 
     // If the key was not found, return a default-constructed value and an error code
-    return result<T> {error_code::Undefined};
+    return std::unexpected<error_code> {error_code::Undefined};
 }
 
 template <ConvertibleFrom T>
@@ -395,9 +396,9 @@ inline auto array::make(auto&&... indices) const -> T
 }
 
 template <ConvertibleFrom T>
-inline auto array::get(isize index) const -> result<T>
+inline auto array::get(isize index) const -> std::expected<T, error_code>
 {
-    if (index < 0 || index >= size()) { return result<T> {error_code::Undefined}; }
+    if (index < 0 || index >= size()) { return std::unexpected<error_code> {error_code::Undefined}; }
 
     return (*values())[static_cast<usize>(index)].get<T>();
 }
@@ -443,11 +444,14 @@ inline auto entry::as() const -> T
 }
 
 template <typename T>
-inline auto entry::get() const -> result<T>
+inline auto entry::get() const -> std::expected<T, error_code>
 {
     T                retValue {};
     error_code const result {converter<T>::From(_value, retValue) ? error_code::Ok : error_code::TypeMismatch};
-    return make_result(std::move(retValue), result);
+    if (result == error_code::Ok) {
+        return {std::move(retValue)};
+    }
+    return std::unexpected<error_code>(result);
 }
 
 template <typename T>

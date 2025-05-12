@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <expected>
     #include <unordered_set>
     #include <vector>
 
@@ -65,7 +66,7 @@ public:
     auto try_make(T& value, auto&&... keys) const -> bool;
 
     template <ConvertibleFrom T>
-    auto get(auto&&... keys) const -> result<T>;
+    auto get(auto&&... keys) const -> std::expected<T, error_code>;
 
     template <ConvertibleFrom T>
     auto try_get(T& value, auto&& key) const -> bool;
@@ -91,7 +92,7 @@ private:
     void write_to_stream(io::ostream& stream, usize indent) const;
 
     template <typename T>
-    auto get(state_view view, auto&& key, auto&&... keys) const -> result<T>;
+    auto get(state_view view, auto&& key, auto&&... keys) const -> std::expected<T, error_code>;
 
     void set(state_view view, auto&& key, auto&&... keys) const;
 
@@ -135,8 +136,8 @@ public:
     function() = default;
 
     auto operator()(auto&&... params) const -> return_type;
-    auto protected_call(auto&&... params) const -> result<return_type>;
-    auto unprotected_call(auto&&... params) const -> result<return_type>;
+    auto protected_call(auto&&... params) const -> std::expected<R, error_code>;
+    auto unprotected_call(auto&&... params) const -> std::expected<R, error_code>;
 
     auto static Acquire(state_view view, i32 idx) -> function<R>;
 
@@ -149,7 +150,7 @@ protected:
 class TCOB_API coroutine final : public ref {
 public:
     template <typename R = void>
-    auto resume(auto&&... params) -> result<R>;
+    auto resume(auto&&... params) -> std::expected<R, error_code>;
 
     void push(auto&&... values) const;
 

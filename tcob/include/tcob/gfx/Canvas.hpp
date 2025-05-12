@@ -260,11 +260,11 @@ private:
     void decompose_text(utf8_string_view text, point_f offset);
     auto create_gradient(color_gradient const& gradient) -> paint_color;
 
-    std::unique_ptr<render_backend::canvas_base> _impl {};
+    std::unique_ptr<render_backend::canvas_base> _impl;
 
-    std::unique_ptr<states> _states {};
+    std::unique_ptr<states> _states;
 
-    std::unique_ptr<path_cache> _cache {};
+    std::unique_ptr<path_cache> _cache;
     std::vector<color_gradient> _gradients;
 
     f32 _fringeWidth {0};

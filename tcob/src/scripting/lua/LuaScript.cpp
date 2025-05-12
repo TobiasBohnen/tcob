@@ -21,7 +21,7 @@ namespace tcob::scripting::lua {
 void static warn(void* ud, char const* msg, int toCont)
 {
     auto* scr {static_cast<script*>(ud)};
-    scr->Warning({msg, toCont != 0});
+    scr->Warning({.Message = msg, .ToCont = toCont != 0});
 }
 
 script::script()

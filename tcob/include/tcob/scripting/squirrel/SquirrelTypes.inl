@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <expected>
     #include <tuple>
     #include <vector>
 
@@ -49,7 +50,7 @@ inline auto table::try_make(T& value, auto&&... keys) const -> bool
 }
 
 template <ConvertibleFrom T>
-inline auto table::get(auto&&... keys) const -> result<T>
+inline auto table::get(auto&&... keys) const -> std::expected<T, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -111,24 +112,24 @@ inline auto table::get_keys() const -> std::vector<T>
 }
 
 template <typename T>
-inline auto table::get(vm_view view, auto&& key, auto&&... keys) const -> result<T>
+inline auto table::get(vm_view view, auto&& key, auto&&... keys) const -> std::expected<T, error_code>
 {
     push_self();
     view.push_convert(key);
     if (view.get(-2)) {
         if constexpr (sizeof...(keys) > 0) {
             if (!view.is_table(-1)) {
-                return result<T> {error_code::NonTableIndex};
+                return std::unexpected<error_code> {error_code::NonTableIndex};
             }
             return table {view, -1}.get<T>(view, keys...);
         } else {
             T          retValue {};
             error_code result {view.pull_convert_idx(view.get_top(), retValue) ? error_code::Ok : error_code::TypeMismatch};
-            return make_result(std::move(retValue), result);
+            return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
         }
     }
 
-    return result<T> {error_code::Undefined};
+    return std::unexpected<error_code> {error_code::Undefined};
 }
 
 inline void table::set(vm_view view, auto&& key, auto&&... keysOrValue) const
@@ -196,7 +197,7 @@ inline auto table::has(vm_view view, auto&& key, auto&&... keys) const -> bool
 ////////////////////////////////////////////////////////////
 
 template <ConvertibleFrom T>
-inline auto array::get(SQInteger index) const -> result<T>
+inline auto array::get(SQInteger index) const -> std::expected<T, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -206,10 +207,10 @@ inline auto array::get(SQInteger index) const -> result<T>
     if (view.get(-2)) {
         T          retValue {};
         error_code result {view.pull_convert_idx(-1, retValue) ? error_code::Ok : error_code::TypeMismatch};
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 
-    return result<T> {error_code::Undefined};
+    return std::unexpected<error_code> {error_code::Undefined};
 }
 
 inline void array::set(SQInteger index, auto&& value)
@@ -253,7 +254,7 @@ inline void array::add(T const& addValue)
 namespace detail {
 
     template <ConvertibleFrom T>
-    inline auto type_ref::get(auto&& key) const -> result<T>
+    inline auto type_ref::get(auto&& key) const -> std::expected<T, error_code>
     {
         auto const view {get_view()};
         auto const guard {view.create_stack_guard()};
@@ -263,10 +264,10 @@ namespace detail {
         if (view.get(-2)) {
             T          retValue {};
             error_code result {view.pull_convert_idx(view.get_top(), retValue) ? error_code::Ok : error_code::TypeMismatch};
-            return make_result(std::move(retValue), result);
+            return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
         }
 
-        return result<T> {error_code::Undefined};
+        return std::unexpected<error_code> {error_code::Undefined};
     }
 
     template <ConvertibleFrom T>
@@ -368,7 +369,7 @@ inline auto function<R>::operator()(auto&&... params) const -> return_type
 }
 
 template <typename R>
-inline auto function<R>::call(auto&&... params) const -> result<return_type>
+inline auto function<R>::call(auto&&... params) const -> std::expected<R, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -382,9 +383,9 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
     SQInteger const paramsCount {view.get_top() - oldTop};
 
     // call squirrel function
-    auto result {upcall(paramsCount, !std::is_void_v<R>)};
+    auto result {upcall(paramsCount, !std::is_void_v<return_type>)};
     if constexpr (std::is_void_v<R>) {
-        return make_result(result);
+        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
     } else {
         R retValue {};
         if (result == error_code::Ok) {
@@ -393,7 +394,7 @@ inline auto function<R>::call(auto&&... params) const -> result<return_type>
             }
         }
 
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 }
 
@@ -412,7 +413,7 @@ inline auto function<R>::IsType(vm_view view, SQInteger idx) -> bool
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename R>
-inline auto generator::resume() const -> result<R>
+inline auto generator::resume() const -> std::expected<R, error_code>
 {
     auto const view {get_view()};
     auto const guard {view.create_stack_guard()};
@@ -425,18 +426,18 @@ inline auto generator::resume() const -> result<R>
         } else {
             R retValue {};
             return view.pull_convert_idx(view.get_top(), retValue)
-                ? result<R> {std::move(retValue)}
-                : result<R> {error_code::TypeMismatch};
+                ? std::expected<R, error_code> {std::move(retValue)}
+                : std::unexpected<error_code> {error_code::TypeMismatch};
         }
     }
 
-    return result<R> {error_code::Error};
+    return std::unexpected<error_code> {error_code::Error};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename R>
-inline auto thread::call(auto&&... params) const -> result<R>
+inline auto thread::call(auto&&... params) const -> std::expected<R, error_code>
 {
     auto const thread {get_thread()};
     // auto const  guard{thread.create_stack_guard()}; don't clean up stack
@@ -450,7 +451,7 @@ inline auto thread::call(auto&&... params) const -> result<R>
     // call squirrel function
     auto result {thread.call(paramsCount, !std::is_void_v<R>, true)};
     if constexpr (std::is_void_v<R>) {
-        return make_result(result);
+        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
     } else {
         R retValue {};
         if (result == error_code::Ok) {
@@ -459,18 +460,18 @@ inline auto thread::call(auto&&... params) const -> result<R>
             }
         }
 
-        return make_result(std::move(retValue), result);
+        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
     }
 }
 
 template <typename R>
-inline auto thread::wake_up() const -> result<R>
+inline auto thread::wake_up() const -> std::expected<R, error_code>
 {
     return wake_up<R>(nullptr);
 }
 
 template <typename R>
-inline auto thread::wake_up(auto&& arg) const -> result<R>
+inline auto thread::wake_up(auto&& arg) const -> std::expected<R, error_code>
 {
     auto const thread {get_thread()};
     auto const guard {thread.create_stack_guard()};
@@ -482,12 +483,12 @@ inline auto thread::wake_up(auto&& arg) const -> result<R>
         } else {
             R retValue {};
             return thread.pull_convert_idx(thread.get_top(), retValue)
-                ? result<R> {std::move(retValue)}
-                : result<R> {error_code::TypeMismatch};
+                ? std::expected<R, error_code> {std::move(retValue)}
+                : std::unexpected<error_code> {error_code::TypeMismatch};
         }
     }
 
-    return result<R> {error_code::Error};
+    return std::unexpected<error_code> {error_code::Error};
 }
 
 }

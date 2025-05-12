@@ -7,6 +7,7 @@
 
 #pragma once
 #include "tcob/tcob_config.hpp"
+#include <expected>
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -962,25 +963,25 @@ struct converter<scripting::managed_ptr<T>> {
 };
 
 template <typename T>
-struct converter<result<T>> {
+struct converter<std::expected<T, error_code>> {
     auto static IsType(state_view view, i32 idx) -> bool
     {
         return converter<T>::IsType(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, result<T>& value) -> bool
+    auto static From(state_view view, i32& idx, std::expected<T, error_code>& value) -> bool
     {
         T val;
         if (converter<T>::From(view, idx, val)) {
-            value = result<T> {std::move(val)};
+            value = std::expected<T, error_code> {std::move(val)};
             return true;
         }
 
-        value = result<T> {error_code::TypeMismatch};
+        value = std::unexpected<error_code> {error_code::TypeMismatch};
         return false;
     }
 
-    void static To(state_view view, result<T> const& value)
+    void static To(state_view view, std::expected<T, error_code> const& value)
     {
         converter<T>::To(view, value.value());
     }
