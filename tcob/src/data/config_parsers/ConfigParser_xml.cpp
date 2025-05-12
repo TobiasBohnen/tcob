@@ -17,7 +17,7 @@
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config::detail {
+namespace tcob::data::detail {
 
 constexpr u32 INDENT_SPACES {2};
 

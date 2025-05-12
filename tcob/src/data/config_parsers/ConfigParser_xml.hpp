@@ -14,7 +14,7 @@
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config::detail {
+namespace tcob::data::detail {
 //////////////////////////////////////////////////////////////////////
 
 class xml_reader : public text_reader {

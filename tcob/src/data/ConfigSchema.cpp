@@ -16,7 +16,7 @@
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config {
+namespace tcob::data {
 
 auto schema::validate(object const& obj) const -> result
 {

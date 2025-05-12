@@ -11,7 +11,7 @@
 namespace tcob::data {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API config_file final : public data::config::object {
+class TCOB_API config_file final : public data::object {
 public:
     explicit config_file(string file);
     config_file(config_file const&)                    = delete;

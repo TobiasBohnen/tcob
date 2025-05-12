@@ -7,17 +7,6 @@
 
 #include <cstdlib>
 
-#if defined(_MSC_VER) and !defined(__llvm__)
-    #include <intrin.h>
-    #define bswap16 _byteswap_ushort
-    #define bswap32 _byteswap_ulong
-    #define bswap64 _byteswap_uint64
-#else
-    #define bswap16 __builtin_bswap16
-    #define bswap32 __builtin_bswap32
-    #define bswap64 __builtin_bswap64
-#endif
-
 namespace tcob::helper {
 
 auto round_to_multiple(i32 num, i32 step) -> i32

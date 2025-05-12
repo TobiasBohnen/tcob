@@ -19,7 +19,7 @@
 #include "tcob/core/Proxy.hpp"
 #include "tcob/data/Config.hpp"
 
-namespace tcob::data::config {
+namespace tcob::data {
 ////////////////////////////////////////////////////////////
 
 struct comment {
@@ -249,10 +249,10 @@ private:
 }
 
 namespace tcob::literals {
-auto operator""_ini(char const* str, usize) -> tcob::data::config::object;
-auto operator""_json(char const* str, usize) -> tcob::data::config::object;
-auto operator""_xml(char const* str, usize) -> tcob::data::config::object;
-auto operator""_yaml(char const* str, usize) -> tcob::data::config::object;
+auto operator""_ini(char const* str, usize) -> tcob::data::object;
+auto operator""_json(char const* str, usize) -> tcob::data::object;
+auto operator""_xml(char const* str, usize) -> tcob::data::object;
+auto operator""_yaml(char const* str, usize) -> tcob::data::object;
 }
 
 #include "ConfigTypes.inl"

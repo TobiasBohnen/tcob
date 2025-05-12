@@ -40,7 +40,7 @@
 
 using namespace tcob::gfx;
 using namespace tcob::audio;
-using namespace tcob::data::config;
+using namespace tcob::data;
 using namespace tcob::assets;
 
 using namespace std::chrono_literals;
@@ -220,7 +220,7 @@ void cfg_asset_loader_manager::load_script(path const& file)
 
 ////////////////////////////////////////////////////////////
 
-cfg_frame_animation_loader::cfg_frame_animation_loader(assets::group& group, data::config::object& object)
+cfg_frame_animation_loader::cfg_frame_animation_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -249,7 +249,7 @@ void cfg_frame_animation_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_music_loader::cfg_music_loader(assets::group& group, data::config::object& object)
+cfg_music_loader::cfg_music_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -285,7 +285,7 @@ void cfg_music_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_sound_loader::cfg_sound_loader(assets::group& group, data::config::object& object)
+cfg_sound_loader::cfg_sound_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -323,7 +323,7 @@ void cfg_sound_loader::prepare()
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
 
-cfg_sound_font_loader::cfg_sound_font_loader(assets::group& group, data::config::object& object)
+cfg_sound_font_loader::cfg_sound_font_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -361,7 +361,7 @@ void cfg_sound_font_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_cursor_loader::cfg_cursor_loader(assets::group& group, data::config::object& object)
+cfg_cursor_loader::cfg_cursor_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -399,7 +399,7 @@ void cfg_cursor_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_font_loader::cfg_font_loader(assets::group& group, data::config::object& object)
+cfg_font_loader::cfg_font_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -435,7 +435,7 @@ void cfg_font_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_font_family_loader::cfg_font_family_loader(assets::group& group, data::config::object& object)
+cfg_font_family_loader::cfg_font_family_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -474,7 +474,7 @@ void cfg_font_family_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_material_loader::cfg_material_loader(assets::group& group, data::config::object& object)
+cfg_material_loader::cfg_material_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -551,7 +551,7 @@ void cfg_material_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_shader_loader::cfg_shader_loader(assets::group& group, data::config::object& object)
+cfg_shader_loader::cfg_shader_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {
@@ -601,7 +601,7 @@ void cfg_shader_loader::prepare()
 
 ////////////////////////////////////////////////////////////
 
-cfg_texture_loader::cfg_texture_loader(assets::group& group, data::config::object& object)
+cfg_texture_loader::cfg_texture_loader(assets::group& group, data::object& object)
     : loader {group}
     , _object {object}
 {

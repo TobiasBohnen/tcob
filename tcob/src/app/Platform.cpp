@@ -165,10 +165,10 @@ void platform::remove_services() const
     remove_service<task_manager>();
 
     remove_service<assets::loader_manager::factory>();
-    remove_service<data::config::text_reader::factory>();
-    remove_service<data::config::text_writer::factory>();
-    remove_service<data::config::binary_reader::factory>();
-    remove_service<data::config::binary_writer::factory>();
+    remove_service<data::text_reader::factory>();
+    remove_service<data::text_writer::factory>();
+    remove_service<data::binary_reader::factory>();
+    remove_service<data::binary_writer::factory>();
     remove_service<gfx::image_decoder::factory>();
     remove_service<gfx::image_encoder::factory>();
     remove_service<gfx::animated_image_decoder::factory>();
@@ -413,27 +413,27 @@ void platform::InitConfigFormats()
 {
     // text
     // readers
-    auto trFactory {register_service<data::config::text_reader::factory>()};
-    trFactory->add({".ini"}, &make_unique<data::config::detail::ini_reader>);
-    trFactory->add({".json"}, &make_unique<data::config::detail::json_reader>);
-    trFactory->add({".xml"}, &make_unique<data::config::detail::xml_reader>);
-    trFactory->add({".yaml"}, &make_unique<data::config::detail::yaml_reader>);
+    auto trFactory {register_service<data::text_reader::factory>()};
+    trFactory->add({".ini"}, &make_unique<data::detail::ini_reader>);
+    trFactory->add({".json"}, &make_unique<data::detail::json_reader>);
+    trFactory->add({".xml"}, &make_unique<data::detail::xml_reader>);
+    trFactory->add({".yaml"}, &make_unique<data::detail::yaml_reader>);
 
     // writers
-    auto twFactory {register_service<data::config::text_writer::factory>()};
-    twFactory->add({".ini"}, &make_unique<data::config::detail::ini_writer>);
-    twFactory->add({".json"}, &make_unique<data::config::detail::json_writer>);
-    twFactory->add({".xml"}, &make_unique<data::config::detail::xml_writer>);
-    twFactory->add({".yaml"}, &make_unique<data::config::detail::yaml_writer>);
+    auto twFactory {register_service<data::text_writer::factory>()};
+    twFactory->add({".ini"}, &make_unique<data::detail::ini_writer>);
+    twFactory->add({".json"}, &make_unique<data::detail::json_writer>);
+    twFactory->add({".xml"}, &make_unique<data::detail::xml_writer>);
+    twFactory->add({".yaml"}, &make_unique<data::detail::yaml_writer>);
 
     // binary
     // readers
-    auto brFactory {register_service<data::config::binary_reader::factory>()};
-    brFactory->add({".bsbd"}, &make_unique<data::config::detail::bsbd_reader>);
+    auto brFactory {register_service<data::binary_reader::factory>()};
+    brFactory->add({".bsbd"}, &make_unique<data::detail::bsbd_reader>);
 
     // writers
-    auto bwFactory {register_service<data::config::binary_writer::factory>()};
-    bwFactory->add({".bsbd"}, &make_unique<data::config::detail::bsbd_writer>);
+    auto bwFactory {register_service<data::binary_writer::factory>()};
+    bwFactory->add({".bsbd"}, &make_unique<data::detail::bsbd_writer>);
 }
 
 void platform::InitImageCodecs()

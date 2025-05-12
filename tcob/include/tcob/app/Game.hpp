@@ -31,13 +31,13 @@ class TCOB_API game : public non_copyable {
 public:
     //! Initialization parameters for the game.
     struct init {
-        path                                Path {};                      //!< The path to the game.
-        path                                Name {};                      //!< The name of the game.
-        path                                OrgName {"tcob"};             //!< The organization name.
-        path                                LogFile {"tcob.log"};         //!< The log file name.
-        path                                ConfigFile {"config.ini"};    //!< The configuration file name.
-        std::optional<data::config::object> ConfigDefaults {std::nullopt};
-        std::optional<isize>                WorkerThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
+        path                        Path {};                      //!< The path to the game.
+        path                        Name {};                      //!< The name of the game.
+        path                        OrgName {"tcob"};             //!< The organization name.
+        path                        LogFile {"tcob.log"};         //!< The log file name.
+        path                        ConfigFile {"config.ini"};    //!< The configuration file name.
+        std::optional<data::object> ConfigDefaults {std::nullopt};
+        std::optional<isize>        WorkerThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
     };
 
     //! Constructs a game instance with the specified initialization parameters.

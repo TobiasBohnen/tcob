@@ -82,7 +82,7 @@ concept HasSize = requires(T& t) { { t.size() }; };
 template <typename T>
 concept OverloadsArrowOp = requires(T a) { { a.operator->() } -> Pointer; };
 
-// S=data::config::object|scripting::lua::table|scripting::squirrel::table
+// S=data::object|scripting::lua::table|scripting::squirrel::table
 // TODO: replace with proxy?
 template <typename T, typename S>
 concept Serializable =

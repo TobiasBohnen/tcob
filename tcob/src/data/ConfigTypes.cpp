@@ -24,7 +24,7 @@
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigConversions.hpp"
 
-namespace tcob::data::config {
+namespace tcob::data {
 
 ////////////////////////////////////////////////////////////
 
@@ -326,30 +326,30 @@ void entry::set_comment(comment const& comment)
 
 }
 
-auto tcob::literals::operator""_ini(char const* str, usize) -> tcob::data::config::object
+auto tcob::literals::operator""_ini(char const* str, usize) -> tcob::data::object
 {
-    tcob::data::config::object retValue {};
+    tcob::data::object retValue {};
     retValue.parse(string {str}, ".ini");
     return retValue;
 }
 
-auto tcob::literals::operator""_json(char const* str, usize) -> tcob::data::config::object
+auto tcob::literals::operator""_json(char const* str, usize) -> tcob::data::object
 {
-    tcob::data::config::object retValue {};
+    tcob::data::object retValue {};
     retValue.parse(string {str}, ".json");
     return retValue;
 }
 
-auto tcob::literals::operator""_xml(char const* str, usize) -> tcob::data::config::object
+auto tcob::literals::operator""_xml(char const* str, usize) -> tcob::data::object
 {
-    tcob::data::config::object retValue {};
+    tcob::data::object retValue {};
     retValue.parse(string {str}, ".xml");
     return retValue;
 }
 
-auto tcob::literals::operator""_yaml(char const* str, usize) -> tcob::data::config::object
+auto tcob::literals::operator""_yaml(char const* str, usize) -> tcob::data::object
 {
-    tcob::data::config::object retValue {};
+    tcob::data::object retValue {};
     retValue.parse(string {str}, ".yaml");
     return retValue;
 }

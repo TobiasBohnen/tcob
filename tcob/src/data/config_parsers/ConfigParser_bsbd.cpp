@@ -17,7 +17,7 @@
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config::detail {
+namespace tcob::data::detail {
 
 constexpr std::array<ubyte, 5> MAGIC {'B', 'S', 'B', 'D', 1};
 constexpr u8                   LitIntVal {static_cast<u8>(bsbd::marker_type::LitInt)};

@@ -13,7 +13,7 @@
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config::detail {
+namespace tcob::data::detail {
 //////////////////////////////////////////////////////////////////////
 
 struct ini_settings {

@@ -24,7 +24,7 @@
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/data/Config.hpp"
 
-namespace tcob::data::config {
+namespace tcob::data {
 
 ////////////////////////////////////////////////////////////
 

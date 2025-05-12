@@ -14,7 +14,7 @@
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config {
+namespace tcob::data {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API schema {

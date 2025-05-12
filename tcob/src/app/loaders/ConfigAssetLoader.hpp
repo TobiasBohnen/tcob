@@ -37,7 +37,7 @@ namespace tcob::detail {
 
 class cfg_frame_animation_loader final : public assets::loader<gfx::frame_animation> {
 public:
-    cfg_frame_animation_loader(assets::group& group, data::config::object& object);
+    cfg_frame_animation_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -48,14 +48,14 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_music_loader final : public assets::loader<audio::music> {
 public:
-    cfg_music_loader(assets::group& group, data::config::object& object);
+    cfg_music_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -67,14 +67,14 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_sound_loader final : public assets::loader<audio::sound> {
 public:
-    cfg_sound_loader(assets::group& group, data::config::object& object);
+    cfg_sound_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -87,7 +87,7 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ private:
 
 class cfg_sound_font_loader final : public assets::loader<audio::sound_font> {
 public:
-    cfg_sound_font_loader(assets::group& group, data::config::object& object);
+    cfg_sound_font_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -109,7 +109,7 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 #endif
@@ -118,7 +118,7 @@ private:
 
 class cfg_cursor_loader final : public assets::loader<gfx::cursor> {
 public:
-    cfg_cursor_loader(assets::group& group, data::config::object& object);
+    cfg_cursor_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -130,14 +130,14 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_font_loader final : public assets::loader<gfx::font> {
 public:
-    cfg_font_loader(assets::group& group, data::config::object& object);
+    cfg_font_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -151,14 +151,14 @@ private:
 
     std::vector<std::unique_ptr<asset_def>> _cache;
 
-    data::config::object& _object;
+    data::object& _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_font_family_loader final : public assets::loader<gfx::font_family> {
 public:
-    cfg_font_family_loader(assets::group& group, data::config::object& object);
+    cfg_font_family_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -170,14 +170,14 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_material_loader final : public assets::loader<gfx::material> {
 public:
-    cfg_material_loader(assets::group& group, data::config::object& object);
+    cfg_material_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -190,14 +190,14 @@ private:
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
-    data::config::object&                   _object;
+    data::object&                           _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_shader_loader final : public assets::loader<gfx::shader> {
 public:
-    cfg_shader_loader(assets::group& group, data::config::object& object);
+    cfg_shader_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -211,14 +211,14 @@ private:
 
     std::vector<std::unique_ptr<asset_def>> _cache;
 
-    data::config::object& _object;
+    data::object& _object;
 };
 
 ////////////////////////////////////////////////////////////
 
 class cfg_texture_loader final : public assets::loader<gfx::texture> {
 public:
-    cfg_texture_loader(assets::group& group, data::config::object& object);
+    cfg_texture_loader(assets::group& group, data::object& object);
 
     void declare() override;
     void prepare() override;
@@ -257,7 +257,7 @@ private:
     std::vector<std::unique_ptr<ani_asset_def>> _cacheAni;
 
     //
-    data::config::object& _object;
+    data::object& _object;
 };
 
 ////////////////////////////////////////////////////////////
@@ -269,7 +269,7 @@ public:
     void load_script(path const& file) override;
 
 private:
-    data::config::object _object;
+    data::object _object;
 };
 
 }

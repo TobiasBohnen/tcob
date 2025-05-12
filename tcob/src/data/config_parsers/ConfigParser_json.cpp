@@ -14,7 +14,7 @@
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
-namespace tcob::data::config::detail {
+namespace tcob::data::detail {
 
 auto static find_unquoted(string_view source, char needle) -> string_view::size_type
 {

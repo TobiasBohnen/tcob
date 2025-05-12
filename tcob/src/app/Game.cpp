@@ -36,7 +36,7 @@ game::game(init const& gameInit)
     // init platform
     init i {gameInit};
     if (!i.ConfigDefaults) {
-        data::config::object obj;
+        data::object obj;
         obj[Cfg::Video::Name] = gfx::video_config {};
         i.ConfigDefaults      = obj;
     }

@@ -24,7 +24,7 @@ config_file::config_file(string file)
         logger::Warning("Config: File not found. Trying default file '{}'", configFile);
     }
 
-    if (data::config::object::load(configFile) == load_status::Ok) {
+    if (data::object::load(configFile) == load_status::Ok) {
         logger::Info("Config: loading completed");
     } else {
         logger::Warning("Config: loading failed");
@@ -39,7 +39,7 @@ config_file::~config_file()
 void config_file::save() const
 {
     logger::Info("Config: saving '{}'", _fileName);
-    if (data::config::object::save(_fileName)) {
+    if (data::object::save(_fileName)) {
         logger::Info("Config: saving completed");
     }
 }
