@@ -119,139 +119,139 @@ void sound_font::reset() const
 
 ////////////////////////////////////////////////////////////
 
-note_on_command::note_on_command(i32 pi, midi_note note, f32 vel)
+sound_font::note_on::note_on(i32 pi, midi_note note, f32 vel)
     : PresetIndex {pi}
     , Note {note}
     , Velocity {vel}
 {
 }
 
-void note_on_command::apply(tsf* font) const
+void sound_font::note_on::apply(tsf* font) const
 {
     tsf_note_on(font, PresetIndex, static_cast<u8>(Note), Velocity);
 }
 
-note_off_command::note_off_command(i32 pi, midi_note note)
+sound_font::note_off::note_off(i32 pi, midi_note note)
     : PresetIndex {pi}
     , Note {note}
 {
 }
 
-void note_off_command::apply(tsf* font) const
+void sound_font::note_off::apply(tsf* font) const
 {
     tsf_note_off(font, PresetIndex, static_cast<u8>(Note));
 }
 
-void note_off_all_command::apply(tsf* font) const
+void sound_font::note_off_all::apply(tsf* font) const
 {
     tsf_note_off_all(font);
 }
 
-channel_preset_index::channel_preset_index(i32 ch, i32 pi)
+sound_font::channel_preset_index::channel_preset_index(i32 ch, i32 pi)
     : Channel {ch}
     , PresetIndex {pi}
 {
 }
 
-void channel_preset_index::apply(tsf* font) const
+void sound_font::channel_preset_index::apply(tsf* font) const
 {
     tsf_channel_set_presetindex(font, Channel, PresetIndex);
 }
 
-channel_pan::channel_pan(i32 ch, f32 pan)
+sound_font::channel_pan::channel_pan(i32 ch, f32 pan)
     : Channel {ch}
     , Pan {pan}
 {
 }
 
-void channel_pan::apply(tsf* font) const
+void sound_font::channel_pan::apply(tsf* font) const
 {
     tsf_channel_set_pan(font, Channel, Pan);
 }
 
-channel_volume::channel_volume(i32 ch, f32 vol)
+sound_font::channel_volume::channel_volume(i32 ch, f32 vol)
     : Channel {ch}
     , Volume {vol}
 {
 }
 
-void channel_volume::apply(tsf* font) const
+void sound_font::channel_volume::apply(tsf* font) const
 {
     tsf_channel_set_volume(font, Channel, Volume);
 }
 
-channel_pitch_wheel::channel_pitch_wheel(i32 ch, u16 pw)
+sound_font::channel_pitch_wheel::channel_pitch_wheel(i32 ch, u16 pw)
     : Channel {ch}
     , PitchWheel {pw}
 {
 }
 
-void channel_pitch_wheel::apply(tsf* font) const
+void sound_font::channel_pitch_wheel::apply(tsf* font) const
 {
     tsf_channel_set_pitchwheel(font, Channel, PitchWheel);
 }
 
-channel_pitch_range::channel_pitch_range(i32 ch, f32 pr)
+sound_font::channel_pitch_range::channel_pitch_range(i32 ch, f32 pr)
     : Channel {ch}
     , PitchRange {pr}
 {
 }
 
-void channel_pitch_range::apply(tsf* font) const
+void sound_font::channel_pitch_range::apply(tsf* font) const
 {
     tsf_channel_set_pitchrange(font, Channel, PitchRange);
 }
 
-channel_tunning::channel_tunning(i32 ch, f32 tunning)
+sound_font::channel_tunning::channel_tunning(i32 ch, f32 tunning)
     : Channel {ch}
     , Tunning {tunning}
 {
 }
 
-void channel_tunning::apply(tsf* font) const
+void sound_font::channel_tunning::apply(tsf* font) const
 {
     tsf_channel_set_tuning(font, Channel, Tunning);
 }
 
-channel_note_on_command::channel_note_on_command(i32 ch, midi_note note, f32 vel)
+sound_font::channel_note_on::channel_note_on(i32 ch, midi_note note, f32 vel)
     : Channel {ch}
     , Note {note}
     , Velocity {vel}
 {
 }
 
-void channel_note_on_command::apply(tsf* font) const
+void sound_font::channel_note_on::apply(tsf* font) const
 {
     tsf_channel_note_on(font, Channel, static_cast<u8>(Note), Velocity);
 }
 
-channel_note_off_command::channel_note_off_command(i32 ch, midi_note note)
+sound_font::channel_note_off::channel_note_off(i32 ch, midi_note note)
     : Channel {ch}
     , Note {note}
 {
 }
 
-void channel_note_off_command::apply(tsf* font) const
+void sound_font::channel_note_off::apply(tsf* font) const
 {
     tsf_channel_note_off(font, Channel, static_cast<u8>(Note));
 }
 
-channel_note_off_all_command::channel_note_off_all_command(i32 ch)
+sound_font::channel_note_off_all::channel_note_off_all(i32 ch)
     : Channel {ch}
 {
 }
 
-void channel_note_off_all_command::apply(tsf* font) const
+void sound_font::channel_note_off_all::apply(tsf* font) const
 {
     tsf_channel_note_off_all(font, Channel);
 }
 
-channel_sound_off_all_command::channel_sound_off_all_command(i32 ch)
+sound_font::channel_sound_off_all::channel_sound_off_all(i32 ch)
     : Channel {ch}
 {
 }
 
-void channel_sound_off_all_command::apply(tsf* font) const
+void sound_font::channel_sound_off_all::apply(tsf* font) const
 {
     tsf_channel_sounds_off_all(font, Channel);
 }
@@ -261,7 +261,7 @@ void channel_sound_off_all_command::apply(tsf* font) const
 void sound_font_commands::start_new_section(milliseconds duration)
 {
     _totalDuration += duration;
-    _commands.emplace_back(duration, std::vector<std::unique_ptr<sound_font_command>> {});
+    _commands.emplace_back(duration, std::vector<std::unique_ptr<sound_font::command>> {});
 }
 
 auto sound_font_commands::duration() const -> milliseconds

@@ -24,71 +24,7 @@ struct tml_message;
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class sound_font;
-class sound_font_command;
 class sound_font_commands;
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API sound_font final : public non_copyable {
-public:
-    ////////////////////////////////////////////////////////////
-
-    struct information {
-        i32 PresetCount {};
-        i8  Channels {};
-        i32 SampleRate {};
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    sound_font() = default;
-    ~sound_font();
-
-    auto info() const -> information;
-
-    auto load [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
-    auto load [[nodiscard]] (io::istream& stream, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
-    auto load_async [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> std::future<load_status>;
-
-    auto create_buffer [[nodiscard]] (sound_font_commands const& commands) const -> buffer;
-    auto create_sound [[nodiscard]] (sound_font_commands const& commands) const -> std::shared_ptr<sound>;
-
-    auto get_preset_name(i32 index) const -> string;
-
-    auto get_impl() const -> tsf*;
-
-    static inline char const* AssetName {"sound_font"};
-
-private:
-    void reset() const;
-    void render(milliseconds duration, f32*& ptr) const;
-
-    tsf* _font {nullptr};
-    i8   _channels {0};
-    i32  _sampleRate {0};
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API sound_font_commands : public non_copyable {
-    friend class sound_font;
-
-public:
-    void start_new_section(milliseconds duration);
-
-    template <std::derived_from<sound_font_command> T>
-    void add(auto&&... args);
-
-    auto duration() const -> milliseconds;
-
-private:
-    void render(tsf* font, f32* buffer, u8 channels, i32 sampleRate) const;
-
-    milliseconds _totalDuration {0};
-
-    std::vector<std::pair<milliseconds, std::vector<std::unique_ptr<sound_font_command>>>> _commands;
-};
 
 ////////////////////////////////////////////////////////////
 
@@ -234,142 +170,200 @@ enum class midi_note : u8 {
     B8    = B7 + 12
 };
 
-class TCOB_API sound_font_command {
-public:
-    sound_font_command()                                                            = default;
-    sound_font_command(sound_font_command const& other) noexcept                    = delete;
-    auto operator=(sound_font_command const& other) noexcept -> sound_font_command& = delete;
-    sound_font_command(sound_font_command&& other) noexcept                         = delete;
-    auto operator=(sound_font_command&& other) noexcept -> sound_font_command&      = delete;
-    virtual ~sound_font_command()                                                   = default;
+////////////////////////////////////////////////////////////
 
-    void virtual apply(tsf* font) const = 0;
+class TCOB_API sound_font final : public non_copyable {
+public:
+    ////////////////////////////////////////////////////////////
+
+    struct information {
+        i32 PresetCount {};
+        i8  Channels {};
+        i32 SampleRate {};
+    };
+
+    class TCOB_API command {
+    public:
+        virtual ~command() = default;
+
+        void virtual apply(tsf* font) const = 0;
+    };
+
+    class TCOB_API note_on : public command {
+    public:
+        note_on(i32 pi, midi_note note, f32 vel);
+
+        i32       PresetIndex {0};
+        midi_note Note {0};
+        f32       Velocity {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API note_off : public command {
+    public:
+        note_off(i32 pi, midi_note note);
+
+        i32       PresetIndex {0};
+        midi_note Note {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API note_off_all : public command {
+    public:
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_preset_index : public command {
+    public:
+        channel_preset_index(i32 ch, i32 pi);
+
+        i32 Channel {0};
+        i32 PresetIndex {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_pan : public command {
+    public:
+        channel_pan(i32 ch, f32 pan);
+
+        i32 Channel {0};
+        f32 Pan {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_volume : public command {
+    public:
+        channel_volume(i32 ch, f32 vol);
+
+        i32 Channel {0};
+        f32 Volume {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_pitch_wheel : public command {
+    public:
+        channel_pitch_wheel(i32 ch, u16 pw);
+
+        i32 Channel {0};
+        u16 PitchWheel {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_pitch_range : public command {
+    public:
+        channel_pitch_range(i32 ch, f32 pr);
+
+        i32 Channel {0};
+        f32 PitchRange {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_tunning : public command {
+    public:
+        channel_tunning(i32 ch, f32 tunning);
+
+        i32 Channel {0};
+        f32 Tunning {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_note_on : public command {
+    public:
+        channel_note_on(i32 ch, midi_note note, f32 vel);
+
+        i32       Channel {0};
+        midi_note Note {0};
+        f32       Velocity {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_note_off : public command {
+    public:
+        channel_note_off(i32 ch, midi_note note);
+
+        i32       Channel {0};
+        midi_note Note {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_note_off_all : public command {
+    public:
+        channel_note_off_all(i32 ch);
+
+        i32 Channel {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    class TCOB_API channel_sound_off_all : public command {
+    public:
+        channel_sound_off_all(i32 ch);
+
+        i32 Channel {0};
+
+        void apply(tsf* font) const override;
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    sound_font() = default;
+    ~sound_font();
+
+    auto info() const -> information;
+
+    auto load [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
+    auto load [[nodiscard]] (io::istream& stream, bool stereo = true, i32 sampleRate = 44100) noexcept -> load_status;
+    auto load_async [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> std::future<load_status>;
+
+    auto create_buffer [[nodiscard]] (sound_font_commands const& commands) const -> buffer;
+    auto create_sound [[nodiscard]] (sound_font_commands const& commands) const -> std::shared_ptr<sound>;
+
+    auto get_preset_name(i32 index) const -> string;
+
+    auto get_impl() const -> tsf*;
+
+    static inline char const* AssetName {"sound_font"};
+
+private:
+    void reset() const;
+    void render(milliseconds duration, f32*& ptr) const;
+
+    tsf* _font {nullptr};
+    i8   _channels {0};
+    i32  _sampleRate {0};
+};
+////////////////////////////////////////////////////////////
+
+class TCOB_API sound_font_commands : public non_copyable {
+    friend class sound_font;
+
+public:
+    void start_new_section(milliseconds duration);
+
+    template <std::derived_from<sound_font::command> T>
+    void add(auto&&... args);
+
+    auto duration() const -> milliseconds;
+
+private:
+    void render(tsf* font, f32* buffer, u8 channels, i32 sampleRate) const;
+
+    milliseconds _totalDuration {0};
+
+    std::vector<std::pair<milliseconds, std::vector<std::unique_ptr<sound_font::command>>>> _commands;
 };
 
-class TCOB_API note_on_command : public sound_font_command {
-public:
-    note_on_command(i32 pi, midi_note note, f32 vel);
-
-    i32       PresetIndex {0};
-    midi_note Note {0};
-    f32       Velocity {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API note_off_command : public sound_font_command {
-public:
-    note_off_command(i32 pi, midi_note note);
-
-    i32       PresetIndex {0};
-    midi_note Note {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API note_off_all_command : public sound_font_command {
-public:
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_preset_index : public sound_font_command {
-public:
-    channel_preset_index(i32 ch, i32 pi);
-
-    i32 Channel {0};
-    i32 PresetIndex {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_pan : public sound_font_command {
-public:
-    channel_pan(i32 ch, f32 pan);
-
-    i32 Channel {0};
-    f32 Pan {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_volume : public sound_font_command {
-public:
-    channel_volume(i32 ch, f32 vol);
-
-    i32 Channel {0};
-    f32 Volume {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_pitch_wheel : public sound_font_command {
-public:
-    channel_pitch_wheel(i32 ch, u16 pw);
-
-    i32 Channel {0};
-    u16 PitchWheel {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_pitch_range : public sound_font_command {
-public:
-    channel_pitch_range(i32 ch, f32 pr);
-
-    i32 Channel {0};
-    f32 PitchRange {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_tunning : public sound_font_command {
-public:
-    channel_tunning(i32 ch, f32 tunning);
-
-    i32 Channel {0};
-    f32 Tunning {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_note_on_command : public sound_font_command {
-public:
-    channel_note_on_command(i32 ch, midi_note note, f32 vel);
-
-    i32       Channel {0};
-    midi_note Note {0};
-    f32       Velocity {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_note_off_command : public sound_font_command {
-public:
-    channel_note_off_command(i32 ch, midi_note note);
-
-    i32       Channel {0};
-    midi_note Note {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_note_off_all_command : public sound_font_command {
-public:
-    channel_note_off_all_command(i32 ch);
-
-    i32 Channel {0};
-
-    void apply(tsf* font) const override;
-};
-
-class TCOB_API channel_sound_off_all_command : public sound_font_command {
-public:
-    channel_sound_off_all_command(i32 ch);
-
-    i32 Channel {0};
-
-    void apply(tsf* font) const override;
-};
+////////////////////////////////////////////////////////////
 
 }
 
