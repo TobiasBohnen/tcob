@@ -20,21 +20,6 @@
 
 namespace tcob::helper {
 
-auto byteswap(u16 val) -> u16
-{
-    return bswap16(val);
-}
-
-auto byteswap(u32 val) -> u32
-{
-    return bswap32(val);
-}
-
-auto byteswap(u64 val) -> u64
-{
-    return bswap64(val);
-}
-
 auto round_to_multiple(i32 num, i32 step) -> i32
 {
     if (step <= 1) { return num; }

@@ -13,8 +13,6 @@
 #include <span>
 #include <vector>
 
-#include "tcob/core/Common.hpp"
-
 namespace tcob::io {
 
 template <POD T, std::endian Endianess>
@@ -22,8 +20,8 @@ inline auto istream::read() -> T
 {
     T s {};
     read_bytes(&s, sizeof(T));
-    if constexpr (Endianess != std::endian::native) {
-        s = helper::byteswap(s);
+    if constexpr (Integral<T> && Endianess != std::endian::native) {
+        s = std::byteswap(s);
     }
     return s;
 }
@@ -123,8 +121,8 @@ inline auto sink_istream<Sink>::seek(std::streamoff off, seek_dir way) -> bool
 template <NotStringLikePOD T, std::endian Endianess>
 inline auto ostream::write(T s) -> std::streamsize
 {
-    if constexpr (Endianess != std::endian::native) {
-        s = helper::byteswap(s);
+    if constexpr (Integral<T> && Endianess != std::endian::native) {
+        s = std::byteswap(s);
     }
 
     return write_bytes(&s, sizeof(T));

@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <type_traits>
-#include <utility>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -17,23 +16,6 @@ namespace tcob {
 ////////////////////////////////////////////////////////////
 
 namespace helper {
-    TCOB_API auto byteswap(u16 val) -> u16;
-    TCOB_API auto byteswap(u32 val) -> u32;
-    TCOB_API auto byteswap(u64 val) -> u64;
-
-    template <POD T>
-    auto byteswap(T val) -> T
-    {
-        usize const size {sizeof(T)};
-        static_assert(size % 2 == 0);
-        byte* dst {reinterpret_cast<byte*>(&val)};
-
-        for (usize i {0}; i < size / 2; ++i) {
-            std::swap(dst[i], dst[size - i - 1]);
-        }
-
-        return val;
-    }
 
     TCOB_API auto round_to_multiple(i32 num, i32 step) -> i32;
     TCOB_API auto round_up_to_multiple(i32 num, i32 step) -> i32;

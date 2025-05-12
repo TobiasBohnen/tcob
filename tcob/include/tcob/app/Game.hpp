@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <optional>
 #include <stack>
 
@@ -14,7 +15,9 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
+#include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigTypes.hpp"
+#include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob {
 

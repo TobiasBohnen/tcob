@@ -17,7 +17,6 @@
 
 #include <miniz/miniz.h>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/io/Filter.hpp"
@@ -550,11 +549,11 @@ void png_encoder::write_header(image const& image, io::ostream& out) const
 
     std::array<u8, 17> header {};
 
-    u32 const type {helper::byteswap(static_cast<u32>(png::chunk_type::IHDR))};
+    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IHDR))}; // TODO: endianess
     memcpy(header.data(), &type, 4);
-    u32 const width {helper::byteswap(static_cast<u32>(info.Size.Width))};
+    u32 const width {std::byteswap(static_cast<u32>(info.Size.Width))};      // TODO: endianess
     memcpy(header.data() + 4, &width, 4);
-    u32 const height {helper::byteswap(static_cast<u32>(info.Size.Height))};
+    u32 const height {std::byteswap(static_cast<u32>(info.Size.Height))};    // TODO: endianess
     memcpy(header.data() + 8, &height, 4);
 
     u8 bitDepth {0};
@@ -630,7 +629,7 @@ void png_encoder::write_image(image const& image, io::ostream& out) const
     constexpr usize                idatLength {8192};
     std::array<u8, idatLength + 4> idat {};
 
-    u32 const type {helper::byteswap(static_cast<u32>(png::chunk_type::IDAT))};
+    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IDAT))}; // TODO: endianess
     while (total > 0) {
         memcpy(idat.data(), &type, 4);
         usize const length {std::min(idatLength, total)};
@@ -644,7 +643,7 @@ void png_encoder::write_image(image const& image, io::ostream& out) const
 void png_encoder::write_end(io::ostream& out) const
 {
     std::array<u8, 4> iend {};
-    u32 const         type {helper::byteswap(static_cast<u32>(png::chunk_type::IEND))};
+    u32 const         type {std::byteswap(static_cast<u32>(png::chunk_type::IEND))}; // TODO: endianess
     memcpy(iend.data(), &type, 4);
     write_chunk(out, iend);
 }
