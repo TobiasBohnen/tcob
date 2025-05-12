@@ -25,10 +25,12 @@ public:
     grid() = default;
     explicit grid(size_type size, T const& defaultValue = T {});
 
-    auto operator[](point_type pos) -> T&;
-    auto operator[](point_type pos) const -> T const&;
     auto operator[](isize idx) -> T&;
     auto operator[](isize idx) const -> T const&;
+    auto operator[](isize x, isize y) -> T&;
+    auto operator[](isize x, isize y) const -> T const&;
+    auto operator[](point_type pos) -> T&;
+    auto operator[](point_type pos) const -> T const&;
 
     void fill(T const& value);
 
@@ -50,7 +52,7 @@ public:
     auto data() const -> T const*;
 
 private:
-    auto get_index(point_type pos) const -> isize;
+    auto get_index(isize x, isize y) const -> isize;
 
     size_type      _size;
     std::vector<T> _data;
@@ -74,10 +76,12 @@ public:
     static_grid();
     explicit static_grid(T const& defaultValue);
 
-    auto operator[](point_type pos) -> T&;
-    auto operator[](point_type pos) const -> T const&;
     auto operator[](isize idx) -> T&;
     auto operator[](isize idx) const -> T const&;
+    auto operator[](isize x, isize y) -> T&;
+    auto operator[](isize x, isize y) const -> T const&;
+    auto operator[](point_type pos) -> T&;
+    auto operator[](point_type pos) const -> T const&;
 
     void fill(T const& value);
 
@@ -97,7 +101,7 @@ public:
     auto data() const -> T const*;
 
 private:
-    auto get_index(point_type pos) const -> isize;
+    auto get_index(isize x, isize y) const -> isize;
 
     array_type _data;
 };

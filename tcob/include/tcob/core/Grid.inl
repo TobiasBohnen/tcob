@@ -18,18 +18,6 @@ inline grid<T>::grid(size_type size, T const& defaultValue)
 }
 
 template <typename T>
-inline auto grid<T>::operator[](point_type pos) -> T&
-{
-    return operator[](get_index(pos));
-}
-
-template <typename T>
-inline auto grid<T>::operator[](point_type pos) const -> T const&
-{
-    return operator[](get_index(pos));
-}
-
-template <typename T>
 inline auto grid<T>::operator[](isize idx) -> T&
 {
     assert(idx < std::ssize(_data));
@@ -41,6 +29,30 @@ inline auto grid<T>::operator[](isize idx) const -> T const&
 {
     assert(idx < std::ssize(_data));
     return _data[idx];
+}
+
+template <typename T>
+inline auto grid<T>::operator[](isize x, isize y) -> T&
+{
+    return operator[](get_index(x, y));
+}
+
+template <typename T>
+inline auto grid<T>::operator[](isize x, isize y) const -> T const&
+{
+    return operator[](get_index(x, y));
+}
+
+template <typename T>
+inline auto grid<T>::operator[](point_type pos) -> T&
+{
+    return operator[](pos.X, pos.Y);
+}
+
+template <typename T>
+inline auto grid<T>::operator[](point_type pos) const -> T const&
+{
+    return operator[](pos.X, pos.Y);
 }
 
 template <typename T>
@@ -123,10 +135,10 @@ inline auto grid<T>::data() const -> T const*
 }
 
 template <typename T>
-inline auto grid<T>::get_index(point_type pos) const -> isize
+inline auto grid<T>::get_index(isize x, isize y) const -> isize
 {
-    assert(pos.X >= 0 && pos.Y >= 0);
-    return pos.Y * _size.Width + pos.X;
+    assert(x >= 0 && y >= 0);
+    return (y * _size.Width) + x;
 }
 
 ////////////////////////////////////////////////////////////
@@ -145,18 +157,6 @@ inline static_grid<T, Width, Height>::static_grid(T const& defaultValue)
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](point_type pos) -> T&
-{
-    return operator[](get_index(pos));
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](point_type pos) const -> T const&
-{
-    return operator[](get_index(pos));
-}
-
-template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::operator[](isize idx) -> T&
 {
     assert(idx < std::ssize(_data));
@@ -168,6 +168,30 @@ inline auto static_grid<T, Width, Height>::operator[](isize idx) const -> T cons
 {
     assert(idx < std::ssize(_data));
     return _data[idx];
+}
+
+template <typename T, usize Width, usize Height>
+inline auto static_grid<T, Width, Height>::operator[](isize x, isize y) -> T&
+{
+    return operator[](get_index(x, y));
+}
+
+template <typename T, usize Width, usize Height>
+inline auto static_grid<T, Width, Height>::operator[](isize x, isize y) const -> T const&
+{
+    return operator[](get_index(x, y));
+}
+
+template <typename T, usize Width, usize Height>
+inline auto static_grid<T, Width, Height>::operator[](point_type pos) -> T&
+{
+    return operator[](pos.X, pos.Y);
+}
+
+template <typename T, usize Width, usize Height>
+inline auto static_grid<T, Width, Height>::operator[](point_type pos) const -> T const&
+{
+    return operator[](pos.X, pos.Y);
 }
 
 template <typename T, usize Width, usize Height>
@@ -243,10 +267,10 @@ inline auto static_grid<T, Width, Height>::data() const -> T const*
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::get_index(point_type pos) const -> isize
+inline auto static_grid<T, Width, Height>::get_index(isize x, isize y) const -> isize
 {
-    assert(pos.X >= 0 && pos.Y >= 0);
-    return pos.Y * Width + pos.X;
+    assert(x >= 0 && y >= 0);
+    return (y * Width) + x;
 }
 
 }
