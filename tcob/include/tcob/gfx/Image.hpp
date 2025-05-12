@@ -49,11 +49,9 @@ public:
 
     auto info() const -> information const&;
 
-    auto data() -> std::span<u8>;
-    auto data() const -> std::span<u8 const>;
+    auto data(this auto&& self);
     auto data(rect_i const& bounds) const -> std::vector<u8>;
-    auto ptr() -> u8*;
-    auto ptr() const -> u8 const*;
+    auto ptr(this auto&& self);
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> load_status;
@@ -82,9 +80,19 @@ private:
     image(size_i size, format f);
     image(size_i size, format f, std::span<u8 const> data);
 
-    std::vector<u8> _buffer;
     information     _info;
+    std::vector<u8> _buffer;
 };
+
+inline auto image::data(this auto&& self)
+{
+    return std::span {self._buffer.data(), self._buffer.size()};
+}
+
+inline auto image::ptr(this auto&& self)
+{
+    return self._buffer.data();
+}
 
 ////////////////////////////////////////////////////////////
 

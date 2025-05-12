@@ -18,41 +18,22 @@ inline grid<T>::grid(size_type size, T const& defaultValue)
 }
 
 template <typename T>
-inline auto grid<T>::operator[](isize idx) -> T&
+inline auto grid<T>::operator[](this auto&& self, isize idx) -> decltype(auto)
 {
-    assert(idx < std::ssize(_data));
-    return _data[idx];
+    assert(idx < std::ssize(self._data));
+    return self._data[static_cast<usize>(idx)];
 }
 
 template <typename T>
-inline auto grid<T>::operator[](isize idx) const -> T const&
+inline auto grid<T>::operator[](this auto&& self, isize x, isize y) -> decltype(auto)
 {
-    assert(idx < std::ssize(_data));
-    return _data[idx];
+    return self.operator[](self.get_index(x, y));
 }
 
 template <typename T>
-inline auto grid<T>::operator[](isize x, isize y) -> T&
+inline auto grid<T>::operator[](this auto&& self, point_type pos) -> decltype(auto)
 {
-    return operator[](get_index(x, y));
-}
-
-template <typename T>
-inline auto grid<T>::operator[](isize x, isize y) const -> T const&
-{
-    return operator[](get_index(x, y));
-}
-
-template <typename T>
-inline auto grid<T>::operator[](point_type pos) -> T&
-{
-    return operator[](pos.X, pos.Y);
-}
-
-template <typename T>
-inline auto grid<T>::operator[](point_type pos) const -> T const&
-{
-    return operator[](pos.X, pos.Y);
+    return self.operator[](pos.X, pos.Y);
 }
 
 template <typename T>
@@ -62,27 +43,21 @@ inline void grid<T>::fill(T const& value)
 }
 
 template <typename T>
-inline auto grid<T>::begin() -> iterator
+inline auto grid<T>::begin(this auto&& self)
 {
-    return _data.begin();
+    return self._data.begin();
 }
 
 template <typename T>
-inline auto grid<T>::begin() const -> const_iterator
+inline auto grid<T>::end(this auto&& self)
 {
-    return _data.begin();
+    return self._data.end();
 }
 
 template <typename T>
-inline auto grid<T>::end() -> iterator
+inline auto grid<T>::data(this auto&& self)
 {
-    return _data.end();
-}
-
-template <typename T>
-inline auto grid<T>::end() const -> const_iterator
-{
-    return _data.end();
+    return self._data.data();
 }
 
 template <typename T>
@@ -123,18 +98,6 @@ inline void grid<T>::resize(size_type newSize)
 }
 
 template <typename T>
-inline auto grid<T>::data() -> T*
-{
-    return _data.data();
-}
-
-template <typename T>
-inline auto grid<T>::data() const -> T const*
-{
-    return _data.data();
-}
-
-template <typename T>
 inline auto grid<T>::get_index(isize x, isize y) const -> isize
 {
     assert(x >= 0 && y >= 0);
@@ -157,41 +120,22 @@ inline static_grid<T, Width, Height>::static_grid(T const& defaultValue)
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](isize idx) -> T&
+inline auto static_grid<T, Width, Height>::operator[](this auto&& self, isize idx) -> decltype(auto)
 {
-    assert(idx < std::ssize(_data));
-    return _data[idx];
+    assert(idx < std::ssize(self._data));
+    return self._data[static_cast<usize>(idx)];
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](isize idx) const -> T const&
+inline auto static_grid<T, Width, Height>::operator[](this auto&& self, isize x, isize y) -> decltype(auto)
 {
-    assert(idx < std::ssize(_data));
-    return _data[idx];
+    return self.operator[](self.get_index(x, y));
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](isize x, isize y) -> T&
+inline auto static_grid<T, Width, Height>::operator[](this auto&& self, point_type pos) -> decltype(auto)
 {
-    return operator[](get_index(x, y));
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](isize x, isize y) const -> T const&
-{
-    return operator[](get_index(x, y));
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](point_type pos) -> T&
-{
-    return operator[](pos.X, pos.Y);
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::operator[](point_type pos) const -> T const&
-{
-    return operator[](pos.X, pos.Y);
+    return self.operator[](pos.X, pos.Y);
 }
 
 template <typename T, usize Width, usize Height>
@@ -201,27 +145,21 @@ inline void static_grid<T, Width, Height>::fill(T const& value)
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::begin() -> iterator
+inline auto static_grid<T, Width, Height>::begin(this auto&& self)
 {
-    return _data.begin();
+    return self._data.begin();
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::begin() const -> const_iterator
+inline auto static_grid<T, Width, Height>::end(this auto&& self)
 {
-    return _data.begin();
+    return self._data.end();
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::end() -> iterator
+inline auto static_grid<T, Width, Height>::data(this auto&& self)
 {
-    return _data.end();
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::end() const -> const_iterator
-{
-    return _data.end();
+    return self._data.data();
 }
 
 template <typename T, usize Width, usize Height>
@@ -252,18 +190,6 @@ template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::count() const -> usize
 {
     return _data.size();
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::data() -> T*
-{
-    return _data.data();
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::data() const -> T const*
-{
-    return _data.data();
 }
 
 template <typename T, usize Width, usize Height>

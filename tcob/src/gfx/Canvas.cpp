@@ -364,8 +364,8 @@ void canvas::arc(point_f const c, f32 const r, radian_f const startAngle, radian
         f32 const a {a0 + (da * (i / static_cast<f32>(ndivs)))};
         f32 const dx {std::cos(a)};
         f32 const dy {std::sin(a)};
-        f32 const x {c.X + dx * r};
-        f32 const y {c.Y + dy * r};
+        f32 const x {c.X + (dx * r)};
+        f32 const y {c.Y + (dy * r)};
         f32 const tanx {-dy * r * kappa};
         f32 const tany {dx * r * kappa};
 
@@ -512,9 +512,9 @@ void canvas::wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase)
         f32 const sl {i * step}; // Arc length along the line.
         f32 const t {sl / l};    // Normalized parameter [0,1].
 
-        point_f const base {from.X + d.X * t, from.Y + d.Y * t};
-        f32 const     offset {amp * std::sin(freq * sl + phase)};
-        point_f const finalPt {base.X + offset * perp.X, base.Y + offset * perp.Y};
+        point_f const base {from.X + (d.X * t), from.Y + (d.Y * t)};
+        f32 const     offset {amp * std::sin((freq * sl) + phase)};
+        point_f const finalPt {base.X + (offset * perp.X), base.Y + (offset * perp.Y)};
 
         _cache->append_commands(path2d::CommandsLineTo(finalPt), s.XForm);
     }

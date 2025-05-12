@@ -31,26 +31,6 @@ auto buffer::info() const -> information const&
     return _info;
 }
 
-auto buffer::data() -> std::span<f32>
-{
-    return _buffer;
-}
-
-auto buffer::data() const -> std::span<f32 const>
-{
-    return _buffer;
-}
-
-auto buffer::ptr() -> f32*
-{
-    return _buffer.data();
-}
-
-auto buffer::ptr() const -> f32 const*
-{
-    return _buffer.data();
-}
-
 auto buffer::Create(specification const& info, std::span<f32 const> data) -> buffer
 {
     buffer retValue;

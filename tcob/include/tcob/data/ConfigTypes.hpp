@@ -49,11 +49,8 @@ public:
     auto save(path const& file) const noexcept -> bool;
     auto save(io::ostream& out, string const& ext) const noexcept -> bool;
 
-    auto begin() -> iterator;
-    auto begin() const -> const_iterator;
-
-    auto end() -> iterator;
-    auto end() const -> const_iterator;
+    auto begin(this auto&& self);
+    auto end(this auto&& self);
 
     auto empty() const -> bool;
     auto size() const -> isize;
@@ -67,10 +64,9 @@ public:
 protected:
     auto virtual on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status = 0;
 
-    auto values() -> Container*;
-    auto values() const -> Container*;
+    auto values(this auto&& self);
 
-    auto swap(Impl& other);
+    void swap(Impl& other);
 
 private:
     std::shared_ptr<Container> _values;

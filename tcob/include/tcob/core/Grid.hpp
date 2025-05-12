@@ -25,20 +25,14 @@ public:
     grid() = default;
     explicit grid(size_type size, T const& defaultValue = T {});
 
-    auto operator[](isize idx) -> T&;
-    auto operator[](isize idx) const -> T const&;
-    auto operator[](isize x, isize y) -> T&;
-    auto operator[](isize x, isize y) const -> T const&;
-    auto operator[](point_type pos) -> T&;
-    auto operator[](point_type pos) const -> T const&;
+    auto operator[](this auto&& self, isize idx) -> decltype(auto);
+    auto operator[](this auto&& self, isize x, isize y) -> decltype(auto);
+    auto operator[](this auto&& self, point_type pos) -> decltype(auto);
 
     void fill(T const& value);
 
-    auto begin() -> iterator;
-    auto begin() const -> const_iterator;
-
-    auto end() -> iterator;
-    auto end() const -> const_iterator;
+    auto begin(this auto&& self);
+    auto end(this auto&& self);
 
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
@@ -48,8 +42,7 @@ public:
     auto count() const -> usize;
     void resize(size_type newSize);
 
-    auto data() -> T*;
-    auto data() const -> T const*;
+    auto data(this auto&& self);
 
 private:
     auto get_index(isize x, isize y) const -> isize;
@@ -76,20 +69,15 @@ public:
     static_grid();
     explicit static_grid(T const& defaultValue);
 
-    auto operator[](isize idx) -> T&;
-    auto operator[](isize idx) const -> T const&;
-    auto operator[](isize x, isize y) -> T&;
-    auto operator[](isize x, isize y) const -> T const&;
-    auto operator[](point_type pos) -> T&;
-    auto operator[](point_type pos) const -> T const&;
+    auto operator[](this auto&& self, isize idx) -> decltype(auto);
+    auto operator[](this auto&& self, isize x, isize y) -> decltype(auto);
+    auto operator[](this auto&& self, point_type pos) -> decltype(auto);
 
     void fill(T const& value);
 
-    auto begin() -> iterator;
-    auto begin() const -> const_iterator;
+    auto begin(this auto&& self);
 
-    auto end() -> iterator;
-    auto end() const -> const_iterator;
+    auto end(this auto&& self);
 
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
@@ -97,8 +85,7 @@ public:
     auto contains(point_type pos) const -> bool;
 
     auto count() const -> usize;
-    auto data() -> T*;
-    auto data() const -> T const*;
+    auto data(this auto&& self);
 
 private:
     auto get_index(isize x, isize y) const -> isize;

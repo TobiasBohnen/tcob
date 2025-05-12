@@ -76,27 +76,15 @@ inline auto base_type<Impl, Container>::save(io::ostream& out, string const& ext
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::begin() -> Container::iterator
+inline auto base_type<Impl, Container>::begin(this auto&& self)
 {
-    return _values->begin();
+    return self._values->begin();
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::begin() const -> Container::const_iterator
+inline auto base_type<Impl, Container>::end(this auto&& self)
 {
-    return _values->begin();
-}
-
-template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::end() -> Container::iterator
-{
-    return _values->end();
-}
-
-template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::end() const -> Container::const_iterator
-{
-    return _values->end();
+    return self._values->end();
 }
 
 template <typename Impl, typename Container>
@@ -130,21 +118,15 @@ inline void base_type<Impl, Container>::clear()
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::values() -> Container*
+inline auto base_type<Impl, Container>::values(this auto&& self)
 {
-    return _values.get();
+    return self._values.get();
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::values() const -> Container*
+inline void base_type<Impl, Container>::swap(Impl& other)
 {
-    return _values.get();
-}
-
-template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::swap(Impl& other)
-{
-    return std::swap(_values, other._values);
+    std::swap(_values, other._values);
 }
 
 template <typename Impl, typename Container>

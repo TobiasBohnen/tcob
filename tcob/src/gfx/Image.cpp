@@ -43,16 +43,6 @@ image::image(size_i size, format f, std::span<u8 const> data)
     _buffer = {data.begin(), data.end()};
 }
 
-auto image::data() -> std::span<u8>
-{
-    return _buffer;
-}
-
-auto image::data() const -> std::span<u8 const>
-{
-    return _buffer;
-}
-
 auto image::data(rect_i const& bounds) const -> std::vector<u8>
 {
     i32 const bpp {_info.bytes_per_pixel()};
@@ -70,15 +60,6 @@ auto image::data(rect_i const& bounds) const -> std::vector<u8>
     }
 
     return retValue;
-}
-auto image::ptr() -> u8*
-{
-    return _buffer.data();
-}
-
-auto image::ptr() const -> u8 const*
-{
-    return _buffer.data();
 }
 
 auto image::info() const -> information const&

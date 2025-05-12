@@ -359,8 +359,8 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
             f32 const d0 {accumLengths[0]};
             f32 const d1 {accumLengths[1]};
             f32 const ratio {(d - d0) / (d1 - d0)};
-            return {pts[0].X + ratio * (pts[1].X - pts[0].X),
-                    pts[0].Y + ratio * (pts[1].Y - pts[0].Y)};
+            return {.X = pts[0].X + (ratio * (pts[1].X - pts[0].X)),
+                    .Y = pts[0].Y + (ratio * (pts[1].Y - pts[0].Y))};
         }
 
         while (left + 1 < accumLengths.size() && accumLengths[left + 1] <= d) { ++left; }
@@ -369,8 +369,8 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
         f32 const d0 {accumLengths[left]};
         f32 const d1 {accumLengths[right]};
         f32 const ratio {(d - d0) / (d1 - d0)};
-        return {pts[left].X + ratio * (pts[right].X - pts[left].X),
-                pts[left].Y + ratio * (pts[right].Y - pts[left].Y)};
+        return {.X = pts[left].X + (ratio * (pts[right].X - pts[left].X)),
+                .Y = pts[left].Y + (ratio * (pts[right].Y - pts[left].Y))};
     }};
 
     // Compute total dash pattern period.

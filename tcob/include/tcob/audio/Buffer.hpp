@@ -33,10 +33,8 @@ public:
 
     auto info() const -> information const&;
 
-    auto data() -> std::span<f32>;
-    auto data() const -> std::span<f32 const>;
-    auto ptr() -> f32*;
-    auto ptr() const -> f32 const*;
+    auto data(this auto&& self);
+    auto ptr(this auto&& self);
 
     auto load [[nodiscard]] (path const& file, std::any const& ctx) noexcept -> load_status;
     auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> load_status;
@@ -55,6 +53,16 @@ private:
     information      _info;
     std::vector<f32> _buffer;
 };
+
+auto buffer::data(this auto&& self)
+{
+    return std::span {self._buffer.data(), self._buffer.size()};
+}
+
+auto buffer::ptr(this auto&& self)
+{
+    return self._buffer.data();
+}
 
 ////////////////////////////////////////////////////////////
 
