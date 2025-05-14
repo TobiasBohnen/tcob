@@ -194,9 +194,9 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
                 command);
         }
 
-        funcs.Offset.X += static_cast<f32>(_glyphCache[result.CodePoint].AdvanceX);
+        funcs.Offset.X += _glyphCache[result.CodePoint].AdvanceX;
         if (kerning && i < len - 1) {
-            funcs.Offset.X += static_cast<f32>(_engine->get_kerning(result.CodePoint, utf32text[i + 1]));
+            funcs.Offset.X += _engine->get_kerning(result.CodePoint, utf32text[i + 1]);
         }
     }
 }

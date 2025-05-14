@@ -91,4 +91,4 @@ Diagnostics:
             - "readability-convert-member-functions-to-static"
             - "readability-container-data-pointer"
             - "readability-redundant-member-init"
-           # - "readability-avoid-nested-conditional-operator"
+            - "readability-avoid-nested-conditional-operator"

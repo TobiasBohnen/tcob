@@ -184,11 +184,11 @@ void grid_view::on_draw(widget_painter& painter)
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
             item_style cellStyle {};
-            apply_sub_style(cellStyle, idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
+            apply_sub_style(cellStyle, idx.X + (idx.Y * std::ssize(_columnHeaders)), className, cellFlags);
             painter.draw_item(cellStyle.Item, cellRect, item);
             cell = cellRect;
         } else {
-            reset_sub_style(idx.X + idx.Y * std::ssize(_columnHeaders), className, cellFlags);
+            reset_sub_style(idx.X + (idx.Y * std::ssize(_columnHeaders)), className, cellFlags);
         }
     }};
 

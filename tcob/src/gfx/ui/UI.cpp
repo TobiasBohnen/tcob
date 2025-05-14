@@ -171,7 +171,7 @@ auto length::Lerp(length const& left, length const& right, f64 step) -> length
     assert(left.Type == right.Type);
     length retValue;
     retValue.Type  = left.Type;
-    retValue.Value = static_cast<f32>(left.Value + (right.Value - left.Value) * step);
+    retValue.Value = static_cast<f32>(left.Value + ((right.Value - left.Value) * step));
     return retValue;
 }
 

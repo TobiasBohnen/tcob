@@ -245,7 +245,7 @@ void seven_segment_display::on_draw(widget_painter& painter)
         {width, width - (thickness / 2)},             // 18
     }};
 
-    enum class OffsetType {
+    enum class OffsetType : u8 {
         None,
         Plus,
         Minus
