@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <algorithm>
     #include <functional>
     #include <string>
     #include <type_traits>
@@ -67,18 +68,16 @@ inline auto wrapper<T>::impl_make_unique_overload(Funcs&&... fns) -> native_clos
 }
 
 template <typename T>
-inline void wrapper<T>::impl_wrap_func(string const& name, wrap_target target, native_closure_unique_ptr func)
+inline void wrapper<T>::impl_wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func)
 {
+    string const str {name};
+
     switch (target) {
-    case wrap_target::Getter:
-        _getters[name] = std::move(func);
-        break;
-    case wrap_target::Setter:
-        _setters[name] = std::move(func);
-        break;
+    case wrap_target::Getter: _getters[str] = std::move(func); break;
+    case wrap_target::Setter: _setters[str] = std::move(func); break;
     case wrap_target::Method:
-        _metaTable[name] = func.get();
-        _functions[name] = std::move(func);
+        _metaTable[str] = func.get();
+        _functions[str] = std::move(func);
         break;
     }
 }

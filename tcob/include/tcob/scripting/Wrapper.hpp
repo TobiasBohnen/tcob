@@ -86,25 +86,25 @@ public:
     auto operator[](string const& name) -> proxy;
 
     template <auto Func>
-    void wrap_method(string const& name);
-    void wrap_method(string const& name, auto&& func);
+    void wrap_method(string_view name);
+    void wrap_method(string_view name, auto&& func);
 
     template <typename... Funcs>
-    void wrap_overload(string const& name, Funcs&&... funcs);
+    void wrap_overload(string_view name, Funcs&&... funcs);
 
     template <auto Getter, auto Setter>
-    void wrap_property(string const& name);
+    void wrap_property(string_view name);
     template <auto Field>
-    void wrap_property(string const& name);
-    void wrap_property(string const& name, auto&& get, auto&& set);
+    void wrap_property(string_view name);
+    void wrap_property(string_view name, auto&& get, auto&& set);
 
     template <auto Getter>
-    void wrap_getter(string const& name);
-    void wrap_getter(string const& name, auto&& get);
+    void wrap_getter(string_view name);
+    void wrap_getter(string_view name, auto&& get);
 
     template <auto Setter>
-    void wrap_setter(string const& name);
-    void wrap_setter(string const& name, auto&& set);
+    void wrap_setter(string_view name);
+    void wrap_setter(string_view name, auto&& set);
 
     template <typename S>
     void register_base();
@@ -137,13 +137,13 @@ protected:
     template <typename R, typename S>
     auto wrap_property_helper(void (S::*prop)(R const));
     template <typename R, typename S>
-    auto wrap_property_helper_field_getter(R S::*field);
+    auto wrap_property_helper_field_getter(R S::* field);
     template <typename R, typename S>
-    auto wrap_property_helper_field_setter(R S::*field);
+    auto wrap_property_helper_field_setter(R S::* field);
     template <typename R, typename S>
-    auto wrap_property_helper_field_getter(prop<R> S::*prop);
+    auto wrap_property_helper_field_getter(prop<R> S::* prop);
     template <typename R, typename S>
-    auto wrap_property_helper_field_setter(prop<R> S::*prop);
+    auto wrap_property_helper_field_setter(prop<R> S::* prop);
 
 private:
     auto get_impl() -> WrapperImpl*;

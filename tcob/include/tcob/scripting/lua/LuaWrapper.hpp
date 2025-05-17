@@ -129,7 +129,7 @@ private:
     template <typename... Funcs>
     auto static impl_make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr;
 
-    void impl_wrap_func(string const& name, wrap_target target, native_closure_unique_ptr func);
+    void impl_wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func);
 
     template <typename S>
     void impl_register_base();

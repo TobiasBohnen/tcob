@@ -74,12 +74,12 @@ inline auto wrapper<T>::impl_make_unique_overload(Funcs&&... fns) -> native_clos
 }
 
 template <typename T>
-inline void wrapper<T>::impl_wrap_func(string const& name, wrap_target target, native_closure_unique_ptr func)
+inline void wrapper<T>::impl_wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func)
 {
     switch (target) {
-    case wrap_target::Getter: _getters[name] = std::move(func); break;
-    case wrap_target::Setter: _setters[name] = std::move(func); break;
-    case wrap_target::Method: _functions[name] = std::move(func); break;
+    case wrap_target::Getter: _getters[string {name}] = std::move(func); break;
+    case wrap_target::Setter: _setters[string {name}] = std::move(func); break;
+    case wrap_target::Method: _functions[string {name}] = std::move(func); break;
     }
 }
 
