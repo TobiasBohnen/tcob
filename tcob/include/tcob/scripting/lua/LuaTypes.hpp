@@ -29,12 +29,13 @@ public:
     auto operator=(ref&& other) noexcept -> ref&;
     virtual ~ref();
 
-    auto is_valid() const -> bool;
-
     void acquire(state_view view, i32 idx);
     void release();
 
     void push_self() const;
+
+    auto     is_valid() const -> bool;
+    explicit operator bool() const;
 
     friend auto operator==(ref const& left, ref const& right) -> bool;
 
@@ -51,7 +52,6 @@ private:
 class TCOB_API table : public ref {
 public:
     table();
-    explicit table(state_view view);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<table, Key>;
@@ -84,10 +84,12 @@ public:
 
     void dump(io::ostream& stream) const;
 
+    auto static Create(state_view view) -> table;
     auto static PushNew(state_view view) -> table;
     auto static Acquire(state_view view, i32 idx) -> table;
 
 private:
+    explicit table(state_view view);
     table(state_view view, i32 idx);
 
     void write_to_stream(io::ostream& stream, usize indent) const;
@@ -122,7 +124,7 @@ namespace detail {
     protected:
         function_base(state_view view, i32 idx);
 
-        void upcall(i32 nargs) const;
+        void call(i32 nargs) const;
         auto pcall(i32 nargs) const -> std::optional<error_code>;
     };
 }

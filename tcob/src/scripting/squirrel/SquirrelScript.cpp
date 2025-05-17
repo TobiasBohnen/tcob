@@ -104,17 +104,17 @@ auto script::get_view() const -> vm_view
 
 auto script::create_array() const -> array
 {
-    return array {_view};
+    return array::Create(_view);
 }
 
 auto script::create_table() const -> table
 {
-    return table {_view};
+    return table::Create(_view);
 }
 
 auto script::create_class() const -> clazz
 {
-    return clazz {_view};
+    return clazz::Create(_view);
 }
 
 void script::enable_debug_info() const

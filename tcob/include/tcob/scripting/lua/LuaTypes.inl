@@ -171,9 +171,7 @@ inline auto table::is(state_view view, auto&& key, auto&&... keys) const -> bool
     view.get_table(-2);
 
     if constexpr (sizeof...(keys) > 0) {
-        if (!view.is_table(-1)) {
-            return false;
-        }
+        if (!view.is_table(-1)) { return false; }
         table lt {view, -1};
         return lt.is<T>(view, keys...);
     } else {
@@ -253,7 +251,7 @@ inline auto function<R>::unprotected_call(auto&&... params) const -> std::expect
     i32 const paramsCount {view.get_top() - oldTop};
 
     // call lua function
-    upcall(paramsCount);
+    call(paramsCount);
     if constexpr (std::is_void_v<R>) {
         return {};
     } else {

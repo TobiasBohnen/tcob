@@ -74,7 +74,7 @@ auto script::gc() const -> garbage_collector
 
 auto script::create_table() const -> table
 {
-    return table {_view};
+    return table::Create(_view);
 }
 
 auto script::call_buffer(string_view script, string const& name) const -> std::optional<error_code>
@@ -111,8 +111,6 @@ void script::register_searcher()
 {
     if (!_globalTable.has("package", "searchers")) { return; }
 
-    table searchers {_globalTable["package"]["searchers"].as<table>()};
-
     _loader = [this](string const& name) -> table {
         require_event ev {.Name = name, .Table = std::nullopt};
         Require(ev);
@@ -121,7 +119,8 @@ void script::register_searcher()
 
     _searcher = [this](string const&) -> LoaderFunc* { return &_loader; };
 
-    searchers[searchers.raw_length() + 1] = &_searcher;
+    table tab {_globalTable["package"]["searchers"].as<table>()};
+    tab[tab.raw_length() + 1] = &_searcher;
 }
 
 void static hook(lua_State* l, lua_Debug* ar)
@@ -132,9 +131,10 @@ void static hook(lua_State* l, lua_Debug* ar)
     ls.get_metatable("_tcob");
     table lt {table::Acquire(ls, -1)};
     if (lt.has("_hook")) {
-        auto* hook {reinterpret_cast<script::HookFunc*>(lt["_hook"].as<void*>())};
         ls.get_info(ar);
         debug dbg {&ls, ar};
+
+        auto* hook {reinterpret_cast<script::HookFunc*>(lt["_hook"].as<void*>())};
         (*hook)(dbg);
     }
 }
@@ -145,11 +145,11 @@ void script::set_hook(HookFunc&& func, debug_mask mask)
 
     _view.new_metatable("_tcob");
     i32 const tableIdx {_view.get_top()};
+
     _view.push_convert("_hook");
     _hookFunc = std::move(func);
     _view.push_convert(reinterpret_cast<void*>(&_hookFunc));
     _view.set_table(tableIdx);
-
     _view.set_hook(&hook, debug::GetMask(mask), 1);
 }
 

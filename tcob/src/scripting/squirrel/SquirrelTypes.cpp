@@ -153,6 +153,11 @@ void table::set_delegate(table const& mt) const
     view.set_delegate(-2);
 }
 
+auto table::Create(vm_view view) -> table
+{
+    return table {view};
+}
+
 auto table::PushNew(vm_view view) -> table
 {
     view.new_table();
@@ -214,6 +219,11 @@ auto array::size() const -> SQInteger
 
     push_self();
     return view.get_size(-1);
+}
+
+auto array::Create(vm_view view) -> array
+{
+    return array {view};
 }
 
 auto array::PushNew(vm_view view) -> array
@@ -282,6 +292,11 @@ auto clazz::create_instance() const -> instance
     push_self();
     view.create_instance(-1);
     return instance::Acquire(view, -1);
+}
+
+auto clazz::Create(vm_view view) -> clazz
+{
+    return clazz {view};
 }
 
 auto clazz::PushNew(vm_view view) -> clazz

@@ -280,9 +280,7 @@ struct converter<T> {
                 i32      idx2 {-1};
                 retValue = converter<key_type>::From(view, idx2, val);
                 view.pop(1);
-                if (retValue) {
-                    value.insert(val);
-                }
+                if (retValue) { value.insert(val); }
             }
             idx++;
         }

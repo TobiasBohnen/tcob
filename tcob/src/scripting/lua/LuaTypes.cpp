@@ -98,6 +98,11 @@ auto ref::is_valid() const -> bool
     return _ref != NOREF && _view.is_valid();
 }
 
+ref::operator bool() const
+{
+    return is_valid();
+}
+
 auto operator==(ref const& left, ref const& right) -> bool
 {
     auto const guard {left._view.create_stack_guard()};
@@ -112,7 +117,7 @@ table::table() = default;
 
 table::table(state_view view)
 {
-    auto guard {view.create_stack_guard()};
+    auto const guard {view.create_stack_guard()};
     view.new_table();
     acquire(view, -1);
 }
@@ -161,6 +166,11 @@ void table::set_metatable(table const& mt) const
     view.set_metatable(-2);
 }
 
+auto table::Create(state_view view) -> table
+{
+    return table {view};
+}
+
 auto table::PushNew(state_view view) -> table
 {
     view.new_table();
@@ -201,7 +211,7 @@ void table::write_to_stream(io::ostream& stream, usize indent) const
 
         view.pop(2);
     }
-    std::sort(keys.begin(), keys.end());
+    std::ranges::sort(keys);
 
     for (auto const& key : keys) {
         // push key
@@ -281,7 +291,7 @@ namespace detail {
         view.pop(1);
     }
 
-    void function_base::upcall(i32 nargs) const
+    void function_base::call(i32 nargs) const
     {
         get_view().call(nargs);
     }

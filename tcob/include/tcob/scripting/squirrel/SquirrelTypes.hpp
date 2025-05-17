@@ -52,7 +52,6 @@ private:
 class TCOB_API table : public ref {
 public:
     table();
-    explicit table(vm_view view);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<table, Key>;
@@ -82,11 +81,13 @@ public:
     template <typename T>
     auto get_keys() const -> std::vector<T>;
 
+    auto static Create(vm_view view) -> table;
     auto static PushNew(vm_view view) -> table;
     auto static Acquire(vm_view view, SQInteger idx) -> table;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
+    explicit table(vm_view view);
     table(vm_view view, SQInteger idx);
 
     template <typename T>
@@ -110,7 +111,6 @@ class TCOB_API stack_base : public table {
 class TCOB_API array : public ref {
 public:
     array();
-    explicit array(vm_view view);
 
     auto operator[](SQInteger index) -> proxy<array, SQInteger>;
     auto operator[](SQInteger index) const -> proxy<array const, SQInteger>;
@@ -128,11 +128,13 @@ public:
     template <ConvertibleTo T>
     void add(T const& addValue);
 
+    auto static Create(vm_view view) -> array;
     auto static PushNew(vm_view view) -> array;
     auto static Acquire(vm_view view, SQInteger idx) -> array;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
+    explicit array(vm_view view);
     array(vm_view view, SQInteger idx);
 };
 
@@ -180,7 +182,6 @@ private:
 class TCOB_API clazz : public detail::type_ref {
 public:
     clazz();
-    explicit clazz(vm_view view);
 
     template <typename Key>
     auto operator[](Key key) -> proxy<clazz, Key>;
@@ -192,11 +193,13 @@ public:
 
     auto create_instance() const -> instance;
 
+    auto static Create(vm_view view) -> clazz;
     auto static PushNew(vm_view view) -> clazz;
     auto static Acquire(vm_view view, SQInteger idx) -> clazz;
     auto static IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
+    explicit clazz(vm_view view);
     clazz(vm_view view, SQInteger idx);
 };
 
