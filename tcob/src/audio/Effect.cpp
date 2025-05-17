@@ -34,7 +34,7 @@ auto delay_effect::operator()(buffer const& buf) const -> buffer
         std::vector<f32> echo(outputFrames, 0.0f);
 
         for (usize frame {0}; frame < outputFrames; ++frame) {
-            f32 const dry {(frame < inputFrames) ? inData[frame * channels + ch] : 0.0f};
+            f32 const dry {(frame < inputFrames) ? inData[(frame * channels) + ch] : 0.0f};
             f32       delayed {0.0f};
 
             if (frame >= delayFrames) {
@@ -43,7 +43,7 @@ auto delay_effect::operator()(buffer const& buf) const -> buffer
 
             echo[frame] = dry + _feedback * delayed;
 
-            usize const idx {frame * channels + ch};
+            usize const idx {(frame * channels) + ch};
             outData[idx] = (1.0f - _mix) * dry + _mix * echo[frame];
         }
     }
@@ -73,12 +73,12 @@ auto pitch_shift_effect::operator()(buffer const& buf) const -> buffer
             usize const idx0 {static_cast<usize>(std::floor(srcIdx))};
             usize const idx1 {(idx0 + 1 < static_cast<usize>(info.FrameCount)) ? idx0 + 1 : idx0};
 
-            f32 const sample0 {inData[idx0 * channels + ch]};
-            f32 const sample1 {inData[idx1 * channels + ch]};
+            f32 const sample0 {inData[(idx0 * channels) + ch]};
+            f32 const sample1 {inData[(idx1 * channels) + ch]};
 
             f32 const frac {srcIdx - static_cast<f32>(idx0)};
 
-            outData[frame * channels + ch] = sample0 + (sample1 - sample0) * frac;
+            outData[(frame * channels) + ch] = sample0 + (sample1 - sample0) * frac;
         }
     }
 
