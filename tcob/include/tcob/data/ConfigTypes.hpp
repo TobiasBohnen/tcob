@@ -129,6 +129,7 @@ public:
 
     auto static Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
 
+    auto get_entry(string_view key) -> entry*;
     auto get_entry(string_view key) const -> entry const*;
     void set_entry(string_view key, entry const& entry);
 

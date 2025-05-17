@@ -158,9 +158,18 @@ auto object::Parse(string_view config, string const& ext) -> std::optional<objec
     return retValue.parse(config, ext) ? std::optional {retValue} : std::nullopt;
 }
 
-auto object::get_entry(string_view key) const -> entry const*
+auto object::get_entry(string_view key) -> entry*
 {
     if (auto it {find(key)}; it != values()->end()) {
+        return &it->second;
+    }
+
+    return nullptr;
+}
+
+auto object::get_entry(string_view key) const -> entry const*
+{
+    if (auto const it {find(key)}; it != values()->end()) {
         return &it->second;
     }
 

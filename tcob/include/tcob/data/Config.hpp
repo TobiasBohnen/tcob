@@ -60,7 +60,6 @@ enum class type : u8 {
 ////////////////////////////////////////////////////////////
 
 enum class error_code : u8 {
-    Ok,
     Undefined,
     TypeMismatch
 };
