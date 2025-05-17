@@ -137,6 +137,7 @@ protected:
 
 private:
     void add_entry(string_view key, entry const& entry);
+    void remove_entry(string_view key);
 
     auto find(string_view key) -> cfg_object_entries::iterator;
     auto find(string_view key) const -> cfg_object_entries::const_iterator;

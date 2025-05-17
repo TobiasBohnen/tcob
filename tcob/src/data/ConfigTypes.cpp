@@ -60,7 +60,7 @@ auto object::operator[](string const& key) const -> proxy<object const, string> 
 
 void object::set(string_view key, std::nullptr_t)
 {
-    values()->erase(find(key));
+    remove_entry(key);
 }
 
 auto object::str() const -> string
@@ -108,7 +108,6 @@ auto object::parse(string_view config, string const& ext) noexcept -> bool
 auto object::clone(bool deep) const -> object
 {
     object retValue;
-    auto*  dst {retValue.values()};
 
     if (deep) {
         for (auto const& [k, v] : *values()) {
@@ -119,19 +118,19 @@ auto object::clone(bool deep) const -> object
             case type::Float:
             case type::Integer:
             case type::Bool:
-                dst->emplace_back(k, v);
+                retValue.add_entry(k, v);
                 break;
             case type::Array:
-                dst->emplace_back(k, v.as<array>().clone(true));
+                retValue.add_entry(k, v.as<array>().clone(true));
                 break;
             case type::Object:
-                dst->emplace_back(k, v.as<object>().clone(true));
+                retValue.add_entry(k, v.as<object>().clone(true));
                 break;
             }
         }
     } else {
         for (auto const& entry : *values()) {
-            dst->push_back(entry);
+            retValue.add_entry(entry.first, entry.second);
         }
     }
 
@@ -182,6 +181,11 @@ void object::set_entry(string_view key, entry const& entry)
 void object::add_entry(string_view key, entry const& entry)
 {
     values()->emplace_back(key, entry);
+}
+
+void object::remove_entry(string_view key)
+{
+    values()->erase(find(key));
 }
 
 auto object::find(string_view key) -> cfg_object_entries::iterator
