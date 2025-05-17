@@ -9,6 +9,7 @@
 
     #include <algorithm>
     #include <cassert>
+    #include <optional>
     #include <unordered_set>
     #include <utility>
     #include <variant>
@@ -280,12 +281,12 @@ namespace detail {
         view.pop(1);
     }
 
-    auto function_base::upcall(i32 nargs) const -> error_code
+    void function_base::upcall(i32 nargs) const
     {
-        return get_view().call(nargs);
+        get_view().call(nargs);
     }
 
-    auto function_base::pcall(i32 nargs) const -> error_code
+    auto function_base::pcall(i32 nargs) const -> std::optional<error_code>
     {
         return get_view().pcall(nargs);
     }

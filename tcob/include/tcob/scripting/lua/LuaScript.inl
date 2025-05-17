@@ -38,18 +38,18 @@ inline auto script::impl_run(string_view script, string const& name) const -> st
 {
     auto const guard {_view.create_stack_guard()};
 
-    auto result {call_buffer(script, name)};
+    auto const result {call_buffer(script, name)};
     if constexpr (std::is_void_v<R>) {
-        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
+        return !result ? std::expected<void, error_code> {} : std::unexpected {*result};
     } else {
+        if (result) { return std::unexpected {*result}; }
+
         R retValue {};
-        if (result == error_code::Ok) {
-            if (!_view.pull_convert_idx(guard.get_top() + 1, retValue)) {
-                result = error_code::TypeMismatch;
-            }
+        if (!_view.pull_convert_idx(guard.get_top() + 1, retValue)) {
+            return std::unexpected {error_code::TypeMismatch};
         }
 
-        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        return std::expected<R, error_code> {std::move(retValue)};
     }
 }
 

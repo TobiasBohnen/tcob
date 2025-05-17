@@ -13,6 +13,7 @@
     #include <cstdio>
     #include <iostream>
     #include <memory>
+    #include <optional>
     #include <utility>
 
     #include "tcob/core/Logger.hpp"
@@ -141,13 +142,11 @@ void script::remove_hook()
     _view.set_native_debughook(nullptr);
 }
 
-auto script::call_buffer(string_view script, string const& name, bool retValue) const -> error_code
+auto script::call_buffer(string_view script, string const& name, bool retValue) const -> std::optional<error_code>
 {
-    if (_view.compile_buffer(script, name) == error_code::Ok) {
+    if (!_view.compile_buffer(script, name)) {
         _view.push_roottable();
-        if (_view.call(1, retValue, true) == error_code::Ok) {
-            return error_code::Ok;
-        }
+        return _view.call(1, retValue, true);
     }
 
     return error_code::Error;

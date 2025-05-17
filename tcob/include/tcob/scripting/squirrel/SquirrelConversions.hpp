@@ -942,7 +942,7 @@ struct converter<std::expected<T, error_code>> {
             return true;
         }
 
-        value = std::unexpected<error_code> {error_code::TypeMismatch};
+        value = std::unexpected {error_code::TypeMismatch};
         return false;
     }
 

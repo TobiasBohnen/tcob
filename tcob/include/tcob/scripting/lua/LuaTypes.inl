@@ -5,10 +5,10 @@
 
 #pragma once
 #include "LuaTypes.hpp"
-#include <expected>
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <expected>
     #include <tuple>
     #include <vector>
 
@@ -124,20 +124,16 @@ inline auto table::get(state_view view, auto&& key, auto&&... keys) const -> std
 
     if constexpr (sizeof...(keys) > 0) {
         if (!view.is_table(-1)) {
-            return std::unexpected<error_code> {error_code::NonTableIndex};
+            return std::unexpected {error_code::NonTableIndex};
         }
         return table {view, -1}.get<T>(view, keys...);
     } else {
-        T          retValue {};
-        error_code result {};
+        if (view.is_nil(-1)) { return std::unexpected {error_code::Undefined}; }
 
-        if (view.is_nil(-1)) {
-            result = error_code::Undefined;
-        } else {
-            result = view.pull_convert_idx(-1, retValue) ? error_code::Ok : error_code::TypeMismatch;
-        }
-
-        return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        T retValue {};
+        return view.pull_convert_idx(-1, retValue)
+            ? std::expected<T, error_code> {std::move(retValue)}
+            : std::unexpected {error_code::TypeMismatch};
     }
 }
 
@@ -228,18 +224,18 @@ inline auto function<R>::protected_call(auto&&... params) const -> std::expected
     i32 const paramsCount {view.get_top() - oldTop};
 
     // call lua function
-    auto result {pcall(paramsCount)};
+    auto const result {pcall(paramsCount)};
     if constexpr (std::is_void_v<R>) {
-        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
+        return !result ? std::expected<void, error_code> {} : std::unexpected {*result};
     } else {
+        if (result) { return std::unexpected {*result}; }
+
         R retValue {};
-        if (result == error_code::Ok) {
-            if (!view.pull_convert_idx(oldTop, retValue)) {
-                result = error_code::TypeMismatch;
-            }
+        if (!view.pull_convert_idx(oldTop, retValue)) {
+            return std::unexpected {error_code::TypeMismatch};
         }
 
-        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        return std::expected<R, error_code> {std::move(retValue)};
     }
 }
 
@@ -257,16 +253,16 @@ inline auto function<R>::unprotected_call(auto&&... params) const -> std::expect
     i32 const paramsCount {view.get_top() - oldTop};
 
     // call lua function
-    auto result {upcall(paramsCount)};
+    upcall(paramsCount);
     if constexpr (std::is_void_v<R>) {
-        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
+        return {};
     } else {
         R retValue {};
         if (!view.pull_convert_idx(oldTop, retValue)) {
-            result = error_code::TypeMismatch;
+            return std::unexpected {error_code::TypeMismatch};
         }
 
-        return result == error_code::Ok ? std::expected<return_type, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        return retValue;
     }
 }
 
@@ -282,7 +278,7 @@ template <typename R>
 inline auto coroutine::resume(auto&&... params) -> std::expected<R, error_code>
 {
     if (_status == coroutine_status::Dead) {
-        return std::unexpected<error_code> {error_code::Error};
+        return std::unexpected {error_code::Error};
     }
 
     state_view const thread {get_thread()};
@@ -302,10 +298,10 @@ inline auto coroutine::resume(auto&&... params) -> std::expected<R, error_code>
             R retValue {};
             return thread.pull_convert_idx(1, retValue)
                 ? std::expected<R, error_code> {std::move(retValue)}
-                : std::unexpected<error_code> {error_code::TypeMismatch};
+                : std::unexpected {error_code::TypeMismatch};
         }
     } else {
-        return std::unexpected<error_code> {error_code::Error};
+        return std::unexpected {error_code::Error};
     }
 }
 

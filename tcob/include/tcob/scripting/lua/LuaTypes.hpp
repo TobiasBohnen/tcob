@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
     #include <expected>
+    #include <optional>
     #include <unordered_set>
     #include <vector>
 
@@ -121,8 +122,8 @@ namespace detail {
     protected:
         function_base(state_view view, i32 idx);
 
-        auto upcall(i32 nargs) const -> error_code;
-        auto pcall(i32 nargs) const -> error_code;
+        void upcall(i32 nargs) const;
+        auto pcall(i32 nargs) const -> std::optional<error_code>;
     };
 }
 

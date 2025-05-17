@@ -5,9 +5,9 @@
 
 #pragma once
 #include "tcob/tcob_config.hpp"
-
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <optional>
     #include <type_traits>
     #include <vector>
 
@@ -251,11 +251,11 @@ public:
     auto has_error() const -> bool;
     auto get_error() const -> string;
 
-    auto call(SQInteger params, bool retVal, bool raiseError) const -> error_code;
+    auto call(SQInteger params, bool retVal, bool raiseError) const -> std::optional<error_code>;
 
     void enable_debug_info(bool enable) const;
 
-    auto compile_buffer(string_view script, string const& name) const -> error_code;
+    auto compile_buffer(string_view script, string const& name) const -> std::optional<error_code>;
 
     void set_print_func(SQPRINTFUNCTION printfunc, SQPRINTFUNCTION errfunc) const;
     void set_compiler_errorhandler(SQCOMPILERERROR func) const;

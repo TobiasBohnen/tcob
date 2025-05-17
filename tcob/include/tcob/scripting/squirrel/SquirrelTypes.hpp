@@ -10,6 +10,7 @@
 
     #include <expected>
     #include <memory>
+    #include <optional>
     #include <vector>
 
     #include "tcob/core/Proxy.hpp"
@@ -211,7 +212,7 @@ namespace detail {
     protected:
         function_base(vm_view view, SQInteger idx);
 
-        auto upcall(SQInteger nargs, bool retValue) const -> error_code;
+        auto upcall(SQInteger nargs, bool retValue) const -> std::optional<error_code>;
     };
 }
 

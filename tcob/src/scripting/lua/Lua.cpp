@@ -11,6 +11,7 @@
     #include <lua.h>
     #include <lualib.h>
 
+    #include <optional>
     #include <unordered_map>
     #include <utility>
 
@@ -473,10 +474,9 @@ void state_view::error(string const& message) const
     luaL_error(_state, message.c_str());
 }
 
-auto state_view::call(i32 nargs) const -> error_code
+void state_view::call(i32 nargs) const
 {
     lua_call(_state, nargs, LUA_MULTRET);
-    return error_code::Ok;
 }
 
 auto static error_handler(lua_State* l) -> i32
@@ -488,7 +488,7 @@ auto static error_handler(lua_State* l) -> i32
     return 0;
 }
 
-auto state_view::pcall(i32 nargs) const -> error_code
+auto state_view::pcall(i32 nargs) const -> std::optional<error_code>
 {
     i32 const hpos {get_top() - nargs};
 
@@ -499,7 +499,7 @@ auto state_view::pcall(i32 nargs) const -> error_code
 
     switch (err) {
     case LUA_OK:
-        return error_code::Ok;
+        return std::nullopt;
     case LUA_ERRRUN:
     case LUA_ERRMEM:
     default:

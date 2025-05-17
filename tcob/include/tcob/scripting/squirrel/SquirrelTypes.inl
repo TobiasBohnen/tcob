@@ -119,17 +119,18 @@ inline auto table::get(vm_view view, auto&& key, auto&&... keys) const -> std::e
     if (view.get(-2)) {
         if constexpr (sizeof...(keys) > 0) {
             if (!view.is_table(-1)) {
-                return std::unexpected<error_code> {error_code::NonTableIndex};
+                return std::unexpected {error_code::NonTableIndex};
             }
             return table {view, -1}.get<T>(view, keys...);
         } else {
-            T          retValue {};
-            error_code result {view.pull_convert_idx(view.get_top(), retValue) ? error_code::Ok : error_code::TypeMismatch};
-            return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+            T retValue {};
+            return view.pull_convert_idx(view.get_top(), retValue)
+                ? std::expected<T, error_code> {std::move(retValue)}
+                : std::unexpected {error_code::TypeMismatch};
         }
     }
 
-    return std::unexpected<error_code> {error_code::Undefined};
+    return std::unexpected {error_code::Undefined};
 }
 
 inline void table::set(vm_view view, auto&& key, auto&&... keysOrValue) const
@@ -205,12 +206,13 @@ inline auto array::get(SQInteger index) const -> std::expected<T, error_code>
     push_self();
     view.push_convert(index);
     if (view.get(-2)) {
-        T          retValue {};
-        error_code result {view.pull_convert_idx(-1, retValue) ? error_code::Ok : error_code::TypeMismatch};
-        return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        T retValue {};
+        return view.pull_convert_idx(-1, retValue)
+            ? std::expected<T, error_code> {std::move(retValue)}
+            : std::unexpected {error_code::TypeMismatch};
     }
 
-    return std::unexpected<error_code> {error_code::Undefined};
+    return std::unexpected {error_code::Undefined};
 }
 
 inline void array::set(SQInteger index, auto&& value)
@@ -262,12 +264,13 @@ namespace detail {
         push_self();
         view.push_convert(key);
         if (view.get(-2)) {
-            T          retValue {};
-            error_code result {view.pull_convert_idx(view.get_top(), retValue) ? error_code::Ok : error_code::TypeMismatch};
-            return result == error_code::Ok ? std::expected<T, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+            T retValue {};
+            return view.pull_convert_idx(view.get_top(), retValue)
+                ? std::expected<T, error_code> {std::move(retValue)}
+                : std::unexpected {error_code::TypeMismatch};
         }
 
-        return std::unexpected<error_code> {error_code::Undefined};
+        return std::unexpected {error_code::Undefined};
     }
 
     template <ConvertibleFrom T>
@@ -383,18 +386,18 @@ inline auto function<R>::call(auto&&... params) const -> std::expected<R, error_
     SQInteger const paramsCount {view.get_top() - oldTop};
 
     // call squirrel function
-    auto result {upcall(paramsCount, !std::is_void_v<return_type>)};
+    auto const result {upcall(paramsCount, !std::is_void_v<return_type>)};
     if constexpr (std::is_void_v<R>) {
-        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
+        return !result ? std::expected<void, error_code> {} : std::unexpected {*result};
     } else {
+        if (result) { return std::unexpected {*result}; }
+
         R retValue {};
-        if (result == error_code::Ok) {
-            if (!view.pull_convert_idx(view.get_top(), retValue)) {
-                result = error_code::TypeMismatch;
-            }
+        if (!view.pull_convert_idx(view.get_top(), retValue)) {
+            return std::unexpected {error_code::TypeMismatch};
         }
 
-        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        return std::expected<R, error_code> {std::move(retValue)};
     }
 }
 
@@ -427,11 +430,11 @@ inline auto generator::resume() const -> std::expected<R, error_code>
             R retValue {};
             return view.pull_convert_idx(view.get_top(), retValue)
                 ? std::expected<R, error_code> {std::move(retValue)}
-                : std::unexpected<error_code> {error_code::TypeMismatch};
+                : std::unexpected {error_code::TypeMismatch};
         }
     }
 
-    return std::unexpected<error_code> {error_code::Error};
+    return std::unexpected {error_code::Error};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -449,18 +452,18 @@ inline auto thread::call(auto&&... params) const -> std::expected<R, error_code>
     SQInteger const paramsCount {thread.get_top() - oldTop};
 
     // call squirrel function
-    auto result {thread.call(paramsCount, !std::is_void_v<R>, true)};
+    auto const result {thread.call(paramsCount, !std::is_void_v<R>, true)};
     if constexpr (std::is_void_v<R>) {
-        return result == error_code::Ok ? std::expected<void, error_code> {} : std::unexpected<error_code>(result);
+        return !result ? std::expected<void, error_code> {} : std::unexpected {*result};
     } else {
+        if (result) { return std::unexpected {*result}; }
+
         R retValue {};
-        if (result == error_code::Ok) {
-            if (!thread.pull_convert_idx(thread.get_top(), retValue)) {
-                result = error_code::TypeMismatch;
-            }
+        if (!thread.pull_convert_idx(thread.get_top(), retValue)) {
+            return std::unexpected {error_code::TypeMismatch};
         }
 
-        return result == error_code::Ok ? std::expected<R, error_code>(std::move(retValue)) : std::unexpected<error_code>(result);
+        return std::expected<R, error_code> {std::move(retValue)};
     }
 }
 
@@ -484,11 +487,11 @@ inline auto thread::wake_up(auto&& arg) const -> std::expected<R, error_code>
             R retValue {};
             return thread.pull_convert_idx(thread.get_top(), retValue)
                 ? std::expected<R, error_code> {std::move(retValue)}
-                : std::unexpected<error_code> {error_code::TypeMismatch};
+                : std::unexpected {error_code::TypeMismatch};
         }
     }
 
-    return std::unexpected<error_code> {error_code::Error};
+    return std::unexpected {error_code::Error};
 }
 
 }

@@ -10,6 +10,7 @@
 
     #include <concepts>
     #include <cstddef>
+    #include <optional>
     #include <type_traits>
 
     #include "tcob/core/Interfaces.hpp"
@@ -270,8 +271,8 @@ public:
 
     void error(string const& message) const;
 
-    auto call(i32 nargs) const -> error_code;
-    auto pcall(i32 nargs) const -> error_code;
+    void call(i32 nargs) const;
+    auto pcall(i32 nargs) const -> std::optional<error_code>;
 
     auto traceback(i32 level) const -> string;
 

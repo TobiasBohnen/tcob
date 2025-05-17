@@ -175,7 +175,7 @@ template <ConvertibleFrom T>
 inline auto object::get(string_view key) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
-    if (!val) { return std::unexpected<error_code> {error_code::Undefined}; }
+    if (!val) { return std::unexpected {error_code::Undefined}; }
 
     return val->template get<T>();
 }
@@ -184,26 +184,26 @@ template <ConvertibleFrom T, typename... Keys>
 inline auto object::get(string_view key, string_view subkey, Keys&&... keys) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
-    if (!val) { return std::unexpected<error_code> {error_code::Undefined}; }
+    if (!val) { return std::unexpected {error_code::Undefined}; }
 
     if (object sub; val->try_get(sub)) {                        // If the value is a object (a nested key-value pair)
         return sub.get<T>(subkey, std::forward<Keys>(keys)...); // Recursively search the nested object for the value
     }
 
-    return std::unexpected<error_code> {error_code::TypeMismatch};
+    return std::unexpected {error_code::TypeMismatch};
 }
 
 template <ConvertibleFrom T>
 inline auto object::get(string_view key, isize index) const -> std::expected<T, error_code>
 {
     auto const* val {get_entry(key)};
-    if (!val) { return std::unexpected<error_code> {error_code::Undefined}; }
+    if (!val) { return std::unexpected {error_code::Undefined}; }
 
     if (array sub; val->try_get(sub)) { // If the value is an array
         return sub.get<T>(index);       // Recursively search the array for the value
     }
 
-    return std::unexpected<error_code> {error_code::TypeMismatch};
+    return std::unexpected {error_code::TypeMismatch};
 }
 
 template <ConvertibleFrom T>
@@ -374,7 +374,7 @@ inline auto array::make(auto&&... indices) const -> T
 template <ConvertibleFrom T>
 inline auto array::get(isize index) const -> std::expected<T, error_code>
 {
-    if (index < 0 || index >= size()) { return std::unexpected<error_code> {error_code::Undefined}; }
+    if (index < 0 || index >= size()) { return std::unexpected {error_code::Undefined}; }
 
     return (*values())[static_cast<usize>(index)].get<T>();
 }
@@ -425,7 +425,7 @@ inline auto entry::get() const -> std::expected<T, error_code>
     T retValue {};
     return converter<T>::From(_value, retValue)
         ? std::expected<T, error_code> {std::move(retValue)}
-        : std::unexpected<error_code> {error_code::TypeMismatch};
+        : std::unexpected {error_code::TypeMismatch};
 }
 
 template <typename T>

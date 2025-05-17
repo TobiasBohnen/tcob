@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
+    #include <expected>
     #include <functional>
     #include <memory>
     #include <optional>
@@ -76,7 +77,7 @@ private:
     template <typename T>
     auto impl_create_wrapper(string const& name) -> std::shared_ptr<wrapper<T>>;
 
-    auto call_buffer(string_view script, string const& name) const -> error_code;
+    auto call_buffer(string_view script, string const& name) const -> std::optional<error_code>;
     auto load_binary_buffer(string_view script, string const& name) const -> bool;
 
     template <typename... Args>

@@ -77,7 +77,7 @@ auto script::create_table() const -> table
     return table {_view};
 }
 
-auto script::call_buffer(string_view script, string const& name) const -> error_code
+auto script::call_buffer(string_view script, string const& name) const -> std::optional<error_code>
 {
     if (_view.load_buffer(script, name)) {
         if (_environment) {

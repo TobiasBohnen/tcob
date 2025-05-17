@@ -8,8 +8,10 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <expected>
     #include <functional>
     #include <memory>
+    #include <optional>
 
     #include "tcob/scripting/Script.hpp"
     #include "tcob/scripting/Scripting.hpp"
@@ -62,7 +64,7 @@ private:
     template <typename T>
     auto impl_create_wrapper(string const& name) -> std::shared_ptr<wrapper<T>>;
 
-    auto call_buffer(string_view script, string const& name, bool retValue) const -> error_code;
+    auto call_buffer(string_view script, string const& name, bool retValue) const -> std::optional<error_code>;
 
     template <typename... Args>
     void load_library(library lib, Args... args);

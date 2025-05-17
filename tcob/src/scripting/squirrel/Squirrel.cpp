@@ -8,6 +8,7 @@
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
     #include <iterator>
+    #include <optional>
     #include <vector>
 
     #include <squirrel.h>
@@ -560,9 +561,9 @@ auto vm_view::get_error() const -> string
     return "";
 }
 
-auto vm_view::call(SQInteger params, bool retVal, bool raiseError) const -> error_code
+auto vm_view::call(SQInteger params, bool retVal, bool raiseError) const -> std::optional<error_code>
 {
-    return sq_call(_vm, params, retVal, raiseError) == SQ_OK ? error_code::Ok : error_code::Error;
+    return sq_call(_vm, params, retVal, raiseError) == SQ_OK ? std::nullopt : std::optional {error_code::Error};
 }
 
 void vm_view::enable_debug_info(bool enable) const
@@ -570,13 +571,13 @@ void vm_view::enable_debug_info(bool enable) const
     sq_enabledebuginfo(_vm, enable);
 }
 
-auto vm_view::compile_buffer(string_view script, string const& name) const -> error_code
+auto vm_view::compile_buffer(string_view script, string const& name) const -> std::optional<error_code>
 {
     #if defined(TCOB_DEBUG)
     enable_debug_info(true);
     #endif
 
-    return sq_compilebuffer(_vm, script.data(), std::ssize(script), name.c_str(), true) == SQ_OK ? error_code::Ok : error_code::Error;
+    return sq_compilebuffer(_vm, script.data(), std::ssize(script), name.c_str(), true) == SQ_OK ? std::nullopt : std::optional {error_code::Error};
 }
 
 void vm_view::set_print_func(SQPRINTFUNCTION printfunc, SQPRINTFUNCTION errfunc) const

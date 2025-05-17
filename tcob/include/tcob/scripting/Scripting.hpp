@@ -12,7 +12,6 @@ namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
 
 enum class error_code : u8 {
-    Ok,
     Undefined,
     TypeMismatch,
     NonTableIndex,
