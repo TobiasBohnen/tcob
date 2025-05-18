@@ -413,9 +413,10 @@ inline wrapper<T>::unknown_get_event::unknown_get_event(T* instance, string name
 }
 
 template <typename T>
-inline void wrapper<T>::unknown_get_event::return_value(auto&& value) const
+inline void wrapper<T>::unknown_get_event::return_value(auto&& value)
 {
     _view.push_convert(std::move(value));
+    Handled = true;
 }
 
 ////////////////////////////////////////////////////////////
@@ -430,10 +431,13 @@ inline wrapper<T>::unknown_set_event::unknown_set_event(T* instance, string name
 
 template <typename T>
 template <typename X>
-inline auto wrapper<T>::unknown_set_event::get_value(X& val) const -> bool
+inline auto wrapper<T>::unknown_set_event::get_value(X& val) -> bool
 {
     if (converter<X>::IsType(_view, 2)) {
-        return _view.pull_convert_idx(2, val);
+        if (_view.pull_convert_idx(2, val)) {
+            Handled = true;
+            return true;
+        }
     }
 
     return false;

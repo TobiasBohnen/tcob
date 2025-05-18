@@ -52,7 +52,7 @@ public:
         string Name;
         bool   Handled {false};
 
-        void return_value(auto&& value) const;
+        void return_value(auto&& value);
 
     private:
         vm_view _view {nullptr};
@@ -67,7 +67,7 @@ public:
         bool   Handled {false};
 
         template <typename X>
-        auto get_value(X& val) const -> bool;
+        auto get_value(X& val) -> bool;
 
     private:
         vm_view _view {nullptr};
