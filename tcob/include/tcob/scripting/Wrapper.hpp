@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <tuple>
+#include <utility>
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
@@ -26,19 +27,10 @@ struct setter {
 };
 
 template <typename Get, typename Set>
-struct property {
-    Get Getter;
-    Set Setter;
-};
+using property = std::pair<Get, Set>;
 
 template <typename... Ts>
-struct overload {
-    overload(Ts... items)
-        : Overloads {items...}
-    {
-    }
-    std::tuple<Ts...> Overloads;
-};
+using overload = std::tuple<Ts...>;
 
 ////////////////////////////////////////////////////////////
 

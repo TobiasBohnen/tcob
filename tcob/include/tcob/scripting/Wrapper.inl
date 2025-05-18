@@ -50,7 +50,7 @@ template <typename WrapperImpl>
 template <typename Get, typename Set>
 inline auto wrapper<WrapperImpl>::proxy::operator=(property<Get, Set> const& prop) -> proxy&
 {
-    _parent.wrap_property(_name, prop.Getter, prop.Setter);
+    _parent.wrap_property(_name, prop.first, prop.second);
     return *this;
 }
 
@@ -60,7 +60,7 @@ inline auto wrapper<WrapperImpl>::proxy::operator=(overload<Ts...> const& ov) ->
 {
     std::apply(
         [&](auto&&... item) { _parent.wrap_overload(_name, item...); },
-        ov.Overloads);
+        ov);
 
     return *this;
 }
