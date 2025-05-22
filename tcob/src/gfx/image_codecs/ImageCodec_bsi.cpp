@@ -19,7 +19,7 @@ namespace tcob::gfx::detail {
 void bsi::header::read(io::istream& reader)
 {
     reader.read_to<ubyte>(Sig);
-    Size   = {static_cast<i32>(reader.read<u32>()), static_cast<i32>(reader.read<u32, std::endian::little>())};
+    Size   = {static_cast<i32>(reader.read<u32, std::endian::little>()), static_cast<i32>(reader.read<u32, std::endian::little>())};
     Format = static_cast<image::format>(reader.read<u8>());
 }
 
@@ -44,7 +44,7 @@ auto bsi_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     bsi::header header {};
     header.read(in);
     return header.Sig == SIGNATURE
-        ? std::optional {image::information {header.Size, header.Format}}
+        ? std::optional {image::information {.Size = header.Size, .Format = header.Format}}
         : std::nullopt;
 }
 

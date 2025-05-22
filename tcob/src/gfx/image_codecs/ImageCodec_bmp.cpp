@@ -5,6 +5,7 @@
 
 #include "ImageCodec_bmp.hpp"
 
+#include <bit>
 #include <cmath>
 #include <ios>
 #include <optional>
@@ -22,39 +23,39 @@ namespace bmp {
 
     void bitmap_file_header::read(io::istream& reader)
     {
-        Signature = reader.read<u16>();
-        Size      = reader.read<u32>();
-        reader.read<u32>();
-        BitsOffset = reader.read<u32>();
+        Signature = reader.read<u16, std::endian::little>();
+        Size      = reader.read<u32, std::endian::little>();
+        reader.read<u32, std::endian::little>();
+        BitsOffset = reader.read<u32, std::endian::little>();
     }
 
     void bitmap_info_header::read(io::istream& reader)
     {
         read40(reader);
-        RedMask   = reader.read<u32>();
-        GreenMask = reader.read<u32>();
-        BlueMask  = reader.read<u32>();
-        AlphaMask = reader.read<u32>();
-        CsType    = reader.read<u32>();
+        RedMask   = reader.read<u32, std::endian::little>();
+        GreenMask = reader.read<u32, std::endian::little>();
+        BlueMask  = reader.read<u32, std::endian::little>();
+        AlphaMask = reader.read<u32, std::endian::little>();
+        CsType    = reader.read<u32, std::endian::little>();
         reader.read_to<u32>(Endpoints);
-        GammaRed   = reader.read<u32>();
-        GammaGreen = reader.read<u32>();
-        GammaBlue  = reader.read<u32>();
+        GammaRed   = reader.read<u32, std::endian::little>();
+        GammaGreen = reader.read<u32, std::endian::little>();
+        GammaBlue  = reader.read<u32, std::endian::little>();
     }
 
     void bitmap_info_header::read40(io::istream& reader)
     {
-        HeaderSize    = reader.read<u32>();
-        Width         = reader.read<i32>();
-        Height        = reader.read<i32>();
-        Planes        = reader.read<u16>();
-        BitCount      = reader.read<u16>();
-        Compression   = static_cast<compression>(reader.read<u32>());
-        SizeImage     = reader.read<u32>();
-        PelsPerMeterX = reader.read<i32>();
-        PelsPerMeterY = reader.read<i32>();
-        ClrUsed       = reader.read<u32>();
-        ClrImportant  = reader.read<u32>();
+        HeaderSize    = reader.read<u32, std::endian::little>();
+        Width         = reader.read<i32, std::endian::little>();
+        Height        = reader.read<i32, std::endian::little>();
+        Planes        = reader.read<u16, std::endian::little>();
+        BitCount      = reader.read<u16, std::endian::little>();
+        Compression   = static_cast<compression>(reader.read<u32, std::endian::little>());
+        SizeImage     = reader.read<u32, std::endian::little>();
+        PelsPerMeterX = reader.read<i32, std::endian::little>();
+        PelsPerMeterY = reader.read<i32, std::endian::little>();
+        ClrUsed       = reader.read<u32, std::endian::little>();
+        ClrImportant  = reader.read<u32, std::endian::little>();
     }
 }
 

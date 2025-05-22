@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cmath>
 #include <ios>
 #include <limits>
@@ -79,8 +80,8 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
     u32 keyIdx {0};
     switch (_stringPoolSize) {
     case bsbd::marker_type::UInt8:  keyIdx = stream.read<u8>(); break;
-    case bsbd::marker_type::UInt16: keyIdx = stream.read<u16>(); break;
-    case bsbd::marker_type::UInt32: keyIdx = stream.read<u32>(); break;
+    case bsbd::marker_type::UInt16: keyIdx = stream.read<u16, std::endian::little>(); break;
+    case bsbd::marker_type::UInt32: keyIdx = stream.read<u32, std::endian::little>(); break;
     default:                        return false;
     }
     if (keyIdx >= _stringPool.size()) { return false; }
@@ -94,19 +95,19 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
 
     switch (type) {
     case bsbd::marker_type::Int8:         obj.set_entry(key, stream.read<i8>()); return true;
-    case bsbd::marker_type::Int16:        obj.set_entry(key, stream.read<i16>()); return true;
-    case bsbd::marker_type::Int32:        obj.set_entry(key, stream.read<i32>()); return true;
+    case bsbd::marker_type::Int16:        obj.set_entry(key, stream.read<i16, std::endian::little>()); return true;
+    case bsbd::marker_type::Int32:        obj.set_entry(key, stream.read<i32, std::endian::little>()); return true;
     case bsbd::marker_type::UInt8:        obj.set_entry(key, stream.read<u8>()); return true;
-    case bsbd::marker_type::UInt16:       obj.set_entry(key, stream.read<u16>()); return true;
-    case bsbd::marker_type::UInt32:       obj.set_entry(key, stream.read<u32>()); return true;
-    case bsbd::marker_type::Int64:        obj.set_entry(key, stream.read<i64>()); return true;
-    case bsbd::marker_type::Float32:      obj.set_entry(key, stream.read<f32>()); return true;
-    case bsbd::marker_type::Float64:      obj.set_entry(key, stream.read<f64>()); return true;
+    case bsbd::marker_type::UInt16:       obj.set_entry(key, stream.read<u16, std::endian::little>()); return true;
+    case bsbd::marker_type::UInt32:       obj.set_entry(key, stream.read<u32, std::endian::little>()); return true;
+    case bsbd::marker_type::Int64:        obj.set_entry(key, stream.read<i64, std::endian::little>()); return true;
+    case bsbd::marker_type::Float32:      obj.set_entry(key, stream.read<f32, std::endian::little>()); return true;
+    case bsbd::marker_type::Float64:      obj.set_entry(key, stream.read<f64, std::endian::little>()); return true;
     case bsbd::marker_type::BoolTrue:     obj.set_entry(key, true); return true;
     case bsbd::marker_type::BoolFalse:    obj.set_entry(key, false); return true;
 
-    case bsbd::marker_type::LongString:   obj.set_entry(key, stream.read_string(stream.read<long_string_size>())); return true;
-    case bsbd::marker_type::ShortString:  obj.set_entry(key, stream.read_string(stream.read<short_string_size>())); return true;
+    case bsbd::marker_type::LongString:   obj.set_entry(key, stream.read_string(stream.read<long_string_size, std::endian::little>())); return true;
+    case bsbd::marker_type::ShortString:  obj.set_entry(key, stream.read_string(stream.read<short_string_size, std::endian::little>())); return true;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
@@ -152,19 +153,19 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
 
     switch (type) {
     case bsbd::marker_type::Int8:         arr.add_entry(stream.read<i8>()); break;
-    case bsbd::marker_type::Int16:        arr.add_entry(stream.read<i16>()); break;
-    case bsbd::marker_type::Int32:        arr.add_entry(stream.read<i32>()); break;
+    case bsbd::marker_type::Int16:        arr.add_entry(stream.read<i16, std::endian::little>()); break;
+    case bsbd::marker_type::Int32:        arr.add_entry(stream.read<i32, std::endian::little>()); break;
     case bsbd::marker_type::UInt8:        arr.add_entry(stream.read<u8>()); break;
-    case bsbd::marker_type::UInt16:       arr.add_entry(stream.read<u16>()); break;
-    case bsbd::marker_type::UInt32:       arr.add_entry(stream.read<u32>()); break;
-    case bsbd::marker_type::Int64:        arr.add_entry(stream.read<i64>()); break;
-    case bsbd::marker_type::Float32:      arr.add_entry(stream.read<f32>()); break;
-    case bsbd::marker_type::Float64:      arr.add_entry(stream.read<f64>()); break;
+    case bsbd::marker_type::UInt16:       arr.add_entry(stream.read<u16, std::endian::little>()); break;
+    case bsbd::marker_type::UInt32:       arr.add_entry(stream.read<u32, std::endian::little>()); break;
+    case bsbd::marker_type::Int64:        arr.add_entry(stream.read<i64, std::endian::little>()); break;
+    case bsbd::marker_type::Float32:      arr.add_entry(stream.read<f32, std::endian::little>()); break;
+    case bsbd::marker_type::Float64:      arr.add_entry(stream.read<f64, std::endian::little>()); break;
     case bsbd::marker_type::BoolTrue:     arr.add_entry(true); break;
     case bsbd::marker_type::BoolFalse:    arr.add_entry(false); break;
 
-    case bsbd::marker_type::LongString:   arr.add_entry(stream.read_string(stream.read<long_string_size>())); break;
-    case bsbd::marker_type::ShortString:  arr.add_entry(stream.read_string(stream.read<short_string_size>())); break;
+    case bsbd::marker_type::LongString:   arr.add_entry(stream.read_string(stream.read<long_string_size, std::endian::little>())); break;
+    case bsbd::marker_type::ShortString:  arr.add_entry(stream.read_string(stream.read<short_string_size, std::endian::little>())); break;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
@@ -196,8 +197,8 @@ auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
     u64 poolSize {0};
     switch (_stringPoolSize) {
     case bsbd::marker_type::UInt8:  poolSize = stream.read<u8>(); break;
-    case bsbd::marker_type::UInt16: poolSize = stream.read<u16>(); break;
-    case bsbd::marker_type::UInt32: poolSize = stream.read<u32>(); break;
+    case bsbd::marker_type::UInt16: poolSize = stream.read<u16, std::endian::little>(); break;
+    case bsbd::marker_type::UInt32: poolSize = stream.read<u32, std::endian::little>(); break;
     default:                        return false;
     }
 
@@ -207,8 +208,8 @@ auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
         std::streamsize len {0};
         switch (element) {
         case bsbd::marker_type::UInt8:  len = stream.read<u8>(); break;
-        case bsbd::marker_type::UInt16: len = stream.read<u16>(); break;
-        case bsbd::marker_type::UInt32: len = stream.read<u32>(); break;
+        case bsbd::marker_type::UInt16: len = stream.read<u16, std::endian::little>(); break;
+        case bsbd::marker_type::UInt32: len = stream.read<u32, std::endian::little>(); break;
         default:                        return false;
         }
         _stringPool[i] = stream.read_string(len);
@@ -290,12 +291,12 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         write_key(stream, type, name);
         switch (type) {
         case bsbd::marker_type::Int8:   stream.write(static_cast<i8>(val)); break;
-        case bsbd::marker_type::Int16:  stream.write(static_cast<i16>(val)); break;
-        case bsbd::marker_type::Int32:  stream.write(static_cast<i32>(val)); break;
+        case bsbd::marker_type::Int16:  stream.write<i16, std::endian::little>(static_cast<i16>(val)); break;
+        case bsbd::marker_type::Int32:  stream.write<i32, std::endian::little>(static_cast<i32>(val)); break;
         case bsbd::marker_type::UInt8:  stream.write(static_cast<u8>(val)); break;
-        case bsbd::marker_type::UInt16: stream.write(static_cast<u16>(val)); break;
-        case bsbd::marker_type::UInt32: stream.write(static_cast<u32>(val)); break;
-        case bsbd::marker_type::Int64:  stream.write(val); break;
+        case bsbd::marker_type::UInt16: stream.write<u16, std::endian::little>(static_cast<u16>(val)); break;
+        case bsbd::marker_type::UInt32: stream.write<u32, std::endian::little>(static_cast<u32>(val)); break;
+        case bsbd::marker_type::Int64:  stream.write<i64, std::endian::little>(val); break;
         default:                        break;
         }
     } else if (ent.is<f64>()) {
@@ -303,19 +304,19 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         auto const type {fit_float(val)};
         write_key(stream, type, name);
         switch (type) {
-        case bsbd::marker_type::Float32: stream.write(static_cast<f32>(val)); break;
-        case bsbd::marker_type::Float64: stream.write(val); break;
+        case bsbd::marker_type::Float32: stream.write<f32, std::endian::little>(static_cast<f32>(val)); break;
+        case bsbd::marker_type::Float64: stream.write<f64, std::endian::little>(val); break;
         default:                         break;
         }
     } else if (ent.is<utf8_string>()) {
         auto const str {ent.as<utf8_string>()};
         if (str.size() <= std::numeric_limits<short_string_size>::max()) {
             write_key(stream, bsbd::marker_type::ShortString, name);
-            stream.write(static_cast<short_string_size>(str.size()));
+            stream.write<short_string_size, std::endian::little>(static_cast<short_string_size>(str.size()));
         } else {
             // TODO: size check
             write_key(stream, bsbd::marker_type::LongString, name);
-            stream.write(static_cast<long_string_size>(str.size()));
+            stream.write<long_string_size, std::endian::little>(static_cast<long_string_size>(str.size()));
         }
         stream.write(str);
     } else if (ent.is<array>()) {
@@ -332,8 +333,8 @@ void bsbd_writer::write_key(io::ostream& stream, bsbd::marker_type type, utf8_st
         auto const val {_stringPool.at(name)};
         switch (_stringPoolSize) {
         case bsbd::marker_type::UInt8:  stream.write(static_cast<u8>(val)); break;
-        case bsbd::marker_type::UInt16: stream.write(static_cast<u16>(val)); break;
-        case bsbd::marker_type::UInt32: stream.write(static_cast<u32>(val)); break;
+        case bsbd::marker_type::UInt16: stream.write<u16, std::endian::little>(static_cast<u16>(val)); break;
+        case bsbd::marker_type::UInt32: stream.write<u32, std::endian::little>(static_cast<u32>(val)); break;
         default:                        break;
         }
     }
@@ -375,11 +376,11 @@ auto bsbd_writer::write_string_pool(io::ostream& stream) -> bool
     } else if (poolSize <= std::numeric_limits<u16>::max()) {
         _stringPoolSize = bsbd::marker_type::UInt16;
         stream.write(_stringPoolSize);
-        stream.write(static_cast<u16>(poolSize));
+        stream.write<u16, std::endian::little>(static_cast<u16>(poolSize));
     } else if (poolSize <= std::numeric_limits<u32>::max()) {
         _stringPoolSize = bsbd::marker_type::UInt32;
         stream.write(_stringPoolSize);
-        stream.write(static_cast<u32>(poolSize));
+        stream.write<u32, std::endian::little>(static_cast<u32>(poolSize));
     } else {
         return false;
     }
@@ -408,8 +409,8 @@ auto bsbd_writer::write_string_pool(io::ostream& stream) -> bool
     for (auto const& s : stringIdx) {
         switch (element) {
         case bsbd::marker_type::UInt8:  stream.write(static_cast<u8>(s.second.size())); break;
-        case bsbd::marker_type::UInt16: stream.write(static_cast<u16>(s.second.size())); break;
-        case bsbd::marker_type::UInt32: stream.write(static_cast<u32>(s.second.size())); break;
+        case bsbd::marker_type::UInt16: stream.write<u16, std::endian::little>(static_cast<u16>(s.second.size())); break;
+        case bsbd::marker_type::UInt32: stream.write<u32, std::endian::little>(static_cast<u32>(s.second.size())); break;
         default:                        break;
         }
         stream.write(s.second);
