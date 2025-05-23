@@ -47,10 +47,10 @@ void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally,
     rect_f const rect {region.UVRect};
     f32 const    level {static_cast<f32>(region.Level)};
 
-    uv topRight {rect.right(), rect.top(), level};
-    uv bottomRight {rect.right(), rect.bottom(), level};
-    uv bottomLeft {rect.left(), rect.bottom(), level};
-    uv topLeft {rect.left(), rect.top(), level};
+    uv topRight {.U = rect.right(), .V = rect.top(), .Level = level};
+    uv bottomRight {.U = rect.right(), .V = rect.bottom(), .Level = level};
+    uv bottomLeft {.U = rect.left(), .V = rect.bottom(), .Level = level};
+    uv topLeft {.U = rect.left(), .V = rect.top(), .Level = level};
 
     if (flipHorizontally) {
         std::swap(topLeft, topRight);
@@ -77,10 +77,10 @@ void scroll_texcoords(quad& q, point_f offset)
     rect_f const rect {left, top, right - left, bottom - top};
     f32 const    level {q[0].TexCoords.Level};
 
-    q[0].TexCoords = {rect.right(), rect.top(), level};
-    q[1].TexCoords = {rect.right(), rect.bottom(), level};
-    q[2].TexCoords = {rect.left(), rect.bottom(), level};
-    q[3].TexCoords = {rect.left(), rect.top(), level};
+    q[0].TexCoords = {.U = rect.right(), .V = rect.top(), .Level = level};
+    q[1].TexCoords = {.U = rect.right(), .V = rect.bottom(), .Level = level};
+    q[2].TexCoords = {.U = rect.left(), .V = rect.bottom(), .Level = level};
+    q[3].TexCoords = {.U = rect.left(), .V = rect.top(), .Level = level};
 }
 
 }

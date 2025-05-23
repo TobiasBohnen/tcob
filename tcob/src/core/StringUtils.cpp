@@ -158,10 +158,10 @@ auto wildcard_match(string_view str, string_view pattern) -> bool
 
 auto random_string(usize length) -> string
 {
-    std::string static const characters {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"};
+    string static const characters {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"};
     rng static rand;
 
-    std::string retValue;
+    string retValue;
     for (usize i {0}; i < length; ++i) {
         retValue += characters[rand(usize {0}, characters.size() - 1)];
     }

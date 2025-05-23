@@ -189,7 +189,7 @@ struct std::formatter<tcob::gfx::font::style> {
 
     auto format(tcob::gfx::font::style val, format_context& ctx) const
     {
-        std::string weight;
+        string weight;
         switch (val.Weight) {
         case tcob::gfx::font::weight::Thin:       weight = "Thin"; break;
         case tcob::gfx::font::weight::ExtraLight: weight = "ExtraLight"; break;

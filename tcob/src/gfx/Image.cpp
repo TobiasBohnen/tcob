@@ -211,11 +211,6 @@ auto image::save(path const& file) const noexcept -> bool
 
 auto image::save(io::ostream& out, string const& ext) const noexcept -> bool
 {
-    if (_info.Format != image::format::RGBA
-        && _info.Format != image::format::RGB) { // TODO:
-        return false;
-    }
-
     if (auto enc {locate_service<image_encoder::factory>().create(ext)}) {
         return enc->encode(*this, out);
     }
@@ -251,10 +246,8 @@ auto image::information::stride() const -> i32
 auto image::information::GetBPP(format f) -> i32
 {
     switch (f) {
-    case image::format::RGB:
-        return 3;
-    case image::format::RGBA:
-        return 4;
+    case image::format::RGB:  return 3;
+    case image::format::RGBA: return 4;
     }
 
     return 0;

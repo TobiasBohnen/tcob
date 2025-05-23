@@ -25,7 +25,7 @@ namespace tcob::scripting::squirrel {
 
 namespace detail {
     ////////////////////////////////////////////////////////////
-    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> std::string
+    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> string
     {
         switch (m) {
         case metamethod::Add:        return "_add";

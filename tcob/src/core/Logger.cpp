@@ -128,9 +128,7 @@ file_logger::~file_logger() = default;
 
 void file_logger::log(string const& message, level level) const
 {
-    if (level < MinLevel) {
-        return;
-    }
+    if (level < MinLevel) { return; }
 
     *_logStream << format_message(message, level);
 }

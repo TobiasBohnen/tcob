@@ -7,7 +7,6 @@
 
 #include <ios>
 #include <sstream>
-#include <string>
 #include <unordered_map>
 
 #include "tcob/core/StringUtils.hpp"
@@ -163,11 +162,6 @@ auto color::FromString(string_view name) -> color
 
     if (name.empty()) { return colors::Transparent; }
 
-    string const test {helper::to_lower(name)};
-    if (colorMap.contains(test)) {
-        return colorMap.at(test);
-    }
-
     if (name[0] == '#') {
         std::stringstream ss {};
 
@@ -175,15 +169,13 @@ auto color::FromString(string_view name) -> color
         string_view const color {name.substr(1)};
         switch (color.size()) {
         case 3:
-            for (char ch : color) { ss << std::string(2, ch); }
+            for (char ch : color) { ss << string(2, ch); }
             ss << "ff";
             break;
         case 4:
-            for (char ch : color) { ss << std::string(2, ch); }
+            for (char ch : color) { ss << string(2, ch); }
             break;
-        case 6:
-            ss << color << "ff";
-            break;
+        case 6: ss << color << "ff"; break;
         case 8: ss << color; break;
         }
 
@@ -191,6 +183,9 @@ auto color::FromString(string_view name) -> color
         ss >> x;
         return color::FromRGBA(x);
     }
+
+    string const test {helper::to_lower(name)};
+    if (colorMap.contains(test)) { return colorMap.at(test); }
 
     return {0, 0, 0, 0};
 }
