@@ -85,7 +85,7 @@ void audio_stream::clear()
 
 auto audio_stream::get() -> std::vector<f32>
 {
-    std::vector<f32> data((available_bytes()) / sizeof(f32));
+    std::vector<f32> data(available_bytes() / sizeof(f32));
     i32 const        ret {SDL_GetAudioStreamData(_impl, data.data(), static_cast<i32>(data.size() * sizeof(f32)))};
     if (ret == -1) { return {}; }
     data.resize(ret / sizeof(f32));
