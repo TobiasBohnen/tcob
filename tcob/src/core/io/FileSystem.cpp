@@ -70,17 +70,14 @@ auto static EnumerateCallback(void* data, char const* origdir, char const* fname
             cd->Files.insert(entry);
         }
     } break;
-    case file_type::Folder:
-        cd->Folders.insert(entry);
-        break;
-    default:
-        break;
+    case file_type::Folder: cd->Folders.insert(entry); break;
+    default:                break;
     }
 
     return PHYSFS_ENUM_OK;
 }
 
-auto static emptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_EnumerateCallbackResult
+auto static EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_EnumerateCallbackResult
 {
     bool* ok {static_cast<bool*>(data)};
     *ok = false;
@@ -265,7 +262,7 @@ auto is_folder_empty(path const& folder) -> bool
     if (!is_folder(folder)) { return false; }
 
     bool retValue {true};
-    PHYSFS_enumerate(folder.c_str(), &emptyEnumCallback, &retValue);
+    PHYSFS_enumerate(folder.c_str(), &EmptyEnumCallback, &retValue);
     return retValue;
 }
 

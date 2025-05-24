@@ -1630,7 +1630,7 @@ void static DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int 
     verts.reserve(vertexCount);
     for (auto const& v : span) { verts.emplace_back(v.x, v.y); }
 
-    ddraw->Impl->draw_solid_polygon({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, verts, radius, color::FromRGB(color));
+    ddraw->Impl->draw_solid_polygon({.Center = {transform.p.x, transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(transform.q)}}, verts, radius, color::FromRGB(color));
 }
 
 void static DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* context)
@@ -1642,7 +1642,7 @@ void static DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* cont
 void static DrawSolidCircle(b2Transform transform, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->Impl->draw_solid_circle({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}}, radius, color::FromRGB(color));
+    ddraw->Impl->draw_solid_circle({.Center = {transform.p.x, transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(transform.q)}}, radius, color::FromRGB(color));
 }
 
 void static DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
@@ -1660,7 +1660,7 @@ void static DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context)
 void static DrawTransform(b2Transform transform, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
-    ddraw->Impl->draw_transform({{transform.p.x, transform.p.y}, radian_f {b2Rot_GetAngle(transform.q)}});
+    ddraw->Impl->draw_transform({.Center = {transform.p.x, transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(transform.q)}});
 }
 
 void static DrawPoint(b2Vec2 p, float size, b2HexColor color, void* context)
