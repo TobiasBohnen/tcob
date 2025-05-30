@@ -11,7 +11,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Sound.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Source.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator_types.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/synth/SoundGenerator_private.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/synth/SpeechGenerator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_bsa.cpp
 )

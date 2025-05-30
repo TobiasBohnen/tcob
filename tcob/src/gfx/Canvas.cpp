@@ -13,7 +13,7 @@
 #include <variant>
 #include <vector>
 
-#include "Canvas_types.hpp"
+#include "Canvas_private.hpp"
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"

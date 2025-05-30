@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "Canvas_types.hpp"
+#include "Canvas_private.hpp"
 
 #include <algorithm>
 #include <cassert>

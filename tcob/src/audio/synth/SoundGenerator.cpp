@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-#include "SoundGenerator_types.hpp"
+#include "SoundGenerator_private.hpp"
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Sound.hpp"

@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "SoundGenerator_types.hpp"
+#include "SoundGenerator_private.hpp"
 
 #include <algorithm>
 #include <cmath>
