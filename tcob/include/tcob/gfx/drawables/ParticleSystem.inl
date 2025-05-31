@@ -134,7 +134,7 @@ inline void particle_system<Emitter>::on_update(milliseconds deltaTime)
         [&](par_task const& ctx) {
             for (isize i {ctx.Start}; i < ctx.End; ++i) {
                 auto& particle {_particles[i]};
-                if (particle.RemainingLife.count() > 0) {
+                if (particle.is_alive()) {
                     ParticleUpdate({.Particle = particle, .DeltaTime = deltaTime});
                     particle.update(deltaTime);
                 } else {
@@ -172,6 +172,129 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
     _renderer.set_geometry({_geometry.data(), static_cast<usize>(_aliveParticleCount)});
 
     _renderer.render_to_target(target);
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+inline void point_particle::settings::Serialize(point_particle::settings const& v, auto&& s)
+{
+    s["speed"]     = v.Speed;
+    s["direction"] = v.Direction;
+
+    s["linear_acceleration"]     = v.LinearAcceleration;
+    s["linear_dampling"]         = v.LinearDamping;
+    s["radial_acceleration"]     = v.RadialAcceleration;
+    s["tangential_acceleration"] = v.TangentialAcceleration;
+
+    s["gravity"] = v.Gravity;
+
+    s["texture"]      = v.Texture;
+    s["colors"]       = v.Colors;
+    s["transparency"] = v.Transparency;
+
+    s["lifetime"] = v.Lifetime;
+}
+
+inline void quad_particle::settings::Serialize(quad_particle::settings const& v, auto&& s)
+{
+    s["speed"]     = v.Speed;
+    s["direction"] = v.Direction;
+
+    s["linear_acceleration"]     = v.LinearAcceleration;
+    s["linear_dampling"]         = v.LinearDamping;
+    s["radial_acceleration"]     = v.RadialAcceleration;
+    s["tangential_acceleration"] = v.TangentialAcceleration;
+
+    s["gravity"] = v.Gravity;
+
+    s["texture"]      = v.Texture;
+    s["colors"]       = v.Colors;
+    s["transparency"] = v.Transparency;
+
+    s["lifetime"] = v.Lifetime;
+
+    s["scale"]    = v.Scale;
+    s["size"]     = v.Size;
+    s["spin"]     = v.Spin;
+    s["rotation"] = v.Rotation;
+}
+
+inline auto point_particle::settings::Deserialize(point_particle::settings& v, auto&& s) -> bool
+{
+    return s.try_get(v.Speed, "speed")
+        && s.try_get(v.Direction, "direction")
+
+        && s.try_get(v.LinearAcceleration, "linear_acceleration")
+        && s.try_get(v.LinearDamping, "linear_dampling")
+        && s.try_get(v.RadialAcceleration, "radial_acceleration")
+        && s.try_get(v.TangentialAcceleration, "tangential_acceleration")
+
+        && s.try_get(v.Gravity, "gravity")
+
+        && s.try_get(v.Texture, "texture")
+        && s.try_get(v.Colors, "colors")
+        && s.try_get(v.Transparency, "transparency")
+
+        && s.try_get(v.Lifetime, "lifetime");
+}
+
+inline auto quad_particle::settings::Deserialize(quad_particle::settings& v, auto&& s) -> bool
+{
+    return s.try_get(v.Speed, "speed")
+        && s.try_get(v.Direction, "direction")
+
+        && s.try_get(v.LinearAcceleration, "linear_acceleration")
+        && s.try_get(v.LinearDamping, "linear_dampling")
+        && s.try_get(v.RadialAcceleration, "radial_acceleration")
+        && s.try_get(v.TangentialAcceleration, "tangential_acceleration")
+
+        && s.try_get(v.Gravity, "gravity")
+
+        && s.try_get(v.Texture, "texture")
+        && s.try_get(v.Colors, "colors")
+        && s.try_get(v.Transparency, "transparency")
+
+        && s.try_get(v.Lifetime, "lifetime")
+
+        && s.try_get(v.Scale, "scale")
+        && s.try_get(v.Size, "size")
+        && s.try_get(v.Spin, "spin")
+        && s.try_get(v.Rotation, "rotation");
+}
+
+inline void point_particle_emitter::settings::Serialize(point_particle_emitter::settings const& v, auto&& s)
+{
+    s["template"]     = v.Template;
+    s["spawn_area"]   = v.SpawnArea;
+    s["spawn_rate"]   = v.SpawnRate;
+    s["is_explosion"] = v.IsExplosion;
+    if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
+}
+
+inline void quad_particle_emitter::settings::Serialize(quad_particle_emitter::settings const& v, auto&& s)
+{
+    s["template"]     = v.Template;
+    s["spawn_area"]   = v.SpawnArea;
+    s["spawn_rate"]   = v.SpawnRate;
+    s["is_explosion"] = v.IsExplosion;
+    if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
+}
+
+inline auto point_particle_emitter::settings::Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool
+{
+    if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
+    return s.try_get(v.Template, "template")
+        && s.try_get(v.SpawnArea, "spawn_area")
+        && s.try_get(v.SpawnRate, "spawn_rate");
+}
+
+inline auto quad_particle_emitter::settings::Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool
+{
+    if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
+    return s.try_get(v.Template, "template")
+        && s.try_get(v.SpawnArea, "spawn_area")
+        && s.try_get(v.SpawnRate, "spawn_rate");
 }
 
 }

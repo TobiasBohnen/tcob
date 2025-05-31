@@ -33,7 +33,7 @@ void point_particle::convert_to(vertex* vertex) const
 {
     vertex->Position  = Position;
     vertex->Color     = Color;
-    vertex->TexCoords = {Region.UVRect.left(), Region.UVRect.top(), static_cast<f32>(Region.Level)};
+    vertex->TexCoords = {.U = Region.UVRect.left(), .V = Region.UVRect.top(), .Level = static_cast<f32>(Region.Level)};
 }
 
 void point_particle::update(milliseconds deltaTime)
@@ -41,7 +41,7 @@ void point_particle::update(milliseconds deltaTime)
     f32 const seconds {static_cast<f32>(deltaTime.count() / 1000)};
 
     // age
-    RemainingLife -= deltaTime;
+    RemainingLife -= std::chrono::abs(deltaTime);
 
     // move
     point_f const pos {(Position - Origin).as_normalized()};
@@ -58,12 +58,12 @@ void quad_particle::convert_to(quad* quad) const
     geometry::set_texcoords(*quad, Region);
 }
 
-void quad_particle::update(milliseconds delta)
+void quad_particle::update(milliseconds deltaTime)
 {
-    f32 const seconds {static_cast<f32>(delta.count() / 1000)};
+    f32 const seconds {static_cast<f32>(deltaTime.count() / 1000)};
 
     // age
-    RemainingLife -= delta;
+    RemainingLife -= std::chrono::abs(deltaTime);
 
     // move
     point_f const pos {(Bounds.center() - Origin).as_normalized()};
@@ -145,7 +145,7 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
     _remainingLife -= deltaTime;
 
     i32 particleCount {0};
-    if (Settings.Explosion) {
+    if (Settings.IsExplosion) {
         particleCount = static_cast<i32>(Settings.SpawnRate);
         _alive        = false;
     } else {
@@ -194,7 +194,7 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
     _remainingLife -= deltaTime;
 
     i32 particleCount {0};
-    if (Settings.Explosion) {
+    if (Settings.IsExplosion) {
         particleCount = static_cast<i32>(Settings.SpawnRate);
         _alive        = false;
     } else {
@@ -229,6 +229,11 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
         particle.Bounds = {{x, y}, tmpl.Size};
         particle.Origin = particle.Bounds.center();
     }
+}
+
+auto particle_base::is_alive() const -> bool
+{
+    return RemainingLife.count() > 0;
 }
 
 ////////////////////////////////////////////////////////////

@@ -33,11 +33,6 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-void SerializeParticleSettings(auto&& v, auto&& s);
-auto DeserializeParticleSettings(auto&& v, auto&& s) -> bool;
-
-////////////////////////////////////////////////////////////
-
 template <typename T>
 struct particle_event {
     T&           Particle;
@@ -56,7 +51,7 @@ class particle_system final : public drawable, public updatable {
     using renderer_type = typename Emitter::renderer_type;
 
     static_assert(requires(particle_type p, geometry_type* q, milliseconds deltaTime) {
-        { p.RemainingLife } -> std::same_as<milliseconds&>;
+        { p.is_alive() } -> std::same_as<bool>;
         { p.convert_to(q) };
         { p.update(deltaTime) }; }, "Invalid particle type");
 
@@ -119,12 +114,36 @@ template <typename T>
 using min_max = std::pair<T, T>;
 
 ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
-class TCOB_API point_particle final {
+class TCOB_API particle_base {
+public:
+    std::any UserData;
+
+    point_f Velocity {point_f::Zero};
+    point_f LinearAcceleration {point_f::Zero};
+    f32     LinearDamping {0.0f};
+    f32     RadialAcceleration {0.0f};
+    f32     TangentialAcceleration {0.0f};
+    point_f Gravity {point_f::Zero};
+
+    milliseconds StartingLife {0};
+    milliseconds RemainingLife {0};
+
+    color          Color {colors::White};
+    texture_region Region {};
+
+    auto is_alive() const -> bool;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API point_particle final : public particle_base {
 public:
     ////////////////////////////////////////////////////////////
 
-    struct settings {
+    class TCOB_API settings {
+    public:
         min_max<f32>      Speed;
         min_max<degree_f> Direction;
 
@@ -143,39 +162,14 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(point_particle::settings const& v, auto&& s)
-        {
-            SerializeParticleSettings(v, s);
-        }
-
-        auto static Deserialize(point_particle::settings& v, auto&& s) -> bool
-        {
-            return DeserializeParticleSettings(v, s);
-        }
+        void static Serialize(point_particle::settings const& v, auto&& s);
+        auto static Deserialize(point_particle::settings& v, auto&& s) -> bool;
     };
 
     ////////////////////////////////////////////////////////////
 
-    std::any UserData;
-
     point_f Position {point_f::Zero};
     point_f Origin {point_f::Zero};
-
-    point_f Velocity {point_f::Zero};
-
-    point_f LinearAcceleration {point_f::Zero};
-    f32     LinearDamping {0.0f};
-    f32     RadialAcceleration {0.0f};
-    f32     TangentialAcceleration {0.0f};
-
-    point_f Gravity {point_f::Zero};
-
-    color Color {colors::White};
-
-    milliseconds StartingLife {0};
-    milliseconds RemainingLife {0};
-
-    texture_region Region {};
 
     void convert_to(vertex* vertex) const;
 
@@ -184,11 +178,12 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_particle final {
+class TCOB_API quad_particle final : public particle_base {
 public:
     ////////////////////////////////////////////////////////////
 
-    struct settings {
+    class TCOB_API settings {
+    public:
         min_max<f32>      Speed;
         min_max<degree_f> Direction;
 
@@ -213,28 +208,11 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(quad_particle::settings const& v, auto&& s)
-        {
-            SerializeParticleSettings(v, s);
-            s["scale"]    = v.Scale;
-            s["size"]     = v.Size;
-            s["spin"]     = v.Spin;
-            s["rotation"] = v.Rotation;
-        }
-
-        auto static Deserialize(quad_particle::settings& v, auto&& s) -> bool
-        {
-            return DeserializeParticleSettings(v, s)
-                && s.try_get(v.Scale, "scale")
-                && s.try_get(v.Size, "size")
-                && s.try_get(v.Spin, "spin")
-                && s.try_get(v.Rotation, "rotation");
-        }
+        void static Serialize(quad_particle::settings const& v, auto&& s);
+        auto static Deserialize(quad_particle::settings& v, auto&& s) -> bool;
     };
 
     ////////////////////////////////////////////////////////////
-
-    std::any UserData;
 
     size_f  Scale {size_f::One};
     rect_f  Bounds {rect_f::Zero};
@@ -242,22 +220,6 @@ public:
 
     degree_f Spin {0.0f};
     degree_f Rotation {0.0f};
-
-    point_f Velocity {point_f::Zero};
-
-    point_f LinearAcceleration {point_f::Zero};
-    f32     LinearDamping {0.0f};
-    f32     RadialAcceleration {0.0f};
-    f32     TangentialAcceleration {0.0f};
-
-    point_f Gravity {point_f::Zero};
-
-    color Color {colors::White};
-
-    milliseconds StartingLife {0};
-    milliseconds RemainingLife {0};
-
-    texture_region Region {};
 
     void convert_to(quad* quad) const;
 
@@ -268,37 +230,25 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 class TCOB_API point_particle_emitter final {
 public:
     ////////////////////////////////////////////////////////////
 
-    struct settings {
+    class TCOB_API settings {
+    public:
         point_particle::settings Template;
 
-        bool                        Explosion {false};
+        bool                        IsExplosion {false};
         rect_f                      SpawnArea {rect_f::Zero};
         f32                         SpawnRate {0};
         std::optional<milliseconds> Lifetime {};
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(point_particle_emitter::settings const& v, auto&& s)
-        {
-            s["template"]   = v.Template;
-            s["spawn_area"] = v.SpawnArea;
-            s["spawn_rate"] = v.SpawnRate;
-            s["explosion"]  = v.Explosion;
-            if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
-        }
-
-        auto static Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool
-        {
-            if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
-            return s.try_get(v.Template, "template")
-                && s.try_get(v.SpawnArea, "spawn_area")
-                && s.try_get(v.SpawnRate, "spawn_rate");
-        }
+        void static Serialize(point_particle_emitter::settings const& v, auto&& s);
+        auto static Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool;
     };
 
     ////////////////////////////////////////////////////////////
@@ -328,32 +278,19 @@ class TCOB_API quad_particle_emitter final {
 public:
     ////////////////////////////////////////////////////////////
 
-    struct settings {
+    class TCOB_API settings {
+    public:
         quad_particle::settings Template;
 
-        bool                        Explosion {false};
+        bool                        IsExplosion {false};
         rect_f                      SpawnArea {rect_f::Zero};
         f32                         SpawnRate {0};
         std::optional<milliseconds> Lifetime {};
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(quad_particle_emitter::settings const& v, auto&& s)
-        {
-            s["template"]   = v.Template;
-            s["spawn_area"] = v.SpawnArea;
-            s["spawn_rate"] = v.SpawnRate;
-            s["explosion"]  = v.Explosion;
-            if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
-        }
-
-        auto static Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool
-        {
-            if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
-            return s.try_get(v.Template, "template")
-                && s.try_get(v.SpawnArea, "spawn_area")
-                && s.try_get(v.SpawnRate, "spawn_rate");
-        }
+        void static Serialize(quad_particle_emitter::settings const& v, auto&& s);
+        auto static Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool;
     };
 
     ////////////////////////////////////////////////////////////
@@ -381,47 +318,6 @@ private:
 
 using point_particle_system = particle_system<point_particle_emitter>;
 using quad_particle_system  = particle_system<quad_particle_emitter>;
-
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-void SerializeParticleSettings(auto&& v, auto&& s)
-{
-    s["speed"]     = v.Speed;
-    s["direction"] = v.Direction;
-
-    s["linear_acceleration"]     = v.LinearAcceleration;
-    s["linear_dampling"]         = v.LinearDamping;
-    s["radial_acceleration"]     = v.RadialAcceleration;
-    s["tangential_acceleration"] = v.TangentialAcceleration;
-
-    s["gravity"] = v.Gravity;
-
-    s["texture"]      = v.Texture;
-    s["colors"]       = v.Colors;
-    s["transparency"] = v.Transparency;
-
-    s["lifetime"] = v.Lifetime;
-}
-
-auto DeserializeParticleSettings(auto&& v, auto&& s) -> bool
-{
-    return s.try_get(v.Speed, "speed")
-        && s.try_get(v.Direction, "direction")
-
-        && s.try_get(v.LinearAcceleration, "linear_acceleration")
-        && s.try_get(v.LinearDamping, "linear_dampling")
-        && s.try_get(v.RadialAcceleration, "radial_acceleration")
-        && s.try_get(v.TangentialAcceleration, "tangential_acceleration")
-
-        && s.try_get(v.Gravity, "gravity")
-
-        && s.try_get(v.Texture, "texture")
-        && s.try_get(v.Colors, "colors")
-        && s.try_get(v.Transparency, "transparency")
-
-        && s.try_get(v.Lifetime, "lifetime");
-}
 
 ////////////////////////////////////////////////////////////
 
