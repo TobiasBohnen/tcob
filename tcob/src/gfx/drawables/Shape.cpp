@@ -31,7 +31,7 @@ namespace tcob::gfx {
 static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapes)
 {
     for (auto& shape : shapes) {
-        shape->update(milliseconds {0});
+        shape->update(milliseconds::zero());
         if (shape->is_visible()) {
             _renderer.add_geometry(shape->geometry(), shape->Material().ptr());
         }

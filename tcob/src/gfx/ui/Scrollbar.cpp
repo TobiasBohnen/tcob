@@ -162,7 +162,7 @@ void scrollbar::start(f32 target)
 void scrollbar::reset(f32 target)
 {
     _tween.reset(target);
-    _delay = milliseconds {0};
+    _delay = milliseconds::zero();
 }
 
 void scrollbar::calculate_value(point_f mp)

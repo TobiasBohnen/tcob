@@ -128,7 +128,7 @@ void gif_decoder::reset()
     _firstFrame   = true;
     _transparency = false;
 
-    _currentTimeStamp = milliseconds {0};
+    _currentTimeStamp = milliseconds::zero();
     stream().seek(_contentOffset, io::seek_dir::Begin);
 }
 

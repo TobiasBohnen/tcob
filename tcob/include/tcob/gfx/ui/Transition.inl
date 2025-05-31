@@ -17,7 +17,7 @@ inline void transition<T>::try_start(T const* target, milliseconds duration)
 {
     if (target == _targetStyle) { return; }
 
-    _currentTime = milliseconds {0};
+    _currentTime = milliseconds::zero();
     _duration    = duration;
 
     _sourceStyle = _targetStyle;
@@ -27,8 +27,8 @@ inline void transition<T>::try_start(T const* target, milliseconds duration)
 template <typename T>
 inline void transition<T>::reset(T const* target)
 {
-    _currentTime = milliseconds {0};
-    _duration    = milliseconds {0};
+    _currentTime = milliseconds::zero();
+    _duration    = milliseconds::zero();
 
     _targetStyle = target;
     _sourceStyle = _targetStyle;
