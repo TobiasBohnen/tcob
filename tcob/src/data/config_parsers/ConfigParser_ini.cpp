@@ -130,58 +130,56 @@ auto ini_reader::read_comment(object& targetObject, utf8_string_view line) -> bo
 auto ini_reader::read_section_header(object& targetObject, utf8_string_view line) -> bool
 {
     // read object header
-    if (line[0] == _settings.Section.first) {
-        auto const endPos {line.find(_settings.Section.second)};
-        if (endPos == utf8_string::npos || endPos == 1) { return false; } // ERROR: invalid object header
+    if (line[0] != _settings.Section.first) { return false; }
 
-        auto const lineSize {line.size()};
-        // quoted key
-        if ((line[1] == '\'' || line[1] == '"') && line[1] == line[lineSize - 2]) {
-            line = line.substr(2, lineSize - 4);
-            auto secRes {_mainSection[utf8_string {line}]};
-            if (!secRes.is<object>()) { secRes = object {}; }
-            targetObject = secRes.as<object>();
-        } else {
-            // read sub-sections
-            bool first {true};
-            helper::split_for_each(
-                line.substr(1, endPos - 1), _settings.Path,
-                [&first, &targetObject, this](utf8_string_view token) {
-                    if (token.empty()) { return false; }
-                    auto secRes {(first ? _mainSection : targetObject)[utf8_string {token}]};
-                    if (!secRes.is<object>()) { secRes = object {}; }
-                    targetObject = secRes.as<object>();
-                    first        = false;
-                    return true;
-                });
-        }
+    auto const endPos {line.find(_settings.Section.second)};
+    if (endPos == utf8_string::npos || endPos == 1) { return false; } // ERROR: invalid object header
 
-        // inheritance
-        if (line.find(_settings.Reference, endPos) != utf8_string::npos) {
-            auto const inh {helper::split_preserve_brackets(line, _settings.Reference)};
-            if (inh.size() != 2) { return false; }
-
-            object     obj {_mainSection};
-            auto const keys {helper::split(inh[1], _settings.Path)};
-            if (keys.size() > 1) {
-                for (usize i {0}; i < keys.size() - 1; ++i) {
-                    if (!obj.try_get(obj, keys[i])) { return false; }
-                }
-            }
-            if (auto const* entry {obj.get_entry(keys[keys.size() - 1])}) {
-                if (entry->is<object>()) {
-                    targetObject.merge(entry->as<object>());
-                } else {
-                    return false;
-                }
-            }
-        }
-
-        _currentComment = {};
-        return true;
+    auto const lineSize {line.size()};
+    // quoted key
+    if ((line[1] == '\'' || line[1] == '"') && line[1] == line[lineSize - 2]) {
+        line = line.substr(2, lineSize - 4);
+        auto secRes {_mainSection[utf8_string {line}]};
+        if (!secRes.is<object>()) { secRes = object {}; }
+        targetObject = secRes.as<object>();
+    } else {
+        // read sub-sections
+        bool first {true};
+        helper::split_for_each(
+            line.substr(1, endPos - 1), _settings.Path,
+            [&first, &targetObject, this](utf8_string_view token) {
+                if (token.empty()) { return false; }
+                auto secRes {(first ? _mainSection : targetObject)[utf8_string {token}]};
+                if (!secRes.is<object>()) { secRes = object {}; }
+                targetObject = secRes.as<object>();
+                first        = false;
+                return true;
+            });
     }
 
-    return false;
+    // inheritance
+    if (line.find(_settings.Reference, endPos) != utf8_string::npos) {
+        auto const inh {helper::split_preserve_brackets(line, _settings.Reference)};
+        if (inh.size() != 2) { return false; }
+
+        object     obj {_mainSection};
+        auto const keys {helper::split(inh[1], _settings.Path)};
+        if (keys.size() > 1) {
+            for (usize i {0}; i < keys.size() - 1; ++i) {
+                if (!obj.try_get(obj, keys[i])) { return false; }
+            }
+        }
+        if (auto const* entry {obj.get_entry(keys[keys.size() - 1])}) {
+            if (entry->is<object>()) {
+                targetObject.merge(entry->as<object>());
+            } else {
+                return false;
+            }
+        }
+    }
+
+    _currentComment = {};
+    return true;
 }
 
 auto ini_reader::read_key_value_pair(object& targetObject, utf8_string_view line) -> bool
@@ -276,65 +274,63 @@ auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
 
 auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line[0] == _settings.Array.first) {
-        utf8_string arrayLine {line};
-        while (!is_eof()
-               && (arrayLine.size() <= 1
-                   || arrayLine[arrayLine.size() - 1] != _settings.Array.second
-                   || !check_brackets(arrayLine, _settings.Array.first, _settings.Array.second))) {
-            arrayLine += get_trimmed_next_line();
-        }
+    if (line[0] != _settings.Array.first) { return false; }
 
-        if (arrayLine[arrayLine.size() - 1] != _settings.Array.second) { return false; }
-
-        array arr {};
-        if (!helper::split_preserve_brackets_for_each(
-                arrayLine.substr(1, arrayLine.size() - 2), ',',
-                [&arr, this](utf8_string_view token) {
-                    auto const tokenString {helper::trim(token)};
-                    if (tokenString.empty()) { return true; } // allow empty entries
-                    entry arrEntry;
-                    if (read_entry(arrEntry, tokenString)) {
-                        arr.add_entry(arrEntry);
-                        return true;
-                    }
-                    return false;
-                })) {
-            return false;
-        }
-
-        currentEntry.set_value(arr);
-        return true;
+    utf8_string arrayLine {line};
+    while (!is_eof()
+           && (arrayLine.size() <= 1
+               || arrayLine[arrayLine.size() - 1] != _settings.Array.second
+               || !check_brackets(arrayLine, _settings.Array.first, _settings.Array.second))) {
+        arrayLine += get_trimmed_next_line();
     }
 
-    return false;
+    if (arrayLine[arrayLine.size() - 1] != _settings.Array.second) { return false; }
+
+    array arr {};
+    if (!helper::split_preserve_brackets_for_each(
+            arrayLine.substr(1, arrayLine.size() - 2), ',',
+            [&arr, this](utf8_string_view token) {
+                auto const tokenString {helper::trim(token)};
+                if (tokenString.empty()) { return true; } // allow empty entries
+                entry arrEntry;
+                if (read_entry(arrEntry, tokenString)) {
+                    arr.add_entry(arrEntry);
+                    return true;
+                }
+                return false;
+            })) {
+        return false;
+    }
+
+    currentEntry.set_value(arr);
+    return true;
 }
 
 auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line) -> bool
 {
-    if (line[0] == _settings.Object.first) {
-        utf8_string sectionLine {line};
-        while (!is_eof()
-               && (sectionLine.size() <= 1
-                   || sectionLine[sectionLine.size() - 1] != _settings.Object.second
-                   || !check_brackets(sectionLine, _settings.Object.first, _settings.Object.second))) {
-            sectionLine += get_trimmed_next_line();
-        }
+    if (line[0] != _settings.Object.first) { return false; }
 
-        if (sectionLine[sectionLine.size() - 1] != _settings.Object.second) { return false; }
+    utf8_string sectionLine {line};
+    while (!is_eof()
+           && (sectionLine.size() <= 1
+               || sectionLine[sectionLine.size() - 1] != _settings.Object.second
+               || !check_brackets(sectionLine, _settings.Object.first, _settings.Object.second))) {
+        sectionLine += get_trimmed_next_line();
+    }
 
-        object obj {};
-        if (helper::split_preserve_brackets_for_each(
-                sectionLine.substr(1, sectionLine.size() - 2), ',',
-                [&obj, this](utf8_string_view token) {
-                    auto const tokenString {helper::trim(token)};
-                    if (tokenString.empty()) { return true; } // allow empty entries
-                    entry secEntry;
-                    return read_key_value_pair(obj, secEntry, tokenString);
-                })) {
-            currentEntry.set_value(obj);
-            return true;
-        }
+    if (sectionLine[sectionLine.size() - 1] != _settings.Object.second) { return false; }
+
+    object obj {};
+    if (helper::split_preserve_brackets_for_each(
+            sectionLine.substr(1, sectionLine.size() - 2), ',',
+            [&obj, this](utf8_string_view token) {
+                auto const tokenString {helper::trim(token)};
+                if (tokenString.empty()) { return true; } // allow empty entries
+                entry secEntry;
+                return read_key_value_pair(obj, secEntry, tokenString);
+            })) {
+        currentEntry.set_value(obj);
+        return true;
     }
 
     return false;

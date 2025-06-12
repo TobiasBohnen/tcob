@@ -84,66 +84,60 @@ auto json_reader::ReadEntry(entry& currentEntry, utf8_string_view line) -> bool
 auto json_reader::ReadArray(entry& currentEntry, utf8_string_view line) -> bool
 {
     auto const lineSize {line.size()};
-    if (lineSize <= 1) { return false; }
+    if (lineSize < 2) { return false; }
+    if (line[0] != '[') { return false; }
+    if (line[lineSize - 1] != ']') { return false; }
 
-    if (line[0] == '[') {
-        if (line[lineSize - 1] != ']') { return false; }
+    array arr {};
 
-        array arr {};
-
-        auto const splitLine {helper::trim(line.substr(1, lineSize - 2))};
-        if (splitLine.empty()) {
-            currentEntry.set_value(arr);
-            return true;
-        }
-
-        if (!helper::split_preserve_brackets_for_each(
-                splitLine, ',',
-                [&arr](utf8_string_view token) {
-                    auto const tk {helper::trim(token)};
-                    entry      arrvalue;
-                    if (ReadEntry(arrvalue, tk)) {
-                        arr.add_entry(arrvalue);
-                        return true;
-                    }
-
-                    return false;
-                })) {
-            return false;
-        }
-
+    auto const splitLine {helper::trim(line.substr(1, lineSize - 2))};
+    if (splitLine.empty()) {
         currentEntry.set_value(arr);
         return true;
     }
 
-    return false;
+    if (!helper::split_preserve_brackets_for_each(
+            splitLine, ',',
+            [&arr](utf8_string_view token) {
+                auto const tk {helper::trim(token)};
+                entry      arrvalue;
+                if (ReadEntry(arrvalue, tk)) {
+                    arr.add_entry(arrvalue);
+                    return true;
+                }
+
+                return false;
+            })) {
+        return false;
+    }
+
+    currentEntry.set_value(arr);
+    return true;
 }
 
 auto json_reader::ReadObject(entry& currentEntry, utf8_string_view line) -> bool
 {
     auto const lineSize {line.size()};
     if (lineSize <= 1) { return false; }
+    if (line[0] != '{') { return false; }
+    if (line[lineSize - 1] != '}') { return false; }
 
-    if (line[0] == '{') {
-        if (line[lineSize - 1] != '}') { return false; }
+    object obj {};
 
-        object obj {};
+    auto const splitLine {helper::trim(line.substr(1, lineSize - 2))};
+    if (splitLine.empty()) {
+        currentEntry.set_value(obj);
+        return true;
+    }
 
-        auto const splitLine {helper::trim(line.substr(1, lineSize - 2))};
-        if (splitLine.empty()) {
-            currentEntry.set_value(obj);
-            return true;
-        }
-
-        if (helper::split_preserve_brackets_for_each(
-                splitLine, ',',
-                [&obj](utf8_string_view token) {
-                    entry objValue;
-                    return ReadKeyValuePair(obj, objValue, helper::trim(token));
-                })) {
-            currentEntry.set_value(obj);
-            return true;
-        }
+    if (helper::split_preserve_brackets_for_each(
+            splitLine, ',',
+            [&obj](utf8_string_view token) {
+                entry objValue;
+                return ReadKeyValuePair(obj, objValue, helper::trim(token));
+            })) {
+        currentEntry.set_value(obj);
+        return true;
     }
 
     return false;
