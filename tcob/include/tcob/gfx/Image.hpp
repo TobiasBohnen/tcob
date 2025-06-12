@@ -49,9 +49,9 @@ public:
 
     auto info() const -> information const&;
 
-    auto data(this auto&& self);
+    auto data(this auto&& self) -> decltype(auto);
     auto data(rect_i const& bounds) const -> std::vector<u8>;
-    auto ptr(this auto&& self);
+    auto ptr(this auto&& self) -> decltype(auto);
 
     auto load [[nodiscard]] (path const& file) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> load_status;
@@ -84,12 +84,12 @@ private:
     std::vector<u8> _buffer;
 };
 
-inline auto image::data(this auto&& self)
+inline auto image::data(this auto&& self) -> decltype(auto)
 {
     return std::span {self._buffer.data(), self._buffer.size()};
 }
 
-inline auto image::ptr(this auto&& self)
+inline auto image::ptr(this auto&& self) -> decltype(auto)
 {
     return self._buffer.data();
 }

@@ -76,13 +76,13 @@ inline auto base_type<Impl, Container>::save(io::ostream& out, string const& ext
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::begin(this auto&& self)
+inline auto base_type<Impl, Container>::begin(this auto&& self) -> decltype(auto)
 {
     return self._values->begin();
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::end(this auto&& self)
+inline auto base_type<Impl, Container>::end(this auto&& self) -> decltype(auto)
 {
     return self._values->end();
 }
@@ -118,7 +118,7 @@ inline void base_type<Impl, Container>::clear()
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::values(this auto&& self)
+inline auto base_type<Impl, Container>::values(this auto&& self) -> decltype(auto)
 {
     return self._values.get();
 }

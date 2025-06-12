@@ -54,8 +54,8 @@ auto source::play() -> bool
 
     auto const stat {state()};
     if (stat == playback_state::Stopped) { // start if stopped
+        _output->clear();
         if (on_start()) {
-            _output->clear();
             if (!_output->is_bound()) { _output->bind(); }
             return true;
         }

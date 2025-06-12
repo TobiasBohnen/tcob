@@ -31,8 +31,8 @@ public:
 
     void fill(T const& value);
 
-    auto begin(this auto&& self);
-    auto end(this auto&& self);
+    auto begin(this auto&& self) -> decltype(auto);
+    auto end(this auto&& self) -> decltype(auto);
 
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
@@ -42,7 +42,7 @@ public:
     auto count() const -> usize;
     void resize(size_type newSize);
 
-    auto data(this auto&& self);
+    auto data(this auto&& self) -> decltype(auto);
 
 private:
     auto get_index(isize x, isize y) const -> isize;
@@ -75,9 +75,9 @@ public:
 
     void fill(T const& value);
 
-    auto begin(this auto&& self);
+    auto begin(this auto&& self) -> decltype(auto);
 
-    auto end(this auto&& self);
+    auto end(this auto&& self) -> decltype(auto);
 
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
@@ -85,7 +85,7 @@ public:
     auto contains(point_type pos) const -> bool;
 
     auto count() const -> usize;
-    auto data(this auto&& self);
+    auto data(this auto&& self) -> decltype(auto);
 
 private:
     auto get_index(isize x, isize y) const -> isize;

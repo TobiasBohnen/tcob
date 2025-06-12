@@ -43,19 +43,19 @@ inline void grid<T>::fill(T const& value)
 }
 
 template <typename T>
-inline auto grid<T>::begin(this auto&& self)
+inline auto grid<T>::begin(this auto&& self) -> decltype(auto)
 {
     return self._data.begin();
 }
 
 template <typename T>
-inline auto grid<T>::end(this auto&& self)
+inline auto grid<T>::end(this auto&& self) -> decltype(auto)
 {
     return self._data.end();
 }
 
 template <typename T>
-inline auto grid<T>::data(this auto&& self)
+inline auto grid<T>::data(this auto&& self) -> decltype(auto)
 {
     return self._data.data();
 }
@@ -145,19 +145,19 @@ inline void static_grid<T, Width, Height>::fill(T const& value)
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::begin(this auto&& self)
+inline auto static_grid<T, Width, Height>::begin(this auto&& self) -> decltype(auto)
 {
     return self._data.begin();
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::end(this auto&& self)
+inline auto static_grid<T, Width, Height>::end(this auto&& self) -> decltype(auto)
 {
     return self._data.end();
 }
 
 template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::data(this auto&& self)
+inline auto static_grid<T, Width, Height>::data(this auto&& self) -> decltype(auto)
 {
     return self._data.data();
 }

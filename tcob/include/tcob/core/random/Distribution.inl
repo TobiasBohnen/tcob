@@ -64,8 +64,7 @@ inline uniform_distribution<T>::uniform_distribution(T min, T max)
 template <Arithmetic T>
 inline auto uniform_distribution<T>::operator()(auto&& rng) -> T
 {
-    core_uniform_distribution uniform;
-    return uniform(rng, _min, _max);
+    return core_uniform_distribution {}(rng, _min, _max);
 }
 
 ////////////////////////////////////////////////////////////

@@ -49,8 +49,8 @@ public:
     auto save(path const& file) const noexcept -> bool;
     auto save(io::ostream& out, string const& ext) const noexcept -> bool;
 
-    auto begin(this auto&& self);
-    auto end(this auto&& self);
+    auto begin(this auto&& self) -> decltype(auto);
+    auto end(this auto&& self) -> decltype(auto);
 
     auto empty() const -> bool;
     auto size() const -> isize;
@@ -64,7 +64,7 @@ public:
 protected:
     auto virtual on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status = 0;
 
-    auto values(this auto&& self);
+    auto values(this auto&& self) -> decltype(auto);
 
     void swap(Impl& other);
 
