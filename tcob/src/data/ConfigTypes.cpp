@@ -74,7 +74,7 @@ auto object::str() const -> string
 auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
 {
     if (!skipBinary) {
-        if (auto binParser {locate_service<binary_reader::factory>().create_from_sig_or_ext(in, ext)}) {
+        if (auto binParser {locate_service<binary_reader::factory>().from_magic(in, ext)}) {
             if (auto result {binParser->read_as_object(in)}) {
                 swap(*result);
                 return load_status::Ok;
@@ -227,7 +227,7 @@ auto array::operator[](isize index) const -> proxy<array const, isize>
 auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
 {
     if (!skipBinary) {
-        if (auto binParser {locate_service<binary_reader::factory>().create_from_sig_or_ext(in, ext)}) {
+        if (auto binParser {locate_service<binary_reader::factory>().from_magic(in, ext)}) {
             if (auto result {binParser->read_as_array(in)}) {
                 swap(*result);
                 return load_status::Ok;

@@ -384,36 +384,36 @@ void platform::InitSignatures()
     using namespace io;
 
     // image
-    magic::add_signature({".bmp", "image", {{0, {'B', 'M'}}}});
-    magic::add_signature({".bsi", "image", {{0, {'B', 'S', 'I'}}}});
-    magic::add_signature({".gif", "image", {{0, {'G', 'I', 'F', '8', '7', 'a'}}}});
-    magic::add_signature({".gif", "image", {{0, {'G', 'I', 'F', '8', '9', 'a'}}}});
-    magic::add_signature({".pcx", "image", {{0, {0x0a, 0x05, 0x00}}}});
-    magic::add_signature({".pcx", "image", {{0, {0x0a, 0x05, 0x01}}}});
-    magic::add_signature({".png", "image", {{0, {0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a}}}});
-    magic::add_signature({".pnm", "image", {{0, {'P', '1'}}}});
-    magic::add_signature({".pnm", "image", {{0, {'P', '2'}}}});
-    magic::add_signature({".pnm", "image", {{0, {'P', '3'}}}});
-    magic::add_signature({".qoi", "image", {{0, {'q', 'o', 'i', 'f'}}}});
-    magic::add_signature({".webp", "image", {{0, {'R', 'I', 'F', 'F'}}, {8, {'W', 'E', 'B', 'P'}}}});
-    magic::add_signature({".ogv", "image", {{0, {'O', 'g', 'g', 'S'}}, {29, {'t', 'h', 'e', 'o', 'r', 'a'}}}});
-    magic::add_signature({".tga", "image", {{-18, {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'}}}});
+    magic::add_signature({.Extension = ".bmp", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'B', 'M'}}}});
+    magic::add_signature({.Extension = ".bsi", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'B', 'S', 'I'}}}});
+    magic::add_signature({.Extension = ".gif", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'G', 'I', 'F', '8', '7', 'a'}}}});
+    magic::add_signature({.Extension = ".gif", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'G', 'I', 'F', '8', '9', 'a'}}}});
+    magic::add_signature({.Extension = ".pcx", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {0x0a, 0x05, 0x00}}}});
+    magic::add_signature({.Extension = ".pcx", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {0x0a, 0x05, 0x01}}}});
+    magic::add_signature({.Extension = ".png", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a}}}});
+    magic::add_signature({.Extension = ".pnm", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'P', '1'}}}});
+    magic::add_signature({.Extension = ".pnm", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'P', '2'}}}});
+    magic::add_signature({.Extension = ".pnm", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'P', '3'}}}});
+    magic::add_signature({.Extension = ".qoi", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'q', 'o', 'i', 'f'}}}});
+    magic::add_signature({.Extension = ".webp", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'R', 'I', 'F', 'F'}}, {.Offset = 8, .Bytes = {'W', 'E', 'B', 'P'}}}});
+    magic::add_signature({.Extension = ".ogv", .Group = "image", .Parts = {{.Offset = 0, .Bytes = {'O', 'g', 'g', 'S'}}, {.Offset = 29, .Bytes = {'t', 'h', 'e', 'o', 'r', 'a'}}}});
+    magic::add_signature({.Extension = ".tga", .Group = "image", .Parts = {{.Offset = -18, .Bytes = {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'}}}});
     // audio
-    magic::add_signature({".bsa", "audio", {{0, {'B', 'S', 'A'}}}});
-    magic::add_signature({".flac", "audio", {{0, {'f', 'L', 'a', 'C'}}}});
-    magic::add_signature({".mp3", "audio", {{0, {0xff, 0xfb}}}});
-    magic::add_signature({".mp3", "audio", {{0, {0xff, 0xf3}}}});
-    magic::add_signature({".mp3", "audio", {{0, {0xff, 0xf2}}}});
-    magic::add_signature({".mp3", "audio", {{0, {'I', 'D', '3'}}}});
-    magic::add_signature({".wav", "audio", {{0, {'R', 'I', 'F', 'F'}}, {8, {'W', 'A', 'V', 'E'}}}});
-    magic::add_signature({".ogg", "audio", {{0, {'O', 'g', 'g', 'S'}}, {29, {'v', 'o', 'r', 'b', 'i', 's'}}}});
-    magic::add_signature({".opus", "audio", {{0, {'O', 'g', 'g', 'S'}}, {28, {'O', 'p', 'u', 's', 'H', 'e', 'a', 'd'}}}});
-    magic::add_signature({".mid", "audio", {{0, {'M', 'T', 'h', 'd'}}}});
-    magic::add_signature({".it", "audio", {{0, {'I', 'M', 'P', 'M'}}}});
-    magic::add_signature({".xm", "audio", {{0, {0x45, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x20, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65}}}});
-    magic::add_signature({".s3m", "audio", {{44, {'S', 'C', 'R', 'M'}}}});
+    magic::add_signature({.Extension = ".bsa", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'B', 'S', 'A'}}}});
+    magic::add_signature({.Extension = ".flac", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'f', 'L', 'a', 'C'}}}});
+    magic::add_signature({.Extension = ".mp3", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {0xff, 0xfb}}}});
+    magic::add_signature({.Extension = ".mp3", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {0xff, 0xf3}}}});
+    magic::add_signature({.Extension = ".mp3", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {0xff, 0xf2}}}});
+    magic::add_signature({.Extension = ".mp3", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'I', 'D', '3'}}}});
+    magic::add_signature({.Extension = ".wav", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'R', 'I', 'F', 'F'}}, {.Offset = 8, .Bytes = {'W', 'A', 'V', 'E'}}}});
+    magic::add_signature({.Extension = ".ogg", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'O', 'g', 'g', 'S'}}, {.Offset = 29, .Bytes = {'v', 'o', 'r', 'b', 'i', 's'}}}});
+    magic::add_signature({.Extension = ".opus", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'O', 'g', 'g', 'S'}}, {.Offset = 28, .Bytes = {'O', 'p', 'u', 's', 'H', 'e', 'a', 'd'}}}});
+    magic::add_signature({.Extension = ".mid", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'M', 'T', 'h', 'd'}}}});
+    magic::add_signature({.Extension = ".it", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {'I', 'M', 'P', 'M'}}}});
+    magic::add_signature({.Extension = ".xm", .Group = "audio", .Parts = {{.Offset = 0, .Bytes = {0x45, 0x78, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x64, 0x20, 0x4d, 0x6f, 0x64, 0x75, 0x6c, 0x65}}}});
+    magic::add_signature({.Extension = ".s3m", .Group = "audio", .Parts = {{.Offset = 44, .Bytes = {'S', 'C', 'R', 'M'}}}});
     // config
-    magic::add_signature({".bsbd", "config", {{0, {'B', 'S', 'B', 'D', 1}}}});
+    magic::add_signature({.Extension = ".bsbd", .Group = "config", .Parts = {{.Offset = 0, .Bytes = {'B', 'S', 'B', 'D', 1}}}});
 }
 
 template <typename T>

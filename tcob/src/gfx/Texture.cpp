@@ -121,7 +121,7 @@ auto animated_texture::load(std::shared_ptr<io::istream> in, string const& ext) 
     if (!in) { return load_status::Error; }
     stop();
 
-    _decoder = locate_service<animated_image_decoder::factory>().create_from_sig_or_ext(*in, ext);
+    _decoder = locate_service<animated_image_decoder::factory>().from_magic(*in, ext);
     if (auto info {_decoder->open(std::move(in))}) {
         _frameInfo = *info;
         i32 const bpp {_frameInfo.bytes_per_pixel()};

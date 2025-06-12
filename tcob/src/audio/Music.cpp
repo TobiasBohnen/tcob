@@ -64,7 +64,7 @@ auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_sta
 
     stop();
 
-    _decoder = locate_service<decoder::factory>().create_from_sig_or_ext(*in, ext);
+    _decoder = locate_service<decoder::factory>().from_magic(*in, ext);
     if (!_decoder) { return load_status::Error; }
 
     auto const info {_decoder->open(std::move(in), DecoderContext)};
