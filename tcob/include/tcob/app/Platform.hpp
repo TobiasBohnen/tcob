@@ -7,8 +7,11 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
+#include <compare>
+#include <functional>
 #include <map>
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "tcob/app/Game.hpp"
@@ -28,14 +31,19 @@ struct locale {
 
 ////////////////////////////////////////////////////////////
 
-struct display_mode {
+class TCOB_API display_mode {
+public:
     size_i Size {size_i::Zero};
-    i32    RefreshRate {0};
+    f32    PixelDensity {0.0f};
+    f32    RefreshRate {0.0f};
+
+    auto operator==(display_mode const& other) const -> bool = default;
+    auto operator<=>(display_mode const& other) const -> std::partial_ordering;
 };
 
 struct display {
-    std::vector<display_mode> Modes;
-    display_mode              DesktopMode;
+    std::set<display_mode, std::greater<>> Modes;
+    display_mode                           DesktopMode;
 };
 
 ////////////////////////////////////////////////////////////
@@ -52,7 +60,7 @@ public:
     auto preferred_locales() const -> std::vector<locale> const&;
 
     auto displays() const -> std::map<i32, display>;
-    auto get_desktop_size(i32 display) const -> size_i;
+    auto get_desktop_mode(i32 display) const -> display_mode;
 
     auto was_paused() const -> bool; // WINDOWS: true if window was dragged
 

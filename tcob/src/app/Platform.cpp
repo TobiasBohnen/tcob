@@ -6,6 +6,7 @@
 #include "tcob/app/Platform.hpp"
 
 #include <any>
+#include <compare>
 #include <map>
 #include <memory>
 #include <optional>
@@ -245,6 +246,14 @@ auto platform::preferred_locales() const -> std::vector<locale> const&
     return _locales;
 }
 
+auto display_mode::operator<=>(display_mode const& other) const -> std::partial_ordering
+{
+    if (auto const cmp {Size.Width <=> other.Size.Width}; cmp != 0) { return cmp; }
+    if (auto const cmp {Size.Height <=> other.Size.Height}; cmp != 0) { return cmp; }
+    if (auto const cmp {RefreshRate <=> other.RefreshRate}; cmp != 0) { return cmp; }
+    return other.PixelDensity <=> PixelDensity;
+}
+
 auto platform::displays() const -> std::map<i32, display>
 {
     std::map<i32, display> retValue;
@@ -257,22 +266,26 @@ auto platform::displays() const -> std::map<i32, display>
         auto** displayModes {SDL_GetFullscreenDisplayModes(displayID[i], &numModes)};
         for (i32 j {0}; j < numModes; ++j) {
             auto* mode {displayModes[j]};
-            retValue[mode->displayID].Modes.push_back({.Size        = {mode->w, mode->h},
-                                                       .RefreshRate = static_cast<i32>(mode->refresh_rate)});
+            retValue[mode->displayID].Modes.insert({.Size         = {mode->w, mode->h},
+                                                    .PixelDensity = mode->pixel_density,
+                                                    .RefreshRate  = mode->refresh_rate});
         }
 
         auto const* dmode {SDL_GetDesktopDisplayMode(displayID[i])};
-        retValue[dmode->displayID].DesktopMode = {.Size        = {dmode->w, dmode->h},
-                                                  .RefreshRate = static_cast<i32>(dmode->refresh_rate)};
+        retValue[dmode->displayID].DesktopMode = {.Size         = {dmode->w, dmode->h},
+                                                  .PixelDensity = dmode->pixel_density,
+                                                  .RefreshRate  = dmode->refresh_rate};
     }
 
     return retValue;
 }
 
-auto platform::get_desktop_size(i32 display) const -> size_i
+auto platform::get_desktop_mode(i32 display) const -> display_mode
 {
     auto const* mode {SDL_GetDesktopDisplayMode(display)};
-    return {mode->w, mode->h};
+    return {.Size         = {mode->w, mode->h},
+            .PixelDensity = mode->pixel_density,
+            .RefreshRate  = mode->refresh_rate};
 }
 
 auto platform::was_paused() const -> bool
