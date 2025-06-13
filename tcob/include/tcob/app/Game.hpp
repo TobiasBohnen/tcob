@@ -12,7 +12,6 @@
 
 #include "tcob/app/Scene.hpp"
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -23,13 +22,8 @@ namespace tcob {
 
 ////////////////////////////////////////////////////////////
 
-//! Represents a game instance.
-//!
-//! The `game` class provides a framework for creating and managing game instances. It handles
-//! scene management, rendering, updates, and event handling.
 class TCOB_API game : public non_copyable {
 public:
-    //! Initialization parameters for the game.
     struct init {
         path                        Path {};                      //!< The path to the game.
         path                        Name {};                      //!< The name of the game.
@@ -40,11 +34,8 @@ public:
         std::optional<isize>        WorkerThreads {std::nullopt}; //!< The number of concurrent asynchronous threads.
     };
 
-    //! Constructs a game instance with the specified initialization parameters.
-    //! @param gameInit The initialization parameters for the game.
     explicit game(init const& gameInit);
 
-    //! Destructor for the game instance.
     virtual ~game();
 
     signal<>                   Start;       //!< Signal emitted when the game starts.
@@ -55,54 +46,39 @@ public:
     signal<milliseconds const> PostUpdate;  //!< Signal emitted after the main update.
     signal<gfx::render_target> Draw;        //!< Signal emitted when rendering is required.
 
-    prop<i32> FrameLimit;                   //!< Property to control the frame rate limit.
-
-    //! Starts the game.
     void start();
 
-    //! Pushes a new scene onto the scene stack.
-    //! @tparam T The type of the scene to be pushed.
     template <std::derived_from<scene> T>
     void push_scene();
 
-    //! Pushes a shared scene onto the scene stack.
-    //! @param scene The shared pointer to the scene to be pushed.
     void push_scene(std::shared_ptr<scene> const& scene);
 
-    //! Pops the current scene from the scene stack.
     void pop_current_scene();
 
-    //! Requests to finish the game.
     void queue_finish();
 
     auto library() -> assets::library&;
 
 protected:
-    //! Called when the game finishes.
     void finish();
 
-    //! Hook method called on game start.
     void virtual on_start() { }
 
-    //! Hook method called on game finish.
     void virtual on_finish() { }
 
 private:
-    //! Main game loop.
     void loop();
     void step();
 
-    //! Pops the top scene from the scene stack.
     void pop_scene();
 
     void on_key_down(input::keyboard::event const& ev);
 
     assets::library _mainLibrary {};
 
-    milliseconds                       _frameLimit {}; //!< Frame rate limit.
-    std::stack<std::shared_ptr<scene>> _scenes {};     //!< Stack of active scenes.
+    std::stack<std::shared_ptr<scene>> _scenes {};
 
-    bool         _shouldQuit {false};                  //!< Flag indicating if the game should quit.
+    bool         _shouldQuit {false};
     milliseconds _nextFixedUpdate {};
     milliseconds _lastUpdate {};
 };

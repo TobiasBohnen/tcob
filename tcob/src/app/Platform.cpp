@@ -359,6 +359,11 @@ void platform::init_render_system(string const& windowTitle)
         (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = window.Size();
     });
 
+    FrameLimit.Changed.connect([this](i32 value) {
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
+    });
+    FrameLimit = (*_configFile)[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
+
     logger::Info("Device: {}", renderSystem->device_name());
 
 #if defined(_MSC_VER)

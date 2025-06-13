@@ -9,7 +9,9 @@
     #include "emscripten.h"
 #endif
 
+#include <cassert>
 #include <memory>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 
@@ -33,6 +35,8 @@ constexpr u8           MAX_FRAME_SKIP {10};
 
 game::game(init const& gameInit)
 {
+    if (has_service<platform>()) { throw std::runtime_error("Only one instance of game is allowed at a time."); }
+
     // init platform
     init i {gameInit};
     if (!i.ConfigDefaults) {
@@ -40,15 +44,8 @@ game::game(init const& gameInit)
         obj[Cfg::Video::Name] = gfx::video_config {};
         i.ConfigDefaults      = obj;
     }
-    auto plt {register_service<platform>(std::make_shared<platform>(false, i))};
 
-    // properties
-    FrameLimit.Changed.connect([this, plt](i32 value) {
-        plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
-        _frameLimit                                              = milliseconds {1000.f / static_cast<f32>(value)};
-    });
-    FrameLimit = plt->config()[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
-
+    register_service<platform>(std::make_shared<platform>(false, i));
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
 }
 
@@ -163,10 +160,11 @@ void game::step()
 
     milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
+    milliseconds const frameLimit {1000.f / static_cast<f32>(plt.FrameLimit)};
 
     tm.process_queue(deltaUpdate);
 
-    if (deltaUpdate >= _frameLimit) {
+    if (deltaUpdate >= frameLimit) {
         // update
         PreUpdate(deltaUpdate);
         Update(deltaUpdate);

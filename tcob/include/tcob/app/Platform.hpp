@@ -16,6 +16,7 @@
 
 #include "tcob/app/Game.hpp"
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -54,6 +55,8 @@ public:
     ~platform();
 
     signal<path const> DropFile;
+
+    prop<i32> FrameLimit; //!< Property to control the frame rate limit.
 
     auto config() const -> data::config_file&;
 
