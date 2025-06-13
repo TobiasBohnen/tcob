@@ -17,9 +17,9 @@ namespace tcob::gfx::detail {
 
 namespace bsi {
     struct header {
-        std::array<ubyte, 3> Sig {};
-        size_i               Size {};
-        image::format        Format {};
+        std::array<byte, 3> Sig {};
+        size_i              Size {};
+        image::format       Format {};
 
         void read(io::istream& reader);
     };

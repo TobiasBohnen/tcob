@@ -33,8 +33,8 @@ auto file_hasher::crc32() const -> u32
 {
     if (!is_file(_path)) { return 0; }
 
-    ifstream           fs {_path};
-    std::vector<ubyte> fileData {fs.read_all<ubyte>()};
+    ifstream          fs {_path};
+    std::vector<byte> fileData {fs.read_all<byte>()};
     return mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size());
 }
 
@@ -214,7 +214,7 @@ auto read_as_string(path const& file) -> string
     PHYSFS_File* handle {PHYSFS_openRead(file.c_str())};
     i64          read {0};
     do {
-        std::array<byte, 1024> buffer {};
+        std::array<string::value_type, 1024> buffer {};
         read = PHYSFS_readBytes(handle, buffer.data(), buffer.size());
         retValue.append(buffer.data(), static_cast<usize>(read));
     } while (read != 0);

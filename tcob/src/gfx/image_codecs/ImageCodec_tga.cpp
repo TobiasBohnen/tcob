@@ -22,7 +22,7 @@
 
 namespace tcob::gfx::detail {
 
-constexpr std::array<ubyte, 18> SIGNATURE {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'};
+constexpr std::array<byte, 18> SIGNATURE {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'};
 
 auto static is_rle(tga::header const& h) -> bool
 {
@@ -248,8 +248,8 @@ void tga::footer::read(io::istream& reader)
     reader.seek(-Offset + SignatureOffset, io::seek_dir::End);
 
     // try reading the signature
-    std::array<ubyte, SIGNATURE.size()> sig {};
-    reader.read_to<ubyte>(sig);
+    std::array<byte, SIGNATURE.size()> sig {};
+    reader.read_to<byte>(sig);
 
     if (sig == SIGNATURE) {
         Format = format::New;
@@ -515,7 +515,7 @@ void tga_encoder::write_extension_area(io::ostream& out) const
 void tga_encoder::write_footer(io::ostream& out, std::streamsize extOffset) const
 {
     out.write<u32>(static_cast<u32>(extOffset));
-    out.write<ubyte>(SIGNATURE);
+    out.write<byte>(SIGNATURE);
 }
 
 }

@@ -105,7 +105,7 @@ png::pHYs_chunk::pHYs_chunk(std::span<u8 const> data)
     Value = static_cast<f32>(ppuX) / static_cast<f32>(ppuY);
 }
 
-constexpr std::array<ubyte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a};
+constexpr std::array<byte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a};
 
 ////////////////////////////////////////////////////////////
 
@@ -114,7 +114,7 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
     if (decode_info(in)) {
         if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
 
-        std::vector<ubyte>             idat {};
+        std::vector<byte>              idat {};
         std::optional<png::pHYs_chunk> phys {};
 
         for (;;) {
@@ -201,8 +201,8 @@ auto png_decoder::read_chunk(io::istream& in) const -> png::chunk
 
 auto png_decoder::check_sig(io::istream& in) -> bool
 {
-    std::array<ubyte, 8> buf {};
-    in.read_to<ubyte>(buf);
+    std::array<byte, 8> buf {};
+    in.read_to<byte>(buf);
     return buf == SIGNATURE;
 }
 
@@ -484,7 +484,7 @@ void png_decoder::prepare_delegate()
     }
 }
 
-auto png_decoder::read_image(std::span<ubyte const> idat) -> bool
+auto png_decoder::read_image(std::span<byte const> idat) -> bool
 {
     prepare();
     if (_pixelSize == 0) { return false; }

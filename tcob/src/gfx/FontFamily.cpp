@@ -125,7 +125,7 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
     // check if font data has already been loaded
     if (!_fontData.contains(fontStyle)) {
         io::ifstream fs {_fontSources[fontStyle]};
-        _fontData[fontStyle] = fs.read_all<ubyte>();
+        _fontData[fontStyle] = fs.read_all<byte>();
     }
 
     // load font
@@ -187,7 +187,7 @@ void font_family::FindSources(font_family& fam, path const& source)
     fam._fontData.reserve(fam._fontSources.size());
 }
 
-void font_family::SingleFont(font_family& fam, std::span<ubyte const> font)
+void font_family::SingleFont(font_family& fam, std::span<byte const> font)
 {
     fam._fontSources.clear();
     fam._fontData.clear();

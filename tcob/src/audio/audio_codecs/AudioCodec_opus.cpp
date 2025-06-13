@@ -27,7 +27,7 @@ extern "C" {
 auto static read_opus(void* _stream, unsigned char* _ptr, int _nbytes) -> int
 {
     auto* stream {static_cast<io::istream*>(_stream)};
-    return static_cast<int>(stream->read_to<byte>({reinterpret_cast<byte*>(_ptr), static_cast<usize>(_nbytes)}));
+    return static_cast<int>(stream->read_to<unsigned char>({_ptr, static_cast<usize>(_nbytes)}));
 }
 
 auto static seek_opus(void* _stream, opus_int64 _offset, int _whence) -> int

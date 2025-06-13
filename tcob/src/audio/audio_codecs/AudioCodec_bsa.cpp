@@ -21,8 +21,8 @@
 
 namespace tcob::audio::detail {
 
-constexpr std::array<ubyte, 3> SIGNATURE {'B', 'S', 'A'};
-constexpr std::streamsize      OFFSET {sizeof(SIGNATURE) + sizeof(u8) + sizeof(u32) + sizeof(u32)};
+constexpr std::array<byte, 3> SIGNATURE {'B', 'S', 'A'};
+constexpr std::streamsize     OFFSET {sizeof(SIGNATURE) + sizeof(u8) + sizeof(u32) + sizeof(u32)};
 
 void bsa_decoder::seek_from_start(milliseconds pos)
 {
@@ -32,9 +32,9 @@ void bsa_decoder::seek_from_start(milliseconds pos)
 
 auto bsa_decoder::open() -> std::optional<buffer::information>
 {
-    auto&                reader {stream()};
-    std::array<ubyte, 3> sig {};
-    reader.read_to<ubyte>(sig);
+    auto&               reader {stream()};
+    std::array<byte, 3> sig {};
+    reader.read_to<byte>(sig);
 
     if (sig == SIGNATURE) {
         _info.Specs.Channels   = reader.read<u8>();

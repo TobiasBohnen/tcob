@@ -13,7 +13,7 @@
 
 namespace tcob::data::csv {
 
-static byte const LineEnding {'\n'};
+static char const LineEnding {'\n'};
 
 auto table::load(path const& file, settings s) noexcept -> load_status
 {

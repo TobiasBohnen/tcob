@@ -125,7 +125,7 @@ auto gl_texture::copy_to_image(u32 depth) const -> image
 {
     bind();
 
-    std::vector<ubyte> buffer(static_cast<usize>(_size.Width * _size.Height * 4));
+    std::vector<byte> buffer(static_cast<usize>(_size.Width * _size.Height * 4));
 
     gl_framebuffer frameBuffer;
     frameBuffer.attach_texture(this, depth);

@@ -129,7 +129,7 @@ public:
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
     auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> load_status;
-    auto load [[nodiscard]] (std::span<ubyte const> fontData, u32 size) noexcept -> load_status;
+    auto load [[nodiscard]] (std::span<byte const> fontData, u32 size) noexcept -> load_status;
 
     auto render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>;
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);
@@ -153,8 +153,8 @@ private:
     u32     _fontTextureLayer {0};
     bool    _textureNeedsSetup {false};
 
-    information        _info;
-    std::vector<ubyte> _fontData {};
+    information       _info;
+    std::vector<byte> _fontData {};
 
     std::unique_ptr<truetype_font_engine> _engine;
 

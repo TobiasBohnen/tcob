@@ -124,7 +124,7 @@ private:
 
     void prepare();
     void prepare_delegate();
-    auto read_image(std::span<ubyte const> idat) -> bool;
+    auto read_image(std::span<byte const> idat) -> bool;
 
     void filter_pixel();
     void filter_line();

@@ -31,7 +31,7 @@ namespace tcob::gfx {
 // based on: https://github.com/brofield/simpleini/blob/master/ConvertUTF.c
 auto static convert_UTF8_to_UTF32(string_view text) -> std::u32string
 {
-    static constexpr std::array<ubyte, 256> trailingBytesForUTF8 {
+    static constexpr std::array<byte, 256> trailingBytesForUTF8 {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -48,19 +48,19 @@ auto static convert_UTF8_to_UTF32(string_view text) -> std::u32string
     retValue.reserve(texSize);
 
     for (usize i {0}; i < texSize;) {
-        ubyte const source {static_cast<ubyte>(text[i])};
-        u32         ch {0};
+        byte const source {static_cast<byte>(text[i])};
+        u32        ch {0};
 
-        ubyte const extraBytesToRead {trailingBytesForUTF8[source]};
+        byte const extraBytesToRead {trailingBytesForUTF8[source]};
         if (i + extraBytesToRead >= texSize) {
             return {};
         }
 
-        for (ubyte j {extraBytesToRead}; j > 0; --j) {
-            ch += static_cast<ubyte>(text[i++]);
+        for (byte j {extraBytesToRead}; j > 0; --j) {
+            ch += static_cast<byte>(text[i++]);
             ch <<= 6;
         }
-        ch += static_cast<ubyte>(text[i++]);
+        ch += static_cast<byte>(text[i++]);
         ch -= offsetsFromUTF8[extraBytesToRead];
 
         if (ch <= 0x0010FFFF) {
@@ -105,11 +105,11 @@ auto font::load(io::istream& stream, u32 size) noexcept -> load_status
 {
     if (!stream) { return load_status::Error; }
 
-    _fontData = stream.read_all<ubyte>();
+    _fontData = stream.read_all<byte>();
     return load(_fontData, size);
 }
 
-auto font::load(std::span<ubyte const> fontData, u32 size) noexcept -> load_status
+auto font::load(std::span<byte const> fontData, u32 size) noexcept -> load_status
 {
     if (auto info {_engine->load_data(fontData, size)}) {
         _info = *info;

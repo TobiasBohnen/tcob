@@ -15,8 +15,8 @@ namespace tcob::io::magic {
 
 struct signature {
     struct part {
-        i8                 Offset;
-        std::vector<ubyte> Bytes;
+        i8                Offset;
+        std::vector<byte> Bytes;
     };
 
     path   Extension;

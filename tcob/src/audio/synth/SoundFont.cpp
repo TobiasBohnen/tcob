@@ -59,7 +59,7 @@ auto sound_font::load(io::istream& stream, bool stereo, i32 sampleRate) noexcept
         tsf_close(_font);
     }
 
-    auto const buffer {stream.read_all<ubyte>()};
+    auto const buffer {stream.read_all<byte>()};
     _font = tsf_load_memory(buffer.data(), static_cast<i32>(buffer.size()));
 
     // Initialize preset on special 10th MIDI channel to use percussion sound bank (128) if available

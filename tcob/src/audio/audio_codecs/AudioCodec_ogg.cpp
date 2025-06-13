@@ -144,8 +144,8 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::information co
         ogg_stream_packetin(&os, &header_code);
 
         if (ogg_stream_flush(&os, &og) == 0) { return false; }
-        out.write<ubyte>({og.header, static_cast<usize>(og.header_len)});
-        out.write<ubyte>({og.body, static_cast<usize>(og.body_len)});
+        out.write<byte>({og.header, static_cast<usize>(og.header_len)});
+        out.write<byte>({og.body, static_cast<usize>(og.body_len)});
     }
 
     i32 readOffset {0};
@@ -195,8 +195,8 @@ void vorbis_encoder::flush(io::ostream& out, ogg_stream_state& os, ogg_page& og,
                 if (ogg_stream_pageout(&os, &og) == 0) {
                     break;
                 }
-                out.write<ubyte>({og.header, static_cast<usize>(og.header_len)});
-                out.write<ubyte>({og.body, static_cast<usize>(og.body_len)});
+                out.write<byte>({og.header, static_cast<usize>(og.header_len)});
+                out.write<byte>({og.body, static_cast<usize>(og.body_len)});
                 if (ogg_page_eos(&og)) {
                     break;
                 }

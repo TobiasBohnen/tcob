@@ -18,19 +18,19 @@ namespace tcob::gfx::detail {
 
 void bsi::header::read(io::istream& reader)
 {
-    reader.read_to<ubyte>(Sig);
+    reader.read_to<byte>(Sig);
     Size   = {static_cast<i32>(reader.read<u32, std::endian::little>()), static_cast<i32>(reader.read<u32, std::endian::little>())};
     Format = static_cast<image::format>(reader.read<u8>());
 }
 
-constexpr std::array<ubyte, 3> SIGNATURE {'B', 'S', 'I'};
+constexpr std::array<byte, 3> SIGNATURE {'B', 'S', 'I'};
 
 ////////////////////////////////////////////////////////////
 
 auto bsi_decoder::decode(io::istream& in) -> std::optional<image>
 {
     if (auto info {decode_info(in)}) {
-        auto const pixels {in.read_filtered<ubyte>(in.size_in_bytes(), io::zlib_filter {})};
+        auto const pixels {in.read_filtered<byte>(in.size_in_bytes(), io::zlib_filter {})};
         if (std::ssize(pixels) == info->size_in_bytes()) {
             return image::Create(info->Size, info->Format, pixels);
         }
@@ -58,7 +58,7 @@ auto bsi_encoder::encode(image const& img, io::ostream& out) const -> bool
     out.write<u32, std::endian::little>(info.Size.Height);
     out.write<u8>(static_cast<u8>(info.Format));
 
-    return out.write_filtered<ubyte>(img.data(), io::zlib_filter {}) > 0;
+    return out.write_filtered<byte>(img.data(), io::zlib_filter {}) > 0;
 }
 
 }

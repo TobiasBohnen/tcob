@@ -30,7 +30,7 @@ public:
     void clear_assets();
 
     void static FindSources(font_family& fam, path const& source);
-    void static SingleFont(font_family& fam, std::span<ubyte const> font);
+    void static SingleFont(font_family& fam, std::span<byte const> font);
 
     static inline char const* AssetName {"font_family"};
 
@@ -40,7 +40,7 @@ private:
     string _name;
 
     std::unordered_map<font::style, path>                                                    _fontSources;
-    std::unordered_map<font::style, std::vector<ubyte>>                                      _fontData;
+    std::unordered_map<font::style, std::vector<byte>>                                       _fontData;
     std::unordered_map<font::style, std::unordered_map<u32, assets::owning_asset_ptr<font>>> _fontAssets;
 };
 

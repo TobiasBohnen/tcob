@@ -61,7 +61,7 @@ truetype_font_engine::~truetype_font_engine()
     }
 }
 
-auto truetype_font_engine::load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::information>
+auto truetype_font_engine::load_data(std::span<byte const> data, u32 fontsize) -> std::optional<font::information>
 {
     assert(library);
 
@@ -106,16 +106,7 @@ auto truetype_font_engine::render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap
     retValue.first = load_glyph(cp);
     FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
 
-    /*
-        FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_SDF); // render twice to force bsdf
-        std::vector<byte> bitmap {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
-        retValue.Bitmap.reserve(bitmap.size());
-        for (ubyte pixel : bitmap) {
-            retValue.Bitmap.push_back(pixel < 128 ? static_cast<ubyte>(256 - (128 - pixel) * 2) : 255);
-        }
-    */
-
-    retValue.second.Bitmap = std::vector<ubyte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
+    retValue.second.Bitmap = std::vector<byte> {_face->glyph->bitmap.buffer, _face->glyph->bitmap.buffer + (_face->glyph->bitmap.width * _face->glyph->bitmap.rows)};
 
     retValue.second.BitmapSize.Width  = _face->glyph->bitmap.width;
     retValue.second.BitmapSize.Height = _face->glyph->bitmap.rows;

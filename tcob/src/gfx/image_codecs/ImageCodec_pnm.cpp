@@ -24,13 +24,13 @@ auto static check_supported_format(pnm::header const& h) -> bool
     return h.FormatString[0] == 'P' && (h.FormatString[1] == '1' || h.FormatString[1] == '2' || h.FormatString[1] == '3');
 }
 
-auto static read_until_space(io::istream& reader, std::span<byte> buffer, i32 offset) -> i32
+auto static read_until_space(io::istream& reader, std::span<char> buffer, i32 offset) -> i32
 {
     i32 read {0};
 
-    u8 b {reader.read<u8>()};
+    char b {reader.read<char>()};
     while (!std::isspace(b)) {
-        buffer[offset + read] = static_cast<byte>(b);
+        buffer[offset + read] = b;
         read++;
         if (reader.is_eof()) {
             break;
@@ -41,17 +41,17 @@ auto static read_until_space(io::istream& reader, std::span<byte> buffer, i32 of
     return read;
 }
 
-auto static read_char(io::istream& reader) -> u8
+auto static read_char(io::istream& reader) -> char
 {
-    u8 retValue {0};
+    char retValue {0};
 
     do {
-        retValue = reader.read<u8>();
+        retValue = reader.read<char>();
     } while (std::isspace(retValue));
 
     if (retValue == '#') {
         while (retValue != '\n') {
-            retValue = reader.read<u8>();
+            retValue = reader.read<char>();
         }
 
         return read_char(reader);
@@ -63,7 +63,7 @@ auto static read_char(io::istream& reader) -> u8
 template <typename T>
 auto read_int(io::istream& reader) -> T
 {
-    std::array<byte, 256> buffer {};
+    std::array<char, 256> buffer {};
     buffer[0] = read_char(reader);
     i32 const    read {read_until_space(reader, buffer, 1) + 1};
     string const str(buffer.begin(), buffer.begin() + read);
@@ -77,7 +77,7 @@ auto static read_p1_data(io::istream& reader, int width, int height) -> std::vec
     std::vector<u8> retValue;
 
     for (i32 i {0}; i < width * height; ++i) {
-        u8 const pix {read_char(reader)};
+        char const pix {read_char(reader)};
         if (pix == '0') {
             retValue.push_back(255);
             retValue.push_back(255);

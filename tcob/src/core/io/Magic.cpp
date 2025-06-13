@@ -31,15 +31,15 @@ void add_signature(signature const& sig)
 auto get_signature(istream& stream) -> std::optional<signature>
 {
     auto const offset {stream.tell()};
-    auto const startBuffer {stream.read_n<ubyte>(BUFFER_LENGTH)};
+    auto const startBuffer {stream.read_n<byte>(BUFFER_LENGTH)};
     stream.seek(-std::min(stream.size_in_bytes(), static_cast<std::streamsize>(BUFFER_LENGTH)), seek_dir::End);
-    auto const endBuffer {stream.read_n<ubyte>(BUFFER_LENGTH)};
+    auto const endBuffer {stream.read_n<byte>(BUFFER_LENGTH)};
     stream.seek(offset, seek_dir::Begin);
 
     for (auto const& sig : GetSignatures()) {
         bool found {true};
         for (auto const& part : sig.Parts) {
-            std::span<ubyte const> slice;
+            std::span<byte const> slice;
 
             if (part.Offset >= 0) {
                 usize const startIndex {static_cast<usize>(part.Offset)};

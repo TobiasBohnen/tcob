@@ -58,11 +58,11 @@ auto constexpr EPSILON {1e-6f};
 auto Normalize(f32& x, f32& y) -> f32;
 
 struct canvas_point {
-    f32   X {0}, Y {0};
-    f32   DX {0}, DY {0};
-    f32   Length {0};
-    f32   DMX {0}, DMY {0};
-    ubyte Flags {0};
+    f32  X {0}, Y {0};
+    f32  DX {0}, DY {0};
+    f32  Length {0};
+    f32  DMX {0}, DMY {0};
+    byte Flags {0};
 };
 
 ////////////////////////////////////////////////////////////

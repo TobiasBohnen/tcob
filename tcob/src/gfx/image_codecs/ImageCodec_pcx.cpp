@@ -30,8 +30,8 @@ namespace tcob::gfx::detail {
 
 constexpr i32  HeaderPaletteLength {48};
 constexpr i32  HeaderPaletteOffset {16};
-constexpr byte ManufacturerMagicNumber {0x0a};
-constexpr byte PaletteMagicNumber {12};
+constexpr char ManufacturerMagicNumber {0x0a};
+constexpr char PaletteMagicNumber {12};
 constexpr i32  PaletteOffset {769};
 constexpr i32  HeaderLength {128};
 

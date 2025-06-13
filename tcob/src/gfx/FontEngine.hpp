@@ -21,8 +21,8 @@ using FT_Face = struct FT_FaceRec_*;
 namespace tcob::gfx {
 
 struct glyph_bitmap {
-    std::vector<ubyte> Bitmap {};
-    size_i             BitmapSize {};
+    std::vector<byte> Bitmap {};
+    size_i            BitmapSize {};
 };
 
 class TCOB_API truetype_font_engine : public non_copyable {
@@ -30,7 +30,7 @@ public:
     truetype_font_engine() = default;
     ~truetype_font_engine();
 
-    auto load_data(std::span<ubyte const> data, u32 fontsize) -> std::optional<font::information>;
+    auto load_data(std::span<byte const> data, u32 fontsize) -> std::optional<font::information>;
     auto get_kerning(u32 cp0, u32 cp1) -> f32;
 
     auto render_glyph(u32 cp) -> std::pair<glyph, glyph_bitmap>;

@@ -15,8 +15,8 @@ namespace tcob::data::csv {
 
 struct settings {
     bool HasHeader {true};
-    byte Separator {','};
-    byte Quote {'"'};
+    char Separator {','};
+    char Quote {'"'};
 };
 
 ////////////////////////////////////////////////////////////
