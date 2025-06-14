@@ -63,20 +63,20 @@ auto constexpr transform::as_matrix4() const -> mat4
 
 auto constexpr transform::as_inverted() const -> transform
 {
-    f32 const det {Matrix[0] * (Matrix[8] * Matrix[4] - Matrix[5] * Matrix[7])
-                   - Matrix[1] * (Matrix[8] * Matrix[3] - Matrix[5] * Matrix[6])
-                   + Matrix[2] * (Matrix[7] * Matrix[3] - Matrix[4] * Matrix[6])};
+    f32 const det {(Matrix[0] * (Matrix[8] * Matrix[4] - Matrix[5] * Matrix[7]))
+                   - (Matrix[1] * (Matrix[8] * Matrix[3] - Matrix[5] * Matrix[6]))
+                   + (Matrix[2] * (Matrix[7] * Matrix[3] - Matrix[4] * Matrix[6]))};
 
     if (det != 0.0f) {
-        return {(Matrix[8] * Matrix[4] - Matrix[5] * Matrix[7]) / det,
-                -(Matrix[8] * Matrix[3] - Matrix[5] * Matrix[6]) / det,
-                (Matrix[7] * Matrix[3] - Matrix[4] * Matrix[6]) / det,
-                -(Matrix[8] * Matrix[1] - Matrix[2] * Matrix[7]) / det,
-                (Matrix[8] * Matrix[0] - Matrix[2] * Matrix[6]) / det,
-                -(Matrix[7] * Matrix[0] - Matrix[1] * Matrix[6]) / det,
-                (Matrix[5] * Matrix[1] - Matrix[2] * Matrix[4]) / det,
-                -(Matrix[5] * Matrix[0] - Matrix[2] * Matrix[3]) / det,
-                (Matrix[4] * Matrix[0] - Matrix[1] * Matrix[3]) / det};
+        return {((Matrix[8] * Matrix[4]) - (Matrix[5] * Matrix[7])) / det,
+                -((Matrix[8] * Matrix[3]) - (Matrix[5] * Matrix[6])) / det,
+                ((Matrix[7] * Matrix[3]) - (Matrix[6] * Matrix[4])) / det,
+                -((Matrix[8] * Matrix[1]) - (Matrix[2] * Matrix[7])) / det,
+                ((Matrix[8] * Matrix[0]) - (Matrix[2] * Matrix[6])) / det,
+                -((Matrix[7] * Matrix[0]) - (Matrix[1] * Matrix[6])) / det,
+                ((Matrix[5] * Matrix[1]) - (Matrix[4] * Matrix[2])) / det,
+                -((Matrix[5] * Matrix[0]) - (Matrix[2] * Matrix[3])) / det,
+                ((Matrix[4] * Matrix[0]) - (Matrix[1] * Matrix[3])) / det};
     }
 
     return Identity;
@@ -105,8 +105,8 @@ void constexpr transform::to_identity()
 auto constexpr transform::transform_point(point_f point) const -> point_f
 {
     f32 const* a {Matrix.data()};
-    return {a[0] * point.X + a[3] * point.Y + a[6],
-            a[1] * point.X + a[4] * point.Y + a[7]};
+    return {(a[0] * point.X) + (a[3] * point.Y) + a[6],
+            (a[1] * point.X) + (a[4] * point.Y) + a[7]};
 }
 
 void constexpr transform::translate(point_f offset)
@@ -147,9 +147,9 @@ void constexpr transform::combine(transform const& xform)
     f32 const* a {Matrix.data()};
     f32 const* b {xform.Matrix.data()};
 
-    Matrix = {a[0] * b[0] + a[3] * b[1] + a[6] * b[2], a[1] * b[0] + a[4] * b[1] + a[7] * b[2], a[2] * b[0] + a[5] * b[1] + a[8] * b[2],
-              a[0] * b[3] + a[3] * b[4] + a[6] * b[5], a[1] * b[3] + a[4] * b[4] + a[7] * b[5], a[2] * b[3] + a[5] * b[4] + a[8] * b[5],
-              a[0] * b[6] + a[3] * b[7] + a[6] * b[8], a[1] * b[6] + a[4] * b[7] + a[7] * b[8], a[2] * b[6] + a[5] * b[7] + a[8] * b[8]};
+    Matrix = {(a[0] * b[0]) + (a[3] * b[1]) + (a[6] * b[2]), (a[1] * b[0]) + (a[4] * b[1]) + (a[7] * b[2]), (a[2] * b[0]) + (a[5] * b[1]) + (a[8] * b[2]),
+              (a[0] * b[3]) + (a[3] * b[4]) + (a[6] * b[5]), (a[1] * b[3]) + (a[4] * b[4]) + (a[7] * b[5]), (a[2] * b[3]) + (a[5] * b[4]) + (a[8] * b[5]),
+              (a[0] * b[6]) + (a[3] * b[7]) + (a[6] * b[8]), (a[1] * b[6]) + (a[4] * b[7]) + (a[7] * b[8]), (a[2] * b[6]) + (a[5] * b[7]) + (a[8] * b[8])};
 }
 
 inline auto operator<<(std::ostream& os, transform const& m) -> std::ostream&
