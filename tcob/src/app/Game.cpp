@@ -45,7 +45,7 @@ game::game(init const& gameInit)
         i.ConfigDefaults      = obj;
     }
 
-    register_service<platform>(std::make_shared<platform>(false, i));
+    register_service<platform>(platform::Init(i));
     locate_service<input::system>().KeyDown.connect<&game::on_key_down>(this);
 }
 

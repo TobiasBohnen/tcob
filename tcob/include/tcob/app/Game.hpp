@@ -25,7 +25,6 @@ namespace tcob {
 class TCOB_API game : public non_copyable {
 public:
     struct init {
-        path                        Path {};                      //!< The path to the game.
         path                        Name {};                      //!< The name of the game.
         path                        OrgName {"tcob"};             //!< The organization name.
         path                        LogFile {"tcob.log"};         //!< The log file name.

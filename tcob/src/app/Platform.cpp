@@ -12,7 +12,6 @@
 #include <optional>
 #include <stdexcept>
 #include <thread>
-#include <utility>
 #include <vector>
 
 #include <SDL3/SDL.h>
@@ -73,9 +72,9 @@ platform::platform(bool headless, game::init const& ginit)
 {
     //  file system
     if (!headless) {
-        io::detail::init(ginit.Path.c_str(), ginit.Name, ginit.OrgName);
+        io::detail::init(ginit.Name, ginit.OrgName);
     } else {
-        io::detail::simple_init(ginit.Path.c_str());
+        io::detail::simple_init();
     }
 
     //  logger
@@ -179,16 +178,21 @@ void platform::remove_services() const
     remove_service<gfx::render_system::factory>();
 }
 
-auto platform::HeadlessInit(char const* argv0, path logFile) -> platform
+auto platform::Init(game::init const& ginit) -> std::shared_ptr<platform>
 {
-    return {true,
-            {.Path           = argv0,
-             .Name           = "",
-             .OrgName        = "",
-             .LogFile        = std::move(logFile),
-             .ConfigFile     = "config.ini",
-             .ConfigDefaults = {},
-             .WorkerThreads  = std::nullopt}};
+    return std::shared_ptr<platform> {new platform {false, ginit}};
+}
+
+auto platform::HeadlessInit(path const& logFile) -> std::shared_ptr<platform>
+{
+    return std::shared_ptr<platform> {
+        new platform {true,
+                      {.Name           = "",
+                       .OrgName        = "",
+                       .LogFile        = logFile,
+                       .ConfigFile     = "config.ini",
+                       .ConfigDefaults = {},
+                       .WorkerThreads  = std::nullopt}}};
 }
 
 auto platform::IsRunningOnWine() -> bool

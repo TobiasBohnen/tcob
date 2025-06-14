@@ -51,7 +51,6 @@ struct display {
 
 class TCOB_API platform final : public non_copyable {
 public:
-    platform(bool headless, game::init const& ginit);
     ~platform();
 
     signal<path const> DropFile;
@@ -69,13 +68,16 @@ public:
 
     auto process_events() const -> bool;
 
-    auto static HeadlessInit(char const* argv0, path logFile = "") -> platform;
-
     auto static IsRunningOnWine() -> bool;
+
+    auto static Init(game::init const& ginit) -> std::shared_ptr<platform>;
+    auto static HeadlessInit(path const& logFile = "") -> std::shared_ptr<platform>;
 
     static inline char const* ServiceName {"platform"};
 
 private:
+    platform(bool headless, game::init const& ginit);
+
     void init_locales();
     void init_render_system(string const& windowTitle);
 

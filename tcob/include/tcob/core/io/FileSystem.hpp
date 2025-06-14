@@ -46,8 +46,8 @@ struct pattern {
 
 ////////////////////////////////////////////////////////////
 namespace detail {
-    TCOB_API void simple_init(char const* argv0);
-    TCOB_API void init(char const* argv0, string const& name, string const& orgName);
+    TCOB_API void simple_init();
+    TCOB_API void init(string const& name, string const& orgName);
     TCOB_API void done();
 }
 
