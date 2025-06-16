@@ -119,10 +119,10 @@ void default_render_target::prepare_render(bool)
 {
     auto const& stats {locate_service<render_system>().stats()};
 
-    constexpr mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
-                           0.0f, 1.0f, 0.0f, 0.0f,
-                           0.0f, 0.0f, 1.0f, 0.0f,
-                           0.0f, 0.0f, 0.0f, 1.0f};
+    constexpr static mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
+                                  0.0f, 1.0f, 0.0f, 0.0f,
+                                  0.0f, 0.0f, 1.0f, 0.0f,
+                                  0.0f, 0.0f, 0.0f, 1.0f};
 
     get_impl<render_backend::render_target_base>()->prepare_render({
         .ViewMatrix            = Matrix,
