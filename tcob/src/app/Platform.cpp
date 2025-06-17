@@ -340,7 +340,8 @@ void platform::init_render_system(string const& windowTitle)
     rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
 #endif
 
-    auto video {(*_configFile)[Cfg::Video::Name].as<gfx::video_config>()};
+    gfx::video_config video;
+    if (!_configFile->try_get(video, Cfg::Video::Name)) { throw std::runtime_error("Invalid video config"); }
 
     string renderer {video.RenderSystem};
 
@@ -348,7 +349,7 @@ void platform::init_render_system(string const& windowTitle)
     logger::Info("RenderSystem: {}", renderer);
 
     auto renderSystem {rsFactory->create(renderer)};
-    if (!renderSystem) { throw std::runtime_error("Render system creation failed!"); }
+    if (!renderSystem) { throw std::runtime_error("Render system creation failed"); }
 
     register_service<gfx::render_system>(renderSystem);
     auto& window {renderSystem->init_window(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
