@@ -18,8 +18,8 @@ public:
     i32 Channels {0};
     i32 SampleRate {0};
 
-    auto     is_valid() const -> bool;
     explicit operator bool() const;
+    auto     is_valid() const -> bool;
 
     auto operator==(specification const& other) const -> bool = default;
 };

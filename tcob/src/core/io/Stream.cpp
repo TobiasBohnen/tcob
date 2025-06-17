@@ -31,14 +31,14 @@ auto istream::read_string_until(char delim) -> string
     return retValue;
 }
 
-auto istream::is_valid() const -> bool
-{
-    return true;
-}
-
 istream::operator bool() const
 {
     return is_valid();
+}
+
+auto istream::is_valid() const -> bool
+{
+    return true;
 }
 
 ////////////////////////////////////////////////////////////

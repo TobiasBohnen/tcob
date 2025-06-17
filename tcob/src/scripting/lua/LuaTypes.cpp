@@ -93,14 +93,14 @@ auto ref::get_view() const -> state_view
     return _view;
 }
 
-auto ref::is_valid() const -> bool
-{
-    return _ref != NOREF && _view.is_valid();
-}
-
 ref::operator bool() const
 {
     return is_valid();
+}
+
+auto ref::is_valid() const -> bool
+{
+    return _ref != NOREF && _view.is_valid();
 }
 
 auto operator==(ref const& left, ref const& right) -> bool

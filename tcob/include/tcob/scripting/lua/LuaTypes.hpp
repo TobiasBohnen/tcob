@@ -34,8 +34,8 @@ public:
 
     void push_self() const;
 
-    auto     is_valid() const -> bool;
     explicit operator bool() const;
+    auto     is_valid() const -> bool;
 
     friend auto operator==(ref const& left, ref const& right) -> bool;
 
