@@ -85,7 +85,7 @@ protected:
     void on_clear(color c) const override;
 
 private:
-    explicit window(std::unique_ptr<render_backend::window_base> window, assets::owning_asset_ptr<texture> const& texture = {});
+    explicit window(std::unique_ptr<render_backend::window_base> window, assets::asset_owner_ptr<texture> const& texture = {});
 
     auto get_fullscreen() const -> bool;
     void set_fullscreen(bool value);
@@ -93,8 +93,8 @@ private:
     auto get_title() const -> string;
     void set_title(string const& value);
 
-    assets::owning_asset_ptr<texture>  _texture;
-    assets::owning_asset_ptr<material> _material {};
+    assets::asset_owner_ptr<texture>  _texture;
+    assets::asset_owner_ptr<material> _material {};
 
     std::unique_ptr<render_backend::window_base> _impl;
     quad_renderer                                _renderer {buffer_usage_hint::StaticDraw};

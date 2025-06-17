@@ -158,7 +158,7 @@ private:
 
     std::unique_ptr<truetype_font_engine> _engine;
 
-    assets::owning_asset_ptr<gfx::texture> _texture {};
+    assets::asset_owner_ptr<gfx::texture> _texture {};
 };
 
 ////////////////////////////////////////////////////////////

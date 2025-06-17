@@ -275,7 +275,7 @@ private:
     bool _edgeAntiAlias {true};
     bool _enforceWinding {true};
 
-    std::unordered_map<i32, assets::owning_asset_ptr<render_texture>> _rtt {};
-    i32                                                               _activeRtt {0};
+    std::unordered_map<i32, assets::asset_owner_ptr<render_texture>> _rtt {};
+    i32                                                              _activeRtt {0};
 };
 }

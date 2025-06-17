@@ -35,7 +35,7 @@ auto static check(string const& msg, bool c) -> bool
     return c;
 }
 
-window::window(std::unique_ptr<render_backend::window_base> window, assets::owning_asset_ptr<texture> const& texture)
+window::window(std::unique_ptr<render_backend::window_base> window, assets::asset_owner_ptr<texture> const& texture)
     : render_target {texture.ptr()}
     , FullScreen {{[this]() { return get_fullscreen(); },
                    [this](auto const& value) { set_fullscreen(value); }}}

@@ -167,7 +167,7 @@ private:
     std::vector<vertex> _verts;
     std::vector<u32>    _inds;
 
-    assets::owning_asset_ptr<material> _material;
+    assets::asset_owner_ptr<material> _material;
 
     std::mutex _mutex {};
     bool       _multiThreaded;

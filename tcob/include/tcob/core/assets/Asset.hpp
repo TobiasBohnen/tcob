@@ -98,11 +98,11 @@ inline auto operator==(asset_ptr<T> const& left, asset_ptr<T> const& right) -> b
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class owning_asset_ptr {
+class asset_owner_ptr {
 public:
     using type = T;
 
-    owning_asset_ptr(string const& name = "", auto&&... args);
+    asset_owner_ptr(string const& name = "", auto&&... args);
 
     auto operator->() const -> type*;
     auto operator*() const -> type&;

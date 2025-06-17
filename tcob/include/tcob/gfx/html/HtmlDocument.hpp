@@ -105,7 +105,7 @@ private:
     point_i _mousePosition;
     bool    _buttonDown {false};
 
-    assets::owning_asset_ptr<material> _material {};
+    assets::asset_owner_ptr<material> _material {};
 };
 }
 

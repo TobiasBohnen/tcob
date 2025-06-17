@@ -202,33 +202,33 @@ inline auto operator==(asset_ptr<T> const& left, asset_ptr<T> const& right) -> b
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline owning_asset_ptr<T>::owning_asset_ptr(string const& name, auto&&... args)
+inline asset_owner_ptr<T>::asset_owner_ptr(string const& name, auto&&... args)
     : _object {std::make_shared<T>(args...)}
     , _assetPtr {std::make_shared<asset<T>>(name, _object, asset_status::Loaded)}
 {
 }
 
 template <typename T>
-inline auto owning_asset_ptr<T>::operator->() const -> type*
+inline auto asset_owner_ptr<T>::operator->() const -> type*
 {
     return _object.get();
 }
 
 template <typename T>
-inline auto owning_asset_ptr<T>::operator*() const -> type&
+inline auto asset_owner_ptr<T>::operator*() const -> type&
 {
     return *_object.get();
 }
 
 template <typename T>
 template <BaseOfOrDerivedFrom<T> U>
-inline owning_asset_ptr<T>::operator asset_ptr<U>() const
+inline asset_owner_ptr<T>::operator asset_ptr<U>() const
 {
     return _assetPtr;
 }
 
 template <typename T>
-inline auto owning_asset_ptr<T>::ptr() const -> type*
+inline auto asset_owner_ptr<T>::ptr() const -> type*
 {
     return _object.get();
 }

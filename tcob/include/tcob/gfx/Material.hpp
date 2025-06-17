@@ -32,7 +32,7 @@ public:
 
     static inline char const* AssetName {"material"};
 
-    auto static Empty() -> assets::owning_asset_ptr<material>;
+    auto static Empty() -> assets::asset_owner_ptr<material>;
 
     auto operator==(material const& other) const -> bool = default;
 };

@@ -39,9 +39,9 @@ private:
 
     string _name;
 
-    std::unordered_map<font::style, path>                                                    _fontSources;
-    std::unordered_map<font::style, std::vector<byte>>                                       _fontData;
-    std::unordered_map<font::style, std::unordered_map<u32, assets::owning_asset_ptr<font>>> _fontAssets;
+    std::unordered_map<font::style, path>                                                   _fontSources;
+    std::unordered_map<font::style, std::vector<byte>>                                      _fontData;
+    std::unordered_map<font::style, std::unordered_map<u32, assets::asset_owner_ptr<font>>> _fontAssets;
 };
 
 ////////////////////////////////////////////////////////////
