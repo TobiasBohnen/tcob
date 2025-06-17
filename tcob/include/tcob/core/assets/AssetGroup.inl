@@ -21,7 +21,7 @@ inline bucket<T>::bucket(group& parent)
 
 template <typename T>
 template <typename R, typename... Args>
-inline auto bucket<T>::create_or_get(string const& name, Args&&... args) -> assets::asset_ptr<T>
+inline auto bucket<T>::create(string const& name, Args&&... args) -> assets::asset_ptr<T>
 {
     if (!_objects.contains(name)) {
         auto obj {std::make_shared<R>(std::forward<Args>(args)...)};

@@ -144,7 +144,10 @@ void gl_texture::create(size_i texsize, u32 depth, texture::format format)
         do_destroy();
     }
 
-    create();
+    GLCHECK(glGenTextures(1, &ID));
+    set_filtering(texture::filtering::NearestNeighbor);
+    set_wrapping(texture::wrapping::Repeat);
+
     bind();
 
     auto const [iform, _] {convert_enum(format)};
@@ -179,10 +182,4 @@ void gl_texture::do_destroy()
     GLCHECK(glDeleteTextures(1, &ID));
 }
 
-void gl_texture::create()
-{
-    GLCHECK(glGenTextures(1, &ID));
-    set_filtering(texture::filtering::NearestNeighbor);
-    set_wrapping(texture::wrapping::Repeat);
-}
 }

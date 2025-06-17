@@ -54,9 +54,11 @@ public:
     ////////////////////////////////////////////////////////////
 
     texture();
+    texture(size_i size, u32 depth, format f);
     virtual ~texture();
 
     explicit operator bool() const;
+    auto     is_valid() const -> bool;
 
     prop_fn<filtering> Filtering;
     prop_fn<wrapping>  Wrapping;

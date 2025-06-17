@@ -15,12 +15,11 @@ namespace tcob::gfx {
 
 class TCOB_API shader final {
 public:
-    shader();
+    shader(string const& vertexShaderSource, string const& fragmentShaderSource);
     ~shader();
 
     explicit operator bool() const;
-
-    auto create(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool;
+    auto     is_valid() const -> bool;
 
     template <std::derived_from<render_backend::shader_base> T>
     auto get_impl() const -> T*;
@@ -28,6 +27,8 @@ public:
     static inline char const* AssetName {"shader"};
 
 private:
+    auto compile(string const& vertexShaderSource, string const& fragmentShaderSource) -> bool;
+
     std::unique_ptr<render_backend::shader_base> _impl;
 };
 

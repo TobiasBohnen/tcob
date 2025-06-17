@@ -134,7 +134,7 @@ template <typename T, typename TDef>
 auto default_new(string const& name, auto&& bucket, auto&& cache) -> TDef*
 {
     auto def {std::make_unique<TDef>()};
-    def->assetPtr = bucket->template create_or_get<T>(name);
+    def->assetPtr = bucket->template create<T>(name);
 
     auto const retValue {def.get()};
     cache.push_back(std::move(def));
@@ -315,7 +315,7 @@ void cfg_sound_loader::prepare()
     }
 
     locate_service<task_manager>().run_deferred([this](def_task& ctx) {
-        return default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+        default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
@@ -353,7 +353,7 @@ void cfg_sound_font_loader::prepare()
     }
 
     locate_service<task_manager>().run_deferred([this](def_task& ctx) {
-        return default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
+        default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
 
@@ -448,7 +448,7 @@ void cfg_font_family_loader::declare()
 
     for (auto const& [k, v] : obj) {
         auto asset {std::make_unique<asset_def>()};
-        asset->assetPtr = bucket()->template create_or_get<font_family>(k, k);
+        asset->assetPtr = bucket()->template create<font_family>(k, k);
 
         if (object assetSection; v.try_get(assetSection)) {
             assetSection.try_get(asset->source, API::FontFamily::source);
@@ -567,35 +567,35 @@ void cfg_shader_loader::declare()
             // try getting render system specific shader
             assetSection.try_get(assetSection, locate_service<render_system>().name());
 
-            auto* asset {default_new<shader, asset_def>(k, bucket(), _cache)};
-            assetSection.try_get(asset->vertex, API::Shader::vertex);
-            assetSection.try_get(asset->fragment, API::Shader::fragment);
+            auto def {std::make_unique<asset_def>()};
+
+            assetSection.try_get(def->vertex, API::Shader::vertex);
+            auto const vertSource {io::read_as_string(group().mount_point() + def->vertex)};
+            if (vertSource.empty()) {
+                logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
+                set_asset_status(def->assetPtr, asset_status::Error);
+                continue;
+            }
+
+            assetSection.try_get(def->fragment, API::Shader::fragment);
+            auto const fragSource {io::read_as_string(group().mount_point() + def->fragment)};
+            if (fragSource.empty()) {
+                logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
+                set_asset_status(def->assetPtr, asset_status::Error);
+                continue;
+            }
+
+            def->assetPtr = bucket()->template create<gfx::shader>(k, vertSource, fragSource);
+            _cache.push_back(std::move(def));
         }
     }
 }
 
 void cfg_shader_loader::prepare()
 {
-    if (_cache.empty()) { return; }
-
     for (auto& def : _cache) {
-        auto const vertSource {io::read_as_string(group().mount_point() + def->vertex)};
-        if (vertSource.empty()) {
-            logger::Error("shader asset '{}': Vertex shader '{}' not found.", def->assetPtr.get()->name(), def->vertex);
-            set_asset_status(def->assetPtr, asset_status::Error);
-            continue;
-        }
-        auto const fragSource {io::read_as_string(group().mount_point() + def->fragment)};
-        if (fragSource.empty()) {
-            logger::Error("shader asset '{}': Fragment shader '{}' not found.", def->assetPtr.get()->name(), def->fragment);
-            set_asset_status(def->assetPtr, asset_status::Error);
-            continue;
-        }
-
-        def->assetPtr->create(vertSource, fragSource);
-        set_asset_status(def->assetPtr, asset_status::Loaded);
+        set_asset_status(def->assetPtr, def->assetPtr->is_valid() ? asset_status::Loaded : asset_status::Error);
     }
-
     _cache.clear();
 }
 
@@ -614,7 +614,7 @@ void cfg_texture_loader::declare()
     if (object textureSection; _object.try_get(textureSection, API::Texture::Name)) {
         for (auto const& [k, v] : textureSection) {
             auto* asset {default_new<texture, tex_asset_def>(k, bucket(), _cacheTex)};
-            asset->assetPtr->add_region("default", {{0.0f, 0.0f, 1.0f, 1.0f}, 0});
+            asset->assetPtr->add_region("default", {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0});
 
             // texture objects
             if (object assetSection; v.try_get(assetSection)) {
@@ -627,11 +627,11 @@ void cfg_texture_loader::declare()
                             if (io::is_file(f)) {
                                 files.push_back(f);
                             } else if (io::is_folder(f)) {
-                                auto const moreFiles {io::enumerate(f, {"*.*"}, false)};
+                                auto const moreFiles {io::enumerate(f, {.String = "*.*", .MatchWholePath = true}, false)};
                                 files.insert(files.end(), moreFiles.begin(), moreFiles.end());
                             }
                         } else { // pattern
-                            if (auto const moreFiles {io::enumerate(io::get_parent_folder(f), {f, true}, false)}; !moreFiles.empty()) {
+                            if (auto const moreFiles {io::enumerate(io::get_parent_folder(f), {.String = f, .MatchWholePath = true}, false)}; !moreFiles.empty()) {
                                 files.insert(files.end(), moreFiles.begin(), moreFiles.end());
                             } else {
                                 logger::Error("texture asset '{}': File or folder '{}' not found.", asset->assetPtr.get()->name(), f);
@@ -651,7 +651,7 @@ void cfg_texture_loader::declare()
                 for (u32 i {0}; i < files.size(); ++i) {
                     auto const& file {files[i]};
                     auto const  regionName {io::get_stem(file)};
-                    asset->assetPtr->add_region(regionName, {{0.0f, 0.0f, 1.0f, 1.0f}, i});
+                    asset->assetPtr->add_region(regionName, {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = i});
                     asset->images.emplace_back(i, file);
                 }
 
@@ -674,7 +674,7 @@ void cfg_texture_loader::declare()
                 path const f {mp + assetString};
                 if (io::is_file(f)) {
                     auto const regionName {io::get_stem(f)};
-                    asset->assetPtr->add_region(regionName, {{0.0f, 0.0f, 1.0f, 1.0f}, 0});
+                    asset->assetPtr->add_region(regionName, {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0});
                     asset->images.emplace_back(0, f); //{.Depth = 0, .Path = file});
                 }
             }
@@ -684,7 +684,7 @@ void cfg_texture_loader::declare()
     if (object textureSection; _object.try_get(textureSection, API::AnimatedTexture::Name)) {
         for (auto const& [k, v] : textureSection) {
             auto* asset {default_new<animated_texture, ani_asset_def>(k, bucket(), _cacheAni)};
-            asset->assetPtr->add_region("default", {{0.0f, 0.0f, 1.0f, 1.0f}, 0});
+            asset->assetPtr->add_region("default", {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0});
 
             if (object assetSection; v.try_get(assetSection)) {
                 if (path source; assetSection.try_get(source, API::AnimatedTexture::source)) {
@@ -769,7 +769,7 @@ void cfg_texture_loader::prepare()
     }
     _cacheAni.clear();
 
-    locate_service<task_manager>().run_deferred([this](def_task& ctx) { return check_async_load(ctx); });
+    locate_service<task_manager>().run_deferred([this](def_task& ctx) { check_async_load(ctx); });
 }
 
 void cfg_texture_loader::check_async_load(def_task& ctx)

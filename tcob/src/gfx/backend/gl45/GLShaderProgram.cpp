@@ -32,11 +32,6 @@ auto gl_shader::compile(string const& vertexShaderSource, string const& fragment
     }
 
     GLint success {};
-    glGetProgramiv(ID, GL_LINK_STATUS, &success);
-    if (success) { // already linked -> destroy and recreate
-        do_destroy();
-        ID = glCreateProgram();
-    }
 
     char const* cstr {nullptr};
 

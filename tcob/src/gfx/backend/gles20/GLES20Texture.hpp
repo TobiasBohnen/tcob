@@ -35,13 +35,10 @@ public:
 
     auto get_size() const -> size_i;
 
-protected:
-    void create();
-
-    void do_destroy() override;
-
 private:
     void bind() const;
+
+    void do_destroy() override;
 
     size_i          _size {size_i::Zero};
     texture::format _format {};

@@ -48,7 +48,7 @@ public:
     explicit bucket(group& parent);
 
     template <typename R = T, typename... Args>
-    auto create_or_get(string const& name, Args&&... args) -> assets::asset_ptr<T>;
+    auto create(string const& name, Args&&... args) -> assets::asset_ptr<T>;
 
     auto get(string const& name) const -> assets::asset_ptr<T>;
 

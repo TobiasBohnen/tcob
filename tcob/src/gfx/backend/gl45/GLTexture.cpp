@@ -128,7 +128,9 @@ void gl_texture::create(size_i texsize, u32 depth, texture::format format)
         do_destroy();
     }
 
-    create(GL_TEXTURE_2D_ARRAY);
+    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &ID);
+    set_filtering(texture::filtering::NearestNeighbor);
+    set_wrapping(texture::wrapping::Repeat);
 
     auto const [iform, _] {convert_enum(format)};
     glTextureStorage3D(ID, 1, iform, texsize.Width, texsize.Height, depth);
@@ -162,10 +164,4 @@ void gl_texture::do_destroy()
     glDeleteTextures(1, &ID);
 }
 
-void gl_texture::create(i32 type)
-{
-    glCreateTextures(type, 1, &ID);
-    set_filtering(texture::filtering::NearestNeighbor);
-    set_wrapping(texture::wrapping::Repeat);
-}
 }

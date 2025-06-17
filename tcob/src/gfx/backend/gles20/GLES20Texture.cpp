@@ -64,6 +64,28 @@ gl_texture::~gl_texture()
     destroy();
 }
 
+void gl_texture::create(size_i texsize, u32 /* depth */, texture::format format)
+{
+    _size   = texsize;
+    _format = format;
+
+    if (ID) {
+        do_destroy();
+    }
+
+    GLCHECK(glGenTextures(1, &ID));
+    set_filtering(texture::filtering::NearestNeighbor);
+    set_wrapping(texture::wrapping::Repeat);
+
+    bind();
+
+    auto const [iform, _] {convert_enum(format)};
+    // Replaced glTexStorage3D with glTexImage2D for 2D textures
+    GLCHECK(glTexImage2D(GL_TEXTURE_2D, 0, iform, texsize.Width, texsize.Height, 0, iform, GL_UNSIGNED_BYTE, nullptr));
+
+    logger::Debug("Texture: created ID {}: width {}, height {}", ID, texsize.Width, texsize.Height);
+}
+
 void gl_texture::bind() const
 {
     assert(ID);
@@ -136,25 +158,6 @@ auto gl_texture::copy_to_image(u32 depth) const -> image
     return image::Create(_size, image::format::RGBA, buffer);
 }
 
-void gl_texture::create(size_i texsize, u32 /* depth */, texture::format format)
-{
-    _size   = texsize;
-    _format = format;
-
-    if (ID) {
-        do_destroy();
-    }
-
-    create();
-    bind();
-
-    auto const [iform, _] {convert_enum(format)};
-    // Replaced glTexStorage3D with glTexImage2D for 2D textures
-    GLCHECK(glTexImage2D(GL_TEXTURE_2D, 0, iform, texsize.Width, texsize.Height, 0, iform, GL_UNSIGNED_BYTE, nullptr));
-
-    logger::Debug("Texture: created ID {}: width {}, height {}", ID, texsize.Width, texsize.Height);
-}
-
 void gl_texture::update(point_i origin, size_i size, void const* data, u32 /* depth */, i32 /* rowLength */, i32 alignment) const
 {
     bind();
@@ -179,10 +182,4 @@ void gl_texture::do_destroy()
     GLCHECK(glDeleteTextures(1, &ID));
 }
 
-void gl_texture::create()
-{
-    GLCHECK(glGenTextures(1, &ID));
-    set_filtering(texture::filtering::NearestNeighbor);
-    set_wrapping(texture::wrapping::Repeat);
-}
 }

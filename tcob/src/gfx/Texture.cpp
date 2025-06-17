@@ -36,9 +36,32 @@ texture::texture()
 {
 }
 
+texture::texture(size_i size, u32 depth, format f)
+    : texture {}
+{
+    create(size, depth, f);
+}
+
+void texture::create(size_i size, u32 depth, format f)
+{
+    if (size == _size && depth == _depth && f == _format) {
+        return;
+    }
+
+    _impl->create(size, depth, f);
+    _size   = size;
+    _format = f;
+    _depth  = depth;
+}
+
 texture::~texture() = default;
 
 texture::operator bool() const
+{
+    return is_valid();
+}
+
+auto texture::is_valid() const -> bool
 {
     return _impl->is_valid();
 }
@@ -75,18 +98,6 @@ auto texture::get_regions() const -> std::unordered_map<string, texture_region> 
 auto texture::has_region(string const& name) const -> bool
 {
     return _regions.contains(name);
-}
-
-void texture::create(size_i size, u32 depth, format f)
-{
-    if (size == _size && depth == _depth && f == _format) {
-        return;
-    }
-
-    _impl->create(size, depth, f);
-    _size   = size;
-    _format = f;
-    _depth  = depth;
 }
 
 void texture::update_data(void const* data, u32 depth, i32 rowLength, i32 alignment) const

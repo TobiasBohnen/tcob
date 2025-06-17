@@ -39,7 +39,7 @@ static u32 const GLNVG_FRAG_BINDING {0};
 gl_canvas::gl_canvas()
 {
     if (!_shader.compile(fillVertShader, fillFragShader)) {
-        throw std::runtime_error("failed to compile nanovg shader");
+        throw std::runtime_error("Failed to compile nanovg shader");
     }
     _shader.set_uniform(_shader.get_uniform_location("texture0"), 0);
 
