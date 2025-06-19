@@ -71,12 +71,12 @@ public:
     auto write(io::ostream& stream, object const& obj) -> bool override;
     auto write(io::ostream& stream, array const& arr) -> bool override;
 
-    void write_inline_section(io::ostream& stream, object const& obj) const;
+    auto write_inline_section(io::ostream& stream, object const& obj, usize maxDepth) const -> bool;
 
 private:
-    void write_array(io::ostream& stream, array const& arr) const;
-    void write_section(io::ostream& stream, object const& obj, utf8_string const& prefix) const;
-    void write_entry(io::ostream& stream, entry const& ent) const;
+    auto write_section(io::ostream& stream, object const& obj, utf8_string const& prefix, usize maxDepth) const -> bool;
+    auto write_array(io::ostream& stream, array const& arr, usize maxDepth) const -> bool;
+    auto write_entry(io::ostream& stream, entry const& ent, usize maxDepth) const -> bool;
 };
 
 }

@@ -462,20 +462,22 @@ auto ini_reader::is_eof() const -> bool
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr usize MAX_DEPTH {1000};
+
 auto ini_writer::write(io::ostream& stream, object const& obj) -> bool
 {
-    write_section(stream, obj, "");
-    return true;
+    return write_section(stream, obj, "", MAX_DEPTH);
 }
 
 auto ini_writer::write(io::ostream& stream, array const& arr) -> bool
 {
-    write_array(stream, arr);
-    return true;
+    return write_array(stream, arr, MAX_DEPTH);
 }
 
-void ini_writer::write_section(io::ostream& stream, object const& obj, utf8_string const& prefix) const
+auto ini_writer::write_section(io::ostream& stream, object const& obj, utf8_string const& prefix, usize maxDepth) const -> bool
 {
+    if (maxDepth == 0) { return false; }
+
     std::unordered_map<utf8_string, object> objects;
     for (auto const& [k, v] : obj) {
         auto const& comment {v.get_comment()};
@@ -490,7 +492,7 @@ void ini_writer::write_section(io::ostream& stream, object const& obj, utf8_stri
                     objects.emplace("'" + k + "'", v.as<object>());
                 } else {
                     stream << "'" << k << "' = ";
-                    write_entry(stream, v);
+                    if (!write_entry(stream, v, maxDepth - 1)) { return false; }
                     stream << "\n";
                 }
             } else {
@@ -502,7 +504,7 @@ void ini_writer::write_section(io::ostream& stream, object const& obj, utf8_stri
             } else {
                 stream << k << " = ";
             }
-            write_entry(stream, v);
+            if (!write_entry(stream, v, maxDepth - 1)) { return false; }
             stream << "\n";
         }
     }
@@ -512,12 +514,16 @@ void ini_writer::write_section(io::ostream& stream, object const& obj, utf8_stri
         if (stream.tell() > 0) { stream << "\n"; }
 
         stream << "[" << prefixSec << k << "]\n";
-        write_section(stream, v, prefixSec + k);
+        write_section(stream, v, prefixSec + k, maxDepth - 1);
     }
+
+    return true;
 }
 
-void ini_writer::write_inline_section(io::ostream& stream, object const& obj) const
+auto ini_writer::write_inline_section(io::ostream& stream, object const& obj, usize maxDepth) const -> bool
 {
+    if (maxDepth == 0) { return false; }
+
     stream << "{ ";
     bool first {true};
     for (auto const& [k, v] : obj) {
@@ -531,25 +537,31 @@ void ini_writer::write_inline_section(io::ostream& stream, object const& obj) co
             stream << k << " = ";
         }
 
-        write_entry(stream, v);
+        if (!write_entry(stream, v, maxDepth - 1)) { return false; }
     }
     stream << " }";
+
+    return true;
 }
 
-void ini_writer::write_array(io::ostream& stream, array const& arr) const
+auto ini_writer::write_array(io::ostream& stream, array const& arr, usize maxDepth) const -> bool
 {
+    if (maxDepth == 0) { return false; }
+
     stream << "[ ";
     bool first {true};
     for (auto const& v : arr) {
         if (!first) { stream << ", "; }
         first = false;
 
-        write_entry(stream, v);
+        if (!write_entry(stream, v, maxDepth - 1)) { return false; }
     }
     stream << " ]";
+
+    return true;
 }
 
-void ini_writer::write_entry(io::ostream& stream, entry const& ent) const
+auto ini_writer::write_entry(io::ostream& stream, entry const& ent, usize maxDepth) const -> bool
 {
     if (ent.is<bool>()) {
         stream << (ent.as<bool>() ? "true" : "false");
@@ -560,9 +572,11 @@ void ini_writer::write_entry(io::ostream& stream, entry const& ent) const
     } else if (ent.is<utf8_string>()) {
         stream << "\"" << ent.as<utf8_string>() << "\"";
     } else if (ent.is<array>()) {
-        write_array(stream, ent.as<array>());
+        return write_array(stream, ent.as<array>(), maxDepth);
     } else if (ent.is<object>()) {
-        write_inline_section(stream, ent.as<object>());
+        return write_inline_section(stream, ent.as<object>(), maxDepth);
     }
+
+    return true;
 }
 }

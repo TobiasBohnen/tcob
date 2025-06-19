@@ -66,7 +66,7 @@ void object::set(string_view key, std::nullptr_t)
 auto object::str() const -> string
 {
     io::iomstream stream {};
-    detail::ini_writer {}.write_inline_section(stream, *this);
+    detail::ini_writer {}.write_inline_section(stream, *this, 1000);
     stream.seek(0, io::seek_dir::Begin);
     return stream.read_string(stream.size_in_bytes());
 }

@@ -181,20 +181,22 @@ auto json_reader::ReadScalar(entry& currentEntry, utf8_string_view line) -> bool
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr usize MAX_DEPTH {1000};
+
 auto json_writer::write(io::ostream& stream, object const& obj) -> bool
 {
-    write_object(stream, 0, obj);
-    return true;
+    return write_object(stream, 0, obj, MAX_DEPTH);
 }
 
 auto json_writer::write(io::ostream& stream, array const& arr) -> bool
 {
-    write_array(stream, 0, arr);
-    return true;
+    return write_array(stream, 0, arr, MAX_DEPTH);
 }
 
-void json_writer::write_object(io::ostream& stream, usize indent, object const& obj) const
+auto json_writer::write_object(io::ostream& stream, usize indent, object const& obj, usize maxDepth) const -> bool
 {
+    if (maxDepth == 0) { return false; }
+
     utf8_string indentEntry(indent + INDENT_SPACES, ' ');
     utf8_string indentClose(indent, ' ');
 
@@ -203,17 +205,22 @@ void json_writer::write_object(io::ostream& stream, usize indent, object const& 
     for (auto const& [k, v] : obj) {
         if (!first) { stream << ", \n"; }
         stream << indentEntry << "\"" << k << "\": ";
-        write_entry(stream, indent + INDENT_SPACES, v);
+
+        if (!write_entry(stream, indent + INDENT_SPACES, v, maxDepth - 1)) { return false; }
 
         first = false;
     }
 
     stream << "\n"
            << indentClose << "}";
+
+    return true;
 }
 
-void json_writer::write_array(io::ostream& stream, usize indent, array const& arr) const
+auto json_writer::write_array(io::ostream& stream, usize indent, array const& arr, usize maxDepth) const -> bool
 {
+    if (maxDepth == 0) { return false; }
+
     utf8_string indentItem(indent + INDENT_SPACES, ' ');
     utf8_string indentClose(indent, ' ');
 
@@ -222,16 +229,19 @@ void json_writer::write_array(io::ostream& stream, usize indent, array const& ar
     for (auto const& v : arr) {
         if (!first) { stream << ", \n"; }
         stream << indentItem;
-        write_entry(stream, indent + INDENT_SPACES, v);
+
+        if (!write_entry(stream, indent + INDENT_SPACES, v, maxDepth - 1)) { return false; }
 
         first = false;
     }
 
     stream << "\n"
            << indentClose << "]";
+
+    return true;
 }
 
-void json_writer::write_entry(io::ostream& stream, usize indent, entry const& ent) const
+auto json_writer::write_entry(io::ostream& stream, usize indent, entry const& ent, usize maxDepth) const -> bool
 {
     if (ent.is<bool>()) {
         stream << (ent.as<bool>() ? "true" : "false");
@@ -242,10 +252,12 @@ void json_writer::write_entry(io::ostream& stream, usize indent, entry const& en
     } else if (ent.is<utf8_string>()) {
         stream << "\"" << ent.as<utf8_string>() << "\"";
     } else if (ent.is<array>()) {
-        write_array(stream, indent, ent.as<array>());
+        return write_array(stream, indent, ent.as<array>(), maxDepth);
     } else if (ent.is<object>()) {
-        write_object(stream, indent, ent.as<object>());
+        return write_object(stream, indent, ent.as<object>(), maxDepth);
     }
+
+    return true;
 }
 
 }
