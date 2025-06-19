@@ -119,12 +119,12 @@ namespace detail {
 template <typename T, typename Source>
 class prop_base final : public detail::prop_base<T, Source, prop_base<T, Source>> {
 public:
-    using base_t = detail::prop_base<T, Source, prop_base<T, Source>>;
-    using base_t::base_t;
+    using base_type = detail::prop_base<T, Source, prop_base<T, Source>>;
+    using base_type::base_type;
 
     auto operator=(T const& value) -> prop_base&
     {
-        base_t::set(value, false);
+        base_type::set(value, false);
         return *this;
     }
 
@@ -134,13 +134,14 @@ public:
 template <Container T, typename Source>
 class prop_base<T, Source> final : public detail::prop_base<T, Source, prop_base<T, Source>> {
 public:
-    using base_t     = detail::prop_base<T, Source, prop_base<T, Source>>;
+    using base_type  = detail::prop_base<T, Source, prop_base<T, Source>>;
     using value_type = typename T::value_type;
-    using base_t::base_t;
+
+    using base_type::base_type;
 
     auto operator=(T const& value) -> prop_base&
     {
-        base_t::set(value, false);
+        base_type::set(value, false);
         return *this;
     }
 
@@ -148,20 +149,20 @@ public:
 
     void add(value_type const& element)
     {
-        if constexpr (std::is_reference_v<typename base_t::return_type>) {
+        if constexpr (std::is_reference_v<typename base_type::return_type>) {
             auto& vec {this->_source.get()};
             vec.push_back(element);
             Changed(vec);
         } else {
             auto vec {this->_source.get()};
             vec.push_back(element);
-            base_t::set(vec, true);
+            base_type::set(vec, true);
         }
     }
 
     void set(usize index, value_type const& newValue)
     {
-        if constexpr (std::is_reference_v<typename base_t::return_type>) {
+        if constexpr (std::is_reference_v<typename base_type::return_type>) {
             auto& vec {this->_source.get()};
             if (index < vec.size()) {
                 vec[index] = newValue;
@@ -171,7 +172,7 @@ public:
             auto vec {this->_source.get()};
             if (index < vec.size()) {
                 vec[index] = newValue;
-                base_t::set(vec, true);
+                base_type::set(vec, true);
             }
         }
     }
