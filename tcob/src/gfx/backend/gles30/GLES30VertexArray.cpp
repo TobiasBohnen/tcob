@@ -144,14 +144,14 @@ void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset) co
 void gl_vertex_array::draw_elements(primitive_type mode, usize count, u32 offset) const
 {
     bind();
-    GLCHECK(glDrawElements(convert_enum(mode), static_cast<i32>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint)))); // NOLINT(performance-no-int-to-ptr)
+    GLCHECK(glDrawElements(convert_enum(mode), static_cast<GLsizei>(count), GL_UNSIGNED_INT, reinterpret_cast<void*>(offset * sizeof(GLuint)))); // NOLINT(performance-no-int-to-ptr)
     unbind();
 }
 
 void gl_vertex_array::draw_arrays(primitive_type mode, i32 first, usize count) const
 {
     bind();
-    GLCHECK(glDrawArrays(convert_enum(mode), first, static_cast<i32>(count)));
+    glDrawArrays(convert_enum(mode), static_cast<GLint>(first), static_cast<GLsizei>(count));
     unbind();
 }
 

@@ -429,7 +429,7 @@ void gl_canvas::fill(nvg_call const& call)
     glStencilMask(0x7F);
     glStencilFunc(GL_NOTEQUAL, 0x00, 0x7F); // Only draw where inside clip.
     glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    glDrawArrays(GL_TRIANGLE_STRIP, static_cast<GLint>(call.TriangleOffset), call.TriangleCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, static_cast<GLint>(call.TriangleOffset), static_cast<GLsizei>(call.TriangleCount));
 
     glDisable(GL_STENCIL_TEST);
 }
@@ -511,7 +511,7 @@ void gl_canvas::stroke(nvg_call const& call)
 void gl_canvas::triangles(nvg_call const& call)
 {
     set_uniforms(call.UniformOffset, call.Image);
-    glDrawArrays(GL_TRIANGLES, static_cast<i32>(call.TriangleOffset), static_cast<i32>(call.TriangleCount));
+    glDrawArrays(GL_TRIANGLES, static_cast<GLint>(call.TriangleOffset), static_cast<GLsizei>(call.TriangleCount));
 }
 
 void gl_canvas::clip(nvg_call const& call)
