@@ -21,7 +21,7 @@
 
 namespace tcob::ui {
 
-static constexpr point_i INVALID {INVALID_INDEX, INVALID_INDEX};
+constexpr point_i INVALID {INVALID_INDEX, INVALID_INDEX};
 
 void grid_view::style::Transition(style& target, style const& left, style const& right, f64 step)
 {

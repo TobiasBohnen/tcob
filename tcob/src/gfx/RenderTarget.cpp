@@ -119,7 +119,7 @@ void default_render_target::prepare_render(bool)
 {
     auto const& stats {locate_service<render_system>().stats()};
 
-    constexpr static mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
+    static constexpr mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
                                   0.0f, 1.0f, 0.0f, 0.0f,
                                   0.0f, 0.0f, 1.0f, 0.0f,
                                   0.0f, 0.0f, 0.0f, 1.0f};
