@@ -6,7 +6,9 @@
 #include "tcob/core/StringUtils.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -253,6 +255,51 @@ auto capitalize(utf8_string_view str) -> utf8_string
             retValue += utf8::to_lower(utf8::substr(str, i, 1));
         }
         ::utf8::next_ex(it, str.end());
+    }
+
+    return retValue;
+}
+
+auto to_utf32(utf8_string_view str) -> std::optional<std::u32string>
+{
+    // based on: https://github.com/brofield/simpleini/blob/master/ConvertUTF.c
+    static constexpr std::array<byte, 256> trailingBytesForUTF8 {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5};
+
+    static constexpr std::array<u32, 6> offsetsFromUTF8 {0x00000000UL, 0x00003080UL, 0x000E2080UL, 0x03C82080UL, 0xFA082080UL, 0x82082080UL};
+
+    usize const    size {str.size()};
+    std::u32string retValue {};
+    retValue.reserve(size);
+
+    for (usize i {0}; i < size;) {
+        byte const source {static_cast<byte>(str[i])};
+        u32        ch {0};
+
+        byte const extraBytesToRead {trailingBytesForUTF8[source]};
+        if (i + extraBytesToRead >= size) {
+            return std::nullopt;
+        }
+
+        for (byte j {extraBytesToRead}; j > 0; --j) {
+            ch += static_cast<byte>(str[i++]);
+            ch <<= 6;
+        }
+        ch += static_cast<byte>(str[i++]);
+        ch -= offsetsFromUTF8[extraBytesToRead];
+
+        if (ch <= 0x0010FFFF) {
+            retValue.append(1, static_cast<char32_t>(ch));
+        } else {
+            return std::nullopt;
+        }
     }
 
     return retValue;
