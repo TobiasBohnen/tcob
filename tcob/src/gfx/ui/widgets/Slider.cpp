@@ -103,7 +103,7 @@ void slider::on_draw(widget_painter& painter)
 
 void slider::on_key_down(input::keyboard::event const& ev)
 {
-    auto const& controls {parent_form()->Controls};
+    auto const& controls {form().Controls};
     if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
         if (ev.KeyCode == controls->NavLeftKey) {
             handle_dir_input(direction::Left);
@@ -192,7 +192,7 @@ void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
 void slider::on_controller_button_down(input::controller::button_event const& ev)
 {
-    auto const& controls {parent_form()->Controls};
+    auto const& controls {form().Controls};
     if (ev.Controller->is_button_pressed(controls->ActivateButton)) {
         if (ev.Button == controls->NavLeftButton) {
             handle_dir_input(direction::Left);

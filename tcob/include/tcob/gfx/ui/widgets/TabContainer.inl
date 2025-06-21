@@ -25,10 +25,11 @@ inline auto tab_container::create_tab(utf8_string const& name, item const& label
 {
     request_redraw(this->name() + ": tab created");
 
-    widget::init wi {};
-    wi.Form   = parent_form();
-    wi.Parent = this;
-    wi.Name   = name;
+    widget::init const wi {
+        .Form   = &form(),
+        .Parent = nullptr,
+        .Name   = name,
+    };
 
     auto retValue {std::make_shared<T>(wi)};
     _tabs.push_back(retValue);

@@ -108,7 +108,7 @@ auto layout::create_init(string const& name) const -> widget::init
     std::visit(
         overloaded {
             [this, &retValue](widget_container* parent) {
-                retValue.Form   = parent->parent_form();
+                retValue.Form   = &parent->form();
                 retValue.Parent = parent;
                 Changed();
             },

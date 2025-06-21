@@ -279,9 +279,9 @@ auto widget::parent() const -> widget_container*
     return dynamic_cast<widget_container*>(_parent);
 }
 
-auto widget::parent_form() const -> form_base*
+auto widget::form() const -> form_base&
 {
-    return _form;
+    return *_form;
 }
 
 auto widget::is_top_level() const -> bool
@@ -315,7 +315,7 @@ void widget::do_key_down(input::keyboard::event const& ev)
         request_redraw(_name + ": KeyDown");
     }
 
-    KeyDown({this, ev});
+    KeyDown({.Sender = this, .Event = ev});
 }
 
 void widget::do_key_up(input::keyboard::event const& ev)
@@ -332,7 +332,7 @@ void widget::do_key_up(input::keyboard::event const& ev)
         request_redraw(_name + ": KeyUp");
     }
 
-    KeyUp({this, ev});
+    KeyUp({.Sender = this, .Event = ev});
 }
 
 void widget::do_text_input(input::keyboard::text_input_event const& ev)
@@ -354,7 +354,7 @@ void widget::do_mouse_enter()
     request_redraw(_name + ": MouseEnter");
 
     on_mouse_enter();
-    MouseEnter({this});
+    MouseEnter({.Sender = this});
 }
 
 void widget::do_mouse_leave()
@@ -371,7 +371,7 @@ void widget::do_mouse_leave()
     request_redraw(_name + ": MouseLeave");
 
     on_mouse_leave();
-    MouseLeave({this});
+    MouseLeave({.Sender = this});
 }
 
 void widget::do_mouse_hover(input::mouse::motion_event const& ev)
@@ -444,7 +444,7 @@ void widget::do_mouse_wheel(input::mouse::wheel_event const& ev)
         request_redraw(_name + ": MouseWheel");
     }
 
-    MouseWheel({this, ev});
+    MouseWheel({.Sender = this, .Event = ev});
 }
 
 void widget::do_controller_button_down(input::controller::button_event const& ev)
@@ -462,7 +462,7 @@ void widget::do_controller_button_down(input::controller::button_event const& ev
         request_redraw(_name + ": ControllerButtonDown");
     }
 
-    ControllerButtonDown({this, ev});
+    ControllerButtonDown({.Sender = this, .Event = ev});
 }
 
 void widget::do_controller_button_up(input::controller::button_event const& ev)
@@ -481,21 +481,21 @@ void widget::do_controller_button_up(input::controller::button_event const& ev)
         request_redraw(_name + ": ControllerButtonUp");
     }
 
-    ControllerButtonUp({this, ev});
+    ControllerButtonUp({.Sender = this, .Event = ev});
 }
 
 void widget::do_click()
 {
     on_click();
 
-    Click({this});
+    Click({.Sender = this});
 }
 
 void widget::do_double_click()
 {
     on_double_click();
 
-    DoubleClick({this});
+    DoubleClick({.Sender = this});
 }
 
 void widget::do_focus_gained()
@@ -505,7 +505,7 @@ void widget::do_focus_gained()
 
     on_focus_gained();
 
-    FocusGained({this});
+    FocusGained({.Sender = this});
 }
 
 void widget::do_focus_lost()
@@ -515,7 +515,7 @@ void widget::do_focus_lost()
 
     on_focus_lost();
 
-    FocusLost({this});
+    FocusLost({.Sender = this});
 }
 
 auto widget::attributes() const -> widget_attributes

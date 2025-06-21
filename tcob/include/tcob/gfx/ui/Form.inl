@@ -73,10 +73,11 @@ inline auto form<Layout>::get_layout() const -> layout const*
 template <std::derived_from<tooltip> T>
 inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
 {
-    widget::init wi {};
-    wi.Form   = this;
-    wi.Parent = nullptr;
-    wi.Name   = name;
+    widget::init const wi {
+        .Form   = this,
+        .Parent = nullptr,
+        .Name   = name,
+    };
 
     auto retValue {std::make_shared<T>(wi)};
     _tooltips.push_back(retValue);

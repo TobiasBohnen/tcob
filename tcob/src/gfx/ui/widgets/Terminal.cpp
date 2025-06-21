@@ -372,7 +372,7 @@ void terminal::on_key_down(input::keyboard::event const& ev)
         _cursorVisible = true;
     }
 
-    auto const& controls {parent_form()->Controls};
+    auto const& controls {form().Controls};
     auto const [x, y] {get_xy()};
 
     if (ev.KeyCode == controls->NavLeftKey) {

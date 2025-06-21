@@ -204,7 +204,7 @@ auto global_to_parent(widget const& widget, point_i p) -> point_f
     if (auto* parent {widget.parent()}) {
         retValue -= (parent->global_content_bounds().Position - parent->scroll_offset());
     } else {
-        retValue -= point_f {widget.parent_form()->Bounds->Position};
+        retValue -= point_f {widget.form().Bounds->Position};
     }
 
     return retValue;

@@ -80,7 +80,7 @@ public:
     auto is_enabled() const -> bool;
 
     auto parent() const -> widget_container*;
-    auto parent_form() const -> form_base*;
+    auto form() const -> form_base&;
     auto is_top_level() const -> bool;
     auto top_level_widget() -> widget*;
 

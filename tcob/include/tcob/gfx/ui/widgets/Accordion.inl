@@ -23,11 +23,11 @@ template <std::derived_from<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name, item const& label) -> std::shared_ptr<T>
 {
     request_redraw(this->name() + ": section created");
-
-    widget::init wi {};
-    wi.Form   = parent_form();
-    wi.Parent = this;
-    wi.Name   = name;
+    widget::init const wi {
+        .Form   = &form(),
+        .Parent = nullptr,
+        .Name   = name,
+    };
 
     auto retValue {std::make_shared<T>(wi)};
     _sections.push_back(retValue);

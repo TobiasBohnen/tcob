@@ -182,7 +182,7 @@ void accordion::on_draw_children(widget_painter& painter)
 
     // scissor
     rect_f bounds {global_content_bounds()};
-    bounds.Position -= parent_form()->Bounds->Position;
+    bounds.Position -= form().Bounds->Position;
     painter.push_scissor(bounds);
 
     // active section
