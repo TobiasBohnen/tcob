@@ -42,7 +42,7 @@ private:
 
 class TCOB_API entity : public drawable, public hybrid_updatable, public input::receiver {
 public:
-    // TODO: bounds, mouse enter/leave
+    // TODO: bounds, mouse enter/leave, frame limit
 
     void update(milliseconds deltaTime) final;
     void fixed_update(milliseconds deltaTime) final;
