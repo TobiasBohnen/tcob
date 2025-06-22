@@ -174,7 +174,7 @@ namespace detail {
     template <typename T, typename Source, typename Derived>
     inline void prop_base<T, Source, Derived>::set(T const& value, bool force)
     {
-        if (_source.set(value, force) && static_cast<Derived*>(this)->Changed.slot_count() > 0) {
+        if (_source.set(value, force)) {
             static_cast<Derived*>(this)->Changed(_source.get());
         }
     }
