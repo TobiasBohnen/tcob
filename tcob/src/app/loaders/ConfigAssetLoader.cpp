@@ -141,7 +141,7 @@ auto default_new(string const& name, auto&& bucket, auto&& cache) -> TDef*
     return retValue;
 }
 
-void default_check_async_load(def_task& ctx, auto&& cache, auto&& stateSetter)
+void default_check_async_load(def_task const& ctx, auto&& cache, auto&& stateSetter)
 {
     using namespace std::chrono_literals;
 
@@ -314,7 +314,7 @@ void cfg_sound_loader::prepare()
         set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
-    locate_service<task_manager>().run_deferred([this](def_task& ctx) {
+    locate_service<task_manager>().run_deferred([this](def_task const& ctx) {
         default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -352,7 +352,7 @@ void cfg_sound_font_loader::prepare()
         set_asset_status(def->assetPtr, asset_status::Loading);
     }
 
-    locate_service<task_manager>().run_deferred([this](def_task& ctx) {
+    locate_service<task_manager>().run_deferred([this](def_task const& ctx) {
         default_check_async_load(ctx, _cache, [this](auto&& asset, auto&& state) { set_asset_status(asset, state); });
     });
 }
@@ -769,10 +769,10 @@ void cfg_texture_loader::prepare()
     }
     _cacheAni.clear();
 
-    locate_service<task_manager>().run_deferred([this](def_task& ctx) { check_async_load(ctx); });
+    locate_service<task_manager>().run_deferred([this](def_task const& ctx) { check_async_load(ctx); });
 }
 
-void cfg_texture_loader::check_async_load(def_task& ctx)
+void cfg_texture_loader::check_async_load(def_task const& ctx)
 {
     if (_cacheTex.empty()) {
         ctx.Finished = true;

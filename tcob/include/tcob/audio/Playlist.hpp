@@ -34,7 +34,7 @@ public:
 
 private:
     void launch_task();
-    void update(def_task& ctx);
+    void update(def_task const& ctx);
 
     void play(source* source);
 

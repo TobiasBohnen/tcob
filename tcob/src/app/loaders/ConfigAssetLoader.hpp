@@ -224,7 +224,7 @@ public:
     void prepare() override;
 
 private:
-    void check_async_load(def_task& ctx);
+    void check_async_load(def_task const& ctx);
 
     // texture
     struct image_ftr {

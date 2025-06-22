@@ -24,7 +24,7 @@ playlist::playlist()
 playlist::~playlist()
 {
     for (auto* source : _playing) { source->stop(); }
-    locate_service<task_manager>().cancel_deferred(_deferred);
+    locate_service<task_manager>().drop_deferred(_deferred);
 }
 
 void playlist::add(string const& name, source* source)
@@ -54,11 +54,11 @@ void playlist::clear_queue()
 void playlist::launch_task()
 {
     if (_deferred == INVALID_ID) {
-        _deferred = locate_service<task_manager>().run_deferred([this](def_task& ctx) { update(ctx); });
+        _deferred = locate_service<task_manager>().run_deferred([this](def_task const& ctx) { update(ctx); });
     }
 }
 
-auto playlist::update(def_task& ctx) -> void
+auto playlist::update(def_task const& ctx) -> void
 {
     for (auto it {_playing.begin()}; it != _playing.end();) {
         if ((*it)->state() == playback_state::Stopped) {

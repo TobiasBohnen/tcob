@@ -76,13 +76,13 @@ void game::finish()
 {
     // wait for command queue
     auto& tm {locate_service<task_manager>()};
-    while (!tm.process_queue(milliseconds {9999})) { // TODO: abort?
+    while (!tm.process_queue(milliseconds {9999}, true)) {
         std::this_thread::yield();
     }
 
     // pop all scenes
     while (!_scenes.empty()) {
-        pop_scene();
+        do_pop_current_scene();
     }
 
     Finish();
@@ -91,7 +91,7 @@ void game::finish()
 
 void game::push_scene(std::shared_ptr<scene> const& scene)
 {
-    auto command {[&, scene](def_task& ctx) {
+    auto const command {[&, scene](def_task const& ctx) {
         if (!_scenes.empty()) {
             _scenes.top()->sleep();
         }
@@ -108,8 +108,8 @@ void game::push_scene(std::shared_ptr<scene> const& scene)
 void game::pop_current_scene()
 {
     if (!_scenes.empty()) {
-        locate_service<task_manager>().run_deferred({[this](def_task& ctx) {
-            pop_scene();
+        locate_service<task_manager>().run_deferred({[this](def_task const& ctx) {
+            do_pop_current_scene();
             ctx.Finished = true;
         }});
     }
@@ -117,10 +117,10 @@ void game::pop_current_scene()
 
 void game::queue_finish()
 {
-    _shouldQuit = true;
+    _forceQuit = true;
 }
 
-void game::pop_scene()
+void game::do_pop_current_scene()
 {
     if (_scenes.empty()) { return; }
 
@@ -131,11 +131,16 @@ void game::pop_scene()
     }
 }
 
+auto game::should_quit() const -> bool
+{
+    return _forceQuit || _scenes.empty();
+}
+
 void game::loop()
 {
     do {
         step();
-    } while (!_shouldQuit);
+    } while (!should_quit());
 }
 
 void game::step()
@@ -162,7 +167,7 @@ void game::step()
     milliseconds const deltaUpdate {now - _lastUpdate};
     milliseconds const frameLimit {1000.f / static_cast<f32>(plt.FrameLimit)};
 
-    tm.process_queue(deltaUpdate);
+    tm.process_queue(deltaUpdate, false);
 
     if (deltaUpdate >= frameLimit) {
         // update
@@ -189,8 +194,6 @@ void game::step()
             rs.stats().update(deltaUpdate);
         }
     }
-
-    if (_scenes.empty()) { queue_finish(); }
 }
 
 auto game::library() -> assets::library&

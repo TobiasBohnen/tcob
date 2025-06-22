@@ -27,8 +27,10 @@ struct par_task {
 };
 
 struct def_task {
-    bool         Finished {true};
     milliseconds DeltaTime {};
+    bool         AbortRequested {false};
+
+    mutable bool Finished {true};
 };
 
 ////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ public:
     template <typename T>
     using async_func = std::function<T()>;
     using par_func   = std::function<void(par_task const&)>;
-    using def_func   = std::function<void(def_task&)>;
+    using def_func   = std::function<void(def_task const&)>;
 
     explicit task_manager(isize threads);
     ~task_manager();
@@ -52,7 +54,7 @@ public:
     void run_parallel(par_func const& func, isize count, isize minRange = 1);
 
     auto run_deferred(def_func const& func) -> uid;
-    void cancel_deferred(uid id);
+    void drop_deferred(uid id);
 
     auto thread_count() const -> isize;
 
@@ -61,7 +63,7 @@ public:
 private:
     void add_task(task_func&& func);
 
-    auto process_queue(milliseconds deltaTime) -> bool;
+    auto process_queue(milliseconds deltaTime, bool abort) -> bool;
 
     void worker_thread(std::stop_token const& stopToken);
 

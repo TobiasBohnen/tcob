@@ -69,7 +69,9 @@ private:
     void loop();
     void step();
 
-    void pop_scene();
+    void do_pop_current_scene();
+
+    auto should_quit() const -> bool;
 
     void on_key_down(input::keyboard::event const& ev);
 
@@ -77,7 +79,7 @@ private:
 
     std::stack<std::shared_ptr<scene>> _scenes {};
 
-    bool         _shouldQuit {false};
+    bool         _forceQuit {false};
     milliseconds _nextFixedUpdate {};
     milliseconds _lastUpdate {};
 };
