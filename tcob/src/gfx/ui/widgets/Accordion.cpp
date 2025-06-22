@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -32,7 +33,9 @@ void accordion::style::Transition(style& target, style const& left, style const&
 
 accordion::accordion(init const& wi)
     : widget_container {wi}
-    , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
+    , ActiveSectionIndex {{[this](isize val) -> isize {
+        return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1);
+    }}}
     , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
     _expandTween.Changed.connect([&]() {
@@ -144,6 +147,8 @@ void accordion::on_draw(widget_painter& painter)
 {
     rect_f rect {draw_background(_style, painter)};
 
+    auto const [secIdx, val] {section_expand()};
+
     // sections
     f32 const  sectionHeight {_style.SectionBarHeight.calc(rect.height())};
     auto const getSectionRect {[&](item_style const& itemStyle, isize index) {
@@ -151,8 +156,8 @@ void accordion::on_draw(widget_painter& painter)
         retValue.Position.Y += sectionHeight * static_cast<f32>(index);
         retValue.Size.Height = sectionHeight;
         retValue -= itemStyle.Item.Border.thickness();
-        if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
-            retValue.Position.Y += content_bounds().height() * _expandTween.current_value();
+        if (secIdx > INVALID_INDEX && index > secIdx) {
+            retValue.Position.Y += content_bounds().height() * val;
         }
         return retValue;
     }};
@@ -167,7 +172,7 @@ void accordion::on_draw(widget_painter& painter)
         _sectionRectCache.push_back(sectionRect);
     }};
 
-    if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
+    if (MaximizeActiveSection() && ActiveSectionIndex > INVALID_INDEX) {
         paintSection(ActiveSectionIndex(), 0);
     } else {
         for (isize i {0}; i < std::ssize(_sections); ++i) {
@@ -178,23 +183,23 @@ void accordion::on_draw(widget_painter& painter)
 
 void accordion::on_draw_children(widget_painter& painter)
 {
-    if (ActiveSectionIndex < 0 || ActiveSectionIndex >= std::ssize(_sections)) { return; }
+    auto const [secIdx, val] {section_expand()};
+    if (secIdx == INVALID_INDEX) { return; }
+
+    // active section
+    apply_style(_style);
 
     // scissor
     rect_f bounds {global_content_bounds()};
     bounds.Position -= form().Bounds->Position;
-    bounds.Size.Height *= _expandTween.current_value();
-
+    bounds.Size.Height *= val;
     painter.push_scissor(bounds);
-
-    // active section
-    apply_style(_style);
 
     // content
     auto xform {gfx::transform::Identity};
     xform.translate(bounds.Position);
 
-    auto& sec {_sections[ActiveSectionIndex()]};
+    auto& sec {_sections[secIdx]};
     painter.begin(Alpha(), xform);
     sec->draw(painter);
     painter.end();
@@ -230,6 +235,7 @@ void accordion::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredSectionIndex >= 0) {
+            _oldActiveSectionIndex = ActiveSectionIndex;
             if (ActiveSectionIndex == HoveredSectionIndex) {
                 ActiveSectionIndex = INVALID_INDEX;
                 if (MaximizeActiveSection()) { HoveredSectionIndex = 0; }
@@ -260,9 +266,33 @@ void accordion::on_animation_step(string const& val)
 
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
+    auto const [secIdx, _] {section_expand()};
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
     bounds.Size.Height -= barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(_sections.size()));
-    bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(ActiveSectionIndex() + 1));
+    bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(secIdx + 1));
+}
+
+auto accordion::section_expand() const -> std::pair<isize, f32>
+{
+    std::pair<isize, f32> retValue;
+    f32 const             val {_expandTween.current_value()};
+    if (_oldActiveSectionIndex == INVALID_INDEX) {
+        retValue.first  = ActiveSectionIndex;
+        retValue.second = val;
+    } else if (ActiveSectionIndex == INVALID_INDEX) {
+        retValue.first  = _oldActiveSectionIndex;
+        retValue.second = 1 - val;
+    } else {
+        if (val >= 0.5f) {
+            retValue.first  = ActiveSectionIndex;
+            retValue.second = (val - 0.5f) * 2;
+        } else {
+            retValue.first  = _oldActiveSectionIndex;
+            retValue.second = 1 - (val * 2.f);
+        }
+    }
+    if (retValue.first < 0 || retValue.first >= std::ssize(_sections)) { return {INVALID_INDEX, 0}; }
+    return retValue;
 }
 
 void accordion::offset_content(rect_f& bounds, bool isHitTest) const

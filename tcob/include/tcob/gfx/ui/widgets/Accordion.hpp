@@ -8,6 +8,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -73,10 +74,13 @@ protected:
 
 private:
     void offset_section_content(rect_f& bounds, style const& style) const;
+    auto section_expand() const -> std::pair<isize, f32>;
 
     std::vector<std::shared_ptr<widget>> _sections;
     std::vector<item>                    _sectionLabels;
     std::vector<rect_f>                  _sectionRectCache;
+
+    isize _oldActiveSectionIndex {INVALID_INDEX};
 
     accordion::style _style;
     widget_tweener   _expandTween;
