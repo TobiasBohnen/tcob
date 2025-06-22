@@ -55,7 +55,7 @@ using mat4 = std::array<f32, 4 * 4>;
 f64 constexpr TAU {std::numbers::pi * 2};
 f32 constexpr TAU_F {std::numbers::pi_v<f32> * 2};
 
-using clock        = std::chrono::high_resolution_clock;
+using clock        = std::chrono::steady_clock;
 using milliseconds = std::chrono::duration<f64, std::milli>;
 using seconds      = std::chrono::duration<f64>;
 using minutes      = std::chrono::duration<f64, std::ratio<60>>;
