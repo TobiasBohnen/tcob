@@ -79,7 +79,7 @@ private:
     std::vector<rect_f>                  _sectionRectCache;
 
     accordion::style _style;
-    widget_tweener   _tween;
+    widget_tweener   _expandTween;
 };
 
 }

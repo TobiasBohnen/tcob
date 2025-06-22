@@ -27,7 +27,7 @@ inline auto tab_container::create_tab(utf8_string const& name, item const& label
 
     widget::init const wi {
         .Form   = &form(),
-        .Parent = nullptr,
+        .Parent = this,
         .Name   = name,
     };
 

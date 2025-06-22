@@ -25,7 +25,7 @@ inline auto accordion::create_section(utf8_string const& name, item const& label
     request_redraw(this->name() + ": section created");
     widget::init const wi {
         .Form   = &form(),
-        .Parent = nullptr,
+        .Parent = this,
         .Name   = name,
     };
 

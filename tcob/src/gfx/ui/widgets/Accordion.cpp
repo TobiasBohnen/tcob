@@ -35,16 +35,16 @@ accordion::accordion(init const& wi)
     , ActiveSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
     , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
-    _tween.Changed.connect([&]() {
+    _expandTween.Changed.connect([&]() {
         request_redraw(this->name() + ": Tween value changed");
     });
 
     ActiveSectionIndex.Changed.connect([this](auto const&) {
         if (MaximizeActiveSection) {
-            _tween.reset(1);
+            _expandTween.reset(1);
         } else {
-            _tween.reset(0);
-            _tween.start(1, _style.ExpandDuration);
+            _expandTween.reset(0);
+            _expandTween.start(1, _style.ExpandDuration);
         }
         request_redraw(this->name() + ": ActiveSection changed");
     });
@@ -152,7 +152,7 @@ void accordion::on_draw(widget_painter& painter)
         retValue.Size.Height = sectionHeight;
         retValue -= itemStyle.Item.Border.thickness();
         if (ActiveSectionIndex >= 0 && index > ActiveSectionIndex) {
-            retValue.Position.Y += content_bounds().height() * _tween.current_value();
+            retValue.Position.Y += content_bounds().height() * _expandTween.current_value();
         }
         return retValue;
     }};
@@ -183,21 +183,20 @@ void accordion::on_draw_children(widget_painter& painter)
     // scissor
     rect_f bounds {global_content_bounds()};
     bounds.Position -= form().Bounds->Position;
+    bounds.Size.Height *= _expandTween.current_value();
+
     painter.push_scissor(bounds);
 
     // active section
     apply_style(_style);
 
-    rect_f rect {content_bounds()};
-
     // content
-    auto          xform {gfx::transform::Identity};
-    point_f const translate {rect.Position + paint_offset()};
-    xform.translate(translate);
+    auto xform {gfx::transform::Identity};
+    xform.translate(bounds.Position);
 
-    auto& tab {_sections[ActiveSectionIndex()]};
+    auto& sec {_sections[ActiveSectionIndex()]};
     painter.begin(Alpha(), xform);
-    tab->draw(painter);
+    sec->draw(painter);
     painter.end();
 
     painter.pop_scissor();
@@ -245,7 +244,7 @@ void accordion::on_mouse_button_down(input::mouse::button_event const& ev)
 
 void accordion::on_update(milliseconds deltaTime)
 {
-    _tween.update(deltaTime);
+    _expandTween.update(deltaTime);
 }
 
 void accordion::on_animation_step(string const& val)
@@ -264,7 +263,6 @@ void accordion::offset_section_content(rect_f& bounds, style const& style) const
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
     bounds.Size.Height -= barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(_sections.size()));
     bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(ActiveSectionIndex() + 1));
-    // bounds.Size.Height *= _tween.current_value();
 }
 
 void accordion::offset_content(rect_f& bounds, bool isHitTest) const
