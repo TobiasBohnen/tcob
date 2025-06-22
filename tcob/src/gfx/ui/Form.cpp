@@ -37,7 +37,7 @@ using namespace std::chrono_literals;
 ////////////////////////////////////////////////////////////
 
 form_base::form_base(string name, rect_f const& bounds)
-    : entity {update_mode::Fixed}
+    : entity {update_mode::Normal}
     , Bounds {bounds}
     , _renderer {_canvas}
     , _painter {std::make_unique<widget_painter>(_canvas)}
@@ -156,7 +156,7 @@ auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
     return false;
 }
 
-void form_base::on_fixed_update(milliseconds deltaTime)
+void form_base::on_update(milliseconds deltaTime)
 {
     auto const& widgets {containers()};
 

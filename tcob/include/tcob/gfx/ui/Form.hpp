@@ -72,7 +72,7 @@ public:
 protected:
     form_base(string name, rect_f const& bounds);
 
-    void on_fixed_update(milliseconds deltaTime) override;
+    void on_update(milliseconds deltaTime) override;
 
     auto can_draw() const -> bool override;
     void on_draw_to(gfx::render_target& target) override;
