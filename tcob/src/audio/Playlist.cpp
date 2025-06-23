@@ -78,7 +78,7 @@ auto playlist::update(def_task const& ctx) -> void
 
 void playlist::play(source* source)
 {
-    source->Volume = Volume();
+    source->Volume = *Volume;
     source->play();
     _playing.push_back(source);
 }

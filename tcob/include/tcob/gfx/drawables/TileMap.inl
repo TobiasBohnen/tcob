@@ -41,8 +41,8 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
 {
     auto const& tile {idx != 0 ? _tileSet.get_tile(idx) : tile_type {}};
 
-    auto rect {Grid->layout_tile(tile, coord)};
-    rect.move_by(Position());
+    rect_f rect {Grid->layout_tile(tile, coord)};
+    rect.move_by(*Position);
 
     geometry::set_position(q, rect);
     geometry::set_color(q, tile.Color);
@@ -51,7 +51,7 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
     } else if (Material->Texture && Material->Texture->has_region(tile.TextureRegion)) {
         geometry::set_texcoords(q, Material->Texture->get_region(tile.TextureRegion), tile.FlipHorizontally, tile.FlipVertically);
     } else {
-        geometry::set_texcoords(q, {{0, 0, 1, 1}, 1});
+        geometry::set_texcoords(q, {.UVRect = {0, 0, 1, 1}, .Level = 1});
     }
 }
 

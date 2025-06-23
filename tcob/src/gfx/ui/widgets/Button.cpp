@@ -35,7 +35,7 @@ void button::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    painter.draw_text_and_icon(_style.Text, rect, Label(), Icon());
+    painter.draw_text_and_icon(_style.Text, rect, Label, Icon);
 }
 
 void button::on_update(milliseconds /* deltaTime */)
@@ -44,7 +44,7 @@ void button::on_update(milliseconds /* deltaTime */)
 
 void button::on_animation_step(string const& val)
 {
-    (*Icon).Region = val;
+    Icon.mut_ref().Region = val;
     request_redraw(this->name() + ": Animation Frame changed ");
 }
 
@@ -52,7 +52,7 @@ auto button::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["label"] = Label();
+    retValue["label"] = *Label;
 
     return retValue;
 }

@@ -361,7 +361,7 @@ void platform::init_render_system(string const& windowTitle)
     });
     window.Resized.connect([this, &window](auto const&) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == displays().begin()->second.DesktopMode.Size);
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = window.Size();
+        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = *window.Size;
     });
 
     FrameLimit.Changed.connect([this](i32 value) {

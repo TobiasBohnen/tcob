@@ -287,7 +287,7 @@ void grid_view::on_mouse_button_down(input::mouse::button_event const& ev)
     if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredCellIndex != INVALID) {
             if (HeaderSelectable || HoveredCellIndex->Y != 0) {
-                SelectedCellIndex = HoveredCellIndex();
+                SelectedCellIndex = *HoveredCellIndex;
             }
         }
 
@@ -299,13 +299,13 @@ auto grid_view::attributes() const -> widget_attributes
 {
     auto retValue {vscroll_widget::attributes()};
 
-    retValue["selected_index"] = SelectedCellIndex();
-    if (SelectedCellIndex() != INVALID) {
+    retValue["selected_index"] = *SelectedCellIndex;
+    if (SelectedCellIndex != INVALID) {
         retValue["selected"] = get_cell(SelectedCellIndex).Text;
     }
 
-    retValue["hover_index"] = HoveredCellIndex();
-    if (HoveredCellIndex() != INVALID) {
+    retValue["hover_index"] = *HoveredCellIndex;
+    if (HoveredCellIndex != INVALID) {
         retValue["hover"] = get_cell(HoveredCellIndex).Text;
     }
 

@@ -31,7 +31,7 @@ cursor::cursor()
         geometry::set_texcoords(_quad, region);
         _size = tex->info().Size;
 
-        _renderer.set_material(Material().ptr());
+        _renderer.set_material((*Material).ptr());
     });
 
     geometry::set_color(_quad, colors::White);
@@ -44,7 +44,7 @@ void cursor::add_mode(string const& name, point_i hotspot)
 
 auto cursor::bounds() const -> rect_i
 {
-    return rect_i {{Position() - _currentMode.Hotspot}, _size};
+    return rect_i {{*Position - _currentMode.Hotspot}, _size};
 }
 
 void cursor::on_update(milliseconds /* deltaTime */)
@@ -54,7 +54,7 @@ void cursor::on_update(milliseconds /* deltaTime */)
 
 auto cursor::can_draw() const -> bool
 {
-    return !Material().is_expired();
+    return !(*Material).is_expired();
 }
 
 void cursor::on_draw_to(render_target& target)

@@ -129,7 +129,7 @@ void source::write_to_output(std::span<f32 const> data)
     assert(_output);
 
     if (_canPan && Panning != 0.0f) {
-        f32 const        pan {std::clamp(Panning(), -1.0f, 1.0f)};
+        f32 const        pan {std::clamp(*Panning, -1.0f, 1.0f)};
         std::vector<f32> buffer {data.begin(), data.end()};
         for (usize i {0}; i < data.size(); i += 2) {
             f32 const leftGain {(pan < 0) ? 1.0f : (1.0f - pan)};

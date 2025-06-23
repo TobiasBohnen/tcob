@@ -29,32 +29,32 @@ void slider::style::Transition(style& target, style const& left, style const& ri
 
 slider::slider(init const& wi)
     : widget {wi}
-    , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
-    , Max {{[this](i32 val) -> i32 { return std::max(val, Min()); }}}
+    , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
+    , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
     , Value {{[this](i32 val) -> i32 {
-        if (IncrementalChange && std::abs(Value() - val) > Step) { return Value(); }
-        return std::clamp(val, Min(), Max());
+        if (IncrementalChange && std::abs(*Value - val) > Step) { return *Value; }
+        return std::clamp(val, *Min, *Max);
     }}}
 {
     _tween.Changed.connect([this]() {
         request_redraw(this->name() + ": Tween value changed");
     });
     Min.Changed.connect([this](auto val) {
-        Value = std::max(val, Value());
-        on_value_changed(Value());
+        Value = std::max(val, *Value);
+        on_value_changed(*Value);
         request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
-        Value = std::min(val, Value());
-        on_value_changed(Value());
+        Value = std::min(val, *Value);
+        on_value_changed(*Value);
         request_redraw(this->name() + ": Max changed");
     });
     Max(100);
     Step.Changed.connect([this](auto) { request_redraw(this->name() + ": Step changed"); });
     Step(1);
     Value.Changed.connect([this](auto val) { on_value_changed(val); });
-    Value(Min());
+    Value(*Min);
 
     Class("slider");
 }
@@ -178,13 +178,13 @@ void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (!is_focused()) { return; }
 
     if (ev.Scroll.Y > 0) {
-        Value += Step();
+        Value += *Step;
     } else if (ev.Scroll.Y < 0) {
-        Value -= Step();
+        Value -= *Step;
     } else if (ev.Scroll.X > 0) {
-        Value += Step();
+        Value += *Step;
     } else if (ev.Scroll.X < 0) {
-        Value -= Step();
+        Value -= *Step;
     }
 
     ev.Handled = true;
@@ -217,7 +217,7 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(i32 newVal)
 {
-    f32 const newFrac {Max != Min ? static_cast<f32>(newVal - Min()) / static_cast<f32>(Max() - Min()) : 0.f};
+    f32 const newFrac {Max != Min ? static_cast<f32>(newVal - *Min) / static_cast<f32>(*Max - *Min) : 0.f};
     if (_isDragging) {
         _tween.reset(newFrac);
     } else {
@@ -241,8 +241,8 @@ void slider::calculate_value(point_f mp)
     } break;
     }
 
-    i32 const val {static_cast<i32>(Min() + ((Max() - Min() + 1) * frac))};
-    Value = helper::round_to_multiple(val, Step());
+    i32 const val {static_cast<i32>(*Min + ((*Max - *Min + 1) * frac))};
+    Value = helper::round_to_multiple(val, *Step);
 
     if (!_overThumb) {
         _overThumb = true;
@@ -254,10 +254,10 @@ auto slider::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["min"]   = Min();
-    retValue["max"]   = Max();
-    retValue["value"] = Value();
-    retValue["step"]  = Step();
+    retValue["min"]   = *Min;
+    retValue["max"]   = *Max;
+    retValue["value"] = *Value;
+    retValue["step"]  = *Step;
 
     return retValue;
 }
@@ -267,16 +267,16 @@ void slider::handle_dir_input(direction dir)
     switch (get_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
-        case direction::Left:  Value -= Step(); break;
-        case direction::Right: Value += Step(); break;
+        case direction::Left:  Value -= *Step; break;
+        case direction::Right: Value += *Step; break;
         default:
             break;
         }
         break;
     case orientation::Vertical:
         switch (dir) {
-        case direction::Down: Value -= Step(); break;
-        case direction::Up:   Value += Step(); break;
+        case direction::Down: Value -= *Step; break;
+        case direction::Up:   Value += *Step; break;
         default:
             break;
         }

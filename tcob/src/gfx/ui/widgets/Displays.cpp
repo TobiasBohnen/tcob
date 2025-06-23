@@ -88,7 +88,7 @@ void dot_matrix_display::on_update(milliseconds /* deltaTime */)
     _isDirty = false;
 
     i32 const   width {Dots->width()};
-    auto const& dots {Dots()};
+    auto const& dots {*Dots};
     _sortedDots.clear();
     for (usize idx {0}; idx < dots.count(); ++idx) {
         _sortedDots[dots[idx]].emplace_back(static_cast<i32>(idx % width), static_cast<i32>(idx / width));
@@ -313,7 +313,7 @@ void color_picker::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
-    auto const bounds {Bounds()};
+    auto const bounds {*Bounds};
 
     canvas.set_scissor(bounds);
     canvas.translate(bounds.Position);
@@ -327,7 +327,7 @@ void color_picker::on_draw(widget_painter& painter)
     canvas.set_fill_style(colors::White);
     canvas.fill();
 
-    color const baseColor {color::FromHSVA({BaseHue(), 1.0, 1.0f})};
+    color const baseColor {color::FromHSVA({.Hue = BaseHue, .Saturation = 1.0, .X = 1.0f})};
     canvas.set_fill_style(canvas.create_linear_gradient(
         {0, 0}, {sizeColor.Width, 0},
         {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
@@ -375,7 +375,7 @@ void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
             _selectedHuePos   = mp.Y - Bounds->Position.Y;
             _selectedColorPos = {-1, -1};
         } else {
-            SelectedColor     = color::FromHSVA({BaseHue(), s, 1 - v});
+            SelectedColor     = color::FromHSVA({.Hue = BaseHue, .Saturation = s, .X = 1 - v});
             _selectedColorPos = mp - Bounds->Position;
         }
 

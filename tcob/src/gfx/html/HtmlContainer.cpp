@@ -202,7 +202,7 @@ void container::on_mouse_event(litehtml::element::ptr const& el, litehtml::mouse
 
 void container::set_cursor(char const* cursor)
 {
-    auto winCursor {_config.Window->Cursor()};
+    auto winCursor {*_config.Window->Cursor};
     if (winCursor.is_ready()) {
         winCursor->ActiveMode = cursor;
     }
@@ -258,8 +258,8 @@ void container::get_media_features(litehtml::media_features& media) const
     media.type          = litehtml::media_type_screen;
     media.width         = _windowSize.Width;
     media.height        = _windowSize.Height;
-    media.device_width  = _config.Window->Size().Width;
-    media.device_height = _config.Window->Size().Height;
+    media.device_width  = (*_config.Window->Size).Width;
+    media.device_height = (*_config.Window->Size).Height;
     media.color         = 8;
     media.monochrome    = 0;
     media.color_index   = 0;

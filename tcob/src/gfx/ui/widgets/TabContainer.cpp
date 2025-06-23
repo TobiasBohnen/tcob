@@ -112,7 +112,7 @@ auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
         return nullptr;
     }
 
-    auto& activeTab {_tabs[ActiveTabIndex()]};
+    auto& activeTab {_tabs[ActiveTabIndex]};
     if (!activeTab->hit_test(pos)) { return nullptr; }
 
     if (auto container {std::dynamic_pointer_cast<widget_container>(activeTab)}) {
@@ -210,8 +210,8 @@ void tab_container::on_draw_children(widget_painter& painter)
         point_f const translate {rect.Position + paint_offset()};
         xform.translate(translate);
 
-        auto& tab {_tabs[ActiveTabIndex()]};
-        painter.begin(Alpha(), xform);
+        auto& tab {_tabs[ActiveTabIndex]};
+        painter.begin(Alpha, xform);
         tab->draw(painter);
         painter.end();
     }
@@ -240,7 +240,7 @@ void tab_container::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredTabIndex != INVALID_INDEX) {
-            ActiveTabIndex = HoveredTabIndex();
+            ActiveTabIndex = *HoveredTabIndex;
         }
 
         ev.Handled = true;
@@ -283,7 +283,7 @@ void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
 
 auto tab_container::get_tab_line_count() const -> isize
 {
-    if (*MaxTabsPerLine > 0) {
+    if (MaxTabsPerLine > 0) {
         return static_cast<isize>(std::ceil(static_cast<f32>(std::ssize(_tabs)) / static_cast<f32>(*MaxTabsPerLine)));
     }
 
@@ -302,11 +302,11 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 auto tab_container::attributes() const -> widget_attributes
 {
     auto retValue {widget_container::attributes()};
-    retValue["active_index"] = ActiveTabIndex();
+    retValue["active_index"] = *ActiveTabIndex;
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
         retValue["active"] = _tabLabels[ActiveTabIndex].Text;
     }
-    retValue["hover_index"] = HoveredTabIndex();
+    retValue["hover_index"] = *HoveredTabIndex;
     if (HoveredTabIndex >= 0 && HoveredTabIndex < std::ssize(_tabs)) {
         retValue["hover"] = _tabLabels[HoveredTabIndex].Text;
     }

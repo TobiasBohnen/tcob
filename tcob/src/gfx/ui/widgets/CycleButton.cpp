@@ -69,7 +69,7 @@ auto cycle_button::get_item_at(isize index) const -> item const&
 
 auto cycle_button::selected_item() const -> item const&
 {
-    return _items.at(SelectedItemIndex());
+    return _items.at(SelectedItemIndex);
 }
 
 auto cycle_button::item_count() const -> isize
@@ -117,7 +117,7 @@ auto cycle_button::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["selected_index"] = SelectedItemIndex();
+    retValue["selected_index"] = *SelectedItemIndex;
     if (SelectedItemIndex >= 0) {
         retValue["selected"] = selected_item().Text;
     }
@@ -128,7 +128,7 @@ auto cycle_button::attributes() const -> widget_attributes
 void cycle_button::select_next()
 {
     if (_items.empty()) { return; }
-    SelectedItemIndex = (SelectedItemIndex() + 1) % item_count();
+    SelectedItemIndex = (SelectedItemIndex + 1) % item_count();
 }
 
 } // namespace ui

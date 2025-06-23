@@ -127,7 +127,7 @@ auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
         return nullptr;
     }
 
-    auto& activeSection {_sections[ActiveSectionIndex()]};
+    auto& activeSection {_sections[ActiveSectionIndex]};
     if (!activeSection->hit_test(pos)) { return nullptr; }
 
     if (auto container {std::dynamic_pointer_cast<widget_container>(activeSection)}) {
@@ -172,8 +172,8 @@ void accordion::on_draw(widget_painter& painter)
         _sectionRectCache.push_back(sectionRect);
     }};
 
-    if (MaximizeActiveSection() && ActiveSectionIndex > INVALID_INDEX) {
-        paintSection(ActiveSectionIndex(), 0);
+    if (MaximizeActiveSection && ActiveSectionIndex > INVALID_INDEX) {
+        paintSection(ActiveSectionIndex, 0);
     } else {
         for (isize i {0}; i < std::ssize(_sections); ++i) {
             paintSection(i, i);
@@ -200,7 +200,7 @@ void accordion::on_draw_children(widget_painter& painter)
     xform.translate(bounds.Position);
 
     auto& sec {_sections[secIdx]};
-    painter.begin(Alpha(), xform);
+    painter.begin(Alpha, xform);
     sec->draw(painter);
     painter.end();
 
@@ -220,8 +220,8 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
     for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
         if (!_sectionRectCache[i].contains(mp)) { continue; }
 
-        if (MaximizeActiveSection() && ActiveSectionIndex >= 0) {
-            HoveredSectionIndex = ActiveSectionIndex();
+        if (MaximizeActiveSection && ActiveSectionIndex >= 0) {
+            HoveredSectionIndex = *ActiveSectionIndex;
         } else {
             HoveredSectionIndex = i;
         }
@@ -238,9 +238,9 @@ void accordion::on_mouse_button_down(input::mouse::button_event const& ev)
             _oldActiveSectionIndex = ActiveSectionIndex;
             if (ActiveSectionIndex == HoveredSectionIndex) {
                 ActiveSectionIndex = INVALID_INDEX;
-                if (MaximizeActiveSection()) { HoveredSectionIndex = 0; }
+                if (MaximizeActiveSection) { HoveredSectionIndex = 0; }
             } else {
-                ActiveSectionIndex = HoveredSectionIndex();
+                ActiveSectionIndex = *HoveredSectionIndex;
             }
         }
 
@@ -268,8 +268,8 @@ void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
     auto const [secIdx, _] {section_expand()};
     f32 const barHeight {style.SectionBarHeight.calc(bounds.height())};
-    bounds.Size.Height -= barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(_sections.size()));
-    bounds.Position.Y += barHeight * (MaximizeActiveSection() ? 1 : static_cast<f32>(secIdx + 1));
+    bounds.Size.Height -= barHeight * (MaximizeActiveSection ? 1 : static_cast<f32>(_sections.size()));
+    bounds.Position.Y += barHeight * (MaximizeActiveSection ? 1 : static_cast<f32>(secIdx + 1));
 }
 
 auto accordion::section_expand() const -> std::pair<isize, f32>
@@ -307,11 +307,11 @@ auto accordion::attributes() const -> widget_attributes
 {
     auto retValue {widget_container::attributes()};
 
-    retValue["active_index"] = ActiveSectionIndex();
+    retValue["active_index"] = *ActiveSectionIndex;
     if (ActiveSectionIndex >= 0 && ActiveSectionIndex < std::ssize(_sections)) {
         retValue["active"] = _sectionLabels[ActiveSectionIndex].Text;
     }
-    retValue["hover_index"] = HoveredSectionIndex();
+    retValue["hover_index"] = *HoveredSectionIndex;
     if (HoveredSectionIndex >= 0 && HoveredSectionIndex < std::ssize(_sections)) {
         retValue["hover"] = _sectionLabels[HoveredSectionIndex].Text;
     }

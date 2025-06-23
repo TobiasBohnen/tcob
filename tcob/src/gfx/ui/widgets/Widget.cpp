@@ -24,7 +24,7 @@ namespace tcob::ui {
 widget::widget(init const& wi)
     : Alpha {{[this]() {
                   f32 retValue {_alpha};
-                  if (auto* wparent {parent()}) { retValue *= wparent->Alpha(); }
+                  if (auto* wparent {parent()}) { retValue *= wparent->Alpha; }
                   return retValue;
               },
               [this](auto const& value) { _alpha = value; }}}
@@ -42,7 +42,7 @@ widget::widget(init const& wi)
     ZOrder.Changed.connect([this](auto const&) { request_redraw(_name + ": ZOrder changed"); });
 
     static i32 tabIndex {0};
-    (*TabStop).Index = tabIndex++;
+    TabStop.mut_ref().Index = tabIndex++;
 
     _animationTween.Changed.connect([this](auto const& val) { on_animation_step(val); });
 }
@@ -70,7 +70,7 @@ void widget::hide()
 
 auto widget::is_visible() const -> bool
 {
-    return _visible && Alpha() > 0.01f
+    return _visible && Alpha > 0.01f
         && (_parent ? _parent->is_visible()
                     : _form->is_visible());
 }
@@ -113,7 +113,7 @@ void widget::draw(widget_painter& painter)
 
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
-    painter.begin(Alpha());
+    painter.begin(Alpha);
 
     on_draw(painter);
 
@@ -154,7 +154,7 @@ auto widget::hit_test_bounds() const -> rect_f
     offset_content(retValue, true);
 
     if (_parent) { retValue = retValue.as_intersection_with(_parent->global_content_bounds()); }
-    retValue = retValue.as_intersection_with(_form->Bounds());
+    retValue = retValue.as_intersection_with(_form->Bounds);
 
     return retValue;
 }
@@ -179,7 +179,7 @@ auto widget::global_content_bounds() const -> rect_f
 
 auto widget::content_bounds() const -> rect_f
 {
-    rect_f retValue {Bounds()};
+    rect_f retValue {*Bounds};
     offset_content(retValue, false);
     return retValue;
 }
@@ -208,7 +208,7 @@ auto widget::can_tab_stop(i32 high, i32 low) const -> bool
 void widget::on_styles_changed()
 {
     widget_style_selectors const newSelectors {
-        .Class      = Class(),
+        .Class      = Class,
         .Flags      = flags(),
         .Attributes = attributes(),
     };
@@ -225,7 +225,7 @@ void widget::on_styles_changed()
 void widget::prepare_redraw()
 {
     widget_style_selectors const newSelectors {
-        .Class      = Class(),
+        .Class      = Class,
         .Flags      = flags(),
         .Attributes = attributes(),
     };
@@ -252,7 +252,7 @@ void widget::request_redraw(string const& reason)
             if (w.get() == tlw) { continue; }
             if (w->ZOrder < tlw->ZOrder) { continue; }
 
-            if (w->Bounds->intersects(tlw->Bounds())) { // top level widget overlaps with other widget -> redraw everything
+            if (w->Bounds->intersects(tlw->Bounds)) { // top level widget overlaps with other widget -> redraw everything
                 _form->request_redraw(reason);
                 return;
             }
@@ -577,7 +577,7 @@ void widget::deactivate()
 
 auto widget::styles() const -> style_collection const&
 {
-    return _form->Styles();
+    return *_form->Styles;
 }
 
 void widget::reset_sub_style(isize idx, string const& styleClass, widget_flags flags)
@@ -598,6 +598,6 @@ void widget::clear_sub_styles()
 
 auto widget::controls() const -> control_map const&
 {
-    return _form->Controls();
+    return *_form->Controls;
 }
 }

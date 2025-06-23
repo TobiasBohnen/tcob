@@ -21,7 +21,7 @@ static_point_cloud::static_point_cloud(std::span<vertex> points)
 
 auto static_point_cloud::can_draw() const -> bool
 {
-    return !Material().is_expired();
+    return !(*Material).is_expired();
 }
 
 void static_point_cloud::on_draw_to(render_target& target)
@@ -59,7 +59,7 @@ auto point_cloud::get_point_at(i32 index) -> vertex&
 
 auto point_cloud::can_draw() const -> bool
 {
-    return !Material().is_expired() && !_points.empty();
+    return !(*Material).is_expired() && !_points.empty();
 }
 
 void point_cloud::on_draw_to(render_target& target)

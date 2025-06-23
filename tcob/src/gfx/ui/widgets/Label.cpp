@@ -40,7 +40,7 @@ void label::on_draw(widget_painter& painter)
 
     // text
     if (_style.Text.Font) {
-        painter.draw_text(_style.Text, rect, Label());
+        painter.draw_text(_style.Text, rect, Label);
     }
 }
 
@@ -129,7 +129,7 @@ auto label::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["label"] = Label();
+    retValue["label"] = *Label;
 
     return retValue;
 }

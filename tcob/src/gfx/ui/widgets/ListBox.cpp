@@ -74,7 +74,7 @@ void list_box::add_item(utf8_string const& item)
 void list_box::add_item(item const& item)
 {
     _items.push_back(item);
-    if (!Filter->empty() && case_insensitive_contains(item.Text, Filter())) {
+    if (!Filter->empty() && case_insensitive_contains(item.Text, *Filter)) {
         _filteredItems.push_back(item);
     }
     request_redraw(this->name() + ": item added");
@@ -118,7 +118,7 @@ auto list_box::get_item_at(isize index) const -> item const&
 
 auto list_box::selected_item() const -> item const&
 {
-    return get_items().at(SelectedItemIndex());
+    return get_items().at(SelectedItemIndex);
 }
 
 auto list_box::item_count() const -> isize
@@ -185,7 +185,7 @@ void list_box::on_update(milliseconds deltaTime)
     // scroll to selected
     if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
-        set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex()), get_scroll_max()));
+        set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max()));
         _scrollToSelected = false;
     }
 }
@@ -211,7 +211,7 @@ void list_box::on_key_down(input::keyboard::event const& ev)
     if (Filter->empty() && !items.empty() && SelectedItemIndex >= 0 && kc >= 'a' && kc <= 'z') { // TODO: make optional
         bool const reverse {ev.KeyMods.left_shift()};
 
-        isize idx {SelectedItemIndex()};
+        isize idx {SelectedItemIndex};
         do {
             if (reverse) {
                 idx--;
@@ -259,8 +259,8 @@ void list_box::on_mouse_button_down(input::mouse::button_event const& ev)
 
     if (ev.Button == controls().PrimaryMouseButton) {
         if (HoveredItemIndex == INVALID_INDEX) { return; }
-        if (SelectedItemIndex != HoveredItemIndex()) {
-            SelectedItemIndex = HoveredItemIndex();
+        if (SelectedItemIndex != HoveredItemIndex) {
+            SelectedItemIndex = *HoveredItemIndex;
             ev.Handled        = true;
         }
     }
@@ -285,13 +285,13 @@ auto list_box::attributes() const -> widget_attributes
     auto const& items {get_items()};
     auto const  size {std::ssize(items)};
 
-    retValue["selected_index"] = SelectedItemIndex();
+    retValue["selected_index"] = SelectedItemIndex;
     if (SelectedItemIndex >= 0 && SelectedItemIndex < size) {
         retValue["selected"] = items.at(SelectedItemIndex).Text;
     }
-    retValue["hover_index"] = HoveredItemIndex();
+    retValue["hover_index"] = HoveredItemIndex;
     if (HoveredItemIndex >= 0 && HoveredItemIndex < size) {
-        retValue["hover"] = items.at(HoveredItemIndex()).Text;
+        retValue["hover"] = items.at(HoveredItemIndex).Text;
     }
 
     return retValue;

@@ -324,7 +324,7 @@ void canvas_widget::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
-    canvas.set_scissor(Bounds());
+    canvas.set_scissor(Bounds);
     canvas.translate(Bounds->Position);
     for (auto const& command : _commands) { command(canvas); }
 }

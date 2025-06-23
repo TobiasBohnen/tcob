@@ -147,7 +147,7 @@ public:
     }
 };
 
-enum hex_top {
+enum hex_top : u8 {
     Pointy,
     Flat
 };

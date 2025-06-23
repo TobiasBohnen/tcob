@@ -122,7 +122,7 @@ inline void particle_system<Emitter>::add_emitter(std::shared_ptr<Emitter> const
 template <typename Emitter>
 inline void particle_system<Emitter>::on_update(milliseconds deltaTime)
 {
-    if (!_isRunning || !Material()) { return; }
+    if (!_isRunning || !Material) { return; }
 
     for (auto& emitter : _emitters) {
         emitter->emit(*this, deltaTime);
@@ -153,7 +153,7 @@ inline void particle_system<Emitter>::on_update(milliseconds deltaTime)
 template <typename Emitter>
 inline auto particle_system<Emitter>::can_draw() const -> bool
 {
-    return _isRunning && _aliveParticleCount != 0 && !Material().is_expired();
+    return _isRunning && _aliveParticleCount != 0 && !(*Material).is_expired();
 }
 
 template <typename Emitter>

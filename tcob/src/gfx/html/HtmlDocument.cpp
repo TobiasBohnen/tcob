@@ -100,7 +100,7 @@ void document::force_redraw()
 void document::on_update(milliseconds)
 {
     if (_isTransformDirty) {
-        geometry::set_position(_quad, Bounds(), transform());
+        geometry::set_position(_quad, Bounds, transform());
         _isTransformDirty = false;
         _needsRedraw      = true;
     }
@@ -151,7 +151,7 @@ void document::on_mouse_motion(input::mouse::motion_event const& ev)
 
     litehtml::position::vector redraw {};
 
-    rect_i const  bound {Bounds()};
+    rect_i const  bound {*Bounds};
     point_i const mp {convert_screen_to_world(ev.Position)};
 
     if (bound.contains(mp)) {
@@ -182,7 +182,7 @@ void document::on_mouse_button_down(input::mouse::button_event const& ev)
 
         litehtml::position::vector redraw {};
 
-        rect_i const  bound {Bounds()};
+        rect_i const  bound {*Bounds};
         point_i const mp {convert_screen_to_world(ev.Position)};
 
         if (_lhdoc->on_lbutton_down(mp.X - bound.left(), mp.Y - bound.top(), mp.X, mp.Y, redraw)) {
@@ -200,7 +200,7 @@ void document::on_mouse_button_up(input::mouse::button_event const& ev)
 
         litehtml::position::vector redraw {};
 
-        rect_i const  bound {Bounds()};
+        rect_i const  bound {*Bounds};
         point_i const mp {convert_screen_to_world(ev.Position)};
 
         if (_lhdoc->on_lbutton_up(mp.X - bound.left(), mp.Y - bound.top(), mp.X, mp.Y, redraw)) {

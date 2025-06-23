@@ -35,7 +35,7 @@ inline void widget::apply_sub_style(T& style, isize idx, string const& styleClas
 inline auto widget::draw_background(auto&& style, widget_painter& painter, bool isCircle) -> rect_f
 {
     apply_style(style);
-    rect_f rect {Bounds()};
+    rect_f rect {*Bounds};
     painter.draw_background_and_border(style, rect, isCircle);
     return rect;
 }

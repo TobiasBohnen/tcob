@@ -64,10 +64,10 @@ void panel::on_styles_changed()
 
 auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
 {
-    if (!ScrollEnabled()) { return false; }
+    if (!ScrollEnabled) { return false; }
 
     return std::ranges::any_of(widgets(), [orien, rect](auto const& w) {
-        auto const& bounds {w->Bounds()};
+        auto const& bounds {*w->Bounds};
         if (orien == orientation::Horizontal) {
             if (bounds.left() < 0) { return true; }
             if (bounds.right() > rect.width()) { return true; }
@@ -136,7 +136,7 @@ void panel::on_draw_children(widget_painter& painter)
     xform.translate(translate);
 
     for (auto const& w : this->widgets() | std::views::reverse) { // ZORDER
-        painter.begin(Alpha(), xform);
+        painter.begin(Alpha, xform);
         w->draw(painter);
         painter.end();
     }
@@ -239,7 +239,7 @@ auto panel::get_layout() const -> layout*
 
 auto panel::is_movable() const -> bool
 {
-    return Movable() && is_top_level() && form().get_layout()->is_move_allowed();
+    return *Movable && is_top_level() && form().get_layout()->is_move_allowed();
 }
 
 auto panel::get_scroll_max_value(orientation orien) const -> f32
@@ -247,7 +247,7 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
     f32         retValue {0.0f};
     auto const& content {content_bounds()};
     for (auto const& w : widgets()) {
-        auto const& bounds {w->Bounds()};
+        auto const& bounds {*w->Bounds};
         retValue = std::max(retValue, orien == orientation::Horizontal ? bounds.right() - content.width() : bounds.bottom() - content.height());
     }
     return retValue * 1.05f;
@@ -287,7 +287,7 @@ void glass::on_draw_children(widget_painter& painter)
     xform.translate(translate);
 
     for (auto const& w : this->widgets() | std::views::reverse) { // ZORDER
-        painter.begin(Alpha(), xform);
+        painter.begin(Alpha, xform);
         w->draw(painter);
         painter.end();
     }

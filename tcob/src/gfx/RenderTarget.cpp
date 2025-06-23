@@ -108,7 +108,7 @@ default_render_target::default_render_target(window* win)
 {
 }
 
-auto default_render_target::get_size() const -> size_i { return _window ? _window->Size() : size_i::Zero; }
+auto default_render_target::get_size() const -> size_i { return _window ? _window->Size : size_i::Zero; }
 
 void default_render_target::set_size(size_i /* newsize */)
 {

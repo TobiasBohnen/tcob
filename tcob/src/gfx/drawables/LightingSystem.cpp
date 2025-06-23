@@ -113,7 +113,7 @@ void lighting_system::notify_shadow_changed(shadow_caster* shadow)
         return;
     }
 
-    rect_f const newBounds {polygons::info(shadow->Polygon()).BoundingBox};
+    rect_f const newBounds {polygons::info(*shadow->Polygon).BoundingBox};
     if (shadow->_bounds != rect_f::Zero) {
         _quadTree->replace({.Bounds = shadow->_bounds, .Caster = shadow}, {.Bounds = newBounds, .Caster = shadow});
     } else {
@@ -138,7 +138,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
     if (_quadTree) {
         u32 indOffset {0};
         for (auto const& ls : _lightSources) {
-            auto const lightRange {ls->is_range_limited() ? *ls->Range() : std::numeric_limits<f32>::max()};
+            auto const lightRange {ls->is_range_limited() ? **ls->Range : std::numeric_limits<f32>::max()};
             cast_ray(*ls, lightRange);
             build_geometry(*ls, lightRange, indOffset);
         }
@@ -155,7 +155,7 @@ auto static is_in_shadowcaster(light_source& light, auto&& casterPoints) -> bool
     bool retValue {false};
     for (usize i {0}; i < casterPoints.size() - 1; ++i) {
         if (casterPoints[i].Points.empty()) { continue; }
-        retValue = polygons::is_point_inside(light.Position(), casterPoints[i].Points);
+        retValue = polygons::is_point_inside(light.Position, casterPoints[i].Points);
         if (retValue) { break; }
     }
     return retValue;
@@ -167,18 +167,18 @@ void lighting_system::cast_ray(light_source& light, f32 lightRange)
     light._isDirty = false;
 
     bool const   limitRange {light.is_range_limited()};
-    auto const   lightPosition {light.Position()};
+    auto const   lightPosition {*light.Position};
     rect_f const lightBounds {limitRange
                                   ? rect_f {point_f::Zero, {lightRange * 2, lightRange * 2}}
                                         .as_centered_at(lightPosition)
-                                        .as_intersection_with(Bounds())
-                                  : Bounds()};
+                                        .as_intersection_with(*Bounds)
+                                  : *Bounds};
 
     auto                              casters {_quadTree->query(lightBounds)};
     std::vector<shadow_caster_points> casterPoints {};
     casterPoints.reserve(casters.size());
     for (auto const& caster : casters) {
-        casterPoints.push_back({.Points = caster.Caster->Polygon(), .Caster = caster.Caster});
+        casterPoints.push_back({.Points = *caster.Caster->Polygon, .Caster = caster.Caster});
     }
 
     std::array<point_f, 4> const boundPoints {{Bounds->top_left(), Bounds->bottom_left(), Bounds->bottom_right(), Bounds->top_right()}};
@@ -256,15 +256,15 @@ void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& i
     u32 const n {static_cast<u32>(light._collisionResult.size())};
     if (n <= 1) { return; }
 
-    _verts.push_back({.Position  = light.Position(),
-                      .Color     = light.Color(),
-                      .TexCoords = {0, 0, 0}});
+    _verts.push_back({.Position  = light.Position,
+                      .Color     = light.Color,
+                      .TexCoords = {.U = 0, .V = 0, .Level = 0}});
 
     bool const limitRange {light.is_range_limited()};
 
     for (auto const& p : light._collisionResult) {
-        auto col {light.Color()};
-        if (limitRange && light.Falloff()) {
+        auto col {*light.Color};
+        if (limitRange && *light.Falloff) {
             // FIXME: should be inverse square
             f64 const falloff {std::clamp(1.0 - (p.Distance / lightRange), 0.0, 1.0)};
             col.R = static_cast<u8>(col.R * falloff);
@@ -275,7 +275,7 @@ void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& i
 
         _verts.push_back({.Position  = p.Point,
                           .Color     = col,
-                          .TexCoords = {0, 0, 0}});
+                          .TexCoords = {.U = 0, .V = 0, .Level = 0}});
     }
 
     for (u32 i {2}; i <= n; ++i) {
@@ -293,7 +293,7 @@ void lighting_system::build_geometry(light_source& light, f32 lightRange, u32& i
 
 auto lighting_system::collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>
 {
-    auto const lightPosition {light.Position()};
+    auto const lightPosition {*light.Position};
     bool const limitAngle {light.is_angle_limited()};
 
     std::set<f64> angles;
@@ -342,10 +342,10 @@ void lighting_system::rebuild_quadtree()
         _quadTree->clear();
         mark_lights_dirty();
         for (auto& sc : _shadowCasters) {
-            _quadTree->add(quadtree_node {.Bounds = polygons::info(sc->Polygon()).BoundingBox, .Caster = sc.get()});
+            _quadTree->add(quadtree_node {.Bounds = polygons::info(*sc->Polygon).BoundingBox, .Caster = sc.get()});
         }
     } else {
-        _quadTree = std::make_unique<quadtree<quadtree_node>>(Bounds());
+        _quadTree = std::make_unique<quadtree<quadtree_node>>(*Bounds);
     }
 }
 
@@ -379,12 +379,12 @@ void lighting_system::on_draw_to(render_target& target)
 
 auto light_source::is_range_limited() const -> bool
 {
-    return Range().has_value();
+    return (*Range).has_value();
 }
 
 auto light_source::is_angle_limited() const -> bool
 {
-    return StartAngle().has_value() || EndAngle().has_value();
+    return (*StartAngle).has_value() || (*EndAngle).has_value();
 }
 
 light_source::light_source(lighting_system* parent)

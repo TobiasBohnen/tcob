@@ -44,7 +44,7 @@ form_base::form_base(string name, rect_f const& bounds)
     , _name {std::move(name)}
 {
     Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
-    _renderer.set_bounds(Bounds());
+    _renderer.set_bounds(*Bounds);
 
     Styles.Changed.connect([this](auto const&) { on_styles_changed(); });
 
@@ -139,10 +139,10 @@ auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
 
     string navTarget;
     switch (dir) {
-    case direction::Left:  navTarget = (*NavMap)[widget].Left; break;
-    case direction::Right: navTarget = (*NavMap)[widget].Right; break;
-    case direction::Up:    navTarget = (*NavMap)[widget].Up; break;
-    case direction::Down:  navTarget = (*NavMap)[widget].Down; break;
+    case direction::Left:  navTarget = NavMap->at(widget).Left; break;
+    case direction::Right: navTarget = NavMap->at(widget).Right; break;
+    case direction::Up:    navTarget = NavMap->at(widget).Up; break;
+    case direction::Down:  navTarget = NavMap->at(widget).Down; break;
     case direction::None:  break;
     }
 
@@ -233,7 +233,7 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
-        auto& ttBounds {*_topWidget->Tooltip->Bounds};
+        auto ttBounds {*_topWidget->Tooltip->Bounds};
         ttBounds.Position = point_f {locate_service<input::system>().mouse().get_position()} - Bounds->Position + TooltipOffset;
         if (ttBounds.right() > Bounds->right()) {
             ttBounds.Position.X -= ttBounds.width() + TooltipOffset.X;
@@ -241,6 +241,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         if (ttBounds.bottom() > Bounds->bottom()) {
             ttBounds.Position.Y -= ttBounds.height() + TooltipOffset.Y;
         }
+        _topWidget->Tooltip->Bounds = ttBounds;
 
         _canvas.begin_frame(bounds, 1.0f, 1);
         _topWidget->Tooltip->set_redraw(true);
@@ -444,7 +445,7 @@ void form_base::on_controller_button_up(input::controller::button_event const& e
 
 void form_base::on_bounds_changed()
 {
-    _renderer.set_bounds(Bounds());
+    _renderer.set_bounds(*Bounds);
 
     request_redraw(this->name() + "bounds changed");
     on_styles_changed();
@@ -508,7 +509,7 @@ void form_base::on_styles_changed()
         auto tooltip {tt.lock()};
 
         widget_style_selectors const ttNewSelectors {
-            .Class      = tooltip->Class(),
+            .Class      = tooltip->Class,
             .Flags      = tooltip->flags(),
             .Attributes = tooltip->attributes(),
         };

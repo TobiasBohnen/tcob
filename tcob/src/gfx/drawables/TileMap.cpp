@@ -90,7 +90,7 @@ void tilemap_base::set_tile_index(uid layerId, point_i pos, tile_index_t setIdx)
     _tileMap[idx] = setIdx;
 
     i32 quadIndex {0};
-    switch (RenderDirection()) {
+    switch (*RenderDirection) {
     case render_direction::RightDown: quadIndex = (pos.Y * layer.Size.Width) + pos.X; break;
     case render_direction::LeftDown:  quadIndex = (pos.Y * layer.Size.Width) + (layer.Size.Width - 1 - pos.X); break;
     case render_direction::RightUp:   quadIndex = ((layer.Size.Height - 1 - pos.Y) * layer.Size.Width) + pos.X; break;
@@ -145,7 +145,7 @@ void tilemap_base::clear()
 
 void tilemap_base::on_update(milliseconds /* deltaTime */)
 {
-    if (_tileMap.empty() || !Material()) { return; }
+    if (_tileMap.empty() || !Material) { return; }
     if (!_isDirty) { return; }
 
     _isDirty        = false;
@@ -155,7 +155,7 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
         if (!layer.Visible) { continue; }
 
         for (i32 i {0}; i < (layer.Size.Width * layer.Size.Height); ++i) {
-            point_i const      tilePos {IndexToPosition(i, RenderDirection(), layer.Size)};
+            point_i const      tilePos {IndexToPosition(i, RenderDirection, layer.Size)};
             tile_index_t const tileIdx {_tileMap[layer.get_index(tilePos)]};
             setup_quad(_quads.emplace_back(), {tilePos.X + layer.Offset.X, tilePos.Y + layer.Offset.Y}, tileIdx);
         }
@@ -164,7 +164,7 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
 
 auto tilemap_base::can_draw() const -> bool
 {
-    return !_tileMap.empty() && !Material().is_expired();
+    return !_tileMap.empty() && !(*Material).is_expired();
 }
 
 void tilemap_base::on_draw_to(render_target& target)

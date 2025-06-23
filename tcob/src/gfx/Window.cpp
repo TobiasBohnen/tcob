@@ -55,7 +55,7 @@ window::window(std::unique_ptr<render_backend::window_base> window, assets::asse
     _material->Texture = _texture;
     _renderer.set_material(_material.ptr());
 
-    set_size(Size());
+    set_size(Size);
 
     SDL_StartTextInput(_impl->get_handle());
 }
@@ -64,7 +64,7 @@ window::~window() = default;
 
 auto window::bounds() const -> rect_i
 {
-    return {point_i::Zero, Size()};
+    return {point_i::Zero, Size};
 }
 
 void window::load_icon(path const& file)
@@ -170,7 +170,7 @@ void window::draw_to(render_target& target)
     _impl->set_viewport({point_i::Zero, get_size()});
     _renderer.render_to_target(target);
 
-    if (Cursor()) {
+    if (*Cursor) {
         Cursor->draw_to(target);
     }
 }

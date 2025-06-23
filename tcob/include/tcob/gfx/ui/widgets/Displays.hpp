@@ -43,7 +43,7 @@ public:
 
     explicit dot_matrix_display(init const& wi);
 
-    prop<grid<u8> const> Dots;
+    prop<grid<u8>> Dots;
 
 protected:
     void on_draw(widget_painter& painter) override;

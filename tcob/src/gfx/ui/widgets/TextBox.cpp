@@ -44,7 +44,7 @@ text_box::text_box(init const& wi)
 
     MaxLength.Changed.connect([this](auto const& val) {
         if (_textLength > val) {
-            Text = utf8::substr(Text(), 0, val);
+            Text = utf8::substr(*Text, 0, val);
             request_redraw(this->name() + ": MaxLength changed");
         }
     });
@@ -63,7 +63,7 @@ text_box::text_box(init const& wi)
 auto text_box::selected_text() const -> utf8_string
 {
     if (!is_text_selected()) { return ""; }
-    return utf8::substr(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1);
+    return utf8::substr(*Text, _selectedText.first, _selectedText.second - _selectedText.first + 1);
 }
 
 void text_box::select_text(isize first, isize last)
@@ -95,7 +95,7 @@ void text_box::on_draw(widget_painter& painter)
     // text
     if (!Text->empty() && _style.Text.Font) {
         if (_textDirty) {
-            _formatResult = painter.format_text(_style.Text, rect, Text());
+            _formatResult = painter.format_text(_style.Text, rect, *Text);
             _textDirty    = false;
         }
 
@@ -166,18 +166,18 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     } else if (ev.KeyCode == controls->ForwardDeleteKey) {
         if (!remove_selected_text()) {
             if (_textLength > 0 && _caretPos < _textLength) {
-                Text = utf8::remove(Text(), _caretPos);
+                Text = utf8::remove(*Text, _caretPos);
             }
         }
     } else if (ev.KeyCode == controls->BackwardDeleteKey) {
         if (!remove_selected_text()) {
             if (_textLength > 0 && _caretPos > 0) {
                 --_caretPos;
-                Text = utf8::remove(Text(), _caretPos);
+                Text = utf8::remove(*Text, _caretPos);
             }
         }
     } else if (ev.KeyCode == controls->SubmitKey) {
-        Submit({.Sender = this, .Text = Text()});
+        Submit({.Sender = this, .Text = *Text});
     } else if (ev.KeyMods.is_down(controls->CutCopyPasteMod)) {
         if (is_text_selected()) {
             if (ev.KeyCode == controls->CopyKey) {
@@ -259,7 +259,7 @@ void text_box::on_focus_lost()
 
 auto text_box::attributes() const -> widget_attributes
 {
-    widget_attributes retValue {{"text", Text()}, {"selected_text", selected_text()}};
+    widget_attributes retValue {{"text", *Text}, {"selected_text", selected_text()}};
     auto const        base {widget::attributes()};
     retValue.insert(base.begin(), base.end());
     return retValue;
@@ -273,7 +273,7 @@ void text_box::insert_text(utf8_string const& newText)
     BeforeTextInserted(ev);
     isize const newTextLength {utf8::length(ev.Text)};
     if (newTextLength > 0 && _textLength + newTextLength <= MaxLength) {
-        Text = utf8::insert(Text(), ev.Text, _caretPos);
+        Text = utf8::insert(*Text, ev.Text, _caretPos);
         _caretPos += newTextLength;
     }
 }
@@ -287,7 +287,7 @@ void text_box::on_styles_changed()
 auto text_box::remove_selected_text() -> bool
 {
     if (is_text_selected()) {
-        Text      = utf8::remove(Text(), _selectedText.first, _selectedText.second - _selectedText.first + 1);
+        Text      = utf8::remove(*Text, _selectedText.first, _selectedText.second - _selectedText.first + 1);
         _caretPos = _selectedText.first;
         select_text(INVALID_INDEX, INVALID_INDEX);
         return true;

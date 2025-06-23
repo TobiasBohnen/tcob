@@ -57,8 +57,8 @@ void text::on_draw_to(render_target& target)
 
 auto text::pivot() const -> point_f
 {
-    if (Pivot().has_value()) {
-        return Bounds->top_left() + *Pivot();
+    if ((*Pivot).has_value()) {
+        return Bounds->top_left() + **Pivot;
     }
 
     return Bounds->center();
@@ -86,7 +86,7 @@ void text::format()
 
     // format text
     auto const size {Bounds->Size};
-    auto const formatResult {text_formatter::format(Text(), *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled, true)};
+    auto const formatResult {text_formatter::format(*Text, *_font, Style->Alignment, size, 1.0f, Style->KerningEnabled, true)};
     _quads.reserve(formatResult.QuadCount);
 
     color c {Style->Color};

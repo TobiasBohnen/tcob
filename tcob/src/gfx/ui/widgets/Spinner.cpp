@@ -26,17 +26,17 @@ void spinner::style::Transition(style& target, style const& left, style const& r
 
 spinner::spinner(init const& wi)
     : widget {wi}
-    , Min {{[this](i32 val) -> i32 { return std::min(val, Max()); }}}
-    , Max {{[this](i32 val) -> i32 { return std::max(val, Min()); }}}
-    , Value {{[this](i32 val) -> i32 { return std::clamp(val, Min(), Max()); }}}
+    , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
+    , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
+    , Value {{[this](i32 val) -> i32 { return std::clamp(val, *Min, *Max); }}}
 {
     Min.Changed.connect([this](auto const& val) {
-        Value = std::min(val, Value());
+        Value = std::min(val, *Value);
         request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto const& val) {
-        Value = std::max(val, Value());
+        Value = std::max(val, *Value);
         request_redraw(this->name() + ": Max changed");
     });
     Max(100);
@@ -64,7 +64,7 @@ void spinner::on_draw(widget_painter& painter)
 
     // text
     if (_style.Text.Font) {
-        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()}, std::to_string(Value()));
+        painter.draw_text(_style.Text, {rect.left(), rect.top(), rect.width() - _rectCache.first.width(), rect.height()}, std::to_string(*Value));
     }
 }
 
@@ -99,9 +99,9 @@ void spinner::on_mouse_button_down(input::mouse::button_event const& ev)
     if (_hoverArrow == arrow::None) { return; }
 
     if (_hoverArrow == arrow::Increase) {
-        Value += Step();
+        Value += *Step;
     } else if (_hoverArrow == arrow::Decrease) {
-        Value -= Step();
+        Value -= *Step;
     }
 
     ev.Handled = true;
@@ -120,9 +120,9 @@ void spinner::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (!is_focused()) { return; }
 
     if (ev.Scroll.Y > 0) {
-        Value += Step();
+        Value += *Step;
     } else if (ev.Scroll.Y < 0) {
-        Value -= Step();
+        Value -= *Step;
     }
 
     ev.Handled = true;
@@ -132,9 +132,9 @@ void spinner::on_update(milliseconds /*deltaTime*/)
 {
     if (_mouseDown && _holdTime.elapsed_milliseconds() > (250.f / _holdCount)) {
         if (_hoverArrow == arrow::Increase) {
-            Value += Step();
+            Value += *Step;
         } else if (_hoverArrow == arrow::Decrease) {
-            Value -= Step();
+            Value -= *Step;
         }
         _holdTime.restart();
         _holdCount += 0.1f;
@@ -145,10 +145,10 @@ auto spinner::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["min"]   = Min();
-    retValue["max"]   = Max();
-    retValue["value"] = Value();
-    retValue["step"]  = Step();
+    retValue["min"]   = *Min;
+    retValue["max"]   = *Max;
+    retValue["value"] = *Value;
+    retValue["step"]  = *Step;
 
     return retValue;
 }

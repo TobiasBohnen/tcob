@@ -23,8 +23,8 @@ namespace detail {
     class field_source final {
     public:
         using type              = std::remove_const_t<T>;
-        using return_type       = T&;
-        using const_return_type = T const&;
+        using return_type       = type&;
+        using const_return_type = type const&;
 
         field_source() = default;
         field_source(type value);
@@ -43,8 +43,8 @@ namespace detail {
     class validating_field_source final {
     public:
         using type              = std::remove_const_t<T>;
-        using return_type       = T&;
-        using const_return_type = T const&;
+        using return_type       = type&;
+        using const_return_type = type const&;
 
         using validate_func = std::function<type(type const&)>;
 
@@ -99,20 +99,22 @@ namespace detail {
         explicit prop_base(Source source);
         explicit prop_base(T val);
 
+        signal<T const> Changed;
+
         operator T() const;
-
-        void operator()(T const& value);
-
+        auto operator!() const -> bool;
         auto operator->() const;
-
-        auto operator*() -> return_type;
         auto operator*() const -> const_return_type;
 
-        auto operator()() const -> const_return_type;
-
+        void operator()(T const& value);
         auto operator=(T const& value) -> prop_base&;
 
-        signal<T const> Changed;
+        auto operator[](auto&&... idx) const -> decltype(auto);
+
+        auto mut_ref() -> return_type
+        {
+            return _source.get();
+        }
 
     protected:
         void set(T const& value, bool force);
@@ -126,43 +128,25 @@ namespace detail {
     auto constexpr operator+=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator+=(prop_base<T const, Source>& left, T const& right) -> prop_base<T const, Source>&;
-
-    template <typename T, typename Source>
     auto constexpr operator-(prop_base<T, Source>& right) -> T;
 
     template <typename T, typename Source>
     auto constexpr operator-=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator-=(prop_base<T const, Source>& left, T const& right) -> prop_base<T const, Source>&;
-
-    template <typename T, typename Source>
     auto constexpr operator/=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
-
-    template <typename T, typename Source>
-    auto constexpr operator/=(prop_base<T const, Source>& left, T const& right) -> prop_base<T const, Source>&;
 
     template <typename T, typename Source>
     auto constexpr operator*=(prop_base<T, Source>& left, T const& right) -> prop_base<T, Source>&;
 
     template <typename T, typename Source>
-    auto constexpr operator*=(prop_base<T const, Source>& left, T const& right) -> prop_base<T const, Source>&;
-
-    template <typename T, typename Source>
     auto constexpr operator==(prop_base<T, Source> const& left, T const& right) -> bool;
-
-    template <typename T, typename Source>
-    auto constexpr operator==(prop_base<T const, Source> const& left, T const& right) -> bool;
 
     template <typename T, typename Source>
     auto constexpr operator==(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> bool;
 
     template <typename T, typename Source>
     auto constexpr operator<=>(prop_base<T, Source> const& left, T const& right) -> std::partial_ordering;
-
-    template <typename T, typename Source>
-    auto constexpr operator<=>(prop_base<T const, Source> const& left, T const& right) -> std::partial_ordering;
 
     template <typename T, typename Source>
     auto constexpr operator<=>(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> std::partial_ordering;

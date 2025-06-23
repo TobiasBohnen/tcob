@@ -33,7 +33,7 @@ static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapes)
     for (auto& shape : shapes) {
         shape->update(milliseconds::zero());
         if (shape->is_visible()) {
-            _renderer.add_geometry(shape->geometry(), shape->Material().ptr());
+            _renderer.add_geometry(shape->geometry(), (*shape->Material).ptr());
         }
     }
 }
@@ -132,7 +132,7 @@ void shape_batch::on_draw_to(render_target& target)
 
         for (auto& shape : _children) {
             if (shape->is_visible()) {
-                _renderer.add_geometry(shape->geometry(), shape->Material().ptr());
+                _renderer.add_geometry(shape->geometry(), (*shape->Material).ptr());
             }
         }
     }
@@ -146,7 +146,7 @@ void shape_batch::on_draw_to(render_target& target)
 shape::shape()
     : Transparency {{[this]() -> f32 { return static_cast<f32>(Color->A) / 255.0f; },
                      [this](f32 value) {
-                         color c {Color()};
+                         color c {Color};
                          c.A   = 255 - static_cast<u8>(255 * std::clamp(value, 0.0f, 1.0f));
                          Color = c; }}}
 
@@ -176,7 +176,7 @@ void shape::hide()
 
 auto shape::is_visible() const -> bool
 {
-    return _visible && Material();
+    return _visible && *Material;
 }
 
 void shape::on_transform_changed()
@@ -201,8 +201,8 @@ void shape::mark_clean()
 
 auto shape::pivot() const -> point_f
 {
-    if (Pivot().has_value()) {
-        return *Pivot();
+    if ((*Pivot).has_value()) {
+        return **Pivot;
     }
 
     return center();
@@ -227,7 +227,7 @@ auto circle_shape::geometry() -> geometry_data
 
 auto circle_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
-    return ray.intersect_circle(transform() * Center(), Radius());
+    return ray.intersect_circle(transform() * Center, Radius);
 }
 
 void circle_shape::on_update(milliseconds /* deltaTime */)
@@ -257,24 +257,24 @@ void circle_shape::create()
 
     // vertices
     auto const& xform {transform()};
-    f32 const   angleStep {TAU_F / Segments()};
-    f32 const   radius {Radius()};
+    f32 const   angleStep {TAU_F / Segments};
+    f32 const   radius {Radius};
 
     texture_region texReg {};
-    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion())) {
-        texReg = Material->Texture->get_region(TextureRegion());
+    if (*Material && Material->Texture && Material->Texture->has_region(TextureRegion)) {
+        texReg = Material->Texture->get_region(TextureRegion);
     } else {
         texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }
     f32 const texLevel {static_cast<f32>(texReg.Level)};
 
-    auto const [centerX, centerY] {Center()};
+    auto const [centerX, centerY] {*Center};
     auto const& uvRect {texReg.UVRect};
-    _verts.push_back({.Position  = (xform * Center()),
-                      .Color     = Color(),
-                      .TexCoords = {(0.5f * uvRect.width()) + uvRect.left(),
-                                    (0.5f * uvRect.height()) + uvRect.top(),
-                                    texLevel}});
+    _verts.push_back({.Position  = (xform * Center),
+                      .Color     = Color,
+                      .TexCoords = {.U     = (0.5f * uvRect.width()) + uvRect.left(),
+                                    .V     = (0.5f * uvRect.height()) + uvRect.top(),
+                                    .Level = texLevel}});
 
     auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
 
@@ -283,10 +283,10 @@ void circle_shape::create()
         f32 const x {(radius * std::cos(angle)) + centerX};
         f32 const y {(radius * std::sin(angle)) + centerY};
         _verts.push_back({.Position  = (xform * point_f {x, y}),
-                          .Color     = Color(),
-                          .TexCoords = {(((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
-                                        (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
-                                        texLevel}});
+                          .Color     = Color,
+                          .TexCoords = {.U     = (((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
+                                        .V     = (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
+                                        .Level = texLevel}});
     }
 
     // indices
@@ -298,12 +298,12 @@ void circle_shape::create()
 
     _inds.push_back(0);
     _inds.push_back(1);
-    _inds.push_back(Segments());
+    _inds.push_back(*Segments);
 }
 
 auto circle_shape::center() const -> point_f
 {
-    return Center();
+    return Center;
 }
 
 ////////////////////////////////////////////////////////////
@@ -327,7 +327,7 @@ auto rect_shape::geometry() -> geometry_data
 
 auto rect_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
-    return ray.intersect_rect(Bounds(), transform());
+    return ray.intersect_rect(*Bounds, transform());
 }
 
 auto rect_shape::aabb() const -> rect_f
@@ -343,7 +343,7 @@ void rect_shape::move_by(point_f offset)
 void rect_shape::update_aabb()
 {
     auto const& xform {transform()};
-    auto const& rect {Bounds()};
+    auto const& rect {*Bounds};
 
     auto const topLeft {xform * rect.top_left()};
     auto const topRight {xform * rect.top_right()};
@@ -359,13 +359,13 @@ void rect_shape::update_aabb()
 void rect_shape::on_update(milliseconds deltaTime)
 {
     if (is_dirty()) {
-        geometry::set_position(_quad, Bounds(), transform());
+        geometry::set_position(_quad, *Bounds, transform());
         update_aabb();
         mark_clean();
     }
 
-    if (TextureScroll() != point_f::Zero) {
-        geometry::scroll_texcoords(_quad, TextureScroll() * (deltaTime.count() / 1000.0f));
+    if (TextureScroll != point_f::Zero) {
+        geometry::scroll_texcoords(_quad, *TextureScroll * (deltaTime.count() / 1000.0f));
     }
 }
 
@@ -376,7 +376,7 @@ void rect_shape::on_color_changed(color c)
 
 void rect_shape::on_texture_region_changed(string const& texRegion)
 {
-    if (Material() && Material->Texture && Material->Texture->has_region(texRegion)) {
+    if (*Material && Material->Texture && Material->Texture->has_region(texRegion)) {
         geometry::set_texcoords(_quad, Material->Texture->get_region(texRegion));
     } else {
         geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
@@ -406,7 +406,7 @@ auto poly_shape::geometry() -> geometry_data
 auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
 {
     std::vector<ray::result> retValue;
-    for (auto const& polygon : Polygons()) {
+    for (auto const& polygon : *Polygons) {
         auto points {ray.intersect_polyline(polygon.Outline, transform())};
         retValue.insert(retValue.end(), points.begin(), points.end());
 
@@ -420,13 +420,13 @@ auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
 
 void poly_shape::clip(poly_shape const& other, clip_mode mode)
 {
-    polygons::clip(*Polygons, *other.Polygons, mode);
+    polygons::clip(Polygons.mut_ref(), *other.Polygons, mode);
     mark_dirty();
 }
 
 void poly_shape::move_by(point_f offset)
 {
-    polygons::move_by(*Polygons, offset);
+    polygons::move_by(Polygons.mut_ref(), offset);
     mark_dirty();
 }
 
@@ -466,8 +466,8 @@ void poly_shape::create()
     // create verts
     auto const&    xform {transform()};
     texture_region texReg {};
-    if (Material() && Material->Texture && Material->Texture->has_region(TextureRegion())) {
-        texReg = Material->Texture->get_region(TextureRegion());
+    if (*Material && Material->Texture && Material->Texture->has_region(TextureRegion)) {
+        texReg = Material->Texture->get_region(TextureRegion);
     } else {
         texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }
@@ -477,13 +477,13 @@ void poly_shape::create()
     auto const pushVert {[&](point_f point) {
         auto const& [x, y] {point};
         _verts.push_back({.Position  = (xform * point),
-                          .Color     = Color(),
-                          .TexCoords = {(((x - _boundingBox.left()) / _boundingBox.width()) * uvRect.width()) + uvRect.left(),
-                                        (((y - _boundingBox.top()) / _boundingBox.height()) * uvRect.height()) + uvRect.top(),
-                                        texLevel}});
+                          .Color     = Color,
+                          .TexCoords = {.U     = (((x - _boundingBox.left()) / _boundingBox.width()) * uvRect.width()) + uvRect.left(),
+                                        .V     = (((y - _boundingBox.top()) / _boundingBox.height()) * uvRect.height()) + uvRect.top(),
+                                        .Level = texLevel}});
     }};
 
-    for (auto const& polygon : Polygons()) {
+    for (auto const& polygon : *Polygons) {
         // outline
         // push verts
         for (auto const& p : polygon.Outline) { pushVert(p); }

@@ -189,7 +189,7 @@ template <typename R, typename S>
 inline auto wrapper<WrapperImpl>::wrap_property_helper_field_getter(prop<R> S::* prop)
 {
     register_base<S>();
-    auto lambda {[prop](S* instance) -> R { return (instance->*prop)(); }};
+    auto lambda {[prop](S* instance) -> R { return *(instance->*prop); }};
     return make_unique_closure(std::function<R(S*)> {lambda});
 }
 

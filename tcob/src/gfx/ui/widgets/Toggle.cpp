@@ -52,7 +52,7 @@ void toggle::on_update(milliseconds deltaTime)
 
 void toggle::on_checked_changed()
 {
-    if (Checked()) {
+    if (Checked) {
         _tween.start(1.0f, _style.AnimationDuration * (1.0f - _tween.current_value()));
     } else {
         _tween.start(0.0f, _style.AnimationDuration * _tween.current_value());
@@ -61,14 +61,14 @@ void toggle::on_checked_changed()
 
 void toggle::on_click()
 {
-    Checked = !Checked();
+    Checked = !Checked;
 }
 
 auto toggle::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["checked"] = Checked();
+    retValue["checked"] = *Checked;
 
     return retValue;
 }

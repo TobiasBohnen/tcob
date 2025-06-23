@@ -80,7 +80,7 @@ void layout::send_to_back(widget* target)
 
 void layout::normalize_zorder()
 {
-    std::ranges::stable_sort(_widgets, [](auto const& a, auto const& b) { return a->ZOrder() > b->ZOrder(); });
+    std::ranges::stable_sort(_widgets, [](auto const& a, auto const& b) { return a->ZOrder > b->ZOrder; });
 
     auto newZ {static_cast<isize>(_widgets.size())};
     for (auto& w : _widgets) { w->ZOrder = newZ--; }
@@ -145,7 +145,7 @@ void flex_size_layout::do_layout(size_f size)
     auto const& w {widgets()};
 
     for (auto const& widget : w) {
-        auto bounds {widget->Bounds()};
+        auto bounds {*widget->Bounds};
         bounds.Size.Width  = widget->Flex->Width.calc(size.Width);
         bounds.Size.Height = widget->Flex->Height.calc(size.Height);
         widget->Bounds     = bounds;

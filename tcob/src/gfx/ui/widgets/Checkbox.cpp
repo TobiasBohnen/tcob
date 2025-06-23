@@ -34,7 +34,7 @@ void checkbox::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    if (Checked()) {
+    if (Checked) {
         // tick
         painter.draw_tick(_style.Tick, rect);
     }
@@ -51,14 +51,14 @@ void checkbox::on_checked_changed()
 
 void checkbox::on_click()
 {
-    Checked = !Checked();
+    Checked = !Checked;
 }
 
 auto checkbox::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["checked"] = Checked();
+    retValue["checked"] = *Checked;
 
     return retValue;
 }
@@ -66,7 +66,7 @@ auto checkbox::attributes() const -> widget_attributes
 auto checkbox::flags() -> widget_flags
 {
     auto retValue {widget::flags()};
-    retValue.Checked = Checked();
+    retValue.Checked = Checked;
     return retValue;
 }
 

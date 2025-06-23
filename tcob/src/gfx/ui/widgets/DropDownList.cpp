@@ -81,7 +81,7 @@ auto drop_down_list::get_item_at(isize index) const -> item const&
 
 auto drop_down_list::selected_item() const -> item const&
 {
-    return get_items().at(SelectedItemIndex());
+    return get_items().at(SelectedItemIndex);
 }
 
 auto drop_down_list::item_count() const -> isize
@@ -121,7 +121,7 @@ void drop_down_list::on_draw(widget_painter& painter)
         auto const& items {get_items()};
 
         // list background
-        rect_f listRect {Bounds()};
+        rect_f listRect {Bounds};
         listRect.Position.Y += listRect.height();
         f32 const listHeight {itemHeight * MaxVisibleItems};
         listRect.Size.Height = listHeight;
@@ -167,10 +167,10 @@ void drop_down_list::on_draw(widget_painter& painter)
         }
 
         if (SelectedItemIndex >= 0) {
-            paintItem(SelectedItemIndex());
+            paintItem(SelectedItemIndex);
         }
         if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paintItem(HoveredItemIndex());
+            paintItem(HoveredItemIndex);
         }
     } else {
         _visibleItems = 0;
@@ -230,8 +230,8 @@ void drop_down_list::on_mouse_button_down(input::mouse::button_event const& ev)
         if (_mouseOverBox) {
             set_extended(!_isExtended);
         } else if (HoveredItemIndex != INVALID_INDEX) {
-            if (SelectedItemIndex != HoveredItemIndex()) {
-                SelectedItemIndex = HoveredItemIndex();
+            if (SelectedItemIndex != HoveredItemIndex) {
+                SelectedItemIndex = *HoveredItemIndex;
             }
         }
 
@@ -319,13 +319,13 @@ auto drop_down_list::attributes() const -> widget_attributes
     auto const& items {get_items()};
     auto const  size {std::ssize(items)};
 
-    retValue["selected_index"] = SelectedItemIndex();
+    retValue["selected_index"] = *SelectedItemIndex;
     if (SelectedItemIndex >= 0 && SelectedItemIndex < size) {
         retValue["selected"] = items.at(SelectedItemIndex).Text;
     }
-    retValue["hover_index"] = HoveredItemIndex();
+    retValue["hover_index"] = *HoveredItemIndex;
     if (HoveredItemIndex >= 0 && HoveredItemIndex < size) {
-        retValue["hover"] = items.at(HoveredItemIndex()).Text;
+        retValue["hover"] = items.at(HoveredItemIndex).Text;
     }
 
     return retValue;
@@ -338,7 +338,7 @@ auto drop_down_list::get_items() const -> std::vector<item> const&
 
 auto drop_down_list::get_item_height() const -> f32
 {
-    rect_f bounds {Bounds()};
+    rect_f bounds {*Bounds};
     widget::offset_content(bounds, false);
     return _style.ItemHeight.calc(bounds.height());
 }
@@ -358,7 +358,7 @@ auto drop_down_list::get_scroll_distance() const -> f32
 
 auto drop_down_list::get_scroll_max() const -> f32
 {
-    return std::max(1.0f, (get_item_height() * static_cast<f32>(std::max(std::ssize(get_items()), MaxVisibleItems()))) - content_bounds().height());
+    return std::max(1.0f, (get_item_height() * static_cast<f32>(std::max(std::ssize(get_items()), *MaxVisibleItems))) - content_bounds().height());
 }
 
 } // namespace ui

@@ -37,7 +37,7 @@ void radio_button::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    if (Checked()) {
+    if (Checked) {
         // tick
         painter.draw_tick(_style.Tick, rect);
     }
@@ -49,7 +49,7 @@ void radio_button::on_update(milliseconds /*deltaTime*/)
 
 void radio_button::on_checked_changed()
 {
-    if (Checked()) {
+    if (Checked) {
         for (auto const& w : parent()->widgets()) {
             if (w.get() != this) {
                 if (auto rb {std::dynamic_pointer_cast<radio_button>(w)}) {
@@ -64,8 +64,8 @@ void radio_button::on_checked_changed()
 
 void radio_button::on_click()
 {
-    if (!Checked()) {
-        Checked = !Checked();
+    if (!Checked) {
+        Checked = !Checked;
     }
 }
 
@@ -73,7 +73,7 @@ auto radio_button::attributes() const -> widget_attributes
 {
     auto retValue {widget::attributes()};
 
-    retValue["checked"] = Checked();
+    retValue["checked"] = *Checked;
 
     return retValue;
 }
@@ -81,7 +81,7 @@ auto radio_button::attributes() const -> widget_attributes
 auto radio_button::flags() -> widget_flags
 {
     auto retValue {widget::flags()};
-    retValue.Checked = Checked();
+    retValue.Checked = *Checked;
     return retValue;
 }
 

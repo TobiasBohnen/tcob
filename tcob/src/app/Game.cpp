@@ -186,7 +186,7 @@ void game::step()
             window.draw_to(rs.default_target());
             window.swap_buffer();
 
-            if (window.Cursor()) {
+            if (*window.Cursor) {
                 window.Cursor->update(deltaUpdate);
                 window.Cursor->ActiveMode = "default"; // set cursor to default mode if available
             }
@@ -208,7 +208,7 @@ void game::on_key_down(input::keyboard::event const& ev)
         // Alt+Enter -> toggle fullscreen
         if (ev.ScanCode == input::scan_code::RETURN && ev.KeyMods.left_alt()) {
             auto& window {locate_service<gfx::render_system>().window()};
-            window.FullScreen = !window.FullScreen();
+            window.FullScreen = !window.FullScreen;
         }
     }
 }
