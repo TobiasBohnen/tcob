@@ -73,8 +73,8 @@ TCOB_API auto get_sub_folders(path const& folder) -> std::unordered_set<string>;
 
 TCOB_API auto read_as_string(path const& file) -> string;
 
-TCOB_API auto zip(path const& srcFileOrFolder, path const& dstFile, bool relative = false, i32 level = -1) -> bool;
-TCOB_API auto unzip(path const& srcFile, path const& dstFolder) -> bool;
+TCOB_API auto zip(path const& srcFileOrFolder, ofstream& dstStream, bool relative = false, i32 level = -1) -> bool;
+TCOB_API auto unzip(ifstream& srcStream, path const& dstFolder) -> bool;
 
 TCOB_API auto get_file_size(path const& file) -> i64;
 

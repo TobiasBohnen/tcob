@@ -130,14 +130,12 @@ auto static mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t
 
 ////////////////////////////////////////////////////////////
 
-auto zip(path const& srcFileOrFolder, path const& dstFile, bool relative, i32 level) -> bool
+auto zip(path const& srcFileOrFolder, ofstream& dstStream, bool relative, i32 level) -> bool
 {
-    ofstream stream {dstFile};
-
     mz_zip_archive zip;
     mz_zip_zero_struct(&zip);
     zip.m_pWrite     = &mz_write;
-    zip.m_pIO_opaque = &stream;
+    zip.m_pIO_opaque = &dstStream;
 
     if (!mz_zip_writer_init(&zip, 0)) { return false; }
 
@@ -165,16 +163,14 @@ auto zip(path const& srcFileOrFolder, path const& dstFile, bool relative, i32 le
     return mz_zip_writer_end(&zip);
 }
 
-auto unzip(path const& srcFile, path const& dstFolder) -> bool
+auto unzip(ifstream& srcStream, path const& dstFolder) -> bool
 {
-    ifstream stream {srcFile};
-
     mz_zip_archive zip;
     mz_zip_zero_struct(&zip);
     zip.m_pRead      = &mz_read;
-    zip.m_pIO_opaque = &stream;
+    zip.m_pIO_opaque = &srcStream;
 
-    if (!mz_zip_reader_init(&zip, static_cast<u64>(stream.size_in_bytes()), 0)) { return false; }
+    if (!mz_zip_reader_init(&zip, static_cast<u64>(srcStream.size_in_bytes()), 0)) { return false; }
 
     mz_uint const n {mz_zip_reader_get_num_files(&zip)};
     for (mz_uint i {0}; i < n; ++i) {
