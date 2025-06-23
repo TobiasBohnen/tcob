@@ -8,177 +8,180 @@
 
 #include <compare>
 
-namespace tcob {
+namespace tcob::detail {
 
-namespace detail {
+template <typename T>
+inline field_source<T>::field_source(type value)
+    : _value {value}
+{
+}
 
-    template <typename T>
-    inline field_source<T>::field_source(type value)
-        : _value {value}
-    {
+template <typename T>
+inline auto field_source<T>::get() -> return_type
+{
+    return _value;
+}
+
+template <typename T>
+inline auto field_source<T>::get() const -> const_return_type
+{
+    return _value;
+}
+
+template <typename T>
+inline auto field_source<T>::set(type const& value, bool force) -> bool
+{
+    if constexpr (Equatable<T>) {
+        if (!force && _value == value) { return false; }
     }
+    _value = value;
+    return true;
+}
 
-    template <typename T>
-    inline auto field_source<T>::get() -> return_type
-    {
-        return _value;
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline validating_field_source<T>::validating_field_source(validate_func val)
+    : validating_field_source {{}, val}
+{
+}
+
+template <typename T>
+inline validating_field_source<T>::validating_field_source(type value, validate_func val)
+    : _validate {val}
+    , _value {value}
+{
+}
+
+template <typename T>
+inline auto validating_field_source<T>::get() -> return_type
+{
+    return _value;
+}
+
+template <typename T>
+inline auto validating_field_source<T>::get() const -> const_return_type
+{
+    return _value;
+}
+
+template <typename T>
+inline auto validating_field_source<T>::set(type const& value, bool force) -> bool
+{
+    T const newValue {_validate(value)};
+    if constexpr (Equatable<T>) {
+        if (!force && _value == newValue) { return false; }
     }
+    _value = newValue;
+    return true;
+}
 
-    template <typename T>
-    inline auto field_source<T>::get() const -> const_return_type
-    {
-        return _value;
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline func_source<T>::func_source(getter_func get, setter_func set)
+    : _getter {get}
+    , _setter {set}
+{
+}
+
+template <typename T>
+inline func_source<T>::func_source(type value, getter_func get, setter_func set)
+    : func_source {get, set}
+{
+    set(value);
+}
+
+template <typename T>
+inline auto func_source<T>::get() -> return_type
+{
+    return _getter();
+}
+
+template <typename T>
+inline auto func_source<T>::get() const -> const_return_type
+{
+    return _getter();
+}
+
+template <typename T>
+inline auto func_source<T>::set(type const& value, bool force) -> bool
+{
+    if constexpr (Equatable<T>) {
+        if (!force && get() == value) { return false; }
     }
+    _setter(value);
+    return true;
+}
 
-    template <typename T>
-    inline auto field_source<T>::set(type const& value, bool force) -> bool
-    {
-        if constexpr (Equatable<T>) {
-            if (!force && _value == value) { return false; }
-        }
-        _value = value;
-        return true;
-    }
+////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////
+template <typename T, typename Source>
+inline prop_base<T, Source>::prop_base(Source source)
+    : _source {std::move(source)}
+{
+}
 
-    template <typename T>
-    inline validating_field_source<T>::validating_field_source(validate_func val)
-        : validating_field_source {{}, val}
-    {
-    }
+template <typename T, typename Source>
+inline prop_base<T, Source>::prop_base(T val)
+    : _source {val}
+{
+}
 
-    template <typename T>
-    inline validating_field_source<T>::validating_field_source(type value, validate_func val)
-        : _validate {val}
-        , _value {value}
-    {
-    }
+template <typename T, typename Source>
+inline void prop_base<T, Source>::operator()(T const& value)
+{
+    set(value, true);
+}
 
-    template <typename T>
-    inline auto validating_field_source<T>::get() -> return_type
-    {
-        return _value;
-    }
-
-    template <typename T>
-    inline auto validating_field_source<T>::get() const -> const_return_type
-    {
-        return _value;
-    }
-
-    template <typename T>
-    inline auto validating_field_source<T>::set(type const& value, bool force) -> bool
-    {
-        T const newValue {_validate(value)};
-        if constexpr (Equatable<T>) {
-            if (!force && _value == newValue) { return false; }
-        }
-        _value = newValue;
-        return true;
-    }
-
-    ////////////////////////////////////////////////////////////
-
-    template <typename T>
-    inline func_source<T>::func_source(getter_func get, setter_func set)
-        : _getter {get}
-        , _setter {set}
-    {
-    }
-
-    template <typename T>
-    inline func_source<T>::func_source(type value, getter_func get, setter_func set)
-        : func_source {get, set}
-    {
-        set(value);
-    }
-
-    template <typename T>
-    inline auto func_source<T>::get() -> return_type
-    {
-        return _getter();
-    }
-
-    template <typename T>
-    inline auto func_source<T>::get() const -> const_return_type
-    {
-        return _getter();
-    }
-
-    template <typename T>
-    inline auto func_source<T>::set(type const& value, bool force) -> bool
-    {
-        if constexpr (Equatable<T>) {
-            if (!force && get() == value) { return false; }
-        }
-        _setter(value);
-        return true;
-    }
-
-    ////////////////////////////////////////////////////////////
-
-    template <typename T, typename Source, typename Derived>
-    inline prop_base<T, Source, Derived>::prop_base(Source source)
-        : _source {std::move(source)}
-    {
-    }
-
-    template <typename T, typename Source, typename Derived>
-    inline prop_base<T, Source, Derived>::prop_base(T val)
-        : _source {val}
-    {
-    }
-
-    template <typename T, typename Source, typename Derived>
-    inline void prop_base<T, Source, Derived>::operator()(T const& value)
-    {
-        set(value, true);
-    }
-
-    template <typename T, typename Source, typename Derived>
-    inline auto prop_base<T, Source, Derived>::operator->() const
-    {
-        if constexpr (OverloadsArrowOp<T>) {
-            return _source.get();
-        } else {
-            static_assert(std::is_reference_v<return_type>);
-            return &_source.get();
-        }
-    }
-
-    template <typename T, typename Source, typename Derived>
-    inline prop_base<T, Source, Derived>::operator T() const
-    {
+template <typename T, typename Source>
+inline auto prop_base<T, Source>::operator->() const
+{
+    if constexpr (OverloadsArrowOp<T>) {
         return _source.get();
+    } else {
+        static_assert(std::is_reference_v<return_type>);
+        return &_source.get();
     }
+}
 
-    template <typename T, typename Source, typename Derived>
-    inline auto prop_base<T, Source, Derived>::operator*() -> return_type
-    {
-        return _source.get();
+template <typename T, typename Source>
+inline prop_base<T, Source>::operator T() const
+{
+    return _source.get();
+}
+
+template <typename T, typename Source>
+inline auto prop_base<T, Source>::operator*() -> return_type
+{
+    return _source.get();
+}
+
+template <typename T, typename Source>
+inline auto prop_base<T, Source>::operator*() const -> const_return_type
+{
+    return _source.get();
+}
+
+template <typename T, typename Source>
+inline auto prop_base<T, Source>::operator()() const -> const_return_type
+{
+    return _source.get();
+}
+
+template <typename T, typename Source>
+inline auto prop_base<T, Source>::operator=(T const& value) -> prop_base&
+{
+    set(value, false);
+    return *this;
+}
+
+template <typename T, typename Source>
+inline void prop_base<T, Source>::set(T const& value, bool force)
+{
+    if (_source.set(value, force) && Changed.slot_count() > 0) {
+        Changed(_source.get());
     }
-
-    template <typename T, typename Source, typename Derived>
-    inline auto prop_base<T, Source, Derived>::operator*() const -> const_return_type
-    {
-        return _source.get();
-    }
-
-    template <typename T, typename Source, typename Derived>
-    inline auto prop_base<T, Source, Derived>::operator()() const -> const_return_type
-    {
-        return _source.get();
-    }
-
-    template <typename T, typename Source, typename Derived>
-    inline void prop_base<T, Source, Derived>::set(T const& value, bool force)
-    {
-        if (_source.set(value, force) && static_cast<Derived*>(this)->Changed.slot_count() > 0) {
-            static_cast<Derived*>(this)->Changed(_source.get());
-        }
-    }
-
 }
 
 ////////////////////////////////////////////////////////////
