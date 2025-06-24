@@ -74,18 +74,24 @@ class widget_container;
 
 ////////////////////////////////////////////////////////////
 
-struct tab_stop {
+class TCOB_API tab_stop {
+public:
     i32  Index {0};
     bool Enabled {true};
+
+    auto operator==(tab_stop const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
 
-struct nav_map_entry {
+class TCOB_API nav_map_entry {
+public:
     string Left;
     string Up;
     string Right;
     string Down;
+
+    auto operator==(nav_map_entry const& other) const -> bool = default;
 };
 
 using nav_map = std::unordered_map<string, nav_map_entry>;

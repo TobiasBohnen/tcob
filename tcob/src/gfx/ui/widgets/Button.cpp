@@ -44,8 +44,7 @@ void button::on_update(milliseconds /* deltaTime */)
 
 void button::on_animation_step(string const& val)
 {
-    Icon.mut_ref().Region = val;
-    request_redraw(this->name() + ": Animation Frame changed ");
+    Icon.mutate([&val](icon& icon) { icon.Region = val; });
 }
 
 auto button::attributes() const -> widget_attributes

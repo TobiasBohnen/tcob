@@ -420,13 +420,13 @@ auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
 
 void poly_shape::clip(poly_shape const& other, clip_mode mode)
 {
-    polygons::clip(Polygons.mut_ref(), *other.Polygons, mode);
+    Polygons.mutate([&](std::vector<polygon>& polygons) { polygons::clip(polygons, *other.Polygons, mode); });
     mark_dirty();
 }
 
 void poly_shape::move_by(point_f offset)
 {
-    polygons::move_by(Polygons.mut_ref(), offset);
+    Polygons.mutate([&](std::vector<polygon>& polygons) { polygons::move_by(polygons, offset); });
     mark_dirty();
 }
 

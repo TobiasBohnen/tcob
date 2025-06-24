@@ -111,9 +111,11 @@ namespace detail {
 
         auto operator[](auto&&... idx) const -> decltype(auto);
 
-        auto mut_ref() -> return_type
+        void mutate(auto&& func)
         {
-            return _source.get();
+            static_assert(std::is_reference_v<return_type>);
+            func(_source.get());
+            Changed(_source.get());
         }
 
     protected:

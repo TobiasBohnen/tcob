@@ -20,6 +20,7 @@
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Concepts.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
@@ -680,6 +681,31 @@ struct converter<angle_unit<ValueType, OneTurn>> {
     void static To(cfg_value& config, angle_unit<ValueType, OneTurn> const& value)
     {
         config = value.Value;
+    }
+};
+
+template <typename T>
+struct converter<prop<T>> {
+    auto static IsType(cfg_value const& config) -> bool
+    {
+        return converter<T>::IsType(config);
+    }
+
+    auto static From(cfg_value const& config, prop<T>& value) -> bool
+    {
+        if (IsType(config)) {
+            if (T val; converter<T>::From(config, val)) {
+                value = val;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void static To(cfg_value& config, prop<T> const& value)
+    {
+        converter<T>::To(config, value);
     }
 };
 

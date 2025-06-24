@@ -42,7 +42,7 @@ widget::widget(init const& wi)
     ZOrder.Changed.connect([this](auto const&) { request_redraw(_name + ": ZOrder changed"); });
 
     static i32 tabIndex {0};
-    TabStop.mut_ref().Index = tabIndex++;
+    TabStop.mutate([&](tab_stop& tabStop) { tabStop.Index = tabIndex++; });
 
     _animationTween.Changed.connect([this](auto const& val) { on_animation_step(val); });
 }

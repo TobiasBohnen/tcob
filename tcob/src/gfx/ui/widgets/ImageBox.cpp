@@ -81,8 +81,7 @@ void image_box::on_update(milliseconds /* deltaTime */)
 
 void image_box::on_animation_step(string const& val)
 {
-    Image.mut_ref().Region = val;
-    request_redraw(this->name() + ": Animation Frame changed ");
+    Image.mutate([&val](icon& icon) { icon.Region = val; });
 }
 
 auto image_box::attributes() const -> widget_attributes
