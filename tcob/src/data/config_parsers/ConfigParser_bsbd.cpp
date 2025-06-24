@@ -89,35 +89,35 @@ auto bsbd_reader::read_section_entry(io::istream& stream, bsbd::marker_type type
 
     // value
     if (u8 val {static_cast<u8>(type)}; val >= LitIntVal) {
-        obj.set_entry(key, val - LitIntVal);
+        obj.set_entry(key, entry {val - LitIntVal});
         return true;
     }
 
     switch (type) {
-    case bsbd::marker_type::Int8:         obj.set_entry(key, stream.read<i8>()); return true;
-    case bsbd::marker_type::Int16:        obj.set_entry(key, stream.read<i16, std::endian::little>()); return true;
-    case bsbd::marker_type::Int32:        obj.set_entry(key, stream.read<i32, std::endian::little>()); return true;
-    case bsbd::marker_type::UInt8:        obj.set_entry(key, stream.read<u8>()); return true;
-    case bsbd::marker_type::UInt16:       obj.set_entry(key, stream.read<u16, std::endian::little>()); return true;
-    case bsbd::marker_type::UInt32:       obj.set_entry(key, stream.read<u32, std::endian::little>()); return true;
-    case bsbd::marker_type::Int64:        obj.set_entry(key, stream.read<i64, std::endian::little>()); return true;
-    case bsbd::marker_type::Float32:      obj.set_entry(key, stream.read<f32, std::endian::little>()); return true;
-    case bsbd::marker_type::Float64:      obj.set_entry(key, stream.read<f64, std::endian::little>()); return true;
-    case bsbd::marker_type::BoolTrue:     obj.set_entry(key, true); return true;
-    case bsbd::marker_type::BoolFalse:    obj.set_entry(key, false); return true;
+    case bsbd::marker_type::Int8:         obj.set_entry(key, entry {stream.read<i8>()}); return true;
+    case bsbd::marker_type::Int16:        obj.set_entry(key, entry {stream.read<i16, std::endian::little>()}); return true;
+    case bsbd::marker_type::Int32:        obj.set_entry(key, entry {stream.read<i32, std::endian::little>()}); return true;
+    case bsbd::marker_type::UInt8:        obj.set_entry(key, entry {stream.read<u8>()}); return true;
+    case bsbd::marker_type::UInt16:       obj.set_entry(key, entry {stream.read<u16, std::endian::little>()}); return true;
+    case bsbd::marker_type::UInt32:       obj.set_entry(key, entry {stream.read<u32, std::endian::little>()}); return true;
+    case bsbd::marker_type::Int64:        obj.set_entry(key, entry {stream.read<i64, std::endian::little>()}); return true;
+    case bsbd::marker_type::Float32:      obj.set_entry(key, entry {stream.read<f32, std::endian::little>()}); return true;
+    case bsbd::marker_type::Float64:      obj.set_entry(key, entry {stream.read<f64, std::endian::little>()}); return true;
+    case bsbd::marker_type::BoolTrue:     obj.set_entry(key, entry {true}); return true;
+    case bsbd::marker_type::BoolFalse:    obj.set_entry(key, entry {false}); return true;
 
-    case bsbd::marker_type::LongString:   obj.set_entry(key, stream.read_string(stream.read<long_string_size, std::endian::little>())); return true;
-    case bsbd::marker_type::ShortString:  obj.set_entry(key, stream.read_string(stream.read<short_string_size, std::endian::little>())); return true;
+    case bsbd::marker_type::LongString:   obj.set_entry(key, entry {stream.read_string(stream.read<long_string_size, std::endian::little>())}); return true;
+    case bsbd::marker_type::ShortString:  obj.set_entry(key, entry {stream.read_string(stream.read<short_string_size, std::endian::little>())}); return true;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
-            obj.set_entry(key, *subSec);
+            obj.set_entry(key, entry {*subSec});
             return true;
         }
     } break;
     case bsbd::marker_type::ArrayStart: {
         if (auto subArr {read_array(stream)}) {
-            obj.set_entry(key, *subArr);
+            obj.set_entry(key, entry {*subArr});
             return true;
         }
     } break;
@@ -147,36 +147,36 @@ auto bsbd_reader::read_array(io::istream& stream) const -> std::optional<array>
 auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, array& arr) const -> bool
 {
     if (u8 val {static_cast<u8>(type)}; val >= LitIntVal) {
-        arr.add_entry(val - LitIntVal);
+        arr.add_entry(entry {val - LitIntVal});
         return true;
     }
 
     switch (type) {
-    case bsbd::marker_type::Int8:         arr.add_entry(stream.read<i8>()); break;
-    case bsbd::marker_type::Int16:        arr.add_entry(stream.read<i16, std::endian::little>()); break;
-    case bsbd::marker_type::Int32:        arr.add_entry(stream.read<i32, std::endian::little>()); break;
-    case bsbd::marker_type::UInt8:        arr.add_entry(stream.read<u8>()); break;
-    case bsbd::marker_type::UInt16:       arr.add_entry(stream.read<u16, std::endian::little>()); break;
-    case bsbd::marker_type::UInt32:       arr.add_entry(stream.read<u32, std::endian::little>()); break;
-    case bsbd::marker_type::Int64:        arr.add_entry(stream.read<i64, std::endian::little>()); break;
-    case bsbd::marker_type::Float32:      arr.add_entry(stream.read<f32, std::endian::little>()); break;
-    case bsbd::marker_type::Float64:      arr.add_entry(stream.read<f64, std::endian::little>()); break;
-    case bsbd::marker_type::BoolTrue:     arr.add_entry(true); break;
-    case bsbd::marker_type::BoolFalse:    arr.add_entry(false); break;
+    case bsbd::marker_type::Int8:         arr.add_entry(entry {stream.read<i8>()}); break;
+    case bsbd::marker_type::Int16:        arr.add_entry(entry {stream.read<i16, std::endian::little>()}); break;
+    case bsbd::marker_type::Int32:        arr.add_entry(entry {stream.read<i32, std::endian::little>()}); break;
+    case bsbd::marker_type::UInt8:        arr.add_entry(entry {stream.read<u8>()}); break;
+    case bsbd::marker_type::UInt16:       arr.add_entry(entry {stream.read<u16, std::endian::little>()}); break;
+    case bsbd::marker_type::UInt32:       arr.add_entry(entry {stream.read<u32, std::endian::little>()}); break;
+    case bsbd::marker_type::Int64:        arr.add_entry(entry {stream.read<i64, std::endian::little>()}); break;
+    case bsbd::marker_type::Float32:      arr.add_entry(entry {stream.read<f32, std::endian::little>()}); break;
+    case bsbd::marker_type::Float64:      arr.add_entry(entry {stream.read<f64, std::endian::little>()}); break;
+    case bsbd::marker_type::BoolTrue:     arr.add_entry(entry {true}); break;
+    case bsbd::marker_type::BoolFalse:    arr.add_entry(entry {false}); break;
 
-    case bsbd::marker_type::LongString:   arr.add_entry(stream.read_string(stream.read<long_string_size, std::endian::little>())); break;
-    case bsbd::marker_type::ShortString:  arr.add_entry(stream.read_string(stream.read<short_string_size, std::endian::little>())); break;
+    case bsbd::marker_type::LongString:   arr.add_entry(entry {stream.read_string(stream.read<long_string_size, std::endian::little>())}); break;
+    case bsbd::marker_type::ShortString:  arr.add_entry(entry {stream.read_string(stream.read<short_string_size, std::endian::little>())}); break;
 
     case bsbd::marker_type::SectionStart: {
         if (auto subSec {read_section(stream)}) {
-            arr.add_entry(*subSec);
+            arr.add_entry(entry {*subSec});
         } else {
             return false;
         }
     } break;
     case bsbd::marker_type::ArrayStart: {
         if (auto subArr {read_array(stream)}) {
-            arr.add_entry(*subArr);
+            arr.add_entry(entry {*subArr});
         } else {
             return false;
         }

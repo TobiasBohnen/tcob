@@ -218,7 +218,7 @@ public:
     entry(entry const& other)                    = default;
     auto operator=(entry const& other) -> entry& = default;
     template <typename T>
-    entry(T val);
+    explicit entry(T val);
 
     template <typename T>
     auto as() const -> T;

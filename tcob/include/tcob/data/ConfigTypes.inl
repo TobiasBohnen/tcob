@@ -255,7 +255,7 @@ inline void object::set(string_view key, string_view subkey, KeysOrValue&&... ke
     using last_type = typename std::remove_cvref_t<detail::last_element_t<KeysOrValue...>>;
     if constexpr (!std::is_same_v<last_type, std::nullptr_t>) {
         // key not found -> add new object
-        add_entry(key, object {});
+        add_entry(key, entry {object {}});
         set(key, subkey, std::forward<KeysOrValue>(keys)...);
     }
 }
@@ -271,7 +271,7 @@ inline void object::set(string_view key, isize index, Value&& value)
     }
 
     // key not found -> add new array
-    add_entry(key, array {});
+    add_entry(key, entry {array {}});
     set(key, index, value);
 }
 

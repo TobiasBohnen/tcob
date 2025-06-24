@@ -311,7 +311,7 @@ auto xml_reader::convert_to_array(element const& n) -> array
 
             retValue.add_entry(entry);
         } else {
-            retValue.add_entry(convert_to_object(*el));
+            retValue.add_entry(entry {convert_to_object(*el)});
         }
     }
     return retValue;

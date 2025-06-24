@@ -121,10 +121,10 @@ auto object::clone(bool deep) const -> object
                 retValue.add_entry(k, v);
                 break;
             case type::Array:
-                retValue.add_entry(k, v.as<array>().clone(true));
+                retValue.add_entry(k, entry {v.as<array>().clone(true)});
                 break;
             case type::Object:
-                retValue.add_entry(k, v.as<object>().clone(true));
+                retValue.add_entry(k, entry {v.as<object>().clone(true)});
                 break;
             }
         }
