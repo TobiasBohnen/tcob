@@ -34,31 +34,27 @@ drop_down_list::drop_down_list(init const& wi)
     , _vScrollbar {orientation::Vertical}
 {
     _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
+
     SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
     HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
     MaxVisibleItems.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaxVisibleItems changed"); });
     MaxVisibleItems(5);
+
+    Items.Changed.connect([this](auto const& val) {
+        if ((std::ssize(val) <= SelectedItemIndex && SelectedItemIndex != INVALID_INDEX)
+            || (std::ssize(val) <= HoveredItemIndex && HoveredItemIndex != INVALID_INDEX)) {
+            clear_sub_styles();
+            set_extended(false);
+            SelectedItemIndex = INVALID_INDEX;
+            HoveredItemIndex  = INVALID_INDEX;
+        }
+
+        request_redraw(this->name() + ": Items changed");
+    });
+
     Class("drop_down_list");
-}
-
-void drop_down_list::add_item(utf8_string const& item)
-{
-    add_item({.Text = item, .Icon = {}, .UserData = {}});
-}
-
-void drop_down_list::add_item(item const& item)
-{
-    _items.push_back(item);
-    request_redraw(this->name() + ": item added");
-}
-
-void drop_down_list::clear_items()
-{
-    _items.clear();
-    clear_sub_styles();
-    request_redraw(this->name() + ": items cleared");
 }
 
 auto drop_down_list::select_item(utf8_string const& item) -> bool
@@ -280,11 +276,14 @@ void drop_down_list::on_update(milliseconds deltaTime)
 void drop_down_list::on_animation_step(string const& val)
 {
     if (_isExtended && SelectedItemIndex >= 0) {
-        auto& item {_items[SelectedItemIndex]};
-        item.Icon.Region = val;
-        if (item.Icon.Texture) {
-            request_redraw(this->name() + ": Animation Frame changed ");
-        }
+        Items.mutate([&](auto& items) {
+            auto& item {items[SelectedItemIndex]};
+            item.Icon.Region = val;
+            if (item.Icon.Texture) {
+                request_redraw(this->name() + ": Animation Frame changed ");
+            }
+            return false;
+        });
     }
 }
 
@@ -333,7 +332,7 @@ auto drop_down_list::attributes() const -> widget_attributes
 
 auto drop_down_list::get_items() const -> std::vector<item> const&
 {
-    return _items;
+    return *Items;
 }
 
 auto drop_down_list::get_item_height() const -> f32

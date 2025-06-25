@@ -32,13 +32,11 @@ public:
 
     explicit list_box(init const& wi);
 
-    prop_val<isize>   SelectedItemIndex;
-    prop_val<isize>   HoveredItemIndex;
-    prop<utf8_string> Filter;
+    prop_val<isize> SelectedItemIndex;
+    prop_val<isize> HoveredItemIndex;
 
-    void add_item(utf8_string const& item);
-    void add_item(item const& item);
-    void clear_items();
+    prop<std::vector<item>> Items;
+    prop<utf8_string>       Filter;
 
     auto select_item(utf8_string const& item) -> bool;
     void scroll_to_selected();
@@ -68,9 +66,9 @@ protected:
     auto get_scroll_distance() const -> f32 override;
 
 private:
+    void apply_filter();
     auto get_items() const -> std::vector<item> const&;
 
-    std::vector<item>                 _items;
     std::vector<item>                 _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
     isize                             _visibleItems {0};

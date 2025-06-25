@@ -30,9 +30,7 @@ public:
 
     prop_val<isize> SelectedItemIndex;
 
-    void add_item(utf8_string const& item);
-    void add_item(item const& item);
-    void clear_items();
+    prop<std::vector<item>> Items;
 
     auto select_item(utf8_string const& item) -> bool;
 
@@ -55,8 +53,6 @@ private:
     auto is_select_valid() const -> bool;
 
     void select_next();
-
-    std::vector<item> _items;
 
     cycle_button::style _style;
 };

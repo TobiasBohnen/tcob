@@ -42,11 +42,8 @@ public:
     prop_val<isize> SelectedItemIndex;
     prop_val<isize> HoveredItemIndex;
 
-    prop<isize> MaxVisibleItems; // TODO: change to prop_val
-
-    void add_item(utf8_string const& item);
-    void add_item(item const& item);
-    void clear_items();
+    prop<std::vector<item>> Items;
+    prop<isize>             MaxVisibleItems; // TODO: change to prop_val
 
     auto select_item(utf8_string const& item) -> bool;
 
@@ -85,7 +82,6 @@ private:
     auto get_scroll_distance() const -> f32;
     auto get_scroll_max() const -> f32;
 
-    std::vector<item>                 _items;
     std::unordered_map<isize, rect_f> _itemRectCache;
     isize                             _visibleItems {0};
 

@@ -37,7 +37,7 @@ grid_view::grid_view(init const& wi)
         _columnSizes.resize(val.width());
         for (isize y {0}; y < val.height(); ++y) {
             for (isize x {0}; x < val.width(); ++x) {
-                _columnSizes[y] = std::max(_columnSizes[y], std::ssize(val[x, y].Text));
+                _columnSizes[x] = std::max(_columnSizes[x], std::ssize(val[x, y].Text));
             }
         }
 
@@ -54,7 +54,7 @@ grid_view::grid_view(init const& wi)
     Header.Changed.connect([this](auto const& val) {
         _columnSizes.resize(val.size());
         for (usize x {0}; x < _columnSizes.size(); ++x) {
-            _columnSizes[x] = std::ssize(val[x].Text);
+            _columnSizes[x] = std::max(_columnSizes[x], std::ssize(val[x].Text));
         }
         request_redraw(this->name() + ": Header changed");
     });
@@ -180,6 +180,8 @@ void grid_view::on_animation_step(string const& val)
             Header.mutate([&](auto& header) {
                 auto& cell {header[SelectedCellIndex->X]};
                 cell.Icon.Region = val;
+                request_redraw(this->name() + ": Animation Frame changed ");
+                return false; // don't invoke Header.Changed
             });
         } else {
             Grid.mutate([&](auto& grid) {

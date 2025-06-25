@@ -24,36 +24,27 @@ void cycle_button::style::Transition(style& target, style const& left, style con
 
 cycle_button::cycle_button(init const& wi)
     : widget {wi}
-    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_items) - 1); }}}
+    , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(*Items) - 1); }}}
 {
     SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
 
+    Items.Changed.connect([this](auto const& val) {
+        if (std::ssize(val) <= SelectedItemIndex && SelectedItemIndex != INVALID_INDEX) {
+            clear_sub_styles();
+            SelectedItemIndex = INVALID_INDEX;
+        }
+
+        request_redraw(this->name() + ": Items changed");
+    });
+
     Class("cycle_button");
-}
-
-void cycle_button::add_item(utf8_string const& item)
-{
-    add_item({.Text = item, .Icon = {}, .UserData = {}});
-}
-
-void cycle_button::add_item(item const& item)
-{
-    _items.push_back(item);
-    request_redraw(this->name() + ": item added");
-}
-
-void cycle_button::clear_items()
-{
-    _items.clear();
-    SelectedItemIndex = INVALID_INDEX;
-    request_redraw(this->name() + ": items cleared");
 }
 
 auto cycle_button::select_item(utf8_string const& item) -> bool
 {
-    for (isize i {0}; i < std::ssize(_items); ++i) {
-        if (_items[i].Text == item) {
+    for (isize i {0}; i < std::ssize(*Items); ++i) {
+        if (Items[i].Text == item) {
             SelectedItemIndex = i;
             return true;
         }
@@ -64,17 +55,17 @@ auto cycle_button::select_item(utf8_string const& item) -> bool
 
 auto cycle_button::get_item_at(isize index) const -> item const&
 {
-    return _items.at(static_cast<usize>(index));
+    return Items->at(static_cast<usize>(index));
 }
 
 auto cycle_button::selected_item() const -> item const&
 {
-    return _items.at(SelectedItemIndex);
+    return Items->at(SelectedItemIndex);
 }
 
 auto cycle_button::item_count() const -> isize
 {
-    return std::ssize(_items);
+    return std::ssize(*Items);
 }
 
 void cycle_button::on_draw(widget_painter& painter)
@@ -98,8 +89,11 @@ void cycle_button::on_update(milliseconds /*deltaTime*/)
 void cycle_button::on_animation_step(string const& val)
 {
     if (SelectedItemIndex >= 0) {
-        _items[SelectedItemIndex].Icon.Region = val;
-        request_redraw(this->name() + ": Animation Frame changed ");
+        Items.mutate([&](auto& items) {
+            items[SelectedItemIndex].Icon.Region = val;
+            request_redraw(this->name() + ": Animation Frame changed ");
+            return false;
+        });
     }
 }
 
@@ -127,7 +121,7 @@ auto cycle_button::attributes() const -> widget_attributes
 
 void cycle_button::select_next()
 {
-    if (_items.empty()) { return; }
+    if (Items->empty()) { return; }
     SelectedItemIndex = (SelectedItemIndex + 1) % item_count();
 }
 

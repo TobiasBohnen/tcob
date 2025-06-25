@@ -46,49 +46,29 @@ list_box::list_box(init const& wi)
     HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
 
-    Filter.Changed.connect([this](auto const& val) {
+    Items.Changed.connect([this](auto const& val) {
+        if ((std::ssize(val) <= SelectedItemIndex && SelectedItemIndex != INVALID_INDEX)
+            || (std::ssize(val) <= HoveredItemIndex && HoveredItemIndex != INVALID_INDEX)) {
+            clear_sub_styles();
+            set_scrollbar_value(0);
+            SelectedItemIndex = INVALID_INDEX;
+            HoveredItemIndex  = INVALID_INDEX;
+        }
+
+        apply_filter();
+        request_redraw(this->name() + ": Items changed");
+    });
+
+    Filter.Changed.connect([this](auto const& /* val */) {
         HoveredItemIndex  = INVALID_INDEX;
         SelectedItemIndex = INVALID_INDEX;
         set_scrollbar_value(0);
 
-        _filteredItems.clear();
-        if (!val.empty()) {
-            _filteredItems.reserve(_items.size());
-            for (i32 i {0}; i < std::ssize(_items); ++i) {
-                if (case_insensitive_contains(_items[i].Text, val)) {
-                    _filteredItems.push_back(_items[i]);
-                }
-            }
-        }
+        apply_filter();
         request_redraw(this->name() + ": Filter changed");
     });
 
     Class("list_box");
-}
-
-void list_box::add_item(utf8_string const& item)
-{
-    add_item({.Text = item, .Icon = {}, .UserData = {}});
-}
-
-void list_box::add_item(item const& item)
-{
-    _items.push_back(item);
-    if (!Filter->empty() && case_insensitive_contains(item.Text, *Filter)) {
-        _filteredItems.push_back(item);
-    }
-    request_redraw(this->name() + ": item added");
-}
-
-void list_box::clear_items()
-{
-    _items.clear();
-    _filteredItems.clear();
-    clear_sub_styles();
-
-    SelectedItemIndex = INVALID_INDEX;
-    HoveredItemIndex  = INVALID_INDEX;
-    request_redraw(this->name() + ": items cleared");
 }
 
 auto list_box::select_item(utf8_string const& item) -> bool
@@ -193,11 +173,14 @@ void list_box::on_update(milliseconds deltaTime)
 void list_box::on_animation_step(string const& val)
 {
     if (SelectedItemIndex >= 0) {
-        auto& item {(Filter->empty() ? _items : _filteredItems)[SelectedItemIndex]};
-        item.Icon.Region = val;
-        if (item.Icon.Texture) {
-            request_redraw(this->name() + ": Animation Frame changed ");
-        }
+        Items.mutate([&](auto& items) {
+            auto& item {(Filter->empty() ? items : _filteredItems)[SelectedItemIndex]};
+            item.Icon.Region = val;
+            if (item.Icon.Texture) {
+                request_redraw(this->name() + ": Animation Frame changed ");
+            }
+            return false;
+        });
     }
 }
 
@@ -275,7 +258,7 @@ void list_box::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
 auto list_box::get_items() const -> std::vector<item> const&
 {
-    return Filter->empty() ? _items : _filteredItems;
+    return Filter->empty() ? *Items : _filteredItems;
 }
 
 auto list_box::attributes() const -> widget_attributes
@@ -299,7 +282,7 @@ auto list_box::attributes() const -> widget_attributes
 
 auto list_box::get_scroll_content_height() const -> f32
 {
-    if (_items.empty()) { return 0; }
+    if (Items->empty()) { return 0; }
 
     f32       retValue {0.0f};
     f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
@@ -311,6 +294,19 @@ auto list_box::get_scroll_content_height() const -> f32
 auto list_box::get_scroll_distance() const -> f32
 {
     return _style.ItemHeight.calc(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max();
+}
+
+void list_box::apply_filter()
+{
+    _filteredItems.clear();
+    if (!Filter->empty()) {
+        _filteredItems.reserve(Items->size());
+        for (i32 i {0}; i < std::ssize(*Items); ++i) {
+            if (case_insensitive_contains(Items[i].Text, *Filter)) {
+                _filteredItems.push_back(Items[i]);
+            }
+        }
+    }
 }
 
 } // namespace ui
