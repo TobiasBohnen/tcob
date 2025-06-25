@@ -20,7 +20,6 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-// TODO: datasource
 class TCOB_API drop_down_list : public widget {
 public:
     class TCOB_API style : public widget_style {

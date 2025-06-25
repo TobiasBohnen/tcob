@@ -18,8 +18,6 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-// TODO: datasource
-
 class TCOB_API list_box : public vscroll_widget {
 public:
     class TCOB_API style : public vscroll_widget::style {
