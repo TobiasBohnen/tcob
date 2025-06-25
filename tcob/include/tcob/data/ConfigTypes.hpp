@@ -219,6 +219,8 @@ public:
     auto operator=(entry const& other) -> entry& = default;
     template <typename T>
     explicit entry(T val);
+    template <typename T>
+    auto operator=(T const& other) -> entry&;
 
     template <typename T>
     auto as() const -> T;

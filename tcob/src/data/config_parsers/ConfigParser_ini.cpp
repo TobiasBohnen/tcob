@@ -259,11 +259,11 @@ auto ini_reader::read_ref(entry& currentEntry, utf8_string_view line) -> bool
 
     if (auto const* e {obj.get_entry(keys[keys.size() - 1])}) {
         if (e->is<object>()) {
-            currentEntry = entry {e->as<object>().clone(true)};
+            currentEntry = e->as<object>().clone(true);
         } else if (e->is<array>()) {
-            currentEntry = entry {e->as<array>().clone(true)};
+            currentEntry = e->as<array>().clone(true);
         } else {
-            currentEntry = entry {*e};
+            currentEntry = *e;
         }
 
         return true;

@@ -414,6 +414,13 @@ inline entry::entry(T val)
 }
 
 template <typename T>
+inline auto entry::operator=(T const& other) -> entry&
+{
+    set(std::move(other));
+    return *this;
+}
+
+template <typename T>
 inline auto entry::as() const -> T
 {
     return get<T>().value();
