@@ -173,7 +173,7 @@ void border_element::Transition(border_element& target, border_element const& le
     }
     target.Dash = targetDash;
 
-    target.DashOffset = static_cast<f32>(left.DashOffset + (right.DashOffset - left.DashOffset) * step);
+    target.DashOffset = static_cast<f32>(left.DashOffset + ((right.DashOffset - left.DashOffset) * step));
 }
 
 void text_element::Transition(text_element& target, text_element const& left, text_element const& right, f64 step)

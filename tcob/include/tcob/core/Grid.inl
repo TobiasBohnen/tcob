@@ -79,7 +79,8 @@ template <typename T>
 inline void grid<T>::append(std::span<T const> values)
 {
     assert(static_cast<dimension_type>(values.size()) == width());
-    _data.append_range(values);
+    _data.insert(_data.end(), values.cbegin(), values.cend());
+    // _data.append_range(values);
     ++_size.Height;
 }
 
