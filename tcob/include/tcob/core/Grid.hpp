@@ -51,7 +51,7 @@ public:
     auto width() const -> dimension_type;
     auto size() const -> size_type;
 
-    auto count() const -> usize;
+    auto count() const -> isize;
     void resize(size_type newSize);
 
     auto data(this auto&& self) -> decltype(auto);

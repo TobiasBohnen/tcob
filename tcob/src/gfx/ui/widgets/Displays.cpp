@@ -90,7 +90,7 @@ void dot_matrix_display::on_update(milliseconds /* deltaTime */)
     i32 const   width {Dots->width()};
     auto const& dots {*Dots};
     _sortedDots.clear();
-    for (usize idx {0}; idx < dots.count(); ++idx) {
+    for (isize idx {0}; idx < dots.count(); ++idx) {
         _sortedDots[dots[idx]].emplace_back(static_cast<i32>(idx % width), static_cast<i32>(idx / width));
     }
 }

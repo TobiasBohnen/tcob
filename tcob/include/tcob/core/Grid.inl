@@ -139,9 +139,9 @@ inline auto grid<T>::size() const -> size_type
 }
 
 template <typename T>
-inline auto grid<T>::count() const -> usize
+inline auto grid<T>::count() const -> isize
 {
-    return _data.size();
+    return std::ssize(_data);
 }
 
 template <typename T>
