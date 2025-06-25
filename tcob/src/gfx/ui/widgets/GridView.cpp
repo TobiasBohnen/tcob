@@ -33,6 +33,32 @@ void grid_view::style::Transition(style& target, style const& left, style const&
 grid_view::grid_view(init const& wi)
     : vscroll_widget {wi}
 {
+    Grid.Changed.connect([this](auto const& val) {
+        _columnSizes.resize(val.width());
+        for (isize y {0}; y < val.height(); ++y) {
+            for (isize x {0}; x < val.width(); ++x) {
+                _columnSizes[y] = std::max(_columnSizes[y], std::ssize(val[x, y].Text));
+            }
+        }
+
+        if ((!val.size().contains({SelectedCellIndex->X, SelectedCellIndex->Y - 1}) && SelectedCellIndex != INVALID)
+            || (!val.size().contains({HoveredCellIndex->X, HoveredCellIndex->Y - 1}) && HoveredCellIndex != INVALID)) {
+            clear_sub_styles();
+            set_scrollbar_value(0);
+            SelectedCellIndex = INVALID;
+            HoveredCellIndex  = INVALID;
+        }
+
+        request_redraw(this->name() + ": Grid changed");
+    });
+    Header.Changed.connect([this](auto const& val) {
+        _columnSizes.resize(val.size());
+        for (usize x {0}; x < _columnSizes.size(); ++x) {
+            _columnSizes[x] = std::ssize(val[x].Text);
+        }
+        request_redraw(this->name() + ": Header changed");
+    });
+
     SelectedCellIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedCell changed"); });
     SelectedCellIndex(INVALID);
     HoveredCellIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredCell changed"); });
@@ -44,102 +70,10 @@ grid_view::grid_view(init const& wi)
     Class("grid_view");
 }
 
-void grid_view::set_columns(std::vector<utf8_string> const& col, bool clearRows)
-{
-    if (clearRows) { clear_rows(); }
-
-    _columnHeaders.clear();
-    for (auto const& c : col) {
-        _columnHeaders.push_back({.Text = c, .Icon = {}, .UserData = {}});
-    }
-
-    _columnSizes.resize(_columnHeaders.size());
-    for (usize x {0}; x < _columnSizes.size(); ++x) {
-        _columnSizes[x] = std::ssize(col[x]);
-    }
-
-    request_redraw(this->name() + ": column headers set");
-}
-
-auto grid_view::column_count() const -> isize
-{
-    return std::ssize(_columnHeaders);
-}
-
-void grid_view::add_row(std::vector<utf8_string> const& row)
-{
-    std::vector<item> newRow {};
-    newRow.resize(_columnHeaders.size());
-
-    auto const size {std::min(row.size(), _columnHeaders.size())};
-    for (usize i {0}; i < size; ++i) { newRow[i].Text = row[i]; }
-
-    add_row(newRow);
-}
-
-void grid_view::add_row(std::span<item const> row)
-{
-    std::vector<item>& newRow {_rows.emplace_back()};
-    newRow.resize(_columnHeaders.size());
-
-    auto const size {std::min(row.size(), _columnHeaders.size())};
-    for (usize i {0}; i < size; ++i) { newRow[i] = row[i]; }
-
-    for (usize i {0}; i < size; ++i) {
-        _columnSizes[i] = std::max(_columnSizes[i], std::ssize(row[i].Text));
-    }
-
-    request_redraw(this->name() + ": row added");
-}
-
-void grid_view::remove_row(isize idx)
-{
-    _rows.erase(_rows.begin() + idx);
-    // TODO: update _columnSizes
-
-    clear_sub_styles();
-
-    set_scrollbar_value(0);
-    SelectedCellIndex = INVALID;
-    HoveredCellIndex  = INVALID;
-
-    request_redraw(this->name() + ": row removed");
-}
-
-void grid_view::clear_rows()
-{
-    _rows.clear();
-    _columnSizes.clear();
-    _columnSizes.resize(_columnHeaders.size());
-    clear_sub_styles();
-
-    set_scrollbar_value(0);
-    SelectedCellIndex = INVALID;
-    HoveredCellIndex  = INVALID;
-
-    request_redraw(this->name() + ": rows cleared");
-}
-
-auto grid_view::row_count() const -> isize
-{
-    return std::ssize(_rows);
-}
-
-auto grid_view::get_cell(point_i idx) -> item&
-{
-    if (idx.Y == 0) { return _columnHeaders.at(idx.X); }
-    return _rows.at(idx.Y - 1).at(idx.X);
-}
-
 auto grid_view::get_cell(point_i idx) const -> item const&
 {
-    if (idx.Y == 0) { return _columnHeaders.at(idx.X); }
-    return _rows.at(idx.Y - 1).at(idx.X);
-}
-
-auto grid_view::get_row(isize idx) const -> std::vector<item> const&
-{
-    return _rows[idx];
+    if (idx.Y == 0) { return Header->at(idx.X); }
+    return Grid[idx.X, idx.Y - 1];
 }
 
 void grid_view::prepare_redraw()
@@ -161,10 +95,13 @@ void grid_view::on_draw(widget_painter& painter)
     rect_f    gridRect {rect};
     f32 const rowHeight {_style.RowHeight.calc(gridRect.height())};
 
-    std::vector<f32> columnWidths(_columnHeaders.size());
-    std::vector<f32> columnOffsets(_columnHeaders.size());
+    usize const size {static_cast<usize>(Grid->width())};
+    if (size == 0) { return; }
 
-    for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
+    std::vector<f32> columnWidths(size);
+    std::vector<f32> columnOffsets(size);
+
+    for (usize x {0}; x < size; ++x) {
         columnWidths[x] = get_column_width(x, gridRect.width());
         if (x > 0) {
             columnOffsets[x] = columnOffsets[x - 1] + columnWidths[x - 1];
@@ -184,11 +121,11 @@ void grid_view::on_draw(widget_painter& painter)
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
             item_style cellStyle {};
-            apply_sub_style(cellStyle, idx.X + (idx.Y * std::ssize(_columnHeaders)), className, cellFlags);
+            apply_sub_style(cellStyle, idx.X + (idx.Y * std::ssize(*Header)), className, cellFlags);
             painter.draw_item(cellStyle.Item, cellRect, item);
             cell = cellRect;
         } else {
-            reset_sub_style(idx.X + (idx.Y * std::ssize(_columnHeaders)), className, cellFlags);
+            reset_sub_style(idx.X + (idx.Y * std::ssize(*Header)), className, cellFlags);
         }
     }};
 
@@ -204,8 +141,8 @@ void grid_view::on_draw(widget_painter& painter)
     // Draw rows
     std::vector<point_i> selectedCells;
     std::vector<point_i> hoveredCells;
-    for (i32 y {0}; y < std::ssize(_rows); ++y) {
-        for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
+    for (i32 y {0}; y < Grid->height(); ++y) {
+        for (i32 x {0}; x < Grid->width(); ++x) {
             point_i const idx {x, y + 1};
             auto const    cellFlags {getCellFlags(idx, SelectMode)};
             // skip selected/hover
@@ -218,31 +155,39 @@ void grid_view::on_draw(widget_painter& painter)
                 continue;
             }
 
-            paintCell(idx, _rows[y][x], _style.RowItemClass, cellFlags, _rowRectCache[idx]);
+            paintCell(idx, Grid[x, y], _style.RowItemClass, cellFlags, _rowRectCache[idx]);
         }
     }
 
     for (auto const& idx : selectedCells) {
-        paintCell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Active = true}, _rowRectCache[idx]);
+        paintCell(idx, Grid[idx.X, idx.Y - 1], _style.RowItemClass, {.Active = true}, _rowRectCache[idx]);
     }
     for (auto const& idx : hoveredCells) {
-        paintCell(idx, _rows[idx.Y - 1][idx.X], _style.RowItemClass, {.Hover = true}, _rowRectCache[idx]);
+        paintCell(idx, Grid[idx.X, idx.Y - 1], _style.RowItemClass, {.Hover = true}, _rowRectCache[idx]);
     }
 
     // Draw headers
-    for (i32 x {0}; x < std::ssize(_columnHeaders); ++x) {
+    for (i32 x {0}; x < std::ssize(*Header); ++x) {
         point_i const idx {x, 0};
-        paintCell(idx, _columnHeaders[x], _style.HeaderItemClass, getCellFlags(idx, SelectMode), _headerRectCache[idx]);
+        paintCell(idx, Header[x], _style.HeaderItemClass, getCellFlags(idx, SelectMode), _headerRectCache[idx]);
     }
 }
 
 void grid_view::on_animation_step(string const& val)
 {
     if (SelectedCellIndex != INVALID) {
-        auto& cell {_rows[SelectedCellIndex->Y - 1][SelectedCellIndex->X]};
-        cell.Icon.Region = val;
-        if (cell.Icon.Texture) {
-            request_redraw(this->name() + ": Animation Frame changed ");
+        if (SelectedCellIndex->Y == 0) {
+            Header.mutate([&](auto& header) {
+                auto& cell {header[SelectedCellIndex->X]};
+                cell.Icon.Region = val;
+            });
+        } else {
+            Grid.mutate([&](auto& grid) {
+                auto& cell {grid[SelectedCellIndex->X, SelectedCellIndex->Y - 1]};
+                cell.Icon.Region = val;
+                request_redraw(this->name() + ": Animation Frame changed ");
+                return false; // don't invoke Grid.Changed
+            });
         }
     }
 }
@@ -312,22 +257,22 @@ auto grid_view::attributes() const -> widget_attributes
     return retValue;
 }
 
-auto grid_view::get_column_width(i32 col, f32 width) const -> f32
+auto grid_view::get_column_width(usize col, f32 width) const -> f32
 {
     if (_style.AutoSizeColumns) {
         auto const sum {std::reduce(_columnSizes.begin(), _columnSizes.end())};
         return width * (static_cast<f32>(_columnSizes[col]) / static_cast<f32>(sum));
     }
 
-    return width / static_cast<f32>(_columnHeaders.size());
+    return width / static_cast<f32>(Header->size());
 }
 
 auto grid_view::get_scroll_content_height() const -> f32
 {
-    if (_columnHeaders.empty()) { return 0; }
+    if (Header->empty()) { return 0; }
 
     f32 const itemHeight {_style.RowHeight.calc(content_bounds().height())};
-    return itemHeight * static_cast<f32>(_rows.size() + 1);
+    return itemHeight * static_cast<f32>(Grid->height() + 1);
 }
 
 auto grid_view::get_scroll_distance() const -> f32

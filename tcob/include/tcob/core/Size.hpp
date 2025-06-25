@@ -32,7 +32,7 @@ public:
 
     auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
 
-    template <Arithmetic U>
+    template <Arithmetic U = T>
     auto constexpr contains(point<U> const& point) const -> bool;
 
     auto constexpr equals(size<T> const& other, f32 tol) const -> bool;

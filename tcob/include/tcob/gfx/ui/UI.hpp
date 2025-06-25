@@ -309,18 +309,27 @@ using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradi
 
 ////////////////////////////////////////////////////////////
 
-struct icon {
+class TCOB_API icon {
+public:
     assets::asset_ptr<gfx::texture> Texture;
     string                          Region {"default"};
     color                           Color {colors::White};
+
+    auto operator==(icon const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
 
-struct item {
+class TCOB_API item {
+public:
     utf8_string Text;
-    icon        Icon;
-    std::any    UserData;
+    icon        Icon {};
+    std::any    UserData {};
+
+    auto operator==(item const& other) const -> bool
+    {
+        return Text == other.Text && Icon == other.Icon; // FIXME
+    }
 };
 
 ////////////////////////////////////////////////////////////

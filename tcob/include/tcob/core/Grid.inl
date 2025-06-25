@@ -6,7 +6,10 @@
 #pragma once
 #include "Grid.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <initializer_list>
+#include <span>
 
 namespace tcob {
 
@@ -37,9 +40,64 @@ inline auto grid<T>::operator[](this auto&& self, point_type pos) -> decltype(au
 }
 
 template <typename T>
+inline auto grid<T>::row(this auto&& self, isize row) -> decltype(auto)
+{
+    assert(row >= 0 && row < self._size.Height);
+    auto const w {self.width()};
+    auto const start {row * w};
+    return std::span {self._data.data() + start, static_cast<usize>(w)};
+}
+
+template <typename T>
 inline void grid<T>::fill(T const& value)
 {
     std::fill(_data.begin(), _data.end(), value);
+}
+
+template <typename T>
+inline void grid<T>::assign(point_type pos, std::initializer_list<T> values)
+{
+    assign(pos, std::span<T const>(values));
+}
+
+template <typename T>
+inline void grid<T>::assign(point_type pos, std::span<T const> values)
+{
+    auto const start {get_index(pos.X, pos.Y)};
+    std::ranges::copy(values, _data.begin() + start);
+}
+
+template <typename T>
+inline void grid<T>::append(std::initializer_list<T> values)
+{
+    append(std::span<T const>(values));
+}
+
+template <typename T>
+inline void grid<T>::append(std::span<T const> values)
+{
+    assert(static_cast<dimension_type>(values.size()) == width());
+    _data.append_range(values);
+    ++_size.Height;
+}
+
+template <typename T>
+inline void grid<T>::erase(isize row)
+{
+    assert(row >= 0 && row < _size.Height);
+
+    auto const w {width()};
+    auto const start {row * w};
+    auto const end {start + w};
+    _data.erase(_data.begin() + start, _data.begin() + end);
+    --_size.Height;
+}
+
+template <typename T>
+inline void grid<T>::clear()
+{
+    _data.clear();
+    _size = size_type::Zero;
 }
 
 template <typename T>
@@ -76,12 +134,6 @@ template <typename T>
 inline auto grid<T>::size() const -> size_type
 {
     return _size;
-}
-
-template <typename T>
-inline auto grid<T>::contains(point_type pos) const -> bool
-{
-    return _size.contains(pos);
 }
 
 template <typename T>
@@ -178,12 +230,6 @@ template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::size() const -> size_type
 {
     return {Width, Height};
-}
-
-template <typename T, usize Width, usize Height>
-inline auto static_grid<T, Width, Height>::contains(point_type pos) const -> bool
-{
-    return size().contains(pos);
 }
 
 template <typename T, usize Width, usize Height>

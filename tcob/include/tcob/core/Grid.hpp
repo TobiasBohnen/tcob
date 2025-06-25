@@ -2,6 +2,8 @@
 #include "tcob/tcob_config.hpp"
 
 #include <array>
+#include <initializer_list>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -29,7 +31,18 @@ public:
     auto operator[](this auto&& self, isize x, isize y) -> decltype(auto);
     auto operator[](this auto&& self, point_type pos) -> decltype(auto);
 
+    auto row(this auto&& self, isize row) -> decltype(auto);
+
     void fill(T const& value);
+
+    void assign(point_type pos, std::initializer_list<T> values);
+    void assign(point_type pos, std::span<T const> values);
+
+    void append(std::initializer_list<T> values);
+    void append(std::span<T const> values);
+
+    void erase(isize row);
+    void clear();
 
     auto begin(this auto&& self) -> decltype(auto);
     auto end(this auto&& self) -> decltype(auto);
@@ -37,7 +50,6 @@ public:
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
     auto size() const -> size_type;
-    auto contains(point_type pos) const -> bool;
 
     auto count() const -> usize;
     void resize(size_type newSize);
@@ -82,7 +94,6 @@ public:
     auto height() const -> dimension_type;
     auto width() const -> dimension_type;
     auto size() const -> size_type;
-    auto contains(point_type pos) const -> bool;
 
     auto count() const -> usize;
     auto data(this auto&& self) -> decltype(auto);

@@ -6,10 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <span>
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Grid.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
@@ -22,7 +22,6 @@ namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 // TODO: horizontal scrolling
-// TODO: datasource
 // TODO: sort by column
 class TCOB_API grid_view : public vscroll_widget {
 public:
@@ -44,23 +43,15 @@ public:
 
     explicit grid_view(init const& wi);
 
+    prop<std::vector<item>> Header;
+    prop<grid<item>>        Grid;
+
     prop<point_i>     SelectedCellIndex; // TODO: change to prop_val
     prop<point_i>     HoveredCellIndex;  // TODO: change to prop_val
     prop<select_mode> SelectMode;
     prop<bool>        HeaderSelectable;
 
-    void set_columns(std::vector<utf8_string> const& col, bool clearRows = true);
-    auto column_count() const -> isize;
-
-    void add_row(std::vector<utf8_string> const& row);
-    void add_row(std::span<item const> row);
-    void remove_row(isize idx);
-    void clear_rows();
-    auto row_count() const -> isize;
-
-    auto get_cell(point_i idx) -> item&;
     auto get_cell(point_i idx) const -> item const&;
-    auto get_row(isize idx) const -> std::vector<item> const&;
 
     void prepare_redraw() override;
 
@@ -79,11 +70,9 @@ protected:
     auto get_scroll_distance() const -> f32 override;
 
 private:
-    auto get_column_width(i32 col, f32 width) const -> f32;
+    auto get_column_width(usize col, f32 width) const -> f32;
 
-    std::vector<item>              _columnHeaders;
-    std::vector<isize>             _columnSizes;
-    std::vector<std::vector<item>> _rows;
+    std::vector<isize> _columnSizes;
 
     std::unordered_map<point_i, rect_f> _headerRectCache;
     std::unordered_map<point_i, rect_f> _rowRectCache;
