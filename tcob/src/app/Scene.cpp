@@ -162,9 +162,9 @@ auto scene_node::child_count() const -> isize
     return std::ssize(_children);
 }
 
-auto scene_node::get_child_at(usize index) const -> std::shared_ptr<scene_node>
+auto scene_node::get_child_at(isize index) const -> std::shared_ptr<scene_node>
 {
-    return _children.at(index);
+    return _children.at(static_cast<usize>(index));
 }
 
 void scene_node::clear_children()

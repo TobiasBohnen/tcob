@@ -91,9 +91,9 @@ auto shape_batch::is_empty() const -> bool
     return _children.empty();
 }
 
-auto shape_batch::get_shape_at(usize index) const -> std::shared_ptr<shape>
+auto shape_batch::get_shape_at(isize index) const -> std::shared_ptr<shape>
 {
-    return _children.at(index);
+    return _children.at(static_cast<usize>(index));
 }
 
 auto shape_batch::intersect(ray const& ray, u32 mask) -> std::unordered_map<shape*, std::vector<ray::result>>

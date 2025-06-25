@@ -56,6 +56,8 @@ public:
 
     auto data(this auto&& self) -> decltype(auto);
 
+    auto operator==(grid const& other) const -> bool = default;
+
 private:
     auto get_index(isize x, isize y) const -> isize;
 
@@ -97,6 +99,8 @@ public:
 
     auto count() const -> usize;
     auto data(this auto&& self) -> decltype(auto);
+
+    auto operator==(static_grid const& other) const -> bool = default;
 
 private:
     auto get_index(isize x, isize y) const -> isize;

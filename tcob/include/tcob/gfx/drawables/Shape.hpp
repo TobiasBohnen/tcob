@@ -202,7 +202,7 @@ public:
     auto shape_count() const -> isize;
     auto is_empty() const -> bool;
 
-    auto get_shape_at(usize index) const -> std::shared_ptr<shape>;
+    auto get_shape_at(isize index) const -> std::shared_ptr<shape>;
 
     auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) -> std::unordered_map<shape*, std::vector<ray::result>>;
 

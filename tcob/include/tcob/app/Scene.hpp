@@ -35,7 +35,7 @@ public:
 
     auto create_child() -> std::shared_ptr<scene_node>;
     auto child_count() const -> isize;
-    auto get_child_at(usize index) const -> std::shared_ptr<scene_node>;
+    auto get_child_at(isize index) const -> std::shared_ptr<scene_node>;
     void clear_children();
 
     void bring_to_front();

@@ -151,8 +151,9 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
         return true;
     }
 
+    entry entry;
     switch (type) {
-    case bsbd::marker_type::Int8:         arr.add_entry(entry {stream.read<i8>()}); break;
+    case bsbd::marker_type::Int8:         entry = stream.read<i8>(); break;
     case bsbd::marker_type::Int16:        arr.add_entry(entry {stream.read<i16, std::endian::little>()}); break;
     case bsbd::marker_type::Int32:        arr.add_entry(entry {stream.read<i32, std::endian::little>()}); break;
     case bsbd::marker_type::UInt8:        arr.add_entry(entry {stream.read<u8>()}); break;

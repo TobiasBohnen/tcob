@@ -63,7 +63,9 @@ inline void grid<T>::assign(point_type pos, std::initializer_list<T> values)
 template <typename T>
 inline void grid<T>::assign(point_type pos, std::span<T const> values)
 {
+    assert(_size.contains(pos));
     auto const start {get_index(pos.X, pos.Y)};
+    assert(start + std::ssize(values) <= std::ssize(_data));
     std::ranges::copy(values, _data.begin() + start);
 }
 
