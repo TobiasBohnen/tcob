@@ -419,8 +419,10 @@ void range_slider::on_mouse_leave()
 
 void range_slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
+    auto const mp {global_to_parent(*this, ev.Position)};
+
     auto const hover {[&](thumb& thumb) {
-        bool const overThumb {thumb.Rect.contains(global_to_parent(*this, ev.Position))};
+        bool const overThumb {thumb.Rect.contains(mp)};
         if (overThumb != thumb.Over) {
             thumb.Over = overThumb;
             return true;
@@ -433,9 +435,11 @@ void range_slider::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void range_slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
+    auto const mp {global_to_content(*this, ev.Position)};
+
     auto const drag {[&](thumb& thumb) {
         if (thumb.IsDragging || thumb.Over) {
-            calculate_value(thumb, global_to_content(*this, ev.Position));
+            calculate_value(thumb, mp);
             thumb.IsDragging = true;
             return true;
         }
@@ -463,10 +467,26 @@ void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
     ev.Handled = buttonUp(_min) || buttonUp(_max);
 }
 
-void range_slider::on_mouse_button_down(input::mouse::button_event const& /* ev */)
+void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
 {
+    auto const mp {global_to_parent(*this, ev.Position)};
+
     _min.IsDragging = false;
     _max.IsDragging = false;
+
+    if (ev.Button == controls().PrimaryMouseButton) {
+        if (_min.Over) {
+            _dragOffset     = point_i {mp - _min.Rect.center()};
+            _min.IsDragging = true;
+        } else if (_max.Over) {
+            _dragOffset     = point_i {mp - _max.Rect.center()};
+            _max.IsDragging = true;
+        } else {
+            // calculate_value(global_to_content(*this, ev.Position));
+        }
+
+        ev.Handled = true;
+    }
 }
 
 void range_slider::on_update(milliseconds deltaTime)
