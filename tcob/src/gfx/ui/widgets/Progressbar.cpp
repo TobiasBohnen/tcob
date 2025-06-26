@@ -62,10 +62,9 @@ void progress_bar::on_draw(widget_painter& painter)
         _style.Bar,
         rect,
         {.Orientation = get_orientation(),
-         .Inverted    = false,
          .Position    = bar_element::position::CenterOrMiddle,
          .BlockCount  = numBlocks,
-         .Fraction    = _tween.current_value()});
+         .Stops       = {0.0f, _tween.current_value(), 1.0f}});
 }
 
 void progress_bar::on_update(milliseconds deltaTime)

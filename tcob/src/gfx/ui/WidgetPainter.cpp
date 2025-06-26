@@ -444,51 +444,34 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
 auto widget_painter::draw_bar(bar_element const& style, rect_f const& rect, bar_element::context const& barCtx) -> rect_f
 {
     rect_f retValue {style.calc(rect, barCtx.Orientation, barCtx.Position)};
-    rect_f lowRect {retValue};
 
-    if (style.Type == bar_type::Continuous) {
-        // Higher
+    if (style.HigherBackground == style.LowerBackground || barCtx.Stops.size() < 3) {
         draw_bordered_rect(retValue, style.HigherBackground, style.Border);
-        if (style.HigherBackground != style.LowerBackground) {
-            // Lower
-            switch (barCtx.Orientation) {
-            case orientation::Horizontal:
-                lowRect.Size.Width *= (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction);
-                break;
-            case orientation::Vertical:
-                lowRect.Size.Height *= (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction);
-                lowRect.Position.Y += retValue.height() - lowRect.height();
-                break;
-            }
-            if (lowRect.height() > 0 && lowRect.width() > 0) {
-                draw_bordered_rect(lowRect, style.LowerBackground, style.Border);
-            }
-        }
-    } else if (style.Type == bar_type::Blocks) {
-        for (i32 i {0}; i < barCtx.BlockCount; ++i) {
-            rect_f   blockRect {retValue};
-            ui_paint back;
+        return retValue;
+    }
 
-            f32 const frac {static_cast<f32>(i) / static_cast<f32>(barCtx.BlockCount)};
-            switch (barCtx.Orientation) {
-            case orientation::Horizontal:
-                blockRect.Size.Width /= static_cast<f32>(barCtx.BlockCount);
-                blockRect.Position.X += blockRect.width() * static_cast<f32>(i);
-                back = frac < (barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction)
-                    ? style.LowerBackground
-                    : style.HigherBackground;
-                break;
-            case orientation::Vertical:
-                blockRect.Size.Height /= static_cast<f32>(barCtx.BlockCount);
-                blockRect.Position.Y += blockRect.height() * static_cast<f32>(i);
-                back = frac < (!barCtx.Inverted ? 1.0f - barCtx.Fraction : barCtx.Fraction)
-                    ? style.HigherBackground
-                    : style.LowerBackground;
-                break;
-            }
+    bool low {true};
+    for (usize i {0}; i < barCtx.Stops.size() - 1; ++i) {
+        f32 const start {barCtx.Stops[i]};
+        f32 const end {barCtx.Stops[i + 1]};
+        f32 const size {end - start};
 
-            draw_bordered_rect(blockRect, back, style.Border);
+        rect_f segRect {retValue};
+        switch (barCtx.Orientation) {
+        case orientation::Horizontal:
+            segRect.Position.X += retValue.width() * start;
+            segRect.Size.Width *= size;
+            break;
+        case orientation::Vertical:
+            segRect.Position.Y += retValue.height() * (1 - end);
+            segRect.Size.Height *= size;
+            break;
         }
+        if (segRect.height() > 0 && segRect.width() > 0) {
+            draw_bordered_rect(segRect, low ? style.LowerBackground : style.HigherBackground, style.Border);
+        }
+
+        low = !low;
     }
 
     return retValue;

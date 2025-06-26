@@ -4,7 +4,10 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+#include "tcob/core/Rect.hpp"
 #include "tcob/tcob_config.hpp"
+
+#include <utility>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
@@ -53,7 +56,7 @@ protected:
 
     void on_update(milliseconds deltaTime) override;
 
-    void virtual on_value_changed(i32 newVal);
+    void on_value_changed(i32 newVal);
 
     auto attributes() const -> widget_attributes override;
 
@@ -71,4 +74,54 @@ private:
 
     slider::style _style;
 };
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API range_slider : public widget {
+public:
+    class TCOB_API style : public slider::style {
+    };
+
+    explicit range_slider(init const& wi);
+
+    prop_val<i32>                 Min;
+    prop_val<i32>                 Max;
+    prop<i32>                     Step;
+    prop_val<std::pair<i32, i32>> Values;
+
+    bool IncrementalChange {false};
+
+protected:
+    void on_draw(widget_painter& painter) override;
+
+    void on_mouse_leave() override;
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
+    void on_mouse_drag(input::mouse::motion_event const& ev) override;
+    void on_mouse_button_up(input::mouse::button_event const& ev) override;
+    void on_mouse_button_down(input::mouse::button_event const& ev) override;
+
+    void on_update(milliseconds deltaTime) override;
+
+    void on_value_changed(std::pair<i32, i32> newVal);
+
+    auto attributes() const -> widget_attributes override;
+
+private:
+    struct thumb {
+        bool           Over {false};
+        bool           IsDragging {false};
+        rect_f         Rect;
+        widget_tweener Tween;
+    };
+
+    void calculate_value(thumb& thumb, point_f mp);
+
+    thumb   _min;
+    thumb   _max;
+    point_i _dragOffset {point_i::Zero};
+    rect_f  _barRectCache {};
+
+    range_slider::style _style;
+};
+
 }

@@ -33,18 +33,15 @@ void scrollbar::draw(widget_painter& painter, scrollbar_element const& scrollbar
     if (!Visible) { return; }
 
     i32 const numBlocks {10};
-    f32 const frac {current_value()};
 
     bar_element::context const barCtx {
         .Orientation = _orien,
-        .Inverted    = _orien == orientation::Vertical,
         .Position    = bar_element::position::RightOrBottom,
         .BlockCount  = numBlocks,
-        .Fraction    = frac};
+        .Stops       = {0.0f, _orien == orientation::Vertical ? 1.0f - current_value() : current_value(), 1.0f}};
     thumb_element::context const thumbCtx {
-        .Orientation = barCtx.Orientation,
-        .Inverted    = barCtx.Inverted,
-        .Fraction    = barCtx.Fraction};
+        .Orientation      = barCtx.Orientation,
+        .RelativePosition = current_value()};
 
     rect_f const scrRect {rect};
     _barRectCache.Bar   = painter.draw_bar(scrollbar.Bar, scrRect, barCtx);

@@ -42,6 +42,7 @@ class label;
 class list_box;
 class progress_bar;
 class radio_button;
+class range_slider;
 class slider;
 class spinner;
 class terminal;
@@ -54,7 +55,6 @@ class toggle;
 // class menu;
 // class context_menu;
 // class radial_menu
-// class range_slider;
 
 // displays
 class dot_matrix_display;

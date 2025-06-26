@@ -37,13 +37,13 @@ auto thumb_element::calc(rect_f const& rect, context const& ctx) const -> rect_f
     case orientation::Horizontal:
         retValue.Size.Width  = LongSide.calc(rect.width());
         retValue.Size.Height = ShortSide.calc(rect.height());
-        retValue.Position.X += (rect.width() - retValue.width()) * (ctx.Inverted ? (1.0f - ctx.Fraction) : ctx.Fraction);
+        retValue.Position.X += (rect.width() - retValue.width()) * ctx.RelativePosition;
         retValue.Position.Y += (rect.height() - retValue.height()) / 2.0f;
         break;
     case orientation::Vertical:
         retValue.Size.Height = LongSide.calc(rect.height());
         retValue.Size.Width  = ShortSide.calc(rect.width());
-        retValue.Position.Y += (rect.height() - retValue.height()) * (!ctx.Inverted ? (1.0f - ctx.Fraction) : ctx.Fraction);
+        retValue.Position.Y += (rect.height() - retValue.height()) * ctx.RelativePosition;
         retValue.Position.X += (rect.width() - retValue.width()) / 2.0f;
     }
 
@@ -72,26 +72,18 @@ auto bar_element::calc(rect_f const& rect, orientation orien, position align) co
         retValue.Size.Height = Size.calc(rect.height());
 
         switch (align) {
-        case position::RightOrBottom:
-            retValue.Position.Y += rect.height() - retValue.height();
-            break;
-        case position::CenterOrMiddle:
-            retValue.Position.Y += (rect.height() - retValue.height()) / 2.0f;
-            break;
-        default: break;
+        case position::RightOrBottom:  retValue.Position.Y += rect.height() - retValue.height(); break;
+        case position::CenterOrMiddle: retValue.Position.Y += (rect.height() - retValue.height()) / 2.0f; break;
+        default:                       break;
         }
         break;
     case orientation::Vertical:
         retValue.Size.Width = Size.calc(rect.width());
 
         switch (align) {
-        case position::RightOrBottom:
-            retValue.Position.X += rect.width() - retValue.width();
-            break;
-        case position::CenterOrMiddle:
-            retValue.Position.X += (rect.width() - retValue.width()) / 2.0f;
-            break;
-        default: break;
+        case position::RightOrBottom:  retValue.Position.X += rect.width() - retValue.width(); break;
+        case position::CenterOrMiddle: retValue.Position.X += (rect.width() - retValue.width()) / 2.0f; break;
+        default:                       break;
         }
         break;
     }

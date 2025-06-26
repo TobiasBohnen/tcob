@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <utility>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
@@ -41,13 +42,11 @@ slider::slider(init const& wi)
     });
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, *Value);
-        on_value_changed(*Value);
         request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
         Value = std::min(val, *Value);
-        on_value_changed(*Value);
         request_redraw(this->name() + ": Max changed");
     });
     Max(100);
@@ -77,10 +76,9 @@ void slider::on_draw(widget_painter& painter)
         _style.Bar,
         rect,
         {.Orientation = orien,
-         .Inverted    = false,
          .Position    = pos,
          .BlockCount  = numBlocks,
-         .Fraction    = _tween.current_value()});
+         .Stops       = {0.0f, _tween.current_value(), 1.0f}});
 
     // thumb
     auto const  thumbFlags {!_overThumb          ? widget_flags {}
@@ -92,7 +90,8 @@ void slider::on_draw(widget_painter& painter)
     _barRectCache.Thumb = painter.draw_thumb(
         thumbStyle.Thumb,
         rect,
-        {.Orientation = orien, .Inverted = false, .Fraction = _tween.current_value()});
+        {.Orientation      = orien,
+         .RelativePosition = orien == orientation::Vertical ? 1.0f - _tween.current_value() : _tween.current_value()});
 
     if (orien == orientation::Vertical) {
         _barRectCache.Thumb.Size.Width -= thumbStyle.Thumb.Border.Size.calc(_barRectCache.Thumb.width());
@@ -281,6 +280,221 @@ void slider::handle_dir_input(direction dir)
             break;
         }
         break;
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+range_slider::range_slider(init const& wi)
+    : widget {wi}
+    , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
+    , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
+    , Values {{[this](std::pair<i32, i32> val) -> std::pair<i32, i32> {
+        if (IncrementalChange && std::abs(Values->first - val.first) > Step && std::abs(Values->second - val.second) > Step) { return *Values; }
+        i32 const first {std::clamp(val.first, *Min, *Max)};
+        i32 const second {std::clamp(val.second, *Min, *Max)};
+        return {std::min(first, second), std::max(first, second)};
+    }}}
+{
+    _min.Tween.Changed.connect([this]() {
+        request_redraw(this->name() + ": Tween value changed");
+    });
+    _max.Tween.Changed.connect([this]() {
+        request_redraw(this->name() + ": Tween value changed");
+    });
+    Min.Changed.connect([this](auto val) {
+        Values = {std::max(val, Values->first), std::max(val, Values->second)};
+        request_redraw(this->name() + ": Min changed");
+    });
+    Min(0);
+    Max.Changed.connect([this](auto val) {
+        Values = {std::min(val, Values->first), std::min(val, Values->second)};
+        request_redraw(this->name() + ": Max changed");
+    });
+    Max(100);
+
+    Step.Changed.connect([this](auto) { request_redraw(this->name() + ": Step changed"); });
+    Step(1);
+    Values.Changed.connect([this](auto val) { on_value_changed(val); });
+    Values({*Min, *Min});
+
+    Class("range_slider");
+}
+
+void range_slider::on_draw(widget_painter& painter)
+{
+    // TODO: draw background
+    apply_style(_style);
+
+    rect_f const rect {content_bounds()};
+
+    scissor_guard const guard {painter, this};
+
+    i32 const  numBlocks {10};
+    auto const orien {get_orientation()};
+    auto const pos {bar_element::position::CenterOrMiddle};
+
+    // bar
+    _barRectCache = painter.draw_bar(
+        _style.Bar,
+        rect,
+        {.Orientation = orien,
+         .Position    = pos,
+         .BlockCount  = numBlocks,
+         .Stops       = {0.0f, _min.Tween.current_value(), _max.Tween.current_value(), 1.0f}});
+
+    // thumb
+    thumb_style thumbStyle {};
+
+    auto const drawThumb {[&](thumb& thumb, i32 idx) {
+        auto const thumbFlags {!thumb.Over          ? widget_flags {}
+                                   : flags().Active ? widget_flags {.Active = true}
+                                                    : widget_flags {.Hover = true}};
+        apply_sub_style(thumbStyle, idx, _style.ThumbClass, thumbFlags);
+
+        thumb.Rect = painter.draw_thumb(
+            thumbStyle.Thumb,
+            rect,
+            {.Orientation = orien, .RelativePosition = thumb.Tween.current_value()});
+    }};
+
+    if (_min.Over) {
+        drawThumb(_max, 1);
+        drawThumb(_min, 0);
+    } else {
+        drawThumb(_min, 0);
+        drawThumb(_max, 1);
+    }
+
+    if (orien == orientation::Vertical) {
+        _min.Rect.Size.Width -= thumbStyle.Thumb.Border.Size.calc(_min.Rect.width());
+        _max.Rect.Size.Width -= thumbStyle.Thumb.Border.Size.calc(_max.Rect.width());
+    } else if (orien == orientation::Horizontal) {
+        _min.Rect.Size.Height -= thumbStyle.Thumb.Border.Size.calc(_min.Rect.height());
+        _max.Rect.Size.Height -= thumbStyle.Thumb.Border.Size.calc(_max.Rect.height());
+    }
+}
+
+void range_slider::on_mouse_leave()
+{
+    if (_min.Over || _max.Over) {
+        _min.Over = false;
+        _max.Over = false;
+        request_redraw(this->name() + ": mouse left");
+    }
+}
+
+void range_slider::on_mouse_hover(input::mouse::motion_event const& ev)
+{
+    auto const hover {[&](thumb& thumb) {
+        bool const overThumb {thumb.Rect.contains(global_to_parent(*this, ev.Position))};
+        if (overThumb != thumb.Over) {
+            thumb.Over = overThumb;
+            return true;
+        }
+        return false;
+    }};
+
+    ev.Handled = hover(_min) || hover(_max);
+}
+
+void range_slider::on_mouse_drag(input::mouse::motion_event const& ev)
+{
+    auto const drag {[&](thumb& thumb) {
+        if (thumb.IsDragging || thumb.Over) {
+            calculate_value(thumb, global_to_content(*this, ev.Position));
+            thumb.IsDragging = true;
+            return true;
+        }
+        return false;
+    }};
+
+    ev.Handled = drag(_min) || drag(_max);
+}
+
+void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
+{
+    _dragOffset = point_i::Zero;
+
+    _min.IsDragging = false;
+    _max.IsDragging = false;
+
+    auto const buttonUp {[&](thumb& thumb) {
+        if (thumb.Over && !hit_test(point_f {ev.Position})) {
+            thumb.Over = false;
+            return true;
+        }
+        return false;
+    }};
+
+    ev.Handled = buttonUp(_min) || buttonUp(_max);
+}
+
+void range_slider::on_mouse_button_down(input::mouse::button_event const& /* ev */)
+{
+    _min.IsDragging = false;
+    _max.IsDragging = false;
+}
+
+void range_slider::on_update(milliseconds deltaTime)
+{
+    _min.Tween.update(deltaTime);
+    _max.Tween.update(deltaTime);
+}
+
+void range_slider::on_value_changed(std::pair<i32, i32> newVal)
+{
+    auto const value {[&](thumb& thumb, f32 val) {
+        f32 const newFrac0 {Max != Min ? static_cast<f32>(val - *Min) / static_cast<f32>(*Max - *Min) : 0.f};
+        if (thumb.IsDragging) {
+            thumb.Tween.reset(newFrac0);
+        } else {
+            thumb.Tween.start(newFrac0, _style.Bar.MotionDuration);
+        }
+    }};
+
+    value(_min, newVal.first);
+    value(_max, newVal.second);
+}
+
+auto range_slider::attributes() const -> widget_attributes
+{
+    auto retValue {widget::attributes()};
+
+    retValue["min"]       = *Min;
+    retValue["max"]       = *Max;
+    retValue["min_value"] = Values->first;
+    retValue["max_value"] = Values->second;
+    retValue["step"]      = *Step;
+
+    return retValue;
+}
+
+void range_slider::calculate_value(thumb& thumb, point_f mp)
+{
+    rect_f const rect {_barRectCache};
+    f32          frac {0.0f};
+
+    switch (get_orientation()) {
+    case orientation::Horizontal: {
+        f32 const tw {thumb.Rect.width()};
+        frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / (rect.width() - tw);
+    } break;
+    case orientation::Vertical: {
+        f32 const th {thumb.Rect.height()};
+        frac = 1.0f - ((mp.Y - static_cast<f32>(_dragOffset.Y) - (th / 2)) / (rect.height() - th));
+    } break;
+    }
+
+    i32 const val {static_cast<i32>(*Min + ((*Max - *Min + 1) * frac))};
+    if (&thumb == &_min) {
+        Values = {helper::round_to_multiple(val, *Step), Values->second};
+    } else {
+        Values = {Values->first, helper::round_to_multiple(val, *Step)};
+    }
+    if (!thumb.Over) {
+        thumb.Over = true;
+        request_redraw(this->name() + ": thumb move after value change");
     }
 }
 

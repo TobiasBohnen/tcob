@@ -74,13 +74,6 @@ enum class tick_type : u8 {
 
 ////////////////////////////////////////////////////////////
 
-enum class bar_type : u8 {
-    Continuous,
-    Blocks
-};
-
-////////////////////////////////////////////////////////////
-
 enum class nav_arrow_type : u8 {
     Triangle
 };
@@ -181,8 +174,7 @@ class TCOB_API thumb_element {
 public:
     struct context {
         orientation Orientation {orientation::Horizontal};
-        bool        Inverted {false};
-        f32         Fraction {0.0f};
+        f32         RelativePosition {0.0f};
     };
 
     thumb_type     Type {thumb_type::Rect};
@@ -223,13 +215,12 @@ public:
 
     struct context {
         orientation Orientation {orientation::Horizontal};
-        bool        Inverted {false};
         position    Position {position::CenterOrMiddle};
         i32         BlockCount {0};
-        f32         Fraction {0};
+
+        std::vector<f32> Stops;
     };
 
-    bar_type       Type {bar_type::Continuous};
     ui_paint       LowerBackground {colors::White};
     ui_paint       HigherBackground {colors::White};
     length         Size {1, length::type::Relative};
