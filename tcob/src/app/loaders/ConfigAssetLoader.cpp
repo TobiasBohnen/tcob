@@ -421,7 +421,7 @@ void cfg_font_loader::declare()
 void cfg_font_loader::prepare()
 {
     for (auto& def : _cache) {
-        if (auto* ttf {dynamic_cast<font*>(def->assetPtr.ptr())}) {
+        if (auto* ttf {def->assetPtr.ptr()}) {
             if (ttf->load(group().mount_point() + def->source, def->size) == load_status::Ok) {
                 set_asset_status(def->assetPtr, asset_status::Loaded);
             } else {
