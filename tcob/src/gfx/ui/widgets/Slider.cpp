@@ -6,7 +6,6 @@
 #include "tcob/gfx/ui/widgets/Slider.hpp"
 
 #include <algorithm>
-#include <cstdlib>
 #include <utility>
 
 #include "tcob/core/Common.hpp"
@@ -32,10 +31,7 @@ slider::slider(init const& wi)
     : widget {wi}
     , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
     , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
-    , Value {{[this](i32 val) -> i32 {
-        if (IncrementalChange && std::abs(*Value - val) > Step) { return *Value; }
-        return std::clamp(val, *Min, *Max);
-    }}}
+    , Value {{[this](i32 val) -> i32 { return std::clamp(val, *Min, *Max); }}}
 {
     _tween.Changed.connect([this]() {
         request_redraw(this->name() + ": Tween value changed");
@@ -289,11 +285,18 @@ range_slider::range_slider(init const& wi)
     : widget {wi}
     , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
     , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
+    , MinRange {{[this](i32 val) -> i32 { return std::min(val, *MaxRange); }}}
+    , MaxRange {{[this](i32 val) -> i32 { return std::max(val, *MinRange); }}}
     , Values {{[this](std::pair<i32, i32> val) -> std::pair<i32, i32> {
-        if (IncrementalChange && std::abs(Values->first - val.first) > Step && std::abs(Values->second - val.second) > Step) { return *Values; }
-        i32 const first {std::clamp(val.first, *Min, *Max)};
-        i32 const second {std::clamp(val.second, *Min, *Max)};
-        return {std::min(first, second), std::max(first, second)};
+        i32 first {std::clamp(val.first, *Min, *Max)};
+        i32 second {std::clamp(val.second, *Min, *Max)};
+        if (first > second) { std::swap(first, second); }
+
+        i32 range {second - first};
+        if (range < *MinRange) { return *Values; }
+        if (range > *MaxRange) { return *Values; }
+
+        return {first, second};
     }}}
 {
     _min.Tween.Changed.connect([this]() {
@@ -312,6 +315,35 @@ range_slider::range_slider(init const& wi)
         request_redraw(this->name() + ": Max changed");
     });
     Max(100);
+
+    MinRange.Changed.connect([this](auto) {
+        auto [first, second] {*Values};
+        i32 const range {second - first};
+
+        if (range < *MinRange) {
+            if (second + (*MinRange - range) <= *Max) {
+                second += (*MinRange - range);
+            } else {
+                first = second - *MinRange;
+            }
+        }
+
+        Values = {first, second};
+        request_redraw(this->name() + ": MinRange changed");
+    });
+    MinRange(0);
+    MaxRange.Changed.connect([this](auto) {
+        auto [first, second] {*Values};
+        i32 const range {second - first};
+
+        if (range > *MaxRange) {
+            second = std::min(second, first + *MaxRange);
+        }
+
+        Values = {first, second};
+        request_redraw(this->name() + ": MaxRange changed");
+    });
+    MaxRange(100);
 
     Step.Changed.connect([this](auto) { request_redraw(this->name() + ": Step changed"); });
     Step(1);
@@ -355,7 +387,8 @@ void range_slider::on_draw(widget_painter& painter)
         thumb.Rect = painter.draw_thumb(
             thumbStyle.Thumb,
             rect,
-            {.Orientation = orien, .RelativePosition = thumb.Tween.current_value()});
+            {.Orientation      = orien,
+             .RelativePosition = orien == orientation::Vertical ? 1.0f - thumb.Tween.current_value() : thumb.Tween.current_value()});
     }};
 
     if (_min.Over) {
@@ -463,6 +496,8 @@ auto range_slider::attributes() const -> widget_attributes
 
     retValue["min"]       = *Min;
     retValue["max"]       = *Max;
+    retValue["min_range"] = *MinRange;
+    retValue["max_range"] = *MaxRange;
     retValue["min_value"] = Values->first;
     retValue["max_value"] = Values->second;
     retValue["step"]      = *Step;

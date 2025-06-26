@@ -40,8 +40,6 @@ public:
     prop<i32>     Step;
     prop_val<i32> Value;
 
-    bool IncrementalChange {false};
-
 protected:
     void on_draw(widget_painter& painter) override;
 
@@ -86,10 +84,10 @@ public:
 
     prop_val<i32>                 Min;
     prop_val<i32>                 Max;
+    prop_val<i32>                 MinRange;
+    prop_val<i32>                 MaxRange;
     prop<i32>                     Step;
     prop_val<std::pair<i32, i32>> Values;
-
-    bool IncrementalChange {false};
 
 protected:
     void on_draw(widget_painter& painter) override;
