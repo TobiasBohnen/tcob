@@ -103,12 +103,16 @@ class TCOB_API color_picker : public widget {
 public:
     explicit color_picker(init const& wi);
 
-    prop<color>    SelectedColor;
-    prop<degree_f> BaseHue {degree_f {0}};
+    prop<color> SelectedColor;
+    prop<color> HoveredColor;
+
+    prop<degree_f> SelectedBaseHue {degree_f {0}};
+    prop<degree_f> HoveredBaseHue {degree_f {0}};
 
 protected:
     void on_draw(widget_painter& painter) override;
 
+    void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
@@ -116,8 +120,8 @@ protected:
 private:
     auto static GetGradient() -> gfx::color_gradient const&;
 
-    point_f _selectedColorPos {point_f {-1, -1}};
-    f32     _selectedHuePos {-1};
+    point_f _selectedColorPos {point_f {INVALID_INDEX, INVALID_INDEX}};
+    f32     _selectedHuePos {INVALID_INDEX};
 };
 
 }

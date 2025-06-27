@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -302,14 +303,13 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
-    BaseHue.Changed.connect([this](auto const&) { request_redraw(this->name() + ": BaseHue changed"); });
+    SelectedBaseHue.Changed.connect([this](auto const&) { request_redraw(this->name() + ": BaseHue changed"); });
 
     Class("color_picker");
 }
 
 void color_picker::on_draw(widget_painter& painter)
 {
-
     auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
@@ -327,7 +327,7 @@ void color_picker::on_draw(widget_painter& painter)
     canvas.set_fill_style(colors::White);
     canvas.fill();
 
-    color const baseColor {color::FromHSVA({.Hue = BaseHue, .Saturation = 1.0, .X = 1.0f})};
+    color const baseColor {color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = 1.0, .X = 1.0f})};
     canvas.set_fill_style(canvas.create_linear_gradient(
         {0, 0}, {sizeColor.Width, 0},
         {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
@@ -345,7 +345,7 @@ void color_picker::on_draw(widget_painter& painter)
     canvas.set_fill_style(canvas.create_linear_gradient({0, 0}, {0, sizeHue.Height}, GetGradient()));
     canvas.fill();
 
-    if (_selectedColorPos.X > -1) {
+    if (_selectedColorPos.X != INVALID_INDEX) {
         canvas.begin_path();
         canvas.circle(_selectedColorPos, 5);
         canvas.set_stroke_style(colors::White);
@@ -353,7 +353,7 @@ void color_picker::on_draw(widget_painter& painter)
         canvas.stroke();
     }
 
-    if (_selectedHuePos > -1) {
+    if (_selectedHuePos != INVALID_INDEX) {
         canvas.begin_path();
         canvas.move_to({sizeColor.Width, _selectedHuePos});
         canvas.line_to({sizeColor.Width + sizeHue.Width, _selectedHuePos});
@@ -363,23 +363,36 @@ void color_picker::on_draw(widget_painter& painter)
     }
 }
 
-void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
+void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     auto const mp {global_to_parent(*this, ev.Position)};
     if (Bounds->contains(mp)) {
         f32 const s {(mp.X - Bounds->left()) / (Bounds->width() * 0.9f)};
         f32 const v {(mp.Y - Bounds->top()) / Bounds->height()};
-        if (s > 1.0f) {
-            auto const col {GetGradient().colors().at(static_cast<i32>(255 * v))};
-            BaseHue           = col.to_hsv().Hue;
-            _selectedHuePos   = mp.Y - Bounds->Position.Y;
-            _selectedColorPos = {-1, -1};
+        if (s < 1.0f) {
+            HoveredColor   = color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = s, .X = 1 - v});
+            HoveredBaseHue = degree_f {INVALID_INDEX};
         } else {
-            SelectedColor     = color::FromHSVA({.Hue = BaseHue, .Saturation = s, .X = 1 - v});
-            _selectedColorPos = mp - Bounds->Position;
+            HoveredColor = colors::Transparent;
+            auto const col {GetGradient().colors().at(static_cast<i32>(255 * v))};
+            HoveredBaseHue = col.to_hsv().Hue;
         }
 
         ev.Handled = true;
+    }
+}
+
+void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
+{
+    auto const mp {global_to_parent(*this, ev.Position)};
+    if (HoveredBaseHue->Value != INVALID_INDEX) {
+        SelectedBaseHue = *HoveredBaseHue;
+        _selectedHuePos = mp.Y - Bounds->Position.Y;
+        ev.Handled      = true;
+    } else if (HoveredColor != colors::Transparent) {
+        SelectedColor     = *HoveredColor;
+        _selectedColorPos = mp - Bounds->Position;
+        ev.Handled        = true;
     }
 }
 
