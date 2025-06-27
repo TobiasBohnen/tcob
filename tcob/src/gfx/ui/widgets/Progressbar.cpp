@@ -56,14 +56,11 @@ void progress_bar::on_draw(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     // bar
-    i32 const numBlocks {10};
-
     (void)painter.draw_bar(
         _style.Bar,
         rect,
         {.Orientation = get_orientation(),
          .Position    = bar_element::position::CenterOrMiddle,
-         .BlockCount  = numBlocks,
          .Stops       = {0.0f, _tween.current_value(), 1.0f}});
 }
 

@@ -216,7 +216,6 @@ public:
     struct context {
         orientation Orientation {orientation::Horizontal};
         position    Position {position::CenterOrMiddle};
-        i32         BlockCount {0};
 
         std::vector<f32> Stops;
     };

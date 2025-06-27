@@ -29,20 +29,22 @@ void slider::style::Transition(style& target, style const& left, style const& ri
 
 slider::slider(init const& wi)
     : widget {wi}
-    , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
-    , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
-    , Value {{[this](i32 val) -> i32 { return std::clamp(val, *Min, *Max); }}}
+    , Min {{[this](f32 val) -> f32 { return std::min(val, *Max); }}}
+    , Max {{[this](f32 val) -> f32 { return std::max(val, *Min); }}}
+    , Value {{[this](f32 val) -> f32 { return std::clamp(val, *Min, *Max); }}}
 {
     _tween.Changed.connect([this]() {
         request_redraw(this->name() + ": Tween value changed");
     });
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, *Value);
+        on_value_changed(*Value); // moves the thumb
         request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
         Value = std::min(val, *Value);
+        on_value_changed(*Value); // moves the thumb
         request_redraw(this->name() + ": Max changed");
     });
     Max(100);
@@ -63,7 +65,6 @@ void slider::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    i32 const  numBlocks {10};
     auto const orien {get_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
@@ -73,7 +74,6 @@ void slider::on_draw(widget_painter& painter)
         rect,
         {.Orientation = orien,
          .Position    = pos,
-         .BlockCount  = numBlocks,
          .Stops       = {0.0f, _tween.current_value(), 1.0f}});
 
     // thumb
@@ -210,9 +210,9 @@ void slider::on_update(milliseconds deltaTime)
     _tween.update(deltaTime);
 }
 
-void slider::on_value_changed(i32 newVal)
+void slider::on_value_changed(f32 newVal)
 {
-    f32 const newFrac {Max != Min ? static_cast<f32>(newVal - *Min) / static_cast<f32>(*Max - *Min) : 0.f};
+    f32 const newFrac {Max != Min ? (newVal - *Min) / (*Max - *Min) : 0.f};
     if (_isDragging) {
         _tween.reset(newFrac);
     } else {
@@ -236,7 +236,7 @@ void slider::calculate_value(point_f mp)
     } break;
     }
 
-    i32 const val {static_cast<i32>(*Min + ((*Max - *Min + 1) * frac))};
+    f32 const val {*Min + ((*Max - *Min) * frac)};
     Value = helper::round_to_multiple(val, *Step);
 
     if (!_overThumb) {
@@ -283,16 +283,16 @@ void slider::handle_dir_input(direction dir)
 
 range_slider::range_slider(init const& wi)
     : widget {wi}
-    , Min {{[this](i32 val) -> i32 { return std::min(val, *Max); }}}
-    , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
-    , MinRange {{[this](i32 val) -> i32 { return std::min(val, *MaxRange); }}}
-    , MaxRange {{[this](i32 val) -> i32 { return std::max(val, *MinRange); }}}
-    , Values {{[this](std::pair<i32, i32> val) -> std::pair<i32, i32> {
-        i32 first {std::clamp(val.first, *Min, *Max)};
-        i32 second {std::clamp(val.second, *Min, *Max)};
+    , Min {{[this](f32 val) -> f32 { return std::min(val, *Max); }}}
+    , Max {{[this](f32 val) -> f32 { return std::max(val, *Min); }}}
+    , MinRange {{[this](f32 val) -> f32 { return std::min(val, *MaxRange); }}}
+    , MaxRange {{[this](f32 val) -> f32 { return std::max(val, *MinRange); }}}
+    , Values {{[this](std::pair<f32, f32> val) -> std::pair<f32, f32> {
+        f32 first {std::clamp(val.first, *Min, *Max)};
+        f32 second {std::clamp(val.second, *Min, *Max)};
         if (first > second) { std::swap(first, second); }
 
-        i32 const range {second - first};
+        f32 const range {second - first};
         if (range < *MinRange) { return *Values; }
         if (range > *MaxRange) { return *Values; }
 
@@ -307,18 +307,20 @@ range_slider::range_slider(init const& wi)
     });
     Min.Changed.connect([this](auto val) {
         Values = {std::max(val, Values->first), std::max(val, Values->second)};
+        on_value_changed(*Values); // moves the thumb
         request_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
         Values = {std::min(val, Values->first), std::min(val, Values->second)};
+        on_value_changed(*Values); // moves the thumb
         request_redraw(this->name() + ": Max changed");
     });
     Max(100);
 
     MinRange.Changed.connect([this](auto) {
         auto [first, second] {*Values};
-        i32 const range {second - first};
+        f32 const range {second - first};
 
         if (range < *MinRange) {
             if (second + (*MinRange - range) <= *Max) {
@@ -334,7 +336,7 @@ range_slider::range_slider(init const& wi)
     MinRange(0);
     MaxRange.Changed.connect([this](auto) {
         auto [first, second] {*Values};
-        i32 const range {second - first};
+        f32 const range {second - first};
 
         if (range > *MaxRange) {
             second = std::min(second, first + *MaxRange);
@@ -362,7 +364,6 @@ void range_slider::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    i32 const  numBlocks {10};
     auto const orien {get_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
@@ -372,7 +373,6 @@ void range_slider::on_draw(widget_painter& painter)
         rect,
         {.Orientation = orien,
          .Position    = pos,
-         .BlockCount  = numBlocks,
          .Stops       = {0.0f, _min.Tween.current_value(), _max.Tween.current_value(), 1.0f}});
 
     // thumb
@@ -499,10 +499,10 @@ void range_slider::on_update(milliseconds deltaTime)
     _max.Tween.update(deltaTime);
 }
 
-void range_slider::on_value_changed(std::pair<i32, i32> newVal)
+void range_slider::on_value_changed(std::pair<f32, f32> newVal)
 {
     auto const value {[&](thumb& thumb, f32 val) {
-        f32 const newFrac0 {Max != Min ? static_cast<f32>(val - *Min) / static_cast<f32>(*Max - *Min) : 0.f};
+        f32 const newFrac0 {Max != Min ? (val - *Min) / (*Max - *Min) : 0.f};
         if (thumb.IsDragging) {
             thumb.Tween.reset(newFrac0);
         } else {
@@ -547,13 +547,13 @@ void range_slider::calculate_value(bool isMin, point_f mp)
     } break;
     }
 
-    i32 const  val {static_cast<i32>(*Min + ((*Max - *Min + 1) * frac))};
-    auto const round {[this](i32 v) { return helper::round_to_multiple(v, *Step); }};
+    f32 const  val {Min + ((*Max - *Min) * frac)};
+    auto const round {[this](f32 v) { return helper::round_to_multiple(v, *Step); }};
 
-    std::pair<i32, i32> newVal {isMin ? round(val) : Values->first,
+    std::pair<f32, f32> newVal {isMin ? round(val) : Values->first,
                                 isMin ? Values->second : round(val)};
 
-    i32 const range {newVal.second - newVal.first};
+    f32 const range {newVal.second - newVal.first};
     if (range < MinRange) {
         if (isMin) {
             newVal.first = newVal.second - MinRange;

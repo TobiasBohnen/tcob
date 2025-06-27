@@ -5,6 +5,7 @@
 
 #include "tcob/core/Common.hpp"
 
+#include <cmath>
 #include <cstdlib>
 
 namespace tcob::helper {
@@ -18,6 +19,17 @@ auto round_to_multiple(i32 num, i32 step) -> i32
 
     i32 const adjustment {rem > step / 2 ? step - rem : -rem};
     return num < 0 ? num - adjustment : num + adjustment;
+}
+
+auto round_to_multiple(f32 num, f32 step) -> f32
+{
+    if (step <= 0.0f) { return num; }
+
+    f32 const rem {std::abs(std::fmod(num, step))};
+    if (rem == 0.0f) { return num; }
+
+    f32 const adjustment {rem > step / 2 ? step - rem : -rem};
+    return num < 0.0f ? num - adjustment : num + adjustment;
 }
 
 auto round_up_to_multiple(i32 num, i32 step) -> i32
