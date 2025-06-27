@@ -8,8 +8,10 @@
 #include <algorithm>
 #include <string>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -126,6 +128,34 @@ void spinner::on_mouse_wheel(input::mouse::wheel_event const& ev)
     }
 
     ev.Handled = true;
+}
+
+void spinner::on_key_down(input::keyboard::event const& ev)
+{
+    auto const& controls {form().Controls};
+    if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
+        if (ev.KeyCode == controls->NavDownKey) {
+            Value -= *Step;
+            ev.Handled = true;
+        } else if (ev.KeyCode == controls->NavUpKey) {
+            Value += *Step;
+            ev.Handled = true;
+        }
+    }
+}
+
+void spinner::on_controller_button_down(input::controller::button_event const& ev)
+{
+    auto const& controls {form().Controls};
+    if (ev.Controller->is_button_pressed(controls->ActivateButton)) {
+        if (ev.Button == controls->NavDownButton) {
+            Value -= *Step;
+            ev.Handled = true;
+        } else if (ev.Button == controls->NavUpButton) {
+            Value += *Step;
+            ev.Handled = true;
+        }
+    }
 }
 
 void spinner::on_update(milliseconds /*deltaTime*/)

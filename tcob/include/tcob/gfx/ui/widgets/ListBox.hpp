@@ -51,12 +51,12 @@ protected:
     void on_update(milliseconds deltaTime) override;
     void on_animation_step(string const& val) override;
 
-    void on_key_down(input::keyboard::event const& ev) override;
-
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
+
+    void on_key_down(input::keyboard::event const& ev) override;
 
     auto attributes() const -> widget_attributes override;
 

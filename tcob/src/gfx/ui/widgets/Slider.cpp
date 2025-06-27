@@ -96,26 +96,6 @@ void slider::on_draw(widget_painter& painter)
     }
 }
 
-void slider::on_key_down(input::keyboard::event const& ev)
-{
-    auto const& controls {form().Controls};
-    if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
-        if (ev.KeyCode == controls->NavLeftKey) {
-            handle_dir_input(direction::Left);
-            ev.Handled = true;
-        } else if (ev.KeyCode == controls->NavRightKey) {
-            handle_dir_input(direction::Right);
-            ev.Handled = true;
-        } else if (ev.KeyCode == controls->NavDownKey) {
-            handle_dir_input(direction::Down);
-            ev.Handled = true;
-        } else if (ev.KeyCode == controls->NavUpKey) {
-            handle_dir_input(direction::Up);
-            ev.Handled = true;
-        }
-    }
-}
-
 void slider::on_mouse_leave()
 {
     if (_overThumb) {
@@ -185,22 +165,34 @@ void slider::on_mouse_wheel(input::mouse::wheel_event const& ev)
     ev.Handled = true;
 }
 
+void slider::on_key_down(input::keyboard::event const& ev)
+{
+    auto const& controls {form().Controls};
+    if (ev.Keyboard->is_key_down(controls->ActivateKey)) {
+        if (ev.KeyCode == controls->NavLeftKey) {
+            ev.Handled = handle_dir_input(direction::Left);
+        } else if (ev.KeyCode == controls->NavRightKey) {
+            ev.Handled = handle_dir_input(direction::Right);
+        } else if (ev.KeyCode == controls->NavDownKey) {
+            ev.Handled = handle_dir_input(direction::Down);
+        } else if (ev.KeyCode == controls->NavUpKey) {
+            ev.Handled = handle_dir_input(direction::Up);
+        }
+    }
+}
+
 void slider::on_controller_button_down(input::controller::button_event const& ev)
 {
     auto const& controls {form().Controls};
     if (ev.Controller->is_button_pressed(controls->ActivateButton)) {
         if (ev.Button == controls->NavLeftButton) {
-            handle_dir_input(direction::Left);
-            ev.Handled = true;
+            ev.Handled = handle_dir_input(direction::Left);
         } else if (ev.Button == controls->NavRightButton) {
-            handle_dir_input(direction::Right);
-            ev.Handled = true;
+            ev.Handled = handle_dir_input(direction::Right);
         } else if (ev.Button == controls->NavDownButton) {
-            handle_dir_input(direction::Down);
-            ev.Handled = true;
+            ev.Handled = handle_dir_input(direction::Down);
         } else if (ev.Button == controls->NavUpButton) {
-            handle_dir_input(direction::Up);
-            ev.Handled = true;
+            ev.Handled = handle_dir_input(direction::Up);
         }
     }
 }
@@ -257,26 +249,26 @@ auto slider::attributes() const -> widget_attributes
     return retValue;
 }
 
-void slider::handle_dir_input(direction dir)
+auto slider::handle_dir_input(direction dir) -> bool
 {
     switch (get_orientation()) {
     case orientation::Horizontal:
         switch (dir) {
         case direction::Left:  Value -= *Step; break;
         case direction::Right: Value += *Step; break;
-        default:
-            break;
+        default:               return false;
         }
         break;
     case orientation::Vertical:
         switch (dir) {
         case direction::Down: Value -= *Step; break;
         case direction::Up:   Value += *Step; break;
-        default:
-            break;
+        default:              return false;
         }
         break;
     }
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////

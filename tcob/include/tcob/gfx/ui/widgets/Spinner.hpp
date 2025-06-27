@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+#include "tcob/core/Common.hpp"
 #include "tcob/tcob_config.hpp"
 
 #include <utility>
@@ -44,6 +45,9 @@ protected:
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
+
+    void on_key_down(input::keyboard::event const& ev) override;
+    void on_controller_button_down(input::controller::button_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
 

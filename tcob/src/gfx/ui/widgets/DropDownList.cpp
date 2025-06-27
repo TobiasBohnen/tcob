@@ -112,6 +112,7 @@ void drop_down_list::on_draw(widget_painter& painter)
     }
 
     if (_isExtended) {
+        // TODO: move this to 'overlay' renderer
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
 
         auto const& items {get_items()};

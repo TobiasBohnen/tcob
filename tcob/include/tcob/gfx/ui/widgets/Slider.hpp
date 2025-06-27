@@ -43,13 +43,14 @@ public:
 protected:
     void on_draw(widget_painter& painter) override;
 
-    void on_key_down(input::keyboard::event const& ev) override;
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
     void on_mouse_button_down(input::mouse::button_event const& ev) override;
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
+
+    void on_key_down(input::keyboard::event const& ev) override;
     void on_controller_button_down(input::controller::button_event const& ev) override;
 
     void on_update(milliseconds deltaTime) override;
@@ -59,7 +60,7 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
-    void handle_dir_input(direction dir);
+    auto handle_dir_input(direction dir) -> bool;
 
     void calculate_value(point_f mp);
 

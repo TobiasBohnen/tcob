@@ -309,9 +309,13 @@ void form_base::on_key_down(input::keyboard::event const& ev)
             }
             focus_widget(nextWidget);
         }
+        ev.Handled = true;
     } else if (ev.KeyMods.is_down(Controls->CutCopyPasteMod) && ev.KeyCode == Controls->PasteKey) {
         input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
-        _injector.on_text_input(_focusWidget, tev);
+        if (!tev.Text.empty()) {
+            _injector.on_text_input(_focusWidget, tev);
+            ev.Handled = true;
+        }
     } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
         if (ev.KeyCode == Controls->NavLeftKey) {
             ev.Handled = focus_nav_target(_focusWidget->name(), direction::Left);
@@ -322,9 +326,9 @@ void form_base::on_key_down(input::keyboard::event const& ev)
         } else if (ev.KeyCode == Controls->NavUpKey) {
             ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
         }
-        if (!ev.Handled) {
-            _injector.on_key_down(_focusWidget, ev);
-        }
+    }
+    if (!ev.Handled) {
+        _injector.on_key_down(_focusWidget, ev);
     }
 }
 

@@ -33,7 +33,7 @@ void tooltip::on_popup(widget* top)
     _fadeInTween->Value.Changed.connect([this](auto val) { Alpha = val; });
     _fadeInTween->start();
 
-    Popup({this, top});
+    Popup({.Sender = this, .Widget = top});
 }
 
 } // namespace ui
