@@ -292,7 +292,7 @@ range_slider::range_slider(init const& wi)
         i32 second {std::clamp(val.second, *Min, *Max)};
         if (first > second) { std::swap(first, second); }
 
-        i32 range {second - first};
+        i32 const range {second - first};
         if (range < *MinRange) { return *Values; }
         if (range > *MaxRange) { return *Values; }
 
@@ -388,7 +388,9 @@ void range_slider::on_draw(widget_painter& painter)
             thumbStyle.Thumb,
             rect,
             {.Orientation      = orien,
-             .RelativePosition = orien == orientation::Vertical ? 1.0f - thumb.Tween.current_value() : thumb.Tween.current_value()});
+             .RelativePosition = orien == orientation::Vertical
+                 ? 1.0f - thumb.Tween.current_value()
+                 : thumb.Tween.current_value()});
     }};
 
     if (_min.Over) {
@@ -437,16 +439,17 @@ void range_slider::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     auto const mp {global_to_content(*this, ev.Position)};
 
-    auto const drag {[&](thumb& thumb) {
+    auto const drag {[&](bool isMin) {
+        thumb& thumb {isMin ? _min : _max};
         if (thumb.IsDragging || thumb.Over) {
-            calculate_value(thumb, mp);
+            calculate_value(isMin, mp);
             thumb.IsDragging = true;
             return true;
         }
         return false;
     }};
 
-    ev.Handled = drag(_min) || drag(_max);
+    ev.Handled = drag(true) || drag(false);
 }
 
 void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
@@ -482,7 +485,8 @@ void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
             _dragOffset     = point_i {mp - _max.Rect.center()};
             _max.IsDragging = true;
         } else {
-            // calculate_value(global_to_content(*this, ev.Position));
+            calculate_value(mp.distance_to(_min.Rect.center()) < mp.distance_to(_max.Rect.center()),
+                            global_to_content(*this, ev.Position));
         }
 
         ev.Handled = true;
@@ -525,8 +529,10 @@ auto range_slider::attributes() const -> widget_attributes
     return retValue;
 }
 
-void range_slider::calculate_value(thumb& thumb, point_f mp)
+void range_slider::calculate_value(bool isMin, point_f mp)
 {
+    auto& thumb {isMin ? _min : _max};
+
     rect_f const rect {_barRectCache};
     f32          frac {0.0f};
 
@@ -541,12 +547,29 @@ void range_slider::calculate_value(thumb& thumb, point_f mp)
     } break;
     }
 
-    i32 const val {static_cast<i32>(*Min + ((*Max - *Min + 1) * frac))};
-    if (&thumb == &_min) {
-        Values = {helper::round_to_multiple(val, *Step), Values->second};
-    } else {
-        Values = {Values->first, helper::round_to_multiple(val, *Step)};
+    i32 const  val {static_cast<i32>(*Min + ((*Max - *Min + 1) * frac))};
+    auto const round {[this](i32 v) { return helper::round_to_multiple(v, *Step); }};
+
+    std::pair<i32, i32> newVal {isMin ? round(val) : Values->first,
+                                isMin ? Values->second : round(val)};
+
+    i32 const range {newVal.second - newVal.first};
+    if (range < MinRange) {
+        if (isMin) {
+            newVal.first = newVal.second - MinRange;
+        } else {
+            newVal.second = newVal.first + MinRange;
+        }
+    } else if (range > MaxRange) {
+        if (isMin) {
+            newVal.first = newVal.second - MaxRange;
+        } else {
+            newVal.second = newVal.first + MaxRange;
+        }
     }
+
+    Values = newVal;
+
     if (!thumb.Over) {
         thumb.Over = true;
         request_redraw(this->name() + ": thumb move after value change");

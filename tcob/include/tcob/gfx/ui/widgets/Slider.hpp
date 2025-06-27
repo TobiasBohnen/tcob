@@ -112,7 +112,7 @@ private:
         widget_tweener Tween;
     };
 
-    void calculate_value(thumb& thumb, point_f mp);
+    void calculate_value(bool isMin, point_f mp);
 
     thumb   _min;
     thumb   _max;
