@@ -26,6 +26,7 @@ namespace tcob::ui {
 class TCOB_API grid_view : public vscroll_widget {
 public:
     enum class select_mode : u8 {
+        None,
         Cell,
         Row,
         Column

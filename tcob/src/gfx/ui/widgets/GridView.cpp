@@ -131,6 +131,7 @@ void grid_view::on_draw(widget_painter& painter)
 
     auto const getCellFlags {[this](point_i idx, select_mode mode) -> widget_flags {
         switch (mode) {
+        case select_mode::None:   return {.Active = false, .Hover = false};
         case select_mode::Cell:   return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
         case select_mode::Row:    return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
         case select_mode::Column: return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
@@ -169,7 +170,11 @@ void grid_view::on_draw(widget_painter& painter)
     // Draw headers
     for (i32 x {0}; x < std::ssize(*Header); ++x) {
         point_i const idx {x, 0};
-        paintCell(idx, Header[x], _style.HeaderItemClass, getCellFlags(idx, SelectMode), _headerRectCache[idx]);
+        paintCell(idx,
+                  Header[x],
+                  _style.HeaderItemClass,
+                  !HeaderSelectable ? widget_flags {.Active = false, .Hover = false} : getCellFlags(idx, SelectMode),
+                  _headerRectCache[idx]);
     }
 }
 
