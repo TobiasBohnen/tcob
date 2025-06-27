@@ -195,13 +195,13 @@ private:
 
     bool _redraw {true};
 
-    bool         _visible {true};
-    bool         _enabled {true};
-    widget_flags _flags {};
-    f32          _alpha {1.0f};
-    form_base*   _form {nullptr};
-    widget*      _parent {nullptr};
-    string       _name;
+    bool              _visible {true};
+    bool              _enabled {true};
+    widget_flags      _flags {};
+    f32               _alpha {1.0f};
+    form_base*        _form {nullptr};
+    widget_container* _parent {nullptr};
+    string            _name;
 
     widget_style_selectors _lastSelectors;
     widget_style*          _currentStyle {nullptr};

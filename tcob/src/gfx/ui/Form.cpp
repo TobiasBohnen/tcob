@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/Form.hpp"
 
+#include <cassert>
 #include <chrono>
 #include <limits>
 #include <memory>
@@ -517,7 +518,9 @@ void form_base::on_styles_changed()
             .Flags      = tooltip->flags(),
             .Attributes = tooltip->attributes(),
         };
-        tooltip->_transition.reset(dynamic_cast<widget_style*>(Styles->get(ttNewSelectors)));
+        auto* style {dynamic_cast<widget_style*>(Styles->get(ttNewSelectors))};
+        assert(style);
+        tooltip->_transition.reset(style);
         tooltip->on_styles_changed();
     }
 }

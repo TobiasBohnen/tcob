@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
 #include <algorithm>
+#include <cassert>
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -40,6 +41,7 @@ void vscroll_widget::on_styles_changed()
 void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
 {
     auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
+    assert(style);
 
     _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
     if (!_vScrollbar.Visible) { return; }
@@ -113,7 +115,9 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     if (isHitTest) { return; }
     if (!_vScrollbar.Visible) { return; }
 
-    bounds.Size.Width -= dynamic_cast<vscroll_widget::style const*>(current_style())->VScrollBar.Bar.Size.calc(bounds.width());
+    auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
+    assert(style);
+    bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
 }
 
 auto vscroll_widget::get_scroll_max() const -> f32
