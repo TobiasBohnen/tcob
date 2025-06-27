@@ -110,6 +110,7 @@ struct control_map {
     input::key_code NavDownKey {input::key_code::DOWN};
     input::key_code ForwardDeleteKey {input::key_code::DEL};
     input::key_code BackwardDeleteKey {input::key_code::BACKSPACE};
+    input::key_mod  SelectMod {input::key_mod::LeftShift};
     input::key_code TabKey {input::key_code::TAB};
     input::key_mod  TabMod {input::key_mod::LeftShift};
     input::key_code CutKey {input::key_code::x};

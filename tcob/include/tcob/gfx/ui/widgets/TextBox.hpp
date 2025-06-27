@@ -69,6 +69,7 @@ private:
     void insert_text(utf8_string const& newText);
 
     void select_text(isize first, isize last);
+    void deselect_text();
     auto is_text_selected() const -> bool;
     void set_caret_pos(isize pos);
     auto calc_caret_pos(point_f mp) const -> isize;
