@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <string>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
