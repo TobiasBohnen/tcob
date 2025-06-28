@@ -18,6 +18,12 @@
     <Type Name="tcob::radian&lt;*&gt;">
         <DisplayString>{Value} rad</DisplayString>
     </Type>
+    <Type Name="tcob::detail::prop_base&lt;*, tcob::detail::field_source&lt;*&gt;&gt;">
+        <DisplayString>{_source._value}</DisplayString>
+    </Type>
+    <Type Name="tcob::detail::prop_base&lt;*, tcob::detail::validating_field_source&lt;*&gt;&gt;">
+        <DisplayString>{_source._value}</DisplayString>
+    </Type>
     <Type Name="solitaire::card">
         <DisplayString>{{Suit={_suit};Rank={_rank}}}</DisplayString>
     </Type>

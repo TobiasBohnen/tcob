@@ -49,13 +49,6 @@ class terminal;
 class text_box;
 class toggle;
 
-// TODO:
-// class html_control;
-// class video_control;
-// class menu;
-// class context_menu;
-// class radial_menu
-
 // displays
 class dot_matrix_display;
 class seven_segment_display;
@@ -66,6 +59,13 @@ class glass;
 class panel;
 class tab_container;
 class tooltip;
+
+// TODO:
+// class html_control;
+// class video_control;
+// class menu;
+// class context_menu;
+// class radial_menu
 
 // base
 class widget;

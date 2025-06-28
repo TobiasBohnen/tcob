@@ -135,7 +135,7 @@ void panel::on_draw_children(widget_painter& painter)
     point_f const translate {rect.Position + paint_offset()};
     xform.translate(translate);
 
-    for (auto const& w : this->widgets() | std::views::reverse) { // ZORDER
+    for (auto const& w : widgets() | std::views::reverse) { // ZORDER
         painter.begin(Alpha, xform);
         w->draw(painter);
         painter.end();
