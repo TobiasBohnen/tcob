@@ -6,8 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <functional>
 #include <stack>
 #include <utility>
+#include <vector>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -22,6 +24,8 @@ namespace tcob::ui {
 
 class TCOB_API widget_painter {
 public:
+    using overlay_func = std::function<void(widget_painter&)>;
+
     explicit widget_painter(gfx::canvas& canvas);
 
     void begin(f32 alpha);
@@ -29,6 +33,9 @@ public:
     void end();
     void push_scissor(rect_f const& globalScissor);
     void pop_scissor();
+
+    void add_overlay(overlay_func const& func);
+    void draw_overlays();
 
     void draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle);
 
@@ -61,8 +68,9 @@ private:
     auto format_text(text_element const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
     auto transform_text(text_transform xform, utf8_string_view text) const -> utf8_string;
 
-    gfx::canvas&       _canvas;
-    std::stack<rect_f> _scissorStack;
+    gfx::canvas&              _canvas;
+    std::stack<rect_f>        _scissorStack;
+    std::vector<overlay_func> _overlays;
 };
 
 ////////////////////////////////////////////////////////////

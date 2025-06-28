@@ -70,6 +70,27 @@ void widget_painter::pop_scissor()
 
 ////////////////////////////////////////////////////////////
 
+void widget_painter::add_overlay(overlay_func const& func)
+{
+    _overlays.push_back(func);
+}
+
+void widget_painter::draw_overlays()
+{
+    if (_overlays.empty()) { return; }
+
+    _canvas.reset();
+
+    for (auto& func : _overlays) {
+        func(*this);
+    }
+    _overlays.clear();
+
+    _canvas.reset();
+}
+
+////////////////////////////////////////////////////////////
+
 void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
 {
     // FIXME: transparent widgets don't properly clear their content area

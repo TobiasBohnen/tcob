@@ -223,6 +223,8 @@ void form_base::on_draw_to(gfx::render_target& target)
             container->draw(*_painter);
         }
 
+        _painter->draw_overlays();
+
         _canvas.end_frame();
         _redrawWidgets = false;
         _clearRedraw   = false;

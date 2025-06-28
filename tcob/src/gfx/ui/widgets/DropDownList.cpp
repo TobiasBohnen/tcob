@@ -9,8 +9,11 @@
 #include <iterator>
 #include <vector>
 
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Transform.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -112,63 +115,73 @@ void drop_down_list::on_draw(widget_painter& painter)
     }
 
     if (_isExtended) {
-        // TODO: move this to 'overlay' renderer
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
 
-        auto const& items {get_items()};
+        point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
 
-        // list background
-        rect_f listRect {Bounds};
-        listRect.Position.Y += listRect.height();
-        f32 const listHeight {itemHeight * MaxVisibleItems};
-        listRect.Size.Height = listHeight;
-        listRect.Size.Height += _style.Margin.Top.calc(listHeight) + _style.Margin.Bottom.calc(listHeight);
-        listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
-        listRect.Size.Height += _style.Border.Size.calc(listHeight);
+        painter.add_overlay([this, globalOffset, itemHeight, isActive = fls.Active](widget_painter& painter) {
+            gfx::transform xform;
+            xform.translate(globalOffset);
+            painter.begin(Alpha, xform);
 
-        _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
+            rect_f listRect {Bounds};
+            listRect.Position.Y += listRect.height();
+            f32 const listHeight {itemHeight * MaxVisibleItems};
+            listRect.Size.Height = listHeight;
+            listRect.Size.Height += _style.Margin.Top.calc(listHeight) + _style.Margin.Bottom.calc(listHeight);
+            listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
+            listRect.Size.Height += _style.Border.Size.calc(listHeight);
 
-        painter.draw_background_and_border(_style, listRect, false);
+            _vScrollbar.Visible = std::ssize(get_items()) > MaxVisibleItems;
 
-        // scrollbar
-        auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max()};
-        _vScrollbar.Visible = std::ssize(items) > MaxVisibleItems;
+            // list background
+            painter.draw_background_and_border(_style, listRect, false);
+            _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
 
-        auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
-                                    : fls.Active                   ? widget_flags {.Active = true}
-                                                                   : widget_flags {.Hover = true}};
-        thumb_style thumbStyle;
-        apply_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
-        _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
+            // scrollbar
+            auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max()};
 
-        scissor_guard const guard {painter, this};
+            auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
+                                        : isActive                     ? widget_flags {.Active = true}
+                                                                       : widget_flags {.Hover = true}};
+            thumb_style thumbStyle;
+            apply_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
+            _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
-        auto const paintItem {[&](isize i) {
-            rect_f itemRect {listRect};
-            itemRect.Size.Height = itemHeight;
-            itemRect.Position.Y  = listRect.top() + (itemRect.height() * static_cast<f32>(i)) - scrollOffset;
+            // items
+            scissor_guard const guard {painter, this};
+            auto const&         items {get_items()};
+            auto const          paintItem {[&](isize i) {
+                rect_f itemRect {listRect};
+                itemRect.Size.Height = itemHeight;
+                itemRect.Position.Y  = listRect.top() + (itemRect.height() * static_cast<f32>(i)) - scrollOffset;
 
-            if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
-                item_style itemStyle {};
-                apply_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+                if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
+                    item_style itemStyle {};
+                    apply_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
 
-                painter.draw_item(itemStyle.Item, itemRect, items[i]);
-                _itemRectCache[i] = itemRect;
+                    painter.draw_item(itemStyle.Item, itemRect, items[i]);
+                    _itemRectCache[i] = itemRect;
+                } else {
+                    reset_sub_style(i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+                }
+            }};
+
+            // content
+            for (isize i {0}; i < std::ssize(items); ++i) {
+                if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
+                paintItem(i);
             }
-        }};
 
-        // content
-        for (i32 i {0}; i < std::ssize(items); ++i) {
-            if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
-            paintItem(i);
-        }
+            if (SelectedItemIndex >= 0) {
+                paintItem(SelectedItemIndex);
+            }
+            if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
+                paintItem(HoveredItemIndex);
+            }
 
-        if (SelectedItemIndex >= 0) {
-            paintItem(SelectedItemIndex);
-        }
-        if (HoveredItemIndex >= 0 && SelectedItemIndex != HoveredItemIndex) {
-            paintItem(HoveredItemIndex);
-        }
+            painter.end();
+        });
     } else {
         _visibleItems = 0;
     }
@@ -220,6 +233,13 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     HoveredItemIndex = INVALID_INDEX;
 }
 
+void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
+{
+    if (_vScrollbar.mouse_drag(*this, ev.Position)) {
+        ev.Handled = true;
+    }
+}
+
 void drop_down_list::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
@@ -236,18 +256,18 @@ void drop_down_list::on_mouse_button_down(input::mouse::button_event const& ev)
     }
 }
 
-void drop_down_list::on_mouse_drag(input::mouse::motion_event const& ev)
-{
-    if (_vScrollbar.mouse_drag(*this, ev.Position)) {
-        ev.Handled = true;
-    }
-}
-
 void drop_down_list::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (ev.Button == controls().PrimaryMouseButton) {
         _vScrollbar.mouse_up(*this, ev.Position);
         ev.Handled = true;
+    }
+}
+
+void drop_down_list::on_double_click()
+{
+    if (!_mouseOverBox) {
+        set_extended(false);
     }
 }
 
