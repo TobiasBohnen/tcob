@@ -106,7 +106,7 @@ private:
 
     void on_styles_changed();
 
-    auto can_popup_tooltip() const -> bool;
+    void handle_tooltip(milliseconds deltaTime);
     void hide_tooltip();
 
     gfx::canvas          _canvas {};

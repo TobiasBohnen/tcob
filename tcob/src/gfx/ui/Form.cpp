@@ -162,17 +162,7 @@ void form_base::on_update(milliseconds deltaTime)
     auto const& widgets {containers()};
 
     // tooltip
-    if (_topWidget) {
-        _mouseOverTime += deltaTime;
-        if (can_popup_tooltip()) {
-            _topWidget->Tooltip->on_popup(_topWidget);
-            _isTooltipVisible = true;
-        }
-
-        if (_isTooltipVisible) {
-            _topWidget->Tooltip->update(deltaTime);
-        }
-    }
+    handle_tooltip(deltaTime);
 
     // update styles
     if (_prepareWidgets) {
@@ -527,20 +517,34 @@ void form_base::on_styles_changed()
     }
 }
 
-auto form_base::can_popup_tooltip() const -> bool
+void form_base::handle_tooltip(milliseconds deltaTime)
 {
-    if (_isTooltipVisible) { return false; }
-    if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
+    if (!_topWidget) { return; }
 
-    bool const hasTooltip {_topWidget && _topWidget->Tooltip};
-    bool const isTopFocused {_topWidget && _topWidget->is_focused()};
-    bool const isMouseButtonDown {_isLButtonDown || _isRButtonDown};
+    _mouseOverTime += deltaTime;
 
-    if (hasTooltip && !isTopFocused && !isMouseButtonDown) {
-        return _mouseOverTime > _topWidget->Tooltip->Delay;
+    auto const shouldPopup {[this]() {
+        if (_isTooltipVisible) { return false; }
+        if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
+
+        bool const hasTooltip {_topWidget && _topWidget->Tooltip};
+        bool const isTopFocused {_topWidget && _topWidget->is_focused()};
+        bool const isMouseButtonDown {_isLButtonDown || _isRButtonDown};
+
+        if (hasTooltip && !isTopFocused && !isMouseButtonDown) {
+            return _mouseOverTime > _topWidget->Tooltip->Delay;
+        }
+
+        return false;
+    }};
+    if (shouldPopup()) {
+        _topWidget->Tooltip->on_popup(_topWidget);
+        _isTooltipVisible = true;
     }
 
-    return false;
+    if (_isTooltipVisible) {
+        _topWidget->Tooltip->update(deltaTime);
+    }
 }
 
 void form_base::hide_tooltip()
