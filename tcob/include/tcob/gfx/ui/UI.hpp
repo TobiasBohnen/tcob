@@ -57,8 +57,8 @@ class seven_segment_display;
 class accordion;
 class glass;
 class panel;
+class popup;
 class tab_container;
-class tooltip;
 
 // TODO:
 // class html_control;
@@ -385,9 +385,9 @@ struct text_event {
     utf8_string Text;
 };
 
-struct tooltip_event {
-    tooltip* Sender {nullptr};
-    widget*  Widget {nullptr};
+struct popup_event {
+    popup*  Sender {nullptr};
+    widget* Widget {nullptr};
 };
 
 ////////////////////////////////////////////////////////////

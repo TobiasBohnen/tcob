@@ -70,8 +70,8 @@ inline auto form<Layout>::get_layout() const -> layout const*
 
 ////////////////////////////////////////////////////////////
 
-template <std::derived_from<tooltip> T>
-inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
+template <std::derived_from<popup> T>
+inline auto form_base::create_popup(string const& name) -> std::shared_ptr<T>
 {
     widget::init const wi {
         .Form   = this,
@@ -80,7 +80,7 @@ inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
     };
 
     auto retValue {std::make_shared<T>(wi)};
-    _tooltips.push_back(retValue);
+    _popups.push_back(retValue);
     return retValue;
 }
 

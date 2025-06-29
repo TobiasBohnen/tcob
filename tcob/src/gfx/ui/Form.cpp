@@ -27,7 +27,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/widgets/Tooltip.hpp"
+#include "tcob/gfx/ui/widgets/Popup.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
@@ -161,7 +161,7 @@ void form_base::on_update(milliseconds deltaTime)
 {
     auto const& widgets {containers()};
 
-    // tooltip
+    // popup
     handle_tooltip(deltaTime);
 
     // update styles
@@ -174,10 +174,10 @@ void form_base::on_update(milliseconds deltaTime)
             container->prepare_redraw();
         }
 
-        // tooltips
-        std::erase_if(_tooltips, [](auto const& tooltip) { return tooltip.expired(); });
-        for (auto const& tooltip : _tooltips) {
-            tooltip.lock()->prepare_redraw();
+        // popups
+        std::erase_if(_popups, [](auto const& popup) { return popup.expired(); });
+        for (auto const& popup : _popups) {
+            popup.lock()->prepare_redraw();
         }
 
         _prepareWidgets = false;
@@ -501,19 +501,19 @@ void form_base::on_styles_changed()
         container->on_styles_changed();
     }
 
-    for (auto const& tt : _tooltips) {
+    for (auto const& tt : _popups) {
         if (tt.expired()) { continue; }
-        auto tooltip {tt.lock()};
+        auto popup {tt.lock()};
 
         widget_style_selectors const ttNewSelectors {
-            .Class      = tooltip->Class,
-            .Flags      = tooltip->flags(),
-            .Attributes = tooltip->attributes(),
+            .Class      = popup->Class,
+            .Flags      = popup->flags(),
+            .Attributes = popup->attributes(),
         };
         auto* style {dynamic_cast<widget_style*>(Styles->get(ttNewSelectors))};
         assert(style);
-        tooltip->_transition.reset(style);
-        tooltip->on_styles_changed();
+        popup->_transition.reset(style);
+        popup->on_styles_changed();
     }
 }
 

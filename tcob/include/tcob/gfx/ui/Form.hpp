@@ -33,20 +33,20 @@ class TCOB_API form_base : public gfx::entity {
 public:
     ~form_base() override;
 
-    prop<rect_f> Bounds;
+    signal<string const> CursorChanged;
 
+    point_f TooltipOffset {point_f::Zero};
+
+    prop<rect_f>                         Bounds;
     prop<style_collection>               Styles;
     prop<control_map>                    Controls;
     prop<nav_map>                        NavMap;
     prop<assets::asset_ptr<gfx::shader>> Shader;
 
-    signal<string const> CursorChanged;
-    point_f              TooltipOffset {point_f::Zero};
-
     auto name() const -> string const&;
 
-    template <std::derived_from<tooltip> T>
-    auto create_tooltip(string const& name) -> std::shared_ptr<T>;
+    template <std::derived_from<popup> T = popup>
+    auto create_popup(string const& name) -> std::shared_ptr<T>;
 
     auto find_widget_at(point_f pos) const -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
@@ -112,10 +112,10 @@ private:
     gfx::canvas          _canvas {};
     gfx::canvas_renderer _renderer;
 
-    widget*                             _topWidget {nullptr};
-    widget*                             _focusWidget {nullptr};
-    detail::input_injector              _injector;
-    std::vector<std::weak_ptr<tooltip>> _tooltips;
+    widget*                           _topWidget {nullptr};
+    widget*                           _focusWidget {nullptr};
+    detail::input_injector            _injector;
+    std::vector<std::weak_ptr<popup>> _popups;
 
     bool _redrawWidgets {true};
     bool _clearRedraw {true};
