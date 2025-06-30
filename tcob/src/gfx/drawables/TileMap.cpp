@@ -211,7 +211,7 @@ auto tilemap_base::layer::get_index(point_i pos) const -> i32
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-auto ortho_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f
+auto orthogonal_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f
 {
     auto const [x, y] {point_f {coord}};
     return {{TileSize.Width * x, TileSize.Height * y},
@@ -220,7 +220,7 @@ auto ortho_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rec
 
 ////////////////////////////////////////////////////////////
 
-auto iso_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
+auto isometric_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
 {
     auto const [x, y] {point_f {coord}};
     return Staggered
@@ -234,7 +234,7 @@ auto iso_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
 
 ////////////////////////////////////////////////////////////
 
-auto hex_grid::layout_tile(hex_tile const& /* tile */, point_i coord) const -> rect_f
+auto hexagonal_grid::layout_tile(hex_tile const& /* tile */, point_i coord) const -> rect_f
 {
     auto const [x, y] {point_f {coord}};
     return Top == hex_top::Flat

@@ -76,7 +76,7 @@ public:
     }
 };
 
-class TCOB_API ortho_grid {
+class TCOB_API orthogonal_grid {
 public:
     using tile_type = ortho_tile;
 
@@ -84,7 +84,7 @@ public:
 
     auto layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f;
 
-    auto operator==(ortho_grid const& other) const -> bool = default;
+    auto operator==(orthogonal_grid const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ public:
     }
 };
 
-class TCOB_API iso_grid {
+class TCOB_API isometric_grid {
 public:
     using tile_type = iso_tile;
 
@@ -124,7 +124,7 @@ public:
 
     auto layout_tile(iso_tile const& tile, point_i coord) const -> rect_f;
 
-    auto operator==(iso_grid const& other) const -> bool = default;
+    auto operator==(isometric_grid const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ enum hex_top : u8 {
     Flat
 };
 
-class TCOB_API hex_grid {
+class TCOB_API hexagonal_grid {
 public:
     using tile_type = hex_tile;
 
@@ -161,7 +161,7 @@ public:
 
     auto layout_tile(hex_tile const& tile, point_i coord) const -> rect_f;
 
-    auto operator==(hex_grid const& other) const -> bool = default;
+    auto operator==(hexagonal_grid const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
@@ -262,9 +262,9 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-using ortho_tilemap = tilemap<ortho_grid>;
-using iso_tilemap   = tilemap<iso_grid>;
-using hex_tilemap   = tilemap<hex_grid>;
+using orthogonal_tilemap = tilemap<orthogonal_grid>;
+using isometric_tilemap  = tilemap<isometric_grid>;
+using hexagonal_tilemap  = tilemap<hexagonal_grid>;
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
