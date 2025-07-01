@@ -156,7 +156,7 @@ void widget_painter::draw_nine_patch(nine_patch const& np, rect_f const& rect, b
     _canvas.set_fill_style(colors::White);
     f32 const    borderSize {borderStyle.Size.calc(rect.width())};
     rect_f const center {rect.left() + borderSize, rect.top() + borderSize, rect.width() - (borderSize * 2), rect.height() - (borderSize * 2)};
-    _canvas.draw_nine_patch(np.Texture.ptr(), np.Region, rect, center, np.UV);
+    _canvas.draw_nine_patch(np.Texture.ptr(), np.TextureRegion, rect, center, np.UV);
 }
 
 void widget_painter::draw_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius)
@@ -350,7 +350,7 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
     rect_f contentRect {rect};
 
     bool const drawText {!text.empty() && style.Font};
-    bool const drawIcon {icon.Texture && icon.Texture->has_region(icon.Region)};
+    bool const drawIcon {icon.Texture && icon.Texture->has_region(icon.TextureRegion)};
 
     if (drawText && drawIcon) {
         rect_f textRect {contentRect};
@@ -367,7 +367,7 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
         iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
 
         _canvas.set_fill_style(icon.Color);
-        _canvas.draw_image(icon.Texture.ptr(), icon.Region, iconRect);
+        _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, iconRect);
     } else if (drawText) {
         draw_text(style, contentRect, text);
     } else if (drawIcon) {
@@ -375,7 +375,7 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
         contentRect = {{contentRect.center().X - (iconSize.Width / 2), contentRect.top()}, iconSize};
 
         _canvas.set_fill_style(icon.Color);
-        _canvas.draw_image(icon.Texture.ptr(), icon.Region, contentRect);
+        _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, contentRect);
     }
 }
 

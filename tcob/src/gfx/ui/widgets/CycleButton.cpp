@@ -90,7 +90,7 @@ void cycle_button::on_animation_step(string const& val)
 {
     if (SelectedItemIndex >= 0) {
         Items.mutate([&](auto& items) {
-            items[SelectedItemIndex].Icon.Region = val;
+            items[SelectedItemIndex].Icon.TextureRegion = val;
             request_redraw(this->name() + ": Animation Frame changed ");
             return false;
         });

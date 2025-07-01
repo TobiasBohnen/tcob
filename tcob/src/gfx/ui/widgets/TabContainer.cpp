@@ -255,7 +255,7 @@ void tab_container::on_animation_step(string const& val)
 {
     if (ActiveTabIndex >= 0) {
         auto& tab {_tabLabels[ActiveTabIndex]};
-        tab.Icon.Region = val;
+        tab.Icon.TextureRegion = val;
         if (tab.Icon.Texture) {
             request_redraw(this->name() + ": Animation Frame changed ");
         }

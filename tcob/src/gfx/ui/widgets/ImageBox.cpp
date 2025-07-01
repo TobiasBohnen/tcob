@@ -72,7 +72,7 @@ void image_box::on_draw(widget_painter& painter)
 
     auto& canvas {painter.canvas()};
     canvas.set_fill_style(colors::White);
-    canvas.draw_image(tex.ptr(), Image->Region, targetRect);
+    canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
 }
 
 void image_box::on_update(milliseconds /* deltaTime */)
@@ -81,7 +81,7 @@ void image_box::on_update(milliseconds /* deltaTime */)
 
 void image_box::on_animation_step(string const& val)
 {
-    Image.mutate([&val](icon& icon) { icon.Region = val; });
+    Image.mutate([&val](icon& icon) { icon.TextureRegion = val; });
 }
 
 auto image_box::attributes() const -> widget_attributes

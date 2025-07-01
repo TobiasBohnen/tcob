@@ -189,9 +189,9 @@ inline void point_particle::settings::Serialize(point_particle::settings const& 
 
     s["gravity"] = v.Gravity;
 
-    s["texture"]      = v.Texture;
-    s["colors"]       = v.Colors;
-    s["transparency"] = v.Transparency;
+    s["texture_region"] = v.TextureRegion;
+    s["colors"]         = v.Colors;
+    s["transparency"]   = v.Transparency;
 
     s["lifetime"] = v.Lifetime;
 }
@@ -208,9 +208,9 @@ inline void quad_particle::settings::Serialize(quad_particle::settings const& v,
 
     s["gravity"] = v.Gravity;
 
-    s["texture"]      = v.Texture;
-    s["colors"]       = v.Colors;
-    s["transparency"] = v.Transparency;
+    s["texture_region"] = v.TextureRegion;
+    s["colors"]         = v.Colors;
+    s["transparency"]   = v.Transparency;
 
     s["lifetime"] = v.Lifetime;
 
@@ -232,7 +232,7 @@ inline auto point_particle::settings::Deserialize(point_particle::settings& v, a
 
         && s.try_get(v.Gravity, "gravity")
 
-        && s.try_get(v.Texture, "texture")
+        && s.try_get(v.TextureRegion, "texture_region")
         && s.try_get(v.Colors, "colors")
         && s.try_get(v.Transparency, "transparency")
 
@@ -251,7 +251,7 @@ inline auto quad_particle::settings::Deserialize(quad_particle::settings& v, aut
 
         && s.try_get(v.Gravity, "gravity")
 
-        && s.try_get(v.Texture, "texture")
+        && s.try_get(v.TextureRegion, "texture_region")
         && s.try_get(v.Colors, "colors")
         && s.try_get(v.Transparency, "transparency")
 

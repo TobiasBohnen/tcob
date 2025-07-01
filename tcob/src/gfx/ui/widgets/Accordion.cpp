@@ -257,7 +257,7 @@ void accordion::on_animation_step(string const& val)
 {
     if (ActiveSectionIndex >= 0) {
         auto& sec {_sectionLabels[ActiveSectionIndex]};
-        sec.Icon.Region = val;
+        sec.Icon.TextureRegion = val;
         if (sec.Icon.Texture) {
             request_redraw(this->name() + ": Animation Frame changed ");
         }

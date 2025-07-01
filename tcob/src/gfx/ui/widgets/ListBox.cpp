@@ -175,7 +175,7 @@ void list_box::on_animation_step(string const& val)
     if (SelectedItemIndex >= 0) {
         Items.mutate([&](auto& items) {
             auto& item {(Filter->empty() ? items : _filteredItems)[SelectedItemIndex]};
-            item.Icon.Region = val;
+            item.Icon.TextureRegion = val;
             if (item.Icon.Texture) {
                 request_redraw(this->name() + ": Animation Frame changed ");
             }

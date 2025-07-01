@@ -298,7 +298,7 @@ public:
 class TCOB_API nine_patch {
 public:
     assets::asset_ptr<gfx::texture> Texture;
-    string                          Region {"default"};
+    string                          TextureRegion {"default"};
     rect_f                          UV;
 
     auto operator==(nine_patch const& other) const -> bool = default;
@@ -313,7 +313,7 @@ using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradi
 class TCOB_API icon {
 public:
     assets::asset_ptr<gfx::texture> Texture;
-    string                          Region {"default"};
+    string                          TextureRegion {"default"};
     color                           Color {colors::White};
 
     auto operator==(icon const& other) const -> bool = default;

@@ -154,7 +154,7 @@ public:
 
         min_max<point_f> Gravity;
 
-        string             Texture;
+        string             TextureRegion;
         std::vector<color> Colors;
         min_max<f32>       Transparency;
 
@@ -194,7 +194,7 @@ public:
 
         min_max<point_f> Gravity;
 
-        string             Texture;
+        string             TextureRegion;
         std::vector<color> Colors;
         min_max<f32>       Transparency;
 

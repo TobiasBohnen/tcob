@@ -184,14 +184,14 @@ void grid_view::on_animation_step(string const& val)
         if (SelectedCellIndex->Y == 0) {
             Header.mutate([&](auto& header) {
                 auto& cell {header[SelectedCellIndex->X]};
-                cell.Icon.Region = val;
+                cell.Icon.TextureRegion = val;
                 request_redraw(this->name() + ": Animation Frame changed ");
                 return false; // don't invoke Header.Changed
             });
         } else {
             Grid.mutate([&](auto& grid) {
                 auto& cell {grid[SelectedCellIndex->X, SelectedCellIndex->Y - 1]};
-                cell.Icon.Region = val;
+                cell.Icon.TextureRegion = val;
                 request_redraw(this->name() + ": Animation Frame changed ");
                 return false; // don't invoke Grid.Changed
             });

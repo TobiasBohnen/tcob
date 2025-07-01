@@ -44,7 +44,7 @@ void button::on_update(milliseconds /* deltaTime */)
 
 void button::on_animation_step(string const& val)
 {
-    Icon.mutate([&val](icon& icon) { icon.Region = val; });
+    Icon.mutate([&val](icon& icon) { icon.TextureRegion = val; });
 }
 
 auto button::attributes() const -> widget_attributes

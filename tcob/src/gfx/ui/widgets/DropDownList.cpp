@@ -299,7 +299,7 @@ void drop_down_list::on_animation_step(string const& val)
     if (_isExtended && SelectedItemIndex >= 0) {
         Items.mutate([&](auto& items) {
             auto& item {items[SelectedItemIndex]};
-            item.Icon.Region = val;
+            item.Icon.TextureRegion = val;
             if (item.Icon.Texture) {
                 request_redraw(this->name() + ": Animation Frame changed ");
             }
