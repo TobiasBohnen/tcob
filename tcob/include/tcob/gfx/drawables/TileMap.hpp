@@ -38,8 +38,8 @@ class tileset {
 public:
     using tile_type = T;
 
-    tileset(std::unordered_map<tile_index_t, tile_type> set);
-    tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items);
+    explicit tileset(std::unordered_map<tile_index_t, tile_type> set);
+    explicit tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items);
 
     auto get_tile(tile_index_t idx) const -> tile_type const&;
     void set_tile(tile_index_t idx, tile_type const& tile_type);
@@ -53,7 +53,7 @@ private:
 void SerializeTile(auto&& v, auto&& s);
 auto DeserializeTile(auto&& v, auto&& s) -> bool;
 
-class TCOB_API ortho_tile {
+class TCOB_API orthogonal_tile {
 public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
@@ -62,13 +62,13 @@ public:
 
     size_f Scale {size_f::One};
 
-    void static Serialize(ortho_tile const& v, auto&& s)
+    void static Serialize(orthogonal_tile const& v, auto&& s)
     {
         SerializeTile(v, s);
         s["scale"] = v.Scale;
     }
 
-    auto static Deserialize(ortho_tile& v, auto&& s) -> bool
+    auto static Deserialize(orthogonal_tile& v, auto&& s) -> bool
     {
         if (!DeserializeTile(v, s)) { return false; }
         s.try_get(v.Scale, "scale");
@@ -78,18 +78,18 @@ public:
 
 class TCOB_API orthogonal_grid {
 public:
-    using tile_type = ortho_tile;
+    using tile_type = orthogonal_tile;
 
     size_f TileSize {size_f::Zero};
 
-    auto layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f;
+    auto layout_tile(orthogonal_tile const& tile, point_i coord) const -> rect_f;
 
     auto operator==(orthogonal_grid const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API iso_tile {
+class TCOB_API isometric_tile {
 public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
@@ -99,14 +99,14 @@ public:
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
 
-    void static Serialize(iso_tile const& v, auto&& s)
+    void static Serialize(isometric_tile const& v, auto&& s)
     {
         SerializeTile(v, s);
         s["center"] = v.Center;
         s["height"] = v.Height;
     }
 
-    auto static Deserialize(iso_tile& v, auto&& s) -> bool
+    auto static Deserialize(isometric_tile& v, auto&& s) -> bool
     {
         if (!DeserializeTile(v, s)) { return false; }
         s.try_get(v.Center, "center");
@@ -117,49 +117,49 @@ public:
 
 class TCOB_API isometric_grid {
 public:
-    using tile_type = iso_tile;
+    using tile_type = isometric_tile;
 
     size_f TileSize {size_f::Zero};
     bool   Staggered {false};
 
-    auto layout_tile(iso_tile const& tile, point_i coord) const -> rect_f;
+    auto layout_tile(isometric_tile const& tile, point_i coord) const -> rect_f;
 
     auto operator==(isometric_grid const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API hex_tile {
+class TCOB_API hexagonal_tile {
 public:
     string TextureRegion {};
     bool   FlipHorizontally {false};
     bool   FlipVertically {false};
     color  Color {colors::White};
 
-    void static Serialize(hex_tile const& v, auto&& s)
+    void static Serialize(hexagonal_tile const& v, auto&& s)
     {
         SerializeTile(v, s);
     }
 
-    auto static Deserialize(hex_tile& v, auto&& s) -> bool
+    auto static Deserialize(hexagonal_tile& v, auto&& s) -> bool
     {
         return static_cast<bool>(DeserializeTile(v, s));
     }
 };
 
-enum hex_top : u8 {
+enum hexagonal_top : u8 {
     Pointy,
     Flat
 };
 
 class TCOB_API hexagonal_grid {
 public:
-    using tile_type = hex_tile;
+    using tile_type = hexagonal_tile;
 
-    size_f  TileSize {size_f::Zero};
-    hex_top Top {hex_top::Pointy};
+    size_f        TileSize {size_f::Zero};
+    hexagonal_top Top {hexagonal_top::Pointy};
 
-    auto layout_tile(hex_tile const& tile, point_i coord) const -> rect_f;
+    auto layout_tile(hexagonal_tile const& tile, point_i coord) const -> rect_f;
 
     auto operator==(hexagonal_grid const& other) const -> bool = default;
 };
@@ -263,8 +263,13 @@ private:
 ////////////////////////////////////////////////////////////
 
 using orthogonal_tilemap = tilemap<orthogonal_grid>;
-using isometric_tilemap  = tilemap<isometric_grid>;
-using hexagonal_tilemap  = tilemap<hexagonal_grid>;
+using orthogonal_tileset = tileset<orthogonal_tile>;
+
+using isometric_tilemap = tilemap<isometric_grid>;
+using isometric_tileset = tileset<isometric_tile>;
+
+using hexagonal_tilemap = tilemap<hexagonal_grid>;
+using hexagonal_tileset = tileset<hexagonal_tile>;
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////

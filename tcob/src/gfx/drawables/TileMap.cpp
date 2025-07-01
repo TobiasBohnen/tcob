@@ -211,7 +211,7 @@ auto tilemap_base::layer::get_index(point_i pos) const -> i32
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-auto orthogonal_grid::layout_tile(ortho_tile const& tile, point_i coord) const -> rect_f
+auto orthogonal_grid::layout_tile(orthogonal_tile const& tile, point_i coord) const -> rect_f
 {
     auto const [x, y] {point_f {coord}};
     return {{TileSize.Width * x, TileSize.Height * y},
@@ -220,12 +220,12 @@ auto orthogonal_grid::layout_tile(ortho_tile const& tile, point_i coord) const -
 
 ////////////////////////////////////////////////////////////
 
-auto isometric_grid::layout_tile(iso_tile const& tile, point_i coord) const -> rect_f
+auto isometric_grid::layout_tile(isometric_tile const& tile, point_i coord) const -> rect_f
 {
     auto const [x, y] {point_f {coord}};
     return Staggered
-        ? rect_f {{TileSize.Width * (x + 0.5f * (coord.Y & 1)),
-                   TileSize.Height * (0.5f * y)},
+        ? rect_f {{TileSize.Width * (x + tile.Center.X * (coord.Y & 1)),
+                   TileSize.Height * (tile.Center.Y * y)},
                   TileSize}
         : rect_f {{((TileSize.Width * tile.Center.X) * (x - y)),
                    ((TileSize.Height * tile.Center.Y) * (y + x)) - (TileSize.Height * tile.Height)},
@@ -234,10 +234,10 @@ auto isometric_grid::layout_tile(iso_tile const& tile, point_i coord) const -> r
 
 ////////////////////////////////////////////////////////////
 
-auto hexagonal_grid::layout_tile(hex_tile const& /* tile */, point_i coord) const -> rect_f
+auto hexagonal_grid::layout_tile(hexagonal_tile const& /* tile */, point_i coord) const -> rect_f
 {
     auto const [x, y] {point_f {coord}};
-    return Top == hex_top::Flat
+    return Top == hexagonal_top::Flat
         ? rect_f {{TileSize.Width * (3.0f / 4.0f * x),
                    TileSize.Height * (y + 0.5f * (coord.X & 1))},
                   TileSize}
