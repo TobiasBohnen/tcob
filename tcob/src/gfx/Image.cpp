@@ -128,7 +128,7 @@ auto image::get_pixel(point_i pos) const -> color
 auto image::count_colors [[nodiscard]] () const -> isize
 {
     std::unordered_set<u32> colors;
-    for (u32 i {0}; i < _buffer.size(); i += _info.bytes_per_pixel()) {
+    for (usize i {0}; i < _buffer.size(); i += _info.bytes_per_pixel()) {
         u8 const r {_buffer[i + 0]};
         u8 const g {_buffer[i + 1]};
         u8 const b {_buffer[i + 2]};
