@@ -115,7 +115,7 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     return retValue;
 }
 
-void form_base::request_redraw(string const& reason)
+void form_base::queue_redraw(string const& reason)
 {
     for (auto const& widget : containers()) {
         widget->set_redraw(true);
@@ -132,6 +132,15 @@ void form_base::notify_redraw(string const& reason)
     }
 
     _prepareWidgets = true;
+}
+
+void form_base::refresh_hover(widget* widget)
+{
+    point_i const mp {locate_service<input::system>().mouse().get_position()};
+    if (!widget->hit_test(point_f {mp})) { return; }
+
+    widget->prepare_redraw();
+    on_mouse_hover({.Position = mp});
 }
 
 auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
@@ -343,7 +352,8 @@ void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 void form_base::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     auto* newTop {find_widget_at(point_f {ev.Position}).get()};
-    if (newTop && newTop->is_inert()) {
+
+    if (newTop && newTop->is_inert()) { // inert top
         _injector.on_mouse_leave(_topWidget);
         _topWidget = nullptr;
         return;
@@ -444,7 +454,7 @@ void form_base::on_bounds_changed()
 {
     _renderer.set_bounds(*Bounds);
 
-    request_redraw(this->name() + "bounds changed");
+    queue_redraw(this->name() + "bounds changed");
     on_styles_changed();
 }
 
@@ -552,5 +562,4 @@ void form_base::hide_tooltip()
     _mouseOverTime    = 0ms;
     _isTooltipVisible = false;
 }
-
 }

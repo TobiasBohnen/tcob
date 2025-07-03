@@ -29,18 +29,18 @@ progress_bar::progress_bar(init const& wi)
     , Value {{[this](i32 val) -> i32 { return std::clamp(val, *Min, *Max); }}}
 {
     _tween.Changed.connect([this]() {
-        request_redraw(this->name() + ": Tween value changed");
+        queue_redraw(this->name() + ": Tween value changed");
     });
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, *Value);
         on_value_changed(*Value);
-        request_redraw(this->name() + ": Min changed");
+        queue_redraw(this->name() + ": Min changed");
     });
     Min(0);
     Max.Changed.connect([this](auto val) {
         Value = std::min(val, *Value);
         on_value_changed(*Value);
-        request_redraw(this->name() + ": Max changed");
+        queue_redraw(this->name() + ": Max changed");
     });
     Max(100);
     Value.Changed.connect([this](auto val) { on_value_changed(val); });

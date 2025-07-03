@@ -10,6 +10,7 @@
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -28,7 +29,10 @@ vscroll_widget::vscroll_widget(init const& wi)
     : widget {wi}
     , _vScrollbar {orientation::Vertical}
 {
-    _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
+    _vScrollbar.ValueChanged.connect([this]() {
+        form().refresh_hover(this);
+        queue_redraw(this->name() + ": Scrollbar changed");
+    });
 }
 
 void vscroll_widget::on_styles_changed()

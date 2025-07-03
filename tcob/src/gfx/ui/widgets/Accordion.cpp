@@ -39,7 +39,7 @@ accordion::accordion(init const& wi)
     , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
     _expandTween.Changed.connect([&]() {
-        request_redraw(this->name() + ": Tween value changed");
+        queue_redraw(this->name() + ": Tween value changed");
     });
 
     ActiveSectionIndex.Changed.connect([this](auto const&) {
@@ -49,14 +49,14 @@ accordion::accordion(init const& wi)
             _expandTween.reset(0);
             _expandTween.start(1, _style.ExpandDuration);
         }
-        request_redraw(this->name() + ": ActiveSection changed");
+        queue_redraw(this->name() + ": ActiveSection changed");
     });
     ActiveSectionIndex(INVALID_INDEX);
 
-    HoveredSectionIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredSection changed"); });
+    HoveredSectionIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": HoveredSection changed"); });
     HoveredSectionIndex(INVALID_INDEX);
 
-    MaximizeActiveSection.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaximizeActiveSection changed"); });
+    MaximizeActiveSection.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": MaximizeActiveSection changed"); });
     MaximizeActiveSection(false);
 
     Class("accordion");
@@ -89,7 +89,7 @@ void accordion::remove_section(widget* sec)
         ActiveSectionIndex = 0;
     }
 
-    request_redraw(this->name() + ": section removed");
+    queue_redraw(this->name() + ": section removed");
 }
 
 void accordion::clear_sections()
@@ -107,7 +107,7 @@ void accordion::change_section_label(widget* sec, utf8_string const& label)
             break;
         }
     }
-    request_redraw(this->name() + ": section renamed");
+    queue_redraw(this->name() + ": section renamed");
 }
 
 void accordion::change_section_label(widget* sec, item const& label)
@@ -118,7 +118,7 @@ void accordion::change_section_label(widget* sec, item const& label)
             break;
         }
     }
-    request_redraw(this->name() + ": section label changed");
+    queue_redraw(this->name() + ": section label changed");
 }
 
 auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
@@ -259,7 +259,7 @@ void accordion::on_animation_step(string const& val)
         auto& sec {_sectionLabels[ActiveSectionIndex]};
         sec.Icon.TextureRegion = val;
         if (sec.Icon.Texture) {
-            request_redraw(this->name() + ": Animation Frame changed ");
+            queue_redraw(this->name() + ": Animation Frame changed ");
         }
     }
 }

@@ -41,9 +41,9 @@ list_box::list_box(init const& wi)
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
-    HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
 
     Items.Changed.connect([this](auto const& val) {
@@ -56,7 +56,7 @@ list_box::list_box(init const& wi)
         }
 
         apply_filter();
-        request_redraw(this->name() + ": Items changed");
+        queue_redraw(this->name() + ": Items changed");
     });
 
     Filter.Changed.connect([this](auto const& /* val */) {
@@ -65,7 +65,7 @@ list_box::list_box(init const& wi)
         set_scrollbar_value(0);
 
         apply_filter();
-        request_redraw(this->name() + ": Filter changed");
+        queue_redraw(this->name() + ": Filter changed");
     });
 
     Class("list_box");
@@ -177,7 +177,7 @@ void list_box::on_animation_step(string const& val)
             auto& item {(Filter->empty() ? items : _filteredItems)[SelectedItemIndex]};
             item.Icon.TextureRegion = val;
             if (item.Icon.Texture) {
-                request_redraw(this->name() + ": Animation Frame changed ");
+                queue_redraw(this->name() + ": Animation Frame changed ");
             }
             return false;
         });

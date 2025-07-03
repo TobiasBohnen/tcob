@@ -46,7 +46,7 @@ void checkbox::on_update(milliseconds /*deltaTime*/)
 
 void checkbox::on_checked_changed()
 {
-    request_redraw(this->name() + ": Checked changed");
+    queue_redraw(this->name() + ": Checked changed");
 }
 
 void checkbox::on_click()

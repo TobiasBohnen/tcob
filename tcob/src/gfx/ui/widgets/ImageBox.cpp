@@ -17,9 +17,9 @@ namespace tcob::ui {
 image_box::image_box(init const& wi)
     : widget {wi}
 {
-    Image.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Image changed"); });
+    Image.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Image changed"); });
 
-    Fit.Changed.connect([this](auto const&) { request_redraw(this->name() + ": Fit changed"); });
+    Fit.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Fit changed"); });
     Fit(fit_mode::Contain);
 
     Class("image_box");

@@ -129,4 +129,11 @@ inline auto tree_layout::create_widget(i32 level, string const& name) -> std::sh
     return retValue;
 }
 
+////////////////////////////////////////////////////////////
+template <std::derived_from<widget> T>
+inline auto stack_layout::create_widget(string const& name) -> std::shared_ptr<T>
+{
+    return add_widget<T>(name);
+}
+
 }

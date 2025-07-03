@@ -26,7 +26,7 @@ cycle_button::cycle_button(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(*Items) - 1); }}}
 {
-    SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
 
     Items.Changed.connect([this](auto const& val) {
@@ -35,7 +35,7 @@ cycle_button::cycle_button(init const& wi)
             SelectedItemIndex = INVALID_INDEX;
         }
 
-        request_redraw(this->name() + ": Items changed");
+        queue_redraw(this->name() + ": Items changed");
     });
 
     Class("cycle_button");
@@ -91,7 +91,7 @@ void cycle_button::on_animation_step(string const& val)
     if (SelectedItemIndex >= 0) {
         Items.mutate([&](auto& items) {
             items[SelectedItemIndex].Icon.TextureRegion = val;
-            request_redraw(this->name() + ": Animation Frame changed ");
+            queue_redraw(this->name() + ": Animation Frame changed ");
             return false;
         });
     }

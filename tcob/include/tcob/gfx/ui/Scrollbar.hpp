@@ -26,7 +26,7 @@ public:
 
     scrollbar(orientation orien);
 
-    signal<> Changed;
+    signal<> ValueChanged;
 
     bool Visible {false};
 

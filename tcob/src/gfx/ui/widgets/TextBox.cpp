@@ -39,13 +39,13 @@ text_box::text_box(init const& wi)
         _textLength = utf8::length(val);
         _textDirty  = true;
         _caretPos   = std::min(_caretPos, _textLength);
-        request_redraw(this->name() + ": Text changed");
+        queue_redraw(this->name() + ": Text changed");
     });
 
     MaxLength.Changed.connect([this](auto const& val) {
         if (_textLength > val) {
             Text = utf8::substr(*Text, 0, val);
-            request_redraw(this->name() + ": MaxLength changed");
+            queue_redraw(this->name() + ": MaxLength changed");
         }
     });
     MaxLength(std::numeric_limits<isize>::max());
@@ -54,7 +54,7 @@ text_box::text_box(init const& wi)
         if (!val) {
             select_text(INVALID_INDEX, INVALID_INDEX);
         }
-        request_redraw(this->name() + ": Selectable changed");
+        queue_redraw(this->name() + ": Selectable changed");
     });
     Selectable(false);
 
@@ -73,7 +73,7 @@ void text_box::select_text(isize first, isize last)
     _selectedText.second = std::max(first, last);
 
     if (Selectable) {
-        request_redraw(this->name() + ": SelectedText changed");
+        queue_redraw(this->name() + ": SelectedText changed");
     }
 }
 
@@ -91,7 +91,7 @@ void text_box::set_caret_pos(isize pos)
 {
     if (_caretPos == pos) { return; }
     _caretPos = pos;
-    request_redraw(this->name() + ": Caret moved");
+    queue_redraw(this->name() + ": Caret moved");
 }
 
 void text_box::on_draw(widget_painter& painter)
@@ -294,7 +294,7 @@ void text_box::on_focus_gained()
     _caretTween = make_unique_tween<square_wave_tween<bool>>(_style.Caret.BlinkRate, 1.0f, 0.0f);
     _caretTween->Value.Changed.connect([this](auto val) {
         _caretVisible = val;
-        request_redraw(this->name() + ": Caret blink");
+        queue_redraw(this->name() + ": Caret blink");
     });
     _caretTween->start(playback_mode::Looped);
 }

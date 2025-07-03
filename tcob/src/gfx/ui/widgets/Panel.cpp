@@ -38,12 +38,18 @@ panel::panel(init const& wi)
     , _vScrollbar {orientation::Vertical}
     , _hScrollbar {orientation::Horizontal}
 {
-    _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
-    _hScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
+    _vScrollbar.ValueChanged.connect([this]() {
+        form().refresh_hover(this);
+        queue_redraw(this->name() + ": Scrollbar changed");
+    });
+    _hScrollbar.ValueChanged.connect([this]() {
+        form().refresh_hover(this);
+        queue_redraw(this->name() + ": Scrollbar changed");
+    });
 
-    _layout->Changed.connect([&]() { request_redraw("Layout changed"); });
+    _layout->Changed.connect([&]() { queue_redraw("Layout changed"); });
 
-    ScrollEnabled.Changed.connect([this](auto const&) { request_redraw(this->name() + ": ScrollEnabled changed"); });
+    ScrollEnabled.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": ScrollEnabled changed"); });
     ScrollEnabled(false);
 
     Class("panel");

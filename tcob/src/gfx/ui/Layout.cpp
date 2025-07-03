@@ -416,14 +416,48 @@ void tree_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
     f32 const   horiSize {size.Width / static_cast<f32>(_maxLevel + 1)};
-    f32 const   vertSize {size.Height / static_cast<f32>(widgets().size())};
+    f32 const   vertSize {size.Height / static_cast<f32>(w.size())};
 
     f32 y {0.f};
     for (auto const& widget : w) {
+        f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
+        f32 const widgetHeight {widget->Flex->Height.calc(vertSize)};
+
         i32 const level {_levels[widget.get()]};
         f32 const x {level * horiSize};
-        widget->Bounds = {{x, y}, {horiSize, vertSize}};
+        widget->Bounds = {{x, y}, {widgetWidth, widgetHeight}};
         y += vertSize;
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+stack_layout::stack_layout(parent parent)
+    : layout {parent}
+{
+}
+
+void stack_layout::activate_widget(widget* widget)
+{
+    _active = widget;
+}
+
+void stack_layout::do_layout(size_f size)
+{
+    auto const& w {widgets()};
+    f32 const   horiSize {size.Width};
+    f32 const   vertSize {size.Height};
+
+    for (auto const& widget : w) {
+        if (widget.get() == _active) {
+            rect_f const bounds {point_f::Zero, {widget->Flex->Width.calc(horiSize), widget->Flex->Height.calc(vertSize)}};
+            if (widget->Bounds != bounds) {
+                widget->Bounds = bounds;
+                widget->form().refresh_hover(widget.get());
+            }
+        } else {
+            widget->Bounds = rect_f::Zero;
+        }
     }
 }
 

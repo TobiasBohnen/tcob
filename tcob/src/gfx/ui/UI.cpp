@@ -105,12 +105,12 @@ namespace detail {
 
     void input_injector::on_mouse_button_down(widget* widget, input::mouse::button_event const& ev) const
     {
-        if (check(widget)) { widget->do_mouse_down(ev); }
+        if (check(widget)) { widget->do_mouse_button_down(ev); }
     }
 
     void input_injector::on_mouse_button_up(widget* widget, input::mouse::button_event const& ev) const
     {
-        if (check(widget)) { widget->do_mouse_up(ev); }
+        if (check(widget)) { widget->do_mouse_button_up(ev); }
     }
 
     void input_injector::on_mouse_hover(widget* widget, input::mouse::motion_event const& ev) const

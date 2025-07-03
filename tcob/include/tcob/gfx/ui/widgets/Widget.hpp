@@ -40,8 +40,8 @@ public:
     signal<keyboard_event const>          KeyUp;
     signal<widget_event const>            MouseEnter;
     signal<widget_event const>            MouseLeave;
-    signal<mouse_button_event const>      MouseDown;
-    signal<mouse_button_event const>      MouseUp;
+    signal<mouse_button_event const>      MouseButtonDown;
+    signal<mouse_button_event const>      MouseButtonUp;
     signal<mouse_motion_event const>      MouseHover;
     signal<mouse_motion_event const>      MouseDrag;
     signal<mouse_wheel_event const>       MouseWheel;
@@ -130,7 +130,7 @@ protected:
 
     void virtual on_draw(widget_painter& painter) = 0;
     void virtual prepare_redraw();
-    void request_redraw(string const& reason);
+    void queue_redraw(string const& reason);
 
     auto draw_background(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
 
@@ -178,8 +178,8 @@ private:
     void do_mouse_leave();
     void do_mouse_hover(input::mouse::motion_event const& ev);
     void do_mouse_drag(input::mouse::motion_event const& ev);
-    void do_mouse_down(input::mouse::button_event const& ev);
-    void do_mouse_up(input::mouse::button_event const& ev);
+    void do_mouse_button_down(input::mouse::button_event const& ev);
+    void do_mouse_button_up(input::mouse::button_event const& ev);
     void do_mouse_wheel(input::mouse::wheel_event const& ev);
     void do_controller_button_down(input::controller::button_event const& ev);
     void do_controller_button_up(input::controller::button_event const& ev);

@@ -49,19 +49,19 @@ grid_view::grid_view(init const& wi)
             HoveredCellIndex  = INVALID;
         }
 
-        request_redraw(this->name() + ": Grid changed");
+        queue_redraw(this->name() + ": Grid changed");
     });
     Header.Changed.connect([this](auto const& val) {
         _columnSizes.resize(val.size());
         for (usize x {0}; x < _columnSizes.size(); ++x) {
             _columnSizes[x] = std::max(_columnSizes[x], std::ssize(val[x].Text));
         }
-        request_redraw(this->name() + ": Header changed");
+        queue_redraw(this->name() + ": Header changed");
     });
 
-    SelectedCellIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedCell changed"); });
+    SelectedCellIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": SelectedCell changed"); });
     SelectedCellIndex(INVALID);
-    HoveredCellIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredCell changed"); });
+    HoveredCellIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": HoveredCell changed"); });
     HoveredCellIndex(INVALID);
 
     SelectMode(select_mode::Cell);
@@ -185,14 +185,14 @@ void grid_view::on_animation_step(string const& val)
             Header.mutate([&](auto& header) {
                 auto& cell {header[SelectedCellIndex->X]};
                 cell.Icon.TextureRegion = val;
-                request_redraw(this->name() + ": Animation Frame changed ");
+                queue_redraw(this->name() + ": Animation Frame changed ");
                 return false; // don't invoke Header.Changed
             });
         } else {
             Grid.mutate([&](auto& grid) {
                 auto& cell {grid[SelectedCellIndex->X, SelectedCellIndex->Y - 1]};
                 cell.Icon.TextureRegion = val;
-                request_redraw(this->name() + ": Animation Frame changed ");
+                queue_redraw(this->name() + ": Animation Frame changed ");
                 return false; // don't invoke Grid.Changed
             });
         }

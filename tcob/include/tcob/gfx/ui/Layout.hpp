@@ -231,6 +231,25 @@ private:
     i32                              _maxLevel {0};
 };
 
+////////////////////////////////////////////////////////////
+
+// stack_layout: Only active widget is visible.
+class TCOB_API stack_layout final : public layout {
+public:
+    explicit stack_layout(parent parent);
+
+    template <std::derived_from<widget> T>
+    auto create_widget(string const& name) -> std::shared_ptr<T>;
+
+    void activate_widget(widget* widget);
+
+protected:
+    void do_layout(size_f size) override;
+
+private:
+    widget* _active {nullptr};
+};
+
 }
 
 #include "Layout.inl"

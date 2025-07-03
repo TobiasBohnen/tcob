@@ -36,13 +36,16 @@ drop_down_list::drop_down_list(init const& wi)
     , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , _vScrollbar {orientation::Vertical}
 {
-    _vScrollbar.Changed.connect([this]() { request_redraw(this->name() + ": Scrollbar changed"); });
+    _vScrollbar.ValueChanged.connect([this]() {
+        form().refresh_hover(this);
+        queue_redraw(this->name() + ": Scrollbar changed");
+    });
 
-    SelectedItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": SelectedItem changed"); });
+    SelectedItemIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": SelectedItem changed"); });
     SelectedItemIndex(INVALID_INDEX);
-    HoveredItemIndex.Changed.connect([this](auto const&) { request_redraw(this->name() + ": HoveredItem changed"); });
+    HoveredItemIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": HoveredItem changed"); });
     HoveredItemIndex(INVALID_INDEX);
-    MaxVisibleItems.Changed.connect([this](auto const&) { request_redraw(this->name() + ": MaxVisibleItems changed"); });
+    MaxVisibleItems.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": MaxVisibleItems changed"); });
     MaxVisibleItems(5);
 
     Items.Changed.connect([this](auto const& val) {
@@ -54,7 +57,7 @@ drop_down_list::drop_down_list(init const& wi)
             HoveredItemIndex  = INVALID_INDEX;
         }
 
-        request_redraw(this->name() + ": Items changed");
+        queue_redraw(this->name() + ": Items changed");
     });
 
     Class("drop_down_list");
@@ -193,7 +196,7 @@ void drop_down_list::on_mouse_leave()
 
     if (_mouseOverBox) {
         _mouseOverBox = false;
-        request_redraw(this->name() + ": mouse left");
+        queue_redraw(this->name() + ": mouse left");
     }
     _vScrollbar.mouse_leave();
 }
@@ -301,7 +304,7 @@ void drop_down_list::on_animation_step(string const& val)
             auto& item {items[SelectedItemIndex]};
             item.Icon.TextureRegion = val;
             if (item.Icon.Texture) {
-                request_redraw(this->name() + ": Animation Frame changed ");
+                queue_redraw(this->name() + ": Animation Frame changed ");
             }
             return false;
         });
@@ -367,7 +370,7 @@ void drop_down_list::set_extended(bool v)
 {
     if (_isExtended != v) {
         _isExtended = v;
-        request_redraw(this->name() + ": extended change");
+        queue_redraw(this->name() + ": extended change");
     }
 }
 

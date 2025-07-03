@@ -60,7 +60,7 @@ public:
     void virtual remove_container(widget* widget)                                  = 0;
     void virtual clear_containers()                                                = 0;
 
-    void request_redraw(string const& reason);
+    void queue_redraw(string const& reason);
     void notify_redraw(string const& reason);
 
     template <SubmitTarget Target>
@@ -68,6 +68,8 @@ public:
 
     auto virtual get_layout() -> layout*             = 0;
     auto virtual get_layout() const -> layout const* = 0;
+
+    void refresh_hover(widget* widget);
 
 protected:
     form_base(string name, rect_f const& bounds);

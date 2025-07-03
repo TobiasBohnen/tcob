@@ -24,7 +24,7 @@ toggle::toggle(init const& wi)
     : widget {wi}
 {
     _tween.Changed.connect([this]() {
-        request_redraw(this->name() + ": Tween value changed");
+        queue_redraw(this->name() + ": Tween value changed");
     });
 
     Checked.Changed.connect([this](auto const&) { on_checked_changed(); });
