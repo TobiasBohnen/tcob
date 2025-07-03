@@ -34,7 +34,7 @@ void panel::style::Transition(style& target, style const& left, style const& rig
 
 panel::panel(init const& wi)
     : widget_container {wi}
-    , _layout {std::make_unique<static_layout>(this)}
+    , _layout {std::make_unique<panel::default_layout>(this)}
     , _vScrollbar {orientation::Vertical}
     , _hScrollbar {orientation::Horizontal}
 {
@@ -166,7 +166,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
     if (ev.Handled) { return; }
 
-    if (is_movable()) {
+    if (can_move()) {
         Bounds     = {Bounds->Position + ev.RelativeMotion, Bounds->Size};
         ev.Handled = true;
         return;
@@ -237,9 +237,9 @@ auto panel::get_layout() const -> layout*
     return _layout.get();
 }
 
-auto panel::is_movable() const -> bool
+auto panel::can_move() const -> bool
 {
-    return *Movable && is_top_level() && form().get_layout()->is_move_allowed();
+    return *Movable && is_top_level() && form().get_layout()->allows_move();
 }
 
 auto panel::get_scroll_max_value(orientation orien) const -> f32

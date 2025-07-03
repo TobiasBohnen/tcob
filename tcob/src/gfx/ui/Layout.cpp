@@ -24,10 +24,8 @@
 
 namespace tcob::ui {
 
-layout::layout(parent parent, bool resizeAllowed, bool moveAllowed)
+layout::layout(parent parent)
     : _parent {parent}
-    , _resizeAllowed {resizeAllowed}
-    , _moveAllowed {moveAllowed}
 {
 }
 
@@ -86,14 +84,14 @@ void layout::normalize_zorder()
     for (auto& w : _widgets) { w->ZOrder = newZ--; }
 }
 
-auto layout::is_resize_allowed() const -> bool
+auto layout::allows_move() const -> bool
 {
-    return _resizeAllowed;
+    return false;
 }
 
-auto layout::is_move_allowed() const -> bool
+auto layout::allows_resize() const -> bool
 {
-    return _moveAllowed;
+    return false;
 }
 
 auto layout::create_init(string const& name) const -> widget::init
@@ -125,8 +123,18 @@ auto layout::create_init(string const& name) const -> widget::init
 ////////////////////////////////////////////////////////////
 
 static_layout::static_layout(parent parent)
-    : layout {parent, true, true}
+    : layout {parent}
 {
+}
+
+auto static_layout::allows_move() const -> bool
+{
+    return true;
+}
+
+auto static_layout::allows_resize() const -> bool
+{
+    return true;
 }
 
 void static_layout::do_layout(size_f /* size */)
@@ -136,8 +144,13 @@ void static_layout::do_layout(size_f /* size */)
 ////////////////////////////////////////////////////////////
 
 flex_size_layout::flex_size_layout(parent parent)
-    : layout {parent, false, true}
+    : layout {parent}
 {
+}
+
+auto flex_size_layout::allows_move() const -> bool
+{
+    return true;
 }
 
 void flex_size_layout::do_layout(size_f size)
@@ -208,9 +221,10 @@ void dock_layout::do_layout(size_f size)
 
 ////////////////////////////////////////////////////////////
 
-grid_layout::grid_layout(parent parent, size_i initSize)
+grid_layout::grid_layout(parent parent, size_i initSize, bool autoGrow)
     : layout {parent}
     , _grid {initSize}
+    , _autoGrow {autoGrow}
 {
 }
 
@@ -224,11 +238,9 @@ void grid_layout::do_layout(size_f size)
     for (auto const& widget : w) {
         rect_f bounds {_widgetBounds[widget.get()]};
         bounds.Position.X *= horiSize;
-        bounds.Size.Width *= horiSize;
-        bounds.Size.Width = widget->Flex->Width.calc(bounds.Size.Width);
+        bounds.Size.Width = widget->Flex->Width.calc(bounds.Size.Width * horiSize);
         bounds.Position.Y *= vertSize;
-        bounds.Size.Height *= vertSize;
-        bounds.Size.Height = widget->Flex->Height.calc(bounds.Size.Height);
+        bounds.Size.Height = widget->Flex->Height.calc(bounds.Size.Height * vertSize);
 
         widget->Bounds = bounds;
     }
@@ -357,18 +369,18 @@ void flow_layout::do_layout(size_f size)
 
 masonry_layout::masonry_layout(parent parent, i32 columns)
     : layout {parent}
-    , _columns {columns} // _columns is a member variable
+    , _columns {columns}
 {
 }
 
 void masonry_layout::do_layout(size_f size)
 {
     auto const&      w {widgets()};
-    f32 const        colWidth {size.Width / _columns};
+    f32 const        horiSize {size.Width / _columns};
     std::vector<f32> colHeights(_columns, 0.0f);
 
     for (auto const& widget : w) {
-        f32 const widgetWidth {widget->Flex->Width.calc(colWidth)};
+        f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
         f32 const widgetHeight {widget->Flex->Height.calc(size.Height)};
 
         // Find the shortest column that can fit the widget
@@ -386,10 +398,32 @@ void masonry_layout::do_layout(size_f size)
         }
 
         // Place the widget in the selected column
-        f32 const x {colIndex * colWidth};
+        f32 const x {colIndex * horiSize};
         f32 const y {colHeights[colIndex]};
         widget->Bounds = {x, y, widgetWidth, widgetHeight};
         colHeights[colIndex] += widgetHeight;
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+tree_layout::tree_layout(parent parent)
+    : layout {parent}
+{
+}
+
+void tree_layout::do_layout(size_f size)
+{
+    auto const& w {widgets()};
+    f32 const   horiSize {size.Width / static_cast<f32>(_maxLevel + 1)};
+    f32 const   vertSize {size.Height / static_cast<f32>(widgets().size())};
+
+    f32 y {0.f};
+    for (auto const& widget : w) {
+        i32 const level {_levels[widget.get()]};
+        f32 const x {level * horiSize};
+        widget->Bounds = {{x, y}, {horiSize, vertSize}};
+        y += vertSize;
     }
 }
 

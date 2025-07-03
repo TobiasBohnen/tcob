@@ -63,12 +63,12 @@ inline auto dock_layout::create_widget(dock_style dock, string const& name) -> s
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto grid_layout::create_widget(rect_i const& bounds, string const& name, bool growGrid) -> std::shared_ptr<T>
+inline auto grid_layout::create_widget(rect_i const& bounds, string const& name) -> std::shared_ptr<T>
 {
     auto retValue {add_widget<T>(name)};
 
     _widgetBounds[retValue.get()] = bounds;
-    if (growGrid) {
+    if (_autoGrow) {
         _grid.Width  = std::max(_grid.Width, bounds.right());
         _grid.Height = std::max(_grid.Height, bounds.bottom());
     }
@@ -114,6 +114,19 @@ template <std::derived_from<widget> T>
 inline auto masonry_layout::create_widget(string const& name) -> std::shared_ptr<T>
 {
     return add_widget<T>(name);
+}
+
+////////////////////////////////////////////////////////////
+
+template <std::derived_from<widget> T>
+inline auto tree_layout::create_widget(i32 level, string const& name) -> std::shared_ptr<T>
+{
+    auto retValue {add_widget<T>(name)};
+
+    _levels[retValue.get()] = level;
+    _maxLevel               = std::max(_maxLevel, level);
+
+    return retValue;
 }
 
 }

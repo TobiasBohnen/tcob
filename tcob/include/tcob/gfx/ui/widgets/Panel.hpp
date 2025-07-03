@@ -13,6 +13,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/Scrollbar.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -25,6 +26,8 @@ namespace tcob::ui {
 
 class TCOB_API panel : public widget_container { // TODO: convert to template
 public:
+    using default_layout = static_layout;
+
     class TCOB_API style : public widget_style {
     public:
         scrollbar_element HScrollBar;
@@ -70,7 +73,7 @@ protected:
 
     auto get_layout() const -> layout*;
 
-    auto is_movable() const -> bool;
+    auto can_move() const -> bool;
 
 private:
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;

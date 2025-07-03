@@ -267,7 +267,7 @@ void form_base::focus_widget(widget* newFocus)
         }
 
         auto* layout {get_layout()};
-        if (layout->is_move_allowed()) {
+        if (layout->allows_move()) {
             layout->bring_to_front(_focusWidget->top_level_widget());
         }
 
