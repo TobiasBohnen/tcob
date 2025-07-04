@@ -673,6 +673,11 @@ void canvas::clip()
     _impl->render_clip(s.Scissor, _fringeWidth, _cache->paths());
 }
 
+void canvas::clear_clip()
+{
+    _impl->render_clip({}, 0, {});
+}
+
 ////////////////////////////////////////////////////////////
 
 auto canvas::create_linear_gradient(point_f s, point_f e, color_gradient const& gradient) -> paint

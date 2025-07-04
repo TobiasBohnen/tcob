@@ -55,7 +55,8 @@ enum class nvg_call_type : u8 {
     ConvexFill,
     Stroke,
     Triangles,
-    Clip
+    Clip,
+    ClearClip
 };
 
 struct nvg_call {

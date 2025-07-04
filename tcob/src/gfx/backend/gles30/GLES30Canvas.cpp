@@ -66,6 +66,14 @@ gl_canvas::~gl_canvas()
 void gl_canvas::flush(size_f size)
 {
     if (!_calls.empty()) {
+        auto const clearStencil {[] {
+            glStencilMask(0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+            glClearStencil(0x80);
+            glClear(GL_STENCIL_BUFFER_BIT);
+        }};
+
         // Setup require GL state.
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -74,11 +82,7 @@ void gl_canvas::flush(size_f size)
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_SCISSOR_TEST);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glStencilMask(0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glClearStencil(0x80);
-        glClear(GL_STENCIL_BUFFER_BIT);
+        clearStencil();
 
         // Upload ubo for frag shaders
         glBindBuffer(GL_UNIFORM_BUFFER, _fragBuf);
@@ -106,6 +110,7 @@ void gl_canvas::flush(size_f size)
             case nvg_call_type::Stroke:     stroke(call); break;
             case nvg_call_type::Triangles:  triangles(call); break;
             case nvg_call_type::Clip:       clip(call); break;
+            case nvg_call_type::ClearClip:  clearStencil(); break;
             default:
                 break;
             }
@@ -263,6 +268,11 @@ void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& 
 void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths)
 {
     auto& call {_calls.emplace_back()};
+    if (paths.empty()) {
+        call.Type = nvg_call_type::ClearClip;
+        return;
+    }
+
     usize pathCount {paths.size()};
 
     call.PathOffset    = _paths.size();
