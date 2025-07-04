@@ -170,6 +170,7 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
         case line_type::Solid: {
             _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
             _canvas.set_stroke_width(borderSize);
+
             _canvas.begin_path();
             _canvas.rounded_rect(rect, borderRadius);
             _canvas.stroke();
@@ -178,6 +179,7 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
             _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
             f32 const dborderSize {borderSize / 3};
             _canvas.set_stroke_width(dborderSize);
+
             _canvas.begin_path();
             _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
             _canvas.rounded_rect(rect, borderRadius);
@@ -212,7 +214,18 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
             _canvas.set_line_dash({});
             _canvas.set_line_cap(gfx::line_cap::Butt);
         } break;
-        case line_type::Wavy: // TODO
+        case line_type::Wavy:
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_width(borderSize);
+
+            _canvas.begin_path();
+            _canvas.move_to(rect.top_left());
+            _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
+            _canvas.stroke();
+            break;
         case line_type::Hidden:
             break;
         }
