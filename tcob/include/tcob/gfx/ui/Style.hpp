@@ -18,9 +18,7 @@
 
 namespace tcob::ui {
 
-////////////////////////////////////////////////////////////
-
-enum class line_type : u8 {
+enum class border_type : u8 {
     Solid,
     Double,
     Dotted,
@@ -30,7 +28,18 @@ enum class line_type : u8 {
     // Inset,
     // Outset,
     // Groove,
-    // Ridge
+    // Ridge,
+    Wavy,
+    Hidden
+};
+
+////////////////////////////////////////////////////////////
+
+enum class line_type : u8 {
+    Solid,
+    Double,
+    Dotted,
+    Dashed,
     Wavy,
     Hidden
 };
@@ -154,7 +163,7 @@ public:
 
 class TCOB_API border_element {
 public:
-    line_type           Type {line_type::Solid};
+    border_type         Type {border_type::Solid};
     ui_paint            Background {colors::Transparent};
     length              Radius {};
     length              Size {};

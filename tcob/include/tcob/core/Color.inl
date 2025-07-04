@@ -126,10 +126,10 @@ auto constexpr color::as_grayscale(f32 redFactor, f32 greenFactor, f32 blueFacto
 
 auto constexpr color::Lerp(color left, color right, f64 step) -> color
 {
-    u8 const nr {static_cast<u8>(left.R + (right.R - left.R) * step)};
-    u8 const ng {static_cast<u8>(left.G + (right.G - left.G) * step)};
-    u8 const nb {static_cast<u8>(left.B + (right.B - left.B) * step)};
-    u8 const na {static_cast<u8>(left.A + (right.A - left.A) * step)};
+    u8 const nr {static_cast<u8>(left.R + ((right.R - left.R) * step))};
+    u8 const ng {static_cast<u8>(left.G + ((right.G - left.G) * step))};
+    u8 const nb {static_cast<u8>(left.B + ((right.B - left.B) * step))};
+    u8 const na {static_cast<u8>(left.A + ((right.A - left.A) * step))};
     return {nr, ng, nb, na};
 }
 
