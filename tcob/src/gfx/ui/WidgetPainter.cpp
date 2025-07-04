@@ -214,7 +214,44 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
             _canvas.set_line_dash({});
             _canvas.set_line_cap(gfx::line_cap::Butt);
         } break;
-        case line_type::Wavy:
+        case line_type::Cornered: {
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_width(borderSize);
+
+            _canvas.begin_path();
+
+            auto const drawCorner {[&](point_f p0, point_f p1, point_f p2) {
+                _canvas.move_to(p0);
+                _canvas.arc_to(p1, p2, borderRadius);
+                _canvas.line_to(p2);
+            }};
+
+            f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
+            drawCorner({rect.left() + len, rect.top()}, rect.top_left(), {rect.left(), rect.top() + len});
+            drawCorner({rect.right() - len, rect.top()}, rect.top_right(), {rect.right(), rect.top() + len});
+            drawCorner({rect.right(), rect.bottom() - len}, rect.bottom_right(), {rect.right() - len, rect.bottom()});
+            drawCorner({rect.left(), rect.bottom() - len}, rect.bottom_left(), {rect.left() + len, rect.bottom()});
+            _canvas.stroke();
+        } break;
+        case line_type::Centered: {
+            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+            _canvas.set_stroke_width(borderSize);
+
+            _canvas.begin_path();
+
+            auto const drawEdge {[&](point_f from, point_f to) {
+                _canvas.move_to(from);
+                _canvas.line_to(to);
+            }};
+
+            f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
+            drawEdge({rect.left() + len, rect.top()}, {rect.right() - len, rect.top()});
+            drawEdge({rect.right(), rect.top() + len}, {rect.right(), rect.bottom() - len});
+            drawEdge({rect.right() - len, rect.bottom()}, {rect.left() + len, rect.bottom()});
+            drawEdge({rect.left(), rect.bottom() - len}, {rect.left(), rect.top() + len});
+            _canvas.stroke();
+        } break;
+        case line_type::Wavy: {
             _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
             _canvas.set_stroke_width(borderSize);
 
@@ -225,9 +262,8 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
             _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
             _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
             _canvas.stroke();
-            break;
-        case line_type::Hidden:
-            break;
+        } break;
+        case line_type::Hidden: break;
         }
     }
 }
@@ -276,7 +312,9 @@ void widget_painter::draw_text(text_element const& style, rect_f const& rect, gf
             auto const drawLine {[&](point_f p0, point_f p1, point_f offset) {
                 switch (deco.Style) {
                 case line_type::Solid:
-                case line_type::Double:
+                case line_type::Double:   // drawn twice
+                case line_type::Cornered: // TODO
+                case line_type::Centered: // TODO
                     _canvas.set_stroke_width(strokeWidth);
                     _canvas.set_stroke_style(deco.Color);
                     _canvas.stroke_line(p0 + offset, p1 + offset);
