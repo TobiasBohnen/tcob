@@ -263,6 +263,52 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
             _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
             _canvas.stroke();
         } break;
+        case border_type::Inset:
+        case border_type::Outset: {
+            auto const base {get_paint(borderStyle.Background, rect)};
+            if (std::get_if<gfx::paint_gradient>(&base.Color)) {
+                _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
+                _canvas.set_stroke_width(borderSize);
+
+                _canvas.begin_path();
+                _canvas.rounded_rect(rect, borderRadius);
+                _canvas.stroke();
+            } else if (auto const* col {std::get_if<color>(&base.Color)}) {
+                hsx const h {col->to_hsl()};
+                hsx       bright {h};
+                hsx       dark {h};
+                if (h.X < 0.25f) {
+                    bright.X = h.X + 0.25f;
+                } else {
+                    dark.X = h.X - 0.25f;
+                }
+                color const brightCol {color::FromHSLA(bright, col->A)};
+                color const darkCol {color::FromHSLA(dark, col->A)};
+
+                rect_f const clipRect {rect.as_padded_by({-borderSize, -borderSize})};
+
+                _canvas.set_stroke_width(borderSize);
+
+                _canvas.begin_path();
+                _canvas.triangle(clipRect.bottom_left(), clipRect.top_right(), clipRect.bottom_right());
+                _canvas.clip();
+                _canvas.set_stroke_style(borderStyle.Type == border_type::Inset ? brightCol : darkCol);
+                _canvas.begin_path();
+                _canvas.rounded_rect(rect, borderRadius);
+                _canvas.stroke();
+
+                _canvas.begin_path();
+                _canvas.triangle(clipRect.top_left(), clipRect.top_right(), clipRect.bottom_left());
+                _canvas.clip();
+                _canvas.set_stroke_style(borderStyle.Type == border_type::Inset ? darkCol : brightCol);
+                _canvas.begin_path();
+                _canvas.rounded_rect(rect, borderRadius);
+                _canvas.stroke();
+
+                _canvas.clear_clip();
+            }
+        } break;
+
         case border_type::Hidden: break;
         }
     }
