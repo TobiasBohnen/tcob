@@ -56,6 +56,8 @@ public:
     auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
+    void hover_widget(widget* widget);
+
     auto virtual containers() const -> std::vector<std::shared_ptr<widget>> const& = 0;
     void virtual remove_container(widget* widget)                                  = 0;
     void virtual clear_containers()                                                = 0;
@@ -68,8 +70,6 @@ public:
 
     auto virtual get_layout() -> layout*             = 0;
     auto virtual get_layout() const -> layout const* = 0;
-
-    void refresh_hover(widget* widget);
 
 protected:
     form_base(string name, rect_f const& bounds);

@@ -134,15 +134,6 @@ void form_base::notify_redraw(string const& reason)
     _prepareWidgets = true;
 }
 
-void form_base::refresh_hover(widget* widget)
-{
-    point_i const mp {locate_service<input::system>().mouse().get_position()};
-    if (!widget->hit_test(point_f {mp})) { return; }
-
-    widget->prepare_redraw();
-    on_mouse_hover({.Position = mp});
-}
-
 auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
 {
     if (!NavMap->contains(widget)) { return false; }
@@ -283,6 +274,15 @@ void form_base::focus_widget(widget* newFocus)
         _currentTabIndex = _focusWidget->TabStop->Index;
         _injector.on_focus_gained(_focusWidget);
     }
+}
+
+void form_base::hover_widget(widget* widget)
+{
+    point_i const mp {locate_service<input::system>().mouse().get_position()};
+    if (!widget->hit_test(point_f {mp})) { return; }
+
+    widget->prepare_redraw();
+    on_mouse_hover({.Position = mp});
 }
 
 void form_base::on_key_down(input::keyboard::event const& ev)
