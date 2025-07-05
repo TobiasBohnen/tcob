@@ -96,7 +96,7 @@ public:
 
     void virtual draw(widget_painter& painter);
 
-    auto hit_test(point_f pos) const -> bool;
+    auto hit_test(point_i pos) const -> bool;
 
     auto current_style() const -> widget_style const*;
 

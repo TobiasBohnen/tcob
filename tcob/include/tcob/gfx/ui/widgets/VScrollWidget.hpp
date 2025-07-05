@@ -25,9 +25,9 @@ public:
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };
 
+protected:
     explicit vscroll_widget(init const& wi);
 
-protected:
     void on_styles_changed() override;
 
     void draw_scrollbar(widget_painter& painter, rect_f& rect);

@@ -69,6 +69,7 @@ class tab_container;
 
 // base
 class widget;
+class draggable_widget;
 class vscroll_widget;
 class widget_container;
 
@@ -388,6 +389,12 @@ struct text_event {
 struct popup_event {
     popup*  Sender {nullptr};
     widget* Widget {nullptr};
+};
+
+struct drop_event {
+    widget* Sender {nullptr};
+    widget* Target {nullptr};
+    point_i Position {point_i::Zero};
 };
 
 ////////////////////////////////////////////////////////////

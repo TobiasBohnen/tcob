@@ -40,7 +40,7 @@ void widget_container::draw(widget_painter& painter)
     set_redraw(false);
 }
 
-auto widget_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
+auto widget_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
 {
     for (auto const& widget : widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }

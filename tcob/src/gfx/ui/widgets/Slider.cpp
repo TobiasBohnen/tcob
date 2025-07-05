@@ -127,7 +127,7 @@ void slider::on_mouse_button_up(input::mouse::button_event const& ev)
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
-    if (_overThumb && !hit_test(point_f {ev.Position})) {
+    if (_overThumb && !hit_test(ev.Position)) {
         _overThumb = false;
         ev.Handled = true;
     }
@@ -452,7 +452,7 @@ void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
     _max.IsDragging = false;
 
     auto const buttonUp {[&](thumb& thumb) {
-        if (thumb.Over && !hit_test(point_f {ev.Position})) {
+        if (thumb.Over && !hit_test(ev.Position)) {
             thumb.Over = false;
             return true;
         }

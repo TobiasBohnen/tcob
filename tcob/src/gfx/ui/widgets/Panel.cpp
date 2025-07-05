@@ -276,8 +276,7 @@ glass::glass(init const& wi)
 void glass::on_draw(widget_painter& painter)
 {
     if (is_top_level()) {
-        scissor_guard const guard {painter, this};
-        painter.canvas().clear();
+        painter.canvas().clear_active_texture(rect_i {*Bounds});
     }
 }
 

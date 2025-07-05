@@ -142,6 +142,7 @@ public:
     ~canvas();
 
     auto get_texture(i32 level = 0) -> assets::asset_ptr<texture>;
+    void clear_active_texture(rect_i const& rect);
 
     void begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt = 0, bool clear = true);
     void end_frame();
@@ -151,8 +152,6 @@ public:
     void set_global_composite_blendfunc(blend_func sfactor, blend_func dfactor);
     void set_global_composite_blendfunc_separate(blend_func srcRGB, blend_func dstRGB, blend_func srcAlpha, blend_func dstAlpha);
     void set_global_enforce_path_winding(bool force);
-
-    void clear();
 
     // State handling
     void save();
@@ -196,7 +195,7 @@ public:
     void stroke();
 
     void clip();
-    void clear_clip();
+    void reset_clip();
 
     // Extras
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);

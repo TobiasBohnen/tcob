@@ -136,7 +136,7 @@ void widget::update(milliseconds deltaTime)
     on_update(deltaTime);
 }
 
-auto widget::hit_test(point_f pos) const -> bool
+auto widget::hit_test(point_i pos) const -> bool
 {
     return is_visible()
         && is_enabled()

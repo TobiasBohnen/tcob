@@ -50,7 +50,7 @@ public:
     void change_tab_label(widget* tab, utf8_string const& label);
     void change_tab_label(widget* tab, item const& label);
 
-    auto find_child_at(point_f pos) -> std::shared_ptr<widget> override;
+    auto find_child_at(point_i pos) -> std::shared_ptr<widget> override;
 
     auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
 

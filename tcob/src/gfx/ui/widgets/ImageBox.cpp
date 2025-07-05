@@ -5,17 +5,21 @@
 
 #include "tcob/gfx/ui/widgets/ImageBox.hpp"
 
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Transform.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/widgets/DraggableWidget.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
 
 image_box::image_box(init const& wi)
-    : widget {wi}
+    : draggable_widget {wi}
 {
     Image.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Image changed"); });
 
@@ -73,6 +77,22 @@ void image_box::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
     canvas.set_fill_style(colors::White);
     canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
+    _imageRectCache = targetRect;
+
+    if (auto dragOffset {drag_offset()}) {
+        point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
+        painter.add_overlay([this, globalOffset, dragOffset = *dragOffset](widget_painter& painter) {
+            auto& canvas {painter.canvas()};
+
+            gfx::transform xform;
+            xform.translate(globalOffset);
+            painter.begin(Alpha, xform);
+
+            canvas.set_global_alpha(0.5f);
+            canvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
+                              {dragOffset, _imageRectCache.Size});
+        });
+    }
 }
 
 void image_box::on_update(milliseconds /* deltaTime */)
@@ -91,6 +111,11 @@ auto image_box::attributes() const -> widget_attributes
     retValue["fit"] = *Fit;
 
     return retValue;
+}
+
+auto image_box::drag_origin() const -> point_f
+{
+    return _imageRectCache.top_left();
 }
 
 } // namespace ui

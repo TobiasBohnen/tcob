@@ -106,7 +106,7 @@ void tab_container::change_tab_label(widget* tab, item const& label)
     queue_redraw(this->name() + ": tab label changed");
 }
 
-auto tab_container::find_child_at(point_f pos) -> std::shared_ptr<widget>
+auto tab_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
 {
     if (ActiveTabIndex < 0 || ActiveTabIndex >= std::ssize(_tabs)) {
         return nullptr;

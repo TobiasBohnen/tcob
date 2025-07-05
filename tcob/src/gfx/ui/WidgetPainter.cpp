@@ -93,7 +93,6 @@ void widget_painter::draw_overlays()
 
 void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
 {
-    // FIXME: transparent widgets don't properly clear their content area
     //  add margin
     rect -= style.Margin;
 
@@ -305,7 +304,7 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
                 _canvas.rounded_rect(rect, borderRadius);
                 _canvas.stroke();
 
-                _canvas.clear_clip();
+                _canvas.reset_clip();
             }
         } break;
 

@@ -166,6 +166,7 @@ namespace detail {
 }
 
 ////////////////////////////////////////////////////////////
+
 auto length::Lerp(length const& left, length const& right, f64 step) -> length
 {
     assert(left.Type == right.Type);
@@ -200,14 +201,11 @@ auto global_to_content(widget const& widget, point_i p) -> point_f
 
 auto global_to_parent(widget const& widget, point_i p) -> point_f
 {
-    point_f retValue {p};
     if (auto* parent {widget.parent()}) {
-        retValue -= (parent->global_content_bounds().Position - parent->scroll_offset());
-    } else {
-        retValue -= point_f {widget.form().Bounds->Position};
+        return point_f {p} - (parent->global_content_bounds().Position - parent->scroll_offset());
     }
 
-    return retValue;
+    return point_f {p} - point_f {widget.form().Bounds->Position};
 }
 
 void ui_paint_transition(ui_paint& target, ui_paint const& left, ui_paint const& right, f64 step)

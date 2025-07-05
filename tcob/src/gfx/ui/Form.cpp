@@ -67,7 +67,7 @@ auto form_base::top_widget() const -> widget*
     return _topWidget;
 }
 
-auto form_base::find_widget_at(point_f pos) const -> std::shared_ptr<widget>
+auto form_base::find_widget_at(point_i pos) const -> std::shared_ptr<widget>
 {
     for (auto const& widget : get_layout()->widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
@@ -279,7 +279,7 @@ void form_base::focus_widget(widget* newFocus)
 void form_base::hover_widget(widget* widget)
 {
     point_i const mp {locate_service<input::system>().mouse().get_position()};
-    if (!widget->hit_test(point_f {mp})) { return; }
+    if (!widget->hit_test(mp)) { return; }
 
     widget->prepare_redraw();
     on_mouse_hover({.Position = mp});
@@ -351,7 +351,7 @@ void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 
 void form_base::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto* newTop {find_widget_at(point_f {ev.Position}).get()};
+    auto* newTop {find_widget_at(ev.Position).get()};
 
     if (newTop && newTop->is_inert()) { // inert top
         _injector.on_mouse_leave(_topWidget);

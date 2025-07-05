@@ -27,7 +27,7 @@ public:
     void draw(widget_painter& painter) override;
     void prepare_redraw() final;
 
-    auto virtual find_child_at(point_f pos) -> std::shared_ptr<widget>;
+    auto virtual find_child_at(point_i pos) -> std::shared_ptr<widget>;
     auto virtual find_child_by_name(string const& name) -> std::shared_ptr<widget>;
 
     auto virtual widgets() const -> std::vector<std::shared_ptr<widget>> const& = 0;

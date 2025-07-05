@@ -121,7 +121,7 @@ void accordion::change_section_label(widget* sec, item const& label)
     queue_redraw(this->name() + ": section label changed");
 }
 
-auto accordion::find_child_at(point_f pos) -> std::shared_ptr<widget>
+auto accordion::find_child_at(point_i pos) -> std::shared_ptr<widget>
 {
     if (ActiveSectionIndex < 0 || ActiveSectionIndex >= std::ssize(_sections)) {
         return nullptr;

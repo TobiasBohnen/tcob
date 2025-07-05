@@ -136,6 +136,12 @@ auto canvas::get_texture(i32 level) -> assets::asset_ptr<texture>
     return _rtt[level];
 }
 
+void canvas::clear_active_texture(rect_i const& rect)
+{
+    auto& rtt {_rtt[_activeRtt]};
+    rtt->clear_rect(colors::Transparent, rect);
+}
+
 void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt, bool clear)
 {
     _activeRtt  = rtt;
@@ -673,7 +679,7 @@ void canvas::clip()
     _impl->render_clip(s.Scissor, _fringeWidth, _cache->paths());
 }
 
-void canvas::clear_clip()
+void canvas::reset_clip()
 {
     _impl->render_clip({}, 0, {});
 }
@@ -790,11 +796,6 @@ void canvas::set_global_composite_blendfunc_separate(blend_func srcRGB, blend_fu
 void canvas::set_global_enforce_path_winding(bool force)
 {
     _enforceWinding = force;
-}
-
-void canvas::clear()
-{
-    _rtt[_activeRtt]->clear({0, 0, 0, 0});
 }
 
 ////////////////////////////////////////////////////////////

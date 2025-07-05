@@ -9,6 +9,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
+#include "tcob/gfx/ui/WidgetPainter.hpp"
 
 namespace tcob::ui {
 
@@ -34,6 +35,10 @@ inline void widget::apply_sub_style(T& style, isize idx, string const& styleClas
 
 inline auto widget::draw_background(auto&& style, widget_painter& painter, bool isCircle) -> rect_f
 {
+    if (is_top_level()) {
+        painter.canvas().clear_active_texture(rect_i {*Bounds});
+    }
+
     apply_style(style);
     rect_f rect {*Bounds};
     painter.draw_background_and_border(style, rect, isCircle);

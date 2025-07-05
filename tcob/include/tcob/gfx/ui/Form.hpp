@@ -48,7 +48,7 @@ public:
     template <std::derived_from<popup> T = popup>
     auto create_popup(string const& name) -> std::shared_ptr<T>;
 
-    auto find_widget_at(point_f pos) const -> std::shared_ptr<widget>;
+    auto find_widget_at(point_i pos) const -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
     auto top_widget() const -> widget*;
     auto all_widgets() const -> std::vector<widget*>;
