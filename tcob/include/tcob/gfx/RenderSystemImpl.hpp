@@ -57,9 +57,9 @@ public:
     void virtual bind_material(material const* mat) const       = 0;
     void virtual unbind_material() const                        = 0;
 
-    void virtual enable_scissor(rect_i const& rect, i32 height) const = 0; // TODO: move to render_properties
-    void virtual disable_scissor() const                              = 0; // TODO: move to render_properties
-    void virtual clear(color c) const                                 = 0;
+    void virtual enable_scissor(rect_i const& rect) const = 0; // TODO: move to render_properties
+    void virtual disable_scissor() const                  = 0; // TODO: move to render_properties
+    void virtual clear(color c) const                     = 0;
 
     void virtual on_resize(size_i size) = 0;
 

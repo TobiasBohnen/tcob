@@ -96,13 +96,14 @@ void gl_render_target::set_viewport(rect_i const& rect)
     }
 }
 
-void gl_render_target::enable_scissor(rect_i const& rect, i32 height) const
+void gl_render_target::enable_scissor(rect_i const& rect) const
 {
     if (rect.width() < 0 || rect.height() < 0) {
         return;
     }
 
     GLCHECK(glEnable(GL_SCISSOR_TEST));
+    i32 const height {_tex->info().Size.Height};
     GLCHECK(glScissor(rect.left(), height - rect.top() - rect.height(), rect.width(), rect.height()));
 }
 

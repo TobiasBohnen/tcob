@@ -88,7 +88,7 @@ void null_render_target::finalize_render() const
 {
 }
 
-void null_render_target::enable_scissor(rect_i const&, i32) const
+void null_render_target::enable_scissor(rect_i const&) const
 {
 }
 

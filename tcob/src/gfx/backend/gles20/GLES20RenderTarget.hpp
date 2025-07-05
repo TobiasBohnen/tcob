@@ -29,7 +29,7 @@ public:
     void prepare_render(render_properties const& props) override;
     void finalize_render() const override;
 
-    void enable_scissor(rect_i const& rect, i32 height) const override;
+    void enable_scissor(rect_i const& rect) const override;
     void disable_scissor() const override;
 
     void clear(color c) const override;

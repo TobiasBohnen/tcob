@@ -49,6 +49,7 @@ public:
 
     void clear() const;
     void clear(color c) const;
+    void clear_rect(color c, rect_i const& rect) const;
 
     auto copy_to_image() const -> image;
 
