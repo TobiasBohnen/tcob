@@ -23,7 +23,21 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
+namespace detail {
+    template <typename Derived>
+    class default_creator {
+    public:
+        template <std::derived_from<widget> T>
+        auto create_widget(string const& name) -> std::shared_ptr<T>;
+    };
+}
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API layout : public non_copyable {
+    template <typename>
+    friend class detail::default_creator;
+
 public:
     using parent = std::variant<widget_container*, form_base*>;
 
@@ -60,17 +74,6 @@ private:
     parent                               _parent;
     std::vector<std::shared_ptr<widget>> _widgets {};
 };
-
-////////////////////////////////////////////////////////////
-
-namespace detail {
-    template <typename Derived>
-    class default_creator {
-    public:
-        template <std::derived_from<widget> T>
-        auto create_widget(string const& name) -> std::shared_ptr<T>;
-    };
-}
 
 ////////////////////////////////////////////////////////////
 
