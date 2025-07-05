@@ -19,6 +19,18 @@ namespace tcob::ui {
 
 ////////////////////////////////////////////////////////////
 
+namespace detail {
+    template <typename Derived>
+    template <std::derived_from<widget> T>
+    inline auto default_creator<Derived>::create_widget(string const& name) -> std::shared_ptr<T>
+    {
+        return static_cast<Derived*>(this)->template add_widget<T>(name);
+    }
+
+}
+
+////////////////////////////////////////////////////////////
+
 template <std::derived_from<widget> T>
 inline auto layout::add_widget(string const& name) -> std::shared_ptr<T>
 {
@@ -79,46 +91,6 @@ inline auto grid_layout::create_widget(rect_i const& bounds, string const& name)
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto box_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
-inline auto horizontal_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
-inline auto vertical_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
-inline auto flow_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
-inline auto masonry_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
 inline auto tree_layout::create_widget(i32 level, string const& name) -> std::shared_ptr<T>
 {
     auto retValue {add_widget<T>(name)};
@@ -127,22 +99,6 @@ inline auto tree_layout::create_widget(i32 level, string const& name) -> std::sh
     _maxLevel               = std::max(_maxLevel, level);
 
     return retValue;
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
-inline auto stack_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
-}
-
-////////////////////////////////////////////////////////////
-
-template <std::derived_from<widget> T>
-inline auto circle_layout::create_widget(string const& name) -> std::shared_ptr<T>
-{
-    return add_widget<T>(name);
 }
 
 ////////////////////////////////////////////////////////////

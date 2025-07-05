@@ -21,7 +21,6 @@
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API layout : public non_copyable {
@@ -61,6 +60,17 @@ private:
     parent                               _parent;
     std::vector<std::shared_ptr<widget>> _widgets {};
 };
+
+////////////////////////////////////////////////////////////
+
+namespace detail {
+    template <typename Derived>
+    class default_creator {
+    public:
+        template <std::derived_from<widget> T>
+        auto create_widget(string const& name) -> std::shared_ptr<T>;
+    };
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -134,12 +144,9 @@ private:
 ////////////////////////////////////////////////////////////
 
 // box_layout: Arranges widgets in a fixed grid defined by box dimensions, positioning each widget in its cell.
-class TCOB_API box_layout final : public layout {
+class TCOB_API box_layout final : public layout, public detail::default_creator<box_layout> {
 public:
     box_layout(parent parent, size_i boxSize);
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
@@ -151,12 +158,9 @@ private:
 ////////////////////////////////////////////////////////////
 
 // horizontal_layout: Evenly distributes widgets horizontally across the container.
-class TCOB_API horizontal_layout final : public layout {
+class TCOB_API horizontal_layout final : public layout, public detail::default_creator<horizontal_layout> {
 public:
     explicit horizontal_layout(parent parent, gfx::vertical_alignment alignment = gfx::vertical_alignment::Top);
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
@@ -168,12 +172,9 @@ private:
 ////////////////////////////////////////////////////////////
 
 // vertical_layout: Evenly distributes widgets vertically down the container.
-class TCOB_API vertical_layout final : public layout {
+class TCOB_API vertical_layout final : public layout, public detail::default_creator<vertical_layout> {
 public:
     explicit vertical_layout(parent parent, gfx::horizontal_alignment alignment = gfx::horizontal_alignment::Left);
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
@@ -185,12 +186,9 @@ private:
 ////////////////////////////////////////////////////////////
 
 // flow_layout: Lays out widgets left-to-right and wraps to a new row when exceeding container width.
-class TCOB_API flow_layout final : public layout {
+class TCOB_API flow_layout final : public layout, public detail::default_creator<flow_layout> {
 public:
     explicit flow_layout(parent parent);
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
@@ -199,12 +197,9 @@ protected:
 ////////////////////////////////////////////////////////////
 
 // masonry_layout: distributes widgets across a fixed number of columns
-class TCOB_API masonry_layout final : public layout {
+class TCOB_API masonry_layout final : public layout, public detail::default_creator<masonry_layout> {
 public:
     masonry_layout(parent parent, i32 columns);
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
@@ -234,12 +229,9 @@ private:
 ////////////////////////////////////////////////////////////
 
 // stack_layout: Only active widget is visible.
-class TCOB_API stack_layout final : public layout {
+class TCOB_API stack_layout final : public layout, public detail::default_creator<stack_layout> {
 public:
     explicit stack_layout(parent parent);
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
     void activate_widget(widget* widget);
 
@@ -253,12 +245,9 @@ private:
 ////////////////////////////////////////////////////////////
 
 // circle_layout: Positions widgets in a circle around the container center.
-class TCOB_API circle_layout final : public layout {
+class TCOB_API circle_layout final : public layout, public detail::default_creator<circle_layout> {
 public:
     explicit circle_layout(parent parent, length radius = {0.75f, length::type::Relative});
-
-    template <std::derived_from<widget> T>
-    auto create_widget(string const& name) -> std::shared_ptr<T>;
 
 protected:
     void do_layout(size_f size) override;
