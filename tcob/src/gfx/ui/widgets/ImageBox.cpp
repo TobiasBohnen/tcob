@@ -81,14 +81,14 @@ void image_box::on_draw(widget_painter& painter)
 
     if (auto dragOffset {drag_offset()}) {
         point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
-        painter.add_overlay([this, globalOffset, dragOffset = *dragOffset](widget_painter& painter) {
+        painter.add_overlay([this, alpha = _style.DragAlpha, globalOffset, dragOffset = *dragOffset](widget_painter& painter) {
             auto& canvas {painter.canvas()};
 
             gfx::transform xform;
             xform.translate(globalOffset);
             painter.begin(Alpha, xform);
 
-            canvas.set_global_alpha(0.5f);
+            canvas.set_global_alpha(alpha);
             canvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
                               {dragOffset, _imageRectCache.Size});
         });

@@ -18,6 +18,13 @@ namespace tcob::ui {
 
 class TCOB_API draggable_widget : public widget {
 public:
+    class TCOB_API style : public widget_style {
+    public:
+        f32 DragAlpha {0.5f};
+
+        void static Transition(style& target, style const& left, style const& right, f64 step);
+    };
+
     signal<drop_event const> Dropped;
 
     bool Draggable {false};

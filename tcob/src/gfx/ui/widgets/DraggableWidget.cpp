@@ -15,6 +15,13 @@
 
 namespace tcob::ui {
 
+void draggable_widget::style::Transition(style& target, style const& left, style const& right, f64 step)
+{
+    widget_style::Transition(target, left, right, step);
+
+    target.DragAlpha = static_cast<f32>(left.DragAlpha + ((right.DragAlpha - left.DragAlpha) * step));
+}
+
 draggable_widget::draggable_widget(init const& wi)
     : widget {wi}
 {
