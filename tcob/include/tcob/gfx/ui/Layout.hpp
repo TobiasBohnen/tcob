@@ -250,6 +250,23 @@ private:
     widget* _active {nullptr};
 };
 
+////////////////////////////////////////////////////////////
+
+// circle_layout: Positions widgets in a circle around the container center.
+class TCOB_API circle_layout final : public layout {
+public:
+    explicit circle_layout(parent parent, length radius = {0.75f, length::type::Relative});
+
+    template <std::derived_from<widget> T>
+    auto create_widget(string const& name) -> std::shared_ptr<T>;
+
+protected:
+    void do_layout(size_f size) override;
+
+private:
+    length _radius;
+};
+
 }
 
 #include "Layout.inl"

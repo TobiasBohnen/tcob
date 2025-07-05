@@ -11,6 +11,7 @@
 #include <variant>
 #include <vector>
 
+#include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -458,6 +459,36 @@ void stack_layout::do_layout(size_f size)
         } else {
             widget->Bounds = rect_f::Zero;
         }
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+circle_layout::circle_layout(parent parent, length radius)
+    : layout {parent}
+    , _radius {radius}
+{
+}
+
+void circle_layout::do_layout(size_f size)
+{
+    auto const& w {widgets()};
+    f32 const   horiSize {size.Width};
+    f32 const   vertSize {size.Height};
+
+    point_f const center {size.Width / 2.0f, size.Height / 2.0f};
+    auto const    angleStep {TAU_F / static_cast<f32>(w.size())};
+    f32 const     radius {_radius.calc(std::min(horiSize / 2.0f, vertSize / 2.0f))};
+
+    for (usize i {0}; i < w.size(); ++i) {
+        f32 const  angle {i * angleStep};
+        auto const pos {center + (point_f::FromDirection(radian_f {angle}) * radius)};
+
+        auto const& widget {w[i]};
+        f32 const   widgetWidth {widget->Flex->Width.calc(horiSize)};
+        f32 const   widgetHeight {widget->Flex->Height.calc(vertSize)};
+
+        widget->Bounds = {{pos.X - (widgetWidth / 2.0f), pos.Y - (widgetHeight / 2.0f)}, {widgetWidth, widgetHeight}};
     }
 }
 
