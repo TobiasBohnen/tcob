@@ -57,11 +57,11 @@ public:
     auto format_text(text_element const& style, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result;
 
 private:
-    void draw_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle);
-    void draw_bordered_rect(rect_f const& rect, ui_paint const& back, border_element const& borderStyle);
-    void draw_bordered_circle(rect_f const& rect, ui_paint const& back, border_element const& borderStyle);
-    void draw_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius);
-    void draw_shadow(shadow_element const& style, rect_f const& rect, bool isCircle, border_element const& borderStyle);
+    void do_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle);
+    void do_bordered_rect(rect_f const& rect, ui_paint const& back, border_element const& borderStyle);
+    void do_bordered_circle(rect_f const& rect, ui_paint const& back, border_element const& borderStyle);
+    void do_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius);
+    void do_shadow(shadow_element const& style, rect_f const& rect, bool isCircle, border_element const& borderStyle);
 
     auto get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint;
 
