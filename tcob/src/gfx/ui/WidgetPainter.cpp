@@ -91,6 +91,23 @@ void widget_painter::draw_overlays()
 
 ////////////////////////////////////////////////////////////
 
+auto static fill(gfx::canvas& canvas, auto&& paint, auto&& func)
+{
+    canvas.set_fill_style(paint);
+    canvas.begin_path();
+    func();
+    canvas.fill();
+}
+
+auto static stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
+{
+    canvas.set_stroke_width(size);
+    canvas.set_stroke_style(paint);
+    canvas.begin_path();
+    func();
+    canvas.stroke();
+}
+
 void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
 {
     //  add margin
@@ -119,10 +136,9 @@ void widget_painter::draw_bordered_rect(rect_f const& rect, ui_paint const& back
     } else {
         // background
         f32 const borderRadius {borderStyle.Radius.calc(rect.width())};
-        _canvas.set_fill_style(get_paint(back, rect));
-        _canvas.begin_path();
-        _canvas.rounded_rect(rect, borderRadius);
-        _canvas.fill();
+        fill(_canvas, get_paint(back, rect), [&] {
+            _canvas.rounded_rect(rect, borderRadius);
+        });
 
         // border
         f32 const borderSize {borderStyle.Size.calc(rect.width())};
@@ -138,11 +154,10 @@ void widget_painter::draw_bordered_circle(rect_f const& rect, ui_paint const& ba
         draw_nine_patch(*np, rect, borderStyle);
     } else {
         // background
-        _canvas.set_fill_style(get_paint(back, rect));
         f32 const r {std::min(rect.height(), rect.width()) / 2};
-        _canvas.begin_path();
-        _canvas.circle(rect.center(), r);
-        _canvas.fill();
+        fill(_canvas, get_paint(back, rect), [&] {
+            _canvas.circle(rect.center(), r);
+        });
 
         // border
         f32 const borderSize {borderStyle.Size.calc(rect.width())};
@@ -167,58 +182,40 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
     } else {
         switch (borderStyle.Type) {
         case border_type::Solid: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-            _canvas.set_stroke_width(borderSize);
-
-            _canvas.begin_path();
-            _canvas.rounded_rect(rect, borderRadius);
-            _canvas.stroke();
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                _canvas.rounded_rect(rect, borderRadius);
+            });
         } break;
         case border_type::Double: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
             f32 const dborderSize {borderSize / 3};
-            _canvas.set_stroke_width(dborderSize);
-
-            _canvas.begin_path();
-            _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
-            _canvas.rounded_rect(rect, borderRadius);
-            _canvas.stroke();
+            stroke(_canvas, dborderSize, get_paint(borderStyle.Background, rect), [&] {
+                _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
+                _canvas.rounded_rect(rect, borderRadius);
+            });
         } break;
         case border_type::Dashed: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-            _canvas.set_stroke_width(borderSize);
-
             std::vector<f32> dash;
             dash.reserve(borderStyle.Dash.size());
-            for (auto const& l : borderStyle.Dash) {
-                dash.push_back(l.calc(rect.width()));
-            }
+            for (auto const& l : borderStyle.Dash) { dash.push_back(l.calc(rect.width())); }
             _canvas.set_line_dash(dash);
             _canvas.set_dash_offset(borderStyle.DashOffset);
-            _canvas.begin_path();
-            _canvas.rounded_rect(rect, borderRadius);
-            _canvas.stroke();
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                _canvas.rounded_rect(rect, borderRadius);
+            });
             _canvas.set_line_dash({});
         } break;
         case border_type::Dotted: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-            _canvas.set_stroke_width(borderSize);
 
             _canvas.set_line_dash(std::array {borderSize / 2, borderSize * 2});
             _canvas.set_line_cap(gfx::line_cap::Round);
             _canvas.set_dash_offset(borderStyle.DashOffset);
-            _canvas.begin_path();
-            _canvas.rounded_rect(rect, borderRadius);
-            _canvas.stroke();
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                _canvas.rounded_rect(rect, borderRadius);
+            });
             _canvas.set_line_dash({});
             _canvas.set_line_cap(gfx::line_cap::Butt);
         } break;
         case border_type::Cornered: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-            _canvas.set_stroke_width(borderSize);
-
-            _canvas.begin_path();
-
             auto const drawCorner {[&](point_f p0, point_f p1, point_f p2) {
                 _canvas.move_to(p0);
                 _canvas.arc_to(p1, p2, borderRadius);
@@ -226,52 +223,44 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
             }};
 
             f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
-            drawCorner({rect.left() + len, rect.top()}, rect.top_left(), {rect.left(), rect.top() + len});
-            drawCorner({rect.right() - len, rect.top()}, rect.top_right(), {rect.right(), rect.top() + len});
-            drawCorner({rect.right(), rect.bottom() - len}, rect.bottom_right(), {rect.right() - len, rect.bottom()});
-            drawCorner({rect.left(), rect.bottom() - len}, rect.bottom_left(), {rect.left() + len, rect.bottom()});
-            _canvas.stroke();
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                drawCorner({rect.left() + len, rect.top()}, rect.top_left(), {rect.left(), rect.top() + len});
+                drawCorner({rect.right() - len, rect.top()}, rect.top_right(), {rect.right(), rect.top() + len});
+                drawCorner({rect.right(), rect.bottom() - len}, rect.bottom_right(), {rect.right() - len, rect.bottom()});
+                drawCorner({rect.left(), rect.bottom() - len}, rect.bottom_left(), {rect.left() + len, rect.bottom()});
+            });
         } break;
         case border_type::Centered: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-            _canvas.set_stroke_width(borderSize);
-
-            _canvas.begin_path();
-
             auto const drawEdge {[&](point_f from, point_f to) {
                 _canvas.move_to(from);
                 _canvas.line_to(to);
             }};
 
             f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
-            drawEdge({rect.left() + len, rect.top()}, {rect.right() - len, rect.top()});
-            drawEdge({rect.right(), rect.top() + len}, {rect.right(), rect.bottom() - len});
-            drawEdge({rect.right() - len, rect.bottom()}, {rect.left() + len, rect.bottom()});
-            drawEdge({rect.left(), rect.bottom() - len}, {rect.left(), rect.top() + len});
-            _canvas.stroke();
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                drawEdge({rect.left() + len, rect.top()}, {rect.right() - len, rect.top()});
+                drawEdge({rect.right(), rect.top() + len}, {rect.right(), rect.bottom() - len});
+                drawEdge({rect.right() - len, rect.bottom()}, {rect.left() + len, rect.bottom()});
+                drawEdge({rect.left(), rect.bottom() - len}, {rect.left(), rect.top() + len});
+            });
         } break;
         case border_type::Wavy: {
-            _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-            _canvas.set_stroke_width(borderSize);
-
-            _canvas.begin_path();
-            _canvas.move_to(rect.top_left());
-            _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
-            _canvas.stroke();
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                _canvas.move_to(rect.top_left());
+                _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1);
+                _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1);
+                _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
+                _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
+            });
         } break;
         case border_type::Inset:
         case border_type::Outset: {
             auto const base {get_paint(borderStyle.Background, rect)};
             if (std::get_if<gfx::paint_gradient>(&base.Color)) {
-                _canvas.set_stroke_style(get_paint(borderStyle.Background, rect));
-                _canvas.set_stroke_width(borderSize);
-
-                _canvas.begin_path();
-                _canvas.rounded_rect(rect, borderRadius);
-                _canvas.stroke();
+                stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                    _canvas.move_to(rect.top_left());
+                    _canvas.rounded_rect(rect, borderRadius);
+                });
             } else if (auto const* col {std::get_if<color>(&base.Color)}) {
                 hsx const h {col->to_hsl()};
                 hsx       bright {h};
@@ -286,23 +275,19 @@ void widget_painter::draw_border(rect_f const& rect, border_element const& borde
 
                 rect_f const clipRect {rect.as_padded_by({-borderSize, -borderSize})};
 
-                _canvas.set_stroke_width(borderSize);
-
                 _canvas.begin_path();
                 _canvas.triangle(clipRect.bottom_left(), clipRect.top_right(), clipRect.bottom_right());
                 _canvas.clip();
-                _canvas.set_stroke_style(borderStyle.Type == border_type::Inset ? brightCol : darkCol);
-                _canvas.begin_path();
-                _canvas.rounded_rect(rect, borderRadius);
-                _canvas.stroke();
+                stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? brightCol : darkCol, [&] {
+                    _canvas.rounded_rect(rect, borderRadius);
+                });
 
                 _canvas.begin_path();
                 _canvas.triangle(clipRect.top_left(), clipRect.top_right(), clipRect.bottom_left());
                 _canvas.clip();
-                _canvas.set_stroke_style(borderStyle.Type == border_type::Inset ? darkCol : brightCol);
-                _canvas.begin_path();
-                _canvas.rounded_rect(rect, borderRadius);
-                _canvas.stroke();
+                stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? darkCol : brightCol, [&] {
+                    _canvas.rounded_rect(rect, borderRadius);
+                });
 
                 _canvas.reset_clip();
             }
@@ -358,41 +343,36 @@ void widget_painter::draw_text(text_element const& style, rect_f const& rect, gf
                 switch (deco.Style) {
                 case line_type::Solid:
                 case line_type::Double: // drawn twice
-                    _canvas.set_stroke_width(strokeWidth);
-                    _canvas.set_stroke_style(deco.Color);
-                    _canvas.stroke_line(p0 + offset, p1 + offset);
+                    stroke(_canvas, strokeWidth, deco.Color, [&] {
+                        _canvas.move_to(p0 + offset);
+                        _canvas.line_to(p1 + offset);
+                    });
                     break;
                 case line_type::Dotted: {
-                    _canvas.set_stroke_width(strokeWidth);
-                    _canvas.set_stroke_style(deco.Color);
                     f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 20))};
                     _canvas.set_line_dash(std::array {dash, dash * 2});
-                    _canvas.begin_path();
-                    _canvas.move_to(p0 + offset);
-                    _canvas.line_to(p1 + offset);
-                    _canvas.stroke();
+                    stroke(_canvas, strokeWidth, deco.Color, [&] {
+                        _canvas.move_to(p0 + offset);
+                        _canvas.line_to(p1 + offset);
+                    });
                     _canvas.set_line_dash({});
                 } break;
                 case line_type::Dashed: {
-                    _canvas.set_stroke_width(strokeWidth);
-                    _canvas.set_stroke_style(deco.Color);
                     f32 const dash {std::max(1.0f, static_cast<f32>(p0.distance_to(p1) / 7))};
                     _canvas.set_line_dash(std::array {dash, dash});
                     _canvas.set_dash_offset(dash / 2);
-                    _canvas.begin_path();
-                    _canvas.move_to(p0 + offset);
-                    _canvas.line_to(p1 + offset);
-                    _canvas.stroke();
+                    stroke(_canvas, strokeWidth, deco.Color, [&] {
+                        _canvas.move_to(p0 + offset);
+                        _canvas.line_to(p1 + offset);
+                    });
                     _canvas.set_line_dash({});
                     _canvas.set_dash_offset(0);
                 } break;
                 case line_type::Wavy:
-                    _canvas.set_stroke_width(strokeWidth);
-                    _canvas.set_stroke_style(deco.Color);
-                    _canvas.begin_path();
-                    _canvas.move_to(p0 + offset);
-                    _canvas.wavy_line_to(p1 + offset, strokeWidth * 1.25f, 0.5f);
-                    _canvas.stroke();
+                    stroke(_canvas, strokeWidth, deco.Color, [&] {
+                        _canvas.move_to(p0 + offset);
+                        _canvas.wavy_line_to(p1 + offset, strokeWidth * 1.25f, 0.5f);
+                    });
                     break;
                 case line_type::Hidden:
                     break;
@@ -483,39 +463,32 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
         switch (style.Type) {
         case tick_type::Checkmark: {
             f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 4};
-            _canvas.set_stroke_width(width);
-            _canvas.set_stroke_style(get_paint(style.Foreground, rect));
-            _canvas.begin_path();
-            _canvas.move_to({rect.left(), rect.center().Y});
-            _canvas.line_to({rect.center().X, rect.bottom()});
-            _canvas.line_to(rect.top_right());
-            _canvas.stroke();
+            stroke(_canvas, width, get_paint(style.Foreground, rect), [&] {
+                _canvas.move_to({rect.left(), rect.center().Y});
+                _canvas.line_to({rect.center().X, rect.bottom()});
+                _canvas.line_to(rect.top_right());
+            });
         } break;
         case tick_type::Cross: {
             f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 4};
-            _canvas.set_stroke_width(width);
-            _canvas.set_stroke_style(get_paint(style.Foreground, rect));
-            _canvas.begin_path();
-            _canvas.move_to(rect.top_left());
-            _canvas.line_to(rect.bottom_right());
-            _canvas.move_to(rect.top_right());
-            _canvas.line_to(rect.bottom_left());
-            _canvas.stroke();
+            stroke(_canvas, width, get_paint(style.Foreground, rect), [&] {
+                _canvas.move_to(rect.top_left());
+                _canvas.line_to(rect.bottom_right());
+                _canvas.move_to(rect.top_right());
+                _canvas.line_to(rect.bottom_left());
+            });
         } break;
         case tick_type::Circle: {
             f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 3};
-            _canvas.set_stroke_width(width);
-            _canvas.set_stroke_style(get_paint(style.Foreground, rect));
-            _canvas.begin_path();
-            _canvas.circle(rect.center(), width);
-            _canvas.stroke();
+            stroke(_canvas, width, get_paint(style.Foreground, rect), [&] {
+                _canvas.circle(rect.center(), width);
+            });
         } break;
         case tick_type::Disc: {
             f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 2};
-            _canvas.set_fill_style(get_paint(style.Foreground, rect));
-            _canvas.begin_path();
-            _canvas.circle(rect.center(), width);
-            _canvas.fill();
+            fill(_canvas, get_paint(style.Foreground, rect), [&] {
+                _canvas.circle(rect.center(), width);
+            });
         } break;
         case tick_type::Rect: {
             f32 const    width {style.Size.calc(rect.width())};
@@ -524,18 +497,16 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
                                   rect.top() + ((rect.height() - height) / 2),
                                   width,
                                   height};
-            _canvas.set_fill_style(get_paint(style.Foreground, newRect));
-            _canvas.begin_path();
-            _canvas.rect(newRect);
-            _canvas.fill();
+            fill(_canvas, get_paint(style.Foreground, newRect), [&] {
+                _canvas.rect(newRect);
+            });
         } break;
         case tick_type::Square: {
             f32 const    width {style.Size.calc(std::min(rect.height(), rect.width()))};
             rect_f const newRect {rect.center() - point_f {width, width} / 2, {width, width}};
-            _canvas.set_fill_style(get_paint(style.Foreground, newRect));
-            _canvas.begin_path();
-            _canvas.rect(newRect);
-            _canvas.fill();
+            fill(_canvas, get_paint(style.Foreground, newRect), [&] {
+                _canvas.rect(newRect);
+            });
         } break;
         case tick_type::Triangle: {
             f32 const    width {style.Size.calc(rect.width())};
@@ -544,13 +515,12 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
                                   rect.top() + ((rect.height() - height) / 2),
                                   width,
                                   height};
-            _canvas.set_fill_style(get_paint(style.Foreground, newRect));
-            _canvas.begin_path();
-            _canvas.triangle(
-                {newRect.left() + 2, newRect.top() + 4},
-                {newRect.center().X, newRect.bottom() - 4},
-                {newRect.right() - 2, newRect.top() + 4});
-            _canvas.fill();
+            fill(_canvas, get_paint(style.Foreground, newRect), [&] {
+                _canvas.triangle(
+                    {newRect.left() + 2, newRect.top() + 4},
+                    {newRect.center().X, newRect.bottom() - 4},
+                    {newRect.right() - 2, newRect.top() + 4});
+            });
         } break;
         }
     }
@@ -604,28 +574,40 @@ auto widget_painter::draw_thumb(thumb_element const& style, rect_f const& rect, 
     return retValue;
 }
 
-void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& rect)
+void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& rect, bool up)
 {
     auto const guard {_canvas.create_guard()};
 
     rect_f const navRect {style.calc(rect)};
 
     rect_f decRect {navRect};
-    draw_bordered_rect(decRect, style.DownBackground, style.Border);
+    draw_bordered_rect(decRect, up ? style.UpBackground : style.DownBackground, style.Border);
 
     if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
         draw_nine_patch(*np, decRect, style.Border);
     } else {
-        switch (style.Type) {
-        case nav_arrow_type::Triangle: {
-            _canvas.set_fill_style(get_paint(style.Foreground, navRect));
-            _canvas.begin_path();
-            _canvas.triangle(
-                {navRect.left() + 2, navRect.top() + 4},
-                {navRect.center().X, navRect.bottom() - 4},
-                {navRect.right() - 2, navRect.top() + 4});
-            _canvas.fill();
-        } break;
+        if (up) {
+            switch (style.Type) {
+            case nav_arrow_type::Triangle: {
+                fill(_canvas, get_paint(style.Foreground, navRect), [&] {
+                    _canvas.triangle(
+                        {navRect.left() + 2, navRect.bottom() - 4},
+                        {navRect.center().X, navRect.top() + 4},
+                        {navRect.right() - 2, navRect.bottom() - 4});
+                });
+            } break;
+            }
+        } else {
+            switch (style.Type) {
+            case nav_arrow_type::Triangle: {
+                fill(_canvas, get_paint(style.Foreground, navRect), [&] {
+                    _canvas.triangle(
+                        {navRect.left() + 2, navRect.top() + 4},
+                        {navRect.center().X, navRect.bottom() - 4},
+                        {navRect.right() - 2, navRect.top() + 4});
+                });
+            } break;
+            }
         }
     }
 }
@@ -650,13 +632,12 @@ auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arro
             switch (decStyle.Type) {
             case nav_arrow_type::Triangle: {
                 point_f const center {navRect.center()};
-                _canvas.set_fill_style(get_paint(decStyle.Foreground, decRect));
-                _canvas.begin_path();
-                _canvas.triangle(
-                    {navRect.left() + 2, center.Y + 4},
-                    {center.X, navRect.bottom() - 4},
-                    {navRect.right() - 2, center.Y + 4});
-                _canvas.fill();
+                fill(_canvas, get_paint(decStyle.Foreground, decRect), [&] {
+                    _canvas.triangle(
+                        {navRect.left() + 2, center.Y + 4},
+                        {center.X, navRect.bottom() - 4},
+                        {navRect.right() - 2, center.Y + 4});
+                });
             } break;
             }
 
@@ -677,13 +658,12 @@ auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arro
             switch (incStyle.Type) {
             case nav_arrow_type::Triangle: {
                 point_f const center {navRect.center()};
-                _canvas.set_fill_style(get_paint(incStyle.Foreground, incRect));
-                _canvas.begin_path();
-                _canvas.triangle(
-                    {navRect.left() + 2, center.Y - 4},
-                    {center.X, navRect.top() + 4},
-                    {navRect.right() - 2, center.Y - 4});
-                _canvas.fill();
+                fill(_canvas, get_paint(incStyle.Foreground, incRect), [&] {
+                    _canvas.triangle(
+                        {navRect.left() + 2, center.Y - 4},
+                        {center.X, navRect.top() + 4},
+                        {navRect.right() - 2, center.Y - 4});
+                });
             } break;
             }
         }
