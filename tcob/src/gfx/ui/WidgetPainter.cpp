@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <utility>
 #include <variant>
 #include <vector>
 
@@ -576,100 +575,40 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
 {
     auto const guard {_canvas.create_guard()};
 
-    rect_f const navRect {style.calc(rect)};
+    rect_f retValue {style.calc(rect)};
+    do_bordered_rect(retValue, up ? style.UpBackground : style.DownBackground, style.Border);
+    retValue -= style.Border.thickness();
 
-    rect_f decRect {navRect};
-    do_bordered_rect(decRect, up ? style.UpBackground : style.DownBackground, style.Border);
+    rect_f arrowRect {retValue};
+    arrowRect -= style.Padding;
 
     if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
-        do_nine_patch(*np, decRect, style.Border);
-        return decRect;
+        do_nine_patch(*np, arrowRect, style.Border);
+        return retValue;
     }
 
     if (up) {
         switch (style.Type) {
         case nav_arrow_type::Triangle: {
-            fill(_canvas, get_paint(style.Foreground, decRect), [&] {
+            fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
                 _canvas.triangle(
-                    {navRect.left() + 2, navRect.bottom() - 4},
-                    {navRect.center().X, navRect.top() + 4},
-                    {navRect.right() - 2, navRect.bottom() - 4});
+                    {arrowRect.left() + 2, arrowRect.bottom() - 4},
+                    {arrowRect.center().X, arrowRect.top() + 4},
+                    {arrowRect.right() - 2, arrowRect.bottom() - 4});
             });
         } break;
         }
     } else {
         switch (style.Type) {
         case nav_arrow_type::Triangle: {
-            fill(_canvas, get_paint(style.Foreground, decRect), [&] {
+            fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
                 _canvas.triangle(
-                    {navRect.left() + 2, navRect.top() + 4},
-                    {navRect.center().X, navRect.bottom() - 4},
-                    {navRect.right() - 2, navRect.top() + 4});
+                    {arrowRect.left() + 2, arrowRect.top() + 4},
+                    {arrowRect.center().X, arrowRect.bottom() - 4},
+                    {arrowRect.right() - 2, arrowRect.top() + 4});
             });
         } break;
         }
-    }
-
-    return decRect;
-}
-
-auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arrow_element const& decStyle, rect_f const& rect) -> std::pair<rect_f, rect_f>
-{
-    std::pair<rect_f, rect_f> retValue;
-
-    auto const guard {_canvas.create_guard()};
-
-    {
-        rect_f const navRect {decStyle.calc(rect)};
-
-        rect_f decRect {navRect};
-        decRect.Size.Height /= 2;
-        decRect.Position.Y += decRect.height();
-        do_bordered_rect(decRect, decStyle.DownBackground, decStyle.Border);
-
-        if (auto const* np {std::get_if<nine_patch>(&decStyle.Foreground)}) {
-            do_nine_patch(*np, decRect, decStyle.Border);
-        } else {
-            switch (decStyle.Type) {
-            case nav_arrow_type::Triangle: {
-                point_f const center {navRect.center()};
-                fill(_canvas, get_paint(decStyle.Foreground, decRect), [&] {
-                    _canvas.triangle(
-                        {navRect.left() + 2, center.Y + 4},
-                        {center.X, navRect.bottom() - 4},
-                        {navRect.right() - 2, center.Y + 4});
-                });
-            } break;
-            }
-
-            retValue.second = decRect;
-        }
-    }
-
-    {
-        rect_f const navRect {incStyle.calc(rect)};
-
-        rect_f incRect {navRect};
-        incRect.Size.Height /= 2;
-        do_bordered_rect(incRect, incStyle.UpBackground, incStyle.Border);
-
-        if (auto const* np {std::get_if<nine_patch>(&incStyle.Foreground)}) {
-            do_nine_patch(*np, incRect, incStyle.Border);
-        } else {
-            switch (incStyle.Type) {
-            case nav_arrow_type::Triangle: {
-                point_f const center {navRect.center()};
-                fill(_canvas, get_paint(incStyle.Foreground, incRect), [&] {
-                    _canvas.triangle(
-                        {navRect.left() + 2, center.Y - 4},
-                        {center.X, navRect.top() + 4},
-                        {navRect.right() - 2, center.Y - 4});
-                });
-            } break;
-            }
-        }
-
-        retValue.first = incRect;
     }
 
     return retValue;

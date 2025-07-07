@@ -61,7 +61,13 @@ void spinner::on_draw(widget_painter& painter)
     apply_sub_style(incArrowStyle, 0, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Increase, .Hover = !fls.Active && _hoverArrow == arrow::Increase});
     nav_arrows_style decArrowStyle {};
     apply_sub_style(decArrowStyle, 1, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Decrease, .Hover = !fls.Active && _hoverArrow == arrow::Decrease});
-    _rectCache = painter.draw_nav_arrows(incArrowStyle.NavArrow, decArrowStyle.NavArrow, rect);
+
+    rect_f incRect {rect};
+    incRect.Size.Height /= 2;
+    _rectCache.first = painter.draw_nav_arrow(incArrowStyle.NavArrow, incRect, true);
+    rect_f decRect {incRect};
+    decRect.Position.Y += decRect.height();
+    _rectCache.second = painter.draw_nav_arrow(decArrowStyle.NavArrow, decRect, false);
 
     // text
     if (_style.Text.Font) {
