@@ -108,8 +108,8 @@ void drop_down_list::on_draw(widget_painter& painter)
     auto const& fls {flags()};
 
     nav_arrows_style arrowStyle {};
-    apply_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverBox, .Hover = !fls.Active && _mouseOverBox});
-    painter.draw_chevron(arrowStyle.NavArrow, rect, _isExtended);
+    apply_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverChevron, .Hover = !fls.Active && _mouseOverChevron});
+    _chevronRectCache = painter.draw_nav_arrow(arrowStyle.NavArrow, rect, _isExtended);
 
     // text
     if (_style.Text.Font && SelectedItemIndex >= 0) {
@@ -195,7 +195,8 @@ void drop_down_list::on_mouse_leave()
     HoveredItemIndex = INVALID_INDEX;
 
     if (_mouseOverBox) {
-        _mouseOverBox = false;
+        _mouseOverBox     = false;
+        _mouseOverChevron = false;
         queue_redraw(this->name() + ": mouse left");
     }
     _vScrollbar.mouse_leave();
@@ -205,15 +206,22 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     // over scrollbar
     if (_vScrollbar.mouse_hover(*this, ev.Position)) {
-        _mouseOverBox    = false;
-        HoveredItemIndex = INVALID_INDEX;
-        ev.Handled       = true;
+        _mouseOverBox     = false;
+        _mouseOverChevron = false;
+        HoveredItemIndex  = INVALID_INDEX;
+        ev.Handled        = true;
         return;
     }
 
     // over box
     auto const mp {global_to_parent(*this, ev.Position)};
     if (Bounds->contains(mp)) {
+        bool const overChevron {_chevronRectCache.contains(mp)};
+        if (_mouseOverChevron != overChevron) {
+            _mouseOverChevron = overChevron;
+            queue_redraw(this->name() + ": chevron hover");
+        }
+
         if (!_mouseOverBox) {
             _mouseOverBox    = true;
             HoveredItemIndex = INVALID_INDEX;
@@ -222,7 +230,8 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
         return;
     }
 
-    _mouseOverBox = false;
+    _mouseOverBox     = false;
+    _mouseOverChevron = false;
     if (!_isExtended) { return; }
 
     // over list

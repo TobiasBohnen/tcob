@@ -44,12 +44,12 @@ public:
     void draw_text_and_icon(text_element const& style, rect_f const& rect, utf8_string const& text, icon const& icon);
 
     void draw_tick(tick_element const& style, rect_f const& rect);
-    void draw_chevron(nav_arrow_element const& style, rect_f const& rect, bool up);
     void draw_item(item_element const& style, rect_f const& rect, item const& item);
     void draw_caret(caret_element const& style, rect_f const& rect, point_f offset);
 
     auto draw_bar(bar_element const& style, rect_f const& rect, bar_element::context const& barCtx) -> rect_f;
     auto draw_thumb(thumb_element const& style, rect_f const& rect, thumb_element::context const& thumbCtx) -> rect_f;
+    auto draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, bool up) -> rect_f;
     auto draw_nav_arrows(nav_arrow_element const& incStyle, nav_arrow_element const& decStyle, rect_f const& rect) -> std::pair<rect_f, rect_f>;
 
     auto canvas() -> gfx::canvas&;

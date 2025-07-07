@@ -83,10 +83,12 @@ private:
     auto get_scroll_max() const -> f32;
 
     std::unordered_map<isize, rect_f> _itemRectCache;
+    rect_f                            _chevronRectCache;
     isize                             _visibleItems {0};
 
     bool _isExtended {false};
     bool _mouseOverBox {false};
+    bool _mouseOverChevron {false};
 
     scrollbar _vScrollbar;
 

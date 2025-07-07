@@ -572,7 +572,7 @@ auto widget_painter::draw_thumb(thumb_element const& style, rect_f const& rect, 
     return retValue;
 }
 
-void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& rect, bool up)
+auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, bool up) -> rect_f
 {
     auto const guard {_canvas.create_guard()};
 
@@ -583,13 +583,13 @@ void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& 
 
     if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
         do_nine_patch(*np, decRect, style.Border);
-        return;
+        return decRect;
     }
 
     if (up) {
         switch (style.Type) {
         case nav_arrow_type::Triangle: {
-            fill(_canvas, get_paint(style.Foreground, navRect), [&] {
+            fill(_canvas, get_paint(style.Foreground, decRect), [&] {
                 _canvas.triangle(
                     {navRect.left() + 2, navRect.bottom() - 4},
                     {navRect.center().X, navRect.top() + 4},
@@ -600,7 +600,7 @@ void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& 
     } else {
         switch (style.Type) {
         case nav_arrow_type::Triangle: {
-            fill(_canvas, get_paint(style.Foreground, navRect), [&] {
+            fill(_canvas, get_paint(style.Foreground, decRect), [&] {
                 _canvas.triangle(
                     {navRect.left() + 2, navRect.top() + 4},
                     {navRect.center().X, navRect.bottom() - 4},
@@ -609,6 +609,8 @@ void widget_painter::draw_chevron(nav_arrow_element const& style, rect_f const& 
         } break;
         }
     }
+
+    return decRect;
 }
 
 auto widget_painter::draw_nav_arrows(nav_arrow_element const& incStyle, nav_arrow_element const& decStyle, rect_f const& rect) -> std::pair<rect_f, rect_f>
