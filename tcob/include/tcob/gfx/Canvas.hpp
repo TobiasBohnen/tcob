@@ -142,7 +142,6 @@ public:
     ~canvas();
 
     auto get_texture(i32 level = 0) -> assets::asset_ptr<texture>;
-    void clear_active_texture(rect_i const& rect);
 
     void begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt = 0, bool clear = true);
     void end_frame();
@@ -196,6 +195,8 @@ public:
 
     void clip();
     void reset_clip();
+
+    void clear();
 
     // Extras
     void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);

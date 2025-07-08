@@ -136,12 +136,6 @@ auto canvas::get_texture(i32 level) -> assets::asset_ptr<texture>
     return _rtt[level];
 }
 
-void canvas::clear_active_texture(rect_i const& rect)
-{
-    auto& rtt {_rtt[_activeRtt]};
-    rtt->clear_rect(colors::Transparent, rect);
-}
-
 void canvas::begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt, bool clear)
 {
     _activeRtt  = rtt;
@@ -682,6 +676,20 @@ void canvas::clip()
 void canvas::reset_clip()
 {
     _impl->render_clip({}, 0, {});
+}
+
+void canvas::clear()
+{
+    state&     s {_states->get()};
+    auto const oldCO {s.CompositeOperation};
+    auto const oldFill {s.Fill};
+
+    set_global_composite_blendfunc(blend_func::One, blend_func::Zero);
+    set_fill_style(colors::Transparent);
+    fill();
+
+    s.CompositeOperation = oldCO;
+    s.Fill               = oldFill;
 }
 
 ////////////////////////////////////////////////////////////

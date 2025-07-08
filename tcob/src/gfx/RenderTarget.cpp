@@ -49,15 +49,6 @@ void render_target::clear(color c) const
     _impl->clear(c);
 }
 
-void render_target::clear_rect(color c, rect_i const& rect) const
-{
-    _impl->enable_scissor(rect);
-    _impl->clear(c);
-    _impl->disable_scissor();
-
-    on_clear(c);
-}
-
 void render_target::prepare_render(bool debug)
 {
     auto const& stats {locate_service<render_system>().stats()};

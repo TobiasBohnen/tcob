@@ -36,7 +36,10 @@ inline void widget::apply_sub_style(T& style, isize idx, string const& styleClas
 inline auto widget::draw_background(auto&& style, widget_painter& painter, bool isCircle) -> rect_f
 {
     if (is_top_level()) {
-        painter.canvas().clear_active_texture(rect_i {*Bounds});
+        auto& canvas {painter.canvas()};
+        canvas.begin_path();
+        canvas.rect(*Bounds);
+        canvas.clear();
     }
 
     apply_style(style);

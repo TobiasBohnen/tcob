@@ -276,7 +276,10 @@ glass::glass(init const& wi)
 void glass::on_draw(widget_painter& painter)
 {
     if (is_top_level()) {
-        painter.canvas().clear_active_texture(rect_i {*Bounds});
+        auto& canvas {painter.canvas()};
+        canvas.begin_path();
+        canvas.rect(*Bounds);
+        canvas.clear();
     }
 }
 
