@@ -571,12 +571,12 @@ auto widget_painter::draw_thumb(thumb_element const& style, rect_f const& rect, 
     return retValue;
 }
 
-auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, bool up) -> rect_f
+auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, direction dir) -> rect_f
 {
     auto const guard {_canvas.create_guard()};
 
     rect_f retValue {style.calc(rect)};
-    do_bordered_rect(retValue, up ? style.UpBackground : style.DownBackground, style.Border);
+    do_bordered_rect(retValue, dir == direction::Up ? style.UpBackground : style.DownBackground, style.Border);
     retValue -= style.Border.thickness();
 
     rect_f arrowRect {retValue};
@@ -587,28 +587,67 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
         return retValue;
     }
 
-    if (up) {
-        switch (style.Type) {
-        case nav_arrow_type::Triangle: {
-            fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
-                _canvas.triangle(
-                    {arrowRect.left() + 2, arrowRect.bottom() - 4},
-                    {arrowRect.center().X, arrowRect.top() + 4},
-                    {arrowRect.right() - 2, arrowRect.bottom() - 4});
-            });
-        } break;
-        }
-    } else {
-        switch (style.Type) {
-        case nav_arrow_type::Triangle: {
-            fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
-                _canvas.triangle(
-                    {arrowRect.left() + 2, arrowRect.top() + 4},
-                    {arrowRect.center().X, arrowRect.bottom() - 4},
-                    {arrowRect.right() - 2, arrowRect.top() + 4});
-            });
-        } break;
-        }
+    f32 const pad {arrowRect.width() * 0.1f};
+    switch (style.Type) {
+    case nav_arrow_type::Triangle: {
+        fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
+            if (dir == direction::Up) {
+                _canvas.triangle({arrowRect.left() + pad, arrowRect.bottom() - (pad * 2)},
+                                 {arrowRect.center().X, arrowRect.top() + (pad * 2)},
+                                 {arrowRect.right() - pad, arrowRect.bottom() - (pad * 2)});
+            } else {
+                _canvas.triangle({arrowRect.left() + pad, arrowRect.top() + (pad * 2)},
+                                 {arrowRect.center().X, arrowRect.bottom() - (pad * 2)},
+                                 {arrowRect.right() - pad, arrowRect.top() + (pad * 2)});
+            }
+        });
+    } break;
+    case nav_arrow_type::Chevron: {
+        fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
+            if (dir == direction::Up) {
+                _canvas.move_to({arrowRect.left(), arrowRect.center().Y + pad});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y - (pad * 2)});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y - (pad * 2)});
+                _canvas.line_to({arrowRect.right(), arrowRect.center().Y + pad});
+                _canvas.line_to({arrowRect.right(), arrowRect.center().Y + (pad * 3)});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y + (pad / 2)});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y + (pad / 2)});
+                _canvas.line_to({arrowRect.left(), arrowRect.center().Y + (pad * 3)});
+            } else {
+                _canvas.move_to({arrowRect.left(), arrowRect.center().Y - pad});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y + (pad * 2)});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y + (pad * 2)});
+                _canvas.line_to({arrowRect.right(), arrowRect.center().Y - pad});
+                _canvas.line_to({arrowRect.right(), arrowRect.center().Y - (pad * 3)});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y - (pad / 2)});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y - (pad / 2)});
+                _canvas.line_to({arrowRect.left(), arrowRect.center().Y - (pad * 3)});
+            }
+        });
+    } break;
+    case nav_arrow_type::Arrow: {
+        fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
+            if (dir == direction::Up) {
+                _canvas.move_to({arrowRect.left(), arrowRect.center().Y});
+                _canvas.line_to({arrowRect.center().X, arrowRect.top()});
+                _canvas.line_to({arrowRect.right(), arrowRect.center().Y});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.bottom()});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.bottom()});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y});
+                _canvas.line_to({arrowRect.left(), arrowRect.center().Y});
+            } else {
+                _canvas.move_to({arrowRect.left(), arrowRect.center().Y});
+                _canvas.line_to({arrowRect.center().X, arrowRect.bottom()});
+                _canvas.line_to({arrowRect.right(), arrowRect.center().Y});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y});
+                _canvas.line_to({arrowRect.center().X + pad, arrowRect.top()});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.top()});
+                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y});
+                _canvas.line_to({arrowRect.left(), arrowRect.center().Y});
+            }
+        });
+    } break;
     }
 
     return retValue;

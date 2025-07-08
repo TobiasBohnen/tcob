@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -64,10 +65,10 @@ void spinner::on_draw(widget_painter& painter)
 
     rect_f incRect {rect};
     incRect.Size.Height /= 2;
-    _rectCache.first = painter.draw_nav_arrow(incArrowStyle.NavArrow, incRect, true);
+    _rectCache.first = painter.draw_nav_arrow(incArrowStyle.NavArrow, incRect, direction::Up);
     rect_f decRect {incRect};
     decRect.Position.Y += decRect.height();
-    _rectCache.second = painter.draw_nav_arrow(decArrowStyle.NavArrow, decRect, false);
+    _rectCache.second = painter.draw_nav_arrow(decArrowStyle.NavArrow, decRect, direction::Down);
 
     // text
     if (_style.Text.Font) {

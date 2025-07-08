@@ -9,6 +9,7 @@
 #include <iterator>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -109,7 +110,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 
     nav_arrows_style arrowStyle {};
     apply_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverChevron, .Hover = !fls.Active && _mouseOverChevron});
-    _chevronRectCache = painter.draw_nav_arrow(arrowStyle.NavArrow, rect, _isExtended);
+    _chevronRectCache = painter.draw_nav_arrow(arrowStyle.NavArrow, rect, _isExtended ? direction::Up : direction::Down);
 
     // text
     if (_style.Text.Font && SelectedItemIndex >= 0) {

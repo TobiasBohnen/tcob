@@ -10,6 +10,7 @@
 #include <stack>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
@@ -48,7 +49,7 @@ public:
 
     auto draw_bar(bar_element const& style, rect_f const& rect, bar_element::context const& barCtx) -> rect_f;
     auto draw_thumb(thumb_element const& style, rect_f const& rect, thumb_element::context const& thumbCtx) -> rect_f;
-    auto draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, bool up) -> rect_f;
+    auto draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, direction dir) -> rect_f;
 
     auto canvas() -> gfx::canvas&;
 
