@@ -45,8 +45,8 @@ grid_view::grid_view(init const& wi)
             || (!val.size().contains({HoveredCellIndex->X, HoveredCellIndex->Y - 1}) && HoveredCellIndex != INVALID)) {
             SelectedCellIndex = INVALID;
             HoveredCellIndex  = INVALID;
-            _headerRectCache.clear();
             _rowRectCache.clear();
+            _headerRectCache.clear();
             clear_sub_styles();
             set_scrollbar_value(0);
         }
