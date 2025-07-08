@@ -587,69 +587,77 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
         return retValue;
     }
 
-    f32 const pad {arrowRect.width() * 0.1f};
+    auto const [cx, cy] {arrowRect.center()};
+    auto const [l, t] {arrowRect.top_left()};
+    auto const [r, b] {arrowRect.bottom_right()};
+    bool const up {dir == direction::Up};
+    bool const left {dir == direction::Left};
+    bool const vert {dir == direction::Up || dir == direction::Down};
+
     switch (style.Type) {
     case nav_arrow_type::Triangle: {
         fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
-            if (dir == direction::Up) {
-                _canvas.triangle({arrowRect.left() + pad, arrowRect.bottom() - (pad * 2)},
-                                 {arrowRect.center().X, arrowRect.top() + (pad * 2)},
-                                 {arrowRect.right() - pad, arrowRect.bottom() - (pad * 2)});
+            if (vert) {
+                f32 const y1 {up ? b : t};
+                f32 const y2 {up ? t : b};
+                _canvas.triangle({l, y1}, {cx, y2}, {r, y1});
             } else {
-                _canvas.triangle({arrowRect.left() + pad, arrowRect.top() + (pad * 2)},
-                                 {arrowRect.center().X, arrowRect.bottom() - (pad * 2)},
-                                 {arrowRect.right() - pad, arrowRect.top() + (pad * 2)});
+                f32 const x1 {left ? r : l};
+                f32 const x2 {left ? l : r};
+                _canvas.triangle({x1, t}, {x2, cy}, {x1, b});
             }
         });
     } break;
     case nav_arrow_type::Chevron: {
+        f32 const thick {arrowRect.width() * 0.1f};
         fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
-            if (dir == direction::Up) {
-                _canvas.move_to({arrowRect.left(), arrowRect.center().Y + pad});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y - (pad * 2)});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y - (pad * 2)});
-                _canvas.line_to({arrowRect.right(), arrowRect.center().Y + pad});
-                _canvas.line_to({arrowRect.right(), arrowRect.center().Y + (pad * 3)});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y + (pad / 2)});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y + (pad / 2)});
-                _canvas.line_to({arrowRect.left(), arrowRect.center().Y + (pad * 3)});
+            f32 const dp {up || left ? thick : -thick};
+            if (vert) {
+                _canvas.move_to({l, cy + dp});
+                _canvas.line_to({cx - thick, cy - (dp * 2.0f)});
+                _canvas.line_to({cx + thick, cy - (dp * 2.0f)});
+                _canvas.line_to({r, cy + dp});
+                _canvas.line_to({r, cy + (dp * 3.0f)});
+                _canvas.line_to({cx + thick, cy + (dp / 2.0f)});
+                _canvas.line_to({cx - thick, cy + (dp / 2.0f)});
+                _canvas.line_to({l, cy + (dp * 3.0f)});
             } else {
-                _canvas.move_to({arrowRect.left(), arrowRect.center().Y - pad});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y + (pad * 2)});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y + (pad * 2)});
-                _canvas.line_to({arrowRect.right(), arrowRect.center().Y - pad});
-                _canvas.line_to({arrowRect.right(), arrowRect.center().Y - (pad * 3)});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y - (pad / 2)});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y - (pad / 2)});
-                _canvas.line_to({arrowRect.left(), arrowRect.center().Y - (pad * 3)});
+                _canvas.move_to({cx + dp, t});
+                _canvas.line_to({cx - (dp * 2.0f), cy - thick});
+                _canvas.line_to({cx - (dp * 2.0f), cy + thick});
+                _canvas.line_to({cx + dp, b});
+                _canvas.line_to({cx + (dp * 3.0f), b});
+                _canvas.line_to({cx - (dp / 2.0f), cy + thick});
+                _canvas.line_to({cx - (dp / 2.0f), cy - thick});
+                _canvas.line_to({cx + (dp * 3.0f), t});
             }
         });
     } break;
     case nav_arrow_type::Arrow: {
+        f32 const thick {arrowRect.width() * 0.1f};
         fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
-            if (dir == direction::Up) {
-                _canvas.move_to({arrowRect.left(), arrowRect.center().Y});
-                _canvas.line_to({arrowRect.center().X, arrowRect.top()});
-                _canvas.line_to({arrowRect.right(), arrowRect.center().Y});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.bottom()});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.bottom()});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y});
-                _canvas.line_to({arrowRect.left(), arrowRect.center().Y});
+            if (vert) {
+                _canvas.move_to({l, cy});
+                _canvas.line_to({cx, up ? t : b});
+                _canvas.line_to({r, cy});
+                _canvas.line_to({cx + thick, cy});
+                _canvas.line_to({cx + thick, up ? b : t});
+                _canvas.line_to({cx - thick, up ? b : t});
+                _canvas.line_to({cx - thick, cy});
+                _canvas.line_to({l, cy});
             } else {
-                _canvas.move_to({arrowRect.left(), arrowRect.center().Y});
-                _canvas.line_to({arrowRect.center().X, arrowRect.bottom()});
-                _canvas.line_to({arrowRect.right(), arrowRect.center().Y});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.center().Y});
-                _canvas.line_to({arrowRect.center().X + pad, arrowRect.top()});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.top()});
-                _canvas.line_to({arrowRect.center().X - pad, arrowRect.center().Y});
-                _canvas.line_to({arrowRect.left(), arrowRect.center().Y});
+                _canvas.move_to({cx, t});
+                _canvas.line_to({left ? l : r, cy});
+                _canvas.line_to({cx, b});
+                _canvas.line_to({cx, cy + thick});
+                _canvas.line_to({left ? r : l, cy + thick});
+                _canvas.line_to({left ? r : l, cy - thick});
+                _canvas.line_to({cx, cy - thick});
+                _canvas.line_to({cx, t});
             }
         });
     } break;
     }
-
     return retValue;
 }
 
