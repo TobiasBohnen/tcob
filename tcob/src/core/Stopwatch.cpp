@@ -12,7 +12,7 @@ namespace tcob {
 
 auto stopwatch::elapsed() const -> duration
 {
-    if (_isRunning) { return tcob::clock::now().time_since_epoch() - _start; }
+    if (_isRunning) { return tcob::clock::now() - _start; }
 
     return _stop - _start;
 }
@@ -38,7 +38,7 @@ void stopwatch::start()
 {
     if (_isRunning) { return; }
 
-    _start     = tcob::clock::now().time_since_epoch();
+    _start     = tcob::clock::now();
     _isRunning = true;
 }
 
@@ -50,7 +50,7 @@ void stopwatch::restart()
 
 void stopwatch::stop()
 {
-    _stop      = tcob::clock::now().time_since_epoch();
+    _stop      = tcob::clock::now();
     _isRunning = false;
 }
 

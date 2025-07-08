@@ -10,7 +10,8 @@ namespace tcob {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API stopwatch final {
-    using duration = clock::duration;
+    using duration   = clock::duration;
+    using time_point = clock::time_point;
 
 public:
     auto static StartNew() -> stopwatch;
@@ -25,8 +26,8 @@ public:
     auto is_running [[nodiscard]] () const -> bool;
 
 private:
-    duration _start {};
-    duration _stop {};
-    bool     _isRunning {false};
+    time_point _start {};
+    time_point _stop {};
+    bool       _isRunning {false};
 };
 }
