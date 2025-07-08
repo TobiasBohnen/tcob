@@ -43,10 +43,12 @@ grid_view::grid_view(init const& wi)
 
         if ((!val.size().contains({SelectedCellIndex->X, SelectedCellIndex->Y - 1}) && SelectedCellIndex != INVALID)
             || (!val.size().contains({HoveredCellIndex->X, HoveredCellIndex->Y - 1}) && HoveredCellIndex != INVALID)) {
-            clear_sub_styles();
-            set_scrollbar_value(0);
             SelectedCellIndex = INVALID;
             HoveredCellIndex  = INVALID;
+            _headerRectCache.clear();
+            _rowRectCache.clear();
+            clear_sub_styles();
+            set_scrollbar_value(0);
         }
 
         queue_redraw(this->name() + ": Grid changed");

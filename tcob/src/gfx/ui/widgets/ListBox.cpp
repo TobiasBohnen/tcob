@@ -49,10 +49,11 @@ list_box::list_box(init const& wi)
     Items.Changed.connect([this](auto const& val) {
         if ((std::ssize(val) <= SelectedItemIndex && SelectedItemIndex != INVALID_INDEX)
             || (std::ssize(val) <= HoveredItemIndex && HoveredItemIndex != INVALID_INDEX)) {
-            clear_sub_styles();
-            set_scrollbar_value(0);
             SelectedItemIndex = INVALID_INDEX;
             HoveredItemIndex  = INVALID_INDEX;
+            _itemRectCache.clear();
+            clear_sub_styles();
+            set_scrollbar_value(0);
         }
 
         apply_filter();
