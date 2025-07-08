@@ -167,7 +167,7 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
 auto png_decoder::decode_info(io::istream& in) -> std::optional<image::information>
 {
     if (check_sig(in) && read_header(in)) {
-        return image::information {{_ihdr.Width, _ihdr.Height}, image::format::RGBA};
+        return image::information {.Size = {_ihdr.Width, _ihdr.Height}, .Format = image::format::RGBA};
     }
 
     return std::nullopt;
@@ -404,26 +404,12 @@ void png_decoder::prepare_delegate()
     switch (_ihdr.ColorType) {
     case png::color_type::Grayscale:
         switch (_ihdr.BitDepth) {
-        case 1:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_G1
-                : &png_decoder::interlaced_G1;
-            break;
-        case 2:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_G2
-                : &png_decoder::interlaced_G2;
-            break;
-        case 4:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_G4
-                : &png_decoder::interlaced_G4;
-            break;
+        case 1: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_G1 : &png_decoder::interlaced_G1; break;
+        case 2: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_G2 : &png_decoder::interlaced_G2; break;
+        case 4: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_G4 : &png_decoder::interlaced_G4; break;
         case 8:
         case 16:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_G8_16
-                : &png_decoder::interlaced_G8_16;
+            _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_G8_16 : &png_decoder::interlaced_G8_16;
             break;
         }
         break;
@@ -431,43 +417,23 @@ void png_decoder::prepare_delegate()
         switch (_ihdr.BitDepth) {
         case 8:
         case 16:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_TC8_16
-                : &png_decoder::interlaced_TC8_16;
+            _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_TC8_16 : &png_decoder::interlaced_TC8_16;
             break;
         }
         break;
     case png::color_type::Indexed:
         switch (_ihdr.BitDepth) {
-        case 1:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_I1
-                : &png_decoder::interlaced_I1;
-            break;
-        case 2:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_I2
-                : &png_decoder::interlaced_I2;
-            break;
-        case 4:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_I4
-                : &png_decoder::interlaced_I4;
-            break;
-        case 8:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_I8
-                : &png_decoder::interlaced_I8;
-            break;
+        case 1: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_I1 : &png_decoder::interlaced_I1; break;
+        case 2: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_I2 : &png_decoder::interlaced_I2; break;
+        case 4: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_I4 : &png_decoder::interlaced_I4; break;
+        case 8: _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_I8 : &png_decoder::interlaced_I8; break;
         }
         break;
     case png::color_type::GrayscaleAlpha:
         switch (_ihdr.BitDepth) {
         case 8:
         case 16:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_GA8_16
-                : &png_decoder::interlaced_GA8_16;
+            _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_GA8_16 : &png_decoder::interlaced_GA8_16;
             break;
         }
         break;
@@ -475,9 +441,7 @@ void png_decoder::prepare_delegate()
         switch (_ihdr.BitDepth) {
         case 8:
         case 16:
-            _getImageData = _ihdr.NonInterlaced
-                ? &png_decoder::non_interlaced_TCA8_16
-                : &png_decoder::interlaced_TCA8_16;
+            _getImageData = _ihdr.NonInterlaced ? &png_decoder::non_interlaced_TCA8_16 : &png_decoder::interlaced_TCA8_16;
             break;
         }
         break;
