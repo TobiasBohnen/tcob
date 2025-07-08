@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <expected>
 #include <future>
 #include <memory>
 #include <optional>
@@ -72,9 +73,9 @@ public:
     auto static Create(size_i size, format f, std::span<u8 const> data) -> image;
     auto static CreateEmpty(size_i size, format f) -> image;
 
-    auto static Load(path const& file) noexcept -> std::optional<image>;                   // TODO: change to result
-    auto static Load(io::istream& in, string const& ext) noexcept -> std::optional<image>; // TODO: change to result
-    auto static LoadInfo(path const& file) noexcept -> std::optional<information>;         // TODO: change to result
+    auto static Load(path const& file) noexcept -> std::expected<image, load_status>;
+    auto static Load(io::istream& in, string const& ext) noexcept -> std::expected<image, load_status>;
+    auto static LoadInfo(path const& file) noexcept -> std::optional<information>;
 
 private:
     image(size_i size, format f);

@@ -7,6 +7,7 @@
 
 #include <any>
 #include <chrono>
+#include <expected>
 #include <future>
 #include <memory>
 #include <optional>
@@ -40,20 +41,20 @@ auto buffer::Create(specification const& info, std::span<f32 const> data) -> buf
     return retValue;
 }
 
-auto buffer::Load(path const& file) -> std::optional<buffer>
+auto buffer::Load(path const& file) -> std::expected<buffer, load_status>
 {
-    buffer retValue;
-    if (retValue.load(file, {}) == load_status::Ok) { return retValue; }
-
-    return std::nullopt;
+    buffer     retValue;
+    auto const err {retValue.load(file, {})};
+    if (err == load_status::Ok) { return retValue; }
+    return std::unexpected {err};
 }
 
-auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>
+auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, load_status>
 {
-    buffer retValue;
-    if (retValue.load(std::move(in), ext, {}) == load_status::Ok) { return retValue; }
-
-    return std::nullopt;
+    buffer     retValue;
+    auto const err {retValue.load(std::move(in), ext, {})};
+    if (err == load_status::Ok) { return retValue; }
+    return std::unexpected {err};
 }
 
 auto buffer::load(path const& file, std::any const& ctx) noexcept -> load_status

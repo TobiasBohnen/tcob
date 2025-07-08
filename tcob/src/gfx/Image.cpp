@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <expected>
 #include <future>
 #include <memory>
 #include <optional>
@@ -151,20 +152,20 @@ auto image::CreateEmpty(size_i size, format f) -> image
     return retValue;
 }
 
-auto image::Load(path const& file) noexcept -> std::optional<image>
+auto image::Load(path const& file) noexcept -> std::expected<image, load_status>
 {
-    image retValue;
-    if (retValue.load(file) == load_status::Ok) { return retValue; }
-
-    return std::nullopt;
+    image      retValue;
+    auto const err {retValue.load(file)};
+    if (err == load_status::Ok) { return retValue; }
+    return std::unexpected {err};
 }
 
-auto image::Load(io::istream& in, string const& ext) noexcept -> std::optional<image>
+auto image::Load(io::istream& in, string const& ext) noexcept -> std::expected<image, load_status>
 {
-    image retValue;
-    if (retValue.load(in, ext) == load_status::Ok) { return retValue; }
-
-    return std::nullopt;
+    image      retValue;
+    auto const err {retValue.load(in, ext)};
+    if (err == load_status::Ok) { return retValue; }
+    return std::unexpected {err};
 }
 
 auto image::load(path const& file) noexcept -> load_status
