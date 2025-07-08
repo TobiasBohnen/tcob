@@ -1030,19 +1030,6 @@ void canvas::draw_image(texture* image, string const& region, rect_f const& rect
     _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
 }
 
-void canvas::draw_nine_patch(texture* image, string const& region, rect_f const& rect, point_f offsetCenterLT, point_f offsetCenterRB, rect_f const& localCenterUV)
-{
-    point_f const posTopLeft {offsetCenterLT};
-    point_f const posBottomRight {offsetCenterRB};
-
-    f32 const leftCenter {rect.left() + posTopLeft.X};
-    f32 const rightCenter {rect.right() - posBottomRight.X};
-    f32 const topCenter {rect.top() + posTopLeft.Y};
-    f32 const bottomCenter {rect.bottom() - posBottomRight.Y};
-
-    draw_nine_patch(image, region, rect, rect_f::FromLTRB(leftCenter, topCenter, rightCenter, bottomCenter), localCenterUV);
-}
-
 void canvas::draw_nine_patch(texture* image, string const& region, rect_f const& rect, rect_f const& center, rect_f const& localCenterUV)
 {
     state const& s {_states->get()};

@@ -65,7 +65,8 @@ class tab_container;
 // class video_control;
 // class menu;
 // class context_menu;
-// class radial_menu
+// class radial_menu;
+// class render_view;
 
 // base
 class widget;

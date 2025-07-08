@@ -219,7 +219,6 @@ public:
 
     // Image
     void draw_image(texture* image, string const& region, rect_f const& rect);
-    void draw_nine_patch(texture* image, string const& region, rect_f const& rect, point_f offsetCenterLT, point_f offsetCenterRB, rect_f const& localCenterUV);
     void draw_nine_patch(texture* image, string const& region, rect_f const& rect, rect_f const& center, rect_f const& localCenterUV);
 
     // Transforms
