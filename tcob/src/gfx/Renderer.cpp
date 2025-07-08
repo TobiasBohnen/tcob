@@ -379,7 +379,7 @@ canvas_renderer::canvas_renderer(canvas& c)
 
     _vertexArray->resize(vertCount, indCount);
 
-    std::array<u32, 6> inds {3, 1, 0, 3, 2, 1};
+    static constexpr std::array<u32, 6> inds {3, 1, 0, 3, 2, 1};
     _vertexArray->update_data(inds, 0);
 }
 

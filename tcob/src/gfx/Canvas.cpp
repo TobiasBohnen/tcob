@@ -1065,38 +1065,31 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
     f32 const uv_bottomCenter {uvRect.top() + localCenterUV.bottom()};
     f32 const uv_bottom {uvRect.bottom()};
 
-    auto const setQuad {[&s, level](quad& q, rect_f const& pos, rect_f const& uv) {
-        geometry::set_position(q, pos, s.XForm);
-        geometry::set_color(q, colors::White);
-        geometry::set_texcoords(q, {uv, level});
+    std::array<vertex, 9 * 6> verts;
+    usize                     i {0};
+    quad                      q;
 
-        for (auto& vert : q) {
-            vert.Position.X = std::floor(vert.Position.X + 0.5f);
-            vert.Position.Y = std::floor(vert.Position.Y + 0.5f);
-        }
+    auto const emitQuad {[&](rect_f const& pos, rect_f const& uv) {
+        geometry::set_position(q, pos, s.XForm);
+        for (auto& vert : q) { vert.Position = {std::floor(vert.Position.X + 0.5f), std::floor(vert.Position.Y + 0.5f)}; }
+        geometry::set_color(q, colors::White);
+        geometry::set_texcoords(q, {.UVRect = uv, .Level = level});
+
+        static constexpr std::array<usize, 6> idx {3, 1, 0, 3, 2, 1};
+        for (usize j {0}; j < 6; ++j) { verts[i++] = q[idx[j]]; }
     }};
 
-    std::array<quad, 9> quads {};
+    emitQuad(rect_f::FromLTRB(left, top, leftCenter, topCenter), rect_f::FromLTRB(uv_left, uv_top, uv_leftCenter, uv_topCenter));
+    emitQuad(rect_f::FromLTRB(leftCenter, top, rightCenter, topCenter), rect_f::FromLTRB(uv_leftCenter, uv_top, uv_rightCenter, uv_topCenter));
+    emitQuad(rect_f::FromLTRB(rightCenter, top, right, topCenter), rect_f::FromLTRB(uv_rightCenter, uv_top, uv_right, uv_topCenter));
 
-    setQuad(quads[0], rect_f::FromLTRB(left, top, leftCenter, topCenter), rect_f::FromLTRB(uv_left, uv_top, uv_leftCenter, uv_topCenter));                                 // top-left
-    setQuad(quads[1], rect_f::FromLTRB(leftCenter, top, rightCenter, topCenter), rect_f::FromLTRB(uv_leftCenter, uv_top, uv_rightCenter, uv_topCenter));                   // top
-    setQuad(quads[2], rect_f::FromLTRB(rightCenter, top, right, topCenter), rect_f::FromLTRB(uv_rightCenter, uv_top, uv_right, uv_topCenter));                             // top-right
-    setQuad(quads[3], rect_f::FromLTRB(left, topCenter, leftCenter, bottomCenter), rect_f::FromLTRB(uv_left, uv_topCenter, uv_leftCenter, uv_bottomCenter));               // left
-    setQuad(quads[4], rect_f::FromLTRB(leftCenter, topCenter, rightCenter, bottomCenter), rect_f::FromLTRB(uv_leftCenter, uv_topCenter, uv_rightCenter, uv_bottomCenter)); // center
-    setQuad(quads[5], rect_f::FromLTRB(rightCenter, topCenter, right, bottomCenter), rect_f::FromLTRB(uv_rightCenter, uv_topCenter, uv_right, uv_bottomCenter));           // right
-    setQuad(quads[6], rect_f::FromLTRB(left, bottomCenter, leftCenter, bottom), rect_f::FromLTRB(uv_left, uv_bottomCenter, uv_leftCenter, uv_bottom));                     // bottom-left
-    setQuad(quads[7], rect_f::FromLTRB(leftCenter, bottomCenter, rightCenter, bottom), rect_f::FromLTRB(uv_leftCenter, uv_bottomCenter, uv_rightCenter, uv_bottom));       // bottom
-    setQuad(quads[8], rect_f::FromLTRB(rightCenter, bottomCenter, right, bottom), rect_f::FromLTRB(uv_rightCenter, uv_bottomCenter, uv_right, uv_bottom));                 // bottom-right
+    emitQuad(rect_f::FromLTRB(left, topCenter, leftCenter, bottomCenter), rect_f::FromLTRB(uv_left, uv_topCenter, uv_leftCenter, uv_bottomCenter));
+    emitQuad(rect_f::FromLTRB(leftCenter, topCenter, rightCenter, bottomCenter), rect_f::FromLTRB(uv_leftCenter, uv_topCenter, uv_rightCenter, uv_bottomCenter));
+    emitQuad(rect_f::FromLTRB(rightCenter, topCenter, right, bottomCenter), rect_f::FromLTRB(uv_rightCenter, uv_topCenter, uv_right, uv_bottomCenter));
 
-    std::array<vertex, 9 * 6> const verts {quads[0][3], quads[0][1], quads[0][0], quads[0][3], quads[0][2], quads[0][1],
-                                           quads[1][3], quads[1][1], quads[1][0], quads[1][3], quads[1][2], quads[1][1],
-                                           quads[2][3], quads[2][1], quads[2][0], quads[2][3], quads[2][2], quads[2][1],
-                                           quads[3][3], quads[3][1], quads[3][0], quads[3][3], quads[3][2], quads[3][1],
-                                           quads[4][3], quads[4][1], quads[4][0], quads[4][3], quads[4][2], quads[4][1],
-                                           quads[5][3], quads[5][1], quads[5][0], quads[5][3], quads[5][2], quads[5][1],
-                                           quads[6][3], quads[6][1], quads[6][0], quads[6][3], quads[6][2], quads[6][1],
-                                           quads[7][3], quads[7][1], quads[7][0], quads[7][3], quads[7][2], quads[7][1],
-                                           quads[8][3], quads[8][1], quads[8][0], quads[8][3], quads[8][2], quads[8][1]};
+    emitQuad(rect_f::FromLTRB(left, bottomCenter, leftCenter, bottom), rect_f::FromLTRB(uv_left, uv_bottomCenter, uv_leftCenter, uv_bottom));
+    emitQuad(rect_f::FromLTRB(leftCenter, bottomCenter, rightCenter, bottom), rect_f::FromLTRB(uv_leftCenter, uv_bottomCenter, uv_rightCenter, uv_bottom));
+    emitQuad(rect_f::FromLTRB(rightCenter, bottomCenter, right, bottom), rect_f::FromLTRB(uv_rightCenter, uv_bottomCenter, uv_right, uv_bottom));
 
     _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
 }

@@ -318,7 +318,7 @@ rect_shape::rect_shape()
 
 auto rect_shape::geometry() -> geometry_data
 {
-    static std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
+    static constexpr std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
     return {
         .Vertices = _quad,
         .Indices  = Inds,

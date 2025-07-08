@@ -30,9 +30,9 @@ using triangle = std::array<vertex, 3>;
 using quad     = std::array<vertex, 4>;
 
 struct geometry_data {
-    std::span<vertex> Vertices;
-    std::span<u32>    Indices;
-    primitive_type    Type {};
+    std::span<vertex const> Vertices;
+    std::span<u32 const>    Indices;
+    primitive_type          Type {};
 };
 
 namespace geometry {

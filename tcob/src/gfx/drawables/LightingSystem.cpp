@@ -364,10 +364,9 @@ auto lighting_system::can_draw() const -> bool
 void lighting_system::on_draw_to(render_target& target)
 {
     if (_updateGeometry) {
-        geometry_data data;
-        data.Indices  = _inds;
-        data.Vertices = _verts;
-        data.Type     = primitive_type::Triangles;
+        geometry_data const data {.Vertices = _verts,
+                                  .Indices  = _inds,
+                                  .Type     = primitive_type::Triangles};
         _renderer.set_geometry(data);
         _updateGeometry = false;
     }
