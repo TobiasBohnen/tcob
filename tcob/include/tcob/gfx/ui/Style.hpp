@@ -18,6 +18,8 @@
 
 namespace tcob::ui {
 
+////////////////////////////////////////////////////////////
+
 enum class border_type : u8 {
     Solid,
     Double,
@@ -51,6 +53,13 @@ enum class text_transform : u8 {
     Capitalize,
     Uppercase,
     Lowercase
+};
+
+////////////////////////////////////////////////////////////
+
+enum class icon_text_order : u8 {
+    IconBeforeText,
+    TextBeforeIcon,
 };
 
 ////////////////////////////////////////////////////////////
@@ -279,10 +288,11 @@ public:
 
 class TCOB_API item_element {
 public:
-    text_element   Text;
-    ui_paint       Background {colors::White};
-    border_element Border {};
-    thickness      Padding {};
+    text_element    Text;
+    ui_paint        Background {colors::White};
+    border_element  Border {};
+    thickness       Padding {};
+    icon_text_order IconTextOrder {icon_text_order::IconBeforeText};
 
     auto operator==(item_element const& other) const -> bool = default;
 
@@ -308,7 +318,7 @@ public:
     thickness Margin {};
 
     ui_paint       Background {colors::Transparent};
-    shadow_element DropShadow {colors::Transparent, length {5, length::type::Absolute}, length {5, length::type::Absolute}};
+    shadow_element DropShadow {.Color = colors::Transparent, .OffsetX = length {5, length::type::Absolute}, .OffsetY = length {5, length::type::Absolute}};
     border_element Border;
 
     void static Transition(widget_style& target, widget_style const& left, widget_style const& right, f64 step);

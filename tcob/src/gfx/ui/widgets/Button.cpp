@@ -35,7 +35,7 @@ void button::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    painter.draw_text_and_icon(_style.Text, rect, Label, Icon);
+    painter.draw_text_and_icon(_style.Text, rect, Label, Icon, _style.IconTextOrder);
 }
 
 void button::on_update(milliseconds /* deltaTime */)

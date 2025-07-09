@@ -18,7 +18,8 @@ class TCOB_API button : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        text_element Text;
+        text_element    Text;
+        icon_text_order IconTextOrder {icon_text_order::IconBeforeText};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };

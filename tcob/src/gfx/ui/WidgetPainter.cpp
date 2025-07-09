@@ -107,23 +107,23 @@ auto static stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
     canvas.stroke();
 }
 
-void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
+void widget_painter::draw_background_and_border(widget_style const& element, rect_f& rect, bool isCircle)
 {
     //  add margin
-    rect -= style.Margin;
+    rect -= element.Margin;
 
-    do_shadow(style.DropShadow, rect, isCircle, style.Border);
+    do_shadow(element.DropShadow, rect, isCircle, element.Border);
     if (isCircle) {
-        do_bordered_circle(rect, style.Background, style.Border);
+        do_bordered_circle(rect, element.Background, element.Border);
     } else {
-        do_bordered_rect(rect, style.Background, style.Border);
+        do_bordered_rect(rect, element.Background, element.Border);
     }
 
     // add padding
-    rect -= style.Padding;
+    rect -= element.Padding;
 
     // add border
-    rect -= style.Border.thickness();
+    rect -= element.Border.thickness();
 }
 
 void widget_painter::do_bordered_rect(rect_f const& rect, ui_paint const& back, border_element const& borderStyle)
@@ -298,27 +298,27 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
     }
 }
 
-void widget_painter::draw_text(text_element const& style, rect_f const& rect, utf8_string const& text)
+void widget_painter::draw_text(text_element const& element, rect_f const& rect, utf8_string const& text)
 {
     if (text.empty()) { return; }
 
-    draw_text(style, rect, format_text(style, rect, text));
+    draw_text(element, rect, format_text(element, rect, text));
 }
 
-void widget_painter::draw_text(text_element const& style, rect_f const& rect, gfx::text_formatter::result const& text)
+void widget_painter::draw_text(text_element const& element, rect_f const& rect, gfx::text_formatter::result const& text)
 {
     auto const guard {_canvas.create_guard()};
 
     _canvas.set_font(text.Font);
-    _canvas.set_text_halign(style.Alignment.Horizontal);
-    _canvas.set_text_valign(style.Alignment.Vertical);
+    _canvas.set_text_halign(element.Alignment.Horizontal);
+    _canvas.set_text_valign(element.Alignment.Vertical);
 
     // shadow
-    if (style.Shadow.Color.A != 0) {
-        point_f const dropShadowOffset {style.Shadow.OffsetX.calc(rect.width()),
-                                        style.Shadow.OffsetY.calc(rect.height())};
+    if (element.Shadow.Color.A != 0) {
+        point_f const dropShadowOffset {element.Shadow.OffsetX.calc(rect.width()),
+                                        element.Shadow.OffsetY.calc(rect.height())};
 
-        _canvas.set_fill_style(style.Shadow.Color);
+        _canvas.set_fill_style(element.Shadow.Color);
         rect_f shadowRect {rect};
         shadowRect.Position.X += dropShadowOffset.X;
         shadowRect.Position.Y += dropShadowOffset.Y;
@@ -326,11 +326,11 @@ void widget_painter::draw_text(text_element const& style, rect_f const& rect, gf
     }
 
     // text
-    _canvas.set_fill_style(style.Color);
+    _canvas.set_fill_style(element.Color);
     _canvas.draw_text(rect.Position, text);
 
     // deco
-    auto const& deco {style.Decoration};
+    auto const& deco {element.Decoration};
     if (deco.Style != line_type::Hidden && (deco.Line.LineThrough || deco.Line.Overline || deco.Line.Underline) && deco.Color.A > 0 && text.QuadCount > 0) {
         f32 const strokeWidth {deco.Size.calc(rect.height())};
 
@@ -415,31 +415,44 @@ void widget_painter::draw_text(text_element const& style, rect_f const& rect, gf
     };
 }
 
-void widget_painter::draw_text_and_icon(text_element const& style, rect_f const& rect, utf8_string const& text, icon const& icon)
+void widget_painter::draw_text_and_icon(text_element const& element, rect_f const& rect, utf8_string const& text, icon const& icon, icon_text_order order)
 {
     rect_f contentRect {rect};
 
-    bool const drawText {!text.empty() && style.Font};
+    bool const drawText {!text.empty() && element.Font};
     bool const drawIcon {icon.Texture && icon.Texture->has_region(icon.TextureRegion)};
 
     if (drawText && drawIcon) {
-        rect_f textRect {contentRect};
-        textRect.Size.Width /= 2;
-        textRect.Position.X += textRect.width();
+        rect_f firstHalf {contentRect};
+        rect_f secondHalf {contentRect};
+        firstHalf.Size.Width /= 2;
+        secondHalf.Size.Width /= 2;
+        secondHalf.Position.X += secondHalf.width();
 
-        draw_text(style, textRect, text);
+        switch (order) {
+        case icon_text_order::IconBeforeText: {
+            draw_text(element, secondHalf, text);
 
-        rect_f iconRect {contentRect};
-        iconRect.Size.Width /= 2;
+            size_f const iconSize {firstHalf.Size.as_fitted(size_f {icon.Texture->info().Size})};
+            rect_f       iconRect {firstHalf.Position, iconSize};
+            iconRect.Position.Y += (contentRect.height() - iconSize.Height) / 2;
 
-        size_f const iconSize {iconRect.Size.as_fitted(size_f {icon.Texture->info().Size})};
-        iconRect = {iconRect.Position, iconSize};
-        iconRect.Position.Y += (contentRect.height() - iconRect.height()) / 2;
+            _canvas.set_fill_style(icon.Color);
+            _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, iconRect);
+        } break;
+        case icon_text_order::TextBeforeIcon: {
+            draw_text(element, firstHalf, text);
 
-        _canvas.set_fill_style(icon.Color);
-        _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, iconRect);
+            size_f const iconSize {secondHalf.Size.as_fitted(size_f {icon.Texture->info().Size})};
+            rect_f       iconRect {secondHalf.Position, iconSize};
+            iconRect.Position.Y += (contentRect.height() - iconSize.Height) / 2;
+
+            _canvas.set_fill_style(icon.Color);
+            _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, iconRect);
+        } break;
+        }
     } else if (drawText) {
-        draw_text(style, contentRect, text);
+        draw_text(element, contentRect, text);
     } else if (drawIcon) {
         size_f const iconSize {contentRect.Size.as_fitted(size_f {icon.Texture->info().Size})};
         contentRect = {{contentRect.center().X - (iconSize.Width / 2), contentRect.top()}, iconSize};
@@ -449,27 +462,27 @@ void widget_painter::draw_text_and_icon(text_element const& style, rect_f const&
     }
 }
 
-void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
+void widget_painter::draw_tick(tick_element const& element, rect_f const& rect)
 {
     auto const guard {_canvas.create_guard()};
 
-    if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
+    if (auto const* np {std::get_if<nine_patch>(&element.Foreground)}) {
         do_nine_patch(*np, rect, {});
         return;
     }
 
-    switch (style.Type) {
+    switch (element.Type) {
     case tick_type::Checkmark: {
-        f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 4};
-        stroke(_canvas, width, get_paint(style.Foreground, rect), [&] {
+        f32 const width {element.Size.calc(std::min(rect.height(), rect.width())) / 4};
+        stroke(_canvas, width, get_paint(element.Foreground, rect), [&] {
             _canvas.move_to({rect.left(), rect.center().Y});
             _canvas.line_to({rect.center().X, rect.bottom()});
             _canvas.line_to(rect.top_right());
         });
     } break;
     case tick_type::Cross: {
-        f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 4};
-        stroke(_canvas, width, get_paint(style.Foreground, rect), [&] {
+        f32 const width {element.Size.calc(std::min(rect.height(), rect.width())) / 4};
+        stroke(_canvas, width, get_paint(element.Foreground, rect), [&] {
             _canvas.move_to(rect.top_left());
             _canvas.line_to(rect.bottom_right());
             _canvas.move_to(rect.top_right());
@@ -477,43 +490,43 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
         });
     } break;
     case tick_type::Circle: {
-        f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 3};
-        stroke(_canvas, width, get_paint(style.Foreground, rect), [&] {
+        f32 const width {element.Size.calc(std::min(rect.height(), rect.width())) / 3};
+        stroke(_canvas, width, get_paint(element.Foreground, rect), [&] {
             _canvas.circle(rect.center(), width);
         });
     } break;
     case tick_type::Disc: {
-        f32 const width {style.Size.calc(std::min(rect.height(), rect.width())) / 2};
-        fill(_canvas, get_paint(style.Foreground, rect), [&] {
+        f32 const width {element.Size.calc(std::min(rect.height(), rect.width())) / 2};
+        fill(_canvas, get_paint(element.Foreground, rect), [&] {
             _canvas.circle(rect.center(), width);
         });
     } break;
     case tick_type::Rect: {
-        f32 const    width {style.Size.calc(rect.width())};
-        f32 const    height {style.Size.calc(rect.height())};
+        f32 const    width {element.Size.calc(rect.width())};
+        f32 const    height {element.Size.calc(rect.height())};
         rect_f const newRect {rect.left() + ((rect.width() - width) / 2),
                               rect.top() + ((rect.height() - height) / 2),
                               width,
                               height};
-        fill(_canvas, get_paint(style.Foreground, newRect), [&] {
+        fill(_canvas, get_paint(element.Foreground, newRect), [&] {
             _canvas.rect(newRect);
         });
     } break;
     case tick_type::Square: {
-        f32 const    width {style.Size.calc(std::min(rect.height(), rect.width()))};
+        f32 const    width {element.Size.calc(std::min(rect.height(), rect.width()))};
         rect_f const newRect {rect.center() - point_f {width, width} / 2, {width, width}};
-        fill(_canvas, get_paint(style.Foreground, newRect), [&] {
+        fill(_canvas, get_paint(element.Foreground, newRect), [&] {
             _canvas.rect(newRect);
         });
     } break;
     case tick_type::Triangle: {
-        f32 const    width {style.Size.calc(rect.width())};
-        f32 const    height {style.Size.calc(rect.height())};
+        f32 const    width {element.Size.calc(rect.width())};
+        f32 const    height {element.Size.calc(rect.height())};
         rect_f const newRect {rect.left() + ((rect.width() - width) / 2),
                               rect.top() + ((rect.height() - height) / 2),
                               width,
                               height};
-        fill(_canvas, get_paint(style.Foreground, newRect), [&] {
+        fill(_canvas, get_paint(element.Foreground, newRect), [&] {
             _canvas.triangle(
                 {newRect.left() + 2, newRect.top() + 4},
                 {newRect.center().X, newRect.bottom() - 4},
@@ -523,12 +536,12 @@ void widget_painter::draw_tick(tick_element const& style, rect_f const& rect)
     }
 }
 
-auto widget_painter::draw_bar(bar_element const& style, rect_f const& rect, bar_element::context const& barCtx) -> rect_f
+auto widget_painter::draw_bar(bar_element const& element, rect_f const& rect, bar_element::context const& barCtx) -> rect_f
 {
-    rect_f retValue {style.calc(rect, barCtx.Orientation, barCtx.Position)};
+    rect_f retValue {element.calc(rect, barCtx.Orientation, barCtx.Position)};
 
-    if (style.HigherBackground == style.LowerBackground || barCtx.Stops.size() < 3) {
-        do_bordered_rect(retValue, style.HigherBackground, style.Border);
+    if (element.HigherBackground == element.LowerBackground || barCtx.Stops.size() < 3) {
+        do_bordered_rect(retValue, element.HigherBackground, element.Border);
         return retValue;
     }
 
@@ -550,7 +563,7 @@ auto widget_painter::draw_bar(bar_element const& style, rect_f const& rect, bar_
             break;
         }
         if (segRect.height() > 0 && segRect.width() > 0) {
-            do_bordered_rect(segRect, low ? style.LowerBackground : style.HigherBackground, style.Border);
+            do_bordered_rect(segRect, low ? element.LowerBackground : element.HigherBackground, element.Border);
         }
 
         low = !low;
@@ -559,31 +572,31 @@ auto widget_painter::draw_bar(bar_element const& style, rect_f const& rect, bar_
     return retValue;
 }
 
-auto widget_painter::draw_thumb(thumb_element const& style, rect_f const& rect, thumb_element::context const& thumbCtx) -> rect_f
+auto widget_painter::draw_thumb(thumb_element const& element, rect_f const& rect, thumb_element::context const& thumbCtx) -> rect_f
 {
-    rect_f retValue {style.calc(rect, thumbCtx)};
+    rect_f retValue {element.calc(rect, thumbCtx)};
 
-    switch (style.Type) {
-    case thumb_type::Rect: do_bordered_rect(retValue, style.Background, style.Border); break;
-    case thumb_type::Disc: do_bordered_circle(retValue, style.Background, style.Border); break;
+    switch (element.Type) {
+    case thumb_type::Rect: do_bordered_rect(retValue, element.Background, element.Border); break;
+    case thumb_type::Disc: do_bordered_circle(retValue, element.Background, element.Border); break;
     }
 
     return retValue;
 }
 
-auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const& rect, direction dir) -> rect_f
+auto widget_painter::draw_nav_arrow(nav_arrow_element const& element, rect_f const& rect, direction dir) -> rect_f
 {
     auto const guard {_canvas.create_guard()};
 
-    rect_f retValue {style.calc(rect)};
-    do_bordered_rect(retValue, dir == direction::Up ? style.UpBackground : style.DownBackground, style.Border);
-    retValue -= style.Border.thickness();
+    rect_f retValue {element.calc(rect)};
+    do_bordered_rect(retValue, dir == direction::Up ? element.UpBackground : element.DownBackground, element.Border);
+    retValue -= element.Border.thickness();
 
     rect_f arrowRect {retValue};
-    arrowRect -= style.Padding;
+    arrowRect -= element.Padding;
 
-    if (auto const* np {std::get_if<nine_patch>(&style.Foreground)}) {
-        do_nine_patch(*np, arrowRect, style.Border);
+    if (auto const* np {std::get_if<nine_patch>(&element.Foreground)}) {
+        do_nine_patch(*np, arrowRect, element.Border);
         return retValue;
     }
 
@@ -594,9 +607,9 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
     bool const left {dir == direction::Left};
     bool const vert {dir == direction::Up || dir == direction::Down};
 
-    switch (style.Type) {
+    switch (element.Type) {
     case nav_arrow_type::Triangle: {
-        fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
+        fill(_canvas, get_paint(element.Foreground, arrowRect), [&] {
             if (vert) {
                 f32 const y1 {up ? b : t};
                 f32 const y2 {up ? t : b};
@@ -610,7 +623,7 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
     } break;
     case nav_arrow_type::Chevron: {
         f32 const thick {arrowRect.width() * 0.1f};
-        fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
+        fill(_canvas, get_paint(element.Foreground, arrowRect), [&] {
             f32 const dp {up || left ? thick : -thick};
             if (vert) {
                 _canvas.move_to({l, cy + dp});
@@ -635,7 +648,7 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
     } break;
     case nav_arrow_type::Arrow: {
         f32 const thick {arrowRect.width() * 0.1f};
-        fill(_canvas, get_paint(style.Foreground, arrowRect), [&] {
+        fill(_canvas, get_paint(element.Foreground, arrowRect), [&] {
             if (vert) {
                 _canvas.move_to({l, cy});
                 _canvas.line_to({cx, up ? t : b});
@@ -661,38 +674,38 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& style, rect_f const
     return retValue;
 }
 
-void widget_painter::draw_item(item_element const& style, rect_f const& rect, item const& item)
+void widget_painter::draw_item(item_element const& element, rect_f const& rect, item const& item)
 {
-    do_bordered_rect(rect, style.Background, style.Border);
+    do_bordered_rect(rect, element.Background, element.Border);
 
     rect_f contentRect {rect};
-    contentRect -= style.Padding;
-    contentRect -= style.Border.thickness();
-    draw_text_and_icon(style.Text, contentRect, item.Text, item.Icon);
+    contentRect -= element.Padding;
+    contentRect -= element.Border.thickness();
+    draw_text_and_icon(element.Text, contentRect, item.Text, item.Icon, element.IconTextOrder);
 }
 
-void widget_painter::draw_caret(caret_element const& style, rect_f const& rect, point_f offset)
+void widget_painter::draw_caret(caret_element const& element, rect_f const& rect, point_f offset)
 {
     rect_f r {rect};
-    r.Size.Width = style.Width.calc(rect.Size.Width);
+    r.Size.Width = element.Width.calc(rect.Size.Width);
     r.Position += offset;
-    do_bordered_rect(r, style.Color, {});
+    do_bordered_rect(r, element.Color, {});
 }
 
-void widget_painter::do_shadow(shadow_element const& style, rect_f const& rect, bool isCircle, border_element const& borderStyle)
+void widget_painter::do_shadow(shadow_element const& element, rect_f const& rect, bool isCircle, border_element const& borderStyle)
 {
-    if (style.Color.A == 0) { return; }
+    if (element.Color.A == 0) { return; }
 
-    point_f const dropShadowOffset {style.OffsetX.calc(rect.width()),
-                                    style.OffsetY.calc(rect.height())};
+    point_f const dropShadowOffset {element.OffsetX.calc(rect.width()),
+                                    element.OffsetY.calc(rect.height())};
     rect_f        shadowRect {rect};
     shadowRect.Position.X += dropShadowOffset.X;
     shadowRect.Position.Y += dropShadowOffset.Y;
 
     if (isCircle) {
-        do_bordered_circle(shadowRect, style.Color, {.Radius = borderStyle.Radius});
+        do_bordered_circle(shadowRect, element.Color, {.Radius = borderStyle.Radius});
     } else {
-        do_bordered_rect(shadowRect, style.Color, {.Radius = borderStyle.Radius});
+        do_bordered_rect(shadowRect, element.Color, {.Radius = borderStyle.Radius});
     }
 }
 
@@ -701,35 +714,35 @@ auto widget_painter::canvas() -> gfx::canvas&
     return _canvas;
 }
 
-auto widget_painter::format_text(text_element const& style, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result
+auto widget_painter::format_text(text_element const& element, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result
 {
-    auto const tt {transform_text(style.Transform, text)};
-    return format_text(style, rect, tt, style.calc_font_size(rect), true);
+    auto const tt {transform_text(element.Transform, text)};
+    return format_text(element, rect, tt, element.calc_font_size(rect), true);
 }
 
 ////////////////////////////////////////////////////////////
 
-auto widget_painter::format_text(text_element const& style, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
+auto widget_painter::format_text(text_element const& element, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
 {
     auto const guard {_canvas.create_guard()};
 
-    auto* const font {style.Font->get_font(style.Style, fontSize).ptr()};
+    auto* const font {element.Font->get_font(element.Style, fontSize).ptr()};
 
     _canvas.set_font(font);
-    _canvas.set_text_halign(style.Alignment.Horizontal);
-    _canvas.set_text_valign(style.Alignment.Vertical);
+    _canvas.set_text_halign(element.Alignment.Horizontal);
+    _canvas.set_text_valign(element.Alignment.Vertical);
 
     auto const rectSize {rect.Size};
 
     f32 scale {1.0f};
 
-    if (resize && style.AutoSize != auto_size_mode::Never) {
+    if (resize && element.AutoSize != auto_size_mode::Never) {
         auto const textSize {_canvas.measure_text(-1, text)};
 
-        bool const shouldShrink {(style.AutoSize == auto_size_mode::Always || style.AutoSize == auto_size_mode::OnlyShrink)
+        bool const shouldShrink {(element.AutoSize == auto_size_mode::Always || element.AutoSize == auto_size_mode::OnlyShrink)
                                  && (textSize.Width > rectSize.Width || textSize.Height > rectSize.Height)};
 
-        bool const shouldGrow {(style.AutoSize == auto_size_mode::Always || style.AutoSize == auto_size_mode::OnlyGrow)
+        bool const shouldGrow {(element.AutoSize == auto_size_mode::Always || element.AutoSize == auto_size_mode::OnlyGrow)
                                && (textSize.Width < rectSize.Width && textSize.Height < rectSize.Height)};
 
         if (shouldShrink || shouldGrow) {
