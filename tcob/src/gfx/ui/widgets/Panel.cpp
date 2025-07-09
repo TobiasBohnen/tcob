@@ -245,7 +245,7 @@ auto panel::get_layout() const -> layout*
 
 auto panel::can_move() const -> bool
 {
-    return *Movable && is_top_level() && form().get_layout()->allows_move();
+    return *Movable && is_top_level() && form().allows_move();
 }
 
 auto panel::get_scroll_max_value(orientation orien) const -> f32

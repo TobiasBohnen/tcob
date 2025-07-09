@@ -68,8 +68,8 @@ public:
     template <SubmitTarget Target>
     void submit(Target& target);
 
-    auto virtual get_layout() -> layout*             = 0;
-    auto virtual get_layout() const -> layout const* = 0;
+    auto virtual allows_move() const -> bool   = 0;
+    auto virtual allows_resize() const -> bool = 0;
 
 protected:
     form_base(string name, rect_f const& bounds);
@@ -96,7 +96,9 @@ protected:
     void virtual on_bounds_changed();
     void on_visiblity_changed() override;
 
-    void virtual apply_layout() = 0;
+    void virtual apply_layout()                      = 0;
+    auto virtual get_layout() -> layout*             = 0;
+    auto virtual get_layout() const -> layout const* = 0;
 
 private:
     auto focus_nav_target(string const& widget, direction dir) -> bool;
@@ -158,11 +160,13 @@ public:
 
     void clear_containers() override;
 
-    auto get_layout() -> layout* override;
-    auto get_layout() const -> layout const* override;
+    auto allows_move() const -> bool override;
+    auto allows_resize() const -> bool override;
 
 protected:
     void apply_layout() override;
+    auto get_layout() -> layout* override;
+    auto get_layout() const -> layout const* override;
 
 private:
     Layout _layout;

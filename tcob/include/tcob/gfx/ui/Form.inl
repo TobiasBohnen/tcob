@@ -68,6 +68,18 @@ inline auto form<Layout>::get_layout() const -> layout const*
     return &_layout;
 }
 
+template <std::derived_from<layout> Layout>
+inline auto form<Layout>::allows_move() const -> bool
+{
+    return _layout.allows_move();
+}
+
+template <std::derived_from<layout> Layout>
+inline auto form<Layout>::allows_resize() const -> bool
+{
+    return _layout.allows_resize();
+}
+
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<popup> T>
