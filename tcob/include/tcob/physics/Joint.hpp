@@ -53,6 +53,8 @@ public:
     auto constraint_force() const -> point_f;
     auto constraint_torque() const -> f32;
 
+    void set_constraint_tuning(f32 hertz, f32 dampingRatio) const;
+
     auto operator==(joint const& other) const -> bool;
 
 protected:

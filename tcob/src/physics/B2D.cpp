@@ -62,8 +62,6 @@ b2d_world::b2d_world(world::settings const& settings)
     worldDef.contactHertz         = settings.ContactHertz;
     worldDef.contactDampingRatio  = settings.ContactDampingRatio;
     worldDef.maxContactPushSpeed  = settings.MaxContactPushSpeed;
-    worldDef.jointHertz           = settings.JointHertz;
-    worldDef.jointDampingRatio    = settings.JointDampingRatio;
     worldDef.maximumLinearSpeed   = settings.MaximumLinearSpeed;
     worldDef.enableSleep          = settings.EnableSleeping;
     worldDef.enableContinuous     = settings.EnableContinuous;
@@ -242,11 +240,6 @@ auto b2d_world::get_sensor_events() const -> sensor_events
         retValue.EndTouch.emplace_back(get_shape(event.sensorShapeId), get_shape(event.visitorShapeId));
     }
     return retValue;
-}
-
-void b2d_world::set_joint_tuning(f32 hertz, f32 damping) const
-{
-    b2World_SetJointTuning(ID, hertz, damping);
 }
 
 void b2d_world::set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const
@@ -785,6 +778,11 @@ auto b2d_joint::get_collide_connected() const -> bool
 void b2d_joint::set_collide_connected(bool value) const
 {
     b2Joint_SetCollideConnected(ID, value);
+}
+
+void b2d_joint::set_constraint_tuning(f32 hertz, f32 dampingRatio) const
+{
+    b2Joint_SetConstraintTuning(ID, hertz, dampingRatio);
 }
 
 void b2d_joint::distance_joint_set_length(f32 length) const

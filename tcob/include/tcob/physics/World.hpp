@@ -120,12 +120,6 @@ public:
         /// decreasing the damping ratio.
         f32 MaxContactPushSpeed {3.0f};
 
-        /// Joint stiffness. Cycles per second.
-        f32 JointHertz {60};
-
-        /// Joint bounciness. Non-dimensional.
-        f32 JointDampingRatio {2.0f};
-
         /// Maximum linear speed. Usually meters per second.
         f32 MaximumLinearSpeed {400.0f};
 

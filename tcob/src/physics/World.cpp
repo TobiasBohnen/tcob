@@ -115,11 +115,6 @@ void world::explode(explosion const& explosion) const
     _impl->explode(explosion);
 }
 
-void world::set_joint_tuning(f32 hertz, f32 damping) const
-{
-    _impl->set_joint_tuning(hertz, damping);
-}
-
 void world::set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const
 {
     _impl->set_contact_tuning(hertz, damping, pushSpeed);

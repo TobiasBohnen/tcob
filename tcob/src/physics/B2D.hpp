@@ -191,6 +191,8 @@ public:
     auto get_collide_connected() const -> bool;
     void set_collide_connected(bool value) const;
 
+    void set_constraint_tuning(f32 hertz, f32 dampingRatio) const;
+
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
 

@@ -76,6 +76,11 @@ auto joint::constraint_torque() const -> f32
     return _impl->get_constraint_torque();
 }
 
+void joint::set_constraint_tuning(f32 hertz, f32 dampingRatio) const
+{
+    _impl->set_constraint_tuning(hertz, dampingRatio);
+}
+
 auto joint::get_body_impl(body* body) const -> detail::b2d_body*
 {
     assert(body);
