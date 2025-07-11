@@ -110,9 +110,10 @@ inline auto select_statement<Values...>::limit(i32 value, std::optional<i32> off
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::group_by(utf8_string const& column) -> select_statement<Values...>&
+inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_statement<Values...>&
 {
-    _values.GroupBy = std::format(" GROUP BY \"{}\" ", column);
+    std::vector<utf8_string> colStrings {quote_string(columns)...};
+    _values.GroupBy = std::format(" GROUP BY {} ", helper::join(colStrings, ", "));
     return *this;
 }
 

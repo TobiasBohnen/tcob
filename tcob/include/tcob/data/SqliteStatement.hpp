@@ -62,7 +62,7 @@ public:
 
     auto order_by(auto&&... orderings) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
-    auto group_by(utf8_string const& column) -> select_statement&;
+    auto group_by(auto&&... columns) -> select_statement&;
 
     auto left_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
     auto inner_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
