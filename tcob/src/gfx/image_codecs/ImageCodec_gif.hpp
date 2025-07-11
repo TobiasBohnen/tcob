@@ -27,10 +27,10 @@ namespace gif {
         std::vector<color> GlobalColorTable;
         bool               GlobalColorTableFlag;
         i32                GlobalColorTableSize;
-        u32                Height;
+        u16                Width;
+        u16                Height;
         string             Id;
         i32                PixelAspect;
-        u32                Width;
 
         void read(io::istream& reader);
     };
@@ -61,8 +61,8 @@ protected:
     void clear_pixel_cache();
 
 private:
-    std::array<u8, 256> _block {};      // current data block
-    i32                 _blockSize {0}; // block size
+    std::array<u8, 256> _block {}; // current data block
+    usize               _blockSize {0};
 
     i32             _dispose {0};
     std::vector<u8> _pixelCache {};

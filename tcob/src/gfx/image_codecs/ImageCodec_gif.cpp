@@ -43,8 +43,8 @@ void gif::header::read(io::istream& reader)
 
     //.ReadLogicalScreenDescriptor(s);
     // logical screen size
-    Width  = static_cast<u32>(reader.read<u16, std::endian::little>());
-    Height = static_cast<u32>(reader.read<u16, std::endian::little>());
+    Width  = reader.read<u16, std::endian::little>();
+    Height = reader.read<u16, std::endian::little>();
 
     // packed fields
     i32 packed {reader.read<u8>()};
@@ -77,8 +77,8 @@ auto gif_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 {
     _header.read(in);
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
-    if (_header.Id.rfind("GIF", 0) == 0) {
-        return image::information {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
+    if (_header.Id.starts_with("GIF")) {
+        return image::information {.Size = {_header.Width, _header.Height}, .Format = image::format::RGBA};
     }
 
     return std::nullopt;
@@ -91,9 +91,9 @@ auto gif_decoder::open() -> std::optional<image::information>
     auto& in {stream()};
     _header.read(in);
     _pixelCache.resize(_header.Height * _header.Width * gif::BPP);
-    if (_header.Id.rfind("GIF", 0) == 0) {
+    if (_header.Id.starts_with("GIF")) {
         read_contents(in);
-        return image::information {{static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA};
+        return image::information {.Size = {_header.Width, _header.Height}, .Format = image::format::RGBA};
     }
 
     return std::nullopt;
@@ -106,7 +106,7 @@ auto gif_decoder::current_frame() const -> u8 const*
 
 auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 {
-    if (_header.Id.rfind("GIF", 0) != 0) {
+    if (!_header.Id.starts_with("GIF")) {
         return animated_image_decoder::status::DecodeFailure;
     }
 
@@ -293,11 +293,11 @@ auto gif_decoder::decode_frame_data(io::istream& reader, u16 iw, u16 ih) -> std:
 auto gif_decoder::read_block(io::istream& reader) -> i32
 {
     _blockSize = reader.read<u8>();
-    i32 n {0};
+    usize n {0};
     if (_blockSize > 0) {
-        i32 count {0};
+        usize count {0};
         while (n < _blockSize) {
-            count = static_cast<i32>(reader.read_to<u8>({_block.data(), static_cast<usize>(_blockSize - n)}));
+            count = reader.read_to<u8>({_block.data(), (_blockSize - n)});
             if (reader.is_eof()) { break; }
             n += count;
         }
@@ -364,13 +364,13 @@ void gif_decoder::read_frame(io::istream& reader)
         _firstFrame = false;
     } else {
         i32 index {0};
-        for (i32 y {0}; y < ih; y++) {
-            for (i32 x {0}; x < iw; x++) {
+        for (usize y {0}; y < ih; y++) {
+            for (usize x {0}; x < iw; x++) {
                 u8 palIdx {data[index++]};
                 if (palIdx != _transIndex || (palIdx == _header.BackgroundIndex && !_transparency) || _dispose == 2) {
                     assert(palIdx < act.size());
                     auto [r, g, b, a] {act[palIdx]};
-                    u32 const pixInd {((x + ix) * gif::BPP) + ((y + iy) * (_header.Width * gif::BPP))};
+                    usize const pixInd {((x + ix) * gif::BPP) + ((y + iy) * (_header.Width * gif::BPP))};
                     pixPtr[pixInd + 0] = r;
                     pixPtr[pixInd + 1] = g;
                     pixPtr[pixInd + 2] = b;
@@ -380,7 +380,7 @@ void gif_decoder::read_frame(io::istream& reader)
         }
     }
 
-    _currentFrame = image::Create({static_cast<i32>(_header.Width), static_cast<i32>(_header.Height)}, image::format::RGBA, _pixelCache);
+    _currentFrame = image::Create({_header.Width, _header.Height}, image::format::RGBA, _pixelCache);
 }
 
 void gif_decoder::clear_pixel_cache()
