@@ -215,13 +215,13 @@ auto tga::read_data(io::istream& reader, header const& h) -> std::vector<u8>
     }
 
     if (flipV) {
-        std::reverse(rows.begin(), rows.end());
+        std::ranges::reverse(rows);
     }
 
     std::vector<u8> retValue;
     for (auto& r : rows) {
         if (flipH) {
-            std::reverse(r.begin(), r.end());
+            std::ranges::reverse(r);
         }
 
         retValue.insert(retValue.end(), r.begin(), r.end());

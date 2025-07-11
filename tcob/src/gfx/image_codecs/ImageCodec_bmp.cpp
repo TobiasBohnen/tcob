@@ -263,9 +263,9 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
 void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSize, io::ostream& writer)
 {
     writer.write(SIGNATURE);
-    writer.write<u32>(static_cast<u32>(fileSize));
+    writer.write<u32, std::endian::little>(static_cast<u32>(fileSize));
     writer.write(0);
-    writer.write<u32>(static_cast<u32>(imageOffset));
+    writer.write<u32, std::endian::little>(static_cast<u32>(imageOffset));
 }
 
 void static WriteImageData(image const& img, io::ostream& writer)
@@ -295,12 +295,12 @@ void static WriteImageData(image const& img, io::ostream& writer)
 void static WriteInfoHeader(image::information const& info, io::ostream& writer)
 {
     writer.write(40);
-    writer.write<i32>(info.Size.Width);
-    writer.write<i32>(info.Size.Height);
-    writer.write<i16>(1);
-    writer.write<i16>(32);
-    writer.write<i32>(static_cast<i32>(bmp::compression::Rgb));
-    writer.write<u32>(static_cast<u32>(info.size_in_bytes()));
+    writer.write<i32, std::endian::little>(info.Size.Width);
+    writer.write<i32, std::endian::little>(info.Size.Height);
+    writer.write<i16, std::endian::little>(1);
+    writer.write<i16, std::endian::little>(32);
+    writer.write<i32, std::endian::little>(static_cast<i32>(bmp::compression::Rgb));
+    writer.write<u32, std::endian::little>(static_cast<u32>(info.size_in_bytes()));
     writer.write(0);
     writer.write(0);
     writer.write(0);
