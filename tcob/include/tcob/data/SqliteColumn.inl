@@ -9,8 +9,10 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <format>
+    #include <string>
     #include <unordered_set>
 
+    #include "tcob/core/Common.hpp"
     #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
 
@@ -37,6 +39,27 @@ inline unique::unique(auto&&... columns)
 
 ////////////////////////////////////////////////////////////
 
+template <order Order>
+inline auto ordering<Order>::str() const -> utf8_string
+{
+    utf8_string order;
+    // type
+    switch (Order) {
+    case order::Ascending:  order = "ASC"; break;
+    case order::Descending: order = "DESC"; break;
+    }
+
+    utf8_string const column {
+        std::visit(overloaded {
+                       [](string const& name) { return quote_string(name); },
+                       [](i32 column) { return std::to_string(column); }},
+                   Column)};
+
+    return std::format("{} {}", column, order);
+}
+
+////////////////////////////////////////////////////////////
+
 template <type Type, typename C>
 inline auto column<Type, C>::str() const -> utf8_string
 {
@@ -55,7 +78,6 @@ inline auto column<Type, C>::str() const -> utf8_string
 }
 
 ////////////////////////////////////////////////////////////
-
 }
 
 #endif

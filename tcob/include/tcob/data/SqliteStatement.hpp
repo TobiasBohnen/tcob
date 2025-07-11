@@ -60,7 +60,7 @@ public:
 
     auto where(utf8_string const& expr) -> select_statement&;
 
-    auto order_by(utf8_string const& term) -> select_statement&;
+    auto order_by(auto&&... orderings) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
     auto group_by(utf8_string const& column) -> select_statement&;
 

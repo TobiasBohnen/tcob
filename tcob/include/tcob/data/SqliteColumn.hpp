@@ -10,6 +10,8 @@
 
     #include "tcob/data/Sqlite.hpp"
 
+    #include <variant>
+
 namespace tcob::data::sqlite {
 ////////////////////////////////////////////////////////////
 
@@ -127,6 +129,18 @@ public:
 
     auto str() const -> utf8_string;
 };
+
+////////////////////////////////////////////////////////////
+
+template <order Order = order::Ascending>
+struct ordering {
+    std::variant<utf8_string, i32> Column;
+
+    auto str() const -> utf8_string;
+};
+
+using asc  = ordering<order::Ascending>;
+using desc = ordering<order::Descending>;
 
 ////////////////////////////////////////////////////////////
 

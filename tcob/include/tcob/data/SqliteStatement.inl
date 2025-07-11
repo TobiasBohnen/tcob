@@ -14,6 +14,7 @@
     #include <type_traits>
     #include <vector>
 
+    #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
 
 namespace tcob::data::sqlite {
@@ -90,9 +91,10 @@ inline auto select_statement<Values...>::where(utf8_string const& expr) -> selec
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::order_by(utf8_string const& term) -> select_statement<Values...>&
+inline auto select_statement<Values...>::order_by(auto&&... orderings) -> select_statement<Values...>&
 {
-    _values.OrderBy = std::format(" ORDER BY {}", term);
+    std::vector<utf8_string> colStrings {orderings.str()...};
+    _values.OrderBy = std::format(" ORDER BY {}", helper::join(colStrings, ", "));
     return *this;
 }
 
