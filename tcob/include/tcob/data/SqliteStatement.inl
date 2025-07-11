@@ -57,14 +57,14 @@ template <typename T>
 inline auto statement::get_column_value(i32 col) const -> T
 {
     T value {};
-    converter<T>::From(statement_view {_stmt}, col, value);
+    converter<T>::From(_stmt, col, value);
     return value;
 }
 
 template <typename T>
 inline auto statement::bind_parameter(i32& idx, T&& value) const -> bool
 {
-    return converter<std::remove_cvref_t<T>>::To(statement_view {_stmt}, idx, std::forward<T>(value));
+    return converter<std::remove_cvref_t<T>>::To(_stmt, idx, std::forward<T>(value));
 }
 
 ////////////////////////////////////////////////////////////

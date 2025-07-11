@@ -48,15 +48,9 @@ void static update(void* ptr, i32 mode, char const* dbName, char const* table, l
     auto*       db {static_cast<database*>(ptr)};
     update_mode upMode {};
     switch (mode) {
-    case 9:
-        upMode = update_mode::Delete;
-        break;
-    case 18:
-        upMode = update_mode::Insert;
-        break;
-    case 23:
-        upMode = update_mode::Update;
-        break;
+    case 9:  upMode = update_mode::Delete; break;
+    case 18: upMode = update_mode::Insert; break;
+    case 23: upMode = update_mode::Update; break;
     default:
         break;
     }
@@ -100,18 +94,10 @@ database::~database()
 void database::set_journal_mode(journal_mode mode) const
 {
     switch (mode) {
-    case journal_mode::Delete:
-        _db.exec("PRAGMA journal_mode=DELETE;");
-        break;
-    case journal_mode::Memory:
-        _db.exec("PRAGMA journal_mode=MEMORY;");
-        break;
-    case journal_mode::Wal:
-        _db.exec("PRAGMA journal_mode=WAL;");
-        break;
-    case journal_mode::Off:
-        _db.exec("PRAGMA journal_mode=OFF;");
-        break;
+    case journal_mode::Delete: _db.exec("PRAGMA journal_mode=DELETE;"); break;
+    case journal_mode::Memory: _db.exec("PRAGMA journal_mode=MEMORY;"); break;
+    case journal_mode::Wal:    _db.exec("PRAGMA journal_mode=WAL;"); break;
+    case journal_mode::Off:    _db.exec("PRAGMA journal_mode=OFF;"); break;
     }
 }
 

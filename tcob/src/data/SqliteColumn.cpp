@@ -38,6 +38,11 @@ auto primary_key::str() const -> utf8_string
 
 auto foreign_key::str() const -> utf8_string
 {
+    return std::format(R"(REFERENCES {}("{}"))", ForeignTable, ForeignColumn);
+}
+
+auto table_foreign_key::str() const -> utf8_string
+{
     return std::format(R"(FOREIGN KEY("{}") REFERENCES {}("{}"))", Column, ForeignTable, ForeignColumn);
 }
 
@@ -104,4 +109,5 @@ auto sum::str() const -> utf8_string
 }
 
 }
+
 #endif

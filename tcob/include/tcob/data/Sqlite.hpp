@@ -85,7 +85,7 @@ public:
     auto bind(i32 idx, void const* value, i64 size) const -> bool;
     auto bind_null(i32 idx) -> bool;
 
-    void finalize() const;
+    void finalize();
 
     auto get_column_name(i32 col) const -> utf8_string;
     auto get_column_type(i32 col) const -> type;

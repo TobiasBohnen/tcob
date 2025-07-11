@@ -103,6 +103,14 @@ public:
 
 class TCOB_API foreign_key {
 public:
+    utf8_string ForeignTable;
+    utf8_string ForeignColumn;
+
+    auto str() const -> utf8_string;
+};
+
+class TCOB_API table_foreign_key {
+public:
     utf8_string Column;
 
     utf8_string ForeignTable;
@@ -122,12 +130,11 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-template <typename T = no_constraint>
+template <type Type = type::Integer, typename C = no_constraint>
 struct column {
     utf8_string Name;
-    type        Type {type::Integer};
     bool        NotNull {false};
-    T           Constraint {};
+    C           Constraint {};
 
     auto str() const -> utf8_string;
 };

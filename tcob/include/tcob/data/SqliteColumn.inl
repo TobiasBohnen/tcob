@@ -37,8 +37,8 @@ inline unique::unique(auto&&... columns)
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
-inline auto column<T>::str() const -> utf8_string
+template <type Type, typename C>
+inline auto column<Type, C>::str() const -> utf8_string
 {
     utf8_string type;
     // type

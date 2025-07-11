@@ -79,10 +79,11 @@ auto statement_view::bind(i32 idx, f64 value) const -> bool
     return sqlite3_bind_double(_stmt, idx, value) == SQLITE_OK;
 }
 
-void statement_view::finalize() const
+void statement_view::finalize()
 {
     if (_stmt) {
         sqlite3_finalize(_stmt);
+        _stmt = nullptr;
     }
 }
 
@@ -96,18 +97,12 @@ auto statement_view::get_column_type(i32 col) const -> type
 {
     assert(_stmt);
     switch (sqlite3_column_type(_stmt, col)) {
-    case SQLITE_INTEGER:
-        return type::Integer;
-    case SQLITE_FLOAT:
-        return type::Real;
-    case SQLITE_BLOB:
-        return type::Blob;
-    case SQLITE_NULL:
-        return type::Null;
-    case SQLITE_TEXT:
-        return type::Text;
-    default:
-        return type::Blob;
+    case SQLITE_INTEGER: return type::Integer;
+    case SQLITE_FLOAT:   return type::Real;
+    case SQLITE_BLOB:    return type::Blob;
+    case SQLITE_NULL:    return type::Null;
+    case SQLITE_TEXT:    return type::Text;
+    default:             return type::Blob;
     }
 }
 
