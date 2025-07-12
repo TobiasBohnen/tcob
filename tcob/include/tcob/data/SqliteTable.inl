@@ -13,16 +13,14 @@
 
     #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
-    #include "tcob/data/SqliteColumn.hpp"
     #include "tcob/data/SqliteStatement.hpp"
-
 
 namespace tcob::data::sqlite {
 
 namespace detail {
     auto get_column_string(auto&& column) -> utf8_string
     {
-        if constexpr (Aggregate<decltype(column)>) {
+        if constexpr (HasStr<decltype(column)>) {
             return column.str();
         } else {
             return quote_string(utf8_string {column});

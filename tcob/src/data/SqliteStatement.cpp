@@ -95,12 +95,6 @@ update_statement::update_statement(database_view db, utf8_string const& table, u
     _sql = std::format("UPDATE {} SET {}", table, columns);
 }
 
-auto update_statement::where(utf8_string const& expr) -> update_statement&
-{
-    _where = expr;
-    return *this;
-}
-
 auto update_statement::query_string() const -> utf8_string
 {
     return std::format("{} WHERE {};", _sql, _where);
@@ -116,13 +110,13 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
 
     string modeStr;
     switch (mode) {
-    case Normal:  modeStr = ""; break;
-    case Ignore:  modeStr = "OR IGNORE"; break;
-    case Replace: modeStr = "OR REPLACE"; break;
+    case Normal:  modeStr = " "; break;
+    case Ignore:  modeStr = " OR IGNORE "; break;
+    case Replace: modeStr = " OR REPLACE "; break;
     }
 
     // create query
-    _sql = std::format("INSERT {} INTO {} ({})", modeStr, table, columns);
+    _sql = std::format("INSERT{}INTO {} ({})", modeStr, table, columns);
 }
 
 auto insert_statement::query_string(usize valueSize, usize valueCount) const -> utf8_string
@@ -142,12 +136,6 @@ delete_statement::delete_statement(database_view db, utf8_string const& table)
     // DELETE FROM table_name
     // WHERE [condition];
     _sql = std::format("DELETE FROM {}", table);
-}
-
-auto delete_statement::where(utf8_string const& expr) -> delete_statement&
-{
-    _where = expr;
-    return *this;
 }
 
 auto delete_statement::query_string() const -> utf8_string

@@ -84,16 +84,27 @@ inline select_statement<Values...>::select_statement(database_view db, bool addD
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::where(utf8_string const& expr) -> select_statement<Values...>&
+inline auto select_statement<Values...>::where(auto&& cond) -> select_statement<Values...>&
 {
-    _values.Where = std::format(" WHERE {}", expr);
+    if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
+        _values.Where = std::format(" WHERE {}", cond.str());
+    } else {
+        _values.Where = std::format(" WHERE {}", cond);
+    }
+
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::order_by(auto&&... orderings) -> select_statement<Values...>&
+inline auto select_statement<Values...>::order_by(auto&&... orders) -> select_statement<Values...>&
 {
-    std::vector<utf8_string> colStrings {orderings.str()...};
+    std::vector<utf8_string> colStrings {[&]() {
+        if constexpr (detail::HasStr<std::remove_cvref_t<decltype(orders)>>) {
+            return orders.str();
+        } else {
+            return orders;
+        }
+    }()...};
     _values.OrderBy = std::format(" ORDER BY {}", helper::join(colStrings, ", "));
     return *this;
 }
@@ -101,9 +112,9 @@ inline auto select_statement<Values...>::order_by(auto&&... orderings) -> select
 template <typename... Values>
 inline auto select_statement<Values...>::limit(i32 value, std::optional<i32> offset) -> select_statement<Values...>&
 {
-    _values.Limit = std::format(" LIMIT {} ", value);
+    _values.Limit = std::format(" LIMIT {}", value);
     if (offset.has_value()) {
-        _values.Offset = std::format(" OFFSET {} ", *offset);
+        _values.Offset = std::format(" OFFSET {}", *offset);
     }
 
     return *this;
@@ -112,8 +123,15 @@ inline auto select_statement<Values...>::limit(i32 value, std::optional<i32> off
 template <typename... Values>
 inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_statement<Values...>&
 {
-    std::vector<utf8_string> colStrings {quote_string(columns)...};
-    _values.GroupBy = std::format(" GROUP BY {} ", helper::join(colStrings, ", "));
+    std::vector<utf8_string> colStrings {[&]() {
+        if constexpr (detail::HasStr<std::remove_cvref_t<decltype(columns)>>) {
+            return columns.str();
+        } else {
+            return quote_string(columns);
+        }
+    }()...};
+
+    _values.GroupBy = std::format(" GROUP BY {}", helper::join(colStrings, ", "));
     return *this;
 }
 
@@ -142,10 +160,11 @@ template <typename... Values>
 inline auto select_statement<Values...>::query_string() const -> utf8_string
 {
     return std::format(
-        "SELECT {} {} FROM {} {} {} {} {} {} {};",
-        _distinct ? "DISTINCT" : "",
+        "SELECT{}{} FROM {}{}{}{}{}{}{};",
+        _distinct ? " DISTINCT " : " ",
         _values.Columns, _values.Table,
-        _values.Where, _values.OrderBy, _values.Limit, _values.Offset,
+        _values.Where, _values.OrderBy,
+        _values.Limit, _values.Offset,
         _values.GroupBy, _values.Join);
 }
 
@@ -239,6 +258,17 @@ inline auto update_statement::operator()(auto&&... values) -> bool
     return step() == step_status::Done;
 }
 
+inline auto update_statement::where(auto&& cond) -> update_statement&
+{
+    if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
+        _where = cond.str();
+    } else {
+        _where = cond;
+    }
+
+    return *this;
+}
+
 ////////////////////////////////////////////////////////////
 
 inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
@@ -275,6 +305,18 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
     // execute
     return step() == step_status::Done;
 }
+
+inline auto delete_statement::where(auto&& cond) -> delete_statement&
+{
+    if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
+        _where = cond.str();
+    } else {
+        _where = cond;
+    }
+
+    return *this;
+}
+
 }
 
 #endif

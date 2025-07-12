@@ -10,16 +10,11 @@
 
     #include "tcob/data/Sqlite.hpp"
 
+    #include <optional>
     #include <variant>
 
 namespace tcob::data::sqlite {
 ////////////////////////////////////////////////////////////
-
-template <typename T>
-concept Aggregate =
-    requires(T t) {
-        { t.str() } -> std::same_as<utf8_string>;
-    };
 
 class TCOB_API avg {
 public:
@@ -29,7 +24,7 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(Aggregate<avg>);
+static_assert(detail::HasStr<avg>);
 
 class TCOB_API count {
 public:
@@ -39,7 +34,7 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(Aggregate<count>);
+static_assert(detail::HasStr<count>);
 
 class TCOB_API max {
 public:
@@ -49,7 +44,7 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(Aggregate<max>);
+static_assert(detail::HasStr<max>);
 
 class TCOB_API min {
 public:
@@ -59,7 +54,7 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(Aggregate<min>);
+static_assert(detail::HasStr<min>);
 
 class TCOB_API sum {
 public:
@@ -69,7 +64,7 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(Aggregate<sum>);
+static_assert(detail::HasStr<sum>);
 
 ////////////////////////////////////////////////////////////
 
@@ -132,8 +127,14 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+enum class order : u8 {
+    Ascending,
+    Descending
+};
+
 template <order Order = order::Ascending>
-struct ordering {
+class TCOB_API ordering {
+public:
     std::variant<utf8_string, i32> Column;
 
     auto str() const -> utf8_string;
@@ -141,6 +142,35 @@ struct ordering {
 
 using asc  = ordering<order::Ascending>;
 using desc = ordering<order::Descending>;
+
+////////////////////////////////////////////////////////////
+
+enum class op : u8 {
+    Equal,
+    NotEqual,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
+    Like
+};
+
+template <op Operator>
+class TCOB_API conditional {
+public:
+    utf8_string                                   Column;
+    std::optional<std::variant<i32, utf8_string>> Value {};
+
+    auto str() const -> utf8_string;
+};
+
+using equal         = conditional<op::Equal>;
+using not_equal     = conditional<op::NotEqual>;
+using greater       = conditional<op::Greater>;
+using greater_equal = conditional<op::GreaterEqual>;
+using less          = conditional<op::Less>;
+using less_equal    = conditional<op::LessEqual>;
+using like          = conditional<op::Like>;
 
 ////////////////////////////////////////////////////////////
 

@@ -58,9 +58,9 @@ public:
     template <typename T>
     auto exec [[nodiscard]] (auto&&... params) -> std::vector<T>;
 
-    auto where(utf8_string const& expr) -> select_statement&;
+    auto where(auto&& cond) -> select_statement&;
 
-    auto order_by(auto&&... orderings) -> select_statement&;
+    auto order_by(auto&&... orders) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
     auto group_by(auto&&... columns) -> select_statement&;
 
@@ -94,7 +94,7 @@ public:
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
-    auto where(utf8_string const& expr) -> update_statement&;
+    auto where(auto&& cond) -> update_statement&;
 
 private:
     auto query_string() const -> utf8_string;
@@ -131,7 +131,7 @@ public:
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
-    auto where(utf8_string const& expr) -> delete_statement&;
+    auto where(auto&& cond) -> delete_statement&;
 
 private:
     auto query_string() const -> utf8_string;

@@ -36,6 +36,14 @@ concept ConvertibleFrom = requires(statement_view stmt, i32 col, T& t) {
     { converter<std::remove_cvref_t<T>>::From(stmt, col, t) };
 };
 
+namespace detail {
+    template <typename T>
+    concept HasStr =
+        requires(T t) {
+            { t.str() } -> std::same_as<utf8_string>;
+        };
+}
+
 ////////////////////////////////////////////////////////////
 
 enum class type : u8 {
@@ -45,13 +53,6 @@ enum class type : u8 {
     Real,
     Blob,
     Null
-};
-
-////////////////////////////////////////////////////////////
-
-enum class order : u8 {
-    Ascending,
-    Descending
 };
 
 ////////////////////////////////////////////////////////////

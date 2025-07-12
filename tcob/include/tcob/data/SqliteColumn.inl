@@ -27,7 +27,7 @@ inline default_value<T>::default_value(T defaultValue)
 template <typename T>
 inline auto default_value<T>::str() const -> utf8_string
 {
-    return std::format(" DEFAULT {}", DefaultValue);
+    return std::format("DEFAULT {}", DefaultValue);
 }
 
 ////////////////////////////////////////////////////////////
@@ -43,7 +43,6 @@ template <order Order>
 inline auto ordering<Order>::str() const -> utf8_string
 {
     utf8_string order;
-    // type
     switch (Order) {
     case order::Ascending:  order = "ASC"; break;
     case order::Descending: order = "DESC"; break;
@@ -60,11 +59,36 @@ inline auto ordering<Order>::str() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
+template <op Operator>
+inline auto conditional<Operator>::str() const -> utf8_string
+{
+    utf8_string op;
+    switch (Operator) {
+    case op::Equal:        op = "="; break;
+    case op::NotEqual:     op = "<>"; break;
+    case op::Greater:      op = ">"; break;
+    case op::GreaterEqual: op = ">="; break;
+    case op::Less:         op = "<"; break;
+    case op::LessEqual:    op = "<="; break;
+    case op::Like:         op = "like"; break;
+    }
+
+    utf8_string const value {
+        Value ? std::visit(overloaded {
+                               [](utf8_string const& val) { return quote_string(val); },
+                               [](i32 val) { return std::to_string(val); }},
+                           *Value)
+              : "?"};
+
+    return std::format("{} {} {}", Column, op, value);
+}
+
+////////////////////////////////////////////////////////////
+
 template <type Type, typename C>
 inline auto column<Type, C>::str() const -> utf8_string
 {
     utf8_string type;
-    // type
     switch (Type) {
     case type::Text:    type = "TEXT"; break;
     case type::Numeric: type = "NUMERIC"; break;
@@ -74,7 +98,11 @@ inline auto column<Type, C>::str() const -> utf8_string
     case type::Null:    break;
     }
 
-    return std::format("{} {} {} {}", quote_string(Name), type, NotNull ? "NOT NULL" : "", Constraint.str());
+    auto const constraint {Constraint.str()};
+    return std::format("{} {}{}{}{}",
+                       quote_string(Name), type,
+                       NotNull ? " NOT NULL" : "",
+                       constraint.empty() ? "" : " ", constraint);
 }
 
 ////////////////////////////////////////////////////////////
