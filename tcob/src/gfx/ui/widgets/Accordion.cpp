@@ -42,12 +42,15 @@ accordion::accordion(init const& wi)
         queue_redraw(this->name() + ": Tween value changed");
     });
 
-    ActiveSectionIndex.Changed.connect([this](auto const&) {
+    ActiveSectionIndex.Changed.connect([this](auto const& val) {
         if (MaximizeActiveSection) {
             _expandTween.reset(1);
         } else {
             _expandTween.reset(0);
-            _expandTween.start(1, _style.ExpandDuration);
+            auto const duration {val != INVALID_INDEX && _oldActiveSectionIndex != INVALID_INDEX
+                                     ? _style.ExpandDuration * 2
+                                     : _style.ExpandDuration};
+            _expandTween.start(1, duration);
         }
         queue_redraw(this->name() + ": ActiveSection changed");
     });

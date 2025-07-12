@@ -434,21 +434,23 @@ void widget_painter::draw_text_and_icon(text_element const& element, rect_f cons
             draw_text(element, secondHalf, text);
 
             size_f const iconSize {firstHalf.Size.as_fitted(size_f {icon.Texture->info().Size})};
-            rect_f       iconRect {firstHalf.Position, iconSize};
-            iconRect.Position.Y += (contentRect.height() - iconSize.Height) / 2;
+            firstHalf.Position.X += (firstHalf.Size.Width - iconSize.Width) / 2;
+            firstHalf.Position.Y += (contentRect.height() - iconSize.Height) / 2;
+            firstHalf.Size = iconSize;
 
             _canvas.set_fill_style(icon.Color);
-            _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, iconRect);
+            _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, firstHalf);
         } break;
         case icon_text_order::TextBeforeIcon: {
             draw_text(element, firstHalf, text);
 
             size_f const iconSize {secondHalf.Size.as_fitted(size_f {icon.Texture->info().Size})};
-            rect_f       iconRect {secondHalf.Position, iconSize};
-            iconRect.Position.Y += (contentRect.height() - iconSize.Height) / 2;
+            secondHalf.Position.X += (secondHalf.Size.Width - iconSize.Width) / 2;
+            secondHalf.Position.Y += (contentRect.height() - iconSize.Height) / 2;
+            secondHalf.Size = iconSize;
 
             _canvas.set_fill_style(icon.Color);
-            _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, iconRect);
+            _canvas.draw_image(icon.Texture.ptr(), icon.TextureRegion, secondHalf);
         } break;
         }
     } else if (drawText) {
