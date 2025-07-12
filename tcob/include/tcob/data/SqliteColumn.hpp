@@ -133,7 +133,7 @@ enum class order : u8 {
 };
 
 template <order Order = order::Ascending>
-class TCOB_API ordering {
+class ordering {
 public:
     std::variant<utf8_string, i32> Column;
 
@@ -156,7 +156,7 @@ enum class op : u8 {
 };
 
 template <op Operator>
-class TCOB_API conditional {
+class conditional {
 public:
     utf8_string                                   Column;
     std::optional<std::variant<i32, utf8_string>> Value {};
