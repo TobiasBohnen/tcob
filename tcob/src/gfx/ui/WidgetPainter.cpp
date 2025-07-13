@@ -275,16 +275,27 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
             color const darkCol {color::FromHSLA(dark, col->A)};
 
             rect_f const clipRect {rect.as_padded_by({-borderSize, -borderSize})};
+            f32 const    diff {std::min(clipRect.width(), clipRect.height()) / 2};
 
             _canvas.begin_path();
-            _canvas.triangle(clipRect.bottom_left(), clipRect.top_right(), clipRect.bottom_right());
+            _canvas.move_to(clipRect.bottom_right());
+            _canvas.line_to(clipRect.top_right());
+            _canvas.line_to({clipRect.right() - diff, clipRect.top() + diff});
+            _canvas.line_to({clipRect.left() + diff, clipRect.bottom() - diff});
+            _canvas.line_to(clipRect.bottom_left());
+            _canvas.close_path();
             _canvas.clip();
             stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? brightCol : darkCol, [&] {
                 _canvas.rounded_rect(rect, borderRadius);
             });
 
             _canvas.begin_path();
-            _canvas.triangle(clipRect.top_left(), clipRect.top_right(), clipRect.bottom_left());
+            _canvas.move_to(clipRect.top_right());
+            _canvas.line_to(clipRect.top_left());
+            _canvas.line_to(clipRect.bottom_left());
+            _canvas.line_to({clipRect.left() + diff, clipRect.bottom() - diff});
+            _canvas.line_to({clipRect.right() - diff, clipRect.top() + diff});
+            _canvas.line_to(clipRect.top_right());
             _canvas.clip();
             stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? darkCol : brightCol, [&] {
                 _canvas.rounded_rect(rect, borderRadius);
