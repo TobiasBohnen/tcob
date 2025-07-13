@@ -50,7 +50,7 @@ inline auto ordering<Order>::str() const -> utf8_string
 
     utf8_string const column {
         std::visit(overloaded {
-                       [](string const& name) { return quote_string(name); },
+                       [](string const& name) { return quote_identifier(name); },
                        [](i32 column) { return std::to_string(column); }},
                    Column)};
 
@@ -100,7 +100,7 @@ inline auto column<Type, C>::str() const -> utf8_string
 
     auto const constraint {Constraint.str()};
     return std::format("{} {}{}{}{}",
-                       quote_string(Name), type,
+                       quote_identifier(Name), type,
                        NotNull ? " NOT NULL" : "",
                        constraint.empty() ? "" : " ", constraint);
 }

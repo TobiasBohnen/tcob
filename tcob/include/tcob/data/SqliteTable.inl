@@ -23,7 +23,7 @@ namespace detail {
         if constexpr (HasStr<decltype(column)>) {
             return column.str();
         } else {
-            return quote_string(utf8_string {column});
+            return quote_identifier(utf8_string {column});
         }
     }
 
@@ -72,7 +72,7 @@ inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) c
     assert(check_columns(columns...));
 
     std::vector<utf8_string> columnStrings;
-    ((columnStrings.push_back(quote_string(utf8_string {columns}))), ...);
+    ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
     return insert_statement {_db, mode, _name, helper::join(columnStrings, ", ")};
 }
 
@@ -82,7 +82,7 @@ inline auto table::update(auto&&... columns) const -> update_statement
 
     // SET column1 = value1, column2 = value2...., columnN = valueN
     std::vector<utf8_string> setStrings;
-    ((setStrings.push_back(quote_string(utf8_string {columns}) + " = ?")), ...);
+    ((setStrings.push_back(quote_identifier(utf8_string {columns}) + " = ?")), ...);
     return update_statement {_db, _name, helper::join(setStrings, ", ")};
 }
 

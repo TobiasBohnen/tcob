@@ -18,7 +18,8 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-struct vertex final {
+class TCOB_API vertex final {
+public:
     point_f Position {};  // x, y
     color   Color {};     // r, g, b, a
     uv      TexCoords {}; // u, v, level

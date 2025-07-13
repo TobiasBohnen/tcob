@@ -227,6 +227,11 @@ auto database_view::config(i32 key, i32 value) const -> bool
 
 auto quote_string(utf8_string_view str) -> utf8_string
 {
+    return std::format("'{}'", str);
+}
+
+auto quote_identifier(utf8_string_view str) -> utf8_string
+{
     return std::format("\"{}\"", str);
 }
 

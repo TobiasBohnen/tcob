@@ -127,7 +127,7 @@ inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_s
         if constexpr (detail::HasStr<std::remove_cvref_t<decltype(columns)>>) {
             return columns.str();
         } else {
-            return quote_string(columns);
+            return quote_identifier(columns);
         }
     }()...};
 

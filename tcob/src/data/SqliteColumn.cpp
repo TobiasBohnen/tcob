@@ -65,7 +65,7 @@ avg::avg(utf8_string column)
 
 auto avg::str() const -> utf8_string
 {
-    return std::format("AVG({})", quote_string(Column));
+    return std::format("AVG({})", quote_identifier(Column));
 }
 
 count::count(utf8_string column)
@@ -75,7 +75,7 @@ count::count(utf8_string column)
 
 auto count::str() const -> utf8_string
 {
-    return std::format("COUNT({})", quote_string(Column));
+    return std::format("COUNT({})", quote_identifier(Column));
 }
 
 max::max(utf8_string column)
@@ -85,7 +85,7 @@ max::max(utf8_string column)
 
 auto max::str() const -> utf8_string
 {
-    return std::format("MAX({})", quote_string(Column));
+    return std::format("MAX({})", quote_identifier(Column));
 }
 
 min::min(utf8_string column)
@@ -95,7 +95,7 @@ min::min(utf8_string column)
 
 auto min::str() const -> utf8_string
 {
-    return std::format("MIN({})", quote_string(Column));
+    return std::format("MIN({})", quote_identifier(Column));
 }
 
 sum::sum(utf8_string column)
@@ -105,7 +105,7 @@ sum::sum(utf8_string column)
 
 auto sum::str() const -> utf8_string
 {
-    return std::format("SUM({})", quote_string(Column));
+    return std::format("SUM({})", quote_identifier(Column));
 }
 
 }
