@@ -6,6 +6,7 @@
 #include "Canvas_private.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <iterator>
@@ -13,6 +14,9 @@
 #include <span>
 #include <utility>
 #include <vector>
+
+#include "EarcutHelper.hpp"
+#include <earcut.hpp>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/StringUtils.hpp"
@@ -542,6 +546,46 @@ void path_cache::stroke(state const& s, bool enforceWinding, bool edgeAntiAlias,
         expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, fringeWidth);
     } else {
         expand_stroke(strokeWidth * 0.5f, s.LineCap, s.LineJoin, s.MiterLimit, 0.0f);
+    }
+}
+
+void path_cache::clip(bool enforceWinding, f32 fringeWidth)
+{
+    _concaveVerts.clear();
+    _paths.clear();
+    _points.clear();
+
+    flatten_paths(enforceWinding, {}, 0);
+
+    expand_fill(0.0f, line_join::Miter, 2.4f, fringeWidth);
+
+    // earcut concave paths
+    struct concave_offset {
+        usize Path {0};
+        usize Offset {0};
+        usize Count {0};
+    };
+    std::vector<concave_offset> concaveOffsets;
+    usize                       currentOffset {0};
+
+    for (usize i {0}; i < _paths.size(); ++i) {
+        auto& path {_paths[i]};
+
+        assert(path.StrokeCount == 0);
+        if (!path.Convex) {
+            std::span<vertex> earcut {path.Fill, path.FillCount};
+            auto const        inds {mapbox::earcut<u32>(std::array<std::span<vertex>, 1> {earcut})};
+
+            for (u32 ind : inds) { _concaveVerts.push_back(earcut[ind]); }
+            concaveOffsets.emplace_back(i, currentOffset, inds.size());
+            currentOffset += inds.size();
+        }
+    }
+
+    for (auto const& offset : concaveOffsets) {
+        auto& path {_paths[offset.Path]};
+        path.Fill      = &_concaveVerts[offset.Offset];
+        path.FillCount = offset.Count;
     }
 }
 

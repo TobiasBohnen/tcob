@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cmath>
 #include <memory>
 #include <span>
@@ -668,7 +669,7 @@ void canvas::stroke()
 void canvas::clip()
 {
     state const& s {_states->get()};
-    _cache->fill(s, true, false, _fringeWidth);
+    _cache->clip(_enforceWinding, _fringeWidth);
 
     _impl->render_clip(s.Scissor, _fringeWidth, _cache->paths());
 }

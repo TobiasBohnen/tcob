@@ -111,6 +111,7 @@ public:
 
     void fill(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 fringeWidth);
     void stroke(state const& s, bool enforceWinding, bool edgeAntiAlias, f32 strokeWidth, f32 fringeWidth);
+    void clip(bool enforceWinding, f32 fringeWidth);
 
     auto paths() const -> std::vector<canvas::path> const&;
     auto has_commands() const -> bool;
@@ -137,6 +138,7 @@ private:
     void calculate_joins(f32 w, line_join lineJoin, f32 miterLimit);
 
     std::vector<vertex>       _verts;
+    std::vector<vertex>       _concaveVerts;
     std::vector<canvas_point> _points;
 
     std::vector<canvas::path> _paths;

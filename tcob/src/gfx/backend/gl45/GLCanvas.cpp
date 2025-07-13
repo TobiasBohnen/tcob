@@ -6,6 +6,7 @@
 #include "GLCanvas.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstring>
 #include <span>
@@ -183,13 +184,13 @@ void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& compo
         call.TriangleOffset = offset;
         vertex* quad {&_verts[call.TriangleOffset]};
         quad[0].Position  = {bounds[2], bounds[3]};
-        quad[0].TexCoords = {0.5f, 1.0f, 0};
+        quad[0].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
         quad[1].Position  = {bounds[2], bounds[1]};
-        quad[1].TexCoords = {0.5f, 1.0f, 0};
+        quad[1].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
         quad[2].Position  = {bounds[0], bounds[3]};
-        quad[2].TexCoords = {0.5f, 1.0f, 0};
+        quad[2].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
         quad[3].Position  = {bounds[0], bounds[1]};
-        quad[3].TexCoords = {0.5f, 1.0f, 0};
+        quad[3].TexCoords = {.U = 0.5f, .V = 1.0f, .Level = 0};
 
         call.UniformOffset = alloc_frag_uniforms(2);
 
@@ -274,7 +275,7 @@ void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vec
         return;
     }
 
-    usize pathCount {paths.size()};
+    usize const pathCount {paths.size()};
 
     call.PathOffset    = _paths.size();
     call.PathCount     = pathCount;
@@ -283,8 +284,8 @@ void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vec
     call.TriangleCount = 0;
 
     // Allocate vertices.
-    usize maxverts {get_max_vertcount(paths) + call.TriangleCount};
-    usize offset {alloc_verts(maxverts)};
+    usize const maxverts {get_max_vertcount(paths) + call.TriangleCount};
+    usize       offset {alloc_verts(maxverts)};
 
     for (auto const& path : paths) {
         nvg_path& copy {_paths.emplace_back()};
@@ -293,12 +294,6 @@ void gl_canvas::render_clip(canvas::scissor const& scissor, f32 fringe, std::vec
             copy.FillCount  = path.FillCount;
             memcpy(&_verts[offset], path.Fill, sizeof(vertex) * path.FillCount);
             offset += path.FillCount;
-        }
-        if (path.StrokeCount > 0) {
-            copy.StrokeOffset = offset;
-            copy.StrokeCount  = path.StrokeCount;
-            memcpy(&_verts[offset], path.Stroke, sizeof(vertex) * path.StrokeCount);
-            offset += path.StrokeCount;
         }
     }
 
@@ -402,17 +397,15 @@ void gl_canvas::fill(nvg_call const& call)
 
     set_uniforms(call.UniformOffset);
 
-    {
-        std::vector<GLint> fillFirsts, fillCounts;
-        fillFirsts.reserve(call.PathCount);
-        fillCounts.reserve(call.PathCount);
-        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
-            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
-        }
-        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
-                          static_cast<GLsizei>(fillFirsts.size()));
+    std::vector<GLint> fillFirsts, fillCounts;
+    fillFirsts.reserve(call.PathCount);
+    fillCounts.reserve(call.PathCount);
+    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+        fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+        fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
     }
+    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                      static_cast<GLsizei>(fillFirsts.size()));
 
     glEnable(GL_CULL_FACE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -422,17 +415,16 @@ void gl_canvas::fill(nvg_call const& call)
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
     set_uniforms(call.UniformOffset + _fragSize, call.Image);
-    {
-        std::vector<GLint> strokeFirsts, strokeCounts;
-        strokeFirsts.reserve(call.PathCount);
-        strokeCounts.reserve(call.PathCount);
-        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-            strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
-            strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
-        }
-        glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
-                          static_cast<GLsizei>(strokeFirsts.size()));
+
+    std::vector<GLint> strokeFirsts, strokeCounts;
+    strokeFirsts.reserve(call.PathCount);
+    strokeCounts.reserve(call.PathCount);
+    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+        strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+        strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
     }
+    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                      static_cast<GLsizei>(strokeFirsts.size()));
 
     glStencilMask(0x7F);
     glStencilFunc(GL_NOTEQUAL, 0x00, 0x7F); // Only draw where inside clip.
@@ -524,8 +516,6 @@ void gl_canvas::triangles(nvg_call const& call)
 
 void gl_canvas::clip(nvg_call const& call)
 {
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
     glEnable(GL_STENCIL_TEST);
 
     glStencilMask(0xFF);
@@ -534,6 +524,10 @@ void gl_canvas::clip(nvg_call const& call)
 
     glClearStencil(0);
     glClear(GL_STENCIL_BUFFER_BIT);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glDisable(GL_CULL_FACE);
+
+    set_uniforms(call.UniformOffset);
 
     std::vector<GLint> fillFirsts, fillCounts;
     fillFirsts.reserve(call.PathCount);
@@ -542,8 +536,10 @@ void gl_canvas::clip(nvg_call const& call)
         fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
         fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
     }
-    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(), static_cast<GLsizei>(fillFirsts.size()));
+    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                      static_cast<GLsizei>(fillFirsts.size()));
 
+    glEnable(GL_CULL_FACE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     glDisable(GL_STENCIL_TEST);
