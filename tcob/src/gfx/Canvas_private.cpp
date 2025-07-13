@@ -573,10 +573,11 @@ void path_cache::clip(bool enforceWinding, f32 fringeWidth)
 
         assert(path.StrokeCount == 0);
         if (!path.Convex) {
-            std::span<vertex> earcut {path.Fill, path.FillCount};
-            auto const        inds {mapbox::earcut<u32>(std::array<std::span<vertex>, 1> {earcut})};
+            std::array<std::span<vertex>, 1> poly;
+            poly[0] = {path.Fill, path.FillCount};
+            auto const inds {mapbox::earcut<u32>(poly)};
+            for (u32 ind : inds) { _concaveVerts.push_back(poly[0][ind]); }
 
-            for (u32 ind : inds) { _concaveVerts.push_back(earcut[ind]); }
             concaveOffsets.emplace_back(i, currentOffset, inds.size());
             currentOffset += inds.size();
         }
@@ -810,7 +811,7 @@ void path_cache::expand_stroke(f32 w, line_cap lineCap, line_join lineJoin, f32 
         }
 
         path.StrokeCount = dst - verts;
-
+        assert(path.StrokeCount < _verts.capacity());
         verts = dst;
     }
 }
@@ -879,7 +880,8 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
         }
 
         path.FillCount = dst - verts;
-        verts          = dst;
+        assert(path.FillCount < _verts.capacity());
+        verts = dst;
 
         // Calculate fringe
         if (fringe) {
@@ -909,7 +911,8 @@ void path_cache::expand_fill(f32 w, line_join lineJoin, f32 miterLimit, f32 frin
             SetVertex(dst++, verts[1].Position.X, verts[1].Position.Y, ru, 1);
 
             path.StrokeCount = dst - verts;
-            verts            = dst;
+            assert(path.StrokeCount < _verts.capacity());
+            verts = dst;
         } else {
             path.Stroke      = nullptr;
             path.StrokeCount = 0;
