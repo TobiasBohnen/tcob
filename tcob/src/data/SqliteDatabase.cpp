@@ -21,15 +21,6 @@
 
 namespace tcob::data::sqlite {
 
-auto static create_master_query(utf8_string const& name, utf8_string const& type) -> utf8_string
-{
-    return std::format(
-        "SELECT name FROM sqlite_master WHERE name = '{0}' and type = '{1}' "
-        "UNION ALL "
-        "SELECT name FROM sqlite_temp_master WHERE name = '{0}' and type = '{1}';",
-        name, type);
-}
-
 extern "C" {
 auto static commit(void* ptr) -> i32
 {
@@ -101,47 +92,88 @@ void database::set_journal_mode(journal_mode mode) const
     }
 }
 
-auto database::table_names() const -> std::set<utf8_string>
+auto database::schema_names() const -> std::set<utf8_string>
 {
-    // SELECT name FROM sqlite_master WHERE type='table' ORDER BY name
-    statement select {_db};
-    select.prepare(
-        "SELECT name FROM sqlite_master "
-        "WHERE type='table' "
-        "UNION ALL "
-        "SELECT name FROM sqlite_temp_master "
-        "WHERE type='table';");
+    std::set<utf8_string> result;
 
+    statement stmt {_db};
+    if (stmt.prepare("PRAGMA database_list;")) {
+        while (stmt.step() == step_status::Row) {
+            result.insert(stmt.get_column_value<utf8_string>(1)); // column 1 = schema name
+        }
+    }
+
+    return result;
+}
+
+auto database::table_names(utf8_string const& schema) const -> std::set<utf8_string>
+{
+    // SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name
+    statement select {_db};
+    if (schema == "main") {
+        select.prepare("SELECT name FROM sqlite_schema WHERE type='table';");
+    } else {
+        select.prepare(std::format("SELECT name FROM {}.sqlite_schema WHERE type='table';", schema));
+    }
     return select.get_column_value<std::set<utf8_string>>(0);
 }
 
-auto database::view_names() const -> std::set<utf8_string>
+auto database::view_names(utf8_string const& schema) const -> std::set<utf8_string>
 {
-    // SELECT name FROM sqlite_master WHERE type='view' ORDER BY name
+    // SELECT name FROM sqlite_schema WHERE type='view' ORDER BY name
     statement select {_db};
-    select.prepare(
-        "SELECT name FROM sqlite_master "
-        "WHERE type='view' "
-        "UNION ALL "
-        "SELECT name FROM sqlite_temp_master "
-        "WHERE type='view';");
-
+    if (schema == "main") {
+        select.prepare("SELECT name FROM sqlite_temp_schema WHERE type='view';");
+    } else {
+        select.prepare(std::format("SELECT name FROM {}.sqlite_temp_schema WHERE type='view';", schema));
+    }
     return select.get_column_value<std::set<utf8_string>>(0);
 }
 
-auto database::table_exists(utf8_string const& tableName) const -> bool
+auto database::schema_exists(utf8_string const& schema) const -> bool
 {
-    //  SELECT name FROM sqlite_master WHERE name='tableName' and type='table';
     statement select {_db};
-    select.prepare(create_master_query(tableName, "table"));
+    if (!select.prepare("PRAGMA database_list;")) {
+        return false;
+    }
+
+    while (select.step() == step_status::Row) {
+        if (select.get_column_value<utf8_string>(1) == schema) {
+            return true;
+        }
+    }
+    return false;
+}
+
+auto database::table_exists(utf8_string const& tableName, utf8_string const& schema) const -> bool
+{
+    if (!schema_exists(schema)) { return false; }
+
+    //  SELECT name FROM sqlite_schema WHERE name='tableName' and type='table';
+    statement select {_db};
+    if (schema == "main") {
+        select.prepare("SELECT name FROM sqlite_schema WHERE name = ? and type = 'table';");
+    } else {
+        select.prepare(std::format("SELECT name FROM {0}.sqlite_schema WHERE name = ? and type = 'table';", schema));
+    }
+
+    i32 idx {1};
+    select.bind_parameter(idx, tableName);
     return select.step() == step_status::Row;
 }
 
-auto database::view_exists(utf8_string const& viewName) const -> bool
+auto database::view_exists(utf8_string const& viewName, utf8_string const& schema) const -> bool
 {
-    //  SELECT name FROM sqlite_master WHERE name='viewName' and type='view';
+    //  SELECT name FROM sqlite_schema WHERE name='viewName' and type='view';
     statement select {_db};
-    select.prepare(create_master_query(viewName, "view"));
+    if (schema == "main") {
+        select.prepare("SELECT name FROM sqlite_temp_schema WHERE name = ? and type = 'view';");
+    } else {
+        select.prepare(std::format("SELECT name FROM {0}.sqlite_temp_schema WHERE name = ? and type = 'view';", schema));
+    }
+
+    i32 idx {1};
+    select.bind_parameter(idx, viewName);
     return select.step() == step_status::Row;
 }
 
@@ -155,30 +187,30 @@ auto database::create_statement() const -> statement
     return statement {_db};
 }
 
-auto database::get_table(utf8_string const& tableName) const -> std::optional<table>
+auto database::get_table(utf8_string const& tableName, utf8_string const& schema) const -> std::optional<table>
 {
-    return table_exists(tableName)
-        ? std::optional {table {_db, tableName}}
+    return table_exists(tableName, schema)
+        ? std::optional {table {_db, schema + "." + tableName}}
         : std::nullopt;
 }
 
-auto database::get_view(utf8_string const& viewName) const -> std::optional<view>
+auto database::get_view(utf8_string const& viewName, utf8_string const& schema) const -> std::optional<view>
 {
-    return view_exists(viewName)
+    return view_exists(viewName, schema)
         ? std::optional {view {_db, viewName}}
         : std::nullopt;
 }
 
-auto database::drop_table(utf8_string const& tableName) const -> bool
+auto database::drop_table(utf8_string const& tableName, utf8_string const& schema) const -> bool
 {
     // DROP TABLE [IF EXISTS] [schema_name.]table_name;
-    return _db.exec("DROP TABLE IF EXISTS " + tableName + ";");
+    return _db.exec(std::format("DROP TABLE IF EXISTS {}.{};", quote_identifier(schema), quote_identifier(tableName)));
 }
 
-auto database::drop_view(utf8_string const& viewName) const -> bool
+auto database::drop_view(utf8_string const& viewName, utf8_string const& schema) const -> bool
 {
     // DROP VIEW  [IF EXISTS] [schema_name.]table_name;
-    return _db.exec("DROP VIEW IF EXISTS " + viewName + ";");
+    return _db.exec(std::format("DROP VIEW IF EXISTS {}.{};", quote_identifier(schema), quote_identifier(viewName)));
 }
 
 void database::set_commit_hook(std::function<i32(database*)>&& func)
@@ -243,6 +275,18 @@ void database::close()
 auto database::vacuum_into(path const& file) const -> bool
 {
     return _db.exec("VACUUM main INTO '" + file + "';");
+}
+
+auto database::attach(path const& file, utf8_string const& alias) const -> bool
+{
+    statement stmt {_db};
+    return stmt.prepare(std::format("ATTACH DATABASE '{}' AS '{}';", file, alias)) && stmt.step() == step_status::Done;
+}
+
+auto database::detach(utf8_string const& alias) const -> bool
+{
+    statement stmt {_db};
+    return stmt.prepare(std::format("DETACH DATABASE '{}';", alias)) && stmt.step() == step_status::Done;
 }
 
 }

@@ -47,8 +47,9 @@ public:
 
     void set_journal_mode(journal_mode mode) const;
 
-    auto table_names() const -> std::set<utf8_string>;
-    auto view_names() const -> std::set<utf8_string>;
+    auto schema_names() const -> std::set<utf8_string>;
+    auto table_names(utf8_string const& schema = "main") const -> std::set<utf8_string>;
+    auto view_names(utf8_string const& schema = "main") const -> std::set<utf8_string>;
 
     auto create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>;
     template <typename... Values>
@@ -56,16 +57,20 @@ public:
     auto create_savepoint(utf8_string const& name) const -> savepoint;
     auto create_statement() const -> statement;
 
-    auto table_exists(utf8_string const& tableName) const -> bool;
-    auto view_exists(utf8_string const& viewName) const -> bool;
+    auto schema_exists(utf8_string const& schema) const -> bool;
+    auto table_exists(utf8_string const& tableName, utf8_string const& schema = "main") const -> bool;
+    auto view_exists(utf8_string const& viewName, utf8_string const& schema = "main") const -> bool;
 
-    auto get_table(utf8_string const& tableName) const -> std::optional<table>;
-    auto get_view(utf8_string const& viewName) const -> std::optional<view>;
+    auto get_table(utf8_string const& tableName, utf8_string const& schema = "main") const -> std::optional<table>;
+    auto get_view(utf8_string const& viewName, utf8_string const& schema = "main") const -> std::optional<view>;
 
-    auto drop_table(utf8_string const& tableName) const -> bool;
-    auto drop_view(utf8_string const& viewName) const -> bool;
+    auto drop_table(utf8_string const& tableName, utf8_string const& schema = "main") const -> bool;
+    auto drop_view(utf8_string const& viewName, utf8_string const& schema = "main") const -> bool;
 
     auto vacuum_into(path const& file) const -> bool;
+
+    auto attach(path const& file, utf8_string const& alias) const -> bool;
+    auto detach(utf8_string const& alias) const -> bool;
 
     void set_commit_hook(std::function<i32(database*)>&& func);
     auto call_commit_hook() -> i32;

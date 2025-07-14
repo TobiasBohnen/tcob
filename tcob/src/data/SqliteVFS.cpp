@@ -8,6 +8,7 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <cassert>
+    #include <cstring>
 
     #include <sqlite3/sqlite3.h>
 
@@ -45,7 +46,7 @@ auto static xRead(sqlite3_file* f, void* dst, int iAmt, sqlite3_int64 iOfst) -> 
     auto  nRead {stream.read_to<byte>({dstBuffer, static_cast<usize>(iAmt)})};
 
     if (nRead < 0) { return SQLITE_IOERR_READ; }
-    if (nRead < iAmt) { return SQLITE_IOERR_SHORT_READ; }
+    if (nRead < iAmt) { std::memset(dstBuffer + nRead, 0, iAmt - nRead); }
     return SQLITE_OK;
 }
 
@@ -105,7 +106,7 @@ auto static xCheckReservedLock(sqlite3_file* /* f */, int* pResOut) -> int
 
 auto static xFileControl(sqlite3_file* /* f */, int /* op */, void* /* pArg */) -> int
 {
-    return 0;
+    return SQLITE_NOTFOUND;
 }
 
 auto static xSectorSize(sqlite3_file* /* f */) -> int
@@ -140,7 +141,7 @@ static sqlite3_io_methods const physfs_sqlite3_io_methods {
     .xUnfetch               = nullptr,
 };
 
-auto static xOpen(sqlite3_vfs*, char const* zName, sqlite3_file* f, int /* flags */, int* /* pOutFlags */) -> int
+auto static xOpen(sqlite3_vfs*, char const* zName, sqlite3_file* f, int flags, int* pOutFlags) -> int
 {
     auto* file {reinterpret_cast<physfs_sqlite3_file*>(f)};
     assert(&file->SqliteFile == f);
@@ -148,11 +149,19 @@ auto static xOpen(sqlite3_vfs*, char const* zName, sqlite3_file* f, int /* flags
     file->SqliteFile.pMethods = &physfs_sqlite3_io_methods;
     file->FileName            = zName;
 
-    if (!fs::is_file(file->FileName)) { // FIXME: check flags
-        fs::create_file(file->FileName);
+    bool const exists {fs::is_file(zName)};
+
+    if ((flags & SQLITE_OPEN_CREATE) && !exists) {
+        if (!fs::create_file(zName)) {
+            return SQLITE_IOERR;
+        }
+    } else if (!exists) {
+        return SQLITE_CANTOPEN;
     }
 
-    return file->FileName ? SQLITE_OK : SQLITE_IOERR;
+    if (pOutFlags) { *pOutFlags = flags; }
+
+    return SQLITE_OK;
 }
 
 auto static xDelete(sqlite3_vfs*, char const* zName, int /* syncDir */) -> int

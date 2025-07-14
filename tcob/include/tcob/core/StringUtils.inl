@@ -91,7 +91,7 @@ auto split_preserve_brackets_for_each(string_view str, char delim, auto&& f) -> 
 template <typename T>
 auto to_string(T&& value) -> string
 {
-    if constexpr (std::is_convertible_v<T, string>) {
+    if constexpr (std::is_convertible_v<T, string> || std::is_convertible_v<T, string_view>) {
         return string {std::forward<T>(value)};
     } else {
         return std::to_string(value);

@@ -49,8 +49,9 @@ auto statement::prepare(utf8_string const& sql) -> bool
     _stmt = _db.prepare(sql);
     if (!is_valid()) {
         logger::Error("SQLite: {}", _db.error_message());
+        return false;
     }
-    return is_valid();
+    return true;
 }
 
 auto statement::step() const -> step_status

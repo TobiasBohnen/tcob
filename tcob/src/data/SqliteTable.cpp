@@ -7,10 +7,12 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <format>
     #include <set>
     #include <utility>
     #include <vector>
 
+    #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
 
@@ -60,14 +62,17 @@ auto table::schema() const -> std::vector<column_info>
     std::vector<column_info> result;
 
     statement pragma {_db};
-    if (pragma.prepare("PRAGMA table_info(" + _name + ")")) {
+    auto      split {helper::split(_name, '.')};
+    if (split.size() != 2) { return {}; }
+    if (pragma.prepare(std::format("PRAGMA {}.table_info({})", split[0], split[1]))) {
         while (pragma.step() == step_status::Row) {
-            column_info info;
-            info.Name         = pragma.get_column_value<utf8_string>(1); // name
-            info.Type         = pragma.get_column_value<utf8_string>(2); // type
-            info.NotNull      = pragma.get_column_value<i32>(3) != 0;    // notnull
-            info.IsPrimaryKey = pragma.get_column_value<i32>(5) != 0;    // pk
-            result.push_back(std::move(info));
+            column_info const info {
+                .Name         = pragma.get_column_value<utf8_string>(1),
+                .Type         = pragma.get_column_value<utf8_string>(2),
+                .NotNull      = pragma.get_column_value<i32>(3) != 0,
+                .IsPrimaryKey = pragma.get_column_value<i32>(5) != 0,
+            };
+            result.push_back(info);
         }
     }
 
