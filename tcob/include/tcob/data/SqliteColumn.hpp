@@ -8,11 +8,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <variant>
+    #include <vector>
+
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
-
-    #include <optional>
-    #include <variant>
 
 namespace tcob::data::sqlite {
 ////////////////////////////////////////////////////////////
@@ -148,22 +148,25 @@ enum class op : u8 {
     GreaterEqual,
     Less,
     LessEqual,
-    Like
+    Like,
+    In,
+    Between
 };
 
 template <op Operator>
 class conditional {
+    using params = std::variant<i32, f32, bool, utf8_string>;
+
 public:
     template <typename T>
-    explicit conditional(T const& column);
-    template <typename T>
-    conditional(T const& column, auto&& value);
-
-    utf8_string                                              Column;
-    std::optional<std::variant<i32, f32, bool, utf8_string>> Value {};
+    conditional(T const& column, auto&&... params);
 
     auto str() const -> utf8_string;
     auto bind() const -> bind_func;
+
+private:
+    utf8_string         _column;
+    std::vector<params> _params;
 };
 
 using equal         = conditional<op::Equal>;
@@ -173,6 +176,8 @@ using greater_equal = conditional<op::GreaterEqual>;
 using less          = conditional<op::Less>;
 using less_equal    = conditional<op::LessEqual>;
 using like          = conditional<op::Like>;
+using in            = conditional<op::In>;
+using between       = conditional<op::Between>;
 
 ////////////////////////////////////////////////////////////
 

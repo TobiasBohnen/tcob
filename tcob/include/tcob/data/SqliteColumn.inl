@@ -8,11 +8,12 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <cassert>
     #include <format>
-    #include <optional>
     #include <string>
     #include <type_traits>
     #include <unordered_set>
+    #include <vector>
 
     #include "tcob/core/Common.hpp"
     #include "tcob/core/StringUtils.hpp"
@@ -64,20 +65,16 @@ inline auto ordering<Order>::str() const -> utf8_string
 
 template <op Operator>
 template <typename T>
-inline conditional<Operator>::conditional(T const& column)
-    : conditional {column, std::nullopt}
+inline conditional<Operator>::conditional(T const& column, auto&&... params)
 {
-}
+    if constexpr (sizeof...(params) > 0) {
+        (_params.push_back(params), ...);
+    }
 
-template <op Operator>
-template <typename T>
-inline conditional<Operator>::conditional(T const& column, auto&& value)
-    : Value {value}
-{
     if constexpr (detail::HasStr<std::remove_cvref_t<T>>) {
-        Column = column.str();
+        _column = column.str();
     } else {
-        Column = column;
+        _column = column;
     }
 }
 
@@ -85,6 +82,7 @@ template <op Operator>
 inline auto conditional<Operator>::str() const -> utf8_string
 {
     utf8_string op;
+
     switch (Operator) {
     case op::Equal:        op = "="; break;
     case op::NotEqual:     op = "<>"; break;
@@ -92,19 +90,22 @@ inline auto conditional<Operator>::str() const -> utf8_string
     case op::GreaterEqual: op = ">="; break;
     case op::Less:         op = "<"; break;
     case op::LessEqual:    op = "<="; break;
-    case op::Like:         op = "like"; break;
+    case op::Like:         op = "LIKE"; break;
+    case op::In:           return std::format("{} IN ({})", _column, helper::join(std::vector<utf8_string>(_params.size(), "?"), ", "));
+    case op::Between:      return std::format("{} BETWEEN ? AND ?", _column);
     }
 
-    return std::format("{} {} ?", Column, op);
+    return std::format("{} {} ?", _column, op);
 }
 
 template <op Operator>
 inline auto conditional<Operator>::bind() const -> bind_func
 {
-    return [value = Value](i32& idx, statement& view) {
-        if (!value) { return; }
-        std::visit([&](auto&& item) { view.bind_parameter(idx, item); }, *value);
-        return;
+    return [values = _params](i32& idx, statement& view) {
+        if (values.empty()) { return; }
+        for (auto const& value : values) {
+            std::visit([&](auto&& item) { view.bind_parameter(idx, item); }, value);
+        }
     };
 }
 
