@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <set>
+    #include <vector>
 
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
@@ -25,6 +26,13 @@ inline constexpr ignore_t ignore;
 struct replace_t { };
 inline constexpr replace_t replace;
 
+struct column_info {
+    utf8_string Name;
+    utf8_string Type;
+    bool        NotNull {false};
+    bool        IsPrimaryKey {false};
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API table final {
@@ -34,6 +42,7 @@ public:
     auto name() const -> utf8_string const&;
     auto column_names() const -> std::set<utf8_string>;
     auto row_count() const -> i32;
+    auto schema() const -> std::vector<column_info>;
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
