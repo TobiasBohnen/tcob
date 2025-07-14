@@ -15,6 +15,7 @@
     #include "tcob/core/Common.hpp"
     #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::data::sqlite {
 
@@ -73,14 +74,21 @@ inline auto conditional<Operator>::str() const -> utf8_string
     case op::Like:         op = "like"; break;
     }
 
-    utf8_string const value {
-        Value ? std::visit(overloaded {
-                               [](utf8_string const& val) { return quote_string(val); },
-                               [](i32 val) { return std::to_string(val); }},
-                           *Value)
-              : "?"};
+    return std::format("{} {} ?", Column, op);
+}
 
-    return std::format("{} {} {}", Column, op, value);
+template <op Operator>
+inline auto conditional<Operator>::bind() const -> bind_func
+{
+    return [&](i32& idx, statement& view) {
+        if (!Value) { return; }
+
+        std::visit(overloaded {
+                       [&](utf8_string const& val) { view.bind_parameter(idx, val); },
+                       [&](i32 val) { view.bind_parameter(idx, val); }},
+                   *Value);
+        return;
+    };
 }
 
 ////////////////////////////////////////////////////////////

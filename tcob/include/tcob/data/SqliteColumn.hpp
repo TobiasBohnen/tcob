@@ -9,6 +9,7 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
 
     #include <optional>
     #include <variant>
@@ -24,7 +25,6 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(detail::HasStr<avg>);
 
 class TCOB_API count {
 public:
@@ -34,7 +34,6 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(detail::HasStr<count>);
 
 class TCOB_API max {
 public:
@@ -44,7 +43,6 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(detail::HasStr<max>);
 
 class TCOB_API min {
 public:
@@ -54,7 +52,6 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(detail::HasStr<min>);
 
 class TCOB_API sum {
 public:
@@ -64,7 +61,6 @@ public:
 
     auto str() const -> utf8_string;
 };
-static_assert(detail::HasStr<sum>);
 
 ////////////////////////////////////////////////////////////
 
@@ -162,6 +158,7 @@ public:
     std::optional<std::variant<i32, utf8_string>> Value {};
 
     auto str() const -> utf8_string;
+    auto bind() const -> bind_func;
 };
 
 using equal         = conditional<op::Equal>;
@@ -174,7 +171,7 @@ using like          = conditional<op::Like>;
 
 ////////////////////////////////////////////////////////////
 
-template <type Type = type::Integer, typename C = no_constraint>
+template <type Type, typename C>
 struct column {
     utf8_string Name;
     bool        NotNull {false};
@@ -182,6 +179,17 @@ struct column {
 
     auto str() const -> utf8_string;
 };
+
+template <typename C = no_constraint>
+using text_column = column<type::Text, C>;
+template <typename C = no_constraint>
+using numeric_column = column<type::Numeric, C>;
+template <typename C = no_constraint>
+using int_column = column<type::Integer, C>;
+template <typename C = no_constraint>
+using real_column = column<type::Real, C>;
+template <typename C = no_constraint>
+using blob_column = column<type::Blob, C>;
 
 ////////////////////////////////////////////////////////////
 

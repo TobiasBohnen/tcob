@@ -88,6 +88,7 @@ inline auto select_statement<Values...>::where(auto&& cond) -> select_statement<
 {
     if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
         _values.Where = std::format(" WHERE {}", cond.str());
+        _whereBind    = cond.bind();
     } else {
         _values.Where = std::format(" WHERE {}", cond);
     }
@@ -169,45 +170,41 @@ inline auto select_statement<Values...>::query_string() const -> utf8_string
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... params)
+inline auto select_statement<Values...>::prepare_and_bind(auto&&... params) -> bool
 {
     // prepare
-    bool const prepared {prepare(query_string())};
+    if (!prepare(query_string())) { return false; };
 
+    // bind parameters
+    i32 idx {1};
     if constexpr (sizeof...(params) > 0) {
-        if (prepared) {
-            // bind parameters
-            i32 idx {1};
-            ((bind_parameter(idx, params)), ...);
-        }
+        ((bind_parameter(idx, params)), ...);
     }
+    if (_whereBind) { (*_whereBind)(idx, *this); }
+    return true;
+}
+
+template <typename... Values>
+inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... params)
+{
+    bool const prepared(prepare_and_bind(params...));
 
     if constexpr (sizeof...(Values) > 1) {
-        std::vector<std::tuple<Values...>> retValue;
+        using return_type = std::vector<std::tuple<Values...>>;
+        if (!prepared) { return return_type {}; }
+        if (sizeof...(Values) != column_count()) { return return_type {}; }
 
-        // prepare
-        if (prepared) {
-            if (sizeof...(Values) != column_count()) { return retValue; }
-
-            // get columns
-            retValue = get_column_value<std::vector<std::tuple<Values...>>>(0);
-        }
-
-        return retValue;
+        // get columns
+        return get_column_value<std::vector<std::tuple<Values...>>>(0);
     }
 
     if constexpr (sizeof...(Values) == 1) {
-        std::vector<Values...> retValue;
+        using return_type = std::vector<Values...>;
+        if (!prepared) { return return_type {}; }
+        if (column_count() != 1) { return return_type {}; }
 
-        // prepare
-        if (prepared) {
-            if (column_count() != 1) { return retValue; }
-
-            // get columns
-            retValue = get_column_value<std::vector<Values...>>(0);
-        }
-
-        return retValue;
+        // get columns
+        return get_column_value<std::vector<Values...>>(0);
     }
 }
 
@@ -216,28 +213,17 @@ template <typename T>
 inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -> std::vector<T>
 {
     static_assert(sizeof...(Values) > 1);
+    using return_type = std::vector<T>;
 
-    // prepare
-    bool const prepared {prepare(query_string())};
+    if (!prepare_and_bind(params...)) { return return_type {}; }
+    if (sizeof...(Values) != column_count()) { return return_type {}; }
 
-    if constexpr (sizeof...(params) > 0) {
-        if (prepared) {
-            // bind parameters
-            i32 idx {1};
-            ((bind_parameter(idx, params)), ...);
-        }
-    }
-
+    // get columns
+    auto const     values {get_column_value<std::vector<std::tuple<Values...>>>(0)};
     std::vector<T> retValue;
-    if (prepared) {
-        if (sizeof...(Values) != column_count()) { return retValue; }
-
-        // get columns
-        auto const values {get_column_value<std::vector<std::tuple<Values...>>>(0)};
-        retValue.reserve(values.size());
-        for (auto const& tup : values) {
-            retValue.push_back(std::make_from_tuple<T>(tup));
-        }
+    retValue.reserve(values.size());
+    for (auto const& tup : values) {
+        retValue.push_back(std::make_from_tuple<T>(tup));
     }
 
     return retValue;
@@ -253,6 +239,7 @@ inline auto update_statement::operator()(auto&&... values) -> bool
     // bind parameters
     i32 idx {1};
     ((bind_parameter(idx, values)), ...);
+    if (_whereBind) { (*_whereBind)(idx, *this); }
 
     // execute
     return step() == step_status::Done;
@@ -261,7 +248,8 @@ inline auto update_statement::operator()(auto&&... values) -> bool
 inline auto update_statement::where(auto&& cond) -> update_statement&
 {
     if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
-        _where = cond.str();
+        _where     = cond.str();
+        _whereBind = cond.bind();
     } else {
         _where = cond;
     }
@@ -296,11 +284,12 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
     // prepare
     if (!prepare(query_string())) { return false; }
 
+    // bind parameters
+    i32 idx {1};
     if constexpr (sizeof...(values) > 0) {
-        // bind parameters
-        i32 idx {1};
         ((bind_parameter(idx, values)), ...);
     }
+    if (_whereBind) { (*_whereBind)(idx, *this); }
 
     // execute
     return step() == step_status::Done;
@@ -309,7 +298,8 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
 inline auto delete_statement::where(auto&& cond) -> delete_statement&
 {
     if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
-        _where = cond.str();
+        _where     = cond.str();
+        _whereBind = cond.bind();
     } else {
         _where = cond;
     }

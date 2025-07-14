@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <functional>
     #include <optional>
     #include <vector>
 
@@ -46,6 +47,8 @@ private:
     statement_view _stmt;
 };
 
+using bind_func = std::function<void(i32&, statement&)>;
+
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>
@@ -71,6 +74,8 @@ public:
     auto query_string() const -> utf8_string;
 
 private:
+    auto prepare_and_bind(auto&&... params) -> bool;
+
     struct values {
         utf8_string Columns;
         utf8_string Table;
@@ -82,8 +87,9 @@ private:
         utf8_string Join;
     };
 
-    values _values;
-    bool   _distinct;
+    values                   _values;
+    std::optional<bind_func> _whereBind;
+    bool                     _distinct;
 };
 
 ////////////////////////////////////////////////////////////
@@ -99,8 +105,9 @@ public:
 private:
     auto query_string() const -> utf8_string;
 
-    utf8_string _where;
-    utf8_string _sql;
+    utf8_string              _where;
+    std::optional<bind_func> _whereBind;
+    utf8_string              _sql;
 };
 
 ////////////////////////////////////////////////////////////
@@ -136,8 +143,9 @@ public:
 private:
     auto query_string() const -> utf8_string;
 
-    utf8_string _where;
-    utf8_string _sql;
+    utf8_string              _where;
+    std::optional<bind_func> _whereBind;
+    utf8_string              _sql;
 };
 
 }
