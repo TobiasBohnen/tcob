@@ -154,6 +154,11 @@ enum class op : u8 {
 template <op Operator>
 class conditional {
 public:
+    template <typename T>
+    explicit conditional(T const& column);
+    template <typename T>
+    conditional(T const& column, auto&& value);
+
     utf8_string                                              Column;
     std::optional<std::variant<i32, f32, bool, utf8_string>> Value {};
 

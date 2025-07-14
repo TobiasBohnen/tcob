@@ -232,6 +232,7 @@ auto quote_string(utf8_string_view str) -> utf8_string
 
 auto quote_identifier(utf8_string_view str) -> utf8_string
 {
+    if (str == "*") { return "*"; }
     return std::format("\"{}\"", str);
 }
 

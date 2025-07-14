@@ -9,7 +9,9 @@
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
     #include <format>
+    #include <optional>
     #include <string>
+    #include <type_traits>
     #include <unordered_set>
 
     #include "tcob/core/Common.hpp"
@@ -59,6 +61,25 @@ inline auto ordering<Order>::str() const -> utf8_string
 }
 
 ////////////////////////////////////////////////////////////
+
+template <op Operator>
+template <typename T>
+inline conditional<Operator>::conditional(T const& column)
+    : conditional {column, std::nullopt}
+{
+}
+
+template <op Operator>
+template <typename T>
+inline conditional<Operator>::conditional(T const& column, auto&& value)
+    : Value {value}
+{
+    if constexpr (detail::HasStr<std::remove_cvref_t<T>>) {
+        Column = column.str();
+    } else {
+        Column = column;
+    }
+}
 
 template <op Operator>
 inline auto conditional<Operator>::str() const -> utf8_string

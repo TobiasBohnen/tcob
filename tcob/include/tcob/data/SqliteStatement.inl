@@ -98,6 +98,20 @@ inline auto select_statement<Values...>::where(T const& cond) -> select_statemen
 }
 
 template <typename... Values>
+template <typename T>
+inline auto select_statement<Values...>::having(T const& cond) -> select_statement&
+{
+    if constexpr (detail::HasBind<T>) {
+        _values.Having = std::format(" HAVING {}", cond.str());
+        _havingBind    = cond.bind();
+    } else {
+        _values.Having = std::format(" HAVING {}", cond);
+    }
+
+    return *this;
+}
+
+template <typename... Values>
 inline auto select_statement<Values...>::order_by(auto&&... orders) -> select_statement<Values...>&
 {
     std::vector<utf8_string> colStrings {[&]() {
@@ -162,12 +176,13 @@ template <typename... Values>
 inline auto select_statement<Values...>::query_string() const -> utf8_string
 {
     return std::format(
-        "SELECT{}{} FROM {}{}{}{}{}{}{};",
+        "SELECT{}{} FROM {}{}{}{}{}{}{}{};",
         _distinct ? " DISTINCT " : " ",
         _values.Columns, _values.Table,
-        _values.Where, _values.OrderBy,
-        _values.Limit, _values.Offset,
-        _values.GroupBy, _values.Join);
+        _values.Join,
+        _values.Where, _values.GroupBy,
+        _values.Having, _values.OrderBy,
+        _values.Limit, _values.Offset);
 }
 
 template <typename... Values>
@@ -182,6 +197,8 @@ inline auto select_statement<Values...>::prepare_and_bind(auto&&... params) -> b
         ((bind_parameter(idx, params)), ...);
     }
     if (_whereBind) { (*_whereBind)(idx, *this); }
+    if (_havingBind) { (*_havingBind)(idx, *this); }
+
     return true;
 }
 

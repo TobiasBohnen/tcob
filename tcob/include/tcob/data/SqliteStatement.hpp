@@ -72,6 +72,8 @@ public:
 
     template <typename T>
     auto where(T const& cond) -> select_statement&;
+    template <typename T>
+    auto having(T const& cond) -> select_statement&;
 
     auto order_by(auto&&... orders) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
@@ -94,11 +96,13 @@ private:
         utf8_string Limit;
         utf8_string Offset;
         utf8_string GroupBy;
+        utf8_string Having;
         utf8_string Join;
     };
 
     values                   _values;
     std::optional<bind_func> _whereBind;
+    std::optional<bind_func> _havingBind;
     bool                     _distinct;
 };
 
