@@ -57,9 +57,9 @@ auto table::row_count() const -> i32
     return 0;
 }
 
-auto table::schema() const -> std::vector<column_info>
+auto table::info() const -> std::vector<column_info>
 {
-    std::vector<column_info> result;
+    std::vector<column_info> retValue;
 
     statement pragma {_db};
     auto      split {helper::split(_name, '.')};
@@ -72,11 +72,11 @@ auto table::schema() const -> std::vector<column_info>
                 .NotNull      = pragma.get_column_value<i32>(3) != 0,
                 .IsPrimaryKey = pragma.get_column_value<i32>(5) != 0,
             };
-            result.push_back(info);
+            retValue.push_back(info);
         }
     }
 
-    return result;
+    return retValue;
 }
 
 auto table::delete_from() const -> delete_statement

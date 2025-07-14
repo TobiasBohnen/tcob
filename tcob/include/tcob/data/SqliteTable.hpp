@@ -42,7 +42,7 @@ public:
     auto name() const -> utf8_string const&;
     auto column_names() const -> std::set<utf8_string>;
     auto row_count() const -> i32;
-    auto schema() const -> std::vector<column_info>;
+    auto info() const -> std::vector<column_info>;
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
