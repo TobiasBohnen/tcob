@@ -154,8 +154,8 @@ enum class op : u8 {
 template <op Operator>
 class conditional {
 public:
-    utf8_string                                   Column;
-    std::optional<std::variant<i32, utf8_string>> Value {};
+    utf8_string                                              Column;
+    std::optional<std::variant<i32, f32, bool, utf8_string>> Value {};
 
     auto str() const -> utf8_string;
     auto bind() const -> bind_func;

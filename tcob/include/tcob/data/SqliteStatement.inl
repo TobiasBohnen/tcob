@@ -84,9 +84,10 @@ inline select_statement<Values...>::select_statement(database_view db, bool addD
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::where(auto&& cond) -> select_statement<Values...>&
+template <typename T>
+inline auto select_statement<Values...>::where(T const& cond) -> select_statement<Values...>&
 {
-    if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
+    if constexpr (detail::HasBind<T>) {
         _values.Where = std::format(" WHERE {}", cond.str());
         _whereBind    = cond.bind();
     } else {
@@ -195,7 +196,7 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... par
         if (sizeof...(Values) != column_count()) { return return_type {}; }
 
         // get columns
-        return get_column_value<std::vector<std::tuple<Values...>>>(0);
+        return get_column_value<return_type>(0);
     }
 
     if constexpr (sizeof...(Values) == 1) {
@@ -204,7 +205,7 @@ inline auto select_statement<Values...>::operator() [[nodiscard]] (auto&&... par
         if (column_count() != 1) { return return_type {}; }
 
         // get columns
-        return get_column_value<std::vector<Values...>>(0);
+        return get_column_value<return_type>(0);
     }
 }
 
@@ -219,8 +220,8 @@ inline auto select_statement<Values...>::exec [[nodiscard]] (auto&&... params) -
     if (sizeof...(Values) != column_count()) { return return_type {}; }
 
     // get columns
-    auto const     values {get_column_value<std::vector<std::tuple<Values...>>>(0)};
-    std::vector<T> retValue;
+    auto const  values {get_column_value<std::vector<std::tuple<Values...>>>(0)};
+    return_type retValue;
     retValue.reserve(values.size());
     for (auto const& tup : values) {
         retValue.push_back(std::make_from_tuple<T>(tup));
@@ -245,9 +246,10 @@ inline auto update_statement::operator()(auto&&... values) -> bool
     return step() == step_status::Done;
 }
 
-inline auto update_statement::where(auto&& cond) -> update_statement&
+template <typename T>
+inline auto update_statement::where(T const& cond) -> update_statement&
 {
-    if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
+    if constexpr (detail::HasBind<std::remove_cvref_t<T>>) {
         _where     = cond.str();
         _whereBind = cond.bind();
     } else {
@@ -295,9 +297,10 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
     return step() == step_status::Done;
 }
 
-inline auto delete_statement::where(auto&& cond) -> delete_statement&
+template <typename T>
+inline auto delete_statement::where(T const& cond) -> delete_statement&
 {
-    if constexpr (detail::HasStr<std::remove_cvref_t<decltype(cond)>>) {
+    if constexpr (detail::HasBind<std::remove_cvref_t<T>>) {
         _where     = cond.str();
         _whereBind = cond.bind();
     } else {

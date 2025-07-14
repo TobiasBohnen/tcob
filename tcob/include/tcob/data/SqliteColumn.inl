@@ -80,13 +80,9 @@ inline auto conditional<Operator>::str() const -> utf8_string
 template <op Operator>
 inline auto conditional<Operator>::bind() const -> bind_func
 {
-    return [&](i32& idx, statement& view) {
-        if (!Value) { return; }
-
-        std::visit(overloaded {
-                       [&](utf8_string const& val) { view.bind_parameter(idx, val); },
-                       [&](i32 val) { view.bind_parameter(idx, val); }},
-                   *Value);
+    return [value = Value](i32& idx, statement& view) {
+        if (!value) { return; }
+        std::visit([&](auto&& item) { view.bind_parameter(idx, item); }, *value);
         return;
     };
 }

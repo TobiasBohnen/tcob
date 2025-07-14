@@ -49,6 +49,15 @@ private:
 
 using bind_func = std::function<void(i32&, statement&)>;
 
+namespace detail {
+    template <typename T>
+    concept HasBind =
+        requires(T t) {
+            { t.str() } -> std::same_as<utf8_string>;
+            { t.bind() } -> std::same_as<bind_func>;
+        };
+}
+
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>
@@ -61,7 +70,8 @@ public:
     template <typename T>
     auto exec [[nodiscard]] (auto&&... params) -> std::vector<T>;
 
-    auto where(auto&& cond) -> select_statement&;
+    template <typename T>
+    auto where(T const& cond) -> select_statement&;
 
     auto order_by(auto&&... orders) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
@@ -100,7 +110,8 @@ public:
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
-    auto where(auto&& cond) -> update_statement&;
+    template <typename T>
+    auto where(T const& cond) -> update_statement&;
 
 private:
     auto query_string() const -> utf8_string;
@@ -138,7 +149,8 @@ public:
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
-    auto where(auto&& cond) -> delete_statement&;
+    template <typename T>
+    auto where(T const& cond) -> delete_statement&;
 
 private:
     auto query_string() const -> utf8_string;
