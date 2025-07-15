@@ -28,6 +28,7 @@ if(TCOB_ENABLE_ADDON_DATA_SQLITE)
         ${CMAKE_CURRENT_SOURCE_DIR}/SqliteColumn.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SqliteDatabase.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SqliteSavepoint.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/SqliteSchema.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SqliteStatement.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SqliteTable.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SqliteVFS.cpp
@@ -40,6 +41,7 @@ if(TCOB_ENABLE_ADDON_DATA_SQLITE)
         ${TCOB_INC_DIR}/tcob/data/SqliteDatabase.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteDatabase.inl
         ${TCOB_INC_DIR}/tcob/data/SqliteSavepoint.hpp
+        ${TCOB_INC_DIR}/tcob/data/SqliteSchema.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteStatement.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteStatement.inl
         ${TCOB_INC_DIR}/tcob/data/SqliteTable.hpp

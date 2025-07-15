@@ -16,6 +16,7 @@
     #include "tcob/core/io/FileSystem.hpp"
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteSavepoint.hpp"
+    #include "tcob/data/SqliteSchema.hpp"
     #include "tcob/data/SqliteStatement.hpp"
     #include "tcob/data/SqliteTable.hpp"
 
@@ -57,11 +58,13 @@ database::database()
 
 database::database(database_view db)
     : _db {db}
+    , _main {db, "main"}
 {
 }
 
 database::database(database&& other) noexcept
     : _db {std::exchange(other._db, database_view {nullptr})}
+    , _main {std::exchange(other._main, schema {database_view {nullptr}, ""})}
     , _commitHookFunc {std::exchange(other._commitHookFunc, {})}
     , _rbHookFunc {std::exchange(other._rbHookFunc, {})}
     , _updateHookFunc {std::exchange(other._updateHookFunc, {})}
@@ -71,6 +74,7 @@ database::database(database&& other) noexcept
 auto database::operator=(database&& other) noexcept -> database&
 {
     std::swap(_db, other._db);
+    std::swap(_main, other._main);
     std::swap(_commitHookFunc, other._commitHookFunc);
     std::swap(_rbHookFunc, other._rbHookFunc);
     std::swap(_updateHookFunc, other._updateHookFunc);
@@ -106,28 +110,14 @@ auto database::schema_names() const -> std::set<utf8_string>
     return result;
 }
 
-auto database::table_names(utf8_string const& schema) const -> std::set<utf8_string>
+auto database::table_names() const -> std::set<utf8_string>
 {
-    // SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name
-    statement select {_db};
-    if (schema == "main") {
-        select.prepare("SELECT name FROM sqlite_schema WHERE type='table';");
-    } else {
-        select.prepare(std::format("SELECT name FROM {}.sqlite_schema WHERE type='table';", schema));
-    }
-    return select.get_column_value<std::set<utf8_string>>(0);
+    return _main.table_names();
 }
 
-auto database::view_names(utf8_string const& schema) const -> std::set<utf8_string>
+auto database::view_names() const -> std::set<utf8_string>
 {
-    // SELECT name FROM sqlite_schema WHERE type='view' ORDER BY name
-    statement select {_db};
-    if (schema == "main") {
-        select.prepare("SELECT name FROM sqlite_temp_schema WHERE type='view';");
-    } else {
-        select.prepare(std::format("SELECT name FROM {}.sqlite_temp_schema WHERE type='view';", schema));
-    }
-    return select.get_column_value<std::set<utf8_string>>(0);
+    return _main.view_names();
 }
 
 auto database::schema_exists(utf8_string const& schema) const -> bool
@@ -145,36 +135,14 @@ auto database::schema_exists(utf8_string const& schema) const -> bool
     return false;
 }
 
-auto database::table_exists(utf8_string const& tableName, utf8_string const& schema) const -> bool
+auto database::table_exists(utf8_string const& tableName) const -> bool
 {
-    if (!schema_exists(schema)) { return false; }
-
-    //  SELECT name FROM sqlite_schema WHERE name='tableName' and type='table';
-    statement select {_db};
-    if (schema == "main") {
-        select.prepare("SELECT name FROM sqlite_schema WHERE name = ? and type = 'table';");
-    } else {
-        select.prepare(std::format("SELECT name FROM {0}.sqlite_schema WHERE name = ? and type = 'table';", schema));
-    }
-
-    i32 idx {1};
-    select.bind_parameter(idx, tableName);
-    return select.step() == step_status::Row;
+    return _main.table_exists(tableName);
 }
 
-auto database::view_exists(utf8_string const& viewName, utf8_string const& schema) const -> bool
+auto database::view_exists(utf8_string const& viewName) const -> bool
 {
-    //  SELECT name FROM sqlite_schema WHERE name='viewName' and type='view';
-    statement select {_db};
-    if (schema == "main") {
-        select.prepare("SELECT name FROM sqlite_temp_schema WHERE name = ? and type = 'view';");
-    } else {
-        select.prepare(std::format("SELECT name FROM {0}.sqlite_temp_schema WHERE name = ? and type = 'view';", schema));
-    }
-
-    i32 idx {1};
-    select.bind_parameter(idx, viewName);
-    return select.step() == step_status::Row;
+    return _main.view_exists(viewName);
 }
 
 auto database::create_savepoint(utf8_string const& name) const -> savepoint
@@ -187,30 +155,31 @@ auto database::create_statement() const -> statement
     return statement {_db};
 }
 
-auto database::get_table(utf8_string const& tableName, utf8_string const& schema) const -> std::optional<table>
+auto database::get_schema(utf8_string const& schemaName) const -> std::optional<schema>
 {
-    return table_exists(tableName, schema)
-        ? std::optional {table {_db, schema + "." + tableName}}
+    return schema_exists(schemaName)
+        ? std::make_optional<schema>(_db, schemaName)
         : std::nullopt;
 }
 
-auto database::get_view(utf8_string const& viewName, utf8_string const& schema) const -> std::optional<view>
+auto database::get_table(utf8_string const& tableName) const -> std::optional<table>
 {
-    return view_exists(viewName, schema)
-        ? std::optional {view {_db, viewName}}
-        : std::nullopt;
+    return _main.get_table(tableName);
 }
 
-auto database::drop_table(utf8_string const& tableName, utf8_string const& schema) const -> bool
+auto database::get_view(utf8_string const& viewName) const -> std::optional<view>
 {
-    // DROP TABLE [IF EXISTS] [schema_name.]table_name;
-    return _db.exec(std::format("DROP TABLE IF EXISTS {}.{};", quote_identifier(schema), quote_identifier(tableName)));
+    return _main.get_view(viewName);
 }
 
-auto database::drop_view(utf8_string const& viewName, utf8_string const& schema) const -> bool
+auto database::drop_table(utf8_string const& tableName) const -> bool
 {
-    // DROP VIEW  [IF EXISTS] [schema_name.]table_name;
-    return _db.exec(std::format("DROP VIEW IF EXISTS {}.{};", quote_identifier(schema), quote_identifier(viewName)));
+    return _main.drop_table(tableName);
+}
+
+auto database::drop_view(utf8_string const& viewName) const -> bool
+{
+    return _main.drop_view(viewName);
 }
 
 void database::set_commit_hook(std::function<i32(database*)>&& func)
@@ -274,7 +243,7 @@ void database::close()
 
 auto database::vacuum_into(path const& file) const -> bool
 {
-    return _db.exec("VACUUM main INTO '" + file + "';");
+    return _main.vacuum_into(file);
 }
 
 auto database::attach(path const& file, utf8_string const& alias) const -> bool

@@ -71,6 +71,7 @@
 #include <tcob/data/SqliteConversions.hpp>
 #include <tcob/data/SqliteDatabase.hpp>
 #include <tcob/data/SqliteSavepoint.hpp>
+#include <tcob/data/SqliteSchema.hpp>
 #include <tcob/data/SqliteStatement.hpp>
 #include <tcob/data/SqliteTable.hpp>
 

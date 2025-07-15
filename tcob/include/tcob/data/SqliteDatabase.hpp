@@ -15,6 +15,7 @@
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteSavepoint.hpp"
+    #include "tcob/data/SqliteSchema.hpp"
     #include "tcob/data/SqliteStatement.hpp"
     #include "tcob/data/SqliteTable.hpp"
 
@@ -48,8 +49,8 @@ public:
     void set_journal_mode(journal_mode mode) const;
 
     auto schema_names() const -> std::set<utf8_string>;
-    auto table_names(utf8_string const& schema = "main") const -> std::set<utf8_string>;
-    auto view_names(utf8_string const& schema = "main") const -> std::set<utf8_string>;
+    auto table_names() const -> std::set<utf8_string>;
+    auto view_names() const -> std::set<utf8_string>;
 
     auto create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>;
     template <typename... Values>
@@ -58,14 +59,15 @@ public:
     auto create_statement() const -> statement;
 
     auto schema_exists(utf8_string const& schema) const -> bool;
-    auto table_exists(utf8_string const& tableName, utf8_string const& schema = "main") const -> bool;
-    auto view_exists(utf8_string const& viewName, utf8_string const& schema = "main") const -> bool;
+    auto table_exists(utf8_string const& tableName) const -> bool;
+    auto view_exists(utf8_string const& viewName) const -> bool;
 
-    auto get_table(utf8_string const& tableName, utf8_string const& schema = "main") const -> std::optional<table>;
-    auto get_view(utf8_string const& viewName, utf8_string const& schema = "main") const -> std::optional<view>;
+    auto get_schema(utf8_string const& schemaName) const -> std::optional<schema>;
+    auto get_table(utf8_string const& tableName) const -> std::optional<table>;
+    auto get_view(utf8_string const& viewName) const -> std::optional<view>;
 
-    auto drop_table(utf8_string const& tableName, utf8_string const& schema = "main") const -> bool;
-    auto drop_view(utf8_string const& viewName, utf8_string const& schema = "main") const -> bool;
+    auto drop_table(utf8_string const& tableName) const -> bool;
+    auto drop_view(utf8_string const& viewName) const -> bool;
 
     auto vacuum_into(path const& file) const -> bool;
 
@@ -88,6 +90,7 @@ private:
     void close();
 
     database_view _db {nullptr};
+    schema        _main;
 
     std::function<i32(database*)>                                              _commitHookFunc {};
     std::function<void(database*)>                                             _rbHookFunc {};
