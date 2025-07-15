@@ -153,6 +153,29 @@ enum class op : u8 {
     Between
 };
 
+enum class combine_op : u8 {
+    And,
+    Or
+};
+
+template <combine_op Operator, typename Cond1, typename Cond2>
+class combined_condition {
+public:
+    combined_condition(Cond1 const& cond1, Cond2 const& cond2);
+
+    auto str() const -> utf8_string;
+    auto bind() const -> bind_func;
+
+    template <typename Cond3>
+    auto operator&&(Cond3 const& other) -> combined_condition<combine_op::And, combined_condition, Cond3>;
+    template <typename Cond3>
+    auto operator||(Cond3 const& other) -> combined_condition<combine_op::Or, combined_condition, Cond3>;
+
+private:
+    Cond1 _cond1;
+    Cond2 _cond2;
+};
+
 template <op Operator>
 class conditional {
     using params = std::variant<i32, f32, bool, utf8_string>;
@@ -163,6 +186,11 @@ public:
 
     auto str() const -> utf8_string;
     auto bind() const -> bind_func;
+
+    template <typename Cond2>
+    auto operator&&(Cond2 const& other) -> combined_condition<combine_op::And, conditional, Cond2>;
+    template <typename Cond2>
+    auto operator||(Cond2 const& other) -> combined_condition<combine_op::Or, conditional, Cond2>;
 
 private:
     utf8_string         _column;

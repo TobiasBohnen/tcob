@@ -63,6 +63,49 @@ inline auto ordering<Order>::str() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
+template <combine_op Operator, typename Cond1, typename Cond2>
+inline combined_condition<Operator, Cond1, Cond2>::combined_condition(Cond1 const& cond1, Cond2 const& cond2)
+    : _cond1 {cond1}
+    , _cond2 {cond2}
+{
+}
+
+template <combine_op Operator, typename Cond1, typename Cond2>
+inline auto combined_condition<Operator, Cond1, Cond2>::str() const -> utf8_string
+{
+    utf8_string op;
+    switch (Operator) {
+    case combine_op::And: op = "AND"; break;
+    case combine_op::Or:  op = "OR"; break;
+    }
+    return std::format("({} {} {})", _cond1.str(), op, _cond2.str());
+}
+
+template <combine_op Operator, typename Cond1, typename Cond2>
+inline auto combined_condition<Operator, Cond1, Cond2>::bind() const -> bind_func
+{
+    return [cond1 = _cond1, cond2 = _cond2](i32& idx, statement& view) {
+        cond1.bind()(idx, view);
+        cond2.bind()(idx, view);
+    };
+}
+
+template <combine_op Operator, typename Cond1, typename Cond2>
+template <typename Cond3>
+inline auto combined_condition<Operator, Cond1, Cond2>::operator||(Cond3 const& other) -> combined_condition<combine_op::Or, combined_condition, Cond3>
+{
+    return {*this, other};
+}
+
+template <combine_op Operator, typename Cond1, typename Cond2>
+template <typename Cond3>
+inline auto combined_condition<Operator, Cond1, Cond2>::operator&&(Cond3 const& other) -> combined_condition<combine_op::And, combined_condition, Cond3>
+{
+    return {*this, other};
+}
+
+////////////////////////////////////////////////////////////
+
 template <op Operator>
 template <typename T>
 inline conditional<Operator>::conditional(T const& column, auto&&... params)
@@ -107,6 +150,20 @@ inline auto conditional<Operator>::bind() const -> bind_func
             std::visit([&](auto&& item) { view.bind_parameter(idx, item); }, value);
         }
     };
+}
+
+template <op Operator>
+template <typename Cond2>
+inline auto conditional<Operator>::operator||(Cond2 const& other) -> combined_condition<combine_op::Or, conditional, Cond2>
+{
+    return {*this, other};
+}
+
+template <op Operator>
+template <typename Cond2>
+inline auto conditional<Operator>::operator&&(Cond2 const& other) -> combined_condition<combine_op::And, conditional, Cond2>
+{
+    return {*this, other};
 }
 
 ////////////////////////////////////////////////////////////
