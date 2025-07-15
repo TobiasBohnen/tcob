@@ -20,7 +20,7 @@
     #include "tcob/data/SqliteStatement.hpp"
     #include "tcob/data/SqliteTable.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 extern "C" {
 auto static commit(void* ptr) -> i32
@@ -150,11 +150,6 @@ auto database::create_savepoint(utf8_string const& name) const -> savepoint
     return {_db, name};
 }
 
-auto database::create_statement() const -> statement
-{
-    return statement {_db};
-}
-
 auto database::get_schema(utf8_string const& schemaName) const -> std::optional<schema>
 {
     return schema_exists(schemaName)
@@ -246,16 +241,17 @@ auto database::vacuum_into(path const& file) const -> bool
     return _main.vacuum_into(file);
 }
 
-auto database::attach(path const& file, utf8_string const& alias) const -> bool
+auto database::attach_memory(utf8_string const& alias) const -> std::optional<schema>
 {
-    statement stmt {_db};
-    return stmt.prepare(std::format("ATTACH DATABASE '{}' AS '{}';", file, alias)) && stmt.step() == step_status::Done;
+    return attach(":memory:", alias);
 }
 
-auto database::detach(utf8_string const& alias) const -> bool
+auto database::attach(path const& file, utf8_string const& alias) const -> std::optional<schema>
 {
     statement stmt {_db};
-    return stmt.prepare(std::format("DETACH DATABASE '{}';", alias)) && stmt.step() == step_status::Done;
+    return stmt.prepare(std::format("ATTACH DATABASE '{}' AS '{}';", file, alias)) && stmt.step() == step_status::Done
+        ? get_schema(alias)
+        : std::nullopt;
 }
 
 }

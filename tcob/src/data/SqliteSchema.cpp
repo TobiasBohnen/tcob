@@ -16,7 +16,7 @@
     #include "tcob/data/SqliteStatement.hpp"
     #include "tcob/data/SqliteTable.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 schema::schema(database_view db, utf8_string name)
     : _db {db}
@@ -40,16 +40,16 @@ auto schema::view_names() const -> std::set<utf8_string>
     // SELECT name FROM sqlite_schema WHERE type='view' ORDER BY name
     statement select {_db};
     if (_name == "main") {
-        select.prepare("SELECT name FROM sqlite_temp_schema WHERE type='view';");
+        select.prepare("SELECT name FROM sqlite_schema WHERE type='view';");
     } else {
-        select.prepare(std::format("SELECT name FROM {}.sqlite_temp_schema WHERE type='view';", _name));
+        select.prepare(std::format("SELECT name FROM {}.sqlite_schema WHERE type='view';", _name));
     }
     return select.get_column_value<std::set<utf8_string>>(0);
 }
 
 auto schema::table_exists(utf8_string const& tableName) const -> bool
 {
-    //  SELECT name FROM sqlite_schema WHERE name='tableName' and type='table';
+    // SELECT name FROM sqlite_schema WHERE name='tableName' and type='table';
     statement select {_db};
     if (_name == "main") {
         select.prepare("SELECT name FROM sqlite_schema WHERE name = ? and type = 'table';");
@@ -67,9 +67,9 @@ auto schema::view_exists(utf8_string const& viewName) const -> bool
     //  SELECT name FROM sqlite_schema WHERE name='viewName' and type='view';
     statement select {_db};
     if (_name == "main") {
-        select.prepare("SELECT name FROM sqlite_temp_schema WHERE name = ? and type = 'view';");
+        select.prepare("SELECT name FROM sqlite_schema WHERE name = ? and type = 'view';");
     } else {
-        select.prepare(std::format("SELECT name FROM {0}.sqlite_temp_schema WHERE name = ? and type = 'view';", _name));
+        select.prepare(std::format("SELECT name FROM {0}.sqlite_schema WHERE name = ? and type = 'view';", _name));
     }
 
     i32 idx {1};
@@ -107,6 +107,13 @@ auto schema::vacuum_into(path const& file) const -> bool
 {
     return _db.exec(std::format("VACUUM {} INTO '{}';", _name, file));
 }
+
+auto schema::detach() const -> bool
+{
+    statement stmt {_db};
+    return stmt.prepare(std::format("DETACH DATABASE '{}';", _name)) && stmt.step() == step_status::Done;
+}
+
 }
 
 #endif

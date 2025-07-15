@@ -17,7 +17,7 @@
     #include "tcob/core/StringUtils.hpp"
     #include "tcob/data/Sqlite.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 namespace detail {
     template <typename T>

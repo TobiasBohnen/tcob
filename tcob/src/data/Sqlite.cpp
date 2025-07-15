@@ -15,7 +15,7 @@
     #include "SqliteVFS.hpp"
     #include "tcob/core/Logger.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 ////////////////////////////////////////////////////////////
 statement_view::statement_view(sqlite3_stmt* stmt)

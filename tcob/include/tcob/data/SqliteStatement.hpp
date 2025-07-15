@@ -16,7 +16,7 @@
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteConversions.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API statement : public non_copyable {

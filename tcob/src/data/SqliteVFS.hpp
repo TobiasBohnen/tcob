@@ -8,7 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
-namespace tcob::data::sqlite::detail {
+namespace tcob::db::detail {
 ////////////////////////////////////////////////////////////
 
 auto register_vfs() -> string;

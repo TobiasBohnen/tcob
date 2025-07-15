@@ -11,7 +11,7 @@
     #include "tcob/core/Interfaces.hpp"
     #include "tcob/data/Sqlite.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API savepoint : public non_copyable {

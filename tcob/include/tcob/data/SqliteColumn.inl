@@ -20,7 +20,7 @@
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 template <typename T>
 inline default_value<T>::default_value(T defaultValue)

@@ -14,7 +14,7 @@
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API avg {

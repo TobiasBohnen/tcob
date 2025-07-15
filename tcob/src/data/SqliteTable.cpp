@@ -16,7 +16,7 @@
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 table::table(database_view db, utf8_string name)
     : _db {db}

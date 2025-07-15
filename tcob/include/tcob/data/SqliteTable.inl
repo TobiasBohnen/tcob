@@ -15,7 +15,7 @@
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteStatement.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 namespace detail {
     auto get_column_string(auto&& column) -> utf8_string

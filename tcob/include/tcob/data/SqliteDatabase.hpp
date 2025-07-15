@@ -19,7 +19,7 @@
     #include "tcob/data/SqliteStatement.hpp"
     #include "tcob/data/SqliteTable.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
 enum class update_mode : u8 {
@@ -46,17 +46,16 @@ public:
     auto operator=(database&& other) noexcept -> database&;
     ~database();
 
+    auto create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>;
+    template <typename... Values>
+    auto create_view(utf8_string const& viewName, select_statement<Values...>& stmt) -> std::optional<view>;
+    auto create_savepoint(utf8_string const& name) const -> savepoint;
+
     void set_journal_mode(journal_mode mode) const;
 
     auto schema_names() const -> std::set<utf8_string>;
     auto table_names() const -> std::set<utf8_string>;
     auto view_names() const -> std::set<utf8_string>;
-
-    auto create_table(utf8_string const& tableName, auto&&... columns) const -> std::optional<table>;
-    template <typename... Values>
-    auto create_view(utf8_string const& viewName, select_statement<Values...>& stmt, bool temp = true) -> std::optional<view>;
-    auto create_savepoint(utf8_string const& name) const -> savepoint;
-    auto create_statement() const -> statement;
 
     auto schema_exists(utf8_string const& schema) const -> bool;
     auto table_exists(utf8_string const& tableName) const -> bool;
@@ -71,8 +70,8 @@ public:
 
     auto vacuum_into(path const& file) const -> bool;
 
-    auto attach(path const& file, utf8_string const& alias) const -> bool;
-    auto detach(utf8_string const& alias) const -> bool;
+    auto attach_memory(utf8_string const& alias) const -> std::optional<schema>;
+    auto attach(path const& file, utf8_string const& alias) const -> std::optional<schema>;
 
     void set_commit_hook(std::function<i32(database*)>&& func);
     auto call_commit_hook() -> i32;

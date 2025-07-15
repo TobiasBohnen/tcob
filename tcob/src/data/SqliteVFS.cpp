@@ -16,7 +16,7 @@
     #include "tcob/core/io/FileSystem.hpp"
     #include "tcob/core/io/Stream.hpp"
 
-namespace tcob::data::sqlite::detail {
+namespace tcob::db::detail {
 
 namespace fs = tcob::io;
 

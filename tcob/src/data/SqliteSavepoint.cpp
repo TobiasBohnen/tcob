@@ -11,7 +11,7 @@
 
     #include "tcob/data/Sqlite.hpp"
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 
 savepoint::savepoint(database_view db, utf8_string name)
     : _db {db}

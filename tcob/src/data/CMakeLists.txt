@@ -42,6 +42,7 @@ if(TCOB_ENABLE_ADDON_DATA_SQLITE)
         ${TCOB_INC_DIR}/tcob/data/SqliteDatabase.inl
         ${TCOB_INC_DIR}/tcob/data/SqliteSavepoint.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteSchema.hpp
+        ${TCOB_INC_DIR}/tcob/data/SqliteSchema.inl
         ${TCOB_INC_DIR}/tcob/data/SqliteStatement.hpp
         ${TCOB_INC_DIR}/tcob/data/SqliteStatement.inl
         ${TCOB_INC_DIR}/tcob/data/SqliteTable.hpp

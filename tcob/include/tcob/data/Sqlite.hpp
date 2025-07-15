@@ -13,7 +13,7 @@
 struct sqlite3;
 struct sqlite3_stmt;
 
-namespace tcob::data::sqlite {
+namespace tcob::db {
 ////////////////////////////////////////////////////////////
 
 class statement_view;
