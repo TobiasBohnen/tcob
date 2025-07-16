@@ -100,10 +100,10 @@ private:
         utf8_string Join;
     };
 
-    values                   _values;
-    std::optional<bind_func> _whereBind;
-    std::optional<bind_func> _havingBind;
-    bool                     _distinct;
+    values    _values;
+    bind_func _whereBind;
+    bind_func _havingBind;
+    bool      _distinct;
 };
 
 ////////////////////////////////////////////////////////////
@@ -120,9 +120,9 @@ public:
 private:
     auto query_string() const -> utf8_string;
 
-    utf8_string              _where;
-    std::optional<bind_func> _whereBind;
-    utf8_string              _sql;
+    utf8_string _where;
+    bind_func   _whereBind;
+    utf8_string _sql;
 };
 
 ////////////////////////////////////////////////////////////
@@ -159,9 +159,9 @@ public:
 private:
     auto query_string() const -> utf8_string;
 
-    utf8_string              _where;
-    std::optional<bind_func> _whereBind;
-    utf8_string              _sql;
+    utf8_string _where;
+    bind_func   _whereBind;
+    utf8_string _sql;
 };
 
 }

@@ -196,8 +196,8 @@ inline auto select_statement<Values...>::prepare_and_bind(auto&&... params) -> b
     if constexpr (sizeof...(params) > 0) {
         ((bind_parameter(idx, params)), ...);
     }
-    if (_whereBind) { (*_whereBind)(idx, *this); }
-    if (_havingBind) { (*_havingBind)(idx, *this); }
+    if (_whereBind) { _whereBind(idx, *this); }
+    if (_havingBind) { _havingBind(idx, *this); }
 
     return true;
 }
@@ -257,7 +257,7 @@ inline auto update_statement::operator()(auto&&... values) -> bool
     // bind parameters
     i32 idx {1};
     ((bind_parameter(idx, values)), ...);
-    if (_whereBind) { (*_whereBind)(idx, *this); }
+    if (_whereBind) { _whereBind(idx, *this); }
 
     // execute
     return step() == step_status::Done;
@@ -308,7 +308,7 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
     if constexpr (sizeof...(values) > 0) {
         ((bind_parameter(idx, values)), ...);
     }
-    if (_whereBind) { (*_whereBind)(idx, *this); }
+    if (_whereBind) { _whereBind(idx, *this); }
 
     // execute
     return step() == step_status::Done;
