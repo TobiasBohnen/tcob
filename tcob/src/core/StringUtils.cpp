@@ -171,6 +171,23 @@ auto random_string(usize length) -> string
     return retValue;
 }
 
+auto join(string_view c, usize count, string_view delim) -> string
+{
+    if (count == 0 || c.empty()) { return {}; }
+
+    string result;
+    result.reserve((c.size() * count) + (delim.size() * (count - 1)));
+
+    for (usize i {0}; i < count; ++i) {
+        if (i > 0) {
+            result += delim;
+        }
+        result += c;
+    }
+
+    return result;
+}
+
 }
 
 namespace tcob::utf8 {

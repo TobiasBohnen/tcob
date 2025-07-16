@@ -123,7 +123,7 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
 auto insert_statement::query_string(usize valueSize, usize valueCount) const -> utf8_string
 {
     // values
-    auto const paramLine {"(" + helper::join(std::vector<utf8_string>(valueSize, "?"), ", ") + ")"};
+    auto const paramLine {"(" + helper::join("?", valueSize, ", ") + ")"};
     auto const paramLines {std::vector<utf8_string>(valueCount, paramLine)};
     return std::format("{} VALUES {};",
                        _sql, helper::join(paramLines, ", "));

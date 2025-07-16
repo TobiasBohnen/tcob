@@ -134,7 +134,7 @@ template <op Operator>
 inline auto conditional<Operator>::str() const -> utf8_string
 {
     switch (Operator) {
-    case op::In:      return std::format("{} {} ({})", _column, _not ? "NOT IN" : "IN", helper::join(std::vector<utf8_string>(_params.size(), "?"), ", "));
+    case op::In:      return std::format("{} {} ({})", _column, _not ? "NOT IN" : "IN", helper::join("?", _params.size(), ", "));
     case op::Between: return std::format("{} {} ? AND ?", _column, _not ? "NOT BETWEEN" : "BETWEEN");
     case op::IsNull:  return std::format("{} {}", _column, _not ? "IS NOT NULL" : "IS NULL");
     default:          break;
