@@ -78,7 +78,9 @@ inline auto combined_condition<Operator, Cond1, Cond2>::str() const -> utf8_stri
     case combine_op::And: op = "AND"; break;
     case combine_op::Or:  op = "OR"; break;
     }
-    return std::format("({} {} {})", _cond1.str(), op, _cond2.str());
+
+    return _not ? std::format("(NOT ({} {} {}))", _cond1.str(), op, _cond2.str())
+                : std::format("({} {} {})", _cond1.str(), op, _cond2.str());
 }
 
 template <combine_op Operator, typename Cond1, typename Cond2>
@@ -92,16 +94,24 @@ inline auto combined_condition<Operator, Cond1, Cond2>::bind() const -> bind_fun
 
 template <combine_op Operator, typename Cond1, typename Cond2>
 template <typename Cond3>
-inline auto combined_condition<Operator, Cond1, Cond2>::operator||(Cond3 const& other) -> combined_condition<combine_op::Or, combined_condition, Cond3>
+inline auto combined_condition<Operator, Cond1, Cond2>::operator||(Cond3 const& other) const -> combined_condition<combine_op::Or, combined_condition, Cond3>
 {
     return {*this, other};
 }
 
 template <combine_op Operator, typename Cond1, typename Cond2>
 template <typename Cond3>
-inline auto combined_condition<Operator, Cond1, Cond2>::operator&&(Cond3 const& other) -> combined_condition<combine_op::And, combined_condition, Cond3>
+inline auto combined_condition<Operator, Cond1, Cond2>::operator&&(Cond3 const& other) const -> combined_condition<combine_op::And, combined_condition, Cond3>
 {
     return {*this, other};
+}
+
+template <combine_op Operator, typename Cond1, typename Cond2>
+inline auto combined_condition<Operator, Cond1, Cond2>::operator!() const -> combined_condition
+{
+    auto copy {*this};
+    copy._not = !copy._not;
+    return copy;
 }
 
 ////////////////////////////////////////////////////////////
@@ -134,11 +144,12 @@ inline auto conditional<Operator>::str() const -> utf8_string
     case op::Less:         op = "<"; break;
     case op::LessEqual:    op = "<="; break;
     case op::Like:         op = "LIKE"; break;
-    case op::In:           return std::format("{} IN ({})", _column, helper::join(std::vector<utf8_string>(_params.size(), "?"), ", "));
-    case op::Between:      return std::format("{} BETWEEN ? AND ?", _column);
+    case op::In:           return std::format("{} {} ({})", _column, _not ? "NOT IN" : "IN", helper::join(std::vector<utf8_string>(_params.size(), "?"), ", "));
+    case op::Between:      return std::format("{} {} ? AND ?", _column, _not ? "NOT BETWEEN" : "BETWEEN");
     }
 
-    return std::format("{} {} ?", _column, op);
+    auto const base {std::format("{} {} ?", _column, op)};
+    return _not ? std::format("NOT ({})", base) : base;
 }
 
 template <op Operator>
@@ -154,16 +165,24 @@ inline auto conditional<Operator>::bind() const -> bind_func
 
 template <op Operator>
 template <typename Cond2>
-inline auto conditional<Operator>::operator||(Cond2 const& other) -> combined_condition<combine_op::Or, conditional, Cond2>
+inline auto conditional<Operator>::operator||(Cond2 const& other) const -> combined_condition<combine_op::Or, conditional, Cond2>
 {
     return {*this, other};
 }
 
 template <op Operator>
 template <typename Cond2>
-inline auto conditional<Operator>::operator&&(Cond2 const& other) -> combined_condition<combine_op::And, conditional, Cond2>
+inline auto conditional<Operator>::operator&&(Cond2 const& other) const -> combined_condition<combine_op::And, conditional, Cond2>
 {
     return {*this, other};
+}
+
+template <op Operator>
+inline auto conditional<Operator>::operator!() const -> conditional
+{
+    auto copy {*this};
+    copy._not = !copy._not;
+    return copy;
 }
 
 ////////////////////////////////////////////////////////////

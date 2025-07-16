@@ -135,16 +135,19 @@ auto to_number(string_view str) -> std::optional<T>
 
 auto join(auto&& container, string_view delim) -> string
 {
-    if (container.empty()) { return ""; }
+    auto       it {std::begin(container)};
+    auto const last {std::end(container)};
+    if (it == last) { return {}; }
 
-    string retValue;
-    for (auto it {container.cbegin()}; it != container.cend(); ++it) {
-        retValue += to_string(*it);
-        retValue += delim;
+    string result;
+    result += to_string(*it);
+    ++it;
+
+    for (; it != last; ++it) {
+        result += delim;
+        result += to_string(*it);
     }
 
-    retValue.erase(retValue.size() - delim.size());
-
-    return retValue;
+    return result;
 }
 }
