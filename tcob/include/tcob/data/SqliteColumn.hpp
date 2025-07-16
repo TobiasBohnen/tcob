@@ -158,25 +158,25 @@ enum class combine_op : u8 {
     Or
 };
 
-template <combine_op Operator, typename Cond1, typename Cond2>
+template <combine_op Operator, typename C0, typename C1>
 class combined_condition {
 public:
-    combined_condition(Cond1 const& cond1, Cond2 const& cond2);
+    combined_condition(C0 const& cond1, C1 const& cond2);
 
     auto str() const -> utf8_string;
     auto bind() const -> bind_func;
 
-    template <typename Cond3>
-    auto operator&&(Cond3 const& other) const -> combined_condition<combine_op::And, combined_condition, Cond3>;
-    template <typename Cond3>
-    auto operator||(Cond3 const& other) const -> combined_condition<combine_op::Or, combined_condition, Cond3>;
+    template <typename C>
+    auto operator&&(C const& other) const -> combined_condition<combine_op::And, combined_condition, C>;
+    template <typename C>
+    auto operator||(C const& other) const -> combined_condition<combine_op::Or, combined_condition, C>;
 
     auto operator!() const -> combined_condition;
 
 private:
-    Cond1 _cond1;
-    Cond2 _cond2;
-    bool  _not {false};
+    C0   _cond0;
+    C1   _cond1;
+    bool _not {false};
 };
 
 template <op Operator>
@@ -190,10 +190,10 @@ public:
     auto str() const -> utf8_string;
     auto bind() const -> bind_func;
 
-    template <typename Cond2>
-    auto operator&&(Cond2 const& other) const -> combined_condition<combine_op::And, conditional, Cond2>;
-    template <typename Cond2>
-    auto operator||(Cond2 const& other) const -> combined_condition<combine_op::Or, conditional, Cond2>;
+    template <typename C>
+    auto operator&&(C const& other) const -> combined_condition<combine_op::And, conditional, C>;
+    template <typename C>
+    auto operator||(C const& other) const -> combined_condition<combine_op::Or, conditional, C>;
 
     auto operator!() const -> conditional;
 
