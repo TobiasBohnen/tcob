@@ -126,7 +126,7 @@ inline conditional<Operator>::conditional(T const& column, auto&&... params)
     if constexpr (detail::HasStr<std::remove_cvref_t<T>>) {
         _column = column.str();
     } else {
-        _column = column;
+        _column = quote_identifier(column);
     }
 }
 
@@ -136,6 +136,7 @@ inline auto conditional<Operator>::str() const -> utf8_string
     switch (Operator) {
     case op::In:      return std::format("{} {} ({})", _column, _not ? "NOT IN" : "IN", helper::join(std::vector<utf8_string>(_params.size(), "?"), ", "));
     case op::Between: return std::format("{} {} ? AND ?", _column, _not ? "NOT BETWEEN" : "BETWEEN");
+    case op::IsNull:  return std::format("{} {}", _column, _not ? "IS NOT NULL" : "IS NULL");
     default:          break;
     }
 

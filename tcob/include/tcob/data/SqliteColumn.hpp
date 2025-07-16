@@ -151,7 +151,8 @@ enum class op : u8 {
     Like,
     Glob,
     In,
-    Between
+    Between,
+    IsNull
 };
 
 enum class combine_op : u8 {
@@ -214,6 +215,7 @@ using like          = conditional<op::Like>;
 using glob          = conditional<op::Glob>;
 using in            = conditional<op::In>;
 using between       = conditional<op::Between>;
+using is_null       = conditional<op::IsNull>;
 
 ////////////////////////////////////////////////////////////
 
