@@ -149,6 +149,7 @@ enum class op : u8 {
     Less,
     LessEqual,
     Like,
+    Glob,
     In,
     Between
 };
@@ -210,6 +211,7 @@ using greater_equal = conditional<op::GreaterEqual>;
 using less          = conditional<op::Less>;
 using less_equal    = conditional<op::LessEqual>;
 using like          = conditional<op::Like>;
+using glob          = conditional<op::Glob>;
 using in            = conditional<op::In>;
 using between       = conditional<op::Between>;
 

@@ -147,6 +147,7 @@ inline auto conditional<Operator>::str() const -> utf8_string
         if constexpr (Operator == op::Less) { return "<"; }
         if constexpr (Operator == op::LessEqual) { return "<="; }
         if constexpr (Operator == op::Like) { return "LIKE"; }
+        if constexpr (Operator == op::Glob) { return "GLOB"; }
         return "";
     }()};
 
