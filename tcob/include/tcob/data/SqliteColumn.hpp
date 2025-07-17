@@ -64,52 +64,6 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API no_constraint {
-public:
-    auto str() const -> utf8_string;
-};
-
-template <typename T>
-class default_value {
-public:
-    T DefaultValue;
-
-    auto str() const -> utf8_string;
-};
-
-class TCOB_API unique {
-public:
-    unique(auto&&... columns);
-
-    utf8_string Columns;
-
-    auto str() const -> utf8_string;
-};
-
-class TCOB_API primary_key {
-public:
-    auto str() const -> utf8_string;
-};
-
-class TCOB_API foreign_key {
-public:
-    utf8_string Column {};
-
-    utf8_string ForeignTable;
-    utf8_string ForeignColumn;
-
-    auto str() const -> utf8_string;
-};
-
-class TCOB_API check {
-public:
-    utf8_string Check;
-
-    auto str() const -> utf8_string;
-};
-
-////////////////////////////////////////////////////////////
-
 enum class order : u8 {
     Ascending,
     Descending
@@ -170,7 +124,7 @@ private:
 
 template <op Operator>
 class conditional {
-    using params = std::variant<i32, f32, bool, utf8_string>;
+    using params = std::variant<i64, f64, bool, utf8_string>;
 
 public:
     template <typename T>
@@ -212,6 +166,52 @@ public:
     utf8_string RightColumn;
 
     auto str(utf8_string const& table, utf8_string const& otherTable) const -> utf8_string;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API no_constraint {
+public:
+    auto str() const -> utf8_string;
+};
+
+template <typename T>
+class default_value {
+public:
+    T DefaultValue;
+
+    auto str() const -> utf8_string;
+};
+
+class TCOB_API unique {
+public:
+    unique(auto&&... columns);
+
+    utf8_string Columns;
+
+    auto str() const -> utf8_string;
+};
+
+class TCOB_API primary_key {
+public:
+    auto str() const -> utf8_string;
+};
+
+class TCOB_API foreign_key {
+public:
+    utf8_string Column {};
+
+    utf8_string ForeignTable;
+    utf8_string ForeignColumn;
+
+    auto str() const -> utf8_string;
+};
+
+class TCOB_API check {
+public:
+    utf8_string Check;
+
+    auto str() const -> utf8_string;
 };
 
 ////////////////////////////////////////////////////////////

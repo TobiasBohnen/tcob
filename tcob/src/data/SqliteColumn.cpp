@@ -14,34 +14,6 @@
 
 namespace tcob::db {
 
-auto no_constraint::str() const -> utf8_string
-{
-    return "";
-}
-
-auto unique::str() const -> utf8_string
-{
-    if (Columns.empty()) { return "UNIQUE"; }
-
-    return std::format("UNIQUE({})", Columns);
-}
-
-auto primary_key::str() const -> utf8_string
-{
-    return "PRIMARY KEY";
-}
-
-auto foreign_key::str() const -> utf8_string
-{
-    return Column.empty() ? std::format(R"(REFERENCES {}("{}"))", ForeignTable, ForeignColumn)
-                          : std::format(R"(FOREIGN KEY("{}") REFERENCES {}("{}"))", Column, ForeignTable, ForeignColumn);
-}
-
-auto check::str() const -> utf8_string
-{
-    return "CHECK(" + Check + ")";
-}
-
 ////////////////////////////////////////////////////////////
 
 avg::avg(utf8_string column)
@@ -99,6 +71,36 @@ auto sum::str() const -> utf8_string
 auto on::str(utf8_string const& table, utf8_string const& otherTable) const -> utf8_string
 {
     return std::format(R"({}."{}" = {}."{}")", table, LeftColumn, otherTable, RightColumn);
+}
+
+////////////////////////////////////////////////////////////
+
+auto no_constraint::str() const -> utf8_string
+{
+    return "";
+}
+
+auto unique::str() const -> utf8_string
+{
+    if (Columns.empty()) { return "UNIQUE"; }
+
+    return std::format("UNIQUE({})", Columns);
+}
+
+auto primary_key::str() const -> utf8_string
+{
+    return "PRIMARY KEY";
+}
+
+auto foreign_key::str() const -> utf8_string
+{
+    return Column.empty() ? std::format(R"(REFERENCES {}("{}"))", ForeignTable, ForeignColumn)
+                          : std::format(R"(FOREIGN KEY("{}") REFERENCES {}("{}"))", Column, ForeignTable, ForeignColumn);
+}
+
+auto check::str() const -> utf8_string
+{
+    return "CHECK(" + Check + ")";
 }
 }
 
