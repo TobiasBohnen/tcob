@@ -29,7 +29,7 @@ inline auto schema::create_table(utf8_string const& tableName, auto&&... columns
     // );
     std::vector<utf8_string> colStrings {columns.str()...};
 
-    utf8_string const sql {std::format("CREATE TABLE IF NOT EXISTS {}.{} ({});",
+    utf8_string const sql {std::format(R"(CREATE TABLE IF NOT EXISTS "{}"."{}" ({});)",
                                        _name, tableName, helper::join(colStrings, ", "))};
 
     return _db.exec(sql) ? get_table(tableName) : std::nullopt;
@@ -38,10 +38,10 @@ inline auto schema::create_table(utf8_string const& tableName, auto&&... columns
 template <typename... Values>
 inline auto schema::create_view(utf8_string const& viewName, select_statement<Values...>& stmt) -> std::optional<view>
 {
-    utf8_string const sql {std::format("CREATE VIEW IF NOT EXISTS {}.{} AS {};", // TODO: Temp
+    utf8_string const sql {std::format(R"(CREATE VIEW IF NOT EXISTS "{}"."{}" AS {};)", // TODO: Temp
                                        _name, viewName, stmt.query_string())};
 
-    return (stmt.prepare(sql) && stmt.step() == step_status::Done) ? get_view(viewName) : std::nullopt;
+    return _db.exec(sql) ? get_view(viewName) : std::nullopt;
 }
 }
 

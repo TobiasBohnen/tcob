@@ -53,7 +53,6 @@ namespace detail {
     template <typename T>
     concept HasBind =
         requires(T t) {
-            { t.str() } -> std::same_as<utf8_string>;
             { t.bind() } -> std::same_as<bind_func>;
         };
 }
@@ -79,12 +78,12 @@ public:
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
     auto group_by(auto&&... columns) -> select_statement&;
 
-    // TODO: actual table as first parameter
+    template <typename T, typename O>
+    auto left_join(T const& table, O const& on) -> select_statement&;
+    template <typename T, typename O>
+    auto inner_join(T const& table, O const& on) -> select_statement&;
     template <typename T>
-    auto left_join(utf8_string const& table, T const& on) -> select_statement&;
-    template <typename T>
-    auto inner_join(utf8_string const& table, T const& on) -> select_statement&;
-    auto cross_join(utf8_string const& table) -> select_statement&;
+    auto cross_join(T const& table) -> select_statement&;
 
     auto query_string() const -> utf8_string;
 

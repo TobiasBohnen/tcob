@@ -88,7 +88,7 @@ template <typename... Values>
 template <typename T>
 inline auto select_statement<Values...>::where(T const& cond) -> select_statement<Values...>&
 {
-    if constexpr (detail::HasBind<T>) {
+    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
         _values.Where = std::format(" WHERE {}", cond.str());
         _whereBind    = cond.bind();
     } else {
@@ -102,7 +102,7 @@ template <typename... Values>
 template <typename T>
 inline auto select_statement<Values...>::having(T const& cond) -> select_statement&
 {
-    if constexpr (detail::HasBind<T>) {
+    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
         _values.Having = std::format(" HAVING {}", cond.str());
         _havingBind    = cond.bind();
     } else {
@@ -153,35 +153,61 @@ inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_s
 }
 
 template <typename... Values>
-template <typename T>
-inline auto select_statement<Values...>::left_join(utf8_string const& table, T const& on) -> select_statement<Values...>&
+template <typename T, typename O>
+inline auto select_statement<Values...>::left_join(T const& table, O const& on) -> select_statement<Values...>&
 {
-    if constexpr (detail::HasStr2<std::remove_cvref_t<decltype(on)>>) {
-        _values.Join = std::format(" LEFT JOIN {} ON ({})", table, on.str(_values.Table, table));
+    string tableStr;
+    if constexpr (detail::HasQualifiedName<T>) {
+        tableStr = table.qualified_name();
     } else {
-        _values.Join = std::format(" LEFT JOIN {} ON ({})", table, on);
+        tableStr = table;
     }
 
+    string onStr;
+    if constexpr (detail::HasStr2<O>) {
+        onStr = on.str(std::format(R"("{}"."{}")", _values.Schema, _values.Table), tableStr);
+    } else {
+        onStr = on;
+    }
+
+    _values.Join = std::format(" LEFT JOIN {} ON ({})", tableStr, onStr);
+    return *this;
+}
+
+template <typename... Values>
+template <typename T, typename O>
+inline auto select_statement<Values...>::inner_join(T const& table, O const& on) -> select_statement<Values...>&
+{
+    string tableStr;
+    if constexpr (detail::HasQualifiedName<T>) {
+        tableStr = table.qualified_name();
+    } else {
+        tableStr = table;
+    }
+
+    string onStr;
+    if constexpr (detail::HasStr2<O>) {
+        onStr = on.str(std::format(R"("{}"."{}")", _values.Schema, _values.Table), tableStr);
+    } else {
+        onStr = on;
+    }
+
+    _values.Join = std::format(" INNER JOIN {} ON ({})", tableStr, onStr);
     return *this;
 }
 
 template <typename... Values>
 template <typename T>
-inline auto select_statement<Values...>::inner_join(utf8_string const& table, T const& on) -> select_statement<Values...>&
+inline auto select_statement<Values...>::cross_join(T const& table) -> select_statement<Values...>&
 {
-    if constexpr (detail::HasStr2<std::remove_cvref_t<decltype(on)>>) {
-        _values.Join = std::format(" INNER JOIN {} ON ({})", table, on.str(_values.Table, table));
+    string tableStr;
+    if constexpr (detail::HasQualifiedName<T>) {
+        tableStr = table.qualified_name();
     } else {
-        _values.Join = std::format(" INNER JOIN {} ON ({})", table, on);
+        tableStr = table;
     }
 
-    return *this;
-}
-
-template <typename... Values>
-inline auto select_statement<Values...>::cross_join(utf8_string const& table) -> select_statement<Values...>&
-{
-    _values.Join = std::format(" CROSS JOIN {}", table);
+    _values.Join = std::format(" CROSS JOIN {}", tableStr);
     return *this;
 }
 
@@ -189,12 +215,10 @@ template <typename... Values>
 inline auto select_statement<Values...>::query_string() const -> utf8_string
 {
     return std::format(
-        "SELECT{}{} FROM {}.{}{}{}{}{}{}{}{};",
+        R"(SELECT{}{} FROM "{}"."{}"{}{}{}{}{}{}{};)",
         _distinct ? " DISTINCT " : " ",
-        _values.Columns, _values.Schema, _values.Table,
-        _values.Join,
-        _values.Where, _values.GroupBy,
-        _values.Having, _values.OrderBy,
+        _values.Columns, _values.Schema, _values.Table, _values.Join,
+        _values.Where, _values.GroupBy, _values.Having, _values.OrderBy,
         _values.Limit, _values.Offset);
 }
 
@@ -279,7 +303,7 @@ inline auto update_statement::operator()(auto&&... values) -> bool
 template <typename T>
 inline auto update_statement::where(T const& cond) -> update_statement&
 {
-    if constexpr (detail::HasBind<std::remove_cvref_t<T>>) {
+    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
         _where     = cond.str();
         _whereBind = cond.bind();
     } else {
@@ -330,7 +354,7 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
 template <typename T>
 inline auto delete_statement::where(T const& cond) -> delete_statement&
 {
-    if constexpr (detail::HasBind<std::remove_cvref_t<T>>) {
+    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
         _where     = cond.str();
         _whereBind = cond.bind();
     } else {

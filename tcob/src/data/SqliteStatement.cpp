@@ -93,7 +93,7 @@ update_statement::update_statement(database_view db, utf8_string const& schemaNa
     // WHERE [condition];
 
     // create query
-    _sql = std::format("UPDATE {}.{} SET {}", schemaName, table, columns);
+    _sql = std::format(R"(UPDATE "{}"."{}" SET {})", schemaName, table, columns);
 }
 
 auto update_statement::query_string() const -> utf8_string
@@ -117,7 +117,7 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
     }
 
     // create query
-    _sql = std::format("INSERT{}INTO {}.{} ({})", modeStr, schemaName, table, columns);
+    _sql = std::format(R"(INSERT{}INTO "{}"."{}" ({}))", modeStr, schemaName, table, columns);
 }
 
 auto insert_statement::query_string(usize valueSize, usize valueCount) const -> utf8_string
@@ -136,7 +136,7 @@ delete_statement::delete_statement(database_view db, utf8_string const& schemaNa
 {
     // DELETE FROM table_name
     // WHERE [condition];
-    _sql = std::format("DELETE FROM {}.{}", schemaName, table);
+    _sql = std::format(R"(DELETE FROM "{}"."{}")", schemaName, table);
 }
 
 auto delete_statement::query_string() const -> utf8_string

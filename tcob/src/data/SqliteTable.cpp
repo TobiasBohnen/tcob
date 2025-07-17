@@ -32,7 +32,7 @@ auto table::name() const -> utf8_string const&
 
 auto table::qualified_name() const -> utf8_string
 {
-    return _schema + "." + _name;
+    return std::format(R"("{}"."{}")", _schema, _name);
 }
 
 auto table::column_names() const -> std::set<utf8_string>
