@@ -19,11 +19,6 @@ auto no_constraint::str() const -> utf8_string
     return "";
 }
 
-unique::unique()
-    : Columns {}
-{
-}
-
 auto unique::str() const -> utf8_string
 {
     if (Columns.empty()) { return "UNIQUE"; }
@@ -38,17 +33,8 @@ auto primary_key::str() const -> utf8_string
 
 auto foreign_key::str() const -> utf8_string
 {
-    return std::format(R"(REFERENCES {}("{}"))", ForeignTable, ForeignColumn);
-}
-
-auto table_foreign_key::str() const -> utf8_string
-{
-    return std::format(R"(FOREIGN KEY("{}") REFERENCES {}("{}"))", Column, ForeignTable, ForeignColumn);
-}
-
-check::check(utf8_string check)
-    : Check {std::move(check)}
-{
+    return Column.empty() ? std::format(R"(REFERENCES {}("{}"))", ForeignTable, ForeignColumn)
+                          : std::format(R"(FOREIGN KEY("{}") REFERENCES {}("{}"))", Column, ForeignTable, ForeignColumn);
 }
 
 auto check::str() const -> utf8_string
@@ -110,17 +96,10 @@ auto sum::str() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
-on::on(utf8_string left, utf8_string right)
-    : LeftColumn {std::move(left)}
-    , RightColumn {std::move(right)}
-{
-}
-
 auto on::str(utf8_string const& table, utf8_string const& otherTable) const -> utf8_string
 {
     return std::format(R"({}."{}" = {}."{}")", table, LeftColumn, otherTable, RightColumn);
 }
-
 }
 
 #endif

@@ -72,8 +72,6 @@ public:
 template <typename T>
 class default_value {
 public:
-    default_value(T defaultValue);
-
     T DefaultValue;
 
     auto str() const -> utf8_string;
@@ -81,7 +79,6 @@ public:
 
 class TCOB_API unique {
 public:
-    unique();
     unique(auto&&... columns);
 
     utf8_string Columns;
@@ -96,15 +93,7 @@ public:
 
 class TCOB_API foreign_key {
 public:
-    utf8_string ForeignTable;
-    utf8_string ForeignColumn;
-
-    auto str() const -> utf8_string;
-};
-
-class TCOB_API table_foreign_key {
-public:
-    utf8_string Column;
+    utf8_string Column {};
 
     utf8_string ForeignTable;
     utf8_string ForeignColumn;
@@ -114,8 +103,6 @@ public:
 
 class TCOB_API check {
 public:
-    check(utf8_string check);
-
     utf8_string Check;
 
     auto str() const -> utf8_string;
@@ -221,8 +208,6 @@ using is_null       = conditional<op::IsNull>;
 
 class TCOB_API on {
 public:
-    on(utf8_string left, utf8_string right);
-
     utf8_string LeftColumn;
     utf8_string RightColumn;
 

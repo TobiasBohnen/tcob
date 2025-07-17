@@ -23,12 +23,6 @@
 namespace tcob::db {
 
 template <typename T>
-inline default_value<T>::default_value(T defaultValue)
-    : DefaultValue {defaultValue}
-{
-}
-
-template <typename T>
 inline auto default_value<T>::str() const -> utf8_string
 {
     return std::format("DEFAULT {}", DefaultValue);
