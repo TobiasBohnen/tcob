@@ -63,7 +63,7 @@ namespace detail {
 template <typename... Values>
 class select_statement : public statement {
 public:
-    select_statement(database_view db, bool addDistinct, utf8_string const& table, utf8_string const& columns);
+    select_statement(database_view db, bool addDistinct, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] (auto&&... params);
 
@@ -75,12 +75,15 @@ public:
     template <typename T>
     auto having(T const& cond) -> select_statement&;
 
-    auto order_by(auto&&... orders) -> select_statement&;
+    auto order_by(auto&&... orderings) -> select_statement&;
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
     auto group_by(auto&&... columns) -> select_statement&;
 
-    auto left_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
-    auto inner_join(utf8_string const& table, utf8_string const& on) -> select_statement&;
+    // TODO: actual table as first parameter
+    template <typename T>
+    auto left_join(utf8_string const& table, T const& on) -> select_statement&;
+    template <typename T>
+    auto inner_join(utf8_string const& table, T const& on) -> select_statement&;
     auto cross_join(utf8_string const& table) -> select_statement&;
 
     auto query_string() const -> utf8_string;
@@ -90,6 +93,7 @@ private:
 
     struct values {
         utf8_string Columns;
+        utf8_string Schema;
         utf8_string Table;
         utf8_string Where;
         utf8_string OrderBy;
@@ -110,7 +114,7 @@ private:
 
 class TCOB_API update_statement : public statement {
 public:
-    update_statement(database_view db, utf8_string const& table, utf8_string const& columns);
+    update_statement(database_view db, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 
@@ -135,7 +139,7 @@ public:
         Replace
     };
 
-    insert_statement(database_view db, mode mode, utf8_string const& table, utf8_string const& columns);
+    insert_statement(database_view db, mode mode, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns);
 
     auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
 
@@ -149,7 +153,7 @@ private:
 
 class TCOB_API delete_statement : public statement {
 public:
-    delete_statement(database_view db, utf8_string const& table);
+    delete_statement(database_view db, utf8_string const& schemaName, utf8_string const& table);
 
     auto operator() [[nodiscard]] (auto&&... values) -> bool;
 

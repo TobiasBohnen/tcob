@@ -37,9 +37,10 @@ struct column_info {
 
 class TCOB_API table final {
 public:
-    table(database_view db, utf8_string name);
+    table(database_view db, utf8_string schema, utf8_string name);
 
     auto name() const -> utf8_string const&;
+    auto qualified_name() const -> utf8_string;
     auto column_names() const -> std::set<utf8_string>;
     auto row_count() const -> i32;
     auto info() const -> std::vector<column_info>;
@@ -63,6 +64,7 @@ private:
     auto check_columns(auto&&... columns) const -> bool;
 
     database_view _db;
+    utf8_string   _schema;
     utf8_string   _name;
 };
 
@@ -70,7 +72,7 @@ private:
 
 class TCOB_API view final {
 public:
-    view(database_view db, utf8_string name);
+    view(database_view db, utf8_string schema, utf8_string name);
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
@@ -79,6 +81,7 @@ public:
 
 private:
     database_view _db;
+    utf8_string   _schema;
     utf8_string   _name;
 };
 

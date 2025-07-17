@@ -219,8 +219,21 @@ using is_null       = conditional<op::IsNull>;
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API on {
+public:
+    on(utf8_string left, utf8_string right);
+
+    utf8_string LeftColumn;
+    utf8_string RightColumn;
+
+    auto str(utf8_string const& table, utf8_string const& otherTable) const -> utf8_string;
+};
+
+////////////////////////////////////////////////////////////
+
 template <type Type, typename C>
-struct column {
+class column {
+public:
     utf8_string Name;
     bool        NotNull {false};
     C           Constraint {};

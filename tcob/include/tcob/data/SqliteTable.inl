@@ -28,14 +28,14 @@ namespace detail {
     }
 
     template <typename... Values>
-    auto create_select(database_view db, utf8_string const& name, bool distinct, auto&&... columns) -> select_statement<Values...>
+    auto create_select(database_view db, utf8_string const& schema, utf8_string const& name, bool distinct, auto&&... columns) -> select_statement<Values...>
     {
         if constexpr (sizeof...(columns) == 0) {
-            return select_statement<Values...> {db, distinct, name, "*"};
+            return select_statement<Values...> {db, distinct, schema, name, "*"};
         } else {
             std::vector<utf8_string> columnStrings;
             ((columnStrings.push_back(get_column_string(columns))), ...);
-            return select_statement<Values...> {db, distinct, name, helper::join(columnStrings, ", ")};
+            return select_statement<Values...> {db, distinct, schema, name, helper::join(columnStrings, ", ")};
         }
     }
 }
@@ -43,13 +43,13 @@ namespace detail {
 template <typename... Values>
 inline auto table::select_from(auto&&... columns) const -> select_statement<Values...>
 {
-    return detail::create_select<Values...>(_db, _name, false, columns...);
+    return detail::create_select<Values...>(_db, _schema, _name, false, columns...);
 }
 
 template <typename... Values>
 inline auto table::select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>
 {
-    return detail::create_select<Values...>(_db, _name, true, columns...);
+    return detail::create_select<Values...>(_db, _schema, _name, true, columns...);
 }
 
 inline auto table::insert_into(auto&&... columns) const -> insert_statement
@@ -73,7 +73,7 @@ inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) c
 
     std::vector<utf8_string> columnStrings;
     ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
-    return insert_statement {_db, mode, _name, helper::join(columnStrings, ", ")};
+    return insert_statement {_db, mode, _schema, _name, helper::join(columnStrings, ", ")};
 }
 
 inline auto table::update(auto&&... columns) const -> update_statement
@@ -83,7 +83,7 @@ inline auto table::update(auto&&... columns) const -> update_statement
     // SET column1 = value1, column2 = value2...., columnN = valueN
     std::vector<utf8_string> setStrings;
     ((setStrings.push_back(quote_identifier(utf8_string {columns}) + " = ?")), ...);
-    return update_statement {_db, _name, helper::join(setStrings, ", ")};
+    return update_statement {_db, _schema, _name, helper::join(setStrings, ", ")};
 }
 
 inline auto table::check_columns(auto&&... columns) const -> bool
@@ -107,13 +107,13 @@ inline auto table::check_columns(auto&&... columns) const -> bool
 template <typename... Values>
 inline auto view::select_from(auto&&... columns) const -> select_statement<Values...>
 {
-    return detail::create_select<Values...>(_db, _name, false, columns...);
+    return detail::create_select<Values...>(_db, _schema, _name, false, columns...);
 }
 
 template <typename... Values>
 inline auto view::select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>
 {
-    return detail::create_select<Values...>(_db, _name, true, columns...);
+    return detail::create_select<Values...>(_db, _schema, _name, true, columns...);
 }
 }
 

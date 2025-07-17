@@ -80,14 +80,14 @@ auto schema::view_exists(utf8_string const& viewName) const -> bool
 auto schema::get_table(utf8_string const& tableName) const -> std::optional<table>
 {
     return table_exists(tableName)
-        ? std::optional {table {_db, _name + "." + tableName}}
+        ? std::optional {table {_db, _name, tableName}}
         : std::nullopt;
 }
 
 auto schema::get_view(utf8_string const& viewName) const -> std::optional<view>
 {
     return view_exists(viewName)
-        ? std::optional {view {_db, _name + "." + viewName}}
+        ? std::optional {view {_db, _name, viewName}}
         : std::nullopt;
 }
 

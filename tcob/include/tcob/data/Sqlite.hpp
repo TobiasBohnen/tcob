@@ -42,6 +42,12 @@ namespace detail {
         requires(T t) {
             { t.str() } -> std::same_as<utf8_string>;
         };
+
+    template <typename T>
+    concept HasStr2 =
+        requires(T t, string const& x) {
+            { t.str(x, x) } -> std::same_as<utf8_string>;
+        };
 }
 
 ////////////////////////////////////////////////////////////

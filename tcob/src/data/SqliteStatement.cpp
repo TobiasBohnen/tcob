@@ -85,7 +85,7 @@ auto statement::is_valid() const -> bool
 
 ////////////////////////////////////////////////////////////
 
-update_statement::update_statement(database_view db, utf8_string const& table, utf8_string const& columns)
+update_statement::update_statement(database_view db, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns)
     : statement {db}
 {
     // UPDATE table_name
@@ -93,7 +93,7 @@ update_statement::update_statement(database_view db, utf8_string const& table, u
     // WHERE [condition];
 
     // create query
-    _sql = std::format("UPDATE {} SET {}", table, columns);
+    _sql = std::format("UPDATE {}.{} SET {}", schemaName, table, columns);
 }
 
 auto update_statement::query_string() const -> utf8_string
@@ -103,7 +103,7 @@ auto update_statement::query_string() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
-insert_statement::insert_statement(database_view db, mode mode, utf8_string const& table, utf8_string const& columns)
+insert_statement::insert_statement(database_view db, mode mode, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns)
     : statement {db}
 {
     // INSERT (OR IGNORE) INTO TABLE_NAME [(column1, column2, column3,...columnN)]
@@ -117,7 +117,7 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
     }
 
     // create query
-    _sql = std::format("INSERT{}INTO {} ({})", modeStr, table, columns);
+    _sql = std::format("INSERT{}INTO {}.{} ({})", modeStr, schemaName, table, columns);
 }
 
 auto insert_statement::query_string(usize valueSize, usize valueCount) const -> utf8_string
@@ -131,12 +131,12 @@ auto insert_statement::query_string(usize valueSize, usize valueCount) const -> 
 
 ////////////////////////////////////////////////////////////
 
-delete_statement::delete_statement(database_view db, utf8_string const& table)
+delete_statement::delete_statement(database_view db, utf8_string const& schemaName, utf8_string const& table)
     : statement {db}
 {
     // DELETE FROM table_name
     // WHERE [condition];
-    _sql = std::format("DELETE FROM {}", table);
+    _sql = std::format("DELETE FROM {}.{}", schemaName, table);
 }
 
 auto delete_statement::query_string() const -> utf8_string

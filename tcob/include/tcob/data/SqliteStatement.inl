@@ -71,7 +71,7 @@ inline auto statement::bind_parameter(i32& idx, T&& value) const -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>
-inline select_statement<Values...>::select_statement(database_view db, bool addDistinct, utf8_string const& table, utf8_string const& columns)
+inline select_statement<Values...>::select_statement(database_view db, bool addDistinct, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns)
     : statement {db}
     , _distinct {addDistinct}
 {
@@ -80,6 +80,7 @@ inline select_statement<Values...>::select_statement(database_view db, bool addD
     // SELECT column1, column2, columnN FROM table_name;
     // create query
     _values.Columns = columns;
+    _values.Schema  = schemaName;
     _values.Table   = table;
 }
 
@@ -112,13 +113,13 @@ inline auto select_statement<Values...>::having(T const& cond) -> select_stateme
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::order_by(auto&&... orders) -> select_statement<Values...>&
+inline auto select_statement<Values...>::order_by(auto&&... orderings) -> select_statement<Values...>&
 {
     std::vector<utf8_string> colStrings {[&]() {
-        if constexpr (detail::HasStr<std::remove_cvref_t<decltype(orders)>>) {
-            return orders.str();
+        if constexpr (detail::HasStr<std::remove_cvref_t<decltype(orderings)>>) {
+            return orderings.str();
         } else {
-            return orders;
+            return orderings;
         }
     }()...};
     _values.OrderBy = std::format(" ORDER BY {}", helper::join(colStrings, ", "));
@@ -152,16 +153,28 @@ inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_s
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::left_join(utf8_string const& table, utf8_string const& on) -> select_statement<Values...>&
+template <typename T>
+inline auto select_statement<Values...>::left_join(utf8_string const& table, T const& on) -> select_statement<Values...>&
 {
-    _values.Join = std::format(" LEFT JOIN {} ON {}", table, on);
+    if constexpr (detail::HasStr2<std::remove_cvref_t<decltype(on)>>) {
+        _values.Join = std::format(" LEFT JOIN {} ON ({})", table, on.str(_values.Table, table));
+    } else {
+        _values.Join = std::format(" LEFT JOIN {} ON ({})", table, on);
+    }
+
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::inner_join(utf8_string const& table, utf8_string const& on) -> select_statement<Values...>&
+template <typename T>
+inline auto select_statement<Values...>::inner_join(utf8_string const& table, T const& on) -> select_statement<Values...>&
 {
-    _values.Join = std::format(" INNER JOIN {} ON {}", table, on);
+    if constexpr (detail::HasStr2<std::remove_cvref_t<decltype(on)>>) {
+        _values.Join = std::format(" INNER JOIN {} ON ({})", table, on.str(_values.Table, table));
+    } else {
+        _values.Join = std::format(" INNER JOIN {} ON ({})", table, on);
+    }
+
     return *this;
 }
 
@@ -176,9 +189,9 @@ template <typename... Values>
 inline auto select_statement<Values...>::query_string() const -> utf8_string
 {
     return std::format(
-        "SELECT{}{} FROM {}{}{}{}{}{}{}{};",
+        "SELECT{}{} FROM {}.{}{}{}{}{}{}{}{};",
         _distinct ? " DISTINCT " : " ",
-        _values.Columns, _values.Table,
+        _values.Columns, _values.Schema, _values.Table,
         _values.Join,
         _values.Where, _values.GroupBy,
         _values.Having, _values.OrderBy,

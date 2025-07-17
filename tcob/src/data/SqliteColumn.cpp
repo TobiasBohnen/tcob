@@ -108,6 +108,19 @@ auto sum::str() const -> utf8_string
     return std::format("SUM({})", quote_identifier(Column));
 }
 
+////////////////////////////////////////////////////////////
+
+on::on(utf8_string left, utf8_string right)
+    : LeftColumn {std::move(left)}
+    , RightColumn {std::move(right)}
+{
+}
+
+auto on::str(utf8_string const& table, utf8_string const& otherTable) const -> utf8_string
+{
+    return std::format(R"("{}"."{}" = "{}"."{}")", table, LeftColumn, otherTable, RightColumn);
+}
+
 }
 
 #endif

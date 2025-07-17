@@ -18,8 +18,9 @@
 
 namespace tcob::db {
 
-table::table(database_view db, utf8_string name)
+table::table(database_view db, utf8_string schema, utf8_string name)
     : _db {db}
+    , _schema {std::move(schema)}
     , _name {std::move(name)}
 {
 }
@@ -29,12 +30,17 @@ auto table::name() const -> utf8_string const&
     return _name;
 }
 
+auto table::qualified_name() const -> utf8_string
+{
+    return _schema + "." + _name;
+}
+
 auto table::column_names() const -> std::set<utf8_string>
 {
     std::set<utf8_string> retValue;
 
     statement select {_db};
-    if (select.prepare("SELECT * FROM " + _name + ";")) {
+    if (select.prepare("SELECT * FROM " + qualified_name() + ";")) {
         i32 const count {select.column_count()};
         for (i32 i {0}; i < count; i++) {
             retValue.insert(select.get_column_name(i));
@@ -48,7 +54,7 @@ auto table::row_count() const -> i32
 {
     // SELECT COUNT(1) FROM table
     statement select {_db};
-    if (select.prepare("SELECT COUNT(1) FROM " + _name + ";")) {
+    if (select.prepare("SELECT COUNT(1) FROM " + qualified_name() + ";")) {
         if (select.step() == step_status::Row) {
             return select.get_column_value<i32>(0);
         }
@@ -62,9 +68,7 @@ auto table::info() const -> std::vector<column_info>
     std::vector<column_info> retValue;
 
     statement pragma {_db};
-    auto      split {helper::split(_name, '.')};
-    if (split.size() != 2) { return {}; }
-    if (pragma.prepare(std::format("PRAGMA {}.table_info({})", split[0], split[1]))) {
+    if (pragma.prepare(std::format("PRAGMA {}.table_info({})", _schema, _name))) {
         while (pragma.step() == step_status::Row) {
             column_info const info {
                 .Name         = pragma.get_column_value<utf8_string>(1),
@@ -81,13 +85,14 @@ auto table::info() const -> std::vector<column_info>
 
 auto table::delete_from() const -> delete_statement
 {
-    return delete_statement {_db, _name};
+    return delete_statement {_db, _schema, _name};
 }
 
 ////////////////////////////////////////////////////////////
 
-view::view(database_view db, utf8_string name)
+view::view(database_view db, utf8_string schema, utf8_string name)
     : _db {db}
+    , _schema {std::move(schema)}
     , _name {std::move(name)}
 {
 }
