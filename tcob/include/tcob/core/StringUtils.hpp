@@ -27,8 +27,8 @@ TCOB_API auto to_string(char const* s) -> string;
 template <Arithmetic T>
 auto to_number(string_view str) -> std::optional<T>;
 
-auto join(auto&& container, string_view delim) -> string;
-auto join(string_view c, usize count, string_view delim) -> string;
+auto          join(auto&& container, string_view delim) -> string;
+TCOB_API auto join(string_view c, usize count, string_view delim) -> string;
 
 auto          split_for_each(string_view str, char delim, auto&& f) -> bool;
 TCOB_API auto split(string_view str, char delim) -> std::vector<string_view>;
