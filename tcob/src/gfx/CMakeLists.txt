@@ -227,22 +227,6 @@ if(TCOB_ENABLE_RENDERER_OPENGLES30)
     )
 endif()
 
-if(TCOB_ENABLE_RENDERER_OPENGLES20)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Canvas.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Context.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Enum.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Framebuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Object.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20RenderSystem.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20RenderTarget.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20ShaderProgram.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Texture.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20VertexArray.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles20/GLES20Window.cpp
-    )
-endif()
-
 if(TCOB_ENABLE_RENDERER_NULL)
     list(APPEND SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/backend/null/NullRenderSystem.cpp
