@@ -124,9 +124,8 @@ auto insert_statement::query_string(usize valueSize, usize valueCount) const -> 
 {
     // values
     auto const paramLine {"(" + helper::join("?", valueSize, ", ") + ")"};
-    auto const paramLines {std::vector<utf8_string>(valueCount, paramLine)};
-    return std::format("{} VALUES {};",
-                       _sql, helper::join(paramLines, ", "));
+    auto const paramLines {helper::join(std::vector<utf8_string>(valueCount, paramLine), ", ")};
+    return std::format("{} VALUES {};", _sql, paramLines);
 }
 
 ////////////////////////////////////////////////////////////
