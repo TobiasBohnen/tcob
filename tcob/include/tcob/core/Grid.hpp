@@ -82,6 +82,7 @@ public:
 
     static_grid();
     explicit static_grid(T const& defaultValue);
+    explicit static_grid(std::initializer_list<std::initializer_list<T>> rows);
 
     auto operator[](this auto&& self, isize idx) -> decltype(auto);
     auto operator[](this auto&& self, isize x, isize y) -> decltype(auto);

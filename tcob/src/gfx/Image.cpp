@@ -103,6 +103,17 @@ void image::flip_vertically()
     }
 }
 
+auto image::get_pixel(point_i pos) const -> color
+{
+    assert(_info.Size.contains(pos));
+    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
+    u8 const    r {_buffer[idx + 0]};
+    u8 const    g {_buffer[idx + 1]};
+    u8 const    b {_buffer[idx + 2]};
+    u8 const    a {_info.Format == image::format::RGBA ? _buffer[idx + 3] : static_cast<u8>(255)};
+    return {r, g, b, a};
+}
+
 void image::set_pixel(point_i pos, color c)
 {
     assert(_info.Size.contains(pos));
@@ -113,17 +124,6 @@ void image::set_pixel(point_i pos, color c)
     if (_info.Format == image::format::RGBA) {
         _buffer[idx + 3] = c.A;
     }
-}
-
-auto image::get_pixel(point_i pos) const -> color
-{
-    assert(_info.Size.contains(pos));
-    usize const idx {static_cast<usize>((pos.X + (pos.Y * _info.Size.Width)) * _info.bytes_per_pixel())};
-    u8 const    r {_buffer[idx + 0]};
-    u8 const    g {_buffer[idx + 1]};
-    u8 const    b {_buffer[idx + 2]};
-    u8 const    a {_info.Format == image::format::RGBA ? _buffer[idx + 3] : static_cast<u8>(255)};
-    return {r, g, b, a};
 }
 
 auto image::count_colors [[nodiscard]] () const -> isize

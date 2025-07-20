@@ -174,6 +174,22 @@ inline static_grid<T, Width, Height>::static_grid(T const& defaultValue)
 }
 
 template <typename T, usize Width, usize Height>
+inline static_grid<T, Width, Height>::static_grid(std::initializer_list<std::initializer_list<T>> rows)
+{
+    usize idx {0};
+    usize y {0};
+    for (auto const& row : rows) {
+        if (y >= Height) { break; }
+        usize x {0};
+        for (auto const& val : row) {
+            if (x >= Width) { break; }
+            _data[idx++] = val;
+        }
+        ++y;
+    }
+}
+
+template <typename T, usize Width, usize Height>
 inline auto static_grid<T, Width, Height>::operator[](this auto&& self, isize idx) -> decltype(auto)
 {
     assert(idx < std::ssize(self._data));
