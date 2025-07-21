@@ -91,31 +91,31 @@ auto constexpr operator-=(size<T>& left, size<R> const& right) -> size<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator+(size<T> const& left, size<R> const& right) -> size<T>
 {
-    return {left.Width + right.Width, left.Height + right.Height};
+    return {static_cast<T>(left.Width + right.Width), static_cast<T>(left.Height + right.Height)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator-(size<T> const& left, size<R> const& right) -> size<T>
 {
-    return {left.Width - right.Width, left.Height - right.Height};
+    return {static_cast<T>(left.Width - right.Width), static_cast<T>(left.Height - right.Height)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*(size<T> const& left, size<R> const& right) -> size<T>
 {
-    return {left.Width * right.Width, left.Height * right.Height};
+    return {static_cast<T>(left.Width * right.Width), static_cast<T>(left.Height * right.Height)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*(size<T> const& left, R const right) -> size<T>
 {
-    return {left.Width * right, left.Height * right};
+    return {static_cast<T>(left.Width * right), static_cast<T>(left.Height * right)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*(T const left, size<R> const& right) -> size<T>
 {
-    return {right.Width * left, right.Height * left};
+    return {static_cast<T>(right.Width * left), static_cast<T>(right.Height * left)};
 }
 
 template <Arithmetic T, Arithmetic R>
@@ -139,13 +139,13 @@ auto constexpr operator*=(size<T>& left, size<R> const& right) -> size<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(size<T> const& left, size<R> const& right) -> size<T>
 {
-    return {left.Width / right.Width, left.Height / right.Height};
+    return {static_cast<T>(left.Width / right.Width), static_cast<T>(left.Height / right.Height)};
 }
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(size<T> const& left, R const right) -> size<T>
 {
-    return {left.Width / right, left.Height / right};
+    return {static_cast<T>(left.Width / right), static_cast<T>(left.Height / right)};
 }
 
 template <Arithmetic T, Arithmetic R>

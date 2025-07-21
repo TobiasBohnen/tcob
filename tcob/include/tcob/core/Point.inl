@@ -118,7 +118,7 @@ auto constexpr operator+=(point<T>& left, point<R> const& right) -> point<T>&
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator+(point<T> const& left, point<R> const& right) -> point<T>
 {
-    return {static_cast<T>(left.X) + static_cast<T>(right.X), static_cast<T>(left.Y) + static_cast<T>(right.Y)};
+    return {static_cast<T>(left.X + right.X), static_cast<T>(left.Y + right.Y)};
 }
 
 template <Arithmetic T>
@@ -181,7 +181,7 @@ auto constexpr operator/(point<T> const& left, point<R> const& right) -> point<T
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(point<T> const& left, R const right) -> point<T>
 {
-    return {static_cast<T>(left.X) / static_cast<T>(right), static_cast<T>(left.Y) / static_cast<T>(right)};
+    return {static_cast<T>(left.X / right), static_cast<T>(left.Y / right)};
 }
 
 template <Arithmetic T, Arithmetic R>

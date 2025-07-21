@@ -31,6 +31,14 @@ auto constexpr color::FromRGBA(u32 value) -> color
             static_cast<u8>((value & 0x000000ff) >> 0)};
 }
 
+auto constexpr color::FromABGR(u32 value) -> color
+{
+    return {static_cast<u8>((value >> 0) & 0x000000FF),
+            static_cast<u8>((value >> 8) & 0x000000FF),
+            static_cast<u8>((value >> 16) & 0x000000FF),
+            static_cast<u8>((value >> 24) & 0x000000FF)};
+}
+
 auto constexpr color::FromRGB(u32 value) -> color
 {
     return {static_cast<u8>((value & 0xff0000) >> 16),
