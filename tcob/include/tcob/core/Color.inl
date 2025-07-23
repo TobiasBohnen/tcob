@@ -25,25 +25,25 @@ constexpr color::color(u8 r, u8 g, u8 b, u8 a)
 
 auto constexpr color::FromRGBA(u32 value) -> color
 {
-    return {static_cast<u8>((value & 0xff000000) >> 24),
-            static_cast<u8>((value & 0x00ff0000) >> 16),
-            static_cast<u8>((value & 0x0000ff00) >> 8),
-            static_cast<u8>((value & 0x000000ff) >> 0)};
+    return {static_cast<u8>((value >> 24) & 0xFF),
+            static_cast<u8>((value >> 16) & 0xFF),
+            static_cast<u8>((value >> 8) & 0xFF),
+            static_cast<u8>((value >> 0) & 0xFF)};
 }
 
 auto constexpr color::FromABGR(u32 value) -> color
 {
-    return {static_cast<u8>((value >> 0) & 0x000000FF),
-            static_cast<u8>((value >> 8) & 0x000000FF),
-            static_cast<u8>((value >> 16) & 0x000000FF),
-            static_cast<u8>((value >> 24) & 0x000000FF)};
+    return {static_cast<u8>((value >> 0) & 0xFF),
+            static_cast<u8>((value >> 8) & 0xFF),
+            static_cast<u8>((value >> 16) & 0xFF),
+            static_cast<u8>((value >> 24) & 0xFF)};
 }
 
 auto constexpr color::FromRGB(u32 value) -> color
 {
-    return {static_cast<u8>((value & 0xff0000) >> 16),
-            static_cast<u8>((value & 0x00ff00) >> 8),
-            static_cast<u8>((value & 0x0000ff) >> 0)};
+    return {static_cast<u8>((value >> 16) & 0xFF),
+            static_cast<u8>((value >> 8) & 0xFF),
+            static_cast<u8>((value >> 0) & 0xFF)};
 }
 
 auto constexpr color::FromHSLA(hsx const& hsl, u8 a) -> color
