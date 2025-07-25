@@ -105,7 +105,7 @@ auto bmp_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     _header.read(in);
     if (_header.Signature == SIGNATURE) {
         _infoHeader.read(in);
-        _info = image::information {{_infoHeader.Width, _infoHeader.Height}, image::format::RGBA};
+        _info = image::information {.Size = {_infoHeader.Width, _infoHeader.Height}, .Format = image::format::RGBA};
         return _info;
     }
     return std::nullopt;
