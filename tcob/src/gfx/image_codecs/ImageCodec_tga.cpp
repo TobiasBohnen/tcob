@@ -381,7 +381,9 @@ auto tga_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     }
 
     return _footer.Format == tga::format::New && check_supported_format(_header)
-        ? std::optional {image::information {{_header.ImageSpecs.Width, _header.ImageSpecs.Height}, bpp == 4 ? image::format::RGBA : image::format::RGB}}
+        ? std::optional {image::information {
+              .Size   = {_header.ImageSpecs.Width, _header.ImageSpecs.Height},
+              .Format = bpp == 4 ? image::format::RGBA : image::format::RGB}}
         : std::nullopt;
 }
 

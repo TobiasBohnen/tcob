@@ -46,13 +46,14 @@ image::image(size_i size, format f, std::span<u8 const> data)
 
 auto image::data(rect_i const& bounds) const -> std::vector<u8>
 {
+    assert(bounds.width() > 0 && bounds.height() > 0);
+    assert(bounds.left() >= 0 && bounds.right() <= _info.Size.Width);
+
     i32 const bpp {_info.bytes_per_pixel()};
     i32 const srcStride {_info.stride()};
     i32 const dstStride {bounds.width() * bpp};
 
     std::vector<u8> retValue(static_cast<usize>(bounds.height() * dstStride));
-
-    // TODO: bounds check
 
     for (i32 y {bounds.top()}; y < bounds.bottom(); ++y) {
         u8 const* src {&_buffer[(y * srcStride) + (bounds.left() * bpp)]};
@@ -110,7 +111,7 @@ auto image::get_pixel(point_i pos) const -> color
     u8 const    r {_buffer[idx + 0]};
     u8 const    g {_buffer[idx + 1]};
     u8 const    b {_buffer[idx + 2]};
-    u8 const    a {_info.Format == image::format::RGBA ? _buffer[idx + 3] : static_cast<u8>(255)};
+    u8 const    a {image::information::HasAlpha(_info.Format) ? _buffer[idx + 3] : static_cast<u8>(255)};
     return {r, g, b, a};
 }
 
@@ -121,9 +122,7 @@ void image::set_pixel(point_i pos, color c)
     _buffer[idx + 0] = c.R;
     _buffer[idx + 1] = c.G;
     _buffer[idx + 2] = c.B;
-    if (_info.Format == image::format::RGBA) {
-        _buffer[idx + 3] = c.A;
-    }
+    if (image::information::HasAlpha(_info.Format)) { _buffer[idx + 3] = c.A; }
 }
 
 auto image::count_colors [[nodiscard]] () const -> isize
@@ -133,7 +132,7 @@ auto image::count_colors [[nodiscard]] () const -> isize
         u8 const r {_buffer[i + 0]};
         u8 const g {_buffer[i + 1]};
         u8 const b {_buffer[i + 2]};
-        u8 const a {_info.Format == image::format::RGBA ? _buffer[i + 3] : static_cast<u8>(255)};
+        u8 const a {image::information::HasAlpha(_info.Format) ? _buffer[i + 3] : static_cast<u8>(255)};
         colors.insert(static_cast<u32>(r << 24 | g << 16 | b << 8 | a));
     }
 
@@ -254,6 +253,16 @@ auto image::information::GetBPP(format f) -> i32
     return 0;
 }
 
+auto image::information::HasAlpha(format f) -> bool
+{
+    switch (f) {
+    case image::format::RGB:  return false;
+    case image::format::RGBA: return true;
+    }
+
+    return 0;
+}
+
 ////////////////////////////////////////////////////////////
 
 auto animated_image_decoder::open(std::shared_ptr<io::istream> in) -> std::optional<image::information>
@@ -266,4 +275,5 @@ auto animated_image_decoder::stream() -> io::istream&
 {
     return *_stream;
 }
+
 }

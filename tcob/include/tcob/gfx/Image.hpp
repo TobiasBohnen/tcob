@@ -42,6 +42,7 @@ public:
         auto stride() const -> i32;
 
         auto static GetBPP(format f) -> i32;
+        auto static HasAlpha(format f) -> bool;
     };
 
     ////////////////////////////////////////////////////////////

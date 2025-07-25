@@ -49,7 +49,9 @@ auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::informat
 
     WebPBitstreamFeatures features;
     if (WebPGetFeatures(_buffer.data(), _buffer.size(), &features) == VP8_STATUS_OK) {
-        return image::information {.Size = {features.width, features.height}, .Format = features.has_alpha ? image::format::RGBA : image::format::RGB};
+        return image::information {
+            .Size   = {features.width, features.height},
+            .Format = features.has_alpha ? image::format::RGBA : image::format::RGB};
     }
 
     return std::nullopt;
@@ -59,20 +61,24 @@ auto webp_decoder::decode_info(io::istream& in) -> std::optional<image::informat
 
 auto webp_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
+    bool retValue {false};
+
     auto const& info {image.info()};
     auto const  imageBuffer {image.data()};
     u8*         output {};
     if (info.Format == image::format::RGBA) {
         usize const outputSize {WebPEncodeLosslessRGBA(imageBuffer.data(), info.Size.Width, info.Size.Height, info.stride(), &output)};
         out.write<u8>({output, outputSize});
+        retValue = true;
     } else if (info.Format == image::format::RGB) {
         usize const outputSize {WebPEncodeLosslessRGB(imageBuffer.data(), info.Size.Width, info.Size.Height, info.stride(), &output)};
         out.write<u8>({output, outputSize});
+        retValue = true;
     }
 
     WebPFree(output);
 
-    return true;
+    return retValue;
 }
 
 ////////////////////////////////////////////////////////////
@@ -113,7 +119,7 @@ auto webp_anim_decoder::open() -> std::optional<image::information>
         WebPAnimInfo anim_info;
         WebPAnimDecoderGetInfo(_decoder, &anim_info);
         _size = {static_cast<i32>(anim_info.canvas_width), static_cast<i32>(anim_info.canvas_height)};
-        return image::information {_size, image::format::RGBA};
+        return image::information {.Size = _size, .Format = image::format::RGBA};
     }
 
     return std::nullopt;

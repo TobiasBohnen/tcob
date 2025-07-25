@@ -48,7 +48,7 @@ auto qoi_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     i32 const w {static_cast<i32>(in.read<u32, std::endian::big>())};
     i32 const h {static_cast<i32>(in.read<u32, std::endian::big>())};
     u8 const  bpp {in.read<u8>()};
-    return image::information {{w, h}, bpp == 3 ? image::format::RGB : image::format::RGBA};
+    return image::information {.Size = {w, h}, .Format = bpp == 3 ? image::format::RGB : image::format::RGBA};
 }
 
 ////////////////////////////////////////////////////////////
