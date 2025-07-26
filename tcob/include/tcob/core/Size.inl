@@ -7,7 +7,6 @@
 #include "Size.hpp"
 
 #include <array>
-#include <ostream>
 
 #include "tcob/core/Point.hpp"
 
@@ -170,12 +169,6 @@ template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(size<T> const& left, size<R> const& right) -> bool
 {
     return (left.Width == right.Width) && (left.Height == right.Height);
-}
-
-template <Arithmetic T>
-inline auto operator<<(std::ostream& os, size<T> const& m) -> std::ostream&
-{
-    return os << "width:" << m.Width << "|height:" << m.Height;
 }
 
 template <Arithmetic T>

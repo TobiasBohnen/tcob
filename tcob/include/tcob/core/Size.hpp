@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <format>
 #include <functional>
-#include <ostream>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
@@ -107,24 +106,14 @@ auto constexpr operator/=(size<T>& left, size<R> const& right) -> size<T>&;
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(size<T> const& left, size<R> const& right) -> bool;
 
-template <Arithmetic T>
-inline auto operator<<(std::ostream& os, size<T> const& m) -> std::ostream&;
-
 }
 
 #include "Size.inl"
 
 template <tcob::Arithmetic T>
 struct std::formatter<tcob::size<T>> {
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
-
-    auto format(tcob::size<T> val, format_context& ctx) const
-    {
-        return format_to(ctx.out(), "(w:{},h:{})", val.Width, val.Height);
-    }
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto           format(tcob::size<T> val, format_context& ctx) const { return format_to(ctx.out(), "(w:{},h:{})", val.Width, val.Height); }
 };
 
 template <tcob::Arithmetic T>

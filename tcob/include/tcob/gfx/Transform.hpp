@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <ostream>
 #include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -58,8 +57,6 @@ auto constexpr operator*(transform const& left, point_f right) -> point_f;
 auto constexpr operator*(transform const& left, transform const& right) -> transform;
 
 auto constexpr operator*=(transform& left, transform const& right) -> transform&;
-
-inline auto operator<<(std::ostream& os, transform const& m) -> std::ostream&;
 
 }
 

@@ -8,7 +8,6 @@
 
 #include <cmath>
 #include <compare>
-#include <ostream>
 
 namespace tcob {
 
@@ -200,12 +199,6 @@ template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
 auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, R right) -> std::partial_ordering
 {
     return left.Value <=> static_cast<ValueType>(right);
-}
-
-template <FloatingPoint ValueType, f64 OneTurn>
-inline auto operator<<(std::ostream& os, angle_unit<ValueType, OneTurn> const& m) -> std::ostream&
-{
-    return os << "value:" << m.Value;
 }
 
 ////////////////////////////////////////////////////////////

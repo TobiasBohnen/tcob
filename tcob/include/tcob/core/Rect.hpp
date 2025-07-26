@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <format>
 #include <functional>
-#include <ostream>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Common.hpp"
@@ -104,24 +103,14 @@ auto constexpr operator/=(rect<T>& left, R const& right) -> rect<T>&;
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(rect<T> const& left, rect<R> const& right) -> bool;
 
-template <Arithmetic T>
-inline auto operator<<(std::ostream& os, rect<T> const& m) -> std::ostream&;
-
 }
 
 #include "Rect.inl"
 
 template <tcob::Arithmetic T>
 struct std::formatter<tcob::rect<T>> {
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
-
-    auto format(tcob::rect<T> val, format_context& ctx) const
-    {
-        return format_to(ctx.out(), "(x:{},y:{},w:{},h:{})", val.left(), val.top(), val.width(), val.height());
-    }
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto           format(tcob::rect<T> val, format_context& ctx) const { return format_to(ctx.out(), "(x:{},y:{},w:{},h:{})", val.left(), val.top(), val.width(), val.height()); }
 };
 
 template <tcob::Arithmetic T>

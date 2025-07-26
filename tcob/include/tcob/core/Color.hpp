@@ -8,7 +8,6 @@
 
 #include <array>
 #include <format>
-#include <ostream>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -22,8 +21,6 @@ struct hsx {
 };
 
 auto constexpr operator==(hsx left, hsx right) -> bool;
-
-inline auto operator<<(std::ostream& os, hsx m) -> std::ostream&;
 
 ////////////////////////////////////////////////////////////
 
@@ -64,21 +61,12 @@ public:
 
 auto constexpr operator==(color left, color right) -> bool;
 
-inline auto operator<<(std::ostream& os, color m) -> std::ostream&;
-
 }
 
 #include "Color.inl"
 
 template <>
 struct std::formatter<tcob::color> {
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
-
-    auto format(tcob::color val, format_context& ctx) const
-    {
-        return format_to(ctx.out(), "(r:{},g:{},b:{},a:{})", val.R, val.G, val.B, val.A);
-    }
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    auto           format(tcob::color val, format_context& ctx) const { return format_to(ctx.out(), "(r:{},g:{},b:{},a:{})", val.R, val.G, val.B, val.A); }
 };

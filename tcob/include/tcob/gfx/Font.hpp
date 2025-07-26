@@ -182,10 +182,7 @@ struct std::hash<tcob::gfx::font::style> {
 
 template <>
 struct std::formatter<tcob::gfx::font::style> {
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     auto format(tcob::gfx::font::style val, format_context& ctx) const
     {

@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <ostream>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -234,19 +233,9 @@ auto constexpr operator==(color left, color right) -> bool
     return (left.R == right.R) && (left.G == right.G) && (left.B == right.B) && (left.A == right.A);
 }
 
-inline auto operator<<(std::ostream& os, color m) -> std::ostream&
-{
-    return os << "r:" << static_cast<u32>(m.R) << "|g:" << static_cast<u32>(m.G) << "|b:" << static_cast<u32>(m.B) << "|a:" << static_cast<u32>(m.A);
-}
-
 auto constexpr operator==(hsx left, hsx right) -> bool
 {
     return (left.Hue == right.Hue) && (left.Saturation == right.Saturation) && (left.X == right.X);
-}
-
-inline auto operator<<(std::ostream& os, hsx m) -> std::ostream&
-{
-    return os << "h:" << m.Hue.Value << "|s:" << m.Saturation << "|x:" << m.X;
 }
 
 inline void color::Serialize(color v, auto&& s)

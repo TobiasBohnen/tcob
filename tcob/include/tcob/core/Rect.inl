@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
-#include <ostream>
 #include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -320,12 +319,6 @@ template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(rect<T> const& left, rect<R> const& right) -> bool
 {
     return (left.Position == right.Position) && (left.Size == right.Size);
-}
-
-template <Arithmetic T>
-inline auto operator<<(std::ostream& os, rect<T> const& m) -> std::ostream&
-{
-    return os << "left:" << m.left() << "|top:" << m.top() << "|width:" << m.width() << "|height:" << m.height();
 }
 
 template <Arithmetic T>

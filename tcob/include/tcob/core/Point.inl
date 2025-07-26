@@ -8,7 +8,6 @@
 
 #include <array>
 #include <cmath>
-#include <ostream>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -206,12 +205,6 @@ template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(point<T> const& left, point<R> const& right) -> bool
 {
     return (left.X == right.X) && (left.Y == right.Y);
-}
-
-template <Arithmetic T>
-inline auto operator<<(std::ostream& os, point<T> const& m) -> std::ostream&
-{
-    return os << "x:" << m.X << "|y:" << m.Y;
 }
 
 template <Arithmetic T>

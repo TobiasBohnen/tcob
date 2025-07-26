@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <compare>
-#include <ostream>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -88,9 +87,6 @@ auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, angle_uni
 
 template <FloatingPoint ValueType, f64 OneTurn, Arithmetic R>
 auto constexpr operator<=>(angle_unit<ValueType, OneTurn> const& left, R right) -> std::partial_ordering;
-
-template <FloatingPoint ValueType, f64 OneTurn>
-inline auto operator<<(std::ostream& os, angle_unit<ValueType, OneTurn> const& m) -> std::ostream&;
 
 ////////////////////////////////////////////////////////////
 
