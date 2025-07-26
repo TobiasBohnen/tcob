@@ -7,6 +7,7 @@
 
 #include <array>
 
+#include "tcob/core/Color.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/gfx/Image.hpp"
@@ -183,13 +184,13 @@ auto resize_nearest_neighbor::operator()(image const& img) const -> image
     locate_service<task_manager>().run_parallel(
         [&](par_task const& ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                isize const x {pixIdx % newWidth};
-                isize const y {pixIdx / newWidth};
+                i32 const x {static_cast<i32>(pixIdx % newWidth)};
+                i32 const y {static_cast<i32>(pixIdx / newWidth)};
 
                 i32 const srcY {static_cast<i32>(y * yFactor)};
                 i32 const srcX {static_cast<i32>(x * xFactor)};
 
-                retValue.set_pixel({static_cast<i32>(x), static_cast<i32>(y)}, img.get_pixel({srcX, srcY}));
+                retValue.set_pixel({x, y}, img.get_pixel({srcX, srcY}));
             }
         },
         newWidth * newHeight);
@@ -216,8 +217,8 @@ auto resize_bilinear::operator()(image const& img) const -> image
     locate_service<task_manager>().run_parallel(
         [&](par_task const& ctx) {
             for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
-                isize const x {pixIdx % newWidth};
-                isize const y {pixIdx / newWidth};
+                i32 const x {static_cast<i32>(pixIdx % newWidth)};
+                i32 const y {static_cast<i32>(pixIdx / newWidth)};
 
                 f64 const oy {y * yFactor};
                 i32 const y1 {static_cast<i32>(oy)};
@@ -242,7 +243,7 @@ auto resize_bilinear::operator()(image const& img) const -> image
                 u8 const b {static_cast<u8>((dy2 * (dx2 * c1.B + dx1 * c2.B)) + (dy1 * (dx2 * c3.B + dx1 * c4.B)))};
                 u8 const a {static_cast<u8>((dy2 * (dx2 * c1.A + dx1 * c2.A)) + (dy1 * (dx2 * c3.A + dx1 * c4.A)))};
 
-                retValue.set_pixel({static_cast<i32>(x), static_cast<i32>(y)}, {r, g, b, a});
+                retValue.set_pixel({x, y}, {r, g, b, a});
             }
         },
         newWidth * newHeight);
@@ -251,5 +252,31 @@ auto resize_bilinear::operator()(image const& img) const -> image
 }
 
 ////////////////////////////////////////////////////////////
+
+auto remove_alpha::operator()(image const& img) const -> image
+{
+    if (!image::information::HasAlpha(img.info().Format)) {
+        return img;
+    }
+
+    auto const& info {img.info()};
+    auto const [width, height] {info.Size};
+
+    auto retValue {image::CreateEmpty(info.Size, image::format::RGB)};
+
+    locate_service<task_manager>().run_parallel(
+        [&](par_task const& ctx) {
+            for (isize pixIdx {ctx.Start}; pixIdx < ctx.End; ++pixIdx) {
+                i32 const x {static_cast<i32>(pixIdx % width)};
+                i32 const y {static_cast<i32>(pixIdx / width)};
+
+                color const src {img.get_pixel({x, y})};
+                retValue.set_pixel({x, y}, color {src.R, src.G, src.B});
+            }
+        },
+        width * height);
+
+    return retValue;
+}
 
 }

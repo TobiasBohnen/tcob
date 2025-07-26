@@ -122,6 +122,13 @@ public:
     auto operator()(image const& img) const -> image override;
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API remove_alpha final : public filter_base {
+public:
+    auto operator()(image const& img) const -> image override;
+};
+
 }
 
 #include "ImageFilters.inl"
