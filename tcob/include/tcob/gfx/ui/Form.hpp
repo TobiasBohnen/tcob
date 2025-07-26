@@ -62,8 +62,8 @@ public:
     void virtual remove_container(widget* widget)                                  = 0;
     void virtual clear_containers()                                                = 0;
 
-    void queue_redraw(string const& reason);
-    void notify_redraw(string const& reason);
+    void queue_redraw();
+    void notify_redraw();
 
     template <SubmitTarget Target>
     void submit(Target& target);

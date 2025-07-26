@@ -40,16 +40,16 @@ panel::panel(init const& wi)
 {
     _vScrollbar.ValueChanged.connect([this]() {
         form().hover_widget(this);
-        queue_redraw(this->name() + ": Scrollbar changed");
+        queue_redraw();
     });
     _hScrollbar.ValueChanged.connect([this]() {
         form().hover_widget(this);
-        queue_redraw(this->name() + ": Scrollbar changed");
+        queue_redraw();
     });
 
-    _layout->Changed.connect([&]() { queue_redraw("Layout changed"); });
+    _layout->Changed.connect([&]() { queue_redraw(); });
 
-    ScrollEnabled.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": ScrollEnabled changed"); });
+    ScrollEnabled.Changed.connect([this](auto const&) { queue_redraw(); });
     ScrollEnabled(false);
 
     Class("panel");

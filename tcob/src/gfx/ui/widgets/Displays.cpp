@@ -43,7 +43,7 @@ dot_matrix_display::dot_matrix_display(init const& wi)
 {
     Dots.Changed.connect([this](auto const&) {
         _isDirty = true;
-        queue_redraw(this->name() + ": Dots changed");
+        queue_redraw();
     });
 
     Class("dot_matrix_display");
@@ -118,7 +118,7 @@ void seven_segment_display::draw_text(string const& text)
     _segments.resize(text.size());
     std::ranges::transform(text, _segments.begin(), [this](char const c) { return get_segment(c); });
 
-    queue_redraw(this->name() + ": segments changed");
+    queue_redraw();
 }
 
 void seven_segment_display::draw_segments(std::span<segment const> segments)
@@ -126,7 +126,7 @@ void seven_segment_display::draw_segments(std::span<segment const> segments)
     _segments.resize(segments.size());
     std::ranges::transform(segments, _segments.begin(), [this](segment const& seg) { return get_segment(seg); });
 
-    queue_redraw(this->name() + ": segments changed");
+    queue_redraw();
 }
 
 auto seven_segment_display::get_segment(char c) -> std::bitset<7>
@@ -303,7 +303,7 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
-    SelectedBaseHue.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": BaseHue changed"); });
+    SelectedBaseHue.Changed.connect([this](auto const&) { queue_redraw(); });
 
     Class("color_picker");
 }

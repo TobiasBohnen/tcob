@@ -15,7 +15,6 @@
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
-#include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
@@ -115,21 +114,18 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     return retValue;
 }
 
-void form_base::queue_redraw(string const& reason)
+void form_base::queue_redraw()
 {
     for (auto const& widget : containers()) {
         widget->set_redraw(true);
     }
-    notify_redraw(reason);
+    notify_redraw();
 
     _clearRedraw = true;
 }
 
-void form_base::notify_redraw(string const& reason)
+void form_base::notify_redraw()
 {
-    if (!_prepareWidgets) {
-        logger::Debug("Form: {} redraw; reason: {}", _name, reason);
-    }
 
     _prepareWidgets = true;
 }
@@ -454,7 +450,7 @@ void form_base::on_bounds_changed()
 {
     _renderer.set_bounds(*Bounds);
 
-    queue_redraw(this->name() + "bounds changed");
+    queue_redraw();
     on_styles_changed();
 }
 

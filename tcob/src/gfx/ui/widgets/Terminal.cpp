@@ -758,7 +758,7 @@ void terminal::parse_esc(char code, std::vector<string> const& seq)
 
 void terminal::redraw()
 {
-    queue_redraw(this->name() + ": redraw");
+    queue_redraw();
 }
 
 void terminal::set(utf8_string_view text, bool insert)

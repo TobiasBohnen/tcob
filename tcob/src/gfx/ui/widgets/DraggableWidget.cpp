@@ -31,7 +31,7 @@ void draggable_widget::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (Draggable) {
         _isDragging = true;
-        queue_redraw(this->name() + ": dragging");
+        queue_redraw();
         ev.Handled = true;
     }
 }
@@ -40,7 +40,7 @@ void draggable_widget::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (_isDragging) {
         Dropped({.Sender = this, .Target = form().find_widget_at(ev.Position).get(), .Position = ev.Position});
-        queue_redraw(this->name() + ": dropped");
+        queue_redraw();
         ev.Handled = true;
     }
 

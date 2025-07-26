@@ -23,7 +23,7 @@ inline auto tab_container::create_tab(utf8_string const& name) -> std::shared_pt
 template <std::derived_from<widget_container> T>
 inline auto tab_container::create_tab(utf8_string const& name, item const& label) -> std::shared_ptr<T>
 {
-    queue_redraw(this->name() + ": tab created");
+    queue_redraw();
 
     widget::init const wi {
         .Form   = &form(),

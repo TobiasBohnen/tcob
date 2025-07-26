@@ -34,17 +34,17 @@ spinner::spinner(init const& wi)
 {
     Min.Changed.connect([this](auto const& val) {
         Value = std::min(val, *Value);
-        queue_redraw(this->name() + ": Min changed");
+        queue_redraw();
     });
     Min(0);
     Max.Changed.connect([this](auto const& val) {
         Value = std::max(val, *Value);
-        queue_redraw(this->name() + ": Max changed");
+        queue_redraw();
     });
     Max(100);
-    Step.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Step changed"); });
+    Step.Changed.connect([this](auto const&) { queue_redraw(); });
     Step(5);
-    Value.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Value changed"); });
+    Value.Changed.connect([this](auto const&) { queue_redraw(); });
     Value(0);
 
     Class("spinner");

@@ -36,12 +36,12 @@ tab_container::tab_container(init const& wi)
     , ActiveTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
     , HoveredTabIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_tabs) - 1); }}}
 {
-    ActiveTabIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": ActiveTab changed"); });
+    ActiveTabIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     ActiveTabIndex(INVALID_INDEX);
-    HoveredTabIndex.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": HoveredTab changed"); });
+    HoveredTabIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     HoveredTabIndex(INVALID_INDEX);
 
-    MaxTabsPerLine.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": MaxTabsPerLine  changed"); });
+    MaxTabsPerLine.Changed.connect([this](auto const&) { queue_redraw(); });
     MaxTabsPerLine(std::numeric_limits<isize>::max());
 
     Class("tab_container");
@@ -74,7 +74,7 @@ void tab_container::remove_tab(widget* tab)
         ActiveTabIndex = 0;
     }
 
-    queue_redraw(this->name() + ": tab removed");
+    queue_redraw();
 }
 
 void tab_container::clear_tabs()
@@ -92,7 +92,7 @@ void tab_container::change_tab_label(widget* tab, utf8_string const& label)
             break;
         }
     }
-    queue_redraw(this->name() + ": tab renamed");
+    queue_redraw();
 }
 
 void tab_container::change_tab_label(widget* tab, item const& label)
@@ -103,7 +103,7 @@ void tab_container::change_tab_label(widget* tab, item const& label)
             break;
         }
     }
-    queue_redraw(this->name() + ": tab label changed");
+    queue_redraw();
 }
 
 auto tab_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
@@ -257,7 +257,7 @@ void tab_container::on_animation_step(string const& val)
         auto& tab {_tabLabels[ActiveTabIndex]};
         tab.Icon.TextureRegion = val;
         if (tab.Icon.Texture) {
-            queue_redraw(this->name() + ": Animation Frame changed ");
+            queue_redraw();
         }
     }
 }

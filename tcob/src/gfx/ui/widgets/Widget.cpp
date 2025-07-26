@@ -34,12 +34,12 @@ widget::widget(init const& wi)
 {
     assert(_form);
 
-    Class.Changed.connect([this](auto const&) { queue_redraw(_name + ": Class changed"); });
+    Class.Changed.connect([this](auto const&) { queue_redraw(); });
     Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
 
-    Flex.Changed.connect([this](auto const&) { queue_redraw(_name + ": Flex changed"); });
+    Flex.Changed.connect([this](auto const&) { queue_redraw(); });
 
-    ZOrder.Changed.connect([this](auto const&) { queue_redraw(_name + ": ZOrder changed"); });
+    ZOrder.Changed.connect([this](auto const&) { queue_redraw(); });
 
     static i32 tabIndex {0};
     TabStop.mutate([&](tab_stop& tabStop) { tabStop.Index = tabIndex++; });
@@ -49,14 +49,14 @@ widget::widget(init const& wi)
 
 void widget::on_bounds_changed()
 {
-    queue_redraw(_name + ": Bounds changed");
+    queue_redraw();
 }
 
 void widget::show()
 {
     if (!_visible) {
         _visible = true;
-        queue_redraw(_name + ": Visibility changed");
+        queue_redraw();
     }
 }
 
@@ -64,7 +64,7 @@ void widget::hide()
 {
     if (_visible) {
         _visible = false;
-        queue_redraw(_name + ": Visibility changed");
+        queue_redraw();
     }
 }
 
@@ -89,7 +89,7 @@ void widget::enable()
 {
     if (!_enabled) {
         _enabled = true;
-        queue_redraw(_name + ": Enable changed");
+        queue_redraw();
     }
 }
 
@@ -97,7 +97,7 @@ void widget::disable()
 {
     if (_enabled) {
         _enabled = false;
-        queue_redraw(_name + ": Enable changed");
+        queue_redraw();
     }
 }
 
@@ -122,12 +122,12 @@ void widget::draw(widget_painter& painter)
 
 void widget::update(milliseconds deltaTime)
 {
-    if (_transition.is_active()) { queue_redraw(this->name() + ": Transition"); }
+    if (_transition.is_active()) { queue_redraw(); }
     _transition.update(deltaTime);
 
     // item transitions
     for (auto& [_, v] : _subStyleTransitions) {
-        if (v.is_active()) { queue_redraw(this->name() + ": Item transition"); }
+        if (v.is_active()) { queue_redraw(); }
         v.update(deltaTime);
     }
 
@@ -239,12 +239,12 @@ void widget::prepare_redraw()
     }
 }
 
-void widget::queue_redraw(string const& reason)
+void widget::queue_redraw()
 {
     if (get_redraw()) { return; }
 
     if (is_top_level()) { // is top level widget -> redraw everything
-        _form->queue_redraw(reason);
+        _form->queue_redraw();
     } else {
         auto* tlw {top_level_widget()};
         assert(tlw);
@@ -253,14 +253,14 @@ void widget::queue_redraw(string const& reason)
             if (w->ZOrder < tlw->ZOrder) { continue; }
 
             if (w->Bounds->intersects(tlw->Bounds)) { // top level widget overlaps with other widget -> redraw everything
-                _form->queue_redraw(reason);
+                _form->queue_redraw();
                 return;
             }
         }
 
         // redraw top level widget
         tlw->set_redraw(true);
-        _form->notify_redraw(reason);
+        _form->notify_redraw();
     }
 }
 
@@ -312,7 +312,7 @@ void widget::do_key_down(input::keyboard::event const& ev)
     }
 
     if (ev.Handled) {
-        queue_redraw(_name + ": KeyDown");
+        queue_redraw();
     }
 
     KeyDown({.Sender = this, .Event = ev});
@@ -329,7 +329,7 @@ void widget::do_key_up(input::keyboard::event const& ev)
     }
 
     if (ev.Handled) {
-        queue_redraw(_name + ": KeyUp");
+        queue_redraw();
     }
 
     KeyUp({.Sender = this, .Event = ev});
@@ -351,7 +351,7 @@ void widget::do_mouse_enter()
         parent               = parent->_parent;
     }
 
-    queue_redraw(_name + ": MouseEnter");
+    queue_redraw();
 
     on_mouse_enter();
     MouseEnter({.Sender = this});
@@ -368,7 +368,7 @@ void widget::do_mouse_leave()
         parent               = parent->_parent;
     }
 
-    queue_redraw(_name + ": MouseLeave");
+    queue_redraw();
 
     on_mouse_leave();
     MouseLeave({.Sender = this});
@@ -379,7 +379,7 @@ void widget::do_mouse_hover(input::mouse::motion_event const& ev)
     on_mouse_hover(ev);
 
     if (ev.Handled) {
-        queue_redraw(_name + ": MouseHover");
+        queue_redraw();
     }
 
     MouseHover({.Sender           = this,
@@ -392,7 +392,7 @@ void widget::do_mouse_drag(input::mouse::motion_event const& ev)
     on_mouse_drag(ev);
 
     if (ev.Handled) {
-        queue_redraw(_name + ": MouseDrag");
+        queue_redraw();
     }
 
     MouseDrag({.Sender           = this,
@@ -410,7 +410,7 @@ void widget::do_mouse_button_down(input::mouse::button_event const& ev)
     }
 
     if (ev.Handled) {
-        queue_redraw(_name + ": MouseButtonDown");
+        queue_redraw();
     }
 
     MouseButtonDown({.Sender           = this,
@@ -428,7 +428,7 @@ void widget::do_mouse_button_up(input::mouse::button_event const& ev)
     }
 
     if (ev.Handled) {
-        queue_redraw(_name + ": MouseButtonUp");
+        queue_redraw();
     }
 
     MouseButtonUp({.Sender           = this,
@@ -441,7 +441,7 @@ void widget::do_mouse_wheel(input::mouse::wheel_event const& ev)
     on_mouse_wheel(ev);
 
     if (ev.Handled) {
-        queue_redraw(_name + ": MouseWheel");
+        queue_redraw();
     }
 
     MouseWheel({.Sender = this, .Event = ev});
@@ -459,7 +459,7 @@ void widget::do_controller_button_down(input::controller::button_event const& ev
     }
 
     if (ev.Handled) {
-        queue_redraw(_name + ": ControllerButtonDown");
+        queue_redraw();
     }
 
     ControllerButtonDown({.Sender = this, .Event = ev});
@@ -478,7 +478,7 @@ void widget::do_controller_button_up(input::controller::button_event const& ev)
     }
 
     if (ev.Handled) {
-        queue_redraw(_name + ": ControllerButtonUp");
+        queue_redraw();
     }
 
     ControllerButtonUp({.Sender = this, .Event = ev});
@@ -501,7 +501,7 @@ void widget::do_double_click()
 void widget::do_focus_gained()
 {
     _flags.Focus = true;
-    queue_redraw(_name + ": FocusGained");
+    queue_redraw();
 
     on_focus_gained();
 
@@ -511,7 +511,7 @@ void widget::do_focus_gained()
 void widget::do_focus_lost()
 {
     _flags.Focus = false;
-    queue_redraw(_name + ": FocusLost");
+    queue_redraw();
 
     on_focus_lost();
 
@@ -563,7 +563,7 @@ void widget::activate()
 {
     if (!_flags.Active) {
         _flags.Active = true;
-        queue_redraw(_name + ": Active changed");
+        queue_redraw();
     }
 }
 
@@ -571,7 +571,7 @@ void widget::deactivate()
 {
     if (_flags.Active) {
         _flags.Active = false;
-        queue_redraw(_name + ": Active changed");
+        queue_redraw();
     }
 }
 

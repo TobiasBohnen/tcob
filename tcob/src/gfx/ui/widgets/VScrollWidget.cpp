@@ -31,7 +31,7 @@ vscroll_widget::vscroll_widget(init const& wi)
 {
     _vScrollbar.ValueChanged.connect([this]() {
         form().hover_widget(this);
-        queue_redraw(this->name() + ": Scrollbar changed");
+        queue_redraw();
     });
 }
 

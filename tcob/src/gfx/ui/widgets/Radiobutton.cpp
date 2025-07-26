@@ -59,7 +59,7 @@ void radio_button::on_checked_changed()
         }
     }
 
-    queue_redraw(this->name() + ": Checked changed");
+    queue_redraw();
 }
 
 void radio_button::on_click()

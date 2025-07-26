@@ -17,9 +17,9 @@ namespace tcob::ui {
 template <std::derived_from<layout> T>
 inline auto panel::create_layout(auto&&... args) -> T&
 {
-    queue_redraw(this->name() + ": Layout created");
+    queue_redraw();
     _layout = std::make_unique<T>(this, std::move(args)...);
-    _layout->Changed.connect([&]() { queue_redraw("Layout changed"); });
+    _layout->Changed.connect([&]() { queue_redraw(); });
     return *static_cast<T*>(_layout.get());
 }
 

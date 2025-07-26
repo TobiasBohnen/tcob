@@ -21,9 +21,9 @@ namespace tcob::ui {
 image_box::image_box(init const& wi)
     : draggable_widget {wi}
 {
-    Image.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Image changed"); });
+    Image.Changed.connect([this](auto const&) { queue_redraw(); });
 
-    Fit.Changed.connect([this](auto const&) { queue_redraw(this->name() + ": Fit changed"); });
+    Fit.Changed.connect([this](auto const&) { queue_redraw(); });
     Fit(fit_mode::Contain);
 
     Class("image_box");
