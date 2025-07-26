@@ -79,7 +79,7 @@ public:
     signal<unknown_get_event> UnknownGet;
     signal<unknown_set_event> UnknownSet;
 
-    void wrap_metamethod(metamethod method, auto&& func);
+    void metamethod(squirrel::metamethod method, auto&& func);
 
 private:
     template <typename R, typename... P>

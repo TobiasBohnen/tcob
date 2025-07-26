@@ -113,10 +113,10 @@ public:
     signal<unknown_get_event> UnknownGet;
     signal<unknown_set_event> UnknownSet;
 
-    void wrap_metamethod(metamethod method, auto&& func);
+    void metamethod(lua::metamethod method, auto&& func);
 
     template <typename... Ts>
-    void wrap_constructors(std::optional<table> targetTable = std::nullopt);
+    void constructors(std::optional<table> targetTable = std::nullopt);
 
     void hide_metatable(auto&& value) const;
 

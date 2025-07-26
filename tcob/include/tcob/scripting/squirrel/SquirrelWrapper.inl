@@ -47,7 +47,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void wrapper<T>::wrap_metamethod(metamethod method, auto&& func)
+inline void wrapper<T>::metamethod(squirrel::metamethod method, auto&& func)
 {
     string const& name {detail::get_metamethod_name(method)};
     push_metamethod(name, std::function {func});

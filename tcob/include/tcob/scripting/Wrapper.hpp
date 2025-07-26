@@ -59,16 +59,16 @@ public:
         auto operator=(T const& method) -> proxy&;
 
         template <typename T>
-        auto operator=(getter<T> const& get) -> proxy&;
+        auto operator=(scripting::getter<T> const& get) -> proxy&;
 
         template <typename T>
-        auto operator=(setter<T> const& set) -> proxy&;
+        auto operator=(scripting::setter<T> const& set) -> proxy&;
 
         template <typename Get, typename Set>
-        auto operator=(property<Get, Set> const& prop) -> proxy&;
+        auto operator=(scripting::property<Get, Set> const& prop) -> proxy&;
 
         template <typename... Ts>
-        auto operator=(overload<Ts...> const& ov) -> proxy&;
+        auto operator=(scripting::overload<Ts...> const& ov) -> proxy&;
 
     private:
         wrapper& _parent;
@@ -78,25 +78,25 @@ public:
     auto operator[](string const& name) -> proxy;
 
     template <auto Func>
-    void wrap_method(string_view name);
-    void wrap_method(string_view name, auto&& func);
+    void method(string_view name);
+    void method(string_view name, auto&& func);
 
     template <typename... Funcs>
-    void wrap_overload(string_view name, Funcs&&... funcs);
+    void overload(string_view name, Funcs&&... funcs);
 
     template <auto Getter, auto Setter>
-    void wrap_property(string_view name);
+    void property(string_view name);
     template <auto Field>
-    void wrap_property(string_view name);
-    void wrap_property(string_view name, auto&& get, auto&& set);
+    void property(string_view name);
+    void property(string_view name, auto&& get, auto&& set);
 
     template <auto Getter>
-    void wrap_getter(string_view name);
-    void wrap_getter(string_view name, auto&& get);
+    void getter(string_view name);
+    void getter(string_view name, auto&& get);
 
     template <auto Setter>
-    void wrap_setter(string_view name);
-    void wrap_setter(string_view name, auto&& set);
+    void setter(string_view name);
+    void setter(string_view name, auto&& set);
 
     template <typename S>
     void register_base();

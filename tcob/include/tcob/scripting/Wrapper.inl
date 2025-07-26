@@ -26,40 +26,40 @@ template <typename WrapperImpl>
 template <typename T>
 inline auto wrapper<WrapperImpl>::proxy::operator=(T const& method) -> proxy&
 {
-    _parent.wrap_method(_name, method);
+    _parent.method(_name, method);
     return *this;
 }
 
 template <typename WrapperImpl>
 template <typename T>
-inline auto wrapper<WrapperImpl>::proxy::operator=(getter<T> const& get) -> proxy&
+inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::getter<T> const& get) -> proxy&
 {
-    _parent.wrap_getter(_name, get.Method);
+    _parent.getter(_name, get.Method);
     return *this;
 }
 
 template <typename WrapperImpl>
 template <typename T>
-inline auto wrapper<WrapperImpl>::proxy::operator=(setter<T> const& set) -> proxy&
+inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::setter<T> const& set) -> proxy&
 {
-    _parent.wrap_setter(_name, set.Method);
+    _parent.setter(_name, set.Method);
     return *this;
 }
 
 template <typename WrapperImpl>
 template <typename Get, typename Set>
-inline auto wrapper<WrapperImpl>::proxy::operator=(property<Get, Set> const& prop) -> proxy&
+inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::property<Get, Set> const& prop) -> proxy&
 {
-    _parent.wrap_property(_name, prop.first, prop.second);
+    _parent.property(_name, prop.first, prop.second);
     return *this;
 }
 
 template <typename WrapperImpl>
 template <typename... Ts>
-inline auto wrapper<WrapperImpl>::proxy::operator=(overload<Ts...> const& ov) -> proxy&
+inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::overload<Ts...> const& ov) -> proxy&
 {
     std::apply(
-        [&](auto&&... item) { _parent.wrap_overload(_name, item...); },
+        [&](auto&&... item) { _parent.overload(_name, item...); },
         ov);
 
     return *this;
@@ -220,14 +220,14 @@ inline auto wrapper<WrapperImpl>::get_impl() const -> WrapperImpl const*
 
 template <typename WrapperImpl>
 template <auto Func>
-inline void wrapper<WrapperImpl>::wrap_method(string_view name)
+inline void wrapper<WrapperImpl>::method(string_view name)
 {
     auto ptr {wrap_method_helper(Func)};
     get_impl()->impl_wrap_func(name, wrap_target::Method, std::move(ptr));
 }
 
 template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::wrap_method(string_view name, auto&& func)
+inline void wrapper<WrapperImpl>::method(string_view name, auto&& func)
 {
     auto ptr {wrap_method_helper(func)};
     get_impl()->impl_wrap_func(name, wrap_target::Method, std::move(ptr));
@@ -235,7 +235,7 @@ inline void wrapper<WrapperImpl>::wrap_method(string_view name, auto&& func)
 
 template <typename WrapperImpl>
 template <typename... Funcs>
-inline void wrapper<WrapperImpl>::wrap_overload(string_view name, Funcs&&... funcs)
+inline void wrapper<WrapperImpl>::overload(string_view name, Funcs&&... funcs)
 {
     auto ptr {make_unique_overload<Funcs...>(std::forward<Funcs>(funcs)...)};
     get_impl()->impl_wrap_func(name, wrap_target::Method, std::move(ptr));
@@ -243,7 +243,7 @@ inline void wrapper<WrapperImpl>::wrap_overload(string_view name, Funcs&&... fun
 
 template <typename WrapperImpl>
 template <auto Getter, auto Setter>
-inline void wrapper<WrapperImpl>::wrap_property(string_view name)
+inline void wrapper<WrapperImpl>::property(string_view name)
 {
     auto getter {wrap_property_helper(Getter)};
     get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
@@ -253,7 +253,7 @@ inline void wrapper<WrapperImpl>::wrap_property(string_view name)
 
 template <typename WrapperImpl>
 template <auto Field>
-inline void wrapper<WrapperImpl>::wrap_property(string_view name)
+inline void wrapper<WrapperImpl>::property(string_view name)
 {
     auto getter {wrap_property_helper_field_getter(Field)};
     get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
@@ -262,7 +262,7 @@ inline void wrapper<WrapperImpl>::wrap_property(string_view name)
 }
 
 template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::wrap_property(string_view name, auto&& get, auto&& set)
+inline void wrapper<WrapperImpl>::property(string_view name, auto&& get, auto&& set)
 {
     auto getter {wrap_property_helper(get)};
     get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
@@ -272,14 +272,14 @@ inline void wrapper<WrapperImpl>::wrap_property(string_view name, auto&& get, au
 
 template <typename WrapperImpl>
 template <auto Getter>
-inline void wrapper<WrapperImpl>::wrap_getter(string_view name)
+inline void wrapper<WrapperImpl>::getter(string_view name)
 {
     auto getter {wrap_property_helper(Getter)};
     get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
 }
 
 template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::wrap_getter(string_view name, auto&& get)
+inline void wrapper<WrapperImpl>::getter(string_view name, auto&& get)
 {
     auto getter {wrap_property_helper(get)};
     get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
@@ -287,14 +287,14 @@ inline void wrapper<WrapperImpl>::wrap_getter(string_view name, auto&& get)
 
 template <typename WrapperImpl>
 template <auto Setter>
-inline void wrapper<WrapperImpl>::wrap_setter(string_view name)
+inline void wrapper<WrapperImpl>::setter(string_view name)
 {
     auto setter {wrap_property_helper(Setter)};
     get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
 }
 
 template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::wrap_setter(string_view name, auto&& set)
+inline void wrapper<WrapperImpl>::setter(string_view name, auto&& set)
 {
     auto setter {wrap_property_helper(set)};
     get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));

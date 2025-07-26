@@ -104,7 +104,7 @@ inline void wrapper<T>::impl_register_base()
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline void wrapper<T>::wrap_metamethod(metamethod method, auto&& func)
+inline void wrapper<T>::metamethod(lua::metamethod method, auto&& func)
 {
     string const& name {detail::get_metamethod_name(method)};
     auto          ptr {scripting::wrapper<wrapper<T>>::make_unique_closure(std::function {func})};
@@ -115,7 +115,7 @@ inline void wrapper<T>::wrap_metamethod(metamethod method, auto&& func)
 
 template <typename T>
 template <typename... Ts>
-inline void wrapper<T>::wrap_constructors(std::optional<table> targetTable)
+inline void wrapper<T>::constructors(std::optional<table> targetTable)
 {
     auto& dstTable {targetTable.has_value() ? targetTable.value() : *_globalTable};
 
