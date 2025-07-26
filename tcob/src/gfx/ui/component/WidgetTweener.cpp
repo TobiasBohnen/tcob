@@ -3,9 +3,9 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <memory>
+#include "tcob/gfx/ui/component/WidgetTweener.hpp"
 
-#include "tcob/gfx/ui/WidgetTweener.hpp"
+#include <memory>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/easing/Tween.hpp"

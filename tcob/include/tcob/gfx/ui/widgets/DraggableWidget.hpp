@@ -16,7 +16,7 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API draggable_widget : public widget {
+class TCOB_API draggable_widget : public widget { // TODO: convert to component
 public:
     class TCOB_API style : public widget_style {
     public:

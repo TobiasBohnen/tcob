@@ -12,7 +12,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/WidgetTweener.hpp"
+#include "tcob/gfx/ui/component/WidgetTweener.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////

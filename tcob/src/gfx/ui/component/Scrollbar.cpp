@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/ui/Scrollbar.hpp"
+#include "tcob/gfx/ui/component/Scrollbar.hpp"
 
 #include <algorithm>
 

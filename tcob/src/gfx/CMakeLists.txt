@@ -48,6 +48,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/Scrollbar.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/WidgetTweener.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CanvasWidget.cpp
@@ -75,12 +77,10 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/WidgetContainer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Form.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Layout.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/Scrollbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Style.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleCollection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/UI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/WidgetPainter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/WidgetTweener.cpp
 )
 
 list(APPEND HDR
@@ -133,6 +133,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/LSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/Noise.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/component/Scrollbar.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/component/WidgetTweener.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Button.hpp
@@ -167,7 +169,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Form.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.inl
-    ${TCOB_INC_DIR}/tcob/gfx/ui/Scrollbar.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.inl
@@ -176,7 +177,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/WidgetPainter.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/ui/WidgetTweener.hpp
 )
 
 # litehtml
