@@ -38,10 +38,18 @@ auto static seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> dr
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
     switch (origin) {
-    case drwav_seek_origin_start:   dir = io::seek_dir::Begin; break;
-    case drwav_seek_origin_current: dir = io::seek_dir::Current; break;
+    case DRWAV_SEEK_SET: dir = io::seek_dir::Begin; break;
+    case DRWAV_SEEK_CUR: dir = io::seek_dir::Current; break;
+    case DRWAV_SEEK_END: dir = io::seek_dir::End; break;
     }
     return stream->seek(offset, dir);
+}
+
+auto static tell_wav(void* userdata, drwav_int64* pCursor) -> drwav_bool32
+{
+    io::istream* stream {static_cast<io::istream*>(userdata)};
+    *pCursor = static_cast<drwav_int64>(stream->tell());
+    return true;
 }
 }
 
@@ -60,7 +68,7 @@ void wav_decoder::seek_from_start(milliseconds pos)
 
 auto wav_decoder::open() -> std::optional<buffer::information>
 {
-    if (drwav_init(&_wav, &read_wav, &seek_wav, &stream(), nullptr)) {
+    if (drwav_init(&_wav, &read_wav, &seek_wav, &tell_wav, &stream(), nullptr)) {
         _info.Specs.Channels   = _wav.channels;
         _info.Specs.SampleRate = static_cast<i32>(_wav.sampleRate);
         _info.FrameCount       = static_cast<i64>(_wav.totalPCMFrameCount);

@@ -7,6 +7,7 @@
 
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
 
+    #include <cstddef>
     #include <optional>
     #include <span>
 
@@ -18,21 +19,29 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-auto static read_flac(void* userdata, void* buffer, usize bytesToRead) -> usize
+auto static read_flac(void* userdata, void* buffer, size_t bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
-    return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
+    return static_cast<size_t>(stream->read_to<unsigned char>({static_cast<unsigned char*>(buffer), bytesToRead}));
 }
 
-auto static seek_flac(void* userdata, i32 offset, drflac_seek_origin origin) -> drflac_bool32
+auto static seek_flac(void* userdata, int offset, drflac_seek_origin origin) -> drflac_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
     switch (origin) {
-    case drflac_seek_origin_start:   dir = io::seek_dir::Begin; break;
-    case drflac_seek_origin_current: dir = io::seek_dir::Current; break;
+    case DRFLAC_SEEK_SET: dir = io::seek_dir::Begin; break;
+    case DRFLAC_SEEK_CUR: dir = io::seek_dir::Current; break;
+    case DRFLAC_SEEK_END: dir = io::seek_dir::End; break;
     }
     return stream->seek(offset, dir);
+}
+
+auto static tell_flac(void* userdata, drflac_int64* pCursor) -> drflac_bool32
+{
+    io::istream* stream {static_cast<io::istream*>(userdata)};
+    *pCursor = static_cast<drflac_int64>(stream->tell());
+    return true;
 }
 }
 
@@ -51,7 +60,7 @@ void flac_decoder::seek_from_start(milliseconds pos)
 
 auto flac_decoder::open() -> std::optional<buffer::information>
 {
-    _flac = drflac_open(&read_flac, &seek_flac, &stream(), nullptr);
+    _flac = drflac_open(&read_flac, &seek_flac, &tell_flac, &stream(), nullptr);
     if (_flac) {
         _info.Specs.Channels   = _flac->channels;
         _info.Specs.SampleRate = static_cast<i32>(_flac->sampleRate);
