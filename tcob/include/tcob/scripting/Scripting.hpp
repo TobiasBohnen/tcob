@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <variant>
 #include <vector>
 
 namespace tcob::scripting {
@@ -20,9 +21,9 @@ enum class error_code : u8 {
 
 ////////////////////////////////////////////////////////////
 
-template <typename T>
+template <typename... P>
 struct parameter_pack final {
-    std::vector<T> Items;
+    std::vector<std::variant<P...>> Items;
 };
 
 ////////////////////////////////////////////////////////////

@@ -381,13 +381,13 @@ struct converter<std::pair<K, V>> {
     }
 };
 
-template <typename T>
-struct converter<parameter_pack<T>> {
+template <typename... P>
+struct converter<parameter_pack<P...>> {
 
-    void static To(state_view view, parameter_pack<T> const& value)
+    void static To(state_view view, parameter_pack<P...> const& value)
     {
         for (auto const& item : value.Items) {
-            converter<T>::To(view, item);
+            converter<std::variant<P...>>::To(view, item);
         }
     }
 };
