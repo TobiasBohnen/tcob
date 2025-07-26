@@ -121,12 +121,11 @@ void form_base::queue_redraw()
     }
     notify_redraw();
 
-    _clearRedraw = true;
+    _fullRedraw = true;
 }
 
 void form_base::notify_redraw()
 {
-
     _prepareWidgets = true;
 }
 
@@ -202,7 +201,7 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     // redraw
     if (_redrawWidgets) {
-        _canvas.begin_frame(bounds, 1.0f, 0, _clearRedraw);
+        _canvas.begin_frame(bounds, 1.0f, 0, _fullRedraw);
 
         for (auto const& container : get_layout()->widgets() | std::views::reverse) { // ZORDER
             _canvas.reset();
@@ -213,7 +212,7 @@ void form_base::on_draw_to(gfx::render_target& target)
 
         _canvas.end_frame();
         _redrawWidgets = false;
-        _clearRedraw   = false;
+        _fullRedraw    = false;
     }
 
     // render
@@ -272,7 +271,7 @@ void form_base::focus_widget(widget* newFocus)
     }
 }
 
-void form_base::hover_widget(widget* widget)
+void form_base::rehover_widget(widget* widget)
 {
     point_i const mp {locate_service<input::system>().mouse().get_position()};
     if (!widget->hit_test(mp)) { return; }

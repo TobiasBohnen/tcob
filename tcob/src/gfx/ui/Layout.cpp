@@ -454,7 +454,7 @@ void stack_layout::do_layout(size_f size)
             rect_f const bounds {point_f::Zero, {widget->Flex->Width.calc(horiSize), widget->Flex->Height.calc(vertSize)}};
             if (widget->Bounds != bounds) {
                 widget->Bounds = bounds;
-                widget->form().hover_widget(widget.get());
+                widget->form().rehover_widget(widget.get());
             }
         } else {
             widget->Bounds = rect_f::Zero;

@@ -30,7 +30,7 @@ vscroll_widget::vscroll_widget(init const& wi)
     , _vScrollbar {orientation::Vertical}
 {
     _vScrollbar.ValueChanged.connect([this]() {
-        form().hover_widget(this);
+        form().rehover_widget(this);
         queue_redraw();
     });
 }

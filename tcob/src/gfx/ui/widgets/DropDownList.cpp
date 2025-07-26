@@ -38,7 +38,7 @@ drop_down_list::drop_down_list(init const& wi)
     , _vScrollbar {orientation::Vertical}
 {
     _vScrollbar.ValueChanged.connect([this]() {
-        form().hover_widget(this);
+        form().rehover_widget(this);
         queue_redraw();
     });
 

@@ -56,7 +56,7 @@ public:
     auto focused_widget() const -> widget*;
     void focus_widget(widget* newFocus);
 
-    void hover_widget(widget* widget);
+    void rehover_widget(widget* widget);
 
     auto virtual containers() const -> std::vector<std::shared_ptr<widget>> const& = 0;
     void virtual remove_container(widget* widget)                                  = 0;
@@ -122,7 +122,7 @@ private:
     std::vector<std::weak_ptr<popup>> _popups;
 
     bool _redrawWidgets {true};
-    bool _clearRedraw {true};
+    bool _fullRedraw {true};
     bool _prepareWidgets {true};
 
     bool         _isLButtonDown {false};
