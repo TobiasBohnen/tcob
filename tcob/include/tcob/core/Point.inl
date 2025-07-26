@@ -215,6 +215,19 @@ inline auto operator<<(std::ostream& os, point<T> const& m) -> std::ostream&
 }
 
 template <Arithmetic T>
+inline void point<T>::Serialize(point<T> const& v, auto&& s)
+{
+    s["x"] = v.X;
+    s["y"] = v.Y;
+}
+
+template <Arithmetic T>
+inline auto point<T>::Deserialize(point<T>& v, auto&& s) -> bool
+{
+    return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
+}
+
+template <Arithmetic T>
 auto euclidean_distance(point<T> const& a, point<T> const& b) -> f64
 {
     return (a - b).length();

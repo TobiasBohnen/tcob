@@ -327,4 +327,26 @@ inline auto operator<<(std::ostream& os, rect<T> const& m) -> std::ostream&
 {
     return os << "left:" << m.left() << "|top:" << m.top() << "|width:" << m.width() << "|height:" << m.height();
 }
+
+template <Arithmetic T>
+inline void rect<T>::Serialize(rect<T> const& v, auto&& s)
+{
+    s["x"]      = v.left();
+    s["y"]      = v.top();
+    s["width"]  = v.width();
+    s["height"] = v.height();
+}
+
+template <Arithmetic T>
+inline auto rect<T>::Deserialize(rect<T>& v, auto&& s) -> bool
+{
+    T x, y, w, h;
+    if (s.try_get(x, "x") && s.try_get(y, "y") && s.try_get(w, "width") && s.try_get(h, "height")) {
+        v.Position = {x, y};
+        v.Size     = {w, h};
+        return true;
+    }
+    return false;
+}
+
 }

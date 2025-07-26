@@ -177,4 +177,18 @@ inline auto operator<<(std::ostream& os, size<T> const& m) -> std::ostream&
 {
     return os << "width:" << m.Width << "|height:" << m.Height;
 }
+
+template <Arithmetic T>
+inline void size<T>::Serialize(size<T> const& v, auto&& s)
+{
+    s["width"]  = v.Width;
+    s["height"] = v.Height;
+}
+
+template <Arithmetic T>
+inline auto size<T>::Deserialize(size<T>& v, auto&& s) -> bool
+{
+    return s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
+}
+
 }

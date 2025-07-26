@@ -54,16 +54,8 @@ public:
     static point<T> const Zero;
     static point<T> const One;
 
-    void static Serialize(point<T> const& v, auto&& s)
-    {
-        s["x"] = v.X;
-        s["y"] = v.Y;
-    }
-
-    auto static Deserialize(point<T>& v, auto&& s) -> bool
-    {
-        return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
-    }
+    void static Serialize(point<T> const& v, auto&& s);
+    auto static Deserialize(point<T>& v, auto&& s) -> bool;
 };
 
 template <Arithmetic T>

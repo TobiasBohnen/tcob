@@ -77,24 +77,8 @@ public:
 
     static rect<T> const Zero;
 
-    void static Serialize(rect<T> const& v, auto&& s)
-    {
-        s["x"]      = v.left();
-        s["y"]      = v.top();
-        s["width"]  = v.width();
-        s["height"] = v.height();
-    }
-
-    auto static Deserialize(rect<T>& v, auto&& s) -> bool
-    {
-        T x, y, w, h;
-        if (s.try_get(x, "x") && s.try_get(y, "y") && s.try_get(w, "width") && s.try_get(h, "height")) {
-            v.Position = {x, y};
-            v.Size     = {w, h};
-            return true;
-        }
-        return false;
-    }
+    void static Serialize(rect<T> const& v, auto&& s);
+    auto static Deserialize(rect<T>& v, auto&& s) -> bool;
 };
 
 using rect_i = rect<i32>;

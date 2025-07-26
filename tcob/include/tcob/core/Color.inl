@@ -194,7 +194,7 @@ auto constexpr color::to_hsl() const -> hsx
         h /= 6.0f;
     }
 
-    return {degree_f {h * 360.0f}, s, l};
+    return {.Hue = degree_f {h * 360.0f}, .Saturation = s, .X = l};
 }
 
 auto constexpr color::to_hsv() const -> hsx
@@ -247,6 +247,25 @@ auto constexpr operator==(hsx left, hsx right) -> bool
 inline auto operator<<(std::ostream& os, hsx m) -> std::ostream&
 {
     return os << "h:" << m.Hue.Value << "|s:" << m.Saturation << "|x:" << m.X;
+}
+
+inline void color::Serialize(color v, auto&& s)
+{
+    s["r"] = v.R;
+    s["g"] = v.G;
+    s["b"] = v.B;
+    s["a"] = v.A;
+}
+
+inline auto color::Deserialize(color& v, auto&& s) -> bool
+{
+    if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
+        if (!s.try_get(v.A, "a")) {
+            v.A = u8 {255};
+        }
+        return true;
+    }
+    return false;
 }
 
 }

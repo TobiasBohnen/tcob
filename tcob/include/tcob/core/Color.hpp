@@ -58,24 +58,8 @@ public:
     u8 B {0};
     u8 A {0};
 
-    void static Serialize(color v, auto&& s)
-    {
-        s["r"] = v.R;
-        s["g"] = v.G;
-        s["b"] = v.B;
-        s["a"] = v.A;
-    }
-
-    auto static Deserialize(color& v, auto&& s) -> bool
-    {
-        if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
-            if (!s.try_get(v.A, "a")) {
-                v.A = u8 {255};
-            }
-            return true;
-        }
-        return false;
-    }
+    void static Serialize(color v, auto&& s);
+    auto static Deserialize(color& v, auto&& s) -> bool;
 };
 
 auto constexpr operator==(color left, color right) -> bool;
