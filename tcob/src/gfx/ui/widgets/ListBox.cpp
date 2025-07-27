@@ -107,10 +107,10 @@ auto list_box::item_count() const -> isize
     return std::ssize(get_items());
 }
 
-void list_box::prepare_redraw()
+void list_box::on_prepare_redraw()
 {
-    apply_style(_style);
-    vscroll_widget::prepare_redraw();
+    prepare_style(_style);
+    vscroll_widget::on_prepare_redraw();
 }
 
 void list_box::on_draw(widget_painter& painter)
@@ -137,7 +137,7 @@ void list_box::on_draw(widget_painter& painter)
 
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
             item_style itemStyle {};
-            apply_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+            prepare_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
             painter.draw_item(itemStyle.Item, itemRect, get_items()[i]);
             _itemRectCache[i] = itemRect;
         } else {

@@ -110,7 +110,7 @@ void drop_down_list::on_draw(widget_painter& painter)
     auto const& fls {flags()};
 
     nav_arrows_style arrowStyle {};
-    apply_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverChevron, .Hover = !fls.Active && _mouseOverChevron});
+    prepare_sub_style(arrowStyle, -1, _style.NavArrowClass, {.Active = fls.Active && _mouseOverChevron, .Hover = !fls.Active && _mouseOverChevron});
     _chevronRectCache = painter.draw_nav_arrow(arrowStyle.NavArrow, rect, _isExtended ? direction::Up : direction::Down);
 
     // text
@@ -150,7 +150,7 @@ void drop_down_list::on_draw(widget_painter& painter)
                                         : isActive                     ? widget_flags {.Active = true}
                                                                        : widget_flags {.Hover = true}};
             thumb_style thumbStyle;
-            apply_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
+            prepare_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
             _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
             // items
@@ -163,7 +163,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 
                 if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
                     item_style itemStyle {};
-                    apply_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
+                    prepare_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
 
                     painter.draw_item(itemStyle.Item, itemRect, items[i]);
                     _itemRectCache[i] = itemRect;

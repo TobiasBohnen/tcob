@@ -59,7 +59,7 @@ slider::slider(init const& wi)
 void slider::on_draw(widget_painter& painter)
 {
     // TODO: draw background
-    apply_style(_style);
+    prepare_style(_style);
 
     rect_f const rect {content_bounds()};
 
@@ -81,7 +81,7 @@ void slider::on_draw(widget_painter& painter)
                                 : flags().Active ? widget_flags {.Active = true}
                                                  : widget_flags {.Hover = true}};
     thumb_style thumbStyle {};
-    apply_sub_style(thumbStyle, 0, _style.ThumbClass, thumbFlags);
+    prepare_sub_style(thumbStyle, 0, _style.ThumbClass, thumbFlags);
 
     _barRectCache.Thumb = painter.draw_thumb(
         thumbStyle.Thumb,
@@ -350,7 +350,7 @@ range_slider::range_slider(init const& wi)
 void range_slider::on_draw(widget_painter& painter)
 {
     // TODO: draw background
-    apply_style(_style);
+    prepare_style(_style);
 
     rect_f const rect {content_bounds()};
 
@@ -374,7 +374,7 @@ void range_slider::on_draw(widget_painter& painter)
         auto const thumbFlags {!thumb.Over          ? widget_flags {}
                                    : flags().Active ? widget_flags {.Active = true}
                                                     : widget_flags {.Hover = true}};
-        apply_sub_style(thumbStyle, idx, _style.ThumbClass, thumbFlags);
+        prepare_sub_style(thumbStyle, idx, _style.ThumbClass, thumbFlags);
 
         thumb.Rect = painter.draw_thumb(
             thumbStyle.Thumb,

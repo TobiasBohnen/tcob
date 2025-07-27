@@ -237,6 +237,8 @@ void widget::prepare_redraw()
 
         _lastSelectors = newSelectors;
     }
+
+    on_prepare_redraw();
 }
 
 void widget::queue_redraw()
@@ -555,10 +557,6 @@ void widget::stop_animation()
     _animationTween.stop();
 }
 
-void widget::on_animation_step(string const& /* val */)
-{
-}
-
 void widget::activate()
 {
     if (!_flags.Active) {
@@ -600,4 +598,5 @@ auto widget::controls() const -> control_map const&
 {
     return *_form->Controls;
 }
+
 }

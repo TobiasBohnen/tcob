@@ -67,12 +67,14 @@ accordion::accordion(init const& wi)
 
 void accordion::on_prepare_redraw()
 {
-    apply_style(_style);
+    prepare_style(_style);
 
     auto const rect {content_bounds()};
     for (auto& t : _sections) {
         t->Bounds = {point_f::Zero, rect.Size};
     }
+
+    widget_container::on_prepare_redraw();
 }
 
 void accordion::remove_section(widget* sec)
@@ -168,7 +170,7 @@ void accordion::on_draw(widget_painter& painter)
     _sectionRectCache.clear();
     auto const paintSection {[&](isize i, isize rectIndex) {
         item_style sectionStyle {};
-        apply_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
+        prepare_sub_style(sectionStyle, i, _style.SectionItemClass, {.Active = i == ActiveSectionIndex, .Hover = i == HoveredSectionIndex});
 
         rect_f const sectionRect {getSectionRect(sectionStyle, rectIndex)};
         painter.draw_item(sectionStyle.Item, sectionRect, _sectionLabels[i]);
@@ -190,7 +192,7 @@ void accordion::on_draw_children(widget_painter& painter)
     if (secIdx == INVALID_INDEX) { return; }
 
     // active section
-    apply_style(_style);
+    prepare_style(_style);
 
     // scissor
     rect_f bounds {global_content_bounds()};

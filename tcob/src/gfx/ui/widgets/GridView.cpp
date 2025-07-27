@@ -78,10 +78,10 @@ auto grid_view::get_cell(point_i idx) const -> item const&
     return Grid[idx.X, idx.Y - 1];
 }
 
-void grid_view::prepare_redraw()
+void grid_view::on_prepare_redraw()
 {
-    apply_style(_style);
-    vscroll_widget::prepare_redraw();
+    prepare_style(_style);
+    vscroll_widget::on_prepare_redraw();
 }
 
 void grid_view::on_draw(widget_painter& painter)
@@ -123,7 +123,7 @@ void grid_view::on_draw(widget_painter& painter)
 
         if (cellRect.bottom() > gridRect.top() && cellRect.top() < gridRect.bottom()) {
             item_style cellStyle {};
-            apply_sub_style(cellStyle, idx.X + (idx.Y * std::ssize(*Header)), className, cellFlags);
+            prepare_sub_style(cellStyle, idx.X + (idx.Y * std::ssize(*Header)), className, cellFlags);
             painter.draw_item(cellStyle.Item, cellRect, item);
             cell = cellRect;
         } else {

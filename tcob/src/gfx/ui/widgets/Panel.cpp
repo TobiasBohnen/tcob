@@ -58,6 +58,8 @@ panel::panel(init const& wi)
 void panel::on_prepare_redraw()
 {
     _layout->apply(content_bounds().Size);
+
+    widget_container::on_prepare_redraw();
 }
 
 void panel::on_styles_changed()
@@ -114,7 +116,7 @@ void panel::on_draw(widget_painter& painter)
                                      : flags().Active               ? widget_flags {.Active = true}
                                                                     : widget_flags {.Hover = true}};
         thumb_style vThumbStyle;
-        apply_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
+        prepare_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
         _vScrollbar.draw(painter, _style.VScrollBar, vThumbStyle.Thumb, rect);
     }
     {
@@ -123,14 +125,14 @@ void panel::on_draw(widget_painter& painter)
                                      : flags().Active               ? widget_flags {.Active = true}
                                                                     : widget_flags {.Hover = true}};
         thumb_style hThumbStyle;
-        apply_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
+        prepare_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
         _hScrollbar.draw(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
     }
 }
 
 void panel::on_draw_children(widget_painter& painter)
 {
-    apply_style(_style);
+    prepare_style(_style);
 
     rect_f rect {content_bounds()};
 

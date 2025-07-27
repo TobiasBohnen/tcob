@@ -54,10 +54,10 @@ public:
 
     auto get_cell(point_i idx) const -> item const&;
 
-    void prepare_redraw() override;
-
 protected:
     void on_draw(widget_painter& painter) override;
+
+    void on_prepare_redraw() override;
 
     void on_animation_step(string const& val) override;
 

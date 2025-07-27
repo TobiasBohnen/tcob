@@ -68,11 +68,9 @@ auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr
     return nullptr;
 }
 
-void widget_container::prepare_redraw()
+void widget_container::on_prepare_redraw()
 {
-    widget::prepare_redraw();
-
-    on_prepare_redraw();
+    widget::on_prepare_redraw();
 
     for (auto const& w : widgets()) {
         w->prepare_redraw();

@@ -77,7 +77,7 @@ void cycle_button::on_draw(widget_painter& painter)
     // text //TODO: hover?
     if (SelectedItemIndex >= 0) {
         item_style itemStyle {};
-        apply_sub_style(itemStyle, 0, _style.ItemClass, {});
+        prepare_sub_style(itemStyle, 0, _style.ItemClass, {});
         painter.draw_item(itemStyle.Item, rect, selected_item());
     }
 }

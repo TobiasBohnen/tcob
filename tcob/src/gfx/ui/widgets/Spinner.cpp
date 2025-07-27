@@ -59,9 +59,9 @@ void spinner::on_draw(widget_painter& painter)
     // arrows
     auto const&      fls {flags()};
     nav_arrows_style incArrowStyle {};
-    apply_sub_style(incArrowStyle, 0, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Increase, .Hover = !fls.Active && _hoverArrow == arrow::Increase});
+    prepare_sub_style(incArrowStyle, 0, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Increase, .Hover = !fls.Active && _hoverArrow == arrow::Increase});
     nav_arrows_style decArrowStyle {};
-    apply_sub_style(decArrowStyle, 1, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Decrease, .Hover = !fls.Active && _hoverArrow == arrow::Decrease});
+    prepare_sub_style(decArrowStyle, 1, _style.NavArrowClass, {.Active = fls.Active && _hoverArrow == arrow::Decrease, .Hover = !fls.Active && _hoverArrow == arrow::Decrease});
 
     rect_f incRect {rect};
     incRect.Size.Height /= 2;

@@ -43,12 +43,13 @@ public:
     auto selected_item() const -> item const&;
     auto item_count() const -> isize;
 
-    void prepare_redraw() override;
-
 protected:
     void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
+
+    void on_prepare_redraw() override;
+
     void on_animation_step(string const& val) override;
 
     void on_mouse_leave() override;

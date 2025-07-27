@@ -288,7 +288,7 @@ void terminal::on_draw(widget_painter& painter)
 {
     if (Size->Width <= 0 || Size->Height <= 0) { return; }
 
-    apply_style(_style);
+    prepare_style(_style);
 
     swap_buffers();
 

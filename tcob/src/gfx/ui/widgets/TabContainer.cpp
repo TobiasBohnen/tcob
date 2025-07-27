@@ -49,12 +49,14 @@ tab_container::tab_container(init const& wi)
 
 void tab_container::on_prepare_redraw()
 {
-    apply_style(_style);
+    prepare_style(_style);
 
     auto const rect {content_bounds()};
     for (auto& t : _tabs) {
         t->Bounds = {point_f::Zero, rect.Size};
     }
+
+    widget_container::on_prepare_redraw();
 }
 
 void tab_container::remove_tab(widget* tab)
@@ -187,7 +189,7 @@ void tab_container::on_draw(widget_painter& painter)
 
     for (i32 i {0}; i < std::ssize(_tabs); ++i) {
         item_style tabStyle {};
-        apply_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
+        prepare_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
 
         rect_f const tabRect {getTabRect(tabStyle, i)};
         painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
@@ -197,7 +199,7 @@ void tab_container::on_draw(widget_painter& painter)
 
 void tab_container::on_draw_children(widget_painter& painter)
 {
-    apply_style(_style);
+    prepare_style(_style);
 
     rect_f rect {content_bounds()};
 

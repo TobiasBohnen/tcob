@@ -14,14 +14,14 @@
 namespace tcob::ui {
 
 template <std::derived_from<widget_style> T>
-inline void widget::apply_style(T& style)
+inline void widget::prepare_style(T& style)
 {
     _transition.apply(style);
     _currentStyle = &style;
 }
 
 template <std::derived_from<style> T>
-inline void widget::apply_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags)
+inline void widget::prepare_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags)
 {
     widget_style_selectors const selectors {
         .Class      = styleClass,
@@ -42,7 +42,7 @@ inline auto widget::draw_background(auto&& style, widget_painter& painter, bool 
         canvas.clear();
     }
 
-    apply_style(style);
+    prepare_style(style);
     rect_f rect {*Bounds};
     painter.draw_background_and_border(style, rect, isCircle);
     return rect;

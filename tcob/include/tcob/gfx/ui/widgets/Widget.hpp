@@ -119,17 +119,17 @@ protected:
     auto styles() const -> style_collection const&;
 
     template <std::derived_from<widget_style> T>
-    void apply_style(T& style);
+    void prepare_style(T& style);
 
     template <std::derived_from<style> T>
-    void apply_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags);
+    void prepare_sub_style(T& style, isize idx, string const& styleClass, widget_flags flags);
     void reset_sub_style(isize idx, string const& styleClass, widget_flags flags);
     void clear_sub_styles();
 
     auto controls() const -> control_map const&;
 
     void virtual on_draw(widget_painter& painter) = 0;
-    void virtual prepare_redraw();
+    void prepare_redraw();
     void queue_redraw();
 
     auto draw_background(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
@@ -137,7 +137,9 @@ protected:
     void virtual set_redraw(bool val);
     auto get_redraw() const -> bool;
 
-    void virtual on_animation_step(string const& val);
+    void virtual on_prepare_redraw() { }
+
+    void virtual on_animation_step(string const& /* val */) { }
 
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }
     void virtual on_key_up(input::keyboard::event const& /* ev */) { }

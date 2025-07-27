@@ -25,7 +25,6 @@ public:
     void update(milliseconds deltaTime) final;
 
     void draw(widget_painter& painter) override;
-    void prepare_redraw() final;
 
     auto virtual find_child_at(point_i pos) -> std::shared_ptr<widget>;
     auto virtual find_child_by_name(string const& name) -> std::shared_ptr<widget>;
@@ -37,9 +36,9 @@ public:
     void submit(Target& target);
 
 protected:
-    void virtual on_prepare_redraw() = 0;
-
     void virtual on_draw_children(widget_painter& painter) = 0;
+
+    void on_prepare_redraw() override;
 
     void on_styles_changed() override;
     void set_redraw(bool val) override;
