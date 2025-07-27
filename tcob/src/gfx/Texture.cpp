@@ -90,7 +90,7 @@ auto texture::get_region(string const& name) const -> texture_region const&
     return _regions.at(name);
 }
 
-auto texture::get_regions() const -> std::unordered_map<string, texture_region> const&
+auto texture::regions() const -> std::unordered_map<string, texture_region> const&
 {
     return _regions;
 }

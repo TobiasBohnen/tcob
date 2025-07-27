@@ -75,7 +75,7 @@ public:
     auto copy_to_image(u32 level) const -> image;
 
     auto get_region(string const& name) const -> texture_region const&;
-    auto get_regions() const -> std::unordered_map<string, texture_region> const&;
+    auto regions() const -> std::unordered_map<string, texture_region> const&;
     void add_region(string const& name, texture_region const& region);
     auto has_region(string const& name) const -> bool;
 
