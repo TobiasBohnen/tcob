@@ -35,7 +35,7 @@ public:
     void pop_scissor();
 
     void add_overlay(overlay_func const& func);
-    void draw_overlays();
+    auto draw_overlays() -> bool;
 
     void draw_background_and_border(widget_style const& element, rect_f& rect, bool isCircle);
 

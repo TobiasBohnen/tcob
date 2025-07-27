@@ -74,9 +74,9 @@ void widget_painter::add_overlay(overlay_func const& func)
     _overlays.push_back(func);
 }
 
-void widget_painter::draw_overlays()
+auto widget_painter::draw_overlays() -> bool
 {
-    if (_overlays.empty()) { return; }
+    if (_overlays.empty()) { return false; }
 
     _canvas.reset();
 
@@ -86,6 +86,7 @@ void widget_painter::draw_overlays()
     _overlays.clear();
 
     _canvas.reset();
+    return true;
 }
 
 ////////////////////////////////////////////////////////////

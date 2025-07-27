@@ -245,25 +245,9 @@ void widget::queue_redraw()
 {
     if (get_redraw()) { return; }
 
-    if (is_top_level()) { // is top level widget -> redraw everything
-        _form->queue_redraw();
-    } else {
-        auto* tlw {top_level_widget()};
-        assert(tlw);
-        for (auto const& w : _form->containers()) {
-            if (w.get() == tlw) { continue; }
-            if (w->ZOrder < tlw->ZOrder) { continue; }
-
-            if (w->Bounds->intersects(tlw->Bounds)) { // top level widget overlaps with other widget -> redraw everything
-                _form->queue_redraw();
-                return;
-            }
-        }
-
-        // redraw top level widget
-        tlw->set_redraw(true);
-        _form->notify_redraw();
-    }
+    auto* tlw {top_level_widget()};
+    tlw->set_redraw(true);
+    _form->notify_redraw();
 }
 
 void widget::set_redraw(bool val)

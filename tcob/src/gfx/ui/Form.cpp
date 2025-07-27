@@ -120,8 +120,6 @@ void form_base::queue_redraw()
         widget->set_redraw(true);
     }
     notify_redraw();
-
-    _fullRedraw = true;
 }
 
 void form_base::notify_redraw()
@@ -192,6 +190,9 @@ auto form_base::can_draw() const -> bool
 
 void form_base::on_draw_to(gfx::render_target& target)
 {
+    constexpr static i32 overlayLayer {0};
+    constexpr static i32 tooltipLayer {1};
+
     // set cursor
     if (_topWidget) {
         CursorChanged(_topWidget->Cursor);
@@ -199,25 +200,37 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     size_i const bounds {size_i {Bounds->Size}};
 
+    auto const layerCount {get_layout()->widgets().size()};
+
     // redraw
     if (_redrawWidgets) {
-        _canvas.begin_frame(bounds, 1.0f, 0, _fullRedraw);
-
+        i32 i {2};
         for (auto const& container : get_layout()->widgets() | std::views::reverse) { // ZORDER
-            _canvas.reset();
-            container->draw(*_painter);
+            if (container->get_redraw()) {
+                _canvas.begin_frame(bounds, 1.0f, i);
+                container->draw(*_painter);
+                _canvas.end_frame();
+            }
+            ++i;
         }
 
-        _painter->draw_overlays();
-
+        _canvas.begin_frame(bounds, 1.0f, overlayLayer);
+        _drawOverlay = _painter->draw_overlays();
         _canvas.end_frame();
         _redrawWidgets = false;
-        _fullRedraw    = false;
     }
 
     // render
-    _renderer.set_layer(0);
-    _renderer.render_to_target(target);
+    for (usize j {2}; j < layerCount + 2; ++j) {
+        _renderer.set_layer(j);
+        _renderer.render_to_target(target);
+    }
+
+    // overlay
+    if (_drawOverlay) {
+        _renderer.set_layer(overlayLayer);
+        _renderer.render_to_target(target);
+    }
 
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
@@ -231,12 +244,12 @@ void form_base::on_draw_to(gfx::render_target& target)
         }
         _topWidget->Tooltip->Bounds = ttBounds;
 
-        _canvas.begin_frame(bounds, 1.0f, 1);
+        _canvas.begin_frame(bounds, 1.0f, tooltipLayer);
         _topWidget->Tooltip->set_redraw(true);
         _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
 
-        _renderer.set_layer(1);
+        _renderer.set_layer(tooltipLayer);
         _renderer.render_to_target(target);
     }
 }

@@ -122,8 +122,8 @@ private:
     std::vector<std::weak_ptr<popup>> _popups;
 
     bool _redrawWidgets {true};
-    bool _fullRedraw {true};
     bool _prepareWidgets {true};
+    bool _drawOverlay {false};
 
     bool         _isLButtonDown {false};
     bool         _isRButtonDown {false};
