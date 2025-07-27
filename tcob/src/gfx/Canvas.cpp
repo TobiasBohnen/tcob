@@ -1015,7 +1015,7 @@ void canvas::draw_image(texture* image, string const& region, rect_f const& rect
     // Apply global alpha
     MultiplyAlphaPaint(paint.Color, s.Alpha);
 
-    texture_region texRegion {paint.Image->get_region(region)};
+    texture_region texRegion {paint.Image->regions()[region]};
 
     quad quad {};
     geometry::set_position(quad, rect, s.XForm);
@@ -1052,7 +1052,7 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
     f32 const bottomCenter {center.bottom()};
     f32 const bottom {rect.bottom()};
 
-    texture_region texRegion {paint.Image->get_region(region)};
+    texture_region texRegion {paint.Image->regions()[region]};
     rect_f const&  uvRect {texRegion.UVRect};
     u32 const      level {texRegion.Level};
 

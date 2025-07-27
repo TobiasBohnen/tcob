@@ -48,8 +48,8 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
     geometry::set_color(q, tile.Color);
     if (idx == 0) {
         geometry::set_color(q, colors::Transparent);
-    } else if (Material->Texture && Material->Texture->has_region(tile.TextureRegion)) {
-        geometry::set_texcoords(q, Material->Texture->get_region(tile.TextureRegion), tile.FlipHorizontally, tile.FlipVertically);
+    } else if (Material->Texture && Material->Texture->regions().contains(tile.TextureRegion)) {
+        geometry::set_texcoords(q, Material->Texture->regions()[tile.TextureRegion], tile.FlipHorizontally, tile.FlipVertically);
     } else {
         geometry::set_texcoords(q, {.UVRect = {0, 0, 1, 1}, .Level = 1});
     }

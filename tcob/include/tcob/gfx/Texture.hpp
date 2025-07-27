@@ -74,10 +74,7 @@ public:
 
     auto copy_to_image(u32 level) const -> image;
 
-    auto get_region(string const& name) const -> texture_region const&;
-    auto regions() const -> std::unordered_map<string, texture_region> const&;
-    void add_region(string const& name, texture_region const& region);
-    auto has_region(string const& name) const -> bool;
+    auto regions(this auto&& self) -> auto&&;
 
     template <std::derived_from<render_backend::texture_base> T>
     auto get_impl() const -> T*;
@@ -93,6 +90,12 @@ private:
     format _format {format::RGBA8};
     u32    _depth {0};
 };
+
+template <typename Self>
+auto texture::regions(this Self&& self) -> auto&&
+{
+    return std::forward<Self>(self)._regions;
+}
 
 ////////////////////////////////////////////////////////////
 

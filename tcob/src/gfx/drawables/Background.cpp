@@ -30,8 +30,8 @@ void background::on_draw_to(render_target& target)
 {
     geometry::set_position(_quad, {point_f::Zero, size_f {*target.Size}});
     geometry::set_color(_quad, colors::White);
-    if (*Material && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        geometry::set_texcoords(_quad, Material->Texture->get_region(TextureRegion));
+    if (*Material && Material->Texture && Material->Texture->regions().contains(TextureRegion)) {
+        geometry::set_texcoords(_quad, Material->Texture->regions()[TextureRegion]);
     } else {
         geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
     }
@@ -118,8 +118,8 @@ void parallax_background::on_draw_to(render_target& target)
         geometry::set_position(quad, {point_f::Zero, size_f {*target.Size}});
         geometry::set_color(quad, colors::White);
 
-        if (*Material && Material->Texture && Material->Texture->has_region(layer.TextureRegion)) {
-            auto  texReg {Material->Texture->get_region(layer.TextureRegion)};
+        if (*Material && Material->Texture && Material->Texture->regions().contains(layer.TextureRegion)) {
+            auto  texReg {Material->Texture->regions()[layer.TextureRegion]};
             auto& uvRect {texReg.UVRect};
             uvRect.Size *= (targetSize / texSize);
 

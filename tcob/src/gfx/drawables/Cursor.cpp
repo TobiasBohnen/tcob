@@ -27,7 +27,7 @@ cursor::cursor()
         _currentMode = _modes[name];
 
         auto const  tex {Material->Texture};
-        auto const& region {tex->get_region(name)};
+        auto const& region {tex->regions()[name]};
         geometry::set_texcoords(_quad, region);
         _size = tex->info().Size;
 

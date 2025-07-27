@@ -155,7 +155,7 @@ void point_particle_emitter::emit(particle_system<point_particle_emitter>& syste
     }
 
     auto const& tmpl {Settings.Template};
-    auto const& texRegion {system.Material->Texture->get_region(tmpl.TextureRegion)};
+    auto const& texRegion {system.Material->Texture->regions()[tmpl.TextureRegion]};
 
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};
@@ -204,7 +204,7 @@ void quad_particle_emitter::emit(particle_system<quad_particle_emitter>& system,
     }
 
     auto const& tmpl {Settings.Template};
-    auto const& texRegion {system.Material->Texture->get_region(tmpl.TextureRegion)};
+    auto const& texRegion {system.Material->Texture->regions()[tmpl.TextureRegion]};
 
     for (i32 i {0}; i < particleCount; ++i) {
         auto& particle {system.activate_particle()};

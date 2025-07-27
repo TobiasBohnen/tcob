@@ -80,24 +80,14 @@ auto texture::copy_to_image(u32 level) const -> image
     return _impl->copy_to_image(level);
 }
 
-void texture::add_region(string const& name, texture_region const& region)
-{
-    _regions[name] = region;
-}
-
-auto texture::get_region(string const& name) const -> texture_region const&
-{
-    return _regions.at(name);
-}
-
 auto texture::regions() const -> std::unordered_map<string, texture_region> const&
 {
     return _regions;
 }
 
-auto texture::has_region(string const& name) const -> bool
+auto texture::regions() -> std::unordered_map<string, texture_region>&
 {
-    return _regions.contains(name);
+    return _regions;
 }
 
 void texture::update_data(void const* data, u32 depth, i32 rowLength, i32 alignment) const

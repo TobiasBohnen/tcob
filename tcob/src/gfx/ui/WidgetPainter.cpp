@@ -432,7 +432,7 @@ void widget_painter::draw_text_and_icon(text_element const& element, rect_f cons
     rect_f contentRect {rect};
 
     bool const drawText {!text.empty() && element.Font};
-    bool const drawIcon {icon.Texture && icon.Texture->has_region(icon.TextureRegion)};
+    bool const drawIcon {icon.Texture && icon.Texture->regions().contains(icon.TextureRegion)};
 
     if (drawText && drawIcon) {
         rect_f firstHalf {contentRect};

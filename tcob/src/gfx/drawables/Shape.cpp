@@ -261,8 +261,8 @@ void circle_shape::create()
     f32 const   radius {Radius};
 
     texture_region texReg {};
-    if (*Material && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        texReg = Material->Texture->get_region(TextureRegion);
+    if (*Material && Material->Texture && Material->Texture->regions().contains(TextureRegion)) {
+        texReg = Material->Texture->regions()[TextureRegion];
     } else {
         texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }
@@ -376,10 +376,10 @@ void rect_shape::on_color_changed(color c)
 
 void rect_shape::on_texture_region_changed(string const& texRegion)
 {
-    if (*Material && Material->Texture && Material->Texture->has_region(texRegion)) {
-        geometry::set_texcoords(_quad, Material->Texture->get_region(texRegion));
+    if (*Material && Material->Texture && Material->Texture->regions().contains(texRegion)) {
+        geometry::set_texcoords(_quad, Material->Texture->regions()[texRegion]);
     } else {
-        geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
+        geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
     }
 }
 
@@ -466,8 +466,8 @@ void poly_shape::create()
     // create verts
     auto const&    xform {transform()};
     texture_region texReg {};
-    if (*Material && Material->Texture && Material->Texture->has_region(TextureRegion)) {
-        texReg = Material->Texture->get_region(TextureRegion);
+    if (*Material && Material->Texture && Material->Texture->regions().contains(TextureRegion)) {
+        texReg = Material->Texture->regions()[TextureRegion];
     } else {
         texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
     }

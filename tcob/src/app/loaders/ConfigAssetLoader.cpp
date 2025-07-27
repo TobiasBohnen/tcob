@@ -614,7 +614,7 @@ void cfg_texture_loader::declare()
     if (object textureSection; _object.try_get(textureSection, API::Texture::Name)) {
         for (auto const& [k, v] : textureSection) {
             auto* asset {default_new<texture, tex_asset_def>(k, bucket(), _cacheTex)};
-            asset->assetPtr->add_region("default", {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0});
+            asset->assetPtr->regions()["default"] = {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0};
 
             // texture objects
             if (object assetSection; v.try_get(assetSection)) {
@@ -651,7 +651,7 @@ void cfg_texture_loader::declare()
                 for (u32 i {0}; i < files.size(); ++i) {
                     auto const& file {files[i]};
                     auto const  regionName {io::get_stem(file)};
-                    asset->assetPtr->add_region(regionName, {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = i});
+                    asset->assetPtr->regions()[regionName] = {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = i};
                     asset->images.emplace_back(i, file);
                 }
 
@@ -662,7 +662,7 @@ void cfg_texture_loader::declare()
                 }
                 if (object uvRegions; assetSection.try_get(uvRegions, API::Texture::uv_regions)) {
                     for (auto const& [regk, regv] : uvRegions) {
-                        asset->assetPtr->add_region(regk, regv.as<texture_region>());
+                        asset->assetPtr->regions()[regk] = regv.as<texture_region>();
                     }
                 }
                 assetSection.try_get(asset->size, API::Texture::size);
@@ -674,7 +674,7 @@ void cfg_texture_loader::declare()
                 path const f {mp + assetString};
                 if (io::is_file(f)) {
                     auto const regionName {io::get_stem(f)};
-                    asset->assetPtr->add_region(regionName, {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0});
+                    asset->assetPtr->regions()[regionName] = {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0};
                     asset->images.emplace_back(0, f); //{.Depth = 0, .Path = file});
                 }
             }
@@ -684,7 +684,7 @@ void cfg_texture_loader::declare()
     if (object textureSection; _object.try_get(textureSection, API::AnimatedTexture::Name)) {
         for (auto const& [k, v] : textureSection) {
             auto* asset {default_new<animated_texture, ani_asset_def>(k, bucket(), _cacheAni)};
-            asset->assetPtr->add_region("default", {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0});
+            asset->assetPtr->regions()["default"] = {.UVRect = {0.0f, 0.0f, 1.0f, 1.0f}, .Level = 0};
 
             if (object assetSection; v.try_get(assetSection)) {
                 if (path source; assetSection.try_get(source, API::AnimatedTexture::source)) {
@@ -746,7 +746,7 @@ void cfg_texture_loader::prepare()
         // convert region from pixels to relative
         auto const [w, h] {size_f {texSize}};
         for (auto const& [k, v] : def->abs_regions) {
-            tex.add_region(k, {.UVRect = {v.UVRect.left() / w, v.UVRect.top() / h, v.UVRect.width() / w, v.UVRect.height() / h}, .Level = v.Level});
+            tex.regions()[k] = {.UVRect = {v.UVRect.left() / w, v.UVRect.top() / h, v.UVRect.width() / w, v.UVRect.height() / h}, .Level = v.Level};
         }
 
         // load images
