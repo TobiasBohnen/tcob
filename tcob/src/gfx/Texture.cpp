@@ -8,7 +8,6 @@
 #include <chrono>
 #include <memory>
 #include <span>
-#include <unordered_map>
 #include <utility>
 
 #include "tcob/core/Common.hpp"
@@ -78,16 +77,6 @@ auto texture::copy_to_image(u32 level) const -> image
     }
 
     return _impl->copy_to_image(level);
-}
-
-auto texture::regions() const -> std::unordered_map<string, texture_region> const&
-{
-    return _regions;
-}
-
-auto texture::regions() -> std::unordered_map<string, texture_region>&
-{
-    return _regions;
 }
 
 void texture::update_data(void const* data, u32 depth, i32 rowLength, i32 alignment) const
