@@ -127,9 +127,9 @@ public:
     auto info() const -> information const&;
     auto texture() const -> assets::asset_ptr<gfx::texture>;
 
-    auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> load_status;
-    auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> load_status;
-    auto load [[nodiscard]] (std::span<byte const> fontData, u32 size) noexcept -> load_status;
+    auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> bool;
+    auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> bool;
+    auto load [[nodiscard]] (std::span<byte const> fontData, u32 size) noexcept -> bool;
 
     auto render_text(utf8_string_view text, bool kerning) -> std::vector<glyph>;
     void decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs);

@@ -19,7 +19,6 @@
 
     #include "tcob/audio/Buffer.hpp"
     #include "tcob/audio/Sound.hpp"
-    #include "tcob/core/Common.hpp"
     #include "tcob/core/ServiceLocator.hpp"
     #include "tcob/core/TaskManager.hpp"
     #include "tcob/core/io/FileStream.hpp"
@@ -44,15 +43,15 @@ auto sound_font::info() const -> information
     return information {.PresetCount = tsf_get_presetcount(_font), .Channels = _channels, .SampleRate = _sampleRate};
 }
 
-auto sound_font::load(path const& file, bool stereo, i32 sampleRate) noexcept -> load_status
+auto sound_font::load(path const& file, bool stereo, i32 sampleRate) noexcept -> bool
 {
     io::ifstream fs {file};
     return load(fs, stereo, sampleRate);
 }
 
-auto sound_font::load(io::istream& stream, bool stereo, i32 sampleRate) noexcept -> load_status
+auto sound_font::load(io::istream& stream, bool stereo, i32 sampleRate) noexcept -> bool
 {
-    if (!stream) { return load_status::Error; }
+    if (!stream) { return false; }
 
     if (_font) {
         reset();
@@ -71,12 +70,12 @@ auto sound_font::load(io::istream& stream, bool stereo, i32 sampleRate) noexcept
     // Set the SoundFont rendering output mode
     tsf_set_output(_font, stereo ? TSF_STEREO_INTERLEAVED : TSF_MONO, sampleRate, 0.0f);
 
-    return _font != nullptr ? load_status::Ok : load_status::Error;
+    return _font != nullptr;
 }
 
-auto sound_font::load_async(path const& file, bool stereo, i32 sampleRate) noexcept -> std::future<load_status>
+auto sound_font::load_async(path const& file, bool stereo, i32 sampleRate) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<load_status>([&, file, stereo, sampleRate]() { return load(file, stereo, sampleRate); });
+    return locate_service<task_manager>().run_async<bool>([&, file, stereo, sampleRate]() { return load(file, stereo, sampleRate); });
 }
 
 auto sound_font::create_buffer(sound_font_commands const& commands) const -> buffer

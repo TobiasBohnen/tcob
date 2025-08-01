@@ -15,7 +15,6 @@
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/easing/Tween.hpp"
 
@@ -38,8 +37,8 @@ public:
     auto duration() const -> milliseconds override;
     auto playback_position() const -> milliseconds;
 
-    auto open [[nodiscard]] (path const& file) -> load_status;
-    auto open [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) -> load_status;
+    auto open [[nodiscard]] (path const& file) -> bool;
+    auto open [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) -> bool;
 
     static inline char const* AssetName {"music"};
 

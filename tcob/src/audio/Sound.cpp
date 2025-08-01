@@ -12,7 +12,6 @@
 
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
@@ -43,27 +42,27 @@ auto sound::duration() const -> milliseconds
     return milliseconds {(static_cast<f32>(info.FrameCount) / static_cast<f32>(info.Specs.SampleRate)) * 1000};
 }
 
-auto sound::load(path const& file) noexcept -> load_status
+auto sound::load(path const& file) noexcept -> bool
 {
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
-auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status
+auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept -> bool
 {
-    if (!in || !(*in)) { return load_status::Error; }
+    if (!in || !(*in)) { return false; }
 
     stop();
 
-    if (_buffer.load(std::move(in), ext, DecoderContext) != load_status::Ok) { return load_status::Error; }
-    if (!_buffer.info().Specs.is_valid()) { return load_status::Error; }
+    if (!_buffer.load(std::move(in), ext, DecoderContext)) { return false; }
+    if (!_buffer.info().Specs.is_valid()) { return false; }
 
     create_output();
-    return load_status::Ok;
+    return true;
 }
 
-auto sound::load_async(path const& file) noexcept -> std::future<load_status>
+auto sound::load_async(path const& file) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<load_status>([&, file]() { return load(file); });
+    return locate_service<task_manager>().run_async<bool>([&, file]() { return load(file); });
 }
 
 auto sound::on_start() -> bool

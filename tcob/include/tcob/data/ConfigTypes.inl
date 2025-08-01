@@ -35,21 +35,21 @@ inline base_type<Impl, Container>::base_type(std::shared_ptr<Container> const& e
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::load(path const& file, bool skipBinary) noexcept -> load_status
+inline auto base_type<Impl, Container>::load(path const& file, bool skipBinary) noexcept -> bool
 {
     io::ifstream fs {file};
     return load(fs, io::get_extension(file), skipBinary);
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+inline auto base_type<Impl, Container>::load(io::istream& in, string const& ext, bool skipBinary) noexcept -> bool
 {
-    if (!in) { return load_status::Error; }
+    if (!in) { return false; }
     return on_load(in, ext, skipBinary);
 }
 
 template <typename Impl, typename Container>
-inline auto base_type<Impl, Container>::load_async(path const& file, bool skipBinary) noexcept -> std::future<load_status>
+inline auto base_type<Impl, Container>::load_async(path const& file, bool skipBinary) noexcept -> std::future<bool>
 {
     return std::async(std::launch::async, [&, file, skipBinary] { return load(file, skipBinary); });
 }

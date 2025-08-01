@@ -9,7 +9,6 @@
 #include <span>
 #include <utility>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/io/FileStream.hpp"
@@ -130,7 +129,7 @@ auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<fon
 
     // load font
     auto const& asset {_fontAssets[fontStyle][size]};
-    if (asset->load(_fontData[fontStyle], size) == load_status::Ok) {
+    if (asset->load(_fontData[fontStyle], size)) {
         return asset;
     }
 

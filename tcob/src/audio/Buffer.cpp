@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "tcob/audio/Audio.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/io/FileStream.hpp"
@@ -41,34 +40,34 @@ auto buffer::Create(specification const& info, std::span<f32 const> data) -> buf
     return retValue;
 }
 
-auto buffer::Load(path const& file) -> std::expected<buffer, load_status>
+auto buffer::Load(path const& file) -> std::expected<buffer, bool>
 {
     buffer     retValue;
     auto const err {retValue.load(file, {})};
-    if (err == load_status::Ok) { return retValue; }
+    if (err) { return retValue; }
     return std::unexpected {err};
 }
 
-auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, load_status>
+auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, bool>
 {
     buffer     retValue;
     auto const err {retValue.load(std::move(in), ext, {})};
-    if (err == load_status::Ok) { return retValue; }
+    if (err) { return retValue; }
     return std::unexpected {err};
 }
 
-auto buffer::load(path const& file, std::any const& ctx) noexcept -> load_status
+auto buffer::load(path const& file, std::any const& ctx) noexcept -> bool
 {
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file), ctx);
 }
 
-auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> load_status
+auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> bool
 {
     _buffer.clear();
-    if (!in || !(*in)) { return load_status::Error; }
+    if (!in || !(*in)) { return false; }
 
     auto decoder {locate_service<decoder::factory>().from_magic(*in, ext)};
-    if (!decoder) { return load_status::Error; }
+    if (!decoder) { return false; }
 
     if (auto info {decoder->open(std::move(in), ctx)}) {
         _info = *info;
@@ -79,16 +78,16 @@ auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any c
         if (size > 0) {
             buffer.resize(size);
             _buffer = std::move(buffer);
-            return load_status::Ok;
+            return true;
         }
     }
 
-    return load_status::Error;
+    return false;
 }
 
-auto buffer::load_async(path const& file, std::any& ctx) noexcept -> std::future<load_status>
+auto buffer::load_async(path const& file, std::any& ctx) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<load_status>([&, file, ctx]() mutable { return load(file, ctx); });
+    return locate_service<task_manager>().run_async<bool>([&, file, ctx]() mutable { return load(file, ctx); });
 }
 
 auto buffer::save(path const& file) const noexcept -> bool

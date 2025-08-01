@@ -48,31 +48,31 @@ auto font::texture() const -> assets::asset_ptr<gfx::texture>
     return _texture;
 }
 
-auto font::load(path const& file, u32 size) noexcept -> load_status
+auto font::load(path const& file, u32 size) noexcept -> bool
 {
     io::ifstream fs {file};
     return load(fs, size);
 }
 
-auto font::load(io::istream& stream, u32 size) noexcept -> load_status
+auto font::load(io::istream& stream, u32 size) noexcept -> bool
 {
-    if (!stream) { return load_status::Error; }
+    if (!stream) { return false; }
 
     _fontData = stream.read_all<byte>();
     return load(_fontData, size);
 }
 
-auto font::load(std::span<byte const> fontData, u32 size) noexcept -> load_status
+auto font::load(std::span<byte const> fontData, u32 size) noexcept -> bool
 {
     if (auto info {_engine->load_data(fontData, size)}) {
         _info = *info;
         _glyphCache.clear();
         _decomposeCache.clear();
         _textureNeedsSetup = true;
-        return load_status::Ok;
+        return true;
     }
 
-    return load_status::Error;
+    return false;
 }
 
 void font::setup_texture()

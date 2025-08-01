@@ -15,7 +15,6 @@
 #include "tcob/audio/Music.hpp"
 #include "tcob/audio/Sound.hpp"
 #include "tcob/audio/synth/SoundFont.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -158,7 +157,7 @@ void default_check_async_load(def_task const& ctx, auto&& cache, auto&& stateSet
         if (!ftr.valid()) { continue; }
 
         if (ftr.wait_for(0s) == std::future_status::ready) {
-            if (ftr.get() == load_status::Ok) {
+            if (ftr.get()) {
                 stateSetter(def->assetPtr, asset_status::Loaded);
             } else {
                 stateSetter(def->assetPtr, asset_status::Error);
@@ -211,7 +210,7 @@ cfg_asset_loader_manager::cfg_asset_loader_manager(group& group)
 void cfg_asset_loader_manager::load_script(path const& file)
 {
     object load;
-    if (load.load(file) == load_status::Ok) {
+    if (load.load(file)) {
         _object.merge(load, true);
     } else {
         logger::Error("AssetLoader '{}': script loading failed.", file);
@@ -273,7 +272,7 @@ void cfg_music_loader::declare()
 void cfg_music_loader::prepare()
 {
     for (auto& def : _cache) {
-        if (def->assetPtr->open(group().mount_point() + def->source) == load_status::Ok) {
+        if (def->assetPtr->open(group().mount_point() + def->source)) {
             set_asset_status(def->assetPtr, asset_status::Loaded);
         } else {
             set_asset_status(def->assetPtr, asset_status::Error);
@@ -422,7 +421,7 @@ void cfg_font_loader::prepare()
 {
     for (auto& def : _cache) {
         if (auto* ttf {def->assetPtr.ptr()}) {
-            if (ttf->load(group().mount_point() + def->source, def->size) == load_status::Ok) {
+            if (ttf->load(group().mount_point() + def->source, def->size)) {
                 set_asset_status(def->assetPtr, asset_status::Loaded);
             } else {
                 set_asset_status(def->assetPtr, asset_status::Error);
@@ -759,7 +758,7 @@ void cfg_texture_loader::prepare()
 
     for (auto const& def : _cacheAni) {
         auto* ani {dynamic_cast<animated_texture*>(def->assetPtr.ptr())};
-        if (ani && ani->load(def->textureFile) == load_status::Ok) {
+        if (ani && ani->load(def->textureFile)) {
             ani->Filtering = def->filtering;
             ani->Wrapping  = def->wrapping;
             set_asset_status(def->assetPtr, asset_status::Loaded);
@@ -797,7 +796,7 @@ void cfg_texture_loader::check_async_load(def_task const& ctx)
                 }
 
                 // loading error -> log and continue
-                if (statusFuture.get() != load_status::Ok) {
+                if (!statusFuture.get()) {
                     logger::Error("texture asset '{}': Error loading image {}.", def->assetPtr.get()->name(), imgIt->Path);
                     set_asset_status(def->assetPtr, asset_status::Error);
                     continue;

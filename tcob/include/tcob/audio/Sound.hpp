@@ -13,7 +13,6 @@
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Source.hpp"
-#include "tcob/core/Common.hpp"
 
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
@@ -27,9 +26,9 @@ public:
     auto info() const -> std::optional<specification> override;
     auto duration() const -> milliseconds override;
 
-    auto load [[nodiscard]] (path const& file) noexcept -> load_status;
-    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status;
-    auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<load_status>;
+    auto load [[nodiscard]] (path const& file) noexcept -> bool;
+    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext) noexcept -> bool;
+    auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<bool>;
 
     static inline char const* AssetName {"sound"};
 

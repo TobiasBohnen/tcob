@@ -101,14 +101,14 @@ void texture::update_data(point_i origin, size_i size, void const* data, u32 dep
 
 ////////////////////////////////////////////////////////////
 
-auto animated_texture::load(path const& file) noexcept -> load_status
+auto animated_texture::load(path const& file) noexcept -> bool
 {
     return load(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
-auto animated_texture::load(std::shared_ptr<io::istream> in, string const& ext) noexcept -> load_status
+auto animated_texture::load(std::shared_ptr<io::istream> in, string const& ext) noexcept -> bool
 {
-    if (!in) { return load_status::Error; }
+    if (!in) { return false; }
     stop();
 
     _decoder = locate_service<animated_image_decoder::factory>().from_magic(*in, ext);
@@ -120,13 +120,13 @@ auto animated_texture::load(std::shared_ptr<io::istream> in, string const& ext) 
         } else if (bpp == 3) {
             create(_frameInfo.Size, 1, format::RGB8);
         } else {
-            return load_status::Error;
+            return false;
         }
 
-        return load_status::Ok;
+        return true;
     }
 
-    return load_status::Error;
+    return false;
 }
 
 auto animated_texture::state() const -> playback_state

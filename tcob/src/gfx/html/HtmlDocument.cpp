@@ -18,7 +18,6 @@
 
     #include "HtmlContainer.hpp"
 
-    #include "tcob/core/Common.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Rect.hpp"
     #include "tcob/core/Size.hpp"
@@ -42,7 +41,7 @@ document::document(config c)
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
-    geometry::set_texcoords(_quad, {render_texture::GetTexcoords(), 0});
+    geometry::set_texcoords(_quad, {.UVRect = render_texture::GetTexcoords(), .Level = 0});
     _renderer.set_material(_material.ptr());
     _material->Texture = _canvas.get_texture();
 }
@@ -76,12 +75,12 @@ void document::from_string(string const& html, string const& css)
     force_redraw();
 }
 
-auto document::load(path const& file) noexcept -> load_status
+auto document::load(path const& file) noexcept -> bool
 {
     io::ifstream fs {file};
-    if (!fs) { return load_status::Error; }
+    if (!fs) { return false; }
     from_string(io::read_as_string(file));
-    return load_status::Ok;
+    return true;
 }
 
 void document::change_language(string const& language, string const& culture)

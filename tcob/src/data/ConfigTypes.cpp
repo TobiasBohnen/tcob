@@ -15,7 +15,6 @@
 
 #include "config_parsers/ConfigParser_ini.hpp"
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Proxy.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/StringUtils.hpp"
@@ -71,23 +70,23 @@ auto object::str() const -> string
     return stream.read_string(stream.size_in_bytes());
 }
 
-auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+auto object::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> bool
 {
     if (!skipBinary) {
         if (auto binParser {locate_service<binary_reader::factory>().from_magic(in, ext)}) {
             if (auto result {binParser->read_as_object(in)}) {
                 swap(*result);
-                return load_status::Ok;
+                return true;
             }
-            return load_status::Error;
+            return false;
         }
     }
 
     if (!parse(in.read_string(in.size_in_bytes()), ext)) {
-        return load_status::Error;
+        return false;
     }
 
-    return load_status::Ok;
+    return true;
 }
 
 auto object::parse(string_view config, string const& ext) noexcept -> bool
@@ -224,23 +223,23 @@ auto array::operator[](isize index) const -> proxy<array const, isize>
     return proxy<array const, isize> {*this, std::tuple {index}};
 }
 
-auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> load_status
+auto array::on_load(io::istream& in, string const& ext, bool skipBinary) noexcept -> bool
 {
     if (!skipBinary) {
         if (auto binParser {locate_service<binary_reader::factory>().from_magic(in, ext)}) {
             if (auto result {binParser->read_as_array(in)}) {
                 swap(*result);
-                return load_status::Ok;
+                return true;
             }
-            return load_status::Error;
+            return false;
         }
     }
 
     if (!parse(in.read_string(in.size_in_bytes()), ext)) {
-        return load_status::Error;
+        return false;
     }
 
-    return load_status::Ok;
+    return true;
 }
 
 auto array::parse(string_view config, string const& ext) -> bool

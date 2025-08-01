@@ -10,7 +10,6 @@
 
     #include <memory>
 
-    #include "tcob/core/Common.hpp"
     #include "tcob/core/Point.hpp"
     #include "tcob/core/Property.hpp"
     #include "tcob/core/Rect.hpp"
@@ -67,7 +66,7 @@ public:
 
     void from_string(string const& html);
     void from_string(string const& html, string const& css);
-    auto load(path const& file) noexcept -> load_status;
+    auto load(path const& file) noexcept -> bool;
 
     void change_language(string const& language, string const& culture);
 

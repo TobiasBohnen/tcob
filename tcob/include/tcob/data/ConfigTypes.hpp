@@ -15,7 +15,6 @@
 #include <span>
 #include <utility>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Proxy.hpp"
 #include "tcob/data/Config.hpp"
 
@@ -42,9 +41,9 @@ public:
     auto operator=(base_type&& other) noexcept -> base_type&      = default;
     virtual ~base_type()                                          = default;
 
-    auto load(path const& file, bool skipBinary = false) noexcept -> load_status;
-    auto load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status;
-    auto load_async(path const& file, bool skipBinary = false) noexcept -> std::future<load_status>;
+    auto load(path const& file, bool skipBinary = false) noexcept -> bool;
+    auto load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool;
+    auto load_async(path const& file, bool skipBinary = false) noexcept -> std::future<bool>;
 
     auto save(path const& file) const noexcept -> bool;
     auto save(io::ostream& out, string const& ext) const noexcept -> bool;
@@ -62,7 +61,7 @@ public:
     auto get_type(Key key) const -> type;
 
 protected:
-    auto virtual on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status = 0;
+    auto virtual on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool = 0;
 
     auto values(this auto&& self) -> decltype(auto);
 
@@ -134,7 +133,7 @@ public:
     void set_entry(string_view key, entry const& entry);
 
 protected:
-    auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
+    auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool override;
 
 private:
     void add_entry(string_view key, entry const& entry);
@@ -198,7 +197,7 @@ public:
     void add_entry(entry const& newEntry);
 
 protected:
-    auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> load_status override;
+    auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool override;
 };
 
 template <>

@@ -18,7 +18,6 @@
 #include "tcob/audio/Music.hpp"
 #include "tcob/audio/Sound.hpp"
 #include "tcob/audio/synth/SoundFont.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/data/ConfigTypes.hpp"
@@ -82,7 +81,7 @@ public:
 private:
     struct asset_def {
         assets::asset_ptr<audio::sound> assetPtr;
-        std::future<load_status>        future;
+        std::future<bool>               future;
         string                          source;
     };
 
@@ -104,7 +103,7 @@ public:
 private:
     struct asset_def {
         assets::asset_ptr<audio::sound_font> assetPtr;
-        std::future<load_status>             future;
+        std::future<bool>                    future;
         string                               source;
     };
 
@@ -228,10 +227,10 @@ private:
 
     // texture
     struct image_ftr {
-        u32                      Depth {};
-        path                     Path {};
-        gfx::image               Image {};
-        std::future<load_status> Future {};
+        u32               Depth {};
+        path              Path {};
+        gfx::image        Image {};
+        std::future<bool> Future {};
     };
 
     struct tex_asset_def {

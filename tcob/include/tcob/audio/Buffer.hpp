@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "tcob/audio/Audio.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/TypeFactory.hpp"
 
@@ -37,9 +36,9 @@ public:
     auto data(this auto&& self) -> decltype(auto);
     auto ptr(this auto&& self) -> decltype(auto);
 
-    auto load [[nodiscard]] (path const& file, std::any const& ctx) noexcept -> load_status;
-    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> load_status;
-    auto load_async [[nodiscard]] (path const& file, std::any& ctx) noexcept -> std::future<load_status>;
+    auto load [[nodiscard]] (path const& file, std::any const& ctx) noexcept -> bool;
+    auto load [[nodiscard]] (std::shared_ptr<io::istream> in, string const& ext, std::any const& ctx) noexcept -> bool;
+    auto load_async [[nodiscard]] (path const& file, std::any& ctx) noexcept -> std::future<bool>;
 
     auto save [[nodiscard]] (path const& file) const noexcept -> bool;
     auto save [[nodiscard]] (io::ostream& out, string const& ext) const noexcept -> bool;
@@ -47,8 +46,8 @@ public:
 
     auto static Create(specification const& info, std::span<f32 const> data) -> buffer;
 
-    auto static Load(path const& file) -> std::expected<buffer, load_status>;
-    auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, load_status>;
+    auto static Load(path const& file) -> std::expected<buffer, bool>;
+    auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, bool>;
 
 private:
     information      _info;

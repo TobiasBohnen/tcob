@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -55,9 +54,9 @@ public:
     auto data(rect_i const& bounds) const -> std::vector<u8>;
     auto ptr(this auto&& self) -> decltype(auto);
 
-    auto load [[nodiscard]] (path const& file) noexcept -> load_status;
-    auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> load_status;
-    auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<load_status>;
+    auto load [[nodiscard]] (path const& file) noexcept -> bool;
+    auto load [[nodiscard]] (io::istream& in, string const& ext) noexcept -> bool;
+    auto load_async [[nodiscard]] (path const& file) noexcept -> std::future<bool>;
 
     auto save [[nodiscard]] (path const& file) const noexcept -> bool;
     auto save [[nodiscard]] (io::ostream& out, string const& ext) const noexcept -> bool;
@@ -74,8 +73,8 @@ public:
     auto static Create(size_i size, format f, std::span<u8 const> data) -> image;
     auto static CreateEmpty(size_i size, format f) -> image;
 
-    auto static Load(path const& file) noexcept -> std::expected<image, load_status>;
-    auto static Load(io::istream& in, string const& ext) noexcept -> std::expected<image, load_status>;
+    auto static Load(path const& file) noexcept -> std::expected<image, bool>;
+    auto static Load(io::istream& in, string const& ext) noexcept -> std::expected<image, bool>;
     auto static LoadInfo(path const& file) noexcept -> std::optional<information>;
 
 private:

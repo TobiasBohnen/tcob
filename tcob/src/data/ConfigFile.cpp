@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/data/ConfigTypes.hpp"
@@ -24,7 +23,7 @@ config_file::config_file(string file)
         logger::Warning("Config: File not found. Trying default file '{}'", configFile);
     }
 
-    if (data::object::load(configFile) == load_status::Ok) {
+    if (data::object::load(configFile)) {
         logger::Info("Config: loading completed");
     } else {
         logger::Warning("Config: loading failed");

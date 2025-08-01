@@ -6,8 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <expected>
 #include <ios>
-#include <optional>
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -53,6 +53,12 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+enum class error_code : u8 {
+    FileNotFound
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API ifstream final : public sink_istream<file_sink> {
 public:
     explicit ifstream(path const& path, u64 bufferSize = 4096);
@@ -62,7 +68,7 @@ public:
 
     auto is_valid() const -> bool override;
 
-    auto static Open(path const& path, u64 bufferSize = 4096) -> std::optional<ifstream>; // TODO: change to result
+    auto static Open(path const& path, u64 bufferSize = 4096) -> std::expected<ifstream, error_code>;
 
 private:
     file_sink _sink;

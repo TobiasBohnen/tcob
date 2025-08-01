@@ -8,8 +8,6 @@
 
 #include <vector>
 
-#include "tcob/core/Common.hpp"
-
 namespace tcob::data::csv {
 ////////////////////////////////////////////////////////////
 
@@ -26,8 +24,8 @@ public:
     std::vector<string>              Header;
     std::vector<std::vector<string>> Rows;
 
-    auto load(path const& file, settings s = {}) noexcept -> load_status;
-    auto load(io::istream& in, settings s = {}) noexcept -> load_status;
+    auto load(path const& file, settings s = {}) noexcept -> bool;
+    auto load(io::istream& in, settings s = {}) noexcept -> bool;
     auto parse(string const& csv, settings s = {}) -> bool;
 
     auto save(path const& file, settings s = {}) const -> bool;

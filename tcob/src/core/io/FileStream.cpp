@@ -6,8 +6,8 @@
 #include "tcob/core/io/FileStream.hpp"
 
 #include <cassert>
+#include <expected>
 #include <ios>
-#include <optional>
 #include <utility>
 
 #include <physfs.h>
@@ -167,13 +167,13 @@ auto ifstream::is_valid() const -> bool
     return _sink.is_valid();
 }
 
-auto ifstream::Open(path const& path, u64 bufferSize) -> std::optional<ifstream>
+auto ifstream::Open(path const& path, u64 bufferSize) -> std::expected<ifstream, error_code>
 {
     if (io::is_file(path)) {
-        return std::optional<ifstream> {std::in_place, path, bufferSize};
+        return std::expected<ifstream, error_code> {std::in_place, path, bufferSize};
     }
 
-    return std::nullopt;
+    return std::unexpected<error_code> {error_code::FileNotFound};
 }
 
 ////////////////////////////////////////////////////////////

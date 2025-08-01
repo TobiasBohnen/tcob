@@ -7,7 +7,6 @@
 
 #include <vector>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/Stream.hpp"
 
@@ -15,16 +14,16 @@ namespace tcob::data::csv {
 
 static char const LineEnding {'\n'};
 
-auto table::load(path const& file, settings s) noexcept -> load_status
+auto table::load(path const& file, settings s) noexcept -> bool
 {
     io::ifstream fs {file};
     return load(fs, s);
 }
 
-auto table::load(io::istream& in, settings s) noexcept -> load_status
+auto table::load(io::istream& in, settings s) noexcept -> bool
 {
-    if (!in) { return load_status::Error; }
-    return parse(in.read_string(in.size_in_bytes()), s) ? load_status::Ok : load_status::Error;
+    if (!in) { return false; }
+    return parse(in.read_string(in.size_in_bytes()), s);
 }
 
 auto table::parse(string const& csv, settings s) -> bool

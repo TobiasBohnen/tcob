@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "tcob/core/Color.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -151,46 +150,46 @@ auto image::CreateEmpty(size_i size, format f) -> image
     return retValue;
 }
 
-auto image::Load(path const& file) noexcept -> std::expected<image, load_status>
+auto image::Load(path const& file) noexcept -> std::expected<image, bool>
 {
     image      retValue;
     auto const err {retValue.load(file)};
-    if (err == load_status::Ok) { return retValue; }
+    if (err) { return retValue; }
     return std::unexpected {err};
 }
 
-auto image::Load(io::istream& in, string const& ext) noexcept -> std::expected<image, load_status>
+auto image::Load(io::istream& in, string const& ext) noexcept -> std::expected<image, bool>
 {
     image      retValue;
     auto const err {retValue.load(in, ext)};
-    if (err == load_status::Ok) { return retValue; }
+    if (err) { return retValue; }
     return std::unexpected {err};
 }
 
-auto image::load(path const& file) noexcept -> load_status
+auto image::load(path const& file) noexcept -> bool
 {
     io::ifstream fs {file};
     return load(fs, io::get_extension(file));
 }
 
-auto image::load(io::istream& in, string const& ext) noexcept -> load_status
+auto image::load(io::istream& in, string const& ext) noexcept -> bool
 {
-    if (!in) { return load_status::Error; }
+    if (!in) { return false; }
 
     if (auto decoder {locate_service<image_decoder::factory>().from_magic(in, ext)}) {
         if (auto img {decoder->decode(in)}) {
             std::swap(_buffer, img->_buffer);
             std::swap(_info, img->_info);
-            return _info.Size != size_i::Zero ? load_status::Ok : load_status::Error;
+            return _info.Size != size_i::Zero;
         }
     }
 
-    return load_status::Error;
+    return false;
 }
 
-auto image::load_async(path const& file) noexcept -> std::future<load_status>
+auto image::load_async(path const& file) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<load_status>([&, file]() { return load(file); });
+    return locate_service<task_manager>().run_async<bool>([&, file]() { return load(file); });
 }
 
 auto image::LoadInfo(path const& file) noexcept -> std::optional<information>

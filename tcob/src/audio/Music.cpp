@@ -53,29 +53,29 @@ auto music::playback_position() const -> milliseconds
     return milliseconds {(static_cast<f32>(_samplesPlayed) / static_cast<f32>(_info->SampleRate) / static_cast<f32>(_info->Channels)) * 1000.0f};
 }
 
-auto music::open(path const& file) -> load_status
+auto music::open(path const& file) -> bool
 {
     return open(std::make_shared<io::ifstream>(file), io::get_extension(file));
 }
 
-auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> load_status
+auto music::open(std::shared_ptr<io::istream> in, string const& ext) -> bool
 {
-    if (!in || !(*in)) { return load_status::Error; }
+    if (!in || !(*in)) { return false; }
 
     stop();
 
     _decoder = locate_service<decoder::factory>().from_magic(*in, ext);
-    if (!_decoder) { return load_status::Error; }
+    if (!_decoder) { return false; }
 
     auto const info {_decoder->open(std::move(in), DecoderContext)};
     _info            = info->Specs;
     _totalFrameCount = info->FrameCount;
 
-    if (!_info) { return load_status::Error; }
-    if (!_info->is_valid()) { return load_status::Error; }
+    if (!_info) { return false; }
+    if (!_info->is_valid()) { return false; }
 
     create_output();
-    return load_status::Ok;
+    return true;
 }
 
 auto music::on_start() -> bool
