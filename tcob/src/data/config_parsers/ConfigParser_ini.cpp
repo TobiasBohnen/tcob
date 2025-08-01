@@ -38,7 +38,7 @@ auto static find_unquoted(string_view source, char needle) -> string_view::size_
     return string_view::npos;
 }
 
-auto static check_brackets(utf8_string_view str, char openBr, char closeBr)
+auto static check_brackets(utf8_string_view str, char openBr, char closeBr) -> bool
 {
     assert(str[str.size() - 1] == closeBr);
     i32 b {0};
@@ -429,6 +429,8 @@ auto ini_reader::read_settings() -> bool
         } else if (key == "array") {
             if (value.size() < 2) { return false; }
             _settings.Array = {value[0], value[1]};
+        } else {
+            return false;
         }
 
         return true;

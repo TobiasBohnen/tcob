@@ -26,12 +26,10 @@ auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
         in.seek(-HEADERSIZE, io::seek_dir::Current);
         std::vector<u8> buf {in.read_all<u8>()};
 
-        qoi_desc   desc;
-        auto const bpp {info->bytes_per_pixel()};
-        auto*      data {qoi_decode(buf.data(), static_cast<i32>(buf.size()), &desc, bpp)};
-
-        image img {image::Create(info->Size, info->Format,
-                                 {static_cast<u8*>(data), static_cast<usize>(info->size_in_bytes())})};
+        qoi_desc desc;
+        auto*    data {qoi_decode(buf.data(), static_cast<i32>(buf.size()), &desc, 0)};
+        image    img {image::Create(info->Size, info->Format,
+                                    {static_cast<u8*>(data), static_cast<usize>(info->size_in_bytes())})};
         free(data); // NOLINT(cppcoreguidelines-owning-memory)
         return img;
     }
@@ -58,7 +56,7 @@ auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
     auto const& info {image.info()};
     qoi_desc    desc;
     desc.channels   = static_cast<u8>(info.bytes_per_pixel());
-    desc.colorspace = 1;
+    desc.colorspace = QOI_LINEAR;
     desc.height     = info.Size.Height;
     desc.width      = info.Size.Width;
 
