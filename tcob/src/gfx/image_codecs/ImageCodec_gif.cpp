@@ -9,6 +9,7 @@
 #include <bit>
 #include <cassert>
 #include <optional>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -99,9 +100,9 @@ auto gif_decoder::open() -> std::optional<image::information>
     return std::nullopt;
 }
 
-auto gif_decoder::current_frame() const -> u8 const*
+auto gif_decoder::current_frame() const -> std::span<u8 const>
 {
-    return _currentFrame.ptr();
+    return _currentFrame.data();
 }
 
 auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status

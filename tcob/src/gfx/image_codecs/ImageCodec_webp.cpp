@@ -105,7 +105,7 @@ auto webp_anim_decoder::open() -> std::optional<image::information>
     WebPDataInit(_data);
     auto buffer {stream().read_all<u8>()};
     u8*  buf {reinterpret_cast<u8*>(WebPMalloc(buffer.size()))};
-    std::copy(buffer.begin(), buffer.end(), buf);
+    std::ranges::copy(buffer, buf);
     _data->bytes = buf;
     _data->size  = buffer.size();
 
@@ -125,9 +125,9 @@ auto webp_anim_decoder::open() -> std::optional<image::information>
     return std::nullopt;
 }
 
-auto webp_anim_decoder::current_frame() const -> u8 const*
+auto webp_anim_decoder::current_frame() const -> std::span<u8 const>
 {
-    return _buffer;
+    return {_buffer, static_cast<usize>(_size.Height * _size.Width * 4)};
 }
 
 void webp_anim_decoder::reset()

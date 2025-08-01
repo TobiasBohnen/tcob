@@ -4,10 +4,10 @@
 // https://opensource.org/licenses/MIT
 
 #include "ImageCodec_theora.hpp"
-
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
 
     #include <optional>
+    #include <span>
     #include <thread>
 
     #include <theoraplay.h>
@@ -96,31 +96,21 @@ auto theora_decoder::open() -> std::optional<image::information>
     return std::nullopt;
 }
 
-auto theora_decoder::current_frame() const -> u8 const*
+auto theora_decoder::current_frame() const -> std::span<u8 const>
 {
-    if (!_currentFrame) { return nullptr; }
-    return _currentFrame->pixels;
+    if (!_currentFrame) { return {}; }
+    return {_currentFrame->pixels, _currentFrame->height * _currentFrame->width * 4};
 }
 
 auto theora_decoder::advance(milliseconds ts) -> animated_image_decoder::status
 {
     auto timestamp {static_cast<i32>(ts.count())};
-    if (!_decoder) {
-        return animated_image_decoder::status::DecodeFailure;
-    }
-
-    if (!THEORAPLAY_isDecoding(_decoder)) {
-        return animated_image_decoder::status::NoMoreFrames;
-    }
-
-    if (timestamp <= _currentTimeStamp) {
-        return animated_image_decoder::status::OldFrame;
-    }
+    if (!_decoder) { return animated_image_decoder::status::DecodeFailure; }
+    if (!THEORAPLAY_isDecoding(_decoder)) { return animated_image_decoder::status::NoMoreFrames; }
+    if (timestamp <= _currentTimeStamp) { return animated_image_decoder::status::OldFrame; }
 
     while (timestamp > _currentTimeStamp) {
-        if (_currentFrame) {
-            THEORAPLAY_freeVideo(_currentFrame);
-        }
+        if (_currentFrame) { THEORAPLAY_freeVideo(_currentFrame); }
 
         _currentFrame = THEORAPLAY_getVideo(_decoder);
         if (_currentFrame) {
@@ -137,13 +127,12 @@ void theora_decoder::reset()
 {
     _currentTimeStamp = 0;
     if (_decoder) {
-        if (!THEORAPLAY_isDecoding(_decoder)) {
-            stream().seek(0, io::seek_dir::Begin); // FIXME: store position
-            THEORAPLAY_stopDecode(_decoder);
-            _decoder = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA, nullptr, MULTI_THREADED);
-            while (!THEORAPLAY_isInitialized(_decoder)) {
-                std::this_thread::yield();
-            }
+        THEORAPLAY_stopDecode(_decoder);
+
+        stream().seek(0, io::seek_dir::Begin); // FIXME: store position
+        _decoder = THEORAPLAY_startDecode(&_io, MAX_FRAMES, THEORAPLAY_VIDFMT_RGBA, nullptr, MULTI_THREADED);
+        while (!THEORAPLAY_isInitialized(_decoder)) {
+            std::this_thread::yield();
         }
     }
 }

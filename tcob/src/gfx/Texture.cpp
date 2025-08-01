@@ -219,8 +219,8 @@ void animated_texture::on_update(milliseconds deltaTime)
         break;
     }
 
-    auto const* textureBuffer {_decoder->current_frame()};
-    if (updateTexture && textureBuffer) {
+    auto const textureBuffer {_decoder->current_frame()};
+    if (updateTexture && textureBuffer.data()) {
         if (_frameInfo.bytes_per_pixel() == 4) {
             update_data(textureBuffer, 0, 0, 4);
         } else {

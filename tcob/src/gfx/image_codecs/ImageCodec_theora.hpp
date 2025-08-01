@@ -11,6 +11,7 @@
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
 
     #include <optional>
+    #include <span>
 
     #include <theoraplay.h>
 
@@ -25,7 +26,7 @@ public:
     theora_decoder();
     ~theora_decoder() override;
 
-    auto current_frame() const -> u8 const* override;
+    auto current_frame() const -> std::span<u8 const> override;
     auto advance(milliseconds ts) -> animated_image_decoder::status override;
     void reset() override;
 

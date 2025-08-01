@@ -144,9 +144,9 @@ public:
 
     auto open(std::shared_ptr<io::istream> in) -> std::optional<image::information>;
 
-    auto virtual current_frame() const -> u8 const* = 0;
-    auto virtual advance(milliseconds ts) -> status = 0;
-    void virtual reset()                            = 0;
+    auto virtual current_frame() const -> std::span<u8 const> = 0;
+    auto virtual advance(milliseconds ts) -> status           = 0;
+    void virtual reset()                                      = 0;
 
 protected:
     auto virtual open() -> std::optional<image::information> = 0;
