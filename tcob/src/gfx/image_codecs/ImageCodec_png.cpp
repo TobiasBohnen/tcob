@@ -111,57 +111,54 @@ constexpr std::array<byte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a
 
 auto png_decoder::decode(io::istream& in) -> std::optional<image>
 {
-    if (decode_info(in)) {
-        if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
+    if (!decode_info(in)) { return std::nullopt; }
+    if (_ihdr.Width > png::MAX_SIZE || _ihdr.Height > png::MAX_SIZE) { return std::nullopt; }
 
-        std::vector<byte>              idat {};
-        std::optional<png::pHYs_chunk> phys {};
+    std::vector<byte>              idat {};
+    std::optional<png::pHYs_chunk> phys {};
 
-        for (;;) {
-            if (in.is_eof()) { return std::nullopt; }
+    for (;;) {
+        if (in.is_eof()) { return std::nullopt; }
 
-            auto const chunk {read_chunk(in)};
-            // IDAT
-            if (chunk.Type == png::chunk_type::IDAT) {
-                idat.insert(idat.end(), chunk.Data.begin(), chunk.Data.end());
-            }
-            // PLTE
-            else if (chunk.Type == png::chunk_type::PLTE) {
-                if (chunk.Length % 3 != 0) { return std::nullopt; }
-                _plte = {chunk.Data};
-            }
-            // TRNS
-            else if (chunk.Type == png::chunk_type::tRNS) {
-                _trns = {chunk.Data, _ihdr.ColorType, _plte};
-            }
-            // PHYS
-            else if (chunk.Type == png::chunk_type::pHYs) {
-                phys = {chunk.Data};
-            }
-            // IEND
-            else if (chunk.Type == png::chunk_type::IEND) {
-                break;
-            }
+        auto const chunk {read_chunk(in)};
+        // IDAT
+        if (chunk.Type == png::chunk_type::IDAT) {
+            idat.insert(idat.end(), chunk.Data.begin(), chunk.Data.end());
         }
-
-        auto const idatInflated {io::zlib_filter {}.from(idat)};
-        if (read_image(idatInflated)) {
-            size_i const size {_ihdr.Width, _ihdr.Height};
-            auto         retValue {image::Create(size, image::format::RGBA, _data)};
-
-            if (phys && phys->Value != 1.0f) {
-                resize_nearest_neighbor filter;
-                filter.NewSize = phys->Value > 1.0f
-                    ? size_i {size.Width, static_cast<i32>(static_cast<f32>(size.Height) * phys->Value)}
-                    : size_i {static_cast<i32>(static_cast<f32>(size.Width) / phys->Value), size.Height};
-                if (filter.NewSize != size) { return filter(retValue); }
-            }
-
-            return retValue;
+        // PLTE
+        else if (chunk.Type == png::chunk_type::PLTE) {
+            if (chunk.Length % 3 != 0) { return std::nullopt; }
+            _plte = {chunk.Data};
+        }
+        // TRNS
+        else if (chunk.Type == png::chunk_type::tRNS) {
+            _trns = {chunk.Data, _ihdr.ColorType, _plte};
+        }
+        // PHYS
+        else if (chunk.Type == png::chunk_type::pHYs) {
+            phys = {chunk.Data};
+        }
+        // IEND
+        else if (chunk.Type == png::chunk_type::IEND) {
+            break;
         }
     }
 
-    return std::nullopt;
+    auto const idatInflated {io::zlib_filter {}.from(idat)};
+    if (!read_image(idatInflated)) { return std::nullopt; }
+
+    size_i const size {_ihdr.Width, _ihdr.Height};
+    auto         retValue {image::Create(size, image::format::RGBA, _data)};
+
+    if (phys && phys->Value != 1.0f) {
+        resize_nearest_neighbor filter;
+        filter.NewSize = phys->Value > 1.0f
+            ? size_i {size.Width, static_cast<i32>(static_cast<f32>(size.Height) * phys->Value)}
+            : size_i {static_cast<i32>(static_cast<f32>(size.Width) / phys->Value), size.Height};
+        if (filter.NewSize != size) { return filter(retValue); }
+    }
+
+    return retValue;
 }
 
 auto png_decoder::decode_info(io::istream& in) -> std::optional<image::information>
@@ -172,6 +169,8 @@ auto png_decoder::decode_info(io::istream& in) -> std::optional<image::informati
 
     return std::nullopt;
 }
+
+////////////////////////////////////////////////////////////
 
 auto png_decoder::read_header(io::istream& in) -> bool
 {
@@ -275,7 +274,7 @@ void png_decoder::filter_line()
     case 3: {
         for (usize i {0}; i < _curLine.size(); ++i) {
             i32 const a {(i >= _pixelSize ? _curLine[i - _pixelSize] : 0) + (_pixel.Y > 0 ? _prvLine[i] : 0)};
-            *(_curLineIt + i) += static_cast<u8>(a / 2);
+            _curLine[i] += static_cast<u8>(a / 2);
         }
     } break;
     case 4: {
@@ -283,7 +282,7 @@ void png_decoder::filter_line()
             u8 const a {(i >= _pixelSize ? _curLine[i - _pixelSize] : u8 {0})};
             u8 const b {(_pixel.Y > 0 ? _prvLine[i] : u8 {0})};
             u8 const c {((i >= _pixelSize && _pixel.Y > 0) ? _prvLine[i - _pixelSize] : u8 {0})};
-            *(_curLineIt + i) += paeth(a, b, c);
+            _curLine[i] += paeth(a, b, c);
         }
     } break;
     }
