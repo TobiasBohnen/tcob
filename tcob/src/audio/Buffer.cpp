@@ -66,7 +66,7 @@ auto buffer::load(std::shared_ptr<io::istream> in, string const& ext, std::any c
     _buffer.clear();
     if (!in || !(*in)) { return false; }
 
-    auto decoder {locate_service<decoder::factory>().from_magic(*in, ext)};
+    auto decoder {locate_service<decoder::factory>().create_from_magic(*in, ext)};
     if (!decoder) { return false; }
 
     if (auto info {decoder->open(std::move(in), ctx)}) {

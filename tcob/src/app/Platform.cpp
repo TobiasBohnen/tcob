@@ -499,6 +499,7 @@ void platform::InitImageCodecs()
 
     // encoders
     auto iaeFactory {register_service<gfx::animated_image_encoder::factory>()};
+    iaeFactory->add({".png"}, &make_unique<gfx::detail::png_anim_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
     iaeFactory->add({".webp"}, &make_unique<gfx::detail::webp_anim_encoder>);
 #endif

@@ -166,6 +166,12 @@ void image::blend(point_i offset, image const& src)
     }
 }
 
+auto image::crop(rect_i const& bounds) const -> image
+{
+    if (bounds == rect_i::Zero) { return image::CreateEmpty(size_i::Zero, _info.Format); }
+    return image::Create(bounds.Size, _info.Format, data(bounds));
+}
+
 auto image::count_colors [[nodiscard]] () const -> isize
 {
     std::unordered_set<u32> colors;
@@ -218,7 +224,7 @@ auto image::load(io::istream& in, string const& ext) noexcept -> bool
 {
     if (!in) { return false; }
 
-    if (auto decoder {locate_service<image_decoder::factory>().from_magic(in, ext)}) {
+    if (auto decoder {locate_service<image_decoder::factory>().create_from_magic(in, ext)}) {
         if (auto img {decoder->decode(in)}) {
             std::swap(_buffer, img->_buffer);
             std::swap(_info, img->_info);
@@ -237,7 +243,7 @@ auto image::load_async(path const& file) noexcept -> std::future<bool>
 auto image::LoadInfo(path const& file) noexcept -> std::optional<information>
 {
     io::ifstream fs {file};
-    if (auto decoder {locate_service<image_decoder::factory>().from_magic(fs, io::get_extension(file))}) {
+    if (auto decoder {locate_service<image_decoder::factory>().create_from_magic(fs, io::get_extension(file))}) {
         return decoder->decode_info(fs);
     }
 

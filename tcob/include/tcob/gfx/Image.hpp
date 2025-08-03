@@ -71,6 +71,7 @@ public:
     void fill(rect_i const& rect, color c);
     void blit(point_i offset, image const& src);
     void blend(point_i offset, image const& src);
+    auto crop(rect_i const& bounds) const -> image;
 
     auto count_colors [[nodiscard]] () const -> isize;
 

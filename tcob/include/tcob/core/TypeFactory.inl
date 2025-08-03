@@ -33,7 +33,7 @@ inline auto type_factory<ReturnType, Args...>::create(string const& name, Args&&
 }
 
 template <typename ReturnType, typename... Args>
-inline auto type_factory<ReturnType, Args...>::from_magic(io::istream& in, string const& fallback, Args&&... args) -> ReturnType
+inline auto type_factory<ReturnType, Args...>::create_from_magic(io::istream& in, string const& fallback, Args&&... args) -> ReturnType
 {
     auto retValue {create(io::magic::get_extension(in))};
     if (!retValue) { retValue = create(fallback, std::move(args)...); }

@@ -211,14 +211,13 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class png_encoder final : public image_encoder {
+class png_encoder : public image_encoder {
 public:
     auto encode(image const& image, io::ostream& out) const -> bool override;
 
-private:
-    void write_header(image const& image, io::ostream& out) const;
-    void write_image(image const& image, io::ostream& out) const;
-    void write_end(io::ostream& out) const;
+    void write_ihdr(image::information const& info, io::ostream& out) const;
+    void write_idat(image const& image, io::ostream& out) const;
+    void write_iend(io::ostream& out) const;
 
     void write_chunk(io::ostream& out, std::span<u8 const> buf) const;
     void write_chunk(io::ostream& out, std::span<u8 const> buf, u32 length) const;
@@ -241,6 +240,20 @@ private:
     image                          _currentFrame;
     milliseconds                   _currentTimeStamp {0};
     std::streamsize                _contentOffset {0};
+};
+
+////////////////////////////////////////////////////////////
+
+class png_anim_encoder final : public animated_image_encoder {
+public:
+    auto encode(std::span<frame const> frames, io::ostream& out) -> bool override;
+
+private:
+    void write_actl(std::span<frame const> frames, io::ostream& out) const;
+    void write_fctl(u32 idx, rect_i const& rect, frame const& frame, io::ostream& out) const;
+    void write_fdat(u32 idx, image const& frame, io::ostream& out) const;
+
+    png_encoder _enc;
 };
 
 }

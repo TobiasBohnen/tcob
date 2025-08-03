@@ -674,23 +674,22 @@ void png_decoder::prepare_delegate()
 auto png_encoder::encode(image const& image, io::ostream& out) const -> bool
 {
     out.write(SIGNATURE);
-    write_header(image, out);
-    write_image(image, out);
-    write_end(out);
+    write_ihdr(image.info(), out);
+    write_idat(image, out);
+    write_iend(out);
     return true;
 }
 
-void png_encoder::write_header(image const& image, io::ostream& out) const
+void png_encoder::write_ihdr(image::information const& info, io::ostream& out) const
 {
-    auto const& info {image.info()};
-
     std::array<u8, 17> header {};
 
-    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IHDR))}; // TODO: endianess
+    // TODO: endianess
+    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::IHDR))};
     memcpy(header.data(), &type, 4);
-    u32 const width {std::byteswap(static_cast<u32>(info.Size.Width))};      // TODO: endianess
+    u32 const width {std::byteswap(static_cast<u32>(info.Size.Width))};
     memcpy(header.data() + 4, &width, 4);
-    u32 const height {std::byteswap(static_cast<u32>(info.Size.Height))};    // TODO: endianess
+    u32 const height {std::byteswap(static_cast<u32>(info.Size.Height))};
     memcpy(header.data() + 8, &height, 4);
 
     u8 bitDepth {0};
@@ -753,7 +752,7 @@ auto static data(image const& image) -> std::vector<u8>
     return retValue;
 }
 
-void png_encoder::write_image(image const& image, io::ostream& out) const
+void png_encoder::write_idat(image const& image, io::ostream& out) const
 {
     // compress
     auto buf {io::zlib_filter {}.to(data(image))};
@@ -777,7 +776,7 @@ void png_encoder::write_image(image const& image, io::ostream& out) const
     }
 }
 
-void png_encoder::write_end(io::ostream& out) const
+void png_encoder::write_iend(io::ostream& out) const
 {
     std::array<u8, 4> iend {};
     u32 const         type {std::byteswap(static_cast<u32>(png::chunk_type::IEND))}; // TODO: endianess
@@ -798,4 +797,143 @@ void png_encoder::write_chunk(io::ostream& out, std::span<u8 const> buf, u32 len
     out.write<u32, std::endian::big>(crc);
 }
 
+////////////////////////////////////////////////////////////
+
+auto calculate_diff_rect(image const& a, image const& b) -> std::optional<rect_i>
+{
+    auto const size {a.info().Size};
+    assert(size == b.info().Size);
+
+    i32  left {size.Width};
+    i32  top {size.Height};
+    i32  right {0};
+    i32  bottom {0};
+    bool found {false};
+
+    for (i32 y {0}; y < size.Height; ++y) {
+        for (i32 x {0}; x < size.Width; ++x) {
+            if (a.get_pixel({x, y}) != b.get_pixel({x, y})) {
+                left   = std::min(left, x);
+                top    = std::min(top, y);
+                right  = std::max(right, x + 1);
+                bottom = std::max(bottom, y + 1);
+                found  = true;
+            }
+        }
+    }
+
+    if (!found) {
+        return std::nullopt;
+    }
+
+    return rect_i::FromLTRB(left, top, right, bottom);
+}
+
+auto png_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) -> bool
+{
+    if (frames.empty()) { return false; }
+
+    auto const& info {frames[0].Image.info()};
+    out.write(SIGNATURE);
+    _enc.write_ihdr(info, out);
+
+    std::vector<frame> newFrames;
+    newFrames.reserve(frames.size());
+    std::vector<rect_i> newFrameRects;
+    newFrameRects.reserve(frames.size());
+
+    newFrames.emplace_back(frames[0]);
+    newFrameRects.emplace_back(point_i::Zero, info.Size);
+
+    for (u32 i {1}; i < frames.size(); ++i) {
+        auto const diff {calculate_diff_rect(frames[i - 1].Image, frames[i].Image)};
+        if (!diff || diff->width() == 0 || diff->height() == 0) {
+            newFrames.back().TimeStamp += frames[i].TimeStamp;
+        } else {
+            newFrames.push_back({.Image = frames[i].Image.crop(*diff), .TimeStamp = frames[i].TimeStamp});
+            newFrameRects.push_back(*diff);
+        }
+    }
+
+    write_actl(newFrames, out);
+
+    write_fctl(0, {point_i::Zero, info.Size}, newFrames[0], out);
+    _enc.write_idat(newFrames[0].Image, out);
+
+    u32 seq {1};
+    for (u32 i {1}; i < newFrames.size(); ++i) {
+        write_fctl(seq++, newFrameRects[i], newFrames[i], out);
+        write_fdat(seq++, newFrames[i].Image, out);
+    }
+    _enc.write_iend(out);
+    return true;
+}
+
+void png_anim_encoder::write_actl(std::span<frame const> frames, io::ostream& out) const
+{
+    std::array<u8, 12> actl {};
+
+    // TODO: endianess
+    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::acTL))};
+    memcpy(actl.data(), &type, 4);
+    u32 const numFrames {std::byteswap(static_cast<u32>(frames.size()))};
+    memcpy(actl.data() + 4, &numFrames, 4);
+    u32 const numPlays {0};
+    memcpy(actl.data() + 8, &numPlays, 4);
+
+    _enc.write_chunk(out, actl);
+}
+
+void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, frame const& frame, io::ostream& out) const
+{
+    std::array<u8, 30> fctl {};
+
+    // TODO: endianess
+    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::fcTL))};
+    memcpy(fctl.data(), &type, 4);
+    u32 const seq {std::byteswap(idx)};
+    memcpy(fctl.data() + 4, &seq, 4);
+    u32 const width {static_cast<u32>(std::byteswap(rect.Size.Width))};
+    memcpy(fctl.data() + 8, &width, 4);
+    u32 const height {static_cast<u32>(std::byteswap(rect.Size.Height))};
+    memcpy(fctl.data() + 12, &height, 4);
+    u32 const xoff {static_cast<u32>(std::byteswap(rect.left()))};
+    memcpy(fctl.data() + 16, &xoff, 4);
+    u32 const yoff {static_cast<u32>(std::byteswap(rect.top()))};
+    memcpy(fctl.data() + 20, &yoff, 4);
+    u16 const delayNum {std::byteswap(static_cast<u16>(frame.TimeStamp.count()))};
+    memcpy(fctl.data() + 24, &delayNum, 2);
+    u16 const delayDen {std::byteswap(u16 {1000})};
+    memcpy(fctl.data() + 26, &delayDen, 2);
+    fctl[28] = static_cast<u8>(png::dispose_op::None);
+    fctl[29] = static_cast<u8>(png::blend_op::Source);
+    _enc.write_chunk(out, fctl);
+}
+
+void png_anim_encoder::write_fdat(u32 idx, image const& frame, io::ostream& out) const
+{
+    // compress
+    auto buf {io::zlib_filter {}.to(data(frame))};
+    if (buf.empty()) { return; }
+
+    // write in 8192 byte chunks
+    isize offset {0};
+    usize total {buf.size()};
+
+    constexpr usize                fdatLength {8192};
+    std::array<u8, fdatLength + 8> fdat {};
+
+    u32 const type {std::byteswap(static_cast<u32>(png::chunk_type::fdAT))}; // TODO: endianess
+    u32 const seq {std::byteswap(idx)};
+
+    while (total > 0) {
+        memcpy(fdat.data(), &type, 4);
+        memcpy(fdat.data() + 4, &seq, 4);
+        usize const length {std::min(fdatLength, total)};
+        memcpy(fdat.data() + 8, buf.data() + offset, length);
+        _enc.write_chunk(out, fdat, static_cast<u32>(length + 8));
+        offset += length;
+        total -= length;
+    }
+}
 }

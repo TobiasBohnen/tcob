@@ -22,7 +22,7 @@ public:
 
     auto create(string const& name, Args&&... args) -> ReturnType;
 
-    auto from_magic(io::istream& in, string const& fallback, Args&&... args) -> ReturnType;
+    auto create_from_magic(io::istream& in, string const& fallback, Args&&... args) -> ReturnType;
 
 private:
     std::unordered_map<string, func> _functions;
