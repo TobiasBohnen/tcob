@@ -246,11 +246,11 @@ private:
 
 class png_anim_encoder final : public animated_image_encoder {
 public:
-    auto encode(std::span<frame const> frames, io::ostream& out) -> bool override;
+    auto encode(std::span<image_frame const> frames, io::ostream& out) -> bool override;
 
 private:
-    void write_actl(std::span<frame const> frames, io::ostream& out) const;
-    void write_fctl(u32 idx, rect_i const& rect, frame const& frame, io::ostream& out) const;
+    void write_actl(std::span<image_frame const> frames, io::ostream& out) const;
+    void write_fctl(u32 idx, rect_i const& rect, image_frame const& frame, io::ostream& out) const;
     void write_fdat(u32 idx, image const& frame, io::ostream& out) const;
 
     png_encoder _enc;

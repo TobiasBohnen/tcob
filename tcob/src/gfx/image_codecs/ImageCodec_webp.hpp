@@ -72,7 +72,7 @@ public:
     webp_anim_encoder();
     ~webp_anim_encoder() override;
 
-    auto encode(std::span<frame const> frames, io::ostream& out) -> bool override;
+    auto encode(std::span<image_frame const> frames, io::ostream& out) -> bool override;
 
 private:
     WebPAnimEncoder* _encoder {nullptr};

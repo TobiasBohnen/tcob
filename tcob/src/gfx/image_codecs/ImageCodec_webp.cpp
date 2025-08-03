@@ -166,7 +166,7 @@ webp_anim_encoder::~webp_anim_encoder()
     }
 }
 
-auto webp_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) -> bool
+auto webp_anim_encoder::encode(std::span<image_frame const> frames, io::ostream& out) -> bool
 {
     bool retValue {true};
 
@@ -197,7 +197,7 @@ auto webp_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) 
         }
 
         if (retValue) {
-            retValue = WebPAnimEncoderAdd(_encoder, &pic, static_cast<i32>(frame.TimeStamp.count()), nullptr) != 0;
+            retValue = WebPAnimEncoderAdd(_encoder, &pic, static_cast<i32>(frame.Duration.count()), nullptr) != 0;
         }
     }
 

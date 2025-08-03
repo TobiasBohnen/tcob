@@ -164,6 +164,11 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+struct image_frame {
+    image        Image;
+    milliseconds Duration {0};
+};
+
 class TCOB_API animated_image_encoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<animated_image_encoder>> {
@@ -173,12 +178,7 @@ public:
     animated_image_encoder()          = default;
     virtual ~animated_image_encoder() = default;
 
-    struct frame {
-        image        Image;
-        milliseconds TimeStamp {0};
-    };
-
-    auto virtual encode(std::span<frame const> frames, io::ostream& out) -> bool = 0;
+    auto virtual encode(std::span<image_frame const> frames, io::ostream& out) -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////

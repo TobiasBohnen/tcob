@@ -829,7 +829,7 @@ auto calculate_diff_rect(image const& a, image const& b) -> std::optional<rect_i
     return rect_i::FromLTRB(left, top, right, bottom);
 }
 
-auto png_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) -> bool
+auto png_anim_encoder::encode(std::span<image_frame const> frames, io::ostream& out) -> bool
 {
     if (frames.empty()) { return false; }
 
@@ -837,7 +837,7 @@ auto png_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) -
     out.write(SIGNATURE);
     _enc.write_ihdr(info, out);
 
-    std::vector<frame> newFrames;
+    std::vector<image_frame> newFrames;
     newFrames.reserve(frames.size());
     std::vector<rect_i> newFrameRects;
     newFrameRects.reserve(frames.size());
@@ -848,9 +848,9 @@ auto png_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) -
     for (u32 i {1}; i < frames.size(); ++i) {
         auto const diff {calculate_diff_rect(frames[i - 1].Image, frames[i].Image)};
         if (!diff || diff->width() == 0 || diff->height() == 0) {
-            newFrames.back().TimeStamp += frames[i].TimeStamp;
+            newFrames.back().Duration += frames[i].Duration;
         } else {
-            newFrames.push_back({.Image = frames[i].Image.crop(*diff), .TimeStamp = frames[i].TimeStamp});
+            newFrames.push_back({.Image = frames[i].Image.crop(*diff), .Duration = frames[i].Duration});
             newFrameRects.push_back(*diff);
         }
     }
@@ -869,7 +869,7 @@ auto png_anim_encoder::encode(std::span<frame const> frames, io::ostream& out) -
     return true;
 }
 
-void png_anim_encoder::write_actl(std::span<frame const> frames, io::ostream& out) const
+void png_anim_encoder::write_actl(std::span<image_frame const> frames, io::ostream& out) const
 {
     std::array<u8, 12> actl {};
 
@@ -884,7 +884,7 @@ void png_anim_encoder::write_actl(std::span<frame const> frames, io::ostream& ou
     _enc.write_chunk(out, actl);
 }
 
-void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, frame const& frame, io::ostream& out) const
+void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, image_frame const& frame, io::ostream& out) const
 {
     std::array<u8, 30> fctl {};
 
@@ -901,7 +901,7 @@ void png_anim_encoder::write_fctl(u32 idx, rect_i const& rect, frame const& fram
     memcpy(fctl.data() + 16, &xoff, 4);
     u32 const yoff {static_cast<u32>(std::byteswap(rect.top()))};
     memcpy(fctl.data() + 20, &yoff, 4);
-    u16 const delayNum {std::byteswap(static_cast<u16>(frame.TimeStamp.count()))};
+    u16 const delayNum {std::byteswap(static_cast<u16>(frame.Duration.count()))};
     memcpy(fctl.data() + 24, &delayNum, 2);
     u16 const delayDen {std::byteswap(u16 {1000})};
     memcpy(fctl.data() + 26, &delayDen, 2);
