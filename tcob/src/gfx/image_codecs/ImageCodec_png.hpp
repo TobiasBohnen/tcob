@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <ios>
 #include <optional>
 #include <span>
 #include <vector>
@@ -42,15 +43,15 @@ namespace png {
         Previous   = 2
     };
 
-    auto static constexpr GetChunkType(string_view s) -> u32
+    auto static consteval GetChunkType(char const* s) -> u32
     {
         return static_cast<u32>(s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3]);
     }
 
     enum class chunk_type : u32 {
-        acTL = GetChunkType("acTL"),
-        fcTL = GetChunkType("fcTL"),
-        fdAT = GetChunkType("fdAT"),
+        acTL = GetChunkType("acTL"), // used
+        fcTL = GetChunkType("fcTL"), // used
+        fdAT = GetChunkType("fdAT"), // used
         gAMA = GetChunkType("gAMA"),
         IDAT = GetChunkType("IDAT"), // used
         IEND = GetChunkType("IEND"), // used
@@ -74,14 +75,14 @@ namespace png {
         IHDR_chunk() = default;
         IHDR_chunk(std::span<u8 const> data);
 
+        i32        Width {0};
+        i32        Height {0};
         u8         BitDepth {0};
         color_type ColorType {};
         u8         CompressionMethod {0};
         u8         FilterMethod {0};
-        i32        Height {0};
         u8         InterlaceMethod {0};
         bool       NonInterlaced {true};
-        i32        Width {0};
     };
 
     struct PLTE_chunk {
@@ -106,26 +107,55 @@ namespace png {
         f32 Value {1.f};
     };
 
+    struct acTL_chunk {
+        acTL_chunk(std::span<u8 const> data);
+
+        u32 NumFrames {0};
+        u32 NumPlays {0};
+    };
+
+    struct fcTL_chunk {
+        fcTL_chunk(std::span<u8 const> data);
+
+        u32        SequenceNumber {0};
+        i32        Width {0};
+        i32        Height {0};
+        u32        XOffset {0};
+        u32        YOffset {0};
+        u16        DelayNum {0};
+        u16        DelayDen {0};
+        dispose_op DisposeOp {0};
+        blend_op   BlendOp {0};
+
+        milliseconds Duration {};
+    };
+
 }
 
 ////////////////////////////////////////////////////////////
 
-class png_decoder final : public image_decoder {
-    using get_image_data = void (png_decoder::*)();
+class png_decoder : public image_decoder {
+    using get_image_data = void (png_decoder::*)(i32, i32);
 
 public:
-    // image_decoder
     auto decode(io::istream& in) -> std::optional<image> override;
     auto decode_info(io::istream& in) -> std::optional<image::information> override;
 
-private:
+protected:
     auto read_header(io::istream& in) -> bool;
     auto read_chunk(io::istream& in) const -> png::chunk;
     auto check_sig(io::istream& in) -> bool;
 
-    void prepare();
+    auto read_image(std::span<byte const> idat, i32 width, i32 height) -> bool;
+
+    auto ihdr() const -> png::IHDR_chunk const&;
+    void handle_plte(png::chunk const& chunk);
+    void handle_trns(png::chunk const& chunk);
+    auto data() const -> std::vector<u8> const&;
+
+private:
+    void prepare(i32 width, i32 height);
     void prepare_delegate();
-    auto read_image(std::span<byte const> idat) -> bool;
 
     void filter_pixel();
     void filter_line();
@@ -133,31 +163,31 @@ private:
     void next_line_interlaced(i32 hei);
     void next_line_non_interlaced();
 
-    auto get_interlace_dimensions() const -> rect_i;
+    auto get_interlace_dimensions(i32 width, i32 height) const -> rect_i;
 
-    void interlaced_G1();
-    void interlaced_G2();
-    void interlaced_G4();
-    void interlaced_G8_16();
-    void interlaced_GA8_16();
-    void interlaced_I1();
-    void interlaced_I2();
-    void interlaced_I4();
-    void interlaced_I8();
-    void interlaced_TC8_16();
-    void interlaced_TCA8_16();
+    void interlaced_G1(i32 width, i32 height);
+    void interlaced_G2(i32 width, i32 height);
+    void interlaced_G4(i32 width, i32 height);
+    void interlaced_G8_16(i32 width, i32 height);
+    void interlaced_GA8_16(i32 width, i32 height);
+    void interlaced_I1(i32 width, i32 height);
+    void interlaced_I2(i32 width, i32 height);
+    void interlaced_I4(i32 width, i32 height);
+    void interlaced_I8(i32 width, i32 height);
+    void interlaced_TC8_16(i32 width, i32 height);
+    void interlaced_TCA8_16(i32 width, i32 height);
 
-    void non_interlaced_G1();
-    void non_interlaced_G2();
-    void non_interlaced_G4();
-    void non_interlaced_G8_16();
-    void non_interlaced_GA8_16();
-    void non_interlaced_I1();
-    void non_interlaced_I2();
-    void non_interlaced_I4();
-    void non_interlaced_I8();
-    void non_interlaced_TC8_16();
-    void non_interlaced_TCA8_16();
+    void non_interlaced_G1(i32 width, i32 height);
+    void non_interlaced_G2(i32 width, i32 height);
+    void non_interlaced_G4(i32 width, i32 height);
+    void non_interlaced_G8_16(i32 width, i32 height);
+    void non_interlaced_GA8_16(i32 width, i32 height);
+    void non_interlaced_I1(i32 width, i32 height);
+    void non_interlaced_I2(i32 width, i32 height);
+    void non_interlaced_I4(i32 width, i32 height);
+    void non_interlaced_I8(i32 width, i32 height);
+    void non_interlaced_TC8_16(i32 width, i32 height);
+    void non_interlaced_TCA8_16(i32 width, i32 height);
 
     png::IHDR_chunk                _ihdr;
     std::optional<png::PLTE_chunk> _plte;
@@ -192,6 +222,25 @@ private:
 
     void write_chunk(io::ostream& out, std::span<u8 const> buf) const;
     void write_chunk(io::ostream& out, std::span<u8 const> buf, u32 length) const;
+};
+
+////////////////////////////////////////////////////////////
+
+class png_anim_decoder final : public png_decoder, public animated_image_decoder {
+public:
+    auto open() -> std::optional<image::information> override;
+    auto current_frame() const -> std::span<u8 const> override;
+    auto advance(milliseconds ts) -> animated_image_decoder::status override;
+    void reset() override;
+
+private:
+    auto get_next_frame(io::istream& in) -> animated_image_decoder::status;
+
+    std::optional<png::fcTL_chunk> _previousFctl {};
+    std::optional<image>           _previousFrame;
+    image                          _currentFrame;
+    milliseconds                   _currentTimeStamp {0};
+    std::streamsize                _contentOffset {0};
 };
 
 }

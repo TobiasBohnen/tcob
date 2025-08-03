@@ -124,6 +124,48 @@ void image::set_pixel(point_i pos, color c)
     if (image::information::HasAlpha(_info.Format)) { _buffer[idx + 3] = c.A; }
 }
 
+void image::fill(rect_i const& rect, color c)
+{
+    for (i32 y {rect.top()}; y < rect.bottom(); ++y) {
+        for (i32 x {rect.left()}; x < rect.right(); ++x) {
+            set_pixel({x, y}, c);
+        }
+    }
+}
+
+void image::blit(point_i offset, image const& src)
+{
+    auto const [width, height] {src.info().Size};
+    for (i32 y {0}; y < height; ++y) {
+        for (i32 x {0}; x < width; ++x) {
+            set_pixel({x + offset.X, y + offset.Y}, src.get_pixel({x, y}));
+        }
+    }
+}
+
+void image::blend(point_i offset, image const& src)
+{
+    auto const [width, height] {src.info().Size};
+    for (i32 y {0}; y < height; ++y) {
+        for (i32 x {0}; x < width; ++x) {
+            color const dstCol {get_pixel({x + offset.X, y + offset.Y})};
+            color const srcCol {src.get_pixel({x, y})};
+
+            f32 const sa {srcCol.A / 255.f};
+            f32 const da {dstCol.A / 255.f};
+            f32 const outA {sa + (da * (1 - sa))};
+
+            color const out {
+                static_cast<u8>((srcCol.R * sa + dstCol.R * da * (1 - sa)) / outA),
+                static_cast<u8>((srcCol.G * sa + dstCol.G * da * (1 - sa)) / outA),
+                static_cast<u8>((srcCol.B * sa + dstCol.B * da * (1 - sa)) / outA),
+                static_cast<u8>(outA * 255)};
+
+            set_pixel({x + offset.X, y + offset.Y}, out);
+        }
+    }
+}
+
 auto image::count_colors [[nodiscard]] () const -> isize
 {
     std::unordered_set<u32> colors;

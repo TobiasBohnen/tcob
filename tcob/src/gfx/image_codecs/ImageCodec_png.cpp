@@ -10,6 +10,7 @@
 #include <bit>
 #include <cassert>
 #include <cstring>
+#include <ios>
 #include <iterator>
 #include <optional>
 #include <span>
@@ -17,6 +18,8 @@
 
 #include <miniz/miniz.h>
 
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/io/Filter.hpp"
@@ -26,15 +29,28 @@
 
 namespace tcob::gfx::detail {
 
+static auto to_i32(std::span<u8 const> data, usize start) -> i32
+{
+    return static_cast<i32>(data[start] << 24 | data[start + 1] << 16 | data[start + 2] << 8 | data[start + 3]);
+}
+static auto to_u32(std::span<u8 const> data, usize start) -> u32
+{
+    return static_cast<u32>(data[start] << 24 | data[start + 1] << 16 | data[start + 2] << 8 | data[start + 3]);
+}
+static auto to_u16(std::span<u8 const> data, usize start) -> u16
+{
+    return static_cast<u16>(data[start] << 8 | data[start + 1]);
+}
+
 png::IHDR_chunk::IHDR_chunk(std::span<u8 const> data)
-    : BitDepth {data[8]}
+    : Width {to_i32(data, 0)}
+    , Height {to_i32(data, 4)}
+    , BitDepth {data[8]}
     , ColorType {static_cast<color_type>(data[9])}
     , CompressionMethod {data[10]}
     , FilterMethod {data[11]}
-    , Height {static_cast<i32>(data[4] << 24 | data[5] << 16 | data[6] << 8 | data[7])}
     , InterlaceMethod {data[12]}
     , NonInterlaced {InterlaceMethod == 0}
-    , Width {static_cast<i32>(data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3])}
 {
 }
 
@@ -100,14 +116,44 @@ png::pHYs_chunk::pHYs_chunk(std::span<u8 const> data)
 {
     if (data.size() != 9) { return; }
 
-    i32 const ppuX {data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3]};
-    i32 const ppuY {data[4] << 24 | data[5] << 16 | data[6] << 8 | data[7]};
-    Value = static_cast<f32>(ppuX) / static_cast<f32>(ppuY);
+    i32 const ppuX {to_i32(data, 0)};
+    i32 const ppuY {to_i32(data, 4)};
+
+    Value = static_cast<f32>(ppuX) / (ppuY != 0 ? static_cast<f32>(ppuY) : 1.0f);
+}
+
+png::acTL_chunk::acTL_chunk(std::span<u8 const> data)
+    : NumFrames {to_u32(data, 0)}
+    , NumPlays {to_u32(data, 4)}
+{
+}
+
+png::fcTL_chunk::fcTL_chunk(std::span<u8 const> data)
+    : SequenceNumber {to_u32(data, 0)}
+    , Width {to_i32(data, 4)}
+    , Height {to_i32(data, 8)}
+    , XOffset {to_u32(data, 12)}
+    , YOffset {to_u32(data, 16)}
+    , DelayNum {to_u16(data, 20)}
+    , DelayDen {to_u16(data, 22)}
+    , DisposeOp {static_cast<dispose_op>(data[24])}
+    , BlendOp {static_cast<blend_op>(data[25])}
+{
+    if (DelayNum == 0) {
+        Duration = milliseconds {1};
+        return;
+    }
+
+    Duration = milliseconds {(DelayNum * 1000) / (DelayDen != 0 ? static_cast<u32>(DelayDen) : 100)};
 }
 
 constexpr std::array<byte, 8> SIGNATURE {0x89, 0x50, 0x4e, 0x47, 0x0d, 0xa, 0x1a, 0x0a};
 
 ////////////////////////////////////////////////////////////
+
+void png_decoder::handle_plte(png::chunk const& chunk) { _plte = {chunk.Data}; }
+
+void png_decoder::handle_trns(png::chunk const& chunk) { _trns = {chunk.Data, _ihdr.ColorType, _plte}; }
 
 auto png_decoder::decode(io::istream& in) -> std::optional<image>
 {
@@ -121,32 +167,22 @@ auto png_decoder::decode(io::istream& in) -> std::optional<image>
         if (in.is_eof()) { return std::nullopt; }
 
         auto const chunk {read_chunk(in)};
-        // IDAT
-        if (chunk.Type == png::chunk_type::IDAT) {
+
+        if (chunk.Type == png::chunk_type::IDAT) {        // IDAT
             idat.insert(idat.end(), chunk.Data.begin(), chunk.Data.end());
-        }
-        // PLTE
-        else if (chunk.Type == png::chunk_type::PLTE) {
+        } else if (chunk.Type == png::chunk_type::PLTE) { // PLTE
             if (chunk.Length % 3 != 0) { return std::nullopt; }
-            _plte = {chunk.Data};
-        }
-        // TRNS
-        else if (chunk.Type == png::chunk_type::tRNS) {
-            _trns = {chunk.Data, _ihdr.ColorType, _plte};
-        }
-        // PHYS
-        else if (chunk.Type == png::chunk_type::pHYs) {
+            handle_plte(chunk);
+        } else if (chunk.Type == png::chunk_type::tRNS) { // TRNS
+            handle_trns(chunk);
+        } else if (chunk.Type == png::chunk_type::pHYs) { // PHYS
             phys = {chunk.Data};
-        }
-        // IEND
-        else if (chunk.Type == png::chunk_type::IEND) {
+        } else if (chunk.Type == png::chunk_type::IEND) { // IEND
             break;
         }
     }
 
-    auto const idatInflated {io::zlib_filter {}.from(idat)};
-    if (!read_image(idatInflated)) { return std::nullopt; }
-
+    if (!read_image(idat, _ihdr.Width, _ihdr.Height)) { return std::nullopt; }
     size_i const size {_ihdr.Width, _ihdr.Height};
     auto         retValue {image::Create(size, image::format::RGBA, _data)};
 
@@ -168,6 +204,137 @@ auto png_decoder::decode_info(io::istream& in) -> std::optional<image::informati
     }
 
     return std::nullopt;
+}
+
+////////////////////////////////////////////////////////////
+
+auto png_anim_decoder::open() -> std::optional<image::information>
+{
+    auto const& hdr {ihdr()};
+
+    auto& in {stream()};
+    if (check_sig(in) && read_header(in)) {
+        if (hdr.Width > png::MAX_SIZE || hdr.Height > png::MAX_SIZE) { return std::nullopt; }
+
+        for (;;) {
+            if (in.is_eof()) { return std::nullopt; }
+
+            auto const chunk {read_chunk(in)};
+
+            if (chunk.Type == png::chunk_type::acTL) {                                               // ACTL
+                _contentOffset = in.tell();
+                _currentFrame  = image::CreateEmpty({hdr.Width, hdr.Height}, image::format::RGBA);
+            } else if (chunk.Type == png::chunk_type::IDAT || chunk.Type == png::chunk_type::fdAT) { // IDAT | fdAT
+                return _currentFrame.info();
+            } else if (chunk.Type == png::chunk_type::PLTE) {                                        // PLTE
+                if (chunk.Length % 3 != 0) { return std::nullopt; }
+                handle_plte(chunk);
+            } else if (chunk.Type == png::chunk_type::tRNS) {                                        // TRNS
+                handle_trns(chunk);
+            } else if (chunk.Type == png::chunk_type::IEND) {                                        // IEND
+                return std::nullopt;
+            }
+        }
+    }
+
+    return std::nullopt;
+}
+
+auto png_anim_decoder::current_frame() const -> std::span<u8 const>
+{
+    return _currentFrame.data();
+}
+
+auto png_anim_decoder::get_next_frame(io::istream& in) -> animated_image_decoder::status
+{
+    std::vector<byte>              idat {};
+    std::optional<png::fcTL_chunk> fctl {};
+
+    for (;;) {
+        if (in.is_eof()) { return animated_image_decoder::status::NoMoreFrames; }
+
+        std::streamsize const lastPos {in.tell()};
+        auto const            chunk {read_chunk(in)};
+
+        if (chunk.Type == png::chunk_type::fcTL) {
+            if (fctl) { // next fctl found -> break
+                in.seek(lastPos, io::seek_dir::Begin);
+                break;
+            }
+            fctl = {chunk.Data};
+            _currentTimeStamp += fctl->Duration;
+        } else if (chunk.Type == png::chunk_type::IDAT) {
+            idat.insert(idat.end(), chunk.Data.begin(), chunk.Data.end());
+        } else if (chunk.Type == png::chunk_type::fdAT) {
+            idat.insert(idat.end(), chunk.Data.begin() + 4, chunk.Data.end()); // skip sequence num
+        } else if (chunk.Type == png::chunk_type::IEND) {
+            break;
+        }
+    }
+
+    if (idat.empty() || !fctl) {
+        return animated_image_decoder::status::NoMoreFrames;
+    }
+
+    if (!read_image(idat, fctl->Width, fctl->Height)) {
+        return animated_image_decoder::status::DecodeFailure;
+    }
+
+    if (_previousFctl) {
+        switch (_previousFctl->DisposeOp) {
+        case png::dispose_op::None:       break;
+        case png::dispose_op::Background: {
+            size_i const  size {_previousFctl->Width, _previousFctl->Height};
+            point_i const offset {static_cast<i32>(_previousFctl->XOffset), static_cast<i32>(_previousFctl->YOffset)};
+            _currentFrame.fill({offset, size}, colors::Transparent);
+        } break;
+        case png::dispose_op::Previous:
+            if (_previousFrame) { _currentFrame.blit(point_i::Zero, *_previousFrame); }
+            break;
+        }
+    }
+
+    _previousFctl = fctl;
+    if (fctl->DisposeOp == png::dispose_op::Previous) {
+        _previousFrame = _currentFrame;
+    } else {
+        _previousFrame.reset();
+    }
+
+    size_i const  size {fctl->Width, fctl->Height};
+    point_i const offset {static_cast<i32>(fctl->XOffset), static_cast<i32>(fctl->YOffset)};
+    auto const    frame {image::Create(size, image::format::RGBA, data())};
+    switch (fctl->BlendOp) {
+    case png::blend_op::Source: _currentFrame.blit(offset, frame); break;
+    case png::blend_op::Over:   _currentFrame.blend(offset, frame); break;
+    }
+
+    return animated_image_decoder::status::NewFrame;
+}
+
+auto png_anim_decoder::advance(milliseconds ts) -> animated_image_decoder::status
+{
+    if (ts <= _currentTimeStamp) {
+        return animated_image_decoder::status::OldFrame;
+    }
+
+    auto& in {stream()};
+    while (get_next_frame(in) != animated_image_decoder::status::NoMoreFrames) {
+        if (ts <= _currentTimeStamp) {
+            return animated_image_decoder::status::NewFrame;
+        }
+    }
+
+    return animated_image_decoder::status::NoMoreFrames; // TODO: check against frame count
+}
+
+void png_anim_decoder::reset()
+{
+    auto const& hdr {ihdr()};
+    _currentTimeStamp = milliseconds::zero();
+    _currentFrame     = image::CreateEmpty({hdr.Width, hdr.Height}, image::format::RGBA);
+    _previousFrame    = {};
+    stream().seek(_contentOffset, io::seek_dir::Begin);
 }
 
 ////////////////////////////////////////////////////////////
@@ -204,6 +371,61 @@ auto png_decoder::check_sig(io::istream& in) -> bool
     in.read_to<byte>(buf);
     return buf == SIGNATURE;
 }
+
+auto png_decoder::read_image(std::span<byte const> idat, i32 width, i32 height) -> bool
+{
+    auto const idatInflated {io::zlib_filter {}.from(idat)};
+
+    prepare(width, height);
+    if (_pixelSize == 0) { return false; }
+
+    auto const idatSize {std::ssize(idatInflated)};
+    if (_ihdr.NonInterlaced) { // size check for non-interlaced
+        if (height * (1 + std::ssize(_curLine)) != idatSize) { return false; }
+    }
+
+    for (i32 bufferIndex {0}; bufferIndex < idatSize; bufferIndex += _pixelSize) {
+        if (_pixel.Y >= height) { return false; }
+
+        if (!_ihdr.NonInterlaced) {
+            if (width < 5 || height < 5) {
+                rect_i rect {get_interlace_dimensions(width, height)};
+                while (rect.width() <= 0 || rect.height() <= 0) {
+                    ++_interlacePass;
+                    rect = get_interlace_dimensions(width, height);
+                }
+            }
+        }
+
+        auto const idatIt {idatInflated.begin() + bufferIndex};
+        if (_pixel.X == -1) { // First byte is filter type for the line.
+            _filter    = *idatIt;
+            _curLineIt = _curLine.begin();
+            _pixel.X   = 0;
+
+            if (_ihdr.NonInterlaced) { // copy and filter whole line if not interlaced
+                std::copy(idatIt + 1, idatIt + 1 + std::ssize(_curLine), _curLineIt);
+                filter_line();
+            }
+
+            bufferIndex = bufferIndex - _pixelSize + 1;
+        } else {
+            if (!_ihdr.NonInterlaced) { // copy and filter one by one if interlaced
+                std::copy(idatIt, idatIt + _pixelSize, _curLineIt);
+                filter_pixel();
+            }
+
+            (this->*_getImageData)(width, height);
+            _curLineIt += _pixelSize;
+        }
+    }
+
+    _pixel = {-1, 0};
+    return true;
+}
+
+auto png_decoder::ihdr() const -> png::IHDR_chunk const& { return _ihdr; }
+auto png_decoder::data() const -> std::vector<u8> const& { return _data; }
 
 auto static paeth(u8 a, u8 b, u8 c) -> u8
 { // https://github.com/nothings/stb/blob/f4a71b13373436a2866c5d68f8f80ac6f0bc1ffe/stb_image.h#L4656C1-L4667C1
@@ -304,22 +526,22 @@ void png_decoder::next_line_non_interlaced()
     _curLine.swap(_prvLine);
 }
 
-auto png_decoder::get_interlace_dimensions() const -> rect_i
+auto png_decoder::get_interlace_dimensions(i32 width, i32 height) const -> rect_i
 {
     switch (_interlacePass) {
-    case 1: return {(0 + (_pixel.X * 8)), (0 + (_pixel.Y * 8)), (_ihdr.Width + 7) / 8, (_ihdr.Height + 7) / 8};
-    case 2: return {(4 + (_pixel.X * 8)), (0 + (_pixel.Y * 8)), (_ihdr.Width + 3) / 8, (_ihdr.Height + 7) / 8};
-    case 3: return {(0 + (_pixel.X * 4)), (4 + (_pixel.Y * 8)), (_ihdr.Width + 3) / 4, (_ihdr.Height + 3) / 8};
-    case 4: return {(2 + (_pixel.X * 4)), (0 + (_pixel.Y * 4)), (_ihdr.Width + 1) / 4, (_ihdr.Height + 3) / 4};
-    case 5: return {(0 + (_pixel.X * 2)), (2 + (_pixel.Y * 4)), (_ihdr.Width + 1) / 2, (_ihdr.Height + 1) / 4};
-    case 6: return {(1 + (_pixel.X * 2)), (0 + (_pixel.Y * 2)), (_ihdr.Width + 0) / 2, (_ihdr.Height + 1) / 2};
-    case 7: return {(0 + (_pixel.X * 1)), (1 + (_pixel.Y * 2)), (_ihdr.Width + 0) / 1, (_ihdr.Height + 0) / 2};
+    case 1: return {(0 + (_pixel.X * 8)), (0 + (_pixel.Y * 8)), (width + 7) / 8, (height + 7) / 8};
+    case 2: return {(4 + (_pixel.X * 8)), (0 + (_pixel.Y * 8)), (width + 3) / 8, (height + 7) / 8};
+    case 3: return {(0 + (_pixel.X * 4)), (4 + (_pixel.Y * 8)), (width + 3) / 4, (height + 3) / 8};
+    case 4: return {(2 + (_pixel.X * 4)), (0 + (_pixel.Y * 4)), (width + 1) / 4, (height + 3) / 4};
+    case 5: return {(0 + (_pixel.X * 2)), (2 + (_pixel.Y * 4)), (width + 1) / 2, (height + 1) / 4};
+    case 6: return {(1 + (_pixel.X * 2)), (0 + (_pixel.Y * 2)), (width + 0) / 2, (height + 1) / 2};
+    case 7: return {(0 + (_pixel.X * 1)), (1 + (_pixel.Y * 2)), (width + 0) / 1, (height + 0) / 2};
     }
 
     return {};
 }
 
-void png_decoder::prepare()
+void png_decoder::prepare(i32 width, i32 height)
 {
     auto const depth {_ihdr.BitDepth};
 
@@ -329,23 +551,23 @@ void png_decoder::prepare()
         switch (depth) {
         case 1:
             _pixelSize = 1;
-            lineSize   = (_ihdr.Width + 7) / 8;
+            lineSize   = (width + 7) / 8;
             break;
         case 2:
             _pixelSize = 1;
-            lineSize   = (_ihdr.Width + 3) / 4;
+            lineSize   = (width + 3) / 4;
             break;
         case 4:
             _pixelSize = 1;
-            lineSize   = (_ihdr.Width + 1) / 2;
+            lineSize   = (width + 1) / 2;
             break;
         case 8:
             _pixelSize = 1;
-            lineSize   = _ihdr.Width;
+            lineSize   = width;
             break;
         case 16:
             _pixelSize = 2;
-            lineSize   = _ihdr.Width * 2;
+            lineSize   = width * 2;
             break;
         default: return;
         }
@@ -358,14 +580,14 @@ void png_decoder::prepare()
         default: return;
         }
 
-        lineSize = _ihdr.Width * _pixelSize;
+        lineSize = width * _pixelSize;
         break;
     case png::color_type::Indexed: // Indexed-color
         switch (depth) {
-        case 1:  lineSize = (_ihdr.Width + 7) / 8; break;
-        case 2:  lineSize = (_ihdr.Width + 3) / 4; break;
-        case 4:  lineSize = (_ihdr.Width + 1) / 2; break;
-        case 8:  lineSize = _ihdr.Width; break;
+        case 1:  lineSize = (width + 7) / 8; break;
+        case 2:  lineSize = (width + 3) / 4; break;
+        case 4:  lineSize = (width + 1) / 2; break;
+        case 8:  lineSize = width; break;
         default: return;
         }
 
@@ -378,7 +600,7 @@ void png_decoder::prepare()
         default: return;
         }
 
-        lineSize = _ihdr.Width * _pixelSize;
+        lineSize = width * _pixelSize;
         break;
     case png::color_type::TrueColorAlpha: // Truecolor with alpha
         switch (depth) {
@@ -387,13 +609,13 @@ void png_decoder::prepare()
         default: return;
         }
 
-        lineSize = _ihdr.Width * _pixelSize;
+        lineSize = width * _pixelSize;
         break;
     }
 
     _prvLine.resize(static_cast<usize>(lineSize));
     _curLine.resize(static_cast<usize>(lineSize));
-    _data.resize(static_cast<usize>(_ihdr.Width * png::BPP * _ihdr.Height));
+    _data.resize(static_cast<usize>(width * png::BPP * height));
     _dataIt = _data.begin();
     prepare_delegate();
 }
@@ -445,54 +667,6 @@ void png_decoder::prepare_delegate()
         }
         break;
     }
-}
-
-auto png_decoder::read_image(std::span<byte const> idat) -> bool
-{
-    prepare();
-    if (_pixelSize == 0) { return false; }
-
-    auto const idatSize {std::ssize(idat)};
-    if (_ihdr.NonInterlaced) { // size check for non-interlaced
-        if (_ihdr.Height * (1 + std::ssize(_curLine)) != idatSize) { return false; }
-    }
-
-    for (i32 bufferIndex {0}; bufferIndex < idatSize; bufferIndex += _pixelSize) {
-        if (_pixel.Y >= _ihdr.Height) { return false; }
-
-        if (!_ihdr.NonInterlaced) {
-            if (_ihdr.Width < 5 || _ihdr.Height < 5) {
-                rect_i rect {get_interlace_dimensions()};
-                while (rect.width() <= 0 || rect.height() <= 0) {
-                    ++_interlacePass;
-                    rect = get_interlace_dimensions();
-                }
-            }
-        }
-
-        auto const idatIt {idat.begin() + bufferIndex};
-        if (_pixel.X == -1) { // First byte is filter type for the line.
-            _filter    = *idatIt;
-            _curLineIt = _curLine.begin();
-            _pixel.X   = 0;
-
-            if (_ihdr.NonInterlaced) { // copy and filter whole line if not interlaced
-                std::copy(idatIt + 1, idatIt + 1 + std::ssize(_curLine), _curLineIt);
-                filter_line();
-            }
-
-            bufferIndex = bufferIndex - _pixelSize + 1;
-        } else {
-            if (!_ihdr.NonInterlaced) { // copy and filter one by one if interlaced
-                std::copy(idatIt, idatIt + _pixelSize, _curLineIt);
-                filter_pixel();
-            }
-
-            (this->*_getImageData)();
-            _curLineIt += _pixelSize;
-        }
-    }
-    return true;
 }
 
 ////////////////////////////////////////////////////////////

@@ -68,6 +68,10 @@ public:
     auto get_pixel(point_i pos) const -> color;
     void set_pixel(point_i pos, color c);
 
+    void fill(rect_i const& rect, color c);
+    void blit(point_i offset, image const& src);
+    void blend(point_i offset, image const& src);
+
     auto count_colors [[nodiscard]] () const -> isize;
 
     auto static Create(size_i size, format f, std::span<u8 const> data) -> image;

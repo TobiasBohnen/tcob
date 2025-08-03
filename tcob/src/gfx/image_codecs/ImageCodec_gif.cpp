@@ -115,7 +115,8 @@ auto gif_decoder::advance(milliseconds ts) -> animated_image_decoder::status
         return animated_image_decoder::status::OldFrame;
     }
 
-    while (read_contents(stream()) != animated_image_decoder::status::NoMoreFrames) {
+    auto& in {stream()};
+    while (read_contents(in) != animated_image_decoder::status::NoMoreFrames) {
         if (ts <= _currentTimeStamp) {
             return animated_image_decoder::status::NewFrame;
         }
