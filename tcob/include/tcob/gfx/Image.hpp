@@ -169,6 +169,9 @@ struct image_frame {
     milliseconds Duration {0};
 };
 
+TCOB_API auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> bool;
+TCOB_API auto save_animation [[nodiscard]] (io::ostream& out, string const& ext, std::span<image_frame const> frames) noexcept -> bool;
+
 class TCOB_API animated_image_encoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<animated_image_encoder>> {

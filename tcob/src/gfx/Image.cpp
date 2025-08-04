@@ -323,4 +323,18 @@ auto animated_image_decoder::stream() -> io::istream&
     return *_stream;
 }
 
+////////////////////////////////////////////////////////////
+
+auto save_animation [[nodiscard]] (path const& file, std::span<image_frame const> frames) noexcept -> bool
+{
+    io::ofstream of {file};
+    return save_animation(of, io::get_extension(file), frames);
+}
+
+auto save_animation [[nodiscard]] (io::ostream& out, string const& ext, std::span<image_frame const> frames) noexcept -> bool
+{
+    auto enc {locate_service<gfx::animated_image_encoder::factory>().create(ext)};
+    return enc->encode(frames, out);
+}
+
 }
