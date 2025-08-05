@@ -126,7 +126,7 @@ public:
 
     void set_viewport(rect_i const& rect) override;
 
-    auto get_handle() const -> SDL_Window* override
+    auto get_handle() const -> void* override
     {
         return nullptr;
     }

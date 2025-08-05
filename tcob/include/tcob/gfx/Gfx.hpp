@@ -6,6 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <compare>
+#include <functional>
+#include <set>
+
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -206,6 +210,31 @@ struct video_config {
             && s.try_get(v.VSync, Cfg::Video::vsync)
             && s.try_get(v.RenderSystem, Cfg::Video::render_system);
     }
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API display_mode {
+public:
+    size_i Size {size_i::Zero};
+    f32    PixelDensity {0.0f};
+    f32    RefreshRate {0.0f};
+
+    auto operator==(display_mode const& other) const -> bool = default;
+    auto operator<=>(display_mode const& other) const -> std::partial_ordering;
+};
+
+auto inline display_mode::operator<=>(display_mode const& other) const -> std::partial_ordering
+{
+    if (auto const cmp {Size.Width <=> other.Size.Width}; cmp != 0) { return cmp; }
+    if (auto const cmp {Size.Height <=> other.Size.Height}; cmp != 0) { return cmp; }
+    if (auto const cmp {RefreshRate <=> other.RefreshRate}; cmp != 0) { return cmp; }
+    return other.PixelDensity <=> PixelDensity;
+}
+
+struct display {
+    std::set<display_mode, std::greater<>> Modes;
+    display_mode                           DesktopMode;
 };
 
 }

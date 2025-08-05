@@ -20,8 +20,6 @@
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Texture.hpp"
 
-struct SDL_Window;
-
 namespace tcob::gfx::render_backend {
 ////////////////////////////////////////////////////////////
 
@@ -140,6 +138,6 @@ public:
 
     void virtual set_viewport(rect_i const& rect) = 0;
 
-    auto virtual get_handle() const -> SDL_Window* = 0;
+    auto virtual get_handle() const -> void* = 0;
 };
 }

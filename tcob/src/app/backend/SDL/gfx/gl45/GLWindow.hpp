@@ -13,6 +13,8 @@
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 
+struct SDL_Window;
+
 namespace tcob::gfx::gl45 {
 ////////////////////////////////////////////////////////////
 
@@ -32,7 +34,7 @@ public:
 
     void set_viewport(rect_i const& rect) override;
 
-    auto get_handle() const -> SDL_Window* override
+    auto get_handle() const -> void* override
     {
         return _window;
     }

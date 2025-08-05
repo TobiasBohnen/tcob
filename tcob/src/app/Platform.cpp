@@ -6,7 +6,6 @@
 #include "tcob/app/Platform.hpp"
 
 #include <any>
-#include <compare>
 #include <map>
 #include <memory>
 #include <optional>
@@ -25,6 +24,7 @@
 #include "tcob/app/Game.hpp"
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
@@ -54,9 +54,8 @@
 #endif
 
 #include "backend/SDL/audio/SDLAudioSystem.hpp"
+#include "backend/SDL/gfx/SDLWindow.hpp"
 #include "backend/SDL/input/SDLInputSystem.hpp"
-
-// TODO: backendify window
 
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
@@ -224,17 +223,9 @@ auto platform::preferred_locales() const -> std::vector<locale> const&
     return _locales;
 }
 
-auto display_mode::operator<=>(display_mode const& other) const -> std::partial_ordering
+auto platform::displays() const -> std::map<i32, gfx::display>
 {
-    if (auto const cmp {Size.Width <=> other.Size.Width}; cmp != 0) { return cmp; }
-    if (auto const cmp {Size.Height <=> other.Size.Height}; cmp != 0) { return cmp; }
-    if (auto const cmp {RefreshRate <=> other.RefreshRate}; cmp != 0) { return cmp; }
-    return other.PixelDensity <=> PixelDensity;
-}
-
-auto platform::displays() const -> std::map<i32, display>
-{
-    std::map<i32, display> retValue;
+    std::map<i32, gfx::display> retValue;
 
     i32   numDisplays {};
     auto* displayID {SDL_GetDisplays(&numDisplays)};
@@ -258,7 +249,7 @@ auto platform::displays() const -> std::map<i32, display>
     return retValue;
 }
 
-auto platform::get_desktop_mode(i32 display) const -> display_mode
+auto platform::get_desktop_mode(i32 display) const -> gfx::display_mode
 {
     auto const* mode {SDL_GetDesktopDisplayMode(display)};
     return {.Size         = {mode->w, mode->h},
@@ -328,7 +319,8 @@ void platform::init_render_system(string const& windowTitle)
     if (!renderSystem) { throw std::runtime_error("Render system creation failed"); }
 
     register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
+    // combine sdl_window <-> gl_window ?
+    auto& window {renderSystem->init_window<gfx::sdl_window>(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
     window.FullScreen.Changed.connect([this](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });

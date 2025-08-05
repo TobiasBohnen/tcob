@@ -44,7 +44,8 @@ public:
     render_system();
     virtual ~render_system();
 
-    auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> gfx::window&;
+    template <typename T>
+    auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> window&;
 
     auto virtual name() const -> string        = 0;
     auto virtual device_name() const -> string = 0;
@@ -71,5 +72,28 @@ private:
     std::unique_ptr<gfx::window>           _window;
     std::unique_ptr<default_render_target> _defaultTarget;
 };
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto render_system::init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> gfx::window&
+{
+    size_i const resolution {config.UseDesktopResolution ? desktopResolution : config.Resolution};
+
+    _window = std::make_unique<T>(create_window(resolution));
+
+    _window->FullScreen(config.FullScreen || config.UseDesktopResolution);
+    _window->VSync(config.VSync);
+    _window->Size(resolution);
+    _window->Title = windowTitle;
+
+    _defaultTarget = std::make_unique<gfx::default_render_target>(_window.get());
+
+    _window->clear();
+    _window->draw_to(*_defaultTarget);
+    _window->swap_buffer();
+
+    return *_window;
+}
 
 }

@@ -7,47 +7,21 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
-#include <compare>
-#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
-#include <set>
 #include <vector>
 
 #include "tcob/app/Game.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigFile.hpp"
+#include "tcob/gfx/Gfx.hpp"
 
 namespace tcob {
-////////////////////////////////////////////////////////////
-
-struct locale {
-    string Language;
-    string Country;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API display_mode {
-public:
-    size_i Size {size_i::Zero};
-    f32    PixelDensity {0.0f};
-    f32    RefreshRate {0.0f};
-
-    auto operator==(display_mode const& other) const -> bool = default;
-    auto operator<=>(display_mode const& other) const -> std::partial_ordering;
-};
-
-struct display {
-    std::set<display_mode, std::greater<>> Modes;
-    display_mode                           DesktopMode;
-};
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API platform final : public non_copyable {
@@ -56,14 +30,14 @@ public:
 
     signal<path const> DropFile;
 
-    prop<i32> FrameLimit; //!< Property to control the frame rate limit.
+    prop<i32> FrameLimit;
 
     auto config() const -> data::config_file&;
 
     auto preferred_locales() const -> std::vector<locale> const&;
 
-    auto displays() const -> std::map<i32, display>;
-    auto get_desktop_mode(i32 display) const -> display_mode;
+    auto displays() const -> std::map<i32, gfx::display>;
+    auto get_desktop_mode(i32 display) const -> gfx::display_mode;
 
     auto was_paused() const -> bool; // WINDOWS: true if window was dragged
 

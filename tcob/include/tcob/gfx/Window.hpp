@@ -12,9 +12,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
-#include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
@@ -22,18 +20,11 @@
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/drawables/Cursor.hpp"
 
-////////////////////////////////////////////////////////////
-
-using SDL_Event = union SDL_Event;
-struct SDL_Window;
-
 namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API window final : public render_target {
-    friend class tcob::gfx::render_system;
-
+class TCOB_API window : public render_target {
 public:
     struct event : event_base {
         u32 WindowID {0};
@@ -69,29 +60,31 @@ public:
 
     auto bounds() const -> rect_i;
 
-    void load_icon(path const& file);
+    void virtual load_icon(path const& file) = 0;
 
-    auto has_focus() const -> bool;
-    void grab_input(bool grab);
+    auto virtual has_focus() const -> bool = 0;
+    void virtual grab_input(bool grab)     = 0;
 
     void draw_to(render_target& target);
     void swap_buffer() const;
 
-    void process_events(SDL_Event* ev);
+    void virtual process_events(void* ev) = 0;
+
+    auto get_impl() const -> render_backend::window_base*;
 
 protected:
-    auto get_size() const -> size_i override;
-    void set_size(size_i newsize) override;
-    void on_clear(color c) const override;
-
-private:
     explicit window(std::unique_ptr<render_backend::window_base> window, assets::asset_owner_ptr<texture> const& texture = {});
 
-    auto get_fullscreen() const -> bool;
-    void set_fullscreen(bool value);
+    void on_clear(color c) const override;
 
-    auto get_title() const -> string;
-    void set_title(string const& value);
+    auto renderer() -> quad_renderer&;
+
+private:
+    auto virtual get_fullscreen() const -> bool = 0;
+    void virtual set_fullscreen(bool value)     = 0;
+
+    auto virtual get_title() const -> string    = 0;
+    void virtual set_title(string const& value) = 0;
 
     assets::asset_owner_ptr<texture>  _texture;
     assets::asset_owner_ptr<material> _material {};

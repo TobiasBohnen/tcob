@@ -8,6 +8,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/audio/SDLAudioSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/input/SDLInputEnums.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/input/SDLInputSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/gfx/SDLWindow.cpp
 )
 
 list(APPEND HDR
