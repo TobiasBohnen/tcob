@@ -3,19 +3,17 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "AudioStream.hpp"
+#include "SDLAudioStream.hpp"
 
 #include <cassert>
 #include <span>
 #include <vector>
 
-#include <SDL3/SDL.h>
-
 #include "tcob/audio/Audio.hpp"
 
-namespace tcob::audio::detail {
+namespace tcob::audio {
 
-audio_stream::audio_stream(u32 device, specification const& info, bool input)
+sdl_audio_stream::sdl_audio_stream(u32 device, specification const& info, bool input)
     : _device {device}
 {
     SDL_AudioSpec srcSpec;
@@ -36,54 +34,54 @@ audio_stream::audio_stream(u32 device, specification const& info, bool input)
     assert(_impl);
 }
 
-audio_stream::~audio_stream()
+sdl_audio_stream::~sdl_audio_stream()
 {
     SDL_DestroyAudioStream(_impl);
 }
 
-void audio_stream::bind()
+void sdl_audio_stream::bind()
 {
     [[maybe_unused]] bool const err {SDL_BindAudioStream(_device, _impl)};
     assert(err);
 }
 
-void audio_stream::unbind()
+void sdl_audio_stream::unbind()
 {
     SDL_UnbindAudioStream(_impl);
 }
 
-auto audio_stream::is_bound() const -> bool
+auto sdl_audio_stream::is_bound() const -> bool
 {
     return SDL_GetAudioStreamDevice(_impl) != 0;
 }
 
-auto audio_stream::get_volume() const -> f32
+auto sdl_audio_stream::get_volume() const -> f32
 {
     return SDL_GetAudioStreamGain(_impl);
 }
 
-void audio_stream::set_volume(f32 val)
+void sdl_audio_stream::set_volume(f32 val)
 {
     SDL_SetAudioStreamGain(_impl, val);
 }
 
-void audio_stream::put(std::span<f32 const> data)
+void sdl_audio_stream::put(std::span<f32 const> data)
 {
     [[maybe_unused]] bool const err {SDL_PutAudioStreamData(_impl, data.data(), static_cast<i32>(data.size_bytes()))};
     assert(err);
 }
 
-void audio_stream::flush()
+void sdl_audio_stream::flush()
 {
     SDL_FlushAudioStream(_impl);
 }
 
-void audio_stream::clear()
+void sdl_audio_stream::clear()
 {
     SDL_ClearAudioStream(_impl);
 }
 
-auto audio_stream::get() -> std::vector<f32>
+auto sdl_audio_stream::get() -> std::vector<f32>
 {
     std::vector<f32> data(available_bytes() / sizeof(f32));
     i32 const        ret {SDL_GetAudioStreamData(_impl, data.data(), static_cast<i32>(data.size() * sizeof(f32)))};
@@ -92,12 +90,12 @@ auto audio_stream::get() -> std::vector<f32>
     return data;
 }
 
-auto audio_stream::available_bytes() const -> i32
+auto sdl_audio_stream::available_bytes() const -> i32
 {
     return SDL_GetAudioStreamAvailable(_impl);
 }
 
-auto audio_stream::queued_bytes() const -> i32
+auto sdl_audio_stream::queued_bytes() const -> i32
 {
     return SDL_GetAudioStreamQueued(_impl);
 }

@@ -8,9 +8,7 @@
 #include <cassert>
 #include <memory>
 
-#include "AudioStream.hpp"
-
-#include "tcob/audio/AudioSystem.hpp"
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 

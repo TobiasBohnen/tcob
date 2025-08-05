@@ -192,47 +192,6 @@ if(TCOB_ENABLE_ADDON_GFX_LITEHTML)
     )
 endif()
 
-# OpenGL
-if(TCOB_ENABLE_RENDERER_OPENGL45)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLCanvas.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLContext.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLEnum.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLFramebuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLObject.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLRenderSystem.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLRenderTarget.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLShaderProgram.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLTexture.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLUniformBuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLVertexArray.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gl45/GLWindow.cpp
-    )
-endif()
-
-if(TCOB_ENABLE_RENDERER_OPENGLES30)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Canvas.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Context.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Enum.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Framebuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Object.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30RenderSystem.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30RenderTarget.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30ShaderProgram.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Texture.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30UniformBuffer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30VertexArray.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/gles30/GLES30Window.cpp
-    )
-endif()
-
-if(TCOB_ENABLE_RENDERER_NULL)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/null/NullRenderSystem.cpp
-    )
-endif()
-
 if(TCOB_ENABLE_FILETYPES_GFX_QOI)
     list(APPEND SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_qoi.cpp

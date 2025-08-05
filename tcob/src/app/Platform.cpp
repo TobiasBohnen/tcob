@@ -23,7 +23,7 @@
 #include "loaders/ConfigAssetLoader.hpp"
 
 #include "tcob/app/Game.hpp"
-#include "tcob/audio/AudioSystem.hpp"
+#include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -44,14 +44,18 @@
 #include "tcob/gfx/RenderSystem.hpp"
 
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)
-    #include "../gfx/backend/gl45/GLRenderSystem.hpp"
+    #include "backend/SDL/gfx/gl45/GLRenderSystem.hpp"
 #endif
 #if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    #include "../gfx/backend/gles30/GLES30RenderSystem.hpp"
+    #include "backend/SDL/gfx/gles30/GLES30RenderSystem.hpp"
 #endif
 #if defined(TCOB_ENABLE_RENDERER_NULL)
-    #include "../gfx/backend/null/NullRenderSystem.hpp"
+    #include "backend/null/gfx/NullRenderSystem.hpp"
 #endif
+
+#include "backend/SDL/audio/SDLAudioSystem.hpp"
+
+// TODO: backendify input/window
 
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
@@ -84,51 +88,23 @@ platform::platform(bool headless, game::init const& ginit)
     }
     logger::Info("starting");
 
-    //  SDL
     InitSDL();
 
-    // locales
+    init_input_system();
     init_locales();
-
-    // magic signatures
     InitSignatures();
-
-    // task manager
-    register_service<task_manager>(std::make_shared<task_manager>(
-        ginit.WorkerThreads
-            ? *ginit.WorkerThreads
-            : static_cast<isize>(std::thread::hardware_concurrency())));
-
-    // init config formats
+    InitTaskManager(ginit.WorkerThreads);
     InitConfigFormats();
-
-    // init image codecs
     InitImageCodecs();
-
-    // init audio codecs
     InitAudioCodecs();
-
-    // init truetype font engine
     InitFontEngines();
-
-    // init input
-    auto input {register_service<input::system>()};
-
-    // init assets
-    auto factory {register_service<assets::loader_manager::factory>()};
-    factory->add({".ini", ".json", ".xml", ".yaml"},
-                 [](assets::group& group) {
-                     return std::make_unique<detail::cfg_asset_loader_manager>(group);
-                 });
+    InitAssetFormats();
 
     if (!headless) {
-        // init audio system
-        register_service<audio::system>();                                   // DON'T MOVE AGAIN
-
         _configFile = std::make_unique<data::config_file>(ginit.ConfigFile); // load config
         _configFile->merge(*ginit.ConfigDefaults, false);                    // merge config with default
 
-        // init render system
+        init_audio_system();                                                 // <-- DON'T MOVE OUTSIDE HEADLESS
         init_render_system(ginit.Name);
     } else {
 #if defined(TCOB_ENABLE_RENDERER_NULL)
@@ -321,6 +297,11 @@ void platform::init_locales()
     }
 }
 
+void platform::init_audio_system()
+{
+    register_service<audio::system>(std::make_shared<audio::sdl_audio_system>());
+}
+
 void platform::init_render_system(string const& windowTitle)
 {
     auto rsFactory {register_service<gfx::render_system::factory>()};
@@ -373,6 +354,11 @@ void platform::init_render_system(string const& windowTitle)
     },
                               this);
 #endif
+}
+
+void platform::init_input_system()
+{
+    register_service<input::system>();
 }
 
 void platform::InitSDL()
@@ -451,6 +437,15 @@ void platform::InitConfigFormats()
     // writers
     auto bwFactory {register_service<data::binary_writer::factory>()};
     bwFactory->add({".bsbd"}, &make_unique<data::detail::bsbd_writer>);
+}
+
+void platform::InitAssetFormats()
+{
+    auto factory {register_service<assets::loader_manager::factory>()};
+    factory->add({".ini", ".json", ".xml", ".yaml"},
+                 [](assets::group& group) {
+                     return std::make_unique<detail::cfg_asset_loader_manager>(group);
+                 });
 }
 
 void platform::InitImageCodecs()
@@ -544,8 +539,15 @@ void platform::InitAudioCodecs()
 
 void platform::InitFontEngines()
 {
-    /// init ttf engines
     gfx::font::Init();
+}
+
+void platform::InitTaskManager(std::optional<isize> workerThreads)
+{
+    register_service<task_manager>(std::make_shared<task_manager>(
+        workerThreads
+            ? *workerThreads
+            : static_cast<isize>(std::thread::hardware_concurrency())));
 }
 
 ////////////////////////////////////////////////////////////
@@ -593,5 +595,4 @@ single_instance::operator bool() const
 {
     return _locked;
 }
-
 }

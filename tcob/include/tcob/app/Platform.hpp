@@ -11,6 +11,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -79,7 +80,10 @@ private:
     platform(bool headless, game::init const& ginit);
 
     void init_locales();
+
+    void init_audio_system();
     void init_render_system(string const& windowTitle);
+    void init_input_system();
 
     void remove_services() const;
 
@@ -88,9 +92,11 @@ private:
     void static InitSDL();
     void static InitSignatures();
     void static InitConfigFormats();
+    void static InitAssetFormats();
     void static InitImageCodecs();
     void static InitAudioCodecs();
     void static InitFontEngines();
+    void static InitTaskManager(std::optional<isize> workerThreads);
 
     std::vector<locale> _locales {};
 

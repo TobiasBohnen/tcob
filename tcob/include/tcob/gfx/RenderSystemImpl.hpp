@@ -72,7 +72,7 @@ class shader_base {
 public:
     virtual ~shader_base() = default;
 
-    auto virtual compile(string const& vert, string const& frag) -> bool = 0; // TODO: change to files
+    auto virtual compile(string const& vert, string const& frag) -> bool = 0; // TODO: change to streams
 
     auto virtual is_valid() const -> bool = 0;
 };
