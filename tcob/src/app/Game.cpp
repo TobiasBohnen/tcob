@@ -18,7 +18,6 @@
 #include "tcob/app/Platform.hpp"
 #include "tcob/app/Scene.hpp"
 #include "tcob/core/ServiceLocator.hpp"
-#include "tcob/core/Stats.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/assets/AssetLibrary.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -27,6 +26,7 @@
 #include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
+#include "tcob/gfx/Stats.hpp"
 
 namespace tcob {
 
@@ -191,7 +191,7 @@ void game::step()
                 window.Cursor->ActiveMode = "default"; // set cursor to default mode if available
             }
 
-            rs.stats().update(deltaUpdate);
+            rs.statistics().update(deltaUpdate);
         }
     }
 }

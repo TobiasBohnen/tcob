@@ -35,7 +35,6 @@
 #include <tcob/core/ServiceLocator.hpp>
 #include <tcob/core/Signal.hpp>
 #include <tcob/core/Size.hpp>
-#include <tcob/core/Stats.hpp>
 #include <tcob/core/Stopwatch.hpp>
 #include <tcob/core/StringUtils.hpp>
 #include <tcob/core/TaskManager.hpp>
@@ -94,6 +93,7 @@
 #include <tcob/gfx/RenderTexture.hpp>
 #include <tcob/gfx/Renderer.hpp>
 #include <tcob/gfx/ShaderProgram.hpp>
+#include <tcob/gfx/Stats.hpp>
 #include <tcob/gfx/TextFormatter.hpp>
 #include <tcob/gfx/Texture.hpp>
 #include <tcob/gfx/Transform.hpp>

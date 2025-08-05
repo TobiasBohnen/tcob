@@ -32,7 +32,7 @@ class null_render_system final : public render_system {
 public:
     auto name() const -> string override;
     auto device_name() const -> string override;
-    auto caps() const -> capabilities override;
+    auto capabilities() const -> render_capabilities override;
     auto rtt_coords() const -> rect_f override;
 
     auto create_canvas() -> std::unique_ptr<render_backend::canvas_base> override;

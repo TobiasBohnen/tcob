@@ -19,6 +19,7 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Texture.hpp"
@@ -27,7 +28,7 @@ namespace tcob::gfx::null {
 
 auto null_render_system::name() const -> string { return "NULL"; }
 auto null_render_system::device_name() const -> string { return "NULL"; }
-auto null_render_system::caps() const -> capabilities { return {}; }
+auto null_render_system::capabilities() const -> render_capabilities { return {}; }
 auto null_render_system::rtt_coords() const -> rect_f { return {}; }
 auto null_render_system::create_canvas() -> std::unique_ptr<render_backend::canvas_base> { return std::make_unique<null_canvas>(); }
 auto null_render_system::create_render_target(texture*) -> std::unique_ptr<render_backend::render_target_base> { return std::make_unique<null_render_target>(); }

@@ -9,14 +9,14 @@
 #include <array>
 #include <limits>
 
-namespace tcob {
+namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API statistics {
+class TCOB_API render_statistics {
     static constexpr i32 FRAME_VALUES = 100;
 
 public:
-    statistics();
+    render_statistics();
 
     auto current_time() const -> f32;
 

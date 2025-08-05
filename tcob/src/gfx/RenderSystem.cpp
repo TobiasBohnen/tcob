@@ -9,9 +9,9 @@
 #include <memory>
 
 #include "tcob/core/Size.hpp"
-#include "tcob/core/Stats.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Stats.hpp"
 #include "tcob/gfx/Window.hpp"
 
 namespace tcob::gfx {
@@ -42,7 +42,7 @@ auto render_system::init_window(video_config const& config, string const& window
     return *_window;
 }
 
-auto render_system::stats() -> statistics&
+auto render_system::statistics() -> render_statistics&
 {
     return _stats;
 }

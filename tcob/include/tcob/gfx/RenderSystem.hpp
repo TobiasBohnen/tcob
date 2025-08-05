@@ -12,15 +12,29 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/core/Stats.hpp"
 #include "tcob/core/TypeFactory.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+#include "tcob/gfx/Stats.hpp"
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/Window.hpp"
 
 namespace tcob::gfx {
+////////////////////////////////////////////////////////////
+
+struct render_capabilities {
+    struct point_size {
+        std::pair<f32, f32> Range;
+        f32                 Granularity {};
+    } PointSize;
+
+    struct texture {
+        i32 MaxSize {};
+        i32 MaxLayers {};
+    } Texture;
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API render_system : public non_copyable {
@@ -29,29 +43,17 @@ public:
         static inline char const* ServiceName {"gfx::render_system::factory"};
     };
 
-    struct capabilities {
-        struct point_size {
-            std::pair<f32, f32> Range;
-            f32                 Granularity {};
-        } PointSize;
-
-        struct texture {
-            i32 MaxSize {};
-            i32 MaxLayers {};
-        } Texture;
-    };
-
     render_system();
     virtual ~render_system();
 
     auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> window&;
 
-    auto virtual name() const -> string        = 0;
-    auto virtual device_name() const -> string = 0;
-    auto virtual caps() const -> capabilities  = 0;
-    auto virtual rtt_coords() const -> rect_f  = 0;
+    auto virtual name() const -> string                      = 0;
+    auto virtual device_name() const -> string               = 0;
+    auto virtual capabilities() const -> render_capabilities = 0;
+    auto virtual rtt_coords() const -> rect_f                = 0;
 
-    auto stats() -> statistics&;
+    auto statistics() -> render_statistics&;
 
     auto window() const -> window&;
     auto default_target() const -> default_render_target&;
@@ -67,7 +69,7 @@ public:
     static inline char const* ServiceName {"render_system"};
 
 private:
-    statistics                             _stats;
+    render_statistics                      _stats;
     std::unique_ptr<gfx::window>           _window;
     std::unique_ptr<default_render_target> _defaultTarget;
 };

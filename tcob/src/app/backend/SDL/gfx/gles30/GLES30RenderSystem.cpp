@@ -19,6 +19,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/Texture.hpp"
 
@@ -35,9 +36,9 @@ auto gl_render_system::device_name() const -> string
     return str ? reinterpret_cast<char const*>(str) : "";
 }
 
-auto gl_render_system::caps() const -> capabilities
+auto gl_render_system::capabilities() const -> render_capabilities
 {
-    capabilities retValue;
+    render_capabilities retValue;
 
     retValue.PointSize.Range       = {0.0f, 4096.0f};
     retValue.PointSize.Granularity = 0.01f;

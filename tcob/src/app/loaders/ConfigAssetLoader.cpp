@@ -709,7 +709,7 @@ void cfg_texture_loader::prepare()
         }
 
         auto& tex {*def->assetPtr};
-        if (std::ssize(def->images) > locate_service<render_system>().caps().Texture.MaxLayers) {
+        if (std::ssize(def->images) > locate_service<render_system>().capabilities().Texture.MaxLayers) {
             logger::Error("texture asset '{}': Layer count exceeds MaxArrayTextureLayers.", name);
             set_asset_status(def->assetPtr, asset_status::Error);
             continue;

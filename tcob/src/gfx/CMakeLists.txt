@@ -19,6 +19,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/RenderTarget.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RenderTexture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ShaderProgram.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Stats.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/TextFormatter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Texture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Transform.cpp
@@ -108,6 +109,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/RenderTexture.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ShaderProgram.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ShaderProgram.inl
+    ${TCOB_INC_DIR}/tcob/gfx/Stats.hpp
     ${TCOB_INC_DIR}/tcob/gfx/TextFormatter.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Texture.hpp
     ${TCOB_INC_DIR}/tcob/gfx/Texture.inl

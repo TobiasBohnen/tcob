@@ -22,7 +22,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ServiceLocator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Signal.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Stats.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Stopwatch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/StringUtils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/TaskManager.cpp
@@ -82,7 +81,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Signal.inl
     ${TCOB_INC_DIR}/tcob/core/Size.hpp
     ${TCOB_INC_DIR}/tcob/core/Size.inl
-    ${TCOB_INC_DIR}/tcob/core/Stats.hpp
     ${TCOB_INC_DIR}/tcob/core/Stopwatch.hpp
     ${TCOB_INC_DIR}/tcob/core/StringUtils.hpp
     ${TCOB_INC_DIR}/tcob/core/StringUtils.inl

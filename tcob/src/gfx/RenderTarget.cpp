@@ -12,13 +12,13 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/core/Stats.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Camera.hpp"
 #include "tcob/gfx/Image.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystem.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
+#include "tcob/gfx/Stats.hpp"
 #include "tcob/gfx/Texture.hpp"
 #include "tcob/gfx/Window.hpp"
 
@@ -51,7 +51,7 @@ void render_target::clear(color c) const
 
 void render_target::prepare_render(bool debug)
 {
-    auto const& stats {locate_service<render_system>().stats()};
+    auto const& stats {locate_service<render_system>().statistics()};
 
     if (ScissorRect) {
         _impl->enable_scissor(*ScissorRect);
@@ -120,7 +120,7 @@ void default_render_target::set_size(size_i /* newsize */)
 
 void default_render_target::prepare_render(bool)
 {
-    auto const& stats {locate_service<render_system>().stats()};
+    auto const& stats {locate_service<render_system>().statistics()};
 
     static constexpr mat4 Matrix {1.0f, 0.0f, 0.0f, 0.0f,
                                   0.0f, 1.0f, 0.0f, 0.0f,
