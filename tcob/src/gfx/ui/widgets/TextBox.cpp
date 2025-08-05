@@ -229,9 +229,9 @@ void text_box::on_key_down(input::keyboard::event const& ev)
     } else if (ev.KeyMods.is_down(controls->CutCopyPasteMod)) {
         if (is_text_selected()) {
             if (ev.KeyCode == controls->CopyKey) {
-                locate_service<input::system>().clipboard().set_text(selected_text());
+                locate_service<input::system>().clipboard()->set_text(selected_text());
             } else if (ev.KeyCode == controls->CutKey) {
-                locate_service<input::system>().clipboard().set_text(selected_text());
+                locate_service<input::system>().clipboard()->set_text(selected_text());
                 remove_selected_text();
             }
         }

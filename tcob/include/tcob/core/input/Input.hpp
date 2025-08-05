@@ -17,13 +17,6 @@
 
 ////////////////////////////////////////////////////////////
 
-extern "C" {
-struct SDL_Gamepad;
-using SDL_Event = union SDL_Event;
-}
-
-////////////////////////////////////////////////////////////
-
 namespace tcob::input {
 ////////////////////////////////////////////////////////////
 
@@ -103,14 +96,16 @@ public:
         utf8_string Text {};
     };
 
-    auto get_scancode(key_code key) const -> scan_code;
-    auto get_keycode(scan_code key) const -> key_code;
+    virtual ~keyboard() = default;
 
-    auto is_key_down(scan_code key) const -> bool;
-    auto is_key_down(key_code key) const -> bool;
-    auto is_mod_down(key_mod mod) const -> bool;
+    auto virtual get_scancode(key_code key) const -> scan_code = 0;
+    auto virtual get_keycode(scan_code key) const -> key_code  = 0;
 
-    auto mods() const -> key_mods;
+    auto virtual is_key_down(scan_code key) const -> bool = 0;
+    auto virtual is_key_down(key_code key) const -> bool  = 0;
+    auto virtual is_mod_down(key_mod mod) const -> bool   = 0;
+
+    auto virtual mods() const -> key_mods = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -149,16 +144,16 @@ public:
         point_i Position {point_i::Zero};
     };
 
-    auto get_position() const -> point_i; // TODO: set_get_
-    void set_position(point_i pos) const;
-    auto is_button_down(button button) const -> bool;
+    virtual ~mouse() = default;
+
+    auto virtual get_position() const -> point_i             = 0; // TODO: set_get_
+    void virtual set_position(point_i pos) const             = 0;
+    auto virtual is_button_down(button button) const -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API controller final {
-    friend class system;
-
+class TCOB_API controller {
 public:
     enum class button : i8 {
         Invalid = -1,
@@ -227,46 +222,43 @@ public:
         f32         RelativeValue {0};
     };
 
-    auto id() const -> u32;
-    auto name() const -> string;
+    virtual ~controller() = default;
 
-    auto has_rumble() const -> bool;
-    auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, milliseconds duration) const -> bool;
+    auto virtual id() const -> u32      = 0;
+    auto virtual name() const -> string = 0;
 
-    auto has_rumble_triggers() const -> bool;
-    auto rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds duration) const -> bool;
+    auto virtual has_rumble() const -> bool                                                                   = 0;
+    auto virtual rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, milliseconds duration) const -> bool = 0;
 
-    auto is_button_pressed(button b) const -> bool;
-    auto has_button(button b) const -> bool;
-    auto get_button_name(button b) const -> string;
-    auto get_button_label(button b) const -> button_label;
+    auto virtual has_rumble_triggers() const -> bool                                                   = 0;
+    auto virtual rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds duration) const -> bool = 0;
 
-    auto get_axis_value(axis a) const -> i16;
-    auto has_axis(axis a) const -> bool;
-    auto get_axis_name(axis a) const -> string;
+    auto virtual is_button_pressed(button b) const -> bool        = 0;
+    auto virtual has_button(button b) const -> bool               = 0;
+    auto virtual get_button_name(button b) const -> string        = 0;
+    auto virtual get_button_label(button b) const -> button_label = 0;
 
-private:
-    controller(SDL_Gamepad* controller, u32 id);
-
-    SDL_Gamepad* _controller;
-    u32          _id;
+    auto virtual get_axis_value(axis a) const -> i16   = 0;
+    auto virtual has_axis(axis a) const -> bool        = 0;
+    auto virtual get_axis_name(axis a) const -> string = 0;
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API clipboard {
 public:
-    auto has_text() const -> bool;
-    auto get_text() const -> utf8_string; // TODO: set_get_
-    void set_text(utf8_string const& text);
+    virtual ~clipboard() = default;
+
+    auto virtual has_text() const -> bool          = 0;
+    auto virtual get_text() const -> utf8_string   = 0; // TODO: set_get_
+    void virtual set_text(utf8_string const& text) = 0;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API system final {
+class TCOB_API system {
 public:
-    system();
-    ~system();
+    virtual ~system() = default;
 
     signal<input::keyboard::event const>            KeyDown;
     signal<input::keyboard::event const>            KeyUp;
@@ -285,22 +277,19 @@ public:
 
     prop<mode> InputMode;
 
-    auto controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const&;
-    auto first_controller() const -> controller&;
-    auto has_controller() const -> bool;
+    auto virtual controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& = 0;
+    auto virtual first_controller() const -> controller&                                            = 0;
+    auto virtual has_controller() const -> bool                                                     = 0;
 
-    auto mouse() const -> input::mouse;
+    auto virtual mouse() const -> std::shared_ptr<input::mouse> = 0;
 
-    auto keyboard() const -> input::keyboard;
+    auto virtual keyboard() const -> std::shared_ptr<input::keyboard> = 0;
 
-    auto clipboard() const -> input::clipboard;
+    auto virtual clipboard() const -> std::shared_ptr<input::clipboard> = 0;
 
-    void process_events(SDL_Event* ev);
+    void virtual process_events(void* ev) = 0;
 
     static inline char const* ServiceName {"input_system"};
-
-private:
-    std::unordered_map<i32, std::shared_ptr<controller>> _controllers;
 };
 
 ////////////////////////////////////////////////////////////

@@ -54,8 +54,9 @@
 #endif
 
 #include "backend/SDL/audio/SDLAudioSystem.hpp"
+#include "backend/SDL/input/SDLInputSystem.hpp"
 
-// TODO: backendify input/window
+// TODO: backendify window
 
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
@@ -358,7 +359,7 @@ void platform::init_render_system(string const& windowTitle)
 
 void platform::init_input_system()
 {
-    register_service<input::system>();
+    register_service<input::sdl_system>();
 }
 
 void platform::InitSDL()

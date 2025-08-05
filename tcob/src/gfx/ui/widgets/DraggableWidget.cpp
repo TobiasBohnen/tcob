@@ -61,7 +61,7 @@ void draggable_widget::on_mouse_button_down(input::mouse::button_event const& ev
 
 auto draggable_widget::drag_offset() const -> std::optional<point_f>
 {
-    return _isDragging ? std::optional {global_to_parent(*this, locate_service<input::system>().mouse().get_position()) - _dragOffset}
+    return _isDragging ? std::optional {global_to_parent(*this, locate_service<input::system>().mouse()->get_position()) - _dragOffset}
                        : std::nullopt;
 }
 
