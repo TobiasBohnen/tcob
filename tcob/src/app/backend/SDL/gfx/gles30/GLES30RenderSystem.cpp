@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "../SDLWindow.hpp"
 #include "GLES30Canvas.hpp"
 #include "GLES30RenderTarget.hpp"
 #include "GLES30ShaderProgram.hpp"
@@ -81,9 +82,9 @@ auto gl_render_system::create_vertex_array(buffer_usage_hint usage) -> std::uniq
     return std::make_unique<gl_vertex_array>(usage);
 }
 
-auto gl_render_system::create_window(size_i size) -> std::unique_ptr<render_backend::window_base>
+auto gl_render_system::create_window(size_i size) -> std::unique_ptr<gfx::window>
 {
-    return std::make_unique<gl_window>(size);
+    return std::make_unique<sdl_window>(std::make_unique<gl_window>(size));
 }
 
 } // namespace gfx

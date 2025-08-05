@@ -54,7 +54,6 @@
 #endif
 
 #include "backend/SDL/audio/SDLAudioSystem.hpp"
-#include "backend/SDL/gfx/SDLWindow.hpp"
 #include "backend/SDL/input/SDLInputSystem.hpp"
 
 #if defined(_MSC_VER)
@@ -319,7 +318,7 @@ void platform::init_render_system(string const& windowTitle)
     if (!renderSystem) { throw std::runtime_error("Render system creation failed"); }
 
     register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window<gfx::sdl_window>(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
+    auto& window {renderSystem->init_window(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
     window.FullScreen.Changed.connect([this](bool value) {
         (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
     });
@@ -543,6 +542,7 @@ void platform::InitTaskManager(std::optional<isize> workerThreads)
 }
 
 ////////////////////////////////////////////////////////////
+
 single_instance::single_instance(string const& name)
 {
 #if defined(_MSC_VER)

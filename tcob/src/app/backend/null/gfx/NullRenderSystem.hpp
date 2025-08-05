@@ -41,7 +41,7 @@ public:
     auto create_texture() -> std::unique_ptr<render_backend::texture_base> override;
     auto create_uniform_buffer(usize size) -> std::unique_ptr<render_backend::uniform_buffer_base> override;
     auto create_vertex_array(buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> override;
-    auto create_window(size_i size) -> std::unique_ptr<render_backend::window_base> override;
+    auto create_window(size_i size) -> std::unique_ptr<gfx::window> override;
 };
 
 ////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class null_window final : public tcob::gfx::render_backend::window_base {
+class null_window_impl final : public tcob::gfx::render_backend::window_base {
 public:
     auto get_vsync() const -> bool override;
     void set_vsync(bool value) override;
@@ -130,6 +130,27 @@ public:
     {
         return nullptr;
     }
+};
+
+class null_window final : public tcob::gfx::window {
+public:
+    null_window();
+
+    void load_icon(path const& file) override;
+
+    auto has_focus() const -> bool override;
+    void grab_input(bool grab) override;
+
+    void process_events(void* ev) override;
+
+    auto get_size() const -> size_i override;
+    void set_size(size_i newsize) override;
+
+    auto get_fullscreen() const -> bool override;
+    void set_fullscreen(bool value) override;
+
+    auto get_title() const -> string override;
+    void set_title(string const& value) override;
 };
 
 ////////////////////////////////////////////////////////////

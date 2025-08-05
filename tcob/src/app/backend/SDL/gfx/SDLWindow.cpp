@@ -40,7 +40,7 @@ sdl_window::sdl_window(std::unique_ptr<render_backend::window_base> win)
 
     SDL_StartTextInput(_handle);
 
-    set_size(Size);
+    set_size(get_size());
 }
 
 void sdl_window::load_icon(path const& file)

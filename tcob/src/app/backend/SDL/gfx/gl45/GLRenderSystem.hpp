@@ -30,7 +30,7 @@ public:
     auto create_texture() -> std::unique_ptr<render_backend::texture_base> override;
     auto create_uniform_buffer(usize size) -> std::unique_ptr<render_backend::uniform_buffer_base> override;
     auto create_vertex_array(buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> override;
-    auto create_window(size_i size) -> std::unique_ptr<render_backend::window_base> override;
+    auto create_window(size_i size) -> std::unique_ptr<gfx::window> override;
 };
 
 } // namespace gfx
