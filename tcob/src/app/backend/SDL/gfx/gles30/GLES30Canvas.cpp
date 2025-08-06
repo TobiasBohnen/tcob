@@ -137,7 +137,7 @@ void gl_canvas::cancel()
     _calls.clear();
 }
 
-void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
                             vec4 const& bounds, std::vector<canvas::path> const& paths)
 {
     auto& call {_calls.emplace_back()};
@@ -146,7 +146,7 @@ void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& compo
     call.PathOffset = _paths.size();
     call.PathCount  = pathCount;
     call.Image      = paint.Image;
-    call.BlendFunc  = compositeOperation;
+    call.BlendFunc  = blend;
 
     if (pathCount == 1 && paths[0].Convex) {
         call.Type          = nvg_call_type::ConvexFill;
@@ -208,7 +208,7 @@ void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& compo
     }
 }
 
-void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
                               f32 strokeWidth, std::vector<canvas::path> const& paths)
 {
     auto& call {_calls.emplace_back()};
@@ -218,7 +218,7 @@ void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& com
 
     call.PathCount = paths.size();
     call.Image     = paint.Image;
-    call.BlendFunc = compositeOperation;
+    call.BlendFunc = blend;
 
     // Allocate vertices for all the paths.
     usize maxverts {get_max_vertcount(paths)};
@@ -242,14 +242,14 @@ void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& com
     *get_frag_uniformptr(call.UniformOffset + _fragSize) = convert_paint(paint, scissor, strokeWidth, fringe, 1.0f - (0.5f / 255.0f));
 }
 
-void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
-                                 std::span<vertex const> verts, f32 fringe)
+void gl_canvas::render_triangles(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe,
+                                 std::span<vertex const> verts)
 {
     auto& call {_calls.emplace_back()};
 
     call.Type      = nvg_call_type::Triangles;
     call.Image     = paint.Image;
-    call.BlendFunc = compositeOperation;
+    call.BlendFunc = blend;
 
     // Allocate vertices for all the paths.
     call.TriangleOffset = alloc_verts(verts.size());

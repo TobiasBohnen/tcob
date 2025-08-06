@@ -1028,7 +1028,7 @@ void canvas::draw_image(texture* image, string const& region, rect_f const& rect
     }
 
     std::array<vertex, 6> const verts {quad[3], quad[1], quad[0], quad[3], quad[2], quad[1]};
-    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
+    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, _fringeWidth, verts);
 }
 
 void canvas::draw_nine_patch(texture* image, string const& region, rect_f const& rect, rect_f const& center, rect_f const& localCenterUV)
@@ -1092,7 +1092,7 @@ void canvas::draw_nine_patch(texture* image, string const& region, rect_f const&
     emitQuad(rect_f::FromLTRB(leftCenter, bottomCenter, rightCenter, bottom), rect_f::FromLTRB(uv_leftCenter, uv_bottomCenter, uv_rightCenter, uv_bottom));
     emitQuad(rect_f::FromLTRB(rightCenter, bottomCenter, right, bottom), rect_f::FromLTRB(uv_rightCenter, uv_bottomCenter, uv_right, uv_bottom));
 
-    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
+    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, _fringeWidth, verts);
 }
 
 ////////////////////////////////////////////////////////////
@@ -1142,7 +1142,7 @@ void canvas::render_text(font* font, std::span<vertex const> verts)
     // Apply global alpha
     MultiplyAlphaPaint(paint.Color, s.Alpha);
 
-    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, verts, _fringeWidth);
+    _impl->render_triangles(paint, s.CompositeOperation, s.Scissor, _fringeWidth, verts);
 }
 
 ////////////////////////////////////////////////////////////

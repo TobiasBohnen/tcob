@@ -162,8 +162,8 @@ public:
                      vec4 const& bounds, std::vector<canvas::path> const& paths) override;
     void render_stroke(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
                        f32 strokeWidth, std::vector<canvas::path> const& paths) override;
-    void render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
-                          std::span<vertex const> verts, f32 fringe) override;
+    void render_triangles(canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor, f32 fringe,
+                          std::span<vertex const> verts) override;
     void render_clip(canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths) override;
     void add_gradient(i32 idx, color_gradient const& gradient) override;
 };

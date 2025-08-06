@@ -91,7 +91,7 @@ void null_canvas::cancel() { }
 void null_canvas::flush(size_f) { }
 void null_canvas::render_fill(canvas::paint const&, blend_funcs const&, canvas::scissor const&, f32, vec4 const&, std::vector<canvas::path> const&) { }
 void null_canvas::render_stroke(canvas::paint const&, blend_funcs const&, canvas::scissor const&, f32, f32, std::vector<canvas::path> const&) { }
-void null_canvas::render_triangles(canvas::paint const&, blend_funcs const&, canvas::scissor const&, std::span<vertex const>, f32) { }
+void null_canvas::render_triangles(canvas::paint const&, blend_funcs const&, canvas::scissor const&, f32, std::span<vertex const>) { }
 void null_canvas::render_clip(canvas::scissor const&, f32, std::vector<canvas::path> const&) { }
 void null_canvas::add_gradient(i32, color_gradient const&) { }
 

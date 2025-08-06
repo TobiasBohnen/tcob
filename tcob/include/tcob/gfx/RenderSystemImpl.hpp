@@ -30,18 +30,11 @@ public:
     void virtual flush(size_f size) = 0;
     void virtual cancel()           = 0;
 
-    void virtual render_fill(
-        canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
-        f32 fringe, vec4 const& bounds, std::vector<canvas::path> const& paths) = 0;
-    void virtual render_stroke(
-        canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
-        f32 fringe, f32 strokeWidth, std::vector<canvas::path> const& paths) = 0;
-    void virtual render_triangles(
-        canvas::paint const& paint, blend_funcs const& compositeOperation, canvas::scissor const& scissor,
-        std::span<vertex const> verts, f32 fringe) = 0;
-    void virtual render_clip(
-        canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths) = 0;
-    void virtual add_gradient(i32 idx, color_gradient const& gradient)                      = 0;
+    void virtual render_fill(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe, vec4 const& bounds, std::vector<canvas::path> const& paths) = 0;
+    void virtual render_stroke(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe, f32 strokeWidth, std::vector<canvas::path> const& paths)  = 0;
+    void virtual render_triangles(canvas::paint const& paint, blend_funcs const& blend, canvas::scissor const& scissor, f32 fringe, std::span<vertex const> verts)                         = 0;
+    void virtual render_clip(canvas::scissor const& scissor, f32 fringe, std::vector<canvas::path> const& paths)                                                                           = 0;
+    void virtual add_gradient(i32 idx, color_gradient const& gradient)                                                                                                                     = 0;
 };
 
 ////////////////////////////////////////////////////////////
