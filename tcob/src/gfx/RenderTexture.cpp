@@ -17,12 +17,12 @@ namespace tcob::gfx {
 render_texture::render_texture()
     : render_target {this}
 {
-    regions()["default"] = {.UVRect = GetTexcoords(), .Level = 0};
+    regions()["default"] = {.UVRect = UVRect(), .Level = 0};
 }
 
-auto render_texture::GetTexcoords() -> rect_f
+auto render_texture::UVRect() -> rect_f
 {
-    return locate_service<render_system>().rtt_coords();
+    return locate_service<render_system>().capabilities().RenderTextureUVRect;
 }
 
 auto render_texture::get_size() const -> size_i

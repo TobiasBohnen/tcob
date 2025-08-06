@@ -45,12 +45,9 @@ auto gl_render_system::capabilities() const -> render_capabilities
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &retValue.Texture.MaxSize);
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &retValue.Texture.MaxLayers);
 
-    return retValue;
-}
+    retValue.RenderTextureUVRect = {0, 0, 1, -1};
 
-auto gl_render_system::rtt_coords() const -> rect_f
-{
-    return {0, 0, 1, -1};
+    return retValue;
 }
 
 auto gl_render_system::create_canvas() -> std::unique_ptr<render_backend::canvas_base>

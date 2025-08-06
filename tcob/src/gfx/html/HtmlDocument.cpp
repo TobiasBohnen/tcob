@@ -41,7 +41,7 @@ document::document(config c)
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
-    geometry::set_texcoords(_quad, {.UVRect = render_texture::GetTexcoords(), .Level = 0});
+    geometry::set_texcoords(_quad, {.UVRect = render_texture::UVRect(), .Level = 0});
     _renderer.set_material(_material.ptr());
     _material->Texture = _canvas.get_texture();
 }

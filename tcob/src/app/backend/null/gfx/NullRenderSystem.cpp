@@ -29,7 +29,6 @@ namespace tcob::gfx::null {
 auto null_render_system::name() const -> string { return "NULL"; }
 auto null_render_system::device_name() const -> string { return "NULL"; }
 auto null_render_system::capabilities() const -> render_capabilities { return {}; }
-auto null_render_system::rtt_coords() const -> rect_f { return {}; }
 auto null_render_system::create_canvas() -> std::unique_ptr<render_backend::canvas_base> { return std::make_unique<null_canvas>(); }
 auto null_render_system::create_render_target(texture*) -> std::unique_ptr<render_backend::render_target_base> { return std::make_unique<null_render_target>(); }
 auto null_render_system::create_shader() -> std::unique_ptr<render_backend::shader_base> { return std::make_unique<null_shader>(); }

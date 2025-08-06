@@ -388,7 +388,7 @@ void canvas_renderer::set_bounds(rect_f const& bounds)
     quad q {};
     geometry::set_position(q, bounds);
     geometry::set_color(q, colors::White);
-    geometry::set_texcoords(q, {.UVRect = render_texture::GetTexcoords(), .Level = 0});
+    geometry::set_texcoords(q, {.UVRect = render_texture::UVRect(), .Level = 0});
     _vertexArray->update_data(std::span {&q, 1}, 0);
 }
 

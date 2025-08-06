@@ -33,6 +33,8 @@ struct render_capabilities {
         i32 MaxSize {};
         i32 MaxLayers {};
     } Texture;
+
+    rect_f RenderTextureUVRect;
 };
 
 ////////////////////////////////////////////////////////////
@@ -51,7 +53,6 @@ public:
     auto virtual name() const -> string                      = 0;
     auto virtual device_name() const -> string               = 0;
     auto virtual capabilities() const -> render_capabilities = 0;
-    auto virtual rtt_coords() const -> rect_f                = 0;
 
     auto statistics() -> render_statistics&;
 
