@@ -39,10 +39,8 @@ template <Arithmetic T>
 auto constexpr size<T>::integer_ratio() const -> size<i32>
 {
     if (Width == 0 || Height == 0) { return {0, 0}; }
-    auto const divisor {std::gcd(Width, Height)};
-    auto const w {static_cast<i32>(Width / divisor)};
-    auto const h {static_cast<i32>(Height / divisor)};
-    return {w, h};
+    auto const divisor {std::gcd(static_cast<i32>(Width), static_cast<i32>(Height))};
+    return {static_cast<i32>(Width / divisor), static_cast<i32>(Height / divisor)};
 }
 
 template <Arithmetic T>
