@@ -29,6 +29,9 @@ public:
     template <typename U>
     explicit constexpr size(size<U> const& p);
 
+    auto constexpr aspect_ratio() const -> f32;
+    auto constexpr integer_ratio() const -> size<i32>;
+
     auto constexpr to_array [[nodiscard]] () const -> std::array<T, 2>;
 
     template <Arithmetic U = T>
@@ -105,7 +108,6 @@ auto constexpr operator/=(size<T>& left, size<R> const& right) -> size<T>&;
 
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator==(size<T> const& left, size<R> const& right) -> bool;
-
 }
 
 #include "Size.inl"

@@ -7,6 +7,7 @@
 #include "Size.hpp"
 
 #include <array>
+#include <numeric>
 
 #include "tcob/core/Point.hpp"
 
@@ -25,6 +26,23 @@ constexpr size<T>::size(size<U> const& p)
     : Width {static_cast<T>(p.Width)}
     , Height {static_cast<T>(p.Height)}
 {
+}
+
+template <Arithmetic T>
+auto constexpr size<T>::aspect_ratio() const -> f32
+{
+    if (Width == 0 || Height == 0) { return 0; }
+    return static_cast<f32>(Width) / static_cast<f32>(Height);
+}
+
+template <Arithmetic T>
+auto constexpr size<T>::integer_ratio() const -> size<i32>
+{
+    if (Width == 0 || Height == 0) { return {0, 0}; }
+    auto const divisor {std::gcd(Width, Height)};
+    auto const w {static_cast<i32>(Width / divisor)};
+    auto const h {static_cast<i32>(Height / divisor)};
+    return {w, h};
 }
 
 template <Arithmetic T>
@@ -183,5 +201,4 @@ inline auto size<T>::Deserialize(size<T>& v, auto&& s) -> bool
 {
     return s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
 }
-
 }
