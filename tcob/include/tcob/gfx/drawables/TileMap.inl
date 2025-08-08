@@ -84,4 +84,61 @@ void tileset<T>::set_tile(tile_index_t idx, tile_type const& tile)
     _set[idx] = tile;
 }
 
+////////////////////////////////////////////////////////////
+
+inline void SerializeTile(auto&& v, auto&& s)
+{
+    s["texture"] = v.TextureRegion;
+    s["h_flip"]  = v.FlipHorizontally;
+    s["v_flip"]  = v.FlipVertically;
+    s["color"]   = v.Color;
+}
+
+inline auto DeserializeTile(auto&& v, auto&& s) -> bool
+{
+    if (!s.try_get(v.TextureRegion, "texture")) { return false; }
+    s.try_get(v.FlipHorizontally, "h_flip");
+    s.try_get(v.FlipVertically, "v_flip");
+    s.try_get(v.Color, "color");
+    return true;
+}
+
+inline void orthogonal_tile::Serialize(orthogonal_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+    s["scale"] = v.Scale;
+}
+
+inline auto orthogonal_tile::Deserialize(orthogonal_tile& v, auto&& s) -> bool
+{
+    if (!DeserializeTile(v, s)) { return false; }
+    s.try_get(v.Scale, "scale");
+    return true;
+}
+
+inline void isometric_tile::Serialize(isometric_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+    s["center"] = v.Center;
+    s["height"] = v.Height;
+}
+
+inline auto isometric_tile::Deserialize(isometric_tile& v, auto&& s) -> bool
+{
+    if (!DeserializeTile(v, s)) { return false; }
+    s.try_get(v.Center, "center");
+    s.try_get(v.Height, "height");
+    return true;
+}
+
+inline void hexagonal_tile::Serialize(hexagonal_tile const& v, auto&& s)
+{
+    SerializeTile(v, s);
+}
+
+inline auto hexagonal_tile::Deserialize(hexagonal_tile& v, auto&& s) -> bool
+{
+    return static_cast<bool>(DeserializeTile(v, s));
+}
+
 }

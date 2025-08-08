@@ -50,9 +50,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-void SerializeTile(auto&& v, auto&& s);
-auto DeserializeTile(auto&& v, auto&& s) -> bool;
-
 class TCOB_API orthogonal_tile {
 public:
     string TextureRegion {};
@@ -62,18 +59,8 @@ public:
 
     size_f Scale {size_f::One};
 
-    void static Serialize(orthogonal_tile const& v, auto&& s)
-    {
-        SerializeTile(v, s);
-        s["scale"] = v.Scale;
-    }
-
-    auto static Deserialize(orthogonal_tile& v, auto&& s) -> bool
-    {
-        if (!DeserializeTile(v, s)) { return false; }
-        s.try_get(v.Scale, "scale");
-        return true;
-    }
+    void static Serialize(orthogonal_tile const& v, auto&& s);
+    auto static Deserialize(orthogonal_tile& v, auto&& s) -> bool;
 };
 
 class TCOB_API orthogonal_grid {
@@ -99,20 +86,8 @@ public:
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
 
-    void static Serialize(isometric_tile const& v, auto&& s)
-    {
-        SerializeTile(v, s);
-        s["center"] = v.Center;
-        s["height"] = v.Height;
-    }
-
-    auto static Deserialize(isometric_tile& v, auto&& s) -> bool
-    {
-        if (!DeserializeTile(v, s)) { return false; }
-        s.try_get(v.Center, "center");
-        s.try_get(v.Height, "height");
-        return true;
-    }
+    void static Serialize(isometric_tile const& v, auto&& s);
+    auto static Deserialize(isometric_tile& v, auto&& s) -> bool;
 };
 
 class TCOB_API isometric_grid {
@@ -136,15 +111,8 @@ public:
     bool   FlipVertically {false};
     color  Color {colors::White};
 
-    void static Serialize(hexagonal_tile const& v, auto&& s)
-    {
-        SerializeTile(v, s);
-    }
-
-    auto static Deserialize(hexagonal_tile& v, auto&& s) -> bool
-    {
-        return static_cast<bool>(DeserializeTile(v, s));
-    }
+    void static Serialize(hexagonal_tile const& v, auto&& s);
+    auto static Deserialize(hexagonal_tile& v, auto&& s) -> bool;
 };
 
 enum hexagonal_top : u8 {
@@ -272,24 +240,6 @@ using hexagonal_tilemap = tilemap<hexagonal_grid>;
 using hexagonal_tileset = tileset<hexagonal_tile>;
 
 ////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-void SerializeTile(auto&& v, auto&& s)
-{
-    s["texture"] = v.TextureRegion;
-    s["h_flip"]  = v.FlipHorizontally;
-    s["v_flip"]  = v.FlipVertically;
-    s["color"]   = v.Color;
-}
-
-auto DeserializeTile(auto&& v, auto&& s) -> bool
-{
-    if (!s.try_get(v.TextureRegion, "texture")) { return false; }
-    s.try_get(v.FlipHorizontally, "h_flip");
-    s.try_get(v.FlipVertically, "v_flip");
-    s.try_get(v.Color, "color");
-    return true;
-}
 
 }
 
