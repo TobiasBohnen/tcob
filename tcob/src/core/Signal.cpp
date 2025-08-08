@@ -44,6 +44,8 @@ void connection::disconnect()
 {
     if (_signal && _id != INVALID_ID) {
         _signal->disconnect(_id);
+        _signal = nullptr;
+        _id     = INVALID_ID;
     }
 }
 

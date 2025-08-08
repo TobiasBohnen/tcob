@@ -86,6 +86,25 @@ inline void signal<EvArgs>::disconnect_all() const
 }
 
 template <typename EvArgs>
+template <typename Func>
+inline auto signal<EvArgs>::operator+=(Func func) const -> connection
+{
+    return connect(std::move(func));
+}
+
+template <typename EvArgs>
+inline auto signal<EvArgs>::operator-=(connection& c) const -> void
+{
+    c.disconnect();
+}
+
+template <typename EvArgs>
+inline auto signal<EvArgs>::operator-=(uid c) const -> void
+{
+    disconnect(c);
+}
+
+template <typename EvArgs>
 inline auto signal<EvArgs>::slot_count() const -> isize
 {
     return std::ssize(_slots);

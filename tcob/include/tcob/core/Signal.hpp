@@ -109,6 +109,12 @@ public:
     void disconnect(uid id) const override;
     void disconnect_all() const;
 
+    template <typename Func>
+    auto operator+=(Func func) const -> connection;
+
+    auto operator-=(connection& c) const -> void;
+    auto operator-=(uid c) const -> void;
+
     auto slot_count() const -> isize;
 
 private:
