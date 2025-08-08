@@ -164,7 +164,7 @@ struct converter<std::tuple<T...>> {
     {
         std::apply(
             [&](auto&&... item) {
-                ((converter<std::remove_cvref_t<decltype(item)>>::From(stmt, col++, item)), ...);
+                (converter<std::remove_cvref_t<decltype(item)>>::From(stmt, col++, item), ...);
             },
             value);
 
