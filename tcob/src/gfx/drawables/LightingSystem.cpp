@@ -150,15 +150,13 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
 constexpr f32 angleTolerance {0.05f}; // 0.0005f
 
-auto static is_in_shadowcaster(light_source& light, auto&& casterPoints) -> bool
+auto static is_in_shadowcaster(light_source& light, auto const& casterPoints) -> bool
 {
-    bool retValue {false};
     for (usize i {0}; i < casterPoints.size() - 1; ++i) {
         if (casterPoints[i].Points.empty()) { continue; }
-        retValue = polygons::is_point_inside(light.Position, casterPoints[i].Points);
-        if (retValue) { break; }
+        if (polygons::is_point_inside(light.Position, casterPoints[i].Points)) { return true; }
     }
-    return retValue;
+    return false;
 }
 
 void lighting_system::cast_ray(light_source& light, f32 lightRange)
