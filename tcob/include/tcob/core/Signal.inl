@@ -112,7 +112,6 @@ inline auto signal<EvArgs>::slot_count() const -> isize
 
 ////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////
 namespace detail {
     template <typename Signal, typename Func>
     inline void connection_manager::connect(Signal const& sig, Func func)
@@ -126,4 +125,5 @@ namespace detail {
         _connections.push_back(std::move(sig.template connect<Func>(ptr)));
     }
 }
+
 }
