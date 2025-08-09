@@ -103,7 +103,7 @@ void text_box::on_draw(widget_painter& painter)
     // text
     if (!Text->empty() && _style.Text.Font) {
         if (_textDirty) {
-            _formatResult = painter.format_text(_style.Text, rect, *Text);
+            _formatResult = painter.format_text(_style.Text, rect.Size, *Text);
             _textDirty    = false;
         }
 

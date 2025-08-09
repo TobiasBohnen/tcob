@@ -296,7 +296,7 @@ void terminal::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    u32 const   fontSize {_style.Text.calc_font_size(rect)};
+    u32 const   fontSize {_style.Text.calc_font_size(rect.height())};
     auto* const font {_style.Text.Font->get_font(_style.Text.Style, fontSize).ptr()};
     f32 const   fontHeight {font->info().Ascender - font->info().Descender};
     f32 const   fontWidth {get_font_width(font)};
@@ -338,8 +338,8 @@ void terminal::on_draw(widget_painter& painter)
 
         auto textStyle {_style.Text};
         textStyle.Color     = cell.Colors.first;
-        textStyle.Alignment = {gfx::horizontal_alignment::Left, gfx::vertical_alignment::Top};
-        painter.draw_text(textStyle, cellRect, painter.format_text(textStyle, {cellRect.Position, rect.Size}, cell.Text));
+        textStyle.Alignment = {.Horizontal = gfx::horizontal_alignment::Left, .Vertical = gfx::vertical_alignment::Top};
+        painter.draw_text(textStyle, cellRect, painter.format_text(textStyle, rect.Size, cell.Text));
     }
 
     // cursor

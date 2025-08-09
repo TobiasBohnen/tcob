@@ -163,7 +163,7 @@ public:
     text_transform                      Transform {text_transform::None};
     auto_size_mode                      AutoSize {auto_size_mode::Never};
 
-    auto calc_font_size(rect_f const& rect) const -> u32;
+    auto calc_font_size(f32 height) const -> u32;
 
     auto operator==(text_element const& other) const -> bool = default;
 

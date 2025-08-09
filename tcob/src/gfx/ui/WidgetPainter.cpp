@@ -314,7 +314,7 @@ void widget_painter::draw_text(text_element const& element, rect_f const& rect, 
 {
     if (text.empty()) { return; }
 
-    draw_text(element, rect, format_text(element, rect, text));
+    draw_text(element, rect, format_text(element, rect.Size, text));
 }
 
 void widget_painter::draw_text(text_element const& element, rect_f const& rect, gfx::text_formatter::result const& text)
@@ -728,15 +728,15 @@ auto widget_painter::canvas() -> gfx::canvas&
     return _canvas;
 }
 
-auto widget_painter::format_text(text_element const& element, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result
+auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text) -> gfx::text_formatter::result
 {
     auto const tt {transform_text(element.Transform, text)};
-    return format_text(element, rect, tt, element.calc_font_size(rect), true);
+    return format_text(element, size, tt, element.calc_font_size(size.Height), true);
 }
 
 ////////////////////////////////////////////////////////////
 
-auto widget_painter::format_text(text_element const& element, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
+auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
 {
     auto const guard {_canvas.create_guard()};
 
@@ -746,25 +746,23 @@ auto widget_painter::format_text(text_element const& element, rect_f const& rect
     _canvas.set_text_halign(element.Alignment.Horizontal);
     _canvas.set_text_valign(element.Alignment.Vertical);
 
-    auto const rectSize {rect.Size};
-
     f32 scale {1.0f};
 
     if (resize && element.AutoSize != auto_size_mode::Never) {
         auto const textSize {_canvas.measure_text(-1, text)};
 
         bool const shouldShrink {(element.AutoSize == auto_size_mode::Always || element.AutoSize == auto_size_mode::OnlyShrink)
-                                 && (textSize.Width > rectSize.Width || textSize.Height > rectSize.Height)};
+                                 && (textSize.Width > size.Width || textSize.Height > size.Height)};
 
         bool const shouldGrow {(element.AutoSize == auto_size_mode::Always || element.AutoSize == auto_size_mode::OnlyGrow)
-                               && (textSize.Width < rectSize.Width && textSize.Height < rectSize.Height)};
+                               && (textSize.Width < size.Width && textSize.Height < size.Height)};
 
         if (shouldShrink || shouldGrow) {
-            scale = std::min(std::floor(rectSize.Width) / textSize.Width, std::floor(rectSize.Height) / textSize.Height);
+            scale = std::min(std::floor(size.Width) / textSize.Width, std::floor(size.Height) / textSize.Height);
         }
     }
 
-    return _canvas.format_text(rectSize, text, scale);
+    return _canvas.format_text(size, text, scale);
 }
 
 auto widget_painter::transform_text(text_transform xform, utf8_string_view text) const -> utf8_string

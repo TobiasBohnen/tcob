@@ -21,13 +21,26 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
+// TODO:
+// enum class tab_header_overflow : u8 {
+//    Wrap,
+//    Scroll
+//};
+
 class TCOB_API tab_container : public widget_container {
 public:
+    enum class header_mode : u8 {
+        Fill,
+        Compact
+    };
+
     class TCOB_API style : public widget_style {
     public:
         utf8_string TabItemClass {"tab_items"};
-        position    TabBarPosition {position::Top};
-        length      TabBarSize;
+        position    HeaderPosition {position::Top};
+        length      HeaderSize;
+        header_mode HeaderMode {header_mode::Fill};
+        // header_overflow HeaderOverflow {tab_header_mode::Wrap};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };
@@ -37,7 +50,7 @@ public:
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
 
-    prop<isize> MaxTabsPerLine; // TODO: change to prop_val & overflow mode (multiline | scrollable)
+    prop<isize> MaxTabsPerLine; // TODO: change to prop_val & overflow mode (Wrap | Scroll)
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;

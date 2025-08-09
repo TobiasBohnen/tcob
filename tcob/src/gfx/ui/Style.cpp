@@ -11,6 +11,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
@@ -96,9 +97,9 @@ auto border_element::thickness() const -> ui::thickness
     return {Size / 2};
 }
 
-auto text_element::calc_font_size(rect_f const& rect) const -> u32
+auto text_element::calc_font_size(f32 height) const -> u32
 {
-    return static_cast<u32>(std::floor(Size.calc(1.0f, rect.height())));
+    return static_cast<u32>(std::floor(Size.calc(1.0f, height)));
 }
 
 ////////////////////////////////////////////////////////////

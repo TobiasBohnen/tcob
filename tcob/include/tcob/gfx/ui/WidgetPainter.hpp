@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
+#include "tcob/core/Size.hpp"
 #include "tcob/tcob_config.hpp"
 
 #include <functional>
@@ -53,7 +54,7 @@ public:
 
     auto canvas() -> gfx::canvas&;
 
-    auto format_text(text_element const& element, rect_f const& rect, utf8_string_view text) -> gfx::text_formatter::result;
+    auto format_text(text_element const& element, size_f size, utf8_string_view text) -> gfx::text_formatter::result;
 
 private:
     void do_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle);
@@ -64,7 +65,7 @@ private:
 
     auto get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint;
 
-    auto format_text(text_element const& element, rect_f const& rect, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
+    auto format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
     auto transform_text(text_transform xform, utf8_string_view text) const -> utf8_string;
 
     gfx::canvas&              _canvas;
