@@ -199,7 +199,7 @@ void tab_container::on_draw(widget_painter& painter)
 
 void tab_container::on_draw_children(widget_painter& painter)
 {
-    prepare_style(_style);
+    // prepare_style(_style);
 
     rect_f rect {content_bounds()};
 

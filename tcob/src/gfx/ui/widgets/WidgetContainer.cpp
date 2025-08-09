@@ -32,10 +32,12 @@ void widget_container::draw(widget_painter& painter)
 {
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
-    painter.begin(Alpha);
-    if (get_redraw()) { on_draw(painter); }
-    on_draw_children(painter);
-    painter.end();
+    if (get_redraw()) {
+        painter.begin(Alpha);
+        on_draw(painter);
+        on_draw_children(painter);
+        painter.end();
+    }
 
     set_redraw(false);
 }

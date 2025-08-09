@@ -191,8 +191,7 @@ void accordion::on_draw_children(widget_painter& painter)
     auto const [secIdx, val] {section_expand()};
     if (secIdx == INVALID_INDEX) { return; }
 
-    // active section
-    prepare_style(_style);
+    // prepare_style(_style);
 
     // scissor
     rect_f bounds {global_content_bounds()};
