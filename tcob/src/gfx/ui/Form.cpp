@@ -95,11 +95,11 @@ auto form_base::find_widget_by_name(string const& name) const -> std::shared_ptr
 
 auto form_base::all_widgets() const -> std::vector<widget*>
 {
-    auto const collectWidgets {[](std::vector<widget*>& vec, std::shared_ptr<widget_container> const& container, auto&& collect) -> void {
+    auto const collectWidgets {[](this auto&& self, std::vector<widget*>& vec, std::shared_ptr<widget_container> const& container) -> void {
         for (auto const& widget : container->widgets()) {
             vec.push_back(widget.get());
             if (auto widgetContainer {std::dynamic_pointer_cast<widget_container>(widget)}) {
-                collect(vec, widgetContainer, collect);
+                self(vec, widgetContainer);
             }
         }
     }};
@@ -108,7 +108,7 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     for (auto const& widget : containers()) {
         retValue.push_back(widget.get());
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-            collectWidgets(retValue, container, collectWidgets);
+            collectWidgets(retValue, container);
         }
     }
     return retValue;

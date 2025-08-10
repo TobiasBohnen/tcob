@@ -43,6 +43,8 @@ public:
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
 
+    prop<i32> HeaderLineCount;
+
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
     template <std::derived_from<widget_container> T>

@@ -39,6 +39,9 @@ tab_container::tab_container(init const& wi)
     HoveredTabIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     HoveredTabIndex(INVALID_INDEX);
 
+    HeaderLineCount.Changed.connect([this](auto const&) { queue_redraw(); });
+    HeaderLineCount(1);
+
     Class("tab_container");
 }
 
@@ -139,25 +142,27 @@ void tab_container::on_draw(widget_painter& painter)
         break;
     case position::Bottom:
         tabHeaderRect.Size.Height = _style.HeaderSize.calc(tabHeaderRect.height());
-        tabHeaderRect.Position.Y  = rect.bottom() - tabHeaderRect.height();
+        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * static_cast<f32>(*HeaderLineCount));
         break;
     case position::Left:
         tabHeaderRect.Size.Width = _style.HeaderSize.calc(tabHeaderRect.width());
         break;
     case position::Right:
         tabHeaderRect.Size.Width = _style.HeaderSize.calc(tabHeaderRect.width());
-        tabHeaderRect.Position.X = rect.right() - tabHeaderRect.width();
+        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * static_cast<f32>(*HeaderLineCount));
         break;
 
     case position::None: return;
     }
 
-    isize const maxItems {std::ssize(_tabs)};
-    f32         tabRectX {0};
-    f32         tabRectY {0};
+    isize const        maxItems {std::ssize(_tabs)};
+    isize const        columns {(maxItems + HeaderLineCount - 1) / HeaderLineCount};
+    std::vector<isize> lineOffsets;
+    lineOffsets.resize(HeaderLineCount);
 
-    auto const getNextTabRect {[&](item const& item, item_style const& itemStyle) {
-        rect_f retValue {};
+    auto const getNextTabRect {[&](isize index, item const& item, item_style const& itemStyle) {
+        rect_f      retValue {};
+        isize const line {index / columns};
 
         rect_f itemTabHeaderRect {tabHeaderRect};
         itemTabHeaderRect -= itemStyle.Item.Padding;
@@ -171,19 +176,19 @@ void tab_container::on_draw(widget_painter& painter)
 
             switch (_style.HeaderMode) {
             case tab_container::header_mode::Fill: {
-                itemWidth = itemTabHeaderRect.width() / static_cast<f32>(maxItems);
+                itemWidth = itemTabHeaderRect.width() / columns;
             } break;
             case tab_container::header_mode::Compact: {
-                auto const textFormat {painter.format_text(itemStyle.Item.Text, {itemTabHeaderRect.width() / static_cast<f32>(maxItems), itemHeight}, item.Text)};
+                auto const textFormat {painter.format_text(itemStyle.Item.Text, {itemTabHeaderRect.width() / columns, itemHeight}, item.Text)};
                 itemWidth = textFormat.UsedSize.Width;
             } break;
             }
 
-            retValue.Position.X  = itemTabHeaderRect.left() + tabRectX;
+            retValue.Position.X  = itemTabHeaderRect.left() + lineOffsets[line];
             retValue.Size.Width  = itemWidth;
-            retValue.Position.Y  = itemTabHeaderRect.top();
+            retValue.Position.Y  = itemTabHeaderRect.top() + (itemHeight * line);
             retValue.Size.Height = itemHeight;
-            tabRectX += itemWidth;
+            lineOffsets[line] += itemWidth;
         } break;
         case position::Left:
         case position::Right: {
@@ -192,19 +197,19 @@ void tab_container::on_draw(widget_painter& painter)
 
             switch (_style.HeaderMode) {
             case tab_container::header_mode::Fill: {
-                itemHeight = itemTabHeaderRect.height() / static_cast<f32>(maxItems);
+                itemHeight = itemTabHeaderRect.height() / columns;
             } break;
             case tab_container::header_mode::Compact: {
-                auto const textFormat {painter.format_text(itemStyle.Item.Text, {itemWidth, itemTabHeaderRect.height() / static_cast<f32>(maxItems)}, item.Text)};
+                auto const textFormat {painter.format_text(itemStyle.Item.Text, {itemWidth, itemTabHeaderRect.height() / columns}, item.Text)};
                 itemHeight = textFormat.UsedSize.Height;
             } break;
             }
 
-            retValue.Position.X  = itemTabHeaderRect.left();
+            retValue.Position.X  = itemTabHeaderRect.left() + (itemWidth * line);
             retValue.Size.Width  = itemWidth;
-            retValue.Position.Y  = itemTabHeaderRect.top() + tabRectY;
+            retValue.Position.Y  = itemTabHeaderRect.top() + lineOffsets[line];
             retValue.Size.Height = itemHeight;
-            tabRectY += itemHeight;
+            lineOffsets[line] += itemHeight;
         } break;
         case position::None: break;
         }
@@ -216,7 +221,7 @@ void tab_container::on_draw(widget_painter& painter)
         item_style tabStyle {};
         prepare_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
 
-        rect_f const tabRect {getNextTabRect(_tabLabels[i], tabStyle)};
+        rect_f const tabRect {getNextTabRect(i, _tabLabels[i], tabStyle)};
         painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
         _tabRectCache.push_back(tabRect);
     }
@@ -301,13 +306,13 @@ void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
     switch (style.HeaderPosition) {
     case position::Top:
     case position::Bottom: {
-        f32 const size {style.HeaderSize.calc(bounds.height())};
+        f32 const size {style.HeaderSize.calc(bounds.height()) * *HeaderLineCount};
         bounds.Size.Height -= size;
         if (style.HeaderPosition == position::Top) { bounds.Position.Y += size; }
     } break;
     case position::Left:
     case position::Right: {
-        f32 const size {style.HeaderSize.calc(bounds.width())};
+        f32 const size {style.HeaderSize.calc(bounds.width()) * *HeaderLineCount};
         bounds.Size.Width -= size;
         if (style.HeaderPosition == position::Left) { bounds.Position.X += size; }
     } break;
