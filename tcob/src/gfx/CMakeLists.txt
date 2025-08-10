@@ -57,7 +57,6 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Checkbox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CycleButton.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Displays.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/DraggableWidget.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/DropDownList.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/GridView.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/ImageBox.cpp
@@ -145,7 +144,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Checkbox.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/CycleButton.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Displays.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/DraggableWidget.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/DropDownList.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/GridView.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/ImageBox.hpp

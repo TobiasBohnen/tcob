@@ -70,7 +70,6 @@ class tab_container;
 
 // base
 class widget;
-class draggable_widget;
 class vscroll_widget;
 class widget_container;
 
