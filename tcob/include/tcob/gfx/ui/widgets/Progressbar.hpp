@@ -8,6 +8,7 @@
 
 #include "tcob/core/Property.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/component/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"

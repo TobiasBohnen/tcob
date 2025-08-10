@@ -80,6 +80,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Layout.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Style.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleCollection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleElements.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/UI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/WidgetPainter.cpp
 )
@@ -174,6 +175,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.inl
+    ${TCOB_INC_DIR}/tcob/gfx/ui/StyleElements.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Transition.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/UI.hpp
