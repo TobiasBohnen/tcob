@@ -25,10 +25,7 @@ void label::style::Transition(style& target, style const& left, style const& rig
 label::label(init const& wi)
     : widget {wi}
 {
-    Label.Changed.connect([this](auto const&) {
-        // TODO: translation hook
-        queue_redraw();
-    });
+    Label.Changed.connect([this](auto const&) { queue_redraw(); });
 
     Class("label");
 }

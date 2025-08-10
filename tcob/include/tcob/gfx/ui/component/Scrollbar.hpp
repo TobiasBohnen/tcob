@@ -9,7 +9,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/component/WidgetTweener.hpp"
@@ -41,13 +41,11 @@ public:
 
     auto is_mouse_over() const -> bool;
     auto is_mouse_over_thumb() const -> bool;
+
     auto mouse_hover(widget const& widget, point_i mp) -> bool;
-
     auto mouse_drag(widget const& widget, point_i mp) -> bool;
-
     void mouse_down(widget const& widget, point_i mp);
     void mouse_up(widget const& widget, point_i mp);
-
     void mouse_leave();
 
 private:
