@@ -6,9 +6,7 @@
 #include "tcob/gfx/ui/widgets/TabContainer.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <iterator>
-#include <limits>
 #include <memory>
 #include <vector>
 
@@ -40,9 +38,6 @@ tab_container::tab_container(init const& wi)
     ActiveTabIndex(INVALID_INDEX);
     HoveredTabIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     HoveredTabIndex(INVALID_INDEX);
-
-    MaxTabsPerLine.Changed.connect([this](auto const&) { queue_redraw(); });
-    MaxTabsPerLine(std::numeric_limits<isize>::max());
 
     Class("tab_container");
 }
@@ -144,20 +139,20 @@ void tab_container::on_draw(widget_painter& painter)
         break;
     case position::Bottom:
         tabHeaderRect.Size.Height = _style.HeaderSize.calc(tabHeaderRect.height());
-        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * static_cast<f32>(get_tab_line_count()));
+        tabHeaderRect.Position.Y  = rect.bottom() - tabHeaderRect.height();
         break;
     case position::Left:
         tabHeaderRect.Size.Width = _style.HeaderSize.calc(tabHeaderRect.width());
         break;
     case position::Right:
         tabHeaderRect.Size.Width = _style.HeaderSize.calc(tabHeaderRect.width());
-        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * static_cast<f32>(get_tab_line_count()));
+        tabHeaderRect.Position.X = rect.right() - tabHeaderRect.width();
         break;
 
     case position::None: return;
     }
 
-    isize const maxItems {std::min(*MaxTabsPerLine, std::ssize(_tabs))};
+    isize const maxItems {std::ssize(_tabs)};
     f32         tabRectX {0};
     f32         tabRectY {0};
 
@@ -229,8 +224,6 @@ void tab_container::on_draw(widget_painter& painter)
 
 void tab_container::on_draw_children(widget_painter& painter)
 {
-    // prepare_style(_style);
-
     rect_f rect {content_bounds()};
 
     // content
@@ -294,34 +287,6 @@ void tab_container::on_animation_step(string const& val)
     }
 }
 
-void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
-{
-    switch (style.HeaderPosition) {
-    case position::Top:
-    case position::Bottom: {
-        f32 const size {style.HeaderSize.calc(bounds.height()) * get_tab_line_count()};
-        bounds.Size.Height -= size;
-        if (style.HeaderPosition == position::Top) { bounds.Position.Y += size; }
-    } break;
-    case position::Left:
-    case position::Right: {
-        f32 const size {style.HeaderSize.calc(bounds.width()) * get_tab_line_count()};
-        bounds.Size.Width -= size;
-        if (style.HeaderPosition == position::Left) { bounds.Position.X += size; }
-    } break;
-    case position::None: break;
-    }
-}
-
-auto tab_container::get_tab_line_count() const -> isize
-{
-    if (MaxTabsPerLine > 0) {
-        return static_cast<isize>(std::ceil(static_cast<f32>(std::ssize(_tabs)) / static_cast<f32>(*MaxTabsPerLine)));
-    }
-
-    return 1;
-}
-
 void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget::offset_content(bounds, isHitTest);
@@ -329,6 +294,25 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
     // subtract tab bar from content
     if (isHitTest) { return; }
     offset_tab_content(bounds, _style);
+}
+
+void tab_container::offset_tab_content(rect_f& bounds, style const& style) const
+{
+    switch (style.HeaderPosition) {
+    case position::Top:
+    case position::Bottom: {
+        f32 const size {style.HeaderSize.calc(bounds.height())};
+        bounds.Size.Height -= size;
+        if (style.HeaderPosition == position::Top) { bounds.Position.Y += size; }
+    } break;
+    case position::Left:
+    case position::Right: {
+        f32 const size {style.HeaderSize.calc(bounds.width())};
+        bounds.Size.Width -= size;
+        if (style.HeaderPosition == position::Left) { bounds.Position.X += size; }
+    } break;
+    case position::None: break;
+    }
 }
 
 auto tab_container::attributes() const -> widget_attributes
