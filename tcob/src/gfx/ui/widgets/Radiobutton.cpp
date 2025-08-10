@@ -21,7 +21,7 @@ void radio_button::style::Transition(style& target, style const& left, style con
 {
     widget_style::Transition(target, left, right, step);
 
-    tick_element::Transition(target.Tick, left.Tick, right.Tick, step);
+    target.Tick.lerp(left.Tick, right.Tick, step);
 }
 
 radio_button::radio_button(init const& wi)

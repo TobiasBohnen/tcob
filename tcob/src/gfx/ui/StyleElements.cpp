@@ -91,41 +91,41 @@ auto text_element::calc_font_size(f32 height) const -> u32
 
 ////////////////////////////////////////////////////////////
 
-void thumb_element::Transition(thumb_element& target, thumb_element const& left, thumb_element const& right, f64 step)
+void thumb_element::lerp(thumb_element const& left, thumb_element const& right, f64 step)
 {
-    ui_paint_transition(target.Background, left.Background, right.Background, step);
+    ui_paint_lerp(Background, left.Background, right.Background, step);
 
-    target.LongSide  = length::Lerp(left.LongSide, right.LongSide, step);
-    target.ShortSide = length::Lerp(left.ShortSide, right.ShortSide, step);
-    border_element::Transition(target.Border, left.Border, right.Border, step);
+    LongSide  = length::Lerp(left.LongSide, right.LongSide, step);
+    ShortSide = length::Lerp(left.ShortSide, right.ShortSide, step);
+    Border.lerp(left.Border, right.Border, step);
 }
 
-void nav_arrow_element::Transition(nav_arrow_element& target, nav_arrow_element const& left, nav_arrow_element const& right, f64 step)
+void nav_arrow_element::lerp(nav_arrow_element const& left, nav_arrow_element const& right, f64 step)
 {
-    ui_paint_transition(target.UpBackground, left.UpBackground, right.UpBackground, step);
-    ui_paint_transition(target.DownBackground, left.DownBackground, right.DownBackground, step);
-    ui_paint_transition(target.Foreground, left.Foreground, right.Foreground, step);
+    ui_paint_lerp(UpBackground, left.UpBackground, right.UpBackground, step);
+    ui_paint_lerp(DownBackground, left.DownBackground, right.DownBackground, step);
+    ui_paint_lerp(Foreground, left.Foreground, right.Foreground, step);
 
-    target.Size = dimensions::Lerp(left.Size, right.Size, step);
-    border_element::Transition(target.Border, left.Border, right.Border, step);
-    target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
+    Size = dimensions::Lerp(left.Size, right.Size, step);
+    Border.lerp(left.Border, right.Border, step);
+    Padding = thickness::Lerp(left.Padding, right.Padding, step);
 }
 
-void bar_element::Transition(bar_element& target, bar_element const& left, bar_element const& right, f64 step)
+void bar_element::lerp(bar_element const& left, bar_element const& right, f64 step)
 {
-    ui_paint_transition(target.LowerBackground, left.LowerBackground, right.LowerBackground, step);
-    ui_paint_transition(target.HigherBackground, left.HigherBackground, right.HigherBackground, step);
+    ui_paint_lerp(LowerBackground, left.LowerBackground, right.LowerBackground, step);
+    ui_paint_lerp(HigherBackground, left.HigherBackground, right.HigherBackground, step);
 
-    target.Size = length::Lerp(left.Size, right.Size, step);
-    border_element::Transition(target.Border, left.Border, right.Border, step);
+    Size = length::Lerp(left.Size, right.Size, step);
+    Border.lerp(left.Border, right.Border, step);
 }
 
-void border_element::Transition(border_element& target, border_element const& left, border_element const& right, f64 step)
+void border_element::lerp(border_element const& left, border_element const& right, f64 step)
 {
-    ui_paint_transition(target.Background, left.Background, right.Background, step);
+    ui_paint_lerp(Background, left.Background, right.Background, step);
 
-    target.Radius = length::Lerp(left.Radius, right.Radius, step);
-    target.Size   = length::Lerp(left.Size, right.Size, step);
+    Radius = length::Lerp(left.Radius, right.Radius, step);
+    Size   = length::Lerp(left.Size, right.Size, step);
 
     usize const         ldashSize {left.Dash.size()};
     usize const         rdashSize {right.Dash.size()};
@@ -136,58 +136,58 @@ void border_element::Transition(border_element& target, border_element const& le
         auto const rdash {i < rdashSize ? right.Dash[i] : length {0, i < ldashSize ? left.Dash[i].Type : length::type::Absolute}};
         targetDash[i] = length::Lerp(ldash, rdash, step);
     }
-    target.Dash = targetDash;
+    Dash = targetDash;
 
-    target.DashOffset = static_cast<f32>(left.DashOffset + ((right.DashOffset - left.DashOffset) * step));
+    DashOffset = static_cast<f32>(left.DashOffset + ((right.DashOffset - left.DashOffset) * step));
 }
 
-void text_element::Transition(text_element& target, text_element const& left, text_element const& right, f64 step)
+void text_element::lerp(text_element const& left, text_element const& right, f64 step)
 {
-    target.Color = color::Lerp(left.Color, right.Color, step);
-    target.Size  = length::Lerp(left.Size, right.Size, step);
-    deco_element::Transition(target.Decoration, left.Decoration, right.Decoration, step);
-    shadow_element::Transition(target.Shadow, left.Shadow, right.Shadow, step);
+    Color = color::Lerp(left.Color, right.Color, step);
+    Size  = length::Lerp(left.Size, right.Size, step);
+    Decoration.lerp(left.Decoration, right.Decoration, step);
+    Shadow.lerp(left.Shadow, right.Shadow, step);
 }
 
-void caret_element::Transition(caret_element& target, caret_element const& left, caret_element const& right, f64 step)
+void caret_element::lerp(caret_element const& left, caret_element const& right, f64 step)
 {
-    target.Color = color::Lerp(left.Color, right.Color, step);
-    target.Width = length::Lerp(left.Width, right.Width, step);
+    Color = color::Lerp(left.Color, right.Color, step);
+    Width = length::Lerp(left.Width, right.Width, step);
 }
 
-void shadow_element::Transition(shadow_element& target, shadow_element const& left, shadow_element const& right, f64 step)
+void shadow_element::lerp(shadow_element const& left, shadow_element const& right, f64 step)
 {
-    target.Color   = color::Lerp(left.Color, right.Color, step);
-    target.OffsetX = length::Lerp(left.OffsetX, right.OffsetX, step);
-    target.OffsetY = length::Lerp(left.OffsetY, right.OffsetY, step);
+    Color   = color::Lerp(left.Color, right.Color, step);
+    OffsetX = length::Lerp(left.OffsetX, right.OffsetX, step);
+    OffsetY = length::Lerp(left.OffsetY, right.OffsetY, step);
 }
 
-void deco_element::Transition(deco_element& target, deco_element const& left, deco_element const& right, f64 step)
+void deco_element::lerp(deco_element const& left, deco_element const& right, f64 step)
 {
-    target.Color = color::Lerp(left.Color, right.Color, step);
-    target.Size  = length::Lerp(left.Size, right.Size, step);
+    Color = color::Lerp(left.Color, right.Color, step);
+    Size  = length::Lerp(left.Size, right.Size, step);
 }
 
-void tick_element::Transition(tick_element& target, tick_element const& left, tick_element const& right, f64 step)
+void tick_element::lerp(tick_element const& left, tick_element const& right, f64 step)
 {
-    ui_paint_transition(target.Foreground, left.Foreground, right.Foreground, step);
+    ui_paint_lerp(Foreground, left.Foreground, right.Foreground, step);
 
-    target.Size = length::Lerp(left.Size, right.Size, step);
+    Size = length::Lerp(left.Size, right.Size, step);
 }
 
-void scrollbar_element::Transition(scrollbar_element& target, scrollbar_element const& left, scrollbar_element const& right, f64 step)
+void scrollbar_element::lerp(scrollbar_element const& left, scrollbar_element const& right, f64 step)
 {
-    bar_element::Transition(target.Bar, left.Bar, right.Bar, step);
+    Bar.lerp(left.Bar, right.Bar, step);
 }
 
-void item_element::Transition(item_element& target, item_element const& left, item_element const& right, f64 step)
+void item_element::lerp(item_element const& left, item_element const& right, f64 step)
 {
-    text_element::Transition(target.Text, left.Text, right.Text, step);
+    Text.lerp(left.Text, right.Text, step);
 
-    ui_paint_transition(target.Background, left.Background, right.Background, step);
+    ui_paint_lerp(Background, left.Background, right.Background, step);
 
-    border_element::Transition(target.Border, left.Border, right.Border, step);
-    target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
+    Border.lerp(left.Border, right.Border, step);
+    Padding = thickness::Lerp(left.Padding, right.Padding, step);
 }
 
 ////////////////////////////////////////////////////////////

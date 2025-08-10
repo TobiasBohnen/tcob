@@ -39,8 +39,8 @@ void terminal::style::Transition(style& target, style const& left, style const& 
 {
     widget_style::Transition(target, left, right, step);
 
-    text_element::Transition(target.Text, left.Text, right.Text, step);
-    caret_element::Transition(target.Caret, left.Caret, right.Caret, step);
+    target.Text.lerp(left.Text, right.Text, step);
+    target.Caret.lerp(left.Caret, right.Caret, step);
 }
 
 terminal::terminal(init const& wi)

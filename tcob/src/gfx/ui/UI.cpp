@@ -208,7 +208,7 @@ auto global_to_parent(widget const& widget, point_i p) -> point_f
     return point_f {p} - point_f {widget.form().Bounds->Position};
 }
 
-void ui_paint_transition(ui_paint& target, ui_paint const& left, ui_paint const& right, f64 step)
+void ui_paint_lerp(ui_paint& target, ui_paint const& left, ui_paint const& right, f64 step)
 {
     if (auto const* lc {std::get_if<color>(&left)}) {
         if (auto const* rc {std::get_if<color>(&right)}) {
