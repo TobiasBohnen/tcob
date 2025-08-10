@@ -14,6 +14,7 @@
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
@@ -310,6 +311,8 @@ public:
     style(style&& other) noexcept                         = default;
     auto operator=(style&& other) noexcept -> style&      = default;
     virtual ~style()                                      = default;
+
+    easing_func EasingFunc {easing_func::Linear};
 };
 
 class TCOB_API widget_style : public style {

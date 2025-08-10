@@ -54,9 +54,7 @@ inline auto curve<T>::operator()(f64 t) const -> type
 template <typename T>
 inline auto power<T>::operator()(f64 t) const -> type
 {
-    if (Exponent <= 0 && t == 0) {
-        return Start;
-    }
+    if (Exponent <= 0 && t == 0) { return Start; }
 
     if constexpr (Lerpable<type>) {
         return type::Lerp(Start, End, std::pow(t, Exponent));
@@ -70,9 +68,7 @@ inline auto power<T>::operator()(f64 t) const -> type
 template <typename T>
 inline auto inverse_power<T>::operator()(f64 t) const -> type
 {
-    if (Exponent <= 0 && t == 0) {
-        return Start;
-    }
+    if (Exponent <= 0 && t == 0) { return Start; }
 
     if constexpr (Lerpable<type>) {
         return type::Lerp(Start, End, 1 - std::pow(1 - t, Exponent));
@@ -84,11 +80,81 @@ inline auto inverse_power<T>::operator()(f64 t) const -> type
 ////////////////////////////////////////////////////////////
 
 template <typename T>
+inline auto inout_power<T>::operator()(f64 t) const -> type
+{
+    if (Exponent <= 0 && t == 0) { return Start; }
+
+    auto const midpoint {Start + (End - Start) * 0.5};
+
+    if (t < 0.5) {
+        f64 const scaledT {t * 2.0};
+        if constexpr (Lerpable<type>) {
+            return type::Lerp(Start, midpoint, std::pow(scaledT, Exponent));
+        } else {
+            return static_cast<type>(Start + ((midpoint - Start) * std::pow(scaledT, Exponent)));
+        }
+    } else {
+        f64 const scaledT {(t - 0.5) * 2.0};
+        if constexpr (Lerpable<type>) {
+            return type::Lerp(midpoint, End, 1 - std::pow(1 - scaledT, Exponent));
+        } else {
+            return static_cast<type>(midpoint + ((End - midpoint) * (1 - std::pow(1 - scaledT, Exponent))));
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto exponential<T>::operator()(f64 t) const -> type
+{
+    if (t <= 0.0) { return Start; }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, std::pow(2.0, 10.0 * (t - 1.0)));
+    } else {
+        return static_cast<type>(Start + (End - Start) * std::pow(2.0, 10.0 * (t - 1.0)));
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto inverse_exponential<T>::operator()(f64 t) const -> type
+{
+    if (t >= 1.0) { return End; }
+
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, 1.0 - std::pow(2.0, -10.0 * t));
+    } else {
+        return static_cast<type>(Start + (End - Start) * (1.0 - std::pow(2.0, -10.0 * t)));
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+inline auto inout_exponential<T>::operator()(f64 t) const -> type
+{
+    if (t <= 0.0) { return Start; }
+    if (t >= 1.0) { return End; }
+
+    f64 const factor {t < 0.5
+                          ? std::pow(2.0, (20.0 * t) - 10.0) / 2.0
+                          : (2.0 - std::pow(2.0, (-20.0 * t) + 10.0)) / 2.0};
+    if constexpr (Lerpable<type>) {
+        return type::Lerp(Start, End, factor);
+    } else {
+        return static_cast<type>(Start + (End - Start) * factor);
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
 inline auto linear<T>::operator()(f64 t) const -> type
 {
-    if (t == 0) {
-        return Start;
-    }
+    if (t == 0) { return Start; }
 
     if constexpr (Lerpable<type>) {
         return type::Lerp(Start, End, t);
@@ -109,30 +175,26 @@ inline auto circular::operator()(f64 t) const -> type
 template <typename T>
 inline auto smoothstep<T>::operator()(f64 t) const -> type
 {
-    if (t == 0) {
-        return Edge0;
-    }
+    if (t == 0) { return Start; }
 
     f64 const e {t * t * (3. - 2. * t)};
     if constexpr (Lerpable<type>) {
-        return type::Lerp(Edge0, Edge1, e);
+        return type::Lerp(Start, End, e);
     } else {
-        return static_cast<type>(Edge0 + static_cast<f64>((Edge1 - Edge0) * e));
+        return static_cast<type>(Start + static_cast<f64>((End - Start) * e));
     }
 }
 
 template <typename T>
 inline auto smootherstep<T>::operator()(f64 t) const -> type
 {
-    if (t == 0) {
-        return Edge0;
-    }
+    if (t == 0) { return Start; }
 
     f64 const e {t * t * t * (t * (t * 6. - 15.) + 10.)};
     if constexpr (Lerpable<type>) {
-        return type::Lerp(Edge0, Edge1, e);
+        return type::Lerp(Start, End, e);
     } else {
-        return static_cast<type>(Edge0 + static_cast<f64>((Edge1 - Edge0) * e));
+        return static_cast<type>(Start + static_cast<f64>((End - Start) * e));
     }
 }
 

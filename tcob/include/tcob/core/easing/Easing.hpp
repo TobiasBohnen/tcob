@@ -84,6 +84,59 @@ public:
 ////////////////////////////////////////////////////////////
 
 template <typename T>
+class inout_power final {
+public:
+    using type = T;
+
+    type Start {};
+    type End {};
+    f64  Exponent {1.0};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class exponential final {
+public:
+    using type = T;
+
+    type Start {};
+    type End {};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class inverse_exponential final {
+public:
+    using type = T;
+
+    type Start {};
+    type End {};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
+class inout_exponential final {
+public:
+    using type = T;
+
+    type Start {};
+    type End {};
+
+    auto operator()(f64 t) const -> type;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename T>
 class linear final {
 public:
     using type = T;
@@ -113,8 +166,8 @@ class smoothstep final {
 public:
     using type = T;
 
-    type Edge0 {};
-    type Edge1 {};
+    type Start {};
+    type End {};
 
     auto operator()(f64 t) const -> type;
 };
@@ -126,8 +179,8 @@ class smootherstep final {
 public:
     using type = T;
 
-    type Edge0 {};
-    type Edge1 {};
+    type Start {};
+    type End {};
 
     auto operator()(f64 t) const -> type;
 };

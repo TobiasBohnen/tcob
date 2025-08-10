@@ -111,6 +111,18 @@ template <typename T>
 using inverse_power_tween = tween<easing::inverse_power<T>>;
 
 template <typename T>
+using inout_power_tween = tween<easing::inout_power<T>>;
+
+template <typename T>
+using exponential_tween = tween<easing::exponential<T>>;
+
+template <typename T>
+using inverse_exponential_tween = tween<easing::inverse_exponential<T>>;
+
+template <typename T>
+using inout_exponential_tween = tween<easing::inout_exponential<T>>;
+
+template <typename T>
 using linear_tween = tween<easing::linear<T>>;
 
 using circular_tween = tween<easing::circular>;

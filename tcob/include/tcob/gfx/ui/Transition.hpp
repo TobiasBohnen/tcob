@@ -9,6 +9,29 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
+enum class easing_func : u8 {
+    Linear,
+    SmoothStep,
+    SmootherStep,
+    QuadIn,
+    QuadOut,
+    QuadInOut,
+    CubicIn,
+    CubicOut,
+    CubicInOut,
+    QuartIn,
+    QuartOut,
+    QuartInOut,
+    QuintIn,
+    QuintOut,
+    QuintInOut,
+    ExpoIn,
+    ExpoOut,
+    ExpoInOut,
+};
+
+////////////////////////////////////////////////////////////
+
 template <typename T>
 class transition {
 public:
