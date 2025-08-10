@@ -34,6 +34,7 @@ public:
         position    HeaderPosition {position::Top};
         length      HeaderSize;
         header_mode HeaderMode {header_mode::Fill};
+        i32         HeaderLineCount {1};
 
         void static Transition(style& target, style const& left, style const& right, f64 step);
     };
@@ -42,8 +43,6 @@ public:
 
     prop_val<isize> ActiveTabIndex;
     prop_val<isize> HoveredTabIndex;
-
-    prop<i32> HeaderLineCount;
 
     template <std::derived_from<widget_container> T>
     auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
@@ -78,7 +77,7 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
-    void offset_tab_content(rect_f& bounds, style const& style) const;
+    void offset_tab_content(rect_f& bounds) const;
 
     std::vector<std::shared_ptr<widget>> _tabs;
     std::vector<item>                    _tabLabels;
