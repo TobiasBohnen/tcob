@@ -74,7 +74,7 @@ public:
 
     auto copy_to_image(u32 level) const -> image;
 
-    auto regions(this auto&& self) -> auto&&;
+    auto regions(this auto&& self) -> decltype(auto);
 
     template <std::derived_from<render_backend::texture_base> T>
     auto get_impl() const -> T*;
@@ -91,10 +91,9 @@ private:
     u32    _depth {0};
 };
 
-template <typename Self>
-auto texture::regions(this Self&& self) -> auto&&
+auto texture::regions(this auto&& self) -> decltype(auto)
 {
-    return std::forward<Self>(self)._regions;
+    return (self._regions);
 }
 
 ////////////////////////////////////////////////////////////
