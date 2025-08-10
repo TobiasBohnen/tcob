@@ -9,8 +9,6 @@
 #include <algorithm>
 #include <cassert>
 
-#include "tcob/core/easing/Easing.hpp"
-
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
@@ -64,28 +62,7 @@ inline void transition<T>::apply(S& style)
 
     if (!is_active()) { return; }
 
-    f64 frac {_currentTime.count() / _duration.count()};
-    switch (_targetStyle->EasingFunc) {
-    case easing_func::Linear:       break;
-    case easing_func::SmoothStep:   frac = easing::smoothstep<f32> {.Start = 0, .End = 1}(frac); break;
-    case easing_func::SmootherStep: frac = easing::smootherstep<f32> {.Start = 0, .End = 1}(frac); break;
-    case easing_func::QuadIn:       frac = easing::power<f32> {.Start = 0, .End = 1, .Exponent = 2}(frac); break;
-    case easing_func::QuadOut:      frac = easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 2}(frac); break;
-    case easing_func::QuadInOut:    frac = easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 2}(frac); break;
-    case easing_func::CubicIn:      frac = easing::power<f32> {.Start = 0, .End = 1, .Exponent = 3}(frac); break;
-    case easing_func::CubicOut:     frac = easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 3}(frac); break;
-    case easing_func::CubicInOut:   frac = easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 3}(frac); break;
-    case easing_func::QuartIn:      frac = easing::power<f32> {.Start = 0, .End = 1, .Exponent = 4}(frac); break;
-    case easing_func::QuartOut:     frac = easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 4}(frac); break;
-    case easing_func::QuartInOut:   frac = easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 4}(frac); break;
-    case easing_func::QuintIn:      frac = easing::power<f32> {.Start = 0, .End = 1, .Exponent = 5}(frac); break;
-    case easing_func::QuintOut:     frac = easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 5}(frac); break;
-    case easing_func::QuintInOut:   frac = easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 5}(frac); break;
-    case easing_func::ExpoIn:       frac = easing::exponential<f32> {.Start = 0, .End = 1.}(frac); break;
-    case easing_func::ExpoOut:      frac = easing::inverse_exponential<f32> {.Start = 0, .End = 1.}(frac); break;
-    case easing_func::ExpoInOut:    frac = easing::inout_exponential<f32> {.Start = 0, .End = 1.}(frac); break;
-    }
-
+    f64 const frac {_targetStyle->ease_value(_currentTime.count() / _duration.count())};
     S::Transition(style, *static_cast<S const*>(_sourceStyle), *static_cast<S const*>(_targetStyle), frac);
 }
 

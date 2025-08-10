@@ -12,9 +12,37 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/easing/Easing.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
+////////////////////////////////////////////////////////////
+
+auto style::ease_value(f64 t) const -> f64
+{
+    switch (EasingFunc) {
+    case easing_func::Linear:       return t;
+    case easing_func::SmoothStep:   return easing::smoothstep<f32> {.Start = 0, .End = 1}(t); break;
+    case easing_func::SmootherStep: return easing::smootherstep<f32> {.Start = 0, .End = 1}(t); break;
+    case easing_func::QuadIn:       return easing::power<f32> {.Start = 0, .End = 1, .Exponent = 2}(t); break;
+    case easing_func::QuadOut:      return easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 2}(t); break;
+    case easing_func::QuadInOut:    return easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 2}(t); break;
+    case easing_func::CubicIn:      return easing::power<f32> {.Start = 0, .End = 1, .Exponent = 3}(t); break;
+    case easing_func::CubicOut:     return easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 3}(t); break;
+    case easing_func::CubicInOut:   return easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 3}(t); break;
+    case easing_func::QuartIn:      return easing::power<f32> {.Start = 0, .End = 1, .Exponent = 4}(t); break;
+    case easing_func::QuartOut:     return easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 4}(t); break;
+    case easing_func::QuartInOut:   return easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 4}(t); break;
+    case easing_func::QuintIn:      return easing::power<f32> {.Start = 0, .End = 1, .Exponent = 5}(t); break;
+    case easing_func::QuintOut:     return easing::inverse_power<f32> {.Start = 0, .End = 1, .Exponent = 5}(t); break;
+    case easing_func::QuintInOut:   return easing::inout_power<f32> {.Start = 0, .End = 1., .Exponent = 5}(t); break;
+    case easing_func::ExpoIn:       return easing::exponential<f32> {.Start = 0, .End = 1.}(t); break;
+    case easing_func::ExpoOut:      return easing::inverse_exponential<f32> {.Start = 0, .End = 1.}(t); break;
+    case easing_func::ExpoInOut:    return easing::inout_exponential<f32> {.Start = 0, .End = 1.}(t); break;
+    }
+
+    return t;
+}
 
 ////////////////////////////////////////////////////////////
 

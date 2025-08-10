@@ -14,10 +14,31 @@
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
+////////////////////////////////////////////////////////////
+
+enum class easing_func : u8 {
+    Linear,
+    SmoothStep,
+    SmootherStep,
+    QuadIn,
+    QuadOut,
+    QuadInOut,
+    CubicIn,
+    CubicOut,
+    CubicInOut,
+    QuartIn,
+    QuartOut,
+    QuartInOut,
+    QuintIn,
+    QuintOut,
+    QuintInOut,
+    ExpoIn,
+    ExpoOut,
+    ExpoInOut,
+};
 
 ////////////////////////////////////////////////////////////
 
@@ -313,6 +334,8 @@ public:
     virtual ~style()                                      = default;
 
     easing_func EasingFunc {easing_func::Linear};
+
+    auto ease_value(f64 t) const -> f64;
 };
 
 class TCOB_API widget_style : public style {

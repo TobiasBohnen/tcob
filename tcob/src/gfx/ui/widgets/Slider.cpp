@@ -68,13 +68,15 @@ void slider::on_draw(widget_painter& painter)
     auto const orien {get_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
 
+    f32 const tweenValue {_tween.current_value()};
+
     // bar
     _barRectCache.Bar = painter.draw_bar(
         _style.Bar,
         rect,
         {.Orientation = orien,
          .Position    = pos,
-         .Stops       = {0.0f, _tween.current_value(), 1.0f}});
+         .Stops       = {0.0f, tweenValue, 1.0f}});
 
     // thumb
     auto const  thumbFlags {!_overThumb          ? widget_flags {}
@@ -87,7 +89,7 @@ void slider::on_draw(widget_painter& painter)
         thumbStyle.Thumb,
         rect,
         {.Orientation      = orien,
-         .RelativePosition = orien == orientation::Vertical ? 1.0f - _tween.current_value() : _tween.current_value()});
+         .RelativePosition = orien == orientation::Vertical ? 1.0f - tweenValue : tweenValue});
 
     if (orien == orientation::Vertical) {
         _barRectCache.Thumb.Size.Width -= thumbStyle.Thumb.Border.Size.calc(_barRectCache.Thumb.width());
