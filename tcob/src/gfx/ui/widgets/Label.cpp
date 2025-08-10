@@ -38,7 +38,7 @@ void label::on_draw(widget_painter& painter)
 
     // text
     if (_style.Text.Font) {
-        painter.draw_text(_style.Text, rect, Label);
+        painter.draw_text(_style.Text, rect, *Label);
     }
 }
 

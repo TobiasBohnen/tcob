@@ -109,23 +109,23 @@ auto static stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
     canvas.stroke();
 }
 
-void widget_painter::draw_background_and_border(widget_style const& element, rect_f& rect, bool isCircle)
+void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
 {
     //  add margin
-    rect -= element.Margin;
+    rect -= style.Margin;
 
-    do_shadow(element.DropShadow, rect, isCircle, element.Border);
+    do_shadow(style.DropShadow, rect, isCircle, style.Border);
     if (isCircle) {
-        do_bordered_circle(rect, element.Background, element.Border);
+        do_bordered_circle(rect, style.Background, style.Border);
     } else {
-        do_bordered_rect(rect, element.Background, element.Border);
+        do_bordered_rect(rect, style.Background, style.Border);
     }
 
     // add padding
-    rect -= element.Padding;
+    rect -= style.Padding;
 
     // add border
-    rect -= element.Border.thickness();
+    rect -= style.Border.thickness();
 }
 
 void widget_painter::do_bordered_rect(rect_f const& rect, ui_paint const& back, border_element const& borderStyle)
@@ -311,7 +311,7 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
     }
 }
 
-void widget_painter::draw_text(text_element const& element, rect_f const& rect, utf8_string const& text)
+void widget_painter::draw_text(text_element const& element, rect_f const& rect, utf8_string_view text)
 {
     if (text.empty()) { return; }
 
