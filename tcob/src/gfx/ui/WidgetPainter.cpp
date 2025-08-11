@@ -23,6 +23,7 @@
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
+#include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -130,7 +131,7 @@ void widget_painter::draw_background_and_border(widget_style const& style, rect_
     rect -= style.Border.thickness();
 }
 
-void widget_painter::do_bordered_rect(rect_f const& rect, ui_paint const& back, border_element const& borderStyle)
+void widget_painter::do_bordered_rect(rect_f const& rect, paint const& back, border_element const& borderStyle)
 {
     auto const guard {_canvas.create_guard()};
 
@@ -150,7 +151,7 @@ void widget_painter::do_bordered_rect(rect_f const& rect, ui_paint const& back, 
     do_border(rect, borderStyle, borderSize, borderRadius);
 }
 
-void widget_painter::do_bordered_circle(rect_f const& rect, ui_paint const& back, border_element const& borderStyle)
+void widget_painter::do_bordered_circle(rect_f const& rect, paint const& back, border_element const& borderStyle)
 {
     auto const guard {_canvas.create_guard()};
 
@@ -781,7 +782,7 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
     return retValue;
 }
 
-auto widget_painter::get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint
+auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canvas::paint
 {
     return std::visit(
         overloaded {

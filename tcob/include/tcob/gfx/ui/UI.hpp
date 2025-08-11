@@ -9,16 +9,10 @@
 #include <unordered_map>
 #include <variant>
 
-#include "tcob/core/AngleUnits.hpp"
-#include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/Size.hpp"
-#include "tcob/core/assets/Asset.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
-#include "tcob/gfx/ColorGradient.hpp"
-#include "tcob/gfx/Texture.hpp"
 
 namespace tcob::ui {
 
@@ -267,54 +261,6 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API linear_gradient {
-public:
-    degree_f            Angle {0};
-    gfx::color_gradient Colors;
-
-    auto operator==(linear_gradient const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API radial_gradient {
-public:
-    length              InnerRadius {0.0f, length::type::Relative};
-    length              OuterRadius {1.0f, length::type::Relative};
-    size_f              Scale {size_f::One};
-    gfx::color_gradient Colors;
-
-    auto operator==(radial_gradient const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API box_gradient {
-public:
-    length              Radius {0.25f, length::type::Relative};
-    length              Feather {0.50f, length::type::Relative};
-    gfx::color_gradient Colors;
-
-    auto operator==(box_gradient const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API nine_patch {
-public:
-    assets::asset_ptr<gfx::texture> Texture;
-    string                          TextureRegion {"default"};
-    rect_f                          UV;
-
-    auto operator==(nine_patch const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradient, nine_patch>;
-
-////////////////////////////////////////////////////////////
-
 static constexpr isize INVALID_INDEX {-1};
 
 ////////////////////////////////////////////////////////////
@@ -370,8 +316,6 @@ struct drop_event {
 
 TCOB_API auto global_to_content(widget const& widget, point_i p) -> point_f;
 TCOB_API auto global_to_parent(widget const& widget, point_i p) -> point_f;
-
-TCOB_API void ui_paint_lerp(ui_paint& target, ui_paint const& left, ui_paint const& right, f64 step);
 
 ////////////////////////////////////////////////////////////
 

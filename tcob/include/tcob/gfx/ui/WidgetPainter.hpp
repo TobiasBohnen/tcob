@@ -17,6 +17,7 @@
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Transform.hpp"
+#include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -61,12 +62,12 @@ public:
 
 private:
     void do_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle);
-    void do_bordered_rect(rect_f const& rect, ui_paint const& back, border_element const& borderStyle);
-    void do_bordered_circle(rect_f const& rect, ui_paint const& back, border_element const& borderStyle);
+    void do_bordered_rect(rect_f const& rect, paint const& back, border_element const& borderStyle);
+    void do_bordered_circle(rect_f const& rect, paint const& back, border_element const& borderStyle);
     void do_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius);
     void do_shadow(shadow_element const& element, rect_f const& rect, bool isCircle, border_element const& borderStyle);
 
-    auto get_paint(ui_paint const& p, rect_f const& rect) -> gfx::canvas::paint;
+    auto get_paint(paint const& p, rect_f const& rect) -> gfx::canvas::paint;
 
     auto format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result;
     auto transform_text(text_transform xform, utf8_string_view text) const -> utf8_string;

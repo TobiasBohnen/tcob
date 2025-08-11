@@ -118,6 +118,7 @@
 
 #include <tcob/gfx/ui/Form.hpp>
 #include <tcob/gfx/ui/Layout.hpp>
+#include <tcob/gfx/ui/Paint.hpp>
 #include <tcob/gfx/ui/Style.hpp>
 #include <tcob/gfx/ui/StyleCollection.hpp>
 #include <tcob/gfx/ui/StyleElements.hpp>
@@ -152,7 +153,6 @@
 #include <tcob/gfx/ui/widgets/VScrollWidget.hpp>
 #include <tcob/gfx/ui/widgets/Widget.hpp>
 #include <tcob/gfx/ui/widgets/WidgetContainer.hpp>
-
 
 #include <tcob/physics/Body.hpp>
 #include <tcob/physics/DebugDraw.hpp>

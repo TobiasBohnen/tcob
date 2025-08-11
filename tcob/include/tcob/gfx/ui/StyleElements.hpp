@@ -14,6 +14,7 @@
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/FontFamily.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
@@ -174,7 +175,7 @@ public:
 class TCOB_API border_element {
 public:
     border_type         Type {border_type::Solid};
-    ui_paint            Background {colors::Transparent};
+    paint               Background {colors::Transparent};
     length              Radius {};
     length              Size {};
     std::vector<length> Dash {};
@@ -197,7 +198,7 @@ public:
     };
 
     thumb_type     Type {thumb_type::Rect};
-    ui_paint       Background {colors::White};
+    paint          Background {colors::White};
     length         LongSide {};
     length         ShortSide {};
     border_element Border {};
@@ -214,7 +215,7 @@ public:
 class TCOB_API tick_element {
 public:
     tick_type Type {tick_type::Checkmark};
-    ui_paint  Foreground {colors::White};
+    paint     Foreground {colors::White};
     length    Size {};
 
     void lerp(tick_element const& left, tick_element const& right, f64 step);
@@ -239,8 +240,8 @@ public:
         std::vector<f32> Stops;
     };
 
-    ui_paint       LowerBackground {colors::White};
-    ui_paint       HigherBackground {colors::White};
+    paint          LowerBackground {colors::White};
+    paint          HigherBackground {colors::White};
     length         Size {1, length::type::Relative};
     border_element Border {};
     milliseconds   MotionDuration {0};
@@ -269,9 +270,9 @@ public:
 class TCOB_API nav_arrow_element {
 public:
     nav_arrow_type Type {nav_arrow_type::Triangle};
-    ui_paint       UpBackground {colors::Transparent};
-    ui_paint       DownBackground {colors::Transparent};
-    ui_paint       Foreground {colors::Transparent};
+    paint          UpBackground {colors::Transparent};
+    paint          DownBackground {colors::Transparent};
+    paint          Foreground {colors::Transparent};
     dimensions     Size {};
     border_element Border {};
     thickness      Padding {};
@@ -288,7 +289,7 @@ public:
 class TCOB_API item_element {
 public:
     text_element    Text;
-    ui_paint        Background {colors::White};
+    paint           Background {colors::White};
     border_element  Border {};
     thickness       Padding {};
     icon_text_order IconTextOrder {icon_text_order::IconBeforeText};

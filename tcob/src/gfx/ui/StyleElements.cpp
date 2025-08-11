@@ -93,7 +93,7 @@ auto text_element::calc_font_size(f32 height) const -> u32
 
 void thumb_element::lerp(thumb_element const& left, thumb_element const& right, f64 step)
 {
-    ui_paint_lerp(Background, left.Background, right.Background, step);
+    paint_lerp(Background, left.Background, right.Background, step);
 
     LongSide  = length::Lerp(left.LongSide, right.LongSide, step);
     ShortSide = length::Lerp(left.ShortSide, right.ShortSide, step);
@@ -102,9 +102,9 @@ void thumb_element::lerp(thumb_element const& left, thumb_element const& right, 
 
 void nav_arrow_element::lerp(nav_arrow_element const& left, nav_arrow_element const& right, f64 step)
 {
-    ui_paint_lerp(UpBackground, left.UpBackground, right.UpBackground, step);
-    ui_paint_lerp(DownBackground, left.DownBackground, right.DownBackground, step);
-    ui_paint_lerp(Foreground, left.Foreground, right.Foreground, step);
+    paint_lerp(UpBackground, left.UpBackground, right.UpBackground, step);
+    paint_lerp(DownBackground, left.DownBackground, right.DownBackground, step);
+    paint_lerp(Foreground, left.Foreground, right.Foreground, step);
 
     Size = dimensions::Lerp(left.Size, right.Size, step);
     Border.lerp(left.Border, right.Border, step);
@@ -113,8 +113,8 @@ void nav_arrow_element::lerp(nav_arrow_element const& left, nav_arrow_element co
 
 void bar_element::lerp(bar_element const& left, bar_element const& right, f64 step)
 {
-    ui_paint_lerp(LowerBackground, left.LowerBackground, right.LowerBackground, step);
-    ui_paint_lerp(HigherBackground, left.HigherBackground, right.HigherBackground, step);
+    paint_lerp(LowerBackground, left.LowerBackground, right.LowerBackground, step);
+    paint_lerp(HigherBackground, left.HigherBackground, right.HigherBackground, step);
 
     Size = length::Lerp(left.Size, right.Size, step);
     Border.lerp(left.Border, right.Border, step);
@@ -122,7 +122,7 @@ void bar_element::lerp(bar_element const& left, bar_element const& right, f64 st
 
 void border_element::lerp(border_element const& left, border_element const& right, f64 step)
 {
-    ui_paint_lerp(Background, left.Background, right.Background, step);
+    paint_lerp(Background, left.Background, right.Background, step);
 
     Radius = length::Lerp(left.Radius, right.Radius, step);
     Size   = length::Lerp(left.Size, right.Size, step);
@@ -170,7 +170,7 @@ void deco_element::lerp(deco_element const& left, deco_element const& right, f64
 
 void tick_element::lerp(tick_element const& left, tick_element const& right, f64 step)
 {
-    ui_paint_lerp(Foreground, left.Foreground, right.Foreground, step);
+    paint_lerp(Foreground, left.Foreground, right.Foreground, step);
 
     Size = length::Lerp(left.Size, right.Size, step);
 }
@@ -184,7 +184,7 @@ void item_element::lerp(item_element const& left, item_element const& right, f64
 {
     Text.lerp(left.Text, right.Text, step);
 
-    ui_paint_lerp(Background, left.Background, right.Background, step);
+    paint_lerp(Background, left.Background, right.Background, step);
 
     Border.lerp(left.Border, right.Border, step);
     Padding = thickness::Lerp(left.Padding, right.Padding, step);

@@ -44,7 +44,7 @@ void widget_style::Transition(widget_style& target, widget_style const& left, wi
 {
     target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
     target.Margin  = thickness::Lerp(left.Margin, right.Margin, step);
-    ui_paint_lerp(target.Background, left.Background, right.Background, step);
+    paint_lerp(target.Background, left.Background, right.Background, step);
 
     target.DropShadow.lerp(left.DropShadow, right.DropShadow, step);
     target.Border.lerp(left.Border, right.Border, step);

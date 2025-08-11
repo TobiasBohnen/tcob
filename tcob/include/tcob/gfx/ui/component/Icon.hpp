@@ -4,7 +4,6 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-
 #include "tcob/tcob_config.hpp"
 
 #include "tcob/core/Color.hpp"

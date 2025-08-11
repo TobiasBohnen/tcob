@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
@@ -54,7 +55,7 @@ public:
     thickness Padding {};
     thickness Margin {};
 
-    ui_paint       Background {colors::Transparent};
+    paint          Background {colors::Transparent};
     shadow_element DropShadow {.Color = colors::Transparent, .OffsetX = length {5, length::type::Absolute}, .OffsetY = length {5, length::type::Absolute}};
     border_element Border;
 

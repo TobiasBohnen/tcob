@@ -77,6 +77,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/WidgetContainer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Form.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Layout.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/Paint.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/Style.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleCollection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/StyleElements.cpp
@@ -172,6 +173,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/Form.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Layout.inl
+    ${TCOB_INC_DIR}/tcob/gfx/ui/Paint.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/Style.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/StyleCollection.inl
