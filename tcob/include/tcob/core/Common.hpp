@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <type_traits>
 
 #include "tcob/core/Concepts.hpp"
@@ -24,7 +25,13 @@ namespace helper {
 
     TCOB_API auto get_bits(u32 i, i32 offset, i32 count) -> u32;
 
-    TCOB_API auto hash_combine(usize h1, usize h2) -> usize;
+    template <typename... Ts>
+    auto constexpr hash_combine(usize seed, Ts... values) noexcept -> usize
+    {
+        constexpr usize magic {sizeof(usize) == 8 ? 0x9e3779b97f4a7c15ULL : 0x9e3779b9U};
+        ((seed ^= std::hash<Ts> {}(values) + magic + (seed << 6) + (seed >> 2)), ...);
+        return seed;
+    }
 
     auto erase_first(auto&& container, auto&& pred) -> bool
     {

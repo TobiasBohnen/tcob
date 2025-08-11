@@ -75,11 +75,11 @@ enum class blend_equation : u8 {
 
 enum class stencil_func : u8 {
     Never,
-    Less,
     Equal,
+    NotEqual,
+    Less,
     LessEqual,
     Greater,
-    NotEqual,
     GreaterEqual,
     Always
 };

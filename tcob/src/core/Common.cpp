@@ -61,12 +61,6 @@ auto get_bits(u32 i, i32 offset, i32 count) -> u32
     return static_cast<u32>(i >> offset) & ((1 << count) - 1);
 }
 
-auto hash_combine(usize h1, usize h2) -> usize
-{
-    // from Boost
-    return h1 ^= h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2);
-}
-
 }
 
 ////////////////////////////////////////////////////////////

@@ -30,12 +30,12 @@ concept QuadtreeValue =
 ////////////////////////////////////////////////////////////
 
 namespace detail {
-    constexpr auto contains(rect_f const& left, rect_f const& right) noexcept -> bool
+    auto constexpr contains(rect_f const& left, rect_f const& right) noexcept -> bool
     {
         return left.left() <= right.left() && right.right() <= left.right() && left.top() <= right.top() && right.bottom() <= left.bottom();
     }
 
-    constexpr auto intersects(rect_f const& left, rect_f const& right) noexcept -> bool
+    auto constexpr intersects(rect_f const& left, rect_f const& right) noexcept -> bool
     {
         return left.left() < right.right() && left.right() > right.left() && left.top() < right.bottom() && left.bottom() > right.top();
     }
