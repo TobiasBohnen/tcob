@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 
 #include "tcob/core/easing/Easing.hpp"
+#include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
