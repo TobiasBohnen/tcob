@@ -6,14 +6,17 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/component/Icon.hpp"
+#include "tcob/gfx/ui/component/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -39,11 +42,13 @@ public:
 
     bool Draggable {false};
 
+    void start_animation(gfx::frame_animation const& ani, playback_mode mode);
+    void stop_animation();
+
 protected:
     void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
-    void on_animation_step(string const& val) override;
 
     void on_mouse_drag(input::mouse::motion_event const& ev) override;
     void on_mouse_button_up(input::mouse::button_event const& ev) override;
@@ -61,5 +66,7 @@ private:
 
     bool    _isDragging {false};
     point_f _dragOffset {point_f::Zero};
+
+    animation_tweener _animationTween;
 };
 }

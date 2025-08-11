@@ -7,11 +7,9 @@
 
 #include <cassert>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
@@ -43,8 +41,6 @@ widget::widget(init const& wi)
 
     static i32 tabIndex {0};
     TabStop.mutate([&](tab_stop& tabStop) { tabStop.Index = tabIndex++; });
-
-    _animationTween.Changed.connect([this](auto const& val) { on_animation_step(val); });
 }
 
 void widget::on_bounds_changed()
@@ -130,8 +126,6 @@ void widget::update(milliseconds deltaTime)
         if (v.is_active()) { queue_redraw(); }
         v.update(deltaTime);
     }
-
-    _animationTween.update(deltaTime);
 
     on_update(deltaTime);
 }
@@ -529,16 +523,6 @@ auto widget::get_orientation() const -> orientation
 auto widget::is_inert() const -> bool
 {
     return false;
-}
-
-void widget::start_animation(gfx::frame_animation const& ani, playback_mode mode)
-{
-    _animationTween.start(ani, mode);
-}
-
-void widget::stop_animation()
-{
-    _animationTween.stop();
 }
 
 void widget::activate()

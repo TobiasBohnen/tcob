@@ -275,17 +275,6 @@ void tab_container::on_update(milliseconds /* deltaTime */)
 {
 }
 
-void tab_container::on_animation_step(string const& val)
-{
-    if (ActiveTabIndex >= 0) {
-        auto& tab {_tabLabels[ActiveTabIndex]};
-        tab.Icon.TextureRegion = val;
-        if (tab.Icon.Texture) {
-            queue_redraw();
-        }
-    }
-}
-
 void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 {
     widget::offset_content(bounds, isHitTest);

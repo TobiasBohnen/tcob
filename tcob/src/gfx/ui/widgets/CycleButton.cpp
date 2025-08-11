@@ -87,17 +87,6 @@ void cycle_button::on_update(milliseconds /*deltaTime*/)
 {
 }
 
-void cycle_button::on_animation_step(string const& val)
-{
-    if (SelectedItemIndex >= 0) {
-        Items.mutate([&](auto& items) {
-            items[SelectedItemIndex].Icon.TextureRegion = val;
-            queue_redraw();
-            return false;
-        });
-    }
-}
-
 void cycle_button::on_mouse_wheel(input::mouse::wheel_event const& /* ev */)
 {
     select_next();

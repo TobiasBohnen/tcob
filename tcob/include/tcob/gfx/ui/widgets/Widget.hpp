@@ -10,19 +10,16 @@
 #include <memory>
 #include <unordered_map>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
-#include "tcob/gfx/animation/Animation.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
 #include "tcob/gfx/ui/Transition.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/component/WidgetTweener.hpp"
 
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
@@ -100,9 +97,6 @@ public:
 
     auto current_style() const -> widget_style const*;
 
-    void start_animation(gfx::frame_animation const& ani, playback_mode mode);
-    void stop_animation();
-
 protected:
     struct init {
         form_base*        Form {nullptr};
@@ -138,8 +132,6 @@ protected:
     auto get_redraw() const -> bool;
 
     void virtual on_prepare_redraw() { }
-
-    void virtual on_animation_step(string const& /* val */) { }
 
     void virtual on_key_down(input::keyboard::event const& /* ev */) { }
     void virtual on_key_up(input::keyboard::event const& /* ev */) { }
@@ -210,8 +202,6 @@ private:
 
     transition<widget_style>                     _transition;
     std::unordered_map<isize, transition<style>> _subStyleTransitions;
-
-    animation_tweener _animationTween;
 };
 
 ////////////////////////////////////////////////////////////

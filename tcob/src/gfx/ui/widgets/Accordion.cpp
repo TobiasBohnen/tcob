@@ -258,17 +258,6 @@ void accordion::on_update(milliseconds deltaTime)
     _expandTween.update(deltaTime);
 }
 
-void accordion::on_animation_step(string const& val)
-{
-    if (ActiveSectionIndex >= 0) {
-        auto& sec {_sectionLabels[ActiveSectionIndex]};
-        sec.Icon.TextureRegion = val;
-        if (sec.Icon.Texture) {
-            queue_redraw();
-        }
-    }
-}
-
 void accordion::offset_section_content(rect_f& bounds, style const& style) const
 {
     auto const [secIdx, _] {section_expand()};

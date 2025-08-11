@@ -43,7 +43,6 @@ protected:
     void on_draw(widget_painter& painter) override;
 
     void on_update(milliseconds deltaTime) override;
-    void on_animation_step(string const& val) override;
 
     void on_mouse_wheel(input::mouse::wheel_event const& ev) override;
     void on_click() override;

@@ -310,20 +310,6 @@ void drop_down_list::on_update(milliseconds deltaTime)
     _vScrollbar.update(deltaTime);
 }
 
-void drop_down_list::on_animation_step(string const& val)
-{
-    if (_isExtended && SelectedItemIndex >= 0) {
-        Items.mutate([&](auto& items) {
-            auto& item {items[SelectedItemIndex]};
-            item.Icon.TextureRegion = val;
-            if (item.Icon.Texture) {
-                queue_redraw();
-            }
-            return false;
-        });
-    }
-}
-
 void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
 {
     rect_f    listRect {bounds};

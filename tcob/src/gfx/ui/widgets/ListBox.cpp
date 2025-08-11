@@ -172,20 +172,6 @@ void list_box::on_update(milliseconds deltaTime)
     }
 }
 
-void list_box::on_animation_step(string const& val)
-{
-    if (SelectedItemIndex >= 0) {
-        Items.mutate([&](auto& items) {
-            auto& item {(Filter->empty() ? items : _filteredItems)[SelectedItemIndex]};
-            item.Icon.TextureRegion = val;
-            if (item.Icon.Texture) {
-                queue_redraw();
-            }
-            return false;
-        });
-    }
-}
-
 void list_box::on_key_down(input::keyboard::event const& ev)
 {
     using namespace tcob::enum_ops;

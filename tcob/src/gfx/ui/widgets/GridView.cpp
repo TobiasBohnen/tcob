@@ -181,27 +181,6 @@ void grid_view::on_draw(widget_painter& painter)
     }
 }
 
-void grid_view::on_animation_step(string const& val)
-{
-    if (SelectedCellIndex != INVALID) {
-        if (SelectedCellIndex->Y == 0) {
-            Header.mutate([&](auto& header) {
-                auto& cell {header[SelectedCellIndex->X]};
-                cell.Icon.TextureRegion = val;
-                queue_redraw();
-                return false; // don't invoke Header.Changed
-            });
-        } else {
-            Grid.mutate([&](auto& grid) {
-                auto& cell {grid[SelectedCellIndex->X, SelectedCellIndex->Y - 1]};
-                cell.Icon.TextureRegion = val;
-                queue_redraw();
-                return false; // don't invoke Grid.Changed
-            });
-        }
-    }
-}
-
 void grid_view::on_mouse_leave()
 {
     vscroll_widget::on_mouse_leave();

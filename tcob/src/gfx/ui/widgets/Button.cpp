@@ -10,7 +10,6 @@
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/component/Icon.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -42,11 +41,6 @@ void button::on_draw(widget_painter& painter)
 
 void button::on_update(milliseconds /* deltaTime */)
 {
-}
-
-void button::on_animation_step(string const& val)
-{
-    Icon.mutate([&val](icon& icon) { icon.TextureRegion = val; });
 }
 
 auto button::attributes() const -> widget_attributes
