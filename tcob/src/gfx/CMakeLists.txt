@@ -135,6 +135,8 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/LSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/Noise.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/component/Icon.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/component/Item.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Scrollbar.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/WidgetTweener.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.hpp

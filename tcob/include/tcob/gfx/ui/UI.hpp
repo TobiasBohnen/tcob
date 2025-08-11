@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <any>
 #include <unordered_map>
 #include <variant>
 
@@ -72,6 +71,11 @@ class tab_container;
 class widget;
 class vscroll_widget;
 class widget_container;
+
+// utility
+class widget_painter;
+class form_base;
+class layout;
 
 ////////////////////////////////////////////////////////////
 
@@ -311,42 +315,7 @@ using ui_paint = std::variant<color, linear_gradient, radial_gradient, box_gradi
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API icon {
-public:
-    assets::asset_ptr<gfx::texture> Texture;
-    string                          TextureRegion {"default"};
-    color                           Color {colors::White};
-
-    auto operator==(icon const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API item {
-public:
-    utf8_string Text;
-    icon        Icon {};
-    std::any    UserData {};
-
-    auto operator==(item const& other) const -> bool
-    {
-        return Text == other.Text && Icon == other.Icon; // FIXME
-    }
-};
-
-////////////////////////////////////////////////////////////
-
 static constexpr isize INVALID_INDEX {-1};
-
-////////////////////////////////////////////////////////////
-
-class widget_painter;
-class form_base;
-class layout;
-
-namespace detail {
-    class input_injector;
-}
 
 ////////////////////////////////////////////////////////////
 

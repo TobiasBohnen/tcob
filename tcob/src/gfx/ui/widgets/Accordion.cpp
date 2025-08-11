@@ -19,6 +19,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/component/Item.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
