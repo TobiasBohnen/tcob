@@ -61,35 +61,14 @@ constexpr std::array<comparator_fn, 6> op_table {
         return cmp == op::Less || cmp == op::Equal;
     }};
 
-auto rule::test(widget_attribute_types const& other) const -> bool
-{
-    return op_table[static_cast<usize>(Op)](other, Value);
-}
+auto rule::operator()(widget_attribute_types const& other) const -> bool { return op_table[static_cast<usize>(Op)](other, Value); }
 
-auto rule::Equal(widget_attribute_types const& value) -> rule
-{
-    return {.Op = op::Equal, .Value = value};
-}
-auto rule::NotEqual(widget_attribute_types const& value) -> rule
-{
-    return {.Op = op::NotEqual, .Value = value};
-}
-auto rule::Greater(widget_attribute_types const& value) -> rule
-{
-    return {.Op = op::Greater, .Value = value};
-}
-auto rule::GreaterEqual(widget_attribute_types const& value) -> rule
-{
-    return {.Op = op::GreaterEqual, .Value = value};
-}
-auto rule::Less(widget_attribute_types const& value) -> rule
-{
-    return {.Op = op::Less, .Value = value};
-}
-auto rule::LessEqual(widget_attribute_types const& value) -> rule
-{
-    return {.Op = op::LessEqual, .Value = value};
-}
+auto rule::Equal(widget_attribute_types const& value) -> rule { return {.Op = op::Equal, .Value = value}; }
+auto rule::NotEqual(widget_attribute_types const& value) -> rule { return {.Op = op::NotEqual, .Value = value}; }
+auto rule::Greater(widget_attribute_types const& value) -> rule { return {.Op = op::Greater, .Value = value}; }
+auto rule::GreaterEqual(widget_attribute_types const& value) -> rule { return {.Op = op::GreaterEqual, .Value = value}; }
+auto rule::Less(widget_attribute_types const& value) -> rule { return {.Op = op::Less, .Value = value}; }
+auto rule::LessEqual(widget_attribute_types const& value) -> rule { return {.Op = op::LessEqual, .Value = value}; }
 
 ////////////////////////////////////////////////////////////
 
@@ -119,7 +98,7 @@ auto style_attributes::score(widget_attributes const& widgetAttribs) const -> i3
         auto const& widgetAttrib {it->second};
 
         for (auto const& rule : rules) {
-            if (!rule.test(widgetAttrib)) { return FAIL_SCORE; }
+            if (!rule(widgetAttrib)) { return FAIL_SCORE; }
         }
 
         ++retValue;

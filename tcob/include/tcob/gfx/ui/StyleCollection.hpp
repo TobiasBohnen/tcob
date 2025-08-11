@@ -6,19 +6,15 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <cstddef>
-#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <optional>
 #include <span>
 #include <tuple>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 
 namespace tcob::ui {
@@ -38,7 +34,7 @@ public:
     op                     Op {};
     widget_attribute_types Value;
 
-    auto test(widget_attribute_types const& other) const -> bool;
+    auto operator()(widget_attribute_types const& other) const -> bool;
 
     auto operator==(rule const& other) const -> bool = default;
 
@@ -50,29 +46,12 @@ public:
     auto static LessEqual(widget_attribute_types const& value) -> rule;
 };
 
-}
-
-////////////////////////////////////////////////////////////
-
-template <>
-struct std::hash<tcob::ui::rule> {
-    auto operator()(tcob::ui::rule const& s) const noexcept -> size_t
-    {
-        std::size_t const h1 {std::hash<tcob::ui::op> {}(s.Op)};
-        std::size_t const h2 {std::hash<tcob::ui::widget_attribute_types> {}(s.Value)};
-        return tcob::helper::hash_combine(h1, h2);
-    }
-};
-
-////////////////////////////////////////////////////////////
-
-namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API style_attributes final {
-    using rules = std::pair<string, std::unordered_set<rule>>;
-
 public:
+    using rules = std::pair<string, std::vector<rule>>;
+
     style_attributes() = default;
     style_attributes(std::initializer_list<rules const> values);
     explicit style_attributes(std::span<rules const> values);
@@ -82,7 +61,7 @@ public:
     auto operator==(style_attributes const& other) const -> bool = default;
 
 private:
-    std::unordered_map<string, std::unordered_set<rule>> _values;
+    std::unordered_map<string, std::vector<rule>> _values;
 };
 
 ////////////////////////////////////////////////////////////
