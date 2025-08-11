@@ -110,6 +110,8 @@ platform::platform(bool headless, game::init const& ginit)
         register_service<gfx::render_system, gfx::null::null_render_system>();
 #endif
     }
+
+    process_events(); // gamepad add events
 }
 
 platform::~platform()
@@ -195,15 +197,12 @@ auto platform::process_events() const -> bool
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         case SDL_EVENT_MOUSE_BUTTON_UP:
         case SDL_EVENT_MOUSE_WHEEL:
-        case SDL_EVENT_JOYSTICK_AXIS_MOTION:
-        case SDL_EVENT_JOYSTICK_HAT_MOTION:
-        case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
-        case SDL_EVENT_JOYSTICK_BUTTON_UP:
-        case SDL_EVENT_JOYSTICK_ADDED:
-        case SDL_EVENT_JOYSTICK_REMOVED:
+        case SDL_EVENT_GAMEPAD_ADDED:
+        case SDL_EVENT_GAMEPAD_REMOVED:
         case SDL_EVENT_GAMEPAD_AXIS_MOTION:
         case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
         case SDL_EVENT_GAMEPAD_BUTTON_UP:
+        case SDL_EVENT_CLIPBOARD_UPDATE:
             inputMgr.process_events(&ev);
             break;
         default:

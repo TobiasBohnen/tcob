@@ -275,6 +275,8 @@ public:
     signal<i32 const>                      ControllerAdded;
     signal<i32 const>                      ControllerRemoved;
 
+    signal<> ClipboardUpdated;
+
     prop<mode> InputMode;
 
     auto virtual controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& = 0;

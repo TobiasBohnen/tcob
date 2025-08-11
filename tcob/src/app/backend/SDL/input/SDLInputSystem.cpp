@@ -313,7 +313,7 @@ void sdl_system::process_events(void* ev)
     } break;
     case SDL_EVENT_GAMEPAD_ADDED: {
         u32 const id {sev->gdevice.which};
-        _controllers[id] = std::shared_ptr<sdl_controller>(new sdl_controller {SDL_OpenGamepad(id), id});
+        _controllers[id] = std::make_shared<sdl_controller>(SDL_OpenGamepad(id), id);
         ControllerAdded(id);
     } break;
     case SDL_EVENT_GAMEPAD_REMOVED: {
@@ -322,20 +322,8 @@ void sdl_system::process_events(void* ev)
         _controllers.erase(id);
         ControllerRemoved(id);
     } break;
-    case SDL_EVENT_JOYSTICK_ADDED: {
-        u32 const id {sev->jdevice.which};
-        if (SDL_IsGamepad(id)) {
-            _controllers[id] = std::make_shared<sdl_controller>(SDL_OpenGamepad(id), id);
-            ControllerAdded(id);
-        }
-    } break;
-    case SDL_EVENT_JOYSTICK_REMOVED: {
-        u32 const id {sev->jdevice.which};
-        if (_controllers.contains(id)) {
-            SDL_CloseGamepad(std::dynamic_pointer_cast<sdl_controller>(_controllers[id])->_controller);
-            _controllers.erase(id);
-            ControllerRemoved(id);
-        }
+    case SDL_EVENT_CLIPBOARD_UPDATE: {
+        ClipboardUpdated();
     } break;
     }
 }
