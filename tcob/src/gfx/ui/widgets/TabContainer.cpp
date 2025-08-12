@@ -129,7 +129,7 @@ auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> cons
 
 void tab_container::on_draw(widget_painter& painter)
 {
-    rect_f rect {draw_background(_style, painter)};
+    rect_f const rect {draw_background(_style, painter)};
 
     // tabs
     _tabRectCache.clear();

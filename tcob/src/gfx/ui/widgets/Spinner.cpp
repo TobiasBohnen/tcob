@@ -53,7 +53,7 @@ spinner::spinner(init const& wi)
 
 void spinner::on_draw(widget_painter& painter)
 {
-    rect_f rect {draw_background(_style, painter)};
+    rect_f const rect {draw_background(_style, painter)};
 
     scissor_guard const guard {painter, this};
 

@@ -52,7 +52,7 @@ progress_bar::progress_bar(init const& wi)
 
 void progress_bar::on_draw(widget_painter& painter)
 {
-    rect_f rect {draw_background(_style, painter)};
+    rect_f const rect {draw_background(_style, painter)};
 
     scissor_guard const guard {painter, this};
 
