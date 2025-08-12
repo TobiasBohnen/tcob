@@ -223,8 +223,8 @@ void gl_canvas::render_stroke(canvas::paint const& paint, blend_funcs const& ble
     call.BlendFunc = blend;
 
     // Allocate vertices for all the paths.
-    usize maxverts {get_max_vertcount(paths)};
-    usize offset {alloc_verts(maxverts)};
+    usize const maxverts {get_max_vertcount(paths)};
+    usize       offset {alloc_verts(maxverts)};
 
     for (auto const& path : paths) {
         auto& copy {_paths.emplace_back()};
@@ -387,49 +387,62 @@ void gl_canvas::fill(nvg_call const& call)
 {
     glEnable(GL_STENCIL_TEST);
 
+    // --- Pass 1: Mark winding regions in stencil buffer ---
+    // Use lower 7 bits for winding count (0x7F mask), keep high bit (0x80) for clip.
     glStencilMask(0x7F);
-    glStencilFunc(GL_EQUAL, 0x80, 0x80);
+    glStencilFunc(GL_EQUAL, 0x80, 0x80); // Only affect pixels already inside clip (0x80).
+    // Increment winding for front faces, decrement for back faces.
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 
+    // No color output during stencil fill.
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
     glDisable(GL_CULL_FACE);
 
+    // Draw filled paths into stencil buffer to count coverage.
     set_uniforms(call.UniformOffset);
-
-    std::vector<GLint> fillFirsts, fillCounts;
-    fillFirsts.reserve(call.PathCount);
-    fillCounts.reserve(call.PathCount);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
-        fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+    {
+        std::vector<GLint> fillFirsts, fillCounts;
+        fillFirsts.reserve(call.PathCount);
+        fillCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                          static_cast<GLsizei>(fillFirsts.size()));
     }
-    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
-                      static_cast<GLsizei>(fillFirsts.size()));
 
     glEnable(GL_CULL_FACE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    glStencilMask(0x00); // Disable stencil writes.
-    glStencilFunc(GL_EQUAL, 0x80, 0xFF);
+    // --- Pass 2: Stroke shapes (while stencil == clip bit) ---
+    // Lock stencil writes for color pass.
+    glStencilMask(0x00);
+    glStencilFunc(GL_EQUAL, 0x80, 0xFF); // Clip bit must match; ignore winding bits.
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
+    // Draw strokes over the filled shapes.
     set_uniforms(call.UniformOffset + _fragSize, call.Image);
-
-    std::vector<GLint> strokeFirsts, strokeCounts;
-    strokeFirsts.reserve(call.PathCount);
-    strokeCounts.reserve(call.PathCount);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
-        strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+    {
+        std::vector<GLint> strokeFirsts, strokeCounts;
+        strokeFirsts.reserve(call.PathCount);
+        strokeCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+            strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                          static_cast<GLsizei>(strokeFirsts.size()));
     }
-    glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
-                      static_cast<GLsizei>(strokeFirsts.size()));
 
+    // --- Pass 3: Fill actual pixels where winding != 0 ---
     glStencilMask(0x7F);
-    glStencilFunc(GL_NOTEQUAL, 0x00, 0x7F); // Only draw where inside clip.
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    glDrawArrays(GL_TRIANGLE_STRIP, static_cast<GLint>(call.TriangleOffset), static_cast<GLsizei>(call.TriangleCount));
+    glStencilFunc(GL_NOTEQUAL, 0x00, 0x7F); // Inside shape (non-zero winding count).
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO); // Clear winding after drawing.
+    glDrawArrays(GL_TRIANGLE_STRIP,
+                 static_cast<GLint>(call.TriangleOffset),
+                 static_cast<GLsizei>(call.TriangleCount));
 
     glDisable(GL_STENCIL_TEST);
 }
@@ -438,35 +451,43 @@ void gl_canvas::convex_fill(nvg_call const& call)
 {
     glEnable(GL_STENCIL_TEST);
 
+    // No stencil writes; just test against clip bit.
     glStencilMask(0x00);
     glStencilFunc(GL_EQUAL, 0x80, 0x80);
 
+    // Directly draw colors (convex fill doesn't require winding).
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     set_uniforms(call.UniformOffset, call.Image);
 
-    std::vector<GLint> fillFirsts, fillCounts;
-    fillFirsts.reserve(call.PathCount);
-    fillCounts.reserve(call.PathCount);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
-        fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
-    }
-    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
-                      static_cast<GLsizei>(fillFirsts.size()));
-
-    std::vector<GLint> strokeFirsts, strokeCounts;
-    strokeFirsts.reserve(call.PathCount);
-    strokeCounts.reserve(call.PathCount);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        if (_paths[i].StrokeCount > 0) {
-            strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
-            strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+    // Fill convex polygons.
+    {
+        std::vector<GLint> fillFirsts, fillCounts;
+        fillFirsts.reserve(call.PathCount);
+        fillCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
         }
+        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                          static_cast<GLsizei>(fillFirsts.size()));
     }
-    if (!strokeFirsts.empty()) {
-        glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
-                          static_cast<GLsizei>(strokeFirsts.size()));
+
+    // Optional stroke pass (if present).
+    {
+        std::vector<GLint> strokeFirsts, strokeCounts;
+        strokeFirsts.reserve(call.PathCount);
+        strokeCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            if (_paths[i].StrokeCount > 0) {
+                strokeFirsts.push_back(static_cast<GLint>(_paths[i].StrokeOffset));
+                strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
+            }
+        }
+        if (!strokeFirsts.empty()) {
+            glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
+                              static_cast<GLsizei>(strokeFirsts.size()));
+        }
     }
 
     glDisable(GL_STENCIL_TEST);
@@ -476,8 +497,10 @@ void gl_canvas::stroke(nvg_call const& call)
 {
     glEnable(GL_STENCIL_TEST);
 
+    // Use lower 7 bits for stroke mask; preserve clip in high bit.
     glStencilMask(0x7F);
 
+    // Collect stroke geometry.
     std::vector<GLint> strokeFirsts, strokeCounts;
     strokeFirsts.reserve(call.PathCount);
     strokeCounts.reserve(call.PathCount);
@@ -486,21 +509,24 @@ void gl_canvas::stroke(nvg_call const& call)
         strokeCounts.push_back(static_cast<GLsizei>(_paths[i].StrokeCount));
     }
 
-    glStencilFunc(GL_EQUAL, 0x80, 0x80); // Only update where clip is active.
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    // --- Pass 1: Mark stroke coverage in stencil ---
+    glStencilFunc(GL_EQUAL, 0x80, 0x80);    // Only inside clip.
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR); // Increase coverage count in stencil.
     set_uniforms(call.UniformOffset + _fragSize, call.Image);
     glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
                       static_cast<GLsizei>(strokeFirsts.size()));
 
-    set_uniforms(call.UniformOffset, call.Image);
+    // --- Pass 2: Draw stroke color (still respecting clip) ---
     glStencilFunc(GL_EQUAL, 0x80, 0x80);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Don't modify stencil during color draw.
+    set_uniforms(call.UniformOffset, call.Image);
     glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
                       static_cast<GLsizei>(strokeFirsts.size()));
 
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glStencilFunc(GL_GREATER, 0x80, 0xFF);
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    // --- Pass 3: Cleanup stencil (erase stroke mask) ---
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // No color output.
+    glStencilFunc(GL_GREATER, 0x80, 0xFF);               // Any coverage count above clip-only.
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);              // Reset stencil to 0 in these areas.
     glMultiDrawArrays(GL_TRIANGLE_STRIP, strokeFirsts.data(), strokeCounts.data(),
                       static_cast<GLsizei>(strokeFirsts.size()));
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -511,37 +537,66 @@ void gl_canvas::stroke(nvg_call const& call)
 void gl_canvas::triangles(nvg_call const& call)
 {
     set_uniforms(call.UniformOffset, call.Image);
-    glDrawArrays(GL_TRIANGLES, static_cast<GLint>(call.TriangleOffset), static_cast<GLsizei>(call.TriangleCount));
+
+    // Enable stencil test so triangles are rasterized only where clip wrote 0x80
+    glEnable(GL_STENCIL_TEST);
+
+    // Pass only where stencil == 0x80 (mask 0xFF). Do not write to stencil.
+    glStencilFunc(GL_EQUAL, 0x80, 0xFF);
+    glStencilMask(0x00); // prevent modifications of stencil
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    glDrawArrays(GL_TRIANGLES,
+                 static_cast<GLint>(call.TriangleOffset),
+                 static_cast<GLsizei>(call.TriangleCount));
+
+    // Restore stencil state (disable if you don't need it afterwards)
+    glDisable(GL_STENCIL_TEST);
 }
 
 void gl_canvas::clip(nvg_call const& call)
 {
     glEnable(GL_STENCIL_TEST);
 
+    // Allow writing to all stencil bits.
     glStencilMask(0xFF);
-    glStencilFunc(GL_ALWAYS, 0x80, 0xFF);
-    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
+    // Always pass stencil test; write reference value 0x80 (clip bit set).
+    // Mask = 0xFF means all bits are affected.
+    glStencilFunc(GL_ALWAYS, 0x80, 0xFF);
+    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE); // Replace stencil with ref on any pass/fail.
+
+    // Clear stencil to 0 before defining clip region.
     glClearStencil(0);
     glClear(GL_STENCIL_BUFFER_BIT);
+
+    // Disable color writes; we only want to update stencil here.
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+    // Disable face culling to ensure clip path is drawn regardless of winding.
     glDisable(GL_CULL_FACE);
 
+    // Use uniforms for this draw (no image — just clip path).
     set_uniforms(call.UniformOffset);
 
-    std::vector<GLint> fillFirsts, fillCounts;
-    fillFirsts.reserve(call.PathCount);
-    fillCounts.reserve(call.PathCount);
-    for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
-        fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
-        fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+    // Draw filled paths to set stencil = 0x80 inside clip region.
+    {
+        std::vector<GLint> fillFirsts, fillCounts;
+        fillFirsts.reserve(call.PathCount);
+        fillCounts.reserve(call.PathCount);
+        for (usize i {call.PathOffset}; i < call.PathOffset + call.PathCount; ++i) {
+            fillFirsts.push_back(static_cast<GLint>(_paths[i].FillOffset));
+            fillCounts.push_back(static_cast<GLsizei>(_paths[i].FillCount));
+        }
+        glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
+                          static_cast<GLsizei>(fillFirsts.size()));
     }
-    glMultiDrawArrays(GL_TRIANGLE_FAN, fillFirsts.data(), fillCounts.data(),
-                      static_cast<GLsizei>(fillFirsts.size()));
 
+    // Restore normal raster state.
     glEnable(GL_CULL_FACE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
+    // Disable stencil test for subsequent draws unless explicitly needed.
     glDisable(GL_STENCIL_TEST);
 }
 

@@ -157,8 +157,8 @@ void gl_canvas::render_fill(canvas::paint const& paint, blend_funcs const& blend
     }
 
     // Allocate vertices for all the paths.
-    usize maxverts {get_max_vertcount(paths) + call.TriangleCount};
-    usize offset {alloc_verts(maxverts)};
+    usize const maxverts {get_max_vertcount(paths) + call.TriangleCount};
+    usize       offset {alloc_verts(maxverts)};
 
     for (auto const& path : paths) {
         nvg_path& copy {_paths.emplace_back()};
@@ -486,7 +486,19 @@ void gl_canvas::stroke(nvg_call const& call)
 void gl_canvas::triangles(nvg_call const& call)
 {
     set_uniforms(call.UniformOffset, call.Image);
+
+    // Enable stencil test so triangles are rasterized only where clip wrote 0x80
+    glEnable(GL_STENCIL_TEST);
+
+    // Pass only where stencil == 0x80 (mask 0xFF). Do not write to stencil.
+    glStencilFunc(GL_EQUAL, 0x80, 0xFF);
+    glStencilMask(0x00); // prevent modifications of stencil
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
     _vertexArray.draw_arrays(primitive_type::Triangles, static_cast<i32>(call.TriangleOffset), call.TriangleCount);
+
+    // Restore stencil state (disable if you don't need it afterwards)
+    glDisable(GL_STENCIL_TEST);
 }
 
 void gl_canvas::clip(nvg_call const& call)
