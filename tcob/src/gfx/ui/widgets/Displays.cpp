@@ -26,14 +26,14 @@
 
 namespace tcob::ui {
 
-void dot_matrix_display::style::Transition(style& target, style const& left, style const& right, f64 step)
+void dot_matrix_display::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    if (left.Colors.size() != right.Colors.size()) { return; }
-    for (auto const& [k, v] : left.Colors) {
-        if (right.Colors.contains(k)) {
-            target.Colors[k] = color::Lerp(v, right.Colors.at(k), step);
+    if (from.Colors.size() != to.Colors.size()) { return; }
+    for (auto const& [k, v] : from.Colors) {
+        if (to.Colors.contains(k)) {
+            target.Colors[k] = color::Lerp(v, to.Colors.at(k), step);
         }
     }
 }
@@ -98,13 +98,13 @@ void dot_matrix_display::on_update(milliseconds /* deltaTime */)
 
 ////////////////////////////////////////////////////////////
 
-void seven_segment_display::style::Transition(style& target, style const& left, style const& right, f64 step)
+void seven_segment_display::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.Size          = length::Lerp(left.Size, right.Size, step);
-    target.ActiveColor   = color::Lerp(left.ActiveColor, right.ActiveColor, step);
-    target.InactiveColor = color::Lerp(left.InactiveColor, right.InactiveColor, step);
+    target.Size          = length::Lerp(from.Size, to.Size, step);
+    target.ActiveColor   = color::Lerp(from.ActiveColor, to.ActiveColor, step);
+    target.InactiveColor = color::Lerp(from.InactiveColor, to.InactiveColor, step);
 }
 
 seven_segment_display::seven_segment_display(init const& wi)

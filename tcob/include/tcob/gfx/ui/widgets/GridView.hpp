@@ -40,7 +40,7 @@ public:
         utf8_string RowItemClass {"row_items"};
         length      RowHeight {};
 
-        void static Transition(style& target, style const& left, style const& right, f64 step);
+        void static Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit grid_view(init const& wi);

@@ -24,7 +24,7 @@ public:
     public:
         utf8_string ItemClass {"items"};
 
-        void static Transition(style& target, style const& left, style const& right, f64 step);
+        void static Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit cycle_button(init const& wi);

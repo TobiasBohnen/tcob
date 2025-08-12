@@ -24,11 +24,11 @@ namespace tcob::ui {
 
 constexpr point_i INVALID {INVALID_INDEX, INVALID_INDEX};
 
-void grid_view::style::Transition(style& target, style const& left, style const& right, f64 step)
+void grid_view::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    vscroll_widget::style::Transition(target, left, right, step);
+    vscroll_widget::style::Transition(target, from, to, step);
 
-    target.RowHeight = length::Lerp(left.RowHeight, right.RowHeight, step);
+    target.RowHeight = length::Lerp(from.RowHeight, to.RowHeight, step);
 }
 
 grid_view::grid_view(init const& wi)

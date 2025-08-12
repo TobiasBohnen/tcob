@@ -22,11 +22,11 @@
 
 namespace tcob::ui {
 
-void image_box::style::Transition(style& target, style const& left, style const& right, f64 step)
+void image_box::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.DragAlpha = static_cast<f32>(left.DragAlpha + ((right.DragAlpha - left.DragAlpha) * step));
+    target.DragAlpha = static_cast<f32>(from.DragAlpha + ((to.DragAlpha - from.DragAlpha) * step));
 }
 
 image_box::image_box(init const& wi)

@@ -20,11 +20,11 @@
 
 namespace tcob::ui {
 
-void spinner::style::Transition(style& target, style const& left, style const& right, f64 step)
+void spinner::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.Text.lerp(left.Text, right.Text, step);
+    target.Text.lerp(from.Text, to.Text, step);
 }
 
 spinner::spinner(init const& wi)

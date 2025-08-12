@@ -25,11 +25,11 @@
 
 namespace tcob::ui {
 
-void accordion::style::Transition(style& target, style const& left, style const& right, f64 step)
+void accordion::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.SectionBarHeight = length::Lerp(left.SectionBarHeight, right.SectionBarHeight, step);
+    target.SectionBarHeight = length::Lerp(from.SectionBarHeight, to.SectionBarHeight, step);
 }
 
 accordion::accordion(init const& wi)

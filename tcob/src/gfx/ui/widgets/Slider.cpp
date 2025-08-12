@@ -21,11 +21,11 @@
 
 namespace tcob::ui {
 
-void slider::style::Transition(style& target, style const& left, style const& right, f64 step)
+void slider::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.Bar.lerp(left.Bar, right.Bar, step);
+    target.Bar.lerp(from.Bar, to.Bar, step);
 }
 
 slider::slider(init const& wi)

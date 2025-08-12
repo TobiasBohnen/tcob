@@ -23,12 +23,12 @@
 
 namespace tcob::ui {
 
-void tab_container::style::Transition(style& target, style const& left, style const& right, f64 step)
+void tab_container::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.HeaderSize      = length::Lerp(left.HeaderSize, right.HeaderSize, step);
-    target.HeaderLineCount = static_cast<i32>(left.HeaderLineCount + ((right.HeaderLineCount - left.HeaderLineCount) * step));
+    target.HeaderSize      = length::Lerp(from.HeaderSize, to.HeaderSize, step);
+    target.HeaderLineCount = static_cast<i32>(from.HeaderLineCount + ((to.HeaderLineCount - from.HeaderLineCount) * step));
 }
 
 tab_container::tab_container(init const& wi)

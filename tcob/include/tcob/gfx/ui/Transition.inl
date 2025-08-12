@@ -61,6 +61,7 @@ inline void transition<T>::apply(S& style)
     }
 
     if (!is_active()) { return; }
+    assert(dynamic_cast<S const*>(_sourceStyle));
 
     f64 const frac {_targetStyle->ease_value(_currentTime.count() / _duration.count())};
     S::Transition(style, *static_cast<S const*>(_sourceStyle), *static_cast<S const*>(_targetStyle), frac);

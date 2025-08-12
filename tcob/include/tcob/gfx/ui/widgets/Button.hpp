@@ -23,7 +23,7 @@ public:
         text_element    Text;
         icon_text_order IconTextOrder {icon_text_order::IconBeforeText};
 
-        void static Transition(style& target, style const& left, style const& right, f64 step);
+        void static Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit button(init const& wi);

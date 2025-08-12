@@ -25,12 +25,12 @@
 
 namespace tcob::ui {
 
-void panel::style::Transition(style& target, style const& left, style const& right, f64 step)
+void panel::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.HScrollBar.lerp(left.HScrollBar, right.HScrollBar, step);
-    target.VScrollBar.lerp(left.VScrollBar, right.VScrollBar, step);
+    target.HScrollBar.lerp(from.HScrollBar, to.HScrollBar, step);
+    target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
 }
 
 panel::panel(init const& wi)

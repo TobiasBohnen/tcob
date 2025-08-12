@@ -38,7 +38,7 @@ public:
         std::unordered_map<u8, color> Colors;
         dot_type                      Type {dot_type::Disc};
 
-        void static Transition(style& target, style const& left, style const& right, f64 step);
+        void static Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit dot_matrix_display(init const& wi);
@@ -76,7 +76,7 @@ public:
         color  ActiveColor {colors::Black};
         color  InactiveColor {colors::Transparent};
 
-        void static Transition(style& target, style const& left, style const& right, f64 step);
+        void static Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit seven_segment_display(init const& wi);

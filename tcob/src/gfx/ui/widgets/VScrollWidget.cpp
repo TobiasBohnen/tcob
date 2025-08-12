@@ -19,11 +19,11 @@
 
 namespace tcob::ui {
 
-void vscroll_widget::style::Transition(style& target, style const& left, style const& right, f64 step)
+void vscroll_widget::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.VScrollBar.lerp(left.VScrollBar, right.VScrollBar, step);
+    target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
 }
 
 vscroll_widget::vscroll_widget(init const& wi)

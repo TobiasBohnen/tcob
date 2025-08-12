@@ -24,13 +24,13 @@
 
 namespace tcob::ui {
 
-void drop_down_list::style::Transition(style& target, style const& left, style const& right, f64 step)
+void drop_down_list::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    widget_style::Transition(target, left, right, step);
+    widget_style::Transition(target, from, to, step);
 
-    target.Text.lerp(left.Text, right.Text, step);
-    target.ItemHeight = length::Lerp(left.ItemHeight, right.ItemHeight, step);
-    target.VScrollBar.lerp(left.VScrollBar, right.VScrollBar, step);
+    target.Text.lerp(from.Text, to.Text, step);
+    target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
+    target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
 }
 
 drop_down_list::drop_down_list(init const& wi)

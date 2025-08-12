@@ -30,11 +30,11 @@ auto static case_insensitive_contains(string_view lhs, string_view rhs) -> bool
         != lhs.end();
 }
 
-void list_box::style::Transition(style& target, style const& left, style const& right, f64 step)
+void list_box::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    vscroll_widget::style::Transition(target, left, right, step);
+    vscroll_widget::style::Transition(target, from, to, step);
 
-    target.ItemHeight = length::Lerp(left.ItemHeight, right.ItemHeight, step);
+    target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
 }
 
 list_box::list_box(init const& wi)
