@@ -206,7 +206,7 @@ void form_base::on_draw_to(gfx::render_target& target)
     if (_redrawWidgets) {
         i32 i {2};
         for (auto const& container : get_layout()->widgets() | std::views::reverse) { // ZORDER
-            if (container->get_redraw()) {
+            if (container->needs_redraw()) {
                 _canvas.begin_frame(bounds, 1.0f, i);
                 container->draw(*_painter);
                 _canvas.end_frame();

@@ -51,8 +51,6 @@ void render_target::clear(color c) const
 
 void render_target::prepare_render(bool debug)
 {
-    auto const& stats {locate_service<render_system>().statistics()};
-
     if (ScissorRect) {
         _impl->enable_scissor(*ScissorRect);
     } else {
@@ -63,7 +61,7 @@ void render_target::prepare_render(bool debug)
         {.ViewMatrix            = _camera.matrix(),
          .Viewport              = rect_i {_camera.viewport()},
          .MousePosition         = locate_service<input::system>().mouse()->get_position(),
-         .Time                  = stats.current_time(),
+         .Time                  = locate_service<render_system>().statistics().current_time(),
          .Debug                 = debug,
          .UseDefaultFramebuffer = false});
 }

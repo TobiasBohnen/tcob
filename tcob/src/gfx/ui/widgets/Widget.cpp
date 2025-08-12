@@ -104,7 +104,7 @@ auto widget::is_enabled() const -> bool
 
 void widget::draw(widget_painter& painter)
 {
-    if (!get_redraw()) { return; }
+    if (!needs_redraw()) { return; }
     set_redraw(false);
 
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
@@ -237,7 +237,7 @@ void widget::prepare_redraw()
 
 void widget::queue_redraw()
 {
-    if (get_redraw()) { return; }
+    if (needs_redraw()) { return; }
 
     auto* tlw {top_level_widget()};
     tlw->set_redraw(true);
@@ -249,7 +249,7 @@ void widget::set_redraw(bool val)
     _redraw = val;
 }
 
-auto widget::get_redraw() const -> bool
+auto widget::needs_redraw() const -> bool
 {
     return _redraw;
 }
