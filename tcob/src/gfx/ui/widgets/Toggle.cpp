@@ -42,7 +42,7 @@ void toggle::on_draw(widget_painter& painter)
     // tick
     f32 const tickWidth {rect.width() / 2};
     rect.Size.Width = tickWidth;
-    rect.Position.X += tickWidth * _style.ease_value(_tween.current_value());
+    rect.Position.X += static_cast<f32>(tickWidth * _style.ease_value(_tween.current_value()));
     painter.draw_tick(_style.Tick, rect);
 }
 

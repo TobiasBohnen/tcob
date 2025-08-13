@@ -304,7 +304,7 @@ auto gif_decoder::read_block(io::istream& reader) -> i32
             n += count;
         }
     }
-    return n;
+    return static_cast<i32>(n);
 }
 
 void gif_decoder::read_graphic_control_ext(io::istream& reader)

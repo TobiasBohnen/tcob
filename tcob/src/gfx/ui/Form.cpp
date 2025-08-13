@@ -200,7 +200,7 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     size_i const bounds {size_i {Bounds->Size}};
 
-    auto const layerCount {get_layout()->widgets().size()};
+    auto const layerCount {static_cast<i32>(get_layout()->widgets().size())};
 
     // redraw
     if (_redrawWidgets) {
@@ -221,7 +221,7 @@ void form_base::on_draw_to(gfx::render_target& target)
     }
 
     // render
-    for (usize j {2}; j < layerCount + 2; ++j) {
+    for (i32 j {2}; j < layerCount + 2; ++j) {
         _renderer.set_layer(j);
         _renderer.render_to_target(target);
     }

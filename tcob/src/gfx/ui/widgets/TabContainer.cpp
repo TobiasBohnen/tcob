@@ -154,8 +154,8 @@ void tab_container::on_draw(widget_painter& painter)
     case position::None: return;
     }
 
-    isize const        columns {(std::ssize(_tabs) + _style.HeaderLineCount - 1) / _style.HeaderLineCount};
-    std::vector<isize> lineOffsets;
+    isize const      columns {(std::ssize(_tabs) + _style.HeaderLineCount - 1) / _style.HeaderLineCount};
+    std::vector<f32> lineOffsets;
     lineOffsets.resize(_style.HeaderLineCount);
 
     auto const getNextTabRect {[&](isize index, item const& item, item_style const& itemStyle) {

@@ -63,7 +63,7 @@ protected:
 
 private:
     std::array<u8, 256> _block {}; // current data block
-    usize               _blockSize {0};
+    u8                  _blockSize {0};
 
     i32             _dispose {0};
     std::vector<u8> _pixelCache {};
