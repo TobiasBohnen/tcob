@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "ConfigParser_bsbd.hpp"
+#include "Config_bsbd.hpp"
 
 #include <algorithm>
 #include <array>

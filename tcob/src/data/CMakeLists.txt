@@ -4,11 +4,11 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/CSV.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigSchema.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigTypes.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/config_parsers/ConfigParser_bsbd.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/config_parsers/ConfigParser_ini.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/config_parsers/ConfigParser_json.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/config_parsers/ConfigParser_xml.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/config_parsers/ConfigParser_yaml.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_formats/Config_bsbd.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_formats/Config_ini.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_formats/Config_json.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_formats/Config_xml.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_formats/Config_yaml.cpp
 )
 
 list(APPEND HDR

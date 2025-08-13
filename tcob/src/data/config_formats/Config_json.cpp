@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "ConfigParser_json.hpp"
+#include "Config_json.hpp"
 
 #include <optional>
 #include <string>

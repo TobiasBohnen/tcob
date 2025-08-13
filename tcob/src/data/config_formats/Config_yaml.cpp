@@ -3,14 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "ConfigParser_yaml.hpp"
+#include "Config_yaml.hpp"
 
 #include <cctype>
 #include <optional>
 #include <variant>
 #include <vector>
 
-#include "ConfigParser_json.hpp"
+#include "Config_json.hpp"
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/FileStream.hpp"

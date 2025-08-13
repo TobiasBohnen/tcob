@@ -13,7 +13,7 @@
 #include <tuple>
 #include <utility>
 
-#include "config_parsers/ConfigParser_ini.hpp"
+#include "config_formats/Config_ini.hpp"
 
 #include "tcob/core/Proxy.hpp"
 #include "tcob/core/ServiceLocator.hpp"

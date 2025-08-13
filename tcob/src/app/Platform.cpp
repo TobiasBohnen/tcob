@@ -16,7 +16,7 @@
 #include <SDL3/SDL.h>
 
 #include "../audio/audio_codecs/AudioCodecs.hpp"
-#include "../data/config_parsers/ConfigParsers.hpp"
+#include "../data/config_formats/ConfigFormats.hpp"
 #include "../gfx/image_codecs/ImageCodecs.hpp"
 
 #include "loaders/ConfigAssetLoader.hpp"

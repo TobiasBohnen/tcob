@@ -6,9 +6,9 @@
 #pragma once
 
 // IWYU pragma: begin_exports
-#include "ConfigParser_bsbd.hpp"
-#include "ConfigParser_ini.hpp"
-#include "ConfigParser_json.hpp"
-#include "ConfigParser_xml.hpp"
-#include "ConfigParser_yaml.hpp"
+#include "Config_bsbd.hpp"
+#include "Config_ini.hpp"
+#include "Config_json.hpp"
+#include "Config_xml.hpp"
+#include "Config_yaml.hpp"
 // IWYU pragma: end_exports

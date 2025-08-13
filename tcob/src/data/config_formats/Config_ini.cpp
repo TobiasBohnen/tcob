@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "ConfigParser_ini.hpp"
+#include "Config_ini.hpp"
 
 #include <cassert>
 #include <optional>

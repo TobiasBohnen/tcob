@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "ConfigParser_xml.hpp"
+#include "Config_xml.hpp"
 
 #include <algorithm>
 #include <cctype>
