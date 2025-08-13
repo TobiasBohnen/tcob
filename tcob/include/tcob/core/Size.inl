@@ -8,6 +8,7 @@
 
 #include <array>
 #include <numeric>
+#include <tuple>
 
 #include "tcob/core/Point.hpp"
 
@@ -188,15 +189,11 @@ auto constexpr operator==(size<T> const& left, size<R> const& right) -> bool
 }
 
 template <Arithmetic T>
-inline void size<T>::Serialize(size<T> const& v, auto&& s)
+auto constexpr size<T>::members(this auto&& self)
 {
-    s["width"]  = v.Width;
-    s["height"] = v.Height;
+    return std::tuple {
+        nm("width", self.Width),
+        nm("height", self.Height)};
 }
 
-template <Arithmetic T>
-inline auto size<T>::Deserialize(size<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.Width, "width") && s.try_get(v.Height, "height");
-}
 }

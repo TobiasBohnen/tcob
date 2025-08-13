@@ -10,6 +10,7 @@
 #include <initializer_list>
 #include <map>
 #include <span>
+#include <tuple>
 
 #include "tcob/core/Color.hpp"
 
@@ -24,15 +25,11 @@ public:
     f32   Position {0};
     color Value {};
 
-    void static Serialize(color_stop const& v, auto&& s)
+    auto constexpr members(this auto&& self)
     {
-        s["pos"]   = v.Position;
-        s["value"] = v.Value;
-    }
-
-    auto static Deserialize(color_stop& v, auto&& s) -> bool
-    {
-        return s.try_get(v.Position, "pos") && s.try_get(v.Value, "value");
+        return std::tuple {
+            nm("pos", self.Position),
+            nm("value", self.Value)};
     }
 };
 

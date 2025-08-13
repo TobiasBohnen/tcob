@@ -13,6 +13,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -106,16 +107,11 @@ public:
 
         auto operator==(font::style const& other) const -> bool = default;
 
-        void static Serialize(font::style const& v, auto&& s)
+        auto constexpr members(this auto&& self)
         {
-            s["is_italic"] = v.IsItalic;
-            s["weight"]    = v.Weight;
-        }
-
-        auto static Deserialize(font::style& v, auto&& s) -> bool
-        {
-            return s.try_get(v.IsItalic, "is_italic")
-                && s.try_get(v.Weight, "weight");
+            return std::tuple {
+                nm("is_italic", self.IsItalic),
+                nm("weight", self.Weight)};
         }
     };
 

@@ -53,8 +53,7 @@ public:
     static point<T> const Zero;
     static point<T> const One;
 
-    void static Serialize(point<T> const& v, auto&& s);
-    auto static Deserialize(point<T>& v, auto&& s) -> bool;
+    auto constexpr members(this auto&& self);
 };
 
 template <Arithmetic T>

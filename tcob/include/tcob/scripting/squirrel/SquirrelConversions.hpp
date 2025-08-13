@@ -998,6 +998,42 @@ struct converter<T> {
     }
 };
 
+template <MemberSerializable T>
+struct converter<T> {
+public:
+    auto static IsType(vm_view view, SQInteger idx) -> bool
+    {
+        if (view.is_table(idx)) {
+            T t {};
+            return From(view, idx, t);
+        }
+        return false;
+    }
+
+    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    {
+        table      tab {table::Acquire(view, idx++)};
+        auto const members {value.members()};
+        bool       ok {true};
+        std::apply([&](auto&&... m) {
+            ((ok = ok && tab.try_get(m.second.get(), m.first)), ...);
+        },
+                   members);
+        return ok;
+    }
+
+    void static To(vm_view view, T const& value)
+    {
+        table tab {table::PushNew(view)};
+
+        auto const members {value.members()};
+        std::apply([&](auto&&... m) {
+            ((tab[m.first] = m.second.get()), ...);
+        },
+                   members);
+    }
+};
+
 template <FloatingPoint ValueType, double OneTurn>
 struct converter<angle_unit<ValueType, OneTurn>> {
     auto static IsType(vm_view view, SQInteger idx) -> bool

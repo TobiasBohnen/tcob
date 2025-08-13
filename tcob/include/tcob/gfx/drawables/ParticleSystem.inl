@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <tuple>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -177,90 +178,51 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-inline void point_particle::settings::Serialize(point_particle::settings const& v, auto&& s)
+auto constexpr point_particle::settings::members(this auto&& self)
 {
-    s["speed"]     = v.Speed;
-    s["direction"] = v.Direction;
+    return std::tuple {
+        nm("speed", self.Speed),
+        nm("direction", self.Direction),
 
-    s["linear_acceleration"]     = v.LinearAcceleration;
-    s["linear_dampling"]         = v.LinearDamping;
-    s["radial_acceleration"]     = v.RadialAcceleration;
-    s["tangential_acceleration"] = v.TangentialAcceleration;
+        nm("linear_acceleration", self.LinearAcceleration),
+        nm("linear_dampling", self.LinearDamping),
+        nm("radial_acceleration", self.RadialAcceleration),
+        nm("tangential_acceleration", self.TangentialAcceleration),
 
-    s["gravity"] = v.Gravity;
+        nm("gravity", self.Gravity),
 
-    s["texture_region"] = v.TextureRegion;
-    s["colors"]         = v.Colors;
-    s["transparency"]   = v.Transparency;
+        nm("texture_region", self.TextureRegion),
+        nm("colors", self.Colors),
+        nm("transparency", self.Transparency),
 
-    s["lifetime"] = v.Lifetime;
+        nm("lifetime", self.Lifetime),
+    };
 }
 
-inline void quad_particle::settings::Serialize(quad_particle::settings const& v, auto&& s)
+auto constexpr quad_particle::settings::members(this auto&& self)
 {
-    s["speed"]     = v.Speed;
-    s["direction"] = v.Direction;
+    return std::tuple {
+        nm("speed", self.Speed),
+        nm("direction", self.Direction),
 
-    s["linear_acceleration"]     = v.LinearAcceleration;
-    s["linear_dampling"]         = v.LinearDamping;
-    s["radial_acceleration"]     = v.RadialAcceleration;
-    s["tangential_acceleration"] = v.TangentialAcceleration;
+        nm("linear_acceleration", self.LinearAcceleration),
+        nm("linear_dampling", self.LinearDamping),
+        nm("radial_acceleration", self.RadialAcceleration),
+        nm("tangential_acceleration", self.TangentialAcceleration),
 
-    s["gravity"] = v.Gravity;
+        nm("gravity", self.Gravity),
 
-    s["texture_region"] = v.TextureRegion;
-    s["colors"]         = v.Colors;
-    s["transparency"]   = v.Transparency;
+        nm("texture_region", self.TextureRegion),
+        nm("colors", self.Colors),
+        nm("transparency", self.Transparency),
 
-    s["lifetime"] = v.Lifetime;
+        nm("lifetime", self.Lifetime),
 
-    s["scale"]    = v.Scale;
-    s["size"]     = v.Size;
-    s["spin"]     = v.Spin;
-    s["rotation"] = v.Rotation;
-}
-
-inline auto point_particle::settings::Deserialize(point_particle::settings& v, auto&& s) -> bool
-{
-    return s.try_get(v.Speed, "speed")
-        && s.try_get(v.Direction, "direction")
-
-        && s.try_get(v.LinearAcceleration, "linear_acceleration")
-        && s.try_get(v.LinearDamping, "linear_dampling")
-        && s.try_get(v.RadialAcceleration, "radial_acceleration")
-        && s.try_get(v.TangentialAcceleration, "tangential_acceleration")
-
-        && s.try_get(v.Gravity, "gravity")
-
-        && s.try_get(v.TextureRegion, "texture_region")
-        && s.try_get(v.Colors, "colors")
-        && s.try_get(v.Transparency, "transparency")
-
-        && s.try_get(v.Lifetime, "lifetime");
-}
-
-inline auto quad_particle::settings::Deserialize(quad_particle::settings& v, auto&& s) -> bool
-{
-    return s.try_get(v.Speed, "speed")
-        && s.try_get(v.Direction, "direction")
-
-        && s.try_get(v.LinearAcceleration, "linear_acceleration")
-        && s.try_get(v.LinearDamping, "linear_dampling")
-        && s.try_get(v.RadialAcceleration, "radial_acceleration")
-        && s.try_get(v.TangentialAcceleration, "tangential_acceleration")
-
-        && s.try_get(v.Gravity, "gravity")
-
-        && s.try_get(v.TextureRegion, "texture_region")
-        && s.try_get(v.Colors, "colors")
-        && s.try_get(v.Transparency, "transparency")
-
-        && s.try_get(v.Lifetime, "lifetime")
-
-        && s.try_get(v.Scale, "scale")
-        && s.try_get(v.Size, "size")
-        && s.try_get(v.Spin, "spin")
-        && s.try_get(v.Rotation, "rotation");
+        nm("scale", self.Scale),
+        nm("size", self.Size),
+        nm("spin", self.Spin),
+        nm("rotation", self.Rotation),
+    };
 }
 
 inline void point_particle_emitter::settings::Serialize(point_particle_emitter::settings const& v, auto&& s)

@@ -7,6 +7,7 @@
 #include "TileMap.hpp"
 
 #include <initializer_list>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 
@@ -86,59 +87,34 @@ void tileset<T>::set_tile(tile_index_t idx, tile_type const& tile)
 
 ////////////////////////////////////////////////////////////
 
-inline void SerializeTile(auto&& v, auto&& s)
+auto constexpr orthogonal_tile::members(this auto&& self)
 {
-    s["texture"] = v.TextureRegion;
-    s["h_flip"]  = v.FlipHorizontally;
-    s["v_flip"]  = v.FlipVertically;
-    s["color"]   = v.Color;
+    return std::tuple {
+        nm("texture", self.TextureRegion),
+        nm("h_flip", self.FlipHorizontally),
+        nm("v_flip", self.FlipVertically),
+        nm("color", self.Color),
+        nm("scale", self.Scale)};
 }
 
-inline auto DeserializeTile(auto&& v, auto&& s) -> bool
+auto constexpr isometric_tile::members(this auto&& self)
 {
-    if (!s.try_get(v.TextureRegion, "texture")) { return false; }
-    s.try_get(v.FlipHorizontally, "h_flip");
-    s.try_get(v.FlipVertically, "v_flip");
-    s.try_get(v.Color, "color");
-    return true;
+    return std::tuple {
+        nm("texture", self.TextureRegion),
+        nm("h_flip", self.FlipHorizontally),
+        nm("v_flip", self.FlipVertically),
+        nm("color", self.Color),
+        nm("center", self.Center),
+        nm("height", self.Height)};
 }
 
-inline void orthogonal_tile::Serialize(orthogonal_tile const& v, auto&& s)
+auto constexpr hexagonal_tile::members(this auto&& self)
 {
-    SerializeTile(v, s);
-    s["scale"] = v.Scale;
-}
-
-inline auto orthogonal_tile::Deserialize(orthogonal_tile& v, auto&& s) -> bool
-{
-    if (!DeserializeTile(v, s)) { return false; }
-    s.try_get(v.Scale, "scale");
-    return true;
-}
-
-inline void isometric_tile::Serialize(isometric_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-    s["center"] = v.Center;
-    s["height"] = v.Height;
-}
-
-inline auto isometric_tile::Deserialize(isometric_tile& v, auto&& s) -> bool
-{
-    if (!DeserializeTile(v, s)) { return false; }
-    s.try_get(v.Center, "center");
-    s.try_get(v.Height, "height");
-    return true;
-}
-
-inline void hexagonal_tile::Serialize(hexagonal_tile const& v, auto&& s)
-{
-    SerializeTile(v, s);
-}
-
-inline auto hexagonal_tile::Deserialize(hexagonal_tile& v, auto&& s) -> bool
-{
-    return static_cast<bool>(DeserializeTile(v, s));
+    return std::tuple {
+        nm("texture", self.TextureRegion),
+        nm("h_flip", self.FlipHorizontally),
+        nm("v_flip", self.FlipVertically),
+        nm("color", self.Color)};
 }
 
 }

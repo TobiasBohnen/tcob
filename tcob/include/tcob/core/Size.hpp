@@ -49,8 +49,7 @@ public:
     static size<T> const Zero;
     static size<T> const One;
 
-    void static Serialize(size<T> const& v, auto&& s);
-    auto static Deserialize(size<T>& v, auto&& s) -> bool;
+    auto constexpr members(this auto&& self);
 };
 
 template <Arithmetic T>

@@ -661,6 +661,47 @@ struct converter<T> {
     }
 };
 
+template <MemberSerializable T>
+struct converter<T> {
+public:
+    auto static IsType(cfg_value const& config) -> bool
+    {
+        if (std::holds_alternative<object>(config)) {
+            T t {};
+            return From(config, t);
+        }
+        return false;
+    }
+
+    auto static From(cfg_value const& config, T& value) -> bool
+    {
+        if (std::holds_alternative<object>(config)) {
+            object const& obj {std::get<object>(config)};
+            auto const    members {value.members()};
+            bool          retValue {true};
+            std::apply([&](auto&&... m) {
+                ((retValue = retValue && obj.try_get(m.second.get(), m.first)), ...);
+            },
+                       members);
+            return retValue;
+        }
+        return false;
+    }
+
+    void static To(cfg_value& config, T const& value)
+    {
+        object obj {};
+
+        auto const members {value.members()};
+        std::apply([&](auto&&... m) {
+            ((obj[m.first] = m.second.get()), ...);
+        },
+                   members);
+
+        config = obj;
+    }
+};
+
 template <FloatingPoint ValueType, double OneTurn>
 struct converter<angle_unit<ValueType, OneTurn>> {
     auto static IsType(cfg_value const& config) -> bool

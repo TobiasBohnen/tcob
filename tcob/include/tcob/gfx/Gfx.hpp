@@ -9,7 +9,9 @@
 #include <compare>
 #include <functional>
 #include <set>
+#include <tuple>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -124,15 +126,11 @@ public:
 
     auto operator==(texture_region const& other) const -> bool = default;
 
-    void static Serialize(texture_region const& v, auto&& s)
+    auto constexpr members(this auto&& self)
     {
-        s["level"] = v.Level;
-        Serialize(v.UVRect, s);
-    }
-
-    auto static Deserialize(texture_region& v, auto&& s) -> bool
-    {
-        return s.try_get(v.Level, "level") && rect_f::Deserialize(v.UVRect, s);
+        return std::tuple {
+            nm("rect", self.UVRect),
+            nm("level", self.Level)};
     }
 };
 
@@ -159,21 +157,18 @@ public:
 
     auto operator==(alignments const& other) const -> bool = default;
 
-    void static Serialize(alignments const& v, auto&& s)
+    auto constexpr members(this auto&& self)
     {
-        s["horizontal"] = v.Horizontal;
-        s["vertical"]   = v.Vertical;
-    }
-
-    auto static Deserialize(alignments& v, auto&& s) -> bool
-    {
-        return s.try_get(v.Horizontal, "horizontal") && s.try_get(v.Vertical, "vertical");
+        return std::tuple {
+            nm("horizontal", self.Horizontal),
+            nm("vertical", self.Vertical)};
     }
 };
 
 ////////////////////////////////////////////////////////////
 
-struct video_config {
+class TCOB_API video_config {
+public:
 #if defined(TCOB_DEBUG)
     bool   FullScreen {false};
     bool   UseDesktopResolution {false};
@@ -191,24 +186,17 @@ struct video_config {
     string RenderSystem {"OPENGL45"};
 #endif
 
-    void static Serialize(video_config const& v, auto&& s)
-    {
-        s[Cfg::Video::fullscreen]             = v.FullScreen;
-        s[Cfg::Video::use_desktop_resolution] = v.UseDesktopResolution;
-        s[Cfg::Video::resolution]             = v.Resolution;
-        s[Cfg::Video::frame_limit]            = v.FrameLimit;
-        s[Cfg::Video::vsync]                  = v.VSync;
-        s[Cfg::Video::render_system]          = v.RenderSystem;
-    }
+    auto operator==(video_config const& other) const -> bool = default;
 
-    auto static Deserialize(video_config& v, auto&& s) -> bool
+    auto constexpr members(this auto&& self)
     {
-        return s.try_get(v.FullScreen, Cfg::Video::fullscreen)
-            && s.try_get(v.UseDesktopResolution, Cfg::Video::use_desktop_resolution)
-            && s.try_get(v.Resolution, Cfg::Video::resolution)
-            && s.try_get(v.FrameLimit, Cfg::Video::frame_limit)
-            && s.try_get(v.VSync, Cfg::Video::vsync)
-            && s.try_get(v.RenderSystem, Cfg::Video::render_system);
+        return std::tuple {
+            nm(Cfg::Video::fullscreen, self.FullScreen),
+            nm(Cfg::Video::use_desktop_resolution, self.UseDesktopResolution),
+            nm(Cfg::Video::resolution, self.Resolution),
+            nm(Cfg::Video::frame_limit, self.FrameLimit),
+            nm(Cfg::Video::vsync, self.VSync),
+            nm(Cfg::Video::render_system, self.RenderSystem)};
     }
 };
 

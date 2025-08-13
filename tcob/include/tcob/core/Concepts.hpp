@@ -83,12 +83,17 @@ template <typename T>
 concept OverloadsArrowOp = requires(T a) { { a.operator->() } -> Pointer; };
 
 // S=data::object|scripting::lua::table|scripting::squirrel::table
-// TODO: replace with proxy?
 template <typename T, typename S>
 concept Serializable =
     requires(T& t, S& s) {
         { T::Serialize(t, s) };
         { T::Deserialize(t, s) };
+    };
+
+template <typename T>
+concept MemberSerializable =
+    requires(T& t) {
+        { t.members() };
     };
 
 template <typename T>

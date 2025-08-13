@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cmath>
+#include <tuple>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -208,16 +209,11 @@ auto constexpr operator==(point<T> const& left, point<R> const& right) -> bool
 }
 
 template <Arithmetic T>
-inline void point<T>::Serialize(point<T> const& v, auto&& s)
+auto constexpr point<T>::members(this auto&& self)
 {
-    s["x"] = v.X;
-    s["y"] = v.Y;
-}
-
-template <Arithmetic T>
-inline auto point<T>::Deserialize(point<T>& v, auto&& s) -> bool
-{
-    return s.try_get(v.X, "x") && s.try_get(v.Y, "y");
+    return std::tuple {
+        nm("x", self.X),
+        nm("y", self.Y)};
 }
 
 template <Arithmetic T>

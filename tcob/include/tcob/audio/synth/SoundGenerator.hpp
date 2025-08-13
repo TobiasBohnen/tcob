@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <tuple>
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Sound.hpp"
@@ -72,62 +73,34 @@ public:
 
     auto operator==(sound_wave const& other) const -> bool = default;
 
-    void static Serialize(sound_wave const& v, auto&& s)
+    auto constexpr members(this auto&& self)
     {
-        s["random_seed"]      = v.RandomSeed;
-        s["sample_rate"]      = v.SampleRate;
-        s["wave_type"]        = v.WaveType;
-        s["attack_time"]      = v.AttackTime;
-        s["sustain_time"]     = v.SustainTime;
-        s["sustain_punch"]    = v.SustainPunch;
-        s["decay_time"]       = v.DecayTime;
-        s["start_frequency"]  = v.StartFrequency;
-        s["min_frequency"]    = v.MinFrequency;
-        s["slide"]            = v.Slide;
-        s["delta_slide"]      = v.DeltaSlide;
-        s["vibrato_depth"]    = v.VibratoDepth;
-        s["vibrato_speed"]    = v.VibratoSpeed;
-        s["change_amount"]    = v.ChangeAmount;
-        s["change_speed"]     = v.ChangeSpeed;
-        s["square_duty"]      = v.SquareDuty;
-        s["duty_sweep"]       = v.DutySweep;
-        s["repeat_speed"]     = v.RepeatSpeed;
-        s["phaser_offset"]    = v.PhaserOffset;
-        s["phaser_sweep"]     = v.PhaserSweep;
-        s["lpf_cutoff"]       = v.LowPassFilterCutoff;
-        s["lpf_cutoff_sweep"] = v.LowPassFilterCutoffSweep;
-        s["lpf_resonance"]    = v.LowPassFilterResonance;
-        s["hpf_cutoff"]       = v.HighPassFilterCutoff;
-        s["hpf_cutoff_sweep"] = v.HighPassFilterCutoffSweep;
-    }
-
-    auto static Deserialize(sound_wave& v, auto&& s) -> bool
-    {
-        return s.try_get(v.RandomSeed, "random_seed")
-            && s.try_get(v.SampleRate, "sample_rate")
-            && s.try_get(v.WaveType, "wave_type")
-            && s.try_get(v.AttackTime, "attack_time")
-            && s.try_get(v.SustainTime, "sustain_time")
-            && s.try_get(v.SustainPunch, "sustain_punch")
-            && s.try_get(v.DecayTime, "decay_time")
-            && s.try_get(v.StartFrequency, "start_frequency")
-            && s.try_get(v.MinFrequency, "min_frequency")
-            && s.try_get(v.Slide, "slide")
-            && s.try_get(v.DeltaSlide, "delta_slide")
-            && s.try_get(v.VibratoDepth, "vibrato_depth")
-            && s.try_get(v.VibratoSpeed, "vibrato_speed")
-            && s.try_get(v.ChangeAmount, "change_amount")
-            && s.try_get(v.ChangeSpeed, "change_speed")
-            && s.try_get(v.SquareDuty, "square_duty")
-            && s.try_get(v.DutySweep, "duty_sweep")
-            && s.try_get(v.RepeatSpeed, "repeat_speed")
-            && s.try_get(v.PhaserOffset, "phaser_offset")
-            && s.try_get(v.PhaserSweep, "phaser_sweep")
-            && s.try_get(v.LowPassFilterCutoff, "lpf_cutoff")
-            && s.try_get(v.LowPassFilterCutoffSweep, "lpf_cutoff_sweep")
-            && s.try_get(v.LowPassFilterResonance, "lpf_resonance")
-            && s.try_get(v.HighPassFilterCutoff, "hpf_cutoff")
-            && s.try_get(v.HighPassFilterCutoffSweep, "hpf_cutoff_sweep");
+        return std::tuple {
+            nm("random_seed", self.RandomSeed),
+            nm("sample_rate", self.SampleRate),
+            nm("wave_type", self.WaveType),
+            nm("attack_time", self.AttackTime),
+            nm("sustain_time", self.SustainTime),
+            nm("sustain_punch", self.SustainPunch),
+            nm("decay_time", self.DecayTime),
+            nm("start_frequency", self.StartFrequency),
+            nm("min_frequency", self.MinFrequency),
+            nm("slide", self.Slide),
+            nm("delta_slide", self.DeltaSlide),
+            nm("vibrato_depth", self.VibratoDepth),
+            nm("vibrato_speed", self.VibratoSpeed),
+            nm("change_amount", self.ChangeAmount),
+            nm("change_speed", self.ChangeSpeed),
+            nm("square_duty", self.SquareDuty),
+            nm("duty_sweep", self.DutySweep),
+            nm("repeat_speed", self.RepeatSpeed),
+            nm("phaser_offset", self.PhaserOffset),
+            nm("phaser_sweep", self.PhaserSweep),
+            nm("lpf_cutoff", self.LowPassFilterCutoff),
+            nm("lpf_cutoff_sweep", self.LowPassFilterCutoffSweep),
+            nm("lpf_resonance", self.LowPassFilterResonance),
+            nm("hpf_cutoff", self.HighPassFilterCutoff),
+            nm("hpf_cutoff_sweep", self.HighPassFilterCutoffSweep)};
     }
 };
 

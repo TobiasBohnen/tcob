@@ -162,8 +162,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(point_particle::settings const& v, auto&& s);
-        auto static Deserialize(point_particle::settings& v, auto&& s) -> bool;
+        auto constexpr members(this auto&& self);
     };
 
     ////////////////////////////////////////////////////////////
@@ -208,10 +207,8 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(quad_particle::settings const& v, auto&& s);
-        auto static Deserialize(quad_particle::settings& v, auto&& s) -> bool;
+        auto constexpr members(this auto&& self);
     };
-
     ////////////////////////////////////////////////////////////
 
     size_f  Scale {size_f::One};

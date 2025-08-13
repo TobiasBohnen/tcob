@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <tuple>
 #include <vector>
 
 #include "tcob/core/easing/Tween.hpp"
@@ -20,15 +21,11 @@ public:
 
     auto operator==(frame const& other) const -> bool = default;
 
-    void static Serialize(frame const& v, auto&& s)
+    auto constexpr members(this auto&& self)
     {
-        s["name"]     = v.Name;
-        s["duration"] = v.Duration;
-    }
-
-    auto static Deserialize(frame& v, auto&& s) -> bool
-    {
-        return s.try_get(v.Name, "name") && s.try_get(v.Duration, "duration");
+        return std::tuple {
+            nm("name", self.Name),
+            nm("duration", self.Duration)};
     }
 };
 

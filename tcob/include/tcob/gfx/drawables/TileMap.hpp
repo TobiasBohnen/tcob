@@ -59,8 +59,7 @@ public:
 
     size_f Scale {size_f::One};
 
-    void static Serialize(orthogonal_tile const& v, auto&& s);
-    auto static Deserialize(orthogonal_tile& v, auto&& s) -> bool;
+    auto constexpr members(this auto&& self);
 };
 
 class TCOB_API orthogonal_grid {
@@ -86,8 +85,7 @@ public:
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
 
-    void static Serialize(isometric_tile const& v, auto&& s);
-    auto static Deserialize(isometric_tile& v, auto&& s) -> bool;
+    auto constexpr members(this auto&& self);
 };
 
 class TCOB_API isometric_grid {
@@ -111,8 +109,7 @@ public:
     bool   FlipVertically {false};
     color  Color {colors::White};
 
-    void static Serialize(hexagonal_tile const& v, auto&& s);
-    auto static Deserialize(hexagonal_tile& v, auto&& s) -> bool;
+    auto constexpr members(this auto&& self);
 };
 
 enum hexagonal_top : u8 {
