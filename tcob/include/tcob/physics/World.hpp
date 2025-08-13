@@ -141,8 +141,6 @@ public:
     prop_fn<f32>     HitEventThreshold;
     prop_fn<f32>     MaximumLinearSpeed;
     prop_fn<bool>    EnableSleeping;
-    prop_fn<bool>    EnableContinuous;
-    prop_fn<bool>    EnableWarmStarting;
 
     auto bodies() -> std::span<std::shared_ptr<body>>;
 

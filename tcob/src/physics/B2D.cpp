@@ -112,16 +112,6 @@ void b2d_world::set_enable_sleeping(bool value) const
     b2World_EnableSleeping(ID, value);
 }
 
-auto b2d_world::get_enable_continuous() const -> bool
-{
-    return b2World_IsContinuousEnabled(ID);
-}
-
-void b2d_world::set_enable_continuous(bool value) const
-{
-    b2World_EnableContinuous(ID, value);
-}
-
 auto b2d_world::get_restitution_threshold() const -> f32
 {
     return b2World_GetRestitutionThreshold(ID);
@@ -250,16 +240,6 @@ void b2d_world::set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const
 auto b2d_world::get_awake_body_count() const -> i32
 {
     return b2World_GetAwakeBodyCount(ID);
-}
-
-auto b2d_world::get_enable_warm_starting() const -> bool
-{
-    return b2World_IsWarmStartingEnabled(ID);
-}
-
-void b2d_world::set_enable_warm_starting(bool value) const
-{
-    b2World_EnableWarmStarting(ID, value);
 }
 
 ////////////////////////////////////////////////////////////

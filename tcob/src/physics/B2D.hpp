@@ -41,9 +41,6 @@ public:
     auto get_enable_sleeping() const -> bool;
     void set_enable_sleeping(bool value) const;
 
-    auto get_enable_continuous() const -> bool;
-    void set_enable_continuous(bool value) const;
-
     auto get_restitution_threshold() const -> f32;
     void set_restitution_threshold(f32 value) const;
 
@@ -63,9 +60,6 @@ public:
     void set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const;
 
     auto get_awake_body_count() const -> i32;
-
-    auto get_enable_warm_starting() const -> bool;
-    void set_enable_warm_starting(bool value) const;
 
     b2WorldId ID {};
 };
@@ -506,4 +500,9 @@ b2World_OverlapShape
 b2World_CastRay
 b2World_CastRayClosest
 b2World_CollideMover
+
+- auto get_enable_continuous() const -> bool;
+- void set_enable_continuous(bool value) const;
+- auto get_enable_warm_starting() const -> bool;
+- void set_enable_warm_starting(bool value) const;
 */
