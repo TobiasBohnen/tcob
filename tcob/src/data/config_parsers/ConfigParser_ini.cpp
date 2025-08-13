@@ -9,6 +9,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -482,6 +483,8 @@ auto ini_writer::write_section(io::ostream& stream, object const& obj, utf8_stri
 
     std::unordered_map<utf8_string, object> objects;
     for (auto const& [k, v] : obj) {
+        if (v.is<std::monostate>()) { continue; }
+
         auto const& comment {v.get_comment()};
         for (auto const& c : helper::split(comment.Text, '\n')) {
             stream << ";" << c << "\n";
@@ -529,6 +532,8 @@ auto ini_writer::write_inline_section(io::ostream& stream, object const& obj, us
     stream << "{ ";
     bool first {true};
     for (auto const& [k, v] : obj) {
+        if (v.is<std::monostate>()) { continue; }
+
         if (!first) { stream << ", "; }
         first = false;
 
@@ -553,6 +558,8 @@ auto ini_writer::write_array(io::ostream& stream, array const& arr, usize maxDep
     stream << "[ ";
     bool first {true};
     for (auto const& v : arr) {
+        if (v.is<std::monostate>()) { continue; }
+
         if (!first) { stream << ", "; }
         first = false;
 

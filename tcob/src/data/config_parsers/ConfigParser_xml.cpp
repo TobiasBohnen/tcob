@@ -11,6 +11,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <variant>
 
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/io/Stream.hpp"
@@ -360,6 +361,8 @@ auto xml_writer::write_element(io::ostream& stream, u32 indent, utf8_string cons
     stream << indentString << "<" << name;
 
     for (auto const& [k, v] : obj) {
+        if (v.is<std::monostate>()) { continue; }
+
         if (v.is<object>()) {
             sections[k] = v.as<object>();
         } else if (v.is<array>()) {
@@ -399,6 +402,8 @@ auto xml_writer::write_array(io::ostream& stream, u32 indent, utf8_string const&
     stream << indentArray << "<" << name << ">\n";
 
     for (auto const& v : arr) {
+        if (v.is<std::monostate>()) { continue; }
+
         if (v.is<object>()) {
             write_element(stream, indent + INDENT_SPACES, "item", v.as<object>());
         } else if (v.is<array>()) {

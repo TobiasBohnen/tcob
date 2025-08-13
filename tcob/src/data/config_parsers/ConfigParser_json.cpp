@@ -255,6 +255,8 @@ auto json_writer::write_entry(io::ostream& stream, usize indent, entry const& en
         return write_array(stream, indent, ent.as<array>(), maxDepth);
     } else if (ent.is<object>()) {
         return write_object(stream, indent, ent.as<object>(), maxDepth);
+    } else if (ent.is<std::monostate>()) {
+        stream << "null";
     }
 
     return true;

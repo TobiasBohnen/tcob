@@ -7,6 +7,7 @@
 
 #include <cctype>
 #include <optional>
+#include <variant>
 #include <vector>
 
 #include "ConfigParser_json.hpp"
@@ -639,6 +640,12 @@ auto yaml_reader::convert_scalar(entry& currentEntry, utf8_string const& value) 
         return true;
     }
 
+    // null
+    if (value == "null" || value == "~") {
+        currentEntry.set_value(std::monostate {});
+        return true;
+    }
+
     // utf8_string
     currentEntry.set_value(value);
     return true;
@@ -741,7 +748,11 @@ void yaml_writer::write_entry(io::ostream& stream, usize indent, entry const& en
 
 void yaml_writer::write_scalar(io::ostream& stream, entry const& ent) const
 {
-    stream << ent.as<utf8_string>();
+    if (ent.is<std::monostate>()) {
+        stream << "~";
+    } else {
+        stream << ent.as<utf8_string>();
+    }
 }
 
 void yaml_writer::write_comment(io::ostream& stream, entry const& ent) const
