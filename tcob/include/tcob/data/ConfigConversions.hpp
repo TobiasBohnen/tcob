@@ -280,6 +280,23 @@ struct converter<std::optional<T>> {
 
         return true;
     }
+
+    void static To(cfg_value& config, std::optional<T> const& value)
+    {
+        if (value) {
+            converter<T>::To(config, *value);
+        } else {
+            config = std::monostate {};
+        }
+    }
+};
+
+template <>
+struct converter<std::nullopt_t> {
+    void static To(cfg_value& config, std::nullopt_t const&)
+    {
+        config = std::monostate {};
+    }
 };
 
 template <typename... P>
