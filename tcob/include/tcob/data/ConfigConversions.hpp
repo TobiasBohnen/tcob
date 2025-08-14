@@ -19,6 +19,7 @@
 #include <variant>
 
 #include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/data/Config.hpp"
@@ -697,7 +698,7 @@ public:
             auto const    members {T::Members()};
             bool          retValue {true};
             std::apply([&](auto&&... m) {
-                ((retValue = retValue && obj.try_get(value.*(m.second), m.first)), ...);
+                ((retValue = retValue && tcob::detail::process_member(m, obj, value)), ...);
             },
                        members);
             return retValue;
@@ -711,7 +712,7 @@ public:
 
         auto const members {T::Members()};
         std::apply([&](auto&&... m) {
-            ((obj[m.first] = value.*(m.second)), ...);
+            ((obj[std::get<0>(m)] = value.*(std::get<1>(m))), ...);
         },
                    members);
 

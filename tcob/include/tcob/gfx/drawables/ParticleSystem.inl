@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <tuple>
 #include <utility>
@@ -226,38 +227,26 @@ auto constexpr quad_particle::settings::Members()
     };
 }
 
-inline void point_particle_emitter::settings::Serialize(point_particle_emitter::settings const& v, auto&& s)
+auto constexpr point_particle_emitter::settings::Members()
 {
-    s["template"]     = v.Template;
-    s["spawn_area"]   = v.SpawnArea;
-    s["spawn_rate"]   = v.SpawnRate;
-    s["is_explosion"] = v.IsExplosion;
-    if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
+    return std::tuple {
+        std::pair {"template", &point_particle_emitter::settings::Template},
+        std::pair {"spawn_area", &point_particle_emitter::settings::SpawnArea},
+        std::pair {"spawn_rate", &point_particle_emitter::settings::SpawnRate},
+        std::pair {"is_explosion", &point_particle_emitter::settings::IsExplosion},
+        std::tuple {"lifetime", &point_particle_emitter::settings::Lifetime, std::optional<milliseconds> {}},
+    };
 }
 
-inline void quad_particle_emitter::settings::Serialize(quad_particle_emitter::settings const& v, auto&& s)
+auto constexpr quad_particle_emitter::settings::Members()
 {
-    s["template"]     = v.Template;
-    s["spawn_area"]   = v.SpawnArea;
-    s["spawn_rate"]   = v.SpawnRate;
-    s["is_explosion"] = v.IsExplosion;
-    if (v.Lifetime) { s["lifetime"] = *v.Lifetime; }
-}
-
-inline auto point_particle_emitter::settings::Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool
-{
-    if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
-    return s.try_get(v.Template, "template")
-        && s.try_get(v.SpawnArea, "spawn_area")
-        && s.try_get(v.SpawnRate, "spawn_rate");
-}
-
-inline auto quad_particle_emitter::settings::Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool
-{
-    if (s.has("lifetime")) { v.Lifetime = s["lifetime"].template as<milliseconds>(); }
-    return s.try_get(v.Template, "template")
-        && s.try_get(v.SpawnArea, "spawn_area")
-        && s.try_get(v.SpawnRate, "spawn_rate");
+    return std::tuple {
+        std::pair {"template", &point_particle_emitter::settings::Template},
+        std::pair {"spawn_area", &point_particle_emitter::settings::SpawnArea},
+        std::pair {"spawn_rate", &point_particle_emitter::settings::SpawnRate},
+        std::pair {"is_explosion", &point_particle_emitter::settings::IsExplosion},
+        std::tuple {"lifetime", &point_particle_emitter::settings::Lifetime, std::optional<milliseconds> {}},
+    };
 }
 
 }

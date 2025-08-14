@@ -152,6 +152,25 @@ namespace detail {
             }
         }
     };
+
+    ////////////////////////////////////////////////////////////
+
+    template <typename Tuple>
+    auto constexpr process_member(Tuple const& m, auto const& obj, auto& value) -> bool
+    {
+        constexpr usize tupleSize {std::tuple_size_v<std::remove_cvref_t<Tuple>>};
+        auto const&     name {std::get<0>(m)};
+        auto const&     ptr {std::get<1>(m)};
+
+        if (!obj.try_get(value.*ptr, name)) {
+            if constexpr (tupleSize == 2) {
+                return false;
+            } else if constexpr (tupleSize == 3) { // has default
+                value.*ptr = std::get<2>(m);
+            }
+        }
+        return true;
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -161,5 +180,4 @@ struct locale {
     string Country;
 };
 
-////////////////////////////////////////////////////////////
 }

@@ -55,8 +55,7 @@ public:
     u8 B {0};
     u8 A {0};
 
-    void static Serialize(color v, auto&& s);
-    auto static Deserialize(color& v, auto&& s) -> bool;
+    auto static constexpr Members();
 };
 
 auto constexpr operator==(color left, color right) -> bool;

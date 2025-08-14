@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <tuple>
+#include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -238,23 +240,14 @@ auto constexpr operator==(hsx left, hsx right) -> bool
     return (left.Hue == right.Hue) && (left.Saturation == right.Saturation) && (left.X == right.X);
 }
 
-inline void color::Serialize(color v, auto&& s)
+auto constexpr color::Members()
 {
-    s["r"] = v.R;
-    s["g"] = v.G;
-    s["b"] = v.B;
-    s["a"] = v.A;
-}
-
-inline auto color::Deserialize(color& v, auto&& s) -> bool
-{
-    if (s.try_get(v.R, "r") && s.try_get(v.G, "g") && s.try_get(v.B, "b")) {
-        if (!s.try_get(v.A, "a")) {
-            v.A = u8 {255};
-        }
-        return true;
-    }
-    return false;
+    return std::tuple {
+        std::pair {"r", &color::R},
+        std::pair {"g", &color::G},
+        std::pair {"b", &color::B},
+        std::tuple {"a", &color::A, 255},
+    };
 }
 
 }

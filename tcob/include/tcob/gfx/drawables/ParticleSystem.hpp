@@ -244,8 +244,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(point_particle_emitter::settings const& v, auto&& s);
-        auto static Deserialize(point_particle_emitter::settings& v, auto&& s) -> bool;
+        auto static constexpr Members();
     };
 
     ////////////////////////////////////////////////////////////
@@ -286,8 +285,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        void static Serialize(quad_particle_emitter::settings const& v, auto&& s);
-        auto static Deserialize(quad_particle_emitter::settings& v, auto&& s) -> bool;
+        auto static constexpr Members();
     };
 
     ////////////////////////////////////////////////////////////
