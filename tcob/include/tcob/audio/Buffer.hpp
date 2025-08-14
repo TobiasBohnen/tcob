@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <any>
-#include <expected>
 #include <future>
 #include <memory>
 #include <optional>
@@ -46,8 +45,8 @@ public:
 
     auto static Create(specification const& info, std::span<f32 const> data) -> buffer;
 
-    auto static Load(path const& file) -> std::expected<buffer, bool>;
-    auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, bool>;
+    auto static Load(path const& file) -> std::optional<buffer>;
+    auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>;
 
 private:
     information      _info;

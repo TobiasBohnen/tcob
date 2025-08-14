@@ -7,7 +7,6 @@
 
 #include <any>
 #include <chrono>
-#include <expected>
 #include <future>
 #include <memory>
 #include <optional>
@@ -40,20 +39,20 @@ auto buffer::Create(specification const& info, std::span<f32 const> data) -> buf
     return retValue;
 }
 
-auto buffer::Load(path const& file) -> std::expected<buffer, bool>
+auto buffer::Load(path const& file) -> std::optional<buffer>
 {
     buffer     retValue;
     auto const err {retValue.load(file, {})};
     if (err) { return retValue; }
-    return std::unexpected {err};
+    return std::nullopt;
 }
 
-auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::expected<buffer, bool>
+auto buffer::Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>
 {
     buffer     retValue;
     auto const err {retValue.load(std::move(in), ext, {})};
     if (err) { return retValue; }
-    return std::unexpected {err};
+    return std::nullopt;
 }
 
 auto buffer::load(path const& file, std::any const& ctx) noexcept -> bool
