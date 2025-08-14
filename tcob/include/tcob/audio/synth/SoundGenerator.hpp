@@ -74,7 +74,7 @@ public:
 
     auto operator==(sound_wave const& other) const -> bool = default;
 
-    auto constexpr static Members()
+    auto static constexpr Members()
     {
         return std::tuple {
             std::pair {"random_seed", &sound_wave::RandomSeed},

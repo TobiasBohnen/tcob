@@ -26,7 +26,7 @@ public:
     f32   Position {0};
     color Value {};
 
-    auto constexpr static Members()
+    auto static constexpr Members()
     {
         return std::tuple {
             std::pair {"pos", &color_stop::Position},

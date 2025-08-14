@@ -126,7 +126,7 @@ public:
 
     auto operator==(texture_region const& other) const -> bool = default;
 
-    auto constexpr static Members()
+    auto static constexpr Members()
     {
         return std::tuple {
             std::pair {"rect", &texture_region::UVRect},
@@ -157,7 +157,7 @@ public:
 
     auto operator==(alignments const& other) const -> bool = default;
 
-    auto constexpr static Members()
+    auto static constexpr Members()
     {
         return std::tuple {
             std::pair {"horizontal", &alignments::Horizontal},
@@ -188,7 +188,7 @@ public:
 
     auto operator==(video_config const& other) const -> bool = default;
 
-    auto constexpr static Members()
+    auto static constexpr Members()
     {
         return std::tuple {
             std::pair {Cfg::Video::fullscreen, &video_config::FullScreen},

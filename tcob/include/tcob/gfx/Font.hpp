@@ -108,7 +108,7 @@ public:
 
         auto operator==(font::style const& other) const -> bool = default;
 
-        auto constexpr static Members()
+        auto static constexpr Members()
         {
             return std::tuple {
                 std::pair {"is_italic", &font::style::IsItalic},

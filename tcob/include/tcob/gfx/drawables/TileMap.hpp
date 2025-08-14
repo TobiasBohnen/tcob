@@ -59,7 +59,7 @@ public:
 
     size_f Scale {size_f::One};
 
-    auto constexpr static Members();
+    auto static constexpr Members();
 };
 
 class TCOB_API orthogonal_grid {
@@ -85,7 +85,7 @@ public:
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
 
-    auto constexpr static Members();
+    auto static constexpr Members();
 };
 
 class TCOB_API isometric_grid {
@@ -109,7 +109,7 @@ public:
     bool   FlipVertically {false};
     color  Color {colors::White};
 
-    auto constexpr static Members();
+    auto static constexpr Members();
 };
 
 enum hexagonal_top : u8 {
