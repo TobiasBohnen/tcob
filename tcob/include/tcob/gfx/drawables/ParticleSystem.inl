@@ -235,7 +235,7 @@ auto constexpr point_particle_emitter::settings::Members()
         member<&point_particle_emitter::settings::SpawnArea> {"spawn_area"},
         member<&point_particle_emitter::settings::SpawnRate> {"spawn_rate"},
         member<&point_particle_emitter::settings::IsExplosion> {"is_explosion"},
-        member_with_default<&point_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
+        optional_member<&point_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
     };
 }
 
@@ -246,7 +246,7 @@ auto constexpr quad_particle_emitter::settings::Members()
         member<&quad_particle_emitter::settings::SpawnArea> {"spawn_area"},
         member<&quad_particle_emitter::settings::SpawnRate> {"spawn_rate"},
         member<&quad_particle_emitter::settings::IsExplosion> {"is_explosion"},
-        member_with_default<&quad_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
+        optional_member<&quad_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
     };
 }
 

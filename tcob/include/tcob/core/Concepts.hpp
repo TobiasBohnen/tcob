@@ -29,6 +29,12 @@ template <typename T>
 concept Integral = std::is_integral_v<T>;
 
 template <typename T>
+concept Unsigned = std::is_unsigned_v<T> && std::is_integral_v<T>;
+
+template <typename T>
+concept Signed = std::is_signed_v<T> && std::is_integral_v<T>;
+
+template <typename T>
 concept FloatingPoint = std::is_floating_point_v<T>;
 
 template <typename T>
@@ -82,16 +88,8 @@ concept HasSize = requires(T& t) { { t.size() }; };
 template <typename T>
 concept OverloadsArrowOp = requires(T a) { { a.operator->() } -> Pointer; };
 
-// S=data::object|scripting::lua::table|scripting::squirrel::table
-template <typename T, typename S>
-concept Serializable =
-    requires(T& t, S& s) {
-        { T::Serialize(t, s) };
-        { T::Deserialize(t, s) };
-    };
-
 template <typename T>
-concept MemberSerializable =
+concept Serializable =
     requires(T&) {
         { T::Members() };
     };

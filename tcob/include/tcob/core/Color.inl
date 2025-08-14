@@ -246,7 +246,7 @@ auto constexpr color::Members()
         member<&color::R> {"r"},
         member<&color::G> {"g"},
         member<&color::B> {"b"},
-        member_with_default<&color::A, u8 {255}> {"a"},
+        optional_member<&color::A, u8 {255}> {"a"},
     };
 }
 

@@ -652,34 +652,7 @@ struct converter<std::monostate> {
 ////tcob//////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-template <Serializable<object> T>
-struct converter<T> {
-    auto static IsType(cfg_value const& config) -> bool
-    {
-        if (std::holds_alternative<object>(config)) {
-            T t {};
-            return T::Deserialize(t, std::get<object>(config));
-        }
-        return false;
-    }
-
-    auto static From(cfg_value const& config, T& value) -> bool
-    {
-        if (std::holds_alternative<object>(config)) {
-            return T::Deserialize(value, std::get<object>(config));
-        }
-        return false;
-    }
-
-    void static To(cfg_value& config, T const& value)
-    {
-        object obj {};
-        T::Serialize(value, obj);
-        config = obj;
-    }
-};
-
-template <MemberSerializable T>
+template <Serializable T>
 struct converter<T> {
 public:
     auto static IsType(cfg_value const& config) -> bool

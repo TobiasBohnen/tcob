@@ -34,7 +34,6 @@
     #include "tcob/scripting/lua/LuaClosure.hpp"
     #include "tcob/scripting/lua/LuaTypes.hpp"
 
-
     #include "tcob/core/ext/magic_enum_reduced.hpp"
 
 namespace tcob::scripting::lua {
@@ -1007,33 +1006,7 @@ struct converter<proxy<table const, Keys...>> {
     }
 };
 
-template <Serializable<table> T>
-struct converter<T> {
-    auto static IsType(state_view view, i32 idx) -> bool
-    {
-        if (view.is_table(idx)) {
-            table tab {table::Acquire(view, idx)};
-            T     t {};
-            return T::Deserialize(t, tab);
-        }
-
-        return false;
-    }
-
-    auto static From(state_view view, i32& idx, T& value) -> bool
-    {
-        table tab {table::Acquire(view, idx++)};
-        return T::Deserialize(value, tab);
-    }
-
-    void static To(state_view view, T const& value)
-    {
-        table tab {table::PushNew(view)};
-        T::Serialize(value, tab);
-    }
-};
-
-template <MemberSerializable T>
+template <Serializable T>
 struct converter<T> {
 public:
     auto static IsType(state_view view, i32 idx) -> bool

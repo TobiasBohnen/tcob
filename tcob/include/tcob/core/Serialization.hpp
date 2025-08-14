@@ -25,8 +25,8 @@ struct member {
 };
 
 template <auto Ptr, auto Default>
-struct member_with_default {
-    constexpr member_with_default(utf8_string name)
+struct optional_member {
+    constexpr optional_member(utf8_string name)
         : Name {std::move(name)}
     {
     }
@@ -53,7 +53,7 @@ void constexpr get_member(member<Ptr> const& m, auto& target, T const& object)
 }
 
 template <typename T, auto Ptr, auto Default>
-void constexpr get_member(member_with_default<Ptr, Default> const& m, auto& target, T const& object)
+void constexpr get_member(optional_member<Ptr, Default> const& m, auto& target, T const& object)
 {
     target[m.Name] = object.*Ptr;
 }
@@ -71,7 +71,7 @@ auto constexpr set_member(member<Ptr> const& m, auto const& source, T& object) -
 }
 
 template <typename T, auto Ptr, auto Default>
-auto constexpr set_member(member_with_default<Ptr, Default> const& m, auto const& source, T& object) -> bool
+auto constexpr set_member(optional_member<Ptr, Default> const& m, auto const& source, T& object) -> bool
 {
     if (!source.try_get(object.*Ptr, m.Name)) {
         object.*Ptr = Default;
