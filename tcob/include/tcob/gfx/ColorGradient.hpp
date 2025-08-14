@@ -11,9 +11,9 @@
 #include <map>
 #include <span>
 #include <tuple>
-#include <utility>
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Serialization.hpp"
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
@@ -29,8 +29,8 @@ public:
     auto static constexpr Members()
     {
         return std::tuple {
-            std::pair {"pos", &color_stop::Position},
-            std::pair {"value", &color_stop::Value}};
+            member<&color_stop::Position> {"pos"},
+            member<&color_stop::Value> {"value"}};
     }
 };
 

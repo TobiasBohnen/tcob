@@ -76,8 +76,7 @@ public:
 
     static rect<T> const Zero;
 
-    void static Serialize(rect<T> const& v, auto&& s);
-    auto static Deserialize(rect<T>& v, auto&& s) -> bool;
+    auto static constexpr Members();
 };
 
 using rect_i = rect<i32>;

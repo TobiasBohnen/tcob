@@ -15,13 +15,13 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
-#include <utility>
 #include <variant>
 #include <vector>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -111,8 +111,8 @@ public:
         auto static constexpr Members()
         {
             return std::tuple {
-                std::pair {"is_italic", &font::style::IsItalic},
-                std::pair {"weight", &font::style::Weight}};
+                member<&font::style::IsItalic> {"is_italic"},
+                member<&font::style::Weight> {"weight"}};
         }
     };
 

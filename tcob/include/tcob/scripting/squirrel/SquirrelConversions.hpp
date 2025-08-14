@@ -25,9 +25,9 @@
     #include <variant>
 
     #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Common.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Proxy.hpp"
+    #include "tcob/core/Serialization.hpp"
     #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
     #include "tcob/scripting/squirrel/SquirrelClosure.hpp"
@@ -1017,7 +1017,7 @@ public:
         auto const members {T::Members()};
         bool       retValue {true};
         std::apply([&](auto&&... m) {
-            ((retValue = retValue && tcob::detail::process_member(m, tab, value)), ...);
+            ((retValue = retValue && set_member(m, tab, value)), ...);
         },
                    members);
         return retValue;
@@ -1029,7 +1029,7 @@ public:
 
         auto const members {T::Members()};
         std::apply([&](auto&&... m) {
-            ((tab[std::get<0>(m)] = value.*(std::get<1>(m))), ...);
+            (get_member(m, tab, value), ...);
         },
                    members);
     }

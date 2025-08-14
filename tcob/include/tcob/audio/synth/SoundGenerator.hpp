@@ -8,10 +8,10 @@
 
 #include <memory>
 #include <tuple>
-#include <utility>
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Sound.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/random/Random.hpp"
 
 namespace tcob::audio {
@@ -77,31 +77,31 @@ public:
     auto static constexpr Members()
     {
         return std::tuple {
-            std::pair {"random_seed", &sound_wave::RandomSeed},
-            std::pair {"sample_rate", &sound_wave::SampleRate},
-            std::pair {"wave_type", &sound_wave::WaveType},
-            std::pair {"attack_time", &sound_wave::AttackTime},
-            std::pair {"sustain_time", &sound_wave::SustainTime},
-            std::pair {"sustain_punch", &sound_wave::SustainPunch},
-            std::pair {"decay_time", &sound_wave::DecayTime},
-            std::pair {"start_frequency", &sound_wave::StartFrequency},
-            std::pair {"min_frequency", &sound_wave::MinFrequency},
-            std::pair {"slide", &sound_wave::Slide},
-            std::pair {"delta_slide", &sound_wave::DeltaSlide},
-            std::pair {"vibrato_depth", &sound_wave::VibratoDepth},
-            std::pair {"vibrato_speed", &sound_wave::VibratoSpeed},
-            std::pair {"change_amount", &sound_wave::ChangeAmount},
-            std::pair {"change_speed", &sound_wave::ChangeSpeed},
-            std::pair {"square_duty", &sound_wave::SquareDuty},
-            std::pair {"duty_sweep", &sound_wave::DutySweep},
-            std::pair {"repeat_speed", &sound_wave::RepeatSpeed},
-            std::pair {"phaser_offset", &sound_wave::PhaserOffset},
-            std::pair {"phaser_sweep", &sound_wave::PhaserSweep},
-            std::pair {"lpf_cutoff", &sound_wave::LowPassFilterCutoff},
-            std::pair {"lpf_cutoff_sweep", &sound_wave::LowPassFilterCutoffSweep},
-            std::pair {"lpf_resonance", &sound_wave::LowPassFilterResonance},
-            std::pair {"hpf_cutoff", &sound_wave::HighPassFilterCutoff},
-            std::pair {"hpf_cutoff_sweep", &sound_wave::HighPassFilterCutoffSweep}};
+            member<&sound_wave::RandomSeed> {"random_seed"},
+            member<&sound_wave::SampleRate> {"sample_rate"},
+            member<&sound_wave::WaveType> {"wave_type"},
+            member<&sound_wave::AttackTime> {"attack_time"},
+            member<&sound_wave::SustainTime> {"sustain_time"},
+            member<&sound_wave::SustainPunch> {"sustain_punch"},
+            member<&sound_wave::DecayTime> {"decay_time"},
+            member<&sound_wave::StartFrequency> {"start_frequency"},
+            member<&sound_wave::MinFrequency> {"min_frequency"},
+            member<&sound_wave::Slide> {"slide"},
+            member<&sound_wave::DeltaSlide> {"delta_slide"},
+            member<&sound_wave::VibratoDepth> {"vibrato_depth"},
+            member<&sound_wave::VibratoSpeed> {"vibrato_speed"},
+            member<&sound_wave::ChangeAmount> {"change_amount"},
+            member<&sound_wave::ChangeSpeed> {"change_speed"},
+            member<&sound_wave::SquareDuty> {"square_duty"},
+            member<&sound_wave::DutySweep> {"duty_sweep"},
+            member<&sound_wave::RepeatSpeed> {"repeat_speed"},
+            member<&sound_wave::PhaserOffset> {"phaser_offset"},
+            member<&sound_wave::PhaserSweep> {"phaser_sweep"},
+            member<&sound_wave::LowPassFilterCutoff> {"lpf_cutoff"},
+            member<&sound_wave::LowPassFilterCutoffSweep> {"lpf_cutoff_sweep"},
+            member<&sound_wave::LowPassFilterResonance> {"lpf_resonance"},
+            member<&sound_wave::HighPassFilterCutoff> {"hpf_cutoff"},
+            member<&sound_wave::HighPassFilterCutoffSweep> {"hpf_cutoff_sweep"}};
     }
 };
 

@@ -9,9 +9,9 @@
 #include <array>
 #include <numeric>
 #include <tuple>
-#include <utility>
 
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Serialization.hpp"
 
 namespace tcob {
 
@@ -193,7 +193,7 @@ template <Arithmetic T>
 auto constexpr size<T>::Members()
 {
     return std::tuple {
-        std::pair {"width", &size<T>::Width},
-        std::pair {"height", &size<T>::Height}};
+        member<&size<T>::Width> {"width"},
+        member<&size<T>::Height> {"height"}};
 }
 }

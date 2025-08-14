@@ -7,9 +7,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <tuple>
-#include <utility>
 #include <vector>
 
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/easing/Tween.hpp"
 
 namespace tcob::gfx {
@@ -25,8 +25,8 @@ public:
     auto static constexpr Members()
     {
         return std::tuple {
-            std::pair {"name", &frame::Name},
-            std::pair {"duration", &frame::Duration}};
+            member<&frame::Name> {"name"},
+            member<&frame::Duration> {"duration"}};
     }
 };
 

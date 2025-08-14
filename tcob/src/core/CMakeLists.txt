@@ -75,6 +75,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/core/Proxy.inl
     ${TCOB_INC_DIR}/tcob/core/Rect.hpp
     ${TCOB_INC_DIR}/tcob/core/Rect.inl
+    ${TCOB_INC_DIR}/tcob/core/Serialization.hpp
     ${TCOB_INC_DIR}/tcob/core/ServiceLocator.hpp
     ${TCOB_INC_DIR}/tcob/core/ServiceLocator.inl
     ${TCOB_INC_DIR}/tcob/core/Signal.hpp

@@ -10,9 +10,9 @@
 #include <array>
 #include <cmath>
 #include <tuple>
-#include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Serialization.hpp"
 
 namespace tcob {
 
@@ -243,10 +243,10 @@ auto constexpr operator==(hsx left, hsx right) -> bool
 auto constexpr color::Members()
 {
     return std::tuple {
-        std::pair {"r", &color::R},
-        std::pair {"g", &color::G},
-        std::pair {"b", &color::B},
-        std::tuple {"a", &color::A, 255},
+        member<&color::R> {"r"},
+        member<&color::G> {"g"},
+        member<&color::B> {"b"},
+        member_with_default<&color::A, u8 {255}> {"a"},
     };
 }
 

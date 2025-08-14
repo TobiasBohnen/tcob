@@ -32,6 +32,7 @@
 #include <tcob/core/Property.hpp>
 #include <tcob/core/Proxy.hpp>
 #include <tcob/core/Rect.hpp>
+#include <tcob/core/Serialization.hpp>
 #include <tcob/core/ServiceLocator.hpp>
 #include <tcob/core/Signal.hpp>
 #include <tcob/core/Size.hpp>

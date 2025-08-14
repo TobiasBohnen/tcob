@@ -9,10 +9,12 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
+#include <tuple>
 #include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/Size.hpp"
 
 namespace tcob {
@@ -322,24 +324,14 @@ auto constexpr operator==(rect<T> const& left, rect<R> const& right) -> bool
 }
 
 template <Arithmetic T>
-inline void rect<T>::Serialize(rect<T> const& v, auto&& s)
+auto constexpr rect<T>::Members()
 {
-    s["x"]      = v.left();
-    s["y"]      = v.top();
-    s["width"]  = v.width();
-    s["height"] = v.height();
-}
-
-template <Arithmetic T>
-inline auto rect<T>::Deserialize(rect<T>& v, auto&& s) -> bool
-{
-    T x, y, w, h;
-    if (s.try_get(x, "x") && s.try_get(y, "y") && s.try_get(w, "width") && s.try_get(h, "height")) {
-        v.Position = {x, y};
-        v.Size     = {w, h};
-        return true;
-    }
-    return false;
+    return std::tuple {
+        computed_member<[](rect<T> const& rect) { return rect.left(); }, [](rect<T>& rect, T const& val) { rect.Position.X = val; }> {"x"},
+        computed_member<[](rect<T> const& rect) { return rect.top(); }, [](rect<T>& rect, T const& val) { rect.Position.Y = val; }> {"y"},
+        computed_member<[](rect<T> const& rect) { return rect.width(); }, [](rect<T>& rect, T const& val) { rect.Size.Width = val; }> {"width"},
+        computed_member<[](rect<T> const& rect) { return rect.height(); }, [](rect<T>& rect, T const& val) { rect.Size.Height = val; }> {"height"},
+    };
 }
 
 }

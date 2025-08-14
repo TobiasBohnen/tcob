@@ -13,6 +13,7 @@
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/gfx/Geometry.hpp"
 
 namespace tcob::gfx {
@@ -90,30 +91,31 @@ void tileset<T>::set_tile(tile_index_t idx, tile_type const& tile)
 auto constexpr orthogonal_tile::Members()
 {
     return std::tuple {
-        std::pair {"texture", &orthogonal_tile::TextureRegion},
-        std::pair {"h_flip", &orthogonal_tile::FlipHorizontally},
-        std::pair {"v_flip", &orthogonal_tile::FlipVertically},
-        std::pair {"color", &orthogonal_tile::Color},
-        std::pair {"scale", &orthogonal_tile::Scale}};
+        member<&orthogonal_tile::TextureRegion> {"texture"},
+        member<&orthogonal_tile::FlipHorizontally> {"h_flip"},
+        member<&orthogonal_tile::FlipVertically> {"v_flip"},
+        member<&orthogonal_tile::Color> {"color"},
+        member<&orthogonal_tile::Scale> {"scale"}};
 }
 
 auto constexpr isometric_tile::Members()
 {
     return std::tuple {
-        std::pair {"texture", &isometric_tile::TextureRegion},
-        std::pair {"h_flip", &isometric_tile::FlipHorizontally},
-        std::pair {"v_flip", &isometric_tile::FlipVertically},
-        std::pair {"color", &isometric_tile::Color},
-        std::pair {"center", &isometric_tile::Center},
-        std::pair {"height", &isometric_tile::Height}};
+        member<&isometric_tile::TextureRegion> {"texture"},
+        member<&isometric_tile::FlipHorizontally> {"h_flip"},
+        member<&isometric_tile::FlipVertically> {"v_flip"},
+        member<&isometric_tile::Color> {"color"},
+        member<&isometric_tile::Center> {"center"},
+        member<&isometric_tile::Height> {"height"}};
 }
 
 auto constexpr hexagonal_tile::Members()
 {
     return std::tuple {
-        std::pair {"texture", &hexagonal_tile::TextureRegion},
-        std::pair {"h_flip", &hexagonal_tile::FlipHorizontally},
-        std::pair {"v_flip", &hexagonal_tile::FlipVertically},
-        std::pair {"color", &hexagonal_tile::Color}};
+        member<&hexagonal_tile::TextureRegion> {"texture"},
+        member<&hexagonal_tile::FlipHorizontally> {"h_flip"},
+        member<&hexagonal_tile::FlipVertically> {"v_flip"},
+        member<&hexagonal_tile::Color> {"color"}};
 }
+
 }

@@ -10,9 +10,9 @@
 #include <functional>
 #include <set>
 #include <tuple>
-#include <utility>
 
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/Size.hpp"
 
 namespace tcob::Cfg::Video {
@@ -129,8 +129,8 @@ public:
     auto static constexpr Members()
     {
         return std::tuple {
-            std::pair {"rect", &texture_region::UVRect},
-            std::pair {"level", &texture_region::Level}};
+            member<&texture_region::UVRect> {"rect"},
+            member<&texture_region::Level> {"level"}};
     }
 };
 
@@ -160,8 +160,8 @@ public:
     auto static constexpr Members()
     {
         return std::tuple {
-            std::pair {"horizontal", &alignments::Horizontal},
-            std::pair {"vertical", &alignments::Vertical}};
+            member<&alignments::Horizontal> {"horizontal"},
+            member<&alignments::Vertical> {"vertical"}};
     }
 };
 
@@ -191,12 +191,12 @@ public:
     auto static constexpr Members()
     {
         return std::tuple {
-            std::pair {Cfg::Video::fullscreen, &video_config::FullScreen},
-            std::pair {Cfg::Video::use_desktop_resolution, &video_config::UseDesktopResolution},
-            std::pair {Cfg::Video::resolution, &video_config::Resolution},
-            std::pair {Cfg::Video::frame_limit, &video_config::FrameLimit},
-            std::pair {Cfg::Video::vsync, &video_config::VSync},
-            std::pair {Cfg::Video::render_system, &video_config::RenderSystem}};
+            member<&video_config::FullScreen> {Cfg::Video::fullscreen},
+            member<&video_config::UseDesktopResolution> {Cfg::Video::use_desktop_resolution},
+            member<&video_config::Resolution> {Cfg::Video::resolution},
+            member<&video_config::FrameLimit> {Cfg::Video::frame_limit},
+            member<&video_config::VSync> {Cfg::Video::vsync},
+            member<&video_config::RenderSystem> {Cfg::Video::render_system}};
     }
 };
 

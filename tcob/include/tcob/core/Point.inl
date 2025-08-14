@@ -9,9 +9,9 @@
 #include <array>
 #include <cmath>
 #include <tuple>
-#include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Serialization.hpp"
 
 namespace tcob {
 
@@ -213,8 +213,8 @@ template <Arithmetic T>
 auto constexpr point<T>::Members()
 {
     return std::tuple {
-        std::pair {"x", &point<T>::X},
-        std::pair {"y", &point<T>::Y}};
+        member<&point<T>::X> {"x"},
+        member<&point<T>::Y> {"y"}};
 }
 
 template <Arithmetic T>

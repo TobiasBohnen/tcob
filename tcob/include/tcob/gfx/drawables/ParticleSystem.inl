@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
@@ -183,69 +184,69 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
 auto constexpr point_particle::settings::Members()
 {
     return std::tuple {
-        std::pair {"speed", &point_particle::settings::Speed},
-        std::pair {"direction", &point_particle::settings::Direction},
+        member<&point_particle::settings::Speed> {"speed"},
+        member<&point_particle::settings::Direction> {"direction"},
 
-        std::pair {"linear_acceleration", &point_particle::settings::LinearAcceleration},
-        std::pair {"linear_dampling", &point_particle::settings::LinearDamping},
-        std::pair {"radial_acceleration", &point_particle::settings::RadialAcceleration},
-        std::pair {"tangential_acceleration", &point_particle::settings::TangentialAcceleration},
+        member<&point_particle::settings::LinearAcceleration> {"linear_acceleration"},
+        member<&point_particle::settings::LinearDamping> {"linear_dampling"},
+        member<&point_particle::settings::RadialAcceleration> {"radial_acceleration"},
+        member<&point_particle::settings::TangentialAcceleration> {"tangential_acceleration"},
 
-        std::pair {"gravity", &point_particle::settings::Gravity},
+        member<&point_particle::settings::Gravity> {"gravity"},
 
-        std::pair {"texture_region", &point_particle::settings::TextureRegion},
-        std::pair {"colors", &point_particle::settings::Colors},
-        std::pair {"transparency", &point_particle::settings::Transparency},
+        member<&point_particle::settings::TextureRegion> {"texture_region"},
+        member<&point_particle::settings::Colors> {"colors"},
+        member<&point_particle::settings::Transparency> {"transparency"},
 
-        std::pair {"lifetime", &point_particle::settings::Lifetime},
+        member<&point_particle::settings::Lifetime> {"lifetime"},
     };
 }
 
 auto constexpr quad_particle::settings::Members()
 {
     return std::tuple {
-        std::pair {"speed", &quad_particle::settings::Speed},
-        std::pair {"direction", &quad_particle::settings::Direction},
+        member<&quad_particle::settings::Speed> {"speed"},
+        member<&quad_particle::settings::Direction> {"direction"},
 
-        std::pair {"linear_acceleration", &quad_particle::settings::LinearAcceleration},
-        std::pair {"linear_dampling", &quad_particle::settings::LinearDamping},
-        std::pair {"radial_acceleration", &quad_particle::settings::RadialAcceleration},
-        std::pair {"tangential_acceleration", &quad_particle::settings::TangentialAcceleration},
+        member<&quad_particle::settings::LinearAcceleration> {"linear_acceleration"},
+        member<&quad_particle::settings::LinearDamping> {"linear_dampling"},
+        member<&quad_particle::settings::RadialAcceleration> {"radial_acceleration"},
+        member<&quad_particle::settings::TangentialAcceleration> {"tangential_acceleration"},
 
-        std::pair {"gravity", &quad_particle::settings::Gravity},
+        member<&quad_particle::settings::Gravity> {"gravity"},
 
-        std::pair {"texture_region", &quad_particle::settings::TextureRegion},
-        std::pair {"colors", &quad_particle::settings::Colors},
-        std::pair {"transparency", &quad_particle::settings::Transparency},
+        member<&quad_particle::settings::TextureRegion> {"texture_region"},
+        member<&quad_particle::settings::Colors> {"colors"},
+        member<&quad_particle::settings::Transparency> {"transparency"},
 
-        std::pair {"lifetime", &quad_particle::settings::Lifetime},
+        member<&quad_particle::settings::Lifetime> {"lifetime"},
 
-        std::pair {"scale", &quad_particle::settings::Scale},
-        std::pair {"size", &quad_particle::settings::Size},
-        std::pair {"spin", &quad_particle::settings::Spin},
-        std::pair {"rotation", &quad_particle::settings::Rotation},
+        member<&quad_particle::settings::Scale> {"scale"},
+        member<&quad_particle::settings::Size> {"size"},
+        member<&quad_particle::settings::Spin> {"spin"},
+        member<&quad_particle::settings::Rotation> {"rotation"},
     };
 }
 
 auto constexpr point_particle_emitter::settings::Members()
 {
     return std::tuple {
-        std::pair {"template", &point_particle_emitter::settings::Template},
-        std::pair {"spawn_area", &point_particle_emitter::settings::SpawnArea},
-        std::pair {"spawn_rate", &point_particle_emitter::settings::SpawnRate},
-        std::pair {"is_explosion", &point_particle_emitter::settings::IsExplosion},
-        std::tuple {"lifetime", &point_particle_emitter::settings::Lifetime, std::optional<milliseconds> {}},
+        member<&point_particle_emitter::settings::Template> {"template"},
+        member<&point_particle_emitter::settings::SpawnArea> {"spawn_area"},
+        member<&point_particle_emitter::settings::SpawnRate> {"spawn_rate"},
+        member<&point_particle_emitter::settings::IsExplosion> {"is_explosion"},
+        member_with_default<&point_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
     };
 }
 
 auto constexpr quad_particle_emitter::settings::Members()
 {
     return std::tuple {
-        std::pair {"template", &point_particle_emitter::settings::Template},
-        std::pair {"spawn_area", &point_particle_emitter::settings::SpawnArea},
-        std::pair {"spawn_rate", &point_particle_emitter::settings::SpawnRate},
-        std::pair {"is_explosion", &point_particle_emitter::settings::IsExplosion},
-        std::tuple {"lifetime", &point_particle_emitter::settings::Lifetime, std::optional<milliseconds> {}},
+        member<&quad_particle_emitter::settings::Template> {"template"},
+        member<&quad_particle_emitter::settings::SpawnArea> {"spawn_area"},
+        member<&quad_particle_emitter::settings::SpawnRate> {"spawn_rate"},
+        member<&quad_particle_emitter::settings::IsExplosion> {"is_explosion"},
+        member_with_default<&quad_particle_emitter::settings::Lifetime, std::nullopt> {"lifetime"},
     };
 }
 
