@@ -41,15 +41,15 @@ inline auto field_source<T>::set(type const& value, bool force) -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline validating_field_source<T>::validating_field_source(validate_func val)
-    : validating_field_source {{}, val}
+inline validating_field_source<T>::validating_field_source(type value, validate_func val)
+    : _validate {std::move(val)}
+    , _value {value}
 {
 }
 
 template <typename T>
-inline validating_field_source<T>::validating_field_source(type value, validate_func val)
-    : _validate {val}
-    , _value {value}
+inline validating_field_source<T>::validating_field_source(validate_func val)
+    : validating_field_source {{}, std::move(val)}
 {
 }
 
@@ -87,7 +87,7 @@ inline func_source<T>::func_source(getter_func get, setter_func set)
 
 template <typename T>
 inline func_source<T>::func_source(type value, getter_func get, setter_func set)
-    : func_source {get, set}
+    : func_source {std::move(get), std::move(set)}
 {
     set(value);
 }
