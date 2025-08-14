@@ -49,7 +49,7 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
             par_task const ctx {.Start  = i * partitionSize,
                                 .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
                                 .Thread = i};
-            add_task([func, ctx, &activeTasks]() {
+            add_task([func, ctx, &activeTasks] {
                 func(ctx);
                 --activeTasks;
             });

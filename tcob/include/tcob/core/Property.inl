@@ -80,8 +80,8 @@ inline auto validating_field_source<T>::set(type const& value, bool force) -> bo
 
 template <typename T>
 inline func_source<T>::func_source(getter_func get, setter_func set)
-    : _getter {get}
-    , _setter {set}
+    : _getter {std::move(get)}
+    , _setter {std::move(set)}
 {
 }
 

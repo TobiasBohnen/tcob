@@ -20,7 +20,7 @@
 namespace tcob::ui {
 
 widget::widget(init const& wi)
-    : Alpha {{[this]() {
+    : Alpha {{[this] {
                   f32 retValue {_alpha};
                   if (auto* wparent {parent()}) { retValue *= wparent->Alpha; }
                   return retValue;

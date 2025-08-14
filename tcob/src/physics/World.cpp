@@ -27,15 +27,15 @@ world::world()
 }
 
 world::world(settings const& settings)
-    : Gravity {{[this]() -> point_f { return _impl->get_gravity(); },
+    : Gravity {{[this] -> point_f { return _impl->get_gravity(); },
                 [this](auto const& value) { _impl->set_gravity(value); }}}
-    , RestitutionThreshold {{[this]() -> f32 { return _impl->get_restitution_threshold(); },
+    , RestitutionThreshold {{[this] -> f32 { return _impl->get_restitution_threshold(); },
                              [this](auto const& value) { _impl->set_restitution_threshold(value); }}}
-    , HitEventThreshold {{[this]() -> f32 { return _impl->get_hit_event_threshold(); },
+    , HitEventThreshold {{[this] -> f32 { return _impl->get_hit_event_threshold(); },
                           [this](auto const& value) { _impl->set_hit_event_threshold(value); }}}
-    , MaximumLinearSpeed {{[this]() -> f32 { return _impl->get_maximum_linear_speed(); },
+    , MaximumLinearSpeed {{[this] -> f32 { return _impl->get_maximum_linear_speed(); },
                            [this](auto const& value) { _impl->set_maximum_linear_speed(value); }}}
-    , EnableSleeping {{[this]() -> bool { return _impl->get_enable_sleeping(); },
+    , EnableSleeping {{[this] -> bool { return _impl->get_enable_sleeping(); },
                        [this](auto const& value) { _impl->set_enable_sleeping(value); }}}
     , _impl {std::make_unique<detail::b2d_world>(settings)}
 {

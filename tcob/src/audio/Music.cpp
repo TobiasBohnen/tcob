@@ -86,13 +86,13 @@ auto music::on_start() -> bool
     _isRunning = true;
 
     auto& tm {locate_service<task_manager>()};
-    tm.run_async<void>([this]() { update_stream(); });
+    tm.run_async<void>([this] { update_stream(); });
 
     if (*FadeIn > 0ms) {
         tm.drop_deferred(_deferred);
         _fadeTween = make_unique_tween<linear_tween<f32>>(*FadeIn, 0.f, *Volume);
         _fadeTween->Value.Changed.connect([this](f32 val) { Volume = val; });
-        _fadeTween->Finished.connect([this]() { _deferred = INVALID_ID; });
+        _fadeTween->Finished.connect([this] { _deferred = INVALID_ID; });
         _fadeTween->start();
         _deferred = tm.run_deferred([this](def_task const& ctx) {
             _fadeTween->update(ctx.DeltaTime);
@@ -111,7 +111,7 @@ auto music::on_stop() -> bool
         tm.drop_deferred(_deferred);
         _fadeTween = make_unique_tween<linear_tween<f32>>(FadeOut, Volume, 0.f);
         _fadeTween->Value.Changed.connect([this](f32 val) { Volume = val; });
-        _fadeTween->Finished.connect([this]() {
+        _fadeTween->Finished.connect([this] {
             stop_stream();
             stop_output();
             _deferred = INVALID_ID;

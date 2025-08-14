@@ -33,7 +33,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
 
     if (has_style(retValue)) { return retValue; }
 
-    auto const ascend {[&]() {
+    auto const ascend {[&] {
         while (static_cast<i32>(retValue.Weight) <= static_cast<i32>(font::weight::Heavy)) {
             retValue.Weight = static_cast<font::weight>(static_cast<i32>(retValue.Weight) + 100);
             if (has_style(retValue)) { return true; }
@@ -41,7 +41,7 @@ auto font_family::get_fallback_style(font::style style) const -> std::optional<f
         return false;
     }};
 
-    auto const descend {[&]() {
+    auto const descend {[&] {
         while (static_cast<i32>(retValue.Weight) > 0) {
             retValue.Weight = static_cast<font::weight>(static_cast<i32>(retValue.Weight) - 100);
             if (has_style(retValue)) { return true; }

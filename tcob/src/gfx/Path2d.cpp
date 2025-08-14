@@ -366,7 +366,7 @@ auto path2d::GetCommands(string_view path) -> std::optional<std::vector<std::var
     std::vector<std::variant<char, f32>> commands;
     string                               valStr;
 
-    auto const getFloat {[&valStr, &commands]() -> bool {
+    auto const getFloat {[&valStr, &commands] -> bool {
         if (!valStr.empty()) {
             if (auto value {helper::to_number<f32>(valStr)}) {
                 commands.emplace_back(*value);

@@ -39,7 +39,7 @@ drop_down_list::drop_down_list(init const& wi)
     , HoveredItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(get_items()) - 1); }}}
     , _vScrollbar {orientation::Vertical}
 {
-    _vScrollbar.ValueChanged.connect([this]() {
+    _vScrollbar.ValueChanged.connect([this] {
         form().rehover_widget(this);
         queue_redraw();
     });

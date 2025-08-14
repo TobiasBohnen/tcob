@@ -62,7 +62,7 @@ auto sound::load(std::shared_ptr<io::istream> in, string const& ext) noexcept ->
 
 auto sound::load_async(path const& file) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<bool>([&, file]() { return load(file); });
+    return locate_service<task_manager>().run_async<bool>([&, file] { return load(file); });
 }
 
 auto sound::on_start() -> bool

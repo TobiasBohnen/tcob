@@ -39,7 +39,7 @@ accordion::accordion(init const& wi)
     }}}
     , HoveredSectionIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(_sections) - 1); }}}
 {
-    _expandTween.Changed.connect([&]() {
+    _expandTween.Changed.connect([&] {
         queue_redraw();
     });
 

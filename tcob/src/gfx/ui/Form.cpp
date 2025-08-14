@@ -541,7 +541,7 @@ void form_base::handle_tooltip(milliseconds deltaTime)
 
     _mouseOverTime += deltaTime;
 
-    auto const shouldPopup {[this]() {
+    auto const shouldPopup {[this] {
         if (_isTooltipVisible) { return false; }
         if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
 

@@ -148,7 +148,7 @@ inline auto quadtree<T, SplitThreshold, MaxDepth>::node::remove(rect_f const& re
 {
     assert(detail::contains(rect, value.get_rect()));
 
-    auto const removeValue {[&]() {
+    auto const removeValue {[&] {
         // Find the value in node->values
         auto it {std::ranges::find_if(_values, [&value](auto const& rhs) { return value == rhs; })};
         assert(it != std::end(_values) && "Trying to remove a value that is not present in the node");

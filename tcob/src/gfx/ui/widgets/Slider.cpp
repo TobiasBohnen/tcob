@@ -34,7 +34,7 @@ slider::slider(init const& wi)
     , Max {{[this](f32 val) -> f32 { return std::max(val, *Min); }}}
     , Value {{[this](f32 val) -> f32 { return std::clamp(val, *Min, *Max); }}}
 {
-    _tween.Changed.connect([this]() {
+    _tween.Changed.connect([this] {
         queue_redraw();
     });
     Min.Changed.connect([this](auto val) {
@@ -294,10 +294,10 @@ range_slider::range_slider(init const& wi)
         return {first, second};
     }}}
 {
-    _min.Tween.Changed.connect([this]() {
+    _min.Tween.Changed.connect([this] {
         queue_redraw();
     });
-    _max.Tween.Changed.connect([this]() {
+    _max.Tween.Changed.connect([this] {
         queue_redraw();
     });
     Min.Changed.connect([this](auto val) {

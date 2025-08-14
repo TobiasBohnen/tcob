@@ -24,35 +24,35 @@
 namespace tcob::physics {
 
 body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings)
-    : Type {{[this]() { return _impl->get_type(); },
+    : Type {{[this] { return _impl->get_type(); },
              [this](auto const& value) { _impl->set_type(value); }}}
-    , LinearVelocity {{[this]() -> point_f { return _impl->get_linear_velocity(); },
+    , LinearVelocity {{[this] -> point_f { return _impl->get_linear_velocity(); },
                        [this](auto const& value) { _impl->set_linear_velocity(value); }}}
-    , AngularVelocity {{[this]() -> radian_f { return radian_f {_impl->get_angular_velocity()}; },
+    , AngularVelocity {{[this] -> radian_f { return radian_f {_impl->get_angular_velocity()}; },
                         [this](auto const& value) { _impl->set_angular_velocity(radian_f {value.Value}); }}}
-    , LinearDamping {{[this]() -> f32 { return _impl->get_linear_damping(); },
+    , LinearDamping {{[this] -> f32 { return _impl->get_linear_damping(); },
                       [this](auto const& value) { _impl->set_linear_damping(value); }}}
-    , AngularDamping {{[this]() -> f32 { return _impl->get_angular_damping(); },
+    , AngularDamping {{[this] -> f32 { return _impl->get_angular_damping(); },
                        [this](auto const& value) { _impl->set_angular_damping(value); }}}
-    , EnableSleep {{[this]() -> bool { return _impl->get_enable_sleep(); },
+    , EnableSleep {{[this] -> bool { return _impl->get_enable_sleep(); },
                     [this](auto const& value) { _impl->set_enable_sleep(value); }}}
-    , IsAwake {{[this]() -> bool { return _impl->get_awake(); },
+    , IsAwake {{[this] -> bool { return _impl->get_awake(); },
                 [this](auto const& value) { _impl->set_awake(value); }}}
-    , IsFixedRotation {{[this]() -> bool { return _impl->get_fixed_rotation(); },
+    , IsFixedRotation {{[this] -> bool { return _impl->get_fixed_rotation(); },
                         [this](auto const& value) { _impl->set_fixed_rotation(value); }}}
-    , IsBullet {{[this]() -> bool { return _impl->get_bullet(); },
+    , IsBullet {{[this] -> bool { return _impl->get_bullet(); },
                  [this](auto const& value) { _impl->set_bullet(value); }}}
-    , Enabled {{[this]() -> bool { return _impl->get_enabled(); },
+    , Enabled {{[this] -> bool { return _impl->get_enabled(); },
                 [this](auto const& value) { _impl->set_enabled(value); }}}
-    , GravityScale {{[this]() -> f32 { return _impl->get_gravity_scale(); },
+    , GravityScale {{[this] -> f32 { return _impl->get_gravity_scale(); },
                      [this](auto const& value) { _impl->set_gravity_scale(value); }}}
-    , SleepThreshold {{[this]() -> f32 { return _impl->get_sleep_threshold(); },
+    , SleepThreshold {{[this] -> f32 { return _impl->get_sleep_threshold(); },
                        [this](auto const& value) { _impl->set_sleep_threshold(value); }}}
-    , Name {{[this]() -> string { return _impl->get_name(); },
+    , Name {{[this] -> string { return _impl->get_name(); },
              [this](auto const& value) { _impl->set_name(value); }}}
-    , Transform {{[this]() -> body_transform { return _impl->get_transform(); },
+    , Transform {{[this] -> body_transform { return _impl->get_transform(); },
                   [this](auto const& value) { _impl->set_transform(value); }}}
-    , MassData {{[this]() -> mass_data { return _impl->get_mass_data(); },
+    , MassData {{[this] -> mass_data { return _impl->get_mass_data(); },
                  [this](auto const& value) { _impl->set_mass_data(value); }}}
     , _impl {std::make_unique<detail::b2d_body>(b2dWorld, xform, bodySettings)}
     , _world {world}

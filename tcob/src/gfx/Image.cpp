@@ -236,7 +236,7 @@ auto image::load(io::istream& in, string const& ext) noexcept -> bool
 
 auto image::load_async(path const& file) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<bool>([&, file]() { return load(file); });
+    return locate_service<task_manager>().run_async<bool>([&, file] { return load(file); });
 }
 
 auto image::LoadInfo(path const& file) noexcept -> std::optional<information>

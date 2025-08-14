@@ -115,7 +115,7 @@ inline auto select_statement<Values...>::having(T const& cond) -> select_stateme
 template <typename... Values>
 inline auto select_statement<Values...>::order_by(auto&&... orderings) -> select_statement<Values...>&
 {
-    std::vector<utf8_string> colStrings {[&]() {
+    std::vector<utf8_string> colStrings {[&] {
         if constexpr (detail::HasStr<std::remove_cvref_t<decltype(orderings)>>) {
             return orderings.str();
         } else {
@@ -140,7 +140,7 @@ inline auto select_statement<Values...>::limit(i32 value, std::optional<i32> off
 template <typename... Values>
 inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_statement<Values...>&
 {
-    std::vector<utf8_string> colStrings {[&]() {
+    std::vector<utf8_string> colStrings {[&] {
         if constexpr (detail::HasStr<std::remove_cvref_t<decltype(columns)>>) {
             return columns.str();
         } else {

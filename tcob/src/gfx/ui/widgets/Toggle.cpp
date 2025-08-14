@@ -24,7 +24,7 @@ void toggle::style::Transition(style& target, style const& from, style const& to
 toggle::toggle(init const& wi)
     : widget {wi}
 {
-    _tween.Changed.connect([this]() {
+    _tween.Changed.connect([this] {
         queue_redraw();
     });
 

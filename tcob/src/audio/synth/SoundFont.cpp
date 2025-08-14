@@ -75,7 +75,7 @@ auto sound_font::load(io::istream& stream, bool stereo, i32 sampleRate) noexcept
 
 auto sound_font::load_async(path const& file, bool stereo, i32 sampleRate) noexcept -> std::future<bool>
 {
-    return locate_service<task_manager>().run_async<bool>([&, file, stereo, sampleRate]() { return load(file, stereo, sampleRate); });
+    return locate_service<task_manager>().run_async<bool>([&, file, stereo, sampleRate] { return load(file, stereo, sampleRate); });
 }
 
 auto sound_font::create_buffer(sound_font_commands const& commands) const -> buffer

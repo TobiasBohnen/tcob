@@ -25,7 +25,7 @@
 namespace tcob::gfx {
 
 render_target::render_target(texture* tex)
-    : Size {{[this]() { return get_size(); },
+    : Size {{[this] { return get_size(); },
              [this](auto const& value) { set_size(value); }}}
     , _impl {locate_service<render_system>().create_render_target(tex)}
     , _camera {*this}

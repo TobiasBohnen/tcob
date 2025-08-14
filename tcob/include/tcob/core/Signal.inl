@@ -50,7 +50,7 @@ inline auto signal<EvArgs>::connect(Func func) const -> connection
         return connection {this, id};
     } else {
         if constexpr (IsVoid) {
-            return connect([func]() { func(); });
+            return connect([func] { func(); });
         } else {
             return connect([func](EvArgs&) { func(); });
         }
@@ -62,7 +62,7 @@ template <auto Func, typename T>
 inline auto signal<EvArgs>::connect(T* inst) const -> connection
 {
     if constexpr (IsVoid) {
-        return connect([inst]() { (inst->*Func)(); });
+        return connect([inst] { (inst->*Func)(); });
     } else {
         return connect([inst](EvArgs& args) { (inst->*Func)(args); });
     }

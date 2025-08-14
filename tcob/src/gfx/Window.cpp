@@ -22,11 +22,11 @@ namespace tcob::gfx {
 
 window::window(std::unique_ptr<render_backend::window_base> window, assets::asset_owner_ptr<texture> const& texture)
     : render_target {texture.ptr()}
-    , FullScreen {{[this]() { return get_fullscreen(); },
+    , FullScreen {{[this] { return get_fullscreen(); },
                    [this](auto const& value) { set_fullscreen(value); }}}
-    , Title {{[this]() { return get_title(); },
+    , Title {{[this] { return get_title(); },
               [this](auto const& value) { set_title(value); }}}
-    , VSync {{[this]() { return _impl->get_vsync(); },
+    , VSync {{[this] { return _impl->get_vsync(); },
               [this](auto const& value) { _impl->set_vsync(value); }}}
     , _texture {texture}
     , _impl {std::move(window)}

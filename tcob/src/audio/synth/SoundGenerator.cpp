@@ -354,7 +354,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 
     square_duty squareDuty;
     period      wavePeriod;
-    auto const  reset {[&]() {
+    auto const  reset {[&] {
         wavePeriod = {wave};
         squareDuty = {wave};
     }};
