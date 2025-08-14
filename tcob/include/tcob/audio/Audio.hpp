@@ -17,7 +17,7 @@
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API specification {
+class TCOB_API specification final {
 public:
     i32 Channels {0};
     i32 SampleRate {0};

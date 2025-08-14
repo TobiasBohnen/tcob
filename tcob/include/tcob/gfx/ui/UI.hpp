@@ -6,11 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <tuple>
 #include <unordered_map>
 #include <variant>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Serialization.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
 
@@ -79,6 +81,13 @@ public:
     bool Enabled {true};
 
     auto operator==(tab_stop const& other) const -> bool = default;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&tab_stop::Index> {"index"},
+            member<&tab_stop::Enabled> {"enabled"}};
+    }
 };
 
 ////////////////////////////////////////////////////////////
@@ -91,6 +100,15 @@ public:
     string Down;
 
     auto operator==(nav_map_entry const& other) const -> bool = default;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&nav_map_entry::Left> {"left"},
+            member<&nav_map_entry::Up> {"up"},
+            member<&nav_map_entry::Right> {"right"},
+            member<&nav_map_entry::Down> {"down"}};
+    }
 };
 
 using nav_map = std::unordered_map<string, nav_map_entry>;
@@ -148,6 +166,13 @@ public:
     auto operator-() const -> length;
 
     auto static Lerp(length const& left, length const& right, f64 step) -> length;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&length::Value> {"value"},
+            member<&length::Type> {"type"}};
+    }
 };
 
 auto operator/(length const& left, f32 right) -> length;
@@ -169,6 +194,15 @@ public:
     auto operator==(thickness const& other) const -> bool = default;
 
     auto static Lerp(thickness const& left, thickness const& right, f64 step) -> thickness;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&thickness::Left> {"left"},
+            member<&thickness::Right> {"right"},
+            member<&thickness::Top> {"top"},
+            member<&thickness::Bottom> {"bottom"}};
+    }
 };
 
 auto operator-(rect_f const& left, thickness const& right) -> rect_f;
@@ -184,6 +218,13 @@ public:
     auto operator==(dimensions const& other) const -> bool = default;
 
     auto static Lerp(dimensions const& left, dimensions const& right, f64 step) -> dimensions;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&dimensions::Width> {"width"},
+            member<&dimensions::Height> {"height"}};
+    }
 };
 
 ////////////////////////////////////////////////////////////

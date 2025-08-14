@@ -58,13 +58,23 @@ enum class blend_func : u8 {
     OneMinusConstantAlpha
 };
 
-struct blend_funcs {
+class TCOB_API blend_funcs final {
+public:
     blend_func SourceColorBlendFunc {blend_func::SrcAlpha};
     blend_func DestinationColorBlendFunc {blend_func::OneMinusSrcAlpha};
     blend_func SourceAlphaBlendFunc {blend_func::SrcAlpha};
     blend_func DestinationAlphaBlendFunc {blend_func::OneMinusSrcAlpha};
 
     auto operator==(blend_funcs const& other) const -> bool = default;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&blend_funcs::SourceColorBlendFunc> {"src_color"},
+            member<&blend_funcs::DestinationColorBlendFunc> {"dst_color"},
+            member<&blend_funcs::SourceAlphaBlendFunc> {"src_alpha"},
+            member<&blend_funcs::DestinationAlphaBlendFunc> {"dst_alpha"}};
+    }
 };
 
 enum class blend_equation : u8 {
@@ -109,12 +119,21 @@ enum class primitive_type : u8 {
 
 ////////////////////////////////////////////////////////////
 
-struct uv {
+class TCOB_API uv final {
+public:
     f32 U {0.f};
     f32 V {0.f};
     f32 Level {0.f};
 
     auto operator==(uv const& other) const -> bool = default;
+
+    auto static constexpr Members()
+    {
+        return std::tuple {
+            member<&uv::U> {"u"},
+            member<&uv::V> {"v"},
+            member<&uv::Level> {"level"}};
+    }
 };
 
 ////////////////////////////////////////////////////////////
