@@ -694,10 +694,10 @@ public:
     {
         if (std::holds_alternative<object>(config)) {
             object const& obj {std::get<object>(config)};
-            auto const    members {value.members()};
+            auto const    members {T::Members()};
             bool          retValue {true};
             std::apply([&](auto&&... m) {
-                ((retValue = retValue && obj.try_get(m.second.get(), m.first)), ...);
+                ((retValue = retValue && obj.try_get(value.*(m.second), m.first)), ...);
             },
                        members);
             return retValue;
@@ -709,9 +709,9 @@ public:
     {
         object obj {};
 
-        auto const members {value.members()};
+        auto const members {T::Members()};
         std::apply([&](auto&&... m) {
-            ((obj[m.first] = m.second.get()), ...);
+            ((obj[m.first] = value.*(m.second)), ...);
         },
                    members);
 

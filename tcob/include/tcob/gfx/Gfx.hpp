@@ -10,8 +10,8 @@
 #include <functional>
 #include <set>
 #include <tuple>
+#include <utility>
 
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 
@@ -126,11 +126,11 @@ public:
 
     auto operator==(texture_region const& other) const -> bool = default;
 
-    auto constexpr members(this auto&& self)
+    auto constexpr static Members()
     {
         return std::tuple {
-            nm("rect", self.UVRect),
-            nm("level", self.Level)};
+            std::pair {"rect", &texture_region::UVRect},
+            std::pair {"level", &texture_region::Level}};
     }
 };
 
@@ -157,11 +157,11 @@ public:
 
     auto operator==(alignments const& other) const -> bool = default;
 
-    auto constexpr members(this auto&& self)
+    auto constexpr static Members()
     {
         return std::tuple {
-            nm("horizontal", self.Horizontal),
-            nm("vertical", self.Vertical)};
+            std::pair {"horizontal", &alignments::Horizontal},
+            std::pair {"vertical", &alignments::Vertical}};
     }
 };
 
@@ -188,15 +188,15 @@ public:
 
     auto operator==(video_config const& other) const -> bool = default;
 
-    auto constexpr members(this auto&& self)
+    auto constexpr static Members()
     {
         return std::tuple {
-            nm(Cfg::Video::fullscreen, self.FullScreen),
-            nm(Cfg::Video::use_desktop_resolution, self.UseDesktopResolution),
-            nm(Cfg::Video::resolution, self.Resolution),
-            nm(Cfg::Video::frame_limit, self.FrameLimit),
-            nm(Cfg::Video::vsync, self.VSync),
-            nm(Cfg::Video::render_system, self.RenderSystem)};
+            std::pair {Cfg::Video::fullscreen, &video_config::FullScreen},
+            std::pair {Cfg::Video::use_desktop_resolution, &video_config::UseDesktopResolution},
+            std::pair {Cfg::Video::resolution, &video_config::Resolution},
+            std::pair {Cfg::Video::frame_limit, &video_config::FrameLimit},
+            std::pair {Cfg::Video::vsync, &video_config::VSync},
+            std::pair {Cfg::Video::render_system, &video_config::RenderSystem}};
     }
 };
 
@@ -224,7 +224,6 @@ struct display {
     std::set<display_mode, std::greater<>> Modes;
     display_mode                           DesktopMode;
 };
-
 }
 
 ////////////////////////////////////////////////////////////

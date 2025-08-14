@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <functional>
 #include <type_traits>
-#include <utility>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -161,18 +160,6 @@ struct locale {
     string Language;
     string Country;
 };
-
-////////////////////////////////////////////////////////////
-
-auto constexpr nm(auto&& name, auto&& member)
-{
-    using T = std::remove_reference_t<decltype(member)>;
-    if constexpr (std::is_const_v<T>) {
-        return std::pair<utf8_string, decltype(std::cref(member))> {name, std::cref(member)};
-    } else {
-        return std::pair<utf8_string, decltype(std::ref(member))> {name, std::ref(member)};
-    }
-}
 
 ////////////////////////////////////////////////////////////
 }

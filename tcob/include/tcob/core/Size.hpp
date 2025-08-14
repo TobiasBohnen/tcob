@@ -49,7 +49,7 @@ public:
     static size<T> const Zero;
     static size<T> const One;
 
-    auto constexpr members(this auto&& self);
+    auto constexpr static Members();
 };
 
 template <Arithmetic T>

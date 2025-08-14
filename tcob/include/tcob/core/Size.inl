@@ -9,6 +9,7 @@
 #include <array>
 #include <numeric>
 #include <tuple>
+#include <utility>
 
 #include "tcob/core/Point.hpp"
 
@@ -189,11 +190,10 @@ auto constexpr operator==(size<T> const& left, size<R> const& right) -> bool
 }
 
 template <Arithmetic T>
-auto constexpr size<T>::members(this auto&& self)
+auto constexpr size<T>::Members()
 {
     return std::tuple {
-        nm("width", self.Width),
-        nm("height", self.Height)};
+        std::pair {"width", &size<T>::Width},
+        std::pair {"height", &size<T>::Height}};
 }
-
 }

@@ -87,34 +87,33 @@ void tileset<T>::set_tile(tile_index_t idx, tile_type const& tile)
 
 ////////////////////////////////////////////////////////////
 
-auto constexpr orthogonal_tile::members(this auto&& self)
+auto constexpr orthogonal_tile::Members()
 {
     return std::tuple {
-        nm("texture", self.TextureRegion),
-        nm("h_flip", self.FlipHorizontally),
-        nm("v_flip", self.FlipVertically),
-        nm("color", self.Color),
-        nm("scale", self.Scale)};
+        std::pair {"texture", &orthogonal_tile::TextureRegion},
+        std::pair {"h_flip", &orthogonal_tile::FlipHorizontally},
+        std::pair {"v_flip", &orthogonal_tile::FlipVertically},
+        std::pair {"color", &orthogonal_tile::Color},
+        std::pair {"scale", &orthogonal_tile::Scale}};
 }
 
-auto constexpr isometric_tile::members(this auto&& self)
+auto constexpr isometric_tile::Members()
 {
     return std::tuple {
-        nm("texture", self.TextureRegion),
-        nm("h_flip", self.FlipHorizontally),
-        nm("v_flip", self.FlipVertically),
-        nm("color", self.Color),
-        nm("center", self.Center),
-        nm("height", self.Height)};
+        std::pair {"texture", &isometric_tile::TextureRegion},
+        std::pair {"h_flip", &isometric_tile::FlipHorizontally},
+        std::pair {"v_flip", &isometric_tile::FlipVertically},
+        std::pair {"color", &isometric_tile::Color},
+        std::pair {"center", &isometric_tile::Center},
+        std::pair {"height", &isometric_tile::Height}};
 }
 
-auto constexpr hexagonal_tile::members(this auto&& self)
+auto constexpr hexagonal_tile::Members()
 {
     return std::tuple {
-        nm("texture", self.TextureRegion),
-        nm("h_flip", self.FlipHorizontally),
-        nm("v_flip", self.FlipVertically),
-        nm("color", self.Color)};
+        std::pair {"texture", &hexagonal_tile::TextureRegion},
+        std::pair {"h_flip", &hexagonal_tile::FlipHorizontally},
+        std::pair {"v_flip", &hexagonal_tile::FlipVertically},
+        std::pair {"color", &hexagonal_tile::Color}};
 }
-
 }

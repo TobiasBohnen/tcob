@@ -53,7 +53,7 @@ public:
     static point<T> const Zero;
     static point<T> const One;
 
-    auto constexpr members(this auto&& self);
+    auto constexpr static Members();
 };
 
 template <Arithmetic T>

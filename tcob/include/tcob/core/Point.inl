@@ -9,6 +9,7 @@
 #include <array>
 #include <cmath>
 #include <tuple>
+#include <utility>
 
 #include "tcob/core/AngleUnits.hpp"
 
@@ -209,11 +210,11 @@ auto constexpr operator==(point<T> const& left, point<R> const& right) -> bool
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::members(this auto&& self)
+auto constexpr point<T>::Members()
 {
     return std::tuple {
-        nm("x", self.X),
-        nm("y", self.Y)};
+        std::pair {"x", &point<T>::X},
+        std::pair {"y", &point<T>::Y}};
 }
 
 template <Arithmetic T>
@@ -239,5 +240,4 @@ auto minkowski_distance(point<T> const& a, point<T> const& b, f64 p) -> f64
 {
     return std::pow(std::pow(std::abs(a.X - b.X), p) + std::pow(std::abs(a.Y - b.Y), p), 1.0 / p);
 }
-
 }

@@ -11,6 +11,7 @@
 #include <map>
 #include <span>
 #include <tuple>
+#include <utility>
 
 #include "tcob/core/Color.hpp"
 
@@ -25,11 +26,11 @@ public:
     f32   Position {0};
     color Value {};
 
-    auto constexpr members(this auto&& self)
+    auto constexpr static Members()
     {
         return std::tuple {
-            nm("pos", self.Position),
-            nm("value", self.Value)};
+            std::pair {"pos", &color_stop::Position},
+            std::pair {"value", &color_stop::Value}};
     }
 };
 

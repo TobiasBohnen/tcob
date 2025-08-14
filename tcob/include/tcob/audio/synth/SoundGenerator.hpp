@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <tuple>
+#include <utility>
 
 #include "tcob/audio/Buffer.hpp"
 #include "tcob/audio/Sound.hpp"
@@ -73,34 +74,34 @@ public:
 
     auto operator==(sound_wave const& other) const -> bool = default;
 
-    auto constexpr members(this auto&& self)
+    auto constexpr static Members()
     {
         return std::tuple {
-            nm("random_seed", self.RandomSeed),
-            nm("sample_rate", self.SampleRate),
-            nm("wave_type", self.WaveType),
-            nm("attack_time", self.AttackTime),
-            nm("sustain_time", self.SustainTime),
-            nm("sustain_punch", self.SustainPunch),
-            nm("decay_time", self.DecayTime),
-            nm("start_frequency", self.StartFrequency),
-            nm("min_frequency", self.MinFrequency),
-            nm("slide", self.Slide),
-            nm("delta_slide", self.DeltaSlide),
-            nm("vibrato_depth", self.VibratoDepth),
-            nm("vibrato_speed", self.VibratoSpeed),
-            nm("change_amount", self.ChangeAmount),
-            nm("change_speed", self.ChangeSpeed),
-            nm("square_duty", self.SquareDuty),
-            nm("duty_sweep", self.DutySweep),
-            nm("repeat_speed", self.RepeatSpeed),
-            nm("phaser_offset", self.PhaserOffset),
-            nm("phaser_sweep", self.PhaserSweep),
-            nm("lpf_cutoff", self.LowPassFilterCutoff),
-            nm("lpf_cutoff_sweep", self.LowPassFilterCutoffSweep),
-            nm("lpf_resonance", self.LowPassFilterResonance),
-            nm("hpf_cutoff", self.HighPassFilterCutoff),
-            nm("hpf_cutoff_sweep", self.HighPassFilterCutoffSweep)};
+            std::pair {"random_seed", &sound_wave::RandomSeed},
+            std::pair {"sample_rate", &sound_wave::SampleRate},
+            std::pair {"wave_type", &sound_wave::WaveType},
+            std::pair {"attack_time", &sound_wave::AttackTime},
+            std::pair {"sustain_time", &sound_wave::SustainTime},
+            std::pair {"sustain_punch", &sound_wave::SustainPunch},
+            std::pair {"decay_time", &sound_wave::DecayTime},
+            std::pair {"start_frequency", &sound_wave::StartFrequency},
+            std::pair {"min_frequency", &sound_wave::MinFrequency},
+            std::pair {"slide", &sound_wave::Slide},
+            std::pair {"delta_slide", &sound_wave::DeltaSlide},
+            std::pair {"vibrato_depth", &sound_wave::VibratoDepth},
+            std::pair {"vibrato_speed", &sound_wave::VibratoSpeed},
+            std::pair {"change_amount", &sound_wave::ChangeAmount},
+            std::pair {"change_speed", &sound_wave::ChangeSpeed},
+            std::pair {"square_duty", &sound_wave::SquareDuty},
+            std::pair {"duty_sweep", &sound_wave::DutySweep},
+            std::pair {"repeat_speed", &sound_wave::RepeatSpeed},
+            std::pair {"phaser_offset", &sound_wave::PhaserOffset},
+            std::pair {"phaser_sweep", &sound_wave::PhaserSweep},
+            std::pair {"lpf_cutoff", &sound_wave::LowPassFilterCutoff},
+            std::pair {"lpf_cutoff_sweep", &sound_wave::LowPassFilterCutoffSweep},
+            std::pair {"lpf_resonance", &sound_wave::LowPassFilterResonance},
+            std::pair {"hpf_cutoff", &sound_wave::HighPassFilterCutoff},
+            std::pair {"hpf_cutoff_sweep", &sound_wave::HighPassFilterCutoffSweep}};
     }
 };
 

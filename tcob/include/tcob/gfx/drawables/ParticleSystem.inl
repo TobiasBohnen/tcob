@@ -13,6 +13,7 @@
 #include <mutex>
 #include <set>
 #include <tuple>
+#include <utility>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -178,50 +179,50 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-auto constexpr point_particle::settings::members(this auto&& self)
+auto constexpr point_particle::settings::Members()
 {
     return std::tuple {
-        nm("speed", self.Speed),
-        nm("direction", self.Direction),
+        std::pair {"speed", &point_particle::settings::Speed},
+        std::pair {"direction", &point_particle::settings::Direction},
 
-        nm("linear_acceleration", self.LinearAcceleration),
-        nm("linear_dampling", self.LinearDamping),
-        nm("radial_acceleration", self.RadialAcceleration),
-        nm("tangential_acceleration", self.TangentialAcceleration),
+        std::pair {"linear_acceleration", &point_particle::settings::LinearAcceleration},
+        std::pair {"linear_dampling", &point_particle::settings::LinearDamping},
+        std::pair {"radial_acceleration", &point_particle::settings::RadialAcceleration},
+        std::pair {"tangential_acceleration", &point_particle::settings::TangentialAcceleration},
 
-        nm("gravity", self.Gravity),
+        std::pair {"gravity", &point_particle::settings::Gravity},
 
-        nm("texture_region", self.TextureRegion),
-        nm("colors", self.Colors),
-        nm("transparency", self.Transparency),
+        std::pair {"texture_region", &point_particle::settings::TextureRegion},
+        std::pair {"colors", &point_particle::settings::Colors},
+        std::pair {"transparency", &point_particle::settings::Transparency},
 
-        nm("lifetime", self.Lifetime),
+        std::pair {"lifetime", &point_particle::settings::Lifetime},
     };
 }
 
-auto constexpr quad_particle::settings::members(this auto&& self)
+auto constexpr quad_particle::settings::Members()
 {
     return std::tuple {
-        nm("speed", self.Speed),
-        nm("direction", self.Direction),
+        std::pair {"speed", &quad_particle::settings::Speed},
+        std::pair {"direction", &quad_particle::settings::Direction},
 
-        nm("linear_acceleration", self.LinearAcceleration),
-        nm("linear_dampling", self.LinearDamping),
-        nm("radial_acceleration", self.RadialAcceleration),
-        nm("tangential_acceleration", self.TangentialAcceleration),
+        std::pair {"linear_acceleration", &quad_particle::settings::LinearAcceleration},
+        std::pair {"linear_dampling", &quad_particle::settings::LinearDamping},
+        std::pair {"radial_acceleration", &quad_particle::settings::RadialAcceleration},
+        std::pair {"tangential_acceleration", &quad_particle::settings::TangentialAcceleration},
 
-        nm("gravity", self.Gravity),
+        std::pair {"gravity", &quad_particle::settings::Gravity},
 
-        nm("texture_region", self.TextureRegion),
-        nm("colors", self.Colors),
-        nm("transparency", self.Transparency),
+        std::pair {"texture_region", &quad_particle::settings::TextureRegion},
+        std::pair {"colors", &quad_particle::settings::Colors},
+        std::pair {"transparency", &quad_particle::settings::Transparency},
 
-        nm("lifetime", self.Lifetime),
+        std::pair {"lifetime", &quad_particle::settings::Lifetime},
 
-        nm("scale", self.Scale),
-        nm("size", self.Size),
-        nm("spin", self.Spin),
-        nm("rotation", self.Rotation),
+        std::pair {"scale", &quad_particle::settings::Scale},
+        std::pair {"size", &quad_particle::settings::Size},
+        std::pair {"spin", &quad_particle::settings::Spin},
+        std::pair {"rotation", &quad_particle::settings::Rotation},
     };
 }
 

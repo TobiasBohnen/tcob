@@ -15,6 +15,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -107,11 +108,11 @@ public:
 
         auto operator==(font::style const& other) const -> bool = default;
 
-        auto constexpr members(this auto&& self)
+        auto constexpr static Members()
         {
             return std::tuple {
-                nm("is_italic", self.IsItalic),
-                nm("weight", self.Weight)};
+                std::pair {"is_italic", &font::style::IsItalic},
+                std::pair {"weight", &font::style::Weight}};
         }
     };
 

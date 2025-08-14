@@ -92,8 +92,8 @@ concept Serializable =
 
 template <typename T>
 concept MemberSerializable =
-    requires(T& t) {
-        { t.members() };
+    requires(T&) {
+        { T::Members() };
     };
 
 template <typename T>

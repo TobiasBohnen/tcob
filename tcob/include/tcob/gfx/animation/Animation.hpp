@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/easing/Tween.hpp"
@@ -21,11 +22,11 @@ public:
 
     auto operator==(frame const& other) const -> bool = default;
 
-    auto constexpr members(this auto&& self)
+    auto constexpr static Members()
     {
         return std::tuple {
-            nm("name", self.Name),
-            nm("duration", self.Duration)};
+            std::pair {"name", &frame::Name},
+            std::pair {"duration", &frame::Duration}};
     }
 };
 

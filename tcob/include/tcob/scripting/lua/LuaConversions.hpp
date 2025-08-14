@@ -1046,10 +1046,10 @@ public:
     auto static From(state_view view, i32& idx, T& value) -> bool
     {
         table      tab {table::Acquire(view, idx++)};
-        auto const members {value.members()};
+        auto const members {T::Members()};
         bool       ok {true};
         std::apply([&](auto&&... m) {
-            ((ok = ok && tab.try_get(m.second.get(), m.first)), ...);
+            ((ok = ok && tab.try_get(value.*(m.second), m.first)), ...);
         },
                    members);
         return ok;
@@ -1059,9 +1059,9 @@ public:
     {
         table tab {table::PushNew(view)};
 
-        auto const members {value.members()};
+        auto const members {T::Members()};
         std::apply([&](auto&&... m) {
-            ((tab[m.first] = m.second.get()), ...);
+            ((tab[m.first] = value.*(m.second)), ...);
         },
                    members);
     }
