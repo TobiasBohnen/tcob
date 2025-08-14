@@ -161,10 +161,10 @@ auto bsbd_reader::read_array_entry(io::istream& stream, bsbd::marker_type type, 
     case bsbd::marker_type::Int8:         entry = stream.read<i8>(); break;
     case bsbd::marker_type::Int16:        entry = stream.read<i16, std::endian::little>(); break;
     case bsbd::marker_type::Int32:        entry = stream.read<i32, std::endian::little>(); break;
+    case bsbd::marker_type::Int64:        entry = stream.read<i64, std::endian::little>(); break;
     case bsbd::marker_type::UInt8:        entry = stream.read<u8>(); break;
     case bsbd::marker_type::UInt16:       entry = stream.read<u16, std::endian::little>(); break;
     case bsbd::marker_type::UInt32:       entry = stream.read<u32, std::endian::little>(); break;
-    case bsbd::marker_type::Int64:        entry = stream.read<i64, std::endian::little>(); break;
     case bsbd::marker_type::Float32:      entry = stream.read<f32, std::endian::little>(); break;
     case bsbd::marker_type::Float64:      entry = stream.read<f64, std::endian::little>(); break;
     case bsbd::marker_type::BoolTrue:     entry = true; break;
@@ -301,10 +301,10 @@ void bsbd_writer::write_entry(io::ostream& stream, entry const& ent, utf8_string
         case bsbd::marker_type::Int8:   stream.write(static_cast<i8>(val)); break;
         case bsbd::marker_type::Int16:  stream.write<i16, std::endian::little>(static_cast<i16>(val)); break;
         case bsbd::marker_type::Int32:  stream.write<i32, std::endian::little>(static_cast<i32>(val)); break;
+        case bsbd::marker_type::Int64:  stream.write<i64, std::endian::little>(val); break;
         case bsbd::marker_type::UInt8:  stream.write(static_cast<u8>(val)); break;
         case bsbd::marker_type::UInt16: stream.write<u16, std::endian::little>(static_cast<u16>(val)); break;
         case bsbd::marker_type::UInt32: stream.write<u32, std::endian::little>(static_cast<u32>(val)); break;
-        case bsbd::marker_type::Int64:  stream.write<i64, std::endian::little>(val); break;
         default:                        break;
         }
     } else if (ent.is<f64>()) {
