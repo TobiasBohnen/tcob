@@ -280,7 +280,7 @@ auto capitalize(utf8_string_view str) -> utf8_string
 auto to_utf32(utf8_string_view str) -> std::optional<std::u32string>
 {
     // based on: https://github.com/brofield/simpleini/blob/master/ConvertUTF.c
-    static constexpr std::array<byte, 256> trailingBytesForUTF8 {
+    static constexpr std::array<char, 256> trailingBytesForUTF8 {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -297,19 +297,19 @@ auto to_utf32(utf8_string_view str) -> std::optional<std::u32string>
     retValue.reserve(size);
 
     for (usize i {0}; i < size;) {
-        byte const source {static_cast<byte>(str[i])};
+        char const source {static_cast<char>(str[i])};
         u32        ch {0};
 
-        byte const extraBytesToRead {trailingBytesForUTF8[source]};
+        char const extraBytesToRead {trailingBytesForUTF8[source]};
         if (i + extraBytesToRead >= size) {
             return std::nullopt;
         }
 
-        for (byte j {extraBytesToRead}; j > 0; --j) {
-            ch += static_cast<byte>(str[i++]);
+        for (char j {extraBytesToRead}; j > 0; --j) {
+            ch += static_cast<char>(str[i++]);
             ch <<= 6;
         }
-        ch += static_cast<byte>(str[i++]);
+        ch += static_cast<char>(str[i++]);
         ch -= offsetsFromUTF8[extraBytesToRead];
 
         if (ch <= 0x0010FFFF) {
