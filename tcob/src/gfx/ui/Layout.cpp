@@ -119,22 +119,22 @@ auto layout::create_init(string const& name) const -> widget::init
 
 ////////////////////////////////////////////////////////////
 
-static_layout::static_layout(parent parent)
+manual_layout::manual_layout(parent parent)
     : layout {parent}
 {
 }
 
-auto static_layout::allows_move() const -> bool
+auto manual_layout::allows_move() const -> bool
 {
     return true;
 }
 
-auto static_layout::allows_resize() const -> bool
+auto manual_layout::allows_resize() const -> bool
 {
     return true;
 }
 
-void static_layout::do_layout(size_f /* size */)
+void manual_layout::do_layout(size_f /* size */)
 {
 }
 

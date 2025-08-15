@@ -77,10 +77,10 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-// static_layout: No automatic re-layout; widgets maintain manually set bounds.
-class TCOB_API static_layout : public layout {
+// manual_layout: No automatic re-layout; widgets maintain manually set bounds.
+class TCOB_API manual_layout : public layout {
 public:
-    explicit static_layout(parent parent);
+    explicit manual_layout(parent parent);
 
     template <std::derived_from<widget> T>
     auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
