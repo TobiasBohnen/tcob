@@ -5,10 +5,11 @@
 
 #include "tcob/gfx/ui/widgets/ImageBox.hpp"
 
+#include <optional>
+
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
-#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -100,21 +101,19 @@ void image_box::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
     canvas.set_fill_style(colors::White);
     canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
-    _imageRectCache = targetRect;
 
-    if (_isDragging) {
-        auto const    dragOffset {drag_offset()};
+    if (_dragPosition) {
         point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
-        painter.add_overlay([this, alpha = _style.DragAlpha, globalOffset, dragOffset](widget_painter& painter) {
+        painter.add_overlay([this, globalOffset, targetRect](widget_painter& painter) {
             auto& canvas {painter.canvas()};
 
             gfx::transform xform;
             xform.translate(globalOffset);
             painter.begin(Alpha, xform);
 
-            canvas.set_global_alpha(alpha);
+            canvas.set_global_alpha(_style.DragAlpha);
             canvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
-                              {dragOffset, _imageRectCache.Size});
+                              {*_dragPosition - _dragStart + targetRect.top_left(), targetRect.Size});
         });
     }
 }
@@ -127,7 +126,7 @@ void image_box::on_update(milliseconds deltaTime)
 void image_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (Draggable) {
-        _isDragging = true;
+        _dragPosition = global_to_parent(*this, ev.Position);
         queue_redraw();
         ev.Handled = true;
     }
@@ -135,24 +134,19 @@ void image_box::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void image_box::on_mouse_button_up(input::mouse::button_event const& ev)
 {
-    if (_isDragging) {
+    if (_dragPosition) {
+        _dragPosition = std::nullopt;
         Dropped({.Sender = this, .Target = form().find_widget_at(ev.Position).get(), .Position = ev.Position});
         queue_redraw();
         ev.Handled = true;
     }
-
-    _dragOffset = point_f::Zero;
-    _isDragging = false;
 }
 
 void image_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    _isDragging = false;
-
     if (Draggable && ev.Button == controls().PrimaryMouseButton) {
-        _dragOffset = global_to_parent(*this, ev.Position) - drag_origin();
-        _isDragging = true;
-        ev.Handled  = true;
+        _dragStart = global_to_parent(*this, ev.Position);
+        ev.Handled = true;
     }
 }
 
@@ -163,16 +157,6 @@ auto image_box::attributes() const -> widget_attributes
     retValue["fit"] = *Fit;
 
     return retValue;
-}
-
-auto image_box::drag_origin() const -> point_f
-{
-    return _imageRectCache.top_left();
-}
-
-auto image_box::drag_offset() const -> point_f
-{
-    return global_to_parent(*this, locate_service<input::system>().mouse()->get_position()) - _dragOffset;
 }
 
 } // namespace ui

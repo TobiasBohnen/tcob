@@ -6,10 +6,11 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <optional>
+
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -57,15 +58,10 @@ protected:
     auto attributes() const -> widget_attributes override;
 
 private:
-    auto drag_origin() const -> point_f; // relative to parent
-    auto drag_offset() const -> point_f; // relative to parent
-
     image_box::style _style;
 
-    rect_f _imageRectCache;
-
-    bool    _isDragging {false};
-    point_f _dragOffset {point_f::Zero};
+    point_f                _dragStart {point_f::Zero};
+    std::optional<point_f> _dragPosition {std::nullopt};
 
     animation_tweener _animationTween;
 };
