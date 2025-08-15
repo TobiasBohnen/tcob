@@ -89,7 +89,7 @@ template <typename T>
 inline func_source<T>::func_source(type value, getter_func get, setter_func set)
     : func_source {std::move(get), std::move(set)}
 {
-    set(value);
+    _setter(value);
 }
 
 template <typename T>
