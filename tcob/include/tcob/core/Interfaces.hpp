@@ -44,12 +44,13 @@ protected:
 ////////////////////////////////////////////////////////////
 
 class TCOB_API non_copyable {
+public:
+    non_copyable(non_copyable const&)                    = delete;
+    auto operator=(non_copyable const&) -> non_copyable& = delete;
+
 protected:
     non_copyable()  = default;
     ~non_copyable() = default;
-
-    non_copyable(non_copyable const&)                    = delete; // NOLINT(modernize-use-equals-delete)
-    auto operator=(non_copyable const&) -> non_copyable& = delete; // NOLINT(modernize-use-equals-delete)
 };
 
 ////////////////////////////////////////////////////////////

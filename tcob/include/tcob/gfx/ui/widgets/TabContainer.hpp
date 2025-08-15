@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -58,7 +59,7 @@ public:
 
     auto find_child_at(point_i pos) -> std::shared_ptr<widget> override;
 
-    auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
+    auto widgets() const -> std::span<std::shared_ptr<widget> const> override;
 
 protected:
     void on_prepare_redraw() override;

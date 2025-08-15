@@ -65,15 +65,13 @@ auto buffer::ptr(this auto&& self) -> decltype(auto)
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API decoder {
+class TCOB_API decoder : public non_copyable {
 public:
     struct factory : public type_factory<std::unique_ptr<decoder>> {
         static inline char const* ServiceName {"audio::decoder::factory"};
     };
 
     decoder();
-    decoder(decoder const& other) noexcept                    = delete;
-    auto operator=(decoder const& other) noexcept -> decoder& = delete;
     virtual ~decoder();
 
     auto open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>;

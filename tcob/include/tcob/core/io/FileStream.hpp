@@ -19,8 +19,6 @@ namespace tcob::io {
 
 class TCOB_API file_sink final : public non_copyable {
 public:
-    file_sink(file_sink const&)                    = delete;
-    auto operator=(file_sink const&) -> file_sink& = delete;
     file_sink(file_sink&& other) noexcept;
     auto operator=(file_sink&& other) noexcept -> file_sink&;
     ~file_sink();

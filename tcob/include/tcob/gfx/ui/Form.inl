@@ -7,6 +7,7 @@
 #include "Form.hpp"
 
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Rect.hpp"
@@ -33,7 +34,7 @@ inline auto form<Layout>::create_container(auto&&... args) -> std::shared_ptr<T>
 }
 
 template <std::derived_from<layout> Layout>
-inline auto form<Layout>::containers() const -> std::vector<std::shared_ptr<widget>> const&
+inline auto form<Layout>::containers() const -> std::span<std::shared_ptr<widget> const>
 {
     return _layout.widgets();
 }

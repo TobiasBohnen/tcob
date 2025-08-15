@@ -20,13 +20,9 @@
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API tween_base : public updatable {
+class TCOB_API tween_base : public updatable, public non_copyable {
 public:
     explicit tween_base(milliseconds duration);
-    tween_base(tween_base const& other) noexcept                    = delete;
-    auto operator=(tween_base const& other) noexcept -> tween_base& = delete;
-    tween_base(tween_base&& other) noexcept                         = delete;
-    auto operator=(tween_base&& other) noexcept -> tween_base&      = delete;
     ~tween_base() override;
 
     signal<> Finished;

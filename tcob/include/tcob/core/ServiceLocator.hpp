@@ -10,14 +10,14 @@
 #include <memory>
 #include <unordered_map>
 
+#include "tcob/core/Interfaces.hpp"
+
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API service_locator final {
+class TCOB_API service_locator final : public non_copyable {
 public:
     service_locator();
-    service_locator(service_locator const& other) noexcept                    = delete;
-    auto operator=(service_locator const& other) noexcept -> service_locator& = delete;
     ~service_locator();
 
     auto static GetInstance() -> service_locator&;

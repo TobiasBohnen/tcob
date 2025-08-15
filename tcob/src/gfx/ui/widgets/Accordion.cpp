@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -144,7 +145,7 @@ auto accordion::find_child_at(point_i pos) -> std::shared_ptr<widget>
     return activeSection;
 }
 
-auto accordion::widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto accordion::widgets() const -> std::span<std::shared_ptr<widget> const>
 {
     return _sections;
 }

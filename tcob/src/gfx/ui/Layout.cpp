@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <span>
 #include <variant>
 #include <vector>
 
@@ -53,12 +54,7 @@ void layout::clear()
     Changed();
 }
 
-auto layout::widgets() const -> std::vector<std::shared_ptr<widget>> const&
-{
-    return _widgets;
-}
-
-auto layout::widgets() -> std::vector<std::shared_ptr<widget>>&
+auto layout::widgets() const -> std::span<std::shared_ptr<widget> const>
 {
     return _widgets;
 }
@@ -314,7 +310,7 @@ vertical_layout::vertical_layout(parent parent, gfx::horizontal_alignment alignm
 
 void vertical_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     f32 const horiSize {size.Width};
     f32 const vertSize {size.Height / w.size()};
@@ -342,7 +338,7 @@ flow_layout::flow_layout(parent parent)
 
 void flow_layout::do_layout(size_f size)
 {
-    auto& w {widgets()};
+    auto const& w {widgets()};
 
     f32 const availableWidth {size.Width};
     f32       x {0.0f};

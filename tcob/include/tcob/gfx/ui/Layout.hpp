@@ -4,10 +4,10 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "tcob/core/Signal.hpp"
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <span>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -15,6 +15,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -50,8 +51,7 @@ public:
     void remove(widget* target);
     void clear();
 
-    auto widgets() const -> std::vector<std::shared_ptr<widget>> const&;
-    auto widgets() -> std::vector<std::shared_ptr<widget>>&;
+    auto widgets() const -> std::span<std::shared_ptr<widget> const>;
 
     void bring_to_front(widget* target);
     void send_to_back(widget* target);

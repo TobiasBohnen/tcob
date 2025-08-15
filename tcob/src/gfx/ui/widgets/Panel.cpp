@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <memory>
 #include <ranges>
-#include <vector>
+#include <span>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -89,7 +89,7 @@ auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
     });
 }
 
-auto panel::widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto panel::widgets() const -> std::span<std::shared_ptr<widget> const>
 {
     return _layout->widgets();
 }

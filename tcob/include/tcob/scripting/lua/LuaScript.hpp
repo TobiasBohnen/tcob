@@ -42,8 +42,6 @@ public:
     };
 
     script();
-    script(script&& other) noexcept                    = delete;
-    auto operator=(script&& other) noexcept -> script& = delete;
     ~script();
 
     signal<require_event>       Require;

@@ -7,7 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
-#include <vector>
+#include <span>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -47,7 +47,7 @@ public:
     template <std::derived_from<layout> T>
     auto get_layout() -> T&;
 
-    auto widgets() const -> std::vector<std::shared_ptr<widget>> const& override;
+    auto widgets() const -> std::span<std::shared_ptr<widget> const> override;
 
     void clear();
 

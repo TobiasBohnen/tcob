@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -122,7 +123,7 @@ auto tab_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
     return activeTab;
 }
 
-auto tab_container::widgets() const -> std::vector<std::shared_ptr<widget>> const&
+auto tab_container::widgets() const -> std::span<std::shared_ptr<widget> const>
 {
     return _tabs;
 }

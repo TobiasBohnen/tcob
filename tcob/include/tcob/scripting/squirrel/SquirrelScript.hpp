@@ -40,8 +40,6 @@ public:
     using HookFunc = std::function<void(debug_event /*type*/, string const& /*sourcename*/, SQInteger /*line*/, string const& /*funcname*/)>;
 
     script();
-    script(script&& other) noexcept                    = delete;
-    auto operator=(script&& other) noexcept -> script& = delete;
     ~script();
 
     auto root_table() -> table&;

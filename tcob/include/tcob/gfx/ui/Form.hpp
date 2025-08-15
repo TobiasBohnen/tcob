@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Common.hpp"
@@ -58,9 +59,9 @@ public:
 
     void rehover_widget(widget* widget);
 
-    auto virtual containers() const -> std::vector<std::shared_ptr<widget>> const& = 0;
-    void virtual remove_container(widget* widget)                                  = 0;
-    void virtual clear_containers()                                                = 0;
+    auto virtual containers() const -> std::span<std::shared_ptr<widget> const> = 0;
+    void virtual remove_container(widget* widget)                               = 0;
+    void virtual clear_containers()                                             = 0;
 
     void queue_redraw();
     void notify_redraw();
@@ -154,7 +155,7 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_container(auto&&... args) -> std::shared_ptr<T>;
 
-    auto containers() const -> std::vector<std::shared_ptr<widget>> const& override;
+    auto containers() const -> std::span<std::shared_ptr<widget> const> override;
 
     void remove_container(widget* widget) override;
 
