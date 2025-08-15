@@ -259,6 +259,28 @@ private:
     length _radius;
 };
 
+////////////////////////////////////////////////////////////
+
+// magnetic_snap_layout: No automatic re-layout; widgets snap to nearby edges.
+class TCOB_API magnetic_snap_layout : public layout {
+public:
+    explicit magnetic_snap_layout(parent parent, f32 distance, bool snapEdges = true, bool snapSiblings = true);
+
+    template <std::derived_from<widget> T>
+    auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
+
+    auto allows_move() const -> bool override;
+    auto allows_resize() const -> bool override;
+
+protected:
+    void do_layout(size_f size) override;
+
+private:
+    f32  _distance {50};
+    bool _snapEdges {true};
+    bool _snapSiblings {true};
+};
+
 }
 
 #include "Layout.inl"

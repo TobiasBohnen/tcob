@@ -84,6 +84,8 @@ private:
     scrollbar               _vScrollbar;
     scrollbar               _hScrollbar;
 
+    point_f _dragStart {point_i::Zero};
+
     panel::style _style;
 };
 

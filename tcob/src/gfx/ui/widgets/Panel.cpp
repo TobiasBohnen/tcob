@@ -176,7 +176,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     if (ev.Handled) { return; }
 
     if (can_move()) {
-        Bounds     = {Bounds->Position + ev.RelativeMotion, Bounds->Size};
+        Bounds     = {global_to_parent(*this, ev.Position) - _dragStart, Bounds->Size};
         ev.Handled = true;
         return;
     }
@@ -184,6 +184,8 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 {
+    _dragStart = global_to_parent(*this, ev.Position) - Bounds->Position;
+
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
             _vScrollbar.mouse_down(*this, ev.Position);
@@ -196,6 +198,8 @@ void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 
 void panel::on_mouse_button_up(input::mouse::button_event const& ev)
 {
+    _dragStart = point_f::Zero;
+
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
             _vScrollbar.mouse_up(*this, ev.Position);

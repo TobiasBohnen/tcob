@@ -103,4 +103,14 @@ inline auto tree_layout::create_widget(i32 level, string const& name) -> std::sh
 
 ////////////////////////////////////////////////////////////
 
+template <std::derived_from<widget> T>
+inline auto magnetic_snap_layout::create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>
+{
+    auto retValue {add_widget<T>(name)};
+    retValue->Bounds = rect;
+    return retValue;
+}
+
+////////////////////////////////////////////////////////////
+
 }

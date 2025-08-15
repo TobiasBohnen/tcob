@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/Layout.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <iterator>
 #include <memory>
 #include <span>
@@ -485,6 +486,67 @@ void circle_layout::do_layout(size_f size)
         f32 const   widgetHeight {widget->Flex->Height.calc(vertSize)};
 
         widget->Bounds = {{pos.X - (widgetWidth / 2.0f), pos.Y - (widgetHeight / 2.0f)}, {widgetWidth, widgetHeight}};
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+magnetic_snap_layout::magnetic_snap_layout(parent parent, f32 distance, bool snapEdges, bool snapSiblings)
+    : layout {parent}
+    , _distance {distance}
+    , _snapEdges {snapEdges}
+    , _snapSiblings {snapSiblings}
+{
+}
+
+auto magnetic_snap_layout::allows_move() const -> bool
+{
+    return true;
+}
+
+auto magnetic_snap_layout::allows_resize() const -> bool
+{
+    return true;
+}
+
+void magnetic_snap_layout::do_layout(size_f size)
+{
+    auto const& w {widgets()};
+
+    for (usize i {0}; i < w.size(); ++i) {
+        auto const& widget {w[i]};
+        auto        b {*widget->Bounds};
+
+        if (_snapEdges) {
+            if (b.left() <= _distance) { b.Position.X = 0.f; }
+            if (b.right() >= size.Width - _distance) { b.Position.X = size.Width - b.width(); }
+            if (b.top() <= _distance) { b.Position.Y = 0.f; }
+            if (b.bottom() >= size.Height - _distance) { b.Position.Y = size.Height - b.height(); }
+        }
+
+        if (_snapSiblings) {
+            for (usize j {i}; j < w.size(); ++j) {
+                auto const& other {w[j]};
+                auto const& o {*other->Bounds};
+
+                if ((b.top() >= o.top() && b.top() <= o.bottom()) || (b.bottom() >= o.top() && b.bottom() <= o.bottom())) {
+                    if (std::abs(b.left() - o.right()) <= _distance) {
+                        b.Position.X = o.right();
+                        continue;
+                    }
+                    if (std::abs(b.right() - o.left()) <= _distance) {
+                        b.Position.X = o.left() - b.width();
+                        continue;
+                    }
+                }
+                if ((b.left() >= o.left() && b.left() <= o.right()) || (b.right() >= o.left() && b.right() <= o.right())) {
+                    if (std::abs(b.top() - o.bottom()) <= _distance) { b.Position.Y = o.bottom(); }
+                    if (std::abs(b.bottom() - o.top()) <= _distance) { b.Position.Y = o.top() - b.height(); }
+                }
+            }
+        }
+
+        widget->Bounds = b;
     }
 }
 
