@@ -91,7 +91,6 @@ public:
     void fill(T const& value);
 
     auto begin(this auto&& self) -> decltype(auto);
-
     auto end(this auto&& self) -> decltype(auto);
 
     auto height() const -> dimension_type;

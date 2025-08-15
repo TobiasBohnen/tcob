@@ -8,28 +8,28 @@
 
 #include <vector>
 
-namespace tcob::data::csv {
+#include "tcob/core/Grid.hpp"
+
+namespace tcob::data {
 ////////////////////////////////////////////////////////////
 
-struct settings {
-    bool HasHeader {true};
-    char Separator {','};
-    char Quote {'"'};
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API table final {
+class TCOB_API csv_table final {
 public:
-    std::vector<string>              Header;
-    std::vector<std::vector<string>> Rows;
+    struct settings {
+        bool HasHeader {true};
+        char Separator {','};
+        char Quote {'"'};
+    };
 
-    auto load(path const& file, settings s = {}) noexcept -> bool;
-    auto load(io::istream& in, settings s = {}) noexcept -> bool;
-    auto parse(string const& csv, settings s = {}) -> bool;
+    std::vector<string> Header;
+    grid<string>        Rows;
 
-    auto save(path const& file, settings s = {}) const -> bool;
-    auto save(io::ostream& out, settings s = {}) const -> bool;
+    auto load(path const& file, settings s) noexcept -> bool;
+    auto load(io::istream& in, settings s) noexcept -> bool;
+    auto parse(string const& csv, settings s) -> bool;
+
+    auto save(path const& file, settings s) const -> bool;
+    auto save(io::ostream& out, settings s) const -> bool;
 };
 
 }
