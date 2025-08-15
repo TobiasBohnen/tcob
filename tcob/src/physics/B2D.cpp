@@ -1332,7 +1332,7 @@ b2d_shape::~b2d_shape()
 b2d_shape::b2d_shape(b2d_body* body, rect_shape::settings const& settings, shape::settings const& shapeSettings)
 {
     auto const& rect {settings.Extents};
-    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.top_left()), b2MakeRot(settings.Angle.Value))};
+    auto        poly {b2MakeOffsetBox(rect.width() / 2, rect.height() / 2, to_b2Vec2(rect.Position), b2MakeRot(settings.Angle.Value))};
 
     b2ShapeDef shapeDef {GetShapeDef(shapeSettings)};
     ID = b2CreatePolygonShape(body->ID, &shapeDef, &poly);

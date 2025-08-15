@@ -186,7 +186,7 @@ auto constexpr rect<T>::top() const -> T
 template <Arithmetic T>
 auto constexpr rect<T>::top_left() const -> point<T>
 {
-    return {Position.X, Position.Y};
+    return Position;
 }
 
 template <Arithmetic T>

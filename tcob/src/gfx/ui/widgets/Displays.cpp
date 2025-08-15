@@ -217,7 +217,7 @@ void seven_segment_display::on_draw(widget_painter& painter)
     f32 const width {_style.Size.calc(rect.width())};
     f32 const thickness {width / 4};
 
-    point_f       offset {rect.top_left()};
+    point_f       offset {rect.Position};
     point_f const lineOffset {1, 0};
 
     std::array<point_f, 18> const points {{

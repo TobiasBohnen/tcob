@@ -293,8 +293,8 @@ inline void quadtree<T, SplitThreshold, MaxDepth>::node::find_intersections_in_d
 template <QuadtreeValue T, usize SplitThreshold, usize MaxDepth>
 inline auto quadtree<T, SplitThreshold, MaxDepth>::node::ComputeRect(rect_f const& rect, i32 i) -> rect_f
 {
-    auto const origin {rect.top_left()};
-    auto const childSize {rect.Size / 2.f};
+    auto const& origin {rect.Position};
+    auto const  childSize {rect.Size / 2.f};
     switch (i) {
     case 0: return {origin, childSize};                                               // North West
     case 1: return {point_f {origin.X + childSize.Width, origin.Y}, childSize};       // Norst East

@@ -58,7 +58,7 @@ void text::on_draw_to(render_target& target)
 auto text::pivot() const -> point_f
 {
     if ((*Pivot).has_value()) {
-        return Bounds->top_left() + **Pivot;
+        return Bounds->Position + **Pivot;
     }
 
     return Bounds->center();

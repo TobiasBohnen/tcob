@@ -32,7 +32,7 @@ void element_painter::draw_image(image_draw_context const& ctx)
             _canvas.draw_image(ctx.Image, "default", ctx.OriginBox);
         } else {
             size_f     imgSize {ctx.Image->info().Size};
-            auto const imgPattern {_canvas.create_image_pattern(ctx.OriginBox.top_left(), imgSize, degree_f {0.0f}, ctx.Image, 1)};
+            auto const imgPattern {_canvas.create_image_pattern(ctx.OriginBox.Position, imgSize, degree_f {0.0f}, ctx.Image, 1)};
             _canvas.set_fill_style(imgPattern);
 
             switch (ctx.Repeat) {
@@ -43,12 +43,12 @@ void element_painter::draw_image(image_draw_context const& ctx)
                 break;
             case background_repeat::RepeatX:
                 _canvas.begin_path();
-                _canvas.rect({ctx.OriginBox.top_left(), {ctx.OriginBox.width(), imgSize.Height}});
+                _canvas.rect({ctx.OriginBox.Position, {ctx.OriginBox.width(), imgSize.Height}});
                 _canvas.fill();
                 break;
             case background_repeat::RepeatY:
                 _canvas.begin_path();
-                _canvas.rect({ctx.OriginBox.top_left(), {imgSize.Width, ctx.OriginBox.height()}});
+                _canvas.rect({ctx.OriginBox.Position, {imgSize.Width, ctx.OriginBox.height()}});
                 _canvas.fill();
                 break;
             case background_repeat::NoRepeat:

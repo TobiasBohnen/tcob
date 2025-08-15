@@ -113,7 +113,7 @@ void image_box::on_draw(widget_painter& painter)
 
             canvas.set_global_alpha(_style.DragAlpha);
             canvas.draw_image(Image->Texture.ptr(), Image->TextureRegion,
-                              {*_dragPosition - _dragStart + targetRect.top_left(), targetRect.Size});
+                              {*_dragPosition - _dragStart + targetRect.Position, targetRect.Size});
         });
     }
 }

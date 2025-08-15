@@ -154,7 +154,7 @@ void document::on_mouse_motion(input::mouse::motion_event const& ev)
     point_i const mp {convert_screen_to_world(ev.Position)};
 
     if (bound.contains(mp)) {
-        _mousePosition = mp - bound.top_left();
+        _mousePosition = mp - bound.Position;
         if (_lhdoc->on_mouse_over(mp.X - bound.left(), mp.Y - bound.top(), mp.X, mp.Y, redraw)) {
             force_redraw();
         }
