@@ -56,7 +56,7 @@ public:
     template <Arithmetic U>
     auto constexpr contains [[nodiscard]] (rect<U> const& rect) const -> bool;
 
-    auto constexpr intersects [[nodiscard]] (rect const& rectangle, bool includeEdges = false) const -> bool;
+    auto constexpr intersects [[nodiscard]] (rect const& other, bool includeEdges = false) const -> bool;
 
     auto constexpr equals(rect const& other, f32 tol) const -> bool;
 

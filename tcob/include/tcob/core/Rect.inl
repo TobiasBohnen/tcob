@@ -46,26 +46,18 @@ auto constexpr rect<T>::FromLTRB(T left, T top, T right, T bottom) -> rect<T>
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::intersects(rect const& rectangle, bool includeEdges) const -> bool
+auto constexpr rect<T>::intersects(rect const& other, bool includeEdges) const -> bool
 {
-    std::pair<T, T> const r1MinMaxX {std::minmax(Position.X, static_cast<T>(Position.X + Size.Width))};
-    std::pair<T, T> const r2MinMaxX {std::minmax(rectangle.Position.X, static_cast<T>(rectangle.Position.X + rectangle.Size.Width))};
+    auto const [minX1, maxX1] {std::minmax(Position.X, Position.X + Size.Width)};
+    auto const [minX2, maxX2] {std::minmax(other.Position.X, other.Position.X + other.Size.Width)};
+    auto const [minY1, maxY1] {std::minmax(Position.Y, Position.Y + Size.Height)};
+    auto const [minY2, maxY2] {std::minmax(other.Position.Y, other.Position.Y + other.Size.Height)};
 
     if (includeEdges) {
-        if (std::max(r1MinMaxX.first, r2MinMaxX.first) <= std::min(r1MinMaxX.second, r2MinMaxX.second)) {
-            std::pair<T, T> const r1MinMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
-            std::pair<T, T> const r2MinMaxY {std::minmax(rectangle.Position.Y, static_cast<T>(rectangle.Position.Y + rectangle.Size.Height))};
-            return std::max(r1MinMaxY.first, r2MinMaxY.first) <= std::min(r1MinMaxY.second, r2MinMaxY.second);
-        }
-    } else {
-        if (std::max(r1MinMaxX.first, r2MinMaxX.first) < std::min(r1MinMaxX.second, r2MinMaxX.second)) {
-            std::pair<T, T> const r1MinMaxY {std::minmax(Position.Y, static_cast<T>(Position.Y + Size.Height))};
-            std::pair<T, T> const r2MinMaxY {std::minmax(rectangle.Position.Y, static_cast<T>(rectangle.Position.Y + rectangle.Size.Height))};
-            return std::max(r1MinMaxY.first, r2MinMaxY.first) < std::min(r1MinMaxY.second, r2MinMaxY.second);
-        }
+        return (std::max(minX1, minX2) <= std::min(maxX1, maxX2)) && (std::max(minY1, minY2) <= std::min(maxY1, maxY2));
     }
 
-    return false;
+    return (std::max(minX1, minX2) < std::min(maxX1, maxX2)) && (std::max(minY1, minY2) < std::min(maxY1, maxY2));
 }
 
 template <Arithmetic T>
