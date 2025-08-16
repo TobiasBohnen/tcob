@@ -78,7 +78,7 @@ void cycle_button::on_draw(widget_painter& painter)
         itemRect.Size.Height = itemHeight;
 
         item_style itemStyle {};
-        prepare_sub_style(itemStyle, 0, _style.ItemClass, {.Active = true, .Hover = true});
+        prepare_sub_style(itemStyle, 0, _style.ItemClass, {});
         painter.draw_item(itemStyle.Item, itemRect, selected_item());
 
         // bar

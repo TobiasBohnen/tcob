@@ -35,10 +35,10 @@ public:
 
     class TCOB_API style : public vscroll_widget::style {
     public:
-        bool        AutoSizeColumns {true};
-        utf8_string HeaderItemClass {"header_items"};
-        utf8_string RowItemClass {"row_items"};
-        length      RowHeight {};
+        bool                     AutoSizeColumns {true};
+        utf8_string              HeaderItemClass {"header_items"};
+        std::vector<utf8_string> RowItemClasses {"row_items"};
+        length                   RowHeight {};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };

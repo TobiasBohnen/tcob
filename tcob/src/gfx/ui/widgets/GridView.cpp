@@ -142,10 +142,15 @@ void grid_view::on_draw(widget_painter& painter)
         return {};
     }};
 
+    auto getRowStyle {[&](i32 y) {
+        return _style.RowItemClasses[y % _style.RowItemClasses.size()];
+    }};
+
     // Draw rows
     std::vector<point_i> selectedCells;
     std::vector<point_i> hoveredCells;
     for (i32 y {0}; y < Grid->height(); ++y) {
+        auto const rowStyle(getRowStyle(y));
         for (i32 x {0}; x < Grid->width(); ++x) {
             point_i const idx {x, y + 1};
             auto const    cellFlags {getCellFlags(idx, SelectMode)};
@@ -159,15 +164,15 @@ void grid_view::on_draw(widget_painter& painter)
                 continue;
             }
 
-            paintCell(idx, Grid[x, y], _style.RowItemClass, cellFlags, _rowRectCache[idx]);
+            paintCell(idx, Grid[x, y], rowStyle, cellFlags, _rowRectCache[idx]);
         }
     }
 
     for (auto const& idx : selectedCells) {
-        paintCell(idx, Grid[idx.X, idx.Y - 1], _style.RowItemClass, {.Active = true}, _rowRectCache[idx]);
+        paintCell(idx, Grid[idx.X, idx.Y - 1], getRowStyle(idx.Y - 1), {.Active = true}, _rowRectCache[idx]);
     }
     for (auto const& idx : hoveredCells) {
-        paintCell(idx, Grid[idx.X, idx.Y - 1], _style.RowItemClass, {.Hover = true}, _rowRectCache[idx]);
+        paintCell(idx, Grid[idx.X, idx.Y - 1], getRowStyle(idx.Y - 1), {.Hover = true}, _rowRectCache[idx]);
     }
 
     // Draw headers
