@@ -11,6 +11,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/component/Item.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
@@ -23,6 +24,8 @@ public:
     class TCOB_API style : public widget_style {
     public:
         utf8_string ItemClass {"items"};
+        length      ItemHeight {0.8f, length::type::Relative};
+        bar_element Bar;
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };

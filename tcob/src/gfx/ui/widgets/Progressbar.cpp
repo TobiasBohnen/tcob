@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Progressbar.hpp"
 
 #include <algorithm>
+#include <tuple>
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -57,7 +58,7 @@ void progress_bar::on_draw(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     // bar
-    (void)painter.draw_bar(
+    std::ignore = painter.draw_bar(
         _style.Bar,
         rect,
         {.Orientation = get_orientation(),

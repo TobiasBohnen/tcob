@@ -7,10 +7,12 @@
 
 #include <algorithm>
 #include <iterator>
+#include <tuple>
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
+#include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/component/Item.hpp"
@@ -21,6 +23,9 @@ namespace tcob::ui {
 void cycle_button::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
     widget_style::Transition(target, from, to, step);
+
+    target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
+    target.Bar.lerp(from.Bar, to.Bar, step);
 }
 
 cycle_button::cycle_button(init const& wi)
@@ -65,11 +70,29 @@ void cycle_button::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    // text //TODO: hover?
-    if (SelectedItemIndex >= 0) {
+    // text
+    if (SelectedItemIndex != INVALID_INDEX) {
+        // item
+        rect_f    itemRect {rect};
+        f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
+        itemRect.Size.Height = itemHeight;
+
         item_style itemStyle {};
-        prepare_sub_style(itemStyle, 0, _style.ItemClass, {});
-        painter.draw_item(itemStyle.Item, rect, selected_item());
+        prepare_sub_style(itemStyle, 0, _style.ItemClass, {.Active = true, .Hover = true});
+        painter.draw_item(itemStyle.Item, itemRect, selected_item());
+
+        // bar
+        rect_f barRect {rect};
+        barRect.Position.Y += itemHeight;
+        barRect.Size.Height -= itemHeight;
+        if (barRect.height() > 0) {
+            std::ignore = painter.draw_bar(
+                _style.Bar,
+                barRect,
+                {.Orientation = orientation::Horizontal,
+                 .Position    = bar_element::position::CenterOrMiddle,
+                 .Stops       = {0.0f, static_cast<f32>(SelectedItemIndex) / Items->size(), static_cast<f32>(SelectedItemIndex + 1) / Items->size(), 1.0f}});
+        }
     }
 }
 

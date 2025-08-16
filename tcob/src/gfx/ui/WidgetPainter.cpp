@@ -131,189 +131,6 @@ void widget_painter::draw_background_and_border(widget_style const& style, rect_
     rect -= style.Border.thickness();
 }
 
-void widget_painter::do_bordered_rect(rect_f const& rect, paint const& back, border_element const& borderStyle)
-{
-    auto const guard {_canvas.create_guard()};
-
-    if (auto const* np {std::get_if<nine_patch>(&back)}) {
-        do_nine_patch(*np, rect, borderStyle);
-        return;
-    }
-
-    // background
-    f32 const borderRadius {borderStyle.Radius.calc(rect.width())};
-    fill(_canvas, get_paint(back, rect), [&] {
-        _canvas.rounded_rect(rect, borderRadius);
-    });
-
-    // border
-    f32 const borderSize {borderStyle.Size.calc(rect.width())};
-    do_border(rect, borderStyle, borderSize, borderRadius);
-}
-
-void widget_painter::do_bordered_circle(rect_f const& rect, paint const& back, border_element const& borderStyle)
-{
-    auto const guard {_canvas.create_guard()};
-
-    if (auto const* np {std::get_if<nine_patch>(&back)}) {
-        do_nine_patch(*np, rect, borderStyle);
-        return;
-    }
-
-    // background
-    f32 const r {std::min(rect.height(), rect.width()) / 2};
-    fill(_canvas, get_paint(back, rect), [&] {
-        _canvas.circle(rect.center(), r);
-    });
-
-    // border
-    f32 const borderSize {borderStyle.Size.calc(rect.width())};
-    do_border({rect.left() + (rect.width() / 2 - r), rect.top() + (rect.height() / 2 - r), r * 2, r * 2}, borderStyle, borderSize, r);
-}
-
-void widget_painter::do_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle)
-{
-    _canvas.set_fill_style(colors::White);
-    f32 const    borderSize {borderStyle.Size.calc(rect.width())};
-    rect_f const center {rect.left() + borderSize, rect.top() + borderSize, rect.width() - (borderSize * 2), rect.height() - (borderSize * 2)};
-    _canvas.draw_nine_patch(np.Texture.ptr(), np.TextureRegion, rect, center, np.UV);
-}
-
-void widget_painter::do_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius)
-{
-    if (borderSize <= 0.0f) { return; }
-
-    if (auto const* np {std::get_if<nine_patch>(&borderStyle.Background)}) {
-        do_nine_patch(*np, rect, borderStyle);
-        return;
-    }
-    switch (borderStyle.Type) {
-    case border_type::Solid: {
-        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-            _canvas.rounded_rect(rect, borderRadius);
-        });
-    } break;
-    case border_type::Double: {
-        f32 const dborderSize {borderSize / 3};
-        stroke(_canvas, dborderSize, get_paint(borderStyle.Background, rect), [&] {
-            _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
-            _canvas.rounded_rect(rect, borderRadius);
-        });
-    } break;
-    case border_type::Dashed: {
-        std::vector<f32> dash;
-        dash.reserve(borderStyle.Dash.size());
-        for (auto const& l : borderStyle.Dash) { dash.push_back(l.calc(rect.width())); }
-        _canvas.set_line_dash(dash);
-        _canvas.set_dash_offset(borderStyle.DashOffset);
-        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-            _canvas.rounded_rect(rect, borderRadius);
-        });
-        _canvas.set_line_dash({});
-    } break;
-    case border_type::Dotted: {
-        _canvas.set_line_dash(std::array {borderSize / 2, borderSize * 2});
-        _canvas.set_line_cap(gfx::line_cap::Round);
-        _canvas.set_dash_offset(borderStyle.DashOffset);
-        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-            _canvas.rounded_rect(rect, borderRadius);
-        });
-        _canvas.set_line_dash({});
-        _canvas.set_line_cap(gfx::line_cap::Butt);
-    } break;
-    case border_type::Cornered: {
-        auto const drawCorner {[&](point_f p0, point_f p1, point_f p2) {
-            _canvas.move_to(p0);
-            _canvas.arc_to(p1, p2, borderRadius);
-            _canvas.line_to(p2);
-        }};
-
-        f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
-        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-            drawCorner({rect.left() + len, rect.top()}, rect.top_left(), {rect.left(), rect.top() + len});
-            drawCorner({rect.right() - len, rect.top()}, rect.top_right(), {rect.right(), rect.top() + len});
-            drawCorner({rect.right(), rect.bottom() - len}, rect.bottom_right(), {rect.right() - len, rect.bottom()});
-            drawCorner({rect.left(), rect.bottom() - len}, rect.bottom_left(), {rect.left() + len, rect.bottom()});
-        });
-    } break;
-    case border_type::Centered: {
-        auto const drawEdge {[&](point_f from, point_f to) {
-            _canvas.move_to(from);
-            _canvas.line_to(to);
-        }};
-
-        f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
-        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-            drawEdge({rect.left() + len, rect.top()}, {rect.right() - len, rect.top()});
-            drawEdge({rect.right(), rect.top() + len}, {rect.right(), rect.bottom() - len});
-            drawEdge({rect.right() - len, rect.bottom()}, {rect.left() + len, rect.bottom()});
-            drawEdge({rect.left(), rect.bottom() - len}, {rect.left(), rect.top() + len});
-        });
-    } break;
-    case border_type::Wavy: {
-        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-            _canvas.move_to(rect.top_left());
-            _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
-        });
-    } break;
-    case border_type::Inset:
-    case border_type::Outset: {
-        auto const base {get_paint(borderStyle.Background, rect)};
-        if (std::get_if<gfx::paint_gradient>(&base.Color)) {
-            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
-                _canvas.move_to(rect.top_left());
-                _canvas.rounded_rect(rect, borderRadius);
-            });
-        } else if (auto const* col {std::get_if<color>(&base.Color)}) {
-            hsx const h {col->to_hsl()};
-            hsx       bright {h};
-            hsx       dark {h};
-            if (h.X < 0.25f) {
-                bright.X = h.X + 0.25f;
-            } else {
-                dark.X = h.X - 0.25f;
-            }
-            color const brightCol {color::FromHSLA(bright, col->A)};
-            color const darkCol {color::FromHSLA(dark, col->A)};
-
-            rect_f const clipRect {rect.as_padded_by({-borderSize, -borderSize})};
-            f32 const    diff {std::min(clipRect.width(), clipRect.height()) / 2};
-
-            _canvas.begin_path();
-            _canvas.move_to(clipRect.bottom_right());
-            _canvas.line_to(clipRect.top_right());
-            _canvas.line_to({clipRect.right() - diff, clipRect.top() + diff});
-            _canvas.line_to({clipRect.left() + diff, clipRect.bottom() - diff});
-            _canvas.line_to(clipRect.bottom_left());
-            _canvas.close_path();
-            _canvas.clip();
-            stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? brightCol : darkCol, [&] {
-                _canvas.rounded_rect(rect, borderRadius);
-            });
-
-            _canvas.begin_path();
-            _canvas.move_to(clipRect.top_right());
-            _canvas.line_to(clipRect.top_left());
-            _canvas.line_to(clipRect.bottom_left());
-            _canvas.line_to({clipRect.left() + diff, clipRect.bottom() - diff});
-            _canvas.line_to({clipRect.right() - diff, clipRect.top() + diff});
-            _canvas.line_to(clipRect.top_right());
-            _canvas.clip();
-            stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? darkCol : brightCol, [&] {
-                _canvas.rounded_rect(rect, borderRadius);
-            });
-
-            _canvas.reset_clip();
-        }
-    } break;
-
-    case border_type::Hidden: break;
-    }
-}
-
 void widget_painter::draw_text(text_element const& element, rect_f const& rect, utf8_string_view text)
 {
     if (text.empty()) { return; }
@@ -554,6 +371,25 @@ void widget_painter::draw_tick(tick_element const& element, rect_f const& rect)
     }
 }
 
+void widget_painter::draw_item(item_element const& element, rect_f const& rect, item const& item)
+{
+    rect_f itemRect {rect};
+    itemRect -= element.Border.thickness();
+    do_bordered_rect(itemRect, element.Background, element.Border);
+
+    rect_f contentRect {itemRect};
+    contentRect -= element.Padding;
+    draw_text_and_icon(element.Text, contentRect, item.Text, item.Icon, element.IconTextOrder);
+}
+
+void widget_painter::draw_caret(caret_element const& element, rect_f const& rect, point_f offset)
+{
+    rect_f r {rect};
+    r.Size.Width = element.Width.calc(rect.Size.Width);
+    r.Position += offset;
+    do_bordered_rect(r, element.Color, {});
+}
+
 auto widget_painter::draw_bar(bar_element const& element, rect_f const& rect, bar_element::context const& barCtx) -> rect_f
 {
     rect_f retValue {element.calc(rect, barCtx.Orientation, barCtx.Position)};
@@ -568,18 +404,23 @@ auto widget_painter::draw_bar(bar_element const& element, rect_f const& rect, ba
         f32 const start {barCtx.Stops[i]};
         f32 const end {barCtx.Stops[i + 1]};
         f32 const size {end - start};
+        if (size == 0) {
+            low = !low;
+            continue;
+        }
 
         rect_f segRect {retValue};
         switch (barCtx.Orientation) {
-        case orientation::Horizontal:
+        case orientation::Horizontal: {
             segRect.Position.X += retValue.width() * start;
             segRect.Size.Width *= size;
-            break;
-        case orientation::Vertical:
+        } break;
+        case orientation::Vertical: {
             segRect.Position.Y += retValue.height() * (1 - end);
             segRect.Size.Height *= size;
-            break;
+        } break;
         }
+
         if (segRect.height() > 0 && segRect.width() > 0) {
             do_bordered_rect(segRect, low ? element.LowerBackground : element.HigherBackground, element.Border);
         }
@@ -692,22 +533,200 @@ auto widget_painter::draw_nav_arrow(nav_arrow_element const& element, rect_f con
     return retValue;
 }
 
-void widget_painter::draw_item(item_element const& element, rect_f const& rect, item const& item)
+auto widget_painter::canvas() -> gfx::canvas&
 {
-    do_bordered_rect(rect, element.Background, element.Border);
-
-    rect_f contentRect {rect};
-    contentRect -= element.Padding;
-    contentRect -= element.Border.thickness();
-    draw_text_and_icon(element.Text, contentRect, item.Text, item.Icon, element.IconTextOrder);
+    return _canvas;
 }
 
-void widget_painter::draw_caret(caret_element const& element, rect_f const& rect, point_f offset)
+auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text) -> gfx::text_formatter::result
 {
-    rect_f r {rect};
-    r.Size.Width = element.Width.calc(rect.Size.Width);
-    r.Position += offset;
-    do_bordered_rect(r, element.Color, {});
+    auto const tt {transform_text(element.Transform, text)};
+    return format_text(element, size, tt, element.calc_font_size(size.Height), true);
+}
+
+////////////////////////////////////////////////////////////
+
+void widget_painter::do_nine_patch(nine_patch const& np, rect_f const& rect, border_element const& borderStyle)
+{
+    _canvas.set_fill_style(colors::White);
+    f32 const    borderSize {borderStyle.Size.calc(rect.width())};
+    rect_f const center {rect.left() + borderSize, rect.top() + borderSize, rect.width() - (borderSize * 2), rect.height() - (borderSize * 2)};
+    _canvas.draw_nine_patch(np.Texture.ptr(), np.TextureRegion, rect, center, np.UV);
+}
+
+void widget_painter::do_bordered_rect(rect_f const& rect, paint const& back, border_element const& borderStyle)
+{
+    auto const guard {_canvas.create_guard()};
+
+    if (auto const* np {std::get_if<nine_patch>(&back)}) {
+        do_nine_patch(*np, rect, borderStyle);
+        return;
+    }
+
+    // background
+    f32 const borderRadius {borderStyle.Radius.calc(rect.width())};
+    fill(_canvas, get_paint(back, rect), [&] {
+        _canvas.rounded_rect(rect, borderRadius);
+    });
+
+    // border
+    f32 const borderSize {borderStyle.Size.calc(rect.width())};
+    do_border(rect, borderStyle, borderSize, borderRadius);
+}
+
+void widget_painter::do_bordered_circle(rect_f const& rect, paint const& back, border_element const& borderStyle)
+{
+    auto const guard {_canvas.create_guard()};
+
+    if (auto const* np {std::get_if<nine_patch>(&back)}) {
+        do_nine_patch(*np, rect, borderStyle);
+        return;
+    }
+
+    // background
+    f32 const r {std::min(rect.height(), rect.width()) / 2};
+    fill(_canvas, get_paint(back, rect), [&] {
+        _canvas.circle(rect.center(), r);
+    });
+
+    // border
+    f32 const borderSize {borderStyle.Size.calc(rect.width())};
+    do_border({rect.left() + (rect.width() / 2 - r), rect.top() + (rect.height() / 2 - r), r * 2, r * 2}, borderStyle, borderSize, r);
+}
+
+void widget_painter::do_border(rect_f const& rect, border_element const& borderStyle, f32 borderSize, f32 borderRadius)
+{
+    if (borderSize <= 0.0f) { return; }
+
+    if (auto const* np {std::get_if<nine_patch>(&borderStyle.Background)}) {
+        do_nine_patch(*np, rect, borderStyle);
+        return;
+    }
+    switch (borderStyle.Type) {
+    case border_type::Solid: {
+        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            _canvas.rounded_rect(rect, borderRadius);
+        });
+    } break;
+    case border_type::Double: {
+        f32 const dborderSize {borderSize / 3};
+        stroke(_canvas, dborderSize, get_paint(borderStyle.Background, rect), [&] {
+            _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
+            _canvas.rounded_rect(rect, borderRadius);
+        });
+    } break;
+    case border_type::Dashed: {
+        std::vector<f32> dash;
+        dash.reserve(borderStyle.Dash.size());
+        for (auto const& l : borderStyle.Dash) { dash.push_back(l.calc(rect.width())); }
+        _canvas.set_line_dash(dash);
+        _canvas.set_dash_offset(borderStyle.DashOffset);
+        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            _canvas.rounded_rect(rect, borderRadius);
+        });
+        _canvas.set_line_dash({});
+    } break;
+    case border_type::Dotted: {
+        _canvas.set_line_dash(std::array {borderSize / 2, borderSize * 2});
+        _canvas.set_line_cap(gfx::line_cap::Round);
+        _canvas.set_dash_offset(borderStyle.DashOffset);
+        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            _canvas.rounded_rect(rect, borderRadius);
+        });
+        _canvas.set_line_dash({});
+        _canvas.set_line_cap(gfx::line_cap::Butt);
+    } break;
+    case border_type::Cornered: {
+        auto const drawCorner {[&](point_f p0, point_f p1, point_f p2) {
+            _canvas.move_to(p0);
+            _canvas.arc_to(p1, p2, borderRadius);
+            _canvas.line_to(p2);
+        }};
+
+        f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
+        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            drawCorner({rect.left() + len, rect.top()}, rect.top_left(), {rect.left(), rect.top() + len});
+            drawCorner({rect.right() - len, rect.top()}, rect.top_right(), {rect.right(), rect.top() + len});
+            drawCorner({rect.right(), rect.bottom() - len}, rect.bottom_right(), {rect.right() - len, rect.bottom()});
+            drawCorner({rect.left(), rect.bottom() - len}, rect.bottom_left(), {rect.left() + len, rect.bottom()});
+        });
+    } break;
+    case border_type::Centered: {
+        auto const drawEdge {[&](point_f from, point_f to) {
+            _canvas.move_to(from);
+            _canvas.line_to(to);
+        }};
+
+        f32 const len {std::min(rect.width(), rect.height()) * 0.25f};
+        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            drawEdge({rect.left() + len, rect.top()}, {rect.right() - len, rect.top()});
+            drawEdge({rect.right(), rect.top() + len}, {rect.right(), rect.bottom() - len});
+            drawEdge({rect.right() - len, rect.bottom()}, {rect.left() + len, rect.bottom()});
+            drawEdge({rect.left(), rect.bottom() - len}, {rect.left(), rect.top() + len});
+        });
+    } break;
+    case border_type::Wavy: {
+        stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            _canvas.move_to(rect.top_left());
+            _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
+        });
+    } break;
+    case border_type::Inset:
+    case border_type::Outset: {
+        auto const base {get_paint(borderStyle.Background, rect)};
+        if (std::get_if<gfx::paint_gradient>(&base.Color)) {
+            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+                _canvas.move_to(rect.top_left());
+                _canvas.rounded_rect(rect, borderRadius);
+            });
+        } else if (auto const* col {std::get_if<color>(&base.Color)}) {
+            hsx const h {col->to_hsl()};
+            hsx       bright {h};
+            hsx       dark {h};
+            if (h.X < 0.25f) {
+                bright.X = h.X + 0.25f;
+            } else {
+                dark.X = h.X - 0.25f;
+            }
+            color const brightCol {color::FromHSLA(bright, col->A)};
+            color const darkCol {color::FromHSLA(dark, col->A)};
+
+            rect_f const clipRect {rect.as_padded_by({-borderSize, -borderSize})};
+            f32 const    diff {std::min(clipRect.width(), clipRect.height()) / 2};
+
+            _canvas.begin_path();
+            _canvas.move_to(clipRect.bottom_right());
+            _canvas.line_to(clipRect.top_right());
+            _canvas.line_to({clipRect.right() - diff, clipRect.top() + diff});
+            _canvas.line_to({clipRect.left() + diff, clipRect.bottom() - diff});
+            _canvas.line_to(clipRect.bottom_left());
+            _canvas.close_path();
+            _canvas.clip();
+            stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? brightCol : darkCol, [&] {
+                _canvas.rounded_rect(rect, borderRadius);
+            });
+
+            _canvas.begin_path();
+            _canvas.move_to(clipRect.top_right());
+            _canvas.line_to(clipRect.top_left());
+            _canvas.line_to(clipRect.bottom_left());
+            _canvas.line_to({clipRect.left() + diff, clipRect.bottom() - diff});
+            _canvas.line_to({clipRect.right() - diff, clipRect.top() + diff});
+            _canvas.line_to(clipRect.top_right());
+            _canvas.clip();
+            stroke(_canvas, borderSize, borderStyle.Type == border_type::Inset ? darkCol : brightCol, [&] {
+                _canvas.rounded_rect(rect, borderRadius);
+            });
+
+            _canvas.reset_clip();
+        }
+    } break;
+
+    case border_type::Hidden: break;
+    }
 }
 
 void widget_painter::do_shadow(shadow_element const& element, rect_f const& rect, bool isCircle, border_element const& borderStyle)
@@ -727,18 +746,42 @@ void widget_painter::do_shadow(shadow_element const& element, rect_f const& rect
     }
 }
 
-auto widget_painter::canvas() -> gfx::canvas&
-{
-    return _canvas;
-}
-
-auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text) -> gfx::text_formatter::result
-{
-    auto const tt {transform_text(element.Transform, text)};
-    return format_text(element, size, tt, element.calc_font_size(size.Height), true);
-}
-
 ////////////////////////////////////////////////////////////
+
+auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canvas::paint
+{
+    return std::visit(
+        overloaded {
+            [&](color const& arg) {
+                return gfx::canvas::paint {
+                    .Feather = 1.0f,
+                    .Color   = arg,
+                };
+            },
+            [&](linear_gradient const& arg) {
+                degree_f const angle {arg.Angle + degree_f {90}};
+                return _canvas.create_linear_gradient(
+                    rect.find_edge(angle),
+                    rect.find_edge(angle - degree_f {180}),
+                    arg.Colors);
+            },
+            [&](radial_gradient const& arg) {
+                return _canvas.create_radial_gradient(
+                    rect.center(),
+                    arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
+                    arg.Scale, arg.Colors);
+            },
+            [&](box_gradient const& arg) {
+                return _canvas.create_box_gradient(
+                    rect,
+                    arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
+            },
+            [&](nine_patch const&) -> gfx::canvas::paint {
+                return {};
+            },
+        },
+        p);
+}
 
 auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
 {
@@ -780,41 +823,6 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
         break;
     }
     return retValue;
-}
-
-auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canvas::paint
-{
-    return std::visit(
-        overloaded {
-            [&](color const& arg) {
-                return gfx::canvas::paint {
-                    .Feather = 1.0f,
-                    .Color   = arg,
-                };
-            },
-            [&](linear_gradient const& arg) {
-                degree_f const angle {arg.Angle + degree_f {90}};
-                return _canvas.create_linear_gradient(
-                    rect.find_edge(angle),
-                    rect.find_edge(angle - degree_f {180}),
-                    arg.Colors);
-            },
-            [&](radial_gradient const& arg) {
-                return _canvas.create_radial_gradient(
-                    rect.center(),
-                    arg.InnerRadius.calc(rect.width()), arg.OuterRadius.calc(rect.width()),
-                    arg.Scale, arg.Colors);
-            },
-            [&](box_gradient const& arg) {
-                return _canvas.create_box_gradient(
-                    rect,
-                    arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
-            },
-            [&](nine_patch const&) -> gfx::canvas::paint {
-                return {};
-            },
-        },
-        p);
 }
 
 ////////////////////////////////////////////////////////////
