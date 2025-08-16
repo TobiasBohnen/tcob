@@ -308,9 +308,11 @@ void text_box::on_focus_lost()
 
 auto text_box::attributes() const -> widget_attributes
 {
-    widget_attributes retValue {{"text", *Text}, {"selected_text", selected_text()}};
-    auto const        base {widget::attributes()};
-    retValue.insert(base.begin(), base.end());
+    auto retValue {widget::attributes()};
+
+    retValue["text"]          = *Text;
+    retValue["selected_text"] = selected_text();
+
     return retValue;
 }
 

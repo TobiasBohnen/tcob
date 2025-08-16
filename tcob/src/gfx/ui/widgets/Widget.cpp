@@ -500,7 +500,8 @@ void widget::do_focus_lost()
 
 auto widget::attributes() const -> widget_attributes
 {
-    return {{"name", _name}, {"orientation", get_orientation()}};
+    return {{"name", _name},
+            {"orientation", get_orientation()}};
 }
 
 auto widget::flags() -> widget_flags
