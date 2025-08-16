@@ -54,19 +54,9 @@ auto cycle_button::select_item(utf8_string const& item) -> bool
     return false;
 }
 
-auto cycle_button::get_item_at(isize index) const -> item const&
-{
-    return Items->at(static_cast<usize>(index));
-}
-
 auto cycle_button::selected_item() const -> item const&
 {
     return Items->at(SelectedItemIndex);
-}
-
-auto cycle_button::item_count() const -> isize
-{
-    return std::ssize(*Items);
 }
 
 void cycle_button::on_draw(widget_painter& painter)
@@ -112,7 +102,7 @@ auto cycle_button::attributes() const -> widget_attributes
 void cycle_button::select_next()
 {
     if (Items->empty()) { return; }
-    SelectedItemIndex = (SelectedItemIndex + 1) % item_count();
+    SelectedItemIndex = (SelectedItemIndex + 1) % Items->size();
 }
 
 } // namespace ui

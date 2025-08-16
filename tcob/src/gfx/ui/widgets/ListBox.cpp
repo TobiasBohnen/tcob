@@ -93,19 +93,9 @@ void list_box::scroll_to_selected()
     _scrollToSelected = true;
 }
 
-auto list_box::get_item_at(isize index) const -> item const&
-{
-    return get_items().at(static_cast<usize>(index));
-}
-
 auto list_box::selected_item() const -> item const&
 {
     return get_items().at(SelectedItemIndex);
-}
-
-auto list_box::item_count() const -> isize
-{
-    return std::ssize(get_items());
 }
 
 void list_box::on_prepare_redraw()
@@ -146,8 +136,8 @@ void list_box::on_draw(widget_painter& painter)
         }
     }};
 
-    isize const size {item_count()};
-    for (i32 i {0}; i < size; ++i) {
+    isize const size {std::ssize(*Items)};
+    for (isize i {0}; i < size; ++i) {
         if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
         paintItem(i);
     }
@@ -274,7 +264,7 @@ auto list_box::get_scroll_content_height() const -> f32
 
     f32       retValue {0.0f};
     f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
-    for (i32 i {0}; i < item_count(); ++i) { retValue += itemHeight; }
+    for (isize i {0}; i < std::ssize(*Items); ++i) { retValue += itemHeight; }
 
     return retValue;
 }

@@ -80,19 +80,9 @@ auto drop_down_list::select_item(utf8_string const& item) -> bool
     return false;
 }
 
-auto drop_down_list::get_item_at(isize index) const -> item const&
-{
-    return get_items().at(static_cast<usize>(index));
-}
-
 auto drop_down_list::selected_item() const -> item const&
 {
     return get_items().at(SelectedItemIndex);
-}
-
-auto drop_down_list::item_count() const -> isize
-{
-    return std::ssize(get_items());
 }
 
 void drop_down_list::on_styles_changed()

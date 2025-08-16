@@ -35,9 +35,7 @@ public:
 
     auto select_item(utf8_string const& item) -> bool;
 
-    auto get_item_at(isize index) const -> item const&;
     auto selected_item() const -> item const&;
-    auto item_count() const -> isize;
 
 protected:
     void on_draw(widget_painter& painter) override;
