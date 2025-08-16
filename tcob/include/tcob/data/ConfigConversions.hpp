@@ -399,6 +399,7 @@ struct converter<T> {
     auto static From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<array>(config)) {
+            value.clear();
             array arr {std::get<array>(config)};
             for (auto const& v : arr) {
                 auto res {v.template get<key_type>()};
@@ -554,6 +555,7 @@ struct converter<T> {
     auto static From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<array>(config)) {
+            value.clear();
             array arr {std::get<array>(config)};
             for (i32 i {0}; i < arr.size(); ++i) {
                 value.push_back(*arr.get<value_type>(i));

@@ -116,6 +116,7 @@ concept Container =
         typename T::value_type;
 
         { container.push_back(value) };
+        { container.clear() };
         { container.resize(usize {}) };
         { container.size() } -> std::same_as<usize>;
         { container.operator[](usize {}) };

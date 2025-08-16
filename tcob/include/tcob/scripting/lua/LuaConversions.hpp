@@ -207,6 +207,8 @@ struct converter<T> {
     auto static From(state_view view, i32& idx, T& value) -> bool
     {
         if (view.is_table(idx)) {
+            value.clear();
+
             bool retValue {true};
 
             view.push_value(idx);               // stack: -1 => table
@@ -274,6 +276,7 @@ struct converter<T> {
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
+            value.clear();
             i64 const len {static_cast<i64>(view.raw_len(idx))};
             for (i64 i {1}; i <= len && retValue; ++i) {
                 view.raw_get(idx, i);
@@ -451,6 +454,7 @@ struct converter<T> {
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
+            value.clear();
             u64 const len {view.raw_len(idx)};
             value.resize(static_cast<usize>(len));
 

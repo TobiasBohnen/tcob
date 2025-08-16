@@ -214,6 +214,8 @@ struct converter<T> {
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         if (view.is_table(idx) || view.is_array(idx)) {
+            value.clear();
+
             bool retValue {true};
 
             view.push(idx);                     // stack: -1 => table
@@ -280,6 +282,7 @@ struct converter<T> {
     {
         bool retValue {view.is_array(idx)};
         if (retValue) {
+            value.clear();
             SQInteger const len {view.get_size(idx)};
             for (SQInteger i {0}; i < len && retValue; ++i) {
                 view.push_integer(i);
@@ -402,6 +405,7 @@ struct converter<T> {
     {
         bool retValue {view.is_array(idx)};
         if (retValue) {
+            value.clear();
             SQInteger const len {view.get_size(idx)};
             value.resize(static_cast<usize>(len));
 
