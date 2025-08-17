@@ -399,15 +399,14 @@ auto widget_painter::draw_bar(bar_element const& element, rect_f const& rect, ba
         return retValue;
     }
 
-    bool low {true};
     for (usize i {0}; i < barCtx.Stops.size() - 1; ++i) {
+        auto const pattern {barCtx.StopPattern[i]};
+        if (pattern == bar_element::type::Empty) { continue; }
+
         f32 const start {barCtx.Stops[i]};
         f32 const end {barCtx.Stops[i + 1]};
         f32 const size {end - start};
-        if (size == 0) {
-            low = !low;
-            continue;
-        }
+        if (size == 0) { continue; }
 
         rect_f segRect {retValue};
         switch (barCtx.Orientation) {
@@ -421,11 +420,8 @@ auto widget_painter::draw_bar(bar_element const& element, rect_f const& rect, ba
         } break;
         }
 
-        if (segRect.height() > 0 && segRect.width() > 0) {
-            do_bordered_rect(segRect, low ? element.LowerBackground : element.HigherBackground, element.Border);
-        }
-
-        low = !low;
+        bool const low {pattern == bar_element::type::Low};
+        do_bordered_rect(segRect, low ? element.LowerBackground : element.HigherBackground, element.Border);
     }
 
     return retValue;

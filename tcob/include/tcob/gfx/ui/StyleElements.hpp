@@ -233,11 +233,18 @@ public:
         CenterOrMiddle
     };
 
+    enum class type : u8 {
+        Low,
+        High,
+        Empty
+    };
+
     struct context {
         orientation Orientation {orientation::Horizontal};
         position    Position {position::CenterOrMiddle};
 
-        std::vector<f32> Stops;
+        std::vector<f32>  Stops;
+        std::vector<type> StopPattern;
     };
 
     paint          LowerBackground {colors::White};

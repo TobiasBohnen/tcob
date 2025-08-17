@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <tuple>
+#include <vector>
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -86,12 +87,21 @@ void cycle_button::on_draw(widget_painter& painter)
         barRect.Position.Y += itemHeight;
         barRect.Size.Height -= itemHeight;
         if (barRect.height() > 0) {
+            isize const      itemCount {std::ssize(*Items)};
+            std::vector<f32> stops(itemCount + 1);
+            stops[0] = 0;
+            std::vector<bar_element::type> stopPattern(itemCount);
+            for (isize i {1}; i <= itemCount; ++i) {
+                stops[i]           = static_cast<f32>(i) / itemCount;
+                stopPattern[i - 1] = (i - 1 == SelectedItemIndex ? bar_element::type::High : bar_element::type::Low);
+            }
             std::ignore = painter.draw_bar(
                 _style.Bar,
                 barRect,
                 {.Orientation = orientation::Horizontal,
                  .Position    = bar_element::position::CenterOrMiddle,
-                 .Stops       = {0.0f, static_cast<f32>(SelectedItemIndex) / Items->size(), static_cast<f32>(SelectedItemIndex + 1) / Items->size(), 1.0f}});
+                 .Stops       = stops,
+                 .StopPattern = stopPattern});
         }
     }
 }

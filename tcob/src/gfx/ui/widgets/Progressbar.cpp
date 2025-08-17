@@ -63,7 +63,8 @@ void progress_bar::on_draw(widget_painter& painter)
         rect,
         {.Orientation = get_orientation(),
          .Position    = bar_element::position::CenterOrMiddle,
-         .Stops       = {0.0f, _tween.current_value(), 1.0f}});
+         .Stops       = {0.0f, _tween.current_value(), 1.0f},
+         .StopPattern = {bar_element::type::Low, bar_element::type::High}});
 }
 
 void progress_bar::on_update(milliseconds deltaTime)

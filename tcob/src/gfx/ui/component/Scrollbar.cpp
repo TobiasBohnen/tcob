@@ -35,7 +35,8 @@ void scrollbar::draw(widget_painter& painter, scrollbar_element const& scrollbar
     bar_element::context const barCtx {
         .Orientation = _orien,
         .Position    = bar_element::position::RightOrBottom,
-        .Stops       = {0.0f, _orien == orientation::Vertical ? 1.0f - current_value() : current_value(), 1.0f}};
+        .Stops       = {0.0f, _orien == orientation::Vertical ? 1.0f - current_value() : current_value(), 1.0f},
+        .StopPattern = {bar_element::type::Low, bar_element::type::High}};
     thumb_element::context const thumbCtx {
         .Orientation      = barCtx.Orientation,
         .RelativePosition = current_value()};

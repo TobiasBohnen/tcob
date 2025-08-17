@@ -77,7 +77,8 @@ void slider::on_draw(widget_painter& painter)
         rect,
         {.Orientation = orien,
          .Position    = pos,
-         .Stops       = {0.0f, tweenValue, 1.0f}});
+         .Stops       = {0.0f, tweenValue, 1.0f},
+         .StopPattern = {bar_element::type::Low, bar_element::type::High}});
 
     // thumb
     auto const  thumbFlags {!_overThumb          ? widget_flags {}
@@ -368,7 +369,8 @@ void range_slider::on_draw(widget_painter& painter)
         rect,
         {.Orientation = orien,
          .Position    = pos,
-         .Stops       = {0.0f, _min.Tween.current_value(), _max.Tween.current_value(), 1.0f}});
+         .Stops       = {0.0f, _min.Tween.current_value(), _max.Tween.current_value(), 1.0f},
+         .StopPattern = {bar_element::type::Low, bar_element::type::High, bar_element::type::Low}});
 
     // thumb
     thumb_style thumbStyle {};
