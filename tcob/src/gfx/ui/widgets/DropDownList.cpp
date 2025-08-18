@@ -31,6 +31,8 @@ void drop_down_list::style::Transition(style& target, style const& from, style c
     target.Text.lerp(from.Text, to.Text, step);
     target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
     target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
+
+    target.MaxVisibleItems = static_cast<isize>(from.MaxVisibleItems + ((to.MaxVisibleItems - from.MaxVisibleItems) * step));
 }
 
 drop_down_list::drop_down_list(init const& wi)
@@ -48,8 +50,6 @@ drop_down_list::drop_down_list(init const& wi)
     SelectedItemIndex(INVALID_INDEX);
     HoveredItemIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     HoveredItemIndex(INVALID_INDEX);
-    MaxVisibleItems.Changed.connect([this](auto const&) { queue_redraw(); });
-    MaxVisibleItems(5);
 
     Items.Changed.connect([this](auto const& val) {
         if ((std::ssize(val) <= SelectedItemIndex && SelectedItemIndex != INVALID_INDEX)
@@ -123,13 +123,13 @@ void drop_down_list::on_draw(widget_painter& painter)
 
             rect_f listRect {Bounds};
             listRect.Position.Y += listRect.height();
-            f32 const listHeight {itemHeight * MaxVisibleItems};
+            f32 const listHeight {itemHeight * _style.MaxVisibleItems};
             listRect.Size.Height = listHeight;
             listRect.Size.Height += _style.Margin.Top.calc(listHeight) + _style.Margin.Bottom.calc(listHeight);
             listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
             listRect.Size.Height += _style.Border.Size.calc(listHeight);
 
-            _vScrollbar.Visible = std::ssize(get_items()) > MaxVisibleItems;
+            _vScrollbar.Visible = std::ssize(get_items()) > _style.MaxVisibleItems;
 
             // list background
             painter.draw_background_and_border(_style, listRect, false);
@@ -314,7 +314,7 @@ void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
     refListHeight -= _style.Padding.Top.calc(listRect.Size.Height) + _style.Padding.Bottom.calc(listRect.Size.Height);
     refListHeight -= _style.Border.Size.calc(listRect.Size.Height);
     f32 const itemHeight {_style.ItemHeight.calc(refListHeight)};
-    f32 const listHeight {itemHeight * MaxVisibleItems};
+    f32 const listHeight {itemHeight * _style.MaxVisibleItems};
     bounds.Size.Height = listHeight;
 
     if (isHitTest) {
@@ -370,7 +370,7 @@ auto drop_down_list::get_scroll_distance() const -> f32
 
 auto drop_down_list::get_scroll_max() const -> f32
 {
-    return std::max(1.0f, (get_item_height() * static_cast<f32>(std::max(std::ssize(get_items()), *MaxVisibleItems))) - content_bounds().height());
+    return std::max(1.0f, (get_item_height() * static_cast<f32>(get_items().size())) - content_bounds().height());
 }
 
 } // namespace ui

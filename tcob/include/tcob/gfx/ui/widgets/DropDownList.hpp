@@ -32,6 +32,7 @@ public:
 
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};
+        isize       MaxVisibleItems {5};
 
         scrollbar_element VScrollBar;
 
@@ -44,7 +45,6 @@ public:
     prop_val<isize> HoveredItemIndex;
 
     prop<std::vector<item>> Items;
-    prop<isize>             MaxVisibleItems; // TODO: change to prop_val
 
     auto select_item(utf8_string const& item) -> bool;
 
