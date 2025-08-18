@@ -27,7 +27,7 @@ void cycle_button::style::Transition(style& target, style const& from, style con
 
     target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
     target.Bar.lerp(from.Bar, to.Bar, step);
-    target.GapFactor = static_cast<f32>(from.GapFactor + ((to.GapFactor - from.GapFactor) * step));
+    target.GapRatio = static_cast<f32>(from.GapRatio + ((to.GapRatio - from.GapRatio) * step));
 }
 
 cycle_button::cycle_button(init const& wi)
@@ -91,7 +91,7 @@ void cycle_button::on_draw(widget_painter& painter)
             isize const itemCount {std::ssize(*Items) * 2};
 
             f32 const unit {1.0f / itemCount};
-            f32 const gapSize {unit * _style.GapFactor};
+            f32 const gapSize {unit * _style.GapRatio};
             f32 const barSize {(2 * unit) - gapSize};
 
             std::vector<f32> stops(itemCount + 2);

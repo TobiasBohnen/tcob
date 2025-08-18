@@ -26,7 +26,7 @@ public:
         utf8_string ItemClass {"items"};
         length      ItemHeight {0.8f, length::type::Relative};
         bar_element Bar;
-        f32         GapFactor {1.0f};
+        f32         GapRatio {1.0f};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };
