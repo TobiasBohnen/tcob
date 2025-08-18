@@ -303,6 +303,7 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
+    SelectedColor.Changed.connect([this](auto const&) { queue_redraw(); });
     SelectedBaseHue.Changed.connect([this](auto const&) { queue_redraw(); });
 
     Class("color_picker");
@@ -365,10 +366,31 @@ void color_picker::on_draw(widget_painter& painter)
 
 void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto const mp {global_to_parent(*this, ev.Position)};
-    if (Bounds->contains(mp)) {
-        f32 const s {(mp.X - Bounds->left()) / (Bounds->width() * 0.9f)};
-        f32 const v {(mp.Y - Bounds->top()) / Bounds->height()};
+    if (hover_color(ev.Position)) { ev.Handled = true; }
+}
+
+void color_picker::on_mouse_drag(input::mouse::motion_event const& ev)
+{
+    if (hover_color(ev.Position) && select_color(ev.Position)) {
+        ev.Handled = true;
+    }
+}
+
+void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
+{
+    if (select_color(ev.Position)) { ev.Handled = true; }
+}
+
+void color_picker::on_update(milliseconds /* deltaTime */)
+{
+}
+
+auto color_picker::hover_color(point_i mp) -> bool
+{
+    auto const pos {global_to_parent(*this, mp)};
+    if (Bounds->contains(pos)) {
+        f32 const s {(pos.X - Bounds->left()) / (Bounds->width() * 0.9f)};
+        f32 const v {(pos.Y - Bounds->top()) / Bounds->height()};
         if (s < 1.0f) {
             HoveredColor   = color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = s, .X = 1 - v});
             HoveredBaseHue = degree_f {INVALID_INDEX};
@@ -378,26 +400,30 @@ void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
             HoveredBaseHue = col.to_hsv().Hue;
         }
 
-        ev.Handled = true;
+        return true;
     }
+    return false;
 }
 
-void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
+auto color_picker::select_color(point_i mp) -> bool
 {
-    auto const mp {global_to_parent(*this, ev.Position)};
+    bool       retValue {false};
+    auto const pos {global_to_parent(*this, mp)};
     if (HoveredBaseHue->Value != INVALID_INDEX) {
         SelectedBaseHue = *HoveredBaseHue;
-        _selectedHuePos = mp.Y - Bounds->Position.Y;
-        ev.Handled      = true;
-    } else if (HoveredColor != colors::Transparent) {
-        SelectedColor     = *HoveredColor;
-        _selectedColorPos = mp - Bounds->Position;
-        ev.Handled        = true;
+        if (SelectedColor != colors::Transparent) {
+            auto const col {SelectedColor->to_hsv()};
+            SelectedColor = color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = col.Saturation, .X = col.X});
+        }
+        _selectedHuePos = pos.Y - Bounds->Position.Y;
+        retValue        = true;
     }
-}
-
-void color_picker::on_update(milliseconds /* deltaTime */)
-{
+    if (HoveredColor != colors::Transparent) {
+        SelectedColor     = *HoveredColor;
+        _selectedColorPos = pos - Bounds->Position;
+        retValue          = true;
+    }
+    return retValue;
 }
 
 auto color_picker::GetGradient() -> gfx::color_gradient const&
