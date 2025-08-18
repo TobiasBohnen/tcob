@@ -167,7 +167,7 @@ void spinner::on_controller_button_down(input::controller::button_event const& e
 
 void spinner::on_update(milliseconds /*deltaTime*/)
 {
-    if (_mouseDown && _holdTime.elapsed_milliseconds() > (250.f / _holdCount)) {
+    if (_mouseDown && _holdTime.elapsed_milliseconds() > (250.0f / _holdCount)) {
         if (_hoverArrow == arrow::Increase) {
             Value += *Step;
         } else if (_hoverArrow == arrow::Decrease) {

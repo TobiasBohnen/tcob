@@ -165,7 +165,7 @@ void game::step()
 
     milliseconds const now {clock::now().time_since_epoch()};
     milliseconds const deltaUpdate {now - _lastUpdate};
-    milliseconds const frameLimit {1000.f / static_cast<f32>(plt.FrameLimit)};
+    milliseconds const frameLimit {1000.0f / static_cast<f32>(plt.FrameLimit)};
 
     tm.process_queue(deltaUpdate, false);
 

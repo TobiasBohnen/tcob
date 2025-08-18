@@ -199,7 +199,7 @@ public:
     void clear();
 
     // Extras
-    void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.f);
+    void wavy_line_to(point_f to, f32 amp, f32 freq, f32 phase = 0.0f);
     void regular_polygon(point_f pos, size_f size, i32 n);
     void star(point_f pos, f32 outerR, f32 innerR, i32 n);
     void triangle(point_f a, point_f b, point_f c);

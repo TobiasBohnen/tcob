@@ -90,7 +90,7 @@ auto music::on_start() -> bool
 
     if (*FadeIn > 0ms) {
         tm.drop_deferred(_deferred);
-        _fadeTween = make_unique_tween<linear_tween<f32>>(*FadeIn, 0.f, *Volume);
+        _fadeTween = make_unique_tween<linear_tween<f32>>(*FadeIn, 0.0f, *Volume);
         _fadeTween->Value.Changed.connect([this](f32 val) { Volume = val; });
         _fadeTween->Finished.connect([this] { _deferred = INVALID_ID; });
         _fadeTween->start();
@@ -109,7 +109,7 @@ auto music::on_stop() -> bool
 
     if (*FadeOut > 0ms) {
         tm.drop_deferred(_deferred);
-        _fadeTween = make_unique_tween<linear_tween<f32>>(FadeOut, Volume, 0.f);
+        _fadeTween = make_unique_tween<linear_tween<f32>>(FadeOut, Volume, 0.0f);
         _fadeTween->Value.Changed.connect([this](f32 val) { Volume = val; });
         _fadeTween->Finished.connect([this] {
             stop_stream();

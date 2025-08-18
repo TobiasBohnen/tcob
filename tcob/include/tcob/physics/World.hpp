@@ -100,7 +100,7 @@ public:
     class TCOB_API settings {
     public:
         /// Gravity vector.
-        point_f Gravity {0, 10.f};
+        point_f Gravity {0, 10.0f};
 
         /// Restitution velocity threshold, usually in m/s. Collisions above this
         /// speed have restitution applied (will bounce).

@@ -283,7 +283,7 @@ auto accordion::section_expand() const -> std::pair<isize, f32>
             retValue.second = (val - 0.5f) * 2;
         } else {
             retValue.first  = _oldActiveSectionIndex;
-            retValue.second = 1 - (val * 2.f);
+            retValue.second = 1 - (val * 2.0f);
         }
     }
     if (retValue.first < 0 || retValue.first >= std::ssize(_sections)) { return {INVALID_INDEX, 0.0f}; }

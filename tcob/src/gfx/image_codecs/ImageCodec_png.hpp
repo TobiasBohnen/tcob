@@ -104,7 +104,7 @@ namespace png {
     struct pHYs_chunk {
         pHYs_chunk(std::span<u8 const> data);
 
-        f32 Value {1.f};
+        f32 Value {1.0f};
     };
 
     struct acTL_chunk {

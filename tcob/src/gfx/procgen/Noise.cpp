@@ -25,7 +25,7 @@ noise_base::~noise_base() = default;
 
 auto noise_base::interpolate(f32 a0, f32 a1, f32 w) const -> f32
 {
-    f32 const e {w * w * w * (w * (w * 6.f - 15.f) + 10.f)};
+    f32 const e {w * w * w * (w * (w * 6.0f - 15.0f) + 10.0f)};
     return ((a1 - a0) * e) + a0;
 }
 
@@ -70,7 +70,7 @@ auto perlin_noise::operator()(point_f p) const -> f32
 auto perlin_noise::random_gradient(point_i i) const -> point_f
 {
     rng       rand {(i.X * 73856093) ^ (i.Y * 19349663) ^ _seed};
-    f32 const random {rand(0.f, TAU_F)};
+    f32 const random {rand(0.0f, TAU_F)};
     return {std::cos(random), std::sin(random)};
 }
 
@@ -106,7 +106,7 @@ auto cellular_noise::operator()(point_f p) const -> f32
 void cellular_noise::generate_points()
 {
     for (i32 i {0}; i < _pointCount; ++i) {
-        point_f new_point {rand(0.f, 1.0f), rand(0.f, 1.0f)};
+        point_f new_point {rand(0.0f, 1.0f), rand(0.0f, 1.0f)};
         _points.push_back(new_point);
     }
 }

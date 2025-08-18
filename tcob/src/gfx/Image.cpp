@@ -150,8 +150,8 @@ void image::blend(point_i offset, image const& src)
             color const dstCol {get_pixel({x + offset.X, y + offset.Y})};
             color const srcCol {src.get_pixel({x, y})};
 
-            f32 const sa {srcCol.A / 255.f};
-            f32 const da {dstCol.A / 255.f};
+            f32 const sa {srcCol.A / 255.0f};
+            f32 const da {dstCol.A / 255.0f};
             f32 const outA {sa + (da * (1 - sa))};
 
             color const out {

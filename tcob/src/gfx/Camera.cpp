@@ -100,7 +100,7 @@ auto camera::get_transform() const -> transform
     transform xform;
     if (Zoom != size_f::One) {
         auto const size {size_f {*_parent.Size}};
-        xform.scale_at(Zoom, {size.Width / 2.f, size.Height / 2.f});
+        xform.scale_at(Zoom, {size.Width / 2.0f, size.Height / 2.0f});
     }
     if (Position != point_f::Zero) {
         xform.translate({-Position.X, -Position.Y});

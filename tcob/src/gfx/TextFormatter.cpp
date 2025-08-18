@@ -277,7 +277,7 @@ auto static Layout(std::vector<line_definition> const& lines, font& font, alignm
                 f32 const offsetX {x + (glyph.Offset.X * scale)};
                 f32 const offsetY {y + (glyph.Offset.Y * scale)};
                 if (shapeToken->Type == token_type::Whitespace) {
-                    quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.AdvanceX * scale, 0.f}};
+                    quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.AdvanceX * scale, 0.0f}};
                 } else {
                     quadDef.Rect = {{offsetX, offsetY}, size_f {glyph.Size} * scale};
                 }

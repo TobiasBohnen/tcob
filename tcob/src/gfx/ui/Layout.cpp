@@ -416,7 +416,7 @@ void tree_layout::do_layout(size_f size)
     f32 const   horiSize {size.Width / static_cast<f32>(_maxLevel + 1)};
     f32 const   vertSize {size.Height / static_cast<f32>(w.size())};
 
-    f32 y {0.f};
+    f32 y {0.0f};
     for (auto const& widget : w) {
         f32 const widgetWidth {widget->Flex->Width.calc(horiSize)};
         f32 const widgetHeight {widget->Flex->Height.calc(vertSize)};
@@ -518,9 +518,9 @@ void magnetic_snap_layout::do_layout(size_f size)
         auto        b {*widget->Bounds};
 
         if (_snapEdges) {
-            if (b.left() <= _distance) { b.Position.X = 0.f; }
+            if (b.left() <= _distance) { b.Position.X = 0.0f; }
             if (b.right() >= size.Width - _distance) { b.Position.X = size.Width - b.width(); }
-            if (b.top() <= _distance) { b.Position.Y = 0.f; }
+            if (b.top() <= _distance) { b.Position.Y = 0.0f; }
             if (b.bottom() >= size.Height - _distance) { b.Position.Y = size.Height - b.height(); }
         }
 

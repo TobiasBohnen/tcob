@@ -121,9 +121,9 @@ enum class primitive_type : u8 {
 
 class TCOB_API uv final {
 public:
-    f32 U {0.f};
-    f32 V {0.f};
-    f32 Level {0.f};
+    f32 U {0.0f};
+    f32 V {0.0f};
+    f32 Level {0.0f};
 
     auto operator==(uv const& other) const -> bool = default;
 

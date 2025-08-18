@@ -208,7 +208,7 @@ void slider::on_update(milliseconds deltaTime)
 
 void slider::on_value_changed(f32 newVal)
 {
-    f32 const newFrac {Max != Min ? (newVal - *Min) / (*Max - *Min) : 0.f};
+    f32 const newFrac {Max != Min ? (newVal - *Min) / (*Max - *Min) : 0.0f};
     if (_isDragging) {
         _tween.reset(newFrac);
     } else {
@@ -499,7 +499,7 @@ void range_slider::on_update(milliseconds deltaTime)
 void range_slider::on_value_changed(std::pair<f32, f32> newVal)
 {
     auto const value {[&](thumb& thumb, f32 val) {
-        f32 const newFrac0 {Max != Min ? (val - *Min) / (*Max - *Min) : 0.f};
+        f32 const newFrac0 {Max != Min ? (val - *Min) / (*Max - *Min) : 0.0f};
         if (thumb.IsDragging) {
             thumb.Tween.reset(newFrac0);
         } else {

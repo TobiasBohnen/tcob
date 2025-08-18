@@ -402,7 +402,7 @@ void color_picker::on_update(milliseconds /* deltaTime */)
 
 auto color_picker::GetGradient() -> gfx::color_gradient const&
 {
-    static std::array<gfx::color_stop, 7> colorStops {{{0.f, colors::Red}, {1 / 6.f, colors::Orange}, {2 / 6.f, colors::Yellow}, {3 / 6.f, colors::Green}, {4 / 6.f, colors::Blue}, {5 / 6.f, colors::Indigo}, {1.f, colors::Violet}}};
+    static std::array<gfx::color_stop, 7> colorStops {{{0.0f, colors::Red}, {1 / 6.0f, colors::Orange}, {2 / 6.0f, colors::Yellow}, {3 / 6.0f, colors::Green}, {4 / 6.0f, colors::Blue}, {5 / 6.0f, colors::Indigo}, {1.0f, colors::Violet}}};
     static gfx::color_gradient            grad {colorStops};
     return grad;
 }
