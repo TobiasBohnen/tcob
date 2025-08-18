@@ -34,7 +34,7 @@ void list_box::style::Transition(style& target, style const& from, style const& 
 {
     vscroll_widget::style::Transition(target, from, to, step);
 
-    target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
+    target.MaxVisibleItems = static_cast<f32>(from.MaxVisibleItems + ((to.MaxVisibleItems - from.MaxVisibleItems) * step));
 }
 
 list_box::list_box(init const& wi)
@@ -117,7 +117,7 @@ void list_box::on_draw(widget_painter& painter)
     _itemRectCache.clear();
 
     rect_f const listRect {rect};
-    f32 const    itemHeight {_style.ItemHeight.calc(listRect.height())};
+    f32 const    itemHeight {get_item_height(listRect.height())};
     _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
     auto const scrollOffset {scrollbar_offset()};
 
@@ -156,7 +156,7 @@ void list_box::on_update(milliseconds deltaTime)
 
     // scroll to selected
     if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
-        f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
+        f32 const itemHeight {get_item_height(content_bounds().height())};
         set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max()));
         _scrollToSelected = false;
     }
@@ -263,7 +263,7 @@ auto list_box::get_scroll_content_height() const -> f32
     if (Items->empty()) { return 0; }
 
     f32       retValue {0.0f};
-    f32 const itemHeight {_style.ItemHeight.calc(content_bounds().height())};
+    f32 const itemHeight {get_item_height(content_bounds().height())};
     for (isize i {0}; i < std::ssize(*Items); ++i) { retValue += itemHeight; }
 
     return retValue;
@@ -271,7 +271,7 @@ auto list_box::get_scroll_content_height() const -> f32
 
 auto list_box::get_scroll_distance() const -> f32
 {
-    return _style.ItemHeight.calc(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max();
+    return get_item_height(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max();
 }
 
 void list_box::apply_filter()
@@ -285,6 +285,11 @@ void list_box::apply_filter()
             }
         }
     }
+}
+
+auto list_box::get_item_height(f32 ref) const -> f32
+{
+    return ref / _style.MaxVisibleItems;
 }
 
 } // namespace ui

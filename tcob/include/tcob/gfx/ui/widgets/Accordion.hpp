@@ -29,8 +29,8 @@ class TCOB_API accordion : public widget_container {
 public:
     class TCOB_API style : public widget_style {
     public:
-        length       SectionBarHeight;
         utf8_string  SectionItemClass {"section_items"};
+        length       SectionBarHeight;
         milliseconds ExpandDuration {0};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);

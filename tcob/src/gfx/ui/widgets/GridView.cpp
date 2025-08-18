@@ -28,7 +28,7 @@ void grid_view::style::Transition(style& target, style const& from, style const&
 {
     vscroll_widget::style::Transition(target, from, to, step);
 
-    target.RowHeight = length::Lerp(from.RowHeight, to.RowHeight, step);
+    target.MaxVisibleRows = static_cast<f32>(from.MaxVisibleRows + ((to.MaxVisibleRows - from.MaxVisibleRows) * step));
 }
 
 grid_view::grid_view(init const& wi)
@@ -96,7 +96,7 @@ void grid_view::on_draw(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     rect_f    gridRect {rect};
-    f32 const rowHeight {_style.RowHeight.calc(gridRect.height())};
+    f32 const rowHeight {get_row_height(gridRect.height())};
 
     usize const size {static_cast<usize>(Grid->width())};
     if (size == 0) { return; }
@@ -265,13 +265,18 @@ auto grid_view::get_scroll_content_height() const -> f32
 {
     if (Header->empty()) { return 0; }
 
-    f32 const itemHeight {_style.RowHeight.calc(content_bounds().height())};
+    f32 const itemHeight {get_row_height(content_bounds().height())};
     return itemHeight * static_cast<f32>(Grid->height() + 1);
 }
 
 auto grid_view::get_scroll_distance() const -> f32
 {
-    return _style.RowHeight.calc(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max();
+    return get_row_height(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max();
+}
+
+auto grid_view::get_row_height(f32 ref) const -> f32
+{
+    return ref / (_style.MaxVisibleRows + 1);
 }
 
 } // namespace ui

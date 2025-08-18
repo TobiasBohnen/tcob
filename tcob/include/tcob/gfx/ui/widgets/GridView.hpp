@@ -38,7 +38,7 @@ public:
         bool                     AutoSizeColumns {true};
         utf8_string              HeaderItemClass {"header_items"};
         std::vector<utf8_string> RowItemClasses {"row_items"};
-        length                   RowHeight {};
+        f32                      MaxVisibleRows {5};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -71,6 +71,7 @@ protected:
 
 private:
     auto get_column_width(usize col, f32 width) const -> f32;
+    auto get_row_height(f32 ref) const -> f32;
 
     std::vector<isize> _columnSizes;
 

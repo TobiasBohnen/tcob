@@ -24,7 +24,7 @@ public:
     class TCOB_API style : public vscroll_widget::style {
     public:
         utf8_string ItemClass {"list_items"};
-        length      ItemHeight {};
+        f32         MaxVisibleItems {5};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -64,6 +64,7 @@ protected:
 private:
     void apply_filter();
     auto get_items() const -> std::vector<item> const&;
+    auto get_item_height(f32 ref) const -> f32;
 
     std::vector<item>                 _filteredItems;
     std::unordered_map<isize, rect_f> _itemRectCache;
