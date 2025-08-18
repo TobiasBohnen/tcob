@@ -27,6 +27,7 @@ void cycle_button::style::Transition(style& target, style const& from, style con
 
     target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
     target.Bar.lerp(from.Bar, to.Bar, step);
+    target.GapFactor = static_cast<f32>(from.GapFactor + ((to.GapFactor - from.GapFactor) * step));
 }
 
 cycle_button::cycle_button(init const& wi)
@@ -87,13 +88,27 @@ void cycle_button::on_draw(widget_painter& painter)
         barRect.Position.Y += itemHeight;
         barRect.Size.Height -= itemHeight;
         if (barRect.height() > 0) {
-            isize const      itemCount {std::ssize(*Items)};
-            std::vector<f32> stops(itemCount + 1);
+            isize const itemCount {std::ssize(*Items) * 2};
+
+            f32 const unit {1.0f / itemCount};
+            f32 const gapSize {unit * _style.GapFactor};
+            f32 const barSize {(2 * unit) - gapSize};
+
+            std::vector<f32> stops(itemCount + 2);
             stops[0] = 0;
-            std::vector<bar_element::type> stopPattern(itemCount);
-            for (isize i {1}; i <= itemCount; ++i) {
-                stops[i]           = static_cast<f32>(i) / itemCount;
-                stopPattern[i - 1] = (i - 1 == SelectedItemIndex ? bar_element::type::High : bar_element::type::Low);
+            stops[1] = gapSize / 2;
+
+            std::vector<bar_element::type> stopPattern(stops.size() - 1);
+            stopPattern[0] = bar_element::type::Empty;
+
+            for (isize i {2}; i < std::ssize(stops); ++i) {
+                if (i % 2 == 0) {
+                    stops[i]           = stops[i - 1] + barSize;
+                    stopPattern[i - 1] = (SelectedItemIndex == (i - 1) / 2 ? bar_element::type::High : bar_element::type::Low);
+                } else {
+                    stops[i]           = stops[i - 1] + gapSize;
+                    stopPattern[i - 1] = bar_element::type::Empty;
+                }
             }
             std::ignore = painter.draw_bar(
                 _style.Bar,
