@@ -96,8 +96,8 @@ namespace detail {
         using const_return_type = typename Source::const_return_type;
 
         prop_base() = default;
-        explicit prop_base(Source source);
         explicit prop_base(T val);
+        explicit prop_base(Source source);
 
         signal<T const> Changed;
 
@@ -113,14 +113,7 @@ namespace detail {
 
         void mutate(auto&& func);
 
-        void bind(auto&... others)
-        {
-            Changed.connect([&others...](T const& v) {
-                ((others = v), ...);
-            });
-
-            ((others.Changed.connect([this](T const& v) { *this = v; })), ...);
-        }
+        void bind(auto&... others);
 
     protected:
         void set(T const& value, bool force);

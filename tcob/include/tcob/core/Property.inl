@@ -118,14 +118,14 @@ inline auto func_source<T>::set(type const& value, bool force) -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename T, typename Source>
-inline prop_base<T, Source>::prop_base(Source source)
-    : _source {std::move(source)}
+inline prop_base<T, Source>::prop_base(T val)
+    : _source {val}
 {
 }
 
 template <typename T, typename Source>
-inline prop_base<T, Source>::prop_base(T val)
-    : _source {val}
+inline prop_base<T, Source>::prop_base(Source source)
+    : _source {std::move(source)}
 {
 }
 
@@ -192,6 +192,13 @@ inline void prop_base<T, Source>::mutate(auto&& func)
         func(_source.get());
         Changed(_source.get());
     }
+}
+
+template <typename T, typename Source>
+inline void prop_base<T, Source>::bind(auto&... others)
+{
+    Changed.connect([&others...](T const& v) { ((others = v), ...); });
+    ((others.Changed.connect([this](T const& v) { *this = v; })), ...);
 }
 
 template <typename T, typename Source>
