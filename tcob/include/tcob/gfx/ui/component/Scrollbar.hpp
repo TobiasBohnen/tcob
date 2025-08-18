@@ -34,7 +34,6 @@ public:
     void draw(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect);
 
     auto current_value() const -> f32;
-    auto target_value() const -> f32;
 
     void start(f32 target);
     void reset(f32 target);
@@ -49,6 +48,8 @@ public:
     void mouse_leave();
 
 private:
+    void do_start(f32 target);
+
     void calculate_value(point_f mp);
 
     bool    _isDragging {false};

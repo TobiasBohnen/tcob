@@ -155,7 +155,7 @@ void list_box::on_update(milliseconds deltaTime)
     vscroll_widget::on_update(deltaTime);
 
     // scroll to selected
-    if (SelectedItemIndex != INVALID_INDEX && _scrollToSelected && !_itemRectCache.empty()) { // delay scroll to selected after first paint
+    if (_scrollToSelected && SelectedItemIndex != INVALID_INDEX && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {get_item_height(content_bounds().height())};
         set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max()));
         _scrollToSelected = false;

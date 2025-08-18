@@ -29,8 +29,6 @@ public:
 protected:
     explicit vscroll_widget(init const& wi);
 
-    void on_styles_changed() override;
-
     void draw_scrollbar(widget_painter& painter, rect_f& rect);
 
     void on_mouse_leave() override;

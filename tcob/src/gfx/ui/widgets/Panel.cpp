@@ -226,9 +226,9 @@ void panel::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
         f32 const diff {invert ? -0.2f : 0.2f};
         if (orien == orientation::Vertical) {
-            _vScrollbar.start(_vScrollbar.target_value() + diff);
+            _vScrollbar.start(diff);
         } else if (orien == orientation::Horizontal) {
-            _hScrollbar.start(_hScrollbar.target_value() + diff);
+            _hScrollbar.start(diff);
         }
 
         ev.Handled = true;

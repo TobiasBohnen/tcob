@@ -36,13 +36,6 @@ vscroll_widget::vscroll_widget(init const& wi)
     });
 }
 
-void vscroll_widget::on_styles_changed()
-{
-    widget::on_styles_changed();
-
-    _vScrollbar.reset(0);
-}
-
 void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
 {
     auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
@@ -102,7 +95,7 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (ev.Scroll.Y == 0) { return; }
 
     f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
-    _vScrollbar.start(_vScrollbar.target_value() + scrollOffset);
+    _vScrollbar.start(scrollOffset);
 
     ev.Handled = true;
 }
@@ -138,11 +131,7 @@ auto vscroll_widget::scrollbar_offset() const -> f32
 void vscroll_widget::set_scrollbar_value(f32 value)
 {
     auto const max {get_scroll_max()};
-    if (max == 0) {
-        _vScrollbar.reset(0);
-    } else {
-        _vScrollbar.reset(value / max);
-    }
+    _vScrollbar.reset(max == 0 ? 0 : value / max);
 }
 
 } // namespace ui

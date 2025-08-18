@@ -32,7 +32,7 @@ public:
 
         utf8_string ItemClass {"list_items"};
         length      ItemHeight {};
-        isize       MaxVisibleItems {5};
+        f32         MaxVisibleItems {5};
 
         scrollbar_element VScrollBar;
 

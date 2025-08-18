@@ -134,12 +134,12 @@ auto scrollbar::current_value() const -> f32
     return _tween.current_value();
 }
 
-auto scrollbar::target_value() const -> f32
+void scrollbar::start(f32 target)
 {
-    return _tween.target_value();
+    do_start(target + _tween.target_value());
 }
 
-void scrollbar::start(f32 target)
+void scrollbar::do_start(f32 target)
 {
     if (!Visible) {
         _tween.reset(target);
@@ -178,7 +178,7 @@ void scrollbar::calculate_value(point_f mp)
     } break;
     }
 
-    start(frac);
+    do_start(frac);
 
     _overThumb = true;
 }

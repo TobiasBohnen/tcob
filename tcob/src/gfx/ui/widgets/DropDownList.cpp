@@ -32,7 +32,7 @@ void drop_down_list::style::Transition(style& target, style const& from, style c
     target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
     target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
 
-    target.MaxVisibleItems = static_cast<isize>(from.MaxVisibleItems + ((to.MaxVisibleItems - from.MaxVisibleItems) * step));
+    target.MaxVisibleItems = static_cast<f32>(from.MaxVisibleItems + ((to.MaxVisibleItems - from.MaxVisibleItems) * step));
 }
 
 drop_down_list::drop_down_list(init const& wi)
@@ -112,8 +112,7 @@ void drop_down_list::on_draw(widget_painter& painter)
     }
 
     if (_isExtended) {
-        f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
-
+        f32 const     itemHeight {_style.ItemHeight.calc(rect.height())};
         point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
 
         painter.add_overlay([this, globalOffset, itemHeight, isActive = fls.Active](widget_painter& painter) {
@@ -285,7 +284,7 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
     HoveredItemIndex = INVALID_INDEX;
 
     f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
-    _vScrollbar.start(_vScrollbar.target_value() + scrollOffset);
+    _vScrollbar.start(scrollOffset);
 
     ev.Handled = true;
 }
@@ -298,6 +297,7 @@ void drop_down_list::on_focus_lost()
 void drop_down_list::on_update(milliseconds deltaTime)
 {
     _vScrollbar.update(deltaTime);
+    if (_style.MaxVisibleItems <= 0.1f) { set_extended(false); }
 }
 
 void drop_down_list::offset_content(rect_f& bounds, bool isHitTest) const
