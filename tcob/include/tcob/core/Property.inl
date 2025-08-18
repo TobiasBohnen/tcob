@@ -7,6 +7,7 @@
 #include "Property.hpp"
 
 #include <compare>
+#include <type_traits>
 
 namespace tcob::detail {
 
@@ -174,6 +175,23 @@ template <typename T, typename Source>
 inline auto prop_base<T, Source>::operator[](auto&&... idx) const -> decltype(auto)
 {
     return _source.get()[idx...];
+}
+
+template <typename T, typename Source>
+inline void prop_base<T, Source>::mutate(auto&& func)
+{
+    static_assert(std::is_reference_v<return_type>);
+
+    using result_t = std::invoke_result_t<decltype(func), decltype(_source.get())>;
+
+    if constexpr (std::is_same_v<result_t, bool>) {
+        if (func(_source.get())) {
+            Changed(_source.get());
+        }
+    } else if constexpr (std::is_void_v<result_t>) {
+        func(_source.get());
+        Changed(_source.get());
+    }
 }
 
 template <typename T, typename Source>

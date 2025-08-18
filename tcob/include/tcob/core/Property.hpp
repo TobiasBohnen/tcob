@@ -111,20 +111,15 @@ namespace detail {
 
         auto operator[](auto&&... idx) const -> decltype(auto);
 
-        void mutate(auto&& func)
+        void mutate(auto&& func);
+
+        void bind(auto&... others)
         {
-            static_assert(std::is_reference_v<return_type>);
+            Changed.connect([&others...](T const& v) {
+                ((others = v), ...);
+            });
 
-            using result_t = std::invoke_result_t<decltype(func), decltype(_source.get())>;
-
-            if constexpr (std::is_same_v<result_t, bool>) {
-                if (func(_source.get())) {
-                    Changed(_source.get());
-                }
-            } else if constexpr (std::is_void_v<result_t>) {
-                func(_source.get());
-                Changed(_source.get());
-            }
+            ((others.Changed.connect([this](T const& v) { *this = v; })), ...);
         }
 
     protected:
