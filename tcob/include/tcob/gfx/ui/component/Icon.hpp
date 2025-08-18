@@ -15,7 +15,7 @@ namespace tcob::ui {
 
 class TCOB_API icon {
 public:
-    assets::asset_ptr<gfx::texture> Texture;
+    assets::asset_ptr<gfx::texture> Texture {};
     string                          TextureRegion {"default"};
     color                           Color {colors::White};
 

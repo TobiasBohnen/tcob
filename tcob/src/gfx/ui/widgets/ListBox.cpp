@@ -119,7 +119,8 @@ void list_box::on_draw(widget_painter& painter)
     rect_f const listRect {rect};
     f32 const    itemHeight {get_item_height(listRect.height())};
     _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
-    auto const scrollOffset {scrollbar_offset()};
+    auto const  scrollOffset {scrollbar_offset()};
+    auto const& items {get_items()};
 
     auto const paintItem {[&](isize i) {
         rect_f itemRect {listRect};
@@ -129,14 +130,14 @@ void list_box::on_draw(widget_painter& painter)
         if (itemRect.bottom() > listRect.top() && itemRect.top() < listRect.bottom()) {
             item_style itemStyle {};
             prepare_sub_style(itemStyle, i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
-            painter.draw_item(itemStyle.Item, itemRect, get_items()[i]);
+            painter.draw_item(itemStyle.Item, itemRect, items[i]);
             _itemRectCache[i] = itemRect;
         } else {
             reset_sub_style(i, _style.ItemClass, {.Active = i == SelectedItemIndex, .Hover = i == HoveredItemIndex});
         }
     }};
 
-    isize const size {std::ssize(*Items)};
+    isize const size {std::ssize(items)};
     for (isize i {0}; i < size; ++i) {
         if (i == HoveredItemIndex || i == SelectedItemIndex) { continue; }
         paintItem(i);
