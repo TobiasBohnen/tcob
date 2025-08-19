@@ -195,7 +195,7 @@ auto constexpr color::to_hsl() const -> hsx
         h /= 6.0f;
     }
 
-    return {.Hue = degree_f {h * 360.0f}, .Saturation = s, .X = l};
+    return {.Hue = degree_f {h * 360.0f}.as_normalized(), .Saturation = s, .X = l};
 }
 
 auto constexpr color::to_hsv() const -> hsx
@@ -227,7 +227,7 @@ auto constexpr color::to_hsv() const -> hsx
         h /= 6.0f;
     }
 
-    return {.Hue = degree_f {h * 360.0f}, .Saturation = s, .X = v};
+    return {.Hue = degree_f {h * 360.0f}.as_normalized(), .Saturation = s, .X = v};
 }
 
 auto constexpr operator==(color left, color right) -> bool
