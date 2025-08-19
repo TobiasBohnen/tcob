@@ -301,78 +301,81 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 
 ////////////////////////////////////////////////////////////
 
+void color_picker::style::Transition(style& target, style const& from, style const& to, f64 step)
+{
+    widget_style::Transition(target, from, to, step);
+
+    target.HueSelectWidth = length::Lerp(from.HueSelectWidth, to.HueSelectWidth, step);
+    target.MarkerColor    = color::Lerp(from.MarkerColor, to.MarkerColor, step);
+    target.MarkerSize     = length::Lerp(from.MarkerSize, to.MarkerSize, step);
+}
+
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
-    SelectedColor.Changed.connect([this](hsx const& val) {
-        auto const& cols {GetColors()};
-
-        auto const  it {std::lower_bound(cols.begin(), cols.end(), val.Hue.as_normalized().Value, // NOLINT
-                                         [](color c, f32 h) { return c.to_hsv().Hue.Value < h; })};
-        usize const idx {static_cast<usize>(std::distance(cols.begin(), it))};
-        _selectedHuePos = static_cast<f32>(idx) / (cols.size() - 1) * Bounds->height();
-
-        _selectedColorPos = {val.Saturation * Bounds->width() * 0.9f,
-                             (1 - val.X) * Bounds->height()};
-        queue_redraw();
-    });
+    SelectedColor.Changed.connect([this](hsx const&) { queue_redraw(); });
+    SelectedColor(colors::Black.to_hsv());
 
     Class("color_picker");
 }
 
 void color_picker::on_draw(widget_painter& painter)
 {
+    // TODO: draw background
+    prepare_style(_style);
+
     auto& canvas {painter.canvas()};
     auto  guard {canvas.create_guard()};
 
-    auto const bounds {*Bounds};
+    canvas.set_scissor(Bounds);
+    canvas.translate(Bounds->Position);
 
-    canvas.set_scissor(bounds);
-    canvas.translate(bounds.Position);
+    size_f const hueSize {_style.HueSelectWidth.calc(Bounds->width()), Bounds->height()};
+    size_f const colorSize {Bounds->width() - hueSize.Width, Bounds->height()};
 
     // color gradient
-    size_f const sizeColor {bounds.width() * 0.9f, bounds.height()};
-
     canvas.begin_path();
-    canvas.rect({point_f::Zero, sizeColor});
+    canvas.rect({point_f::Zero, colorSize});
 
     canvas.set_fill_style(colors::White);
     canvas.fill();
 
     color const baseColor {color::FromHSVA({.Hue = SelectedColor->Hue, .Saturation = 1.0, .X = 1.0f})};
     canvas.set_fill_style(canvas.create_linear_gradient(
-        {0, 0}, {sizeColor.Width, 0},
+        {0, 0}, {colorSize.Width, 0},
         {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
     canvas.fill();
     canvas.set_fill_style(canvas.create_linear_gradient(
-        {0, 0}, {0, sizeColor.Height},
+        {0, 0}, {0, colorSize.Height},
         {color {0, 0, 0, 0}, color {0, 0, 0, 255}}));
     canvas.fill();
 
     // hue gradient
-    size_f const sizeHue {bounds.width() * 0.1f, bounds.height()};
-
     canvas.begin_path();
-    canvas.rect({{sizeColor.Width, 0}, sizeHue});
-    canvas.set_fill_style(canvas.create_linear_gradient({0, 0}, {0, sizeHue.Height}, GetGradient()));
+    canvas.rect({{colorSize.Width, 0}, hueSize});
+    canvas.set_fill_style(canvas.create_linear_gradient({0, 0}, {0, hueSize.Height}, GetGradient()));
     canvas.fill();
 
-    if (_selectedColorPos.X != INVALID_INDEX) {
-        canvas.begin_path();
-        canvas.circle(_selectedColorPos, 5);
-        canvas.set_stroke_style(colors::White);
-        canvas.set_stroke_width(2);
-        canvas.stroke();
-    }
+    // selected positions
+    f32 const markerSize {_style.MarkerSize.calc(colorSize.Width)};
+    canvas.set_stroke_style(_style.MarkerColor);
+    canvas.set_stroke_width(markerSize);
 
-    if (_selectedHuePos != INVALID_INDEX) {
-        canvas.begin_path();
-        canvas.move_to({sizeColor.Width, _selectedHuePos});
-        canvas.line_to({sizeColor.Width + sizeHue.Width, _selectedHuePos});
-        canvas.set_stroke_style(colors::White);
-        canvas.set_stroke_width(2);
-        canvas.stroke();
-    }
+    point_f const selectedColorPos {SelectedColor->Saturation * colorSize.Width,
+                                    (1 - SelectedColor->X) * Bounds->height()};
+    canvas.begin_path();
+    canvas.circle(selectedColorPos, markerSize * 2);
+    canvas.stroke();
+
+    auto const& cols {GetColors()};
+    auto const  it {std::lower_bound(cols.begin(), cols.end(), SelectedColor->Hue.as_normalized().Value, // NOLINT
+                                     [](color c, f32 h) { return c.to_hsv().Hue.Value < h; })};
+    usize const idx {static_cast<usize>(std::distance(cols.begin(), it))};
+    f32 const   selectedHuePos {static_cast<f32>(idx) / (cols.size() - 1) * Bounds->height()};
+    canvas.begin_path();
+    canvas.move_to({colorSize.Width, selectedHuePos});
+    canvas.line_to({colorSize.Width + hueSize.Width, selectedHuePos});
+    canvas.stroke();
 }
 
 void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
@@ -382,9 +385,7 @@ void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void color_picker::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    if (hover_color(ev.Position) && select_color()) {
-        ev.Handled = true;
-    }
+    if (hover_color(ev.Position) && select_color()) { ev.Handled = true; }
 }
 
 void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
@@ -400,15 +401,14 @@ auto color_picker::hover_color(point_i mp) -> bool
 {
     auto const pos {global_to_local(*this, mp)};
     if (Bounds->contains(pos)) {
-        f32 const s {(pos.X - Bounds->left()) / (Bounds->width() * 0.9f)};
+        f32 const s {(pos.X - Bounds->left()) / (Bounds->width() - _style.HueSelectWidth.calc(Bounds->width()))};
         f32 const v {(pos.Y - Bounds->top()) / Bounds->height()};
         if (s < 1.0f) {
             _hoveredColor   = {.Hue = SelectedColor->Hue, .Saturation = s, .X = 1 - v};
             _hoveredBaseHue = std::nullopt;
         } else {
-            _hoveredColor = std::nullopt;
-            auto const& col {GetColors().at(static_cast<i32>(255 * v))};
-            _hoveredBaseHue = col.to_hsv().Hue;
+            _hoveredColor   = std::nullopt;
+            _hoveredBaseHue = GetColors().at(static_cast<usize>(255 * v)).to_hsv().Hue;
         }
 
         return true;

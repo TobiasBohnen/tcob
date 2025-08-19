@@ -103,6 +103,14 @@ private:
 
 class TCOB_API color_picker : public widget {
 public:
+    struct style : public widget_style {
+        length HueSelectWidth {0.1f, length::type::Relative};
+        color  MarkerColor {colors::White};
+        length MarkerSize {2, length::type::Absolute};
+
+        void static Transition(style& target, style const& from, style const& to, f64 step);
+    };
+
     explicit color_picker(init const& wi);
 
     prop<hsx> SelectedColor;
@@ -119,14 +127,14 @@ protected:
 private:
     auto hover_color(point_i mp) -> bool;
     auto select_color() -> bool;
+
     auto static GetGradient() -> gfx::color_gradient const&;
     auto static GetColors() -> std::array<color, 256> const&;
 
-    point_f _selectedColorPos {point_f {INVALID_INDEX, INVALID_INDEX}};
-    f32     _selectedHuePos {INVALID_INDEX};
-
     std::optional<hsx>      _hoveredColor;
     std::optional<degree_f> _hoveredBaseHue;
+
+    color_picker::style _style;
 };
 
 }
