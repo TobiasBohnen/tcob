@@ -6,7 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <bitset>
+#include <optional>
 #include <span>
 #include <unordered_map>
 #include <vector>
@@ -103,11 +105,7 @@ class TCOB_API color_picker : public widget {
 public:
     explicit color_picker(init const& wi);
 
-    prop<color> SelectedColor;
-    prop<color> HoveredColor;
-
-    prop<degree_f> SelectedBaseHue {degree_f {0}};
-    prop<degree_f> HoveredBaseHue {degree_f {0}};
+    prop<hsx> SelectedColor;
 
 protected:
     void on_draw(widget_painter& painter) override;
@@ -120,11 +118,15 @@ protected:
 
 private:
     auto hover_color(point_i mp) -> bool;
-    auto select_color(point_i mp) -> bool;
+    auto select_color() -> bool;
     auto static GetGradient() -> gfx::color_gradient const&;
+    auto static GetColors() -> std::array<color, 256> const&;
 
     point_f _selectedColorPos {point_f {INVALID_INDEX, INVALID_INDEX}};
     f32     _selectedHuePos {INVALID_INDEX};
+
+    std::optional<hsx>      _hoveredColor;
+    std::optional<degree_f> _hoveredBaseHue;
 };
 
 }

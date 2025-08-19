@@ -8,11 +8,12 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <iterator>
+#include <optional>
 #include <span>
 #include <utility>
 #include <vector>
 
-#include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -303,8 +304,18 @@ void seven_segment_display::on_update(milliseconds /* deltaTime */)
 color_picker::color_picker(init const& wi)
     : widget {wi}
 {
-    SelectedColor.Changed.connect([this](auto const&) { queue_redraw(); });
-    SelectedBaseHue.Changed.connect([this](auto const&) { queue_redraw(); });
+    SelectedColor.Changed.connect([this](hsx const& val) {
+        auto const& cols {GetColors()};
+
+        auto const  it {std::lower_bound(cols.begin(), cols.end(), val.Hue.as_normalized().Value, // NOLINT
+                                         [](color c, f32 h) { return c.to_hsv().Hue.Value < h; })};
+        usize const idx {static_cast<usize>(std::distance(cols.begin(), it))};
+        _selectedHuePos = static_cast<f32>(idx) / (cols.size() - 1) * Bounds->height();
+
+        _selectedColorPos = {val.Saturation * Bounds->width() * 0.9f,
+                             (1 - val.X) * Bounds->height()};
+        queue_redraw();
+    });
 
     Class("color_picker");
 }
@@ -328,7 +339,7 @@ void color_picker::on_draw(widget_painter& painter)
     canvas.set_fill_style(colors::White);
     canvas.fill();
 
-    color const baseColor {color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = 1.0, .X = 1.0f})};
+    color const baseColor {color::FromHSVA({.Hue = SelectedColor->Hue, .Saturation = 1.0, .X = 1.0f})};
     canvas.set_fill_style(canvas.create_linear_gradient(
         {0, 0}, {sizeColor.Width, 0},
         {color {baseColor.R, baseColor.G, baseColor.B, 0}, color {baseColor.R, baseColor.G, baseColor.B, 255}}));
@@ -371,14 +382,14 @@ void color_picker::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void color_picker::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    if (hover_color(ev.Position) && select_color(ev.Position)) {
+    if (hover_color(ev.Position) && select_color()) {
         ev.Handled = true;
     }
 }
 
 void color_picker::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    if (select_color(ev.Position)) { ev.Handled = true; }
+    if (select_color()) { ev.Handled = true; }
 }
 
 void color_picker::on_update(milliseconds /* deltaTime */)
@@ -387,17 +398,17 @@ void color_picker::on_update(milliseconds /* deltaTime */)
 
 auto color_picker::hover_color(point_i mp) -> bool
 {
-    auto const pos {global_to_parent(*this, mp)};
+    auto const pos {global_to_local(*this, mp)};
     if (Bounds->contains(pos)) {
         f32 const s {(pos.X - Bounds->left()) / (Bounds->width() * 0.9f)};
         f32 const v {(pos.Y - Bounds->top()) / Bounds->height()};
         if (s < 1.0f) {
-            HoveredColor   = color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = s, .X = 1 - v});
-            HoveredBaseHue = degree_f {INVALID_INDEX};
+            _hoveredColor   = {.Hue = SelectedColor->Hue, .Saturation = s, .X = 1 - v};
+            _hoveredBaseHue = std::nullopt;
         } else {
-            HoveredColor = colors::Transparent;
-            auto const col {GetGradient().colors().at(static_cast<i32>(255 * v))};
-            HoveredBaseHue = col.to_hsv().Hue;
+            _hoveredColor = std::nullopt;
+            auto const& col {GetColors().at(static_cast<i32>(255 * v))};
+            _hoveredBaseHue = col.to_hsv().Hue;
         }
 
         return true;
@@ -405,24 +416,17 @@ auto color_picker::hover_color(point_i mp) -> bool
     return false;
 }
 
-auto color_picker::select_color(point_i mp) -> bool
+auto color_picker::select_color() -> bool
 {
-    bool       retValue {false};
-    auto const pos {global_to_parent(*this, mp)};
-    if (HoveredBaseHue->Value != INVALID_INDEX) {
-        SelectedBaseHue = *HoveredBaseHue;
-        if (SelectedColor != colors::Transparent) {
-            auto const col {SelectedColor->to_hsv()};
-            SelectedColor = color::FromHSVA({.Hue = SelectedBaseHue, .Saturation = col.Saturation, .X = col.X});
-        }
-        _selectedHuePos = pos.Y - Bounds->Position.Y;
-        retValue        = true;
+    bool retValue {false};
+    if (_hoveredBaseHue) {
+        SelectedColor = {.Hue = *_hoveredBaseHue, .Saturation = SelectedColor->Saturation, .X = SelectedColor->X};
+        retValue      = true;
+    } else if (_hoveredColor) {
+        SelectedColor = *_hoveredColor;
+        retValue      = true;
     }
-    if (HoveredColor != colors::Transparent) {
-        SelectedColor     = *HoveredColor;
-        _selectedColorPos = pos - Bounds->Position;
-        retValue          = true;
-    }
+
     return retValue;
 }
 
@@ -431,6 +435,12 @@ auto color_picker::GetGradient() -> gfx::color_gradient const&
     static std::array<gfx::color_stop, 7> colorStops {{{0.0f, colors::Red}, {1 / 6.0f, colors::Orange}, {2 / 6.0f, colors::Yellow}, {3 / 6.0f, colors::Green}, {4 / 6.0f, colors::Blue}, {5 / 6.0f, colors::Indigo}, {1.0f, colors::Violet}}};
     static gfx::color_gradient            grad {colorStops};
     return grad;
+}
+
+auto color_picker::GetColors() -> std::array<color, 256> const&
+{
+    static std::array<color, 256> colors {GetGradient().colors()};
+    return colors;
 }
 
 } // namespace display
