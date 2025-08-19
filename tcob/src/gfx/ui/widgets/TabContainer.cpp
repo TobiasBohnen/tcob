@@ -251,7 +251,7 @@ void tab_container::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredTabIndex = INVALID_INDEX;
 
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
     for (i32 i {0}; i < std::ssize(_tabRectCache); ++i) {
         if (!_tabRectCache[i].contains(mp)) { continue; }
 

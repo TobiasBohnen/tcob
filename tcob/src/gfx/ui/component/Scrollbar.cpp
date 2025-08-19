@@ -71,7 +71,7 @@ auto scrollbar::mouse_hover(widget const& widget, point_i mp) -> bool
 
     if (!Visible) { return false; }
 
-    auto const pos {global_to_parent(widget, mp)};
+    auto const pos {global_to_local(widget, mp)};
 
     if (_barRectCache.Thumb.contains(pos)) {
         _overThumb = true;
@@ -105,7 +105,7 @@ void scrollbar::mouse_down(widget const& widget, point_i mp)
     if (!_overThumb) {
         calculate_value(global_to_content(widget, mp));
     } else {
-        _dragOffset = point_i {global_to_parent(widget, mp) - _barRectCache.Thumb.center()};
+        _dragOffset = point_i {global_to_local(widget, mp) - _barRectCache.Thumb.center()};
         _isDragging = true;
     }
 }
@@ -115,7 +115,7 @@ void scrollbar::mouse_up(widget const& widget, point_i mp)
     _dragOffset = point_i::Zero;
     _isDragging = false;
 
-    auto const pos {global_to_parent(widget, mp)};
+    auto const pos {global_to_local(widget, mp)};
     _overThumb = _barRectCache.Thumb.contains(pos);
     _overBar   = _barRectCache.Bar.contains(pos);
 }

@@ -126,7 +126,7 @@ void image_box::on_update(milliseconds deltaTime)
 void image_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (Draggable) {
-        _dragPosition = global_to_parent(*this, ev.Position);
+        _dragPosition = global_to_local(*this, ev.Position);
         queue_redraw();
         ev.Handled = true;
     }
@@ -145,7 +145,7 @@ void image_box::on_mouse_button_up(input::mouse::button_event const& ev)
 void image_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (Draggable && ev.Button == controls().PrimaryMouseButton) {
-        _dragStart = global_to_parent(*this, ev.Position);
+        _dragStart = global_to_local(*this, ev.Position);
         ev.Handled = true;
     }
 }

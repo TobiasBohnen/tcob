@@ -110,7 +110,7 @@ void slider::on_mouse_leave()
 
 void slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    bool const overThumb {_barRectCache.Thumb.contains(global_to_parent(*this, ev.Position))};
+    bool const overThumb {_barRectCache.Thumb.contains(global_to_local(*this, ev.Position))};
     if (overThumb != _overThumb) {
         _overThumb = overThumb;
         ev.Handled = true;
@@ -145,7 +145,7 @@ void slider::on_mouse_button_down(input::mouse::button_event const& ev)
         if (!_overThumb) {
             calculate_value(global_to_content(*this, ev.Position));
         } else {
-            _dragOffset = point_i {global_to_parent(*this, ev.Position) - _barRectCache.Thumb.center()};
+            _dragOffset = point_i {global_to_local(*this, ev.Position) - _barRectCache.Thumb.center()};
             _isDragging = true;
         }
         ev.Handled = true;
@@ -418,7 +418,7 @@ void range_slider::on_mouse_leave()
 
 void range_slider::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
 
     auto const hover {[&](thumb& thumb) {
         bool const overThumb {thumb.Rect.contains(mp)};
@@ -469,7 +469,7 @@ void range_slider::on_mouse_button_up(input::mouse::button_event const& ev)
 
 void range_slider::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
 
     _min.IsDragging = false;
     _max.IsDragging = false;

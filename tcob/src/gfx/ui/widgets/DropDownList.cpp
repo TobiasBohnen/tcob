@@ -207,7 +207,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     }
 
     // over box
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
     if (Bounds->contains(mp)) {
         bool const overChevron {_chevronRectCache.contains(mp)};
         if (_mouseOverChevron != overChevron) {

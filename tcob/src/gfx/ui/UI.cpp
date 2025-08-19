@@ -194,7 +194,7 @@ auto global_to_content(widget const& widget, point_i p) -> point_f
     return point_f {p} - widget.global_content_bounds().Position;
 }
 
-auto global_to_parent(widget const& widget, point_i p) -> point_f
+auto global_to_local(widget const& widget, point_i p) -> point_f
 {
     if (auto* parent {widget.parent()}) {
         return point_f {p} - (parent->global_content_bounds().Position - parent->scroll_offset());

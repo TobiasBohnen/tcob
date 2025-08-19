@@ -222,7 +222,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredSectionIndex = INVALID_INDEX;
 
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
         if (!_sectionRectCache[i].contains(mp)) { continue; }
 

@@ -480,7 +480,7 @@ void terminal::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     if (!_useMouse) { return; }
 
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
     for (auto const& cell : _cellRectCache) {
         if (cell.first.contains(mp)) {
             HoveredCell = cell.second;

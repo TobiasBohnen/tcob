@@ -86,7 +86,7 @@ void spinner::on_mouse_leave()
 
 void spinner::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto const mp {global_to_parent(*this, ev.Position)};
+    auto const mp {global_to_local(*this, ev.Position)};
     if (_rectCache.first.contains(mp)) {
         if (_hoverArrow != arrow::Increase) {
             _hoverArrow = arrow::Increase;
