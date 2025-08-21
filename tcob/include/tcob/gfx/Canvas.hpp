@@ -207,7 +207,7 @@ public:
     void path_2d(path2d const& path);
 
     void fill_polyline(polyline_span points);
-    void stoke_polyline(polyline_span points);
+    void stroke_polyline(polyline_span points);
     void stroke_line(point_f from, point_f to);
 
     // Paints

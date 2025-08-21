@@ -467,7 +467,7 @@ void canvas::fill_polyline(polyline_span points)
     fill();
 }
 
-void canvas::stoke_polyline(polyline_span points)
+void canvas::stroke_polyline(polyline_span points)
 {
     if (points.size() == 1) { return; }
 
