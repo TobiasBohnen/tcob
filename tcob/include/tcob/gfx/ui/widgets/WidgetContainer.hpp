@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "tcob/core/Point.hpp"
@@ -20,8 +21,6 @@ class TCOB_API widget_container : public widget {
     friend class form_base;
 
 public:
-    explicit widget_container(init const& wi);
-
     void update(milliseconds deltaTime) final;
 
     void draw(widget_painter& painter) override;
@@ -36,6 +35,8 @@ public:
     void submit(Target& target);
 
 protected:
+    explicit widget_container(init const& wi);
+
     void virtual on_draw_children(widget_painter& painter) = 0;
 
     void on_prepare_redraw() override;

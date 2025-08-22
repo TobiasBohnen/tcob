@@ -41,31 +41,31 @@ auto style::ease_value(f64 t) const -> f64
 
 ////////////////////////////////////////////////////////////
 
-void widget_style::Transition(widget_style& target, widget_style const& left, widget_style const& right, f64 step)
+void widget_style::Transition(widget_style& target, widget_style const& from, widget_style const& to, f64 step)
 {
-    target.Padding = thickness::Lerp(left.Padding, right.Padding, step);
-    target.Margin  = thickness::Lerp(left.Margin, right.Margin, step);
-    paint_lerp(target.Background, left.Background, right.Background, step);
+    target.Padding = thickness::Lerp(from.Padding, to.Padding, step);
+    target.Margin  = thickness::Lerp(from.Margin, to.Margin, step);
+    paint_lerp(target.Background, from.Background, to.Background, step);
 
-    target.DropShadow.lerp(left.DropShadow, right.DropShadow, step);
-    target.Border.lerp(left.Border, right.Border, step);
+    target.DropShadow.lerp(from.DropShadow, to.DropShadow, step);
+    target.Border.lerp(from.Border, to.Border, step);
 }
 
 ////////////////////////////////////////////////////////////
 
-void thumb_style::Transition(thumb_style& target, thumb_style const& left, thumb_style const& right, f64 step)
+void thumb_style::Transition(thumb_style& target, thumb_style const& from, thumb_style const& to, f64 step)
 {
-    target.Thumb.lerp(left.Thumb, right.Thumb, step);
+    target.Thumb.lerp(from.Thumb, to.Thumb, step);
 }
 
-void nav_arrows_style::Transition(nav_arrows_style& target, nav_arrows_style const& left, nav_arrows_style const& right, f64 step)
+void nav_arrows_style::Transition(nav_arrows_style& target, nav_arrows_style const& from, nav_arrows_style const& to, f64 step)
 {
-    target.NavArrow.lerp(left.NavArrow, right.NavArrow, step);
+    target.NavArrow.lerp(from.NavArrow, to.NavArrow, step);
 }
 
-void item_style::Transition(item_style& target, item_style const& left, item_style const& right, f64 step)
+void item_style::Transition(item_style& target, item_style const& from, item_style const& to, f64 step)
 {
-    target.Item.lerp(left.Item, right.Item, step);
+    target.Item.lerp(from.Item, to.Item, step);
 }
 
 ////////////////////////////////////////////////////////////

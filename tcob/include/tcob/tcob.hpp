@@ -133,6 +133,7 @@
 #include <tcob/gfx/ui/widgets/Accordion.hpp>
 #include <tcob/gfx/ui/widgets/Button.hpp>
 #include <tcob/gfx/ui/widgets/CanvasWidget.hpp>
+#include <tcob/gfx/ui/widgets/Charting.hpp>
 #include <tcob/gfx/ui/widgets/Checkbox.hpp>
 #include <tcob/gfx/ui/widgets/CycleButton.hpp>
 #include <tcob/gfx/ui/widgets/Displays.hpp>
