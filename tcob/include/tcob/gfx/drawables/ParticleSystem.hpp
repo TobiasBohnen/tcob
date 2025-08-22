@@ -10,7 +10,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -107,11 +106,6 @@ private:
 
     bool _isRunning {false};
 };
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-using min_max = std::pair<T, T>;
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
