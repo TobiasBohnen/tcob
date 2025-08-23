@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/ui/widgets/VScrollWidget.hpp"
 
-#include <algorithm>
 #include <cassert>
 
 #include "tcob/core/Rect.hpp"
@@ -41,7 +40,7 @@ void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
     auto const* style {dynamic_cast<vscroll_widget::style const*>(current_style())};
     assert(style);
 
-    _vScrollbar.Visible = get_scroll_content_height() - 1 > rect.height();
+    _vScrollbar.Visible = get_scroll_max_value() > 0;
     if (!_vScrollbar.Visible) { return; }
 
     auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
@@ -94,8 +93,8 @@ void vscroll_widget::on_mouse_wheel(input::mouse::wheel_event const& ev)
     if (!_vScrollbar.Visible) { return; }
     if (ev.Scroll.Y == 0) { return; }
 
-    f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
-    _vScrollbar.start(scrollOffset);
+    f32 const step {(ev.Scroll.Y > 0) ? -get_scroll_step() : get_scroll_step()};
+    _vScrollbar.start(step);
 
     ev.Handled = true;
 }
@@ -118,19 +117,14 @@ void vscroll_widget::offset_content(rect_f& bounds, bool isHitTest) const
     bounds.Size.Width -= style->VScrollBar.Bar.Size.calc(bounds.width());
 }
 
-auto vscroll_widget::get_scroll_max() const -> f32
-{
-    return std::max(0.0f, get_scroll_content_height() - content_bounds().height());
-}
-
 auto vscroll_widget::scrollbar_offset() const -> f32
 {
-    return _vScrollbar.current_value() * get_scroll_max();
+    return _vScrollbar.current_value() * get_scroll_max_value();
 }
 
 void vscroll_widget::set_scrollbar_value(f32 value)
 {
-    auto const max {get_scroll_max()};
+    auto const max {get_scroll_max_value()};
     _vScrollbar.reset(max == 0 ? 0 : value / max);
 }
 

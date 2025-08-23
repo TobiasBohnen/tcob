@@ -42,9 +42,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto virtual get_scroll_content_height() const -> f32 = 0;
-    auto virtual get_scroll_distance() const -> f32       = 0;
-    auto get_scroll_max() const -> f32;
+    auto virtual get_scroll_step() const -> f32      = 0;
+    auto virtual get_scroll_max_value() const -> f32 = 0;
 
     auto scrollbar_offset() const -> f32;
     void set_scrollbar_value(f32 value);

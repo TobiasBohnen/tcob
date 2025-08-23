@@ -261,17 +261,17 @@ auto grid_view::get_column_width(usize col, f32 width) const -> f32
     return width / static_cast<f32>(Header->size());
 }
 
-auto grid_view::get_scroll_content_height() const -> f32
+auto grid_view::get_scroll_max_value() const -> f32
 {
     if (Header->empty()) { return 0; }
 
     f32 const itemHeight {get_row_height(content_bounds().height())};
-    return itemHeight * static_cast<f32>(Grid->height() + 1);
+    return std::max(0.0f, (itemHeight * static_cast<f32>(Grid->height() + 1)) - content_bounds().height());
 }
 
-auto grid_view::get_scroll_distance() const -> f32
+auto grid_view::get_scroll_step() const -> f32
 {
-    return get_row_height(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max();
+    return get_row_height(content_bounds().height()) * static_cast<f32>(_visibleRows) / get_scroll_max_value();
 }
 
 auto grid_view::get_row_height(f32 ref) const -> f32

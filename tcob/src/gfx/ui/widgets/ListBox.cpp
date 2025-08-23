@@ -158,7 +158,7 @@ void list_box::on_update(milliseconds deltaTime)
     // scroll to selected
     if (_scrollToSelected && SelectedItemIndex != INVALID_INDEX && !_itemRectCache.empty()) { // delay scroll to selected after first paint
         f32 const itemHeight {get_item_height(content_bounds().height())};
-        set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max()));
+        set_scrollbar_value(std::min(itemHeight * static_cast<f32>(SelectedItemIndex), get_scroll_max_value()));
         _scrollToSelected = false;
     }
 }
@@ -259,20 +259,17 @@ auto list_box::attributes() const -> widget_attributes
     return retValue;
 }
 
-auto list_box::get_scroll_content_height() const -> f32
+auto list_box::get_scroll_max_value() const -> f32
 {
     if (Items->empty()) { return 0; }
 
-    f32       retValue {0.0f};
     f32 const itemHeight {get_item_height(content_bounds().height())};
-    for (isize i {0}; i < std::ssize(*Items); ++i) { retValue += itemHeight; }
-
-    return retValue;
+    return std::max(0.0f, (itemHeight * get_items().size()) - content_bounds().height());
 }
 
-auto list_box::get_scroll_distance() const -> f32
+auto list_box::get_scroll_step() const -> f32
 {
-    return get_item_height(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max();
+    return get_item_height(content_bounds().height()) * static_cast<f32>(_visibleItems) / get_scroll_max_value();
 }
 
 void list_box::apply_filter()

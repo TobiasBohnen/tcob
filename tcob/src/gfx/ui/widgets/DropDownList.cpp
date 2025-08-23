@@ -135,7 +135,7 @@ void drop_down_list::on_draw(widget_painter& painter)
             _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
 
             // scrollbar
-            auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max()};
+            auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max_value()};
 
             auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
                                         : isActive                     ? widget_flags {.Active = true}
@@ -283,8 +283,8 @@ void drop_down_list::on_mouse_wheel(input::mouse::wheel_event const& ev)
 
     HoveredItemIndex = INVALID_INDEX;
 
-    f32 const scrollOffset {(ev.Scroll.Y > 0) ? -get_scroll_distance() : get_scroll_distance()};
-    _vScrollbar.start(scrollOffset);
+    f32 const step {(ev.Scroll.Y > 0) ? -get_scroll_step() : get_scroll_step()};
+    _vScrollbar.start(step);
 
     ev.Handled = true;
 }
@@ -363,12 +363,12 @@ void drop_down_list::set_extended(bool v)
     }
 }
 
-auto drop_down_list::get_scroll_distance() const -> f32
+auto drop_down_list::get_scroll_step() const -> f32
 {
-    return get_item_height() * static_cast<f32>(_visibleItems) / get_scroll_max();
+    return get_item_height() * static_cast<f32>(_visibleItems) / get_scroll_max_value();
 }
 
-auto drop_down_list::get_scroll_max() const -> f32
+auto drop_down_list::get_scroll_max_value() const -> f32
 {
     return std::max(1.0f, (get_item_height() * static_cast<f32>(get_items().size())) - content_bounds().height());
 }

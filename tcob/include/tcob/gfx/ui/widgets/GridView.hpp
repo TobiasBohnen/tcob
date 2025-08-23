@@ -66,8 +66,8 @@ protected:
 
     auto attributes() const -> widget_attributes override;
 
-    auto get_scroll_content_height() const -> f32 override;
-    auto get_scroll_distance() const -> f32 override;
+    auto get_scroll_max_value() const -> f32 override;
+    auto get_scroll_step() const -> f32 override;
 
 private:
     auto get_column_width(usize col, f32 width) const -> f32;
