@@ -54,9 +54,9 @@ void toggle::on_update(milliseconds deltaTime)
 void toggle::on_checked_changed()
 {
     if (Checked) {
-        _tween.start(1.0f, _style.AnimationDuration * (1.0f - _tween.current_value()));
+        _tween.start(1.0f, _style.Delay * (1.0f - _tween.current_value()));
     } else {
-        _tween.start(0.0f, _style.AnimationDuration * _tween.current_value());
+        _tween.start(0.0f, _style.Delay * _tween.current_value());
     }
 }
 

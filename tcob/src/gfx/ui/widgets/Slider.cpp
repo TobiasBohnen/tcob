@@ -212,7 +212,7 @@ void slider::on_value_changed(f32 newVal)
     if (_isDragging) {
         _tween.reset(newFrac);
     } else {
-        _tween.start(newFrac, _style.Bar.MotionDuration);
+        _tween.start(newFrac, _style.Bar.Delay);
     }
 }
 
@@ -503,7 +503,7 @@ void range_slider::on_value_changed(std::pair<f32, f32> newVal)
         if (thumb.IsDragging) {
             thumb.Tween.reset(newFrac0);
         } else {
-            thumb.Tween.start(newFrac0, _style.Bar.MotionDuration);
+            thumb.Tween.start(newFrac0, _style.Bar.Delay);
         }
     }};
 

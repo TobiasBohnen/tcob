@@ -21,7 +21,7 @@ public:
     class TCOB_API style : public widget_style {
     public:
         tick_element Tick;
-        milliseconds AnimationDuration {0};
+        milliseconds Delay {0};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };

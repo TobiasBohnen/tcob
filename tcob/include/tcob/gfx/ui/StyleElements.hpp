@@ -251,7 +251,7 @@ public:
     paint          HigherBackground {colors::White};
     length         Size {1, length::type::Relative};
     border_element Border {};
-    milliseconds   MotionDuration {0};
+    milliseconds   Delay {0};
 
     auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
 

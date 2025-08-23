@@ -28,7 +28,7 @@ void scrollbar::update(milliseconds deltaTime)
 
 void scrollbar::draw(widget_painter& painter, scrollbar_element const& scrollbar, thumb_element const& thumb, rect_f& rect)
 {
-    _delay = scrollbar.Bar.MotionDuration;
+    _delay = scrollbar.Bar.Delay;
 
     if (!Visible) { return; }
 
