@@ -133,7 +133,7 @@ template <typename T>
 using sine_wave_tween = tween<easing::sine_wave<T>>;
 
 template <typename T>
-using triange_wave_tween = tween<easing::triange_wave<T>>;
+using triangle_wave_tween = tween<easing::triangle_wave<T>>;
 
 template <typename T>
 using square_wave_tween = tween<easing::square_wave<T>>;

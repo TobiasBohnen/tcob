@@ -206,7 +206,7 @@ private:
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-class triange_wave final {
+class triangle_wave final {
 public:
     using type = T;
 

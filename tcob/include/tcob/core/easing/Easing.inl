@@ -220,7 +220,7 @@ inline auto sine_wave<T>::get_wavevalue(f64 t) const -> f64
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline auto triange_wave<T>::operator()(f64 t) const -> type
+inline auto triangle_wave<T>::operator()(f64 t) const -> type
 {
     f64 const val {get_wavevalue((Frequency * t) + Phase)};
     if constexpr (Lerpable<type>) {
@@ -231,7 +231,7 @@ inline auto triange_wave<T>::operator()(f64 t) const -> type
 }
 
 template <typename T>
-inline auto triange_wave<T>::get_wavevalue(f64 t) const -> f64
+inline auto triangle_wave<T>::get_wavevalue(f64 t) const -> f64
 {
     return 2 * std::abs(std::round(t) - t);
 }
