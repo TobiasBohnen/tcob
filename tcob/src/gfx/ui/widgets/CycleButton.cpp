@@ -34,6 +34,11 @@ cycle_button::cycle_button(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(*Items) - 1); }}}
 {
+    _tween.Changed.connect([this] {
+        queue_redraw();
+    });
+    _tween.reset(1);
+
     SelectedItemIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     SelectedItemIndex(INVALID_INDEX);
 
@@ -72,7 +77,6 @@ void cycle_button::on_draw(widget_painter& painter)
 
     scissor_guard const guard {painter, this};
 
-    // text
     if (SelectedItemIndex != INVALID_INDEX) {
         // item
         rect_f    itemRect {rect};
@@ -94,17 +98,22 @@ void cycle_button::on_draw(widget_painter& painter)
             f32 const gapSize {unit * _style.GapRatio};
             f32 const barSize {(2 * unit) - gapSize};
 
-            std::vector<f32> stops(itemCount + 2);
-            stops[0] = 0;
-            stops[1] = gapSize / 2;
-
+            std::vector<f32>               stops(itemCount + 2);
             std::vector<bar_element::type> stopPattern(stops.size() - 1);
+            stops[0]       = 0;
+            stops[1]       = gapSize / 2;
             stopPattern[0] = bar_element::type::Empty;
 
             for (isize i {2}; i < std::ssize(stops); ++i) {
                 if (i % 2 == 0) {
-                    stops[i]           = stops[i - 1] + barSize;
-                    stopPattern[i - 1] = (SelectedItemIndex == (i - 1) / 2 ? bar_element::type::High : bar_element::type::Low);
+                    isize const idx {(i - 1) / 2};
+                    stops[i] = stops[i - 1] + barSize;
+                    if ((idx == SelectedItemIndex - 1 && _tween.current_value() < 0.5f)
+                        || (idx == SelectedItemIndex && _tween.current_value() >= 0.5f)) {
+                        stopPattern[i - 1] = bar_element::type::High;
+                    } else {
+                        stopPattern[i - 1] = bar_element::type::Low;
+                    }
                 } else {
                     stops[i]           = stops[i - 1] + gapSize;
                     stopPattern[i - 1] = bar_element::type::Empty;
@@ -121,8 +130,9 @@ void cycle_button::on_draw(widget_painter& painter)
     }
 }
 
-void cycle_button::on_update(milliseconds /*deltaTime*/)
+void cycle_button::on_update(milliseconds deltaTime)
 {
+    _tween.update(deltaTime);
 }
 
 void cycle_button::on_mouse_wheel(input::mouse::wheel_event const& /* ev */)
@@ -151,6 +161,12 @@ void cycle_button::select_next()
 {
     if (Items->empty()) { return; }
     SelectedItemIndex = (SelectedItemIndex + 1) % Items->size();
+    if (SelectedItemIndex == 0) {
+        _tween.reset(1);
+    } else {
+        _tween.reset(0);
+        _tween.start(1, _style.Bar.Delay);
+    }
 }
 
 } // namespace ui

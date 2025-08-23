@@ -14,6 +14,7 @@
 #include "tcob/gfx/ui/StyleElements.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/component/Item.hpp"
+#include "tcob/gfx/ui/component/WidgetTweener.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui {
@@ -55,6 +56,8 @@ private:
     auto is_select_valid() const -> bool;
 
     void select_next();
+
+    widget_tweener _tween;
 
     cycle_button::style _style;
 };
