@@ -43,8 +43,8 @@ void render_statistics::update(milliseconds delta)
 
     if (_frameCount >= FRAME_VALUES) {
         _averageFrames = 1000.0f / (std::accumulate(_frameTimes.begin(), _frameTimes.end(), 0.0f) / FRAME_VALUES);
-        _bestFrames    = std::max(_bestFrames, 1000.0f / *std::min_element(_frameTimes.begin(), _frameTimes.end()));
-        _worstFrames   = std::min(_worstFrames, 1000.0f / *std::max_element(_frameTimes.begin(), _frameTimes.end()));
+        _bestFrames    = std::max(_bestFrames, 1000.0f / *std::ranges::min_element(_frameTimes));
+        _worstFrames   = std::min(_worstFrames, 1000.0f / *std::ranges::max_element(_frameTimes));
     } else {
         _averageFrames = 1000.0f / (std::accumulate(_frameTimes.begin(), _frameTimes.end(), 0.0f) / static_cast<f32>(_frameCount));
     }

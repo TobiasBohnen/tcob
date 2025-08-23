@@ -19,10 +19,7 @@ cursor::cursor()
                  [](point_i value) { locate_service<input::system>().mouse()->set_position(value); }}}
 {
     ActiveMode.Changed.connect([this](string const& name) {
-        if (!_modes.contains(name)) {
-            // TODO: log error
-            return;
-        }
+        if (!_modes.contains(name)) { return; } // TODO: log error
 
         _currentMode = _modes[name];
 
