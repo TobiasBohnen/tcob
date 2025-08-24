@@ -516,33 +516,67 @@ void magnetic_snap_layout::do_layout(size_f size)
     for (usize i {0}; i < w.size(); ++i) {
         auto const& widget {w[i]};
         auto        b {*widget->Bounds};
+        auto const  border {widget->current_style()->Border.Size.calc(b.width())};
+
+        f32 const left {b.left() - border};
+        f32 const right {b.right() + border};
+        f32 const top {b.top() - border};
+        f32 const bottom {b.bottom() + border};
+
+        bool hasSnappedX {false}, hasSnappedY {false};
 
         if (_snapEdges) {
-            if (b.left() <= _distance) { b.Position.X = 0.0f; }
-            if (b.right() >= size.Width - _distance) { b.Position.X = size.Width - b.width(); }
-            if (b.top() <= _distance) { b.Position.Y = 0.0f; }
-            if (b.bottom() >= size.Height - _distance) { b.Position.Y = size.Height - b.height(); }
+            if (left <= _distance) {
+                b.Position.X = border / 2;
+                hasSnappedX  = true;
+            }
+            if (right >= size.Width - _distance) {
+                b.Position.X = size.Width - b.width() - border / 2;
+                hasSnappedX  = true;
+            }
+            if (top <= _distance) {
+                b.Position.Y = border / 2;
+                hasSnappedY  = true;
+            }
+            if (bottom >= size.Height - _distance) {
+                b.Position.Y = size.Height - b.height() - border / 2;
+                hasSnappedY  = true;
+            }
         }
 
         if (_snapSiblings) {
             for (usize j {i}; j < w.size(); ++j) {
                 auto const& other {w[j]};
                 auto const& o {*other->Bounds};
+                auto const  otherBorder {other->current_style()->Border.Size.calc(o.width())};
 
-                if ((b.top() >= o.top() && b.top() <= o.bottom()) || (b.bottom() >= o.top() && b.bottom() <= o.bottom())) {
-                    if (std::abs(b.left() - o.right()) <= _distance) {
-                        b.Position.X = o.right();
-                        continue;
+                f32 const otherLeft {o.left() - otherBorder};
+                f32 const otherRight {o.right() + otherBorder};
+                f32 const otherTop {o.top() - otherBorder};
+                f32 const otherBottom {o.bottom() + otherBorder};
+
+                if (!hasSnappedX && ((top >= otherTop && top <= otherBottom) || (bottom >= otherTop && bottom <= otherBottom))) {
+                    if (std::abs(left - otherRight) <= _distance) {
+                        b.Position.X = otherRight;
+                        hasSnappedX  = true;
                     }
-                    if (std::abs(b.right() - o.left()) <= _distance) {
-                        b.Position.X = o.left() - b.width();
-                        continue;
+                    if (std::abs(right - otherLeft) <= _distance) {
+                        b.Position.X = otherLeft - b.width();
+                        hasSnappedX  = true;
                     }
                 }
-                if ((b.left() >= o.left() && b.left() <= o.right()) || (b.right() >= o.left() && b.right() <= o.right())) {
-                    if (std::abs(b.top() - o.bottom()) <= _distance) { b.Position.Y = o.bottom(); }
-                    if (std::abs(b.bottom() - o.top()) <= _distance) { b.Position.Y = o.top() - b.height(); }
+                if (!hasSnappedY && ((left >= otherLeft && left <= otherRight) || (right >= otherLeft && right <= otherRight))) {
+                    if (std::abs(top - otherBottom) <= _distance) {
+                        b.Position.Y = otherBottom;
+                        hasSnappedY  = true;
+                    }
+                    if (std::abs(bottom - otherTop) <= _distance) {
+                        b.Position.Y = otherTop - b.height();
+                        hasSnappedY  = true;
+                    }
                 }
+
+                if (hasSnappedX && hasSnappedY) { break; }
             }
         }
 

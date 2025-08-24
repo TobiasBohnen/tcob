@@ -605,10 +605,18 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
         });
     } break;
     case border_type::Double: {
-        f32 const dborderSize {borderSize / 3};
-        stroke(_canvas, dborderSize, get_paint(borderStyle.Background, rect), [&] {
-            _canvas.rounded_rect({rect.left() - (dborderSize * 2), rect.top() - (dborderSize * 2), rect.width() + (dborderSize * 4), rect.height() + (dborderSize * 4)}, borderRadius);
+        f32 const  dborderSize {borderSize / 3};
+        auto const paint {get_paint(borderStyle.Background, rect)};
+
+        stroke(_canvas, dborderSize, paint, [&] {
             _canvas.rounded_rect(rect, borderRadius);
+        });
+        stroke(_canvas, dborderSize, paint, [&] {
+            _canvas.rounded_rect({rect.left() + (2.0f * dborderSize),
+                                  rect.top() + (2.0f * dborderSize),
+                                  rect.width() - (4.0f * dborderSize),
+                                  rect.height() - (4.0f * dborderSize)},
+                                 borderRadius);
         });
     } break;
     case border_type::Dashed: {
@@ -731,7 +739,10 @@ void widget_painter::do_shadow(shadow_element const& element, rect_f const& rect
 
     point_f const dropShadowOffset {element.OffsetX.calc(rect.width()),
                                     element.OffsetY.calc(rect.height())};
-    rect_f        shadowRect {rect};
+
+    if (dropShadowOffset.X == 0 && dropShadowOffset.Y == 0) { return; }
+
+    rect_f shadowRect {rect};
     shadowRect.Position.X += dropShadowOffset.X;
     shadowRect.Position.Y += dropShadowOffset.Y;
 
