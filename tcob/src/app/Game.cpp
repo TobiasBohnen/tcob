@@ -150,7 +150,7 @@ void game::step()
 
     if (!plt.process_events()) { queue_finish(); }
 
-    if (plt.was_paused()) {
+    if (plt.window_freezed()) {
         _lastUpdate      = clock::now().time_since_epoch();
         _nextFixedUpdate = _lastUpdate + FIXED_FRAMES;
     }

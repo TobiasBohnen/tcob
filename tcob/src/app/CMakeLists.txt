@@ -6,6 +6,8 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/loaders/ConfigAssetLoader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/null/audio/NullAudioSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/null/input/NullInputSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/backend/null/gfx/NullRenderSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/SDLPlatform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/audio/SDLAudioStream.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/audio/SDLAudioSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend/SDL/input/SDLInputEnums.cpp
@@ -20,12 +22,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/app/Scene.hpp
     ${TCOB_INC_DIR}/tcob/app/Scene.inl
 )
-
-if(TCOB_ENABLE_RENDERER_NULL)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/backend/null/gfx/NullRenderSystem.cpp
-    )
-endif()
 
 # OpenGL
 if(TCOB_ENABLE_RENDERER_OPENGL45)

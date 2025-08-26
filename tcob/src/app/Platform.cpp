@@ -6,14 +6,10 @@
 #include "tcob/app/Platform.hpp"
 
 #include <any>
-#include <map>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <thread>
 #include <vector>
-
-#include <SDL3/SDL.h>
 
 #include "../audio/audio_codecs/AudioCodecs.hpp"
 #include "../data/config_formats/ConfigFormats.hpp"
@@ -24,40 +20,21 @@
 #include "tcob/app/Game.hpp"
 #include "tcob/audio/Audio.hpp"
 #include "tcob/audio/Buffer.hpp"
-#include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
 #include "tcob/core/ServiceLocator.hpp"
-#include "tcob/core/Size.hpp"
 #include "tcob/core/TaskManager.hpp"
 #include "tcob/core/assets/AssetGroup.hpp"
 #include "tcob/core/assets/AssetLoader.hpp"
-#include "tcob/core/input/Input.hpp"
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Magic.hpp"
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigFile.hpp"
-#include "tcob/data/ConfigTypes.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
-#include "tcob/gfx/RenderSystem.hpp"
 
-#if defined(TCOB_ENABLE_RENDERER_OPENGL45)
-    #include "backend/SDL/gfx/gl45/GLRenderSystem.hpp"
-#endif
-#if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    #include "backend/SDL/gfx/gles30/GLES30RenderSystem.hpp"
-#endif
-#if defined(TCOB_ENABLE_RENDERER_NULL)
-    #include "backend/null/gfx/NullRenderSystem.hpp"
-#endif
-
-#include "backend/SDL/input/SDLInputSystem.hpp"
-#include "backend/null/input/NullInputSystem.hpp"
-
-#include "backend/SDL/audio/SDLAudioSystem.hpp"
-#include "backend/null/audio/NullAudioSystem.hpp"
+#include "backend/SDL/SDLPlatform.hpp"
 
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
@@ -75,12 +52,6 @@ template <typename T>
 static auto make_unique() -> std::unique_ptr<T>
 {
     return std::make_unique<T>();
-}
-
-template <typename T>
-static auto make_shared() -> std::shared_ptr<T>
-{
-    return std::make_shared<T>();
 }
 
 platform::platform(bool headless, game::init const& ginit)
@@ -102,10 +73,6 @@ platform::platform(bool headless, game::init const& ginit)
     }
     logger::Info("starting");
 
-    InitSDL();
-
-    init_input_system();
-    init_locales();
     InitSignatures();
     InitTaskManager(ginit.WorkerThreads);
     InitConfigFormats();
@@ -117,16 +84,7 @@ platform::platform(bool headless, game::init const& ginit)
     if (!headless) {
         _configFile = std::make_unique<data::config_file>(ginit.ConfigFile); // load config
         _configFile->merge(*ginit.ConfigDefaults, false);                    // merge config with default
-
-        init_audio_system();                                                 // <-- DON'T MOVE OUTSIDE HEADLESS
-        init_render_system(ginit.Name);
-    } else {
-#if defined(TCOB_ENABLE_RENDERER_NULL)
-        register_service<gfx::render_system, gfx::null::null_render_system>();
-#endif
     }
-
-    process_events(); // gamepad add events
 }
 
 platform::~platform()
@@ -139,18 +97,12 @@ platform::~platform()
     remove_service<logger>();
     io::detail::done();
 
-    //  SDL
-    SDL_Quit();
-
     //  FreeType
     gfx::font::Done();
 }
 
 void platform::remove_services() const
 {
-    remove_service<input::system>();
-    remove_service<audio::system>();
-    remove_service<gfx::render_system>();
     remove_service<task_manager>();
 
     remove_service<assets::loader_manager::factory>();
@@ -164,24 +116,6 @@ void platform::remove_services() const
     remove_service<gfx::animated_image_encoder::factory>();
     remove_service<audio::decoder::factory>();
     remove_service<audio::encoder::factory>();
-    remove_service<gfx::render_system::factory>();
-}
-
-auto platform::Init(game::init const& ginit) -> std::shared_ptr<platform>
-{
-    return std::shared_ptr<platform> {new platform {false, ginit}};
-}
-
-auto platform::HeadlessInit(path const& logFile) -> std::shared_ptr<platform>
-{
-    return std::shared_ptr<platform> {
-        new platform {true,
-                      {.Name           = "",
-                       .OrgName        = "",
-                       .LogFile        = logFile,
-                       .ConfigFile     = "config.ini",
-                       .ConfigDefaults = {},
-                       .WorkerThreads  = std::nullopt}}};
 }
 
 auto platform::IsRunningOnWine() -> bool
@@ -194,206 +128,26 @@ auto platform::IsRunningOnWine() -> bool
 #endif
 }
 
-auto platform::process_events() const -> bool
+auto platform::Init(game::init const& ginit) -> std::shared_ptr<platform>
 {
-    SDL_Event ev;
-    auto&     inputMgr {locate_service<input::system>()};
-    while (SDL_PollEvent(&ev)) {
-        switch (ev.type) {
-        case SDL_EVENT_DROP_FILE: {
-            DropFile(ev.drop.data);
-        } break;
-        case SDL_EVENT_QUIT: return false;
-        case SDL_EVENT_KEY_DOWN:
-        case SDL_EVENT_KEY_UP:
-        case SDL_EVENT_TEXT_INPUT:
-        case SDL_EVENT_TEXT_EDITING:
-        case SDL_EVENT_MOUSE_MOTION:
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        case SDL_EVENT_MOUSE_BUTTON_UP:
-        case SDL_EVENT_MOUSE_WHEEL:
-        case SDL_EVENT_GAMEPAD_ADDED:
-        case SDL_EVENT_GAMEPAD_REMOVED:
-        case SDL_EVENT_GAMEPAD_AXIS_MOTION:
-        case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-        case SDL_EVENT_GAMEPAD_BUTTON_UP:
-        case SDL_EVENT_CLIPBOARD_UPDATE:
-            inputMgr.process_events(&ev);
-            break;
-        default:
-            if (ev.type >= SDL_EVENT_WINDOW_FIRST && ev.type <= SDL_EVENT_WINDOW_LAST) {
-                locate_service<gfx::render_system>().window().process_events(&ev);
-            }
-            break;
-        }
-    }
-
-    return true;
+    return std::shared_ptr<platform> {new sdl_platform {false, ginit}};
 }
 
-auto platform::preferred_locales() const -> std::vector<locale> const&
+auto platform::HeadlessInit(path const& logFile) -> std::shared_ptr<platform>
 {
-    return _locales;
-}
-
-auto platform::displays() const -> std::map<i32, gfx::display>
-{
-    std::map<i32, gfx::display> retValue;
-
-    i32   numDisplays {};
-    auto* displayID {SDL_GetDisplays(&numDisplays)};
-
-    for (i32 i {0}; i < numDisplays; ++i) {
-        i32    numModes {};
-        auto** displayModes {SDL_GetFullscreenDisplayModes(displayID[i], &numModes)};
-        for (i32 j {0}; j < numModes; ++j) {
-            auto* mode {displayModes[j]};
-            retValue[mode->displayID].Modes.insert({.Size         = {mode->w, mode->h},
-                                                    .PixelDensity = mode->pixel_density,
-                                                    .RefreshRate  = mode->refresh_rate});
-        }
-
-        auto const* dmode {SDL_GetDesktopDisplayMode(displayID[i])};
-        retValue[dmode->displayID].DesktopMode = {.Size         = {dmode->w, dmode->h},
-                                                  .PixelDensity = dmode->pixel_density,
-                                                  .RefreshRate  = dmode->refresh_rate};
-    }
-
-    return retValue;
-}
-
-auto platform::get_desktop_mode(i32 display) const -> gfx::display_mode
-{
-    auto const* mode {SDL_GetDesktopDisplayMode(display)};
-    return {.Size         = {mode->w, mode->h},
-            .PixelDensity = mode->pixel_density,
-            .RefreshRate  = mode->refresh_rate};
-}
-
-auto platform::was_paused() const -> bool
-{
-    return _wasPaused;
+    return std::shared_ptr<platform> {
+        new sdl_platform {true,
+                          {.Name           = "",
+                           .OrgName        = "",
+                           .LogFile        = logFile,
+                           .ConfigFile     = "config.ini",
+                           .ConfigDefaults = {},
+                           .WorkerThreads  = std::nullopt}}};
 }
 
 auto platform::config() const -> data::config_file&
 {
     return *_configFile;
-}
-
-void platform::init_locales()
-{
-    i32 count {};
-    if (auto** sdlLocales {SDL_GetPreferredLocales(&count)}) {
-        for (i32 i {0}; i < count; ++i) {
-            locale loc {};
-            auto*  sdlLocale {sdlLocales[i]};
-            if (sdlLocale->language) {
-                loc.Language = sdlLocale->language;
-                if (sdlLocale->country) {
-                    loc.Country = sdlLocale->country;
-                }
-            } else {
-                break;
-            }
-
-            _locales.push_back(loc);
-        }
-        SDL_free(sdlLocales);
-    }
-}
-
-void platform::init_audio_system()
-{
-    auto factory {register_service<audio::system::factory>()};
-    factory->add({"SDL"}, &make_shared<audio::sdl_audio_system>);
-    factory->add({"NULL"}, &make_shared<audio::null::null_audio_system>);
-
-    string audio {"SDL"};
-
-    logger::Info("AudioSystem: {}", audio);
-
-    auto system {factory->create(audio)};
-    if (!system) { throw std::runtime_error("Audio system creation failed"); }
-
-    register_service<audio::system>(system);
-}
-
-void platform::init_render_system(string const& windowTitle)
-{
-    auto rsFactory {register_service<gfx::render_system::factory>()};
-#if defined(TCOB_ENABLE_RENDERER_OPENGL45)
-    rsFactory->add({"OPENGL45"}, &make_shared<gfx::gl45::gl_render_system>);
-#endif
-#if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    rsFactory->add({"OPENGLES30"}, &make_shared<gfx::gles30::gl_render_system>);
-#endif
-#if defined(TCOB_ENABLE_RENDERER_NULL)
-    rsFactory->add({"NULL"}, &make_shared<gfx::null::null_render_system>);
-#endif
-
-    gfx::video_config video;
-    if (!_configFile->try_get(video, Cfg::Video::Name)) { throw std::runtime_error("Invalid video config"); }
-
-    string renderer {video.RenderSystem};
-
-    // create rendersystem (and window (and context))
-    logger::Info("RenderSystem: {}", renderer);
-
-    auto renderSystem {rsFactory->create(renderer)};
-    if (!renderSystem) { throw std::runtime_error("Render system creation failed"); }
-
-    register_service<gfx::render_system>(renderSystem);
-    auto& window {renderSystem->init_window(video, windowTitle, displays().begin()->second.DesktopMode.Size)};
-    window.FullScreen.Changed.connect([this](bool value) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::fullscreen] = value;
-    });
-    window.VSync.Changed.connect([this](bool value) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::vsync] = value;
-    });
-    window.Resized.connect([this, &window](auto const&) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::use_desktop_resolution] = (window.Size == displays().begin()->second.DesktopMode.Size);
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::resolution]             = *window.Size;
-    });
-
-    FrameLimit.Changed.connect([this](i32 value) {
-        (*_configFile)[Cfg::Video::Name][Cfg::Video::frame_limit] = value;
-    });
-    FrameLimit = (*_configFile)[Cfg::Video::Name][Cfg::Video::frame_limit].as<i32>();
-
-    logger::Info("Device: {}", renderSystem->device_name());
-
-#if defined(_MSC_VER)
-    SDL_SetWindowsMessageHook([](void* userdata, tagMSG* msg) -> bool {
-        auto* plt {reinterpret_cast<platform*>(userdata)};
-        plt->_wasPaused = msg->message == WM_NCLBUTTONDOWN; // left click on title bar
-        return true;
-    },
-                              this);
-#endif
-}
-
-void platform::init_input_system()
-{
-    auto factory {register_service<input::system::factory>()};
-    factory->add({"SDL"}, &make_shared<input::sdl_input_system>);
-    factory->add({"NULL"}, &make_shared<input::null::null_input_system>);
-
-    string input {"SDL"};
-
-    logger::Info("InputSystem: {}", input);
-
-    auto system {factory->create(input)};
-    if (!system) { throw std::runtime_error("Input system creation failed"); }
-
-    register_service<input::system>(system);
-}
-
-void platform::InitSDL()
-{
-    SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS);
-
-    i32 const version {SDL_GetVersion()};
-    logger::Info("SDL version: {}.{}.{}", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version), SDL_VERSIONNUM_MICRO(version));
 }
 
 void platform::InitSignatures()

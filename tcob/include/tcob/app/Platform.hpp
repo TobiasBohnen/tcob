@@ -17,16 +17,15 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/core/input/Input.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API platform final : public non_copyable {
+class TCOB_API platform : public non_copyable {
 public:
-    ~platform();
+    virtual ~platform();
 
     signal<path const> DropFile;
 
@@ -34,36 +33,25 @@ public:
 
     auto config() const -> data::config_file&;
 
-    auto preferred_locales() const -> std::vector<locale> const&;
+    auto virtual displays() const -> std::map<i32, gfx::display>          = 0;
+    auto virtual get_desktop_mode(i32 display) const -> gfx::display_mode = 0;
 
-    auto displays() const -> std::map<i32, gfx::display>;
-    auto get_desktop_mode(i32 display) const -> gfx::display_mode;
+    auto virtual preferred_locales() const -> std::vector<locale> const& = 0;
 
-    auto was_paused() const -> bool; // WINDOWS: true if window was dragged
+    auto virtual window_freezed() const -> bool = 0; // WINDOWS: true if window was dragged
 
-    auto process_events() const -> bool;
+    auto virtual process_events() const -> bool = 0;
 
     auto static IsRunningOnWine() -> bool;
+
+    static inline char const* ServiceName {"platform"};
 
     auto static Init(game::init const& ginit) -> std::shared_ptr<platform>;
     auto static HeadlessInit(path const& logFile = "") -> std::shared_ptr<platform>;
 
-    static inline char const* ServiceName {"platform"};
-
-private:
+protected:
     platform(bool headless, game::init const& ginit);
 
-    void init_locales();
-
-    void init_audio_system();
-    void init_render_system(string const& windowTitle);
-    void init_input_system();
-
-    void remove_services() const;
-
-    void on_key_down(input::keyboard::event const& ev);
-
-    void static InitSDL();
     void static InitSignatures();
     void static InitConfigFormats();
     void static InitAssetFormats();
@@ -72,10 +60,10 @@ private:
     void static InitFontEngines();
     void static InitTaskManager(std::optional<isize> workerThreads);
 
-    std::vector<locale> _locales {};
+private:
+    void remove_services() const;
 
     std::unique_ptr<data::config_file> _configFile;
-    bool                               _wasPaused {false};
 };
 
 ////////////////////////////////////////////////////////////
