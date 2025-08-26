@@ -100,4 +100,11 @@ auto key_mods::is_down(key_mod mod) const -> bool
     return (_mod & mod) == mod;
 }
 
+auto system::has_controller() const -> bool { return !controllers().empty(); }
+
+auto system::first_controller() const -> controller&
+{
+    return *controllers().begin()->second;
+}
+
 }

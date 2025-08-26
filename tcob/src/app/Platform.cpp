@@ -53,8 +53,11 @@
     #include "backend/null/gfx/NullRenderSystem.hpp"
 #endif
 
-#include "backend/SDL/audio/SDLAudioSystem.hpp"
 #include "backend/SDL/input/SDLInputSystem.hpp"
+#include "backend/null/input/NullInputSystem.hpp"
+
+#include "backend/SDL/audio/SDLAudioSystem.hpp"
+#include "backend/null/audio/NullAudioSystem.hpp"
 
 #if defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
@@ -67,6 +70,18 @@
 #endif
 
 namespace tcob {
+
+template <typename T>
+static auto make_unique() -> std::unique_ptr<T>
+{
+    return std::make_unique<T>();
+}
+
+template <typename T>
+static auto make_shared() -> std::shared_ptr<T>
+{
+    return std::make_shared<T>();
+}
 
 platform::platform(bool headless, game::init const& ginit)
 {
@@ -289,20 +304,31 @@ void platform::init_locales()
 
 void platform::init_audio_system()
 {
-    register_service<audio::system>(std::make_shared<audio::sdl_audio_system>());
+    auto factory {register_service<audio::system::factory>()};
+    factory->add({"SDL"}, &make_shared<audio::sdl_audio_system>);
+    factory->add({"NULL"}, &make_shared<audio::null::null_audio_system>);
+
+    string audio {"SDL"};
+
+    logger::Info("AudioSystem: {}", audio);
+
+    auto system {factory->create(audio)};
+    if (!system) { throw std::runtime_error("Audio system creation failed"); }
+
+    register_service<audio::system>(system);
 }
 
 void platform::init_render_system(string const& windowTitle)
 {
     auto rsFactory {register_service<gfx::render_system::factory>()};
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)
-    rsFactory->add({"OPENGL45"}, std::make_shared<gfx::gl45::gl_render_system>);
+    rsFactory->add({"OPENGL45"}, &make_shared<gfx::gl45::gl_render_system>);
 #endif
 #if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    rsFactory->add({"OPENGLES30"}, std::make_shared<gfx::gles30::gl_render_system>);
+    rsFactory->add({"OPENGLES30"}, &make_shared<gfx::gles30::gl_render_system>);
 #endif
 #if defined(TCOB_ENABLE_RENDERER_NULL)
-    rsFactory->add({"NULL"}, std::make_shared<gfx::null::null_render_system>);
+    rsFactory->add({"NULL"}, &make_shared<gfx::null::null_render_system>);
 #endif
 
     gfx::video_config video;
@@ -348,7 +374,18 @@ void platform::init_render_system(string const& windowTitle)
 
 void platform::init_input_system()
 {
-    register_service<input::sdl_system>();
+    auto factory {register_service<input::system::factory>()};
+    factory->add({"SDL"}, &make_shared<input::sdl_input_system>);
+    factory->add({"NULL"}, &make_shared<input::null::null_input_system>);
+
+    string input {"SDL"};
+
+    logger::Info("InputSystem: {}", input);
+
+    auto system {factory->create(input)};
+    if (!system) { throw std::runtime_error("Input system creation failed"); }
+
+    register_service<input::system>(system);
 }
 
 void platform::InitSDL()
@@ -394,12 +431,6 @@ void platform::InitSignatures()
     magic::add_signature({.Extension = ".s3m", .Group = "audio", .Parts = {{.Offset = 44, .Bytes = {'S', 'C', 'R', 'M'}}}});
     // config
     magic::add_signature({.Extension = ".bsbd", .Group = "config", .Parts = {{.Offset = 0, .Bytes = {'B', 'S', 'B', 'D', 1}}}});
-}
-
-template <typename T>
-static auto make_unique() -> std::unique_ptr<T>
-{
-    return std::make_unique<T>();
 }
 
 void platform::InitConfigFormats()

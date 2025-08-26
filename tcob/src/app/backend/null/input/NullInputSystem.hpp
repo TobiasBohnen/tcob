@@ -9,18 +9,16 @@
 #include <memory>
 #include <unordered_map>
 
-#include <SDL3/SDL.h>
-
 #include "tcob/core/Point.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
 
 ////////////////////////////////////////////////////////////
 
-namespace tcob::input {
+namespace tcob::input::null {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sdl_keyboard final : public keyboard {
+class TCOB_API null_keyboard final : public keyboard {
 public:
     auto get_scancode(key_code key) const -> scan_code override;
     auto get_keycode(scan_code key) const -> key_code override;
@@ -34,7 +32,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sdl_mouse final : public mouse {
+class TCOB_API null_mouse final : public mouse {
 public:
     auto get_position() const -> point_i override; // TODO: set_get_
     void set_position(point_i pos) const override;
@@ -43,12 +41,8 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sdl_controller final : public controller {
-    friend class sdl_input_system;
-
+class TCOB_API null_controller final : public controller {
 public:
-    sdl_controller(SDL_Gamepad* controller, u32 id);
-
     auto id() const -> u32 override;
     auto name() const -> string override;
 
@@ -66,28 +60,21 @@ public:
     auto get_axis_value(axis a) const -> i16 override;
     auto has_axis(axis a) const -> bool override;
     auto get_axis_name(axis a) const -> string override;
-
-private:
-    SDL_Gamepad* _controller;
-    u32          _id;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sdl_clipboard final : public clipboard {
+class TCOB_API null_clipboard final : public clipboard {
 public:
     auto has_text() const -> bool override;
-    auto get_text() const -> utf8_string override; // TODO: set_get_
+    auto get_text() const -> utf8_string override;
     void set_text(utf8_string const& text) override;
 };
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sdl_input_system final : public system {
+class TCOB_API null_input_system final : public system {
 public:
-    sdl_input_system();
-    ~sdl_input_system() override;
-
     auto controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& override;
 
     auto mouse() const -> std::shared_ptr<input::mouse> override;
@@ -97,13 +84,6 @@ public:
     auto clipboard() const -> std::shared_ptr<input::clipboard> override;
 
     void process_events(void* ev) override;
-
-private:
-    std::shared_ptr<input::mouse>     _mouse;
-    std::shared_ptr<input::keyboard>  _keyboard;
-    std::shared_ptr<input::clipboard> _clipboard;
-
-    std::unordered_map<i32, std::shared_ptr<controller>> _controllers;
 };
 
 ////////////////////////////////////////////////////////////

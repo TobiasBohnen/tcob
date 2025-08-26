@@ -13,6 +13,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/TypeFactory.hpp"
 #include "tcob/core/input/Input_Codes.hpp"
 
 ////////////////////////////////////////////////////////////
@@ -258,6 +259,10 @@ public:
 
 class TCOB_API system {
 public:
+    struct factory : public type_factory<std::shared_ptr<system>> {
+        static inline char const* ServiceName {"input::system::factory"};
+    };
+
     virtual ~system() = default;
 
     signal<input::keyboard::event const>            KeyDown;
@@ -280,8 +285,8 @@ public:
     prop<mode> InputMode;
 
     auto virtual controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& = 0;
-    auto virtual first_controller() const -> controller&                                            = 0;
-    auto virtual has_controller() const -> bool                                                     = 0;
+    auto first_controller() const -> controller&;
+    auto has_controller() const -> bool;
 
     auto virtual mouse() const -> std::shared_ptr<input::mouse> = 0;
 
@@ -291,7 +296,7 @@ public:
 
     void virtual process_events(void* ev) = 0;
 
-    static inline char const* ServiceName {"input_system"};
+    static inline char const* ServiceName {"input::system"};
 };
 
 ////////////////////////////////////////////////////////////

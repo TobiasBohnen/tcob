@@ -166,7 +166,7 @@ void sdl_clipboard::set_text(utf8_string const& text)
 
 ////////////////////////////////////////////////////////////
 
-sdl_system::sdl_system()
+sdl_input_system::sdl_input_system()
     : _mouse {std::make_shared<sdl_mouse>()}
     , _keyboard {std::make_shared<sdl_keyboard>()}
     , _clipboard {std::make_shared<sdl_clipboard>()}
@@ -174,7 +174,7 @@ sdl_system::sdl_system()
     InputMode = mode::KeyboardMouse;
 }
 
-sdl_system::~sdl_system()
+sdl_input_system::~sdl_input_system()
 {
     for (auto const& [_, gc] : _controllers) {
         SDL_CloseGamepad(std::dynamic_pointer_cast<sdl_controller>(gc)->_controller);
@@ -183,37 +183,27 @@ sdl_system::~sdl_system()
     _controllers.clear();
 }
 
-auto sdl_system::controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const&
+auto sdl_input_system::controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const&
 {
     return _controllers;
 }
 
-auto sdl_system::first_controller() const -> controller&
-{
-    return *_controllers.begin()->second;
-}
-
-auto sdl_system::has_controller() const -> bool
-{
-    return !_controllers.empty();
-}
-
-auto sdl_system::mouse() const -> std::shared_ptr<input::mouse>
+auto sdl_input_system::mouse() const -> std::shared_ptr<input::mouse>
 {
     return _mouse;
 }
 
-auto sdl_system::keyboard() const -> std::shared_ptr<input::keyboard>
+auto sdl_input_system::keyboard() const -> std::shared_ptr<input::keyboard>
 {
     return _keyboard;
 }
 
-auto sdl_system::clipboard() const -> std::shared_ptr<input::clipboard>
+auto sdl_input_system::clipboard() const -> std::shared_ptr<input::clipboard>
 {
     return _clipboard;
 }
 
-void sdl_system::process_events(void* ev)
+void sdl_input_system::process_events(void* ev)
 {
     auto* sev {static_cast<SDL_Event*>(ev)};
 
