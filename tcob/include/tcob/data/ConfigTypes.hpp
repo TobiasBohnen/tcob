@@ -143,13 +143,6 @@ private:
     auto find(string_view key) const -> cfg_object_entries::const_iterator;
 };
 
-template <>
-struct converter<object> {
-    auto static IsType(cfg_value const& config) -> bool;
-    auto static From(cfg_value const& config, object& value) -> bool;
-    void static To(cfg_value& config, object const& value);
-};
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API array : public base_type<array, cfg_array_entries> {
@@ -198,13 +191,6 @@ public:
 
 protected:
     auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool override;
-};
-
-template <>
-struct converter<array> {
-    auto static IsType(cfg_value const& config) -> bool;
-    auto static From(cfg_value const& config, array& value) -> bool;
-    void static To(cfg_value& config, array const& value);
 };
 
 ////////////////////////////////////////////////////////////

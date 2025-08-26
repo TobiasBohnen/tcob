@@ -36,14 +36,14 @@ template <typename T>
 concept ConvertibleTo =
     requires(cfg_value& config, T const& t) {
         { converter<std::remove_cvref_t<T>>::To(config, t) };
-    };
+    } || std::is_same_v<std::remove_cvref_t<T>, object> || std::is_same_v<std::remove_cvref_t<T>, array>;
 
 template <typename T>
 concept ConvertibleFrom =
     requires(cfg_value& config, T& t) {
-        { converter<T>::From(config, t) };
-        { converter<T>::IsType(config) };
-    };
+        { converter<std::remove_cvref_t<T>>::From(config, t) };
+        { converter<std::remove_cvref_t<T>>::IsType(config) };
+    } || std::is_same_v<std::remove_cvref_t<T>, object> || std::is_same_v<std::remove_cvref_t<T>, array>;
 
 ////////////////////////////////////////////////////////////
 

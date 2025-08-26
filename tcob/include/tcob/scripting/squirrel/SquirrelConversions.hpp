@@ -991,9 +991,9 @@ public:
 
     auto static From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        table      tab {table::Acquire(view, idx++)};
-        auto const members {T::Members()};
-        bool       retValue {true};
+        table tab {table::Acquire(view, idx++)};
+        auto static const members {T::Members()};
+        bool retValue {true};
         std::apply([&](auto&&... m) {
             ((retValue = retValue && set_member(m, tab, value)), ...);
         },
@@ -1005,7 +1005,7 @@ public:
     {
         table tab {table::PushNew(view)};
 
-        auto const members {T::Members()};
+        auto static const members {T::Members()};
         std::apply([&](auto&&... m) {
             (get_member(m, tab, value), ...);
         },

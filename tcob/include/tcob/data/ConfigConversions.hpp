@@ -32,40 +32,6 @@ namespace tcob::data {
 ////config///////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-inline auto converter<object>::IsType(cfg_value const& config) -> bool
-{
-    return std::holds_alternative<object>(config);
-}
-inline auto converter<object>::From(cfg_value const& config, object& value) -> bool
-{
-    if (std::holds_alternative<object>(config)) {
-        value = std::get<object>(config);
-        return true;
-    }
-    return false;
-}
-inline void converter<object>::To(cfg_value& config, object const& value)
-{
-    config = value;
-}
-
-inline auto converter<array>::IsType(cfg_value const& config) -> bool
-{
-    return std::holds_alternative<array>(config);
-}
-inline auto converter<array>::From(cfg_value const& config, array& value) -> bool
-{
-    if (std::holds_alternative<array>(config)) {
-        value = std::get<array>(config);
-        return true;
-    }
-    return false;
-}
-inline void converter<array>::To(cfg_value& config, array const& value)
-{
-    config = value;
-}
-
 template <>
 struct converter<cfg_value> {
     auto static IsType(cfg_value const&) -> bool
@@ -670,8 +636,8 @@ public:
     {
         if (std::holds_alternative<object>(config)) {
             object const& obj {std::get<object>(config)};
-            auto const    members {T::Members()};
-            bool          retValue {true};
+            auto static const members {T::Members()};
+            bool retValue {true};
             std::apply([&](auto&&... m) {
                 ((retValue = retValue && set_member(m, obj, value)), ...);
             },
@@ -685,7 +651,7 @@ public:
     {
         object obj {};
 
-        auto const members {T::Members()};
+        auto static const members {T::Members()};
         std::apply([&](auto&&... m) {
             ((get_member(m, obj, value)), ...);
         },

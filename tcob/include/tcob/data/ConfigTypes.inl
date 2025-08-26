@@ -16,6 +16,7 @@
 #include <span>
 #include <tuple>
 #include <type_traits>
+#include <variant>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/ServiceLocator.hpp"
@@ -430,7 +431,7 @@ template <typename T>
 inline auto entry::get() const -> std::expected<T, error_code>
 {
     T retValue {};
-    return converter<T>::From(_value, retValue)
+    return try_get(retValue)
         ? std::expected<T, error_code> {std::move(retValue)}
         : std::unexpected {error_code::TypeMismatch};
 }
@@ -438,13 +439,25 @@ inline auto entry::get() const -> std::expected<T, error_code>
 template <typename T>
 inline auto entry::try_get(T& value) const -> bool
 {
-    return converter<T>::From(_value, value);
+    using type = std::remove_cvref_t<T>;
+    if constexpr (std::is_same_v<type, object> || std::is_same_v<type, array>) {
+        if (!std::holds_alternative<type>(_value)) { return false; }
+        value = std::get<type>(_value);
+        return true;
+    } else {
+        return converter<std::remove_cvref_t<T>>::From(_value, value);
+    }
 }
 
 template <typename T>
 inline void entry::set(T&& value)
 {
-    converter<std::remove_cvref_t<T>>::To(_value, std::forward<T>(value));
+    using type = std::remove_cvref_t<T>;
+    if constexpr (std::is_same_v<type, object> || std::is_same_v<type, array>) {
+        _value = value;
+    } else {
+        converter<type>::To(_value, std::forward<T>(value));
+    }
 }
 
 template <typename T>
@@ -456,7 +469,14 @@ inline void entry::set_value(T const& value)
 template <typename T>
 inline auto entry::is() const -> bool
 {
-    return converter<std::remove_cvref_t<T>>::IsType(_value);
+    using type = std::remove_cvref_t<T>;
+    if constexpr (std::is_same_v<type, object>) {
+        return std::holds_alternative<object>(_value);
+    } else if constexpr (std::is_same_v<type, array>) {
+        return std::holds_alternative<array>(_value);
+    } else {
+        return converter<type>::IsType(_value);
+    }
 }
 
 ////////////////////////////////////////////////////////////
