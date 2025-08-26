@@ -59,7 +59,7 @@ TCOB_API auto to_lower(utf8_string_view str) -> utf8_string;
 TCOB_API auto to_upper(utf8_string_view str) -> utf8_string;
 TCOB_API auto capitalize(utf8_string_view str) -> utf8_string;
 
-TCOB_API auto to_utf32(utf8_string_view str) -> std::optional<std::u32string>;
+TCOB_API auto to_utf32(utf8_string_view str) -> std::u32string;
 
 }
 

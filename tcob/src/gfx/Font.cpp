@@ -91,10 +91,8 @@ auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph
 {
     if (_textureNeedsSetup) { setup_texture(); }
 
-    auto const conv {utf8::to_utf32(text)};
-    if (!conv) { return {}; }
-    usize const len {conv->size()};
-    auto const& u32text {*conv};
+    auto const  u32text {utf8::to_utf32(text)};
+    usize const len {u32text.size()};
 
     std::vector<glyph> retValue;
     retValue.reserve(len);
@@ -117,10 +115,8 @@ auto font::render_text(utf8_string_view text, bool kerning) -> std::vector<glyph
 
 void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbacks& funcs)
 {
-    auto const conv {utf8::to_utf32(text)};
-    if (!conv) { return; }
-    usize const len {conv->size()};
-    auto const& u32text {*conv};
+    auto const  u32text {utf8::to_utf32(text)};
+    usize const len {u32text.size()};
 
     funcs.Offset.Y += _info.Ascender;
 
@@ -160,10 +156,8 @@ void font::decompose_text(utf8_string_view text, bool kerning, decompose_callbac
 
 auto font::get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>
 {
-    auto const conv {utf8::to_utf32(text)};
-    if (!conv) { return {}; }
-    usize const len {conv->size()};
-    auto const& u32text {*conv};
+    auto const  u32text {utf8::to_utf32(text)};
+    usize const len {u32text.size()};
 
     std::vector<glyph> retValue;
     retValue.reserve(len);
