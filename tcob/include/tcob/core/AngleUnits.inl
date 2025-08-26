@@ -18,9 +18,16 @@ constexpr angle_unit<ValueType, OneTurn>::angle_unit(ValueType value)
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
+template <FloatingPoint ValueType2>
+constexpr angle_unit<ValueType, OneTurn>::angle_unit(angle_unit<ValueType2, OneTurn> const& other) noexcept
+    : Value {static_cast<ValueType>(static_cast<f64>(other.Value))}
+{
+}
+
+template <FloatingPoint ValueType, f64 OneTurn>
 template <FloatingPoint ValueType2, f64 OneTurn2>
 constexpr angle_unit<ValueType, OneTurn>::angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept
-    : Value(static_cast<ValueType>(static_cast<f64>(other.Value) / OneTurn2 * OneTurn))
+    : Value {static_cast<ValueType>(static_cast<f64>(other.Value) / OneTurn2 * OneTurn)}
 {
 }
 
@@ -30,7 +37,7 @@ inline auto angle_unit<ValueType, OneTurn>::sin() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::sin(Value);
     } else {
-        return std::sin(angle_unit<ValueType, TAU> {*this}.Value);
+        return std::sin(Value / OneTurn * TAU);
     }
 }
 
@@ -40,7 +47,7 @@ inline auto angle_unit<ValueType, OneTurn>::asin() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::asin(Value);
     } else {
-        return std::asin(angle_unit<ValueType, TAU> {*this}.Value);
+        return std::asin(Value / OneTurn * TAU);
     }
 }
 
@@ -50,7 +57,7 @@ inline auto angle_unit<ValueType, OneTurn>::cos() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::cos(Value);
     } else {
-        return std::cos(angle_unit<ValueType, TAU> {*this}.Value);
+        return std::cos(Value / OneTurn * TAU);
     }
 }
 
@@ -60,7 +67,7 @@ inline auto angle_unit<ValueType, OneTurn>::acos() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::acos(Value);
     } else {
-        return std::acos(angle_unit<ValueType, TAU> {*this}.Value);
+        return std::acos(Value / OneTurn * TAU);
     }
 }
 
@@ -70,7 +77,7 @@ inline auto angle_unit<ValueType, OneTurn>::tan() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::tan(Value);
     } else {
-        return std::tan(angle_unit<ValueType, TAU> {*this}.Value);
+        return std::tan(Value / OneTurn * TAU);
     }
 }
 
@@ -80,7 +87,7 @@ inline auto angle_unit<ValueType, OneTurn>::atan() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::atan(Value);
     } else {
-        return std::atan(angle_unit<ValueType, TAU> {*this}.Value);
+        return std::atan(Value / OneTurn * TAU);
     }
 }
 

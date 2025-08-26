@@ -30,6 +30,9 @@ public:
     constexpr angle_unit() = default;
     explicit constexpr angle_unit(ValueType value);
 
+    template <FloatingPoint ValueType2>
+    constexpr angle_unit(angle_unit<ValueType2, OneTurn> const& other) noexcept;
+
     template <FloatingPoint ValueType2, f64 OneTurn2>
     constexpr angle_unit(angle_unit<ValueType2, OneTurn2> const& other) noexcept;
 
