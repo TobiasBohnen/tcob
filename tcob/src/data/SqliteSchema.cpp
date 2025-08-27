@@ -26,7 +26,7 @@ schema::schema(database_view db, utf8_string name)
 
 auto schema::table_names() const -> std::set<utf8_string>
 {
-    // SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name
+    // SELECT name FROM sqlite_schema WHERE type='table'
     statement select {_db};
     if (_name == "main") {
         select.prepare("SELECT name FROM sqlite_schema WHERE type='table';");
@@ -35,9 +35,10 @@ auto schema::table_names() const -> std::set<utf8_string>
     }
     return select.get_column_value<std::set<utf8_string>>(0);
 }
+
 auto schema::view_names() const -> std::set<utf8_string>
 {
-    // SELECT name FROM sqlite_schema WHERE type='view' ORDER BY name
+    // SELECT name FROM sqlite_schema WHERE type='view'
     statement select {_db};
     if (_name == "main") {
         select.prepare("SELECT name FROM sqlite_schema WHERE type='view';");
@@ -105,13 +106,13 @@ auto schema::drop_view(utf8_string const& viewName) const -> bool
 
 auto schema::vacuum_into(path const& file) const -> bool
 {
-    return _db.exec(std::format("VACUUM {} INTO '{}';", _name, file));
+    return _db.exec(std::format("VACUUM {} INTO {};", quote_identifier(_name), quote_file(file)));
 }
 
 auto schema::detach() const -> bool
 {
     statement stmt {_db};
-    return stmt.prepare(std::format("DETACH DATABASE '{}';", _name)) && stmt.step() == step_status::Done;
+    return stmt.prepare(std::format("DETACH DATABASE {};", quote_identifier(_name))) && stmt.step() == step_status::Done;
 }
 
 }

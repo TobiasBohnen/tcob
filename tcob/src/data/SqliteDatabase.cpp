@@ -13,7 +13,6 @@
     #include <set>
     #include <utility>
 
-    #include "tcob/core/io/FileSystem.hpp"
     #include "tcob/data/Sqlite.hpp"
     #include "tcob/data/SqliteSavepoint.hpp"
     #include "tcob/data/SqliteSchema.hpp"
@@ -212,8 +211,6 @@ void database::call_update_hook(update_mode mode, utf8_string const& dbName, utf
 
 auto database::Open(path const& file) -> std::optional<database>
 {
-    if (!io::is_file(file)) { io::create_file(file); }
-
     database_view db {nullptr};
     if (db.open(file)) {
         db.config(1002, 1); // foreign key
@@ -221,6 +218,15 @@ auto database::Open(path const& file) -> std::optional<database>
     }
 
     return std::nullopt;
+}
+
+auto database::Open(path const& file, journal_mode mode) -> std::optional<database>
+{
+    auto retValue {Open(file)};
+    if (retValue) {
+        retValue->set_journal_mode(mode);
+    }
+    return retValue;
 }
 
 auto database::OpenMemory() -> database
@@ -236,6 +242,11 @@ void database::close()
     _db.close();
 }
 
+auto database::vacuum() const -> bool
+{
+    return _db.exec("VACUUM;");
+}
+
 auto database::vacuum_into(path const& file) const -> bool
 {
     return _main.vacuum_into(file);
@@ -249,7 +260,7 @@ auto database::attach_memory(utf8_string const& alias) const -> std::optional<sc
 auto database::attach(path const& file, utf8_string const& alias) const -> std::optional<schema>
 {
     statement stmt {_db};
-    return stmt.prepare(std::format("ATTACH DATABASE '{}' AS '{}';", file, alias)) && stmt.step() == step_status::Done
+    return stmt.prepare(std::format("ATTACH DATABASE {} AS {};", quote_file(file), quote_identifier(alias))) && stmt.step() == step_status::Done
         ? get_schema(alias)
         : std::nullopt;
 }

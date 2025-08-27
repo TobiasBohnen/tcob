@@ -29,7 +29,6 @@ enum class update_mode : u8 {
 };
 
 enum class journal_mode : u8 {
-    // TRUNCATE | PERSIST
     Delete,
     Memory,
     Wal,
@@ -51,8 +50,6 @@ public:
     auto create_view(utf8_string const& viewName, select_statement<Values...>& stmt) -> std::optional<view>;
     auto create_savepoint(utf8_string const& name) const -> savepoint;
 
-    void set_journal_mode(journal_mode mode) const;
-
     auto schema_names() const -> std::set<utf8_string>;
     auto table_names() const -> std::set<utf8_string>;
     auto view_names() const -> std::set<utf8_string>;
@@ -68,6 +65,7 @@ public:
     auto drop_table(utf8_string const& tableName) const -> bool;
     auto drop_view(utf8_string const& viewName) const -> bool;
 
+    auto vacuum() const -> bool;
     auto vacuum_into(path const& file) const -> bool;
 
     auto attach_memory(utf8_string const& alias) const -> std::optional<schema>;
@@ -82,10 +80,13 @@ public:
     void set_update_hook(std::function<void(database*, update_mode, utf8_string, utf8_string, i64)>&& func);
     void call_update_hook(update_mode mode, utf8_string const& dbName, utf8_string const& table, i64 rowId);
 
-    auto static Open(path const& file) -> std::optional<database>; // TODO: change to result
+    auto static Open(path const& file) -> std::optional<database>;                    // TODO: change to result
+    auto static Open(path const& file, journal_mode mode) -> std::optional<database>; // TODO: change to result
     auto static OpenMemory() -> database;
 
 private:
+    void set_journal_mode(journal_mode mode) const;
+
     void close();
 
     database_view _db {nullptr};

@@ -79,6 +79,7 @@ enum class step_status : u8 {
 
 TCOB_API auto quote_string(utf8_string_view str) -> utf8_string;
 TCOB_API auto quote_identifier(utf8_string_view str) -> utf8_string;
+TCOB_API auto quote_file(utf8_string_view str) -> utf8_string;
 
 ////////////////////////////////////////////////////////////
 

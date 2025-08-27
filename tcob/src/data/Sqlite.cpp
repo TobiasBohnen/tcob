@@ -236,6 +236,20 @@ auto quote_identifier(utf8_string_view str) -> utf8_string
     return std::format("\"{}\"", str);
 }
 
+auto quote_file(utf8_string_view str) -> utf8_string
+{
+    utf8_string result {"'"};
+    for (auto c : str) {
+        if (c == '\'') {
+            result += "''";
+        } else {
+            result += c;
+        }
+    }
+    result += "'";
+    return result;
+}
+
 }
 
 #endif
