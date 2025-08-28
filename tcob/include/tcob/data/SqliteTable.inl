@@ -86,6 +86,13 @@ inline auto table::update(auto&&... columns) const -> update_statement
     return update_statement {_db, _schema, _name, helper::join(setStrings, ", ")};
 }
 
+inline auto table::add_column(auto&& columnDef) -> bool
+{
+    statement  stmt {_db};
+    auto const sql {std::format("ALTER TABLE {} ADD COLUMN {};", qualified_name(), columnDef.str())};
+    return stmt.prepare(sql) && stmt.step() == step_status::Done;
+}
+
 inline auto table::check_columns(auto&&... columns) const -> bool
 {
     auto const tableColumns {column_names()};
@@ -115,6 +122,7 @@ inline auto view::select_from(distinct_t, auto&&... columns) const -> select_sta
 {
     return detail::create_select<Values...>(_db, _schema, _name, true, columns...);
 }
+
 }
 
 #endif

@@ -41,9 +41,14 @@ public:
 
     auto name() const -> utf8_string const&;
     auto qualified_name() const -> utf8_string;
+    auto info() const -> std::vector<column_info>;
+
     auto column_names() const -> std::set<utf8_string>;
     auto row_count() const -> i32;
-    auto info() const -> std::vector<column_info>;
+
+    auto rename(utf8_string const& newName) -> bool;
+
+    auto add_column(auto&& columnDef) -> bool;
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
@@ -73,6 +78,12 @@ private:
 class TCOB_API view final {
 public:
     view(database_view db, utf8_string schema, utf8_string name);
+
+    auto name() const -> utf8_string const&;
+    auto qualified_name() const -> utf8_string;
+
+    auto column_names() const -> std::set<utf8_string>;
+    auto row_count() const -> i32;
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;
