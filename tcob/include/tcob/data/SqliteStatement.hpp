@@ -138,14 +138,15 @@ public:
         Replace
     };
 
-    insert_statement(database_view db, mode mode, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns);
+    insert_statement(database_view db, mode mode, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns, usize columnCount);
 
     auto operator() [[nodiscard]] (auto&& value, auto&&... values) -> bool;
 
 private:
-    auto query_string(usize valueSize, usize valueCount) const -> utf8_string;
+    auto query_string(usize columnCount, usize rowCount) const -> utf8_string;
 
     utf8_string _sql;
+    usize       _columnCount;
 };
 
 ////////////////////////////////////////////////////////////

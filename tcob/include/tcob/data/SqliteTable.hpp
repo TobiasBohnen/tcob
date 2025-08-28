@@ -51,8 +51,8 @@ public:
     auto select_from(distinct_t, auto&&... columns) const -> select_statement<Values...>;
 
     auto insert_into(auto&&... columns) const -> insert_statement;
-    auto insert_into(replace_t, auto&&... columns) const -> insert_statement;
     auto insert_into(ignore_t, auto&&... columns) const -> insert_statement;
+    auto insert_into(replace_t, auto&&... columns) const -> insert_statement;
 
     auto update(auto&&... columns) const -> update_statement;
 

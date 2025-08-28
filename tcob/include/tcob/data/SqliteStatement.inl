@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <cassert>
     #include <format>
     #include <optional>
     #include <tuple>
@@ -35,7 +36,7 @@ namespace detail {
         static constexpr usize Size {sizeof...(Ts)};
     };
 
-    auto value_count(auto&& value, auto&&... values) -> usize
+    auto count(auto&& value, auto&&... values) -> usize
     {
         usize retValue {};
         if constexpr (HasSize<std::remove_cvref_t<decltype(value)>>) {
@@ -45,7 +46,7 @@ namespace detail {
         }
 
         if constexpr (sizeof...(values) > 0) {
-            return value_count(values...) + retValue;
+            return count(values...) + retValue;
         } else {
             return retValue;
         }
@@ -318,10 +319,19 @@ inline auto update_statement::where(T const& cond) -> update_statement&
 inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
 {
     // prepare
-    usize const valueSize {detail::value_size<std::remove_cvref_t<decltype(value)>>::Size};
-    usize const valueCount {detail::value_count(value, values...)};
-    if (!prepare(query_string(valueSize, valueCount))) {
-        return false;
+    usize constexpr columnsPerValue {detail::value_size<std::remove_cvref_t<decltype(value)>>::Size};
+    static_assert(((detail::value_size<std::remove_cvref_t<decltype(values)>>::Size == columnsPerValue) && ...), "All inserted values must have the same number of columns");
+
+    usize const valueCount {detail::count(value, values...)};
+    if (columnsPerValue == 1 && _columnCount == valueCount) { //  single row
+        if (!prepare(query_string(_columnCount, 1))) {
+            return false;
+        }
+    } else {
+        assert(_columnCount == columnsPerValue);
+        if (!prepare(query_string(columnsPerValue, valueCount))) {
+            return false;
+        }
     }
 
     // bind parameters

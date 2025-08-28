@@ -57,14 +57,14 @@ inline auto table::insert_into(auto&&... columns) const -> insert_statement
     return insert_into(insert_statement::mode::Normal, std::move(columns)...);
 }
 
-inline auto table::insert_into(replace_t, auto&&... columns) const -> insert_statement
-{
-    return insert_into(insert_statement::mode::Replace, std::move(columns)...);
-}
-
 inline auto table::insert_into(ignore_t, auto&&... columns) const -> insert_statement
 {
     return insert_into(insert_statement::mode::Ignore, std::move(columns)...);
+}
+
+inline auto table::insert_into(replace_t, auto&&... columns) const -> insert_statement
+{
+    return insert_into(insert_statement::mode::Replace, std::move(columns)...);
 }
 
 inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) const -> insert_statement
@@ -73,7 +73,7 @@ inline auto table::insert_into(insert_statement::mode mode, auto&&... columns) c
 
     std::vector<utf8_string> columnStrings;
     ((columnStrings.push_back(quote_identifier(utf8_string {columns}))), ...);
-    return insert_statement {_db, mode, _schema, _name, helper::join(columnStrings, ", ")};
+    return insert_statement {_db, mode, _schema, _name, helper::join(columnStrings, ", "), sizeof...(columns)};
 }
 
 inline auto table::update(auto&&... columns) const -> update_statement

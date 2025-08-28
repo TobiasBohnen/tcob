@@ -103,8 +103,9 @@ auto update_statement::query_string() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
-insert_statement::insert_statement(database_view db, mode mode, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns)
+insert_statement::insert_statement(database_view db, mode mode, utf8_string const& schemaName, utf8_string const& table, utf8_string const& columns, usize columnCount)
     : statement {db}
+    , _columnCount {columnCount}
 {
     // INSERT (OR IGNORE) INTO TABLE_NAME [(column1, column2, column3,...columnN)]
     // VALUES (value1, value2, value3,...valueN);
@@ -120,11 +121,11 @@ insert_statement::insert_statement(database_view db, mode mode, utf8_string cons
     _sql = std::format(R"(INSERT{}INTO "{}"."{}" ({}))", modeStr, schemaName, table, columns);
 }
 
-auto insert_statement::query_string(usize valueSize, usize valueCount) const -> utf8_string
+auto insert_statement::query_string(usize columnCount, usize rowCount) const -> utf8_string
 {
     // values
-    auto const paramLine {"(" + helper::join("?", valueSize, ", ") + ")"};
-    auto const paramLines {helper::join(std::vector<utf8_string>(valueCount, paramLine), ", ")};
+    auto const paramLine {"(" + helper::join("?", columnCount, ", ") + ")"};
+    auto const paramLines {helper::join(std::vector<utf8_string>(rowCount, paramLine), ", ")};
     return std::format("{} VALUES {};", _sql, paramLines);
 }
 
