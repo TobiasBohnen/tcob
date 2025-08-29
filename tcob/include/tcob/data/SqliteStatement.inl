@@ -213,21 +213,57 @@ inline auto select_statement<Values...>::cross_join(T const& table) -> select_st
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::query_string() const -> utf8_string
+inline auto select_statement<Values...>::union_with(select_statement const& other) -> select_statement&
 {
-    return std::format(
-        R"(SELECT{}{} FROM "{}"."{}"{}{}{}{}{}{}{};)",
+    _setOps.emplace_back("UNION", other.query_string(false));
+    return *this;
+}
+
+template <typename... Values>
+inline auto select_statement<Values...>::union_all_with(select_statement const& other) -> select_statement&
+{
+    _setOps.emplace_back("UNION ALL", other.query_string(false));
+    return *this;
+}
+
+template <typename... Values>
+inline auto select_statement<Values...>::intersect_with(select_statement const& other) -> select_statement&
+{
+    _setOps.emplace_back("INTERSECT", other.query_string(false));
+    return *this;
+}
+
+template <typename... Values>
+inline auto select_statement<Values...>::except_with(select_statement const& other) -> select_statement&
+{
+    _setOps.emplace_back("EXCEPT", other.query_string(false));
+    return *this;
+}
+
+template <typename... Values>
+inline auto select_statement<Values...>::query_string(bool semicolon) const -> utf8_string
+{
+    utf8_string retValue {std::format(
+        R"(SELECT{}{} FROM "{}"."{}"{}{}{}{}{}{}{})",
         _distinct ? " DISTINCT " : " ",
         _values.Columns, _values.Schema, _values.Table, _values.Join,
         _values.Where, _values.GroupBy, _values.Having, _values.OrderBy,
-        _values.Limit, _values.Offset);
+        _values.Limit, _values.Offset)};
+
+    for (auto const& op : _setOps) {
+        retValue += std::format(" {} {}", op.first, op.second);
+    }
+
+    if (semicolon) { retValue += ";"; }
+
+    return retValue;
 }
 
 template <typename... Values>
 inline auto select_statement<Values...>::prepare_and_bind(auto&&... params) -> bool
 {
     // prepare
-    if (!prepare(query_string())) { return false; };
+    if (!prepare(query_string(true))) { return false; };
 
     // bind parameters
     i32 idx {1};

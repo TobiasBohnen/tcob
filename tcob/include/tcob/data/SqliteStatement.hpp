@@ -10,6 +10,7 @@
 
     #include <functional>
     #include <optional>
+    #include <utility>
     #include <vector>
 
     #include "tcob/core/Interfaces.hpp"
@@ -85,7 +86,12 @@ public:
     template <typename T>
     auto cross_join(T const& table) -> select_statement&;
 
-    auto query_string() const -> utf8_string;
+    auto union_all_with(select_statement const& other) -> select_statement&;
+    auto union_with(select_statement const& other) -> select_statement&;
+    auto intersect_with(select_statement const& other) -> select_statement&;
+    auto except_with(select_statement const& other) -> select_statement&;
+
+    auto query_string(bool semicolon) const -> utf8_string;
 
 private:
     auto prepare_and_bind(auto&&... params) -> bool;
@@ -103,10 +109,11 @@ private:
         utf8_string Join;
     };
 
-    values    _values;
-    bind_func _whereBind;
-    bind_func _havingBind;
-    bool      _distinct;
+    std::vector<std::pair<utf8_string, utf8_string>> _setOps;
+    values                                           _values;
+    bind_func                                        _whereBind;
+    bind_func                                        _havingBind;
+    bool                                             _distinct;
 };
 
 ////////////////////////////////////////////////////////////
