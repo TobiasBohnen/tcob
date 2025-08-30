@@ -18,13 +18,13 @@ inline field_source<T>::field_source(type value)
 }
 
 template <typename T>
-inline auto field_source<T>::get() -> return_type
+inline auto field_source<T>::get() noexcept -> return_type
 {
     return _value;
 }
 
 template <typename T>
-inline auto field_source<T>::get() const -> const_return_type
+inline auto field_source<T>::get() const noexcept -> const_return_type
 {
     return _value;
 }
@@ -55,13 +55,13 @@ inline validating_field_source<T>::validating_field_source(validate_func val)
 }
 
 template <typename T>
-inline auto validating_field_source<T>::get() -> return_type
+inline auto validating_field_source<T>::get() noexcept -> return_type
 {
     return _value;
 }
 
 template <typename T>
-inline auto validating_field_source<T>::get() const -> const_return_type
+inline auto validating_field_source<T>::get() const noexcept -> const_return_type
 {
     return _value;
 }
@@ -94,13 +94,13 @@ inline func_source<T>::func_source(type value, getter_func get, setter_func set)
 }
 
 template <typename T>
-inline auto func_source<T>::get() -> return_type
+inline auto func_source<T>::get() noexcept -> return_type
 {
     return _getter();
 }
 
 template <typename T>
-inline auto func_source<T>::get() const -> const_return_type
+inline auto func_source<T>::get() const noexcept -> const_return_type
 {
     return _getter();
 }
@@ -153,7 +153,7 @@ inline auto prop_base<T, Source>::operator->() const
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator*() const -> const_return_type
+inline auto prop_base<T, Source>::operator*() const noexcept -> const_return_type
 {
     return _source.get();
 }
@@ -172,13 +172,13 @@ inline auto prop_base<T, Source>::operator=(T const& value) -> prop_base&
 }
 
 template <typename T, typename Source>
-inline auto prop_base<T, Source>::operator[](auto&&... idx) const -> decltype(auto)
+inline auto prop_base<T, Source>::operator[](auto&&... idx) const noexcept -> decltype(auto)
 {
     return _source.get()[idx...];
 }
 
 template <typename T, typename Source>
-inline void prop_base<T, Source>::mutate(auto&& func)
+inline void prop_base<T, Source>::mutate(auto&& func) noexcept
 {
     static_assert(std::is_reference_v<return_type>);
 

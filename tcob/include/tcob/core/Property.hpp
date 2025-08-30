@@ -29,8 +29,8 @@ namespace detail {
         field_source() = default;
         field_source(type value);
 
-        auto get() -> return_type;
-        auto get() const -> const_return_type;
+        auto get() noexcept -> return_type;
+        auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
     private:
@@ -51,8 +51,8 @@ namespace detail {
         validating_field_source(validate_func val);
         validating_field_source(type value, validate_func val);
 
-        auto get() -> return_type;
-        auto get() const -> const_return_type;
+        auto get() noexcept -> return_type;
+        auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
     private:
@@ -75,8 +75,8 @@ namespace detail {
         func_source(getter_func get, setter_func set);
         func_source(type value, getter_func get, setter_func set);
 
-        auto get() -> return_type;
-        auto get() const -> const_return_type;
+        auto get() noexcept -> return_type;
+        auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
     private:
@@ -101,17 +101,17 @@ namespace detail {
 
         signal<T const> Changed;
 
-        operator T() const;
+             operator T() const;
         auto operator!() const -> bool;
         auto operator->() const;
-        auto operator*() const -> const_return_type;
+        auto operator*() const noexcept -> const_return_type;
 
         void operator()(T const& value);
         auto operator=(T const& value) -> prop_base&;
 
-        auto operator[](auto&&... idx) const -> decltype(auto);
+        auto operator[](auto&&... idx) const noexcept -> decltype(auto);
 
-        void mutate(auto&& func);
+        void mutate(auto&& func) noexcept;
 
         void bind(auto&... others);
 
