@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/ui/widgets/Popup.hpp"
+#include "tcob/gfx/ui/widgets/Tooltip.hpp"
 
 #include "tcob/core/easing/Tween.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
@@ -12,13 +12,13 @@
 
 namespace tcob::ui {
 
-popup::popup(init const& wi)
+tooltip::tooltip(init const& wi)
     : panel {wi}
 {
-    Class("popup");
+    Class("tooltip");
 }
 
-void popup::on_update(milliseconds deltaTime)
+void tooltip::on_update(milliseconds deltaTime)
 {
     if (_fadeInTween) {
         get_layout()->apply(content_bounds().Size);
@@ -27,7 +27,7 @@ void popup::on_update(milliseconds deltaTime)
     panel::on_update(deltaTime);
 }
 
-void popup::on_popup(widget* top)
+void tooltip::on_tooltip(widget* top)
 {
     _fadeInTween = make_unique_tween<linear_tween<f32>>(FadeIn, 0.0f, 1.0f);
     _fadeInTween->Value.Changed.connect([this](auto val) { Alpha = val; });

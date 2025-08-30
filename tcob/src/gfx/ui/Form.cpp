@@ -26,7 +26,7 @@
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
-#include "tcob/gfx/ui/widgets/Popup.hpp"
+#include "tcob/gfx/ui/widgets/Tooltip.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 #include "tcob/gfx/ui/widgets/WidgetContainer.hpp"
 
@@ -154,7 +154,7 @@ void form_base::on_update(milliseconds deltaTime)
 {
     auto const& widgets {containers()};
 
-    // popup
+    // tooltip
     handle_tooltip(deltaTime);
 
     // update styles
@@ -167,10 +167,10 @@ void form_base::on_update(milliseconds deltaTime)
             container->prepare_redraw();
         }
 
-        // popups
-        std::erase_if(_popups, [](auto const& popup) { return popup.expired(); });
-        for (auto const& popup : _popups) {
-            popup.lock()->prepare_redraw();
+        // tooltips
+        std::erase_if(_tooltips, [](auto const& tooltip) { return tooltip.expired(); });
+        for (auto const& tooltip : _tooltips) {
+            tooltip.lock()->prepare_redraw();
         }
 
         _prepareWidgets = false;
@@ -519,19 +519,19 @@ void form_base::on_styles_changed()
         container->on_styles_changed();
     }
 
-    for (auto const& tt : _popups) {
+    for (auto const& tt : _tooltips) {
         if (tt.expired()) { continue; }
-        auto popup {tt.lock()};
+        auto tooltip {tt.lock()};
 
         widget_style_selectors const ttNewSelectors {
-            .Class      = popup->Class,
-            .Flags      = popup->flags(),
-            .Attributes = popup->attributes(),
+            .Class      = tooltip->Class,
+            .Flags      = tooltip->flags(),
+            .Attributes = tooltip->attributes(),
         };
         auto* style {dynamic_cast<widget_style*>(Styles->get(ttNewSelectors))};
         assert(style);
-        popup->_transition.reset(style);
-        popup->on_styles_changed();
+        tooltip->_transition.reset(style);
+        tooltip->on_styles_changed();
     }
 }
 
@@ -541,7 +541,7 @@ void form_base::handle_tooltip(milliseconds deltaTime)
 
     _mouseOverTime += deltaTime;
 
-    auto const shouldPopup {[this] {
+    auto const shouldtooltip {[this] {
         if (_isTooltipVisible) { return false; }
         if (locate_service<input::system>().InputMode != input::mode::KeyboardMouse) { return false; }
 
@@ -555,8 +555,8 @@ void form_base::handle_tooltip(milliseconds deltaTime)
 
         return false;
     }};
-    if (shouldPopup()) {
-        _topWidget->Tooltip->on_popup(_topWidget);
+    if (shouldtooltip()) {
+        _topWidget->Tooltip->on_tooltip(_topWidget);
         _isTooltipVisible = true;
     }
 

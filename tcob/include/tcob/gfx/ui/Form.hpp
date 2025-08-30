@@ -46,8 +46,8 @@ public:
 
     auto name() const -> string const&;
 
-    template <std::derived_from<popup> T = popup>
-    auto create_popup(string const& name) -> std::shared_ptr<T>;
+    template <std::derived_from<tooltip> T = tooltip>
+    auto create_tooltip(string const& name) -> std::shared_ptr<T>;
 
     auto find_widget_at(point_i pos) const -> std::shared_ptr<widget>;
     auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
@@ -117,10 +117,10 @@ private:
     gfx::canvas          _canvas {};
     gfx::canvas_renderer _renderer;
 
-    widget*                           _topWidget {nullptr};
-    widget*                           _focusWidget {nullptr};
-    detail::input_injector            _injector;
-    std::vector<std::weak_ptr<popup>> _popups;
+    widget*                             _topWidget {nullptr};
+    widget*                             _focusWidget {nullptr};
+    detail::input_injector              _injector;
+    std::vector<std::weak_ptr<tooltip>> _tooltips;
 
     bool _redrawWidgets {true};
     bool _prepareWidgets {true};

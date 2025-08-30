@@ -52,7 +52,7 @@ class seven_segment_display;
 class accordion;
 class glass;
 class panel;
-class popup;
+class tooltip;
 class tab_container;
 
 // TODO:
@@ -72,6 +72,14 @@ class widget_container;
 class widget_painter;
 class form_base;
 class layout;
+
+// charting
+namespace charts {
+    class chart;
+    class line_chart;
+    class bar_chart;
+    class pie_chart;
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -342,9 +350,9 @@ struct text_event {
     utf8_string Text;
 };
 
-struct popup_event {
-    popup*  Sender {nullptr};
-    widget* Widget {nullptr};
+struct tooltip_event {
+    tooltip* Sender {nullptr};
+    widget*  Widget {nullptr};
 };
 
 struct drop_event {

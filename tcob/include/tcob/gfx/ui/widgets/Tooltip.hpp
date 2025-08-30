@@ -17,13 +17,13 @@
 namespace tcob::ui {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API popup : public panel {
+class TCOB_API tooltip : public panel {
     friend class form_base;
 
 public:
-    signal<popup_event const> Popup;
+    signal<tooltip_event const> Popup;
 
-    explicit popup(init const& wi);
+    explicit tooltip(init const& wi);
 
     milliseconds Delay {1000};
     milliseconds FadeIn {250};
@@ -31,7 +31,7 @@ public:
 protected:
     void on_update(milliseconds deltaTime) override;
 
-    void virtual on_popup(widget* top);
+    void virtual on_tooltip(widget* top);
 
 private:
     std::unique_ptr<linear_tween<f32>> _fadeInTween;

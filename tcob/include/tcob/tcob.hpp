@@ -143,7 +143,6 @@
 #include <tcob/gfx/ui/widgets/Label.hpp>
 #include <tcob/gfx/ui/widgets/ListBox.hpp>
 #include <tcob/gfx/ui/widgets/Panel.hpp>
-#include <tcob/gfx/ui/widgets/Popup.hpp>
 #include <tcob/gfx/ui/widgets/Progressbar.hpp>
 #include <tcob/gfx/ui/widgets/Radiobutton.hpp>
 #include <tcob/gfx/ui/widgets/Slider.hpp>
@@ -152,6 +151,7 @@
 #include <tcob/gfx/ui/widgets/Terminal.hpp>
 #include <tcob/gfx/ui/widgets/TextBox.hpp>
 #include <tcob/gfx/ui/widgets/Toggle.hpp>
+#include <tcob/gfx/ui/widgets/Tooltip.hpp>
 #include <tcob/gfx/ui/widgets/VScrollWidget.hpp>
 #include <tcob/gfx/ui/widgets/Widget.hpp>
 #include <tcob/gfx/ui/widgets/WidgetContainer.hpp>

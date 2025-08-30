@@ -63,7 +63,7 @@ public:
 
     string Cursor {"default"};
 
-    std::shared_ptr<popup> Tooltip;
+    std::shared_ptr<tooltip> Tooltip;
 
     void focus();
     auto is_focused() const -> bool;

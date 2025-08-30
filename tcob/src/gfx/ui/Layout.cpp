@@ -531,7 +531,7 @@ void magnetic_snap_layout::do_layout(size_f size)
                 hasSnappedX  = true;
             }
             if (right >= size.Width - _distance) {
-                b.Position.X = size.Width - b.width() - border / 2;
+                b.Position.X = size.Width - b.width() - (border / 2);
                 hasSnappedX  = true;
             }
             if (top <= _distance) {
@@ -539,7 +539,7 @@ void magnetic_snap_layout::do_layout(size_f size)
                 hasSnappedY  = true;
             }
             if (bottom >= size.Height - _distance) {
-                b.Position.Y = size.Height - b.height() - border / 2;
+                b.Position.Y = size.Height - b.height() - (border / 2);
                 hasSnappedY  = true;
             }
         }
