@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/Form.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <limits>
@@ -66,27 +67,31 @@ auto form_base::top_widget() const -> widget*
     return _topWidget;
 }
 
-auto form_base::find_widget_at(point_i pos) const -> std::shared_ptr<widget>
+auto form_base::find_widget_at(point_i pos) const -> widget*
 {
-    for (auto const& widget : get_layout()->widgets()) { // ZORDER
+    auto* modal {active_modal()};
+
+    auto const widgets {modal ? modal->widgets() : get_layout()->widgets()};
+    for (auto const& widget : widgets) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
             if (auto retValue {container->find_child_at(pos)}) {
-                return retValue;
+                return retValue.get();
             }
         }
-        return widget;
+        return widget.get();
     }
-    return nullptr;
+
+    return modal && modal->hit_test(pos) ? modal : nullptr;
 }
 
-auto form_base::find_widget_by_name(string const& name) const -> std::shared_ptr<widget>
+auto form_base::find_widget_by_name(string const& name) const -> widget*
 {
     for (auto const& widget : containers()) {
-        if (widget->name() == name) { return widget; }
+        if (widget->name() == name) { return widget.get(); }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
             if (auto retValue {container->find_child_by_name(name)}) {
-                return retValue;
+                return retValue.get();
             }
         }
     }
@@ -95,20 +100,26 @@ auto form_base::find_widget_by_name(string const& name) const -> std::shared_ptr
 
 auto form_base::all_widgets() const -> std::vector<widget*>
 {
-    auto const collectWidgets {[](this auto&& self, std::vector<widget*>& vec, std::shared_ptr<widget_container> const& container) -> void {
-        for (auto const& widget : container->widgets()) {
-            vec.push_back(widget.get());
+    std::vector<widget*> retValue;
+
+    auto const collectWidgets {[&retValue](this auto&& self, widget_container const& container) -> void {
+        for (auto const& widget : container.widgets()) {
+            retValue.push_back(widget.get());
             if (auto widgetContainer {std::dynamic_pointer_cast<widget_container>(widget)}) {
-                self(vec, widgetContainer);
+                self(*widgetContainer);
             }
         }
     }};
 
-    std::vector<widget*> retValue;
-    for (auto const& widget : containers()) {
-        retValue.push_back(widget.get());
-        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-            collectWidgets(retValue, container);
+    if (auto* modal {active_modal()}) {
+        retValue.push_back(modal);
+        collectWidgets(*modal);
+    } else {
+        for (auto const& widget : containers()) {
+            retValue.push_back(widget.get());
+            if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+                collectWidgets(*container);
+            }
         }
     }
     return retValue;
@@ -127,27 +138,27 @@ void form_base::notify_redraw()
     _prepareWidgets = true;
 }
 
-auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
+void form_base::push_modal(modal_dialog* dlg)
 {
-    if (!NavMap->contains(widget)) { return false; }
+    auto it {std::ranges::find(_modals, dlg)};
+    if (it != _modals.end()) { _modals.erase(it); }
 
-    string navTarget;
-    switch (dir) {
-    case direction::Left:  navTarget = NavMap->at(widget).Left; break;
-    case direction::Right: navTarget = NavMap->at(widget).Right; break;
-    case direction::Up:    navTarget = NavMap->at(widget).Up; break;
-    case direction::Down:  navTarget = NavMap->at(widget).Down; break;
-    case direction::None:  break;
+    _modals.push_back(dlg);
+    focus_widget(dlg);
+}
+
+void form_base::pop_modal(modal_dialog* dlg)
+{
+    auto it {std::ranges::find(_modals, dlg)};
+    if (it != _modals.end()) {
+        _modals.erase(it);
+        focus_widget(active_modal());
     }
+}
 
-    if (!navTarget.empty()) {
-        if (auto target {find_widget_by_name(navTarget)}) {
-            focus_widget(target.get());
-            return true;
-        }
-    }
-
-    return false;
+auto form_base::active_modal() const -> modal_dialog*
+{
+    return _modals.empty() ? nullptr : _modals.back();
 }
 
 void form_base::on_update(milliseconds deltaTime)
@@ -173,6 +184,11 @@ void form_base::on_update(milliseconds deltaTime)
             tooltip.lock()->prepare_redraw();
         }
 
+        // modal
+        if (auto* modal {active_modal()}) {
+            modal->prepare_redraw();
+        }
+
         _prepareWidgets = false;
         _redrawWidgets  = true;
     }
@@ -180,6 +196,11 @@ void form_base::on_update(milliseconds deltaTime)
     // update widgets
     for (auto const& container : widgets) {
         container->update(deltaTime);
+    }
+
+    // update modal
+    if (auto* modal {active_modal()}) {
+        modal->update(deltaTime);
     }
 }
 
@@ -192,37 +213,41 @@ void form_base::on_draw_to(gfx::render_target& target)
 {
     constexpr static i32 overlayLayer {0};
     constexpr static i32 tooltipLayer {1};
+    constexpr static i32 modalLayer {2};
+    constexpr static i32 firstUILayer {modalLayer + 1};
 
     // set cursor
     if (_topWidget) {
         CursorChanged(_topWidget->Cursor);
     }
 
-    size_i const bounds {size_i {Bounds->Size}};
+    size_i const size {size_i {Bounds->Size}};
 
-    auto const layerCount {static_cast<i32>(get_layout()->widgets().size())};
+    auto const widgets {get_layout()->widgets()};
+    auto const layerCount {static_cast<i32>(widgets.size())};
 
+    // ui
     // redraw
     if (_redrawWidgets) {
-        i32 i {2};
-        for (auto const& container : get_layout()->widgets() | std::views::reverse) { // ZORDER
+        i32 i {0};
+        for (auto const& container : widgets | std::views::reverse) { // ZORDER
             if (container->needs_redraw()) {
-                _canvas.begin_frame(bounds, 1.0f, i);
+                _canvas.begin_frame(size, 1.0f, firstUILayer + i);
                 container->draw(*_painter);
                 _canvas.end_frame();
             }
             ++i;
         }
 
-        _canvas.begin_frame(bounds, 1.0f, overlayLayer);
+        _canvas.begin_frame(size, 1.0f, overlayLayer);
         _drawOverlay = _painter->draw_overlays();
         _canvas.end_frame();
         _redrawWidgets = false;
     }
 
     // render
-    for (i32 j {2}; j < layerCount + 2; ++j) {
-        _renderer.set_layer(j);
+    for (i32 j {0}; j < layerCount; ++j) {
+        _renderer.set_layer(firstUILayer + j);
         _renderer.render_to_target(target);
     }
 
@@ -236,20 +261,35 @@ void form_base::on_draw_to(gfx::render_target& target)
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         auto ttBounds {*_topWidget->Tooltip->Bounds};
         ttBounds.Position = point_f {locate_service<input::system>().mouse()->get_position()} - Bounds->Position + TooltipOffset;
-        if (ttBounds.right() > Bounds->right()) {
-            ttBounds.Position.X -= ttBounds.width() + TooltipOffset.X;
-        }
-        if (ttBounds.bottom() > Bounds->bottom()) {
-            ttBounds.Position.Y -= ttBounds.height() + TooltipOffset.Y;
-        }
+        if (ttBounds.right() > Bounds->right()) { ttBounds.Position.X -= ttBounds.width() + TooltipOffset.X; }
+        if (ttBounds.bottom() > Bounds->bottom()) { ttBounds.Position.Y -= ttBounds.height() + TooltipOffset.Y; }
         _topWidget->Tooltip->Bounds = ttBounds;
 
-        _canvas.begin_frame(bounds, 1.0f, tooltipLayer);
+        _canvas.begin_frame(size, 1.0f, tooltipLayer);
         _topWidget->Tooltip->set_redraw(true);
         _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
 
         _renderer.set_layer(tooltipLayer);
+        _renderer.render_to_target(target);
+    }
+
+    // modal
+    if (auto* modal {active_modal()}) {
+        if (modal->needs_redraw()) {
+            _canvas.begin_frame(size, 1.0f, modalLayer);
+            _canvas.begin_path();
+            _canvas.rect({point_f::Zero, size_f {size}});
+            _canvas.set_fill_style({0, 0, 0, 128});
+            _canvas.fill();
+
+            for (auto* m : _modals) {
+                m->set_redraw(true);
+                m->draw(*_painter);
+            }
+            _canvas.end_frame();
+        }
+        _renderer.set_layer(modalLayer);
         _renderer.render_to_target(target);
     }
 }
@@ -300,43 +340,17 @@ void form_base::on_key_down(input::keyboard::event const& ev)
     using namespace tcob::enum_ops;
 
     if (ev.KeyCode == Controls->TabKey) {
-        auto const vec {all_widgets()};
-
-        if (ev.KeyMods.is_down(Controls->TabMod)) {
-            // shift tab
-            widget* nextWidget {find_prev_tab_widget(vec)};
-            if (!nextWidget) {
-                _currentTabIndex = std::numeric_limits<i32>::max();
-                nextWidget       = find_prev_tab_widget(vec);
-            }
-            focus_widget(nextWidget);
-        } else {
-            // tab
-            widget* nextWidget {find_next_tab_widget(vec)};
-            if (!nextWidget) {
-                _currentTabIndex = -1;
-                nextWidget       = find_next_tab_widget(vec);
-            }
-            focus_widget(nextWidget);
-        }
-        ev.Handled = true;
+        handle_tab(ev);
+    } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
+        handle_nav(ev);
     } else if (ev.KeyMods.is_down(Controls->CutCopyPasteMod) && ev.KeyCode == Controls->PasteKey) {
         input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard()->get_text()};
         if (!tev.Text.empty()) {
             _injector.on_text_input(_focusWidget, tev);
             ev.Handled = true;
         }
-    } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
-        if (ev.KeyCode == Controls->NavLeftKey) {
-            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Left);
-        } else if (ev.KeyCode == Controls->NavRightKey) {
-            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Right);
-        } else if (ev.KeyCode == Controls->NavDownKey) {
-            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Down);
-        } else if (ev.KeyCode == Controls->NavUpKey) {
-            ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
-        }
     }
+
     if (!ev.Handled) {
         _injector.on_key_down(_focusWidget, ev);
     }
@@ -359,7 +373,7 @@ void form_base::on_mouse_motion(input::mouse::motion_event const& ev)
 
 void form_base::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto* newTop {find_widget_at(ev.Position).get()};
+    auto* newTop {find_widget_at(ev.Position)};
 
     if (newTop && newTop->is_inert()) { // inert top
         _injector.on_mouse_leave(_topWidget);
@@ -486,6 +500,31 @@ void form_base::on_text_input(input::keyboard::text_input_event const& ev)
     _injector.on_text_input(_focusWidget, ev);
 }
 
+void form_base::handle_tab(input::keyboard::event const& ev)
+{
+    auto const vec {all_widgets()};
+
+    ev.Handled = true;
+
+    if (ev.KeyMods.is_down(Controls->TabMod)) {
+        // shift tab
+        widget* nextWidget {find_prev_tab_widget(vec)};
+        if (!nextWidget) {
+            _currentTabIndex = std::numeric_limits<i32>::max();
+            nextWidget       = find_prev_tab_widget(vec);
+        }
+        focus_widget(nextWidget);
+    } else {
+        // tab
+        widget* nextWidget {find_next_tab_widget(vec)};
+        if (!nextWidget) {
+            _currentTabIndex = -1;
+            nextWidget       = find_next_tab_widget(vec);
+        }
+        focus_widget(nextWidget);
+    }
+}
+
 auto form_base::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*
 {
     widget* retValue {nullptr};
@@ -510,6 +549,42 @@ auto form_base::find_prev_tab_widget(std::vector<widget*> const& vec) const -> w
         }
     }
     return retValue;
+}
+
+void form_base::handle_nav(input::keyboard::event const& ev)
+{
+    if (ev.KeyCode == Controls->NavLeftKey) {
+        ev.Handled = focus_nav_target(_focusWidget->name(), direction::Left);
+    } else if (ev.KeyCode == Controls->NavRightKey) {
+        ev.Handled = focus_nav_target(_focusWidget->name(), direction::Right);
+    } else if (ev.KeyCode == Controls->NavDownKey) {
+        ev.Handled = focus_nav_target(_focusWidget->name(), direction::Down);
+    } else if (ev.KeyCode == Controls->NavUpKey) {
+        ev.Handled = focus_nav_target(_focusWidget->name(), direction::Up);
+    }
+}
+
+auto form_base::focus_nav_target(string const& widget, direction dir) -> bool
+{
+    if (!NavMap->contains(widget)) { return false; }
+
+    string navTarget;
+    switch (dir) {
+    case direction::Left:  navTarget = NavMap->at(widget).Left; break;
+    case direction::Right: navTarget = NavMap->at(widget).Right; break;
+    case direction::Up:    navTarget = NavMap->at(widget).Up; break;
+    case direction::Down:  navTarget = NavMap->at(widget).Down; break;
+    case direction::None:  break;
+    }
+
+    if (!navTarget.empty()) {
+        if (auto* target {find_widget_by_name(navTarget)}) {
+            focus_widget(target);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void form_base::on_styles_changed()

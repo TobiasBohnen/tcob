@@ -48,9 +48,11 @@ public:
 
     template <std::derived_from<tooltip> T = tooltip>
     auto create_tooltip(string const& name) -> std::shared_ptr<T>;
+    template <std::derived_from<modal_dialog> T = modal_dialog>
+    auto create_modal_dialog(string const& name) -> std::shared_ptr<T>;
 
-    auto find_widget_at(point_i pos) const -> std::shared_ptr<widget>;
-    auto find_widget_by_name(string const& name) const -> std::shared_ptr<widget>;
+    auto find_widget_at(point_i pos) const -> widget*;
+    auto find_widget_by_name(string const& name) const -> widget*;
     auto top_widget() const -> widget*;
     auto all_widgets() const -> std::vector<widget*>;
 
@@ -71,6 +73,10 @@ public:
 
     auto virtual allows_move() const -> bool   = 0;
     auto virtual allows_resize() const -> bool = 0;
+
+    void push_modal(modal_dialog* dlg);
+    void pop_modal(modal_dialog* dlg);
+    auto active_modal() const -> modal_dialog*;
 
 protected:
     form_base(string name, rect_f const& bounds);
@@ -102,12 +108,13 @@ protected:
     auto virtual get_layout() const -> layout const* = 0;
 
 private:
-    auto focus_nav_target(string const& widget, direction dir) -> bool;
-
     void on_mouse_hover(input::mouse::motion_event const& ev);
 
+    void handle_tab(input::keyboard::event const& ev);
     auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
+    void handle_nav(input::keyboard::event const& ev);
+    auto focus_nav_target(string const& widget, direction dir) -> bool;
 
     void on_styles_changed();
 
@@ -121,6 +128,7 @@ private:
     widget*                             _focusWidget {nullptr};
     detail::input_injector              _injector;
     std::vector<std::weak_ptr<tooltip>> _tooltips;
+    std::vector<modal_dialog*>          _modals {};
 
     bool _redrawWidgets {true};
     bool _prepareWidgets {true};

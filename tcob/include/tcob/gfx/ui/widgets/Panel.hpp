@@ -102,6 +102,25 @@ protected:
     auto is_inert() const -> bool override;
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API modal_dialog : public panel {
+public:
+    explicit modal_dialog(init const& wi);
+
+    void open();
+    void close();
+
+    auto is_open() const -> bool;
+
+protected:
+    virtual void on_open() { }
+    virtual void on_close() { }
+
+private:
+    bool _open {false};
+};
+
 }
 
 #include "Panel.inl"

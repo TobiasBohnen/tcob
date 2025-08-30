@@ -52,8 +52,9 @@ class seven_segment_display;
 class accordion;
 class glass;
 class panel;
-class tooltip;
+class modal_dialog;
 class tab_container;
+class tooltip;
 
 // TODO:
 // class html_control;

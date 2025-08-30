@@ -159,7 +159,7 @@ void panel::on_mouse_leave()
 
 void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 {
-    auto const scrollHover {[&](auto&& scrollbar) {
+    auto const scrollHover {[&](auto&& scrollbar) -> bool {
         return scrollbar.mouse_hover(*this, ev.Position);
     }};
 
@@ -168,7 +168,7 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 
 void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    auto const scrollDrag {[this, &ev](auto&& scrollbar) {
+    auto const scrollDrag {[this, &ev](auto&& scrollbar) -> bool {
         return scrollbar.mouse_drag(*this, ev.Position);
     }};
 
@@ -311,6 +311,39 @@ void glass::on_draw_children(widget_painter& painter)
 auto glass::is_inert() const -> bool
 {
     return true;
+}
+
+////////////////////////////////////////////////////////////
+
+modal_dialog::modal_dialog(init const& wi)
+    : panel {wi}
+{
+    Class("modal_dialog");
+}
+
+void modal_dialog::open()
+{
+    form().push_modal(this); // always push to top
+    if (!_open) {
+        _open = true;
+        on_open();
+        queue_redraw();
+    }
+}
+
+void modal_dialog::close()
+{
+    if (_open) {
+        form().pop_modal(this);
+        _open = false;
+        on_close();
+        queue_redraw();
+    }
+}
+
+auto modal_dialog::is_open() const -> bool
+{
+    return _open;
 }
 
 } // namespace ui

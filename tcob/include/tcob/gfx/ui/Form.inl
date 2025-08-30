@@ -97,6 +97,18 @@ inline auto form_base::create_tooltip(string const& name) -> std::shared_ptr<T>
     return retValue;
 }
 
+template <std::derived_from<modal_dialog> T>
+inline auto form_base::create_modal_dialog(string const& name) -> std::shared_ptr<T>
+{
+    widget::init const wi {
+        .Form   = this,
+        .Parent = nullptr,
+        .Name   = name,
+    };
+
+    return std::make_shared<T>(wi);
+}
+
 template <SubmitTarget Target>
 inline void form_base::submit(Target& target)
 {

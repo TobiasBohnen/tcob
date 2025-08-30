@@ -92,3 +92,5 @@ Diagnostics:
             - "readability-container-data-pointer"
             - "readability-redundant-member-init"
             - "readability-avoid-nested-conditional-operator"
+        CheckOptions:
+            modernize-use-trailing-return-type.TransformLambdas: all_except_auto
