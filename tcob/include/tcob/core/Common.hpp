@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <functional>
 #include <type_traits>
-#include <utility>
 
 #include "tcob/core/Concepts.hpp"
 
@@ -103,11 +102,6 @@ template <typename T, typename... Args>
 struct arg_list;
 template <typename T, typename... Args>
 struct arg_list<T(Args...)> { };
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-using min_max = std::pair<T, T>;
 
 ////////////////////////////////////////////////////////////
 

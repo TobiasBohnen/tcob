@@ -10,6 +10,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -29,6 +30,10 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
+////////////////////////////////////////////////////////////
+
+template <typename T>
+using min_max = std::pair<T, T>;
 
 ////////////////////////////////////////////////////////////
 
@@ -54,7 +59,7 @@ class particle_system final : public drawable, public updatable {
         { p.convert_to(q) };
         { p.update(deltaTime) }; }, "Invalid particle type");
 
-    static_assert(requires(Emitter t, particle_system<Emitter>& system, milliseconds deltaTime) {
+    static_assert(requires(Emitter t, particle_system& system, milliseconds deltaTime) {
         { t.reset() };
         { t.emit(system, deltaTime) }; }, "Invalid emitter type");
 
