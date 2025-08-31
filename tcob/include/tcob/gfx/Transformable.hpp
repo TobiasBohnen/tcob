@@ -35,13 +35,13 @@ public:
     void scale_by(size_f factor);
     void skew_by(std::pair<degree_f, degree_f> factor);
 
-    void virtual reset_transform();
+    virtual void reset_transform();
 
 protected:
-    auto virtual pivot() const -> point_f = 0;
-    void virtual on_transform_changed()   = 0;
-    void mark_transform_dirty();
-    void update_transform();
+    virtual auto pivot() const -> point_f = 0;
+    virtual void on_transform_changed()   = 0;
+    void         mark_transform_dirty();
+    void         update_transform();
 
 private:
     gfx::transform _transform {};

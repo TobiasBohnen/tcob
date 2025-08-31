@@ -16,7 +16,7 @@
 
 namespace tcob::data::detail {
 
-auto static find_unquoted(string_view source, char needle) -> string_view::size_type
+static auto find_unquoted(string_view source, char needle) -> string_view::size_type
 {
     char const quote {source[0]};
     if (quote != '"' && quote != '\'') {

@@ -25,7 +25,7 @@ constexpr usize INDENT_SPACES {2};
 //////////////////////////////////////////////////////////////////////
 using token_type = yaml_tokenizer::token_type;
 
-[[maybe_unused]] void static DumpTokens(std::vector<yaml_tokenizer::token>& tokens)
+[[maybe_unused]] static void DumpTokens(std::vector<yaml_tokenizer::token>& tokens)
 {
     io::ofstream fs {"out.txt"};
     for (auto& x : tokens) {
@@ -62,7 +62,7 @@ using token_type = yaml_tokenizer::token_type;
     }
 }
 
-auto static IsIgnored(yaml_tokenizer::token const& token) -> bool
+static auto IsIgnored(yaml_tokenizer::token const& token) -> bool
 {
     // List all types we want to ignore
     switch (token.Type) {

@@ -108,7 +108,7 @@ public:
 
         auto operator==(font::style const& other) const -> bool = default;
 
-        auto static constexpr Members()
+        static auto constexpr Members()
         {
             return std::tuple {
                 member<&font::style::IsItalic> {"is_italic"},
@@ -135,8 +135,8 @@ public:
 
     static inline char const* AssetName {"font"};
 
-    auto static Init() -> bool;
-    void static Done();
+    static auto Init() -> bool;
+    static void Done();
 
 private:
     void setup_texture();

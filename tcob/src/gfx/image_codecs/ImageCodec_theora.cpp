@@ -18,25 +18,25 @@
 namespace tcob::gfx::detail {
 
 extern "C" {
-auto static read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
+static auto read(THEORAPLAY_Io* io, void* buf, long buflen) -> long
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
     return static_cast<long>(stream->read_to<byte>({static_cast<byte*>(buf), static_cast<usize>(buflen)}));
 }
 
-auto static streamlen(THEORAPLAY_Io* io) -> long
+static auto streamlen(THEORAPLAY_Io* io) -> long
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
     return static_cast<long>(stream->size_in_bytes());
 }
 
-auto static seek(THEORAPLAY_Io* io, long absolute_offset) -> int
+static auto seek(THEORAPLAY_Io* io, long absolute_offset) -> int
 {
     auto* stream {static_cast<io::istream*>(io->userdata)};
     return stream->seek(absolute_offset, io::seek_dir::Begin) ? 0 : -1;
 }
 
-void static close(THEORAPLAY_Io*)
+static void close(THEORAPLAY_Io*)
 {
     // stream is closed in theora_anim_decoder destructor
 }

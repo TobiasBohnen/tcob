@@ -60,12 +60,12 @@ void states::reset()
 
 ////////////////////////////////////////////////////////////
 
-auto static hypot(f32 x, f32 y) -> f32
+static auto hypot(f32 x, f32 y) -> f32
 {
     return std::sqrt((x * x) + (y * y));
 }
 
-void static SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v)
+static void SetVertex(vertex* vtx, f32 x, f32 y, f32 u, f32 v)
 {
     vtx->Position.X = x;
     vtx->Position.Y = y;
@@ -85,14 +85,14 @@ auto Normalize(f32& x, f32& y) -> f32
     return d;
 }
 
-auto static PointEquals(f32 x1, f32 y1, f32 x2, f32 y2, f32 tol) -> i32
+static auto PointEquals(f32 x1, f32 y1, f32 x2, f32 y2, f32 tol) -> i32
 {
     f32 const dx {x2 - x1};
     f32 const dy {y2 - y1};
     return dx * dx + dy * dy < tol * tol;
 }
 
-void static PolyReverse(std::span<canvas_point> pts)
+static void PolyReverse(std::span<canvas_point> pts)
 {
     canvas_point tmp;
     usize        i {0};
@@ -106,7 +106,7 @@ void static PolyReverse(std::span<canvas_point> pts)
     }
 }
 
-auto static TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
+static auto TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
 {
     f32 const abx {bx - ax};
     f32 const aby {by - ay};
@@ -115,7 +115,7 @@ auto static TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
     return (acx * aby) - (abx * acy);
 }
 
-void static ChooseBevel(bool bevel, canvas_point const& p0, canvas_point const& p1, f32 w, f32& x0, f32& y0, f32& x1, f32& y1)
+static void ChooseBevel(bool bevel, canvas_point const& p0, canvas_point const& p1, f32 w, f32& x0, f32& y0, f32& x1, f32& y1)
 {
     if (bevel) {
         x0 = p1.X + p0.DY * w;
@@ -130,7 +130,7 @@ void static ChooseBevel(bool bevel, canvas_point const& p0, canvas_point const& 
     }
 }
 
-auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1, f32 lw, f32 rw, f32 lu, f32 ru, i32 ncap) -> vertex*
+static auto RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1, f32 lw, f32 rw, f32 lu, f32 ru, i32 ncap) -> vertex*
 {
     f32 const dlx0 {p0.DY};
     f32 const dly0 {-p0.DX};
@@ -189,7 +189,7 @@ auto static RoundJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
     return dst;
 }
 
-auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1, f32 lw, f32 rw, f32 lu, f32 ru) -> vertex*
+static auto BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p1, f32 lw, f32 rw, f32 lu, f32 ru) -> vertex*
 {
     f32 const dlx0 {p0.DY};
     f32 const dly0 {-p0.DX};
@@ -259,7 +259,7 @@ auto static BevelJoin(vertex* dst, canvas_point const& p0, canvas_point const& p
     return dst;
 }
 
-auto static ButtCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, f32 d, f32 aa, f32 u0, f32 u1) -> vertex*
+static auto ButtCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, f32 d, f32 aa, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X - (dx * d)};
     f32 const py {p.Y - (dy * d)};
@@ -272,7 +272,7 @@ auto static ButtCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32
     return dst;
 }
 
-auto static ButtCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, f32 d, f32 aa, f32 u0, f32 u1) -> vertex*
+static auto ButtCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, f32 d, f32 aa, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X + (dx * d)};
     f32 const py {p.Y + (dy * d)};
@@ -285,7 +285,7 @@ auto static ButtCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w
     return dst;
 }
 
-auto static RoundCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
+static auto RoundCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X};
     f32 const py {p.Y};
@@ -303,7 +303,7 @@ auto static RoundCapStart(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f3
     return dst;
 }
 
-auto static RoundCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
+static auto RoundCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 w, i32 ncap, f32 u0, f32 u1) -> vertex*
 {
     f32 const px {p.X};
     f32 const py {p.Y};
@@ -321,7 +321,7 @@ auto static RoundCapEnd(vertex* dst, canvas_point const& p, f32 dx, f32 dy, f32 
     return dst;
 }
 
-auto static DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
+static auto DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 total) -> bool
 {
     if (total <= EPSILON) { return false; }
 
@@ -342,7 +342,7 @@ auto static DashPattern(std::vector<f32>& dst, std::span<f32 const> src, f32 tot
     return true;
 }
 
-auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std::span<f32 const> dashPattern, f32 dashOffset) -> std::vector<std::vector<canvas_point>>
+static auto DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std::span<f32 const> dashPattern, f32 dashOffset) -> std::vector<std::vector<canvas_point>>
 {
     // Precompute cumulative distances along the polyline.
     std::vector<f32> accumLengths {};
@@ -440,7 +440,7 @@ auto static DashPolyline(std::span<canvas_point const> pts, f32 totalLength, std
     return dashedPaths;
 }
 
-auto static PolyArea(std::span<canvas_point> pts)
+static auto PolyArea(std::span<canvas_point> pts)
 {
     f32 area {0};
     for (usize i {2}; i < pts.size(); ++i) {
@@ -452,7 +452,7 @@ auto static PolyArea(std::span<canvas_point> pts)
     return area * 0.5f;
 }
 
-auto static PolylineLength(std::span<canvas_point const> pts) -> f32
+static auto PolylineLength(std::span<canvas_point const> pts) -> f32
 {
     f32 length {0.0f};
     for (usize i {1}; i < pts.size(); ++i) {
@@ -703,7 +703,7 @@ void path_cache::flatten_paths(bool enforceWinding, std::span<f32 const> dash, f
 
 void path_cache::expand_stroke(f32 w, line_cap lineCap, line_join lineJoin, f32 miterLimit, f32 fringeWidth)
 {
-    auto static CurveDivs {[](f32 r, f32 arc, f32 tol) {
+    static auto CurveDivs {[](f32 r, f32 arc, f32 tol) {
         f32 const da {std::acos(r / (r + tol)) * 2.0f};
         return std::max(2, static_cast<i32>(std::ceil(arc / da)));
     }};
@@ -954,7 +954,7 @@ void path_cache::set_tolerances(f32 dist, f32 tess)
 
 auto path_cache::is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const -> bool
 {
-    auto static DistancePointSegment {[](point_f r, point_f p, point_f q) -> f32 {
+    static auto DistancePointSegment {[](point_f r, point_f p, point_f q) -> f32 {
         f32 const pqx {q.X - p.X};
         f32 const pqy {q.Y - p.Y};
         f32       dx {r.X - p.X};

@@ -30,13 +30,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-auto static read_vorbis(void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
+static auto read_vorbis(void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 {
     auto* stream {static_cast<io::istream*>(datasource)};
     return static_cast<size_t>(stream->read_to<byte>({reinterpret_cast<byte*>(ptr), static_cast<usize>(size * nmemb)}));
 }
 
-auto static seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
+static auto seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
 {
     auto*      stream {static_cast<io::istream*>(datasource)};
     auto const dir {static_cast<io::seek_dir>(whence)};
@@ -44,7 +44,7 @@ auto static seek_vorbis(void* datasource, ogg_int64_t offset, int whence) -> int
     return 0;
 }
 
-auto static tell_vorbis(void* datasource) -> long
+static auto tell_vorbis(void* datasource) -> long
 {
     io::istream* stream {static_cast<io::istream*>(datasource)};
     return static_cast<long>(stream->tell());

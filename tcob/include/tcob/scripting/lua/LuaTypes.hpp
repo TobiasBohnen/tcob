@@ -84,9 +84,9 @@ public:
 
     void dump(io::ostream& stream) const;
 
-    auto static Create(state_view view) -> table;
-    auto static PushNew(state_view view) -> table;
-    auto static Acquire(state_view view, i32 idx) -> table;
+    static auto Create(state_view view) -> table;
+    static auto PushNew(state_view view) -> table;
+    static auto Acquire(state_view view, i32 idx) -> table;
 
 private:
     explicit table(state_view view);
@@ -142,7 +142,7 @@ public:
     auto protected_call(auto&&... params) const -> std::expected<R, error_code>;
     auto unprotected_call(auto&&... params) const -> std::expected<R, error_code>;
 
-    auto static Acquire(state_view view, i32 idx) -> function<R>;
+    static auto Acquire(state_view view, i32 idx) -> function<R>;
 
 protected:
     using detail::function_base::function_base;

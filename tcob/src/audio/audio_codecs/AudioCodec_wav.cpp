@@ -20,20 +20,20 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-auto static read_wav(void* userdata, void* buffer, usize bytesToRead) -> usize
+static auto read_wav(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
 }
 
-auto static write_wav(void* userdata, void const* buffer, usize bytesToWrite) -> usize
+static auto write_wav(void* userdata, void const* buffer, usize bytesToWrite) -> usize
 {
     auto*      stream {static_cast<io::ostream*>(userdata)};
     auto const retValue {stream->write<byte>({static_cast<byte const*>(buffer), bytesToWrite})};
     return static_cast<usize>(std::max<isize>(0, retValue));
 }
 
-auto static seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> drwav_bool32
+static auto seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> drwav_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
@@ -45,7 +45,7 @@ auto static seek_wav(void* userdata, i32 offset, drwav_seek_origin origin) -> dr
     return stream->seek(offset, dir);
 }
 
-auto static tell_wav(void* userdata, drwav_int64* pCursor) -> drwav_bool32
+static auto tell_wav(void* userdata, drwav_int64* pCursor) -> drwav_bool32
 {
     io::istream* stream {static_cast<io::istream*>(userdata)};
     *pCursor = static_cast<drwav_int64>(stream->tell());

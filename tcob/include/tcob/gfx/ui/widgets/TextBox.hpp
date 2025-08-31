@@ -30,7 +30,7 @@ public:
         text_element  Text;
         caret_element Caret;
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit text_box(init const& wi);

@@ -38,7 +38,7 @@ private:
     void init_render_system(string const& windowTitle);
     void init_input_system();
 
-    void static InitSDL();
+    static void InitSDL();
 
     std::vector<locale> _locales {};
 

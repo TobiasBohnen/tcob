@@ -18,7 +18,7 @@
 
 namespace tcob::db {
 
-auto static get_column_names(auto&& select, utf8_string const& name) -> std::set<utf8_string>
+static auto get_column_names(auto&& select, utf8_string const& name) -> std::set<utf8_string>
 {
     std::set<utf8_string> retValue;
 
@@ -32,7 +32,7 @@ auto static get_column_names(auto&& select, utf8_string const& name) -> std::set
     return retValue;
 }
 
-auto static get_row_count(auto&& select, utf8_string const& name) -> i32
+static auto get_row_count(auto&& select, utf8_string const& name) -> i32
 {
     // SELECT COUNT(1) FROM table
     if (select.prepare(std::format("SELECT COUNT(1) FROM {};", name))) {

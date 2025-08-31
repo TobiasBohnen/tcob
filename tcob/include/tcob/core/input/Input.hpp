@@ -99,14 +99,14 @@ public:
 
     virtual ~keyboard() = default;
 
-    auto virtual get_scancode(key_code key) const -> scan_code = 0;
-    auto virtual get_keycode(scan_code key) const -> key_code  = 0;
+    virtual auto get_scancode(key_code key) const -> scan_code = 0;
+    virtual auto get_keycode(scan_code key) const -> key_code  = 0;
 
-    auto virtual is_key_down(scan_code key) const -> bool = 0;
-    auto virtual is_key_down(key_code key) const -> bool  = 0;
-    auto virtual is_mod_down(key_mod mod) const -> bool   = 0;
+    virtual auto is_key_down(scan_code key) const -> bool = 0;
+    virtual auto is_key_down(key_code key) const -> bool  = 0;
+    virtual auto is_mod_down(key_mod mod) const -> bool   = 0;
 
-    auto virtual mods() const -> key_mods = 0;
+    virtual auto mods() const -> key_mods = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -147,9 +147,9 @@ public:
 
     virtual ~mouse() = default;
 
-    auto virtual get_position() const -> point_i             = 0; // TODO: set_get_
-    void virtual set_position(point_i pos) const             = 0;
-    auto virtual is_button_down(button button) const -> bool = 0;
+    virtual auto get_position() const -> point_i             = 0; // TODO: set_get_
+    virtual void set_position(point_i pos) const             = 0;
+    virtual auto is_button_down(button button) const -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -225,23 +225,23 @@ public:
 
     virtual ~controller() = default;
 
-    auto virtual id() const -> u32      = 0;
-    auto virtual name() const -> string = 0;
+    virtual auto id() const -> u32      = 0;
+    virtual auto name() const -> string = 0;
 
-    auto virtual has_rumble() const -> bool                                                                   = 0;
-    auto virtual rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, milliseconds duration) const -> bool = 0;
+    virtual auto has_rumble() const -> bool                                                                   = 0;
+    virtual auto rumble(u16 lowFrequencyRumble, u16 highFrequencyRumble, milliseconds duration) const -> bool = 0;
 
-    auto virtual has_rumble_triggers() const -> bool                                                   = 0;
-    auto virtual rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds duration) const -> bool = 0;
+    virtual auto has_rumble_triggers() const -> bool                                                   = 0;
+    virtual auto rumble_triggers(u16 leftRumble, u16 rightRumble, milliseconds duration) const -> bool = 0;
 
-    auto virtual is_button_pressed(button b) const -> bool        = 0;
-    auto virtual has_button(button b) const -> bool               = 0;
-    auto virtual get_button_name(button b) const -> string        = 0;
-    auto virtual get_button_label(button b) const -> button_label = 0;
+    virtual auto is_button_pressed(button b) const -> bool        = 0;
+    virtual auto has_button(button b) const -> bool               = 0;
+    virtual auto get_button_name(button b) const -> string        = 0;
+    virtual auto get_button_label(button b) const -> button_label = 0;
 
-    auto virtual get_axis_value(axis a) const -> i16   = 0;
-    auto virtual has_axis(axis a) const -> bool        = 0;
-    auto virtual get_axis_name(axis a) const -> string = 0;
+    virtual auto get_axis_value(axis a) const -> i16   = 0;
+    virtual auto has_axis(axis a) const -> bool        = 0;
+    virtual auto get_axis_name(axis a) const -> string = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -250,9 +250,9 @@ class TCOB_API clipboard {
 public:
     virtual ~clipboard() = default;
 
-    auto virtual has_text() const -> bool          = 0;
-    auto virtual get_text() const -> utf8_string   = 0; // TODO: set_get_
-    void virtual set_text(utf8_string const& text) = 0;
+    virtual auto has_text() const -> bool          = 0;
+    virtual auto get_text() const -> utf8_string   = 0; // TODO: set_get_
+    virtual void set_text(utf8_string const& text) = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -284,17 +284,17 @@ public:
 
     prop<mode> InputMode;
 
-    auto virtual controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& = 0;
-    auto first_controller() const -> controller&;
-    auto has_controller() const -> bool;
+    virtual auto controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& = 0;
+    auto         first_controller() const -> controller&;
+    auto         has_controller() const -> bool;
 
-    auto virtual mouse() const -> std::shared_ptr<input::mouse> = 0;
+    virtual auto mouse() const -> std::shared_ptr<input::mouse> = 0;
 
-    auto virtual keyboard() const -> std::shared_ptr<input::keyboard> = 0;
+    virtual auto keyboard() const -> std::shared_ptr<input::keyboard> = 0;
 
-    auto virtual clipboard() const -> std::shared_ptr<input::clipboard> = 0;
+    virtual auto clipboard() const -> std::shared_ptr<input::clipboard> = 0;
 
-    void virtual process_events(void* ev) = 0;
+    virtual void process_events(void* ev) = 0;
 
     static inline char const* ServiceName {"input::system"};
 };
@@ -306,16 +306,16 @@ public:
     receiver()          = default;
     virtual ~receiver() = default;
 
-    void virtual on_key_down(keyboard::event const& ev)                        = 0;
-    void virtual on_key_up(keyboard::event const& ev)                          = 0;
-    void virtual on_text_input(keyboard::text_input_event const& ev)           = 0;
-    void virtual on_mouse_motion(mouse::motion_event const& ev)                = 0;
-    void virtual on_mouse_button_down(mouse::button_event const& ev)           = 0;
-    void virtual on_mouse_button_up(mouse::button_event const& ev)             = 0;
-    void virtual on_mouse_wheel(mouse::wheel_event const& ev)                  = 0;
-    void virtual on_controller_axis_motion(controller::axis_event const& ev)   = 0;
-    void virtual on_controller_button_down(controller::button_event const& ev) = 0;
-    void virtual on_controller_button_up(controller::button_event const& ev)   = 0;
+    virtual void on_key_down(keyboard::event const& ev)                        = 0;
+    virtual void on_key_up(keyboard::event const& ev)                          = 0;
+    virtual void on_text_input(keyboard::text_input_event const& ev)           = 0;
+    virtual void on_mouse_motion(mouse::motion_event const& ev)                = 0;
+    virtual void on_mouse_button_down(mouse::button_event const& ev)           = 0;
+    virtual void on_mouse_button_up(mouse::button_event const& ev)             = 0;
+    virtual void on_mouse_wheel(mouse::wheel_event const& ev)                  = 0;
+    virtual void on_controller_axis_motion(controller::axis_event const& ev)   = 0;
+    virtual void on_controller_button_down(controller::button_event const& ev) = 0;
+    virtual void on_controller_button_up(controller::button_event const& ev)   = 0;
 };
 
 ////////////////////////////////////////////////////////////

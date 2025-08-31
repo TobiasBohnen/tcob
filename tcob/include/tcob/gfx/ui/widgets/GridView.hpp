@@ -40,7 +40,7 @@ public:
         std::vector<utf8_string> RowItemClasses {"row_items"};
         f32                      MaxVisibleRows {5};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit grid_view(init const& wi);

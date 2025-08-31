@@ -22,19 +22,19 @@
 namespace tcob::db {
 
 extern "C" {
-auto static commit(void* ptr) -> i32
+static auto commit(void* ptr) -> i32
 {
     auto* db {static_cast<database*>(ptr)};
     return db->call_commit_hook();
 }
 
-void static rollback(void* ptr)
+static void rollback(void* ptr)
 {
     auto* db {static_cast<database*>(ptr)};
     db->call_rollback_hook();
 }
 
-void static update(void* ptr, i32 mode, char const* dbName, char const* table, long long int rowid)
+static void update(void* ptr, i32 mode, char const* dbName, char const* table, long long int rowid)
 {
     auto*       db {static_cast<database*>(ptr)};
     update_mode upMode {};

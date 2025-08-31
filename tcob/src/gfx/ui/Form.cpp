@@ -499,7 +499,7 @@ void form_base::on_text_input(input::keyboard::text_input_event const& ev)
 
 void form_base::handle_tab(input::keyboard::event const& ev)
 {
-    auto static find_next_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
+    static auto find_next_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
         widget* retValue {nullptr};
         i32     lowestHigherValue {std::numeric_limits<i32>::max()};
         for (auto* widget : vec) {
@@ -511,7 +511,7 @@ void form_base::handle_tab(input::keyboard::event const& ev)
         return retValue;
     }};
 
-    auto static find_prev_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
+    static auto find_prev_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
         widget* retValue {nullptr};
         i32     highestLowerValue {std::numeric_limits<i32>::min()};
         for (auto* widget : vec) {

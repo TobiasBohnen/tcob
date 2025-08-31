@@ -23,7 +23,7 @@ public:
     public:
         scrollbar_element VScrollBar;
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
 protected:
@@ -42,8 +42,8 @@ protected:
 
     void offset_content(rect_f& bounds, bool isHitTest) const override;
 
-    auto virtual get_scroll_step() const -> f32      = 0;
-    auto virtual get_scroll_max_value() const -> f32 = 0;
+    virtual auto get_scroll_step() const -> f32      = 0;
+    virtual auto get_scroll_max_value() const -> f32 = 0;
 
     auto scrollbar_offset() const -> f32;
     void set_scrollbar_value(f32 value);

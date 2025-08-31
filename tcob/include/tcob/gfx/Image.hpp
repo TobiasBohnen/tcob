@@ -39,8 +39,8 @@ public:
         auto bytes_per_pixel() const -> i32;
         auto stride() const -> i32;
 
-        auto static GetBPP(format f) -> i32;
-        auto static HasAlpha(format f) -> bool;
+        static auto GetBPP(format f) -> i32;
+        static auto HasAlpha(format f) -> bool;
     };
 
     ////////////////////////////////////////////////////////////
@@ -74,12 +74,12 @@ public:
 
     auto count_colors [[nodiscard]] () const -> isize;
 
-    auto static Create(size_i size, format f, std::span<u8 const> data) -> image;
-    auto static CreateEmpty(size_i size, format f) -> image;
+    static auto Create(size_i size, format f, std::span<u8 const> data) -> image;
+    static auto CreateEmpty(size_i size, format f) -> image;
 
-    auto static Load(path const& file) noexcept -> std::optional<image>;
-    auto static Load(io::istream& in, string const& ext) noexcept -> std::optional<image>;
-    auto static LoadInfo(path const& file) noexcept -> std::optional<information>;
+    static auto Load(path const& file) noexcept -> std::optional<image>;
+    static auto Load(io::istream& in, string const& ext) noexcept -> std::optional<image>;
+    static auto LoadInfo(path const& file) noexcept -> std::optional<information>;
 
 private:
     image(size_i size, format f);
@@ -110,8 +110,8 @@ public:
     image_decoder()          = default;
     virtual ~image_decoder() = default;
 
-    auto virtual decode(io::istream& in) -> std::optional<image>                   = 0;
-    auto virtual decode_info(io::istream& in) -> std::optional<image::information> = 0;
+    virtual auto decode(io::istream& in) -> std::optional<image>                   = 0;
+    virtual auto decode_info(io::istream& in) -> std::optional<image::information> = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ public:
     image_encoder()          = default;
     virtual ~image_encoder() = default;
 
-    auto virtual encode(image const& img, io::ostream& out) const -> bool = 0;
+    virtual auto encode(image const& img, io::ostream& out) const -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -148,12 +148,12 @@ public:
 
     auto open(std::shared_ptr<io::istream> in) -> std::optional<image::information>;
 
-    auto virtual current_frame() const -> std::span<u8 const> = 0;
-    auto virtual advance(milliseconds ts) -> status           = 0;
-    void virtual reset()                                      = 0;
+    virtual auto current_frame() const -> std::span<u8 const> = 0;
+    virtual auto advance(milliseconds ts) -> status           = 0;
+    virtual void reset()                                      = 0;
 
 protected:
-    auto virtual open() -> std::optional<image::information> = 0;
+    virtual auto open() -> std::optional<image::information> = 0;
 
     auto stream() -> io::istream&;
 
@@ -180,7 +180,7 @@ public:
     animated_image_encoder()          = default;
     virtual ~animated_image_encoder() = default;
 
-    auto virtual encode(std::span<image_frame const> frames, io::ostream& out) -> bool = 0;
+    virtual auto encode(std::span<image_frame const> frames, io::ostream& out) -> bool = 0;
 };
 
 ////////////////////////////////////////////////////////////

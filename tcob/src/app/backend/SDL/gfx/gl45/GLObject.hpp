@@ -38,10 +38,10 @@ public:
 
     u32 ID {0};
 
-    void static DestroyAll();
+    static void DestroyAll();
 
 protected:
-    void destroy();
-    void virtual do_destroy() = 0;
+    void         destroy();
+    virtual void do_destroy() = 0;
 };
 }

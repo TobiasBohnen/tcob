@@ -20,7 +20,7 @@ public:
     explicit noise_base(u64 seed);
     virtual ~noise_base();
 
-    auto virtual operator()(point_f p) const -> f32 = 0;
+    virtual auto operator()(point_f p) const -> f32 = 0;
 
 protected:
     auto interpolate(f32 a0, f32 a1, f32 w) const -> f32;

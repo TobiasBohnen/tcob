@@ -84,12 +84,12 @@ protected:
     auto window() -> gfx::window&;
     auto library() -> assets::library&;
 
-    void virtual on_start();
-    void virtual on_finish();
-    void virtual on_wake_up();
-    void virtual on_sleep();
+    virtual void on_start();
+    virtual void on_finish();
+    virtual void on_wake_up();
+    virtual void on_sleep();
 
-    void virtual on_draw_to(gfx::render_target& target) = 0;
+    virtual void on_draw_to(gfx::render_target& target) = 0;
 
     void on_key_down(input::keyboard::event const&) override { }
     void on_key_up(input::keyboard::event const&) override { }

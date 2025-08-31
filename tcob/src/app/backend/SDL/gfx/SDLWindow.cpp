@@ -23,7 +23,7 @@
 
 namespace tcob::gfx {
 
-auto static check(string const& msg, bool c) -> bool
+static auto check(string const& msg, bool c) -> bool
 {
     if (!c) {
         logger::Error(msg + ": " + SDL_GetError());

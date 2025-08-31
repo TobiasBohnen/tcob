@@ -53,18 +53,18 @@ public:
     auto copy_to_image() const -> image;
 
     // Renderer
-    void virtual prepare_render(bool debug = false);
-    void virtual finalize_render() const;
-    void bind_material(material const* mat) const;
-    void unbind_material() const;
+    virtual void prepare_render(bool debug = false);
+    virtual void finalize_render() const;
+    void         bind_material(material const* mat) const;
+    void         unbind_material() const;
 
     template <std::derived_from<render_backend::render_target_base> T>
     auto get_impl() const -> T*;
 
 protected:
-    void virtual on_clear(color c) const;
-    auto virtual get_size() const -> size_i = 0;
-    void virtual set_size(size_i size);
+    virtual void on_clear(color c) const;
+    virtual auto get_size() const -> size_i = 0;
+    virtual void set_size(size_i size);
 
 private:
     std::unique_ptr<render_backend::render_target_base> _impl;

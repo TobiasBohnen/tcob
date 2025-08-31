@@ -64,7 +64,7 @@ namespace detail {
         signal_base() = default;
         virtual ~signal_base();
 
-        void virtual disconnect(uid id) const = 0;
+        virtual void disconnect(uid id) const = 0;
 
     protected:
         auto next_id() const -> uid;

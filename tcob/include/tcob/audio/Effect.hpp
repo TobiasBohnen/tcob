@@ -16,7 +16,7 @@ public:
     effect_base()          = default;
     virtual ~effect_base() = default;
 
-    auto virtual operator()(buffer const& img) const -> buffer = 0;
+    virtual auto operator()(buffer const& img) const -> buffer = 0;
 };
 
 ////////////////////////////////////////////////////////////

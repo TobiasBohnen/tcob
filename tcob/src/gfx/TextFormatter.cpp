@@ -42,7 +42,7 @@ struct line_definition {
     f32                       WhiteSpaceCount {0};
 };
 
-auto static HandleCommands(token& token) -> bool
+static auto HandleCommands(token& token) -> bool
 {
     static std::locale loc {"en_US.UTF8"};
 
@@ -73,7 +73,7 @@ auto static HandleCommands(token& token) -> bool
     return false;
 }
 
-void static FinishToken(std::vector<token>& vec, token& token)
+static void FinishToken(std::vector<token>& vec, token& token)
 {
     if (token.Type == token_type::Command) {
         if (!HandleCommands(token)) {
@@ -89,7 +89,7 @@ void static FinishToken(std::vector<token>& vec, token& token)
     token.Command = {};
 }
 
-auto static Tokenize(utf8_string_view text, bool parseCommands) -> std::vector<token>
+static auto Tokenize(utf8_string_view text, bool parseCommands) -> std::vector<token>
 {
     std::vector<token> retValue {};
 
@@ -174,7 +174,7 @@ auto static Tokenize(utf8_string_view text, bool parseCommands) -> std::vector<t
     return retValue;
 }
 
-auto static Shape(utf8_string_view text, font& font, bool kerning, bool measure, bool parseCommands) -> std::vector<token>
+static auto Shape(utf8_string_view text, font& font, bool kerning, bool measure, bool parseCommands) -> std::vector<token>
 {
     auto retValue {Tokenize(text, parseCommands)};
 
@@ -198,7 +198,7 @@ auto static Shape(utf8_string_view text, font& font, bool kerning, bool measure,
     return retValue;
 }
 
-auto static Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>
+static auto Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> std::vector<line_definition>
 {
     std::vector<line_definition> retValue {};
     line_definition              currentLine {};
@@ -251,7 +251,7 @@ auto static Wrap(std::vector<token> const& tokens, f32 lineWidth, f32 scale) -> 
     return retValue;
 }
 
-auto static Layout(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
+static auto Layout(std::vector<line_definition> const& lines, font& font, alignments align, f32 availableHeight, f32 scale) -> result
 {
     availableHeight = availableHeight < 0 ? std::numeric_limits<f32>::max() : availableHeight;
 

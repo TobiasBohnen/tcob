@@ -24,13 +24,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-auto static read_opus(void* _stream, unsigned char* _ptr, int _nbytes) -> int
+static auto read_opus(void* _stream, unsigned char* _ptr, int _nbytes) -> int
 {
     auto* stream {static_cast<io::istream*>(_stream)};
     return static_cast<int>(stream->read_to<unsigned char>({_ptr, static_cast<usize>(_nbytes)}));
 }
 
-auto static seek_opus(void* _stream, opus_int64 _offset, int _whence) -> int
+static auto seek_opus(void* _stream, opus_int64 _offset, int _whence) -> int
 {
     auto*      stream {static_cast<io::istream*>(_stream)};
     auto const dir {static_cast<io::seek_dir>(_whence)};
@@ -38,7 +38,7 @@ auto static seek_opus(void* _stream, opus_int64 _offset, int _whence) -> int
     return 0;
 }
 
-auto static tell_opus(void* _stream) -> opus_int64
+static auto tell_opus(void* _stream) -> opus_int64
 {
     io::istream* stream {static_cast<io::istream*>(_stream)};
     return static_cast<long>(stream->tell());
@@ -103,13 +103,13 @@ auto opus_decoder::decode(std::span<f32> outputSamples) -> isize
 ////////////////////////////////////////////////////////////
 
 extern "C" {
-auto static write_opus(void* user_data, unsigned char const* ptr, opus_int32 len) -> int
+static auto write_opus(void* user_data, unsigned char const* ptr, opus_int32 len) -> int
 {
     auto* stream {static_cast<io::ostream*>(user_data)};
     return static_cast<int>(stream->write<unsigned char>({ptr, static_cast<usize>(len)})) == len ? 0 : 1;
 }
 
-auto static close_opus(void* /* user_data */) -> int
+static auto close_opus(void* /* user_data */) -> int
 {
     return 0;
 }

@@ -26,7 +26,7 @@ namespace tcob::audio::detail {
 
     #define RENDER_EFFECTSAMPLEBLOCK 64
 
-void static handle_message(tsf* font, tml_message* midiMessage)
+static void handle_message(tsf* font, tml_message* midiMessage)
 {
     switch (midiMessage->type) {
     case TML_PROGRAM_CHANGE: // channel program (preset) change (special handling for 10th MIDI channel with drums)

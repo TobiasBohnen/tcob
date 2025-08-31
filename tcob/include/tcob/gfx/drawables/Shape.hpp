@@ -52,18 +52,18 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    auto virtual geometry() -> geometry_data = 0;
+    virtual auto geometry() -> geometry_data = 0;
 
-    auto virtual intersect(ray const& ray) -> std::vector<ray::result> = 0;
+    virtual auto intersect(ray const& ray) -> std::vector<ray::result> = 0;
 
     auto is_dirty() const -> bool;
 
 protected:
-    auto virtual center() const -> point_f = 0;
-    auto pivot() const -> point_f override;
+    virtual auto center() const -> point_f = 0;
+    auto         pivot() const -> point_f override;
 
-    void virtual on_color_changed(color c)                          = 0;
-    void virtual on_texture_region_changed(string const& texRegion) = 0;
+    virtual void on_color_changed(color c)                          = 0;
+    virtual void on_texture_region_changed(string const& texRegion) = 0;
 
     void on_transform_changed() override;
 

@@ -59,28 +59,28 @@ public:
     shadow_element DropShadow {.Color = colors::Transparent, .OffsetX = length {5, length::type::Absolute}, .OffsetY = length {5, length::type::Absolute}};
     border_element Border;
 
-    void static Transition(widget_style& target, widget_style const& from, widget_style const& to, f64 step);
+    static void Transition(widget_style& target, widget_style const& from, widget_style const& to, f64 step);
 };
 
 class TCOB_API thumb_style : public style {
 public:
     thumb_element Thumb;
 
-    void static Transition(thumb_style& target, thumb_style const& from, thumb_style const& to, f64 step);
+    static void Transition(thumb_style& target, thumb_style const& from, thumb_style const& to, f64 step);
 };
 
 class TCOB_API nav_arrows_style : public style {
 public:
     nav_arrow_element NavArrow;
 
-    void static Transition(nav_arrows_style& target, nav_arrows_style const& from, nav_arrows_style const& to, f64 step);
+    static void Transition(nav_arrows_style& target, nav_arrows_style const& from, nav_arrows_style const& to, f64 step);
 };
 
 class TCOB_API item_style : public style {
 public:
     item_element Item;
 
-    void static Transition(item_style& target, item_style const& from, item_style const& to, f64 step);
+    static void Transition(item_style& target, item_style const& from, item_style const& to, f64 step);
 };
 
 }

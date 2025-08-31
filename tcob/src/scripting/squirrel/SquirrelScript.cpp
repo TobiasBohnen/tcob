@@ -24,7 +24,7 @@
 namespace tcob::scripting::squirrel {
 
 extern "C" {
-void static print(HSQUIRRELVM, char const* c, ...)
+static void print(HSQUIRRELVM, char const* c, ...)
 {
     #if defined(__llvm__)
         #pragma clang diagnostic push
@@ -45,13 +45,13 @@ void static print(HSQUIRRELVM, char const* c, ...)
     std::cout << buf << "\n";
 }
 
-void static comp_error(HSQUIRRELVM, char const* desc, char const* source, SQInteger line, SQInteger column)
+static void comp_error(HSQUIRRELVM, char const* desc, char const* source, SQInteger line, SQInteger column)
 {
     logger::Error("Squirrel: \"{}\" @([{}] line: {} col: {})",
                   desc, source, line, column);
 }
 
-auto static error(HSQUIRRELVM v) -> SQInteger
+static auto error(HSQUIRRELVM v) -> SQInteger
 {
     SQChar const* sErr {nullptr};
     if (sq_gettop(v) >= 1) {
@@ -122,7 +122,7 @@ void script::enable_debug_info() const
     _view.enable_debug_info(true);
 }
 
-void static hook(HSQUIRRELVM v, SQInteger type, SQChar const* sourcename, SQInteger line, SQChar const* funcname)
+static void hook(HSQUIRRELVM v, SQInteger type, SQChar const* sourcename, SQInteger line, SQChar const* funcname)
 {
     vm_view view {v};
 

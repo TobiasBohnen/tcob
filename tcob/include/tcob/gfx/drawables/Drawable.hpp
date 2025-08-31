@@ -29,10 +29,10 @@ public:
     void draw_to(render_target& target);
 
 protected:
-    void virtual on_draw_to(render_target& target) = 0;
-    auto virtual can_draw() const -> bool          = 0;
+    virtual void on_draw_to(render_target& target) = 0;
+    virtual auto can_draw() const -> bool          = 0;
 
-    void virtual on_visiblity_changed();
+    virtual void on_visiblity_changed();
 
 private:
     bool _visible {true};

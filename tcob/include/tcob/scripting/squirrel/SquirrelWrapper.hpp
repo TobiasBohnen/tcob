@@ -83,10 +83,10 @@ public:
 
 private:
     template <typename R, typename... P>
-    auto static impl_make_unique_closure(std::function<R(P...)>&& fn)
+    static auto impl_make_unique_closure(std::function<R(P...)>&& fn)
         -> native_closure_unique_ptr;
     template <typename... Funcs>
-    auto static impl_make_unique_overload(Funcs&&... fns)
+    static auto impl_make_unique_overload(Funcs&&... fns)
         -> native_closure_unique_ptr;
 
     void impl_wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func);

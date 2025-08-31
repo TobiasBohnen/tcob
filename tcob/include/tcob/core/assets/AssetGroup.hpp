@@ -27,13 +27,13 @@ namespace detail {
 
         auto name() const -> string const&;
 
-        void virtual asset_stats(bucket_stats& out) const = 0;
+        virtual void asset_stats(bucket_stats& out) const = 0;
 
-        void virtual destroy_all()               = 0;
-        void virtual destroy(string const& name) = 0;
+        virtual void destroy_all()               = 0;
+        virtual void destroy(string const& name) = 0;
 
-        void virtual unload_all()               = 0;
-        void virtual unload(string const& name) = 0;
+        virtual void unload_all()               = 0;
+        virtual void unload(string const& name) = 0;
 
     private:
         string _assetName;

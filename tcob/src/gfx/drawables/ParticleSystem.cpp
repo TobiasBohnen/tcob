@@ -19,7 +19,7 @@ using namespace std::chrono_literals;
 
 ////////////////////////////////////////////////////////////
 
-void static calc_velocity(auto&& particle, point_f pos, f32 seconds)
+static void calc_velocity(auto&& particle, point_f pos, f32 seconds)
 {
     point_f const radial {pos * particle.RadialAcceleration};
     point_f const tangential {pos.as_perpendicular() * particle.TangentialAcceleration};
@@ -82,27 +82,27 @@ void quad_particle::update(milliseconds deltaTime)
 
 ////////////////////////////////////////////////////////////
 
-auto static minmax_rng(min_max<f32> const& range, auto&& rng) -> f32
+static auto minmax_rng(min_max<f32> const& range, auto&& rng) -> f32
 {
     return rng(range.first, range.second);
 }
 
-auto static minmax_rng(min_max<point_f> const& range, auto&& rng) -> point_f
+static auto minmax_rng(min_max<point_f> const& range, auto&& rng) -> point_f
 {
     return point_f {rng(range.first.X, range.second.X), rng(range.first.Y, range.second.Y)};
 }
 
-auto static minmax_rng(min_max<degree_f> const& range, auto&& rng) -> degree_f
+static auto minmax_rng(min_max<degree_f> const& range, auto&& rng) -> degree_f
 {
     return degree_f {rng(range.first.Value, range.second.Value)};
 }
 
-auto static minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> milliseconds
+static auto minmax_rng(min_max<milliseconds> const& range, auto&& rng) -> milliseconds
 {
     return milliseconds {rng(range.first.count(), range.second.count())};
 }
 
-void static setup_particle(auto&& particle, auto&& tmpl, auto&& _randomGen)
+static void setup_particle(auto&& particle, auto&& tmpl, auto&& _randomGen)
 {
     auto const dir {point_f::FromDirection(minmax_rng(tmpl.Direction, _randomGen))};
     particle.Velocity               = dir * minmax_rng(tmpl.Speed, _randomGen);

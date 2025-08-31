@@ -19,7 +19,7 @@ class TCOB_API updatable {
 public:
     virtual ~updatable() = default;
 
-    void virtual update(milliseconds deltaTime);
+    virtual void update(milliseconds deltaTime);
 
 protected:
     updatable()                                                   = default;
@@ -28,17 +28,17 @@ protected:
     updatable(updatable&& other) noexcept                         = default;
     auto operator=(updatable&& other) noexcept -> updatable&      = default;
 
-    void virtual on_update(milliseconds deltaTime);
+    virtual void on_update(milliseconds deltaTime);
 };
 
 ////////////////////////////////////////////////////////////
 
 class TCOB_API hybrid_updatable : public updatable {
 public:
-    void virtual fixed_update(milliseconds deltaTime);
+    virtual void fixed_update(milliseconds deltaTime);
 
 protected:
-    void virtual on_fixed_update(milliseconds deltaTime);
+    virtual void on_fixed_update(milliseconds deltaTime);
 };
 
 ////////////////////////////////////////////////////////////

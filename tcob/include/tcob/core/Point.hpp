@@ -44,8 +44,8 @@ public:
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;
 
-    auto static constexpr Lerp(point<T> const& from, point<T> const& to, f64 step) -> point<T>;
-    auto static constexpr FromDirection(degree<f64> angle) -> point<T>;
+    static auto constexpr Lerp(point<T> const& from, point<T> const& to, f64 step) -> point<T>;
+    static auto constexpr FromDirection(degree<f64> angle) -> point<T>;
 
     T X {0};
     T Y {0};
@@ -53,7 +53,7 @@ public:
     static point<T> const Zero;
     static point<T> const One;
 
-    auto static constexpr Members();
+    static auto constexpr Members();
 };
 
 template <Arithmetic T>

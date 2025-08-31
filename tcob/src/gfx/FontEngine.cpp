@@ -20,21 +20,21 @@
 namespace tcob::gfx {
 
 extern "C" {
-auto static move_to(FT_Vector const* to, void* user) -> i32
+static auto move_to(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->MoveTo({(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
-auto static line_to(FT_Vector const* to, void* user) -> i32
+static auto line_to(FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->LineTo({(static_cast<f32>(to->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(to->y) / 64.0f) + funcs->Offset.Y});
     return 0;
 }
 
-auto static conic_to(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
+static auto conic_to(FT_Vector const* control, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->ConicTo({(static_cast<f32>(control->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control->y) / 64.0f) + funcs->Offset.Y},
@@ -42,7 +42,7 @@ auto static conic_to(FT_Vector const* control, FT_Vector const* to, void* user) 
     return 0;
 }
 
-auto static cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
+static auto cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Vector const* to, void* user) -> i32
 {
     auto* funcs {reinterpret_cast<decompose_callbacks*>(user)};
     funcs->CubicTo({(static_cast<f32>(control1->x) / 64.0f) + funcs->Offset.X, (static_cast<f32>(control1->y) / 64.0f) + funcs->Offset.Y},

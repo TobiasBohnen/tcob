@@ -30,9 +30,9 @@ public:
     void render_to_target(render_target& target, bool debug = false);
 
 protected:
-    void virtual prepare_render(render_target& target, bool debug);
-    void virtual on_render_to_target(render_target& target) = 0;
-    void virtual finalize_render(render_target& target);
+    virtual void prepare_render(render_target& target, bool debug);
+    virtual void on_render_to_target(render_target& target) = 0;
+    virtual void finalize_render(render_target& target);
 };
 
 ////////////////////////////////////////////////////////////

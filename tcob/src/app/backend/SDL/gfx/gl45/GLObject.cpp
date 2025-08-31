@@ -29,7 +29,7 @@ void gl_object_registry::unregister_object(gl_object const* res) noexcept
 
 ////////////////////////////////////////////////////////////
 
-auto static GetRegistry() -> gl_object_registry&
+static auto GetRegistry() -> gl_object_registry&
 {
     static gl_object_registry registry;
     return registry;

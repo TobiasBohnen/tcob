@@ -43,7 +43,7 @@ public:
 
         std::vector<color> Colors;
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     prop<std::vector<series>> Series;
@@ -67,7 +67,7 @@ public:
     public:
         length LineSize {3.0f, length::type::Absolute};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit line_chart(init const& wi);
@@ -89,7 +89,7 @@ public:
     public:
         length BarSize {0.8f, length::type::Relative};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit bar_chart(init const& wi);

@@ -34,7 +34,7 @@ public:
         scrollbar_element HScrollBar;
         scrollbar_element VScrollBar;
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit panel(init const& wi);

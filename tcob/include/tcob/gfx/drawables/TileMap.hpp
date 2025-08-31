@@ -59,7 +59,7 @@ public:
 
     size_f Scale {size_f::One};
 
-    auto static constexpr Members();
+    static auto constexpr Members();
 };
 
 class TCOB_API orthogonal_grid {
@@ -85,7 +85,7 @@ public:
     point_f Center {0.5f, 0.5f};
     f32     Height {0.0f};
 
-    auto static constexpr Members();
+    static auto constexpr Members();
 };
 
 class TCOB_API isometric_grid {
@@ -109,7 +109,7 @@ public:
     bool   FlipVertically {false};
     color  Color {colors::White};
 
-    auto static constexpr Members();
+    static auto constexpr Members();
 };
 
 enum hexagonal_top : u8 {
@@ -192,7 +192,7 @@ private:
     auto get_layer(uid id) -> layer*;
     auto get_layer(uid id) const -> layer const*;
 
-    void virtual setup_quad(quad& q, point_i coord, tile_index_t idx) const = 0;
+    virtual void setup_quad(quad& q, point_i coord, tile_index_t idx) const = 0;
 
     std::vector<layer>        _layers {};
     std::vector<tile_index_t> _tileMap {};

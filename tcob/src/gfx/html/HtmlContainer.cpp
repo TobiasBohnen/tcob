@@ -59,7 +59,7 @@ auto to_color(litehtml::web_color const& col) -> color
     return {col.red, col.green, col.blue, col.alpha};
 }
 
-auto static to_border_style(litehtml::border_style style) -> border_style
+static auto to_border_style(litehtml::border_style style) -> border_style
 {
     // TODO:add styles
     switch (style) {

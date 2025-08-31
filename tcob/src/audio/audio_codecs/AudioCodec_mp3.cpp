@@ -18,13 +18,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-auto static read_mp3(void* userdata, void* buffer, usize bytesToRead) -> usize
+static auto read_mp3(void* userdata, void* buffer, usize bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<usize>(stream->read_to<byte>({static_cast<byte*>(buffer), bytesToRead}));
 }
 
-auto static seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32
+static auto seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> drmp3_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
@@ -36,7 +36,7 @@ auto static seek_mp3(void* userdata, i32 offset, drmp3_seek_origin origin) -> dr
     return stream->seek(offset, dir);
 }
 
-auto static tell_mp3(void* userdata, drmp3_int64* pCursor) -> drmp3_bool32
+static auto tell_mp3(void* userdata, drmp3_int64* pCursor) -> drmp3_bool32
 {
     io::istream* stream {static_cast<io::istream*>(userdata)};
     *pCursor = static_cast<drmp3_int64>(stream->tell());

@@ -37,8 +37,8 @@ public:
     auto decompose_glyph(u32 cp, decompose_callbacks& funcs) -> glyph;
     auto load_glyph(u32 cp) -> glyph;
 
-    auto static Init() -> bool;
-    void static Done();
+    static auto Init() -> bool;
+    static void Done();
 
 private:
     auto codepoint_to_glyphindex(u32 cp) -> u32;

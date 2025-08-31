@@ -69,7 +69,7 @@ public:
 
     auto validate(object const& obj) const -> result;
 
-    auto static FromObject(object const& obj) -> std::shared_ptr<schema>;
+    static auto FromObject(object const& obj) -> std::shared_ptr<schema>;
 
 private:
     auto validate_property(object const& obj, string_property const& prop) const -> std::optional<failure>;

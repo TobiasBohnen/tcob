@@ -42,7 +42,7 @@ namespace tcob::scripting::squirrel {
 
 template <typename R, typename... P>
 struct converter<R(P...)> {
-    void static To(vm_view view, R (*value)(P...))
+    static void To(vm_view view, R (*value)(P...))
     {
         view.push_userpointer(reinterpret_cast<void*>(value));
         view.new_closure(
@@ -59,7 +59,7 @@ struct converter<R(P...)> {
 
 template <typename R, typename... P>
 struct converter<R (*)(P...)> {
-    void static To(vm_view view, R (*value)(P...))
+    static void To(vm_view view, R (*value)(P...))
     {
         view.push_userpointer(reinterpret_cast<void*>(value));
         view.new_closure(
@@ -76,7 +76,7 @@ struct converter<R (*)(P...)> {
 
 template <typename R, typename... P>
 struct converter<std::function<R(P...)>*> {
-    void static To(vm_view view, std::function<R(P...)>* value)
+    static void To(vm_view view, std::function<R(P...)>* value)
     {
         view.push_userpointer(reinterpret_cast<void*>(value));
         view.new_closure(
@@ -93,7 +93,7 @@ struct converter<std::function<R(P...)>*> {
 
 template <>
 struct converter<detail::native_closure_base*> {
-    void static To(vm_view view, detail::native_closure_base* value)
+    static void To(vm_view view, detail::native_closure_base* value)
     {
         view.push_userpointer(reinterpret_cast<void*>(value));
         view.new_closure(
@@ -113,12 +113,12 @@ struct converter<detail::native_closure_base*> {
 
 template <typename T>
 struct converter<std::optional<T>> {
-    auto static IsType(vm_view, SQInteger) -> bool
+    static auto IsType(vm_view, SQInteger) -> bool
     {
         return true;
     }
 
-    auto static From(vm_view view, SQInteger& idx, std::optional<T>& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, std::optional<T>& value) -> bool
     {
         if (idx > view.get_top() || !converter<T>::IsType(view, idx)) {
             value = std::nullopt;
@@ -131,7 +131,7 @@ struct converter<std::optional<T>> {
         return true;
     }
 
-    void static To(vm_view view, std::optional<T> const& value)
+    static void To(vm_view view, std::optional<T> const& value)
     {
         if (value) {
             converter<T>::To(view, *value);
@@ -143,7 +143,7 @@ struct converter<std::optional<T>> {
 
 template <>
 struct converter<std::nullopt_t> {
-    void static To(vm_view view, std::nullopt_t const&)
+    static void To(vm_view view, std::nullopt_t const&)
     {
         view.push_null();
     }
@@ -151,24 +151,24 @@ struct converter<std::nullopt_t> {
 
 template <typename... P>
 struct converter<std::variant<P...>> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return check_variant<P...>(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, std::variant<P...>& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, std::variant<P...>& value) -> bool
     {
         return convert_from<P...>(view, idx, value);
     }
 
-    void static To(vm_view view, std::variant<P...> const& value)
+    static void To(vm_view view, std::variant<P...> const& value)
     {
         std::visit([&view](auto&& item) { convert_to(view, item); }, value);
     }
 
 private:
     template <typename T, typename... Ts>
-    auto static convert_from(vm_view view, SQInteger& idx, std::variant<P...>& value) -> bool
+    static auto convert_from(vm_view view, SQInteger& idx, std::variant<P...>& value) -> bool
     {
         if (converter<T>::IsType(view, idx)) {
             T val {};
@@ -185,13 +185,13 @@ private:
     }
 
     template <typename R>
-    void static convert_to(vm_view view, R const& value)
+    static void convert_to(vm_view view, R const& value)
     {
         converter<R>::To(view, value);
     }
 
     template <typename T, typename... Ts>
-    auto static check_variant(vm_view view, SQInteger idx) -> bool
+    static auto check_variant(vm_view view, SQInteger idx) -> bool
     {
         if constexpr (sizeof...(Ts) > 0) {
             return converter<T>::IsType(view, idx) || check_variant<Ts...>(view, idx);
@@ -206,12 +206,12 @@ struct converter<T> {
     using key_type    = typename T::key_type;
     using mapped_type = typename T::mapped_type;
 
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return check_map(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         if (view.is_table(idx) || view.is_array(idx)) {
             value.clear();
@@ -237,7 +237,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         view.new_table(std::ssize(value));
         for (auto& [key, val] : value) {
@@ -248,7 +248,7 @@ struct converter<T> {
     }
 
 private:
-    auto static check_map(vm_view view, SQInteger idx) -> bool
+    static auto check_map(vm_view view, SQInteger idx) -> bool
     {
         bool retValue {view.is_table(idx) || view.is_array(idx)};
         if (retValue) {
@@ -273,12 +273,12 @@ template <Set T>
 struct converter<T> {
     using key_type = typename T::key_type;
 
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return check_set(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         bool retValue {view.is_array(idx)};
         if (retValue) {
@@ -298,7 +298,7 @@ struct converter<T> {
         return retValue;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         view.new_array(std::ssize(value));
 
@@ -310,7 +310,7 @@ struct converter<T> {
     }
 
 private:
-    auto static check_set(vm_view view, SQInteger idx) -> bool
+    static auto check_set(vm_view view, SQInteger idx) -> bool
     {
         bool retValue {view.is_array(idx)};
         if (retValue) {
@@ -329,7 +329,7 @@ private:
 template <typename... P>
 struct converter<parameter_pack<P...>> {
 
-    void static To(vm_view view, parameter_pack<P...> const& value)
+    static void To(vm_view view, parameter_pack<P...> const& value)
     {
         for (auto const& item : value.Items) {
             converter<std::variant<P...>>::To(view, item);
@@ -339,12 +339,12 @@ struct converter<parameter_pack<P...>> {
 
 template <typename T, usize Size>
 struct converter<std::array<T, Size>> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return check_array(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, std::array<T, Size>& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, std::array<T, Size>& value) -> bool
     {
         SQInteger const size {static_cast<SQInteger>(Size)};
         bool            retValue {view.is_array(idx) && view.get_size(idx) == size};
@@ -365,7 +365,7 @@ struct converter<std::array<T, Size>> {
         return retValue;
     }
 
-    void static To(vm_view view, std::array<T, Size> const& value)
+    static void To(vm_view view, std::array<T, Size> const& value)
     {
         view.new_array(static_cast<SQInteger>(Size));
 
@@ -377,7 +377,7 @@ struct converter<std::array<T, Size>> {
     }
 
 private:
-    auto static check_array(vm_view view, SQInteger idx) -> bool
+    static auto check_array(vm_view view, SQInteger idx) -> bool
     {
         SQInteger const size {static_cast<SQInteger>(Size)};
         bool            retValue {view.is_array(idx) && view.get_size(idx) == size};
@@ -396,12 +396,12 @@ template <Container T>
 struct converter<T> {
     using value_type = typename T::value_type;
 
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return check_vector(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         bool retValue {view.is_array(idx)};
         if (retValue) {
@@ -428,7 +428,7 @@ struct converter<T> {
         return retValue;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         SQInteger const size {std::ssize(value)};
         view.new_array(size);
@@ -441,7 +441,7 @@ struct converter<T> {
     }
 
 private:
-    auto static check_vector(vm_view view, SQInteger idx) -> bool
+    static auto check_vector(vm_view view, SQInteger idx) -> bool
     {
         bool retValue {view.is_array(idx)};
         if (retValue) {
@@ -466,7 +466,7 @@ private:
 
 template <typename T>
 struct converter<std::span<T>> {
-    void static To(vm_view view, std::span<T> const& value)
+    static void To(vm_view view, std::span<T> const& value)
     {
         SQInteger const size {std::ssize(value)};
         view.new_array(size);
@@ -481,12 +481,12 @@ struct converter<std::span<T>> {
 
 template <typename K, typename V>
 struct converter<std::pair<K, V>> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.is_array(idx) && view.get_size(idx) == 2; // TODO: check types
     }
 
-    auto static From(vm_view view, SQInteger& idx, std::pair<K, V>& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, std::pair<K, V>& value) -> bool
     {
         bool retValue {view.is_array(idx) && view.get_size(idx) == 2};
         if (retValue) {
@@ -508,7 +508,7 @@ struct converter<std::pair<K, V>> {
         return retValue;
     }
 
-    void static To(vm_view view, std::pair<K, V> const& value)
+    static void To(vm_view view, std::pair<K, V> const& value)
     {
         view.new_array(2);
 
@@ -524,12 +524,12 @@ struct converter<std::pair<K, V>> {
 
 template <>
 struct converter<std::filesystem::path> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(vm_view view, SQInteger& idx, std::filesystem::path& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, std::filesystem::path& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.get_string(idx++);
@@ -540,7 +540,7 @@ struct converter<std::filesystem::path> {
         return false;
     }
 
-    void static To(vm_view view, std::filesystem::path const& value)
+    static void To(vm_view view, std::filesystem::path const& value)
     {
         view.push_string(value.string());
     }
@@ -551,12 +551,12 @@ struct converter<std::filesystem::path> {
 
 template <>
 struct converter<ref> {
-    auto static IsType(vm_view, SQInteger) -> bool
+    static auto IsType(vm_view, SQInteger) -> bool
     {
         return true;
     }
 
-    auto static From(vm_view view, SQInteger& idx, ref& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, ref& value) -> bool
     {
         value.acquire(view, idx++);
         return value.is_valid();
@@ -565,12 +565,12 @@ struct converter<ref> {
 
 template <typename T>
 struct ref_converter {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return T::IsType(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         if (T::IsType(view, idx)) {
             value.acquire(view, idx++);
@@ -581,12 +581,12 @@ struct ref_converter {
         return false;
     }
 
-    void static To(vm_view /* view */, T const& value)
+    static void To(vm_view /* view */, T const& value)
     {
         value.push_self();
     }
 
-    void static To(vm_view view, T& value)
+    static void To(vm_view view, T& value)
     {
         if (!value.is_valid()) {
             if constexpr (requires { T::PushNew(view); }) {
@@ -626,12 +626,12 @@ struct converter<function<T>> : public ref_converter<function<T>> { };
 
 template <>
 struct converter<char const*> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(vm_view view, SQInteger& idx, char const*& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, char const*& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.get_string(idx++);
@@ -642,7 +642,7 @@ struct converter<char const*> {
         return false;
     }
 
-    void static To(vm_view view, char const* value)
+    static void To(vm_view view, char const* value)
     {
         view.push_string(value);
     }
@@ -650,12 +650,12 @@ struct converter<char const*> {
 
 template <usize N>
 struct converter<char const[N]> { // NOLINT(*-avoid-c-arrays)
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    void static To(vm_view view, char const* value)
+    static void To(vm_view view, char const* value)
     {
         view.push_string(value);
     }
@@ -663,12 +663,12 @@ struct converter<char const[N]> { // NOLINT(*-avoid-c-arrays)
 
 template <>
 struct converter<string> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(vm_view view, SQInteger& idx, string& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, string& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.get_string(idx++);
@@ -689,7 +689,7 @@ struct converter<string> {
         return false;
     }
 
-    void static To(vm_view view, string const& value)
+    static void To(vm_view view, string const& value)
     {
         view.push_string(value);
     }
@@ -697,12 +697,12 @@ struct converter<string> {
 
 template <>
 struct converter<string_view> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(vm_view view, SQInteger& idx, string_view& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, string_view& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.get_string(idx++);
@@ -713,7 +713,7 @@ struct converter<string_view> {
         return false;
     }
 
-    void static To(vm_view view, string_view value)
+    static void To(vm_view view, string_view value)
     {
         view.push_string(value);
     }
@@ -721,7 +721,7 @@ struct converter<string_view> {
 
 template <>
 struct converter<std::nullptr_t> {
-    void static To(vm_view view, std::nullptr_t const&)
+    static void To(vm_view view, std::nullptr_t const&)
     {
         view.push_null();
     }
@@ -729,12 +729,12 @@ struct converter<std::nullptr_t> {
 
 template <>
 struct converter<bool> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.get_type(idx) == type::Boolean;
     }
 
-    auto static From(vm_view view, SQInteger& idx, bool& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, bool& value) -> bool
     {
         if (view.is_bool(idx)) {
             value = view.get_bool(idx++);
@@ -745,7 +745,7 @@ struct converter<bool> {
         return false;
     }
 
-    void static To(vm_view view, bool const& value)
+    static void To(vm_view view, bool const& value)
     {
         view.push_bool(value);
     }
@@ -753,12 +753,12 @@ struct converter<bool> {
 
 template <Enum T>
 struct converter<T> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.is_integer(idx) || view.is_string(idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         if (view.is_integer(idx)) {
             value = static_cast<T>(view.get_integer(idx++));
@@ -774,7 +774,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         view.push_string(tcob::detail::magic_enum_reduced::enum_to_string(value));
     }
@@ -782,12 +782,12 @@ struct converter<T> {
 
 template <Integral T>
 struct converter<T> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.is_integer(idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         if (view.is_integer(idx)) {
             value = static_cast<T>(view.get_integer(idx++));
@@ -807,7 +807,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         view.push_integer(static_cast<SQInteger>(value));
     }
@@ -815,12 +815,12 @@ struct converter<T> {
 
 template <FloatingPoint T>
 struct converter<T> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.is_number(idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         if (view.is_number(idx)) {
             value = static_cast<T>(view.get_float(idx++));
@@ -831,7 +831,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         view.push_float(static_cast<f32>(value));
     }
@@ -839,12 +839,12 @@ struct converter<T> {
 
 template <Pointer T>
 struct converter<T> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.is_userdata(idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
         static string TypeName {typeid(std::remove_pointer_t<T>).name()};
 
@@ -886,7 +886,7 @@ struct converter<T> {
         }
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         static string TypeName {typeid(std::remove_pointer_t<T>).name()};
 
@@ -912,7 +912,7 @@ struct converter<T> {
 
 template <typename T>
 struct converter<scripting::managed_ptr<T>> {
-    void static To(vm_view view, scripting::managed_ptr<T> const& value)
+    static void To(vm_view view, scripting::managed_ptr<T> const& value)
     {
         converter<T*>::To(view, value.Pointer);
         if constexpr (std::is_destructible_v<T>) {
@@ -920,7 +920,7 @@ struct converter<scripting::managed_ptr<T>> {
         }
     }
 
-    auto static hook(void* ptr, SQInteger) -> SQInteger
+    static auto hook(void* ptr, SQInteger) -> SQInteger
     {
         T** obj {static_cast<T**>(ptr)};
 
@@ -934,12 +934,12 @@ struct converter<scripting::managed_ptr<T>> {
 
 template <typename T>
 struct converter<std::expected<T, error_code>> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return converter<T>::IsType(view, idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, std::expected<T, error_code>& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, std::expected<T, error_code>& value) -> bool
     {
         T val;
         if (converter<T>::From(view, idx, val)) {
@@ -951,7 +951,7 @@ struct converter<std::expected<T, error_code>> {
         return false;
     }
 
-    void static To(vm_view view, std::expected<T, error_code> const& value)
+    static void To(vm_view view, std::expected<T, error_code> const& value)
     {
         converter<T>::To(view, value.value());
     }
@@ -959,7 +959,7 @@ struct converter<std::expected<T, error_code>> {
 
 template <typename... Keys>
 struct converter<proxy<table, Keys...>> {
-    void static To(vm_view, proxy<table, Keys...> const& value)
+    static void To(vm_view, proxy<table, Keys...> const& value)
     {
         if (ref val; value.try_get(val)) {
             val.push_self();
@@ -969,7 +969,7 @@ struct converter<proxy<table, Keys...>> {
 
 template <typename... Keys>
 struct converter<proxy<table const, Keys...>> {
-    void static To(vm_view, proxy<table const, Keys...> const& value)
+    static void To(vm_view, proxy<table const, Keys...> const& value)
     {
         if (ref val; value.try_get(val)) {
             val.push_self();
@@ -980,7 +980,7 @@ struct converter<proxy<table const, Keys...>> {
 template <Serializable T>
 struct converter<T> {
 public:
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         if (view.is_table(idx)) {
             T t {};
@@ -989,11 +989,11 @@ public:
         return false;
     }
 
-    auto static From(vm_view view, SQInteger& idx, T& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        table tab {table::Acquire(view, idx++)};
-        auto static const members {T::Members()};
-        bool retValue {true};
+        table             tab {table::Acquire(view, idx++)};
+        static auto const members {T::Members()};
+        bool              retValue {true};
         std::apply([&](auto&&... m) {
             ((retValue = retValue && set_member(m, tab, value)), ...);
         },
@@ -1001,11 +1001,11 @@ public:
         return retValue;
     }
 
-    void static To(vm_view view, T const& value)
+    static void To(vm_view view, T const& value)
     {
         table tab {table::PushNew(view)};
 
-        auto static const members {T::Members()};
+        static auto const members {T::Members()};
         std::apply([&](auto&&... m) {
             (get_member(m, tab, value), ...);
         },
@@ -1015,12 +1015,12 @@ public:
 
 template <FloatingPoint ValueType, double OneTurn>
 struct converter<angle_unit<ValueType, OneTurn>> {
-    auto static IsType(vm_view view, SQInteger idx) -> bool
+    static auto IsType(vm_view view, SQInteger idx) -> bool
     {
         return view.is_number(idx);
     }
 
-    auto static From(vm_view view, SQInteger& idx, angle_unit<ValueType, OneTurn>& value) -> bool
+    static auto From(vm_view view, SQInteger& idx, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (view.is_number(idx)) {
             value = angle_unit<ValueType, OneTurn> {static_cast<ValueType>(view.get_float(idx++))};
@@ -1031,7 +1031,7 @@ struct converter<angle_unit<ValueType, OneTurn>> {
         return false;
     }
 
-    void static To(vm_view view, angle_unit<ValueType, OneTurn> const& value)
+    static void To(vm_view view, angle_unit<ValueType, OneTurn> const& value)
     {
         view.push_float(static_cast<f32>(value.Value));
     }

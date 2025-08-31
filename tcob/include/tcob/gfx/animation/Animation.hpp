@@ -22,7 +22,7 @@ public:
 
     auto operator==(frame const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&frame::Name> {"name"},

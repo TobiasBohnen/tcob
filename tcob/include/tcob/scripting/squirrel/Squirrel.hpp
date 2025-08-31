@@ -274,8 +274,8 @@ public:
     void register_systemlib() const;
     void register_stringlib() const;
 
-    auto static NewVM() -> HSQUIRRELVM;
-    void close() const;
+    static auto NewVM() -> HSQUIRRELVM;
+    void        close() const;
 
     auto is_valid() const -> bool;
 

@@ -94,7 +94,7 @@ auto widget_painter::draw_overlays() -> bool
 
 ////////////////////////////////////////////////////////////
 
-auto static fill(gfx::canvas& canvas, auto&& paint, auto&& func)
+static auto fill(gfx::canvas& canvas, auto&& paint, auto&& func)
 {
     canvas.set_fill_style(paint);
     canvas.begin_path();
@@ -102,7 +102,7 @@ auto static fill(gfx::canvas& canvas, auto&& paint, auto&& func)
     canvas.fill();
 }
 
-auto static stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
+static auto stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
 {
     canvas.set_stroke_width(size);
     canvas.set_stroke_style(paint);

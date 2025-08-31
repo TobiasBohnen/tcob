@@ -29,7 +29,7 @@ public:
         bar_element Bar;
         f32         GapRatio {1.0f};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit cycle_button(init const& wi);

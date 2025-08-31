@@ -27,7 +27,7 @@ namespace tcob::scripting::lua {
 namespace detail {
 
     ////////////////////////////////////////////////////////////
-    [[maybe_unused]] auto static get_metamethod_name(metamethod m) -> string
+    [[maybe_unused]] static auto get_metamethod_name(metamethod m) -> string
     {
         switch (m) {
         case metamethod::Length:          return "__len";

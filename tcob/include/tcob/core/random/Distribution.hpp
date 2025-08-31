@@ -19,7 +19,7 @@ public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;
 
-    auto static NextFloat(auto&& rng) -> f64;
+    static auto NextFloat(auto&& rng) -> f64;
 };
 
 ////////////////////////////////////////////////////////////

@@ -162,7 +162,7 @@ database_view::operator bool() const
 
 auto database_view::open(path const& file) -> bool
 {
-    [[maybe_unused]] auto static reg {detail::register_vfs()};
+    [[maybe_unused]] static auto reg {detail::register_vfs()};
     return sqlite3_open_v2(file.c_str(), &_db, SQLITE_OPEN_READWRITE, reg.c_str()) == SQLITE_OK;
 }
 

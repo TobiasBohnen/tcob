@@ -26,7 +26,7 @@ public:
         utf8_string ItemClass {"list_items"};
         f32         MaxVisibleItems {5};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit list_box(init const& wi);

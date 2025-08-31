@@ -29,9 +29,9 @@ public:
     prop<f32> Volume;
     prop<f32> Panning; // TODO: prop_val
 
-    auto virtual info() const -> std::optional<specification> = 0;
-    auto virtual duration() const -> milliseconds             = 0;
-    auto state() const -> playback_state;
+    virtual auto info() const -> std::optional<specification> = 0;
+    virtual auto duration() const -> milliseconds             = 0;
+    auto         state() const -> playback_state;
 
     auto play() -> bool;
     auto stop() -> bool;
@@ -42,8 +42,8 @@ public:
     void toggle_pause();
 
 protected:
-    auto virtual on_start() -> bool = 0;
-    auto virtual on_stop() -> bool  = 0;
+    virtual auto on_start() -> bool = 0;
+    virtual auto on_stop() -> bool  = 0;
 
     void create_output();
     void write_to_output(std::span<f32 const> data);

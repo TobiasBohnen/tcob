@@ -83,15 +83,15 @@ public:
 
     auto name() const -> string const&;
 
-    auto form_offset() const -> point_f;
-    auto virtual scroll_offset() const -> point_f;
+    auto         form_offset() const -> point_f;
+    virtual auto scroll_offset() const -> point_f;
 
     auto content_bounds() const -> rect_f;
     auto hit_test_bounds() const -> rect_f;
 
     void update(milliseconds deltaTime) override;
 
-    void virtual draw(widget_painter& painter);
+    virtual void draw(widget_painter& painter);
 
     auto hit_test(point_i pos) const -> bool;
 
@@ -106,9 +106,9 @@ protected:
 
     explicit widget(init const& wi);
 
-    void virtual offset_content(rect_f& bounds, bool isHitTest) const;
+    virtual void offset_content(rect_f& bounds, bool isHitTest) const;
 
-    void virtual on_styles_changed();
+    virtual void on_styles_changed();
 
     auto styles() const -> style_collection const&;
 
@@ -122,47 +122,47 @@ protected:
 
     auto controls() const -> control_map const&;
 
-    void virtual on_draw(widget_painter& painter) = 0;
-    void prepare_redraw();
-    void queue_redraw();
+    virtual void on_draw(widget_painter& painter) = 0;
+    void         prepare_redraw();
+    void         queue_redraw();
 
     auto draw_background(auto&& style, widget_painter& painter, bool isCircle = false) -> rect_f;
 
-    void virtual set_redraw(bool val);
-    auto needs_redraw() const -> bool;
+    virtual void set_redraw(bool val);
+    auto         needs_redraw() const -> bool;
 
-    void virtual on_prepare_redraw() { }
+    virtual void on_prepare_redraw() { }
 
-    void virtual on_key_down(input::keyboard::event const& /* ev */) { }
-    void virtual on_key_up(input::keyboard::event const& /* ev */) { }
+    virtual void on_key_down(input::keyboard::event const& /* ev */) { }
+    virtual void on_key_up(input::keyboard::event const& /* ev */) { }
 
-    void virtual on_text_input(input::keyboard::text_input_event const& /* ev */) { }
+    virtual void on_text_input(input::keyboard::text_input_event const& /* ev */) { }
 
-    void virtual on_mouse_enter() { }
-    void virtual on_mouse_leave() { }
-    void virtual on_mouse_hover(input::mouse::motion_event const& /* ev */) { }
-    void virtual on_mouse_drag(input::mouse::motion_event const& /* ev */) { }
-    void virtual on_mouse_button_down(input::mouse::button_event const& /* ev */) { }
-    void virtual on_mouse_button_up(input::mouse::button_event const& /* ev */) { }
-    void virtual on_mouse_wheel(input::mouse::wheel_event const& /* ev */) { }
+    virtual void on_mouse_enter() { }
+    virtual void on_mouse_leave() { }
+    virtual void on_mouse_hover(input::mouse::motion_event const& /* ev */) { }
+    virtual void on_mouse_drag(input::mouse::motion_event const& /* ev */) { }
+    virtual void on_mouse_button_down(input::mouse::button_event const& /* ev */) { }
+    virtual void on_mouse_button_up(input::mouse::button_event const& /* ev */) { }
+    virtual void on_mouse_wheel(input::mouse::wheel_event const& /* ev */) { }
 
-    void virtual on_controller_button_down(input::controller::button_event const& /* ev */) { }
-    void virtual on_controller_button_up(input::controller::button_event const& /* ev */) { }
+    virtual void on_controller_button_down(input::controller::button_event const& /* ev */) { }
+    virtual void on_controller_button_up(input::controller::button_event const& /* ev */) { }
 
-    void virtual on_click() { }
-    void virtual on_double_click() { }
+    virtual void on_click() { }
+    virtual void on_double_click() { }
 
-    void virtual on_focus_gained() { }
-    void virtual on_focus_lost() { }
+    virtual void on_focus_gained() { }
+    virtual void on_focus_lost() { }
 
-    void virtual on_bounds_changed();
+    virtual void on_bounds_changed();
 
-    auto virtual attributes() const -> widget_attributes;
-    auto virtual flags() -> widget_flags;
+    virtual auto attributes() const -> widget_attributes;
+    virtual auto flags() -> widget_flags;
 
     auto get_orientation() const -> orientation;
 
-    auto virtual is_inert() const -> bool;
+    virtual auto is_inert() const -> bool;
 
 private:
     void do_key_down(input::keyboard::event const& ev);

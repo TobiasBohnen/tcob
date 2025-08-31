@@ -28,7 +28,7 @@
 
 namespace tcob::gfx::gles30 {
 
-auto static GlobalUBO() -> gl_uniform_buffer&
+static auto GlobalUBO() -> gl_uniform_buffer&
 {
     /*
     layout(std140, binding = 0)uniform Globals

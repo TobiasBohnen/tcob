@@ -33,32 +33,32 @@ public:
 
     auto config() const -> data::config_file&;
 
-    auto virtual displays() const -> std::map<i32, gfx::display>          = 0;
-    auto virtual get_desktop_mode(i32 display) const -> gfx::display_mode = 0;
+    virtual auto displays() const -> std::map<i32, gfx::display>          = 0;
+    virtual auto get_desktop_mode(i32 display) const -> gfx::display_mode = 0;
 
-    auto virtual preferred_locales() const -> std::vector<locale> const& = 0;
+    virtual auto preferred_locales() const -> std::vector<locale> const& = 0;
 
-    auto virtual window_freezed() const -> bool = 0; // WINDOWS: true if window was dragged
+    virtual auto window_freezed() const -> bool = 0; // WINDOWS: true if window was dragged
 
-    auto virtual process_events() const -> bool = 0;
+    virtual auto process_events() const -> bool = 0;
 
-    auto static IsRunningOnWine() -> bool;
+    static auto IsRunningOnWine() -> bool;
 
     static inline char const* ServiceName {"platform"};
 
-    auto static Init(game::init const& ginit) -> std::shared_ptr<platform>;
-    auto static HeadlessInit(path const& logFile = "") -> std::shared_ptr<platform>;
+    static auto Init(game::init const& ginit) -> std::shared_ptr<platform>;
+    static auto HeadlessInit(path const& logFile = "") -> std::shared_ptr<platform>;
 
 protected:
     platform(bool headless, game::init const& ginit);
 
-    void static InitSignatures();
-    void static InitConfigFormats();
-    void static InitAssetFormats();
-    void static InitImageCodecs();
-    void static InitAudioCodecs();
-    void static InitFontEngines();
-    void static InitTaskManager(std::optional<isize> workerThreads);
+    static void InitSignatures();
+    static void InitConfigFormats();
+    static void InitAssetFormats();
+    static void InitImageCodecs();
+    static void InitAudioCodecs();
+    static void InitFontEngines();
+    static void InitTaskManager(std::optional<isize> workerThreads);
 
 private:
     void remove_services() const;

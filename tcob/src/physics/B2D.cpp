@@ -33,22 +33,22 @@
     #include "tcob/physics/World.hpp"
 
 namespace tcob::physics::detail {
-auto static to_b2Vec2(point_f val) -> b2Vec2
+static auto to_b2Vec2(point_f val) -> b2Vec2
 {
     return {val.X, val.Y};
 }
 
-auto static to_point_f(b2Vec2 val) -> point_f
+static auto to_point_f(b2Vec2 val) -> point_f
 {
     return {val.x, val.y};
 }
 
-auto static get_body(b2BodyId id) -> body*
+static auto get_body(b2BodyId id) -> body*
 {
     return reinterpret_cast<body*>(b2Body_GetUserData(id));
 }
 
-auto static get_shape(b2ShapeId id) -> shape*
+static auto get_shape(b2ShapeId id) -> shape*
 {
     return reinterpret_cast<shape*>(b2Shape_GetUserData(id));
 }
@@ -1287,7 +1287,7 @@ auto b2d_joint::wheel_joint_get_motor_torque() const -> f32
 
 ////////////////////////////////////////////////////////////
 
-auto static GetShapeDef(shape::settings const& shapeSettings)
+static auto GetShapeDef(shape::settings const& shapeSettings)
 {
     b2ShapeDef shapeDef {b2DefaultShapeDef()};
     shapeDef.material.friction          = shapeSettings.Material.Friction;
@@ -1587,7 +1587,7 @@ auto b2d_chain::get_segments() const -> std::vector<chain_segment>
 ////////////////////////////////////////////////////////////
 
 extern "C" {
-void static DrawPolygon(b2Vec2 const* vertices, int vertexCount, b2HexColor color, void* context)
+static void DrawPolygon(b2Vec2 const* vertices, int vertexCount, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
 
@@ -1599,7 +1599,7 @@ void static DrawPolygon(b2Vec2 const* vertices, int vertexCount, b2HexColor colo
     ddraw->Impl->draw_polygon(verts, color::FromRGB(color));
 }
 
-void static DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int vertexCount, float radius, b2HexColor color, void* context)
+static void DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int vertexCount, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
 
@@ -1611,43 +1611,43 @@ void static DrawSolidPolygon(b2Transform transform, b2Vec2 const* vertices, int 
     ddraw->Impl->draw_solid_polygon({.Center = {transform.p.x, transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(transform.q)}}, verts, radius, color::FromRGB(color));
 }
 
-void static DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* context)
+static void DrawCircle(b2Vec2 center, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_circle({center.x, center.y}, radius, color::FromRGB(color));
 }
 
-void static DrawSolidCircle(b2Transform transform, float radius, b2HexColor color, void* context)
+static void DrawSolidCircle(b2Transform transform, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_solid_circle({.Center = {transform.p.x, transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(transform.q)}}, radius, color::FromRGB(color));
 }
 
-void static DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
+static void DrawSolidCapsule(b2Vec2 p1, b2Vec2 p2, float radius, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_solid_capsule({p1.x, p1.y}, {p2.x, p2.y}, radius, color::FromRGB(color));
 }
 
-void static DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context)
+static void DrawSegment(b2Vec2 p1, b2Vec2 p2, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_segment({p1.x, p1.y}, {p2.x, p2.y}, color::FromRGB(color));
 }
 
-void static DrawTransform(b2Transform transform, void* context)
+static void DrawTransform(b2Transform transform, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_transform({.Center = {transform.p.x, transform.p.y}, .Angle = radian_f {b2Rot_GetAngle(transform.q)}});
 }
 
-void static DrawPoint(b2Vec2 p, float size, b2HexColor color, void* context)
+static void DrawPoint(b2Vec2 p, float size, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_point({p.x, p.y}, size, color::FromRGB(color));
 }
 
-void static DrawString(b2Vec2 p, char const* s, b2HexColor color, void* context)
+static void DrawString(b2Vec2 p, char const* s, b2HexColor color, void* context)
 {
     auto* ddraw {reinterpret_cast<b2d_debug_draw*>(context)};
     ddraw->Impl->draw_string({p.x, p.y}, s, color::FromRGB(color));

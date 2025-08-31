@@ -19,13 +19,13 @@
 namespace tcob::audio::detail {
 
 extern "C" {
-auto static read_flac(void* userdata, void* buffer, size_t bytesToRead) -> usize
+static auto read_flac(void* userdata, void* buffer, size_t bytesToRead) -> usize
 {
     auto* stream {static_cast<io::istream*>(userdata)};
     return static_cast<size_t>(stream->read_to<unsigned char>({static_cast<unsigned char*>(buffer), bytesToRead}));
 }
 
-auto static seek_flac(void* userdata, int offset, drflac_seek_origin origin) -> drflac_bool32
+static auto seek_flac(void* userdata, int offset, drflac_seek_origin origin) -> drflac_bool32
 {
     auto*        stream {static_cast<io::istream*>(userdata)};
     io::seek_dir dir {};
@@ -37,7 +37,7 @@ auto static seek_flac(void* userdata, int offset, drflac_seek_origin origin) -> 
     return stream->seek(offset, dir);
 }
 
-auto static tell_flac(void* userdata, drflac_int64* pCursor) -> drflac_bool32
+static auto tell_flac(void* userdata, drflac_int64* pCursor) -> drflac_bool32
 {
     io::istream* stream {static_cast<io::istream*>(userdata)};
     *pCursor = static_cast<drflac_int64>(stream->tell());

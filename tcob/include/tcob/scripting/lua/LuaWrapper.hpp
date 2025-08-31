@@ -125,9 +125,9 @@ private:
     auto process_constructor(arg_list<T(Args...)>) -> std::function<managed_ptr<T>(Args...)>;
 
     template <typename R, typename... P>
-    auto static impl_make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr;
+    static auto impl_make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr;
     template <typename... Funcs>
-    auto static impl_make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr;
+    static auto impl_make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr;
 
     void impl_wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func);
 
@@ -148,7 +148,7 @@ private:
     void newindex(T* b, i32 arg);
     void newindex(T* b, string const& arg);
 
-    auto static gc(lua_State* l) -> i32;
+    static auto gc(lua_State* l) -> i32;
 
     std::unordered_map<string, native_closure_unique_ptr> _functions;
     std::unordered_map<string, native_closure_unique_ptr> _getters;

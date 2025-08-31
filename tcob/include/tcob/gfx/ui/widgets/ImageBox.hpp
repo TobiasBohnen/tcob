@@ -31,7 +31,7 @@ public:
 
         f32 DragAlpha {0.5f};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit image_box(init const& wi);

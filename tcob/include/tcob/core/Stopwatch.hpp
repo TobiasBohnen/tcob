@@ -14,11 +14,11 @@ class TCOB_API stopwatch final {
     using time_point = clock::time_point;
 
 public:
-    auto static StartNew() -> stopwatch;
-    void start();
-    void stop();
-    void restart();
-    void reset();
+    static auto StartNew() -> stopwatch;
+    void        start();
+    void        stop();
+    void        restart();
+    void        reset();
 
     auto elapsed [[nodiscard]] () const -> duration;
     auto elapsed_milliseconds [[nodiscard]] () const -> f64;

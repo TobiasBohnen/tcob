@@ -38,7 +38,7 @@ auto file_hasher::crc32() const -> u32
     return mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size());
 }
 
-auto static check(string const& msg, i32 c) -> bool
+static auto check(string const& msg, i32 c) -> bool
 {
     if (c == 0) {
         logger::Error(msg + ": " + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
@@ -53,7 +53,7 @@ struct callback_data {
     pattern                    Pattern;
 };
 
-auto static EnumerateCallback(void* data, char const* origdir, char const* fname) -> PHYSFS_EnumerateCallbackResult
+static auto EnumerateCallback(void* data, char const* origdir, char const* fname) -> PHYSFS_EnumerateCallbackResult
 {
     if (!origdir || !fname) { return PHYSFS_ENUM_ERROR; }
 
@@ -77,7 +77,7 @@ auto static EnumerateCallback(void* data, char const* origdir, char const* fname
     return PHYSFS_ENUM_OK;
 }
 
-auto static EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_EnumerateCallbackResult
+static auto EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_EnumerateCallbackResult
 {
     bool* ok {static_cast<bool*>(data)};
     *ok = false;
@@ -113,14 +113,14 @@ void detail::done()
 
 ////////////////////////////////////////////////////////////
 extern "C" {
-auto static mz_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> size_t
+static auto mz_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ifstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);
     return static_cast<size_t>(fs->read_to<byte>({static_cast<byte*>(pBuf), n}));
 }
 
-auto static mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
+static auto mz_write(void* pOpaque, mz_uint64 file_ofs, void const* pBuf, size_t n) -> size_t
 {
     auto* fs {static_cast<ofstream*>(pOpaque)};
     fs->seek(static_cast<std::streamoff>(file_ofs), seek_dir::Begin);

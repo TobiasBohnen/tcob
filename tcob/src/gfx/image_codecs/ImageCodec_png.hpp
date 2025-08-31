@@ -43,7 +43,7 @@ namespace png {
         Previous   = 2
     };
 
-    auto static consteval GetChunkType(char const* s) -> u32
+    static auto consteval GetChunkType(char const* s) -> u32
     {
         return static_cast<u32>(s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3]);
     }

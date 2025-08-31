@@ -31,7 +31,7 @@ public:
 protected:
     void on_update(milliseconds deltaTime) override;
 
-    void virtual on_tooltip(widget* top);
+    virtual void on_tooltip(widget* top);
 
 private:
     std::unique_ptr<linear_tween<f32>> _fadeInTween;

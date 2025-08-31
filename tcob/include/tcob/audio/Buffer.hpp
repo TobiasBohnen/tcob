@@ -43,10 +43,10 @@ public:
     auto save [[nodiscard]] (io::ostream& out, string const& ext) const noexcept -> bool;
     auto save_async [[nodiscard]] (path const& file) const noexcept -> std::future<bool>;
 
-    auto static Create(specification const& info, std::span<f32 const> data) -> buffer;
+    static auto Create(specification const& info, std::span<f32 const> data) -> buffer;
 
-    auto static Load(path const& file) -> std::optional<buffer>;
-    auto static Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>;
+    static auto Load(path const& file) -> std::optional<buffer>;
+    static auto Load(std::shared_ptr<io::istream> in, string const& ext) -> std::optional<buffer>;
 
 private:
     information      _info;
@@ -76,12 +76,12 @@ public:
 
     auto open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>;
 
-    auto virtual decode(std::span<f32> outputSamples) -> isize = 0;
+    virtual auto decode(std::span<f32> outputSamples) -> isize = 0;
 
-    void virtual seek_from_start(milliseconds pos) = 0;
+    virtual void seek_from_start(milliseconds pos) = 0;
 
 protected:
-    auto virtual open() -> std::optional<buffer::information> = 0;
+    virtual auto open() -> std::optional<buffer::information> = 0;
 
     auto stream() -> io::istream&;
     auto context() -> std::any&;
@@ -103,7 +103,7 @@ public:
     encoder()          = default;
     virtual ~encoder() = default;
 
-    auto virtual encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool = 0;
+    virtual auto encode(std::span<f32 const> samples, buffer::information const& info, io::ostream& out) const -> bool = 0;
 };
 
 }

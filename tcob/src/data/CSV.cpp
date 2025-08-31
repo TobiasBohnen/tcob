@@ -97,7 +97,7 @@ auto csv_table::parse(string const& csv, settings s) -> bool
     return true;
 }
 
-void static write_line(std::span<string const> row, io::ostream& ss, csv_table::settings const& s)
+static void write_line(std::span<string const> row, io::ostream& ss, csv_table::settings const& s)
 {
     for (usize i {0}; i < row.size(); ++i) {
         string const& value {row[i]};

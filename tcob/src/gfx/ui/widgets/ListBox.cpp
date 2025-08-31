@@ -22,7 +22,7 @@
 
 namespace tcob::ui {
 
-auto static case_insensitive_contains(string_view lhs, string_view rhs) -> bool
+static auto case_insensitive_contains(string_view lhs, string_view rhs) -> bool
 {
     return std::search( // NOLINT(modernize-use-ranges)
                lhs.begin(), lhs.end(),

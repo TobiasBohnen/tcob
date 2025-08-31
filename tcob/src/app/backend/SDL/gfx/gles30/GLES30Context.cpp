@@ -36,7 +36,7 @@ static char const* defaultFontFragShader {
 };
 
 extern "C" {
-auto static load(char const* c) -> GLADapiproc
+static auto load(char const* c) -> GLADapiproc
 {
     return reinterpret_cast<GLADapiproc>(SDL_GL_GetProcAddress(c));
 }

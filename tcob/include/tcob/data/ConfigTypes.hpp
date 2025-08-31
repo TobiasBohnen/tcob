@@ -61,7 +61,7 @@ public:
     auto get_type(Key key) const -> type;
 
 protected:
-    auto virtual on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool = 0;
+    virtual auto on_load(io::istream& in, string const& ext, bool skipBinary = false) noexcept -> bool = 0;
 
     auto values(this auto&& self) -> decltype(auto);
 
@@ -126,7 +126,7 @@ public:
 
     auto str() const -> string;
 
-    auto static Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
+    static auto Parse(string_view config, string const& ext) -> std::optional<object>; // TODO: change to result
 
     auto get_entry(string_view key) -> entry*;
     auto get_entry(string_view key) const -> entry const*;
@@ -184,7 +184,7 @@ public:
 
     auto str() const -> string;
 
-    auto static Parse(string_view config, string const& ext) -> std::optional<array>; // TODO: change to result
+    static auto Parse(string_view config, string const& ext) -> std::optional<array>; // TODO: change to result
 
     auto get_entry(isize index) const -> entry*;
     void add_entry(entry const& newEntry);

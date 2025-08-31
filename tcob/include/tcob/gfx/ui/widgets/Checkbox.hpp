@@ -21,7 +21,7 @@ public:
     public:
         tick_element Tick;
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit checkbox(init const& wi);
@@ -33,7 +33,7 @@ protected:
 
     void on_update(milliseconds deltaTime) override;
 
-    void virtual on_checked_changed();
+    virtual void on_checked_changed();
 
     void on_click() override;
 

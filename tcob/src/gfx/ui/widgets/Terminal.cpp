@@ -277,7 +277,7 @@ void terminal::dump(io::ostream& stream) const
     }
 }
 
-auto static get_font_width(gfx::font* font) -> f32
+static auto get_font_width(gfx::font* font) -> f32
 {
     auto qs {font->get_glyphs("m", false)};
     if (qs.empty()) { return 0; }
@@ -578,7 +578,7 @@ struct esc_seq {
     std::vector<string> Values;
 };
 
-auto static GetESC(utf8_string_view text, i32& i, i32 len) -> esc_seq
+static auto GetESC(utf8_string_view text, i32& i, i32 len) -> esc_seq
 {
     esc_seq retValue;
     string  seq {};

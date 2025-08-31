@@ -61,9 +61,9 @@ public:
 
     void rehover_widget(widget* widget);
 
-    auto virtual containers() const -> std::span<std::shared_ptr<widget> const> = 0;
-    void virtual remove_container(widget* widget)                               = 0;
-    void virtual clear_containers()                                             = 0;
+    virtual auto containers() const -> std::span<std::shared_ptr<widget> const> = 0;
+    virtual void remove_container(widget* widget)                               = 0;
+    virtual void clear_containers()                                             = 0;
 
     void queue_redraw();
     void notify_redraw();
@@ -71,8 +71,8 @@ public:
     template <SubmitTarget Target>
     void submit(Target& target);
 
-    auto virtual allows_move() const -> bool   = 0;
-    auto virtual allows_resize() const -> bool = 0;
+    virtual auto allows_move() const -> bool   = 0;
+    virtual auto allows_resize() const -> bool = 0;
 
     void push_modal(modal_dialog* dlg);
     void pop_modal(modal_dialog* dlg);
@@ -100,12 +100,12 @@ protected:
     void on_controller_button_down(input::controller::button_event const& ev) override;
     void on_controller_button_up(input::controller::button_event const& ev) override;
 
-    void virtual on_bounds_changed();
-    void on_visiblity_changed() override;
+    virtual void on_bounds_changed();
+    void         on_visiblity_changed() override;
 
-    void virtual apply_layout()                      = 0;
-    auto virtual get_layout() -> layout*             = 0;
-    auto virtual get_layout() const -> layout const* = 0;
+    virtual void apply_layout()                      = 0;
+    virtual auto get_layout() -> layout*             = 0;
+    virtual auto get_layout() const -> layout const* = 0;
 
 private:
     void on_mouse_hover(input::mouse::motion_event const& ev);

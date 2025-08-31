@@ -24,7 +24,7 @@ public:
     public:
         text_element Text;
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit label(init const& wi);

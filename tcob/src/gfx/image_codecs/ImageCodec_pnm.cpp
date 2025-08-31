@@ -19,12 +19,12 @@
 
 namespace tcob::gfx::detail {
 
-auto static check_supported_format(pnm::header const& h) -> bool
+static auto check_supported_format(pnm::header const& h) -> bool
 {
     return h.FormatString[0] == 'P' && (h.FormatString[1] == '1' || h.FormatString[1] == '2' || h.FormatString[1] == '3');
 }
 
-auto static read_until_space(io::istream& reader, std::span<char> buffer, i32 offset) -> i32
+static auto read_until_space(io::istream& reader, std::span<char> buffer, i32 offset) -> i32
 {
     i32 read {0};
 
@@ -41,7 +41,7 @@ auto static read_until_space(io::istream& reader, std::span<char> buffer, i32 of
     return read;
 }
 
-auto static read_char(io::istream& reader) -> char
+static auto read_char(io::istream& reader) -> char
 {
     char retValue {0};
 
@@ -71,7 +71,7 @@ auto read_int(io::istream& reader) -> T
     return static_cast<T>(std::strtol(str.data(), nullptr, 10));
 }
 
-auto static read_p1_data(io::istream& reader, int width, int height) -> std::vector<u8>
+static auto read_p1_data(io::istream& reader, int width, int height) -> std::vector<u8>
 {
     // black and white
     std::vector<u8> retValue;
@@ -92,7 +92,7 @@ auto static read_p1_data(io::istream& reader, int width, int height) -> std::vec
     return retValue;
 }
 
-auto static read_p2_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
+static auto read_p2_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
 {
     // grayscale
     std::vector<u8> retValue;
@@ -108,7 +108,7 @@ auto static read_p2_data(io::istream& reader, pnm::header const& h) -> std::vect
     return retValue;
 }
 
-auto static read_p3_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
+static auto read_p3_data(io::istream& reader, pnm::header const& h) -> std::vector<u8>
 {
     // RGB
     std::vector<u8> retValue;

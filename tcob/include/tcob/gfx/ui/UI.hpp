@@ -91,7 +91,7 @@ public:
 
     auto operator==(tab_stop const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&tab_stop::Index> {"index"},
@@ -110,7 +110,7 @@ public:
 
     auto operator==(nav_map_entry const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&nav_map_entry::Left> {"left"},
@@ -174,9 +174,9 @@ public:
     auto operator==(length const& other) const -> bool = default;
     auto operator-() const -> length;
 
-    auto static Lerp(length const& from, length const& to, f64 step) -> length;
+    static auto Lerp(length const& from, length const& to, f64 step) -> length;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&length::Value> {"value"},
@@ -202,9 +202,9 @@ public:
 
     auto operator==(thickness const& other) const -> bool = default;
 
-    auto static Lerp(thickness const& from, thickness const& to, f64 step) -> thickness;
+    static auto Lerp(thickness const& from, thickness const& to, f64 step) -> thickness;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&thickness::Left> {"left"},
@@ -226,9 +226,9 @@ public:
 
     auto operator==(dimensions const& other) const -> bool = default;
 
-    auto static Lerp(dimensions const& from, dimensions const& to, f64 step) -> dimensions;
+    static auto Lerp(dimensions const& from, dimensions const& to, f64 step) -> dimensions;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&dimensions::Width> {"width"},

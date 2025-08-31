@@ -161,7 +161,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        auto static constexpr Members();
+        static auto constexpr Members();
     };
 
     ////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        auto static constexpr Members();
+        static auto constexpr Members();
     };
     ////////////////////////////////////////////////////////////
 
@@ -243,7 +243,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        auto static constexpr Members();
+        static auto constexpr Members();
     };
 
     ////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ public:
 
         auto operator==(settings const& other) const -> bool = default;
 
-        auto static constexpr Members();
+        static auto constexpr Members();
     };
 
     ////////////////////////////////////////////////////////////

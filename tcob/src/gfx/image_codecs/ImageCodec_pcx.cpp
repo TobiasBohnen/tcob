@@ -253,7 +253,7 @@ auto pcx_decoder::read_palette(io::istream& in) const -> std::vector<color>
 
 ////////////////////////////////////////////////////////////
 
-auto static Compress(std::span<u8> buf, i32 lineWidth) -> std::vector<u8>
+static auto Compress(std::span<u8> buf, i32 lineWidth) -> std::vector<u8>
 {
     std::vector<u8> retValue {};
     retValue.reserve(buf.size());

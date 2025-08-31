@@ -51,15 +51,15 @@ public:
 
     auto polygonize() -> std::vector<polygon>;
 
-    auto static Parse(string_view path) -> std::optional<path2d>;
+    static auto Parse(string_view path) -> std::optional<path2d>;
 
 private:
-    auto static CommandsMoveTo(point_f pos) -> std::vector<f32>;
-    auto static CommandsLineTo(point_f pos) -> std::vector<f32>;
-    auto static CommandsCubicTo(point_f cp0, point_f cp1, point_f end) -> std::vector<f32>;
-    auto static CommandsQuadTo(point_f start, point_f cp, point_f end) -> std::vector<f32>;
+    static auto CommandsMoveTo(point_f pos) -> std::vector<f32>;
+    static auto CommandsLineTo(point_f pos) -> std::vector<f32>;
+    static auto CommandsCubicTo(point_f cp0, point_f cp1, point_f end) -> std::vector<f32>;
+    static auto CommandsQuadTo(point_f start, point_f cp, point_f end) -> std::vector<f32>;
 
-    auto static GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>;
+    static auto GetCommands(string_view path) -> std::optional<std::vector<std::variant<char, f32>>>;
 
     point_f _lastPoint {point_f::Zero};
     point_f _lastQuadControlPoint {point_f::Zero};

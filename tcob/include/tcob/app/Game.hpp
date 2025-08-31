@@ -61,9 +61,9 @@ public:
 protected:
     void finish();
 
-    void virtual on_start() { }
+    virtual void on_start() { }
 
-    void virtual on_finish() { }
+    virtual void on_finish() { }
 
 private:
     void loop();

@@ -18,7 +18,7 @@ class TCOB_API render_texture : public texture, public render_target {
 public:
     render_texture();
 
-    auto static UVRect() -> rect_f;
+    static auto UVRect() -> rect_f;
 
 protected:
     auto get_size() const -> size_i override;

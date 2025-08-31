@@ -81,10 +81,10 @@ public:
     template <typename T>
     auto get_keys() const -> std::vector<T>;
 
-    auto static Create(vm_view view) -> table;
-    auto static PushNew(vm_view view) -> table;
-    auto static Acquire(vm_view view, SQInteger idx) -> table;
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto Create(vm_view view) -> table;
+    static auto PushNew(vm_view view) -> table;
+    static auto Acquire(vm_view view, SQInteger idx) -> table;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
     explicit table(vm_view view);
@@ -128,10 +128,10 @@ public:
     template <ConvertibleTo T>
     void add(T const& addValue);
 
-    auto static Create(vm_view view) -> array;
-    auto static PushNew(vm_view view) -> array;
-    auto static Acquire(vm_view view, SQInteger idx) -> array;
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto Create(vm_view view) -> array;
+    static auto PushNew(vm_view view) -> array;
+    static auto Acquire(vm_view view, SQInteger idx) -> array;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
     explicit array(vm_view view);
@@ -170,8 +170,8 @@ public:
 
     void set(auto&& key, auto&& value) const;
 
-    auto static Acquire(vm_view view, SQInteger idx) -> instance;
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto Acquire(vm_view view, SQInteger idx) -> instance;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
     instance(vm_view view, SQInteger idx);
@@ -193,10 +193,10 @@ public:
 
     auto create_instance() const -> instance;
 
-    auto static Create(vm_view view) -> clazz;
-    auto static PushNew(vm_view view) -> clazz;
-    auto static Acquire(vm_view view, SQInteger idx) -> clazz;
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto Create(vm_view view) -> clazz;
+    static auto PushNew(vm_view view) -> clazz;
+    static auto Acquire(vm_view view, SQInteger idx) -> clazz;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
     explicit clazz(vm_view view);
@@ -232,8 +232,8 @@ public:
 
     auto call(auto&&... params) const -> std::expected<R, error_code>;
 
-    auto static Acquire(vm_view view, SQInteger idx) -> function<return_type>;
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto Acquire(vm_view view, SQInteger idx) -> function<return_type>;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 
 protected:
     using detail::function_base::function_base;
@@ -246,7 +246,7 @@ public:
     template <typename R = void>
     auto resume() const -> std::expected<R, error_code>;
 
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 };
 
 ////////////////////////////////////////////////////////////
@@ -266,7 +266,7 @@ public:
 
     auto status() const -> vm_view::status;
 
-    auto static IsType(vm_view view, SQInteger idx) -> bool;
+    static auto IsType(vm_view view, SQInteger idx) -> bool;
 
 private:
     auto get_thread() const -> vm_view;

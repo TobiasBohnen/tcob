@@ -24,29 +24,29 @@ namespace tcob::gfx::detail {
 
 constexpr std::array<byte, 18> SIGNATURE {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'};
 
-auto static is_rle(tga::header const& h) -> bool
+static auto is_rle(tga::header const& h) -> bool
 {
     return h.ImageType == tga::image_type::RLEBlackAndWhiteImage
         || h.ImageType == tga::image_type::RLEColorMappedImage
         || h.ImageType == tga::image_type::RLETrueColorImage;
 }
 
-auto static is_truecolor(tga::header const& h) -> bool
+static auto is_truecolor(tga::header const& h) -> bool
 {
     return h.ImageType == tga::image_type::RLETrueColorImage || h.ImageType == tga::image_type::UncompressedTrueColorImage;
 }
 
-auto static is_colormapped(tga::header const& h) -> bool
+static auto is_colormapped(tga::header const& h) -> bool
 {
     return h.ColorMapIncluded && (h.ImageType == tga::image_type::RLEColorMappedImage || h.ImageType == tga::image_type::UncompressedColorMappedImage);
 }
 
-auto static is_blackandwhite(tga::header const& h) -> bool
+static auto is_blackandwhite(tga::header const& h) -> bool
 {
     return h.ImageType == tga::image_type::RLEBlackAndWhiteImage || h.ImageType == tga::image_type::UncompressedBlackAndWhiteImage;
 }
 
-auto static check_supported_format(tga::header const& h) -> bool
+static auto check_supported_format(tga::header const& h) -> bool
 {
     if (!h.ColorMapIncluded) {
         if (is_truecolor(h)) {
@@ -62,7 +62,7 @@ auto static check_supported_format(tga::header const& h) -> bool
     return false;
 }
 
-auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
+static auto get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 {
     if (bitsPerPixel < 8) {
         return stride - static_cast<i32>(std::ceil(static_cast<f32>(width) * (static_cast<f32>(bitsPerPixel) / 8.0f)));
@@ -71,7 +71,7 @@ auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
     return stride - (width * (bitsPerPixel / 8));
 }
 
-auto static get_color(u8 one, u8 two) -> color
+static auto get_color(u8 one, u8 two) -> color
 {
     u32 const r1 {helper::extract_bits(one, 2, 5)};
     u8 const  r {static_cast<u8>(r1 << 3)};

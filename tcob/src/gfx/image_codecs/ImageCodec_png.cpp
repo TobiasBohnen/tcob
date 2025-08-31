@@ -427,7 +427,7 @@ auto png_decoder::read_image(std::span<byte const> idat, i32 width, i32 height) 
 auto png_decoder::ihdr() const -> png::IHDR_chunk const& { return _ihdr; }
 auto png_decoder::data() const -> std::vector<u8> const& { return _data; }
 
-auto static paeth(u8 a, u8 b, u8 c) -> u8
+static auto paeth(u8 a, u8 b, u8 c) -> u8
 { // https://github.com/nothings/stb/blob/f4a71b13373436a2866c5d68f8f80ac6f0bc1ffe/stb_image.h#L4656C1-L4667C1
     i32 const thresh {(c * 3) - (a + b)};
     u8 const  lo {a < b ? a : b};
@@ -715,7 +715,7 @@ void png_encoder::write_ihdr(image::information const& info, io::ostream& out) c
     write_chunk(out, header);
 }
 
-auto static data(image const& image) -> std::vector<u8>
+static auto data(image const& image) -> std::vector<u8>
 {
     auto const  buffer {image.data()};
     auto const& info {image.info()};

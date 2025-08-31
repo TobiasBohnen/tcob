@@ -29,8 +29,8 @@ public:
 
     void clear_assets();
 
-    void static FindSources(font_family& fam, path const& source);
-    void static SingleFont(font_family& fam, std::span<byte const> font);
+    static void FindSources(font_family& fam, path const& source);
+    static void SingleFont(font_family& fam, std::span<byte const> font);
 
     static inline char const* AssetName {"font_family"};
 

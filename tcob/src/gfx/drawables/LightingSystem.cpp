@@ -150,7 +150,7 @@ void lighting_system::on_update(milliseconds /* deltaTime */)
 
 constexpr f32 angleTolerance {0.05f}; // 0.0005f
 
-auto static is_in_shadowcaster(light_source& light, auto const& casterPoints) -> bool
+static auto is_in_shadowcaster(light_source& light, auto const& casterPoints) -> bool
 {
     for (usize i {0}; i < casterPoints.size() - 1; ++i) {
         if (casterPoints[i].Points.empty()) { continue; }

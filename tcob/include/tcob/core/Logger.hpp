@@ -36,30 +36,30 @@ public:
 
     virtual ~logger();
 
-    void static Debug(string const& message, auto&&... args);
-    void static Debug(string const& message);
-    void static Info(string const& message, auto&&... args);
-    void static Info(string const& message);
-    void static Warning(string const& message, auto&&... args);
-    void static Warning(string const& message);
-    void static Error(error_msg const& msg, auto&&... args);
-    void static Error(error_msg const& msg);
+    static void Debug(string const& message, auto&&... args);
+    static void Debug(string const& message);
+    static void Info(string const& message, auto&&... args);
+    static void Info(string const& message);
+    static void Warning(string const& message, auto&&... args);
+    static void Warning(string const& message);
+    static void Error(error_msg const& msg, auto&&... args);
+    static void Error(error_msg const& msg);
 
     level MinLevel {level::Debug};
 
     static inline char const* ServiceName {"logger"};
 
 protected:
-    void virtual log(string const& message, level level) const = 0;
-    auto format_message(string const& message, level level) const -> string;
+    virtual void log(string const& message, level level) const = 0;
+    auto         format_message(string const& message, level level) const -> string;
 
 private:
-    void static FormatDebug(string const& message, std::format_args const& args);
-    void static FormatInfo(string const& message, std::format_args const& args);
-    void static FormatWarning(string const& message, std::format_args const& args);
-    void static FormatError(error_msg const& msg, std::format_args const& args);
+    static void FormatDebug(string const& message, std::format_args const& args);
+    static void FormatInfo(string const& message, std::format_args const& args);
+    static void FormatWarning(string const& message, std::format_args const& args);
+    static void FormatError(error_msg const& msg, std::format_args const& args);
 
-    void static Log(string const& message, level level);
+    static void Log(string const& message, level level);
 };
 
 ////////////////////////////////////////////////////////////

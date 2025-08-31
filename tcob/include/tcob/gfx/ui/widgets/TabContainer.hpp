@@ -39,7 +39,7 @@ public:
         header_mode TabBarMode {header_mode::Fill};
         i32         TabBarRows {1};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit tab_container(init const& wi);

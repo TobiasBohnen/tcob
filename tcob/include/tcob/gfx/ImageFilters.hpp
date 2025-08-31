@@ -19,7 +19,7 @@ public:
     filter_base()          = default;
     virtual ~filter_base() = default;
 
-    auto virtual operator()(image const& img) const -> image = 0;
+    virtual auto operator()(image const& img) const -> image = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -34,9 +34,9 @@ public:
     auto operator()(image const& img) const -> image override;
 
 protected:
-    auto virtual factor() const -> f64                   = 0;
-    auto virtual offset() const -> u8                    = 0;
-    auto virtual matrix() const -> std::array<i32, Size> = 0;
+    virtual auto factor() const -> f64                   = 0;
+    virtual auto offset() const -> u8                    = 0;
+    virtual auto matrix() const -> std::array<i32, Size> = 0;
 };
 
 ////////////////////////////////////////////////////////////

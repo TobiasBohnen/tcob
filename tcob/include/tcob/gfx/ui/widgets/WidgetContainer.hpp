@@ -25,11 +25,11 @@ public:
 
     void draw(widget_painter& painter) override;
 
-    auto virtual find_child_at(point_i pos) -> std::shared_ptr<widget>;
-    auto virtual find_child_by_name(string const& name) -> std::shared_ptr<widget>;
+    virtual auto find_child_at(point_i pos) -> std::shared_ptr<widget>;
+    virtual auto find_child_by_name(string const& name) -> std::shared_ptr<widget>;
 
-    auto virtual widgets() const -> std::span<std::shared_ptr<widget> const> = 0;
-    auto widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>;
+    virtual auto widgets() const -> std::span<std::shared_ptr<widget> const> = 0;
+    auto         widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>;
 
     template <SubmitTarget Target>
     void submit(Target& target);
@@ -37,7 +37,7 @@ public:
 protected:
     explicit widget_container(init const& wi);
 
-    void virtual on_draw_children(widget_painter& painter) = 0;
+    virtual void on_draw_children(widget_painter& painter) = 0;
 
     void on_prepare_redraw() override;
 

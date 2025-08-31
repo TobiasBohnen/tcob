@@ -40,7 +40,7 @@ public:
         std::unordered_map<u8, color> Colors;
         dot_type                      Type {dot_type::Disc};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit dot_matrix_display(init const& wi);
@@ -78,7 +78,7 @@ public:
         color  ActiveColor {colors::Black};
         color  InactiveColor {colors::Transparent};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit seven_segment_display(init const& wi);
@@ -108,7 +108,7 @@ public:
         color  MarkerColor {colors::White};
         length MarkerSize {2, length::type::Absolute};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit color_picker(init const& wi);
@@ -128,8 +128,8 @@ private:
     auto hover_color(point_i mp) -> bool;
     auto select_color() -> bool;
 
-    auto static GetGradient() -> gfx::color_gradient const&;
-    auto static GetColors() -> std::array<color, 256> const&;
+    static auto GetGradient() -> gfx::color_gradient const&;
+    static auto GetColors() -> std::array<color, 256> const&;
 
     std::optional<hsx>      _hoveredColor;
     std::optional<degree_f> _hoveredBaseHue;

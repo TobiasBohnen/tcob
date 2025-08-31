@@ -29,12 +29,12 @@ public:
     constexpr color() = default;
     constexpr color(u8 r, u8 g, u8 b, u8 a = 255);
 
-    auto static constexpr FromRGBA(u32 value) -> color;
-    auto static constexpr FromRGB(u32 value) -> color;
-    auto static constexpr FromABGR(u32 value) -> color;
+    static auto constexpr FromRGBA(u32 value) -> color;
+    static auto constexpr FromRGB(u32 value) -> color;
+    static auto constexpr FromABGR(u32 value) -> color;
 
-    auto static constexpr FromHSLA(hsx const& hsl, u8 a = 255) -> color;
-    auto static constexpr FromHSVA(hsx const& hsv, u8 a = 255) -> color;
+    static auto constexpr FromHSLA(hsx const& hsl, u8 a = 255) -> color;
+    static auto constexpr FromHSVA(hsx const& hsv, u8 a = 255) -> color;
 
     auto constexpr as_grayscale [[nodiscard]] (f32 redFactor = 0.299f, f32 greenFactor = 0.587f, f32 blueFactor = 0.114f) const -> color;
     auto constexpr as_alpha_premultiplied [[nodiscard]] () const -> color;
@@ -46,16 +46,16 @@ public:
     auto constexpr to_hsl() const -> hsx;
     auto constexpr to_hsv() const -> hsx;
 
-    auto static constexpr Lerp(color from, color to, f64 step) -> color;
+    static auto constexpr Lerp(color from, color to, f64 step) -> color;
 
-    auto static FromString(string_view name) -> color;
+    static auto FromString(string_view name) -> color;
 
     u8 R {0};
     u8 G {0};
     u8 B {0};
     u8 A {0};
 
-    auto static constexpr Members();
+    static auto constexpr Members();
 };
 
 auto constexpr operator==(color left, color right) -> bool;

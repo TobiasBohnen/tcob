@@ -18,7 +18,7 @@
 
 namespace tcob::gfx {
 
-auto static IndexToPosition(i32 i, render_direction direction, size_i layerSize) -> point_i
+static auto IndexToPosition(i32 i, render_direction direction, size_i layerSize) -> point_i
 {
     i32 row {}, col {};
 

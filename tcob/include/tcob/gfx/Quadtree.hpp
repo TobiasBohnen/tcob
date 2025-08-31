@@ -82,8 +82,8 @@ private:
 
         void find_intersections_in_descendants(T const& value, std::vector<std::pair<T, T>>& intersections) const;
 
-        auto static ComputeRect(rect_f const& rect, i32 i) -> rect_f;
-        auto static GetQuadrant(rect_f const& nodeRect, rect_f const& valueRect) -> i32;
+        static auto ComputeRect(rect_f const& rect, i32 i) -> rect_f;
+        static auto GetQuadrant(rect_f const& nodeRect, rect_f const& valueRect) -> i32;
 
     private:
         std::array<std::unique_ptr<node>, 4> _children;

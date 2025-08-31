@@ -18,7 +18,7 @@
 
 namespace tcob::scripting::lua {
 
-void static warn(void* ud, char const* msg, int toCont)
+static void warn(void* ud, char const* msg, int toCont)
 {
     auto* scr {static_cast<script*>(ud)};
     scr->Warning({.Message = msg, .ToCont = toCont != 0});
@@ -123,7 +123,7 @@ void script::register_searcher()
     tab[tab.raw_length() + 1] = &_searcher;
 }
 
-void static hook(lua_State* l, lua_Debug* ar)
+static void hook(lua_State* l, lua_Debug* ar)
 {
     state_view ls {l};
     auto const guard {ls.create_stack_guard()};

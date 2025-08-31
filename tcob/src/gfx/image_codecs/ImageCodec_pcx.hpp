@@ -63,8 +63,8 @@ namespace pcx {
             return static_cast<i32>(XMax - XMin + 1);
         }
 
-        void read(io::istream& reader);
-        void static Write(image::information const& info, io::ostream& writer);
+        void        read(io::istream& reader);
+        static void Write(image::information const& info, io::ostream& writer);
     };
 
     auto read_image_data(io::istream& reader, header const& h) -> std::vector<u8>;

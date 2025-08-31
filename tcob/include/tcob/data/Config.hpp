@@ -74,8 +74,8 @@ public:
 
     virtual ~text_reader() = default;
 
-    auto virtual read_as_object(utf8_string_view txt) -> std::optional<object> = 0;
-    auto virtual read_as_array(utf8_string_view txt) -> std::optional<array>   = 0;
+    virtual auto read_as_object(utf8_string_view txt) -> std::optional<object> = 0;
+    virtual auto read_as_array(utf8_string_view txt) -> std::optional<array>   = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -88,8 +88,8 @@ public:
 
     virtual ~text_writer() = default;
 
-    auto virtual write(io::ostream& stream, object const& obj) -> bool = 0;
-    auto virtual write(io::ostream& stream, array const& arr) -> bool  = 0;
+    virtual auto write(io::ostream& stream, object const& obj) -> bool = 0;
+    virtual auto write(io::ostream& stream, array const& arr) -> bool  = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -102,8 +102,8 @@ public:
 
     virtual ~binary_reader() = default;
 
-    auto virtual read_as_object(io::istream& stream) -> std::optional<object> = 0;
-    auto virtual read_as_array(io::istream& stream) -> std::optional<array>   = 0;
+    virtual auto read_as_object(io::istream& stream) -> std::optional<object> = 0;
+    virtual auto read_as_array(io::istream& stream) -> std::optional<array>   = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -116,8 +116,8 @@ public:
 
     virtual ~binary_writer() = default;
 
-    auto virtual write(io::ostream& stream, object const& obj) -> bool = 0;
-    auto virtual write(io::ostream& stream, array const& arr) -> bool  = 0;
+    virtual auto write(io::ostream& stream, object const& obj) -> bool = 0;
+    virtual auto write(io::ostream& stream, array const& arr) -> bool  = 0;
 };
 
 ////////////////////////////////////////////////////////////

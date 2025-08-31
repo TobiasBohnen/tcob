@@ -41,9 +41,9 @@ using namespace detail;
 
 auto constexpr NVG_KAPPA90 {0.5522847493f}; // Length proportional to radius of a cubic bezier handle for 90deg arcs.;
 
-auto static signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
+static auto signf(f32 a) -> f32 { return a >= 0.0f ? 1.0f : -1.0f; }
 
-auto static CompositeOperationState(composite_operation op) -> blend_funcs
+static auto CompositeOperationState(composite_operation op) -> blend_funcs
 {
     blend_func sfactor {}, dfactor {};
 
@@ -101,14 +101,14 @@ auto static CompositeOperationState(composite_operation op) -> blend_funcs
         .DestinationAlphaBlendFunc = dfactor};
 }
 
-auto static GetAverageScale(mat3 const& t) -> f32
+static auto GetAverageScale(mat3 const& t) -> f32
 {
     f32 const sx {std::sqrt((t[0] * t[0]) + (t[3] * t[3]))};
     f32 const sy {std::sqrt((t[1] * t[1]) + (t[4] * t[4]))};
     return (sx + sy) * 0.5f;
 }
 
-void static MultiplyAlphaPaint(paint_color& c, f32 alpha)
+static void MultiplyAlphaPaint(paint_color& c, f32 alpha)
 {
     if (auto* arg0 {std::get_if<color>(&c)}) {
         arg0->A = static_cast<u8>(arg0->A * alpha);
@@ -422,7 +422,7 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     f32      cx {0}, cy {0};
     radian_f a0 {0}, a1 {0};
 
-    auto static cross {[](f32 x0, f32 y0, f32 x1, f32 y1) -> f32 { return (x1 * y0) - (x0 * y1); }};
+    static auto cross {[](f32 x0, f32 y0, f32 x1, f32 y1) -> f32 { return (x1 * y0) - (x0 * y1); }};
 
     if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
         cx  = pos1.X + dx0 * d + dy0 * radius;
@@ -1124,7 +1124,7 @@ void canvas::set_paint_color(paint& p, color c)
 
 auto canvas::get_font_scale() -> f32
 {
-    auto static Quantize {[](f32 a, f32 d) -> f32 {
+    static auto Quantize {[](f32 a, f32 d) -> f32 {
         return (static_cast<f32>(static_cast<i32>((a / d) + 0.5f))) * d;
     }};
 

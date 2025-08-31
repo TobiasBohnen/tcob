@@ -229,12 +229,12 @@ auto bsbd_reader::read_string_pool(io::istream& stream) -> bool
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
-auto static is_within_limits(i64 value) -> bool
+static auto is_within_limits(i64 value) -> bool
 {
     return value >= std::numeric_limits<T>::min() && value <= std::numeric_limits<T>::max();
 }
 
-auto static fit_int(i64 value) -> bsbd::marker_type
+static auto fit_int(i64 value) -> bsbd::marker_type
 {
     if (value >= 0 && value <= std::numeric_limits<u8>::max() - LitIntVal) { return static_cast<bsbd::marker_type>(value + LitIntVal); }
 
@@ -248,7 +248,7 @@ auto static fit_int(i64 value) -> bsbd::marker_type
     return bsbd::marker_type::Int64;
 }
 
-auto static fit_float(f64 value) -> bsbd::marker_type
+static auto fit_float(f64 value) -> bsbd::marker_type
 {
     return std::fabs(static_cast<f32>(value) - value) > std::numeric_limits<f32>::epsilon() ? bsbd::marker_type::Float64 : bsbd::marker_type::Float32;
 }

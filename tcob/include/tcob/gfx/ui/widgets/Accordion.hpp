@@ -33,7 +33,7 @@ public:
         length       SectionBarHeight;
         milliseconds ExpandDuration {0};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     explicit accordion(init const& wi);

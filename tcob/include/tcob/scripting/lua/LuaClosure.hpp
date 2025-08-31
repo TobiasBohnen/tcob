@@ -25,7 +25,7 @@ namespace detail {
         native_closure_base()          = default;
         virtual ~native_closure_base() = default;
 
-        auto virtual operator()(state_view view) -> i32 = 0;
+        virtual auto operator()(state_view view) -> i32 = 0;
     };
 
     ////////////////////////////////////////////////////////////

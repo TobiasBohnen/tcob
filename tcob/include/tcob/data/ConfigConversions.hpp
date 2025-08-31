@@ -34,18 +34,18 @@ namespace tcob::data {
 
 template <>
 struct converter<cfg_value> {
-    auto static IsType(cfg_value const&) -> bool
+    static auto IsType(cfg_value const&) -> bool
     {
         return true;
     }
 
-    auto static From(cfg_value const& config, cfg_value& value) -> bool
+    static auto From(cfg_value const& config, cfg_value& value) -> bool
     {
         value = config;
         return true;
     }
 
-    void static To(cfg_value& config, cfg_value const& value)
+    static void To(cfg_value& config, cfg_value const& value)
     {
         config = value;
     }
@@ -56,7 +56,7 @@ struct converter<cfg_value> {
 
 template <>
 struct converter<char const*> {
-    void static To(cfg_value& config, char const* value)
+    static void To(cfg_value& config, char const* value)
     {
         config = utf8_string {value};
     }
@@ -64,7 +64,7 @@ struct converter<char const*> {
 
 template <usize N>
 struct converter<char[N]> { // NOLINT(*-avoid-c-arrays)
-    void static To(cfg_value& config, char const* value)
+    static void To(cfg_value& config, char const* value)
     {
         config = utf8_string {value};
     }
@@ -72,7 +72,7 @@ struct converter<char[N]> { // NOLINT(*-avoid-c-arrays)
 
 template <>
 struct converter<string_view> {
-    void static To(cfg_value& config, string_view value)
+    static void To(cfg_value& config, string_view value)
     {
         config = utf8_string {value};
     }
@@ -80,12 +80,12 @@ struct converter<string_view> {
 
 template <>
 struct converter<string> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<string>(config);
     }
 
-    auto static From(cfg_value const& config, string& value) -> bool
+    static auto From(cfg_value const& config, string& value) -> bool
     {
         if (std::holds_alternative<string>(config)) {
             value = std::get<string>(config);
@@ -119,7 +119,7 @@ struct converter<string> {
         return false;
     }
 
-    void static To(cfg_value& config, string const& value)
+    static void To(cfg_value& config, string const& value)
     {
         config = value;
     }
@@ -127,12 +127,12 @@ struct converter<string> {
 
 template <>
 struct converter<bool> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<bool>(config);
     }
 
-    auto static From(cfg_value const& config, bool& value) -> bool
+    static auto From(cfg_value const& config, bool& value) -> bool
     {
         if (std::holds_alternative<bool>(config)) {
             value = std::get<bool>(config);
@@ -141,7 +141,7 @@ struct converter<bool> {
         return false;
     }
 
-    void static To(cfg_value& config, bool value)
+    static void To(cfg_value& config, bool value)
     {
         config = value;
     }
@@ -149,12 +149,12 @@ struct converter<bool> {
 
 template <FloatingPoint T>
 struct converter<T> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<f64>(config) || std::holds_alternative<i64>(config);
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<f64>(config)) {
             value = static_cast<T>(std::get<f64>(config));
@@ -169,7 +169,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         config = static_cast<f64>(value);
     }
@@ -177,12 +177,12 @@ struct converter<T> {
 
 template <Integral T>
 struct converter<T> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<i64>(config);
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<i64>(config)) {
             value = static_cast<T>(std::get<i64>(config));
@@ -191,7 +191,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         config = static_cast<i64>(value);
     }
@@ -199,12 +199,12 @@ struct converter<T> {
 
 template <Enum T>
 struct converter<T> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<i64>(config) || std::holds_alternative<utf8_string>(config);
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<utf8_string>(config)) {
             value = tcob::detail::magic_enum_reduced::string_to_enum<T>(std::get<utf8_string>(config));
@@ -219,7 +219,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         config = utf8_string {tcob::detail::magic_enum_reduced::enum_to_string(value)};
     }
@@ -230,12 +230,12 @@ struct converter<T> {
 
 template <typename T>
 struct converter<std::optional<T>> {
-    auto static IsType(cfg_value const& /* config */) -> bool
+    static auto IsType(cfg_value const& /* config */) -> bool
     {
         return true;
     }
 
-    auto static From(cfg_value const& config, std::optional<T>& value) -> bool
+    static auto From(cfg_value const& config, std::optional<T>& value) -> bool
     {
         if (!converter<T>::IsType(config)) {
             value = std::nullopt;
@@ -248,7 +248,7 @@ struct converter<std::optional<T>> {
         return true;
     }
 
-    void static To(cfg_value& config, std::optional<T> const& value)
+    static void To(cfg_value& config, std::optional<T> const& value)
     {
         if (value) {
             converter<T>::To(config, *value);
@@ -260,7 +260,7 @@ struct converter<std::optional<T>> {
 
 template <>
 struct converter<std::nullopt_t> {
-    void static To(cfg_value& config, std::nullopt_t const&)
+    static void To(cfg_value& config, std::nullopt_t const&)
     {
         config = std::monostate {};
     }
@@ -268,24 +268,24 @@ struct converter<std::nullopt_t> {
 
 template <typename... P>
 struct converter<std::variant<P...>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return check_variant<P...>(config);
     }
 
-    auto static From(cfg_value const& config, std::variant<P...>& value) -> bool
+    static auto From(cfg_value const& config, std::variant<P...>& value) -> bool
     {
         return convert_from<P...>(config, value);
     }
 
-    void static To(cfg_value& config, std::variant<P...> const& value)
+    static void To(cfg_value& config, std::variant<P...> const& value)
     {
         std::visit([&config](auto&& item) { convert_to(config, item); }, value);
     }
 
 private:
     template <typename T, typename... Ts>
-    auto static convert_from(cfg_value const& config, std::variant<P...>& value) -> bool
+    static auto convert_from(cfg_value const& config, std::variant<P...>& value) -> bool
     {
         if (converter<T>::IsType(config)) {
             T val {};
@@ -302,13 +302,13 @@ private:
     }
 
     template <typename R>
-    void static convert_to(cfg_value& config, R const& value)
+    static void convert_to(cfg_value& config, R const& value)
     {
         converter<R>::To(config, value);
     }
 
     template <typename T, typename... Ts>
-    auto static check_variant(cfg_value const& config) -> bool
+    static auto check_variant(cfg_value const& config) -> bool
     {
         if constexpr (sizeof...(Ts) > 0) {
             return converter<T>::IsType(config) || check_variant<Ts...>(config);
@@ -320,12 +320,12 @@ private:
 
 template <Map T>
 struct converter<T> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<object>(config); // TODO: check types
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<object>(config)) {
             object obj {std::get<object>(config)};
@@ -343,7 +343,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         object obj {};
         for (auto const& [key, val] : value) {
@@ -357,12 +357,12 @@ template <Set T>
 struct converter<T> {
     using key_type = typename T::key_type;
 
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<array>(config); // TODO: check types
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             value.clear();
@@ -381,7 +381,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         config = array {value};
     }
@@ -389,12 +389,12 @@ struct converter<T> {
 
 template <typename... T>
 struct converter<std::tuple<T...>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<array>(config); // TODO: check types
     }
 
-    auto static From(cfg_value const& config, std::tuple<T...>& value) -> bool
+    static auto From(cfg_value const& config, std::tuple<T...>& value) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
@@ -409,7 +409,7 @@ struct converter<std::tuple<T...>> {
         return false;
     }
 
-    void static To(cfg_value& config, std::tuple<T...> const& value)
+    static void To(cfg_value& config, std::tuple<T...> const& value)
     {
         array arr {};
         std::apply(
@@ -424,13 +424,13 @@ struct converter<std::tuple<T...>> {
 
 private:
     template <typename R>
-    void static from_cfg(array& arr, i32 idx, R& value)
+    static void from_cfg(array& arr, i32 idx, R& value)
     {
         value = arr[idx].as<R>();
     }
 
     template <typename R>
-    void static to_cfg(array& arr, i32 idx, R& value)
+    static void to_cfg(array& arr, i32 idx, R& value)
     {
         arr[idx] = value;
     }
@@ -438,7 +438,7 @@ private:
 
 template <typename K, typename V>
 struct converter<std::pair<K, V>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             array const arr {std::get<array>(config)};
@@ -448,7 +448,7 @@ struct converter<std::pair<K, V>> {
         return false;
     }
 
-    auto static From(cfg_value const& config, std::pair<K, V>& value) -> bool
+    static auto From(cfg_value const& config, std::pair<K, V>& value) -> bool
     {
         if (IsType(config)) {
             array arr {std::get<array>(config)};
@@ -459,7 +459,7 @@ struct converter<std::pair<K, V>> {
         return false;
     }
 
-    void static To(cfg_value& config, std::pair<K, V> const& value)
+    static void To(cfg_value& config, std::pair<K, V> const& value)
     {
         array arr {value.first, value.second};
         config = arr;
@@ -468,7 +468,7 @@ struct converter<std::pair<K, V>> {
 
 template <typename T, usize Size>
 struct converter<std::array<T, Size>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
@@ -480,7 +480,7 @@ struct converter<std::array<T, Size>> {
         return false;
     }
 
-    auto static From(cfg_value const& config, std::array<T, Size>& value) -> bool
+    static auto From(cfg_value const& config, std::array<T, Size>& value) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
@@ -492,7 +492,7 @@ struct converter<std::array<T, Size>> {
         return false;
     }
 
-    void static To(cfg_value& config, std::array<T, Size> const& value)
+    static void To(cfg_value& config, std::array<T, Size> const& value)
     {
         array arr {};
         for (auto& val : value) {
@@ -506,7 +506,7 @@ template <Container T>
 struct converter<T> {
     using value_type = typename T::value_type;
 
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             array arr {std::get<array>(config)};
@@ -518,7 +518,7 @@ struct converter<T> {
         return false;
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<array>(config)) {
             value.clear();
@@ -531,7 +531,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         array arr {};
         for (auto& val : value) {
@@ -543,7 +543,7 @@ struct converter<T> {
 
 template <typename T>
 struct converter<std::span<T>> {
-    void static To(cfg_value& config, std::span<T> const& value)
+    static void To(cfg_value& config, std::span<T> const& value)
     {
         array arr {};
         for (auto const& val : value) {
@@ -555,12 +555,12 @@ struct converter<std::span<T>> {
 
 template <typename T, typename R>
 struct converter<std::chrono::duration<T, R>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return converter<T>::IsType(config);
     }
 
-    auto static From(cfg_value const& config, std::chrono::duration<T, R>& value) -> bool
+    static auto From(cfg_value const& config, std::chrono::duration<T, R>& value) -> bool
     {
         T val;
         if (converter<T>::From(config, val)) {
@@ -570,7 +570,7 @@ struct converter<std::chrono::duration<T, R>> {
         return false;
     }
 
-    void static To(cfg_value& config, std::chrono::duration<T, R> const& value)
+    static void To(cfg_value& config, std::chrono::duration<T, R> const& value)
     {
         converter<T>::To(config, value.count());
     }
@@ -578,12 +578,12 @@ struct converter<std::chrono::duration<T, R>> {
 
 template <>
 struct converter<std::filesystem::path> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<utf8_string>(config);
     }
 
-    auto static From(cfg_value const& config, std::filesystem::path& value) -> bool
+    static auto From(cfg_value const& config, std::filesystem::path& value) -> bool
     {
         if (std::holds_alternative<utf8_string>(config)) {
             value = std::get<utf8_string>(config);
@@ -593,7 +593,7 @@ struct converter<std::filesystem::path> {
         return false;
     }
 
-    void static To(cfg_value& config, std::filesystem::path const& value)
+    static void To(cfg_value& config, std::filesystem::path const& value)
     {
         config = value.string();
     }
@@ -601,17 +601,17 @@ struct converter<std::filesystem::path> {
 
 template <>
 struct converter<std::monostate> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return std::holds_alternative<std::monostate>(config);
     }
 
-    auto static From(cfg_value const& config, std::monostate& /* value */) -> bool
+    static auto From(cfg_value const& config, std::monostate& /* value */) -> bool
     {
         return std::holds_alternative<std::monostate>(config);
     }
 
-    void static To(cfg_value& config, std::monostate const& value)
+    static void To(cfg_value& config, std::monostate const& value)
     {
         config = value;
     }
@@ -623,7 +623,7 @@ struct converter<std::monostate> {
 template <Serializable T>
 struct converter<T> {
 public:
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         if (std::holds_alternative<object>(config)) {
             T t {};
@@ -632,12 +632,12 @@ public:
         return false;
     }
 
-    auto static From(cfg_value const& config, T& value) -> bool
+    static auto From(cfg_value const& config, T& value) -> bool
     {
         if (std::holds_alternative<object>(config)) {
-            object const& obj {std::get<object>(config)};
-            auto static const members {T::Members()};
-            bool retValue {true};
+            object const&     obj {std::get<object>(config)};
+            static auto const members {T::Members()};
+            bool              retValue {true};
             std::apply([&](auto&&... m) {
                 ((retValue = retValue && set_member(m, obj, value)), ...);
             },
@@ -647,11 +647,11 @@ public:
         return false;
     }
 
-    void static To(cfg_value& config, T const& value)
+    static void To(cfg_value& config, T const& value)
     {
         object obj {};
 
-        auto static const members {T::Members()};
+        static auto const members {T::Members()};
         std::apply([&](auto&&... m) {
             ((get_member(m, obj, value)), ...);
         },
@@ -663,12 +663,12 @@ public:
 
 template <FloatingPoint ValueType, double OneTurn>
 struct converter<angle_unit<ValueType, OneTurn>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return converter<ValueType>::IsType(config);
     }
 
-    auto static From(cfg_value const& config, angle_unit<ValueType, OneTurn>& value) -> bool
+    static auto From(cfg_value const& config, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (IsType(config)) {
             converter<ValueType>::From(config, value.Value);
@@ -678,7 +678,7 @@ struct converter<angle_unit<ValueType, OneTurn>> {
         return false;
     }
 
-    void static To(cfg_value& config, angle_unit<ValueType, OneTurn> const& value)
+    static void To(cfg_value& config, angle_unit<ValueType, OneTurn> const& value)
     {
         config = value.Value;
     }
@@ -686,12 +686,12 @@ struct converter<angle_unit<ValueType, OneTurn>> {
 
 template <typename T>
 struct converter<prop<T>> {
-    auto static IsType(cfg_value const& config) -> bool
+    static auto IsType(cfg_value const& config) -> bool
     {
         return converter<T>::IsType(config);
     }
 
-    auto static From(cfg_value const& config, prop<T>& value) -> bool
+    static auto From(cfg_value const& config, prop<T>& value) -> bool
     {
         if (IsType(config)) {
             if (T val; converter<T>::From(config, val)) {
@@ -703,7 +703,7 @@ struct converter<prop<T>> {
         return false;
     }
 
-    void static To(cfg_value& config, prop<T> const& value)
+    static void To(cfg_value& config, prop<T> const& value)
     {
         converter<T>::To(config, value);
     }

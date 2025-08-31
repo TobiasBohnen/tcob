@@ -18,7 +18,7 @@
 
 namespace tcob::data::detail {
 
-auto static find_unquoted(string_view source, char needle) -> string_view::size_type
+static auto find_unquoted(string_view source, char needle) -> string_view::size_type
 {
     char const quote {source[0]};
     if (quote != '"' && quote != '\'') {
@@ -39,7 +39,7 @@ auto static find_unquoted(string_view source, char needle) -> string_view::size_
     return string_view::npos;
 }
 
-auto static check_brackets(utf8_string_view str, char openBr, char closeBr) -> bool
+static auto check_brackets(utf8_string_view str, char openBr, char closeBr) -> bool
 {
     assert(str[str.size() - 1] == closeBr);
     i32 b {0};

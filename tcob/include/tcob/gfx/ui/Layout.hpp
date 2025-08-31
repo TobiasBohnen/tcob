@@ -56,8 +56,8 @@ public:
     void bring_to_front(widget* target);
     void send_to_back(widget* target);
 
-    auto virtual allows_move() const -> bool;
-    auto virtual allows_resize() const -> bool;
+    virtual auto allows_move() const -> bool;
+    virtual auto allows_resize() const -> bool;
 
 protected:
     explicit layout(parent parent);
@@ -65,7 +65,7 @@ protected:
     template <std::derived_from<widget> T>
     auto add_widget(string const& name) -> std::shared_ptr<T>;
 
-    void virtual do_layout(size_f size) = 0;
+    virtual void do_layout(size_f size) = 0;
 
 private:
     auto create_init(string const& name) const -> widget::init;

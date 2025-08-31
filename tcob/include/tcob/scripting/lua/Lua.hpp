@@ -146,7 +146,7 @@ public:
     auto get_local(i32 n) const -> string;
     auto set_local(i32 n) const -> string;
 
-    auto static GetMask(debug_mask mask) -> i32;
+    static auto GetMask(debug_mask mask) -> i32;
 
 private:
     state_view* _view;
@@ -294,9 +294,9 @@ public:
     auto get_upvalue(i32 funcindex, i32 n) const -> char const*;
     auto set_upvalue(i32 funcindex, i32 n) const -> char const*;
 
-    auto static GetUpvalueIndex(i32 n) -> i32;
+    static auto GetUpvalueIndex(i32 n) -> i32;
 
-    auto static NewState() -> lua_State*;
+    static auto NewState() -> lua_State*;
 
     void close();
     auto is_valid() const -> bool;

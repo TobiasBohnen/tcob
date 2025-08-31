@@ -38,12 +38,12 @@ public:
 
     auto operator==(rule const& other) const -> bool = default;
 
-    auto static Equal(widget_attribute_types const& value) -> rule;
-    auto static NotEqual(widget_attribute_types const& value) -> rule;
-    auto static Greater(widget_attribute_types const& value) -> rule;
-    auto static GreaterEqual(widget_attribute_types const& value) -> rule;
-    auto static Less(widget_attribute_types const& value) -> rule;
-    auto static LessEqual(widget_attribute_types const& value) -> rule;
+    static auto Equal(widget_attribute_types const& value) -> rule;
+    static auto NotEqual(widget_attribute_types const& value) -> rule;
+    static auto Greater(widget_attribute_types const& value) -> rule;
+    static auto GreaterEqual(widget_attribute_types const& value) -> rule;
+    static auto Less(widget_attribute_types const& value) -> rule;
+    static auto LessEqual(widget_attribute_types const& value) -> rule;
 };
 
 ////////////////////////////////////////////////////////////

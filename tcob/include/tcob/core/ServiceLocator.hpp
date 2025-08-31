@@ -20,7 +20,7 @@ public:
     service_locator();
     ~service_locator();
 
-    auto static GetInstance() -> service_locator&;
+    static auto GetInstance() -> service_locator&;
 
     template <typename T>
     void set(std::shared_ptr<T> service);

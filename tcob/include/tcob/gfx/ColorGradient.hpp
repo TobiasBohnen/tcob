@@ -26,7 +26,7 @@ public:
     f32   Position {0};
     color Value {};
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&color_stop::Position> {"pos"},
@@ -53,7 +53,7 @@ public:
 
     auto operator==(color_gradient const& other) const -> bool = default;
 
-    auto static Lerp(color_gradient const& from, color_gradient const& to, f64 step) -> color_gradient;
+    static auto Lerp(color_gradient const& from, color_gradient const& to, f64 step) -> color_gradient;
 
 private:
     bool                 _premulAlpha {true};

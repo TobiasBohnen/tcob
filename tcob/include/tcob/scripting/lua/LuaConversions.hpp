@@ -43,7 +43,7 @@ namespace tcob::scripting::lua {
 
 template <typename R, typename... P>
 struct converter<R(P...)> {
-    void static To(state_view view, R (*value)(P...))
+    static void To(state_view view, R (*value)(P...))
     {
         view.push_lightuserdata(reinterpret_cast<void*>(value));
         view.push_cclosure(
@@ -58,7 +58,7 @@ struct converter<R(P...)> {
 
 template <typename R, typename... P>
 struct converter<R (*)(P...)> {
-    void static To(state_view view, R (*value)(P...))
+    static void To(state_view view, R (*value)(P...))
     {
         view.push_lightuserdata(reinterpret_cast<void*>(value));
         view.push_cclosure(
@@ -73,7 +73,7 @@ struct converter<R (*)(P...)> {
 
 template <typename R, typename... P>
 struct converter<std::function<R(P...)>*> {
-    void static To(state_view view, std::function<R(P...)>* value)
+    static void To(state_view view, std::function<R(P...)>* value)
     {
         view.push_lightuserdata(reinterpret_cast<void*>(value));
         view.push_cclosure(
@@ -88,7 +88,7 @@ struct converter<std::function<R(P...)>*> {
 
 template <>
 struct converter<detail::native_closure_base*> {
-    void static To(state_view view, detail::native_closure_base* value)
+    static void To(state_view view, detail::native_closure_base* value)
     {
         view.push_lightuserdata(reinterpret_cast<void*>(value));
         view.push_cclosure(
@@ -106,12 +106,12 @@ struct converter<detail::native_closure_base*> {
 
 template <typename T>
 struct converter<std::optional<T>> {
-    auto static IsType(state_view, i32) -> bool
+    static auto IsType(state_view, i32) -> bool
     {
         return true;
     }
 
-    auto static From(state_view view, i32& idx, std::optional<T>& value) -> bool
+    static auto From(state_view view, i32& idx, std::optional<T>& value) -> bool
     {
         if (idx > view.get_top() || !converter<T>::IsType(view, idx)) {
             value = std::nullopt;
@@ -124,7 +124,7 @@ struct converter<std::optional<T>> {
         return true;
     }
 
-    void static To(state_view view, std::optional<T> const& value)
+    static void To(state_view view, std::optional<T> const& value)
     {
         if (value) {
             converter<T>::To(view, *value);
@@ -136,7 +136,7 @@ struct converter<std::optional<T>> {
 
 template <>
 struct converter<std::nullopt_t> {
-    void static To(state_view view, std::nullopt_t const&)
+    static void To(state_view view, std::nullopt_t const&)
     {
         view.push_nil();
     }
@@ -144,24 +144,24 @@ struct converter<std::nullopt_t> {
 
 template <typename... P>
 struct converter<std::variant<P...>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return check_variant<P...>(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, std::variant<P...>& value) -> bool
+    static auto From(state_view view, i32& idx, std::variant<P...>& value) -> bool
     {
         return convert_from<P...>(view, idx, value);
     }
 
-    void static To(state_view view, std::variant<P...> const& value)
+    static void To(state_view view, std::variant<P...> const& value)
     {
         std::visit([&view](auto&& item) { convert_to(view, item); }, value);
     }
 
 private:
     template <typename T, typename... Ts>
-    auto static convert_from(state_view view, i32& idx, std::variant<P...>& value) -> bool
+    static auto convert_from(state_view view, i32& idx, std::variant<P...>& value) -> bool
     {
         if (converter<T>::IsType(view, idx)) {
             T val {};
@@ -178,13 +178,13 @@ private:
     }
 
     template <typename R>
-    void static convert_to(state_view view, R const& value)
+    static void convert_to(state_view view, R const& value)
     {
         converter<R>::To(view, value);
     }
 
     template <typename T, typename... Ts>
-    auto static check_variant(state_view view, i32 idx) -> bool
+    static auto check_variant(state_view view, i32 idx) -> bool
     {
         if constexpr (sizeof...(Ts) > 0) {
             return converter<T>::IsType(view, idx) || check_variant<Ts...>(view, idx);
@@ -199,12 +199,12 @@ struct converter<T> {
     using key_type    = typename T::key_type;
     using mapped_type = typename T::mapped_type;
 
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return check_map(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         if (view.is_table(idx)) {
             value.clear();
@@ -231,7 +231,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         view.create_table(0, static_cast<i32>(value.size()));
         for (auto& [key, val] : value) {
@@ -242,7 +242,7 @@ struct converter<T> {
     }
 
 private:
-    auto static check_map(state_view view, i32 idx) -> bool
+    static auto check_map(state_view view, i32 idx) -> bool
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
@@ -267,12 +267,12 @@ template <Set T>
 struct converter<T> {
     using key_type = typename T::key_type;
 
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return check_set(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
@@ -291,7 +291,7 @@ struct converter<T> {
         return retValue;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         view.create_table(0, static_cast<i32>(value.size()));
 
@@ -302,7 +302,7 @@ struct converter<T> {
     }
 
 private:
-    auto static check_set(state_view view, i32 idx) -> bool
+    static auto check_set(state_view view, i32 idx) -> bool
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
@@ -320,12 +320,12 @@ private:
 
 template <typename... T>
 struct converter<std::tuple<T...>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return (converter<T>::IsType(view, idx++) && ...);
     }
 
-    auto static From(state_view view, i32& idx, std::tuple<T...>& value) -> bool
+    static auto From(state_view view, i32& idx, std::tuple<T...>& value) -> bool
     {
         return std::apply(
             [view, &idx](auto&&... item) {
@@ -334,7 +334,7 @@ struct converter<std::tuple<T...>> {
             value);
     }
 
-    void static To(state_view view, std::tuple<T...> const& value)
+    static void To(state_view view, std::tuple<T...> const& value)
     {
         std::apply(
             [view](auto&&... item) {
@@ -345,13 +345,13 @@ struct converter<std::tuple<T...>> {
 
 private:
     template <typename R>
-    auto static convert_from(state_view view, i32& idx, R& value) -> bool
+    static auto convert_from(state_view view, i32& idx, R& value) -> bool
     {
         return converter<R>::From(view, idx, value);
     }
 
     template <typename R>
-    void static convert_to(state_view view, R const& value)
+    static void convert_to(state_view view, R const& value)
     {
         converter<R>::To(view, value);
     }
@@ -359,12 +359,12 @@ private:
 
 template <typename K, typename V>
 struct converter<std::pair<K, V>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return converter<K>::IsType(view, idx) && converter<V>::IsType(view, idx + 1);
     }
 
-    auto static From(state_view view, i32& idx, std::pair<K, V>& value) -> bool
+    static auto From(state_view view, i32& idx, std::pair<K, V>& value) -> bool
     {
         K first {};
         if (converter<K>::From(view, idx, first)) {
@@ -378,7 +378,7 @@ struct converter<std::pair<K, V>> {
         return false;
     }
 
-    void static To(state_view view, std::pair<K, V> const& value)
+    static void To(state_view view, std::pair<K, V> const& value)
     {
         converter<K>::To(view, value.first);
         converter<V>::To(view, value.second);
@@ -388,7 +388,7 @@ struct converter<std::pair<K, V>> {
 template <typename... P>
 struct converter<parameter_pack<P...>> {
 
-    void static To(state_view view, parameter_pack<P...> const& value)
+    static void To(state_view view, parameter_pack<P...> const& value)
     {
         for (auto const& item : value.Items) {
             converter<std::variant<P...>>::To(view, item);
@@ -398,12 +398,12 @@ struct converter<parameter_pack<P...>> {
 
 template <typename T, usize Size>
 struct converter<std::array<T, Size>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return check_array(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, std::array<T, Size>& value) -> bool
+    static auto From(state_view view, i32& idx, std::array<T, Size>& value) -> bool
     {
         bool retValue {view.is_table(idx) && view.raw_len(idx) == Size};
         for (usize i {1}; i <= Size && retValue; ++i) {
@@ -418,7 +418,7 @@ struct converter<std::array<T, Size>> {
         return retValue;
     }
 
-    void static To(state_view view, std::array<T, Size> const& value)
+    static void To(state_view view, std::array<T, Size> const& value)
     {
         view.create_table(0, static_cast<i32>(Size));
 
@@ -429,7 +429,7 @@ struct converter<std::array<T, Size>> {
     }
 
 private:
-    auto static check_array(state_view view, i32 idx) -> bool
+    static auto check_array(state_view view, i32 idx) -> bool
     {
         bool retValue {view.is_table(idx) && view.raw_len(idx) == Size};
         for (u64 i {1}; i <= Size && retValue; ++i) {
@@ -445,12 +445,12 @@ template <Container T>
 struct converter<T> {
     using value_type = typename T::value_type;
 
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return check_vector(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
@@ -476,7 +476,7 @@ struct converter<T> {
         return retValue;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         view.create_table(0, static_cast<i32>(value.size()));
 
@@ -487,7 +487,7 @@ struct converter<T> {
     }
 
 private:
-    auto static check_vector(state_view view, i32 idx) -> bool
+    static auto check_vector(state_view view, i32 idx) -> bool
     {
         bool retValue {view.is_table(idx)};
         if (retValue) {
@@ -511,7 +511,7 @@ private:
 
 template <typename T>
 struct converter<std::span<T>> {
-    void static To(state_view view, std::span<T> const& value)
+    static void To(state_view view, std::span<T> const& value)
     {
         view.create_table(0, static_cast<i32>(value.size()));
 
@@ -524,12 +524,12 @@ struct converter<std::span<T>> {
 
 template <>
 struct converter<std::filesystem::path> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(state_view view, i32& idx, std::filesystem::path& value) -> bool
+    static auto From(state_view view, i32& idx, std::filesystem::path& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.to_string(idx++);
@@ -540,7 +540,7 @@ struct converter<std::filesystem::path> {
         return false;
     }
 
-    void static To(state_view view, std::filesystem::path const& value)
+    static void To(state_view view, std::filesystem::path const& value)
     {
         view.push_string(value.string());
     }
@@ -551,12 +551,12 @@ struct converter<std::filesystem::path> {
 
 template <>
 struct converter<ref> {
-    auto static IsType(state_view, i32) -> bool
+    static auto IsType(state_view, i32) -> bool
     {
         return true;
     }
 
-    auto static From(state_view view, i32& idx, ref& value) -> bool
+    static auto From(state_view view, i32& idx, ref& value) -> bool
     {
         value.acquire(view, idx++);
         return value.is_valid();
@@ -565,12 +565,12 @@ struct converter<ref> {
 
 template <>
 struct converter<table> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_table(idx);
     }
 
-    auto static From(state_view view, i32& idx, table& value) -> bool
+    static auto From(state_view view, i32& idx, table& value) -> bool
     {
         if (view.is_table(idx)) {
             value.acquire(view, idx++);
@@ -581,12 +581,12 @@ struct converter<table> {
         return false;
     }
 
-    void static To(state_view /*view*/, table const& value)
+    static void To(state_view /*view*/, table const& value)
     {
         value.push_self();
     }
 
-    void static To(state_view view, table& value)
+    static void To(state_view view, table& value)
     {
         if (!value.is_valid()) {
             value = table::PushNew(view);
@@ -598,12 +598,12 @@ struct converter<table> {
 
 template <>
 struct converter<coroutine> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_thread(idx);
     }
 
-    auto static From(state_view view, i32& idx, coroutine& value) -> bool
+    static auto From(state_view view, i32& idx, coroutine& value) -> bool
     {
         if (view.is_thread(idx)) {
             value.acquire(view, idx++);
@@ -614,7 +614,7 @@ struct converter<coroutine> {
         return false;
     }
 
-    void static To(state_view /*view*/, coroutine const& value)
+    static void To(state_view /*view*/, coroutine const& value)
     {
         value.push_self();
     }
@@ -622,12 +622,12 @@ struct converter<coroutine> {
 
 template <typename T>
 struct converter<function<T>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_function(idx);
     }
 
-    auto static From(state_view view, i32& idx, function<T>& value) -> bool
+    static auto From(state_view view, i32& idx, function<T>& value) -> bool
     {
         if (view.is_function(idx)) {
             value.acquire(view, idx++);
@@ -638,7 +638,7 @@ struct converter<function<T>> {
         return false;
     }
 
-    void static To(state_view /*view*/, function<T> const& value)
+    static void To(state_view /*view*/, function<T> const& value)
     {
         value.push_self();
     }
@@ -649,12 +649,12 @@ struct converter<function<T>> {
 
 template <>
 struct converter<char const*> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(state_view view, i32& idx, char const*& value) -> bool
+    static auto From(state_view view, i32& idx, char const*& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.to_string(idx++);
@@ -665,7 +665,7 @@ struct converter<char const*> {
         return false;
     }
 
-    void static To(state_view view, char const* value)
+    static void To(state_view view, char const* value)
     {
         view.push_string(value);
     }
@@ -673,12 +673,12 @@ struct converter<char const*> {
 
 template <usize N>
 struct converter<char const[N]> { // NOLINT(*-avoid-c-arrays)
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    void static To(state_view view, char const* value)
+    static void To(state_view view, char const* value)
     {
         view.push_string(value);
     }
@@ -686,12 +686,12 @@ struct converter<char const[N]> { // NOLINT(*-avoid-c-arrays)
 
 template <>
 struct converter<string> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(state_view view, i32& idx, string& value) -> bool
+    static auto From(state_view view, i32& idx, string& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.to_string(idx++);
@@ -702,7 +702,7 @@ struct converter<string> {
         return false;
     }
 
-    void static To(state_view view, string const& value)
+    static void To(state_view view, string const& value)
     {
         view.push_string(value);
     }
@@ -710,12 +710,12 @@ struct converter<string> {
 
 template <>
 struct converter<string_view> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;
     }
 
-    auto static From(state_view view, i32& idx, string_view& value) -> bool
+    static auto From(state_view view, i32& idx, string_view& value) -> bool
     {
         if (view.is_string(idx)) {
             value = view.to_string(idx++);
@@ -726,7 +726,7 @@ struct converter<string_view> {
         return false;
     }
 
-    void static To(state_view view, string_view value)
+    static void To(state_view view, string_view value)
     {
         view.push_lstring(value);
     }
@@ -734,7 +734,7 @@ struct converter<string_view> {
 
 template <>
 struct converter<std::nullptr_t> {
-    void static To(state_view view, std::nullptr_t const&)
+    static void To(state_view view, std::nullptr_t const&)
     {
         view.push_nil();
     }
@@ -742,12 +742,12 @@ struct converter<std::nullptr_t> {
 
 template <>
 struct converter<bool> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::Boolean;
     }
 
-    auto static From(state_view view, i32& idx, bool& value) -> bool
+    static auto From(state_view view, i32& idx, bool& value) -> bool
     {
         if (view.is_bool(idx)) {
             value = view.to_bool(idx++);
@@ -758,7 +758,7 @@ struct converter<bool> {
         return false;
     }
 
-    void static To(state_view view, bool const& value)
+    static void To(state_view view, bool const& value)
     {
         view.push_bool(value);
     }
@@ -766,12 +766,12 @@ struct converter<bool> {
 
 template <Enum T>
 struct converter<T> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_integer(idx) || view.is_string(idx);
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         if (view.is_integer(idx)) {
             value = static_cast<T>(view.to_integer(idx++));
@@ -787,7 +787,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         view.push_lstring(tcob::detail::magic_enum_reduced::enum_to_string(value));
     }
@@ -795,12 +795,12 @@ struct converter<T> {
 
 template <Integral T>
 struct converter<T> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_integer(idx);
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         if (view.is_integer(idx)) {
             value = static_cast<T>(view.to_integer(idx++));
@@ -820,7 +820,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         view.push_integer(static_cast<i64>(value));
     }
@@ -828,12 +828,12 @@ struct converter<T> {
 
 template <FloatingPoint T>
 struct converter<T> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::Number;
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         if (view.is_number(idx)) {
             value = static_cast<T>(view.to_number(idx++));
@@ -844,7 +844,7 @@ struct converter<T> {
         return false;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         view.push_number(value);
     }
@@ -852,12 +852,12 @@ struct converter<T> {
 
 template <Pointer T>
 struct converter<T> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.is_userdata(idx);
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
         static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
@@ -905,7 +905,7 @@ struct converter<T> {
         }
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         static char const* TypeName {typeid(std::remove_pointer_t<T>).name()};
 
@@ -927,7 +927,7 @@ struct converter<T> {
 
 template <typename T>
 struct converter<scripting::managed_ptr<T>> {
-    void static To(state_view view, scripting::managed_ptr<T> const& value)
+    static void To(state_view view, scripting::managed_ptr<T> const& value)
     {
         static string TypeName {typeid(T).name()};
 
@@ -953,7 +953,7 @@ struct converter<scripting::managed_ptr<T>> {
         }
     }
 
-    auto static gc(lua_State* l) -> i32
+    static auto gc(lua_State* l) -> i32
     {
         T** obj {static_cast<T**>(state_view {l}.to_userdata(-1))};
 
@@ -967,12 +967,12 @@ struct converter<scripting::managed_ptr<T>> {
 
 template <typename T>
 struct converter<std::expected<T, error_code>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return converter<T>::IsType(view, idx);
     }
 
-    auto static From(state_view view, i32& idx, std::expected<T, error_code>& value) -> bool
+    static auto From(state_view view, i32& idx, std::expected<T, error_code>& value) -> bool
     {
         T val;
         if (converter<T>::From(view, idx, val)) {
@@ -984,7 +984,7 @@ struct converter<std::expected<T, error_code>> {
         return false;
     }
 
-    void static To(state_view view, std::expected<T, error_code> const& value)
+    static void To(state_view view, std::expected<T, error_code> const& value)
     {
         converter<T>::To(view, value.value());
     }
@@ -992,7 +992,7 @@ struct converter<std::expected<T, error_code>> {
 
 template <typename... Keys>
 struct converter<proxy<table, Keys...>> {
-    void static To(state_view, proxy<table, Keys...> const& value)
+    static void To(state_view, proxy<table, Keys...> const& value)
     {
         if (ref val; value.try_get(val)) {
             val.push_self();
@@ -1002,7 +1002,7 @@ struct converter<proxy<table, Keys...>> {
 
 template <typename... Keys>
 struct converter<proxy<table const, Keys...>> {
-    void static To(state_view, proxy<table const, Keys...> const& value)
+    static void To(state_view, proxy<table const, Keys...> const& value)
     {
         if (ref val; value.try_get(val)) {
             val.push_self();
@@ -1013,7 +1013,7 @@ struct converter<proxy<table const, Keys...>> {
 template <Serializable T>
 struct converter<T> {
 public:
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         if (view.is_table(idx)) {
             T t {};
@@ -1022,11 +1022,11 @@ public:
         return false;
     }
 
-    auto static From(state_view view, i32& idx, T& value) -> bool
+    static auto From(state_view view, i32& idx, T& value) -> bool
     {
-        table tab {table::Acquire(view, idx++)};
-        auto static const members {T::Members()};
-        bool retValue {true};
+        table             tab {table::Acquire(view, idx++)};
+        static auto const members {T::Members()};
+        bool              retValue {true};
         std::apply([&](auto&&... m) {
             ((retValue = retValue && set_member(m, tab, value)), ...);
         },
@@ -1034,11 +1034,11 @@ public:
         return retValue;
     }
 
-    void static To(state_view view, T const& value)
+    static void To(state_view view, T const& value)
     {
         table tab {table::PushNew(view)};
 
-        auto static const members {T::Members()};
+        static auto const members {T::Members()};
         std::apply([&](auto&&... m) {
             (get_member(m, tab, value), ...);
         },
@@ -1048,12 +1048,12 @@ public:
 
 template <FloatingPoint ValueType, double OneTurn>
 struct converter<angle_unit<ValueType, OneTurn>> {
-    auto static IsType(state_view view, i32 idx) -> bool
+    static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::Number;
     }
 
-    auto static From(state_view view, i32& idx, angle_unit<ValueType, OneTurn>& value) -> bool
+    static auto From(state_view view, i32& idx, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (view.is_number(idx)) {
             value = angle_unit<ValueType, OneTurn> {static_cast<ValueType>(view.to_number(idx++))};
@@ -1064,7 +1064,7 @@ struct converter<angle_unit<ValueType, OneTurn>> {
         return false;
     }
 
-    void static To(state_view view, angle_unit<ValueType, OneTurn> const& value)
+    static void To(state_view view, angle_unit<ValueType, OneTurn> const& value)
     {
         view.push_number(value.Value);
     }

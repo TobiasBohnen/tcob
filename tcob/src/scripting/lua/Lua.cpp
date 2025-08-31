@@ -89,7 +89,7 @@ auto stack_guard::get_top() const -> i32
 
 ////////////////////////////////////////////////////////////
 
-auto static GetType(i32 i) -> type
+static auto GetType(i32 i) -> type
 {
     switch (i) {
     case LUA_TNONE:          return type::None;
@@ -479,7 +479,7 @@ void state_view::call(i32 nargs) const
     lua_call(_state, nargs, LUA_MULTRET);
 }
 
-auto static error_handler(lua_State* l) -> i32
+static auto error_handler(lua_State* l) -> i32
 {
     i32 const n {lua_gettop(l)};
     if (lua_isstring(l, n) != 0) {

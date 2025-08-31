@@ -37,7 +37,7 @@ public:
         caret_element Caret;
         milliseconds  FlashDuration {500};
 
-        void static Transition(style& target, style const& from, style const& to, f64 step);
+        static void Transition(style& target, style const& from, style const& to, f64 step);
     };
 
     struct border {

@@ -25,7 +25,7 @@ namespace detail {
         native_closure_base()          = default;
         virtual ~native_closure_base() = default;
 
-        auto virtual operator()(vm_view view) -> SQInteger = 0;
+        virtual auto operator()(vm_view view) -> SQInteger = 0;
     };
 
     ////////////////////////////////////////////////////////////

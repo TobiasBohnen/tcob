@@ -23,7 +23,7 @@ namespace tcob::ui {
 
 constexpr i32 FAIL_SCORE {std::numeric_limits<i32>::min()};
 
-auto static variant_compare(auto const& lhs, auto const& rhs) -> op
+static auto variant_compare(auto const& lhs, auto const& rhs) -> op
 {
     return std::visit([]<typename A, typename B>(A const& a, B const& b) -> op {
         if constexpr (!std::is_same_v<A, B>) {

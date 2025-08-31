@@ -37,7 +37,7 @@ static char const* defaultFontFragShader {
 
 extern "C" {
 #if defined(TCOB_DEBUG)
-void static GLAD_API_PTR debugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum severity, GLsizei, GLchar const* message, void const*)
+static void GLAD_API_PTR debugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum severity, GLsizei, GLchar const* message, void const*)
 {
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
         logger::Error("GL: error {}", message);
@@ -46,7 +46,7 @@ void static GLAD_API_PTR debugCallback(GLenum /*source*/, GLenum /*type*/, GLuin
 
 #endif
 
-auto static load(char const* c) -> GLADapiproc
+static auto load(char const* c) -> GLADapiproc
 {
     return reinterpret_cast<GLADapiproc>(SDL_GL_GetProcAddress(c));
 }

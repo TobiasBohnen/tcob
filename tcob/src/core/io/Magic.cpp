@@ -17,7 +17,7 @@ namespace tcob::io::magic {
 
 constexpr u8 BUFFER_LENGTH {128};
 
-auto static GetSignatures() -> std::vector<signature>&
+static auto GetSignatures() -> std::vector<signature>&
 {
     static std::vector<signature> signatures {};
     return signatures;

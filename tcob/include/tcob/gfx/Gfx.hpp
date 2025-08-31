@@ -67,7 +67,7 @@ public:
 
     auto operator==(blend_funcs const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&blend_funcs::SourceColorBlendFunc> {"src_color"},
@@ -127,7 +127,7 @@ public:
 
     auto operator==(uv const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&uv::U> {"u"},
@@ -145,7 +145,7 @@ public:
 
     auto operator==(texture_region const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&texture_region::UVRect> {"rect"},
@@ -176,7 +176,7 @@ public:
 
     auto operator==(alignments const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&alignments::Horizontal> {"horizontal"},
@@ -207,7 +207,7 @@ public:
 
     auto operator==(video_config const& other) const -> bool = default;
 
-    auto static constexpr Members()
+    static auto constexpr Members()
     {
         return std::tuple {
             member<&video_config::FullScreen> {Cfg::Video::fullscreen},

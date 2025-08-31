@@ -50,22 +50,22 @@ public:
 
     auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> window&;
 
-    auto virtual name() const -> string                      = 0;
-    auto virtual device_name() const -> string               = 0;
-    auto virtual capabilities() const -> render_capabilities = 0;
+    virtual auto name() const -> string                      = 0;
+    virtual auto device_name() const -> string               = 0;
+    virtual auto capabilities() const -> render_capabilities = 0;
 
     auto statistics() -> render_statistics&;
 
     auto window() const -> window&;
     auto default_target() const -> default_render_target&;
 
-    auto virtual create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
-    auto virtual create_render_target [[nodiscard]] (texture* tex) -> std::unique_ptr<render_backend::render_target_base>          = 0;
-    auto virtual create_shader [[nodiscard]] () -> std::unique_ptr<render_backend::shader_base>                                    = 0;
-    auto virtual create_texture [[nodiscard]] () -> std::unique_ptr<render_backend::texture_base>                                  = 0;
-    auto virtual create_uniform_buffer [[nodiscard]] (usize size) -> std::unique_ptr<render_backend::uniform_buffer_base>          = 0;
-    auto virtual create_vertex_array [[nodiscard]] (buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> = 0;
-    auto virtual create_window [[nodiscard]] (size_i size) -> std::unique_ptr<gfx::window>                                         = 0;
+    virtual auto create_canvas [[nodiscard]] () -> std::unique_ptr<render_backend::canvas_base>                                    = 0;
+    virtual auto create_render_target [[nodiscard]] (texture* tex) -> std::unique_ptr<render_backend::render_target_base>          = 0;
+    virtual auto create_shader [[nodiscard]] () -> std::unique_ptr<render_backend::shader_base>                                    = 0;
+    virtual auto create_texture [[nodiscard]] () -> std::unique_ptr<render_backend::texture_base>                                  = 0;
+    virtual auto create_uniform_buffer [[nodiscard]] (usize size) -> std::unique_ptr<render_backend::uniform_buffer_base>          = 0;
+    virtual auto create_vertex_array [[nodiscard]] (buffer_usage_hint usage) -> std::unique_ptr<render_backend::vertex_array_base> = 0;
+    virtual auto create_window [[nodiscard]] (size_i size) -> std::unique_ptr<gfx::window>                                         = 0;
 
     static inline char const* ServiceName {"render_system"};
 

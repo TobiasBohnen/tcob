@@ -44,7 +44,7 @@ public:
 private:
     void on_update(milliseconds deltaTime) final;
 
-    void virtual update_values() = 0;
+    virtual void update_values() = 0;
 
     milliseconds _duration {0};
     milliseconds _elapsedTime {0};

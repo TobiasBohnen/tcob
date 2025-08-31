@@ -185,7 +185,7 @@ public:
     public:
         virtual ~command() = default;
 
-        void virtual apply(tsf* font) const = 0;
+        virtual void apply(tsf* font) const = 0;
     };
 
     class TCOB_API note_on : public command {

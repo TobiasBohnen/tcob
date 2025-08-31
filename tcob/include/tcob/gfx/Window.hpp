@@ -60,15 +60,15 @@ public:
 
     auto bounds() const -> rect_i;
 
-    void virtual load_icon(path const& file) = 0;
+    virtual void load_icon(path const& file) = 0;
 
-    auto virtual has_focus() const -> bool = 0;
-    void virtual grab_input(bool grab)     = 0;
+    virtual auto has_focus() const -> bool = 0;
+    virtual void grab_input(bool grab)     = 0;
 
     void draw_to(render_target& target);
     void swap_buffer() const;
 
-    void virtual process_events(void* ev) = 0;
+    virtual void process_events(void* ev) = 0;
 
     auto get_impl() const -> render_backend::window_base*;
 
@@ -80,11 +80,11 @@ protected:
     auto renderer() -> quad_renderer&;
 
 private:
-    auto virtual get_fullscreen() const -> bool = 0;
-    void virtual set_fullscreen(bool value)     = 0;
+    virtual auto get_fullscreen() const -> bool = 0;
+    virtual void set_fullscreen(bool value)     = 0;
 
-    auto virtual get_title() const -> string    = 0;
-    void virtual set_title(string const& value) = 0;
+    virtual auto get_title() const -> string    = 0;
+    virtual void set_title(string const& value) = 0;
 
     assets::asset_owner_ptr<texture>  _texture;
     assets::asset_owner_ptr<material> _material {};

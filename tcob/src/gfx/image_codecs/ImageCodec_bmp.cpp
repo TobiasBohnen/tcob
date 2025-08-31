@@ -140,7 +140,7 @@ auto bmp_decoder::get_palette(io::istream& in) const -> std::vector<color>
     return {};
 }
 
-void static CheckAlpha(std::vector<u8>& data)
+static void CheckAlpha(std::vector<u8>& data)
 {
     for (u32 i {3}; i < data.size(); i += 4) {
         if (data[i] != 0) { return; }
@@ -260,7 +260,7 @@ auto bmp_decoder::get_rgb_data(io::istream& in, size_i size, u16 bitCount, std::
 
 ////////////////////////////////////////////////////////////
 
-void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSize, io::ostream& writer)
+static void WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSize, io::ostream& writer)
 {
     writer.write(SIGNATURE);
     writer.write<u32, std::endian::little>(static_cast<u32>(fileSize));
@@ -268,7 +268,7 @@ void static WriteFileHeader(std::streamsize imageOffset, std::streamsize fileSiz
     writer.write<u32, std::endian::little>(static_cast<u32>(imageOffset));
 }
 
-void static WriteImageData(image const& img, io::ostream& writer)
+static void WriteImageData(image const& img, io::ostream& writer)
 {
     auto const& info {img.info()};
     auto const  data {img.data()};
@@ -292,7 +292,7 @@ void static WriteImageData(image const& img, io::ostream& writer)
     writer.write<u8>(buffer);
 }
 
-void static WriteInfoHeader(image::information const& info, io::ostream& writer)
+static void WriteInfoHeader(image::information const& info, io::ostream& writer)
 {
     writer.write(40);
     writer.write<i32, std::endian::little>(info.Size.Width);

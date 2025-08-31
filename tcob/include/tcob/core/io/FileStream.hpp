@@ -39,9 +39,9 @@ public:
 
     auto is_valid() const -> bool;
 
-    auto static OpenRead(path const& path) -> file_sink;
-    auto static OpenWrite(path const& path) -> file_sink;
-    auto static OpenAppend(path const& path) -> file_sink;
+    static auto OpenRead(path const& path) -> file_sink;
+    static auto OpenWrite(path const& path) -> file_sink;
+    static auto OpenAppend(path const& path) -> file_sink;
 
 private:
     explicit file_sink(PHYSFS_File* handle);
@@ -66,7 +66,7 @@ public:
 
     auto is_valid() const -> bool override;
 
-    auto static Open(path const& path, u64 bufferSize = 4096) -> std::expected<ifstream, error_code>;
+    static auto Open(path const& path, u64 bufferSize = 4096) -> std::expected<ifstream, error_code>;
 
 private:
     file_sink _sink;

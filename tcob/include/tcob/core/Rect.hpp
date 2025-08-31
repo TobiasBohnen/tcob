@@ -68,16 +68,16 @@ public:
     auto constexpr as_union_with(rect const& other) const -> rect;
     auto constexpr as_padded_by(size<T> const& size) const -> rect;
 
-    auto static constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
+    static auto constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
 
-    auto static constexpr Lerp(rect const& from, rect const& to, f64 step) -> rect;
+    static auto constexpr Lerp(rect const& from, rect const& to, f64 step) -> rect;
 
     point<T> Position;
     size<T>  Size;
 
     static rect<T> const Zero;
 
-    auto static constexpr Members();
+    static auto constexpr Members();
 };
 
 using rect_i = rect<i32>;

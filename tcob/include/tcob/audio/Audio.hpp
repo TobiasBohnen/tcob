@@ -36,21 +36,21 @@ class TCOB_API audio_stream_base {
 public:
     virtual ~audio_stream_base() = default;
 
-    void virtual bind()                   = 0;
-    void virtual unbind()                 = 0;
-    auto virtual is_bound() const -> bool = 0;
+    virtual void bind()                   = 0;
+    virtual void unbind()                 = 0;
+    virtual auto is_bound() const -> bool = 0;
 
-    auto virtual get_volume() const -> f32 = 0;
-    void virtual set_volume(f32 val)       = 0;
+    virtual auto get_volume() const -> f32 = 0;
+    virtual void set_volume(f32 val)       = 0;
 
-    void virtual put(std::span<f32 const> data) = 0;
-    void virtual flush()                        = 0;
-    void virtual clear()                        = 0;
+    virtual void put(std::span<f32 const> data) = 0;
+    virtual void flush()                        = 0;
+    virtual void clear()                        = 0;
 
-    auto virtual get() -> std::vector<f32> = 0;
+    virtual auto get() -> std::vector<f32> = 0;
 
-    auto virtual available_bytes() const -> i32 = 0;
-    auto virtual queued_bytes() const -> i32    = 0;
+    virtual auto available_bytes() const -> i32 = 0;
+    virtual auto queued_bytes() const -> i32    = 0;
 };
 
 ////////////////////////////////////////////////////////////
@@ -67,8 +67,8 @@ public:
 
     static inline char const* ServiceName {"audio::system"};
 
-    auto virtual create_output(specification const& info) const -> std::unique_ptr<audio_stream_base> = 0;
-    auto virtual create_input() const -> std::unique_ptr<audio_stream_base>                           = 0;
+    virtual auto create_output(specification const& info) const -> std::unique_ptr<audio_stream_base> = 0;
+    virtual auto create_input() const -> std::unique_ptr<audio_stream_base>                           = 0;
 };
 
 ////////////////////////////////////////////////////////////

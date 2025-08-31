@@ -26,12 +26,12 @@ struct physfs_sqlite3_file {
     char const*  FileName;
 };
 
-auto static xClose(sqlite3_file* /* f */) -> int
+static auto xClose(sqlite3_file* /* f */) -> int
 {
     return SQLITE_OK;
 }
 
-auto static xRead(sqlite3_file* f, void* dst, int iAmt, sqlite3_int64 iOfst) -> int
+static auto xRead(sqlite3_file* f, void* dst, int iAmt, sqlite3_int64 iOfst) -> int
 {
     auto const* file {reinterpret_cast<physfs_sqlite3_file const*>(f)};
     assert(&file->SqliteFile == f);
@@ -50,7 +50,7 @@ auto static xRead(sqlite3_file* f, void* dst, int iAmt, sqlite3_int64 iOfst) -> 
     return SQLITE_OK;
 }
 
-auto static xWrite(sqlite3_file* f, void const* src, int iAmt, sqlite3_int64 iOfst) -> int
+static auto xWrite(sqlite3_file* f, void const* src, int iAmt, sqlite3_int64 iOfst) -> int
 {
     auto const* file {reinterpret_cast<physfs_sqlite3_file const*>(f)};
     assert(&file->SqliteFile == f);
@@ -67,17 +67,17 @@ auto static xWrite(sqlite3_file* f, void const* src, int iAmt, sqlite3_int64 iOf
     return written == iAmt ? SQLITE_OK : SQLITE_IOERR_WRITE;
 }
 
-auto static xTruncate(sqlite3_file* /* f */, sqlite3_int64 /* size */) -> int
+static auto xTruncate(sqlite3_file* /* f */, sqlite3_int64 /* size */) -> int
 {
     return SQLITE_OK;
 }
 
-auto static xSync(sqlite3_file* /* f */, int /* flags */) -> int
+static auto xSync(sqlite3_file* /* f */, int /* flags */) -> int
 {
     return SQLITE_OK;
 }
 
-auto static xFileSize(sqlite3_file* f, sqlite3_int64* pSize) -> int
+static auto xFileSize(sqlite3_file* f, sqlite3_int64* pSize) -> int
 {
     auto const* file {reinterpret_cast<physfs_sqlite3_file const*>(f)};
     assert(&file->SqliteFile == f);
@@ -88,33 +88,33 @@ auto static xFileSize(sqlite3_file* f, sqlite3_int64* pSize) -> int
     return SQLITE_OK;
 }
 
-auto static xLock(sqlite3_file* /* f */, int /* level */) -> int
+static auto xLock(sqlite3_file* /* f */, int /* level */) -> int
 {
     return SQLITE_OK;
 }
 
-auto static xUnlock(sqlite3_file* /* f */, int /* level */) -> int
+static auto xUnlock(sqlite3_file* /* f */, int /* level */) -> int
 {
     return SQLITE_OK;
 }
 
-auto static xCheckReservedLock(sqlite3_file* /* f */, int* pResOut) -> int
+static auto xCheckReservedLock(sqlite3_file* /* f */, int* pResOut) -> int
 {
     *pResOut = false;
     return SQLITE_OK;
 }
 
-auto static xFileControl(sqlite3_file* /* f */, int /* op */, void* /* pArg */) -> int
+static auto xFileControl(sqlite3_file* /* f */, int /* op */, void* /* pArg */) -> int
 {
     return SQLITE_NOTFOUND;
 }
 
-auto static xSectorSize(sqlite3_file* /* f */) -> int
+static auto xSectorSize(sqlite3_file* /* f */) -> int
 {
     return 4096;
 }
 
-auto static xDeviceCharacteristics(sqlite3_file* /* f */) -> int
+static auto xDeviceCharacteristics(sqlite3_file* /* f */) -> int
 {
     return 0;
 }
@@ -141,7 +141,7 @@ static sqlite3_io_methods const physfs_sqlite3_io_methods {
     .xUnfetch               = nullptr,
 };
 
-auto static xOpen(sqlite3_vfs*, char const* zName, sqlite3_file* f, int flags, int* pOutFlags) -> int
+static auto xOpen(sqlite3_vfs*, char const* zName, sqlite3_file* f, int flags, int* pOutFlags) -> int
 {
     auto* file {reinterpret_cast<physfs_sqlite3_file*>(f)};
     assert(&file->SqliteFile == f);
@@ -164,12 +164,12 @@ auto static xOpen(sqlite3_vfs*, char const* zName, sqlite3_file* f, int flags, i
     return SQLITE_OK;
 }
 
-auto static xDelete(sqlite3_vfs*, char const* zName, int /* syncDir */) -> int
+static auto xDelete(sqlite3_vfs*, char const* zName, int /* syncDir */) -> int
 {
     return fs::delete_file(zName) ? SQLITE_OK : SQLITE_IOERR_DELETE;
 }
 
-auto static xAccess(sqlite3_vfs*, char const* zName, int flags, int* pResOut) -> int
+static auto xAccess(sqlite3_vfs*, char const* zName, int flags, int* pResOut) -> int
 {
     switch (flags) {
     case SQLITE_ACCESS_EXISTS:    *pResOut = fs::is_file(zName); break;
@@ -181,45 +181,45 @@ auto static xAccess(sqlite3_vfs*, char const* zName, int flags, int* pResOut) ->
     return SQLITE_OK;
 }
 
-auto static xFullPathname(sqlite3_vfs*, char const* zName, int nOut, char* zOut) -> int
+static auto xFullPathname(sqlite3_vfs*, char const* zName, int nOut, char* zOut) -> int
 {
     return sqlite3_snprintf(nOut, zOut, "%s", zName) ? SQLITE_OK : SQLITE_IOERR;
 }
 
-auto static xDlOpen(sqlite3_vfs*, char const* /* zFilename */) -> void*
+static auto xDlOpen(sqlite3_vfs*, char const* /* zFilename */) -> void*
 {
     return nullptr;
 }
 
-void static xDlError(sqlite3_vfs*, int, char*)
+static void xDlError(sqlite3_vfs*, int, char*)
 {
 }
 
-auto static xDlSym(sqlite3_vfs*, void*, char const*) -> void (*)(void)
+static auto xDlSym(sqlite3_vfs*, void*, char const*) -> void (*)(void)
 {
     return nullptr;
 }
 
-void static xDlClose(sqlite3_vfs*, void*)
+static void xDlClose(sqlite3_vfs*, void*)
 {
 }
 
-auto static xRandomness(sqlite3_vfs*, int, char*) -> int
-{
-    return 0;
-}
-
-auto static xSleep(sqlite3_vfs*, int) -> int
+static auto xRandomness(sqlite3_vfs*, int, char*) -> int
 {
     return 0;
 }
 
-auto static xCurrentTime(sqlite3_vfs*, double*) -> int
+static auto xSleep(sqlite3_vfs*, int) -> int
 {
     return 0;
 }
 
-auto static xGetLastError(sqlite3_vfs*, int /* nBuf */, char* /* zBuf */) -> int
+static auto xCurrentTime(sqlite3_vfs*, double*) -> int
+{
+    return 0;
+}
+
+static auto xGetLastError(sqlite3_vfs*, int /* nBuf */, char* /* zBuf */) -> int
 {
     return 0;
 }

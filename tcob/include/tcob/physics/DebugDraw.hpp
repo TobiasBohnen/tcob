@@ -78,32 +78,32 @@ public:
     settings Settings;
 
     /// Draw a closed polygon provided in CCW order.
-    void virtual draw_polygon(std::span<point_f const> vertices, color color) = 0;
+    virtual void draw_polygon(std::span<point_f const> vertices, color color) = 0;
 
     /// Draw a solid closed polygon provided in CCW order.
-    void virtual draw_solid_polygon(body_transform xform, std::span<point_f const> vertices, f32 radius, color color) = 0;
+    virtual void draw_solid_polygon(body_transform xform, std::span<point_f const> vertices, f32 radius, color color) = 0;
 
     /// Draw a circle.
-    void virtual draw_circle(point_f center, f32 radius, color color) = 0;
+    virtual void draw_circle(point_f center, f32 radius, color color) = 0;
 
     /// Draw a solid circle.
-    void virtual draw_solid_circle(body_transform xform, f32 radius, color color) = 0;
+    virtual void draw_solid_circle(body_transform xform, f32 radius, color color) = 0;
 
     /// Draw a solid capsule.
-    void virtual draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color) = 0;
+    virtual void draw_solid_capsule(point_f p1, point_f p2, f32 radius, color color) = 0;
 
     /// Draw a line segment.
-    void virtual draw_segment(point_f p1, point_f p2, color color) = 0;
+    virtual void draw_segment(point_f p1, point_f p2, color color) = 0;
 
     /// Draw a transform. Choose your own length scale.
     /// @param xf a transform.
-    void virtual draw_transform(body_transform const& xf) = 0;
+    virtual void draw_transform(body_transform const& xf) = 0;
 
     /// Draw a point.
-    void virtual draw_point(point_f p, f32 size, color color) = 0;
+    virtual void draw_point(point_f p, f32 size, color color) = 0;
 
     /// Draw a string.
-    void virtual draw_string(point_f p, string const& text, color color) = 0;
+    virtual void draw_string(point_f p, string const& text, color color) = 0;
 
 private:
     std::unique_ptr<detail::b2d_debug_draw> _impl;

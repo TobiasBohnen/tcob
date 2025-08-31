@@ -80,9 +80,9 @@ public:
     void set_update_hook(std::function<void(database*, update_mode, utf8_string, utf8_string, i64)>&& func);
     void call_update_hook(update_mode mode, utf8_string const& dbName, utf8_string const& table, i64 rowId);
 
-    auto static Open(path const& file) -> std::optional<database>;                    // TODO: change to result
-    auto static Open(path const& file, journal_mode mode) -> std::optional<database>; // TODO: change to result
-    auto static OpenMemory() -> database;
+    static auto Open(path const& file) -> std::optional<database>;                    // TODO: change to result
+    static auto Open(path const& file, journal_mode mode) -> std::optional<database>; // TODO: change to result
+    static auto OpenMemory() -> database;
 
 private:
     void set_journal_mode(journal_mode mode) const;

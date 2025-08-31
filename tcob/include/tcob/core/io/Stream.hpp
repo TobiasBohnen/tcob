@@ -46,16 +46,16 @@ public:
     auto read_string(std::streamsize length) -> string;
     auto read_string_until(char delim) -> string;
 
-    auto virtual tell() const -> std::streamsize                = 0;
-    auto virtual seek(std::streamoff off, seek_dir way) -> bool = 0;
-    auto virtual size_in_bytes() const -> std::streamsize       = 0;
-    auto virtual is_eof() const -> bool                         = 0;
+    virtual auto tell() const -> std::streamsize                = 0;
+    virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;
+    virtual auto size_in_bytes() const -> std::streamsize       = 0;
+    virtual auto is_eof() const -> bool                         = 0;
 
-    explicit operator bool() const;
-    auto virtual is_valid() const -> bool;
+    explicit     operator bool() const;
+    virtual auto is_valid() const -> bool;
 
 protected:
-    auto virtual read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize = 0;
+    virtual auto read_bytes(void* s, std::streamsize sizeInBytes) -> std::streamsize = 0;
 };
 
 template <typename T>
@@ -112,12 +112,12 @@ public:
     template <POD T>
     auto write_filtered(std::span<T const> s, auto&& filter, auto&&... filters) -> std::streamsize;
 
-    auto virtual tell() const -> std::streamsize                = 0;
-    auto virtual seek(std::streamoff off, seek_dir way) -> bool = 0;
+    virtual auto tell() const -> std::streamsize                = 0;
+    virtual auto seek(std::streamoff off, seek_dir way) -> bool = 0;
     // TODO: add flush
 protected:
-    auto virtual write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize = 0;
-    auto write_string(string_view s) -> std::streamsize;
+    virtual auto write_bytes(void const* s, std::streamsize sizeInBytes) -> std::streamsize = 0;
+    auto         write_string(string_view s) -> std::streamsize;
 };
 
 template <typename T>

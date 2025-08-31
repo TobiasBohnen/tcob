@@ -19,14 +19,14 @@ public:
     auto read_as_object(utf8_string_view txt) -> std::optional<object> override;
     auto read_as_array(utf8_string_view txt) -> std::optional<array> override;
 
-    auto static ReadArray(entry& currentEntry, utf8_string_view line) -> bool;
-    auto static ReadObject(entry& currentEntry, utf8_string_view line) -> bool;
+    static auto ReadArray(entry& currentEntry, utf8_string_view line) -> bool;
+    static auto ReadObject(entry& currentEntry, utf8_string_view line) -> bool;
 
 private:
-    auto static ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string_view line) -> bool;
+    static auto ReadKeyValuePair(object& obj, entry& currentEntry, utf8_string_view line) -> bool;
 
-    auto static ReadEntry(entry& currentEntry, utf8_string_view line) -> bool;
-    auto static ReadScalar(entry& currentEntry, utf8_string_view line) -> bool;
+    static auto ReadEntry(entry& currentEntry, utf8_string_view line) -> bool;
+    static auto ReadScalar(entry& currentEntry, utf8_string_view line) -> bool;
 };
 
 //////////////////////////////////////////////////////////////////////
