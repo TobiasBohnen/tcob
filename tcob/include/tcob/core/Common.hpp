@@ -24,7 +24,7 @@ namespace helper {
     TCOB_API auto round_up_to_multiple(i32 num, i32 step) -> i32;
     TCOB_API auto round_down_to_multiple(i32 num, i32 step) -> i32;
 
-    TCOB_API auto get_bits(u32 i, i32 offset, i32 count) -> u32;
+    TCOB_API auto extract_bits(u32 i, i32 offset, i32 count) -> u32;
 
     template <typename... Ts>
     auto constexpr hash_combine(usize seed, Ts... values) noexcept -> usize

@@ -73,20 +73,20 @@ auto static get_padding_bytes(i32 bitsPerPixel, i32 stride, i32 width) -> i32
 
 auto static get_color(u8 one, u8 two) -> color
 {
-    u32 const r1 {helper::get_bits(one, 2, 5)};
+    u32 const r1 {helper::extract_bits(one, 2, 5)};
     u8 const  r {static_cast<u8>(r1 << 3)};
 
-    u32       bit {helper::get_bits(one, 0, 2)};
+    u32       bit {helper::extract_bits(one, 0, 2)};
     u32 const g1 {bit << 6};
 
-    bit = helper::get_bits(two, 5, 3);
+    bit = helper::extract_bits(two, 5, 3);
     u32 const g2 {bit << 3};
     u8 const  g {static_cast<u8>(g1 + g2)};
 
-    u32 const b1 {helper::get_bits(two, 0, 5)};
+    u32 const b1 {helper::extract_bits(two, 0, 5)};
     u8 const  b {static_cast<u8>(b1 << 3)};
 
-    u32 const a1 {helper::get_bits(one, 7, 1)};
+    u32 const a1 {helper::extract_bits(one, 7, 1)};
     u8 const  a {static_cast<u8>(a1 * 255)};
 
     return {r, g, b, a};
@@ -267,8 +267,8 @@ void tga::footer::read(io::istream& reader)
 void tga::image_descriptor::read(io::istream& reader)
 {
     u8 imgDesc            = reader.read<u8>();
-    AttributeBits         = helper::get_bits(imgDesc, 0, 4);
-    FirstPixelDestination = static_cast<first_pixel_destination>(helper::get_bits(imgDesc, 4, 2));
+    AttributeBits         = helper::extract_bits(imgDesc, 0, 4);
+    FirstPixelDestination = static_cast<first_pixel_destination>(helper::extract_bits(imgDesc, 4, 2));
 }
 
 void tga::image_specifications::read(io::istream& reader)

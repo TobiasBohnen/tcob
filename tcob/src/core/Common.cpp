@@ -56,7 +56,7 @@ auto round_down_to_multiple(i32 num, i32 step) -> i32
         : num - rem;
 }
 
-auto get_bits(u32 i, i32 offset, i32 count) -> u32
+auto extract_bits(u32 i, i32 offset, i32 count) -> u32
 {
     return static_cast<u32>(i >> offset) & ((1 << count) - 1);
 }

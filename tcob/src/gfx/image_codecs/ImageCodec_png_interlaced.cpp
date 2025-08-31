@@ -16,7 +16,7 @@ void png_decoder::interlaced_G1(i32 width, i32 height)
     auto iRect {get_interlace_dimensions(width, height)};
 
     for (i32 i {0}; i < 8 && _pixel.X < width; i++) {
-        u8 const  c {static_cast<u8>(helper::get_bits(*_curLineIt, 7 - i, 1) * 255)};
+        u8 const  c {static_cast<u8>(helper::extract_bits(*_curLineIt, 7 - i, 1) * 255)};
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
             _data[dataIndex]     = c;
@@ -38,7 +38,7 @@ void png_decoder::interlaced_G2(i32 width, i32 height)
     auto iRect {get_interlace_dimensions(width, height)};
 
     for (i32 i {0}; i < 8 && _pixel.X < width; i += 2) {
-        u8 const  c {static_cast<u8>(helper::get_bits(*_curLineIt, 6 - i, 2) / 3.0f * 255)};
+        u8 const  c {static_cast<u8>(helper::extract_bits(*_curLineIt, 6 - i, 2) / 3.0f * 255)};
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
             _data[dataIndex]     = c;
@@ -60,7 +60,7 @@ void png_decoder::interlaced_G4(i32 width, i32 height)
     auto iRect {get_interlace_dimensions(width, height)};
 
     for (i32 i {0}; i < 8 && _pixel.X < width; i += 4) {
-        u8 const  c {static_cast<u8>(helper::get_bits(*_curLineIt, 4 - i, 4) / 15.0f * 255)};
+        u8 const  c {static_cast<u8>(helper::extract_bits(*_curLineIt, 4 - i, 4) / 15.0f * 255)};
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
             _data[dataIndex]     = c;
@@ -117,7 +117,7 @@ void png_decoder::interlaced_I1(i32 width, i32 height)
     for (i32 i {0}; i < 8 && _pixel.X < width; i++) {
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
-            u8 const idx {static_cast<u8>(helper::get_bits(*_curLineIt, 7 - i, 1))};
+            u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 7 - i, 1))};
 
             auto const color {_plte->Entries.at(idx)};
             _data[dataIndex]     = color.R;
@@ -141,7 +141,7 @@ void png_decoder::interlaced_I2(i32 width, i32 height)
     for (i32 i {0}; i < 8 && _pixel.X < width; i += 2) {
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
-            u8 const idx {static_cast<u8>(helper::get_bits(*_curLineIt, 6 - i, 2))};
+            u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 6 - i, 2))};
 
             auto const color {_plte->Entries.at(idx)};
             _data[dataIndex]     = color.R;
@@ -165,7 +165,7 @@ void png_decoder::interlaced_I4(i32 width, i32 height)
     for (i32 i {0}; i < 8 && _pixel.X < width; i += 4) {
         i32 const dataIndex {(iRect.left() * png::BPP) + (iRect.top() * width * png::BPP)};
         if (dataIndex + 3 < std::ssize(_data)) {
-            u8 const idx {static_cast<u8>(helper::get_bits(*_curLineIt, 4 - i, 4))};
+            u8 const idx {static_cast<u8>(helper::extract_bits(*_curLineIt, 4 - i, 4))};
 
             auto const color {_plte->Entries.at(idx)};
             _data[dataIndex]     = color.R;

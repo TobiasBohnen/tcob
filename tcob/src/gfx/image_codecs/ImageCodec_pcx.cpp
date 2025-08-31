@@ -172,7 +172,7 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
                                 i32 const off {(x / 8) + ((y * bpl * 4) + (bpl * i))};
                                 assert(off < std::ssize(data));
                                 i32 const b {data[off]};
-                                u32 const l {helper::get_bits(b, 7 - (x % 8), 1)};
+                                u32 const l {helper::extract_bits(b, 7 - (x % 8), 1)};
                                 c1 += l << i;
                             }
 
@@ -208,7 +208,7 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
             for (i32 i {0}; i < std::ssize(data); ++i) {
                 u8 b {data[i]};
                 for (i32 j {0}; j < 8; ++j) {
-                    u8 col {helper::get_bits(b, 7 - j, 1) == 0 ? u8 {0} : u8 {255}};
+                    u8 col {helper::extract_bits(b, 7 - j, 1) == 0 ? u8 {0} : u8 {255}};
                     imgData[index++] = col;
                     imgData[index++] = col;
                     imgData[index++] = col;
