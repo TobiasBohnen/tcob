@@ -185,11 +185,11 @@ auto constexpr color::to_hsl() const -> hsx
         s = l > 0.5f ? d / (2.0f - max_val - min_val) : d / (max_val + min_val);
 
         if (max_val == r) {
-            h = (g - b) / d + (g < b ? 6.0f : 0.0f);
+            h = ((g - b) / d) + (g < b ? 6.0f : 0.0f);
         } else if (max_val == g) {
-            h = (b - r) / d + 2.0f;
+            h = ((b - r) / d) + 2.0f;
         } else {
-            h = (r - g) / d + 4.0f;
+            h = ((r - g) / d) + 4.0f;
         }
 
         h /= 6.0f;
@@ -217,11 +217,11 @@ auto constexpr color::to_hsv() const -> hsx
         h = 0; // achromatic
     } else {
         if (max_val == r) {
-            h = (g - b) / d + (g < b ? 6.0f : 0.0f);
+            h = ((g - b) / d) + (g < b ? 6.0f : 0.0f);
         } else if (max_val == g) {
-            h = (b - r) / d + 2.0f;
+            h = ((b - r) / d) + 2.0f;
         } else {
-            h = (r - g) / d + 4.0f;
+            h = ((r - g) / d) + 4.0f;
         }
 
         h /= 6.0f;
