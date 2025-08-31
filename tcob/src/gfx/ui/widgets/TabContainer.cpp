@@ -28,8 +28,8 @@ void tab_container::style::Transition(style& target, style const& from, style co
 {
     widget_style::Transition(target, from, to, step);
 
-    target.HeaderSize      = length::Lerp(from.HeaderSize, to.HeaderSize, step);
-    target.HeaderLineCount = static_cast<i32>(from.HeaderLineCount + ((to.HeaderLineCount - from.HeaderLineCount) * step));
+    target.TabBarSize = length::Lerp(from.TabBarSize, to.TabBarSize, step);
+    target.TabBarRows = static_cast<i32>(from.TabBarRows + ((to.TabBarRows - from.TabBarRows) * step));
 }
 
 tab_container::tab_container(init const& wi)
@@ -136,40 +136,40 @@ void tab_container::on_draw(widget_painter& painter)
     _tabRectCache.clear();
 
     rect_f tabHeaderRect {rect};
-    switch (_style.HeaderPosition) {
+    switch (_style.TabBarPosition) {
     case position::Top:
-        tabHeaderRect.Size.Height = _style.HeaderSize.calc(tabHeaderRect.height());
+        tabHeaderRect.Size.Height = _style.TabBarSize.calc(tabHeaderRect.height());
         break;
     case position::Bottom:
-        tabHeaderRect.Size.Height = _style.HeaderSize.calc(tabHeaderRect.height());
-        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * static_cast<f32>(_style.HeaderLineCount));
+        tabHeaderRect.Size.Height = _style.TabBarSize.calc(tabHeaderRect.height());
+        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * static_cast<f32>(_style.TabBarRows));
         break;
     case position::Left:
-        tabHeaderRect.Size.Width = _style.HeaderSize.calc(tabHeaderRect.width());
+        tabHeaderRect.Size.Width = _style.TabBarSize.calc(tabHeaderRect.width());
         break;
     case position::Right:
-        tabHeaderRect.Size.Width = _style.HeaderSize.calc(tabHeaderRect.width());
-        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * static_cast<f32>(_style.HeaderLineCount));
+        tabHeaderRect.Size.Width = _style.TabBarSize.calc(tabHeaderRect.width());
+        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * static_cast<f32>(_style.TabBarRows));
         break;
 
     case position::None: return;
     }
 
-    isize const      columns {(std::ssize(_tabs) + _style.HeaderLineCount - 1) / _style.HeaderLineCount};
+    isize const      columns {(std::ssize(_tabs) + _style.TabBarRows - 1) / _style.TabBarRows};
     std::vector<f32> lineOffsets;
-    lineOffsets.resize(_style.HeaderLineCount);
+    lineOffsets.resize(_style.TabBarRows);
 
     auto const getNextTabRect {[&](isize index, item const& item, item_style const& itemStyle) {
         rect_f      retValue {};
         isize const line {index / columns};
 
-        switch (_style.HeaderPosition) {
+        switch (_style.TabBarPosition) {
         case position::Top:
         case position::Bottom: {
             f32 const itemHeight {tabHeaderRect.height()};
             f32       itemWidth {0};
 
-            switch (_style.HeaderMode) {
+            switch (_style.TabBarMode) {
             case tab_container::header_mode::Fill: {
                 itemWidth = tabHeaderRect.width() / columns;
             } break;
@@ -190,7 +190,7 @@ void tab_container::on_draw(widget_painter& painter)
             f32       itemHeight {0};
             f32 const itemWidth {tabHeaderRect.width()};
 
-            switch (_style.HeaderMode) {
+            switch (_style.TabBarMode) {
             case tab_container::header_mode::Fill: {
                 itemHeight = tabHeaderRect.height() / columns;
             } break;
@@ -287,18 +287,18 @@ void tab_container::offset_content(rect_f& bounds, bool isHitTest) const
 
 void tab_container::offset_tab_content(rect_f& bounds) const
 {
-    switch (_style.HeaderPosition) {
+    switch (_style.TabBarPosition) {
     case position::Top:
     case position::Bottom: {
-        f32 const size {_style.HeaderSize.calc(bounds.height()) * _style.HeaderLineCount};
+        f32 const size {_style.TabBarSize.calc(bounds.height()) * _style.TabBarRows};
         bounds.Size.Height -= size;
-        if (_style.HeaderPosition == position::Top) { bounds.Position.Y += size; }
+        if (_style.TabBarPosition == position::Top) { bounds.Position.Y += size; }
     } break;
     case position::Left:
     case position::Right: {
-        f32 const size {_style.HeaderSize.calc(bounds.width()) * _style.HeaderLineCount};
+        f32 const size {_style.TabBarSize.calc(bounds.width()) * _style.TabBarRows};
         bounds.Size.Width -= size;
-        if (_style.HeaderPosition == position::Left) { bounds.Position.X += size; }
+        if (_style.TabBarPosition == position::Left) { bounds.Position.X += size; }
     } break;
     case position::None: break;
     }

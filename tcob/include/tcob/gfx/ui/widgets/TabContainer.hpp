@@ -33,10 +33,11 @@ public:
     class TCOB_API style : public widget_style {
     public:
         utf8_string TabItemClass {"tab_items"};
-        position    HeaderPosition {position::Top};
-        length      HeaderSize;
-        header_mode HeaderMode {header_mode::Fill};
-        i32         HeaderLineCount {1};
+
+        position    TabBarPosition {position::Top};
+        length      TabBarSize;
+        header_mode TabBarMode {header_mode::Fill};
+        i32         TabBarRows {1};
 
         void static Transition(style& target, style const& from, style const& to, f64 step);
     };
