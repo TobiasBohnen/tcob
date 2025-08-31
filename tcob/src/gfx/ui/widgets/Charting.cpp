@@ -10,6 +10,7 @@
 
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
@@ -25,10 +26,10 @@ void chart::style::Transition(style& target, style const& from, style const& to,
 {
     widget_style::Transition(target, from, to, step);
 
-    target.HorizontalGridLines = static_cast<i32>(from.HorizontalGridLines + ((to.HorizontalGridLines - from.HorizontalGridLines) * step));
-    target.VerticalGridLines   = static_cast<i32>(from.VerticalGridLines + ((to.VerticalGridLines - from.VerticalGridLines) * step));
+    target.HorizontalGridLines = helper::lerp(from.HorizontalGridLines, to.HorizontalGridLines, step);
+    target.VerticalGridLines   = helper::lerp(from.VerticalGridLines, to.VerticalGridLines, step);
 
-    target.GridLineWidth = static_cast<f32>(from.GridLineWidth + ((to.GridLineWidth - from.GridLineWidth) * step));
+    target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
     target.GridColor     = color::Lerp(from.GridColor, to.GridColor, step);
 
     target.Colors.clear();

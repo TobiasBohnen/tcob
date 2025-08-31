@@ -85,10 +85,10 @@ inline auto point<T>::as_normalized() const -> point<f64>
 }
 
 template <Arithmetic T>
-auto constexpr point<T>::Lerp(point<T> const& left, point<T> const& right, f64 step) -> point<T>
+auto constexpr point<T>::Lerp(point<T> const& from, point<T> const& to, f64 step) -> point<T>
 {
-    T const x {static_cast<T>(left.X + ((right.X - left.X) * step))};
-    T const y {static_cast<T>(left.Y + ((right.Y - left.Y) * step))};
+    T const x {helper::lerp(from.X, to.X, step)};
+    T const y {helper::lerp(from.Y, to.Y, step)};
     return {x, y};
 }
 

@@ -11,6 +11,7 @@
 #include <span>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -28,7 +29,7 @@ void grid_view::style::Transition(style& target, style const& from, style const&
 {
     vscroll_widget::style::Transition(target, from, to, step);
 
-    target.MaxVisibleRows = static_cast<f32>(from.MaxVisibleRows + ((to.MaxVisibleRows - from.MaxVisibleRows) * step));
+    target.MaxVisibleRows = helper::lerp(from.MaxVisibleRows, to.MaxVisibleRows, step);
 }
 
 grid_view::grid_view(init const& wi)

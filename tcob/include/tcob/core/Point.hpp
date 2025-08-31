@@ -44,7 +44,7 @@ public:
 
     auto constexpr equals(point<T> const& other, T tol) const -> bool;
 
-    auto static constexpr Lerp(point<T> const& left, point<T> const& right, f64 step) -> point<T>;
+    auto static constexpr Lerp(point<T> const& from, point<T> const& to, f64 step) -> point<T>;
     auto static constexpr FromDirection(degree<f64> angle) -> point<T>;
 
     T X {0};

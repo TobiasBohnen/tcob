@@ -52,10 +52,10 @@ auto constexpr size<T>::to_array [[nodiscard]] () const -> std::array<T, 2>
 }
 
 template <Arithmetic T>
-auto constexpr size<T>::Lerp(size<T> const& left, size<T> const& right, f64 step) -> size<T>
+auto constexpr size<T>::Lerp(size<T> const& from, size<T> const& to, f64 step) -> size<T>
 {
-    T const w {static_cast<T>(left.Width + ((right.Width - left.Width) * step))};
-    T const h {static_cast<T>(left.Height + ((right.Height - left.Height) * step))};
+    T const w {helper::lerp(from.Width, to.Width, step)};
+    T const h {helper::lerp(from.Height, to.Height, step)};
     return {w, h};
 }
 
@@ -71,7 +71,7 @@ auto constexpr size<T>::equals(size<T> const& other, f32 tol) const -> bool
 {
     f32 const dw {static_cast<f32>(other.Width) - Width};
     f32 const dh {static_cast<f32>(other.Height) - Height};
-    return dw * dw + dh * dh <= tol * tol;
+    return (dw * dw) + (dh * dh) <= tol * tol;
 }
 
 template <Arithmetic T>

@@ -145,6 +145,7 @@ void form_base::push_modal(modal_dialog* dlg)
 
     _modals.push_back(dlg);
     focus_widget(dlg);
+    _topWidget = nullptr; // TODO: mouse left
 }
 
 void form_base::pop_modal(modal_dialog* dlg)
@@ -153,6 +154,7 @@ void form_base::pop_modal(modal_dialog* dlg)
     if (it != _modals.end()) {
         _modals.erase(it);
         focus_widget(active_modal());
+        _topWidget = nullptr; // TODO: mouse left
     }
 }
 

@@ -70,7 +70,7 @@ public:
 
     auto static constexpr FromLTRB(T left, T top, T right, T bottom) -> rect<T>;
 
-    auto static constexpr Lerp(rect const& left, rect const& right, f64 step) -> rect;
+    auto static constexpr Lerp(rect const& from, rect const& to, f64 step) -> rect;
 
     point<T> Position;
     size<T>  Size;

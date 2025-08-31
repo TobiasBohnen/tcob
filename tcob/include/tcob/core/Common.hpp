@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <type_traits>
 
@@ -41,6 +42,12 @@ namespace helper {
         }
 
         return false;
+    }
+
+    template <Arithmetic A>
+    auto lerp(A from, A to, f64 step) -> A
+    {
+        return static_cast<A>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
     }
 }
 

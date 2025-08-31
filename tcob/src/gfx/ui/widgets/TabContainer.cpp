@@ -11,6 +11,7 @@
 #include <span>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -29,7 +30,7 @@ void tab_container::style::Transition(style& target, style const& from, style co
     widget_style::Transition(target, from, to, step);
 
     target.TabBarSize = length::Lerp(from.TabBarSize, to.TabBarSize, step);
-    target.TabBarRows = static_cast<i32>(from.TabBarRows + ((to.TabBarRows - from.TabBarRows) * step));
+    target.TabBarRows = helper::lerp(from.TabBarRows, to.TabBarRows, step);
 }
 
 tab_container::tab_container(init const& wi)

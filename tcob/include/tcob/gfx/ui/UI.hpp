@@ -174,7 +174,7 @@ public:
     auto operator==(length const& other) const -> bool = default;
     auto operator-() const -> length;
 
-    auto static Lerp(length const& left, length const& right, f64 step) -> length;
+    auto static Lerp(length const& from, length const& to, f64 step) -> length;
 
     auto static constexpr Members()
     {
@@ -202,7 +202,7 @@ public:
 
     auto operator==(thickness const& other) const -> bool = default;
 
-    auto static Lerp(thickness const& left, thickness const& right, f64 step) -> thickness;
+    auto static Lerp(thickness const& from, thickness const& to, f64 step) -> thickness;
 
     auto static constexpr Members()
     {
@@ -226,7 +226,7 @@ public:
 
     auto operator==(dimensions const& other) const -> bool = default;
 
-    auto static Lerp(dimensions const& left, dimensions const& right, f64 step) -> dimensions;
+    auto static Lerp(dimensions const& from, dimensions const& to, f64 step) -> dimensions;
 
     auto static constexpr Members()
     {

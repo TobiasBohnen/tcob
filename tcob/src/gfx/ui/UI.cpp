@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -162,30 +163,30 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////
 
-auto length::Lerp(length const& left, length const& right, f64 step) -> length
+auto length::Lerp(length const& from, length const& to, f64 step) -> length
 {
-    assert(left.Type == right.Type);
+    assert(from.Type == to.Type);
     length retValue;
-    retValue.Type  = left.Type;
-    retValue.Value = static_cast<f32>(left.Value + ((right.Value - left.Value) * step));
+    retValue.Type  = from.Type;
+    retValue.Value = helper::lerp(from.Value, to.Value, step);
     return retValue;
 }
 
-auto thickness::Lerp(thickness const& left, thickness const& right, f64 step) -> thickness
+auto thickness::Lerp(thickness const& from, thickness const& to, f64 step) -> thickness
 {
     thickness retValue;
-    retValue.Bottom = length::Lerp(left.Bottom, right.Bottom, step);
-    retValue.Top    = length::Lerp(left.Top, right.Top, step);
-    retValue.Left   = length::Lerp(left.Left, right.Left, step);
-    retValue.Right  = length::Lerp(left.Right, right.Right, step);
+    retValue.Bottom = length::Lerp(from.Bottom, to.Bottom, step);
+    retValue.Top    = length::Lerp(from.Top, to.Top, step);
+    retValue.Left   = length::Lerp(from.Left, to.Left, step);
+    retValue.Right  = length::Lerp(from.Right, to.Right, step);
     return retValue;
 }
 
-auto dimensions::Lerp(dimensions const& left, dimensions const& right, f64 step) -> dimensions
+auto dimensions::Lerp(dimensions const& from, dimensions const& to, f64 step) -> dimensions
 {
     dimensions retValue;
-    retValue.Width  = length::Lerp(left.Width, right.Width, step);
-    retValue.Height = length::Lerp(left.Height, right.Height, step);
+    retValue.Width  = length::Lerp(from.Width, to.Width, step);
+    retValue.Height = length::Lerp(from.Height, to.Height, step);
     return retValue;
 }
 

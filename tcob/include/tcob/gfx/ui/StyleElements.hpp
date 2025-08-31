@@ -107,7 +107,7 @@ public:
     length       Width {3, length::type::Absolute};
     milliseconds BlinkRate {500};
 
-    void lerp(caret_element const& left, caret_element const& right, f64 step);
+    void lerp(caret_element const& from, caret_element const& to, f64 step);
 
     auto operator==(caret_element const& other) const -> bool = default;
 };
@@ -120,7 +120,7 @@ public:
     length OffsetX {};
     length OffsetY {};
 
-    void lerp(shadow_element const& left, shadow_element const& right, f64 step);
+    void lerp(shadow_element const& from, shadow_element const& to, f64 step);
 
     auto operator==(shadow_element const& other) const -> bool = default;
 };
@@ -143,7 +143,7 @@ public:
     color     Color {colors::Transparent};
     length    Size {};
 
-    void lerp(deco_element const& left, deco_element const& right, f64 step);
+    void lerp(deco_element const& from, deco_element const& to, f64 step);
 
     auto operator==(deco_element const& other) const -> bool = default;
 };
@@ -165,7 +165,7 @@ public:
 
     auto calc_font_size(f32 height) const -> u32;
 
-    void lerp(text_element const& left, text_element const& right, f64 step);
+    void lerp(text_element const& from, text_element const& to, f64 step);
 
     auto operator==(text_element const& other) const -> bool = default;
 };
@@ -183,7 +183,7 @@ public:
 
     auto thickness() const -> thickness;
 
-    void lerp(border_element const& left, border_element const& right, f64 step);
+    void lerp(border_element const& from, border_element const& to, f64 step);
 
     auto operator==(border_element const& other) const -> bool = default;
 };
@@ -205,7 +205,7 @@ public:
 
     auto calc(rect_f const& rect, context const& ctx) const -> rect_f;
 
-    void lerp(thumb_element const& left, thumb_element const& right, f64 step);
+    void lerp(thumb_element const& from, thumb_element const& to, f64 step);
 
     auto operator==(thumb_element const& other) const -> bool = default;
 };
@@ -218,7 +218,7 @@ public:
     paint     Foreground {colors::White};
     length    Size {};
 
-    void lerp(tick_element const& left, tick_element const& right, f64 step);
+    void lerp(tick_element const& from, tick_element const& to, f64 step);
 
     auto operator==(tick_element const& other) const -> bool = default;
 };
@@ -255,7 +255,7 @@ public:
 
     auto calc(rect_f const& rect, orientation orien, position align) const -> rect_f;
 
-    void lerp(bar_element const& left, bar_element const& right, f64 step);
+    void lerp(bar_element const& from, bar_element const& to, f64 step);
 
     auto operator==(bar_element const& other) const -> bool = default;
 };
@@ -267,7 +267,7 @@ public:
     bar_element Bar;
     utf8_string ThumbClass {"scrollbar_thumb"};
 
-    void lerp(scrollbar_element const& left, scrollbar_element const& right, f64 step);
+    void lerp(scrollbar_element const& from, scrollbar_element const& to, f64 step);
 
     auto operator==(scrollbar_element const& other) const -> bool = default;
 };
@@ -286,7 +286,7 @@ public:
 
     auto calc(rect_f const& rect) const -> rect_f;
 
-    void lerp(nav_arrow_element const& left, nav_arrow_element const& right, f64 step);
+    void lerp(nav_arrow_element const& from, nav_arrow_element const& to, f64 step);
 
     auto operator==(nav_arrow_element const& other) const -> bool = default;
 };
@@ -301,7 +301,7 @@ public:
     thickness       Padding {};
     icon_text_order IconTextOrder {icon_text_order::IconBeforeText};
 
-    void lerp(item_element const& left, item_element const& right, f64 step);
+    void lerp(item_element const& from, item_element const& to, f64 step);
 
     auto operator==(item_element const& other) const -> bool = default;
 };

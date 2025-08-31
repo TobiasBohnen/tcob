@@ -170,10 +170,10 @@ auto constexpr rect<T>::as_padded_by(size<T> const& size) const -> rect
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::Lerp(rect const& left, rect const& right, f64 step) -> rect
+auto constexpr rect<T>::Lerp(rect const& from, rect const& to, f64 step) -> rect
 {
-    auto const pos {point<T>::Lerp(left.Position, right.Position, step)};
-    auto const siz {size<T>::Lerp(left.Size, right.Size, step)};
+    auto const pos {point<T>::Lerp(from.Position, to.Position, step)};
+    auto const siz {size<T>::Lerp(from.Size, to.Size, step)};
     return {pos, siz};
 }
 

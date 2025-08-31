@@ -9,6 +9,8 @@
 #include <cmath>
 #include <compare>
 
+#include "tcob/core/Common.hpp"
+
 namespace tcob {
 
 template <FloatingPoint ValueType, f64 OneTurn>
@@ -131,7 +133,7 @@ auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angl
 {
     ValueType const leftVal {static_cast<ValueType>(left.Value)};
     ValueType const rightVal {static_cast<ValueType>(right.Value)};
-    return angle_unit<ValueType, OneTurn> {leftVal + (rightVal - leftVal) * static_cast<ValueType>(step)};
+    return angle_unit<ValueType, OneTurn> {helper::lerp(leftVal, rightVal, step)};
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>

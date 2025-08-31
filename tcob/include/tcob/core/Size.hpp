@@ -41,7 +41,7 @@ public:
 
     auto constexpr as_fitted(size<T> const& s) const -> size<T>;
 
-    auto static constexpr Lerp(size<T> const& left, size<T> const& right, f64 step) -> size<T>;
+    auto static constexpr Lerp(size<T> const& from, size<T> const& to, f64 step) -> size<T>;
 
     T Width {0};
     T Height {0};

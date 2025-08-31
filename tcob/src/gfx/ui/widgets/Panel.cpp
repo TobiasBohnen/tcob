@@ -331,8 +331,8 @@ void modal_dialog::open()
     if (!_open) {
         _open = true;
         on_open();
-        queue_redraw();
     }
+    queue_redraw();
 }
 
 void modal_dialog::close()

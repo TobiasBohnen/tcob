@@ -114,17 +114,17 @@ auto color_gradient::get_color_at(u32 key) const -> color
     return color::Lerp(lower->second, upper->second, t);
 }
 
-auto color_gradient::Lerp(color_gradient const& left, color_gradient const& right, f64 step) -> color_gradient
+auto color_gradient::Lerp(color_gradient const& from, color_gradient const& to, f64 step) -> color_gradient
 {
     color_gradient retValue;
 
     std::set<u32> allKeys;
-    for (auto const& [k, _] : left._colorStops) { allKeys.insert(k); }
-    for (auto const& [k, _] : right._colorStops) { allKeys.insert(k); }
+    for (auto const& [k, _] : from._colorStops) { allKeys.insert(k); }
+    for (auto const& [k, _] : to._colorStops) { allKeys.insert(k); }
 
     for (auto k : allKeys) {
-        color const leftColor {left._colorStops.contains(k) ? left._colorStops.at(k) : left.get_color_at(k)};
-        color const rightColor {right._colorStops.contains(k) ? right._colorStops.at(k) : right.get_color_at(k)};
+        color const leftColor {from._colorStops.contains(k) ? from._colorStops.at(k) : from.get_color_at(k)};
+        color const rightColor {to._colorStops.contains(k) ? to._colorStops.at(k) : to.get_color_at(k)};
 
         retValue._colorStops[k] = color::Lerp(leftColor, rightColor, step);
     }

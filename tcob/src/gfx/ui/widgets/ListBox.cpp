@@ -10,6 +10,7 @@
 #include <iterator>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -34,7 +35,7 @@ void list_box::style::Transition(style& target, style const& from, style const& 
 {
     vscroll_widget::style::Transition(target, from, to, step);
 
-    target.MaxVisibleItems = static_cast<f32>(from.MaxVisibleItems + ((to.MaxVisibleItems - from.MaxVisibleItems) * step));
+    target.MaxVisibleItems = helper::lerp(from.MaxVisibleItems, to.MaxVisibleItems, step);
 }
 
 list_box::list_box(init const& wi)

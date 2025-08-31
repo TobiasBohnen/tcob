@@ -27,7 +27,7 @@ void image_box::style::Transition(style& target, style const& from, style const&
 {
     widget_style::Transition(target, from, to, step);
 
-    target.DragAlpha = static_cast<f32>(from.DragAlpha + ((to.DragAlpha - from.DragAlpha) * step));
+    target.DragAlpha = helper::lerp(from.DragAlpha, to.DragAlpha, step);
 }
 
 image_box::image_box(init const& wi)

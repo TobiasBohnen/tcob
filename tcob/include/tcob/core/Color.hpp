@@ -46,7 +46,7 @@ public:
     auto constexpr to_hsl() const -> hsx;
     auto constexpr to_hsv() const -> hsx;
 
-    auto static constexpr Lerp(color left, color right, f64 step) -> color;
+    auto static constexpr Lerp(color from, color to, f64 step) -> color;
 
     auto static FromString(string_view name) -> color;
 

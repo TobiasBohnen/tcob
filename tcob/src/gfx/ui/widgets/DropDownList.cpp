@@ -32,7 +32,7 @@ void drop_down_list::style::Transition(style& target, style const& from, style c
     target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
     target.VScrollBar.lerp(from.VScrollBar, to.VScrollBar, step);
 
-    target.MaxVisibleItems = static_cast<f32>(from.MaxVisibleItems + ((to.MaxVisibleItems - from.MaxVisibleItems) * step));
+    target.MaxVisibleItems = helper::lerp(from.MaxVisibleItems, to.MaxVisibleItems, step);
 }
 
 drop_down_list::drop_down_list(init const& wi)

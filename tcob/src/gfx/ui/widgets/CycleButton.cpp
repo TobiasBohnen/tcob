@@ -10,6 +10,7 @@
 #include <tuple>
 #include <vector>
 
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -27,7 +28,7 @@ void cycle_button::style::Transition(style& target, style const& from, style con
 
     target.ItemHeight = length::Lerp(from.ItemHeight, to.ItemHeight, step);
     target.Bar.lerp(from.Bar, to.Bar, step);
-    target.GapRatio = static_cast<f32>(from.GapRatio + ((to.GapRatio - from.GapRatio) * step));
+    target.GapRatio = helper::lerp(from.GapRatio, to.GapRatio, step);
 }
 
 cycle_button::cycle_button(init const& wi)
