@@ -142,31 +142,33 @@ auto widget::current_style() const -> widget_style const*
 
 auto widget::hit_test_bounds() const -> rect_f
 {
-    rect_f retValue {global_position(), Bounds->Size};
+    rect_f retValue {local_to_screen(*this, Bounds->Position), Bounds->Size};
     offset_content(retValue, true);
 
-    if (_parent) { retValue = retValue.as_intersection_with(_parent->global_content_bounds()); }
+    if (_parent) {
+        rect_f const cb {_parent->content_bounds()};
+        rect_f const bounds {local_to_screen(*_parent, cb.Position), cb.Size};
+        retValue = retValue.as_intersection_with(bounds);
+    }
     retValue = retValue.as_intersection_with(_form->Bounds);
 
     return retValue;
 }
 
-auto widget::global_position() const -> point_f
+auto widget::form_offset() const -> point_f
 {
-    auto retValue {Bounds->Position};
+    point_f retValue {point_f::Zero};
     if (_parent) {
-        retValue += _parent->global_content_bounds().Position - _parent->scroll_offset();
-    } else {
-        retValue += _form->Bounds->Position;
+        retValue += _parent->content_bounds().Position
+            + _parent->form_offset()
+            - _parent->scroll_offset();
     }
     return retValue;
 }
 
-auto widget::global_content_bounds() const -> rect_f
+auto widget::scroll_offset() const -> point_f
 {
-    rect_f retValue {global_position(), Bounds->Size};
-    offset_content(retValue, false);
-    return retValue;
+    return point_f::Zero;
 }
 
 auto widget::content_bounds() const -> rect_f
@@ -185,11 +187,6 @@ void widget::offset_content(rect_f& bounds, bool isHitTest) const
         bounds -= _currentStyle->Padding;
         bounds -= _currentStyle->Border.thickness();
     }
-}
-
-auto widget::scroll_offset() const -> point_f
-{
-    return point_f::Zero;
 }
 
 auto widget::can_tab_stop(i32 high, i32 low) const -> bool

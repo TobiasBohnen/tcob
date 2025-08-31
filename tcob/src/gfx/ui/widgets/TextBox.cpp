@@ -258,7 +258,7 @@ void text_box::on_text_input(input::keyboard::text_input_event const& ev)
 
 void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    isize const target {calc_caret_pos(global_to_content(*this, ev.Position))};
+    isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
     if (_caretPos != target) {
         if (target < _dragCaretPos) {
             select_text(_dragCaretPos - 1, target);
@@ -275,7 +275,7 @@ void text_box::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void text_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    isize const target {calc_caret_pos(global_to_content(*this, ev.Position))};
+    isize const target {calc_caret_pos(screen_to_content(*this, ev.Position))};
     if (_caretPos != target) {
         deselect_text();
         set_caret_pos(target);

@@ -63,6 +63,7 @@ public:
     auto constexpr find_edge(degree_f angle) const -> point<T>;
 
     auto constexpr as_centered_at(point<T> const& center) const -> rect;
+    auto constexpr as_moved_by(point<T> const& point) const -> rect;
     auto constexpr as_intersection_with(rect const& other) const -> rect;
     auto constexpr as_union_with(rect const& other) const -> rect;
     auto constexpr as_padded_by(size<T> const& size) const -> rect;

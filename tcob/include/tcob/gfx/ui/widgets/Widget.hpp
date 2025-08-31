@@ -83,11 +83,11 @@ public:
 
     auto name() const -> string const&;
 
-    auto global_position() const -> point_f;
-    auto global_content_bounds() const -> rect_f;
+    auto form_offset() const -> point_f;
+    auto virtual scroll_offset() const -> point_f;
+
     auto content_bounds() const -> rect_f;
     auto hit_test_bounds() const -> rect_f;
-    auto virtual scroll_offset() const -> point_f;
 
     void update(milliseconds deltaTime) override;
 

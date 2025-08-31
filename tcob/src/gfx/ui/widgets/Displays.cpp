@@ -399,7 +399,7 @@ void color_picker::on_update(milliseconds /* deltaTime */)
 
 auto color_picker::hover_color(point_i mp) -> bool
 {
-    auto const pos {global_to_local(*this, mp)};
+    auto const pos {screen_to_local(*this, mp)};
     if (Bounds->contains(pos)) {
         f32 const s {(pos.X - Bounds->left()) / (Bounds->width() - _style.HueSelectWidth.calc(Bounds->width()))};
         f32 const v {(pos.Y - Bounds->top()) / Bounds->height()};

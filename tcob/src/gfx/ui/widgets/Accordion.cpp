@@ -16,7 +16,6 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Transform.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -196,8 +195,7 @@ void accordion::on_draw_children(widget_painter& painter)
     // prepare_style(_style);
 
     // scissor
-    rect_f bounds {global_content_bounds()};
-    bounds.Position -= form().Bounds->Position;
+    rect_f bounds {content_bounds().as_moved_by(form_offset())};
     bounds.Size.Height *= val;
     painter.push_scissor(bounds);
 
@@ -222,7 +220,7 @@ void accordion::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     HoveredSectionIndex = INVALID_INDEX;
 
-    auto const mp {global_to_local(*this, ev.Position)};
+    auto const mp {screen_to_local(*this, ev.Position)};
     for (i32 i {0}; i < std::ssize(_sectionRectCache); ++i) {
         if (!_sectionRectCache[i].contains(mp)) { continue; }
 

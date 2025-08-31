@@ -189,18 +189,33 @@ auto dimensions::Lerp(dimensions const& left, dimensions const& right, f64 step)
     return retValue;
 }
 
-auto global_to_content(widget const& widget, point_i p) -> point_f
+auto screen_to_content(widget const& widget, point_i p) -> point_f
 {
-    return point_f {p} - widget.global_content_bounds().Position;
+    return point_f {p} - (widget.content_bounds().Position + widget.form_offset() + widget.form().Bounds->Position);
 }
 
-auto global_to_local(widget const& widget, point_i p) -> point_f
+auto screen_to_local(widget const& widget, point_i p) -> point_f
 {
+    point_f delta {};
     if (auto* parent {widget.parent()}) {
-        return point_f {p} - (parent->global_content_bounds().Position - parent->scroll_offset());
+        delta = parent->content_bounds().Position + parent->form_offset() + parent->form().Bounds->Position - parent->scroll_offset();
+    } else {
+        delta = widget.form().Bounds->Position;
     }
 
-    return point_f {p} - point_f {widget.form().Bounds->Position};
+    return point_f {p} - delta;
+}
+
+auto local_to_screen(widget const& widget, point_f p) -> point_f
+{
+    point_f delta {};
+    if (auto* parent {widget.parent()}) {
+        delta = parent->content_bounds().Position + parent->form_offset() + parent->form().Bounds->Position - parent->scroll_offset();
+    } else {
+        delta = widget.form().Bounds->Position;
+    }
+
+    return p + delta;
 }
 
 } // namespace ui

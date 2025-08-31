@@ -103,12 +103,11 @@ void image_box::on_draw(widget_painter& painter)
     canvas.draw_image(tex.ptr(), Image->TextureRegion, targetRect);
 
     if (_dragPosition) {
-        point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
-        painter.add_overlay([this, globalOffset, targetRect](widget_painter& painter) {
+        painter.add_overlay([this, targetRect](widget_painter& painter) -> void {
             auto& canvas {painter.canvas()};
 
             gfx::transform xform;
-            xform.translate(globalOffset);
+            xform.translate(form_offset());
             painter.begin(Alpha, xform);
 
             canvas.set_global_alpha(_style.DragAlpha);
@@ -126,7 +125,7 @@ void image_box::on_update(milliseconds deltaTime)
 void image_box::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (Draggable) {
-        _dragPosition = global_to_local(*this, ev.Position);
+        _dragPosition = screen_to_local(*this, ev.Position);
         queue_redraw();
         ev.Handled = true;
     }
@@ -145,7 +144,7 @@ void image_box::on_mouse_button_up(input::mouse::button_event const& ev)
 void image_box::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (Draggable && ev.Button == controls().PrimaryMouseButton) {
-        _dragStart = global_to_local(*this, ev.Position);
+        _dragStart = screen_to_local(*this, ev.Position);
         ev.Handled = true;
     }
 }

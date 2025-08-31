@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "tcob/core/Point.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
@@ -93,21 +92,6 @@ void widget_container::set_redraw(bool val)
     for (auto const& w : widgets()) {
         w->set_redraw(val);
     }
-}
-
-auto widget_container::paint_offset() const -> point_f
-{
-    point_f retValue {point_f::Zero};
-
-    if (auto const* wparent {parent()}) {
-        retValue += wparent->global_content_bounds().Position;
-        retValue -= wparent->scroll_offset();
-        retValue -= form().Bounds->Position;
-    }
-
-    retValue -= scroll_offset();
-
-    return retValue;
 }
 
 } // namespace ui

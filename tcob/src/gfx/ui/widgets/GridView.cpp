@@ -197,7 +197,7 @@ void grid_view::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     vscroll_widget::on_mouse_hover(ev);
 
-    auto const mp {global_to_local(*this, ev.Position)};
+    auto const mp {screen_to_local(*this, ev.Position)};
 
     for (auto const& kvp : _headerRectCache) {
         if (!kvp.second.contains(mp)) { continue; }

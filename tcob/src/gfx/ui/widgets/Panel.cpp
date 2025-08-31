@@ -141,7 +141,7 @@ void panel::on_draw_children(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     auto          xform {gfx::transform::Identity};
-    point_f const translate {rect.Position + paint_offset()};
+    point_f const translate {rect.Position + form_offset() - scroll_offset()};
     xform.translate(translate);
 
     for (auto const& w : widgets() | std::views::reverse) { // ZORDER
@@ -176,7 +176,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
     if (ev.Handled) { return; }
 
     if (can_move()) {
-        Bounds     = {global_to_local(*this, ev.Position) - _dragStart, Bounds->Size};
+        Bounds     = {screen_to_local(*this, ev.Position) - _dragStart, Bounds->Size};
         ev.Handled = true;
         return;
     }
@@ -184,7 +184,7 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 
 void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    _dragStart = global_to_local(*this, ev.Position) - Bounds->Position;
+    _dragStart = screen_to_local(*this, ev.Position) - Bounds->Position;
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
@@ -261,7 +261,10 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
     auto const& content {content_bounds()};
     for (auto const& w : widgets()) {
         auto const& bounds {*w->Bounds};
-        retValue = std::max(retValue, orien == orientation::Horizontal ? bounds.right() - content.width() : bounds.bottom() - content.height());
+        retValue = std::max(retValue,
+                            orien == orientation::Horizontal
+                                ? bounds.right() - content.width()
+                                : bounds.bottom() - content.height());
     }
     return retValue * 1.05f;
 }
@@ -269,7 +272,8 @@ auto panel::get_scroll_max_value(orientation orien) const -> f32
 auto panel::scroll_offset() const -> point_f
 {
     if (!ScrollEnabled) { return point_f::Zero; }
-    return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal), _vScrollbar.current_value() * get_scroll_max_value(orientation::Vertical)};
+    return {_hScrollbar.current_value() * get_scroll_max_value(orientation::Horizontal),
+            _vScrollbar.current_value() * get_scroll_max_value(orientation::Vertical)};
 }
 
 ////////////////////////////////////////////////////////////
@@ -298,7 +302,7 @@ void glass::on_draw_children(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     auto          xform {gfx::transform::Identity};
-    point_f const translate {rect.Position + paint_offset()};
+    point_f const translate {rect.Position + form_offset() - scroll_offset()};
     xform.translate(translate);
 
     for (auto const& w : this->widgets() | std::views::reverse) { // ZORDER

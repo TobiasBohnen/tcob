@@ -43,8 +43,6 @@ protected:
 
     void on_styles_changed() override;
     void set_redraw(bool val) override;
-
-    auto paint_offset() const -> point_f;
 };
 
 }

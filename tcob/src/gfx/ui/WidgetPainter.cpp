@@ -22,7 +22,6 @@
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/TextFormatter.hpp"
 #include "tcob/gfx/Transform.hpp"
-#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Paint.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -837,8 +836,7 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
 scissor_guard::scissor_guard(widget_painter& painter, widget* w)
     : _painter {painter}
 {
-    rect_f bounds {w->global_content_bounds()};
-    bounds.Position -= w->form().Bounds->Position;
+    rect_f const bounds {w->content_bounds().as_moved_by(w->form_offset())};
     painter.push_scissor(bounds);
 }
 

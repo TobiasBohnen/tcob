@@ -112,12 +112,10 @@ void drop_down_list::on_draw(widget_painter& painter)
     }
 
     if (_isExtended) {
-        f32 const     itemHeight {_style.ItemHeight.calc(rect.height())};
-        point_f const globalOffset {global_position() - Bounds->Position - form().Bounds->Position};
-
-        painter.add_overlay([this, globalOffset, itemHeight, isActive = fls.Active](widget_painter& painter) {
+        f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
+        painter.add_overlay([this, itemHeight, isActive = fls.Active](widget_painter& painter) -> void {
             gfx::transform xform;
-            xform.translate(globalOffset);
+            xform.translate(form_offset());
             painter.begin(Alpha, xform);
 
             rect_f listRect {Bounds};
@@ -207,7 +205,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
     }
 
     // over box
-    auto const mp {global_to_local(*this, ev.Position)};
+    auto const mp {screen_to_local(*this, ev.Position)};
     if (Bounds->contains(mp)) {
         bool const overChevron {_chevronRectCache.contains(mp)};
         if (_mouseOverChevron != overChevron) {

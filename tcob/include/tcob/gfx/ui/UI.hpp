@@ -364,8 +364,9 @@ struct drop_event {
 
 ////////////////////////////////////////////////////////////
 
-TCOB_API auto global_to_content(widget const& widget, point_i p) -> point_f;
-TCOB_API auto global_to_local(widget const& widget, point_i p) -> point_f;
+TCOB_API auto screen_to_content(widget const& widget, point_i p) -> point_f;
+TCOB_API auto screen_to_local(widget const& widget, point_i p) -> point_f;
+TCOB_API auto local_to_screen(widget const& widget, point_f p) -> point_f;
 
 ////////////////////////////////////////////////////////////
 

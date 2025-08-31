@@ -124,6 +124,12 @@ auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect
 }
 
 template <Arithmetic T>
+auto constexpr rect<T>::as_moved_by(point<T> const& point) const -> rect
+{
+    return {Position + point, Size};
+}
+
+template <Arithmetic T>
 auto constexpr rect<T>::as_intersection_with(rect const& other) const -> rect
 {
     T const x1 {std::max(Position.X, other.Position.X)};
@@ -282,7 +288,7 @@ auto constexpr rect<T>::equals(rect const& other, f32 tol) const -> bool
     f32 const dy {static_cast<f32>(other.Position.Y) - Position.Y};
     f32 const dw {static_cast<f32>(other.Size.Width) - Size.Width};
     f32 const dh {static_cast<f32>(other.Size.Height) - Size.Height};
-    return (dx * dx + dy * dy + dw * dw + dh * dh) <= (tol * tol);
+    return ((dx * dx) + (dy * dy) + (dw * dw) + (dh * dh)) <= (tol * tol);
 }
 
 template <Arithmetic T, Arithmetic R>
