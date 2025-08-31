@@ -68,6 +68,6 @@ public:
 
 using paint = std::variant<color, linear_gradient, radial_gradient, box_gradient, nine_patch>;
 
-TCOB_API void paint_lerp(paint& target, paint const& left, paint const& right, f64 step);
+TCOB_API void paint_lerp(paint& target, paint const& from, paint const& to, f64 step);
 
 }

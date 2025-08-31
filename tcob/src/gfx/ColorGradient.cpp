@@ -31,14 +31,14 @@ color_gradient::color_gradient()
 {
 }
 
-color_gradient::color_gradient(color startColor, color endColor, bool preMulAlpha)
+color_gradient::color_gradient(std::initializer_list<color const> colors, bool preMulAlpha)
     : _premulAlpha {preMulAlpha}
 {
-    if (startColor == endColor) {
-        _colorStops[0] = startColor;
-    } else {
-        _colorStops[0]        = startColor;
-        _colorStops[Size - 1] = endColor;
+    f32 const step {1.0f / (colors.size() - 1)};
+    f32       current {0.0f};
+    for (auto const& color : colors) {
+        _colorStops[current * (Size - 1)] = color;
+        current += step;
     }
 }
 

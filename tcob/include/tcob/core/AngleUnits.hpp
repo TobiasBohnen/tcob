@@ -47,7 +47,7 @@ public:
 
     auto constexpr equals(angle_unit const& other, value_type tol) const -> bool;
 
-    static auto constexpr Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>;
+    static auto constexpr Lerp(angle_unit const& from, angle_unit const& to, f64 step) -> angle_unit<ValueType, OneTurn>;
 
     ValueType Value {0};
 };

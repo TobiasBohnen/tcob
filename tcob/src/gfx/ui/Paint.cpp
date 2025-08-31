@@ -17,41 +17,49 @@ namespace tcob::ui {
 
 ////////////////////////////////////////////////////////////
 
-void paint_lerp(paint& target, paint const& left, paint const& right, f64 step)
+void paint_lerp(paint& target, paint const& from, paint const& to, f64 step)
 {
-    if (auto const* lc {std::get_if<color>(&left)}) {
-        if (auto const* rc {std::get_if<color>(&right)}) {
+    if (auto const* lc {std::get_if<color>(&from)}) {
+        if (auto const* rc {std::get_if<color>(&to)}) {
             target = color::Lerp(*lc, *rc, step);
+        } else {
+            target = to;
         }
         return;
     }
-    if (auto const* lc {std::get_if<linear_gradient>(&left)}) {
-        if (auto const* rc {std::get_if<linear_gradient>(&right)}) {
+    if (auto const* lc {std::get_if<linear_gradient>(&from)}) {
+        if (auto const* rc {std::get_if<linear_gradient>(&to)}) {
             linear_gradient grad;
             grad.Angle  = degree_f::Lerp(lc->Angle, rc->Angle, step);
             grad.Colors = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
             target      = grad;
+        } else {
+            target = to;
         }
         return;
     }
-    if (auto const* lc {std::get_if<radial_gradient>(&left)}) {
-        if (auto const* rc {std::get_if<radial_gradient>(&right)}) {
+    if (auto const* lc {std::get_if<radial_gradient>(&from)}) {
+        if (auto const* rc {std::get_if<radial_gradient>(&to)}) {
             radial_gradient grad;
             grad.InnerRadius = length::Lerp(lc->InnerRadius, rc->InnerRadius, step);
             grad.OuterRadius = length::Lerp(lc->OuterRadius, rc->OuterRadius, step);
             grad.Scale       = size_f::Lerp(lc->Scale, rc->Scale, step);
             grad.Colors      = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
             target           = grad;
+        } else {
+            target = to;
         }
         return;
     }
-    if (auto const* lc {std::get_if<box_gradient>(&left)}) {
-        if (auto const* rc {std::get_if<box_gradient>(&right)}) {
+    if (auto const* lc {std::get_if<box_gradient>(&from)}) {
+        if (auto const* rc {std::get_if<box_gradient>(&to)}) {
             box_gradient grad;
             grad.Radius  = length::Lerp(lc->Radius, rc->Radius, step);
             grad.Feather = length::Lerp(lc->Feather, rc->Feather, step);
             grad.Colors  = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
             target       = grad;
+        } else {
+            target = to;
         }
         return;
     }

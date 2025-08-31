@@ -41,9 +41,9 @@ public:
     static constexpr u32 Size {256};
 
     color_gradient();
-    color_gradient(color startColor, color endColor, bool preMulAlpha = true);
-    explicit color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha = true);
-    explicit color_gradient(std::span<color_stop const> colorStops, bool preMulAlpha = true);
+    color_gradient(std::initializer_list<color const> colors, bool preMulAlpha = true);
+    color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha = true);
+    color_gradient(std::span<color_stop const> colorStops, bool preMulAlpha = true);
 
     auto colors() const -> std::array<color, Size>;
 

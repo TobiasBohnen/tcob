@@ -129,10 +129,10 @@ auto constexpr angle_unit<ValueType, OneTurn>::equals(angle_unit const& other, v
 }
 
 template <FloatingPoint ValueType, f64 OneTurn>
-auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& left, angle_unit const& right, f64 step) -> angle_unit<ValueType, OneTurn>
+auto constexpr angle_unit<ValueType, OneTurn>::Lerp(angle_unit const& from, angle_unit const& to, f64 step) -> angle_unit<ValueType, OneTurn>
 {
-    ValueType const leftVal {static_cast<ValueType>(left.Value)};
-    ValueType const rightVal {static_cast<ValueType>(right.Value)};
+    ValueType const leftVal {static_cast<ValueType>(from.Value)};
+    ValueType const rightVal {static_cast<ValueType>(to.Value)};
     return angle_unit<ValueType, OneTurn> {helper::lerp(leftVal, rightVal, step)};
 }
 
