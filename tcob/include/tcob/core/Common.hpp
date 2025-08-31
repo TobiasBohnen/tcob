@@ -45,7 +45,7 @@ namespace helper {
     }
 
     template <Arithmetic A>
-    auto lerp(A from, A to, f64 step) -> A
+    auto constexpr lerp(A from, A to, f64 step) -> A
     {
         return static_cast<A>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
     }
