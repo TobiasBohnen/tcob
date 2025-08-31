@@ -110,9 +110,7 @@ void widget::draw(widget_painter& painter)
     if (!is_visible() || Bounds->width() <= 0 || Bounds->height() <= 0) { return; }
 
     painter.begin(Alpha);
-
     on_draw(painter);
-
     painter.end();
 }
 

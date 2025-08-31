@@ -278,11 +278,6 @@ void form_base::on_draw_to(gfx::render_target& target)
     if (auto* modal {active_modal()}) {
         if (modal->needs_redraw()) {
             _canvas.begin_frame(size, 1.0f, modalLayer);
-            _canvas.begin_path();
-            _canvas.rect({point_f::Zero, size_f {size}});
-            _canvas.set_fill_style({0, 0, 0, 128});
-            _canvas.fill();
-
             for (auto* m : _modals) {
                 m->set_redraw(true);
                 m->draw(*_painter);
@@ -502,53 +497,51 @@ void form_base::on_text_input(input::keyboard::text_input_event const& ev)
 
 void form_base::handle_tab(input::keyboard::event const& ev)
 {
+    auto static find_next_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
+        widget* retValue {nullptr};
+        i32     lowestHigherValue {std::numeric_limits<i32>::max()};
+        for (auto* widget : vec) {
+            if (widget->can_tab_stop(lowestHigherValue, currentTabIndex)) {
+                lowestHigherValue = widget->TabStop->Index;
+                retValue          = widget;
+            }
+        }
+        return retValue;
+    }};
+
+    auto static find_prev_tab_widget {[](std::vector<widget*> const& vec, i32 currentTabIndex) -> widget* {
+        widget* retValue {nullptr};
+        i32     highestLowerValue {std::numeric_limits<i32>::min()};
+        for (auto* widget : vec) {
+            if (widget->can_tab_stop(currentTabIndex, highestLowerValue)) {
+                highestLowerValue = widget->TabStop->Index;
+                retValue          = widget;
+            }
+        }
+        return retValue;
+    }};
+
     auto const vec {all_widgets()};
 
     ev.Handled = true;
 
     if (ev.KeyMods.is_down(Controls->TabMod)) {
         // shift tab
-        widget* nextWidget {find_prev_tab_widget(vec)};
+        widget* nextWidget {find_prev_tab_widget(vec, _currentTabIndex)};
         if (!nextWidget) {
             _currentTabIndex = std::numeric_limits<i32>::max();
-            nextWidget       = find_prev_tab_widget(vec);
+            nextWidget       = find_prev_tab_widget(vec, _currentTabIndex);
         }
         focus_widget(nextWidget);
     } else {
         // tab
-        widget* nextWidget {find_next_tab_widget(vec)};
+        widget* nextWidget {find_next_tab_widget(vec, _currentTabIndex)};
         if (!nextWidget) {
             _currentTabIndex = -1;
-            nextWidget       = find_next_tab_widget(vec);
+            nextWidget       = find_next_tab_widget(vec, _currentTabIndex);
         }
         focus_widget(nextWidget);
     }
-}
-
-auto form_base::find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*
-{
-    widget* retValue {nullptr};
-    i32     lowestHigherValue {std::numeric_limits<i32>::max()};
-    for (auto* widget : vec) {
-        if (widget->can_tab_stop(lowestHigherValue, _currentTabIndex)) {
-            lowestHigherValue = widget->TabStop->Index;
-            retValue          = widget;
-        }
-    }
-    return retValue;
-}
-
-auto form_base::find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*
-{
-    widget* retValue {nullptr};
-    i32     highestLowerValue {std::numeric_limits<i32>::min()};
-    for (auto* widget : vec) {
-        if (widget->can_tab_stop(_currentTabIndex, highestLowerValue)) {
-            highestLowerValue = widget->TabStop->Index;
-            retValue          = widget;
-        }
-    }
-    return retValue;
 }
 
 void form_base::handle_nav(input::keyboard::event const& ev)

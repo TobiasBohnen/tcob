@@ -111,8 +111,6 @@ private:
     void on_mouse_hover(input::mouse::motion_event const& ev);
 
     void handle_tab(input::keyboard::event const& ev);
-    auto find_next_tab_widget(std::vector<widget*> const& vec) const -> widget*;
-    auto find_prev_tab_widget(std::vector<widget*> const& vec) const -> widget*;
     void handle_nav(input::keyboard::event const& ev);
     auto focus_nav_target(string const& widget, direction dir) -> bool;
 
