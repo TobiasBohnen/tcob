@@ -8,9 +8,7 @@
 
 #include <unordered_map>
 
-namespace tcob::assets {
-////////////////////////////////////////////////////////////
-
+namespace tcob {
 enum class asset_status : u8 {
     Unloaded,
     Created,
@@ -18,6 +16,10 @@ enum class asset_status : u8 {
     Loaded,
     Error
 };
+}
+
+namespace tcob::assets {
+////////////////////////////////////////////////////////////
 
 struct stat {
     asset_status Status;
@@ -34,12 +36,6 @@ struct group_stats {
 };
 
 ////////////////////////////////////////////////////////////
-
-template <typename T>
-class asset;
-
-template <typename T>
-class asset_ptr;
 
 template <typename T>
 class bucket;

@@ -36,8 +36,8 @@ class TCOB_API shape : public transformable, public updatable {
 public:
     shape();
 
-    prop<assets::asset_ptr<material>> Material;
-    prop<string>                      TextureRegion {"default"};
+    prop<asset_ptr<material>> Material;
+    prop<string>              TextureRegion {"default"};
 
     prop<color>  Color {colors::White};
     prop_fn<f32> Transparency;

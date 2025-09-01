@@ -53,10 +53,10 @@ public:
     prop_fn<string> Title;
     prop_fn<bool>   VSync;
 
-    prop<assets::asset_ptr<cursor>> Cursor;
-    prop<bool>                      SystemCursorEnabled;
+    prop<asset_ptr<cursor>> Cursor;
+    prop<bool>              SystemCursorEnabled;
 
-    prop<assets::asset_ptr<shader>> Shader;
+    prop<asset_ptr<shader>> Shader;
 
     auto bounds() const -> rect_i;
 
@@ -73,7 +73,7 @@ public:
     auto get_impl() const -> render_backend::window_base*;
 
 protected:
-    explicit window(std::unique_ptr<render_backend::window_base> window, assets::asset_owner_ptr<texture> const& texture = {});
+    explicit window(std::unique_ptr<render_backend::window_base> window, asset_owner_ptr<texture> const& texture = {});
 
     void on_clear(color c) const override;
 
@@ -86,8 +86,8 @@ private:
     virtual auto get_title() const -> string    = 0;
     virtual void set_title(string const& value) = 0;
 
-    assets::asset_owner_ptr<texture>  _texture;
-    assets::asset_owner_ptr<material> _material {};
+    asset_owner_ptr<texture>  _texture;
+    asset_owner_ptr<material> _material {};
 
     std::unique_ptr<render_backend::window_base> _impl;
     quad_renderer                                _renderer {buffer_usage_hint::StaticDraw};

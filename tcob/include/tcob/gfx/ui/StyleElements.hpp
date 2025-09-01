@@ -152,16 +152,16 @@ public:
 
 class TCOB_API text_element {
 public:
-    assets::asset_ptr<gfx::font_family> Font;
-    color                               Color {colors::White};
-    color                               SelectColor {colors::Blue};
-    shadow_element                      Shadow {.Color = colors::Transparent, .OffsetX = length {1, length::type::Absolute}, .OffsetY = length {1, length::type::Absolute}};
-    deco_element                        Decoration {};
-    gfx::font::style                    Style {};
-    length                              Size {16, length::type::Absolute};
-    gfx::alignments                     Alignment {.Horizontal = gfx::horizontal_alignment::Centered, .Vertical = gfx::vertical_alignment::Middle};
-    text_transform                      Transform {text_transform::None};
-    auto_size_mode                      AutoSize {auto_size_mode::Never};
+    asset_ptr<gfx::font_family> Font;
+    color                       Color {colors::White};
+    color                       SelectColor {colors::Blue};
+    shadow_element              Shadow {.Color = colors::Transparent, .OffsetX = length {1, length::type::Absolute}, .OffsetY = length {1, length::type::Absolute}};
+    deco_element                Decoration {};
+    gfx::font::style            Style {};
+    length                      Size {16, length::type::Absolute};
+    gfx::alignments             Alignment {.Horizontal = gfx::horizontal_alignment::Centered, .Vertical = gfx::vertical_alignment::Middle};
+    text_transform              Transform {text_transform::None};
+    auto_size_mode              AutoSize {auto_size_mode::Never};
 
     auto calc_font_size(f32 height) const -> u32;
 

@@ -122,7 +122,7 @@ public:
     virtual ~font();
 
     auto info() const -> information const&;
-    auto texture() const -> assets::asset_ptr<gfx::texture>;
+    auto texture() const -> asset_ptr<gfx::texture>;
 
     auto load [[nodiscard]] (path const& filename, u32 size) noexcept -> bool;
     auto load [[nodiscard]] (io::istream& stream, u32 size) noexcept -> bool;
@@ -155,7 +155,7 @@ private:
 
     std::unique_ptr<truetype_font_engine> _engine;
 
-    assets::asset_owner_ptr<gfx::texture> _texture {};
+    asset_owner_ptr<gfx::texture> _texture {};
 };
 
 ////////////////////////////////////////////////////////////

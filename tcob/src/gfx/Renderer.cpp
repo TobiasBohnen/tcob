@@ -397,7 +397,7 @@ void canvas_renderer::set_layer(i32 layer)
     _material->Texture = _canvas.get_texture(layer);
 }
 
-void canvas_renderer::set_shader(assets::asset_ptr<shader> shader)
+void canvas_renderer::set_shader(asset_ptr<shader> shader)
 {
     _material->Shader = std::move(shader);
 }

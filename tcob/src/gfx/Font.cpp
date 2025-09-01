@@ -43,7 +43,7 @@ font::font()
 
 font::~font() = default;
 
-auto font::texture() const -> assets::asset_ptr<gfx::texture>
+auto font::texture() const -> asset_ptr<gfx::texture>
 {
     return _texture;
 }

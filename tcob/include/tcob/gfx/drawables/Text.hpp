@@ -40,15 +40,15 @@ public:
         auto operator==(style const& other) const -> bool = default;
     };
 
-    explicit text(assets::asset_ptr<font> font);
+    explicit text(asset_ptr<font> font);
 
     prop<rect_f>                 Bounds;
     prop<std::optional<point_f>> Pivot;
 
-    prop<utf8_string>               Text;
-    prop<style>                     Style;
-    prop<assets::asset_ptr<shader>> Shader;
-    quad_tweens                     Effects;
+    prop<utf8_string>       Text;
+    prop<style>             Style;
+    prop<asset_ptr<shader>> Shader;
+    quad_tweens             Effects;
 
     void force_reshape();
 
@@ -70,10 +70,10 @@ private:
 
     std::vector<quad> _quads {};
 
-    quad_renderer                     _renderer {buffer_usage_hint::DynamicDraw};
-    assets::asset_owner_ptr<material> _material {};
+    quad_renderer             _renderer {buffer_usage_hint::DynamicDraw};
+    asset_owner_ptr<material> _material {};
 
-    assets::asset_ptr<font> _font;
+    asset_ptr<font> _font;
 };
 
 }

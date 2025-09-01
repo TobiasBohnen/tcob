@@ -142,7 +142,7 @@ public:
     canvas();
     ~canvas();
 
-    auto get_texture(i32 level = 0) -> assets::asset_ptr<texture>;
+    auto get_texture(i32 level = 0) -> asset_ptr<texture>;
 
     void begin_frame(size_i windowSize, f32 devicePixelRatio, i32 rtt = 0, bool clear = true);
     void end_frame();
@@ -278,7 +278,7 @@ private:
     bool _edgeAntiAlias {true};
     bool _enforceWinding {true};
 
-    std::unordered_map<i32, assets::asset_owner_ptr<render_texture>> _rtt {};
-    i32                                                              _activeRtt {0};
+    std::unordered_map<i32, asset_owner_ptr<render_texture>> _rtt {};
+    i32                                                      _activeRtt {0};
 };
 }

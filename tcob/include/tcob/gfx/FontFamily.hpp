@@ -22,7 +22,7 @@ public:
     explicit font_family(string name);
 
     auto name() const -> string const&;
-    auto get_font(font::style style, u32 size) -> assets::asset_ptr<font>;
+    auto get_font(font::style style, u32 size) -> asset_ptr<font>;
 
     auto get_fallback_style(font::style style) const -> std::optional<font::style>;
     auto has_style(font::style style) const -> bool;
@@ -39,9 +39,9 @@ private:
 
     string _name;
 
-    std::unordered_map<font::style, path>                                                   _fontSources;
-    std::unordered_map<font::style, std::vector<byte>>                                      _fontData;
-    std::unordered_map<font::style, std::unordered_map<u32, assets::asset_owner_ptr<font>>> _fontAssets;
+    std::unordered_map<font::style, path>                                           _fontSources;
+    std::unordered_map<font::style, std::vector<byte>>                              _fontData;
+    std::unordered_map<font::style, std::unordered_map<u32, asset_owner_ptr<font>>> _fontAssets;
 };
 
 ////////////////////////////////////////////////////////////

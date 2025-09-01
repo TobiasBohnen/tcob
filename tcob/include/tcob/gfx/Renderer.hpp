@@ -171,16 +171,16 @@ public:
     void set_bounds(rect_f const& bounds);
     void set_layer(i32 layer);
 
-    void set_shader(assets::asset_ptr<shader> shader);
+    void set_shader(asset_ptr<shader> shader);
 
 protected:
     void prepare_render(render_target& target, bool debug) override;
     void on_render_to_target(render_target& target) override;
     void finalize_render(render_target& target) override;
 
-    std::unique_ptr<vertex_array>     _vertexArray;
-    canvas&                           _canvas;
-    assets::asset_owner_ptr<material> _material {};
+    std::unique_ptr<vertex_array> _vertexArray;
+    canvas&                       _canvas;
+    asset_owner_ptr<material>     _material {};
 };
 
 }

@@ -17,8 +17,8 @@ namespace tcob::gfx {
 
 class TCOB_API material {
 public:
-    assets::asset_ptr<shader>  Shader {};
-    assets::asset_ptr<texture> Texture {};
+    asset_ptr<shader>  Shader {};
+    asset_ptr<texture> Texture {};
 
     blend_funcs    BlendFuncs {};
     blend_equation BlendEquation {blend_equation::Add};
@@ -32,7 +32,7 @@ public:
 
     static inline char const* AssetName {"material"};
 
-    static auto Empty() -> assets::asset_owner_ptr<material>;
+    static auto Empty() -> asset_owner_ptr<material>;
 
     auto operator==(material const& other) const -> bool = default;
 };

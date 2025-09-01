@@ -33,10 +33,10 @@ protected:
 private:
     buffer::information _info {};
 
-    assets::asset_ptr<sound_font> _font;
-    tml_message*                  _firstMessage {nullptr};
-    tml_message*                  _currentMessage {nullptr};
-    f64                           _currentTime {0.0};
+    asset_ptr<sound_font> _font;
+    tml_message*          _firstMessage {nullptr};
+    tml_message*          _currentMessage {nullptr};
+    f64                   _currentTime {0.0};
 };
 
 }

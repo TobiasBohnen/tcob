@@ -98,7 +98,7 @@ auto font_family::name() const -> string const&
     return _name;
 }
 
-auto font_family::get_font(font::style style, u32 size) -> assets::asset_ptr<font>
+auto font_family::get_font(font::style style, u32 size) -> asset_ptr<font>
 {
     auto fallbackStyle {get_fallback_style(style)};
     if (!fallbackStyle) {

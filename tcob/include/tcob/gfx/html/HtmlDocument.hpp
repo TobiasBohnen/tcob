@@ -45,11 +45,11 @@ class TCOB_API document final : public entity, public transformable {
 public:
     ////////////////////////////////////////////////////////////
     struct config {
-        assets::group*                 AssetGroup {nullptr};
-        assets::asset_ptr<font_family> Fonts;
-        i32                            DefaultFontSize {0};
-        window*                        Window {nullptr};
-        string                         MasterCSSPath;
+        assets::group*         AssetGroup {nullptr};
+        asset_ptr<font_family> Fonts;
+        i32                    DefaultFontSize {0};
+        window*                Window {nullptr};
+        string                 MasterCSSPath;
     };
 
     ////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ private:
     point_i _mousePosition;
     bool    _buttonDown {false};
 
-    assets::asset_owner_ptr<material> _material {};
+    asset_owner_ptr<material> _material {};
 };
 }
 

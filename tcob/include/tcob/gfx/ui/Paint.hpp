@@ -66,9 +66,9 @@ public:
 
 class TCOB_API nine_patch {
 public:
-    assets::asset_ptr<gfx::texture> Texture;
-    string                          TextureRegion {"default"};
-    rect_f                          UV;
+    asset_ptr<gfx::texture> Texture;
+    string                  TextureRegion {"default"};
+    rect_f                  UV;
 
     auto operator==(nine_patch const& other) const -> bool = default;
 };

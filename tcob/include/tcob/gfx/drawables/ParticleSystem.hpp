@@ -72,7 +72,7 @@ public:
 
     signal<particle_event<particle_type> const> ParticleUpdate;
 
-    prop<assets::asset_ptr<material>> Material;
+    prop<asset_ptr<material>> Material;
 
     auto is_running() const -> bool;
 

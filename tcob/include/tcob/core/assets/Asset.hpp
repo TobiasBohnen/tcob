@@ -12,7 +12,7 @@
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/assets/Assets.hpp"
 
-namespace tcob::assets {
+namespace tcob {
 ////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -20,7 +20,9 @@ class asset {
     template <typename U>
     friend class asset;
     template <typename U>
-    friend class loader;
+    friend class assets::loader;
+    template <typename U>
+    friend class assets::bucket;
 
 public:
     using type = T;

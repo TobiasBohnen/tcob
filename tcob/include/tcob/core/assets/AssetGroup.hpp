@@ -48,9 +48,9 @@ public:
     explicit bucket(group& parent);
 
     template <typename R = T, typename... Args>
-    auto create(string const& name, Args&&... args) -> assets::asset_ptr<T>;
+    auto create(string const& name, Args&&... args) -> asset_ptr<T>;
 
-    auto get(string const& name) const -> assets::asset_ptr<T>;
+    auto get(string const& name) const -> asset_ptr<T>;
 
     auto has(string const& name) const -> bool;
 
@@ -68,7 +68,7 @@ protected:
 private:
     group& _group;
 
-    std::unordered_map<string, std::pair<std::shared_ptr<T>, assets::asset_ptr<T>>> _objects;
+    std::unordered_map<string, std::pair<std::shared_ptr<T>, asset_ptr<T>>> _objects;
 };
 
 ////////////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ public:
     auto bucket() -> assets::bucket<T>*;
 
     template <typename T>
-    auto get(string const& assetName) const -> assets::asset_ptr<T>;
+    auto get(string const& assetName) const -> asset_ptr<T>;
 
     template <typename T>
     auto has(string const& assetName) const -> bool;

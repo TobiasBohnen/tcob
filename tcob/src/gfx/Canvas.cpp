@@ -132,7 +132,7 @@ canvas::canvas()
 
 canvas::~canvas() = default;
 
-auto canvas::get_texture(i32 level) -> assets::asset_ptr<texture>
+auto canvas::get_texture(i32 level) -> asset_ptr<texture>
 {
     return _rtt[level];
 }

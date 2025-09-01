@@ -43,7 +43,7 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<gfx::frame_animation> assetPtr;
+        asset_ptr<gfx::frame_animation> assetPtr;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -61,8 +61,8 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<audio::music> assetPtr;
-        string                          source;
+        asset_ptr<audio::music> assetPtr;
+        string                  source;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -80,9 +80,9 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<audio::sound> assetPtr;
-        std::future<bool>               future;
-        string                          source;
+        asset_ptr<audio::sound> assetPtr;
+        std::future<bool>       future;
+        string                  source;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -102,9 +102,9 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<audio::sound_font> assetPtr;
-        std::future<bool>                    future;
-        string                               source;
+        asset_ptr<audio::sound_font> assetPtr;
+        std::future<bool>            future;
+        string                       source;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -124,8 +124,8 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<gfx::cursor> assetPtr;
-        string                         material;
+        asset_ptr<gfx::cursor> assetPtr;
+        string                 material;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -143,9 +143,9 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<gfx::font> assetPtr;
-        string                       source;
-        u32                          size {0};
+        asset_ptr<gfx::font> assetPtr;
+        string               source;
+        u32                  size {0};
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -164,8 +164,8 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<gfx::font_family> assetPtr;
-        string                              source;
+        asset_ptr<gfx::font_family> assetPtr;
+        string                      source;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -183,9 +183,9 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<gfx::material> assetPtr;
-        string                           shader;
-        string                           texture;
+        asset_ptr<gfx::material> assetPtr;
+        string                   shader;
+        string                   texture;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -203,9 +203,9 @@ public:
 
 private:
     struct asset_def {
-        assets::asset_ptr<gfx::shader> assetPtr;
-        string                         vertex;
-        string                         fragment;
+        asset_ptr<gfx::shader> assetPtr;
+        string                 vertex;
+        string                 fragment;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;
@@ -234,7 +234,7 @@ private:
     };
 
     struct tex_asset_def {
-        assets::asset_ptr<gfx::texture>                 assetPtr;
+        asset_ptr<gfx::texture>                         assetPtr;
         gfx::texture::filtering                         filtering {gfx::texture::filtering::NearestNeighbor};
         gfx::texture::wrapping                          wrapping {gfx::texture::wrapping::Repeat};
         size_i                                          size {size_i::Zero};
@@ -247,10 +247,10 @@ private:
 
     // animated texture
     struct ani_asset_def {
-        assets::asset_ptr<gfx::texture> assetPtr;
-        gfx::texture::filtering         filtering {gfx::texture::filtering::NearestNeighbor};
-        gfx::texture::wrapping          wrapping {gfx::texture::wrapping::Repeat};
-        path                            textureFile;
+        asset_ptr<gfx::texture> assetPtr;
+        gfx::texture::filtering filtering {gfx::texture::filtering::NearestNeighbor};
+        gfx::texture::wrapping  wrapping {gfx::texture::wrapping::Repeat};
+        path                    textureFile;
     };
 
     std::vector<std::unique_ptr<ani_asset_def>> _cacheAni;

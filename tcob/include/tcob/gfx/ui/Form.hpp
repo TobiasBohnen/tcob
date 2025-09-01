@@ -35,13 +35,13 @@ class TCOB_API form_base : public gfx::entity {
 public:
     ~form_base() override;
 
-    prop<rect_f>                         Bounds;
-    prop<style_collection>               Styles;
-    prop<control_map>                    Controls;
-    prop<nav_map>                        NavMap;
-    prop<assets::asset_ptr<gfx::shader>> Shader;
+    prop<rect_f>                 Bounds;
+    prop<style_collection>       Styles;
+    prop<control_map>            Controls;
+    prop<nav_map>                NavMap;
+    prop<asset_ptr<gfx::shader>> Shader;
 
-    assets::asset_ptr<gfx::cursor> Cursor;
+    asset_ptr<gfx::cursor> Cursor;
 
     point_f TooltipOffset {point_f::Zero};
 

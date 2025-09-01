@@ -12,7 +12,7 @@
 
 #include "tcob/core/assets/Assets.hpp"
 
-namespace tcob::assets {
+namespace tcob {
 
 template <typename T>
 inline asset<T>::asset(string name, std::weak_ptr<T> ptr, asset_status status)

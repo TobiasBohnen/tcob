@@ -21,11 +21,11 @@ inline bucket<T>::bucket(group& parent)
 
 template <typename T>
 template <typename R, typename... Args>
-inline auto bucket<T>::create(string const& name, Args&&... args) -> assets::asset_ptr<T>
+inline auto bucket<T>::create(string const& name, Args&&... args) -> asset_ptr<T>
 {
     if (!_objects.contains(name)) {
         auto obj {std::make_shared<R>(std::forward<Args>(args)...)};
-        _objects[name] = {obj, assets::asset_ptr<T> {std::make_shared<asset<T>>(name, obj)}};
+        _objects[name] = {obj, asset_ptr<T> {std::make_shared<asset<T>>(name, obj)}};
     } else {
         auto& assetEntry {_objects[name]};
         assetEntry.first.reset(new R {std::forward<Args>(args)...});
@@ -36,10 +36,10 @@ inline auto bucket<T>::create(string const& name, Args&&... args) -> assets::ass
 }
 
 template <typename T>
-inline auto bucket<T>::get(string const& name) const -> assets::asset_ptr<T>
+inline auto bucket<T>::get(string const& name) const -> asset_ptr<T>
 {
     if (!has(name)) {
-        return assets::asset_ptr<T> {nullptr};
+        return asset_ptr<T> {nullptr};
     }
     return _objects.at(name).second;
 }
@@ -75,7 +75,9 @@ inline void bucket<T>::unload_all()
 template <typename T>
 inline void bucket<T>::unload(string const& name)
 {
-    _objects[name].first.reset();
+    auto& obj {_objects[name]};
+    obj.first.reset();
+    obj.second.get()->set_status(asset_status::Unloaded);
 }
 
 template <typename T>
@@ -115,11 +117,11 @@ inline auto group::bucket() -> assets::bucket<T>*
 }
 
 template <typename T>
-inline auto group::get(string const& assetName) const -> assets::asset_ptr<T>
+inline auto group::get(string const& assetName) const -> asset_ptr<T>
 {
     if (!has<T>(assetName)) {
         logger::Error("AssetGroup '{}': asset '{}' not found.", _name, assetName);
-        return assets::asset_ptr<T> {nullptr};
+        return asset_ptr<T> {nullptr};
     }
 
     return dynamic_cast<assets::bucket<T>*>(_buckets.at(T::AssetName).get())->get(assetName);

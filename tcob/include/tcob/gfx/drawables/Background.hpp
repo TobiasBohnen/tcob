@@ -25,8 +25,8 @@ class TCOB_API background : public drawable {
 public:
     background();
 
-    prop<assets::asset_ptr<material>> Material;
-    prop<string>                      TextureRegion {"default"};
+    prop<asset_ptr<material>> Material;
+    prop<string>              TextureRegion {"default"};
 
 protected:
     auto can_draw() const -> bool override;
@@ -51,8 +51,8 @@ class TCOB_API parallax_background final : public drawable {
 public:
     parallax_background();
 
-    prop<assets::asset_ptr<material>> Material;
-    size_f                            TextureScale {size_f::One};
+    prop<asset_ptr<material>> Material;
+    size_f                    TextureScale {size_f::One};
 
     auto add_layer(parallax_background_layer const& layer) -> uid;
 

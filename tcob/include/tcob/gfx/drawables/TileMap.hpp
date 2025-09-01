@@ -152,9 +152,9 @@ public:
     tilemap_base();
     ~tilemap_base() override = default;
 
-    prop<render_direction>            RenderDirection {render_direction::RightDown};
-    prop<assets::asset_ptr<material>> Material;
-    prop<point_f>                     Position;
+    prop<render_direction>    RenderDirection {render_direction::RightDown};
+    prop<asset_ptr<material>> Material;
+    prop<point_f>             Position;
 
     auto add_layer(tilemap_layer const& layer) -> uid;
 

@@ -28,9 +28,9 @@ class TCOB_API cursor final : public drawable, public updatable {
 public:
     cursor();
 
-    prop<assets::asset_ptr<material>> Material;
-    prop_fn<point_i>                  Position;
-    prop<string>                      ActiveMode;
+    prop<asset_ptr<material>> Material;
+    prop_fn<point_i>          Position;
+    prop<string>              ActiveMode;
 
     void add_mode(string const& name, point_i hotspot = point_i::Zero);
 

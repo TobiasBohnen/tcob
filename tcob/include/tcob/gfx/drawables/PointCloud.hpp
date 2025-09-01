@@ -25,7 +25,7 @@ class TCOB_API static_point_cloud final : public drawable {
 public:
     explicit static_point_cloud(std::span<vertex> points);
 
-    prop<assets::asset_ptr<material>> Material;
+    prop<asset_ptr<material>> Material;
 
 protected:
     auto can_draw() const -> bool override;
@@ -41,7 +41,7 @@ class TCOB_API point_cloud final : public drawable {
 public:
     explicit point_cloud(i32 reservedSize);
 
-    prop<assets::asset_ptr<material>> Material;
+    prop<asset_ptr<material>> Material;
 
     auto create_point() -> vertex&;
     void clear();

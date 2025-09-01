@@ -18,7 +18,7 @@
 
 namespace tcob::gfx {
 
-text::text(assets::asset_ptr<font> font)
+text::text(asset_ptr<font> font)
     : _font {std::move(font)}
 {
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
