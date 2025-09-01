@@ -57,8 +57,9 @@ public:
 
 protected:
     void on_draw(widget_painter& painter) override;
-
     void on_prepare_redraw() override;
+
+    void on_update(milliseconds deltaTime) override;
 
     void on_mouse_leave() override;
     void on_mouse_hover(input::mouse::motion_event const& ev) override;

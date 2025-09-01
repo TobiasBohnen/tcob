@@ -52,9 +52,7 @@ text_box::text_box(init const& wi)
     MaxLength(std::numeric_limits<isize>::max());
 
     Selectable.Changed.connect([this](auto const& val) {
-        if (!val) {
-            select_text(INVALID_INDEX, INVALID_INDEX);
-        }
+        if (!val) { select_text(INVALID_INDEX, INVALID_INDEX); }
         queue_redraw();
     });
     Selectable(false);
@@ -148,6 +146,9 @@ void text_box::on_update(milliseconds deltaTime)
 {
     if (_caretTween) {
         _caretTween->update(deltaTime);
+    }
+    if (form().top_widget() == this) {
+        form().change_cursor_mode(cursor_mode::Text);
     }
 }
 

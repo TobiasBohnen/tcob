@@ -275,6 +275,28 @@ enum class position : u8 {
 
 ////////////////////////////////////////////////////////////
 
+enum class cursor_mode : u8 {
+    Default,
+
+    EW_Resize,   // TODO
+    NS_Resize,   // TODO
+    NWSE_Resize, // TODO
+    NESW_Resize, // TODO
+    Move,
+    Grab,
+    Grabbing,
+    Text,
+    Cell,
+
+    User1,
+    User2,
+    User3,
+    User4,
+    User5,
+};
+
+////////////////////////////////////////////////////////////
+
 using widget_attribute_types = std::variant<isize, f64, bool, string, orientation, fit_mode, point_i>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 

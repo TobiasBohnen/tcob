@@ -15,6 +15,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -184,6 +185,14 @@ void grid_view::on_draw(widget_painter& painter)
                   _style.HeaderItemClass,
                   !HeaderSelectable ? widget_flags {.Active = false, .Hover = false} : getCellFlags(idx, SelectMode),
                   _headerRectCache[idx]);
+    }
+}
+
+void grid_view::on_update(milliseconds deltaTime)
+{
+    vscroll_widget::on_update(deltaTime);
+    if (HoveredCellIndex != INVALID && form().top_widget() == this) {
+        form().change_cursor_mode(cursor_mode::Cell);
     }
 }
 

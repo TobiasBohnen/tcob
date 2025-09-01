@@ -61,7 +61,7 @@ public:
     prop<dimensions>   Flex;
     prop<milliseconds> TransitionDuration;
 
-    string Cursor {"default"};
+    cursor_mode Cursor {cursor_mode::Default};
 
     std::shared_ptr<tooltip> Tooltip;
 

@@ -5,12 +5,14 @@
 
 #include "tcob/gfx/drawables/Cursor.hpp"
 
+#include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
+
 
 namespace tcob::gfx {
 
@@ -19,7 +21,10 @@ cursor::cursor()
                  [](point_i value) { locate_service<input::system>().mouse()->set_position(value); }}}
 {
     ActiveMode.Changed.connect([this](string const& name) {
-        if (!_modes.contains(name)) { return; } // TODO: log error
+        if (!_modes.contains(name)) {
+            logger::Error("Cursor: missing mode {}", name);
+            return;
+        }
 
         _currentMode = _modes[name];
 

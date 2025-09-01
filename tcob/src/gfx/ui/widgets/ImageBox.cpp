@@ -120,6 +120,11 @@ void image_box::on_draw(widget_painter& painter)
 void image_box::on_update(milliseconds deltaTime)
 {
     _animationTween.update(deltaTime);
+    if (_dragPosition) {
+        form().change_cursor_mode(cursor_mode::Grabbing);
+    } else if (form().top_widget() == this) {
+        form().change_cursor_mode(cursor_mode::Grab);
+    }
 }
 
 void image_box::on_mouse_drag(input::mouse::motion_event const& ev)

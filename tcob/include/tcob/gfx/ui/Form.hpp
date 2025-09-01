@@ -21,6 +21,7 @@
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
 #include "tcob/gfx/ShaderProgram.hpp"
+#include "tcob/gfx/drawables/Cursor.hpp"
 #include "tcob/gfx/drawables/Drawable.hpp"
 #include "tcob/gfx/ui/Layout.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
@@ -34,15 +35,15 @@ class TCOB_API form_base : public gfx::entity {
 public:
     ~form_base() override;
 
-    signal<string const> CursorChanged;
-
-    point_f TooltipOffset {point_f::Zero};
-
     prop<rect_f>                         Bounds;
     prop<style_collection>               Styles;
     prop<control_map>                    Controls;
     prop<nav_map>                        NavMap;
     prop<assets::asset_ptr<gfx::shader>> Shader;
+
+    assets::asset_ptr<gfx::cursor> Cursor;
+
+    point_f TooltipOffset {point_f::Zero};
 
     auto name() const -> string const&;
 
@@ -77,6 +78,8 @@ public:
     void push_modal(modal_dialog* dlg);
     void pop_modal(modal_dialog* dlg);
     auto active_modal() const -> modal_dialog*;
+
+    void change_cursor_mode(cursor_mode mode);
 
 protected:
     form_base(string name, rect_f const& bounds);

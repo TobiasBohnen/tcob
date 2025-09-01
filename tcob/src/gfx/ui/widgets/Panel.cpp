@@ -101,9 +101,12 @@ void panel::clear()
 
 void panel::on_update(milliseconds deltaTime)
 {
-    // TODO: update style here
     _vScrollbar.update(deltaTime);
     _hScrollbar.update(deltaTime);
+
+    if (_dragStart != point_f::Zero) {
+        form().change_cursor_mode(cursor_mode::Move);
+    }
 }
 
 void panel::on_draw(widget_painter& painter)

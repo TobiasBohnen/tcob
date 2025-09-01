@@ -163,8 +163,42 @@ auto form_base::active_modal() const -> modal_dialog*
     return _modals.empty() ? nullptr : _modals.back();
 }
 
+void form_base::change_cursor_mode(cursor_mode mode)
+{
+    if (!Cursor) { return; }
+
+    string newMode;
+    switch (mode) {
+    case cursor_mode::Default:     newMode = "default"; break;
+    case cursor_mode::Move:        newMode = "move"; break;
+    case cursor_mode::EW_Resize:   newMode = "ew-resize"; break;
+    case cursor_mode::NS_Resize:   newMode = "ns-resize"; break;
+    case cursor_mode::NWSE_Resize: newMode = "nwse-resize"; break;
+    case cursor_mode::NESW_Resize: newMode = "nesw-resize"; break;
+    case cursor_mode::Grab:        newMode = "grab"; break;
+    case cursor_mode::Grabbing:    newMode = "grabbing"; break;
+    case cursor_mode::Text:        newMode = "text"; break;
+    case cursor_mode::Cell:        newMode = "cell"; break;
+    case cursor_mode::User1:
+    case cursor_mode::User2:
+    case cursor_mode::User3:
+    case cursor_mode::User4:
+    case cursor_mode::User5:       newMode = "cursor2"; break;
+    }
+    if (Cursor->ActiveMode == newMode) { return; }
+
+    Cursor->ActiveMode = newMode;
+    size_f const off {Cursor->bounds().Size};
+    TooltipOffset = point_f {off.Width, off.Height};
+}
+
 void form_base::on_update(milliseconds deltaTime)
 {
+    // set cursor
+    if (_topWidget) {
+        change_cursor_mode(_topWidget->Cursor);
+    }
+
     auto const& widgets {containers()};
 
     // tooltip
@@ -217,11 +251,6 @@ void form_base::on_draw_to(gfx::render_target& target)
     constexpr static i32 tooltipLayer {1};
     constexpr static i32 modalLayer {2};
     constexpr static i32 firstUILayer {modalLayer + 1};
-
-    // set cursor
-    if (_topWidget) {
-        CursorChanged(_topWidget->Cursor);
-    }
 
     size_i const size {size_i {Bounds->Size}};
 
