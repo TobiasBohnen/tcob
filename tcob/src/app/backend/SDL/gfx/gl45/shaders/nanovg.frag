@@ -104,6 +104,20 @@ void main(void) {
         // Combine alpha
         color *= scissor;
         result = color;
+    }else if (frag.Type == 4) {
+        vec2 pt = (frag.PaintMatrix * vec4(fs_in.Position, 1.0, 1.0)).xy;
+
+        // atan2 gives [-pi..pi], normalize to [0..1]
+        float angle = atan(pt.y, pt.x) / (2.0 * 3.14159265) + 0.5;
+        angle = fract(angle - 0.25);
+        
+        // Sample gradient texture using angle
+        vec4 color = texture(gradientTexture, vec3(angle, frag.GradientIndex, 0));
+        color.a *= frag.GradientAlpha;
+
+         // Combine alpha
+        color *= strokeAlpha * scissor;
+        result = color;
     }
     outColor = result;
 }

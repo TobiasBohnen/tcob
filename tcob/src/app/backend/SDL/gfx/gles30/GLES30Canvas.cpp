@@ -381,7 +381,7 @@ auto gl_canvas::convert_paint(canvas::paint const& paint, canvas::scissor const&
             retValue.TexType = 1;
         }
     } else {
-        retValue.Type    = nvg_shader_type::Gradient;
+        retValue.Type    = paint.IsConical ? nvg_shader_type::Conical : nvg_shader_type::Gradient;
         retValue.Radius  = paint.Radius;
         retValue.Feather = paint.Feather;
     }

@@ -105,6 +105,7 @@ public:
         f32         Feather {0};
         paint_color Color {colors::White};
         texture*    Image {nullptr};
+        bool        IsConical {false};
     };
 
     struct scissor {
@@ -215,6 +216,7 @@ public:
     auto create_box_gradient [[nodiscard]] (rect_f const& rect, f32 r, f32 f, color_gradient const& gradient) -> paint;
     auto create_radial_gradient [[nodiscard]] (point_f c, f32 inr, f32 outr, color_gradient const& gradient) -> paint;
     auto create_radial_gradient [[nodiscard]] (point_f c, f32 inr, f32 outr, size_f scale, color_gradient const& gradient) -> paint;
+    auto create_conic_gradient(point_f center, color_gradient const& gradient) -> paint;
     auto create_image_pattern [[nodiscard]] (point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> paint;
 
     // Image

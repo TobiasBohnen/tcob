@@ -754,6 +754,19 @@ auto canvas::create_radial_gradient(point_f c, f32 inr, f32 outr, size_f scale, 
         .Color   = create_gradient(gradient)};
 }
 
+auto canvas::create_conic_gradient(point_f center, color_gradient const& gradient) -> paint
+{
+    return {
+        .XForm     = {1.0f, 0.0f, center.X,
+                      0.0f, 1.0f, center.Y,
+                      0.0f, 0.0f, 1.0f},
+        .Extent    = {1.0f, 1.0f},
+        .Radius    = 0.0f,
+        .Feather   = 1.0f,
+        .Color     = create_gradient(gradient),
+        .IsConical = true};
+}
+
 auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
 {
     if (gradient.is_single_color()) {

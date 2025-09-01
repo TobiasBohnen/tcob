@@ -47,7 +47,8 @@ enum class nvg_shader_type : i32 { // NOLINT(performance-enum-size) part of frag
     Gradient    = 0,
     Image       = 1,
     StencilFill = 2,
-    Triangles   = 3
+    Triangles   = 3,
+    Conical     = 4
 };
 
 enum class nvg_call_type : u8 {
