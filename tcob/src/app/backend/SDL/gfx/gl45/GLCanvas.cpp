@@ -18,6 +18,7 @@
 #include "GLTexture.hpp"
 
 #include "tcob/core/Color.hpp"
+#include "tcob/core/Logger.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
@@ -308,13 +309,14 @@ void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
 {
     i32 const size {_gradientTexture.get_size().Height};
     if (idx >= size) { // grow texture
+        logger::Info("GLCanvas: gradient texture resize from {} to {}", size, size * 2);
         auto const img {_gradientTexture.copy_to_image(0)};
         _gradientTexture.create({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
         _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
         _gradientTexture.update(point_i::Zero, img.info().Size, img.data().data(), 0, color_gradient::Size, 1);
     }
 
-    auto const colors {gradient.colors()};
+    auto const colors {gradient.colors(true)};
     _gradientTexture.update({0, idx}, {color_gradient::Size, 1}, colors.data(), 0, color_gradient::Size, 1);
 }
 

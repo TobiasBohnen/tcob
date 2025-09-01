@@ -26,6 +26,8 @@ public:
     f32   Position {0};
     color Value {};
 
+    auto operator==(color_stop const& other) const -> bool = default;
+
     static auto constexpr Members()
     {
         return std::tuple {
@@ -41,11 +43,11 @@ public:
     static constexpr u32 Size {256};
 
     color_gradient();
-    color_gradient(std::initializer_list<color const> colors, bool preMulAlpha = true);
-    color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha = true);
-    color_gradient(std::span<color_stop const> colorStops, bool preMulAlpha = true);
+    color_gradient(std::initializer_list<color const> colors);
+    color_gradient(std::initializer_list<color_stop const> colorStops);
+    color_gradient(std::span<color_stop const> colorStops);
 
-    auto colors() const -> std::array<color, Size>;
+    auto colors(bool preMulAlpha = true) const -> std::array<color, Size>;
 
     auto is_single_color() const -> bool;
     auto first_color() const -> color;
@@ -56,7 +58,6 @@ public:
     static auto Lerp(color_gradient const& from, color_gradient const& to, f64 step) -> color_gradient;
 
 private:
-    bool                 _premulAlpha {true};
     std::map<u32, color> _colorStops;
 };
 

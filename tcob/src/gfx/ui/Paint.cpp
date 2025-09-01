@@ -5,6 +5,7 @@
 
 #include "tcob/gfx/ui/Paint.hpp"
 
+#include <cmath>
 #include <variant>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -27,11 +28,16 @@ void paint_lerp(paint& target, paint const& from, paint const& to, f64 step)
         }
         return;
     }
+
+    // quantize step for color gradients
+    constexpr f64 increment {0.05};
+    f64 const     qstep {std::round(step / increment) * increment};
+
     if (auto const* lc {std::get_if<linear_gradient>(&from)}) {
         if (auto const* rc {std::get_if<linear_gradient>(&to)}) {
             linear_gradient grad;
             grad.Angle  = degree_f::Lerp(lc->Angle, rc->Angle, step);
-            grad.Colors = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
+            grad.Colors = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, qstep);
             target      = grad;
         } else {
             target = to;
@@ -44,7 +50,7 @@ void paint_lerp(paint& target, paint const& from, paint const& to, f64 step)
             grad.InnerRadius = length::Lerp(lc->InnerRadius, rc->InnerRadius, step);
             grad.OuterRadius = length::Lerp(lc->OuterRadius, rc->OuterRadius, step);
             grad.Scale       = size_f::Lerp(lc->Scale, rc->Scale, step);
-            grad.Colors      = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
+            grad.Colors      = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, qstep);
             target           = grad;
         } else {
             target = to;
@@ -56,7 +62,7 @@ void paint_lerp(paint& target, paint const& from, paint const& to, f64 step)
             box_gradient grad;
             grad.Radius  = length::Lerp(lc->Radius, rc->Radius, step);
             grad.Feather = length::Lerp(lc->Feather, rc->Feather, step);
-            grad.Colors  = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, step);
+            grad.Colors  = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, qstep);
             target       = grad;
         } else {
             target = to;

@@ -425,14 +425,14 @@ void canvas::arc_to(point_f pos1, point_f pos2, f32 radius)
     static auto cross {[](f32 x0, f32 y0, f32 x1, f32 y1) -> f32 { return (x1 * y0) - (x0 * y1); }};
 
     if (cross(dx0, dy0, dx1, dy1) > 0.0f) {
-        cx  = pos1.X + dx0 * d + dy0 * radius;
-        cy  = pos1.Y + dy0 * d + -dx0 * radius;
+        cx  = pos1.X + (dx0 * d) + (dy0 * radius);
+        cy  = pos1.Y + (dy0 * d) + (-dx0 * radius);
         a0  = radian_f {std::atan2(dx0, -dy0) + RAD90};
         a1  = radian_f {std::atan2(-dx1, dy1) + RAD90};
         dir = winding::CW;
     } else {
-        cx  = pos1.X + dx0 * d + -dy0 * radius;
-        cy  = pos1.Y + dy0 * d + dx0 * radius;
+        cx  = pos1.X + (dx0 * d) + (-dy0 * radius);
+        cy  = pos1.Y + (dy0 * d) + (dx0 * radius);
         a0  = radian_f {std::atan2(-dx0, dy0) + RAD90};
         a1  = radian_f {std::atan2(dx1, -dy1) + RAD90};
         dir = winding::CCW;
@@ -764,10 +764,11 @@ auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
         if (_gradients[i] == gradient) { return paint_gradient {1.0f, static_cast<i32>(i)}; }
     }
 
-    i32 const retValue {static_cast<i32>(_gradients.size())};
+    i32 const newIdx {static_cast<i32>(_gradients.size())};
     _gradients.push_back(gradient);
-    _impl->add_gradient(retValue, gradient);
-    return paint_gradient {1.0f, retValue};
+    _impl->add_gradient(newIdx, gradient);
+
+    return paint_gradient {1.0f, newIdx};
 }
 
 auto canvas::create_image_pattern(point_f c, size_f e, degree_f angle, texture* image, f32 alpha) -> paint

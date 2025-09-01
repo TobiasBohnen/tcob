@@ -31,8 +31,7 @@ color_gradient::color_gradient()
 {
 }
 
-color_gradient::color_gradient(std::initializer_list<color const> colors, bool preMulAlpha)
-    : _premulAlpha {preMulAlpha}
+color_gradient::color_gradient(std::initializer_list<color const> colors)
 {
     f32 const step {1.0f / (colors.size() - 1)};
     f32       current {0.0f};
@@ -42,13 +41,12 @@ color_gradient::color_gradient(std::initializer_list<color const> colors, bool p
     }
 }
 
-color_gradient::color_gradient(std::initializer_list<color_stop const> colorStops, bool preMulAlpha)
-    : color_gradient {std::span<color_stop const> {colorStops}, preMulAlpha}
+color_gradient::color_gradient(std::initializer_list<color_stop const> colorStops)
+    : color_gradient {std::span<color_stop const> {colorStops}}
 {
 }
 
-color_gradient::color_gradient(std::span<color_stop const> colorStops, bool preMulAlpha)
-    : _premulAlpha {preMulAlpha}
+color_gradient::color_gradient(std::span<color_stop const> colorStops)
 {
     for (auto const& cs : colorStops) {
         u32 pos {static_cast<u32>(cs.Position * (Size - 1))};
@@ -57,7 +55,7 @@ color_gradient::color_gradient(std::span<color_stop const> colorStops, bool preM
     }
 }
 
-auto color_gradient::colors() const -> std::array<color, Size>
+auto color_gradient::colors(bool preMulAlpha) const -> std::array<color, Size>
 {
     std::array<color, Size> retValue {};
 
@@ -75,7 +73,7 @@ auto color_gradient::colors() const -> std::array<color, Size>
 
             for (u32 i {0}; i <= size; ++i) {
                 color col {color::Lerp(col1, col2, static_cast<f32>(i) / size)};
-                if (_premulAlpha) { col = col.as_alpha_premultiplied(); }
+                if (preMulAlpha) { col = col.as_alpha_premultiplied(); }
 
                 retValue[i + start] = col;
             }

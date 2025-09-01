@@ -145,6 +145,7 @@ auto constexpr color::Lerp(color from, color to, f64 step) -> color
 
 auto constexpr color::as_alpha_premultiplied() const -> color
 {
+    if (A == 255) { return *this; }
     f32 const factor {static_cast<f32>(A) / 255.0f};
     u8 const  nr {static_cast<u8>(static_cast<f32>(R) * factor)};
     u8 const  ng {static_cast<u8>(static_cast<f32>(G) * factor)};
