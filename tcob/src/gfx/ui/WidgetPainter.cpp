@@ -782,6 +782,11 @@ auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canva
                     rect,
                     arg.Radius.calc(rect.width()), arg.Feather.calc(rect.width()), arg.Colors);
             },
+            [&](conic_gradient const& arg) {
+                return _canvas.create_conic_gradient(
+                    rect.center(),
+                    arg.Colors);
+            },
             [&](nine_patch const&) -> gfx::canvas::paint {
                 return {};
             },

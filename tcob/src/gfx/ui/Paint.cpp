@@ -69,6 +69,16 @@ void paint_lerp(paint& target, paint const& from, paint const& to, f64 step)
         }
         return;
     }
+    if (auto const* lc {std::get_if<conic_gradient>(&from)}) {
+        if (auto const* rc {std::get_if<conic_gradient>(&to)}) {
+            conic_gradient grad;
+            grad.Colors = gfx::color_gradient::Lerp(lc->Colors, rc->Colors, qstep);
+            target      = grad;
+        } else {
+            target = to;
+        }
+        return;
+    }
 }
 
 } // namespace ui

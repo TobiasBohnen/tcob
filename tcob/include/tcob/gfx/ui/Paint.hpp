@@ -55,6 +55,15 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API conic_gradient {
+public:
+    gfx::color_gradient Colors;
+
+    auto operator==(conic_gradient const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API nine_patch {
 public:
     assets::asset_ptr<gfx::texture> Texture;
@@ -66,7 +75,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-using paint = std::variant<color, linear_gradient, radial_gradient, box_gradient, nine_patch>;
+using paint = std::variant<color, linear_gradient, radial_gradient, box_gradient, conic_gradient, nine_patch>;
 
 TCOB_API void paint_lerp(paint& target, paint const& from, paint const& to, f64 step);
 
