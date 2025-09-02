@@ -10,6 +10,7 @@
 #include <cassert>
 #include <initializer_list>
 #include <iterator>
+#include <optional>
 #include <set>
 #include <span>
 
@@ -86,14 +87,11 @@ auto color_gradient::colors(bool preMulAlpha) const -> std::array<color, Size>
     return retValue;
 }
 
-auto color_gradient::is_single_color() const -> bool
+auto color_gradient::as_single_color() const -> std::optional<color>
 {
-    return _colorStops.size() == 1;
-}
-
-auto color_gradient::first_color() const -> color
-{
-    return _colorStops.begin()->second;
+    return _colorStops.size() == 1
+        ? std::optional<color> {_colorStops.begin()->second}
+        : std::nullopt;
 }
 
 auto color_gradient::get_color_at(u32 key) const -> color

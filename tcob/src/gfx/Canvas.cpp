@@ -769,8 +769,8 @@ auto canvas::create_conic_gradient(point_f center, color_gradient const& gradien
 
 auto canvas::create_gradient(color_gradient const& gradient) -> paint_color
 {
-    if (gradient.is_single_color()) {
-        return gradient.first_color();
+    if (auto color {gradient.as_single_color()}) {
+        return *color;
     }
 
     for (usize i {0}; i < _gradients.size(); ++i) {

@@ -9,6 +9,7 @@
 #include <array>
 #include <initializer_list>
 #include <map>
+#include <optional>
 #include <span>
 #include <tuple>
 
@@ -49,8 +50,8 @@ public:
 
     auto colors(bool preMulAlpha = true) const -> std::array<color, Size>;
 
-    auto is_single_color() const -> bool;
-    auto first_color() const -> color;
+    auto as_single_color() const -> std::optional<color>;
+
     auto get_color_at(u32 key) const -> color;
 
     auto operator==(color_gradient const& other) const -> bool = default;
