@@ -326,22 +326,21 @@ struct converter<T> {
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
-        if (std::holds_alternative<object>(config)) {
-            object obj {std::get<object>(config)};
-            value.clear();
+        if (!std::holds_alternative<object>(config)) { return false; }
 
-            for (auto const& [k, v] : obj) {
-                auto res {v.template get<typename T::mapped_type>()};
-                if (res) {
-                    value[k] = res.value();
-                } else {
-                    return false;
-                }
+        object obj {std::get<object>(config)};
+        value.clear();
+
+        for (auto const& [k, v] : obj) {
+            auto res {v.template get<typename T::mapped_type>()};
+            if (res) {
+                value[k] = res.value();
+            } else {
+                return false;
             }
-
-            return true;
         }
-        return false;
+
+        return true;
     }
 
     static void To(cfg_value& config, T const& value)
@@ -365,21 +364,19 @@ struct converter<T> {
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
-        if (std::holds_alternative<array>(config)) {
-            value.clear();
-            array arr {std::get<array>(config)};
-            for (auto const& v : arr) {
-                auto res {v.template get<key_type>()};
-                if (res) {
-                    value.insert(res.value());
-                } else {
-                    return false;
-                }
-            }
+        if (!std::holds_alternative<array>(config)) { return false; }
 
-            return true;
+        value.clear();
+        array arr {std::get<array>(config)};
+        for (auto const& v : arr) {
+            if (auto res {v.template get<key_type>()}) {
+                value.insert(res.value());
+            } else {
+                return false;
+            }
         }
-        return false;
+
+        return true;
     }
 
     static void To(cfg_value& config, T const& value)
@@ -397,17 +394,16 @@ struct converter<std::tuple<T...>> {
 
     static auto From(cfg_value const& config, std::tuple<T...>& value) -> bool
     {
-        if (std::holds_alternative<array>(config)) {
-            array arr {std::get<array>(config)};
-            std::apply(
-                [&arr](auto&&... item) {
-                    i32 idx {0};
-                    ((from_cfg(arr, idx++, item)), ...);
-                },
-                value);
-            return true;
-        }
-        return false;
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        array arr {std::get<array>(config)};
+        std::apply(
+            [&arr](auto&&... item) {
+                i32 idx {0};
+                ((from_cfg(arr, idx++, item)), ...);
+            },
+            value);
+        return true;
     }
 
     static void To(cfg_value& config, std::tuple<T...> const& value)
@@ -471,34 +467,28 @@ template <typename T, usize Size>
 struct converter<std::array<T, Size>> {
     static auto IsType(cfg_value const& config) -> bool
     {
-        if (std::holds_alternative<array>(config)) {
-            array arr {std::get<array>(config)};
-            if (arr.size() > 0) {
-                return arr.is<T>(0);
-            }
-            return true;
-        }
-        return false;
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        array arr {std::get<array>(config)};
+        if (arr.size() > 0) { return arr.is<T>(0); }
+        return true;
     }
 
     static auto From(cfg_value const& config, std::array<T, Size>& value) -> bool
     {
-        if (std::holds_alternative<array>(config)) {
-            array arr {std::get<array>(config)};
-            for (isize i {0}; i < arr.size(); ++i) {
-                value[static_cast<usize>(i)] = *arr.get<T>(i);
-            }
-            return true;
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        array arr {std::get<array>(config)};
+        for (isize i {0}; i < arr.size(); ++i) {
+            value[static_cast<usize>(i)] = *arr.get<T>(i);
         }
-        return false;
+        return true;
     }
 
     static void To(cfg_value& config, std::array<T, Size> const& value)
     {
         array arr {};
-        for (auto& val : value) {
-            arr.add(val);
-        }
+        for (auto& val : value) { arr.add(val); }
         config = arr;
     }
 };
@@ -509,35 +499,29 @@ struct converter<T> {
 
     static auto IsType(cfg_value const& config) -> bool
     {
-        if (std::holds_alternative<array>(config)) {
-            array arr {std::get<array>(config)};
-            if (arr.size() > 0) {
-                return arr.is<value_type>(0);
-            }
-            return true;
-        }
-        return false;
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        array arr {std::get<array>(config)};
+        if (arr.size() > 0) { return arr.is<value_type>(0); }
+        return true;
     }
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
-        if (std::holds_alternative<array>(config)) {
-            value.clear();
-            array arr {std::get<array>(config)};
-            for (i32 i {0}; i < arr.size(); ++i) {
-                value.push_back(*arr.get<value_type>(i));
-            }
-            return true;
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        value.clear();
+        array arr {std::get<array>(config)};
+        for (i32 i {0}; i < arr.size(); ++i) {
+            value.push_back(*arr.get<value_type>(i));
         }
-        return false;
+        return true;
     }
 
     static void To(cfg_value& config, T const& value)
     {
         array arr {};
-        for (auto& val : value) {
-            arr.add(val);
-        }
+        for (auto& val : value) { arr.add(val); }
         config = arr;
     }
 };
@@ -547,9 +531,7 @@ struct converter<std::span<T>> {
     static void To(cfg_value& config, std::span<T> const& value)
     {
         array arr {};
-        for (auto const& val : value) {
-            arr.add(val);
-        }
+        for (auto const& val : value) { arr.add(val); }
         config = arr;
     }
 };
@@ -635,17 +617,16 @@ public:
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
-        if (std::holds_alternative<object>(config)) {
-            object const&     obj {std::get<object>(config)};
-            static auto const members {T::Members()};
-            bool              retValue {true};
-            std::apply([&](auto&&... m) {
-                ((retValue = retValue && m.set(obj, value)), ...);
-            },
-                       members);
-            return retValue;
-        }
-        return false;
+        if (!std::holds_alternative<object>(config)) { return false; }
+
+        object const&     obj {std::get<object>(config)};
+        static auto const members {T::Members()};
+        bool              retValue {true};
+        std::apply([&](auto&&... m) {
+            ((retValue = retValue && m.set(obj, value)), ...);
+        },
+                   members);
+        return retValue;
     }
 
     static void To(cfg_value& config, T const& value)

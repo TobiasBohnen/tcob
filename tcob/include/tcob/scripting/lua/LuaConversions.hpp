@@ -205,29 +205,28 @@ struct converter<T> {
 
     static auto From(state_view view, i32& idx, T& value) -> bool
     {
-        if (view.is_table(idx)) {
-            value.clear();
+        if (!view.is_table(idx)) { return false; }
 
-            bool retValue {true};
+        value.clear();
 
-            view.push_value(idx);               // stack: -1 => table
-            view.push_nil();                    // stack: -1 => nil; -2 => table
+        bool retValue {true};
 
-            while (view.next(-2) && retValue) { // stack: -1 => value; -2 => key; -3 => table
-                view.push_value(-2);            // stack: -1 => key; -2 => value; -3 => key; -4 => table
-                key_type key {};
-                i32      idx0 {-1}, idx1 {-2};
-                retValue = converter<key_type>::From(view, idx0, key)
-                    && converter<mapped_type>::From(view, idx1, value[key]);
-                view.pop(2); // stack: -1 => key; -2 => table
-            }
+        view.push_value(idx);               // stack: -1 => table
+        view.push_nil();                    // stack: -1 => nil; -2 => table
 
-            view.pop(1);     // stack: -1 => table
-
-            idx++;
-            return retValue;
+        while (view.next(-2) && retValue) { // stack: -1 => value; -2 => key; -3 => table
+            view.push_value(-2);            // stack: -1 => key; -2 => value; -3 => key; -4 => table
+            key_type key {};
+            i32      idx0 {-1}, idx1 {-2};
+            retValue = converter<key_type>::From(view, idx0, key)
+                && converter<mapped_type>::From(view, idx1, value[key]);
+            view.pop(2); // stack: -1 => key; -2 => table
         }
-        return false;
+
+        view.pop(1);     // stack: -1 => table
+
+        idx++;
+        return retValue;
     }
 
     static void To(state_view view, T const& value)
@@ -273,20 +272,21 @@ struct converter<T> {
 
     static auto From(state_view view, i32& idx, T& value) -> bool
     {
-        bool retValue {view.is_table(idx)};
-        if (retValue) {
-            value.clear();
-            i64 const len {static_cast<i64>(view.raw_len(idx))};
-            for (i64 i {1}; i <= len && retValue; ++i) {
-                view.raw_get(idx, i);
-                key_type val {};
-                i32      idx2 {-1};
-                retValue = converter<key_type>::From(view, idx2, val);
-                view.pop(1);
-                if (retValue) { value.insert(val); }
-            }
-            idx++;
+        if (!view.is_table(idx)) { return false; }
+
+        bool retValue {true};
+        value.clear();
+        i64 const len {static_cast<i64>(view.raw_len(idx))};
+        for (i64 i {1}; i <= len && retValue; ++i) {
+            view.raw_get(idx, i);
+            key_type val {};
+            i32      idx2 {-1};
+            retValue = converter<key_type>::From(view, idx2, val);
+            view.pop(1);
+            if (retValue) { value.insert(val); }
         }
+        idx++;
+
         return retValue;
     }
 
@@ -303,16 +303,17 @@ struct converter<T> {
 private:
     static auto check_set(state_view view, i32 idx) -> bool
     {
-        bool retValue {view.is_table(idx)};
-        if (retValue) {
-            u64 const len {view.raw_len(idx)};
+        if (!view.is_table(idx)) { return false; }
 
-            for (u64 i {1}; i <= len && retValue; ++i) {
-                view.raw_get(idx, static_cast<i64>(i));
-                retValue = converter<key_type>::IsType(view, -1);
-                view.pop(1);
-            }
+        bool      retValue {true};
+        u64 const len {view.raw_len(idx)};
+
+        for (u64 i {1}; i <= len && retValue; ++i) {
+            view.raw_get(idx, static_cast<i64>(i));
+            retValue = converter<key_type>::IsType(view, -1);
+            view.pop(1);
         }
+
         return retValue;
     }
 };
@@ -451,27 +452,28 @@ struct converter<T> {
 
     static auto From(state_view view, i32& idx, T& value) -> bool
     {
-        bool retValue {view.is_table(idx)};
-        if (retValue) {
-            value.clear();
-            u64 const len {view.raw_len(idx)};
-            value.resize(static_cast<usize>(len));
+        if (!view.is_table(idx)) { return false; }
 
-            for (usize i {1}; i <= len; ++i) {
-                view.raw_get(idx, static_cast<i64>(i));
-                value_type val {};
-                i32        idx2 {-1};
-                retValue = converter<value_type>::From(view, idx2, val);
-                view.pop(1);
-                if (retValue) {
-                    value[i - 1] = val;
-                } else {
-                    value.resize(i - 1);
-                    break;
-                }
+        bool retValue {true};
+        value.clear();
+        u64 const len {view.raw_len(idx)};
+        value.resize(static_cast<usize>(len));
+
+        for (usize i {1}; i <= len; ++i) {
+            view.raw_get(idx, static_cast<i64>(i));
+            value_type val {};
+            i32        idx2 {-1};
+            retValue = converter<value_type>::From(view, idx2, val);
+            view.pop(1);
+            if (retValue) {
+                value[i - 1] = val;
+            } else {
+                value.resize(i - 1);
+                break;
             }
-            idx++;
         }
+        idx++;
+
         return retValue;
     }
 
@@ -488,22 +490,21 @@ struct converter<T> {
 private:
     static auto check_vector(state_view view, i32 idx) -> bool
     {
-        bool retValue {view.is_table(idx)};
-        if (retValue) {
-            u64 const len {view.raw_len(idx)};
-            if (len == 0) {
-                return false;
-            }
+        if (!view.is_table(idx)) { return false; }
 
-            for (u64 i {1}; i <= len; ++i) {
-                view.raw_get(idx, static_cast<i64>(i));
-                retValue = converter<value_type>::IsType(view, -1);
-                view.pop(1);
-                if (!retValue) {
-                    break;
-                }
+        bool      retValue {true};
+        u64 const len {view.raw_len(idx)};
+        if (len == 0) { return false; }
+
+        for (u64 i {1}; i <= len; ++i) {
+            view.raw_get(idx, static_cast<i64>(i));
+            retValue = converter<value_type>::IsType(view, -1);
+            view.pop(1);
+            if (!retValue) {
+                break;
             }
         }
+
         return retValue;
     }
 };

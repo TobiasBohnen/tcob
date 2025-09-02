@@ -212,28 +212,27 @@ struct converter<T> {
 
     static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        if (view.is_table(idx) || view.is_array(idx)) {
-            value.clear();
+        if (!view.is_table(idx) && !view.is_array(idx)) { return false; }
 
-            bool retValue {true};
+        value.clear();
 
-            view.push(idx);                     // stack: -1 => table
-            view.push_null();                   // stack: -1 => nil; -2 => table
+        bool retValue {true};
 
-            while (view.next(-2) && retValue) { // stack: -1 => value; -2 => key; -3 => iterator; -4 => table
-                key_type  key {};
-                SQInteger idx0 {-2}, idx1 {-1};
-                retValue = converter<key_type>::From(view, idx0, key)
-                    && converter<mapped_type>::From(view, idx1, value[key]);
-                view.pop(2); // stack: -1 => iterator; -2 => table
-            }
+        view.push(idx);                     // stack: -1 => table
+        view.push_null();                   // stack: -1 => nil; -2 => table
 
-            view.pop(1);     // stack: -1 => table
-
-            idx++;
-            return retValue;
+        while (view.next(-2) && retValue) { // stack: -1 => value; -2 => key; -3 => iterator; -4 => table
+            key_type  key {};
+            SQInteger idx0 {-2}, idx1 {-1};
+            retValue = converter<key_type>::From(view, idx0, key)
+                && converter<mapped_type>::From(view, idx1, value[key]);
+            view.pop(2); // stack: -1 => iterator; -2 => table
         }
-        return false;
+
+        view.pop(1);     // stack: -1 => table
+
+        idx++;
+        return retValue;
     }
 
     static void To(vm_view view, T const& value)
@@ -249,20 +248,20 @@ struct converter<T> {
 private:
     static auto check_map(vm_view view, SQInteger idx) -> bool
     {
-        bool retValue {view.is_table(idx) || view.is_array(idx)};
-        if (retValue) {
-            view.push(idx);                     // stack: -1 => table
-            view.push_null();                   // stack: -1 => nil; -2 => table
+        if (!view.is_table(idx) && !view.is_array(idx)) { return false; }
 
-            while (view.next(-2) && retValue) { // stack: -1 => value; -2 => key; -3 => table
-                view.push(-2);                  // stack: -1 => key; -2 => value; -3 => key; -4 => table
-                retValue = converter<key_type>::IsType(view, -1)
-                    && converter<mapped_type>::IsType(view, -2);
-                view.pop(2);                    // stack: -1 => key; -2 => table
-            }
+        bool retValue {true};
+        view.push(idx);                     // stack: -1 => table
+        view.push_null();                   // stack: -1 => nil; -2 => table
 
-            view.pop(1);                        // stack: -1 => table
+        while (view.next(-2) && retValue) { // stack: -1 => value; -2 => key; -3 => table
+            view.push(-2);                  // stack: -1 => key; -2 => value; -3 => key; -4 => table
+            retValue = converter<key_type>::IsType(view, -1)
+                && converter<mapped_type>::IsType(view, -2);
+            view.pop(2);                    // stack: -1 => key; -2 => table
         }
+
+        view.pop(1);                        // stack: -1 => table
 
         return retValue;
     }
@@ -279,21 +278,22 @@ struct converter<T> {
 
     static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        bool retValue {view.is_array(idx)};
-        if (retValue) {
-            value.clear();
-            SQInteger const len {view.get_size(idx)};
-            for (SQInteger i {0}; i < len && retValue; ++i) {
-                view.push_integer(i);
-                view.raw_get(idx);
-                key_type  val {};
-                SQInteger idx2 {-1};
-                retValue = converter<key_type>::From(view, idx2, val);
-                value.insert(val);
-                view.pop(1);
-            }
-            idx++;
+        if (!view.is_array(idx)) { return false; }
+
+        bool retValue {true};
+        value.clear();
+        SQInteger const len {view.get_size(idx)};
+        for (SQInteger i {0}; i < len && retValue; ++i) {
+            view.push_integer(i);
+            view.raw_get(idx);
+            key_type  val {};
+            SQInteger idx2 {-1};
+            retValue = converter<key_type>::From(view, idx2, val);
+            value.insert(val);
+            view.pop(1);
         }
+        idx++;
+
         return retValue;
     }
 
@@ -311,16 +311,17 @@ struct converter<T> {
 private:
     static auto check_set(vm_view view, SQInteger idx) -> bool
     {
-        bool retValue {view.is_array(idx)};
-        if (retValue) {
-            SQInteger const len {view.get_size(idx)};
-            for (SQInteger i {0}; i < len && retValue; ++i) {
-                view.push_integer(i);
-                view.raw_get(idx);
-                retValue = converter<key_type>::IsType(view, -1);
-                view.pop(1);
-            }
+        if (!view.is_array(idx)) { return false; }
+
+        bool            retValue {true};
+        SQInteger const len {view.get_size(idx)};
+        for (SQInteger i {0}; i < len && retValue; ++i) {
+            view.push_integer(i);
+            view.raw_get(idx);
+            retValue = converter<key_type>::IsType(view, -1);
+            view.pop(1);
         }
+
         return retValue;
     }
 };
@@ -402,28 +403,29 @@ struct converter<T> {
 
     static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        bool retValue {view.is_array(idx)};
-        if (retValue) {
-            value.clear();
-            SQInteger const len {view.get_size(idx)};
-            value.resize(static_cast<usize>(len));
+        if (!view.is_array(idx)) { return false; }
 
-            for (SQInteger i {0}; i < len; ++i) {
-                view.push_integer(i);
-                view.raw_get(idx);
-                value_type val {};
-                SQInteger  idx2 {-1};
-                retValue = converter<value_type>::From(view, idx2, val);
-                view.pop(1);
-                if (retValue) {
-                    value[static_cast<usize>(i)] = val;
-                } else {
-                    value.resize(static_cast<usize>(i));
-                    break;
-                }
+        bool retValue {true};
+        value.clear();
+        SQInteger const len {view.get_size(idx)};
+        value.resize(static_cast<usize>(len));
+
+        for (SQInteger i {0}; i < len; ++i) {
+            view.push_integer(i);
+            view.raw_get(idx);
+            value_type val {};
+            SQInteger  idx2 {-1};
+            retValue = converter<value_type>::From(view, idx2, val);
+            view.pop(1);
+            if (retValue) {
+                value[static_cast<usize>(i)] = val;
+            } else {
+                value.resize(static_cast<usize>(i));
+                break;
             }
-            idx++;
         }
+        idx++;
+
         return retValue;
     }
 
@@ -442,22 +444,18 @@ struct converter<T> {
 private:
     static auto check_vector(vm_view view, SQInteger idx) -> bool
     {
-        bool retValue {view.is_array(idx)};
-        if (retValue) {
-            SQInteger const len {view.get_size(idx)};
-            if (len == 0) {
-                return false;
-            }
+        if (!view.is_array(idx)) { return false; }
 
-            for (SQInteger i {0}; i < len; ++i) {
-                view.push_integer(i);
-                view.raw_get(idx);
-                retValue = converter<value_type>::IsType(view, -1);
-                view.pop(1);
-                if (!retValue) {
-                    break;
-                }
-            }
+        SQInteger const len {view.get_size(idx)};
+        if (len == 0) { return false; }
+
+        bool retValue {true};
+        for (SQInteger i {0}; i < len; ++i) {
+            view.push_integer(i);
+            view.raw_get(idx);
+            retValue = converter<value_type>::IsType(view, -1);
+            view.pop(1);
+            if (!retValue) { break; }
         }
         return retValue;
     }
