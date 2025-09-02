@@ -148,67 +148,49 @@ inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_s
             return quote_identifier(columns);
         }
     }()...};
-
     _values.GroupBy = std::format(" GROUP BY {}", helper::join(colStrings, ", "));
     return *this;
 }
 
 template <typename... Values>
 template <typename T, typename O>
-inline auto select_statement<Values...>::left_join(T const& table, O const& on) -> select_statement<Values...>&
+inline auto select_statement<Values...>::on_str(T const& table, O const& on) -> string
 {
-    string tableStr;
-    if constexpr (detail::HasQualifiedName<T>) {
-        tableStr = table.qualified_name();
-    } else {
-        tableStr = table;
-    }
+    return on.str(std::format(R"("{}"."{}")", _values.Schema, _values.Table), table.qualified_name());
+}
 
-    string onStr;
-    if constexpr (detail::HasStr2<O>) {
-        onStr = on.str(std::format(R"("{}"."{}")", _values.Schema, _values.Table), tableStr);
-    } else {
-        onStr = on;
-    }
-
-    _values.Join = std::format(" LEFT JOIN {} ON ({})", tableStr, onStr);
+template <typename... Values>
+inline auto select_statement<Values...>::left_join(auto const& table, auto const& on) -> select_statement<Values...>&
+{
+    _values.Join = std::format(" LEFT JOIN {} ON ({})", table.qualified_name(), on_str(table, on));
     return *this;
 }
 
 template <typename... Values>
-template <typename T, typename O>
-inline auto select_statement<Values...>::inner_join(T const& table, O const& on) -> select_statement<Values...>&
+inline auto select_statement<Values...>::right_join(auto const& table, auto const& on) -> select_statement<Values...>&
 {
-    string tableStr;
-    if constexpr (detail::HasQualifiedName<T>) {
-        tableStr = table.qualified_name();
-    } else {
-        tableStr = table;
-    }
-
-    string onStr;
-    if constexpr (detail::HasStr2<O>) {
-        onStr = on.str(std::format(R"("{}"."{}")", _values.Schema, _values.Table), tableStr);
-    } else {
-        onStr = on;
-    }
-
-    _values.Join = std::format(" INNER JOIN {} ON ({})", tableStr, onStr);
+    _values.Join = std::format(" RIGHT JOIN {} ON ({})", table.qualified_name(), on_str(table, on));
     return *this;
 }
 
 template <typename... Values>
-template <typename T>
-inline auto select_statement<Values...>::cross_join(T const& table) -> select_statement<Values...>&
+inline auto select_statement<Values...>::full_join(auto const& table, auto const& on) -> select_statement<Values...>&
 {
-    string tableStr;
-    if constexpr (detail::HasQualifiedName<T>) {
-        tableStr = table.qualified_name();
-    } else {
-        tableStr = table;
-    }
+    _values.Join = std::format(" FULL JOIN {} ON ({})", table.qualified_name(), on_str(table, on));
+    return *this;
+}
 
-    _values.Join = std::format(" CROSS JOIN {}", tableStr);
+template <typename... Values>
+inline auto select_statement<Values...>::inner_join(auto const& table, auto const& on) -> select_statement<Values...>&
+{
+    _values.Join = std::format(" INNER JOIN {} ON ({})", table.qualified_name(), on_str(table, on));
+    return *this;
+}
+
+template <typename... Values>
+inline auto select_statement<Values...>::cross_join(auto const& table) -> select_statement<Values...>&
+{
+    _values.Join = std::format(" CROSS JOIN {}", table.qualified_name());
     return *this;
 }
 
@@ -359,15 +341,16 @@ inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
     static_assert(((detail::value_size<std::remove_cvref_t<decltype(values)>>::Size == columnsPerValue) && ...), "All inserted values must have the same number of columns");
 
     usize const valueCount {detail::count(value, values...)};
-    if (columnsPerValue == 1 && _columnCount == valueCount) { //  single row
-        if (!prepare(query_string(_columnCount, 1))) {
+    if (columnsPerValue == 1 && valueCount % _columnCount == 0) { //  single values
+        if (!prepare(query_string(_columnCount, valueCount / _columnCount))) {
             return false;
         }
-    } else {
-        assert(_columnCount == columnsPerValue);
+    } else if (_columnCount == columnsPerValue) {
         if (!prepare(query_string(columnsPerValue, valueCount))) {
             return false;
         }
+    } else {
+        return false;
     }
 
     // bind parameters

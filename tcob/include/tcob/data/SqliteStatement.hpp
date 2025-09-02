@@ -79,12 +79,11 @@ public:
     auto limit(i32 value, std::optional<i32> offset = std::nullopt) -> select_statement&;
     auto group_by(auto&&... columns) -> select_statement&;
 
-    template <typename T, typename O>
-    auto left_join(T const& table, O const& on) -> select_statement&;
-    template <typename T, typename O>
-    auto inner_join(T const& table, O const& on) -> select_statement&;
-    template <typename T>
-    auto cross_join(T const& table) -> select_statement&;
+    auto left_join(auto const& table, auto const& on) -> select_statement&;
+    auto right_join(auto const& table, auto const& on) -> select_statement&;
+    auto full_join(auto const& table, auto const& on) -> select_statement&;
+    auto inner_join(auto const& table, auto const& on) -> select_statement&;
+    auto cross_join(auto const& table) -> select_statement&;
 
     auto union_all_with(select_statement const& other) -> select_statement&;
     auto union_with(select_statement const& other) -> select_statement&;
@@ -94,6 +93,11 @@ public:
     auto query_string(bool semicolon) const -> utf8_string;
 
 private:
+    template <typename T, typename O>
+    auto on_str(T const& table, O const& on) -> string;
+    template <typename T>
+    auto table_str(T const& table) -> string;
+
     auto prepare_and_bind(auto&&... params) -> bool;
 
     struct values {

@@ -13,7 +13,9 @@
     #include <sqlite3/sqlite3.h>
 
     #include "SqliteVFS.hpp"
+
     #include "tcob/core/Logger.hpp"
+    #include "tcob/core/StringUtils.hpp"
 
 namespace tcob::db {
 
@@ -64,7 +66,7 @@ auto statement_view::column_int64(i32 col) const -> i64
 auto statement_view::column_text(i32 col) const -> utf8_string
 {
     assert(_stmt);
-    return reinterpret_cast<char const*>(sqlite3_column_text(_stmt, col));
+    return helper::to_string(reinterpret_cast<char const*>(sqlite3_column_text(_stmt, col)));
 }
 
 auto statement_view::column_blob(i32 col) const -> void const*
