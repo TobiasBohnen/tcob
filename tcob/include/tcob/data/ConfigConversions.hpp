@@ -328,6 +328,8 @@ struct converter<T> {
     {
         if (std::holds_alternative<object>(config)) {
             object obj {std::get<object>(config)};
+            value.clear();
+
             for (auto const& [k, v] : obj) {
                 auto res {v.template get<typename T::mapped_type>()};
                 if (res) {

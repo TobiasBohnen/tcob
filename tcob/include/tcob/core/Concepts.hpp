@@ -9,12 +9,9 @@
 #include "tcob/tcob_config.hpp"
 
 #include <concepts>
-#include <map>
-#include <set>
+#include <iterator>
 #include <span>
 #include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
 
 ////////////////////////////////////////////////////////////
 namespace tcob {
@@ -95,14 +92,24 @@ concept Serializable =
     };
 
 template <typename T>
-concept Map =
-    std::same_as<T, std::map<typename T::key_type, typename T::mapped_type, typename T::key_compare, typename T::allocator_type>>
-    || std::same_as<T, std::unordered_map<typename T::key_type, typename T::mapped_type, typename T::hasher, typename T::key_equal, typename T::allocator_type>>;
+concept Map = requires(T a, typename T::key_type k, typename T::mapped_type v) {
+    typename T::key_type;
+    typename T::mapped_type;
+    { a.clear() };
+    { a[k] } -> std::convertible_to<typename T::mapped_type&>;
+    { a.begin() } -> std::forward_iterator;
+    { a.end() } -> std::sentinel_for<decltype(a.begin())>;
+};
 
 template <typename T>
-concept Set =
-    std::same_as<T, std::set<typename T::key_type, typename T::key_compare, typename T::allocator_type>>
-    || std::same_as<T, std::unordered_set<typename T::key_type, typename T::hasher, typename T::key_equal, typename T::allocator_type>>;
+concept Set = requires(T a, typename T::key_type key) {
+    typename T::key_type;
+    { a.insert(key) };
+    { a.clear() };
+    { a.size() } -> std::convertible_to<usize>;
+    { a.begin() } -> std::forward_iterator;
+    { a.end() } -> std::sentinel_for<decltype(a.begin())>;
+};
 
 template <typename T>
 concept StringLike = std::is_convertible_v<T, string_view>;
@@ -118,7 +125,7 @@ concept Container =
         { container.push_back(value) };
         { container.clear() };
         { container.resize(usize {}) };
-        { container.size() } -> std::same_as<usize>;
+        { container.size() } -> std::convertible_to<usize>;
         { container.operator[](usize {}) };
     } && !StringLike<T>;
 
