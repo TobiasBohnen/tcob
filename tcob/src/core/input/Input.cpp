@@ -9,6 +9,20 @@
 
 namespace tcob::input {
 
+system::system()
+{
+    InputMode = mode::KeyboardMouse;
+}
+
+auto system::has_controller() const -> bool { return !controllers().empty(); }
+
+auto system::first_controller() const -> controller&
+{
+    return *controllers().begin()->second;
+}
+
+////////////////////////////////////////////////////////////
+
 key_mods::key_mods(key_mod mod)
     : _mod {mod}
 {
@@ -98,13 +112,6 @@ auto key_mods::is_down(key_mod mod) const -> bool
 {
     using namespace tcob::enum_ops;
     return (_mod & mod) == mod;
-}
-
-auto system::has_controller() const -> bool { return !controllers().empty(); }
-
-auto system::first_controller() const -> controller&
-{
-    return *controllers().begin()->second;
 }
 
 }

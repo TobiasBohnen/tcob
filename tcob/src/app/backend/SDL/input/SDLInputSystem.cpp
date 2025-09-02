@@ -167,11 +167,11 @@ void sdl_clipboard::set_text(utf8_string const& text)
 ////////////////////////////////////////////////////////////
 
 sdl_input_system::sdl_input_system()
-    : _mouse {std::make_shared<sdl_mouse>()}
+    : system {}
+    , _mouse {std::make_shared<sdl_mouse>()}
     , _keyboard {std::make_shared<sdl_keyboard>()}
     , _clipboard {std::make_shared<sdl_clipboard>()}
 {
-    InputMode = mode::KeyboardMouse;
 }
 
 sdl_input_system::~sdl_input_system()
@@ -207,13 +207,10 @@ void sdl_input_system::process_events(void* ev)
 {
     auto* sev {static_cast<SDL_Event*>(ev)};
 
-    static class sdl_keyboard key;
-    static class sdl_mouse    sdl_mouse;
-
     switch (sev->type) {
     case SDL_EVENT_KEY_DOWN: {
         sdl_keyboard::event const event {
-            .Keyboard = &key,
+            .Keyboard = _keyboard.get(),
             .Pressed  = !sev->key.down,
             .Repeat   = sev->key.repeat != 0,
             .ScanCode = convert_enum(sev->key.scancode),
@@ -224,7 +221,7 @@ void sdl_input_system::process_events(void* ev)
     } break;
     case SDL_EVENT_KEY_UP: {
         sdl_keyboard::event const event {
-            .Keyboard = &key,
+            .Keyboard = _keyboard.get(),
             .Pressed  = sev->key.down,
             .Repeat   = sev->key.repeat != 0,
             .ScanCode = convert_enum(sev->key.scancode),
@@ -239,7 +236,7 @@ void sdl_input_system::process_events(void* ev)
     } break;
     case SDL_EVENT_MOUSE_MOTION: {
         sdl_mouse::motion_event const event {
-            .Mouse          = &sdl_mouse,
+            .Mouse          = _mouse.get(),
             .Position       = {static_cast<i32>(sev->motion.x), static_cast<i32>(sev->motion.y)},
             .RelativeMotion = {static_cast<i32>(sev->motion.xrel), static_cast<i32>(sev->motion.yrel)}};
         MouseMotion(event);
@@ -247,7 +244,7 @@ void sdl_input_system::process_events(void* ev)
     } break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
         sdl_mouse::button_event const event {
-            .Mouse    = &sdl_mouse,
+            .Mouse    = _mouse.get(),
             .Button   = convert_mouse_button(sev->button.button),
             .Pressed  = sev->button.down,
             .Clicks   = sev->button.clicks,
@@ -257,7 +254,7 @@ void sdl_input_system::process_events(void* ev)
     } break;
     case SDL_EVENT_MOUSE_BUTTON_UP: {
         sdl_mouse::button_event const event {
-            .Mouse    = &sdl_mouse,
+            .Mouse    = _mouse.get(),
             .Button   = convert_mouse_button(sev->button.button),
             .Pressed  = !sev->button.down,
             .Clicks   = sev->button.clicks,
@@ -267,7 +264,7 @@ void sdl_input_system::process_events(void* ev)
     } break;
     case SDL_EVENT_MOUSE_WHEEL: {
         sdl_mouse::wheel_event const event {
-            .Mouse    = &sdl_mouse,
+            .Mouse    = _mouse.get(),
             .Scroll   = sev->wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? point_f {-sev->wheel.x, -sev->wheel.y} : point_f {sev->wheel.x, sev->wheel.y},
             .Position = {static_cast<i32>(sev->wheel.mouse_x), static_cast<i32>(sev->wheel.mouse_y)}};
         MouseWheel(event);

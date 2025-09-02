@@ -297,6 +297,9 @@ public:
     virtual void process_events(void* ev) = 0;
 
     static inline char const* ServiceName {"input::system"};
+
+protected:
+    system();
 };
 
 ////////////////////////////////////////////////////////////
