@@ -128,32 +128,30 @@ auto to_lower(string_view source) -> string
 
 auto wildcard_match(string_view str, string_view pattern) -> bool
 {
-    auto strIt {str.begin()};
-    auto patternIt {pattern.begin()};
+    usize s {0};
+    usize p {0};
 
-    auto strLastStar {str.end()};
-    auto patternLastStar {pattern.end()};
+    usize lastStarS {string_view::npos};
+    usize lastStarP {string_view::npos};
 
-    while (strIt != str.end()) {
-        if (patternIt != pattern.end() && (*patternIt == '?' || *patternIt == *strIt)) { // match
-            ++strIt;
-            ++patternIt;
-        } else if (patternIt != pattern.end() && *patternIt == '*') {                    // begin star matching
-            patternLastStar = patternIt++;
-            strLastStar     = strIt;
-        } else if (patternLastStar != pattern.end()) {                                   // continue star matching
-            patternIt = patternLastStar + 1;
-            strIt     = ++strLastStar;
+    while (s < str.size()) {
+        if (p < pattern.size() && (pattern[p] == '?' || pattern[p] == str[s])) {
+            ++s;
+            ++p;
+        } else if (p < pattern.size() && pattern[p] == '*') {
+            lastStarP = p++;
+            lastStarS = s;
+        } else if (lastStarP != string_view::npos) {
+            p = lastStarP + 1;
+            s = ++lastStarS;
         } else {
             return false;
         }
     }
 
-    while (patternIt != pattern.end() && *patternIt == '*') {
-        ++patternIt;
-    }
+    while (p < pattern.size() && pattern[p] == '*') { ++p; }
 
-    return patternIt == pattern.end();
+    return p == pattern.size();
 }
 
 auto random_string(usize length) -> string
