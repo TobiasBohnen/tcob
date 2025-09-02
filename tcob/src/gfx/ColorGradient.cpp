@@ -87,7 +87,7 @@ auto color_gradient::colors(bool preMulAlpha) const -> std::array<color, Size>
     return retValue;
 }
 
-auto color_gradient::as_single_color() const -> std::optional<color>
+auto color_gradient::solid_color() const -> std::optional<color>
 {
     return _colorStops.size() == 1
         ? std::optional<color> {_colorStops.begin()->second}

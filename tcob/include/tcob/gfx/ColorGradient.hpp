@@ -50,7 +50,7 @@ public:
 
     auto colors(bool preMulAlpha = true) const -> std::array<color, Size>;
 
-    auto as_single_color() const -> std::optional<color>;
+    auto solid_color() const -> std::optional<color>;
 
     auto get_color_at(u32 key) const -> color;
 
