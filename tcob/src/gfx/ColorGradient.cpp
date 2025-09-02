@@ -34,6 +34,11 @@ color_gradient::color_gradient()
 
 color_gradient::color_gradient(std::initializer_list<color const> colors)
 {
+    if (colors.size() == 1) {
+        _colorStops[0] = *colors.begin();
+        return;
+    }
+
     f32 const step {1.0f / (colors.size() - 1)};
     f32       current {0.0f};
     for (auto const& color : colors) {
@@ -61,26 +66,19 @@ auto color_gradient::colors(bool preMulAlpha) const -> std::array<color, Size>
     std::array<color, Size> retValue {};
 
     if (_colorStops.size() == 1) {
-        retValue.fill(_colorStops.begin()->second);
+        color const col {_colorStops.begin()->second};
+        retValue.fill(preMulAlpha ? col.as_alpha_premultiplied() : col);
     } else {
-        auto it2 {_colorStops.begin()};
-        auto it1 {it2++};
-        while (it2 != _colorStops.end()) {
-            auto const [k1, col1] {*it1};
-            auto const [k2, col2] {*it2};
+        auto curr {_colorStops.begin()};
+        for (auto next {std::next(curr)}; next != _colorStops.end(); ++curr, ++next) {
+            auto const [currStop, currColor] {*curr};
+            auto const [nextStop, nextColor] {*next};
 
-            u32 const start {k1};
-            u32 const size {k2 - start};
-
-            for (u32 i {0}; i <= size; ++i) {
-                color col {color::Lerp(col1, col2, static_cast<f32>(i) / size)};
-                if (preMulAlpha) { col = col.as_alpha_premultiplied(); }
-
-                retValue[i + start] = col;
+            u32 const distance {nextStop - currStop};
+            for (u32 i {0}; i <= distance; ++i) {
+                color const col {color::Lerp(currColor, nextColor, static_cast<f32>(i) / distance)};
+                retValue[i + currStop] = preMulAlpha ? col.as_alpha_premultiplied() : col;
             }
-
-            it1 = it2;
-            ++it2;
         }
     }
 
