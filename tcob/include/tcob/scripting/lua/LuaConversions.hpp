@@ -28,7 +28,6 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Proxy.hpp"
-    #include "tcob/core/Serialization.hpp"
     #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/lua/Lua.hpp"
     #include "tcob/scripting/lua/LuaClosure.hpp"
@@ -1028,7 +1027,7 @@ public:
         static auto const members {T::Members()};
         bool              retValue {true};
         std::apply([&](auto&&... m) {
-            ((retValue = retValue && set_member(m, tab, value)), ...);
+            ((retValue = retValue && m.set(tab, value)), ...);
         },
                    members);
         return retValue;
@@ -1039,9 +1038,7 @@ public:
         table tab {table::PushNew(view)};
 
         static auto const members {T::Members()};
-        std::apply([&](auto&&... m) {
-            (get_member(m, tab, value), ...);
-        },
+        std::apply([&](auto&&... m) { (m.get(tab, value), ...); },
                    members);
     }
 };

@@ -21,7 +21,6 @@
 #include "tcob/core/AngleUnits.hpp"
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/core/Serialization.hpp"
 #include "tcob/data/Config.hpp"
 #include "tcob/data/ConfigTypes.hpp"
 
@@ -639,7 +638,7 @@ public:
             static auto const members {T::Members()};
             bool              retValue {true};
             std::apply([&](auto&&... m) {
-                ((retValue = retValue && set_member(m, obj, value)), ...);
+                ((retValue = retValue && m.set(obj, value)), ...);
             },
                        members);
             return retValue;
@@ -652,9 +651,7 @@ public:
         object obj {};
 
         static auto const members {T::Members()};
-        std::apply([&](auto&&... m) {
-            ((get_member(m, obj, value)), ...);
-        },
+        std::apply([&](auto&&... m) { ((m.get(obj, value)), ...); },
                    members);
 
         config = obj;

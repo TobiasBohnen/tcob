@@ -7,13 +7,13 @@
 
 #pragma once
 #include "tcob/tcob_config.hpp"
-#include <expected>
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
     #include <array>
     #include <cmath>
     #include <cstddef>
+    #include <expected>
     #include <filesystem>
     #include <functional>
     #include <optional>
@@ -27,7 +27,6 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Proxy.hpp"
-    #include "tcob/core/Serialization.hpp"
     #include "tcob/scripting/Scripting.hpp"
     #include "tcob/scripting/squirrel/Squirrel.hpp"
     #include "tcob/scripting/squirrel/SquirrelClosure.hpp"
@@ -995,7 +994,7 @@ public:
         static auto const members {T::Members()};
         bool              retValue {true};
         std::apply([&](auto&&... m) {
-            ((retValue = retValue && set_member(m, tab, value)), ...);
+            ((retValue = retValue && m.set(tab, value)), ...);
         },
                    members);
         return retValue;
@@ -1006,9 +1005,7 @@ public:
         table tab {table::PushNew(view)};
 
         static auto const members {T::Members()};
-        std::apply([&](auto&&... m) {
-            (get_member(m, tab, value), ...);
-        },
+        std::apply([&](auto&&... m) { (m.get(tab, value), ...); },
                    members);
     }
 };
