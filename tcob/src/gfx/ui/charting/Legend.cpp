@@ -5,6 +5,8 @@
 
 #include "tcob/gfx/ui/charting/Legend.hpp"
 
+#include <algorithm>
+
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -46,8 +48,7 @@ void legend::on_draw(widget_painter& painter)
     if (legendDefs.empty()) { return; }
 
     f32 const lineHeight {rect.height() / static_cast<f32>(legendDefs.size())};
-    f32 const markerSize {lineHeight * 0.6f};
-    f32 const spacing {lineHeight * 0.2f};
+    f32 const markerSize {std::min(rect.width() / 2, lineHeight * 0.6f)};
 
     point_f pos {rect.top_left()};
 
@@ -59,9 +60,9 @@ void legend::on_draw(widget_painter& painter)
         canvas.fill();
 
         rect_f const textBounds {
-            pos.X + markerSize + spacing,
+            pos.X + markerSize,
             pos.Y,
-            rect.width() - (markerSize + spacing),
+            rect.width() - markerSize,
             lineHeight};
 
         painter.draw_text(_style.Text, textBounds, name);

@@ -174,17 +174,17 @@ inline auto gamma_distribution::operator()(auto&& rng) -> f64
         f64 x {}, v {};
         do {
             x = normal(rng);
-            v = 1.0 + c * x;
+            v = 1.0 + (c * x);
         } while (v <= 0.0);
 
         v = v * v * v;
         f64 const u {core_uniform_distribution::NextFloat(rng)};
 
-        if (u < 1.0 - 0.0331 * (x * x) * (x * x)) {
+        if (u < 1.0 - (0.0331 * (x * x) * (x * x))) {
             return _scale * d * v;
         }
 
-        if (std::log(u) < 0.5 * x * x + d * (1.0 - v + std::log(v))) {
+        if (std::log(u) < (0.5 * x * x) + (d * (1.0 - v + std::log(v)))) {
             return _scale * d * v;
         }
     }
@@ -235,9 +235,9 @@ inline auto normal_distribution::operator()(auto&& rng) -> f64
 
     f64 v1 {}, v2 {}, s {0};
     do {
-        v1 = 2 * core_uniform_distribution::NextFloat(rng) - 1;
-        v2 = 2 * core_uniform_distribution::NextFloat(rng) - 1;
-        s  = v1 * v1 + v2 * v2;
+        v1 = (2 * core_uniform_distribution::NextFloat(rng)) - 1;
+        v2 = (2 * core_uniform_distribution::NextFloat(rng)) - 1;
+        s  = (v1 * v1) + (v2 * v2);
     } while (s >= 1 || s == 0);
 
     f64 const multiplier {std::sqrt(-2 * std::log(s) / s)};
