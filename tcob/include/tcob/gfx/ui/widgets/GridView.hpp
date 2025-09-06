@@ -35,7 +35,7 @@ public:
 
     class TCOB_API style : public vscroll_widget::style {
     public:
-        bool                     AutoSizeColumns {true};
+        bool                     AutoSizeColumns {true}; // TODO: lerp?
         utf8_string              HeaderItemClass {"header_items"};
         std::vector<utf8_string> RowItemClasses {"row_items"};
         f32                      MaxVisibleRows {5};

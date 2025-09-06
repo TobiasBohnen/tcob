@@ -8,6 +8,7 @@
 
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
+#include "tcob/gfx/ui/WidgetPainter.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui::charts {
@@ -26,13 +27,23 @@ inline chart<T>::chart(init const& wi)
 }
 
 template <typename T>
+inline void chart<T>::on_draw(widget_painter& painter)
+{
+    if (Series->empty()) { return; }
+    auto const* style {dynamic_cast<chart_style const*>(current_style())};
+    if (style && style->Colors.empty()) { return; }
+
+    on_draw_chart(painter);
+}
+
+template <typename T>
 inline auto chart<T>::max_x() const -> usize
 {
     return _maxX;
 }
 
 template <typename T>
-inline auto chart<T>::position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
+inline auto grid_chart<T>::position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
 {
     f32 const range {axis.Max - axis.Min};
     if (range == 0.0f) { return bounds.left(); }
@@ -41,7 +52,7 @@ inline auto chart<T>::position_in_xaxis(f32 value, axis const& axis, rect_f cons
 }
 
 template <typename T>
-inline auto chart<T>::position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
+inline auto grid_chart<T>::position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32
 {
     f32 const range {axis.Max - axis.Min};
     if (range == 0.0f) { return bounds.bottom(); }

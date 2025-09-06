@@ -44,10 +44,14 @@ namespace helper {
         return false;
     }
 
-    template <Arithmetic A>
-    auto constexpr lerp(A from, A to, f64 step) -> A
+    template <typename T>
+    auto constexpr lerp(T from, T to, f64 step) -> T
     {
-        return static_cast<A>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
+        if constexpr (Arithmetic<T>) {
+            return static_cast<T>(std::lerp(static_cast<f64>(from), static_cast<f64>(to), step));
+        } else {
+            return (step < 0.5) ? from : to;
+        }
     }
 }
 

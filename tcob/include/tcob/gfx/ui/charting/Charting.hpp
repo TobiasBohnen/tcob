@@ -48,9 +48,11 @@ public:
 protected:
     explicit chart(init const& wi);
 
+    void on_draw(widget_painter& painter) final;
+
+    void virtual on_draw_chart(widget_painter& painter) = 0;
+
     auto max_x() const -> usize;
-    auto position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
-    auto position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
 
 private:
     usize _maxX {0};
@@ -85,6 +87,9 @@ protected:
     void draw_grid(gfx::canvas& canvas, grid_chart_style const& style, rect_f const& bounds) const;
 
     virtual auto calc_grid_lines() const -> size_i = 0;
+
+    auto position_in_xaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
+    auto position_in_yaxis(f32 value, axis const& axis, rect_f const& bounds) const -> f32;
 };
 
 }

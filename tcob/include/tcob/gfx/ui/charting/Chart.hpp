@@ -22,7 +22,7 @@ public:
     class TCOB_API style : public grid_chart_style {
     public:
         length LineSize {3.0f, length::type::Absolute};
-        bool   SmoothLines {false};
+        bool   SmoothLines {false}; // TODO: lerp?
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -32,7 +32,7 @@ public:
     prop<axis> YAxis;
 
 protected:
-    void on_draw(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter) override;
 
     auto calc_grid_lines() const -> size_i override;
 
@@ -48,7 +48,7 @@ public:
     public:
         length BarSize {1.f, length::type::Relative};
         length BarRadius {};
-        bool   StackBars {false};
+        bool   StackBars {false}; // TODO: lerp?
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -58,7 +58,7 @@ public:
     prop<axis> YAxis;
 
 protected:
-    void on_draw(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter) override;
 
     auto calc_grid_lines() const -> size_i override;
 
@@ -81,7 +81,7 @@ public:
     explicit marimekko_chart(init const& wi);
 
 protected:
-    void on_draw(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter) override;
 
 private:
     style _style;
@@ -98,7 +98,7 @@ public:
     explicit pie_chart(init const& wi);
 
 protected:
-    void on_draw(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter) override;
 
 private:
     style _style;
@@ -122,9 +122,36 @@ public:
     prop<axis> YAxis;
 
 protected:
-    void on_draw(widget_painter& painter) override;
+    void on_draw_chart(widget_painter& painter) override;
 
     auto calc_grid_lines() const -> size_i override;
+
+private:
+    style _style;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API radar_chart : public chart<f32> {
+public:
+    class style : public chart_style {
+    public:
+        f32 LineWidth {4.0f};
+        u8  FillAreaAlpha {0};
+
+        grid_line_amount GridLines {grid_line_amount::Normal};
+        f32              GridLineWidth {2.0f};
+        color            GridColor {colors::Gray};
+
+        static void Transition(style& target, style const& from, style const& to, f64 step);
+    };
+
+    explicit radar_chart(init const& wi);
+
+    prop<axis> ValueAxis;
+
+protected:
+    void on_draw_chart(widget_painter& painter) override;
 
 private:
     style _style;

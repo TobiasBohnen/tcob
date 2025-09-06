@@ -86,6 +86,7 @@ namespace charts {
     class marimekko_chart;
     class pie_chart;
     class scatter_chart;
+    class radar_chart;
 }
 
 ////////////////////////////////////////////////////////////

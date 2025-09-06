@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/charting/Chart.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <vector>
 
@@ -40,7 +41,7 @@ line_chart::line_chart(init const& wi)
     YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
-void line_chart::on_draw(widget_painter& painter)
+void line_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
@@ -131,7 +132,7 @@ bar_chart::bar_chart(init const& wi)
     YAxis.Changed.connect([&] { queue_redraw(); });
 }
 
-void bar_chart::on_draw(widget_painter& painter)
+void bar_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
@@ -141,7 +142,6 @@ void bar_chart::on_draw(widget_painter& painter)
     draw_grid(canvas, _style, rect);
 
     auto const barCount {Series->size()};
-    if (barCount == 0) { return; }
 
     auto const columnWidth {rect.width() / max_x()};
     auto const barWidth {_style.BarSize.calc(columnWidth)};
@@ -232,7 +232,7 @@ marimekko_chart::marimekko_chart(init const& wi)
     Class("marimekko_chart");
 }
 
-void marimekko_chart::on_draw(widget_painter& painter)
+void marimekko_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
@@ -240,7 +240,6 @@ void marimekko_chart::on_draw(widget_painter& painter)
     auto& canvas {painter.canvas()};
 
     usize const seriesCount {Series->size()};
-    if (seriesCount == 0) { return; }
 
     usize const valueCount {Series->front().Values.size()};
     if (valueCount == 0) { return; }
@@ -305,7 +304,7 @@ pie_chart::pie_chart(init const& wi)
     Class("pie_chart");
 }
 
-void pie_chart::on_draw(widget_painter& painter)
+void pie_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
@@ -372,15 +371,12 @@ scatter_chart::scatter_chart(init const& wi)
     Class("scatter_chart");
 }
 
-void scatter_chart::on_draw(widget_painter& painter)
+void scatter_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
 
     auto& canvas {painter.canvas()};
-
-    usize const seriesCount {Series->size()};
-    if (seriesCount == 0) { return; }
 
     draw_grid(canvas, _style, rect);
 
@@ -419,6 +415,108 @@ auto scatter_chart::calc_grid_lines() const -> size_i
     case grid_line_amount::Many:   horizontalGridLines = ((YAxis->Max - YAxis->Min) * 2) + 1; break;
     }
     return {horizontalGridLines, verticalGridLines};
+}
+
+////////////////////////////////////////////////////////////
+
+void radar_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
+{
+    chart_style::Transition(target, from, to, step);
+    target.LineWidth     = helper::lerp(from.LineWidth, to.LineWidth, step);
+    target.FillAreaAlpha = helper::lerp(from.FillAreaAlpha, to.FillAreaAlpha, step);
+
+    target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
+    target.GridColor     = color::Lerp(from.GridColor, to.GridColor, step);
+}
+
+radar_chart::radar_chart(init const& wi)
+    : chart {wi}
+{
+    Class("radar_chart");
+}
+
+void radar_chart::on_draw_chart(widget_painter& painter)
+{
+    rect_f const        rect {draw_background(_style, painter)};
+    scissor_guard const guard {painter, this};
+    auto&               canvas {painter.canvas()};
+
+    usize const axisCount {max_x()};
+
+    point_f const center {rect.center()};
+    f32 const     radius {std::min(rect.width(), rect.height()) / 2};
+
+    if (_style.GridLines != grid_line_amount::None) {
+        // draw radial axes
+        canvas.set_stroke_style(_style.GridColor);
+        canvas.set_stroke_width(_style.GridLineWidth);
+        for (usize i {0}; i < axisCount; ++i) {
+            f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
+            f32 const x {center.X + (std::cos(angle) * radius)};
+            f32 const y {center.Y + (std::sin(angle) * radius)};
+            canvas.begin_path();
+            canvas.move_to(center);
+            canvas.line_to({x, y});
+            canvas.stroke();
+        }
+
+        // draw helper/concentric lines
+        usize ringCount {0};
+        switch (_style.GridLines) {
+        case grid_line_amount::None:   break;
+        case grid_line_amount::Few:    ringCount = 3; break;
+        case grid_line_amount::Normal: ringCount = 6; break;
+        case grid_line_amount::Many:   ringCount = 12; break;
+        }
+        for (usize r {1}; r <= ringCount; ++r) {
+            f32 const ringRadius {(static_cast<f32>(r) / ringCount) * radius};
+            canvas.begin_path();
+            for (usize i {0}; i < axisCount; ++i) {
+                f32 const angle {(static_cast<f32>(i) / axisCount) * TAU_F};
+                f32 const x {center.X + (std::cos(angle) * ringRadius)};
+                f32 const y {center.Y + (std::sin(angle) * ringRadius)};
+                if (i == 0) {
+                    canvas.move_to({x, y});
+                } else {
+                    canvas.line_to({x, y});
+                }
+            }
+            canvas.close_path();
+            canvas.stroke();
+        }
+    }
+
+    // draw series polygons
+    for (usize i {0}; i < Series->size(); ++i) {
+        auto const& s {Series[i]};
+        if (s.Values.empty()) { continue; }
+        std::vector<point_f> points;
+        for (usize j {0}; j < axisCount; ++j) {
+            f32 const value {(j < s.Values.size()) ? s.Values[j] : 0.0f};
+            f32 const normalized {(value - ValueAxis->Min) / (ValueAxis->Max - ValueAxis->Min)};
+            f32 const angle {(static_cast<f32>(j) / axisCount) * TAU_F};
+            f32 const r {normalized * radius};
+
+            points.emplace_back(center.X + (std::cos(angle) * r), center.Y + (std::sin(angle) * r));
+        }
+
+        canvas.begin_path();
+        canvas.move_to(points[0]);
+        for (usize j {1}; j < points.size(); ++j) {
+            canvas.line_to(points[j]);
+        }
+        canvas.close_path();
+
+        color c {_style.Colors[i % _style.Colors.size()]};
+        if (_style.FillAreaAlpha > 0) {
+            canvas.set_fill_style({c.R, c.G, c.B, _style.FillAreaAlpha});
+            canvas.fill();
+        }
+
+        canvas.set_stroke_style(c);
+        canvas.set_stroke_width(_style.LineWidth);
+        canvas.stroke();
+    }
 }
 
 } // namespace display
