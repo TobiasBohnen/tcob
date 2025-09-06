@@ -128,6 +128,7 @@
 #include <tcob/gfx/ui/WidgetPainter.hpp>
 #include <tcob/gfx/ui/charting/Chart.hpp>
 #include <tcob/gfx/ui/charting/Charting.hpp>
+#include <tcob/gfx/ui/charting/Legend.hpp>
 #include <tcob/gfx/ui/component/Icon.hpp>
 #include <tcob/gfx/ui/component/Item.hpp>
 #include <tcob/gfx/ui/component/Scrollbar.hpp>

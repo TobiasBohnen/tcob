@@ -11,6 +11,7 @@
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Signal.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -31,6 +32,11 @@ struct datapoint {
     T           Value;
 };
 
+struct legend_def {
+    utf8_string Name;
+    color       Color;
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API chart_style : public widget_style {
@@ -40,10 +46,24 @@ public:
     static void Transition(chart_style& target, chart_style const& from, chart_style const& to, f64 step);
 };
 
+class TCOB_API chart_base : public widget {
+public:
+    virtual ~chart_base() = default;
+
+    signal<> Drawn;
+
+    virtual auto legend() const -> std::vector<legend_def> = 0;
+
+protected:
+    using widget::widget;
+};
+
 template <typename T>
-class chart : public widget {
+class chart : public chart_base {
 public:
     prop<std::vector<datapoint<T>>> Dataset;
+
+    auto legend() const -> std::vector<legend_def> override;
 
 protected:
     explicit chart(init const& wi);

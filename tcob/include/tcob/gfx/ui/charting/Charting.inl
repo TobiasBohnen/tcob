@@ -6,6 +6,8 @@
 #pragma once
 #include "Charting.hpp"
 
+#include <vector>
+
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
@@ -15,7 +17,7 @@ namespace tcob::ui::charts {
 
 template <typename T>
 inline chart<T>::chart(init const& wi)
-    : widget {wi}
+    : chart_base {wi}
 {
     Dataset.Changed.connect([&] {
         _maxX = 0;
@@ -31,6 +33,18 @@ inline chart<T>::chart(init const& wi)
 }
 
 template <typename T>
+inline auto chart<T>::legend() const -> std::vector<legend_def>
+{
+    std::vector<legend_def> retValue;
+
+    auto const* style {dynamic_cast<chart_style const*>(current_style())};
+    for (usize i {0}; i < Dataset->size() && style; ++i) {
+        retValue.emplace_back(Dataset[i].Name, style->Colors[i % style->Colors.size()]);
+    }
+    return retValue;
+}
+
+template <typename T>
 inline void chart<T>::on_draw(widget_painter& painter)
 {
     if (Dataset->empty()) { return; }
@@ -38,6 +52,7 @@ inline void chart<T>::on_draw(widget_painter& painter)
     if (style && style->Colors.empty()) { return; }
 
     on_draw_chart(painter);
+    Drawn();
 }
 
 template <typename T>
@@ -100,5 +115,4 @@ inline void grid_chart<T>::draw_grid(gfx::canvas& canvas, grid_chart_style const
         }
     }
 }
-
 }

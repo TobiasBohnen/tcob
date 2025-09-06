@@ -51,6 +51,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Chart.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Charting.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Legend.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/Scrollbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/WidgetTweener.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
@@ -141,6 +142,7 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Chart.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Charting.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Charting.inl
+    ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Legend.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Icon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Item.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Scrollbar.hpp

@@ -39,7 +39,7 @@ protected:
     auto calc_grid_lines() const -> size_i override;
 
 private:
-    style _style;
+    line_chart::style _style;
 };
 
 ////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ protected:
     auto calc_grid_lines() const -> size_i override;
 
 private:
-    style _style;
+    bar_chart::style _style;
 };
 
 ////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ protected:
     void on_draw_chart(widget_painter& painter) override;
 
 private:
-    style _style;
+    marimekko_chart::style _style;
 };
 
 ////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ protected:
     void on_draw_chart(widget_painter& painter) override;
 
 private:
-    style _style;
+    pie_chart::style _style;
 };
 
 ////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ protected:
     auto calc_grid_lines() const -> size_i override;
 
 private:
-    style _style;
+    scatter_chart::style _style;
 };
 
 ////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ protected:
     void on_draw_chart(widget_painter& painter) override;
 
 private:
-    style _style;
+    radar_chart::style _style;
 };
 
 }
