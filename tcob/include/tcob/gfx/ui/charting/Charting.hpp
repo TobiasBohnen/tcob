@@ -77,7 +77,7 @@ public:
 };
 
 template <typename T>
-class TCOB_API grid_chart : public chart<T> {
+class grid_chart : public chart<T> {
 public:
 protected:
     grid_chart(widget::init const& wi);
