@@ -34,6 +34,7 @@ layout::layout(parent parent)
 
 void layout::apply(size_f size)
 {
+    if (_widgets.empty()) { return; }
     normalize_zorder();
     do_layout(size);
 }
@@ -284,20 +285,34 @@ void horizontal_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
 
-    f32 const horiSize {size.Width / w.size()};
-    f32 const vertSize {size.Height};
+    std::vector<f32> widths;
+    widths.reserve(w.size());
 
-    for (i32 i {0}; i < std::ssize(w); ++i) {
-        auto const& widget {w[i]};
-        f32 const   width {widget->Flex->Width.calc(horiSize)};
-        f32 const   height {widget->Flex->Height.calc(vertSize)};
-        f32 const   x {i * horiSize};
+    f32 totalDesiredWidth {0.f};
+    for (auto const& widget : w) {
+        f32 const width {widget->Flex->Width.calc(size.Width)};
+        widths.push_back(width);
+        totalDesiredWidth += width;
+    }
 
+    f32 const scale {(totalDesiredWidth > size.Width) ? (size.Width / totalDesiredWidth) : 1.f};
+    f32 const remaining {size.Width - (totalDesiredWidth * scale)};
+    f32 const offsetX {remaining / (w.size() + 1)};
+
+    f32 x {offsetX};
+    for (usize i {0}; i < w.size(); ++i) {
+        f32 const width {widths[i] * scale};
+        f32 const height {w[i]->Flex->Height.calc(size.Height)};
+
+        f32 y {0.f};
         switch (_alignment) {
-        case gfx::vertical_alignment::Top:    widget->Bounds = {x, 0, width, height}; break;
-        case gfx::vertical_alignment::Bottom: widget->Bounds = {x, vertSize - height, width, height}; break;
-        case gfx::vertical_alignment::Middle: widget->Bounds = {x, (vertSize - height) / 2, width, height}; break;
+        case gfx::vertical_alignment::Top:    y = 0.f; break;
+        case gfx::vertical_alignment::Bottom: y = size.Height - height; break;
+        case gfx::vertical_alignment::Middle: y = (size.Height - height) / 2.f; break;
         }
+
+        w[i]->Bounds = {x, y, width, height};
+        x += width + offsetX;
     }
 }
 
@@ -313,20 +328,35 @@ void vertical_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};
 
-    f32 const horiSize {size.Width};
-    f32 const vertSize {size.Height / w.size()};
+    std::vector<f32> heights;
+    heights.reserve(w.size());
 
-    for (i32 i {0}; i < std::ssize(w); ++i) {
+    f32 totalDesiredHeight {0.f};
+    for (auto const& widget : w) {
+        f32 const height {widget->Flex->Height.calc(size.Height)};
+        heights.push_back(height);
+        totalDesiredHeight += height;
+    }
+
+    f32 const scale {(totalDesiredHeight > size.Height) ? (size.Height / totalDesiredHeight) : 1.f};
+    f32 const remaining {size.Height - (totalDesiredHeight * scale)};
+    f32 const offsetY {remaining / (w.size() + 1)};
+
+    f32 y {offsetY};
+    for (usize i {0}; i < w.size(); ++i) {
         auto const& widget {w[i]};
-        f32 const   width {widget->Flex->Width.calc(horiSize)};
-        f32 const   height {widget->Flex->Height.calc(vertSize)};
-        f32 const   y {i * vertSize};
+        f32 const   height {heights[i] * scale};
+        f32 const   width {widget->Flex->Width.calc(size.Width)};
 
+        f32 x {0.f};
         switch (_alignment) {
-        case gfx::horizontal_alignment::Left:     widget->Bounds = {0, y, width, height}; break;
-        case gfx::horizontal_alignment::Right:    widget->Bounds = {horiSize - width, y, width, height}; break;
-        case gfx::horizontal_alignment::Centered: widget->Bounds = {(horiSize - width) / 2, y, width, height}; break;
+        case gfx::horizontal_alignment::Left:     x = 0.f; break;
+        case gfx::horizontal_alignment::Right:    x = size.Width - width; break;
+        case gfx::horizontal_alignment::Centered: x = (size.Width - width) / 2.f; break;
         }
+
+        widget->Bounds = {x, y, width, height};
+        y += height + offsetY;
     }
 }
 
