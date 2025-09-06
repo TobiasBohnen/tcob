@@ -76,11 +76,16 @@ class layout;
 
 // charting
 namespace charts {
+    template <typename T>
     class chart;
+    template <typename T>
+    class grid_chart;
+
     class line_chart;
     class bar_chart;
     class marimekko_chart;
     class pie_chart;
+    class scatter_chart;
 }
 
 ////////////////////////////////////////////////////////////

@@ -49,12 +49,13 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/LSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/procgen/Noise.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Chart.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/charting/Charting.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/Scrollbar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/component/WidgetTweener.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Accordion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Button.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CanvasWidget.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Charting.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Checkbox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/CycleButton.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/widgets/Displays.cpp
@@ -137,6 +138,9 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/drawables/TileMap.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/LSystem.hpp
     ${TCOB_INC_DIR}/tcob/gfx/procgen/Noise.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Chart.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Charting.hpp
+    ${TCOB_INC_DIR}/tcob/gfx/ui/charting/Charting.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Icon.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Item.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/component/Scrollbar.hpp
@@ -145,7 +149,6 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Accordion.inl
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Button.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/CanvasWidget.hpp
-    ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Charting.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Checkbox.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/CycleButton.hpp
     ${TCOB_INC_DIR}/tcob/gfx/ui/widgets/Displays.hpp

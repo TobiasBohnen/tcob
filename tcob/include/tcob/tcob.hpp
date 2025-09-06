@@ -126,6 +126,8 @@
 #include <tcob/gfx/ui/Transition.hpp>
 #include <tcob/gfx/ui/UI.hpp>
 #include <tcob/gfx/ui/WidgetPainter.hpp>
+#include <tcob/gfx/ui/charting/Chart.hpp>
+#include <tcob/gfx/ui/charting/Charting.hpp>
 #include <tcob/gfx/ui/component/Icon.hpp>
 #include <tcob/gfx/ui/component/Item.hpp>
 #include <tcob/gfx/ui/component/Scrollbar.hpp>
@@ -133,7 +135,6 @@
 #include <tcob/gfx/ui/widgets/Accordion.hpp>
 #include <tcob/gfx/ui/widgets/Button.hpp>
 #include <tcob/gfx/ui/widgets/CanvasWidget.hpp>
-#include <tcob/gfx/ui/widgets/Charting.hpp>
 #include <tcob/gfx/ui/widgets/Checkbox.hpp>
 #include <tcob/gfx/ui/widgets/CycleButton.hpp>
 #include <tcob/gfx/ui/widgets/Displays.hpp>

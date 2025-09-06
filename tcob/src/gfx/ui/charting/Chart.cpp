@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/gfx/ui/widgets/Charting.hpp"
+#include "tcob/gfx/ui/charting/Chart.hpp"
 
 #include <algorithm>
 #include <numeric>
@@ -14,100 +14,27 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/Gfx.hpp"
-#include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
 #include "tcob/gfx/ui/WidgetPainter.hpp"
+#include "tcob/gfx/ui/charting/Charting.hpp"
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
 namespace tcob::ui::charts {
-
-void chart::style::Transition(style& target, style const& from, style const& to, f64 step)
-{
-    widget_style::Transition(target, from, to, step);
-
-    target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
-    target.GridColor     = color::Lerp(from.GridColor, to.GridColor, step);
-
-    target.Colors.clear();
-    target.Colors.resize(from.Colors.size());
-    for (usize i {0}; i < from.Colors.size(); ++i) {
-        if (i >= to.Colors.size()) {
-            target.Colors[i] = from.Colors[i];
-        } else {
-            target.Colors[i] = color::Lerp(from.Colors[i], to.Colors[i], step);
-        }
-    }
-}
-
-chart::chart(init const& wi)
-    : widget {wi}
-{
-    Series.Changed.connect([&] {
-        _maxX = 0;
-        for (auto const& s : *Series) {
-            _maxX = std::max(_maxX, s.Values.size());
-        }
-        queue_redraw();
-    });
-}
-
-void chart::draw_grid(gfx::canvas& canvas, style const& style, rect_f const& bounds, i32 verticalGridLines) const
-{
-    canvas.set_stroke_style(style.GridColor);
-    canvas.set_stroke_width(style.GridLineWidth);
-
-    // horizontal lines
-    i32 horizontalGridLines {0};
-    switch (style.HorizontalGridLines) {
-    case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    horizontalGridLines = 3; break;
-    case grid_line_amount::Normal: horizontalGridLines = 5; break;
-    case grid_line_amount::Many:   horizontalGridLines = 10; break;
-    }
-    if (horizontalGridLines > 1) {
-        for (i32 i {0}; i < horizontalGridLines; ++i) {
-            f32 const t {static_cast<f32>(i) / static_cast<f32>(horizontalGridLines - 1)};
-            f32 const y {bounds.bottom() - (t * bounds.height())};
-            canvas.stroke_line({bounds.left(), y}, {bounds.right(), y});
-        }
-    }
-
-    // vertical lines
-    if (verticalGridLines > 1) {
-        for (i32 i {0}; i < verticalGridLines; ++i) {
-            f32 const t {static_cast<f32>(i) / static_cast<f32>(verticalGridLines - 1)};
-            f32 const x {bounds.right() - (t * bounds.width())};
-            canvas.stroke_line({x, bounds.top()}, {x, bounds.bottom()});
-        }
-    }
-}
-
-auto chart::max_x() const -> usize
-{
-    return _maxX;
-}
-
-auto point_y(f32 value, axis const& axis, rect_f const& bounds) -> f32
-{
-    f32 const range {axis.Max - axis.Min};
-    if (range == 0.0f) { return bounds.bottom(); }
-    f32 const norm {(value - axis.Min) / range};
-    return bounds.bottom() - (norm * bounds.height());
-}
 
 ////////////////////////////////////////////////////////////
 
 void line_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    chart::style::Transition(target, from, to, step);
+    grid_chart_style::Transition(target, from, to, step);
 
     target.LineSize = length::Lerp(from.LineSize, to.LineSize, step);
 }
 
 line_chart::line_chart(init const& wi)
-    : chart {wi}
+    : grid_chart {wi}
 {
     Class("line_chart");
     YAxis.Changed.connect([&] { queue_redraw(); });
@@ -120,14 +47,7 @@ void line_chart::on_draw(widget_painter& painter)
 
     auto& canvas {painter.canvas()};
 
-    i32 verticalGridLines {0};
-    switch (_style.VerticalGridLines) {
-    case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    verticalGridLines = max_x() / 2; break;
-    case grid_line_amount::Normal: verticalGridLines = max_x(); break;
-    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) - 1; break;
-    }
-    draw_grid(canvas, _style, rect, verticalGridLines);
+    draw_grid(canvas, _style, rect);
 
     auto const xStep {rect.width() / (max_x() - 1)};
 
@@ -139,7 +59,7 @@ void line_chart::on_draw(widget_painter& painter)
         std::vector<point_f> points;
         for (usize j {0}; j < len; ++j) {
             f32 const x {rect.left() + (xStep * j)};
-            f32 const y {point_y(s.Values[j], *YAxis, rect)};
+            f32 const y {position_in_yaxis(s.Values[j], *YAxis, rect)};
             points.emplace_back(x, y);
         }
         if (points.size() == 1) { continue; }
@@ -175,18 +95,37 @@ void line_chart::on_draw(widget_painter& painter)
     }
 }
 
+auto line_chart::calc_grid_lines() const -> size_i
+{
+    i32 verticalGridLines {0};
+    switch (_style.VerticalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    verticalGridLines = (max_x() / 2); break;
+    case grid_line_amount::Normal: verticalGridLines = max_x(); break;
+    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) - 1; break;
+    }
+    i32 horizontalGridLines {0};
+    switch (_style.HorizontalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    horizontalGridLines = 3; break;
+    case grid_line_amount::Normal: horizontalGridLines = 5; break;
+    case grid_line_amount::Many:   horizontalGridLines = 10; break;
+    }
+    return {horizontalGridLines, verticalGridLines};
+}
+
 ////////////////////////////////////////////////////////////
 
 void bar_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    chart::style::Transition(target, from, to, step);
+    grid_chart_style::Transition(target, from, to, step);
 
     target.BarSize   = length::Lerp(from.BarSize, to.BarSize, step);
     target.BarRadius = length::Lerp(from.BarRadius, to.BarRadius, step);
 }
 
 bar_chart::bar_chart(init const& wi)
-    : chart {wi}
+    : grid_chart {wi}
 {
     Class("bar_chart");
     YAxis.Changed.connect([&] { queue_redraw(); });
@@ -199,14 +138,7 @@ void bar_chart::on_draw(widget_painter& painter)
 
     auto& canvas {painter.canvas()};
 
-    i32 verticalGridLines {0};
-    switch (_style.VerticalGridLines) {
-    case grid_line_amount::None:   break;
-    case grid_line_amount::Few:    verticalGridLines = (max_x() / 2) + 1; break;
-    case grid_line_amount::Normal: verticalGridLines = max_x() + 1; break;
-    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) + 1; break;
-    }
-    draw_grid(canvas, _style, rect, verticalGridLines);
+    draw_grid(canvas, _style, rect);
 
     auto const barCount {Series->size()};
     if (barCount == 0) { return; }
@@ -225,7 +157,7 @@ void bar_chart::on_draw(widget_painter& painter)
 
                 canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-                f32 const yAbs {point_y(s.Values[j], *YAxis, rect)};
+                f32 const yAbs {position_in_yaxis(s.Values[j], *YAxis, rect)};
                 f32 const barHeight {rect.bottom() - yAbs};
                 f32 const y {yAbs - yOffset};
                 f32 const x {rect.left() + (columnWidth * j) + ((columnWidth - barWidth) / 2)};
@@ -252,7 +184,7 @@ void bar_chart::on_draw(widget_painter& painter)
             f32 const xOffset {rect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2)};
             for (usize j {0}; j < valueCount; ++j) {
                 f32 const x {xOffset + (columnWidth * j)};
-                f32 const y {point_y(s.Values[j], *YAxis, rect)};
+                f32 const y {position_in_yaxis(s.Values[j], *YAxis, rect)};
 
                 canvas.begin_path();
                 canvas.rounded_rect({{x, y}, {barWidth / barCount, rect.bottom() - y}}, barRadius);
@@ -265,11 +197,30 @@ void bar_chart::on_draw(widget_painter& painter)
     }
 }
 
+auto bar_chart::calc_grid_lines() const -> size_i
+{
+    i32 verticalGridLines {0};
+    switch (_style.VerticalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    verticalGridLines = (max_x() / 2) + 1; break;
+    case grid_line_amount::Normal: verticalGridLines = max_x() + 1; break;
+    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) + 1; break;
+    }
+    i32 horizontalGridLines {0};
+    switch (_style.HorizontalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    horizontalGridLines = 3; break;
+    case grid_line_amount::Normal: horizontalGridLines = 5; break;
+    case grid_line_amount::Many:   horizontalGridLines = 10; break;
+    }
+    return {horizontalGridLines, verticalGridLines};
+}
+
 ////////////////////////////////////////////////////////////
 
 void marimekko_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
 {
-    chart::style::Transition(target, from, to, step);
+    chart_style::Transition(target, from, to, step);
 
     target.BarSize   = dimensions::Lerp(from.BarSize, to.BarSize, step);
     target.BarRadius = length::Lerp(from.BarRadius, to.BarRadius, step);
@@ -403,6 +354,71 @@ void pie_chart::on_draw(widget_painter& painter)
             ++colorIndex;
         }
     }
+}
+
+////////////////////////////////////////////////////////////
+
+void scatter_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
+{
+    chart_style::Transition(target, from, to, step);
+
+    target.PointSize   = helper::lerp(from.PointSize, to.PointSize, step);
+    target.StrokeColor = color::Lerp(from.StrokeColor, to.StrokeColor, step);
+}
+
+scatter_chart::scatter_chart(init const& wi)
+    : grid_chart {wi}
+{
+    Class("scatter_chart");
+}
+
+void scatter_chart::on_draw(widget_painter& painter)
+{
+    rect_f const        rect {draw_background(_style, painter)};
+    scissor_guard const guard {painter, this};
+
+    auto& canvas {painter.canvas()};
+
+    usize const seriesCount {Series->size()};
+    if (seriesCount == 0) { return; }
+
+    draw_grid(canvas, _style, rect);
+
+    // plot points
+    for (usize i {0}; i < Series->size(); ++i) {
+        auto const& s {Series[i]};
+        canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+        canvas.set_stroke_style(_style.StrokeColor);
+        canvas.set_stroke_width(1);
+
+        canvas.begin_path();
+        for (auto const& pt : s.Values) {
+            f32 const x {position_in_xaxis(pt.X, XAxis, rect)};
+            f32 const y {position_in_yaxis(pt.Y, YAxis, rect)};
+            canvas.circle({x, y}, _style.PointSize);
+        }
+        canvas.fill();
+        canvas.stroke();
+    }
+}
+
+auto scatter_chart::calc_grid_lines() const -> size_i
+{
+    i32 verticalGridLines {0};
+    switch (_style.VerticalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    verticalGridLines = ((XAxis->Max - XAxis->Min) / 2) + 1; break;
+    case grid_line_amount::Normal: verticalGridLines = ((XAxis->Max - XAxis->Min)) + 1; break;
+    case grid_line_amount::Many:   verticalGridLines = ((XAxis->Max - XAxis->Min) * 2) + 1; break;
+    }
+    i32 horizontalGridLines {0};
+    switch (_style.HorizontalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    horizontalGridLines = ((YAxis->Max - YAxis->Min) / 2) + 1; break;
+    case grid_line_amount::Normal: horizontalGridLines = ((YAxis->Max - YAxis->Min)) + 1; break;
+    case grid_line_amount::Many:   horizontalGridLines = ((YAxis->Max - YAxis->Min) * 2) + 1; break;
+    }
+    return {horizontalGridLines, verticalGridLines};
 }
 
 } // namespace display
