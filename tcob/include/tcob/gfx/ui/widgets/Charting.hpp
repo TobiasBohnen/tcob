@@ -29,14 +29,21 @@ struct series {
     std::vector<f32> Values;
 };
 
+enum class grid_line_amount : u8 {
+    None,
+    Few,
+    Normal,
+    Many
+};
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API chart : public widget {
 public:
     class TCOB_API style : public widget_style {
     public:
-        i32 HorizontalGridLines {5};
-        i32 VerticalGridLines {5};
+        grid_line_amount HorizontalGridLines {grid_line_amount::Normal};
+        grid_line_amount VerticalGridLines {grid_line_amount::Normal};
 
         f32   GridLineWidth {1.0f};
         color GridColor {colors::Gray};
@@ -51,7 +58,7 @@ public:
 protected:
     explicit chart(init const& wi);
 
-    void draw_grid(gfx::canvas& canvas, style const& style, rect_f const& bounds) const;
+    void draw_grid(gfx::canvas& canvas, style const& style, rect_f const& bounds, i32 verticalGridLines) const;
 
     auto max_x() const -> usize;
 
@@ -66,6 +73,7 @@ public:
     class TCOB_API style : public chart::style {
     public:
         length LineSize {3.0f, length::type::Absolute};
+        bool   SmoothLines {false};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };
@@ -87,7 +95,9 @@ class TCOB_API bar_chart : public chart {
 public:
     class TCOB_API style : public chart::style {
     public:
-        length BarSize {0.8f, length::type::Relative};
+        length BarSize {1.f, length::type::Relative};
+        length BarRadius {};
+        bool   StackBars {false};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

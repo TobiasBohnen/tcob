@@ -26,9 +26,6 @@ void chart::style::Transition(style& target, style const& from, style const& to,
 {
     widget_style::Transition(target, from, to, step);
 
-    target.HorizontalGridLines = helper::lerp(from.HorizontalGridLines, to.HorizontalGridLines, step);
-    target.VerticalGridLines   = helper::lerp(from.VerticalGridLines, to.VerticalGridLines, step);
-
     target.GridLineWidth = helper::lerp(from.GridLineWidth, to.GridLineWidth, step);
     target.GridColor     = color::Lerp(from.GridColor, to.GridColor, step);
 
@@ -55,24 +52,31 @@ chart::chart(init const& wi)
     });
 }
 
-void chart::draw_grid(gfx::canvas& canvas, style const& style, rect_f const& bounds) const
+void chart::draw_grid(gfx::canvas& canvas, style const& style, rect_f const& bounds, i32 verticalGridLines) const
 {
     canvas.set_stroke_style(style.GridColor);
     canvas.set_stroke_width(style.GridLineWidth);
 
     // horizontal lines
-    if (style.HorizontalGridLines > 1) {
-        for (i32 i {0}; i < style.HorizontalGridLines; ++i) {
-            f32 const t {static_cast<f32>(i) / static_cast<f32>(style.HorizontalGridLines - 1)};
+    i32 horizontalGridLines {0};
+    switch (style.HorizontalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    horizontalGridLines = 3; break;
+    case grid_line_amount::Normal: horizontalGridLines = 5; break;
+    case grid_line_amount::Many:   horizontalGridLines = 10; break;
+    }
+    if (horizontalGridLines > 1) {
+        for (i32 i {0}; i < horizontalGridLines; ++i) {
+            f32 const t {static_cast<f32>(i) / static_cast<f32>(horizontalGridLines - 1)};
             f32 const y {bounds.bottom() - (t * bounds.height())};
             canvas.stroke_line({bounds.left(), y}, {bounds.right(), y});
         }
     }
 
     // vertical lines
-    if (style.VerticalGridLines > 1) {
-        for (i32 i {0}; i < style.VerticalGridLines; ++i) {
-            f32 const t {static_cast<f32>(i) / static_cast<f32>(style.VerticalGridLines - 1)};
+    if (verticalGridLines > 1) {
+        for (i32 i {0}; i < verticalGridLines; ++i) {
+            f32 const t {static_cast<f32>(i) / static_cast<f32>(verticalGridLines - 1)};
             f32 const x {bounds.right() - (t * bounds.width())};
             canvas.stroke_line({x, bounds.top()}, {x, bounds.bottom()});
         }
@@ -114,7 +118,15 @@ void line_chart::on_draw(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     auto& canvas {painter.canvas()};
-    draw_grid(canvas, _style, rect);
+
+    i32 verticalGridLines {0};
+    switch (_style.VerticalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    verticalGridLines = max_x() / 2; break;
+    case grid_line_amount::Normal: verticalGridLines = max_x(); break;
+    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) - 1; break;
+    }
+    draw_grid(canvas, _style, rect, verticalGridLines);
 
     auto const xStep {rect.width() / (max_x() - 1)};
 
@@ -129,14 +141,28 @@ void line_chart::on_draw(widget_painter& painter)
             f32 const y {point_y(s.Values[j], *YAxis, rect)};
             points.emplace_back(x, y);
         }
-
         if (points.size() == 1) { continue; }
 
         canvas.begin_path();
-
         canvas.move_to(points[0]);
-        for (u32 i {1}; i < points.size(); ++i) {
-            canvas.line_to(points[i]);
+        if (_style.SmoothLines) {
+            for (usize i {0}; i + 1 < points.size(); ++i) {
+                auto const& p0 {(i == 0) ? points[i] : points[i - 1]};
+                auto const& p1 {points[i]};
+                auto const& p2 {points[i + 1]};
+                auto const& p3 {(i + 2 < points.size()) ? points[i + 2] : points[i + 1]};
+
+                point_f c1 {p1.X + ((p2.X - p0.X) * 0.5f / 3.0f),
+                            p1.Y + ((p2.Y - p0.Y) * 0.5f / 3.0f)};
+                point_f c2 {p2.X - ((p3.X - p1.X) * 0.5f / 3.0f),
+                            p2.Y - ((p3.Y - p1.Y) * 0.5f / 3.0f)};
+
+                canvas.cubic_bezier_to(c1, c2, p2);
+            }
+        } else {
+            for (u32 i {1}; i < points.size(); ++i) {
+                canvas.line_to(points[i]);
+            }
         }
 
         canvas.set_stroke_style(colors::Black);
@@ -154,7 +180,8 @@ void bar_chart::style::Transition(style& target, style const& from, style const&
 {
     chart::style::Transition(target, from, to, step);
 
-    target.BarSize = length::Lerp(from.BarSize, to.BarSize, step);
+    target.BarSize   = length::Lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius = length::Lerp(from.BarRadius, to.BarRadius, step);
 }
 
 bar_chart::bar_chart(init const& wi)
@@ -170,32 +197,69 @@ void bar_chart::on_draw(widget_painter& painter)
     scissor_guard const guard {painter, this};
 
     auto& canvas {painter.canvas()};
-    draw_grid(canvas, _style, rect);
+
+    i32 verticalGridLines {0};
+    switch (_style.VerticalGridLines) {
+    case grid_line_amount::None:   break;
+    case grid_line_amount::Few:    verticalGridLines = (max_x() / 2) + 1; break;
+    case grid_line_amount::Normal: verticalGridLines = max_x() + 1; break;
+    case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) + 1; break;
+    }
+    draw_grid(canvas, _style, rect, verticalGridLines);
 
     auto const barCount {Series->size()};
     if (barCount == 0) { return; }
 
     auto const xStep {rect.width() / max_x()};
     auto const xWidth {_style.BarSize.calc(xStep)};
+    auto const xRound {_style.BarRadius.calc(xWidth)};
 
-    for (usize i {0}; i < barCount; ++i) {
-        auto const& s {Series[i]};
-        usize const valueCount {s.Values.size()};
-        if (valueCount == 0) { return; }
+    if (_style.StackBars) {
+        for (usize j {0}; j < max_x(); ++j) {
+            f32 yOffset {0.0f};
 
-        canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+            for (usize i {0}; i < barCount; ++i) {
+                auto const& s {Series[i]};
+                if (j >= s.Values.size()) { continue; }
 
-        f32 const xOffset {rect.left() + (xWidth / barCount * i) + ((xStep - xWidth) / 2)};
-        for (usize j {0}; j < valueCount; ++j) {
-            f32 const x {xOffset + (xStep * j)};
-            f32 const y {point_y(s.Values[j], *YAxis, rect)};
+                canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-            canvas.begin_path();
-            canvas.rect({{x, y}, {xWidth / barCount, rect.bottom() - y}});
-            canvas.fill();
-            canvas.set_stroke_width(1);
-            canvas.set_stroke_style(colors::Black);
-            canvas.stroke();
+                f32 const yAbs {point_y(s.Values[j], *YAxis, rect)};
+                f32 const barHeight {rect.bottom() - yAbs};
+                f32 const y {yAbs - yOffset};
+                f32 const x {rect.left() + (xStep * j) + ((xStep - xWidth) / 2)};
+
+                canvas.begin_path();
+                canvas.rounded_rect({{x, y}, {xWidth, barHeight}}, xRound);
+                canvas.fill();
+                canvas.set_stroke_width(1);
+                canvas.set_stroke_style(colors::Black);
+                canvas.stroke();
+
+                yOffset += barHeight;
+            }
+        }
+
+    } else {
+        for (usize i {0}; i < barCount; ++i) {
+            auto const& s {Series[i]};
+            usize const valueCount {s.Values.size()};
+            if (valueCount == 0) { return; }
+
+            canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+
+            f32 const xOffset {rect.left() + (xWidth / barCount * i) + ((xStep - xWidth) / 2)};
+            for (usize j {0}; j < valueCount; ++j) {
+                f32 const x {xOffset + (xStep * j)};
+                f32 const y {point_y(s.Values[j], *YAxis, rect)};
+
+                canvas.begin_path();
+                canvas.rounded_rect({{x, y}, {xWidth / barCount, rect.bottom() - y}}, xRound);
+                canvas.fill();
+                canvas.set_stroke_width(1);
+                canvas.set_stroke_style(colors::Black);
+                canvas.stroke();
+            }
         }
     }
 }
