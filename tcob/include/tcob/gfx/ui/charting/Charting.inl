@@ -17,10 +17,14 @@ template <typename T>
 inline chart<T>::chart(init const& wi)
     : widget {wi}
 {
-    Series.Changed.connect([&] {
+    Dataset.Changed.connect([&] {
         _maxX = 0;
-        for (auto const& s : *Series) {
-            _maxX = std::max(_maxX, s.Values.size());
+        if constexpr (HasSize<T>) {
+            for (auto const& s : *Dataset) {
+                _maxX = std::max(_maxX, s.Value.size());
+            }
+        } else {
+            _maxX = 1;
         }
         queue_redraw();
     });
@@ -29,7 +33,7 @@ inline chart<T>::chart(init const& wi)
 template <typename T>
 inline void chart<T>::on_draw(widget_painter& painter)
 {
-    if (Series->empty()) { return; }
+    if (Dataset->empty()) { return; }
     auto const* style {dynamic_cast<chart_style const*>(current_style())};
     if (style && style->Colors.empty()) { return; }
 

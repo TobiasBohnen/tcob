@@ -45,22 +45,21 @@ void line_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
-
-    auto& canvas {painter.canvas()};
+    auto&               canvas {painter.canvas()};
 
     draw_grid(canvas, _style, rect);
 
     auto const xStep {rect.width() / (max_x() - 1)};
 
-    for (usize i {0}; i < Series->size(); ++i) {
-        auto const& s {Series[i]};
-        usize const len {s.Values.size()};
+    for (usize i {0}; i < Dataset->size(); ++i) {
+        auto const& s {Dataset[i]};
+        usize const len {s.Value.size()};
         if (len < 2) { continue; }
 
         std::vector<point_f> points;
         for (usize j {0}; j < len; ++j) {
             f32 const x {rect.left() + (xStep * j)};
-            f32 const y {position_in_yaxis(s.Values[j], *YAxis, rect)};
+            f32 const y {position_in_yaxis(s.Value[j], *YAxis, rect)};
             points.emplace_back(x, y);
         }
         if (points.size() == 1) { continue; }
@@ -136,12 +135,11 @@ void bar_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
-
-    auto& canvas {painter.canvas()};
+    auto&               canvas {painter.canvas()};
 
     draw_grid(canvas, _style, rect);
 
-    auto const barCount {Series->size()};
+    auto const barCount {Dataset->size()};
 
     auto const columnWidth {rect.width() / max_x()};
     auto const barWidth {_style.BarSize.calc(columnWidth)};
@@ -152,12 +150,12 @@ void bar_chart::on_draw_chart(widget_painter& painter)
             f32 yOffset {0.0f};
 
             for (usize i {0}; i < barCount; ++i) {
-                auto const& s {Series[i]};
-                if (j >= s.Values.size()) { continue; }
+                auto const& s {Dataset[i]};
+                if (j >= s.Value.size()) { continue; }
 
                 canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-                f32 const yAbs {position_in_yaxis(s.Values[j], *YAxis, rect)};
+                f32 const yAbs {position_in_yaxis(s.Value[j], *YAxis, rect)};
                 f32 const barHeight {rect.bottom() - yAbs};
                 f32 const y {yAbs - yOffset};
                 f32 const x {rect.left() + (columnWidth * j) + ((columnWidth - barWidth) / 2)};
@@ -175,8 +173,8 @@ void bar_chart::on_draw_chart(widget_painter& painter)
 
     } else {
         for (usize i {0}; i < barCount; ++i) {
-            auto const& s {Series[i]};
-            usize const valueCount {s.Values.size()};
+            auto const& s {Dataset[i]};
+            usize const valueCount {s.Value.size()};
             if (valueCount == 0) { return; }
 
             canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
@@ -184,7 +182,7 @@ void bar_chart::on_draw_chart(widget_painter& painter)
             f32 const xOffset {rect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2)};
             for (usize j {0}; j < valueCount; ++j) {
                 f32 const x {xOffset + (columnWidth * j)};
-                f32 const y {position_in_yaxis(s.Values[j], *YAxis, rect)};
+                f32 const y {position_in_yaxis(s.Value[j], *YAxis, rect)};
 
                 canvas.begin_path();
                 canvas.rounded_rect({{x, y}, {barWidth / barCount, rect.bottom() - y}}, barRadius);
@@ -236,19 +234,18 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
+    auto&               canvas {painter.canvas()};
 
-    auto& canvas {painter.canvas()};
+    usize const seriesCount {Dataset->size()};
 
-    usize const seriesCount {Series->size()};
-
-    usize const valueCount {Series->front().Values.size()};
+    usize const valueCount {Dataset->front().Value.size()};
     if (valueCount == 0) { return; }
 
     std::vector<f32> columnTotals(valueCount, 0.0f);
     for (usize j {0}; j < valueCount; ++j) {
         for (usize i {0}; i < seriesCount; ++i) {
-            if (j < Series[i].Values.size()) {
-                columnTotals[j] += Series[i].Values[j];
+            if (j < Dataset[i].Value.size()) {
+                columnTotals[j] += Dataset[i].Value[j];
             }
         }
     }
@@ -268,10 +265,10 @@ void marimekko_chart::on_draw_chart(widget_painter& painter)
         f32 const baseline {rect.bottom()};
 
         for (usize i {0}; i < seriesCount; ++i) {
-            auto const& s {Series[i]};
-            if (j >= s.Values.size()) { continue; }
+            auto const& s {Dataset[i]};
+            if (j >= s.Value.size()) { continue; }
 
-            f32 const value {s.Values[j]};
+            f32 const value {s.Value[j]};
             if (columnTotals[j] == 0.0f) { continue; }
 
             f32 const  height {rect.height() * (value / columnTotals[j])};
@@ -308,50 +305,36 @@ void pie_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
+    auto&               canvas {painter.canvas()};
 
-    auto& canvas {painter.canvas()};
-
-    auto const seriesCount {Series->size()};
-    if (seriesCount == 0) { return; }
+    f64 total {0.0};
+    for (auto const& s : *Dataset) { total += s.Value; }
+    if (total == 0.0) { return; }
 
     auto const [cx, cy] {rect.center()};
-    f32 const maxRadius {std::min(rect.width(), rect.height()) / 2};
-    f32 const radiusStep {maxRadius / (seriesCount)};
+    f32 const radius {std::min(rect.width(), rect.height()) / 2};
 
-    for (usize i {seriesCount}; i-- > 0;) {
-        usize colorIndex {0};
+    f64 angle {0.0};
+    for (usize i {0}; i < Dataset->size(); ++i) {
+        auto const& s {Dataset[i]};
 
-        auto const& s {Series[i]};
-        if (s.Values.empty()) { continue; }
+        f64 const fraction {s.Value / total};
+        f64 const sweep {fraction * TAU};
 
-        // total for this series
-        f64 total {0.0};
-        for (auto const& v : s.Values) { total += v; }
-        if (total == 0.0) { continue; }
+        canvas.begin_path();
+        canvas.move_to({cx, cy});
+        canvas.arc({cx, cy}, radius,
+                   radian_d {angle}, radian_d {angle + sweep},
+                   gfx::winding::CW);
+        canvas.close_path();
 
-        f32 const radius {(i + 1) * radiusStep};
-        f64       angle {0.0};
+        canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+        canvas.fill();
+        canvas.set_stroke_width(1);
+        canvas.set_stroke_style(colors::Black);
+        canvas.stroke();
 
-        for (auto const& v : s.Values) {
-            f64 const fraction {v / total};
-            f64 const sweep {fraction * TAU};
-
-            canvas.begin_path();
-            canvas.move_to({cx, cy});
-            canvas.arc({cx, cy}, radius,
-                       radian_d {angle}, radian_d {angle + sweep},
-                       gfx::winding::CW);
-            canvas.close_path();
-
-            canvas.set_fill_style(_style.Colors[colorIndex % _style.Colors.size()]);
-            canvas.fill();
-            canvas.set_stroke_width(1);
-            canvas.set_stroke_style(colors::Black);
-            canvas.stroke();
-
-            angle += sweep;
-            ++colorIndex;
-        }
+        angle += sweep;
     }
 }
 
@@ -375,20 +358,19 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
 {
     rect_f const        rect {draw_background(_style, painter)};
     scissor_guard const guard {painter, this};
-
-    auto& canvas {painter.canvas()};
+    auto&               canvas {painter.canvas()};
 
     draw_grid(canvas, _style, rect);
 
     // plot points
-    for (usize i {0}; i < Series->size(); ++i) {
-        auto const& s {Series[i]};
+    for (usize i {0}; i < Dataset->size(); ++i) {
+        auto const& s {Dataset[i]};
         canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
         canvas.set_stroke_style(_style.StrokeColor);
         canvas.set_stroke_width(1);
 
         canvas.begin_path();
-        for (auto const& pt : s.Values) {
+        for (auto const& pt : s.Value) {
             f32 const x {position_in_xaxis(pt.X, XAxis, rect)};
             f32 const y {position_in_yaxis(pt.Y, YAxis, rect)};
             canvas.circle({x, y}, _style.PointSize);
@@ -487,12 +469,12 @@ void radar_chart::on_draw_chart(widget_painter& painter)
     }
 
     // draw series polygons
-    for (usize i {0}; i < Series->size(); ++i) {
-        auto const& s {Series[i]};
-        if (s.Values.empty()) { continue; }
+    for (usize i {0}; i < Dataset->size(); ++i) {
+        auto const& s {Dataset[i]};
+        if (s.Value.empty()) { continue; }
         std::vector<point_f> points;
         for (usize j {0}; j < axisCount; ++j) {
-            f32 const value {(j < s.Values.size()) ? s.Values[j] : 0.0f};
+            f32 const value {(j < s.Value.size()) ? s.Value[j] : 0.0f};
             f32 const normalized {(value - ValueAxis->Min) / (ValueAxis->Max - ValueAxis->Min)};
             f32 const angle {(static_cast<f32>(j) / axisCount) * TAU_F};
             f32 const r {normalized * radius};

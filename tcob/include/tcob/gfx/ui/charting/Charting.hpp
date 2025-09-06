@@ -26,9 +26,9 @@ struct axis {
 };
 
 template <typename T>
-struct series {
-    utf8_string    Name;
-    std::vector<T> Values;
+struct datapoint {
+    utf8_string Name;
+    T           Value;
 };
 
 ////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ public:
 template <typename T>
 class chart : public widget {
 public:
-    prop<std::vector<series<T>>> Series;
+    prop<std::vector<datapoint<T>>> Dataset;
 
 protected:
     explicit chart(init const& wi);

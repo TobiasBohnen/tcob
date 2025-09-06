@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <vector>
+
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
@@ -17,7 +19,7 @@
 namespace tcob::ui::charts {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API line_chart : public grid_chart<f32> {
+class TCOB_API line_chart : public grid_chart<std::vector<f32>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
@@ -42,7 +44,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API bar_chart : public grid_chart<f32> {
+class TCOB_API bar_chart : public grid_chart<std::vector<f32>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
@@ -68,7 +70,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API marimekko_chart : public chart<f32> {
+class TCOB_API marimekko_chart : public chart<std::vector<f32>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
@@ -106,7 +108,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API scatter_chart : public grid_chart<point_f> {
+class TCOB_API scatter_chart : public grid_chart<std::vector<point_f>> {
 public:
     class TCOB_API style : public grid_chart_style {
     public:
@@ -132,7 +134,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API radar_chart : public chart<f32> {
+class TCOB_API radar_chart : public chart<std::vector<f32>> {
 public:
     class style : public chart_style {
     public:
