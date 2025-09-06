@@ -41,26 +41,26 @@ void widget_container::draw(widget_painter& painter)
     set_redraw(false);
 }
 
-auto widget_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
+auto widget_container::find_child_at(point_i pos) -> widget*
 {
     for (auto const& widget : widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-            if (auto retValue {container->find_child_at(pos)}) {
+            if (auto* retValue {container->find_child_at(pos)}) {
                 return retValue;
             }
         }
-        return widget;
+        return widget.get();
     }
     return nullptr;
 }
 
-auto widget_container::find_child_by_name(string const& name) -> std::shared_ptr<widget>
+auto widget_container::find_child_by_name(string const& name) -> widget*
 {
     for (auto const& widget : widgets()) {
-        if (widget->name() == name) { return widget; }
+        if (widget->name() == name) { return widget.get(); }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-            if (auto retValue {container->find_child_by_name(name)}) {
+            if (auto* retValue {container->find_child_by_name(name)}) {
                 return retValue;
             }
         }

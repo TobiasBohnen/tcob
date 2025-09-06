@@ -53,7 +53,7 @@ public:
     void change_section_label(widget* sec, utf8_string const& label);
     void change_section_label(widget* sec, item const& label);
 
-    auto find_child_at(point_i pos) -> std::shared_ptr<widget> override;
+    auto find_child_at(point_i pos) -> widget* override;
 
     auto widgets() const -> std::span<std::shared_ptr<widget> const> override;
 

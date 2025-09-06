@@ -127,7 +127,7 @@ void accordion::change_section_label(widget* sec, item const& label)
     queue_redraw();
 }
 
-auto accordion::find_child_at(point_i pos) -> std::shared_ptr<widget>
+auto accordion::find_child_at(point_i pos) -> widget*
 {
     if (ActiveSectionIndex < 0 || ActiveSectionIndex >= std::ssize(_sections)) {
         return nullptr;
@@ -137,11 +137,11 @@ auto accordion::find_child_at(point_i pos) -> std::shared_ptr<widget>
     if (!activeSection->hit_test(pos)) { return nullptr; }
 
     if (auto container {std::dynamic_pointer_cast<widget_container>(activeSection)}) {
-        if (auto retValue {container->find_child_at(pos)}) {
+        if (auto* retValue {container->find_child_at(pos)}) {
             return retValue;
         }
     }
-    return activeSection;
+    return activeSection.get();
 }
 
 auto accordion::widgets() const -> std::span<std::shared_ptr<widget> const>

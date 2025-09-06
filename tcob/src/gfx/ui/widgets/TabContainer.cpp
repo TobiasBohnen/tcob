@@ -107,7 +107,7 @@ void tab_container::change_tab_label(widget* tab, item const& label)
     queue_redraw();
 }
 
-auto tab_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
+auto tab_container::find_child_at(point_i pos) -> widget*
 {
     if (ActiveTabIndex < 0 || ActiveTabIndex >= std::ssize(_tabs)) {
         return nullptr;
@@ -117,11 +117,11 @@ auto tab_container::find_child_at(point_i pos) -> std::shared_ptr<widget>
     if (!activeTab->hit_test(pos)) { return nullptr; }
 
     if (auto container {std::dynamic_pointer_cast<widget_container>(activeTab)}) {
-        if (auto retValue {container->find_child_at(pos)}) {
+        if (auto* retValue {container->find_child_at(pos)}) {
             return retValue;
         }
     }
-    return activeTab;
+    return activeTab.get();
 }
 
 auto tab_container::widgets() const -> std::span<std::shared_ptr<widget> const>

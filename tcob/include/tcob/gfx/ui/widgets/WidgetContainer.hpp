@@ -8,7 +8,6 @@
 
 #include <memory>
 #include <span>
-#include <vector>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -25,11 +24,10 @@ public:
 
     void draw(widget_painter& painter) override;
 
-    virtual auto find_child_at(point_i pos) -> std::shared_ptr<widget>;
-    virtual auto find_child_by_name(string const& name) -> std::shared_ptr<widget>;
+    virtual auto find_child_at(point_i pos) -> widget*;
+    virtual auto find_child_by_name(string const& name) -> widget*;
 
     virtual auto widgets() const -> std::span<std::shared_ptr<widget> const> = 0;
-    auto         widgets_by_zorder(bool reverse) const -> std::vector<std::shared_ptr<widget>>;
 
     template <SubmitTarget Target>
     void submit(Target& target);

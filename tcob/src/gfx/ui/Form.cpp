@@ -75,8 +75,8 @@ auto form_base::find_widget_at(point_i pos) const -> widget*
     for (auto const& widget : widgets) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-            if (auto retValue {container->find_child_at(pos)}) {
-                return retValue.get();
+            if (auto* retValue {container->find_child_at(pos)}) {
+                return retValue;
             }
         }
         return widget.get();
@@ -90,8 +90,8 @@ auto form_base::find_widget_by_name(string const& name) const -> widget*
     for (auto const& widget : containers()) {
         if (widget->name() == name) { return widget.get(); }
         if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
-            if (auto retValue {container->find_child_by_name(name)}) {
-                return retValue.get();
+            if (auto* retValue {container->find_child_by_name(name)}) {
+                return retValue;
             }
         }
     }
