@@ -6,6 +6,7 @@
 #include "tcob/gfx/ui/widgets/Charting.hpp"
 
 #include <algorithm>
+#include <numeric>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -210,9 +211,9 @@ void bar_chart::on_draw(widget_painter& painter)
     auto const barCount {Series->size()};
     if (barCount == 0) { return; }
 
-    auto const xStep {rect.width() / max_x()};
-    auto const xWidth {_style.BarSize.calc(xStep)};
-    auto const xRound {_style.BarRadius.calc(xWidth)};
+    auto const columnWidth {rect.width() / max_x()};
+    auto const barWidth {_style.BarSize.calc(columnWidth)};
+    auto const barRadius {_style.BarRadius.calc(barWidth)};
 
     if (_style.StackBars) {
         for (usize j {0}; j < max_x(); ++j) {
@@ -227,10 +228,10 @@ void bar_chart::on_draw(widget_painter& painter)
                 f32 const yAbs {point_y(s.Values[j], *YAxis, rect)};
                 f32 const barHeight {rect.bottom() - yAbs};
                 f32 const y {yAbs - yOffset};
-                f32 const x {rect.left() + (xStep * j) + ((xStep - xWidth) / 2)};
+                f32 const x {rect.left() + (columnWidth * j) + ((columnWidth - barWidth) / 2)};
 
                 canvas.begin_path();
-                canvas.rounded_rect({{x, y}, {xWidth, barHeight}}, xRound);
+                canvas.rounded_rect({{x, y}, {barWidth, barHeight}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(1);
                 canvas.set_stroke_style(colors::Black);
@@ -248,19 +249,100 @@ void bar_chart::on_draw(widget_painter& painter)
 
             canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
 
-            f32 const xOffset {rect.left() + (xWidth / barCount * i) + ((xStep - xWidth) / 2)};
+            f32 const xOffset {rect.left() + (barWidth / barCount * i) + ((columnWidth - barWidth) / 2)};
             for (usize j {0}; j < valueCount; ++j) {
-                f32 const x {xOffset + (xStep * j)};
+                f32 const x {xOffset + (columnWidth * j)};
                 f32 const y {point_y(s.Values[j], *YAxis, rect)};
 
                 canvas.begin_path();
-                canvas.rounded_rect({{x, y}, {xWidth / barCount, rect.bottom() - y}}, xRound);
+                canvas.rounded_rect({{x, y}, {barWidth / barCount, rect.bottom() - y}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(1);
                 canvas.set_stroke_style(colors::Black);
                 canvas.stroke();
             }
         }
+    }
+}
+
+////////////////////////////////////////////////////////////
+
+void marimekko_chart::style::Transition(style& target, style const& from, style const& to, f64 step)
+{
+    chart::style::Transition(target, from, to, step);
+
+    target.BarSize   = dimensions::Lerp(from.BarSize, to.BarSize, step);
+    target.BarRadius = length::Lerp(from.BarRadius, to.BarRadius, step);
+}
+
+marimekko_chart::marimekko_chart(init const& wi)
+    : chart {wi}
+{
+    Class("marimekko_chart");
+}
+
+void marimekko_chart::on_draw(widget_painter& painter)
+{
+    rect_f const        rect {draw_background(_style, painter)};
+    scissor_guard const guard {painter, this};
+
+    auto& canvas {painter.canvas()};
+
+    usize const seriesCount {Series->size()};
+    if (seriesCount == 0) { return; }
+
+    usize const valueCount {Series->front().Values.size()};
+    if (valueCount == 0) { return; }
+
+    std::vector<f32> columnTotals(valueCount, 0.0f);
+    for (usize j {0}; j < valueCount; ++j) {
+        for (usize i {0}; i < seriesCount; ++i) {
+            if (j < Series[i].Values.size()) {
+                columnTotals[j] += Series[i].Values[j];
+            }
+        }
+    }
+
+    f32 const total {std::accumulate(columnTotals.begin(), columnTotals.end(), 0.0f)};
+    if (total == 0.0f) { return; }
+
+    f32 xCursor {rect.left()};
+
+    for (usize j {0}; j < valueCount; ++j) {
+        f32 const  columnFraction {columnTotals[j] / total};
+        f32 const  columnWidth {rect.width() * columnFraction};
+        auto const barWidth {_style.BarSize.Width.calc(columnWidth)};
+        auto const barRadius {_style.BarRadius.calc(barWidth)};
+
+        f32       yOffset {0.0f};
+        f32 const baseline {rect.bottom()};
+
+        for (usize i {0}; i < seriesCount; ++i) {
+            auto const& s {Series[i]};
+            if (j >= s.Values.size()) { continue; }
+
+            f32 const value {s.Values[j]};
+            if (columnTotals[j] == 0.0f) { continue; }
+
+            f32 const  height {rect.height() * (value / columnTotals[j])};
+            auto const barHeight {_style.BarSize.Height.calc(height)};
+            f32 const  y {baseline - (yOffset + height) + ((height - barHeight) / 2)};
+            f32 const  x {xCursor + ((columnWidth - barWidth) / 2)};
+
+            canvas.set_fill_style(_style.Colors[i % _style.Colors.size()]);
+
+            canvas.begin_path();
+            rect_f const block {{x, y}, {barWidth, barHeight}};
+            canvas.rounded_rect(block, barRadius);
+            canvas.fill();
+            canvas.set_stroke_width(1);
+            canvas.set_stroke_style(colors::Black);
+            canvas.stroke();
+
+            yOffset += height;
+        }
+
+        xCursor += columnWidth;
     }
 }
 

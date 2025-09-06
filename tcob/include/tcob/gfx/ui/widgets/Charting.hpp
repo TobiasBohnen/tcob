@@ -115,6 +115,27 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API marimekko_chart : public chart {
+public:
+    class TCOB_API style : public chart::style {
+    public:
+        dimensions BarSize {};
+        length     BarRadius {};
+
+        static void Transition(style& target, style const& from, style const& to, f64 step);
+    };
+
+    explicit marimekko_chart(init const& wi);
+
+protected:
+    void on_draw(widget_painter& painter) override;
+
+private:
+    style _style;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API pie_chart : public chart {
 public:
     class TCOB_API style : public chart::style {

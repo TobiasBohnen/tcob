@@ -79,6 +79,7 @@ namespace charts {
     class chart;
     class line_chart;
     class bar_chart;
+    class marimekko_chart;
     class pie_chart;
 }
 
