@@ -186,6 +186,8 @@ void widget::offset_content(rect_f& bounds, bool isHitTest) const
     if (!isHitTest) {
         bounds -= _currentStyle->Padding;
         bounds -= _currentStyle->Border.thickness();
+    } else {
+        bounds += _currentStyle->Border.thickness();
     }
 }
 

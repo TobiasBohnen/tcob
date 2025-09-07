@@ -13,12 +13,11 @@
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
-
 namespace tcob::gfx {
 
 cursor::cursor()
-    : Position {{[] { return locate_service<input::system>().mouse()->get_position(); },
-                 [](point_i value) { locate_service<input::system>().mouse()->set_position(value); }}}
+    : Position {{[] -> point_i { return locate_service<input::system>().mouse()->get_position(); },
+                 [](point_i value) -> void { locate_service<input::system>().mouse()->set_position(value); }}}
 {
     ActiveMode.Changed.connect([this](string const& name) {
         if (!_modes.contains(name)) {
@@ -42,6 +41,11 @@ cursor::cursor()
 void cursor::add_mode(string const& name, point_i hotspot)
 {
     _modes[name] = {hotspot};
+}
+
+auto cursor::has_mode(string const& name) const -> bool
+{
+    return _modes.contains(name);
 }
 
 auto cursor::bounds() const -> rect_i

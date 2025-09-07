@@ -223,6 +223,8 @@ public:
 
 auto operator-(rect_f const& left, thickness const& right) -> rect_f;
 auto operator-=(rect_f& left, thickness const& right) -> rect_f&;
+auto operator+(rect_f const& left, thickness const& right) -> rect_f;
+auto operator+=(rect_f& left, thickness const& right) -> rect_f&;
 
 ////////////////////////////////////////////////////////////
 
@@ -285,10 +287,15 @@ enum class position : u8 {
 enum class cursor_mode : u8 {
     Default,
 
-    EW_Resize,   // TODO
-    NS_Resize,   // TODO
-    NWSE_Resize, // TODO
-    NESW_Resize, // TODO
+    W_Resize,
+    E_Resize,
+    N_Resize,
+    S_Resize,
+    SE_Resize,
+    NW_Resize,
+    NE_Resize,
+    SW_Resize,
+
     Move,
     Grab,
     Grabbing,

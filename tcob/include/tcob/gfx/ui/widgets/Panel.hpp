@@ -7,6 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
+#include <optional>
 #include <span>
 
 #include "tcob/core/Point.hpp"
@@ -41,6 +42,7 @@ public:
 
     prop<bool> ScrollEnabled;
     prop<bool> Movable;
+    prop<bool> Resizable;
 
     template <std::derived_from<layout> T>
     auto create_layout(auto&&... args) -> T&;
@@ -75,8 +77,11 @@ protected:
     auto get_layout() const -> layout*;
 
     auto can_move() const -> bool;
+    auto can_resize() const -> bool;
 
 private:
+    void check_mode();
+
     auto requires_scroll(orientation orien, rect_f const& rect) const -> bool;
     auto get_scroll_max_value(orientation orien) const -> f32;
 
@@ -84,7 +89,8 @@ private:
     scrollbar               _vScrollbar;
     scrollbar               _hScrollbar;
 
-    point_f _dragStart {point_i::Zero};
+    std::optional<point_f>     _dragStart;
+    std::optional<cursor_mode> _currentMode;
 
     panel::style _style;
 };

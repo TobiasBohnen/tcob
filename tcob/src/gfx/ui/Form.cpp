@@ -168,26 +168,58 @@ void form_base::change_cursor_mode(cursor_mode mode)
     if (!Cursor) { return; }
 
     string newMode;
+    string fallbackMode;
     switch (mode) {
-    case cursor_mode::Default:     newMode = "default"; break;
-    case cursor_mode::Move:        newMode = "move"; break;
-    case cursor_mode::EW_Resize:   newMode = "ew-resize"; break;
-    case cursor_mode::NS_Resize:   newMode = "ns-resize"; break;
-    case cursor_mode::NWSE_Resize: newMode = "nwse-resize"; break;
-    case cursor_mode::NESW_Resize: newMode = "nesw-resize"; break;
-    case cursor_mode::Grab:        newMode = "grab"; break;
-    case cursor_mode::Grabbing:    newMode = "grabbing"; break;
-    case cursor_mode::Text:        newMode = "text"; break;
-    case cursor_mode::Cell:        newMode = "cell"; break;
+    case cursor_mode::Default: newMode = "default"; break;
+    case cursor_mode::Move:    newMode = "move"; break;
+    case cursor_mode::W_Resize:
+        newMode      = "w-resize";
+        fallbackMode = "ew-resize";
+        break;
+    case cursor_mode::E_Resize:
+        newMode      = "e-resize";
+        fallbackMode = "ew-resize";
+        break;
+    case cursor_mode::N_Resize:
+        newMode      = "n-resize";
+        fallbackMode = "ns-resize";
+        break;
+    case cursor_mode::S_Resize:
+        newMode      = "s-resize";
+        fallbackMode = "ns-resize";
+        break;
+    case cursor_mode::SE_Resize:
+        newMode      = "se-resize";
+        fallbackMode = "nwse-resize";
+        break;
+    case cursor_mode::NW_Resize:
+        newMode      = "nw-resize";
+        fallbackMode = "nwse-resize";
+        break;
+    case cursor_mode::NE_Resize:
+        newMode      = "ne-resize";
+        fallbackMode = "nesw-resize";
+        break;
+    case cursor_mode::SW_Resize:
+        newMode      = "sw-resize";
+        fallbackMode = "nesw-resize";
+        break;
+    case cursor_mode::Grab:     newMode = "grab"; break;
+    case cursor_mode::Grabbing: newMode = "grabbing"; break;
+    case cursor_mode::Text:     newMode = "text"; break;
+    case cursor_mode::Cell:     newMode = "cell"; break;
     case cursor_mode::User1:
     case cursor_mode::User2:
     case cursor_mode::User3:
     case cursor_mode::User4:
-    case cursor_mode::User5:       newMode = "cursor2"; break;
+    case cursor_mode::User5:    newMode = "cursor2"; break;
     }
-    if (Cursor->ActiveMode == newMode) { return; }
 
+    if (Cursor->ActiveMode == newMode) { return; }
+    if (!Cursor->has_mode(fallbackMode)) { fallbackMode = "default"; }
+    if (!Cursor->has_mode(newMode)) { newMode = fallbackMode; }
     Cursor->ActiveMode = newMode;
+
     size_f const off {Cursor->bounds().Size};
     TooltipOffset = point_f {off.Width, off.Height};
 }

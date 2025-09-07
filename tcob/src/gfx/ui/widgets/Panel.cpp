@@ -7,11 +7,13 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <ranges>
 #include <span>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/Transform.hpp"
 #include "tcob/gfx/ui/Form.hpp"
@@ -104,8 +106,9 @@ void panel::on_update(milliseconds deltaTime)
     _vScrollbar.update(deltaTime);
     _hScrollbar.update(deltaTime);
 
-    if (can_move() && _dragStart != point_f::Zero) {
-        form().change_cursor_mode(cursor_mode::Move);
+    check_mode();
+    if (_currentMode) {
+        form().change_cursor_mode(*_currentMode);
     }
 }
 
@@ -168,33 +171,103 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 
     ev.Handled = scrollHover(_vScrollbar) || scrollHover(_hScrollbar);
 }
-
 void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    auto const scrollDrag {[this, &ev](auto&& scrollbar) -> bool {
+    auto const scrollDrag = [this, &ev](auto&& scrollbar) -> bool {
         return scrollbar.mouse_drag(*this, ev.Position);
-    }};
+    };
 
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
     if (ev.Handled) { return; }
 
-    if (can_move()) {
-        Bounds     = {screen_to_local(*this, ev.Position) - _dragStart, Bounds->Size};
+    if (_dragStart && _currentMode) {
+        rect_f     newBounds {*Bounds};
+        auto const localPos {screen_to_local(*this, ev.Position)};
+
+        switch (*_currentMode) {
+        case cursor_mode::Move: {
+            newBounds = {localPos - *_dragStart, Bounds->Size};
+            break;
+        }
+        // --- Edges ---
+        case cursor_mode::W_Resize: {
+            f32 const newX {localPos.X};
+            f32 const deltaW {Bounds->left() - newX};
+            newBounds.Position.X = newX;
+            newBounds.Size.Width += deltaW;
+            break;
+        }
+        case cursor_mode::E_Resize: {
+            newBounds.Size.Width = localPos.X - Bounds->left();
+            break;
+        }
+        case cursor_mode::N_Resize: {
+            f32 const newY {localPos.Y};
+            f32 const deltaH {Bounds->top() - newY};
+            newBounds.Position.Y = newY;
+            newBounds.Size.Height += deltaH;
+            break;
+        }
+        case cursor_mode::S_Resize: {
+            newBounds.Size.Height = localPos.Y - Bounds->top();
+            break;
+        }
+        // --- Corners ---
+        case cursor_mode::SE_Resize: {
+            newBounds.Size.Width  = localPos.X - Bounds->left();
+            newBounds.Size.Height = localPos.Y - Bounds->top();
+            break;
+        }
+        case cursor_mode::NW_Resize: {
+            f32 const newX {localPos.X};
+            f32 const deltaW {Bounds->left() - newX};
+            newBounds.Position.X = newX;
+            newBounds.Size.Width += deltaW;
+
+            f32 const newY {localPos.Y};
+            f32 const deltaH {Bounds->top() - newY};
+            newBounds.Position.Y = newY;
+            newBounds.Size.Height += deltaH;
+            break;
+        }
+        case cursor_mode::NE_Resize: {
+            newBounds.Size.Width = localPos.X - Bounds->left();
+
+            f32 const newY {localPos.Y};
+            f32 const deltaH {Bounds->top() - newY};
+            newBounds.Position.Y = newY;
+            newBounds.Size.Height += deltaH;
+            break;
+        }
+        case cursor_mode::SW_Resize: {
+            f32 const newX {localPos.X};
+            f32 const deltaW {Bounds->left() - newX};
+            newBounds.Position.X = newX;
+            newBounds.Size.Width += deltaW;
+            newBounds.Size.Height = localPos.Y - Bounds->top();
+            break;
+        }
+        default: break;
+        }
+
+        Bounds     = newBounds;
         ev.Handled = true;
-        return;
     }
 }
 
 void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 {
-    if (can_move()) {
-        _dragStart = screen_to_local(*this, ev.Position) - Bounds->Position;
+    auto const mp {ev.Position};
+
+    if (can_move() || can_resize()) {
+        _dragStart = screen_to_local(*this, mp) - Bounds->Position;
+        ev.Handled = true;
     }
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
-            _vScrollbar.mouse_down(*this, ev.Position);
-            _hScrollbar.mouse_down(*this, ev.Position);
+            _vScrollbar.mouse_down(*this, mp);
+            _hScrollbar.mouse_down(*this, mp);
             ev.Handled = true;
             return;
         }
@@ -203,7 +276,7 @@ void panel::on_mouse_button_down(input::mouse::button_event const& ev)
 
 void panel::on_mouse_button_up(input::mouse::button_event const& ev)
 {
-    _dragStart = point_f::Zero;
+    _dragStart = std::nullopt;
 
     if (_vScrollbar.Visible || _hScrollbar.Visible) {
         if (ev.Button == controls().PrimaryMouseButton) {
@@ -257,7 +330,49 @@ auto panel::get_layout() const -> layout*
 
 auto panel::can_move() const -> bool
 {
-    return *Movable && is_top_level() && form().allows_move();
+    return *Movable && is_top_level() && form().allows_move() && form().top_widget() == this;
+}
+
+auto panel::can_resize() const -> bool
+{
+    return *Resizable && is_top_level() && form().allows_resize() && form().top_widget() == this;
+}
+
+void panel::check_mode()
+{
+    auto const mp {locate_service<input::system>().mouse()->get_position()};
+
+    _currentMode = can_move() ? std::optional {cursor_mode::Move} : std::nullopt;
+    if (!can_resize()) { return; }
+
+    auto const inBounds {hit_test_bounds()};
+    auto const outBounds {inBounds - thickness {_style.Border.Size}};
+
+    if (inBounds.contains(mp) && !outBounds.contains(mp)) {
+        bool const onLeft {mp.X < outBounds.left()};
+        bool const onRight {mp.X > outBounds.right()};
+
+        bool const onTop {mp.Y < outBounds.top()};
+        bool const onBottom {mp.Y > outBounds.bottom()};
+
+        if (onLeft && onTop) {
+            _currentMode = cursor_mode::NW_Resize;
+        } else if (onRight && onBottom) {
+            _currentMode = cursor_mode::SE_Resize;
+        } else if (onRight && onTop) {
+            _currentMode = cursor_mode::NE_Resize;
+        } else if (onLeft && onBottom) {
+            _currentMode = cursor_mode::SW_Resize;
+        } else if (onLeft) {
+            _currentMode = cursor_mode::W_Resize;
+        } else if (onRight) {
+            _currentMode = cursor_mode::E_Resize;
+        } else if (onTop) {
+            _currentMode = cursor_mode::N_Resize;
+        } else if (onBottom) {
+            _currentMode = cursor_mode::S_Resize;
+        }
+    }
 }
 
 auto panel::get_scroll_max_value(orientation orien) const -> f32

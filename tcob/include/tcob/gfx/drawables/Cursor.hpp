@@ -33,6 +33,7 @@ public:
     prop<string>              ActiveMode;
 
     void add_mode(string const& name, point_i hotspot = point_i::Zero);
+    auto has_mode(string const& name) const -> bool;
 
     auto bounds() const -> rect_i;
 

@@ -17,18 +17,56 @@ inline auto operator/(length const& left, f32 right) -> length
 
 inline auto operator-(rect_f const& left, thickness const& right) -> rect_f
 {
-    return {left.left() + right.Left.calc(left.width()),
-            left.top() + right.Top.calc(left.width()),
-            left.width() - (right.Left.calc(left.width()) + right.Right.calc(left.width())),
-            left.height() - (right.Top.calc(left.width()) + right.Bottom.calc(left.width()))};
+    f32 const l {right.Left.calc(left.width())};
+    f32 const r {right.Right.calc(left.width())};
+    f32 const t {right.Top.calc(left.width())};
+    f32 const b {right.Bottom.calc(left.width())};
+
+    return {left.left() + l,
+            left.top() + t,
+            left.width() - (l + r),
+            left.height() - (t + b)};
 }
 
 inline auto operator-=(rect_f& left, thickness const& right) -> rect_f&
 {
-    left.Position.X += right.Left.calc(left.width());
-    left.Position.Y += right.Top.calc(left.width());
-    left.Size.Width -= right.Left.calc(left.width()) + right.Right.calc(left.width());
-    left.Size.Height -= right.Top.calc(left.width()) + right.Bottom.calc(left.width());
+    f32 const l {right.Left.calc(left.width())};
+    f32 const r {right.Right.calc(left.width())};
+    f32 const t {right.Top.calc(left.width())};
+    f32 const b {right.Bottom.calc(left.width())};
+
+    left.Position.X += l;
+    left.Position.Y += t;
+    left.Size.Width -= (l + r);
+    left.Size.Height -= (t + b);
+
+    return left;
+}
+
+inline auto operator+(rect_f const& left, thickness const& right) -> rect_f
+{
+    f32 const l {right.Left.calc(left.width())};
+    f32 const r {right.Right.calc(left.width())};
+    f32 const t {right.Top.calc(left.width())};
+    f32 const b {right.Bottom.calc(left.width())};
+
+    return {left.left() - l,
+            left.top() - t,
+            left.width() + (l + r),
+            left.height() + (t + b)};
+}
+
+inline auto operator+=(rect_f& left, thickness const& right) -> rect_f&
+{
+    f32 const l {right.Left.calc(left.width())};
+    f32 const r {right.Right.calc(left.width())};
+    f32 const t {right.Top.calc(left.width())};
+    f32 const b {right.Bottom.calc(left.width())};
+
+    left.Position.X -= l;
+    left.Position.Y -= t;
+    left.Size.Width += (l + r);
+    left.Size.Height += (t + b);
 
     return left;
 }
