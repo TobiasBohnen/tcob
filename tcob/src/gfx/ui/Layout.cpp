@@ -534,11 +534,6 @@ auto magnetic_snap_layout::allows_move() const -> bool
     return true;
 }
 
-auto magnetic_snap_layout::allows_resize() const -> bool
-{
-    return true;
-}
-
 void magnetic_snap_layout::do_layout(size_f size)
 {
     auto const& w {widgets()};

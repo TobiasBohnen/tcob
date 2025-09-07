@@ -270,7 +270,7 @@ public:
     auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
 
     auto allows_move() const -> bool override;
-    auto allows_resize() const -> bool override;
+    // FIXME: auto allows_resize() const -> bool override;
 
 protected:
     void do_layout(size_f size) override;

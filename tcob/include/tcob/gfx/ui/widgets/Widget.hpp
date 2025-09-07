@@ -15,6 +15,7 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/StyleCollection.hpp"
 #include "tcob/gfx/ui/Transition.hpp"
@@ -52,14 +53,16 @@ public:
 
     std::any UserData;
 
-    prop<rect_f>   Bounds;
-    prop<string>   Class;
-    prop_fn<f32>   Alpha;
-    prop<tab_stop> TabStop;
-    prop<isize>    ZOrder;
-
-    prop<dimensions>   Flex;
+    prop<string>       Class;
+    prop_fn<f32>       Alpha;
+    prop<tab_stop>     TabStop;
+    prop<isize>        ZOrder;
     prop<milliseconds> TransitionDuration;
+
+    prop_val<rect_f> Bounds;
+    prop_val<size_f> MinSize;
+    prop_val<size_f> MaxSize;
+    prop<dimensions> Flex;
 
     cursor_mode Cursor {cursor_mode::Default};
 

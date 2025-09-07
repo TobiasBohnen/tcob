@@ -330,16 +330,17 @@ auto panel::get_layout() const -> layout*
 
 auto panel::can_move() const -> bool
 {
-    return *Movable && is_top_level() && form().allows_move() && form().top_widget() == this;
+    return *Movable && form().allows_move() && form().top_widget() == this;
 }
 
 auto panel::can_resize() const -> bool
 {
-    return *Resizable && is_top_level() && form().allows_resize() && form().top_widget() == this;
+    return *Resizable && form().allows_resize() && form().top_widget() == this;
 }
 
 void panel::check_mode()
 {
+    if (_dragStart) { return; }
     auto const mp {locate_service<input::system>().mouse()->get_position()};
 
     _currentMode = can_move() ? std::optional {cursor_mode::Move} : std::nullopt;

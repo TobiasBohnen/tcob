@@ -5,10 +5,13 @@
 
 #include "tcob/gfx/ui/widgets/Widget.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <limits>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Form.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -20,12 +23,19 @@
 namespace tcob::ui {
 
 widget::widget(init const& wi)
-    : Alpha {{[this] {
+    : Alpha {{[this] -> f32 {
                   f32 retValue {_alpha};
                   if (auto* wparent {parent()}) { retValue *= wparent->Alpha; }
                   return retValue;
               },
               [this](auto const& value) { _alpha = value; }}}
+    , Bounds {{[this](rect_f const& val) -> rect_f {
+        return {val.Position,
+                {std::clamp(val.width(), MinSize->Width, MaxSize->Width),
+                 std::clamp(val.height(), MinSize->Height, MaxSize->Height)}};
+    }}}
+    , MinSize {{[this](size_f const& val) -> size_f { return {std::min(val.Width, MaxSize->Width), std::min(val.Height, MaxSize->Height)}; }}}
+    , MaxSize {{[this](size_f const& val) -> size_f { return {std::max(val.Width, MinSize->Width), std::max(val.Height, MinSize->Height)}; }}}
     , _form {wi.Form}
     , _parent {wi.Parent}
     , _name {wi.Name}
@@ -33,14 +43,21 @@ widget::widget(init const& wi)
     assert(_form);
 
     Class.Changed.connect([this](auto const&) { queue_redraw(); });
-    Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
-
     Flex.Changed.connect([this](auto const&) { queue_redraw(); });
-
     ZOrder.Changed.connect([this](auto const&) { queue_redraw(); });
 
     static i32 tabIndex {0};
-    TabStop.mutate([&](tab_stop& tabStop) { tabStop.Index = tabIndex++; });
+    TabStop.mutate([&](tab_stop& tabStop) -> void { tabStop.Index = tabIndex++; });
+
+    Bounds.Changed.connect([this](auto const&) { on_bounds_changed(); });
+    MinSize.Changed.connect([this](auto const& val) { Bounds = {Bounds->Position,
+                                                                {std::clamp(Bounds->width(), val.Width, MaxSize->Width),
+                                                                 std::clamp(Bounds->height(), val.Height, MaxSize->Height)}}; });
+    MinSize(size_f::Zero);
+    MaxSize.Changed.connect([this](auto const& val) { Bounds = {Bounds->Position,
+                                                                {std::clamp(Bounds->width(), MinSize->Width, val.Width),
+                                                                 std::clamp(Bounds->height(), MinSize->Height, val.Height)}}; });
+    MaxSize({std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()});
 }
 
 void widget::on_bounds_changed()
