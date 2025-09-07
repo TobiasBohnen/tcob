@@ -305,9 +305,7 @@ void widget::do_key_down(input::keyboard::event const& ev)
         }
     }
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     KeyDown({.Sender = this, .Event = ev});
 }
@@ -316,15 +314,15 @@ void widget::do_key_up(input::keyboard::event const& ev)
 {
     on_key_up(ev);
 
-    if (ev.KeyCode == controls().ActivateKey) {
-        deactivate();
-        do_click();
-        ev.Handled = true;
+    if (!ev.Handled) {
+        if (ev.KeyCode == controls().ActivateKey) {
+            deactivate();
+            do_click();
+            ev.Handled = true;
+        }
     }
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     KeyUp({.Sender = this, .Event = ev});
 }
@@ -372,9 +370,7 @@ void widget::do_mouse_hover(input::mouse::motion_event const& ev)
 {
     on_mouse_hover(ev);
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     MouseHover({.Sender           = this,
                 .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
@@ -385,9 +381,7 @@ void widget::do_mouse_drag(input::mouse::motion_event const& ev)
 {
     on_mouse_drag(ev);
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     MouseDrag({.Sender           = this,
                .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
@@ -403,9 +397,7 @@ void widget::do_mouse_button_down(input::mouse::button_event const& ev)
         ev.Handled = true;
     }
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     MouseButtonDown({.Sender           = this,
                      .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
@@ -421,9 +413,7 @@ void widget::do_mouse_button_up(input::mouse::button_event const& ev)
         ev.Handled = true;
     }
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     MouseButtonUp({.Sender           = this,
                    .RelativePosition = ev.Position - point_i {hit_test_bounds().Position},
@@ -434,9 +424,7 @@ void widget::do_mouse_wheel(input::mouse::wheel_event const& ev)
 {
     on_mouse_wheel(ev);
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     MouseWheel({.Sender = this, .Event = ev});
 }
@@ -452,9 +440,7 @@ void widget::do_controller_button_down(input::controller::button_event const& ev
         }
     }
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     ControllerButtonDown({.Sender = this, .Event = ev});
 }
@@ -471,9 +457,7 @@ void widget::do_controller_button_up(input::controller::button_event const& ev)
         }
     }
 
-    if (ev.Handled) {
-        queue_redraw();
-    }
+    if (ev.Handled) { queue_redraw(); }
 
     ControllerButtonUp({.Sender = this, .Event = ev});
 }
