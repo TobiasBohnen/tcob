@@ -135,9 +135,6 @@ public:
 
     static inline char const* AssetName {"font"};
 
-    static auto Init() -> bool;
-    static void Done();
-
 private:
     void setup_texture();
 

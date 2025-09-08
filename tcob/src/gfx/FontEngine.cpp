@@ -54,11 +54,23 @@ static auto cubic_to(FT_Vector const* control1, FT_Vector const* control2, FT_Ve
 
 static FT_Library library {nullptr};
 
+truetype_font_engine::truetype_font_engine() = default;
+
 truetype_font_engine::~truetype_font_engine()
 {
     if (_face) {
         FT_Done_Face(_face);
     }
+}
+
+auto truetype_font_engine::Init() -> bool
+{
+    return !FT_Init_FreeType(&library);
+}
+
+void truetype_font_engine::Done()
+{
+    FT_Done_FreeType(library);
 }
 
 auto truetype_font_engine::load_data(std::span<byte const> data, u32 fontsize) -> std::optional<font::information>
@@ -152,7 +164,7 @@ auto truetype_font_engine::load_glyph(u32 cp) -> glyph
     retValue.Size.Width  = _face->glyph->metrics.width / 64;
     retValue.Size.Height = _face->glyph->metrics.height / 64;
     retValue.Offset.X    = static_cast<f32>(_face->glyph->metrics.horiBearingX) / 64.0f;
-    retValue.Offset.Y    = static_cast<f32>(-_face->glyph->metrics.horiBearingY) / 64.0f + _info.Ascender;
+    retValue.Offset.Y    = (static_cast<f32>(-_face->glyph->metrics.horiBearingY) / 64.0f) + _info.Ascender;
     retValue.AdvanceX    = static_cast<f32>(_face->glyph->metrics.horiAdvance) / 64.0f;
 
     return retValue;
@@ -168,16 +180,6 @@ auto truetype_font_engine::codepoint_to_glyphindex(u32 cp) -> u32
     }
 
     return it->second;
-}
-
-auto truetype_font_engine::Init() -> bool
-{
-    return !FT_Init_FreeType(&library);
-}
-
-void truetype_font_engine::Done()
-{
-    FT_Done_FreeType(library);
 }
 
 }

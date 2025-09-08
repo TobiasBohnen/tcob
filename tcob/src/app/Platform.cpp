@@ -15,6 +15,8 @@
 #include "../data/config_formats/ConfigFormats.hpp"
 #include "../gfx/image_codecs/ImageCodecs.hpp"
 
+#include "../gfx/FontEngine.hpp"
+
 #include "loaders/ConfigAssetLoader.hpp"
 
 #include "tcob/app/Game.hpp"
@@ -31,7 +33,6 @@
 #include "tcob/data/ConfigConversions.hpp"
 #include "tcob/data/ConfigFile.hpp"
 #include "tcob/gfx/Font.hpp"
-#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Image.hpp"
 
 #include "backend/SDL/SDLPlatform.hpp"
@@ -98,7 +99,7 @@ platform::~platform()
     io::detail::done();
 
     //  FreeType
-    gfx::font::Done();
+    gfx::truetype_font_engine::Done();
 }
 
 void platform::remove_services() const
@@ -314,7 +315,7 @@ void platform::InitAudioCodecs()
 
 void platform::InitFontEngines()
 {
-    gfx::font::Init();
+    gfx::truetype_font_engine::Init();
 }
 
 void platform::InitTaskManager(std::optional<isize> workerThreads)

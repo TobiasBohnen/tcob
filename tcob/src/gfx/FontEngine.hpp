@@ -27,7 +27,7 @@ struct glyph_bitmap {
 
 class TCOB_API truetype_font_engine : public non_copyable {
 public:
-    truetype_font_engine() = default;
+    truetype_font_engine();
     ~truetype_font_engine();
 
     auto load_data(std::span<byte const> data, u32 fontsize) -> std::optional<font::information>;

@@ -178,16 +178,6 @@ auto font::get_glyphs(utf8_string_view text, bool kerning) -> std::vector<glyph>
     return retValue;
 }
 
-auto font::Init() -> bool
-{
-    return truetype_font_engine::Init();
-}
-
-void font::Done()
-{
-    truetype_font_engine::Done();
-}
-
 auto font::info() const -> font::information const&
 {
     return _info;
