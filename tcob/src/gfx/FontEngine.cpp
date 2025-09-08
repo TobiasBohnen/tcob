@@ -102,7 +102,7 @@ auto truetype_font_engine::get_kerning(u32 cp0, u32 cp1) -> f32
 
     if (!_kerningCache.contains(cp0) || !_kerningCache[cp0].contains(cp1)) {
         FT_Vector kerning;
-        FT_Get_Kerning(_face, codepoint_to_glyphindex(cp0), codepoint_to_glyphindex(cp1), FT_KERNING_DEFAULT, &kerning);
+        FT_Get_Kerning(_face, codepoint_to_glyphindex(cp0), codepoint_to_glyphindex(cp1), FT_KERNING_UNFITTED /* was: FT_KERNING_DEFAULT */, &kerning);
         _kerningCache[cp0][cp1] = static_cast<f32>(kerning.x) / 64.0f;
     }
 

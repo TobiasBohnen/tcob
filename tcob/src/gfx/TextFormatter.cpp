@@ -295,7 +295,7 @@ static auto Layout(std::vector<line_definition> const& lines, font& font, alignm
         y += fontInfo.LineHeight * scale;
         retValue.UsedSize.Width = std::max(x, retValue.UsedSize.Width);
 
-        if (y + fontInfo.LineHeight * scale > availableHeight) { break; }
+        if (y + (fontInfo.LineHeight * scale) > availableHeight) { break; }
     }
 
     retValue.UsedSize.Height = y;

@@ -938,19 +938,46 @@ void canvas::draw_text(point_f offset, text_formatter::result const& formatResul
 
             f32 const level {static_cast<f32>(quad.TextureRegion.Level)};
 
-            point_f topLeft {}, topRight {}, bottomLeft {}, bottomRight {};
+            point_f const posTL {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
+            point_f const posTR {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.top() * invscale) + y}};
+            point_f const posBR {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
+            point_f const posBL {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.bottom() * invscale) + y}};
 
-            topLeft     = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.top() * invscale) + y}};
-            topRight    = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.top() * invscale) + y}};
-            bottomRight = {s.XForm * point_f {(posRect.right() * invscale) + x, (posRect.bottom() * invscale) + y}};
-            bottomLeft  = {s.XForm * point_f {(posRect.left() * invscale) + x, (posRect.bottom() * invscale) + y}};
+            bool const leftIsVertical {std::fabs(posTL.X - posBL.X) < 1e-3f};
+            bool const rightIsVertical {std::fabs(posTR.X - posBR.X) < 1e-3f};
+            bool const topIsHorizontal {std::fabs(posTL.Y - posTR.Y) < 1e-3f};
+            bool const bottomIsHorizontal {std::fabs(posBL.Y - posBR.Y) < 1e-3f};
 
-            verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {uvLeft, uvTop, level}};
-            verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {uvRight, uvBottom, level}};
-            verts[nverts++] = vertex {.Position = topRight, .TexCoords = {uvRight, uvTop, level}};
-            verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {uvLeft, uvTop, level}};
-            verts[nverts++] = vertex {.Position = bottomLeft, .TexCoords = {uvLeft, uvBottom, level}};
-            verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {uvRight, uvBottom, level}};
+            point_f topLeft, topRight, bottomRight, bottomLeft;
+
+            if (leftIsVertical && rightIsVertical && topIsHorizontal && bottomIsHorizontal) {
+                f32 const minX {std::min({posTL.X, posTR.X, posBR.X, posBL.X})};
+                f32 const maxX {std::max({posTL.X, posTR.X, posBR.X, posBL.X})};
+                f32 const minY {std::min({posTL.Y, posTR.Y, posBR.Y, posBL.Y})};
+                f32 const maxY {std::max({posTL.Y, posTR.Y, posBR.Y, posBL.Y})};
+
+                f32 const snapMinX {std::floor(minX + 1e-3f)};
+                f32 const snapMinY {std::floor(minY + 1e-3f)};
+                f32 const snapMaxX {std::ceil(maxX - 1e-3f)};
+                f32 const snapMaxY {std::ceil(maxY - 1e-3f)};
+
+                topLeft     = {snapMinX, snapMinY};
+                topRight    = {snapMaxX, snapMinY};
+                bottomRight = {snapMaxX, snapMaxY};
+                bottomLeft  = {snapMinX, snapMaxY};
+            } else {
+                topLeft     = {std::round(posTL.X), std::round(posTL.Y)};
+                topRight    = {std::round(posTR.X), std::round(posTR.Y)};
+                bottomRight = {std::round(posBR.X), std::round(posBR.Y)};
+                bottomLeft  = {std::round(posBL.X), std::round(posBL.Y)};
+            }
+
+            verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {.U = uvLeft, .V = uvTop, .Level = level}};
+            verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {.U = uvRight, .V = uvBottom, .Level = level}};
+            verts[nverts++] = vertex {.Position = topRight, .TexCoords = {.U = uvRight, .V = uvTop, .Level = level}};
+            verts[nverts++] = vertex {.Position = topLeft, .TexCoords = {.U = uvLeft, .V = uvTop, .Level = level}};
+            verts[nverts++] = vertex {.Position = bottomLeft, .TexCoords = {.U = uvLeft, .V = uvBottom, .Level = level}};
+            verts[nverts++] = vertex {.Position = bottomRight, .TexCoords = {.U = uvRight, .V = uvBottom, .Level = level}};
         }
     }
 
