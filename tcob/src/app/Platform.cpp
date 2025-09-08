@@ -192,26 +192,26 @@ void platform::InitConfigFormats()
     // text
     // readers
     auto trFactory {register_service<data::text_reader::factory>()};
-    trFactory->add({".ini"}, &make_unique<data::detail::ini_reader>);
-    trFactory->add({".json"}, &make_unique<data::detail::json_reader>);
-    trFactory->add({".xml"}, &make_unique<data::detail::xml_reader>);
-    trFactory->add({".yaml"}, &make_unique<data::detail::yaml_reader>);
+    trFactory->add(".ini", &make_unique<data::detail::ini_reader>);
+    trFactory->add(".json", &make_unique<data::detail::json_reader>);
+    trFactory->add(".xml", &make_unique<data::detail::xml_reader>);
+    trFactory->add(".yaml", &make_unique<data::detail::yaml_reader>);
 
     // writers
     auto twFactory {register_service<data::text_writer::factory>()};
-    twFactory->add({".ini"}, &make_unique<data::detail::ini_writer>);
-    twFactory->add({".json"}, &make_unique<data::detail::json_writer>);
-    twFactory->add({".xml"}, &make_unique<data::detail::xml_writer>);
-    twFactory->add({".yaml"}, &make_unique<data::detail::yaml_writer>);
+    twFactory->add(".ini", &make_unique<data::detail::ini_writer>);
+    twFactory->add(".json", &make_unique<data::detail::json_writer>);
+    twFactory->add(".xml", &make_unique<data::detail::xml_writer>);
+    twFactory->add(".yaml", &make_unique<data::detail::yaml_writer>);
 
     // binary
     // readers
     auto brFactory {register_service<data::binary_reader::factory>()};
-    brFactory->add({".bsbd"}, &make_unique<data::detail::bsbd_reader>);
+    brFactory->add(".bsbd", &make_unique<data::detail::bsbd_reader>);
 
     // writers
     auto bwFactory {register_service<data::binary_writer::factory>()};
-    bwFactory->add({".bsbd"}, &make_unique<data::detail::bsbd_writer>);
+    bwFactory->add(".bsbd", &make_unique<data::detail::bsbd_writer>);
 }
 
 void platform::InitAssetFormats()
@@ -227,51 +227,51 @@ void platform::InitImageCodecs()
 {
     // decoders
     auto idFactory {register_service<gfx::image_decoder::factory>()};
-    idFactory->add({".bmp"}, &make_unique<gfx::detail::bmp_decoder>);
-    idFactory->add({".bsi"}, &make_unique<gfx::detail::bsi_decoder>);
-    idFactory->add({".tga"}, &make_unique<gfx::detail::tga_decoder>);
-    idFactory->add({".pcx"}, &make_unique<gfx::detail::pcx_decoder>);
-    idFactory->add({".pnm"}, &make_unique<gfx::detail::pnm_decoder>);
-    idFactory->add({".gif"}, &make_unique<gfx::detail::gif_decoder>);
-    idFactory->add({".png"}, &make_unique<gfx::detail::png_decoder>);
+    idFactory->add(".bmp", &make_unique<gfx::detail::bmp_decoder>);
+    idFactory->add(".bsi", &make_unique<gfx::detail::bsi_decoder>);
+    idFactory->add(".tga", &make_unique<gfx::detail::tga_decoder>);
+    idFactory->add(".pcx", &make_unique<gfx::detail::pcx_decoder>);
+    idFactory->add(".pnm", &make_unique<gfx::detail::pnm_decoder>);
+    idFactory->add(".gif", &make_unique<gfx::detail::gif_decoder>);
+    idFactory->add(".png", &make_unique<gfx::detail::png_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
-    idFactory->add({".qoi"}, &make_unique<gfx::detail::qoi_decoder>);
+    idFactory->add(".qoi", &make_unique<gfx::detail::qoi_decoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    idFactory->add({".webp"}, &make_unique<gfx::detail::webp_decoder>);
+    idFactory->add(".webp", &make_unique<gfx::detail::webp_decoder>);
 #endif
 
     // encoders
     auto ieFactory {register_service<gfx::image_encoder::factory>()};
-    ieFactory->add({".bmp"}, &make_unique<gfx::detail::bmp_encoder>);
-    ieFactory->add({".bsi"}, &make_unique<gfx::detail::bsi_encoder>);
-    ieFactory->add({".tga"}, &make_unique<gfx::detail::tga_encoder>);
-    ieFactory->add({".pcx"}, &make_unique<gfx::detail::pcx_encoder>);
-    ieFactory->add({".png"}, &make_unique<gfx::detail::png_encoder>);
+    ieFactory->add(".bmp", &make_unique<gfx::detail::bmp_encoder>);
+    ieFactory->add(".bsi", &make_unique<gfx::detail::bsi_encoder>);
+    ieFactory->add(".tga", &make_unique<gfx::detail::tga_encoder>);
+    ieFactory->add(".pcx", &make_unique<gfx::detail::pcx_encoder>);
+    ieFactory->add(".png", &make_unique<gfx::detail::png_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
-    ieFactory->add({".qoi"}, &make_unique<gfx::detail::qoi_encoder>);
+    ieFactory->add(".qoi", &make_unique<gfx::detail::qoi_encoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    ieFactory->add({".webp"}, &make_unique<gfx::detail::webp_encoder>);
+    ieFactory->add(".webp", &make_unique<gfx::detail::webp_encoder>);
 #endif
 
     // animated
     // decoders
     auto iadFactory {register_service<gfx::animated_image_decoder::factory>()};
-    iadFactory->add({".gif"}, &make_unique<gfx::detail::gif_decoder>);
-    iadFactory->add({".png"}, &make_unique<gfx::detail::png_anim_decoder>);
+    iadFactory->add(".gif", &make_unique<gfx::detail::gif_decoder>);
+    iadFactory->add(".png", &make_unique<gfx::detail::png_anim_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    iadFactory->add({".webp"}, &make_unique<gfx::detail::webp_anim_decoder>);
+    iadFactory->add(".webp", &make_unique<gfx::detail::webp_anim_decoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_GFX_THEORA)
-    iadFactory->add({".ogv"}, &make_unique<gfx::detail::theora_decoder>);
+    iadFactory->add(".ogv", &make_unique<gfx::detail::theora_decoder>);
 #endif
 
     // encoders
     auto iaeFactory {register_service<gfx::animated_image_encoder::factory>()};
-    iaeFactory->add({".png"}, &make_unique<gfx::detail::png_anim_encoder>);
+    iaeFactory->add(".png", &make_unique<gfx::detail::png_anim_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
-    iaeFactory->add({".webp"}, &make_unique<gfx::detail::webp_anim_encoder>);
+    iaeFactory->add(".webp", &make_unique<gfx::detail::webp_anim_encoder>);
 #endif
 }
 
@@ -279,20 +279,20 @@ void platform::InitAudioCodecs()
 {
     // decoders
     auto adFactory {register_service<audio::decoder::factory>()};
-    adFactory->add({".bsa"}, &make_unique<audio::detail::bsa_decoder>);
+    adFactory->add(".bsa", &make_unique<audio::detail::bsa_decoder>);
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
-    adFactory->add({".flac"}, &make_unique<audio::detail::flac_decoder>);
-    adFactory->add({".mp3"}, &make_unique<audio::detail::mp3_decoder>);
-    adFactory->add({".wav"}, &make_unique<audio::detail::wav_decoder>);
+    adFactory->add(".flac", &make_unique<audio::detail::flac_decoder>);
+    adFactory->add(".mp3", &make_unique<audio::detail::mp3_decoder>);
+    adFactory->add(".wav", &make_unique<audio::detail::wav_decoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
-    adFactory->add({".ogg"}, &make_unique<audio::detail::vorbis_decoder>);
+    adFactory->add(".ogg", &make_unique<audio::detail::vorbis_decoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
-    adFactory->add({".opus"}, &make_unique<audio::detail::opus_decoder>);
+    adFactory->add(".opus", &make_unique<audio::detail::opus_decoder>);
 #endif
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
-    adFactory->add({".mid"}, &make_unique<audio::detail::midi_decoder>);
+    adFactory->add(".mid", &make_unique<audio::detail::midi_decoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
     adFactory->add({".it", ".mod", ".s3m", ".xm"}, &make_unique<audio::detail::xmp_decoder>);
@@ -300,15 +300,15 @@ void platform::InitAudioCodecs()
 
     // encoders
     auto aeFactory {register_service<audio::encoder::factory>()};
-    aeFactory->add({".bsa"}, &make_unique<audio::detail::bsa_encoder>);
+    aeFactory->add(".bsa", &make_unique<audio::detail::bsa_encoder>);
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS)
-    aeFactory->add({".wav"}, &make_unique<audio::detail::wav_encoder>);
+    aeFactory->add(".wav", &make_unique<audio::detail::wav_encoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
-    aeFactory->add({".ogg"}, &make_unique<audio::detail::vorbis_encoder>);
+    aeFactory->add(".ogg", &make_unique<audio::detail::vorbis_encoder>);
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
-    aeFactory->add({".opus"}, &make_unique<audio::detail::opus_encoder>);
+    aeFactory->add(".opus", &make_unique<audio::detail::opus_encoder>);
 #endif
 }
 

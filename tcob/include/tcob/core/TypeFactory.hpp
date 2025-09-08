@@ -18,7 +18,8 @@ class type_factory {
     using func = std::function<ReturnType(Args...)>;
 
 public:
-    void add(std::vector<string> const& names, func&& func);
+    void add(string const& name, func&& func);
+    void add(std::vector<string> const& names, func const& func);
 
     auto create(string const& name, Args&&... args) -> ReturnType;
 

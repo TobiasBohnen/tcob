@@ -14,10 +14,16 @@
 namespace tcob {
 
 template <typename ReturnType, typename... Args>
-inline void type_factory<ReturnType, Args...>::add(std::vector<string> const& names, func&& func)
+inline void type_factory<ReturnType, Args...>::add(string const& name, func&& func)
+{
+    _functions[name] = std::move(func);
+}
+
+template <typename ReturnType, typename... Args>
+inline void type_factory<ReturnType, Args...>::add(std::vector<string> const& names, func const& func)
 {
     for (auto const& name : names) {
-        _functions[name] = std::move(func);
+        _functions[name] = func;
     }
 }
 
@@ -26,7 +32,7 @@ inline auto type_factory<ReturnType, Args...>::create(string const& name, Args&&
 {
     auto const it {_functions.find(name)};
     if (it != _functions.end()) {
-        return it->second(args...);
+        return it->second(std::forward<Args>(args)...);
     }
 
     return nullptr;

@@ -194,8 +194,8 @@ void sdl_platform::init_locales()
 void sdl_platform::init_audio_system()
 {
     auto factory {register_service<audio::system::factory>()};
-    factory->add({"SDL"}, &make_shared<audio::sdl_audio_system>);
-    factory->add({"NULL"}, &make_shared<audio::null::null_audio_system>);
+    factory->add("SDL", &make_shared<audio::sdl_audio_system>);
+    factory->add("NULL", &make_shared<audio::null::null_audio_system>);
 
     string audio {"SDL"};
 
@@ -211,12 +211,12 @@ void sdl_platform::init_render_system(string const& windowTitle)
 {
     auto rsFactory {register_service<gfx::render_system::factory>()};
 #if defined(TCOB_ENABLE_RENDERER_OPENGL45)
-    rsFactory->add({"OPENGL45"}, &make_shared<gfx::gl45::gl_render_system>);
+    rsFactory->add("OPENGL45", &make_shared<gfx::gl45::gl_render_system>);
 #endif
 #if defined(TCOB_ENABLE_RENDERER_OPENGLES30)
-    rsFactory->add({"OPENGLES30"}, &make_shared<gfx::gles30::gl_render_system>);
+    rsFactory->add("OPENGLES30", &make_shared<gfx::gles30::gl_render_system>);
 #endif
-    rsFactory->add({"NULL"}, &make_shared<gfx::null::null_render_system>);
+    rsFactory->add("NULL", &make_shared<gfx::null::null_render_system>);
 
     gfx::video_config video;
     if (!config().try_get(video, Cfg::Video::Name)) { throw std::runtime_error("Invalid video config"); }
@@ -262,8 +262,8 @@ void sdl_platform::init_render_system(string const& windowTitle)
 void sdl_platform::init_input_system()
 {
     auto factory {register_service<input::system::factory>()};
-    factory->add({"SDL"}, &make_shared<input::sdl_input_system>);
-    factory->add({"NULL"}, &make_shared<input::null::null_input_system>);
+    factory->add("SDL", &make_shared<input::sdl_input_system>);
+    factory->add("NULL", &make_shared<input::null::null_input_system>);
 
     string input {"SDL"};
 
