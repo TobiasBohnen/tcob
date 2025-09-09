@@ -42,7 +42,7 @@ color_gradient::color_gradient(std::initializer_list<color const> colors)
     f32 const step {1.0f / (colors.size() - 1)};
     f32       current {0.0f};
     for (auto const& color : colors) {
-        _colorStops[current * (Size - 1)] = color;
+        _colorStops[static_cast<usize>(current * (Size - 1))] = color;
         current += step;
     }
 }

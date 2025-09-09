@@ -67,11 +67,11 @@ void line_chart::on_draw_chart(widget_painter& painter)
         canvas.begin_path();
         canvas.move_to(points[0]);
         if (_style.SmoothLines) {
-            for (usize i {0}; i + 1 < points.size(); ++i) {
-                auto const& p0 {(i == 0) ? points[i] : points[i - 1]};
-                auto const& p1 {points[i]};
-                auto const& p2 {points[i + 1]};
-                auto const& p3 {(i + 2 < points.size()) ? points[i + 2] : points[i + 1]};
+            for (usize j {0}; j + 1 < points.size(); ++j) {
+                auto const& p0 {(j == 0) ? points[j] : points[j - 1]};
+                auto const& p1 {points[j]};
+                auto const& p2 {points[j + 1]};
+                auto const& p3 {(j + 2 < points.size()) ? points[j + 2] : points[j + 1]};
 
                 point_f c1 {p1.X + ((p2.X - p0.X) * 0.5f / 3.0f),
                             p1.Y + ((p2.Y - p0.Y) * 0.5f / 3.0f)};
@@ -81,8 +81,8 @@ void line_chart::on_draw_chart(widget_painter& painter)
                 canvas.cubic_bezier_to(c1, c2, p2);
             }
         } else {
-            for (u32 i {1}; i < points.size(); ++i) {
-                canvas.line_to(points[i]);
+            for (u32 j {1}; j < points.size(); ++j) {
+                canvas.line_to(points[j]);
             }
         }
 
@@ -97,21 +97,21 @@ void line_chart::on_draw_chart(widget_painter& painter)
 
 auto line_chart::calc_grid_lines() const -> size_i
 {
-    i32 verticalGridLines {0};
+    isize verticalGridLines {0};
     switch (_style.VerticalGridLines) {
     case grid_line_amount::None:   break;
     case grid_line_amount::Few:    verticalGridLines = (max_x() / 2); break;
     case grid_line_amount::Normal: verticalGridLines = max_x(); break;
     case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) - 1; break;
     }
-    i32 horizontalGridLines {0};
+    isize horizontalGridLines {0};
     switch (_style.HorizontalGridLines) {
     case grid_line_amount::None:   break;
     case grid_line_amount::Few:    horizontalGridLines = 3; break;
     case grid_line_amount::Normal: horizontalGridLines = 5; break;
     case grid_line_amount::Many:   horizontalGridLines = 10; break;
     }
-    return {horizontalGridLines, verticalGridLines};
+    return {static_cast<i32>(horizontalGridLines), static_cast<i32>(verticalGridLines)};
 }
 
 ////////////////////////////////////////////////////////////
@@ -197,21 +197,21 @@ void bar_chart::on_draw_chart(widget_painter& painter)
 
 auto bar_chart::calc_grid_lines() const -> size_i
 {
-    i32 verticalGridLines {0};
+    isize verticalGridLines {0};
     switch (_style.VerticalGridLines) {
     case grid_line_amount::None:   break;
     case grid_line_amount::Few:    verticalGridLines = (max_x() / 2) + 1; break;
     case grid_line_amount::Normal: verticalGridLines = max_x() + 1; break;
     case grid_line_amount::Many:   verticalGridLines = (max_x() * 2) + 1; break;
     }
-    i32 horizontalGridLines {0};
+    isize horizontalGridLines {0};
     switch (_style.HorizontalGridLines) {
     case grid_line_amount::None:   break;
     case grid_line_amount::Few:    horizontalGridLines = 3; break;
     case grid_line_amount::Normal: horizontalGridLines = 5; break;
     case grid_line_amount::Many:   horizontalGridLines = 10; break;
     }
-    return {horizontalGridLines, verticalGridLines};
+    return {static_cast<i32>(horizontalGridLines), static_cast<i32>(verticalGridLines)};
 }
 
 ////////////////////////////////////////////////////////////
@@ -382,21 +382,21 @@ void scatter_chart::on_draw_chart(widget_painter& painter)
 
 auto scatter_chart::calc_grid_lines() const -> size_i
 {
-    i32 verticalGridLines {0};
+    f32 verticalGridLines {0};
     switch (_style.VerticalGridLines) {
     case grid_line_amount::None:   break;
     case grid_line_amount::Few:    verticalGridLines = ((XAxis->Max - XAxis->Min) / 2) + 1; break;
     case grid_line_amount::Normal: verticalGridLines = ((XAxis->Max - XAxis->Min)) + 1; break;
     case grid_line_amount::Many:   verticalGridLines = ((XAxis->Max - XAxis->Min) * 2) + 1; break;
     }
-    i32 horizontalGridLines {0};
+    f32 horizontalGridLines {0};
     switch (_style.HorizontalGridLines) {
     case grid_line_amount::None:   break;
     case grid_line_amount::Few:    horizontalGridLines = ((YAxis->Max - YAxis->Min) / 2) + 1; break;
     case grid_line_amount::Normal: horizontalGridLines = ((YAxis->Max - YAxis->Min)) + 1; break;
     case grid_line_amount::Many:   horizontalGridLines = ((YAxis->Max - YAxis->Min) * 2) + 1; break;
     }
-    return {horizontalGridLines, verticalGridLines};
+    return {static_cast<i32>(horizontalGridLines), static_cast<i32>(verticalGridLines)};
 }
 
 ////////////////////////////////////////////////////////////

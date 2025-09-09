@@ -67,17 +67,17 @@ auto qoi_decoder::decode(io::istream& in) -> std::optional<image>
                     i32 const dr {static_cast<i32>(helper::extract_bits(tag8, 4, 2)) - 2};
                     i32 const dg {static_cast<i32>(helper::extract_bits(tag8, 2, 2)) - 2};
                     i32 const db {static_cast<i32>(helper::extract_bits(tag8, 0, 2)) - 2};
-                    prevPixel.R += dr;
-                    prevPixel.G += dg;
-                    prevPixel.B += db;
+                    prevPixel.R += static_cast<u8>(dr);
+                    prevPixel.G += static_cast<u8>(dg);
+                    prevPixel.B += static_cast<u8>(db);
                 } else if (tag2 == QOI_OP_LUMA >> 6) {
                     byte const tag8_2 {in.read<byte>()};
                     i32 const  dr {static_cast<i32>(helper::extract_bits(tag8_2, 4, 4)) - 8};
                     i32 const  dg {static_cast<i32>(helper::extract_bits(tag8, 0, 6)) - 32};
                     i32 const  db {static_cast<i32>(helper::extract_bits(tag8_2, 0, 4)) - 8};
-                    prevPixel.R += dg + dr;
-                    prevPixel.G += dg;
-                    prevPixel.B += dg + db;
+                    prevPixel.R += static_cast<u8>(dg + dr);
+                    prevPixel.G += static_cast<u8>(dg);
+                    prevPixel.B += static_cast<u8>(dg + db);
                 } else if (tag2 == QOI_OP_RUN >> 6) {
                     byte const rl {static_cast<byte>(helper::extract_bits(tag8, 0, 6))};
                     for (u32 j {0}; j < rl; ++j) {
@@ -134,8 +134,8 @@ auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
     out.write(magic);
     out.write<u32, std::endian::big>(info.Size.Width);
     out.write<u32, std::endian::big>(info.Size.Height);
-    out.write<u8>(bpp);
-    out.write<u8>(1);
+    out.write<byte>(static_cast<byte>(bpp));
+    out.write<byte>(1);
 
     // content
     auto const imgData {image.data()};
@@ -148,18 +148,18 @@ auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
         if (currPixel == prevPixel) {
             ++run;
             if (run == 62 || i + bpp >= size) {
-                out.write<byte>(QOI_OP_RUN | (run - 1));
+                out.write<byte>(static_cast<byte>(QOI_OP_RUN | (run - 1)));
                 run = 0;
             }
         } else {
             if (run > 0) {
-                out.write<byte>(QOI_OP_RUN | (run - 1));
+                out.write<byte>(static_cast<byte>(QOI_OP_RUN | (run - 1)));
                 run = 0;
             }
 
             auto const idx {to_index(currPixel)};
             if (indexCache[idx] == currPixel) {
-                out.write<byte>(QOI_OP_INDEX | idx);
+                out.write<byte>(static_cast<byte>(QOI_OP_INDEX | idx));
             } else {
                 if (currPixel.A == prevPixel.A) {
                     i32 const dr {static_cast<i32>(currPixel.R) - static_cast<i32>(prevPixel.R)};
@@ -167,10 +167,10 @@ auto qoi_encoder::encode(image const& image, io::ostream& out) const -> bool
                     i32 const db {static_cast<i32>(currPixel.B) - static_cast<i32>(prevPixel.B)};
 
                     if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1) {
-                        out.write<byte>(QOI_OP_DIFF | ((dr + 2) << 4) | ((dg + 2) << 2) | (db + 2));
+                        out.write<byte>(static_cast<byte>(QOI_OP_DIFF | ((dr + 2) << 4) | ((dg + 2) << 2) | (db + 2)));
                     } else if (dg >= -32 && dg <= 31 && (dr - dg) >= -8 && (dr - dg) <= 7 && (db - dg) >= -8 && (db - dg) <= 7) {
-                        out.write<byte>(QOI_OP_LUMA | (dg + 32));
-                        out.write<byte>(((dr - dg + 8) << 4) | (db - dg + 8));
+                        out.write<byte>(static_cast<byte>(QOI_OP_LUMA | (dg + 32)));
+                        out.write<byte>(static_cast<byte>(((dr - dg + 8) << 4) | (db - dg + 8)));
                     } else {
                         out.write<byte>(QOI_OP_RGB);
                         out.write<byte>(currPixel.R);
