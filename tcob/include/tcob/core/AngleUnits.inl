@@ -39,7 +39,7 @@ inline auto angle_unit<ValueType, OneTurn>::sin() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::sin(Value);
     } else {
-        return std::sin(Value / OneTurn * TAU);
+        return static_cast<ValueType>(std::sin(Value / OneTurn * TAU));
     }
 }
 
@@ -49,7 +49,7 @@ inline auto angle_unit<ValueType, OneTurn>::asin() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::asin(Value);
     } else {
-        return std::asin(Value / OneTurn * TAU);
+        return static_cast<ValueType>(std::asin(Value / OneTurn * TAU));
     }
 }
 
@@ -59,7 +59,7 @@ inline auto angle_unit<ValueType, OneTurn>::cos() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::cos(Value);
     } else {
-        return std::cos(Value / OneTurn * TAU);
+        return static_cast<ValueType>(std::cos(Value / OneTurn * TAU));
     }
 }
 
@@ -69,7 +69,7 @@ inline auto angle_unit<ValueType, OneTurn>::acos() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::acos(Value);
     } else {
-        return std::acos(Value / OneTurn * TAU);
+        return static_cast<ValueType>(std::acos(Value / OneTurn * TAU));
     }
 }
 
@@ -79,7 +79,7 @@ inline auto angle_unit<ValueType, OneTurn>::tan() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::tan(Value);
     } else {
-        return std::tan(Value / OneTurn * TAU);
+        return static_cast<ValueType>(std::tan(Value / OneTurn * TAU));
     }
 }
 
@@ -89,7 +89,7 @@ inline auto angle_unit<ValueType, OneTurn>::atan() const -> ValueType
     if constexpr (OneTurn == TAU) {
         return std::atan(Value);
     } else {
-        return std::atan(Value / OneTurn * TAU);
+        return static_cast<ValueType>(std::atan(Value / OneTurn * TAU));
     }
 }
 
