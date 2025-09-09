@@ -44,6 +44,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png_non_interlaced.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_png.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_pnm.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_qoi.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_tga.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/Animation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/animation/QuadTween.cpp
@@ -202,12 +203,6 @@ if(TCOB_ENABLE_ADDON_GFX_LITEHTML)
     list(APPEND HDR
         ${TCOB_INC_DIR}/tcob/gfx/html/HtmlDocument.hpp
         ${TCOB_INC_DIR}/tcob/gfx/html/HtmlElementPainter.hpp
-    )
-endif()
-
-if(TCOB_ENABLE_FILETYPES_GFX_QOI)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/image_codecs/ImageCodec_qoi.cpp
     )
 endif()
 

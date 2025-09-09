@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <array>
 #include <bit>
 #include <ios>
 #include <span>
@@ -37,6 +38,8 @@ public:
     auto read_to(std::span<T> target) -> std::streamsize;
     template <POD T>
     auto read_n(std::streamsize n) -> std::vector<T>;
+    template <POD T, std::streamsize Size>
+    auto read_n() -> std::array<T, Size>;
     template <POD T>
     auto read_filtered(std::streamsize n, auto&&... filters) -> std::vector<T>;
 

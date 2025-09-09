@@ -6,15 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-////////////////////////////////////////////////////////////
+#include <optional>
 
-#if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
-
-    #include <optional>
-
-    #include <qoi/qoi.h>
-
-    #include "tcob/gfx/Image.hpp"
+#include "tcob/gfx/Image.hpp"
 
 namespace tcob::gfx::detail {
 ////////////////////////////////////////////////////////////
@@ -33,5 +27,3 @@ public:
 };
 
 }
-
-#endif

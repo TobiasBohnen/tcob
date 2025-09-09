@@ -2360,7 +2360,6 @@ PREDEFINED             = TCOB_ENABLE_RENDERER_OPENGL45 \
                         TCOB_ENABLE_FILETYPES_AUDIO_VORBIS \
                         TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP \
                         TCOB_ENABLE_FILETYPES_AUDIO_OPUS \
-                        TCOB_ENABLE_FILETYPES_GFX_QOI \
                         TCOB_ENABLE_FILETYPES_GFX_WEBP \
                         TCOB_ENABLE_FILETYPES_GFX_THEORA \
 

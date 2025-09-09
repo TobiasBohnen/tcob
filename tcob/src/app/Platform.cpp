@@ -235,9 +235,7 @@ void platform::InitImageCodecs()
     idFactory->add(".pnm", &make_unique<gfx::detail::pnm_decoder>);
     idFactory->add(".gif", &make_unique<gfx::detail::gif_decoder>);
     idFactory->add(".png", &make_unique<gfx::detail::png_decoder>);
-#if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
     idFactory->add(".qoi", &make_unique<gfx::detail::qoi_decoder>);
-#endif
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
     idFactory->add(".webp", &make_unique<gfx::detail::webp_decoder>);
 #endif
@@ -249,9 +247,7 @@ void platform::InitImageCodecs()
     ieFactory->add(".tga", &make_unique<gfx::detail::tga_encoder>);
     ieFactory->add(".pcx", &make_unique<gfx::detail::pcx_encoder>);
     ieFactory->add(".png", &make_unique<gfx::detail::png_encoder>);
-#if defined(TCOB_ENABLE_FILETYPES_GFX_QOI)
     ieFactory->add(".qoi", &make_unique<gfx::detail::qoi_encoder>);
-#endif
 #if defined(TCOB_ENABLE_FILETYPES_GFX_WEBP)
     ieFactory->add(".webp", &make_unique<gfx::detail::webp_encoder>);
 #endif

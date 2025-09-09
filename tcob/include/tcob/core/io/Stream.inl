@@ -40,6 +40,14 @@ inline auto istream::read_n(std::streamsize n) -> std::vector<T>
     return retValue;
 }
 
+template <POD T, std::streamsize Size>
+inline auto istream::read_n() -> std::array<T, Size>
+{
+    std::array<T, Size> retValue;
+    read_bytes(retValue.data(), Size);
+    return retValue;
+}
+
 template <POD T>
 inline auto istream::read_filtered(std::streamsize n, auto&&... filters) -> std::vector<T>
 {

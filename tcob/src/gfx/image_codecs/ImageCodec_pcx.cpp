@@ -171,7 +171,7 @@ auto pcx_decoder::decode(io::istream& in) -> std::optional<image>
                             for (i32 i {0}; i < 4; i++) {
                                 i32 const off {(x / 8) + ((y * bpl * 4) + (bpl * i))};
                                 assert(off < std::ssize(data));
-                                i32 const b {data[off]};
+                                u8 const  b {data[off]};
                                 u32 const l {helper::extract_bits(b, 7 - (x % 8), 1)};
                                 c1 += l << i;
                             }
