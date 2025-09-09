@@ -6,7 +6,6 @@
 #include "tcob/core/StringUtils.hpp"
 
 #include <algorithm>
-#include <cctype>
 #include <string>
 #include <utility>
 #include <vector>
@@ -116,13 +115,6 @@ auto replace(string_view source, string_view from, string_view to) -> string
 
     retValue.append(source.substr(startPos));
 
-    return retValue;
-}
-
-auto to_lower(string_view source) -> string
-{
-    string retValue {source};
-    std::ranges::transform(retValue, retValue.begin(), [](char c) { return std::tolower(c); });
     return retValue;
 }
 

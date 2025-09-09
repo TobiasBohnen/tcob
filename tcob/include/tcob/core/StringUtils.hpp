@@ -41,8 +41,6 @@ TCOB_API auto trim(string_view source) -> string_view;
 
 TCOB_API auto replace(string_view source, string_view from, string_view to) -> string;
 
-TCOB_API auto to_lower(string_view source) -> string;
-
 TCOB_API auto wildcard_match(string_view str, string_view pattern) -> bool;
 
 TCOB_API auto random_string(usize length) -> string;

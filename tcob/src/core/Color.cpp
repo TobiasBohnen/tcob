@@ -184,7 +184,7 @@ auto color::FromString(string_view name) -> color
         return color::FromRGBA(x);
     }
 
-    string const test {helper::to_lower(name)};
+    string const test {utf8::to_lower(name)};
     if (colorMap.contains(test)) { return colorMap.at(test); }
 
     return {0, 0, 0, 0};

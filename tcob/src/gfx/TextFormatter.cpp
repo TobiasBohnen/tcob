@@ -6,15 +6,14 @@
 #include "tcob/gfx/TextFormatter.hpp"
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
-#include <locale>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Size.hpp"
+#include "tcob/core/StringUtils.hpp"
 #include "tcob/gfx/Font.hpp"
 #include "tcob/gfx/Gfx.hpp"
 
@@ -44,26 +43,21 @@ struct line_definition {
 
 static auto HandleCommands(token& token) -> bool
 {
-    static std::locale loc {"en_US.UTF8"};
+    auto const hay {utf8::to_upper(token.Text)};
 
-    auto hay {token.Text};
-    for (auto& c : hay) {
-        c = std::toupper(c, loc);
-    }
-
-    if (hay.rfind("COLOR:", 0) == 0) {
+    if (hay.starts_with("COLOR:")) {
         token.Command = {
             .Type  = command_type::Color,
             .Value = color::FromString(token.Text.substr(6))};
         return true;
     }
-    if (hay.rfind("ALPHA:", 0) == 0) {
+    if (hay.starts_with("ALPHA:")) {
         token.Command = {
             .Type  = command_type::Alpha,
             .Value = static_cast<u8>(255 * std::clamp(std::strtof(token.Text.substr(6).c_str(), nullptr), 0.0f, 1.0f))};
         return true;
     }
-    if (hay.rfind("EFFECT:", 0) == 0) {
+    if (hay.starts_with("EFFECT:")) {
         token.Command = {
             .Type  = command_type::Effect,
             .Value = static_cast<u8>(std::strtoul(token.Text.substr(7).c_str(), nullptr, 10))};
