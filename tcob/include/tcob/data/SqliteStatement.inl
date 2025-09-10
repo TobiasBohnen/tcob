@@ -341,7 +341,8 @@ inline auto insert_statement::operator()(auto&& value, auto&&... values) -> bool
     static_assert(((detail::value_size<std::remove_cvref_t<decltype(values)>>::Size == columnsPerValue) && ...), "All inserted values must have the same number of columns");
 
     usize const valueCount {detail::count(value, values...)};
-    if (columnsPerValue == 1 && valueCount % _columnCount == 0) { //  single values
+    bool const  singleValues {columnsPerValue == 1 && (valueCount % _columnCount) == 0};
+    if (singleValues) {
         if (!prepare(query_string(_columnCount, valueCount / _columnCount))) {
             return false;
         }
