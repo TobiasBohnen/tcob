@@ -65,9 +65,11 @@ function(tcob_mark_all_as_advanced name)
 endfunction()
 
 function(tcob_disable_warnings target)
-    target_compile_options(${target} PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/w>
-        $<$<CXX_COMPILER_ID:Clang>:-Wno-everything>
-        $<$<CXX_COMPILER_ID:GNU>:-w>
-    )
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W0 /w)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(${target} PRIVATE -Wno-everything)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(${target} PRIVATE -w)
+    endif()
 endfunction()
