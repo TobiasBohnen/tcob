@@ -608,7 +608,7 @@ struct converter<T> {
 public:
     static auto IsType(cfg_value const& config) -> bool
     {
-        if (std::holds_alternative<object>(config)) {
+        if (std::holds_alternative<object>(config) || std::holds_alternative<array>(config)) {
             T t {};
             return From(config, t);
         }
@@ -617,16 +617,27 @@ public:
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
-        if (!std::holds_alternative<object>(config)) { return false; }
-
-        object const&     obj {std::get<object>(config)};
         static auto const members {T::Members()};
-        bool              retValue {true};
-        std::apply([&](auto&&... m) {
-            ((retValue = retValue && m.set(obj, value)), ...);
-        },
-                   members);
-        return retValue;
+        if (std::holds_alternative<object>(config)) {
+            object const& obj {std::get<object>(config)};
+            bool          retValue {true};
+            std::apply([&](auto&&... m) {
+                ((retValue = retValue && m.set(obj[m.Name], value)), ...);
+            },
+                       members);
+            return retValue;
+        }
+        if (std::holds_alternative<array>(config)) {
+            array const& arr {std::get<array>(config)};
+            if (arr.size() != std::tuple_size_v<decltype(members)>) { return false; }
+
+            auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
+                return ((std::get<I>(members).set(arr[I], object)) && ...);
+            }};
+            return assign(members, arr, value, std::make_index_sequence<std::tuple_size_v<decltype(members)>> {});
+        }
+
+        return false;
     }
 
     static void To(cfg_value& config, T const& value)
@@ -634,7 +645,7 @@ public:
         object obj {};
 
         static auto const members {T::Members()};
-        std::apply([&](auto&&... m) { ((m.get(obj, value)), ...); },
+        std::apply([&](auto&&... m) { ((m.get(obj[m.Name], value)), ...); },
                    members);
 
         config = obj;

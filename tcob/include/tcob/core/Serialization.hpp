@@ -24,15 +24,15 @@ struct member {
     utf8_string Name;
 
     template <typename T>
-    void constexpr get(auto& target, T const& object) const
+    void constexpr get(auto proxy, T const& object) const
     {
-        target[Name] = object.*Ptr;
+        proxy = object.*Ptr;
     }
 
     template <typename T>
-    auto constexpr set(auto const& source, T& object) const -> bool
+    auto constexpr set(auto const& proxy, T& object) const -> bool
     {
-        return source.try_get(object.*Ptr, Name);
+        return proxy.try_get(object.*Ptr);
     }
 };
 
@@ -46,15 +46,15 @@ struct optional_member {
     utf8_string Name;
 
     template <typename T>
-    void constexpr get(auto& target, T const& object) const
+    void constexpr get(auto proxy, T const& object) const
     {
-        target[Name] = object.*Ptr;
+        proxy = object.*Ptr;
     }
 
     template <typename T>
-    auto constexpr set(auto const& source, T& object) const -> bool
+    auto constexpr set(auto const& proxy, T& object) const -> bool
     {
-        if (!source.try_get(object.*Ptr, Name)) {
+        if (!proxy.try_get(object.*Ptr)) {
             object.*Ptr = Default;
         }
         return true;
@@ -71,17 +71,17 @@ struct computed_member {
     utf8_string Name;
 
     template <typename T>
-    void constexpr get(auto& target, T const& object) const
+    void constexpr get(auto proxy, T const& object) const
     {
-        target[Name] = Get(object);
+        proxy = Get(object);
     }
 
     template <typename T>
-    auto constexpr set(auto const& source, T& object) const -> bool
+    auto constexpr set(auto const& proxy, T& object) const -> bool
     {
         using FieldType = std::invoke_result_t<decltype(Get), T const&>;
         FieldType temp;
-        if (!source.try_get(temp, Name)) { return false; }
+        if (!proxy.try_get(temp)) { return false; }
         Set(object, temp);
         return true;
     }

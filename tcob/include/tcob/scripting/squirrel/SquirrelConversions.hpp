@@ -979,7 +979,7 @@ struct converter<T> {
 public:
     static auto IsType(vm_view view, SQInteger idx) -> bool
     {
-        if (view.is_table(idx)) {
+        if (view.is_table(idx) || view.is_array(idx)) {
             T t {};
             return From(view, idx, t);
         }
@@ -988,14 +988,27 @@ public:
 
     static auto From(vm_view view, SQInteger& idx, T& value) -> bool
     {
-        table             tab {table::Acquire(view, idx++)};
         static auto const members {T::Members()};
-        bool              retValue {true};
-        std::apply([&](auto&&... m) {
-            ((retValue = retValue && m.set(tab, value)), ...);
-        },
-                   members);
-        return retValue;
+        if (view.is_table(idx)) {
+            table tab {table::Acquire(view, idx++)};
+            bool  retValue {true};
+            std::apply([&](auto&&... m) {
+                ((retValue = retValue && m.set(tab[m.Name], value)), ...);
+            },
+                       members);
+            return retValue;
+        }
+        if (view.is_array(idx)) {
+            array arr {array::Acquire(view, idx++)};
+            if (arr.size() != std::tuple_size_v<decltype(members)>) { return false; }
+
+            auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
+                return ((std::get<I>(members).set(arr[I], object)) && ...);
+            }};
+            return assign(members, arr, value, std::make_index_sequence<std::tuple_size_v<decltype(members)>> {});
+        }
+
+        return false;
     }
 
     static void To(vm_view view, T const& value)
@@ -1003,7 +1016,7 @@ public:
         table tab {table::PushNew(view)};
 
         static auto const members {T::Members()};
-        std::apply([&](auto&&... m) { (m.get(tab, value), ...); },
+        std::apply([&](auto&&... m) { (m.get(tab[m.Name], value), ...); },
                    members);
     }
 };

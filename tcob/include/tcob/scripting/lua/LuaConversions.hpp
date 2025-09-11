@@ -1024,13 +1024,25 @@ public:
 
     static auto From(state_view view, i32& idx, T& value) -> bool
     {
+        if (!view.is_table(idx)) { return false; }
+
         table             tab {table::Acquire(view, idx++)};
         static auto const members {T::Members()};
-        bool              retValue {true};
+
+        bool retValue {true};
+
+        if (tab.raw_length() == std::tuple_size_v<decltype(members)>) {
+            auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
+                return ((std::get<I>(members).set(arr[I + 1], object)) && ...);
+            }};
+            return assign(members, tab, value, std::make_index_sequence<std::tuple_size_v<decltype(members)>> {});
+        }
+
         std::apply([&](auto&&... m) {
-            ((retValue = retValue && m.set(tab, value)), ...);
+            ((retValue = retValue && m.set(tab[m.Name], value)), ...);
         },
                    members);
+
         return retValue;
     }
 
@@ -1039,7 +1051,7 @@ public:
         table tab {table::PushNew(view)};
 
         static auto const members {T::Members()};
-        std::apply([&](auto&&... m) { (m.get(tab, value), ...); },
+        std::apply([&](auto&&... m) { (m.get(tab[m.Name], value), ...); },
                    members);
     }
 };
