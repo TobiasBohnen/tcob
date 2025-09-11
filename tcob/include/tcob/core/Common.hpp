@@ -138,6 +138,17 @@ namespace detail {
 
     template <typename... Ts>
     using last_element_t = typename last_element<Ts...>::type;
+
+    ////////////////////////////////////////////////////////////
+
+    template <typename T>
+    struct member_pointer_traits;
+
+    template <typename Class, typename Field>
+    struct member_pointer_traits<Field Class::*> {
+        using field_type = Field;
+    };
+
 }
 
 ////////////////////////////////////////////////////////////

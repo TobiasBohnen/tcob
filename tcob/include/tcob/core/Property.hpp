@@ -150,6 +150,12 @@ namespace detail {
     template <typename T, typename Source>
     auto constexpr operator<=>(prop_base<T, Source> const& left, prop_base<T, Source> const& right) -> std::partial_ordering;
 
+    template <typename T>
+    struct is_prop_base : std::false_type { };
+
+    template <typename V, typename S>
+    struct is_prop_base<prop_base<V, S>> : std::true_type { };
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -165,6 +171,9 @@ using prop_val = detail::prop_base<T, detail::validating_field_source<T>>;
 // function-backed property.
 template <typename T>
 using prop_fn = detail::prop_base<T, detail::func_source<T>>;
+
+template <typename T>
+concept PropertyLike = detail::is_prop_base<std::remove_cvref_t<T>>::value;
 
 }
 
