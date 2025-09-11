@@ -45,7 +45,7 @@ auto constexpr point<T>::dot(point<T> const& p) const -> f64
 template <Arithmetic T>
 auto constexpr point<T>::cross(point<T> const& p) const -> f64
 {
-    return static_cast<f64>(X * p.Y - Y * p.Y);
+    return static_cast<f64>(X * p.Y - Y * p.X);
 }
 
 template <Arithmetic T>
