@@ -56,8 +56,9 @@ struct member {
         if constexpr (!std::is_same_v<decltype(Default), no_default_t>) {
             object.*Ptr = Default;
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 };
 
