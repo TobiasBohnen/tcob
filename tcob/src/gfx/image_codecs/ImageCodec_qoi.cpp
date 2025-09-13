@@ -26,7 +26,7 @@ static constexpr byte QOI_OP_INDEX {0b00000000};
 static constexpr byte QOI_OP_DIFF {0b01000000};
 static constexpr byte QOI_OP_LUMA {0b10000000};
 
-auto static to_index(color c) -> usize
+static auto to_index(color c) -> usize
 {
     return ((c.R * 3) + (c.G * 5) + (c.B * 7) + (c.A * 11)) % 64;
 }

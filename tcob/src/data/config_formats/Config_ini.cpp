@@ -54,6 +54,13 @@ static auto check_brackets(utf8_string_view str, char openBr, char closeBr) -> b
     return b == 0;
 }
 
+static auto check_incomplete(utf8_string_view str, char openBr, char closeBr) -> bool
+{
+    return (str.size() <= 1
+            || str[str.size() - 1] != closeBr
+            || !check_brackets(str, openBr, closeBr));
+}
+
 auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
 {
     if (txt.empty()) { return object {}; }
@@ -87,11 +94,9 @@ auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
 
 auto ini_reader::read_lines(object& targetObject) -> bool
 {
-    auto line {get_trimmed_next_line()};
-    for (;;) {
+    while (!is_eof()) {
+        auto line {get_trimmed_next_line()};
         if (!read_line(targetObject, line)) { return false; }
-        if (is_eof()) { break; }
-        line = get_trimmed_next_line();
     }
 
     return true;
@@ -148,7 +153,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
         bool first {true};
         helper::split_for_each(
             line.substr(1, endPos - 1), _settings.Path,
-            [&first, &targetObject, this](utf8_string_view token) {
+            [&first, &targetObject, this](utf8_string_view token) -> bool {
                 if (token.empty()) { return false; }
                 auto secRes {(first ? _mainSection : targetObject)[utf8_string {token}]};
                 if (!secRes.is<object>()) { secRes = object {}; }
@@ -211,7 +216,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, 
     } else { // read sub-keys
         helper::split_for_each(
             keyStr, _settings.Path,
-            [&first, &key, &sec](utf8_string_view token) {
+            [&first, &key, &sec](utf8_string_view token) -> bool {
                 if (first) {
                     key   = utf8_string {token};
                     first = false;
@@ -278,10 +283,7 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
     if (line[0] != _settings.Array.first) { return false; }
 
     utf8_string arrayLine {line};
-    while (!is_eof()
-           && (arrayLine.size() <= 1
-               || arrayLine[arrayLine.size() - 1] != _settings.Array.second
-               || !check_brackets(arrayLine, _settings.Array.first, _settings.Array.second))) {
+    while (!is_eof() && check_incomplete(arrayLine, _settings.Array.first, _settings.Array.second)) {
         arrayLine += get_trimmed_next_line();
     }
 
@@ -290,20 +292,21 @@ auto ini_reader::read_inline_array(entry& currentEntry, utf8_string_view line) -
     array arr {};
     if (!helper::split_preserve_brackets_for_each(
             arrayLine.substr(1, arrayLine.size() - 2), ',',
-            [&arr, this](utf8_string_view token) {
+            [&arr, this](utf8_string_view token) -> bool {
                 auto const tokenString {helper::trim(token)};
                 if (tokenString.empty()) { return true; } // allow empty entries
-                entry arrEntry;
-                if (read_entry(arrEntry, tokenString)) {
+
+                if (entry arrEntry; read_entry(arrEntry, tokenString)) {
                     arr.add_entry(arrEntry);
                     return true;
                 }
+
                 return false;
             })) {
         return false;
     }
-
     currentEntry.set_value(arr);
+
     return true;
 }
 
@@ -312,10 +315,7 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
     if (line[0] != _settings.Object.first) { return false; }
 
     utf8_string sectionLine {line};
-    while (!is_eof()
-           && (sectionLine.size() <= 1
-               || sectionLine[sectionLine.size() - 1] != _settings.Object.second
-               || !check_brackets(sectionLine, _settings.Object.first, _settings.Object.second))) {
+    while (!is_eof() && check_incomplete(sectionLine, _settings.Object.first, _settings.Object.second)) {
         sectionLine += get_trimmed_next_line();
     }
 
@@ -324,9 +324,10 @@ auto ini_reader::read_inline_section(entry& currentEntry, utf8_string_view line)
     object obj {};
     if (helper::split_preserve_brackets_for_each(
             sectionLine.substr(1, sectionLine.size() - 2), ',',
-            [&obj, this](utf8_string_view token) {
+            [&obj, this](utf8_string_view token) -> bool {
                 auto const tokenString {helper::trim(token)};
                 if (tokenString.empty()) { return true; } // allow empty entries
+
                 entry secEntry;
                 return read_key_value_pair(obj, secEntry, tokenString);
             })) {
@@ -588,4 +589,5 @@ auto ini_writer::write_entry(io::ostream& stream, entry const& ent, usize maxDep
 
     return true;
 }
+
 }
