@@ -120,9 +120,7 @@ inline void wrapper<T>::constructors(std::optional<table> targetTable)
     auto& dstTable {targetTable.has_value() ? targetTable.value() : *_globalTable};
 
     // create constructor table
-    if (!dstTable.has(_name)) {
-        dstTable[_name] = table {};
-    }
+    if (!dstTable.has(_name)) { dstTable[_name] = table {}; }
 
     if constexpr (sizeof...(Ts) > 1) {
         _constructor = scripting::wrapper<wrapper<T>>::make_unique_overload(process_constructor(arg_list<Ts> {})...);
@@ -393,11 +391,7 @@ template <typename T>
 inline auto wrapper<T>::gc(lua_State* l) -> i32
 {
     T** obj {static_cast<T**>(state_view {l}.to_userdata(-1))};
-
-    if (obj && *obj) {
-        delete (*obj); // NOLINT(cppcoreguidelines-owning-memory)
-    }
-
+    if (obj && *obj) { delete (*obj); } // NOLINT(cppcoreguidelines-owning-memory)
     return 0;
 }
 

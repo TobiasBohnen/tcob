@@ -355,9 +355,7 @@ struct converter<std::array<T, Size>> {
             SQInteger idx2 {-1};
             retValue = converter<T>::From(view, idx2, val);
             view.pop(1);
-            if (!retValue) {
-                break;
-            }
+            if (!retValue) { break; }
         }
 
         idx++;
@@ -912,19 +910,13 @@ struct converter<scripting::managed_ptr<T>> {
     static void To(vm_view view, scripting::managed_ptr<T> const& value)
     {
         converter<T*>::To(view, value.Pointer);
-        if constexpr (std::is_destructible_v<T>) {
-            view.set_releasehook(-1, &hook);
-        }
+        if constexpr (std::is_destructible_v<T>) { view.set_releasehook(-1, &hook); }
     }
 
     static auto hook(void* ptr, SQInteger) -> SQInteger
     {
         T** obj {static_cast<T**>(ptr)};
-
-        if (obj && *obj) {
-            delete (*obj); // NOLINT(cppcoreguidelines-owning-memory)
-        }
-
+        if (obj && *obj) { delete (*obj); } // NOLINT(cppcoreguidelines-owning-memory)
         return 0;
     }
 };
@@ -958,9 +950,7 @@ template <typename... Keys>
 struct converter<proxy<table, Keys...>> {
     static void To(vm_view, proxy<table, Keys...> const& value)
     {
-        if (ref val; value.try_get(val)) {
-            val.push_self();
-        }
+        if (ref val; value.try_get(val)) { val.push_self(); }
     }
 };
 
@@ -968,9 +958,7 @@ template <typename... Keys>
 struct converter<proxy<table const, Keys...>> {
     static void To(vm_view, proxy<table const, Keys...> const& value)
     {
-        if (ref val; value.try_get(val)) {
-            val.push_self();
-        }
+        if (ref val; value.try_get(val)) { val.push_self(); }
     }
 };
 
@@ -992,9 +980,7 @@ public:
         if (view.is_table(idx)) {
             table tab {table::Acquire(view, idx++)};
             bool  retValue {true};
-            std::apply([&](auto&&... m) {
-                ((retValue = retValue && m.set(tab[m.Name], value)), ...);
-            },
+            std::apply([&](auto&&... m) { ((retValue = retValue && m.set(tab[m.Name], value)), ...); },
                        members);
             return retValue;
         }

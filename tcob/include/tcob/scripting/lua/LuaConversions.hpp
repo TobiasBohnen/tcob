@@ -956,11 +956,7 @@ struct converter<scripting::managed_ptr<T>> {
     static auto gc(lua_State* l) -> i32
     {
         T** obj {static_cast<T**>(state_view {l}.to_userdata(-1))};
-
-        if (obj && *obj) {
-            delete (*obj); // NOLINT(cppcoreguidelines-owning-memory)
-        }
-
+        if (obj && *obj) { delete (*obj); } // NOLINT(cppcoreguidelines-owning-memory)
         return 0;
     }
 };
@@ -994,9 +990,7 @@ template <typename... Keys>
 struct converter<proxy<table, Keys...>> {
     static void To(state_view, proxy<table, Keys...> const& value)
     {
-        if (ref val; value.try_get(val)) {
-            val.push_self();
-        }
+        if (ref val; value.try_get(val)) { val.push_self(); }
     }
 };
 
@@ -1004,9 +998,7 @@ template <typename... Keys>
 struct converter<proxy<table const, Keys...>> {
     static void To(state_view, proxy<table const, Keys...> const& value)
     {
-        if (ref val; value.try_get(val)) {
-            val.push_self();
-        }
+        if (ref val; value.try_get(val)) { val.push_self(); }
     }
 };
 
