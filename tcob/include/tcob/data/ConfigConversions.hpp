@@ -115,6 +115,7 @@ struct converter<string> {
             value = std::get<object>(config).str();
             return true;
         }
+
         return false;
     }
 
@@ -321,14 +322,21 @@ template <Map T>
 struct converter<T> {
     static auto IsType(cfg_value const& config) -> bool
     {
-        return std::holds_alternative<object>(config); // TODO: check types
+        if (!std::holds_alternative<object>(config)) { return false; }
+
+        object const& obj {std::get<object>(config)};
+        for (auto const& [k, v] : obj) {
+            if (!v.template is<typename T::mapped_type>()) { return false; }
+        }
+
+        return true;
     }
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
         if (!std::holds_alternative<object>(config)) { return false; }
 
-        object obj {std::get<object>(config)};
+        object const& obj {std::get<object>(config)};
         value.clear();
 
         for (auto const& [k, v] : obj) {
@@ -359,7 +367,14 @@ struct converter<T> {
 
     static auto IsType(cfg_value const& config) -> bool
     {
-        return std::holds_alternative<array>(config); // TODO: check types
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        array const& arr {std::get<array>(config)};
+        for (auto const& v : arr) {
+            if (!v.template is<typename T::key_type>()) { return false; }
+        }
+
+        return true;
     }
 
     static auto From(cfg_value const& config, T& value) -> bool
@@ -367,7 +382,7 @@ struct converter<T> {
         if (!std::holds_alternative<array>(config)) { return false; }
 
         value.clear();
-        array arr {std::get<array>(config)};
+        array const& arr {std::get<array>(config)};
         for (auto const& v : arr) {
             if (auto res {v.template get<key_type>()}) {
                 value.insert(res.value());
@@ -389,45 +404,50 @@ template <typename... T>
 struct converter<std::tuple<T...>> {
     static auto IsType(cfg_value const& config) -> bool
     {
-        return std::holds_alternative<array>(config); // TODO: check types
+        if (!std::holds_alternative<array>(config)) { return false; }
+
+        array const& arr {std::get<array>(config)};
+        if (arr.size() != sizeof...(T)) { return false; }
+
+        i32 idx {0};
+        return (is<T>(arr, idx++) && ...);
     }
 
     static auto From(cfg_value const& config, std::tuple<T...>& value) -> bool
     {
-        if (!std::holds_alternative<array>(config)) { return false; }
+        if (!IsType(config)) { return false; }
 
-        array arr {std::get<array>(config)};
-        std::apply(
-            [&arr](auto&&... item) {
-                i32 idx {0};
-                ((from_cfg(arr, idx++, item)), ...);
-            },
-            value);
+        array const& arr {std::get<array>(config)};
+        i32          idx {0};
+        std::apply([&arr, &idx](auto&&... item) { ((from(arr, idx++, item)), ...); },
+                   value);
         return true;
     }
 
     static void To(cfg_value& config, std::tuple<T...> const& value)
     {
         array arr {};
-        std::apply(
-            [&arr](auto&&... item) {
-                i32 idx {0};
-                ((to_cfg(arr, idx++, item)), ...);
-            },
-            value);
-
+        i32   idx {0};
+        std::apply([&arr, &idx](auto&&... item) { ((to(arr, idx++, item)), ...); },
+                   value);
         config = arr;
     }
 
 private:
     template <typename R>
-    static void from_cfg(array& arr, i32 idx, R& value)
+    static auto is(array const& arr, i32 idx) -> bool
+    {
+        return arr[idx].is<R>();
+    }
+
+    template <typename R>
+    static void from(array const& arr, i32 idx, R& value)
     {
         value = arr[idx].as<R>();
     }
 
     template <typename R>
-    static void to_cfg(array& arr, i32 idx, R& value)
+    static void to(array& arr, i32 idx, R& value)
     {
         arr[idx] = value;
     }
@@ -438,7 +458,7 @@ struct converter<std::pair<K, V>> {
     static auto IsType(cfg_value const& config) -> bool
     {
         if (std::holds_alternative<array>(config)) {
-            array const arr {std::get<array>(config)};
+            array const& arr {std::get<array>(config)};
             return arr.size() >= 2 && arr[0].is<K>() && arr[1].is<V>();
         }
 
@@ -448,7 +468,7 @@ struct converter<std::pair<K, V>> {
     static auto From(cfg_value const& config, std::pair<K, V>& value) -> bool
     {
         if (IsType(config)) {
-            array arr {std::get<array>(config)};
+            array const& arr {std::get<array>(config)};
             value.first  = arr[0].as<K>();
             value.second = arr[1].as<V>();
             return true;
@@ -458,8 +478,7 @@ struct converter<std::pair<K, V>> {
 
     static void To(cfg_value& config, std::pair<K, V> const& value)
     {
-        array arr {value.first, value.second};
-        config = arr;
+        config = array {value.first, value.second};
     }
 };
 
@@ -469,8 +488,10 @@ struct converter<std::array<T, Size>> {
     {
         if (!std::holds_alternative<array>(config)) { return false; }
 
-        array arr {std::get<array>(config)};
-        if (arr.size() > 0) { return arr.is<T>(0); }
+        array const& arr {std::get<array>(config)};
+        for (i32 i {0}; i < arr.size(); ++i) {
+            if (!arr.is<T>(i)) { return false; }
+        }
         return true;
     }
 
@@ -478,9 +499,15 @@ struct converter<std::array<T, Size>> {
     {
         if (!std::holds_alternative<array>(config)) { return false; }
 
-        array arr {std::get<array>(config)};
+        array const& arr {std::get<array>(config)};
+        if (arr.size() != Size) { return false; }
+
         for (isize i {0}; i < arr.size(); ++i) {
-            value[static_cast<usize>(i)] = *arr.get<T>(i);
+            if (auto p {arr.get<T>(i)}) {
+                value[static_cast<usize>(i)] = *p;
+            } else {
+                return false;
+            }
         }
         return true;
     }
@@ -501,8 +528,10 @@ struct converter<T> {
     {
         if (!std::holds_alternative<array>(config)) { return false; }
 
-        array arr {std::get<array>(config)};
-        if (arr.size() > 0) { return arr.is<value_type>(0); }
+        array const& arr {std::get<array>(config)};
+        for (i32 i {0}; i < arr.size(); ++i) {
+            if (!arr.is<value_type>(i)) { return false; }
+        }
         return true;
     }
 
@@ -511,9 +540,13 @@ struct converter<T> {
         if (!std::holds_alternative<array>(config)) { return false; }
 
         value.clear();
-        array arr {std::get<array>(config)};
+        array const& arr {std::get<array>(config)};
         for (i32 i {0}; i < arr.size(); ++i) {
-            value.push_back(*arr.get<value_type>(i));
+            if (auto p {arr.get<value_type>(i)}) {
+                value.push_back(*p);
+            } else {
+                return false;
+            }
         }
         return true;
     }
@@ -621,9 +654,7 @@ public:
         if (std::holds_alternative<object>(config)) {
             object const& obj {std::get<object>(config)};
             bool          retValue {true};
-            std::apply([&](auto&&... m) {
-                ((retValue = retValue && m.set(obj[m.Name], value)), ...);
-            },
+            std::apply([&](auto&&... m) { ((retValue = retValue && m.set(obj[m.Name], value)), ...); },
                        members);
             return retValue;
         }
@@ -642,12 +673,11 @@ public:
 
     static void To(cfg_value& config, T const& value)
     {
-        object obj {};
-
         static auto const members {T::Members()};
+
+        object obj {};
         std::apply([&](auto&&... m) { ((m.get(obj[m.Name], value)), ...); },
                    members);
-
         config = obj;
     }
 };
