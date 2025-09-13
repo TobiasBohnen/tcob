@@ -18,7 +18,7 @@
 
 namespace tcob::data::detail {
 
-static auto find_unquoted(string_view source, char needle) -> string_view::size_type
+static auto find_unquoted(utf8_string_view source, char needle) -> utf8_string_view::size_type
 {
     char const quote {source[0]};
     if (quote != '"' && quote != '\'') {
@@ -36,7 +36,7 @@ static auto find_unquoted(string_view source, char needle) -> string_view::size_
         ++pos;
     }
 
-    return string_view::npos;
+    return utf8_string_view::npos;
 }
 
 static auto check_brackets(utf8_string_view str, char openBr, char closeBr) -> bool
@@ -134,7 +134,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
     if (line[0] != _settings.Section.first) { return false; }
 
     auto const endPos {line.find(_settings.Section.second)};
-    if (endPos == utf8_string::npos || endPos == 1) { return false; } // ERROR: invalid object header
+    if (endPos == utf8_string_view::npos || endPos == 1) { return false; } // ERROR: invalid object header
 
     auto const lineSize {line.size()};
     // quoted key
@@ -159,7 +159,7 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
     }
 
     // inheritance
-    if (line.find(_settings.Reference, endPos) != utf8_string::npos) {
+    if (line.find(_settings.Reference, endPos) != utf8_string_view::npos) {
         auto const inh {helper::split_preserve_brackets(line, _settings.Reference)};
         if (inh.size() != 2) { return false; }
 
@@ -192,7 +192,7 @@ auto ini_reader::read_key_value_pair(object& targetObject, utf8_string_view line
 auto ini_reader::read_key_value_pair(object& targetObject, entry& currentEntry, utf8_string_view line) -> bool
 {
     auto const separatorPos {find_unquoted(line, _settings.KeyValueDelim)};
-    if (separatorPos == utf8_string::npos) { return false; } // ERROR:  invalid pair
+    if (separatorPos == utf8_string_view::npos) { return false; } // ERROR:  invalid pair
 
     auto const keyStr {helper::trim(line.substr(0, separatorPos))};
     auto const valueStr {helper::trim(line.substr(separatorPos + 1))};
@@ -444,7 +444,7 @@ auto ini_reader::get_next_line() -> utf8_string_view
 
     _iniBegin = _iniEnd;
     _iniEnd   = _ini.find('\n', _iniEnd);
-    if (_iniEnd == utf8_string::npos) {
+    if (_iniEnd == utf8_string_view::npos) {
         _iniEnd = _ini.size() + 1;
     } else {
         ++_iniEnd;
