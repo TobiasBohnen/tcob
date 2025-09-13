@@ -45,8 +45,8 @@ private:
     auto read_tag() -> std::optional<tag>;
     auto read_tag_name(tag& t) -> bool;
     auto read_tag_attributes(tag& t) -> bool;
-    auto read_tag_attribute_key() -> utf8_string;
-    auto read_tag_attribute_value() -> utf8_string;
+    auto read_tag_attribute_key() -> utf8_string_view;
+    auto read_tag_attribute_value() -> utf8_string_view;
 
     auto read_content(element& n) -> bool;
 
@@ -59,7 +59,7 @@ private:
 
     auto convert_to_object(element const& n) -> object;
     auto convert_to_array(element const& n) -> array;
-    void convert_value(entry& currentEntry, utf8_string const& str);
+    void convert_value(entry& currentEntry, utf8_string_view str);
 
     usize            _xmlIndex {0};
     utf8_string_view _xml;

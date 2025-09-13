@@ -120,58 +120,49 @@ auto xml_reader::read_tag_attributes(tag& t) -> bool
     while (!is_eof()) {
         auto const key {read_tag_attribute_key()};
         auto const value {read_tag_attribute_value()};
-        if (key.empty() || value.empty()) {
-            return false;
-        }
+        if (key.empty() || value.empty()) { return false; }
 
         t.Attributes.emplace(key, value);
 
         skip_whitespace();
-        if (peek() == '>' || peek() == '/') {
-            return true;
-        }
+        if (peek() == '>' || peek() == '/') { return true; }
     }
 
     return false;
 }
 
-auto xml_reader::read_tag_attribute_key() -> utf8_string
+auto xml_reader::read_tag_attribute_key() -> utf8_string_view
 {
-    utf8_string retValue;
     skip_whitespace();
 
+    usize const start {_xmlIndex};
     while (!is_eof()) {
         char const c {read()};
-        if (std::isspace(c) || c == '=') {
+        if (std::isspace(static_cast<unsigned char>(c)) || c == '=') {
             step_back();
-            return retValue;
+            break;
         }
-        retValue += c;
     }
-    return "";
+
+    return {_xml.data() + start, _xmlIndex - start};
 }
 
-auto xml_reader::read_tag_attribute_value() -> utf8_string
+auto xml_reader::read_tag_attribute_value() -> utf8_string_view
 {
-    utf8_string retValue;
     skip_whitespace();
-    if (read() != '=') {
-        return "";
-    }
+    if (read() != '=') { return {}; }
     skip_whitespace();
-    if (read() != '"') {
-        return "";
-    }
+    if (read() != '"') { return {}; }
 
+    usize const start {_xmlIndex};
     while (!is_eof()) {
         char const c {read()};
         if (c == '"') {
-            return retValue;
+            return {_xml.data() + start, _xmlIndex - start - 1};
         }
-        retValue += c;
     }
 
-    return "";
+    return {}; // no closing quote found
 }
 
 auto xml_reader::read_content(element& n) -> bool
@@ -214,19 +205,13 @@ void xml_reader::skip_whitespace()
 
 auto xml_reader::peek() -> char
 {
-    if (is_eof()) {
-        return '\0';
-    }
-
+    if (is_eof()) { return '\0'; }
     return _xml[_xmlIndex];
 }
 
 auto xml_reader::read() -> char
 {
-    if (is_eof()) {
-        return '\0';
-    }
-
+    if (is_eof()) { return '\0'; }
     return _xml[_xmlIndex++];
 }
 
@@ -260,7 +245,7 @@ auto xml_reader::convert_to_object(element const& n) -> object
                 || !el->Value.empty())) {
             entry e;
             if (el->Tag.Attributes.size() == 1) {
-                convert_value(e, el->Tag.Attributes.begin()->first);
+                convert_value(e, el->Tag.Attributes.begin()->second);
             } else {
                 convert_value(e, el->Value);
             }
@@ -318,7 +303,7 @@ auto xml_reader::convert_to_array(element const& n) -> array
     return retValue;
 }
 
-void xml_reader::convert_value(entry& currentEntry, utf8_string const& str)
+void xml_reader::convert_value(entry& currentEntry, utf8_string_view str)
 {
     if (auto intVal {helper::to_number<i64>(str)}) {
         currentEntry.set_value(*intVal);
@@ -337,7 +322,7 @@ void xml_reader::convert_value(entry& currentEntry, utf8_string const& str)
     }
 
     // utf8_string
-    currentEntry.set_value(str);
+    currentEntry.set_value(utf8_string {str});
 }
 
 //////////////////////////////////////////////////////////////////////
