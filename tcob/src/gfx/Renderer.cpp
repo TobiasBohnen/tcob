@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <array>
-#include <memory>
 #include <span>
 #include <utility>
 #include <vector>
@@ -45,7 +44,7 @@ void renderer::finalize_render(render_target& target)
 ////////////////////////////////////////////////////////////
 
 point_renderer::point_renderer(buffer_usage_hint usage)
-    : _vertexArray {std::make_unique<vertex_array>(usage)}
+    : _vertexArray {usage}
 {
 }
 
@@ -67,7 +66,7 @@ void point_renderer::set_geometry(std::span<vertex const> vertices)
 
 void point_renderer::modify_geometry(std::span<vertex const> vertices, usize offset) const
 {
-    _vertexArray->update_data(vertices, offset);
+    _vertexArray.update_data(vertices, offset);
 }
 
 void point_renderer::reset_geometry()
@@ -78,7 +77,7 @@ void point_renderer::reset_geometry()
 void point_renderer::prepare(usize vertCount)
 {
     if (vertCount > _numVerts) {
-        _vertexArray->resize(vertCount, 0);
+        _vertexArray.resize(vertCount, 0);
     }
     _numVerts = vertCount;
 }
@@ -90,14 +89,14 @@ void point_renderer::on_render_to_target(render_target& target)
     }
 
     target.bind_material(_material);
-    _vertexArray->draw_arrays(primitive_type::Points, 0, _numVerts);
+    _vertexArray.draw_arrays(primitive_type::Points, 0, _numVerts);
     target.unbind_material();
 }
 
 ////////////////////////////////////////////////////////////
 
 quad_renderer::quad_renderer(buffer_usage_hint usage)
-    : _vertexArray {std::make_unique<vertex_array>(usage)}
+    : _vertexArray {usage}
 {
 }
 
@@ -121,7 +120,7 @@ void quad_renderer::set_geometry(std::span<quad const> quads)
 
 void quad_renderer::modify_geometry(std::span<quad const> quads, usize offset) const
 {
-    _vertexArray->update_data(quads, offset);
+    _vertexArray.update_data(quads, offset);
 }
 
 void quad_renderer::reset_geometry()
@@ -135,7 +134,7 @@ void quad_renderer::prepare(usize quadCount)
         usize const vertCount {quadCount * 4};
         usize const indCount {quadCount * 6};
 
-        _vertexArray->resize(vertCount, indCount);
+        _vertexArray.resize(vertCount, indCount);
 
         std::vector<u32> inds(indCount);
         for (u32 i {0}, j {0}; i < quadCount; ++i, j += 4) {
@@ -147,7 +146,7 @@ void quad_renderer::prepare(usize quadCount)
             inds[(i * 6) + 5] = 1 + j;
         }
 
-        _vertexArray->update_data(inds, 0);
+        _vertexArray.update_data(inds, 0);
     }
 }
 
@@ -158,14 +157,14 @@ void quad_renderer::on_render_to_target(render_target& target)
     }
 
     target.bind_material(_material);
-    _vertexArray->draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
+    _vertexArray.draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
     target.unbind_material();
 }
 
 ////////////////////////////////////////////////////////////
 
 batch_quad_renderer::batch_quad_renderer()
-    : _vertexArray {std::make_unique<vertex_array>(buffer_usage_hint::StreamDraw)}
+    : _vertexArray {buffer_usage_hint::StreamDraw}
 {
 }
 
@@ -174,7 +173,7 @@ void batch_quad_renderer::prepare(usize quadCount)
     usize const vertCount {quadCount * 4};
     usize const indCount {quadCount * 6};
 
-    _vertexArray->resize(vertCount, indCount);
+    _vertexArray.resize(vertCount, indCount);
 
     _indices.resize(indCount);
     _quads.resize(quadCount);
@@ -202,7 +201,7 @@ void batch_quad_renderer::add_geometry(std::span<quad const> quads, material con
 
     _currentBatch.MaterialPtr = mat;
 
-    std::copy(quads.begin(), quads.end(), _quads.begin() + _currentBatch.NumQuads + _currentBatch.OffsetQuads);
+    std::ranges::copy(quads, _quads.begin() + _currentBatch.NumQuads + _currentBatch.OffsetQuads);
 
     u32* ptr {&_indices[_currentBatch.OffsetInds]};
 
@@ -227,8 +226,8 @@ void batch_quad_renderer::on_render_to_target(render_target& target)
         _batches.push_back(_currentBatch);
         _currentBatch = {};
 
-        _vertexArray->update_data(_indices, 0);
-        _vertexArray->update_data(_quads, 0);
+        _vertexArray.update_data(_indices, 0);
+        _vertexArray.update_data(_quads, 0);
     }
 
     for (auto const& batch : _batches) { // draw batches
@@ -237,7 +236,7 @@ void batch_quad_renderer::on_render_to_target(render_target& target)
         }
 
         target.bind_material(batch.MaterialPtr);
-        _vertexArray->draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
+        _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
     }
 
     target.unbind_material();
@@ -246,7 +245,7 @@ void batch_quad_renderer::on_render_to_target(render_target& target)
 ////////////////////////////////////////////////////////////
 
 polygon_renderer::polygon_renderer(buffer_usage_hint usage)
-    : _vertexArray {std::make_unique<vertex_array>(usage)}
+    : _vertexArray {usage}
 {
 }
 
@@ -265,8 +264,8 @@ void polygon_renderer::set_geometry(geometry_data const& gd)
 
 void polygon_renderer::modify_geometry(geometry_data const& gd, usize offset)
 {
-    _vertexArray->update_data(gd.Indices, offset);
-    _vertexArray->update_data(gd.Vertices, offset);
+    _vertexArray.update_data(gd.Indices, offset);
+    _vertexArray.update_data(gd.Vertices, offset);
     _type = gd.Type;
 }
 
@@ -279,7 +278,7 @@ void polygon_renderer::reset_geometry()
 void polygon_renderer::prepare(usize vcount, usize icount)
 {
     if (vcount > _numVerts || icount > _numIndices) {
-        _vertexArray->resize(vcount, icount);
+        _vertexArray.resize(vcount, icount);
     }
 }
 
@@ -290,14 +289,14 @@ void polygon_renderer::on_render_to_target(render_target& target)
     }
 
     target.bind_material(_material);
-    _vertexArray->draw_elements(_type, _numIndices, 0);
+    _vertexArray.draw_elements(_type, _numIndices, 0);
     target.unbind_material();
 }
 
 ////////////////////////////////////////////////////////////
 
 batch_polygon_renderer::batch_polygon_renderer()
-    : _vertexArray {std::make_unique<vertex_array>(buffer_usage_hint::DynamicDraw)}
+    : _vertexArray {buffer_usage_hint::DynamicDraw}
 {
 }
 
@@ -330,7 +329,7 @@ void batch_polygon_renderer::add_geometry(geometry_data const& gd, material cons
     _verts.insert(_verts.end(), gd.Vertices.begin(), gd.Vertices.end());
     _currentBatch.NumVerts += static_cast<u32>(gd.Vertices.size());
 
-    _vertexArray->resize(_verts.size(), _indices.size());
+    _vertexArray.resize(_verts.size(), _indices.size());
 }
 
 void batch_polygon_renderer::reset_geometry()
@@ -352,8 +351,8 @@ void batch_polygon_renderer::on_render_to_target(render_target& target)
         _batches.push_back(_currentBatch);
         _currentBatch = {};
 
-        _vertexArray->update_data(_indices, 0);
-        _vertexArray->update_data(_verts, 0);
+        _vertexArray.update_data(_indices, 0);
+        _vertexArray.update_data(_verts, 0);
     }
 
     for (auto const& batch : _batches) { // draw batches
@@ -362,7 +361,7 @@ void batch_polygon_renderer::on_render_to_target(render_target& target)
         }
 
         target.bind_material(batch.MaterialPtr);
-        _vertexArray->draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
+        _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
     }
 
     target.unbind_material();
@@ -371,16 +370,16 @@ void batch_polygon_renderer::on_render_to_target(render_target& target)
 ////////////////////////////////////////////////////////////
 
 canvas_renderer::canvas_renderer(canvas& c)
-    : _vertexArray {std::make_unique<vertex_array>(buffer_usage_hint::StaticDraw)}
+    : _vertexArray {buffer_usage_hint::StaticDraw}
     , _canvas {c}
 {
     usize const vertCount {4};
     usize const indCount {6};
 
-    _vertexArray->resize(vertCount, indCount);
+    _vertexArray.resize(vertCount, indCount);
 
     static constexpr std::array<u32, 6> inds {3, 1, 0, 3, 2, 1};
-    _vertexArray->update_data(inds, 0);
+    _vertexArray.update_data(inds, 0);
 }
 
 void canvas_renderer::set_bounds(rect_f const& bounds)
@@ -389,7 +388,7 @@ void canvas_renderer::set_bounds(rect_f const& bounds)
     geometry::set_position(q, bounds);
     geometry::set_color(q, colors::White);
     geometry::set_texcoords(q, {.UVRect = render_texture::UVRect(), .Level = 0});
-    _vertexArray->update_data(std::span {&q, 1}, 0);
+    _vertexArray.update_data(std::span {&q, 1}, 0);
 }
 
 void canvas_renderer::set_layer(i32 layer)
@@ -411,7 +410,7 @@ void canvas_renderer::prepare_render(render_target& target, bool debug)
 void canvas_renderer::on_render_to_target(render_target& target)
 {
     target.bind_material(_material.ptr());
-    _vertexArray->draw_elements(primitive_type::Triangles, 6, 0);
+    _vertexArray.draw_elements(primitive_type::Triangles, 6, 0);
     target.unbind_material();
 }
 

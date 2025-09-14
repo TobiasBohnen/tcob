@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <memory>
 #include <span>
 #include <vector>
 
@@ -54,7 +53,7 @@ private:
     material const* _material {nullptr};
     usize           _numVerts {0};
 
-    std::unique_ptr<vertex_array> _vertexArray;
+    vertex_array _vertexArray;
 };
 
 ////////////////////////////////////////////////////////////
@@ -76,7 +75,7 @@ private:
     material const* _material {nullptr};
     usize           _numQuads {0};
 
-    std::unique_ptr<vertex_array> _vertexArray;
+    vertex_array _vertexArray;
 };
 
 ////////////////////////////////////////////////////////////
@@ -95,7 +94,7 @@ private:
     std::vector<u32>  _indices;
     std::vector<quad> _quads;
 
-    std::unique_ptr<vertex_array> _vertexArray;
+    vertex_array _vertexArray;
 
     struct batch {
         material const* MaterialPtr {nullptr};
@@ -128,8 +127,8 @@ private:
     usize           _numIndices {0};
     usize           _numVerts {0};
 
-    primitive_type                _type {};
-    std::unique_ptr<vertex_array> _vertexArray;
+    primitive_type _type {};
+    vertex_array   _vertexArray;
 };
 
 ////////////////////////////////////////////////////////////
@@ -147,7 +146,7 @@ private:
     std::vector<u32>    _indices;
     std::vector<vertex> _verts;
 
-    std::unique_ptr<vertex_array> _vertexArray;
+    vertex_array _vertexArray;
 
     struct batch {
         material const* MaterialPtr {nullptr};
@@ -178,9 +177,9 @@ protected:
     void on_render_to_target(render_target& target) override;
     void finalize_render(render_target& target) override;
 
-    std::unique_ptr<vertex_array> _vertexArray;
-    canvas&                       _canvas;
-    asset_owner_ptr<material>     _material {};
+    vertex_array              _vertexArray;
+    canvas&                   _canvas;
+    asset_owner_ptr<material> _material {};
 };
 
 }
