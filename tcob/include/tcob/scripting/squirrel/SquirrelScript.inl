@@ -5,10 +5,10 @@
 
 #pragma once
 #include "SquirrelScript.hpp"
-#include <expected>
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
 
+    #include <expected>
     #include <memory>
 
     #include "tcob/scripting/Scripting.hpp"
