@@ -72,7 +72,7 @@ auto split(string_view str, char delim) -> std::vector<string_view>
 auto split_once(string_view str, char delim) -> std::pair<string_view, string_view>
 {
     usize const pos {str.find(delim)};
-    if (pos == string_view::npos) { return {str, ""}; }
+    if (pos == string_view::npos) { return {str, {}}; }
 
     string_view key {str.substr(0, pos)};
     string_view value {str.substr(pos + 1)};
@@ -93,7 +93,7 @@ auto split_preserve_brackets(string_view str, char delim) -> std::vector<string_
 auto trim(string_view source) -> string_view
 {
     auto front {source.find_first_not_of(" \n\r\t")};
-    if (front == string_view::npos) { return ""; }
+    if (front == string_view::npos) { return {}; }
 
     auto back {source.find_last_not_of(" \n\r\t")};
     back = back == string_view::npos ? source.size() - 1 : back;
@@ -148,7 +148,7 @@ auto wildcard_match(string_view str, string_view pattern) -> bool
 
 auto random_string(usize length) -> string
 {
-    string static const characters {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"};
+    static string const characters {"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"};
     rng static rand;
 
     string retValue;

@@ -357,41 +357,39 @@ auto ini_reader::read_scalar(entry& currentEntry, utf8_string_view line) -> bool
     }
 
     // string
-    if (!line.empty()) {
-        char const first {line[0]};
-        if (first == '\'') { // single-quoted (literal multi-line)
-            utf8_string stringLine {line};
-            bool        firstLine {true};
+    char const first {line[0]};
+    if (first == '\'') { // single-quoted (literal multi-line)
+        utf8_string stringLine {line};
+        bool        firstLine {true};
 
-            while (!is_eof() && ((firstLine && line.size() == 1) || helper::trim(stringLine).back() != first)) {
-                if (firstLine) {
-                    firstLine = false;
-                } else {
-                    stringLine += "\n";
-                }
-                stringLine += get_next_line();
+        while (!is_eof() && ((firstLine && line.size() == 1) || helper::trim(stringLine).back() != first)) {
+            if (firstLine) {
+                firstLine = false;
+            } else {
+                stringLine += "\n";
             }
-
-            auto const endPos {stringLine.find(first, 1)};
-            auto       val {stringLine.substr(1, endPos - 1)};
-
-            if (!val.empty() && val.back() == '\n') {
-                val.pop_back(); // Remove the last '\n'
-            }
-
-            currentEntry.set_value(val);
-            return true;
+            stringLine += get_next_line();
         }
 
-        if (first == '"') { // double-quoted (trimmed multi-line)
-            utf8_string stringLine {line};
-            while (!is_eof() && stringLine.size() > 1 && stringLine.back() != first) {
-                stringLine += "\n" + utf8_string {get_trimmed_next_line()};
-            }
+        auto const endPos {stringLine.find(first, 1)};
+        auto       val {stringLine.substr(1, endPos - 1)};
 
-            currentEntry.set_value(stringLine.substr(1, stringLine.size() - 2));
-            return true;
+        if (!val.empty() && val.back() == '\n') {
+            val.pop_back(); // Remove the last '\n'
         }
+
+        currentEntry.set_value(val);
+        return true;
+    }
+
+    if (first == '"') { // double-quoted (trimmed multi-line)
+        utf8_string stringLine {line};
+        while (!is_eof() && stringLine.size() > 1 && stringLine.back() != first) {
+            stringLine += "\n" + utf8_string {get_trimmed_next_line()};
+        }
+
+        currentEntry.set_value(stringLine.substr(1, stringLine.size() - 2));
+        return true;
     }
 
     currentEntry.set_value(utf8_string {line});
