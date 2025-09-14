@@ -70,11 +70,10 @@ auto ini_reader::read_as_object(utf8_string_view txt) -> std::optional<object>
     _iniEnd      = 0;
     _mainSection = {};
 
-    object kvp {_mainSection};
     if (txt[0] == _settings.Settings) {
         if (!read_settings()) { return std::nullopt; }
     }
-    return read_lines(kvp) ? std::optional {_mainSection} : std::nullopt;
+    return read_lines() ? std::optional {_mainSection} : std::nullopt;
 }
 
 auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
@@ -92,8 +91,9 @@ auto ini_reader::read_as_array(utf8_string_view txt) -> std::optional<array>
     return currentEntry.is<array>() ? std::optional {currentEntry.as<array>()} : std::nullopt;
 }
 
-auto ini_reader::read_lines(object& targetObject) -> bool
+auto ini_reader::read_lines() -> bool
 {
+    object targetObject {_mainSection};
     while (!is_eof()) {
         auto line {get_trimmed_next_line()};
         if (!read_line(targetObject, line)) { return false; }
@@ -149,16 +149,14 @@ auto ini_reader::read_section_header(object& targetObject, utf8_string_view line
         if (!secRes.is<object>()) { secRes = object {}; }
         targetObject = secRes.as<object>();
     } else {
-        // read sub-sections
-        bool first {true};
+        targetObject = _mainSection;
         helper::split_for_each(
             line.substr(1, endPos - 1), _settings.Path,
-            [&first, &targetObject, this](utf8_string_view token) -> bool {
+            [&targetObject](utf8_string_view token) -> bool {
                 if (token.empty()) { return false; }
-                auto secRes {(first ? _mainSection : targetObject)[utf8_string {token}]};
+                auto secRes {targetObject[utf8_string {token}]};
                 if (!secRes.is<object>()) { secRes = object {}; }
                 targetObject = secRes.as<object>();
-                first        = false;
                 return true;
             });
     }

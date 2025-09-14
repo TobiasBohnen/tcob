@@ -35,7 +35,7 @@ public:
     auto read_as_array(utf8_string_view txt) -> std::optional<array> override;
 
 private:
-    auto read_lines(object& targetObject) -> bool;
+    auto read_lines() -> bool;
     auto read_line(object& targetObject, utf8_string_view line) -> bool;
 
     auto read_comment(object& targetObject, utf8_string_view line) -> bool;
