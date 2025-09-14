@@ -16,7 +16,7 @@
 namespace tcob::audio::null {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API null_audio_stream final : public audio_stream_base {
+class TCOB_API null_audio_stream final : public audio_stream {
 public:
     void bind() override;
     void unbind() override;
@@ -39,8 +39,8 @@ public:
 
 class TCOB_API null_audio_system final : public system, public non_copyable {
 public:
-    auto create_output(specification const& info) const -> std::unique_ptr<audio_stream_base> override;
-    auto create_input() const -> std::unique_ptr<audio_stream_base> override;
+    auto create_output(specification const& info) const -> std::unique_ptr<audio_stream> override;
+    auto create_input() const -> std::unique_ptr<audio_stream> override;
 };
 
 }

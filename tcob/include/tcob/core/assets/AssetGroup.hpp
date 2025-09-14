@@ -114,9 +114,9 @@ public:
     void destroy();
 
 private:
-    string                                                           _name;
-    std::unordered_map<string, std::unique_ptr<detail::bucket_base>> _buckets;
-    std::unordered_map<string, std::unique_ptr<loader_manager>>      _loaderManagers;
+    string                                                          _name;
+    std::unordered_map<usize, std::unique_ptr<detail::bucket_base>> _buckets;
+    std::unordered_map<string, std::unique_ptr<loader_manager>>     _loaderManagers;
 };
 
 }

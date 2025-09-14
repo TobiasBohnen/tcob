@@ -13,19 +13,25 @@ namespace tcob {
 template <typename T>
 inline void service_locator::set(std::shared_ptr<T> service)
 {
-    _services[T::ServiceName] = service;
+    _services[typeid(T).hash_code()] = service;
 }
 
 template <typename T>
 inline auto service_locator::get() const -> T*
 {
-    return static_cast<T*>(_services.at(T::ServiceName).get());
+    return static_cast<T*>(_services.at(typeid(T).hash_code()).get());
 }
 
 template <typename T>
 inline auto service_locator::has() const -> bool
 {
-    return _services.contains(T::ServiceName);
+    return _services.contains(typeid(T).hash_code());
+}
+
+template <typename T>
+inline auto service_locator::name() const -> string
+{
+    return T::ServiceName;
 }
 
 }

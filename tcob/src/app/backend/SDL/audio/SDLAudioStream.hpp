@@ -16,7 +16,7 @@
 namespace tcob::audio {
 ////////////////////////////////////////////////////////////
 
-class TCOB_API sdl_audio_stream final : public audio_stream_base {
+class TCOB_API sdl_audio_stream final : public audio_stream {
 public:
     sdl_audio_stream(u32 device, specification const& info, bool input);
     ~sdl_audio_stream() override;

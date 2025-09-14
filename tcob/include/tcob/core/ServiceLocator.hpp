@@ -31,8 +31,11 @@ public:
     template <typename T>
     auto has() const -> bool;
 
+    template <typename T>
+    auto name() const -> string;
+
 private:
-    std::unordered_map<char const*, std::shared_ptr<void>> _services;
+    std::unordered_map<usize, std::shared_ptr<void>> _services;
 };
 
 template <typename T, typename R = T>

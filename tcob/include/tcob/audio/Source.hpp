@@ -52,8 +52,8 @@ protected:
     auto queued_bytes() const -> i32;
 
 private:
-    std::unique_ptr<audio_stream_base> _output;
-    bool                               _canPan {false};
+    std::unique_ptr<audio_stream> _output;
+    bool                          _canPan {false};
 };
 
 }

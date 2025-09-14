@@ -21,8 +21,8 @@ public:
     sdl_audio_system();
     ~sdl_audio_system() override;
 
-    auto create_output(specification const& info) const -> std::unique_ptr<audio_stream_base> override;
-    auto create_input() const -> std::unique_ptr<audio_stream_base> override;
+    auto create_output(specification const& info) const -> std::unique_ptr<audio_stream> override;
+    auto create_input() const -> std::unique_ptr<audio_stream> override;
 
 private:
     u32 _devicePlayback;

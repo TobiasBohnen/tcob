@@ -32,9 +32,9 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API audio_stream_base {
+class TCOB_API audio_stream {
 public:
-    virtual ~audio_stream_base() = default;
+    virtual ~audio_stream() = default;
 
     virtual void bind()                   = 0;
     virtual void unbind()                 = 0;
@@ -67,8 +67,8 @@ public:
 
     static inline char const* ServiceName {"audio::system"};
 
-    virtual auto create_output(specification const& info) const -> std::unique_ptr<audio_stream_base> = 0;
-    virtual auto create_input() const -> std::unique_ptr<audio_stream_base>                           = 0;
+    virtual auto create_output(specification const& info) const -> std::unique_ptr<audio_stream> = 0;
+    virtual auto create_input() const -> std::unique_ptr<audio_stream>                           = 0;
 };
 
 ////////////////////////////////////////////////////////////

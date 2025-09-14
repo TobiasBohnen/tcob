@@ -44,6 +44,7 @@ protected:
 private:
     assets::group& _group;
 };
+
 ////////////////////////////////////////////////////////////
 
 class TCOB_API loader_manager : public non_copyable {

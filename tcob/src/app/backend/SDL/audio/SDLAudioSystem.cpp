@@ -25,12 +25,12 @@ sdl_audio_system::~sdl_audio_system()
     SDL_CloseAudioDevice(_deviceRecording);
 }
 
-auto sdl_audio_system::create_output(specification const& info) const -> std::unique_ptr<audio_stream_base>
+auto sdl_audio_system::create_output(specification const& info) const -> std::unique_ptr<audio_stream>
 {
     return std::make_unique<sdl_audio_stream>(_devicePlayback, info, false);
 }
 
-auto sdl_audio_system::create_input() const -> std::unique_ptr<audio_stream_base>
+auto sdl_audio_system::create_input() const -> std::unique_ptr<audio_stream>
 {
     return std::make_unique<sdl_audio_stream>(_deviceRecording, specification {.Channels = 1, .SampleRate = RECORDING_SAMPLE_RATE}, true);
 }

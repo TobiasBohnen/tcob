@@ -26,12 +26,12 @@ auto null_audio_stream::get() -> std::vector<f32> { return {}; }
 auto null_audio_stream::available_bytes() const -> i32 { return 0; }
 auto null_audio_stream::queued_bytes() const -> i32 { return 0; }
 
-auto null_audio_system::create_output(specification const&) const -> std::unique_ptr<audio_stream_base>
+auto null_audio_system::create_output(specification const&) const -> std::unique_ptr<audio_stream>
 {
     return std::make_unique<null_audio_stream>();
 }
 
-auto null_audio_system::create_input() const -> std::unique_ptr<audio_stream_base>
+auto null_audio_system::create_input() const -> std::unique_ptr<audio_stream>
 {
     return std::make_unique<null_audio_stream>();
 }

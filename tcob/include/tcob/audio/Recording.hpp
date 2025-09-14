@@ -23,7 +23,7 @@ public:
     auto stop() -> buffer;
 
 private:
-    std::unique_ptr<audio_stream_base> _output;
+    std::unique_ptr<audio_stream> _output;
 };
 
 }

@@ -102,17 +102,17 @@ inline auto bucket<T>::parent() -> group&
 template <typename T>
 inline void group::add_bucket()
 {
-    if (_buckets.contains(T::AssetName)) {
+    if (_buckets.contains(typeid(T).hash_code())) {
         return;
     }
 
-    _buckets[T::AssetName] = std::make_unique<assets::bucket<T>>(*this);
+    _buckets[typeid(T).hash_code()] = std::make_unique<assets::bucket<T>>(*this);
 }
 
 template <typename T>
 inline auto group::bucket() -> assets::bucket<T>*
 {
-    auto it {_buckets.find(T::AssetName)};
+    auto it {_buckets.find(typeid(T).hash_code())};
     return it != _buckets.end() ? dynamic_cast<assets::bucket<T>*>(it->second.get()) : nullptr;
 }
 
@@ -124,13 +124,13 @@ inline auto group::get(string const& assetName) const -> asset_ptr<T>
         return asset_ptr<T> {nullptr};
     }
 
-    return dynamic_cast<assets::bucket<T>*>(_buckets.at(T::AssetName).get())->get(assetName);
+    return dynamic_cast<assets::bucket<T>*>(_buckets.at(typeid(T).hash_code()).get())->get(assetName);
 }
 
 template <typename T>
 inline auto group::has(string const& assetName) const -> bool
 {
-    auto it {_buckets.find(T::AssetName)};
+    auto it {_buckets.find(typeid(T).hash_code())};
     if (it == _buckets.end()) { return false; }
 
     return dynamic_cast<assets::bucket<T>*>(it->second.get())->has(assetName);
