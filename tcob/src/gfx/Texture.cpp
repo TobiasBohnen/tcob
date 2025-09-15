@@ -29,11 +29,11 @@ using namespace std::chrono_literals;
 
 texture::texture()
     : Filtering {make_prop_fn<filtering,
-                              [](texture* t) { return t->_impl->get_filtering(); },
-                              [](texture* t, filtering value) { t->_impl->set_filtering(value); }>(this)}
+                              [](texture const& t) { return t._impl->get_filtering(); },
+                              [](texture& t, filtering value) { t._impl->set_filtering(value); }>(this)}
     , Wrapping {make_prop_fn<wrapping,
-                             [](texture* t) { return t->_impl->get_wrapping(); },
-                             [](texture* t, wrapping value) { t->_impl->set_wrapping(value); }>(this)}
+                             [](texture const& t) { return t._impl->get_wrapping(); },
+                             [](texture& t, wrapping value) { t._impl->set_wrapping(value); }>(this)}
     , _impl {locate_service<render_system>().create_texture()}
 {
 }

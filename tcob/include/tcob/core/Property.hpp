@@ -94,9 +94,9 @@ namespace detail {
         using return_type       = typename Source::return_type;
         using const_return_type = typename Source::const_return_type;
 
-        prop_base() = default;
-        explicit prop_base(T val); // HACK: only field_source
-        explicit prop_base(Source source);
+        constexpr prop_base() = default;
+        explicit constexpr prop_base(T val); // HACK: only field_source
+        explicit constexpr prop_base(Source source);
 
         signal<T const> Changed;
 
@@ -175,17 +175,24 @@ template <typename T>
 concept PropertyLike = detail::is_prop_base<std::remove_cvref_t<T>>::value;
 
 template <typename T, auto Getter, auto Setter, typename Parent>
-auto make_prop_fn(Parent* owner) -> prop_fn<T>
+auto constexpr make_prop_fn(Parent* owner) -> prop_fn<T>
 {
-    if constexpr (std::is_member_function_pointer_v<decltype(Getter)> && std::is_member_function_pointer_v<decltype(Setter)>) {
-        return prop_fn<T> {{owner,
-                            [](void* ctx) { return (static_cast<Parent*>(ctx)->*Getter)(); },
-                            [](void* ctx, T const& value) { (static_cast<Parent*>(ctx)->*Setter)(value); }}};
-    } else {
-        return prop_fn<T> {{owner,
-                            [](void* ctx) { return Getter(static_cast<Parent*>(ctx)); },
-                            [](void* ctx, T const& value) { Setter(static_cast<Parent*>(ctx), value); }}};
-    }
+    return prop_fn<T> {
+        {owner,
+         [](void* ctx) {
+             if constexpr (std::is_member_function_pointer_v<decltype(Getter)>) {
+                 return (static_cast<Parent const*>(ctx)->*Getter)();
+             } else {
+                 return Getter(*static_cast<Parent const*>(ctx));
+             }
+         },
+         [](void* ctx, T const& value) {
+             if constexpr (std::is_member_function_pointer_v<decltype(Setter)>) {
+                 (static_cast<Parent*>(ctx)->*Setter)(value);
+             } else {
+                 Setter(*static_cast<Parent*>(ctx), value);
+             }
+         }}};
 }
 
 }

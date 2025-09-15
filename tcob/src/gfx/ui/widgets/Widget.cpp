@@ -25,19 +25,21 @@ namespace tcob::ui {
 
 widget::widget(init const& wi)
     : Alpha {make_prop_fn<f32,
-                          [](widget* w) {
-                              f32 retValue {w->_alpha};
-                              if (auto* wparent {w->parent()}) { retValue *= wparent->Alpha; }
+                          [](widget const& w) {
+                              f32 retValue {w._alpha};
+                              if (auto* wparent {w.parent()}) { retValue *= wparent->Alpha; }
                               return retValue;
                           },
-                          [](widget* w, f32 value) { w->_alpha = value; }>(this)}
+                          [](widget& w, f32 value) { w._alpha = value; }>(this)}
     , Bounds {{[this](rect_f const& val) -> rect_f {
         return {val.Position,
                 {std::clamp(val.width(), MinSize->Width, MaxSize->Width),
                  std::clamp(val.height(), MinSize->Height, MaxSize->Height)}};
     }}}
-    , MinSize {{[this](size_f const& val) -> size_f { return {std::min(val.Width, MaxSize->Width), std::min(val.Height, MaxSize->Height)}; }}}
-    , MaxSize {{[this](size_f const& val) -> size_f { return {std::max(val.Width, MinSize->Width), std::max(val.Height, MinSize->Height)}; }}}
+    , MinSize {{[this](size_f const& val) -> size_f { return {std::min(val.Width, MaxSize->Width),
+                                                              std::min(val.Height, MaxSize->Height)}; }}}
+    , MaxSize {{[this](size_f const& val) -> size_f { return {std::max(val.Width, MinSize->Width),
+                                                              std::max(val.Height, MinSize->Height)}; }}}
     , _form {wi.Form}
     , _parent {wi.Parent}
     , _name {wi.Name}

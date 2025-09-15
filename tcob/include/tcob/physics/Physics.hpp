@@ -100,7 +100,7 @@ namespace detail {
     class b2d_debug_draw;
 
     template <typename T, auto Getter, auto Setter, typename Parent>
-    auto make_prop(Parent* owner) -> prop_fn<T>
+    auto constexpr make_prop(Parent* owner) -> prop_fn<T>
     {
         return prop_fn<T> {{owner,
                             [](void* ctx) { return (static_cast<Parent*>(ctx)->get_impl()->*Getter)(); },

@@ -26,8 +26,8 @@ window::window(std::unique_ptr<render_backend::window_base> windowBase, asset_ow
     , FullScreen {make_prop_fn<bool, &window::get_fullscreen, &window::set_fullscreen>(this)}
     , Title {make_prop_fn<string, &window::get_title, &window::set_title>(this)}
     , VSync {make_prop_fn<bool,
-                          [](window* w) { return w->_impl->get_vsync(); },
-                          [](window* w, bool value) { w->_impl->set_vsync(value); }>(this)}
+                          [](window const& w) { return w._impl->get_vsync(); },
+                          [](window& w, bool value) { w._impl->set_vsync(value); }>(this)}
     , _texture {texture}
     , _impl {std::move(windowBase)}
 {
