@@ -175,9 +175,9 @@ template <typename T>
 concept PropertyLike = detail::is_prop_base<std::remove_cvref_t<T>>::value;
 
 template <typename T, auto Getter, auto Setter, typename Parent>
-auto make_prop_fn(Parent* owner)
+auto make_prop_fn(Parent* owner) -> prop_fn<T>
 {
-    if constexpr (std::is_member_function_pointer_v<typeof(Getter)> && std::is_member_function_pointer_v<typeof(Setter)>) {
+    if constexpr (std::is_member_function_pointer_v<decltype(Getter)> && std::is_member_function_pointer_v<decltype(Setter)>) {
         return prop_fn<T> {{owner,
                             [](void* ctx) { return (static_cast<Parent*>(ctx)->*Getter)(); },
                             [](void* ctx, T const& value) { (static_cast<Parent*>(ctx)->*Setter)(value); }}};
