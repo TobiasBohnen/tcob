@@ -42,15 +42,8 @@ inline auto field_source<T>::set(type const& value, bool force) -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline validating_field_source<T>::validating_field_source(type value, validate_func val)
-    : _validate {std::move(val)}
-    , _value {value}
-{
-}
-
-template <typename T>
 inline validating_field_source<T>::validating_field_source(validate_func val)
-    : validating_field_source {{}, std::move(val)}
+    : _validate {std::move(val)}
 {
 }
 
@@ -80,29 +73,21 @@ inline auto validating_field_source<T>::set(type const& value, bool force) -> bo
 ////////////////////////////////////////////////////////////
 
 template <typename T>
-inline func_source<T>::func_source(getter_func get, setter_func set)
-    : _getter {std::move(get)}
-    , _setter {std::move(set)}
+inline func_source<T>::func_source(void* ctx, getter_func g, setter_func s)
+    : _ctx {ctx}
+    , _getter {g}
+    , _setter {s}
 {
 }
-
-template <typename T>
-inline func_source<T>::func_source(type value, getter_func get, setter_func set)
-    : func_source {std::move(get), std::move(set)}
-{
-    _setter(value);
-}
-
 template <typename T>
 inline auto func_source<T>::get() noexcept -> return_type
 {
-    return _getter();
+    return _getter(_ctx);
 }
-
 template <typename T>
 inline auto func_source<T>::get() const noexcept -> const_return_type
 {
-    return _getter();
+    return _getter(_ctx);
 }
 
 template <typename T>
@@ -111,7 +96,7 @@ inline auto func_source<T>::set(type const& value, bool force) -> bool
     if constexpr (Equatable<T>) {
         if (!force && get() == value) { return false; }
     }
-    _setter(value);
+    _setter(_ctx, value);
     return true;
 }
 

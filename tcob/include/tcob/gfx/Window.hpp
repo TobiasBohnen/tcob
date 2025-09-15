@@ -73,7 +73,7 @@ public:
     auto get_impl() const -> render_backend::window_base*;
 
 protected:
-    explicit window(std::unique_ptr<render_backend::window_base> window, asset_owner_ptr<texture> const& texture = {});
+    explicit window(std::unique_ptr<render_backend::window_base> windowBase, asset_owner_ptr<texture> const& texture = {});
 
     void on_clear(color c) const override;
 

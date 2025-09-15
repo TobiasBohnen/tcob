@@ -49,7 +49,6 @@ namespace detail {
         using validate_func = std::function<type(type const&)>;
 
         validating_field_source(validate_func val);
-        validating_field_source(type value, validate_func val);
 
         auto get() noexcept -> return_type;
         auto get() const noexcept -> const_return_type;
@@ -69,17 +68,17 @@ namespace detail {
         using return_type       = T;
         using const_return_type = T const;
 
-        using getter_func = std::function<type()>;
-        using setter_func = std::function<void(type const&)>;
+        using getter_func = T (*)(void*);
+        using setter_func = void (*)(void*, const_return_type&);
 
-        func_source(getter_func get, setter_func set);
-        func_source(type value, getter_func get, setter_func set);
+        func_source(void* ctx, getter_func g, setter_func s);
 
         auto get() noexcept -> return_type;
         auto get() const noexcept -> const_return_type;
         auto set(type const& value, bool force) -> bool;
 
     private:
+        void*       _ctx;
         getter_func _getter;
         setter_func _setter;
     };
@@ -96,7 +95,7 @@ namespace detail {
         using const_return_type = typename Source::const_return_type;
 
         prop_base() = default;
-        explicit prop_base(T val);
+        explicit prop_base(T val); // HACK: only field_source
         explicit prop_base(Source source);
 
         signal<T const> Changed;
@@ -174,6 +173,20 @@ using prop_fn = detail::prop_base<T, detail::func_source<T>>;
 
 template <typename T>
 concept PropertyLike = detail::is_prop_base<std::remove_cvref_t<T>>::value;
+
+template <typename T, auto Getter, auto Setter, typename Parent>
+auto make_prop_fn(Parent* owner)
+{
+    if constexpr (std::is_member_function_pointer_v<typeof(Getter)> && std::is_member_function_pointer_v<typeof(Setter)>) {
+        return prop_fn<T> {{owner,
+                            [](void* ctx) { return (static_cast<Parent*>(ctx)->*Getter)(); },
+                            [](void* ctx, T const& value) { (static_cast<Parent*>(ctx)->*Setter)(value); }}};
+    } else {
+        return prop_fn<T> {{owner,
+                            [](void* ctx) { return Getter(static_cast<Parent*>(ctx)); },
+                            [](void* ctx, T const& value) { Setter(static_cast<Parent*>(ctx), value); }}};
+    }
+}
 
 }
 

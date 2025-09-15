@@ -57,11 +57,12 @@ public:
 
     auto operator==(joint const& other) const -> bool;
 
+    auto get_impl() const -> detail::b2d_joint*;
+
 protected:
     joint(world& world, std::unique_ptr<detail::b2d_joint> impl);
 
     auto get_body_impl(body* body) const -> detail::b2d_body*;
-    auto get_impl() const -> detail::b2d_joint&;
 
 private:
     std::unique_ptr<detail::b2d_joint> _impl;

@@ -39,8 +39,7 @@ public:
     prop<asset_ptr<material>> Material;
     prop<string>              TextureRegion {"default"};
 
-    prop<color>  Color {colors::White};
-    prop_fn<f32> Transparency;
+    prop<color> Color {colors::White};
 
     prop<std::optional<point_f>> Pivot;
 

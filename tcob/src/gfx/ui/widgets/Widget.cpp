@@ -10,6 +10,7 @@
 #include <limits>
 
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
@@ -23,12 +24,13 @@
 namespace tcob::ui {
 
 widget::widget(init const& wi)
-    : Alpha {{[this] -> f32 {
-                  f32 retValue {_alpha};
-                  if (auto* wparent {parent()}) { retValue *= wparent->Alpha; }
-                  return retValue;
-              },
-              [this](auto const& value) { _alpha = value; }}}
+    : Alpha {make_prop_fn<f32,
+                          [](widget* w) {
+                              f32 retValue {w->_alpha};
+                              if (auto* wparent {w->parent()}) { retValue *= wparent->Alpha; }
+                              return retValue;
+                          },
+                          [](widget* w, f32 value) { w->_alpha = value; }>(this)}
     , Bounds {{[this](rect_f const& val) -> rect_f {
         return {val.Position,
                 {std::clamp(val.width(), MinSize->Width, MaxSize->Width),
@@ -565,5 +567,4 @@ auto widget::controls() const -> control_map const&
 {
     return *_form->Controls;
 }
-
 }

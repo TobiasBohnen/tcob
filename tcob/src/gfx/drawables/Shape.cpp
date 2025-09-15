@@ -144,12 +144,6 @@ void shape_batch::on_draw_to(render_target& target)
 ////////////////////////////////////////////////////////////
 
 shape::shape()
-    : Transparency {{[this] -> f32 { return static_cast<f32>(Color->A) / 255.0f; },
-                     [this](f32 value) {
-                         color c {Color};
-                         c.A   = 255 - static_cast<u8>(255 * std::clamp(value, 0.0f, 1.0f));
-                         Color = c; }}}
-
 {
     Pivot.Changed.connect([this](auto const&) { mark_dirty(); });
 

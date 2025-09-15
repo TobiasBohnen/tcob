@@ -8,6 +8,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
@@ -97,6 +98,14 @@ namespace detail {
     class b2d_shape;
     class b2d_joint;
     class b2d_debug_draw;
+
+    template <typename T, auto Getter, auto Setter, typename Parent>
+    auto make_prop(Parent* owner)
+    {
+        return prop_fn<T> {{owner,
+                            [](void* ctx) { return (static_cast<Parent*>(ctx)->get_impl()->*Getter)(); },
+                            [](void* ctx, T const& value) { (static_cast<Parent*>(ctx)->get_impl()->*Setter)(value); }}};
+    }
 }
 
 }

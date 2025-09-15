@@ -205,10 +205,10 @@ public:
     auto distance_joint_is_limit_enabled() const -> bool;
     void distance_joint_enable_limit(bool enableLimit) const;
 
-    void distance_joint_set_length_range(f32 minLength, f32 maxLength) const;
-
     auto distance_joint_get_min_length() const -> f32;
     auto distance_joint_get_max_length() const -> f32;
+    void distance_joint_set_min_length(f32 min) const;
+    void distance_joint_set_max_length(f32 max) const;
 
     auto distance_joint_get_current_length() const -> f32;
 
@@ -270,7 +270,8 @@ public:
 
     auto prismatic_joint_get_lower_limit() const -> f32;
     auto prismatic_joint_get_upper_limit() const -> f32;
-    void prismatic_joint_set_limits(f32 lower, f32 upper) const;
+    void prismatic_joint_set_lower_limit(f32 min) const;
+    void prismatic_joint_set_upper_limit(f32 max) const;
 
     auto prismatic_joint_is_motor_enabled() const -> bool;
     void prismatic_joint_enable_motor(bool enableMotor) const;
@@ -304,7 +305,8 @@ public:
 
     auto revolute_joint_get_lower_limit() const -> f32;
     auto revolute_joint_get_upper_limit() const -> f32;
-    void revolute_joint_set_limits(f32 lower, f32 upper) const;
+    void revolute_joint_set_lower_limit(f32 min) const;
+    void revolute_joint_set_upper_limit(f32 max) const;
 
     auto revolute_joint_is_motor_enabled() const -> bool;
     void revolute_joint_enable_motor(bool enableMotor) const;
@@ -347,7 +349,8 @@ public:
 
     auto wheel_joint_get_lower_limit() const -> f32;
     auto wheel_joint_get_upper_limit() const -> f32;
-    void wheel_joint_set_limits(f32 lower, f32 upper) const;
+    void wheel_joint_set_lower_limit(f32 min) const;
+    void wheel_joint_set_upper_limit(f32 max) const;
 
     auto wheel_joint_is_motor_enabled() const -> bool;
     void wheel_joint_enable_motor(bool enableMotor) const;

@@ -177,6 +177,8 @@ public:
     void enable_contact_events(bool enable) const;
     void enable_hit_events(bool enable) const;
 
+    auto get_impl() -> detail::b2d_body*;
+
 private:
     body(world& world, detail::b2d_world* b2dWorld, body_transform const& xform, settings const& bodySettings);
 

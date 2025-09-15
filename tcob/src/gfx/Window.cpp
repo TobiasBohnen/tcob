@@ -11,6 +11,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
@@ -20,16 +21,15 @@
 
 namespace tcob::gfx {
 
-window::window(std::unique_ptr<render_backend::window_base> window, asset_owner_ptr<texture> const& texture)
+window::window(std::unique_ptr<render_backend::window_base> windowBase, asset_owner_ptr<texture> const& texture)
     : render_target {texture.ptr()}
-    , FullScreen {{[this] { return get_fullscreen(); },
-                   [this](auto const& value) { set_fullscreen(value); }}}
-    , Title {{[this] { return get_title(); },
-              [this](auto const& value) { set_title(value); }}}
-    , VSync {{[this] { return _impl->get_vsync(); },
-              [this](auto const& value) { _impl->set_vsync(value); }}}
+    , FullScreen {make_prop_fn<bool, &window::get_fullscreen, &window::set_fullscreen>(this)}
+    , Title {make_prop_fn<string, &window::get_title, &window::set_title>(this)}
+    , VSync {make_prop_fn<bool,
+                          [](window* w) { return w->_impl->get_vsync(); },
+                          [](window* w, bool value) { w->_impl->set_vsync(value); }>(this)}
     , _texture {texture}
-    , _impl {std::move(window)}
+    , _impl {std::move(windowBase)}
 {
     Cursor.Changed.connect([this](auto const& value) { SystemCursorEnabled = !value.is_ready(); });
     SystemCursorEnabled(true);

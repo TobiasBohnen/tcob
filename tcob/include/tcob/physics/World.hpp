@@ -168,6 +168,8 @@ public:
     void set_joint_tuning(f32 hertz, f32 damping) const;
     void set_contact_tuning(f32 hertz, f32 damping, f32 pushSpeed) const;
 
+    auto get_impl() -> detail::b2d_world*;
+
 private:
     void on_update(milliseconds deltaTime) override;
 

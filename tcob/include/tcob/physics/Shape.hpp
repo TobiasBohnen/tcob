@@ -86,6 +86,8 @@ public:
 
     auto operator==(shape const& other) const -> bool;
 
+    auto get_impl() -> detail::b2d_shape*;
+
 protected:
     shape(body& body, std::unique_ptr<detail::b2d_shape> impl);
 
@@ -220,6 +222,8 @@ public:
     auto parent() -> body&;
 
     auto segments() -> std::vector<chain_segment>;
+
+    auto get_impl() -> detail::b2d_chain*;
 
 protected:
     chain(body& body, detail::b2d_body* b2dBody, settings const& settings);

@@ -21,21 +21,19 @@ namespace tcob::physics {
 
 ////////////////////////////////////////////////////////////
 
+auto shape::get_impl() -> detail::b2d_shape*
+{
+    return _impl.get();
+}
+
 shape::shape(body& body, std::unique_ptr<detail::b2d_shape> impl)
-    : Friction {{[this] -> f32 { return _impl->get_friction(); },
-                 [this](auto const& value) { _impl->set_friction(value); }}}
-    , Restitution {{[this] -> f32 { return _impl->get_restitution(); },
-                    [this](auto const& value) { _impl->set_restitution(value); }}}
-    , Density {{[this] -> f32 { return _impl->get_density(); },
-                [this](auto const& value) { _impl->set_density(value); }}}
-    , EnableSensorEvents {{[this] -> bool { return _impl->are_sensor_events_enabled(); },
-                           [this](auto const& value) { _impl->enable_sensor_events(value); }}}
-    , EnableContactEvents {{[this] -> bool { return _impl->are_contact_events_enabled(); },
-                            [this](auto const& value) { _impl->enable_contact_events(value); }}}
-    , EnableHitEvents {{[this] -> bool { return _impl->are_hit_events_enabled(); },
-                        [this](auto const& value) { _impl->enable_hit_events(value); }}}
-    , EnablePreSolveEvents {{[this] -> bool { return _impl->are_pre_solve_events_enabled(); },
-                             [this](auto const& value) { _impl->enable_pre_solve_events(value); }}}
+    : Friction {detail::make_prop<f32, &detail::b2d_shape::get_friction, &detail::b2d_shape::set_friction>(this)}
+    , Restitution {detail::make_prop<f32, &detail::b2d_shape::get_restitution, &detail::b2d_shape::set_restitution>(this)}
+    , Density {detail::make_prop<f32, &detail::b2d_shape::get_density, &detail::b2d_shape::set_density>(this)}
+    , EnableSensorEvents {detail::make_prop<bool, &detail::b2d_shape::are_sensor_events_enabled, &detail::b2d_shape::enable_sensor_events>(this)}
+    , EnableContactEvents {detail::make_prop<bool, &detail::b2d_shape::are_contact_events_enabled, &detail::b2d_shape::enable_contact_events>(this)}
+    , EnableHitEvents {detail::make_prop<bool, &detail::b2d_shape::are_hit_events_enabled, &detail::b2d_shape::enable_hit_events>(this)}
+    , EnablePreSolveEvents {detail::make_prop<bool, &detail::b2d_shape::are_pre_solve_events_enabled, &detail::b2d_shape::enable_pre_solve_events>(this)}
     , _impl {std::move(impl)}
     , _body {body}
 {
@@ -113,11 +111,14 @@ capsule_shape::capsule_shape(body& body, detail::b2d_body* b2dBody, settings con
 
 ////////////////////////////////////////////////////////////
 
+auto chain::get_impl() -> detail::b2d_chain*
+{
+    return _impl.get();
+}
+
 chain::chain(body& body, detail::b2d_body* b2dBody, settings const& settings)
-    : Friction {{[this] -> f32 { return _impl->get_friction(); },
-                 [this](auto const& value) { _impl->set_friction(value); }}}
-    , Restitution {{[this] -> f32 { return _impl->get_restitution(); },
-                    [this](auto const& value) { _impl->set_restitution(value); }}}
+    : Friction {detail::make_prop<f32, &detail::b2d_chain::get_friction, &detail::b2d_chain::set_friction>(this)}
+    , Restitution {detail::make_prop<f32, &detail::b2d_chain::get_restitution, &detail::b2d_chain::set_restitution>(this)}
     , _impl {std::make_unique<detail::b2d_chain>(b2dBody, settings)}
     , _body {body}
 {

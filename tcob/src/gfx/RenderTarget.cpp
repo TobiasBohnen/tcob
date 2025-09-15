@@ -9,6 +9,7 @@
 
 #include "tcob/core/Color.hpp"
 #include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/Size.hpp"
@@ -25,8 +26,7 @@
 namespace tcob::gfx {
 
 render_target::render_target(texture* tex)
-    : Size {{[this] { return get_size(); },
-             [this](auto const& value) { set_size(value); }}}
+    : Size {make_prop_fn<size_i, &render_target::get_size, &render_target::set_size>(this)}
     , _impl {locate_service<render_system>().create_render_target(tex)}
     , _camera {*this}
 {

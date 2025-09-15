@@ -815,11 +815,6 @@ auto b2d_joint::distance_joint_is_limit_enabled() const -> bool
     return b2DistanceJoint_IsLimitEnabled(ID);
 }
 
-void b2d_joint::distance_joint_set_length_range(f32 minLength, f32 maxLength) const
-{
-    b2DistanceJoint_SetLengthRange(ID, minLength, maxLength);
-}
-
 auto b2d_joint::distance_joint_get_min_length() const -> f32
 {
     return b2DistanceJoint_GetMinLength(ID);
@@ -828,6 +823,16 @@ auto b2d_joint::distance_joint_get_min_length() const -> f32
 auto b2d_joint::distance_joint_get_max_length() const -> f32
 {
     return b2DistanceJoint_GetMaxLength(ID);
+}
+
+void b2d_joint::distance_joint_set_min_length(f32 min) const
+{
+    b2DistanceJoint_SetLengthRange(ID, min, distance_joint_get_max_length());
+}
+
+void b2d_joint::distance_joint_set_max_length(f32 max) const
+{
+    b2DistanceJoint_SetLengthRange(ID, distance_joint_get_min_length(), max);
 }
 
 auto b2d_joint::distance_joint_get_current_length() const -> f32
@@ -1010,9 +1015,14 @@ auto b2d_joint::prismatic_joint_get_upper_limit() const -> f32
     return b2PrismaticJoint_GetUpperLimit(ID);
 }
 
-void b2d_joint::prismatic_joint_set_limits(f32 lower, f32 upper) const
+void b2d_joint::prismatic_joint_set_lower_limit(f32 min) const
 {
-    b2PrismaticJoint_SetLimits(ID, lower, upper);
+    b2PrismaticJoint_SetLimits(ID, min, prismatic_joint_get_upper_limit());
+}
+
+void b2d_joint::prismatic_joint_set_upper_limit(f32 max) const
+{
+    b2PrismaticJoint_SetLimits(ID, prismatic_joint_get_lower_limit(), max);
 }
 
 void b2d_joint::prismatic_joint_enable_motor(bool enableMotor) const
@@ -1115,9 +1125,14 @@ auto b2d_joint::revolute_joint_get_upper_limit() const -> f32
     return b2RevoluteJoint_GetUpperLimit(ID);
 }
 
-void b2d_joint::revolute_joint_set_limits(f32 lower, f32 upper) const
+void b2d_joint::revolute_joint_set_lower_limit(f32 min) const
 {
-    b2RevoluteJoint_SetLimits(ID, lower, upper);
+    b2RevoluteJoint_SetLimits(ID, min, revolute_joint_get_upper_limit());
+}
+
+void b2d_joint::revolute_joint_set_upper_limit(f32 max) const
+{
+    b2RevoluteJoint_SetLimits(ID, revolute_joint_get_lower_limit(), max);
 }
 
 void b2d_joint::revolute_joint_enable_motor(bool enableMotor) const
@@ -1245,9 +1260,14 @@ auto b2d_joint::wheel_joint_get_upper_limit() const -> f32
     return b2WheelJoint_GetUpperLimit(ID);
 }
 
-void b2d_joint::wheel_joint_set_limits(f32 lower, f32 upper) const
+void b2d_joint::wheel_joint_set_lower_limit(f32 min) const
 {
-    b2WheelJoint_SetLimits(ID, lower, upper);
+    b2WheelJoint_SetLimits(ID, min, wheel_joint_get_upper_limit());
+}
+
+void b2d_joint::wheel_joint_set_upper_limit(f32 max) const
+{
+    b2WheelJoint_SetLimits(ID, wheel_joint_get_lower_limit(), max);
 }
 
 void b2d_joint::wheel_joint_enable_motor(bool enableMotor) const
