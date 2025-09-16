@@ -32,26 +32,4 @@ if(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
     )
 endif()
 
-# Squirrel
-if(TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/squirrel/Squirrel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/squirrel/SquirrelScript.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/squirrel/SquirrelTypes.cpp
-    )
-    list(APPEND HDR
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/Squirrel.hpp
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/Squirrel.inl
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelClosure.hpp
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelClosure.inl
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelConversions.hpp
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelScript.hpp
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelScript.inl
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelTypes.hpp
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelTypes.inl
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelWrapper.hpp
-        ${TCOB_INC_DIR}/tcob/scripting/squirrel/SquirrelWrapper.inl
-    )
-endif()
-
 tcob_add_obj_library(tcob_scripting "${SRC}" "${HDR}")

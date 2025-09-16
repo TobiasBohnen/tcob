@@ -173,9 +173,3 @@
 #include <tcob/scripting/lua/LuaScript.hpp>
 #include <tcob/scripting/lua/LuaTypes.hpp>
 #include <tcob/scripting/lua/LuaWrapper.hpp>
-#include <tcob/scripting/squirrel/Squirrel.hpp>
-#include <tcob/scripting/squirrel/SquirrelClosure.hpp>
-#include <tcob/scripting/squirrel/SquirrelConversions.hpp>
-#include <tcob/scripting/squirrel/SquirrelScript.hpp>
-#include <tcob/scripting/squirrel/SquirrelTypes.hpp>
-#include <tcob/scripting/squirrel/SquirrelWrapper.hpp>

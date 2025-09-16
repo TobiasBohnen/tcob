@@ -2353,7 +2353,6 @@ PREDEFINED             = TCOB_ENABLE_RENDERER_OPENGL45 \
                         TCOB_ENABLE_ADDON_PHYSICS_BOX2D \
                         TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT \
                         TCOB_ENABLE_ADDON_SCRIPTING_LUA \
-                        TCOB_ENABLE_ADDON_SCRIPTING_SQUIRREL \
                         TCOB_ENABLE_ADDON_DATA_SQLITE \
                         TCOB_ENABLE_ADDON_GFX_LITEHTML \
                         TCOB_ENABLE_FILETYPES_AUDIO_DRLIBS \
