@@ -18,7 +18,6 @@
     #include "tcob/core/Common.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Interfaces.hpp"
-    #include "tcob/core/Property.hpp"
     #include "tcob/core/Signal.hpp"
     #include "tcob/scripting/Closure.hpp"
     #include "tcob/scripting/Conversions.hpp"
@@ -29,12 +28,6 @@
 namespace tcob::scripting {
 
 ////////////////////////////////////////////////////////////
-
-enum class wrap_target : u8 {
-    Getter,
-    Setter,
-    Method
-};
 
 template <typename T>
 struct getter {
@@ -144,27 +137,6 @@ public:
 
     auto operator[](string const& name) -> proxy;
 
-    template <auto Func>
-    void method(string_view name);
-    void method(string_view name, auto&& func);
-
-    template <typename... Funcs>
-    void overload(string_view name, Funcs&&... funcs);
-
-    template <auto Getter, auto Setter>
-    void property(string_view name);
-    template <auto Field>
-    void property(string_view name);
-    void property(string_view name, auto&& get, auto&& set);
-
-    template <auto Getter>
-    void getter(string_view name);
-    void getter(string_view name, auto&& get);
-
-    template <auto Setter>
-    void setter(string_view name);
-    void setter(string_view name, auto&& set);
-
     void metamethod(metamethod_type method, auto&& func);
 
     template <typename... Ts>
@@ -176,6 +148,15 @@ public:
     void register_base();
 
 private:
+    enum class wrap_target : u8 {
+        Getter,
+        Setter,
+        Method
+    };
+
+    template <typename... Funcs>
+    void wrap_overload(string_view name, Funcs&&... funcs);
+
     template <typename Func>
     auto wrap_method_helper(Func&& func);
     template <typename R, typename S, typename... Args>
@@ -184,27 +165,6 @@ private:
     auto wrap_method_helper(R (S::*func)(Args...) const);
     template <typename R, typename... Args>
     auto wrap_method_helper(R (*func)(Args...));
-
-    template <typename Func>
-    auto wrap_property_helper(Func&& func);
-    template <typename R, typename S>
-    auto wrap_property_helper(R const (S::*prop)() const);
-    template <typename R, typename S>
-    auto wrap_property_helper(R (S::*prop)() const);
-    template <typename R, typename S>
-    auto wrap_property_helper(R const (S::*prop)());
-    template <typename R, typename S>
-    auto wrap_property_helper(R (S::*prop)());
-    template <typename R, typename S>
-    auto wrap_property_helper(void (S::*prop)(R const));
-    template <typename R, typename S>
-    auto wrap_property_helper_field_getter(R S::* field);
-    template <typename R, typename S>
-    auto wrap_property_helper_field_setter(R S::* field);
-    template <typename R, typename S>
-    auto wrap_property_helper_field_getter(prop<R> S::* prop);
-    template <typename R, typename S>
-    auto wrap_property_helper_field_setter(prop<R> S::* prop);
 
     template <typename... Args>
     auto wrap_constructor(arg_list<WrappedType(Args...)>) -> std::function<managed_ptr<WrappedType>(Args...)>;

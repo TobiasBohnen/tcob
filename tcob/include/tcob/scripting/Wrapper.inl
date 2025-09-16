@@ -16,7 +16,6 @@
     #include <variant>
 
     #include "tcob/core/Common.hpp"
-    #include "tcob/core/Property.hpp"
     #include "tcob/scripting/Closure.hpp"
     #include "tcob/scripting/Lua.hpp"
     #include "tcob/scripting/Scripting.hpp"
@@ -94,7 +93,8 @@ template <typename WrappedType>
 template <typename T>
 inline auto wrapper<WrappedType>::proxy::operator=(T const& method) -> proxy&
 {
-    _parent.method(_name, method);
+    auto ptr {_parent.wrap_method_helper(method)};
+    _parent.wrap_func(_name, wrap_target::Method, std::move(ptr));
     return *this;
 }
 
@@ -102,7 +102,8 @@ template <typename WrappedType>
 template <typename T>
 inline auto wrapper<WrappedType>::proxy::operator=(scripting::getter<T> const& get) -> proxy&
 {
-    _parent.getter(_name, get.Method);
+    auto getter {_parent.wrap_method_helper(get.Method)};
+    _parent.wrap_func(_name, wrap_target::Getter, std::move(getter));
     return *this;
 }
 
@@ -110,7 +111,8 @@ template <typename WrappedType>
 template <typename T>
 inline auto wrapper<WrappedType>::proxy::operator=(scripting::setter<T> const& set) -> proxy&
 {
-    _parent.setter(_name, set.Method);
+    auto setter {_parent.wrap_method_helper(set.Method)};
+    _parent.wrap_func(_name, wrap_target::Setter, std::move(setter));
     return *this;
 }
 
@@ -118,7 +120,10 @@ template <typename WrappedType>
 template <typename Get, typename Set>
 inline auto wrapper<WrappedType>::proxy::operator=(scripting::property<Get, Set> const& prop) -> proxy&
 {
-    _parent.property(_name, prop.first, prop.second);
+    auto getter {_parent.wrap_method_helper(prop.first)};
+    _parent.wrap_func(_name, wrap_target::Getter, std::move(getter));
+    auto setter {_parent.wrap_method_helper(prop.second)};
+    _parent.wrap_func(_name, wrap_target::Setter, std::move(setter));
     return *this;
 }
 
@@ -126,10 +131,7 @@ template <typename WrappedType>
 template <typename... Ts>
 inline auto wrapper<WrappedType>::proxy::operator=(scripting::overload<Ts...> const& ov) -> proxy&
 {
-    std::apply(
-        [&](auto&&... item) { _parent.overload(_name, item...); },
-        ov);
-
+    std::apply([&](auto&&... item) { _parent.wrap_overload(_name, item...); }, ov);
     return *this;
 }
 
@@ -162,17 +164,10 @@ inline void wrapper<WrappedType>::register_base()
 ////////////////////////////////////////////////////////////
 
 template <typename WrappedType>
-template <auto Func>
-inline void wrapper<WrappedType>::method(string_view name)
+template <typename... Funcs>
+inline void wrapper<WrappedType>::wrap_overload(string_view name, Funcs&&... funcs)
 {
-    auto ptr {wrap_method_helper(Func)};
-    wrap_func(name, wrap_target::Method, std::move(ptr));
-}
-
-template <typename WrappedType>
-inline void wrapper<WrappedType>::method(string_view name, auto&& func)
-{
-    auto ptr {wrap_method_helper(func)};
+    auto ptr {make_unique_overload<Funcs...>(std::forward<Funcs>(funcs)...)};
     wrap_func(name, wrap_target::Method, std::move(ptr));
 }
 
@@ -204,156 +199,6 @@ template <typename R, typename... Args>
 inline auto wrapper<WrappedType>::wrap_method_helper(R (*func)(Args...))
 {
     return make_unique_closure(std::function<R(Args...)> {func});
-}
-
-template <typename WrappedType>
-template <typename... Funcs>
-inline void wrapper<WrappedType>::overload(string_view name, Funcs&&... funcs)
-{
-    auto ptr {make_unique_overload<Funcs...>(std::forward<Funcs>(funcs)...)};
-    wrap_func(name, wrap_target::Method, std::move(ptr));
-}
-
-template <typename WrappedType>
-template <auto Getter, auto Setter>
-inline void wrapper<WrappedType>::property(string_view name)
-{
-    auto getter {wrap_property_helper(Getter)};
-    wrap_func(name, wrap_target::Getter, std::move(getter));
-    auto setter {wrap_property_helper(Setter)};
-    wrap_func(name, wrap_target::Setter, std::move(setter));
-}
-
-template <typename WrappedType>
-inline void wrapper<WrappedType>::property(string_view name, auto&& get, auto&& set)
-{
-    auto getter {wrap_property_helper(get)};
-    wrap_func(name, wrap_target::Getter, std::move(getter));
-    auto setter {wrap_property_helper(set)};
-    wrap_func(name, wrap_target::Setter, std::move(setter));
-}
-
-template <typename WrappedType>
-template <auto Getter>
-inline void wrapper<WrappedType>::getter(string_view name)
-{
-    auto getter {wrap_property_helper(Getter)};
-    wrap_func(name, wrap_target::Getter, std::move(getter));
-}
-
-template <typename WrappedType>
-inline void wrapper<WrappedType>::getter(string_view name, auto&& get)
-{
-    auto getter {wrap_property_helper(get)};
-    wrap_func(name, wrap_target::Getter, std::move(getter));
-}
-
-template <typename WrappedType>
-template <auto Setter>
-inline void wrapper<WrappedType>::setter(string_view name)
-{
-    auto setter {wrap_property_helper(Setter)};
-    wrap_func(name, wrap_target::Setter, std::move(setter));
-}
-
-template <typename WrappedType>
-inline void wrapper<WrappedType>::setter(string_view name, auto&& set)
-{
-    auto setter {wrap_property_helper(set)};
-    wrap_func(name, wrap_target::Setter, std::move(setter));
-}
-
-template <typename WrappedType>
-template <typename Func>
-inline auto wrapper<WrappedType>::wrap_property_helper(Func&& func)
-{
-    return make_unique_closure(std::function {std::forward<Func>(func)});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper(R const (S::*prop)() const)
-{
-    register_base<S>();
-    return make_unique_closure(std::function<R(S*)> {prop});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper(R (S::*prop)() const)
-{
-    register_base<S>();
-    return make_unique_closure(std::function<R(S*)> {prop});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper(R const (S::*prop)())
-{
-    register_base<S>();
-    return make_unique_closure(std::function<R(S*)> {prop});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper(R (S::*prop)())
-{
-    register_base<S>();
-    return make_unique_closure(std::function<R(S*)> {prop});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper(void (S::*prop)(R const))
-{
-    register_base<S>();
-    return make_unique_closure(std::function<void(S*, R)> {prop});
-}
-
-template <typename WrappedType>
-template <auto Field>
-inline void wrapper<WrappedType>::property(string_view name)
-{
-    auto getter {wrap_property_helper_field_getter(Field)};
-    wrap_func(name, wrap_target::Getter, std::move(getter));
-    auto setter {wrap_property_helper_field_setter(Field)};
-    wrap_func(name, wrap_target::Setter, std::move(setter));
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper_field_getter(R S::* field)
-{
-    register_base<S>();
-    auto lambda {[field](S* instance) -> R { return (instance->*field); }};
-    return make_unique_closure(std::function<R(S*)> {lambda});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper_field_setter(R S::* field)
-{
-    register_base<S>();
-    auto lambda {[field](S* instance, R value) -> void { (instance->*field) = value; }};
-    return make_unique_closure(std::function<void(S*, R)> {lambda});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper_field_getter(prop<R> S::* prop)
-{
-    register_base<S>();
-    auto lambda {[prop](S* instance) -> R { return *(instance->*prop); }};
-    return make_unique_closure(std::function<R(S*)> {lambda});
-}
-
-template <typename WrappedType>
-template <typename R, typename S>
-inline auto wrapper<WrappedType>::wrap_property_helper_field_setter(prop<R> S::* prop)
-{
-    register_base<S>();
-    auto lambda {[prop](S* instance, R value) -> void { (instance->*prop) = value; }};
-    return make_unique_closure(std::function<void(S*, R)> {lambda});
 }
 
 template <typename WrappedType>
