@@ -103,6 +103,7 @@ public:
         state_view _view {nullptr};
     };
 
+    template <auto IsMeta>
     class proxy {
     public:
         proxy(wrapper& parent, string name);
@@ -135,9 +136,8 @@ public:
     signal<unknown_get_event> UnknownGet;
     signal<unknown_set_event> UnknownSet;
 
-    auto operator[](string const& name) -> proxy;
-
-    void metamethod(metamethod_type method, auto&& func);
+    auto operator[](string const& name) -> proxy<false>;
+    auto operator[](metamethod_type type) -> proxy<true>;
 
     template <typename... Ts>
     void constructors(std::optional<table> targetTable = std::nullopt);

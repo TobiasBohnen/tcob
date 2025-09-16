@@ -83,24 +83,34 @@ inline auto wrapper<WrappedType>::unknown_set_event::get_value(X& val) -> bool
 ////////////////////////////////////////////////////////////
 
 template <typename WrappedType>
-inline wrapper<WrappedType>::proxy::proxy(wrapper& parent, string name)
+template <auto IsMeta>
+inline wrapper<WrappedType>::proxy<IsMeta>::proxy(wrapper& parent, string name)
     : _parent {parent}
     , _name {std::move(name)}
 {
 }
 
 template <typename WrappedType>
+template <auto IsMeta>
 template <typename T>
-inline auto wrapper<WrappedType>::proxy::operator=(T const& method) -> proxy&
+inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(T const& method) -> proxy&
 {
-    auto ptr {_parent.wrap_method_helper(method)};
-    _parent.wrap_func(_name, wrap_target::Method, std::move(ptr));
+    if constexpr (IsMeta) {
+        auto ptr {make_unique_closure(std::function {method})};
+        _parent.set_metatable_field(_name, typeid(WrappedType).name(), ptr.get());
+        _parent.set_metatable_field(_name, (string(typeid(WrappedType).name()) + "_gc"), ptr.get());
+        _parent._metamethods.push_back(std::move(ptr));
+    } else {
+        auto ptr {_parent.wrap_method_helper(method)};
+        _parent.wrap_func(_name, wrap_target::Method, std::move(ptr));
+    }
     return *this;
 }
 
 template <typename WrappedType>
+template <auto IsMeta>
 template <typename T>
-inline auto wrapper<WrappedType>::proxy::operator=(scripting::getter<T> const& get) -> proxy&
+inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::getter<T> const& get) -> proxy&
 {
     auto getter {_parent.wrap_method_helper(get.Method)};
     _parent.wrap_func(_name, wrap_target::Getter, std::move(getter));
@@ -108,8 +118,9 @@ inline auto wrapper<WrappedType>::proxy::operator=(scripting::getter<T> const& g
 }
 
 template <typename WrappedType>
+template <auto IsMeta>
 template <typename T>
-inline auto wrapper<WrappedType>::proxy::operator=(scripting::setter<T> const& set) -> proxy&
+inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::setter<T> const& set) -> proxy&
 {
     auto setter {_parent.wrap_method_helper(set.Method)};
     _parent.wrap_func(_name, wrap_target::Setter, std::move(setter));
@@ -117,8 +128,9 @@ inline auto wrapper<WrappedType>::proxy::operator=(scripting::setter<T> const& s
 }
 
 template <typename WrappedType>
+template <auto IsMeta>
 template <typename Get, typename Set>
-inline auto wrapper<WrappedType>::proxy::operator=(scripting::property<Get, Set> const& prop) -> proxy&
+inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::property<Get, Set> const& prop) -> proxy&
 {
     auto getter {_parent.wrap_method_helper(prop.first)};
     _parent.wrap_func(_name, wrap_target::Getter, std::move(getter));
@@ -128,17 +140,24 @@ inline auto wrapper<WrappedType>::proxy::operator=(scripting::property<Get, Set>
 }
 
 template <typename WrappedType>
+template <auto IsMeta>
 template <typename... Ts>
-inline auto wrapper<WrappedType>::proxy::operator=(scripting::overload<Ts...> const& ov) -> proxy&
+inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::overload<Ts...> const& ov) -> proxy&
 {
     std::apply([&](auto&&... item) { _parent.wrap_overload(_name, item...); }, ov);
     return *this;
 }
 
 template <typename WrappedType>
-inline auto wrapper<WrappedType>::operator[](string const& name) -> proxy
+inline auto wrapper<WrappedType>::operator[](string const& name) -> proxy<false>
 {
-    return proxy {*this, name};
+    return proxy<false> {*this, name};
+}
+
+template <typename WrappedType>
+inline auto wrapper<WrappedType>::operator[](metamethod_type type) -> proxy<true>
+{
+    return proxy<true> {*this, detail::get_metamethod_name(type)};
 }
 
 ////////////////////////////////////////////////////////////
@@ -212,16 +231,6 @@ inline void wrapper<WrappedType>::wrap_func(string_view name, wrap_target target
 }
 
 ////////////////////////////////////////////////////////////
-
-template <typename WrappedType>
-inline void wrapper<WrappedType>::metamethod(metamethod_type method, auto&& func)
-{
-    string const& name {detail::get_metamethod_name(method)};
-    auto          ptr {make_unique_closure(std::function {func})};
-    set_metatable_field(name, typeid(WrappedType).name(), ptr.get());
-    set_metatable_field(name, (string(typeid(WrappedType).name()) + "_gc"), ptr.get());
-    _metamethods.push_back(std::move(ptr));
-}
 
 template <typename WrappedType>
 template <typename... Ts>
@@ -522,7 +531,6 @@ inline void wrapper<WrappedType>::unknown_get_event::return_value(auto&& value)
     _view.push_convert(std::move(value));
     Handled = true;
 }
-
 }
 
 #endif
