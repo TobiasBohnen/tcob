@@ -6,57 +6,125 @@
 #pragma once
 #include "Wrapper.hpp"
 
-#include <functional>
-#include <utility>
+#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-#include "tcob/core/Property.hpp"
+    #include <functional>
+    #include <optional>
+    #include <string>
+    #include <unordered_set>
+    #include <utility>
+    #include <variant>
+
+    #include "tcob/core/Common.hpp"
+    #include "tcob/core/Property.hpp"
+    #include "tcob/scripting/Closure.hpp"
+    #include "tcob/scripting/Lua.hpp"
+    #include "tcob/scripting/Scripting.hpp"
+    #include "tcob/scripting/Types.hpp"
 
 namespace tcob::scripting {
 
+namespace detail {
+
+    ////////////////////////////////////////////////////////////
+    [[maybe_unused]] static auto get_metamethod_name(metamethod_type m) -> string
+    {
+        switch (m) {
+        case metamethod_type::Length:          return "__len";
+        case metamethod_type::ToString:        return "__tostring";
+        case metamethod_type::UnaryMinus:      return "__unm";
+        case metamethod_type::Add:             return "__add";
+        case metamethod_type::Subtract:        return "__sub";
+        case metamethod_type::Divide:          return "__div";
+        case metamethod_type::Multiply:        return "__mul";
+        case metamethod_type::Concat:          return "__concat";
+        case metamethod_type::LessThan:        return "__lt";
+        case metamethod_type::LessOrEqualThan: return "__le";
+        case metamethod_type::Call:            return "__call";
+        case metamethod_type::FloorDivide:     return "__idiv";
+        case metamethod_type::Modulo:          return "__mod";
+        case metamethod_type::PowerOf:         return "__pow";
+        case metamethod_type::BitwiseAnd:      return "__band";
+        case metamethod_type::BitwiseOr:       return "__bor";
+        case metamethod_type::BitwiseXor:      return "__bxor";
+        case metamethod_type::BitwiseNot:      return "__bnot";
+        case metamethod_type::LeftShift:       return "__shl";
+        case metamethod_type::RightShift:      return "__shr";
+        case metamethod_type::Close:           return "__close";
+        }
+
+        return "";
+    }
+}
+
 ////////////////////////////////////////////////////////////
 
-template <typename WrapperImpl>
-inline wrapper<WrapperImpl>::proxy::proxy(wrapper& parent, string name)
+template <typename WrappedType>
+inline wrapper<WrappedType>::unknown_set_event::unknown_set_event(WrappedType* instance, string name, state_view view)
+    : Instance {instance}
+    , Name {std::move(name)}
+    , _view {view}
+{
+}
+
+template <typename WrappedType>
+template <typename X>
+inline auto wrapper<WrappedType>::unknown_set_event::get_value(X& val) -> bool
+{
+    if (converter<X>::IsType(_view, 2)) {
+        if (_view.pull_convert_idx(2, val)) {
+            Handled = true;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename WrappedType>
+inline wrapper<WrappedType>::proxy::proxy(wrapper& parent, string name)
     : _parent {parent}
     , _name {std::move(name)}
 {
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename T>
-inline auto wrapper<WrapperImpl>::proxy::operator=(T const& method) -> proxy&
+inline auto wrapper<WrappedType>::proxy::operator=(T const& method) -> proxy&
 {
     _parent.method(_name, method);
     return *this;
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename T>
-inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::getter<T> const& get) -> proxy&
+inline auto wrapper<WrappedType>::proxy::operator=(scripting::getter<T> const& get) -> proxy&
 {
     _parent.getter(_name, get.Method);
     return *this;
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename T>
-inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::setter<T> const& set) -> proxy&
+inline auto wrapper<WrappedType>::proxy::operator=(scripting::setter<T> const& set) -> proxy&
 {
     _parent.setter(_name, set.Method);
     return *this;
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename Get, typename Set>
-inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::property<Get, Set> const& prop) -> proxy&
+inline auto wrapper<WrappedType>::proxy::operator=(scripting::property<Get, Set> const& prop) -> proxy&
 {
     _parent.property(_name, prop.first, prop.second);
     return *this;
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename... Ts>
-inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::overload<Ts...> const& ov) -> proxy&
+inline auto wrapper<WrappedType>::proxy::operator=(scripting::overload<Ts...> const& ov) -> proxy&
 {
     std::apply(
         [&](auto&&... item) { _parent.overload(_name, item...); },
@@ -65,246 +133,551 @@ inline auto wrapper<WrapperImpl>::proxy::operator=(scripting::overload<Ts...> co
     return *this;
 }
 
-template <typename WrapperImpl>
-inline auto wrapper<WrapperImpl>::operator[](string const& name) -> proxy
+template <typename WrappedType>
+inline auto wrapper<WrappedType>::operator[](string const& name) -> proxy
 {
     return proxy {*this, name};
 }
 
 ////////////////////////////////////////////////////////////
 
-template <typename WrapperImpl>
-template <typename R, typename... P>
-inline auto wrapper<WrapperImpl>::make_unique_closure(std::function<R(P...)>&& fn)
+template <typename WrappedType>
+template <typename S>
+inline void wrapper<WrappedType>::register_base()
 {
-    return get_impl()->template impl_make_unique_closure<R, P...>(std::move(fn));
-}
+    static_assert(std::is_base_of_v<S, WrappedType>);
+    _view.get_metatable(typeid(WrappedType).name());
+    table tab {table::Acquire(_view, -1)};
 
-template <typename WrapperImpl>
-template <typename... Funcs>
-inline auto wrapper<WrapperImpl>::make_unique_overload(Funcs&&... fns)
-{
-    return get_impl()->template impl_make_unique_overload<Funcs...>(std::forward<Funcs>(fns)...);
+    std::unordered_set<string> types;
+    tab.try_get(types, "__types");
+    if (!types.contains(typeid(S).name())) {
+        types.insert(typeid(S).name());
+        tab["__types"] = types;
+    }
+
+    _view.pop(1);
 }
 
 ////////////////////////////////////////////////////////////
 
-template <typename WrapperImpl>
+template <typename WrappedType>
+template <auto Func>
+inline void wrapper<WrappedType>::method(string_view name)
+{
+    auto ptr {wrap_method_helper(Func)};
+    wrap_func(name, wrap_target::Method, std::move(ptr));
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::method(string_view name, auto&& func)
+{
+    auto ptr {wrap_method_helper(func)};
+    wrap_func(name, wrap_target::Method, std::move(ptr));
+}
+
+template <typename WrappedType>
 template <typename Func>
-inline auto wrapper<WrapperImpl>::wrap_method_helper(Func&& func)
+inline auto wrapper<WrappedType>::wrap_method_helper(Func&& func)
 {
     return make_unique_closure(std::function {std::forward<Func>(func)});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S, typename... Args>
-inline auto wrapper<WrapperImpl>::wrap_method_helper(R (S::*func)(Args...))
+inline auto wrapper<WrappedType>::wrap_method_helper(R (S::*func)(Args...))
 {
     register_base<S>();
     return make_unique_closure(std::function<R(S*, Args...)> {func});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S, typename... Args>
-inline auto wrapper<WrapperImpl>::wrap_method_helper(R (S::*func)(Args...) const)
+inline auto wrapper<WrappedType>::wrap_method_helper(R (S::*func)(Args...) const)
 {
     register_base<S>();
     return make_unique_closure(std::function<R(S*, Args...)> {func});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename... Args>
-inline auto wrapper<WrapperImpl>::wrap_method_helper(R (*func)(Args...))
+inline auto wrapper<WrappedType>::wrap_method_helper(R (*func)(Args...))
 {
     return make_unique_closure(std::function<R(Args...)> {func});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
+template <typename... Funcs>
+inline void wrapper<WrappedType>::overload(string_view name, Funcs&&... funcs)
+{
+    auto ptr {make_unique_overload<Funcs...>(std::forward<Funcs>(funcs)...)};
+    wrap_func(name, wrap_target::Method, std::move(ptr));
+}
+
+template <typename WrappedType>
+template <auto Getter, auto Setter>
+inline void wrapper<WrappedType>::property(string_view name)
+{
+    auto getter {wrap_property_helper(Getter)};
+    wrap_func(name, wrap_target::Getter, std::move(getter));
+    auto setter {wrap_property_helper(Setter)};
+    wrap_func(name, wrap_target::Setter, std::move(setter));
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::property(string_view name, auto&& get, auto&& set)
+{
+    auto getter {wrap_property_helper(get)};
+    wrap_func(name, wrap_target::Getter, std::move(getter));
+    auto setter {wrap_property_helper(set)};
+    wrap_func(name, wrap_target::Setter, std::move(setter));
+}
+
+template <typename WrappedType>
+template <auto Getter>
+inline void wrapper<WrappedType>::getter(string_view name)
+{
+    auto getter {wrap_property_helper(Getter)};
+    wrap_func(name, wrap_target::Getter, std::move(getter));
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::getter(string_view name, auto&& get)
+{
+    auto getter {wrap_property_helper(get)};
+    wrap_func(name, wrap_target::Getter, std::move(getter));
+}
+
+template <typename WrappedType>
+template <auto Setter>
+inline void wrapper<WrappedType>::setter(string_view name)
+{
+    auto setter {wrap_property_helper(Setter)};
+    wrap_func(name, wrap_target::Setter, std::move(setter));
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::setter(string_view name, auto&& set)
+{
+    auto setter {wrap_property_helper(set)};
+    wrap_func(name, wrap_target::Setter, std::move(setter));
+}
+
+template <typename WrappedType>
 template <typename Func>
-inline auto wrapper<WrapperImpl>::wrap_property_helper(Func&& func)
+inline auto wrapper<WrappedType>::wrap_property_helper(Func&& func)
 {
     return make_unique_closure(std::function {std::forward<Func>(func)});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper(R const (S::*prop)() const)
+inline auto wrapper<WrappedType>::wrap_property_helper(R const (S::*prop)() const)
 {
     register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper(R (S::*prop)() const)
+inline auto wrapper<WrappedType>::wrap_property_helper(R (S::*prop)() const)
 {
     register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper(R const (S::*prop)())
+inline auto wrapper<WrappedType>::wrap_property_helper(R const (S::*prop)())
 {
     register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper(R (S::*prop)())
+inline auto wrapper<WrappedType>::wrap_property_helper(R (S::*prop)())
 {
     register_base<S>();
     return make_unique_closure(std::function<R(S*)> {prop});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper(void (S::*prop)(R const))
+inline auto wrapper<WrappedType>::wrap_property_helper(void (S::*prop)(R const))
 {
     register_base<S>();
     return make_unique_closure(std::function<void(S*, R)> {prop});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
+template <auto Field>
+inline void wrapper<WrappedType>::property(string_view name)
+{
+    auto getter {wrap_property_helper_field_getter(Field)};
+    wrap_func(name, wrap_target::Getter, std::move(getter));
+    auto setter {wrap_property_helper_field_setter(Field)};
+    wrap_func(name, wrap_target::Setter, std::move(setter));
+}
+
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper_field_getter(R S::* field)
+inline auto wrapper<WrappedType>::wrap_property_helper_field_getter(R S::* field)
 {
     register_base<S>();
     auto lambda {[field](S* instance) -> R { return (instance->*field); }};
     return make_unique_closure(std::function<R(S*)> {lambda});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper_field_setter(R S::* field)
+inline auto wrapper<WrappedType>::wrap_property_helper_field_setter(R S::* field)
 {
     register_base<S>();
     auto lambda {[field](S* instance, R value) -> void { (instance->*field) = value; }};
     return make_unique_closure(std::function<void(S*, R)> {lambda});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper_field_getter(prop<R> S::* prop)
+inline auto wrapper<WrappedType>::wrap_property_helper_field_getter(prop<R> S::* prop)
 {
     register_base<S>();
     auto lambda {[prop](S* instance) -> R { return *(instance->*prop); }};
     return make_unique_closure(std::function<R(S*)> {lambda});
 }
 
-template <typename WrapperImpl>
+template <typename WrappedType>
 template <typename R, typename S>
-inline auto wrapper<WrapperImpl>::wrap_property_helper_field_setter(prop<R> S::* prop)
+inline auto wrapper<WrappedType>::wrap_property_helper_field_setter(prop<R> S::* prop)
 {
     register_base<S>();
     auto lambda {[prop](S* instance, R value) -> void { (instance->*prop) = value; }};
     return make_unique_closure(std::function<void(S*, R)> {lambda});
 }
 
-////////////////////////////////////////////////////////////
-
-template <typename WrapperImpl>
-inline auto wrapper<WrapperImpl>::get_impl() -> WrapperImpl*
+template <typename WrappedType>
+inline void wrapper<WrappedType>::wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func)
 {
-    return static_cast<WrapperImpl*>(this);
-}
-
-template <typename WrapperImpl>
-inline auto wrapper<WrapperImpl>::get_impl() const -> WrapperImpl const*
-{
-    return static_cast<WrapperImpl const*>(this);
+    switch (target) {
+    case wrap_target::Getter: _getters[string {name}] = std::move(func); break;
+    case wrap_target::Setter: _setters[string {name}] = std::move(func); break;
+    case wrap_target::Method: _functions[string {name}] = std::move(func); break;
+    }
 }
 
 ////////////////////////////////////////////////////////////
 
-template <typename WrapperImpl>
-template <auto Func>
-inline void wrapper<WrapperImpl>::method(string_view name)
+template <typename WrappedType>
+inline void wrapper<WrappedType>::metamethod(metamethod_type method, auto&& func)
 {
-    auto ptr {wrap_method_helper(Func)};
-    get_impl()->impl_wrap_func(name, wrap_target::Method, std::move(ptr));
+    string const& name {detail::get_metamethod_name(method)};
+    auto          ptr {make_unique_closure(std::function {func})};
+    set_metatable_field(name, typeid(WrappedType).name(), ptr.get());
+    set_metatable_field(name, (string(typeid(WrappedType).name()) + "_gc"), ptr.get());
+    _metamethods.push_back(std::move(ptr));
 }
 
-template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::method(string_view name, auto&& func)
+template <typename WrappedType>
+template <typename... Ts>
+inline void wrapper<WrappedType>::constructors(std::optional<table> targetTable)
 {
-    auto ptr {wrap_method_helper(func)};
-    get_impl()->impl_wrap_func(name, wrap_target::Method, std::move(ptr));
+    auto& dstTable {targetTable.has_value() ? targetTable.value() : *_globalTable};
+
+    // create constructor table
+    if (!dstTable.has(_name)) { dstTable[_name] = table {}; }
+
+    if constexpr (sizeof...(Ts) > 1) {
+        _constructor = make_unique_overload(wrap_constructor(arg_list<Ts> {})...);
+    } else {
+        _constructor = make_unique_closure(wrap_constructor(arg_list<Ts> {})...);
+    }
+
+    // create 'new' function
+    dstTable[_name]["new"] = _constructor.get();
 }
 
-template <typename WrapperImpl>
-template <typename... Funcs>
-inline void wrapper<WrapperImpl>::overload(string_view name, Funcs&&... funcs)
+template <typename WrappedType>
+template <typename... Args>
+inline auto wrapper<WrappedType>::wrap_constructor(arg_list<WrappedType(Args...)>) -> std::function<managed_ptr<WrappedType>(Args...)>
 {
-    auto ptr {make_unique_overload<Funcs...>(std::forward<Funcs>(funcs)...)};
-    get_impl()->impl_wrap_func(name, wrap_target::Method, std::move(ptr));
+    return std::function<managed_ptr<WrappedType>(Args...)> {[](Args... args) {
+        return managed_ptr<WrappedType> {new WrappedType(std::forward<Args>(args)...)};
+    }};
 }
 
-template <typename WrapperImpl>
-template <auto Getter, auto Setter>
-inline void wrapper<WrapperImpl>::property(string_view name)
+////////////////////////////////////////////////////////////
+
+template <typename WrappedType>
+inline wrapper<WrappedType>::wrapper(state_view view, table* globaltable, string name)
+    : _name {std::move(name)}
+    , _globalTable {globaltable}
+    , _view {view}
 {
-    auto getter {wrap_property_helper(Getter)};
-    get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
-    auto setter {wrap_property_helper(Setter)};
-    get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
+    create_metatable(typeid(WrappedType).name(), false);
+    create_metatable((string {typeid(WrappedType).name()} + "_gc"), true);
 }
 
-template <typename WrapperImpl>
-template <auto Field>
-inline void wrapper<WrapperImpl>::property(string_view name)
+template <typename WrappedType>
+inline wrapper<WrappedType>::~wrapper()
 {
-    auto getter {wrap_property_helper_field_getter(Field)};
-    get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
-    auto setter {wrap_property_helper_field_setter(Field)};
-    get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
+    remove_metatable(typeid(WrappedType).name());
+    remove_metatable((string {typeid(WrappedType).name()} + "_gc"));
 }
 
-template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::property(string_view name, auto&& get, auto&& set)
+////////////////////////////////////////////////////////////
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::hide_metatable(auto&& value) const
 {
-    auto getter {wrap_property_helper(get)};
-    get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
-    auto setter {wrap_property_helper(set)};
-    get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
+    set_metatable_field("__metatable", typeid(WrappedType).name(), value);
+    set_metatable_field("__metatable", (string {typeid(WrappedType).name()} + "_gc"), value);
 }
 
-template <typename WrapperImpl>
-template <auto Getter>
-inline void wrapper<WrapperImpl>::getter(string_view name)
+template <typename WrappedType>
+inline void wrapper<WrappedType>::set_metatable_field(string const& name, string const& tableName, auto&& value) const
 {
-    auto getter {wrap_property_helper(Getter)};
-    get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
+    _view.get_metatable(tableName);
+
+    i32 const top {_view.get_top()};
+    _view.push_convert(name);
+    _view.push_convert(value);
+    _view.raw_set(top);
+
+    _view.pop(1);
 }
 
-template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::getter(string_view name, auto&& get)
+template <typename WrappedType>
+inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc)
 {
-    auto getter {wrap_property_helper(get)};
-    get_impl()->impl_wrap_func(name, wrap_target::Getter, std::move(getter));
+    _view.new_metatable(name);
+    i32 const tableIdx {_view.get_top()};
+
+    // set __name
+    _view.push_string("__name");
+    _view.push_string(_name);
+    _view.raw_set(tableIdx);
+
+    // set __type
+    _view.push_string("__type");
+    _view.push_string(name);
+    _view.raw_set(tableIdx);
+
+    // index metamethod
+    push_metamethod("__index",
+                    std::function {[this](WrappedType* instance, std::variant<i32, string>& arg) {
+                        if (auto* arg0 {std::get_if<i32>(&arg)}) {
+                            this->index(instance, *arg0);
+                        } else if (auto* arg1 {std::get_if<string>(&arg)}) {
+                            this->index(instance, *arg1);
+                        }
+                    }},
+                    tableIdx);
+
+    // newindex metamethod
+    push_metamethod("__newindex",
+                    std::function {[this](WrappedType* instance, std::variant<i32, string>& arg) {
+                        if (auto* arg0 {std::get_if<i32>(&arg)}) {
+                            this->newindex(instance, *arg0);
+                        } else if (auto* arg1 {std::get_if<string>(&arg)}) {
+                            this->newindex(instance, *arg1);
+                        }
+                    }},
+                    tableIdx);
+
+    // eq metamethod
+    if constexpr (Equatable<WrappedType>) {
+        push_metamethod("__eq",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 == *instance2; }},
+                        tableIdx);
+    }
+
+    // lt metamethod
+    if constexpr (LessComparable<WrappedType>) {
+        push_metamethod("__lt",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 < *instance2; }},
+                        tableIdx);
+    }
+
+    // le metamethod
+    if constexpr (LessEqualComparable<WrappedType>) {
+        push_metamethod("__le",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 <= *instance2; }},
+                        tableIdx);
+    }
+
+    // unm metamethod
+    if constexpr (Negatable<WrappedType>) {
+        push_metamethod("__unm",
+                        std::function {[](WrappedType* instance) { return managed_ptr<WrappedType> {new WrappedType(-*instance)}; }},
+                        tableIdx);
+    }
+
+    // add metamethod
+    if constexpr (Addable<WrappedType>) {
+        push_metamethod("__add",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 + *instance2)}; }},
+                        tableIdx);
+    }
+
+    // sub metamethod
+    if constexpr (Subtractable<WrappedType>) {
+        push_metamethod("__sub",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 - *instance2)}; }},
+                        tableIdx);
+    }
+
+    // mul metamethod
+    if constexpr (Multipliable<WrappedType>) {
+        push_metamethod("__mul",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 * *instance2)}; }},
+                        tableIdx);
+    }
+
+    // div metamethod
+    if constexpr (Dividable<WrappedType>) {
+        push_metamethod("__div",
+                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 / *instance2)}; }},
+                        tableIdx);
+    }
+
+    // length operator
+    if constexpr (HasSize<WrappedType>) {
+        push_metamethod("__len",
+                        std::function {[](WrappedType* instance) {
+                            return instance->size();
+                        }},
+                        tableIdx);
+    }
+
+    // gc for Lua created instances
+    if constexpr (std::is_destructible_v<WrappedType>) {
+        if (gc) {
+            _view.push_convert("__gc");
+            _view.push_cfunction(&wrapper::gc);
+            _view.set_table(tableIdx);
+        }
+    }
+
+    _view.pop(1);
 }
 
-template <typename WrapperImpl>
-template <auto Setter>
-inline void wrapper<WrapperImpl>::setter(string_view name)
+template <typename WrappedType>
+inline void wrapper<WrappedType>::remove_metatable(string const& name)
 {
-    auto setter {wrap_property_helper(Setter)};
-    get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
+    _view.push_convert(nullptr);
+    _view.set_registry_field(name);
 }
 
-template <typename WrapperImpl>
-inline void wrapper<WrapperImpl>::setter(string_view name, auto&& set)
+template <typename WrappedType>
+template <typename R, typename... P>
+inline void wrapper<WrappedType>::push_metamethod(string const& methodname, std::function<R(P...)>&& func, i32 tableIdx)
 {
-    auto setter {wrap_property_helper(set)};
-    get_impl()->impl_wrap_func(name, wrap_target::Setter, std::move(setter));
+    _view.push_convert(methodname);
+    auto ptr {make_unique_closure(std::move(func))};
+    _view.push_convert(ptr.get());
+    _view.raw_set(tableIdx);
+    _metamethods.push_back(std::move(ptr));
 }
 
-template <typename WrapperImpl>
-template <typename S>
-inline void wrapper<WrapperImpl>::register_base()
+template <typename WrappedType>
+inline void wrapper<WrappedType>::index(WrappedType* b, i32 arg)
 {
-    get_impl()->template impl_register_base<S>();
+    if constexpr (detail::IntIndexable<WrappedType>) {
+        if constexpr (HasSize<WrappedType>) {
+            if (arg > std::ssize(*b)) {
+                _view.push_nil(); // pushing null for ipairs
+                return;
+            }
+        }
+
+        _view.push_convert((*b)[static_cast<typename WrappedType::size_type>(arg - 1)]);
+    } else {
+        _view.push_nil();
+    }
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::index(WrappedType* b, string const& arg)
+{
+    if constexpr (detail::StringIndexable<WrappedType>) {
+        _view.push_convert((*b)[arg]);
+    } else {
+        if (auto fit {_functions.find(arg)}; fit != _functions.end()) {
+            _view.push_convert(fit->second.get());
+        } else if (auto git {_getters.find(arg)}; git != _getters.end()) {
+            (*git->second)(_view);
+        } else {
+            unknown_get_event ev {b, arg, _view};
+            UnknownGet(ev);
+            if (!ev.Handled) { _view.push_nil(); }
+        }
+    }
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::newindex(WrappedType* b, i32 arg)
+{
+    _view.remove(2); // remove arg
+    if constexpr (detail::IntIndexable<WrappedType>) {
+        typename WrappedType::value_type val {};
+        _view.pull_convert_idx(-1, val);
+        _view.pop(_view.get_top());
+        if constexpr (Container<WrappedType>) {
+            if (arg == std::ssize(*b) + 1) { // add to vector if index is size + 1
+                b->push_back(val);
+                return;
+            }
+        }
+
+        (*b)[static_cast<typename WrappedType::size_type>(arg - 1)] = val;
+    } else {
+        _view.error("unknown set: " + std::to_string(arg));
+    }
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::newindex(WrappedType* b, string const& arg)
+{
+    _view.remove(2); // remove arg
+    if constexpr (detail::StringIndexable<WrappedType>) {
+        _view.pull_convert_idx(-1, (*b)[arg]);
+    } else if (auto sit {_setters.find(arg)}; sit != _setters.end()) {
+        (*sit->second)(_view);
+    } else {
+        unknown_set_event ev {b, arg, _view};
+        UnknownSet(ev);
+        if (!ev.Handled) { _view.error("unknown set: " + arg); }
+    }
+    _view.pop(_view.get_top());
+}
+
+template <typename WrappedType>
+inline auto wrapper<WrappedType>::gc(lua_State* l) -> i32
+{
+    WrappedType** obj {static_cast<WrappedType**>(state_view {l}.to_userdata(-1))};
+    if (obj && *obj) { delete (*obj); } // NOLINT(cppcoreguidelines-owning-memory)
+    return 0;
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+template <typename WrappedType>
+inline wrapper<WrappedType>::unknown_get_event::unknown_get_event(WrappedType* instance, string name, state_view view)
+    : Instance {instance}
+    , Name {std::move(name)}
+    , _view {view}
+{
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::unknown_get_event::return_value(auto&& value)
+{
+    _view.push_convert(std::move(value));
+    Handled = true;
 }
 
 }
+
+#endif

@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "LuaTypes.hpp"
+#include "Types.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -13,10 +13,11 @@
     #include <vector>
 
     #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Lua.hpp"
     #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/lua/Lua.hpp"
 
-namespace tcob::scripting::lua {
+
+namespace tcob::scripting {
 
 template <typename Key>
 inline auto table::operator[](Key key) -> proxy<table, Key>

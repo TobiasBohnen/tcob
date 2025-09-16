@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/scripting/lua/Lua.hpp"
+#include "tcob/scripting/Lua.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -18,7 +18,7 @@
     #include "tcob/core/Logger.hpp"
     #include "tcob/scripting/Scripting.hpp"
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 static_assert(NOREF == LUA_NOREF);
 static_assert(REGISTRYINDEX == LUA_REGISTRYINDEX);

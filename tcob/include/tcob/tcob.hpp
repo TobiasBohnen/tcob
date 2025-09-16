@@ -164,12 +164,10 @@
 #include <tcob/physics/Shape.hpp>
 #include <tcob/physics/World.hpp>
 
+#include <tcob/scripting/Closure.hpp>
+#include <tcob/scripting/Conversions.hpp>
+#include <tcob/scripting/Lua.hpp>
 #include <tcob/scripting/Script.hpp>
 #include <tcob/scripting/Scripting.hpp>
+#include <tcob/scripting/Types.hpp>
 #include <tcob/scripting/Wrapper.hpp>
-#include <tcob/scripting/lua/Lua.hpp>
-#include <tcob/scripting/lua/LuaClosure.hpp>
-#include <tcob/scripting/lua/LuaConversions.hpp>
-#include <tcob/scripting/lua/LuaScript.hpp>
-#include <tcob/scripting/lua/LuaTypes.hpp>
-#include <tcob/scripting/lua/LuaWrapper.hpp>

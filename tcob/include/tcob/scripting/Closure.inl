@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "LuaClosure.hpp"
+#include "Closure.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -12,9 +12,9 @@
     #include <tuple>
     #include <type_traits>
 
-    #include "tcob/scripting/lua/Lua.hpp"
+    #include "tcob/scripting/Lua.hpp"
 
-namespace tcob::scripting::lua::detail {
+namespace tcob::scripting::detail {
 
 template <typename R, typename... Args>
 inline native_closure<R(Args...)>::native_closure(std::function<R(Args...)> fn)
@@ -128,7 +128,7 @@ inline void native_overload<Funcs...>::call_func(state_view view, std::function<
 
 ////////////////////////////////////////////////////////////
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 template <typename R, typename... P>
 auto make_unique_closure(std::function<R(P...)>&& fn) -> native_closure_unique_ptr

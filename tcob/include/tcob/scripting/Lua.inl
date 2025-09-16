@@ -8,7 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 template <typename... T>
 inline void state_view::push_convert(T&&... t) const

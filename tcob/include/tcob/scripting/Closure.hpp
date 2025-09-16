@@ -13,9 +13,9 @@
     #include <tuple>
 
     #include "tcob/core/Interfaces.hpp"
-    #include "tcob/scripting/lua/Lua.hpp"
+    #include "tcob/scripting/Lua.hpp"
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 namespace detail {
     ////////////////////////////////////////////////////////////
@@ -81,8 +81,8 @@ template <typename... Funcs>
 auto make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr;
 template <typename... Funcs>
 auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr;
-} // namespace tcob::scripting::lua
+} // namespace tcob::scripting
 
-    #include "LuaClosure.inl"
+    #include "Closure.inl"
 
 #endif

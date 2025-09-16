@@ -28,7 +28,7 @@ using lua_Alloc        = void* (*)(void* ud, void* ptr, size_t osize, size_t nsi
 
 ////////////////////////////////////////////////////////////
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 ////////////////////////////////////////////////////////////
 
@@ -102,6 +102,32 @@ enum class coroutine_status : u8 {
     SyntaxError,
     MemError,
     Error
+};
+
+////////////////////////////////////////////////////////////
+
+enum class metamethod_type : u8 {
+    Length,
+    ToString,
+    UnaryMinus,
+    Add,
+    Subtract,
+    Divide,
+    Multiply,
+    Concat,
+    LessThan,
+    LessOrEqualThan,
+    Call,
+    FloorDivide,
+    Modulo,
+    PowerOf,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    BitwiseNot,
+    LeftShift,
+    RightShift,
+    Close
 };
 
 ////////////////////////////////////////////////////////////

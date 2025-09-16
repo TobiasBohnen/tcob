@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/scripting/lua/LuaScript.hpp"
+#include "tcob/scripting/Script.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -12,11 +12,11 @@
     #include <utility>
 
     #include "tcob/core/Logger.hpp"
+    #include "tcob/scripting/Lua.hpp"
     #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/lua/Lua.hpp"
-    #include "tcob/scripting/lua/LuaTypes.hpp"
+    #include "tcob/scripting/Types.hpp"
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 static void warn(void* ud, char const* msg, int toCont)
 {
@@ -163,13 +163,18 @@ void script::raise_error(string const& message)
     _view.error(message);
 }
 
+void script::clear_wrappers()
+{
+    _wrappers.clear();
+}
+
 }
 
 ////////////////////////////////////////////////////////////
 
-auto tcob::literals::operator""_lua(char const* str, usize) -> std::unique_ptr<tcob::scripting::lua::script>
+auto tcob::literals::operator""_lua(char const* str, usize) -> std::unique_ptr<tcob::scripting::script>
 {
-    auto retValue {std::make_unique<tcob::scripting::lua::script>()};
+    auto retValue {std::make_unique<tcob::scripting::script>()};
     (void)retValue->run(string {str});
     return retValue;
 }

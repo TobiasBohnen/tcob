@@ -28,14 +28,14 @@
     #include "tcob/core/AngleUnits.hpp"
     #include "tcob/core/Concepts.hpp"
     #include "tcob/core/Proxy.hpp"
+    #include "tcob/scripting/Closure.hpp"
+    #include "tcob/scripting/Lua.hpp"
     #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/lua/Lua.hpp"
-    #include "tcob/scripting/lua/LuaClosure.hpp"
-    #include "tcob/scripting/lua/LuaTypes.hpp"
+    #include "tcob/scripting/Types.hpp"
 
     #include "tcob/core/ext/magic_enum_reduced.hpp"
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 ////functions/////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////

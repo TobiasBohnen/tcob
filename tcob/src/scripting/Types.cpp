@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/scripting/lua/LuaTypes.hpp"
+#include "tcob/scripting/Types.hpp"
 
 #if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
 
@@ -16,10 +16,10 @@
     #include <vector>
 
     #include "tcob/core/io/Stream.hpp"
+    #include "tcob/scripting/Lua.hpp"
     #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/lua/Lua.hpp"
 
-namespace tcob::scripting::lua {
+namespace tcob::scripting {
 
 ref::ref() = default;
 
