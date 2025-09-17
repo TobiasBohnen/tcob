@@ -180,7 +180,7 @@ inline void asset_ptr<T>::reset()
 }
 
 template <typename T>
-inline auto asset_ptr<T>::use_count() const -> i32
+inline auto asset_ptr<T>::use_count() const -> isize
 {
     return _asset.use_count();
 }

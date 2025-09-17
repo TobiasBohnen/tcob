@@ -82,7 +82,7 @@ public:
     auto get() const -> asset<type>*;
     auto ptr() const -> type*;
 
-    auto use_count() const -> i32;
+    auto use_count() const -> isize;
 
     explicit operator bool() const;
     auto     is_expired() const -> bool;

@@ -36,7 +36,7 @@ auto zlib_filter::to(std::span<byte const> bytes) const -> std::vector<byte>
     memset(&stream, 0, sizeof(stream));
 
     stream.next_in  = bytes.data();
-    stream.avail_in = static_cast<mz_ulong>(bytes.size());
+    stream.avail_in = static_cast<unsigned int>(bytes.size());
 
     i32 status {mz_deflateInit(&stream, _level)};
     while (status == MZ_OK) {
@@ -225,7 +225,7 @@ auto z85_filter::to(std::span<byte const> bytes) const -> std::vector<byte>
     u32 byteNbr {0};
     u32 value {0};
     while (byteNbr < bufLen) {
-        value = value * 256 + bytes[byteNbr++];
+        value = (value * 256) + bytes[byteNbr++];
         if (byteNbr % 4 == 0) {
             u32 divisor {85 * 85 * 85 * 85};
             while (divisor) {
@@ -253,7 +253,7 @@ auto z85_filter::from(std::span<byte const> bytes) const -> std::vector<byte>
     u32 byteNbr {0};
     u32 value {0};
     while (charNbr < bufLen) {
-        value = value * 85 + static_cast<u32>(z85_decode[bytes[charNbr++] - 32]);
+        value = (value * 85) + static_cast<u32>(z85_decode[bytes[charNbr++] - 32]);
         if (charNbr % 5 == 0) {
             u32 divisor {256 * 256 * 256};
             while (divisor) {
