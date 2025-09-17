@@ -139,11 +139,11 @@ void bar_chart::on_draw_chart(widget_painter& painter)
 
     draw_grid(canvas, _style, rect);
 
-    auto const barCount {Dataset->size()};
+    usize const barCount {Dataset->size()};
 
-    auto const columnWidth {rect.width() / max_x()};
-    auto const barWidth {_style.BarSize.calc(columnWidth)};
-    auto const barRadius {_style.BarRadius.calc(barWidth)};
+    f32 const columnWidth {rect.width() / max_x()};
+    f32 const barWidth {_style.BarSize.calc(columnWidth)};
+    f32 const barRadius {_style.BarRadius.calc(barWidth)};
 
     if (_style.StackBars) {
         for (usize j {0}; j < max_x(); ++j) {
@@ -185,7 +185,7 @@ void bar_chart::on_draw_chart(widget_painter& painter)
                 f32 const y {position_in_yaxis(s.Value[j], *YAxis, rect)};
 
                 canvas.begin_path();
-                canvas.rounded_rect({{x, y}, {barWidth / barCount, rect.bottom() - y}}, barRadius);
+                canvas.rounded_rect({{x, y}, {barWidth / static_cast<f32>(barCount), rect.bottom() - y}}, barRadius);
                 canvas.fill();
                 canvas.set_stroke_width(1);
                 canvas.set_stroke_style(colors::Black);

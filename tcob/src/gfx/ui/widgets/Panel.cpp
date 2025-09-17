@@ -171,11 +171,12 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
 
     ev.Handled = scrollHover(_vScrollbar) || scrollHover(_hScrollbar);
 }
+
 void panel::on_mouse_drag(input::mouse::motion_event const& ev)
 {
-    auto const scrollDrag = [this, &ev](auto&& scrollbar) -> bool {
+    auto const scrollDrag {[this, &ev](auto&& scrollbar) -> bool {
         return scrollbar.mouse_drag(*this, ev.Position);
-    };
+    }};
 
     ev.Handled = scrollDrag(_vScrollbar) || scrollDrag(_hScrollbar);
     if (ev.Handled) { return; }
@@ -189,7 +190,6 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
             newBounds = {localPos - *_dragStart, Bounds->Size};
             break;
         }
-        // --- Edges ---
         case cursor_mode::W_Resize: {
             f32 const newX {localPos.X};
             f32 const deltaW {Bounds->left() - newX};
@@ -212,7 +212,6 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
             newBounds.Size.Height = localPos.Y - Bounds->top();
             break;
         }
-        // --- Corners ---
         case cursor_mode::SE_Resize: {
             newBounds.Size.Width  = localPos.X - Bounds->left();
             newBounds.Size.Height = localPos.Y - Bounds->top();
@@ -250,8 +249,11 @@ void panel::on_mouse_drag(input::mouse::motion_event const& ev)
         default: break;
         }
 
-        Bounds     = newBounds;
-        ev.Handled = true;
+        if (newBounds.width() >= MinSize->Width && newBounds.width() <= MaxSize->Width
+            && newBounds.height() >= MinSize->Height && newBounds.height() <= MaxSize->Height) {
+            Bounds     = newBounds;
+            ev.Handled = true;
+        }
     }
 }
 
@@ -350,11 +352,11 @@ void panel::check_mode()
     auto const outBounds {inBounds - thickness {_style.Border.Size}};
 
     if (inBounds.contains(mp) && !outBounds.contains(mp)) {
-        bool const onLeft {mp.X < outBounds.left()};
-        bool const onRight {mp.X > outBounds.right()};
+        bool const onLeft {mp.X < static_cast<i32>(outBounds.left())};
+        bool const onRight {mp.X > static_cast<i32>(outBounds.right())};
 
-        bool const onTop {mp.Y < outBounds.top()};
-        bool const onBottom {mp.Y > outBounds.bottom()};
+        bool const onTop {mp.Y < static_cast<i32>(outBounds.top())};
+        bool const onBottom {mp.Y > static_cast<i32>(outBounds.bottom())};
 
         if (onLeft && onTop) {
             _currentMode = cursor_mode::NW_Resize;

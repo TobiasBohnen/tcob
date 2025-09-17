@@ -126,7 +126,7 @@ void drop_down_list::on_draw(widget_painter& painter)
             listRect.Size.Height += _style.Padding.Top.calc(listHeight) + _style.Padding.Bottom.calc(listHeight);
             listRect.Size.Height += _style.Border.Size.calc(listHeight);
 
-            _vScrollbar.Visible = std::ssize(get_items()) > _style.MaxVisibleItems;
+            _vScrollbar.Visible = get_items().size() > static_cast<usize>(_style.MaxVisibleItems);
 
             // list background
             painter.draw_background_and_border(_style, listRect, false);

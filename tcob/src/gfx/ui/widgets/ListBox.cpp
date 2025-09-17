@@ -265,7 +265,7 @@ auto list_box::get_scroll_max_value() const -> f32
     if (Items->empty()) { return 0; }
 
     f32 const itemHeight {get_item_height(content_bounds().height())};
-    return std::max(0.0f, (itemHeight * get_items().size()) - content_bounds().height());
+    return std::max(0.0f, (itemHeight * static_cast<f32>(get_items().size())) - content_bounds().height());
 }
 
 auto list_box::get_scroll_step() const -> f32

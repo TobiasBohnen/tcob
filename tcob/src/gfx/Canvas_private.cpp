@@ -89,7 +89,7 @@ static auto PointEquals(f32 x1, f32 y1, f32 x2, f32 y2, f32 tol) -> i32
 {
     f32 const dx {x2 - x1};
     f32 const dy {y2 - y1};
-    return dx * dx + dy * dy < tol * tol;
+    return (dx * dx) + (dy * dy) < tol * tol;
 }
 
 static void PolyReverse(std::span<canvas_point> pts)
@@ -118,15 +118,15 @@ static auto TriArea2(f32 ax, f32 ay, f32 bx, f32 by, f32 cx, f32 cy) -> f32
 static void ChooseBevel(bool bevel, canvas_point const& p0, canvas_point const& p1, f32 w, f32& x0, f32& y0, f32& x1, f32& y1)
 {
     if (bevel) {
-        x0 = p1.X + p0.DY * w;
-        y0 = p1.Y - p0.DX * w;
-        x1 = p1.X + p1.DY * w;
-        y1 = p1.Y - p1.DX * w;
+        x0 = p1.X + (p0.DY * w);
+        y0 = p1.Y - (p0.DX * w);
+        x1 = p1.X + (p1.DY * w);
+        y1 = p1.Y - (p1.DX * w);
     } else {
-        x0 = p1.X + p1.DMX * w;
-        y0 = p1.Y + p1.DMY * w;
-        x1 = p1.X + p1.DMX * w;
-        y1 = p1.Y + p1.DMY * w;
+        x0 = p1.X + (p1.DMX * w);
+        y0 = p1.Y + (p1.DMY * w);
+        x1 = p1.X + (p1.DMX * w);
+        y1 = p1.Y + (p1.DMY * w);
     }
 }
 
@@ -963,8 +963,8 @@ auto path_cache::is_degenerate_arc(point_f pos1, point_f pos2, f32 radius) const
         f32       t {(pqx * dx) + (pqy * dy)};
         if (d > 0) { t /= d; }
         t  = std::clamp(t, 0.0f, 1.0f);
-        dx = p.X + t * pqx - r.X;
-        dy = p.Y + t * pqy - r.Y;
+        dx = p.X + (t * pqx) - r.X;
+        dy = p.Y + (t * pqy) - r.Y;
         return (dx * dx) + (dy * dy);
     }};
 
