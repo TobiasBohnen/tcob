@@ -6,17 +6,15 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
+#include <any>
+#include <memory>
 
-    #include <any>
-    #include <memory>
-
-    #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Property.hpp"
-    #include "tcob/physics/Body.hpp"
-    #include "tcob/physics/Physics.hpp"
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Property.hpp"
+#include "tcob/physics/Body.hpp"
+#include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
@@ -450,5 +448,3 @@ private:
 };
 
 }
-
-#endif

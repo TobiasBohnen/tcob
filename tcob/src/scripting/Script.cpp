@@ -5,16 +5,14 @@
 
 #include "tcob/scripting/Script.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <memory>
+#include <optional>
+#include <utility>
 
-    #include <memory>
-    #include <optional>
-    #include <utility>
-
-    #include "tcob/core/Logger.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/Types.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
+#include "tcob/scripting/Types.hpp"
 
 namespace tcob::scripting {
 
@@ -178,5 +176,3 @@ auto tcob::literals::operator""_lua(char const* str, usize) -> std::unique_ptr<t
     (void)retValue->run(string {str});
     return retValue;
 }
-
-#endif

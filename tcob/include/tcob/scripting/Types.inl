@@ -6,16 +6,13 @@
 #pragma once
 #include "Types.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <expected>
+#include <tuple>
+#include <vector>
 
-    #include <expected>
-    #include <tuple>
-    #include <vector>
-
-    #include "tcob/core/Proxy.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
-
+#include "tcob/core/Proxy.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting {
 
@@ -310,5 +307,3 @@ inline void coroutine::push(auto&&... values) const
 }
 
 }
-
-#endif

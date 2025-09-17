@@ -5,21 +5,19 @@
 
 #include "tcob/physics/Body.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
+#include <cassert>
+#include <memory>
+#include <span>
 
-    #include <cassert>
-    #include <memory>
-    #include <span>
+#include "B2D.hpp"
 
-    #include "B2D.hpp"
-
-    #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Common.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/physics/Physics.hpp"
-    #include "tcob/physics/Shape.hpp"
-    #include "tcob/physics/World.hpp"
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/physics/Physics.hpp"
+#include "tcob/physics/Shape.hpp"
+#include "tcob/physics/World.hpp"
 
 namespace tcob::physics {
 
@@ -225,5 +223,3 @@ auto rotation::FromAngle(radian_f angle) -> rotation
 }
 
 }
-
-#endif

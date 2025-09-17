@@ -5,18 +5,16 @@
 
 #include "tcob/scripting/Lua.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
 
-    #include <lauxlib.h>
-    #include <lua.h>
-    #include <lualib.h>
+#include <optional>
+#include <unordered_map>
+#include <utility>
 
-    #include <optional>
-    #include <unordered_map>
-    #include <utility>
-
-    #include "tcob/core/Logger.hpp"
-    #include "tcob/scripting/Scripting.hpp"
+#include "tcob/core/Logger.hpp"
+#include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting {
 
@@ -653,5 +651,3 @@ auto garbage_collector::count() const -> i32
 
 ////////////////////////////////////////////////////////////
 }
-
-#endif

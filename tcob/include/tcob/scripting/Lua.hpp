@@ -6,15 +6,13 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <concepts>
+#include <cstddef>
+#include <optional>
+#include <type_traits>
 
-    #include <concepts>
-    #include <cstddef>
-    #include <optional>
-    #include <type_traits>
-
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/scripting/Scripting.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/scripting/Scripting.hpp"
 
 ////////////////////////////////////////////////////////////
 
@@ -367,6 +365,4 @@ private:
 ////////////////////////////////////////////////////////////
 }
 
-    #include "Lua.inl"
-
-#endif
+#include "Lua.inl"

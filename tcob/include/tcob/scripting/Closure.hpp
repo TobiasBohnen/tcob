@@ -6,14 +6,12 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <functional>
+#include <memory>
+#include <tuple>
 
-    #include <functional>
-    #include <memory>
-    #include <tuple>
-
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/scripting/Lua.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/scripting/Lua.hpp"
 
 namespace tcob::scripting {
 
@@ -83,6 +81,4 @@ template <typename... Funcs>
 auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr;
 } // namespace tcob::scripting
 
-    #include "Closure.inl"
-
-#endif
+#include "Closure.inl"

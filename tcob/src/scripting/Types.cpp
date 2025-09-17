@@ -5,19 +5,17 @@
 
 #include "tcob/scripting/Types.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <algorithm>
+#include <cassert>
+#include <optional>
+#include <unordered_set>
+#include <utility>
+#include <variant>
+#include <vector>
 
-    #include <algorithm>
-    #include <cassert>
-    #include <optional>
-    #include <unordered_set>
-    #include <utility>
-    #include <variant>
-    #include <vector>
-
-    #include "tcob/core/io/Stream.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
+#include "tcob/core/io/Stream.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
 
 namespace tcob::scripting {
 
@@ -374,5 +372,3 @@ auto coroutine::get_thread() const -> state_view
 }
 
 }
-
-#endif

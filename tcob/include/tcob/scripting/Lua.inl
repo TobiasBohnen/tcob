@@ -6,8 +6,6 @@
 #pragma once
 #include "Lua.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
-
 namespace tcob::scripting {
 
 template <typename... T>
@@ -58,5 +56,3 @@ inline void state_view::convert_to(T& value) const
 }
 
 }
-
-#endif

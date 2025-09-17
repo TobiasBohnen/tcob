@@ -5,32 +5,30 @@
 
 #include "B2D.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
+#include <cstdint>
+#include <span>
+#include <vector>
 
-    #include <cstdint>
-    #include <span>
-    #include <vector>
+#include <box2d/base.h>
+#include <box2d/box2d.h>
+#include <box2d/collision.h>
+#include <box2d/id.h>
+#include <box2d/math_functions.h>
+#include <box2d/types.h>
 
-    #include <box2d/base.h>
-    #include <box2d/box2d.h>
-    #include <box2d/collision.h>
-    #include <box2d/id.h>
-    #include <box2d/math_functions.h>
-    #include <box2d/types.h>
-
-    #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Color.hpp"
-    #include "tcob/core/Point.hpp"
-    #include "tcob/core/Rect.hpp"
-    #include "tcob/core/ServiceLocator.hpp"
-    #include "tcob/core/StringUtils.hpp"
-    #include "tcob/core/TaskManager.hpp"
-    #include "tcob/physics/Body.hpp"
-    #include "tcob/physics/DebugDraw.hpp"
-    #include "tcob/physics/Joint.hpp"
-    #include "tcob/physics/Physics.hpp"
-    #include "tcob/physics/Shape.hpp"
-    #include "tcob/physics/World.hpp"
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Point.hpp"
+#include "tcob/core/Rect.hpp"
+#include "tcob/core/ServiceLocator.hpp"
+#include "tcob/core/StringUtils.hpp"
+#include "tcob/core/TaskManager.hpp"
+#include "tcob/physics/Body.hpp"
+#include "tcob/physics/DebugDraw.hpp"
+#include "tcob/physics/Joint.hpp"
+#include "tcob/physics/Physics.hpp"
+#include "tcob/physics/Shape.hpp"
+#include "tcob/physics/World.hpp"
 
 namespace tcob::physics::detail {
 static auto to_b2Vec2(point_f val) -> b2Vec2
@@ -1719,5 +1717,3 @@ auto rot_from_angle(radian_f angle) -> rotation
     return {.Cosine = rot.c, .Sine = rot.s};
 }
 }
-
-#endif

@@ -6,21 +6,19 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <expected>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <vector>
 
-    #include <expected>
-    #include <functional>
-    #include <memory>
-    #include <optional>
-    #include <vector>
-
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/core/Signal.hpp"
-    #include "tcob/scripting/Conversions.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/Types.hpp"
-    #include "tcob/scripting/Wrapper.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Signal.hpp"
+#include "tcob/scripting/Conversions.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
+#include "tcob/scripting/Types.hpp"
+#include "tcob/scripting/Wrapper.hpp"
 
 namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
@@ -108,6 +106,4 @@ namespace tcob::literals {
 auto operator""_lua(char const* str, usize) -> std::unique_ptr<tcob::scripting::script>;
 }
 
-    #include "Script.inl"
-
-#endif
+#include "Script.inl"

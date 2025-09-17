@@ -6,20 +6,18 @@
 #pragma once
 #include "Wrapper.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <functional>
+#include <optional>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <variant>
 
-    #include <functional>
-    #include <optional>
-    #include <string>
-    #include <unordered_set>
-    #include <utility>
-    #include <variant>
-
-    #include "tcob/core/Common.hpp"
-    #include "tcob/scripting/Closure.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/Types.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/scripting/Closure.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
+#include "tcob/scripting/Types.hpp"
 
 namespace tcob::scripting {
 
@@ -532,5 +530,3 @@ inline void wrapper<WrappedType>::unknown_get_event::return_value(auto&& value)
     Handled = true;
 }
 }
-
-#endif

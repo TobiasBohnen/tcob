@@ -5,11 +5,9 @@
 
 #include "tcob/physics/DebugDraw.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
+#include <memory>
 
-    #include <memory>
-
-    #include "B2D.hpp"
+#include "B2D.hpp"
 
 namespace tcob::physics {
 
@@ -21,5 +19,3 @@ debug_draw::debug_draw()
 debug_draw::~debug_draw() = default;
 
 }
-
-#endif

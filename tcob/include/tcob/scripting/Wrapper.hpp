@@ -6,24 +6,22 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <functional>
+#include <optional>
+#include <tuple>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
-    #include <functional>
-    #include <optional>
-    #include <tuple>
-    #include <unordered_map>
-    #include <utility>
-    #include <vector>
-
-    #include "tcob/core/Common.hpp"
-    #include "tcob/core/Concepts.hpp"
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/core/Signal.hpp"
-    #include "tcob/scripting/Closure.hpp"
-    #include "tcob/scripting/Conversions.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/Types.hpp"
+#include "tcob/core/Common.hpp"
+#include "tcob/core/Concepts.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Signal.hpp"
+#include "tcob/scripting/Closure.hpp"
+#include "tcob/scripting/Conversions.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
+#include "tcob/scripting/Types.hpp"
 
 namespace tcob::scripting {
 
@@ -200,6 +198,4 @@ private:
 
 }
 
-    #include "Wrapper.inl"
-
-#endif
+#include "Wrapper.inl"

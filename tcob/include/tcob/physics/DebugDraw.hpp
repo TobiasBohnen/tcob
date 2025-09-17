@@ -6,18 +6,16 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#if defined(TCOB_ENABLE_ADDON_PHYSICS_BOX2D)
+#include <memory>
+#include <optional>
+#include <span>
 
-    #include <memory>
-    #include <optional>
-    #include <span>
+#include "tcob/core/Color.hpp"
+#include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Point.hpp"
 
-    #include "tcob/core/Color.hpp"
-    #include "tcob/core/Interfaces.hpp"
-    #include "tcob/core/Point.hpp"
-
-    #include "tcob/physics/Body.hpp"
-    #include "tcob/physics/Physics.hpp"
+#include "tcob/physics/Body.hpp"
+#include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
@@ -110,5 +108,3 @@ private:
 };
 
 }
-
-#endif

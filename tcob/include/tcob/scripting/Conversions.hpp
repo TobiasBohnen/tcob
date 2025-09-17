@@ -9,31 +9,29 @@
 #include "tcob/tcob_config.hpp"
 #include <expected>
 
-#if defined(TCOB_ENABLE_ADDON_SCRIPTING_LUA)
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <span>
+#include <tuple>
+#include <type_traits>
+#include <unordered_set>
+#include <utility>
+#include <variant>
 
-    #include <array>
-    #include <cassert>
-    #include <cmath>
-    #include <cstddef>
-    #include <filesystem>
-    #include <functional>
-    #include <optional>
-    #include <span>
-    #include <tuple>
-    #include <type_traits>
-    #include <unordered_set>
-    #include <utility>
-    #include <variant>
+#include "tcob/core/AngleUnits.hpp"
+#include "tcob/core/Concepts.hpp"
+#include "tcob/core/Proxy.hpp"
+#include "tcob/scripting/Closure.hpp"
+#include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/Scripting.hpp"
+#include "tcob/scripting/Types.hpp"
 
-    #include "tcob/core/AngleUnits.hpp"
-    #include "tcob/core/Concepts.hpp"
-    #include "tcob/core/Proxy.hpp"
-    #include "tcob/scripting/Closure.hpp"
-    #include "tcob/scripting/Lua.hpp"
-    #include "tcob/scripting/Scripting.hpp"
-    #include "tcob/scripting/Types.hpp"
-
-    #include "tcob/core/ext/magic_enum_reduced.hpp"
+#include "tcob/core/ext/magic_enum_reduced.hpp"
 
 namespace tcob::scripting {
 
@@ -1072,5 +1070,3 @@ struct converter<angle_unit<ValueType, OneTurn>> {
     }
 };
 }
-
-#endif
