@@ -126,7 +126,7 @@ auto constexpr operator*(size<T> const& left, size<R> const& right) -> size<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator*(size<T> const& left, R const right) -> size<T>
 {
-    return {static_cast<T>(left.Width * right), static_cast<T>(left.Height * right)};
+    return {left.Width * static_cast<T>(right), left.Height * static_cast<T>(right)};
 }
 
 template <Arithmetic T, Arithmetic R>
@@ -162,7 +162,7 @@ auto constexpr operator/(size<T> const& left, size<R> const& right) -> size<T>
 template <Arithmetic T, Arithmetic R>
 auto constexpr operator/(size<T> const& left, R const right) -> size<T>
 {
-    return {static_cast<T>(left.Width / right), static_cast<T>(left.Height / right)};
+    return {left.Width / static_cast<T>(right), left.Height / static_cast<T>(right)};
 }
 
 template <Arithmetic T, Arithmetic R>
