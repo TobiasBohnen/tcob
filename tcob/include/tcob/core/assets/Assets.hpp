@@ -23,7 +23,7 @@ namespace tcob::assets {
 
 struct stat {
     asset_status Status;
-    i32          UseCount;
+    isize        UseCount;
 };
 
 struct bucket_stats {
