@@ -6,9 +6,11 @@
 #pragma once
 #include "Lua.hpp"
 
+#include <type_traits>
+
 namespace tcob::scripting {
 
-template <typename... T>
+template <ConvertibleTo... T>
 inline void state_view::push_convert(T&&... t) const
 {
     check_stack(sizeof...(t));
@@ -33,26 +35,14 @@ inline auto state_view::pull_convert_idx(i32 idx, T& t) const -> bool
 template <ConvertibleFrom T>
 inline auto state_view::convert_from(i32& idx, T& value) const -> bool
 {
-    return converter<T>::From(*this, idx, value);
+    return converter<std::remove_cvref_t<T>>::From(*this, idx, value);
 }
 
 //////push//////
 template <ConvertibleTo T>
-inline void state_view::convert_to(T const& value) const
-{
-    converter<T>::To(*this, value);
-}
-
-template <ConvertibleTo T>
 inline void state_view::convert_to(T&& value) const
 {
-    converter<T>::To(*this, std::forward<T>(value));
-}
-
-template <ConvertibleTo T>
-inline void state_view::convert_to(T& value) const
-{
-    converter<T>::To(*this, value);
+    converter<std::remove_cvref_t<T>>::To(*this, std::forward<T>(value));
 }
 
 }

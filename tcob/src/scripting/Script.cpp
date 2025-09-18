@@ -32,8 +32,6 @@ script::script()
     _globalTable.acquire(_view, -1);
     _view.pop(1);
 
-    _environment = _globalTable; // NOLINT(cppcoreguidelines-prefer-member-initializer)
-
     _view.set_warnf(&warn, this);
 }
 
@@ -60,7 +58,7 @@ void script::set_environment(table const& env)
     _environment = env;
 }
 
-auto script::get_view() const -> state_view
+auto script::view() const -> state_view
 {
     return _view;
 }

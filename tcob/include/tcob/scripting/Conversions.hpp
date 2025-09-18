@@ -670,7 +670,7 @@ struct converter<char const*> {
 };
 
 template <usize N>
-struct converter<char const[N]> { // NOLINT(*-avoid-c-arrays)
+struct converter<char[N]> { // NOLINT(*-avoid-c-arrays)
     static auto IsType(state_view view, i32 idx) -> bool
     {
         return view.get_type(idx) == type::String;

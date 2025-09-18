@@ -57,7 +57,7 @@ public:
     auto get_environment() const -> std::optional<table>; // TODO: set_get_
     void set_environment(table const& env);
 
-    auto get_view() const -> state_view;                  // TODO: get_
+    auto view() const -> state_view;
     auto gc() const -> garbage_collector;
 
     auto create_table() const -> table;

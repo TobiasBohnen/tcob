@@ -199,7 +199,7 @@ public:
 
     auto create_stack_guard [[nodiscard]] () const -> stack_guard;
 
-    template <typename... T>
+    template <ConvertibleTo... T>
     void push_convert(T&&... t) const;
 
     template <ConvertibleFrom T>
@@ -330,13 +330,7 @@ private:
     auto convert_from(i32& idx, T& value) const -> bool;
 
     template <ConvertibleTo T>
-    void convert_to(T const& value) const;
-
-    template <ConvertibleTo T>
     void convert_to(T&& value) const;
-
-    template <ConvertibleTo T>
-    void convert_to(T& value) const;
 
     lua_State* _state;
 };
