@@ -13,8 +13,6 @@
 
 namespace tcob {
 
-timer::timer() = default;
-
 timer::~timer()
 {
     stop();

@@ -19,8 +19,6 @@
 
 namespace tcob::scripting {
 
-ref::ref() = default;
-
 ref::ref(ref const& other) noexcept
     : ref {}
 {

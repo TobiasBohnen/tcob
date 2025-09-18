@@ -57,8 +57,6 @@ static ov_callbacks vorbisCallbacks {
     .tell_func  = &tell_vorbis};
 }
 
-vorbis_decoder::vorbis_decoder() = default;
-
 vorbis_decoder::~vorbis_decoder()
 {
     ov_clear(&_file);

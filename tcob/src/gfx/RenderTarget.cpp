@@ -32,8 +32,6 @@ render_target::render_target(texture* tex)
 {
 }
 
-render_target::~render_target() = default;
-
 auto render_target::camera() -> gfx::camera&
 {
     return _camera;

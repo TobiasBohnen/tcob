@@ -21,7 +21,7 @@ namespace tcob::audio::detail {
 
 class opus_decoder final : public decoder {
 public:
-    opus_decoder();
+    opus_decoder() = default;
     ~opus_decoder() override;
 
     void seek_from_start(milliseconds pos) override;

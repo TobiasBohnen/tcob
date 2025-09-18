@@ -45,7 +45,7 @@ public:
         static inline char const* ServiceName {"gfx::render_system::factory"};
     };
 
-    render_system();
+    render_system() = default;
     virtual ~render_system();
 
     auto init_window(video_config const& config, string const& windowTitle, size_i desktopResolution) -> window&;

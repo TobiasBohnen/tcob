@@ -16,8 +16,6 @@
 
 namespace tcob::gfx {
 
-render_system::render_system() = default;
-
 render_system::~render_system()
 {
     _window        = nullptr;

@@ -17,8 +17,8 @@ namespace tcob {
 
 class TCOB_API service_locator final : public non_copyable {
 public:
-    service_locator();
-    ~service_locator();
+    service_locator()  = default;
+    ~service_locator() = default;
 
     static auto GetInstance() -> service_locator&;
 

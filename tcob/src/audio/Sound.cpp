@@ -21,15 +21,11 @@
 namespace tcob::audio {
 using namespace std::chrono_literals;
 
-sound::sound() = default;
-
 sound::sound(buffer buffer)
     : _buffer {std::move(buffer)}
 {
     create_output();
 }
-
-sound::~sound() = default;
 
 auto sound::info() const -> std::optional<specification>
 {

@@ -53,8 +53,6 @@ static OpusFileCallbacks opusCallbacks {
     .close = nullptr};
 }
 
-opus_decoder::opus_decoder() = default;
-
 opus_decoder::~opus_decoder()
 {
     if (_file) {

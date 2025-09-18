@@ -16,7 +16,7 @@ namespace tcob::gfx {
 class TCOB_API shader final {
 public:
     shader(string const& vertexShaderSource, string const& fragmentShaderSource);
-    ~shader();
+    ~shader() = default;
 
     explicit operator bool() const;
     auto     is_valid() const -> bool;

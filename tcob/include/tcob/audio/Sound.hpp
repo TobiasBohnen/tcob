@@ -19,9 +19,9 @@ namespace tcob::audio {
 
 class TCOB_API sound final : public source {
 public:
-    sound();
+    sound() = default;
     explicit sound(buffer buffer);
-    ~sound() override;
+    ~sound() override = default;
 
     auto info() const -> std::optional<specification> override;
     auto duration() const -> milliseconds override;

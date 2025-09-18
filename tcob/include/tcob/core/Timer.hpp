@@ -20,7 +20,7 @@ public:
         Sleep
     };
 
-    timer();
+    timer() = default;
     ~timer();
 
     signal<milliseconds const> Tick;

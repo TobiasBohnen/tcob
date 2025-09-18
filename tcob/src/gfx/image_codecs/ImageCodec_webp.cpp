@@ -157,8 +157,6 @@ auto webp_anim_decoder::advance(milliseconds ts) -> animated_image_decoder::stat
 
 ////////////////////////////////////////////////////////////
 
-webp_anim_encoder::webp_anim_encoder() = default;
-
 webp_anim_encoder::~webp_anim_encoder()
 {
     if (_encoder) {

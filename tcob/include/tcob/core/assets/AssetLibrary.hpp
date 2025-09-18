@@ -18,7 +18,7 @@ namespace tcob::assets {
 
 class TCOB_API library final : public non_copyable {
 public:
-    explicit library();
+    explicit library() = default;
     ~library();
 
     auto loading_progress() const -> f32;

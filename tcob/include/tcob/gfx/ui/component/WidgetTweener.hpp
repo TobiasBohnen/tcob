@@ -19,7 +19,7 @@ namespace tcob::ui {
 
 class TCOB_API widget_tweener : public non_copyable {
 public:
-    widget_tweener();
+    widget_tweener() = default;
 
     signal<> Changed;
 
@@ -43,7 +43,7 @@ private:
 
 class TCOB_API animation_tweener {
 public:
-    animation_tweener();
+    animation_tweener() = default;
 
     signal<string const> Changed;
 

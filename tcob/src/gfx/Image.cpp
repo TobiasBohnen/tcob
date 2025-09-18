@@ -28,8 +28,6 @@
 
 namespace tcob::gfx {
 
-image::image() = default;
-
 image::image(size_i size, format f)
     : _info {.Size = size, .Format = f}
 {

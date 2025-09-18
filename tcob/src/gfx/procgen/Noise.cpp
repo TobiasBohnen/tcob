@@ -21,8 +21,6 @@ noise_base::noise_base(u64 seed)
 {
 }
 
-noise_base::~noise_base() = default;
-
 auto noise_base::interpolate(f32 a0, f32 a1, f32 w) const -> f32
 {
     f32 const e {w * w * w * (w * (w * 6.0f - 15.0f) + 10.0f)};

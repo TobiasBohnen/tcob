@@ -14,8 +14,6 @@
 
 namespace tcob::assets {
 
-library::library() = default;
-
 library::~library()
 {
     destroy_all_groups();

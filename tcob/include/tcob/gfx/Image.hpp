@@ -45,7 +45,7 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    image();
+    image() = default;
 
     auto info() const -> information const&;
 

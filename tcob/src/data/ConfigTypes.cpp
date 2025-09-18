@@ -324,8 +324,6 @@ void array::add_entry(entry const& newEntry)
 
 ////////////////////////////////////////////////////////////
 
-entry::entry() noexcept = default;
-
 auto entry::get_comment() const -> comment const&
 {
     return _comment;

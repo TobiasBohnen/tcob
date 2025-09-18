@@ -164,8 +164,6 @@ auto vibrato::operator()(f64 fperiod) -> f32
 
 ////////////////////////////////////////////////////////////
 
-arpeggio::arpeggio() = default;
-
 arpeggio::arpeggio(sound_wave const& wave)
     : _modulation {wave.ChangeAmount >= 0.0f
                        ? 1.0 - (std::pow(static_cast<f64>(wave.ChangeAmount), 2.0) * 0.9)

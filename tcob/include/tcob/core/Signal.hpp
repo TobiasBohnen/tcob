@@ -36,7 +36,7 @@ public:
     auto operator=(connection const& other) noexcept -> connection& = default;
     connection(connection&& other) noexcept                         = default;
     auto operator=(connection&& other) noexcept -> connection&      = default;
-    virtual ~connection();
+    virtual ~connection()                                           = default;
 
     void disconnect();
 
@@ -61,8 +61,8 @@ public:
 namespace detail {
     class TCOB_API signal_base : public non_copyable {
     public:
-        signal_base() = default;
-        virtual ~signal_base();
+        signal_base()          = default;
+        virtual ~signal_base() = default;
 
         virtual void disconnect(uid id) const = 0;
 

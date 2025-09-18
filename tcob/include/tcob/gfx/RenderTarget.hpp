@@ -38,7 +38,7 @@ struct render_properties {
 class TCOB_API render_target {
 public:
     explicit render_target(texture* tex);
-    virtual ~render_target();
+    virtual ~render_target() = default;
 
     prop_fn<size_i> Size;
 

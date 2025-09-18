@@ -118,9 +118,6 @@ auto buffer::save_async(path const& file) const noexcept -> std::future<bool>
 
 using namespace std::chrono_literals;
 
-decoder::decoder()  = default;
-decoder::~decoder() = default;
-
 auto decoder::open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>
 {
     _stream = std::move(in);

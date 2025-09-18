@@ -47,8 +47,6 @@ static void handle_message(tsf* font, tml_message* midiMessage)
     }
 }
 
-midi_decoder::midi_decoder() = default;
-
 midi_decoder::~midi_decoder()
 {
     tml_free(_firstMessage);

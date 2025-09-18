@@ -25,8 +25,6 @@
 
 namespace tcob {
 
-logger::~logger() = default;
-
 void logger::FormatDebug(string const& message, std::format_args const& args)
 {
     Debug(std::vformat(message, args));
@@ -135,15 +133,11 @@ void file_logger::log(string const& message, level level) const
 
 ////////////////////////////////////////////////////////////
 
-null_logger::null_logger() = default;
-
 void null_logger::log(string const&, level) const
 {
 }
 
 ////////////////////////////////////////////////////////////
-
-stdout_logger::stdout_logger() = default;
 
 void stdout_logger::log(string const& message, level level) const
 {

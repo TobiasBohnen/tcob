@@ -71,8 +71,8 @@ public:
         static inline char const* ServiceName {"audio::decoder::factory"};
     };
 
-    decoder();
-    virtual ~decoder();
+    decoder()          = default;
+    virtual ~decoder() = default;
 
     auto open(std::shared_ptr<io::istream> in, std::any const& ctx) -> std::optional<buffer::information>;
 

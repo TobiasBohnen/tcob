@@ -20,7 +20,7 @@ namespace tcob::scripting {
 
 class TCOB_API ref {
 public:
-    ref();
+    ref() = default;
     ref(ref const& other) noexcept;
     auto operator=(ref const& other) noexcept -> ref&;
     ref(ref&& other) noexcept;

@@ -10,8 +10,6 @@
 #include <numeric>
 
 namespace tcob::gfx {
-render_statistics::render_statistics() = default;
-
 auto render_statistics::current_time() const -> f32
 {
     return _time;

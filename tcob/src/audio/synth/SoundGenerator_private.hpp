@@ -113,7 +113,7 @@ private:
 
 class arpeggio {
 public:
-    arpeggio();
+    arpeggio() = default;
     arpeggio(sound_wave const& wave);
 
     auto operator()(f64 fperiod) -> f64;

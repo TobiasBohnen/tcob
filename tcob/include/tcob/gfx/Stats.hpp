@@ -16,7 +16,7 @@ class TCOB_API render_statistics {
     static constexpr i32 FRAME_VALUES = 100;
 
 public:
-    render_statistics();
+    render_statistics() = default;
 
     auto current_time() const -> f32;
 

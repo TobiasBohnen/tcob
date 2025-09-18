@@ -7,10 +7,6 @@
 
 namespace tcob {
 
-service_locator::service_locator() = default;
-
-service_locator::~service_locator() = default;
-
 auto service_locator::GetInstance() -> service_locator&
 {
     static service_locator instance;

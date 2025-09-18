@@ -44,18 +44,6 @@ texture::texture(size_i size, u32 depth, format f)
     resize(size, depth, f);
 }
 
-void texture::resize(size_i size, u32 depth, format f)
-{
-    if (size == _size && depth == _depth && f == _format) {
-        return;
-    }
-
-    _impl->resize(size, depth, f);
-    _size   = size;
-    _format = f;
-    _depth  = depth;
-}
-
 texture::~texture() = default;
 
 texture::operator bool() const
@@ -66,6 +54,18 @@ texture::operator bool() const
 auto texture::is_valid() const -> bool
 {
     return _impl->is_valid();
+}
+
+void texture::resize(size_i size, u32 depth, format f)
+{
+    if (size == _size && depth == _depth && f == _format) {
+        return;
+    }
+
+    _impl->resize(size, depth, f);
+    _size   = size;
+    _format = f;
+    _depth  = depth;
 }
 
 auto texture::info() const -> information

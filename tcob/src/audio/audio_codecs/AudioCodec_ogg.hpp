@@ -24,7 +24,7 @@ namespace tcob::audio::detail {
 
 class vorbis_decoder final : public decoder {
 public:
-    vorbis_decoder();
+    vorbis_decoder() = default;
     ~vorbis_decoder() override;
 
     void seek_from_start(milliseconds pos) override;

@@ -34,7 +34,7 @@ public:
         Off     = 4
     };
 
-    virtual ~logger();
+    virtual ~logger() = default;
 
     static void Debug(string const& message, auto&&... args);
     static void Debug(string const& message);
@@ -80,7 +80,7 @@ private:
 
 class TCOB_API null_logger final : public logger {
 public:
-    null_logger();
+    null_logger() = default;
 
 protected:
     void log(string const& message, level level) const override;
@@ -90,7 +90,7 @@ protected:
 
 class TCOB_API stdout_logger final : public logger {
 public:
-    stdout_logger();
+    stdout_logger() = default;
 
 protected:
     void log(string const& message, level level) const override;

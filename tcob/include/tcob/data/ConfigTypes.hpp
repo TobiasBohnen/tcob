@@ -199,7 +199,7 @@ class TCOB_API entry {
     friend auto operator==(entry const& left, entry const& right) -> bool;
 
 public:
-    entry() noexcept;
+    entry() noexcept                             = default;
     entry(entry const& other)                    = default;
     auto operator=(entry const& other) -> entry& = default;
     template <typename T>

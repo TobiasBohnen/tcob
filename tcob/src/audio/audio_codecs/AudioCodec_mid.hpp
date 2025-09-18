@@ -20,7 +20,7 @@ namespace tcob::audio::detail {
 
 class midi_decoder final : public decoder {
 public:
-    midi_decoder();
+    midi_decoder() = default;
     ~midi_decoder() override;
 
     void seek_from_start(milliseconds pos) override;

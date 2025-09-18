@@ -18,7 +18,7 @@ namespace tcob::gfx {
 class TCOB_API noise_base {
 public:
     explicit noise_base(u64 seed);
-    virtual ~noise_base();
+    virtual ~noise_base() = default;
 
     virtual auto operator()(point_f p) const -> f32 = 0;
 

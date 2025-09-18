@@ -13,8 +13,6 @@
 
 namespace tcob::ui {
 
-widget_tweener::widget_tweener() = default;
-
 void widget_tweener::start(f32 toValue, milliseconds delay)
 {
     _targetValue = toValue;
@@ -57,8 +55,6 @@ void widget_tweener::set_value(f32 value)
 }
 
 ////////////////////////////////////////////////////////////
-
-animation_tweener::animation_tweener() = default;
 
 void animation_tweener::start(gfx::frame_animation const& ani, playback_mode mode)
 {
