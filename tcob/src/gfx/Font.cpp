@@ -77,7 +77,7 @@ auto font::load(std::span<byte const> fontData, u32 size) noexcept -> bool
 
 void font::setup_texture()
 {
-    _texture->create({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, FONT_TEXTURE_LAYERS, texture::format::R8);
+    _texture->resize({FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE}, FONT_TEXTURE_LAYERS, texture::format::R8);
     _texture->Filtering = texture::filtering::Linear;
     _texture->Wrapping  = texture::wrapping::ClampToBorder;
 

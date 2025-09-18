@@ -119,7 +119,7 @@ auto gl_texture::copy_to_image(u32 depth) const -> image
     return image::Create(_size, image::format::RGBA, buffer);
 }
 
-void gl_texture::create(size_i texsize, u32 depth, texture::format format)
+void gl_texture::resize(size_i texsize, u32 depth, texture::format format)
 {
     _size   = texsize;
     _format = format;

@@ -44,7 +44,7 @@ gl_canvas::gl_canvas()
     }
 
     // gradient
-    _gradientTexture.create({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
+    _gradientTexture.resize({color_gradient::Size, 1024}, 1, texture::format::RGBA8);
     _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
     _shader.set_uniform(_shader.get_uniform_location("gradientTexture"), 1);
 
@@ -315,7 +315,7 @@ void gl_canvas::add_gradient(i32 idx, color_gradient const& gradient)
     if (idx >= size) { // grow texture
         logger::Info("GLES30Canvas: gradient texture resize from {} to {}", size, size * 2);
         auto const img {_gradientTexture.copy_to_image(0)};
-        _gradientTexture.create({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
+        _gradientTexture.resize({color_gradient::Size, size * 2}, 1, texture::format::RGBA8);
         _gradientTexture.set_wrapping(texture::wrapping::ClampToEdge);
         _gradientTexture.update(point_i::Zero, img.info().Size, img.ptr(), 0, color_gradient::Size, 1);
     }

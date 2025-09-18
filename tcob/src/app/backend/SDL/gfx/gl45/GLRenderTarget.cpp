@@ -124,7 +124,7 @@ void gl_render_target::clear(color c) const
 
 void gl_render_target::on_resize(size_i size)
 {
-    _tex->create(size, 1, texture::format::RGBA8);
+    _tex->resize(size, 1, texture::format::RGBA8);
     _frameBuffer->attach_texture(_tex);
 }
 

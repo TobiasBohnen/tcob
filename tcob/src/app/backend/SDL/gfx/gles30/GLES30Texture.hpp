@@ -21,7 +21,7 @@ class gl_texture : public gl_object, public tcob::gfx::render_backend::texture_b
 public:
     ~gl_texture() override;
 
-    void create(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) override;
+    void resize(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) override;
     void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const override;
 
     auto get_filtering() const -> texture::filtering override;

@@ -65,7 +65,7 @@ public:
 
     auto info() const -> information;
 
-    void create(size_i size, u32 depth, format f);
+    void resize(size_i size, u32 depth, format f);
 
     void update_data(void const* data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;
     void update_data(std::span<u8 const> data, u32 depth, i32 rowLength = 0, i32 alignment = 4) const;

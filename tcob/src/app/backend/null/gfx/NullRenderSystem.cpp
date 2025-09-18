@@ -50,7 +50,7 @@ void null_render_target::unbind_material() const { }
 auto null_shader::compile(string const&, string const&) -> bool { return true; }
 auto null_shader::is_valid() const -> bool { return true; }
 
-void null_texture::create(size_i, u32, texture::format) { }
+void null_texture::resize(size_i, u32, texture::format) { }
 void null_texture::update(point_i, size_i, void const*, u32, i32, i32) const { }
 auto null_texture::get_filtering() const -> texture::filtering { return texture::filtering::Linear; }
 void null_texture::set_filtering(texture::filtering) const { }

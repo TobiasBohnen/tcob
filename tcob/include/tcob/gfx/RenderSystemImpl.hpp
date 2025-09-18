@@ -74,7 +74,7 @@ class texture_base {
 public:
     virtual ~texture_base() = default;
 
-    virtual void create(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) = 0;
+    virtual void resize(size_i texsize, u32 depth, texture::format format = texture::format::RGBA8) = 0;
 
     virtual void update(point_i origin, size_i size, void const* data, u32 depth, i32 rowLength, i32 alignment) const = 0;
 

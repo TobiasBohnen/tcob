@@ -737,7 +737,7 @@ void cfg_texture_loader::prepare()
             }
         }
 
-        tex.create(texSize, texDepth, texFormat);
+        tex.resize(texSize, texDepth, texFormat);
 
         tex.Filtering = def->filtering;
         tex.Wrapping  = def->wrapping;

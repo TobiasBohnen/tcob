@@ -41,16 +41,16 @@ texture::texture()
 texture::texture(size_i size, u32 depth, format f)
     : texture {}
 {
-    create(size, depth, f);
+    resize(size, depth, f);
 }
 
-void texture::create(size_i size, u32 depth, format f)
+void texture::resize(size_i size, u32 depth, format f)
 {
     if (size == _size && depth == _depth && f == _format) {
         return;
     }
 
-    _impl->create(size, depth, f);
+    _impl->resize(size, depth, f);
     _size   = size;
     _format = f;
     _depth  = depth;
@@ -119,9 +119,9 @@ auto animated_texture::load(std::shared_ptr<io::istream> in, string const& ext) 
         _frameInfo = *info;
         i32 const bpp {_frameInfo.bytes_per_pixel()};
         if (bpp == 4) {
-            create(_frameInfo.Size, 1, format::RGBA8);
+            resize(_frameInfo.Size, 1, format::RGBA8);
         } else if (bpp == 3) {
-            create(_frameInfo.Size, 1, format::RGB8);
+            resize(_frameInfo.Size, 1, format::RGB8);
         } else {
             return false;
         }
