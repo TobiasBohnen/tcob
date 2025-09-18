@@ -20,6 +20,8 @@ shader::shader(string const& vertexShaderSource, string const& fragmentShaderSou
     assert(success);
 }
 
+shader::~shader() = default;
+
 shader::operator bool() const
 {
     return is_valid();
