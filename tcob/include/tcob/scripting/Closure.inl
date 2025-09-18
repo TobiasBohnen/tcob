@@ -45,8 +45,7 @@ inline auto native_closure<R(Args...)>::operator()(state_view view) -> i32
 template <typename Arg>
 inline auto compare_types_impl(state_view view, i32 startIndex) -> bool
 {
-    using converter_type = std::remove_cvref_t<Arg>;
-    return {converter<converter_type>::IsType(view, startIndex)};
+    return converter<std::remove_cvref_t<Arg>>::IsType(view, startIndex);
 }
 
 template <typename R, typename... Args>
@@ -66,60 +65,48 @@ inline native_overload<Funcs...>::native_overload(std::tuple<Funcs...> fns)
 template <typename... Funcs>
 inline auto native_overload<Funcs...>::operator()(state_view view) -> i32
 {
-    bool      result {false};
     i32 const oldTop {view.get_top()};
-
-    std::apply(
-        [&](auto&&... item) {
-            ((result = check(view, oldTop, item)) || ...);
-        },
-        _fns);
-
+    if (!std::apply([&](auto&&... item) { return ((try_call(view, oldTop, item)) || ...); }, _fns)) {
+        view.error("no matching overload found");
+    }
     return view.get_top() - oldTop;
 }
 
 template <typename... Funcs>
 template <typename R, typename T, typename... Args>
-inline auto native_overload<Funcs...>::check(state_view view, i32 top, R (T::*func)(Args...)) -> bool
+inline auto native_overload<Funcs...>::try_call(state_view view, i32 top, R (T::*func)(Args...)) -> bool
 {
-    return check_func(view, top, std::function<R(T*, Args...)> {func});
+    return try_call_func(view, top, std::function<R(T*, Args...)> {func});
 }
 
 template <typename... Funcs>
-inline auto native_overload<Funcs...>::check(state_view view, i32 top, auto&& func) -> bool
+inline auto native_overload<Funcs...>::try_call(state_view view, i32 top, auto&& func) -> bool
 {
-    return check_func(view, top, std::function {func});
+    return try_call_func(view, top, std::function {func});
 }
 
 template <typename... Funcs>
 template <typename R, typename... Args>
-inline auto native_overload<Funcs...>::check_func(state_view view, i32 top, std::function<R(Args...)> const& func) -> bool
+inline auto native_overload<Funcs...>::try_call_func(state_view view, i32 top, std::function<R(Args...)> const& func) -> bool
 {
     if (top == sizeof...(Args) && compare_types(view, 1, func)) {
-        call_func(view, func);
+        std::tuple<std::remove_cvref_t<Args>...> params;
+        std::apply(
+            [&view](auto&&... item) {
+                [[maybe_unused]] i32 idx {1};
+                (view.pull_convert(idx, item), ...);
+            },
+            params);
+
+        if constexpr (std::is_void_v<R>) {
+            std::apply(func, params);
+        } else {
+            view.push_convert(std::apply(func, params));
+        }
         return true;
     }
 
     return false;
-}
-
-template <typename... Funcs>
-template <typename R, typename... Args>
-inline void native_overload<Funcs...>::call_func(state_view view, std::function<R(Args...)> const& func)
-{
-    std::tuple<std::remove_cvref_t<Args>...> params;
-    std::apply(
-        [&view](auto&&... item) {
-            [[maybe_unused]] i32 idx {1};
-            (view.pull_convert(idx, item), ...);
-        },
-        params);
-
-    if constexpr (std::is_void_v<R>) {
-        std::apply(func, params);
-    } else {
-        view.push_convert(std::apply(func, params));
-    }
 }
 
 }

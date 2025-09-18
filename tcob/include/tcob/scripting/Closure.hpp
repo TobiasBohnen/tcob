@@ -52,13 +52,10 @@ namespace detail {
 
     private:
         template <typename R, typename T, typename... Args>
-        auto check(state_view view, i32 top, R (T::*func)(Args...)) -> bool;
-        auto check(state_view view, i32 top, auto&& func) -> bool;
+        auto try_call(state_view view, i32 top, R (T::*func)(Args...)) -> bool;
+        auto try_call(state_view view, i32 top, auto&& func) -> bool;
         template <typename R, typename... Args>
-        auto check_func(state_view view, i32 top, std::function<R(Args...)> const& func) -> bool;
-
-        template <typename R, typename... Args>
-        auto call_func(state_view view, std::function<R(Args...)> const& func) -> void;
+        auto try_call_func(state_view view, i32 top, std::function<R(Args...)> const& func) -> bool;
 
         std::tuple<Funcs...> _fns;
     };
