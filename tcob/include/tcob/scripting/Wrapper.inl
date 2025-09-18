@@ -142,7 +142,11 @@ template <auto IsMeta>
 template <typename... Ts>
 inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::overload<Ts...> const& ov) -> proxy&
 {
-    std::apply([&](auto&&... item) { _parent.wrap_overload(_name, item...); }, ov);
+    std::apply([&](auto&&... item) {
+        auto ptr {make_unique_overload(std::move(item)...)};
+        _parent.wrap_func(_name, wrap_target::Method, std::move(ptr));
+    },
+               ov);
     return *this;
 }
 
@@ -179,14 +183,6 @@ inline void wrapper<WrappedType>::register_base()
 }
 
 ////////////////////////////////////////////////////////////
-
-template <typename WrappedType>
-template <typename... Funcs>
-inline void wrapper<WrappedType>::wrap_overload(string_view name, Funcs&&... funcs)
-{
-    auto ptr {make_unique_overload<Funcs...>(std::forward<Funcs>(funcs)...)};
-    wrap_func(name, wrap_target::Method, std::move(ptr));
-}
 
 template <typename WrappedType>
 template <typename Func>

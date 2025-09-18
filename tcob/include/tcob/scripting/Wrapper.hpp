@@ -152,9 +152,6 @@ private:
         Method
     };
 
-    template <typename... Funcs>
-    void wrap_overload(string_view name, Funcs&&... funcs);
-
     template <typename Func>
     auto wrap_method_helper(Func&& func);
     template <typename R, typename S, typename... Args>
