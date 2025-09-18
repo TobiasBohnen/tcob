@@ -66,7 +66,7 @@ auto zlib_filter::from(std::span<byte const> bytes) const -> std::vector<byte>
     memset(&stream, 0, sizeof(stream));
 
     stream.next_in  = bytes.data();
-    stream.avail_in = static_cast<mz_ulong>(bytes.size());
+    stream.avail_in = static_cast<u32>(bytes.size());
 
     i32 status {mz_inflateInit(&stream)};
     while (status == MZ_OK) {

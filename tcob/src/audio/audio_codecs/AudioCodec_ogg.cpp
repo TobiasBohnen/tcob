@@ -75,7 +75,7 @@ auto vorbis_decoder::open() -> std::optional<buffer::information>
     if (error == 0) {
         auto* info {ov_info(&_file, -1)};
         _info.Specs.Channels   = info->channels;
-        _info.Specs.SampleRate = info->rate;
+        _info.Specs.SampleRate = static_cast<i32>(info->rate);
         _info.FrameCount       = ov_pcm_total(&_file, -1);
         return _info;
     }

@@ -35,7 +35,7 @@ auto file_hasher::crc32() const -> u32
 
     ifstream          fs {_path};
     std::vector<byte> fileData {fs.read_all<byte>()};
-    return mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size());
+    return static_cast<u32>(mz_crc32(MZ_CRC32_INIT, fileData.data(), fileData.size()));
 }
 
 static auto check(string const& msg, i32 c) -> bool
