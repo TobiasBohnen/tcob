@@ -159,8 +159,9 @@ void tab_container::on_draw(widget_painter& painter)
     isize const      columns {(std::ssize(_tabs) + static_cast<isize>(_style.TabBarRows) - 1) / static_cast<isize>(_style.TabBarRows)};
     std::vector<f32> lineOffsets;
     lineOffsets.resize(static_cast<usize>(_style.TabBarRows));
+    isize index {0};
 
-    auto const getNextTabRect {[&](isize index, item const& item, item_style const& itemStyle) {
+    auto const getNextTabRect {[&](item const& item, item_style const& itemStyle) {
         rect_f      retValue {};
         isize const line {index / columns};
 
@@ -213,12 +214,12 @@ void tab_container::on_draw(widget_painter& painter)
         return retValue;
     }};
 
-    for (i32 i {0}; i < std::ssize(_tabs); ++i) {
+    for (; index < std::ssize(_tabs); ++index) {
         item_style tabStyle {};
-        prepare_sub_style(tabStyle, i, _style.TabItemClass, {.Active = i == ActiveTabIndex, .Hover = i == HoveredTabIndex});
+        prepare_sub_style(tabStyle, index, _style.TabItemClass, {.Active = index == ActiveTabIndex, .Hover = index == HoveredTabIndex});
 
-        rect_f const tabRect {getNextTabRect(i, _tabLabels[i], tabStyle)};
-        painter.draw_item(tabStyle.Item, tabRect, _tabLabels[i]);
+        rect_f const tabRect {getNextTabRect(_tabLabels[index], tabStyle)};
+        painter.draw_item(tabStyle.Item, tabRect, _tabLabels[index]);
         _tabRectCache.push_back(tabRect);
     }
 }
