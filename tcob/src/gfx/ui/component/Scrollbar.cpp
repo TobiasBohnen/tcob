@@ -105,14 +105,14 @@ void scrollbar::mouse_down(widget const& widget, point_i mp)
     if (!_overThumb) {
         calculate_value(screen_to_content(widget, mp));
     } else {
-        _dragOffset = point_i {screen_to_local(widget, mp) - _barRectCache.Thumb.center()};
+        _dragOffset = screen_to_local(widget, mp) - _barRectCache.Thumb.center();
         _isDragging = true;
     }
 }
 
 void scrollbar::mouse_up(widget const& widget, point_i mp)
 {
-    _dragOffset = point_i::Zero;
+    _dragOffset = point_f::Zero;
     _isDragging = false;
 
     auto const pos {screen_to_local(widget, mp)};
@@ -122,7 +122,7 @@ void scrollbar::mouse_up(widget const& widget, point_i mp)
 
 void scrollbar::mouse_leave()
 {
-    _dragOffset = point_i::Zero;
+    _dragOffset = point_f::Zero;
     _isDragging = false;
 
     _overThumb = false;
@@ -169,12 +169,12 @@ void scrollbar::calculate_value(point_f mp)
     case orientation::Horizontal: {
         f32 const tw {_barRectCache.Thumb.width()};
         f32 const width {rect.width() - tw};
-        if (width > 0) { frac = (mp.X - static_cast<f32>(_dragOffset.X) - (tw / 2)) / width; }
+        if (width > 0) { frac = (mp.X - _dragOffset.X - (tw / 2)) / width; }
     } break;
     case orientation::Vertical: {
         f32 const th {_barRectCache.Thumb.height()};
         f32 const height {rect.height() - th};
-        if (height > 0) { frac = (mp.Y - static_cast<f32>(_dragOffset.Y) - (th / 2)) / height; }
+        if (height > 0) { frac = (mp.Y - _dragOffset.Y - (th / 2)) / height; }
     } break;
     }
 

@@ -55,7 +55,7 @@ private:
     bool    _isDragging {false};
     bool    _overThumb {false};
     bool    _overBar {false};
-    point_i _dragOffset {point_i::Zero};
+    point_f _dragOffset {point_f::Zero};
 
     orientation    _orien;
     widget_tweener _tween;

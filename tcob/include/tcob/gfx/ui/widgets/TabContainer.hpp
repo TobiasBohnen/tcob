@@ -37,7 +37,7 @@ public:
         position    TabBarPosition {position::Top};
         length      TabBarSize;
         header_mode TabBarMode {header_mode::Fill};
-        i32         TabBarRows {1};
+        f32         TabBarRows {1};
 
         static void Transition(style& target, style const& from, style const& to, f64 step);
     };

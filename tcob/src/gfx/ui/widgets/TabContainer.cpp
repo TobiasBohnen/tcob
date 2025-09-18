@@ -143,22 +143,22 @@ void tab_container::on_draw(widget_painter& painter)
         break;
     case position::Bottom:
         tabHeaderRect.Size.Height = _style.TabBarSize.calc(tabHeaderRect.height());
-        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * static_cast<f32>(_style.TabBarRows));
+        tabHeaderRect.Position.Y  = rect.bottom() - (tabHeaderRect.height() * _style.TabBarRows);
         break;
     case position::Left:
         tabHeaderRect.Size.Width = _style.TabBarSize.calc(tabHeaderRect.width());
         break;
     case position::Right:
         tabHeaderRect.Size.Width = _style.TabBarSize.calc(tabHeaderRect.width());
-        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * static_cast<f32>(_style.TabBarRows));
+        tabHeaderRect.Position.X = rect.right() - (tabHeaderRect.width() * _style.TabBarRows);
         break;
 
     case position::None: return;
     }
 
-    isize const      columns {(std::ssize(_tabs) + _style.TabBarRows - 1) / _style.TabBarRows};
+    isize const      columns {(std::ssize(_tabs) + static_cast<isize>(_style.TabBarRows) - 1) / static_cast<isize>(_style.TabBarRows)};
     std::vector<f32> lineOffsets;
-    lineOffsets.resize(_style.TabBarRows);
+    lineOffsets.resize(static_cast<usize>(_style.TabBarRows));
 
     auto const getNextTabRect {[&](isize index, item const& item, item_style const& itemStyle) {
         rect_f      retValue {};
