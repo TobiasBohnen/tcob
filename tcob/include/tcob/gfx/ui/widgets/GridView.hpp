@@ -26,13 +26,6 @@ namespace tcob::ui {
 // TODO: sort by column
 class TCOB_API grid_view : public vscroll_widget {
 public:
-    enum class select_mode : u8 {
-        None,
-        Cell,
-        Row,
-        Column
-    };
-
     class TCOB_API style : public vscroll_widget::style {
     public:
         bool                     AutoSizeColumns {true}; // TODO: lerp?
@@ -48,10 +41,10 @@ public:
     prop<std::vector<item>> Header;
     prop<grid<item>>        Grid;
 
-    prop<point_i>     SelectedCellIndex; // TODO: change to prop_val
-    prop<point_i>     HoveredCellIndex;  // TODO: change to prop_val
-    prop<select_mode> SelectMode;
-    prop<bool>        HeaderSelectable;
+    prop<point_i>          SelectedCellIndex; // TODO: change to prop_val
+    prop<point_i>          HoveredCellIndex;  // TODO: change to prop_val
+    prop<grid_select_mode> SelectMode;
+    prop<bool>             HeaderSelectable;
 
     auto get_cell(point_i idx) const -> item const&;
 

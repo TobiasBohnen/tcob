@@ -267,6 +267,15 @@ enum class fit_mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
+enum class grid_select_mode : u8 {
+    None,
+    Cell,
+    Row,
+    Column
+};
+
+////////////////////////////////////////////////////////////
+
 enum class orientation : u8 {
     Horizontal,
     Vertical
@@ -311,7 +320,7 @@ enum class cursor_mode : u8 {
 
 ////////////////////////////////////////////////////////////
 
-using widget_attribute_types = std::variant<isize, f64, bool, string, orientation, fit_mode, point_i>;
+using widget_attribute_types = std::variant<isize, f64, bool, string, point_i, orientation, fit_mode, grid_select_mode>;
 using widget_attributes      = std::unordered_map<string, widget_attribute_types>;
 
 ////////////////////////////////////////////////////////////

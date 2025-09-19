@@ -48,8 +48,6 @@ grid_view::grid_view(init const& wi)
             || (!val.size().contains({HoveredCellIndex->X, HoveredCellIndex->Y - 1}) && HoveredCellIndex != INVALID)) {
             SelectedCellIndex = INVALID;
             HoveredCellIndex  = INVALID;
-            _rowRectCache.clear();
-            _headerRectCache.clear();
             clear_sub_styles();
             set_scrollbar_value(0);
         }
@@ -69,7 +67,7 @@ grid_view::grid_view(init const& wi)
     HoveredCellIndex.Changed.connect([this](auto const&) { queue_redraw(); });
     HoveredCellIndex(INVALID);
 
-    SelectMode(select_mode::Cell);
+    SelectMode(grid_select_mode::Cell);
     HeaderSelectable(false);
 
     Class("grid_view");
@@ -134,17 +132,17 @@ void grid_view::on_draw(widget_painter& painter)
         }
     }};
 
-    auto const getCellFlags {[this](point_i idx, select_mode mode) -> widget_flags {
+    auto const getCellFlags {[this](point_i idx, grid_select_mode mode) -> widget_flags {
         switch (mode) {
-        case select_mode::None:   return {.Active = false, .Hover = false};
-        case select_mode::Cell:   return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
-        case select_mode::Row:    return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
-        case select_mode::Column: return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
+        case grid_select_mode::None:   return {.Active = false, .Hover = false};
+        case grid_select_mode::Cell:   return {.Active = idx == SelectedCellIndex, .Hover = idx == HoveredCellIndex};
+        case grid_select_mode::Row:    return {.Active = idx.Y == SelectedCellIndex->Y, .Hover = idx.Y == HoveredCellIndex->Y};
+        case grid_select_mode::Column: return {.Active = idx.X == SelectedCellIndex->X, .Hover = idx.X == HoveredCellIndex->X};
         }
         return {};
     }};
 
-    auto getRowStyle {[&](i32 y) {
+    auto const getRowStyle {[&](i32 y) {
         return _style.RowItemClasses[y % _style.RowItemClasses.size()];
     }};
 
@@ -257,6 +255,9 @@ auto grid_view::attributes() const -> widget_attributes
     if (HoveredCellIndex != INVALID) {
         retValue["hover"] = get_cell(HoveredCellIndex).Text;
     }
+
+    retValue["header_selectable"] = *HeaderSelectable;
+    retValue["grid_select_mode"]  = *SelectMode;
 
     return retValue;
 }
