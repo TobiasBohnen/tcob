@@ -2,7 +2,7 @@ tcob
 
 MIT License
 
-Copyright (c) 2024 Tobias Bohnen
+Copyright (c) 2025 Tobias Bohnen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
