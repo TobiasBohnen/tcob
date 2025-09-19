@@ -285,9 +285,6 @@ void platform::InitAudioCodecs()
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
     adFactory->add(".ogg", &make_unique<audio::detail::vorbis_decoder>);
 #endif
-#if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
-    adFactory->add(".opus", &make_unique<audio::detail::opus_decoder>);
-#endif
 #if defined(TCOB_ENABLE_ADDON_AUDIO_TINYSOUNDFONT)
     adFactory->add(".mid", &make_unique<audio::detail::midi_decoder>);
 #endif
@@ -303,9 +300,6 @@ void platform::InitAudioCodecs()
 #endif
 #if defined(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
     aeFactory->add(".ogg", &make_unique<audio::detail::vorbis_encoder>);
-#endif
-#if defined(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
-    aeFactory->add(".opus", &make_unique<audio::detail::opus_encoder>);
 #endif
 }
 

@@ -41,12 +41,6 @@ if(TCOB_ENABLE_FILETYPES_AUDIO_VORBIS)
     )
 endif()
 
-if(TCOB_ENABLE_FILETYPES_AUDIO_OPUS)
-    list(APPEND SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_opus.cpp
-    )
-endif()
-
 if(TCOB_ENABLE_FILETYPES_AUDIO_LIBXMP)
     list(APPEND SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/audio_codecs/AudioCodec_xmp.cpp
