@@ -50,14 +50,6 @@ private:
 
 using bind_func = std::function<void(i32&, statement&)>;
 
-namespace detail {
-    template <typename T>
-    concept HasBind =
-        requires(T t) {
-            { t.bind() } -> std::same_as<bind_func>;
-        };
-}
-
 ////////////////////////////////////////////////////////////
 
 template <typename... Values>

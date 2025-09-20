@@ -89,12 +89,8 @@ template <typename... Values>
 template <typename T>
 inline auto select_statement<Values...>::where(T const& cond) -> select_statement<Values...>&
 {
-    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
-        _values.Where = std::format(" WHERE {}", cond.str());
-        _whereBind    = cond.bind();
-    } else {
-        _values.Where = std::format(" WHERE {}", cond);
-    }
+    _values.Where = std::format(" WHERE {}", cond.str());
+    _whereBind    = cond.bind();
 
     return *this;
 }
@@ -103,12 +99,8 @@ template <typename... Values>
 template <typename T>
 inline auto select_statement<Values...>::having(T const& cond) -> select_statement&
 {
-    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
-        _values.Having = std::format(" HAVING {}", cond.str());
-        _havingBind    = cond.bind();
-    } else {
-        _values.Having = std::format(" HAVING {}", cond);
-    }
+    _values.Having = std::format(" HAVING {}", cond.str());
+    _havingBind    = cond.bind();
 
     return *this;
 }
@@ -322,12 +314,8 @@ inline auto update_statement::operator()(auto&&... values) -> bool
 template <typename T>
 inline auto update_statement::where(T const& cond) -> update_statement&
 {
-    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
-        _where     = cond.str();
-        _whereBind = cond.bind();
-    } else {
-        _where = cond;
-    }
+    _where     = cond.str();
+    _whereBind = cond.bind();
 
     return *this;
 }
@@ -384,12 +372,8 @@ inline auto delete_statement::operator()(auto&&... values) -> bool
 template <typename T>
 inline auto delete_statement::where(T const& cond) -> delete_statement&
 {
-    if constexpr (detail::HasBind<T> && detail::HasStr<T>) {
-        _where     = cond.str();
-        _whereBind = cond.bind();
-    } else {
-        _where = cond;
-    }
+    _where     = cond.str();
+    _whereBind = cond.bind();
 
     return *this;
 }

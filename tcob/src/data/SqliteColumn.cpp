@@ -11,6 +11,7 @@
     #include <utility>
 
     #include "tcob/data/Sqlite.hpp"
+    #include "tcob/data/SqliteStatement.hpp"
 
 namespace tcob::db {
 
@@ -68,6 +69,23 @@ auto sum::str() const -> utf8_string
 
 ////////////////////////////////////////////////////////////
 
+raw::raw(utf8_string column)
+    : _column {std::move(column)}
+{
+}
+
+auto raw::str() const -> utf8_string
+{
+    return _column;
+}
+
+auto raw::bind() const -> bind_func
+{
+    return [](i32&, statement&) { };
+}
+
+////////////////////////////////////////////////////////////
+
 auto on::str(utf8_string const& table, utf8_string const& otherTable) const -> utf8_string
 {
     return std::format(R"({}."{}" = {}."{}")", table, LeftColumn, otherTable, RightColumn);
@@ -102,6 +120,7 @@ auto check::str() const -> utf8_string
 {
     return "CHECK(" + Check + ")";
 }
+
 }
 
 #endif

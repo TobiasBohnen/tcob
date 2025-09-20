@@ -160,6 +160,19 @@ using is_null       = conditional<op::IsNull>;
 
 ////////////////////////////////////////////////////////////
 
+class TCOB_API raw {
+public:
+    explicit raw(utf8_string column);
+
+    auto str() const -> utf8_string;
+    auto bind() const -> bind_func;
+
+private:
+    utf8_string _column;
+};
+
+////////////////////////////////////////////////////////////
+
 class TCOB_API on {
 public:
     utf8_string LeftColumn;
