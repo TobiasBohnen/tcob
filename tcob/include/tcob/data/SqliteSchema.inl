@@ -39,7 +39,7 @@ template <typename... Values>
 inline auto schema::create_view(utf8_string const& viewName, select_statement<Values...>& stmt) -> std::optional<view>
 {
     utf8_string const sql {std::format(R"(CREATE VIEW IF NOT EXISTS "{}"."{}" AS {};)", // TODO: Temp
-                                       _name, viewName, stmt.query_string(false))};
+                                       _name, viewName, stmt.query_string())};
 
     return _db.exec(sql) ? get_view(viewName) : std::nullopt;
 }

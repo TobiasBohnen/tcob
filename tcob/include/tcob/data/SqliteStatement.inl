@@ -128,13 +128,13 @@ inline auto select_statement<Values...>::limit(i32 value, std::optional<i32> off
 template <typename... Values>
 inline auto select_statement<Values...>::group_by(auto&&... columns) -> select_statement<Values...>&
 {
-    std::vector<utf8_string> colStrings {[&] {
+    std::array<utf8_string, sizeof...(columns)> const colStrings {{[&] {
         if constexpr (detail::HasStr<std::remove_cvref_t<decltype(columns)>>) {
             return columns.str();
         } else {
             return quote_identifier(columns);
         }
-    }()...};
+    }()...}};
     _values.GroupBy = std::format(" GROUP BY {}", helper::join(colStrings, ", "));
     return *this;
 }
@@ -184,33 +184,33 @@ inline auto select_statement<Values...>::cross_join(auto const& table) -> select
 template <typename... Values>
 inline auto select_statement<Values...>::union_with(select_statement const& other) -> select_statement&
 {
-    _setOps.emplace_back("UNION", other.query_string(false));
+    _setOps.emplace_back("UNION", other.query_string());
     return *this;
 }
 
 template <typename... Values>
 inline auto select_statement<Values...>::union_all_with(select_statement const& other) -> select_statement&
 {
-    _setOps.emplace_back("UNION ALL", other.query_string(false));
+    _setOps.emplace_back("UNION ALL", other.query_string());
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::intersect_with(select_statement const& other) -> select_statement&
+inline auto select_statement<Values...>::intersect(select_statement const& other) -> select_statement&
 {
-    _setOps.emplace_back("INTERSECT", other.query_string(false));
+    _setOps.emplace_back("INTERSECT", other.query_string());
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::except_with(select_statement const& other) -> select_statement&
+inline auto select_statement<Values...>::except(select_statement const& other) -> select_statement&
 {
-    _setOps.emplace_back("EXCEPT", other.query_string(false));
+    _setOps.emplace_back("EXCEPT", other.query_string());
     return *this;
 }
 
 template <typename... Values>
-inline auto select_statement<Values...>::query_string(bool semicolon) const -> utf8_string
+inline auto select_statement<Values...>::query_string() const -> utf8_string
 {
     utf8_string retValue {std::format(
         R"(SELECT{}{} FROM "{}"."{}"{}{}{}{}{}{}{})",
@@ -223,8 +223,6 @@ inline auto select_statement<Values...>::query_string(bool semicolon) const -> u
         retValue += std::format(" {} {}", op.first, op.second);
     }
 
-    if (semicolon) { retValue += ";"; }
-
     return retValue;
 }
 
@@ -232,7 +230,7 @@ template <typename... Values>
 inline auto select_statement<Values...>::prepare_and_bind(auto&&... params) -> bool
 {
     // prepare
-    if (!prepare(query_string(true))) { return false; };
+    if (!prepare(query_string() + ";")) { return false; };
 
     // bind parameters
     i32 idx {1};

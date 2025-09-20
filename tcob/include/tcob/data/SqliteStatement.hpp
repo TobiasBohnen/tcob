@@ -79,10 +79,10 @@ public:
 
     auto union_all_with(select_statement const& other) -> select_statement&;
     auto union_with(select_statement const& other) -> select_statement&;
-    auto intersect_with(select_statement const& other) -> select_statement&;
-    auto except_with(select_statement const& other) -> select_statement&;
+    auto intersect(select_statement const& other) -> select_statement&;
+    auto except(select_statement const& other) -> select_statement&;
 
-    auto query_string(bool semicolon) const -> utf8_string;
+    auto query_string() const -> utf8_string;
 
 private:
     template <typename T, typename O>

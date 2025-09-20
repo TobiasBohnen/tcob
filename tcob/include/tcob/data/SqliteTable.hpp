@@ -49,6 +49,7 @@ public:
     auto rename(utf8_string const& newName) -> bool;
 
     auto add_column(auto&& columnDef) -> bool;
+    auto rename_column(utf8_string const& oldName, utf8_string const& newName) -> bool;
 
     template <typename... Values>
     auto select_from(auto&&... columns) const -> select_statement<Values...>;

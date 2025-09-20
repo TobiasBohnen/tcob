@@ -110,6 +110,17 @@ auto table::rename(utf8_string const& newName) -> bool
     return false;
 }
 
+auto table::rename_column(utf8_string const& oldName, utf8_string const& newName) -> bool
+{
+    statement alter {_db};
+    if (alter.prepare(std::format("ALTER TABLE {} RENAME COLUMN {} TO {};", qualified_name(), quote_identifier(oldName), quote_identifier(newName)))) {
+        if (alter.step() == step_status::Done) {
+            return true;
+        }
+    }
+    return false;
+}
+
 ////////////////////////////////////////////////////////////
 
 view::view(database_view db, utf8_string schema, utf8_string name)
