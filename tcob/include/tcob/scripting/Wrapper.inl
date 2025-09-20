@@ -291,13 +291,13 @@ inline auto wrapper<WrappedType>::wrap_constructor(arg_list<WrappedType(Args...)
 ////////////////////////////////////////////////////////////
 
 template <typename WrappedType>
-inline wrapper<WrappedType>::wrapper(state_view view, table* globaltable, string name)
+inline wrapper<WrappedType>::wrapper(state_view view, table* globaltable, string name, bool autoMeta)
     : _name {std::move(name)}
     , _globalTable {globaltable}
     , _view {view}
 {
-    create_metatable(typeid(WrappedType).name(), false);
-    create_metatable((string {typeid(WrappedType).name()} + "_gc"), true);
+    create_metatable(typeid(WrappedType).name(), false, autoMeta);
+    create_metatable((string {typeid(WrappedType).name()} + "_gc"), true, autoMeta);
 }
 
 template <typename WrappedType>
@@ -330,7 +330,7 @@ inline void wrapper<WrappedType>::set_metatable_field(string const& name, string
 }
 
 template <typename WrappedType>
-inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc)
+inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc, bool autoMeta)
 {
     _view.new_metatable(name);
     i32 const tableIdx {_view.get_top()};
@@ -367,81 +367,83 @@ inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc)
                     }},
                     tableIdx);
 
-    // eq metamethod
-    if constexpr (Equatable<WrappedType>) {
-        push_metamethod("__eq",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 == *instance2; }},
-                        tableIdx);
-    }
+    if (autoMeta) {
 
-    // lt metamethod
-    if constexpr (LessComparable<WrappedType>) {
-        push_metamethod("__lt",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 < *instance2; }},
-                        tableIdx);
-    }
+        // eq metamethod
+        if constexpr (Equatable<WrappedType>) {
+            push_metamethod("__eq",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 == *instance2; }},
+                            tableIdx);
+        }
 
-    // le metamethod
-    if constexpr (LessEqualComparable<WrappedType>) {
-        push_metamethod("__le",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 <= *instance2; }},
-                        tableIdx);
-    }
+        // lt metamethod
+        if constexpr (LessComparable<WrappedType>) {
+            push_metamethod("__lt",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 < *instance2; }},
+                            tableIdx);
+        }
 
-    // unm metamethod
-    if constexpr (Negatable<WrappedType>) {
-        push_metamethod("__unm",
-                        std::function {[](WrappedType* instance) { return managed_ptr<WrappedType> {new WrappedType(-*instance)}; }},
-                        tableIdx);
-    }
+        // le metamethod
+        if constexpr (LessEqualComparable<WrappedType>) {
+            push_metamethod("__le",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return *instance1 <= *instance2; }},
+                            tableIdx);
+        }
 
-    // add metamethod
-    if constexpr (Addable<WrappedType>) {
-        push_metamethod("__add",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 + *instance2)}; }},
-                        tableIdx);
-    }
+        // unm metamethod
+        if constexpr (Negatable<WrappedType>) {
+            push_metamethod("__unm",
+                            std::function {[](WrappedType* instance) { return managed_ptr<WrappedType> {new WrappedType(-*instance)}; }},
+                            tableIdx);
+        }
 
-    // sub metamethod
-    if constexpr (Subtractable<WrappedType>) {
-        push_metamethod("__sub",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 - *instance2)}; }},
-                        tableIdx);
-    }
+        // add metamethod
+        if constexpr (Addable<WrappedType>) {
+            push_metamethod("__add",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 + *instance2)}; }},
+                            tableIdx);
+        }
 
-    // mul metamethod
-    if constexpr (Multipliable<WrappedType>) {
-        push_metamethod("__mul",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 * *instance2)}; }},
-                        tableIdx);
-    }
+        // sub metamethod
+        if constexpr (Subtractable<WrappedType>) {
+            push_metamethod("__sub",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 - *instance2)}; }},
+                            tableIdx);
+        }
 
-    // div metamethod
-    if constexpr (Dividable<WrappedType>) {
-        push_metamethod("__div",
-                        std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 / *instance2)}; }},
-                        tableIdx);
-    }
+        // mul metamethod
+        if constexpr (Multipliable<WrappedType>) {
+            push_metamethod("__mul",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 * *instance2)}; }},
+                            tableIdx);
+        }
 
-    // length operator
-    if constexpr (HasSize<WrappedType>) {
-        push_metamethod("__len",
-                        std::function {[](WrappedType* instance) {
-                            return instance->size();
-                        }},
-                        tableIdx);
-    }
+        // div metamethod
+        if constexpr (Dividable<WrappedType>) {
+            push_metamethod("__div",
+                            std::function {[](WrappedType* instance1, WrappedType* instance2) { return managed_ptr<WrappedType> {new WrappedType(*instance1 / *instance2)}; }},
+                            tableIdx);
+        }
 
-    if constexpr (Map<WrappedType>) {
-        using value_type = std::pair<typename WrappedType::key_type, typename WrappedType::mapped_type>;
-        auto const iter {make_shared_closure(std::function {[it = std::optional<typename WrappedType::iterator> {}](WrappedType* t) mutable -> std::optional<value_type> {
-            if (!it) { it = t->begin(); }
-            return *it == t->end() ? std::nullopt : std::optional<value_type> {*(*it)++};
-        }})};
+        // length operator
+        if constexpr (HasSize<WrappedType>) {
+            push_metamethod("__len",
+                            std::function {[](WrappedType* instance) { return instance->size(); }},
+                            tableIdx);
+        }
 
-        push_metamethod("__pairs",
-                        std::function {[iter](WrappedType* t) { return std::tuple {iter.get(), t, nullptr}; }},
-                        tableIdx);
+        // pairs
+        if constexpr (Map<WrappedType>) {
+            using value_type = std::pair<typename WrappedType::key_type, typename WrappedType::mapped_type>;
+            auto const iter {make_shared_closure(std::function {[it = std::optional<typename WrappedType::iterator> {}](WrappedType* t) mutable -> std::optional<value_type> {
+                if (!it) { it = t->begin(); }
+                return *it == t->end() ? std::nullopt : std::optional<value_type> {*(*it)++};
+            }})};
+
+            push_metamethod("__pairs",
+                            std::function {[iter](WrappedType* t) { return std::tuple {iter.get(), t, nullptr}; }},
+                            tableIdx);
+        }
     }
 
     // gc for Lua created instances

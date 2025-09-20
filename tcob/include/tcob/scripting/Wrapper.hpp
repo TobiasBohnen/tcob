@@ -72,7 +72,7 @@ class wrapper final : public detail::wrapper_base, public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
 
-    class unknown_get_event {
+    class unknown_get_event final {
     public:
         unknown_get_event(WrappedType* instance, string name, state_view view);
 
@@ -86,7 +86,7 @@ public:
         state_view _view {nullptr};
     };
 
-    class unknown_set_event {
+    class unknown_set_event final {
     public:
         unknown_set_event(WrappedType* instance, string name, state_view view);
 
@@ -102,7 +102,7 @@ public:
     };
 
     template <auto IsMeta>
-    class proxy {
+    class proxy final {
     public:
         proxy(wrapper& parent, string name);
 
@@ -128,7 +128,7 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    wrapper(state_view view, table* globaltable, string name);
+    wrapper(state_view view, table* globaltable, string name, bool autoMeta);
     ~wrapper();
 
     signal<unknown_get_event> UnknownGet;
@@ -171,7 +171,7 @@ private:
 
     void set_metatable_field(string const& name, string const& tableName, auto&& value) const;
 
-    void create_metatable(string const& name, bool gc);
+    void create_metatable(string const& name, bool gc, bool autoMeta);
     void remove_metatable(string const& name);
 
     template <typename R, typename... P>

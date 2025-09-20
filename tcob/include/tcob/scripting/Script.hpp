@@ -51,7 +51,7 @@ public:
     auto run(string_view script, string const& name = "main") const -> std::expected<R, error_code>;
 
     template <typename T>
-    auto create_wrapper(string const& name);
+    auto create_wrapper(string const& name, bool autoMeta = true);
 
     auto global_table() -> table&;
     auto get_environment() const -> std::optional<table>; // TODO: set_get_
