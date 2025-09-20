@@ -445,7 +445,7 @@ inline auto entry::try_get(T& value) const -> bool
         value = std::get<type>(_value);
         return true;
     } else {
-        return converter<std::remove_cvref_t<T>>::From(_value, value);
+        return base_converter<T>::From(_value, value);
     }
 }
 
@@ -456,7 +456,7 @@ inline void entry::set(T&& value)
     if constexpr (std::is_same_v<type, object> || std::is_same_v<type, array>) {
         _value = value;
     } else {
-        converter<type>::To(_value, std::forward<T>(value));
+        base_converter<type>::To(_value, std::forward<T>(value));
     }
 }
 
@@ -475,7 +475,7 @@ inline auto entry::is() const -> bool
     } else if constexpr (std::is_same_v<type, array>) {
         return std::holds_alternative<array>(_value);
     } else {
-        return converter<type>::IsType(_value);
+        return base_converter<type>::IsType(_value);
     }
 }
 

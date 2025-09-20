@@ -22,18 +22,17 @@ template <typename T>
 struct converter;
 
 template <typename T>
+using base_converter = converter<std::remove_cvref_t<T>>;
+
+template <typename T>
 concept ConvertibleTo =
     requires(statement_view stmt, i32& idx, T const& t) {
-        { converter<T>::To(stmt, idx, t) };
-    } || requires(statement_view stmt, i32 idx, T const& t) {
-        { converter<std::remove_cvref_t<T>>::To(stmt, idx, t) };
+        { base_converter<T>::To(stmt, idx, t) };
     };
 
 template <typename T>
 concept ConvertibleFrom = requires(statement_view stmt, i32 col, T& t) {
-    { converter<T>::From(stmt, col, t) };
-} || requires(statement_view stmt, i32 col, T& t) {
-    { converter<std::remove_cvref_t<T>>::From(stmt, col, t) };
+    { base_converter<T>::From(stmt, col, t) };
 };
 
 namespace detail {

@@ -14,11 +14,12 @@
 
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/scripting/Conversions.hpp"
 #include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/LuaConversions.hpp"
 #include "tcob/scripting/Scripting.hpp"
 #include "tcob/scripting/Types.hpp"
 #include "tcob/scripting/Wrapper.hpp"
+
 
 namespace tcob::scripting {
 ////////////////////////////////////////////////////////////

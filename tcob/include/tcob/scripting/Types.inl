@@ -103,7 +103,7 @@ inline auto table::get_keys() const -> std::vector<T>
         view.push_value(-2);
 
         T var {};
-        if (converter<T>::IsType(view, -1) && view.pull_convert_idx(-1, var)) {
+        if (base_converter<T>::IsType(view, -1) && view.pull_convert_idx(-1, var)) {
             retValue.push_back(var);
         }
 
@@ -173,7 +173,7 @@ inline auto table::is(state_view view, auto&& key, auto&&... keys) const -> bool
         table lt {view, -1};
         return lt.is<T>(view, keys...);
     } else {
-        return !view.is_nil(-1) && converter<T>::IsType(view, view.get_top());
+        return !view.is_nil(-1) && base_converter<T>::IsType(view, view.get_top());
     }
 }
 

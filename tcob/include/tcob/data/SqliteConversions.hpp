@@ -13,7 +13,6 @@
     #include <cstddef>
     #include <optional>
     #include <tuple>
-    #include <type_traits>
 
     #include "tcob/core/Color.hpp"
     #include "tcob/core/Concepts.hpp"
@@ -133,7 +132,7 @@ struct converter<std::optional<T>> {
             value = std::nullopt;
         } else {
             T val {};
-            converter<T>::From(stmt, col, val);
+            base_converter<T>::From(stmt, col, val);
             value = val;
         }
 
@@ -146,7 +145,7 @@ struct converter<std::optional<T>> {
             return stmt.bind_null(idx++);
         }
 
-        return converter<T>::To(stmt, idx, *value);
+        return base_converter<T>::To(stmt, idx, *value);
     }
 };
 
@@ -164,7 +163,7 @@ struct converter<std::tuple<T...>> {
     {
         std::apply(
             [&](auto&&... item) {
-                (converter<std::remove_cvref_t<decltype(item)>>::From(stmt, col++, item), ...);
+                (base_converter<decltype(item)>::From(stmt, col++, item), ...);
             },
             value);
 
@@ -175,7 +174,7 @@ struct converter<std::tuple<T...>> {
     {
         std::apply(
             [&](auto&&... item) {
-                (converter<std::remove_cvref_t<decltype(item)>>::To(stmt, idx, item), ...);
+                (base_converter<decltype(item)>::To(stmt, idx, item), ...);
             },
             value);
         return true;
@@ -190,7 +189,7 @@ struct converter<T> {
     {
         while (stmt.step() == step_status::Row) {
             value_type val {};
-            converter<value_type>::From(stmt, col, val);
+            base_converter<value_type>::From(stmt, col, val);
             value.push_back(val);
         }
         return true;
@@ -199,7 +198,7 @@ struct converter<T> {
     static auto To(statement_view stmt, i32& idx, T const& value) -> bool
     {
         for (usize i {0}; i < value.size(); ++i) {
-            converter<value_type>::To(stmt, idx, value[i]);
+            base_converter<value_type>::To(stmt, idx, value[i]);
         }
         return true;
     }
@@ -213,7 +212,7 @@ struct converter<T> {
     {
         while (stmt.step() == step_status::Row) {
             key_type val;
-            converter<key_type>::From(stmt, col, val);
+            base_converter<key_type>::From(stmt, col, val);
             value.insert(val);
         }
         return true;
@@ -222,7 +221,7 @@ struct converter<T> {
     static auto To(statement_view stmt, i32& idx, T const& value) -> bool
     {
         for (auto const& item : value) {
-            converter<key_type>::To(stmt, idx, item);
+            base_converter<key_type>::To(stmt, idx, item);
         }
         return true;
     }

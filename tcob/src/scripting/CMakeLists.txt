@@ -9,9 +9,9 @@ list(APPEND HDR
     ${TCOB_INC_DIR}/tcob/scripting/Scripting.hpp
     ${TCOB_INC_DIR}/tcob/scripting/Lua.hpp
     ${TCOB_INC_DIR}/tcob/scripting/Lua.inl
+    ${TCOB_INC_DIR}/tcob/scripting/LuaConversions.hpp
     ${TCOB_INC_DIR}/tcob/scripting/Closure.hpp
     ${TCOB_INC_DIR}/tcob/scripting/Closure.inl
-    ${TCOB_INC_DIR}/tcob/scripting/Conversions.hpp
     ${TCOB_INC_DIR}/tcob/scripting/Script.hpp
     ${TCOB_INC_DIR}/tcob/scripting/Script.inl
     ${TCOB_INC_DIR}/tcob/scripting/Types.hpp

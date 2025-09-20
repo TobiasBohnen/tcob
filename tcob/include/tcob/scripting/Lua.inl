@@ -6,7 +6,6 @@
 #pragma once
 #include "Lua.hpp"
 
-#include <type_traits>
 #include <utility>
 
 namespace tcob::scripting {
@@ -36,14 +35,14 @@ inline auto state_view::pull_convert_idx(i32 idx, T& t) const -> bool
 template <ConvertibleFrom T>
 inline auto state_view::convert_from(i32& idx, T& value) const -> bool
 {
-    return converter<std::remove_cvref_t<T>>::From(*this, idx, value);
+    return base_converter<T>::From(*this, idx, value);
 }
 
 //////push//////
 template <ConvertibleTo T>
 inline void state_view::convert_to(T&& value) const
 {
-    converter<std::remove_cvref_t<T>>::To(*this, std::forward<T>(value));
+    base_converter<T>::To(*this, std::forward<T>(value));
 }
 
 ////////////////////////////////////////////////////////////
@@ -60,7 +59,7 @@ template <typename WrappedType>
 template <typename T>
 inline auto unknown_set_event<WrappedType>::get_value(T& val) -> bool
 {
-    if (converter<std::remove_cvref_t<T>>::IsType(_view, 2)) {
+    if (base_converter<T>::IsType(_view, 2)) {
         if (_view.pull_convert_idx(2, val)) {
             Handled = true;
             return true;

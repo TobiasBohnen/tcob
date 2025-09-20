@@ -165,8 +165,8 @@
 #include <tcob/physics/World.hpp>
 
 #include <tcob/scripting/Closure.hpp>
-#include <tcob/scripting/Conversions.hpp>
 #include <tcob/scripting/Lua.hpp>
+#include <tcob/scripting/LuaConversions.hpp>
 #include <tcob/scripting/Script.hpp>
 #include <tcob/scripting/Scripting.hpp>
 #include <tcob/scripting/Types.hpp>

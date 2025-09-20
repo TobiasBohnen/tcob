@@ -237,11 +237,11 @@ struct converter<std::optional<T>> {
 
     static auto From(cfg_value const& config, std::optional<T>& value) -> bool
     {
-        if (!converter<T>::IsType(config)) {
+        if (!base_converter<T>::IsType(config)) {
             value = std::nullopt;
         } else {
             T val {};
-            converter<T>::From(config, val);
+            base_converter<T>::From(config, val);
             value = val;
         }
 
@@ -251,7 +251,7 @@ struct converter<std::optional<T>> {
     static void To(cfg_value& config, std::optional<T> const& value)
     {
         if (value) {
-            converter<T>::To(config, *value);
+            base_converter<T>::To(config, *value);
         } else {
             config = std::monostate {};
         }
@@ -287,9 +287,9 @@ private:
     template <typename T, typename... Ts>
     static auto convert_from(cfg_value const& config, std::variant<P...>& value) -> bool
     {
-        if (converter<T>::IsType(config)) {
+        if (base_converter<T>::IsType(config)) {
             T val {};
-            converter<T>::From(config, val);
+            base_converter<T>::From(config, val);
             value = val;
             return true;
         }
@@ -304,16 +304,16 @@ private:
     template <typename R>
     static void convert_to(cfg_value& config, R const& value)
     {
-        converter<R>::To(config, value);
+        base_converter<R>::To(config, value);
     }
 
     template <typename T, typename... Ts>
     static auto check_variant(cfg_value const& config) -> bool
     {
         if constexpr (sizeof...(Ts) > 0) {
-            return converter<T>::IsType(config) || check_variant<Ts...>(config);
+            return base_converter<T>::IsType(config) || check_variant<Ts...>(config);
         } else {
-            return converter<T>::IsType(config);
+            return base_converter<T>::IsType(config);
         }
     }
 };
@@ -573,13 +573,13 @@ template <typename T, typename R>
 struct converter<std::chrono::duration<T, R>> {
     static auto IsType(cfg_value const& config) -> bool
     {
-        return converter<T>::IsType(config);
+        return base_converter<T>::IsType(config);
     }
 
     static auto From(cfg_value const& config, std::chrono::duration<T, R>& value) -> bool
     {
         T val;
-        if (converter<T>::From(config, val)) {
+        if (base_converter<T>::From(config, val)) {
             value = std::chrono::duration<T, R> {val};
             return true;
         }
@@ -588,7 +588,7 @@ struct converter<std::chrono::duration<T, R>> {
 
     static void To(cfg_value& config, std::chrono::duration<T, R> const& value)
     {
-        converter<T>::To(config, value.count());
+        base_converter<T>::To(config, value.count());
     }
 };
 
@@ -686,13 +686,13 @@ template <FloatingPoint ValueType, double OneTurn>
 struct converter<angle_unit<ValueType, OneTurn>> {
     static auto IsType(cfg_value const& config) -> bool
     {
-        return converter<ValueType>::IsType(config);
+        return base_converter<ValueType>::IsType(config);
     }
 
     static auto From(cfg_value const& config, angle_unit<ValueType, OneTurn>& value) -> bool
     {
         if (IsType(config)) {
-            converter<ValueType>::From(config, value.Value);
+            base_converter<ValueType>::From(config, value.Value);
             return true;
         }
 
@@ -709,13 +709,13 @@ template <typename T>
 struct converter<prop<T>> {
     static auto IsType(cfg_value const& config) -> bool
     {
-        return converter<T>::IsType(config);
+        return base_converter<T>::IsType(config);
     }
 
     static auto From(cfg_value const& config, prop<T>& value) -> bool
     {
         if (IsType(config)) {
-            if (T val; converter<T>::From(config, val)) {
+            if (T val; base_converter<T>::From(config, val)) {
                 value = val;
                 return true;
             }
@@ -726,7 +726,7 @@ struct converter<prop<T>> {
 
     static void To(cfg_value& config, prop<T> const& value)
     {
-        converter<T>::To(config, value);
+        base_converter<T>::To(config, value);
     }
 };
 

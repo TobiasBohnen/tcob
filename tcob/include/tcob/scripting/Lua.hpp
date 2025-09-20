@@ -38,25 +38,22 @@ constexpr i32 REGISTRYINDEX = -1001000; //  LUA_REGISTRYINDEX
 template <typename T>
 struct converter;
 
+template <typename T>
+using base_converter = converter<std::remove_cvref_t<T>>;
+
 class state_view;
 
 template <typename T>
 concept ConvertibleTo =
     requires(T& t, state_view view) {
-        { converter<T>::To(view, t) };
-    } || requires(T& t, state_view view) {
-        { converter<std::remove_cvref_t<T>>::To(view, t) };
+        { base_converter<T>::To(view, t) };
     };
 
 template <typename T>
 concept ConvertibleFrom =
     requires(T& t, i32& i, state_view view) {
         {
-            converter<T>::From(view, i, t)
-        };
-    } || requires(T& t, i32& i, state_view view) {
-        {
-            converter<std::remove_cvref_t<T>>::From(view, i, t)
+            base_converter<T>::From(view, i, t)
         };
     };
 

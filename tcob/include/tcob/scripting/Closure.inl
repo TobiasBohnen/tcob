@@ -45,7 +45,7 @@ inline auto native_closure<R(Args...)>::operator()(state_view view) -> i32
 template <typename Arg>
 inline auto compare_types_impl(state_view view, i32 startIndex) -> bool
 {
-    return converter<std::remove_cvref_t<Arg>>::IsType(view, startIndex);
+    return base_converter<Arg>::IsType(view, startIndex);
 }
 
 template <typename R, typename... Args>
