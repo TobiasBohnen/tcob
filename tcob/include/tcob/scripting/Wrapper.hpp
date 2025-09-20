@@ -161,10 +161,13 @@ private:
     template <typename R, typename... Args>
     auto wrap_method_helper(R (*func)(Args...));
 
+    template <typename R, typename S>
+    auto wrap_field_helper(R S::* field);
+
     template <typename... Args>
     auto wrap_constructor(arg_list<WrappedType(Args...)>) -> std::function<managed_ptr<WrappedType>(Args...)>;
 
-    void wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func);
+    void wrap(string_view name, wrap_target target, native_closure_unique_ptr func);
 
     void set_metatable_field(string const& name, string const& tableName, auto&& value) const;
 

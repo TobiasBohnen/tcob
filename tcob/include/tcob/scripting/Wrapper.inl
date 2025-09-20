@@ -14,6 +14,7 @@
 #include <variant>
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/scripting/Closure.hpp"
 #include "tcob/scripting/Lua.hpp"
 #include "tcob/scripting/Scripting.hpp"
@@ -99,8 +100,14 @@ inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(T const& method) -> p
         _parent.set_metatable_field(_name, (string(typeid(WrappedType).name()) + "_gc"), ptr.get());
         _parent._metamethods.push_back(std::move(ptr));
     } else {
-        auto ptr {_parent.wrap_method_helper(method)};
-        _parent.wrap_func(_name, wrap_target::Method, std::move(ptr));
+        if constexpr (std::is_member_object_pointer_v<T>) {
+            auto field {_parent.wrap_field_helper(method)};
+            _parent.wrap(_name, wrap_target::Getter, std::move(field.first));
+            _parent.wrap(_name, wrap_target::Setter, std::move(field.second));
+        } else {
+            auto ptr {_parent.wrap_method_helper(method)};
+            _parent.wrap(_name, wrap_target::Method, std::move(ptr));
+        }
     }
     return *this;
 }
@@ -110,8 +117,10 @@ template <auto IsMeta>
 template <typename T>
 inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::getter<T> const& get) -> proxy&
 {
+    static_assert(!IsMeta, "metamethods don't support properties");
+
     auto getter {_parent.wrap_method_helper(get.Method)};
-    _parent.wrap_func(_name, wrap_target::Getter, std::move(getter));
+    _parent.wrap(_name, wrap_target::Getter, std::move(getter));
     return *this;
 }
 
@@ -120,8 +129,10 @@ template <auto IsMeta>
 template <typename T>
 inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::setter<T> const& set) -> proxy&
 {
+    static_assert(!IsMeta, "metamethods don't support properties");
+
     auto setter {_parent.wrap_method_helper(set.Method)};
-    _parent.wrap_func(_name, wrap_target::Setter, std::move(setter));
+    _parent.wrap(_name, wrap_target::Setter, std::move(setter));
     return *this;
 }
 
@@ -130,10 +141,12 @@ template <auto IsMeta>
 template <typename Get, typename Set>
 inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::property<Get, Set> const& prop) -> proxy&
 {
+    static_assert(!IsMeta, "metamethods don't support properties");
+
     auto getter {_parent.wrap_method_helper(prop.first)};
-    _parent.wrap_func(_name, wrap_target::Getter, std::move(getter));
+    _parent.wrap(_name, wrap_target::Getter, std::move(getter));
     auto setter {_parent.wrap_method_helper(prop.second)};
-    _parent.wrap_func(_name, wrap_target::Setter, std::move(setter));
+    _parent.wrap(_name, wrap_target::Setter, std::move(setter));
     return *this;
 }
 
@@ -142,9 +155,11 @@ template <auto IsMeta>
 template <typename... Ts>
 inline auto wrapper<WrappedType>::proxy<IsMeta>::operator=(scripting::overload<Ts...> const& ov) -> proxy&
 {
+    static_assert(!IsMeta, "metamethods don't support overloads");
+
     std::apply([&](auto&&... item) {
         auto ptr {make_unique_overload(std::move(item)...)};
-        _parent.wrap_func(_name, wrap_target::Method, std::move(ptr));
+        _parent.wrap(_name, wrap_target::Method, std::move(ptr));
     },
                ov);
     return *this;
@@ -215,7 +230,24 @@ inline auto wrapper<WrappedType>::wrap_method_helper(R (*func)(Args...))
 }
 
 template <typename WrappedType>
-inline void wrapper<WrappedType>::wrap_func(string_view name, wrap_target target, native_closure_unique_ptr func)
+template <typename R, typename S>
+inline auto wrapper<WrappedType>::wrap_field_helper(R S::* field)
+{
+    register_base<S>();
+    if constexpr (PropertyLike<R>) {
+        using prop_type = R::const_return_type;
+        auto lambdaG {[field](S* instance) -> prop_type { return *(instance->*field); }};
+        auto lambdaS {[field](S* instance, prop_type value) -> void { (instance->*field) = value; }};
+        return std::pair {make_unique_closure(std::function<prop_type(S*)> {lambdaG}), make_unique_closure(std::function<void(S*, prop_type)> {lambdaS})};
+    } else {
+        auto lambdaG {[field](S* instance) -> R { return (instance->*field); }};
+        auto lambdaS {[field](S* instance, R value) -> void { (instance->*field) = value; }};
+        return std::pair {make_unique_closure(std::function<R(S*)> {lambdaG}), make_unique_closure(std::function<void(S*, R)> {lambdaS})};
+    }
+}
+
+template <typename WrappedType>
+inline void wrapper<WrappedType>::wrap(string_view name, wrap_target target, native_closure_unique_ptr func)
 {
     switch (target) {
     case wrap_target::Getter: _getters[string {name}] = std::move(func); break;
