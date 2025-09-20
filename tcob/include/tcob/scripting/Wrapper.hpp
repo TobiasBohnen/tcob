@@ -70,37 +70,6 @@ namespace detail {
 template <typename WrappedType>
 class wrapper final : public detail::wrapper_base, public non_copyable {
 public:
-    ////////////////////////////////////////////////////////////
-
-    class unknown_get_event final {
-    public:
-        unknown_get_event(WrappedType* instance, string name, state_view view);
-
-        WrappedType* Instance {nullptr};
-        string       Name;
-        bool         Handled {false};
-
-        void return_value(auto&& value);
-
-    private:
-        state_view _view {nullptr};
-    };
-
-    class unknown_set_event final {
-    public:
-        unknown_set_event(WrappedType* instance, string name, state_view view);
-
-        WrappedType* Instance {nullptr};
-        string       Name;
-        bool         Handled {false};
-
-        template <typename X>
-        auto get_value(X& val) -> bool;
-
-    private:
-        state_view _view {nullptr};
-    };
-
     template <auto IsMeta>
     class proxy final {
     public:
@@ -131,8 +100,8 @@ public:
     wrapper(state_view view, table* globaltable, string name, bool autoMeta);
     ~wrapper();
 
-    signal<unknown_get_event> UnknownGet;
-    signal<unknown_set_event> UnknownSet;
+    signal<unknown_get_event<WrappedType>> UnknownGet;
+    signal<unknown_set_event<WrappedType>> UnknownSet;
 
     auto operator[](string const& name) -> proxy<false>;
     auto operator[](metamethod_type type) -> proxy<true>;

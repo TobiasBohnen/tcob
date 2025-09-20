@@ -345,9 +345,6 @@ public:
     auto count() const -> i32;
     auto is_running() const -> bool;
 
-    void start_incremental_mode(i32 pause, i32 stepmul, i32 stepsize) const;
-    void start_generational_mode(i32 minormul, i32 majormul) const;
-
     void collect() const;
 
     void stop() const;
@@ -355,6 +352,39 @@ public:
 
 private:
     state_view _luaState;
+};
+
+////////////////////////////////////////////////////////////
+
+template <typename WrappedType>
+class unknown_get_event final {
+public:
+    unknown_get_event(WrappedType* instance, string name, state_view view);
+
+    WrappedType* Instance {nullptr};
+    string       Name;
+    bool         Handled {false};
+
+    void return_value(auto&& value);
+
+private:
+    state_view _view {nullptr};
+};
+
+template <typename WrappedType>
+class unknown_set_event final {
+public:
+    unknown_set_event(WrappedType* instance, string name, state_view view);
+
+    WrappedType* Instance {nullptr};
+    string       Name;
+    bool         Handled {false};
+
+    template <typename T>
+    auto get_value(T& val) -> bool;
+
+private:
+    state_view _view {nullptr};
 };
 
 ////////////////////////////////////////////////////////////

@@ -60,30 +60,6 @@ namespace detail {
 ////////////////////////////////////////////////////////////
 
 template <typename WrappedType>
-inline wrapper<WrappedType>::unknown_set_event::unknown_set_event(WrappedType* instance, string name, state_view view)
-    : Instance {instance}
-    , Name {std::move(name)}
-    , _view {view}
-{
-}
-
-template <typename WrappedType>
-template <typename X>
-inline auto wrapper<WrappedType>::unknown_set_event::get_value(X& val) -> bool
-{
-    if (converter<X>::IsType(_view, 2)) {
-        if (_view.pull_convert_idx(2, val)) {
-            Handled = true;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename WrappedType>
 template <auto IsMeta>
 inline wrapper<WrappedType>::proxy<IsMeta>::proxy(wrapper& parent, string name)
     : _parent {parent}
@@ -557,20 +533,5 @@ inline auto wrapper<WrappedType>::gc(lua_State* l) -> i32
 }
 
 ////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
 
-template <typename WrappedType>
-inline wrapper<WrappedType>::unknown_get_event::unknown_get_event(WrappedType* instance, string name, state_view view)
-    : Instance {instance}
-    , Name {std::move(name)}
-    , _view {view}
-{
-}
-
-template <typename WrappedType>
-inline void wrapper<WrappedType>::unknown_get_event::return_value(auto&& value)
-{
-    _view.push_convert(std::move(value));
-    Handled = true;
-}
 }

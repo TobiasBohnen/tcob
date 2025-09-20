@@ -614,16 +614,6 @@ garbage_collector::garbage_collector(state_view l)
 {
 }
 
-void garbage_collector::start_incremental_mode([[maybe_unused]] i32 pause, [[maybe_unused]] i32 stepmul, [[maybe_unused]] i32 stepsize) const
-{
-    _luaState.gc(LUA_GCINC, pause, stepmul, stepsize);
-}
-
-void garbage_collector::start_generational_mode([[maybe_unused]] i32 minormul, [[maybe_unused]] i32 majormul) const
-{
-    _luaState.gc(LUA_GCGEN, minormul, majormul, 0);
-}
-
 void garbage_collector::collect() const
 {
     _luaState.gc(LUA_GCCOLLECT, 0, 0, 0);

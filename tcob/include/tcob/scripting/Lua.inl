@@ -7,6 +7,7 @@
 #include "Lua.hpp"
 
 #include <type_traits>
+#include <utility>
 
 namespace tcob::scripting {
 
@@ -43,6 +44,45 @@ template <ConvertibleTo T>
 inline void state_view::convert_to(T&& value) const
 {
     converter<std::remove_cvref_t<T>>::To(*this, std::forward<T>(value));
+}
+
+////////////////////////////////////////////////////////////
+
+template <typename WrappedType>
+inline unknown_set_event<WrappedType>::unknown_set_event(WrappedType* instance, string name, state_view view)
+    : Instance {instance}
+    , Name {std::move(name)}
+    , _view {view}
+{
+}
+
+template <typename WrappedType>
+template <typename T>
+inline auto unknown_set_event<WrappedType>::get_value(T& val) -> bool
+{
+    if (converter<std::remove_cvref_t<T>>::IsType(_view, 2)) {
+        if (_view.pull_convert_idx(2, val)) {
+            Handled = true;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+template <typename WrappedType>
+inline unknown_get_event<WrappedType>::unknown_get_event(WrappedType* instance, string name, state_view view)
+    : Instance {instance}
+    , Name {std::move(name)}
+    , _view {view}
+{
+}
+
+template <typename WrappedType>
+inline void unknown_get_event<WrappedType>::return_value(auto&& value)
+{
+    _view.push_convert(std::move(value));
+    Handled = true;
 }
 
 }
