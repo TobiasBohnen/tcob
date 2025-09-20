@@ -8,6 +8,7 @@
 
 #if defined(TCOB_ENABLE_ADDON_DATA_SQLITE)
 
+    #include <array>
     #include <cassert>
     #include <format>
     #include <optional>
@@ -108,13 +109,7 @@ inline auto select_statement<Values...>::having(T const& cond) -> select_stateme
 template <typename... Values>
 inline auto select_statement<Values...>::order_by(auto&&... orderings) -> select_statement<Values...>&
 {
-    std::vector<utf8_string> colStrings {[&] {
-        if constexpr (detail::HasStr<std::remove_cvref_t<decltype(orderings)>>) {
-            return orderings.str();
-        } else {
-            return orderings;
-        }
-    }()...};
+    std::array<utf8_string, sizeof...(orderings)> const colStrings {{orderings.str()...}};
     _values.OrderBy = std::format(" ORDER BY {}", helper::join(colStrings, ", "));
     return *this;
 }
