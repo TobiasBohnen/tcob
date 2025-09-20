@@ -378,8 +378,8 @@ struct converter<std::pair<K, V>> {
 
     static void To(state_view view, std::pair<K, V> const& value)
     {
-        converter<K>::To(view, value.first);
-        converter<V>::To(view, value.second);
+        converter<std::remove_cv_t<K>>::To(view, value.first);
+        converter<std::remove_cv_t<V>>::To(view, value.second);
     }
 };
 

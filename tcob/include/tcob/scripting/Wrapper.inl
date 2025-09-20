@@ -9,6 +9,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <variant>
@@ -49,6 +50,7 @@ namespace detail {
         case metamethod_type::LeftShift:       return "__shl";
         case metamethod_type::RightShift:      return "__shr";
         case metamethod_type::Close:           return "__close";
+        case metamethod_type::Pairs:           return "__pairs";
         }
 
         return "";
@@ -427,6 +429,18 @@ inline void wrapper<WrappedType>::create_metatable(string const& name, bool gc)
                         std::function {[](WrappedType* instance) {
                             return instance->size();
                         }},
+                        tableIdx);
+    }
+
+    if constexpr (Map<WrappedType>) {
+        using value_type = std::pair<typename WrappedType::key_type, typename WrappedType::mapped_type>;
+        auto const iter {make_shared_closure(std::function {[it = std::optional<typename WrappedType::iterator> {}](WrappedType* t) mutable -> std::optional<value_type> {
+            if (!it) { it = t->begin(); }
+            return *it == t->end() ? std::nullopt : std::optional<value_type> {*(*it)++};
+        }})};
+
+        push_metamethod("__pairs",
+                        std::function {[iter](WrappedType* t) { return std::tuple {iter.get(), t, nullptr}; }},
                         tableIdx);
     }
 

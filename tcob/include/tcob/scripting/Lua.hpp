@@ -125,7 +125,8 @@ enum class metamethod_type : u8 {
     BitwiseNot,
     LeftShift,
     RightShift,
-    Close
+    Close,
+    Pairs,
 };
 
 ////////////////////////////////////////////////////////////
