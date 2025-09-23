@@ -13,7 +13,7 @@ namespace tcob::random {
 
 ////////////////////////////////////////////////////////////
 
-auto split_mix_32::operator()(state_type& state) -> result_type
+auto split_mix_32::operator()(state_type& state) const -> result_type
 {
     u32 z {state[0] += 0x9e3779b9};
     z = (z ^ (z >> 15)) * 0x85ebca6b;
@@ -28,7 +28,7 @@ void split_mix_32::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto split_mix_64::operator()(state_type& state) -> result_type
+auto split_mix_64::operator()(state_type& state) const -> result_type
 {
     u64 z {state[0] += 0x9e3779b97f4a7c15ULL};
     z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ULL;
@@ -43,7 +43,7 @@ void split_mix_64::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto game_rand::operator()(state_type& state) -> result_type
+auto game_rand::operator()(state_type& state) const -> result_type
 {
     state[0] = (state[0] << 16) + (state[0] >> 16);
     state[0] += state[1];
@@ -60,7 +60,7 @@ void game_rand::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xorshift_64::operator()(state_type& state) -> result_type
+auto xorshift_64::operator()(state_type& state) const -> result_type
 {
     u64 x {state[0]};
     x ^= x << 13;
@@ -76,7 +76,7 @@ void xorshift_64::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xorshift_64_star::operator()(state_type& state) -> result_type
+auto xorshift_64_star::operator()(state_type& state) const -> result_type
 {
     u64 x {state[0]};
     x ^= x >> 12; // a
@@ -93,7 +93,7 @@ void xorshift_64_star::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xoroshiro_128_plus::operator()(state_type& state) -> result_type
+auto xoroshiro_128_plus::operator()(state_type& state) const -> result_type
 {
     u64 const s0 {state[0]};
     u64       s1 {state[1]};
@@ -115,7 +115,7 @@ void xoroshiro_128_plus::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xoroshiro_128_plus_plus::operator()(state_type& state) -> result_type
+auto xoroshiro_128_plus_plus::operator()(state_type& state) const -> result_type
 {
     u64 const s0 {state[0]};
     u64       s1 {state[1]};
@@ -137,7 +137,7 @@ void xoroshiro_128_plus_plus::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xoroshiro_128_star_star::operator()(state_type& state) -> result_type
+auto xoroshiro_128_star_star::operator()(state_type& state) const -> result_type
 {
     u64 const s0 {state[0]};
     u64       s1 {state[1]};
@@ -159,7 +159,7 @@ void xoroshiro_128_star_star::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xoshiro_256_plus::operator()(state_type& state) -> result_type
+auto xoshiro_256_plus::operator()(state_type& state) const -> result_type
 {
     u64 const result {state[0] + state[3]};
 
@@ -188,7 +188,7 @@ void xoshiro_256_plus::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xoshiro_256_plus_plus::operator()(state_type& state) -> result_type
+auto xoshiro_256_plus_plus::operator()(state_type& state) const -> result_type
 {
     u64 const result {std::rotl(state[0] + state[3], 23) + state[0]};
 
@@ -217,7 +217,7 @@ void xoshiro_256_plus_plus::seed(state_type& state, seed_type seed) const
 
 ////////////////////////////////////////////////////////////
 
-auto xoshiro_256_star_star::operator()(state_type& state) -> result_type
+auto xoshiro_256_star_star::operator()(state_type& state) const -> result_type
 {
     u64 const result {std::rotl(state[1] * 5, 7) * 9};
 

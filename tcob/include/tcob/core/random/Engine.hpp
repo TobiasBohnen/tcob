@@ -32,7 +32,7 @@ public:
     using seed_type   = u32;
     using result_type = u32;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -45,7 +45,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -57,7 +57,7 @@ public:
     using seed_type   = u32;
     using result_type = u32;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -69,7 +69,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -81,7 +81,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -94,7 +94,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -107,7 +107,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -120,7 +120,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -133,7 +133,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -146,7 +146,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
@@ -159,7 +159,7 @@ public:
     using seed_type   = u64;
     using result_type = u64;
 
-    auto operator()(state_type& state) -> result_type;
+    auto operator()(state_type& state) const -> result_type;
     void seed(state_type& state, seed_type seed) const;
 };
 
