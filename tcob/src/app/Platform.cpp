@@ -15,7 +15,7 @@
 #include "../data/config_formats/ConfigFormats.hpp"
 #include "../gfx/image_codecs/ImageCodecs.hpp"
 
-#include "../gfx/FontEngine.hpp"
+#include "../gfx/Font_private.hpp"
 
 #include "loaders/ConfigAssetLoader.hpp"
 

@@ -5,7 +5,7 @@ list(APPEND SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorGradient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/FontEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Font_private.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FontFamily.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Geometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Image.cpp

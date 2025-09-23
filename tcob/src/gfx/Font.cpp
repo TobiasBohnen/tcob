@@ -13,7 +13,7 @@
 #include <variant>
 #include <vector>
 
-#include "FontEngine.hpp"
+#include "Font_private.hpp"
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Logger.hpp"
