@@ -193,17 +193,18 @@ public:
     void add_shape(std::shared_ptr<T> const& shape);
 
     void remove_shape(shape const& shape);
-    void clear();
 
     void bring_to_front(shape const& shape);
     void send_to_back(shape const& shape);
 
-    auto shape_count() const -> isize;
+    auto size() const -> isize;
     auto is_empty() const -> bool;
 
     auto get_shape_at(isize index) const -> std::shared_ptr<shape>;
 
     auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) -> std::unordered_map<shape*, std::vector<ray::result>>;
+
+    void clear();
 
 protected:
     void on_update(milliseconds deltaTime) override;

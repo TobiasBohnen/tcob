@@ -160,6 +160,9 @@ public:
     void replace_layer(uid layerId, tilemap_layer const& layer);
     void remove_layer(uid layerId);
 
+    void bring_to_front(uid layerId);
+    void send_to_back(uid layerId);
+
     auto is_layer_visible(uid layerId) const -> bool;
     void show_layer(uid layerId);
     void hide_layer(uid layerId);

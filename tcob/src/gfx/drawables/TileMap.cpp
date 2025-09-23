@@ -121,6 +121,24 @@ void tilemap_base::remove_layer(uid layerId)
     mark_dirty();
 }
 
+void tilemap_base::bring_to_front(uid layerId)
+{
+    auto it {find_layer(layerId)};
+    if (it == _layers.end()) { return; }
+
+    std::rotate(it, it + 1, _layers.end());
+    mark_dirty();
+}
+
+void tilemap_base::send_to_back(uid layerId)
+{
+    auto it {find_layer(layerId)};
+    if (it == _layers.end()) { return; }
+
+    std::rotate(_layers.begin(), it, it + 1);
+    mark_dirty();
+}
+
 auto tilemap_base::get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>
 {
     auto it {find_layer(layerId)};
@@ -293,4 +311,5 @@ auto hexagonal_grid::layout_tile(hexagonal_tile const& /* tile */, point_i coord
 }
 
 ////////////////////////////////////////////////////////////
+
 }
