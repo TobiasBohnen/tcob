@@ -46,10 +46,9 @@ void task_manager::run_parallel(par_func const& func, isize count, isize minRang
         std::atomic<isize> activeTasks {numThreads};
 
         for (isize i {0}; i < numThreads; ++i) {
-            par_task const ctx {.Start  = i * partitionSize,
-                                .End    = (i == numThreads - 1) ? count : ctx.Start + partitionSize,
-                                .Thread = i};
-            add_task([func, ctx, &activeTasks] {
+            isize const start {i * partitionSize};
+            isize const end {(i == numThreads - 1) ? count : start + partitionSize};
+            add_task([func, ctx = par_task {.Start = start, .End = end, .Thread = i}, &activeTasks] {
                 func(ctx);
                 --activeTasks;
             });
