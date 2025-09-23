@@ -3,6 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <algorithm>
+
 #include "tcob/gfx/drawables/Background.hpp"
 
 #include "tcob/core/Point.hpp"
@@ -66,6 +68,25 @@ auto parallax_background::add_layer(parallax_background_layer const& layer) -> u
     return id;
 }
 
+void parallax_background::replace_layer(uid id, parallax_background_layer const& layer)
+{
+    auto const it {std::ranges::find_if(_layers, [&](auto const& l) { return l.ID == id; })};
+    if (it != _layers.end()) {
+        it->TextureRegion = layer.TextureRegion;
+        it->ScrollScale   = layer.ScrollScale;
+        it->Offset        = layer.Offset;
+    }
+}
+
+void parallax_background::remove_layer(uid id)
+{
+    auto const it {std::ranges::find_if(_layers, [&](auto const& l) { return l.ID == id; })};
+    if (it != _layers.end()) {
+        _layers.erase(it);
+        _quads.resize(_layers.size());
+    }
+}
+
 auto parallax_background::is_layer_visible(uid layerId) const -> bool
 {
     if (auto const* layer {get_layer(layerId)}) {
@@ -89,13 +110,6 @@ void parallax_background::hide_layer(uid layerId)
         if (layer->Visible) {
             layer->Visible = false;
         }
-    }
-}
-
-void parallax_background::set_layer_texture(uid layerId, string const& texture)
-{
-    if (auto* layer {get_layer(layerId)}) {
-        layer->TextureRegion = texture;
     }
 }
 

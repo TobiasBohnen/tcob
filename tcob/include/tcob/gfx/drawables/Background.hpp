@@ -55,12 +55,12 @@ public:
     size_f                    TextureScale {size_f::One};
 
     auto add_layer(parallax_background_layer const& layer) -> uid;
+    void replace_layer(uid id, parallax_background_layer const& layer);
+    void remove_layer(uid id);
 
     auto is_layer_visible(uid layerId) const -> bool;
     void show_layer(uid layerId);
     void hide_layer(uid layerId);
-
-    void set_layer_texture(uid layerId, string const& texture);
 
 protected:
     auto can_draw() const -> bool override;

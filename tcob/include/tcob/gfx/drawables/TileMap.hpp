@@ -157,15 +157,17 @@ public:
     prop<point_f>             Position;
 
     auto add_layer(tilemap_layer const& layer) -> uid;
-
-    auto get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>;
-    void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
+    void replace_layer(uid layerId, tilemap_layer const& layer);
+    void remove_layer(uid layerId);
 
     auto is_layer_visible(uid layerId) const -> bool;
     void show_layer(uid layerId);
     void hide_layer(uid layerId);
 
     auto get_layer_size(uid layerId) const -> std::optional<size_i>;
+
+    auto get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>;
+    void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
 
     void clear();
 
@@ -189,8 +191,8 @@ private:
         auto get_index(point_i pos) const -> i32;
     };
 
-    auto get_layer(uid id) -> layer*;
-    auto get_layer(uid id) const -> layer const*;
+    auto find_layer(uid id) -> std::vector<layer>::iterator;
+    auto find_layer(uid id) const -> std::vector<layer>::const_iterator;
 
     virtual void setup_quad(quad& q, point_i coord, tile_index_t idx) const = 0;
 
