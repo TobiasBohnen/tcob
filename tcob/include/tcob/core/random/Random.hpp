@@ -20,8 +20,8 @@ namespace random {
 
     ////////////////////////////////////////////////////////////
 
-    template <RandomEngine E, typename D = core_uniform_distribution>
-    class random_number_generator final {
+    template <RandomEngine E, typename D>
+    class prng final {
     public:
         using random_engine_type = E;
         using state_type         = typename E::state_type;
@@ -29,8 +29,8 @@ namespace random {
         using result_type        = typename E::result_type;
         using distribution_type  = D;
 
-        explicit random_number_generator(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
-        explicit random_number_generator(state_type state, auto&&... distArgs);
+        explicit prng(seed_type seed = static_cast<seed_type>(clock::now().time_since_epoch().count()), auto&&... distArgs);
+        explicit prng(state_type state, auto&&... distArgs);
 
         auto operator()(auto&&... distArgs);
 
@@ -45,18 +45,18 @@ namespace random {
 
     ////////////////////////////////////////////////////////////
 
-    using rng_split_mix_32            = random_number_generator<split_mix_32>;
-    using rng_split_mix_64            = random_number_generator<split_mix_64>;
-    using rng_game_rand               = random_number_generator<game_rand>;
-    using rng_xorshift_64             = random_number_generator<xorshift_64>;
-    using rng_xorshift_64_star        = random_number_generator<xorshift_64_star>;
-    using rng_xoroshiro_128_plus      = random_number_generator<xoroshiro_128_plus>;
-    using rng_xoroshiro_128_plus_plus = random_number_generator<xoroshiro_128_plus_plus>;
-    using rng_xoroshiro_128_star_star = random_number_generator<xoroshiro_128_star_star>;
-    using rng_xoshiro_256_plus        = random_number_generator<xoshiro_256_plus>;
-    using rng_xoshiro_256_plus_plus   = random_number_generator<xoshiro_256_plus_plus>;
-    using rng_xoshiro_256_star_star   = random_number_generator<xoshiro_256_star_star>;
-    using rng_well_512_a              = random_number_generator<well_512_a>;
+    using prng_split_mix_32            = prng<split_mix_32, core_uniform_distribution>;
+    using prng_split_mix_64            = prng<split_mix_64, core_uniform_distribution>;
+    using prng_game_rand               = prng<game_rand, core_uniform_distribution>;
+    using prng_xorshift_64             = prng<xorshift_64, core_uniform_distribution>;
+    using prng_xorshift_64_star        = prng<xorshift_64_star, core_uniform_distribution>;
+    using prng_xoroshiro_128_plus      = prng<xoroshiro_128_plus, core_uniform_distribution>;
+    using prng_xoroshiro_128_plus_plus = prng<xoroshiro_128_plus_plus, core_uniform_distribution>;
+    using prng_xoroshiro_128_star_star = prng<xoroshiro_128_star_star, core_uniform_distribution>;
+    using prng_xoshiro_256_plus        = prng<xoshiro_256_plus, core_uniform_distribution>;
+    using prng_xoshiro_256_plus_plus   = prng<xoshiro_256_plus_plus, core_uniform_distribution>;
+    using prng_xoshiro_256_star_star   = prng<xoshiro_256_star_star, core_uniform_distribution>;
+    using prng_well_512_a              = prng<well_512_a, core_uniform_distribution>;
 
     ////////////////////////////////////////////////////////////
 
@@ -78,7 +78,7 @@ namespace random {
         auto roll_n_sum(usize n) -> i32;
 
     private:
-        random_number_generator<E> _random {};
+        prng<E, core_uniform_distribution> _random {};
     };
 
     ////////////////////////////////////////////////////////////
@@ -97,12 +97,12 @@ namespace random {
         void operator()(std::span<T> span);
 
     private:
-        random_number_generator<E> _random {};
+        prng<E, core_uniform_distribution> _random {};
     };
 
 }
 
-using rng = random::rng_xoroshiro_128_plus_plus;
+using rng = random::prng_xoroshiro_128_plus_plus;
 
 TCOB_API auto get_random_ID() -> uid;
 

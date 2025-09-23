@@ -14,12 +14,12 @@
 namespace tcob::random {
 ////////////////////////////////////////////////////////////
 
+auto NextFloat(auto&& rng) -> f64;
+
 class core_uniform_distribution {
 public:
     template <typename R, Arithmetic T>
     auto operator()(R& rng, T min, T max) -> T;
-
-    static auto NextFloat(auto&& rng) -> f64;
 };
 
 ////////////////////////////////////////////////////////////

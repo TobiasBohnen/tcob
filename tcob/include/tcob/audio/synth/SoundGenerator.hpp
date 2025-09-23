@@ -110,7 +110,7 @@ public:
 class TCOB_API sound_generator final {
 public:
     sound_generator() = default;
-    explicit sound_generator(random::rng_split_mix_64 random);
+    explicit sound_generator(random::prng_split_mix_64 random);
 
     auto generate_pickup_coin() -> sound_wave;
     auto generate_laser_shoot() -> sound_wave;
@@ -127,6 +127,6 @@ public:
     auto create_sound [[nodiscard]] (sound_wave const& wave) -> std::shared_ptr<sound>;
 
 private:
-    random::rng_split_mix_64 _random;
+    random::prng_split_mix_64 _random;
 };
 }

@@ -23,7 +23,7 @@ namespace tcob::audio {
 
 ////////////////////////////////////////////////////////////
 
-sound_generator::sound_generator(random::rng_split_mix_64 random)
+sound_generator::sound_generator(random::prng_split_mix_64 random)
     : _random {random}
 {
 }
@@ -412,7 +412,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
                 sample = fp < squareDuty() ? 0.5f : -0.5f;
             } break;
             case sound_wave::type::Sawtooth:
-                sample = 1.0f - fp * 2;
+                sample = 1.0f - (fp * 2);
                 break;
             case sound_wave::type::Sine:
                 sample = std::sin(fp * TAU_F);
@@ -421,7 +421,7 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
                 sample = noise[phase * 32 / period];
                 break;
             case sound_wave::type::Triangle:
-                sample = 1.0f - std::abs(std::round(fp) - fp) * 4;
+                sample = 1.0f - (std::abs(std::round(fp) - fp) * 4);
                 break;
             }
 

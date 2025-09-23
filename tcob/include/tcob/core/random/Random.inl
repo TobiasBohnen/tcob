@@ -16,33 +16,33 @@ namespace tcob::random {
 ////////////////////////////////////////////////////////////
 
 template <RandomEngine E, typename D>
-inline random_number_generator<E, D>::random_number_generator(seed_type seed, auto&&... distArgs)
+inline prng<E, D>::prng(seed_type seed, auto&&... distArgs)
     : _distribution {distArgs...}
 {
     _engine.seed(_state, seed);
 }
 
 template <RandomEngine E, typename D>
-inline random_number_generator<E, D>::random_number_generator(state_type state, auto&&... distArgs)
+inline prng<E, D>::prng(state_type state, auto&&... distArgs)
     : _state {state}
     , _distribution {distArgs...}
 {
 }
 
 template <RandomEngine E, typename D>
-inline auto random_number_generator<E, D>::operator()(auto&&... distArgs)
+inline auto prng<E, D>::operator()(auto&&... distArgs)
 {
     return _distribution(*this, distArgs...);
 }
 
 template <RandomEngine E, typename D>
-inline auto random_number_generator<E, D>::next() -> result_type
+inline auto prng<E, D>::next() -> result_type
 {
     return _engine(_state);
 }
 
 template <RandomEngine E, typename D>
-inline auto random_number_generator<E, D>::state() const -> state_type const&
+inline auto prng<E, D>::state() const -> state_type const&
 {
     return _state;
 }

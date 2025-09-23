@@ -91,8 +91,8 @@ public:
     auto operator[](i32 idx) const -> f32;
 
 private:
-    random::rng_split_mix_64 _random {};
-    std::array<f32, 32>      _buffer {};
+    random::prng_split_mix_64 _random {};
+    std::array<f32, 32>       _buffer {};
 };
 
 ////////////////////////////////////////////////////////////

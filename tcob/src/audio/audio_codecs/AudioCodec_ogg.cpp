@@ -128,7 +128,7 @@ auto vorbis_encoder::encode(std::span<f32 const> samples, buffer::information co
     vorbis_analysis_init(&vd, &vi);
     vorbis_block_init(&vd, &vb);
 
-    random::rng_game_rand rng;
+    random::prng_game_rand rng;
     ogg_stream_init(&os, static_cast<i32>(rng.next()));
 
     {

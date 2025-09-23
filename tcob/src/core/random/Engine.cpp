@@ -53,7 +53,7 @@ auto game_rand::operator()(state_type& state) -> result_type
 
 void game_rand::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_32 rnd {seed};
+    prng_split_mix_32 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
 }
@@ -108,7 +108,7 @@ auto xoroshiro_128_plus::operator()(state_type& state) -> result_type
 
 void xoroshiro_128_plus::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_64 rnd {seed};
+    prng_split_mix_64 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
 }
@@ -130,7 +130,7 @@ auto xoroshiro_128_plus_plus::operator()(state_type& state) -> result_type
 
 void xoroshiro_128_plus_plus::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_64 rnd {seed};
+    prng_split_mix_64 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
 }
@@ -152,7 +152,7 @@ auto xoroshiro_128_star_star::operator()(state_type& state) -> result_type
 
 void xoroshiro_128_star_star::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_64 rnd {seed};
+    prng_split_mix_64 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
 }
@@ -179,7 +179,7 @@ auto xoshiro_256_plus::operator()(state_type& state) -> result_type
 
 void xoshiro_256_plus::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_64 rnd {seed};
+    prng_split_mix_64 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
     state[2] = rnd.next();
@@ -208,7 +208,7 @@ auto xoshiro_256_plus_plus::operator()(state_type& state) -> result_type
 
 void xoshiro_256_plus_plus::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_64 rnd {seed};
+    prng_split_mix_64 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
     state[2] = rnd.next();
@@ -237,7 +237,7 @@ auto xoshiro_256_star_star::operator()(state_type& state) -> result_type
 
 void xoshiro_256_star_star::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_64 rnd {seed};
+    prng_split_mix_64 rnd {seed};
     state[0] = rnd.next();
     state[1] = rnd.next();
     state[2] = rnd.next();
@@ -263,7 +263,7 @@ auto well_512_a::operator()(state_type& state) -> result_type
 
 void well_512_a::seed(state_type& state, seed_type seed) const
 {
-    rng_split_mix_32 rnd {seed};
+    prng_split_mix_32 rnd {seed};
     for (usize i {0}; i < state.size(); ++i) {
         state[i] = rnd.next();
     }
