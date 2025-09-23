@@ -47,16 +47,6 @@ object::object(std::shared_ptr<cfg_object_entries> const& entries) noexcept
 {
 }
 
-auto object::operator[](string const& key) -> proxy<object, string>
-{
-    return proxy<object, string> {*this, std::tuple {key}};
-}
-
-auto object::operator[](string const& key) const -> proxy<object const, string> const
-{
-    return proxy<object const, string> {*this, std::tuple {key}};
-}
-
 void object::set(string_view key, std::nullptr_t)
 {
     remove_entry(key);

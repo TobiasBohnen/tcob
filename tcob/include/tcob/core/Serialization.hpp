@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <type_traits>
-#include <utility>
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Concepts.hpp"
@@ -24,12 +23,12 @@ template <auto Ptr, auto Default = no_default>
 struct member {
     using field_type = typename detail::member_pointer_traits<decltype(Ptr)>::field_type;
 
-    constexpr member(utf8_string name)
-        : Name {std::move(name)}
+    constexpr member(utf8_string_view name)
+        : Name {name}
     {
     }
 
-    utf8_string Name;
+    utf8_string_view Name;
 
     template <typename T>
     void constexpr get(auto proxy, T const& object) const
@@ -64,12 +63,12 @@ struct member {
 
 template <auto Get, auto Set>
 struct member_fn {
-    constexpr member_fn(utf8_string name)
-        : Name {std::move(name)}
+    constexpr member_fn(utf8_string_view name)
+        : Name {name}
     {
     }
 
-    utf8_string Name;
+    utf8_string_view Name;
 
     template <typename T>
     void constexpr get(auto proxy, T const& object) const

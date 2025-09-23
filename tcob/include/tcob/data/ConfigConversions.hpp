@@ -650,36 +650,31 @@ public:
 
     static auto From(cfg_value const& config, T& value) -> bool
     {
-        static auto const members {T::Members()};
         if (std::holds_alternative<object>(config)) {
             object const& obj {std::get<object>(config)};
-            bool          retValue {true};
-            std::apply([&](auto&&... m) { ((retValue = retValue && m.set(obj[m.Name], value)), ...); },
-                       members);
-            return retValue;
+            return std::apply([&](auto&&... m) { return (m.set(obj[m.Name], value) && ...); }, Members);
         }
         if (std::holds_alternative<array>(config)) {
             array const& arr {std::get<array>(config)};
-            if (arr.size() != std::tuple_size_v<decltype(members)>) { return false; }
+            if (arr.size() != std::tuple_size_v<decltype(Members)>) { return false; }
 
             auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
                 return ((std::get<I>(members).set(arr[I], object)) && ...);
             }};
-            return assign(members, arr, value, std::make_index_sequence<std::tuple_size_v<decltype(members)>> {});
+            return assign(Members, arr, value, std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
-
         return false;
     }
 
     static void To(cfg_value& config, T const& value)
     {
-        static auto const members {T::Members()};
-
         object obj {};
-        std::apply([&](auto&&... m) { ((m.get(obj[m.Name], value)), ...); },
-                   members);
+        std::apply([&](auto&&... m) { ((m.get(obj[m.Name], value)), ...); }, Members);
         config = obj;
     }
+
+private:
+    constexpr static auto const Members {T::Members()};
 };
 
 template <FloatingPoint ValueType, double OneTurn>

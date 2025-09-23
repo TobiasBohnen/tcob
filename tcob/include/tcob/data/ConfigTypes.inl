@@ -19,6 +19,7 @@
 #include <variant>
 
 #include "tcob/core/Common.hpp"
+#include "tcob/core/Proxy.hpp"
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/io/FileStream.hpp"
 #include "tcob/core/io/FileSystem.hpp"
@@ -146,6 +147,18 @@ inline auto base_type<Impl, Container>::get_type(Key key) const -> type
 }
 
 ////////////////////////////////////////////////////////////
+
+template <typename Key>
+inline auto object::operator[](Key key) -> proxy<object, Key>
+{
+    return proxy<object, Key> {*this, std::tuple {key}};
+}
+
+template <typename Key>
+inline auto object::operator[](Key key) const -> proxy<object const, Key> const
+{
+    return proxy<object const, Key> {*this, std::tuple {key}};
+}
 
 template <ConvertibleFrom T, typename... Keys>
 inline auto object::as(string_view key, Keys&&... keys) const -> T

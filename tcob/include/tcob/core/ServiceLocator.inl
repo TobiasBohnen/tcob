@@ -13,7 +13,11 @@ namespace tcob {
 template <typename T>
 inline void service_locator::set(std::shared_ptr<T> service)
 {
-    _services[typeid(T).hash_code()] = service;
+    if (service) {
+        _services[typeid(T).hash_code()] = service;
+    } else {
+        _services.erase(typeid(T).hash_code());
+    }
 }
 
 template <typename T>

@@ -997,34 +997,29 @@ public:
     {
         if (!view.is_table(idx)) { return false; }
 
-        table             tab {table::Acquire(view, idx++)};
-        static auto const members {T::Members()};
+        table tab {table::Acquire(view, idx++)};
 
-        bool retValue {true};
-
-        if (tab.raw_length() == std::tuple_size_v<decltype(members)>) {
+        // array
+        if (tab.raw_length() == std::tuple_size_v<decltype(Members)>) {
             auto const assign {[]<usize... I>(auto& members, auto const& arr, auto& object, std::index_sequence<I...>) {
                 return ((std::get<I>(members).set(arr[I + 1], object)) && ...);
             }};
-            return assign(members, tab, value, std::make_index_sequence<std::tuple_size_v<decltype(members)>> {});
+            return assign(Members, tab, value, std::make_index_sequence<std::tuple_size_v<decltype(Members)>> {});
         }
 
-        std::apply([&](auto&&... m) {
-            ((retValue = retValue && m.set(tab[m.Name], value)), ...);
-        },
-                   members);
-
-        return retValue;
+        // table
+        return std::apply([&](auto&&... m) { return (m.set(tab[m.Name], value) && ...); }, Members);
     }
 
     static void To(state_view view, T const& value)
     {
         table tab {table::PushNew(view)};
 
-        static auto const members {T::Members()};
-        std::apply([&](auto&&... m) { (m.get(tab[m.Name], value), ...); },
-                   members);
+        std::apply([&](auto&&... m) { (m.get(tab[m.Name], value), ...); }, Members);
     }
+
+private:
+    constexpr static auto const Members {T::Members()};
 };
 
 template <FloatingPoint ValueType, double OneTurn>

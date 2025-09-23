@@ -81,8 +81,10 @@ public:
     object(std::initializer_list<std::pair<utf8_string, cfg_value>> items);
     object(std::shared_ptr<cfg_object_entries> const& entries) noexcept;
 
-    auto operator[](string const& key) -> proxy<object, string>;
-    auto operator[](string const& key) const -> proxy<object const, string> const;
+    template <typename Key>
+    auto operator[](Key key) -> proxy<object, Key>;
+    template <typename Key>
+    auto operator[](Key key) const -> proxy<object const, Key> const;
 
     auto parse(string_view config, string const& ext) noexcept -> bool;
 

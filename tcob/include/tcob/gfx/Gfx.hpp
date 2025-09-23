@@ -16,13 +16,13 @@
 #include "tcob/core/Size.hpp"
 
 namespace tcob::Cfg::Video {
-char const* const Name {"video"};
-char const* const fullscreen {"fullscreen"};
-char const* const use_desktop_resolution {"use_desktop_resolution"};
-char const* const resolution {"resolution"};
-char const* const frame_limit {"frame_limit"};
-char const* const vsync {"vsync"};
-char const* const render_system {"render_system"};
+constexpr char const* const Name {"video"};
+constexpr char const* const fullscreen {"fullscreen"};
+constexpr char const* const use_desktop_resolution {"use_desktop_resolution"};
+constexpr char const* const resolution {"resolution"};
+constexpr char const* const frame_limit {"frame_limit"};
+constexpr char const* const vsync {"vsync"};
+constexpr char const* const render_system {"render_system"};
 }
 
 namespace tcob::gfx {

@@ -10,11 +10,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "tcob/core/Interfaces.hpp"
+
 namespace tcob {
 ////////////////////////////////////////////////////////////
 
 template <typename ReturnType, typename... Args>
-class type_factory {
+class type_factory : public non_copyable {
     using func = std::function<ReturnType(Args...)>;
 
 public:
