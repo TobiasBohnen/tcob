@@ -38,7 +38,7 @@ public:
 
     virtual auto preferred_locales() const -> std::vector<locale> const& = 0;
 
-    virtual auto window_freezed() const -> bool = 0; // WINDOWS: true if window was dragged
+    virtual auto window_frozen() const -> bool = 0; // WINDOWS: true if window was dragged
 
     virtual auto process_events() const -> bool = 0;
 

@@ -164,7 +164,7 @@ auto sdl_platform::get_desktop_mode(i32 display) const -> gfx::display_mode
             .RefreshRate  = mode->refresh_rate};
 }
 
-auto sdl_platform::window_freezed() const -> bool
+auto sdl_platform::window_frozen() const -> bool
 {
     return _wasPaused;
 }

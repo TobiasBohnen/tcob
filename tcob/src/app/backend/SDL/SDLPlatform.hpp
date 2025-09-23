@@ -27,7 +27,7 @@ public:
 
     auto preferred_locales() const -> std::vector<locale> const& override;
 
-    auto window_freezed() const -> bool override; // WINDOWS: true if window was dragged
+    auto window_frozen() const -> bool override; // WINDOWS: true if window was dragged
 
     auto process_events() const -> bool override;
 
