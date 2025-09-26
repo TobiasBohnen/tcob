@@ -285,6 +285,6 @@ void sound_font_commands::render(tsf* font, f32* buffer, u8 channels, i32 sample
 
 ////////////////////////////////////////////////////////////
 
-} // namespace audio
+}
 
 #endif

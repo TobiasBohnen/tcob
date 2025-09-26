@@ -371,4 +371,4 @@ auto drop_down_list::get_scroll_max_value() const -> f32
     return std::max(1.0f, (get_item_height() * static_cast<f32>(get_items().size())) - content_bounds().height());
 }
 
-} // namespace ui
+}

@@ -501,4 +501,4 @@ void radar_chart::on_draw_chart(widget_painter& painter)
     }
 }
 
-} // namespace display
+}

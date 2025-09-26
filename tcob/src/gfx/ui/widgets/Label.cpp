@@ -132,4 +132,4 @@ auto label::attributes() const -> widget_attributes
     return retValue;
 }
 
-} // namespace ui
+}

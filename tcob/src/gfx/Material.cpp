@@ -15,4 +15,4 @@ auto material::Empty() -> asset_owner_ptr<material>
     return instance;
 }
 
-} // namespace gfx
+}

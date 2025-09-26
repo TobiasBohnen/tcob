@@ -52,4 +52,4 @@ void vertex_array::draw_arrays(primitive_type mode, i32 first, usize count) cons
     _impl->draw_arrays(mode, first, count);
 }
 
-} // namespace tcob
+}

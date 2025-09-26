@@ -85,4 +85,4 @@ auto gl_render_system::create_window(size_i size) -> std::unique_ptr<gfx::window
     return std::make_unique<sdl_window>(std::make_unique<gl_window>(size));
 }
 
-} // namespace gfx
+}

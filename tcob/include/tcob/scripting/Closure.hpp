@@ -60,7 +60,7 @@ namespace detail {
         std::tuple<Funcs...> _fns;
     };
 
-} // namespace detail
+}
 
 ////////////////////////////////////////////////////////////
 
@@ -76,6 +76,6 @@ template <typename... Funcs>
 auto make_unique_overload(Funcs&&... fns) -> native_closure_unique_ptr;
 template <typename... Funcs>
 auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr;
-} // namespace tcob::scripting
+}
 
 #include "Closure.inl"

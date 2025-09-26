@@ -71,4 +71,4 @@ auto checkbox::flags() -> widget_flags
     return retValue;
 }
 
-} // namespace ui
+}

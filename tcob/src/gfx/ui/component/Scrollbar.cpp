@@ -183,4 +183,4 @@ void scrollbar::calculate_value(point_f mp)
     _overThumb = true;
 }
 
-} // namespace ui
+}

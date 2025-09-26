@@ -346,4 +346,4 @@ schema::result::operator bool() const
     return Failures.empty();
 }
 
-} // namespace config
+}

@@ -70,4 +70,4 @@ void item_style::Transition(item_style& target, item_style const& from, item_sty
 
 ////////////////////////////////////////////////////////////
 
-} // namespace ui
+}

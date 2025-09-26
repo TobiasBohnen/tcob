@@ -282,4 +282,4 @@ auto reverser_filter::from(std::span<byte const> bytes) const -> std::vector<byt
     return to(bytes);
 }
 
-} // namespace io
+}

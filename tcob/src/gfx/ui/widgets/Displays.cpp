@@ -443,4 +443,4 @@ auto color_picker::GetColors() -> std::array<color, 256> const&
     return colors;
 }
 
-} // namespace display
+}

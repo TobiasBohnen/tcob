@@ -81,4 +81,4 @@ auto toggle::flags() -> widget_flags
     return retValue;
 }
 
-} // namespace ui
+}

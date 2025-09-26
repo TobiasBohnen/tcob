@@ -371,4 +371,4 @@ auto text_box::calc_caret_pos(point_f mp) const -> isize
     return _textLength;
 }
 
-} // namespace ui
+}

@@ -85,4 +85,4 @@ auto pitch_shift_effect::operator()(buffer const& buf) const -> buffer
     return buffer::Create(info.Specs, outData);
 }
 
-} // namespace audio
+}

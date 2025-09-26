@@ -36,4 +36,4 @@ void tooltip::on_tooltip(widget* top)
     Popup({.Sender = this, .Widget = top});
 }
 
-} // namespace ui
+}

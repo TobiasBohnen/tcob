@@ -168,4 +168,4 @@ public:
     void add_gradient(i32 idx, color_gradient const& gradient) override;
 };
 
-} // namespace gfx
+}

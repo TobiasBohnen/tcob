@@ -219,4 +219,4 @@ auto local_to_screen(widget const& widget, point_f p) -> point_f
     return p + delta;
 }
 
-} // namespace ui
+}

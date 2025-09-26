@@ -128,4 +128,4 @@ void vscroll_widget::set_scrollbar_value(f32 value)
     _vScrollbar.reset(max == 0 ? 0 : value / max);
 }
 
-} // namespace ui
+}

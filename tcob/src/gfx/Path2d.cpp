@@ -418,4 +418,4 @@ auto path2d::CommandsQuadTo(point_f start, point_f cp, point_f end) -> std::vect
         end.X, end.Y};
 }
 
-} // namespace gfx
+}

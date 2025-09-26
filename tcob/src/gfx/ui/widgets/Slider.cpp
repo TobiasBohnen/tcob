@@ -573,4 +573,4 @@ void range_slider::calculate_value(bool isMin, point_f mp)
     }
 }
 
-} // namespace ui
+}

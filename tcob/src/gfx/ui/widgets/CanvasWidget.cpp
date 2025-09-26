@@ -333,4 +333,4 @@ void canvas_widget::on_update(milliseconds /* deltaTime */)
 {
 }
 
-} // namespace display
+}

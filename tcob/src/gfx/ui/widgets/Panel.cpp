@@ -473,4 +473,4 @@ auto modal_dialog::is_open() const -> bool
     return _open;
 }
 
-} // namespace ui
+}

@@ -59,4 +59,4 @@ auto l_system::get_replacement(char c, string const& prev, usize pos) -> string
     return {c};
 }
 
-} // namespace gfx
+}

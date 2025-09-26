@@ -76,4 +76,4 @@ void animation_tweener::update(milliseconds deltaTime)
     if (_tween) { _tween->update(deltaTime); }
 }
 
-} // namespace ui
+}

@@ -89,4 +89,4 @@ auto progress_bar::attributes() const -> widget_attributes
     return retValue;
 }
 
-} // namespace ui
+}

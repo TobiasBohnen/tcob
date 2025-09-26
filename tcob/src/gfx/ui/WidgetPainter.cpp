@@ -850,4 +850,4 @@ scissor_guard::~scissor_guard()
     _painter.pop_scissor();
 }
 
-} // namespace ui
+}

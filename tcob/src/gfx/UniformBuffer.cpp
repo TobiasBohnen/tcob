@@ -29,4 +29,4 @@ void uniform_buffer::bind_base(u32 index) const
     _impl->bind_base(index);
 }
 
-} // namespace gfx
+}

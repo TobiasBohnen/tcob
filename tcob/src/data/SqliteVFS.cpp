@@ -254,6 +254,6 @@ auto register_vfs() -> string
     return sqlite3_vfs_register(&physfs_sqlite3_vfs, true) == SQLITE_OK ? physfs_sqlite3_vfs.zName : "";
 }
 
-} // namespace sqlite
+}
 
 #endif

@@ -37,4 +37,4 @@ auto shader::compile(string const& vertexShaderSource, string const& fragmentSha
     return _impl->compile(vertexShaderSource, fragmentShaderSource);
 }
 
-} // namespace tcob
+}

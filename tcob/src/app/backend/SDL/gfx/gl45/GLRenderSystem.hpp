@@ -31,4 +31,4 @@ public:
     auto create_window(size_i size) -> std::unique_ptr<gfx::window> override;
 };
 
-} // namespace gfx
+}

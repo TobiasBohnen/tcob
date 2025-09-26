@@ -85,4 +85,4 @@ auto get_extension(istream& stream) -> path
     return sig ? sig->Extension : "";
 }
 
-} // namespace magic
+}

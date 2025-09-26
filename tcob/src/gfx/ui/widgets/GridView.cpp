@@ -290,4 +290,4 @@ auto grid_view::get_row_height(f32 ref) const -> f32
     return ref / (_style.MaxVisibleRows + 1);
 }
 
-} // namespace ui
+}

@@ -229,4 +229,4 @@ auto period::operator()() -> f64
     return _period;
 }
 
-} // namespace audio
+}

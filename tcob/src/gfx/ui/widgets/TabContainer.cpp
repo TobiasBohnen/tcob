@@ -320,4 +320,4 @@ auto tab_container::attributes() const -> widget_attributes
     return retValue;
 }
 
-} // namespace ui
+}

@@ -144,4 +144,4 @@ void value_noise::generate_grid(i32 gridSize)
     }
 }
 
-} // namespace gfx
+}

@@ -416,4 +416,4 @@ void shadow_caster::notify_parent()
     }
 }
 
-} // namespace gfx
+}

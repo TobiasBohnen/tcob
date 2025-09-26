@@ -190,4 +190,4 @@ auto spinner::attributes() const -> widget_attributes
     return retValue;
 }
 
-} // namespace ui
+}

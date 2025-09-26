@@ -126,4 +126,4 @@ auto color_gradient::Lerp(color_gradient const& from, color_gradient const& to, 
     return retValue;
 }
 
-} // namespace gfx
+}

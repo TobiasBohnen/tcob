@@ -163,4 +163,4 @@ auto image_box::attributes() const -> widget_attributes
     return retValue;
 }
 
-} // namespace ui
+}

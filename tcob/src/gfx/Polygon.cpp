@@ -365,4 +365,4 @@ auto polygonize_text(font& font, utf8_string_view text, bool kerning) -> std::ve
     return retValue;
 }
 
-} // namespace gfx
+}

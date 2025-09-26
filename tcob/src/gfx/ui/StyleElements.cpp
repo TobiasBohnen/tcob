@@ -194,4 +194,4 @@ void item_element::lerp(item_element const& from, item_element const& to, f64 st
 
 ////////////////////////////////////////////////////////////
 
-} // namespace ui
+}

@@ -48,4 +48,4 @@ auto ostream::write_string(string_view s) -> std::streamsize
     return write_bytes(s.data(), static_cast<std::streamsize>(s.size()));
 }
 
-} // namespace io
+}

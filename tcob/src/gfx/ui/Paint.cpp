@@ -81,4 +81,4 @@ void paint_lerp(paint& target, paint const& from, paint const& to, f64 step)
     }
 }
 
-} // namespace ui
+}

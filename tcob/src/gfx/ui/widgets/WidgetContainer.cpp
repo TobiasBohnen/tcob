@@ -94,4 +94,4 @@ void widget_container::set_redraw(bool val)
     }
 }
 
-} // namespace ui
+}

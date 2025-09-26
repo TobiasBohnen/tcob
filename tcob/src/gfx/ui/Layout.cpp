@@ -616,4 +616,4 @@ void magnetic_snap_layout::do_layout(size_f size)
     }
 }
 
-} // namespace ui
+}

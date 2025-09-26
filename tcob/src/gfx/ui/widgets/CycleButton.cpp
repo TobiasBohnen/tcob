@@ -170,4 +170,4 @@ void cycle_button::select_next()
     }
 }
 
-} // namespace ui
+}

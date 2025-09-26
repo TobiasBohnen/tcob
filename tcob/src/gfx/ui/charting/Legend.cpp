@@ -75,4 +75,4 @@ void legend::on_update(milliseconds /*deltaTime*/)
 {
 }
 
-} // namespace ui
+}
