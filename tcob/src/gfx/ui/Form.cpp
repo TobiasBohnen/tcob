@@ -538,7 +538,7 @@ void form_base::on_bounds_changed()
     on_styles_changed();
 }
 
-void form_base::on_visiblity_changed()
+void form_base::on_visibility_changed()
 {
     _isLButtonDown = false;
     _isRButtonDown = false;

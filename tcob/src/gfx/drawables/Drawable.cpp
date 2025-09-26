@@ -20,7 +20,7 @@ void drawable::show()
     if (_visible) { return; }
 
     _visible = true;
-    on_visiblity_changed();
+    on_visibility_changed();
     VisibilityChanged(true);
 }
 
@@ -29,7 +29,7 @@ void drawable::hide()
     if (!_visible) { return; }
 
     _visible = false;
-    on_visiblity_changed();
+    on_visibility_changed();
     VisibilityChanged(false);
 }
 
@@ -42,7 +42,7 @@ void drawable::draw_to(render_target& target)
     }
 }
 
-void drawable::on_visiblity_changed()
+void drawable::on_visibility_changed()
 {
 }
 

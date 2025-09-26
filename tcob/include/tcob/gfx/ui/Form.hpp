@@ -104,7 +104,7 @@ protected:
     void on_controller_button_up(input::controller::button_event const& ev) override;
 
     virtual void on_bounds_changed();
-    void         on_visiblity_changed() override;
+    void         on_visibility_changed() override;
 
     virtual void apply_layout()                      = 0;
     virtual auto get_layout() -> layout*             = 0;
