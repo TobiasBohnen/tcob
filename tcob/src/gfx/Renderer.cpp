@@ -5,7 +5,6 @@
 
 #include "tcob/gfx/Renderer.hpp"
 
-#include <algorithm>
 #include <array>
 #include <span>
 #include <utility>
@@ -61,10 +60,10 @@ void point_renderer::set_geometry(vertex const& v)
 void point_renderer::set_geometry(std::span<vertex const> vertices)
 {
     prepare(vertices.size());
-    modify_geometry(vertices, 0);
+    update_geometry(vertices, 0);
 }
 
-void point_renderer::modify_geometry(std::span<vertex const> vertices, usize offset) const
+void point_renderer::update_geometry(std::span<vertex const> vertices, usize offset) const
 {
     _vertexArray.update_data(vertices, offset);
 }
@@ -114,11 +113,11 @@ void quad_renderer::set_geometry(quad const& q)
 void quad_renderer::set_geometry(std::span<quad const> quads)
 {
     prepare(quads.size());
-    modify_geometry(quads, 0);
+    update_geometry(quads, 0);
     _numQuads = quads.size();
 }
 
-void quad_renderer::modify_geometry(std::span<quad const> quads, usize offset) const
+void quad_renderer::update_geometry(std::span<quad const> quads, usize offset) const
 {
     _vertexArray.update_data(quads, offset);
 }
@@ -163,87 +162,6 @@ void quad_renderer::on_render_to_target(render_target& target)
 
 ////////////////////////////////////////////////////////////
 
-batch_quad_renderer::batch_quad_renderer()
-    : _vertexArray {buffer_usage_hint::StreamDraw}
-{
-}
-
-void batch_quad_renderer::prepare(usize quadCount)
-{
-    usize const vertCount {quadCount * 4};
-    usize const indCount {quadCount * 6};
-
-    _vertexArray.resize(vertCount, indCount);
-
-    _indices.resize(indCount);
-    _quads.resize(quadCount);
-    _batches.clear();
-    _currentBatch = {};
-}
-
-void batch_quad_renderer::add_geometry(quad const& q, material const* mat)
-{
-    add_geometry(std::span {&q, 1}, mat);
-}
-
-void batch_quad_renderer::add_geometry(std::span<quad const> quads, material const* mat)
-{
-    // TODO: add VertexArray size check
-
-    // check if we have to break the batch
-    if (_currentBatch.NumInds > 0 && *_currentBatch.MaterialPtr != *mat) {
-        _batches.push_back(_currentBatch);
-        _currentBatch.OffsetInds += _currentBatch.NumInds;
-        _currentBatch.OffsetQuads += _currentBatch.NumQuads;
-        _currentBatch.NumInds  = 0;
-        _currentBatch.NumQuads = 0;
-    }
-
-    _currentBatch.MaterialPtr = mat;
-
-    std::ranges::copy(quads, _quads.begin() + _currentBatch.NumQuads + _currentBatch.OffsetQuads);
-
-    u32* ptr {&_indices[_currentBatch.OffsetInds]};
-
-    for (u32 i {0}, j {(_currentBatch.NumQuads + _currentBatch.OffsetQuads) * 4}; i < quads.size(); ++i, j += 4) {
-        ptr[_currentBatch.NumInds++] = (3 + j);
-        ptr[_currentBatch.NumInds++] = (1 + j);
-        ptr[_currentBatch.NumInds++] = (0 + j);
-        ptr[_currentBatch.NumInds++] = (3 + j);
-        ptr[_currentBatch.NumInds++] = (2 + j);
-        ptr[_currentBatch.NumInds++] = (1 + j);
-        _currentBatch.NumQuads++;
-    }
-}
-
-void batch_quad_renderer::on_render_to_target(render_target& target)
-{
-    if (_currentBatch.NumQuads == 0 && _batches.empty()) { // nothing to draw
-        return;
-    }
-
-    if (_currentBatch.NumQuads > 0) { // push current batch
-        _batches.push_back(_currentBatch);
-        _currentBatch = {};
-
-        _vertexArray.update_data(_indices, 0);
-        _vertexArray.update_data(_quads, 0);
-    }
-
-    for (auto const& batch : _batches) { // draw batches
-        if (batch.NumQuads == 0 || !batch.MaterialPtr) {
-            continue;
-        }
-
-        target.bind_material(batch.MaterialPtr);
-        _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
-    }
-
-    target.unbind_material();
-}
-
-////////////////////////////////////////////////////////////
-
 polygon_renderer::polygon_renderer(buffer_usage_hint usage)
     : _vertexArray {usage}
 {
@@ -257,12 +175,12 @@ void polygon_renderer::set_material(material const* material)
 void polygon_renderer::set_geometry(geometry_data const& gd)
 {
     prepare(gd.Vertices.size(), gd.Indices.size());
-    modify_geometry(gd, 0);
+    update_geometry(gd, 0);
     _numIndices = gd.Indices.size();
     _numVerts   = gd.Vertices.size();
 }
 
-void polygon_renderer::modify_geometry(geometry_data const& gd, usize offset)
+void polygon_renderer::update_geometry(geometry_data const& gd, usize offset)
 {
     _vertexArray.update_data(gd.Indices, offset);
     _vertexArray.update_data(gd.Vertices, offset);
@@ -391,9 +309,9 @@ void canvas_renderer::set_bounds(rect_f const& bounds)
     _vertexArray.update_data(std::span {&q, 1}, 0);
 }
 
-void canvas_renderer::set_layer(i32 layer)
+void canvas_renderer::add_layer(i32 layer)
 {
-    _material->Texture = _canvas.get_texture(layer);
+    _layers.push_back(layer);
 }
 
 void canvas_renderer::set_shader(asset_ptr<shader> shader)
@@ -409,9 +327,13 @@ void canvas_renderer::prepare_render(render_target& target)
 
 void canvas_renderer::on_render_to_target(render_target& target)
 {
-    target.bind_material(_material.ptr());
-    _vertexArray.draw_elements(primitive_type::Triangles, 6, 0);
+    for (auto layer : _layers) {
+        _material->Texture = _canvas.get_texture(layer);
+        target.bind_material(_material.ptr());
+        _vertexArray.draw_elements(primitive_type::Triangles, 6, 0);
+    }
     target.unbind_material();
+    _layers.clear();
 }
 
 void canvas_renderer::finalize_render(render_target& target)

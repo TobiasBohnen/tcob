@@ -41,9 +41,10 @@ public:
     explicit point_renderer(buffer_usage_hint usage);
 
     void set_material(material const* material);
+
     void set_geometry(vertex const& v);
     void set_geometry(std::span<vertex const> vertices);
-    void modify_geometry(std::span<vertex const> vertices, usize offset) const;
+    void update_geometry(std::span<vertex const> vertices, usize offset) const;
     void reset_geometry();
 
 private:
@@ -63,9 +64,10 @@ public:
     explicit quad_renderer(buffer_usage_hint usage);
 
     void set_material(material const* material);
+
     void set_geometry(quad const& q);
     void set_geometry(std::span<quad const> quads);
-    void modify_geometry(std::span<quad const> quads, usize offset) const;
+    void update_geometry(std::span<quad const> quads, usize offset) const;
     void reset_geometry();
 
 private:
@@ -80,43 +82,14 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API batch_quad_renderer final : public renderer {
-public:
-    batch_quad_renderer();
-
-    void prepare(usize quadCount);
-    void add_geometry(quad const& q, material const* mat);
-    void add_geometry(std::span<quad const> quads, material const* mat);
-
-private:
-    void on_render_to_target(render_target& target) override;
-
-    std::vector<u32>  _indices;
-    std::vector<quad> _quads;
-
-    vertex_array _vertexArray;
-
-    struct batch {
-        material const* MaterialPtr {nullptr};
-        u32             NumQuads {0};
-        u32             NumInds {0};
-        u32             OffsetQuads {0};
-        u32             OffsetInds {0};
-    };
-
-    batch              _currentBatch;
-    std::vector<batch> _batches;
-};
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API polygon_renderer final : public renderer {
 public:
     explicit polygon_renderer(buffer_usage_hint usage);
 
     void set_material(material const* material);
+
     void set_geometry(geometry_data const& gd);
-    void modify_geometry(geometry_data const& gd, usize offset);
+    void update_geometry(geometry_data const& gd, usize offset);
     void reset_geometry();
 
 private:
@@ -167,8 +140,9 @@ class TCOB_API canvas_renderer final : public renderer {
 public:
     explicit canvas_renderer(canvas& c);
 
+    void add_layer(i32 layer);
+
     void set_bounds(rect_f const& bounds);
-    void set_layer(i32 layer);
 
     void set_shader(asset_ptr<shader> shader);
 
@@ -180,6 +154,7 @@ protected:
     vertex_array              _vertexArray;
     canvas&                   _canvas;
     asset_owner_ptr<material> _material {};
+    std::vector<i32>          _layers;
 };
 
 }

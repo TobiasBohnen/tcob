@@ -310,14 +310,12 @@ void form_base::on_draw_to(gfx::render_target& target)
 
     // render
     for (i32 j {0}; j < layerCount; ++j) {
-        _renderer.set_layer(firstUILayer + j);
-        _renderer.render_to_target(target);
+        _renderer.add_layer(firstUILayer + j);
     }
 
     // overlay
     if (_drawOverlay) {
-        _renderer.set_layer(overlayLayer);
-        _renderer.render_to_target(target);
+        _renderer.add_layer(overlayLayer);
     }
 
     // tooltip
@@ -333,8 +331,7 @@ void form_base::on_draw_to(gfx::render_target& target)
         _topWidget->Tooltip->draw(*_painter);
         _canvas.end_frame();
 
-        _renderer.set_layer(tooltipLayer);
-        _renderer.render_to_target(target);
+        _renderer.add_layer(tooltipLayer);
     }
 
     // modal
@@ -347,9 +344,10 @@ void form_base::on_draw_to(gfx::render_target& target)
             }
             _canvas.end_frame();
         }
-        _renderer.set_layer(modalLayer);
-        _renderer.render_to_target(target);
+        _renderer.add_layer(modalLayer);
     }
+
+    _renderer.render_to_target(target);
 }
 
 auto form_base::focused_widget() const -> widget*
