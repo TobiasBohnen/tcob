@@ -250,7 +250,7 @@ namespace effect {
                 center.X = rect.left() - maxSize.Width + rect.width();
                 break;
             case horizontal_alignment::Centered:
-                center.X = rect.center().X - (maxSize.Width - rect.width()) / 2;
+                center.X = rect.center().X - ((maxSize.Width - rect.width()) / 2);
                 break;
             case horizontal_alignment::Right:
                 center.X = rect.right();
@@ -261,7 +261,7 @@ namespace effect {
                 center.Y = rect.top() - maxSize.Height + rect.height();
                 break;
             case vertical_alignment::Middle:
-                center.Y = rect.center().Y - (maxSize.Height - rect.height()) / 2;
+                center.Y = rect.center().Y - ((maxSize.Height - rect.height()) / 2);
                 break;
             case vertical_alignment::Bottom:
                 center.Y = rect.bottom();

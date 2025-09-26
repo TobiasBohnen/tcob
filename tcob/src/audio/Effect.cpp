@@ -41,10 +41,10 @@ auto delay_effect::operator()(buffer const& buf) const -> buffer
                 delayed = echo[frame - delayFrames];
             }
 
-            echo[frame] = dry + _feedback * delayed;
+            echo[frame] = dry + (_feedback * delayed);
 
             usize const idx {(frame * channels) + ch};
-            outData[idx] = (1.0f - _mix) * dry + _mix * echo[frame];
+            outData[idx] = ((1.0f - _mix) * dry) + (_mix * echo[frame]);
         }
     }
 
@@ -78,7 +78,7 @@ auto pitch_shift_effect::operator()(buffer const& buf) const -> buffer
 
             f32 const frac {srcIdx - static_cast<f32>(idx0)};
 
-            outData[(frame * channels) + ch] = sample0 + (sample1 - sample0) * frac;
+            outData[(frame * channels) + ch] = sample0 + ((sample1 - sample0) * frac);
         }
     }
 

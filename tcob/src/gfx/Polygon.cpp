@@ -130,7 +130,7 @@ auto polygons::is_point_inside(point_f point, polyline_span polyline) -> bool
     bool inside {false};
     for (usize i {0}, j {polyline.size() - 1}; i < polyline.size(); j = i++) {
         if ((polyline[i].Y > point.Y) != (polyline[j].Y > point.Y)
-            && point.X < (polyline[j].X - polyline[i].X) * (point.Y - polyline[i].Y) / (polyline[j].Y - polyline[i].Y) + polyline[i].X) {
+            && point.X < ((polyline[j].X - polyline[i].X) * (point.Y - polyline[i].Y) / (polyline[j].Y - polyline[i].Y)) + polyline[i].X) {
             inside = !inside;
         }
     }
