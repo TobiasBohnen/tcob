@@ -60,12 +60,7 @@ void point_renderer::set_geometry(vertex const& v)
 void point_renderer::set_geometry(std::span<vertex const> vertices)
 {
     prepare(vertices.size());
-    update_geometry(vertices, 0);
-}
-
-void point_renderer::update_geometry(std::span<vertex const> vertices, usize offset) const
-{
-    _vertexArray.update_data(vertices, offset);
+    _vertexArray.update_data(vertices, 0);
 }
 
 void point_renderer::reset_geometry()
@@ -113,13 +108,8 @@ void quad_renderer::set_geometry(quad const& q)
 void quad_renderer::set_geometry(std::span<quad const> quads)
 {
     prepare(quads.size());
-    update_geometry(quads, 0);
+    _vertexArray.update_data(quads, 0);
     _numQuads = quads.size();
-}
-
-void quad_renderer::update_geometry(std::span<quad const> quads, usize offset) const
-{
-    _vertexArray.update_data(quads, offset);
 }
 
 void quad_renderer::reset_geometry()
@@ -175,16 +165,13 @@ void polygon_renderer::set_material(material const* material)
 void polygon_renderer::set_geometry(geometry_data const& gd)
 {
     prepare(gd.Vertices.size(), gd.Indices.size());
-    update_geometry(gd, 0);
+
+    _vertexArray.update_data(gd.Indices, 0);
+    _vertexArray.update_data(gd.Vertices, 0);
+    _type = gd.Type;
+
     _numIndices = gd.Indices.size();
     _numVerts   = gd.Vertices.size();
-}
-
-void polygon_renderer::update_geometry(geometry_data const& gd, usize offset)
-{
-    _vertexArray.update_data(gd.Indices, offset);
-    _vertexArray.update_data(gd.Vertices, offset);
-    _type = gd.Type;
 }
 
 void polygon_renderer::reset_geometry()
@@ -202,12 +189,17 @@ void polygon_renderer::prepare(usize vcount, usize icount)
 
 void polygon_renderer::on_render_to_target(render_target& target)
 {
-    if (_numIndices == 0 || _numVerts == 0 || !_material) {
+    if (_numVerts == 0 || !_material) {
         return;
     }
 
     target.bind_material(_material);
-    _vertexArray.draw_elements(_type, _numIndices, 0);
+    if (_numIndices == 0) {
+        _vertexArray.draw_arrays(_type, 0, _numVerts);
+    } else {
+        _vertexArray.draw_elements(_type, _numIndices, 0);
+    }
+
     target.unbind_material();
 }
 

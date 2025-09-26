@@ -120,7 +120,7 @@ void gl_vertex_array::unbind() const
 void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffset) const
 {
     bind();
-    assert(_vboSize >= verts.size_bytes() + vertOffset * sizeof(vertex));
+    assert(_vboSize >= verts.size_bytes() + (vertOffset * sizeof(vertex)));
     GLCHECK(glBufferSubData(GL_ARRAY_BUFFER, vertOffset * sizeof(vertex), verts.size_bytes(), verts.data()));
     unbind();
 }
@@ -128,7 +128,7 @@ void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffse
 void gl_vertex_array::update_data(std::span<quad const> quads, usize quadOffset) const
 {
     bind();
-    assert(_vboSize >= quads.size_bytes() + quadOffset * sizeof(quad));
+    assert(_vboSize >= quads.size_bytes() + (quadOffset * sizeof(quad)));
     GLCHECK(glBufferSubData(GL_ARRAY_BUFFER, quadOffset * sizeof(quad), quads.size_bytes(), quads.data()));
     unbind();
 }
@@ -136,7 +136,7 @@ void gl_vertex_array::update_data(std::span<quad const> quads, usize quadOffset)
 void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset) const
 {
     bind();
-    assert(_eboSize >= inds.size_bytes() + indOffset * sizeof(u32));
+    assert(_eboSize >= inds.size_bytes() + (indOffset * sizeof(u32)));
     GLCHECK(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indOffset * sizeof(u32), inds.size_bytes(), inds.data()));
     unbind();
 }
@@ -151,7 +151,7 @@ void gl_vertex_array::draw_elements(primitive_type mode, usize count, u32 offset
 void gl_vertex_array::draw_arrays(primitive_type mode, i32 first, usize count) const
 {
     bind();
-    glDrawArrays(convert_enum(mode), static_cast<GLint>(first), static_cast<GLsizei>(count));
+    GLCHECK(glDrawArrays(convert_enum(mode), static_cast<GLint>(first), static_cast<GLsizei>(count)));
     unbind();
 }
 

@@ -44,7 +44,6 @@ public:
 
     void set_geometry(vertex const& v);
     void set_geometry(std::span<vertex const> vertices);
-    void update_geometry(std::span<vertex const> vertices, usize offset) const;
     void reset_geometry();
 
 private:
@@ -67,7 +66,6 @@ public:
 
     void set_geometry(quad const& q);
     void set_geometry(std::span<quad const> quads);
-    void update_geometry(std::span<quad const> quads, usize offset) const;
     void reset_geometry();
 
 private:
@@ -89,7 +87,6 @@ public:
     void set_material(material const* material);
 
     void set_geometry(geometry_data const& gd);
-    void update_geometry(geometry_data const& gd, usize offset);
     void reset_geometry();
 
 private:
