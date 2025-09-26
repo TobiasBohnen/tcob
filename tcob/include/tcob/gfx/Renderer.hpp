@@ -26,10 +26,10 @@ class TCOB_API renderer : public non_copyable {
 public:
     virtual ~renderer() = default;
 
-    void render_to_target(render_target& target, bool debug = false);
+    void render_to_target(render_target& target, bool prepare = true);
 
 protected:
-    virtual void prepare_render(render_target& target, bool debug);
+    virtual void prepare_render(render_target& target);
     virtual void on_render_to_target(render_target& target) = 0;
     virtual void finalize_render(render_target& target);
 };
@@ -173,7 +173,7 @@ public:
     void set_shader(asset_ptr<shader> shader);
 
 protected:
-    void prepare_render(render_target& target, bool debug) override;
+    void prepare_render(render_target& target) override;
     void on_render_to_target(render_target& target) override;
     void finalize_render(render_target& target) override;
 

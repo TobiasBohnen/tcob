@@ -74,14 +74,7 @@ void gl_render_target::prepare_render(render_properties const& props)
     buffer.bind_base(0);
 
     // set polygon mode
-    if (props.Debug) {
-        glDisable(GL_LINE_SMOOTH);
-        glDisable(GL_BLEND);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
-        glEnable(GL_LINE_SMOOTH);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+    glEnable(GL_LINE_SMOOTH);
 }
 
 void gl_render_target::finalize_render() const

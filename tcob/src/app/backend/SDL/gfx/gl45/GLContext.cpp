@@ -101,6 +101,8 @@ gl_context::gl_context(SDL_Window* window)
     _defaultFontShader = std::make_shared<gl_shader>();
     _defaultFontShader->compile(defaultVertShader, defaultFontFragShader);
     DefaultFontShader = _defaultFontShader->ID;
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 gl_context::~gl_context()

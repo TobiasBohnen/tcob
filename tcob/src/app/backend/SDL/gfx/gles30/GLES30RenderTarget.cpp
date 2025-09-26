@@ -72,11 +72,6 @@ void gl_render_target::prepare_render(render_properties const& props)
     offset += buffer.update(props.Debug, offset);
 
     buffer.bind_base(0);
-
-    // set polygon mode
-    if (props.Debug) {
-        // TODO: not supported
-    }
 }
 
 void gl_render_target::finalize_render() const

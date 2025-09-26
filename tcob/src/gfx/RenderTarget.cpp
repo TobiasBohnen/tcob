@@ -49,7 +49,7 @@ void render_target::clear(color c) const
     _impl->clear(c);
 }
 
-void render_target::prepare_render(bool debug)
+void render_target::prepare_render()
 {
     if (ScissorRect) {
         _impl->enable_scissor(*ScissorRect);
@@ -62,7 +62,7 @@ void render_target::prepare_render(bool debug)
          .Viewport              = rect_i {_camera.viewport()},
          .MousePosition         = locate_service<input::system>().mouse()->get_position(),
          .Time                  = locate_service<render_system>().statistics().current_time(),
-         .Debug                 = debug,
+         .Debug                 = false, // TODO
          .UseDefaultFramebuffer = false});
 }
 
@@ -116,7 +116,7 @@ void default_render_target::set_size(size_i /* newsize */)
     assert(false);
 }
 
-void default_render_target::prepare_render(bool)
+void default_render_target::prepare_render()
 {
     auto const& stats {locate_service<render_system>().statistics()};
 

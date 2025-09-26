@@ -53,7 +53,7 @@ public:
     auto copy_to_image() const -> image;
 
     // Renderer
-    virtual void prepare_render(bool debug = false);
+    virtual void prepare_render();
     virtual void finalize_render() const;
     void         bind_material(material const* mat) const;
     void         unbind_material() const;
@@ -80,7 +80,7 @@ public:
 protected:
     auto get_size() const -> size_i override;
 
-    void prepare_render(bool) override;
+    void prepare_render() override;
 
 private:
     void set_size(size_i newsize) override;

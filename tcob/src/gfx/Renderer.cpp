@@ -24,16 +24,16 @@
 
 namespace tcob::gfx {
 
-void renderer::render_to_target(render_target& target, bool debug)
+void renderer::render_to_target(render_target& target, bool prepare)
 {
-    prepare_render(target, debug);
+    if (prepare) { prepare_render(target); }
     on_render_to_target(target);
-    finalize_render(target);
+    if (prepare) { finalize_render(target); }
 }
 
-void renderer::prepare_render(render_target& target, bool debug)
+void renderer::prepare_render(render_target& target)
 {
-    target.prepare_render(debug);
+    target.prepare_render();
 }
 
 void renderer::finalize_render(render_target& target)
@@ -401,10 +401,10 @@ void canvas_renderer::set_shader(asset_ptr<shader> shader)
     _material->Shader = std::move(shader);
 }
 
-void canvas_renderer::prepare_render(render_target& target, bool debug)
+void canvas_renderer::prepare_render(render_target& target)
 {
     target.camera().push_state();
-    target.prepare_render(debug);
+    target.prepare_render();
 }
 
 void canvas_renderer::on_render_to_target(render_target& target)
