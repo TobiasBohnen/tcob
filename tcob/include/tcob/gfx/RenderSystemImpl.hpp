@@ -109,7 +109,6 @@ public:
     virtual void resize(usize vertCount, usize indCount) = 0;
 
     virtual void update_data(std::span<vertex const> verts, usize vertOffset) const = 0;
-    virtual void update_data(std::span<quad const> quads, usize quadOffset) const   = 0;
     virtual void update_data(std::span<u32 const> inds, usize indOffset) const      = 0;
 
     virtual void draw_elements(primitive_type mode, usize count, u32 offset) const = 0;

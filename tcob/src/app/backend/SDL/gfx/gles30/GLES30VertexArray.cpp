@@ -125,14 +125,6 @@ void gl_vertex_array::update_data(std::span<vertex const> verts, usize vertOffse
     unbind();
 }
 
-void gl_vertex_array::update_data(std::span<quad const> quads, usize quadOffset) const
-{
-    bind();
-    assert(_vboSize >= quads.size_bytes() + (quadOffset * sizeof(quad)));
-    GLCHECK(glBufferSubData(GL_ARRAY_BUFFER, quadOffset * sizeof(quad), quads.size_bytes(), quads.data()));
-    unbind();
-}
-
 void gl_vertex_array::update_data(std::span<u32 const> inds, usize indOffset) const
 {
     bind();

@@ -61,7 +61,6 @@ auto null_texture::is_valid() const -> bool { return true; }
 
 void null_vertex_array::resize(usize, usize) { }
 void null_vertex_array::update_data(std::span<vertex const>, usize) const { }
-void null_vertex_array::update_data(std::span<quad const>, usize) const { }
 void null_vertex_array::update_data(std::span<u32 const>, usize) const { }
 void null_vertex_array::draw_elements(primitive_type, usize, u32) const { }
 void null_vertex_array::draw_arrays(primitive_type, i32, usize) const { }

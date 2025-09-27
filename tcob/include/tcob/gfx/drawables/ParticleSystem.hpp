@@ -136,6 +136,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 class TCOB_API point_particle final : public particle_base {
 public:
@@ -174,6 +175,48 @@ public:
     void update(milliseconds deltaTime);
 };
 
+////////////////////////////////////////////////////////////
+
+class TCOB_API point_particle_emitter final {
+public:
+    ////////////////////////////////////////////////////////////
+
+    class TCOB_API settings {
+    public:
+        point_particle::settings Template;
+
+        bool                        IsExplosion {false};
+        rect_f                      SpawnArea {rect_f::Zero};
+        f32                         SpawnRate {0};
+        std::optional<milliseconds> Lifetime {};
+
+        auto operator==(settings const& other) const -> bool = default;
+
+        static auto constexpr Members();
+    };
+
+    ////////////////////////////////////////////////////////////
+
+    using particle_type = point_particle;
+    using geometry_type = vertex;
+    using renderer_type = point_renderer;
+
+    settings Settings;
+
+    auto is_alive() const -> bool;
+
+    void reset();
+
+    void emit(particle_system<point_particle_emitter>& system, milliseconds deltaTime);
+
+private:
+    rng          _rng;
+    milliseconds _remainingLife {1000};
+    f64          _emissionDiff {0};
+    bool         _alive {true};
+};
+
+////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
 class TCOB_API quad_particle final : public particle_base {
@@ -223,48 +266,6 @@ public:
 
 private:
     transform _transform {};
-};
-
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-class TCOB_API point_particle_emitter final {
-public:
-    ////////////////////////////////////////////////////////////
-
-    class TCOB_API settings {
-    public:
-        point_particle::settings Template;
-
-        bool                        IsExplosion {false};
-        rect_f                      SpawnArea {rect_f::Zero};
-        f32                         SpawnRate {0};
-        std::optional<milliseconds> Lifetime {};
-
-        auto operator==(settings const& other) const -> bool = default;
-
-        static auto constexpr Members();
-    };
-
-    ////////////////////////////////////////////////////////////
-
-    using particle_type = point_particle;
-    using geometry_type = vertex;
-    using renderer_type = point_renderer;
-
-    settings Settings;
-
-    auto is_alive() const -> bool;
-
-    void reset();
-
-    void emit(particle_system<point_particle_emitter>& system, milliseconds deltaTime);
-
-private:
-    rng          _rng;
-    milliseconds _remainingLife {1000};
-    f64          _emissionDiff {0};
-    bool         _alive {true};
 };
 
 ////////////////////////////////////////////////////////////

@@ -34,7 +34,9 @@ void vertex_array::update_data(std::span<vertex const> verts, usize vertOffset) 
 
 void vertex_array::update_data(std::span<quad const> quads, usize quadOffset) const
 {
-    _impl->update_data(quads, quadOffset);
+    if (!quads.empty()) {
+        _impl->update_data({&quads[0][0], quads.size() * 4}, quadOffset * 4);
+    }
 }
 
 void vertex_array::update_data(std::span<u32 const> inds, usize indOffset) const

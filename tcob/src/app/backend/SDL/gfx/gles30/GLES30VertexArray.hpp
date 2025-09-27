@@ -30,7 +30,6 @@ public:
     void unbind() const;
 
     void update_data(std::span<vertex const> verts, usize vertOffset) const override;
-    void update_data(std::span<quad const> quads, usize quadOffset) const override;
     void update_data(std::span<u32 const> inds, usize indOffset) const override;
 
     void draw_elements(primitive_type mode, usize count, u32 offset) const override;

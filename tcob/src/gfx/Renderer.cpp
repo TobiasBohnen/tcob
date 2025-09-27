@@ -102,7 +102,6 @@ void quad_renderer::set_material(material const* material)
 void quad_renderer::set_geometry(quad const& q)
 {
     set_geometry(std::span {&q, 1});
-    _numQuads = 1;
 }
 
 void quad_renderer::set_geometry(std::span<quad const> quads)
