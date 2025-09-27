@@ -140,7 +140,7 @@ void border_element::lerp(border_element const& from, border_element const& to, 
     }
     Dash = targetDash;
 
-    DashOffset = helper::lerp(from.DashOffset, to.DashOffset, step);
+    PatternOffset = helper::lerp(from.PatternOffset, to.PatternOffset, step);
 }
 
 void text_element::lerp(text_element const& from, text_element const& to, f64 step)

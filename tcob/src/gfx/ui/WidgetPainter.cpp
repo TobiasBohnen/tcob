@@ -621,7 +621,7 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
         dash.reserve(borderStyle.Dash.size());
         for (auto const& l : borderStyle.Dash) { dash.push_back(l.calc(rect.width())); }
         _canvas.set_line_dash(dash);
-        _canvas.set_dash_offset(borderStyle.DashOffset);
+        _canvas.set_dash_offset(borderStyle.PatternOffset);
         stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
             _canvas.rounded_rect(rect, borderRadius);
         });
@@ -630,7 +630,7 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
     case border_type::Dotted: {
         _canvas.set_line_dash(std::array {borderSize / 2, borderSize * 2});
         _canvas.set_line_cap(gfx::line_cap::Round);
-        _canvas.set_dash_offset(borderStyle.DashOffset);
+        _canvas.set_dash_offset(borderStyle.PatternOffset);
         stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
             _canvas.rounded_rect(rect, borderRadius);
         });
@@ -669,10 +669,10 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
     case border_type::Wavy: {
         stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
             _canvas.move_to(rect.top_left());
-            _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1);
-            _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1);
+            _canvas.wavy_line_to(rect.top_right(), borderSize / 3, 1, borderStyle.PatternOffset);
+            _canvas.wavy_line_to(rect.bottom_right(), borderSize / 3, 1, borderStyle.PatternOffset);
+            _canvas.wavy_line_to(rect.bottom_left(), borderSize / 3, 1, borderStyle.PatternOffset);
+            _canvas.wavy_line_to(rect.top_left(), borderSize / 3, 1, borderStyle.PatternOffset);
         });
     } break;
     case border_type::Inset:
