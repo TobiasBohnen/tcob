@@ -114,8 +114,6 @@ static auto stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
 auto widget_painter::draw_background_and_border(widget_style const& style, rect_f const& rect, bool isCircle) -> rect_f
 {
     auto retValue {rect};
-
-    //  add margin
     retValue -= style.Margin;
 
     do_shadow(style.DropShadow, retValue, isCircle, style.Border);
@@ -125,12 +123,8 @@ auto widget_painter::draw_background_and_border(widget_style const& style, rect_
         do_bordered_rect(retValue, style.Background, style.Border);
     }
 
-    // add padding
-    retValue -= style.Padding;
-
-    // add border
     retValue -= style.Border.thickness();
-
+    retValue -= style.Padding;
     return retValue;
 }
 
@@ -685,7 +679,7 @@ void widget_painter::do_border(rect_f const& rect, border_element const& borderS
     case border_type::Outset: {
         auto const base {get_paint(borderStyle.Background, rect)};
         if (std::get_if<gfx::paint_gradient>(&base.Color)) {
-            stroke(_canvas, borderSize, get_paint(borderStyle.Background, rect), [&] {
+            stroke(_canvas, borderSize, base, [&] {
                 _canvas.move_to(rect.top_left());
                 _canvas.rounded_rect(rect, borderRadius);
             });
