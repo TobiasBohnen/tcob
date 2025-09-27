@@ -111,23 +111,27 @@ static auto stroke(gfx::canvas& canvas, f32 size, auto&& paint, auto&& func)
     canvas.stroke();
 }
 
-void widget_painter::draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle)
+auto widget_painter::draw_background_and_border(widget_style const& style, rect_f const& rect, bool isCircle) -> rect_f
 {
-    //  add margin
-    rect -= style.Margin;
+    auto retValue {rect};
 
-    do_shadow(style.DropShadow, rect, isCircle, style.Border);
+    //  add margin
+    retValue -= style.Margin;
+
+    do_shadow(style.DropShadow, retValue, isCircle, style.Border);
     if (isCircle) {
-        do_bordered_circle(rect, style.Background, style.Border);
+        do_bordered_circle(retValue, style.Background, style.Border);
     } else {
-        do_bordered_rect(rect, style.Background, style.Border);
+        do_bordered_rect(retValue, style.Background, style.Border);
     }
 
     // add padding
-    rect -= style.Padding;
+    retValue -= style.Padding;
 
     // add border
-    rect -= style.Border.thickness();
+    retValue -= style.Border.thickness();
+
+    return retValue;
 }
 
 void widget_painter::draw_text(text_element const& element, rect_f const& rect, utf8_string_view text)

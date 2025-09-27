@@ -42,7 +42,7 @@ public:
     void add_overlay(overlay_func const& func);
     auto draw_overlays() -> bool;
 
-    void draw_background_and_border(widget_style const& style, rect_f& rect, bool isCircle);
+    auto draw_background_and_border(widget_style const& style, rect_f const& rect, bool isCircle) -> rect_f;
 
     void draw_text(text_element const& element, rect_f const& rect, utf8_string_view text);
     void draw_text(text_element const& element, rect_f const& rect, gfx::text_formatter::result const& text);

@@ -43,9 +43,7 @@ inline auto widget::draw_background(auto&& style, widget_painter& painter, bool 
     }
 
     prepare_style(style);
-    rect_f rect {*Bounds};
-    painter.draw_background_and_border(style, rect, isCircle);
-    return rect;
+    return painter.draw_background_and_border(style, *Bounds, isCircle);
 }
 
 }

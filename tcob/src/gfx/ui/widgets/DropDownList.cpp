@@ -129,7 +129,7 @@ void drop_down_list::on_draw(widget_painter& painter)
             _vScrollbar.Visible = get_items().size() > static_cast<usize>(_style.MaxVisibleItems);
 
             // list background
-            painter.draw_background_and_border(_style, listRect, false);
+            listRect      = painter.draw_background_and_border(_style, listRect, false);
             _visibleItems = static_cast<isize>(listRect.height() / itemHeight);
 
             // scrollbar
