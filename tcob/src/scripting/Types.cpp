@@ -101,6 +101,8 @@ auto ref::is_valid() const -> bool
 
 auto operator==(ref const& left, ref const& right) -> bool
 {
+    if (!left.is_valid() || !right.is_valid()) { return false; }
+
     auto const guard {left._view.create_scoped_stack()};
     left.push_self();
     right.push_self();

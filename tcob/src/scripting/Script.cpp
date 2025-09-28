@@ -37,7 +37,9 @@ script::script()
 
 script::~script()
 {
-    if (_environment) { _environment->release(); }
+    if (*Environment) {
+        Environment.mutate([](auto& env) { env->release(); });
+    }
     _globalTable.release();
     clear_wrappers();
     _view.close();
@@ -46,16 +48,6 @@ script::~script()
 auto script::global_table() -> table&
 {
     return _globalTable;
-}
-
-auto script::get_environment() const -> std::optional<table>
-{
-    return _environment;
-}
-
-void script::set_environment(table const& env)
-{
-    _environment = env;
 }
 
 auto script::view() const -> state_view
@@ -76,9 +68,9 @@ auto script::create_table() const -> table
 auto script::call_buffer(string_view script, string const& name) const -> std::optional<error_code>
 {
     if (_view.load_buffer(script, name)) {
-        if (_environment) {
+        if (*Environment) {
             function<void> func {function<void>::Acquire(_view, -1)};
-            if (!func.set_environment(*_environment)) {
+            if (!func.set_environment(**Environment)) {
                 return error_code::Error;
             }
         }

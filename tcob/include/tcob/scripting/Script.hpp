@@ -13,13 +13,13 @@
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
+#include "tcob/core/Property.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/scripting/Lua.hpp"
 #include "tcob/scripting/LuaConversions.hpp"
 #include "tcob/scripting/Scripting.hpp"
 #include "tcob/scripting/Types.hpp"
 #include "tcob/scripting/Wrapper.hpp"
-
 
 namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
@@ -46,6 +46,8 @@ public:
     signal<require_event>       Require;
     signal<warning_event const> Warning;
 
+    prop<std::optional<table>> Environment {std::nullopt};
+
     template <typename R = void>
     auto run_file(path const& file) const -> std::expected<R, error_code>;
     template <typename R = void>
@@ -55,8 +57,6 @@ public:
     auto create_wrapper(string const& name, bool autoMeta = true);
 
     auto global_table() -> table&;
-    auto get_environment() const -> std::optional<table>; // TODO: set_get_
-    void set_environment(table const& env);
 
     auto view() const -> state_view;
     auto gc() const -> garbage_collector;
@@ -88,9 +88,8 @@ private:
 
     void register_searcher();
 
-    state_view           _view;
-    table                _globalTable;
-    std::optional<table> _environment;
+    state_view _view;
+    table      _globalTable;
 
     HookFunc    _hookFunc;
     SeacherFunc _searcher;
