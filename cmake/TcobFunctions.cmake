@@ -58,6 +58,13 @@ endfunction()
 
 function(tcob_disable_warnings target)
     if(MSVC)
+        get_target_property(opts ${target} COMPILE_OPTIONS)
+
+        if(opts)
+            list(REMOVE_ITEM opts /W1 /W2 /W3 /W4 /Wall "$<$<COMPILE_LANGUAGE:C,CXX>:/W3>")
+            set_target_properties(${target} PROPERTIES COMPILE_OPTIONS "${opts}")
+        endif()
+
         target_compile_options(${target} PRIVATE /W0 /w)
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(${target} PRIVATE -Wno-everything)
