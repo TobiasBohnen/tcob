@@ -34,9 +34,8 @@ slider::slider(init const& wi)
     , Max {{[this](f32 val) -> f32 { return std::max(val, *Min); }}}
     , Value {{[this](f32 val) -> f32 { return std::clamp(val, *Min, *Max); }}}
 {
-    _tween.Changed.connect([this] {
-        queue_redraw();
-    });
+    _tween.Changed.connect([this] { queue_redraw(); });
+
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, *Value);
         on_value_changed(*Value); // moves the thumb
@@ -295,12 +294,9 @@ range_slider::range_slider(init const& wi)
         return {first, second};
     }}}
 {
-    _min.Tween.Changed.connect([this] {
-        queue_redraw();
-    });
-    _max.Tween.Changed.connect([this] {
-        queue_redraw();
-    });
+    _min.Tween.Changed.connect([this] { queue_redraw(); });
+    _max.Tween.Changed.connect([this] { queue_redraw(); });
+
     Min.Changed.connect([this](auto val) {
         Values = {std::max(val, Values->first), std::max(val, Values->second)};
         on_value_changed(*Values); // moves the thumb
@@ -412,7 +408,6 @@ void range_slider::on_mouse_leave()
     if (_min.Over || _max.Over) {
         _min.Over = false;
         _max.Over = false;
-        queue_redraw();
     }
 }
 

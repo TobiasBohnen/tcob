@@ -35,9 +35,7 @@ cycle_button::cycle_button(init const& wi)
     : widget {wi}
     , SelectedItemIndex {{[this](isize val) -> isize { return std::clamp<isize>(val, INVALID_INDEX, std::ssize(*Items) - 1); }}}
 {
-    _tween.Changed.connect([this] {
-        queue_redraw();
-    });
+    _tween.Changed.connect([this] { queue_redraw(); });
     _tween.reset(1);
 
     SelectedItemIndex.Changed.connect([this](auto const&) { queue_redraw(); });

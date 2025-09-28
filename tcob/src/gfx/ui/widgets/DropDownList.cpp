@@ -188,7 +188,6 @@ void drop_down_list::on_mouse_leave()
     if (_mouseOverBox) {
         _mouseOverBox     = false;
         _mouseOverChevron = false;
-        queue_redraw();
     }
     _vScrollbar.mouse_leave();
 }
@@ -210,7 +209,7 @@ void drop_down_list::on_mouse_hover(input::mouse::motion_event const& ev)
         bool const overChevron {_chevronRectCache.contains(mp)};
         if (_mouseOverChevron != overChevron) {
             _mouseOverChevron = overChevron;
-            queue_redraw();
+            ev.Handled        = true;
         }
 
         if (!_mouseOverBox) {

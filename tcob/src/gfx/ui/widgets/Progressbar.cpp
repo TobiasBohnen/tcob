@@ -30,9 +30,8 @@ progress_bar::progress_bar(init const& wi)
     , Max {{[this](i32 val) -> i32 { return std::max(val, *Min); }}}
     , Value {{[this](i32 val) -> i32 { return std::clamp(val, *Min, *Max); }}}
 {
-    _tween.Changed.connect([this] {
-        queue_redraw();
-    });
+    _tween.Changed.connect([this] { queue_redraw(); });
+
     Min.Changed.connect([this](auto val) {
         Value = std::max(val, *Value);
         on_value_changed(*Value);
