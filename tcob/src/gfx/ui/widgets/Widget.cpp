@@ -191,11 +191,6 @@ auto widget::form_offset() const -> point_f
     return retValue;
 }
 
-auto widget::scroll_offset() const -> point_f
-{
-    return point_f::Zero;
-}
-
 auto widget::content_bounds() const -> rect_f
 {
     rect_f retValue {*Bounds};

@@ -69,6 +69,11 @@ auto widget_container::find_child_by_name(string const& name) -> widget*
     return nullptr;
 }
 
+auto widget_container::scroll_offset() const -> point_f
+{
+    return point_f::Zero;
+}
+
 void widget_container::on_prepare_redraw()
 {
     widget::on_prepare_redraw();

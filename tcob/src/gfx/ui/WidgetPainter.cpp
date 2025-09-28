@@ -839,7 +839,8 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
 scissor_guard::scissor_guard(widget_painter& painter, widget* w)
     : _painter {painter}
 {
-    rect_f const bounds {w->content_bounds().as_moved_by(w->form_offset())};
+    rect_f bounds {w->content_bounds()};
+    bounds.Position += w->form_offset();
     painter.push_scissor(bounds);
 }
 

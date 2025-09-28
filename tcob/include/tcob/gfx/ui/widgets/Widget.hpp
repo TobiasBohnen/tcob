@@ -86,8 +86,7 @@ public:
 
     auto name() const -> string const&;
 
-    auto         form_offset() const -> point_f;
-    virtual auto scroll_offset() const -> point_f;
+    auto form_offset() const -> point_f;
 
     auto content_bounds() const -> rect_f;
     auto hit_test_bounds() const -> rect_f;

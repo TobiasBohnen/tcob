@@ -32,6 +32,8 @@ public:
     template <SubmitTarget Target>
     void submit(Target& target);
 
+    virtual auto scroll_offset() const -> point_f;
+
 protected:
     explicit widget_container(init const& wi);
 

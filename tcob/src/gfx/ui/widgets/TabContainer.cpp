@@ -234,7 +234,7 @@ void tab_container::on_draw_children(widget_painter& painter)
     // active tab
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {
         auto          xform {gfx::transform::Identity};
-        point_f const translate {rect.Position + form_offset() - scroll_offset()};
+        point_f const translate {rect.Position + form_offset()};
         xform.translate(translate);
 
         auto& tab {_tabs[ActiveTabIndex]};

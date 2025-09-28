@@ -195,7 +195,8 @@ void accordion::on_draw_children(widget_painter& painter)
     // prepare_style(_style);
 
     // scissor
-    rect_f bounds {content_bounds().as_moved_by(form_offset())};
+    rect_f bounds {content_bounds()};
+    bounds.Position += form_offset();
     bounds.Size.Height *= val;
     painter.push_scissor(bounds);
 
