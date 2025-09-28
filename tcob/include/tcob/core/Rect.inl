@@ -124,12 +124,6 @@ auto constexpr rect<T>::as_centered_at(point<T> const& center) const -> rect
 }
 
 template <Arithmetic T>
-auto constexpr rect<T>::as_moved_by(point<T> const& point) const -> rect
-{
-    return {Position + point, Size};
-}
-
-template <Arithmetic T>
 auto constexpr rect<T>::as_intersection_with(rect const& other) const -> rect
 {
     T const x1 {std::max(Position.X, other.Position.X)};
