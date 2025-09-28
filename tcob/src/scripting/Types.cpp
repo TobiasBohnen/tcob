@@ -99,14 +99,14 @@ auto ref::is_valid() const -> bool
     return _ref != NOREF && _view.is_valid();
 }
 
-auto operator==(ref const& left, ref const& right) -> bool
+auto ref::operator==(ref const& other) -> bool
 {
-    if (!left.is_valid() || !right.is_valid()) { return false; }
+    if (!is_valid() || !other.is_valid()) { return false; }
 
-    auto const guard {left._view.create_scoped_stack()};
-    left.push_self();
-    right.push_self();
-    return left._view.raw_equal(-1, -2);
+    auto const guard {_view.create_scoped_stack()};
+    push_self();
+    other.push_self();
+    return _view.raw_equal(-1, -2);
 }
 
 ////////////////////////////////////////////////////////////

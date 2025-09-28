@@ -18,10 +18,8 @@ namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API camera final {
-    friend auto constexpr operator==(camera const&, camera const&) -> bool;
-
 public:
-    camera(render_target& parent);
+    explicit camera(render_target& parent);
 
     point_f ViewOffset;
 

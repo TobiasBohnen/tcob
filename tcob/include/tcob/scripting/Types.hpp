@@ -35,7 +35,7 @@ public:
     explicit operator bool() const;
     auto     is_valid() const -> bool;
 
-    friend auto operator==(ref const& left, ref const& right) -> bool;
+    auto operator==(ref const& other) -> bool;
 
 protected:
     auto get_view() const -> state_view;

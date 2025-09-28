@@ -237,6 +237,12 @@ private:
 
 ////////////////////////////////////////////////////////////
 
+auto operator==(entry const& left, entry const& right) -> bool;
+
+auto operator==(object const& left, object const& right) -> bool;
+
+auto operator==(array const& left, array const& right) -> bool;
+
 }
 
 namespace tcob::literals {

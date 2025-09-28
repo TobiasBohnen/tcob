@@ -10,6 +10,7 @@
 #include <limits>
 #include <optional>
 #include <span>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -130,19 +131,22 @@ auto style_flags::score(widget_flags other) const -> i32
 
 auto style_collection::get(widget_style_selectors const& select) const -> style*
 {
+    using score_t = std::tuple<i32, i32>;
+
     auto it {_styles.find(select.Class)};
     if (it == _styles.end()) { return nullptr; }
 
-    style* bestCandidate {nullptr};
-    i32    bestScore {FAIL_SCORE};
+    style*  bestCandidate {nullptr};
+    score_t bestScore {FAIL_SCORE, FAIL_SCORE};
 
     for (auto const& [flags, attribs, stylePtr] : it->second) {
         i32 const flagScore {flags.score(select.Flags)};
         if (flagScore == FAIL_SCORE) { continue; }
-        i32 const attibScore {attribs.score(select.Attributes)};
-        if (attibScore == FAIL_SCORE) { continue; }
-        i32 const score {(flagScore * 10000) + attibScore};
 
+        i32 const attribScore {attribs.score(select.Attributes)};
+        if (attribScore == FAIL_SCORE) { continue; }
+
+        score_t const score {flagScore, attribScore};
         if (score >= bestScore) {
             bestScore     = score;
             bestCandidate = stylePtr.get();
