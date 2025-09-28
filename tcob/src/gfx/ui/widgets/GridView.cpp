@@ -169,10 +169,10 @@ void grid_view::on_draw(widget_painter& painter)
     }
 
     for (auto const& idx : selectedCells) {
-        paintCell(idx, Grid[idx.X, idx.Y - 1], getRowStyle(idx.Y - 1), {.Active = true}, _rowRectCache[idx]);
+        paintCell(idx, Grid[idx.X, idx.Y - 1], getRowStyle(idx.Y - 1), {.Active = true, .Disabled = !is_enabled()}, _rowRectCache[idx]);
     }
     for (auto const& idx : hoveredCells) {
-        paintCell(idx, Grid[idx.X, idx.Y - 1], getRowStyle(idx.Y - 1), {.Hover = true}, _rowRectCache[idx]);
+        paintCell(idx, Grid[idx.X, idx.Y - 1], getRowStyle(idx.Y - 1), {.Hover = true, .Disabled = !is_enabled()}, _rowRectCache[idx]);
     }
 
     // Draw headers

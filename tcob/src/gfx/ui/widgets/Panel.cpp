@@ -119,18 +119,14 @@ void panel::on_draw(widget_painter& painter)
     // scrollbars
     {
         _vScrollbar.Visible = requires_scroll(orientation::Vertical, rect);
-        auto const  vThumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
-                                     : flags().Active               ? widget_flags {.Active = true}
-                                                                    : widget_flags {.Hover = true}};
+        auto const  vThumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
         thumb_style vThumbStyle;
         prepare_sub_style(vThumbStyle, -2, _style.VScrollBar.ThumbClass, vThumbFlags);
         _vScrollbar.draw(painter, _style.VScrollBar, vThumbStyle.Thumb, rect);
     }
     {
         _hScrollbar.Visible = requires_scroll(orientation::Horizontal, rect);
-        auto const  hThumbFlags {!_hScrollbar.is_mouse_over_thumb() ? widget_flags {}
-                                     : flags().Active               ? widget_flags {.Active = true}
-                                                                    : widget_flags {.Hover = true}};
+        auto const  hThumbFlags {!_hScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
         thumb_style hThumbStyle;
         prepare_sub_style(hThumbStyle, -3, _style.HScrollBar.ThumbClass, hThumbFlags);
         _hScrollbar.draw(painter, _style.HScrollBar, hThumbStyle.Thumb, rect);
@@ -169,7 +165,7 @@ void panel::on_mouse_hover(input::mouse::motion_event const& ev)
         return scrollbar.mouse_hover(*this, ev.Position);
     }};
 
-    ev.Handled = scrollHover(_vScrollbar) || scrollHover(_hScrollbar);
+    _overScrollBars = ev.Handled = scrollHover(_vScrollbar) || scrollHover(_hScrollbar);
 }
 
 void panel::on_mouse_drag(input::mouse::motion_event const& ev)
@@ -332,12 +328,12 @@ auto panel::get_layout() const -> layout*
 
 auto panel::can_move() const -> bool
 {
-    return *Movable && form().allows_move() && form().top_widget() == this;
+    return *Movable && !_overScrollBars && form().allows_move() && form().top_widget() == this;
 }
 
 auto panel::can_resize() const -> bool
 {
-    return *Resizable && form().allows_resize() && form().top_widget() == this;
+    return *Resizable && !_overScrollBars && form().allows_resize() && form().top_widget() == this;
 }
 
 void panel::check_mode()

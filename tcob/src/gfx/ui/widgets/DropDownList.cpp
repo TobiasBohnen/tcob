@@ -113,7 +113,7 @@ void drop_down_list::on_draw(widget_painter& painter)
 
     if (_isExtended) {
         f32 const itemHeight {_style.ItemHeight.calc(rect.height())};
-        painter.add_overlay([this, itemHeight, isActive = fls.Active](widget_painter& painter) -> void {
+        painter.add_overlay([this, itemHeight](widget_painter& painter) -> void {
             gfx::transform xform;
             xform.translate(form_offset());
             painter.begin(Alpha, xform);
@@ -135,9 +135,7 @@ void drop_down_list::on_draw(widget_painter& painter)
             // scrollbar
             auto const scrollOffset {_vScrollbar.current_value() * get_scroll_max_value()};
 
-            auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
-                                        : isActive                     ? widget_flags {.Active = true}
-                                                                       : widget_flags {.Hover = true}};
+            auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
             thumb_style thumbStyle;
             prepare_sub_style(thumbStyle, -2, _style.VScrollBar.ThumbClass, thumbFlags);
             _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
@@ -369,5 +367,4 @@ auto drop_down_list::get_scroll_max_value() const -> f32
 {
     return std::max(1.0f, (get_item_height() * static_cast<f32>(get_items().size())) - content_bounds().height());
 }
-
 }

@@ -80,9 +80,7 @@ void slider::on_draw(widget_painter& painter)
          .StopPattern = {bar_element::type::Low, bar_element::type::High}});
 
     // thumb
-    auto const  thumbFlags {!_overThumb          ? widget_flags {}
-                                : flags().Active ? widget_flags {.Active = true}
-                                                 : widget_flags {.Hover = true}};
+    auto const  thumbFlags {!_overThumb ? widget_flags {.Disabled = !is_enabled()} : flags()};
     thumb_style thumbStyle {};
     prepare_sub_style(thumbStyle, 0, _style.ThumbClass, thumbFlags);
 
@@ -372,9 +370,7 @@ void range_slider::on_draw(widget_painter& painter)
     thumb_style thumbStyle {};
 
     auto const drawThumb {[&](thumb& thumb, i32 idx) {
-        auto const thumbFlags {!thumb.Over          ? widget_flags {}
-                                   : flags().Active ? widget_flags {.Active = true}
-                                                    : widget_flags {.Hover = true}};
+        auto const thumbFlags {!thumb.Over ? widget_flags {.Disabled = !is_enabled()} : flags()};
         prepare_sub_style(thumbStyle, idx, _style.ThumbClass, thumbFlags);
 
         thumb.Rect = painter.draw_thumb(

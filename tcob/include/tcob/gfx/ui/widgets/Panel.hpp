@@ -88,6 +88,7 @@ private:
     std::unique_ptr<layout> _layout;
     scrollbar               _vScrollbar;
     scrollbar               _hScrollbar;
+    bool                    _overScrollBars {false};
 
     std::optional<point_f>     _dragStart;
     std::optional<cursor_mode> _currentMode;

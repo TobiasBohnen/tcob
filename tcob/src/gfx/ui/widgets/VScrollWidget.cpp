@@ -43,9 +43,7 @@ void vscroll_widget::draw_scrollbar(widget_painter& painter, rect_f& rect)
     _vScrollbar.Visible = get_scroll_max_value() > 0;
     if (!_vScrollbar.Visible) { return; }
 
-    auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {}
-                                : flags().Active               ? widget_flags {.Active = true}
-                                                               : widget_flags {.Hover = true}};
+    auto const  thumbFlags {!_vScrollbar.is_mouse_over_thumb() ? widget_flags {.Disabled = !is_enabled()} : flags()};
     thumb_style thumbStyle;
     prepare_sub_style(thumbStyle, -2, style->VScrollBar.ThumbClass, thumbFlags);
     _vScrollbar.draw(painter, style->VScrollBar, thumbStyle.Thumb, rect);

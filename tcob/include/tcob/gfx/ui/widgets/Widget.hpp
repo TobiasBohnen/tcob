@@ -193,7 +193,6 @@ private:
     bool _redraw {true};
 
     bool              _visible {true};
-    bool              _enabled {true};
     widget_flags      _flags {};
     f32               _alpha {1.0f};
     i32               _level {0};

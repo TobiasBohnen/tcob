@@ -108,23 +108,23 @@ auto widget::is_focused() const -> bool
 
 void widget::enable()
 {
-    if (!_enabled) {
-        _enabled = true;
+    if (_flags.Disabled) {
+        _flags.Disabled = false;
         queue_redraw();
     }
 }
 
 void widget::disable()
 {
-    if (_enabled) {
-        _enabled = false;
+    if (!_flags.Disabled) {
+        _flags.Disabled = true;
         queue_redraw();
     }
 }
 
 auto widget::is_enabled() const -> bool
 {
-    return _enabled && (_parent ? _parent->is_enabled() : true);
+    return !_flags.Disabled && (_parent ? _parent->is_enabled() : true);
 }
 
 void widget::draw(widget_painter& painter)
