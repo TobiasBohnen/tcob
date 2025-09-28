@@ -196,6 +196,7 @@ private:
     bool              _enabled {true};
     widget_flags      _flags {};
     f32               _alpha {1.0f};
+    i32               _level {0};
     form_base*        _form {nullptr};
     widget_container* _parent {nullptr};
     string            _name;

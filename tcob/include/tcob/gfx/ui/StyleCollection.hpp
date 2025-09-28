@@ -54,7 +54,7 @@ public:
 
     style_attributes() = default;
     style_attributes(std::initializer_list<rules const> values);
-    explicit style_attributes(std::span<rules const> values);
+    style_attributes(std::span<rules const> values);
 
     auto score(widget_attributes const& widgetAttribs) const -> i32;
 

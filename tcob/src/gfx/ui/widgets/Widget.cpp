@@ -62,6 +62,10 @@ widget::widget(init const& wi)
                                                                 {std::clamp(Bounds->width(), MinSize->Width, val.Width),
                                                                  std::clamp(Bounds->height(), MinSize->Height, val.Height)}}; });
     MaxSize({std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()});
+
+    if (_parent) {
+        _level = _parent->_level + 1;
+    }
 }
 
 void widget::on_bounds_changed()
@@ -503,7 +507,8 @@ void widget::do_focus_lost()
 auto widget::attributes() const -> widget_attributes
 {
     return {{"name", _name},
-            {"orientation", get_orientation()}};
+            {"orientation", get_orientation()},
+            {"level", _level}};
 }
 
 auto widget::flags() -> widget_flags
