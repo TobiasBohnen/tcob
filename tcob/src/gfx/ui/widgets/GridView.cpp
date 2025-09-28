@@ -257,7 +257,7 @@ auto grid_view::attributes() const -> widget_attributes
     }
 
     retValue["header_selectable"] = *HeaderSelectable;
-    retValue["grid_select_mode"]  = *SelectMode;
+    retValue["select_mode"]       = *SelectMode;
 
     return retValue;
 }
