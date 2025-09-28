@@ -128,17 +128,6 @@ public:
 
     ////////////////////////////////////////////////////////////
 
-    class TCOB_API state_guard final : public non_copyable {
-    public:
-        explicit state_guard(canvas* c);
-        ~state_guard();
-
-    private:
-        canvas* _canvas;
-    };
-
-    ////////////////////////////////////////////////////////////
-
     canvas();
     ~canvas();
 
@@ -157,7 +146,6 @@ public:
     void save();
     void restore();
     void reset();
-    auto create_guard() -> state_guard;
 
     // Render styles
     void set_fill_style(color c);
@@ -281,4 +269,16 @@ private:
     std::unordered_map<i32, asset_owner_ptr<render_texture>> _rtt {};
     i32                                                      _activeRtt {0};
 };
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API scoped_canvas_state final : public non_copyable {
+public:
+    explicit scoped_canvas_state(canvas& c);
+    ~scoped_canvas_state();
+
+private:
+    canvas& _canvas;
+};
+
 }

@@ -41,7 +41,7 @@ inline auto script::run_file(path const& file) const -> std::expected<R, error_c
 template <typename R>
 inline auto script::run(string_view script, string const& name) const -> std::expected<R, error_code>
 {
-    auto const guard {_view.create_stack_guard()};
+    auto const guard {_view.create_scoped_stack()};
 
     auto const result {call_buffer(script, name)};
     if constexpr (std::is_void_v<R>) {
@@ -50,7 +50,7 @@ inline auto script::run(string_view script, string const& name) const -> std::ex
         if (result) { return std::unexpected {*result}; }
 
         R retValue {};
-        if (!_view.pull_convert_idx(guard.get_top() + 1, retValue)) {
+        if (!_view.pull_convert_idx(guard.top() + 1, retValue)) {
             return std::unexpected {error_code::TypeMismatch};
         }
 
@@ -75,7 +75,7 @@ inline auto script::load_binary(path const& file) const -> function<R>
 template <typename R>
 inline auto script::load_binary(io::istream& in, string const& name) const -> function<R>
 {
-    auto const guard {_view.create_stack_guard()};
+    auto const guard {_view.create_scoped_stack()};
 
     function<R> retVal {};
     auto        script {in.read_string(in.size_in_bytes())};

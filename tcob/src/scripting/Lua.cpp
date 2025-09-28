@@ -66,13 +66,13 @@ auto debug::GetMask(debug_mask mask) -> i32
 
 ////////////////////////////////////////////////////////////
 
-stack_guard::stack_guard(lua_State* l)
+scoped_stack::scoped_stack(lua_State* l)
     : _luaState {l}
     , _oldTop {lua_gettop(l)}
 {
 }
 
-stack_guard::~stack_guard()
+scoped_stack::~scoped_stack()
 {
     i32 const n {lua_gettop(_luaState) - _oldTop};
     if (n > 0) {
@@ -80,7 +80,7 @@ stack_guard::~stack_guard()
     }
 }
 
-auto stack_guard::get_top() const -> i32
+auto scoped_stack::top() const -> i32
 {
     return _oldTop;
 }
@@ -437,9 +437,9 @@ auto state_view::GetUpvalueIndex(i32 n) -> i32
     return lua_upvalueindex(n);
 }
 
-auto state_view::create_stack_guard() const -> stack_guard
+auto state_view::create_scoped_stack() const -> scoped_stack
 {
-    return stack_guard {_state};
+    return scoped_stack {_state};
 }
 
 auto state_view::ref(i32 idx) const -> i32

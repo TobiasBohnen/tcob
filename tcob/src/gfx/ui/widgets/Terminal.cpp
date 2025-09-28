@@ -295,7 +295,7 @@ void terminal::on_draw(widget_painter& painter)
 
     rect_f const rect {content_bounds()};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     u32 const   fontSize {_style.Text.calc_font_size(rect.height())};
     auto* const font {_style.Text.Font->get_font(_style.Text.Style, fontSize).ptr()};

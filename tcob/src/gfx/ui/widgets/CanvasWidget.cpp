@@ -322,7 +322,7 @@ void canvas_widget::clear()
 void canvas_widget::on_draw(widget_painter& painter)
 {
     auto& canvas {painter.canvas()};
-    auto  guard {canvas.create_guard()};
+    auto  guard {gfx::scoped_canvas_state {canvas}};
 
     canvas.set_scissor(Bounds);
     canvas.translate(Bounds->Position);

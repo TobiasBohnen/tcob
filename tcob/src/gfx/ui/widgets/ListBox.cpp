@@ -113,7 +113,7 @@ void list_box::on_draw(widget_painter& painter)
     draw_scrollbar(painter, rect);
 
     // content
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     _itemRectCache.clear();
 

@@ -19,6 +19,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/input/Input.hpp"
+#include "tcob/gfx/Canvas.hpp"
 #include "tcob/gfx/ColorGradient.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/UI.hpp"
@@ -55,7 +56,7 @@ void dot_matrix_display::on_draw(widget_painter& painter)
     if (Dots->width() <= 0 || Dots->height() <= 0) { return; }
     rect_f const rect {draw_background(_style, painter)};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     auto& canvas {painter.canvas()};
     canvas.save();
@@ -210,7 +211,7 @@ void seven_segment_display::on_draw(widget_painter& painter)
 {
     rect_f const rect {draw_background(_style, painter)};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     auto& canvas {painter.canvas()};
     canvas.save();
@@ -325,7 +326,7 @@ void color_picker::on_draw(widget_painter& painter)
     prepare_style(_style);
 
     auto& canvas {painter.canvas()};
-    auto  guard {canvas.create_guard()};
+    auto  guard {gfx::scoped_canvas_state {canvas}};
 
     canvas.set_scissor(Bounds);
     canvas.translate(Bounds->Position);

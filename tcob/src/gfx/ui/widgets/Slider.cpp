@@ -63,7 +63,7 @@ void slider::on_draw(widget_painter& painter)
 
     rect_f const rect {content_bounds()};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     auto const orien {get_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};
@@ -352,7 +352,7 @@ void range_slider::on_draw(widget_painter& painter)
 
     rect_f const rect {content_bounds()};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     auto const orien {get_orientation()};
     auto const pos {bar_element::position::CenterOrMiddle};

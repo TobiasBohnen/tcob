@@ -51,7 +51,7 @@ template <ConvertibleFrom T>
 inline auto table::get(auto&&... keys) const -> std::expected<T, error_code>
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
     return get<T>(view, keys...);
 }
 
@@ -59,7 +59,7 @@ template <ConvertibleFrom T>
 inline auto table::try_get(T& value, auto&& key) const -> bool
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     push_self();
     view.push_convert(key);
@@ -71,7 +71,7 @@ inline auto table::try_get(T& value, auto&& key) const -> bool
 inline void table::set(auto&&... keysOrValue) const
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
     set(view, keysOrValue...);
 }
 
@@ -79,14 +79,14 @@ template <typename T>
 inline auto table::is(auto&&... keys) const -> bool
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
     return is<T>(view, keys...);
 }
 
 inline auto table::has(auto&&... keys) const -> bool
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
     return has(view, keys...);
 }
 
@@ -94,7 +94,7 @@ template <typename T>
 inline auto table::get_keys() const -> std::vector<T>
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     std::vector<T> retValue {};
     push_self();
@@ -210,7 +210,7 @@ template <typename R>
 inline auto function<R>::protected_call(auto&&... params) const -> std::expected<R, error_code>
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     push_self();
 
@@ -239,7 +239,7 @@ template <typename R>
 inline auto function<R>::unprotected_call(auto&&... params) const -> std::expected<R, error_code>
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     push_self();
 
@@ -278,7 +278,7 @@ inline auto coroutine::resume(auto&&... params) -> std::expected<R, error_code>
     }
 
     state_view const thread {get_thread()};
-    auto const       guard {thread.create_stack_guard()};
+    auto const       guard {thread.create_scoped_stack()};
 
     // push parameters to lua
     i32 const oldTop {thread.get_top()};

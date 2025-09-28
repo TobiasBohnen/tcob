@@ -141,9 +141,9 @@ void drop_down_list::on_draw(widget_painter& painter)
             _vScrollbar.draw(painter, _style.VScrollBar, thumbStyle.Thumb, listRect);
 
             // items
-            scissor_guard const guard {painter, this};
-            auto const&         items {get_items()};
-            auto const          paintItem {[&](isize i) {
+            scoped_scissor const guard {painter, this};
+            auto const&          items {get_items()};
+            auto const           paintItem {[&](isize i) {
                 rect_f itemRect {listRect};
                 itemRect.Size.Height = itemHeight;
                 itemRect.Position.Y  = listRect.top() + (itemRect.height() * static_cast<f32>(i)) - scrollOffset;

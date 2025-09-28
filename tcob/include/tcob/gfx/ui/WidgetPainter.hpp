@@ -79,10 +79,10 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API scissor_guard final {
+class TCOB_API scoped_scissor final {
 public:
-    scissor_guard(widget_painter& painter, widget* w);
-    ~scissor_guard();
+    scoped_scissor(widget_painter& painter, widget* w);
+    ~scoped_scissor();
 
 private:
     widget_painter& _painter;

@@ -43,9 +43,9 @@ line_chart::line_chart(init const& wi)
 
 void line_chart::on_draw_chart(widget_painter& painter)
 {
-    rect_f const        rect {draw_background(_style, painter)};
-    scissor_guard const guard {painter, this};
-    auto&               canvas {painter.canvas()};
+    rect_f const         rect {draw_background(_style, painter)};
+    scoped_scissor const guard {painter, this};
+    auto&                canvas {painter.canvas()};
 
     draw_grid(canvas, _style, rect);
 
@@ -133,9 +133,9 @@ bar_chart::bar_chart(init const& wi)
 
 void bar_chart::on_draw_chart(widget_painter& painter)
 {
-    rect_f const        rect {draw_background(_style, painter)};
-    scissor_guard const guard {painter, this};
-    auto&               canvas {painter.canvas()};
+    rect_f const         rect {draw_background(_style, painter)};
+    scoped_scissor const guard {painter, this};
+    auto&                canvas {painter.canvas()};
 
     draw_grid(canvas, _style, rect);
 
@@ -232,9 +232,9 @@ marimekko_chart::marimekko_chart(init const& wi)
 
 void marimekko_chart::on_draw_chart(widget_painter& painter)
 {
-    rect_f const        rect {draw_background(_style, painter)};
-    scissor_guard const guard {painter, this};
-    auto&               canvas {painter.canvas()};
+    rect_f const         rect {draw_background(_style, painter)};
+    scoped_scissor const guard {painter, this};
+    auto&                canvas {painter.canvas()};
 
     usize const seriesCount {Dataset->size()};
 
@@ -303,9 +303,9 @@ pie_chart::pie_chart(init const& wi)
 
 void pie_chart::on_draw_chart(widget_painter& painter)
 {
-    rect_f const        rect {draw_background(_style, painter)};
-    scissor_guard const guard {painter, this};
-    auto&               canvas {painter.canvas()};
+    rect_f const         rect {draw_background(_style, painter)};
+    scoped_scissor const guard {painter, this};
+    auto&                canvas {painter.canvas()};
 
     f64 total {0.0};
     for (auto const& s : *Dataset) { total += s.Value; }
@@ -356,9 +356,9 @@ scatter_chart::scatter_chart(init const& wi)
 
 void scatter_chart::on_draw_chart(widget_painter& painter)
 {
-    rect_f const        rect {draw_background(_style, painter)};
-    scissor_guard const guard {painter, this};
-    auto&               canvas {painter.canvas()};
+    rect_f const         rect {draw_background(_style, painter)};
+    scoped_scissor const guard {painter, this};
+    auto&                canvas {painter.canvas()};
 
     draw_grid(canvas, _style, rect);
 
@@ -419,9 +419,9 @@ radar_chart::radar_chart(init const& wi)
 
 void radar_chart::on_draw_chart(widget_painter& painter)
 {
-    rect_f const        rect {draw_background(_style, painter)};
-    scissor_guard const guard {painter, this};
-    auto&               canvas {painter.canvas()};
+    rect_f const         rect {draw_background(_style, painter)};
+    scoped_scissor const guard {painter, this};
+    auto&                canvas {painter.canvas()};
 
     usize const axisCount {max_x()};
 

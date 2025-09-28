@@ -137,7 +137,7 @@ void widget_painter::draw_text(text_element const& element, rect_f const& rect, 
 
 void widget_painter::draw_text(text_element const& element, rect_f const& rect, gfx::text_formatter::result const& text)
 {
-    auto const guard {_canvas.create_guard()};
+    auto const guard {gfx::scoped_canvas_state {_canvas}};
 
     _canvas.set_font(text.Font);
     _canvas.set_text_halign(element.Alignment.Horizontal);
@@ -296,7 +296,7 @@ void widget_painter::draw_text_and_icon(text_element const& element, rect_f cons
 
 void widget_painter::draw_tick(tick_element const& element, rect_f const& rect)
 {
-    auto const guard {_canvas.create_guard()};
+    auto const guard {gfx::scoped_canvas_state {_canvas}};
 
     if (auto const* np {std::get_if<nine_patch>(&element.Foreground)}) {
         do_nine_patch(*np, rect, {});
@@ -438,7 +438,7 @@ auto widget_painter::draw_thumb(thumb_element const& element, rect_f const& rect
 
 auto widget_painter::draw_nav_arrow(nav_arrow_element const& element, rect_f const& rect, direction dir) -> rect_f
 {
-    auto const guard {_canvas.create_guard()};
+    auto const guard {gfx::scoped_canvas_state {_canvas}};
 
     rect_f retValue {element.calc(rect)};
     do_bordered_rect(retValue, dir == direction::Up ? element.UpBackground : element.DownBackground, element.Border);
@@ -549,7 +549,7 @@ void widget_painter::do_nine_patch(nine_patch const& np, rect_f const& rect, bor
 
 void widget_painter::do_bordered_rect(rect_f const& rect, paint const& back, border_element const& borderStyle)
 {
-    auto const guard {_canvas.create_guard()};
+    auto const guard {gfx::scoped_canvas_state {_canvas}};
 
     if (auto const* np {std::get_if<nine_patch>(&back)}) {
         do_nine_patch(*np, rect, borderStyle);
@@ -569,7 +569,7 @@ void widget_painter::do_bordered_rect(rect_f const& rect, paint const& back, bor
 
 void widget_painter::do_bordered_circle(rect_f const& rect, paint const& back, border_element const& borderStyle)
 {
-    auto const guard {_canvas.create_guard()};
+    auto const guard {gfx::scoped_canvas_state {_canvas}};
 
     if (auto const* np {std::get_if<nine_patch>(&back)}) {
         do_nine_patch(*np, rect, borderStyle);
@@ -794,7 +794,7 @@ auto widget_painter::get_paint(paint const& p, rect_f const& rect) -> gfx::canva
 
 auto widget_painter::format_text(text_element const& element, size_f size, utf8_string_view text, u32 fontSize, bool resize) -> gfx::text_formatter::result
 {
-    auto const guard {_canvas.create_guard()};
+    auto const guard {gfx::scoped_canvas_state {_canvas}};
 
     auto* const font {element.Font->get_font(element.Style, fontSize).ptr()};
 
@@ -836,7 +836,7 @@ auto widget_painter::transform_text(text_transform xform, utf8_string_view text)
 
 ////////////////////////////////////////////////////////////
 
-scissor_guard::scissor_guard(widget_painter& painter, widget* w)
+scoped_scissor::scoped_scissor(widget_painter& painter, widget* w)
     : _painter {painter}
 {
     rect_f bounds {w->content_bounds()};
@@ -844,7 +844,7 @@ scissor_guard::scissor_guard(widget_painter& painter, widget* w)
     painter.push_scissor(bounds);
 }
 
-scissor_guard::~scissor_guard()
+scoped_scissor::~scoped_scissor()
 {
     _painter.pop_scissor();
 }

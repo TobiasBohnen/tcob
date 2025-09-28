@@ -36,7 +36,7 @@ void radio_button::on_draw(widget_painter& painter)
 {
     rect_f const rect {draw_background(_style, painter, true)};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     if (Checked) {
         // tick

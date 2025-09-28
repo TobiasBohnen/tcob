@@ -93,7 +93,7 @@ void grid_view::on_draw(widget_painter& painter)
     draw_scrollbar(painter, rect);
 
     // content
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     rect_f    gridRect {rect};
     f32 const rowHeight {get_row_height(gridRect.height())};

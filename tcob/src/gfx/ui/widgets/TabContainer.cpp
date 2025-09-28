@@ -229,7 +229,7 @@ void tab_container::on_draw_children(widget_painter& painter)
     rect_f rect {content_bounds()};
 
     // content
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     // active tab
     if (ActiveTabIndex >= 0 && ActiveTabIndex < std::ssize(_tabs)) {

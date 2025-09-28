@@ -140,7 +140,7 @@ void panel::on_draw_children(widget_painter& painter)
     rect_f rect {content_bounds()};
 
     // content
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     auto          xform {gfx::transform::Identity};
     point_f const translate {rect.Position + form_offset() - scroll_offset()};
@@ -418,7 +418,7 @@ void glass::on_draw_children(widget_painter& painter)
     rect_f rect {content_bounds()};
 
     // content
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     auto          xform {gfx::transform::Identity};
     point_f const translate {rect.Position + form_offset() - scroll_offset()};

@@ -177,12 +177,12 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API stack_guard final : public non_copyable {
+class TCOB_API scoped_stack final : public non_copyable {
 public:
-    explicit stack_guard(lua_State* l);
-    ~stack_guard();
+    explicit scoped_stack(lua_State* l);
+    ~scoped_stack();
 
-    auto get_top() const -> i32;
+    auto top() const -> i32;
 
 private:
     lua_State* _luaState;
@@ -195,7 +195,7 @@ class TCOB_API state_view final {
 public:
     explicit state_view(lua_State* l);
 
-    auto create_stack_guard [[nodiscard]] () const -> stack_guard;
+    auto create_scoped_stack [[nodiscard]] () const -> scoped_stack;
 
     template <ConvertibleTo... T>
     void push_convert(T&&... t) const;

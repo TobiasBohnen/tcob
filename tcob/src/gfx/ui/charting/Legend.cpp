@@ -38,7 +38,7 @@ void legend::on_draw(widget_painter& painter)
 {
     rect_f const rect {draw_background(_style, painter)};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     if (!For) { return; }
     if (!_style.Text.Font) { return; }

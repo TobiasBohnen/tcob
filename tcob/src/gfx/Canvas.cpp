@@ -201,11 +201,6 @@ void canvas::reset()
     s.Font = nullptr;
 }
 
-auto canvas::create_guard() -> state_guard
-{
-    return state_guard {this};
-}
-
 ////////////////////////////////////////////////////////////
 
 void canvas::begin_path()
@@ -1188,15 +1183,15 @@ void canvas::render_text(font* font, std::span<vertex const> verts)
 
 ////////////////////////////////////////////////////////////
 
-canvas::state_guard::state_guard(canvas* c)
+scoped_canvas_state::scoped_canvas_state(canvas& c)
     : _canvas {c}
 {
-    c->save();
+    c.save();
 }
 
-canvas::state_guard::state_guard::~state_guard()
+scoped_canvas_state::~scoped_canvas_state()
 {
-    _canvas->restore();
+    _canvas.restore();
 }
 
 ////////////////////////////////////////////////////////////

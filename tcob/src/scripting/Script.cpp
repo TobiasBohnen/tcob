@@ -122,7 +122,7 @@ void script::register_searcher()
 static void hook(lua_State* l, lua_Debug* ar)
 {
     state_view ls {l};
-    auto const guard {ls.create_stack_guard()};
+    auto const guard {ls.create_scoped_stack()};
 
     ls.get_metatable("_tcob");
     table lt {table::Acquire(ls, -1)};
@@ -137,7 +137,7 @@ static void hook(lua_State* l, lua_Debug* ar)
 
 void script::set_hook(HookFunc&& func, debug_mask mask)
 {
-    auto const guard {_view.create_stack_guard()};
+    auto const guard {_view.create_scoped_stack()};
 
     _view.new_metatable("_tcob");
     i32 const tableIdx {_view.get_top()};

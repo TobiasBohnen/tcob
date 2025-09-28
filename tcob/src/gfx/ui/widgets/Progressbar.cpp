@@ -54,7 +54,7 @@ void progress_bar::on_draw(widget_painter& painter)
 {
     rect_f const rect {draw_background(_style, painter)};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     // bar
     std::ignore = painter.draw_bar(

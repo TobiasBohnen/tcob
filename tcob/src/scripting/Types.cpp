@@ -101,7 +101,7 @@ auto ref::is_valid() const -> bool
 
 auto operator==(ref const& left, ref const& right) -> bool
 {
-    auto const guard {left._view.create_stack_guard()};
+    auto const guard {left._view.create_scoped_stack()};
     left.push_self();
     right.push_self();
     return left._view.raw_equal(-1, -2);
@@ -113,7 +113,7 @@ table::table() = default;
 
 table::table(state_view view)
 {
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
     view.new_table();
     acquire(view, -1);
 }
@@ -126,7 +126,7 @@ table::table(state_view view, i32 idx)
 auto table::raw_length() const -> u64
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     push_self();
     return view.raw_len(-1);
@@ -135,7 +135,7 @@ auto table::raw_length() const -> u64
 auto table::create_or_get_metatable() const -> table
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     table retValue {};
 
@@ -155,7 +155,7 @@ auto table::create_or_get_metatable() const -> table
 void table::set_metatable(table const& mt) const
 {
     auto const view {get_view()};
-    auto const guard {view.create_stack_guard()};
+    auto const guard {view.create_scoped_stack()};
 
     push_self();
     mt.push_self();
@@ -180,7 +180,7 @@ auto table::Acquire(state_view view, i32 idx) -> table
 
 void table::dump(io::ostream& stream) const
 {
-    auto const guard {get_view().create_stack_guard()};
+    auto const guard {get_view().create_scoped_stack()};
     push_self();
     write_to_stream(stream, 0);
     stream << '\n';
@@ -302,7 +302,7 @@ namespace detail {
         std::unordered_set<string> retValue;
 
         auto const view {get_view()};
-        auto       guard {view.create_stack_guard()};
+        auto       guard {view.create_scoped_stack()};
 
         push_self();
 
@@ -321,7 +321,7 @@ namespace detail {
     auto function_base::set_upvalue(string const& name, ref const& value) -> bool
     {
         auto const view {get_view()};
-        auto       guard {view.create_stack_guard()};
+        auto       guard {view.create_scoped_stack()};
 
         push_self();
 

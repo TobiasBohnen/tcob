@@ -35,7 +35,7 @@ void toggle::on_draw(widget_painter& painter)
 {
     rect_f rect {draw_background(_style, painter)};
 
-    scissor_guard const guard {painter, this};
+    scoped_scissor const guard {painter, this};
 
     // tick
     f32 const tickWidth {rect.width() / 2};
