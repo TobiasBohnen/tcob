@@ -17,9 +17,10 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/scripting/Lua.hpp"
 #include "tcob/scripting/LuaConversions.hpp"
+#include "tcob/scripting/LuaTypes.hpp"
+#include "tcob/scripting/LuaWrapper.hpp"
 #include "tcob/scripting/Scripting.hpp"
-#include "tcob/scripting/Types.hpp"
-#include "tcob/scripting/Wrapper.hpp"
+
 
 namespace tcob::scripting {
 ////////////////////////////////////////////////////////////
@@ -106,4 +107,4 @@ namespace tcob::literals {
 auto operator""_lua(char const* str, usize) -> std::unique_ptr<tcob::scripting::script>;
 }
 
-#include "Script.inl"
+#include "LuaScript.inl"

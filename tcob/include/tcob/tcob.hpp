@@ -158,16 +158,16 @@
 #include <tcob/gfx/ui/widgets/Widget.hpp>
 #include <tcob/gfx/ui/widgets/WidgetContainer.hpp>
 
-#include <tcob/physics/Body.hpp>
-#include <tcob/physics/DebugDraw.hpp>
-#include <tcob/physics/Joint.hpp>
-#include <tcob/physics/Shape.hpp>
-#include <tcob/physics/World.hpp>
+#include <tcob/physics/B2DBody.hpp>
+#include <tcob/physics/B2DDebugDraw.hpp>
+#include <tcob/physics/B2DJoint.hpp>
+#include <tcob/physics/B2DShape.hpp>
+#include <tcob/physics/B2DWorld.hpp>
 
-#include <tcob/scripting/Closure.hpp>
 #include <tcob/scripting/Lua.hpp>
+#include <tcob/scripting/LuaClosure.hpp>
 #include <tcob/scripting/LuaConversions.hpp>
-#include <tcob/scripting/Script.hpp>
+#include <tcob/scripting/LuaScript.hpp>
+#include <tcob/scripting/LuaTypes.hpp>
+#include <tcob/scripting/LuaWrapper.hpp>
 #include <tcob/scripting/Scripting.hpp>
-#include <tcob/scripting/Types.hpp>
-#include <tcob/scripting/Wrapper.hpp>

@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/physics/Body.hpp"
+#include "tcob/physics/B2DBody.hpp"
 
 #include <cassert>
 #include <memory>
@@ -15,9 +15,9 @@
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/physics/B2DShape.hpp"
+#include "tcob/physics/B2DWorld.hpp"
 #include "tcob/physics/Physics.hpp"
-#include "tcob/physics/Shape.hpp"
-#include "tcob/physics/World.hpp"
 
 namespace tcob::physics {
 

@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/scripting/Types.hpp"
+#include "tcob/scripting/LuaTypes.hpp"
 
 #include <algorithm>
 #include <cassert>

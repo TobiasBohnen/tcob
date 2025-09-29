@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/scripting/Script.hpp"
+#include "tcob/scripting/LuaScript.hpp"
 
 #include <memory>
 #include <optional>
@@ -11,8 +11,8 @@
 
 #include "tcob/core/Logger.hpp"
 #include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/LuaTypes.hpp"
 #include "tcob/scripting/Scripting.hpp"
-#include "tcob/scripting/Types.hpp"
 
 namespace tcob::scripting {
 

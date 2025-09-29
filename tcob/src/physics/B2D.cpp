@@ -23,12 +23,12 @@
 #include "tcob/core/ServiceLocator.hpp"
 #include "tcob/core/StringUtils.hpp"
 #include "tcob/core/TaskManager.hpp"
-#include "tcob/physics/Body.hpp"
-#include "tcob/physics/DebugDraw.hpp"
-#include "tcob/physics/Joint.hpp"
+#include "tcob/physics/B2DBody.hpp"
+#include "tcob/physics/B2DDebugDraw.hpp"
+#include "tcob/physics/B2DJoint.hpp"
+#include "tcob/physics/B2DShape.hpp"
+#include "tcob/physics/B2DWorld.hpp"
 #include "tcob/physics/Physics.hpp"
-#include "tcob/physics/Shape.hpp"
-#include "tcob/physics/World.hpp"
 
 namespace tcob::physics::detail {
 static auto to_b2Vec2(point_f val) -> b2Vec2

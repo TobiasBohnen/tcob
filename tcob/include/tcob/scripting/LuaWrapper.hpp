@@ -17,12 +17,11 @@
 #include "tcob/core/Concepts.hpp"
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Signal.hpp"
-#include "tcob/scripting/Closure.hpp"
 #include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/LuaClosure.hpp"
 #include "tcob/scripting/LuaConversions.hpp"
+#include "tcob/scripting/LuaTypes.hpp"
 #include "tcob/scripting/Scripting.hpp"
-#include "tcob/scripting/Types.hpp"
-
 
 namespace tcob::scripting {
 
@@ -168,4 +167,4 @@ private:
 
 }
 
-#include "Wrapper.inl"
+#include "LuaWrapper.inl"

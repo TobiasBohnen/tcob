@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "Closure.hpp"
+#include "LuaClosure.hpp"
 
 #include <functional>
 #include <tuple>

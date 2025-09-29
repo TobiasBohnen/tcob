@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/physics/DebugDraw.hpp"
+#include "tcob/physics/B2DDebugDraw.hpp"
 
 #include <memory>
 

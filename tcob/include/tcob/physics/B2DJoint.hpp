@@ -13,7 +13,7 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/physics/Body.hpp"
+#include "tcob/physics/B2DBody.hpp"
 #include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {

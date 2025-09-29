@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "Script.hpp"
+#include "LuaScript.hpp"
 
 #include <expected>
 #include <memory>
@@ -13,9 +13,9 @@
 #include "tcob/core/io/FileSystem.hpp"
 #include "tcob/core/io/Stream.hpp"
 #include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/LuaTypes.hpp"
+#include "tcob/scripting/LuaWrapper.hpp"
 #include "tcob/scripting/Scripting.hpp"
-#include "tcob/scripting/Types.hpp"
-#include "tcob/scripting/Wrapper.hpp"
 
 namespace tcob::scripting {
 

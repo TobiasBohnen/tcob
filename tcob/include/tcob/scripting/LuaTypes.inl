@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "Types.hpp"
+#include "LuaTypes.hpp"
 
 #include <expected>
 #include <tuple>

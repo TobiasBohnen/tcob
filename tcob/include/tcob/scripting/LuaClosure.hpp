@@ -78,4 +78,4 @@ template <typename... Funcs>
 auto make_shared_overload(Funcs&&... fns) -> native_closure_shared_ptr;
 }
 
-#include "Closure.inl"
+#include "LuaClosure.inl"

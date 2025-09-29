@@ -15,8 +15,9 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
+#include "tcob/physics/B2DShape.hpp"
 #include "tcob/physics/Physics.hpp"
-#include "tcob/physics/Shape.hpp"
+
 
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////

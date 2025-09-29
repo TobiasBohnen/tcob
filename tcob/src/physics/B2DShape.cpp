@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "tcob/physics/Shape.hpp"
+#include "tcob/physics/B2DShape.hpp"
 
 #include <memory>
 #include <utility>
@@ -12,7 +12,7 @@
 #include "B2D.hpp"
 
 #include "tcob/core/Point.hpp"
-#include "tcob/physics/Body.hpp"
+#include "tcob/physics/B2DBody.hpp"
 #include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {

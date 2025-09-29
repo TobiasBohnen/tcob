@@ -13,11 +13,11 @@
 #include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/physics/Body.hpp"
-#include "tcob/physics/DebugDraw.hpp"
-#include "tcob/physics/Joint.hpp"
+#include "tcob/physics/B2DBody.hpp"
+#include "tcob/physics/B2DDebugDraw.hpp"
+#include "tcob/physics/B2DJoint.hpp"
+#include "tcob/physics/B2DShape.hpp"
 #include "tcob/physics/Physics.hpp"
-#include "tcob/physics/Shape.hpp"
 
 namespace tcob::physics {
 

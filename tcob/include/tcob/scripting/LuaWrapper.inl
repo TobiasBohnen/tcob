@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #pragma once
-#include "Wrapper.hpp"
+#include "LuaWrapper.hpp"
 
 #include <functional>
 #include <optional>
@@ -16,10 +16,10 @@
 
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Property.hpp"
-#include "tcob/scripting/Closure.hpp"
 #include "tcob/scripting/Lua.hpp"
+#include "tcob/scripting/LuaClosure.hpp"
+#include "tcob/scripting/LuaTypes.hpp"
 #include "tcob/scripting/Scripting.hpp"
-#include "tcob/scripting/Types.hpp"
 
 namespace tcob::scripting {
 
