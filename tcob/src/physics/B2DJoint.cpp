@@ -95,16 +95,28 @@ auto joint::get_impl() const -> detail::b2d_joint*
 distance_joint::distance_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
     : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
     , Length {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_length, &detail::b2d_joint::distance_joint_set_length>(this)}
-    , EnableSpring {detail::make_prop<bool, &detail::b2d_joint::distance_joint_is_spring_enabled, &detail::b2d_joint::distance_joint_enable_spring>(this)}
     , Hertz {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_spring_hertz, &detail::b2d_joint::distance_joint_set_spring_hertz>(this)}
     , DampingRatio {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_spring_damping_ratio, &detail::b2d_joint::distance_joint_set_spring_damping_ratio>(this)}
-    , EnableLimit {detail::make_prop<bool, &detail::b2d_joint::distance_joint_is_limit_enabled, &detail::b2d_joint::distance_joint_enable_limit>(this)}
     , MinLength {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_min_length, &detail::b2d_joint::distance_joint_set_min_length>(this)}
     , MaxLength {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_max_length, &detail::b2d_joint::distance_joint_set_max_length>(this)}
-    , EnableMotor {detail::make_prop<bool, &detail::b2d_joint::distance_joint_is_motor_enabled, &detail::b2d_joint::distance_joint_enable_motor>(this)}
     , MotorSpeed {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_motor_speed, &detail::b2d_joint::distance_joint_set_motor_speed>(this)}
     , MaxMotorForce {detail::make_prop<f32, &detail::b2d_joint::distance_joint_get_max_motor_force, &detail::b2d_joint::distance_joint_set_max_motor_force>(this)}
 {
+}
+
+void distance_joint::enable_spring(bool enable) const
+{
+    get_impl()->distance_joint_enable_spring(enable);
+}
+
+void distance_joint::enable_limit(bool enable) const
+{
+    get_impl()->distance_joint_enable_limit(enable);
+}
+
+void distance_joint::enable_motor(bool enable) const
+{
+    get_impl()->distance_joint_enable_motor(enable);
 }
 
 auto distance_joint::current_length() const -> f32
@@ -151,16 +163,28 @@ filter_joint::filter_joint(world& world, detail::b2d_world* b2dWorld, settings c
 
 prismatic_joint::prismatic_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
     : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
-    , EnableSpring {detail::make_prop<bool, &detail::b2d_joint::prismatic_joint_is_spring_enabled, &detail::b2d_joint::prismatic_joint_enable_spring>(this)}
     , Hertz {detail::make_prop<f32, &detail::b2d_joint::prismatic_joint_get_spring_hertz, &detail::b2d_joint::prismatic_joint_set_spring_hertz>(this)}
     , DampingRatio {detail::make_prop<f32, &detail::b2d_joint::prismatic_joint_get_spring_damping_ratio, &detail::b2d_joint::prismatic_joint_set_spring_damping_ratio>(this)}
-    , EnableLimit {detail::make_prop<bool, &detail::b2d_joint::prismatic_joint_is_limit_enabled, &detail::b2d_joint::prismatic_joint_enable_limit>(this)}
     , LowerTranslation {detail::make_prop<f32, &detail::b2d_joint::prismatic_joint_get_lower_limit, &detail::b2d_joint::prismatic_joint_set_lower_limit>(this)}
     , UpperTranslation {detail::make_prop<f32, &detail::b2d_joint::prismatic_joint_get_upper_limit, &detail::b2d_joint::prismatic_joint_set_upper_limit>(this)}
-    , EnableMotor {detail::make_prop<bool, &detail::b2d_joint::prismatic_joint_is_motor_enabled, &detail::b2d_joint::prismatic_joint_enable_motor>(this)}
     , MaxMotorForce {detail::make_prop<f32, &detail::b2d_joint::prismatic_joint_get_max_motor_force, &detail::b2d_joint::prismatic_joint_set_max_motor_force>(this)}
     , MotorSpeed {detail::make_prop<f32, &detail::b2d_joint::prismatic_joint_get_motor_speed, &detail::b2d_joint::prismatic_joint_set_motor_speed>(this)}
 {
+}
+
+void prismatic_joint::enable_spring(bool enable) const
+{
+    get_impl()->prismatic_joint_enable_spring(enable);
+}
+
+void prismatic_joint::enable_limit(bool enable) const
+{
+    get_impl()->prismatic_joint_enable_limit(enable);
+}
+
+void prismatic_joint::enable_motor(bool enable) const
+{
+    get_impl()->prismatic_joint_enable_motor(enable);
 }
 
 auto prismatic_joint::motor_force() const -> f32
@@ -182,16 +206,28 @@ auto prismatic_joint::speed() const -> f32
 
 revolute_joint::revolute_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
     : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
-    , EnableSpring {detail::make_prop<bool, &detail::b2d_joint::revolute_joint_is_spring_enabled, &detail::b2d_joint::revolute_joint_enable_spring>(this)}
     , Hertz {detail::make_prop<f32, &detail::b2d_joint::revolute_joint_get_spring_hertz, &detail::b2d_joint::revolute_joint_set_spring_hertz>(this)}
     , DampingRatio {detail::make_prop<f32, &detail::b2d_joint::revolute_joint_get_spring_damping_ratio, &detail::b2d_joint::revolute_joint_set_spring_damping_ratio>(this)}
-    , EnableLimit {detail::make_prop<bool, &detail::b2d_joint::revolute_joint_is_limit_enabled, &detail::b2d_joint::revolute_joint_enable_limit>(this)}
     , LowerAngle {detail::make_prop<f32, &detail::b2d_joint::revolute_joint_get_lower_limit, &detail::b2d_joint::revolute_joint_set_lower_limit>(this)}
     , UpperAngle {detail::make_prop<f32, &detail::b2d_joint::revolute_joint_get_upper_limit, &detail::b2d_joint::revolute_joint_set_upper_limit>(this)}
-    , EnableMotor {detail::make_prop<bool, &detail::b2d_joint::revolute_joint_is_motor_enabled, &detail::b2d_joint::revolute_joint_enable_motor>(this)}
     , MaxMotorTorque {detail::make_prop<f32, &detail::b2d_joint::revolute_joint_get_max_motor_torque, &detail::b2d_joint::revolute_joint_set_max_motor_torque>(this)}
     , MotorSpeed {detail::make_prop<f32, &detail::b2d_joint::revolute_joint_get_motor_speed, &detail::b2d_joint::revolute_joint_set_motor_speed>(this)}
 {
+}
+
+void revolute_joint::enable_spring(bool enable) const
+{
+    get_impl()->revolute_joint_enable_spring(enable);
+}
+
+void revolute_joint::enable_limit(bool enable) const
+{
+    get_impl()->revolute_joint_enable_limit(enable);
+}
+
+void revolute_joint::enable_motor(bool enable) const
+{
+    get_impl()->revolute_joint_enable_motor(enable);
 }
 
 auto revolute_joint::angle() const -> radian_f
@@ -219,16 +255,28 @@ weld_joint::weld_joint(world& world, detail::b2d_world* b2dWorld, settings const
 
 wheel_joint::wheel_joint(world& world, detail::b2d_world* b2dWorld, settings const& jointSettings)
     : joint {world, std::make_unique<detail::b2d_joint>(b2dWorld, get_body_impl(jointSettings.BodyA), get_body_impl(jointSettings.BodyB), jointSettings)}
-    , EnableSpring {detail::make_prop<bool, &detail::b2d_joint::wheel_joint_is_spring_enabled, &detail::b2d_joint::wheel_joint_enable_spring>(this)}
     , Hertz {detail::make_prop<f32, &detail::b2d_joint::wheel_joint_get_spring_hertz, &detail::b2d_joint::wheel_joint_set_spring_hertz>(this)}
     , DampingRatio {detail::make_prop<f32, &detail::b2d_joint::wheel_joint_get_spring_damping_ratio, &detail::b2d_joint::wheel_joint_set_spring_damping_ratio>(this)}
-    , EnableLimit {detail::make_prop<bool, &detail::b2d_joint::wheel_joint_is_limit_enabled, &detail::b2d_joint::wheel_joint_enable_limit>(this)}
     , LowerTranslation {detail::make_prop<f32, &detail::b2d_joint::wheel_joint_get_lower_limit, &detail::b2d_joint::wheel_joint_set_lower_limit>(this)}
     , UpperTranslation {detail::make_prop<f32, &detail::b2d_joint::wheel_joint_get_upper_limit, &detail::b2d_joint::wheel_joint_set_upper_limit>(this)}
-    , EnableMotor {detail::make_prop<bool, &detail::b2d_joint::wheel_joint_is_motor_enabled, &detail::b2d_joint::wheel_joint_enable_motor>(this)}
     , MaxMotorTorque {detail::make_prop<f32, &detail::b2d_joint::wheel_joint_get_max_motor_torque, &detail::b2d_joint::wheel_joint_set_max_motor_torque>(this)}
     , MotorSpeed {detail::make_prop<f32, &detail::b2d_joint::wheel_joint_get_motor_speed, &detail::b2d_joint::wheel_joint_set_motor_speed>(this)}
 {
+}
+
+void wheel_joint::enable_spring(bool enable) const
+{
+    get_impl()->wheel_joint_enable_spring(enable);
+}
+
+void wheel_joint::enable_limit(bool enable) const
+{
+    get_impl()->wheel_joint_enable_limit(enable);
+}
+
+void wheel_joint::enable_motor(bool enable) const
+{
+    get_impl()->wheel_joint_enable_motor(enable);
 }
 
 auto wheel_joint::motor_torque() const -> f32

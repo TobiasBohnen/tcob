@@ -18,7 +18,6 @@
 #include "tcob/physics/B2DShape.hpp"
 #include "tcob/physics/Physics.hpp"
 
-
 namespace tcob::physics {
 ////////////////////////////////////////////////////////////
 
@@ -107,22 +106,16 @@ public:
 
     ~body();
 
-    prop_fn<body_type> Type;
-    prop_fn<point_f>   LinearVelocity;
-    prop_fn<radian_f>  AngularVelocity;
-    prop_fn<f32>       LinearDamping;
-    prop_fn<f32>       AngularDamping;
-    prop_fn<bool>      EnableSleep;
-    prop_fn<bool>      IsAwake;
-    prop_fn<bool>      IsFixedRotation;
-    prop_fn<bool>      IsBullet;
-    prop_fn<bool>      Enabled;
-    prop_fn<f32>       GravityScale;
-    prop_fn<f32>       SleepThreshold;
-
+    prop_fn<body_type>      Type;
+    prop_fn<point_f>        LinearVelocity;
+    prop_fn<radian_f>       AngularVelocity;
+    prop_fn<f32>            LinearDamping;
+    prop_fn<f32>            AngularDamping;
+    prop_fn<f32>            GravityScale;
+    prop_fn<f32>            SleepThreshold;
+    prop_fn<bool>           Enabled;
     prop_fn<string>         Name;
     prop_fn<body_transform> Transform;
-    prop_fn<mass_data>      MassData;
 
     std::any UserData;
 
@@ -132,13 +125,13 @@ public:
     auto local_center_of_mass() const -> point_f;
 
     auto mass() const -> f32;
+    auto rotational_inertia() const -> f32;
+    void set_mass_data(mass_data const& data) const;
 
     auto aabb() const -> rect_f;
 
     auto position() const -> point_f;
     auto rotation() const -> radian_f;
-
-    auto rotational_inertia() const -> f32;
 
     auto world_to_local_point(point_f pos) const -> point_f;
     auto local_to_world_point(point_f pos) const -> point_f;
@@ -172,7 +165,12 @@ public:
 
     void wake_up() const;
     void sleep() const;
+    auto is_awake() const -> bool;
 
+    auto is_fixed_rotation() const -> bool; // TODO: set
+    auto is_bullet() const -> bool;         // TODO: set
+
+    void enable_sleep(bool enable) const;
     void enable_contact_events(bool enable) const;
     void enable_hit_events(bool enable) const;
 

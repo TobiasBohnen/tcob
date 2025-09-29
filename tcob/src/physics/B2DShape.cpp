@@ -28,10 +28,6 @@ shape::shape(body& body, std::unique_ptr<detail::b2d_shape> impl)
     : Friction {detail::make_prop<f32, &detail::b2d_shape::get_friction, &detail::b2d_shape::set_friction>(this)}
     , Restitution {detail::make_prop<f32, &detail::b2d_shape::get_restitution, &detail::b2d_shape::set_restitution>(this)}
     , Density {detail::make_prop<f32, &detail::b2d_shape::get_density, &detail::b2d_shape::set_density>(this)}
-    , EnableSensorEvents {detail::make_prop<bool, &detail::b2d_shape::are_sensor_events_enabled, &detail::b2d_shape::enable_sensor_events>(this)}
-    , EnableContactEvents {detail::make_prop<bool, &detail::b2d_shape::are_contact_events_enabled, &detail::b2d_shape::enable_contact_events>(this)}
-    , EnableHitEvents {detail::make_prop<bool, &detail::b2d_shape::are_hit_events_enabled, &detail::b2d_shape::enable_hit_events>(this)}
-    , EnablePreSolveEvents {detail::make_prop<bool, &detail::b2d_shape::are_pre_solve_events_enabled, &detail::b2d_shape::enable_pre_solve_events>(this)}
     , _impl {std::move(impl)}
     , _body {body}
 {
@@ -78,6 +74,26 @@ auto shape::test_point(point_f point) const -> bool
 auto shape::get_closest_point(point_f target) const -> point_f
 {
     return _impl->get_closest_point(target);
+}
+
+void shape::enable_sensor_events(bool enable) const
+{
+    _impl->enable_sensor_events(enable);
+}
+
+void shape::enable_contact_events(bool enable) const
+{
+    _impl->enable_contact_events(enable);
+}
+
+void shape::enable_hit_events(bool enable) const
+{
+    _impl->enable_hit_events(enable);
+}
+
+void shape::enable_pre_solve_events(bool enable) const
+{
+    _impl->enable_pre_solve_events(enable);
 }
 
 ////////////////////////////////////////////////////////////

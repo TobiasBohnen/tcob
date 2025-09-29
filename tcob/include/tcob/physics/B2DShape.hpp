@@ -60,13 +60,9 @@ public:
 
     ~shape();
 
-    prop_fn<f32>  Friction;
-    prop_fn<f32>  Restitution;
-    prop_fn<f32>  Density;
-    prop_fn<bool> EnableSensorEvents;
-    prop_fn<bool> EnableContactEvents;
-    prop_fn<bool> EnableHitEvents;
-    prop_fn<bool> EnablePreSolveEvents;
+    prop_fn<f32> Friction;
+    prop_fn<f32> Restitution;
+    prop_fn<f32> Density;
 
     std::any UserData;
 
@@ -81,6 +77,11 @@ public:
     auto test_point(point_f point) const -> bool;
 
     auto get_closest_point(point_f target) const -> point_f;
+
+    void enable_sensor_events(bool enable) const;
+    void enable_contact_events(bool enable) const;
+    void enable_hit_events(bool enable) const;
+    void enable_pre_solve_events(bool enable) const;
 
     auto operator==(shape const& other) const -> bool;
 

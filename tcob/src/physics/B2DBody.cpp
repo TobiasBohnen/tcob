@@ -32,16 +32,11 @@ body::body(world& world, detail::b2d_world* b2dWorld, body_transform const& xfor
     , AngularVelocity {detail::make_prop<radian_f, &detail::b2d_body::get_angular_velocity, &detail::b2d_body::set_angular_velocity>(this)}
     , LinearDamping {detail::make_prop<f32, &detail::b2d_body::get_linear_damping, &detail::b2d_body::set_linear_damping>(this)}
     , AngularDamping {detail::make_prop<f32, &detail::b2d_body::get_angular_damping, &detail::b2d_body::set_angular_damping>(this)}
-    , EnableSleep {detail::make_prop<bool, &detail::b2d_body::get_enable_sleep, &detail::b2d_body::set_enable_sleep>(this)}
-    , IsAwake {detail::make_prop<bool, &detail::b2d_body::get_awake, &detail::b2d_body::set_awake>(this)}
-    , IsFixedRotation {detail::make_prop<bool, &detail::b2d_body::get_fixed_rotation, &detail::b2d_body::set_fixed_rotation>(this)}
-    , IsBullet {detail::make_prop<bool, &detail::b2d_body::get_bullet, &detail::b2d_body::set_bullet>(this)}
-    , Enabled {detail::make_prop<bool, &detail::b2d_body::get_enabled, &detail::b2d_body::set_enabled>(this)}
     , GravityScale {detail::make_prop<f32, &detail::b2d_body::get_gravity_scale, &detail::b2d_body::set_gravity_scale>(this)}
     , SleepThreshold {detail::make_prop<f32, &detail::b2d_body::get_sleep_threshold, &detail::b2d_body::set_sleep_threshold>(this)}
+    , Enabled {detail::make_prop<bool, &detail::b2d_body::get_enabled, &detail::b2d_body::set_enabled>(this)}
     , Name {detail::make_prop<string, &detail::b2d_body::get_name, &detail::b2d_body::set_name>(this)}
     , Transform {detail::make_prop<body_transform, &detail::b2d_body::get_transform, &detail::b2d_body::set_transform>(this)}
-    , MassData {detail::make_prop<mass_data, &detail::b2d_body::get_mass_data, &detail::b2d_body::set_mass_data>(this)}
     , _impl {std::make_unique<detail::b2d_body>(b2dWorld, xform, bodySettings)}
     , _world {world}
 {
@@ -98,6 +93,11 @@ auto body::rotation() const -> radian_f
 auto body::rotational_inertia() const -> f32
 {
     return _impl->get_rotational_inertia();
+}
+
+void body::set_mass_data(mass_data const& data) const
+{
+    _impl->set_mass_data(data);
 }
 
 auto body::world_to_local_point(point_f pos) const -> point_f
@@ -188,6 +188,26 @@ void body::wake_up() const
 void body::sleep() const
 {
     _impl->set_awake(false);
+}
+
+auto body::is_awake() const -> bool
+{
+    return _impl->get_awake();
+}
+
+auto body::is_fixed_rotation() const -> bool
+{
+    return _impl->get_fixed_rotation();
+}
+
+auto body::is_bullet() const -> bool
+{
+    return _impl->get_bullet();
+}
+
+void body::enable_sleep(bool enable) const
+{
+    _impl->set_enable_sleep(enable);
 }
 
 void body::enable_contact_events(bool enable) const

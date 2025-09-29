@@ -113,16 +113,17 @@ public:
         f32 MotorSpeed {0.0f};
     };
 
-    prop_fn<f32>  Length;
-    prop_fn<bool> EnableSpring;
-    prop_fn<f32>  Hertz;
-    prop_fn<f32>  DampingRatio;
-    prop_fn<bool> EnableLimit;
-    prop_fn<f32>  MinLength;
-    prop_fn<f32>  MaxLength;
-    prop_fn<bool> EnableMotor;
-    prop_fn<f32>  MotorSpeed;
-    prop_fn<f32>  MaxMotorForce;
+    prop_fn<f32> Length;
+    prop_fn<f32> Hertz;
+    prop_fn<f32> DampingRatio;
+    prop_fn<f32> MinLength;
+    prop_fn<f32> MaxLength;
+    prop_fn<f32> MotorSpeed;
+    prop_fn<f32> MaxMotorForce;
+
+    void enable_spring(bool enable) const;
+    void enable_limit(bool enable) const;
+    void enable_motor(bool enable) const;
 
     auto current_length() const -> f32;
 
@@ -263,15 +264,16 @@ public:
         f32 MotorSpeed {0.0f};
     };
 
-    prop_fn<bool> EnableSpring;
-    prop_fn<f32>  Hertz;
-    prop_fn<f32>  DampingRatio;
-    prop_fn<bool> EnableLimit;
-    prop_fn<f32>  LowerTranslation;
-    prop_fn<f32>  UpperTranslation;
-    prop_fn<bool> EnableMotor;
-    prop_fn<f32>  MaxMotorForce;
-    prop_fn<f32>  MotorSpeed;
+    prop_fn<f32> Hertz;
+    prop_fn<f32> DampingRatio;
+    prop_fn<f32> LowerTranslation;
+    prop_fn<f32> UpperTranslation;
+    prop_fn<f32> MaxMotorForce;
+    prop_fn<f32> MotorSpeed;
+
+    void enable_spring(bool enable) const;
+    void enable_limit(bool enable) const;
+    void enable_motor(bool enable) const;
 
     auto motor_force() const -> f32;
     auto translation() const -> f32;
@@ -329,15 +331,16 @@ public:
         f32 DrawSize {0.25f};
     };
 
-    prop_fn<bool> EnableSpring;
-    prop_fn<f32>  Hertz;
-    prop_fn<f32>  DampingRatio;
-    prop_fn<bool> EnableLimit;
-    prop_fn<f32>  LowerAngle;
-    prop_fn<f32>  UpperAngle;
-    prop_fn<bool> EnableMotor;
-    prop_fn<f32>  MaxMotorTorque;
-    prop_fn<f32>  MotorSpeed;
+    prop_fn<f32> Hertz;
+    prop_fn<f32> DampingRatio;
+    prop_fn<f32> LowerAngle;
+    prop_fn<f32> UpperAngle;
+    prop_fn<f32> MaxMotorTorque;
+    prop_fn<f32> MotorSpeed;
+
+    void enable_spring(bool enable) const;
+    void enable_limit(bool enable) const;
+    void enable_motor(bool enable) const;
 
     auto angle() const -> radian_f;
 
@@ -431,15 +434,16 @@ public:
         f32 MotorSpeed {0.0f};
     };
 
-    prop_fn<bool> EnableSpring;
-    prop_fn<f32>  Hertz;
-    prop_fn<f32>  DampingRatio;
-    prop_fn<bool> EnableLimit;
-    prop_fn<f32>  LowerTranslation;
-    prop_fn<f32>  UpperTranslation;
-    prop_fn<bool> EnableMotor;
-    prop_fn<f32>  MaxMotorTorque;
-    prop_fn<f32>  MotorSpeed;
+    prop_fn<f32> Hertz;
+    prop_fn<f32> DampingRatio;
+    prop_fn<f32> LowerTranslation;
+    prop_fn<f32> UpperTranslation;
+    prop_fn<f32> MaxMotorTorque;
+    prop_fn<f32> MotorSpeed;
+
+    void enable_spring(bool enable) const;
+    void enable_limit(bool enable) const;
+    void enable_motor(bool enable) const;
 
     auto motor_torque() const -> f32;
 
