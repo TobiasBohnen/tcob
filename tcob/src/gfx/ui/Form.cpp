@@ -321,7 +321,7 @@ void form_base::on_draw_to(gfx::render_target& target)
     // tooltip
     if (_isTooltipVisible && _topWidget && _topWidget->Tooltip) {
         auto ttBounds {*_topWidget->Tooltip->Bounds};
-        ttBounds.Position = point_f {locate_service<input::system>().mouse()->get_position()} - Bounds->Position + TooltipOffset;
+        ttBounds.Position = point_f {locate_service<input::system>().mouse().get_position()} - Bounds->Position + TooltipOffset;
         if (ttBounds.right() > Bounds->right()) { ttBounds.Position.X -= ttBounds.width() + TooltipOffset.X; }
         if (ttBounds.bottom() > Bounds->bottom()) { ttBounds.Position.Y -= ttBounds.height() + TooltipOffset.Y; }
         _topWidget->Tooltip->Bounds = ttBounds;
@@ -382,7 +382,7 @@ void form_base::focus_widget(widget* newFocus)
 
 void form_base::rehover_widget(widget* widget)
 {
-    point_i const mp {locate_service<input::system>().mouse()->get_position()};
+    point_i const mp {locate_service<input::system>().mouse().get_position()};
     if (!widget->hit_test(mp)) { return; }
 
     widget->prepare_redraw();
@@ -400,7 +400,7 @@ void form_base::on_key_down(input::keyboard::event const& ev)
     } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
         handle_nav(ev);
     } else if (ev.KeyMods.is_down(Controls->CutCopyPasteMod) && ev.KeyCode == Controls->PasteKey) {
-        input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard()->get_text()};
+        input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
         if (!tev.Text.empty()) {
             _injector.on_text_input(_focusWidget, tev);
             ev.Handled = true;

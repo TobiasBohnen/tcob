@@ -188,19 +188,19 @@ auto sdl_input_system::controllers() const -> std::unordered_map<i32, std::share
     return _controllers;
 }
 
-auto sdl_input_system::mouse() const -> std::shared_ptr<input::mouse>
+auto sdl_input_system::mouse() const -> input::mouse&
 {
-    return _mouse;
+    return *_mouse;
 }
 
-auto sdl_input_system::keyboard() const -> std::shared_ptr<input::keyboard>
+auto sdl_input_system::keyboard() const -> input::keyboard&
 {
-    return _keyboard;
+    return *_keyboard;
 }
 
-auto sdl_input_system::clipboard() const -> std::shared_ptr<input::clipboard>
+auto sdl_input_system::clipboard() const -> input::clipboard&
 {
-    return _clipboard;
+    return *_clipboard;
 }
 
 void sdl_input_system::process_events(void* ev)

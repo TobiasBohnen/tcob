@@ -288,11 +288,11 @@ public:
     auto         first_controller() const -> controller&;
     auto         has_controller() const -> bool;
 
-    virtual auto mouse() const -> std::shared_ptr<input::mouse> = 0;
+    virtual auto mouse() const -> input::mouse& = 0;
 
-    virtual auto keyboard() const -> std::shared_ptr<input::keyboard> = 0;
+    virtual auto keyboard() const -> input::keyboard& = 0;
 
-    virtual auto clipboard() const -> std::shared_ptr<input::clipboard> = 0;
+    virtual auto clipboard() const -> input::clipboard& = 0;
 
     virtual void process_events(void* ev) = 0;
 

@@ -17,8 +17,8 @@ namespace tcob::gfx {
 
 cursor::cursor()
     : Position {{this,
-                 [](void*) -> point_i { return locate_service<input::system>().mouse()->get_position(); },
-                 [](void*, point_i const& value) { locate_service<input::system>().mouse()->set_position(value); }}}
+                 [](void*) -> point_i { return locate_service<input::system>().mouse().get_position(); },
+                 [](void*, point_i const& value) { locate_service<input::system>().mouse().set_position(value); }}}
 {
     ActiveMode.Changed.connect([this](string const& name) {
         if (!_modes.contains(name)) {

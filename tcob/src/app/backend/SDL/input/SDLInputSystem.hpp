@@ -90,11 +90,11 @@ public:
 
     auto controllers() const -> std::unordered_map<i32, std::shared_ptr<controller>> const& override;
 
-    auto mouse() const -> std::shared_ptr<input::mouse> override;
+    auto mouse() const -> input::mouse& override;
 
-    auto keyboard() const -> std::shared_ptr<input::keyboard> override;
+    auto keyboard() const -> input::keyboard& override;
 
-    auto clipboard() const -> std::shared_ptr<input::clipboard> override;
+    auto clipboard() const -> input::clipboard& override;
 
     void process_events(void* ev) override;
 

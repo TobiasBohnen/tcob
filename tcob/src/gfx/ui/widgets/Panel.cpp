@@ -339,7 +339,7 @@ auto panel::can_resize() const -> bool
 void panel::check_mode()
 {
     if (_dragStart) { return; }
-    auto const mp {locate_service<input::system>().mouse()->get_position()};
+    auto const mp {locate_service<input::system>().mouse().get_position()};
 
     _currentMode = can_move() ? std::optional {cursor_mode::Move} : std::nullopt;
     if (!can_resize()) { return; }

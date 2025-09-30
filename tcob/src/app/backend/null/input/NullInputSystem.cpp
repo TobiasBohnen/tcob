@@ -45,8 +45,20 @@ auto null_input_system::controllers() const -> std::unordered_map<i32, std::shar
     static std::unordered_map<i32, std::shared_ptr<controller>> c;
     return c;
 }
-auto null_input_system::mouse() const -> std::shared_ptr<input::mouse> { return std::make_shared<null_mouse>(); }
-auto null_input_system::keyboard() const -> std::shared_ptr<input::keyboard> { return std::make_shared<null_keyboard>(); }
-auto null_input_system::clipboard() const -> std::shared_ptr<input::clipboard> { return std::make_shared<null_clipboard>(); }
+auto null_input_system::mouse() const -> input::mouse&
+{
+    static null_mouse m;
+    return m;
+}
+auto null_input_system::keyboard() const -> input::keyboard&
+{
+    static null_keyboard m;
+    return m;
+}
+auto null_input_system::clipboard() const -> input::clipboard&
+{
+    static null_clipboard m;
+    return m;
+}
 void null_input_system::process_events(void*) { }
 }
