@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <span>
+#include <vector>
 
 #include <B2D.hpp>
 
@@ -83,6 +84,19 @@ auto world::awake_body_count() const -> i32
 void world::remove_joint(joint const& joint)
 {
     helper::erase_first(_joints, [ptr = &joint](auto const& val) { return val.get() == ptr; });
+}
+
+void world::remove_joints(body const& body)
+{
+    std::vector<joint*> removeJoints;
+    for (auto& j : joints()) {
+        if (j->body_a() == &body || j->body_b() == &body) {
+            removeJoints.push_back(j.get());
+        }
+    }
+    for (auto* j : removeJoints) {
+        remove_joint(*j);
+    }
 }
 
 auto world::body_events() const -> physics::body_events

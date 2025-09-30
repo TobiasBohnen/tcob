@@ -33,7 +33,7 @@ public:
         bool IsCollideConnected {false};
     };
 
-    ~joint();
+    virtual ~joint();
 
     prop_fn<bool> IsCollideConnected;
 

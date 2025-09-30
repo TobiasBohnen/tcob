@@ -154,6 +154,7 @@ public:
     template <typename T>
     auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;
     void remove_joint(joint const& joint);
+    void remove_joints(body const& body);
 
     auto body_events() const -> physics::body_events;
     auto contact_events() const -> physics::contact_events;
