@@ -1001,6 +1001,8 @@ void canvas::stroke_text(point_f offset, utf8_string_view text)
 
 void canvas::decompose_text(utf8_string_view text, point_f offset)
 {
+    begin_path();
+
     state const& s {_states->get()};
     if (!s.Font) { return; }
 
