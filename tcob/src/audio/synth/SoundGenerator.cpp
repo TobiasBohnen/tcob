@@ -10,13 +10,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <memory>
 #include <vector>
 
 #include "SoundGenerator_private.hpp"
 
 #include "tcob/audio/Buffer.hpp"
-#include "tcob/audio/Sound.hpp"
 #include "tcob/core/random/Random.hpp"
 
 namespace tcob::audio {
@@ -440,12 +438,6 @@ auto sound_generator::create_buffer(sound_wave const& wave) -> buffer
 
     samples.resize(static_cast<usize>(sampleCount));
     return buffer::Create({.Channels = 1, .SampleRate = wave.SampleRate}, samples);
-}
-
-auto sound_generator::create_sound(sound_wave const& wave) -> std::shared_ptr<sound>
-{
-    auto audioData {create_buffer(wave)};
-    return std::make_shared<sound>(audioData);
 }
 
 ////////////////////////////////////////////////////////////

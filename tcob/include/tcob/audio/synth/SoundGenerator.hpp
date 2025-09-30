@@ -6,11 +6,9 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <memory>
 #include <tuple>
 
 #include "tcob/audio/Buffer.hpp"
-#include "tcob/audio/Sound.hpp"
 #include "tcob/core/Serialization.hpp"
 #include "tcob/core/random/Random.hpp"
 
@@ -124,7 +122,6 @@ public:
     auto mutate_wave(sound_wave const& wave) -> sound_wave;
 
     auto create_buffer [[nodiscard]] (sound_wave const& wave) -> buffer;
-    auto create_sound [[nodiscard]] (sound_wave const& wave) -> std::shared_ptr<sound>;
 
 private:
     random::prng_split_mix_64 _random;

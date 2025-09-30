@@ -7,13 +7,11 @@
 
 #if defined(TCOB_ENABLE_ADDON_AUDIO_SPEECH)
 
-    #include <memory>
     #include <vector>
 
     #include <speech/speech.h>
 
     #include "tcob/audio/Buffer.hpp"
-    #include "tcob/audio/Sound.hpp"
 
 namespace tcob::audio {
 
@@ -30,12 +28,6 @@ auto speech_generator::create_buffer [[nodiscard]] (string const& text) -> buffe
     speech_free(data, nullptr);
 
     return buffer::Create({.Channels = channels, .SampleRate = sampleRate}, databuf);
-}
-
-auto speech_generator::create_sound [[nodiscard]] (string const& text) -> std::shared_ptr<sound>
-{
-    auto audioData {create_buffer(text)};
-    return std::make_shared<sound>(audioData);
 }
 
 ////////////////////////////////////////////////////////////

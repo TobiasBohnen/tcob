@@ -14,7 +14,6 @@
     #include <vector>
 
     #include "tcob/audio/Buffer.hpp"
-    #include "tcob/audio/Sound.hpp"
     #include "tcob/core/Interfaces.hpp"
 
 struct tsf;
@@ -325,7 +324,6 @@ public:
     auto load_async [[nodiscard]] (path const& file, bool stereo = true, i32 sampleRate = 44100) noexcept -> std::future<bool>;
 
     auto create_buffer [[nodiscard]] (sound_font_commands const& commands) const -> buffer;
-    auto create_sound [[nodiscard]] (sound_font_commands const& commands) const -> std::shared_ptr<sound>;
 
     auto get_preset_name(i32 index) const -> string;
 

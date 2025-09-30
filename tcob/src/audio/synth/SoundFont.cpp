@@ -18,7 +18,6 @@
     #include <vector>
 
     #include "tcob/audio/Buffer.hpp"
-    #include "tcob/audio/Sound.hpp"
     #include "tcob/core/ServiceLocator.hpp"
     #include "tcob/core/TaskManager.hpp"
     #include "tcob/core/io/FileStream.hpp"
@@ -92,11 +91,6 @@ auto sound_font::create_buffer(sound_font_commands const& commands) const -> buf
     commands.render(_font, ptr, static_cast<u8>(_channels), _sampleRate);
 
     return buffer::Create({.Channels = _channels, .SampleRate = _sampleRate}, samples);
-}
-
-auto sound_font::create_sound(sound_font_commands const& commands) const -> std::shared_ptr<sound>
-{
-    return std::make_shared<sound>(create_buffer(commands));
 }
 
 auto sound_font::get_preset_name(i32 index) const -> string
