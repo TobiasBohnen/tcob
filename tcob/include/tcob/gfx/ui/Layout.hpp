@@ -51,7 +51,7 @@ public:
     void remove(widget* target);
     void clear();
 
-    auto widgets() const -> std::span<std::shared_ptr<widget> const>;
+    auto widgets() const -> std::span<std::unique_ptr<widget> const>;
 
     void bring_to_front(widget* target);
     void send_to_back(widget* target);
@@ -63,7 +63,7 @@ protected:
     explicit layout(parent parent);
 
     template <std::derived_from<widget> T>
-    auto add_widget(string const& name) -> std::shared_ptr<T>;
+    auto add_widget(string const& name) -> T&;
 
     virtual void do_layout(size_f size) = 0;
 
@@ -72,7 +72,7 @@ private:
     void normalize_zorder();
 
     parent                               _parent;
-    std::vector<std::shared_ptr<widget>> _widgets {};
+    std::vector<std::unique_ptr<widget>> _widgets {};
 };
 
 ////////////////////////////////////////////////////////////

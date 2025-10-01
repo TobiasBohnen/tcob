@@ -74,7 +74,7 @@ auto form_base::find_widget_at(point_i pos) const -> widget*
     auto const widgets {modal ? modal->widgets() : get_layout()->widgets()};
     for (auto const& widget : widgets) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
-        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+        if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
             if (auto* retValue {container->find_child_at(pos)}) {
                 return retValue;
             }
@@ -89,7 +89,7 @@ auto form_base::find_widget_by_name(string const& name) const -> widget*
 {
     for (auto const& widget : containers()) {
         if (widget->name() == name) { return widget.get(); }
-        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+        if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
             if (auto* retValue {container->find_child_by_name(name)}) {
                 return retValue;
             }
@@ -105,8 +105,8 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     auto const collectWidgets {[&retValue](this auto&& self, widget_container const& container) -> void {
         for (auto const& widget : container.widgets()) {
             retValue.push_back(widget.get());
-            if (auto widgetContainer {std::dynamic_pointer_cast<widget_container>(widget)}) {
-                self(*widgetContainer);
+            if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
+                self(*container);
             }
         }
     }};
@@ -117,7 +117,7 @@ auto form_base::all_widgets() const -> std::vector<widget*>
     } else {
         for (auto const& widget : containers()) {
             retValue.push_back(widget.get());
-            if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+            if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
                 collectWidgets(*container);
             }
         }

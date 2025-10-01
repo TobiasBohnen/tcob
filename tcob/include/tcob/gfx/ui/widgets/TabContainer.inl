@@ -32,11 +32,12 @@ inline auto tab_container::create_tab(utf8_string const& name, item const& label
         .Name   = name,
     };
 
-    auto retValue {std::make_shared<T>(wi)};
-    _tabs.push_back(retValue);
-
+    auto  ptr {std::make_unique<T>(wi)};
+    auto& retValue {*ptr};
+    _tabs.push_back(std::move(ptr));
     _tabLabels.push_back(label);
     if (ActiveTabIndex == -1) { ActiveTabIndex = 0; }
-    return *retValue;
+
+    return retValue;
 }
 }

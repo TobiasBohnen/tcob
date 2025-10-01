@@ -116,7 +116,7 @@ auto tab_container::find_child_at(point_i pos) -> widget*
     auto& activeTab {_tabs[ActiveTabIndex]};
     if (!activeTab->hit_test(pos)) { return nullptr; }
 
-    if (auto container {std::dynamic_pointer_cast<widget_container>(activeTab)}) {
+    if (auto* container {dynamic_cast<widget_container*>(activeTab.get())}) {
         if (auto* retValue {container->find_child_at(pos)}) {
             return retValue;
         }
@@ -124,7 +124,7 @@ auto tab_container::find_child_at(point_i pos) -> widget*
     return activeTab.get();
 }
 
-auto tab_container::widgets() const -> std::span<std::shared_ptr<widget> const>
+auto tab_container::widgets() const -> std::span<std::unique_ptr<widget> const>
 {
     return _tabs;
 }

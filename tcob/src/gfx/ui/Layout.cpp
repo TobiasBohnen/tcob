@@ -56,7 +56,7 @@ void layout::clear()
     Changed();
 }
 
-auto layout::widgets() const -> std::span<std::shared_ptr<widget> const>
+auto layout::widgets() const -> std::span<std::unique_ptr<widget> const>
 {
     return _widgets;
 }

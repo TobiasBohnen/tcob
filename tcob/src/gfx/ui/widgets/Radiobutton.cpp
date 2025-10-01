@@ -53,7 +53,7 @@ void radio_button::on_checked_changed()
     if (Checked) {
         for (auto const& w : parent()->widgets()) {
             if (w.get() != this) {
-                if (auto rb {std::dynamic_pointer_cast<radio_button>(w)}) {
+                if (auto* rb {dynamic_cast<radio_button*>(w.get())}) {
                     rb->Checked = false;
                 }
             }

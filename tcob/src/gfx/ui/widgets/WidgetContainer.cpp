@@ -45,7 +45,7 @@ auto widget_container::find_child_at(point_i pos) -> widget*
 {
     for (auto const& widget : widgets()) { // ZORDER
         if (!widget->hit_test(pos)) { continue; }
-        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+        if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
             if (auto* retValue {container->find_child_at(pos)}) {
                 return retValue;
             }
@@ -59,7 +59,7 @@ auto widget_container::find_child_by_name(string const& name) -> widget*
 {
     for (auto const& widget : widgets()) {
         if (widget->name() == name) { return widget.get(); }
-        if (auto container {std::dynamic_pointer_cast<widget_container>(widget)}) {
+        if (auto* container {dynamic_cast<widget_container*>(widget.get())}) {
             if (auto* retValue {container->find_child_by_name(name)}) {
                 return retValue;
             }

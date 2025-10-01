@@ -24,16 +24,18 @@ template <std::derived_from<widget_container> T>
 inline auto accordion::create_section(utf8_string const& name, item const& label) -> T&
 {
     queue_redraw();
+
     widget::init const wi {
         .Form   = &form(),
         .Parent = this,
         .Name   = name,
     };
 
-    auto retValue {std::make_shared<T>(wi)};
-    _sections.push_back(retValue);
+    auto  ptr {std::make_unique<T>(wi)};
+    auto& retValue {*ptr};
+    _sections.push_back(std::move(ptr));
     _sectionLabels.push_back(label);
 
-    return *retValue;
+    return retValue;
 }
 }

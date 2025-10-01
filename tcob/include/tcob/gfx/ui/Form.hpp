@@ -62,7 +62,7 @@ public:
 
     void rehover_widget(widget* widget);
 
-    virtual auto containers() const -> std::span<std::shared_ptr<widget> const> = 0;
+    virtual auto containers() const -> std::span<std::unique_ptr<widget> const> = 0;
     virtual void remove_container(widget* widget)                               = 0;
     virtual void clear_containers()                                             = 0;
 
@@ -164,7 +164,7 @@ public:
     template <std::derived_from<widget_container> T>
     auto create_container(auto&&... args) -> T&;
 
-    auto containers() const -> std::span<std::shared_ptr<widget> const> override;
+    auto containers() const -> std::span<std::unique_ptr<widget> const> override;
 
     void remove_container(widget* widget) override;
 

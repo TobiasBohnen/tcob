@@ -27,7 +27,7 @@ public:
     virtual auto find_child_at(point_i pos) -> widget*;
     virtual auto find_child_by_name(string const& name) -> widget*;
 
-    virtual auto widgets() const -> std::span<std::shared_ptr<widget> const> = 0;
+    virtual auto widgets() const -> std::span<std::unique_ptr<widget> const> = 0;
 
     template <SubmitTarget Target>
     void submit(Target& target);

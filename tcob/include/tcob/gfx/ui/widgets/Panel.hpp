@@ -49,7 +49,7 @@ public:
     template <std::derived_from<layout> T>
     auto get_layout() -> T&;
 
-    auto widgets() const -> std::span<std::shared_ptr<widget> const> override;
+    auto widgets() const -> std::span<std::unique_ptr<widget> const> override;
 
     void clear();
 

@@ -136,7 +136,7 @@ auto accordion::find_child_at(point_i pos) -> widget*
     auto& activeSection {_sections[ActiveSectionIndex]};
     if (!activeSection->hit_test(pos)) { return nullptr; }
 
-    if (auto container {std::dynamic_pointer_cast<widget_container>(activeSection)}) {
+    if (auto* container {dynamic_cast<widget_container*>(activeSection.get())}) {
         if (auto* retValue {container->find_child_at(pos)}) {
             return retValue;
         }
@@ -144,7 +144,7 @@ auto accordion::find_child_at(point_i pos) -> widget*
     return activeSection.get();
 }
 
-auto accordion::widgets() const -> std::span<std::shared_ptr<widget> const>
+auto accordion::widgets() const -> std::span<std::unique_ptr<widget> const>
 {
     return _sections;
 }

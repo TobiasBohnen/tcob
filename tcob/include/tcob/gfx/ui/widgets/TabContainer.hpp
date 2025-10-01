@@ -60,7 +60,7 @@ public:
 
     auto find_child_at(point_i pos) -> widget* override;
 
-    auto widgets() const -> std::span<std::shared_ptr<widget> const> override;
+    auto widgets() const -> std::span<std::unique_ptr<widget> const> override;
 
 protected:
     void on_prepare_redraw() override;
@@ -81,7 +81,7 @@ protected:
 private:
     void offset_tab_content(rect_f& bounds) const;
 
-    std::vector<std::shared_ptr<widget>> _tabs;
+    std::vector<std::unique_ptr<widget>> _tabs;
     std::vector<item>                    _tabLabels;
     std::vector<rect_f>                  _tabRectCache;
 

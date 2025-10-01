@@ -34,7 +34,7 @@ inline auto form<Layout>::create_container(auto&&... args) -> T&
 }
 
 template <std::derived_from<layout> Layout>
-inline auto form<Layout>::containers() const -> std::span<std::shared_ptr<widget> const>
+inline auto form<Layout>::containers() const -> std::span<std::unique_ptr<widget> const>
 {
     return _layout.widgets();
 }

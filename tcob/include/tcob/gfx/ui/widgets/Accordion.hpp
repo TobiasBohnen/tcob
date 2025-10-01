@@ -55,7 +55,7 @@ public:
 
     auto find_child_at(point_i pos) -> widget* override;
 
-    auto widgets() const -> std::span<std::shared_ptr<widget> const> override;
+    auto widgets() const -> std::span<std::unique_ptr<widget> const> override;
 
 protected:
     void on_prepare_redraw() override;
@@ -77,7 +77,7 @@ private:
     void offset_section_content(rect_f& bounds, style const& style) const;
     auto section_expand() const -> std::pair<isize, f32>;
 
-    std::vector<std::shared_ptr<widget>> _sections;
+    std::vector<std::unique_ptr<widget>> _sections;
     std::vector<item>                    _sectionLabels;
     std::vector<rect_f>                  _sectionRectCache;
 

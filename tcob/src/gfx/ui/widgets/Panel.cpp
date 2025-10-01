@@ -91,7 +91,7 @@ auto panel::requires_scroll(orientation orien, rect_f const& rect) const -> bool
     });
 }
 
-auto panel::widgets() const -> std::span<std::shared_ptr<widget> const>
+auto panel::widgets() const -> std::span<std::unique_ptr<widget> const>
 {
     return _layout->widgets();
 }
