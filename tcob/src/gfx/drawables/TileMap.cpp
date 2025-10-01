@@ -200,14 +200,6 @@ void tilemap_base::hide_layer(uid layerId)
     mark_dirty();
 }
 
-auto tilemap_base::get_layer_size(uid layerId) const -> std::optional<size_i>
-{
-    auto it {find_layer(layerId)};
-    if (it == _layers.end()) { return std::nullopt; }
-
-    return it->Size;
-}
-
 void tilemap_base::clear()
 {
     _tileMap.clear();

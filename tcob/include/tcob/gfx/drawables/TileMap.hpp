@@ -167,8 +167,6 @@ public:
     void show_layer(uid layerId);
     void hide_layer(uid layerId);
 
-    auto get_layer_size(uid layerId) const -> std::optional<size_i>;
-
     auto get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>;
     void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
 
