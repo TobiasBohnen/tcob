@@ -6,8 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <memory>
-
 #include "tcob/core/Property.hpp"
 #include "tcob/core/input/Input.hpp"
 #include "tcob/gfx/ui/Style.hpp"
@@ -31,7 +29,7 @@ public:
 
     prop<utf8_string> Label;
 
-    std::shared_ptr<widget> For;
+    widget* For {nullptr};
 
 protected:
     void on_draw(widget_painter& painter) override;

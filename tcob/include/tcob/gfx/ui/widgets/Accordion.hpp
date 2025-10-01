@@ -43,9 +43,9 @@ public:
     prop<bool>      MaximizeActiveSection;
 
     template <std::derived_from<widget_container> T>
-    auto create_section(utf8_string const& name) -> std::shared_ptr<T>;
+    auto create_section(utf8_string const& name) -> T&;
     template <std::derived_from<widget_container> T>
-    auto create_section(utf8_string const& name, item const& label) -> std::shared_ptr<T>;
+    auto create_section(utf8_string const& name, item const& label) -> T&;
 
     void remove_section(widget* sec);
     void clear_sections();

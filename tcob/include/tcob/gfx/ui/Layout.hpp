@@ -29,7 +29,7 @@ namespace detail {
     class default_creator {
     public:
         template <std::derived_from<widget> T>
-        auto create_widget(string const& name) -> std::shared_ptr<T>;
+        auto create_widget(string const& name) -> T&;
     };
 }
 
@@ -83,7 +83,7 @@ public:
     explicit manual_layout(parent parent);
 
     template <std::derived_from<widget> T>
-    auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(rect_f const& rect, string const& name) -> T&;
 
     auto allows_move() const -> bool override;
     auto allows_resize() const -> bool override;
@@ -100,7 +100,7 @@ public:
     explicit flex_size_layout(parent parent);
 
     template <std::derived_from<widget> T>
-    auto create_widget(point_f pos, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(point_f pos, string const& name) -> T&;
 
     auto allows_move() const -> bool override;
 
@@ -116,7 +116,7 @@ public:
     explicit dock_layout(parent parent);
 
     template <std::derived_from<widget> T>
-    auto create_widget(dock_style dock, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(dock_style dock, string const& name) -> T&;
 
 protected:
     void do_layout(size_f size) override;
@@ -133,7 +133,7 @@ public:
     grid_layout(parent parent, size_i initSize, bool autoGrow = false);
 
     template <std::derived_from<widget> T>
-    auto create_widget(rect_i const& bounds, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(rect_i const& bounds, string const& name) -> T&;
 
 protected:
     void do_layout(size_f size) override;
@@ -219,7 +219,7 @@ public:
     tree_layout(parent parent);
 
     template <std::derived_from<widget> T>
-    auto create_widget(i32 level, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(i32 level, string const& name) -> T&;
 
 protected:
     void do_layout(size_f size) override;
@@ -267,7 +267,7 @@ public:
     explicit magnetic_snap_layout(parent parent, f32 distance, bool snapEdges = true, bool snapSiblings = true);
 
     template <std::derived_from<widget> T>
-    auto create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>;
+    auto create_widget(rect_f const& rect, string const& name) -> T&;
 
     auto allows_move() const -> bool override;
     // FIXME: auto allows_resize() const -> bool override;

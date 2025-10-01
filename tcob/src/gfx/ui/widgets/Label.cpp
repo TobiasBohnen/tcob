@@ -45,77 +45,77 @@ void label::on_draw(widget_painter& painter)
 void label::on_key_down(input::keyboard::event const& ev)
 {
     if (For) {
-        _injector.on_key_down(For.get(), ev);
+        _injector.on_key_down(For, ev);
     }
 }
 
 void label::on_key_up(input::keyboard::event const& ev)
 {
     if (For) {
-        _injector.on_key_up(For.get(), ev);
+        _injector.on_key_up(For, ev);
     }
 }
 
 void label::on_mouse_enter()
 {
     if (For) {
-        _injector.on_mouse_enter(For.get());
+        _injector.on_mouse_enter(For);
     }
 }
 
 void label::on_mouse_leave()
 {
     if (For) {
-        _injector.on_mouse_leave(For.get());
+        _injector.on_mouse_leave(For);
     }
 }
 
 void label::on_mouse_hover(input::mouse::motion_event const& ev)
 {
     if (For) {
-        _injector.on_mouse_hover(For.get(), ev);
+        _injector.on_mouse_hover(For, ev);
     }
 }
 
 void label::on_mouse_drag(input::mouse::motion_event const& ev)
 {
     if (For) {
-        _injector.on_mouse_drag(For.get(), ev);
+        _injector.on_mouse_drag(For, ev);
     }
 }
 
 void label::on_mouse_button_down(input::mouse::button_event const& ev)
 {
     if (For) {
-        _injector.on_mouse_button_down(For.get(), ev);
+        _injector.on_mouse_button_down(For, ev);
     }
 }
 
 void label::on_mouse_button_up(input::mouse::button_event const& ev)
 {
     if (For) {
-        _injector.on_mouse_button_up(For.get(), ev);
+        _injector.on_mouse_button_up(For, ev);
     }
 }
 
 void label::on_click()
 {
     if (For) {
-        _injector.on_click(For.get());
+        _injector.on_click(For);
     }
 }
 
 void label::on_focus_gained()
 {
     if (For) {
-        _injector.on_focus_gained(For.get());
+        _injector.on_focus_gained(For);
     }
 }
 
 void label::on_focus_lost()
 {
     if (For) {
-        _injector.on_focus_lost(For.get());
+        _injector.on_focus_lost(For);
     }
 }
 

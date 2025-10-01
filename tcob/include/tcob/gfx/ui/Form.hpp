@@ -162,7 +162,7 @@ public:
     form(form_init const& init, auto&&... layoutArgs);
 
     template <std::derived_from<widget_container> T>
-    auto create_container(auto&&... args) -> std::shared_ptr<T>;
+    auto create_container(auto&&... args) -> T&;
 
     auto containers() const -> std::span<std::shared_ptr<widget> const> override;
 

@@ -48,9 +48,9 @@ public:
     prop_val<isize> HoveredTabIndex;
 
     template <std::derived_from<widget_container> T>
-    auto create_tab(utf8_string const& name) -> std::shared_ptr<T>;
+    auto create_tab(utf8_string const& name) -> T&;
     template <std::derived_from<widget_container> T>
-    auto create_tab(utf8_string const& name, item const& label) -> std::shared_ptr<T>;
+    auto create_tab(utf8_string const& name, item const& label) -> T&;
 
     void remove_tab(widget* tab);
     void clear_tabs();

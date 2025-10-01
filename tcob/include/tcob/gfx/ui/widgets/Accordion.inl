@@ -15,13 +15,13 @@
 namespace tcob::ui {
 
 template <std::derived_from<widget_container> T>
-inline auto accordion::create_section(utf8_string const& name) -> std::shared_ptr<T>
+inline auto accordion::create_section(utf8_string const& name) -> T&
 {
     return create_section<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
 }
 
 template <std::derived_from<widget_container> T>
-inline auto accordion::create_section(utf8_string const& name, item const& label) -> std::shared_ptr<T>
+inline auto accordion::create_section(utf8_string const& name, item const& label) -> T&
 {
     queue_redraw();
     widget::init const wi {
@@ -34,6 +34,6 @@ inline auto accordion::create_section(utf8_string const& name, item const& label
     _sections.push_back(retValue);
     _sectionLabels.push_back(label);
 
-    return retValue;
+    return *retValue;
 }
 }

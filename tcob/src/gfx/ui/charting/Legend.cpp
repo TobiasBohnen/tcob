@@ -44,7 +44,7 @@ void legend::on_draw(widget_painter& painter)
     if (!_style.Text.Font) { return; }
 
     auto&      canvas {painter.canvas()};
-    auto const legendDefs {For->legend()};
+    auto const legendDefs {(*For)->legend()};
     if (legendDefs.empty()) { return; }
 
     f32 const lineHeight {rect.height() / static_cast<f32>(legendDefs.size())};

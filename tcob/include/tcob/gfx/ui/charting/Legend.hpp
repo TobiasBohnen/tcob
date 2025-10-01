@@ -7,8 +7,6 @@
 #include "tcob/core/Signal.hpp"
 #include "tcob/tcob_config.hpp"
 
-#include <memory>
-
 #include "tcob/core/Property.hpp"
 #include "tcob/gfx/ui/Style.hpp"
 #include "tcob/gfx/ui/StyleElements.hpp"
@@ -30,7 +28,7 @@ public:
 
     explicit legend(init const& wi);
 
-    prop<std::shared_ptr<chart_base>> For;
+    prop<chart_base*> For;
 
 protected:
     void on_draw(widget_painter& painter) override;

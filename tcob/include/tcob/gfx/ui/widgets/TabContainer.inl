@@ -16,13 +16,13 @@
 namespace tcob::ui {
 
 template <std::derived_from<widget_container> T>
-inline auto tab_container::create_tab(utf8_string const& name) -> std::shared_ptr<T>
+inline auto tab_container::create_tab(utf8_string const& name) -> T&
 {
     return create_tab<T>(name, {.Text = name, .Icon = {}, .UserData = {}});
 }
 
 template <std::derived_from<widget_container> T>
-inline auto tab_container::create_tab(utf8_string const& name, item const& label) -> std::shared_ptr<T>
+inline auto tab_container::create_tab(utf8_string const& name, item const& label) -> T&
 {
     queue_redraw();
 
@@ -37,6 +37,6 @@ inline auto tab_container::create_tab(utf8_string const& name, item const& label
 
     _tabLabels.push_back(label);
     if (ActiveTabIndex == -1) { ActiveTabIndex = 0; }
-    return retValue;
+    return *retValue;
 }
 }

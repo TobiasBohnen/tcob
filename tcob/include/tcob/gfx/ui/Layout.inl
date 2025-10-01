@@ -22,9 +22,9 @@ namespace tcob::ui {
 namespace detail {
     template <typename Derived>
     template <std::derived_from<widget> T>
-    inline auto default_creator<Derived>::create_widget(string const& name) -> std::shared_ptr<T>
+    inline auto default_creator<Derived>::create_widget(string const& name) -> T&
     {
-        return static_cast<Derived*>(this)->template add_widget<T>(name);
+        return *static_cast<Derived*>(this)->template add_widget<T>(name);
     }
 
 }
@@ -45,37 +45,37 @@ inline auto layout::add_widget(string const& name) -> std::shared_ptr<T>
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto manual_layout::create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>
+inline auto manual_layout::create_widget(rect_f const& rect, string const& name) -> T&
 {
     auto retValue {add_widget<T>(name)};
     retValue->Bounds = rect;
-    return retValue;
+    return *retValue;
 }
 
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto flex_size_layout::create_widget(point_f pos, string const& name) -> std::shared_ptr<T>
+inline auto flex_size_layout::create_widget(point_f pos, string const& name) -> T&
 {
     auto retValue {add_widget<T>(name)};
     retValue->Bounds = {pos, size_f::Zero};
-    return retValue;
+    return *retValue;
 }
 
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto dock_layout::create_widget(dock_style dock, string const& name) -> std::shared_ptr<T>
+inline auto dock_layout::create_widget(dock_style dock, string const& name) -> T&
 {
     auto retValue {add_widget<T>(name)};
     _widgetDock[retValue.get()] = dock;
-    return retValue;
+    return *retValue;
 }
 
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto grid_layout::create_widget(rect_i const& bounds, string const& name) -> std::shared_ptr<T>
+inline auto grid_layout::create_widget(rect_i const& bounds, string const& name) -> T&
 {
     auto retValue {add_widget<T>(name)};
 
@@ -85,30 +85,30 @@ inline auto grid_layout::create_widget(rect_i const& bounds, string const& name)
         _grid.Height = std::max(_grid.Height, bounds.bottom());
     }
 
-    return retValue;
+    return *retValue;
 }
 
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto tree_layout::create_widget(i32 level, string const& name) -> std::shared_ptr<T>
+inline auto tree_layout::create_widget(i32 level, string const& name) -> T&
 {
     auto retValue {add_widget<T>(name)};
 
     _levels[retValue.get()] = level;
     _maxLevel               = std::max(_maxLevel, level);
 
-    return retValue;
+    return *retValue;
 }
 
 ////////////////////////////////////////////////////////////
 
 template <std::derived_from<widget> T>
-inline auto magnetic_snap_layout::create_widget(rect_f const& rect, string const& name) -> std::shared_ptr<T>
+inline auto magnetic_snap_layout::create_widget(rect_f const& rect, string const& name) -> T&
 {
     auto retValue {add_widget<T>(name)};
     retValue->Bounds = rect;
-    return retValue;
+    return *retValue;
 }
 
 ////////////////////////////////////////////////////////////

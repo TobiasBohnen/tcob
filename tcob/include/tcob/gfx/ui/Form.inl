@@ -28,7 +28,7 @@ inline form<Layout>::form(form_init const& init, auto&&... layoutArgs)
 
 template <std::derived_from<layout> Layout>
 template <std::derived_from<widget_container> T>
-inline auto form<Layout>::create_container(auto&&... args) -> std::shared_ptr<T>
+inline auto form<Layout>::create_container(auto&&... args) -> T&
 {
     return _layout.template create_widget<T>(args...);
 }
