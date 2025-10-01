@@ -7,7 +7,6 @@
 #include "tcob/tcob_config.hpp"
 
 #include <memory>
-#include <span>
 #include <vector>
 
 #include "tcob/core/Interfaces.hpp"
@@ -140,21 +139,14 @@ public:
     prop_fn<f32>     MaximumLinearSpeed;
     prop_fn<bool>    EnableSleeping;
 
-    auto bodies() -> std::span<std::shared_ptr<body>>;
-
-    auto create_body(body_transform const& xform, body::settings const& settings) -> std::shared_ptr<body>;
+    auto create_body(body_transform const& xform, body::settings const& settings) -> body&;
     void remove_body(body const& body);
-
-    auto find_body(shape const& s) -> std::shared_ptr<body>;
 
     auto awake_body_count() const -> i32;
 
-    auto joints() -> std::span<std::shared_ptr<joint>>;
-
     template <typename T>
-    auto create_joint(auto&& jointSettings) -> std::shared_ptr<T>;
+    auto create_joint(auto&& jointSettings) -> T&;
     void remove_joint(joint const& joint);
-    void remove_joints(body const& body);
 
     auto body_events() const -> physics::body_events;
     auto contact_events() const -> physics::contact_events;
@@ -172,16 +164,18 @@ public:
 private:
     void on_update(milliseconds deltaTime) override;
 
+    void remove_joints(body const& body);
+
     std::unique_ptr<detail::b2d_world> _impl;
 
-    std::vector<std::shared_ptr<body>>  _bodies;
-    std::vector<std::shared_ptr<joint>> _joints;
+    std::vector<std::unique_ptr<body>>  _bodies;
+    std::vector<std::unique_ptr<joint>> _joints;
 };
 
 template <typename T>
-inline auto world::create_joint(auto&& jointSettings) -> std::shared_ptr<T>
+inline auto world::create_joint(auto&& jointSettings) -> T&
 {
-    return std::static_pointer_cast<T>(_joints.emplace_back(std::shared_ptr<T> {new T {*this, _impl.get(), jointSettings}}));
+    return static_cast<T&>(*_joints.emplace_back(std::unique_ptr<T> {new T {*this, _impl.get(), jointSettings}}));
 }
 
 }

@@ -7,7 +7,6 @@
 
 #include <cassert>
 #include <memory>
-#include <span>
 
 #include "B2D.hpp"
 
@@ -160,19 +159,21 @@ auto body::parent() -> world&
     return _world;
 }
 
-auto body::shapes() -> std::span<std::shared_ptr<shape>>
-{
-    return _shapes;
-}
-
 void body::remove_shape(shape const& shapePtr)
 {
     helper::erase_first(_shapes, [&shapePtr](auto const& val) { return val.get() == &shapePtr; });
 }
 
-auto body::create_chain(chain::settings const& chainSettings) -> std::shared_ptr<chain>
+void body::remove_shapes()
 {
-    return _chains.emplace_back(std::shared_ptr<chain> {new chain {*this, _impl.get(), chainSettings}});
+    for (auto& shape : _shapes) {
+        remove_shape(*shape);
+    }
+}
+
+auto body::create_chain(chain::settings const& chainSettings) -> chain&
+{
+    return *_chains.emplace_back(std::unique_ptr<chain> {new chain {*this, _impl.get(), chainSettings}});
 }
 
 void body::remove_chain(chain const& chainPtr)

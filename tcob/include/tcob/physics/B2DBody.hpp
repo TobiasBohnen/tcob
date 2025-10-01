@@ -8,7 +8,6 @@
 
 #include <any>
 #include <memory>
-#include <span>
 #include <vector>
 
 #include "tcob/core/AngleUnits.hpp"
@@ -145,13 +144,12 @@ public:
 
     auto parent() -> world&;
 
-    auto shapes() -> std::span<std::shared_ptr<shape>>;
-
     template <typename T>
-    auto create_shape(T::settings const& settings) -> std::shared_ptr<T>;
+    auto create_shape(T::settings const& settings) -> T&;
     void remove_shape(shape const& shapePtr);
+    void remove_shapes();
 
-    auto create_chain(chain::settings const& chainSettings) -> std::shared_ptr<chain>;
+    auto create_chain(chain::settings const& chainSettings) -> chain&;
     void remove_chain(chain const& chainPtr);
 
     void apply_force(point_f force, point_f point, bool wake = true) const;
@@ -181,14 +179,14 @@ private:
 
     std::unique_ptr<detail::b2d_body>   _impl;
     world&                              _world;
-    std::vector<std::shared_ptr<shape>> _shapes;
-    std::vector<std::shared_ptr<chain>> _chains;
+    std::vector<std::unique_ptr<shape>> _shapes;
+    std::vector<std::unique_ptr<chain>> _chains;
 };
 
 template <typename T>
-inline auto body::create_shape(T::settings const& settings) -> std::shared_ptr<T>
+inline auto body::create_shape(T::settings const& settings) -> T&
 {
-    return std::static_pointer_cast<T>(_shapes.emplace_back(std::shared_ptr<T> {new T {*this, _impl.get(), settings, settings.Shape}}));
+    return static_cast<T&>(*_shapes.emplace_back(std::unique_ptr<T> {new T {*this, _impl.get(), settings, settings.Shape}}));
 }
 
 }

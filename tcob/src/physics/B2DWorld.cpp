@@ -6,7 +6,6 @@
 #include "tcob/physics/B2DWorld.hpp"
 
 #include <memory>
-#include <span>
 #include <vector>
 
 #include <B2D.hpp>
@@ -16,7 +15,6 @@
 #include "tcob/physics/B2DBody.hpp"
 #include "tcob/physics/B2DDebugDraw.hpp"
 #include "tcob/physics/B2DJoint.hpp"
-#include "tcob/physics/B2DShape.hpp"
 #include "tcob/physics/Physics.hpp"
 
 namespace tcob::physics {
@@ -43,37 +41,15 @@ world::world(settings const& settings)
 
 world::~world() = default;
 
-auto world::bodies() -> std::span<std::shared_ptr<body>>
+auto world::create_body(body_transform const& xform, body::settings const& bodySettings) -> body&
 {
-    return _bodies;
-}
-
-auto world::joints() -> std::span<std::shared_ptr<joint>>
-{
-    return _joints;
-}
-
-auto world::create_body(body_transform const& xform, body::settings const& bodySettings) -> std::shared_ptr<body>
-{
-    return _bodies.emplace_back(std::shared_ptr<body> {new body {*this, _impl.get(), xform, bodySettings}});
+    return *_bodies.emplace_back(std::unique_ptr<body> {new body {*this, _impl.get(), xform, bodySettings}});
 }
 
 void world::remove_body(body const& body)
 {
+    remove_joints(body);
     helper::erase_first(_bodies, [ptr = &body](auto const& val) { return val.get() == ptr; });
-}
-
-auto world::find_body(shape const& s) -> std::shared_ptr<body>
-{
-    for (auto& body : _bodies) {
-        for (auto& shape : body->shapes()) {
-            if (*shape == s) {
-                return body;
-            }
-        }
-    }
-
-    return nullptr;
 }
 
 auto world::awake_body_count() const -> i32
@@ -89,7 +65,7 @@ void world::remove_joint(joint const& joint)
 void world::remove_joints(body const& body)
 {
     std::vector<joint*> removeJoints;
-    for (auto& j : joints()) {
+    for (auto& j : _joints) {
         if (j->body_a() == &body || j->body_b() == &body) {
             removeJoints.push_back(j.get());
         }
