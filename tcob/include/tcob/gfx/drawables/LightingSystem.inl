@@ -11,21 +11,17 @@
 namespace tcob::gfx {
 
 template <typename T>
-inline auto lighting_system::create_light_source(auto&&... args) -> std::shared_ptr<T>
+inline auto lighting_system::create_light_source(auto&&... args) -> T&
 {
-    auto retValue {std::shared_ptr<T>(new T {this, args...})};
-    _lightSources.push_back(retValue);
     _isDirty = true;
-    return retValue;
+    return *_lightSources.emplace_back(std::unique_ptr<T>(new T {this, args...}));
 }
 
 template <typename T>
-inline auto lighting_system::create_shadow_caster(auto&&... args) -> std::shared_ptr<T>
+inline auto lighting_system::create_shadow_caster(auto&&... args) -> T&
 {
-    auto retValue {std::shared_ptr<T>(new T {this, args...})};
-    _shadowCasters.push_back(retValue);
     _isDirty = true;
-    return retValue;
+    return *_shadowCasters.emplace_back(std::unique_ptr<T>(new T {this, args...}));
 }
 
 }

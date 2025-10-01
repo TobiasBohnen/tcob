@@ -114,13 +114,13 @@ public:
     prop<rect_f> Bounds;
 
     template <typename T = light_source>
-    auto create_light_source(auto&&... args) -> std::shared_ptr<T>;
+    auto create_light_source(auto&&... args) -> T&;
 
     void remove_light_source(light_source const& light);
     void clear_light_sources();
 
     template <typename T = shadow_caster>
-    auto create_shadow_caster(auto&&... args) -> std::shared_ptr<T>;
+    auto create_shadow_caster(auto&&... args) -> T&;
 
     void remove_shadow_caster(shadow_caster const& shadow);
     void clear_shadow_casters();
@@ -157,8 +157,8 @@ private:
     void build_geometry(light_source& light, f32 lightRange, u32& indOffset);
     auto collect_angles(light_source& light, bool lightInsideShadowCaster, std::vector<shadow_caster_points> const& casterPoints) const -> std::vector<f64>;
 
-    std::vector<std::shared_ptr<light_source>>  _lightSources {};
-    std::vector<std::shared_ptr<shadow_caster>> _shadowCasters {};
+    std::vector<std::unique_ptr<light_source>>  _lightSources {};
+    std::vector<std::unique_ptr<shadow_caster>> _shadowCasters {};
 
     bool _isDirty {false};
     bool _updateGeometry {false};
