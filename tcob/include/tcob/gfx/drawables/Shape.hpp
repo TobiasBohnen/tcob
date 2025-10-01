@@ -188,9 +188,7 @@ public:
     shape_batch();
 
     template <std::derived_from<shape> T>
-    auto create_shape() -> std::shared_ptr<T>;
-    template <std::derived_from<shape> T>
-    void add_shape(std::shared_ptr<T> const& shape);
+    auto create_shape() -> T&;
 
     void remove_shape(shape const& shape);
 
@@ -200,7 +198,7 @@ public:
     auto size() const -> isize;
     auto is_empty() const -> bool;
 
-    auto get_shape_at(isize index) const -> std::shared_ptr<shape>;
+    auto get_shape_at(isize index) const -> shape&;
 
     auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) -> std::unordered_map<shape*, std::vector<ray::result>>;
 
@@ -214,7 +212,7 @@ protected:
 
 private:
     bool                                _isDirty {false};
-    std::vector<std::shared_ptr<shape>> _children {};
+    std::vector<std::unique_ptr<shape>> _children {};
     batch_polygon_renderer              _renderer {};
 };
 
