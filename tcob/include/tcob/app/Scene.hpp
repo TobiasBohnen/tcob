@@ -33,9 +33,9 @@ public:
 
     prop<std::shared_ptr<gfx::entity>> Entity;
 
-    auto create_child() -> std::shared_ptr<scene_node>;
+    auto create_child() -> scene_node&;
     auto child_count() const -> isize;
-    auto get_child_at(isize index) const -> std::shared_ptr<scene_node>;
+    auto get_child_at(isize index) const -> scene_node&;
     void clear_children();
 
     void bring_to_front();
@@ -56,7 +56,7 @@ private:
 
     void handle_input_event(auto&& event, auto&& handler);
 
-    std::vector<std::shared_ptr<scene_node>> _children;
+    std::vector<std::unique_ptr<scene_node>> _children;
     scene_node*                              _parent;
 };
 
@@ -77,7 +77,7 @@ public:
     void update(milliseconds deltaTime) final;
     void fixed_update(milliseconds deltaTime) final;
 
-    auto root_node() -> std::shared_ptr<scene_node>;
+    auto root_node() -> scene_node&;
 
 protected:
     auto parent() -> game&;
@@ -109,7 +109,7 @@ private:
 
     detail::connection_manager  _connections {};
     game&                       _game;
-    std::shared_ptr<scene_node> _rootNode;
+    std::unique_ptr<scene_node> _rootNode;
 };
 
 }
