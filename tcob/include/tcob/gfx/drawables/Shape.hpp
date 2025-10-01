@@ -32,7 +32,7 @@ namespace tcob::gfx {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API shape : public transformable, public updatable {
+class TCOB_API shape : public transformable, public updatable, public non_copyable {
 public:
     shape();
 

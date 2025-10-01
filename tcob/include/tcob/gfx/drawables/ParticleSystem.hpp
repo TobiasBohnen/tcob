@@ -80,8 +80,7 @@ public:
     void restart();
     void stop();
 
-    auto create_emitter(auto&&... args) -> std::shared_ptr<Emitter>;
-    void add_emitter(std::shared_ptr<Emitter> const& emitter);
+    auto create_emitter(auto&&... args) -> Emitter&;
 
     void remove_emitter(emitter_type const& emitter);
     void clear_emitters();
@@ -102,7 +101,7 @@ private:
     renderer_type              _renderer {buffer_usage_hint::DynamicDraw};
     std::vector<geometry_type> _geometry;
 
-    std::vector<std::shared_ptr<emitter_type>> _emitters {};
+    std::vector<std::unique_ptr<emitter_type>> _emitters {};
     std::vector<particle_type>                 _particles {};
     isize                                      _aliveParticleCount {0};
 
@@ -177,7 +176,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API point_particle_emitter final {
+class TCOB_API point_particle_emitter final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
 
@@ -270,7 +269,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API quad_particle_emitter final {
+class TCOB_API quad_particle_emitter final : public non_copyable {
 public:
     ////////////////////////////////////////////////////////////
 

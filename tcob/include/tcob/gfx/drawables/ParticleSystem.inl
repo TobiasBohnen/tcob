@@ -110,15 +110,9 @@ inline void particle_system<Emitter>::deactivate_particle(particle_type& particl
 }
 
 template <typename Emitter>
-inline auto particle_system<Emitter>::create_emitter(auto&&... args) -> std::shared_ptr<Emitter>
+inline auto particle_system<Emitter>::create_emitter(auto&&... args) -> Emitter&
 {
-    return _emitters.emplace_back(std::make_shared<Emitter>(args...));
-}
-
-template <typename Emitter>
-inline void particle_system<Emitter>::add_emitter(std::shared_ptr<Emitter> const& emitter)
-{
-    _emitters.push_back(emitter);
+    return *_emitters.emplace_back(std::make_unique<Emitter>(args...));
 }
 
 template <typename Emitter>
