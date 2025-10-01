@@ -9,7 +9,6 @@
 #include <any>
 #include <memory>
 #include <optional>
-#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -167,20 +166,6 @@ private:
 };
 
 ////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-class TCOB_API static_shape_batch final : public drawable {
-public:
-    explicit static_shape_batch(std::span<std::shared_ptr<shape>> shapes);
-
-protected:
-    auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) override;
-
-private:
-    batch_polygon_renderer _renderer {};
-};
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API shape_batch final : public drawable, public updatable {

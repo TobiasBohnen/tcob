@@ -12,23 +12,6 @@
 #include "tcob/gfx/RenderTarget.hpp"
 
 namespace tcob::gfx {
-
-static_point_cloud::static_point_cloud(std::span<vertex> points)
-{
-    _renderer.set_geometry(points);
-    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
-}
-
-auto static_point_cloud::can_draw() const -> bool
-{
-    return !(*Material).is_expired();
-}
-
-void static_point_cloud::on_draw_to(render_target& target)
-{
-    _renderer.render_to_target(target);
-}
-
 ////////////////////////////////////////////////////////////
 
 point_cloud::point_cloud(i32 reservedSize)

@@ -27,27 +27,6 @@
 #include "tcob/gfx/Renderer.hpp"
 
 namespace tcob::gfx {
-
-static_shape_batch::static_shape_batch(std::span<std::shared_ptr<shape>> shapes)
-{
-    for (auto& shape : shapes) {
-        shape->update(milliseconds::zero());
-        if (shape->is_visible()) {
-            _renderer.add_geometry(shape->geometry(), (*shape->Material).ptr());
-        }
-    }
-}
-
-auto static_shape_batch::can_draw() const -> bool
-{
-    return true;
-}
-
-void static_shape_batch::on_draw_to(render_target& target)
-{
-    _renderer.render_to_target(target);
-}
-
 ////////////////////////////////////////////////////////////
 
 shape_batch::shape_batch()

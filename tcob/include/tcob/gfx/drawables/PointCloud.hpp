@@ -6,7 +6,6 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <span>
 #include <vector>
 
 #include "tcob/core/Property.hpp"
@@ -19,22 +18,6 @@
 #include "tcob/gfx/drawables/Drawable.hpp"
 
 namespace tcob::gfx {
-////////////////////////////////////////////////////////////
-
-class TCOB_API static_point_cloud final : public drawable {
-public:
-    explicit static_point_cloud(std::span<vertex> points);
-
-    prop<asset_ptr<material>> Material;
-
-protected:
-    auto can_draw() const -> bool override;
-    void on_draw_to(render_target& target) override;
-
-private:
-    point_renderer _renderer {buffer_usage_hint::StaticDraw};
-};
-
 ////////////////////////////////////////////////////////////
 
 class TCOB_API point_cloud final : public drawable {
