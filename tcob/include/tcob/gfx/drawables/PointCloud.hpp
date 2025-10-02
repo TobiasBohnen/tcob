@@ -22,7 +22,7 @@ namespace tcob::gfx {
 
 class TCOB_API point_cloud final : public drawable {
 public:
-    explicit point_cloud(i32 reservedSize);
+    explicit point_cloud(i32 reservedSize = 0);
 
     prop<asset_ptr<material>> Material;
 

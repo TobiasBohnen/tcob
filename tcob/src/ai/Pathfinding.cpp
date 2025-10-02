@@ -72,11 +72,11 @@ auto astar_pathfinding::neighbors(size_i gridSize, point_i pos) const -> std::ve
 auto astar_pathfinding::reconstruct_path(std::unordered_map<point_i, point_i> const& cameFrom, point_i current) const -> std::vector<point_i>
 {
     std::vector<point_i> retValue;
-    while (cameFrom.find(current) != cameFrom.end()) {
+    while (cameFrom.contains(current)) {
         retValue.push_back(current);
         current = cameFrom.at(current);
     }
-    std::reverse(retValue.begin(), retValue.end());
+    std::ranges::reverse(retValue);
     return retValue;
 }
 

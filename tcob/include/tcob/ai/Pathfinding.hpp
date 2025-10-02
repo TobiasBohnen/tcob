@@ -26,7 +26,7 @@ concept AStarGrid =
 
 class TCOB_API astar_pathfinding final {
 public:
-    enum class heuristic {
+    enum class heuristic : u8 {
         Euclidean,
         Manhattan,
         Chebyshev
