@@ -49,7 +49,7 @@ struct light_collision {
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API light_source {
+class TCOB_API light_source : public non_copyable {
     friend class lighting_system;
 
 public:
@@ -79,7 +79,7 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API shadow_caster {
+class TCOB_API shadow_caster : public non_copyable {
     friend class lighting_system;
 
 public:

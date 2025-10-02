@@ -3,13 +3,13 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <algorithm>
-
 #include "tcob/gfx/drawables/Background.hpp"
 
+#include <memory>
+
+#include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Size.hpp"
-#include "tcob/core/random/Random.hpp"
 #include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 
@@ -52,65 +52,22 @@ parallax_background::parallax_background()
     Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
 }
 
-auto parallax_background::add_layer(parallax_background_layer const& layer) -> uid
+auto parallax_background::create_layer() -> parallax_background_layer&
 {
-    uid const id {get_random_ID()};
-
-    _layers.push_back({
-        .ID            = id,
-        .TextureRegion = layer.TextureRegion,
-        .ScrollScale   = layer.ScrollScale,
-        .Offset        = layer.Offset,
-        .Visible       = true,
-    });
     _quads.push_back({});
-
-    return id;
+    return *_layers.emplace_back(std::make_unique<parallax_background_layer>());
 }
 
-void parallax_background::replace_layer(uid id, parallax_background_layer const& layer)
+void parallax_background::remove_layer(parallax_background_layer const& layer)
 {
-    auto const it {std::ranges::find_if(_layers, [&](auto const& l) { return l.ID == id; })};
-    if (it != _layers.end()) {
-        it->TextureRegion = layer.TextureRegion;
-        it->ScrollScale   = layer.ScrollScale;
-        it->Offset        = layer.Offset;
-    }
-}
-
-void parallax_background::remove_layer(uid id)
-{
-    auto const it {std::ranges::find_if(_layers, [&](auto const& l) { return l.ID == id; })};
-    if (it != _layers.end()) {
-        _layers.erase(it);
+    if (helper::erase_first(_layers, [&layer](auto const& val) { return val.get() == &layer; })) {
         _quads.resize(_layers.size());
     }
 }
 
-auto parallax_background::is_layer_visible(uid layerId) const -> bool
+void parallax_background::clear()
 {
-    if (auto const* layer {get_layer(layerId)}) {
-        return layer->Visible;
-    }
-    return false;
-}
-
-void parallax_background::show_layer(uid layerId)
-{
-    if (auto* layer {get_layer(layerId)}) {
-        if (!layer->Visible) {
-            layer->Visible = true;
-        }
-    }
-}
-
-void parallax_background::hide_layer(uid layerId)
-{
-    if (auto* layer {get_layer(layerId)}) {
-        if (layer->Visible) {
-            layer->Visible = false;
-        }
-    }
+    _layers.clear();
 }
 
 auto parallax_background::can_draw() const -> bool
@@ -126,8 +83,9 @@ void parallax_background::on_draw_to(render_target& target)
     auto const texSize {size_f {Material->Texture->info().Size} * TextureScale};
 
     for (usize i {0}; i < _layers.size(); ++i) {
-        auto const& layer {_layers[i]};
-        auto&       quad {_quads[i]};
+        auto const& layer {*_layers[i]};
+        if (!layer.Visible) { continue; }
+        auto& quad {_quads[i]};
 
         geometry::set_position(quad, {point_f::Zero, size_f {*target.Size}});
         geometry::set_color(quad, colors::White);
@@ -151,24 +109,6 @@ void parallax_background::on_draw_to(render_target& target)
     target.camera().push_state();
     _renderer.render_to_target(target);
     target.camera().pop_state();
-}
-
-auto parallax_background::get_layer(uid id) -> layer*
-{
-    for (auto& layer : _layers) {
-        if (layer.ID == id) { return &layer; }
-    }
-
-    return nullptr;
-}
-
-auto parallax_background::get_layer(uid id) const -> layer const*
-{
-    for (auto const& layer : _layers) {
-        if (layer.ID == id) { return &layer; }
-    }
-
-    return nullptr;
 }
 
 }

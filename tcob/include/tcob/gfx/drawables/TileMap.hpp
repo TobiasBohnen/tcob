@@ -131,7 +131,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-class TCOB_API tilemap_layer : public non_copyable {
+class TCOB_API tilemap_layer final : public non_copyable {
     friend class tilemap_base;
 
 public:

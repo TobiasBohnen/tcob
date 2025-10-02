@@ -254,6 +254,7 @@ namespace gfx {
     class canvas;
     class font;
     class material;
+    class parallax_background;
     class render_system;
     class render_target;
     struct render_properties;

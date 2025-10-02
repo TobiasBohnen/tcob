@@ -6,8 +6,10 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <memory>
 #include <vector>
 
+#include "tcob/core/Interfaces.hpp"
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Size.hpp"
 #include "tcob/core/assets/Asset.hpp"
@@ -39,10 +41,14 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-struct parallax_background_layer {
+class TCOB_API parallax_background_layer final : public non_copyable {
+public:
+    parallax_background_layer() = default;
+
     string TextureRegion;
     size_f ScrollScale {size_f::One};
     size_f Offset {size_f::Zero};
+    bool   Visible {true};
 };
 
 ////////////////////////////////////////////////////////////
@@ -54,33 +60,19 @@ public:
     prop<asset_ptr<material>> Material;
     size_f                    TextureScale {size_f::One};
 
-    auto add_layer(parallax_background_layer const& layer) -> uid;
-    void replace_layer(uid id, parallax_background_layer const& layer);
-    void remove_layer(uid id);
-
-    auto is_layer_visible(uid layerId) const -> bool;
-    void show_layer(uid layerId);
-    void hide_layer(uid layerId);
+    auto create_layer() -> parallax_background_layer&;
+    void remove_layer(parallax_background_layer const& layer);
+    void clear();
 
 protected:
     auto can_draw() const -> bool override;
     void on_draw_to(render_target& target) final;
 
 private:
-    struct layer {
-        uid    ID {INVALID_ID};
-        string TextureRegion;
-        size_f ScrollScale;
-        size_f Offset;
-        bool   Visible {true};
-    };
+    std::vector<std::unique_ptr<parallax_background_layer>> _layers {};
 
-    auto get_layer(uid id) -> layer*;
-    auto get_layer(uid id) const -> layer const*;
-
-    std::vector<layer> _layers;
-    std::vector<quad>  _quads;
-    quad_renderer      _renderer {buffer_usage_hint::StreamDraw};
+    std::vector<quad> _quads;
+    quad_renderer     _renderer {buffer_usage_hint::StreamDraw};
 };
 
 }
