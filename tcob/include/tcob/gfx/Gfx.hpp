@@ -257,6 +257,7 @@ namespace gfx {
     class render_system;
     class render_target;
     struct render_properties;
+    class tilemap_base;
     class window;
 }
 namespace gfx::render_backend {

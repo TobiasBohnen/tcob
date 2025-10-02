@@ -7,7 +7,7 @@
 #include "tcob/tcob_config.hpp"
 
 #include <initializer_list>
-#include <optional>
+#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -131,9 +131,20 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-struct tilemap_layer {
-    grid<tile_index_t> Tiles;
-    point_i            Offset {point_i::Zero};
+class TCOB_API tilemap_layer : public non_copyable {
+    friend class tilemap_base;
+
+public:
+    prop<grid<tile_index_t>> Tiles;
+    prop<point_i>            Offset {point_i::Zero};
+    prop<bool>               Visible {true};
+
+protected:
+    tilemap_layer(tilemap_base* parent);
+    void notify_parent();
+
+private:
+    tilemap_base* _parent {nullptr};
 };
 
 ////////////////////////////////////////////////////////////
@@ -148,6 +159,8 @@ enum class render_direction : u8 {
 ////////////////////////////////////////////////////////////
 
 class TCOB_API tilemap_base : public drawable, public updatable {
+    friend class tilemap_layer;
+
 public:
     tilemap_base();
     ~tilemap_base() override = default;
@@ -156,21 +169,12 @@ public:
     prop<asset_ptr<material>> Material;
     prop<point_f>             Position;
 
-    auto add_layer(tilemap_layer const& layer) -> uid;
-    void replace_layer(uid layerId, tilemap_layer const& layer);
-    void remove_layer(uid layerId);
-
-    void bring_to_front(uid layerId);
-    void send_to_back(uid layerId);
-
-    auto is_layer_visible(uid layerId) const -> bool;
-    void show_layer(uid layerId);
-    void hide_layer(uid layerId);
-
-    auto get_tile_index(uid layerId, point_i pos) const -> std::optional<tile_index_t>;
-    void set_tile_index(uid layerId, point_i pos, tile_index_t setIdx);
-
+    auto create_layer() -> tilemap_layer&;
+    void remove_layer(tilemap_layer const& layer);
     void clear();
+
+    void bring_to_front(tilemap_layer const& layer);
+    void send_to_back(tilemap_layer const& layer);
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -181,24 +185,11 @@ protected:
     void mark_dirty();
 
 private:
-    class TCOB_API layer {
-    public:
-        uid     ID {INVALID_ID};
-        size_i  Size {size_i::Zero};
-        point_i Offset {point_i::Zero};
-        i32     TileMapStart {0};
-        bool    Visible {true};
-
-        auto get_index(point_i pos) const -> i32;
-    };
-
-    auto find_layer(uid id) -> std::vector<layer>::iterator;
-    auto find_layer(uid id) const -> std::vector<layer>::const_iterator;
+    void notify_layer_changed(tilemap_layer* layer);
 
     virtual void setup_quad(quad& q, point_i coord, tile_index_t idx) const = 0;
 
-    std::vector<layer>        _layers {};
-    std::vector<tile_index_t> _tileMap {};
+    std::vector<std::unique_ptr<tilemap_layer>> _layers {};
 
     quad_renderer     _renderer;
     std::vector<quad> _quads {};
@@ -219,7 +210,6 @@ public:
 
     prop<grid_type> Grid;
 
-    auto get_tile_bounds(uid layerId, point_i pos) const -> rect_f;
     void change_tileset(tile_index_t idx, tile_type const& t);
 
 private:

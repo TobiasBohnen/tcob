@@ -26,12 +26,6 @@ inline tilemap<G>::tilemap(set_type set)
 }
 
 template <typename G>
-inline auto tilemap<G>::get_tile_bounds(uid layerId, point_i pos) const -> rect_f
-{
-    return Grid->layout_tile(_tileSet.get_tile(get_tile_index(layerId, pos)), pos);
-}
-
-template <typename G>
 inline void tilemap<G>::change_tileset(tile_index_t idx, tile_type const& t)
 {
     _tileSet.set_tile(idx, t);
