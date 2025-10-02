@@ -29,7 +29,7 @@ namespace helper {
     template <typename... Ts>
     auto constexpr hash_combine(usize seed, Ts... values) noexcept -> usize
     {
-        constexpr usize magic {sizeof(usize) == 8 ? 0x9e3779b97f4a7c15ULL : 0x9e3779b9U};
+        constexpr usize magic {static_cast<usize>(0x9e3779b97f4a7c15ull)};
         ((seed ^= std::hash<Ts> {}(values) + magic + (seed << 6) + (seed >> 2)), ...);
         return seed;
     }
