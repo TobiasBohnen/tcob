@@ -54,15 +54,12 @@ parallax_background::parallax_background()
 
 auto parallax_background::create_layer() -> parallax_background_layer&
 {
-    _quads.push_back({});
     return *_layers.emplace_back(std::make_unique<parallax_background_layer>());
 }
 
 void parallax_background::remove_layer(parallax_background_layer const& layer)
 {
-    if (helper::erase_first(_layers, [&layer](auto const& val) { return val.get() == &layer; })) {
-        _quads.resize(_layers.size());
-    }
+    helper::erase_first(_layers, [&layer](auto const& val) { return val.get() == &layer; });
 }
 
 void parallax_background::clear()
@@ -81,6 +78,7 @@ void parallax_background::on_draw_to(render_target& target)
 
     auto const targetSize {size_f {*target.Size}};
     auto const texSize {size_f {Material->Texture->info().Size} * TextureScale};
+    _quads.resize(_layers.size());
 
     for (usize i {0}; i < _layers.size(); ++i) {
         auto const& layer {*_layers[i]};
