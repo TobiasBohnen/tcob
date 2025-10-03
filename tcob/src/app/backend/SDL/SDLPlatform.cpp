@@ -57,7 +57,7 @@ static auto make_shared() -> std::shared_ptr<T>
 ////////////////////////////////////////////////////////////
 
 sdl_platform::sdl_platform(bool headless, game::init const& ginit)
-    : platform(headless, ginit)
+    : platform {headless, ginit}
 {
     InitSDL();
 
@@ -67,11 +67,10 @@ sdl_platform::sdl_platform(bool headless, game::init const& ginit)
     if (!headless) {
         init_audio_system(); // <-- DON'T MOVE OUTSIDE HEADLESS
         init_render_system(ginit.Name);
+        process_events();    // gamepad add events
     } else {
         register_service<gfx::render_system, gfx::null::null_render_system>();
     }
-
-    process_events(); // gamepad add events
 }
 
 sdl_platform::~sdl_platform()

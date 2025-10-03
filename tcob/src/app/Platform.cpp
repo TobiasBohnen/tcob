@@ -58,11 +58,7 @@ static auto make_unique() -> std::unique_ptr<T>
 platform::platform(bool headless, game::init const& ginit)
 {
     //  file system
-    if (!headless) {
-        io::detail::init(ginit.Name, ginit.OrgName);
-    } else {
-        io::detail::simple_init();
-    }
+    io::detail::init(ginit.Name, ginit.OrgName);
 
     //  logger
     if (ginit.LogFile.empty()) {
@@ -141,7 +137,7 @@ auto platform::HeadlessInit(path const& logFile) -> std::shared_ptr<platform>
                           {.Name           = "",
                            .OrgName        = "",
                            .LogFile        = logFile,
-                           .ConfigFile     = "config.ini",
+                           .ConfigFile     = "",
                            .ConfigDefaults = {},
                            .WorkerThreads  = std::nullopt}}};
 }

@@ -88,20 +88,14 @@ static auto EmptyEnumCallback(void* data, char const*, char const*) -> PHYSFS_En
 
 ////////////////////////////////////////////////////////////
 
-void detail::simple_init()
-{
-    auto const cp {std::filesystem::current_path()};
-    check("init", PHYSFS_init(reinterpret_cast<char const*>(cp.c_str())));
-    check("setWriteDir", PHYSFS_setWriteDir("."));
-    mount(".", "/");
-}
-
 void detail::init(string const& name, string const& orgName)
 {
     auto const cp {std::filesystem::current_path()};
     check("init", PHYSFS_init(reinterpret_cast<char const*>(cp.c_str())));
-    if (!orgName.empty() || !name.empty()) {
+    if (!orgName.empty() && !name.empty()) {
         check("setSaneConfig", PHYSFS_setSaneConfig(orgName.c_str(), name.c_str(), "", 0, 0));
+    } else {
+        check("setWriteDir", PHYSFS_setWriteDir("."));
     }
     mount(".", "/");
 }

@@ -6,10 +6,7 @@
 #pragma once
 #include "TileMap.hpp"
 
-#include <initializer_list>
 #include <tuple>
-#include <unordered_map>
-#include <utility>
 
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -28,7 +25,7 @@ inline tilemap<G>::tilemap()
 template <typename G>
 inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) const
 {
-    auto const& tile {idx != 0 ? Tileset->get_tile(idx) : tile_type {}};
+    auto const& tile {idx != 0 ? Tileset->at(idx) : tile_type {}};
 
     rect_f rect {Grid->layout_tile(tile, coord)};
     rect.move_by(*Position);
@@ -42,35 +39,6 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
     } else {
         geometry::set_texcoords(q, {.UVRect = {0, 0, 1, 1}, .Level = 1});
     }
-}
-
-////////////////////////////////////////////////////////////
-
-template <typename T>
-inline tileset<T>::tileset(std::unordered_map<tile_index_t, tile_type> set)
-    : _set {std::move(set)}
-{
-}
-
-template <typename T>
-inline tileset<T>::tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items)
-{
-    _set.reserve(items.size());
-    for (auto const& item : items) {
-        _set[item.first] = item.second;
-    }
-}
-
-template <typename T>
-auto tileset<T>::get_tile(tile_index_t idx) const -> tile_type const&
-{
-    return _set.at(idx);
-}
-
-template <typename T>
-void tileset<T>::set_tile(tile_index_t idx, tile_type const& tile)
-{
-    _set[idx] = tile;
 }
 
 ////////////////////////////////////////////////////////////

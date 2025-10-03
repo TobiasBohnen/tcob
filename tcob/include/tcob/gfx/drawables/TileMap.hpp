@@ -6,10 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
-#include <initializer_list>
 #include <memory>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "tcob/core/Color.hpp"
@@ -29,10 +27,6 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 
-using tile_index_t = u64;
-
-////////////////////////////////////////////////////////////
-
 enum class render_direction : u8 {
     RightDown,
     RightUp,
@@ -42,101 +36,10 @@ enum class render_direction : u8 {
 
 ////////////////////////////////////////////////////////////
 
+using tile_index_t = u64;
+
 template <typename T>
-class tileset {
-public:
-    using tile_type = T;
-
-    explicit tileset(std::unordered_map<tile_index_t, tile_type> set);
-    explicit tileset(std::initializer_list<std::pair<tile_index_t, tile_type>> items);
-
-    auto get_tile(tile_index_t idx) const -> tile_type const&;
-    void set_tile(tile_index_t idx, tile_type const& tile_type);
-
-private:
-    std::unordered_map<tile_index_t, tile_type> _set;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API orthogonal_tile {
-public:
-    string TextureRegion {};
-    bool   FlipHorizontally {false};
-    bool   FlipVertically {false};
-    color  Color {colors::White};
-
-    size_f Scale {size_f::One};
-
-    static auto constexpr Members();
-};
-
-class TCOB_API orthogonal_grid {
-public:
-    using tile_type = orthogonal_tile;
-
-    size_f TileSize {size_f::Zero};
-
-    auto layout_tile(orthogonal_tile const& tile, point_i coord) const -> rect_f;
-
-    auto operator==(orthogonal_grid const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API isometric_tile {
-public:
-    string TextureRegion {};
-    bool   FlipHorizontally {false};
-    bool   FlipVertically {false};
-    color  Color {colors::White};
-
-    point_f Center {0.5f, 0.5f};
-    f32     Height {0.0f};
-
-    static auto constexpr Members();
-};
-
-class TCOB_API isometric_grid {
-public:
-    using tile_type = isometric_tile;
-
-    size_f TileSize {size_f::Zero};
-    bool   Staggered {false};
-
-    auto layout_tile(isometric_tile const& tile, point_i coord) const -> rect_f;
-
-    auto operator==(isometric_grid const& other) const -> bool = default;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API hexagonal_tile {
-public:
-    string TextureRegion {};
-    bool   FlipHorizontally {false};
-    bool   FlipVertically {false};
-    color  Color {colors::White};
-
-    static auto constexpr Members();
-};
-
-enum hexagonal_top : u8 {
-    Pointy,
-    Flat
-};
-
-class TCOB_API hexagonal_grid {
-public:
-    using tile_type = hexagonal_tile;
-
-    size_f        TileSize {size_f::Zero};
-    hexagonal_top Top {hexagonal_top::Pointy};
-
-    auto layout_tile(hexagonal_tile const& tile, point_i coord) const -> rect_f;
-
-    auto operator==(hexagonal_grid const& other) const -> bool = default;
-};
+using tileset = std::unordered_map<tile_index_t, T>;
 
 ////////////////////////////////////////////////////////////
 
@@ -214,6 +117,94 @@ public:
 
 private:
     void setup_quad(quad& q, point_i coord, tile_index_t idx) const override;
+};
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+class TCOB_API orthogonal_tile {
+public:
+    string TextureRegion {};
+    bool   FlipHorizontally {false};
+    bool   FlipVertically {false};
+    color  Color {colors::White};
+
+    size_f Scale {size_f::One};
+
+    static auto constexpr Members();
+
+    auto operator==(orthogonal_tile const& other) const -> bool = default;
+};
+
+class TCOB_API orthogonal_grid {
+public:
+    using tile_type = orthogonal_tile;
+
+    size_f TileSize {size_f::Zero};
+
+    auto layout_tile(orthogonal_tile const& tile, point_i coord) const -> rect_f;
+
+    auto operator==(orthogonal_grid const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API isometric_tile {
+public:
+    string TextureRegion {};
+    bool   FlipHorizontally {false};
+    bool   FlipVertically {false};
+    color  Color {colors::White};
+
+    point_f Center {0.5f, 0.5f};
+    f32     Height {0.0f};
+
+    static auto constexpr Members();
+
+    auto operator==(isometric_tile const& other) const -> bool = default;
+};
+
+class TCOB_API isometric_grid {
+public:
+    using tile_type = isometric_tile;
+
+    size_f TileSize {size_f::Zero};
+    bool   Staggered {false};
+
+    auto layout_tile(isometric_tile const& tile, point_i coord) const -> rect_f;
+
+    auto operator==(isometric_grid const& other) const -> bool = default;
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API hexagonal_tile {
+public:
+    string TextureRegion {};
+    bool   FlipHorizontally {false};
+    bool   FlipVertically {false};
+    color  Color {colors::White};
+
+    static auto constexpr Members();
+
+    auto operator==(hexagonal_tile const& other) const -> bool = default;
+};
+
+enum hexagonal_top : u8 {
+    Pointy,
+    Flat
+};
+
+class TCOB_API hexagonal_grid {
+public:
+    using tile_type = hexagonal_tile;
+
+    size_f        TileSize {size_f::Zero};
+    hexagonal_top Top {hexagonal_top::Pointy};
+
+    auto layout_tile(hexagonal_tile const& tile, point_i coord) const -> rect_f;
+
+    auto operator==(hexagonal_grid const& other) const -> bool = default;
 };
 
 ////////////////////////////////////////////////////////////
