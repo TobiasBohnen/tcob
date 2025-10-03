@@ -52,7 +52,6 @@ tilemap_base::tilemap_base()
 {
     Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
     Position.Changed.connect([this](auto const&) { mark_dirty(); });
-    RenderDirection.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
 auto tilemap_base::create_layer() -> tilemap_layer&
@@ -119,7 +118,7 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
 
         auto const& tiles {*layer->Tiles};
         for (i32 i {0}; i < tiles.width() * tiles.height(); ++i) {
-            point_i const      tilePos {IndexToPosition(i, RenderDirection, tiles.size())};
+            point_i const      tilePos {IndexToPosition(i, layer->RenderDirection, tiles.size())};
             tile_index_t const tileIdx {tiles[tilePos]};
             setup_quad(_quads.emplace_back(), {tilePos.X + layer->Offset->X, tilePos.Y + layer->Offset->Y}, tileIdx);
         }
@@ -154,6 +153,7 @@ tilemap_layer::tilemap_layer(tilemap_base* parent)
     Tiles.Changed.connect([this](auto const&) { notify_parent(); });
     Offset.Changed.connect([this](auto const&) { notify_parent(); });
     Visible.Changed.connect([this](auto const&) { notify_parent(); });
+    RenderDirection.Changed.connect([this](auto const&) { notify_parent(); });
 }
 
 void tilemap_layer::notify_parent()

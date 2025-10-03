@@ -33,6 +33,15 @@ using tile_index_t = u64;
 
 ////////////////////////////////////////////////////////////
 
+enum class render_direction : u8 {
+    RightDown,
+    RightUp,
+    LeftDown,
+    LeftUp
+};
+
+////////////////////////////////////////////////////////////
+
 template <typename T>
 class tileset {
 public:
@@ -138,6 +147,7 @@ public:
     prop<grid<tile_index_t>> Tiles;
     prop<point_i>            Offset {point_i::Zero};
     prop<bool>               Visible {true};
+    prop<render_direction>   RenderDirection {render_direction::RightDown};
 
 protected:
     tilemap_layer(tilemap_base* parent);
@@ -149,15 +159,6 @@ private:
 
 ////////////////////////////////////////////////////////////
 
-enum class render_direction : u8 {
-    RightDown,
-    RightUp,
-    LeftDown,
-    LeftUp
-};
-
-////////////////////////////////////////////////////////////
-
 class TCOB_API tilemap_base : public drawable, public updatable {
     friend class tilemap_layer;
 
@@ -165,7 +166,6 @@ public:
     tilemap_base();
     ~tilemap_base() override = default;
 
-    prop<render_direction>    RenderDirection {render_direction::RightDown};
     prop<asset_ptr<material>> Material;
     prop<point_f>             Position;
 
@@ -203,31 +203,24 @@ template <typename G>
 class tilemap : public tilemap_base {
     using grid_type = G;
     using tile_type = G::tile_type;
-    using set_type  = tileset<tile_type>;
 
 public:
-    explicit tilemap(set_type set);
+    using set = tileset<tile_type>;
+
+    tilemap();
 
     prop<grid_type> Grid;
-
-    void change_tileset(tile_index_t idx, tile_type const& t);
+    prop<set>       Tileset;
 
 private:
     void setup_quad(quad& q, point_i coord, tile_index_t idx) const override;
-
-    set_type _tileSet;
 };
 
 ////////////////////////////////////////////////////////////
 
 using orthogonal_tilemap = tilemap<orthogonal_grid>;
-using orthogonal_tileset = tileset<orthogonal_tile>;
-
-using isometric_tilemap = tilemap<isometric_grid>;
-using isometric_tileset = tileset<isometric_tile>;
-
-using hexagonal_tilemap = tilemap<hexagonal_grid>;
-using hexagonal_tileset = tileset<hexagonal_tile>;
+using isometric_tilemap  = tilemap<isometric_grid>;
+using hexagonal_tilemap  = tilemap<hexagonal_grid>;
 
 ////////////////////////////////////////////////////////////
 

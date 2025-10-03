@@ -19,23 +19,16 @@
 namespace tcob::gfx {
 
 template <typename G>
-inline tilemap<G>::tilemap(set_type set)
-    : _tileSet {std::move(set)}
+inline tilemap<G>::tilemap()
 {
     Grid.Changed.connect([this](auto const&) { mark_dirty(); });
-}
-
-template <typename G>
-inline void tilemap<G>::change_tileset(tile_index_t idx, tile_type const& t)
-{
-    _tileSet.set_tile(idx, t);
-    mark_dirty();
+    Tileset.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
 template <typename G>
 inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) const
 {
-    auto const& tile {idx != 0 ? _tileSet.get_tile(idx) : tile_type {}};
+    auto const& tile {idx != 0 ? Tileset->get_tile(idx) : tile_type {}};
 
     rect_f rect {Grid->layout_tile(tile, coord)};
     rect.move_by(*Position);
