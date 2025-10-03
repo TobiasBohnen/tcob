@@ -63,12 +63,7 @@ auto tilemap_base::create_layer() -> tilemap_layer&
 void tilemap_base::remove_layer(tilemap_layer const& layer)
 {
     helper::erase_first(_layers, [&layer](auto const& val) {
-        if (val.get() == &layer) {
-            val.get()->_parent = nullptr;
-            return true;
-        }
-
-        return false;
+        return static_cast<bool>(val.get() == &layer);
     });
 
     mark_dirty();
@@ -76,7 +71,6 @@ void tilemap_base::remove_layer(tilemap_layer const& layer)
 
 void tilemap_base::clear()
 {
-    for (auto& ls : _layers) { ls->_parent = nullptr; }
     _layers.clear();
     mark_dirty();
 }
@@ -118,9 +112,8 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
 
         auto const& tiles {*layer->Tiles};
         for (i32 i {0}; i < tiles.width() * tiles.height(); ++i) {
-            point_i const      tilePos {IndexToPosition(i, layer->RenderDirection, tiles.size())};
-            tile_index_t const tileIdx {tiles[tilePos]};
-            setup_quad(_quads.emplace_back(), {tilePos.X + layer->Offset->X, tilePos.Y + layer->Offset->Y}, tileIdx);
+            auto const tilePos {IndexToPosition(i, layer->RenderDirection, tiles.size())};
+            setup_quad(_quads.emplace_back(), tilePos + *layer->Offset, tiles[tilePos]);
         }
     }
 }
@@ -148,17 +141,11 @@ void tilemap_base::mark_dirty()
 ////////////////////////////////////////////////////////////
 
 tilemap_layer::tilemap_layer(tilemap_base* parent)
-    : _parent {parent}
 {
-    Tiles.Changed.connect([this](auto const&) { notify_parent(); });
-    Offset.Changed.connect([this](auto const&) { notify_parent(); });
-    Visible.Changed.connect([this](auto const&) { notify_parent(); });
-    RenderDirection.Changed.connect([this](auto const&) { notify_parent(); });
-}
-
-void tilemap_layer::notify_parent()
-{
-    _parent->notify_layer_changed(this);
+    Tiles.Changed.connect([this, parent](auto const&) { parent->notify_layer_changed(this); });
+    Offset.Changed.connect([this, parent](auto const&) { parent->notify_layer_changed(this); });
+    Visible.Changed.connect([this, parent](auto const&) { parent->notify_layer_changed(this); });
+    RenderDirection.Changed.connect([this, parent](auto const&) { parent->notify_layer_changed(this); });
 }
 
 ////////////////////////////////////////////////////////////

@@ -6,6 +6,7 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <any>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -47,17 +48,15 @@ class TCOB_API tilemap_layer final : public non_copyable {
     friend class tilemap_base;
 
 public:
+    std::any UserData;
+
     prop<grid<tile_index_t>> Tiles;
     prop<point_i>            Offset {point_i::Zero};
     prop<bool>               Visible {true};
     prop<render_direction>   RenderDirection {render_direction::RightDown};
 
-protected:
-    tilemap_layer(tilemap_base* parent);
-    void notify_parent();
-
 private:
-    tilemap_base* _parent {nullptr};
+    tilemap_layer(tilemap_base* parent);
 };
 
 ////////////////////////////////////////////////////////////
@@ -73,6 +72,7 @@ public:
     prop<point_f>             Position;
 
     auto create_layer() -> tilemap_layer&;
+
     void remove_layer(tilemap_layer const& layer);
     void clear();
 
