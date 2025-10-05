@@ -14,7 +14,7 @@
 
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
-
+// TODO: material -> technique -> pass
 class TCOB_API material {
 public:
     asset_ptr<shader>  Shader {};

@@ -33,7 +33,7 @@ static auto get_poly_info(polyline_span points) -> polygon::information
 {
     polygon::information retValue;
 
-    point_f max {std::numeric_limits<f32>::denorm_min(), std::numeric_limits<f32>::denorm_min()};
+    point_f max {std::numeric_limits<f32>::lowest(), std::numeric_limits<f32>::lowest()};
     point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
 
     f32 signedArea {0.0f};

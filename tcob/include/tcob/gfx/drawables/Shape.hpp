@@ -44,15 +44,16 @@ public:
 
     std::any UserData;
 
-    u32 RayCastMask {0xFFFFFFFF};
+    u32 IntersectMask {0xFFFFFFFF};
 
     void show();
     void hide();
     auto is_visible() const -> bool;
 
-    virtual auto geometry() -> geometry_data = 0;
+    virtual auto geometry() const -> geometry_data = 0;
+    virtual auto aabb() const -> rect_f            = 0;
 
-    virtual auto intersect(ray const& ray) -> std::vector<ray::result> = 0;
+    virtual auto intersect(ray const& ray) const -> std::vector<ray::result> = 0;
 
     auto is_dirty() const -> bool;
 
@@ -83,9 +84,10 @@ public:
     prop<f32>     Radius;
     prop<i32>     Segments {90};
 
-    auto geometry() -> geometry_data override;
+    auto geometry() const -> geometry_data override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray) -> std::vector<ray::result> override;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -110,11 +112,10 @@ public:
     prop<rect_f>  Bounds;
     prop<point_f> TextureScroll;
 
-    auto geometry() -> geometry_data override;
+    auto geometry() const -> geometry_data override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray) -> std::vector<ray::result> override;
-
-    auto aabb() const -> rect_f;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
     void move_by(point_f offset);
 
@@ -140,9 +141,10 @@ public:
 
     prop<std::vector<polygon>> Polygons;
 
-    auto geometry() -> geometry_data override;
+    auto geometry() const -> geometry_data override;
+    auto aabb() const -> rect_f override;
 
-    auto intersect(ray const& ray) -> std::vector<ray::result> override;
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
     void clip(poly_shape const& other, clip_mode mode);
 
@@ -157,12 +159,15 @@ protected:
 
 private:
     void create();
+    void update_aabb();
 
     std::vector<u32>    _inds;
     std::vector<vertex> _verts;
 
-    rect_f  _boundingBox;
-    point_f _centroid;
+    rect_f  _boundingBox {rect_f::Zero};
+    point_f _centroid {point_f::Zero};
+
+    rect_f _aabb {rect_f::Zero};
 };
 
 ////////////////////////////////////////////////////////////
@@ -185,7 +190,8 @@ public:
 
     auto get_shape_at(isize index) const -> shape&;
 
-    auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) -> std::unordered_map<shape*, std::vector<ray::result>>;
+    auto intersect(ray const& ray, u32 mask = 0xFFFFFFFF) const -> std::unordered_map<shape*, std::vector<ray::result>>;
+    auto intersect(rect_f const& rect, u32 mask = 0xFFFFFFFF) const -> std::vector<shape*>;
 
     void clear();
 

@@ -23,7 +23,7 @@ transformable::transformable()
     Skew.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto transformable::transform() -> gfx::transform const&
+auto transformable::transform() const -> gfx::transform const&
 {
     update_transform();
     return _transform;
@@ -57,7 +57,7 @@ void transformable::mark_transform_dirty()
     on_transform_changed();
 }
 
-void transformable::update_transform()
+void transformable::update_transform() const
 {
     if (!_isDirty) { return; }
     _isDirty = false;

@@ -118,10 +118,12 @@ auto ray::intersect_polyline(polyline_span polygon) const -> std::vector<result>
 auto ray::intersect_polyline(polyline_span polygon, transform const& xform) const -> std::vector<result>
 {
     std::vector<point_f> points;
+
     points.reserve(polygon.size());
     for (auto const& point : polygon) {
         points.push_back(xform * point);
     }
+
     return intersect_polyline(points);
 }
 

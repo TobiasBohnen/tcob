@@ -9,6 +9,7 @@
 #include <array>
 #include <cmath>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <span>
 #include <unordered_map>
@@ -75,14 +76,27 @@ auto shape_batch::get_shape_at(isize index) const -> shape&
     return *_children.at(static_cast<usize>(index));
 }
 
-auto shape_batch::intersect(ray const& ray, u32 mask) -> std::unordered_map<shape*, std::vector<ray::result>>
+auto shape_batch::intersect(ray const& ray, u32 mask) const -> std::unordered_map<shape*, std::vector<ray::result>>
 {
     std::unordered_map<shape*, std::vector<ray::result>> retValue;
-    for (auto& child : _children) {
-        if (child->RayCastMask & mask) {
+    for (auto const& child : _children) {
+        if (child->IntersectMask & mask) {
             auto const points {child->intersect(ray)};
             if (points.empty()) { continue; }
             retValue[child.get()] = points;
+        }
+    }
+    return retValue;
+}
+
+auto shape_batch::intersect(rect_f const& rect, u32 mask) const -> std::vector<shape*>
+{
+    std::vector<shape*> retValue;
+    for (auto const& child : _children) {
+        if (child->IntersectMask & mask) {
+            if (child->aabb().intersects(rect, true)) {
+                retValue.push_back(child.get());
+            }
         }
     }
     return retValue;
@@ -190,7 +204,7 @@ circle_shape::circle_shape()
     Segments.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
-auto circle_shape::geometry() -> geometry_data
+auto circle_shape::geometry() const -> geometry_data
 {
     return {
         .Vertices = _verts,
@@ -198,7 +212,15 @@ auto circle_shape::geometry() -> geometry_data
         .Type     = primitive_type::Triangles};
 }
 
-auto circle_shape::intersect(ray const& ray) -> std::vector<ray::result>
+auto circle_shape::aabb() const -> rect_f
+{
+    auto const worldCenter {transform() * Center};
+    return {
+        worldCenter - point_f {Radius, Radius},
+        {Radius * 2.0f, Radius * 2.0f}};
+}
+
+auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
     return ray.intersect_circle(transform() * Center, Radius);
 }
@@ -286,10 +308,10 @@ rect_shape::rect_shape()
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
-    geometry::set_texcoords(_quad, {{0, 0, 1, 1}, 1});
+    geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
 }
 
-auto rect_shape::geometry() -> geometry_data
+auto rect_shape::geometry() const -> geometry_data
 {
     static constexpr std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
     return {
@@ -298,7 +320,7 @@ auto rect_shape::geometry() -> geometry_data
         .Type     = primitive_type::Triangles};
 }
 
-auto rect_shape::intersect(ray const& ray) -> std::vector<ray::result>
+auto rect_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
     return ray.intersect_rect(*Bounds, transform());
 }
@@ -306,11 +328,6 @@ auto rect_shape::intersect(ray const& ray) -> std::vector<ray::result>
 auto rect_shape::aabb() const -> rect_f
 {
     return _aabb;
-}
-
-void rect_shape::move_by(point_f offset)
-{
-    Bounds = {Bounds->Position + offset, Bounds->Size};
 }
 
 void rect_shape::update_aabb()
@@ -327,6 +344,11 @@ void rect_shape::update_aabb()
     std::pair<f32, f32> const lr {std::minmax({topLeft.X, topRight.X, bottomLeft.X, bottomRight.X})};
 
     _aabb = {{lr.first, tb.first}, {lr.second - lr.first, tb.second - tb.first}};
+}
+
+void rect_shape::move_by(point_f offset)
+{
+    Bounds = {Bounds->Position + offset, Bounds->Size};
 }
 
 void rect_shape::on_update(milliseconds deltaTime)
@@ -368,7 +390,7 @@ poly_shape::poly_shape()
     Polygons.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto poly_shape::geometry() -> geometry_data
+auto poly_shape::geometry() const -> geometry_data
 {
     return {
         .Vertices = _verts,
@@ -376,7 +398,35 @@ auto poly_shape::geometry() -> geometry_data
         .Type     = primitive_type::Triangles};
 }
 
-auto poly_shape::intersect(ray const& ray) -> std::vector<ray::result>
+auto poly_shape::aabb() const -> rect_f
+{
+    return _aabb;
+}
+
+void poly_shape::update_aabb()
+{
+    auto const& xform {transform()};
+
+    std::array<point_f, 4> const corners {{_boundingBox.top_left(),
+                                           _boundingBox.top_right(),
+                                           _boundingBox.bottom_left(),
+                                           _boundingBox.bottom_right()}};
+
+    point_f max {std::numeric_limits<f32>::lowest(), std::numeric_limits<f32>::lowest()};
+    point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
+
+    for (auto const& c : corners) {
+        auto const t {xform * c};
+        min.X = std::min(min.X, t.X);
+        min.Y = std::min(min.Y, t.Y);
+        max.X = std::max(max.X, t.X);
+        max.Y = std::max(max.Y, t.Y);
+    }
+
+    _aabb = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
+}
+
+auto poly_shape::intersect(ray const& ray) const -> std::vector<ray::result>
 {
     std::vector<ray::result> retValue;
     for (auto const& polygon : *Polygons) {
@@ -413,6 +463,7 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     _centroid    = info.Centroid;
 
     create();
+    update_aabb();
 }
 
 void poly_shape::on_color_changed(color c)
