@@ -55,7 +55,8 @@ public:
 
     virtual auto intersect(ray const& ray) const -> std::vector<ray::result> = 0;
 
-    auto is_dirty() const -> bool;
+    auto         is_dirty() const -> bool;
+    virtual void update_geometry() = 0;
 
 protected:
     virtual auto center() const -> point_f = 0;
@@ -89,6 +90,8 @@ public:
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
+    void update_geometry() override;
+
 protected:
     void on_update(milliseconds deltaTime) override;
 
@@ -118,6 +121,8 @@ public:
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
 
     void move_by(point_f offset);
+
+    void update_geometry() override;
 
 protected:
     void on_update(milliseconds deltaTime) override;
@@ -149,6 +154,8 @@ public:
     void clip(poly_shape const& other, clip_mode mode);
 
     void move_by(point_f offset);
+
+    void update_geometry() override;
 
 protected:
     void on_update(milliseconds deltaTime) override;

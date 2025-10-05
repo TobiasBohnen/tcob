@@ -230,6 +230,11 @@ void circle_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
+    update_geometry();
+}
+
+void circle_shape::update_geometry()
+{
     create();
 }
 
@@ -354,14 +359,19 @@ void rect_shape::move_by(point_f offset)
 void rect_shape::on_update(milliseconds deltaTime)
 {
     if (is_dirty()) {
-        geometry::set_position(_quad, *Bounds, transform());
-        update_aabb();
+        update_geometry();
         mark_clean();
     }
 
     if (TextureScroll != point_f::Zero) {
         geometry::scroll_texcoords(_quad, *TextureScroll * (deltaTime.count() / 1000.0f));
     }
+}
+
+void rect_shape::update_geometry()
+{
+    geometry::set_position(_quad, *Bounds, transform());
+    update_aabb();
 }
 
 void rect_shape::on_color_changed(color c)
@@ -407,20 +417,17 @@ void poly_shape::update_aabb()
 {
     auto const& xform {transform()};
 
-    std::array<point_f, 4> const corners {{_boundingBox.top_left(),
-                                           _boundingBox.top_right(),
-                                           _boundingBox.bottom_left(),
-                                           _boundingBox.bottom_right()}};
-
     point_f max {std::numeric_limits<f32>::lowest(), std::numeric_limits<f32>::lowest()};
     point_f min {std::numeric_limits<f32>::max(), std::numeric_limits<f32>::max()};
 
-    for (auto const& c : corners) {
-        auto const t {xform * c};
-        min.X = std::min(min.X, t.X);
-        min.Y = std::min(min.Y, t.Y);
-        max.X = std::max(max.X, t.X);
-        max.Y = std::max(max.Y, t.Y);
+    for (auto const& polygon : *Polygons) {
+        for (auto const& p : polygon.Outline) {
+            auto const t {xform * p};
+            min.X = std::min(min.X, t.X);
+            min.Y = std::min(min.Y, t.Y);
+            max.X = std::max(max.X, t.X);
+            max.Y = std::max(max.Y, t.Y);
+        }
     }
 
     _aabb = rect_f::FromLTRB(min.X, min.Y, max.X, max.Y);
@@ -458,6 +465,11 @@ void poly_shape::on_update(milliseconds /* deltaTime */)
     if (!is_dirty()) { return; }
     mark_clean();
 
+    update_geometry();
+}
+
+void poly_shape::update_geometry()
+{
     auto const info {polygons::info(*Polygons)};
     _boundingBox = info.BoundingBox;
     _centroid    = info.Centroid;
