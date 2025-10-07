@@ -31,6 +31,12 @@ constexpr size<T>::size(size<U> const& p)
 }
 
 template <Arithmetic T>
+auto constexpr size<T>::area() const -> T
+{
+    return Width * Height;
+}
+
+template <Arithmetic T>
 auto constexpr size<T>::aspect_ratio() const -> f32
 {
     if (Width == 0 || Height == 0) { return 0; }

@@ -29,6 +29,7 @@ public:
     template <typename U>
     explicit constexpr size(size<U> const& p);
 
+    auto constexpr area() const -> T;
     auto constexpr aspect_ratio() const -> f32;
     auto constexpr integer_ratio() const -> size<i32>;
 
