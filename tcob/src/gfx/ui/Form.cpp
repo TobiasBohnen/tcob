@@ -386,7 +386,10 @@ void form_base::rehover_widget(widget* widget)
     if (!widget->hit_test(mp)) { return; }
 
     widget->prepare_redraw();
-    on_mouse_hover({.Position = mp});
+
+    input::mouse::motion_event ev {};
+    ev.Position = mp;
+    on_mouse_hover(ev);
 }
 
 void form_base::on_key_down(input::keyboard::event const& ev)
@@ -400,7 +403,8 @@ void form_base::on_key_down(input::keyboard::event const& ev)
     } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
         handle_nav(ev);
     } else if (ev.KeyMods.is_down(Controls->CutCopyPasteMod) && ev.KeyCode == Controls->PasteKey) {
-        input::keyboard::text_input_event tev {.Text = locate_service<input::system>().clipboard().get_text()};
+        input::keyboard::text_input_event tev;
+        tev.Text = locate_service<input::system>().clipboard().get_text();
         if (!tev.Text.empty()) {
             _injector.on_text_input(_focusWidget, tev);
             ev.Handled = true;

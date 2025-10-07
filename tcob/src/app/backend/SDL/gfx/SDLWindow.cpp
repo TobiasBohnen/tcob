@@ -107,10 +107,11 @@ auto sdl_window::get_size() const -> size_i
 
 void sdl_window::process_events(void* xev)
 {
-    auto*       sev {static_cast<SDL_Event*>(xev)};
-    event const ev {.WindowID = sev->window.windowID,
-                    .Data1    = sev->window.data1,
-                    .Data2    = sev->window.data2};
+    auto* sev {static_cast<SDL_Event*>(xev)};
+    event ev {};
+    ev.WindowID = sev->window.windowID;
+    ev.Data1    = sev->window.data1;
+    ev.Data2    = sev->window.data2;
 
     switch (sev->window.type) {
     case SDL_EVENT_WINDOW_SHOWN:           Shown(ev); break;
