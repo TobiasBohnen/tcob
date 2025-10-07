@@ -400,8 +400,6 @@ void form_base::on_key_down(input::keyboard::event const& ev)
 
     if (ev.KeyCode == Controls->TabKey) {
         handle_tab(ev);
-    } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
-        handle_nav(ev);
     } else if (ev.KeyMods.is_down(Controls->CutCopyPasteMod) && ev.KeyCode == Controls->PasteKey) {
         input::keyboard::text_input_event tev;
         tev.Text = locate_service<input::system>().clipboard().get_text();
@@ -409,6 +407,8 @@ void form_base::on_key_down(input::keyboard::event const& ev)
             _injector.on_text_input(_focusWidget, tev);
             ev.Handled = true;
         }
+    } else if (!ev.Keyboard->is_key_down(Controls->ActivateKey) && _focusWidget) {
+        handle_nav(ev);
     }
 
     if (!ev.Handled) {
