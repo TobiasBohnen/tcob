@@ -75,14 +75,14 @@ void render_target::finalize_render() const
     }
 }
 
-void render_target::bind_material(material const* mat) const
+void render_target::bind_pass(pass const& pass) const
 {
-    _impl->bind_material(mat);
+    _impl->bind_pass(pass);
 }
 
-void render_target::unbind_material() const
+void render_target::unbind_pass() const
 {
-    _impl->unbind_material();
+    _impl->unbind_pass();
 }
 
 void render_target::on_clear(color /*c*/) const

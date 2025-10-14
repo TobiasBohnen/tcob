@@ -130,19 +130,17 @@ auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
     return retValue;
 }
 
-void gl_render_target::bind_material(material const* mat) const
+void gl_render_target::bind_pass(pass const& pass) const
 {
-    if (!mat) { return; }
-
-    if (mat->Texture.is_ready()) {
-        glBindTextureUnit(0, mat->Texture->get_impl<gl_texture>()->ID);
+    if (pass.Texture.is_ready()) {
+        glBindTextureUnit(0, pass.Texture->get_impl<gl_texture>()->ID);
     }
 
-    if (mat->Shader.is_ready()) {
-        glUseProgram(mat->Shader->get_impl<gl_shader>()->ID);
+    if (pass.Shader.is_ready()) {
+        glUseProgram(pass.Shader->get_impl<gl_shader>()->ID);
     } else {
-        if (mat->Texture.is_ready()) {
-            if (mat->Texture->info().Format == texture::format::R8) {
+        if (pass.Texture.is_ready()) {
+            if (pass.Texture->info().Format == texture::format::R8) {
                 glUseProgram(gl_context::DefaultFontShader);
             } else {
                 glUseProgram(gl_context::DefaultTexturedShader);
@@ -153,26 +151,26 @@ void gl_render_target::bind_material(material const* mat) const
     }
 
     usize offset {0};
-    offset += _matUniformBuffer.update(mat->Color.to_float_array(), offset);
-    offset += _matUniformBuffer.update(mat->PointSize, offset);
+    offset += _matUniformBuffer.update(pass.Color.to_float_array(), offset);
+    offset += _matUniformBuffer.update(pass.PointSize, offset);
     _matUniformBuffer.bind_base(1);
 
     // set blend mode
     glEnable(GL_BLEND);
     glBlendFuncSeparate(
-        convert_enum(mat->BlendFuncs.SourceColorBlendFunc), convert_enum(mat->BlendFuncs.DestinationColorBlendFunc),
-        convert_enum(mat->BlendFuncs.SourceAlphaBlendFunc), convert_enum(mat->BlendFuncs.DestinationAlphaBlendFunc));
-    glBlendEquation(convert_enum(mat->BlendEquation));
+        convert_enum(pass.BlendFuncs.SourceColorBlendFunc), convert_enum(pass.BlendFuncs.DestinationColorBlendFunc),
+        convert_enum(pass.BlendFuncs.SourceAlphaBlendFunc), convert_enum(pass.BlendFuncs.DestinationAlphaBlendFunc));
+    glBlendEquation(convert_enum(pass.BlendEquation));
 
-    glPointSize(mat->PointSize);
+    glPointSize(pass.PointSize);
 
     // set stencil mode
-    bool const needsStencil {(mat->StencilFunc != stencil_func::Always) || (mat->StencilOp != stencil_op::Keep)};
+    bool const needsStencil {(pass.StencilFunc != stencil_func::Always) || (pass.StencilOp != stencil_op::Keep)};
     if (needsStencil) {
         glEnable(GL_STENCIL_TEST);
 
         GLenum stencilFunc {};
-        switch (mat->StencilFunc) {
+        switch (pass.StencilFunc) {
         case stencil_func::Never:        stencilFunc = GL_NEVER; break;
         case stencil_func::Less:         stencilFunc = GL_LESS; break;
         case stencil_func::Equal:        stencilFunc = GL_EQUAL; break;
@@ -184,7 +182,7 @@ void gl_render_target::bind_material(material const* mat) const
         }
 
         GLenum stencilOp {};
-        switch (mat->StencilOp) {
+        switch (pass.StencilOp) {
         case stencil_op::Keep:         stencilOp = GL_KEEP; break;
         case stencil_op::Zero:         stencilOp = GL_ZERO; break;
         case stencil_op::Replace:      stencilOp = GL_REPLACE; break;
@@ -196,14 +194,14 @@ void gl_render_target::bind_material(material const* mat) const
         }
 
         glStencilMask(0xFF);
-        glStencilFunc(stencilFunc, mat->StencilRef, 0xFF);
+        glStencilFunc(stencilFunc, pass.StencilRef, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, stencilOp);
     } else {
         glDisable(GL_STENCIL_TEST);
     }
 }
 
-void gl_render_target::unbind_material() const
+void gl_render_target::unbind_pass() const
 {
     glBindTextureUnit(0, 0);
     glUseProgram(0);

@@ -45,8 +45,8 @@ public:
 
     virtual void prepare_render(render_properties const& props) = 0;
     virtual void finalize_render() const                        = 0;
-    virtual void bind_material(material const* mat) const       = 0;
-    virtual void unbind_material() const                        = 0;
+    virtual void bind_pass(pass const& pass) const              = 0;
+    virtual void unbind_pass() const                            = 0;
 
     virtual void enable_scissor(rect_i const& rect) const = 0; // TODO: move to render_properties
     virtual void disable_scissor() const                  = 0; // TODO: move to render_properties

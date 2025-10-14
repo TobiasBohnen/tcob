@@ -24,9 +24,9 @@ text::text(asset_ptr<font> font)
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
     Pivot.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
-    _material->Texture = _font->texture();
+    _material->first_pass().Texture = _font->texture();
     _renderer.set_material(_material.ptr());
-    Shader.Changed.connect([this](auto const& value) { _material->Shader = value; });
+    Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
     Text.Changed.connect([this](auto const&) { _needsReshape = true; });
     Style.Changed.connect([this](auto const&) { _needsReshape = true; });
 }

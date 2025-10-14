@@ -34,9 +34,9 @@ window::window(std::unique_ptr<render_backend::window_base> windowBase, asset_ow
     Cursor.Changed.connect([this](auto const& value) { SystemCursorEnabled = !value.is_ready(); });
     SystemCursorEnabled(true);
 
-    Shader.Changed.connect([this](auto const& value) { _material->Shader = value; });
+    Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
 
-    _material->Texture = _texture;
+    _material->first_pass().Texture = _texture;
     _renderer.set_material(_material.ptr());
 }
 

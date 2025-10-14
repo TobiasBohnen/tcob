@@ -30,18 +30,15 @@ auto background::can_draw() const -> bool
 
 void background::on_draw_to(render_target& target)
 {
+    target.camera().push_state();
+
     geometry::set_position(_quad, {point_f::Zero, size_f {*target.Size}});
     geometry::set_color(_quad, colors::White);
-    if (*Material && Material->Texture && Material->Texture->regions().contains(TextureRegion)) {
-        geometry::set_texcoords(_quad, Material->Texture->regions()[TextureRegion]);
-    } else {
-        geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
-    }
+    geometry::set_texcoords(_quad, Material->first_pass(), TextureRegion); // TODO texRegion pass
 
     _renderer.set_geometry(_quad);
-
-    target.camera().push_state();
     _renderer.render_to_target(target);
+
     target.camera().pop_state();
 }
 
@@ -74,10 +71,15 @@ auto parallax_background::can_draw() const -> bool
 
 void parallax_background::on_draw_to(render_target& target)
 {
+    if (!*Material) { return; }
+    auto const& pass {Material->first_pass()}; // TODO texRegion pass
+
     auto const& camera {target.camera()};
 
+    target.camera().push_state();
+
     auto const targetSize {size_f {*target.Size}};
-    auto const texSize {size_f {Material->Texture->info().Size} * TextureScale};
+    auto const texSize {size_f {pass.Texture->info().Size} * TextureScale};
     _quads.resize(_layers.size());
 
     for (usize i {0}; i < _layers.size(); ++i) {
@@ -88,8 +90,8 @@ void parallax_background::on_draw_to(render_target& target)
         geometry::set_position(quad, {point_f::Zero, size_f {*target.Size}});
         geometry::set_color(quad, colors::White);
 
-        if (*Material && Material->Texture && Material->Texture->regions().contains(layer.TextureRegion)) {
-            auto  texReg {Material->Texture->regions()[layer.TextureRegion]};
+        if (*Material && pass.Texture && pass.Texture->regions().contains(layer.TextureRegion)) {
+            auto  texReg {pass.Texture->regions()[layer.TextureRegion]};
             auto& uvRect {texReg.UVRect};
             uvRect.Size *= (targetSize / texSize);
 
@@ -98,14 +100,14 @@ void parallax_background::on_draw_to(render_target& target)
 
             geometry::set_texcoords(quad, texReg);
         } else {
-            geometry::set_texcoords(quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
+            geometry::set_texcoords(quad, {.UVRect = {0, 0, 1, 1}, .Level = 0});
         }
     }
 
     _renderer.set_geometry(_quads);
 
-    target.camera().push_state();
     _renderer.render_to_target(target);
+
     target.camera().pop_state();
 }
 

@@ -141,8 +141,8 @@ shape::shape()
     Pivot.Changed.connect([this](auto const&) { mark_dirty(); });
 
     Material.Changed.connect([this](auto const&) { TextureRegion("default"); });
-    TextureRegion.Changed.connect([this](string const& texRegion) {
-        on_texture_region_changed(texRegion);
+    TextureRegion.Changed.connect([this] {
+        on_texture_region_changed();
         mark_dirty();
     });
     Color.Changed.connect([this](auto const& color) {
@@ -184,6 +184,18 @@ void shape::mark_dirty()
 void shape::mark_clean()
 {
     _isDirty = false;
+}
+
+auto shape::get_texture_region() const -> texture_region
+{
+    if (*Material) {
+        auto const& pass {Material->first_pass()};
+        if (pass.Texture && pass.Texture->regions().contains(TextureRegion)) { // TODO texRegion pass
+            return pass.Texture->regions()[TextureRegion];
+        }
+    }
+
+    return {.UVRect = {0, 0, 1, 1}, .Level = 0};
 }
 
 auto shape::pivot() const -> point_f
@@ -243,7 +255,7 @@ void circle_shape::on_color_changed(color c)
     geometry::set_color(_verts, c);
 }
 
-void circle_shape::on_texture_region_changed(string const& /* texRegion */)
+void circle_shape::on_texture_region_changed()
 {
     // TODO
 }
@@ -260,12 +272,8 @@ void circle_shape::create()
     f32 const   angleStep {TAU_F / Segments};
     f32 const   radius {Radius};
 
-    texture_region texReg {};
-    if (*Material && Material->Texture && Material->Texture->regions().contains(TextureRegion)) {
-        texReg = Material->Texture->regions()[TextureRegion];
-    } else {
-        texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
-    }
+    texture_region const texReg {get_texture_region()};
+
     f32 const texLevel {static_cast<f32>(texReg.Level)};
 
     auto const [centerX, centerY] {*Center};
@@ -313,7 +321,7 @@ rect_shape::rect_shape()
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     geometry::set_color(_quad, colors::White);
-    geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
+    geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 0});
 }
 
 auto rect_shape::geometry() const -> geometry_data
@@ -379,13 +387,9 @@ void rect_shape::on_color_changed(color c)
     geometry::set_color(_quad, c);
 }
 
-void rect_shape::on_texture_region_changed(string const& texRegion)
+void rect_shape::on_texture_region_changed()
 {
-    if (*Material && Material->Texture && Material->Texture->regions().contains(texRegion)) {
-        geometry::set_texcoords(_quad, Material->Texture->regions()[texRegion]);
-    } else {
-        geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 1});
-    }
+    geometry::set_texcoords(_quad, get_texture_region());
 }
 
 auto rect_shape::center() const -> point_f
@@ -483,7 +487,7 @@ void poly_shape::on_color_changed(color c)
     for (auto& vert : _verts) { vert.Color = c; }
 }
 
-void poly_shape::on_texture_region_changed(string const& /* texRegion */)
+void poly_shape::on_texture_region_changed()
 {
     // TODO
 }
@@ -500,13 +504,9 @@ void poly_shape::create()
     u32 indOffset {0};
 
     // create verts
-    auto const&    xform {transform()};
-    texture_region texReg {};
-    if (*Material && Material->Texture && Material->Texture->regions().contains(TextureRegion)) {
-        texReg = Material->Texture->regions()[TextureRegion];
-    } else {
-        texReg = {.UVRect = {0, 0, 1, 1}, .Level = 0};
-    }
+    auto const&          xform {transform()};
+    texture_region const texReg {get_texture_region()};
+
     f32 const   texLevel {static_cast<f32>(texReg.Level)};
     auto const& uvRect {texReg.UVRect};
 

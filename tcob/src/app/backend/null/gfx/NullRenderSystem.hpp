@@ -59,8 +59,8 @@ public:
 
     auto copy_to_image(rect_i const& rect) const -> image override;
 
-    void bind_material(material const* mat) const override;
-    void unbind_material() const override;
+    void bind_pass(pass const& pass) const override;
+    void unbind_pass() const override;
 };
 
 ////////////////////////////////////////////////////////////

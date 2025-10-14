@@ -253,13 +253,15 @@ namespace gfx {
     class background;
     class canvas;
     class font;
-    class material;
     class parallax_background;
     class render_system;
     class render_target;
     struct render_properties;
     class tilemap_base;
     class window;
+
+    class material;
+    class pass;
 }
 namespace gfx::render_backend {
     class canvas_base;

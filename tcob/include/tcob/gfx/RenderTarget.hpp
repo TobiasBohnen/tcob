@@ -55,8 +55,8 @@ public:
     // Renderer
     virtual void prepare_render();
     virtual void finalize_render() const;
-    void         bind_material(material const* mat) const;
-    void         unbind_material() const;
+    void         bind_pass(pass const& pass) const;
+    void         unbind_pass() const;
 
     template <std::derived_from<render_backend::render_target_base> T>
     auto get_impl() const -> T*;

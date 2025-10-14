@@ -25,6 +25,9 @@ inline tilemap<G>::tilemap()
 template <typename G>
 inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) const
 {
+    if (!*Material) { return; }
+    auto const& pass {Material->first_pass()}; // TODO
+
     auto const& tile {idx != 0 ? Tileset->at(idx) : tile_type {}};
 
     rect_f rect {Grid->layout_tile(tile, coord)};
@@ -34,10 +37,8 @@ inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) con
     geometry::set_color(q, tile.Color);
     if (idx == 0) {
         geometry::set_color(q, colors::Transparent);
-    } else if (Material->Texture && Material->Texture->regions().contains(tile.TextureRegion)) {
-        geometry::set_texcoords(q, Material->Texture->regions()[tile.TextureRegion], tile.FlipHorizontally, tile.FlipVertically);
     } else {
-        geometry::set_texcoords(q, {.UVRect = {0, 0, 1, 1}, .Level = 1});
+        geometry::set_texcoords(q, pass, tile.TextureRegion);
     }
 }
 

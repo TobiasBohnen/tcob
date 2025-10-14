@@ -124,7 +124,7 @@ void lighting_system::notify_shadow_changed(shadow_caster* shadow)
 
 void lighting_system::set_blend_funcs(blend_funcs funcs)
 {
-    _material->BlendFuncs = funcs;
+    _material->first_pass().BlendFuncs = funcs;
 }
 
 void lighting_system::on_update(milliseconds /* deltaTime */)

@@ -44,8 +44,8 @@ void null_render_target::disable_scissor() const { }
 void null_render_target::clear(color) const { }
 void null_render_target::on_resize(size_i) { }
 auto null_render_target::copy_to_image(rect_i const&) const -> image { return {}; }
-void null_render_target::bind_material(material const*) const { }
-void null_render_target::unbind_material() const { }
+void null_render_target::bind_pass(pass const&) const { }
+void null_render_target::unbind_pass() const { }
 
 auto null_shader::compile(string const&, string const&) -> bool { return true; }
 auto null_shader::is_valid() const -> bool { return true; }

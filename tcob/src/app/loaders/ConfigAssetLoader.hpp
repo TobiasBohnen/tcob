@@ -182,10 +182,15 @@ public:
     void prepare() override;
 
 private:
+    struct pass_def {
+        gfx::pass pass;
+        string    shader;
+        string    texture;
+    };
+
     struct asset_def {
         asset_ptr<gfx::material> assetPtr;
-        string                   shader;
-        string                   texture;
+        std::vector<pass_def>    passes;
     };
 
     std::vector<std::unique_ptr<asset_def>> _cache;

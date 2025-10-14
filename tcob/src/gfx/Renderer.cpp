@@ -82,9 +82,13 @@ void point_renderer::on_render_to_target(render_target& target)
         return;
     }
 
-    target.bind_material(_material);
-    _vertexArray.draw_arrays(primitive_type::Points, 0, _numVerts);
-    target.unbind_material();
+    for (isize i {0}; i < _material->pass_count(); ++i) {
+        auto const& pass {_material->get_pass(i)};
+
+        target.bind_pass(pass);
+        _vertexArray.draw_arrays(primitive_type::Points, 0, _numVerts);
+        target.unbind_pass();
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -144,9 +148,13 @@ void quad_renderer::on_render_to_target(render_target& target)
         return;
     }
 
-    target.bind_material(_material);
-    _vertexArray.draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
-    target.unbind_material();
+    for (isize i {0}; i < _material->pass_count(); ++i) {
+        auto const& pass {_material->get_pass(i)};
+
+        target.bind_pass(pass);
+        _vertexArray.draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
+        target.unbind_pass();
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -188,18 +196,20 @@ void polygon_renderer::prepare(usize vcount, usize icount)
 
 void polygon_renderer::on_render_to_target(render_target& target)
 {
-    if (_numVerts == 0 || !_material) {
-        return;
-    }
+    if (_numVerts == 0 || !_material) { return; }
 
-    target.bind_material(_material);
-    if (_numIndices == 0) {
-        _vertexArray.draw_arrays(_type, 0, _numVerts);
-    } else {
-        _vertexArray.draw_elements(_type, _numIndices, 0);
-    }
+    for (isize i {0}; i < _material->pass_count(); ++i) {
+        auto const& pass {_material->get_pass(i)};
 
-    target.unbind_material();
+        target.bind_pass(pass);
+        if (_numIndices == 0) {
+            _vertexArray.draw_arrays(_type, 0, _numVerts);
+        } else {
+            _vertexArray.draw_elements(_type, _numIndices, 0);
+        }
+
+        target.unbind_pass();
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -265,15 +275,16 @@ void batch_polygon_renderer::on_render_to_target(render_target& target)
     }
 
     for (auto const& batch : _batches) { // draw batches
-        if (batch.NumVerts == 0 || !batch.MaterialPtr) {
-            continue;
+        if (batch.NumVerts == 0 || !batch.MaterialPtr) { continue; }
+
+        for (isize i {0}; i < batch.MaterialPtr->pass_count(); ++i) {
+            auto const& pass {batch.MaterialPtr->get_pass(i)};
+
+            target.bind_pass(pass);
+            _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
+            target.unbind_pass();
         }
-
-        target.bind_material(batch.MaterialPtr);
-        _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
     }
-
-    target.unbind_material();
 }
 
 ////////////////////////////////////////////////////////////
@@ -307,7 +318,7 @@ void canvas_renderer::add_layer(i32 layer)
 
 void canvas_renderer::set_shader(asset_ptr<shader> shader)
 {
-    _material->Shader = std::move(shader);
+    _material->first_pass().Shader = std::move(shader);
 }
 
 void canvas_renderer::prepare_render(render_target& target)
@@ -319,11 +330,11 @@ void canvas_renderer::prepare_render(render_target& target)
 void canvas_renderer::on_render_to_target(render_target& target)
 {
     for (auto layer : _layers) {
-        _material->Texture = _canvas.get_texture(layer);
-        target.bind_material(_material.ptr());
+        _material->first_pass().Texture = _canvas.get_texture(layer);
+        target.bind_pass(_material->first_pass());
         _vertexArray.draw_elements(primitive_type::Triangles, 6, 0);
     }
-    target.unbind_material();
+    target.unbind_pass();
     _layers.clear();
 }
 

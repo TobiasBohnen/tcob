@@ -44,6 +44,7 @@ namespace geometry {
     TCOB_API void set_color(std::span<vertex> verts, color c);
 
     TCOB_API void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally = false, bool flipVertically = false);
+    TCOB_API void set_texcoords(quad& q, pass const& pass, string const& region, bool flipHorizontally = false, bool flipVertically = false);
 
     TCOB_API void scroll_texcoords(quad& q, point_f offset);
 }

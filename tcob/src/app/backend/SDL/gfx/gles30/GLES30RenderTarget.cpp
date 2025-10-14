@@ -129,22 +129,20 @@ auto gl_render_target::copy_to_image(rect_i const& rect) const -> image
     return retValue;
 }
 
-void gl_render_target::bind_material(material const* mat) const
+void gl_render_target::bind_pass(pass const& pass) const
 {
-    if (!mat) { return; }
-
-    if (mat->Texture.is_ready()) {
+    if (pass.Texture.is_ready()) {
         GLCHECK(glActiveTexture(GL_TEXTURE0));
-        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, mat->Texture->get_impl<gl_texture>()->ID));
+        GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, pass.Texture->get_impl<gl_texture>()->ID));
     }
 
-    if (mat->Shader.is_ready()) {
-        auto* shader {mat->Shader->get_impl<gl_shader>()};
+    if (pass.Shader.is_ready()) {
+        auto* shader {pass.Shader->get_impl<gl_shader>()};
         glUseProgram(shader->ID);
         GLCHECK(glUniformBlockBinding(shader->ID, glGetUniformBlockIndex(shader->ID, "Material"), 1));
     } else {
-        if (mat->Texture.is_ready()) {
-            if (mat->Texture->info().Format == texture::format::R8) {
+        if (pass.Texture.is_ready()) {
+            if (pass.Texture->info().Format == texture::format::R8) {
                 GLCHECK(glUseProgram(gl_context::DefaultFontShader));
                 GLCHECK(glUniformBlockBinding(gl_context::DefaultFontShader, glGetUniformBlockIndex(gl_context::DefaultFontShader, "Material"), 1));
             } else {
@@ -158,24 +156,24 @@ void gl_render_target::bind_material(material const* mat) const
     }
 
     usize offset {0};
-    offset += _matUniformBuffer.update(mat->Color.to_float_array(), offset);
-    offset += _matUniformBuffer.update(mat->PointSize, offset);
+    offset += _matUniformBuffer.update(pass.Color.to_float_array(), offset);
+    offset += _matUniformBuffer.update(pass.PointSize, offset);
     _matUniformBuffer.bind_base(1);
 
     // set blend mode
     GLCHECK(glEnable(GL_BLEND));
     glBlendFuncSeparate(
-        convert_enum(mat->BlendFuncs.SourceColorBlendFunc), convert_enum(mat->BlendFuncs.DestinationColorBlendFunc),
-        convert_enum(mat->BlendFuncs.SourceAlphaBlendFunc), convert_enum(mat->BlendFuncs.DestinationAlphaBlendFunc));
-    GLCHECK(glBlendEquation(convert_enum(mat->BlendEquation)));
+        convert_enum(pass.BlendFuncs.SourceColorBlendFunc), convert_enum(pass.BlendFuncs.DestinationColorBlendFunc),
+        convert_enum(pass.BlendFuncs.SourceAlphaBlendFunc), convert_enum(pass.BlendFuncs.DestinationAlphaBlendFunc));
+    GLCHECK(glBlendEquation(convert_enum(pass.BlendEquation)));
 
     // set stencil mode
-    bool const needsStencil {(mat->StencilFunc != stencil_func::Always) || (mat->StencilOp != stencil_op::Keep)};
+    bool const needsStencil {(pass.StencilFunc != stencil_func::Always) || (pass.StencilOp != stencil_op::Keep)};
     if (needsStencil) {
         GLCHECK(glEnable(GL_STENCIL_TEST));
 
         GLenum stencilFunc {};
-        switch (mat->StencilFunc) {
+        switch (pass.StencilFunc) {
         case stencil_func::Never:        stencilFunc = GL_NEVER; break;
         case stencil_func::Less:         stencilFunc = GL_LESS; break;
         case stencil_func::Equal:        stencilFunc = GL_EQUAL; break;
@@ -187,7 +185,7 @@ void gl_render_target::bind_material(material const* mat) const
         }
 
         GLenum stencilOp {};
-        switch (mat->StencilOp) {
+        switch (pass.StencilOp) {
         case stencil_op::Keep:         stencilOp = GL_KEEP; break;
         case stencil_op::Zero:         stencilOp = GL_ZERO; break;
         case stencil_op::Replace:      stencilOp = GL_REPLACE; break;
@@ -199,14 +197,14 @@ void gl_render_target::bind_material(material const* mat) const
         }
 
         GLCHECK(glStencilMask(0xFF));
-        GLCHECK(glStencilFunc(stencilFunc, mat->StencilRef, 0xFF));
+        GLCHECK(glStencilFunc(stencilFunc, pass.StencilRef, 0xFF));
         GLCHECK(glStencilOp(GL_KEEP, GL_KEEP, stencilOp));
     } else {
         GLCHECK(glDisable(GL_STENCIL_TEST));
     }
 }
 
-void gl_render_target::unbind_material() const
+void gl_render_target::unbind_pass() const
 {
     GLCHECK(glBindTexture(GL_TEXTURE_2D_ARRAY, 0));
     GLCHECK(glUseProgram(0));

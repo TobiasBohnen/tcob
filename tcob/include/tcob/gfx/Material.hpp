@@ -6,6 +6,8 @@
 #pragma once
 #include "tcob/tcob_config.hpp"
 
+#include <vector>
+
 #include "tcob/core/Color.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Gfx.hpp"
@@ -15,7 +17,8 @@
 namespace tcob::gfx {
 ////////////////////////////////////////////////////////////
 // TODO: material -> technique -> pass
-class TCOB_API material {
+
+class TCOB_API pass {
 public:
     asset_ptr<shader>  Shader {};
     asset_ptr<texture> Texture {};
@@ -30,11 +33,27 @@ public:
     stencil_op   StencilOp {stencil_op::Keep};
     u8           StencilRef {1};
 
+    auto operator==(pass const& other) const -> bool = default;
+};
+
+class TCOB_API material {
+public:
+    material() = default;
+
+    auto first_pass() -> pass&;
+    auto create_pass() -> pass&;
+    auto get_pass(isize idx) -> pass&;
+    auto get_pass(isize idx) const -> pass const&;
+    auto pass_count() const -> isize;
+
     static inline char const* AssetName {"material"};
 
     static auto Empty() -> asset_owner_ptr<material>;
 
     auto operator==(material const& other) const -> bool = default;
+
+private:
+    std::vector<pass> _passes;
 };
 
 }

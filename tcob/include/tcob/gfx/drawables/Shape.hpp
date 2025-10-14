@@ -19,6 +19,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
 #include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Polygon.hpp"
 #include "tcob/gfx/Ray.hpp"
@@ -62,13 +63,15 @@ protected:
     virtual auto center() const -> point_f = 0;
     auto         pivot() const -> point_f override;
 
-    virtual void on_color_changed(color c)                          = 0;
-    virtual void on_texture_region_changed(string const& texRegion) = 0;
+    virtual void on_color_changed(color c)   = 0;
+    virtual void on_texture_region_changed() = 0;
 
     void on_transform_changed() override;
 
     void mark_dirty();
     void mark_clean();
+
+    auto get_texture_region() const -> texture_region;
 
 private:
     bool _isDirty {false};
@@ -97,7 +100,7 @@ protected:
 
     auto center() const -> point_f override;
     void on_color_changed(color c) override;
-    void on_texture_region_changed(string const& texRegion) override;
+    void on_texture_region_changed() override;
 
 private:
     void create();
@@ -129,7 +132,7 @@ protected:
 
     auto center() const -> point_f override;
     void on_color_changed(color c) override;
-    void on_texture_region_changed(string const& texRegion) override;
+    void on_texture_region_changed() override;
 
 private:
     void update_aabb();
@@ -162,7 +165,7 @@ protected:
 
     auto center() const -> point_f override;
     void on_color_changed(color c) override;
-    void on_texture_region_changed(string const& texRegion) override;
+    void on_texture_region_changed() override;
 
 private:
     void create();

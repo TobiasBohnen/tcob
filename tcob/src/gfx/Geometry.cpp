@@ -12,6 +12,7 @@
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/gfx/Gfx.hpp"
+#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/Transform.hpp"
 
 namespace tcob::gfx::geometry {
@@ -65,6 +66,15 @@ void set_texcoords(quad& q, texture_region const& region, bool flipHorizontally,
     q[1].TexCoords = bottomRight;
     q[2].TexCoords = bottomLeft;
     q[3].TexCoords = topLeft;
+}
+
+void set_texcoords(quad& q, pass const& pass, string const& region, bool flipHorizontally, bool flipVertically)
+{
+    if (pass.Texture && pass.Texture->regions().contains(region)) {
+        geometry::set_texcoords(q, pass.Texture->regions()[region], flipHorizontally, flipVertically);
+    } else {
+        geometry::set_texcoords(q, {.UVRect = {0, 0, 1, 1}, .Level = 0});
+    }
 }
 
 void scroll_texcoords(quad& q, point_f offset)

@@ -88,6 +88,9 @@ namespace FontFamily {
 
 namespace Material {
     static char const* Name {"material"};
+
+    static char const* passes {"passes"};
+
     static char const* texture {"texture"};
     static char const* shader {"shader"};
 
@@ -135,7 +138,7 @@ auto default_new(string const& name, auto&& bucket, auto&& cache) -> TDef*
     auto def {std::make_unique<TDef>()};
     def->assetPtr = bucket->template create<T>(name);
 
-    auto const retValue {def.get()};
+    TDef* const retValue {def.get()};
     cache.push_back(std::move(def));
     return retValue;
 }
@@ -484,36 +487,47 @@ void cfg_material_loader::declare()
     object obj;
     if (!_object.try_get(obj, API::Material::Name)) { return; }
 
+    auto const getPass {[](object const& assetSection, pass_def& def) {
+        assetSection.try_get(def.texture, API::Material::texture);
+        assetSection.try_get(def.shader, API::Material::shader);
+
+        if (object blendFunc; assetSection.try_get(blendFunc, API::Material::blend_func)) {
+            blend_func s {blendFunc["source"].as<blend_func>()};
+            def.pass.BlendFuncs.SourceAlphaBlendFunc = s;
+            def.pass.BlendFuncs.SourceColorBlendFunc = s;
+
+            blend_func d {blendFunc["destination"].as<blend_func>()};
+            def.pass.BlendFuncs.DestinationAlphaBlendFunc = d;
+            def.pass.BlendFuncs.DestinationColorBlendFunc = d;
+        } else if (object separateBlendFunc; assetSection.try_get(separateBlendFunc, API::Material::separate_blend_func)) {
+            def.pass.BlendFuncs.SourceAlphaBlendFunc      = separateBlendFunc["source_alpha"].as<blend_func>();
+            def.pass.BlendFuncs.SourceColorBlendFunc      = separateBlendFunc["source_color"].as<blend_func>();
+            def.pass.BlendFuncs.DestinationAlphaBlendFunc = separateBlendFunc["destination_alpha"].as<blend_func>();
+            def.pass.BlendFuncs.DestinationColorBlendFunc = separateBlendFunc["destination_color"].as<blend_func>();
+        }
+
+        assetSection.try_get(def.pass.BlendEquation, API::Material::blend_equation);
+        assetSection.try_get(def.pass.Color, API::Material::color);
+        assetSection.try_get(def.pass.PointSize, API::Material::point_size);
+        assetSection.try_get(def.pass.StencilFunc, API::Material::stencil_func);
+        assetSection.try_get(def.pass.StencilOp, API::Material::stencil_op);
+        assetSection.try_get(def.pass.StencilRef, API::Material::stencil_ref);
+    }};
+
     for (auto const& [k, v] : obj) {
         object assetSection;
         if (!v.try_get(assetSection)) { continue; }
 
         auto* asset {default_new<material, asset_def>(k, bucket(), _cache)};
-
-        assetSection.try_get(asset->texture, API::Material::texture);
-        assetSection.try_get(asset->shader, API::Material::shader);
-
-        if (object blendFunc; assetSection.try_get(blendFunc, API::Material::blend_func)) {
-            blend_func s {blendFunc["source"].as<blend_func>()};
-            asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc = s;
-            asset->assetPtr->BlendFuncs.SourceColorBlendFunc = s;
-
-            blend_func d {blendFunc["destination"].as<blend_func>()};
-            asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = d;
-            asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = d;
-        } else if (object separateBlendFunc; assetSection.try_get(separateBlendFunc, API::Material::separate_blend_func)) {
-            asset->assetPtr->BlendFuncs.SourceAlphaBlendFunc      = separateBlendFunc["source_alpha"].as<blend_func>();
-            asset->assetPtr->BlendFuncs.SourceColorBlendFunc      = separateBlendFunc["source_color"].as<blend_func>();
-            asset->assetPtr->BlendFuncs.DestinationAlphaBlendFunc = separateBlendFunc["destination_alpha"].as<blend_func>();
-            asset->assetPtr->BlendFuncs.DestinationColorBlendFunc = separateBlendFunc["destination_color"].as<blend_func>();
+        if (array passes; assetSection.try_get(passes, API::Material::passes)) {
+            for (auto const& pass : passes) {
+                if (object passObj; pass.try_get(passObj)) {
+                    getPass(passObj, asset->passes.emplace_back());
+                }
+            }
+        } else {
+            getPass(assetSection, asset->passes.emplace_back());
         }
-
-        assetSection.try_get(asset->assetPtr->BlendEquation, API::Material::blend_equation);
-        assetSection.try_get(asset->assetPtr->Color, API::Material::color);
-        assetSection.try_get(asset->assetPtr->PointSize, API::Material::point_size);
-        assetSection.try_get(asset->assetPtr->StencilFunc, API::Material::stencil_func);
-        assetSection.try_get(asset->assetPtr->StencilOp, API::Material::stencil_op);
-        assetSection.try_get(asset->assetPtr->StencilRef, API::Material::stencil_ref);
     }
 }
 
@@ -524,22 +538,26 @@ void cfg_material_loader::prepare()
     for (auto const& def : _cache) {
         auto const& name {def->assetPtr.get()->name()};
 
-        if (!def->shader.empty()) {
-            if (!grp.has<shader>(def->shader)) {
-                logger::Error("material asset '{}': Shader '{}' not found.", name, def->shader);
-                set_asset_status(def->assetPtr, asset_status::Error);
-            } else {
-                def->assetPtr->Shader = grp.get<shader>(def->shader);
+        for (auto& passDef : def->passes) {
+            if (!passDef.shader.empty()) {
+                if (!grp.has<shader>(passDef.shader)) {
+                    logger::Error("material asset '{}': Shader '{}' not found.", name, passDef.shader);
+                    set_asset_status(def->assetPtr, asset_status::Error);
+                } else {
+                    passDef.pass.Shader = grp.get<shader>(passDef.shader);
+                }
             }
-        }
 
-        if (!def->texture.empty()) {
-            if (!grp.has<texture>(def->texture)) {
-                logger::Error("material asset '{}': Texture '{}' not found.", name, def->texture);
-                set_asset_status(def->assetPtr, asset_status::Error);
-            } else {
-                def->assetPtr->Texture = grp.get<texture>(def->texture);
+            if (!passDef.texture.empty()) {
+                if (!grp.has<texture>(passDef.texture)) {
+                    logger::Error("material asset '{}': Texture '{}' not found.", name, passDef.texture);
+                    set_asset_status(def->assetPtr, asset_status::Error);
+                } else {
+                    passDef.pass.Texture = grp.get<texture>(passDef.texture);
+                }
             }
+
+            def->assetPtr->create_pass() = passDef.pass;
         }
 
         set_asset_status(def->assetPtr, asset_status::Loaded);
