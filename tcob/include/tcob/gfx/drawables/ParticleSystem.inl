@@ -164,12 +164,10 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
         },
         _aliveParticleCount, _multiThreaded ? 64 : _aliveParticleCount);
 
-    _renderer.set_geometry({_geometry.data(), static_cast<usize>(_aliveParticleCount)});
-
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
 
-        _renderer.set_pass(&pass);
+        _renderer.set_geometry({_geometry.data(), static_cast<usize>(_aliveParticleCount)}, &pass);
         _renderer.render_to_target(target);
     }
 }

@@ -14,6 +14,8 @@
 #include "tcob/core/Property.hpp"
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Geometry.hpp"
+#include "tcob/gfx/Material.hpp"
 #include "tcob/gfx/RenderSystemImpl.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
@@ -37,7 +39,6 @@ window::window(std::unique_ptr<render_backend::window_base> windowBase, asset_ow
     Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
 
     _material->first_pass().Texture = _texture;
-    _renderer.set_pass(&_material->first_pass());
 }
 
 window::~window() = default;
@@ -72,9 +73,9 @@ auto window::get_impl() const -> render_backend::window_base*
     return _impl.get();
 }
 
-auto window::renderer() -> quad_renderer&
+void window::init_renderer(quad const& q)
 {
-    return _renderer;
+    _renderer.set_geometry(q, &_material->first_pass());
 }
 
 }

@@ -40,10 +40,8 @@ class TCOB_API point_renderer final : public renderer {
 public:
     explicit point_renderer(buffer_usage_hint usage);
 
-    void set_pass(pass const* pass);
-
-    void set_geometry(vertex const& v);
-    void set_geometry(std::span<vertex const> vertices);
+    void set_geometry(vertex const& v, pass const* pass);
+    void set_geometry(std::span<vertex const> vertices, pass const* pass);
     void reset_geometry();
 
 private:
@@ -62,10 +60,8 @@ class TCOB_API quad_renderer final : public renderer {
 public:
     explicit quad_renderer(buffer_usage_hint usage);
 
-    void set_pass(pass const* pass);
-
-    void set_geometry(quad const& q);
-    void set_geometry(std::span<quad const> quads);
+    void set_geometry(quad const& q, pass const* pass);
+    void set_geometry(std::span<quad const> quads, pass const* pass);
     void reset_geometry();
 
 private:
@@ -84,9 +80,7 @@ class TCOB_API polygon_renderer final : public renderer {
 public:
     explicit polygon_renderer(buffer_usage_hint usage);
 
-    void set_pass(pass const* pass);
-
-    void set_geometry(geometry_data const& gd);
+    void set_geometry(geometry_data const& gd, pass const* pass);
     void reset_geometry();
 
 private:

@@ -47,20 +47,16 @@ point_renderer::point_renderer(buffer_usage_hint usage)
 {
 }
 
-void point_renderer::set_pass(pass const* pass)
+void point_renderer::set_geometry(vertex const& v, pass const* pass)
 {
-    _pass = pass;
+    set_geometry(std::span {&v, 1}, pass);
 }
 
-void point_renderer::set_geometry(vertex const& v)
-{
-    set_geometry(std::span {&v, 1});
-}
-
-void point_renderer::set_geometry(std::span<vertex const> vertices)
+void point_renderer::set_geometry(std::span<vertex const> vertices, pass const* pass)
 {
     prepare(vertices.size());
     _vertexArray.update_data(vertices, 0);
+    _pass = pass;
 }
 
 void point_renderer::reset_geometry()
@@ -94,21 +90,17 @@ quad_renderer::quad_renderer(buffer_usage_hint usage)
 {
 }
 
-void quad_renderer::set_pass(pass const* pass)
+void quad_renderer::set_geometry(quad const& q, pass const* pass)
 {
-    _pass = pass;
+    set_geometry(std::span {&q, 1}, pass);
 }
 
-void quad_renderer::set_geometry(quad const& q)
-{
-    set_geometry(std::span {&q, 1});
-}
-
-void quad_renderer::set_geometry(std::span<quad const> quads)
+void quad_renderer::set_geometry(std::span<quad const> quads, pass const* pass)
 {
     prepare(quads.size());
     _vertexArray.update_data(quads, 0);
     _numQuads = quads.size();
+    _pass     = pass;
 }
 
 void quad_renderer::reset_geometry()
@@ -156,12 +148,7 @@ polygon_renderer::polygon_renderer(buffer_usage_hint usage)
 {
 }
 
-void polygon_renderer::set_pass(pass const* pass)
-{
-    _pass = pass;
-}
-
-void polygon_renderer::set_geometry(geometry_data const& gd)
+void polygon_renderer::set_geometry(geometry_data const& gd, pass const* pass)
 {
     prepare(gd.Vertices.size(), gd.Indices.size());
 
@@ -171,6 +158,8 @@ void polygon_renderer::set_geometry(geometry_data const& gd)
 
     _numIndices = gd.Indices.size();
     _numVerts   = gd.Vertices.size();
+
+    _pass = pass;
 }
 
 void polygon_renderer::reset_geometry()

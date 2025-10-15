@@ -39,8 +39,7 @@ void background::on_draw_to(render_target& target)
 
         geometry::set_texcoords(_quad, pass, TextureRegion);
 
-        _renderer.set_pass(&pass);
-        _renderer.set_geometry(_quad);
+        _renderer.set_geometry(_quad, &pass);
         _renderer.render_to_target(target);
     }
 
@@ -105,8 +104,7 @@ void parallax_background::on_draw_to(render_target& target)
             }
         }
 
-        _renderer.set_pass(&pass);
-        _renderer.set_geometry(_quads);
+        _renderer.set_geometry(_quads, &pass);
         _renderer.render_to_target(target);
     }
 

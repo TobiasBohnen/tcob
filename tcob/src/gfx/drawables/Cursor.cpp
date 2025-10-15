@@ -67,9 +67,7 @@ void cursor::on_draw_to(render_target& target)
 
         auto const& region {pass.Texture->regions()[ActiveMode]};
         geometry::set_texcoords(_quad, region);
-        _renderer.set_geometry(_quad);
-
-        _renderer.set_pass(&pass);
+        _renderer.set_geometry(_quad, &pass);
         _renderer.render_to_target(target);
     }
 }

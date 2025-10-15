@@ -46,12 +46,10 @@ auto point_cloud::can_draw() const -> bool
 
 void point_cloud::on_draw_to(render_target& target)
 {
-    _renderer.set_geometry(_points);
-
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
 
-        _renderer.set_pass(&pass);
+        _renderer.set_geometry(_points, &pass);
         _renderer.render_to_target(target);
     }
 }

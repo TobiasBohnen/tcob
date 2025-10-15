@@ -104,8 +104,7 @@ void tilemap_base::on_update(milliseconds /* deltaTime */)
     if (!_isDirty) { return; }
 
     _quads.clear();
-    _isDirty        = false;
-    _updateGeometry = true;
+    _isDirty = false;
 
     for (auto const& layer : _layers) {
         if (!layer->Visible) { continue; }
@@ -125,15 +124,10 @@ auto tilemap_base::can_draw() const -> bool
 
 void tilemap_base::on_draw_to(render_target& target)
 {
-    if (_updateGeometry) {
-        _updateGeometry = false;
-        _renderer.set_geometry(_quads);
-    }
-
     for (isize i {0}; i < Material->pass_count(); ++i) {
         auto const& pass {Material->get_pass(i)};
 
-        _renderer.set_pass(&pass);
+        _renderer.set_geometry(_quads, &pass);
         _renderer.render_to_target(target);
     }
 }

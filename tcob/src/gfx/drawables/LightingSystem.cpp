@@ -44,7 +44,6 @@ lighting_system::lighting_system(bool multiThreaded)
     funcs.SourceAlphaBlendFunc = funcs.SourceColorBlendFunc = blend_func::SrcAlpha;
     funcs.DestinationAlphaBlendFunc = funcs.DestinationColorBlendFunc = blend_func::One;
     set_blend_funcs(funcs);
-    _renderer.set_pass(&_material->first_pass());
 }
 
 void lighting_system::remove_light_source(light_source const& light)
@@ -365,7 +364,7 @@ void lighting_system::on_draw_to(render_target& target)
         geometry_data const data {.Vertices = _verts,
                                   .Indices  = _inds,
                                   .Type     = primitive_type::Triangles};
-        _renderer.set_geometry(data);
+        _renderer.set_geometry(data, &_material->first_pass());
         _updateGeometry = false;
     }
 

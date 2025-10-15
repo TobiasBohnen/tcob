@@ -13,6 +13,7 @@
 #include "tcob/core/Rect.hpp"
 #include "tcob/core/Signal.hpp"
 #include "tcob/core/assets/Asset.hpp"
+#include "tcob/gfx/Geometry.hpp"
 #include "tcob/gfx/Gfx.hpp"
 #include "tcob/gfx/RenderTarget.hpp"
 #include "tcob/gfx/Renderer.hpp"
@@ -77,7 +78,7 @@ protected:
 
     void on_clear(color c) const override;
 
-    auto renderer() -> quad_renderer&;
+    void init_renderer(quad const& q);
 
 private:
     virtual auto get_fullscreen() const -> bool = 0;

@@ -42,7 +42,6 @@ document::document(config c)
 
     geometry::set_color(_quad, colors::White);
     geometry::set_texcoords(_quad, {.UVRect = render_texture::UVRect(), .Level = 0});
-    _renderer.set_pass(&_material->first_pass());
     _material->first_pass().Texture = _canvas.get_texture();
 }
 
@@ -130,7 +129,7 @@ void document::on_draw_to(render_target& target)
         _needsRedraw = false;
     }
 
-    _renderer.set_geometry(_quad);
+    _renderer.set_geometry(_quad, &_material->first_pass());
     _renderer.render_to_target(target);
 }
 

@@ -93,7 +93,7 @@ void sdl_window::set_size(size_i newSize)
     geometry::set_color(q, colors::White);
     geometry::set_position(q, {0, 0, static_cast<f32>(newSize.Width), static_cast<f32>(newSize.Height)});
     geometry::set_texcoords(q, {.UVRect = render_texture::UVRect(), .Level = 0});
-    renderer().set_geometry(q);
+    init_renderer(q);
 
     render_target::set_size(newSize);
 }

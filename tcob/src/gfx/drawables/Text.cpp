@@ -25,7 +25,6 @@ text::text(asset_ptr<font> font)
     Pivot.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 
     _material->first_pass().Texture = _font->texture();
-    _renderer.set_pass(&_material->first_pass());
     Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
     Text.Changed.connect([this](auto const&) { _needsReshape = true; });
     Style.Changed.connect([this](auto const&) { _needsReshape = true; });
@@ -51,7 +50,7 @@ auto text::can_draw() const -> bool
 
 void text::on_draw_to(render_target& target)
 {
-    _renderer.set_geometry(_quads);
+    _renderer.set_geometry(_quads, &_material->first_pass());
     _renderer.render_to_target(target);
 }
 

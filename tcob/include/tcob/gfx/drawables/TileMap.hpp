@@ -97,7 +97,6 @@ private:
     quad_renderer     _renderer;
     std::vector<quad> _quads {};
     bool              _isDirty {true};
-    bool              _updateGeometry {true};
 };
 
 ////////////////////////////////////////////////////////////
