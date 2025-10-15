@@ -28,12 +28,8 @@ cursor::cursor()
 
         _currentMode = _modes[name];
 
-        auto const  tex {Material->first_pass().Texture}; // TODO texRegion pass
-        auto const& region {tex->regions()[name]};
-        geometry::set_texcoords(_quad, region);
+        auto const& tex {Material->first_pass().Texture};
         _size = tex->info().Size;
-
-        _renderer.set_material((*Material).ptr());
     });
 
     geometry::set_color(_quad, colors::White);
@@ -66,7 +62,16 @@ auto cursor::can_draw() const -> bool
 
 void cursor::on_draw_to(render_target& target)
 {
-    _renderer.set_geometry(_quad);
-    _renderer.render_to_target(target);
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+
+        auto const& region {pass.Texture->regions()[ActiveMode]};
+        geometry::set_texcoords(_quad, region);
+        _renderer.set_geometry(_quad);
+
+        _renderer.set_pass(&pass);
+        _renderer.render_to_target(target);
+    }
 }
+
 }

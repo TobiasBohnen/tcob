@@ -26,7 +26,7 @@ template <typename G>
 inline void tilemap<G>::setup_quad(quad& q, point_i coord, tile_index_t idx) const
 {
     if (!*Material) { return; }
-    auto const& pass {Material->first_pass()}; // TODO
+    auto const& pass {Material->first_pass()}; // TODO texRegion pass
 
     auto const& tile {idx != 0 ? Tileset->at(idx) : tile_type {}};
 

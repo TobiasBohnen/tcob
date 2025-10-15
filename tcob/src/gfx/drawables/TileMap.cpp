@@ -50,7 +50,7 @@ static auto IndexToPosition(i32 i, render_direction direction, size_i layerSize)
 tilemap_base::tilemap_base()
     : _renderer {buffer_usage_hint::DynamicDraw}
 {
-    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
+    Material.Changed.connect([this](auto const&) { mark_dirty(); });
     Position.Changed.connect([this](auto const&) { mark_dirty(); });
 }
 
@@ -130,7 +130,12 @@ void tilemap_base::on_draw_to(render_target& target)
         _renderer.set_geometry(_quads);
     }
 
-    _renderer.render_to_target(target);
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+
+        _renderer.set_pass(&pass);
+        _renderer.render_to_target(target);
+    }
 }
 
 void tilemap_base::mark_dirty()

@@ -40,7 +40,7 @@ class TCOB_API point_renderer final : public renderer {
 public:
     explicit point_renderer(buffer_usage_hint usage);
 
-    void set_material(material const* material);
+    void set_pass(pass const* pass);
 
     void set_geometry(vertex const& v);
     void set_geometry(std::span<vertex const> vertices);
@@ -50,8 +50,8 @@ private:
     void prepare(usize vertCount);
     void on_render_to_target(render_target& target) override;
 
-    material const* _material {nullptr};
-    usize           _numVerts {0};
+    pass const* _pass {nullptr};
+    usize       _numVerts {0};
 
     vertex_array _vertexArray;
 };
@@ -62,7 +62,7 @@ class TCOB_API quad_renderer final : public renderer {
 public:
     explicit quad_renderer(buffer_usage_hint usage);
 
-    void set_material(material const* material);
+    void set_pass(pass const* pass);
 
     void set_geometry(quad const& q);
     void set_geometry(std::span<quad const> quads);
@@ -72,8 +72,8 @@ private:
     void prepare(usize quadCount);
     void on_render_to_target(render_target& target) override;
 
-    material const* _material {nullptr};
-    usize           _numQuads {0};
+    pass const* _pass {nullptr};
+    usize       _numQuads {0};
 
     vertex_array _vertexArray;
 };
@@ -84,7 +84,7 @@ class TCOB_API polygon_renderer final : public renderer {
 public:
     explicit polygon_renderer(buffer_usage_hint usage);
 
-    void set_material(material const* material);
+    void set_pass(pass const* pass);
 
     void set_geometry(geometry_data const& gd);
     void reset_geometry();
@@ -93,9 +93,9 @@ private:
     void prepare(usize vcount, usize icount);
     void on_render_to_target(render_target& target) override;
 
-    material const* _material {nullptr};
-    usize           _numIndices {0};
-    usize           _numVerts {0};
+    pass const* _pass {nullptr};
+    usize       _numIndices {0};
+    usize       _numVerts {0};
 
     primitive_type _type {};
     vertex_array   _vertexArray;
@@ -107,7 +107,7 @@ class TCOB_API batch_polygon_renderer final : public renderer {
 public:
     batch_polygon_renderer();
 
-    void add_geometry(geometry_data const& gd, material const* mat);
+    void add_geometry(geometry_data const& gd, pass const* pass);
     void reset_geometry();
 
 private:
@@ -119,12 +119,12 @@ private:
     vertex_array _vertexArray;
 
     struct batch {
-        material const* MaterialPtr {nullptr};
-        primitive_type  Type {};
-        u32             NumVerts {0};
-        u32             NumInds {0};
-        u32             OffsetVerts {0};
-        u32             OffsetInds {0};
+        pass const*    Pass {nullptr};
+        primitive_type Type {};
+        u32            NumVerts {0};
+        u32            NumInds {0};
+        u32            OffsetVerts {0};
+        u32            OffsetInds {0};
     };
 
     batch              _currentBatch;

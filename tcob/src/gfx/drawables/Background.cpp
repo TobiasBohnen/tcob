@@ -17,8 +17,7 @@ namespace tcob::gfx {
 
 background::background()
 {
-    Material.Changed.connect([this](auto const& value) {
-        _renderer.set_material(value.ptr());
+    Material.Changed.connect([this](auto const&) {
         TextureRegion("default");
     });
 }
@@ -34,20 +33,23 @@ void background::on_draw_to(render_target& target)
 
     geometry::set_position(_quad, {point_f::Zero, size_f {*target.Size}});
     geometry::set_color(_quad, colors::White);
-    geometry::set_texcoords(_quad, Material->first_pass(), TextureRegion); // TODO texRegion pass
 
-    _renderer.set_geometry(_quad);
-    _renderer.render_to_target(target);
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+
+        geometry::set_texcoords(_quad, pass, TextureRegion);
+
+        _renderer.set_pass(&pass);
+        _renderer.set_geometry(_quad);
+        _renderer.render_to_target(target);
+    }
 
     target.camera().pop_state();
 }
 
 ////////////////////////////////////////////////////////////
 
-parallax_background::parallax_background()
-{
-    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
-}
+parallax_background::parallax_background() = default;
 
 auto parallax_background::create_layer() -> parallax_background_layer&
 {
@@ -71,42 +73,42 @@ auto parallax_background::can_draw() const -> bool
 
 void parallax_background::on_draw_to(render_target& target)
 {
-    if (!*Material) { return; }
-    auto const& pass {Material->first_pass()}; // TODO texRegion pass
-
-    auto const& camera {target.camera()};
-
+    auto const cameraPos {target.camera().Position};
     target.camera().push_state();
 
-    auto const targetSize {size_f {*target.Size}};
-    auto const texSize {size_f {pass.Texture->info().Size} * TextureScale};
     _quads.resize(_layers.size());
+    auto const targetSize {size_f {*target.Size}};
 
-    for (usize i {0}; i < _layers.size(); ++i) {
-        auto const& layer {*_layers[i]};
-        if (!layer.Visible) { continue; }
-        auto& quad {_quads[i]};
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
 
-        geometry::set_position(quad, {point_f::Zero, size_f {*target.Size}});
-        geometry::set_color(quad, colors::White);
+        auto const texSize {size_f {pass.Texture->info().Size} * TextureScale};
 
-        if (*Material && pass.Texture && pass.Texture->regions().contains(layer.TextureRegion)) {
-            auto  texReg {pass.Texture->regions()[layer.TextureRegion]};
-            auto& uvRect {texReg.UVRect};
-            uvRect.Size *= (targetSize / texSize);
+        for (usize i {0}; i < _layers.size(); ++i) {
+            auto const& layer {*_layers[i]};
+            if (!layer.Visible) { continue; }
+            auto& quad {_quads[i]};
 
-            uvRect.Position.X = ((camera.Position.X / texSize.Width) * layer.ScrollScale.Width) + layer.Offset.Width;
-            uvRect.Position.Y = ((camera.Position.Y / texSize.Height) * layer.ScrollScale.Height) + layer.Offset.Height;
+            geometry::set_position(quad, {point_f::Zero, size_f {*target.Size}});
+            geometry::set_color(quad, colors::White);
 
-            geometry::set_texcoords(quad, texReg);
-        } else {
-            geometry::set_texcoords(quad, {.UVRect = {0, 0, 1, 1}, .Level = 0});
+            if (pass.Texture && pass.Texture->regions().contains(layer.TextureRegion)) {
+                auto  texReg {pass.Texture->regions()[layer.TextureRegion]};
+                auto& uvRect {texReg.UVRect};
+                uvRect.Size *= (targetSize / texSize);
+
+                uvRect.Position.X = ((cameraPos.X / texSize.Width) * layer.ScrollScale.Width) + layer.Offset.Width;
+                uvRect.Position.Y = ((cameraPos.Y / texSize.Height) * layer.ScrollScale.Height) + layer.Offset.Height;
+                geometry::set_texcoords(quad, texReg);
+            } else {
+                geometry::set_texcoords(quad, {.UVRect = {0, 0, 1, 1}, .Level = 0});
+            }
         }
+
+        _renderer.set_pass(&pass);
+        _renderer.set_geometry(_quads);
+        _renderer.render_to_target(target);
     }
-
-    _renderer.set_geometry(_quads);
-
-    _renderer.render_to_target(target);
 
     target.camera().pop_state();
 }

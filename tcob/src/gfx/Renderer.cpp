@@ -47,9 +47,9 @@ point_renderer::point_renderer(buffer_usage_hint usage)
 {
 }
 
-void point_renderer::set_material(material const* material)
+void point_renderer::set_pass(pass const* pass)
 {
-    _material = material;
+    _pass = pass;
 }
 
 void point_renderer::set_geometry(vertex const& v)
@@ -78,17 +78,13 @@ void point_renderer::prepare(usize vertCount)
 
 void point_renderer::on_render_to_target(render_target& target)
 {
-    if (_numVerts == 0 || !_material) {
+    if (_numVerts == 0 || !_pass) {
         return;
     }
 
-    for (isize i {0}; i < _material->pass_count(); ++i) {
-        auto const& pass {_material->get_pass(i)};
-
-        target.bind_pass(pass);
-        _vertexArray.draw_arrays(primitive_type::Points, 0, _numVerts);
-        target.unbind_pass();
-    }
+    target.bind_pass(*_pass);
+    _vertexArray.draw_arrays(primitive_type::Points, 0, _numVerts);
+    target.unbind_pass();
 }
 
 ////////////////////////////////////////////////////////////
@@ -98,9 +94,9 @@ quad_renderer::quad_renderer(buffer_usage_hint usage)
 {
 }
 
-void quad_renderer::set_material(material const* material)
+void quad_renderer::set_pass(pass const* pass)
 {
-    _material = material;
+    _pass = pass;
 }
 
 void quad_renderer::set_geometry(quad const& q)
@@ -144,17 +140,13 @@ void quad_renderer::prepare(usize quadCount)
 
 void quad_renderer::on_render_to_target(render_target& target)
 {
-    if (_numQuads == 0 || !_material) {
+    if (_numQuads == 0 || !_pass) {
         return;
     }
 
-    for (isize i {0}; i < _material->pass_count(); ++i) {
-        auto const& pass {_material->get_pass(i)};
-
-        target.bind_pass(pass);
-        _vertexArray.draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
-        target.unbind_pass();
-    }
+    target.bind_pass(*_pass);
+    _vertexArray.draw_elements(primitive_type::Triangles, _numQuads * 6, 0);
+    target.unbind_pass();
 }
 
 ////////////////////////////////////////////////////////////
@@ -164,9 +156,9 @@ polygon_renderer::polygon_renderer(buffer_usage_hint usage)
 {
 }
 
-void polygon_renderer::set_material(material const* material)
+void polygon_renderer::set_pass(pass const* pass)
 {
-    _material = material;
+    _pass = pass;
 }
 
 void polygon_renderer::set_geometry(geometry_data const& gd)
@@ -196,20 +188,16 @@ void polygon_renderer::prepare(usize vcount, usize icount)
 
 void polygon_renderer::on_render_to_target(render_target& target)
 {
-    if (_numVerts == 0 || !_material) { return; }
+    if (_numVerts == 0 || !_pass) { return; }
 
-    for (isize i {0}; i < _material->pass_count(); ++i) {
-        auto const& pass {_material->get_pass(i)};
-
-        target.bind_pass(pass);
-        if (_numIndices == 0) {
-            _vertexArray.draw_arrays(_type, 0, _numVerts);
-        } else {
-            _vertexArray.draw_elements(_type, _numIndices, 0);
-        }
-
-        target.unbind_pass();
+    target.bind_pass(*_pass);
+    if (_numIndices == 0) {
+        _vertexArray.draw_arrays(_type, 0, _numVerts);
+    } else {
+        _vertexArray.draw_elements(_type, _numIndices, 0);
     }
+
+    target.unbind_pass();
 }
 
 ////////////////////////////////////////////////////////////
@@ -219,10 +207,10 @@ batch_polygon_renderer::batch_polygon_renderer()
 {
 }
 
-void batch_polygon_renderer::add_geometry(geometry_data const& gd, material const* mat)
+void batch_polygon_renderer::add_geometry(geometry_data const& gd, pass const* pass)
 {
     // check if we have to break the batch
-    if (_currentBatch.NumInds > 0 && (_currentBatch.Type != gd.Type || *_currentBatch.MaterialPtr != *mat)) {
+    if (_currentBatch.NumInds > 0 && (_currentBatch.Type != gd.Type || *_currentBatch.Pass != *pass)) {
         _batches.push_back(_currentBatch);
         _currentBatch.OffsetInds += _currentBatch.NumInds;
         _currentBatch.OffsetVerts += _currentBatch.NumVerts;
@@ -230,8 +218,8 @@ void batch_polygon_renderer::add_geometry(geometry_data const& gd, material cons
         _currentBatch.NumVerts = 0;
     }
 
-    _currentBatch.MaterialPtr = mat;
-    _currentBatch.Type        = gd.Type;
+    _currentBatch.Pass = pass;
+    _currentBatch.Type = gd.Type;
 
     // copy indices
     if (!_verts.empty()) {
@@ -275,15 +263,11 @@ void batch_polygon_renderer::on_render_to_target(render_target& target)
     }
 
     for (auto const& batch : _batches) { // draw batches
-        if (batch.NumVerts == 0 || !batch.MaterialPtr) { continue; }
+        if (batch.NumVerts == 0 || !batch.Pass) { continue; }
 
-        for (isize i {0}; i < batch.MaterialPtr->pass_count(); ++i) {
-            auto const& pass {batch.MaterialPtr->get_pass(i)};
-
-            target.bind_pass(pass);
-            _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
-            target.unbind_pass();
-        }
+        target.bind_pass(*batch.Pass);
+        _vertexArray.draw_elements(primitive_type::Triangles, batch.NumInds, batch.OffsetInds);
+        target.unbind_pass();
     }
 }
 

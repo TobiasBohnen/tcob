@@ -121,11 +121,16 @@ void shape_batch::on_draw_to(render_target& target)
 {
     if (_isDirty) {
         _isDirty = false;
+
         _renderer.reset_geometry();
 
         for (auto& shape : _children) {
             if (shape->is_visible()) {
-                _renderer.add_geometry(shape->geometry(), (*shape->Material).ptr());
+                for (isize i {0}; i < shape->Material->pass_count(); ++i) {
+                    auto const& pass {shape->Material->get_pass(i)};
+
+                    _renderer.add_geometry(shape->geometry(), &pass);
+                }
             }
         }
     }

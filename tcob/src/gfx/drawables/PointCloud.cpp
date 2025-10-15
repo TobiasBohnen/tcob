@@ -16,7 +16,6 @@ namespace tcob::gfx {
 
 point_cloud::point_cloud(i32 reservedSize)
 {
-    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
     _points.reserve(reservedSize);
 }
 
@@ -48,7 +47,13 @@ auto point_cloud::can_draw() const -> bool
 void point_cloud::on_draw_to(render_target& target)
 {
     _renderer.set_geometry(_points);
-    _renderer.render_to_target(target);
+
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+
+        _renderer.set_pass(&pass);
+        _renderer.render_to_target(target);
+    }
 }
 
 }

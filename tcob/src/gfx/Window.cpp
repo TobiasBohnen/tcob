@@ -37,7 +37,7 @@ window::window(std::unique_ptr<render_backend::window_base> windowBase, asset_ow
     Shader.Changed.connect([this](auto const& value) { _material->first_pass().Shader = value; });
 
     _material->first_pass().Texture = _texture;
-    _renderer.set_material(_material.ptr());
+    _renderer.set_pass(&_material->first_pass());
 }
 
 window::~window() = default;

@@ -30,7 +30,6 @@ template <typename Emitter>
 particle_system<Emitter>::particle_system(bool multiThreaded, isize reservedParticleCount)
     : _multiThreaded {multiThreaded}
 {
-    Material.Changed.connect([this](auto const& value) { _renderer.set_material(value.ptr()); });
     if (reservedParticleCount > 0) {
         _particles.reserve(reservedParticleCount);
     }
@@ -167,7 +166,12 @@ inline void particle_system<Emitter>::on_draw_to(render_target& target)
 
     _renderer.set_geometry({_geometry.data(), static_cast<usize>(_aliveParticleCount)});
 
-    _renderer.render_to_target(target);
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+
+        _renderer.set_pass(&pass);
+        _renderer.render_to_target(target);
+    }
 }
 
 ////////////////////////////////////////////////////////////
