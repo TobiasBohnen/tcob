@@ -14,6 +14,7 @@ namespace tcob::gfx {
 auto material::Empty() -> asset_owner_ptr<material>
 {
     static asset_owner_ptr<material> instance;
+    instance->first_pass();
     return instance;
 }
 

@@ -51,31 +51,56 @@ public:
     void hide();
     auto is_visible() const -> bool;
 
-    virtual auto geometry() const -> geometry_data = 0;
-    virtual auto aabb() const -> rect_f            = 0;
+    virtual auto geometry(pass const& pass) -> geometry_data = 0;
+    virtual auto aabb() const -> rect_f                      = 0;
 
     virtual auto intersect(ray const& ray) const -> std::vector<ray::result> = 0;
 
-    auto         is_dirty() const -> bool;
-    virtual void update_geometry() = 0;
+    auto is_dirty() const -> bool;
 
 protected:
     virtual auto center() const -> point_f = 0;
     auto         pivot() const -> point_f override;
-
-    virtual void on_color_changed(color c)   = 0;
-    virtual void on_texture_region_changed() = 0;
 
     void on_transform_changed() override;
 
     void mark_dirty();
     void mark_clean();
 
-    auto get_texture_region() const -> texture_region;
+    auto get_texture_region(pass const& pass) const -> texture_region;
 
 private:
     bool _isDirty {false};
     bool _visible {true};
+};
+
+////////////////////////////////////////////////////////////
+
+class TCOB_API rect_shape final : public shape {
+public:
+    rect_shape();
+
+    prop<rect_f>  Bounds;
+    prop<point_f> TextureScroll;
+
+    auto geometry(pass const& pass) -> geometry_data override;
+    auto aabb() const -> rect_f override;
+
+    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
+
+    void move_by(point_f offset);
+
+protected:
+    void on_update(milliseconds deltaTime) override;
+
+    auto center() const -> point_f override;
+
+private:
+    void update_geometry();
+    void update_aabb();
+
+    std::unordered_map<pass const*, quad> _quad {};
+    rect_f                                _aabb {rect_f::Zero};
 };
 
 ////////////////////////////////////////////////////////////
@@ -88,57 +113,22 @@ public:
     prop<f32>     Radius;
     prop<i32>     Segments {90};
 
-    auto geometry() const -> geometry_data override;
+    auto geometry(pass const& pass) -> geometry_data override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
-
-    void update_geometry() override;
 
 protected:
     void on_update(milliseconds deltaTime) override;
 
     auto center() const -> point_f override;
-    void on_color_changed(color c) override;
-    void on_texture_region_changed() override;
 
 private:
     void create();
+    void update_geometry();
 
-    std::vector<u32>    _inds;
-    std::vector<vertex> _verts;
-};
-
-////////////////////////////////////////////////////////////
-
-class TCOB_API rect_shape final : public shape {
-public:
-    rect_shape();
-
-    prop<rect_f>  Bounds;
-    prop<point_f> TextureScroll;
-
-    auto geometry() const -> geometry_data override;
-    auto aabb() const -> rect_f override;
-
-    auto intersect(ray const& ray) const -> std::vector<ray::result> override;
-
-    void move_by(point_f offset);
-
-    void update_geometry() override;
-
-protected:
-    void on_update(milliseconds deltaTime) override;
-
-    auto center() const -> point_f override;
-    void on_color_changed(color c) override;
-    void on_texture_region_changed() override;
-
-private:
-    void update_aabb();
-
-    quad   _quad {};
-    rect_f _aabb {rect_f::Zero};
+    std::unordered_map<pass const*, std::vector<u32>>    _inds;
+    std::unordered_map<pass const*, std::vector<vertex>> _verts;
 };
 
 ////////////////////////////////////////////////////////////
@@ -149,7 +139,7 @@ public:
 
     prop<std::vector<polygon>> Polygons;
 
-    auto geometry() const -> geometry_data override;
+    auto geometry(pass const& pass) -> geometry_data override;
     auto aabb() const -> rect_f override;
 
     auto intersect(ray const& ray) const -> std::vector<ray::result> override;
@@ -158,21 +148,18 @@ public:
 
     void move_by(point_f offset);
 
-    void update_geometry() override;
-
 protected:
     void on_update(milliseconds deltaTime) override;
 
     auto center() const -> point_f override;
-    void on_color_changed(color c) override;
-    void on_texture_region_changed() override;
 
 private:
     void create();
+    void update_geometry();
     void update_aabb();
 
-    std::vector<u32>    _inds;
-    std::vector<vertex> _verts;
+    std::unordered_map<pass const*, std::vector<u32>>    _inds;
+    std::unordered_map<pass const*, std::vector<vertex>> _verts;
 
     rect_f  _boundingBox {rect_f::Zero};
     point_f _centroid {point_f::Zero};

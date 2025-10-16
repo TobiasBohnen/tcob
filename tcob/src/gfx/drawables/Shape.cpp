@@ -16,7 +16,6 @@
 #include <utility>
 #include <vector>
 
-#include "tcob/core/Color.hpp"
 #include "tcob/core/Common.hpp"
 #include "tcob/core/Point.hpp"
 #include "tcob/core/Rect.hpp"
@@ -124,12 +123,18 @@ void shape_batch::on_draw_to(render_target& target)
 
         _renderer.reset_geometry();
 
+        isize maxPasses {0};
+        for (auto& shape : _children) {
+            maxPasses = std::max(maxPasses, shape->Material->pass_count());
+        }
+
         for (auto& shape : _children) {
             if (shape->is_visible()) {
-                for (isize i {0}; i < shape->Material->pass_count(); ++i) {
-                    auto const& pass {shape->Material->get_pass(i)};
+                for (isize i {0}; i < maxPasses; ++i) {
+                    if (i >= shape->Material->pass_count()) { continue; }
 
-                    _renderer.add_geometry(shape->geometry(), &pass);
+                    auto const& pass {shape->Material->get_pass(i)};
+                    _renderer.add_geometry(shape->geometry(pass), &pass);
                 }
             }
         }
@@ -145,15 +150,9 @@ shape::shape()
 {
     Pivot.Changed.connect([this](auto const&) { mark_dirty(); });
 
-    Material.Changed.connect([this](auto const&) { TextureRegion("default"); });
-    TextureRegion.Changed.connect([this] {
-        on_texture_region_changed();
-        mark_dirty();
-    });
-    Color.Changed.connect([this](auto const& color) {
-        on_color_changed(color);
-        mark_dirty();
-    });
+    Material.Changed.connect([this] { TextureRegion("default"); });
+    TextureRegion.Changed.connect([this] { mark_dirty(); });
+    Color.Changed.connect([this] { mark_dirty(); });
 }
 
 void shape::show()
@@ -191,13 +190,10 @@ void shape::mark_clean()
     _isDirty = false;
 }
 
-auto shape::get_texture_region() const -> texture_region
+auto shape::get_texture_region(pass const& pass) const -> texture_region
 {
-    if (*Material) {
-        auto const& pass {Material->first_pass()};
-        if (pass.Texture && pass.Texture->regions().contains(TextureRegion)) { // TODO texRegion pass
-            return pass.Texture->regions()[TextureRegion];
-        }
+    if (pass.Texture && pass.Texture->regions().contains(TextureRegion)) { // TODO texRegion pass
+        return pass.Texture->regions()[TextureRegion];
     }
 
     return {.UVRect = {0, 0, 1, 1}, .Level = 0};
@@ -214,126 +210,17 @@ auto shape::pivot() const -> point_f
 
 ////////////////////////////////////////////////////////////
 
-circle_shape::circle_shape()
-{
-    Center.Changed.connect([this](auto const&) { mark_transform_dirty(); });
-    Radius.Changed.connect([this](auto const&) { mark_dirty(); });
-    Segments.Changed.connect([this](auto const&) { mark_dirty(); });
-}
-
-auto circle_shape::geometry() const -> geometry_data
-{
-    return {
-        .Vertices = _verts,
-        .Indices  = _inds,
-        .Type     = primitive_type::Triangles};
-}
-
-auto circle_shape::aabb() const -> rect_f
-{
-    auto const worldCenter {transform() * Center};
-    return {
-        worldCenter - point_f {Radius, Radius},
-        {Radius * 2.0f, Radius * 2.0f}};
-}
-
-auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
-{
-    return ray.intersect_circle(transform() * Center, Radius);
-}
-
-void circle_shape::on_update(milliseconds /* deltaTime */)
-{
-    if (!is_dirty()) { return; }
-    mark_clean();
-
-    update_geometry();
-}
-
-void circle_shape::update_geometry()
-{
-    create();
-}
-
-void circle_shape::on_color_changed(color c)
-{
-    geometry::set_color(_verts, c);
-}
-
-void circle_shape::on_texture_region_changed()
-{
-    // TODO
-}
-
-void circle_shape::create()
-{
-    _verts.clear();
-    _inds.clear();
-
-    if (Segments < 3 || Radius < 1.0f) { return; }
-
-    // vertices
-    auto const& xform {transform()};
-    f32 const   angleStep {TAU_F / Segments};
-    f32 const   radius {Radius};
-
-    texture_region const texReg {get_texture_region()};
-
-    f32 const texLevel {static_cast<f32>(texReg.Level)};
-
-    auto const [centerX, centerY] {*Center};
-    auto const& uvRect {texReg.UVRect};
-    _verts.push_back({.Position  = (xform * Center),
-                      .Color     = Color,
-                      .TexCoords = {.U     = (0.5f * uvRect.width()) + uvRect.left(),
-                                    .V     = (0.5f * uvRect.height()) + uvRect.top(),
-                                    .Level = texLevel}});
-
-    auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
-
-    for (i32 i {0}; i < Segments; ++i) {
-        f32 const angle {i * angleStep};
-        f32 const x {(radius * std::cos(angle)) + centerX};
-        f32 const y {(radius * std::sin(angle)) + centerY};
-        _verts.push_back({.Position  = (xform * point_f {x, y}),
-                          .Color     = Color,
-                          .TexCoords = {.U     = (((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
-                                        .V     = (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
-                                        .Level = texLevel}});
-    }
-
-    // indices
-    for (i32 i {1}; i < Segments; ++i) {
-        _inds.push_back(0);
-        _inds.push_back(i + 1);
-        _inds.push_back(i);
-    }
-
-    _inds.push_back(0);
-    _inds.push_back(1);
-    _inds.push_back(*Segments);
-}
-
-auto circle_shape::center() const -> point_f
-{
-    return Center;
-}
-
-////////////////////////////////////////////////////////////
-
 rect_shape::rect_shape()
 {
     Bounds.Changed.connect([this](auto const&) { mark_transform_dirty(); });
-
-    geometry::set_color(_quad, colors::White);
-    geometry::set_texcoords(_quad, {.UVRect = {0, 0, 1, 1}, .Level = 0});
 }
 
-auto rect_shape::geometry() const -> geometry_data
+auto rect_shape::geometry(pass const& pass) -> geometry_data
 {
     static constexpr std::array<u32, 6> Inds {3, 1, 0, 3, 2, 1};
+
     return {
-        .Vertices = _quad,
+        .Vertices = _quad.at(&pass),
         .Indices  = Inds,
         .Type     = primitive_type::Triangles};
 }
@@ -377,24 +264,24 @@ void rect_shape::on_update(milliseconds deltaTime)
     }
 
     if (TextureScroll != point_f::Zero) {
-        geometry::scroll_texcoords(_quad, *TextureScroll * (deltaTime.count() / 1000.0f));
+        for (auto& kvp : _quad) {
+            geometry::scroll_texcoords(kvp.second, *TextureScroll * (deltaTime.count() / 1000.0f));
+        }
     }
 }
 
 void rect_shape::update_geometry()
 {
-    geometry::set_position(_quad, *Bounds, transform());
+    for (isize i {0}; i < Material->pass_count(); ++i) {
+        auto const& pass {Material->get_pass(i)};
+
+        auto& quad {_quad[&pass]};
+        geometry::set_color(quad, Color);
+        geometry::set_texcoords(quad, get_texture_region(pass));
+        geometry::set_position(quad, *Bounds, transform());
+    }
+
     update_aabb();
-}
-
-void rect_shape::on_color_changed(color c)
-{
-    geometry::set_color(_quad, c);
-}
-
-void rect_shape::on_texture_region_changed()
-{
-    geometry::set_texcoords(_quad, get_texture_region());
 }
 
 auto rect_shape::center() const -> point_f
@@ -404,16 +291,120 @@ auto rect_shape::center() const -> point_f
 
 ////////////////////////////////////////////////////////////
 
+circle_shape::circle_shape()
+{
+    Center.Changed.connect([this](auto const&) { mark_transform_dirty(); });
+    Radius.Changed.connect([this](auto const&) { mark_dirty(); });
+    Segments.Changed.connect([this](auto const&) { mark_dirty(); });
+}
+
+auto circle_shape::geometry(pass const& pass) -> geometry_data
+{
+    return {
+        .Vertices = _verts[&pass],
+        .Indices  = _inds[&pass],
+        .Type     = primitive_type::Triangles};
+}
+
+auto circle_shape::aabb() const -> rect_f
+{
+    auto const worldCenter {transform() * Center};
+    return {
+        worldCenter - point_f {Radius, Radius},
+        {Radius * 2.0f, Radius * 2.0f}};
+}
+
+auto circle_shape::intersect(ray const& ray) const -> std::vector<ray::result>
+{
+    return ray.intersect_circle(transform() * Center, Radius);
+}
+
+void circle_shape::on_update(milliseconds /* deltaTime */)
+{
+    if (!is_dirty()) { return; }
+    mark_clean();
+
+    update_geometry();
+}
+
+void circle_shape::update_geometry()
+{
+    create();
+}
+
+void circle_shape::create()
+{
+    _verts.clear();
+    _inds.clear();
+
+    if (Segments < 3 || Radius < 1.0f) { return; }
+
+    for (isize p {0}; p < Material->pass_count(); ++p) {
+        auto const& pass {Material->get_pass(p)};
+
+        auto& verts {_verts[&pass]};
+        auto& inds {_inds[&pass]};
+
+        // vertices
+        auto const& xform {transform()};
+        f32 const   angleStep {TAU_F / Segments};
+        f32 const   radius {Radius};
+
+        texture_region const texReg {get_texture_region(pass)};
+
+        f32 const texLevel {static_cast<f32>(texReg.Level)};
+
+        auto const [centerX, centerY] {*Center};
+        auto const& uvRect {texReg.UVRect};
+        verts.push_back({.Position  = (xform * Center),
+                         .Color     = Color,
+                         .TexCoords = {.U     = (0.5f * uvRect.width()) + uvRect.left(),
+                                       .V     = (0.5f * uvRect.height()) + uvRect.top(),
+                                       .Level = texLevel}});
+
+        auto const uvSquare {rect_f::FromLTRB(centerX - radius, centerY - radius, centerX + radius, centerY + radius)};
+
+        for (i32 i {0}; i < Segments; ++i) {
+            f32 const angle {i * angleStep};
+            f32 const x {(radius * std::cos(angle)) + centerX};
+            f32 const y {(radius * std::sin(angle)) + centerY};
+            verts.push_back({.Position  = (xform * point_f {x, y}),
+                             .Color     = Color,
+                             .TexCoords = {.U     = (((x - uvSquare.left()) / uvSquare.width()) * uvRect.width()) + uvRect.left(),
+                                           .V     = (((y - uvSquare.top()) / uvSquare.height()) * uvRect.height()) + uvRect.top(),
+                                           .Level = texLevel}});
+        }
+
+        // indices
+        for (i32 i {1}; i < Segments; ++i) {
+            inds.push_back(0);
+            inds.push_back(i + 1);
+            inds.push_back(i);
+        }
+
+        inds.push_back(0);
+        inds.push_back(1);
+        inds.push_back(*Segments);
+    }
+}
+
+auto circle_shape::center() const -> point_f
+{
+    return Center;
+}
+
+////////////////////////////////////////////////////////////
+
 poly_shape::poly_shape()
 {
     Polygons.Changed.connect([this](auto const&) { mark_transform_dirty(); });
 }
 
-auto poly_shape::geometry() const -> geometry_data
+auto poly_shape::geometry(pass const& pass) -> geometry_data
 {
     return {
-        .Vertices = _verts,
-        .Indices  = _inds,
+        .Vertices = _verts[&pass],
+        .Indices  = _inds[&pass],
         .Type     = primitive_type::Triangles};
 }
 
@@ -487,16 +478,6 @@ void poly_shape::update_geometry()
     update_aabb();
 }
 
-void poly_shape::on_color_changed(color c)
-{
-    for (auto& vert : _verts) { vert.Color = c; }
-}
-
-void poly_shape::on_texture_region_changed()
-{
-    // TODO
-}
-
 auto poly_shape::center() const -> point_f
 {
     return _centroid;
@@ -506,44 +487,51 @@ void poly_shape::create()
 {
     _verts.clear();
     _inds.clear();
-    u32 indOffset {0};
 
-    // create verts
-    auto const&          xform {transform()};
-    texture_region const texReg {get_texture_region()};
+    for (isize p {0}; p < Material->pass_count(); ++p) {
+        u32 indOffset {0};
 
-    f32 const   texLevel {static_cast<f32>(texReg.Level)};
-    auto const& uvRect {texReg.UVRect};
+        auto const& pass {Material->get_pass(p)};
+        auto&       verts {_verts[&pass]};
+        auto&       inds {_inds[&pass]};
 
-    auto const pushVert {[&](point_f point) {
-        auto const& [x, y] {point};
-        _verts.push_back({.Position  = (xform * point),
-                          .Color     = Color,
-                          .TexCoords = {.U     = (((x - _boundingBox.left()) / _boundingBox.width()) * uvRect.width()) + uvRect.left(),
-                                        .V     = (((y - _boundingBox.top()) / _boundingBox.height()) * uvRect.height()) + uvRect.top(),
-                                        .Level = texLevel}});
-    }};
+        // create verts
+        auto const&          xform {transform()};
+        texture_region const texReg {get_texture_region(pass)};
 
-    for (auto const& polygon : *Polygons) {
-        // outline
-        // push verts
-        for (auto const& p : polygon.Outline) { pushVert(p); }
+        f32 const   texLevel {static_cast<f32>(texReg.Level)};
+        auto const& uvRect {texReg.UVRect};
 
-        // create inds
-        auto const indices {polygon.earcut()};
-        for (u32 i {0}; i < indices.size(); i += 3) {
-            _inds.push_back(indices[i + 2] + indOffset);
-            _inds.push_back(indices[i + 1] + indOffset);
-            _inds.push_back(indices[i + 0] + indOffset);
-        }
-        indOffset += static_cast<u32>(polygon.Outline.size());
+        auto const pushVert {[&](point_f point) {
+            auto const& [x, y] {point};
+            verts.push_back({.Position  = (xform * point),
+                             .Color     = Color,
+                             .TexCoords = {.U     = (((x - _boundingBox.left()) / _boundingBox.width()) * uvRect.width()) + uvRect.left(),
+                                           .V     = (((y - _boundingBox.top()) / _boundingBox.height()) * uvRect.height()) + uvRect.top(),
+                                           .Level = texLevel}});
+        }};
 
-        // holes
-        for (auto const& hole : polygon.Holes) {
+        for (auto const& polygon : *Polygons) {
+            // outline
             // push verts
-            for (auto const p : hole) { pushVert(p); }
+            for (auto const& p : polygon.Outline) { pushVert(p); }
 
-            indOffset += static_cast<u32>(hole.size());
+            // create inds
+            auto const indices {polygon.earcut()};
+            for (u32 i {0}; i < indices.size(); i += 3) {
+                inds.push_back(indices[i + 2] + indOffset);
+                inds.push_back(indices[i + 1] + indOffset);
+                inds.push_back(indices[i + 0] + indOffset);
+            }
+            indOffset += static_cast<u32>(polygon.Outline.size());
+
+            // holes
+            for (auto const& hole : polygon.Holes) {
+                // push verts
+                for (auto const p : hole) { pushVert(p); }
+
+                indOffset += static_cast<u32>(hole.size());
+            }
         }
     }
 }
