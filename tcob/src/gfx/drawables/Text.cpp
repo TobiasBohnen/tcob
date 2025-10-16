@@ -33,14 +33,9 @@ text::text(asset_ptr<font> font)
 void text::on_update(milliseconds deltaTime)
 {
     if (!_font.is_ready()) { return; }
-
     if (_needsReshape) { reshape(); }
-
     if (_needsFormat) { format(); }
-
-    if (is_visible()) {
-        Effects.update(deltaTime);
-    }
+    if (is_visible()) { Effects.update(deltaTime); }
 }
 
 auto text::can_draw() const -> bool
