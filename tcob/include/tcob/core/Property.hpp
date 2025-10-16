@@ -56,7 +56,7 @@ namespace detail {
 
     private:
         validate_func _validate;
-        type          _value;
+        type          _value {};
     };
 
     ////////////////////////////////////////////////////////////
